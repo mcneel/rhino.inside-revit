@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.Samples
         pushButton.ToolTip = "Creates a mesh sphere";
         pushButton.Image = ImageBuilder.BuildImage("1");
         pushButton.LargeImage = ImageBuilder.BuildLargeImage("1");
-        pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://github.com/mcneel/rhino.inside/blob/master/Autodesk/Revit/README.md#sample-1"));
+        pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://github.com/mcneel/rhino.inside-revit/tree/master#sample-1"));
       }
     }
 
