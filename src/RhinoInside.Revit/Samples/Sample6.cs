@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.Samples
 #endif
         pushButton.Image = ImageBuilder.BuildImage("6");
         pushButton.LargeImage = ImageBuilder.BuildLargeImage("6");
-        pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://github.com/mcneel/rhino.inside/blob/master/Autodesk/Revit/README.md#sample-6"));
+        pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://github.com/mcneel/rhino.inside-revit/tree/master#sample-6"));
       }
     }
 
