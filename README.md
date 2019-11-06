@@ -17,6 +17,8 @@ This folder contains a sample project that demonstrates:
 ## Getting started
 Grab the **[latest installer](https://www.rhino3d.com/download/rhino.inside-revit/7/wip)** (requires [Rhino WIP](https://www.rhino3d.com/download/rhino/wip) and Revit 2017-2020)
 
+For automated push installs and installing for *All Users*, see the [Automated Install for Rhino.Inside.Revit Guide](https://github.com/mcneel/rhino.inside-revit/blob/master/doc/installing-rhino-inside-revit-allusers.md)
+
 If you are looking to contribute to or customize this project go to the [build from source instructions](build-source.md).
 
 ### Installing & Uninstalling
