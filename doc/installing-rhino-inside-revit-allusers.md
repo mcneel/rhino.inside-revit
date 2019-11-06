@@ -13,9 +13,9 @@ To determine how to best automate the push of the Rhino 7 installer, follow the 
 
 To push install Rhino.Inside.Revit quietly for all users use this command line:
 
-'''
+```
 RhinoInside.Revit.msi ALLUSERS="1" /quiet
-'''
+```
 
 For more inforamtion see: https://docs.microsoft.com/windows/win32/msi/single-package-authoring
 
