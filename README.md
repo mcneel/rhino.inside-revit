@@ -17,6 +17,8 @@ This folder contains a sample project that demonstrates:
 ## Getting started
 Grab the **[latest installer](https://www.rhino3d.com/download/rhino.inside-revit/7/wip)** (requires [Rhino WIP](https://www.rhino3d.com/download/rhino/wip) and Revit 2017-2020)
 
+For automated push installs and installing for *All Users*, see the [Automated Install for Rhino.Inside.Revit Guide](https://github.com/mcneel/rhino.inside-revit/blob/master/doc/installing-rhino-inside-revit-allusers.md)
+
 If you are looking to contribute to or customize this project go to the [build from source instructions](build-source.md).
 
 ### Installing & Uninstalling
@@ -29,7 +31,7 @@ To uninstall, open _Programs and Features_, select "RhinoInside.Revit" and click
 * Create a new project or open an existing one.
 * Now in the Add-ins Ribbon tab you have a _Rhinoceros_ section.
 * Be careful about your model units in Rhino
-* The source for all the developer samples can be found here:  https://github.com/mcneel/rhino.inside/tree/master/Autodesk/Revit/src/RhinoInside.Revit/Samples
+* The source for all the developer samples can be found [here](src/RhinoInside.Revit/Samples).
 
 ### Sample 1
 1. Open the ribbon tab called _Add-Ins_.
