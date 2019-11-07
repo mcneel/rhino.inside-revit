@@ -254,24 +254,24 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         var listBox = new ListBox();
         listBox.BorderStyle = BorderStyle.FixedSingle;
-
-        listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
-
         listBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
         listBox.Height = (int) (100 * GH_GraphicsUtil.UiScale);
+        listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
+
         RefreshCategoryList(listBox, DB.CategoryType.Model);
 
-        var comboBox = new ComboBox();
-        comboBox.Items.Add("Model");
-        comboBox.Items.Add("Annotation");
-        comboBox.Items.Add("Tags");
-        comboBox.Items.Add("Internal");
-        comboBox.Items.Add("Analytical");
-        comboBox.Tag = listBox;
-        comboBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
-        comboBox.SelectedIndexChanged += ComboBox_SelectedIndexChanged;
+        var categoriesTypeBox = new ComboBox();
+        categoriesTypeBox.DropDownStyle = ComboBoxStyle.DropDownList;
+        categoriesTypeBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
+        categoriesTypeBox.Tag = listBox;
+        categoriesTypeBox.SelectedIndexChanged += CategoriesTypeBox_SelectedIndexChanged;
+        categoriesTypeBox.Items.Add("Model");
+        categoriesTypeBox.Items.Add("Annotation");
+        categoriesTypeBox.Items.Add("Tags");
+        categoriesTypeBox.Items.Add("Internal");
+        categoriesTypeBox.Items.Add("Analytical");
+        categoriesTypeBox.SelectedIndex = 0;
 
-        comboBox.SelectedIndex = 0;
         if
         (
           SourceCount == 0 && PersistentDataCount == 1 &&
@@ -280,12 +280,12 @@ namespace RhinoInside.Revit.GH.Parameters
           (DB.Category) firstValue is DB.Category current
         )
         {
-          comboBox.SelectedIndex = (int) current.CategoryType - 1;
+          categoriesTypeBox.SelectedIndex = (int) current.CategoryType - 1;
           if (current.IsTagCategory)
-            comboBox.SelectedIndex = 2;
+            categoriesTypeBox.SelectedIndex = 2;
         }
 
-        Menu_AppendCustomItem(menu, comboBox);
+        Menu_AppendCustomItem(menu, categoriesTypeBox);
         Menu_AppendCustomItem(menu, listBox);
       }
 
@@ -299,7 +299,7 @@ namespace RhinoInside.Revit.GH.Parameters
         Menu_AppendExtractParameter(menu);
     }
 
-    private void ComboBox_SelectedIndexChanged(object sender, EventArgs e)
+    private void CategoriesTypeBox_SelectedIndexChanged(object sender, EventArgs e)
     {
       if(sender is ComboBox comboBox)
       {

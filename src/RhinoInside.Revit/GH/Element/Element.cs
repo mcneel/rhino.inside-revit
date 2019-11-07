@@ -868,7 +868,7 @@ namespace RhinoInside.Revit.GH.Components
       {
         RecordUndoEvent("Get Common Parameters");
 
-        var connectedParams = new Dictionary<int, IList<IGH_Param>>();
+        var connectedParams = new Dictionary<Parameters.ParameterParam, IList<IGH_Param>>();
         foreach (var output in Params.Output.ToArray())
         {
           if
@@ -876,7 +876,7 @@ namespace RhinoInside.Revit.GH.Components
             output.Recipients.Count > 0 &&
             output is Parameters.ParameterParam param
           )
-            connectedParams.Add(param.ParameterId, param.Recipients.ToArray());
+            connectedParams.Add(param, param.Recipients.ToArray());
 
           Params.UnregisterOutputParameter(output);
         }
@@ -888,7 +888,7 @@ namespace RhinoInside.Revit.GH.Components
             var param = new Parameters.ParameterParam(definition.Value);
             AddOutputParameter(param);
 
-            if (connectedParams.TryGetValue(param.ParameterId, out var recipients))
+            if (connectedParams.TryGetValue(param, out var recipients))
             {
               foreach (var recipient in recipients)
                 recipient.AddSource(param);
@@ -922,7 +922,7 @@ namespace RhinoInside.Revit.GH.Components
       {
         RecordUndoEvent("Get All Parameters");
 
-        var connectedParams = new Dictionary<int, IList<IGH_Param>>();
+        var connectedParams = new Dictionary<Parameters.ParameterParam, IList<IGH_Param>>();
         foreach (var output in Params.Output.ToArray())
         {
           if
@@ -930,7 +930,7 @@ namespace RhinoInside.Revit.GH.Components
             output.Recipients.Count > 0 &&
             output is Parameters.ParameterParam param
           )
-            connectedParams.Add(param.ParameterId, param.Recipients.ToArray());
+            connectedParams.Add(param, param.Recipients.ToArray());
           
           Params.UnregisterOutputParameter(output);
         }
@@ -942,7 +942,7 @@ namespace RhinoInside.Revit.GH.Components
             var param = new Parameters.ParameterParam(definition.Value);
             AddOutputParameter(param);
 
-            if (connectedParams.TryGetValue(param.ParameterId, out var recipients))
+            if (connectedParams.TryGetValue(param, out var recipients))
             {
               foreach (var recipient in recipients)
                 recipient.AddSource(param);
@@ -986,18 +986,8 @@ namespace RhinoInside.Revit.GH.Components
 
       for (int p = 0; p < Params.Output.Count; ++p)
       {
-        if (Params.Output[p] is Parameters.ParameterParam instance)
-        {
-          var parameterId = instance.ParameterId;
-          if (Enum.IsDefined(typeof(DB.BuiltInParameter), parameterId))
-          {
-            DA.SetData(p, element.get_Parameter((DB.BuiltInParameter) parameterId));
-          }
-          else if (element.Document.GetElement(new DB.ElementId(parameterId)) is DB.ParameterElement parameterelement)
-          {
-            DA.SetData(p, element.get_Parameter(parameterelement.GetDefinition()));
-          }
-        }
+        if (Params.Output[p] is Parameters.ParameterParam param)
+          DA.SetData(p, param.GetParameter(element));
       }
     }
 

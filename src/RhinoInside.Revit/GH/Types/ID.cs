@@ -233,7 +233,7 @@ namespace RhinoInside.Revit.GH.Types
             if (parameter.IsReadOnly)
               description = "Read only " + description;
 
-            description += "\nParameterId : " + parameter.Id.IntegerValue.ToParameterIdString();
+            description += "\nParameterId : " + ((DB.BuiltInParameter)parameter.Id.IntegerValue).ToStringGeneric();
             return description;
           }
         }
