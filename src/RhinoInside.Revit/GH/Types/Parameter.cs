@@ -1,5 +1,12 @@
 using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Windows.Forms;
+using GH_IO.Serialization;
+using Grasshopper.GUI;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Attributes;
 using Grasshopper.Kernel.Types;
 using DB = Autodesk.Revit.DB;
 
@@ -30,7 +37,7 @@ namespace RhinoInside.Revit.GH.Types
         return true;
 
       if (Document is object)
-        return Document.TryGetElementId(UniqueID, out m_value);
+        return Document.TryGetParameterId(UniqueID, out m_value);
 
       return false;
     }
@@ -87,14 +94,7 @@ namespace RhinoInside.Revit.GH.Types
       public Proxy(ParameterKey o) : base(o) { (this as IGH_GooProxy).UserString = FormatInstance(); }
 
       public override bool IsParsable() => true;
-      public override string FormatInstance()
-      {
-        int value = owner.Value.IntegerValue;
-        if (Enum.IsDefined(typeof(DB.BuiltInParameter), value))
-          return value.ToParameterIdString();
-
-        return value.ToString();
-      }
+      public override string FormatInstance() => ((DB.BuiltInParameter) owner.Value.IntegerValue).ToStringGeneric();
       public override bool FromString(string str)
       {
         if (Enum.TryParse(str, out DB.BuiltInParameter builtInParameter))
@@ -112,12 +112,12 @@ namespace RhinoInside.Revit.GH.Types
       [System.ComponentModel.Description("The Guid that identifies this parameter as a shared parameter.")]
       public Guid Guid => (parameter as DB.SharedParameterElement)?.GuidValue ?? Guid.Empty;
       [System.ComponentModel.Description("The user-visible name for the parameter.")]
-      public string Name => IsBuiltIn ? DB.LabelUtils.GetLabelFor(builtInParameter) : parameter?.GetDefinition().Name ?? string.Empty;
+      public string Name => builtInParameter != DB.BuiltInParameter.INVALID ? DB.LabelUtils.GetLabelFor(builtInParameter) : parameter?.GetDefinition().Name ?? string.Empty;
       [System.ComponentModel.Description("API Object Type.")]
       public override Type ObjectType => IsBuiltIn ? typeof(DB.BuiltInParameter) : parameter?.GetType();
 
       [System.ComponentModel.Category("Other"), System.ComponentModel.Description("Internal parameter data storage type.")]
-      public DB.StorageType StorageType => IsBuiltIn ? Revit.ActiveDBDocument.get_TypeOfStorage(builtInParameter) : parameter?.GetDefinition().ParameterType.ToStorageType() ?? DB.StorageType.None;
+      public DB.StorageType StorageType => builtInParameter != DB.BuiltInParameter.INVALID ? Revit.ActiveDBDocument.get_TypeOfStorage(builtInParameter) : parameter?.GetDefinition().ParameterType.ToStorageType() ?? DB.StorageType.None;
       [System.ComponentModel.Category("Other"), System.ComponentModel.Description("Visible in UI.")]
       public bool Visible => IsBuiltIn ? Valid : parameter?.GetDefinition().Visible ?? false;
     }
@@ -302,11 +302,8 @@ namespace RhinoInside.Revit.GH.Types
       return base.Equals(obj);
     }
 
-    public override int GetHashCode()
-    {
-      return Value.Id.IntegerValue;
-    }
-
+    public override int GetHashCode() => Value.Id.IntegerValue;
+    
     public override string ToString()
     {
       if (IsValid)
@@ -353,6 +350,151 @@ namespace RhinoInside.Revit.GH.Parameters
     public ParameterKey() : base("Parameter Key", "Parameter Key", "Represents a Revit parameter definition.", "Params", "Revit") { }
 
     protected override Types.ParameterKey PreferredCast(object data) => null;
+    public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
+    {
+      if (Kind > GH_ParamKind.input || DataType == GH_ParamData.remote)
+      {
+        base.AppendAdditionalMenuItems(menu);
+        return;
+      }
+
+      Menu_AppendWireDisplay(menu);
+      Menu_AppendDisconnectWires(menu);
+
+      Menu_AppendReverseParameter(menu);
+      Menu_AppendFlattenParameter(menu);
+      Menu_AppendGraftParameter(menu);
+      Menu_AppendSimplifyParameter(menu);
+
+      {
+        var parametersListBox = new ListBox();
+        parametersListBox.BorderStyle = BorderStyle.FixedSingle;
+        parametersListBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
+        parametersListBox.Height = (int) (100 * GH_GraphicsUtil.UiScale);
+        parametersListBox.SelectedIndexChanged += ParametersListBox_SelectedIndexChanged;
+
+        var categoriesBox = new ComboBox();
+        categoriesBox.DropDownStyle = ComboBoxStyle.DropDownList;
+        categoriesBox.DropDownHeight = categoriesBox.ItemHeight * 15;
+        categoriesBox.SetCueBanner("Filter by Category…");
+        categoriesBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
+        categoriesBox.Tag = parametersListBox;
+        categoriesBox.SelectedIndexChanged += CategoriesBox_SelectedIndexChanged;
+
+        var categoriesTypeBox = new ComboBox();
+        categoriesTypeBox.DropDownStyle = ComboBoxStyle.DropDownList;
+        categoriesTypeBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
+        categoriesTypeBox.Tag = categoriesBox;
+        categoriesTypeBox.SelectedIndexChanged += CategoryType_SelectedIndexChanged;
+        categoriesTypeBox.Items.Add("All Categories");
+        categoriesTypeBox.Items.Add("Model");
+        categoriesTypeBox.Items.Add("Annotation");
+        categoriesTypeBox.Items.Add("Tags");
+        categoriesTypeBox.Items.Add("Internal");
+        categoriesTypeBox.Items.Add("Analytical");
+        categoriesTypeBox.SelectedIndex = 0;
+
+        Menu_AppendCustomItem(menu, categoriesTypeBox);
+        Menu_AppendCustomItem(menu, categoriesBox);
+        Menu_AppendCustomItem(menu, parametersListBox);
+      }
+
+      Menu_AppendManageCollection(menu);
+      Menu_AppendSeparator(menu);
+
+      Menu_AppendDestroyPersistent(menu);
+      Menu_AppendInternaliseData(menu);
+
+      if (Exposure != GH_Exposure.hidden)
+        Menu_AppendExtractParameter(menu);
+    }
+
+    private void RefreshCategoryList(ComboBox categoriesBox, DB.CategoryType categoryType)
+    {
+      var categories = Revit.ActiveUIDocument.Document.Settings.Categories.Cast<DB.Category>().Where(x => x.AllowsBoundParameters);
+
+      if (categoryType != DB.CategoryType.Invalid)
+      {
+        if (categoryType == (DB.CategoryType) 3)
+          categories = categories.Where(x => x.IsTagCategory);
+        else
+          categories = categories.Where(x => x.CategoryType == categoryType && !x.IsTagCategory);
+      }
+
+      categoriesBox.SelectedIndex = -1;
+      categoriesBox.Items.Clear();
+      foreach (var category in categories.OrderBy(x => x.Name))
+      {
+        var tag = Types.Category.FromCategory(category);
+        int index = categoriesBox.Items.Add(tag);
+      }
+    }
+
+    private void RefreshParametersList(ListBox parametersListBox, ComboBox categoriesBox)
+    {
+      parametersListBox.Items.Clear();
+
+      IEnumerable<DB.ElementId> parameters = null;
+      if (categoriesBox.SelectedIndex == -1)
+      {
+        parameters = categoriesBox.Items.
+                     Cast<Types.Category>().
+                     SelectMany(x => DB.TableView.GetAvailableParameters(Revit.ActiveUIDocument.Document, x.Id)).
+                     GroupBy(x => x.IntegerValue).
+                     Select(x => x.First());
+      }
+      else
+      {
+        parameters = DB.TableView.GetAvailableParameters(Revit.ActiveUIDocument.Document, (categoriesBox.Items[categoriesBox.SelectedIndex] as Types.Category).Id);
+      }
+
+      var current = InstantiateT();
+      if (SourceCount == 0 && PersistentDataCount == 1)
+      {
+        if (PersistentData.get_FirstItem(true) is Types.ParameterKey firstValue)
+          current = firstValue.Duplicate() as Types.ParameterKey;
+      }
+
+      foreach (var parameter in parameters.Select(x => Types.ParameterKey.FromElementId(Revit.ActiveUIDocument.Document, x)).OrderBy(x => x.ToString()))
+      {
+        int index = parametersListBox.Items.Add(parameter);
+        if (parameter.UniqueID == current.UniqueID)
+          parametersListBox.SelectedIndex = index;
+      }
+    }
+
+    private void CategoryType_SelectedIndexChanged(object sender, EventArgs e)
+    {
+      if (sender is ComboBox categoriesTypeBox && categoriesTypeBox.Tag is ComboBox categoriesBox)
+      {
+        RefreshCategoryList(categoriesBox, (DB.CategoryType) categoriesTypeBox.SelectedIndex);
+        RefreshParametersList(categoriesBox.Tag as ListBox, categoriesBox);
+      }
+    }
+
+    private void CategoriesBox_SelectedIndexChanged(object sender, EventArgs e)
+    {
+      if (sender is ComboBox categoriesBox && categoriesBox.Tag is ListBox parametersListBox)
+        RefreshParametersList(parametersListBox, categoriesBox);
+    }
+
+    private void ParametersListBox_SelectedIndexChanged(object sender, EventArgs e)
+    {
+      if (sender is ListBox listBox)
+      {
+        if (listBox.SelectedIndex != -1)
+        {
+          if (listBox.Items[listBox.SelectedIndex] is Types.ParameterKey value)
+          {
+            RecordUndoEvent($"Set: {value}");
+            PersistentData.Clear();
+            PersistentData.Append(value.Duplicate() as Types.ParameterKey);
+          }
+        }
+
+        ExpireSolution(true);
+      }
+    }
   }
 
   public class ParameterValue : GH_Param<Types.ParameterValue>
@@ -363,45 +505,158 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public ParameterValue() : base("ParameterValue", "ParameterValue", "Represents a Revit parameter value on an element.", "Params", "Revit", GH_ParamAccess.item) { }
     protected ParameterValue(string name, string nickname, string description, string category, string subcategory, GH_ParamAccess access) :
-    base(name, nickname, description, category, subcategory, access) { }
+    base(name, nickname, description, category, subcategory, access)
+    { }
   }
 
   public class ParameterParam : ParameterValue
   {
     public override Guid ComponentGuid => new Guid("43F0E4E9-3DC4-4965-AB80-07E28E203A91");
 
-    int parameterId = (int) DB.BuiltInParameter.INVALID;
-    public int ParameterId
-    {
-      get
-      {
-        if (parameterId == (int) DB.BuiltInParameter.INVALID)
-        {
-          if (Enum.TryParse(Name, out DB.BuiltInParameter builtInParameter))
-            parameterId = (int) builtInParameter;
-        }
-
-        return parameterId;
-      }
-      set
-      {
-        parameterId = value;
-        Name = parameterId.ToParameterIdString();
-      }
-    }
-
-    public ParameterParam() : base("INVALID", "Invalid", "Represents a Revit parameter instance.", "Params", "Revit", GH_ParamAccess.item) { }
+    public ParameterParam() : base(string.Empty, string.Empty, string.Empty, "Params", "Revit", GH_ParamAccess.item) { }
     public ParameterParam(DB.Parameter p) : this()
     {
-      MutableNickName = false;
-      ParameterId = p.Id.IntegerValue;
+      ParameterName = p.Definition.Name;
+      ParameterType = p.Definition.ParameterType;
+      ParameterGroup = p.Definition.ParameterGroup;
+      ParameterBinding = p.Element is DB.ElementType ? RevitAPI.ParameterBinding.Type : RevitAPI.ParameterBinding.Instance;
 
-      try { NickName = DB.LabelUtils.GetLabelFor(p.Definition.ParameterGroup) + " : " + p.Definition.Name; }
-      catch (Autodesk.Revit.Exceptions.InvalidOperationException) { NickName = p.Definition.Name; }
+      if (p.IsShared) ParameterSharedGUID = p.GUID;
+      else if (p.Id.TryGetBuiltInParameter(out ParameterBuiltInId)) { }
+
+      try { Name = $"{DB.LabelUtils.GetLabelFor(ParameterGroup)} : {ParameterName}"; }
+      catch (Autodesk.Revit.Exceptions.InvalidOperationException) { Name = ParameterName; }
+
+      NickName = Name;
+      MutableNickName = false;
 
       try { Description = p.StorageType == DB.StorageType.ElementId ? "ElementId" : DB.LabelUtils.GetLabelFor(p.Definition.ParameterType); }
       catch (Autodesk.Revit.Exceptions.InvalidOperationException)
       { Description = p.Definition.UnitType == DB.UnitType.UT_Number ? "Enumerate" : DB.LabelUtils.GetLabelFor(p.Definition.UnitType); }
+
+      if (ParameterSharedGUID.HasValue)
+        Description = $"Shared parameter {ParameterSharedGUID.Value:B}\n{Description}";
+      else if (ParameterBuiltInId != DB.BuiltInParameter.INVALID)
+        Description = $"BuiltIn parameter {ParameterBuiltInId.ToStringGeneric()}\n{Description}";
+      else
+        Description = $"{ParameterBinding} project parameter\n{Description}";
+    }
+
+    string ParameterName                        = string.Empty;
+    DB.ParameterType ParameterType              = DB.ParameterType.Invalid;
+    DB.BuiltInParameterGroup ParameterGroup     = DB.BuiltInParameterGroup.INVALID;
+    RevitAPI.ParameterBinding ParameterBinding  = RevitAPI.ParameterBinding.Unknown;
+    DB.BuiltInParameter ParameterBuiltInId      = DB.BuiltInParameter.INVALID;
+    Guid? ParameterSharedGUID                   = default;
+
+    public override sealed bool Read(GH_IReader reader)
+    {
+      if (!base.Read(reader))
+        return false;
+
+      ///////////////////////////////////////////////////////////////
+      // Keep this code while in WIP to read WIP components
+      if
+      (
+        Enum.TryParse(Name, out DB.BuiltInParameter builtInId) &&
+        Enum.IsDefined(typeof(DB.BuiltInParameter), builtInId)
+      )
+        ParameterBuiltInId = builtInId;
+      ///////////////////////////////////////////////////////////////
+
+      var parameterName = default(string);
+      reader.TryGetString("ParameterName", ref parameterName);
+      ParameterName = parameterName;
+
+      var parameterType = (int) DB.ParameterType.Invalid;
+      reader.TryGetInt32("ParameterType", ref parameterType);
+      ParameterType = (DB.ParameterType) parameterType;
+
+      var parameterGroup = (int) DB.BuiltInParameterGroup.INVALID;
+      reader.TryGetInt32("ParameterGroup", ref parameterGroup);
+      ParameterGroup = (DB.BuiltInParameterGroup) parameterGroup;
+
+      var parameterBinding = (int) RevitAPI.ParameterBinding.Unknown;
+      reader.TryGetInt32("ParameterBinding", ref parameterType);
+      ParameterBinding = (RevitAPI.ParameterBinding) parameterBinding;
+
+      var parameterBuiltInId = (int) DB.BuiltInParameter.INVALID;
+      reader.TryGetInt32("ParameterBuiltInId", ref parameterBuiltInId);
+      ParameterBuiltInId = (DB.BuiltInParameter) parameterBuiltInId;
+
+      var parameterSharedGUID = default(Guid);
+      if (reader.TryGetGuid("ParameterSharedGUID", ref parameterSharedGUID))
+        ParameterSharedGUID = parameterSharedGUID;
+      else
+        ParameterSharedGUID = default;
+
+      return true;
+    }
+
+    public override sealed bool Write(GH_IWriter writer)
+    {
+      if (!base.Write(writer))
+        return false;
+
+      if(!string.IsNullOrEmpty(ParameterName))
+        writer.SetString("ParameterName", ParameterName);
+
+      if (ParameterGroup != DB.BuiltInParameterGroup.INVALID)
+        writer.SetInt32("ParameterGroup", (int) ParameterGroup);
+
+      if (ParameterType != DB.ParameterType.Invalid)
+        writer.SetInt32("ParameterType", (int) ParameterType);
+
+      if (ParameterBinding != RevitAPI.ParameterBinding.Unknown)
+        writer.SetInt32("ParameterBinding", (int) ParameterBinding);
+
+      if (ParameterBuiltInId != DB.BuiltInParameter.INVALID)
+        writer.SetInt32("ParameterBuiltInId", (int) ParameterBuiltInId);
+
+      if (ParameterSharedGUID.HasValue)
+        writer.SetGuid("ParameterSharedGUID", ParameterSharedGUID.Value);
+
+      return true;
+    }
+
+    public override int GetHashCode()
+    {
+      if (ParameterSharedGUID.HasValue)
+        return ParameterSharedGUID.Value.GetHashCode();
+
+      if (ParameterBuiltInId != DB.BuiltInParameter.INVALID)
+        return (int) ParameterBuiltInId;
+
+      return new { ParameterName, ParameterType, ParameterBinding }.GetHashCode();
+    }
+
+    public override bool Equals(object obj)
+    {
+      if(obj is ParameterParam value)
+      {
+        if (ParameterSharedGUID.HasValue)
+          return value.ParameterSharedGUID.HasValue && ParameterSharedGUID == value.ParameterSharedGUID.Value;
+
+        if (ParameterBuiltInId != DB.BuiltInParameter.INVALID)
+          return ParameterBuiltInId == value.ParameterBuiltInId;
+
+        return ParameterName == value.ParameterName &&
+               ParameterType == value.ParameterType &&
+               ParameterBinding == value.ParameterBinding;
+      }
+
+      return false;
+    }
+
+    public DB.Parameter GetParameter(DB.Element element)
+    {
+      if(ParameterSharedGUID.HasValue)
+        return element.get_Parameter(ParameterSharedGUID.Value);
+
+      if(ParameterBuiltInId != DB.BuiltInParameter.INVALID)
+        return element.get_Parameter(ParameterBuiltInId);
+
+      return element.GetParameter(ParameterName, ParameterType, ParameterBinding, RevitAPI.ParameterSet.Project);
     }
   }
 }
