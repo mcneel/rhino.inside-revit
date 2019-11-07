@@ -761,24 +761,46 @@ namespace RhinoInside.Revit.GH.Types
 
         if (typeof(Q).IsAssignableFrom(typeof(GH_Surface)))
         {
-          var brep = Value.ToRhino(true);
-          if (element is DB.Instance instance)
-            brep.Transform(Transform.Scale(Point3d.Origin, Revit.ModelUnits) * instance.GetTransform().ToRhino());
-          else
-            brep.Scale(Revit.ModelUnits);
+          if (Value.ToRhino(true) is Brep brep)
+          {
+            if (element is DB.Instance instance)
+              brep.Transform(Transform.Scale(Point3d.Origin, Revit.ModelUnits) * instance.GetTransform().ToRhino());
+            else
+              brep.Scale(Revit.ModelUnits);
 
-          target = (Q) (object) new GH_Surface(brep);
+            target = (Q) (object) new GH_Surface(brep);
+          }
+          else target = default;
           return true;
         }
         else if (typeof(Q).IsAssignableFrom(typeof(GH_Brep)))
         {
-          var brep = Value.ToRhino(false);
-          if (element is DB.Instance instance)
-            brep.Transform(Transform.Scale(Point3d.Origin, Revit.ModelUnits) * instance.GetTransform().ToRhino());
-          else
-            brep.Scale(Revit.ModelUnits);
+          if (Value.ToRhino(false) is Brep brep)
+          {
+            if (element is DB.Instance instance)
+              brep.Transform(Transform.Scale(Point3d.Origin, Revit.ModelUnits) * instance.GetTransform().ToRhino());
+            else
+              brep.Scale(Revit.ModelUnits);
 
-          target = (Q) (object) new GH_Brep(brep);
+            target = (Q) (object) new GH_Brep(brep);
+          }
+          else target = default;
+          return true;
+        }
+        if (typeof(Q).IsAssignableFrom(typeof(GH_Mesh)))
+        {
+          if (Value.Triangulate()?.ToRhino() is Mesh mesh)
+          {
+            if (element is DB.Instance instance)
+              mesh.Transform(Transform.Scale(Point3d.Origin, Revit.ModelUnits) * instance.GetTransform().ToRhino());
+            else
+              mesh.Scale(Revit.ModelUnits);
+
+            mesh.Normals.ComputeNormals();
+
+            target = (Q) (object) new GH_Mesh(mesh);
+          }
+          else target = default;
           return true;
         }
         else if (element is object && typeof(Q).IsAssignableFrom(typeof(Element)))

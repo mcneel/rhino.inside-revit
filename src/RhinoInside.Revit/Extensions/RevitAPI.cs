@@ -262,6 +262,13 @@ namespace RhinoInside.Revit
       Shared
     }
 
+    public enum ParameterBinding
+    {
+      Unknown,
+      Instance,
+      Type,
+    }
+
     public static IEnumerable<Parameter> GetParameters(this Element element, ParameterSet set)
     {
       switch (set)
@@ -326,6 +333,14 @@ namespace RhinoInside.Revit
       return parameters.FirstOrDefault(x => !x.IsReadOnly) ?? parameters.FirstOrDefault();
     }
 
+    public static Parameter GetParameter(this Element element, string name, ParameterType type, ParameterBinding parameterBinding, ParameterSet set)
+    {
+      if (element is ElementType ? parameterBinding != ParameterBinding.Type : parameterBinding != ParameterBinding.Instance)
+        return null;
+
+      return GetParameter(element, name, type, set);
+    }
+
     public static void CopyParametersFrom(this Element to, Element from, ICollection<BuiltInParameter> parametersMask = null)
     {
       if (ReferenceEquals(to, from) || from is null || to is null)
@@ -383,25 +398,25 @@ namespace RhinoInside.Revit
       }
     }
 
-    public static string ToParameterIdString(this int value)
+    public static string ToStringGeneric(this BuiltInParameter value)
     {
       switch (value)
       {
-        case (int) BuiltInParameter.GENERIC_THICKNESS:          return "GENERIC_THICKNESS";
-        case (int) BuiltInParameter.GENERIC_WIDTH:              return "GENERIC_WIDTH";
-        case (int) BuiltInParameter.GENERIC_HEIGHT:             return "GENERIC_HEIGHT";
-        case (int) BuiltInParameter.GENERIC_DEPTH:              return "GENERIC_DEPTH";
-        case (int) BuiltInParameter.GENERIC_FINISH:             return "GENERIC_FINISH";
-        case (int) BuiltInParameter.GENERIC_CONSTRUCTION_TYPE:  return "GENERIC_CONSTRUCTION_TYPE";
-        case (int) BuiltInParameter.FIRE_RATING:                return "FIRE_RATING";
-        case (int) BuiltInParameter.ALL_MODEL_COST:             return "ALL_MODEL_COST";
-        case (int) BuiltInParameter.ALL_MODEL_MARK:             return "ALL_MODEL_MARK";
-        case (int) BuiltInParameter.ALL_MODEL_FAMILY_NAME:      return "ALL_MODEL_FAMILY_NAME";
-        case (int) BuiltInParameter.ALL_MODEL_TYPE_NAME:        return "ALL_MODEL_TYPE_NAME";
-        case (int) BuiltInParameter.ALL_MODEL_TYPE_MARK:        return "ALL_MODEL_TYPE_MARK";
+        case BuiltInParameter.GENERIC_THICKNESS:          return "GENERIC_THICKNESS";
+        case BuiltInParameter.GENERIC_WIDTH:              return "GENERIC_WIDTH";
+        case BuiltInParameter.GENERIC_HEIGHT:             return "GENERIC_HEIGHT";
+        case BuiltInParameter.GENERIC_DEPTH:              return "GENERIC_DEPTH";
+        case BuiltInParameter.GENERIC_FINISH:             return "GENERIC_FINISH";
+        case BuiltInParameter.GENERIC_CONSTRUCTION_TYPE:  return "GENERIC_CONSTRUCTION_TYPE";
+        case BuiltInParameter.FIRE_RATING:                return "FIRE_RATING";
+        case BuiltInParameter.ALL_MODEL_COST:             return "ALL_MODEL_COST";
+        case BuiltInParameter.ALL_MODEL_MARK:             return "ALL_MODEL_MARK";
+        case BuiltInParameter.ALL_MODEL_FAMILY_NAME:      return "ALL_MODEL_FAMILY_NAME";
+        case BuiltInParameter.ALL_MODEL_TYPE_NAME:        return "ALL_MODEL_TYPE_NAME";
+        case BuiltInParameter.ALL_MODEL_TYPE_MARK:        return "ALL_MODEL_TYPE_MARK";
       }
 
-      return ((BuiltInParameter) value).ToString();
+      return value.ToString();
     }
     #endregion
 
@@ -459,7 +474,7 @@ namespace RhinoInside.Revit
       return ExportUtils.GetGBXMLDocumentId(doc);
     }
 
-    private static bool TryGetDocument(this IEnumerable<Document> set, Guid guid, out Document document, Document activeDBDocument = default(Document))
+    private static bool TryGetDocument(this IEnumerable<Document> set, Guid guid, out Document document, Document activeDBDocument = default)
     {
       if (guid != Guid.Empty)
       {
@@ -477,7 +492,7 @@ namespace RhinoInside.Revit
         }
       }
 
-      document = default(Document);
+      document = default;
       return false;
     }
 
@@ -486,7 +501,7 @@ namespace RhinoInside.Revit
 
     public static bool TryGetCategoryId(this Document doc, string uniqueId, out ElementId categoryId)
     {
-      categoryId = default(ElementId);
+      categoryId = default;
 
       if (UniqueId.TryParse(uniqueId, out var EpisodeId, out var id))
       {
@@ -510,7 +525,7 @@ namespace RhinoInside.Revit
 
     public static bool TryGetParameterId(this Document doc, string uniqueId, out ElementId parameterId)
     {
-      parameterId = default(ElementId);
+      parameterId = default;
 
       if (UniqueId.TryParse(uniqueId, out var EpisodeId, out var id))
       {
@@ -531,7 +546,7 @@ namespace RhinoInside.Revit
 
     public static bool TryGetElementId(this Document doc, string uniqueId, out ElementId elementId)
     {
-      elementId = default(ElementId);
+      elementId = default;
 
       try
       {

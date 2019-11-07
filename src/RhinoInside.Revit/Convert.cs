@@ -115,7 +115,8 @@ namespace RhinoInside.Revit
           }
           case DB.Face face:
           {
-            var f = (meshingParameters is null ? face.Triangulate() : face.Triangulate(meshingParameters.RelativeTolerance)).ToRhino();
+            var faceMesh = (meshingParameters is null ? face.Triangulate() : face.Triangulate(meshingParameters.RelativeTolerance));
+            var f = faceMesh?.ToRhino();
 
             yield return f?.ChangeUnits(scaleFactor); ;
             break;
