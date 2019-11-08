@@ -224,7 +224,7 @@ namespace RhinoInside.Revit
       if (brepFaces.Count == 1)
         return brepFaces.First();
 
-      ICollection<Brep> joinedBreps = Brep.JoinBreps(brepFaces, tolerance);
+      ICollection<Brep> joinedBreps = Brep.JoinBreps(brepFaces.Where(x => x?.IsValid == true), tolerance);
       if (joinedBreps is null)
         joinedBreps = brepFaces;
       else if (joinedBreps.Count == 1)
@@ -241,7 +241,7 @@ namespace RhinoInside.Revit
       if (brepFaces.Count == 1)
         return brepFaces.First();
 
-      var solidBreps = Brep.CreateSolid(brepFaces, tolerance);
+      var solidBreps = Brep.CreateSolid(brepFaces.Where(x => x?.IsValid == true), tolerance);
       if ((solidBreps?.Length ?? 0) == 0)
         return JoinAndMerge(brepFaces, tolerance);
 
@@ -373,6 +373,10 @@ namespace RhinoInside.Revit
             else
               curves.Add(ruledSurface.GetSecondProfileCurve().ToRhino());
 
+              // Revit Ruled surface Parametric Orientation is opposite to Rhino
+              foreach (var curve in curves)
+              curve.Reverse();
+
             var lofts = Brep.CreateFromLoft(curves, start, end, LoftType.Straight, false);
             if (lofts.Length == 1)
               brep = lofts[0];
@@ -456,7 +460,7 @@ namespace RhinoInside.Revit
              Cast<DB.Face>().
              Select(x => x.ToRhino()).
              ToArray().
-             SolidOrMerge(Revit.VertexTolerance);
+             JoinAndMerge(Revit.VertexTolerance);
     }
 
     public static Mesh ToRhino(this DB.Mesh mesh)
@@ -482,13 +486,16 @@ namespace RhinoInside.Revit
       return result;
     }
 
-    public static IEnumerable<GeometryBase> ToRhino(this IEnumerable<DB.GeometryObject> geometries)
+    public static IEnumerable<GeometryBase> ToRhino(this DB.GeometryObject geometry)
     {
       var scaleFactor = Revit.ModelUnits;
-      foreach (var geometry in geometries)
+      switch (geometry)
       {
-        switch (geometry)
-        {
+          case DB.GeometryElement element:
+            foreach (var g in element.SelectMany(x => x.ToRhino()))
+              yield return g;
+
+            break;
           case DB.GeometryInstance instance:
             var xform = instance.Transform.ToRhino().ChangeUnits(scaleFactor);
             foreach (var g in instance.SymbolGeometry.ToRhino())
@@ -518,7 +525,6 @@ namespace RhinoInside.Revit
             yield return p?.ChangeUnits(scaleFactor);
             break;
         }
-      }
     }
     #endregion
   };

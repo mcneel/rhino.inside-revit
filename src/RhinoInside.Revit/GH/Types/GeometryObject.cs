@@ -7,6 +7,7 @@ using Autodesk.Revit.UI.Selection;
 using GH_IO.Serialization;
 using Grasshopper;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using DB = Autodesk.Revit.DB;
@@ -399,7 +400,7 @@ namespace RhinoInside.Revit.GH.Types
 
       return false;
     }
-    public void UnloadElement() { Value = default(X); Document = default(DB.Document); }
+    public void UnloadElement() { Value = default; Document = default; }
     #endregion
 
     #region IGH_GeometricGoo
@@ -521,8 +522,8 @@ namespace RhinoInside.Revit.GH.Types
     readonly int VertexIndex = -1;
     public override bool LoadElement()
     {
-      Document = default(DB.Document);
-      Value = default(DB.Point);
+      Document = default;
+      Value = default;
 
       if (Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var doc))
       {
@@ -940,7 +941,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override GH_GetterResult Prompt_Singular(ref T element)
     {
-      element = default(T);
+      element = default;
 
       try
       {
@@ -978,7 +979,7 @@ namespace RhinoInside.Revit.GH.Parameters
         {
           using (new ModalForm.EditScope())
           {
-            if(uiDocument.Selection.PickObjects(ObjectType.Element, this) is IList<DB.Reference> references)
+            if (uiDocument.Selection.PickObjects(ObjectType.Element, this) is IList<DB.Reference> references)
               elements = references.Select(r => (T) Types.Element.FromElementId(doc, r.ElementId)).ToList();
           }
         }
@@ -987,28 +988,52 @@ namespace RhinoInside.Revit.GH.Parameters
       return GH_GetterResult.success;
     }
 
-    protected GH_GetterResult Prompt_More(ref List<T> elements)
+    protected GH_GetterResult Prompt_More(ref GH_Structure<T> data)
     {
       var uiDocument = Revit.ActiveUIDocument;
       var doc = uiDocument.Document;
-      var preselection = elements.OfType<Types.IGH_ElementId>().
-                         Select(x => { if (!x.IsValid && x.IsReferencedElement) x.LoadElement(); return x; }).
-                         Where(x => x.IsValid && x.Document.Equals(doc)).
-                         Select(x => x.Document.GetElement(x.Id)).
-                         Where(x => x is object).
-                         Select(x => new DB.Reference(x)).
-                         ToArray();
+      var docGUID = doc.GetFingerprintGUID();
+
+      var documents = data.AllData(true).OfType<T>().GroupBy(x => x.DocumentGUID);
+      var activeElements = documents.Where(x => x.Key == docGUID).
+                           SelectMany(x => x).
+                           Select
+                           (
+                             x =>
+                             {
+                               try { return DB.Reference.ParseFromStableRepresentation(doc, x.UniqueID); }
+                               catch (Autodesk.Revit.Exceptions.ArgumentException) { return null; }
+                             }
+                           ).
+                           ToArray();
 
       try
       {
         using (new ModalForm.EditScope())
         {
-          if(uiDocument.Selection.PickObjects(ObjectType.Element, this, null, preselection) is IList<DB.Reference> references)
-            elements = references.Select(r => (T) Types.Element.FromElementId(doc, r.ElementId)).ToList();
+          if (uiDocument.Selection.PickObjects(ObjectType.Element, this, null, activeElements) is IList<DB.Reference> selection)
+          {
+            var newData = new GH_Structure<T>();
+
+            int index = 0;
+            foreach (var document in documents)
+            {
+              if (document.Key == docGUID)
+                continue;
+
+              var path = new GH_Path(index++);
+              newData.AppendRange(document, path);
+            }
+
+            newData.AppendRange(selection.Select(r => (T) Types.Element.FromElementId(doc, r.ElementId)), new GH_Path(index));
+
+            data = newData;
+            return GH_GetterResult.success;
+          }
         }
       }
-      catch (Autodesk.Revit.Exceptions.OperationCanceledException) { return GH_GetterResult.cancel; }
-      return GH_GetterResult.success;
+      catch (Autodesk.Revit.Exceptions.OperationCanceledException) {}
+      return GH_GetterResult.cancel;
     }
 
     protected override void Menu_AppendPromptMore(ToolStripDropDown menu)
@@ -1023,14 +1048,14 @@ namespace RhinoInside.Revit.GH.Parameters
       try
       {
         PrepareForPrompt();
-        var data = PersistentData.AllData(true).OfType<T>().ToList();
+        var data = PersistentData;
         if (Prompt_More(ref data) == GH_GetterResult.success)
         {
           RecordPersistentDataEvent("Change data");
 
           PersistentData.Clear();
           if (data is object)
-            PersistentData.AppendRange(data);
+            PersistentData.MergeStructure(data);
 
           OnObjectChanged(GH_ObjectEventType.PersistentData);
         }
