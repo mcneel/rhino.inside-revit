@@ -521,8 +521,10 @@ namespace RhinoInside.Revit.GH.Parameters
       ParameterGroup = p.Definition.ParameterGroup;
       ParameterBinding = p.Element is DB.ElementType ? RevitAPI.ParameterBinding.Type : RevitAPI.ParameterBinding.Instance;
 
-      if (p.IsShared) ParameterSharedGUID = p.GUID;
-      else if (p.Id.TryGetBuiltInParameter(out ParameterBuiltInId)) { }
+      if (p.IsShared)
+        ParameterSharedGUID = p.GUID;
+      else if (p.Id.TryGetBuiltInParameter(out var parameterBuiltInId))
+        ParameterBuiltInId = parameterBuiltInId;
 
       try { Name = $"{DB.LabelUtils.GetLabelFor(ParameterGroup)} : {ParameterName}"; }
       catch (Autodesk.Revit.Exceptions.InvalidOperationException) { Name = ParameterName; }
@@ -542,12 +544,12 @@ namespace RhinoInside.Revit.GH.Parameters
         Description = $"{ParameterBinding} project parameter\n{Description}";
     }
 
-    string ParameterName                        = string.Empty;
-    DB.ParameterType ParameterType              = DB.ParameterType.Invalid;
-    DB.BuiltInParameterGroup ParameterGroup     = DB.BuiltInParameterGroup.INVALID;
-    RevitAPI.ParameterBinding ParameterBinding  = RevitAPI.ParameterBinding.Unknown;
-    DB.BuiltInParameter ParameterBuiltInId      = DB.BuiltInParameter.INVALID;
-    Guid? ParameterSharedGUID                   = default;
+    public string ParameterName                        { get; private set; } = string.Empty;
+    public DB.ParameterType ParameterType              { get; private set; } = DB.ParameterType.Invalid;
+    public DB.BuiltInParameterGroup ParameterGroup     { get; private set; } = DB.BuiltInParameterGroup.INVALID;
+    public RevitAPI.ParameterBinding ParameterBinding  { get; private set; } = RevitAPI.ParameterBinding.Unknown;
+    public DB.BuiltInParameter ParameterBuiltInId      { get; private set; } = DB.BuiltInParameter.INVALID;
+    public Guid? ParameterSharedGUID                   { get; private set; } = default;
 
     public override sealed bool Read(GH_IReader reader)
     {
@@ -577,7 +579,7 @@ namespace RhinoInside.Revit.GH.Parameters
       ParameterGroup = (DB.BuiltInParameterGroup) parameterGroup;
 
       var parameterBinding = (int) RevitAPI.ParameterBinding.Unknown;
-      reader.TryGetInt32("ParameterBinding", ref parameterType);
+      reader.TryGetInt32("ParameterBinding", ref parameterBinding);
       ParameterBinding = (RevitAPI.ParameterBinding) parameterBinding;
 
       var parameterBuiltInId = (int) DB.BuiltInParameter.INVALID;

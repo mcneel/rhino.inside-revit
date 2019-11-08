@@ -834,77 +834,33 @@ namespace RhinoInside.Revit.GH.Components
       Params.RegisterOutputParam(param);
     }
 
-    class EqualityComparer : IEqualityComparer<KeyValuePair<int, DB.Parameter>>
-    {
-      bool IEqualityComparer<KeyValuePair<int, DB.Parameter>>.Equals(KeyValuePair<int, DB.Parameter> x, KeyValuePair<int, DB.Parameter> y) => x.Key == y.Key;
-      int IEqualityComparer<KeyValuePair<int, DB.Parameter>>.GetHashCode(KeyValuePair<int, DB.Parameter> obj) => obj.Key;
-    }
-
     void Menu_PopulateOutputsWithCommonParameters(object sender, EventArgs e)
     {
-      IEnumerable<KeyValuePair<int, DB.Parameter>> common = null;
-
+      var common = default(HashSet<Parameters.ParameterParam>);
       foreach (var goo in Params.Input[0].VolatileData.AllData(true).OfType<Types.Element>())
       {
-        var definitions = new Dictionary<int, DB.Parameter>();
-
         var element = (DB.Element) goo;
         if (element is null)
           continue;
 
+        var current = new HashSet<Parameters.ParameterParam>();
         foreach (var param in element.Parameters.OfType<DB.Parameter>())
-        {
-          try { definitions.Add(param.Id.IntegerValue, param); }
-          catch (System.ArgumentException) { }
-        }
+          current.Add(new Parameters.ParameterParam(param));
 
         if (common is null)
-          common = definitions;
+          common = current;
         else
-          common = common.Intersect(definitions, new EqualityComparer());
+          common.IntersectWith(current);
       }
 
-      if (common is object)
-      {
-        RecordUndoEvent("Get Common Parameters");
+      RecordUndoEvent("Get Common Parameters");
 
-        var connectedParams = new Dictionary<Parameters.ParameterParam, IList<IGH_Param>>();
-        foreach (var output in Params.Output.ToArray())
-        {
-          if
-          (
-            output.Recipients.Count > 0 &&
-            output is Parameters.ParameterParam param
-          )
-            connectedParams.Add(param, param.Recipients.ToArray());
-
-          Params.UnregisterOutputParameter(output);
-        }
-
-        foreach (var group in common.GroupBy((x) => x.Value.Definition.ParameterGroup).OrderBy((x) => x.Key))
-        {
-          foreach (var definition in group.OrderBy(x => x.Value.Id.IntegerValue))
-          {
-            var param = new Parameters.ParameterParam(definition.Value);
-            AddOutputParameter(param);
-
-            if (connectedParams.TryGetValue(param, out var recipients))
-            {
-              foreach (var recipient in recipients)
-                recipient.AddSource(param);
-            }
-          }
-        }
-
-        Params.OnParametersChanged();
-        ExpireSolution(true);
-      }
+      PopulateOutputParameters(common);
     }
 
     void Menu_PopulateOutputsWithAllParameters(object sender, EventArgs e)
     {
-      var definitions = new Dictionary<int, DB.Parameter>();
-
+      var all = new HashSet<Parameters.ParameterParam>();
       foreach (var goo in Params.Input[0].VolatileData.AllData(true).OfType<Types.Element>())
       {
         var element = (DB.Element) goo;
@@ -912,47 +868,45 @@ namespace RhinoInside.Revit.GH.Components
           continue;
 
         foreach (var param in element.Parameters.OfType<DB.Parameter>())
-        {
-          try { definitions.Add(param.Id.IntegerValue, param); }
-          catch (System.ArgumentException) { }
-        }
+          all.Add(new Parameters.ParameterParam(param));
       }
 
-      if (definitions is object)
+      RecordUndoEvent("Get All Parameters");
+
+      PopulateOutputParameters(all);
+    }
+
+    void PopulateOutputParameters(IEnumerable<Parameters.ParameterParam> parameters)
+    {
+      var connected = new Dictionary<Parameters.ParameterParam, IList<IGH_Param>>();
+      foreach (var output in Params.Output.ToArray())
       {
-        RecordUndoEvent("Get All Parameters");
+        if
+        (
+          output.Recipients.Count > 0 &&
+          output is Parameters.ParameterParam param
+        )
+          connected.Add(param, param.Recipients.ToArray());
 
-        var connectedParams = new Dictionary<Parameters.ParameterParam, IList<IGH_Param>>();
-        foreach (var output in Params.Output.ToArray())
-        {
-          if
-          (
-            output.Recipients.Count > 0 &&
-            output is Parameters.ParameterParam param
-          )
-            connectedParams.Add(param, param.Recipients.ToArray());
-          
-          Params.UnregisterOutputParameter(output);
-        }
+        Params.UnregisterOutputParameter(output);
+      }
 
-        foreach (var group in definitions.GroupBy((x) => x.Value.Definition.ParameterGroup).OrderBy((x) => x.Key))
+      foreach (var group in parameters.GroupBy(x => x.ParameterGroup).OrderBy(x => x.Key))
+      {
+        foreach (var parameter in group.OrderBy(x => x.ParameterBuiltInId))
         {
-          foreach (var definition in group.OrderBy(x => x.Value.Id.IntegerValue))
+          AddOutputParameter(parameter);
+
+          if (connected.TryGetValue(parameter, out var recipients))
           {
-            var param = new Parameters.ParameterParam(definition.Value);
-            AddOutputParameter(param);
-
-            if (connectedParams.TryGetValue(param, out var recipients))
-            {
-              foreach (var recipient in recipients)
-                recipient.AddSource(param);
-            }
+            foreach (var recipient in recipients)
+              recipient.AddSource(parameter);
           }
         }
-
-        Params.OnParametersChanged();
-        ExpireSolution(true);
       }
+
+      Params.OnParametersChanged();
+      ExpireSolution(true);
     }
 
     void Menu_RemoveUnconnectedParameters(object sender, EventArgs e)
