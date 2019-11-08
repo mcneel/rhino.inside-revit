@@ -257,30 +257,42 @@ namespace RhinoInside.Revit
 #if REVIT_2018
         brepFace.OrientationIsReversed = !face.OrientationMatchesSurfaceOrientation;
 #endif
-        var trimmedBrep = brepFace.Split(loops, Revit.VertexTolerance / 10.0);
+        var trimmedBrep = brepFace.Split(loops, Revit.VertexTolerance);
 
         if (trimmedBrep is object)
         {
+          // Remove ears, faces with edges not in the boundary
           foreach (var trimmedFace in trimmedBrep.Faces.OrderByDescending(x => x.FaceIndex))
           {
-            // Remove holes, faces with only interior edges
-            if (!trimmedFace.Loops.SelectMany(loop => loop.Trims).Where(trim => trim.TrimType != BrepTrimType.Singular && trim.Edge.Valence != EdgeAdjacency.Interior).Any())
-            {
-              trimmedBrep.Faces.RemoveAt(trimmedFace.FaceIndex);
-              continue;
-            }
-
-            // Remove ears, faces with edges not in the boundary
             foreach (var trim in trimmedFace.Loops.SelectMany(loop => loop.Trims).Where(trim => trim.TrimType != BrepTrimType.Singular && trim.Edge.Valence == EdgeAdjacency.Naked))
             {
               var midPoint = trim.Edge.PointAt(trim.Edge.Domain.Mid);
 
-              var intersectionResult = face.Project(midPoint.ToHost());
-              if (intersectionResult is null || !face.IsInside(intersectionResult.UVPoint))
+              bool pointOnLoop = false;
+              foreach(var curve in loops.Cast<PolyCurve>().SelectMany(x => x.Explode()))
+              {
+                if (curve.ClosestPoint(midPoint, out var _, Revit.VertexTolerance))
+                {
+                  pointOnLoop = true;
+                  break;
+                }
+              }
+
+              if(!pointOnLoop)
               {
                 trimmedBrep.Faces.RemoveAt(trimmedFace.FaceIndex);
                 break;
               }
+            }
+          }
+
+          // Remove holes, faces with only interior edges
+          foreach (var trimmedFace in trimmedBrep.Faces.OrderByDescending(x => x.FaceIndex))
+          {
+            if (!trimmedFace.Loops.SelectMany(loop => loop.Trims).Where(trim => trim.TrimType != BrepTrimType.Singular && trim.Edge.Valence != EdgeAdjacency.Interior).Any())
+            {
+              trimmedBrep.Faces.RemoveAt(trimmedFace.FaceIndex);
+              continue;
             }
           }
 
@@ -373,8 +385,8 @@ namespace RhinoInside.Revit
             else
               curves.Add(ruledSurface.GetSecondProfileCurve().ToRhino());
 
-              // Revit Ruled surface Parametric Orientation is opposite to Rhino
-              foreach (var curve in curves)
+            // Revit Ruled surface Parametric Orientation is opposite to Rhino
+            foreach (var curve in curves)
               curve.Reverse();
 
             var lofts = Brep.CreateFromLoft(curves, start, end, LoftType.Straight, false);
@@ -437,6 +449,12 @@ namespace RhinoInside.Revit
                     knots[index++] = w;
                 }
 
+                var tol = Revit.ShortCurveTolerance * 10.0;
+                nurbsSurface = nurbsSurface.Extend(IsoStatus.West,  tol, true) as NurbsSurface;
+                nurbsSurface = nurbsSurface.Extend(IsoStatus.South, tol, true) as NurbsSurface;
+                nurbsSurface = nurbsSurface.Extend(IsoStatus.East,  tol, true) as NurbsSurface;
+                nurbsSurface = nurbsSurface.Extend(IsoStatus.North, tol, true) as NurbsSurface;
+
                 brep = Brep.CreateFromSurface(nurbsSurface);
               }
             }
@@ -447,8 +465,15 @@ namespace RhinoInside.Revit
         }
 
         if (untrimmed)
-          return brep;
+        {
+#if REVIT_2018
+          if (!face.OrientationMatchesSurfaceOrientation)
+            brep.Flip();
+#endif
 
+          return brep;
+        }
+        
         try { return brep?.TrimFaces(loops, face); }
         finally { brep?.Dispose(); }
       }
