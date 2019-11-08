@@ -466,8 +466,10 @@ namespace RhinoInside.Revit
 
         if (untrimmed)
         {
+#if REVIT_2018
           if (!face.OrientationMatchesSurfaceOrientation)
             brep.Flip();
+#endif
 
           return brep;
         }
