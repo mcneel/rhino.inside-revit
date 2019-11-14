@@ -214,7 +214,7 @@ namespace RhinoInside.Revit.UI
   {
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
-      using (System.Diagnostics.Process.Start("https://github.com/mcneel/rhino.inside-revit/blob/master/README.md")) { }
+      using (System.Diagnostics.Process.Start("https://github.com/mcneel/rhino.inside/blob/master/Autodesk/Revit/README.md")) { }
 
       return Result.Succeeded;
     }
