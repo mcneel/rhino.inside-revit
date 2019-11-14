@@ -386,6 +386,19 @@ namespace RhinoInside.Revit.GH.Components
       }
     }
 
+    void Add
+    (
+      DB.Document doc,
+      DB.Document familyDoc,
+      IEnumerable<Rhino.Geometry.Curve> loops,
+      DB.HostObject host,
+      DeleteElementEnumerator<DB.Opening> openings
+    )
+    {
+      var profile = loops.SelectMany(x => x.ToHostMultiple()).ToCurveArray();
+      var opening = familyDoc.FamilyCreate.NewOpening(host, profile);
+    }
+
     static string GetFamilyTemplateFileName(DB.ElementId categoryId, Autodesk.Revit.ApplicationServices.LanguageType language)
     {
       if(categoryId.TryGetBuiltInCategory(out var builtInCategory))
@@ -541,27 +554,47 @@ namespace RhinoInside.Revit.GH.Components
 
                 if (updateGeometry)
                 {
-                  using (var forms = new DeleteElementEnumerator<DB.GenericForm>(new DB.FilteredElementCollector(familyDoc).OfClass(typeof(DB.GenericForm)).Cast<DB.GenericForm>()))
-                  using (var curves = new DeleteElementEnumerator<DB.CurveElement>(new DB.FilteredElementCollector(familyDoc).OfClass(typeof(DB.CurveElement)).Cast<DB.CurveElement>()))
+                  using (var forms = new DeleteElementEnumerator<DB.GenericForm>(new DB.FilteredElementCollector(familyDoc).OfClass(typeof(DB.GenericForm)).Cast<DB.GenericForm>().ToArray()))
+                  using (var curves = new DeleteElementEnumerator<DB.CurveElement>(new DB.FilteredElementCollector(familyDoc).OfClass(typeof(DB.CurveElement)).Cast<DB.CurveElement>().Where(x => x.Category.Id.IntegerValue != (int) DB.BuiltInCategory.OST_SketchLines).ToArray()))
+                  using (var openings = new DeleteElementEnumerator<DB.Opening>(new DB.FilteredElementCollector(familyDoc).OfClass(typeof(DB.Opening)).Cast<DB.Opening>().ToArray()))
                   {
                     bool hasVoids = false;
                     var planesSet = new List<KeyValuePair<double[], DB.SketchPlane>>();
                     var planesSetComparer = new PlaneComparer();
+                    var loops = new List<Rhino.Geometry.Curve>();
 
                     foreach (var geo in geometry.Select(x => AsGeometryBase(x).ChangeUnits(scaleFactor)))
                     {
                       try
                       {
-                        switch (geo)
+                        if (geo is Rhino.Geometry.Curve loop && geo.GetUserBoolean("IS_OPENING_PARAM", out var opening) && opening)
                         {
-                          case Rhino.Geometry.Brep brep: hasVoids |= Add(doc, familyDoc, brep, forms); break;
-                          case Rhino.Geometry.Curve curve: Add(doc, familyDoc, curve, planesSet, curves); break;
-                          default: AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"{geo.GetType().Name} is not supported and will be ignored"); break;
+                          loops.Add(loop);
+                        }
+                        else
+                        {
+                          switch (geo)
+                          {
+                            case Rhino.Geometry.Brep brep: hasVoids |= Add(doc, familyDoc, brep, forms); break;
+                            case Rhino.Geometry.Curve curve: Add(doc, familyDoc, curve, planesSet, curves); break;
+                            default: AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"{geo.GetType().Name} is not supported and will be ignored"); break;
+                          }
                         }
                       }
                       catch (Autodesk.Revit.Exceptions.InvalidOperationException e)
                       {
                         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
+                      }
+                    }
+
+                    if (loops.Count > 0)
+                    {
+                      using (var hosts = new DB.FilteredElementCollector(familyDoc).OfClass(typeof(DB.HostObject)))
+                      {
+                        if (hosts.Where(x => x is DB.Wall || x is DB.Ceiling).FirstOrDefault() is DB.HostObject host)
+                          Add(doc, familyDoc, loops, host, openings);
+                        else
+                          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "No suitable host object is been found");
                       }
                     }
 
@@ -576,7 +609,8 @@ namespace RhinoInside.Revit.GH.Components
             }
             finally
             {
-              familyDoc.Close(false);
+              if(!Revit.ActiveDBApplication.Documents.Contains(familyDoc))
+                familyDoc.Close(false);
             }
 
             if (familyIsNew)
@@ -891,6 +925,42 @@ namespace RhinoInside.Revit.GH.Components
       var symbolic = false;
       if (DA.GetData("Symbolic", ref symbolic))
         curve.SetUserString(DB.BuiltInParameter.MODEL_OR_SYMBOLIC.ToString(), symbolic ? "1" : null);
+
+      DA.SetData("Curve", curve);
+    }
+  }
+
+  public class FamilyOpeningByCurve : Component
+  {
+    public override Guid ComponentGuid => new Guid("72FDC627-09C7-4D9F-8D7F-5F6812FB1873");
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
+
+    protected override string IconTag => "O";
+
+    public FamilyOpeningByCurve()
+    : base("FamilyOpening.ByCurve", "FamilyOpening.ByCurve", string.Empty, "Revit", "Family")
+    { }
+
+    protected override void RegisterInputParams(GH_InputParamManager manager)
+    {
+      manager.AddCurveParameter("Curve", "C", string.Empty, GH_ParamAccess.item);
+      manager[manager.AddBooleanParameter("Opening", "O", string.Empty, GH_ParamAccess.item, true)].Optional = true;
+    }
+
+    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    {
+      manager.AddCurveParameter("Curve", "C", string.Empty, GH_ParamAccess.item);
+    }
+
+    protected override void SolveInstance(IGH_DataAccess DA)
+    {
+      var curve = default(Rhino.Geometry.Curve);
+      if (!DA.GetData("Curve", ref curve))
+        return;
+
+      var opening = true;
+      if (DA.GetData("Opening", ref opening))
+        curve.SetUserString("IS_OPENING_PARAM", opening ? "1" : null);
 
       DA.SetData("Curve", curve);
     }
