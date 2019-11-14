@@ -246,10 +246,6 @@ namespace RhinoInside.Revit.GH.Components
       DeleteElementEnumerator<DB.GenericForm> forms
     )
     {
-      bool isCutting = brep.SolidOrientation == Rhino.Geometry.BrepSolidOrientation.Inward;
-      if (isCutting)
-        brep.Flip();
-
       forms.MoveNext();
       if (brep.ToHost() is DB.Solid solid)
       {
@@ -260,12 +256,10 @@ namespace RhinoInside.Revit.GH.Components
         }
         else freeForm = DB.FreeFormElement.Create(familyDoc, solid);
 
-        if (isCutting)
-        {
-          freeForm.get_Parameter(DB.BuiltInParameter.ELEMENT_IS_CUTTING).Set(1);
-          return true;
-        }
-        else
+        brep.GetUserBoolean(DB.BuiltInParameter.ELEMENT_IS_CUTTING.ToString(), out var cutting);
+        freeForm.get_Parameter(DB.BuiltInParameter.ELEMENT_IS_CUTTING).Set(cutting ? 1 : 0);
+
+        if(!cutting)
         {
           DB.Category familySubCategory = null;
           if
@@ -287,24 +281,23 @@ namespace RhinoInside.Revit.GH.Components
             }
           }
 
-          if(familySubCategory is object)
+          if (familySubCategory is null)
+            freeForm.get_Parameter(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY).Set(DB.ElementId.InvalidElementId);
+          else
             freeForm.Subcategory = familySubCategory;
 
-          if(brep.GetUserBoolean(DB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), out var visible))
-            freeForm.get_Parameter(DB.BuiltInParameter.IS_VISIBLE_PARAM).Set(visible ? 1 : 0);
+          brep.GetUserBoolean(DB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), out var visible, true);
+          freeForm.get_Parameter(DB.BuiltInParameter.IS_VISIBLE_PARAM).Set(visible ? 1 : 0);
 
-          if (brep.GetUserInteger(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility))
-            freeForm.get_Parameter(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Set(visibility);
+          brep.GetUserInteger(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility, 57406);
+          freeForm.get_Parameter(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Set(visibility);
 
-          if
-          (
-            brep.GetUserElementId(DB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), out var materialId) &&
-            MapMaterial(doc, familyDoc, materialId, true) is var familyMaterialId
-          )
-          {
-            freeForm.get_Parameter(DB.BuiltInParameter.MATERIAL_ID_PARAM).Set(familyMaterialId);
-          }
+          brep.GetUserElementId(DB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), out var materialId);
+          var familyMaterialId = MapMaterial(doc, familyDoc, materialId, true);
+          freeForm.get_Parameter(DB.BuiltInParameter.MATERIAL_ID_PARAM).Set(familyMaterialId);
         }
+
+        return cutting;
       }
 
       return false;
@@ -353,7 +346,7 @@ namespace RhinoInside.Revit.GH.Components
 
         curve.GetUserBoolean(DB.BuiltInParameter.MODEL_OR_SYMBOLIC.ToString(), out var symbolic);
         curve.GetUserBoolean(DB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), out var visible, true);
-        curve.GetUserInteger(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility, -1);
+        curve.GetUserInteger(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility, 57406);
 
         foreach (var c in curve.ToHostMultiple())
         {
@@ -369,9 +362,7 @@ namespace RhinoInside.Revit.GH.Components
             else symbolicCurve = familyDoc.FamilyCreate.NewSymbolicCurve(c, sketchPlane);
 
             symbolicCurve.get_Parameter(DB.BuiltInParameter.IS_VISIBLE_PARAM).Set(visible ? 1 : 0);
-
-            if (visibility != -1)
-              symbolicCurve.get_Parameter(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Set(visibility);
+            symbolicCurve.get_Parameter(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Set(visibility);
 
             if (familyGraphicsStyle is object)
               symbolicCurve.Subcategory = familyGraphicsStyle;
@@ -386,9 +377,7 @@ namespace RhinoInside.Revit.GH.Components
             else modelCurve = familyDoc.FamilyCreate.NewModelCurve(c, sketchPlane);
 
             modelCurve.get_Parameter(DB.BuiltInParameter.IS_VISIBLE_PARAM).Set(visible ? 1 : 0);
-
-            if (visibility != -1)
-              modelCurve.get_Parameter(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Set(visibility);
+            modelCurve.get_Parameter(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Set(visibility);
 
             if (familyGraphicsStyle is object)
               modelCurve.Subcategory = familyGraphicsStyle;
@@ -777,7 +766,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "B";
 
     public FamilyElementByBrep()
-    : base("AddFamilyElement.ByBrep", "FamilyElement.ByBrep", string.Empty, "Revit", "Family")
+    : base("FamilyElement.ByBrep", "FamilyElement.ByBrep", string.Empty, "Revit", "Family")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -820,6 +809,42 @@ namespace RhinoInside.Revit.GH.Components
     }
   }
 
+  public class FamilyVoidByBrep : Component
+  {
+    public override Guid ComponentGuid => new Guid("F0887AD5-8ACB-4806-BB12-7596BCEDFFED");
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
+
+    protected override string IconTag => "V";
+
+    public FamilyVoidByBrep()
+    : base("FamilyVoid.ByBrep", "FamilyVoid.ByBrep", string.Empty, "Revit", "Family")
+    { }
+
+    protected override void RegisterInputParams(GH_InputParamManager manager)
+    {
+      manager.AddBrepParameter("Brep", "B", string.Empty, GH_ParamAccess.item);
+      manager[manager.AddBooleanParameter("Void", "V", string.Empty, GH_ParamAccess.item, true)].Optional = true;
+    }
+
+    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    {
+      manager.AddBrepParameter("Brep", "B", string.Empty, GH_ParamAccess.item);
+    }
+
+    protected override void SolveInstance(IGH_DataAccess DA)
+    {
+      var brep = default(Rhino.Geometry.Brep);
+      if (!DA.GetData("Brep", ref brep))
+        return;
+
+      var cutting = true;
+      if (DA.GetData("Void", ref cutting))
+        brep.SetUserString(DB.BuiltInParameter.ELEMENT_IS_CUTTING.ToString(), cutting ? "1" : null);
+
+      DA.SetData("Brep", brep);
+    }
+  }
+
   public class FamilyElementByCurve : Component
   {
     public override Guid ComponentGuid => new Guid("6FBB9200-D725-4A0D-9360-89ACBE5B4D9F");
@@ -828,7 +853,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "C";
 
     public FamilyElementByCurve()
-    : base("AddFamilyElement.ByCurve", "FamilyElement.ByCurve", string.Empty, "Revit", "Family")
+    : base("FamilyElement.ByCurve", "FamilyElement.ByCurve", string.Empty, "Revit", "Family")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -874,7 +899,7 @@ namespace RhinoInside.Revit.GH.Components
   public class VisibilityConstruct : Component
   {
     public override Guid ComponentGuid => new Guid("10EA29D4-16AF-4060-89CE-F467F0069675");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
     protected override string IconTag => "V";
 
