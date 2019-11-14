@@ -86,79 +86,111 @@ namespace RhinoInside.Revit
       return new Plane(plane.Origin.ToRhino(), (Vector3d) plane.XVec.ToRhino(), (Vector3d) plane.YVec.ToRhino());
     }
 
+    public static LineCurve ToRhino(this DB.Line line)
+    {
+      var l = new Line(line.GetEndPoint(0).ToRhino(), line.GetEndPoint(1).ToRhino());
+      return line.IsBound ?
+        new LineCurve(l, line.GetEndParameter(0), line.GetEndParameter(1)) :
+        null;
+    }
+
+    public static ArcCurve ToRhino(this DB.Arc arc)
+    {
+      return arc.IsBound ?
+        new ArcCurve
+        (
+          new Arc(arc.GetEndPoint(0).ToRhino(), arc.Evaluate(0.5, true).ToRhino(), arc.GetEndPoint(1).ToRhino()),
+          arc.GetEndParameter(0),
+          arc.GetEndParameter(1)
+        ) :
+        new ArcCurve
+        (
+          new Circle(new Plane(arc.Center.ToRhino(), new Vector3d(arc.XDirection.ToRhino()), new Vector3d(arc.YDirection.ToRhino())), arc.Radius),
+          arc.GetEndParameter(0),
+          arc.GetEndParameter(1)
+        );
+    }
+
+    public static NurbsCurve ToRhino(this DB.Ellipse ellipse)
+    {
+      var plane = new Plane(ellipse.Center.ToRhino(), new Vector3d(ellipse.XDirection.ToRhino()), new Vector3d(ellipse.YDirection.ToRhino()));
+      var e = new Ellipse(plane, ellipse.RadiusX, ellipse.RadiusY);
+      var nurbsCurve = e.ToNurbsCurve();
+      return ellipse.IsBound ?
+        nurbsCurve.Trim(ellipse.GetEndParameter(0), ellipse.GetEndParameter(1)) as NurbsCurve :
+        nurbsCurve;
+    }
+
+    public static NurbsCurve ToRhino(this DB.HermiteSpline hermite)
+    {
+      var nurbsCurve = DB.NurbSpline.Create(hermite).ToRhino();
+      nurbsCurve.Domain = new Interval(hermite.GetEndParameter(0), hermite.GetEndParameter(1));
+      return nurbsCurve;
+    }
+
+    public static NurbsCurve ToRhino(this DB.NurbSpline nurb)
+    {
+      var controlPoints = nurb.CtrlPoints;
+      var n = new NurbsCurve(3, nurb.isRational, nurb.Degree + 1, controlPoints.Count);
+
+      if (nurb.isRational)
+      {
+        using (var Weights = nurb.Weights)
+        {
+          var weights = Weights.Cast<double>().ToArray();
+          int index = 0;
+          foreach (var pt in controlPoints)
+          {
+            var w = weights[index];
+            n.Points.SetPoint(index++, pt.X * w, pt.Y * w, pt.Z * w, w);
+          }
+        }
+      }
+      else
+      {
+        int index = 0;
+        foreach (var pt in controlPoints)
+          n.Points.SetPoint(index++, pt.X, pt.Y, pt.Z);
+      }
+
+      using (var Knots = nurb.Knots)
+      {
+        int index = 0;
+        foreach (var w in Knots.Cast<double>().Skip(1).Take(n.Knots.Count))
+          n.Knots[index++] = w;
+      }
+
+      return n;
+    }
+
+    public static NurbsCurve ToRhino(this DB.CylindricalHelix helix)
+    {
+      var nurbsCurve = NurbsCurve.CreateSpiral
+      (
+        helix.BasePoint.ToRhino(),
+        (Vector3d) helix.ZVector.ToRhino(),
+        helix.BasePoint.ToRhino() + ((Vector3d) helix.XVector.ToRhino()),
+        helix.Pitch,
+        helix.IsRightHanded ? +1 : -1,
+        helix.Radius,
+        helix.Radius
+      );
+
+      nurbsCurve.Domain = new Interval(helix.GetEndParameter(0), helix.GetEndParameter(1));
+      return nurbsCurve;
+    }
+
     public static Curve ToRhino(this DB.Curve curve)
     {
       switch (curve)
       {
-        case DB.Line line:
-        {
-          return line.IsBound ? new LineCurve(line.GetEndPoint(0).ToRhino(), line.GetEndPoint(1).ToRhino()) : null;
-        }
-        case DB.Arc arc:
-        {
-          var plane = new Plane(arc.Center.ToRhino(), new Vector3d(arc.XDirection.ToRhino()), new Vector3d(arc.YDirection.ToRhino()));
-          if (arc.IsBound)
-          {
-            var p0 = arc.GetEndPoint(0).ToRhino();
-            var p1 = arc.Evaluate(0.5, true).ToRhino();
-            var p2 = arc.GetEndPoint(1).ToRhino();
-            return new ArcCurve(new Arc(p0, p1, p2));
-          }
-
-          return new ArcCurve(new Circle(plane, arc.Radius));
-        }
-        case DB.Ellipse ellipse:
-        {
-          var plane = new Plane(ellipse.Center.ToRhino(), new Vector3d(ellipse.XDirection.ToRhino()), new Vector3d(ellipse.YDirection.ToRhino()));
-          var e = new Ellipse(plane, ellipse.RadiusX, ellipse.RadiusY);
-          var n = e.ToNurbsCurve();
-          if (ellipse.IsBound)
-            return n.Trim(ellipse.GetEndParameter(0), ellipse.GetEndParameter(1));
-
-          return n;
-        }
-
-        case DB.HermiteSpline hermite:
-        {
-          return DB.NurbSpline.Create(hermite).ToRhino();
-        }
-        case DB.NurbSpline nurb:
-        {
-          var controlPoints = nurb.CtrlPoints;
-          var n = new NurbsCurve(3, nurb.isRational, nurb.Degree + 1, controlPoints.Count);
-
-          if (nurb.isRational)
-          {
-            using (var Weights = nurb.Weights)
-            {
-              var weights = Weights.Cast<double>().ToArray();
-              int index = 0;
-              foreach (var pt in controlPoints)
-              {
-                var w = weights[index];
-                n.Points.SetPoint(index++, pt.X * w, pt.Y * w, pt.Z * w, w);
-              }
-            }
-          }
-          else
-          {
-            int index = 0;
-            foreach (var pt in controlPoints)
-              n.Points.SetPoint(index++, pt.X, pt.Y, pt.Z);
-          }
-
-          using (var Knots = nurb.Knots)
-          {
-            int index = 0;
-            foreach (var w in Knots.Cast<double>().Skip(1).Take(n.Knots.Count))
-              n.Knots[index++] = w;
-          }
-
-          return n;
-        }
-        case DB.CylindricalHelix helix:  // TODO : 
-        default:
-          return new PolylineCurve(curve.Tessellate().ToRhino());
+        case DB.Line line:              return line.ToRhino();
+        case DB.Arc arc:                return arc.ToRhino();
+        case DB.Ellipse ellipse:        return ellipse.ToRhino();
+        case DB.HermiteSpline hermite:  return hermite.ToRhino();
+        case DB.NurbSpline nurb:        return nurb.ToRhino();
+        case DB.CylindricalHelix helix: return helix.ToRhino();
+        default: throw new NotImplementedException();
       }
     }
 
@@ -171,49 +203,220 @@ namespace RhinoInside.Revit
     {
       foreach (var loop in loops)
       {
-        var polycurve = new PolyCurve();
+        var curves = Curve.JoinCurves(loop.Select(x => x.ToRhino()), Revit.ShortCurveTolerance, false);
+        if (curves.Length != 1)
+          throw new InvalidOperationException("Failed to found one and only one closed loop.");
 
-        foreach (var curve in loop)
-          polycurve.AppendSegment(curve.ToRhino());
-
-        yield return polycurve;
+        yield return curves[0];
       }
     }
 
-    public static PlaneSurface ToRhino(this DB.Plane surface, Interval xExtents, Interval yExtents)
+    public static PlaneSurface ToRhino(this DB.Plane surface, DB.BoundingBoxUV bboxUV)
     {
-      var plane = new Plane(surface.Origin.ToRhino(), (Vector3d) surface.XVec.ToRhino(), (Vector3d) surface.YVec.ToRhino());
-      return new PlaneSurface(plane, xExtents, yExtents);
+      var ctol = Revit.ShortCurveTolerance;
+      var uu = new Interval(bboxUV.Min.U - ctol, bboxUV.Max.U + ctol);
+      var vv = new Interval(bboxUV.Min.V - ctol, bboxUV.Max.V + ctol);
+
+      return new PlaneSurface
+      (
+        new Plane(surface.Origin.ToRhino(), (Vector3d) surface.XVec.ToRhino(), (Vector3d) surface.YVec.ToRhino()),
+        uu,
+        vv
+      );
     }
 
-    public static RevSurface ToRhino(this DB.ConicalSurface surface, Interval interval)
+    public static RevSurface ToRhino(this DB.ConicalSurface surface, DB.BoundingBoxUV bboxUV)
     {
-      var plane = new Plane(surface.Origin.ToRhino(), (Vector3d) surface.XDir.ToRhino(), (Vector3d) surface.YDir.ToRhino());
-      double height = Math.Abs(interval.Min) > Math.Abs(interval.Max) ? interval.Min : interval.Max;
-      var cone = new Cone(plane, height, Math.Tan(surface.HalfAngle) * height);
+      var ctol = Revit.ShortCurveTolerance;
+      var atol = Revit.AngleTolerance * 10.0;
+      var uu = new Interval(bboxUV.Min.U - atol, bboxUV.Max.U + atol);
+      var vv = new Interval(bboxUV.Min.V - ctol, bboxUV.Max.V + ctol);
 
-      return cone.ToRevSurface();
+      var origin = surface.Origin.ToRhino();
+      var xdir = (Vector3d) surface.XDir.ToRhino();
+      var zdir = (Vector3d) surface.Axis.ToRhino();
+
+      var axis = new Line(origin, origin + zdir);
+
+      var dir = zdir + xdir * Math.Tan(surface.HalfAngle);
+      dir.Unitize();
+
+      var curve = new LineCurve
+      (
+        new Line
+        (
+          surface.Origin.ToRhino() + (dir * vv.Min),
+          surface.Origin.ToRhino() + (dir * vv.Max)
+        ),
+        vv.Min,
+        vv.Max
+      );
+
+      return RevSurface.Create(curve, axis, uu.Min, uu.Max);
     }
 
-    public static RevSurface ToRhino(this DB.CylindricalSurface surface, Interval interval)
+    public static RevSurface ToRhino(this DB.CylindricalSurface surface, DB.BoundingBoxUV bboxUV)
     {
-      var plane = new Plane(surface.Origin.ToRhino(), (Vector3d) surface.XDir.ToRhino(), (Vector3d) surface.YDir.ToRhino());
-      var circle = new Circle(plane, surface.Radius);
-      var cylinder = new Cylinder(circle)
-      {
-        Height1 = interval.Min,
-        Height2 = interval.Max
-      };
+      var ctol = Revit.ShortCurveTolerance;
+      var atol = Revit.AngleTolerance;
+      var uu = new Interval(bboxUV.Min.U - atol, bboxUV.Max.U + atol);
+      var vv = new Interval(bboxUV.Min.V - ctol, bboxUV.Max.V + ctol);
 
-      return cylinder.ToRevSurface();
+      var origin = surface.Origin.ToRhino();
+      var xdir = (Vector3d) surface.XDir.ToRhino();
+      var zdir = (Vector3d) surface.Axis.ToRhino();
+
+      var axis = new Line(origin, origin + zdir);
+      var curve = new LineCurve
+      (
+        new Line
+        (
+          origin + (xdir * surface.Radius) + (zdir * vv.Min),
+          origin + (xdir * surface.Radius) + (zdir * vv.Max)
+        ),
+        vv.Min,
+        vv.Max
+      );
+
+      return RevSurface.Create(curve, axis, uu.Min, uu.Max);
     }
 
-    public static RevSurface ToRhino(this DB.RevolvedSurface surface, Interval interval)
+    public static RevSurface ToRhino(this DB.RevolvedSurface surface, DB.BoundingBoxUV bboxUV)
     {
-      var plane = new Plane(surface.Origin.ToRhino(), (Vector3d) surface.XDir.ToRhino(), (Vector3d) surface.YDir.ToRhino());
+      var ctol = Revit.ShortCurveTolerance;
+      var atol = Revit.AngleTolerance;
+      var uu = new Interval(bboxUV.Min.U - atol, bboxUV.Max.U + atol);
+
+      var axis = new Line
+      (
+        surface.Origin.ToRhino(),
+        surface.Origin.ToRhino() + (Vector3d) surface.Axis.ToRhino()
+      );
+
       var curve = surface.GetProfileCurveInWorldCoordinates().ToRhino();
-      var axis = new Line(surface.Origin.ToRhino(), surface.Origin.ToRhino() + (Vector3d) surface.Axis.ToRhino());
-      return RevSurface.Create(curve, axis);
+      curve = curve.Extend(CurveEnd.Both, ctol, CurveExtensionStyle.Line);
+
+      return RevSurface.Create(curve, axis, uu.Min, uu.Max);
+    }
+
+    public static Surface ToRhino(this DB.RuledSurface surface, DB.BoundingBoxUV bboxUV)
+    {
+      var ctol = Revit.ShortCurveTolerance;
+
+      var curves = new List<Curve>();
+      Point3d start = Point3d.Unset, end = Point3d.Unset;
+
+      if (surface.HasFirstProfilePoint())
+        start = surface.GetFirstProfilePoint().ToRhino();
+      else
+        curves.Add(surface.GetFirstProfileCurve().ToRhino());
+
+      if (surface.HasSecondProfilePoint())
+        end = surface.GetSecondProfilePoint().ToRhino();
+      else
+        curves.Add(surface.GetSecondProfileCurve().ToRhino());
+
+      // Revit Ruled surface Parametric Orientation is opposite to Rhino
+      for (var c = 0; c < curves.Count; ++c)
+      {
+        curves[c].Reverse();
+        curves[c] = curves[c].Extend(CurveEnd.Both, ctol, CurveExtensionStyle.Line);
+      }
+
+      var lofts = Brep.CreateFromLoft(curves, start, end, LoftType.Straight, false);
+      if (lofts.Length == 1 && lofts[0].Surfaces.Count == 1)
+        return lofts[0].Surfaces[0];
+
+      return null;
+    }
+
+    public static NurbsSurface ToRhino(this DB.NurbsSurfaceData surface, DB.BoundingBoxUV bboxUV)
+    {
+      var degreeU = surface.DegreeU;
+      var degreeV = surface.DegreeV;
+
+      var knotsU = surface.GetKnotsU();
+      var knotsV = surface.GetKnotsV();
+
+      int controlPointCountU = knotsU.Count - degreeU - 1;
+      int controlPointCountV = knotsV.Count - degreeV - 1;
+
+      var nurbsSurface = NurbsSurface.Create(3, surface.IsRational, degreeU + 1, degreeV + 1, controlPointCountU, controlPointCountV);
+
+      var controlPoints = surface.GetControlPoints();
+      var weights = surface.GetWeights();
+
+      var points = nurbsSurface.Points;
+      for (int u = 0; u < controlPointCountU; u++)
+      {
+        int u_offset = u * controlPointCountV;
+        for (int v = 0; v < controlPointCountV; v++)
+        {
+          var pt = controlPoints[u_offset + v];
+          if (surface.IsRational)
+          {
+            double w = weights[u_offset + v];
+            points.SetPoint(u, v, pt.X * w, pt.Y * w, pt.Z * w, w);
+          }
+          else
+          {
+            points.SetPoint(u, v, pt.X, pt.Y, pt.Z);
+          }
+        }
+      }
+
+      {
+        var knots = nurbsSurface.KnotsU;
+        int index = 0;
+        foreach (var w in knotsU.Skip(1).Take(knots.Count))
+          knots[index++] = w;
+      }
+
+      {
+        var knots = nurbsSurface.KnotsV;
+        int index = 0;
+        foreach (var w in knotsV.Skip(1).Take(knots.Count))
+          knots[index++] = w;
+      }
+
+      double ctol = Revit.ShortCurveTolerance * 5.0;
+      // Extend using smooth way avoids creating C2 discontinuities
+      nurbsSurface = nurbsSurface.Extend(IsoStatus.West, ctol, true) as NurbsSurface ?? nurbsSurface;
+      nurbsSurface = nurbsSurface.Extend(IsoStatus.East, ctol, true) as NurbsSurface ?? nurbsSurface;
+      nurbsSurface = nurbsSurface.Extend(IsoStatus.South, ctol, true) as NurbsSurface ?? nurbsSurface;
+      nurbsSurface = nurbsSurface.Extend(IsoStatus.North, ctol, true) as NurbsSurface ?? nurbsSurface;
+
+      return nurbsSurface;
+    }
+
+    static Surface ToRhinoSurface(this DB.Face face)
+    {
+      Surface surface = default;
+
+      using (var faceSurface = face.GetSurface())
+      {
+        var bboxUV = face.GetBoundingBox();
+
+        switch (faceSurface)
+        {
+          case DB.Plane planeSurface:                     surface = planeSurface.ToRhino(bboxUV);       break;
+          case DB.ConicalSurface conicalSurface:          surface = conicalSurface.ToRhino(bboxUV);     break;
+          case DB.CylindricalSurface cylindricalSurface:  surface = cylindricalSurface.ToRhino(bboxUV); break;
+          case DB.RevolvedSurface revolvedSurface:        surface = revolvedSurface.ToRhino(bboxUV);    break;
+          case DB.RuledSurface ruledSurface:              surface = ruledSurface.ToRhino(bboxUV);       break;
+          case DB.HermiteSurface hermiteSurface:
+            try
+            {
+              using (var nurbsData = DB.ExportUtils.GetNurbsSurfaceDataForFace(face))
+                surface = nurbsData.ToRhino(bboxUV);
+            }
+            catch (Autodesk.Revit.Exceptions.ArgumentException) { }
+            break;
+          default: throw new NotImplementedException();
+        }
+      }
+
+      return surface;
     }
 
     static Brep JoinAndMerge(this ICollection<Brep> brepFaces, double tolerance)
@@ -230,55 +433,33 @@ namespace RhinoInside.Revit
       else if (joinedBreps.Count == 1)
         return joinedBreps.First();
 
-      return Brep.MergeBreps(joinedBreps, tolerance);
+      return Brep.MergeBreps(joinedBreps, Rhino.RhinoMath.UnsetValue);
     }
 
-    static Brep SolidOrMerge(this ICollection<Brep> brepFaces, double tolerance)
-    {
-      if (brepFaces.Count == 0)
-        return null;
-
-      if (brepFaces.Count == 1)
-        return brepFaces.First();
-
-      var solidBreps = Brep.CreateSolid(brepFaces.Where(x => x?.IsValid == true), tolerance);
-      if ((solidBreps?.Length ?? 0) == 0)
-        return JoinAndMerge(brepFaces, tolerance);
-
-      return solidBreps.Length == 1 ? solidBreps[0] : Brep.MergeBreps(solidBreps, tolerance);
-    }
-
-    static Brep TrimFaces(this Brep brep, IEnumerable<Curve> loops, DB.Face face)
+    static Brep TrimFaces(this Brep brep, IEnumerable<Curve> loops)
     {
       var brepFaces = new List<Brep>();
 
       foreach (var brepFace in brep?.Faces ?? Enumerable.Empty<BrepFace>())
       {
-#if REVIT_2018
-        brepFace.OrientationIsReversed = !face.OrientationMatchesSurfaceOrientation;
-#endif
         var trimmedBrep = brepFace.Split(loops, Revit.VertexTolerance);
 
         if (trimmedBrep is object)
         {
-          // Remove ears, faces with edges not in the boundary
+          // Remove ears, faces with edges not over 'loops'
           foreach (var trimmedFace in trimmedBrep.Faces.OrderByDescending(x => x.FaceIndex))
           {
-            foreach (var trim in trimmedFace.Loops.SelectMany(loop => loop.Trims).Where(trim => trim.TrimType != BrepTrimType.Singular && trim.Edge.Valence == EdgeAdjacency.Naked))
+            var boundaryEdges = trimmedFace.Loops.
+                                SelectMany(loop => loop.Trims).
+                                Where(trim => trim.TrimType == BrepTrimType.Boundary).
+                                Select(trim => trim.Edge);
+
+            foreach (var edge in boundaryEdges)
             {
-              var midPoint = trim.Edge.PointAt(trim.Edge.Domain.Mid);
+              var midPoint = edge.PointAt(edge.Domain.Mid);
 
-              bool pointOnLoop = false;
-              foreach(var curve in loops.Cast<PolyCurve>().SelectMany(x => x.Explode()))
-              {
-                if (curve.ClosestPoint(midPoint, out var _, Revit.VertexTolerance))
-                {
-                  pointOnLoop = true;
-                  break;
-                }
-              }
-
-              if(!pointOnLoop)
+              var midPointOnAnyLoop = loops.Where(x => x.ClosestPoint(midPoint, out var _, Revit.VertexTolerance)).Any();
+              if (!midPointOnAnyLoop)
               {
                 trimmedBrep.Faces.RemoveAt(trimmedFace.FaceIndex);
                 break;
@@ -286,16 +467,24 @@ namespace RhinoInside.Revit
             }
           }
 
-          // Remove holes, faces with only interior edges
+          // Remove holes, faces with no boundary edges
           foreach (var trimmedFace in trimmedBrep.Faces.OrderByDescending(x => x.FaceIndex))
           {
-            if (!trimmedFace.Loops.SelectMany(loop => loop.Trims).Where(trim => trim.TrimType != BrepTrimType.Singular && trim.Edge.Valence != EdgeAdjacency.Interior).Any())
+            var boundaryTrims = trimmedFace.Loops.
+                                SelectMany(loop => loop.Trims).
+                                Where(trim => trim.TrimType == BrepTrimType.Boundary);
+
+            if (!boundaryTrims.Any())
             {
               trimmedBrep.Faces.RemoveAt(trimmedFace.FaceIndex);
               continue;
             }
           }
 
+          if (!trimmedBrep.IsValid)
+            trimmedBrep.Repair(Revit.VertexTolerance);
+
+          trimmedBrep.Compact();
           brepFaces.Add(trimmedBrep);
         }
       }
@@ -307,176 +496,25 @@ namespace RhinoInside.Revit
 
     public static Brep ToRhino(this DB.Face face, bool untrimmed = false)
     {
-      using (var surface = face.GetSurface())
-      {
-        Brep brep = null;
-        var loops = face.GetEdgesAsCurveLoops().ToRhino().ToArray();
+      var surface = face.ToRhinoSurface();
+      if (surface is null)
+        return null;
 
-        switch (surface)
-        {
-          case DB.Plane planeSurface:
-          {
-            var plane = new Plane(planeSurface.Origin.ToRhino(), (Vector3d) planeSurface.XVec.ToRhino(), (Vector3d) planeSurface.YVec.ToRhino());
+      var brep = Brep.CreateFromSurface(surface);
+      if (brep is null)
+        return null;
 
-            var bbox = BoundingBox.Empty;
-            foreach (var loop in loops)
-            {
-              var edgeBoundingBox = loop.GetBoundingBox(plane);
-              bbox = BoundingBox.Union(bbox, edgeBoundingBox);
-            }
-
-            brep = Brep.CreateFromSurface(planeSurface.ToRhino(new Interval(bbox.Min.X, bbox.Max.X), new Interval(bbox.Min.Y, bbox.Max.Y)));
-            break;
-          }
-          case DB.ConicalSurface conicalSurface:
-          {
-            var plane = new Plane(conicalSurface.Origin.ToRhino(), (Vector3d) conicalSurface.XDir.ToRhino(), (Vector3d) conicalSurface.YDir.ToRhino());
-
-            var bbox = BoundingBox.Empty;
-            foreach (var loop in loops)
-            {
-              var edgeBoundingBox = loop.GetBoundingBox(plane);
-              bbox = BoundingBox.Union(bbox, edgeBoundingBox);
-            }
-
-            brep = Brep.CreateFromRevSurface(conicalSurface.ToRhino(new Interval(bbox.Min.Z, bbox.Max.Z)), false, false);
-            break;
-          }
-          case DB.CylindricalSurface cylindricalSurface:
-          {
-            var plane = new Plane(cylindricalSurface.Origin.ToRhino(), (Vector3d) cylindricalSurface.XDir.ToRhino(), (Vector3d) cylindricalSurface.YDir.ToRhino());
-
-            var bbox = BoundingBox.Empty;
-            foreach (var loop in loops)
-            {
-              var edgeBoundingBox = loop.GetBoundingBox(plane);
-              bbox = BoundingBox.Union(bbox, edgeBoundingBox);
-            }
-
-            brep = Brep.CreateFromRevSurface(cylindricalSurface.ToRhino(new Interval(bbox.Min.Z, bbox.Max.Z)), false, false);
-            break;
-          }
-          case DB.RevolvedSurface revolvedSurface:
-          {
-            var plane = new Plane(revolvedSurface.Origin.ToRhino(), (Vector3d) revolvedSurface.XDir.ToRhino(), (Vector3d) revolvedSurface.YDir.ToRhino());
-
-            var bbox = BoundingBox.Empty;
-            foreach (var loop in loops)
-            {
-              var edgeBoundingBox = loop.GetBoundingBox(plane);
-              bbox = BoundingBox.Union(bbox, edgeBoundingBox);
-            }
-
-            brep = Brep.CreateFromRevSurface(revolvedSurface.ToRhino(new Interval(bbox.Min.Z, bbox.Max.Z)), false, false);
-            break;
-          }
-          case DB.RuledSurface ruledSurface:
-          {
-            var curves = new List<Curve>();
-            Point3d start = Point3d.Unset, end = Point3d.Unset;
-
-            if (ruledSurface.HasFirstProfilePoint())
-              start = ruledSurface.GetFirstProfilePoint().ToRhino();
-            else
-              curves.Add(ruledSurface.GetFirstProfileCurve().ToRhino());
-
-            if (ruledSurface.HasSecondProfilePoint())
-              end = ruledSurface.GetSecondProfilePoint().ToRhino();
-            else
-              curves.Add(ruledSurface.GetSecondProfileCurve().ToRhino());
-
-            // Revit Ruled surface Parametric Orientation is opposite to Rhino
-            foreach (var curve in curves)
-              curve.Reverse();
-
-            var lofts = Brep.CreateFromLoft(curves, start, end, LoftType.Straight, false);
-            if (lofts.Length == 1)
-              brep = lofts[0];
-            else
-              brep = Brep.MergeBreps(lofts, Revit.VertexTolerance);
-            break;
-          }
-          case DB.HermiteSurface hermiteSurface:
-          {
-            try
-            {
-              using (var nurbsData = DB.ExportUtils.GetNurbsSurfaceDataForFace(face))
-              {
-                var degreeU = nurbsData.DegreeU;
-                var degreeV = nurbsData.DegreeV;
-
-                var knotsU = nurbsData.GetKnotsU();
-                var knotsV = nurbsData.GetKnotsV();
-
-                int controlPointCountU = knotsU.Count - degreeU - 1;
-                int controlPointCountV = knotsV.Count - degreeV - 1;
-
-                var nurbsSurface = NurbsSurface.Create(3, nurbsData.IsRational, degreeU + 1, degreeV + 1, controlPointCountU, controlPointCountV);
-
-                var controlPoints = nurbsData.GetControlPoints();
-                var weights = nurbsData.GetWeights();
-
-                var points = nurbsSurface.Points;
-                for (int u = 0; u < controlPointCountU; u++)
-                {
-                  int u_offset = u * controlPointCountV;
-                  for (int v = 0; v < controlPointCountV; v++)
-                  {
-                    var pt = controlPoints[u_offset + v];
-                    if (nurbsData.IsRational)
-                    {
-                      double w = weights[u_offset + v];
-                      points.SetPoint(u, v, pt.X * w, pt.Y * w, pt.Z * w, w);
-                    }
-                    else
-                    {
-                      points.SetPoint(u, v, pt.X, pt.Y, pt.Z);
-                    }
-                  }
-                }
-
-                {
-                  var knots = nurbsSurface.KnotsU;
-                  int index = 0;
-                  foreach (var w in knotsU.Skip(1).Take(knots.Count))
-                    knots[index++] = w;
-                }
-
-                {
-                  var knots = nurbsSurface.KnotsV;
-                  int index = 0;
-                  foreach (var w in knotsV.Skip(1).Take(knots.Count))
-                    knots[index++] = w;
-                }
-
-                var tol = Revit.ShortCurveTolerance * 10.0;
-                nurbsSurface = nurbsSurface.Extend(IsoStatus.West,  tol, true) as NurbsSurface;
-                nurbsSurface = nurbsSurface.Extend(IsoStatus.South, tol, true) as NurbsSurface;
-                nurbsSurface = nurbsSurface.Extend(IsoStatus.East,  tol, true) as NurbsSurface;
-                nurbsSurface = nurbsSurface.Extend(IsoStatus.North, tol, true) as NurbsSurface;
-
-                brep = Brep.CreateFromSurface(nurbsSurface);
-              }
-            }
-            catch (Autodesk.Revit.Exceptions.ArgumentException) { }
-            break;
-          }
-          default: throw new NotImplementedException();
-        }
-
-        if (untrimmed)
-        {
 #if REVIT_2018
-          if (!face.OrientationMatchesSurfaceOrientation)
-            brep.Flip();
+      if (!face.OrientationMatchesSurfaceOrientation)
+        brep.Flip();
 #endif
+      if (untrimmed)
+        return brep;
 
-          return brep;
-        }
-        
-        try { return brep?.TrimFaces(loops, face); }
-        finally { brep?.Dispose(); }
-      }
+      var loops = face.GetEdgesAsCurveLoops().ToRhino().ToArray();
+
+      try { return brep.TrimFaces(loops); }
+      finally { brep.Dispose(); }
     }
 
     public static Brep ToRhino(this DB.Solid solid)
