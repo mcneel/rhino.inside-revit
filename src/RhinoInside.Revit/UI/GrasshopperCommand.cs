@@ -151,7 +151,8 @@ namespace RhinoInside.Revit.UI
 
           var directShapeCategories = Enum.GetValues(typeof(BuiltInCategory)).Cast<BuiltInCategory>().
           Where(categoryId => DirectShape.IsValidCategoryId(new ElementId(categoryId), doc)).
-          Select(categoryId => Autodesk.Revit.DB.Category.GetCategory(doc, categoryId));
+          Select(categoryId => Autodesk.Revit.DB.Category.GetCategory(doc, categoryId)).
+          Where(x => x is object);
 
           foreach (var group in directShapeCategories.GroupBy(x => x.CategoryType).OrderBy(x => x.Key.ToString()))
           {

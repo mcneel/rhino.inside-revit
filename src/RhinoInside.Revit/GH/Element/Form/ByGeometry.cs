@@ -36,6 +36,7 @@ namespace RhinoInside.Revit.GH.Components
 
       var scaleFactor = 1.0 / Revit.ModelUnits;
       brep = brep.ChangeUnits(scaleFactor);
+      brep.GetUserBoolean(BuiltInParameter.ELEMENT_IS_CUTTING.ToString(), out var cutting);
 
       if (brep.Faces.Count == 1 && brep.Faces[0].Loops.Count == 1 && brep.Faces[0].TryGetPlane(out var capPlane))
       {
@@ -52,7 +53,7 @@ namespace RhinoInside.Revit.GH.Components
               ref element,
               doc.FamilyCreate.NewFormByCap
               (
-                brep.SolidOrientation != Rhino.Geometry.BrepSolidOrientation.Inward,
+                !cutting,
                 referenceArray
               )
             );
@@ -80,7 +81,7 @@ namespace RhinoInside.Revit.GH.Components
               ref element,
               doc.FamilyCreate.NewExtrusionForm
               (
-                brep.SolidOrientation != Rhino.Geometry.BrepSolidOrientation.Inward,
+                !cutting,
                 referenceArray, extrusion.PathLineCurve().Line.Direction.ToHost()
               )
             );
@@ -109,12 +110,7 @@ namespace RhinoInside.Revit.GH.Components
               element.get_Parameter(BuiltInParameter.FAMILY_ELEM_SUBCATEGORY).Set(new ElementId(BuiltInCategory.OST_MassForm));
           }
 
-          element.get_Parameter(BuiltInParameter.ELEMENT_IS_CUTTING)?.Set
-          (
-            brep.SolidOrientation == Rhino.Geometry.BrepSolidOrientation.Inward ?
-            1 /*VOID*/ :
-            0 /*SOLID*/
-          );
+          element.get_Parameter(BuiltInParameter.ELEMENT_IS_CUTTING)?.Set(cutting ? 1 : 0);
         }
       }
     }
