@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.Architecture;
 using Grasshopper.Kernel;
 using RhinoInside.Runtime.InteropServices;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -28,12 +27,12 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructBuildingPadByOutline
     (
-      Document doc,
-      ref Autodesk.Revit.DB.Element element,
+      DB.Document doc,
+      ref DB.Architecture.BuildingPad element,
 
       IList<Rhino.Geometry.Curve> boundaries,
-      Optional<Autodesk.Revit.DB.BuildingPadType> type,
-      Optional<Autodesk.Revit.DB.Level> level
+      Optional<DB.BuildingPadType> type,
+      Optional<DB.Level> level
     )
     {
       var scaleFactor = 1.0 / Revit.ModelUnits;
@@ -43,30 +42,44 @@ namespace RhinoInside.Revit.GH.Components
       foreach (var boundary in boundaries)
         boundaryBBox.Union(boundary.GetBoundingBox(true));
 
-      SolveOptionalType(ref type, doc, ElementTypeGroup.BuildingPadType, (document, param) => BuildingPadType.CreateDefault(document), nameof(type));
+      var curveLoops = boundaries.Select(region => DB.CurveLoop.Create(region.ToHostMultiple().SelectMany(x => x.ToBoundedCurves()).ToList()));
 
       SolveOptionalLevel(ref level, doc, boundaryBBox.Min.Z, nameof(level));
 
-      var curveLoops = boundaries.Select(region => CurveLoop.Create(region.ToHostMultiple().SelectMany(x => x.ToBoundedCurves()).ToList()));
+      if (type.HasValue)
+        ChangeElementTypeId(ref element, type.Value.Id);
 
-      // Type
-      ChangeElementTypeId(ref element, type.Value.Id);
-
-      if (element is BuildingPad buildingPad)
+      if (element is DB.Architecture.BuildingPad buildingPad)
       {
+        element.get_Parameter(DB.BuiltInParameter.LEVEL_PARAM).Set(level.Value.Id);
+
         buildingPad.SetBoundary(curveLoops.ToList());
       }
       else
       {
-        ReplaceElement(ref element, BuildingPad.Create(doc, type.Value.Id, level.Value.Id, curveLoops.ToList()));
+        SolveOptionalType(ref type, doc, DB.ElementTypeGroup.BuildingPadType, (document, param) => DB.BuildingPadType.CreateDefault(document), nameof(type));
+
+        var newPad = DB.Architecture.BuildingPad.Create
+        (
+          doc,
+          type.Value.Id,
+          level.Value.Id,
+          curveLoops.ToList()
+        );
+
+        var parametersMask = new DB.BuiltInParameter[]
+        {
+          DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+          DB.BuiltInParameter.ELEM_FAMILY_PARAM,
+          DB.BuiltInParameter.ELEM_TYPE_PARAM,
+          DB.BuiltInParameter.LEVEL_PARAM,
+          DB.BuiltInParameter.BUILDINGPAD_HEIGHTABOVELEVEL_PARAM
+        };
+
+        ReplaceElement(ref element, newPad, parametersMask);
       }
 
-      if (element != null)
-      {
-        element.get_Parameter(BuiltInParameter.TYPE_WALL_CLOSURE).Set(level.Value.Id);
-        element.get_Parameter(BuiltInParameter.LEVEL_PARAM).Set(level.Value.Id);
-        element.get_Parameter(BuiltInParameter.BUILDINGPAD_HEIGHTABOVELEVEL_PARAM).Set(boundaryBBox.Min.Z - level.Value.Elevation);
-      }
+      element?.get_Parameter(DB.BuiltInParameter.BUILDINGPAD_HEIGHTABOVELEVEL_PARAM).Set(boundaryBBox.Min.Z - level.Value.Elevation);
     }
   }
 }
