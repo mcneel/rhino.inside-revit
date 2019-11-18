@@ -38,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components
 
       SolveOptionalType(ref type, doc, ElementTypeGroup.GridType, nameof(type));
 
-      var parametersMask = name == Optional.Nothig ?
+      var parametersMask = name.IsMissing ?
         new BuiltInParameter[]
         {
           BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
@@ -88,7 +88,7 @@ namespace RhinoInside.Revit.GH.Components
         }
       }
 
-      if (name != Optional.Nothig && element != null)
+      if (name != Optional.Missing && element != null)
       {
         try { element.Name = name.Value; }
         catch (Autodesk.Revit.Exceptions.ArgumentException e)

@@ -13,53 +13,6 @@ using RhinoInside.Runtime.InteropServices;
 
 namespace RhinoInside.Runtime.InteropServices
 {
-  public enum Optional { Nothig = 0 }
-
-  public struct Optional<T>
-  {
-    private readonly T value;
-    public readonly bool HasValue;
-
-    public Optional(T value)
-    {
-      this.value = value;
-      HasValue = true;
-    }
-
-    public T Value
-    {
-      get
-      {
-        if (HasValue) return value;
-        throw new InvalidCastException();
-      }
-    }
-
-    public bool IsNullOrNothing => !HasValue || !(value is object);
-
-    public override bool Equals(object other)
-    {
-      return (other is Optional<T> optional) ? this == optional :
-             (other is Optional) ? !HasValue :
-             false;
-    }
-
-    public override int GetHashCode() => IsNullOrNothing ? (int) Optional.Nothig : value.GetHashCode();
-    public override string ToString() => IsNullOrNothing ?       string.Empty    : value.ToString();
-
-    public static implicit operator Optional<T>(Optional _) => new Optional<T>();
-    public static bool operator ==(Optional<T> value, Optional _) => !value.HasValue;
-    public static bool operator !=(Optional<T> value, Optional _) =>  value.HasValue;
-
-    public static implicit operator Optional<T>(T value) => new Optional<T>(value);
-    public static bool operator ==(Optional<T> value, T other) => value.HasValue ? value == other : false;
-    public static bool operator !=(Optional<T> value, T other) => value.HasValue ? value != other : false;
-
-    public static explicit operator T(Optional<T> value) => value.Value;
-    public static bool operator ==(Optional<T> value, Optional<T> other) => value.HasValue == other.HasValue && Equals(value.value, other.value);
-    public static bool operator !=(Optional<T> value, Optional<T> other) => value.HasValue != other.HasValue || !Equals(value.value, other.value);
-  }
-
   [AttributeUsage(AttributeTargets.Class | AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
   public class NickNameAttribute : Attribute
   {
@@ -146,16 +99,14 @@ namespace RhinoInside.Revit.GH.Components
 
     public bool SolveOptionalCategory(ref Optional<Category> category, Document doc, BuiltInCategory builtInCategory, string paramName)
     {
-      bool wasOptional = category == Optional.Nothig;
+      bool wasMissing = category.IsMissing;
 
-      if (wasOptional)
+      if (wasMissing)
       {
         if (doc.IsFamilyDocument)
-        {
-          category = doc.OwnerFamily?.FamilyCategory;
-        }
+          category = doc.OwnerFamily.FamilyCategory;
 
-        if(category.IsNullOrNothing)
+        if(category.IsMissing)
         {
           category = Autodesk.Revit.DB.Category.GetCategory(doc, builtInCategory) ??
           throw new ArgumentException($"No suitable Category is been found.", paramName);
@@ -165,7 +116,7 @@ namespace RhinoInside.Revit.GH.Components
       else if (category.Value == null)
         throw new ArgumentNullException(paramName);
 
-      return wasOptional;
+      return wasMissing;
     }
 
     public bool SolveOptionalType<T>(ref Optional<T> type, Document doc, ElementTypeGroup group, string paramName) where T : ElementType
@@ -175,44 +126,44 @@ namespace RhinoInside.Revit.GH.Components
 
     public bool SolveOptionalType<T>(ref Optional<T> type, Document doc, ElementTypeGroup group, Func<Document, string, T> recoveryAction, string paramName) where T : ElementType
     {
-      bool wasOptional = type == Optional.Nothig;
+      bool wasMissing = type.IsMissing;
 
-      if (wasOptional)
+      if (wasMissing)
         type = (T) doc.GetElement(doc.GetDefaultElementTypeId(group)) ??
         throw new ArgumentException($"No suitable {group} is been found.", paramName);
 
       else if (type.Value == null)
         type = (T) recoveryAction.Invoke(doc, paramName);
 
-      return wasOptional;
+      return wasMissing;
     }
 
     public bool SolveOptionalType(ref Optional<FamilySymbol> type, Document doc, BuiltInCategory category, string paramName)
     {
-      bool wasOptional = type == Optional.Nothig;
+      bool wasMissing = type.IsMissing;
 
-      if (wasOptional)
+      if (wasMissing)
         type = doc.GetElement(doc.GetDefaultFamilyTypeId(new ElementId(category))) as FamilySymbol ??
                throw new ArgumentException("No suitable type is been found.", paramName);
 
       else if (type.Value == null)
         throw new ArgumentNullException(paramName);
 
-      return wasOptional;
+      return wasMissing;
     }
 
     public bool SolveOptionalLevel(ref Optional<Level> level, Document doc, double elevation, string paramName)
     {
-      bool wasOptional = level == Optional.Nothig;
+      bool wasMissing = level.IsMissing;
 
-      if (wasOptional)
+      if (wasMissing)
         level = doc.FindLevelByElevation(elevation) ??
                 throw new ArgumentException("No suitable level is been found.", paramName);
 
       else if (level.Value == null)
         throw new ArgumentNullException(paramName);
 
-      return wasOptional;
+      return wasMissing;
     }
 
     public bool SolveOptionalLevel(ref Optional<Level> level, Document doc, Rhino.Geometry.Curve curve, string paramName)
@@ -388,7 +339,7 @@ namespace RhinoInside.Revit.GH.Components
         return true;
       }
 
-      optional = Optional.Nothig;
+      optional = Optional.Missing;
       return false;
     }
     static readonly MethodInfo GetInputOptionalDataInfo = typeof(TransactionalComponent).GetMethod("GetInputOptionalData", BindingFlags.Instance | BindingFlags.NonPublic);
