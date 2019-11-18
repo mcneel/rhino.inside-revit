@@ -7,7 +7,6 @@ using Autodesk.Revit.DB;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
 using Grasshopper.Kernel.Types;
-using RhinoInside.Runtime.InteropServices;
 
 namespace RhinoInside.Revit.GH.Parameters
 {

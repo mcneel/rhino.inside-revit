@@ -9,24 +9,6 @@ using Autodesk.Revit.UI.Events;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
-using RhinoInside.Runtime.InteropServices;
-
-namespace RhinoInside.Runtime.InteropServices
-{
-  [AttributeUsage(AttributeTargets.Class | AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
-  public class NickNameAttribute : Attribute
-  {
-    public readonly string NickName;
-    public NickNameAttribute(string value) => NickName = value;
-  }
-
-  [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-  public class ExposureAttribute : Attribute
-  {
-    public readonly GH_Exposure Exposure;
-    public ExposureAttribute(GH_Exposure value) => Exposure = value;
-  }
-}
 
 namespace RhinoInside.Revit.GH.Components
 {
