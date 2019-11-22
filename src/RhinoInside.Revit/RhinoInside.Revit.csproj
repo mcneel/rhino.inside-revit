@@ -285,7 +285,6 @@
     <None Include="Resources\GH\BuiltInParameterGroup.png" />
     <None Include="Resources\GH\BuiltInParameterGroups.png" />
     <None Include="Resources\GH\Category.png" />
-    <None Include="Resources\GH\CategoryDecompose.png" />
     <None Include="Resources\GH\CategoryTypes.png" />
     <None Include="Resources\GH\DirectShapeByGeometry.png" />
     <None Include="Resources\GH\DirectShapeByCurve.png" />
@@ -337,6 +336,7 @@
     <None Include="Resources\GH\AnnotationCategoriesPicker.png" />
     <None Include="Resources\GH\ModelCategoriesPicker.png" />
     <None Include="Resources\GH\AnalyticalCategoriesPicker.png" />
+    <None Include="Resources\GH\TagCategoriesPicker.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\RVT$(RevitVersion)\KeyboardShortcuts.xml" />
@@ -350,7 +350,6 @@
     <EmbeddedResource Include="Resources\GH\Toolbar\SolverOn_24x24.png" />
     <EmbeddedResource Include="Resources\GH\Toolbar\Bake_24x24.png" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild" Condition="$(Configuration.Contains('Debug'))">
     <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.dll" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />
