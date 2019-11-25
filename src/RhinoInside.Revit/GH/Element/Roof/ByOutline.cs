@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH.Components
       SolveOptionalType(ref type, doc, ElementTypeGroup.RoofType, nameof(type));
 
       double minZ = boundary.GetBoundingBox(true).Min.Z;
-      SolveOptionalLevel(ref level, doc, minZ, nameof(level));
+      SolveOptionalLevel(ref level, doc, minZ);
 
       var parametersMask = new BuiltInParameter[]
       {
@@ -60,8 +60,7 @@ namespace RhinoInside.Revit.GH.Components
 
       using (var curveArray = boundary.ToHostMultiple().ToCurveArray())
       {
-        var modelCurveArray = new ModelCurveArray();
-        ReplaceElement(ref element, doc.Create.NewFootPrintRoof(curveArray, level.Value, type.Value, out modelCurveArray), parametersMask);
+        ReplaceElement(ref element, doc.Create.NewFootPrintRoof(curveArray, level.Value, type.Value, out var _), parametersMask);
       }
 
       if (element != null)
