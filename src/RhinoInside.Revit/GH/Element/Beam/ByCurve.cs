@@ -101,10 +101,10 @@ namespace RhinoInside.Revit.GH.Components
         newBeam.get_Parameter(DB.BuiltInParameter.Y_JUSTIFICATION).Set((int) DB.Structure.YJustification.Origin);
         newBeam.get_Parameter(DB.BuiltInParameter.Z_JUSTIFICATION).Set((int) DB.Structure.ZJustification.Origin);
 
-        if (element is object && DB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(element, 0))
-          DB.Structure.StructuralFramingUtils.AllowJoinAtEnd(element, 0);
+        if(element is object && DB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(element, 0))
+          DB.Structure.StructuralFramingUtils.AllowJoinAtEnd(newBeam, 0);
         else
-          DB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(element, 0);
+          DB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(newBeam, 0);
 
         if (element is object && DB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(element, 1))
           DB.Structure.StructuralFramingUtils.AllowJoinAtEnd(newBeam, 1);
