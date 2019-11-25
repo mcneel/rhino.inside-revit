@@ -406,7 +406,7 @@ namespace RhinoInside.Revit.GH.Parameters
         var pinned = ToElementIds(VolatileData).
                      Where(x => x.Document.Equals(doc)).
                      Select(x => x.Document.GetElement(x.Id)).
-                     Where(x => x.Pinned).Any();
+                     Where(x => x?.Pinned == true).Any();
 
         if (pinned)
           Menu_AppendItem(menu, $"Unpin {GH_Convert.ToPlural(TypeName)}", Menu_UnpinElements, DataType != GH_ParamData.remote, false);
@@ -414,7 +414,7 @@ namespace RhinoInside.Revit.GH.Parameters
         var unpinned = ToElementIds(VolatileData).
                      Where(x => x.Document.Equals(doc)).
                      Select(x => x.Document.GetElement(x.Id)).
-                     Where(x => x.Pinned == false).Any();
+                     Where(x => x?.Pinned == false).Any();
 
         if (unpinned)
           Menu_AppendItem(menu, $"Pin {GH_Convert.ToPlural(TypeName)}", Menu_PinElements, DataType != GH_ParamData.remote, false);
