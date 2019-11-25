@@ -24,6 +24,15 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.GeometricElement(), "BuildingPad", "BP", "New BuildingPad", GH_ParamAccess.item);
     }
 
+    static readonly DB.BuiltInParameter[] ParametersMask = new DB.BuiltInParameter[]
+    {
+      DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+      DB.BuiltInParameter.ELEM_FAMILY_PARAM,
+      DB.BuiltInParameter.ELEM_TYPE_PARAM,
+      DB.BuiltInParameter.LEVEL_PARAM,
+      DB.BuiltInParameter.BUILDINGPAD_HEIGHTABOVELEVEL_PARAM
+    };
+
     void ReconstructBuildingPadByOutline
     (
       DB.Document doc,
@@ -34,6 +43,8 @@ namespace RhinoInside.Revit.GH.Components
       Optional<DB.Level> level
     )
     {
+      ChangeElementType(ref element, type);
+
       var scaleFactor = 1.0 / Revit.ModelUnits;
       boundaries = boundaries.Select(x => x.ChangeUnits(scaleFactor)).ToArray();
 
@@ -43,10 +54,7 @@ namespace RhinoInside.Revit.GH.Components
 
       var curveLoops = boundaries.Select(region => DB.CurveLoop.Create(region.ToHostMultiple().SelectMany(x => x.ToBoundedCurves()).ToList()));
 
-      SolveOptionalLevel(ref level, doc, boundaryBBox.Min.Z, nameof(level));
-
-      if (type.HasValue)
-        ChangeElementTypeId(ref element, type.Value.Id);
+      SolveOptionalLevel(ref level, doc, boundaryBBox.Min.Z);
 
       if (element is DB.Architecture.BuildingPad buildingPad)
       {
@@ -66,16 +74,7 @@ namespace RhinoInside.Revit.GH.Components
           curveLoops.ToList()
         );
 
-        var parametersMask = new DB.BuiltInParameter[]
-        {
-          DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-          DB.BuiltInParameter.ELEM_FAMILY_PARAM,
-          DB.BuiltInParameter.ELEM_TYPE_PARAM,
-          DB.BuiltInParameter.LEVEL_PARAM,
-          DB.BuiltInParameter.BUILDINGPAD_HEIGHTABOVELEVEL_PARAM
-        };
-
-        ReplaceElement(ref element, newPad, parametersMask);
+        ReplaceElement(ref element, newPad, ParametersMask);
       }
 
       element?.get_Parameter(DB.BuiltInParameter.BUILDINGPAD_HEIGHTABOVELEVEL_PARAM).Set(boundaryBBox.Min.Z - level.Value.Elevation);
