@@ -7,7 +7,6 @@ using System.Windows.Forms;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
-using RhinoInside.Runtime.InteropServices;
 
 namespace RhinoInside.Revit.GH.Types
 {
