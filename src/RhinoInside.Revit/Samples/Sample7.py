@@ -1,8 +1,7 @@
 import clr
 clr.AddReference('System.Core')
 clr.AddReference('RhinoInside.Revit')
-clr.AddReference('RevitAPI') 
-clr.AddReference('RevitAPIUI')
+clr.AddReference('RevitAPI')
 
 from System.Linq import Enumerable
 from Autodesk.Revit.DB import *
