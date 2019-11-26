@@ -650,14 +650,60 @@ namespace RhinoInside.Revit
     public static Level FindLevelByElevation(this Document doc, double elevation)
     {
       Level level = null;
+      var min = double.PositiveInfinity;
       using (var collector = new FilteredElementCollector(doc))
       {
         foreach (var levelN in collector.OfClass(typeof(Level)).ToElements().Cast<Level>().OrderBy(c => c.Elevation))
         {
-          if (level == null)
+          var distance = Math.Abs(levelN.Elevation - elevation);
+          if (distance < min)
+          {
             level = levelN;
-          else if (elevation >= levelN.Elevation)
-            level = levelN;
+            min = distance;
+          }
+        }
+      }
+
+      return level;
+    }
+
+    public static Level FindBaseLevelByElevation(this Document doc, double elevation, out Level topLevel)
+    {
+      elevation += Revit.ShortCurveTolerance;
+
+      topLevel = null;
+      Level level = null;
+      using (var collector = new FilteredElementCollector(doc))
+      {
+        foreach (var levelN in collector.OfClass(typeof(Level)).ToElements().Cast<Level>().OrderBy(c => c.Elevation))
+        {
+          if (levelN.Elevation <= elevation) level = levelN;
+          else
+          {
+            topLevel = levelN;
+            break;
+          }
+        }
+      }
+      return level;
+    }
+
+    public static Level FindTopLevelByElevation(this Document doc, double elevation, out Level baseLevel)
+    {
+      elevation -= Revit.ShortCurveTolerance;
+
+      baseLevel = null;
+      Level level = null;
+      using (var collector = new FilteredElementCollector(doc))
+      {
+        foreach (var levelN in collector.OfClass(typeof(Level)).ToElements().Cast<Level>().OrderByDescending(c => c.Elevation))
+        {
+          if (levelN.Elevation >= elevation) level = levelN;
+          else
+          {
+            baseLevel = levelN;
+            break;
+          }
         }
       }
       return level;

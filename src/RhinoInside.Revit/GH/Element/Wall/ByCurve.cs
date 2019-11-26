@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
-using RhinoInside.Runtime.InteropServices;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -134,7 +133,7 @@ namespace RhinoInside.Revit.GH.Components
 
       height *= scaleFactor;
       if (height < Revit.VertexTolerance)
-        height = (type.HasValue ? type.Value : null)?.GetCompoundStructure()?.SampleHeight ?? LiteralLengthValue(6.0) / Revit.ModelUnits;
+        height = type.GetValueOrDefault()?.GetCompoundStructure()?.SampleHeight ?? LiteralLengthValue(6.0) / Revit.ModelUnits;
 
       // Axis
       var levelPlane = new Rhino.Geometry.Plane(new Rhino.Geometry.Point3d(0.0, 0.0, level.Value.Elevation), Rhino.Geometry.Vector3d.ZAxis);

@@ -1,7 +1,6 @@
 using System;
 using Autodesk.Revit.DB;
 using Grasshopper.Kernel;
-using RhinoInside.Runtime.InteropServices;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -44,7 +43,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!type.Value.IsActive)
         type.Value.Activate();
 
-      SolveOptionalLevel(ref level, doc, curve.FromZ, nameof(level));
+      SolveOptionalLevel(ref level, doc, curve.FromZ);
 
       // Type
       ChangeElementTypeId(ref element, type.Value.Id);

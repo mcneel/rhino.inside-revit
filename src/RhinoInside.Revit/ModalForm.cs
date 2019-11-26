@@ -8,6 +8,22 @@ namespace RhinoInside.Revit
 {
   class ModalForm : System.Windows.Forms.Form
   {
+    [DllImport("USER32")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool IsIconic(IntPtr hWnd);
+
+    [DllImport("USER32")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool IsZoomed(IntPtr hWnd);
+
+    [DllImport("USER32", SetLastError = true)]
+    internal static extern IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex);
+
+    [DllImport("USER32", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+    internal static bool ShowWindow(IntPtr hWnd, bool bShow) => ShowWindow(hWnd, bShow ? 8 : 0);
+
     [DllImport("USER32", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static extern bool ShowOwnedPopups(IntPtr hWnd, [MarshalAs(UnmanagedType.Bool)] bool fShow);
@@ -77,14 +93,14 @@ namespace RhinoInside.Revit
 
     public class EditScope : IDisposable
     {
-      readonly bool WasExposed = Rhino.UI.RhinoEtoApp.MainWindow.Visible;
+      readonly bool WasExposed = Rhinoceros.WindowVisible;
       readonly bool WasVisible = ActiveForm?.Visible ?? false;
       readonly bool WasEnabled = IsWindowEnabled(Revit.MainWindowHandle);
       public EditScope()
       {
         SetActiveWindow(Revit.MainWindowHandle);
         if (WasVisible) ShowOwnedPopups(false);
-        if (WasExposed) Rhino.UI.RhinoEtoApp.MainWindow.Visible = false;
+        if (WasExposed) Rhinoceros.WindowVisible = false;
         if (ActiveForm != null) ActiveForm.Visible = false;
         EnableWindow(Revit.MainWindowHandle, true);
       }
@@ -92,7 +108,7 @@ namespace RhinoInside.Revit
       {
         EnableWindow(Revit.MainWindowHandle, WasEnabled);
         if (ActiveForm != null) ActiveForm.Visible = WasVisible;
-        if (WasExposed) Rhino.UI.RhinoEtoApp.MainWindow.Visible = WasExposed;
+        if (WasExposed) Rhinoceros.WindowVisible = WasExposed;
         if (WasVisible) ShowOwnedPopups(true);
 
         var activePopup = GetEnabledPopup();

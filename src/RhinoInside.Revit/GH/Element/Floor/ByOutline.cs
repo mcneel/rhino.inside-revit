@@ -2,7 +2,6 @@ using System;
 using System.Runtime.InteropServices;
 using Autodesk.Revit.DB;
 using Grasshopper.Kernel;
-using RhinoInside.Runtime.InteropServices;
 
 namespace RhinoInside.Revit.GH.Components
 {

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -174,6 +174,7 @@
     <Compile Include="Extensions\RhinoCommon.cs" />
     <Compile Include="Extensions\System.cs" />
     <Compile Include="Extensions\WinForms.cs" />
+    <Compile Include="GH\Attributes.cs" />
     <Compile Include="GH\Components\ElementPassport.cs" />
     <Compile Include="GH\Enum.cs" />
     <Compile Include="GH\Guest.cs" />
@@ -246,6 +247,7 @@
     <Compile Include="ImageBuilder.cs" />
     <Compile Include="Operator.cs" />
     <Compile Include="State.cs" />
+    <Compile Include="Optional.cs" />
     <Compile Include="Convert.cs" />
     <Compile Include="Convert.ToHost.cs" />
     <Compile Include="Convert.ToRhino.cs" />

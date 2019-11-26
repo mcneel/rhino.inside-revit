@@ -61,13 +61,14 @@ namespace RhinoInside.Revit
               $"/scheme={SchemeName}",
               $"/language={Revit.ApplicationUI.ControlledApplication.Language.ToLCID()}"
             },
-            WindowStyle.Hidden,
+            Rhino.Runtime.InProcess.WindowStyle.Hidden,
             Revit.MainWindowHandle
           );
+
+          WindowVisible = false;
         }
-        catch (Exception /*e*/)
+        catch (Exception)
         {
-          //Debug.Fail(e.Source, e.Message);
           return Result.Failed;
         }
 
@@ -252,34 +253,74 @@ namespace RhinoInside.Revit
     #endregion
 
     #region Rhino UI
-    static Eto.Forms.Window MainWindow => Rhino.UI.RhinoEtoApp.MainWindow;
-    public static bool Exposed
+    public static bool WindowVisible
     {
-      get => MainWindow.Visible && MainWindow.WindowState != Eto.Forms.WindowState.Minimized;
+      get => 0 != ((int) ModalForm.GetWindowLongPtr(RhinoApp.MainWindowHandle(), -16 /*GWL_STYLE*/) & 0x10000000);
+      set => ModalForm.ShowWindow(RhinoApp.MainWindowHandle(), value ? 8 /*SW_SHOWNA*/ : 0 /*SW_HIDE*/);
+    }
+
+    public static ProcessWindowStyle WindowStyle
+    {
+      get
+      {
+        var hWnd = RhinoApp.MainWindowHandle();
+
+        if (!WindowVisible)
+          return ProcessWindowStyle.Hidden;
+
+        if (ModalForm.IsIconic(hWnd))
+          return ProcessWindowStyle.Minimized;
+
+        if (ModalForm.IsZoomed(hWnd))
+          return ProcessWindowStyle.Maximized;
+
+        return ProcessWindowStyle.Normal;
+      }
+
       set
       {
-        if (value)
+        if (WindowStyle != value)
         {
-          MainWindow.Visible = true;
+          var hWnd = RhinoApp.MainWindowHandle();
+          switch (value)
+          {
+            case ProcessWindowStyle.Normal:
+              ModalForm.ShowWindow(hWnd, 1 /*SW_SHOWNORMAL*/);
+              break;
+            case ProcessWindowStyle.Hidden:
+              ModalForm.ShowWindow(hWnd, 0 /*SW_HIDE*/);
+              break;
+            case ProcessWindowStyle.Maximized:
+              ModalForm.ShowWindow(hWnd, 3 /*SW_MAXIMIZE*/);
+              break;
+            case ProcessWindowStyle.Minimized:
+              ModalForm.ShowWindow(hWnd, 6/*SW_MINIMIZE*/);
+              break;
+          }
+        }
+      }
+    }
 
-          if (MainWindow.WindowState == Eto.Forms.WindowState.Minimized)
-            MainWindow.WindowState = Eto.Forms.WindowState.Normal;
-        }
-        else
-        {
-          MainWindow.Visible = false;
-        }
+    public static bool Exposed
+    {
+      get => WindowVisible && WindowStyle != ProcessWindowStyle.Minimized;
+      set
+      {
+        WindowVisible = value;
+
+        if (value && WindowStyle == ProcessWindowStyle.Minimized)
+          WindowStyle = ProcessWindowStyle.Normal;
       }
     }
 
     class ExposureSnapshot
     {
-      readonly bool Visible                      = MainWindow.Visible;
-      readonly Eto.Forms.WindowState WindowState = MainWindow.WindowState;
+      readonly bool Visible             = WindowVisible;
+      readonly ProcessWindowStyle Style = WindowStyle;
       public void Restore()
       {
-        MainWindow.WindowState = WindowState;
-        MainWindow.Visible     = Visible;
+        WindowStyle   = Style;
+        WindowVisible = Visible;
       }
     }
     static ExposureSnapshot QuiescentExposure;
@@ -304,7 +345,7 @@ namespace RhinoInside.Revit
         // Reenable Revit main window
         ModalForm.ParentEnabled = true;
 
-        if (MainWindow.WindowState != Eto.Forms.WindowState.Maximized)
+        if (WindowStyle != ProcessWindowStyle.Maximized)
         {
           // Restore Rhino Main Window exposure
           QuiescentExposure?.Restore();
@@ -489,7 +530,7 @@ namespace RhinoInside.Revit
         try
         {
           if (exposeMainWindow) Exposed = true;
-          else if (restorePopups) Exposed = wasExposed || MainWindow.WindowState == Eto.Forms.WindowState.Minimized;
+          else if (restorePopups) Exposed = wasExposed || WindowStyle == ProcessWindowStyle.Minimized;
 
           if (restorePopups)
             ModalForm.ShowOwnedPopups(true);

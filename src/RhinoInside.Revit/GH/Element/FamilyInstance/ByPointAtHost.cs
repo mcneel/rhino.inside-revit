@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
-using DB = Autodesk.Revit.DB;
 using Grasshopper.Kernel;
-using RhinoInside.Runtime.InteropServices;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -45,7 +44,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!location.IsValid)
         ThrowArgumentException(nameof(location), "Should be a valid point or plane.");
 
-      SolveOptionalLevel(ref level, doc, location.Origin.Z, nameof(level));
+      SolveOptionalLevel(ref level, doc, location.Origin.Z);
 
       if (host == null && type.Family.FamilyPlacementType == DB.FamilyPlacementType.OneLevelBasedHosted)
         ThrowArgumentException(nameof(host), $"This family requires a host.");

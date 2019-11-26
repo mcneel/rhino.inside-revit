@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
-using RhinoInside.Runtime.InteropServices;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -74,28 +73,24 @@ namespace RhinoInside.Revit.GH.Components
       )
         ThrowArgumentException(nameof(curve), "Curve must be a C2 continuous planar non closed curve.");
 
-      SolveOptionalType(ref type, doc, DB.BuiltInCategory.OST_StructuralFraming, nameof(type));
-
-      if (!type.Value.IsActive)
-        type.Value.Activate();
-
       SolveOptionalLevel(ref level, doc, curve, nameof(level));
 
       var centerLine = curve.ToHost();
 
-      // Type
-      ChangeElementTypeId(ref element, type.Value.Id);
+      if (type.HasValue)
+        ChangeElementTypeId(ref element, type.Value.Id);
 
-      DB.FamilyInstance newBeam = null;
-      if (element is DB.FamilyInstance previousBeam && element.Location is DB.LocationCurve locationCurve && centerLine.IsSameKindAs(locationCurve.Curve))
+      if (element is object && element.Location is DB.LocationCurve locationCurve && centerLine.IsSameKindAs(locationCurve.Curve))
       {
-        newBeam = previousBeam;
+        element.get_Parameter(DB.BuiltInParameter.LEVEL_PARAM).Set(level.Value.Id);
 
         locationCurve.Curve = centerLine;
       }
       else
       {
-        newBeam = doc.Create.NewFamilyInstance
+        SolveOptionalType(ref type, doc, DB.BuiltInCategory.OST_StructuralFraming, nameof(type));
+
+        var newBeam = doc.Create.NewFamilyInstance
         (
           centerLine,
           type.Value,
@@ -106,14 +101,12 @@ namespace RhinoInside.Revit.GH.Components
         newBeam.get_Parameter(DB.BuiltInParameter.Y_JUSTIFICATION).Set((int) DB.Structure.YJustification.Origin);
         newBeam.get_Parameter(DB.BuiltInParameter.Z_JUSTIFICATION).Set((int) DB.Structure.ZJustification.Origin);
 
-        var beam = element as DB.FamilyInstance;
-
-        if(beam is object && DB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(beam, 0))
+        if(element is object && DB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(element, 0))
           DB.Structure.StructuralFramingUtils.AllowJoinAtEnd(newBeam, 0);
         else
           DB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(newBeam, 0);
 
-        if (beam is object && DB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(beam, 1))
+        if (element is object && DB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(element, 1))
           DB.Structure.StructuralFramingUtils.AllowJoinAtEnd(newBeam, 1);
         else
           DB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(newBeam, 1);

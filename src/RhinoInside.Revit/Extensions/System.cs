@@ -15,6 +15,28 @@ namespace RhinoInside.Revit
     {
       return hi < v ? hi : v < lo ? lo : v;
     }
+
+    public static bool IsPositive(this double value)
+    {
+      switch (Math.Sign(value))
+      {
+        case -1: return false;
+        case +1: return true;
+      }
+
+      return double.IsPositiveInfinity(1.0 / value);
+    }
+
+    public static bool IsNegative(this double value)
+    {
+      switch (Math.Sign(value))
+      {
+        case -1: return true;
+        case +1: return false;
+      }
+
+      return double.IsNegativeInfinity(1.0 / value);
+    }
     #endregion
 
     #region string

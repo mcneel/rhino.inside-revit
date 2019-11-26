@@ -119,7 +119,7 @@ namespace RhinoInside.Revit
       Rhino.Geometry.Mesh mesh,
       Primitive.Part part,
       out VertexFormatBits vertexFormatBits,
-      System.Drawing.Color color = default(System.Drawing.Color)
+      System.Drawing.Color color = default
     )
     {
       int verticesCount = part.EndVertexIndex - part.StartVertexIndex;
@@ -147,7 +147,8 @@ namespace RhinoInside.Revit
               for (int v = part.StartVertexIndex; v < part.EndVertexIndex; ++v)
               {
                 var c = !color.IsEmpty ? color : colors[v];
-                stream.AddVertex(new VertexPositionNormalColored(vertices[v].ToHost(), normals[v].ToHost(), new ColorWithTransparency(c.R, c.G, c.B, 255u - c.A)));
+                uint T = Math.Max(1, 255u - c.A);
+                stream.AddVertex(new VertexPositionNormalColored(vertices[v].ToHost(), normals[v].ToHost(), new ColorWithTransparency(c.R, c.G, c.B, T)));
               }
             }
             vb.Unmap();
@@ -180,7 +181,8 @@ namespace RhinoInside.Revit
               for (int v = part.StartVertexIndex; v < part.EndVertexIndex; ++v)
               {
                 var c = !color.IsEmpty ? color : colors[v];
-                stream.AddVertex(new VertexPositionColored(vertices[v].ToHost(), new ColorWithTransparency(c.R, c.G, c.B, 255u - c.A)));
+                uint T = Math.Max(1, 255u - c.A);
+                stream.AddVertex(new VertexPositionColored(vertices[v].ToHost(), new ColorWithTransparency(c.R, c.G, c.B, T)));
               }
             }
             vb.Unmap();
@@ -530,6 +532,28 @@ namespace RhinoInside.Revit
       return pointsCount;
     }
 
+    #region Utils
+    public static bool ShowsEdges(DisplayStyle displayStyle)
+    {
+      return displayStyle == DisplayStyle.Wireframe ||
+             displayStyle == DisplayStyle.HLR ||
+             displayStyle == DisplayStyle.ShadingWithEdges ||
+             displayStyle == DisplayStyle.FlatColors ||
+             displayStyle == DisplayStyle.RealisticWithEdges;
+    }
+
+    public static bool ShowsVertexColors(DisplayStyle displayStyle)
+    {
+      return displayStyle == DisplayStyle.Shading ||
+             displayStyle == DisplayStyle.ShadingWithEdges ||
+             displayStyle == DisplayStyle.Realistic ||
+             displayStyle == DisplayStyle.RealisticWithEdges;
+    }
+
+    public static bool HasVertexNormals(VertexFormatBits vertexFormatBits) => (((int) vertexFormatBits) & 2) != 0;
+    public static bool HasVertexColors (VertexFormatBits vertexFormatBits) => (((int) vertexFormatBits) & 4) != 0;
+    #endregion
+
     #region Primitive
     protected class Primitive : IDisposable
     {
@@ -655,7 +679,8 @@ namespace RhinoInside.Revit
         if (!Regen())
           return;
 
-        if (DrawContext.IsTransparentPass())
+        var vc = HasVertexColors(vertexFormatBits) && ShowsVertexColors(displayStyle);
+        if (DrawContext.IsTransparentPass() != vc)
         {
           if (vertexCount > 0)
           {
@@ -685,21 +710,13 @@ namespace RhinoInside.Revit
             }
           }
         }
-        else
+
+        if(!DrawContext.IsTransparentPass())
         {
           if (linesCount != 0)
           {
-            if (triangleBuffer != null)
-            {
-              bool edges = displayStyle == DisplayStyle.Wireframe ||
-                           displayStyle == DisplayStyle.HLR ||
-                           displayStyle == DisplayStyle.ShadingWithEdges ||
-                           displayStyle == DisplayStyle.FlatColors ||
-                           displayStyle == DisplayStyle.RealisticWithEdges;
-
-              if (!edges)
-                return;
-            }
+            if (triangleBuffer != null && !ShowsEdges(displayStyle))
+              return;
 
             if (linesCount > 0)
             {
