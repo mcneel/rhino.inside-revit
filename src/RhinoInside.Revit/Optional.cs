@@ -92,11 +92,11 @@ namespace RhinoInside
     public static bool operator ==(Optional<T> value, T other) => value.IsMissing ? false : value == other;
     public static bool operator !=(Optional<T> value, T other) => value.IsMissing ? true : value != other;
 
-    public static explicit operator Optional<T>(Missing _) => new Optional<T>();
+    public static explicit operator Optional<T>(Missing m) => new Optional<T>(m);
     public static bool operator ==(Optional<T> value, Missing _) => value.IsMissing;
     public static bool operator !=(Optional<T> value, Missing _) => !value.IsMissing;
 
-    public static implicit operator Optional<T>(Optional _) => new Optional<T>();
+    public static implicit operator Optional<T>(Optional o) => new Optional<T>(o);
     public static bool operator ==(Optional<T> value, Optional _) => value.IsMissing;
     public static bool operator !=(Optional<T> value, Optional _) => !value.IsMissing;
   }
