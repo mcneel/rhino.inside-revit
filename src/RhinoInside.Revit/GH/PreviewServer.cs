@@ -120,8 +120,12 @@ namespace RhinoInside.Revit.GH
 
         if (IsShadingPass)
         {
-          ei.SetTransparency((255 - color.A) / 255.0);
-          ei.SetEmissiveColor(new Color(color.R, color.G, color.B));
+          var vc = HasVertexColors(vertexFormatBits) && ShowsVertexColors(displayStyle);
+          if (!vc)
+          {
+            ei.SetTransparency((255 - color.A) / 255.0);
+            ei.SetEmissiveColor(new Color(color.R, color.G, color.B));
+          }
         }
         else ei.SetColor(new Color(color.R, color.G, color.B));
 
