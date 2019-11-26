@@ -147,7 +147,8 @@ namespace RhinoInside.Revit
               for (int v = part.StartVertexIndex; v < part.EndVertexIndex; ++v)
               {
                 var c = !color.IsEmpty ? color : colors[v];
-                stream.AddVertex(new VertexPositionNormalColored(vertices[v].ToHost(), normals[v].ToHost(), new ColorWithTransparency(c.R, c.G, c.B, 255u - c.A)));
+                uint T = Math.Max(1, 255u - c.A);
+                stream.AddVertex(new VertexPositionNormalColored(vertices[v].ToHost(), normals[v].ToHost(), new ColorWithTransparency(c.R, c.G, c.B, T)));
               }
             }
             vb.Unmap();
@@ -180,7 +181,8 @@ namespace RhinoInside.Revit
               for (int v = part.StartVertexIndex; v < part.EndVertexIndex; ++v)
               {
                 var c = !color.IsEmpty ? color : colors[v];
-                stream.AddVertex(new VertexPositionColored(vertices[v].ToHost(), new ColorWithTransparency(c.R, c.G, c.B, 255u - c.A)));
+                uint T = Math.Max(1, 255u - c.A);
+                stream.AddVertex(new VertexPositionColored(vertices[v].ToHost(), new ColorWithTransparency(c.R, c.G, c.B, T)));
               }
             }
             vb.Unmap();
