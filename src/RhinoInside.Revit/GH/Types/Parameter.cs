@@ -376,7 +376,7 @@ namespace RhinoInside.Revit.GH.Parameters
         var categoriesBox = new ComboBox();
         categoriesBox.DropDownStyle = ComboBoxStyle.DropDownList;
         categoriesBox.DropDownHeight = categoriesBox.ItemHeight * 15;
-        categoriesBox.SetCueBanner("Filter by Category…");
+        categoriesBox.SetCueBanner("Category filter…");
         categoriesBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
         categoriesBox.Tag = parametersListBox;
         categoriesBox.SelectedIndexChanged += CategoriesBox_SelectedIndexChanged;

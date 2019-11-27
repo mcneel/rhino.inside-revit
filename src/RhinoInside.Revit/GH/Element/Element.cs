@@ -233,6 +233,7 @@ namespace RhinoInside.Revit.GH.Types
     new class Proxy : ID.Proxy
     {
       public Proxy(Element e) : base(e) { (this as IGH_GooProxy).UserString = FormatInstance(); }
+      public override string ToString() => element?.Name ?? base.ToString();
 
       public override bool IsParsable() => true;
       public override string FormatInstance() => $"{owner.Value.IntegerValue}:{element?.Name ?? string.Empty}";
@@ -640,18 +641,6 @@ namespace RhinoInside.Revit.GH.Components
       using (var geometry = element?.GetGeometry(DB.ViewDetailLevel.Fine, out options)) using (options)
       {
         var list = geometry?.ToRhino().Where(x => x is object).ToList();
-
-        switch (element.get_Parameter(DB.BuiltInParameter.ELEMENT_IS_CUTTING)?.AsInteger())
-        {
-          case 0: // SOLID
-            foreach (var geo in list.OfType<Rhino.Geometry.Brep>().Where(x => x.SolidOrientation == Rhino.Geometry.BrepSolidOrientation.Inward))
-              geo.Flip();
-            break;
-          case 1: // VOID
-            foreach (var geo in list.OfType<Rhino.Geometry.Brep>().Where(x => x.SolidOrientation == Rhino.Geometry.BrepSolidOrientation.Outward))
-              geo.Flip();
-            break;
-        }
 
         DA.SetDataList(PropertyName, list);
       }
