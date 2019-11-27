@@ -73,8 +73,10 @@ namespace RhinoInside.Revit
         Rhino.Commands.Command.EndCommand += EndCommand;
         RhinoApp.MainLoop += MainLoop;
 
+        #if DEBUG
         // Register IronPython runtime assemblies.
         Rhino.Runtime.PythonScript.AddRuntimeAssembly(typeof(DB.Element).Assembly);
+        #endif
 
         // Reset document units
         UpdateDocumentUnits(RhinoDoc.ActiveDoc);
