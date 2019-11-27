@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
-using Autodesk.Revit.DB;
 using Grasshopper.Kernel;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -20,17 +20,17 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(new Parameters.GeometricElement(), "Floor", "F", "New Floor", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.HostObject(), "Floor", "F", "New Floor", GH_ParamAccess.item);
     }
 
     void ReconstructFloorByOutline
     (
-      Document doc,
-      ref Autodesk.Revit.DB.Element element,
+      DB.Document doc,
+      ref DB.Floor element,
 
       Rhino.Geometry.Curve boundary,
-      Optional<Autodesk.Revit.DB.FloorType> type,
-      Optional<Autodesk.Revit.DB.Level> level,
+      Optional<DB.FloorType> type,
+      Optional<DB.Level> level,
       [Optional] bool structural
     )
     {
@@ -45,30 +45,30 @@ namespace RhinoInside.Revit.GH.Components
       )
         ThrowArgumentException(nameof(boundary), "Boundary must be an horizontal planar closed curve.");
 
-      SolveOptionalType(ref type, doc, ElementTypeGroup.FloorType, nameof(type));
+      SolveOptionalType(ref type, doc, DB.ElementTypeGroup.FloorType, nameof(type));
 
       SolveOptionalLevel(ref level, doc, boundary, nameof(level));
 
       var curveArray = boundary.ToHostMultiple().ToCurveArray();
 
-      var parametersMask = new BuiltInParameter[]
+      var parametersMask = new DB.BuiltInParameter[]
       {
-        BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-        BuiltInParameter.ELEM_FAMILY_PARAM,
-        BuiltInParameter.ELEM_TYPE_PARAM,
-        BuiltInParameter.LEVEL_PARAM,
-        BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL
+        DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+        DB.BuiltInParameter.ELEM_FAMILY_PARAM,
+        DB.BuiltInParameter.ELEM_TYPE_PARAM,
+        DB.BuiltInParameter.LEVEL_PARAM,
+        DB.BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL
       };
 
       if (type.Value.IsFoundationSlab)
-        ReplaceElement(ref element, doc.Create.NewFoundationSlab(curveArray, type.Value, level.Value, structural, XYZ.BasisZ), parametersMask);
+        ReplaceElement(ref element, doc.Create.NewFoundationSlab(curveArray, type.Value, level.Value, structural, DB.XYZ.BasisZ), parametersMask);
       else
-        ReplaceElement(ref element, doc.Create.NewFloor(curveArray, type.Value, level.Value, structural, XYZ.BasisZ), parametersMask);
+        ReplaceElement(ref element, doc.Create.NewFloor(curveArray, type.Value, level.Value, structural, DB.XYZ.BasisZ), parametersMask);
 
       if (element != null)
       {
         var boundaryBBox = boundary.GetBoundingBox(true);
-        element.get_Parameter(BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM).Set(boundaryBBox.Min.Z - level.Value.Elevation);
+        element.get_Parameter(DB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM).Set(boundaryBBox.Min.Z - level.Value.Elevation);
       }
     }
   }
