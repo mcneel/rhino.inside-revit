@@ -1,21 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
-using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
-
 using Rhino;
 using Rhino.Input;
 using Rhino.PlugIns;
 using Rhino.Runtime.InProcess;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside
 {
@@ -72,21 +67,26 @@ namespace RhinoInside.Revit
           return Result.Failed;
         }
 
-        // Look for Guests
-        guests = Assembly.GetCallingAssembly().GetTypes().
-          Where(x => typeof(IGuest).IsAssignableFrom(x)).
-          Where(x => !x.IsInterface).
-          Select(x => new GuestInfo(x)).
-          ToList();
-
         Revit.ApplicationUI.ApplicationClosing += OnApplicationClosing;
         RhinoDoc.NewDocument += OnNewDocument;
         Rhino.Commands.Command.BeginCommand += BeginCommand;
         Rhino.Commands.Command.EndCommand += EndCommand;
         RhinoApp.MainLoop += MainLoop;
 
+        #if DEBUG
+        // Register IronPython runtime assemblies.
+        Rhino.Runtime.PythonScript.AddRuntimeAssembly(typeof(DB.Element).Assembly);
+        #endif
+
         // Reset document units
         UpdateDocumentUnits(RhinoDoc.ActiveDoc);
+
+        // Look for Guests
+        guests = Assembly.GetCallingAssembly().GetTypes().
+          Where(x => typeof(IGuest).IsAssignableFrom(x)).
+          Where(x => !x.IsInterface).
+          Select(x => new GuestInfo(x)).
+          ToList();
 
         CheckInGuests();
       }
@@ -381,7 +381,7 @@ namespace RhinoInside.Revit
       UpdateDocumentUnits(e.Document, Revit.ActiveDBDocument);
     }
 
-    internal static void UpdateDocumentUnits(RhinoDoc rhinoDoc, Document revitDoc = null)
+    internal static void UpdateDocumentUnits(RhinoDoc rhinoDoc, DB.Document revitDoc = null)
     {
       bool docModified = rhinoDoc.Modified;
       try
@@ -395,19 +395,19 @@ namespace RhinoInside.Revit
         else if (rhinoDoc.ModelUnitSystem == Rhino.UnitSystem.None)
         {
           var units = revitDoc.GetUnits();
-          var lengthFormatoptions = units.GetFormatOptions(UnitType.UT_Length);
+          var lengthFormatoptions = units.GetFormatOptions(DB.UnitType.UT_Length);
           switch (lengthFormatoptions.DisplayUnits)
           {
-            case DisplayUnitType.DUT_METERS: rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.Meters; break;
-            case DisplayUnitType.DUT_METERS_CENTIMETERS: rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.Meters; break;
-            case DisplayUnitType.DUT_DECIMETERS: rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.Decimeters; break;
-            case DisplayUnitType.DUT_CENTIMETERS: rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.Centimeters; break;
-            case DisplayUnitType.DUT_MILLIMETERS: rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.Millimeters; break;
+            case DB.DisplayUnitType.DUT_METERS: rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.Meters; break;
+            case DB.DisplayUnitType.DUT_METERS_CENTIMETERS: rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.Meters; break;
+            case DB.DisplayUnitType.DUT_DECIMETERS: rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.Decimeters; break;
+            case DB.DisplayUnitType.DUT_CENTIMETERS: rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.Centimeters; break;
+            case DB.DisplayUnitType.DUT_MILLIMETERS: rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.Millimeters; break;
 
-            case DisplayUnitType.DUT_FRACTIONAL_INCHES: rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.Inches; break;
-            case DisplayUnitType.DUT_DECIMAL_INCHES: rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.Inches; break;
-            case DisplayUnitType.DUT_FEET_FRACTIONAL_INCHES: rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.Feet; break;
-            case DisplayUnitType.DUT_DECIMAL_FEET: rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.Feet; break;
+            case DB.DisplayUnitType.DUT_FRACTIONAL_INCHES: rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.Inches; break;
+            case DB.DisplayUnitType.DUT_DECIMAL_INCHES: rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.Inches; break;
+            case DB.DisplayUnitType.DUT_FEET_FRACTIONAL_INCHES: rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.Feet; break;
+            case DB.DisplayUnitType.DUT_DECIMAL_FEET: rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.Feet; break;
             default: rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.None; break;
           }
 
@@ -437,7 +437,7 @@ namespace RhinoInside.Revit
       }
     }
 
-    static void UpdateViewConstructionPlanesFrom(RhinoDoc rhinoDoc, Document revitDoc)
+    static void UpdateViewConstructionPlanesFrom(RhinoDoc rhinoDoc, DB.Document revitDoc)
     {
       if (!string.IsNullOrEmpty(rhinoDoc.TemplateFileUsed))
         return;
