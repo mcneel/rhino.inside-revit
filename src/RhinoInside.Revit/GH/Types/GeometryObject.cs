@@ -456,7 +456,7 @@ namespace RhinoInside.Revit.GH.Types
 #endif
         return typeName;
       }
-      catch (ApplicationException)
+      catch (Autodesk.Revit.Exceptions.ApplicationException)
       {
         return "Invalid" + TypeName;
       }
@@ -555,22 +555,14 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (point is null)
+        if (point is null && IsValid)
         {
           point = new Point(Value.Coord.ToRhino().ChangeUnits(Revit.ModelUnits));
 
-          using
-          (
-            var element = Reference is object ?
-            Document?.GetElement(Reference) :
-            null
-          )
+          if(/*Value.IsElementGeometry && */Document?.GetElement(Reference) is DB.Instance instance)
           {
-            if (element is DB.Instance instance)
-            {
-              var xform = instance.GetTransform().ToRhino().ChangeUnits(Revit.ModelUnits);
-              point.Transform(xform);
-            }
+            var xform = instance.GetTransform().ToRhino().ChangeUnits(Revit.ModelUnits);
+            point.Transform(xform);
           }
         }
 
@@ -592,7 +584,17 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastTo<Q>(ref Q target)
     {
-      if (Value is object)
+      if (typeof(Q).IsAssignableFrom(typeof(DB.Reference)))
+      {
+        target = (Q) (object) (IsValid ? Reference : null);
+        return true;
+      }
+      else if (typeof(Q).IsAssignableFrom(typeof(DB.Point)))
+      {
+        target = (Q) (object) (IsValid ? Value : null);
+        return true;
+      }
+      else if (Value is object)
       {
         if (typeof(Q).IsAssignableFrom(typeof(GH_Point)))
         {
@@ -648,22 +650,15 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (wires is null)
+        if (wires is null && IsValid)
         {
           wires = Enumerable.Repeat(Value, 1).GetPreviewWires().ToArray();
 
-          using
-          (
-            var element = Reference is object ?
-            Document?.GetElement(Reference) :
-            null
-          )
+          if (Value.IsElementGeometry && Document?.GetElement(Reference) is DB.Instance instance)
           {
-            if (element is DB.Instance instance)
-            {
-              var xform = instance.GetTransform().ToRhino().ChangeUnits(Revit.ModelUnits);
-              wires[0]?.Transform(xform);
-            }
+            var xform = instance.GetTransform().ToRhino().ChangeUnits(Revit.ModelUnits);
+            foreach (var wire in wires)
+              wire.Transform(xform);
           }
         }
 
@@ -673,7 +668,17 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastTo<Q>(ref Q target)
     {
-      if (Value is object)
+      if (typeof(Q).IsAssignableFrom(typeof(DB.Reference)))
+      {
+        target = (Q) (object) (IsValid ? Reference : null);
+        return true;
+      }
+      else if (typeof(Q).IsAssignableFrom(typeof(DB.Edge)))
+      {
+        target = (Q) (object) (IsValid ? Value : null);
+        return true;
+      }
+      else if (Value is object)
       {
         if (typeof(Q).IsAssignableFrom(typeof(GH_Curve)))
         {
@@ -729,24 +734,15 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (wires is null)
+        if (wires is null && IsValid)
         {
           wires = Value.GetEdgesAsCurveLoops().SelectMany(x => x.GetPreviewWires()).ToArray();
 
-          using
-          (
-            var element = Reference is object ?
-            Document?.GetElement(Reference) :
-            null
-          )
+          if (Value.IsElementGeometry && Document?.GetElement(Reference) is DB.Instance instance)
           {
-            if (element is DB.Instance instance)
-            {
-              var xform = instance.GetTransform().ToRhino().ChangeUnits(Revit.ModelUnits);
-
-              foreach (var wire in wires)
-                wire.Transform(xform);
-            }
+            var xform = instance.GetTransform().ToRhino().ChangeUnits(Revit.ModelUnits);
+            foreach (var wire in wires)
+              wire.Transform(xform);
           }
         }
 
@@ -754,9 +750,39 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+    Mesh[] Meshes(MeshingParameters meshingParameters)
+    {
+      if (meshes is null && IsValid)
+      {
+        meshes = Enumerable.Repeat(Value, 1).GetPreviewMeshes(meshingParameters).ToArray();
+
+        if (Value.IsElementGeometry && Document?.GetElement(Reference) is DB.Instance instance)
+        {
+          var xform = instance.GetTransform().ToRhino().ChangeUnits(Revit.ModelUnits);
+          foreach (var mesh in meshes)
+            mesh.Transform(xform);
+        }
+
+        foreach (var mesh in meshes)
+          mesh.Normals.ComputeNormals();
+      }
+
+      return meshes;
+    }
+
     public override bool CastTo<Q>(ref Q target)
     {
-      if (Value is object)
+      if (typeof(Q).IsAssignableFrom(typeof(DB.Reference)))
+      {
+        target = (Q) (object) (IsValid ? Reference : null);
+        return true;
+      }
+      else if (typeof(Q).IsAssignableFrom(typeof(DB.Face)))
+      {
+        target = (Q) (object) (IsValid ? Value : null);
+        return true;
+      }
+      else if (Value is object)
       {
         var element = Reference is object ? Document?.GetElement(Reference) : null;
 
@@ -842,7 +868,7 @@ namespace RhinoInside.Revit.GH.Types
       if (!IsValid)
         return;
 
-      foreach (var curve in Curves ?? Enumerable.Empty<Curve>())
+      foreach (var curve in Curves)
         args.Pipeline.DrawCurve(curve, args.Color, args.Thickness);
     }
 
@@ -851,29 +877,7 @@ namespace RhinoInside.Revit.GH.Types
       if (!IsValid)
         return;
 
-      if (meshes is null)
-      {
-        meshes = Enumerable.Repeat(Value, 1).GetPreviewMeshes(args.MeshingParameters).ToArray();
-
-        var element = Value.IsElementGeometry ?
-          Document?.GetElement(DB.Reference.ParseFromStableRepresentation(Document, UniqueID)) :
-          null;
-
-        if (element is DB.Instance instance)
-        {
-          var transform = instance.GetTransform();
-          transform.Origin = transform.Origin.Multiply(Revit.ModelUnits);
-          var xform = transform.ToRhino();
-
-          foreach (var mesh in meshes)
-            mesh.Transform(xform);
-        }
-
-        foreach (var mesh in meshes)
-          mesh.Normals.ComputeNormals();
-      }
-
-      foreach (var mesh in meshes ?? Enumerable.Empty<Mesh>())
+      foreach (var mesh in Meshes(args.MeshingParameters))
         args.Pipeline.DrawMeshShaded(mesh, args.Material);
     }
     #endregion
@@ -961,6 +965,37 @@ namespace RhinoInside.Revit.GH.Parameters
       return GH_GetterResult.success;
     }
 
+    protected GH_GetterResult Prompt_SingularLinked(ref GH_Structure<T> data)
+    {
+      var uiDocument = Revit.ActiveUIDocument;
+      var doc = uiDocument.Document;
+
+      try
+      {
+        using (new ModalForm.EditScope())
+        {
+          if (uiDocument.Selection.PickObject(ObjectType.LinkedElement, this) is DB.Reference r)
+          {
+            var newData = new GH_Structure<T>();
+
+            if (doc.GetElement(r.ElementId) is DB.RevitLinkInstance instance)
+            {
+              var linkedDoc = instance.GetLinkDocument();
+
+              var element = (T) Types.Element.FromElementId(linkedDoc, r.LinkedElementId);
+
+              newData.Append(element, new GH_Path(0));
+
+              data = newData;
+              return GH_GetterResult.success;
+            }
+          }
+        }
+      }
+      catch (Autodesk.Revit.Exceptions.OperationCanceledException) { }
+      return GH_GetterResult.cancel;
+    }
+
     protected override GH_GetterResult Prompt_Plural(ref List<T> elements)
     {
       elements = null;
@@ -988,6 +1023,43 @@ namespace RhinoInside.Revit.GH.Parameters
       return GH_GetterResult.success;
     }
 
+    protected GH_GetterResult Prompt_PluralLinked(ref GH_Structure<T> data)
+    {
+      var uiDocument = Revit.ActiveUIDocument;
+      var doc = uiDocument.Document;
+
+      try
+      {
+        using (new ModalForm.EditScope())
+        {
+          if (uiDocument.Selection.PickObjects(ObjectType.LinkedElement, this) is IList<DB.Reference> selection)
+          {
+            var newData = new GH_Structure<T>();
+
+            var groups = selection.Select
+            (
+              r =>
+              {
+                var instance = doc.GetElement(r.ElementId) as DB.RevitLinkInstance;
+                var linkedDoc = instance.GetLinkDocument();
+
+                return (T) Types.Element.FromElementId(linkedDoc, r.LinkedElementId);
+              }
+            ).GroupBy(x => x.Document);
+
+            int index = 0;
+            foreach (var group in groups)
+              newData.AppendRange(group, new GH_Path(index));
+
+            data = newData;
+            return GH_GetterResult.success;
+          }
+        }
+      }
+      catch (Autodesk.Revit.Exceptions.OperationCanceledException) { }
+      return GH_GetterResult.cancel;
+    }
+
     protected GH_GetterResult Prompt_More(ref GH_Structure<T> data)
     {
       var uiDocument = Revit.ActiveUIDocument;
@@ -1005,6 +1077,7 @@ namespace RhinoInside.Revit.GH.Parameters
                                catch (Autodesk.Revit.Exceptions.ArgumentException) { return null; }
                              }
                            ).
+                           Where(x => x is object).
                            ToArray();
 
       try
@@ -1032,15 +1105,85 @@ namespace RhinoInside.Revit.GH.Parameters
           }
         }
       }
-      catch (Autodesk.Revit.Exceptions.OperationCanceledException) {}
+      catch (Autodesk.Revit.Exceptions.OperationCanceledException) { }
       return GH_GetterResult.cancel;
+    }
+
+    protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
+    {
+      base.Menu_AppendPromptOne(menu);
+
+      using (var collector = new DB.FilteredElementCollector(Revit.ActiveUIDocument.Document).OfClass(typeof(DB.RevitLinkInstance)))
+      {
+        if(collector.Any())
+          Menu_AppendItem(menu, $"Set one linked {TypeName}", Menu_PromptOneLinked, SourceCount == 0, false);
+      }
     }
 
     protected override void Menu_AppendPromptMore(ToolStripDropDown menu)
     {
-      base.Menu_AppendPromptMore(menu);
       var name_plural = GH_Convert.ToPlural(TypeName);
+
+      base.Menu_AppendPromptMore(menu);
+
+      using (var collector = new DB.FilteredElementCollector(Revit.ActiveUIDocument.Document).OfClass(typeof(DB.RevitLinkInstance)))
+      {
+        if (collector.Any())
+        {
+          Menu_AppendItem(menu, $"Set Multiple linked {name_plural}", Menu_PromptPluralLinked, SourceCount == 0, false);
+          Menu_AppendSeparator(menu);
+        }
+      }
+
       Menu_AppendItem(menu, $"Change {name_plural} collection", Menu_PromptMore, SourceCount == 0, false);
+    }
+
+    private void Menu_PromptOneLinked(object sender, EventArgs e)
+    {
+      try
+      {
+        PrepareForPrompt();
+        var data = PersistentData;
+        if (Prompt_SingularLinked(ref data) == GH_GetterResult.success)
+        {
+          RecordPersistentDataEvent("Change data");
+
+          PersistentData.Clear();
+          if (data is object)
+            PersistentData.MergeStructure(data);
+
+          OnObjectChanged(GH_ObjectEventType.PersistentData);
+        }
+      }
+      finally
+      {
+        RecoverFromPrompt();
+        ExpireSolution(true);
+      }
+    }
+
+    private void Menu_PromptPluralLinked(object sender, EventArgs e)
+    {
+      try
+      {
+        PrepareForPrompt();
+        var data = PersistentData;
+        if (Prompt_PluralLinked(ref data) == GH_GetterResult.success)
+        {
+          RecordPersistentDataEvent("Change data");
+
+          PersistentData.Clear();
+          if (data is object)
+            PersistentData.MergeStructure(data);
+
+          OnObjectChanged(GH_ObjectEventType.PersistentData);
+        }
+      }
+      finally
+      {
+        RecoverFromPrompt();
+        ExpireSolution(true);
+      }
     }
 
     private void Menu_PromptMore(object sender, EventArgs e)
@@ -1063,10 +1206,6 @@ namespace RhinoInside.Revit.GH.Parameters
       finally
       {
         RecoverFromPrompt();
-
-        if (OnPingDocument() is GH_Document doc)
-          doc.ClearReferenceTable();
-
         ExpireSolution(true);
       }
     }
