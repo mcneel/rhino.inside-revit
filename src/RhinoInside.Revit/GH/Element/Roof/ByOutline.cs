@@ -1,6 +1,6 @@
 using System;
-using Autodesk.Revit.DB;
 using Grasshopper.Kernel;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -19,17 +19,17 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(new Parameters.GeometricElement(), "Roof", "R", "New Roof", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.HostObject(), "Roof", "R", "New Roof", GH_ParamAccess.item);
     }
 
     void ReconstructRoofByOutline
     (
-      Document doc,
-      ref Autodesk.Revit.DB.Element element,
+      DB.Document doc,
+      ref DB.FootPrintRoof element,
 
       Rhino.Geometry.Curve boundary,
-      Optional<Autodesk.Revit.DB.RoofType> type,
-      Optional<Autodesk.Revit.DB.Level> level
+      Optional<DB.RoofType> type,
+      Optional<DB.Level> level
     )
     {
       var scaleFactor = 1.0 / Revit.ModelUnits;
@@ -42,30 +42,31 @@ namespace RhinoInside.Revit.GH.Components
         !boundary.TryGetPlane(out var boundaryPlane, Revit.VertexTolerance) ||
         boundaryPlane.ZAxis.IsParallelTo(Rhino.Geometry.Vector3d.ZAxis) == 0
       )
-        ThrowArgumentException(nameof(boundary), "Boundary must be an horizontal planar closed curve.");
+        ThrowArgumentException(nameof(boundary), "Boundary should be an horizontal planar closed curve.");
 
-      SolveOptionalType(ref type, doc, ElementTypeGroup.RoofType, nameof(type));
+      SolveOptionalType(ref type, doc, DB.ElementTypeGroup.RoofType, nameof(type));
 
       double minZ = boundary.GetBoundingBox(true).Min.Z;
       SolveOptionalLevel(ref level, doc, minZ);
 
-      var parametersMask = new BuiltInParameter[]
+      var parametersMask = new DB.BuiltInParameter[]
       {
-        BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-        BuiltInParameter.ELEM_FAMILY_PARAM,
-        BuiltInParameter.ELEM_TYPE_PARAM,
-        BuiltInParameter.LEVEL_PARAM,
-        BuiltInParameter.ROOF_LEVEL_OFFSET_PARAM
+        DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+        DB.BuiltInParameter.ELEM_FAMILY_PARAM,
+        DB.BuiltInParameter.ELEM_TYPE_PARAM,
+        DB.BuiltInParameter.LEVEL_PARAM,
+        DB.BuiltInParameter.ROOF_LEVEL_OFFSET_PARAM
       };
 
       using (var curveArray = boundary.ToHostMultiple().ToCurveArray())
       {
-        ReplaceElement(ref element, doc.Create.NewFootPrintRoof(curveArray, level.Value, type.Value, out var _), parametersMask);
+        var footPrintToModelCurvesMapping = new DB.ModelCurveArray();
+        ReplaceElement(ref element, doc.Create.NewFootPrintRoof(curveArray, level.Value, type.Value, out footPrintToModelCurvesMapping), parametersMask);
       }
 
       if (element != null)
       {
-        element.get_Parameter(BuiltInParameter.ROOF_LEVEL_OFFSET_PARAM).Set(minZ - level.Value.Elevation);
+        element.get_Parameter(DB.BuiltInParameter.ROOF_LEVEL_OFFSET_PARAM).Set(minZ - level.Value.Elevation);
       }
     }
   }

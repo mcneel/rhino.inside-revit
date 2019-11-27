@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(new Parameters.GeometricElement(), "BuildingPad", "BP", "New BuildingPad", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.HostObject(), "BuildingPad", "BP", "New BuildingPad", GH_ParamAccess.item);
     }
 
     static readonly DB.BuiltInParameter[] ParametersMask = new DB.BuiltInParameter[]
