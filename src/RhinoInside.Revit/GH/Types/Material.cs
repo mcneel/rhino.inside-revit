@@ -60,7 +60,7 @@ namespace RhinoInside.Revit.GH.Parameters
         materialCategoryBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
         materialCategoryBox.Tag = listBox;
         materialCategoryBox.SelectedIndexChanged += MaterialCategoryBox_SelectedIndexChanged;
-        materialCategoryBox.SetCueBanner("Material category filter…");
+        materialCategoryBox.SetCueBanner("Material class filter…");
 
         using (var collector = new DB.FilteredElementCollector(Revit.ActiveUIDocument.Document))
         {
@@ -69,7 +69,7 @@ namespace RhinoInside.Revit.GH.Parameters
           var materials = collector.
                           OfClass(typeof(DB.Material)).
                           Cast<DB.Material>().
-                          GroupBy(x => x.MaterialCategory);
+                          GroupBy(x => x.MaterialClass);
 
           foreach(var cat in materials)
             materialCategoryBox.Items.Add(cat.Key);
@@ -100,7 +100,7 @@ namespace RhinoInside.Revit.GH.Parameters
       }
     }
 
-    private void RefreshMaterialsList(ListBox listBox, string category)
+    private void RefreshMaterialsList(ListBox listBox, string materialClass)
     {
       var current = InstantiateT();
       if (SourceCount == 0 && PersistentDataCount == 1)
@@ -119,7 +119,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
         foreach (var material in materials)
         {
-          if (!string.IsNullOrEmpty(category) && material.MaterialCategory != category)
+          if (!string.IsNullOrEmpty(materialClass) && material.MaterialClass != materialClass)
             continue;
 
           var tag = new Types.Material(material);
