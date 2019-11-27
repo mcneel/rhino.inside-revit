@@ -155,6 +155,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       protected readonly ID owner;
       public Proxy(ID o) { owner = o; if(this is IGH_GooProxy proxy) proxy.UserString = proxy.FormatInstance(); }
+      public override string ToString() => owner.Identity;
 
       IGH_Goo IGH_GooProxy.ProxyOwner => owner;
       string IGH_GooProxy.UserString { get; set; }
