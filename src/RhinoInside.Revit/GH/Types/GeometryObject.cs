@@ -70,7 +70,7 @@ namespace RhinoInside.Revit.GH.Types
 
     class Preview : IDisposable
     {
-      readonly DB.ElementId elementId;
+      readonly GeometricElement geometricElement;
       readonly BoundingBox clippingBox;
       public readonly MeshingParameters MeshingParameters;
       public Rhino.Display.DisplayMaterial[] materials;
@@ -79,11 +79,11 @@ namespace RhinoInside.Revit.GH.Types
 
       static List<Preview> previewsQueue;
 
-      void Build(DB.Document document)
+      void Build()
       {
         if ((meshes is null && wires is null && materials is null))
         {
-          var element = document.GetElement(elementId);
+          var element = geometricElement.Document.GetElement(geometricElement.Id);
           if (element is null)
             return;
 
@@ -91,7 +91,7 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
 
-      static void BuildPreviews(DB.Document document, bool cancelled)
+      static void BuildPreviews(DB.Document _, bool cancelled)
       {
         var previews = previewsQueue;
         previewsQueue = null;
@@ -102,10 +102,10 @@ namespace RhinoInside.Revit.GH.Types
         // Sort in reverse order depending on how 'big' is the element on screen.
         // The bigger the more at the end on the list.
         previews.Sort((x, y) => (x.clippingBox.Diagonal.Length < y.clippingBox.Diagonal.Length) ? -1 : +1);
-        BuildPreviews(document, cancelled, previews);
+        BuildPreviews(cancelled, previews);
       }
 
-      static void BuildPreviews(DB.Document document, bool cancelled, List<Preview> previews)
+      static void BuildPreviews(bool cancelled, List<Preview> previews)
       {
         if (cancelled)
           return;
@@ -123,7 +123,7 @@ namespace RhinoInside.Revit.GH.Types
           previews.RemoveAt(last);
 
           stopWatch.Start();
-          preview.Build(document);
+          preview.Build();
           stopWatch.Stop();
 
           // If building those previews take use more than 200 ms we return to Revit, to keep it 'interactive'.
@@ -138,12 +138,12 @@ namespace RhinoInside.Revit.GH.Types
 
         // If there are pending previews to generate enqueue BuildPreviews again
         if (previews.Count > 0)
-          Revit.EnqueueReadAction((doc, cancel) => BuildPreviews(doc, cancel, previews));
+          Revit.EnqueueReadAction((_, cancel) => BuildPreviews(cancel, previews));
       }
 
       Preview(GeometricElement element)
       {
-        elementId = element;
+        geometricElement = element;
         clippingBox = element.ClippingBox;
         MeshingParameters = element.meshingParameters;
       }
