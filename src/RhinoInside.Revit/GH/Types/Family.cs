@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using Grasshopper.Kernel;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -7,32 +9,33 @@ namespace RhinoInside.Revit.GH.Types
   {
     public override string TypeName => "Revit Family";
     public override string TypeDescription => "Represents a Revit family";
-    protected override Type ScriptVariableType => typeof(Autodesk.Revit.DB.Family);
-    public static explicit operator Autodesk.Revit.DB.Family(Family self) =>
-      self.Document?.GetElement(self) as Autodesk.Revit.DB.Family;
+    protected override Type ScriptVariableType => typeof(DB.Family);
+    public static explicit operator DB.Family(Family self) =>
+      self.Document?.GetElement(self) as DB.Family;
 
     public Family() { }
-    public Family(Autodesk.Revit.DB.Family family) : base(family) { }
-
-    public override string ToString()
+    public Family(DB.Family family) : base(family) { }
+    public override string Tooltip
     {
-      if (IsValid)
+      get
       {
-        var family = (Autodesk.Revit.DB.Family) this;
+        var family = (DB.Family) this;
         if (family is object)
         {
-          var ToolTip = string.Empty;
-          if (family.FamilyCategory is object)
-            ToolTip += $"{family.FamilyCategory.Name} : ";
+          var tip = string.Empty;
+          if (family.FamilyCategory is DB.Category familyCategory) tip += $"{familyCategory.Name} : ";
+          else if
+          (
+            family.GetFamilySymbolIds().FirstOrDefault() is DB.ElementId typeId &&
+            family.Document.GetElement(typeId) is DB.ElementType type
+          )
+            tip += $"{type.Category.Name} : ";
 
-          if (!string.IsNullOrEmpty(family.Name))
-            ToolTip += $"{family.Name} : ";
-
-          return $"{ToolTip}{Identity}";
+          return $"{tip}{family.Name}";
         }
-      }
 
-      return base.ToString();
+        return base.Tooltip;
+      }
     }
   }
 }

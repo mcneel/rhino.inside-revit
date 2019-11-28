@@ -155,7 +155,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       protected readonly ID owner;
       public Proxy(ID o) { owner = o; if(this is IGH_GooProxy proxy) proxy.UserString = proxy.FormatInstance(); }
-      public override string ToString() => owner.Identity;
+      public override string ToString() => owner.ToString();
 
       IGH_Goo IGH_GooProxy.ProxyOwner => owner;
       string IGH_GooProxy.UserString { get; set; }
@@ -163,7 +163,7 @@ namespace RhinoInside.Revit.GH.Types
 
       public virtual bool IsParsable() => false;
       public virtual void Construct() { }
-      public virtual string FormatInstance() => owner.Identity;
+      public virtual string FormatInstance() => owner.ToString();
       public virtual bool FromString(string str) => throw new NotImplementedException();
       public virtual string MutateString(string str) => str.Trim();
 
@@ -260,30 +260,23 @@ namespace RhinoInside.Revit.GH.Types
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
 
-    public string Identity
+    public override sealed string ToString()
     {
-      get
-      {
-        if (Value is null)        return $"{UniqueID}@{DocumentGUID}";
-        else if(Document is null) return $"id {Value.IntegerValue}@{DocumentGUID}";
-        else if(Revit.ActiveUIApplication.Application.Documents.Size > 1)
-                                  return $"id {Value.IntegerValue}@{Document.Title}";
-        else                      return $"id {Value.IntegerValue}";
-      }
+      var tip = IsValid ?
+        Tooltip :
+        (IsReferencedElement && !IsElementLoaded) ?
+        $"Unresolved {TypeName} : {UniqueID}" :
+        $"Invalid {TypeName} : {UniqueID}";
+
+      return
+      (
+        Revit.ActiveDBApplication.Documents.Size > 1 ? 
+        $"{tip} @ {Document?.Title ?? DocumentGUID.ToString()}" :
+        tip
+      );
     }
 
-    public override string ToString()
-    {
-      if (!IsValid)
-      {
-        if(IsReferencedElement && IsElementLoaded)
-          return $"Unresolved {TypeName} : {UniqueID}@{DocumentGUID}";
-
-        return $"Null {TypeName}";
-      }
-
-      return $"{TypeName} : {Identity}";
-    }
+    public virtual string Tooltip => Id is null ? UniqueID : $"id {Id.IntegerValue}";
 
     public override sealed bool Read(GH_IReader reader)
     {

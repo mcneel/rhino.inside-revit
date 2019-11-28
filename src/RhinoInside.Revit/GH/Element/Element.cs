@@ -261,37 +261,47 @@ namespace RhinoInside.Revit.GH.Types
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
 
-    public override string ToString()
+    public override string Tooltip
     {
-      if (IsValid)
+      get
       {
         var element = (DB.Element) this;
         if (element is object)
         {
-          var ToolTip = string.Empty;
+          var tip = string.Empty;
 
           if (element.Category is object)
-            ToolTip += $"{element.Category.Name} : ";
+            tip += $"{element.Category.Name} : ";
           else
-            ToolTip += $"{element.GetType().Name} : ";
+            tip += $"{{{element.GetType().Name}}} : ";
 
           if (element.Document.GetElement(element.GetTypeId()) is DB.ElementType elementType)
           {
-            if(!string.IsNullOrEmpty(elementType.FamilyName))
-              ToolTip += $"{elementType.FamilyName} : ";
+            if (!string.IsNullOrEmpty(elementType.FamilyName))
+              tip += $"{elementType.FamilyName} : ";
 
-            ToolTip += $"{elementType.Name} : ";
+            tip += $"{elementType.Name}";
           }
-          else if (!string.IsNullOrEmpty(element.Name))
+          else if (element is DB.Structure.AnalyticalModel model)
           {
-            ToolTip += $"{element.Name} : ";
+            if(model.get_Parameter(DB.BuiltInParameter.ANALYTICAL_MODEL_PHYSICAL_TYPE) is DB.Parameter param && param.HasValue)
+            {
+              if(element.Document.GetElement(param.AsElementId()) is DB.ElementType physicalType)
+              {
+                tip += $"{physicalType.FamilyName} : {physicalType.Name}";
+              }
+            }
+          }
+          else
+          {
+            tip += string.IsNullOrEmpty(element.Name) ? $"id {Id.IntegerValue}" : element.Name;
           }
 
-          return $"{ToolTip}{Identity}";
+          return tip;
         }
-      }
 
-      return base.ToString();
+        return base.Tooltip;
+      }
     }
 
     #region Location

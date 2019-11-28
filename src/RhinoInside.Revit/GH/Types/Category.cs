@@ -163,9 +163,9 @@ namespace RhinoInside.Revit.GH.Types
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
 
-    public override sealed string ToString()
+    public override string Tooltip
     {
-      if (IsValid)
+      get
       {
         var category = (DB.Category) this;
         if (category is object)
@@ -174,11 +174,9 @@ namespace RhinoInside.Revit.GH.Types
         else if (Enum.IsDefined(typeof(DB.BuiltInCategory), Value.IntegerValue))
           return DB.LabelUtils.GetLabelFor((DB.BuiltInCategory) Value.IntegerValue);
 #endif
-        else
-          return "Revit Category \"" + ((DB.BuiltInCategory) Value.IntegerValue).ToString() + "\"";
-      }
 
-      return base.ToString();
+        return base.Tooltip;
+      }
     }
   }
 
@@ -193,33 +191,22 @@ namespace RhinoInside.Revit.GH.Types
     public GraphicsStyle() { }
     public GraphicsStyle(DB.GraphicsStyle graphicsStyle) : base(graphicsStyle) { }
 
-    public override string ToString()
+    public override string Tooltip
     {
-      if (IsValid)
+      get
       {
         var graphicsStyle = (DB.GraphicsStyle) this;
         if (graphicsStyle is object)
         {
-          var ToolTip = string.Empty;
-          if (graphicsStyle.GraphicsStyleCategory is DB.Category graphicsStyleCategory)
+          switch (graphicsStyle.GraphicsStyleType)
           {
-            if(graphicsStyleCategory.Parent is DB.Category parentCategory)
-              ToolTip += $"{parentCategory.Name} : ";
-
-            ToolTip += $"{graphicsStyleCategory.Name} : ";
+            case DB.GraphicsStyleType.Projection: return $"{graphicsStyle.Category.Parent.Name} : {graphicsStyle.GraphicsStyleCategory.Name} [projection]";
+            case DB.GraphicsStyleType.Cut:        return $"{graphicsStyle.Category.Parent.Name} : {graphicsStyle.GraphicsStyleCategory.Name} [cut]";
           }
-
-          switch(graphicsStyle.GraphicsStyleType)
-          {
-            case DB.GraphicsStyleType.Projection: ToolTip += "[projection]"; break;
-            case DB.GraphicsStyleType.Cut:        ToolTip += "[cut]"; break;
-          }
-
-          return ToolTip;
         }
-      }
 
-      return base.ToString();
+        return base.Tooltip;
+      }
     }
   }
 }

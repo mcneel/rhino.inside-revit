@@ -122,11 +122,11 @@ namespace RhinoInside.Revit.GH.Types
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
 
-    public override string ToString()
+    public override string Tooltip
     {
-      if (IsValid)
+      get
       {
-        if(Document?.GetElement(Id) is DB.ParameterElement element)
+        if (Document?.GetElement(Id) is DB.ParameterElement element)
           return element.Name;
 
         try
@@ -135,9 +135,9 @@ namespace RhinoInside.Revit.GH.Types
           return builtInParameterLabel ?? string.Empty;
         }
         catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
-      }
 
-      return base.ToString();
+        return base.Tooltip;
+      }
     }
   }
 
@@ -323,23 +323,11 @@ namespace RhinoInside.Revit.GH.Types
             case DB.StorageType.Double: value = ToRhino(Value.AsDouble(), Value.Definition.ParameterType).ToString(); break;
             case DB.StorageType.String: value = Value.AsString(); break;
             case DB.StorageType.ElementId:
-              var id = Value.AsElementId();
-              var doc = Value.Element.Document;
 
-              if (doc.GetCategory(id) is DB.Category category)
-              {
-                if(category.Parent is DB.Category parent)
-                  value = $"{parent.Name}:{category.Name}";
-                else
-                  value = category.Name;
-              }
-              else if (doc.GetElement(id) is DB.Element element)
-              {
-                if(element is DB.ElementType type)
-                  value = $"{type.Category.Name}:{type.FamilyName}:{type.Name}";
-                else
-                  value = element.Name;
-              }
+              if (ID.FromElementId(Value.Element.Document, Value.AsElementId()) is ID goo)
+                return goo.ToString();
+
+              value = string.Empty;
               break;
             default:
               throw new NotImplementedException();
@@ -524,7 +512,7 @@ namespace RhinoInside.Revit.GH.Parameters
     protected override string Format(Types.ParameterValue data)
     {
       if (data is null)
-        return "Null";
+        return $"Null {TypeName}";
 
       try
       {
