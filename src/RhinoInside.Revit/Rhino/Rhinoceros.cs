@@ -128,7 +128,10 @@ namespace RhinoInside.Revit
       CheckInGuests();
 
       if (idlePending)
+      {
+        Revit.ActiveDBApplication?.PurgeReleasedAPIObjects();
         idlePending = core.DoIdle();
+      }
 
       var active = core.DoEvents();
       if (active)
