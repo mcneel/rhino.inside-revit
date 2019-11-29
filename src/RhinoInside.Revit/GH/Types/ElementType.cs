@@ -13,28 +13,25 @@ namespace RhinoInside.Revit.GH.Types
 
     public ElementType() { }
     public ElementType(Autodesk.Revit.DB.ElementType elementType) : base(elementType) { }
-
-    public override string ToString()
+    public override string Tooltip
     {
-      if (IsValid)
+      get
       {
         var elementType = (Autodesk.Revit.DB.ElementType) this;
         if (elementType != null)
         {
-          var ToolTip = string.Empty;
-          if (elementType.Category != null)
-            ToolTip += $"{elementType.Category.Name} : ";
+          var tip = string.Empty;
+          if (elementType.Category is object)
+            tip += $"{elementType.Category.Name} : ";
 
           if (!string.IsNullOrEmpty(elementType.FamilyName))
-            ToolTip += $"{elementType.FamilyName} : ";
+            tip += $"{elementType.FamilyName} : ";
 
-          ToolTip += $"{elementType.Name} : ";
-
-          return $"{ToolTip}{Identity}";
+          return $"{tip}{elementType.Name}";
         }
-      }
 
-      return base.ToString();
+        return base.Tooltip;
+      }
     }
   }
 }

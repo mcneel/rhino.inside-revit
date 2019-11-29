@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using GH_IO.Serialization;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Attributes;
 using Grasshopper.Kernel.Types;
 using DB = Autodesk.Revit.DB;
 
@@ -124,11 +122,11 @@ namespace RhinoInside.Revit.GH.Types
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
 
-    public override string ToString()
+    public override string Tooltip
     {
-      if (IsValid)
+      get
       {
-        if(Document?.GetElement(Id) is DB.ParameterElement element)
+        if (Document?.GetElement(Id) is DB.ParameterElement element)
           return element.Name;
 
         try
@@ -137,9 +135,9 @@ namespace RhinoInside.Revit.GH.Types
           return builtInParameterLabel ?? string.Empty;
         }
         catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
-      }
 
-      return base.ToString();
+        return base.Tooltip;
+      }
     }
   }
 
@@ -148,7 +146,7 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeName => "Revit ParameterValue";
     public override string TypeDescription => "Represents a Revit parameter value on an element";
     protected Type ScriptVariableType => typeof(DB.Parameter);
-    public override bool IsValid => Value != null;
+    public override bool IsValid => Value is object;
     public override sealed IGH_Goo Duplicate() => (IGH_Goo) MemberwiseClone();
 
     double ToRhino(double value, DB.ParameterType type)
@@ -306,36 +304,39 @@ namespace RhinoInside.Revit.GH.Types
     
     public override string ToString()
     {
-      if (IsValid)
+      if (!IsValid)
+        return null;
+
+      string value = default;
+      try
       {
-        string value = null;
-        try
+        if (Value.HasValue)
         {
-          if (Value.HasValue)
+          switch (Value.StorageType)
           {
-            value = Value.AsValueString();
-            if (value is null)
-            {
-              switch (Value.StorageType)
-              {
-                case DB.StorageType.Integer: value = Value.AsInteger().ToString(); break;
-                case DB.StorageType.Double: value = Value.AsDouble().ToString(); break;
-                case DB.StorageType.String: value = Value.AsString(); break;
-                case DB.StorageType.ElementId:
-                  var id = Value.AsElementId();
-                  var e = Value.Element.Document.GetElement(id);
-                  value = e?.Name; break;
-                default: value = null; break;
-              }
-            }
+            case DB.StorageType.Integer:
+              if (Value.Definition.ParameterType == DB.ParameterType.YesNo)
+                value = Value.AsInteger() == 0 ? "False" : "True";
+              else
+                value = Value.AsInteger().ToString();
+              break;
+            case DB.StorageType.Double: value = ToRhino(Value.AsDouble(), Value.Definition.ParameterType).ToString(); break;
+            case DB.StorageType.String: value = Value.AsString(); break;
+            case DB.StorageType.ElementId:
+
+              if (ID.FromElementId(Value.Element.Document, Value.AsElementId()) is ID goo)
+                return goo.ToString();
+
+              value = string.Empty;
+              break;
+            default:
+              throw new NotImplementedException();
           }
         }
-        catch (Autodesk.Revit.Exceptions.InternalException) { }
-
-        return value;
       }
+      catch (Autodesk.Revit.Exceptions.InternalException) { }
 
-      return "Null " + TypeName;
+      return value;
     }
   }
 }
@@ -507,6 +508,25 @@ namespace RhinoInside.Revit.GH.Parameters
     protected ParameterValue(string name, string nickname, string description, string category, string subcategory, GH_ParamAccess access) :
     base(name, nickname, description, category, subcategory, access)
     { }
+
+    protected override string Format(Types.ParameterValue data)
+    {
+      if (data is null)
+        return $"Null {TypeName}";
+
+      try
+      {
+        if (data.Value is DB.Parameter parameter)
+        {
+          return parameter.HasValue ?
+                 parameter.AsValueString() :
+                 string.Empty;
+        }
+      }
+      catch(Exception) { }
+
+      return $"Invalid {TypeName}";
+    }
   }
 
   public class ParameterParam : ParameterValue
