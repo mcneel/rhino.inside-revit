@@ -1,5 +1,6 @@
 using System;
 using Grasshopper.Kernel;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -7,30 +8,31 @@ namespace RhinoInside.Revit.GH.Types
   {
     public override string TypeName => "Revit Element Type";
     public override string TypeDescription => "Represents a Revit element type";
-    protected override Type ScriptVariableType => typeof(Autodesk.Revit.DB.ElementType);
-    public static explicit operator Autodesk.Revit.DB.ElementType(ElementType self) =>
-      self.Document?.GetElement(self) as Autodesk.Revit.DB.ElementType;
+    protected override Type ScriptVariableType => typeof(DB.ElementType);
+    public static explicit operator DB.ElementType(ElementType self) =>
+      self.Document?.GetElement(self) as DB.ElementType;
 
     public ElementType() { }
-    public ElementType(Autodesk.Revit.DB.ElementType elementType) : base(elementType) { }
-    public override string Tooltip
+    public ElementType(DB.ElementType elementType) : base(elementType) { }
+
+    public override string DisplayName
     {
       get
       {
-        var elementType = (Autodesk.Revit.DB.ElementType) this;
-        if (elementType != null)
+        var element = (DB.ElementType) this;
+        if (element is object)
         {
-          var tip = string.Empty;
-          if (elementType.Category is object)
-            tip += $"{elementType.Category.Name} : ";
+          if (element.get_Parameter(DB.BuiltInParameter.ALL_MODEL_TYPE_MARK) is DB.Parameter parameter && parameter.HasValue)
+          {
+            var mark = parameter.AsString();
+            if (!string.IsNullOrEmpty(mark))
+              return $"{element.Category?.Name} : {element.FamilyName} : {element.Name} [{mark}]";
+          }
 
-          if (!string.IsNullOrEmpty(elementType.FamilyName))
-            tip += $"{elementType.FamilyName} : ";
-
-          return $"{tip}{elementType.Name}";
+          return $"{element.Category?.Name} : {element.FamilyName} : {element.Name}";
         }
 
-        return base.Tooltip;
+        return base.DisplayName;
       }
     }
   }

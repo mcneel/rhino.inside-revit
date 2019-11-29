@@ -52,6 +52,12 @@ namespace RhinoInside.Revit.GH.Types
         if (element is DB.Material material)
           return new Material(material);
 
+        if (element is DB.GraphicsStyle graphicsStyle)
+          return new GraphicsStyle(graphicsStyle);
+
+        if (element is DB.Family family)
+          return new Family(family);
+
         if (element is DB.ElementType elementType)
           return new ElementType(elementType);
 
@@ -233,7 +239,6 @@ namespace RhinoInside.Revit.GH.Types
     new class Proxy : ID.Proxy
     {
       public Proxy(Element e) : base(e) { (this as IGH_GooProxy).UserString = FormatInstance(); }
-      public override string ToString() => element?.Name ?? base.ToString();
 
       public override bool IsParsable() => true;
       public override string FormatInstance() => $"{owner.Value.IntegerValue}:{element?.Name ?? string.Empty}";
@@ -254,53 +259,19 @@ namespace RhinoInside.Revit.GH.Types
       }
 
       DB.Element element => owner.IsElementLoaded ? owner.Document?.GetElement(owner.Id) : null;
-
-      [System.ComponentModel.Description("A human readable name for the Element.")]
-      public string Name => element?.Name;
     }
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
 
-    public override string Tooltip
+    public override string DisplayName
     {
       get
       {
         var element = (DB.Element) this;
-        if (element is object)
-        {
-          var tip = string.Empty;
+        if (element is object && !string.IsNullOrEmpty(element.Name))
+          return element.Name;
 
-          if (element.Category is object)
-            tip += $"{element.Category.Name} : ";
-          else
-            tip += $"{{{element.GetType().Name}}} : ";
-
-          if (element.Document.GetElement(element.GetTypeId()) is DB.ElementType elementType)
-          {
-            if (!string.IsNullOrEmpty(elementType.FamilyName))
-              tip += $"{elementType.FamilyName} : ";
-
-            tip += $"{elementType.Name}";
-          }
-          else if (element is DB.Structure.AnalyticalModel model)
-          {
-            if(model.get_Parameter(DB.BuiltInParameter.ANALYTICAL_MODEL_PHYSICAL_TYPE) is DB.Parameter param && param.HasValue)
-            {
-              if(element.Document.GetElement(param.AsElementId()) is DB.ElementType physicalType)
-              {
-                tip += $"{physicalType.FamilyName} : {physicalType.Name}";
-              }
-            }
-          }
-          else
-          {
-            tip += string.IsNullOrEmpty(element.Name) ? $"id {Id.IntegerValue}" : element.Name;
-          }
-
-          return tip;
-        }
-
-        return base.Tooltip;
+        return base.DisplayName;
       }
     }
 

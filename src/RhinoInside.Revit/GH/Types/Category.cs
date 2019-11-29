@@ -137,9 +137,6 @@ namespace RhinoInside.Revit.GH.Types
 
       DB.Category category => owner.IsElementLoaded ? owner.Document?.GetCategory(owner.Id) : null;
 
-      [System.ComponentModel.Description("The category Name.")]
-      public string Name => category?.Name;
-
       [System.ComponentModel.Category("Other"), System.ComponentModel.Description("Parent category of this category.")]
       public string Parent => category?.Parent?.Name;
       [System.ComponentModel.Category("Other"), System.ComponentModel.Description("Category can have project parameters.")]
@@ -163,19 +160,28 @@ namespace RhinoInside.Revit.GH.Types
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
 
-    public override string Tooltip
+    public override string DisplayName
     {
       get
       {
         var category = (DB.Category) this;
         if (category is object)
-          return category.Parent is null ? category.Name : $"{category.Parent.Name} : {category.Name}";
-#if REVIT_2020
-        else if (Enum.IsDefined(typeof(DB.BuiltInCategory), Value.IntegerValue))
-          return DB.LabelUtils.GetLabelFor((DB.BuiltInCategory) Value.IntegerValue);
-#endif
+        {
+          var tip = string.Empty;
+          if (category.Parent is DB.Category parent)
+            tip = $"{parent.Name} : ";
 
-        return base.Tooltip;
+          return $"{tip}{category.Name}";
+        }
+
+#if REVIT_2020
+        if (Id is object)
+        {
+          if (Id.TryGetBuiltInCategory(out var builtInCategory) == true)
+            return DB.LabelUtils.GetLabelFor(builtInCategory) ?? base.DisplayName;
+        }
+#endif
+        return base.DisplayName;
       }
     }
   }
@@ -191,21 +197,25 @@ namespace RhinoInside.Revit.GH.Types
     public GraphicsStyle() { }
     public GraphicsStyle(DB.GraphicsStyle graphicsStyle) : base(graphicsStyle) { }
 
-    public override string Tooltip
+    public override string DisplayName
     {
       get
       {
         var graphicsStyle = (DB.GraphicsStyle) this;
         if (graphicsStyle is object)
         {
+          var tip = string.Empty;
+          if (graphicsStyle.GraphicsStyleCategory.Parent is DB.Category parent)
+            tip = $"{parent.Name} : ";
+
           switch (graphicsStyle.GraphicsStyleType)
           {
-            case DB.GraphicsStyleType.Projection: return $"{graphicsStyle.Category.Parent.Name} : {graphicsStyle.GraphicsStyleCategory.Name} [projection]";
-            case DB.GraphicsStyleType.Cut:        return $"{graphicsStyle.Category.Parent.Name} : {graphicsStyle.GraphicsStyleCategory.Name} [cut]";
+            case DB.GraphicsStyleType.Projection: return $"{tip}{graphicsStyle.Name} [projection]";
+            case DB.GraphicsStyleType.Cut:        return $"{tip}{graphicsStyle.Name} [cut]";
           }
         }
 
-        return base.Tooltip;
+        return base.DisplayName;
       }
     }
   }
