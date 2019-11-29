@@ -254,6 +254,7 @@ namespace RhinoInside.Revit.GH.Parameters
         listBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
         listBox.Height = (int) (100 * GH_GraphicsUtil.UiScale);
         listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
+        listBox.Sorted = true;
 
         RefreshCategoryList(listBox, DB.CategoryType.Model);
 
@@ -307,24 +308,40 @@ namespace RhinoInside.Revit.GH.Parameters
 
     private void RefreshCategoryList(ListBox listBox, DB.CategoryType categoryType)
     {
-      var current = InstantiateT();
-      if (SourceCount == 0 && PersistentDataCount == 1)
+      var doc = Revit.ActiveUIDocument.Document;
+      var selectedIndex = -1;
+
+      try
       {
-        if (PersistentData.get_FirstItem(true) is Types.Category firstValue)
-          current = firstValue.Duplicate() as Types.Category;
+        listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
+        listBox.Items.Clear();
+
+        var current = default(Types.Category);
+        if (SourceCount == 0 && PersistentDataCount == 1)
+        {
+          if (PersistentData.get_FirstItem(true) is Types.Category firstValue)
+            current = firstValue as Types.Category;
+        }
+
+        using (var collector = doc.Settings.Categories)
+        {
+          var categories = collector.
+                           Cast<DB.Category>().
+                           Where(x => 3 == (int) categoryType ? x.IsTagCategory : x.CategoryType == categoryType && !x.IsTagCategory);
+
+          foreach (var category in categories)
+          {
+            var tag = Types.Category.FromCategory(category);
+            int index = listBox.Items.Add(tag.EmitProxy());
+            if (tag.UniqueID == current?.UniqueID)
+              selectedIndex = index;
+          }
+        }
       }
-
-      var categories = Revit.ActiveUIDocument.Document.Settings.Categories.Cast<DB.Category>().Where(x => x.CategoryType == categoryType && !x.IsTagCategory);
-      if(categoryType == (DB.CategoryType) 3)
-        categories = Revit.ActiveUIDocument.Document.Settings.Categories.Cast<DB.Category>().Where(x => x.IsTagCategory);
-
-      listBox.Items.Clear();
-      foreach (var category in categories.OrderBy(x => x.Name))
+      finally
       {
-        var tag = Types.Category.FromCategory(category);
-        int index = listBox.Items.Add(tag);
-        if (tag.UniqueID == current.UniqueID)
-          listBox.SelectedIndex = index;
+        listBox.SelectedIndex = selectedIndex;
+        listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
       }
     }
 
@@ -334,11 +351,11 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         if (listBox.SelectedIndex != -1)
         {
-          if (listBox.Items[listBox.SelectedIndex] is Types.Category value)
+          if (listBox.Items[listBox.SelectedIndex] is IGH_GooProxy value)
           {
             RecordUndoEvent($"Set: {value}");
             PersistentData.Clear();
-            PersistentData.Append(value.Duplicate() as Types.Category);
+            PersistentData.Append(value.ProxyOwner as Types.Category);
           }
         }
 

@@ -102,31 +102,40 @@ namespace RhinoInside.Revit.GH.Parameters
 
     private void RefreshMaterialsList(ListBox listBox, string materialClass)
     {
-      var current = InstantiateT();
-      if (SourceCount == 0 && PersistentDataCount == 1)
-      {
-        if (PersistentData.get_FirstItem(true) is Types.Material firstValue)
-          current = firstValue.Duplicate() as Types.Material;
-      }
+      var doc = Revit.ActiveUIDocument.Document;
+      var selectedIndex = -1;
 
-      using (var collector = new DB.FilteredElementCollector(Revit.ActiveUIDocument.Document))
+      try
       {
+        listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
         listBox.Items.Clear();
 
-        var materials = collector.
-                        OfClass(typeof(DB.Material)).
-                        Cast<DB.Material>();
-
-        foreach (var material in materials)
+        var current = default(Types.Material);
+        if (SourceCount == 0 && PersistentDataCount == 1)
         {
-          if (!string.IsNullOrEmpty(materialClass) && material.MaterialClass != materialClass)
-            continue;
-
-          var tag = new Types.Material(material);
-          int index = listBox.Items.Add(tag.EmitProxy());
-          if (tag.UniqueID == current.UniqueID)
-            listBox.SelectedIndex = index;
+          if (PersistentData.get_FirstItem(true) is Types.Material firstValue)
+            current = firstValue.Duplicate() as Types.Material;
         }
+
+        using (var collector = new DB.FilteredElementCollector(doc).OfClass(typeof(DB.Material)))
+        {
+          var materials = collector.
+                          Cast<DB.Material>().
+                          Where(x => string.IsNullOrEmpty(materialClass) || x.MaterialClass == materialClass);
+
+          foreach (var material in materials)
+          {
+            var tag = new Types.Material(material);
+            int index = listBox.Items.Add(tag.EmitProxy());
+            if (tag.UniqueID == current?.UniqueID)
+              selectedIndex = index;
+          }
+        }
+      }
+      finally
+      {
+        listBox.SelectedIndex = selectedIndex;
+        listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
       }
     }
 
