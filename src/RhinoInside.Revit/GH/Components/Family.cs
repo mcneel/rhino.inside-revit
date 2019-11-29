@@ -34,7 +34,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetData("Family", ref family))
         return;
 
-      DA.SetDataList("Types", family?.GetFamilySymbolIds());
+      DA.SetDataList("Types", family?.GetFamilySymbolIds().Select(x => Types.ElementType.FromElementId(family.Document, x)));
     }
   }
 
@@ -105,7 +105,7 @@ namespace RhinoInside.Revit.GH.Components
 
     static Rhino.Geometry.GeometryBase AsGeometryBase(IGH_GeometricGoo obj)
     {
-      var scriptVariable = obj.ScriptVariable();
+      var scriptVariable = obj?.ScriptVariable();
       switch (scriptVariable)
       {
         case Rhino.Geometry.Point3d point: return new Rhino.Geometry.Point(point);
@@ -197,7 +197,7 @@ namespace RhinoInside.Revit.GH.Components
       {
         using (var collector = new DB.FilteredElementCollector(family).OfClass(typeof(DB.Material)))
         {
-          if (collector.ToElements().Cast<DB.Material>().Where(x => x.Name == material.Name).FirstOrDefault() is DB.Material familyMaterial)
+          if (collector.Cast<DB.Material>().Where(x => x.Name == material.Name).FirstOrDefault() is DB.Material familyMaterial)
             return familyMaterial.Id;
         }
 
@@ -501,7 +501,7 @@ namespace RhinoInside.Revit.GH.Components
 
       var family = default(DB.Family);
       using (var collector = new DB.FilteredElementCollector(doc).OfClass(typeof(DB.Family)))
-        family = collector.ToElements().Cast<DB.Family>().Where(x => x.Name == name).FirstOrDefault();
+        family = collector.Cast<DB.Family>().Where(x => x.Name == name).FirstOrDefault();
 
       bool familyIsNew = family is null;
 
@@ -563,7 +563,7 @@ namespace RhinoInside.Revit.GH.Components
                     var planesSetComparer = new PlaneComparer();
                     var loops = new List<Rhino.Geometry.Curve>();
 
-                    foreach (var geo in geometry.Select(x => AsGeometryBase(x).ChangeUnits(scaleFactor)))
+                    foreach (var geo in geometry.Select(x => AsGeometryBase(x)?.ChangeUnits(scaleFactor)))
                     {
                       try
                       {
@@ -577,7 +577,10 @@ namespace RhinoInside.Revit.GH.Components
                           {
                             case Rhino.Geometry.Brep brep: hasVoids |= Add(doc, familyDoc, brep, forms); break;
                             case Rhino.Geometry.Curve curve: Add(doc, familyDoc, curve, planesSet, curves); break;
-                            default: AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"{geo.GetType().Name} is not supported and will be ignored"); break;
+                            default:
+                              if(geo is object)
+                                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"{geo.GetType().Name} is not supported and will be ignored");
+                            break;
                           }
                         }
                       }
@@ -693,7 +696,7 @@ namespace RhinoInside.Revit.GH.Components
         {
           var name = Path.GetFileNameWithoutExtension(filePath);
           using (var collector = new DB.FilteredElementCollector(Revit.ActiveDBDocument).OfClass(typeof(DB.Family)))
-            family = collector.ToElements().Cast<DB.Family>().Where(x => x.Name == name).FirstOrDefault();
+            family = collector.Cast<DB.Family>().Where(x => x.Name == name).FirstOrDefault();
 
           if (family is object && overrideFamily == false)
             AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Family '{name}' already loaded!");
