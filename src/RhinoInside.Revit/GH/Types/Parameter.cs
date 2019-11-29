@@ -126,7 +126,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         try
         {
-          if (Id.TryGetBuiltInParameter(out var builtInParameter))
+          if (Id is object && Id.TryGetBuiltInParameter(out var builtInParameter))
             return DB.LabelUtils.GetLabelFor(builtInParameter) ?? base.DisplayName;
         }
         catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
@@ -369,18 +369,19 @@ namespace RhinoInside.Revit.GH.Parameters
       Menu_AppendSimplifyParameter(menu);
 
       {
-        var parametersListBox = new ListBox();
-        parametersListBox.BorderStyle = BorderStyle.FixedSingle;
-        parametersListBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
-        parametersListBox.Height = (int) (100 * GH_GraphicsUtil.UiScale);
-        parametersListBox.SelectedIndexChanged += ParametersListBox_SelectedIndexChanged;
+        var listBox = new ListBox();
+        listBox.BorderStyle = BorderStyle.FixedSingle;
+        listBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
+        listBox.Height = (int) (100 * GH_GraphicsUtil.UiScale);
+        listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
+        listBox.Sorted = true;
 
         var categoriesBox = new ComboBox();
         categoriesBox.DropDownStyle = ComboBoxStyle.DropDownList;
         categoriesBox.DropDownHeight = categoriesBox.ItemHeight * 15;
         categoriesBox.SetCueBanner("Category filter…");
         categoriesBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
-        categoriesBox.Tag = parametersListBox;
+        categoriesBox.Tag = listBox;
         categoriesBox.SelectedIndexChanged += CategoriesBox_SelectedIndexChanged;
 
         var categoriesTypeBox = new ComboBox();
@@ -398,7 +399,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
         Menu_AppendCustomItem(menu, categoriesTypeBox);
         Menu_AppendCustomItem(menu, categoriesBox);
-        Menu_AppendCustomItem(menu, parametersListBox);
+        Menu_AppendCustomItem(menu, listBox);
       }
 
       Menu_AppendManageCollection(menu);
@@ -428,40 +429,57 @@ namespace RhinoInside.Revit.GH.Parameters
       foreach (var category in categories.OrderBy(x => x.Name))
       {
         var tag = Types.Category.FromCategory(category);
-        int index = categoriesBox.Items.Add(tag);
+        int index = categoriesBox.Items.Add(tag.EmitProxy());
       }
     }
 
-    private void RefreshParametersList(ListBox parametersListBox, ComboBox categoriesBox)
+    private void RefreshParametersList(ListBox listBox, ComboBox categoriesBox)
     {
-      parametersListBox.Items.Clear();
+      var doc = Revit.ActiveUIDocument.Document;
+      var selectedIndex = -1;
 
-      IEnumerable<DB.ElementId> parameters = null;
-      if (categoriesBox.SelectedIndex == -1)
+      try
       {
-        parameters = categoriesBox.Items.
-                     Cast<Types.Category>().
-                     SelectMany(x => DB.TableView.GetAvailableParameters(Revit.ActiveUIDocument.Document, x.Id)).
-                     GroupBy(x => x.IntegerValue).
-                     Select(x => x.First());
-      }
-      else
-      {
-        parameters = DB.TableView.GetAvailableParameters(Revit.ActiveUIDocument.Document, (categoriesBox.Items[categoriesBox.SelectedIndex] as Types.Category).Id);
-      }
+        listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
+        listBox.Items.Clear();
 
-      var current = InstantiateT();
-      if (SourceCount == 0 && PersistentDataCount == 1)
-      {
-        if (PersistentData.get_FirstItem(true) is Types.ParameterKey firstValue)
-          current = firstValue.Duplicate() as Types.ParameterKey;
-      }
+        var current = default(Types.ParameterKey);
+        if (SourceCount == 0 && PersistentDataCount == 1)
+        {
+          if (PersistentData.get_FirstItem(true) is Types.ParameterKey firstValue)
+            current = firstValue as Types.ParameterKey;
+        }
 
-      foreach (var parameter in parameters.Select(x => Types.ParameterKey.FromElementId(Revit.ActiveUIDocument.Document, x)).OrderBy(x => x.ToString()))
+        {
+          var parameters = default(IEnumerable<DB.ElementId>);
+          if (categoriesBox.SelectedIndex == -1)
+          {
+            parameters = categoriesBox.Items.
+                         Cast<IGH_GooProxy>().
+                         Select(x => x.ProxyOwner).
+                         Cast<Types.Category>().
+                         SelectMany(x => DB.TableView.GetAvailableParameters(doc, x.Id)).
+                         GroupBy(x => x.IntegerValue).
+                         Select(x => x.First());
+          }
+          else
+          {
+            parameters = DB.TableView.GetAvailableParameters(doc, ((categoriesBox.Items[categoriesBox.SelectedIndex] as IGH_GooProxy).ProxyOwner as Types.Category).Id);
+          }
+
+          foreach (var parameter in parameters)
+          {
+            var tag = Types.ParameterKey.FromElementId(doc, parameter);
+            int index = listBox.Items.Add(tag.EmitProxy());
+            if (tag.UniqueID == current?.UniqueID)
+              selectedIndex = index;
+          }
+        }
+      }
+      finally
       {
-        int index = parametersListBox.Items.Add(parameter);
-        if (parameter.UniqueID == current.UniqueID)
-          parametersListBox.SelectedIndex = index;
+        listBox.SelectedIndex = selectedIndex;
+        listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
       }
     }
 
@@ -480,17 +498,17 @@ namespace RhinoInside.Revit.GH.Parameters
         RefreshParametersList(parametersListBox, categoriesBox);
     }
 
-    private void ParametersListBox_SelectedIndexChanged(object sender, EventArgs e)
+    private void ListBox_SelectedIndexChanged(object sender, EventArgs e)
     {
       if (sender is ListBox listBox)
       {
         if (listBox.SelectedIndex != -1)
         {
-          if (listBox.Items[listBox.SelectedIndex] is Types.ParameterKey value)
+          if (listBox.Items[listBox.SelectedIndex] is IGH_GooProxy value)
           {
             RecordUndoEvent($"Set: {value}");
             PersistentData.Clear();
-            PersistentData.Append(value.Duplicate() as Types.ParameterKey);
+            PersistentData.Append(value.ProxyOwner as Types.ParameterKey);
           }
         }
 
