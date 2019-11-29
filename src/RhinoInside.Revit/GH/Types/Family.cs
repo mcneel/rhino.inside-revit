@@ -15,26 +15,26 @@ namespace RhinoInside.Revit.GH.Types
 
     public Family() { }
     public Family(DB.Family family) : base(family) { }
-    public override string Tooltip
+    public override string DisplayName
     {
       get
       {
         var family = (DB.Family) this;
         if (family is object)
         {
-          var tip = string.Empty;
-          if (family.FamilyCategory is DB.Category familyCategory) tip += $"{familyCategory.Name} : ";
-          else if
+          var familyCategory = family.FamilyCategory;
+          if 
           (
+            familyCategory is null &&
             family.GetFamilySymbolIds().FirstOrDefault() is DB.ElementId typeId &&
             family.Document.GetElement(typeId) is DB.ElementType type
           )
-            tip += $"{type.Category.Name} : ";
+            familyCategory = type.Category;
 
-          return $"{tip}{family.Name}";
+          return $"{familyCategory?.Name} : {family.Name}";
         }
 
-        return base.Tooltip;
+        return base.DisplayName;
       }
     }
   }

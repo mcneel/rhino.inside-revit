@@ -109,8 +109,6 @@ namespace RhinoInside.Revit.GH.Types
 
       [System.ComponentModel.Description("The Guid that identifies this parameter as a shared parameter.")]
       public Guid Guid => (parameter as DB.SharedParameterElement)?.GuidValue ?? Guid.Empty;
-      [System.ComponentModel.Description("The user-visible name for the parameter.")]
-      public string Name => builtInParameter != DB.BuiltInParameter.INVALID ? DB.LabelUtils.GetLabelFor(builtInParameter) : parameter?.GetDefinition().Name ?? string.Empty;
       [System.ComponentModel.Description("API Object Type.")]
       public override Type ObjectType => IsBuiltIn ? typeof(DB.BuiltInParameter) : parameter?.GetType();
 
@@ -122,21 +120,18 @@ namespace RhinoInside.Revit.GH.Types
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
 
-    public override string Tooltip
+    public override string DisplayName
     {
       get
       {
-        if (Document?.GetElement(Id) is DB.ParameterElement element)
-          return element.Name;
-
         try
         {
-          var builtInParameterLabel = DB.LabelUtils.GetLabelFor((DB.BuiltInParameter) Value.IntegerValue);
-          return builtInParameterLabel ?? string.Empty;
+          if (Id.TryGetBuiltInParameter(out var builtInParameter))
+            return DB.LabelUtils.GetLabelFor(builtInParameter) ?? base.DisplayName;
         }
         catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
 
-        return base.Tooltip;
+        return base.DisplayName;
       }
     }
   }
@@ -323,6 +318,12 @@ namespace RhinoInside.Revit.GH.Types
             case DB.StorageType.Double: value = ToRhino(Value.AsDouble(), Value.Definition.ParameterType).ToString(); break;
             case DB.StorageType.String: value = Value.AsString(); break;
             case DB.StorageType.ElementId:
+
+              if (Value.Id.TryGetBuiltInParameter(out var builtInParameter))
+              {
+                if (builtInParameter == DB.BuiltInParameter.ID_PARAM || builtInParameter == DB.BuiltInParameter.SYMBOL_ID_PARAM)
+                  return Value.AsElementId().IntegerValue.ToString();
+              }
 
               if (ID.FromElementId(Value.Element.Document, Value.AsElementId()) is ID goo)
                 return goo.ToString();

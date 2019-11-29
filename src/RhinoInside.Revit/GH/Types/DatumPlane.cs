@@ -1,5 +1,6 @@
 using System;
 using Grasshopper.Kernel;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -7,12 +8,24 @@ namespace RhinoInside.Revit.GH.Types
   {
     public override string TypeName => "Revit DatumPlane";
     public override string TypeDescription => "Represents a Revit DatumPlane";
-    protected override Type ScriptVariableType => typeof(Autodesk.Revit.DB.DatumPlane);
-    public static explicit operator Autodesk.Revit.DB.DatumPlane(DatumPlane self) =>
-      self.Document?.GetElement(self) as Autodesk.Revit.DB.DatumPlane;
+    protected override Type ScriptVariableType => typeof(DB.DatumPlane);
+    public static explicit operator DB.DatumPlane(DatumPlane self) =>
+      self.Document?.GetElement(self) as DB.DatumPlane;
 
     public DatumPlane() { }
-    public DatumPlane(Autodesk.Revit.DB.DatumPlane plane) : base(plane) { }
+    public DatumPlane(DB.DatumPlane plane) : base(plane) { }
+
+    public override string DisplayName
+    {
+      get
+      {
+        var element = (DB.DatumPlane) this;
+        if (element is object)
+          return element.Name;
+
+        return base.DisplayName;
+      }
+    }
   }
 
   public class Level : DatumPlane

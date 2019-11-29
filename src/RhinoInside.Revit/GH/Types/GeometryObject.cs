@@ -23,6 +23,25 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeName => "Revit Geometric element";
     public override string TypeDescription => "Represents a Revit geometric element";
 
+    public override string DisplayName
+    {
+      get
+      {
+        var element = (DB.Element) this;
+        if (element is object)
+        {
+          if (element.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MARK) is DB.Parameter parameter && parameter.HasValue)
+          {
+            var mark = parameter.AsString();
+            if(!string.IsNullOrEmpty(mark))
+              return $"{base.DisplayName} [{mark}]";
+          }
+        }
+
+        return base.DisplayName;
+      }
+    }
+
     public GeometricElement() { }
     public GeometricElement(DB.Element element) : base(element) { }
     protected override bool SetValue(DB.Element element) => IsValidElement(element) ? base.SetValue(element) : false;

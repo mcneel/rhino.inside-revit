@@ -653,7 +653,7 @@ namespace RhinoInside.Revit
       var min = double.PositiveInfinity;
       using (var collector = new FilteredElementCollector(doc))
       {
-        foreach (var levelN in collector.OfClass(typeof(Level)).ToElements().Cast<Level>().OrderBy(c => c.Elevation))
+        foreach (var levelN in collector.OfClass(typeof(Level)).Cast<Level>().OrderBy(c => c.Elevation))
         {
           var distance = Math.Abs(levelN.Elevation - elevation);
           if (distance < min)
@@ -675,7 +675,7 @@ namespace RhinoInside.Revit
       Level level = null;
       using (var collector = new FilteredElementCollector(doc))
       {
-        foreach (var levelN in collector.OfClass(typeof(Level)).ToElements().Cast<Level>().OrderBy(c => c.Elevation))
+        foreach (var levelN in collector.OfClass(typeof(Level)).Cast<Level>().OrderBy(c => c.Elevation))
         {
           if (levelN.Elevation <= elevation) level = levelN;
           else
@@ -696,7 +696,7 @@ namespace RhinoInside.Revit
       Level level = null;
       using (var collector = new FilteredElementCollector(doc))
       {
-        foreach (var levelN in collector.OfClass(typeof(Level)).ToElements().Cast<Level>().OrderByDescending(c => c.Elevation))
+        foreach (var levelN in collector.OfClass(typeof(Level)).Cast<Level>().OrderByDescending(c => c.Elevation))
         {
           if (levelN.Elevation >= elevation) level = levelN;
           else

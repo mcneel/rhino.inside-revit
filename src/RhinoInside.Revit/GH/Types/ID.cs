@@ -155,7 +155,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       protected readonly ID owner;
       public Proxy(ID o) { owner = o; if(this is IGH_GooProxy proxy) proxy.UserString = proxy.FormatInstance(); }
-      public override string ToString() => owner.ToString();
+      public override string ToString() => owner.DisplayName;
 
       IGH_Goo IGH_GooProxy.ProxyOwner => owner;
       string IGH_GooProxy.UserString { get; set; }
@@ -163,7 +163,7 @@ namespace RhinoInside.Revit.GH.Types
 
       public virtual bool IsParsable() => false;
       public virtual void Construct() { }
-      public virtual string FormatInstance() => owner.ToString();
+      public virtual string FormatInstance() => owner.DisplayName;
       public virtual bool FromString(string str) => throw new NotImplementedException();
       public virtual string MutateString(string str) => str.Trim();
 
@@ -183,7 +183,8 @@ namespace RhinoInside.Revit.GH.Types
       public virtual Type ObjectType => owner.ScriptVariable()?.GetType() ?? owner.ScriptVariableType;
       [System.ComponentModel.Description("Element is built in Revit.")]
       public bool IsBuiltIn => owner.Id.IsBuiltInId();
-
+      [System.ComponentModel.Description("A human readable name for the Element.")]
+      public string Name => owner.DisplayName;
 
       class ObjectConverter : ExpandableObjectConverter
       {
@@ -263,10 +264,10 @@ namespace RhinoInside.Revit.GH.Types
     public override sealed string ToString()
     {
       var tip = IsValid ?
-        Tooltip :
+        $"{TypeName} : {DisplayName}" :
         (IsReferencedElement && !IsElementLoaded) ?
         $"Unresolved {TypeName} : {UniqueID}" :
-        $"Invalid {TypeName} : {UniqueID}";
+        $"Invalid {TypeName}";
 
       return
       (
@@ -276,7 +277,7 @@ namespace RhinoInside.Revit.GH.Types
       );
     }
 
-    public virtual string Tooltip => Id is null ? UniqueID : $"id {Id.IntegerValue}";
+    public virtual string DisplayName => Id is null ? UniqueID : $"id {Id.IntegerValue}";
 
     public override sealed bool Read(GH_IReader reader)
     {
