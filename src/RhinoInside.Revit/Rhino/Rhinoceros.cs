@@ -73,22 +73,51 @@ namespace RhinoInside.Revit
         Rhino.Commands.Command.EndCommand += EndCommand;
         RhinoApp.MainLoop += MainLoop;
 
-        #if DEBUG
-        // Register IronPython runtime assemblies.
-        Rhino.Runtime.PythonScript.AddRuntimeAssembly(typeof(DB.Element).Assembly);
-        #endif
-
         // Reset document units
         UpdateDocumentUnits(RhinoDoc.ActiveDoc);
 
-        // Look for Guests
-        guests = Assembly.GetCallingAssembly().GetTypes().
-          Where(x => typeof(IGuest).IsAssignableFrom(x)).
-          Where(x => !x.IsInterface).
-          Select(x => new GuestInfo(x)).
-          ToList();
+        try
+        {
+          // Look for Guests
+          guests = Assembly.GetCallingAssembly().GetTypes().
+            Where(x => typeof(IGuest).IsAssignableFrom(x)).
+            Where(x => !x.IsInterface).
+            Select(x => new GuestInfo(x)).
+            ToList();
 
-        CheckInGuests();
+          CheckInGuests();
+        }
+        catch (ReflectionTypeLoadException e)
+        {
+          using
+          (
+            var taskDialog = new TaskDialog(MethodBase.GetCurrentMethod().DeclaringType.FullName)
+            {
+              Title = "Exception thrown",
+              MainIcon = TaskDialogIcons.IconError,
+              AllowCancellation = true,
+              MainInstruction = "Unable to load one or more of the requested types.",
+              MainContent = "Click on 'Show details' for more info"
+            }
+          )
+          {
+            var expandedContent = string.Empty;
+            int length = Math.Min(e.Types.Length, e.LoaderExceptions.Length);
+            for (int i = 0; i < length; i++)
+            {
+              if(e.Types[i] is null)
+              {
+                if (expandedContent != string.Empty)
+                  expandedContent += Environment.NewLine;
+
+                expandedContent += $"- {e.LoaderExceptions[i].Message}";
+              }
+            }
+
+            taskDialog.ExpandedContent = expandedContent;
+            taskDialog.Show();
+          }
+        }
       }
 
       UpdateDocumentUnits(RhinoDoc.ActiveDoc, Revit.ActiveDBDocument);
@@ -99,12 +128,12 @@ namespace RhinoInside.Revit
     {
       if (core is object)
       {
+        // Unload Guests
+        CheckOutGuests();
+
         RhinoApp.MainLoop -= MainLoop;
         RhinoDoc.NewDocument -= OnNewDocument;
         Revit.ApplicationUI.ApplicationClosing -= OnApplicationClosing;
-
-        // Unload Guests
-        CheckOutGuests();
 
         // Unload RhinoCore
         try
@@ -125,8 +154,6 @@ namespace RhinoInside.Revit
     static bool idlePending = true;
     static bool Run()
     {
-      CheckInGuests();
-
       if (idlePending)
       {
         Revit.ActiveDBApplication?.PurgeReleasedAPIObjects();
@@ -196,6 +223,9 @@ namespace RhinoInside.Revit
 
     static void CheckInGuests()
     {
+      if (guests is null)
+        return;
+
       foreach (var guestInfo in guests)
       {
         if (guestInfo.Guest is object)
@@ -241,6 +271,9 @@ namespace RhinoInside.Revit
 
     static void CheckOutGuests()
     {
+      if (guests is null)
+        return;
+
       foreach (var guestInfo in Enumerable.Reverse(guests))
       {
         if (guestInfo.Guest is null)
