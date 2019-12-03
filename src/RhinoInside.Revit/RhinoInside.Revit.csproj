@@ -188,6 +188,8 @@
     <Compile Include="GH\Element\Element.cs" />
     <Compile Include="GH\Element\Grid\ByCurve.cs" />
     <Compile Include="GH\Element\Level\ByElevation.cs" />
+    <Compile Include="GH\Element\Material\MaterialByColor.cs" />
+    <Compile Include="GH\Element\Material\MaterialByName.cs" />
     <Compile Include="GH\Element\Beam\ByCurve.cs" />
     <Compile Include="GH\Element\ModelLine\ByCurve.cs" />
     <Compile Include="GH\Element\Column\ByCurve.cs" />

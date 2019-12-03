@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
   public class MaterialQuanitiesByElement : Component
   {
     public override Guid ComponentGuid => new Guid("8A162EE6-812E-459B-9123-8F7735AAAC0C");
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     public MaterialQuanitiesByElement()
     : base("MaterialQuanities.ByElement", "MaterialQuanities", "Query element material information", "Revit", "Materials")
@@ -29,18 +31,18 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void SolveInstance(IGH_DataAccess DA)
     {
-      Autodesk.Revit.DB.Element element = null;
+      DB.Element element = null;
       if (!DA.GetData("Element", ref element))
         return;
 
-      var materialIds = new List<Autodesk.Revit.DB.ElementId>();
+      var materialIds = new List<DB.ElementId>();
       if (DA.GetDataList("Materials", materialIds))
       {
         DA.SetDataList("Volume", materialIds.Select(x => (element?.GetMaterialVolume(x)).GetValueOrDefault() * Math.Pow(Revit.ModelUnits, 3.0)));
         DA.SetDataList("Area",   materialIds.Select(x => (element?.GetMaterialArea(x, false)).GetValueOrDefault() * Math.Pow(Revit.ModelUnits, 2.0)));
       }
 
-      var paintIds = new List<Autodesk.Revit.DB.ElementId>();
+      var paintIds = new List<DB.ElementId>();
       if (DA.GetDataList("Paint", paintIds))
       {
         try { DA.SetDataList("Painting", paintIds.Select(x => (element?.GetMaterialArea(x, true)).GetValueOrDefault() * Math.Pow(Revit.ModelUnits, 2.0))); }
@@ -48,5 +50,4 @@ namespace RhinoInside.Revit.GH.Components
       }
     }
   }
-
 }
