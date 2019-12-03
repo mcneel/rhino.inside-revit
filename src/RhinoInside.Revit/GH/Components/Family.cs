@@ -826,6 +826,8 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetData("Brep", ref brep))
         return;
 
+      brep = brep.DuplicateBrep();
+
       var visible = true;
       if (DA.GetData("Visible", ref visible))
         brep.SetUserString(DB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), visible ? null : "0");
@@ -839,7 +841,7 @@ namespace RhinoInside.Revit.GH.Components
         brep.SetUserString(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), visibility == -1 ? null : visibility.ToString());
 
       var materialId = DB.ElementId.InvalidElementId;
-      if(DA.GetData("Material", ref materialId))
+      if (DA.GetData("Material", ref materialId))
         brep.SetUserString(DB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), materialId.IsValid() ? materialId.ToString() : null);
 
       DA.SetData("Brep", brep);
@@ -873,6 +875,8 @@ namespace RhinoInside.Revit.GH.Components
       var brep = default(Rhino.Geometry.Brep);
       if (!DA.GetData("Brep", ref brep))
         return;
+
+      brep = brep.DuplicateBrep();
 
       var cutting = true;
       if (DA.GetData("Void", ref cutting))
@@ -912,6 +916,8 @@ namespace RhinoInside.Revit.GH.Components
       var curve = default(Rhino.Geometry.Curve);
       if (!DA.GetData("Curve", ref curve))
         return;
+
+      curve = curve.DuplicateCurve();
 
       var visible = true;
       if (DA.GetData("Visible", ref visible))
@@ -960,6 +966,8 @@ namespace RhinoInside.Revit.GH.Components
       var curve = default(Rhino.Geometry.Curve);
       if (!DA.GetData("Curve", ref curve))
         return;
+
+      curve = curve.DuplicateCurve();
 
       var opening = true;
       if (DA.GetData("Opening", ref opening))
