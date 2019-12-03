@@ -76,19 +76,12 @@ namespace RhinoInside.Revit
         // Reset document units
         UpdateDocumentUnits(RhinoDoc.ActiveDoc);
 
-        try
+        Type[] types  = default;
+        try { types = Assembly.GetCallingAssembly().GetTypes(); }
+        catch (ReflectionTypeLoadException ex)
         {
-          // Look for Guests
-          guests = Assembly.GetCallingAssembly().GetTypes().
-            Where(x => typeof(IGuest).IsAssignableFrom(x)).
-            Where(x => !x.IsInterface).
-            Select(x => new GuestInfo(x)).
-            ToList();
+          types = ex.Types?.Where(x => x is object).ToArray();
 
-          CheckInGuests();
-        }
-        catch (ReflectionTypeLoadException e)
-        {
           using
           (
             var taskDialog = new TaskDialog(MethodBase.GetCurrentMethod().DeclaringType.FullName)
@@ -96,28 +89,40 @@ namespace RhinoInside.Revit
               Title = "Exception thrown",
               MainIcon = TaskDialogIcons.IconError,
               AllowCancellation = true,
-              MainInstruction = "Unable to load one or more of the requested types.",
-              MainContent = "Click on 'Show details' for more info"
+              MainInstruction = "Unable to load one or more of the requested types."
             }
           )
           {
-            var expandedContent = string.Empty;
-            int length = Math.Min(e.Types.Length, e.LoaderExceptions.Length);
-            for (int i = 0; i < length; i++)
+            var sb = new System.Text.StringBuilder();
+            foreach (var exSub in ex.LoaderExceptions)
             {
-              if(e.Types[i] is null)
+              sb.AppendLine(exSub.Message);
+              if (exSub is System.IO.FileNotFoundException exFileNotFound)
               {
-                if (expandedContent != string.Empty)
-                  expandedContent += Environment.NewLine;
-
-                expandedContent += $"- {e.LoaderExceptions[i].Message}";
+                if (!string.IsNullOrEmpty(exFileNotFound.FusionLog))
+                {
+                  sb.AppendLine($"Fusion Log: {exFileNotFound.FusionLog}");
+                }
               }
+              sb.AppendLine();
             }
+            taskDialog.ExpandedContent = sb.ToString();
 
-            taskDialog.ExpandedContent = expandedContent;
+            if (taskDialog.ExpandedContent.Length > 0)
+              taskDialog.MainContent = "Click on 'Show details' for more info";
+
             taskDialog.Show();
           }
         }
+
+        // Look for Guests
+        guests = types.
+          Where(x => typeof(IGuest).IsAssignableFrom(x)).
+          Where(x => !x.IsInterface).
+          Select(x => new GuestInfo(x)).
+          ToList();
+
+        CheckInGuests();
       }
 
       UpdateDocumentUnits(RhinoDoc.ActiveDoc, Revit.ActiveDBDocument);
