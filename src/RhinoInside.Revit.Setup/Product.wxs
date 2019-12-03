@@ -56,13 +56,13 @@
     <CustomAction
             Id="OverwriteWixSetDefaultPerMachineFolder"
             Property="WixPerMachineFolder"
-            Value="[CommonAppDataFolder]\Autodesk\Revit\Addins"
+            Value="[CommonAppDataFolder]Autodesk\Revit\Addins"
             Execute="immediate"
     />
     <CustomAction
             Id="OverwriteWixSetDefaultPerUserFolder"
             Property="WixPerUserFolder"
-            Value="[AppDataFolder]\Autodesk\Revit\Addins"
+            Value="[AppDataFolder]Autodesk\Revit\Addins"
             Execute="immediate"
     />
     
