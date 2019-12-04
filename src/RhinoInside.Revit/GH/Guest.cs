@@ -67,7 +67,18 @@ namespace RhinoInside.Revit.GH
     {
       var LoadGHAProc = typeof(GH_ComponentServer).GetMethod("LoadGHA", BindingFlags.NonPublic | BindingFlags.Instance);
       if (LoadGHAProc == null)
-        return false;
+      {
+        var message = new StringBuilder();
+        message.AppendLine("An attempt is made to invoke an invalid target method.");
+        message.AppendLine();
+        var assembly = typeof(GH_ComponentServer).Assembly;
+        var assemblyName = assembly.GetName();
+
+        message.AppendLine($"Assembly Version={assemblyName.Version}");
+        message.AppendLine($"{assembly.Location.Replace(' ', (char) 0xA0)}");
+
+        throw new TargetException(message.ToString());
+      }
 
       try
       {
@@ -86,70 +97,75 @@ namespace RhinoInside.Revit.GH
     bool LoadComponents()
     {
       var bCoff = Instances.Settings.GetValue("Assemblies:COFF", true);
-      Instances.Settings.SetValue("Assemblies:COFF", false);
-
-      var rc = LoadGHA(Assembly.GetExecutingAssembly().Location);
-
-      var assemblyFolders = new DirectoryInfo[]
+      try
       {
-        // %ProgramData%\Grasshopper\Libraries-Inside-Revit-20XX
-        new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Grasshopper", $"Libraries-{Rhinoceros.SchemeName}")),
+        Instances.Settings.SetValue("Assemblies:COFF", false);
 
-        // %APPDATA%\Grasshopper\Libraries-Inside-Revit-20XX
-        new DirectoryInfo(Folders.DefaultAssemblyFolder.Substring(0, Folders.DefaultAssemblyFolder.Length - 1) + '-' + Rhinoceros.SchemeName)
-      };
+        var rc = LoadGHA(Assembly.GetExecutingAssembly().Location);
 
-      foreach (var folder in assemblyFolders)
-      {
-        IEnumerable<FileInfo> assemblyFiles;
-        try { assemblyFiles = folder.EnumerateFiles("*.gha");}
-        catch (System.IO.DirectoryNotFoundException) { continue; }
-
-        foreach (var assemblyFile in assemblyFiles)
+        var assemblyFolders = new DirectoryInfo[]
         {
-          bool loaded = false;
-          string mainContent = string.Empty;
-          string expandedContent = string.Empty;
+          // %ProgramData%\Grasshopper\Libraries-Inside-Revit-20XX
+          new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Grasshopper", $"Libraries-{Rhinoceros.SchemeName}")),
 
-          try
-          {
-            loaded = LoadGHA(assemblyFile.FullName);
-          }
-          catch (Exception e)
-          {
-            mainContent     = e.Message;
-            expandedContent = e.Source;
-          }
+          // %APPDATA%\Grasshopper\Libraries-Inside-Revit-20XX
+          new DirectoryInfo(Folders.DefaultAssemblyFolder.Substring(0, Folders.DefaultAssemblyFolder.Length - 1) + '-' + Rhinoceros.SchemeName)
+        };
 
-          if (!loaded)
+        foreach (var folder in assemblyFolders)
+        {
+          IEnumerable<FileInfo> assemblyFiles;
+          try { assemblyFiles = folder.EnumerateFiles("*.gha"); }
+          catch (System.IO.DirectoryNotFoundException) { continue; }
+
+          foreach (var assemblyFile in assemblyFiles)
           {
-            using
-            (
-              var taskDialog = new TaskDialog(MethodBase.GetCurrentMethod().DeclaringType.FullName)
-              {
-                Title = "Grasshopper Assembly Failure",
-                MainIcon = TaskDialogIcons.IconError,
-                TitleAutoPrefix = false,
-                AllowCancellation = false,
-                MainInstruction = $"Grasshopper cannot load the external assembly {assemblyFile.Name}. Please contact the provider for assistance.",
-                MainContent = mainContent,
-                ExpandedContent = expandedContent,
-                FooterText = assemblyFile.FullName
-              }
-            )
+            bool loaded = false;
+            string mainContent = string.Empty;
+            string expandedContent = string.Empty;
+
+            try
             {
-              taskDialog.Show();
+              loaded = LoadGHA(assemblyFile.FullName);
+            }
+            catch (Exception e)
+            {
+              mainContent = e.Message;
+              expandedContent = e.Source;
+            }
+
+            if (!loaded)
+            {
+              using
+              (
+                var taskDialog = new TaskDialog(MethodBase.GetCurrentMethod().DeclaringType.FullName)
+                {
+                  Title = "Grasshopper Assembly Failure",
+                  MainIcon = TaskDialogIcons.IconError,
+                  TitleAutoPrefix = false,
+                  AllowCancellation = false,
+                  MainInstruction = $"Grasshopper cannot load the external assembly {assemblyFile.Name}. Please contact the provider for assistance.",
+                  MainContent = mainContent,
+                  ExpandedContent = expandedContent,
+                  FooterText = assemblyFile.FullName
+                }
+              )
+              {
+                taskDialog.Show();
+              }
             }
           }
         }
+
+        if (rc)
+          GH_ComponentServer.UpdateRibbonUI();
+
+        return rc;
       }
-
-      Instances.Settings.SetValue("Assemblies:COFF", bCoff);
-
-      if (rc)
-        GH_ComponentServer.UpdateRibbonUI();
-
-      return rc;
+      finally
+      {
+        Instances.Settings.SetValue("Assemblies:COFF", bCoff);
+      }
     }
 
     void OnDocumentChanged(object sender, DocumentChangedEventArgs e)
