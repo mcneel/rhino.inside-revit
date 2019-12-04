@@ -78,42 +78,7 @@ namespace RhinoInside.Revit
 
         Type[] types  = default;
         try { types = Assembly.GetCallingAssembly().GetTypes(); }
-        catch (ReflectionTypeLoadException ex)
-        {
-          types = ex.Types?.Where(x => x is object).ToArray();
-
-          using
-          (
-            var taskDialog = new TaskDialog(MethodBase.GetCurrentMethod().DeclaringType.FullName)
-            {
-              Title = "Exception thrown",
-              MainIcon = TaskDialogIcons.IconError,
-              AllowCancellation = true,
-              MainInstruction = "Unable to load one or more of the requested types."
-            }
-          )
-          {
-            var sb = new System.Text.StringBuilder();
-            foreach (var exSub in ex.LoaderExceptions)
-            {
-              sb.AppendLine(exSub.Message);
-              if (exSub is System.IO.FileNotFoundException exFileNotFound)
-              {
-                if (!string.IsNullOrEmpty(exFileNotFound.FusionLog))
-                {
-                  sb.AppendLine($"Fusion Log: {exFileNotFound.FusionLog}");
-                }
-              }
-              sb.AppendLine();
-            }
-            taskDialog.ExpandedContent = sb.ToString();
-
-            if (taskDialog.ExpandedContent.Length > 0)
-              taskDialog.MainContent = "Click on 'Show details' for more info";
-
-            taskDialog.Show();
-          }
-        }
+        catch (ReflectionTypeLoadException ex) { types = ex.Types?.Where(x => x is object).ToArray(); }
 
         // Look for Guests
         guests = types.
@@ -261,7 +226,6 @@ namespace RhinoInside.Revit
             {
               Title = guestInfo.Guest.Name,
               MainIcon = TaskDialogIcons.IconError,
-              TitleAutoPrefix = false,
               AllowCancellation = false,
               MainInstruction = $"{guestInfo.Guest.Name} failed to load",
               MainContent = complainMessage
