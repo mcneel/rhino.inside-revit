@@ -65,7 +65,8 @@ namespace RhinoInside.Revit
 
     static void OnIdle(object sender, IdlingEventArgs args)
     {
-      ActiveUIApplication = (sender as UIApplication);
+      if(ActiveUIApplication?.IsValidObject != true)
+        ActiveUIApplication = (sender as UIApplication);
 
       if (ProcessIdleActions())
         args.SetRaiseWithoutDelay();
