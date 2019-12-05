@@ -123,6 +123,9 @@ namespace RhinoInside.Revit.UI
     {
       public virtual bool IsCommandAvailable(UIApplication applicationData, CategorySet selectedCategories)
       {
+        if (Revit.ActiveUIApplication?.IsValidObject != true)
+          return false;
+
         return applicationData?.ActiveUIDocument?.Document?.IsValidObject ?? false;
       }
     }
