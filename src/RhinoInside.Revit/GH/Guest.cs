@@ -99,7 +99,7 @@ namespace RhinoInside.Revit.GH
         var bCoff = Instances.Settings.GetValue("Assemblies:COFF", true);
         try
         {
-          Instances.Settings.SetValue("Assemblies:COFF", !System.Diagnostics.Debugger.IsAttached);
+          Instances.Settings.SetValue("Assemblies:COFF", false);
 
           var location = Assembly.GetExecutingAssembly().Location;
           if (!LoadGHA(location))
