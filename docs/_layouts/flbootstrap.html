@@ -1,0 +1,80 @@
+---
+---
+<!DOCTYPE html>
+<html>
+  {% if page.language %}
+     {% include /{{page.language}}/head.html %}
+  {% else %}
+    {% include head.html %}
+  {% endif %}
+
+  {% assign splitAtFirstHeader = content | split:'<h1 id="' %}
+
+  {% case page.language %}
+    {% when 'cn' %}
+      {%assign local_categories = site.data.cn.help-index.main_index %}
+    {% when 'de' %}
+      {%assign local_categories = site.data.de.help-index.main_index %}
+    {% when 'en' %}
+      {%assign local_categories = site.data.en.help-index.main_index %}
+    {% when 'es' %}
+      {%assign local_categories = site.data.es.help-index.main_index %}
+    {% when 'fr' %}
+      {%assign local_categories = site.data.fr.help-index.main_index%}
+    {% when 'it' %}
+      {%assign local_categories = site.data.it.help-index.main_index %}
+    {% when 'jp' %}
+      {%assign local_categories = site.data.jp.help-index.main_index %}
+    {% when 'kr' %}
+      {%assign local_categories = site.data.kr.help-index.main_index %}
+    {% when 'tw' %}
+      {%assign local_categories = site.data.tw.help-index.main_index %}
+    {% else %}
+      {%assign local_categories = site.data.en.help-index.main_index %}
+  {% endcase %}
+
+
+  <body>
+
+    {% include googletagmanager.html %}
+
+    <div class="container">
+  {% if page.language %}
+      {% include /{{page.language}}/header.html %}
+  {% else %}
+    {% include header.html %}
+  {% endif %}
+
+
+
+      <div class="page-content">
+        <!--div class="wrapper"-->
+          {{ content }}
+        <!--/div-->
+      </div>
+
+  {% if page.language %}
+      {% include /{{page.language}}/footer.html %}
+  {% else %}
+      {% include footer.html %}
+  {% endif %}
+    </div>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+    <!-- MathJax -->
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    <script type="text/javascript">
+    $('body').scrollspy({
+        target: '.bs-docs-sidebar',
+        offset: 110
+    });
+    </script>
+  </body>
+
+</html>

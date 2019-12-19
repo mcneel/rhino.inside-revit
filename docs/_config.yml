@@ -1,1 +1,68 @@
-theme: jekyll-theme-minimal
+# Site settings
+title: Rhino.Inside.Revit Documentation
+# email: brian@mcneel.com
+# description: > # this means to ignore newlines until "baseurl:"
+#   Write an awesome description for your new site here. You can edit this
+#   line in _config.yml. It will appear in your document head meta (for
+#   Google search results) and in your feed.xml site description.
+baseurl: "" # the subpath of your site, e.g. /blog/
+url: "" # the base hostname & protocol for your site
+editMeOnGhBaseUrl: ""
+
+# To Generate a local Sitemap, remove the following 2 comments on the lines. And set safe: below to false.
+gems:
+  - jekyll-sitemap
+
+
+# twitter_username: ""
+github_username:  mcneel
+simple_search: http://google.com/search
+# Build settings
+#markdown: redcarpet
+encoding: utf-8
+
+# If we decide that we want to use kramdown over redcarpet, syntax
+# highlighting is performed by turning on the following options and
+# including/running highlight.js (https://highlightjs.org/) at the
+# top of pages that need it (probably just add to head.html)
+markdown: kramdown
+kramdown:
+  input: GFM
+
+#port: 4444
+
+safe: false
+
+collections:
+ - en
+# - kr
+# - jp
+# - cn
+# - de
+# - es
+# - fr
+# - it
+# - tw
+
+collections:
+  en:
+    output: true
+    permalink: /en/:path
+    
+defaults:
+  - scope:
+      path: ""
+      type: en
+    values:
+      language: en
+  - scope:
+      path: "en"
+    values:
+      language: "en"
+      lang: "en"
+  - scope:
+      path: "en/flamingo"
+    values:
+      productname: "Flamingo nXt"
+      productpath: flamingo
+      layout: flamingo-toc-page

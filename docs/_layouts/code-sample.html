@@ -1,0 +1,16 @@
+---
+layout: bootstrap
+---
+<h3>{{ page.title }}</h3>
+
+<p>{{ page.description }}</p>
+
+<ul class="nav nav-pills">
+  <li class="active"><a href="#cs" data-toggle="pill">C#</a></li>
+  <li><a href="#vb" data-toggle="pill">VB.NET</a></li>
+  <li><a href="#py" data-toggle="pill">Python</a></li>
+</ul>
+
+<div class="tab-content">
+  {{ content }}
+</div>

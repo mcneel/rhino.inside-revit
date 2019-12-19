@@ -1,0 +1,595 @@
+
+/* Mimicing GitHub's font styling, but puttin Segou UI higher (the Grasshopper font) for Windows users */
+body {
+  font-family: 'Segoe UI', Frutiger, 'Frutiger Linotype', 'Dejavu Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.3;
+  font-weight: 400 !important;
+  font-style: normal;
+  font-variant: normal;
+  color: #111;
+  background-color: white;
+  -webkit-text-size-adjust: 100%;
+}
+@media screen and (max-width: 450px) {
+  body {
+    font-size: 14px;
+  }
+}
+
+body img {
+  vertical-align:bottom;
+}
+
+/* stripping the padding out of boostrap for small displays. */
+@media screen and (max-width: 650px) {
+  .container{
+    padding-left: 2px;
+    padding-right: 2px;
+  }
+  .container-fluid {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+  .col-lg-1, .col-lg-10, .col-lg-11, .col-lg-12, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6, .col-lg-7, .col-lg-8, .col-lg-9, .col-md-1, .col-md-10, .col-md-11, .col-md-12, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8, .col-md-9, .col-sm-1, .col-sm-10, .col-sm-11, .col-sm-12, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, .col-xs-1, .col-xs-10, .col-xs-11, .col-xs-12, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5, .col-xs-6, .col-xs-7, .col-xs-8, .col-xs-9 {
+    padding-left: 2px;
+    padding-right:2px;
+  }
+}
+
+p {
+  margin: 0 0 10px;
+}
+
+ul {
+  list-style-type: disc;
+}
+
+ol {
+  list-style-type: decimal;
+}
+
+img{
+  text-align:left;
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 15px;
+  padding-right: 15px;
+}
+
+.tab-content .tab-pane {
+  display: none;
+}
+
+.tab-content .active {
+  display: block;
+}
+
+.bs-callout {
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px solid #eee;
+    border-left-width: 5px;
+    border-radius: 3px;
+}
+
+.bs-callout-danger {
+    border-left-color: #ce4844;
+}
+
+.site-title img {
+	padding-right: 0;
+}
+
+#sitesearch {
+    float:right;
+    margin-left:20px;
+    margin-top:6px;
+    margin-right:0px;
+    margin-bottom:0px;
+}
+
+.searchBox {
+	background:white;
+	background-repeat: no-repeat;
+	padding-left: 20px;
+	border-style: solid;
+	border-width: 1px;
+	border-color: white;
+	cursor: pointer;
+	vertical-align:middle;
+    line-height: 18px;
+    padding-bottom:15px;
+    padding-top: 2px;
+    margin-top:4px;
+    height:25px;
+}
+.searchBoxBeta {
+	background:white;
+	border-style: solid;
+	border-width: 1px;
+	border-color: white;
+	cursor: pointer;
+	vertical-align:middle;
+}
+
+#heading #cse-search-boxBeta {
+    padding:0;
+    margin: 0;
+    position: absolute;
+    right: 0;
+    bottom:16px;
+    z-index: 100;
+}
+
+
+#cref {
+	margin-top:12px;
+    line-height:24px;
+}
+
+#searchtext {
+	height:22px;
+	padding:0px;
+    padding-top:2px;
+	line-height:18px;
+}
+
+#cse-search-results iframe {
+	height : 1150px;
+}
+
+/*
+##############################################################################
+##  Main body styles
+##############################################################################
+*/
+
+h1 {
+  font-size: 30px;
+  background: #E6E6E6;
+  padding: 6px;
+
+}
+h1 img {
+  vertical-align: bottom;
+  width: 75px;
+  height: 75px;
+}
+@media screen and (max-width: 450px) {
+  h1 {
+    font-size: 24px;
+    padding: 2px;
+    margin-top:10px;
+  }
+  h1 img {
+    display: none;
+  }
+}
+@media print {
+  h1 img {
+    display: none;
+  }
+}
+
+
+h2 {
+  background: white;
+  border-bottom:solid;
+  border-bottom-color:black;
+  border-bottom-width:1px;
+  margin-bottom: 3px;
+  margin-top: 10px;
+}
+
+h2 img {
+  vertical-align: top;
+}
+@media screen and (max-width: 450px) {
+  h2 {
+    font-size: 24px;
+  }
+}
+@media print {
+  h2 {
+    font-size: 24px;
+  }
+}
+h3 {
+  background: white;
+  margin-bottom: 1px;
+  margin-top: 15px;
+}
+h3 img {
+  vertical-align: bottom;
+  margin-top: 0px;
+  margin-bottom: 1px;
+}
+@media screen and (max-width: 450px) {
+  h3 {
+    font-size: 20px;
+  }
+}
+h4 {
+	margin-bottom: 0px;
+}
+h4 img {
+  vertical-align: bottom;
+  margin-top: 0px;
+  margin-bottom: 1px;
+  margin-top: 15px;
+}
+@media screen and (max-width: 450px) {
+  h4 {
+    font-size: 14px;
+  }
+}
+
+h5 {
+  font-size: 15px;
+	margin-bottom: 0px;
+  font-weight: 700;
+  margin-top: 20px;
+}
+h5 img {
+  vertical-align: bottom;
+  margin-top: 0px;
+  margin-bottom: 1px;
+}
+h6 {
+	margin-bottom: 0px;
+}
+
+.fixed {
+    position: fixed;
+}
+
+blockquote {
+	border-color: white;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  margin-bottom: 10px;
+}
+@media screen and (max-width: 450px) {
+  blockquote {
+    font-size: 14px;
+  }
+}
+
+
+/*
+##############################################################################
+## Image float overrides. Allows to wrap text around images.
+## {: .float-img-right}
+## To finish the wrapping, insert this text under next block object:
+## {: .clear-img}
+## That assures the next block element will stay clear of the image.
+##############################################################################
+*/
+.inline {
+    text-align:left;
+    display: inline;
+    vertical-align: bottom;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-right: 0px;
+    padding-right: 0px;
+}
+
+.float-img-right {
+  float: right;
+  padding-left: 25px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.float-img-left {
+  float: left;
+  padding-right: 25px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.clear-img {
+  clear:both;
+}
+
+/*
+##################################################################
+# Style Search
+##################################################################
+*/
+/*
+##############################################################################
+##  Index.md Page
+##############################################################################
+*/
+.index_use_images {
+/* Use only width to control an img-responsive img.  Bootstrap will float the height. */
+	width:130px;
+}
+tbody.index_table tr td{
+	vertical-align:middle;
+}
+.index_table_icon {
+	width:32px;
+	height:32px;
+}
+.index_table_primary_use {
+	margin:10px;
+	font-size:0.85em;
+}
+
+/*
+##############################################################################
+##  Format for the Guides section of the help.
+##############################################################################
+*/
+
+.guide_icon {
+	width:36px;
+	height:36px;
+}
+
+.guide {
+  max-width: 800px;
+}
+
+.guide p,ul,ol{
+  line-height: 1.6;
+}
+
+.guide img{
+  width:35%;
+  text-align:left;
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 15px;
+}
+
+.guide .wide-img {
+  width:75%;
+  text-align:left;
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 15px;
+}
+
+
+@media screen and (max-width: 650px) {
+  .guide img{
+  width: 75%;
+  }
+  .guide .wide-img {
+    width:100%;
+  }
+}
+
+@media screen and (max-width: 450px) {
+  .guide img{
+  width: 100%;
+  }
+}
+
+
+.guide h2{
+  font-size:24px;
+  border-bottom:none;
+  margin-top: 20px;
+}
+
+.guide ol {
+    counter-reset: item;
+    margin-left: 0px;
+}
+.guide ol li { display: block }
+
+.guide ol>li:before{
+  content: counter(item) ". ";
+  counter-increment: item;
+  font-weight: bold;
+}
+
+.guide li>img{
+  margin-top: 10px;
+  margin-bottom: 15px;
+  margin-left: 18px;
+}
+
+@media screen and (max-width: 450px) {
+  .guide li>img{
+    margin-left: 0px;
+  }
+}
+
+/*
+##############################################################################
+##  bootstrap menu header - table of contents (toc)
+##############################################################################
+*/
+
+/*
+.trigger {
+    display:none;
+}
+*/
+
+/*
+##############################################################################
+##  bootstrap docs sidebar - table of contents (toc)
+##############################################################################
+*/
+
+
+
+/* sidebar */
+.bs-docs-sidebar {
+    padding-left: 0px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.bs-docs-sidebar .sitenav {
+  margin-left: -10px;
+}
+
+.bs-docs-sidebar .nav {
+  margin-left:0px;
+}
+
+.bs-docs-sidebar .nav .nav {
+  margin-left:20px;
+}
+
+.bs-docs-sidebar .nav .nav .nav {
+  margin-left:20px;
+}
+
+.bs-docs-sidebar .nav .nav .nav .nav {
+  margin-left:20px;
+}
+
+/* title links */
+.bs-docs-sidebar .nav>li>a {
+    color: #999;
+    border-left: 1px solid transparent;
+    padding: 4px 5px;
+    font-size: 16px;
+    font-weight: 400;
+}
+
+/* nested links */
+.bs-docs-sidebar .nav .nav>li>a {
+    padding-top: 1px;
+    padding-bottom: 1px;
+    padding-left: 5px;
+    font-size: 15px;
+}
+
+/* sub-nested links */
+.bs-docs-sidebar .nav .nav .nav>li>a {
+    padding-top: 1px;
+    padding-bottom: 1px;
+    padding-left: 5px;
+    font-size: 14px;
+}
+
+/* sub-sub-nested links */
+.bs-docs-sidebar .nav .nav .nav .nav>li>a {
+    padding-top: 1px;
+    padding-bottom: 1px;
+    padding-left: 5px;
+    font-size: 13px;
+}
+
+/* active & hover links */
+.bs-docs-sidebar .nav>.active>a,
+.bs-docs-sidebar .nav>li>a:hover,
+.bs-docs-sidebar .nav>li>a:focus {
+    color: #563d7c;
+    text-decoration: none;
+    background-color: transparent;
+    border-left-color: #563d7c;
+    margin-left: 10px;
+}
+/* all active links */
+.bs-docs-sidebar .nav>.active>a,
+.bs-docs-sidebar .nav>.active:hover>a,
+.bs-docs-sidebar .nav>.active:focus>a {
+    font-weight: 700;
+}
+/* nested active links */
+.bs-docs-sidebar .nav .nav>.active>a,
+.bs-docs-sidebar .nav .nav>.active:hover>a,
+.bs-docs-sidebar .nav .nav>.active:focus>a {
+    font-weight: 500;
+}
+
+/* sub-nested active links */
+.bs-docs-sidebar .nav .nav .nav>.active>a,
+.bs-docs-sidebar .nav .nav .nav>.active:hover>a,
+.bs-docs-sidebar .nav .nav .nav>.active:focus>a {
+    font-weight: 500;
+}
+
+/* hide inactive nested list */
+.bs-docs-sidebar .nav ul.nav {
+    display: none;
+}
+
+/* show active nested list */
+.bs-docs-sidebar .nav>.active>ul.nav {
+    display: block;
+}
+
+@media screen and (max-width: 990px) { .bs-docs-sidebar {
+    display: none;
+} }
+
+@media only print {
+  .bs-docs-sidebar {
+      display: none;
+  }
+}
+/*
+##############################################################################
+##  Material Type Advanced Page
+##############################################################################
+*/
+.grided-table table {
+  margin: 20px;
+  margin-bottom: 30px;
+}
+.grided-table th, td {
+  border-bottom-style: solid;
+  border-bottom-color: black;
+  padding-right: 10px;
+  padding-right: 10px;
+}
+
+.grided-table th{
+  border-bottom-width: 2px;
+}
+
+.grided-table td{
+  border-bottom-width: 1px;
+}
+
+/*
+##############################################################################
+##  Plant editor table
+##############################################################################
+*/
+.plant-table table {
+  margin: 20px;
+  margin-bottom: 30px;
+}
+.plant-table th, td {
+  border-bottom-style: none;
+  padding-right: 10px;
+  padding-right: 10px;
+}
+.plant-table img {
+  padding-top: 25px;
+}
+
+/*
+##############################################################################
+##  Video on the Render channel page
+##############################################################################
+*/
+
+#channelsvideo {
+  width: 704px;
+  height: auto;
+}
+@media screen and (max-width: 800px) {
+  #channelsvideo {
+    width: 500px;
+  }
+}
+@media screen and (max-width: 525px) {
+  #channelsvideo {
+    width: 320px;
+  }
+}

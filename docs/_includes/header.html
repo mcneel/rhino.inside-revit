@@ -1,0 +1,24 @@
+<header class="site-header">
+
+
+    <a class="site-title" href="{{ site.baseurl }}/">{% if page.product %} {{page.product}} {% else %} {{ site.title }}{% endif %} Help Documentation</a>
+
+    <nav class="site-nav">
+
+      {% assign pages = site.pages | sort:"order"  %}
+      <div class="trigger">
+      	<a class="page-link" href="{{ site.baseurl }}/">Welcome</a>
+        {% for page in pages %}
+          {% if page.title != 'Administration' %}
+            {% if page.title != 'Blog' %}
+              {% if page.title and page.order %}
+                <a class="page-link" href="{{ page.url | prepend: site.baseurl }}">{{ page.title }}</a>
+              {% endif %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+        <a class="page-link" href="http://discourse.mcneel.com/c/rendering/flamingo">Forums</a>
+      </div>
+    </nav>
+
+</header>
