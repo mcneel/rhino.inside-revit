@@ -3,7 +3,15 @@
 <!DOCTYPE html>
 <html>
 
-  {% include head.html %}
+<!--  {% include head.html %} -->
+  {% if page.language %}
+     {% include /{{page.language}}/head.html %}
+  {% else %}
+    {% include head.html %}
+  {% endif %}
+
+  {% assign splitAtFirstHeader = content | split:'<h1 id="' %}
+
 
   <body>
 
@@ -11,6 +19,13 @@
 
     <div class="container">
       {% include header.html %}
+  <!-- {% if page.language %}
+      {% include /{{page.language}}/header.html %}
+  {% else %}
+    {% include header.html %}
+  {% endif %}
+     -->
+
 
       <div class="page-content">
         <!--div class="wrapper"-->
