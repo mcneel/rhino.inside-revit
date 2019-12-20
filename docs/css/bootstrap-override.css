@@ -21,6 +21,11 @@ body img {
   vertical-align:bottom;
 }
 
+@media (min-width: 1200px) {
+  .container {
+    width: 970px;
+  }
+}
 /* stripping the padding out of boostrap for small displays. */
 @media screen and (max-width: 650px) {
   .container{
@@ -63,6 +68,15 @@ img{
 
 .tab-content .active {
   display: block;
+}
+
+.page-content {
+	padding: 0px;
+}
+
+.site-nav {
+	line-height: 40px;
+	padding-top: 12px;
 }
 
 .bs-callout {
@@ -147,7 +161,6 @@ img{
 
 h1 {
   font-size: 30px;
-  background: #E6E6E6;
   padding: 6px;
 
 }
@@ -451,10 +464,10 @@ tbody.index_table tr td{
 
 /* title links */
 .bs-docs-sidebar .nav>li>a {
-    color: #999;
+    color: #000;
     border-left: 1px solid transparent;
     padding: 4px 5px;
-    font-size: 16px;
+    font-size: 12px;
     font-weight: 400;
 }
 

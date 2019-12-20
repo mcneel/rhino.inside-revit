@@ -1,18 +1,31 @@
+---
+title: Transfer Revit Elements to Rhino
+description: This guide covers the basic transfer of Revit geometry into Rhino.
+language: en
+authors: ['scott_davidson']
+languages: ['Python']
+platforms: ['Windows']
+categories: ['general']
+order: 2
+keywords: ['python', 'commands', 'grasshopper']
+layout: toc-guide-page
+---
+
 # Bringing in a Revit&reg; model to Rhino&reg;
 This sample shows how to take Revit objects into Rhino
 
-![Revit Geometry brought into Rhino](revit-to-rhino-final.jpg)
+![Revit Geometry brought into Rhino](/images/revit-to-rhino-final.jpg)
 
-### Open Sample files:
+## Open Sample files
 
 1. Open the standard Revit sample file *RAC_basic_sample_project.rvt*.
 1. Setting the view to the standard Revit 3d view helps see what is happening in this tutorial 
 1. Start Rhino inside Revit by pressing the the Rhino icon under Add-Ins.
 1. In the Rhinoceros Toolbar in Revit, open Rhino and a new blank Rhino model.
 1. Start Grasshopper within Rhino.
-1. Open the [Sample_Revit-to_rhino.gh](Sample_Revit_to_Rhino.gh)
+1. Open the [Sample_Revit-to_rhino.gh](/images/Sample_Revit_to_Rhino.gh)
 
-### Bringing across the model:
+## Bringing across the model
 
 The Grasshopper definition is split up in a series of categories with a button to activate each one individually.  Please note that the first one you use may not show as the Rhino model probably is not zoomed into the correct area of the model by default.
 
