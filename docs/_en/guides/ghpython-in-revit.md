@@ -1,6 +1,15 @@
-
-
-
+---
+title: Writing Python in Grasshopper in Revit
+description: This guide covers the creation of a GH.Python component Rhino.Inside.revit.
+language: en
+authors: ['scott_davidson']
+languages: ['Python']
+platforms: ['Windows']
+categories: ['started']
+order: 3
+keywords: ['python', 'commands', 'grasshopper']
+layout: toc-guide-page
+---
 
 # Writing Python in Grasshopper in Revit
 
@@ -8,23 +17,23 @@ This guide is about writing a custom Python component in Grasshopper while runni
 
 This grasshopper definition is available as a [download here as ghpython-revit.gh...](samples\ghpython-revit.gh)
 
-##<img src="images/Python.png" width="35px"> GH Python component
+## GH Python component
 
-The GHPython component contains the inputs, outputs and a code editor.  To get started with the component go to the Math tab in Grasshopper and drag out the Python component. 
+<img src="/images/Python.png" width="35px">  The GHPython component contains the inputs, outputs and a code editor.  To get started with the component go to the Math tab in Grasshopper and drag out the Python component. 
 
-<img src="images/ghpython-component-detail.png" width="100%" align="center">
+<img src="/images/ghpython-component-detail.png" width="100%" align="center">
 
 For a detail guide on the GHPython component in Grasshopper, please review [Your First Python Script in Grasshopper Guide](https://developer.rhino3d.com/guides/rhinopython/your-first-python-script-in-grasshopper/)
 
 Double-click on the component to open the Python editor:
 
-<img src="images/ghpython-revit-editor.png" width="100%" align="center">
+<img src="/images/ghpython-revit-editor.png" width="100%" align="center">
 
 ## Setting up the component
 
 This sample component will preview a sphere of an adjustable radius in Revit and Rhino.  It will pass that sphere onto other Grasshopper components through the `a` output.  And it will Bake (actually create) the sphere in Revit and Rhino if the `button` on `y` is pressed.
 
-<img src="images/sphere-sample-gh.png" width="60%" align="middle">
+<img src="/images/sphere-sample-gh.png" width="60%" align="middle">
 
 Use the Python component, a slider and a button to hook up this system.
 
@@ -108,7 +117,7 @@ Here are a few links to more resources about all the SDKs involved:
 
 ##  Completed Sample Code
 
-<img src="images/sphere-sample-gh.png" width="60%" align="middle">
+<img src="/images/sphere-sample-gh.png" width="60%" align="middle">
 
 ```python
 """Provides a scripting component.

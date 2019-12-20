@@ -13,8 +13,9 @@ layout: toc-guide-page
 
 # Bringing in a Revit&reg; model to Rhino&reg;
 This sample shows how to take Revit objects into Rhino
+<!-- ![Revit Geometry brought into Rhino](/images/revit<!-- -to-rhino-final.jpg) -->
 
-![Revit Geometry brought into Rhino](/images/revit-to-rhino-final.jpg)
+{% include youtube_player.html id="8AjX3YlwjEs" %}
 
 ## Open Sample files
 

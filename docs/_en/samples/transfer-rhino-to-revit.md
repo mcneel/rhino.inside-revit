@@ -6,7 +6,7 @@ authors: ['scott_davidson']
 languages: ['Python']
 platforms: ['Windows']
 categories: ['general']
-order: 3
+order: 1
 keywords: ['python', 'commands', 'grasshopper']
 layout: toc-guide-page
 ---
@@ -15,8 +15,9 @@ layout: toc-guide-page
 This sample shows how to take normal Rhino breps, curves and points into Revit.
 
 There are a lot of ways to bring in the Rhino geometry, but in this case we will be bringing them in as DirectShape elements.
+<!-- ![Rhino to Revit as Directshape](/images/rhino-to-revit.jpg) -->
 
-![Rhino to Revit as Directshape](/images/rhino-to-revit.jpg)
+{% include youtube_player.html id="dP83XnJS6jQ" %}
 
 ## Bringing Breps into a Revit category
 Rhino surfaces and brep solids can be imported into Revit as a categorized DirectShape.

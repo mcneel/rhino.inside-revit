@@ -301,14 +301,12 @@
 .post-content {
     margin-bottom: $spacing-unit;
     h1 {
-      font-weight: 700;
       @media print {
         border-bottom: 2px solid black;
       }
     }
     h2 {
         font-size: 26px;
-        font-weight: 700;
         margin-top: 40px;
 
         @include media-query($on-laptop) {
@@ -325,7 +323,6 @@
 
     h3 {
         font-size: 22px;
-        font-weight: 700;
         margin-bottom: 1px;
         margin-top: 30px;
 
@@ -340,7 +337,6 @@
 
     h4 {
         font-size: 18px;
-        font-weight: 700;
         margin-top: 30px;
 
         @include media-query($on-laptop) {

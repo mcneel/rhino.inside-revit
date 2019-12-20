@@ -6,7 +6,7 @@ authors: ['scott_davidson']
 languages: ['Python']
 platforms: ['Windows']
 categories: ['general']
-order: 1
+order: 3
 keywords: ['python', 'commands', 'grasshopper']
 layout: toc-guide-page
 ---
@@ -16,9 +16,11 @@ layout: toc-guide-page
 This sample shows how to read and write the parameters of Revit&reg; elements usign Grasshopper and Rhino&reg;. There are two sample files here. 
 
 1. The first sample will simple copy the Mark value from each door and palce it in the comments parameter of the same door.
-2. The second sample will change the Edited BY show how HumanUI can be used to create a 
+2. The second sample will change the Edited BY show how HumanUI can be used to create a custoemr dialog box.
 
-![Revit Geometry brought into Rhino](/images/revit-to-rhino-final.jpg)
+<! -- ![Revit Geometry brought into Rhino](/images/revit-to-rhino-final.jpg) -->
+
+{% include youtube_player.html id="DZ4y-ZbBkM" %}
 
 ## Reading and Writing Parameters First Sample:
 

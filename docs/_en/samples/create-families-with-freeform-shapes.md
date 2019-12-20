@@ -1,3 +1,16 @@
+---
+title: Creating Families in Revit with Grasshopper
+description: This guide covers the basic transfer of Rhino geometry into Revit.
+language: en
+authors: ['scott_davidson']
+languages: ['Python']
+platforms: ['Windows']
+categories: ['general']
+order: 8
+keywords: ['python', 'commands', 'grasshopper']
+layout: toc-guide-page
+---
+
 # Creating Revit&reg; Families with Grasshopper&reg;
 This sample shows how to create a new Revit family in with Rhino geometry. In this case, a column is created and placed along a curve.
 
@@ -9,7 +22,7 @@ There are a lot of ways to bring in the Rhino geometry, but in this case we will
 
 ![Rhino to Revit as Directshape](rhino-to-revit.jpg)
 
-### Bringing Breps into a Revit category
+## Bringing Breps into a Revit category
 Rhino surfaces and brep solids can be imported into Revit as a categorized DirectShape.
 
 Open Sample files:
@@ -25,22 +38,4 @@ The component necessary:
 ![Rhino Brep to Revit as Directshape](rhino-to-revit-brep.jpg)
 Once you select the Breps, those will feed into the Direct component.
 
-### Live-linking Points from Rhino into Revit
-Rhino curves can be linked/embedded into Revit and Grasshopper will keep them up to date.
 
-The component necessary:
-1. Curve from Geometry
-1. Curve Param component in Grasshopper
-
-![Rhino Curve to Revit](rhino-to-revit-points.jpg)
-Once you select the curves, those will feed into Revit.
-
-### Bringing in complex curves into Revit
-Rhino points can be linked/embedded into Revit and Grasshopper will keep them up to date.
-
-The component necessary:
-1. Curve from Geometry
-1. Curve Param component in Grasshopper
-
-![Rhino curve to Revit](rhino-to-revit-curves.jpg)
-Once you select the points, those will feed into Revit.

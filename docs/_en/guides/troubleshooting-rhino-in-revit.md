@@ -1,6 +1,15 @@
-
-
-
+---
+title: Troubleshooting Rhino in Revit
+description: This guide covers the Rhino.Inside.revit interface.
+language: en
+authors: ['scott_davidson']
+languages: ['Python']
+platforms: ['Windows']
+categories: ['started']
+order: 7
+keywords: ['python', 'commands', 'grasshopper']
+layout: toc-guide-page
+---
 
 # Troubleshooting Rhino in Revit
 
@@ -12,7 +21,7 @@ This address most of the common errors we have seen.  [Please contact us](https:
 
 Problem: When Rhino.inside loads and this error appears. 
 
-<img src="images/error-200.png" width="60%" align="center">
+<img src="/images/error-200.png" width="60%" align="center">
 
 Solutions:
 
@@ -30,7 +39,7 @@ If this does not solve the problem, then using the Advanced Search for Conflicti
 
 Problem:  A Long JSON error shows up:
 
-<img src="images/error-json.png" width="60%" align="center">
+<img src="/images/error-json.png" width="60%" align="center">
 
 Solution: Like the previous -200 error, this is a conflict with another plugin.  See the Error - 200 solution for this problem.
 
@@ -53,7 +62,7 @@ Here is a tool that allows you to disable all but one plugin easily and test if 
 
 If Rhino.inside works when loaded alone, then use this app to enable more plugins and test again until the plugins are not compatible are found.  Hint: there may be more then one plugin that causes trouble.
 
-<img src="images/addin-conflict-tool.png" width="80%" align="center">
+<img src="/images/addin-conflict-tool.png" width="80%" align="center">
 
 To download and install the troubleshooter please follow instructions found [here 3](http://revitaddons.blogspot.com/2016/11/free-and-open-source-add-in-manager.html):
 

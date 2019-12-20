@@ -1,3 +1,16 @@
+---
+title: Automated Install of Rhino.Inside.Revit for All Users
+description: This guide covers the Automated Install of Rhino.Inside.Revit for All Users.
+language: en
+authors: ['scott_davidson']
+languages: ['Python']
+platforms: ['Windows']
+categories: ['started']
+order: 4
+keywords: ['python', 'commands', 'grasshopper']
+layout: toc-guide-page
+---
+
 
 # Automated Install of Rhino.Inside.Revit for All Users
 
@@ -17,10 +30,10 @@ To push install Rhino.Inside.Revit quietly for all users use this command line:
 RhinoInside.Revit.msi ALLUSERS="1" /quiet
 ```
 
-For more inforamtion see: https://docs.microsoft.com/windows/win32/msi/single-package-authoring
+For more information see: https://docs.microsoft.com/windows/win32/msi/single-package-authoring
 
 
-### Installing & Uninstalling
+## Installing & Uninstalling
 The installer copies the necessary files to the _"%APPDATA%\\Autodesk\\Revit\\Addins\\<revit_version>\\"_ folder (for each supported version). Restart Revit to load the add-on.
 
 To uninstall, open _Programs and Features_, select "RhinoInside.Revit" and click "Uninstall".
