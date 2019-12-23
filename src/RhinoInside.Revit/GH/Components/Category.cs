@@ -53,7 +53,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddBooleanParameter("HasMaterialQuantities", "M", "Category has material quantities", GH_ParamAccess.item);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       DB.Category category = null;
       if (!DA.GetData("Category", ref category))
@@ -92,7 +92,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddBooleanParameter("Cuttable", "C", "Indicates if the category is cuttable or not", GH_ParamAccess.item);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       DB.Category category = null;
       if (!DA.GetData("Category", ref category))
@@ -128,7 +128,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.Category(), "SubCategories", "S", string.Empty, GH_ParamAccess.list);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       DB.Category category = null;
       if (!DA.GetData("Category", ref category))
@@ -159,7 +159,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.GraphicsStyle(), "Cut", "C", string.Empty, GH_ParamAccess.list);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       DB.Category category = null;
       if (!DA.GetData("Category", ref category))

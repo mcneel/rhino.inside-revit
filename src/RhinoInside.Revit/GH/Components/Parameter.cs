@@ -131,7 +131,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Param_Guid(), "Guid", "ID", "Shared Parameter global identifier", GH_ParamAccess.item);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       Types.ParameterKey parameterKey = null;
       if (!DA.GetData("ParameterKey", ref parameterKey))
@@ -178,7 +178,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddBooleanParameter("UserModifiable", "U", "Parameter is UserModifiable ", GH_ParamAccess.item);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       Autodesk.Revit.DB.Parameter parameter = null;
       if (!DA.GetData("ParameterValue", ref parameter))

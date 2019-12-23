@@ -29,7 +29,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.Material(), "Material", "M", string.Empty, GH_ParamAccess.item);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var doc = Revit.ActiveDBDocument;
 

@@ -85,7 +85,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.ElementType(), "ElementTypes", "T", "Requested element type", GH_ParamAccess.list);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       Autodesk.Revit.DB.ElementFilter filter = null;
       DA.GetData("Filter", ref filter);

@@ -7,6 +7,18 @@ namespace RhinoInside.Revit
 {
   public static partial class Convert
   {
+    #region ConversionException
+    /// The exception that is thrown when a geometry conversion error occurs.
+    public class ConversionException : ApplicationException
+    {
+      public ConversionException() { }
+      public ConversionException(string message) : base(message) { }
+      public ConversionException(string message, System.Exception inner) : base(message, inner)
+      {
+      }
+    }
+    #endregion
+
     #region Context
     public sealed class Context : State<Context>
     {
