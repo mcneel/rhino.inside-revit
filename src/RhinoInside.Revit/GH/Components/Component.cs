@@ -58,5 +58,27 @@ namespace RhinoInside.Revit.GH.Components
 
       return false;
     }
+
+    protected override sealed void SolveInstance(IGH_DataAccess DA)
+    {
+      try
+      {
+        TrySolveInstance(DA);
+      }
+      catch (ApplicationException e)
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
+      }
+      catch (Autodesk.Revit.Exceptions.ApplicationException e)
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
+      }
+      catch (System.Exception e)
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
+        DA.AbortComponentSolution();
+      }
+    }
+    protected abstract void TrySolveInstance(IGH_DataAccess DA);
   }
 }

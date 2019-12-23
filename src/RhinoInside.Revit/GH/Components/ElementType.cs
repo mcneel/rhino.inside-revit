@@ -222,7 +222,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddTextParameter("Name", "N", "A human readable name for the ElementType", GH_ParamAccess.item);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var elementType = default(DB.ElementType);
       if (!DA.GetData("Type", ref elementType))
@@ -253,7 +253,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.ElementType(), "Types", "T", string.Empty, GH_ParamAccess.list);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var elementType = default(DB.ElementType);
       if (!DA.GetData("Type", ref elementType))

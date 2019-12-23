@@ -205,7 +205,7 @@ namespace RhinoInside.Revit
       {
         var curves = Curve.JoinCurves(loop.Select(x => x.ToRhino()), Revit.ShortCurveTolerance, false);
         if (curves.Length != 1)
-          throw new InvalidOperationException("Failed to found one and only one closed loop.");
+          throw new ConversionException("Failed to found one and only one closed loop.");
 
         yield return curves[0];
       }
