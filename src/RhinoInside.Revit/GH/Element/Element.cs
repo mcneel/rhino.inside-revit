@@ -510,7 +510,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddTextParameter("Name", "N", "A human readable name for the Element", GH_ParamAccess.item);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       Autodesk.Revit.DB.Element element = null;
       if (!DA.GetData("Element", ref element))
@@ -541,7 +541,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.Material(), "Paint", "P", "Materials used to paint this Element", GH_ParamAccess.list);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       DB.Element element = null;
       if (!DA.GetData("Element", ref element))
@@ -569,7 +569,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager) { }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!DA.GetDataTree<Types.Element>("Elements", out var elementsTree))
         return;
@@ -612,7 +612,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddGeometryParameter(PropertyName, PropertyName.Substring(0, 1), ObjectType.Name + " parameter names", GH_ParamAccess.list);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       DB.Element element = null;
       if (!DA.GetData(ObjectType.Name, ref element))
@@ -649,7 +649,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddCurveParameter("Wires", "W", ObjectType.Name + " wires", GH_ParamAccess.list);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var element = default(DB.Element);
       if (!DA.GetData(ObjectType.Name, ref element))
@@ -704,7 +704,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.ParameterKey(), "Parameters", "P", "Element parameters", GH_ParamAccess.list);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       DB.Element element = null;
       if (!DA.GetData(ObjectType.Name, ref element))
@@ -902,7 +902,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager) { }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       DB.Element element = null;
       if (!DA.GetData("Element", ref element))
@@ -1140,7 +1140,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.ParameterValue(), "ParameterValue", "V", "Element parameter value", GH_ParamAccess.item);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       DB.Element element = null;
       if (!DA.GetData("Element", ref element))
@@ -1176,7 +1176,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.Element(), "Element", "E", "Updated Element", GH_ParamAccess.item);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       DB.Element element = null;
       if (!DA.GetData("Element", ref element))
