@@ -116,9 +116,16 @@ namespace RhinoInside.Revit
       var plane = new Plane(ellipse.Center.ToRhino(), new Vector3d(ellipse.XDirection.ToRhino()), new Vector3d(ellipse.YDirection.ToRhino()));
       var e = new Ellipse(plane, ellipse.RadiusX, ellipse.RadiusY);
       var nurbsCurve = e.ToNurbsCurve();
-      return ellipse.IsBound ?
-        nurbsCurve.Trim(ellipse.GetEndParameter(0), ellipse.GetEndParameter(1)) as NurbsCurve :
-        nurbsCurve;
+
+      if(ellipse.IsBound)
+      {
+        nurbsCurve.ClosestPoint(ellipse.GetEndPoint(0).ToRhino(), out var param0);
+        nurbsCurve.ClosestPoint(ellipse.GetEndPoint(1).ToRhino(), out var param1);
+        nurbsCurve = nurbsCurve.Trim(param0, param1) as NurbsCurve;
+        nurbsCurve.Domain = new Interval(ellipse.GetEndParameter(0), ellipse.GetEndParameter(1));
+      }
+
+      return nurbsCurve;
     }
 
     public static NurbsCurve ToRhino(this DB.HermiteSpline hermite)
