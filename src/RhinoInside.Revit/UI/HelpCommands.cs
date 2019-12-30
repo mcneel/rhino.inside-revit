@@ -32,7 +32,7 @@ namespace RhinoInside.Revit.UI
         helpButton.AddPushButton(typeof(CommandDiscourse),         "McNeel Discourse",  "Opens discourse.mcneel.com website",         typeof(AllwaysAvailable));
         helpButton.AddSeparator();
         helpButton.AddPushButton(typeof(CommandCheckForUpdates),   "Updates",           "Checks if there are updates in GitHub",      typeof(AllwaysAvailable));
-        helpButton.AddPushButton(typeof(CommandAbout),             "About",             "Opens GitHub Repo website",                  typeof(AllwaysAvailable));
+        helpButton.AddPushButton(typeof(CommandAbout),             "About…",            "Shows Rhino.Inside Revit version information",typeof(AllwaysAvailable));
       }
 
       CommandCheckForUpdates.CheckUpdates();
@@ -214,7 +214,33 @@ namespace RhinoInside.Revit.UI
   {
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
-      using (System.Diagnostics.Process.Start("https://github.com/mcneel/rhino.inside-revit/blob/master/README.md")) { }
+      using
+      (
+        var taskDialog = new TaskDialog(MethodBase.GetCurrentMethod().DeclaringType.FullName)
+        {
+          Title = "About",
+          MainIcon = TaskDialogIcons.IconInformation,
+          TitleAutoPrefix = true,
+          AllowCancellation = true,
+          MainInstruction = "Rhino.Inside© for Revit",
+          MainContent = $"Version {Addin.DisplayVersion}",
+          CommonButtons = TaskDialogCommonButtons.Ok,
+          DefaultButton = TaskDialogResult.Ok
+        }
+      )
+      {
+        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Read license");
+        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink2, "See source code");
+        switch (taskDialog.Show())
+        {
+          case TaskDialogResult.CommandLink1:
+            using (System.Diagnostics.Process.Start(@"https://github.com/mcneel/rhino.inside-revit/blob/master/LICENSE")) { }
+            break;
+          case TaskDialogResult.CommandLink2:
+            using (System.Diagnostics.Process.Start(@"https://github.com/mcneel/rhino.inside-revit/blob/master/README.md")) { }
+            break;
+        }
+      }
 
       return Result.Succeeded;
     }
