@@ -16,11 +16,11 @@ This sample shows how to create a new Revit family in with Rhino geometry. In th
 
 There are a lot of ways to bring in the Rhino geometry, but in this case we will be bringing them in as Family Type instances. This has a big advantage over other methods.  If the Freeform geometry is wrapped within family then it has 3 advantages:
 
-1.  The Graphic properties can be edited including the hatching and section line.  This is a big advantage over directshapes.
+1. The Graphic properties can be edited including the hatching and section line.  This is a big advantage over directshapes.
 2. The geometry can be edited directly in the Family editor, within reason.
 3. The instances will schedule properly.
 
-![Rhino to Revit as Directshape](rhino-to-revit.jpg)
+![Rhino to Revit as Directshape](/images/rhino-to-revit.jpg)
 
 ## Bringing Breps into a Revit category
 Rhino surfaces and brep solids can be imported into Revit as a categorized DirectShape.
@@ -35,7 +35,7 @@ The component necessary:
 1. Directshape from Geometry
 1. Brep Param component in Grasshopper
 
-![Rhino Brep to Revit as Directshape](rhino-to-revit-brep.jpg)
+![Rhino Brep to Revit as Directshape](/images/rhino-to-revit-brep.jpg)
 Once you select the Breps, those will feed into the Direct component.
 
 
