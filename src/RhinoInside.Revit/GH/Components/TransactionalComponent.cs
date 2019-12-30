@@ -485,7 +485,7 @@ namespace RhinoInside.Revit.GH.Components
     protected virtual void OnAfterStart(Document document, string strTransactionName) { }
 
     // Step 3.
-    //protected override void SolveInstance(IGH_DataAccess DA) { }
+    //protected override void TrySolveInstance(IGH_DataAccess DA) { }
 
     // Step 4.
     protected virtual void OnBeforeCommit(Document document, string strTransactionName) { }
@@ -701,7 +701,7 @@ namespace RhinoInside.Revit.GH.Components
     //protected override void OnAfterStart(Document document, string strTransactionName) { }
 
     // Step 3.
-    //protected override void SolveInstance(IGH_DataAccess DA) { }
+    //protected override void TrySolveInstance(IGH_DataAccess DA) { }
 
     // Step 4.
     //protected override void OnBeforeCommit(Document document, string strTransactionName) { }
@@ -855,11 +855,11 @@ namespace RhinoInside.Revit.GH.Components
     }
 
     // Step 3.
-    protected override sealed void SolveInstance(IGH_DataAccess DA)
+    protected override sealed void TrySolveInstance(IGH_DataAccess DA)
     {
       var ActiveDBDocument = Revit.ActiveDBDocument;
 
-      Iterate(DA, ActiveDBDocument, (Document doc, ref Element current) => SolveInstance(DA, doc, ref current));
+      Iterate(DA, ActiveDBDocument, (Document doc, ref Element current) => TrySolveInstance(DA, doc, ref current));
     }
 
     delegate void CommitAction(Document doc, ref Element element);
@@ -882,9 +882,25 @@ namespace RhinoInside.Revit.GH.Components
         {
           action(doc, ref element);
         }
+        catch (ApplicationException e)
+        {
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
+          element = null;
+        }
+        catch (Autodesk.Revit.Exceptions.ArgumentException e)
+        {
+          var message = e.Message.Split("\r\n".ToCharArray()).First().Replace("Application.ShortCurveTolerance", "Revit.ShortCurveTolerance");
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {message}");
+          element = null;
+        }
+        catch (Autodesk.Revit.Exceptions.ApplicationException e)
+        {
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
+          element = null;
+        }
         catch (System.ComponentModel.WarningException e)
         {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, e.Message.Replace("\r\n", " "));
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, e.Message);
           element = null;
         }
         catch (System.ArgumentNullException)
@@ -894,13 +910,7 @@ namespace RhinoInside.Revit.GH.Components
         }
         catch (System.ArgumentException e)
         {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message.Replace("\r\n", " "));
-          element = null;
-        }
-        catch (Autodesk.Revit.Exceptions.ArgumentException e)
-        {
-          var message = e.Message.Split("\r\n".ToCharArray()).First().Replace("Application.ShortCurveTolerance", "Revit.ShortCurveTolerance");
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, message);
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
           element = null;
         }
         catch (System.Exception e)
@@ -921,7 +931,7 @@ namespace RhinoInside.Revit.GH.Components
       DA.SetData(0, element);
     }
 
-    void SolveInstance
+    void TrySolveInstance
     (
       IGH_DataAccess DA,
       Autodesk.Revit.DB.Document doc,

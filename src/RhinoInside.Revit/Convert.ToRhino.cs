@@ -116,9 +116,16 @@ namespace RhinoInside.Revit
       var plane = new Plane(ellipse.Center.ToRhino(), new Vector3d(ellipse.XDirection.ToRhino()), new Vector3d(ellipse.YDirection.ToRhino()));
       var e = new Ellipse(plane, ellipse.RadiusX, ellipse.RadiusY);
       var nurbsCurve = e.ToNurbsCurve();
-      return ellipse.IsBound ?
-        nurbsCurve.Trim(ellipse.GetEndParameter(0), ellipse.GetEndParameter(1)) as NurbsCurve :
-        nurbsCurve;
+
+      if(ellipse.IsBound)
+      {
+        nurbsCurve.ClosestPoint(ellipse.GetEndPoint(0).ToRhino(), out var param0);
+        nurbsCurve.ClosestPoint(ellipse.GetEndPoint(1).ToRhino(), out var param1);
+        nurbsCurve = nurbsCurve.Trim(param0, param1) as NurbsCurve;
+        nurbsCurve.Domain = new Interval(ellipse.GetEndParameter(0), ellipse.GetEndParameter(1));
+      }
+
+      return nurbsCurve;
     }
 
     public static NurbsCurve ToRhino(this DB.HermiteSpline hermite)
@@ -205,13 +212,13 @@ namespace RhinoInside.Revit
       {
         var curves = Curve.JoinCurves(loop.Select(x => x.ToRhino()), Revit.ShortCurveTolerance, false);
         if (curves.Length != 1)
-          throw new InvalidOperationException("Failed to found one and only one closed loop.");
+          throw new ConversionException("Failed to found one and only one closed loop.");
 
         yield return curves[0];
       }
     }
 
-    public static PlaneSurface ToRhino(this DB.Plane surface, DB.BoundingBoxUV bboxUV)
+    static PlaneSurface FromPlane(DB.XYZ origin, DB.XYZ xDir, DB.XYZ yDir, DB.XYZ zDir, DB.BoundingBoxUV bboxUV)
     {
       var ctol = Revit.ShortCurveTolerance;
       var uu = new Interval(bboxUV.Min.U - ctol, bboxUV.Max.U + ctol);
@@ -219,34 +226,52 @@ namespace RhinoInside.Revit
 
       return new PlaneSurface
       (
-        new Plane(surface.Origin.ToRhino(), (Vector3d) surface.XVec.ToRhino(), (Vector3d) surface.YVec.ToRhino()),
+        new Plane(origin.ToRhino(), (Vector3d) xDir.ToRhino(), (Vector3d) yDir.ToRhino()),
         uu,
         vv
       );
     }
 
-    public static RevSurface ToRhino(this DB.ConicalSurface surface, DB.BoundingBoxUV bboxUV)
+    public static PlaneSurface ToRhino(this DB.Plane surface, DB.BoundingBoxUV bboxUV) => FromPlane
+    (
+      surface.Origin,
+      surface.XVec,
+      surface.YVec,
+      surface.Normal,
+      bboxUV
+    );
+
+    public static PlaneSurface ToRhinoSurface(this DB.PlanarFace face) => FromPlane
+    (
+      face.Origin,
+      face.XVector,
+      face.YVector,
+      face.FaceNormal,
+      face.GetBoundingBox()
+    );
+
+    static RevSurface FromConicalSurface(DB.XYZ origin, DB.XYZ xDir, DB.XYZ yDir, DB.XYZ zDir, double halfAngle, DB.BoundingBoxUV bboxUV)
     {
       var ctol = Revit.ShortCurveTolerance;
       var atol = Revit.AngleTolerance * 10.0;
       var uu = new Interval(bboxUV.Min.U - atol, bboxUV.Max.U + atol);
       var vv = new Interval(bboxUV.Min.V - ctol, bboxUV.Max.V + ctol);
 
-      var origin = surface.Origin.ToRhino();
-      var xdir = (Vector3d) surface.XDir.ToRhino();
-      var zdir = (Vector3d) surface.Axis.ToRhino();
+      var o = origin.ToRhino();
+      var x = (Vector3d) xDir.Normalize().ToRhino();
+      var z = (Vector3d) zDir.Normalize().ToRhino();
 
-      var axis = new Line(origin, origin + zdir);
+      var axis = new Line(o, o + z);
 
-      var dir = zdir + xdir * Math.Tan(surface.HalfAngle);
+      var dir = z + x * Math.Tan(halfAngle);
       dir.Unitize();
 
       var curve = new LineCurve
       (
         new Line
         (
-          surface.Origin.ToRhino() + (dir * vv.Min),
-          surface.Origin.ToRhino() + (dir * vv.Max)
+          o + (dir * vv.Min),
+          o + (dir * vv.Max)
         ),
         vv.Min,
         vv.Max
@@ -255,24 +280,44 @@ namespace RhinoInside.Revit
       return RevSurface.Create(curve, axis, uu.Min, uu.Max);
     }
 
-    public static RevSurface ToRhino(this DB.CylindricalSurface surface, DB.BoundingBoxUV bboxUV)
+    public static RevSurface ToRhinoSurface(this DB.ConicalFace face) => FromConicalSurface
+    (
+      face.Origin,
+      face.get_Radius(0),
+      face.get_Radius(1),
+      face.Axis,
+      face.HalfAngle,
+      face.GetBoundingBox()
+    );
+
+    public static RevSurface ToRhino(this DB.ConicalSurface surface, DB.BoundingBoxUV bboxUV) => FromConicalSurface
+    (
+      surface.Origin,
+      surface.XDir,
+      surface.YDir,
+      surface.Axis,
+      surface.HalfAngle,
+      bboxUV
+    );
+
+    static RevSurface FromCylindricalSurface(DB.XYZ origin, DB.XYZ xDir, DB.XYZ yDir, DB.XYZ zDir, double radius, DB.BoundingBoxUV bboxUV)
     {
       var ctol = Revit.ShortCurveTolerance;
       var atol = Revit.AngleTolerance;
       var uu = new Interval(bboxUV.Min.U - atol, bboxUV.Max.U + atol);
       var vv = new Interval(bboxUV.Min.V - ctol, bboxUV.Max.V + ctol);
 
-      var origin = surface.Origin.ToRhino();
-      var xdir = (Vector3d) surface.XDir.ToRhino();
-      var zdir = (Vector3d) surface.Axis.ToRhino();
+      var o = origin.ToRhino();
+      var x = (Vector3d) xDir.Normalize().ToRhino();
+      var z = (Vector3d) zDir.Normalize().ToRhino();
 
-      var axis = new Line(origin, origin + zdir);
+      var axis = new Line(o, o + z);
       var curve = new LineCurve
       (
         new Line
         (
-          origin + (xdir * surface.Radius) + (zdir * vv.Min),
-          origin + (xdir * surface.Radius) + (zdir * vv.Max)
+          o + (x * radius) + (z * vv.Min),
+          o + (x * radius) + (z * vv.Max)
         ),
         vv.Min,
         vv.Max
@@ -281,53 +326,118 @@ namespace RhinoInside.Revit
       return RevSurface.Create(curve, axis, uu.Min, uu.Max);
     }
 
-    public static RevSurface ToRhino(this DB.RevolvedSurface surface, DB.BoundingBoxUV bboxUV)
+    public static RevSurface ToRhinoSurface(this DB.CylindricalFace face) => FromCylindricalSurface
+    (
+      face.Origin,
+      face.get_Radius(0),
+      face.get_Radius(1),
+      face.Axis,
+      face.get_Radius(0).GetLength(),
+      face.GetBoundingBox()
+    );
+
+    public static RevSurface ToRhino(this DB.CylindricalSurface surface, DB.BoundingBoxUV bboxUV) => FromCylindricalSurface
+    (
+      surface.Origin,
+      surface.XDir,
+      surface.YDir,
+      surface.Axis,
+      surface.Radius,
+      bboxUV
+    );
+
+    static RevSurface FromRevolvedSurface(DB.XYZ origin, DB.XYZ xDir, DB.XYZ yDir, DB.XYZ zDir, DB.Curve curve, DB.BoundingBoxUV bboxUV)
     {
       var ctol = Revit.ShortCurveTolerance;
       var atol = Revit.AngleTolerance;
       var uu = new Interval(bboxUV.Min.U - atol, bboxUV.Max.U + atol);
 
-      var axis = new Line
-      (
-        surface.Origin.ToRhino(),
-        surface.Origin.ToRhino() + (Vector3d) surface.Axis.ToRhino()
-      );
+      var o = origin.ToRhino();
+      var z = (Vector3d) zDir.Normalize().ToRhino();
 
-      var curve = surface.GetProfileCurveInWorldCoordinates().ToRhino();
-      curve = curve.Extend(CurveEnd.Both, ctol, CurveExtensionStyle.Line);
+      var axis = new Line(o, o + z);
 
-      return RevSurface.Create(curve, axis, uu.Min, uu.Max);
+      using(var ECStoWCS = new DB.Transform(DB.Transform.Identity) {Origin = origin, BasisX = xDir.Normalize(), BasisY = yDir.Normalize(), BasisZ = zDir.Normalize() })
+      {
+        var c = curve.CreateTransformed(ECStoWCS).ToRhino().Extend(CurveEnd.Both, ctol, CurveExtensionStyle.Smooth);
+        return RevSurface.Create(c, axis, uu.Min, uu.Max);
+      }
     }
 
-    public static Surface ToRhino(this DB.RuledSurface surface, DB.BoundingBoxUV bboxUV)
+    public static RevSurface ToRhinoSurface(this DB.RevolvedFace face) => FromRevolvedSurface
+    (
+      face.Origin,
+      face.get_Radius(0),
+      face.get_Radius(1),
+      face.Axis,
+      face.Curve,
+      face.GetBoundingBox()
+    );
+
+    public static RevSurface ToRhino(this DB.RevolvedSurface surface, DB.BoundingBoxUV bboxUV) => FromRevolvedSurface
+    (
+      surface.Origin,
+      surface.XDir,
+      surface.YDir,
+      surface.Axis,
+      surface.GetProfileCurve(),
+      bboxUV
+    );
+
+    static Surface FromRuledSurface(IList<DB.Curve> curves, DB.XYZ start, DB.XYZ end, DB.BoundingBoxUV bboxUV)
     {
       var ctol = Revit.ShortCurveTolerance;
 
-      var curves = new List<Curve>();
-      Point3d start = Point3d.Unset, end = Point3d.Unset;
+      var cs = curves.Select
+      (
+        x =>
+        {
+          var c = x.ToRhino(); c.Reverse();
+          return c.Extend(CurveEnd.Both, ctol, CurveExtensionStyle.Smooth);
+        }
+      );
 
-      if (surface.HasFirstProfilePoint())
-        start = surface.GetFirstProfilePoint().ToRhino();
-      else
-        curves.Add(surface.GetFirstProfileCurve().ToRhino());
+      Point3d p0 = start?.ToRhino() ?? Point3d.Unset, pN = end?.ToRhino() ?? Point3d.Unset;
 
-      if (surface.HasSecondProfilePoint())
-        end = surface.GetSecondProfilePoint().ToRhino();
-      else
-        curves.Add(surface.GetSecondProfileCurve().ToRhino());
-
-      // Revit Ruled surface Parametric Orientation is opposite to Rhino
-      for (var c = 0; c < curves.Count; ++c)
-      {
-        curves[c].Reverse();
-        curves[c] = curves[c].Extend(CurveEnd.Both, ctol, CurveExtensionStyle.Line);
-      }
-
-      var lofts = Brep.CreateFromLoft(curves, start, end, LoftType.Straight, false);
-      if (lofts.Length == 1 && lofts[0].Surfaces.Count == 1)
-        return lofts[0].Surfaces[0];
+      var lofts = Brep.CreateFromLoft(cs, p0, pN, LoftType.Straight, false);
+      if (lofts.Length == 1 && lofts[0].Faces.Count == 1)
+        return lofts[0].Faces[0].DuplicateSurface();
 
       return null;
+    }
+
+    public static Surface ToRhinoSurface(this DB.RuledFace face) => FromRuledSurface
+    (
+      new DB.Curve[] { face.get_Curve(0), face.get_Curve(1) },
+      face.get_Point(0),
+      face.get_Point(1),
+      face.GetBoundingBox()
+    );
+
+    public static Surface ToRhino(this DB.RuledSurface surface, DB.BoundingBoxUV bboxUV) => FromRuledSurface
+    (
+      new DB.Curve[] { surface.GetFirstProfileCurve(), surface.GetSecondProfileCurve() },
+      surface.GetFirstProfilePoint(),
+      surface.GetSecondProfilePoint(),
+      bboxUV
+    );
+
+    static NurbsSurface FromHermiteSurface
+    (
+      IList<DB.XYZ> points, IList<DB.XYZ> mixedDerivs,
+      IList<double> paramsU, IList<double> paramsV,
+      IList<DB.XYZ> tangentsU, IList<DB.XYZ> tangentsV
+    )
+    {
+      throw new NotImplementedException();
+      //return NurbsSurface.CreateHermiteSurface
+      //(
+      //  points.Select(x => x.ToRhino()),
+      //  mixedDerivs.Select(x => (Vector3d) x.ToRhino()),
+      //  paramsU, paramsV,
+      //  tangentsU.Select(x => (Vector3d) x.ToRhino()),
+      //  tangentsV.Select(x => (Vector3d) x.ToRhino())
+      //);
     }
 
     public static NurbsSurface ToRhino(this DB.NurbsSurfaceData surface, DB.BoundingBoxUV bboxUV)
@@ -379,41 +489,59 @@ namespace RhinoInside.Revit
           knots[index++] = w;
       }
 
-      double ctol = Revit.ShortCurveTolerance * 5.0;
-      // Extend using smooth way avoids creating C2 discontinuities
-      nurbsSurface = nurbsSurface.Extend(IsoStatus.West, ctol, true) as NurbsSurface ?? nurbsSurface;
-      nurbsSurface = nurbsSurface.Extend(IsoStatus.East, ctol, true) as NurbsSurface ?? nurbsSurface;
-      nurbsSurface = nurbsSurface.Extend(IsoStatus.South, ctol, true) as NurbsSurface ?? nurbsSurface;
-      nurbsSurface = nurbsSurface.Extend(IsoStatus.North, ctol, true) as NurbsSurface ?? nurbsSurface;
+      return nurbsSurface;
+    }
+
+    public static NurbsSurface ToRhinoSurface(this DB.HermiteFace face)
+    {
+      NurbsSurface nurbsSurface = default;
+      try
+      {
+        using (var surface = DB.ExportUtils.GetNurbsSurfaceDataForFace(face))
+          nurbsSurface = surface.ToRhino(face.GetBoundingBox());
+      }
+      catch (Autodesk.Revit.Exceptions.ApplicationException) { }
+
+      if (nurbsSurface is null)
+      {
+        nurbsSurface = FromHermiteSurface
+        (
+          face.Points,
+          face.MixedDerivs,
+          face.get_Params(0).Cast<double>().ToArray(),
+          face.get_Params(1).Cast<double>().ToArray(),
+          face.get_Tangents(0),
+          face.get_Tangents(1)
+        );
+      }
+
+      if (nurbsSurface is object)
+      {
+        double ctol = Revit.ShortCurveTolerance * 5.0;
+
+        // Extend using smooth way avoids creating C2 discontinuities
+        nurbsSurface = nurbsSurface.Extend(IsoStatus.West, ctol, true) as NurbsSurface ?? nurbsSurface;
+        nurbsSurface = nurbsSurface.Extend(IsoStatus.East, ctol, true) as NurbsSurface ?? nurbsSurface;
+        nurbsSurface = nurbsSurface.Extend(IsoStatus.South, ctol, true) as NurbsSurface ?? nurbsSurface;
+        nurbsSurface = nurbsSurface.Extend(IsoStatus.North, ctol, true) as NurbsSurface ?? nurbsSurface;
+      }
 
       return nurbsSurface;
     }
 
-    static Surface ToRhinoSurface(this DB.Face face)
+    public static Surface ToRhinoSurface(this DB.Face face)
     {
       Surface surface = default;
 
-      using (var faceSurface = face.GetSurface())
+      switch (face)
       {
-        var bboxUV = face.GetBoundingBox();
-
-        switch (faceSurface)
-        {
-          case DB.Plane planeSurface:                     surface = planeSurface.ToRhino(bboxUV);       break;
-          case DB.ConicalSurface conicalSurface:          surface = conicalSurface.ToRhino(bboxUV);     break;
-          case DB.CylindricalSurface cylindricalSurface:  surface = cylindricalSurface.ToRhino(bboxUV); break;
-          case DB.RevolvedSurface revolvedSurface:        surface = revolvedSurface.ToRhino(bboxUV);    break;
-          case DB.RuledSurface ruledSurface:              surface = ruledSurface.ToRhino(bboxUV);       break;
-          case DB.HermiteSurface hermiteSurface:
-            try
-            {
-              using (var nurbsData = DB.ExportUtils.GetNurbsSurfaceDataForFace(face))
-                surface = nurbsData.ToRhino(bboxUV);
-            }
-            catch (Autodesk.Revit.Exceptions.ArgumentException) { }
-            break;
-          default: throw new NotImplementedException();
-        }
+        case DB.PlanarFace planarFace:              surface = planarFace.ToRhinoSurface();        break;
+        case DB.ConicalFace conicalFace:            surface = conicalFace.ToRhinoSurface();       break;
+        case DB.CylindricalFace cylindricalFace:    surface = cylindricalFace.ToRhinoSurface();   break;
+        case DB.RevolvedFace revolvedFace:          surface = revolvedFace.ToRhinoSurface();      break;
+        case DB.RuledFace ruledFace:                surface = ruledFace.ToRhinoSurface();         break;
+        case DB.HermiteFace hermiteFace:            surface = hermiteFace.ToRhinoSurface();       break;
+        default: throw new NotImplementedException();
       }
 
       return surface;

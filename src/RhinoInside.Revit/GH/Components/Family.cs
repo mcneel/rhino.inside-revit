@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.ElementType(), "Types", "T", string.Empty, GH_ParamAccess.list);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       DB.Family family = null;
       if (!DA.GetData("Family", ref family))
@@ -475,7 +475,7 @@ namespace RhinoInside.Revit.GH.Components
       );
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var doc = Revit.ActiveDBDocument;
       var scaleFactor = 1.0 / Revit.ModelUnits;
@@ -670,7 +670,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.Family(), "Family", "F", string.Empty, GH_ParamAccess.item);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var filePath = string.Empty;
       if (!DA.GetData("Path", ref filePath))
@@ -734,7 +734,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.Family(), "Family", "F", string.Empty, GH_ParamAccess.item);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       DB.Family family = null;
       if (!DA.GetData("Family", ref family))
@@ -820,7 +820,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddBrepParameter("Brep", "B", string.Empty, GH_ParamAccess.item);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var brep = default(Rhino.Geometry.Brep);
       if (!DA.GetData("Brep", ref brep))
@@ -870,7 +870,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddBrepParameter("Brep", "B", string.Empty, GH_ParamAccess.item);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var brep = default(Rhino.Geometry.Brep);
       if (!DA.GetData("Brep", ref brep))
@@ -911,7 +911,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddCurveParameter("Curve", "C", string.Empty, GH_ParamAccess.item);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var curve = default(Rhino.Geometry.Curve);
       if (!DA.GetData("Curve", ref curve))
@@ -961,7 +961,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddCurveParameter("Curve", "C", string.Empty, GH_ParamAccess.item);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var curve = default(Rhino.Geometry.Curve);
       if (!DA.GetData("Curve", ref curve))
@@ -1007,7 +1007,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddIntegerParameter("Visibility", "V", string.Empty, GH_ParamAccess.item);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var viewSpecific = false; if (!DA.GetData("ViewSpecific", ref viewSpecific)) return;
 

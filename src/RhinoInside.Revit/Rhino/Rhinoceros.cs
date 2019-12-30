@@ -5,7 +5,6 @@ using System.Linq;
 using System.Reflection;
 using System.Windows.Input;
 using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Events;
 using Rhino;
 using Rhino.Input;
 using Rhino.PlugIns;
@@ -56,18 +55,14 @@ namespace RhinoInside.Revit
               $"/scheme={SchemeName}",
               $"/language={Revit.ApplicationUI.ControlledApplication.Language.ToLCID()}"
             },
-            Rhino.Runtime.InProcess.WindowStyle.Hidden,
-            Revit.MainWindowHandle
+            Rhino.Runtime.InProcess.WindowStyle.Hidden
           );
-
-          WindowVisible = false;
         }
         catch (Exception)
         {
           return Result.Failed;
         }
 
-        Revit.ApplicationUI.ApplicationClosing += OnApplicationClosing;
         RhinoDoc.NewDocument += OnNewDocument;
         Rhino.Commands.Command.BeginCommand += BeginCommand;
         Rhino.Commands.Command.EndCommand += EndCommand;
@@ -103,7 +98,6 @@ namespace RhinoInside.Revit
 
         RhinoApp.MainLoop -= MainLoop;
         RhinoDoc.NewDocument -= OnNewDocument;
-        Revit.ApplicationUI.ApplicationClosing -= OnApplicationClosing;
 
         // Unload RhinoCore
         try
@@ -138,45 +132,6 @@ namespace RhinoInside.Revit
         core.RaiseIdle();
 
       return active;
-    }
-
-    internal static void OnApplicationClosing(object sender, ApplicationClosingEventArgs e)
-    {
-      //var doc = RhinoDoc.ActiveDoc;
-      //if (doc?.Modified ?? false)
-      //{
-      //  string docTitle = doc.Name ?? "Untitled";
-      //  switch (Eto.Forms.MessageBox.Show
-      //  (
-      //    "Save changes to " + docTitle + "?",
-      //    RhinoApp.Name,
-      //    e.Cancellable ? Eto.Forms.MessageBoxButtons.YesNoCancel : Eto.Forms.MessageBoxButtons.YesNo,
-      //    Eto.Forms.MessageBoxType.Question
-      //  ))
-      //  {
-      //    case Eto.Forms.DialogResult.Yes:
-      //      var docFileName = doc.Path;
-      //      if (docFileName is null)
-      //      {
-      //        using (var dialog = new Eto.Forms.SaveFileDialog())
-      //        {
-      //          dialog.FileName = docTitle;
-      //          dialog.Filters.Add(new Eto.Forms.FileFilter("Rhino 3D Model", new string[] { "3dm" }));
-      //          if (dialog.ShowDialog(MainWindow) != Eto.Forms.DialogResult.Ok)
-      //            return /*Result.Cancelled*/;
-
-      //          if (Path.HasExtension(dialog.FileName))
-      //            docFileName = dialog.FileName;
-      //          else
-      //            docFileName = Path.ChangeExtension(dialog.FileName, dialog.CurrentFilter.Extensions[0]);
-      //        }
-      //      }
-
-      //      doc.WriteFile(docFileName, new Rhino.FileIO.FileWriteOptions()); break;
-      //    case Eto.Forms.DialogResult.No: break;
-      //    case Eto.Forms.DialogResult.Cancel: e.Cancel(); return/* Result.Cancelled*/;
-      //  }
-      //}
     }
     #endregion
 

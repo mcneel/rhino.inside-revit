@@ -31,7 +31,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddIntegerParameter("Id", "ID", "A unique identifier for an Element within the document that contains it", GH_ParamAccess.item);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var reference = default(Types.ID);
       if (!DA.GetData("Element", ref reference))

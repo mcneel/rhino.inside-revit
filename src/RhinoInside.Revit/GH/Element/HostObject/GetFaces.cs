@@ -1,11 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using Autodesk.Revit.DB;
-using Autodesk.Revit.UI.Selection;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Types;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -31,40 +27,32 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.Face(), "Exterior", "E", string.Empty, GH_ParamAccess.list);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      Autodesk.Revit.DB.HostObject host = null;
+      DB.HostObject host = null;
       if (!DA.GetData("Host", ref host) || host is null)
         return;
 
       var doc = host.Document;
-      try
       {
-        var bottom = HostObjectUtils.GetBottomFaces(host).Select(reference => new Types.Face(doc, reference));
+        var bottom = DB.HostObjectUtils.GetBottomFaces(host).Select(reference => new Types.Face(doc, reference));
         DA.SetDataList("Bottom", bottom);
       }
-      catch (Autodesk.Revit.Exceptions.ArgumentException) { }
 
-      try
       {
-        var top = HostObjectUtils.GetTopFaces(host).Select(reference => new Types.Face(doc, reference));
+        var top = DB.HostObjectUtils.GetTopFaces(host).Select(reference => new Types.Face(doc, reference));
         DA.SetDataList("Top", top);
       }
-      catch (Autodesk.Revit.Exceptions.ArgumentException) { }
 
-      try
       {
-        var interior = HostObjectUtils.GetSideFaces(host, ShellLayerType.Interior).Select(reference => new Types.Face(doc, reference));
+        var interior = DB.HostObjectUtils.GetSideFaces(host, DB.ShellLayerType.Interior).Select(reference => new Types.Face(doc, reference));
         DA.SetDataList("Interior", interior);
       }
-      catch (Autodesk.Revit.Exceptions.ArgumentException) { }
 
-      try
       {
-        var exterior = HostObjectUtils.GetSideFaces(host, ShellLayerType.Exterior).Select(reference => new Types.Face(doc, reference));
+        var exterior = DB.HostObjectUtils.GetSideFaces(host, DB.ShellLayerType.Exterior).Select(reference => new Types.Face(doc, reference));
         DA.SetDataList("Exterior", exterior);
       }
-      catch (Autodesk.Revit.Exceptions.ArgumentException) { }
     }
   }
 }

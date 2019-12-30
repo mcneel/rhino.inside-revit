@@ -38,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.ParameterKey(), "ParameterKeys", "K", "Parameter definitions list", GH_ParamAccess.list);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var category = default(Category);
       if (!DA.GetData("Category", ref category))

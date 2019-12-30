@@ -115,7 +115,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public abstract class ElementFilterComponent : GH_Component
+  public abstract class ElementFilterComponent : Component
   {
     protected ElementFilterComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
@@ -147,7 +147,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.Element(), "Elements", "E", "Elements to exclude", GH_ParamAccess.list);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var elementIds = new List<DB.ElementId>();
       if (!DA.GetDataList("Elements", elementIds))
@@ -176,7 +176,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.ElementFilter(), "Filters", "F", "Filters to combine", GH_ParamAccess.list);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var filters = new List<DB.ElementFilter>();
       if (!DA.GetDataList("Filters", filters))
@@ -201,7 +201,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.ElementFilter(), "Filters", "F", "Filters to combine", GH_ParamAccess.list);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var filters = new List<DB.ElementFilter>();
       if (!DA.GetDataList("Filters", filters))
@@ -223,7 +223,7 @@ namespace RhinoInside.Revit.GH.Components
     : base("Element.ExcludeElementType", "Exclude ElementType Filter", "Filter used to exclude element types", "Revit", "Filter")
     { }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var inverted = false;
       if (!DA.GetData("Inverted", ref inverted))
@@ -249,7 +249,7 @@ namespace RhinoInside.Revit.GH.Components
       base.RegisterInputParams(manager);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var classNames = new List<string>();
       if (!DA.GetDataList("Classes", classNames))
@@ -295,7 +295,7 @@ namespace RhinoInside.Revit.GH.Components
       base.RegisterInputParams(manager);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var categoryIds = new List<DB.ElementId>();
       if (!DA.GetDataList("Categories", categoryIds))
@@ -333,7 +333,7 @@ namespace RhinoInside.Revit.GH.Components
       base.RegisterInputParams(manager);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var typeIds = new List<DB.ElementId>();
       if (!DA.GetDataList("Types", typeIds))
@@ -392,7 +392,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddBoxParameter("Target", "T", string.Empty, GH_ParamAccess.list);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var points = new List<Rhino.Geometry.Point3d>();
       if (!DA.GetDataList("Points", points))
@@ -488,7 +488,7 @@ namespace RhinoInside.Revit.GH.Components
       base.RegisterInputParams(manager);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       DB.Element element = null;
       if (!DA.GetData("Element", ref element))
@@ -518,7 +518,7 @@ namespace RhinoInside.Revit.GH.Components
       base.RegisterInputParams(manager);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       Rhino.Geometry.Brep brep = null;
       if (!DA.GetData("Brep", ref brep))
@@ -549,7 +549,7 @@ namespace RhinoInside.Revit.GH.Components
       base.RegisterInputParams(manager);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       Rhino.Geometry.Mesh mesh = null;
       if (!DA.GetData("Mesh", ref mesh))
@@ -582,7 +582,7 @@ namespace RhinoInside.Revit.GH.Components
       base.RegisterInputParams(manager);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var levelId = DB.ElementId.InvalidElementId;
       if (!DA.GetData("Level", ref levelId))
@@ -612,7 +612,7 @@ namespace RhinoInside.Revit.GH.Components
       base.RegisterInputParams(manager);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var doc = Revit.ActiveDBDocument;
       var designOptionId = DB.DesignOption.GetActiveDesignOptionId(doc);
@@ -651,7 +651,7 @@ namespace RhinoInside.Revit.GH.Components
       base.RegisterInputParams(manager);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var viewId = DB.ElementId.InvalidElementId;
       DA.GetData("View", ref viewId);
@@ -680,7 +680,7 @@ namespace RhinoInside.Revit.GH.Components
       base.RegisterInputParams(manager);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var doc = Revit.ActiveDBDocument;
       var viewId = doc.ActiveView.Id;
@@ -721,7 +721,7 @@ namespace RhinoInside.Revit.GH.Components
       base.RegisterInputParams(manager);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var rules = new List<DB.FilterRule>();
       if (!DA.GetDataList("Rules", rules))
@@ -735,7 +735,7 @@ namespace RhinoInside.Revit.GH.Components
     }
   }
 
-  public abstract class ElementFilterRule : GH_Component
+  public abstract class ElementFilterRule : Component
   {
     public override GH_Exposure Exposure => GH_Exposure.quinary;
     public override bool IsPreviewCapable => false;
@@ -861,7 +861,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected abstract ConditionType Condition { get; }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var parameterKey = default(Types.ParameterKey);
       if (!DA.GetData("ParameterKey", ref parameterKey))

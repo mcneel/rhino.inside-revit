@@ -151,7 +151,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.Category(), "Categories", "Categories", "Categories list", GH_ParamAccess.list);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var categoryType = DB.CategoryType.Invalid;
       DA.GetData("Type", ref categoryType);

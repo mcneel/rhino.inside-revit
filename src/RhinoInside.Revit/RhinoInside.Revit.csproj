@@ -162,13 +162,14 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="RhinoCommon" Version="7.0.19324.8045-wip" IncludeAssets="compile; build" />
-        <PackageReference Include="Grasshopper" Version="7.0.19324.8045-wip " IncludeAssets="compile; build" />
+        <PackageReference Include="RhinoCommon" Version="7.0.19344.14105-wip" IncludeAssets="compile; build" />
+        <PackageReference Include="Grasshopper" Version="7.0.19344.14105-wip " IncludeAssets="compile; build" />
         <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitVersion).0.*" IncludeAssets="build; compile" />
       </ItemGroup>
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Exceptions.cs" />
     <Compile Include="Extensions\Grasshopper.cs" />
     <Compile Include="Extensions\RevitAPI.cs" />
     <Compile Include="Extensions\RhinoCommon.cs" />

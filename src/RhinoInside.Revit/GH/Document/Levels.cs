@@ -82,7 +82,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.Level(), "Levels", "Levels", "Levels list", GH_ParamAccess.list);
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       using (var collector = new FilteredElementCollector(Revit.ActiveDBDocument).OfClass(typeof(Level)))
         DA.SetDataList("Levels", collector);
