@@ -10,9 +10,6 @@ using Microsoft.Win32;
 
 namespace RhinoInside.Revit
 {
-  [Transaction(TransactionMode.Manual)]
-  [Regeneration(RegenerationOption.Manual)]
-  [Journaling(JournalingMode.NoCommandData)]
   public class Addin : IExternalApplication
   {
     #region Static constructor
@@ -22,7 +19,7 @@ namespace RhinoInside.Revit
 
     internal static readonly string RhinoExePath = Path.Combine(SystemDir, "Rhino.exe");
     internal static readonly FileVersionInfo RhinoVersionInfo = File.Exists(RhinoExePath) ? FileVersionInfo.GetVersionInfo(RhinoExePath) : null ;
-    static readonly Version MinimumRhinoVersion = new Version(7, 0, 19324);
+    static readonly Version MinimumRhinoVersion = new Version(7, 0, 19344);
     static readonly Version RhinoVersion = new Version
     (
       RhinoVersionInfo?.FileMajorPart ?? 0,
