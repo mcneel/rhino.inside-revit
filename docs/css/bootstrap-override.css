@@ -21,6 +21,10 @@ body img {
   vertical-align:bottom;
 }
 
+.container-fluid {
+    max-width: 970px;
+}
+  
 @media (min-width: 1200px) {
   .container {
     width: 970px;
