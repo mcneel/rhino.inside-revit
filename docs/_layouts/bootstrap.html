@@ -3,54 +3,46 @@
 <!DOCTYPE html>
 <html>
 
-<!--  {% include head.html %} -->
-  {% if page.language %}
-     {% include /{{page.language}}/head.html %}
-  {% else %}
-    {% include head.html %}
-  {% endif %}
+{% if page.language %}
+{% include /{{page.language}}/head.html %}
+{% else %}
+{% include head.html %}
+{% endif %}
 
-  {% assign splitAtFirstHeader = content | split:'<h1 id="' %}
+    <body>
+        {% include googletagmanager.html %}
 
+        <div class="container">
 
-  <body>
+            {% if page.language %}
+            {% include /{{page.language}}/header.html %}
+            {% else %}
+            {% include header.html %}
+            {% endif %}
 
-    {% include googletagmanager.html %}
+            <div class="page-content">
+                {{ content }}
+            </div>
 
-    <div class="container">
-      {% include header.html %}
-  <!-- {% if page.language %}
-      {% include /{{page.language}}/header.html %}
-  {% else %}
-    {% include header.html %}
-  {% endif %}
-     -->
+            {% if page.language %}
+            {% include /{{page.language}}/footer.html %}
+            {% else %}
+            {% include footer.html %}
+            {% endif %}
+        </div>
 
+        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+        <!-- Latest compiled and minified JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+        <!-- MathJax -->
+        <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
-      <div class="page-content">
-        <!--div class="wrapper"-->
-          {{ content }}
-        <!--/div-->
-      </div>
-
-      {% include footer.html %}
-    </div>
-
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-
-    <!-- Latest compiled and minified JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-
-    <!-- MathJax -->
-    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-    <script type="text/javascript">
-    $('body').scrollspy({
-        target: '.bs-docs-sidebar',
-        offset: 110
-    });
-    </script>
-  </body>
-
+        <script type="text/javascript">
+            $('body').scrollspy({
+                target: '.bs-docs-sidebar',
+                offset: 110
+            });
+        </script>
+    </body>
 </html>

@@ -30,7 +30,7 @@ Most edits can be made on the site, or by pulling the site locally then pushing 
 
 
 
-### ![Mac Instructions](https://github.com/mcneel/help-docs/blob/gh-pages/images/mac_logo_small.png) Mac OS X Local Server Installation
+### ![Mac Instructions](https://github.com/mcneel/help-docs/blob/gh-pages/static/images/mac_logo_small.png) Mac OS X Local Server Installation
 
 Mac OS X Yosemite ships with Ruby and RubyGems, however it's [not wise](https://github.com/mcneel/help-docs/pull/2#issuecomment-112601698) to mess around with this installation. Instead, install your own Ruby using [Homebrew](http://brew.sh).
 
@@ -67,7 +67,7 @@ jekyll serve
 
 Navigate to http://localhost:4000 in your browser to view the site.
 
-### ![Windows Instructions](https://github.com/mcneel/help-docs/blob/gh-pages/images/win_logo_small.png) Windows Local Server Installation
+### ![Windows Instructions](https://github.com/mcneel/help-docs/blob/gh-pages/static/images/win_logo_small.png) Windows Local Server Installation
 
 Please install  Ruby, Ruby Devkit, Jekyll, Github pages, wdm.  The instructiosn are below.
 

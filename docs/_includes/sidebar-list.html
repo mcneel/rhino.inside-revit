@@ -1,0 +1,12 @@
+<nav class="sidebar">
+    {% assign guides = site.en | sort:"order" %}
+    <ul>
+    {% for guide in guides %}
+      {% if guide.categories == page.categories %}
+        {% if guide.title and guide.order %}
+          <li><a class="page-link" href="{{ guide.url | prepend: site.baseurl }}" title="{{ guide.description }}">{{ guide.title }}</a></li>
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+    </ul>  
+</nav>

@@ -5,10 +5,10 @@ language: en
 authors: ['scott_davidson']
 languages: ['Python']
 platforms: ['Windows']
-categories: ['general']
+categories: ['samples']
 order: 3
 keywords: ['python', 'commands', 'grasshopper']
-layout: toc-guide-page
+layout: page-list-toc
 ---
 
 
@@ -18,7 +18,7 @@ This sample shows how to read and write the parameters of Revit&reg; elements us
 1. The first sample will simple copy the Mark value from each door and palce it in the comments parameter of the same door.
 2. The second sample will change the Edited BY show how HumanUI can be used to create a custoemr dialog box.
 
-<! -- ![Revit Geometry brought into Rhino](/images/revit-to-rhino-final.jpg) -->
+<! -- ![Revit Geometry brought into Rhino](/static/images/revit-to-rhino-final.jpg) -->
 
 {% include youtube_player.html id="DZ4y-ZbBkM" %}
 
@@ -26,20 +26,20 @@ This sample shows how to read and write the parameters of Revit&reg; elements us
 
 1. Open the standard Revit sample file *RAC_basic_sample_project.rvt*.
 1. Setting the view to the standard Revit 3d view helps see what is happening in this tutorial 
-1. Start Rhino inside Revit by pressing the the Rhino icon under Add-Ins.
+1. Start Rhino.Inside.Revit by pressing the the Rhino icon under Add-Ins.
 1. In the Rhinoceros Toolbar in Revit, select the Rhino Player icon <img src="GrasshopperPlayer.png" alt="Grasshopper Player"
 	 width="60" height="50" align="middle" float="none">
 	
-1. Open the [Sample Door Parameter Script.gh](/images/Sample_Door_Parameter_Script.gh)
+1. Open the [Sample Door Parameter Script.gh](/static/samples/door-param-script.gh)
 
 This definition will run immediately. Grasshopper will not show, and the player will start and finish. If you select one of the doors, you will see the Mark and Comment are now duplicated.
 
  <img src="door_selected_parameter.jpg" alt="Revit Door Selected"
 	 width="90%" float="left">
 
-Now take a look at the definition by selecting the Grasshopper Icon in the Revit Rhinoceros Toolbar and opening the [Sample Door Parameter Script.gh](Sample_Door_Parameter_Script.gh) definition.
+Now take a look at the definition by selecting the Grasshopper Icon in the Revit Rhinoceros Toolbar and opening the [Sample Door Parameter Script.gh](/static/samples/door-param-script.gh) definition.
 
-![Door Parameters Definition](/images/door_parameters_definition.jpg)
+![Door Parameters Definition](/static/images/door_parameters_definition.jpg)
 
 The definition finds all the Doors setting a Category Filter and finding all the Elements of that Category. Then, using the *ParameterGet* Component each `Mark` is found for each door.  Then the `Comments` parameter is set using the *ParameterSet* component.
 
@@ -55,7 +55,7 @@ The second example here requires the [HumanUI plugin for Grasshopper](https://ww
 
 This definition will run the Human UI dialog immediately without showing Grasshopper.
 
-![Human UI edit](/images/humanUI.jpg)
+![Human UI edit](/static/images/humanUI.jpg)
 
 Simply edit the Text filed and click on the update buttons to the right.  The Titleblock will change.
 

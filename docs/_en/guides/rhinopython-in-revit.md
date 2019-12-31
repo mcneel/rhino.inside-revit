@@ -8,7 +8,7 @@ platforms: ['Windows']
 categories: ['started']
 order: 5
 keywords: ['python', 'commands', 'grasshopper']
-layout: toc-guide-page
+layout: page-list-toc
 ---
 
 # Writing Python in Rhino within Revit
@@ -17,15 +17,15 @@ This guide is about writing a custom Python component in Grasshopper while runni
 
 ## Rhino.Python editor
 
-<img src="/images/Python.png" width="35px"> The Rhino.Python editor can be called up from within Revit. By referencing the Revit.Python namespaces, both the Rhino and Revit Python scripts can be called from a single Python script.
+<img src="/static/images/Python.png" width="35px"> The Rhino.Python editor can be called up from within Revit. By referencing the Revit.Python namespaces, both the Rhino and Revit Python scripts can be called from a single Python script.
 
 Once Rhino.inside is successfully loaded, a Rhinoceros toolbar will appear in Revit:
 
-<img src="/images/revit-toolbar.png" width="100%" align="center">
+<img src="/static/images/revit-toolbar.png" width="100%" align="center">
 
-Select the Python Icon <img src="/images/Python.png" width="35px">  to bring up the Python Editor:
+Select the Python Icon <img src="/static/images/Python.png" width="35px">  to bring up the Python Editor:
 
-![Rhino sending geometry to Revit](/images/Sample7.png)
+![Rhino sending geometry to Revit](/static/images/Sample7.png)
 
   
 
@@ -33,7 +33,7 @@ For a detail guide on the Python in Rhino see the guides on [Rhino.Python Develo
 
 By default, the Python opens like this:
 
-<img src="/images/rhino-python-editor.png" width="100%" align="center">
+<img src="/static/images/rhino-python-editor.png" width="100%" align="center">
 
 
 ## Including the Rhino.inside and Revit APIs

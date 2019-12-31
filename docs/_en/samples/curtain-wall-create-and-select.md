@@ -5,10 +5,10 @@ language: en
 authors: ['scott_davidson']
 languages: ['Python']
 platforms: ['Windows']
-categories: ['general']
+categories: ['samples']
 order: 7
 keywords: ['python', 'commands', 'grasshopper']
-layout: toc-guide-page
+layout: page-list-toc
 ---
 
 # Needs content

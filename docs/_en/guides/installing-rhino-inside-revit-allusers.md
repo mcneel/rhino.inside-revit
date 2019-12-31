@@ -8,7 +8,7 @@ platforms: ['Windows']
 categories: ['started']
 order: 4
 keywords: ['python', 'commands', 'grasshopper']
-layout: toc-guide-page
+layout: page-list-toc
 ---
 
 

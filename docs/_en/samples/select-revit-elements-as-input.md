@@ -5,10 +5,10 @@ language: en
 authors: ['scott_davidson']
 languages: ['Python']
 platforms: ['Windows']
-categories: ['general']
+categories: ['samples']
 order: 6
 keywords: ['python', 'commands', 'grasshopper']
-layout: toc-guide-page
+layout: page-list-toc
 ---
 
 # Using Revit&reg; Elements in Grasshopper&reg;
@@ -16,14 +16,14 @@ This sample shows how to Select Revit Element edges as input to a Grasshopper lo
 
 Using Revit objects as input to Grasshopper definitions allows for a dynamic editing directly in Revit and making Grasshopper interactive within the the Revit model.
 
-<!-- ![Revit Element as Input](/images/select-revit-element.jpg) -->
+<!-- ![Revit Element as Input](/static/images/select-revit-element.jpg) -->
 
 {% include youtube_player.html id="mYSSoOD3QVM" %}
 
 ## Selecting Revit elements as input
 On the Params tool tab is a Revit group which contains Revit element pickers including Revit Elements, Edges, Vertices and Faces.  Also available are the non-model elements such as Category, Type, Family, Grid, Level and Material.
 
-![Revit Element as Input](/images/selectable-revit-element.jpg)
+![Revit Element as Input](/static/images/selectable-revit-element.jpg)
 
 Open Sample files:
 1. Open the [Wall_Roof.rvt](/wall_roof.rvt) in Revit 2019.
@@ -42,11 +42,11 @@ The components necessary:
 
 To start the definition, right click on the top Edge component: 
 
-![Rhino Brep to Revit as Directshape](/images/revit-edge.jpg)
+![Rhino Brep to Revit as Directshape](/static/images/revit-edge.jpg)
 
 Then select one of the Yellow edges on one side of the the Wall model. Use the Finish button under the Revit toolbar to finish the selection.
 
-![Revit as Directshape](/images/select-edges.jpg)
+![Revit as Directshape](/static/images/select-edges.jpg)
 
 Then right click and select to opposite edge.
 

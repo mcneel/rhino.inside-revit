@@ -1,26 +1,22 @@
 <header class="site-header">
-
-
-    
-	<a class="site-title" href="{{ site.baseurl }}/"><img src="{{ site.baseurl }}/images/rir-logo-50x50.png" alt="Rhino Developer Docs" height="50" width="50"></a><a class="site-title" href="{{ site.baseurl }}/en/">Rhino.Inside.Revit</a> <span class="site-title" id="plot-header">{{site.url}}{{page.url}}</span>
+    <a class="site-title" href="{{ site.baseurl }}/">
+        <img src="{{ site.baseurl }}/static/images/rir-logo-50x50.png" alt="Rhino Developer Docs"
+             height="50" width="50">
+    </a>
+    <a class="site-title" href="{{ site.baseurl }}/en/">Rhino.Inside.Revit</a>
+    <span class="site-title" id="plot-header">{{ site.url }}{{ page.url }}</span>
 
     <nav class="site-nav">
-      <img class="menu-icon" src="{{ site.baseurl }}/images/gi.svg">
-      {% assign pages = site.pages | sort:"order"  %}
-      <div class="trigger">
-        <a class="page-link" href="{{ site.baseurl }}/en/guides/getting-started-with-rhino.html"><!-- localize -->Getting Started</a>
-        <a class="page-link" href="{{ site.baseurl }}/{{page.language}}/guides"><!-- localize -->Guides</a>
-         <a class="page-link" href="{{ site.baseurl }}/{{page.language}}/samples"><!-- localize -->Samples</a>
-       <a class="page-link" href="{{ site.baseurl }}/{{page.language}}/reference"><!-- localize -->Reference</a>
+        <img class="menu-icon" src="{{ site.baseurl }}/static/images/gi.svg" />
+        {% assign pages = site.pages | sort:"order"  %}
+        <div class="trigger">
+            <a class="page-link" href="{{ site.baseurl }}/{{ page.language }}/getting-started.html">Getting Started</a>
+            <a class="page-link" href="{{ site.baseurl }}/{{ page.language }}/guides">Guides</a>
+            <a class="page-link" href="{{ site.baseurl }}/{{ page.language }}/samples">Samples</a>
+            <a class="page-link" href="{{ site.baseurl }}/{{ page.language }}/reference">Reference</a>
 
 
-        <a class="page-link" href="https://discourse.mcneel.com/c/rhino-inside/Revit"><!-- localize -->Forum</a>
+            <a class="page-link" href="https://discourse.mcneel.com/c/rhino-inside/Revit">Forum</a>
         </div>
-
-        <!--End of Google Search Engine -->
-      </div>
-	  &nbsp;
     </nav>
-
 </header>
-
