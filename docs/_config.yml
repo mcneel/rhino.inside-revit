@@ -3,9 +3,9 @@ title: Rhino.Inside.Revit Documentation
 # email: brian@mcneel.com
 baseurl: "" # the subpath of your site, e.g. /blog/
 url: "" # the base hostname & protocol for your site
-editMeOnGhBaseUrl: "mcneel/rhino.inside-revit"
+editme_github_base_url: "mcneel/rhino.inside-revit"
 description: Rhino.Inside.Revit Documentation
-copyright: Robert McNeel and Associates. All rights reserved
+copyright: Robert McNeel & Associates
 
 gems:
   - jekyll-sitemap

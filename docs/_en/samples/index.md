@@ -14,19 +14,3 @@ The Rhino.Inside.Revit Project is a super exciting new devlopement sponsored by 
 
 
 ## Sample projects using Rhino.Inside.Revit
-
-<div class="trigger">
-  {% assign guides = site.en | sort:"order" %}
-  <ul>
-  {% for guide in guides %}
-    {% if guide.categories contains 'samples' %}
-      {% if guide.title and guide.order %}
-        <li><a class="page-link" href="{{ guide.url | prepend: site.baseurl }}" title="{{ guide.description }}">{{ guide.title }}</a></li>
-      {% endif %}
-    {% endif %}
-  {% endfor %}
-  </ul>
-</div>
-
-
----

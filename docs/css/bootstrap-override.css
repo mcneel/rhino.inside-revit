@@ -1,9 +1,58 @@
+body {
+    line-height: 1.5;
+}
+
+.page-content {
+    min-height: 25em;
+}
+
 .sidebar {
-    width: 25%;
+    width: 15%;
     position: fixed;
 }
 
+.sidebar ul {
+    list-style: none;
+    padding-left: 0;
+    margin-left: 0;
+}
+
+.sidebar ul li a, .nav li a {
+    color: #999;
+    text-decoration: none;
+    border-left: 1px solid transparent;
+    font-size: 13px;
+    font-weight: 400;
+    padding: 4px 20px 4px 18px;
+    display: block;
+}
+
+.sidebar ul li a:hover, .nav ul li a:hover {
+    color: #111;
+    border-left-color: #111;
+    background: transparent;
+}
+
+.nav {
+    margin: 0;
+    padding: 0;
+}
+
+.nav li.active a {
+    font-weight: bold;
+    color: #111;
+}
+
+
+
 .side-content {
     width: 75%;
-    float: right;
+    margin-left: 25%;
+}
+
+.footer {
+    text-align: center;
+    font-size: 15px;
+    color: #828282;
+    margin-left: -10px; 
 }
