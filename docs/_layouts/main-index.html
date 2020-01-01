@@ -2,9 +2,16 @@
 ---
 <!DOCTYPE html>
 <html>
-   <head>
-      <title>HTML Meta Tag</title>
-      <meta http-equiv = "refresh" content = "0; url = {{ site.baseurl }}/en/" />
+    {% include head.html %}
+    <head>
+      <title>{{ site.title }}</title>
+      <meta http-equiv="refresh" content="0; url={{ site.baseurl }}/en/" />
+      <style>
+          body {
+              margin-top: 20px;
+              text-align: center;
+          }
+      </style>
    </head>
    <body>
       <p>Redirecting to Rhino.Inside.Revit</p>

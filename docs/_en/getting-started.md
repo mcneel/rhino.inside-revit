@@ -5,7 +5,6 @@ language: en
 authors: ['scott_davidson']
 languages: ['Python']
 platforms: ['Windows']
-order: 1
 keywords: ['python', 'commands', 'grasshopper']
 layout: page-h2-toc
 ---
