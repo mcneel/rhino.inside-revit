@@ -1,11 +1,6 @@
 ---
 title: Rhino.Inside.Revit Reference Guides
 description: These guides cover many aspects of Rhino.Inside.Revit in detail
-language: en
-authors: ['scott_davidson']
-platforms: ['Windows']
-categories: ['reference']
-layout: page-list-toc
 ---
 
 Some text

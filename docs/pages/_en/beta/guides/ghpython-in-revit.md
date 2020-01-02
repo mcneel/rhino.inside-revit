@@ -1,14 +1,7 @@
 ---
 title: Writing Python in Grasshopper in Revit
 description: This guide covers the creation of a GH.Python component Rhino.Inside.revit.
-language: en
-authors: ['scott_davidson']
-languages: ['Python']
-platforms: ['Windows']
-categories: ['started']
 order: 3
-keywords: ['python', 'commands', 'grasshopper']
-layout: page-list-toc
 ---
 
 # Writing Python in Grasshopper in Revit

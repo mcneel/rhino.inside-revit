@@ -1,14 +1,7 @@
 ---
 title: Selection filters for Revit objects
 description: This guide covers the basic fitlering for Revit objects in a model for Grasshopper.
-language: en
-authors: ['scott_davidson']
-languages: ['Python']
-platforms: ['Windows']
-categories: ['samples']
 order: 6
-keywords: ['python', 'commands', 'grasshopper']
-layout: page-list-toc
 ---
 
 # Using Revit&reg; Elements in Grasshopper&reg;

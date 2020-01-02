@@ -1,19 +1,26 @@
 <header class="site-header">
     <a class="site-title" href="{{ site.baseurl }}/">
-        <img src="{{ site.baseurl }}/static/images/rir-logo-50x50.png" alt="Rhino Developer Docs"
-             height="50" width="50">
+        <img src="{{ site.baseurl }}/static/images/rir-logo-50x50.png" alt="Rhino Developer Docs" height="50" width="50">
     </a>
-    <a class="site-title" href="{{ site.baseurl }}/en/">Rhino.Inside.Revit</a>
+    <a class="site-title" href="#" onclick="navigateTo('')">Rhino.Inside.Revit</a>
     <span class="site-title" id="plot-header">{{ site.url }}{{ page.url }}</span>
 
     <nav class="site-nav">
         <img class="menu-icon" src="{{ site.baseurl }}/static/images/gi.svg" />
         {% assign pages = site.pages | sort:"order"  %}
         <div class="trigger">
-            <a class="page-link" href="{{ site.baseurl }}/{{ page.language }}/getting-started">Getting Started</a>
-            <a class="page-link" href="{{ site.baseurl }}/{{ page.language }}/guides">Guides</a>
-            <a class="page-link" href="{{ site.baseurl }}/{{ page.language }}/samples">Samples</a>
-            <a class="page-link" href="{{ site.baseurl }}/{{ page.language }}/reference">Reference</a>
+
+            <a class="dropdown">
+                <a class="dropdown-toggle" id="versionSelector" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></a>
+                <div class="dropdown-menu" aria-labelledby="versionSelector">
+                  <a class="version-link" href="#" onclick="navigateTo('', '1.0')">v1.0</a>
+                  <a class="version-link" href="#" onclick="navigateTo('', 'beta')">Latest Beta</a>
+                </div>
+            </a>
+            <a class="page-link" href="#" onclick="navigateTo('getting-started')">Getting Started</a>
+            <a class="page-link" href="#" onclick="navigateTo('guides')">Guides</a>
+            <a class="page-link" href="#" onclick="navigateTo('samples')">Samples</a>
+            <a class="page-link" href="#" onclick="navigateTo('reference')">Reference</a>
 
 
             <a class="page-link" href="https://discourse.mcneel.com/c/rhino-inside/Revit" target="_">Forum</a>

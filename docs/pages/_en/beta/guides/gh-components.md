@@ -1,14 +1,7 @@
 ---
 title: Grasshopper Revit components
 description: This guide covers the Rhino.Inside.revit components.
-language: en
-authors: ['scott_davidson']
-languages: ['Python']
-platforms: ['Windows']
-categories: ['started']
 order: 2
-keywords: ['python', 'commands', 'grasshopper']
-layout: page-list-toc
 ---
 
 # Grasshopper components for Revit

@@ -1,14 +1,7 @@
 ---
 title: Automated Install of Rhino.Inside.Revit for All Users
 description: This guide covers the Automated Install of Rhino.Inside.Revit for All Users.
-language: en
-authors: ['scott_davidson']
-languages: ['Python']
-platforms: ['Windows']
-categories: ['started']
 order: 4
-keywords: ['python', 'commands', 'grasshopper']
-layout: page-list-toc
 ---
 
 

@@ -4,30 +4,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <title>{% if localized.title %}{{ page.title }} {% else %}{{ site.title }} {% endif %}</title>
-    <meta name="description"
-        content="{% if page.excerpt %}{{ page.excerpt | strip_html | strip_newlines | truncate: 160 }}{% else %}{{ site.description }}{% endif %}">
+    <meta name="description" content="{% if page.excerpt %}{{ page.excerpt | strip_html | strip_newlines | truncate: 160 }}{% else %}{{ site.description }}{% endif %}">
 
     <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.6/styles/github.min.css">
-    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.6/highlight.min.js">
-    </script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.6/highlight.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.5/languages/vbnet.min.js"></script>
+
     <script>
         hljs.initHighlightingOnLoad();
+
+        // version selectors can set the active version
+        function setActiveVersion(version) {
+            console.log("setting active version to:", version);
+            activeVersion = version;
+        }
+
+        // navigate to page with active version
+        function navigateTo(pageName, pageVersion) {
+            var pageLink = '{{ site.baseurl }}/{{ page.language }}/VERSION/' + pageName;
+            if (!pageVersion) {
+                pageVersion = activeVersion;
+            }
+            console.log(pageLink.replace("VERSION", pageVersion));
+            window.location.href = pageLink.replace("VERSION", pageVersion); 
+        }
+
+        // extract active version from url
+        var activeVersion = function() {
+            var url = window.location.href;
+            var version = '{{ site.version }}';
+            console.log(url);
+            if (url.endsWith('/beta') || url.includes('/beta/')) {
+                version = 'beta';
+            } else {
+                var re = /\/(\d\.\d)($|\/)/g;
+                var m = url.match(re);
+                if (m) {
+                    version = m[0].replace(/\//g, '');
+                }
+            }
+            setActiveVersion(version)
+            return version;
+        }();
+
     </script>
 
     <!-- Overridden theme -->
     <link rel="stylesheet" href="{{ "/css/main.css" | prepend: site.baseurl }}">
 
     <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
-    <!-- Optional theme -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <!-- Bootstrap override -->
     <link rel="stylesheet" href="{{ "/css/bootstrap-override.css" | prepend: site.baseurl }}">
     <!-- Localized overrides -->
     <link rel="canonical" href="{{ page.url | replace:'index.html','' | prepend: site.baseurl | prepend: site.url }}">
-    <link rel="alternate" type="application/rss+xml" title="{{ site.title }}"
-        href="{{ "/feed.xml" | prepend: site.baseurl | prepend: site.url }}" />
+    <link rel="alternate" type="application/rss+xml" title="{{ site.title }}" href="{{ "/feed.xml" | prepend: site.baseurl | prepend: site.url }}" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="{{ site.baseurl }}/favicon.ico">

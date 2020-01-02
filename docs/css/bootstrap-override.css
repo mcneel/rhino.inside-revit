@@ -1,5 +1,41 @@
 body {
     line-height: 1.5;
+    position: relative;
+    overflow: scroll;
+}
+
+.page-link {
+    display: inline;
+    padding: 0;
+    margin: 0;
+    border: none;
+}
+
+.page-link:hover {
+    background: none;
+    border: none;
+}
+
+.dropdown:not(:first-child) {
+    margin: 0;
+}
+
+.version-link {
+    display: block;
+    color: #111;
+    padding: 4px 28px 4px 20px;
+    margin: 0;
+    text-align: left;
+    font-size: small;
+    line-height: 1.5;
+}
+
+.version-link:visited {
+    color: #111;
+}
+
+.version-link:not([href]) {
+    color: #999;
 }
 
 .page-content {
@@ -29,7 +65,7 @@ body {
 
 .sidebar ul li a:hover, .nav ul li a:hover {
     color: #111;
-    border-left-color: #111;
+    border-left: 1px #111 solid;
     background: transparent;
 }
 
@@ -38,7 +74,7 @@ body {
     padding: 0;
 }
 
-.nav li.active a {
+.nav a.active {
     font-weight: bold;
     color: #111;
 }

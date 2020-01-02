@@ -6,6 +6,8 @@ url: "" # the base hostname & protocol for your site
 editme_github_base_url: "mcneel/rhino.inside-revit"
 description: Rhino.Inside.Revit Documentation
 copyright: Robert McNeel & Associates
+version: beta
+language: en
 
 gems:
   - jekyll-sitemap
@@ -27,14 +29,48 @@ kramdown:
 
 safe: false
 
+collections_dir: pages
+
 collections:
   en:
     output: true
     permalink: /en/:path
 
+# set the attribute defaults for site contents
 defaults:
   - scope:
-      path: ""
-      type: en
+      path: "" # all files
+    values:
+      layout: page-list-toc
+
+  - scope:
+      path: "" # all files
+      type: en # in this collection
     values:
       language: en
+      authors: ['scott_davidson']
+
+  - scope:
+      path: "pages/*/beta"
+    values:
+      version: beta
+
+  - scope:
+      path: "pages/*/1.0"
+    values:
+      version: 1.0
+
+  - scope:
+      path: "pages/*/*/guides"
+    values:
+      categories: ['guides']
+
+  - scope:
+      path: "pages/*/*/reference"
+    values:
+      categories: ['reference']
+
+  - scope:
+      path: "pages/*/*/samples"
+    values:
+      categories: ['samples']

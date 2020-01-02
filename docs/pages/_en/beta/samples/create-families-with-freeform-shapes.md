@@ -1,14 +1,7 @@
 ---
 title: Creating Families in Revit with Grasshopper
 description: This guide covers the basic transfer of Rhino geometry into Revit.
-language: en
-authors: ['scott_davidson']
-languages: ['Python']
-platforms: ['Windows']
-categories: ['samples']
 order: 8
-keywords: ['python', 'commands', 'grasshopper']
-layout: page-list-toc
 ---
 
 # Creating Revit&reg; Families with Grasshopper&reg;

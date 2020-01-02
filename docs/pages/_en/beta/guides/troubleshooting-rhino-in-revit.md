@@ -1,14 +1,7 @@
 ---
 title: Troubleshooting Rhino in Revit
 description: This guide covers the Rhino.Inside.revit interface.
-language: en
-authors: ['scott_davidson']
-languages: ['Python']
-platforms: ['Windows']
-categories: ['started']
 order: 7
-keywords: ['python', 'commands', 'grasshopper']
-layout: page-list-toc
 ---
 
 # Troubleshooting Rhino in Revit

@@ -1,14 +1,7 @@
 ---
 title: Creating Wall in Revit
 description: This guide covers how to create wall in Revit.
-language: en
-authors: ['scott_davidson']
-languages: ['Python']
-platforms: ['Windows']
-categories: ['samples']
 order: 4
-keywords: ['python', 'commands', 'grasshopper']
-layout: page-list-toc
 ---
 
 

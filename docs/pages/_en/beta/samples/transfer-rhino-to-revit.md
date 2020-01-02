@@ -1,14 +1,7 @@
 ---
 title: Transfer Rhino to Revit
 description: This guide covers the basic transfer of Rhino geometry into Revit.
-language: en
-authors: ['scott_davidson']
-languages: ['Python']
-platforms: ['Windows']
-categories: ['samples']
 order: 1
-keywords: ['python', 'commands', 'grasshopper']
-layout: page-list-toc
 ---
 
 # Bringing Rhino&reg; Geometry into Revit&reg;

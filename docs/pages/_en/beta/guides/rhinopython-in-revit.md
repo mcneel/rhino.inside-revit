@@ -1,14 +1,7 @@
 ---
 title: Writing Python in Rhino within Revit
 description: This guide covers the Rhino.Inside.revit Python interface.
-language: en
-authors: ['scott_davidson']
-languages: ['Python']
-platforms: ['Windows']
-categories: ['started']
 order: 5
-keywords: ['python', 'commands', 'grasshopper']
-layout: page-list-toc
 ---
 
 # Writing Python in Rhino within Revit

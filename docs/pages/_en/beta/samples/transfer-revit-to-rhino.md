@@ -1,14 +1,7 @@
 ---
 title: Transfer Revit Elements to Rhino
 description: This guide covers the basic transfer of Revit geometry into Rhino.
-language: en
-authors: ['scott_davidson']
-languages: ['Python']
-platforms: ['Windows']
-categories: ['samples']
 order: 2
-keywords: ['python', 'commands', 'grasshopper']
-layout: page-list-toc
 ---
 
 # Bringing in a Revit&reg; model to Rhino&reg;
