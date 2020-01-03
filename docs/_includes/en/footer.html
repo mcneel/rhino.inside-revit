@@ -2,12 +2,29 @@
     <div class="footer">
         <div class="footer-langauges">
             <ul class="footer-language-list">
-                <li><a href="javascript:navigateTo('');">English</a></li>
-                <li><a href="javascript:navigateTo('');">Arabic (العربیه)</a></li>
+                <li><a title="English" href="javascript:navigateTo('');">English</a></li>
+                <li><a title="German" href="javascript:navigateTo('');">Deutsch</a></li>
+                <li><a title="Spanish" href="javascript:navigateTo('');">Español</a></li>
+                <li><a title="French" href="javascript:navigateTo('');">Français</a></li>
+                <li><a title="Italian" href="javascript:navigateTo('');">Italiano</a></li>
+                <!-- <li><a title="Dutch" href="javascript:navigateTo('');">Nederlands</a></li> -->
+                <li><a title="Simplified Chinese" href="javascript:navigateTo('');">简体中文</a></li>
+                <li><a title="Traditional Chinese" href="javascript:navigateTo('');">繁體中文</a></li>
+                <li><a title="Japanese" href="javascript:navigateTo('');">日本語</a></li>
+                <li><a title="Korean" href="javascript:navigateTo('');">한국어</a></li>
+                <!-- <li><a title="English" href="javascript:navigateTo('');">Русский (Russian)</a></li> -->
+                <!-- <li><a title="English" href="javascript:navigateTo('');">Čeština (Czech)</a></li> -->
+                <!-- <li><a title="English" href="javascript:navigateTo('');">Polski (Polish)</a></li> -->
+                <!-- <!-- <li><a title="English" href="javascript:navigateTo('');">Magyar (Hungarian)</a></li> -->
+                <!-- <li><a title="English" href="javascript:navigateTo('');">Português do Brasil (Brazilian Portuguese)</a></li> -->
+                <!-- <li><a title="English" href="javascript:navigateTo('');">Български (Bulgarian)</a></li> -->
+                <!-- <li><a title="English" href="javascript:navigateTo('');">Українська (Ukrainian)</a></li> -->
+                <li><a title="Arabic" href="javascript:navigateTo('');">العربیه</a></li>
+                <li><a title="Farsi" href="javascript:navigateTo('');">فارسی</a></li>
             </ul>
         </div>
         <!-- Automatic Copyright notice -->
-        <div>Copyright &#169; 1997-20{{ site.time | date: '%y' }} {{ site.copyright }}</div>
+        <div>Copyright &#169; 1997-20{{ site.time | date: '%y' }} <a href="https://www.mcneel.com/" target="_blank">{{ site.copyright }}</a></div>
         <!-- Edit page on Github: relative url is from jekyll site configs -->
         <div>
             {% assign docs_url = site.repo_url | append: site.editme_github_base_url %}
