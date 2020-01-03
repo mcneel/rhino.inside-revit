@@ -8,6 +8,7 @@ description: Wiki, Guidesm Samples, and Documentation for Rhino.Inside.Revit
 copyright: Robert McNeel & Associates
 version: beta
 language: en
+logo: rir-logo-50x50.png
 
 gems:
   - jekyll-sitemap

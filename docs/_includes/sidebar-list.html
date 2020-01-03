@@ -1,3 +1,7 @@
+<!--
+    Populates the sidebar by grabbing all the pages that match
+    the categories, language, and version of the current page
+-->
 <nav class="sidebar">
     {% for collection in site.collections %}
         {% if collection.label == page.collection %}

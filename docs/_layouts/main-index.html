@@ -1,11 +1,16 @@
 ---
 ---
+<!-- 
+    This page is the root page. Its sole purpose is to redirec to the homepage
+    of the website's default language:version set in the jekyll site configs
+ -->
 <!DOCTYPE html>
 <html>
     {% include head.html %}
     <head>
       <title>{{ site.title }}</title>
       <meta http-equiv="refresh" content="0; url={{ site.baseurl }}/{{ site.language }}/{{ site.version }}/" />
+      <!-- Put the text somewhat in the center from top -->
       <style>
           body {
               margin-top: 20px;

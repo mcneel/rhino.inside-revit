@@ -1,27 +1,8 @@
 <header class="site-header">
+    <!-- Logo -->
     <a class="site-title" href="{{ site.baseurl }}/">
-        {% if page.product %}
-            {{page.product}}
-        {% else %}
-            {{ site.title }}
-        {% endif %}
-        Help Documentation
+        <img src="{{ site.baseurl }}/static/images/{{ site.logo }}" alt="{{ site.title }}" height="50" width="50">
     </a>
-
-    <nav class="site-nav">
-        {% assign pages = site.pages | sort:"order"  %}
-        <div class="trigger">
-            <a class="page-link" href="{{ site.baseurl }}/">Welcome</a>
-            {% for page in pages %}
-            {% if page.title != 'Administration' %}
-            {% if page.title != 'Blog' %}
-            {% if page.title and page.order %}
-            <a class="page-link" href="{{ page.url | prepend: site.baseurl }}">{{ page.title }}</a>
-            {% endif %}
-            {% endif %}
-            {% endif %}
-            {% endfor %}
-            <a class="page-link" href="https://discourse.mcneel.com/c/rhino-inside/Revit">Forums</a>
-        </div>
-    </nav>
+    <!-- Title -->
+    <a class="site-title" href="#" onclick="navigateTo('')">{{ site.title }}</a>
 </header>

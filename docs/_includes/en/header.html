@@ -1,15 +1,16 @@
 <header class="site-header">
+    <!-- Logo -->
     <a class="site-title" href="{{ site.baseurl }}/">
-        <img src="{{ site.baseurl }}/static/images/rir-logo-50x50.png" alt="Rhino Developer Docs" height="50" width="50">
+        <img src="{{ site.baseurl }}/static/images/{{ site.logo }}" alt="{{ site.title }}" height="50" width="50">
     </a>
+    <!-- Title -->
     <a class="site-title" href="#" onclick="navigateTo('')">{{ site.title }}</a>
-    <span class="site-title" id="plot-header">{{ site.url }}{{ page.url }}</span>
-
+    <!-- Navigation Bar -->
     <nav class="site-nav">
         <img class="menu-icon" src="{{ site.baseurl }}/static/images/gi.svg" />
         {% assign pages = site.pages | sort:"order"  %}
         <div class="trigger">
-
+            <!-- Version selector dropdown -->
             <a class="dropdown">
                 <a class="dropdown-toggle" id="versionSelector" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></a>
                 <div class="dropdown-menu" aria-labelledby="versionSelector">
@@ -17,12 +18,12 @@
                   <a class="version-link" href="#" onclick="navigateTo('', 'beta')">Latest Beta</a>
                 </div>
             </a>
+            <!-- Other pages -->
             <a class="page-link" href="#" onclick="navigateTo('getting-started')">Getting Started</a>
             <a class="page-link" href="#" onclick="navigateTo('guides')">Guides</a>
             <a class="page-link" href="#" onclick="navigateTo('samples')">Samples</a>
             <a class="page-link" href="#" onclick="navigateTo('reference')">Reference</a>
-
-
+            <!-- External Pages -->
             <a class="page-link" href="https://discourse.mcneel.com/c/rhino-inside/Revit" target="_">Forum</a>
         </div>
     </nav>
