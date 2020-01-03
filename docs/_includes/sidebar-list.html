@@ -5,7 +5,9 @@
             <ul class="nav">
                 {% for guide in guides %}
                 {% if guide.title and guide.order and guide.categories == page.categories and guide.version == page.version %}
-                    <li><a class="page-link" href="{{ guide.url | prepend: site.baseurl }}" title="{{ guide.description }}">{{ guide.title }}</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link page-link" href="{{ guide.url | prepend: site.baseurl }}" title="{{ guide.description }}">{{ guide.title }}</a>
+                    </li>
                 {% endif %}
                 {% endfor %}
             </ul>

@@ -53,6 +53,10 @@ body {
     margin-left: 0;
 }
 
+.sidebar ul li, .nav li {
+    display: block;
+}
+
 .sidebar ul li a, .nav li a {
     color: #999;
     text-decoration: none;
@@ -72,6 +76,7 @@ body {
 .nav {
     margin: 0;
     padding: 0;
+    display: block;
 }
 
 .nav a.active {
