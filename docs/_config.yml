@@ -6,7 +6,7 @@ url: "" # the base hostname & protocol for your site
 repo_url: "https://github.com/mcneel/rhino.inside-revit/"
 editme_github_base_url: "blob/docs/cleanup/docs/"
 forum_url: "https://discourse.mcneel.com/c/rhino-inside/Revit"
-description: Wiki, Guidesm Samples, and Documentation for Rhino.Inside.Revit
+description: Wiki, Guides, Samples, and Documentation for Rhino.Inside.Revit
 copyright: Robert McNeel & Associates
 version: beta
 language: en
