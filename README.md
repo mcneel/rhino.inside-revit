@@ -28,7 +28,7 @@ work-in-progress
 
 The `docs/` directory in this repo contains the contents of https://mcneel.github.io/rhino.inside-revit/.
 
-See [Wiki Readme](docs/README.md) for more information.
+See [Wiki Readme](docs/readme.md) for more information.
 
 ## API Docs
 
