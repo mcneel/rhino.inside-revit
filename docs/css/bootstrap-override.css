@@ -16,6 +16,10 @@ body {
     border: none;
 }
 
+.page-link:focus {
+    box-shadow: none;
+}
+
 .dropdown:not(:first-child) {
     margin: 0;
 }
@@ -73,6 +77,14 @@ body {
     background: transparent;
 }
 
+.site-header {
+    min-height: 60px;
+}
+
+.site-nav svg {
+    margin-top: -4px;
+}
+
 .nav {
     margin: 0;
     padding: 0;
@@ -83,8 +95,6 @@ body {
     font-weight: bold;
     color: #111;
 }
-
-
 
 .side-content {
     width: 75%;

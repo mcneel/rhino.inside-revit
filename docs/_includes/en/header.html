@@ -14,8 +14,8 @@
             <a class="dropdown">
                 <a class="dropdown-toggle" id="versionSelector" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></a>
                 <div class="dropdown-menu" aria-labelledby="versionSelector">
-                  <a class="version-link" href="#" onclick="navigateTo('', '1.0')">v1.0</a>
-                  <a class="version-link" href="#" onclick="navigateTo('', 'beta')">Latest Beta</a>
+                    <a class="version-link" href="#" onclick="navigateTo('', '1.0')">v1.0</a>
+                    <a class="version-link" href="#" onclick="navigateTo('', 'beta')">Latest Beta</a>
                 </div>
             </a>
             <!-- Other pages -->
@@ -24,7 +24,51 @@
             <a class="page-link" href="#" onclick="navigateTo('samples')">Samples</a>
             <a class="page-link" href="#" onclick="navigateTo('reference')">Reference</a>
             <!-- External Pages -->
-            <a class="page-link" href="https://discourse.mcneel.com/c/rhino-inside/Revit" target="_">Forum</a>
+            {% assign repourl = 'https://github.com/' | append: site.editme_github_base_url %}
+            <a class="page-link" href="{{ repourl }}" target="_">
+                <svg width="24" height="24" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/"
+                    style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+                    <path
+                        d="M11.999,0.647C5.571,0.647 0.358,5.858 0.358,12.288C0.358,17.43 3.693,21.794 8.319,23.333C8.901,23.439 9.114,23.081 9.114,22.772C9.114,22.496 9.104,21.763 9.099,20.792C5.861,21.495 5.178,19.231 5.178,19.231C4.649,17.887 3.885,17.529 3.885,17.529C2.828,16.807 3.965,16.821 3.965,16.821C5.133,16.903 5.748,18.021 5.748,18.021C6.786,19.8 8.472,19.286 9.135,18.988C9.242,18.235 9.542,17.724 9.875,17.433C7.29,17.138 4.574,16.14 4.574,11.679C4.574,10.409 5.027,9.369 5.772,8.556C5.652,8.261 5.252,7.077 5.886,5.475C5.886,5.475 6.864,5.162 9.087,6.669C10.016,6.409 11.01,6.281 12,6.276C12.989,6.281 13.985,6.41 14.915,6.668C17.138,5.162 18.112,5.473 18.112,5.473C18.747,7.076 18.348,8.259 18.228,8.554C18.973,9.368 19.425,10.407 19.425,11.677C19.425,16.149 16.704,17.133 14.111,17.421C14.529,17.781 14.901,18.49 14.901,19.576C14.901,21.132 14.886,22.388 14.886,22.77C14.886,23.082 15.096,23.443 15.687,23.329C20.309,21.787 23.64,17.427 23.64,12.286C23.64,5.859 18.428,0.647 11.999,0.647Z"
+                        style="fill-rule:nonzero;" />
+                </svg>
+            </a>
+            <a class="page-link" href="{{ site.forum_url }}" target="_">
+                <svg width="24" height="24" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/"
+                    style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+                    <g transform="matrix(0.214543,0,0,0.214543,0.896631,0.808665)">
+                        <path
+                            d="M51.87,0C23.71,0 0,22.83 0,51L0,103.81L51.86,103.76C80.02,103.76 102.86,80.05 102.86,51.89C102.86,23.73 80,0 51.87,0Z" />
+                    </g>
+                    <g transform="matrix(0.214543,0,0,0.214543,0.896631,0.808665)">
+                        <path
+                            d="M52.37,19.74C41.232,19.747 30.919,25.613 25.22,35.182C19.522,44.752 19.279,56.615 24.58,66.41L18.86,84.81L39.4,80.17C51.162,85.469 64.964,83.089 74.272,74.157C83.58,65.224 86.525,51.531 81.714,39.561C76.903,27.591 65.301,19.746 52.4,19.74L52.37,19.74Z"
+                            style="fill:white;fill-rule:nonzero;" />
+                    </g>
+                    <g transform="matrix(0.214543,0,0,0.214543,0.896631,0.808665)">
+                        <path
+                            d="M77.087,70.914C68.109,82.24 52.59,86.031 39.4,80.12L18.86,84.82L39.77,82.35C53.632,90.47 71.38,86.897 81.021,74.046C90.661,61.195 89.125,43.156 77.45,32.12C86.215,43.612 86.066,59.587 77.087,70.914Z"
+                            style="fill:rgb(89,89,89);fill-rule:nonzero;" />
+                    </g>
+                    <g transform="matrix(0.214543,0,0,0.214543,0.896631,0.808665)">
+                        <path
+                            d="M75.319,64.909C67.572,77.111 52.534,82.501 38.8,78L18.86,84.82L39.4,80.17C54.029,86.778 71.287,81.369 79.527,67.594C87.767,53.818 84.371,36.054 71.63,26.29C81.547,36.804 83.066,52.707 75.319,64.909Z"
+                            style="fill:rgb(166,166,166);fill-rule:nonzero;" />
+                    </g>
+                    <g transform="matrix(0.214543,0,0,0.214543,0.896631,0.808665)">
+                        <path
+                            d="M26.47,67.11C20.745,53.311 25.463,37.388 37.781,28.934C50.099,20.481 66.653,21.806 77.47,32.11C67.452,18.963 48.996,15.754 35.128,24.747C21.26,33.741 16.662,51.901 24.58,66.41L18.86,84.81L26.47,67.11Z"
+                            style="fill:rgb(166,166,166);fill-rule:nonzero;" />
+                    </g>
+                    <g transform="matrix(0.214543,0,0,0.214543,0.896631,0.808665)">
+                        <path
+                            d="M24.58,66.41C17.477,53.289 20.515,36.989 31.868,27.308C43.221,17.627 59.797,17.203 71.63,26.29C60.279,14.338 41.648,13.114 28.832,23.48C16.015,33.846 13.315,52.32 22.63,65.92L18.87,84.82L24.58,66.41Z"
+                            style="fill:rgb(89,89,89);fill-rule:nonzero;" />
+                    </g>
+                </svg>
+            </a>
         </div>
     </nav>
 </header>
