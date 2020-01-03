@@ -3,7 +3,8 @@ title: Rhino.Inside®.Revit
 # email: brian@mcneel.com
 baseurl: "" # the subpath of your site, e.g. /blog/
 url: "" # the base hostname & protocol for your site
-editme_github_base_url: "mcneel/rhino.inside-revit"
+repo_url: "https://github.com/mcneel/rhino.inside-revit/"
+editme_github_base_url: "blob/docs/cleanup/docs/"
 forum_url: "https://discourse.mcneel.com/c/rhino-inside/Revit"
 description: Wiki, Guidesm Samples, and Documentation for Rhino.Inside.Revit
 copyright: Robert McNeel & Associates

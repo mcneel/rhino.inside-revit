@@ -107,3 +107,10 @@ body {
     color: #828282;
     margin-left: -10px; 
 }
+
+.editgithub-link {
+    color: #111;
+}
+.editgithub-link:visited {
+    color: #111;
+}
