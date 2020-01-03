@@ -1,6 +1,5 @@
 ---
-title: Getting started with Rhino.Inside.Revit
-description: This guide covers the Rhino.Inside.Revit interface.
+title: Getting Started with Rhino.Inside.Revit
 layout: page-h2-toc
 ---
 

@@ -1,19 +1,17 @@
 ---
-title: Grasshopper Revit components
-description: This guide covers the Rhino.Inside.revit components.
+title: Components for Revit
 order: 2
 ---
 
-# Grasshopper components for Revit
 The Rhino Inside® technology allows Rhino and Grasshopper to be embedded within Revit.
 
 It is important to have a basic understanding to the [Revit Data Hierarchy](https://www.modelical.com/en/gdocs/revit-data-hierarchy/) of Category -> Family -> Type -> Instance/Element to create and select elements. There is a good guide at [Revit Families: A Step-By-Step Introduction](https://www.autodesk.com/autodesk-university/article/Revit-Families-Step-Step-Introduction-2018)
 
 This guide documents the Grasshopper components that support Revit interaction.
 
-# Components
+## Components
 
-## Parameter Components (Params tab)
+### Parameter Components (Params tab)
 
 <table style="width:100%">
   <tr>
@@ -94,7 +92,7 @@ This guide documents the Grasshopper components that support Revit interaction.
 </table>
 
 
-## Build Components
+### Build Components
 
 <table style="width:100%">
   <tr>
@@ -146,7 +144,7 @@ This guide documents the Grasshopper components that support Revit interaction.
 
 
 
-## Category Components
+### Category Components
 
 <table style="width:100%">
   <tr>
@@ -186,7 +184,7 @@ This guide documents the Grasshopper components that support Revit interaction.
   </tr>
 </table>
 
-## Datum Components
+### Datum Components
 
 <table style="width:100%">
   <tr>
@@ -206,7 +204,7 @@ This guide documents the Grasshopper components that support Revit interaction.
   </tr>
 </table>
 
-## Document Components
+### Document Components
 
 <table style="width:100%">
   <tr>
@@ -241,7 +239,7 @@ This guide documents the Grasshopper components that support Revit interaction.
   </tr>
 </table>
 
-## Elements Components
+### Elements Components
 
 <table style="width:100%">
   <tr>
@@ -291,7 +289,7 @@ This guide documents the Grasshopper components that support Revit interaction.
   </tr>
 </table>
 
-## Family Components
+### Family Components
 
 <table style="width:100%">
   <tr>
@@ -337,7 +335,7 @@ This guide documents the Grasshopper components that support Revit interaction.
 </table>
 
 
-## Filter Components
+### Filter Components
 
 <table style="width:100%">
   <tr>
@@ -457,7 +455,7 @@ This guide documents the Grasshopper components that support Revit interaction.
 </table>
 
 
-## Geometry Components
+### Geometry Components
 
 <table style="width:100%">
   <tr>
@@ -490,7 +488,7 @@ This guide documents the Grasshopper components that support Revit interaction.
     </tr>
 </table>
 
-## Host Components
+### Host Components
 
 <table style="width:100%">
   <tr>
@@ -505,7 +503,7 @@ This guide documents the Grasshopper components that support Revit interaction.
   </tr>
 </table>
 
-## Revit Input Components
+### Revit Input Components
 
 <table style="width:100%">
   <tr>
@@ -550,7 +548,7 @@ This guide documents the Grasshopper components that support Revit interaction.
     </tr>
 </table>
 
-## Massing Components
+### Massing Components
 
 <table style="width:100%">
   <tr>
@@ -571,7 +569,7 @@ This guide documents the Grasshopper components that support Revit interaction.
 </table>
 
 
-## Modeling Components
+### Modeling Components
 
 <table style="width:100%">
   <tr>
@@ -591,7 +589,7 @@ This guide documents the Grasshopper components that support Revit interaction.
   </tr>
 </table>
 
-## Parameter Components
+### Parameter Components
 
 <table style="width:100%">
   <tr>
@@ -627,7 +625,7 @@ This guide documents the Grasshopper components that support Revit interaction.
 </table>
 
 
-## Site Components
+### Site Components
 
 <table style="width:100%">
   <tr>
@@ -647,7 +645,7 @@ This guide documents the Grasshopper components that support Revit interaction.
   </tr>
 </table>
 
-## Type Components
+### Type Components
 
 <table style="width:100%">
   <tr>

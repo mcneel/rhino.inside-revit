@@ -1,11 +1,8 @@
 ---
-title: Transfer Rhino to Revit
-description: This guide covers the basic transfer of Rhino geometry into Revit.
+title: Managing Parameters with Grasshopper
 order: 3
 ---
 
-
-# Managing Parameters with Grasshopper&reg;
 This sample shows how to read and write the parameters of Revit&reg; elements usign Grasshopper and Rhino&reg;. There are two sample files here. 
 
 1. The first sample will simple copy the Mark value from each door and palce it in the comments parameter of the same door.

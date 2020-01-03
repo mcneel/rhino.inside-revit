@@ -1,10 +1,7 @@
 ---
-title: Troubleshooting Rhino in Revit
-description: This guide covers the Rhino.Inside.revit interface.
+title: Known Issues
 order: 7
 ---
-
-# Troubleshooting Rhino in Revit
 
 This guide looks at errors that can appear with Rhino.inside Revit.
 

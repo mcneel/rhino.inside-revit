@@ -1,10 +1,8 @@
 ---
 title: Selection filters for Revit objects
-description: This guide covers the basic fitlering for Revit objects in a model for Grasshopper.
 order: 6
 ---
 
-# Using Revit&reg; Elements in Grasshopper&reg;
 This sample shows how to Select Revit Element edges as input to a Grasshopper lofted surface.
 
 Using Revit objects as input to Grasshopper definitions allows for a dynamic editing directly in Revit and making Grasshopper interactive within the the Revit model.

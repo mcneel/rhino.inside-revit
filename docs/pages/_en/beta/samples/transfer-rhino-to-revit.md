@@ -1,10 +1,8 @@
 ---
 title: Transfer Rhino to Revit
-description: This guide covers the basic transfer of Rhino geometry into Revit.
 order: 1
 ---
 
-# Bringing Rhino&reg; Geometry into Revit&reg;
 This sample shows how to take normal Rhino breps, curves and points into Revit.
 
 There are a lot of ways to bring in the Rhino geometry, but in this case we will be bringing them in as DirectShape elements.

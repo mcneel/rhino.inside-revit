@@ -1,11 +1,9 @@
 ---
 title: Creating Wall in Revit
-description: This guide covers how to create wall in Revit.
 order: 4
 ---
 
 
-# Creating walls in Revit&reg; from a Rhino&reg; Curve
 This sample shows how to take normal Rhino curve and create a set of Revit system family walls
 
 This demonstration is meant to show that true native Revit objects can be created from simple Rhino geometry.  Editing the curve in Rhino will update the walls in Revit.

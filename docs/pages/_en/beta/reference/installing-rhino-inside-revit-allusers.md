@@ -1,11 +1,7 @@
 ---
-title: Automated Install of Rhino.Inside.Revit for All Users
-description: This guide covers the Automated Install of Rhino.Inside.Revit for All Users.
+title: Deployment
 order: 4
 ---
-
-
-# Automated Install of Rhino.Inside.Revit for All Users
 
 ## Required installers
 

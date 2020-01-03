@@ -1,11 +1,9 @@
 ---
 title: Rhino.Inside.Revit
-description: Official resources for Rhino.Inside.Revit. Rhino developer tools are royalty free and include support.
 layout: page-fullwidth
 ---
 
 <img src="{{ site.baseurl }}/static/images/rir-floors.jpg" class="img-fluid" alt="Responsive image">
-
 
 # Rhino.Inside.Revit
 

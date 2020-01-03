@@ -1,10 +1,8 @@
 ---
 title: Transfer Revit Elements to Rhino
-description: This guide covers the basic transfer of Revit geometry into Rhino.
 order: 2
 ---
 
-# Bringing in a Revit&reg; model to Rhino&reg;
 This sample shows how to take Revit objects into Rhino
 <!-- ![Revit Geometry brought into Rhino](/static/images/revit<!-- -to-rhino-final.jpg) -->
 
