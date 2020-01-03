@@ -26,7 +26,7 @@
         <!-- Automatic Copyright notice -->
         <div>Copyright &#169; 1997-20{{ site.time | date: '%y' }} <a href="https://www.mcneel.com/" target="_blank">{{ site.copyright }}</a></div>
         <!-- Edit page on Github: relative url is from jekyll site configs -->
-        <div>
+        <div class="editgithub_link">
             {% assign docs_url = site.repo_url | append: site.editme_github_base_url %}
             {% assign page_url = '/' | append: page.path %}
             <a href="{{ docs_url | append: site.collections_dir | append: page_url }}" target="_blank">

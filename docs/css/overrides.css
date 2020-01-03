@@ -143,3 +143,7 @@ body {
 .footer-language-list li:not(:first-child) {
     margin-left: 10px;
 }
+
+.editgithub_link {
+    margin-top: 5px;
+}
