@@ -1,10 +1,10 @@
 # Site settings
-title: Rhino.Inside.Revit Documentation
+title: Rhino.Inside®.Revit
 # email: brian@mcneel.com
 baseurl: "" # the subpath of your site, e.g. /blog/
 url: "" # the base hostname & protocol for your site
 editme_github_base_url: "mcneel/rhino.inside-revit"
-description: Rhino.Inside.Revit Documentation
+description: Wiki, Guidesm Samples, and Documentation for Rhino.Inside.Revit
 copyright: Robert McNeel & Associates
 version: beta
 language: en
