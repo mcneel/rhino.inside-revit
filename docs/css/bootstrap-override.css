@@ -105,16 +105,41 @@ body {
     margin-left: 25%;
 }
 
-.footer {
-    text-align: center;
-    font-size: 15px;
-    color: #828282;
-    margin-left: -10px; 
+.site-footer {
+    padding: 0px;
 }
 
-.editgithub-link {
-    color: #111;
+.footer {
+    text-align: center;
+    font-size: small;
+    color: #828282;
+    margin-bottom: 20px;
 }
-.editgithub-link:visited {
-    color: #111;
+
+.footer a {
+    color:#828282;
+}
+
+.footer a:visited {
+    color:#828282;
+}
+
+.footer-langauges {
+    border-bottom: 1px solid #e8e8e8;
+    padding: 5px 0px 5px 0px;
+    margin-bottom: 10px;
+}
+
+.footer-language-list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.footer-language-list li {
+    display: inline;
+}
+
+.footer-language-list li:not(:first-child) {
+    margin-left: 10px;
 }
