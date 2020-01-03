@@ -40,7 +40,11 @@
         <script>
             // set active version on version selector
             var verSelector = document.querySelector("#versionSelector");
-            verSelector.innerHTML = activeVersion;
+            if (activeVersion != "beta") {
+                verSelector.innerHTML = 'v' + activeVersion;
+            } else {
+                verSelector.innerHTML = activeVersion;
+            }
         </script>
     </body>
 </html>
