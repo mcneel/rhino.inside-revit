@@ -4,6 +4,14 @@ body {
     overflow: scroll;
 }
 
+.site-header {
+    z-index: 1024;
+    top: 0;
+    position: sticky;
+    min-height: 60px;
+    background: white;
+}
+
 .page-link {
     display: inline;
     padding: 0;
@@ -75,10 +83,6 @@ body {
     color: #111;
     border-left: 1px #111 solid;
     background: transparent;
-}
-
-.site-header {
-    min-height: 60px;
 }
 
 .site-nav svg {
