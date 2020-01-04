@@ -10,7 +10,11 @@
                 {% for guide in guides %}
                 {% if guide.title and guide.order and guide.categories == page.categories and guide.version == page.version %}
                     <li class="nav-item">
-                        <a class="nav-link page-link" href="{{ guide.url | prepend: site.baseurl }}" title="{{ guide.description }}">{{ guide.title }}</a>
+                        {% if guide.title == page.title %}
+                            <a class="nav-link page-link active" href="{{ guide.url | prepend: site.baseurl }}" title="{{ guide.description }}">{{ guide.title }}</a>
+                        {% else %}
+                            <a class="nav-link page-link" href="{{ guide.url | prepend: site.baseurl }}" title="{{ guide.description }}">{{ guide.title }}</a>
+                        {% endif %}
                     </li>
                 {% endif %}
                 {% endfor %}
