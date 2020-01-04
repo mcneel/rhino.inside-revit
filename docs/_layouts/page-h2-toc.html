@@ -13,8 +13,10 @@ layout: bootstrap
  -->
 <div class="container-fluid">
     <div class="row-fluid">
-        <!--Nav Bar -->
-        {% include sidebar-h2.html %}
+        <!--Nav Bar, with automatic highlighting on scroll -->
+        <nav class="sidebar" id="sidebar-toc">
+            {% include sidebar-h2.html %}
+        </nav>
 
         <!--Main Content -->
         <div class="side-content">

@@ -47,7 +47,7 @@ body {
     padding: 4px 28px 4px 20px;
     margin: 0;
     text-align: left;
-    font-size: small;
+    font-size: 13px;
     line-height: 1.5;
 }
 
@@ -74,11 +74,11 @@ body {
     margin-left: 0;
 }
 
-.sidebar ul li, .nav li {
+.sidebar li, .nav li {
     display: block;
 }
 
-.sidebar ul li a, .nav li a {
+.sidebar a, .nav a {
     color: #999;
     text-decoration: none;
     border-left: 1px solid transparent;
@@ -88,10 +88,15 @@ body {
     display: block;
 }
 
-.sidebar ul li a:hover, .nav ul li a:hover {
+.sidebar a:hover, .nav a:hover {
     color: #111;
     border-left: 1px #111 solid;
     background: transparent;
+}
+
+.sidebar nav a {
+    margin-left: 20px;
+    font-size: 12px;
 }
 
 .site-nav svg {
@@ -120,7 +125,7 @@ body {
 
 .footer {
     text-align: center;
-    font-size: small;
+    font-size: 13px;
     color: #828282;
     margin-bottom: 20px;
 }
