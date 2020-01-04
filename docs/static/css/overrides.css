@@ -1,3 +1,12 @@
+/* fix anchor click offset from top */
+/* https://www.itsupportguides.com/knowledge-base/tech-tips-tricks/how-to-offset-anchor-tag-link-using-css/ */
+:target:before {
+    content: "";
+    display: block;
+    height: 80px;      /* fixed header height*/
+    margin: -80px 0 0; /* negative fixed header height */
+}
+
 body {
     line-height: 1.5;
     position: relative;

@@ -38,7 +38,9 @@
 
         <!-- Activate bootstrap scrollspy on the sidebar -->
         <script type="text/javascript">
-            $('body').scrollspy({ target: '#sidebar-toc' });
+            // offset 80 is the size of header nav bar + a little margin
+            // this value is also set in stylesheet under :target:before
+            $('body').scrollspy({ target: '#sidebar-toc', offset: 80 });
         </script>
 
         <!-- Update version selector dropdown with active version -->
