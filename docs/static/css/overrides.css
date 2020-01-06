@@ -7,25 +7,18 @@
     margin: -90px 0 0; /* negative fixed header height */
 }
 
+/* html element adjustments */
 body {
     line-height: 1.5;
     position: relative;
+    /*
+        always show the vertical scrollbar otherwise page width changes
+        from page to page and is annoying
+     */
     overflow: scroll;
 }
 
-.site-title {
-    margin-left: 10px;
-    line-height: 60px;
-}
-
-.site-logo {
-    font-size: 26px;
-    line-height: 60px;
-    letter-spacing: -1px;
-    margin-bottom: 0;
-    float: left;
-}
-
+/* navigation bar overrides */
 .site-header {
     z-index: 1024;
     top: 0;
@@ -34,10 +27,29 @@ body {
     background: white;
 }
 
+/* logo */
+.site-logo {
+    line-height: 60px;
+    float: left;
+}
+
+/* title text */
+.site-title {
+    margin-left: 10px;
+    line-height: 60px;
+}
+
+/* navigation bar with pages */
 .site-nav {
     line-height: 60px;
 }
 
+/* github logo on navigation bar */
+.site-nav svg {
+    margin-top: -4px;
+}
+
+/* page links on navigation bar */
 .page-link {
     display: inline;
     padding: 0;
@@ -54,6 +66,7 @@ body {
     box-shadow: none;
 }
 
+/* version selector on navigation bar */
 .dropdown:not(:first-child) {
     margin: 0;
 }
@@ -76,10 +89,22 @@ body {
     color: #999;
 }
 
+/* full-screen page contents */
 .page-content {
+    /*
+        set the minimum height to the footer does not get
+        too close to header or sidebar when page is empty
+    */
     min-height: 25em;
 }
 
+/* page with sidebar contents */
+.side-content {
+    width: 75%;
+    margin-left: 25%;
+}
+
+/* side bar */
 .sidebar {
     width: 15%;
     position: fixed;
@@ -111,17 +136,14 @@ body {
     background: transparent;
 }
 
+/* side bar second level depth links */
 .sidebar .nav .nav-item .nav a,
 .sidebar nav a {
     margin-left: 20px;
     font-size: 12px;
 }
 
-
-.site-nav svg {
-    margin-top: -4px;
-}
-
+/* side bar navigation */
 .nav {
     margin: 0;
     padding: 0;
@@ -133,11 +155,7 @@ body {
     color: #111;
 }
 
-.side-content {
-    width: 75%;
-    margin-left: 25%;
-}
-
+/* footer */
 .site-footer {
     padding: 0px;
 }
@@ -157,12 +175,7 @@ body {
     color:#828282;
 }
 
-.footer-langauges {
-    border-bottom: 1px solid #e8e8e8;
-    padding: 5px 0px 5px 0px;
-    margin-bottom: 10px;
-}
-
+/* list of languages on footer */
 .footer-language-list {
     list-style-type: none;
     margin: 0;
@@ -177,6 +190,14 @@ body {
     margin-left: 10px;
 }
 
+/* language on footer */
+.footer-langauges {
+    border-bottom: 1px solid #e8e8e8;
+    padding: 5px 0px 5px 0px;
+    margin-bottom: 10px;
+}
+
+/* Edit On Github link on footer */
 .editgithub_link {
     margin-top: 5px;
 }
