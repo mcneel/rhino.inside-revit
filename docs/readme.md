@@ -1,3 +1,22 @@
+- [Rhino.Inside.Revit Wiki](#rhinoinsiderevit-wiki)
+- [Contributing to the Wiki](#contributing-to-the-wiki)
+  - [Applying Minor Changes Using the Github Editor](#applying-minor-changes-using-the-github-editor)
+  - [Clone, Revise, Submit Pull-Request](#clone-revise-submit-pull-request)
+    - [Getting git](#getting-git)
+    - [Cloning the Repository](#cloning-the-repository)
+    - [Installing Ruby](#installing-ruby)
+      - [Windows](#windows)
+      - [macOS](#macos)
+    - [Installing Jekyll](#installing-jekyll)
+    - [Building the Wiki using Jekyll](#building-the-wiki-using-jekyll)
+    - [Make Necessary Changes](#make-necessary-changes)
+    - [Publishing the Changes](#publishing-the-changes)
+- [Understanding Wiki Source Files](#understanding-wiki-source-files)
+  - [Page Metadata](#page-metadata)
+  - [Page Layouts](#page-layouts)
+  - [Adding a New Langauge](#adding-a-new-langauge)
+  - [Adding a New Wiki Version](#adding-a-new-wiki-version)
+
 # Rhino.Inside.Revit Wiki
 
 This repo contains the contents of https://mcneel.github.io/rhino.inside-revit/
@@ -36,7 +55,7 @@ The most popular, and by far, the most flexible approach is to clone the reposit
 
 This step requires basic knowledge of `git` and github. The initial setup for this approach might also look a bit complicated. The steps below will take you through the one-time initialization that is required to be able to test your changes before commiting to the source repo.
 
-### 1) git
+### Getting git
 
 **git** is a utility libray and has an official command-line-utility (CLI) that could be downloaded from the [git website](https://git-scm.com/). The git library is used in many Graphical User Interface (GUI) to provide a more approachable interface to git. A few of these utiliies are listed here:
 
@@ -50,7 +69,7 @@ This step requires basic knowledge of `git` and github. The initial setup for th
 
 These utilities have very comparable feature sets. Choose one that you are comfortable with. For the sake of this tutorial, we focus on the git CLI.
 
-### 2) Cloning the Repository
+### Cloning the Repository
 
 Once you have installed the git CLI, open a shell (e.g. Powershell in Windows, or `bash` in macOS) and navigate to a safe directory. Then clone the repo using the command below. If you do not have write access to the original repo, you need to `fork` the repository using Github and then clone your own forked repo on your machine. This will allow you to make the changes and publish them back to your own fork on github, and create a pull-request from your fork, to the original repository.
 
@@ -59,7 +78,7 @@ git clone https://github.com/mcneel/rhino.inside-revit.git
 ```
 
 
-### 3) Installing Ruby
+### Installing Ruby
 
 Jekyll is a static site generator that is written in ruby. We need to intall Ruby first
 
@@ -88,7 +107,7 @@ brew install ruby
 ```
 
 
-### 4) Installing Jekyll
+### Installing Jekyll
 
 Now we will install Jekyll. Github provides the same version of Jekyll as exists on the GitHub Pages servers. This ensures we aren't accidentally using features that have either been deprecated or simply don't exist yet! We will also install a few utilities that are provided by github to make the process easier.
 
@@ -100,7 +119,7 @@ gem install github-pages
 gem install wdm
 ```
 
-### 5) Building the Wiki using Jekyll
+### Building the Wiki using Jekyll
 
 In this step we will ask Jekyll to parse the wiki source files (e.g. Markdown files and configurations), and build the final static website.
 
@@ -132,10 +151,121 @@ Jekyll will build the website, and will run a local web server and, by default, 
 
 Shutdown the server by pressing CTRL-C in terminal.
 
-### 6) Make Necessary Changes
+### Make Necessary Changes
 
 Now you can make the necessary changes to the Wiki pages
 
-### 7) Publishing the Changes
+### Publishing the Changes
 
 Once you are done with your changes, submit a pull-request through Github. If you don't have write access to the repo, an author will review your pull-request and will merge or comment. Please follow the pull-request untill your changes are completely merged into the master.
+
+# Understanding Wiki Source Files
+
+As mentioned above, the wiki is built using [Jekyll](http://jekyllrb.com/) and is hosted on [GitHub Pages](https://pages.github.com/)
+
+The structure of the source is as explained below:
+
+- `_layouts/` contains Jekyll page layouts of various types (e.g. full-width page vs page with sidebar)
+- `_includes/` contains Jekylll page fragments used across various page layouts
+- `pages/` contains the Wiki contents grouped by langauge and wiki version
+- `static/` contains all static files
+  - `css/` contains all stylesheets for generated pages
+  - `images/` contains all images used across the wiki contents
+- `_config.yml` Jekyll site configs file (see the config file for more information on each available setting)
+- `GemFile*` Ruby gemfile listing the ruby dependencies
+- `index.md` Root of the Wiki. It redirects the visitor to default langauge and Wiki version (defaults are set in the site configs file)
+- `readme.md`: This Markdown document
+
+## Page Metadata
+
+Each page must contain some required metadata at the top of the page.
+
+```
+---
+title: Components for Revit
+order: 2
+---
+```
+
+Required metadata are
+
+- **Title**
+- **Order** (if page is part of a list of similar content e.g. `samples/`)
+- **Language** Set automatically by site configuration. do not set manually
+- **Version** Set automatically by site configuration. do not set manually
+- **Category** Set automatically by site configuration. do not set manually
+- **Layout** Default layout is set automatically by site configuration. override only when your page layout is different from default. See site config file for default layout
+
+## Page Layouts
+
+There are there main layouts created for this wiki. You can specify the layout using the `layout:` directive on the page metadata e.g. `layout: page-h2-toc`
+
+- `_layouts/page-fullwidth.html` fills all the horizontal space of a wiki page
+- `_layouts/page-h2-toc.html` page with sidebar listing `h2 (##)` and `h3 (###)` elements inside page contents
+- `_layouts/page-list-toc.html` page with sidebar listing all pages of the same category, version, and language. Each active page also lists `h2 (##)` elements inside page contents as secondary links
+
+## Adding a New Langauge
+
+To add a new language to the Wiki, a translator generally starts with the English version of the wiki and translates the content. Copy the `pages/_en` content to a new directory under `pages/` with your [ISO 693-1 langauge code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes). For example to translate the English wiki to Persian, copy the `pages/_en` content to `pages/_fa`
+
+Now open the site config file and add the new language to the Jekyll site collections:
+
+```yaml
+collections:
+  en:
+    output: true
+    permalink: /en/:path
+
+  fa:
+    output: true
+    permalink: /fa/:path
+```
+
+Instead of adding `language: fa` to the metadata for every single page, we will edit the site config file to add this metadata to the new pages automatically based on their location in directory structure.
+
+Open the site configurations and add a new scope under `defaults:` for the new langauge:
+
+```yaml
+defaults:
+  - scope:
+      path: ""
+      type: en
+    values:
+      language: en
+
+  - scope:
+      path: ""
+      type: fa
+    values:
+      language: fa
+```
+
+Jekyll site config file automatically sets the correct version and categories on the new page.
+
+Once the new language directory is created, open each page under each version and translate the page contents.
+
+
+## Adding a New Wiki Version
+
+To add a new version to the Wiki, browse under the site contents for your langauge and create a new version directory following the X.X format. For example to add version `1.5` to the wiki for English langauge we need to create `pages/_en/1.5/` directory.
+
+Instead of adding `version: 1.5` to the metadata for every single page, we will edit the site config file to add this metadata to the new pages automatically based on their location in directory structure.
+
+Open the site configurations and add a new scope under `defaults:` for the new version:
+
+```yaml
+defaults:
+  - scope:
+      path: "pages/*/1.0"
+    values:
+      version: 1.0
+
+  - scope:
+      path: "pages/*/1.5"
+    values:
+      version: 1.5
+```
+
+Jekyll site config file automatically sets the correct layout and categories on the new page.
+
+Copy the wiki contents from the previous version to this directory and edit the pages as desired.
