@@ -14,7 +14,7 @@
 - [Understanding Wiki Source Files](#understanding-wiki-source-files)
   - [Page Metadata](#page-metadata)
   - [Page Layouts](#page-layouts)
-  - [Adding a New Langauge](#adding-a-new-langauge)
+  - [Adding a New Language](#adding-a-new-language)
   - [Adding a New Wiki Version](#adding-a-new-wiki-version)
 
 # Rhino.Inside.Revit Wiki
@@ -167,13 +167,13 @@ The structure of the source is as explained below:
 
 - `_layouts/` contains Jekyll page layouts of various types (e.g. full-width page vs page with sidebar)
 - `_includes/` contains Jekylll page fragments used across various page layouts
-- `pages/` contains the Wiki contents grouped by langauge and wiki version
+- `pages/` contains the Wiki contents grouped by language and wiki version
 - `static/` contains all static files
   - `css/` contains all stylesheets for generated pages
   - `images/` contains all images used across the wiki contents
 - `_config.yml` Jekyll site configs file (see the config file for more information on each available setting)
 - `GemFile*` Ruby gemfile listing the ruby dependencies
-- `index.md` Root of the Wiki. It redirects the visitor to default langauge and Wiki version (defaults are set in the site configs file)
+- `index.md` Root of the Wiki. It redirects the visitor to default language and Wiki version (defaults are set in the site configs file)
 - `readme.md`: This Markdown document
 
 ## Page Metadata
@@ -204,9 +204,9 @@ There are there main layouts created for this wiki. You can specify the layout u
 - `_layouts/page-h2-toc.html` page with sidebar listing `h2 (##)` and `h3 (###)` elements inside page contents
 - `_layouts/page-list-toc.html` page with sidebar listing all pages of the same category, version, and language. Each active page also lists `h2 (##)` elements inside page contents as secondary links
 
-## Adding a New Langauge
+## Adding a New Language
 
-To add a new language to the Wiki, a translator generally starts with the English version of the wiki and translates the content. Copy the `pages/_en` content to a new directory under `pages/` with your [ISO 693-1 langauge code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes). For example to translate the English wiki to Persian, copy the `pages/_en` content to `pages/_fa`
+To add a new language to the Wiki, a translator generally starts with the English version of the wiki and translates the content. Copy the `pages/_en` content to a new directory under `pages/` with your [ISO 693-1 language code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes). For example to translate the English wiki to Persian, copy the `pages/_en` content to `pages/_fa`
 
 Now open the site config file and add the new language to the Jekyll site collections:
 
@@ -223,7 +223,7 @@ collections:
 
 Instead of adding `language: fa` to the metadata for every single page, we will edit the site config file to add this metadata to the new pages automatically based on their location in directory structure.
 
-Open the site configurations and add a new scope under `defaults:` for the new langauge:
+Open the site configurations and add a new scope under `defaults:` for the new language:
 
 ```yaml
 defaults:
@@ -247,7 +247,7 @@ Once the new language directory is created, open each page under each version an
 
 ## Adding a New Wiki Version
 
-To add a new version to the Wiki, browse under the site contents for your langauge and create a new version directory following the X.X format. For example to add version `1.5` to the wiki for English langauge we need to create `pages/_en/1.5/` directory.
+To add a new version to the Wiki, browse under the site contents for your language and create a new version directory following the X.X format. For example to add version `1.5` to the wiki for English language we need to create `pages/_en/1.5/` directory.
 
 Instead of adding `version: 1.5` to the metadata for every single page, we will edit the site config file to add this metadata to the new pages automatically based on their location in directory structure.
 

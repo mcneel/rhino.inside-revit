@@ -21,7 +21,7 @@ forum_url: "https://discourse.mcneel.com/c/rhino-inside/Revit"
 # copyright notice (copyright year is dynamic)
 copyright: Robert McNeel & Associates. All Rights Reserved.
 
-# site default version and langauge
+# site default version and language
 version: beta
 language: en
 
