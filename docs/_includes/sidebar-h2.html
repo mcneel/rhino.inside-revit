@@ -1,63 +1,61 @@
-<nav id="sidebar-toc" class="navbar sidebar">
-    <ul class="nav">
-        <!-- Find the h2 group and any h3 subgroups -->
-        {% assign groups = content | split:'<h2 id="' %}
+<ul class="nav">
+    <!-- Find the h2 group and any h3 subgroups -->
+    {% assign groups = content | split:'<h2 id="' %}
 
-        {% for group in groups offset:1 %}
-            {% assign dividedGroup = group | split:'<' %}
+    {% for group in groups offset:1 %}
+        {% assign dividedGroup = group | split:'<' %}
 
-            {% if dividedGroup[1] contains 'a href="' %}
-                {% assign groupToProcess = dividedGroup[1] %}
-                {% assign anchorTag = groupToProcess | split:'">' %}
-                {% assign groupTitle = anchorTag[1] %}
-                {% assign anchorToProcess = anchorTag[0] | split:'="' %}
-                {% assign linkToProcess = anchorToProcess[1] | split:'guides/'%}
-                {% assign anchorTag = linkToProcess[1] %}
+        {% if dividedGroup[1] contains 'a href="' %}
+            {% assign groupToProcess = dividedGroup[1] %}
+            {% assign anchorTag = groupToProcess | split:'">' %}
+            {% assign groupTitle = anchorTag[1] %}
+            {% assign anchorToProcess = anchorTag[0] | split:'="' %}
+            {% assign linkToProcess = anchorToProcess[1] | split:'guides/'%}
+            {% assign anchorTag = linkToProcess[1] %}
 
-                <li class="nav-item">
-                    <a class="nav-link" href="#{{anchorTag}}">{{ groupTitle | truncate: 36 }}</a>
-                    {% if group contains '<h3 id="' %}
-                        <ul>
-                            {% assign subgroups = group | split:'<h3 id="' %}
+            <li class="nav-item">
+                <a class="nav-link page-link" href="#{{anchorTag}}">{{ groupTitle | truncate: 36 }}</a>
+                {% if include.depth == 2 and group contains '<h3 id="' %}
+                    <ul class="nav">
+                        {% assign subgroups = group | split:'<h3 id="' %}
 
-                            {% for subgroup in subgroups offset:1 %}
-                                {% assign dividedSubgroup = subgroup | split:'<' %}
-                                {% assign subgroupToProcess = dividedSubgroup[0] %}
-                                {% assign subgroupHeading = subgroupToProcess | split:'">' %}
-                                {% assign subgroupHandle = subgroupHeading[0] %}
-                                {% assign subgroupTitle = subgroupHeading[1] %}
-                                <li>
-                                    <a href="#{{subgroupHandle}}">{{ subgroupTitle | truncate: 36 }}</a>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                </li>
-            {% else %}
-                {% assign groupToProcess = dividedGroup[0] %}
-                {% assign groupHeading = groupToProcess | split:'">' %}
-                {% assign groupHandle = groupHeading[0] %}
-                {% assign groupTitle = groupHeading[1] %}
-                <li class="nav-item">
-                    <a class="nav-link" href="#{{groupHandle}}">{{ groupTitle | truncate: 36 }}</a>
-                    {% if group contains '<h3 id="' %}
-                        <ul>
-                            {% assign subgroups = group | split:'<h3 id="' %}
+                        {% for subgroup in subgroups offset:1 %}
+                            {% assign dividedSubgroup = subgroup | split:'<' %}
+                            {% assign subgroupToProcess = dividedSubgroup[0] %}
+                            {% assign subgroupHeading = subgroupToProcess | split:'">' %}
+                            {% assign subgroupHandle = subgroupHeading[0] %}
+                            {% assign subgroupTitle = subgroupHeading[1] %}
+                            <li class="nav-item">
+                                <a class="nav-link page-link" href="#{{subgroupHandle}}">{{ subgroupTitle | truncate: 36 }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </li>
+        {% else %}
+            {% assign groupToProcess = dividedGroup[0] %}
+            {% assign groupHeading = groupToProcess | split:'">' %}
+            {% assign groupHandle = groupHeading[0] %}
+            {% assign groupTitle = groupHeading[1] %}
+            <li class="nav-item">
+                <a class="nav-link page-link" href="#{{groupHandle}}">{{ groupTitle | truncate: 36 }}</a>
+                {% if include.depth == 2 and group contains '<h3 id="' %}
+                    <ul class="nav">
+                        {% assign subgroups = group | split:'<h3 id="' %}
 
-                            {% for subgroup in subgroups offset:1 %}
-                                {% assign dividedSubgroup = subgroup | split:'<' %}
-                                {% assign subgroupToProcess = dividedSubgroup[0] %}
-                                {% assign subgroupHeading = subgroupToProcess | split:'">' %}
-                                {% assign subgroupHandle = subgroupHeading[0] %}
-                                {% assign subgroupTitle = subgroupHeading[1] %}
-                                <li>
-                                    <a href="#{{subgroupHandle}}">{{ subgroupTitle | truncate: 36 }}</a>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                </li>
-            {% endif %}
-        {% endfor %}
-    </ul>
-</nav>
+                        {% for subgroup in subgroups offset:1 %}
+                            {% assign dividedSubgroup = subgroup | split:'<' %}
+                            {% assign subgroupToProcess = dividedSubgroup[0] %}
+                            {% assign subgroupHeading = subgroupToProcess | split:'">' %}
+                            {% assign subgroupHandle = subgroupHeading[0] %}
+                            {% assign subgroupTitle = subgroupHeading[1] %}
+                            <li class="nav-item">
+                                <a class="nav-link page-link" href="#{{subgroupHandle}}">{{ subgroupTitle | truncate: 36 }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </li>
+        {% endif %}
+    {% endfor %}
+</ul>

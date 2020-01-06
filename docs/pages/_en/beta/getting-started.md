@@ -3,6 +3,7 @@ title: Getting Started with Rhino.Inside.Revit
 layout: page-h2-toc
 ---
 
+## Install
 Here is how to get started with Rhino/Grasshopper in Revit.
 
 {% include youtube_player.html id="x_MU3vO1_II" %}
@@ -84,6 +85,26 @@ Using a simple Grasshopper component seems the best way to get Rhino geometry in
 
 Within the Grasshopper Revit Toolbar is the Directshape Component.  Along with the Direct Shape Category component, geometry can be selected in Rhino and sent to Revit.
 
+### What is
+
+ <img src="/static/images/Rhino.png" width="35px">  While there is no direct command in Rhino to push geometry into Revit directly there are a number of simple ways Rhino geometry can be pushed into Revit from Rhino.  
+
+When Revit starts with the Rhino.Inside add-on, Rhino and Grasshopper do startup in the background. Use the Rhino button in the Revit Toolbar to bring up the Rhino running inside.
+
+Using a simple Grasshopper component seems the best way to get Rhino geometry into Revit. Press the Grasshopper button in Rhino to start Grasshopper.
+
+Within the Grasshopper Revit Toolbar is the Directshape Component.  Along with the Direct Shape Category component, geometry can be selected in Rhino and sent to Revit.
+
+### Why is
+
+ <img src="/static/images/Rhino.png" width="35px">  While there is no direct command in Rhino to push geometry into Revit directly there are a number of simple ways Rhino geometry can be pushed into Revit from Rhino.  
+
+When Revit starts with the Rhino.Inside add-on, Rhino and Grasshopper do startup in the background. Use the Rhino button in the Revit Toolbar to bring up the Rhino running inside.
+
+Using a simple Grasshopper component seems the best way to get Rhino geometry into Revit. Press the Grasshopper button in Rhino to start Grasshopper.
+
+Within the Grasshopper Revit Toolbar is the Directshape Component.  Along with the Direct Shape Category component, geometry can be selected in Rhino and sent to Revit.
+
 
 ![Rhino sending geometry to Revit](/static/images/Sample2.jpg)
 
@@ -113,4 +134,5 @@ The Rhino.Python editor can be called up from within Revit. By referencing the R
 ![Rhino sending geometry to Revit](/static/images/Sample7.png)
 
 ## Grasshopper Player
+
 <img src="/static/images/GrasshopperPlayer.png" width="35px"> The Grasshopper Player will play a single grasshopper definition and return the results to Revit.
