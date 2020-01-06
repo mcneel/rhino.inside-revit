@@ -14,8 +14,13 @@
             <a class="dropdown">
                 <a class="dropdown-toggle" id="versionSelector" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></a>
                 <div class="dropdown-menu" aria-labelledby="versionSelector">
-                    <a class="version-link" href="#" onclick="navigateTo('', '1.0')">v1.0</a>
-                    <a class="version-link" href="#" onclick="navigateTo('', 'beta')">Latest Beta</a>
+                    {% for version in site.versions %}
+                        {% if version == 'beta' %}
+                            <a class="version-link" href="#" onclick="navigateTo('', '{{ version }}')">{{ version }}</a>
+                        {% else %}
+                            <a class="version-link" href="#" onclick="navigateTo('', '{{ version }}')">v{{ version }}</a>
+                        {% endif %}
+                    {% endfor %}
                 </div>
             </a>
             <!-- Other pages -->

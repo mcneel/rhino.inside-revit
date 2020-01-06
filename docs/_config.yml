@@ -51,6 +51,11 @@ collections:
     output: true
     permalink: /en/:path
 
+# site versions. ordered from most recent to oldest
+versions:
+  - 1.0
+  - beta
+
 # default metadata for pages based on their path
 defaults:
   # default layout for all pages
