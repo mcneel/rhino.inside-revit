@@ -201,3 +201,16 @@ body {
 .editgithub_link {
     margin-top: 5px;
 }
+
+/* content elements */
+.img-fluid {
+    width: 100%;
+}
+
+a.btn-dark {
+    color: white;
+}
+
+a.btn-dark:hover {
+    color: white;
+}

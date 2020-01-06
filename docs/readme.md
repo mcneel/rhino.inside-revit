@@ -251,14 +251,22 @@ To add a new version to the Wiki, browse under the site contents for your langau
 
 Instead of adding `version: 1.5` to the metadata for every single page, we will edit the site config file to add this metadata to the new pages automatically based on their location in directory structure.
 
-Open the site configurations and add the new version to the list of site versions:
+Open the site configurations and add the new version to the list of site versions. You also need to provide the download links to Rhino.Inside and Rhino installers for the new version:
 
 ```yaml
 # site versions. ordered from most recent to oldest
+# id: use a valid id for each version. this id is used to retrieve info about
+# the version in liquid tags e.g. {{ site.versions.one.rir_download }}
+#   version: version directory name
+#   name: version pretty name e.g. v1.0
+#   rir_download: download link for rhino inside Revit
+#   rhino_download: download link for Rhino
 versions:
-  - 1.5
-  - 1.0
-  - beta
+  onefive:
+    version: 1.5
+    name: v1.5
+    rir_download: 
+    rhino_download: 
 ```
 
 Add a new scope under `defaults:` for the new version:
