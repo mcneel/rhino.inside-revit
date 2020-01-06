@@ -27,6 +27,8 @@ The column should populate the points along the curve in both Rhino and Revit.
 
 The inputs needed to make a Family definition are a point and the BREP geometry. In this case the first point on the curve serves as the point under the column assembly.  The column is setup with the foundation, column and small shelf shape.
 
+### Test
+
 The key to making a new family and being able to insert it with accuracy is to move the Rhino BREPs to the world origin.  Revit will always make new Families centered at the Origin (0,0,0).  Here the first point in the list is taken out of the list of points, a vector is made from that point to 0,0,0 and then that transform is applied to the Breps.  This places the geometry at 0,0,0 in Rhino temporarily.
 
 ![Move Rhino Geometry to 0,0,0](/static/images/column_family_move.jpg)

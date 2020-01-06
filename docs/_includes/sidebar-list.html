@@ -12,7 +12,7 @@
                     {% if guide.path == page.path %}
                         <a class="nav-link page-link active" href="{{ guide.url | prepend: site.baseurl }}" title="{{ guide.description }}">{{ guide.title }}</a>
                         <nav id="sidebar-toc">
-                            {% include sidebar-h2.html %}
+                            {% include sidebar-h2.html depth=1 %}
                         </nav>
                     {% else %}
                         <a class="nav-link page-link" href="{{ guide.url | prepend: site.baseurl }}" title="{{ guide.description }}">{{ guide.title }}</a>

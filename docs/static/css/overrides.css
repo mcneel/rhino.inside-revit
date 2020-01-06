@@ -94,10 +94,12 @@ body {
     background: transparent;
 }
 
+.sidebar .nav .nav-item .nav a,
 .sidebar nav a {
     margin-left: 20px;
     font-size: 12px;
 }
+
 
 .site-nav svg {
     margin-top: -4px;

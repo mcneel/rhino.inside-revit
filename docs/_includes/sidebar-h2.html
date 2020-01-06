@@ -14,9 +14,9 @@
             {% assign anchorTag = linkToProcess[1] %}
 
             <li class="nav-item">
-                <a class="nav-link" href="#{{anchorTag}}">{{ groupTitle | truncate: 36 }}</a>
-                {% if group contains '<h3 id="' %}
-                    <ul>
+                <a class="nav-link page-link" href="#{{anchorTag}}">{{ groupTitle | truncate: 36 }}</a>
+                {% if include.depth == 2 and group contains '<h3 id="' %}
+                    <ul class="nav">
                         {% assign subgroups = group | split:'<h3 id="' %}
 
                         {% for subgroup in subgroups offset:1 %}
@@ -25,8 +25,8 @@
                             {% assign subgroupHeading = subgroupToProcess | split:'">' %}
                             {% assign subgroupHandle = subgroupHeading[0] %}
                             {% assign subgroupTitle = subgroupHeading[1] %}
-                            <li>
-                                <a href="#{{subgroupHandle}}">{{ subgroupTitle | truncate: 36 }}</a>
+                            <li class="nav-item">
+                                <a class="nav-link page-link" href="#{{subgroupHandle}}">{{ subgroupTitle | truncate: 36 }}</a>
                             </li>
                         {% endfor %}
                     </ul>
@@ -38,9 +38,9 @@
             {% assign groupHandle = groupHeading[0] %}
             {% assign groupTitle = groupHeading[1] %}
             <li class="nav-item">
-                <a class="nav-link" href="#{{groupHandle}}">{{ groupTitle | truncate: 36 }}</a>
-                {% if group contains '<h3 id="' %}
-                    <ul>
+                <a class="nav-link page-link" href="#{{groupHandle}}">{{ groupTitle | truncate: 36 }}</a>
+                {% if include.depth == 2 and group contains '<h3 id="' %}
+                    <ul class="nav">
                         {% assign subgroups = group | split:'<h3 id="' %}
 
                         {% for subgroup in subgroups offset:1 %}
@@ -49,8 +49,8 @@
                             {% assign subgroupHeading = subgroupToProcess | split:'">' %}
                             {% assign subgroupHandle = subgroupHeading[0] %}
                             {% assign subgroupTitle = subgroupHeading[1] %}
-                            <li>
-                                <a href="#{{subgroupHandle}}">{{ subgroupTitle | truncate: 36 }}</a>
+                            <li class="nav-item">
+                                <a class="nav-link page-link" href="#{{subgroupHandle}}">{{ subgroupTitle | truncate: 36 }}</a>
                             </li>
                         {% endfor %}
                     </ul>
