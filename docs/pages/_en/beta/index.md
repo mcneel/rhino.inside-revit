@@ -7,8 +7,7 @@ layout: page-fullwidth
 <img src="https://via.placeholder.com/1024x600.png?text=Intro+Video" class="img-fluid" alt="Responsive image">
 
 <!-- download links -->
-<a type="button" class="btn btn-dark" href="{{ site.versions.beta.rir_download }}" target="_blank">Download {{ site.terms.rir }} <small>Beta</small></a>
-<a type="button" class="btn btn-dark" href="{{ site.versions.beta.rhino_download }}" target="_blank">Download {{ site.terms.rhino }}</a>
+{% include download_buttons.html version=site.versions.beta %}
 
 # {{ site.title }}
 
