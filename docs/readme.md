@@ -251,7 +251,17 @@ To add a new version to the Wiki, browse under the site contents for your langau
 
 Instead of adding `version: 1.5` to the metadata for every single page, we will edit the site config file to add this metadata to the new pages automatically based on their location in directory structure.
 
-Open the site configurations and add a new scope under `defaults:` for the new version:
+Open the site configurations and add the new version to the list of site versions:
+
+```yaml
+# site versions. ordered from most recent to oldest
+versions:
+  - 1.5
+  - 1.0
+  - beta
+```
+
+Add a new scope under `defaults:` for the new version:
 
 ```yaml
 defaults:
