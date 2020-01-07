@@ -23,7 +23,7 @@ Let's install {{ site.terms.rhino }} first
 - Run the installer and go through the setup process until {{ site.terms.rhino }} is fully installed
 - Run {{ site.terms.rhino }} and make sure it is licensed and runs with no issues
 
-No let's install {{ site.terms.rir }}
+Now let's install {{ site.terms.rir }}
 
 - Run the installer and go through the setup process until {{ site.terms.rir }} is fully installed
 
