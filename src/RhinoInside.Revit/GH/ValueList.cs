@@ -427,7 +427,7 @@ namespace RhinoInside.Revit.GH.Parameters
                 }
 
                 var footnoteBounds = new RectangleF(bounds.Left, bounds.Bottom - 17, bounds.Width - 3, 17);
-                graphics.DrawString($"{Owner.ListItems.Count} items, {Owner.VolatileDataCount} selected.", GH_FontServer.StandardAdjusted, Brushes.Gray, footnoteBounds, GH_TextRenderingConstants.FarCenter);
+                graphics.DrawString($"{Owner.ListItems.Count} items, {Owner.VolatileDataCount} selected", GH_FontServer.StandardAdjusted, Brushes.Gray, footnoteBounds, GH_TextRenderingConstants.FarCenter);
               }
             }
 
