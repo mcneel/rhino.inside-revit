@@ -1,138 +1,227 @@
 ---
 title: Getting Started with Rhino.Inside.Revit
-layout: page-h2-toc
+layout: ltr/page-h2-toc
 ---
 
-## Install
-Here is how to get started with Rhino/Grasshopper in Revit.
+## What is {{ site.terms.rir }}
 
-{% include youtube_player.html id="x_MU3vO1_II" %}
+[Rhino.Inside](https://github.com/mcneel/rhino.inside) is a new technology developed by {{ site.terms.mcneel }} that allows embedding {{ site.terms.rhino }} into other applications. Rhino.Inside is being embedded into many applications from a wide variety of disciplines.
 
-After installing Rhino.Inside Revit, a toolbar will show up in Revit under Add-ons.  Press the Rhinoceros button to load Rhino.inside.
+{{ site.terms.rir }} is one of the Rhino.Inside's most exciting projects. It is an addon for {{ site.terms.revit }} that allows {{ site.terms.rhino }} to be loaded into the memory of Revit just like other Revit addons.
 
-<img src="/static/images/rhino-button-addin.png" width="100">  
+{{ site.terms.rir }} brings the power of {{ site.terms.rhino }} and Grasshopper to the {{ site.terms.revit }} environment
 
-Once Rhino.inside is successfully loaded, a Rhinoceros toolbar will appear in Revit:
+## Installation
 
-<img src="/static/images/revit-toolbar.png" width="100%" align="center">
+Download {{ site.terms.rir }} and {{ site.terms.rhino }} from the links below
 
-<table style="width:100%">
-  <tr>
-    <th width="48px">Icon</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td width="48px"><img src="/static/images/HelpButton.png" alt="Help Button" width="48"></td>
-    <td>Contains links to all the help resources for Rhino.inside Revit.</td>
-  </tr>
-  <tr>
-    <td><img src="/static/images/Rhino.png" alt="Rhino Icon" width="48"></td>
-    <td>The Rhino icon will start Rhino to run inside Revit. Grasshopper can also be run from within that Rhino instance.</td>
-  </tr>
-  <tr>    
-      <td><img src="/static/images/Python.png" alt="Rhino Icon" width="48"></td>    
-      <td>Run the Rhino.Python editor that can be used to write Python scripts that combine both the Rhino and Revit API in the same script. See <a href="Autodesk/Revit/src/RhinoInside.Revit/Samples/Sample7.py">Sample 7</a> for a detailed look at the Python code.</td>  
-  </tr>
-  <tr>          
-      <td><img src="/static/images/Grasshopper.png" alt="Grasshopper Icon" width="48"></td>
-      <td>Open the Grasshopper Canvas in Revit.</td>    
-  </tr>
-    <tr>          
-      <td><img src="/static/images/GrasshopperPlayer.png" alt="Grasshopper Player" width="48"></td>
-      <td>The Grasshopper Player will run any existing Grasshopper definition and immediately return to Revit.</td>
-    </tr>
-  <tr>          
-      <td><img src="/static/images/Preview_Off_24x24.png" alt="Preview Off Icon" width="48"></td>
-      <td>Turns off the real-time preview by Grasshopepr in Revit.</td>    
-  </tr>
-    <tr>          
-      <td><img src="/static/images/Preview_Wireframe_24x24.png" alt="Preview Wireframe Icon" width="48"></td>
-      <td>Grasshopper will use a wireframe display for real-time preview of geometry in Revit.</td>    
-    </tr>
-    <tr>          
-      <td><img src="/static/images/Preview_Shaded_24x24.png" alt="Preview Shaded Icon" width="48"></td>
-      <td>Grasshopper will use a shaded display mode for real-time preview of geometry in Revit.</td>
-    </tr>
-    <tr>          
-      <td><img src="/static/images/Recompute_24x24.png" alt="Grasshopper Recompute" width="48"></td>
-      <td>Forces a recompute to the loaded Grasshopper definitions.</td>
-  </tr>
-    <tr>          
-      <td><img src="/static/images/Bake_24x24.png" alt="Grasshopper Recompute" width="48"></td>
-      <td>Bakes the currently selected Rhino Geometry into the currently selected Category in Revit.</td>
-  </tr>
-    <tr>          
-      <td><img src="/static/images/Sample1.png" alt="Sample 1 Icon" width="48"></td>
-      <td>Sample 1 will simply draw a Rhino sphere in Revit as a example for developers.</td>
-    </tr>
-    <tr>          
-      <td><img src="/static/images/Sample6.png" alt="Sample 6 Icon" width="48"></td>
-      <td>Sample 6 will toggle the visibility of Rhino geometry in Revit.</td>
-    </tr>
-    <tr>          
-      <td><img src="/static/images/Sample8.png" alt="Sample 8 Icon" width="48"></td>
-      <td>Sample 8 will allow Revit to open Rhino .3DM files directly.</td>
-    </tr>
-</table>
+<!-- download links -->
+{% include ltr/download_buttons.html version=site.versions.beta %}
 
-## Rhino in Revit
+Let's install {{ site.terms.rhino }} first
 
- <img src="/static/images/Rhino.png" width="35px">  While there is no direct command in Rhino to push geometry into Revit directly there are a number of simple ways Rhino geometry can be pushed into Revit from Rhino.  
+- Run the installer and go through the setup process until {{ site.terms.rhino }} is fully installed
+- Run {{ site.terms.rhino }} and make sure it is licensed and runs with no issues
 
-When Revit starts with the Rhino.Inside add-on, Rhino and Grasshopper do startup in the background. Use the Rhino button in the Revit Toolbar to bring up the Rhino running inside.
+No let's install {{ site.terms.rir }}
 
-Using a simple Grasshopper component seems the best way to get Rhino geometry into Revit. Press the Grasshopper button in Rhino to start Grasshopper.
+- Run the installer and go through the setup process until {{ site.terms.rir }} is fully installed
 
-Within the Grasshopper Revit Toolbar is the Directshape Component.  Along with the Direct Shape Category component, geometry can be selected in Rhino and sent to Revit.
+Now that we have installed both dependencies, we can proceed to loading {{ site.terms.rir }}
 
-### What is
+## Loading {{ site.terms.rir }}
 
- <img src="/static/images/Rhino.png" width="35px">  While there is no direct command in Rhino to push geometry into Revit directly there are a number of simple ways Rhino geometry can be pushed into Revit from Rhino.  
+Launch {{ site.terms.revit }}. You will be prompted to confirm loading {{ site.terms.rir }}. Make sure to press **Always Load** to skip this dialog in the future.
 
-When Revit starts with the Rhino.Inside add-on, Rhino and Grasshopper do startup in the background. Use the Rhino button in the Revit Toolbar to bring up the Rhino running inside.
+![](/static/images/started/revit-prompt.png)
 
-Using a simple Grasshopper component seems the best way to get Rhino geometry into Revit. Press the Grasshopper button in Rhino to start Grasshopper.
+After load is complete, note the new *Rhinocerous* panel under the *Addins* tab
 
-Within the Grasshopper Revit Toolbar is the Directshape Component.  Along with the Direct Shape Category component, geometry can be selected in Rhino and sent to Revit.
+![](/static/images/started/rir-addon.png)
 
-### Why is
+Click on the *Rhino* button to start loading {{ site.terms.rir }}. The addon, attempts to load {{ site.terms.rhino }} inside Revit's memory and make sure it is licensed. Once the load process is completed, a new *Rhinoceros* toolbar will appear in Revit.
 
- <img src="/static/images/Rhino.png" width="35px">  While there is no direct command in Rhino to push geometry into Revit directly there are a number of simple ways Rhino geometry can be pushed into Revit from Rhino.  
+![](/static/images/started/revit-toolbar.png)
 
-When Revit starts with the Rhino.Inside add-on, Rhino and Grasshopper do startup in the background. Use the Rhino button in the Revit Toolbar to bring up the Rhino running inside.
+The new toolbar contains many new buttons that give you access to
 
-Using a simple Grasshopper component seems the best way to get Rhino geometry into Revit. Press the Grasshopper button in Rhino to start Grasshopper.
+- {{ site.terms.rhino }} itself
+- Python IDE (with access to Revit API)
+- Grasshopper (with custom Revit components)
 
-Within the Grasshopper Revit Toolbar is the Directshape Component.  Along with the Direct Shape Category component, geometry can be selected in Rhino and sent to Revit.
+See [{{ site.terms.rir }} Interface]({% link _en/beta/reference/rir-interface.md %}) for a complete list of buttons in the *Rhinoceros* tab
+
+If you encountered any errors, please consult the [Known Issues]({% link _en/beta/reference/known-issues.md %}) page for a list of already known issues and their temporary workarounds.
+
+## Extracting Revit Geometry
+
+To get started, let's create a simple definition in Grasshopper to extract geometry of a Revit element. Grasshopper is by far one of the most exciting addons for Rhino and as part of the {{ site.terms.rir }} project has the potential to improve the design and documentation in {{ site.terms.revit }} dramatically.
+
+Open a simple Revit model and draw an single wall
+
+![](/static/images/started/revit-doc.png)
+
+Now open Grasshopper by clicking on the Grasshopper button in the new *Rhinoceros* tab
+
+![](/static/images/started/rir-gh.png)
+
+From the *Params > Revit* panel, add a *Geometric Element* parameter
+
+![](/static/images/started/rir-gcomp1.png)
+
+Now Right-Click on the component and Select One Revit Geometric Element. Grasshopper switches to Revit window and asks you to select a Revit element. Select the single Wall element we created earlier.
+
+![](/static/images/started/rir-gcomp2.png)
+
+Now drop a *Panel* component into the definition and connect the *Geometric Element* output to its input
+
+![](/static/images/started/rir-gcomp3.png)
+
+You can see that this parameter now contains the selected wall element.
+
+![](/static/images/started/rir-gcomp4.png)
+
+Let's grab the Wall geometry by using a Revit-specific component. From *Revit > Elements* add an *Element.Geometry* component.
+
+![](/static/images/started/rir-gcomp5.png)
+
+After passing the *Geometric Element* output to the input of the *Element.Geometry*, the new Revit-specific component extracts the Wall geometry from the Wall element using the Revit API. The geoemtry is then converted to Rhino Breps (since other Grasshopper components might not be familiar with Revit geometry) so it can be passed to other Grasshopper components for furthur processing.
+
+![](/static/images/started/rir-gcomp6.png)
+
+Similar to other Grasshopper geometric components, the output geometry is shows as preview in both Revit and Rhino viewports
+
+![](/static/images/started/rir-gcomp7.png)
+
+As you have seen, working with {{ site.terms.rir }} is very intuitive and simple. The Revit-specific Grasshopper components are one of the most important aspects of the {{ site.terms.rir }} project. Grasshopper script components (python and C#) can also be used to access Rhino or Revit APIs simultaneously and create cutom components in Grasshopper for your specific workflows.
+
+## Creating Revit Elements
+
+In the section above, we saw an example of converting Revit geometry into Rhino using custom Revit components in Grasshopper.
+
+Grasshopper has many other Revit-specific components. A subset of these components allow the user to create new content inside the Revit document.
+
+Let's create a simple wall in Revit using a few of these components. To create a wall in Revit we need:
+
+- A line that is the basis of the wall. It defines that start and end point
+- Wall type
+- Level to host the new wall
+- Wall height
+
+Open Rhino (inside Revit) and create a simple line
+
+![](/static/images/started/rir-rhino1.png)
+
+Now open Grasshopper and add a curve component. Right-Click the component and select the newly created line in Rhino.
+
+![](/static/images/started/rir-rhino2.png)
+
+Now from the *Revit > Input* panel and a *Model.CategoriesPicker* component,
+
+![](/static/images/started/rir-rhino3.png)
+
+and also let's add an *ElementType.ByName*, 
+
+![](/static/images/started/rir-rhino4.png)
+
+and a *Document.LevelPicker* component as well.
+
+![](/static/images/started/rir-rhino5.png)
+
+Finally let's add a Grasshopper integer slider as well to provide the height for our new wall
+
+![](/static/images/started/rir-rhino6.png)
+
+To create a wall, we are going to use a custom Grasshopper node that can create a Revit wall by curve. From *Revit > Build* panel add a *AddWall.ByCurve* component.
+
+![](/static/images/started/rir-rhino7.png)
+
+Now that we have all these components inside the grasshopper definition, let's organize them before connecting the parameters
+
+![](/static/images/started/rir-rhino8.png)
+
+From the list of categories shown on the *Model.CategoriesPicker* component, select the **Walls** category
+
+Now connect the output of the *Model.CategoriesPicker* to the input of *ElementType.ByName* (the input parameter is not visible by default. Drag the arrow over to the left of the component where the input parameter is expected to be)
+
+![](/static/images/started/rir-rhino9.png)
+
+The *ElementType.ByName* now shows a list of wall types collected from the model. Select a basic wall type. This wall type is going to be used to create the new wall.
+
+Now connect the rest of the components as shown below
+
+![](/static/images/started/rir-rhino10.png)
+
+The *AddWall.ByCurve* component now has all the information to create a new wall in Revit.
+
+![](/static/images/started/rir-rhino11.png)
+
+The same wall geometry is also visible in Rhino
+
+![](/static/images/started/rir-rhino12.png)
 
 
-![Rhino sending geometry to Revit](/static/images/Sample2.jpg)
+## Grasshopper Interactivity
 
+Arguably the most important feature of a visual programming environment like Grasshopper is the interactivity of its components. {{ site.terms.rir }} project brings this interactivity to the Revit environment and allows the designer to explore the design space a lot more efficiently and create novel solutions.
 
+Let's grab the height slider from the example above, and move it back and forth a bit.
 
+![](/static/images/started/rir-ghinter.gif)
 
-## Grasshopper in Revit
+Imagine the possibilities!
 
-<img src="/static/images/Grasshopper.png" width="35px"> Grasshopper can be started within Revit. Within Grasshopper there is a Revit toolbar of components which manage the interaction of Grasshopper and Revit.  
+## GHPython in Revit
 
-To find out more about these tools, see the [Grasshopper Components in Revit Guide](gh-components.md)
+Since Rhino is running inside the memory of Revit, potentially all the Rhino and Grasshopper addons can also have access to the Revit API. This feature makes the Python scripting in Rhino and Grasshopper exponentially more powerful since the python scripts can use Rhino API, Grasshopper API, and Revit API at the same time. Alongside these APIs, the {{ site.terms.rir }} addon also provides extra functionality that is mostly focused translating Rhino/Grasshopper data types to Revit and vice versa.
 
+Take a look at this example python script. It imports symbols from all the mentioned APIs into the script.
 
-![Rhino sending geometry to Revit](/static/images/gh-revit-roof.png)
+```python
+# adding references to the System, RhinoInside
+import clr
+clr.AddReference('System.Core')
+clr.AddReference('RevitAPI') 
+clr.AddReference('RevitAPIUI')
+clr.AddReference('RhinoInside.Revit')
 
+# now we can import symbols from various APIs
+from System import Enum
 
+# rhinoscript
+import rhinoscriptsyntax as rs
 
-## Python in Revit
+# rhino API
+import Rhino
 
-<img src="/static/images/Python.png" width="35px"> Both the Revit and Rhino APIs are available simultaneously with Rhino.inside.  There are two main ways Python is used.
+# grasshopper API
+import Grasshopper
 
-1. [Create custom Python components in Grasshopper that are Revit aware](ghpython-in-revit.md)
-2. [Use the Rhino Python editor to create Python Scripts](rhinopython-in-revit.md)
+# revit API
+from Autodesk.Revit import DB
 
-The Rhino.Python editor can be called up from within Revit. By referencing the Revit.Python namespaces, both the Rhino and Revit Python scripts can be called from a single Python script.
+# rhino.inside utilities
+import RhinoInside API
+from RhinoInside.Revit import Revit, Convert
 
-![Rhino sending geometry to Revit](/static/images/Sample7.png)
+# getting active Revit document
+doc = Revit.ActiveDBDocument
+```
 
-## Grasshopper Player
+So to use the example above, we can add the lines below to our script to read the geometry of input Revit element (`E`) using Revit API (`.Geometry[DB.Options()]`) and the pass that to the utility method provided by {{ site.terms.rir }} API to convert the Revit geometry into Rhino (`Convert.ToRhino()`) and finally pass the Rhino geometry to Grasshopper output.
 
-<img src="/static/images/GrasshopperPlayer.png" width="35px"> The Grasshopper Player will play a single grasshopper definition and return the results to Revit.
+```python
+O = Convert.ToRhino(
+    E.Geometry[DB.Options()]
+    )
+```
+
+![](/static/images/started/rir-ghpy.png)
+
+{{ site.terms.rir }} is already a very powerful tool but with Python and C# components, the possibilities are endless.
+
+## What's Next
+
+The *Guides* section listed on the navigation bar, is a great next point to see how {{ site.terms.rir }} can be used in tackling many design and documentation challenges in {{ site.terms.revit }}. The articles under this page provide many examples on creating Grasshopper definitions and writing your own custom scripts.
+
+Reach out to {{ site.terms.rir }} developers and the users community on the [forum]({{ site.forum_url }}) if you came across a special condition that might need a new component or a more detailed exaplanation.
