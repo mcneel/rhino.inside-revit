@@ -16,6 +16,11 @@
   - [Page Layouts](#page-layouts)
   - [Adding a New Language](#adding-a-new-language)
   - [Adding a New Wiki Version](#adding-a-new-wiki-version)
+- [Wiki Formatting Conventions](#wiki-formatting-conventions)
+  - [Frequently User Terms](#frequently-user-terms)
+  - [Linking Other Pages](#linking-other-pages)
+  - [Linking Images](#linking-images)
+  - [Linking Videos](#linking-videos)
 
 # Rhino.Inside.Revit Wiki
 
@@ -291,3 +296,62 @@ defaults:
 Jekyll site config file automatically sets the correct layout and categories on the new page.
 
 Copy the wiki contents from the previous version to this directory and edit the pages as desired.
+
+# Wiki Formatting Conventions
+
+## Frequently User Terms
+
+The site configuration file has a list of frequently used terms. When adding or modifying content, ensure that you are using liquid tags instead of typing these terms. This allows for modifying the terms later on without having to chase down all instance of the term across the Wiki.
+
+These terms are stored under `terms:` in site config file:
+
+```yaml
+terms:
+  mcneel: Robert McNeel & Associates
+  rhino: Rhino WIP
+  rir: Rhino.Inside.Revit
+  revit: Autodesk Revit®
+```
+
+You can refer to these terms using liquid tags. Jekyll will automatically place the correct term when rendering the page. In the example below `{{ site.terms.rir }}` will be replaced by `Rhino.Inside.Revit`
+
+```markdown
+- **Reference** This sections contains advanced and detailed documentation on various aspects of the {{ site.terms.rir }} project
+```
+
+## Linking Other Pages
+
+You can use the format below in your pages to point to other pages on the Wiki. Never refer to a page from another Wiki language or version. All the inter-page links should be restricted to pages of the same language and version. This helps keeping the Wiki in clean containers.
+
+```markdown
+{% link _en/beta/reference/rir-interface.md %}
+```
+
+You can combine this with markdown link convention so the link has a title
+
+```markdown
+[Rhino.Inside.Revit Interface]({% link _en/beta/reference/rir-interface.md %})
+```
+
+## Linking Images
+
+You can add images to your page using the standard markdown image links. Make sure the source image is properly organized under the `static/images` directory.
+
+```markdown
+![](/static/images/started/revit-doc.png)
+```
+
+## Linking Videos
+
+You can use the predefined html fragments to easily add videos to your pages. Currently fragments for YouTube and Vimeo has been implemented under `_includes/`. Each fragment takes the video Id as an argument and imports the necessary html elements into the final rendered page.
+
+
+```markdown
+{% include youtube_player.html id="DZ4y-ZbBkM" %}
+```
+
+or for Vimeo,
+
+```markdown
+{% include vimeo_player.html id="280080233" %}
+```
