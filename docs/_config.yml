@@ -6,10 +6,6 @@ description: Wiki, Guides, Samples, and Documentation for Rhino.Inside.Revit
 # site logo file
 logo: static/images/rir-logo-50x50.png
 
-# urls
-baseurl: "" # the subpath of your site, e.g. /blog/
-url: "" # the base hostname & protocol for your site
-
 # github info
 github_username:  mcneel
 repo_url: "https://github.com/mcneel/rhino.inside-revit/"
@@ -21,11 +17,16 @@ forum_url: "https://discourse.mcneel.com/c/rhino-inside/Revit"
 # copyright notice (copyright year is dynamic)
 copyright: Robert McNeel & Associates. All Rights Reserved.
 
+
+# DO NOT CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING ============================
+# urls
+baseurl: "" # the subpath of your site, e.g. /blog/
+url: "" # the base hostname & protocol for your site
+
 # site default version and language
 version: beta
 language: en
 
-# DO NOT CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING ============================
 # Ruby and Jekyll Settings
 gems:
   - jekyll-sitemap
@@ -41,9 +42,11 @@ encoding: utf-8
 markdown: kramdown
 kramdown:
   input: GFM
+# this directory is the root for all collections
 collections_dir: pages
 simple_search: http://google.com/search
 # =============================================================================
+
 # site dictionary: list of often used terms that need to be consistent
 terms:
   mcneel: Robert McNeel & Associates
