@@ -2,7 +2,7 @@
 ---
 <!DOCTYPE html>
 <html>
-{% include head.html %}
+{% include ltr/head.html %}
 
     <body>
         {% include googletagmanager.html %}
@@ -11,9 +11,9 @@
 
             <!-- Pick the correct header for the language -->
             {% if page.language %}
-            {% include /{{ page.language }}/header.html %}
+            {% include ltr/{{ page.language }}/header.html %}
             {% else %}
-            {% include header.html %}
+            {% include ltr/header.html %}
             {% endif %}
 
             <!-- Import child content -->
@@ -23,9 +23,9 @@
 
             <!-- Pick the correct footer for the language -->
             {% if page.language %}
-            {% include /{{page.language}}/footer.html %}
+            {% include ltr/{{page.language}}/footer.html %}
             {% else %}
-            {% include footer.html %}
+            {% include ltr/footer.html %}
             {% endif %}
         </div>
 

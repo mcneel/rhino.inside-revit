@@ -1,8 +1,8 @@
 ---
-layout: bootstrap
+layout: ltr/bootstrap
 ---
 <!-- 
-    Page with Side bar (automatically generated from H2 tags)
+    Page with Side bar (automatically generated from similar pages)
     ---------------------------------------------------------------------------
     |       link        /                                                     |
     |       link        /                                                     |
@@ -13,9 +13,9 @@ layout: bootstrap
  -->
 <div class="container-fluid">
     <div class="row-fluid">
-        <!--Nav Bar, with automatic highlighting on scroll -->
-        <nav class="sidebar" id="sidebar-toc">
-            {% include sidebar-h2.html depth=2 %}
+        <!--Nav Bar -->
+        <nav class="sidebar">
+            {% include ltr/sidebar-list.html %}
         </nav>
 
         <!--Main Content -->

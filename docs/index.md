@@ -1,3 +1,3 @@
 ---
-layout: main-index
+layout: ltr/main-index
 ---

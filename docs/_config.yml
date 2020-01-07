@@ -82,7 +82,7 @@ defaults:
   - scope:
       path: ""
     values:
-      layout: page-list-toc
+      layout: ltr/page-list-toc
 
   # set base metadata for all pages in each collection
   - scope:

@@ -1,5 +1,5 @@
 ---
 title: Getting Started with Rhino.Inside.Revit
-layout: page-h2-toc
+layout: ltr/page-h2-toc
 ---
 
