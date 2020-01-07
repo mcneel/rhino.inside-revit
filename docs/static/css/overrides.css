@@ -66,6 +66,10 @@ body {
     box-shadow: none;
 }
 
+.page-link.active {
+    font-weight: 600;
+}
+
 /* version selector on navigation bar */
 .dropdown:not(:first-child) {
     margin: 0;

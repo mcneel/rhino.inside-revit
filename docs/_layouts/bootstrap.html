@@ -47,6 +47,20 @@
             }
         </script>
 
+        <!-- highlight the active category link on navigation bar -->
+        <script>
+            var url = window.location.href;
+            if (url.endsWith('/getting-started') || url.includes('/getting-started/')) {
+                $('#cat_starting').addClass('active')
+            } else if (url.endsWith('/guides') || url.includes('/guides/')) {
+                $('#cat_guides').addClass('active')
+            } else if (url.endsWith('/samples') || url.includes('/samples/')) {
+                $('#cat_samples').addClass('active')
+            } else if (url.endsWith('/reference') || url.includes('/reference/')) {
+                $('#cat_reference').addClass('active')
+            }
+        </script>
+
         <script>
             $(document).ready(function() {
                 $('.post-content img').magnificPopup({
