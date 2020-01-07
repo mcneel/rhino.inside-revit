@@ -167,10 +167,10 @@ The structure of the source is as explained below:
 
 - `_layouts/` contains Jekyll page layouts of various types (e.g. full-width page vs page with sidebar)
   - `ltr/` contains layouts for Left-to-Right (LTR) languages
-  - `ltr/` contains layouts for Right-to-Left (RTL) languages
+  - `rtl/` contains layouts for Right-to-Left (RTL) languages
 - `_includes/` contains Jekylll page fragments used across various page layouts
   - `ltr/` contains fragments for Left-to-Right (LTR) languages
-  - `ltr/` contains fragments for Right-to-Left (RTL) languages
+  - `rtl/` contains fragments for Right-to-Left (RTL) languages
 - `pages/` contains the Wiki contents grouped by language and wiki version
 - `static/` contains all static files
   - `css/` contains all stylesheets for generated pages
