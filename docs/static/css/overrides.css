@@ -112,6 +112,12 @@ a:hover, a.site-title:hover, a.page-link:hover {
     min-height: 25em;
 }
 
+.page-content a, .page-content a:hover {
+    color: #111;
+    text-decoration: none;
+    font-weight: bold;
+}
+
 /* full-screen page contents */
 .wide-content img {
     width: 100%;
