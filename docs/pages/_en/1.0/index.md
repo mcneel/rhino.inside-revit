@@ -4,7 +4,7 @@ layout: page-fullwidth
 ---
 
 <!-- intro video -->
-<img src="https://via.placeholder.com/1024x600.png?text=Intro+Video" class="img-fluid" alt="Responsive image">
+![](https://via.placeholder.com/1024x600.png?text=Intro+Video)
 
 <!-- download links -->
 {% include download_buttons.html version=site.versions.one %}

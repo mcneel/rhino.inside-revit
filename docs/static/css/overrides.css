@@ -18,6 +18,12 @@ body {
     overflow: scroll;
 }
 
+a, a.site-title, a.page-link,
+a:hover, a.site-title:hover, a.page-link:hover {
+    color: #111;
+    text-decoration: none;
+}
+
 /* navigation bar overrides */
 .site-header {
     z-index: 1024;
@@ -85,6 +91,10 @@ body {
     line-height: 1.5;
 }
 
+.version-link:hover {
+    background-color: #f8f9fa;
+}
+
 .version-link:visited {
     color: #111;
 }
@@ -93,24 +103,34 @@ body {
     color: #999;
 }
 
-/* full-screen page contents */
+/* base page contents */
 .page-content {
     /*
-        set the minimum height to the footer does not get
-        too close to header or sidebar when page is empty
+    set the minimum height to the footer does not get
+    too close to header or sidebar when page is empty
     */
     min-height: 25em;
 }
 
-.post-content h2 {
-    border-bottom: 1px dashed #d0d0d0;
-    padding-bottom: 10px;
+/* full-screen page contents */
+.wide-content img {
+    width: 100%;
 }
 
 /* page with sidebar contents */
 .side-content {
     width: 75%;
     margin-left: 25%;
+}
+
+.side-content h1 {
+    margin-bottom: 20px;
+}
+
+/* post article contents */
+.post-content h2 {
+    border-bottom: 1px dashed #d0d0d0;
+    padding-bottom: 10px;
 }
 
 /* side bar */
@@ -212,10 +232,6 @@ body {
 }
 
 /* content elements */
-.img-fluid {
-    width: 100%;
-}
-
 a.btn-dark {
     color: white;
 }
