@@ -1,19 +1,14 @@
 using System;
-using System.Diagnostics;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
-using System.IO;
-
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
-
-using Rhino;
-
 using Grasshopper;
 using Grasshopper.Kernel;
+using Rhino;
 
 namespace RhinoInside.Revit
 {
@@ -23,13 +18,17 @@ namespace RhinoInside.Revit
     {
       if (MainWindowHandle == IntPtr.Zero)
       {
+        var result = Addin.CheckSetup(applicationUI.ControlledApplication);
+        if (result != Result.Succeeded)
+          return result;
+
 #if REVIT_2019
         MainWindowHandle = applicationUI.MainWindowHandle;
 #else
         MainWindowHandle = Process.GetCurrentProcess().MainWindowHandle;
 #endif
 
-        var result = Rhinoceros.Startup();
+        result = Rhinoceros.Startup();
         if (result != Result.Succeeded)
         {
           MainWindowHandle = IntPtr.Zero;
@@ -329,7 +328,7 @@ namespace RhinoInside.Revit
 #if REVIT_2019
     public static string CurrentUsersDataFolderPath => ApplicationUI.ControlledApplication.CurrentUsersDataFolderPath;
 #else
-    public static string CurrentUsersDataFolderPath => Path.Combine
+    public static string CurrentUsersDataFolderPath => System.IO.Path.Combine
     (
       Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
       "Autodesk",
@@ -339,7 +338,7 @@ namespace RhinoInside.Revit
 #endif
 
     public static Autodesk.Revit.UI.UIControlledApplication       ApplicationUI => Addin.ApplicationUI;
-    public static Autodesk.Revit.UI.UIApplication                 ActiveUIApplication { get; private set; }
+    public static Autodesk.Revit.UI.UIApplication                 ActiveUIApplication { get; internal set; }
     public static Autodesk.Revit.ApplicationServices.Application  ActiveDBApplication => ActiveUIApplication?.Application;
 
     public static Autodesk.Revit.UI.UIDocument                    ActiveUIDocument => ActiveUIApplication?.ActiveUIDocument;

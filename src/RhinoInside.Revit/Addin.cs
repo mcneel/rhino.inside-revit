@@ -5,6 +5,8 @@ using System.Linq;
 using System.Reflection;
 using System.Windows.Input;
 using Autodesk.Revit.Attributes;
+using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
 using Microsoft.Win32;
 
@@ -94,7 +96,7 @@ namespace RhinoInside.Revit
         }
       )
       {
-        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Check for updates...");
+        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Check for updates…");
         if (taskDialog.Show() == TaskDialogResult.CommandLink1)
         {
           using (Process.Start(@"https://www.rhino3d.com/download/rhino.inside-revit/7/wip")) { }
@@ -103,7 +105,7 @@ namespace RhinoInside.Revit
 
       return DaysUntilExpiration < 1;
     }
-    internal static Result CheckSetup(Autodesk.Revit.ApplicationServices.Application app)
+    internal static Result CheckSetup(Autodesk.Revit.ApplicationServices.ControlledApplication app)
     {
       if (RhinoVersion >= MinimumRhinoVersion)
         return IsExpired() ? Result.Cancelled : Result.Succeeded;
@@ -134,7 +136,7 @@ namespace RhinoInside.Revit
         }
       )
       {
-        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Download latest Rhino WIP...");
+        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Download latest Rhino WIP…");
         if (taskDialog.Show() == TaskDialogResult.CommandLink1)
         {
           using (Process.Start(@"https://www.rhino3d.com/download/rhino/wip")) { }
@@ -194,7 +196,7 @@ namespace RhinoInside.Revit.UI
           {
             var versionInfo = Addin.RhinoVersionInfo;
             pushButton.ToolTip = $"Loads {versionInfo.ProductName} inside this Revit session";
-            pushButton.LongDescription = $"{versionInfo.FileDescription} ({versionInfo.ProductVersion})\n{versionInfo.LegalCopyright}";
+            pushButton.LongDescription = $"{versionInfo.FileDescription} ({versionInfo.ProductVersion}){Environment.NewLine}{versionInfo.LegalCopyright}";
           }
           catch (Exception) { }
         }
@@ -257,6 +259,13 @@ namespace RhinoInside.Revit.UI
           Revit.KeyboardShortcuts.SaveAs(shortcuts, Path.Combine(Revit.CurrentUsersDataFolderPath, "KeyboardShortcuts.xml"));
         }
       }
+
+      EventHandler<ApplicationInitializedEventArgs> applicationInitialized = null;
+      Addin.ApplicationUI.ControlledApplication.ApplicationInitialized += applicationInitialized = (sender, args) =>
+      {
+        Addin.ApplicationUI.ControlledApplication.ApplicationInitialized -= applicationInitialized;
+        Revit.ActiveUIApplication = new UIApplication(sender as Autodesk.Revit.ApplicationServices.Application);
+      };
     }
 
     static void ShowShortcutHelp()
@@ -275,7 +284,7 @@ namespace RhinoInside.Revit.UI
         }
       )
       {
-        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Customize keyboard shortcuts...");
+        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Customize keyboard shortcuts…");
         if (taskDialog.Show() == TaskDialogResult.CommandLink1)
         {
           Revit.ActiveUIApplication.PostCommand(RevitCommandId.LookupPostableCommandId(PostableCommand.KeyboardShortcuts));
@@ -308,10 +317,6 @@ namespace RhinoInside.Revit.UI
 
         return result;
       }
-
-      result = Addin.CheckSetup(data.Application.Application);
-      if (result != Result.Succeeded)
-        return result;
 
       result = Revit.OnStartup(Revit.ApplicationUI);
       if (RhinoCommand.Availability.Available = result == Result.Succeeded)
