@@ -28,11 +28,13 @@ version: beta
 language: en
 
 # Ruby and Jekyll Settings
-gems:
+plugins:
   - jekyll-sitemap
 
 # Build settings
+# Disable custom plugins, and ignore symbolic links.
 safe: false
+
 encoding: utf-8
 # If we decide that we want to use kramdown over redcarpet, syntax
 # highlighting is performed by turning on the following options and
