@@ -1,6 +1,6 @@
 ---
 title: Known Issues
-order: 7
+order: 5
 ---
 
 This guide looks at errors that can appear with Rhino.inside Revit.

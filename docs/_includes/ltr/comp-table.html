@@ -1,0 +1,13 @@
+<table class="comp-table">
+    {% for comp in include.components %}
+    <tr>
+        {% if comp.icontag %}
+            <td class="comp-icon"><div class="icontag">{{ comp.icontag }}</div></td>
+        {% else %}
+            <td class="comp-icon"><img src="{{ comp.iconsrc }}"></td>
+        {% endif %}
+      <td class="comp-title">{{ comp.title }}</td>
+      <td class="comp-desc">{{ comp.desc }}</td>
+    </tr>
+    {% endfor %}
+</table>

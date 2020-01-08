@@ -245,3 +245,51 @@ a.btn-dark {
 a.btn-dark:hover {
     color: white;
 }
+
+.comp-table {
+    width: 100%;
+}
+
+.comp-table tr {
+    border-top: 1px solid #e8e8e8;
+}
+
+.comp-table tr:first-child {
+    border-top: none;
+}
+
+.comp-table td {
+    vertical-align: top;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.comp-table td img {
+    width: 24px;
+}
+
+.comp-table td.comp-icon {
+    width: 36px;
+}
+
+.comp-table td.comp-title {
+    padding-right: 10px;
+    font-style: italic;
+}
+
+.comp-table td.comp-desc {
+}
+
+.icontag {
+    display: block;
+    background: linear-gradient(white, #e8e8e8);;
+    border: 1px solid #828282;
+    border-radius: 5px;
+    width: 24px;
+    height: 24px;
+    padding-top: 2px;
+    font-size: 1rem;
+    line-height: 1;
+    font-weight: bold;
+    text-align: center;
+}

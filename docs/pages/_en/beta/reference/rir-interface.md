@@ -1,6 +1,6 @@
 ---
 title: Rhino.Inside.Revit Interface
-order: 3
+order: 1
 ---
 
 <table style="width:100%">
@@ -29,23 +29,23 @@ order: 3
       <td>The Grasshopper Player will run any existing Grasshopper definition and immediately return to Revit.</td>
     </tr>
   <tr>          
-      <td><img src="/static/images/Preview_Off_24x24.png" alt="Preview Off Icon" width="48"></td>
+      <td><img src="/static/images/GH/Toolbar/Preview_Off_24x24.png" alt="Preview Off Icon" width="48"></td>
       <td>Turns off the real-time preview by Grasshopepr in Revit.</td>    
   </tr>
     <tr>          
-      <td><img src="/static/images/Preview_Wireframe_24x24.png" alt="Preview Wireframe Icon" width="48"></td>
+      <td><img src="/static/images/GH/Toolbar/Preview_Wireframe_24x24.png" alt="Preview Wireframe Icon" width="48"></td>
       <td>Grasshopper will use a wireframe display for real-time preview of geometry in Revit.</td>    
     </tr>
     <tr>          
-      <td><img src="/static/images/Preview_Shaded_24x24.png" alt="Preview Shaded Icon" width="48"></td>
+      <td><img src="/static/images/GH/Toolbar/Preview_Shaded_24x24.png" alt="Preview Shaded Icon" width="48"></td>
       <td>Grasshopper will use a shaded display mode for real-time preview of geometry in Revit.</td>
     </tr>
     <tr>          
-      <td><img src="/static/images/Recompute_24x24.png" alt="Grasshopper Recompute" width="48"></td>
+      <td><img src="/static/images/GH/Toolbar/Recompute_24x24.png" alt="Grasshopper Recompute" width="48"></td>
       <td>Forces a recompute to the loaded Grasshopper definitions.</td>
   </tr>
     <tr>          
-      <td><img src="/static/images/Bake_24x24.png" alt="Grasshopper Recompute" width="48"></td>
+      <td><img src="/static/images/GH/Toolbar/Bake_24x24.png" alt="Grasshopper Recompute" width="48"></td>
       <td>Bakes the currently selected Rhino Geometry into the currently selected Category in Revit.</td>
   </tr>
     <tr>          

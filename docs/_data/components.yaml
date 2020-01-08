@@ -1,0 +1,294 @@
+- title: Parameter
+  comps:
+    - title: Geometric Element
+      desc: Select one or more persistent Element(s) in Revit to be used in Grasshopper. Also can be used to convert a sub-part to the parent element
+      iconsrc: /static/images/gh/GeometricElement.png
+      icontag: 
+
+    - title: Host
+      desc: Represents a Revit document host element
+      iconsrc: 
+      icontag: H
+
+    - title: Edge
+      desc: Represents a Revit edge from an element
+      iconsrc: /static/images/gh/Edge.png
+      icontag: 
+
+    - title: Face
+      desc: Select a Revit Element Face(s)
+      iconsrc: /static/images/gh/Face.png
+      icontag: 
+
+    - title: Sketch Plane
+      desc: Represents a Revit document sketch plane. (Selector in the future)
+      iconsrc: /static/images/gh/SketchPlane.png
+      icontag: 
+
+    - title: Vertex
+      desc: Select a Revit Element Vertex(s)
+      iconsrc: /static/images/gh/Vertex.png
+      icontag: 
+
+    - title: Category
+      desc: Revit Category Param used for selecting persistent Category (future)
+      iconsrc: /static/images/gh/Category.png
+      icontag: 
+
+    - title: Element
+      desc: Represents a Revit Element
+      iconsrc: 
+      icontag: E
+
+    - title: Element Type
+      desc: Get Element type from the Element(s) input
+      iconsrc: /static/images/gh/ElementType.png
+      icontag: 
+
+    - title: Family
+      desc: Represents a Revit document family
+      iconsrc: 
+      icontag: F
+
+    - title: Graphic Style
+      desc: Represents a Revit Graphic Style
+      iconsrc: 
+      icontag: G
+
+    - title: Grid
+      desc: Represents a Revit Grid
+      iconsrc: 
+      icontag: G
+
+    - title: Level
+      desc: Represents a Revit Level
+      iconsrc: 
+      icontag: L
+
+    - title: Material
+      desc: Represents a Revit Material
+      iconsrc: 
+      icontag: M
+
+    - title: 
+      desc: 
+      iconsrc: 
+      icontag: 
+
+    - title: Parameter Key
+      desc: Represents a Revit Parameter Key
+      iconsrc: /static/images/gh/ParameterKey.png
+      icontag: 
+
+- title: Build
+  comps:
+    - title: AddAdaptiveComponent.ByPoints
+      desc: Adds an adaptive component instance using a list of points to Revit. The points must be sorted in the same order as the adaptive component expects
+      iconsrc: /static/images/gh/AdaptiveComponentByPoints.png
+      icontag: 
+
+    - title: AddBeam.ByCurve
+      desc: Create a Revit Beam Object using a 2d or 3d curve for an axis. Also assign a level
+      iconsrc: /static/images/gh/BeamByCurve.png
+      icontag: 
+
+    - title: AddColumn.ByCurve
+      desc: Create a Revit Column Object using an axial curve
+      iconsrc: /static/images/gh/ColumnByCurve.png
+      icontag: 
+
+    - title: AddFamilyInstance.ByLocation
+      desc: Given a position, add a FamilyInstance element to the active Revit document in a host element
+      iconsrc: /static/images/gh/FamilyInstanceByLocation.png
+      icontag: 
+
+    - title: AddFloor.ByOutline
+      desc: Create a Revit Floor using a plan curve
+      iconsrc: /static/images/gh/FloorByOutline.png
+      icontag: 
+
+    - title: AddRoof.ByOutline
+      desc: Create a Revit Roof by using a boundary curve, type and level
+      iconsrc: /static/images/gh/RoofByOutline.png
+      icontag: 
+
+    - title: AddWall.ByCurve
+      desc: Create a Revit Wall Object using a plan curve. The Level, Type, Height and other properties can be specified. See the component help for options
+      iconsrc: /static/images/gh/WallByCurve.png
+      icontag: 
+
+    - title: AddDirectShape.ByLocation
+      desc: Create a Directshape instance from a Directshape Type. Insert a specific DirectShape instance. The input for this component many times will the the Element Type By Name Component
+      iconsrc: /static/images/gh/DirectShapeByLocation.png
+      icontag: 
+
+- title: Category
+  comps:
+    - title: Category.GraphicStyle
+      desc: Returns the Projections an Cut of a specifcs categories graphic style
+      iconsrc: 
+      icontag: G
+
+    - title: Category.Identity
+      desc: Break a Revit Category into its component parts.  Name, Parent, Allow Bounds and Material Quantities
+      iconsrc: 
+      icontag: C
+
+    - title: Category.ObjectStyles
+      desc: Returns category object style attributes like Line-Color, Material, ...
+      iconsrc: 
+      icontag: C
+
+    - title: Category.SubCategories
+      desc: Returns a list of all the subcategories of Category
+      iconsrc: /static/images/gh/CategorySubCategories.png
+      icontag: 
+
+    - title: Category.Types
+      desc: A pick list of category types in Revit
+      iconsrc: /static/images/gh/CategoryTypes.png
+      icontag: 
+
+    - title: DirectShape.Categories
+      desc: Select a category for using with the DirectShape Component
+      iconsrc: /static/images/gh/DirectShapeCategories.png
+      icontag: 
+
+- title: Datum
+  comps:
+    - title: AddGrid.ByCurve
+      desc: Add grid by supplying a curve.
+      iconsrc: /static/images/gh/GridByCurve.png
+      icontag: 
+
+    - title: AddLevel.ByElevation
+      desc: Add level by supplying an elevation height
+      iconsrc: /static/images/gh/LevelByElevation.png
+      icontag: 
+
+- title: Document
+  comps:
+    - title: Document.Categories
+      desc: Get Active Document Category list Using the Type, and HasMaterial filter
+      iconsrc: /static/images/gh/DocumentCategories.png
+      icontag: 
+
+    - title: Document.Elements
+      desc: Get Active Document Elements list using a Category filter
+      iconsrc: /static/images/gh/DocumentElements.png
+      icontag: 
+
+    - title: Document.ElementTypes
+      desc: Get Active Document Element Types using the Category, Family and Type filter
+      iconsrc: /static/images/gh/DocumentElementTypes.png
+      icontag: 
+
+    - title: Document.Levels
+      desc: Get Active Document levels list from Revit
+      iconsrc: /static/images/gh/DocumentLevels.png
+      icontag: 
+
+    - title: Document.Parameters
+      desc: Get Active Document Parameters attached to a specific category from Revit
+      iconsrc: /static/images/gh/DocumentParameters.png
+      icontag: 
+
+- title: Element
+  comps:
+    - title: Element.Decompose
+      desc: Decompose an Element into it's associated data including Constraints, Dimensions, Identity Data, Category, Family, Type, ID, etc... Once the Elemnt is wired into this component, <code>Shift</code> double-click on the component to exapand to all Parameters of that component.  <code>Ctrl</code> double-click on the component then to collapse down to only used outputs
+      iconsrc: /static/images/gh/ElementDecompose.png
+      icontag: 
+
+    - title: Element.Geometry
+      desc: Returns one or more Rhino Breps(s) form a Revit Element
+      iconsrc: /static/images/gh/ElementGeometry.png
+      icontag: 
+
+    - title: Element.Identity
+      desc: Returns Element's, Category, Type, and Name
+      iconsrc: /static/images/gh/ElementIdentity.png
+      icontag: 
+
+    - title: Element.Materials
+      desc: Returns materials assigned to the element
+      iconsrc: 
+      icontag: E
+
+    - title: Element.ParameterGet
+      desc: Get Element's Parameter Value based on a Parameter Name
+      iconsrc: /static/images/gh/ElementParameterGet.png
+      icontag: 
+
+    - title: Element.Parameters
+      desc: Get Element's Parameter names attached to a specific Element
+      iconsrc: /static/images/gh/ElementParameters.png
+      icontag: 
+
+    - title: Element.ParametersSet
+      desc: Set an Element's Parameter Value by Element, Key and Value
+      iconsrc: /static/images/gh/ElementParametersSet.png
+      icontag: 
+
+    - title: Element.Preview
+      desc: Create a mesh from an Element using the LOD and the Mesh quality settings
+      iconsrc: /static/images/gh/ElementPreview.png
+      icontag: 
+
+    - title: Element.Passport
+      desc: Returns Element's Id, UUID and Document's Path and GUID
+      iconsrc: 
+      icontag: ID
+
+    - title: Element.Delete
+      desc: Deletes the specified element out of Revit
+      iconsrc: /static/images/gh/ElementDelete.png
+      icontag: 
+
+- title: Family
+  comps:
+    - title: Family.GetType
+      desc: Obtains a set of types that are owned by Family
+      iconsrc: 
+      icontag: T
+
+    - title: Family.Load
+      desc: Loads a family into the document using optional overrides
+      iconsrc: 
+      icontag: L
+
+    - title: Family.New
+      desc: Creates a new Family from a template including optional overrides
+      iconsrc: 
+      icontag: N
+
+    - title: Family.SaveAs
+      desc: Saves the Family to a given file path
+      iconsrc: 
+      icontag: S
+
+    - title: FamilyElement.ByBrep
+      desc: Add a family using a Brep
+      iconsrc: 
+      icontag: B
+
+    - title: FamilyElement.ByCurve
+      desc: Add a family using curve objects
+      iconsrc: 
+      icontag: C
+
+    - title: FamilyOpening.ByCurve
+      desc: 
+      iconsrc: 
+      icontag: O
+
+    - title: FamilyVoid.ByBrep
+      desc: 
+      iconsrc: 
+      icontag: V
+
+    - title: Visibility.Construct
+      desc: Create a View Construct for a Family
+      iconsrc: 
+      icontag: V
+
