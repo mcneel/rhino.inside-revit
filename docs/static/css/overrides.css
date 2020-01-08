@@ -18,10 +18,11 @@ body {
     overflow: scroll;
 }
 
-a, a.site-title, a.page-link,
-a:hover, a.site-title:hover, a.page-link:hover {
+a.site-title, a.page-link, a.dropdown-toggle
+a.site-title:hover, a.page-link:hover, a.dropdown-toggle:hover {
     color: #111;
     text-decoration: none;
+    cursor: pointer;
 }
 
 /* navigation bar overrides */
@@ -113,9 +114,7 @@ a:hover, a.site-title:hover, a.page-link:hover {
 }
 
 .page-content a, .page-content a:hover {
-    color: #111;
     text-decoration: none;
-    font-weight: bold;
 }
 
 /* full-screen page contents */
