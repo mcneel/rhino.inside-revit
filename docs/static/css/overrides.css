@@ -110,7 +110,7 @@ a.site-title:hover, a.page-link:hover, a.dropdown-toggle:hover {
     set the minimum height to the footer does not get
     too close to header or sidebar when page is empty
     */
-    min-height: 25em;
+    min-height: 35em;
 }
 
 .page-content a, .page-content a:hover {
@@ -310,4 +310,52 @@ a.btn-dark:hover {
     line-height: 1;
     font-weight: bold;
     text-align: center;
+}
+
+.warning-block {
+    width: 100%;
+    border: 1px solid #d0d0d0;
+    border-radius: 5px;
+}
+
+.warning-table {
+}
+
+.warning-table td {
+    vertical-align: top;
+
+}
+
+.warning-icon {
+    width: 84px;
+    padding: 10px;
+}
+
+.warning-msg {
+    padding: 15px 15px 15px 5px;
+    color: #4e4e4e;
+}
+
+.wip-block {
+    width: 100%;
+    border: 1px solid #d0d0d0;
+    border-radius: 5px;
+}
+
+.wip-table {
+}
+
+.wip-table td {
+    vertical-align: top;
+
+}
+
+.wip-icon {
+    width: 52px;
+    padding: 10px;
+}
+
+.wip-msg {
+    padding: 15px 15px 15px 5px;
+    color: #4e4e4e;
 }

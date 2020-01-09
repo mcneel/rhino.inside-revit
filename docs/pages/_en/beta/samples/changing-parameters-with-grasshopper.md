@@ -3,6 +3,8 @@ title: Managing Parameters with Grasshopper
 order: 3
 ---
 
+{% include ltr/en/workinprogres.html %}
+
 This sample shows how to read and write the parameters of Revit&reg; elements usign Grasshopper and Rhino&reg;. There are two sample files here. 
 
 1. The first sample will simple copy the Mark value from each door and palce it in the comments parameter of the same door.
