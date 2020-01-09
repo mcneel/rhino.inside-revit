@@ -361,11 +361,11 @@ Avoid including the background in Grasshopper screenshots for a more pleasing im
 
 For example:
 
-![](/static/images/readme/good-gh.png)
+![](static/images/readme/good-gh.png)
 
 Looks better than:
 
-![](/static/images/readme/bad-gh.png)
+![](static/images/readme/bad-gh.png)
 
 ## Linking Videos
 
