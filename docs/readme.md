@@ -21,6 +21,7 @@
   - [Frequently User Terms](#frequently-user-terms)
   - [Linking Other Pages](#linking-other-pages)
   - [Linking Images](#linking-images)
+  - [Grasshopper Screenshots](#grasshopper-screenshots)
   - [Linking Videos](#linking-videos)
 - [Data Sources](#data-sources)
   - [Rhinocerous Tab Button List](#rhinocerous-tab-button-list)
@@ -353,6 +354,18 @@ You can add images to your page using the standard markdown image links. Make su
 ```markdown
 ![](/static/images/started/revit-doc.png)
 ```
+
+## Grasshopper Screenshots
+
+Avoid including the background in Grasshopper screenshots for a more pleasing image. You can use the hi-res screenshot export tool in Grasshopper to generate a PNG with transparent background from your definition.
+
+For example:
+
+![](/static/images/readme/good-gh.png)
+
+Looks better than:
+
+![](/static/images/readme/bad-gh.png)
 
 ## Linking Videos
 
