@@ -307,6 +307,8 @@ Each component can have its own documentation page. The contents of this page is
 
 For example page `pages/_en/beta/reference/components/273ff43d-b771-4eb7-a66d-5da5f7f2731e.md` contains the English (`_en`) docs for the `beta` version of the component with uuid `273ff43d-b771-4eb7-a66d-5da5f7f2731e` which is the `Material.ByColor` component.
 
+These component-specific pages can be directly access as well. For example the component page discussed above can also be directly accessed through `http://.../en/beta/reference/components/273ff43d-b771-4eb7-a66d-5da5f7f2731e`
+
 # Wiki Formatting Conventions
 
 ## Frequently User Terms
