@@ -2,8 +2,8 @@
   comps:
     - title: Help
       desc: Contains links to all the help resources for Rhino.inside Revit
-      iconsrc: /static/images/ribbon/HelpButton.png
-      icontag: 
+      iconsrc: 
+      icontag: '?'
 
     - title: Rhino
       desc: The Rhino icon will start Rhino to run inside Revit. Grasshopper can also be run from within that Rhino instance
