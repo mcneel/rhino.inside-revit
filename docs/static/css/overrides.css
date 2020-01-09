@@ -253,8 +253,13 @@ a.btn-dark:hover {
     border-top: 1px solid #e8e8e8;
 }
 
-.comp-table tr:first-child {
+.comp-table tr:first-child,
+.comp-table tr.comp-docs-row {
     border-top: none;
+}
+
+.comp-table td.comp-docs-col {
+    padding-left: 36px;
 }
 
 .comp-table td {
@@ -263,12 +268,12 @@ a.btn-dark:hover {
     padding-bottom: 5px;
 }
 
-.comp-table td img {
-    width: 24px;
-}
-
 .comp-table td.comp-icon {
     width: 36px;
+}
+
+.comp-table td.comp-icon img {
+    width: 24px;
 }
 
 .comp-table td.comp-title {
@@ -278,6 +283,7 @@ a.btn-dark:hover {
 
 .comp-table td.comp-desc {
 }
+
 
 .icontag {
     display: block;

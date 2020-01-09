@@ -490,9 +490,10 @@
 - title: Material
   comps:
     - title: Material.ByColor
-      desc: 
+      desc: Create new material by color
       iconsrc: 
       icontag: C
+      uuid: 273ff43d-b771-4eb7-a66d-5da5f7f2731e
 
     - title: Material.ByName
       desc: 
