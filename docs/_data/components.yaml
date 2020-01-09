@@ -70,11 +70,6 @@
       iconsrc: 
       icontag: M
 
-    - title: 
-      desc: 
-      iconsrc: 
-      icontag: 
-
     - title: Parameter Key
       desc: Represents a Revit Parameter Key
       iconsrc: /static/images/gh/ParameterKey.png
@@ -292,3 +287,287 @@
       iconsrc: 
       icontag: V
 
+- title: Filter
+  comps:
+    - title: Element.ExclusionFilter
+      desc: Filter used to exclude a set of elements
+      iconsrc: 
+      icontag: '!'
+
+    - title: Element.LogicalOrFilter
+      desc: Filter used to combine a set of filters that pass when any pass
+      iconsrc: 
+      icontag: ∨
+
+    - title: Element.LogicalAndFilter
+      desc: Filter used to combine a set of filters that pass when any pass
+      iconsrc: 
+      icontag: ∧
+
+    - title: Element.CategoryFilter
+      desc: Filter used to match elements by their category
+      iconsrc: 
+      icontag: C
+
+    - title: Element.ClassFilter
+      desc: Filter used to match elements by their API class
+      iconsrc: 
+      icontag: C
+
+    - title: Element.ExcludeElementType
+      desc: Filter used to exclude element types
+      iconsrc: 
+      icontag: T
+
+    - title: Element.TypeFilter
+      desc: Filter used to match elements by their type
+      iconsrc: 
+      icontag: T
+
+    - title: Element.BoundingBoxFilter
+      desc: Filter used to match elements by their position and interesction with a bounding area
+      iconsrc: 
+      icontag: B
+
+    - title: Element.IntersectsElementsFilter
+      desc: Filter used to match elements that intersect to the given element
+      iconsrc: 
+      icontag: I
+
+    - title: Element.IntersectsBrepFilter
+      desc: Filter used to match elements that intersect to the given brep
+      iconsrc: 
+      icontag: I
+
+    - title: Element.IntersectsMeshFilter
+      desc: Filter used to match elements that intersect to the given mesh
+      iconsrc: 
+      icontag: I
+
+    - title: Element.DesignOptionFilter
+      desc: Filter used to match elements associated to the given Design Option
+      iconsrc: 
+      icontag: D
+
+    - title: Element.LevelFilter
+      desc: Filter used to match elements associated to the given level
+      iconsrc: 
+      icontag: L
+
+    - title: Element.OwnerViewFilter
+      desc: Filter used to match elements associated to the given View
+      iconsrc: 
+      icontag: V
+
+    - title: Element.SelectableInViewFilter
+      desc: Filter used to match seletable elements into the given View
+      iconsrc: 
+      icontag: S
+
+    - title: Element.ParameterFilter
+      desc: Filter used to match elements by the value of a parameter
+      iconsrc: 
+      icontag: '#'
+
+    - title: Element.RuleEquals
+      desc: Filter used to match elements if value of a parameter equals to Value
+      iconsrc: 
+      icontag: '='
+
+    - title: Element.RuleGreater
+      desc: Filter used to match elements if value of a parameter greater than Value
+      iconsrc: 
+      icontag: '>'
+
+    - title: Element.RuleGreaterOrEqual
+      desc: Filter used to match elements if value of a parameter greater or equal than Value
+      iconsrc: 
+      icontag: ≥
+
+    - title: Element.RuleLess
+      desc: Filter used to match elements if value of a parameter less than Value
+      iconsrc: 
+      icontag: '<'
+
+    - title: Element.RuleLessOrEqual
+      desc: Filter used to match elements if value of a parameter less or equal than Value
+      iconsrc: 
+      icontag: ≤
+
+    - title: Element.RuleNotEquals
+      desc: Filter used to match elements if value of a parameter less than Value
+      iconsrc: 
+      icontag: ≠
+
+- title: Geometry
+  comps:
+    - title: AddDirectShape.ByBrep
+      desc: Given a Brep, it adds a Brep element to the active Revit document
+      iconsrc: /static/images/gh/DirectShapeByBrep.png
+      icontag: 
+
+    - title: AddDirectShape.ByCurve
+      desc: Given a Curve, it adds a Curve shape to the active Revit document
+      iconsrc: /static/images/gh/DirectShapeByCurve.png
+      icontag: 
+
+    - title: AddDirectShape.ByMesh
+      desc: Given a Mesh, it adds a Mesh element to the active Revit document
+      iconsrc: /static/images/gh/DirectShapeByMesh.png
+      icontag: 
+
+    - title: AddDirectShape.ByPoint
+      desc: Given a Point, it adds a Point element to the active Revit document
+      iconsrc: /static/images/gh/DirectShapeByPoint.png
+      icontag: 
+
+    - title: AddDirectShape.ByGeometry
+      desc: 
+      iconsrc: /static/images/gh/DirectShapeByGeometry.png
+      icontag: 
+
+- title: Host
+  comps:
+    - title: HostObject.GetFaces
+      desc: Obtains a set of types that are owned by Family
+      iconsrc: 
+      icontag: F
+
+- title: Input
+  comps:
+    - title: BuiltInParameter.ByName
+      desc: Use a checklist, dropdown, scroll sequence or cycle interface to select a Parameter Key from Revit
+      iconsrc: /static/images/gh/BuiltInParameterByName.png
+      icontag: 
+
+    - title: Document.FamiliesPicker
+      desc: Use a checklist, dropdown, scroll sequence or cycle interface to select a family from Revit
+      iconsrc: /static/images/gh/DocumentFamiliesPicker.png
+      icontag: 
+
+    - title: Document.LevelsPicker
+      desc: Use a checklist, dropdown, scroll sequence or cycle interface to select a level from Revit
+      iconsrc: /static/images/gh/DocumentLevelsPicker.png
+      icontag: 
+
+    - title: ElementType.ByName
+      desc: Select a specific Element type by its name. This component will be blank unless connected in combination with the Select Document Category or the Select a Family component to select a specific element within a Family or Category. Use a checklist, dropdown, scroll sequence or cycle interface to select a Element Type from Revit
+      iconsrc: /static/images/gh/ElementTypeByName.png
+      icontag: 
+
+    - title: Analytical.CategoriesPicker
+      desc: Use a checklist, dropdown, scroll sequence or cycle interface to select an analytical category from Revit
+      iconsrc: /static/images/gh/AnalyticalCategoriesPicker.png
+      icontag: 
+
+    - title: Annotation.CategoriesPicker
+      desc: Use a checklist, dropdown, scroll sequence or cycle interface to select an annotation category from Revit
+      iconsrc: /static/images/gh/AnnotationCategoriesPicker.png
+      icontag: 
+
+    - title: Model.CategoriesPicker
+      desc: Use a checklist, dropdown, scroll sequence or cycle interface to select a model category from Revit
+      iconsrc: /static/images/gh/ModelCategoriesPicker.png
+      icontag: 
+
+    - title: Tag.CategoriesPicker
+      desc: Use a checklist, dropdown, scroll sequence or cycle interface to select a tag category from Revit
+      iconsrc: /static/images/gh/TagCategoriesPicker.png
+      icontag: 
+
+- title: Mass
+  comps:
+    - title: AddForms.ByCurve
+      desc: Given a list of curves, it adds a Form element to the active Revit document
+      iconsrc: /static/images/gh/FormByCurves.png
+      icontag: 
+
+    - title: AddForms.ByGeometry
+      desc: Given its Geometry, it adds a Form element to the active Revit document
+      iconsrc: /static/images/gh/FormByGeometry.png
+      icontag: 
+
+- title: Material
+  comps:
+    - title: Material.ByColor
+      desc: 
+      iconsrc: 
+      icontag: C
+
+    - title: Material.ByName
+      desc: 
+      iconsrc: 
+      icontag: 'N'
+
+    - title: MaterialQuantities.ByElement
+      desc: 
+      iconsrc: 
+      icontag: M
+
+- title: Model
+  comps:
+    - title: AddModelLine.ByCurve
+      desc: Given a Curve, it adds a Curve element to the active Revit document
+      iconsrc: /static/images/gh/ModelLineByCurve.png
+      icontag: 
+
+    - title: AddSketchPlane.ByPlane
+      desc: Given a Rhino Plane, it adds a SketchPlane element to the active Revit document
+      iconsrc: /static/images/gh/SketchPlaneByPlane.png
+      icontag: 
+
+- title: Parameter
+  comps:
+    - title: AddParameterKey.ByName
+      desc: Given its Name, it adds a Parameter definition to the active Revit document
+      iconsrc: /static/images/gh/ParameterByName.png
+      icontag: 
+
+    - title: ParameterKey.Decompose
+      desc: Decompose a parameter key into Name, Value Type, Visible Property and ID
+      iconsrc: /static/images/gh/ParameterKeyDecompose.png
+      icontag: 
+
+    - title: ParameterValue.Decompose
+      desc: Decompose a parameter value into Name, Value Type, Visible Property and ID
+      iconsrc: /static/images/gh/ParameterValueDecompose.png
+      icontag: 
+
+    - title: BuiltInParameterGroup
+      desc: Represent Revit Paramter Group
+      iconsrc: /static/images/gh/BuiltInParameterGroup.png
+      icontag: 
+
+- title: Site
+  comps:
+    - title: AddBuildingPad.ByOutline
+      desc: Given a set of contour Curves, it adds a BuildingPad element to the active Revit document
+      iconsrc: /static/images/gh/BuildingPadByOutline.png 
+      icontag: 
+
+    - title: AddTopographyElement.ByPoints
+      desc: Given a set of Points, it adds a Topography surface to the active Revit document
+      iconsrc: /static/images/gh/TopographyByPoints.png
+      icontag: 
+
+- title: Type
+  comps:
+    - title: ElementType.Duplicate
+      desc: Given a Name, it duplicates an ElementType into the active Revit document
+      iconsrc: 
+      icontag: D
+
+    - title: ElementType.Identity
+      desc: Query type identity information to return Category, Family Name, Name and UUID
+      iconsrc: 
+      icontag: T
+
+    - title: ElementType.Similar
+      desc: Selects the types that are Similiar to the input Type
+      iconsrc: 
+      icontag: S
+
+    - title: AddDirectShapeType.ByGeometry
+      desc: Given its Geometry, it reconstructs a DirectShapeType to the active Revit document
+      iconsrc: 
+      icontag: D
