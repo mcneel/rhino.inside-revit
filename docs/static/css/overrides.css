@@ -284,7 +284,6 @@ a.btn-dark:hover {
 .comp-table td.comp-desc {
 }
 
-
 .icontag {
     display: block;
     background: linear-gradient(white, #e8e8e8);;
@@ -292,6 +291,20 @@ a.btn-dark:hover {
     border-radius: 5px;
     width: 24px;
     height: 24px;
+    padding-top: 2px;
+    font-size: 1rem;
+    line-height: 1;
+    font-weight: bold;
+    text-align: center;
+}
+
+.icontag_circle {
+    display: inline-block;
+    color: white;
+    background-color: black;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
     padding-top: 2px;
     font-size: 1rem;
     line-height: 1;

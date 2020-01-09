@@ -4,7 +4,7 @@ title: Rhino.Inside®.Revit
 description: Wiki, Guides, Samples, and Documentation for Rhino.Inside.Revit
 
 # site logo file
-logo: static/images/rir-logo-50x50.png
+logo: static/images/frontend/rir-logo-50x50.png
 
 # github info
 github_username:  mcneel
@@ -55,6 +55,7 @@ terms:
   rhino: Rhino WIP
   rir: Rhino.Inside.Revit
   revit: Autodesk Revit®
+  pyrevit: pyRevit
 
 # site collections (various languages)
 collections:

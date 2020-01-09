@@ -6,26 +6,25 @@ order: 4
 ## Required installers
 
 1. Revit 2017-2020
-1. The current [Rhino WIP](https://www.rhino3d.com/download/rhino/wip) which requires a Rhino 6 license to run. 
-1. Download the **[latest Rhino.Inside.Revit installer](https://www.rhino3d.com/download/rhino.inside-revit/7/wip)** 
+2. The current [{{ site.terms.rhino }}]({{ site.versions.beta.rhino_download }}) which requires a Rhino 6 license to run.
+3. Download the [latest {{ site.terms.rir }} installer]({{ site.versions.beta.rir_download }}) 
 
 ## Automated installer for *All Users* in Windows
 
-To determine how to best automate the push of the Rhino 7 installer, follow the [Automating installation of Rhino 6 Guide](https://wiki.mcneel.com/rhino/installingrhino/6)
+To determine how to best automate the push of the {{ site.terms.rhino }} installer, follow the [Automating installation of Rhino 6 Guide](https://wiki.mcneel.com/rhino/installingrhino/6)
 
-To push install Rhino.Inside.Revit quietly for all users use this command line:
+To push install {{ site.terms.rir }} quietly for all users use this command line:
 
 ```
 RhinoInside.Revit.msi ALLUSERS="1" /quiet
 ```
 
-For more information see: https://docs.microsoft.com/windows/win32/msi/single-package-authoring
+For more information see [Single Package Authoring](https://docs.microsoft.com/windows/win32/msi/single-package-authoring)
 
 
 ## Installing & Uninstalling
-The installer copies the necessary files to the _"%APPDATA%\\Autodesk\\Revit\\Addins\\<revit_version>\\"_ folder (for each supported version). Restart Revit to load the add-on.
 
-To uninstall, open _Programs and Features_, select "RhinoInside.Revit" and click "Uninstall".
+The installer copies the necessary files to the `%APPDATA%\Autodesk\Revit\Addins\<revit_version>\` folder (for each supported version). Restart {{ site.terms.revit }} to load the add-on. To uninstall, open *Programs and Features*, select "RhinoInside.Revit" and click "Uninstall".
 
 
 
