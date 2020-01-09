@@ -11,6 +11,7 @@
     - [Building the Wiki using Jekyll](#building-the-wiki-using-jekyll)
     - [Make Necessary Changes](#make-necessary-changes)
     - [Publishing the Changes](#publishing-the-changes)
+- [Online Experience](#online-experience)
 - [Understanding Wiki Source Files](#understanding-wiki-source-files)
   - [Page Metadata](#page-metadata)
   - [Page Layouts](#page-layouts)
@@ -168,6 +169,24 @@ Now you can make the necessary changes to the Wiki pages
 ### Publishing the Changes
 
 Once you are done with your changes, submit a pull-request through Github. If you don't have write access to the repo, an author will review your pull-request and will merge or comment. Please follow the pull-request untill your changes are completely merged into the master.
+
+# Online Experience
+
+This Wiki is the first node and the official landing page for the project. See the sketch below to see the overarching ideas that helped designing this Wiki.
+
+![](static/images/readme/rir-online.png)
+
+- Wiki homepage is the official landing page
+- Wiki helps:
+  - Getting started
+  - Learning how to tackle Revit challenges using Rhino.Inside and provides easy to access samples
+  - Provides the in-detail documentation on various aspects of the project
+- Wiki then
+  - routes the user to Forums for more questions
+  - and routes the advanced users to the repo
+- The Repo
+  - provides the source code
+  - provides the files for the Wiki
 
 # Understanding Wiki Source Files
 
