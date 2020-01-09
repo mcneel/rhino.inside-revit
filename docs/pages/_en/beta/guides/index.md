@@ -10,8 +10,8 @@ This section includes many articles that guide you through solving many {{ site.
 ## Geometry Conversion
 
 These pages guide you through converting geometry between Revit and Rhino (or other applications) using {{ site.terms.rir }}
-- [Revit --> Rhino]({% link _en/beta/guides/revit-to-rhino.md %})
-- [Revit <-- Rhino]({% link _en/beta/guides/rhino-to-revit.md %})
+- [Revit Geometry to Rhino]({% link _en/beta/guides/revit-to-rhino.md %})
+- [Rhino Geometry to Revit]({% link _en/beta/guides/rhino-to-revit.md %})
 
 <!-- 20 -->
 ## Querying Revit Information
