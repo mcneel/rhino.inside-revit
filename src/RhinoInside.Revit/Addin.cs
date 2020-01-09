@@ -196,7 +196,7 @@ namespace RhinoInside.Revit.UI
           {
             var versionInfo = Addin.RhinoVersionInfo;
             pushButton.ToolTip = $"Loads {versionInfo.ProductName} inside this Revit session";
-            pushButton.LongDescription = $"{versionInfo.FileDescription} ({versionInfo.ProductVersion}){Environment.NewLine}{versionInfo.LegalCopyright}";
+            pushButton.LongDescription = $"Rhino: {versionInfo.ProductVersion} ({versionInfo.FileDescription}){Environment.NewLine}Rhino.Inside: {Addin.DisplayVersion}{Environment.NewLine}{versionInfo.LegalCopyright}";
           }
           catch (Exception) { }
         }
