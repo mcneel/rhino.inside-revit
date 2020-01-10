@@ -36,7 +36,7 @@ This repo contains the contents of https://mcneel.github.io/rhino.inside-revit/
 - The page are written using Markdown (specifically [Kramdown](http://kramdown.gettalong.org/syntax.html)) syntax
 - The contents of the Wiki are stored under `pages/` and are grouped by locale (e.g. `en` for English) and Rhino.Inside.Revit versions e.g. `en/beta/getting-started.md` for **Getting Started** article in **English** for **Beta** release.
 - All static resources, e.g. image or Revit models are stored under `static/`
-- Style sheets are under `css/`. Please coordinate any changes with the Authors
+- Front-end assets are under `assets/`. Please coordinate any changes with the authors
 
 
 # Contributing to the Wiki
@@ -201,9 +201,13 @@ The structure of the source is as explained below:
   - `ltr/` contains fragments for Left-to-Right (LTR) languages
   - `rtl/` contains fragments for Right-to-Left (RTL) languages
 - `pages/` contains the Wiki contents grouped by language and wiki version
+- `assets/` contains all front-end assets
+  - `css/` contains all front-end stylesheets
+  - `js/` contains all front-end javascript
+  - `img/` contains all front-end images
 - `static/` contains all static files
-  - `css/` contains all stylesheets for generated pages
   - `images/` contains all images used across the wiki contents
+  - `samples/` contains sample data files
 - `_data/` contains data files used to generate special pages
 - `_config.yml` Jekyll site configs file (see the config file for more information on each available setting)
 - `GemFile*` Ruby gemfile listing the ruby dependencies
