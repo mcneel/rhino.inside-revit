@@ -48,6 +48,9 @@ kramdown:
 # this directory is the root for all collections
 collections_dir: pages
 simple_search: http://google.com/search
+
+# activate to test from other devices on the network
+# host: 0.0.0.0
 # =============================================================================
 
 # site dictionary: list of often used terms that need to be consistent

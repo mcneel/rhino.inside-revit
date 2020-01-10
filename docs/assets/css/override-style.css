@@ -7,7 +7,9 @@
     margin: -90px 0 0; /* negative fixed header height */
 }
 
-/* html element adjustments */
+/*
+    html element adjustments ==================================================
+*/
 body {
     line-height: 1.5;
     position: relative;
@@ -25,7 +27,16 @@ a.site-title:hover, a.page-link:hover, a.dropdown-toggle:hover {
     cursor: pointer;
 }
 
-/* navigation bar overrides */
+/*
+    site content ==============================================================
+*/
+.container {
+    max-width: 1170px;
+}
+
+/*
+    navigation bar ============================================================
+*/
 .site-header {
     z-index: 1024;
     top: 0;
@@ -47,10 +58,6 @@ a.site-title:hover, a.page-link:hover, a.dropdown-toggle:hover {
 }
 
 /* navigation bar with pages */
-.site-nav {
-    line-height: 60px;
-}
-
 /* github logo on navigation bar */
 .site-nav svg {
     margin-top: -4px;
@@ -104,7 +111,14 @@ a.site-title:hover, a.page-link:hover, a.dropdown-toggle:hover {
     color: #999;
 }
 
-/* base page contents */
+.menu-icon {
+    display: none;
+}
+
+/*
+    page contents =============================================================
+*/
+/* base */
 .page-content {
     /*
     set the minimum height to the footer does not get
@@ -127,8 +141,7 @@ a.site-title:hover, a.page-link:hover, a.dropdown-toggle:hover {
 
 /* page with sidebar contents */
 .side-content {
-    width: 75%;
-    margin-left: 25%;
+    margin-left: 225px;
 }
 
 .side-content h1 {
@@ -149,7 +162,7 @@ a.site-title:hover, a.page-link:hover, a.dropdown-toggle:hover {
 
 /* side bar */
 .sidebar {
-    width: 15%;
+    width: 215px;
     position: fixed;
 }
 
@@ -198,7 +211,9 @@ a.site-title:hover, a.page-link:hover, a.dropdown-toggle:hover {
     color: #111;
 }
 
-/* footer */
+/*
+    footer ====================================================================
+*/
 .site-footer {
     padding: 0px;
 }
@@ -245,7 +260,9 @@ a.site-title:hover, a.page-link:hover, a.dropdown-toggle:hover {
     margin-top: 5px;
 }
 
-/* content elements */
+/*
+    content elements  =========================================================
+*/
 a.btn-dark {
     color: white;
 }
@@ -290,9 +307,6 @@ a.btn-dark:hover {
     font-style: italic;
 }
 
-.comp-table td.comp-desc {
-}
-
 .icontag {
     display: block;
     background: linear-gradient(white, #e8e8e8);;
@@ -328,16 +342,10 @@ a.btn-dark:hover {
     margin: 30px 0 30px 0;
 }
 
-.msg-table {
-}
-
-.msg-table td {
-    vertical-align: top;
-}
-
 .msg-icon {
-    width: 52px;
-    padding: 10px;
+    width: 62px;
+    padding: 15px;
+    vertical-align: top;
 }
 
 .msg-msg {

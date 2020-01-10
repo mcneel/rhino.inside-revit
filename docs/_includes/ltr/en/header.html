@@ -7,12 +7,12 @@
     <a class="site-title" href="#" onclick="navigateTo('')">{{ site.title }}</a>
     <!-- Navigation Bar -->
     <nav class="site-nav">
-        <img class="menu-icon" src="{{ site.baseurl }}/assets/img/gi.svg" />
+        <img class="menu-icon" src="{{ site.baseurl }}/assets/img/burger.svg" />
         {% assign pages = site.pages | sort:"order"  %}
         <div class="trigger">
             <!-- Version selector dropdown -->
             <a class="dropdown">
-                <a class="dropdown-toggle" id="versionSelector" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></a>
+                <a id="versionSelector" class="dropdown-toggle version-selector" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></a>
                 <div class="dropdown-menu" aria-labelledby="versionSelector">
                     {% for version in site.versions %}
                         <!-- grab name and link for each version -->
