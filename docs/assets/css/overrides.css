@@ -321,36 +321,11 @@ a.btn-dark:hover {
     text-align: center;
 }
 
-.warning-block {
-    width: 100%;
-    border: 1px solid #d0d0d0;
-    border-radius: 5px;
-}
-
-.warning-table {
-}
-
-.warning-table td {
-    vertical-align: top;
-
-}
-
-.warning-icon {
-    width: 52px;
-    padding: 10px;
-}
-
-.warning-msg {
-    padding: 15px 15px 15px 5px;
-    color: #4e4e4e;
-}
-
 .msg-block {
     width: 100%;
     border: 1px solid #d0d0d0;
     border-radius: 5px;
-    margin-top: 20px;
-    margin-bottom: 20px;
+    margin: 30px 0 30px 0;
 }
 
 .msg-table {
@@ -368,4 +343,8 @@ a.btn-dark:hover {
 .msg-msg {
     padding: 15px 15px 15px 5px;
     color: #4e4e4e;
+}
+
+.msg-msg img {
+    margin-bottom: 20px;
 }

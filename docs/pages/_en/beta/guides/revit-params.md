@@ -40,6 +40,7 @@ Another way of reading parameter values is by specifying the parameter name to t
 
 ![](/static/images/guides/revit-params05.png)
 
-{% include ltr/en/locale_note.html note='Since we are specifying the name of parameter in a specific language, the definition will break if opened on a Revit with a different language.' %}
+{% include ltr/en/locale_note.html note='Since we are specifying the name of parameter in a specific language, the definition will break if opened on a Revit with a different language. A better way (but a lot less intuitive) is to use this component is to specify the API integer value of the built-in parameter as input value.' image='/static/images/guides/revit-params06.png' %}
 
 ## Updating Parameters
+
