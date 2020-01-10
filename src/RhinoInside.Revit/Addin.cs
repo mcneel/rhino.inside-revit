@@ -125,7 +125,7 @@ namespace RhinoInside.Revit
           $"• Version: {RhinoVersion}\n" +
           $"• Path: '{SystemDir}'" + (!File.Exists(RhinoExePath) ? " (not found)" : string.Empty) + "\n" +
           $"\n{app.VersionName}\n" +
-#if REVIT_2018
+#if REVIT_2019
           $"• Version: {app.SubVersionNumber} ({app.VersionBuild})\n" +
 #else
           $"• Version: {app.VersionNumber} ({app.VersionBuild})\n" +
