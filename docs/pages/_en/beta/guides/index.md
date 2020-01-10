@@ -2,22 +2,24 @@
 title: Rhino.Inside.Revit Guides
 ---
 
-This section includes many articles that guide you through solving many {{ site.terms.revit }} challenges using {{ site.terms.rir }}.
+This section includes many articles that guide you through solving many {{ site.terms.revit }} challenges using {{ site.terms.rir }}. Make sure to take a look at the *Getting Started* guide on this Wiki before continuing.
 
 {% include ltr/warning.html message='Keep in mind that this project is in beta and does not fully cover all functions of the Revit API in its custom Revit components. Many of the guides and examples in this Wiki, use custom python components to create the necessary functionality. You are, however, free to grab the python components in these examples and use them in your own Grasshopper definitions.' %}
 
 <!-- 10 -->
+## Basic Interactions
+
+- [Reading & Writing Revit Parameter Values]({% link _en/beta/guides/revit-params.md %})
+
+<!-- 20 -->
 ## Geometry Conversion
 
 These pages guide you through converting geometry between Revit and Rhino (or other applications) using {{ site.terms.rir }}
 - [Revit Geometry to Rhino]({% link _en/beta/guides/revit-to-rhino.md %})
 - [Rhino Geometry to Revit]({% link _en/beta/guides/rhino-to-revit.md %})
 
-<!-- 20 -->
-## Querying Revit Information
-
 <!-- 30 -->
-## Revit Geometry
+## Revit Elements
 {{ site.terms.rir }} provides custom Revit-aware nodes that can create native content in Revit. These pages guide you through generating native Revit elements using {{ site.terms.rir }}
 
 - [Revit Walls]({% link _en/beta/guides/revit-walls.md %})

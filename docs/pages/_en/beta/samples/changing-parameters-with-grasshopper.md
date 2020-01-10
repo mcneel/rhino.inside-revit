@@ -3,7 +3,7 @@ title: Managing Parameters with Grasshopper
 order: 3
 ---
 
-{% include ltr/en/workinprogres.html %}
+{% include ltr/en/wip_note.html %}
 
 This sample shows how to read and write the parameters of Revit&reg; elements usign Grasshopper and Rhino&reg;. There are two sample files here. 
 

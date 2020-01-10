@@ -119,6 +119,9 @@ a.site-title:hover, a.page-link:hover, a.dropdown-toggle:hover {
 
 /* full-screen page contents */
 .wide-content img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
     width: 100%;
 }
 
@@ -130,6 +133,12 @@ a.site-title:hover, a.page-link:hover, a.dropdown-toggle:hover {
 
 .side-content h1 {
     margin-bottom: 20px;
+}
+
+.side-content img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /* post article contents */
@@ -336,26 +345,27 @@ a.btn-dark:hover {
     color: #4e4e4e;
 }
 
-.wip-block {
+.msg-block {
     width: 100%;
     border: 1px solid #d0d0d0;
     border-radius: 5px;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
-.wip-table {
+.msg-table {
 }
 
-.wip-table td {
+.msg-table td {
     vertical-align: top;
-
 }
 
-.wip-icon {
+.msg-icon {
     width: 52px;
     padding: 10px;
 }
 
-.wip-msg {
+.msg-msg {
     padding: 15px 15px 15px 5px;
     color: #4e4e4e;
 }

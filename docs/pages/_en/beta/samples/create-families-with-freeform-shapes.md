@@ -3,7 +3,7 @@ title: Creating Families in Revit with Grasshopper
 order: 8
 ---
 
-{% include ltr/en/workinprogres.html %}
+{% include ltr/en/wip_note.html %}
 
 This sample shows how to create a new Revit family in with Rhino geometry. In this case, a column is created and placed along a curve.
 

@@ -8,5 +8,5 @@ This guide documents the Grasshopper components that support Revit interaction. 
 
 {% for comp_group in site.data.components %}
 ## {{ comp_group.title }} Components
-{% include ltr/comp-table.html components=comp_group.comps %}
+{% include ltr/comp_table.html components=comp_group.comps %}
 {% endfor %}

@@ -3,7 +3,7 @@ title: Python Component in Revit
 order: 100
 ---
 
-{% include ltr/en/workinprogres.html %}
+{% include ltr/en/wip_note.html %}
 
 This guide is about writing a custom Python component in Grasshopper while running Rhino.inside Revit.
 

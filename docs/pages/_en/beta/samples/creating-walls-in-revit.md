@@ -3,7 +3,7 @@ title: Creating Wall in Revit
 order: 4
 ---
 
-{% include ltr/en/workinprogres.html %}
+{% include ltr/en/wip_note.html %}
 
 This sample shows how to take normal Rhino curve and create a set of Revit system family walls
 

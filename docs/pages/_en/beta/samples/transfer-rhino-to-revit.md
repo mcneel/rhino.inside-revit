@@ -3,7 +3,7 @@ title: Transfer Rhino to Revit
 order: 1
 ---
 
-{% include ltr/en/workinprogres.html %}
+{% include ltr/en/wip_note.html %}
 
 This sample shows how to take normal Rhino breps, curves and points into Revit.
 

@@ -26,6 +26,7 @@ url: "" # the base hostname & protocol for your site
 # site default version and language
 version: beta
 language: en
+revit_api: 2020
 
 # Ruby and Jekyll Settings
 plugins:

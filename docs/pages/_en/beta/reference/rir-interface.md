@@ -11,5 +11,5 @@ Here is a description of the buttons and functionality available on this ribbon.
 
 {% for panel in site.data.buttons %}
 ## {{ panel.title }} Panel
-{% include ltr/button-table.html buttons=panel.comps %}
+{% include ltr/button_table.html buttons=panel.comps %}
 {% endfor %}

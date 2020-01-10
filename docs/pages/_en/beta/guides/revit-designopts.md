@@ -3,4 +3,4 @@ title: Working with Design Options
 order: 72
 ---
 
-{% include ltr/en/workinprogres.html %}
+{% include ltr/en/wip_note.html %}

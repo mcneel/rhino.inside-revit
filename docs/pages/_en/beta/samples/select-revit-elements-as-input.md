@@ -3,7 +3,7 @@ title: Selection filters for Revit objects
 order: 6
 ---
 
-{% include ltr/en/workinprogres.html %}
+{% include ltr/en/wip_note.html %}
 
 This sample shows how to Select Revit Element edges as input to a Grasshopper lofted surface.
 
