@@ -265,6 +265,16 @@ namespace RhinoInside.Revit.UI
       {
         Addin.ApplicationUI.ControlledApplication.ApplicationInitialized -= applicationInitialized;
         Revit.ActiveUIApplication = new UIApplication(sender as Autodesk.Revit.ApplicationServices.Application);
+
+        var BootScript = Environment.GetEnvironmentVariable("RHINOINSIDE_RUNSCRIPT");
+        if (!string.IsNullOrEmpty(BootScript))
+        {
+          if (Revit.OnStartup(Revit.ApplicationUI) == Result.Succeeded)
+            Rhino.RhinoApp.RunScript(BootScript, false);
+
+          var exit = RevitCommandId.LookupPostableCommandId(PostableCommand.ExitRevit);
+          Revit.ActiveUIApplication.PostCommand(exit);
+        }
       };
     }
 
@@ -305,10 +315,10 @@ namespace RhinoInside.Revit.UI
 
       if (RhinoCommand.Availability.Available)
       {
-        if(Keyboard.IsKeyDown(Key.LeftCtrl))
+        if (Keyboard.IsKeyDown(Key.LeftCtrl))
           return Rhinoceros.RunCommandAbout();
 
-        using(var modal = new Rhinoceros.ModalScope())
+        using (var modal = new Rhinoceros.ModalScope())
           result = modal.Run(false, true);
 
         // If no windows are visible we show the Ribbon tab
@@ -358,9 +368,100 @@ namespace RhinoInside.Revit.UI
         // No more loads in this session
         Button.Enabled = false;
         Button.ToolTip = "Failed to load.";
+
+        TestInSafeMode(data);
       }
 
       return result;
+    }
+
+    void TestInSafeMode(ExternalCommandData data)
+    {
+      using
+      (
+        var taskDialog = new TaskDialog(MethodBase.GetCurrentMethod().DeclaringType.FullName)
+        {
+          Title = "Failed to load",
+          MainIcon = TaskDialogIcons.IconError,
+          TitleAutoPrefix = false,
+          AllowCancellation = true,
+          MainInstruction = "Rhino.Inside failed to load",
+          MainContent = "It may be due an incompatibility with other installed Addins.\n\nTo test if this is the case please run Revit without addins.\nWhile running in that mode you may see other Addins errors and it may take longer to load, don't worry about that no persistent change will been made on your computer.",
+          FooterText = "Current version: " + Addin.DisplayVersion
+        }
+      )
+      {
+        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Run Revit without Addins…");
+        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink2, "Report Error…");
+        switch(taskDialog.Show())
+        {
+          case TaskDialogResult.CommandLink1:
+            using (new Serialization.LockAddIns(data.Application.Application.VersionNumber))
+            {
+              var si = new ProcessStartInfo()
+              {
+                FileName = Process.GetCurrentProcess().MainModule.FileName,
+                Arguments = "/nosplash",
+                UseShellExecute = false
+              };
+              si.EnvironmentVariables["RHINOINSIDE_RUNSCRIPT"] = "_Grasshopper";
+
+              using (var RevitApp = Process.Start(si)) { RevitApp.WaitForExit(); }
+            }
+
+            ReportAddins(data);
+            break;
+          case TaskDialogResult.CommandLink2:
+            ReportAddins(data);
+            break;
+        }
+      }
+    }
+
+    void ReportAddins(ExternalCommandData data)
+    {
+      var mailtoURI = @"mailto:support@mcneel.com?subject=Rhino.Inside%20Revit%20failed%20to%20load&body=";
+
+      var mailBody = @"<Your comments here...>" + Environment.NewLine + Environment.NewLine;
+
+      mailBody += @"Loaded Addins:" + Environment.NewLine + Environment.NewLine;
+
+      Serialization.AddIns.GetInstalledAddins(data.Application.Application.VersionNumber, out var manifests);
+      foreach (var manifest in manifests)
+      {
+        mailBody += $"Manifest: {manifest}" + Environment.NewLine;
+        if (Serialization.AddIns.LoadFrom(manifest, out var revitAddins))
+        {
+          foreach (var addin in revitAddins)
+          {
+            if (!string.IsNullOrEmpty(addin.Type))
+              mailBody += $"Type: {addin.Type}" + Environment.NewLine;
+
+            if (!string.IsNullOrEmpty(addin.Name))
+              mailBody += $"Name: {addin.Name}" + Environment.NewLine;
+
+            if (!string.IsNullOrEmpty(addin.VendorDescription))
+              mailBody += $"VendorDescription: {addin.VendorDescription}" + Environment.NewLine;
+
+            if (!string.IsNullOrEmpty(addin.Assembly))
+            {
+              mailBody += $"Assembly: {addin.Assembly}" + Environment.NewLine;
+
+              var versionInfo = File.Exists(addin.Assembly) ? FileVersionInfo.GetVersionInfo(addin.Assembly) : null;
+              mailBody += $"FileVersion: {versionInfo?.FileVersion}" + Environment.NewLine;
+            }
+          }
+
+          mailBody += Environment.NewLine;
+        }
+      }
+
+      mailBody = mailBody.Replace(@" ", @"%20");
+      mailBody = mailBody.Replace(@"?", @"[qm]");
+      mailBody = mailBody.Replace(@"=", @"[eq]");
+      mailBody = mailBody.Replace(Environment.NewLine, @"%0A");
+
+      using (Process.Start(mailtoURI + mailBody)) { }
     }
   }
 }
