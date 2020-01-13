@@ -29,7 +29,7 @@ The column should populate the points along the curve in both Rhino and Revit.
 
 The inputs needed to make a Family definition are a point and the BREP geometry. In this case the first point on the curve serves as the point under the column assembly.  The column is setup with the foundation, column and small shelf shape.
 
-### Test
+### Moving Geometry to 0,0,0
 
 The key to making a new family and being able to insert it with accuracy is to move the Rhino BREPs to the world origin.  Revit will always make new Families centered at the Origin (0,0,0).  Here the first point in the list is taken out of the list of points, a vector is made from that point to 0,0,0 and then that transform is applied to the Breps.  This places the geometry at 0,0,0 in Rhino temporarily.
 
@@ -49,13 +49,22 @@ Once the Family is created, it may be inserted.
 
 ## Inserting a Family Instances
 
+Technically, Families cannot be inserted in Revit, only Types of a Family may be inserted.  To insert a Teyp Instance, use the AddFamilyInstance.ByLocation component:
+
+![Get Type](/static/images/new-family04.png)  
+
+The Add Family Instance component requires:
+
+1. A Type to insert
+2. A point or plane for location
+3. A Level to host the object on (optional)
+
+So the first step is to convert the Family to a Type. Because component Families only have one Type, it is quite easy to add a GetType component to get to the Type.
+
+![Get Type](/static/images/new-family03.png)
+
+To place a component a simple point can be used. although this does not allow for initial rotational control. Using a Plane for the location not only is the insertion point controlled, but also the orientation/rotation also controlled. 
+
+Hopefully this guide helps understand the importance the the steps necessary of creating new Families for Rhino geometry in Revit.
 
 
-
-The component necessary:
-1. DirectShape Category picker
-1. Directshape from Geometry
-1. Brep Param component in Grasshopper
-
-![Rhino Brep to Revit as Directshape](/static/images/rhino-to-revit-brep.jpg)
-Once you select the Breps, those will feed into the Direct component.
