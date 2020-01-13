@@ -51,7 +51,7 @@ Once the Family is created, it may be inserted.
 
 Technically, Families cannot be inserted in Revit, only Types of a Family may be inserted.  To insert a Teyp Instance, use the AddFamilyInstance.ByLocation component:
 
-![Get Type](/static/images/new-family04.png)  
+![Get Type](/static/images/samples/new-family04.png)  
 
 The Add Family Instance component requires:
 
@@ -61,7 +61,7 @@ The Add Family Instance component requires:
 
 So the first step is to convert the Family to a Type. Because component Families only have one Type, it is quite easy to add a GetType component to get to the Type.
 
-![Get Type](/static/images/new-family03.png)
+![Get Type](/static/images/samples/new-family03.png){: style="width:450px; "}
 
 To place a component a simple point can be used. although this does not allow for initial rotational control. Using a Plane for the location not only is the insertion point controlled, but also the orientation/rotation also controlled. 
 
