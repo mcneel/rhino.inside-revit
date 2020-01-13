@@ -24,6 +24,12 @@
   - [Linking Images](#linking-images)
   - [Grasshopper Screenshots](#grasshopper-screenshots)
   - [Linking Videos](#linking-videos)
+  - [Pre-defined Blocks](#pre-defined-blocks)
+    - [Work-in-Progress Block](#work-in-progress-block)
+    - [Revit API Link Block](#revit-api-link-block)
+    - [Warning Note Block](#warning-note-block)
+    - [API Note Block](#api-note-block)
+    - [Locale Note Block](#locale-note-block)
 - [Data Sources](#data-sources)
   - [Rhinocerous Tab Button List](#rhinocerous-tab-button-list)
   - [Grasshopper Component List](#grasshopper-component-list)
@@ -404,6 +410,110 @@ or for Vimeo,
 ```markdown
 {% include vimeo_player.html id="280080233" %}
 ```
+
+## Pre-defined Blocks
+
+There are a couple of pre-defined blocks that you can use in your content by using the `{% include}` tags. These blocks and their usage example are listed below.
+
+**Note:** Notice that some of these block have been placed under `ltr/en` for English (Left-to-Right). If you are translating content for your own language, duplicate and translate the content of the block. Make sure to place the new block file in the appropriate directory structure.
+
+**Note:** Some of the blocks can accept arguments. You can use the `{% capture` tags to capture a larger piece of content and use that as the value for the arguments (e.g. `note=` in example below):
+
+```
+{% capture api_note %}
+
+In Revit API, all the built-in parameters are represented by the {% include api_type.html type='Autodesk.Revit.DB.BuiltInParameter' title='DB.BuiltInParameter' %} enumeration.
+
+{% endcapture %}
+
+{% include ltr/en/api_note.html note=api_note %}
+```
+
+
+### Work-in-Progress Block
+
+![](static/images/readme/wip-block.png)
+
+This block is meant to show upcoming content on your page. Make sure to replace with actual content and don't leave these blocks on the Wiki for too long.
+
+This is how you would insert a WIP block into your page.
+
+```
+{% include ltr/en/wip_note.html %}
+```
+
+### Revit API Link Block
+
+This block generates a URL to the desired type on [apidoc.co](https://apidocs.co/). This block takes two parameters as input:
+
+- `type=` the target type to generate the URL for
+- `title=` the title of the generated link
+  
+The example below generates the URL for `Autodesk.Revit.DB.BuiltInParameter` enum
+
+```
+{% include api_type.html type='Autodesk.Revit.DB.BuiltInParameter' title='DB.BuiltInParameter' %}
+```
+
+This block uses values shown below in site configuration to generate the URL:
+
+```yaml
+# revit api version used to generate api links on apidoc.co
+revit_api: 2020
+```
+
+### Warning Note Block
+
+![](static/images/readme/warning-block.png)
+
+This block is for showing alerts and warnings in your content. Below is an example of using a warning note block:
+
+```
+{% include ltr/warning_note.html note=api_note %}
+```
+
+This block can accept two argument:
+
+- `note=` for the note message
+- `image=` for the header image above the note
+
+
+### API Note Block
+
+![](static/images/readme/api-block.png)
+
+This block is for comments related to the APIs. These notes are usually used to explain how APIs work in specific cases. Below is an example of using an API note block:
+
+```
+{% include ltr/en/api_note.html note=api_note %}
+```
+
+This block can accept two argument:
+
+- `note=` for the note message
+- `image=` for the header image above the note
+
+### Locale Note Block
+
+![](static/images/readme/locale-block.png)
+
+This block is for comments related to the various languages supported by the host software. Below is an example of using a locale note block:
+
+```
+{% include ltr/en/locale_note.html note=api_note %}
+```
+
+This block can accept two argument:
+
+- `note=` for the note message
+- `image=` for the header image above the note
+
+This is the code used to generate the example locale block shown in the image above.
+
+```
+{% include ltr/en/locale_note.html note='Since we are specifying the name of parameter in a specific language, the definition will break if opened on a Revit with a different language. A better way (but a lot less intuitive) is to specify the API integer value of the built-in parameter as input value. You can get this value by converting the DB.BuiltInParameter value to an int in python.' image='/static/images/guides/revit-params06.png' %}
+```
+
 
 # Data Sources
 
