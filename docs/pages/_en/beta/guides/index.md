@@ -65,5 +65,5 @@ These pages guide you through working with global model configurations using {{ 
 These pages guide you through using Rhino python editor, and Grasshopper scripting components in {{ site.terms.rir }}
 
 - [Grasshopper Python Component]({% link _en/beta/guides/rir-ghpython.md %})
-<!-- add C# -->
+- [Grasshopper C# Component]({% link _en/beta/guides/rir-csharp.md %})
 - [Rhino Python]({% link _en/beta/guides/rir-rhpython.md %})
