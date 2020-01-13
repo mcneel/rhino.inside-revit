@@ -10,6 +10,7 @@ logo: assets/img/rir-logo-50x50.png
 github_username:  mcneel
 repo_url: "https://github.com/mcneel/rhino.inside-revit/"
 editme_github_base_url: "blob/docs/cleanup/docs/"
+metawiki_url: "tree/master/docs/readme.md"
 
 # forum url
 forum_url: "https://discourse.mcneel.com/c/rhino-inside/Revit"
