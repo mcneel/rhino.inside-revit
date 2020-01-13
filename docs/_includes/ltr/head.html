@@ -29,14 +29,19 @@
             activeVersion = version;
         }
 
-        // navigate to page with active version
-        function navigateTo(pageName, pageVersion) {
+        // get page link for specific version
+        function getPageLink(pageName, pageVersion) {
             var pageLink = '{{ site.baseurl }}/{{ page.language }}/VERSION/' + pageName;
             if (!pageVersion) {
                 pageVersion = activeVersion;
             }
             console.log(pageLink.replace("VERSION", pageVersion));
-            window.location.href = pageLink.replace("VERSION", pageVersion); 
+            return pageLink.replace("VERSION", pageVersion); 
+        }
+
+        // navigate to page with active version
+        function navigateTo(pageName, pageVersion) {
+            window.location.href = getPageLink(pageName, pageVersion);
         }
 
         // extract active version from url

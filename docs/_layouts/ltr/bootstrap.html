@@ -50,14 +50,21 @@
         <!-- highlight the active category link on navigation bar -->
         <script>
             var url = window.location.href;
+            // set nav bar links by selected version
+            $('#cat_homelink').attr('href', getPageLink(''));
+            $('#cat_starting').attr('href', getPageLink('getting-started'));
+            $('#cat_guides').attr('href', getPageLink('guides'));
+            $('#cat_samples').attr('href', getPageLink('samples'));
+            $('#cat_reference').attr('href', getPageLink('reference'));
+            // mark current navbar category as active
             if (url.endsWith('/getting-started') || url.includes('/getting-started/')) {
-                $('#cat_starting').addClass('active')
+                $('#cat_starting').addClass('active');
             } else if (url.endsWith('/guides') || url.includes('/guides/')) {
-                $('#cat_guides').addClass('active')
+                $('#cat_guides').addClass('active');
             } else if (url.endsWith('/samples') || url.includes('/samples/')) {
-                $('#cat_samples').addClass('active')
+                $('#cat_samples').addClass('active');
             } else if (url.endsWith('/reference') || url.includes('/reference/')) {
-                $('#cat_reference').addClass('active')
+                $('#cat_reference').addClass('active');
             }
         </script>
 
