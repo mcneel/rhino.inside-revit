@@ -263,6 +263,15 @@ a.site-title:hover, a.page-link:hover, a.dropdown-toggle:hover {
 /*
     content elements  =========================================================
 */
+.error404 img {
+    width: 400px;
+    margin-top: 100px;
+}
+
+.error404 p {
+    text-align: center;
+}
+
 a.btn-dark {
     color: white;
 }
