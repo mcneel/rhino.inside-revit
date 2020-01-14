@@ -30,6 +30,7 @@
     - [Warning Note Block](#warning-note-block)
     - [API Note Block](#api-note-block)
     - [Locale Note Block](#locale-note-block)
+    - [Release Header Block](#release-header-block)
 - [Data Sources](#data-sources)
   - [Rhinoceros Tab Button List](#rhinoceros-tab-button-list)
   - [Grasshopper Component List](#grasshopper-component-list)
@@ -520,6 +521,18 @@ This is the code used to generate the example locale block shown in the image ab
 {% include ltr/en/locale_note.html note='Since we are specifying the name of parameter in a specific language, the definition will break if opened on a Revit with a different language. A better way (but a lot less intuitive) is to specify the API integer value of the built-in parameter as input value. You can get this value by converting the DB.BuiltInParameter value to an int in python.' image='/static/images/guides/revit-params06.png' %}
 ```
 
+### Release Header Block
+
+![](static/images/readme/release-header.png)
+
+This block is release headers on **Release Notes** page. This block can accept two argument:
+
+- `version=` release version (without prefix v)
+- `time=` build time
+
+```
+{% include ltr/release-header.html version="0.0.7317.30902" time="1/13/2020 17:10:04" %}
+```
 
 # Data Sources
 

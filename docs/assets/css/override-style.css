@@ -380,3 +380,10 @@ a.btn-dark:hover {
 .msg-msg img {
     margin-bottom: 20px;
 }
+
+small.build-time {
+    text-align: right;
+    display: block;
+    color: #999;
+    margin-top: -5px;
+}
