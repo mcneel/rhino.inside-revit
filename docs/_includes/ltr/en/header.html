@@ -3,23 +3,24 @@
     <a class="site-logo" href="{{ site.baseurl }}/">
         <img src="{{ site.baseurl }}/{{ site.logo }}" height="50" width="50">
     </a>
+
     <!-- Title -->
     <a id="cat_homelink" class="site-title" href="#">{{ site.title }}</a>
+
+    <!-- Version selector dropdown -->
+    <a id="versionSelector" class="dropdown-toggle version-selector" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></a>
+    <div class="dropdown-menu" aria-labelledby="versionSelector">
+        {% for version in site.versions %}
+            <!-- grab name and link for each version -->
+            <a class="version-link" href="#" onclick="navigateTo('', '{{ version[1].version }}')">{{ version[1].name }}</a>
+        {% endfor %}
+    </div>
+
     <!-- Navigation Bar -->
     <nav class="site-nav">
         <img class="menu-icon" src="{{ site.baseurl }}/assets/img/burger.svg" />
         {% assign pages = site.pages | sort:"order"  %}
         <div class="trigger">
-            <!-- Version selector dropdown -->
-            <a class="dropdown">
-                <a id="versionSelector" class="dropdown-toggle version-selector" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></a>
-                <div class="dropdown-menu" aria-labelledby="versionSelector">
-                    {% for version in site.versions %}
-                        <!-- grab name and link for each version -->
-                        <a class="version-link" href="#" onclick="navigateTo('', '{{ version[1].version }}')">{{ version[1].name }}</a>
-                    {% endfor %}
-                </div>
-            </a>
             <!-- Other pages -->
             <a id="cat_starting" class="page-link" href="#">Getting Started</a>
             <a id="cat_guides" class="page-link" href="#">Guides</a>

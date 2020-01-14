@@ -15,10 +15,26 @@
     &:visited {
         color: $grey-color-dark;
     }
+
+    @include media-query($on-phone) {
+        font-size: 20px;
+    }
 }
 
 .site-title-short {
     display: none;
+}
+
+.version-selector {
+    color: $text-color;
+    line-height: $base-line-height;
+    display: inline-block;
+    margin-top: 22px;
+    margin-left: 15px;
+
+    @include media-query($on-phone) {
+        font-size: 14px;
+    }
 }
 
 #plot-header {
@@ -44,12 +60,7 @@
         }
     }
 
-    .version-selector {
-        color: $text-color;
-        line-height: $base-line-height;
-    }
-
-    @include media-query($on-phone) {
+    @include media-query($on-tablet) {
         position: absolute;
         top: 3px;
         right: 15px;
@@ -103,11 +114,6 @@
             &:not(:first-child) {
                 margin-left: 0px;
             }
-        }
-
-        .version-selector {
-            display: block;
-            padding: 5px 10px;
         }
     }
 }
