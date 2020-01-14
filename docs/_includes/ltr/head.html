@@ -1,0 +1,77 @@
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Title and Description -->
+    <title>{% if localized.title %}{{ page.title }} {% else %}{{ site.title }} {% endif %}</title>
+    <meta name="description" content="{% if page.excerpt %}{{ page.excerpt | strip_html | strip_newlines | truncate: 160 }}{% else %}{{ site.description }}{% endif %}">
+
+    <!-- Javascript -->
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.6/highlight.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.5/languages/vbnet.min.js"></script>
+    <!-- Javascript -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <!-- MathJax -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <!-- Magnific Popup -->
+    <script type="text/javascript" src="{{ "/assets/js/jquery.magnific-popup.min.js" | prepend: site.baseurl }}"></script>
+
+    <!-- Utility Methods and Init Script -->
+    <script>
+        hljs.initHighlightingOnLoad();
+
+        // version selectors can set the active version
+        function setActiveVersion(version) {
+            console.log("setting active version to:", version);
+            activeVersion = version;
+        }
+
+        // get page link for specific version
+        function getPageLink(pageName, pageVersion) {
+            var pageLink = '{{ site.baseurl }}/{{ page.language }}/VERSION/' + pageName;
+            if (!pageVersion) {
+                pageVersion = activeVersion;
+            }
+            console.log(pageLink.replace("VERSION", pageVersion));
+            return pageLink.replace("VERSION", pageVersion); 
+        }
+
+        // navigate to page with active version
+        function navigateTo(pageName, pageVersion) {
+            window.location.href = getPageLink(pageName, pageVersion);
+        }
+
+        // extract active version from url
+        var activeVersion = function() {
+            var url = window.location.href;
+            var version = '{{ site.version }}';
+            console.log(url);
+            if (url.endsWith('/beta') || url.includes('/beta/')) {
+                version = 'beta';
+            } else {
+                var re = /\/(\d\.\d)($|\/)/g;
+                var m = url.match(re);
+                if (m) {
+                    version = m[0].replace(/\//g, '');
+                }
+            }
+            setActiveVersion(version)
+            return version;
+        }();
+
+    </script>
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="{{ "/assets/css/main.css" | prepend: site.baseurl }}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ "/assets/css/magnific-popup.css" | prepend: site.baseurl }}">
+    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.6/styles/github.min.css">
+    <link rel="stylesheet" href="{{ "/assets/css/override-style.css" | prepend: site.baseurl }}">
+    <link rel="stylesheet" href="{{ "/assets/css/override-layout.css" | prepend: site.baseurl }}">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ site.baseurl }}/favicon.ico">
+</head>

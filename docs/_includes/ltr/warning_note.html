@@ -1,0 +1,13 @@
+<div class="msg-block">
+    <table class="msg-table">
+        <tr>
+            <td class="msg-icon"><img src="/assets/img/warning.svg"></td>
+            <td class="msg-msg">
+                {% if include.image %}
+                    <img src="{{ include.image }}">
+                {% endif %}
+                {{ include.note }}
+            </td>
+        </tr>
+    </table>
+</div>

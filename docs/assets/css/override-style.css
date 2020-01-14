@@ -1,0 +1,385 @@
+/* fix anchor click offset from top */
+/* https://www.itsupportguides.com/knowledge-base/tech-tips-tricks/how-to-offset-anchor-tag-link-using-css/ */
+:target:before {
+    content: "";
+    display: block;
+    height: 90px;      /* fixed header height*/
+    margin: -90px 0 0; /* negative fixed header height */
+}
+
+/*
+    html element adjustments ==================================================
+*/
+body {
+    line-height: 1.5;
+    position: relative;
+    /*
+        always show the vertical scrollbar otherwise page width changes
+        from page to page and is annoying
+     */
+    overflow: scroll;
+}
+
+a.site-title, a.page-link, a.dropdown-toggle
+a.site-title:hover, a.page-link:hover, a.dropdown-toggle:hover {
+    color: #111;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/*
+    site content ==============================================================
+*/
+.container {
+    max-width: 1170px;
+}
+
+/*
+    navigation bar ============================================================
+*/
+.site-header {
+    z-index: 1024;
+    top: 0;
+    position: sticky;
+    min-height: 70px;
+    background: white;
+}
+
+/* logo */
+.site-logo {
+    float: left;
+    line-height: 60px;
+}
+
+/* title text */
+.site-title {
+    margin-left: 10px;
+    line-height: 60px;
+}
+
+/* navigation bar with pages */
+/* github logo on navigation bar */
+.site-nav svg {
+    margin-top: -4px;
+}
+
+/* page links on navigation bar */
+.page-link {
+    display: inline;
+    padding: 0;
+    margin: 0;
+    border: none;
+}
+
+.page-link:hover {
+    background: none;
+    border: none;
+}
+
+.page-link:focus {
+    box-shadow: none;
+}
+
+.page-link.active {
+    font-weight: 600;
+}
+
+/* version selector on navigation bar */
+.dropdown:not(:first-child) {
+    margin: 0;
+}
+
+.version-link {
+    display: block;
+    color: #111;
+    padding: 4px 28px 4px 20px;
+    margin: 0;
+    text-align: left;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.version-link:hover {
+    background-color: #f8f9fa;
+}
+
+.version-link:visited {
+    color: #111;
+}
+
+.version-link:not([href]) {
+    color: #999;
+}
+
+.menu-icon {
+    display: none;
+}
+
+/*
+    page contents =============================================================
+*/
+/* base */
+.page-content {
+    /*
+    set the minimum height to the footer does not get
+    too close to header or sidebar when page is empty
+    */
+    min-height: 35em;
+}
+
+.page-content a, .page-content a:hover {
+    text-decoration: none;
+}
+
+/* full-screen page contents */
+.wide-content img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+}
+
+/* page with sidebar contents */
+.side-content {
+    margin-left: 225px;
+}
+
+.side-content h1 {
+    margin-bottom: 20px;
+}
+
+.side-content img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* post article contents */
+.post-content h2 {
+    border-bottom: 1px dashed #d0d0d0;
+    padding-bottom: 10px;
+}
+
+/* side bar */
+.sidebar {
+    width: 215px;
+    position: fixed;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding-left: 0;
+    margin-left: 0;
+}
+
+.sidebar li, .nav li {
+    display: block;
+}
+
+.sidebar a, .nav a {
+    color: #999;
+    text-decoration: none;
+    border-left: 1px solid transparent;
+    font-size: 13px;
+    font-weight: 400;
+    padding: 4px 20px 4px 18px;
+    display: block;
+}
+
+.sidebar a:hover, .nav a:hover {
+    color: #111;
+    border-left: 1px #111 solid;
+    background: transparent;
+}
+
+/* side bar second level depth links */
+.sidebar .nav .nav-item .nav a,
+.sidebar nav a {
+    margin-left: 20px;
+    font-size: 12px;
+}
+
+/* side bar navigation */
+.nav {
+    margin: 0;
+    padding: 0;
+    display: block;
+}
+
+.nav a.active {
+    font-weight: bold;
+    color: #111;
+}
+
+/*
+    footer ====================================================================
+*/
+.site-footer {
+    padding: 0px;
+}
+
+.footer {
+    text-align: center;
+    font-size: 13px;
+    color: #828282;
+    margin-bottom: 20px;
+}
+
+.footer a {
+    color:#828282;
+}
+
+.footer a:visited {
+    color:#828282;
+}
+
+/* list of languages on footer */
+.footer-language-list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.footer-language-list li {
+    display: inline;
+}
+
+.footer-language-list li:not(:first-child) {
+    margin-left: 10px;
+}
+
+/* language on footer */
+.footer-languages {
+    border-bottom: 1px solid #e8e8e8;
+    padding: 5px 0px 5px 0px;
+    margin-bottom: 10px;
+}
+
+/* Edit On Github link on footer */
+.editgithub_link {
+    margin-top: 5px;
+}
+
+/*
+    kramdown elements  ========================================================
+*/
+
+.scale-half {
+    -moz-transform:scale(0.5);
+    -webkit-transform:scale(0.5);
+    transform:scale(0.5);
+    outline: 1px solid transparent;
+}
+
+/*
+    content elements  =========================================================
+*/
+.error404 img {
+    width: 400px;
+    margin-top: 100px;
+}
+
+.error404 p {
+    text-align: center;
+}
+
+a.btn-dark {
+    color: white;
+}
+
+a.btn-dark:hover {
+    color: white;
+}
+
+.comp-table {
+    width: 100%;
+}
+
+.comp-table tr {
+    border-top: 1px solid #e8e8e8;
+}
+
+.comp-table tr:first-child,
+.comp-table tr.comp-docs-row {
+    border-top: none;
+}
+
+.comp-table td.comp-docs-col {
+    padding-left: 36px;
+}
+
+.comp-table td {
+    vertical-align: top;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.comp-table td.comp-icon {
+    width: 36px;
+}
+
+.comp-table td.comp-icon img {
+    width: 24px;
+}
+
+.comp-table td.comp-title {
+    padding-right: 10px;
+    font-style: italic;
+}
+
+.icontag {
+    display: block;
+    background: linear-gradient(white, #e8e8e8);;
+    border: 1px solid #828282;
+    border-radius: 5px;
+    width: 24px;
+    height: 24px;
+    padding-top: 2px;
+    font-size: 1rem;
+    line-height: 1;
+    font-weight: bold;
+    text-align: center;
+}
+
+.icontag_circle {
+    display: inline-block;
+    color: white;
+    background-color: black;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    padding-top: 2px;
+    font-size: 1rem;
+    line-height: 1;
+    font-weight: bold;
+    text-align: center;
+}
+
+.msg-block {
+    width: 100%;
+    border: 1px solid #d0d0d0;
+    border-radius: 5px;
+    margin: 30px 0 30px 0;
+}
+
+.msg-icon {
+    width: 62px;
+    padding: 15px;
+    vertical-align: top;
+}
+
+.msg-msg {
+    padding: 15px 15px 15px 5px;
+    color: #4e4e4e;
+}
+
+.msg-msg img {
+    margin-bottom: 20px;
+}
+
+small.build-time {
+    text-align: right;
+    display: block;
+    color: #999;
+    margin-top: -5px;
+}

@@ -1,0 +1,29 @@
+<table class="comp-table">
+    {% for comp in include.components %}
+        <tr>
+            <td class="comp-icon">
+                {% if comp.icontag %}
+                    <div class="icontag">{{ comp.icontag }}</div>
+                {% else %}
+                    <img src="{{ comp.iconsrc }}">
+                {% endif %}
+            </td>
+            <td class="comp-title">{{ comp.title }}</td>
+            <td class="comp-desc">{{ comp.desc }}</td>
+        </tr>
+
+        {% for collection in site.collections %}
+            {% if collection.label == page.collection %}
+                {% for cdoc in collection.docs %}
+                    {% if cdoc.title and cdoc.version == page.version and cdoc.categories == page.categories and cdoc.path contains comp.uuid %}
+                        <tr class="comp-docs-row">
+                            <td class="comp-docs-col" colspan="3">
+                                {{ cdoc.content }}
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+</table>

@@ -1,0 +1,81 @@
+- title: Rhinocerous
+  comps:
+    - title: Help
+      desc: Contains links to all the help resources for Rhino.inside Revit
+      iconsrc: 
+      icontag: '?'
+
+    - title: Rhino
+      desc: The Rhino icon will start Rhino to run inside Revit. Grasshopper can also be run from within that Rhino instance
+      iconsrc: /static/images/ribbon/Rhino.png
+      icontag: 
+
+    - title: Python
+      desc: Run the Rhino.Python editor that can be used to write Python scripts that combine both the Rhino and Revit API in the same script. See <a href="Autodesk/Revit/src/RhinoInside.Revit/Samples/Sample7.py">Sample 7</a> for a detailed look at the Python code
+      iconsrc: /static/images/ribbon/Python.png
+      icontag: 
+
+- title: Grasshopper
+  comps:
+    - title: Grasshopper
+      desc: Open the Grasshopper Canvas in Revit
+      iconsrc: /static/images/ribbon/Grasshopper.png
+      icontag: 
+
+    - title: Player
+      desc: The Grasshopper Player will run any existing Grasshopper definition and immediately return to Revit
+      iconsrc: /static/images/ribbon/GrasshopperPlayer.png
+      icontag: 
+
+    - title: 'Off'
+      desc: Turns off the real-time preview by Grasshopepr in Revit
+      iconsrc: /static/images/gh/Toolbar/Preview_Off_24x24.png
+      icontag: 
+
+    - title: Wireframe
+      desc: Grasshopper will use a wireframe display for real-time preview of geometry in Revit
+      iconsrc: /static/images/gh/Toolbar/Preview_Wireframe_24x24.png
+      icontag: 
+
+    - title: Shaded
+      desc: Grasshopper will use a shaded display mode for real-time preview of geometry in Revit
+      iconsrc: /static/images/gh/Toolbar/Preview_Shaded_24x24.png
+      icontag: 
+
+    - title: Recompute
+      desc: Forces a recompute to the loaded Grasshopper definitions
+      iconsrc: /static/images/gh/Toolbar/Recompute_24x24.png
+      icontag: 
+
+    - title: Category Selector
+      desc: Bake tool uses this selected category to bake the geometry into Revit
+      iconsrc: 
+      icontag: 
+
+    - title: Bake Selected
+      desc: Bakes the currently selected Rhino Geometry into the currently selected Category in Revit
+      iconsrc: /static/images/gh/Toolbar/Bake_24x24.png
+      icontag: 
+
+- title: Samples
+  comps:
+    - title: Sample 1
+      desc: Sample 1 will simply draw a Rhino sphere in Revit as a example for developers
+      iconsrc: 
+      icontag: 1
+
+    - title: Sample 4
+      desc: Sample 4 will run an external Grasshopper definition
+      iconsrc: 
+      icontag: 4
+
+    - title: Sample 6
+      desc: Sample 6 will toggle the visibility of Rhino geometry in Revit
+      iconsrc: 
+      icontag: 6
+
+    - title: Sample 8
+      desc: Sample 8 will allow Revit to open Rhino .3DM files directly
+      iconsrc: 
+      icontag: 8
+

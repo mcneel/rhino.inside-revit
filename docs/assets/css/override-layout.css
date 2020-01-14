@@ -1,0 +1,43 @@
+@media only screen and (max-width: 900px) {
+    .container {
+        max-width: 800px;
+    }
+
+    .side-content {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .sidebar {
+        display: inline;
+        position: inherit;
+    }
+
+    .sidebar li {
+        display: inline-flex;
+    }
+
+    .sidebar #sidebar-toc {
+        display: none;
+    }
+
+    .sidebar a, .nav a {
+        display: block;
+        color: #999;
+        text-decoration: none;
+        border-left: 1px solid transparent;
+        font-size: 13px;
+        font-weight: 400;
+        padding: 5px 10px 5px 10px;
+        margin-right: 5px;
+        background:#f7f7f7;
+        border-radius: .25em;
+        margin-bottom: 5px;
+    }
+
+    .sidebar a:hover, .nav a:hover {
+        color: #111;
+        border-left: 1px solid transparent;
+        background:#f7f7f7;
+    }
+}

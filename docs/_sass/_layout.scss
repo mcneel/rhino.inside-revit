@@ -1,0 +1,241 @@
+.site-header {
+    border-top: 5px solid $grey-color-dark;
+    border-bottom: 1px solid $grey-color-light;
+    min-height: 56px;
+}
+
+.site-title {
+    font-size: 26px;
+    line-height: 56px;
+    letter-spacing: -1px;
+    margin-bottom: 0;
+    float: left;
+
+    &,
+    &:visited {
+        color: $grey-color-dark;
+    }
+
+    @include media-query($on-phone) {
+        font-size: 20px;
+    }
+}
+
+.site-title-short {
+    display: none;
+}
+
+.version-selector {
+    color: $text-color;
+    line-height: $base-line-height;
+    display: inline-block;
+    margin-top: 22px;
+    margin-left: 15px;
+
+    @include media-query($on-phone) {
+        font-size: 14px;
+    }
+}
+
+#plot-header {
+    display: none;
+    float: right;
+}
+
+.site-nav {
+    float: right;
+    line-height: 60px;
+
+    .menu-icon {
+        display: none;
+    }
+
+    .page-link {
+        color: $text-color;
+        line-height: $base-line-height;
+
+        // Gaps between nav items, but not on the first one
+        &:not(:first-child) {
+            margin-left: 20px;
+        }
+    }
+
+    @include media-query($on-tablet) {
+        position: absolute;
+        top: 3px;
+        right: 15px;
+        background-color: $background-color;
+        border: 0px solid $grey-color-light;
+        border-radius: 5px;
+        text-align: right;
+        z-index: 10;
+
+        .menu-icon {
+            display: block;
+            float: right;
+            width: 36px;
+            padding-top: 15px;
+            text-align: center;
+            border-style: none;
+
+            > svg {
+                width: 36px;
+
+                path {
+                    fill: $grey-color-dark;
+                }
+            }
+        }
+
+        .trigger {
+            clear: both;
+            display: none;
+        }
+
+        &:hover .trigger {
+            display: block;
+            width: 200px;
+            padding: 10px 0px 10px 0px;
+            background-color: white;
+            border: 1px solid rgba(0,0,0,.15);
+            border-radius: .25rem;
+        }
+
+        .page-link {
+            display: block;
+            padding: 5px 10px;
+            margin: 0px;
+
+            &:hover {
+                background-color: #f8f9fa;
+            }
+
+            // remove left gap between nav items
+            &:not(:first-child) {
+                margin-left: 0px;
+            }
+        }
+    }
+}
+
+
+/**
+ * Site footer
+ */
+.site-footer {
+    border-top: 1px solid $grey-color-light;
+    padding: $spacing-unit 0;
+}
+
+.footer-heading {
+    font-size: 18px;
+    margin-bottom: $spacing-unit / 2;
+}
+
+.contact-list,
+.social-media-list {
+    list-style: none;
+    margin-left: 0;
+}
+
+.footer-col-wrapper {
+    font-size: 15px;
+    color: $grey-color;
+    margin-left: -$spacing-unit / 2;
+    @extend %clearfix;
+}
+
+.footer-col {
+    float: left;
+    margin-bottom: $spacing-unit / 2;
+    padding-left: $spacing-unit / 2;
+}
+
+.footer-col-1 {
+    width: -webkit-calc(35% - (#{$spacing-unit} / 2));
+    width: calc(35% - (#{$spacing-unit} / 2));
+}
+
+.footer-col-2 {
+    width: -webkit-calc(20% - (#{$spacing-unit} / 2));
+    width: calc(20% - (#{$spacing-unit} / 2));
+}
+
+.footer-col-3 {
+    width: -webkit-calc(45% - (#{$spacing-unit} / 2));
+    width: calc(45% - (#{$spacing-unit} / 2));
+}
+
+
+/**
+ * Page content
+ */
+.page-content {
+    padding: $spacing-unit 0;
+}
+
+.page-heading {
+    font-size: 20px;
+}
+
+.post-list {
+    margin-left: 0;
+    list-style: none;
+
+    >li {
+        margin-bottom: $spacing-unit;
+    }
+}
+
+.post-meta {
+    font-size: $small-font-size;
+    color: $grey-color;
+}
+
+.post-link {
+    display: block;
+    font-size: 24px;
+}
+
+/** Remove links when printing */
+@media print {
+    a[href]:after {
+        content: none !important;
+    }
+}
+
+/**
+ * Posts
+ */
+.post-header {
+    margin-bottom: $spacing-unit;
+}
+
+.post-title {
+    font-size: 42px;
+    letter-spacing: -1px;
+    line-height: 1;
+}
+
+.post-content {
+    margin-bottom: $spacing-unit;
+
+    h1 {}
+
+    h2 {
+        font-size: 26px;
+        margin-top: 40px;
+    }
+
+    h3 {
+        font-size: 22px;
+        margin-bottom: 1px;
+        margin-top: 30px;
+    }
+
+    h4 {
+        font-size: 18px;
+        margin-top: 30px;
+    }
+}
+

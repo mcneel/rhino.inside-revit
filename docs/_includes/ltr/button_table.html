@@ -1,0 +1,15 @@
+<table class="comp-table">
+    {% for button in include.buttons %}
+        <tr>
+            <td class="comp-icon">
+                {% if button.icontag %}
+                    <div class="icontag_circle">{{ button.icontag }}</div>
+                {% else %}
+                    <img src="{{ button.iconsrc }}">
+                {% endif %}
+            </td>
+            <td class="comp-title">{{ button.title }}</td>
+            <td class="comp-desc">{{ button.desc }}</td>
+        </tr>
+    {% endfor %}
+</table>
