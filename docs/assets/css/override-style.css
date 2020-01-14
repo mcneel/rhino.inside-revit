@@ -152,6 +152,10 @@ a.site-title:hover, a.page-link:hover, a.dropdown-toggle:hover {
     display: block;
     margin-left: auto;
     margin-right: auto;
+    /* we have lots of screen captures. make sure they are not blurred */
+    image-rendering: auto;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
 }
 
 /* post article contents */
