@@ -5,7 +5,7 @@ order: 1
 
 Once {{ site.terms.rir }} is loaded and licensed, it creates a new ribbon in Revit interface named *Rhinoceros*
 
-![](/static/images/ribbon/ribbon.png)
+![]({{ "/static/images/ribbon/ribbon.png" | prepend: site.baseurl }})
 
 Here is a description of the buttons and functionality available on this ribbon.
 
