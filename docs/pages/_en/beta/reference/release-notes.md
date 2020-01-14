@@ -7,4 +7,4 @@ order: 5
 
 Started documenting release notes.
 
-![](/static/images/release/start.png)
+![](/static/images/release_notes/start.png)
