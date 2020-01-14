@@ -413,17 +413,16 @@ namespace RhinoInside.Revit.UI
     {
       using
       (
-        var taskDialog = new TaskDialog("Failed to load")
+        var taskDialog = new TaskDialog("Ups! Something went wrong :(")
         {
           Id = MethodBase.GetCurrentMethod().DeclaringType.FullName,
           MainIcon = TaskDialogIcons.IconError,
           TitleAutoPrefix = true,
           AllowCancellation = false,
           MainInstruction = "Rhino.Inside failed to load",
-          MainContent = "Do you want to report this by email?\n" +
-                        "Use 'See details' below for more info.",
+          MainContent = "Do you want to report this by email to tech@mcneel.com?",
           ExpandedContent = "This problem use to be due an incompatibility with other installed Addins.\n\n" +
-                            "While running in that mode you may see other Addins errors and it may take longer to load, don't worry about that no persistent change will be made on your computer.",
+                            "While running on these modes you may see other Addins errors and it may take longer to load, don't worry about that no persistent change will be made on your computer.",
           CommonButtons = TaskDialogCommonButtons.Yes | TaskDialogCommonButtons.No,
           DefaultButton = TaskDialogResult.Yes,
           VerificationText = "Exclude installed Addins list from the report.",
@@ -432,7 +431,7 @@ namespace RhinoInside.Revit.UI
       )
       {
         taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Run Revit without other Addins…", "Good for testing if Rhino.Inside would load if no other Addin were installed.");
-        //taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink2, "Run Rhino.Inside in verbose mode…");
+        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink2, "Run Rhino.Inside in verbose mode…", "Enables all logging mechanisms built in Rhino for support purposes.");
 
         var keepAsking = true;
         while(keepAsking)
@@ -448,6 +447,66 @@ namespace RhinoInside.Revit.UI
 
     void RunVerboseMode(ExternalCommandData data)
     {
+      const string SDKRegistryKeyName = @"Software\McNeel\Rhinoceros\SDK";
+
+      var RhinoDebugMessages = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "RhinoDebugMessages.txt");
+      if (File.Exists(RhinoDebugMessages))
+        File.Delete(RhinoDebugMessages);
+
+      bool deleteKey = false;
+      int DebugLoggingEnabled = 0;
+      int DebugLoggingSaveToFile = 0;
+
+      try
+      {
+        using (var existingSDK = Registry.CurrentUser.OpenSubKey(SDKRegistryKeyName))
+        if (existingSDK is null)
+        {
+          using (var newSDK = Registry.CurrentUser.CreateSubKey(SDKRegistryKeyName))
+          if (newSDK is null)
+            return;
+
+          deleteKey = true;
+        }
+
+        try
+        {
+          using (var DebugLogging = Registry.CurrentUser.OpenSubKey(@"Software\McNeel\Rhinoceros\7.0\Global Options\Debug Logging", true))
+          {
+            DebugLoggingEnabled =    (DebugLogging.GetValue("Enabled", 0) as int?).GetValueOrDefault();
+            DebugLoggingSaveToFile = (DebugLogging.GetValue("SaveToFile", 0) as int?).GetValueOrDefault();
+
+            DebugLogging.SetValue("Enabled", 1);
+            DebugLogging.SetValue("SaveToFile", 1);
+            DebugLogging.Flush();
+          }
+
+          var si = new ProcessStartInfo()
+          {
+            FileName = Process.GetCurrentProcess().MainModule.FileName,
+            Arguments = "/nosplash",
+            UseShellExecute = false
+          };
+          si.EnvironmentVariables["RhinoInside_RunScript"] = "_Grasshopper";
+
+          using (var RevitApp = Process.Start(si)) { RevitApp.WaitForExit(); }
+        }
+        finally
+        {
+          using (var DebugLogging = Registry.CurrentUser.OpenSubKey(@"Software\McNeel\Rhinoceros\7.0\Global Options\Debug Logging", true))
+          {
+            DebugLogging.SetValue("Enabled", DebugLoggingEnabled);
+            DebugLogging.SetValue("SaveToFile", DebugLoggingSaveToFile);
+            DebugLogging.Flush();
+          }
+        }
+      }
+      finally
+      {
+        if (deleteKey)
+        try { Registry.CurrentUser.DeleteSubKey(SDKRegistryKeyName); }
+        catch (Exception) { }
+      }
     }
 
     void RunWithoutAddIns(ExternalCommandData data)
@@ -460,7 +519,6 @@ namespace RhinoInside.Revit.UI
           Arguments = "/nosplash",
           UseShellExecute = false
         };
-        si.EnvironmentVariables["RhinoInside_StartupMode"] = "AtStartup";
         si.EnvironmentVariables["RhinoInside_RunScript"] = "_Grasshopper";
 
         using (var RevitApp = Process.Start(si)) { RevitApp.WaitForExit(); }
@@ -471,11 +529,26 @@ namespace RhinoInside.Revit.UI
     {
       var mailtoURI = @"mailto:tech@mcneel.com?subject=Rhino.Inside%20Revit%20failed%20to%20load&body=";
 
-      var mailBody = @"<Please replace this line with your comments>" + Environment.NewLine + Environment.NewLine;
+      var mailBody = @"Please give us any additional info you see fit here..." + Environment.NewLine + Environment.NewLine;
+
+      var RhinoDebugMessages = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "RhinoDebugMessages.txt");
+      if (File.Exists(RhinoDebugMessages))
+        mailBody += $"<Please attach '{RhinoDebugMessages}' file here>" + Environment.NewLine + Environment.NewLine;
+
+      mailBody += $"Rhino.Inside: {Addin.DisplayVersion}" + Environment.NewLine;
+      var rhino = Addin.RhinoVersionInfo;
+      mailBody += $"Rhino: {rhino.ProductVersion} ({rhino.FileDescription})" + Environment.NewLine;
+      var revit = data.Application.Application;
+
+#if REVIT_2019
+      mailBody += $"Revit: {revit.SubVersionNumber} ({revit.VersionBuild})" + Environment.NewLine;
+#else
+      mailBody += $"Revit: {revit.VersionNumber} ({revit.VersionBuild})" + Environment.NewLine;
+#endif
 
       if (includeAddinsList)
       {
-        mailBody += @"Loaded Addins:" + Environment.NewLine + Environment.NewLine;
+        mailBody += @"Revit Addins:" + Environment.NewLine + Environment.NewLine;
 
         Serialization.AddIns.GetInstalledAddins(data.Application.Application.VersionNumber, out var manifests);
         foreach (var manifest in manifests)
