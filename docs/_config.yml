@@ -77,11 +77,11 @@ collections:
 #   rir_download: download link for rhino inside Revit
 #   rhino_download: download link for Rhino
 versions:
-  one:
-    version: 1.0
-    name: v1.0
-    rir_download: https://www.rhino3d.com/download/
-    rhino_download: https://www.rhino3d.com/download/
+  # one:
+  #   version: 1.0
+  #   name: v1.0
+  #   rir_download: https://www.rhino3d.com/download/
+  #   rhino_download: https://www.rhino3d.com/download/
   beta:
     version: beta
     name: Beta
