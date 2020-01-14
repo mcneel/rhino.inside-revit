@@ -384,6 +384,12 @@ You can add images to your page using the standard markdown image links. Make su
 ![](/static/images/started/revit-doc.png)
 ```
 
+The Kramdown syntax also allows for applying [inline attribute overrides](https://kramdown.gettalong.org/quickref.html#inline-attributes) to the image elements. In the example below, the `{: class="scale-half"}` part after the image tag (notice no spaces between the two) applies the CSS class `scale-half` to the image element:
+
+```markdown
+![](/static/images/started/revit-doc.png){: class="scale-half"}
+```
+
 ## Grasshopper Screenshots
 
 Avoid including the background in Grasshopper screenshots for a more pleasing image. You can use the hi-res screenshot export tool in Grasshopper to generate a PNG with transparent background from your definition.

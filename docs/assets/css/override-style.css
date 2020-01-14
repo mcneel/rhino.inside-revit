@@ -261,6 +261,17 @@ a.site-title:hover, a.page-link:hover, a.dropdown-toggle:hover {
 }
 
 /*
+    kramdown elements  ========================================================
+*/
+
+.scale-half {
+    -moz-transform:scale(0.5);
+    -webkit-transform:scale(0.5);
+    transform:scale(0.5);
+    outline: 1px solid transparent;
+}
+
+/*
     content elements  =========================================================
 */
 .error404 img {
