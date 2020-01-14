@@ -5,10 +5,10 @@ order: 3
 
 {% include ltr/en/wip_note.html %}
 
-This sample shows how to read and write the parameters of Revit&reg; elements usign Grasshopper and Rhino&reg;. There are two sample files here. 
+This sample shows how to read and write the parameters of Revit&reg; elements using Grasshopper and Rhino&reg;. There are two sample files here. 
 
-1. The first sample will simple copy the Mark value from each door and palce it in the comments parameter of the same door.
-2. The second sample will change the Edited BY show how HumanUI can be used to create a custoemr dialog box.
+1. The first sample will simple copy the Mark value from each door and place it in the comments parameter of the same door.
+2. The second sample will change the Edited BY show how HumanUI can be used to create a custom dialog box.
 
 <! -- ![Revit Geometry brought into Rhino](/static/images/revit-to-rhino-final.jpg) -->
 

@@ -21,7 +21,7 @@ A common conflict is an older version of the {{ site.terms.pyrevit }} plugin.  W
 
   - Download [Microsoft.WindowsAPICodePack.Shell](https://www.nuget.org/packages/Microsoft.WindowsAPICodePack.Shell/) and place under `bin/` directory in pyRevit installation directory. This fix will be shipped with the next pyRevit version
 
-  - DLL is also uploaded here for convenience if you don't know how to download nuget packages. It's placed inside a ZIP archive for security. Unpack and place under `bin/` directory in pyRevit installation directory. [Microsoft.WindowsAPICodePack.Shell.dll.zip](https://github.com/eirannejad/pyRevit/files/3503717/Microsoft.WindowsAPICodePack.Shell.dll.zip)
+  - DLL is also uploaded here for convenience if you don't know how to download NuGet packages. It's placed inside a ZIP archive for security. Unpack and place under `bin/` directory in pyRevit installation directory. [Microsoft.WindowsAPICodePack.Shell.dll.zip](https://github.com/eirannejad/pyRevit/files/3503717/Microsoft.WindowsAPICodePack.Shell.dll.zip)
 
 If this does not solve the problem, then using the *Search for Conflicting Plugins* section.
 
@@ -76,7 +76,7 @@ Alternatively, you can download the tool from [here](https://bitbucket.org/Boost
 
 There is a way to increase the number and detail of the error messages in {{ site.terms.rir }}. This is a good way to find a specific error that may lead to a solution.
 
-1. Please unzip [RhinoSDK-Messages.zip](https://aws1.discourse-cdn.com/mcneel/uploads/default/original/3X/6/3/6348e99914b9e66417720df74f4cc35ba3e31c6f.zip) and double-click on the file **Enable RhinoSDK Messages.reg**. Windows will ask if you want to modify registery. Say yes
+1. Please unzip [RhinoSDK-Messages.zip](https://aws1.discourse-cdn.com/mcneel/uploads/default/original/3X/6/3/6348e99914b9e66417720df74f4cc35ba3e31c6f.zip) and double-click on the file **Enable RhinoSDK Messages.reg**. Windows will ask if you want to modify registry. Say yes
 2. Then run again {{ site.terms.rir }}
 3. A few message boxes should appear
 4. Please capture those messages using a screenshot tool (e.g. [ShareX](https://getsharex.com/) and send it to  [McNeel Technical Support](https://www.rhino3d.com/support)

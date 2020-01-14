@@ -3,7 +3,7 @@ title: Rhino.Inside.Revit Interface
 order: 1
 ---
 
-Once {{ site.terms.rir }} is loaded and licensed, it creates a new ribbon in Revit interface named *Rhinocerous*
+Once {{ site.terms.rir }} is loaded and licensed, it creates a new ribbon in Revit interface named *Rhinoceros*
 
 ![](/static/images/ribbon/ribbon.png)
 

@@ -35,7 +35,7 @@ Launch {{ site.terms.revit }}. You will be prompted to confirm loading {{ site.t
 
 ![](/static/images/started/revit-prompt.png)
 
-After load is complete, note the new *Rhinocerous* panel under the *Addins* tab
+After load is complete, note the new *Rhinoceros* panel under the *Add-ins* tab
 
 ![](/static/images/started/rir-addon.png)
 
@@ -85,7 +85,7 @@ Let's grab the Wall geometry by using a Revit-specific component. From *Revit > 
 
 ![](/static/images/started/rir-gcomp5.png)
 
-After passing the *Geometric Element* output to the input of the *Element.Geometry*, the new Revit-specific component extracts the Wall geometry from the Wall element using the Revit API. The geoemtry is then converted to Rhino Breps (since other Grasshopper components might not be familiar with Revit geometry) so it can be passed to other Grasshopper components for furthur processing.
+After passing the *Geometric Element* output to the input of the *Element.Geometry*, the new Revit-specific component extracts the Wall geometry from the Wall element using the Revit API. The geometry is then converted to Rhino Breps (since other Grasshopper components might not be familiar with Revit geometry) so it can be passed to other Grasshopper components for further processing.
 
 ![](/static/images/started/rir-gcomp6.png)
 
@@ -93,7 +93,7 @@ Similar to other Grasshopper geometric components, the output geometry is shows 
 
 ![](/static/images/started/rir-gcomp7.png)
 
-As you have seen, working with {{ site.terms.rir }} is very intuitive and simple. The Revit-specific Grasshopper components are one of the most important aspects of the {{ site.terms.rir }} project. Grasshopper script components (python and C#) can also be used to access Rhino or Revit APIs simultaneously and create cutom components in Grasshopper for your specific workflows.
+As you have seen, working with {{ site.terms.rir }} is very intuitive and simple. The Revit-specific Grasshopper components are one of the most important aspects of the {{ site.terms.rir }} project. Grasshopper script components (python and C#) can also be used to access Rhino or Revit APIs simultaneously and create custom components in Grasshopper for your specific workflows.
 
 ## Creating Revit Elements
 
@@ -224,4 +224,4 @@ O = Convert.ToRhino(
 
 The *Guides* section listed on the navigation bar, is a great next point to see how {{ site.terms.rir }} can be used in tackling many design and documentation challenges in {{ site.terms.revit }}. The articles under this page provide many examples on creating Grasshopper definitions and writing your own custom scripts.
 
-Reach out to {{ site.terms.rir }} developers and the users community on the [forum]({{ site.forum_url }}) if you came across a special condition that might need a new component or a more detailed exaplanation.
+Reach out to {{ site.terms.rir }} developers and the users community on the [forum]({{ site.forum_url }}) if you came across a special condition that might need a new component or a more detailed explanation.

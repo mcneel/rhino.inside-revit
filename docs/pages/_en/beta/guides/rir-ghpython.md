@@ -49,7 +49,7 @@ from Rhino import Geometry as Rhino
 from RhinoInside.Revit import Revit, Convert
 ```
 
-Once this foundation is layed down, then we can continue to create the script.
+Once this foundation is laid down, then we can continue to create the script.
 
 
 ## Drawing a Sphere with a preview
@@ -72,7 +72,7 @@ Use the slider to adjust the radius.  Make sure the slider values are set bit en
 
 We can add a custom baking definition in this component.  This can serve as a template to almost an  unlimited number of ways and elements that one might want to create Revit objects from Grasshopper.
 
-Because baking objects to Revit can take a long time and many times only should be done once, this bake functions will only execute if the `y` intput is set to `TRUE` on the component. So use an input button, so if it is pressed Grasshopper will only bake the object once.
+Because baking objects to Revit can take a long time and many times only should be done once, this bake functions will only execute if the `y` input is set to `TRUE` on the component. So use an input button, so if it is pressed Grasshopper will only bake the object once.
 
 First, create a routine that can be called to bake.
 
@@ -104,7 +104,7 @@ Here are a few links to more resources about all the SDKs involved:
 * [The Building Coder for expert guidance in BIM and Revit API](https://thebuildingcoder.typepad.com/)
 * [The Grasshopper IO project with the largest catalog of Grasshopper components available.](https://rhino.github.io/)
 * [Python guides and APi in Rhino](https://developer.rhino3d.com/guides/rhinopython/)
-* [PyRevit for advanced Python in Revit](https://ein.sh/pyRevit/)
+* [pyRevit for advanced Python in Revit](https://ein.sh/pyRevit/)
 * [Data Hierarchy configuration in Revit](https://www.modelical.com/en/gdocs/revit-data-hierarchy/)
 
 ##  Completed Sample Code
