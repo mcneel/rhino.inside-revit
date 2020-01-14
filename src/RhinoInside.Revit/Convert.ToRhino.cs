@@ -117,9 +117,12 @@ namespace RhinoInside.Revit
       var e = new Ellipse(plane, ellipse.RadiusX, ellipse.RadiusY);
       var nurbsCurve = e.ToNurbsCurve();
 
-      if(ellipse.IsBound)
+      if (ellipse.IsBound)
       {
         nurbsCurve.ClosestPoint(ellipse.GetEndPoint(0).ToRhino(), out var param0);
+        if (!nurbsCurve.ChangeClosedCurveSeam(param0))
+          nurbsCurve.Domain = new Interval(param0, param0 + nurbsCurve.Domain.Length);
+
         nurbsCurve.ClosestPoint(ellipse.GetEndPoint(1).ToRhino(), out var param1);
         nurbsCurve = nurbsCurve.Trim(param0, param1) as NurbsCurve;
         nurbsCurve.Domain = new Interval(ellipse.GetEndParameter(0), ellipse.GetEndParameter(1));
