@@ -5,7 +5,7 @@ order: 100
 
 Grasshopper has three scripted components. One for python (IronPython to be specific) programming language and another two for VB.NET and C#. These scripted components allows a user to create custom logic for a Grasshopper component. The component, therefore, can accept a configurable number of input and output connection points.
 
-![](/static/images/guides/rir-ghpython01.png)
+![]({{ "/static/images/guides/rir-ghpython01.png" | prepend: site.baseurl }})
 
 Since {{ site.terms.rir }} project brings Rhino and Grasshopper into the {{ site.terms.revit }} environment, the scripted components also get access to the Revit API runtime. In this article we will discuss using the python component to create custom components for Revit.
 
@@ -62,13 +62,13 @@ from Autodesk.Revit import UI
 
 Since the imports mentioned above need to be done for every single python component, the process can get tedious. You can setup a template python component with a default script importing all the most frequently used APIs and save that as a *User Component* in Grasshopper:
 
-![](/static/images/guides/rir-ghpython02.png)
+![]({{ "/static/images/guides/rir-ghpython02.png" | prepend: site.baseurl }})
 
-![](/static/images/guides/rir-ghpython03.png)
+![]({{ "/static/images/guides/rir-ghpython03.png" | prepend: site.baseurl }})
 
 After the user object has been created, you can easily create a new python component from the user object and it will have the template python script with all your default imports:
 
-![](/static/images/guides/rir-ghpython04.png)
+![]({{ "/static/images/guides/rir-ghpython04.png" | prepend: site.baseurl }})
 
 Here is a template script that covers most of the use cases:
 
@@ -96,7 +96,7 @@ doc = Revit.ActiveDBDocument
 
 This example component will create a sphere of an adjustable radius in Revit and Rhino. It will pass that sphere onto other Grasshopper components through the output and it will create the sphere in Revit and bake into Rhino if the button connected to the input is pressed.
 
-![](/static/images/guides/rir-ghpython05.png)
+![]({{ "/static/images/guides/rir-ghpython05.png" | prepend: site.baseurl }})
 
 As you see in the image above, we have renamed the input components and also the input and output parameters on the python components. This is a really good practice and it makes the definition a lot more clear to a new user.
 

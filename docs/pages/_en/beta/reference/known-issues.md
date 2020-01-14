@@ -11,7 +11,7 @@ This guide looks at errors that can appear with {{ site.terms.rir }}. This addre
 
 When {{ site.terms.rir }} loads, the error below appears.
 
-![](/static/images/reference/knownissues/error-200.png)
+![]({{ "/static/images/reference/knownissues/error-200.png" | prepend: site.baseurl }})
 
 ### Workaround
 
@@ -31,7 +31,7 @@ If this does not solve the problem, then using the *Search for Conflicting Plugi
 
 A Long JSON error shows up as shown below
 
-![](/static/images/reference/knownissues/error-json.png)
+![]({{ "/static/images/reference/knownissues/error-json.png" | prepend: site.baseurl }})
 
 ### Workaround
 
@@ -58,7 +58,7 @@ If {{ site.terms.rir }} works when loaded alone, then use this app to enable mor
 
 **Hint:** there may be more then one plugin that causes trouble.
 
-![](/static/images/reference/knownissues/addin-conflict-tool.png)
+![]({{ "/static/images/reference/knownissues/addin-conflict-tool.png" | prepend: site.baseurl }})
 
 To download and install the troubleshooter please follow instructions found [here](http://revitaddons.blogspot.com/2016/11/free-and-open-source-add-in-manager.html)
 

@@ -10,4 +10,4 @@ order: 5
 
 Started documenting release notes.
 
-![](/static/images/release_notes/start.png)
+![]({{ "/static/images/release_notes/start.png" | prepend: site.baseurl }})

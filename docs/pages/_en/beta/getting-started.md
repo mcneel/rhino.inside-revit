@@ -33,15 +33,15 @@ Now that we have installed both dependencies, we can proceed to loading {{ site.
 
 Launch {{ site.terms.revit }}. You will be prompted to confirm loading {{ site.terms.rir }}. Make sure to press **Always Load** to skip this dialog in the future.
 
-![](/static/images/started/revit-prompt.png)
+![]({{ "/static/images/started/revit-prompt.png" | prepend: site.baseurl }})
 
 After load is complete, note the new *Rhinoceros* panel under the *Add-ins* tab
 
-![](/static/images/started/rir-addon.png)
+![]({{ "/static/images/started/rir-addon.png" | prepend: site.baseurl }})
 
 Click on the *Rhino* button to start loading {{ site.terms.rir }}. The addon, attempts to load {{ site.terms.rhino }} inside Revit's memory and make sure it is licensed. Once the load process is completed, a new *Rhinoceros* toolbar will appear in Revit.
 
-![](/static/images/started/revit-toolbar.png)
+![]({{ "/static/images/started/revit-toolbar.png" | prepend: site.baseurl }})
 
 The new toolbar contains many new buttons that give you access to
 
@@ -59,39 +59,39 @@ To get started, let's create a simple definition in Grasshopper to extract geome
 
 Open a simple Revit model and draw an single wall
 
-![](/static/images/started/revit-doc.png)
+![]({{ "/static/images/started/revit-doc.png" | prepend: site.baseurl }})
 
 Now open Grasshopper by clicking on the Grasshopper button in the new *Rhinoceros* tab
 
-![](/static/images/started/rir-gh.png)
+![]({{ "/static/images/started/rir-gh.png" | prepend: site.baseurl }})
 
 From the *Params > Revit* panel, add a *Geometric Element* parameter
 
-![](/static/images/started/rir-gcomp1.png)
+![]({{ "/static/images/started/rir-gcomp1.png" | prepend: site.baseurl }})
 
 Now Right-Click on the component and Select One Revit Geometric Element. Grasshopper switches to Revit window and asks you to select a Revit element. Select the single Wall element we created earlier.
 
-![](/static/images/started/rir-gcomp2.png)
+![]({{ "/static/images/started/rir-gcomp2.png" | prepend: site.baseurl }})
 
 Now drop a *Panel* component into the definition and connect the *Geometric Element* output to its input
 
-![](/static/images/started/rir-gcomp3.png)
+![]({{ "/static/images/started/rir-gcomp3.png" | prepend: site.baseurl }})
 
 You can see that this parameter now contains the selected wall element.
 
-![](/static/images/started/rir-gcomp4.png)
+![]({{ "/static/images/started/rir-gcomp4.png" | prepend: site.baseurl }})
 
 Let's grab the Wall geometry by using a Revit-specific component. From *Revit > Elements* add an *Element.Geometry* component.
 
-![](/static/images/started/rir-gcomp5.png)
+![]({{ "/static/images/started/rir-gcomp5.png" | prepend: site.baseurl }})
 
 After passing the *Geometric Element* output to the input of the *Element.Geometry*, the new Revit-specific component extracts the Wall geometry from the Wall element using the Revit API. The geometry is then converted to Rhino Breps (since other Grasshopper components might not be familiar with Revit geometry) so it can be passed to other Grasshopper components for further processing.
 
-![](/static/images/started/rir-gcomp6.png)
+![]({{ "/static/images/started/rir-gcomp6.png" | prepend: site.baseurl }})
 
 Similar to other Grasshopper geometric components, the output geometry is shows as preview in both Revit and Rhino viewports
 
-![](/static/images/started/rir-gcomp7.png)
+![]({{ "/static/images/started/rir-gcomp7.png" | prepend: site.baseurl }})
 
 As you have seen, working with {{ site.terms.rir }} is very intuitive and simple. The Revit-specific Grasshopper components are one of the most important aspects of the {{ site.terms.rir }} project. Grasshopper script components (python and C#) can also be used to access Rhino or Revit APIs simultaneously and create custom components in Grasshopper for your specific workflows.
 
@@ -110,55 +110,55 @@ Let's create a simple wall in Revit using a few of these components. To create a
 
 Open Rhino (inside Revit) and create a simple line
 
-![](/static/images/started/rir-rhino1.png)
+![]({{ "/static/images/started/rir-rhino1.png" | prepend: site.baseurl }})
 
 Now open Grasshopper and add a curve component. Right-Click the component and select the newly created line in Rhino.
 
-![](/static/images/started/rir-rhino2.png)
+![]({{ "/static/images/started/rir-rhino2.png" | prepend: site.baseurl }})
 
 Now from the *Revit > Input* panel and a *Model.CategoriesPicker* component,
 
-![](/static/images/started/rir-rhino3.png)
+![]({{ "/static/images/started/rir-rhino3.png" | prepend: site.baseurl }})
 
 and also let's add an *ElementType.ByName*, 
 
-![](/static/images/started/rir-rhino4.png)
+![]({{ "/static/images/started/rir-rhino4.png" | prepend: site.baseurl }})
 
 and a *Document.LevelPicker* component as well.
 
-![](/static/images/started/rir-rhino5.png)
+![]({{ "/static/images/started/rir-rhino5.png" | prepend: site.baseurl }})
 
 Finally let's add a Grasshopper integer slider as well to provide the height for our new wall
 
-![](/static/images/started/rir-rhino6.png)
+![]({{ "/static/images/started/rir-rhino6.png" | prepend: site.baseurl }})
 
 To create a wall, we are going to use a custom Grasshopper node that can create a Revit wall by curve. From *Revit > Build* panel add a *AddWall.ByCurve* component.
 
-![](/static/images/started/rir-rhino7.png)
+![]({{ "/static/images/started/rir-rhino7.png" | prepend: site.baseurl }})
 
 Now that we have all these components inside the grasshopper definition, let's organize them before connecting the parameters
 
-![](/static/images/started/rir-rhino8.png)
+![]({{ "/static/images/started/rir-rhino8.png" | prepend: site.baseurl }})
 
 From the list of categories shown on the *Model.CategoriesPicker* component, select the **Walls** category
 
 Now connect the output of the *Model.CategoriesPicker* to the input of *ElementType.ByName* (the input parameter is not visible by default. Drag the arrow over to the left of the component where the input parameter is expected to be)
 
-![](/static/images/started/rir-rhino9.png)
+![]({{ "/static/images/started/rir-rhino9.png" | prepend: site.baseurl }})
 
 The *ElementType.ByName* now shows a list of wall types collected from the model. Select a basic wall type. This wall type is going to be used to create the new wall.
 
 Now connect the rest of the components as shown below
 
-![](/static/images/started/rir-rhino10.png)
+![]({{ "/static/images/started/rir-rhino10.png" | prepend: site.baseurl }})
 
 The *AddWall.ByCurve* component now has all the information to create a new wall in Revit.
 
-![](/static/images/started/rir-rhino11.png)
+![]({{ "/static/images/started/rir-rhino11.png" | prepend: site.baseurl }})
 
 The same wall geometry is also visible in Rhino
 
-![](/static/images/started/rir-rhino12.png)
+![]({{ "/static/images/started/rir-rhino12.png" | prepend: site.baseurl }})
 
 
 ## Grasshopper Interactivity
@@ -167,7 +167,7 @@ Arguably the most important feature of a visual programming environment like Gra
 
 Let's grab the height slider from the example above, and move it back and forth a bit.
 
-![](/static/images/started/rir-ghinter.gif)
+![]({{ "/static/images/started/rir-ghinter.gif" | prepend: site.baseurl }})
 
 Imagine the possibilities!
 
@@ -216,7 +216,7 @@ O = Convert.ToRhino(
     )
 ```
 
-![](/static/images/started/rir-ghpy.png)
+![]({{ "/static/images/started/rir-ghpy.png" | prepend: site.baseurl }})
 
 {{ site.terms.rir }} is already a very powerful tool but with Python and C# components, the possibilities are endless.
 

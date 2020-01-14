@@ -4,8 +4,8 @@
             <td class="comp-icon">
                 {% if button.icontag %}
                     <div class="icontag_circle">{{ button.icontag }}</div>
-                {% else %}
-                    <img src="{{ button.iconsrc }}">
+                {% elsif button.iconsrc %}
+                    <img src="{{ button.iconsrc | prepend: site.baseurl }}">
                 {% endif %}
             </td>
             <td class="comp-title">{{ button.title }}</td>
