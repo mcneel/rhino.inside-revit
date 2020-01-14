@@ -3,7 +3,4 @@ title: Revit Geometry to Rhino
 order: 20
 ---
 
-
-## Element Geometry
-
-## Collecting Elements
+{% include ltr/en/wip_note.html %}
