@@ -23,7 +23,7 @@ copyright: Robert McNeel & Associates. All Rights Reserved.
 
 # DO NOT CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING ============================
 # urls
-baseurl: "" # the subpath of your site, e.g. /blog/
+baseurl: "/rhino.inside-revit" # the subpath of your site, e.g. /blog/
 url: "" # the base hostname & protocol for your site
 
 # site default version and language
