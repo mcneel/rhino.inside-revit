@@ -55,9 +55,9 @@
             // set nav bar links by selected version
             $('#cat_homelink').attr('href', getPageLink(''));
             $('#cat_starting').attr('href', getPageLink('getting-started'));
-            $('#cat_guides').attr('href', getPageLink('guides'));
-            $('#cat_samples').attr('href', getPageLink('samples'));
-            $('#cat_reference').attr('href', getPageLink('reference'));
+            $('#cat_guides').attr('href', getPageLink('guides/'));
+            $('#cat_samples').attr('href', getPageLink('samples/'));
+            $('#cat_reference').attr('href', getPageLink('reference/'));
             // mark current navbar category as active
             if (url.endsWith('/getting-started') || url.includes('/getting-started/')) {
                 $('#cat_starting').addClass('active');
