@@ -29,22 +29,22 @@
 
     - title: 'Off'
       desc: Turns off the real-time preview by Grasshopepr in Revit
-      iconsrc: /static/images/gh/Toolbar/Preview_Off_24x24.png
+      iconsrc: /static/images/GH/Toolbar/Preview_Off_24x24.png
       icontag: 
 
     - title: Wireframe
       desc: Grasshopper will use a wireframe display for real-time preview of geometry in Revit
-      iconsrc: /static/images/gh/Toolbar/Preview_Wireframe_24x24.png
+      iconsrc: /static/images/GH/Toolbar/Preview_Wireframe_24x24.png
       icontag: 
 
     - title: Shaded
       desc: Grasshopper will use a shaded display mode for real-time preview of geometry in Revit
-      iconsrc: /static/images/gh/Toolbar/Preview_Shaded_24x24.png
+      iconsrc: /static/images/GH/Toolbar/Preview_Shaded_24x24.png
       icontag: 
 
     - title: Recompute
       desc: Forces a recompute to the loaded Grasshopper definitions
-      iconsrc: /static/images/gh/Toolbar/Recompute_24x24.png
+      iconsrc: /static/images/GH/Toolbar/Recompute_24x24.png
       icontag: 
 
     - title: Category Selector
@@ -54,7 +54,7 @@
 
     - title: Bake Selected
       desc: Bakes the currently selected Rhino Geometry into the currently selected Category in Revit
-      iconsrc: /static/images/gh/Toolbar/Bake_24x24.png
+      iconsrc: /static/images/GH/Toolbar/Bake_24x24.png
       icontag: 
 
 - title: Samples
