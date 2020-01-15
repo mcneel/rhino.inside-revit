@@ -23,6 +23,8 @@
     <script>
         hljs.initHighlightingOnLoad();
 
+        var activeVersion = '{{ site.version }}';
+
         // version selectors can set the active version
         function setActiveVersion(version) {
             console.log("setting active version to:", version);
@@ -45,9 +47,9 @@
         }
 
         // extract active version from url
-        var activeVersion = function() {
+        function detemineActiveVersion() {
             var url = window.location.href;
-            var version = '{{ site.version }}';
+            var version = activeVersion;
             console.log(url);
             if (url.endsWith('/beta') || url.includes('/beta/')) {
                 version = 'beta';
@@ -60,7 +62,9 @@
             }
             setActiveVersion(version)
             return version;
-        }();
+        }
+
+        detemineActiveVersion();
 
     </script>
 
