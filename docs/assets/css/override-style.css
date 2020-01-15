@@ -48,7 +48,9 @@ a.site-title:hover, a.page-link:hover, a.dropdown-toggle:hover {
 /* logo */
 .site-logo {
     float: left;
-    line-height: 60px;
+    width: 40px;
+    height: 40px;
+    margin-top: 11px;
 }
 
 /* title text */
