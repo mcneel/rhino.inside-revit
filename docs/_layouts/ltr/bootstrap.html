@@ -38,6 +38,8 @@
 
         <!-- Update version selector dropdown with active version -->
         <script>
+            // determine active page
+            detemineActiveVersion();
             // set active version on version selector
             var verSelector = document.querySelector("#versionSelector");
             if (activeVersion == "beta") {
