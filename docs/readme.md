@@ -59,13 +59,13 @@ This approach is great for making minor changes to a few pages on the wiki (e.g.
 
 To quickly edit the page, browse to the page on GitHub, then click on the pencil button to start the edit process:
 
-![]({{ "static/images/readme/github-edit.png" | prepend: site.baseurl }})
+![](static/images/readme/github-edit.png)
 
 Make your changes, following the document structure and the Markdown syntax. Then scroll to the button of the page, fill in the title textbox (single line) with a short description of the changes, and then fill in the extended description textbox with detailed information about the change if necessary.
 
 Finally, you can either choose to commit to master, or commit to a separate branch and create a pull-request. In most cases it is safer to create a new branch and submit a pull-request.
 
-![]({{ "static/images/readme/github-edit-commit.png" | prepend: site.baseurl }})
+![](static/images/readme/github-edit-commit.png)
 
 ## Clone, Revise, Submit Pull-Request
 
@@ -181,7 +181,7 @@ Once you are done with your changes, submit a pull-request through GitHub. If yo
 
 This Wiki is the first node and the official landing page for the project. See the sketch below to see the overarching ideas that helped designing this Wiki.
 
-![]({{ "static/images/readme/rir-online.png" | prepend: site.baseurl }})
+![](static/images/readme/rir-online.png)
 
 - Wiki homepage is the official landing page
 - Wiki helps:
@@ -382,13 +382,13 @@ You can combine this with markdown link convention so the link has a title
 You can add images to your page using the standard markdown image links. Make sure the source image is properly organized under the `static/images` directory.
 
 ```markdown
-![]({{ "/static/images/started/revit-doc.png" | prepend: site.baseurl }})
+![]({{ "static/images/started/revit-doc.png" | prepend: site.baseurl }})
 ```
 
 The Kramdown syntax also allows for applying [inline attribute overrides](https://kramdown.gettalong.org/quickref.html#inline-attributes) to the image elements. In the example below, the `{: class="scale-half"}` part after the image tag (notice no spaces between the two) applies the CSS class `scale-half` to the image element:
 
 ```markdown
-![]({{ "/static/images/started/revit-doc.png" | prepend: site.baseurl }}){: class="scale-half"}
+![]({{ "static/images/started/revit-doc.png" | prepend: site.baseurl }}){: class="scale-half"}
 ```
 
 ## Grasshopper Screenshots
@@ -397,11 +397,11 @@ Avoid including the background in Grasshopper screenshots for a more pleasing im
 
 For example:
 
-![]({{ "static/images/readme/good-gh.png" | prepend: site.baseurl }})
+![](static/images/readme/good-gh.png)
 
 Looks better than:
 
-![]({{ "static/images/readme/bad-gh.png" | prepend: site.baseurl }})
+![](static/images/readme/bad-gh.png)
 
 ## Linking Videos
 
@@ -439,7 +439,7 @@ In Revit API, all the built-in parameters are represented by the {% include api_
 
 ### Work-in-Progress Block
 
-![]({{ "static/images/readme/wip-block.png" | prepend: site.baseurl }})
+![](static/images/readme/wip-block.png)
 
 This block is meant to show upcoming content on your page. Make sure to replace with actual content and don't leave these blocks on the Wiki for too long.
 
@@ -471,7 +471,7 @@ revit_api: 2020
 
 ### Warning Note Block
 
-![]({{ "static/images/readme/warning-block.png" | prepend: site.baseurl }})
+![](static/images/readme/warning-block.png)
 
 This block is for showing alerts and warnings in your content. Below is an example of using a warning note block:
 
@@ -487,7 +487,7 @@ This block can accept two argument:
 
 ### API Note Block
 
-![]({{ "static/images/readme/api-block.png" | prepend: site.baseurl }})
+![](static/images/readme/api-block.png)
 
 This block is for comments related to the APIs. These notes are usually used to explain how APIs work in specific cases. Below is an example of using an API note block:
 
@@ -502,7 +502,7 @@ This block can accept two argument:
 
 ### Locale Note Block
 
-![]({{ "static/images/readme/locale-block.png" | prepend: site.baseurl }})
+![](static/images/readme/locale-block.png)
 
 This block is for comments related to the various languages supported by the host software. Below is an example of using a locale note block:
 
@@ -523,7 +523,7 @@ This is the code used to generate the example locale block shown in the image ab
 
 ### Release Header Block
 
-![]({{ "static/images/readme/release-header.png" | prepend: site.baseurl }})
+![](static/images/readme/release-header.png)
 
 This block is release headers on **Release Notes** page. This block can accept two argument:
 
