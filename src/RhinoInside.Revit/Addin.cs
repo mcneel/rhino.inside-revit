@@ -226,7 +226,7 @@ namespace RhinoInside.Revit.UI
         }
         else
         {
-          pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://www.rhino3d.com/inside"));
+          pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://mcneel.github.io/rhino.inside-revit/"));
           using (var icon = System.Drawing.Icon.ExtractAssociatedIcon(Addin.RhinoExePath))
           {
             pushButton.Image = icon.ToBitmapSource(true);
