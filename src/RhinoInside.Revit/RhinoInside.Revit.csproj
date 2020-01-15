@@ -233,6 +233,7 @@
     <Compile Include="GH\ValueList.cs" />
     <Compile Include="Rhino\Rhinoceros.cs" />
     <Compile Include="Rhino\DocumentPreviewServer.cs" />
+    <Compile Include="Serialization\KeyboardShortcuts.cs" />
     <Compile Include="ModalForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -255,7 +256,6 @@
     <Compile Include="Convert.ToHost.cs" />
     <Compile Include="Convert.ToRhino.cs" />
     <Compile Include="Revit.cs" />
-    <Compile Include="Revit.KeyboardShortcuts.cs" />
     <Compile Include="Revit.FailuresPreprocessor.cs" />
     <Compile Include="Addin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

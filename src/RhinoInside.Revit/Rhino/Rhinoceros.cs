@@ -68,6 +68,9 @@ namespace RhinoInside.Revit
         Rhino.Commands.Command.EndCommand += EndCommand;
         RhinoApp.MainLoop += MainLoop;
 
+        // Alternative to /runscript= Rhino command line option
+        Revit.ApplicationUI.Idling += RunScript;
+
         // Reset document units
         UpdateDocumentUnits(RhinoDoc.ActiveDoc);
 
@@ -87,6 +90,21 @@ namespace RhinoInside.Revit
 
       UpdateDocumentUnits(RhinoDoc.ActiveDoc, Revit.ActiveDBDocument);
       return Result.Succeeded;
+    }
+
+    private static void RunScript(object sender, Autodesk.Revit.UI.Events.IdlingEventArgs e)
+    {
+      Revit.ApplicationUI.Idling -= RunScript;
+
+      var runScript = Environment.GetEnvironmentVariable("RhinoInside_RunScript");
+      if (string.IsNullOrEmpty(runScript))
+        return;
+
+      using (var modal = new ModalScope())
+      {
+        if (RhinoApp.RunScript(runScript, false))
+          modal.Run(Addin.StartupMode == AddinStartupMode.AtStartup);
+      }
     }
 
     internal static Result Shutdown()
