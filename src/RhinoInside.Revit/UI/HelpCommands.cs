@@ -236,7 +236,7 @@ namespace RhinoInside.Revit.UI
         switch (taskDialog.Show())
         {
           case TaskDialogResult.CommandLink1:
-            using (System.Diagnostics.Process.Start(@"https://mcneel.github.io/rhino.inside-revit/")) { }
+            using (System.Diagnostics.Process.Start(@"https://www.rhino3d.com/inside/revit/beta/")) { }
             break;
           case TaskDialogResult.CommandLink2:
             using (System.Diagnostics.Process.Start(@"https://github.com/mcneel/rhino.inside-revit/blob/master/LICENSE")) { }

@@ -942,7 +942,7 @@ namespace RhinoInside.Revit.GH.Components
         @"<dt><b>Get all parameters</b></dt><dd>Populates the output parameters list with all parameters found in all input elements</dd>" +
         @"<dt><b>Remove unconnected parameters</b></dt><dd>Removes the output parameters that are not connected to anything else</dd>" +
         @"</dl>",
-        ContactURI = @"https://mcneel.github.io/rhino.inside-revit/"
+        ContactURI = @"https://www.rhino3d.com/inside/revit/beta/"
       };
 
       nTopic.AddRemark("SHIFT + Double click runs \"Get common parameters\"");
