@@ -287,7 +287,7 @@ defaults:
 
 Jekyll site config file automatically sets the correct version and categories on the new page.
 
-Once the new language directory is created, open each page under each version and translate the page contents.
+Once the new language directory is created, open each page under each version and translate the page contents. And finally when all the translations are completed for all the content, notify the developers by creating an issue on the GitHub repo to incorporate the new language into the website.
 
 
 ## Adding a New Wiki Version
