@@ -10,7 +10,7 @@ logo: assets/img/logo.svg
 github_username:  mcneel
 repo_url: "https://github.com/mcneel/rhino.inside-revit/"
 # full url: repo_url + editme_github_base_url
-editme_github_base_url: "blob/docs/cleanup/docs/"
+editme_github_base_url: "blob/master/docs/"
 # full url: repo_url + metawiki_url
 metawiki_url: "tree/master/docs/readme.md"
 
