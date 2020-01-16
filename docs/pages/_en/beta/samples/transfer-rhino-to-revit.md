@@ -16,8 +16,8 @@ There are a lot of ways to bring in the Rhino geometry, but in this case we will
 Rhino surfaces and brep solids can be imported into Revit as a categorized DirectShape.
 
 Open Sample files:
-1. Open the [Rhino to Revit.rvt](/rhino_to_revit.rvt) in Revit.
-1. Start Rhino.Inside.Revit and open the [Rhino office.3dm](/rhino_office.3dm) file.
+1. Open the [Rhino to Revit.rvt]({{ site.baseurl }}/static/samples/transfer-rhino-to-revit/rhino_to_revit.rvt) in Revit.
+1. Start Rhino.Inside.Revit and open the [Rhino office.3dm]({{ site.baseurl }}/static/samples/transfer-rhino-to-revit/rhino_office.3dm) file.
 1. Start Grasshopper within Rhino.
 
 The component necessary:
@@ -25,7 +25,7 @@ The component necessary:
 1. Directshape from Geometry
 1. Brep Param component in Grasshopper
 
-![Rhino Brep to Revit as Directshape](/static/images/rhino-to-revit-brep.jpg)
+![Rhino Brep to Revit as Directshape]({{ site.baseurl }}/static/images/rhino-to-revit-brep.jpg)
 Once you select the Breps, those will feed into the Direct component.
 
 ## Live-linking Points
@@ -35,7 +35,7 @@ The component necessary:
 1. Curve from Geometry
 1. Curve Param component in Grasshopper
 
-![Rhino Curve to Revit]({{base.url}}/static/images/rhino-to-revit-points.jpg)
+![Rhino Curve to Revit]({{ site.baseurl }}/static/images/rhino-to-revit-points.jpg)
 Once you select the curves, those will feed into Revit.
 
 ## Bringing in complex curves
@@ -45,5 +45,5 @@ The component necessary:
 1. Curve from Geometry
 1. Curve Param component in Grasshopper
 
-![Rhino curve to Revit](/static/images/rhino-to-revit-curves.jpg)
+![Rhino curve to Revit]({{ site.baseurl }}/static/images/rhino-to-revit-curves.jpg)
 Once you select the points, those will feed into Revit.
