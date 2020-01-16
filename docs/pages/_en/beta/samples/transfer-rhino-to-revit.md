@@ -35,7 +35,7 @@ The component necessary:
 1. Curve from Geometry
 1. Curve Param component in Grasshopper
 
-![Rhino Curve to Revit](/static/images/rhino-to-revit-points.jpg)
+![Rhino Curve to Revit]({{base.url}}/static/images/rhino-to-revit-points.jpg)
 Once you select the curves, those will feed into Revit.
 
 ## Bringing in complex curves
