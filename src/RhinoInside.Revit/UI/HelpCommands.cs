@@ -60,7 +60,7 @@ namespace RhinoInside.Revit.UI
   {
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
-      using (System.Diagnostics.Process.Start("https://www.apidocs.co/apps/")) { }
+      using (System.Diagnostics.Process.Start(@"https://www.apidocs.co/apps/")) { }
 
       return Result.Succeeded;
     }
@@ -71,7 +71,7 @@ namespace RhinoInside.Revit.UI
   {
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
-      using (System.Diagnostics.Process.Start("https://thebuildingcoder.typepad.com/")) { }
+      using (System.Diagnostics.Process.Start(@"https://thebuildingcoder.typepad.com/")) { }
 
       return Result.Succeeded;
     }
@@ -82,7 +82,7 @@ namespace RhinoInside.Revit.UI
   {
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
-      using (System.Diagnostics.Process.Start("https://developer.rhino3d.com/")) { }
+      using (System.Diagnostics.Process.Start(@"https://developer.rhino3d.com/")) { }
 
       return Result.Succeeded;
     }
@@ -93,7 +93,7 @@ namespace RhinoInside.Revit.UI
   {
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
-      using (System.Diagnostics.Process.Start("https://discourse.mcneel.com/c/rhino-inside/Revit")) { }
+      using (System.Diagnostics.Process.Start(@"https://discourse.mcneel.com/c/rhino-inside/Revit")) { }
 
       return Result.Succeeded;
     }
@@ -229,15 +229,20 @@ namespace RhinoInside.Revit.UI
         }
       )
       {
-        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Read license");
-        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink2, "See source code");
+        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Web site");
+        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink2, "Read license");
+        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink3, "See source code");
+
         switch (taskDialog.Show())
         {
           case TaskDialogResult.CommandLink1:
-            using (System.Diagnostics.Process.Start(@"https://github.com/mcneel/rhino.inside-revit/blob/master/LICENSE")) { }
+            using (System.Diagnostics.Process.Start(@"https://www.rhino3d.com/inside/revit/beta/")) { }
             break;
           case TaskDialogResult.CommandLink2:
-            using (System.Diagnostics.Process.Start(@"https://github.com/mcneel/rhino.inside-revit/blob/master/README.md")) { }
+            using (System.Diagnostics.Process.Start(@"https://github.com/mcneel/rhino.inside-revit/blob/master/LICENSE")) { }
+            break;
+          case TaskDialogResult.CommandLink3:
+            using (System.Diagnostics.Process.Start(@"https://github.com/mcneel/rhino.inside-revit/tree/master/src")) { }
             break;
         }
       }

@@ -145,7 +145,7 @@ namespace RhinoInside.Revit.UI
         EventHandler<IdlingEventArgs> BuildDirectShapeCategoryList = null;
         Revit.ApplicationUI.Idling += BuildDirectShapeCategoryList = (sender, args) =>
         {
-          var doc = (sender as UIApplication)?.ActiveUIDocument.Document;
+          var doc = (sender as UIApplication).ActiveUIDocument?.Document;
           if (doc == null)
             return;
 
