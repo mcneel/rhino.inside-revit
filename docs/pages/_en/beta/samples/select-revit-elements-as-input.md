@@ -16,12 +16,12 @@ Using Revit objects as input to Grasshopper definitions allows for a dynamic edi
 ## Selecting Revit elements as input
 On the Params tool tab is a Revit group which contains Revit element pickers including Revit Elements, Edges, Vertices and Faces.  Also available are the non-model elements such as Category, Type, Family, Grid, Level and Material.
 
-![Revit Element as Input]({{ site.baseurl }}/static/images/selectable-revit-elements.jpg)
+![Revit Element as Input]({{ "/static/images/selectable-revit-elements.jpg" | prepend: site.baseurl }})
 
 Open Sample files:
-1. Open the [Wall_Roof.rvt]({{ site.baseurl }}/static/samples/wall_roof.rvt) in Revit 2019.
-1. Start Rhino.Inside.Revit.
-1. Start Grasshopper within Revit.
+1. Open the [Wall_Roof.rvt]({{ "/static/samples/wall_roof.rvt" | prepend: site.baseurl }}) in Revit 2019.
+2. Start Rhino.Inside.Revit.
+3. Start Grasshopper within Revit.
 
 The components necessary:
 1. Revit Edge params.
@@ -35,11 +35,11 @@ The components necessary:
 
 To start the definition, right click on the top Edge component: 
 
-![Rhino Brep to Revit as Directshape]({{ site.baseurl }}/static/images/revit-edge.jpg)
+![Rhino Brep to Revit as Directshape]({{ "/static/images/revit-edge.jpg" | prepend: site.baseurl }})
 
 Then select one of the Yellow edges on one side of the the Wall model. Use the Finish button under the Revit toolbar to finish the selection.
 
-![Revit as Directshape]({{ site.baseurl }}/static/images/select-edges.jpg)
+![Revit as Directshape]({{ "/static/images/select-edges.jpg" | prepend: site.baseurl }})
 
 Then right click and select to opposite edge.
 
