@@ -11,17 +11,29 @@ using Autodesk.Revit.DB.ExternalService;
 using Grasshopper;
 using Grasshopper.Kernel;
 using System.Threading;
+using Grasshopper.GUI.Canvas;
 
 namespace RhinoInside.Revit.GH
 {
   public class PreviewServer : DirectContext3DServer
   {
-    static GH_Document activeDefinition = null;
+    static GH_Document ActiveDefinition => Instances.ActiveCanvas?.Document;
+
     List<ParamPrimitive> primitives = new List<ParamPrimitive>();
     Rhino.Geometry.BoundingBox primitivesBoundingBox = Rhino.Geometry.BoundingBox.Empty;
     int RebuildPrimitives = 1;
 
     public static GH_PreviewMode PreviewMode = GH_PreviewMode.Shaded;
+
+    public PreviewServer()
+    {
+      Instances.CanvasCreatedEventHandler CanvasCreated = default;
+      Instances.CanvasCreated += CanvasCreated = (canvas) =>
+      {
+        Instances.CanvasCreated -= CanvasCreated;
+        canvas.DocumentChanged += ActiveCanvas_DocumentChanged;
+      };
+    }
 
     #region IExternalServer
     public override string GetName() => "Grasshopper";
@@ -30,61 +42,50 @@ namespace RhinoInside.Revit.GH
     #endregion
 
     #region IDirectContext3DServer
-    public override bool UseInTransparentPass(View dBView) => ((activeDefinition != null ? PreviewMode : GH_PreviewMode.Disabled) == GH_PreviewMode.Shaded);
+    public override bool UseInTransparentPass(View dBView) =>
+      ((ActiveDefinition is null ? GH_PreviewMode.Disabled : PreviewMode) == GH_PreviewMode.Shaded);
 
-    public override bool CanExecute(View dBView)
-    {
-      var canvas = Instances.ActiveCanvas;
-      var definition = canvas?.Document;
-
-      if (definition != activeDefinition)
-      {
-        if (activeDefinition != null)
-        {
-          activeDefinition.SolutionEnd                    -= ActiveDefinition_SolutionEnd;
-          activeDefinition.SettingsChanged                -= ActiveDefinition_SettingsChanged;
-          GH_Document.DefaultSelectedPreviewColourChanged -= Document_DefaultPreviewColourChanged;
-          GH_Document.DefaultPreviewColourChanged         -= Document_DefaultPreviewColourChanged;
-        }
-
-        RebuildPrimitives = 1;
-        activeDefinition = definition;
-
-        if (activeDefinition != null)
-        {
-          GH_Document.DefaultPreviewColourChanged         += Document_DefaultPreviewColourChanged;
-          GH_Document.DefaultSelectedPreviewColourChanged += Document_DefaultPreviewColourChanged;
-          activeDefinition.SettingsChanged                += ActiveDefinition_SettingsChanged;
-          activeDefinition.SolutionEnd                    += ActiveDefinition_SolutionEnd;
-        }
-      }
-
-      return
+    public override bool CanExecute(View dBView) =>
       PreviewMode != GH_PreviewMode.Disabled &&
-      IsModelView(dBView) &&
-      activeDefinition != null;
-    }
+      ActiveDefinition is object &&
+      IsModelView(dBView);
 
-    static List<IGH_DocumentObject> lastSelection = new List<IGH_DocumentObject>();
-    public static bool PreviewChanged()
+    List<IGH_DocumentObject> lastSelection;
+
+    private void SelectionChanged(object sender, EventArgs e)
     {
-      if (Instances.ActiveCanvas?.Document != activeDefinition)
-        return true;
+      var newSelection = ActiveDefinition.SelectedObjects();
+      if (lastSelection.Count != newSelection.Count || lastSelection.Except(newSelection).Any())
+        Revit.RefreshActiveView();
 
-      if (activeDefinition != null)
-      {
-        var newSelection = activeDefinition.SelectedObjects();
-        if (lastSelection.Count != newSelection.Count || lastSelection.Except(newSelection).Any())
-        {
-          lastSelection = newSelection;
-          return true;
-        }
-      }
-
-      return false;
+      lastSelection = newSelection;
     }
 
     static void Document_DefaultPreviewColourChanged(System.Drawing.Color colour) => Revit.RefreshActiveView();
+
+    private void ActiveCanvas_DocumentChanged(GH_Canvas sender, GH_CanvasDocumentChangedEventArgs e)
+    {
+      if (e.OldDocument is object)
+      {
+        Rhino.RhinoApp.Idle -= SelectionChanged;
+        e.OldDocument.SolutionEnd -= ActiveDefinition_SolutionEnd;
+        e.OldDocument.SettingsChanged -= ActiveDefinition_SettingsChanged;
+        GH_Document.DefaultSelectedPreviewColourChanged -= Document_DefaultPreviewColourChanged;
+        GH_Document.DefaultPreviewColourChanged -= Document_DefaultPreviewColourChanged;
+      }
+
+      RebuildPrimitives = 1;
+      lastSelection = new List<IGH_DocumentObject>();
+
+      if (e.NewDocument is object)
+      {
+        GH_Document.DefaultPreviewColourChanged += Document_DefaultPreviewColourChanged;
+        GH_Document.DefaultSelectedPreviewColourChanged += Document_DefaultPreviewColourChanged;
+        e.NewDocument.SettingsChanged += ActiveDefinition_SettingsChanged;
+        e.NewDocument.SolutionEnd += ActiveDefinition_SolutionEnd;
+        Rhino.RhinoApp.Idle += SelectionChanged;
+      }
+    }
 
     void ActiveDefinition_SettingsChanged(object sender, GH_DocSettingsEventArgs e)
     {
@@ -116,7 +117,7 @@ namespace RhinoInside.Revit.GH
       public override EffectInstance EffectInstance(DisplayStyle displayStyle, bool IsShadingPass)
       {
         var ei = base.EffectInstance(displayStyle, IsShadingPass);
-        var color = docObject.Attributes.Selected ? activeDefinition.PreviewColourSelected : activeDefinition.PreviewColour;
+        var color = docObject.Attributes.Selected ? ActiveDefinition.PreviewColourSelected : ActiveDefinition.PreviewColour;
 
         if (IsShadingPass)
         {
@@ -140,7 +141,7 @@ namespace RhinoInside.Revit.GH
             return;
         }
 
-        if (activeDefinition.PreviewFilter == GH_PreviewFilter.Selected && !docObject.Attributes.Selected)
+        if (ActiveDefinition.PreviewFilter == GH_PreviewFilter.Selected && !docObject.Attributes.Selected)
           return;
 
         base.Draw(displayStyle);
@@ -180,7 +181,7 @@ namespace RhinoInside.Revit.GH
               break;
               case Rhino.Geometry.Brep brep:
               {
-                if (Rhino.Geometry.Mesh.CreateFromBrep(brep, activeDefinition.PreviewCurrentMeshParameters()) is Rhino.Geometry.Mesh[] brepMeshes)
+                if (Rhino.Geometry.Mesh.CreateFromBrep(brep, ActiveDefinition.PreviewCurrentMeshParameters()) is Rhino.Geometry.Mesh[] brepMeshes)
                 {
                   var previewMesh = new Rhino.Geometry.Mesh();
                   previewMesh.Append(brepMeshes);
@@ -209,10 +210,10 @@ namespace RhinoInside.Revit.GH
           primitives.Clear();
         }
 
-        var previewColour = activeDefinition.PreviewColour;
-        var previewColourSelected = activeDefinition.PreviewColourSelected;
+        var previewColour = ActiveDefinition.PreviewColour;
+        var previewColourSelected = ActiveDefinition.PreviewColourSelected;
 
-        foreach (var obj in activeDefinition.Objects.OfType<IGH_ActiveObject>())
+        foreach (var obj in ActiveDefinition.Objects.OfType<IGH_ActiveObject>())
         {
           if (obj.Locked)
             continue;
@@ -283,8 +284,6 @@ namespace RhinoInside.Revit.GH
     public void Register() { }
 
     public void Unregister() { }
-
-    public static bool PreviewChanged() => false;
   }
 }
 #endif
