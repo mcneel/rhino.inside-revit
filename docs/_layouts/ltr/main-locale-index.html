@@ -1,15 +1,15 @@
 ---
 ---
 <!-- 
-    This page is the root page. Its sole purpose is to redirect to the homepage
-    of the website's default language:version set in the jekyll site configs
+    This page is the root page for a locale. Its sole purpose is to redirect to
+    the homepage of the website's default version set in the jekyll site configs
  -->
 <!DOCTYPE html>
 <html>
     {% include ltr/head.html %}
     <head>
       <title>{{ site.title }}</title>
-      <meta http-equiv="refresh" content="0; url={{ site.baseurl }}/{{ site.language }}/{{ site.version }}/" />
+      <meta http-equiv="refresh" content="0; url={{ site.baseurl }}/{{ page.language }}/{{ site.version }}/" />
       <!-- Put the text somewhat in the center from top -->
       <style>
           body {
