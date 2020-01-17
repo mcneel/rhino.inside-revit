@@ -360,50 +360,49 @@ namespace RhinoInside.Revit.UI
         return result;
       }
 
-      result = Revit.OnStartup(Revit.ApplicationUI);
-      if (RhinoCommand.Availability.Available = result == Result.Succeeded)
+      switch(result = Revit.OnStartup(Revit.ApplicationUI))
       {
-        // Update Rhino button Tooltip
-        Button.ToolTip = $"Restores previously visible Rhino windows on top of Revit window";
-        Button.LongDescription = $"Use CTRL key to open a Rhino model";
+        case Result.Succeeded:
+          RhinoCommand.Availability.Available = true;
 
-        // Register UI on Revit
-        data.Application.CreateRibbonTab(rhinoTab);
+          // Update Rhino button Tooltip
+          Button.ToolTip = $"Restores previously visible Rhino windows on top of Revit window";
+          Button.LongDescription = $"Use CTRL key to open a Rhino model";
 
-        var RhinocerosPanel = data.Application.CreateRibbonPanel(rhinoTab, "Rhinoceros");
-        HelpCommand.CreateUI(RhinocerosPanel);
-        RhinocerosPanel.AddSeparator();
-        CommandRhino.CreateUI(RhinocerosPanel);
-        CommandPython.CreateUI(RhinocerosPanel);
+          // Register UI on Revit
+          data.Application.CreateRibbonTab(rhinoTab);
 
-        var GrasshopperPanel = data.Application.CreateRibbonPanel(rhinoTab, "Grasshopper");
-        CommandGrasshopper.CreateUI(GrasshopperPanel);
-        CommandGrasshopperPlayer.CreateUI(GrasshopperPanel);
-        CommandGrasshopperPreview.CreateUI(GrasshopperPanel);
-        CommandGrasshopperRecompute.CreateUI(GrasshopperPanel);
-        CommandGrasshopperBake.CreateUI(GrasshopperPanel);
+          var RhinocerosPanel = data.Application.CreateRibbonPanel(rhinoTab, "Rhinoceros");
+          HelpCommand.CreateUI(RhinocerosPanel);
+          RhinocerosPanel.AddSeparator();
+          CommandRhino.CreateUI(RhinocerosPanel);
+          CommandPython.CreateUI(RhinocerosPanel);
 
-        var SamplesPanel = data.Application.CreateRibbonPanel(rhinoTab, "Samples");
-        Samples.Sample1.CreateUI(SamplesPanel);
-        Samples.Sample4.CreateUI(SamplesPanel);
-        Samples.Sample6.CreateUI(SamplesPanel);
-        Samples.Sample8.CreateUI(SamplesPanel);
-      }
+          var GrasshopperPanel = data.Application.CreateRibbonPanel(rhinoTab, "Grasshopper");
+          CommandGrasshopper.CreateUI(GrasshopperPanel);
+          CommandGrasshopperPlayer.CreateUI(GrasshopperPanel);
+          CommandGrasshopperPreview.CreateUI(GrasshopperPanel);
+          CommandGrasshopperRecompute.CreateUI(GrasshopperPanel);
+          CommandGrasshopperBake.CreateUI(GrasshopperPanel);
 
-      if (result == Result.Succeeded)
-      {
-        // Activate Rhinoceros Tab
-        result = data.Application.ActivateRibbonTab(rhinoTab) ? Result.Succeeded : Result.Failed;
-      }
-      else
-      {
-#if !DEBUG
-        // No more loads in this session
-        Button.Enabled = false;
-#endif
-        Button.ToolTip = "Failed to load.";
+          var SamplesPanel = data.Application.CreateRibbonPanel(rhinoTab, "Samples");
+          Samples.Sample1.CreateUI(SamplesPanel);
+          Samples.Sample4.CreateUI(SamplesPanel);
+          Samples.Sample6.CreateUI(SamplesPanel);
+          Samples.Sample8.CreateUI(SamplesPanel);
 
-        ShowLoadError(data);
+          result = data.Application.ActivateRibbonTab(rhinoTab) ? Result.Succeeded : Result.Failed;
+          break;
+        case Result.Cancelled:
+          Button.Enabled = false;
+          Button.ToolTip = "Rhino.Inside has expired.";
+          Button.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://www.rhino3d.com/download/rhino.inside-revit/7/wip"));
+          break;
+        case Result.Failed:
+          Button.Enabled = false;
+          Button.ToolTip = "Rhino.Inside failed to load.";
+          ShowLoadError(data);
+          break;
       }
 
       return result;
