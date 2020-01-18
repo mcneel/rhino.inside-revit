@@ -27,6 +27,9 @@ a.site-title:hover, a.page-link:hover, a.dropdown-toggle:hover {
     cursor: pointer;
 }
 
+[type=button], [type=reset], [type=submit], button {
+    -webkit-appearance: none;
+}
 /*
     site content ==============================================================
 */
