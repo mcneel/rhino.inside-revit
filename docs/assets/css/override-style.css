@@ -30,6 +30,11 @@ a.site-title:hover, a.page-link:hover, a.dropdown-toggle:hover {
 [type=button], [type=reset], [type=submit], button {
     -webkit-appearance: none;
 }
+
+pre {
+    padding: 0px;
+}
+
 /*
     site content ==============================================================
 */
