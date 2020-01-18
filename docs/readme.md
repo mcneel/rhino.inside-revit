@@ -368,13 +368,13 @@ You can refer to these terms using liquid tags. Jekyll will automatically place 
 You can use the format below in your pages to point to other pages on the Wiki. Never refer to a page from another Wiki language or version. All the inter-page links should be restricted to pages of the same language and version. This helps keeping the Wiki in clean containers.
 
 ```markdown
-{% link _en/beta/reference/rir-interface.md %}
+{{ site.baseurl }}{% link _en/beta/reference/rir-interface.md %}
 ```
 
 You can combine this with markdown link convention so the link has a title
 
 ```markdown
-[Rhino.Inside.Revit Interface]({% link _en/beta/reference/rir-interface.md %})
+[Rhino.Inside.Revit Interface]({{ site.baseurl }}{% link _en/beta/reference/rir-interface.md %})
 ```
 
 ## Linking Images

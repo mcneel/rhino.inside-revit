@@ -49,9 +49,9 @@ The new toolbar contains many new buttons that give you access to
 - Python IDE (with access to Revit API)
 - Grasshopper (with custom Revit components)
 
-See [{{ site.terms.rir }} Interface]({% link _en/beta/reference/rir-interface.md %}) for a complete list of buttons in the *Rhinoceros* tab
+See [{{ site.terms.rir }} Interface]({{ site.baseurl }}{% link _en/beta/reference/rir-interface.md %}) for a complete list of buttons in the *Rhinoceros* tab
 
-If you encountered any errors, please consult the [Known Issues]({% link _en/beta/reference/known-issues.md %}) page for a list of already known issues and their temporary workarounds.
+If you encountered any errors, please consult the [Known Issues]({{ site.baseurl }}{% link _en/beta/reference/known-issues.md %}) page for a list of already known issues and their temporary workarounds.
 
 ## Extracting Revit Geometry
 
