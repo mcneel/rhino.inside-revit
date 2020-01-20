@@ -393,3 +393,7 @@ small.build-time {
     color: #999;
     margin-top: -5px;
 }
+
+.video-player {
+    margin-bottom: 20px;
+}
