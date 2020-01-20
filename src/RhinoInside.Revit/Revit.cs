@@ -190,7 +190,7 @@ namespace RhinoInside.Revit
 
         // 3. Refresh Active View if necesary
         bool regenComplete = DirectContext3DServer.RegenComplete();
-        if (isRefreshActiveViewPending || !regenComplete || GH.PreviewServer.PreviewChanged())
+        if (isRefreshActiveViewPending || !regenComplete)
         {
           isRefreshActiveViewPending = false;
 
