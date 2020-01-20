@@ -18,5 +18,14 @@ build_script:
 
     copy src\RhinoInside.Revit.Setup\bin\x64\Release\RhinoInside.Revit.msi .
 
-artifacts:
-- path: RhinoInside.Revit.msi
+# disabled (see #110)
+#artifacts:
+#- path: RhinoInside.Revit.msi
+
+notifications:
+- provider: Slack
+  incoming_webhook:
+    secure: /omQg66gmFLwrvmMHBol9b0rcJBZvL6QY5USTJrO8bGnnCfL0pW/cZfDvo01GJxJKCUzjooc16cRUl9mgRoSl9TSrduEh0uOEyGJZnuL5yI=
+  on_build_success: false
+  on_build_failure: true
+  on_build_status_changed: true
