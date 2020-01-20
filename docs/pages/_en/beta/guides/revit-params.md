@@ -58,3 +58,23 @@ Notice that the *Geometry Element* component is only holding a reference to the 
 
 ![]({{ "/static/images/guides/revit-params09.png" | prepend: site.baseurl }})
 
+
+## Creating New Parameters
+
+The components under the *Parameter* panel in Grasshopper, allow you to create new Project Parameters in Revit.
+
+{% include ltr/warning_note.html note='The current implementation always creates Parameters of type TEXT and places them under the DATA category in the Revit parameters panel. The parameter will be attached to all the categories in Revit.' %}
+
+![]({{ "/static/images/guides/revit-params10.png" | prepend: site.baseurl }})
+
+Create a new parameter by connecting the parameter name to the *AddParameterKey.ByName* component on the canvas. You can inspect the created parameter using the *ParameterKey.Decompose* component.
+
+![]({{ "/static/images/guides/revit-params11.png" | prepend: site.baseurl }})
+
+Here is how the parameter configuration in Project Parameters:
+
+![]({{ "/static/images/guides/revit-params12.png" | prepend: site.baseurl }})
+
+The value of this parameter can later be read by passing the parameter name to the *Element.ParameterGet* component. You can inspect the parameter value using the *ParameterValue.Decompose* component.
+
+![]({{ "/static/images/guides/revit-params13.png" | prepend: site.baseurl }})
