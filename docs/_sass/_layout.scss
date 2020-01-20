@@ -68,7 +68,7 @@
         border: 0px solid $grey-color-light;
         border-radius: 5px;
         text-align: right;
-        z-index: 10;
+        z-index: -1;
 
         .menu-icon {
             display: block;

@@ -1,7 +1,11 @@
 <footer class="site-footer">
     <div class="footer">
         <!-- Automatic Copyright notice -->
-        <div>&#169; 1997-20{{ site.time | date: '%y' }} {{ site.copyright }}</div>
+        <div>
+            Copyright &#169; 1997-20{{ site.time | date: '%y' }}
+            <br/>
+            <a href="https://www.mcneel.com/" target="_blank">{{ site.copyright }}</a>
+        </div>
         <!-- Edit page on Github: relative url is from jekyll site configs -->
         <div>
             {% assign repourl = 'https://github.com/' | append: site.editme_github_base_url %}

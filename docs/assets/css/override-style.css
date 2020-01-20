@@ -27,6 +27,14 @@ a.site-title:hover, a.page-link:hover, a.dropdown-toggle:hover {
     cursor: pointer;
 }
 
+[type=button], [type=reset], [type=submit], button {
+    -webkit-appearance: none;
+}
+
+pre {
+    padding: 0px;
+}
+
 /*
     site content ==============================================================
 */
@@ -384,4 +392,8 @@ small.build-time {
     display: block;
     color: #999;
     margin-top: -5px;
+}
+
+.video-player {
+    margin-bottom: 20px;
 }
