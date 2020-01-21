@@ -405,4 +405,5 @@ small.build-time {
 img.button-icon {
     display: inline;
     margin-top: -4px;
+    margin-left: -4px;
 }

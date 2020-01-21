@@ -554,9 +554,10 @@ This block is for buttons to download packages (Zip, GH Clusters, ...)
 {% include ltr/download_pkg.html title='Download Cluster' %}
 ```
 
-This block can accept one argument:
+This block can accept two argument:
 
-- `title=` for the button title. Optional.
+- `archive=` link to the downloadable file
+- `title=` for the button title (Optional)
 
 
 ### Release Header Block
