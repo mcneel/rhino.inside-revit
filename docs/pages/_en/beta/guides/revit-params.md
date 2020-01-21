@@ -59,9 +59,11 @@ Notice that the *Geometry Element* component is only holding a reference to the 
 ![]({{ "/static/images/guides/revit-params09.png" | prepend: site.baseurl }})
 
 
-## Creating New Parameters
+## Creating Shared Parameters
 
-The components under the *Parameter* panel in Grasshopper, allow you to create new Project Parameters in Revit.
+The components under the *Parameter* panel in Grasshopper, allow you to create new Shared Parameters in Revit.
+
+{% include ltr/en/api_note.html note='Currently Revit API does not support creating project parameters.' %}
 
 {% include ltr/warning_note.html note='The current implementation always creates Parameters of type TEXT and places them under the DATA category in the Revit parameters panel. The parameter will be attached to all the categories in Revit.' %}
 
@@ -71,7 +73,7 @@ Create a new parameter by connecting the parameter name to the *AddParameterKey.
 
 ![]({{ "/static/images/guides/revit-params11.png" | prepend: site.baseurl }})
 
-Here is how the parameter configuration in Project Parameters:
+Here is how the parameter configuration in Shared Parameters:
 
 ![]({{ "/static/images/guides/revit-params12.png" | prepend: site.baseurl }})
 
