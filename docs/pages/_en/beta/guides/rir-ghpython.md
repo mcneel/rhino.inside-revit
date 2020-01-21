@@ -171,7 +171,7 @@ Once we are done creating this function, we can modify the script to listen for 
 {% capture api_note %}
 All changes to the Revit model need to be completed inside a <em>Transaction</em>. To facilitate this, {{ site.terms.rir }} provides the <em>Revit.EnqueueAction</em> that will wrap our function inside a transaction and calls when Revit is ready to accept changes to active document. This mechanism is designed to ensure only one Revit Add-in can make changes to the document at any time.
 {% endcapture %}
-{% include ltr/en/api_note.html note=api_note %}
+{% include ltr/api_note.html note=api_note %}
 
 ```python
 if Trigger:
