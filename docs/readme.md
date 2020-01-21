@@ -32,6 +32,7 @@
     - [Bubble Note Block](#bubble-note-block)
     - [API Note Block](#api-note-block)
     - [Locale Note Block](#locale-note-block)
+    - [Download Package Block](#download-package-block)
     - [Release Header Block](#release-header-block)
 - [Data Sources](#data-sources)
   - [Rhinoceros Tab Button List](#rhinoceros-tab-button-list)
@@ -221,6 +222,7 @@ The structure of the source is as explained below:
 - `static/` contains all static files
   - `images/` contains all images used across the wiki contents
   - `samples/` contains sample data files
+  - `clusters/` contains Grasshopper cluster files
 - `_data/` contains data files used to generate special pages
 - `_config.yml` Jekyll site configs file (see the config file for more information on each available setting)
 - `GemFile*` Ruby gemfile listing the ruby dependencies
@@ -541,6 +543,21 @@ This is the code used to generate the example locale block shown in the image ab
 ```
 {% include ltr/locale_note.html note='Since we are specifying the name of parameter in a specific language, the definition will break if opened on a Revit with a different language. A better way (but a lot less intuitive) is to specify the API integer value of the built-in parameter as input value. You can get this value by converting the DB.BuiltInParameter value to an int in python.' image='/static/images/guides/revit-params06.png' %}
 ```
+
+### Download Package Block
+
+![](static/images/readme/dl-pkg.png)
+
+This block is for buttons to download packages (Zip, GH Clusters, ...)
+
+```
+{% include ltr/download_pkg.html title='Download Cluster' %}
+```
+
+This block can accept one argument:
+
+- `title=` for the button title. Optional.
+
 
 ### Release Header Block
 

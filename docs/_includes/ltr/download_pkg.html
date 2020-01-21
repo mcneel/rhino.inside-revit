@@ -1,0 +1,5 @@
+<!-- download sample button -->
+<a type="button" class="btn btn-dark" href="{{ include.archive | prepend: site.baseurl }}" >
+    <img class="button-icon" style="width: 24px" src="{{ "/assets/img/package.svg" | prepend: site.baseurl }}">
+    {% if include.title %} {{ include.title }} {% else %} Download Sample Files {% endif %}
+</a>

@@ -401,3 +401,8 @@ small.build-time {
 .video-player {
     margin-bottom: 20px;
 }
+
+img.button-icon {
+    display: inline;
+    margin-top: -4px;
+}

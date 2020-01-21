@@ -7,7 +7,7 @@ order: 1
 ![]({{ "/static/images/samples/column-family-curve01.jpg" | prepend: site.baseurl }})
 
 
-{% include ltr/download_sample.html archive='/static/samples/column-family-along-curve.zip' %}
+{% include ltr/download_pkg.html archive='/static/samples/column-family-along-curve.zip' %}
 
 
 ## Files
