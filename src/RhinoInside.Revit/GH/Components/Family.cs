@@ -759,30 +759,39 @@ namespace RhinoInside.Revit.GH.Components
       {
         try
         {
-          var options = new DB.SaveAsOptions() { OverwriteExistingFile = overrideFile, Compact = compact };
-          if (backups > -1)
-            options.MaximumBackups = backups;
-
-          if(string.IsNullOrEmpty(filePath))
-            filePath = familyDoc.PathName;
-
-          if(string.IsNullOrEmpty(filePath))
-            filePath = familyDoc.Title;
-
-          if(Directory.Exists(filePath))
-            filePath = Path.Combine(filePath, filePath);
-
-          if (!Path.HasExtension(filePath))
-            filePath += ".rfa";
-
-          if(Path.IsPathRooted(filePath))
+          if (string.IsNullOrEmpty(filePath))
           {
-            familyDoc.SaveAs(filePath, options);
-            DA.SetData("Family", family);
+            if (overrideFile)
+            {
+              using (var saveOptions = new DB.SaveOptions() { Compact = compact })
+                familyDoc.Save(saveOptions);
+            }
+            else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to collect data from 'Path'.");
           }
           else
           {
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Path should be absolute.");
+            bool isFolder = filePath.Last() == Path.DirectorySeparatorChar;
+            if (isFolder)
+              filePath = Path.Combine(filePath, familyDoc.Title);
+
+            if (Path.IsPathRooted(filePath) && filePath.Contains(Path.DirectorySeparatorChar))
+            {
+              if (!Path.HasExtension(filePath))
+                filePath += ".rfa";
+
+              using (var saveAsOptions = new DB.SaveAsOptions() { OverwriteExistingFile = overrideFile, Compact = compact })
+              {
+                if (backups > -1)
+                  saveAsOptions.MaximumBackups = backups;
+
+                familyDoc.SaveAs(filePath, saveAsOptions);
+                DA.SetData("Family", family);
+              }
+            }
+            else
+            {
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Path should be absolute.");
+            }
           }
         }
         catch(Autodesk.Revit.Exceptions.InvalidOperationException e) { AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message); }
