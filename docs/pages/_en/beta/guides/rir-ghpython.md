@@ -35,7 +35,7 @@ import clr
 # add reference so base system types e.g. Enum
 clr.AddReference('System.Core')
 
-# add reference to API provided by Rhino.Inside.Revit
+# add reference to API provided by {{ site.terms.rir }}
 clr.AddReference('RhinoInside.Revit')
 
 # add reference to Revit API (two DLLs)
@@ -49,7 +49,7 @@ Now we can import the namespaces into the script scope:
 # from System.Core DLL
 from System import Enum
 
-# Rhino.Inside.Revit API
+# {{ site.terms.rir }} API
 import RhinoInside
 from RhinoInside.Revit import Revit, Convert
 
