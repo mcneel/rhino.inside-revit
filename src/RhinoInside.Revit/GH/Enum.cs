@@ -109,6 +109,14 @@ namespace RhinoInside.Revit.GH.Types
     {
       switch (source)
       {
+        case GH_Number number:
+          if(GH_Convert.ToInt32(number.Value, out var num, GH_Conversion.Secondary))
+          if (Enum.IsDefined(typeof(T), num))
+          {
+            base.Value = num;
+            return true;
+          }
+          break;
         case GH_Integer integer:
           if (Enum.IsDefined(typeof(T), integer.Value))
           {

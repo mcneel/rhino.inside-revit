@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
 
-namespace RhinoInside.Revit.Serialization
+namespace RhinoInside.Revit.Settings
 {
   public static class AddIns
   {
