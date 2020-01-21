@@ -19,6 +19,6 @@ Each sample page listed here, has a ZIP package that might include these files:
 
 You can download the archive for each sample by clicking on the download button included in each sample. This is how the download button looks like:
 
-{% include ltr/download_sample.html archive='' %}
+{% include ltr/download_pkg.html archive='' %}
 
 Follow the directions provide in the sample article on how and when to open any of these files.

@@ -29,8 +29,10 @@
     - [Work-in-Progress Block](#work-in-progress-block)
     - [Revit API Link Block](#revit-api-link-block)
     - [Warning Note Block](#warning-note-block)
+    - [Bubble Note Block](#bubble-note-block)
     - [API Note Block](#api-note-block)
     - [Locale Note Block](#locale-note-block)
+    - [Download Package Block](#download-package-block)
     - [Release Header Block](#release-header-block)
 - [Data Sources](#data-sources)
   - [Rhinoceros Tab Button List](#rhinoceros-tab-button-list)
@@ -220,6 +222,7 @@ The structure of the source is as explained below:
 - `static/` contains all static files
   - `images/` contains all images used across the wiki contents
   - `samples/` contains sample data files
+  - `clusters/` contains Grasshopper cluster files
 - `_data/` contains data files used to generate special pages
 - `_config.yml` Jekyll site configs file (see the config file for more information on each available setting)
 - `GemFile*` Ruby gemfile listing the ruby dependencies
@@ -489,6 +492,21 @@ This block can accept two argument:
 - `note=` for the note message
 - `image=` for the header image above the note
 
+### Bubble Note Block
+
+![](static/images/readme/bubble-block.png)
+
+This block is for showing tips in your content. Below is an example of using a bubble note block:
+
+```
+{% include ltr/bubble_note.html note='Note text.' %}
+```
+
+This block can accept two argument:
+
+- `note=` for the note message
+- `image=` for the header image above the note
+
 
 ### API Note Block
 
@@ -497,7 +515,7 @@ This block can accept two argument:
 This block is for comments related to the APIs. These notes are usually used to explain how APIs work in specific cases. Below is an example of using an API note block:
 
 ```
-{% include ltr/api_note.html note=api_note %}
+{% include ltr/api_note.html note='Note text.' %}
 ```
 
 This block can accept two argument:
@@ -512,7 +530,7 @@ This block can accept two argument:
 This block is for comments related to the various languages supported by the host software. Below is an example of using a locale note block:
 
 ```
-{% include ltr/locale_note.html note=api_note %}
+{% include ltr/locale_note.html note='Note text.' %}
 ```
 
 This block can accept two argument:
@@ -525,6 +543,22 @@ This is the code used to generate the example locale block shown in the image ab
 ```
 {% include ltr/locale_note.html note='Since we are specifying the name of parameter in a specific language, the definition will break if opened on a Revit with a different language. A better way (but a lot less intuitive) is to specify the API integer value of the built-in parameter as input value. You can get this value by converting the DB.BuiltInParameter value to an int in python.' image='/static/images/guides/revit-params06.png' %}
 ```
+
+### Download Package Block
+
+![](static/images/readme/dl-pkg.png)
+
+This block is for buttons to download packages (Zip, GH Clusters, ...)
+
+```
+{% include ltr/download_pkg.html title='Download Cluster' %}
+```
+
+This block can accept two argument:
+
+- `archive=` link to the downloadable file
+- `title=` for the button title (Optional)
+
 
 ### Release Header Block
 

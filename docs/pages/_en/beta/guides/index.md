@@ -28,10 +28,10 @@ These pages guide you through converting geometry between Revit and Rhino (or ot
 - [Revit Structural Elements]({{ site.baseurl }}{% link _en/beta/guides/revit-struct.md %})
 
 <!-- 50 -->
-## Revit Families
-These pages guide you through working with Revit families using {{ site.terms.rir }}
+## Revit Element Types
+These pages guide you through working with Revit element types using {{ site.terms.rir }}
 
-- [Revit Families]({{ site.baseurl }}{% link _en/beta/guides/revit-families.md %})
+- [Revit Types and Families]({{ site.baseurl }}{% link _en/beta/guides/revit-types.md %})
 
 <!-- 60 -->
 ## Revit Views & Sheets
