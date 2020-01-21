@@ -10,6 +10,7 @@
     - [Installing Jekyll](#installing-jekyll)
     - [Building the Wiki using Jekyll](#building-the-wiki-using-jekyll)
     - [Make Necessary Changes](#make-necessary-changes)
+    - [Spell Check](#spell-check)
     - [Publishing the Changes](#publishing-the-changes)
 - [Online Experience](#online-experience)
 - [Understanding Wiki Source Files](#understanding-wiki-source-files)
@@ -172,6 +173,10 @@ Shutdown the server by pressing CTRL-C in terminal.
 ### Make Necessary Changes
 
 Now you can make the necessary changes to the Wiki pages
+
+### Spell Check
+
+This Wiki has been edited using VSCode with ***Spell Right*** extension for spell checking. There is a spell check dictionary under `.vscode/` directory named `spellright.dict` and contains the excluded words and phrases for the spell check extension.
 
 ### Publishing the Changes
 
