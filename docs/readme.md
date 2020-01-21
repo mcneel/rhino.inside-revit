@@ -10,6 +10,7 @@
     - [Installing Jekyll](#installing-jekyll)
     - [Building the Wiki using Jekyll](#building-the-wiki-using-jekyll)
     - [Make Necessary Changes](#make-necessary-changes)
+    - [Spell Check](#spell-check)
     - [Publishing the Changes](#publishing-the-changes)
 - [Online Experience](#online-experience)
 - [Understanding Wiki Source Files](#understanding-wiki-source-files)
@@ -172,6 +173,10 @@ Shutdown the server by pressing CTRL-C in terminal.
 ### Make Necessary Changes
 
 Now you can make the necessary changes to the Wiki pages
+
+### Spell Check
+
+This Wiki has been edited using VSCode with ***Spell Right*** extension for spell checking. There is a spell check dictionary under `.vscode/` directory named `spellright.dict` and contains the excluded words and phrases for the spell check extension.
 
 ### Publishing the Changes
 
@@ -433,7 +438,7 @@ In Revit API, all the built-in parameters are represented by the {% include api_
 
 {% endcapture %}
 
-{% include ltr/en/api_note.html note=api_note %}
+{% include ltr/api_note.html note=api_note %}
 ```
 
 
@@ -492,7 +497,7 @@ This block can accept two argument:
 This block is for comments related to the APIs. These notes are usually used to explain how APIs work in specific cases. Below is an example of using an API note block:
 
 ```
-{% include ltr/en/api_note.html note=api_note %}
+{% include ltr/api_note.html note=api_note %}
 ```
 
 This block can accept two argument:
@@ -507,7 +512,7 @@ This block can accept two argument:
 This block is for comments related to the various languages supported by the host software. Below is an example of using a locale note block:
 
 ```
-{% include ltr/en/locale_note.html note=api_note %}
+{% include ltr/locale_note.html note=api_note %}
 ```
 
 This block can accept two argument:
@@ -518,7 +523,7 @@ This block can accept two argument:
 This is the code used to generate the example locale block shown in the image above.
 
 ```
-{% include ltr/en/locale_note.html note='Since we are specifying the name of parameter in a specific language, the definition will break if opened on a Revit with a different language. A better way (but a lot less intuitive) is to specify the API integer value of the built-in parameter as input value. You can get this value by converting the DB.BuiltInParameter value to an int in python.' image='/static/images/guides/revit-params06.png' %}
+{% include ltr/locale_note.html note='Since we are specifying the name of parameter in a specific language, the definition will break if opened on a Revit with a different language. A better way (but a lot less intuitive) is to specify the API integer value of the built-in parameter as input value. You can get this value by converting the DB.BuiltInParameter value to an int in python.' image='/static/images/guides/revit-params06.png' %}
 ```
 
 ### Release Header Block

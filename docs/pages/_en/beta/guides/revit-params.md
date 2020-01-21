@@ -16,7 +16,7 @@ Revit shows the list of built-in parameters in the *Element Properties* panel.
 {% capture api_note %}
 In Revit API, all the built-in parameters are represented by the {% include api_type.html type='Autodesk.Revit.DB.BuiltInParameter' title='DB.BuiltInParameter' %} enumeration.
 {% endcapture %}
-{% include ltr/en/api_note.html note=api_note %}
+{% include ltr/api_note.html note=api_note %}
 
 ### Project/Shared Parameters
 
@@ -41,11 +41,25 @@ Another way of reading parameter values is by specifying the parameter name to t
 
 ![]({{ "/static/images/guides/revit-params05.png" | prepend: site.baseurl }})
 
-{% include ltr/en/locale_note.html note='Since we are specifying the name of parameter in a specific language, the definition will break if opened on a Revit with a different language. A better way (but a lot less intuitive) is to specify the API integer value of the built-in parameter as input value. You can get this value by converting the DB.BuiltInParameter value to an integer in python.' image='/static/images/guides/revit-params06.png' %}
+{% include ltr/locale_note.html note='Since we are specifying the name of parameter in a specific language, the definition will break if opened on a Revit with a different language.' %}
 
-When working with Project and Shared parameters, you can also pass the parameter GUID to the component
+When working with Shared parameters, you can also pass the parameter GUID to the component
 
 ![]({{ "/static/images/guides/revit-params07.png" | prepend: site.baseurl }})
+
+## Reading Parameter Values
+
+A language-safe way to query the values for specific parameter is to use the *Parameter Key* component from the Revit Parameters panel
+
+![]({{ "/static/images/guides/revit-params07a.png" | prepend: site.baseurl }})
+
+After adding this component to the canvas, you can Right-Click on the component and select the desired parameter
+
+![]({{ "/static/images/guides/revit-params07b.png" | prepend: site.baseurl }})
+
+The output of this component can be passed to the *Element.ParameterGet* to query the value
+
+![]({{ "/static/images/guides/revit-params07c.png" | prepend: site.baseurl }})
 
 ## Updating Parameters
 
@@ -58,3 +72,25 @@ Notice that the *Geometry Element* component is only holding a reference to the 
 
 ![]({{ "/static/images/guides/revit-params09.png" | prepend: site.baseurl }})
 
+
+## Creating Shared Parameters
+
+The components under the *Parameter* panel in Grasshopper, allow you to create new Shared Parameters in Revit.
+
+{% include ltr/api_note.html note='Currently Revit API does not support creating project parameters.' %}
+
+{% include ltr/warning_note.html note='The current implementation always creates Parameters of type TEXT and places them under the DATA category in the Revit parameters panel. The parameter will be attached to all the categories in Revit.' %}
+
+![]({{ "/static/images/guides/revit-params10.png" | prepend: site.baseurl }})
+
+Create a new parameter by connecting the parameter name to the *AddParameterKey.ByName* component on the canvas. You can inspect the created parameter using the *ParameterKey.Decompose* component.
+
+![]({{ "/static/images/guides/revit-params11.png" | prepend: site.baseurl }})
+
+Here is how the parameter configuration in Shared Parameters:
+
+![]({{ "/static/images/guides/revit-params12.png" | prepend: site.baseurl }})
+
+The value of this parameter can later be read by passing the parameter name to the *Element.ParameterGet* component. You can inspect the parameter value using the *ParameterValue.Decompose* component.
+
+![]({{ "/static/images/guides/revit-params13.png" | prepend: site.baseurl }})

@@ -1,6 +1,7 @@
 ---
 title: Sample Template
-order: 1
+order: 0
+published: false
 ---
 
 <!-- intro video -->
