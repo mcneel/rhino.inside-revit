@@ -37,16 +37,6 @@ You can connect any of these properties, then CTRL and double-click on the *Elem
 
 ![]({{ "/static/images/guides/revit-params04.png" | prepend: site.baseurl }})
 
-Another way of reading parameter values is by specifying the parameter name to the *Element.ParameterGet* component to get the parameter value.
-
-![]({{ "/static/images/guides/revit-params05.png" | prepend: site.baseurl }})
-
-{% include ltr/locale_note.html note='Since we are specifying the name of parameter in a specific language, the definition will break if opened on a Revit with a different language.' %}
-
-When working with Shared parameters, you can also pass the parameter GUID to the component
-
-![]({{ "/static/images/guides/revit-params07.png" | prepend: site.baseurl }})
-
 ## Reading Parameter Values
 
 A language-safe way to query the values for specific parameter is to use the *Parameter Key* component from the Revit Parameters panel
@@ -60,6 +50,16 @@ After adding this component to the canvas, you can Right-Click on the component 
 The output of this component can be passed to the *Element.ParameterGet* to query the value
 
 ![]({{ "/static/images/guides/revit-params07c.png" | prepend: site.baseurl }})
+
+Another way of reading parameter values is by specifying the parameter name to the *Element.ParameterGet* component to get the parameter value.
+
+![]({{ "/static/images/guides/revit-params05.png" | prepend: site.baseurl }})
+
+{% include ltr/locale_note.html note='Since we are specifying the name of parameter in a specific language, the definition will break if opened on a Revit with a different language.' %}
+
+When working with Shared parameters, you can also pass the parameter GUID to the component
+
+![]({{ "/static/images/guides/revit-params07.png" | prepend: site.baseurl }})
 
 ## Updating Parameters
 
