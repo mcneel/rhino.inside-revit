@@ -214,6 +214,9 @@ namespace RhinoInside.Revit
       public static bool IsSupportedObject(
         RhinoObject rhinoObject, bool add)
       {
+        if (rhinoObject.IsInstanceDefinitionGeometry)
+          return false;
+
         if (add && !rhinoObject.IsValid)
           return false;
 

@@ -213,7 +213,6 @@ namespace RhinoInside.Revit.UI
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
       const string CommandName = "Rhino";
-      const string Shortcuts = "R#Ctrl+R";
 
       var buttonData = NewPushButtonData<CommandRhinoInside, AllwaysAvailable>(CommandName);
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
@@ -251,69 +250,10 @@ namespace RhinoInside.Revit.UI
         }
         else
         {
-          RegisterShortcut("Add-Ins", ribbonPanel.Name, typeof(CommandRhinoInside).Name, CommandName, Shortcuts);
+          if(Settings.KeyboardShortcuts.RegisterDefaultShortcut("Add-Ins", ribbonPanel.Name, typeof(CommandRhinoInside).Name, CommandName, "R#Ctrl+R"))
+            Rhinoceros.ModalScope.Exit += ShowShortcutHelp;
         }
       }
-    }
-
-    static void RegisterShortcut(string tabName, string panelName, string commandId, string commandName, string commandShortcuts)
-    {
-      commandId = $"CustomCtrl_%CustomCtrl_%{tabName}%{panelName}%{commandId}";
-
-      string keyboardShortcutsPath = Path.Combine(Revit.CurrentUsersDataFolderPath, "KeyboardShortcuts.xml");
-      if (!File.Exists(keyboardShortcutsPath))
-        keyboardShortcutsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Autodesk", $"RVT {Revit.ApplicationUI.ControlledApplication.VersionNumber}", "UserDataCache", "KeyboardShortcuts.xml");
-
-      if (!Serialization.KeyboardShortcuts.LoadFrom(keyboardShortcutsPath, out var shortcuts))
-        Serialization.KeyboardShortcuts.LoadFromResources($"RhinoInside.Resources.RVT{Revit.ApplicationUI.ControlledApplication.VersionNumber}.KeyboardShortcuts.xml", out shortcuts);
-
-#if DEBUG
-      // Those lines generate the KeyboardShortcuts.xml template file when new Revit version is supported
-      string keyboardShortcutsTemplatePath = Path.Combine(Addin.SourceCodePath, "Resources", $"RVT{Revit.ApplicationUI.ControlledApplication.VersionNumber}", "KeyboardShortcuts.xml");
-      var info = new FileInfo(keyboardShortcutsTemplatePath);
-      if (info.Length == 0)
-      {
-        var shortcutsSummary = new Serialization.KeyboardShortcuts.Shortcuts();
-        foreach (var shortcutItem in shortcuts.OrderBy(x => x.CommandId))
-        {
-          if (!string.IsNullOrEmpty(shortcutItem.Shortcuts))
-          {
-            var shortcutDefinition = new Serialization.KeyboardShortcuts.ShortcutItem
-            {
-              CommandId = shortcutItem.CommandId,
-              Shortcuts = shortcutItem.Shortcuts
-            };
-            shortcutsSummary.Add(shortcutDefinition);
-          }
-        }
-
-        Serialization.KeyboardShortcuts.SaveAs(shortcutsSummary, keyboardShortcutsTemplatePath);
-      }
-#endif
-
-      try
-      {
-        var shortcutItem = shortcuts.Where(x => x.CommandId == commandId).First();
-        if (shortcutItem.Shortcuts is null)
-        {
-          shortcutItem.Shortcuts = commandShortcuts;
-          Rhinoceros.ModalScope.Exit += ShowShortcutHelp;
-        }
-      }
-      catch (InvalidOperationException)
-      {
-        var shortcutItem = new Serialization.KeyboardShortcuts.ShortcutItem()
-        {
-          CommandName = commandName,
-          CommandId = commandId,
-          Shortcuts = commandShortcuts,
-          Paths = $"{tabName}>{panelName}"
-        };
-        shortcuts.Add(shortcutItem);
-        Rhinoceros.ModalScope.Exit += ShowShortcutHelp;
-      }
-
-      Serialization.KeyboardShortcuts.SaveAs(shortcuts, Path.Combine(Revit.CurrentUsersDataFolderPath, "KeyboardShortcuts.xml"));
     }
 
     static void ShowShortcutHelp(object sender, EventArgs e)
@@ -452,7 +392,7 @@ namespace RhinoInside.Revit.UI
 
     void RunWithoutAddIns(ExternalCommandData data)
     {
-      using (new Serialization.LockAddIns(data.Application.Application.VersionNumber))
+      using (new Settings.LockAddIns(data.Application.Application.VersionNumber))
       {
         var si = new ProcessStartInfo()
         {
@@ -608,11 +548,11 @@ namespace RhinoInside.Revit.UI
             var entry = archive.CreateEntry("RevitAddinsList.txt");
             using (var writer = new StreamWriter(entry.Open()))
             {
-              Serialization.AddIns.GetInstalledAddins(data.Application.Application.VersionNumber, out var manifests);
+              Settings.AddIns.GetInstalledAddins(data.Application.Application.VersionNumber, out var manifests);
               foreach (var manifest in manifests)
               {
                 writer.WriteLine($"Manifest: {manifest}");
-                if (Serialization.AddIns.LoadFrom(manifest, out var revitAddins))
+                if (Settings.AddIns.LoadFrom(manifest, out var revitAddins))
                 {
                   foreach (var addin in revitAddins)
                   {
