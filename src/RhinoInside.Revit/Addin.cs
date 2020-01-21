@@ -250,7 +250,7 @@ namespace RhinoInside.Revit.UI
         }
         else
         {
-          if(Serialization.KeyboardShortcuts.RegisterDefaultShortcut("Add-Ins", ribbonPanel.Name, typeof(CommandRhinoInside).Name, CommandName, "R#Ctrl+R"))
+          if(Settings.KeyboardShortcuts.RegisterDefaultShortcut("Add-Ins", ribbonPanel.Name, typeof(CommandRhinoInside).Name, CommandName, "R#Ctrl+R"))
             Rhinoceros.ModalScope.Exit += ShowShortcutHelp;
         }
       }
@@ -392,7 +392,7 @@ namespace RhinoInside.Revit.UI
 
     void RunWithoutAddIns(ExternalCommandData data)
     {
-      using (new Serialization.LockAddIns(data.Application.Application.VersionNumber))
+      using (new Settings.LockAddIns(data.Application.Application.VersionNumber))
       {
         var si = new ProcessStartInfo()
         {
@@ -548,11 +548,11 @@ namespace RhinoInside.Revit.UI
             var entry = archive.CreateEntry("RevitAddinsList.txt");
             using (var writer = new StreamWriter(entry.Open()))
             {
-              Serialization.AddIns.GetInstalledAddins(data.Application.Application.VersionNumber, out var manifests);
+              Settings.AddIns.GetInstalledAddins(data.Application.Application.VersionNumber, out var manifests);
               foreach (var manifest in manifests)
               {
                 writer.WriteLine($"Manifest: {manifest}");
-                if (Serialization.AddIns.LoadFrom(manifest, out var revitAddins))
+                if (Settings.AddIns.LoadFrom(manifest, out var revitAddins))
                 {
                   foreach (var addin in revitAddins)
                   {

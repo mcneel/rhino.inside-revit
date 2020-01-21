@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
 
-namespace RhinoInside.Revit.Serialization
+namespace RhinoInside.Revit.Settings
 {
   public static class KeyboardShortcuts
   {
@@ -84,12 +84,12 @@ namespace RhinoInside.Revit.Serialization
       var info = new FileInfo(keyboardShortcutsTemplatePath);
       if (info.Length == 0)
       {
-        var shortcutsSummary = new Serialization.KeyboardShortcuts.Shortcuts();
+        var shortcutsSummary = new Shortcuts();
         foreach (var shortcutItem in shortcuts.OrderBy(x => x.CommandId))
         {
           if (!string.IsNullOrEmpty(shortcutItem.Shortcuts))
           {
-            var shortcutDefinition = new Serialization.KeyboardShortcuts.ShortcutItem
+            var shortcutDefinition = new ShortcutItem
             {
               CommandId = shortcutItem.CommandId,
               Shortcuts = shortcutItem.Shortcuts
