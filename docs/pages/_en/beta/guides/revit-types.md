@@ -15,7 +15,7 @@ Sometimes referred to as System Families; are built-in element types that can ex
 
 Referred to as Custom Families; are custom element types defined by a Revit user. These types are stored inside a Revit Family file
 
-{% include ltr/bubble_note.html note='Generally Types are predefined and built-in Revit types and Families are custom types that can be saved to family files and shared with others.' %}
+{% include ltr/bubble_note.html note='Generally Types are predefined built-in Revit types, and Families are custom types that can be saved to family files and shared with others.' %}
 
 ## Querying Types
 
@@ -36,7 +36,7 @@ When querying the custom types that exist in a Revit model, we can find out the 
 
 {% include ltr/download_pkg.html archive='/static/clusters/Type Family.ghcluster' title='**Type Family** Cluster' %}
 
-Notice that in case of **Duct Systems** the element types are system types and therefore have no associated family file
+Notice that in case of **Duct Systems** for example, the element types are system types and therefore have no associated family file
 
 ![]({{ "/static/images/guides/revit-families04.png" | prepend: site.baseurl }})
 
