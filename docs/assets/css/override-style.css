@@ -281,6 +281,10 @@ pre {
     outline: 1px solid transparent;
 }
 
+.small-image {
+    width: 50%;
+}
+
 /*
     content elements  =========================================================
 */
