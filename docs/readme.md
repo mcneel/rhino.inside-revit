@@ -29,6 +29,7 @@
     - [Work-in-Progress Block](#work-in-progress-block)
     - [Revit API Link Block](#revit-api-link-block)
     - [Warning Note Block](#warning-note-block)
+    - [Bubble Note Block](#bubble-note-block)
     - [API Note Block](#api-note-block)
     - [Locale Note Block](#locale-note-block)
     - [Release Header Block](#release-header-block)
@@ -489,6 +490,21 @@ This block can accept two argument:
 - `note=` for the note message
 - `image=` for the header image above the note
 
+### Bubble Note Block
+
+![](static/images/readme/bubble-block.png)
+
+This block is for showing tips in your content. Below is an example of using a bubble note block:
+
+```
+{% include ltr/bubble_note.html note='Note text.' %}
+```
+
+This block can accept two argument:
+
+- `note=` for the note message
+- `image=` for the header image above the note
+
 
 ### API Note Block
 
@@ -497,7 +513,7 @@ This block can accept two argument:
 This block is for comments related to the APIs. These notes are usually used to explain how APIs work in specific cases. Below is an example of using an API note block:
 
 ```
-{% include ltr/api_note.html note=api_note %}
+{% include ltr/api_note.html note='Note text.' %}
 ```
 
 This block can accept two argument:
@@ -512,7 +528,7 @@ This block can accept two argument:
 This block is for comments related to the various languages supported by the host software. Below is an example of using a locale note block:
 
 ```
-{% include ltr/locale_note.html note=api_note %}
+{% include ltr/locale_note.html note='Note text.' %}
 ```
 
 This block can accept two argument:
