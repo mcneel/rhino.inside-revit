@@ -109,6 +109,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core">
@@ -233,7 +234,8 @@
     <Compile Include="GH\ValueList.cs" />
     <Compile Include="Rhino\Rhinoceros.cs" />
     <Compile Include="Rhino\DocumentPreviewServer.cs" />
-    <Compile Include="Serialization\KeyboardShortcuts.cs" />
+    <Compile Include="Settings\Addins.cs" />
+    <Compile Include="Settings\KeyboardShortcuts.cs" />
     <Compile Include="ModalForm.cs">
       <SubType>Form</SubType>
     </Compile>
