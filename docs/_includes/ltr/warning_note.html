@@ -6,7 +6,7 @@
                 {% if include.image %}
                     <img src="{{ include.image | prepend: site.baseurl }}">
                 {% endif %}
-                {{ include.note }}
+                {{ include.note | markdownify }}
             </td>
         </tr>
     </table>
