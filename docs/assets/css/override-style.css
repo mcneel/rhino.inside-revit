@@ -391,6 +391,10 @@ a.btn-dark:hover {
     margin-bottom: 20px;
 }
 
+.msg-msg p {
+    margin-bottom: 0px;
+}
+
 small.build-time {
     text-align: right;
     display: block;
