@@ -46,6 +46,14 @@
         background:#f7f7f7;
     }
 
+    .btn {
+        display: inline-block;
+    }
+    
+    .rhino-dl {
+        margin-left: 0;
+    }
+
     a.btn-dark {
         margin-top: 10px;
         width: 100%;
