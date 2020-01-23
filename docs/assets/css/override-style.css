@@ -297,6 +297,11 @@ pre {
     text-align: center;
 }
 
+.btn {
+    display: inline;
+    padding: 10px 15px 10px 15px;
+}
+
 a.btn-dark {
     color: white;
 }
@@ -404,6 +409,8 @@ small.build-time {
 
 img.button-icon {
     display: inline;
+    width: 24px;
+    height: 24px;
     margin-top: -4px;
     margin-left: -4px;
 }
