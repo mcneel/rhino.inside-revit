@@ -302,6 +302,10 @@ pre {
     padding: 10px 15px 10px 15px;
 }
 
+.rhino-dl {
+    margin-left: 8px;
+}
+
 a.btn-dark {
     color: white;
 }
