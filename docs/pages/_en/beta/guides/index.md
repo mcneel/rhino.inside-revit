@@ -22,7 +22,7 @@ These pages guide you through converting geometry between Revit and Rhino (or ot
 ## Revit Element Types
 These pages guide you through working with Revit element types using {{ site.terms.rir }}
 
-- [Revit Types and Families]({{ site.baseurl }}{% link _en/beta/guides/revit-types.md %})
+- [Revit Categories, Types, and Families]({{ site.baseurl }}{% link _en/beta/guides/revit-types.md %})
 
 <!-- 40 -->
 ## Revit Elements
