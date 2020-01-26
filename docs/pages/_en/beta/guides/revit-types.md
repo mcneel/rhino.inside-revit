@@ -1,6 +1,6 @@
 ---
 title: Working with Types
-order: 50
+order: 30
 ---
 
 ## Element Types in Revit
