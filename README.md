@@ -20,7 +20,7 @@ work-in-progress
 
 ## Installer
 
-The installer is generated using [WiX toolset](https://wixtoolset.org/) (see `RhinoInside.Revit.Setup.sln`) and is updated automatically on every new build. See the [Rhino.Inside.Revit Wiki](https://www.rhino3d.com/inside/revit/) homepage to download them most recent installers.
+The installer is generated using [WiX toolset](https://wixtoolset.org/) (see `src/RhinoInside.Revit.Setup.sln`) and is updated automatically on every new build. See the [Rhino.Inside.Revit Wiki](https://www.rhino3d.com/inside/revit/) homepage to download them most recent installers.
 
 ## Wiki
 
@@ -34,4 +34,4 @@ Currently the project does not have any documentation for the API. This is an ar
 
 ## Known Issues
 
-Known issues with the product are listed at [References > Known Issues](https://www.rhino3d.com/inside/revit/beta/reference/known-issues). Please keep this page updated with new and persistent issues are identified.
+Known issues with the product are listed at [References > Known Issues](https://www.rhino3d.com/inside/revit/beta/reference/known-issues) on the Wiki. Please keep this page updated when new and persistent issues are identified.

@@ -1,6 +1,6 @@
 ---
 title: Working with Spatial Elements
-order: 32
+order: 42
 ---
 
 {% include ltr/en/wip_note.html %}

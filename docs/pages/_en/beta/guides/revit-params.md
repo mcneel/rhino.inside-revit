@@ -79,7 +79,7 @@ The components under the *Parameter* panel in Grasshopper, allow you to create n
 
 {% include ltr/api_note.html note='Currently Revit API does not support creating project parameters.' %}
 
-{% include ltr/warning_note.html note='The current implementation always creates Parameters of type TEXT and places them under the DATA category in the Revit parameters panel. The parameter will be attached to all the categories in Revit.' %}
+{% include ltr/warning_note.html note='The current implementation always creates Parameters of type **Text** and places them under the **Data** category in the Revit parameters panel. The parameter will be attached to all the categories in Revit.' %}
 
 ![]({{ "/static/images/guides/revit-params10.png" | prepend: site.baseurl }})
 

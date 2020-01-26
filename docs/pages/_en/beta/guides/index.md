@@ -19,6 +19,12 @@ These pages guide you through converting geometry between Revit and Rhino (or ot
 - [Rhino Geometry to Revit]({{ site.baseurl }}{% link _en/beta/guides/rhino-to-revit.md %})
 
 <!-- 30 -->
+## Revit Element Types
+These pages guide you through working with Revit element types using {{ site.terms.rir }}
+
+- [Revit Categories, Types, and Families]({{ site.baseurl }}{% link _en/beta/guides/revit-types.md %})
+
+<!-- 40 -->
 ## Revit Elements
 {{ site.terms.rir }} provides custom Revit-aware nodes that can create native content in Revit. These pages guide you through generating native Revit elements using {{ site.terms.rir }}
 
@@ -26,12 +32,6 @@ These pages guide you through converting geometry between Revit and Rhino (or ot
 - [Revit Curtain Walls]({{ site.baseurl }}{% link _en/beta/guides/revit-curtainwalls.md %})
 - [Revit Spatial Elements]({{ site.baseurl }}{% link _en/beta/guides/revit-spatial.md %})
 - [Revit Structural Elements]({{ site.baseurl }}{% link _en/beta/guides/revit-struct.md %})
-
-<!-- 50 -->
-## Revit Element Types
-These pages guide you through working with Revit element types using {{ site.terms.rir }}
-
-- [Revit Types and Families]({{ site.baseurl }}{% link _en/beta/guides/revit-types.md %})
 
 <!-- 60 -->
 ## Revit Views & Sheets

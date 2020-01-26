@@ -170,6 +170,10 @@ pre {
     padding-bottom: 10px;
 }
 
+.post-content h3 {
+    margin-bottom: 10px;
+}
+
 /* side bar */
 .sidebar {
     width: 215px;
@@ -398,6 +402,10 @@ a.btn-dark:hover {
 
 .msg-msg img {
     margin-bottom: 20px;
+}
+
+.msg-msg p {
+    margin-bottom: 0px;
 }
 
 small.build-time {

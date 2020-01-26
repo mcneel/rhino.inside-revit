@@ -169,7 +169,7 @@ def create_geometry(doc):
 Once we are done creating this function, we can modify the script to listen for the trigger and call this function.
 
 {% capture api_note %}
-All changes to the Revit model need to be completed inside a <em>Transaction</em>. To facilitate this, {{ site.terms.rir }} provides the <em>Revit.EnqueueAction</em> that will wrap our function inside a transaction and calls when Revit is ready to accept changes to active document. This mechanism is designed to ensure only one Revit Add-in can make changes to the document at any time.
+All changes to the Revit model need to be completed inside a *Transaction*. To facilitate this, {{ site.terms.rir }} provides the *Revit.EnqueueAction*< that will wrap our function inside a transaction and calls when Revit is ready to accept changes to active document. This mechanism is designed to ensure only one Revit Add-in can make changes to the document at any time.
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
