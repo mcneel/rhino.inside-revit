@@ -30,6 +30,8 @@ There are two groups of *Types* in Revit:
  - **System Types** are built-in types that can exist in any Revit model e.g. *Wall* types or *Duct System* types. The logic and behavior of these types is built into Revit and can not be changed by the user.
  - **Custom Types** are types that are defined by a Revit user e.g. *Furniture* types or *Door* types.
 
+Each type, whether *System* or *Custom*, can have a series of **Type Parameters** that modify the behavior or other aspect of that specific Type. When working with Revit, we tend to define or modify various *System* or *Custom* Types and place instances of these types into the model. For example we can define a 3ft x 7ft single-panel door Type and place many instances of this type in the model. All these instances will follow the logic that is enforced by that specific type.
+
 ### Families
 
 Now that we know what Types are we can discuss Families. There are two challenges with the Category and Type structure that we discussed above.
@@ -38,21 +40,20 @@ Now that we know what Types are we can discuss Families. There are two challenge
 
 Revit families are a mechanism designed to solve these challenges:
 
-- *System Families* are named groups, that attempt to organize related system types e.g. *Duct System* or *Basic Wall*
-- *Custom Families* are far more complex. They are a way to create custom types with custom design, and behavior. For example you can create a new table family that looks like a spaceship, is hovering over the floor, and can show 6 to 12 chairs depending on the desired configuration.
+- *System Families* are named groups, that attempt to organize related system types e.g. *Duct System* or *Basic Wall*.
 
-    Revit *Family Editor* can be used to define new custom families based on a family template file (`*.rft`). Custom families can be stored in external family files (*.rvt) and be shared with other Revit users.
+- *Custom Families* are far more complex. They are a way to create custom types with custom design, and behavior. For example you can create a new table family that looks like a spaceship, is hovering over the floor, and can show 6 to 12 chairs depending on the desired configuration. Revit *Family Editor* can be used to define new custom families based on a family template file (`*.rft`). Custom families can be stored in external family files (`*.rvt`) and be shared with other Revit users.
 
-    Defining new families is not a trivial task especially if they need to be smart and flexible to adapt to multiple model conditions, and is arguably one of the most important automation topics in Revit. Most companies create their own set of custom families for various components that are often used in their models. There are also third-party companies that create custom families, or create family organization solutions.
-
-    To get you started, Revit installation provides a default set of these custom families based on the measurement system e.g. Imperial vs Metric and also provides many templates to help creating new custom families from scratch.
+{% include ltr/warning_note.html note='The name, *System Families*, has led to a lot of confusion among Revit users. Remember, **System Families** are just a name given to a related group of **System Types**. They are vastly different from **Custom Families** and can not be stored in external family files. As Revit users or Revit programmers we generally do not deal with *System Families* and Revit API does not support creating or modifying a large portion of the *System Families* yet. Hence when discussing Revit, it is quite common to refer to *Custom Families* simply as *Families*' %}
 
 {% capture api_note %}
 In Revit API, **custom families** are represented by the {% include api_type.html type='Autodesk.Revit.DB.Family' title='DB.Family' %}, their various types are represented by {% include api_type.html type='Autodesk.Revit.DB.FamilySymbol' title='DB.FamilySymbol' %}, and each instance is represented by a {% include api_type.html type='Autodesk.Revit.DB.FamilyInstance' title='DB.FamilyInstance' %}.
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-{% include ltr/warning_note.html note='Remember, **System Families** are just a name given to a related group of **System Types**. They are vastly different from **Custom Families** and can not be stored in external family files.' %}
+Defining new custom families is not a trivial task especially if they need to be smart and flexible to adapt to multiple model conditions, and is arguably one of the most important automation topics in Revit. Most companies create their own set of custom families for various components that are often used in their models. There are also third-party companies that create custom families, or create family organization solutions.
+
+To get you started, Revit installation provides a default set of these custom families based on the measurement system e.g. Imperial vs Metric and also provides many templates to help with creating new custom families from scratch.
 
 When working with Revit or Revit API, we are mostly dealing with Revit **Types** and **Custom Families**. This guide takes you through the various {{ site.terms.rir }} components that help you query and create types and families.
 
@@ -73,7 +74,7 @@ When querying the custom types that exist in a Revit model, we can find out the 
 
 ![]({{ "/static/images/guides/revit-families03.png" | prepend: site.baseurl }})
 
-{% include ltr/download_pkg.html archive='/static/clusters/Type Family.ghcluster' title='Download **Type Family**' %}
+{% include ltr/download_comp.html archive='/static/clusters/Type Family.ghcluster' name='Type Family' %}
 
 Notice that **Duct Systems** for example, is a system types and therefore have no associated family definition. Hence the *Type Family* component is returning `null`.
 
