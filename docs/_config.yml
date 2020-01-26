@@ -97,6 +97,10 @@ defaults:
       path: ""
     values:
       layout: ltr/page-list-toc
+      # assume a large order for all pages so unorderd pages get sorted last
+      order: 9999
+      # assume all pages can be listed on table of contents
+      toc: true
 
   # set base metadata for all pages in each collection
   - scope:

@@ -1,6 +1,5 @@
 ---
 title: Creating Wall in Revit
-order: 4
 ---
 
 {% include ltr/en/wip_note.html %}

@@ -1,5 +1,6 @@
 ---
 title: Rhino.Inside.Revit Reference Guides
+toc: false
 ---
 
 This section includes many articles that provide full documentation on {{ site.terms.rir }} features or dive deep into its inner workings.

@@ -1,6 +1,5 @@
 ---
 title: Analytical Model Manipulation
-order: 10
 ---
 
 {% include ltr/en/wip_note.html %}

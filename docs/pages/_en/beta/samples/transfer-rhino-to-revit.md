@@ -1,6 +1,5 @@
 ---
 title: Transfer Rhino to Revit
-order: 1
 ---
 
 {% include ltr/en/wip_note.html %}

@@ -1,6 +1,5 @@
 ---
 title: Column Family Along Curve
-order: 1
 ---
 
 <!-- intro video -->
