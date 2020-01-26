@@ -1,5 +1,6 @@
 ---
 title: Rhino.Inside.Revit Guides
+toc: false
 ---
 
 This section includes many articles that guide you through solving many {{ site.terms.revit }} challenges using {{ site.terms.rir }}. Make sure to take a look at the *Getting Started* guide on this Wiki before continuing.
@@ -8,33 +9,37 @@ This section includes many articles that guide you through solving many {{ site.
 
 <!-- 10 -->
 ## Basic Interactions
-
-- [Reading & Writing Revit Parameter Values]({{ site.baseurl }}{% link _en/beta/guides/revit-params.md %})
+These pages guide you through automating some of the basic workflows using {{ site.terms.rir }}
 
 <!-- 20 -->
-## Geometry Conversion
+###  Geometry Conversion
 
 These pages guide you through converting geometry between Revit and Rhino (or other applications) using {{ site.terms.rir }}
+
 - [Revit Geometry to Rhino]({{ site.baseurl }}{% link _en/beta/guides/revit-to-rhino.md %})
 - [Rhino Geometry to Revit]({{ site.baseurl }}{% link _en/beta/guides/rhino-to-revit.md %})
 
 <!-- 30 -->
-## Revit Element Types
-These pages guide you through working with Revit element types using {{ site.terms.rir }}
+## Revit Data Hierarchy
+These pages guide you through working with Revit data hierarchy, and explains the concepts behind *Categories*, *Families*, and *Types* and generally how Revit stores and organizes information in a BIM model
 
 - [Revit Categories, Types, and Families]({{ site.baseurl }}{% link _en/beta/guides/revit-types.md %})
+- [Reading & Writing Revit Parameter Values]({{ site.baseurl }}{% link _en/beta/guides/revit-params.md %})
 
 <!-- 40 -->
-## Revit Elements
-{{ site.terms.rir }} provides custom Revit-aware nodes that can create native content in Revit. These pages guide you through generating native Revit elements using {{ site.terms.rir }}
+## Modeling in Revit
+Grasshopper addon, included with {{ site.terms.rir }}, provides custom Revit-aware nodes that can create native content in Revit. These pages guide you through generating native Revit elements using {{ site.terms.rir }}
 
 - [Revit Walls]({{ site.baseurl }}{% link _en/beta/guides/revit-walls.md %})
 - [Revit Curtain Walls]({{ site.baseurl }}{% link _en/beta/guides/revit-curtainwalls.md %})
 - [Revit Spatial Elements]({{ site.baseurl }}{% link _en/beta/guides/revit-spatial.md %})
 - [Revit Structural Elements]({{ site.baseurl }}{% link _en/beta/guides/revit-struct.md %})
+- [Revit Materials]({{ site.baseurl }}{% link _en/beta/guides/revit-materials.md %})
+
+<!-- 50 -->
 
 <!-- 60 -->
-## Revit Views & Sheets
+## Documentation in Revit
 These pages guide you through working with Revit views and sheets using {{ site.terms.rir }}
 
 - [Revisions]({{ site.baseurl }}{% link _en/beta/guides/revit-revisions.md %})
@@ -51,12 +56,10 @@ Revit has a few ways to containerize geometry inside a Revit model. These pages 
 - [Revit Links]({{ site.baseurl }}{% link _en/beta/guides/revit-links.md %})
 
 <!-- 80 -->
-## Revit Parameters
-These pages guide you through working with Revit parameters using {{ site.terms.rir }}
 
 <!-- 90 -->
-## Revit Model Configs
-These pages guide you through working with global model configurations using {{ site.terms.rir }}
+## Revit Model Global Configurations
+These pages guide you through working with global model global configurations using {{ site.terms.rir }}
 
 - [Revit Line Styles]({{ site.baseurl }}{% link _en/beta/guides/revit-linestyles.md %})
 

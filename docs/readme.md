@@ -33,7 +33,9 @@
     - [API Note Block](#api-note-block)
     - [Locale Note Block](#locale-note-block)
     - [Download Package Block](#download-package-block)
+    - [Download Component Block](#download-component-block)
     - [Release Header Block](#release-header-block)
+- [Sample Pages](#sample-pages)
 - [Data Sources](#data-sources)
   - [Rhinoceros Tab Button List](#rhinoceros-tab-button-list)
   - [Grasshopper Component List](#grasshopper-component-list)
@@ -243,11 +245,12 @@ order: 2
 Required metadata are
 
 - **Title**
-- **Order** (if page is part of a list of similar content e.g. `samples/`)
+- **Order** set the order only for sections that have ordered articles e.g. Guides
 - **Language** Set automatically by site configuration. do not set manually
 - **Version** Set automatically by site configuration. do not set manually
 - **Category** Set automatically by site configuration. do not set manually
 - **Layout** Default layout is set automatically by site configuration. override only when your page layout is different from default. See site config file for default layout
+- **TOC** All pages are set to `toc: true` so they will be included in Side panels. Set to `toc: false` to omit the page from side panel lists e.g. samples/index.md` is omitted from the side panel this way.
 
 ## Page Layouts
 
@@ -349,6 +352,15 @@ For example page `pages/_en/beta/reference/components/273ff43d-b771-4eb7-a66d-5d
 
 These component-specific pages can be directly access as well. For example the component page discussed above can also be directly accessed through `http://.../en/beta/reference/components/273ff43d-b771-4eb7-a66d-5da5f7f2731e`
 
+Make sure to provide the minimum metadata for component-specific pages. See below. Notice that `toc: false` to avoid listing these pages in side panels.
+
+```
+---
+title: Material.ByColor
+toc: false
+---
+```
+
 # Wiki Formatting Conventions
 
 ## Frequently User Terms
@@ -401,7 +413,7 @@ The Kramdown syntax also allows for applying [inline attribute overrides](https:
 
 ## Grasshopper Screenshots
 
-Avoid including the background in Grasshopper screenshots for a more pleasing image. You can use the hi-res screenshot export tool in Grasshopper to generate a PNG with transparent background from your definition.
+When discussing abstract concepts or specific functionality of Grasshopper components or groups of components, avoid including the Grasshopper background in screenshots for a more pleasing image. You can use the hi-res screenshot export tool in Grasshopper to generate a PNG with transparent background from your definition.
 
 For example:
 
@@ -410,6 +422,10 @@ For example:
 Looks better than:
 
 ![](static/images/readme/bad-gh.png)
+
+It is okay to include the Grasshopper background if the image is about a specific definition or feature. That way, the background can help providing context to the reader. In this case make sure to use the default Grasshopper background. The image below shows a specific part of a definition and has the default Grasshopper background included.
+
+![](static/images/readme/ok-gh.png)
 
 ## Linking Videos
 
@@ -548,10 +564,10 @@ This is the code used to generate the example locale block shown in the image ab
 
 ![](static/images/readme/dl-pkg.png)
 
-This block is for buttons to download packages (Zip, GH Clusters, ...)
+This block is for buttons to download packages (Zip, ...)
 
 ```
-{% include ltr/download_pkg.html title='Download Cluster' %}
+{% include ltr/download_pkg.html archive='/static/samples/column-family-along-curve.zip' %}
 ```
 
 This block can accept two argument:
@@ -559,6 +575,21 @@ This block can accept two argument:
 - `archive=` link to the downloadable file
 - `title=` for the button title (Optional)
 
+
+### Download Component Block
+
+![](static/images/readme/dl-comp.png)
+
+This block is for buttons to download Grasshopper components (GH Clusters, ...)
+
+```
+{% include ltr/download_comp.html archive='/static/clusters/Type Family.ghcluster' name='Type Family' %}
+```
+
+This block can accept two argument:
+
+- `archive=` link to the downloadable file
+- `name=` of the Grasshopper component
 
 ### Release Header Block
 
@@ -572,6 +603,18 @@ This block is release headers on **Release Notes** page. This block can accept t
 ```
 {% include ltr/release-header.html version="0.0.7317.30902" time="1/13/2020 17:10:04" %}
 ```
+
+# Sample Pages
+
+To create new sample pages, follow the formatting of `samples/sample-template.md` page. You can duplicate this page and create your own sample document:
+
+- Keep it short and to the point. This page is ONLY about the sample
+- Include a banner image for the sample. Choose an image size to be consistent with other samples. This banner might be used to show as cover in sample galleries
+- Make sure the sample files are archived as a ZIP file for easy download and organization. Modify the `download_pkg` button block to point to your sample archive
+- Under Files section, provide a list of sample files with description. After that provide instructions on how to open the samples
+- Under Description section, provide a detailed description of how the sample is structured. Any information about how the generic components work should be included in the Guides and not in sample article. The sample description is intended to help the user understand that specific sample and not the underlying concepts
+- Sample pages are un-ordered. There is no need to define `order:` on page metadata
+- You can set the `authors: [ 'your-name'] ` page metadata and provide your name or handle
 
 # Data Sources
 

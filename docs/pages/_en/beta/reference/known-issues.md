@@ -1,6 +1,6 @@
 ---
 title: Known Issues
-order: 6
+order: 42
 ---
 
 This guide looks at errors that can appear with {{ site.terms.rir }}. This address most of the common errors we have seen. [Please Contact Us](https://www.rhino3d.com/support) whether any of these options worked or did not work. We are working to minimize any of these messages.

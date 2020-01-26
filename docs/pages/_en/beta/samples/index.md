@@ -1,6 +1,7 @@
 ---
 title: Rhino.Inside.Revit Samples
 description: Official developer resources for Rhino and Grasshopper.  Rhino developer tools are royalty free and include support.
+toc: false
 ---
 
 This section includes examples of using {{ site.terms.revit }} to solve many {{ site.terms.revit }} challenges.
@@ -9,13 +10,13 @@ This section includes examples of using {{ site.terms.revit }} to solve many {{ 
 
 ## Sample Files
 
-Each sample page listed here, has a ZIP package that might include these files:
+Each sample page listed here, has a ZIP package that might include one or more of the files listed here:
 
-- Sample Screenshot (sample0X.png)
-- Grasshopper Definition (sample.gh)
-- Rhino Model (sample.3dm)
-- Revit Model (sample.rvt)
-- Revit Family (sample.rfa)
+- Sample Screenshot (`*.png`)
+- Grasshopper Definition (`*.gh`)
+- Rhino Model (`*.3dm`)
+- Revit Model (`*.rvt`)
+- Revit Family (`*.rfa`)
 
 You can download the archive for each sample by clicking on the download button included in each sample. This is how the download button looks like:
 

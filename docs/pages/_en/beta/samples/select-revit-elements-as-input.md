@@ -1,6 +1,5 @@
 ---
 title: Selection filters for Revit objects
-order: 6
 ---
 
 {% include ltr/en/wip_note.html %}

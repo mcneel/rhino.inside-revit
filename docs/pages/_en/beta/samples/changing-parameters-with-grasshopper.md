@@ -1,6 +1,5 @@
 ---
 title: Managing Parameters with Grasshopper
-order: 3
 ---
 
 {% include ltr/en/wip_note.html %}

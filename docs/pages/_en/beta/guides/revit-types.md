@@ -30,7 +30,7 @@ There are two groups of *Types* in Revit:
  - **System Types** are built-in types that can exist in any Revit model e.g. *Wall* types or *Duct System* types. The logic and behavior of these types is built into Revit and can not be changed by the user.
  - **Custom Types** are types that are defined by a Revit user e.g. *Furniture* types or *Door* types.
 
-Each type, whether *System* or *Custom*, can have a series of **Type Parameters** that modify the behavior or other aspect of that specific Type. When working with Revit, we tend to define or modify various *System* or *Custom* Types and place instances of these types into the model. For example we can define a 3ft x 7ft single-panel door Type and place many instances of this type in the model. All these instances will follow the logic that is enforced by that specific type.
+Each type, whether *System* or *Custom*, can have a series of **Type Parameters** that modify the behavior or other aspect of that specific Type. When working with Revit, we tend to define or modify various *System* or *Custom* Types and place instances of these types into the model. For example we can define a 3ft x 7ft single-panel door Type and place many instances of this type in the model. All these instances will follow the logic that is enforced by that specific type. However, Type definitions can also allow certain **Instance Parameters** to be modified to change the behavior or graphics of a specific instance.
 
 ### Families
 
@@ -47,7 +47,7 @@ Revit families are a mechanism designed to solve these challenges:
 {% include ltr/warning_note.html note='The name, *System Families*, has led to a lot of confusion among Revit users. Remember, **System Families** are just a name given to a related group of **System Types**. They are vastly different from **Custom Families** and can not be stored in external family files. As Revit users or Revit programmers we generally do not deal with *System Families* and Revit API does not support creating or modifying a large portion of the *System Families* yet. Hence when discussing Revit, it is quite common to refer to *Custom Families* simply as *Families*' %}
 
 {% capture api_note %}
-In Revit API, **custom families** are represented by the {% include api_type.html type='Autodesk.Revit.DB.Family' title='DB.Family' %}, their various types are represented by {% include api_type.html type='Autodesk.Revit.DB.FamilySymbol' title='DB.FamilySymbol' %}, and each instance is represented by a {% include api_type.html type='Autodesk.Revit.DB.FamilyInstance' title='DB.FamilyInstance' %}.
+In Revit API, **Custom Families** are represented by the {% include api_type.html type='Autodesk.Revit.DB.Family' title='DB.Family' %}, their various types are represented by {% include api_type.html type='Autodesk.Revit.DB.FamilySymbol' title='DB.FamilySymbol' %}, and each instance is represented by a {% include api_type.html type='Autodesk.Revit.DB.FamilyInstance' title='DB.FamilyInstance' %}.
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
@@ -95,18 +95,20 @@ You can pass the any of the categories above to the *ElementType.ByName* compone
 ![]({{ "/static/images/guides/revit-families05.png" | prepend: site.baseurl }})
 
 
+## Modifying Types
+
 ## Extracting Type Geometry
 
-## Loading New Families
+## Loading Families
 
-## Saving Existing Families
+## Saving Families
 
-## Editing Existing Families
+## Editing Families
 
 ## Creating New Families
 
-## Samples
+## Examples
 
-Samples listed below create various types of families in Revit using {{ site.terms.rir }}
+Examples listed below create various types of families in Revit using {{ site.terms.rir }}
 
 - [Column Family Along Curve]({{ site.baseurl }}{% link _en/beta/samples/column-family-along-curve.md %})
