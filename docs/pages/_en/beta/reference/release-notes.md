@@ -1,6 +1,6 @@
 ---
 title: Release Notes
-order: 5
+order: 40
 ---
 
 <!-- most recent release should be on top -->

@@ -1,6 +1,6 @@
 ---
 title: Rhino.Inside.Revit Interface
-order: 1
+order: 10
 ---
 
 Once {{ site.terms.rir }} is loaded and licensed, it creates a new ribbon in Revit interface named *Rhinoceros*
