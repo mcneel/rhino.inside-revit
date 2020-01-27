@@ -9,6 +9,8 @@ Revit organizes the building components into *Categories*, *Families*, and *Type
 
 ### Categories
 
+![]({{ "/static/images/guides/revit-categories.svg" | prepend: site.baseurl }})
+
 Categories are the highest-level groups. These categories are built into Revit and loosely organize the components by their function. There are also multiple category types in a Revit model:
   - *Model* categories e.g. *Walls*, *Doors*, *Floors*, *Roofs*, etc.
   - *Analytical* categories e.g. *Analytical Surfaces*, *Structural Loads*, etc.
@@ -23,6 +25,8 @@ In Revit API, all the built-in categories are represented by the {% include api_
 
 ### Types
 
+![]({{ "/static/images/guides/revit-types.svg" | prepend: site.baseurl }})
+
 Before discussing *Families*, we need to discuss *Types* in Revit. There can be multiple types of elements under each of the Revit categories discussed above. For example a 3ft x 7ft single-panel door, is a door *Type* under the *Doors* category, or a 2x4 wood post is a column *Type* under the *Structural Columns* category.
 
 There are two groups of *Types* in Revit:
@@ -33,6 +37,8 @@ There are two groups of *Types* in Revit:
 Each type, whether *System* or *Custom*, can have a series of **Type Parameters** that modify the behavior or other aspect of that specific Type. When working with Revit, we tend to define or modify various *System* or *Custom* Types and place instances of these types into the model. For example we can define a 3ft x 7ft single-panel door Type and place many instances of this type in the model. All these instances will follow the logic that is enforced by that specific type. However, Type definitions can also allow certain **Instance Parameters** to be modified to change the behavior or graphics of a specific instance.
 
 ### Families
+
+![]({{ "/static/images/guides/revit-families.svg" | prepend: site.baseurl }})
 
 Now that we know what Types are we can discuss Families. There are two challenges with the Category and Type structure that we discussed above.
 - Firstly, there can be many many various types in a Revit model. For example we can have hundreds of door types with various designs and sizes. We need a way to organize these types into related groups.
