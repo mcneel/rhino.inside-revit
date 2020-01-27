@@ -12,7 +12,7 @@ layout: ltr/page-fullwidth
 
 # {{ site.title }}
 
-The {{ site.terms.rir }} project is an exciting new development sponsored by {{ site.terms.mcneel }}. The {{ site.terms.rir }} brings the power of {{ site.terms.rhino }} and Grasshopper to the {{ site.terms.revit }} environment. The various sections of this Wiki are designed to get your started with the project and help you along the way to become an advanced {{ site.terms.rir }} user.
+The {{ site.terms.rir }} project is an exciting new development sponsored by {{ site.terms.mcneel }}. The {{ site.terms.rir }} brings the power of {{ site.terms.rhino }} and Grasshopper to the {{ site.terms.revit }} environment. The various sections of this Wiki are designed to get you started with the project and help you along the way to become an advanced {{ site.terms.rir }} user.
 
 - **Getting Started** This short article shows you how to install and get started with the {{ site.terms.rir }} project very quickly
 - **Guides** This section contains many articles that showcases the power of the {{ site.terms.rir }} project in tackling many design and documentation challenges in {{ site.terms.revit }}
