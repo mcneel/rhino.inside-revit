@@ -573,7 +573,7 @@ This block is for buttons to download packages (Zip, ...)
 This block can accept two argument:
 
 - `archive=` link to the downloadable file
-- `title=` for the button title (Optional)
+- `title=` for the button title (Optional: defaults to `Download Sample Files`)
 
 
 ### Download Component Block
@@ -590,6 +590,7 @@ This block can accept two argument:
 
 - `archive=` link to the downloadable file
 - `name=` of the Grasshopper component
+- `panel=` name of the panel in Grasshopper interface formatted as `Tab name > panel name` (Optional: defaults to `Revit > Custom`)
 
 ### Release Header Block
 

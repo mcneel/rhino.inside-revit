@@ -66,4 +66,8 @@
     h1 {
         font-size: 30px;
     }
+
+    .caption {
+        margin-top: 5px;
+    }
 }

@@ -70,11 +70,11 @@ The *Document.ElementTypes* component can further filter the list of types:
 
 ## Accessing Family of a Type
 
-When querying the custom types that exist in a Revit model, we can find out the custom family definition that contains the logic for each of these types. We are using a custom Grasshopper Python component (*Type Family*) to grab the family of each type being passed into this component. You can download this component, as a Grasshopper cluster, from the link below.
+When querying the custom types that exist in a Revit model, we can find out the custom family definition that contains the logic for each of these types. We are using a custom Grasshopper Python component (*Type Family*) to grab the family of each type being passed into this component. You can download this component, as a Grasshopper user object, from the link below.
 
 ![]({{ "/static/images/guides/revit-families03.png" | prepend: site.baseurl }})
 
-{% include ltr/download_comp.html archive='/static/clusters/Type Family.ghcluster' name='Type Family' %}
+{% include ltr/download_comp.html archive='/static/ghnodes/Type Family.ghuser' name='Type Family' %}
 
 Notice that **Duct Systems** for example, is a system types and therefore have no associated family definition. Hence the *Type Family* component is returning `null`.
 

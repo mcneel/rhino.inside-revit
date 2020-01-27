@@ -426,3 +426,10 @@ img.button-icon {
     margin-top: -4px;
     margin-left: -4px;
 }
+
+.caption {
+    display: block;
+    color: #828282;
+    font-size: 12px;
+    margin-top: 10px;
+}
