@@ -72,8 +72,14 @@
         </script>
 
         <script>
+            // apply magnificPopup to all images except svg
+            // svg images are graphics and charts and not screenshots
             $(document).ready(function() {
-                $('.side-content img').magnificPopup({
+                // grab all images in side content, filter out svg
+                // then apply magnificPopup
+                $('.side-content img').filter(function(){
+                        return ! $(this).attr('src').endsWith(".svg")
+                    }).magnificPopup({
                     type:'image',
                     zoom: { enabled: true },
                     gallery: { enabled: true },

@@ -9,6 +9,8 @@ Revit organizes the building components into *Categories*, *Families*, and *Type
 
 ### Categories
 
+![]({{ "/static/images/guides/revit-categories.svg" | prepend: site.baseurl }})
+
 Categories are the highest-level groups. These categories are built into Revit and loosely organize the components by their function. There are also multiple category types in a Revit model:
   - *Model* categories e.g. *Walls*, *Doors*, *Floors*, *Roofs*, etc.
   - *Analytical* categories e.g. *Analytical Surfaces*, *Structural Loads*, etc.
@@ -23,6 +25,8 @@ In Revit API, all the built-in categories are represented by the {% include api_
 
 ### Types
 
+![]({{ "/static/images/guides/revit-types.svg" | prepend: site.baseurl }})
+
 Before discussing *Families*, we need to discuss *Types* in Revit. There can be multiple types of elements under each of the Revit categories discussed above. For example a 3ft x 7ft single-panel door, is a door *Type* under the *Doors* category, or a 2x4 wood post is a column *Type* under the *Structural Columns* category.
 
 There are two groups of *Types* in Revit:
@@ -34,6 +38,8 @@ Each type, whether *System* or *Custom*, can have a series of **Type Parameters*
 
 ### Families
 
+![]({{ "/static/images/guides/revit-families.svg" | prepend: site.baseurl }})
+
 Now that we know what Types are we can discuss Families. There are two challenges with the Category and Type structure that we discussed above.
 - Firstly, there can be many many various types in a Revit model. For example we can have hundreds of door types with various designs and sizes. We need a way to organize these types into related groups.
 - Secondly, types can be radically different from each other. For example a garage door is vastly different from a single-panel interior door. We need a way to group types by their behavior and design.
@@ -44,7 +50,7 @@ Revit families are a mechanism designed to solve these challenges:
 
 - *Custom Families* (or [Loadable Families](http://help.autodesk.com/view/RVT/2020/ENU/?guid=GUID-7AEC5D66-C2E0-40E2-9504-3CC13781B87A)) are far more complex. They are a way to create custom types with custom design, and behavior. For example you can create a new table family that looks like a spaceship, is hovering over the floor, and can show 6 to 12 chairs depending on the desired configuration. Revit *Family Editor* can be used to define new custom families based on a family template file (`*.rft`). Custom families can be stored in external family files (`*.rvt`) and be shared with other Revit users. *In-Place Families* are a simplified variation of the custom families, specifically created for geometry that has limited use in a model.
 
-{% include ltr/warning_note.html note='The name, *System Families*, has led to a lot of confusion among Revit users. Remember, **System Families** are just a name given to a related group of **System Types**. They are vastly different from **Custom Families** and can not be stored in external family files. As Revit users or Revit programmers we generally do not deal with *System Families* and Revit API does not support creating or modifying a large portion of the *System Families* yet. Hence when discussing Revit, it is quite common to refer to *Custom Families* simply as *Families*' %}
+{% include ltr/warning_note.html note='The name, *System Families*, has led to a lot of confusion among Revit users. Remember, **System Families** are just a name given to a related group of **System Types**. They are vastly different from **Custom Families** and can not be stored in external family files. As Revit users or Revit programmers we generally do not deal with *System Families* and Revit API does not support creating or modifying a large portion of the *System Families* as of yet either. Hence when discussing Revit, it is quite common to refer to *Custom Families* simply as *Families*' %}
 
 {% capture api_note %}
 In Revit API, **Custom Families** are represented by the {% include api_type.html type='Autodesk.Revit.DB.Family' title='DB.Family' %}, their various types are represented by {% include api_type.html type='Autodesk.Revit.DB.FamilySymbol' title='DB.FamilySymbol' %}, and each instance is represented by a {% include api_type.html type='Autodesk.Revit.DB.FamilyInstance' title='DB.FamilyInstance' %}.
