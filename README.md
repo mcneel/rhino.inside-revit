@@ -1,14 +1,14 @@
-# Rhino.Inside®.Revit
-
-[![Build status](https://ci.appveyor.com/api/projects/status/9ot0iyjqwb1jdn6m/branch/master?svg=true)](https://ci.appveyor.com/project/mcneel/rhino-inside-revit/branch/master)
+<img src="docs/assets/img/logo.svg" width="128px"/>
+<h1>Rhino.Inside®.Revit</h1>
+<p>
+<a href="https://ci.appveyor.com/project/mcneel/rhino-inside-revit/branch/master"><img src="https://ci.appveyor.com/api/projects/status/9ot0iyjqwb1jdn6m/branch/master?svg=true"></a>
+</p>
+<p>Please see the <a href="https://www.rhino3d.com/inside/revit/">Rhino.Inside.Revit Wiki</a> for more information on how to use the project. Sections listed below provide more information about the codebase for the developers who want to contribute to this project or the Wiki.
+</p>
 
 ## Overview
 
 The Rhino.Inside® Technology allows Rhino, Grasshopper, and their addons to be embedded within other products. This repository is the Rhino.Inside® for Autodesk Revit®, named Rhino.Inside.Revit
-
-Please see the [Rhino.Inside.Revit Wiki](https://www.rhino3d.com/inside/revit/) for more information about the project.
-
-Sections listed below provide more information about the codebase.
 
 ## Architecture
 
