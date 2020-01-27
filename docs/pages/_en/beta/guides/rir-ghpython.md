@@ -92,6 +92,11 @@ from Autodesk.Revit import DB
 doc = Revit.ActiveDBDocument
 ```
 
+You can download the User Object for this template from this button:
+
+{% include ltr/download_comp.html archive='/static/ghnodes/GhPython Script.ghuser' name='GhPython Script' %}
+
+
 ## Example
 
 This example component will create a sphere of an adjustable radius in Revit and Rhino. It will pass that sphere onto other Grasshopper components through the output and it will create the sphere in Revit and bake into Rhino if the button connected to the input is pressed.
