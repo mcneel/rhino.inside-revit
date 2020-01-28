@@ -481,19 +481,22 @@ namespace RhinoInside.Revit.UI
     {
       var now = DateTime.Now.ToString("yyyyMMddTHHmmssZ");
       var ReportFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), $"Rhino.Inside Revit - Report {now}.zip");
+      var AttachedFiles = new string[]
+      {
+        RhinoDebugMessages_txt,
+        RhinoAssemblyResolveLog_txt
+      };
 
       CreateReportFile
       (
         data,
         ReportFilePath,
         includeAddinsList,
-        new string[]
-        {
-          RhinoDebugMessages_txt,
-          RhinoAssemblyResolveLog_txt
-        },
-        true
+        AttachedFiles
       );
+
+      foreach(var file in AttachedFiles)
+        File.Delete(file);
 
       var mailtoURI = @"mailto:tech@mcneel.com?subject=Rhino.Inside%20Revit%20failed%20to%20load&body=";
 
@@ -501,7 +504,7 @@ namespace RhinoInside.Revit.UI
       if (File.Exists(ReportFilePath))
         mailBody += $"<Please attach '{ReportFilePath}' file here>" + Environment.NewLine + Environment.NewLine;
 
-      mailBody += $"Rhino.Inside: {Addin.DisplayVersion}" + Environment.NewLine;
+      mailBody += $"Rhino.Inside Revit: {Addin.DisplayVersion}" + Environment.NewLine;
       var rhino = Addin.RhinoVersionInfo;
       mailBody += $"Rhino: {rhino.ProductVersion} ({rhino.FileDescription})" + Environment.NewLine;
       var revit = data.Application.Application;
@@ -517,67 +520,119 @@ namespace RhinoInside.Revit.UI
       using (Process.Start(mailtoURI + mailBody)) { }
     }
 
-    void CreateReportFile(ExternalCommandData data, string reportFilePath, bool includeAddinsList, IEnumerable<string> filesToInclude, bool deleteFiles)
+    static void CreateReportEntry(ZipArchive archive, string entryName, string filePath)
     {
+      try
+      {
+        using (var reader = new StreamReader(filePath))
+        {
+          var entry = archive.CreateEntry(entryName);
+          using (var writer = new StreamWriter(entry.Open()))
+          {
+            while (reader.ReadLine() is string line)
+              writer.WriteLine(line);
+          }
+        }
+      }
+      catch (IOException) { }
+    }
+
+    static void CreateReportFile(ExternalCommandData data, string reportFilePath, bool includeAddinsList, IEnumerable<string> attachments)
+    {
+      attachments = attachments.Where(x => File.Exists(x)).ToArray();
+
       using (var zip = new FileStream(reportFilePath, FileMode.Create))
       {
         using (var archive = new ZipArchive(zip, ZipArchiveMode.Create))
         {
-          foreach (var file in filesToInclude)
+          var now = DateTime.Now.ToString("yyyyMMddTHHmmssZ");
+
+          // Report.md
           {
-            try
+            var Report = archive.CreateEntry($"{now}/Report.md");
+            using (var writer = new StreamWriter(Report.Open()))
             {
-              using (var reader = new StreamReader(file))
+              writer.WriteLine($"# Rhino.Inside.Revit");
+
+              writer.WriteLine();
+              writer.WriteLine($"## Host");
+              writer.WriteLine($"- Rhino.Inside Revit: {Addin.DisplayVersion}");
+              var rhino = Addin.RhinoVersionInfo;
+              writer.WriteLine($"- Rhino: {rhino.ProductVersion} ({rhino.FileDescription})");
+
+              var revit = data.Application.Application;
+              writer.WriteLine($"- {revit.VersionName}");
+              writer.WriteLine($"  - VersionBuild: {revit.VersionBuild}");
+#if REVIT_2019
+              writer.WriteLine($"  - SubVersionNumber: {revit.SubVersionNumber}");
+#else
+              writer.WriteLine($"  - VersionNumber: {revit.VersionNumber}");
+#endif
+              writer.WriteLine($"  - ProductType: {revit.Product}");
+              writer.WriteLine($"  - Language: {revit.Language}");
+
+              if (includeAddinsList)
               {
-                var entry = archive.CreateEntry(Path.GetFileName(file));
-                using (var writer = new StreamWriter(entry.Open()))
-                {
-                  while (reader.ReadLine() is string line)
-                    writer.WriteLine(line);
-                }
+                writer.WriteLine();
+                writer.WriteLine($"## Addins");
+                writer.WriteLine();
+                writer.WriteLine("[Loaded Applications](Addins/AddinsInformation.md)  ");
               }
 
-              if (deleteFiles)
-                File.Delete(file);
+              if (attachments.Any())
+              {
+                writer.WriteLine();
+                writer.WriteLine($"## Attachments");
+                writer.WriteLine();
+                foreach (var attachment in attachments)
+                {
+                  var attachmentName = Path.GetFileName(attachment);
+                  writer.WriteLine($"[{attachmentName}](Attachments/{attachmentName})  ");
+                }
+              }
             }
-            catch (IOException) { }
           }
 
-          if (includeAddinsList)
-          {
-            var entry = archive.CreateEntry("RevitAddinsList.txt");
-            using (var writer = new StreamWriter(entry.Open()))
+          // Addins
+          if(includeAddinsList)
+          { 
+            var LoadedApplications = archive.CreateEntry($"{now}/Addins/AddinsInformation.md");
+            using (var writer = new StreamWriter(LoadedApplications.Open()))
             {
-              Settings.AddIns.GetInstalledAddins(data.Application.Application.VersionNumber, out var manifests);
-              foreach (var manifest in manifests)
+              writer.WriteLine($"# UIApplication.LoadedApplications");
+              writer.WriteLine();
+              writer.WriteLine($"> NOTE: Applications listed in load order");
+              writer.WriteLine();
+
+              foreach (var application in data.Application.LoadedApplications)
               {
-                writer.WriteLine($"Manifest: {manifest}");
-                if (Settings.AddIns.LoadFrom(manifest, out var revitAddins))
-                {
-                  foreach (var addin in revitAddins)
-                  {
-                    if (!string.IsNullOrEmpty(addin.Type))
-                      writer.WriteLine($"Type: {addin.Type}");
+                var addinType = application.GetType();
 
-                    if (!string.IsNullOrEmpty(addin.Name))
-                      writer.WriteLine($"Name: {addin.Name}");
+                writer.WriteLine($"1. **{addinType.FullName}**");
+                writer.WriteLine($"  - AssemblyFullName: {addinType.Assembly.FullName}");
+                writer.WriteLine($"  - AssemblyLocation: {addinType.Assembly.Location}");
 
-                    if (!string.IsNullOrEmpty(addin.VendorDescription))
-                      writer.WriteLine($"VendorDescription: {addin.VendorDescription}");
-
-                    if (!string.IsNullOrEmpty(addin.Assembly))
-                    {
-                      writer.WriteLine($"Assembly: {addin.Assembly}");
-
-                      var versionInfo = File.Exists(addin.Assembly) ? FileVersionInfo.GetVersionInfo(addin.Assembly) : null;
-                      writer.WriteLine($"FileVersion: {versionInfo?.FileVersion}");
-                    }
-                  }
-                }
-
+                var versionInfo = File.Exists(addinType.Assembly.Location) ? FileVersionInfo.GetVersionInfo(addinType.Assembly.Location) : null;
+                writer.WriteLine($"    - CompanyName: {versionInfo?.CompanyName}");
+                writer.WriteLine($"    - ProductName: {versionInfo?.ProductName}");
+                writer.WriteLine($"    - ProductVersion: {versionInfo?.ProductVersion}");
                 writer.WriteLine();
               }
             }
+
+            Settings.AddIns.GetSystemAddins(data.Application.Application.VersionNumber, out var systemAddins);
+            foreach (var addin in systemAddins)
+              CreateReportEntry(archive, $"{now}/Addins/System/{Path.GetFileName(addin)}", addin);
+
+            Settings.AddIns.GetInstalledAddins(data.Application.Application.VersionNumber, out var installedAddins);
+            foreach (var addin in installedAddins)
+              CreateReportEntry(archive, $"{now}/Addins/Installed/{Path.GetFileName(addin)}", addin);
+          }
+
+          // Attachments
+          {
+            foreach (var file in attachments)
+              CreateReportEntry(archive, $"{now}/Attachments/{Path.GetFileName(file)}", file);
           }
         }
       }
