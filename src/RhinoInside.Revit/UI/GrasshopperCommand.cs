@@ -46,7 +46,7 @@ namespace RhinoInside.Revit.UI
         pushButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Grasshopper.png", true);
         pushButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Grasshopper.png");
         pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://www.grasshopper3d.com/"));
-        pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool loaded, out bool loadProtected);
+        pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
       }
     }
 
@@ -82,9 +82,9 @@ namespace RhinoInside.Revit.UI
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         pushButton.ToolTip = "Force a complete recompute of all objects";
-        pushButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Recompute_24x24.png", true);
-        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Recompute_24x24.png");
-        pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool loaded, out bool loadProtected);
+        pushButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Recompute.png", true);
+        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Recompute.png");
+        pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
       }
     }
 
@@ -176,9 +176,9 @@ namespace RhinoInside.Revit.UI
       if (items[1] is PushButton bakeButton)
       {
         bakeButton.ToolTip = "Bake geometry in all selected objects";
-        bakeButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Bake_24x24.png", true);
-        bakeButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Bake_24x24.png");
-        bakeButton.Visible = PlugIn.PlugInExists(PluginId, out bool loaded, out bool loadProtected);
+        bakeButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Bake.png", true);
+        bakeButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Bake.png");
+        bakeButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
       }
     }
 
@@ -302,9 +302,9 @@ namespace RhinoInside.Revit.UI
       if (radioButtonGroup.AddItem(buttonData) is ToggleButton pushButton)
       {
         pushButton.ToolTip = "Don't draw any preview geometry";
-        pushButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Preview_Off_24x24.png", true);
-        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Preview_Off_24x24.png");
-        pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool loaded, out bool loadProtected);
+        pushButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Preview_Off.png", true);
+        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Preview_Off.png");
+        pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
 
         if (GH.PreviewServer.PreviewMode == GH_PreviewMode.Disabled)
           radioButtonGroup.Current = pushButton;
@@ -329,9 +329,9 @@ namespace RhinoInside.Revit.UI
       if (radioButtonGroup.AddItem(buttonData) is ToggleButton pushButton)
       {
         pushButton.ToolTip = "Draw wireframe preview geometry";
-        pushButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Preview_Wireframe_24x24.png", true);
-        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Preview_Wireframe_24x24.png");
-        pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool loaded, out bool loadProtected);
+        pushButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Preview_Wireframe.png", true);
+        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Preview_Wireframe.png");
+        pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
 
         if (GH.PreviewServer.PreviewMode == GH_PreviewMode.Wireframe)
           radioButtonGroup.Current = pushButton;
@@ -356,9 +356,9 @@ namespace RhinoInside.Revit.UI
       if (radioButtonGroup.AddItem(buttonData) is ToggleButton pushButton)
       {
         pushButton.ToolTip = "Draw shaded preview geometry";
-        pushButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Preview_Shaded_24x24.png", true);
-        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Preview_Shaded_24x24.png");
-        pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool loaded, out bool loadProtected);
+        pushButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Preview_Shaded.png", true);
+        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Preview_Shaded.png");
+        pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
 
         if(GH.PreviewServer.PreviewMode == GH_PreviewMode.Shaded)
           radioButtonGroup.Current = pushButton;
