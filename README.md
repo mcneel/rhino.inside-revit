@@ -24,7 +24,7 @@ The installer is generated using [WiX toolset](https://wixtoolset.org/) (see `sr
 
 ## Wiki
 
-The `docs/` directory in this repo contains the contents of https://mcneel.github.io/rhino.inside-revit/.
+The `docs/` directory in this repo contains the contents of [Rhino.Inside.Revit Wiki](https://www.rhino3d.com/inside/revit/).
 
 See [Wiki Readme](docs/readme.md) for more information.
 

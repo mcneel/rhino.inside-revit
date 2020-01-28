@@ -40,11 +40,9 @@ Each type, whether *System* or *Custom*, can have a series of **Type Parameters*
 
 ![]({{ "/static/images/guides/revit-families.svg" | prepend: site.baseurl }})
 
-Now that we know what Types are we can discuss Families. There are two challenges with the Category and Type structure that we discussed above.
-- Firstly, there can be many many various types in a Revit model. For example we can have hundreds of door types with various designs and sizes. We need a way to organize these types into related groups.
-- Secondly, types can be radically different from each other. For example a garage door is vastly different from a single-panel interior door. We need a way to group types by their behavior and design.
+Now that we know what Types are we can discuss Families. There is big challenge with the Category and Type structure that we discussed above. There can be many many various types in a Revit model and they can be radically different from each other. For example we can have hundreds of door types with various designs and sizes. A garage door is vastly different from a single-panel interior door. So we need a way to organize these types into related groups.
 
-Revit families are a mechanism designed to solve these challenges:
+Revit families are a mechanism designed to organize the *System* and *Custom Types*:
 
 - *System Families* are named groups, that attempt to organize related system types e.g. *Duct System* or *Basic Wall*.
 
