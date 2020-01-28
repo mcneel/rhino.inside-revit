@@ -349,15 +349,6 @@
     <EmbeddedResource Include="Resources\RVT$(RevitVersion)\KeyboardShortcuts.xml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\GH\Toolbar\Preview_Off_24x24.png" />
-    <EmbeddedResource Include="Resources\GH\Toolbar\Preview_Shaded_24x24.png" />
-    <EmbeddedResource Include="Resources\GH\Toolbar\Preview_Wireframe_24x24.png" />
-    <EmbeddedResource Include="Resources\GH\Toolbar\Recompute_24x24.png" />
-    <EmbeddedResource Include="Resources\GH\Toolbar\SolverOff_24x24.png" />
-    <EmbeddedResource Include="Resources\GH\Toolbar\SolverOn_24x24.png" />
-    <EmbeddedResource Include="Resources\GH\Toolbar\Bake_24x24.png" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\GH\Toolbar\Bake.png" />
     <EmbeddedResource Include="Resources\GH\Toolbar\Preview_Off.png" />
     <EmbeddedResource Include="Resources\GH\Toolbar\Preview_Shaded.png" />
