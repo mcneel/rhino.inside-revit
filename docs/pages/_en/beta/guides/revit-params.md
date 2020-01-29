@@ -37,6 +37,14 @@ You can connect any of these properties, then CTRL and double-click on the *Elem
 
 ![]({{ "/static/images/guides/revit-params04.png" | prepend: site.baseurl }})
 
+### Finding the BuiltInParameter
+
+To find a built-in parameter associated with an element parameter, pass the element and parameter name to the *Find BuiltInParameter* shared here.
+
+![]({{ "/static/images/guides/revit-params04a.png" | prepend: site.baseurl }})
+
+{% include ltr/download_comp.html archive='/static/ghnodes/Find BuiltInParameter.ghuser' name='Find BuiltInParameter' %}
+
 ## Reading Parameter Values
 
 A language-safe way to query the values for specific parameter is to use the *Parameter Key* component from the Revit Parameters panel
