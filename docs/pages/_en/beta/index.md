@@ -18,6 +18,7 @@ The {{ site.terms.rir }} project is an exciting new development sponsored by {{ 
 - **Guides** This section contains many articles that showcases the power of the {{ site.terms.rir }} project in tackling many design and documentation challenges in {{ site.terms.revit }}
 - **Samples** This section contains many examples referenced by the Guides section for easier access and sharing with others
 - **Reference** This sections contains advanced and detailed documentation on various aspects of the {{ site.terms.rir }} project
+- **Community** This sections contains the resources created by and for the {{ site.terms.rir }} community
 - **Forum** Takes you to the official {{ site.terms.mcneel }} forums page specific to the {{ site.terms.rir }} project
 - **GitHub** The GitHub link takes you to the {{ site.terms.rir }} source code on GitHub. This repo also contains the source for this Wiki. See the repository home page for more information about contributing to this Wiki
 

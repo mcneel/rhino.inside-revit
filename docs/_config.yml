@@ -136,3 +136,8 @@ defaults:
       path: "pages/*/*/samples"
     values:
       categories: ['samples']
+
+  - scope:
+      path: "pages/*/*/community"
+    values:
+      categories: ['community']

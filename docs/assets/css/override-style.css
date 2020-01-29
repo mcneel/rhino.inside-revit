@@ -69,8 +69,12 @@ pre {
 
 /* navigation bar with pages */
 /* github logo on navigation bar */
-.site-nav svg {
+.site-nav img {
     margin-top: -4px;
+}
+
+.site-nav .page-link:last-child {
+    margin-left: 10px;
 }
 
 /* page links on navigation bar */
