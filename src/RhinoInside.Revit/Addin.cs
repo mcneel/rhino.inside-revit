@@ -392,19 +392,45 @@ namespace RhinoInside.Revit.UI
 
     void RunWithoutAddIns(ExternalCommandData data)
     {
-      using (new Settings.LockAddIns(data.Application.Application.VersionNumber))
+      var SafeModeFolder = Path.Combine(data.Application.Application.CurrentUserAddinsLocation, "RhinoInside.Revit", "SafeMode");
+      Directory.CreateDirectory(SafeModeFolder);
+
+      Settings.AddIns.GetInstalledAddins(data.Application.Application.VersionNumber, out var AddinFiles);
+      if (AddinFiles.Where(x => Path.GetFileName(x) == "RhinoInside.Revit.addin").FirstOrDefault() is string RhinoInsideRevitAddinFile)
       {
+        var SafeModeAddinFile = Path.Combine(SafeModeFolder, Path.GetFileName(RhinoInsideRevitAddinFile));
+        File.Copy(RhinoInsideRevitAddinFile, SafeModeAddinFile, true);
+
+        if(Settings.AddIns.LoadFrom(SafeModeAddinFile, out var SafeModeAddin))
+        {
+          SafeModeAddin.First().Assembly = Assembly.GetCallingAssembly().Location;
+          Settings.AddIns.SaveAs(SafeModeAddin, SafeModeAddinFile);
+        }
+
+        var journalFile = Path.Combine(SafeModeFolder, "RhinoInside.Revit-SafeMode.txt");
+        using (var journal = File.CreateText(journalFile))
+        {
+          journal.WriteLine("' ");
+          journal.WriteLine("Dim Jrn");
+          journal.WriteLine("Set Jrn = CrsJournalScript");
+          journal.WriteLine(" Jrn.RibbonEvent \"TabActivated:Add-Ins\"");
+          journal.WriteLine(" Jrn.RibbonEvent \"Execute external command:CustomCtrl_%CustomCtrl_%Add-Ins%Rhinoceros%CommandRhinoInside:RhinoInside.Revit.UI.CommandRhinoInside\"");
+        }
+
+        var batchFile = Path.Combine(SafeModeFolder, "RhinoInside.Revit-SafeMode.bat");
+        using (var batch = File.CreateText(batchFile))
+        {
+          batch.WriteLine($"\"{Process.GetCurrentProcess().MainModule.FileName}\" \"{Path.GetFileName(journalFile)}\"");
+        }
+
         var si = new ProcessStartInfo()
         {
           FileName = Process.GetCurrentProcess().MainModule.FileName,
-          Arguments = "/nosplash",
-          UseShellExecute = false
+          Arguments = $"\"{journalFile}\""
         };
-        si.EnvironmentVariables["RhinoInside_RunScript"] = "_Grasshopper";
-
         using (var RevitApp = Process.Start(si)) { RevitApp.WaitForExit(); }
-      }
     }
+  }
 
     static readonly string RhinoDebugMessages_txt = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "RhinoDebugMessages.txt");
     static readonly string RhinoAssemblyResolveLog_txt = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RhinoAssemblyResolveLog.txt");
