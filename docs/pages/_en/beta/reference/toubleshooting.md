@@ -30,7 +30,7 @@ Finally click **Yes** and {{ site.terms.rir }} will generate a ZIP file on the u
 
 {{ site.terms.rir }} will open the user default email client with a pre-written email that suggest the user attach that ZIP file and add information about the error.
 
-The ZIP package is named with date in ISO format e.g. `20200128T1911Z` and contains information about Revit environment and other loaded add-ins (if chosen by user)
+The ZIP package is named with date in ISO format e.g. `20200128T1911Z` and contains information about Revit environment and other loaded add-ins (if shared by user)
 
 
 ## Search for Conflicting Plugins

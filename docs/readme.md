@@ -18,6 +18,7 @@
   - [Page Layouts](#page-layouts)
   - [Adding a New Language](#adding-a-new-language)
   - [Adding a New Wiki Version](#adding-a-new-wiki-version)
+  - [Adding Button-Specific Documentation](#adding-button-specific-documentation)
   - [Adding Component-Specific Documentation](#adding-component-specific-documentation)
 - [Wiki Formatting Conventions](#wiki-formatting-conventions)
   - [Frequently User Terms](#frequently-user-terms)
@@ -35,6 +36,7 @@
     - [Download Package Block](#download-package-block)
     - [Download Component Block](#download-component-block)
     - [Release Header Block](#release-header-block)
+    - [Keyboard Shortcut Block](#keyboard-shortcut-block)
 - [Sample Pages](#sample-pages)
 - [Data Sources](#data-sources)
   - [Rhinoceros Tab Button List](#rhinoceros-tab-button-list)
@@ -344,6 +346,21 @@ Jekyll site config file automatically sets the correct layout and categories on 
 
 Copy the wiki contents from the previous version to this directory and edit the pages as desired.
 
+## Adding Button-Specific Documentation
+
+Each button can have its own documentation page. The contents of this page is inserted after the button name and information, on the button reference list. To create a new button documentation page, create a markdown file under the `pages/<language>/<version>/reference/buttons/` and set the name of the file to the title of the button.
+
+For example page `pages/_en/beta/reference/buttons/Rhino.md` contains the English (`_en`) docs for the `beta` version of the button with title `Rhino` which is the main Rhino button in the interface.
+
+Make sure to provide the minimum metadata for button-specific pages. See below. Notice that `toc: false` to avoid listing these pages in side panels.
+
+```
+---
+title: Rhino Button
+toc: false
+---
+```
+
 ## Adding Component-Specific Documentation
 
 Each component can have its own documentation page. The contents of this page is inserted after the component name and information, on the component reference list. To create a new component documentation page, create a markdown file under the `pages/<language>/<version>/reference/components/` and set the name of the file to the UUID of the component.
@@ -431,7 +448,6 @@ It is okay to include the Grasshopper background if the image is about a specifi
 
 You can use the predefined html fragments to easily add videos to your pages. Currently fragments for YouTube and Vimeo has been implemented under `_includes/`. Each fragment takes the video Id as an argument and imports the necessary html elements into the final rendered page.
 
-
 ```markdown
 {% include youtube_player.html id="DZ4y-ZbBkM" %}
 ```
@@ -440,6 +456,12 @@ or for Vimeo,
 
 ```markdown
 {% include vimeo_player.html id="280080233" %}
+```
+
+For YouTube playlists use:
+
+```markdown
+{% include youtube_list.html id="DZ4y-ZbBkM" %}
 ```
 
 ## Pre-defined Blocks
@@ -590,7 +612,7 @@ This block can accept two argument:
 
 - `archive=` link to the downloadable file
 - `name=` of the Grasshopper component
-- `panel=` name of the panel in Grasshopper interface formatted as `Tab name > panel name` (Optional: defaults to `Revit > Custom`)
+- `panel=` name of the panel in Grasshopper interface formatted as `Tab name > panel name` (Optional: defaults to `Revit > Custom`). Panel name shows up on the note below the button.
 
 ### Release Header Block
 
@@ -603,6 +625,20 @@ This block is release headers on **Release Notes** page. This block can accept t
 
 ```
 {% include ltr/release-header.html version="0.0.7317.30902" time="1/13/2020 17:10:04" %}
+```
+
+### Keyboard Shortcut Block
+
+![](static/images/readme/kb-shortcut.png)
+
+This block generates keyboard shortcut images. This block can accept three argument:
+
+- `keys=` key combination for the shortcut following `KEY+KEY...` format e.g. `Ctrl+Shift`
+- `click=` set to `true` to show `+ Click` after the shortcut for keyboard and mouse combinations
+- `note=` a note that appears in front of the shortcut image
+
+```
+{% include ltr/kb_shortcut.html keys='Ctrl' note='Launches Rhino window only' click=true %}
 ```
 
 # Sample Pages

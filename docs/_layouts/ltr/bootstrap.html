@@ -59,6 +59,7 @@
             $('#cat_guides').attr('href', getPageLink('guides/'));
             $('#cat_samples').attr('href', getPageLink('samples/'));
             $('#cat_reference').attr('href', getPageLink('reference/'));
+            $('#cat_community').attr('href', getPageLink('community/'));
             // mark current navbar category as active
             if (url.endsWith('/getting-started') || url.includes('/getting-started/')) {
                 $('#cat_starting').addClass('active');
@@ -68,6 +69,8 @@
                 $('#cat_samples').addClass('active');
             } else if (url.endsWith('/reference') || url.includes('/reference/')) {
                 $('#cat_reference').addClass('active');
+            } else if (url.endsWith('/community') || url.includes('/community/')) {
+                $('#cat_community').addClass('active');
             }
         </script>
 
@@ -96,7 +99,7 @@
             // add anchor links that show up when hovering over header
             (function () {
                 'use strict';
-                anchors.options.placement = 'left';
+                anchors.options.placement = 'right';
                 anchors.add('.post-content > h2, .post-content > h3, .post-content > h4, .post-content > h5, .post-content > h6');
                 }
             )();

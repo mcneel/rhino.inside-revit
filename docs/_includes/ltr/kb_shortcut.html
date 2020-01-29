@@ -5,6 +5,6 @@
     {% endfor%}
 </ul>
 {% if include.click %}
-<p class="kbnote"> + Click{% if include.note %} :{% endif %}</p>
+<p class="kbnote kbnote-heavy"> → Click{% if include.note %}:{% endif %}</p>
 {% endif %}
 <p class="kbnote">{{ include.note }}</p>
