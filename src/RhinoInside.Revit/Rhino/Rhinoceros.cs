@@ -231,6 +231,9 @@ namespace RhinoInside.Revit
     #endregion
 
     #region Rhino UI
+    internal static void InvokeInHostContext(Action action) => core.InvokeInHostContext(action);
+    internal static T InvokeInHostContext<T>(Func<T> func) => core.InvokeInHostContext(func);
+
     public static bool WindowVisible
     {
       get => 0 != ((int) ModalForm.GetWindowLongPtr(RhinoApp.MainWindowHandle(), -16 /*GWL_STYLE*/) & 0x10000000);
