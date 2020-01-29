@@ -123,15 +123,68 @@ To create new types, you would need to find an existing type, use the *ElementTy
 
 ![]({{ "/static/images/guides/revit-families09.png" | prepend: site.baseurl }})
 
+Revit *Project Browser* now displays the new type under *Families*
 
+## Placing Instances of Types
+
+Use the *AddFamilyInstance.ByLocation* component (under *Revit > Build* panel) to place an instance of a type into the Revit model space.
+
+![]({{ "/static/images/guides/revit-families09a.png" | prepend: site.baseurl }})
+
+For types that require a host, you can pass a host element to the *AddFamilyInstance.ByLocation* component as well.
+
+![]({{ "/static/images/guides/revit-families09b.png" | prepend: site.baseurl }})
+
+The component, places the given type on the nearest location along the host element. In the image below, the green sphere is the actual location that is passed to the component. Notice that the door is placed on the closest point on the wall.
+
+![]({{ "/static/images/guides/revit-families09c.png" | prepend: site.baseurl }})
 
 ## Loading Families
 
+Use the *Family.Load* component to load a new family file into your model.
+
+![]({{ "/static/images/guides/revit-families10.png" | prepend: site.baseurl }})
+
+Revit *Project Browser* now lists the new family under *Families*
+
 ## Saving Families
+
+Use the *Family.Save* component to save a family into an external file.
+
+![]({{ "/static/images/guides/revit-families11.png" | prepend: site.baseurl }})
+
+{% include ltr/download_comp.html archive='/static/ghnodes/Type Family.ghuser' name='Type Family' %}
+
+## Creating New Families
+
+Under current {{ site.terms.rir }} implementation, you can use the *Family.New* component to generate new Revit families and insert a new geometry into the family. Make sure to assign the correct template file to the component for best results.
+
+![]({{ "/static/images/guides/revit-families12.png" | prepend: site.baseurl }})
+
+Revit *Project Browser* now lists the new family under *Families*
+
+You can also pass the **Generic Model** template to the *Family.New* component and set the category manually using the *Model.CategoriesPicker* component.
+
+![]({{ "/static/images/guides/revit-families13.png" | prepend: site.baseurl }})
+
+There are a series of components under the *Revit > Family* panel that will help you generate geometry for Revit families:
+
+- *FamilyElement.ByBrep*
+- *FamilyElement.ByCurve*
+- *FamilyOpening.ByCurve*
+- *FamilyVoid.ByBrep*
+
+![]({{ "/static/images/guides/revit-families14.png" | prepend: site.baseurl }})
+
+As shown in the example above, you can use the *Visibility.Construct* component to create visibility options for the generated geometry. This components provides all the options available in the native Revit *Visibility/Graphics* editor for family geometries.
+
+![]({{ "/static/images/guides/revit-families15.png" | prepend: site.baseurl }})
 
 ## Editing Families
 
-## Creating New Families
+You can use the *Family.New* component to edit existing families as well. Just pass the appropriate template and family name, the new geometry, and the *Family.New* component automatically finds the existing family, replaces the content and reloads the family into the Revit model. Make sure the *OverrideFamily* is set to `True` and *OverrideParameters* is set appropriately to override the family parameters if needed.
+
+![]({{ "/static/images/guides/revit-families16.png" | prepend: site.baseurl }})
 
 ## Examples
 
