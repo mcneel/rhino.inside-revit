@@ -188,7 +188,7 @@ namespace RhinoInside.Revit
         }
       }
 
-      return Result.Failed;
+      return Result.Cancelled;
     }
 
     static string CallerFilePath([System.Runtime.CompilerServices.CallerFilePath] string CallerFilePath = "") => CallerFilePath;
