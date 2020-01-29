@@ -612,7 +612,7 @@ This block can accept two argument:
 
 - `archive=` link to the downloadable file
 - `name=` of the Grasshopper component
-- `panel=` name of the panel in Grasshopper interface formatted as `Tab name > panel name` (Optional: defaults to `Revit > Custom`)
+- `panel=` name of the panel in Grasshopper interface formatted as `Tab name > panel name` (Optional: defaults to `Revit > Custom`). Panel name shows up on the note below the button.
 
 ### Release Header Block
 
