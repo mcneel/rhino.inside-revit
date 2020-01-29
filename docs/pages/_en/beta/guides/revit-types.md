@@ -141,7 +141,9 @@ The component, places the given type on the nearest location along the host elem
 
 ## Removing Types
 
-{% include ltr/en/wip_note.html %}
+You can use the *Element.Delete* component to delete types. Remember that deleting types will delete all instances of that type as well. If you don't want this, find the instances and change their types before deleting a type from model.
+
+![]({{ "/static/images/guides/revit-families09d.png" | prepend: site.baseurl }})
 
 ## Loading Families
 
