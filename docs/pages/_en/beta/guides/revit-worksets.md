@@ -9,16 +9,16 @@ order: 71
 
 Use the *Document Worksets* component shared here to get all the available worksets in the active document.
 
-{% capture api_note %}
-In Revit API, Worksets are represented by the {% include api_type.html type='Autodesk.Revit.DB.Workset' title='DB.Workset' %}
-{% endcapture %}
-{% include ltr/api_note.html note=api_note %}
-
 {% include ltr/bubble_note.html note='Revit has lots of built-in worksets. It is always better to list the **User Worksets** only.' %}
 
 ![]({{ "/static/images/guides/revit-worksets01.png" | prepend: site.baseurl }})
 
 {% include ltr/download_comp.html archive='/static/ghnodes/Document Worksets.ghuser' name='Document Worksets' %}
+
+{% capture api_note %}
+In Revit API, Worksets are represented by the {% include api_type.html type='Autodesk.Revit.DB.Workset' title='DB.Workset' %}. The worksets inside a Revit document are managed by an instance of {% include api_type.html type='Autodesk.Revit.DB.WorksetTable' title='DB.WorksetTable' %} provided by the `DB.Document.GetWorksetTable()`. However, to create new worksets, use the `DB.Workset.Create()` method. Deleting worksets is much more complex as existing workset elements need to be moved to another workset before delete
+{% endcapture %}
+{% include ltr/api_note.html note=api_note %}
 
 ## Finding Specific Worksets
 

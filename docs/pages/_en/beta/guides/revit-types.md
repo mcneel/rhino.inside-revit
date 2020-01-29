@@ -139,6 +139,10 @@ The component, places the given type on the nearest location along the host elem
 
 ![]({{ "/static/images/guides/revit-families09c.png" | prepend: site.baseurl }})
 
+## Removing Types
+
+{% include ltr/en/wip_note.html %}
+
 ## Loading Families
 
 Use the *Family.Load* component to load a new family file into your model.
