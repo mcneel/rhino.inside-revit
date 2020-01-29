@@ -357,7 +357,7 @@ namespace RhinoInside.Revit.UI
     {
       using
       (
-        var taskDialog = new TaskDialog("Ups! Something went wrong :(")
+        var taskDialog = new TaskDialog("Oops! Something went wrong :(")
         {
           Id = MethodBase.GetCurrentMethod().DeclaringType.FullName,
           MainIcon = TaskDialogIcons.IconError,
