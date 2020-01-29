@@ -19,7 +19,7 @@ Categories are the highest-level groups. These categories are built into Revit a
 There are many categories in each category type. Some argue that the Category Type is actually a higher-level organization but in practice, following the *Categories*, *Families*, and *Types* organization system is easier to understand and remember.
 
 {% capture api_note %}
-In Revit API, all the built-in categories are represented by the {% include api_type.html type='Autodesk.Revit.DB.BuiltInCategory' title='DB.BuiltInCategory' %} enumeration and all the built-in category types are represented by the {% include api_type.html type='Autodesk.Revit.DB.CategoryType' title='DB.CategoryType' %} enumeration.
+In Revit API, all the built-in categories are represented by the {% include api_type.html type='Autodesk.Revit.DB.BuiltInCategory' title='DB.BuiltInCategory' %} enumeration and all the built-in category types are represented by the {% include api_type.html type='Autodesk.Revit.DB.CategoryType' title='DB.CategoryType' %} enumeration
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
@@ -51,7 +51,7 @@ Revit families are a mechanism designed to organize the *System* and *Custom Typ
 {% include ltr/warning_note.html note='The name, *System Families*, has led to a lot of confusion among Revit users. Remember, **System Families** are just a name given to a related group of **System Types**. They are vastly different from **Custom Families** and can not be stored in external family files. As Revit users or Revit programmers we generally do not deal with *System Families* and Revit API does not support creating or modifying a large portion of the *System Families* as of yet either. Hence when discussing Revit, it is quite common to refer to *Custom Families* simply as *Families*' %}
 
 {% capture api_note %}
-In Revit API, **Custom Families** are represented by the {% include api_type.html type='Autodesk.Revit.DB.Family' title='DB.Family' %}, their various types are represented by {% include api_type.html type='Autodesk.Revit.DB.FamilySymbol' title='DB.FamilySymbol' %}, and each instance is represented by a {% include api_type.html type='Autodesk.Revit.DB.FamilyInstance' title='DB.FamilyInstance' %}.
+In Revit API, **Custom Families** are represented by the {% include api_type.html type='Autodesk.Revit.DB.Family' title='DB.Family' %}, their various types are represented by {% include api_type.html type='Autodesk.Revit.DB.FamilySymbol' title='DB.FamilySymbol' %}, and each instance is represented by a {% include api_type.html type='Autodesk.Revit.DB.FamilyInstance' title='DB.FamilyInstance' %}
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
