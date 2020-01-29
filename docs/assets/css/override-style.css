@@ -333,6 +333,7 @@ a.btn-dark:hover {
 
 .comp-table td.comp-docs-col {
     padding-left: 36px;
+    padding-bottom: 10px;
 }
 
 .comp-table td {
@@ -432,4 +433,60 @@ img.button-icon {
     color: #828282;
     font-size: 12px;
     margin-top: 10px;
+}
+
+.kbshortcut {
+    display: inline;
+    list-style-type: none;
+    margin: 0 0 5px 0;
+    padding: 0;
+}
+
+.kbkey {
+    display: inline-block;
+    margin: 0px;
+    padding: 5px 10px 5px 10px;
+    color: #4b4e51;
+    background: linear-gradient(white, #ececec);
+    border: 1px solid #c7c7c7;
+    border-radius: 2px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    line-height: 1;
+    text-align: center;
+    vertical-align: middle;
+    height: 30px;
+}
+
+.kbshortcut li:not(:first-child) {
+    margin-left: 20px;
+}
+
+.kbshortcut li:not(:first-child)::before {
+    content: "+";
+    display: inline-block;
+    background: none;
+    margin-left: -30px;
+    padding-right: 15px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.kbclick {
+    content: "+";
+    display: inline-block;
+    background: none;
+    margin-left: -30px;
+    padding-right: 15px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.kbnote, .kbnote p {
+    display: inline-block;
+    height: 30px;
+    vertical-align: text-top;
+    margin: 0;
 }

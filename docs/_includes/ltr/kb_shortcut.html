@@ -1,0 +1,10 @@
+{% assign keyparts = include.keys | split:'+' %}
+<ul class="kbshortcut">
+    {% for key in keyparts %}
+        <li class="kbkey">{{ key || capitalize }}</li>
+    {% endfor%}
+</ul>
+{% if include.click %}
+<p class="kbnote"> + Click{% if include.note %} :{% endif %}</p>
+{% endif %}
+<p class="kbnote">{{ include.note }}</p>
