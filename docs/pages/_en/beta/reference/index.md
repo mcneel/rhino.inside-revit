@@ -36,4 +36,5 @@ These pages provide detailed information on {{ site.terms.rir }} deployment and 
 
 - [Release Notes]({{ site.baseurl }}{% link _en/beta/reference/release-notes.md %})
 - [Deploying {{ site.terms.rir }}]({{ site.baseurl }}{% link _en/beta/reference/deployment.md %})
+- [Troubleshooting]({{ site.baseurl }}{% link _en/beta/reference/toubleshooting.md %})
 - [Known Issues & Bugs]({{ site.baseurl }}{% link _en/beta/reference/known-issues.md %})

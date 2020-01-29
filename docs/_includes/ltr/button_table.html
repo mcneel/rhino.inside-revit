@@ -11,5 +11,19 @@
             <td class="comp-title">{{ button.title }}</td>
             <td class="comp-desc">{{ button.desc }}</td>
         </tr>
+
+        {% for collection in site.collections %}
+            {% if collection.label == page.collection %}
+                {% for cdoc in collection.docs %}
+                    {% if cdoc.title and cdoc.version == page.version and cdoc.categories == page.categories and cdoc.path contains button.title %}
+                        <tr class="comp-docs-row">
+                            <td class="comp-docs-col" colspan="3">
+                                {{ cdoc.content }}
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
     {% endfor %}
 </table>
