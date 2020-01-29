@@ -453,21 +453,21 @@ img.button-icon {
 .kbkey {
     display: inline-block;
     margin: 0px;
-    padding: 5px 10px 5px 10px;
+    padding: 3px 10px 0 10px;
     color: #4b4e51;
     background: linear-gradient(white, #ececec);
     border: 1px solid #c7c7c7;
     border-radius: 2px;
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 600;
     line-height: 1;
     text-align: center;
     vertical-align: middle;
-    height: 30px;
+    height: 26px;
 }
 
 .kbshortcut li:not(:first-child) {
-    margin-left: 20px;
+    margin-left: 22px;
 }
 
 .kbshortcut li:not(:first-child)::before {
@@ -476,7 +476,7 @@ img.button-icon {
     background: none;
     margin-left: -30px;
     padding-right: 15px;
-    font-size: 1.2rem;
+    font-size: 1rem;
     font-weight: 700;
     line-height: 1;
 }
@@ -494,7 +494,12 @@ img.button-icon {
 
 .kbnote, .kbnote p {
     display: inline-block;
-    height: 30px;
+    height: 26px;
     vertical-align: text-top;
     margin: 0;
+}
+
+.kbnote-heavy {
+    font-weight: 600;
+    color: #4b4e51;
 }
