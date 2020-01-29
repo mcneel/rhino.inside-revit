@@ -7,6 +7,32 @@ This guide looks at errors that can appear with {{ site.terms.rir }}. This addre
 
 ## Submitting Debug Info
 
+In case of any issues when loading {{ site.terms.rir }} you can use the debug information collector to create a debug package and submit to the developers team. This process basically automates the directions under the [Logging and Debugging Messages](#logging-and-debugging-messages) and [SDK Debug Messages](#sdk-debug-messages) sections.
+
+
+### Creating Debug Package
+
+Please refer to [{{ site.terms.rir }} Interface]({{ site.baseurl }}{% link _en/beta/reference/rir-interface.md %}) article to learn how to access the debug package maker.
+
+Once debug package maker window is shown, you are presented with a few options:
+
+- **Run Revit without other Add-ins...** will load Revit and {{ site.terms.rir }} only. No other add-ins will be loaded. This is a good way to test if there is a problem due to incompatibility with other add-ins
+- **Run {{ site.terms.rir }} in Verbose mode** will load normally but will generate runtime debug information
+- Exclude Installed Add-ins will allow the user to exclude their installed Revit add-in information from the report. Choose this only when you consider this private information. Knowing which add-ins are loaded, greatly helps us determine potential conflicts, especially when reported before.
+
+![]({{ "/static/images/reference/known-issues-debugmaker.png" | prepend: site.baseurl }})
+
+Click on one of the options above. The debugger with launch another instance of Revit with the selected configuration, and will collect runtime debug info. Once Revit is launched, close the Revit window and switch back to the debug.
+
+### Sending Debug Package to Developers
+
+Finally click **Yes** and {{ site.terms.rir }} will generate a ZIP file on the user desktop that contains the add-ins list the user has installed, and the debug information previously generated.
+
+{{ site.terms.rir }} will open the user default email client with a pre-written email that suggest the user attach that ZIP file and add information about the error.
+
+The ZIP package is named with date in ISO format e.g. `20200128T1911Z` and contains information about Revit environment and other loaded add-ins (if chosen by user)
+
+
 ## Search for Conflicting Plugins
 
 Here is a tool that allows you to disable all but one plugin easily and test if it works. Once determining the conflicting plugins, [Please Contact Us](https://www.rhino3d.com/support)
@@ -70,7 +96,7 @@ A common conflict is an older version of the {{ site.terms.pyrevit }} plugin.  W
 
   - DLL is also uploaded here for convenience if you don't know how to download NuGet packages. It's placed inside a ZIP archive for security. Unpack and place under `bin/` directory in pyRevit installation directory. [Microsoft.WindowsAPICodePack.Shell.dll.zip](https://github.com/eirannejad/pyRevit/files/3503717/Microsoft.WindowsAPICodePack.Shell.dll.zip)
 
-If this does not solve the problem, then using the *Search for Conflicting Plugins* section.
+If this does not solve the problem, then using the [Search for Conflicting Plugins](#search-for-conflicting-plugins) section.
 
 ## JSON Error
 
@@ -82,5 +108,5 @@ A Long JSON error shows up as shown below
 
 ### Workaround
 
-Like the previous -200 error, this is a conflict with another plugin. See the Error - 200 solution for this problem, and the *Search for Conflicting Plugins* section below.
+Like the previous -200 error, this is a conflict with another plugin. See the Error - 200 solution for this problem, and the [Search for Conflicting Plugins](#search-for-conflicting-plugins) section below.
 
