@@ -3,6 +3,10 @@
         max-width: 800px;
     }
 
+    .site-nav .img-button-title{
+        display: inline-block;
+    }
+    
     .side-content {
         width: 100%;
         margin-left: 0;

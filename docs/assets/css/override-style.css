@@ -73,6 +73,10 @@ pre {
     margin-top: -4px;
 }
 
+.site-nav .img-button-title{
+    display: none;
+}
+
 .site-nav .page-link:last-child {
     margin-left: 10px;
 }
