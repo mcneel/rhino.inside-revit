@@ -5,7 +5,7 @@ toc: false
 
 This section includes many articles that guide you through solving many {{ site.terms.revit }} challenges using {{ site.terms.rir }}. Make sure to take a look at the *Getting Started* guide on this Wiki before continuing.
 
-{% include ltr/warning_note.html note='Keep in mind that this project is in beta and does not fully cover all functions of the Revit API in its custom Revit components. Many of the guides and examples in this Wiki, use custom python components to create the necessary functionality. You are, however, free to grab the python components in these examples and use them in your own Grasshopper definitions.' %}
+{% include ltr/warning_note.html note='Keep in mind that this project is in beta and does not fully cover all functions of the Revit API in its custom Revit components. Many of the guides and examples in this Wiki, use custom python components to create the necessary functionality. You are, however, free to grab the python components in these examples and use them in your own Grasshopper definitions' %}
 
 <!-- 10 -->
 ## Basic Interactions

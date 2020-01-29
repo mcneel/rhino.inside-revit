@@ -475,7 +475,7 @@ There are a couple of pre-defined blocks that you can use in your content by usi
 ```
 {% capture api_note %}
 
-In Revit API, all the built-in parameters are represented by the {% include api_type.html type='Autodesk.Revit.DB.BuiltInParameter' title='DB.BuiltInParameter' %} enumeration.
+In Revit API, all the built-in parameters are represented by the {% include api_type.html type='Autodesk.Revit.DB.BuiltInParameter' title='DB.BuiltInParameter' %} enumeration
 
 {% endcapture %}
 
@@ -537,7 +537,7 @@ This block can accept two argument:
 This block is for showing tips in your content. Below is an example of using a bubble note block:
 
 ```
-{% include ltr/bubble_note.html note='Note text.' %}
+{% include ltr/bubble_note.html note='Note text' %}
 ```
 
 This block can accept two argument:
@@ -553,7 +553,7 @@ This block can accept two argument:
 This block is for comments related to the APIs. These notes are usually used to explain how APIs work in specific cases. Below is an example of using an API note block:
 
 ```
-{% include ltr/api_note.html note='Note text.' %}
+{% include ltr/api_note.html note='Note text' %}
 ```
 
 This block can accept two argument:
@@ -568,7 +568,7 @@ This block can accept two argument:
 This block is for comments related to the various languages supported by the host software. Below is an example of using a locale note block:
 
 ```
-{% include ltr/locale_note.html note='Note text.' %}
+{% include ltr/locale_note.html note='Note text' %}
 ```
 
 This block can accept two argument:

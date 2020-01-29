@@ -14,7 +14,7 @@ Revit shows the list of built-in parameters in the *Element Properties* panel.
 ![]({{ "/static/images/guides/revit-params01.png" | prepend: site.baseurl }})
 
 {% capture api_note %}
-In Revit API, all the built-in parameters are represented by the {% include api_type.html type='Autodesk.Revit.DB.BuiltInParameter' title='DB.BuiltInParameter' %} enumeration.
+In Revit API, all the built-in parameters are represented by the {% include api_type.html type='Autodesk.Revit.DB.BuiltInParameter' title='DB.BuiltInParameter' %} enumeration
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
@@ -55,7 +55,7 @@ Another way of reading parameter values is by specifying the parameter name to t
 
 ![]({{ "/static/images/guides/revit-params05.png" | prepend: site.baseurl }})
 
-{% include ltr/locale_note.html note='Since we are specifying the name of parameter in a specific language, the definition will break if opened on a Revit with a different language.' %}
+{% include ltr/locale_note.html note='Since we are specifying the name of parameter in a specific language, the definition will break if opened on a Revit with a different language' %}
 
 When working with Shared parameters, you can also pass the parameter GUID to the component
 
@@ -77,9 +77,9 @@ Notice that the *Geometry Element* component is only holding a reference to the 
 
 The components under the *Parameter* panel in Grasshopper, allow you to create new Shared Parameters in Revit.
 
-{% include ltr/api_note.html note='Currently Revit API does not support creating project parameters.' %}
+{% include ltr/api_note.html note='Currently Revit API does not support creating project parameters' %}
 
-{% include ltr/warning_note.html note='The current implementation always creates Parameters of type **Text** and places them under the **Data** category in the Revit parameters panel. The parameter will be attached to all the categories in Revit.' %}
+{% include ltr/warning_note.html note='The current implementation always creates Parameters of type **Text** and places them under the **Data** category in the Revit parameters panel. The parameter will be attached to all the categories in Revit' %}
 
 ![]({{ "/static/images/guides/revit-params10.png" | prepend: site.baseurl }})
 
