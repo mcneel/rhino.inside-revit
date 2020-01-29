@@ -18,6 +18,8 @@ Download {{ site.terms.rir }} and {{ site.terms.rhino }} from the links below
 <!-- download links -->
 {% include ltr/download_buttons.html version=site.versions.beta %}
 
+The {{ site.terms.rir }} installer is also available on [Food4Rhino Website](https://www.food4rhino.com/app/rhinoinside-autodesk-revit)
+
 Let's install {{ site.terms.rhino }} first
 
 - Run the installer and go through the setup process until {{ site.terms.rhino }} is fully installed
