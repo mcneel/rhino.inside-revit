@@ -42,6 +42,8 @@ Grasshopper addon, included with {{ site.terms.rir }}, provides custom Revit-awa
 ## Documentation in Revit
 These pages guide you through working with Revit views and sheets using {{ site.terms.rir }}
 
+- [Dimensions]({{ site.baseurl }}{% link _en/beta/guides/revit-dims.md %})
+- [Tags]({{ site.baseurl }}{% link _en/beta/guides/revit-tags.md %})
 - [Revisions]({{ site.baseurl }}{% link _en/beta/guides/revit-revisions.md %})
 
 <!-- 70 -->
