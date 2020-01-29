@@ -63,6 +63,25 @@ namespace RhinoInside.Revit.Settings
         return false;
       }
     }
+    internal static bool SaveAs(RevitAddIns revitAddIns, string addinManifestPath)
+    {
+      try
+      {
+        using (var WriteFileStream = new StreamWriter(addinManifestPath))
+        {
+          var ns = new XmlSerializerNamespaces();
+          ns.Add(string.Empty, string.Empty);
+
+          var serializer = new XmlSerializer(typeof(RevitAddIns));
+          serializer.Serialize(WriteFileStream, revitAddIns, ns);
+          return true;
+        }
+      }
+      catch (Exception)
+      {
+        return false;
+      }
+    }
 
     public static void GetSystemAddins(string versionNumber, out List<string> manifests)
     {
