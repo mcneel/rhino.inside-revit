@@ -101,7 +101,29 @@ You can pass the any of the categories above to the *ElementType.ByName* compone
 
 ## Modifying Types
 
+Once you have filtered out the desired type, you can query its parameters and apply new values. See [Reading & Writing Revit Parameter Values]({{ site.baseurl }}{% link _en/beta/guides/revit-params.md %}) to learn how to edit parameters of an element. The element parameter components work on element types as well.
+
+![]({{ "/static/images/guides/revit-families06.png" | prepend: site.baseurl }})
+
+
 ## Extracting Type Geometry
+
+Once you have filtered out the desired type, you can extract the geometry for that element type using the *Element.Geometry* component.
+
+![]({{ "/static/images/guides/revit-families07.png" | prepend: site.baseurl }})
+
+The *Element.Geometry* component automatically previews the geometry in Rhino window.
+
+![]({{ "/static/images/guides/revit-families08.png" | prepend: site.baseurl }})
+
+
+## Creating New Types
+
+To create new types, you would need to find an existing type, use the *ElementType.Duplicate* component to duplicate that type with a new name, and adjust the desired properties.
+
+![]({{ "/static/images/guides/revit-families09.png" | prepend: site.baseurl }})
+
+
 
 ## Loading Families
 
