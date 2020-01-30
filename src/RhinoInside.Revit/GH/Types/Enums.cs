@@ -64,6 +64,12 @@ namespace RhinoInside.Revit.GH.Types
     }
   }
 
+  public class GraphicsStyleType : GH_Enum<DB.GraphicsStyleType>
+  {
+    public GraphicsStyleType() : base(DB.GraphicsStyleType.Projection) { }
+    public GraphicsStyleType(DB.GraphicsStyleType value) : base(value) { }
+  }
+
   public class ViewDetailLevel : GH_Enum<DB.ViewDetailLevel> { }
 
   public class WallLocationLine : GH_Enum<DB.WallLocationLine>

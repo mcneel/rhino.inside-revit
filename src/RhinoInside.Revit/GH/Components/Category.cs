@@ -141,6 +141,8 @@ namespace RhinoInside.Revit.GH.Components
 
   public class CategoryGraphicsStyle : Component
   {
+    public override GH_Exposure Exposure => GH_Exposure.hidden;
+
     public override Guid ComponentGuid => new Guid("46139967-74FC-4820-BA20-B1DC7F30ABDE");
     protected override string IconTag => "G";
 
