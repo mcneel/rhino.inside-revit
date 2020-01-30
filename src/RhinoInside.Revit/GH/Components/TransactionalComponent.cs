@@ -626,6 +626,7 @@ namespace RhinoInside.Revit.GH.Components
       options = options.SetTransactionFinalizer(this);
 
       // Disable Rhino UI if any warning-error dialog popup
+      Rhinoceros.InvokeInHostContext(() =>
       {
         ModalForm.EditScope editScope = null;
         EventHandler<DialogBoxShowingEventArgs> _ = null;
@@ -652,7 +653,7 @@ namespace RhinoInside.Revit.GH.Components
           if (editScope is IDisposable disposable)
             disposable.Dispose();
         }
-      }
+      });
     }
   }
 

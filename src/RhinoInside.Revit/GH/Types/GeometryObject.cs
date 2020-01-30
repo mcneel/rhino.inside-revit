@@ -11,6 +11,7 @@ using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using DB = Autodesk.Revit.DB;
+using RhinoInside.Revit.UI.Selection;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -962,130 +963,128 @@ namespace RhinoInside.Revit.GH.Parameters
       return false;
     }
 
-    protected override GH_GetterResult Prompt_Singular(ref T element)
+    protected override GH_GetterResult Prompt_Singular(ref T value)
     {
-      element = default;
-
-      try
-      {
-        using (new ModalForm.EditScope())
-        {
 #if REVIT_2018
-          var reference = Revit.ActiveUIDocument.Selection.PickObject(ObjectType.Subelement, this);
+      const ObjectType objectType = ObjectType.Subelement;
 #else
-          var reference = Revit.ActiveUIDocument.Selection.PickObject(ObjectType.Element, this);
+      const ObjectType objectType = ObjectType.Element;
 #endif
-          if (reference is object)
-            element = (T) Types.Element.FromElementId(Revit.ActiveUIDocument.Document, reference.ElementId);
-        }
-      }
-      catch (Autodesk.Revit.Exceptions.OperationCanceledException) { return GH_GetterResult.cancel; }
 
+      var uiDocument = Revit.ActiveUIDocument;
+      switch (uiDocument.PickObject(out var reference, objectType, this))
+      {
+        case Autodesk.Revit.UI.Result.Succeeded:
+          value = (T) Types.Element.FromElementId(uiDocument.Document, reference.ElementId);
+          return GH_GetterResult.success;
+        case Autodesk.Revit.UI.Result.Cancelled:
+          return GH_GetterResult.cancel;
+      }
+
+      // If PickObject failed reset the Param content to Null.
+      value = default;
       return GH_GetterResult.success;
     }
 
-    protected GH_GetterResult Prompt_SingularLinked(ref GH_Structure<T> data)
+    protected GH_GetterResult Prompt_SingularLinked(ref GH_Structure<T> value)
     {
       var uiDocument = Revit.ActiveUIDocument;
       var doc = uiDocument.Document;
 
-      try
+      switch (uiDocument.PickObject(out var reference, ObjectType.LinkedElement, this))
       {
-        using (new ModalForm.EditScope())
+      case Autodesk.Revit.UI.Result.Succeeded:
+        value = new GH_Structure<T>();
+
+        if (doc.GetElement(reference.ElementId) is DB.RevitLinkInstance instance)
         {
-          if (uiDocument.Selection.PickObject(ObjectType.LinkedElement, this) is DB.Reference r)
-          {
-            var newData = new GH_Structure<T>();
+          var linkedDoc = instance.GetLinkDocument();
+          var element = (T) Types.Element.FromElementId(linkedDoc, reference.LinkedElementId);
+          value.Append(element, new GH_Path(0));
 
-            if (doc.GetElement(r.ElementId) is DB.RevitLinkInstance instance)
-            {
-              var linkedDoc = instance.GetLinkDocument();
-
-              var element = (T) Types.Element.FromElementId(linkedDoc, r.LinkedElementId);
-
-              newData.Append(element, new GH_Path(0));
-
-              data = newData;
-              return GH_GetterResult.success;
-            }
-          }
+          return GH_GetterResult.success;
         }
+        break;
+        case Autodesk.Revit.UI.Result.Cancelled:
+          return GH_GetterResult.cancel;
       }
-      catch (Autodesk.Revit.Exceptions.OperationCanceledException) { }
-      return GH_GetterResult.cancel;
+
+      // If PickObject failed reset the Param content to Null.
+      value = default;
+      return GH_GetterResult.success;
     }
 
-    protected override GH_GetterResult Prompt_Plural(ref List<T> elements)
+    protected override GH_GetterResult Prompt_Plural(ref List<T> value)
     {
-      elements = null;
-
       var uiDocument = Revit.ActiveUIDocument;
       var doc = uiDocument.Document;
       var selection = uiDocument.Selection.GetElementIds();
       if (selection?.Count > 0)
       {
-        elements = selection.Select(id => doc.GetElement(id)).Where(element => AllowElement(element)).
-                   Select(element => (T) Types.Element.FromElementId(element.Document, element.Id)).ToList();
+        value = selection.Select(id => doc.GetElement(id)).Where(element => AllowElement(element)).
+                Select(element => (T) Types.Element.FromElementId(element.Document, element.Id)).ToList();
+
+        return GH_GetterResult.success;
       }
       else
       {
-        try
+        switch (uiDocument.PickObjects(out var references, ObjectType.Element, this))
         {
-          using (new ModalForm.EditScope())
-          {
-            if (uiDocument.Selection.PickObjects(ObjectType.Element, this) is IList<DB.Reference> references)
-              elements = references.Select(r => (T) Types.Element.FromElementId(doc, r.ElementId)).ToList();
-          }
+          case Autodesk.Revit.UI.Result.Succeeded:
+            value = references.Select(r => (T) Types.Element.FromElementId(doc, r.ElementId)).ToList();
+            return GH_GetterResult.success;
+          case Autodesk.Revit.UI.Result.Cancelled:
+            return GH_GetterResult.cancel;
         }
-        catch (Autodesk.Revit.Exceptions.OperationCanceledException) { return GH_GetterResult.cancel; }
       }
+
+      // If PickObject failed reset the Param content to Null.
+      value = default;
       return GH_GetterResult.success;
     }
 
-    protected GH_GetterResult Prompt_PluralLinked(ref GH_Structure<T> data)
+    protected GH_GetterResult Prompt_PluralLinked(ref GH_Structure<T> value)
     {
       var uiDocument = Revit.ActiveUIDocument;
       var doc = uiDocument.Document;
 
-      try
+      switch(uiDocument.PickObjects(out var references, ObjectType.LinkedElement, this))
       {
-        using (new ModalForm.EditScope())
-        {
-          if (uiDocument.Selection.PickObjects(ObjectType.LinkedElement, this) is IList<DB.Reference> selection)
-          {
-            var newData = new GH_Structure<T>();
+        case Autodesk.Revit.UI.Result.Succeeded:
+          value = new GH_Structure<T>();
 
-            var groups = selection.Select
-            (
-              r =>
-              {
-                var instance = doc.GetElement(r.ElementId) as DB.RevitLinkInstance;
-                var linkedDoc = instance.GetLinkDocument();
+          var groups = references.Select
+          (
+            r =>
+            {
+              var instance = doc.GetElement(r.ElementId) as DB.RevitLinkInstance;
+              var linkedDoc = instance.GetLinkDocument();
 
-                return (T) Types.Element.FromElementId(linkedDoc, r.LinkedElementId);
-              }
-            ).GroupBy(x => x.Document);
+              return (T) Types.Element.FromElementId(linkedDoc, r.LinkedElementId);
+            }
+          ).GroupBy(x => x.Document);
 
-            int index = 0;
-            foreach (var group in groups)
-              newData.AppendRange(group, new GH_Path(index));
+          int index = 0;
+          foreach (var group in groups)
+            value.AppendRange(group, new GH_Path(index));
 
-            data = newData;
-            return GH_GetterResult.success;
-          }
-        }
+          return GH_GetterResult.success;
+        case Autodesk.Revit.UI.Result.Cancelled:
+          return GH_GetterResult.cancel;
       }
-      catch (Autodesk.Revit.Exceptions.OperationCanceledException) { }
-      return GH_GetterResult.cancel;
+
+      // If PickObject failed reset the Param content to Null.
+      value = default;
+      return GH_GetterResult.success;
     }
 
-    protected GH_GetterResult Prompt_More(ref GH_Structure<T> data)
+    protected GH_GetterResult Prompt_More(ref GH_Structure<T> value)
     {
       var uiDocument = Revit.ActiveUIDocument;
       var doc = uiDocument.Document;
       var docGUID = doc.GetFingerprintGUID();
 
-      var documents = data.AllData(true).OfType<T>().GroupBy(x => x.DocumentGUID);
+      var documents = value.AllData(true).OfType<T>().GroupBy(x => x.DocumentGUID);
       var activeElements = documents.Where(x => x.Key == docGUID).
                            SelectMany(x => x).
                            Select
@@ -1099,44 +1098,37 @@ namespace RhinoInside.Revit.GH.Parameters
                            Where(x => x is object).
                            ToArray();
 
-      try
+      switch(uiDocument.PickObjects(out var references, ObjectType.Element, this, null, activeElements))
       {
-        using (new ModalForm.EditScope())
-        {
-          if (uiDocument.Selection.PickObjects(ObjectType.Element, this, null, activeElements) is IList<DB.Reference> selection)
+        case Autodesk.Revit.UI.Result.Succeeded:
+          value = new GH_Structure<T>();
+
+          int index = 0;
+          foreach (var document in documents)
           {
-            var newData = new GH_Structure<T>();
+            if (document.Key == docGUID)
+              continue;
 
-            int index = 0;
-            foreach (var document in documents)
-            {
-              if (document.Key == docGUID)
-                continue;
-
-              var path = new GH_Path(index++);
-              newData.AppendRange(document, path);
-            }
-
-            newData.AppendRange(selection.Select(r => (T) Types.Element.FromElementId(doc, r.ElementId)), new GH_Path(index));
-
-            data = newData;
-            return GH_GetterResult.success;
+            var path = new GH_Path(index++);
+            value.AppendRange(document, path);
           }
-        }
+
+          value.AppendRange(references.Select(r => (T) Types.Element.FromElementId(doc, r.ElementId)), new GH_Path(index));
+          return GH_GetterResult.success;
+        case Autodesk.Revit.UI.Result.Cancelled:
+          return GH_GetterResult.cancel;
       }
-      catch (Autodesk.Revit.Exceptions.OperationCanceledException) { }
-      return GH_GetterResult.cancel;
+
+      // If PickObject failed reset the Param content to Null.
+      value = default;
+      return GH_GetterResult.success;
     }
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
       base.Menu_AppendPromptOne(menu);
 
-      using (var collector = new DB.FilteredElementCollector(Revit.ActiveUIDocument.Document).OfClass(typeof(DB.RevitLinkInstance)))
-      {
-        if(collector.Any())
-          Menu_AppendItem(menu, $"Set one linked {TypeName}", Menu_PromptOneLinked, SourceCount == 0, false);
-      }
+      Menu_AppendItem(menu, $"Set one linked {TypeName}", Menu_PromptOneLinked, SourceCount == 0, false);
     }
 
     protected override void Menu_AppendPromptMore(ToolStripDropDown menu)
@@ -1145,14 +1137,8 @@ namespace RhinoInside.Revit.GH.Parameters
 
       base.Menu_AppendPromptMore(menu);
 
-      using (var collector = new DB.FilteredElementCollector(Revit.ActiveUIDocument.Document).OfClass(typeof(DB.RevitLinkInstance)))
-      {
-        if (collector.Any())
-        {
-          Menu_AppendItem(menu, $"Set Multiple linked {name_plural}", Menu_PromptPluralLinked, SourceCount == 0, false);
-          Menu_AppendSeparator(menu);
-        }
-      }
+      Menu_AppendItem(menu, $"Set Multiple linked {name_plural}", Menu_PromptPluralLinked, SourceCount == 0);
+      Menu_AppendSeparator(menu);
 
       Menu_AppendItem(menu, $"Change {name_plural} collection", Menu_PromptMore, SourceCount == 0, false);
     }
@@ -1253,18 +1239,16 @@ namespace RhinoInside.Revit.GH.Parameters
     public override Guid ComponentGuid => new Guid("BC1B160A-DC04-4139-AB7D-1AECBDE7FF88");
     public Vertex() : base("Vertex", "Vertex", "Represents a Revit vertex.", "Params", "Revit") { }
 
-    #region UI methods
+#region UI methods
     public override void AppendAdditionalElementMenuItems(ToolStripDropDown menu) { }
     protected override GH_GetterResult Prompt_Plural(ref List<Types.Vertex> value)
     {
-      try
+      using (new ModalForm.EditScope())
       {
         var values = new List<Types.Vertex>();
         Types.Vertex vertex = null;
         while(Prompt_Singular(ref vertex) == GH_GetterResult.success)
-        {
           values.Add(vertex);
-        }
 
         if (values.Count > 0)
         {
@@ -1272,37 +1256,36 @@ namespace RhinoInside.Revit.GH.Parameters
           return GH_GetterResult.success;
         }
       }
-      catch (Autodesk.Revit.Exceptions.OperationCanceledException) { return GH_GetterResult.cancel; }
 
-      return GH_GetterResult.accept;
+      return GH_GetterResult.cancel;
     }
     protected override GH_GetterResult Prompt_Singular(ref Types.Vertex value)
     {
-      try
+      var uiDocument = Revit.ActiveUIDocument;
+      switch (uiDocument.PickObject(out var reference, ObjectType.Edge, "Click on an edge near an end to select a vertex, TAB for alternates, ESC quit."))
       {
-        using (new ModalForm.EditScope())
-        {
-          if(Revit.ActiveUIDocument.Selection.PickObject(ObjectType.Edge, "Click on an edge near an end to select a vertex, TAB for alternates, ESC quit.") is DB.Reference reference)
+        case Autodesk.Revit.UI.Result.Succeeded:
+          var element = uiDocument.Document.GetElement(reference);
+          if (element?.GetGeometryObjectFromReference(reference) is DB.Edge edge)
           {
-            var element = Revit.ActiveUIDocument.Document.GetElement(reference);
-            if (element?.GetGeometryObjectFromReference(reference) is DB.Edge edge)
-            {
-              var curve = edge.AsCurve();
-              var result = curve.Project(reference.GlobalPoint);
-              var points = new DB.XYZ[] { curve.GetEndPoint(0), curve.GetEndPoint(1) };
-              int index = result.XYZPoint.DistanceTo(points[0]) < result.XYZPoint.DistanceTo(points[1]) ? 0 : 1;
+            var curve = edge.AsCurve();
+            var result = curve.Project(reference.GlobalPoint);
+            var points = new DB.XYZ[] { curve.GetEndPoint(0), curve.GetEndPoint(1) };
+            int index = result.XYZPoint.DistanceTo(points[0]) < result.XYZPoint.DistanceTo(points[1]) ? 0 : 1;
 
-              value = new Types.Vertex(Revit.ActiveUIDocument.Document, reference, index);
-              return GH_GetterResult.success;
-            }
+            value = new Types.Vertex(uiDocument.Document, reference, index);
+            return GH_GetterResult.success;
           }
-        }
+          break;
+        case Autodesk.Revit.UI.Result.Cancelled:
+          return GH_GetterResult.cancel;
       }
-      catch (Autodesk.Revit.Exceptions.OperationCanceledException) { return GH_GetterResult.cancel; }
 
-      return GH_GetterResult.accept;
+      // If PickObject failed reset the Param content to Null.
+      value = default;
+      return GH_GetterResult.success;
     }
-    #endregion
+#endregion
   }
 
   public class Edge : ElementIdGeometryParam<Types.Edge, DB.Edge>
@@ -1311,44 +1294,41 @@ namespace RhinoInside.Revit.GH.Parameters
     public override Guid ComponentGuid => new Guid("B79FD0FD-63AE-4776-A0A7-6392A3A58B0D");
     public Edge() : base("Edge", "Edge", "Represents a Revit edge.", "Params", "Revit") { }
 
-    #region UI methods
+#region UI methods
     public override void AppendAdditionalElementMenuItems(ToolStripDropDown menu) { }
     protected override GH_GetterResult Prompt_Plural(ref List<Types.Edge> value)
     {
-      try
+      var uiDocument = Revit.ActiveUIDocument;
+      switch(uiDocument.PickObjects(out var references, ObjectType.Edge))
       {
-        using (new ModalForm.EditScope())
-        {
-          var references = Revit.ActiveUIDocument.Selection.PickObjects(ObjectType.Edge);
-          if (references?.Count > 0)
-          {
-            value = references.Select((x) => new Types.Edge(Revit.ActiveUIDocument.Document, x)).ToList();
-            return GH_GetterResult.success;
-          }
-        }
+        case Autodesk.Revit.UI.Result.Succeeded:
+          value = references.Select((x) => new Types.Edge(uiDocument.Document, x)).ToList();
+          return GH_GetterResult.success;
+        case Autodesk.Revit.UI.Result.Cancelled:
+          return GH_GetterResult.cancel;
       }
-      catch (Autodesk.Revit.Exceptions.OperationCanceledException) { return GH_GetterResult.cancel; }
 
-      return GH_GetterResult.accept;
+      // If PickObject failed reset the Param content to Null.
+      value = default;
+      return GH_GetterResult.success;
     }
     protected override GH_GetterResult Prompt_Singular(ref Types.Edge value)
     {
-      try
+      var uiDocument = Revit.ActiveUIDocument;
+      switch (uiDocument.PickObject(out var reference, ObjectType.Edge))
       {
-        using (new ModalForm.EditScope())
-        {
-          var reference = Revit.ActiveUIDocument.Selection.PickObject(ObjectType.Edge);
-          if (reference is null)
-            return GH_GetterResult.accept;
-
-          value = new Types.Edge(Revit.ActiveUIDocument.Document, reference);
-        }
+        case Autodesk.Revit.UI.Result.Succeeded:
+          value = new Types.Edge(uiDocument.Document, reference);
+          return GH_GetterResult.success;
+        case Autodesk.Revit.UI.Result.Cancelled:
+          return GH_GetterResult.cancel;
       }
-      catch (Autodesk.Revit.Exceptions.OperationCanceledException) { return GH_GetterResult.cancel; }
 
+      // If PickObject failed reset the Param content to Null.
+      value = default;
       return GH_GetterResult.success;
     }
-    #endregion
+#endregion
   }
 
   public class Face : ElementIdGeometryParam<Types.Face, DB.Face>
@@ -1357,43 +1337,40 @@ namespace RhinoInside.Revit.GH.Parameters
     public override Guid ComponentGuid => new Guid("759700ED-BC79-4986-A6AB-84921A7C9293");
     public Face() : base("Face", "Face", "Represents a Revit face.", "Params", "Revit") { }
 
-    #region UI methods
+#region UI methods
     public override void AppendAdditionalElementMenuItems(ToolStripDropDown menu) { }
     protected override GH_GetterResult Prompt_Plural(ref List<Types.Face> value)
     {
-      try
+      var uiDocument = Revit.ActiveUIDocument;
+      switch (uiDocument.PickObjects(out var references, ObjectType.Face))
       {
-        using (new ModalForm.EditScope())
-        {
-          var references = Revit.ActiveUIDocument.Selection.PickObjects(ObjectType.Face);
-          if (references?.Count > 0)
-          {
-            value = references.Select((x) => new Types.Face(Revit.ActiveUIDocument.Document, x)).ToList();
-            return GH_GetterResult.success;
-          }
-        }
+        case Autodesk.Revit.UI.Result.Succeeded:
+          value = references.Select((x) => new Types.Face(uiDocument.Document, x)).ToList();
+          return GH_GetterResult.success;
+        case Autodesk.Revit.UI.Result.Cancelled:
+          return GH_GetterResult.cancel;
       }
-      catch (Autodesk.Revit.Exceptions.OperationCanceledException) { return GH_GetterResult.cancel; }
 
-      return GH_GetterResult.accept;
+      // If PickObject failed reset the Param content to Null.
+      value = default;
+      return GH_GetterResult.success;
     }
     protected override GH_GetterResult Prompt_Singular(ref Types.Face value)
     {
-      try
+      var uiDocument = Revit.ActiveUIDocument;
+      switch (uiDocument.PickObject(out var reference, ObjectType.Face))
       {
-        using (new ModalForm.EditScope())
-        {
-          var reference = Revit.ActiveUIDocument.Selection.PickObject(ObjectType.Face);
-          if (reference is null)
-            return GH_GetterResult.accept;
-
-          value = new Types.Face(Revit.ActiveUIDocument.Document, reference);
-        }
+        case Autodesk.Revit.UI.Result.Succeeded:
+          value = new Types.Face(uiDocument.Document, reference);
+          return GH_GetterResult.success;
+        case Autodesk.Revit.UI.Result.Cancelled:
+          return GH_GetterResult.cancel;
       }
-      catch (Autodesk.Revit.Exceptions.OperationCanceledException) { return GH_GetterResult.cancel; }
 
+      // If PickObject failed reset the Param content to Null.
+      value = default;
       return GH_GetterResult.success;
     }
-    #endregion
+#endregion
   }
 }

@@ -63,7 +63,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       try
       {
-        TrySolveInstance(DA);
+        Rhinoceros.InvokeInHostContext(() => TrySolveInstance(DA));
       }
       catch (ApplicationException e)
       {

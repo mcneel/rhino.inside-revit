@@ -163,8 +163,8 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="RhinoCommon" Version="7.0.19344.14105-wip" IncludeAssets="compile; build" />
-        <PackageReference Include="Grasshopper" Version="7.0.19344.14105-wip " IncludeAssets="compile; build" />
+        <PackageReference Include="RhinoCommon" Version="7.0.20028.12435-wip" IncludeAssets="compile; build" />
+        <PackageReference Include="Grasshopper" Version="7.0.20028.12435-wip" IncludeAssets="compile; build" />
         <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitVersion).0.*" IncludeAssets="build; compile" />
       </ItemGroup>
     </Otherwise>
@@ -261,6 +261,7 @@
     <Compile Include="Revit.FailuresPreprocessor.cs" />
     <Compile Include="Addin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UI\Selection.cs" />
     <None Include="Properties\RhinoInside.Revit.addin" />
     <Compile Include="Samples\Sample1.cs" />
     <None Include="Samples\Sample2.ghx" />
@@ -349,13 +350,13 @@
     <EmbeddedResource Include="Resources\RVT$(RevitVersion)\KeyboardShortcuts.xml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\GH\Toolbar\Preview_Off_24x24.png" />
-    <EmbeddedResource Include="Resources\GH\Toolbar\Preview_Shaded_24x24.png" />
-    <EmbeddedResource Include="Resources\GH\Toolbar\Preview_Wireframe_24x24.png" />
-    <EmbeddedResource Include="Resources\GH\Toolbar\Recompute_24x24.png" />
-    <EmbeddedResource Include="Resources\GH\Toolbar\SolverOff_24x24.png" />
-    <EmbeddedResource Include="Resources\GH\Toolbar\SolverOn_24x24.png" />
-    <EmbeddedResource Include="Resources\GH\Toolbar\Bake_24x24.png" />
+    <EmbeddedResource Include="Resources\GH\Toolbar\Bake.png" />
+    <EmbeddedResource Include="Resources\GH\Toolbar\Preview_Off.png" />
+    <EmbeddedResource Include="Resources\GH\Toolbar\Preview_Shaded.png" />
+    <EmbeddedResource Include="Resources\GH\Toolbar\Preview_Wireframe.png" />
+    <EmbeddedResource Include="Resources\GH\Toolbar\Recompute.png" />
+    <EmbeddedResource Include="Resources\GH\Toolbar\SolverOff.png" />
+    <EmbeddedResource Include="Resources\GH\Toolbar\SolverOn.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild" Condition="$(Configuration.Contains('Debug'))">

@@ -50,7 +50,7 @@ namespace RhinoInside.Revit.Settings
           addins = serializer.Deserialize(ReadFileStream) as RevitAddIns;
           foreach (var addin in addins)
           {
-            addin.Assembly = addin.Assembly.Trim('\"');
+            addin.Assembly = addin.Assembly.Trim(Path.DirectorySeparatorChar);
             if (!Path.IsPathRooted(addin.Assembly))
               addin.Assembly = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(addinManifestPath), addin.Assembly));
           }
@@ -60,6 +60,25 @@ namespace RhinoInside.Revit.Settings
       catch (FileNotFoundException)
       {
         addins = null;
+        return false;
+      }
+    }
+    internal static bool SaveAs(RevitAddIns revitAddIns, string addinManifestPath)
+    {
+      try
+      {
+        using (var WriteFileStream = new StreamWriter(addinManifestPath))
+        {
+          var ns = new XmlSerializerNamespaces();
+          ns.Add(string.Empty, string.Empty);
+
+          var serializer = new XmlSerializer(typeof(RevitAddIns));
+          serializer.Serialize(WriteFileStream, revitAddIns, ns);
+          return true;
+        }
+      }
+      catch (Exception)
+      {
         return false;
       }
     }
@@ -108,7 +127,7 @@ namespace RhinoInside.Revit.Settings
       foreach (var folder in addinFolders)
       {
         IEnumerable<FileInfo> addinFiles;
-        try { addinFiles = folder.EnumerateFiles("*.addin", SearchOption.AllDirectories); }
+        try { addinFiles = folder.EnumerateFiles("*.addin", SearchOption.TopDirectoryOnly); }
         catch (System.IO.DirectoryNotFoundException) { continue; }
 
         foreach (var manifest in addinFiles)
