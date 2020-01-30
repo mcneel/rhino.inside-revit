@@ -11,6 +11,8 @@ This section includes many articles that guide you through solving many {{ site.
 ## Basic Interactions
 These pages guide you through automating some of the basic workflows using {{ site.terms.rir }}
 
+- [Interacting with Revit]({{ site.baseurl }}{% link _en/beta/guides/revit-interact.md %})
+
 <!-- 20 -->
 ###  Geometry Conversion
 

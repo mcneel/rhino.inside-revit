@@ -41,3 +41,6 @@ You can pass a design option to the *Element.DesignOptionFilter* component to co
 
 <!-- https://forums.autodesk.com/t5/revit-api-forum/expose-design-options-settings/m-p/6451629/highlight/true#M17496 -->
 <!-- https://thebuildingcoder.typepad.com/blog/2015/03/list-and-switch-design-options-using-ui-automation.html -->
+
+<!-- my tool is for mass-deleting design options, so I need to keep track of which options are being deleted, which option sets are becoming emptied out (these also get deleted) but also, crucially, which views are looking at each design option so I can reallocate them so no views will get deleted in the process -->
+<!-- if you delete a Revit design option and certain views are referencing that option, the view also gets deleted. so i read the  BuiltInParameter.VIEWER_OPTION_VISIBILITY and if it's not null, I can assign it to a new invalid ElementID(-1) to make it non-option specific. That way it won't get deleted when I commit the transaction. Document.Delete(option_id) and Document.Delete(option_set_id) both work fine for deleting design options (in case that's useful to you) -->
