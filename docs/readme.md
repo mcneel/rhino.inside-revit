@@ -26,6 +26,7 @@
   - [Linking Images](#linking-images)
   - [Grasshopper Screenshots](#grasshopper-screenshots)
   - [Linking Videos](#linking-videos)
+  - [Adding Email Links](#adding-email-links)
   - [Pre-defined Blocks](#pre-defined-blocks)
     - [Work-in-Progress Block](#work-in-progress-block)
     - [Revit API Link Block](#revit-api-link-block)
@@ -464,6 +465,21 @@ For YouTube playlists use:
 {% include youtube_list.html id="DZ4y-ZbBkM" %}
 ```
 
+## Adding Email Links
+
+Emails links (`mailto:`) need to be obfuscated to avoid crawlers to extract email from the Wiki pages. Use the method described below:
+
+- Open developers tools in your browser.
+- Open JavaScript console tab
+- Create the `mailto:` link string e.g. `mailto:test@website.com?subject=Email Subject`
+- Type in `btoa('put link string here')`
+- Save the result base64 string into `data-dump=` attribute in link format below
+- Change anchor link title (`Email Link Title`) to desired title
+- Place the html anchor element in your page
+
+```html
+<a href="#" data-dump="put generated base64 string here" onfocus="this.href = atob(this.dataset.dump)">Email Link Title</a>
+```
 ## Pre-defined Blocks
 
 There are a couple of pre-defined blocks that you can use in your content by using the `{% include}` tags. These blocks and their usage example are listed below.

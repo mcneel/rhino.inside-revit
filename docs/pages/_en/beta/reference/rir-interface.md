@@ -17,7 +17,7 @@ Launches the {{ site.terms.rhino }} about window that shows the exact version nu
 
 {% include ltr/kb_shortcut.html keys='Ctrl+Shift' click=true %}
 
-Launches the debug info collector window. See **Submitting Debug Info** under [Known Issues]({{ site.baseurl }}{% link _en/beta/reference/known-issues.md %})
+Launches the debug info collector window. See **Submitting Debug Info** under [Troubleshooting]({{ site.baseurl }}{% link _en/beta/reference/toubleshooting.md %})
 
 ## {{ site.terms.rir }} Tab
 
