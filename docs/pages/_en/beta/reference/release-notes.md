@@ -5,6 +5,12 @@ order: 40
 
 <!-- most recent release should be on top -->
 
+{% include ltr/release-header.html version="0.0.7333.32251" time="1/29/2020 17:55:02 AM" %}
+
+- Added HiDPI images for Grasshopper toolbar buttons
+- Updated RhinoCommon dependency to `7.0.20028.12435-wip`
+- [Resolved Issue #120](https://github.com/mcneel/rhino.inside-revit/issues/120): Grasshopper updates, somehow mess up the Project Browser configurations
+
 {% include ltr/release-header.html version="0.0.7325.6343" time="1/21/2020 03:32:26 AM" %}
 
 - Grasshopper and Rhino shortcuts now work inside Revit (Rhino v7.0.20021.12255, 01/21/2020)
