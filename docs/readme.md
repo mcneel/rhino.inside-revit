@@ -20,6 +20,7 @@
   - [Adding a New Wiki Version](#adding-a-new-wiki-version)
   - [Adding Button-Specific Documentation](#adding-button-specific-documentation)
   - [Adding Component-Specific Documentation](#adding-component-specific-documentation)
+  - [Adding Release Notes](#adding-release-notes)
 - [Wiki Formatting Conventions](#wiki-formatting-conventions)
   - [Frequently User Terms](#frequently-user-terms)
   - [Linking Other Pages](#linking-other-pages)
@@ -378,6 +379,15 @@ title: Material.ByColor
 toc: false
 ---
 ```
+
+## Adding Release Notes
+
+Follow the steps below to add new release notes. Most recent release should be on top:
+
+- Open the Reference / Release Notes page
+- Copy the release notes block from previous release and add the new build info to `version=` and `time=` attributes
+- Write down a list of notes related to the release
+- Add images if necessary. Place images under `static/images/release_notes` and name by the release e.g. `0073256343_01.png` is the first image (`_01.png`) for release `0073256343`
 
 # Wiki Formatting Conventions
 
