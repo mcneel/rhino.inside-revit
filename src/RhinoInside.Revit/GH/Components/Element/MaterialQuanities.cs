@@ -6,13 +6,13 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class MaterialQuanitiesByElement : Component
+  public class ElementMaterialQuanities : Component
   {
     public override Guid ComponentGuid => new Guid("8A162EE6-812E-459B-9123-8F7735AAAC0C");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
 
-    public MaterialQuanitiesByElement()
-    : base("MaterialQuanities.ByElement", "MaterialQuanities", "Query element material information", "Revit", "Materials")
+    public ElementMaterialQuanities()
+    : base("Element.MaterialQuanities", "MaterialQuanities", "Query element material information", "Revit", "Materials")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
