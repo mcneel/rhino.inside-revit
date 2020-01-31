@@ -107,7 +107,7 @@ namespace RhinoInside.Revit.GH.Types
       return base.CastTo<Q>(ref target);
     }
 
-    new class Proxy : ID.Proxy
+    new class Proxy : ElementId.Proxy
     {
       public Proxy(Category c) : base(c) { (this as IGH_GooProxy).UserString = FormatInstance(); }
 

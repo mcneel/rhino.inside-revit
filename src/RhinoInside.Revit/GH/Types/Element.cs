@@ -5,7 +5,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public class Element : ID
+  public class Element : ElementId
   {
     public override string TypeName => "Revit Element";
     public override string TypeDescription => "Represents a Revit element";
@@ -230,7 +230,7 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    new class Proxy : ID.Proxy
+    new class Proxy : ElementId.Proxy
     {
       public Proxy(Element e) : base(e) { (this as IGH_GooProxy).UserString = FormatInstance(); }
 

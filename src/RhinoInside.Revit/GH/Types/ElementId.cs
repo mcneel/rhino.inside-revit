@@ -21,16 +21,16 @@ namespace RhinoInside.Revit.GH.Types
     void UnloadElement();
   }
 
-  public class ID : GH_Goo<DB.ElementId>, IEquatable<ID>, IGH_ElementId
+  public class ElementId : GH_Goo<DB.ElementId>, IEquatable<ElementId>, IGH_ElementId
   {
     public override string TypeName => "Revit Model Object";
     public override string TypeDescription => "Represents a Revit model object";
     public override bool IsValid => (!(Value is null || Value == DB.ElementId.InvalidElementId)) && (Document?.IsValidObject ?? false);
     public override sealed IGH_Goo Duplicate() => (IGH_Goo) MemberwiseClone();
     protected virtual Type ScriptVariableType => typeof(DB.ElementId);
-    public static implicit operator DB.ElementId(ID self) { return self.Value; }
+    public static implicit operator DB.ElementId(ElementId self) { return self.Value; }
 
-    public static ID FromElementId(DB.Document doc, DB.ElementId id)
+    public static ElementId FromElementId(DB.Document doc, DB.ElementId id)
     {
       if (id == DB.ElementId.InvalidElementId)
         return null;
@@ -90,8 +90,8 @@ namespace RhinoInside.Revit.GH.Types
     public void UnloadElement() { m_value = null; Document = null; }
     #endregion
 
-    public ID() { Value = DB.ElementId.InvalidElementId; }
-    protected ID(DB.Document doc, DB.ElementId id)    => SetValue(doc, id);
+    public ElementId() { Value = DB.ElementId.InvalidElementId; }
+    protected ElementId(DB.Document doc, DB.ElementId id)    => SetValue(doc, id);
 
     public override bool CastFrom(object source)
     {
@@ -138,15 +138,15 @@ namespace RhinoInside.Revit.GH.Types
       return base.CastTo<Q>(ref target);
     }
 
-    public bool Equals(ID id) => id?.UniqueID == UniqueID;
-    public override bool Equals(object obj) => (obj is ID id) ? Equals(id) : base.Equals(obj);
+    public bool Equals(ElementId id) => id?.UniqueID == UniqueID;
+    public override bool Equals(object obj) => (obj is ElementId id) ? Equals(id) : base.Equals(obj);
     public override int GetHashCode() => UniqueID.GetHashCode();
 
     [TypeConverter(typeof(Proxy.ObjectConverter))]
     protected class Proxy : IGH_GooProxy
     {
-      protected readonly ID owner;
-      public Proxy(ID o) { owner = o; if(this is IGH_GooProxy proxy) proxy.UserString = proxy.FormatInstance(); }
+      protected readonly ElementId owner;
+      public Proxy(ElementId o) { owner = o; if(this is IGH_GooProxy proxy) proxy.UserString = proxy.FormatInstance(); }
       public override string ToString() => owner.DisplayName;
 
       IGH_Goo IGH_GooProxy.ProxyOwner => owner;

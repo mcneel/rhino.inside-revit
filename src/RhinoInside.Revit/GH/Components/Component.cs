@@ -1,13 +1,13 @@
 using System.Drawing;
 using System.Linq;
-using Autodesk.Revit.DB;
+using DB = Autodesk.Revit.DB;
 using Grasshopper.Kernel;
 
 namespace RhinoInside.Revit.GH.Components
 {
   public interface IGH_ElementIdComponent : IGH_Component
   {
-    bool NeedsToBeExpired(Autodesk.Revit.DB.Events.DocumentChangedEventArgs args);
+    bool NeedsToBeExpired(DB.Events.DocumentChangedEventArgs args);
   }
 
   public abstract class GH_Component : Grasshopper.Kernel.GH_Component
@@ -29,8 +29,8 @@ namespace RhinoInside.Revit.GH.Components
     protected Component(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
 
-    protected virtual ElementFilter ElementFilter { get; }
-    public virtual bool NeedsToBeExpired(Autodesk.Revit.DB.Events.DocumentChangedEventArgs e)
+    protected virtual DB.ElementFilter ElementFilter { get; }
+    public virtual bool NeedsToBeExpired(DB.Events.DocumentChangedEventArgs e)
     {
       var persistentInputs = Params.Input.
         Where(x => x.DataType == GH_ParamData.local && x.Phase != GH_SolutionPhase.Blank).
@@ -46,7 +46,7 @@ namespace RhinoInside.Revit.GH.Components
         if (modified.Count > 0 || deleted.Count > 0)
         {
           var document = e.GetDocument();
-          var empty = new ElementId[0];
+          var empty = new DB.ElementId[0];
 
           foreach (var param in persistentInputs)
           {

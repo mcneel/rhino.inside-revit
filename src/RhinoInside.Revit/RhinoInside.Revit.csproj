@@ -235,11 +235,11 @@
     <Compile Include="GH\Types\Category.cs" />
     <Compile Include="GH\Types\Element.cs" />
     <Compile Include="GH\Types\ElementFilter.cs" />
+    <Compile Include="GH\Types\ElementId.cs" />
     <Compile Include="GH\Types\ElementType.cs" />
     <Compile Include="GH\Types\Enums.cs" />
     <Compile Include="GH\Types\Family.cs" />
     <Compile Include="GH\Types\GeometryObject.cs" />
-    <Compile Include="GH\Types\ID.cs" />
     <Compile Include="GH\Types\Parameter.cs" />
     <Compile Include="GH\Types\DatumPlane.cs" />
     <Compile Include="GH\Types\SketchPlane.cs" />
