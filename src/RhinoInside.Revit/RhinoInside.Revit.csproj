@@ -205,8 +205,8 @@
     <Compile Include="GH\Components\Element\HostObject\GetFaces.cs" />
     <Compile Include="GH\Components\Element\Level\ByElevation.cs" />
     <Compile Include="GH\Components\Element\MaterialQuanities.cs" />
-    <Compile Include="GH\Components\Element\Material\MaterialByColor.cs" />
-    <Compile Include="GH\Components\Element\Material\MaterialByName.cs" />
+    <Compile Include="GH\Components\Element\Material\ByColor.cs" />
+    <Compile Include="GH\Components\Element\Material\ByName.cs" />
     <Compile Include="GH\Components\Element\ModelLine\ByCurve.cs" />
     <Compile Include="GH\Components\Element\Passport.cs" />
     <Compile Include="GH\Components\Element\Roof\ByOutline.cs" />
