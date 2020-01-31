@@ -6,6 +6,7 @@ toc: false
 Welcome to the {{ site.terms.rir }} community. On this section, you will find the resources created by and for the community.
 
 - Please see the [Discussion Forums]({{ site.forum_url }}){: target='_blank'} to discuss features and potential issues and ask questions
+  - [See this link for a list of helpful posts]({{ site.forum_wiki_posts_url }}){: target='_blank'}
 - [Videos]({{ site.baseurl }}{% link _en/beta/community/videos.md %}) contains videos created by community members. These videos help you get started with {{ site.terms.rir }} or tackle specific challenges
 - [Blog Posts]({{ site.baseurl }}{% link _en/beta/community/posts.md %}) contains blog posts written by community members
 
