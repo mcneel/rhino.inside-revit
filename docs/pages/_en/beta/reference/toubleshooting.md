@@ -16,17 +16,19 @@ Please refer to [{{ site.terms.rir }} Interface]({{ site.baseurl }}{% link _en/b
 
 Once debug package maker window is shown, you are presented with a few options:
 
-- **Run Revit without other Add-ins...** will load Revit and {{ site.terms.rir }} only. No other add-ins will be loaded. This is a good way to test if there is a problem due to incompatibility with other add-ins
-- **Run {{ site.terms.rir }} in Verbose mode** will load normally but will generate runtime debug information
+- **1. Run Revit without other Add-ins...** will load Revit and {{ site.terms.rir }} only. No other add-ins will be loaded. This is a good way to test if there is a problem due to incompatibility with other add-ins
+- **2. Run {{ site.terms.rir }} in Verbose mode** will load normally but will generate runtime debug information
 - Exclude Installed Add-ins will allow the user to exclude their installed Revit add-in information from the report. Choose this only when you consider this private information. Knowing which add-ins are loaded, greatly helps us determine potential conflicts, especially when reported before.
 
 ![]({{ "/static/images/reference/known-issues-debugmaker.png" | prepend: site.baseurl }})
 
 Click on one of the options above. The debugger with launch another instance of Revit with the selected configuration, and will collect runtime debug info. Once Revit is launched, close the Revit window and switch back to the debug.
 
+If you run both tests you will have a folder at `%APPDATA%\Autodesk\Revit\Addins\<revit-version>\RhinoInside.Revit\SafeMode\`. It contains a file called `RhinoInside.Revit-SafeMode.bat` you can use it to load Revit only with {{ site.terms.rir }} in the meantime, while we try to determine which other add-in is preventing {{ site.terms.rir }} to load.
+
 ### Sending Debug Package to Developers
 
-Finally click **Yes** and {{ site.terms.rir }} will generate a ZIP file on the user desktop that contains the add-ins list the user has installed, and the debug information previously generated.
+Finally click **3. Send Report** and {{ site.terms.rir }} will generate a ZIP file on the user desktop that contains the add-ins list the user has installed, and the debug information previously generated.
 
 {{ site.terms.rir }} will open the user default email client with a pre-written email that suggest the user attach that ZIP file and add information about the error.
 
