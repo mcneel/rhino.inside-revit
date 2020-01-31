@@ -208,7 +208,6 @@
     <Compile Include="GH\Components\Element\SketchPlane\ByPlane.cs" />
     <Compile Include="GH\Components\Element\Topography\ByPoints.cs" />
     <Compile Include="GH\Components\Element\Wall\ByCurve.cs" />
-    <Compile Include="GH\Components\Element\Wall\ByFace.cs" />
     <Compile Include="GH\Enum.cs" />
     <Compile Include="GH\Guest.cs" />
     <Compile Include="GH\Parameters\Category.cs" />
