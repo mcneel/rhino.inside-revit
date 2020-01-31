@@ -177,6 +177,10 @@
     <Compile Include="Extensions\System.cs" />
     <Compile Include="Extensions\WinForms.cs" />
     <Compile Include="GH\Attributes.cs" />
+    <Compile Include="GH\Components\Category\GraphicsStyle.cs" />
+    <Compile Include="GH\Components\Category\Identity.cs" />
+    <Compile Include="GH\Components\Category\ObjectStyle.cs" />
+    <Compile Include="GH\Components\Category\SubCategories.cs" />
     <Compile Include="GH\Components\Document\Categories.cs" />
     <Compile Include="GH\Components\Document\Document.cs" />
     <Compile Include="GH\Components\Document\Elements.cs" />
@@ -242,7 +246,6 @@
     <Compile Include="GH\Types\HostObject.cs" />
     <Compile Include="GH\Components\Component.cs" />
     <Compile Include="GH\Components\TransactionalComponent.cs" />
-    <Compile Include="GH\Components\Category.cs" />
     <Compile Include="GH\Components\Parameter.cs" />
     <Compile Include="GH\Components\Family.cs" />
     <Compile Include="GH\Components\ElementType.cs" />
@@ -375,6 +378,7 @@
     <EmbeddedResource Include="Resources\GH\Toolbar\SolverOff.png" />
     <EmbeddedResource Include="Resources\GH\Toolbar\SolverOn.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild" Condition="$(Configuration.Contains('Debug'))">
     <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.dll" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />
