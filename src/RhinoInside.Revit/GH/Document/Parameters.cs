@@ -1,15 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Reflection;
-using System.Diagnostics;
-
+using DB = Autodesk.Revit.DB;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Special;
-
-using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -17,7 +9,7 @@ namespace RhinoInside.Revit.GH.Components
   {
     public override Guid ComponentGuid => new Guid("189F0A94-D077-4B96-8A92-6D5334EF7157");
     public override GH_Exposure Exposure => GH_Exposure.primary;
-    protected override ElementFilter ElementFilter => new Autodesk.Revit.DB.ElementClassFilter(typeof(ParameterElement));
+    protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.ParameterElement));
 
     public DocumentParameters() : base
     (
@@ -40,14 +32,13 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var category = default(Category);
+      var category = default(DB.Category);
       if (!DA.GetData("Category", ref category))
         return;
 
-      var doc = category.Document();
-      if(doc is object)
+      if(category.Document() is DB.Document doc)
       {
-        var parameterKeys = TableView.GetAvailableParameters(doc, category.Id);
+        var parameterKeys = DB.TableView.GetAvailableParameters(doc, category.Id);
         DA.SetDataList("ParameterKeys", parameterKeys.Select(paramId => Types.ParameterKey.FromElementId(doc, paramId)));
       }
     }

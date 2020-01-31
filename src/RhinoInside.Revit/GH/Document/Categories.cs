@@ -2,96 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Special;
 using DB = Autodesk.Revit.DB;
-
-namespace RhinoInside.Revit.GH.Parameters
-{
-  public abstract class DocumentCategoriesPicker : DocumentPicker
-  {
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
-    public override bool PassesFilter(DB.Document document, DB.ElementId id) => id.IsCategoryId(document);
-    protected abstract bool CategoryIsInSet(DB.Category category);
-    protected abstract DB.BuiltInCategory DefaultBuiltInCategory { get; }
-
-    public DocumentCategoriesPicker()
-    {
-      Category = "Revit";
-      SubCategory = "Input";
-      NickName = "Document";
-      MutableNickName = false;
-      Name = $"{NickName}.CategoriesPicker";
-      Description = $"Provides a {NickName} Category picker";
-
-      ListMode = GH_ValueListMode.DropDown;
-    }
-
-    protected override void CollectVolatileData_Custom()
-    {
-      var selectedItems = ListItems.Where(x => x.Selected).Select(x => x.Expression).ToList();
-      ListItems.Clear();
-
-      if (Revit.ActiveDBDocument is object)
-      {
-        foreach (var group in Revit.ActiveDBDocument.Settings.Categories.Cast<DB.Category>().GroupBy(x => x.CategoryType).OrderBy(x => x.Key))
-        {
-          foreach (var category in group.OrderBy(x => x.Name).Where(x => CategoryIsInSet(x)))
-          {
-            if (category.CategoryType == DB.CategoryType.Invalid)
-              continue;
-
-            var item = new GH_ValueListItem(category.Name, category.Id.IntegerValue.ToString());
-            item.Selected = selectedItems.Contains(item.Expression);
-            ListItems.Add(item);
-          }
-        }
-
-        if (selectedItems.Count == 0 && ListMode != GH_ValueListMode.CheckList)
-        {
-          foreach (var item in ListItems)
-            item.Selected = item.Expression == ((int) DefaultBuiltInCategory).ToString();
-        }
-      }
-
-      base.CollectVolatileData_Custom();
-    }
-  }
-
-  public class ModelCategoriesPicker : DocumentCategoriesPicker
-  {
-    public override Guid ComponentGuid => new Guid("EB266925-F1AA-4729-B5C0-B978937F51A3");
-    public override string NickName => MutableNickName ? base.NickName : "Model";
-    protected override DB.BuiltInCategory DefaultBuiltInCategory => DB.BuiltInCategory.OST_GenericModel;
-    protected override bool CategoryIsInSet(DB.Category category) => !category.IsTagCategory && category.CategoryType == DB.CategoryType.Model;
-
-    public ModelCategoriesPicker() { }
-  }
-  public class AnnotationCategoriesPicker : DocumentCategoriesPicker
-  {
-    public override Guid ComponentGuid => new Guid("B1D1CA45-3771-49CA-8540-9A916A743C1B");
-    public override string NickName => MutableNickName ? base.NickName : "Annotation";
-    protected override DB.BuiltInCategory DefaultBuiltInCategory => DB.BuiltInCategory.OST_GenericAnnotation;
-    protected override bool CategoryIsInSet(DB.Category category) => !category.IsTagCategory && category.CategoryType == DB.CategoryType.Annotation;
-    public AnnotationCategoriesPicker() { }
-  }
-  public class TagCategoriesPicker : DocumentCategoriesPicker
-  {
-    public override Guid ComponentGuid => new Guid("30F6DA06-35F9-4E83-AE9E-080AF26C8326");
-    public override string NickName => MutableNickName ? base.NickName : "Tag";
-    protected override DB.BuiltInCategory DefaultBuiltInCategory => DB.BuiltInCategory.OST_GenericModelTags;
-    protected override bool CategoryIsInSet(DB.Category category) => category.IsTagCategory;
-    public TagCategoriesPicker() { }
-  }
-  public class AnalyticalCategoriesPicker : DocumentCategoriesPicker
-  {
-    public override Guid ComponentGuid => new Guid("4120C5ED-4329-4F42-B8D3-FA518E6E6807");
-    public override string NickName => MutableNickName ? base.NickName : "Analytical";
-    protected override DB.BuiltInCategory DefaultBuiltInCategory => DB.BuiltInCategory.OST_AnalyticalNodes;
-    protected override bool CategoryIsInSet(DB.Category category) => !category.IsTagCategory && category.CategoryType == DB.CategoryType.AnalyticalModel;
-
-    public AnalyticalCategoriesPicker() { }
-  }
-}
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -128,10 +39,12 @@ namespace RhinoInside.Revit.GH.Components
       return false;
     }
 
-    public DocumentCategories() : base(
+    public DocumentCategories() : base
+    (
       "Document.Categories", "Categories",
       "Get active document categories list",
-      "Revit", "Document")
+      "Revit", "Document"
+    )
     {
     }
 

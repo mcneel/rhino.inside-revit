@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -180,6 +180,21 @@
     <Compile Include="GH\Components\ElementPassport.cs" />
     <Compile Include="GH\Enum.cs" />
     <Compile Include="GH\Guest.cs" />
+    <Compile Include="GH\Parameters\Category.cs" />
+    <Compile Include="GH\Parameters\CategoryTypes.cs" />
+    <Compile Include="GH\Parameters\DatumPlane.cs" />
+    <Compile Include="GH\Parameters\DirectShapeCategories.cs" />
+    <Compile Include="GH\Parameters\DocumentPicker.cs" />
+    <Compile Include="GH\Parameters\Element.cs" />
+    <Compile Include="GH\Parameters\ElementFilter.cs" />
+    <Compile Include="GH\Parameters\ElementType.cs" />
+    <Compile Include="GH\Parameters\Family.cs" />
+    <Compile Include="GH\Parameters\GeometryObject.cs" />
+    <Compile Include="GH\Parameters\HostObject.cs" />
+    <Compile Include="GH\Parameters\ID.cs" />
+    <Compile Include="GH\Parameters\Material.cs" />
+    <Compile Include="GH\Parameters\Parameter.cs" />
+    <Compile Include="GH\Parameters\SketchPlane.cs" />
     <Compile Include="GH\PreviewServer.cs" />
     <Compile Include="GH\Document\Document.cs" />
     <Compile Include="GH\Document\Categories.cs" />
@@ -213,6 +228,7 @@
     <Compile Include="GH\Element\AdaptiveComponent\ByPoints.cs" />
     <Compile Include="GH\Solid.cs" />
     <Compile Include="GH\Types\Category.cs" />
+    <Compile Include="GH\Types\Element.cs" />
     <Compile Include="GH\Types\ElementType.cs" />
     <Compile Include="GH\Types\Enums.cs" />
     <Compile Include="GH\Types\Family.cs" />
