@@ -17,6 +17,8 @@ foodrhino_url: "https://www.food4rhino.com/app/rhinoinside-autodesk-revit"
 
 # forum url
 forum_url: "https://discourse.mcneel.com/c/rhino-inside/Revit"
+# link to a search filter, listing interesting posts on the forum
+forum_wiki_posts_url: "https://discourse.mcneel.com/search?expanded=true&q=%23rhino-inside%3ARevit%20in%3Awiki"
 
 # copyright notice (copyright year is dynamic)
 copyright: Robert McNeel & Associates. All Rights Reserved.
