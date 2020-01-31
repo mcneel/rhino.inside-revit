@@ -4,15 +4,15 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using Autodesk.Revit.DB;
 using Autodesk.Revit.UI.Events;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public abstract class TransactionalComponent : Component, IFailuresPreprocessor, ITransactionFinalizer
+  public abstract class TransactionalComponent : Component, DB.IFailuresPreprocessor, DB.ITransactionFinalizer
   {
     protected TransactionalComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
@@ -53,7 +53,7 @@ namespace RhinoInside.Revit.GH.Components
       }
     }
 
-    protected static void ChangeElementTypeId<T>(ref T element, ElementId elementTypeId) where T : Element
+    protected static void ChangeElementTypeId<T>(ref T element, DB.ElementId elementTypeId) where T : DB.Element
     {
       if (element is object && elementTypeId != element.GetTypeId())
       {
@@ -61,14 +61,14 @@ namespace RhinoInside.Revit.GH.Components
         if (element.IsValidType(elementTypeId))
         {
           var newElmentId = element.ChangeTypeId(elementTypeId);
-          if (newElmentId != ElementId.InvalidElementId)
+          if (newElmentId != DB.ElementId.InvalidElementId)
             element = (T) doc.GetElement(newElmentId);
         }
         else element = null;
       }
     }
 
-    protected static void ChangeElementType<E, T>(ref E element, Optional<T> elementType) where E : Element where T : ElementType
+    protected static void ChangeElementType<E, T>(ref E element, Optional<T> elementType) where E : DB.Element where T : DB.ElementType
     {
       if (elementType.HasValue && element is object)
       {
@@ -79,7 +79,7 @@ namespace RhinoInside.Revit.GH.Components
       }
     }
 
-    public bool SolveOptionalCategory(ref Optional<Category> category, Document doc, BuiltInCategory builtInCategory, string paramName)
+    public bool SolveOptionalCategory(ref Optional<DB.Category> category, DB.Document doc, DB.BuiltInCategory builtInCategory, string paramName)
     {
       bool wasMissing = category.IsMissing;
 
@@ -101,12 +101,12 @@ namespace RhinoInside.Revit.GH.Components
       return wasMissing;
     }
 
-    public bool SolveOptionalType<T>(ref Optional<T> type, Document doc, ElementTypeGroup group, string paramName) where T : ElementType
+    public bool SolveOptionalType<T>(ref Optional<T> type, DB.Document doc, DB.ElementTypeGroup group, string paramName) where T : DB.ElementType
     {
       return SolveOptionalType(ref type, doc, group, (document, name) => throw new ArgumentNullException(paramName), paramName);
     }
 
-    public bool SolveOptionalType<T>(ref Optional<T> type, Document doc, ElementTypeGroup group, Func<Document, string, T> recoveryAction, string paramName) where T : ElementType
+    public bool SolveOptionalType<T>(ref Optional<T> type, DB.Document doc, DB.ElementTypeGroup group, Func<DB.Document, string, T> recoveryAction, string paramName) where T : DB.ElementType
     {
       bool wasMissing = type.IsMissing;
 
@@ -120,12 +120,12 @@ namespace RhinoInside.Revit.GH.Components
       return wasMissing;
     }
 
-    public bool SolveOptionalType(ref Optional<FamilySymbol> type, Document doc, BuiltInCategory category, string paramName)
+    public bool SolveOptionalType(ref Optional<DB.FamilySymbol> type, DB.Document doc, DB.BuiltInCategory category, string paramName)
     {
       bool wasMissing = type.IsMissing;
 
       if (wasMissing)
-        type = doc.GetElement(doc.GetDefaultFamilyTypeId(new ElementId(category))) as FamilySymbol ??
+        type = doc.GetElement(doc.GetDefaultFamilyTypeId(new DB.ElementId(category))) as DB.FamilySymbol ??
                throw new ArgumentException("No suitable type has been found.", paramName);
 
       else if (type.Value == null)
@@ -140,7 +140,7 @@ namespace RhinoInside.Revit.GH.Components
       return wasMissing;
     }
 
-    public bool SolveOptionalLevel(ref Optional<Level> level, Document doc, double elevation)
+    public bool SolveOptionalLevel(ref Optional<DB.Level> level, DB.Document doc, double elevation)
     {
       bool wasMissing = level.IsMissing;
 
@@ -157,7 +157,7 @@ namespace RhinoInside.Revit.GH.Components
       return wasMissing;
     }
 
-    public void SolveOptionalLevelsFromBase(Document doc, ref Optional<Level> baseLevel, ref Optional<Level> topLevel, double elevation)
+    public void SolveOptionalLevelsFromBase(DB.Document doc, ref Optional<DB.Level> baseLevel, ref Optional<DB.Level> topLevel, double elevation)
     {
       if (baseLevel.IsMissing && topLevel.IsMissing)
       {
@@ -184,7 +184,7 @@ namespace RhinoInside.Revit.GH.Components
         throw new ArgumentException("Failed to assign a level from a diferent document.", nameof(topLevel));
     }
 
-    public void SolveOptionalLevelsFromTop(Document doc, ref Optional<Level> baseLevel, ref Optional<Level> topLevel, double elevation)
+    public void SolveOptionalLevelsFromTop(DB.Document doc, ref Optional<DB.Level> baseLevel, ref Optional<DB.Level> topLevel, double elevation)
     {
       if (baseLevel.IsMissing && topLevel.IsMissing)
       {
@@ -211,12 +211,12 @@ namespace RhinoInside.Revit.GH.Components
         throw new ArgumentException("Failed to assign a level from a diferent document.", nameof(topLevel));
     }
 
-    public bool SolveOptionalLevel(ref Optional<Level> level, Document doc, Rhino.Geometry.Curve curve, string paramName)
+    public bool SolveOptionalLevel(ref Optional<DB.Level> level, DB.Document doc, Rhino.Geometry.Curve curve, string paramName)
     {
       return SolveOptionalLevel(ref level, doc, Math.Min(curve.PointAtStart.Z, curve.PointAtEnd.Z));
     }
 
-    public bool SolveOptionalLevels(ref Optional<Level> topLevel, ref Optional<Level> baseLevel, Document doc, Rhino.Geometry.Curve curve)
+    public bool SolveOptionalLevels(ref Optional<DB.Level> topLevel, ref Optional<DB.Level> baseLevel, DB.Document doc, Rhino.Geometry.Curve curve)
     {
       bool result = true;
 
@@ -333,8 +333,8 @@ namespace RhinoInside.Revit.GH.Components
       return parameterType;
     }
 
-    ElementFilter elementFilter = null;
-    protected override ElementFilter ElementFilter => elementFilter;
+    DB.ElementFilter elementFilter = null;
+    protected override DB.ElementFilter ElementFilter => elementFilter;
 
     protected void RegisterInputParams(GH_InputParamManager manager, MethodInfo methodInfo)
     {
@@ -381,8 +381,8 @@ namespace RhinoInside.Revit.GH.Components
       if (elementFilterClasses.Count > 0 && !elementFilterClasses.Contains(typeof(Autodesk.Revit.DB.Element)))
       {
         elementFilter = (elementFilterClasses.Count == 1) ?
-         (ElementFilter) new Autodesk.Revit.DB.ElementClassFilter(elementFilterClasses[0]) :
-         (ElementFilter) new Autodesk.Revit.DB.LogicalOrFilter(elementFilterClasses.Select(x => new Autodesk.Revit.DB.ElementClassFilter(x)).ToArray());
+         (DB.ElementFilter) new Autodesk.Revit.DB.ElementClassFilter(elementFilterClasses[0]) :
+         (DB.ElementFilter) new Autodesk.Revit.DB.LogicalOrFilter(elementFilterClasses.Select(x => new Autodesk.Revit.DB.ElementClassFilter(x)).ToArray());
       }
     }
 
@@ -410,7 +410,7 @@ namespace RhinoInside.Revit.GH.Components
 
           if (param.Optional && param.SourceCount == 0)
           {
-            value = default(T);
+            value = default;
             return false;
           }
 
@@ -431,11 +431,11 @@ namespace RhinoInside.Revit.GH.Components
 
         try { return (bool) GetInputOptionalDataInfo.MakeGenericMethod(typeof(T).GetGenericArguments()[0]).Invoke(this, args); }
         catch (TargetInvocationException e) { throw e.InnerException; }
-        finally { value = args[2] != null ? (T) args[2] : default(T); }
+        finally { value = args[2] != null ? (T) args[2] : default; }
       }
       else
       {
-        value = default(T);
+        value = default;
         if (!DA.GetData(index, ref value))
         {
           var param = Params.Input[index];
@@ -460,7 +460,7 @@ namespace RhinoInside.Revit.GH.Components
       }
       else
       {
-        value = default(IList<T>);
+        value = default;
         return false;
       }
     }
@@ -482,30 +482,30 @@ namespace RhinoInside.Revit.GH.Components
     // protected override void BeforeSolveInstance() { }
 
     // Step 2.
-    protected virtual void OnAfterStart(Document document, string strTransactionName) { }
+    protected virtual void OnAfterStart(DB.Document document, string strTransactionName) { }
 
     // Step 3.
     //protected override void TrySolveInstance(IGH_DataAccess DA) { }
 
     // Step 4.
-    protected virtual void OnBeforeCommit(Document document, string strTransactionName) { }
+    protected virtual void OnBeforeCommit(DB.Document document, string strTransactionName) { }
 
     // Step 5.
     //protected override void AfterSolveInstance() {}
 
     // Step 5.1
     #region IFailuresPreprocessor
-    void AddRuntimeMessage(FailureMessageAccessor error, bool? solved = null)
+    void AddRuntimeMessage(DB.FailureMessageAccessor error, bool? solved = null)
     {
       var level = GH_RuntimeMessageLevel.Remark;
       switch (error.GetSeverity())
       {
-        case FailureSeverity.Warning: level = GH_RuntimeMessageLevel.Warning; break;
-        case FailureSeverity.Error: level = GH_RuntimeMessageLevel.Error; break;
+        case DB.FailureSeverity.Warning: level = GH_RuntimeMessageLevel.Warning; break;
+        case DB.FailureSeverity.Error: level = GH_RuntimeMessageLevel.Error; break;
       }
 
       string solvedMark = string.Empty;
-      if (error.GetSeverity() > FailureSeverity.Warning)
+      if (error.GetSeverity() > DB.FailureSeverity.Warning)
       {
         switch (solved)
         {
@@ -528,9 +528,9 @@ namespace RhinoInside.Revit.GH.Components
     }
 
     // Override to add handled failures to your component (Order is important).
-    protected virtual IEnumerable<FailureDefinitionId> FailureDefinitionIdsToFix => null;
+    protected virtual IEnumerable<DB.FailureDefinitionId> FailureDefinitionIdsToFix => null;
 
-    FailureProcessingResult FixFailures(FailuresAccessor failuresAccessor, IEnumerable<FailureDefinitionId> failureIds)
+    DB.FailureProcessingResult FixFailures(DB.FailuresAccessor failuresAccessor, IEnumerable<DB.FailureDefinitionId> failureIds)
     {
       foreach (var failureId in failureIds)
       {
@@ -552,21 +552,21 @@ namespace RhinoInside.Revit.GH.Components
         }
 
         if (solvedErrors > 0)
-          return FailureProcessingResult.ProceedWithCommit;
+          return DB.FailureProcessingResult.ProceedWithCommit;
       }
 
-      return FailureProcessingResult.Continue;
+      return DB.FailureProcessingResult.Continue;
     }
 
-    FailureProcessingResult IFailuresPreprocessor.PreprocessFailures(FailuresAccessor failuresAccessor)
+    DB.FailureProcessingResult DB.IFailuresPreprocessor.PreprocessFailures(DB.FailuresAccessor failuresAccessor)
     {
       if (!failuresAccessor.IsTransactionBeingCommitted())
-        return FailureProcessingResult.Continue;
+        return DB.FailureProcessingResult.Continue;
 
-      if (failuresAccessor.GetSeverity() >= FailureSeverity.DocumentCorruption)
-        return FailureProcessingResult.ProceedWithRollBack;
+      if (failuresAccessor.GetSeverity() >= DB.FailureSeverity.DocumentCorruption)
+        return DB.FailureProcessingResult.ProceedWithRollBack;
 
-      if (failuresAccessor.GetSeverity() >= FailureSeverity.Error)
+      if (failuresAccessor.GetSeverity() >= DB.FailureSeverity.Error)
       {
         // Handled failures in order
         {
@@ -574,7 +574,7 @@ namespace RhinoInside.Revit.GH.Components
           if (failureDefinitionIdsToFix != null)
           {
             var result = FixFailures(failuresAccessor, failureDefinitionIdsToFix);
-            if (result != FailureProcessingResult.Continue)
+            if (result != DB.FailureProcessingResult.Continue)
               return result;
           }
         }
@@ -583,12 +583,12 @@ namespace RhinoInside.Revit.GH.Components
         {
           var failureDefinitionIdsToFix = failuresAccessor.GetFailureMessages().GroupBy(x => x.GetFailureDefinitionId()).Select(x => x.Key);
           var result = FixFailures(failuresAccessor, failureDefinitionIdsToFix);
-          if (result != FailureProcessingResult.Continue)
+          if (result != DB.FailureProcessingResult.Continue)
             return result;
         }
       }
 
-      if (failuresAccessor.GetSeverity() >= FailureSeverity.Warning)
+      if (failuresAccessor.GetSeverity() >= DB.FailureSeverity.Warning)
       {
         // Unsolved failures or warnings
         foreach (var error in failuresAccessor.GetFailureMessages().OrderBy(error => error.GetSeverity()))
@@ -597,24 +597,24 @@ namespace RhinoInside.Revit.GH.Components
         failuresAccessor.DeleteAllWarnings();
       }
 
-      return FailureProcessingResult.Continue;
+      return DB.FailureProcessingResult.Continue;
     }
     #endregion
 
     // Step 5.2
     #region ITransactionFinalizer
     // Step 5.2.A
-    public virtual void OnCommitted(Document document, string strTransactionName) { }
+    public virtual void OnCommitted(DB.Document document, string strTransactionName) { }
 
     // Step 5.2.B
-    public virtual void OnRolledBack(Document document, string strTransactionName)
+    public virtual void OnRolledBack(DB.Document document, string strTransactionName)
     {
       foreach (var param in Params.Output)
         param.Phase = GH_SolutionPhase.Failed;
     }
     #endregion
 
-    protected void CommitTransaction(Document doc, Transaction transaction)
+    protected void CommitTransaction(DB.Document doc, DB.Transaction transaction)
     {
       var options = transaction.GetFailureHandlingOptions();
 #if !DEBUG
@@ -637,7 +637,7 @@ namespace RhinoInside.Revit.GH.Components
               editScope = new ModalForm.EditScope();
           };
 
-          if (transaction.GetStatus() == TransactionStatus.Started)
+          if (transaction.GetStatus() == DB.TransactionStatus.Started)
           {
             OnBeforeCommit(doc, transaction.GetName());
 
@@ -669,13 +669,13 @@ namespace RhinoInside.Revit.GH.Components
     }
     protected virtual TransactionStrategy TransactionalStrategy => TransactionStrategy.PerComponent;
 
-    protected Transaction CurrentTransaction;
-    protected TransactionStatus TransactionStatus => CurrentTransaction?.GetStatus() ?? TransactionStatus.Uninitialized;
+    protected DB.Transaction CurrentTransaction;
+    protected DB.TransactionStatus TransactionStatus => CurrentTransaction?.GetStatus() ?? DB.TransactionStatus.Uninitialized;
 
-    protected void BeginTransaction(Document document)
+    protected void BeginTransaction(DB.Document document)
     {
-      CurrentTransaction = new Transaction(document, Name);
-      if (CurrentTransaction.Start() != TransactionStatus.Started)
+      CurrentTransaction = new DB.Transaction(document, Name);
+      if (CurrentTransaction.Start() != DB.TransactionStatus.Started)
       {
         CurrentTransaction.Dispose();
         CurrentTransaction = null;
@@ -717,7 +717,7 @@ namespace RhinoInside.Revit.GH.Components
         if (RunCount <= 0)
           return;
 
-        if (TransactionStatus == TransactionStatus.Uninitialized)
+        if (TransactionStatus == DB.TransactionStatus.Uninitialized)
           return;
 
         if (Phase != GH_SolutionPhase.Failed)
@@ -729,9 +729,9 @@ namespace RhinoInside.Revit.GH.Components
       {
         switch (TransactionStatus)
         {
-          case TransactionStatus.Uninitialized:
-          case TransactionStatus.Started:
-          case TransactionStatus.Committed:
+          case DB.TransactionStatus.Uninitialized:
+          case DB.TransactionStatus.Started:
+          case DB.TransactionStatus.Committed:
             break;
           default:
             AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Transaction {TransactionStatus} and aborted.");
@@ -757,21 +757,21 @@ namespace RhinoInside.Revit.GH.Components
     }
     protected virtual TransactionStrategy TransactionalStrategy => TransactionStrategy.PerComponent;
 
-    Dictionary<Document, Transaction> CurrentTransactions;
+    Dictionary<DB.Document, DB.Transaction> CurrentTransactions;
 
-    protected void BeginTransaction(Document document)
+    protected void BeginTransaction(DB.Document document)
     {
       if (CurrentTransactions?.ContainsKey(document) != true)
       {
-        var transaction = new Transaction(document, Name);
-        if (transaction.Start() != TransactionStatus.Started)
+        var transaction = new DB.Transaction(document, Name);
+        if (transaction.Start() != DB.TransactionStatus.Started)
         {
           transaction.Dispose();
           throw new InvalidOperationException($"Unable to start Transaction '{Name}'");
         }
 
         if (CurrentTransactions is null)
-          CurrentTransactions = new Dictionary<Document, Transaction>();
+          CurrentTransactions = new Dictionary<DB.Document, DB.Transaction>();
 
         CurrentTransactions.Add(document, transaction);
       }
@@ -795,7 +795,7 @@ namespace RhinoInside.Revit.GH.Components
         {
           try
           {
-            if (Phase != GH_SolutionPhase.Failed && transaction.Value.GetStatus() != TransactionStatus.Uninitialized)
+            if (Phase != GH_SolutionPhase.Failed && transaction.Value.GetStatus() != DB.TransactionStatus.Uninitialized)
             {
               CommitTransaction(transaction.Key, transaction.Value);
             }
@@ -805,9 +805,9 @@ namespace RhinoInside.Revit.GH.Components
             var transactionStatus = transaction.Value.GetStatus();
             switch (transactionStatus)
             {
-              case TransactionStatus.Uninitialized:
-              case TransactionStatus.Started:
-              case TransactionStatus.Committed:
+              case DB.TransactionStatus.Uninitialized:
+              case DB.TransactionStatus.Started:
+              case DB.TransactionStatus.Committed:
                 break;
               default:
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Transaction {transactionStatus} and aborted.");
@@ -842,14 +842,14 @@ namespace RhinoInside.Revit.GH.Components
       RegisterInputParams(manager, ReconstructInfo);
     }
 
-    protected static void ReplaceElement<T>(ref T previous, T next, ICollection<BuiltInParameter> parametersMask = null) where T : Element
+    protected static void ReplaceElement<T>(ref T previous, T next, ICollection<DB.BuiltInParameter> parametersMask = null) where T : DB.Element
     {
       next.CopyParametersFrom(previous, parametersMask);
       previous = next;
     }
 
     // Step 2.
-    protected override void OnAfterStart(Document document, string strTransactionName)
+    protected override void OnAfterStart(DB.Document document, string strTransactionName)
     {
       PreviousStructureEnumerator = PreviousStructure?.GetEnumerator();
     }
@@ -859,12 +859,12 @@ namespace RhinoInside.Revit.GH.Components
     {
       var ActiveDBDocument = Revit.ActiveDBDocument;
 
-      Iterate(DA, ActiveDBDocument, (Document doc, ref Element current) => TrySolveInstance(DA, doc, ref current));
+      Iterate(DA, ActiveDBDocument, (DB.Document doc, ref DB.Element current) => TrySolveInstance(DA, doc, ref current));
     }
 
-    delegate void CommitAction(Document doc, ref Element element);
+    delegate void CommitAction(DB.Document doc, ref DB.Element element);
 
-    void Iterate(IGH_DataAccess DA, Document doc, CommitAction action)
+    void Iterate(IGH_DataAccess DA, DB.Document doc, CommitAction action)
     {
       var element = PreviousStructureEnumerator?.MoveNext() ?? false ?
                     (
@@ -978,14 +978,14 @@ namespace RhinoInside.Revit.GH.Components
     }
 
     // Step 4.
-    protected override void OnBeforeCommit(Document document, string strTransactionName)
+    protected override void OnBeforeCommit(DB.Document document, string strTransactionName)
     {
       // Remove extra unused elements
       while (PreviousStructureEnumerator?.MoveNext() ?? false)
       {
         if (PreviousStructureEnumerator.Current is Types.Element elementId && document.Equals(elementId.Document))
         {
-          if (document.GetElement(elementId.Id) is Element element)
+          if (document.GetElement(elementId.Id) is DB.Element element)
           {
             try { document.Delete(element.Id); }
             catch (Autodesk.Revit.Exceptions.ApplicationException) { }
@@ -1002,7 +1002,7 @@ namespace RhinoInside.Revit.GH.Components
     }
 
     // Step 5.2.A
-    public override void OnCommitted(Document document, string strTransactionName)
+    public override void OnCommitted(DB.Document document, string strTransactionName)
     {
       // Update previous elements
       PreviousStructure = Params.Output[0].VolatileData.AllData(false).ToArray();
