@@ -197,7 +197,6 @@
     <Compile Include="GH\Components\Element\DirectShape\ByMesh.cs" />
     <Compile Include="GH\Components\Element\DirectShape\ByPoint.cs" />
     <Compile Include="GH\Components\Element\Element.cs" />
-    <Compile Include="GH\Components\Element\ElementPassport.cs" />
     <Compile Include="GH\Components\Element\FamilyInstance\ByPointAtHost.cs" />
     <Compile Include="GH\Components\Element\Floor\ByOutline.cs" />
     <Compile Include="GH\Components\Element\Form\ByCurves.cs" />
@@ -205,9 +204,11 @@
     <Compile Include="GH\Components\Element\Grid\ByCurve.cs" />
     <Compile Include="GH\Components\Element\HostObject\GetFaces.cs" />
     <Compile Include="GH\Components\Element\Level\ByElevation.cs" />
+    <Compile Include="GH\Components\Element\MaterialQuanities.cs" />
     <Compile Include="GH\Components\Element\Material\MaterialByColor.cs" />
     <Compile Include="GH\Components\Element\Material\MaterialByName.cs" />
     <Compile Include="GH\Components\Element\ModelLine\ByCurve.cs" />
+    <Compile Include="GH\Components\Element\Passport.cs" />
     <Compile Include="GH\Components\Element\Roof\ByOutline.cs" />
     <Compile Include="GH\Components\Element\SketchPlane\ByPlane.cs" />
     <Compile Include="GH\Components\Element\Topography\ByPoints.cs" />
@@ -250,7 +251,6 @@
     <Compile Include="GH\Components\Family.cs" />
     <Compile Include="GH\Components\ElementType.cs" />
     <Compile Include="GH\Components\ElementFilter.cs" />
-    <Compile Include="GH\Components\MaterialQuanitiesByElement.cs" />
     <Compile Include="GH\ValueList.cs" />
     <Compile Include="Rhino\Rhinoceros.cs" />
     <Compile Include="Rhino\DocumentPreviewServer.cs" />
