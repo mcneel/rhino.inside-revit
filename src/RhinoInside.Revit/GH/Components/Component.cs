@@ -59,11 +59,14 @@ namespace RhinoInside.Revit.GH.Components
       return false;
     }
 
+    public override sealed void ComputeData() =>
+      Rhinoceros.InvokeInHostContext(() => base.ComputeData());
+
     protected override sealed void SolveInstance(IGH_DataAccess DA)
     {
       try
       {
-        Rhinoceros.InvokeInHostContext(() => TrySolveInstance(DA));
+        TrySolveInstance(DA);
       }
       catch (ApplicationException e)
       {
