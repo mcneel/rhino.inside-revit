@@ -29,11 +29,11 @@ Let's bring a single element into a new Grasshopper definition. We can use the *
 
 ![]({{ "/static/images/guides/revit-params02.png" | prepend: site.baseurl }})
 
-Now hold SHIFT and double-click on the *Element.Decompose* component to see a list of all parameters associated with given element
+Now hold {% include ltr/kb_key.html key='Shift' %} and double-click on the *Element.Decompose* component to see a list of all parameters associated with given element
 
 ![]({{ "/static/images/guides/revit-params03.png" | prepend: site.baseurl }})
 
-You can connect any of these properties, then CTRL and double-click on the *Element.Decompose* component to collapse it to normal size. The component is smart to keep the connected parameters shown in collapsed mode.
+You can connect any of these properties, then {% include ltr/kb_key.html key='Ctrl' %} and double-click on the *Element.Decompose* component to collapse it to normal size. The component is smart to keep the connected parameters shown in collapsed mode.
 
 ![]({{ "/static/images/guides/revit-params04.png" | prepend: site.baseurl }})
 

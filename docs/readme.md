@@ -38,6 +38,7 @@
     - [Download Package Block](#download-package-block)
     - [Download Component Block](#download-component-block)
     - [Release Header Block](#release-header-block)
+    - [Keyboard Key (Inline)](#keyboard-key-inline)
     - [Keyboard Shortcut Block](#keyboard-shortcut-block)
 - [Sample Pages](#sample-pages)
 - [Data Sources](#data-sources)
@@ -651,6 +652,18 @@ This block is release headers on **Release Notes** page. This block can accept t
 
 ```
 {% include ltr/release-header.html version="0.0.7317.30902" time="1/13/2020 17:10:04" %}
+```
+
+### Keyboard Key (Inline)
+
+![](static/images/readme/kb-key.png)
+
+This block generates keyboard key images. Use this for showing single keys inline with text. This block has one required argument:
+
+- `key=` keyboard key e.g. `Ctrl`
+
+```
+{% include ltr/kb_key.html key='Ctrl' %}
 ```
 
 ### Keyboard Shortcut Block
