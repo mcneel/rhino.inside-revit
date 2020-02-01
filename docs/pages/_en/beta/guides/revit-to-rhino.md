@@ -7,6 +7,4 @@ order: 20
 
 {% include youtube_player.html id="8AjX3YlwjEs" %}
 
-## Extracting Geometry by Category
 
-<!-- https://github.com/mcneel/rhino.inside-revit/issues/93 -->

@@ -43,10 +43,10 @@ Created By [Paul Wintour Parametric & BIM specialist, founder of Parametric Monk
 
 > One of the most frequent requests I receive is about running solar access analysis within Revit. Despite the fact that it is still quicker and more accurate to export to Grasshopper, run the analysis and push the results back, many still prefer to stay within Revit. So I decided to do a quick proof-of-concept and I'm proud to announce that it works perfectly using {{ site.terms.rir }}.
 
-## Intro to Rhino.INside.Revit {{ site.terms.rir }}
+## Intro to {{ site.terms.rir }}
 
 {% include youtube_player.html id="qFy1XcNcBsc" %}
 
 Created By [Rethinking BIM](https://www.youtube.com/channel/UC82U-lpftjA7lCeb9Rhdraw)
 
-> This video provides an intro to some of the capabilities of Rhino.Inside.
+> This video provides an intro to some of the capabilities of {{ site.terms.rir }}
