@@ -117,6 +117,20 @@ The *Element.Geometry* component automatically previews the geometry in Rhino wi
 ![]({{ "/static/images/guides/revit-families08.png" | prepend: site.baseurl }})
 
 
+## Extracting Type Geometry by Category
+
+<!-- https://github.com/mcneel/rhino.inside-revit/issues/93 -->
+
+The *Element Geometry By SubCategory* component shared here helps you extract geometry of a family instance alongside information about its subcategory definition inside the family. The example here extracts the geometry from a series of window instances
+
+![]({{ "/static/images/guides/revit-families08a.png" | prepend: site.baseurl }})
+
+![]({{ "/static/images/guides/revit-families08b.png" | prepend: site.baseurl }})
+
+{% include ltr/download_comp.html archive='/static/ghnodes/Element Geometry By SubCategory.ghuser' name='Element Geometry By SubCategory' %}
+
+See [Examples](#examples)
+
 ## Creating New Types
 
 To create new types, you would need to find an existing type, use the *ElementType.Duplicate* component to duplicate that type with a new name, and adjust the desired properties.
@@ -197,3 +211,4 @@ You can use the *Family.New* component to edit existing families as well. Just p
 Examples listed below create various types of families in Revit using {{ site.terms.rir }}
 
 - [Column Family Along Curve]({{ site.baseurl }}{% link _en/beta/samples/column-family-along-curve.md %})
+- [Window Geometry and Material]({{ site.baseurl }}{% link _en/beta/samples/type-geom-material.md %})
