@@ -1,5 +1,5 @@
 ---
-title: Working with Worksets
+title: Worksets
 order: 71
 ---
 

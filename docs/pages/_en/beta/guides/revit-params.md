@@ -1,5 +1,5 @@
 ---
-title: Revit Parameters
+title: Parameters
 order: 31
 ---
 

@@ -35,6 +35,7 @@ Grasshopper addon, included with {{ site.terms.rir }}, provides custom Revit-awa
 - [Revit Walls]({{ site.baseurl }}{% link _en/beta/guides/revit-walls.md %})
 - [Revit Curtain Walls]({{ site.baseurl }}{% link _en/beta/guides/revit-curtainwalls.md %})
 - [Revit Spatial Elements]({{ site.baseurl }}{% link _en/beta/guides/revit-spatial.md %})
+- [Revit Stairs]({{ site.baseurl }}{% link _en/beta/guides/revit-stairs.md %})
 - [Revit Structural Elements]({{ site.baseurl }}{% link _en/beta/guides/revit-struct.md %})
 - [Revit Materials]({{ site.baseurl }}{% link _en/beta/guides/revit-materials.md %})
 
@@ -45,7 +46,9 @@ Grasshopper addon, included with {{ site.terms.rir }}, provides custom Revit-awa
 These pages guide you through working with Revit views and sheets using {{ site.terms.rir }}
 
 - [Dimensions]({{ site.baseurl }}{% link _en/beta/guides/revit-dims.md %})
-- [Tags]({{ site.baseurl }}{% link _en/beta/guides/revit-tags.md %})
+- [Tags and Keynotes]({{ site.baseurl }}{% link _en/beta/guides/revit-tags.md %})
+- [Views]({{ site.baseurl }}{% link _en/beta/guides/revit-views.md %})
+- [Sheets]({{ site.baseurl }}{% link _en/beta/guides/revit-sheets.md %})
 - [Revisions]({{ site.baseurl }}{% link _en/beta/guides/revit-revisions.md %})
 
 <!-- 70 -->

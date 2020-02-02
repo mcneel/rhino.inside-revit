@@ -1,5 +1,5 @@
 ---
-title: Working with Curtain Walls
+title: Curtain Walls
 order: 41
 ---
 

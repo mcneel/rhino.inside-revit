@@ -1,5 +1,5 @@
 ---
-title: Working with Groups
+title: Groups
 order: 70
 ---
 

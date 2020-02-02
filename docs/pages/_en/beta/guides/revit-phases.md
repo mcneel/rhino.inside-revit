@@ -1,5 +1,5 @@
 ---
-title: Working with Phases
+title: Phases
 order: 73
 ---
 

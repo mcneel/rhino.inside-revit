@@ -1,5 +1,5 @@
 ---
-title: Working with Line Styles
+title: Line Styles
 order: 90
 ---
 

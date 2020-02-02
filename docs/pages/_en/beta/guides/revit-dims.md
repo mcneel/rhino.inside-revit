@@ -1,5 +1,5 @@
 ---
-title: Working with Dimensions
+title: Dimensions
 order: 60
 ---
 

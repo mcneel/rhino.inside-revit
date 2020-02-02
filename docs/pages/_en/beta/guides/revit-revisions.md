@@ -1,5 +1,5 @@
 ---
-title: Working with Revisions
+title: Revisions
 order: 65
 ---
 
