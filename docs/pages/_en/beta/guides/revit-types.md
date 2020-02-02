@@ -1,5 +1,5 @@
 ---
-title: Data Model
+title: Document Data Model
 order: 30
 ---
 
