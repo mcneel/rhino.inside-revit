@@ -22,8 +22,8 @@ These pages guide you through converting geometry between Revit and Rhino (or ot
 - [Rhino Geometry to Revit]({{ site.baseurl }}{% link _en/beta/guides/rhino-to-revit.md %})
 
 <!-- 30 -->
-## Revit Data Hierarchy
-These pages guide you through working with Revit data hierarchy, and explains the concepts behind *Categories*, *Families*, and *Types* and generally how Revit stores and organizes information in a BIM model
+## Understanding Revit
+These pages guide you through understanding the underlying concepts in Revit e.g. its data model, and explains the concepts behind *Categories*, *Families*, *Types*, *Elements*, *Parameters*, etc.
 
 - [Document Data Model (Categories, Types, and Families)]({{ site.baseurl }}{% link _en/beta/guides/revit-types.md %})
 - [Element Parameters]({{ site.baseurl }}{% link _en/beta/guides/revit-params.md %})
@@ -52,7 +52,7 @@ These pages guide you through working with Revit views and sheets using {{ site.
 - [Revisions]({{ site.baseurl }}{% link _en/beta/guides/revit-revisions.md %})
 
 <!-- 70 -->
-## Revit Geometry Containers
+## Geometry Containers
 Revit has a few ways to containerize geometry inside a Revit model. These pages guide you through working with these containers in {{ site.terms.rir }}
 
 - [Groups]({{ site.baseurl }}{% link _en/beta/guides/revit-groups.md %})
@@ -65,7 +65,7 @@ Revit has a few ways to containerize geometry inside a Revit model. These pages 
 <!-- 80 -->
 
 <!-- 90 -->
-## Revit Model Global Configurations
+## Configurations
 These pages guide you through working with global model global configurations using {{ site.terms.rir }}
 
 - [Line Styles]({{ site.baseurl }}{% link _en/beta/guides/revit-linestyles.md %})
