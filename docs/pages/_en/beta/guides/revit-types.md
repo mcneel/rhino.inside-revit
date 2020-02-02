@@ -1,9 +1,7 @@
 ---
-title: Working with Types
+title: Document Data Model
 order: 30
 ---
-
-## Revit Data Hierarchy
 
 Revit organizes the building components into *Categories*, *Families*, and *Types*. In this article, we will discuss each and guide you in dealing with this organization method when using {{ site.terms.rir }} (or Revit API).
 

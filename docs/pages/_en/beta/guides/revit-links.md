@@ -1,5 +1,5 @@
 ---
-title: Working with Links
+title: Links
 order: 74
 ---
 

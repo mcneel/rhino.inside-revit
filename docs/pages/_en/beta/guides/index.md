@@ -22,21 +22,22 @@ These pages guide you through converting geometry between Revit and Rhino (or ot
 - [Rhino Geometry to Revit]({{ site.baseurl }}{% link _en/beta/guides/rhino-to-revit.md %})
 
 <!-- 30 -->
-## Revit Data Hierarchy
-These pages guide you through working with Revit data hierarchy, and explains the concepts behind *Categories*, *Families*, and *Types* and generally how Revit stores and organizes information in a BIM model
+## Understanding Revit
+These pages guide you through understanding the underlying concepts in Revit e.g. its data model, and explains the concepts behind *Categories*, *Families*, *Types*, *Elements*, *Parameters*, etc.
 
-- [Revit Categories, Types, and Families]({{ site.baseurl }}{% link _en/beta/guides/revit-types.md %})
-- [Reading & Writing Revit Parameter Values]({{ site.baseurl }}{% link _en/beta/guides/revit-params.md %})
+- [Document Data Model (Categories, Types, and Families)]({{ site.baseurl }}{% link _en/beta/guides/revit-types.md %})
+- [Element Parameters]({{ site.baseurl }}{% link _en/beta/guides/revit-params.md %})
 
 <!-- 40 -->
 ## Modeling in Revit
 Grasshopper addon, included with {{ site.terms.rir }}, provides custom Revit-aware nodes that can create native content in Revit. These pages guide you through generating native Revit elements using {{ site.terms.rir }}
 
-- [Revit Walls]({{ site.baseurl }}{% link _en/beta/guides/revit-walls.md %})
-- [Revit Curtain Walls]({{ site.baseurl }}{% link _en/beta/guides/revit-curtainwalls.md %})
-- [Revit Spatial Elements]({{ site.baseurl }}{% link _en/beta/guides/revit-spatial.md %})
-- [Revit Structural Elements]({{ site.baseurl }}{% link _en/beta/guides/revit-struct.md %})
-- [Revit Materials]({{ site.baseurl }}{% link _en/beta/guides/revit-materials.md %})
+- [Walls]({{ site.baseurl }}{% link _en/beta/guides/revit-walls.md %})
+- [Curtain Walls]({{ site.baseurl }}{% link _en/beta/guides/revit-curtainwalls.md %})
+- [Spatial Elements]({{ site.baseurl }}{% link _en/beta/guides/revit-spatial.md %})
+- [Stairs]({{ site.baseurl }}{% link _en/beta/guides/revit-stairs.md %})
+- [Structural Elements]({{ site.baseurl }}{% link _en/beta/guides/revit-struct.md %})
+- [Materials]({{ site.baseurl }}{% link _en/beta/guides/revit-materials.md %})
 
 <!-- 50 -->
 
@@ -45,27 +46,29 @@ Grasshopper addon, included with {{ site.terms.rir }}, provides custom Revit-awa
 These pages guide you through working with Revit views and sheets using {{ site.terms.rir }}
 
 - [Dimensions]({{ site.baseurl }}{% link _en/beta/guides/revit-dims.md %})
-- [Tags]({{ site.baseurl }}{% link _en/beta/guides/revit-tags.md %})
+- [Tags and Keynotes]({{ site.baseurl }}{% link _en/beta/guides/revit-tags.md %})
+- [Views]({{ site.baseurl }}{% link _en/beta/guides/revit-views.md %})
+- [Sheets]({{ site.baseurl }}{% link _en/beta/guides/revit-sheets.md %})
 - [Revisions]({{ site.baseurl }}{% link _en/beta/guides/revit-revisions.md %})
 
 <!-- 70 -->
-## Revit Geometry Containers
+## Geometry Containers
 Revit has a few ways to containerize geometry inside a Revit model. These pages guide you through working with these containers in {{ site.terms.rir }}
 
-- [Revit Groups]({{ site.baseurl }}{% link _en/beta/guides/revit-groups.md %})
+- [Groups]({{ site.baseurl }}{% link _en/beta/guides/revit-groups.md %})
 <!-- add Assemblies -->
-- [Revit Worksets]({{ site.baseurl }}{% link _en/beta/guides/revit-worksets.md %})
-- [Revit Design Options]({{ site.baseurl }}{% link _en/beta/guides/revit-designopts.md %})
-- [Revit Phases]({{ site.baseurl }}{% link _en/beta/guides/revit-phases.md %})
-- [Revit Links]({{ site.baseurl }}{% link _en/beta/guides/revit-links.md %})
+- [Worksets]({{ site.baseurl }}{% link _en/beta/guides/revit-worksets.md %})
+- [Design Options]({{ site.baseurl }}{% link _en/beta/guides/revit-designopts.md %})
+- [Phases]({{ site.baseurl }}{% link _en/beta/guides/revit-phases.md %})
+- [Links]({{ site.baseurl }}{% link _en/beta/guides/revit-links.md %})
 
 <!-- 80 -->
 
 <!-- 90 -->
-## Revit Model Global Configurations
+## Configurations
 These pages guide you through working with global model global configurations using {{ site.terms.rir }}
 
-- [Revit Line Styles]({{ site.baseurl }}{% link _en/beta/guides/revit-linestyles.md %})
+- [Line Styles]({{ site.baseurl }}{% link _en/beta/guides/revit-linestyles.md %})
 
 ## Scripting
 <!-- 100 -->

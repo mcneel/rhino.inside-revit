@@ -1,5 +1,5 @@
 ---
-title: Working with Design Options
+title: Design Options
 order: 72
 ---
 

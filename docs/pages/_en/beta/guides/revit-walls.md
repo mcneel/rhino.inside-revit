@@ -1,5 +1,5 @@
 ---
-title: Working with Walls
+title: Walls
 order: 40
 ---
 
