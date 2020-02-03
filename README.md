@@ -21,6 +21,10 @@ See Wiki pages below for more information about the architecture of this project
 
 McNeel team is using internal [AppVeyor-based](https://www.appveyor.com/docs/) build systems to build this project branches. If you need custom builds, you are encouraged to fork the project and adapt to your own CI/CD system.
 
+### Building from Source
+
+See [Building from Source](docs/build-source.md) page for instructions on how to build the project from source.
+
 ## Installer
 
 The installer is generated using [WiX toolset](https://wixtoolset.org/) (see `src/RhinoInside.Revit.Setup.sln`) and is updated automatically on every new build. See the [Rhino.Inside.Revit Wiki](https://www.rhino3d.com/inside/revit/) homepage to download them most recent installers.
