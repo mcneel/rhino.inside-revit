@@ -89,4 +89,6 @@ namespace RhinoInside.Revit.GH.Types
       return base.ToString();
     }
   }
+
+  public class StructuralWallUsage : GH_Enum<DB.Structure.StructuralWallUsage> { }
 }
