@@ -23,7 +23,7 @@ McNeel team is using internal [AppVeyor-based](https://www.appveyor.com/docs/) b
 
 ### Building from Source
 
-See [Building from Source](docs/build-source.md) page for instructions on how to build the project from source.
+See [Building from Source](build-source.md) page for instructions on how to build the project from source.
 
 ## Installer
 
