@@ -30,6 +30,7 @@ namespace RhinoInside.Revit.GH.Parameters
       Menu_AppendWireDisplay(menu);
       Menu_AppendDisconnectWires(menu);
 
+      Menu_AppendPrincipalParameter(menu);
       Menu_AppendReverseParameter(menu);
       Menu_AppendFlattenParameter(menu);
       Menu_AppendGraftParameter(menu);
