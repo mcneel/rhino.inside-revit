@@ -28,11 +28,13 @@ If you run both tests you will have a folder at `%APPDATA%\Autodesk\Revit\Addins
 
 ### Sending Debug Package to Developers
 
-Finally click **3. Send Report** and {{ site.terms.rir }} will generate a ZIP file on the user desktop that contains the add-ins list the user has installed, and the debug information previously generated.
+Finally click **3. Send Report** and {{ site.terms.rir }} will generate a ZIP file on the user desktop the debug information previously generated. {{ site.terms.rir }} will open the user default email client with a pre-written email that suggest the user attach that ZIP file and add information about the error.
 
-{{ site.terms.rir }} will open the user default email client with a pre-written email that suggest the user attach that ZIP file and add information about the error.
+The ZIP package is named with date in ISO format e.g. `RhinoInside-Revit-Report-20200128T1911Z` and contains information about Revit environment and other loaded add-ins (if shared by user)
 
-The ZIP package is named with date in ISO format e.g. `20200128T1911Z` and contains information about Revit environment and other loaded add-ins (if shared by user)
+- *RevitAddinsList.txt* contains a list of all other Revit add-ins that are installed. This includes add-ins installed by default.
+- *RhinoAssemblyResolveLog.txt* contains debug messages related to the finding and loading assemblies
+- *RhinoDebugMessages.txt* contains debug messages from rhino itself
 
 
 ## Search for Conflicting Plugins
