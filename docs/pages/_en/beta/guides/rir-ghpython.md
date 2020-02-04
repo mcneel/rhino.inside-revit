@@ -226,6 +226,10 @@ if Trigger:
     )
 ```
 
+## Inspecting Revit
+
+`revit_version = Revit.ActiveUIApplication.Application.VersionNumber`
+
 ## Additional Resources
 
 Here are a few links to more resources about all the APIs mentioned here:
