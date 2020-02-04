@@ -142,7 +142,7 @@ pre {
     set the minimum height to the footer does not get
     too close to header or sidebar when page is empty
     */
-    min-height: 35em;
+    min-height: 50em;
 }
 
 .page-content a, .page-content a:hover {

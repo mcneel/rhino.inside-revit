@@ -36,6 +36,7 @@ Grasshopper addon, included with {{ site.terms.rir }}, provides custom Revit-awa
 - [Curtain Walls]({{ site.baseurl }}{% link _en/beta/guides/revit-curtainwalls.md %})
 - [Spatial Elements]({{ site.baseurl }}{% link _en/beta/guides/revit-spatial.md %})
 - [Stairs]({{ site.baseurl }}{% link _en/beta/guides/revit-stairs.md %})
+- [Levels & Grids]({{ site.baseurl }}{% link _en/beta/guides/revit-levels.md %})
 - [Structural Elements]({{ site.baseurl }}{% link _en/beta/guides/revit-struct.md %})
 - [Materials]({{ site.baseurl }}{% link _en/beta/guides/revit-materials.md %})
 
@@ -48,6 +49,7 @@ These pages guide you through working with Revit views and sheets using {{ site.
 - [Dimensions]({{ site.baseurl }}{% link _en/beta/guides/revit-dims.md %})
 - [Tags and Keynotes]({{ site.baseurl }}{% link _en/beta/guides/revit-tags.md %})
 - [Views]({{ site.baseurl }}{% link _en/beta/guides/revit-views.md %})
+- [View Templates]({{ site.baseurl }}{% link _en/beta/guides/revit-viewtemplates.md %})
 - [Sheets]({{ site.baseurl }}{% link _en/beta/guides/revit-sheets.md %})
 - [Revisions]({{ site.baseurl }}{% link _en/beta/guides/revit-revisions.md %})
 
@@ -68,7 +70,7 @@ Revit has a few ways to containerize geometry inside a Revit model. These pages 
 ## Configurations
 These pages guide you through working with global model global configurations using {{ site.terms.rir }}
 
-- [Line Styles]({{ site.baseurl }}{% link _en/beta/guides/revit-linestyles.md %})
+- [Styles and Patterns]({{ site.baseurl }}{% link _en/beta/guides/revit-styles.md %})
 
 ## Scripting
 <!-- 100 -->
