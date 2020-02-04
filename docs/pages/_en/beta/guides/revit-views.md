@@ -53,9 +53,9 @@ You can use the *Element.SelectableInViewFilter* component to only list the sele
 
 ## Extracting Displayed Geometry
 
-## Getting Visibility/Graphics Overrides
+## Getting V/G Overrides
 
-## Setting Visibility/Graphics Overrides
+## Setting V/G Overrides
 
 ![]({{ "/static/images/guides" | prepend: site.baseurl }})
 
