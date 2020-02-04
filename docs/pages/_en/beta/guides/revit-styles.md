@@ -1,5 +1,5 @@
 ---
-title: Line Styles
+title: Styles and Patterns
 order: 90
 ---
 
