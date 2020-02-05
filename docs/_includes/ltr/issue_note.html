@@ -1,0 +1,12 @@
+<div class="msg-block issue-block">
+    <a href='{{ 'issues/' | prepend: site.repo_url | append: include.issue_id }}' target="_blank">
+        <table class="msg-table">
+            <tr>
+                <td class="msg-icon"><img src="{{ "/assets/img/issue.svg" | prepend: site.baseurl }}"></td>
+                <td class="msg-msg">
+                    <strong>Issue #{{ include.issue_id }}</strong>{{ include.note | markdownify }}
+                </td>
+            </tr>
+        </table>
+    </a>
+</div>
