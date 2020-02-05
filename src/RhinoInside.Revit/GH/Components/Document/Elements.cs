@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Grasshopper.Kernel;
 using DB = Autodesk.Revit.DB;
+
 namespace RhinoInside.Revit.GH.Components
 {
   public class DocumentElements : DocumentComponent
@@ -10,10 +11,12 @@ namespace RhinoInside.Revit.GH.Components
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override DB.ElementFilter ElementFilter => new Autodesk.Revit.DB.ElementIsElementTypeFilter(true);
 
-    public DocumentElements() : base(
+    public DocumentElements() : base
+    (
       "Document.Elements", "Elements",
       "Get active document model elements list",
-      "Revit", "Document")
+      "Revit", "Document"
+    )
     {
     }
 

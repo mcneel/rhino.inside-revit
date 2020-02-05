@@ -362,32 +362,30 @@ namespace RhinoInside.Revit.UI
           Id = MethodBase.GetCurrentMethod().DeclaringType.FullName,
           MainIcon = TaskDialogIcons.IconError,
           TitleAutoPrefix = true,
-          AllowCancellation = false,
+          AllowCancellation = true,
           MainInstruction = "Rhino.Inside failed to load",
-          MainContent = "Do you want to report this by email to tech@mcneel.com?",
-          ExpandedContent = "This problem use to be due an incompatibility with other installed Addins.\n\n" +
-                            "While running on these modes you may see other Addins errors and it may take longer to load, don't worry about that no persistent change will be made on your computer.",
-          CommonButtons = TaskDialogCommonButtons.Yes | TaskDialogCommonButtons.No,
-          DefaultButton = TaskDialogResult.Yes,
-          VerificationText = "Exclude installed Addins list from the report.",
+          MainContent = $"Please run some tests before reporting.{Environment.NewLine}Those tests would help us figure out what happened.",
+          ExpandedContent = "This problem use to be due an incompatibility with other installed add-ins.\n\n" +
+                            "While running on these modes you may see other add-ins errors and it may take longer to load, don't worry about that no persistent change will be made on your computer.",
+          VerificationText = "Exclude installed add-ins list from the report.",
           FooterText = "Current version: " + Addin.DisplayVersion
         }
       )
       {
-        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Run Revit without other Addins…", "Good for testing if Rhino.Inside would load if no other Addin were installed.");
-        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink2, "Run Rhino.Inside in verbose mode…", "Enables all logging mechanisms built in Rhino for support purposes.");
+        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "1. Run Revit without other Addins…", "Good for testing if Rhino.Inside would load if no other add-in were installed.");
+        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink2, "2. Run Rhino.Inside in verbose mode…", "Enables all logging mechanisms built in Rhino for support purposes.");
+        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink3, "3. Send report…", "Reports this problem by email to tech@mcneel.com");
+        taskDialog.DefaultButton = TaskDialogResult.CommandLink3;
 
         while (true)
           switch (taskDialog.Show())
           {
             case TaskDialogResult.CommandLink1: RunWithoutAddIns(data); break;
             case TaskDialogResult.CommandLink2: RunVerboseMode(data); break;
-            case TaskDialogResult.Yes: SendEmail(data, !taskDialog.WasVerificationChecked()); return Result.Succeeded;
+            case TaskDialogResult.CommandLink3: SendEmail(data, !taskDialog.WasVerificationChecked()); return Result.Succeeded;
             default: return Result.Cancelled;
           }
       }
-
-      
     }
 
     void RunWithoutAddIns(ExternalCommandData data)
@@ -429,8 +427,8 @@ namespace RhinoInside.Revit.UI
           Arguments = $"\"{journalFile}\""
         };
         using (var RevitApp = Process.Start(si)) { RevitApp.WaitForExit(); }
+      }
     }
-  }
 
     static readonly string RhinoDebugMessages_txt = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "RhinoDebugMessages.txt");
     static readonly string RhinoAssemblyResolveLog_txt = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RhinoAssemblyResolveLog.txt");
@@ -506,7 +504,7 @@ namespace RhinoInside.Revit.UI
     void SendEmail(ExternalCommandData data, bool includeAddinsList)
     {
       var now = DateTime.Now.ToString("yyyyMMddTHHmmssZ");
-      var ReportFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), $"Rhino.Inside Revit - Report {now}.zip");
+      var ReportFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), $"RhinoInside-Revit-Report-{now}.zip");
       var AttachedFiles = new string[]
       {
         RhinoDebugMessages_txt,

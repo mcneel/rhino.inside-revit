@@ -97,11 +97,11 @@ namespace RhinoInside.Revit.GH.Components
       Rhino.Geometry.Curve curve,
       Optional<DB.WallType> type,
       Optional<DB.Level> level,
-      [Optional] bool structural,
       [Optional] double height,
       [Optional] DB.WallLocationLine locationLine,
       [Optional] bool flipped,
-      [Optional, NickName("J")] bool allowJoins
+      [Optional, NickName("J")] bool allowJoins,
+      [Optional] DB.Structure.StructuralWallUsage structuralUsage
     )
     {
       var scaleFactor = 1.0 / Revit.ModelUnits;
@@ -196,7 +196,7 @@ namespace RhinoInside.Revit.GH.Components
           height,
           levelIsEmpty ? axisMinZ - level.Value.Elevation : 0.0,
           flipped,
-          structural
+          structuralUsage != DB.Structure.StructuralWallUsage.NonBearing
         );
 
         // Walls are created with the last LocationLine used in the Revit editor!!
@@ -210,8 +210,9 @@ namespace RhinoInside.Revit.GH.Components
           DB.BuiltInParameter.WALL_BASE_CONSTRAINT,
           DB.BuiltInParameter.WALL_USER_HEIGHT_PARAM,
           DB.BuiltInParameter.WALL_BASE_OFFSET,
+          DB.BuiltInParameter.WALL_KEY_REF_PARAM,
           DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT,
-          DB.BuiltInParameter.WALL_KEY_REF_PARAM
+          DB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM
         };
 
         ReplaceElement(ref element, newWall, parametersMask);
@@ -222,8 +223,16 @@ namespace RhinoInside.Revit.GH.Components
         newWall.get_Parameter(DB.BuiltInParameter.WALL_BASE_CONSTRAINT).Set(level.Value.Id);
         newWall.get_Parameter(DB.BuiltInParameter.WALL_BASE_OFFSET).Set(levelIsEmpty ? axisMinZ - level.Value.Elevation : 0.0);
         newWall.get_Parameter(DB.BuiltInParameter.WALL_USER_HEIGHT_PARAM).Set(height);
-        newWall.get_Parameter(DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).Set(structural ? 1 : 0);
         newWall.get_Parameter(DB.BuiltInParameter.WALL_KEY_REF_PARAM).Set((int) locationLine);
+        if(structuralUsage == DB.Structure.StructuralWallUsage.NonBearing)
+        {
+          newWall.get_Parameter(DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).Set(0);
+        }
+        else
+        {
+          newWall.get_Parameter(DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).Set(1);
+          newWall.get_Parameter(DB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM).Set((int) structuralUsage);
+        }
 
         if (newWall.Flipped != flipped)
           newWall.Flip();

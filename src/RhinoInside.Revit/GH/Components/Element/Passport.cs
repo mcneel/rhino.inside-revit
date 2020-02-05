@@ -33,7 +33,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var reference = default(Types.ID);
+      var reference = default(Types.ElementId);
       if (!DA.GetData("Element", ref reference))
         return;
 
