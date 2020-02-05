@@ -1,6 +1,6 @@
 ---
 title: Styles and Patterns
-order: 90
+order: 91
 ---
 
 {% include ltr/en/wip_note.html %}

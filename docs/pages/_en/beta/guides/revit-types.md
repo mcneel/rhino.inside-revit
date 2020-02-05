@@ -29,7 +29,7 @@ Before discussing *Families*, we need to discuss *Types* in Revit. There can be 
 
 There are two groups of *Types* in Revit:
 
- - **System Types** are built-in types that can exist in any Revit model e.g. *Wall* types or *Duct System* types. The logic and behavior of these types is built into Revit and can not be changed by the user.
+ - **System Types** are built-in types that can exist in any Revit model e.g. types listed under *Basic Wall* or *Duct System* in *Project Browser*. The logic and behavior of these types is built into Revit and can not be changed by the user.
  - **Custom Types** are types that are defined by a Revit user e.g. *Furniture* types or *Door* types.
 
 Each type, whether *System* or *Custom*, can have a series of **Type Parameters** that modify the behavior or other aspect of that specific Type. When working with Revit, we tend to define or modify various *System* or *Custom* Types and place instances of these types into the model. For example we can define a 3ft x 7ft single-panel door Type and place many instances of this type in the model. All these instances will follow the logic that is enforced by that specific type. However, Type definitions can also allow certain **Instance Parameters** to be modified to change the behavior or graphics of a specific instance.
