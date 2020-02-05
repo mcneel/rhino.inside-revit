@@ -325,23 +325,34 @@ namespace RhinoInside.Revit.GH.Components
         var sketchPlane = planesSet[index].Value;
 
         DB.GraphicsStyle familyGraphicsStyle = null;
-        if
-        (
-          curve.GetUserElementId(DB.BuiltInParameter.FAMILY_CURVE_GSTYLE_PLUS_INVISIBLE.ToString(), out var graphicsStyleId) &&
-          doc.GetElement(graphicsStyleId) is DB.GraphicsStyle graphicsStyle
-        )
         {
-          if (graphicsStyle.GraphicsStyleCategory.Parent.Id == familyDoc.OwnerFamily.FamilyCategory.Id)
+          DB.Category familySubCategory = null;
+          if
+          (
+            curve.GetUserElementId(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), out var subCategoryId) &&
+            DB.Category.GetCategory(doc, subCategoryId) is DB.Category subCategory
+          )
           {
-            familyGraphicsStyle = MapGraphicsStyle(doc, familyDoc, graphicsStyleId, true);
-          }
-          else
-          {
-            if (graphicsStyle.GraphicsStyleCategory.Parent is null)
-              AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"'{graphicsStyle.GraphicsStyleCategory.Name}' is not subcategory of '{familyDoc.OwnerFamily.FamilyCategory.Name}'");
+            if(subCategoryId == familyDoc.OwnerFamily.FamilyCategory.Id)
+            {
+              familySubCategory = MapCategory(doc, familyDoc, subCategoryId, true);
+            }
+            else if (subCategory?.Parent?.Id == familyDoc.OwnerFamily.FamilyCategory.Id)
+            {
+              familySubCategory = MapCategory(doc, familyDoc, subCategoryId, true);
+            }
             else
-              AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"'{graphicsStyle.GraphicsStyleCategory.Parent.Name} : {graphicsStyle.GraphicsStyleCategory.Name}' is not subcategory of '{familyDoc.OwnerFamily.FamilyCategory.Name}'");
+            {
+              if (subCategory.Parent is null)
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"'{subCategory.Name}' is not subcategory of '{familyDoc.OwnerFamily.FamilyCategory.Name}'");
+              else
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"'{subCategory.Parent.Name} : {subCategory.Name}' is not subcategory of '{familyDoc.OwnerFamily.FamilyCategory.Name}'");
+            }
           }
+
+          curve.GetUserEnum(DB.BuiltInParameter.FAMILY_CURVE_GSTYLE_PLUS_INVISIBLE.ToString(), out var graphicsStyleType, DB.GraphicsStyleType.Projection);
+
+          familyGraphicsStyle = familySubCategory?.GetGraphicsStyle(graphicsStyleType);
         }
 
         curve.GetUserBoolean(DB.BuiltInParameter.MODEL_OR_SYMBOLIC.ToString(), out var symbolic);
@@ -910,7 +921,8 @@ namespace RhinoInside.Revit.GH.Components
     {
       manager.AddCurveParameter("Curve", "C", string.Empty, GH_ParamAccess.item);
       manager[manager.AddBooleanParameter("Visible", "V", string.Empty, GH_ParamAccess.item, true)].Optional = true;
-      manager[manager.AddParameter(new Parameters.GraphicsStyle(), "Subcategory", "S", string.Empty, GH_ParamAccess.item)].Optional = true;
+      manager[manager.AddParameter(new Parameters.Category(), "Subcategory", "S", string.Empty, GH_ParamAccess.item)].Optional = true;
+      manager[manager.AddParameter(new Parameters.Param_Enum<Types.GraphicsStyleType>(), "GraphicsStyle", "G", string.Empty, GH_ParamAccess.item)].Optional = true; ;
       manager[manager.AddIntegerParameter("Visibility", "S", string.Empty, GH_ParamAccess.item, -1)].Optional = true;
       manager[manager.AddBooleanParameter("Symbolic", "S", string.Empty, GH_ParamAccess.item, false)].Optional = true;
     }
@@ -934,7 +946,11 @@ namespace RhinoInside.Revit.GH.Components
 
       var subCategoryId = DB.ElementId.InvalidElementId;
       if(DA.GetData("Subcategory", ref subCategoryId))
-        curve.SetUserString(DB.BuiltInParameter.FAMILY_CURVE_GSTYLE_PLUS_INVISIBLE.ToString(), subCategoryId.IsValid() ? subCategoryId.ToString() : null);
+        curve.SetUserString(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), subCategoryId.IsValid() ? subCategoryId.ToString() : null);
+
+      var graphicsStyleType = DB.GraphicsStyleType.Projection;
+      if (DA.GetData("GraphicsStyle", ref graphicsStyleType))
+        curve.SetUserString(DB.BuiltInParameter.FAMILY_CURVE_GSTYLE_PLUS_INVISIBLE.ToString(), graphicsStyleType != DB.GraphicsStyleType.Projection ? graphicsStyleType.ToString() : null);
 
       var visibility = -1;
       if (DA.GetData("Visibility", ref visibility))

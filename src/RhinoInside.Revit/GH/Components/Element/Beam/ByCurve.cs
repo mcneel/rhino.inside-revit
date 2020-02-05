@@ -80,13 +80,23 @@ namespace RhinoInside.Revit.GH.Components
       if (type.HasValue)
         ChangeElementTypeId(ref element, type.Value.Id);
 
+      // Try to update Beam
       if (element is object && element.Location is DB.LocationCurve locationCurve && centerLine.IsSameKindAs(locationCurve.Curve))
       {
-        element.get_Parameter(DB.BuiltInParameter.LEVEL_PARAM).Set(level.Value.Id);
+        var referenceLevel = element.get_Parameter(DB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM);
+        var updateLevel = referenceLevel.AsElementId() != level.Value.Id;
 
-        locationCurve.Curve = centerLine;
+        if (!updateLevel || !referenceLevel.IsReadOnly)
+        {
+          if (updateLevel)
+            referenceLevel.Set(level.Value.Id);
+
+          locationCurve.Curve = centerLine;
+          return;
+        }
       }
-      else
+
+      // Reconstruct Beam
       {
         SolveOptionalType(ref type, doc, DB.BuiltInCategory.OST_StructuralFraming, nameof(type));
 
@@ -116,7 +126,7 @@ namespace RhinoInside.Revit.GH.Components
           DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
           DB.BuiltInParameter.ELEM_FAMILY_PARAM,
           DB.BuiltInParameter.ELEM_TYPE_PARAM,
-          DB.BuiltInParameter.LEVEL_PARAM
+          DB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM
         };
 
         ReplaceElement(ref element, newBeam, parametersMask);

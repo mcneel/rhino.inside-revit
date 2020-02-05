@@ -1,6 +1,5 @@
 using System;
-using Autodesk.Revit.DB;
-using Grasshopper.Kernel;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -8,12 +7,12 @@ namespace RhinoInside.Revit.GH.Types
   {
     public override string TypeName => "Revit Sketch Plane";
     public override string TypeDescription => "Represents a Revit sketch plane";
-    protected override Type ScriptVariableType => typeof(Autodesk.Revit.DB.SketchPlane);
-    public static explicit operator Autodesk.Revit.DB.SketchPlane(SketchPlane self) =>
-      self.Document?.GetElement(self) as Autodesk.Revit.DB.SketchPlane;
+    protected override Type ScriptVariableType => typeof(DB.SketchPlane);
+    public static explicit operator DB.SketchPlane(SketchPlane self) =>
+      self.Document?.GetElement(self) as DB.SketchPlane;
 
     public SketchPlane() : base() { }
-    public SketchPlane(Autodesk.Revit.DB.SketchPlane sketchPlane) : base(sketchPlane) { }
+    public SketchPlane(DB.SketchPlane sketchPlane) : base(sketchPlane) { }
 
     #region Location
     public override Rhino.Geometry.Point3d Location => Plane.Origin;
@@ -32,16 +31,5 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
     #endregion
-  }
-}
-
-namespace RhinoInside.Revit.GH.Parameters
-{
-  public class SketchPlane : ElementIdNonGeometryParam<Types.SketchPlane, Autodesk.Revit.DB.SketchPlane>
-  {
-    public override Guid ComponentGuid => new Guid("93BF1F61-69AD-433F-A202-352C14E4CED8");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
-
-    public SketchPlane() : base("Sketch Plane", "Sketch Plane", "Represents a Revit document sketch plane.", "Params", "Revit") { }
   }
 }
