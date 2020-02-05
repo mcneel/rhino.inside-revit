@@ -12,13 +12,13 @@ These instructions will get you a copy of the project up and running on your loc
 ### Getting Source & Build
 1. Clone the repository. At the command prompt, enter the following command:
 ```
-git clone --recursive https://github.com/mcneel/rhino.inside.git rhino.inside
+git clone --recursive https://github.com/mcneel/rhino.inside-revit.git rhino.inside-revit
 ```
-2. In Visual Studio: open _rhino.inside\Autodesk\Revit\RhinoInside.Revit.sln_.
+2. In Visual Studio: open _rhino.inside-revit\src\RhinoInside.Revit.sln_.
 3. Set the Solution Configuration drop-down according the Revit version you have installed. This will properly link the correct Revit API libraries to the project.
 4. Navigate to _Build_ > _Build Solution_ to begin your build.
 
 ## Installing & Uninstalling
-The project is configured to copy .addon file as well as output files to the folder _"%APPDATA%\\Autodesk\\Revit\\Addins\\%RevitVer%\\RhinoInside.Revit\\"_ folder in order to make Revit load this addon next time it runs.
+The project is configured to copy .addin file as well as output files to the folder _"%APPDATA%\\Autodesk\\Revit\\Addins\\%RevitVer%\\RhinoInside.Revit\\"_ folder in order to make Revit load this addon next time it runs.
 
-In order to uninstall it you can use Visual Studio _Build_ > _Clean Solution_ command or just navigate to the folder _"%APPDATA%\\Autodesk\\Revit\\Addins\\%RevitVer%\\_ and remove the file _RhinoInside.Revit.addon_ and the folder _RhinoInside.Revit_.
+In order to uninstall it you can use Visual Studio _Build_ > _Clean Solution_ command or just navigate to the folder _"%APPDATA%\\Autodesk\\Revit\\Addins\\%RevitVer%\\_ and remove the file _RhinoInside.Revit.addin_ and the folder _RhinoInside.Revit_.

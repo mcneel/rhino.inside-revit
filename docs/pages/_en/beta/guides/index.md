@@ -70,6 +70,7 @@ Revit has a few ways to containerize geometry inside a Revit model. These pages 
 ## Configurations
 These pages guide you through working with global model global configurations using {{ site.terms.rir }}
 
+- [Project Settings]({{ site.baseurl }}{% link _en/beta/guides/revit-psettings.md %})
 - [Styles and Patterns]({{ site.baseurl }}{% link _en/beta/guides/revit-styles.md %})
 
 ## Scripting

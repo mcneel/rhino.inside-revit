@@ -1,5 +1,4 @@
 using System;
-using Grasshopper.Kernel;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -32,18 +31,18 @@ namespace RhinoInside.Revit.GH.Types
   {
     public override string TypeName => "Revit Level";
     public override string TypeDescription => "Represents a Revit level";
-    protected override Type ScriptVariableType => typeof(Autodesk.Revit.DB.Level);
-    public static explicit operator Autodesk.Revit.DB.Level(Level self) =>
-      self.Document?.GetElement(self) as Autodesk.Revit.DB.Level;
+    protected override Type ScriptVariableType => typeof(DB.Level);
+    public static explicit operator DB.Level(Level self) =>
+      self.Document?.GetElement(self) as DB.Level;
 
     public Level() { }
-    public Level(Autodesk.Revit.DB.Level level) : base(level) { }
+    public Level(DB.Level level) : base(level) { }
 
     public override Rhino.Geometry.Point3d Location
     {
       get
       {
-        var level = (Autodesk.Revit.DB.Level) this;
+        var level = (DB.Level) this;
         if (level is object)
         {
           var p = new Rhino.Geometry.Point3d(0.0, 0.0, level.Elevation);
@@ -59,42 +58,23 @@ namespace RhinoInside.Revit.GH.Types
   {
     public override string TypeName => "Revit Level";
     public override string TypeDescription => "Represents a Revit level";
-    protected override Type ScriptVariableType => typeof(Autodesk.Revit.DB.Grid);
-    public static explicit operator Autodesk.Revit.DB.Grid(Grid self) =>
-      self.Document?.GetElement(self) as Autodesk.Revit.DB.Grid;
+    protected override Type ScriptVariableType => typeof(DB.Grid);
+    public static explicit operator DB.Grid(Grid self) =>
+      self.Document?.GetElement(self) as DB.Grid;
 
     public Grid() { }
-    public Grid(Autodesk.Revit.DB.Grid grid) : base(grid) { }
+    public Grid(DB.Grid grid) : base(grid) { }
 
     public override Rhino.Geometry.Curve Axis
     {
       get
       {
-        var grid = (Autodesk.Revit.DB.Grid) this;
+        var grid = (DB.Grid) this;
         if(grid is object)
           return grid.Curve.ToRhino().ChangeUnits(Revit.ModelUnits);
 
         return null;
       }
     }
-  }
-}
-
-namespace RhinoInside.Revit.GH.Parameters
-{
-  public class Level : GeometricElementT<Types.Level, Autodesk.Revit.DB.Level>
-  {
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
-    public override Guid ComponentGuid => new Guid("3238F8BC-8483-4584-B47C-48B4933E478E");
-
-    public Level() : base("Level", "Level", "Represents a Revit document level.", "Params", "Revit") { }
-  }
-
-  public class Grid : GeometricElementT<Types.Grid, Autodesk.Revit.DB.Grid>
-  {
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
-    public override Guid ComponentGuid => new Guid("7D2FB886-A184-41B8-A7D6-A6FDB85CF4E4");
-
-    public Grid() : base("Grid", "Grid", "Represents a Revit document grid.", "Params", "Revit") { }
   }
 }
