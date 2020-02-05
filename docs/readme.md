@@ -32,6 +32,7 @@
     - [Work-in-Progress Block](#work-in-progress-block)
     - [Revit API Link Block](#revit-api-link-block)
     - [Warning Note Block](#warning-note-block)
+    - [GitHub Issue Note Block](#github-issue-note-block)
     - [Bubble Note Block](#bubble-note-block)
     - [API Note Block](#api-note-block)
     - [Locale Note Block](#locale-note-block)
@@ -556,6 +557,22 @@ This block can accept two argument:
 
 - `note=` for the note message
 - `image=` for the header image above the note
+
+### GitHub Issue Note Block
+
+![](static/images/readme/issue-block.png)
+
+This block is for showing code-related issues on the GitHub repo. Below is an example of using an issue note block:
+
+```
+{% include ltr/issue_note.html issue_id='142' note='Add Views to category pickers so an Element.CategoryFilter can be used to list views' %}
+```
+
+This block can accept two argument:
+
+- `issue_id=` for id of the GitHub issue e.g. `142` in `https://github.com/mcneel/rhino.inside-revit/issues/142`
+- `note=` for the note message
+
 
 ### Bubble Note Block
 
