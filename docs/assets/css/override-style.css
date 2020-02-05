@@ -393,7 +393,8 @@ a.btn-dark:hover {
 
 .msg-block {
     width: 100%;
-    border: 1px solid #d0d0d0;
+    background-color: #f6f6f6;
+    border: none;
     border-radius: 5px;
     margin: 30px 0 30px 0;
 }
@@ -415,6 +416,11 @@ a.btn-dark:hover {
 
 .msg-msg p {
     margin-bottom: 0px;
+}
+
+.issue-block {
+    background-color: gold;
+    border: none;
 }
 
 small.build-time {

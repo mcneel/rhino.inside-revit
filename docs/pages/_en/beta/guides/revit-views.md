@@ -16,18 +16,49 @@ You can use the combination of *Element.ClassFilter*, and *Document.ElementTypes
 
 Notice that the *Element.ClassFilter* requires the full name of the API class as string input e.g. `Autodesk.Revit.DB.View`
 
-## Querying Views by Type
+{% include ltr/issue_note.html issue_id='142' note='Add Views to category pickers so an Element.CategoryFilter can be used to list views' %}
+
+## Querying Views by System Family
 
 {% capture api_note %}
-In Revit API, View Types are represented by the {% include api_type.html type='Autodesk.Revit.DB.ViewType' title='DB.ViewType' %} enumeration
+In Revit API, View System Families are represented by the {% include api_type.html type='Autodesk.Revit.DB.ViewFamily' title='DB.ViewFamily' %} enumeration. However, there is a `ViewType` property on the `DB.View` instances that also provides the System Family of the view instance. The enumeration for this property is {% include api_type.html type='Autodesk.Revit.DB.ViewType' title='DB.ViewType' %}. `DB.ViewFamily` and `DB.ViewType` seems to have been created with the same goal in mind. The components shared here use the `DB.ViewFamily` to list the views by system family, however, the same results might be achieved using `DB.ViewType`
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-To collect views of a certain type in a model, use a combination of *View Types* and *Views by Type* components shared here.
+To collect views of a certain system family in a model, use a combination of *View System Families* and *Views By System Family* components shared here.
 
 ![]({{ "/static/images/guides/revit-views01a.png" | prepend: site.baseurl }})
 
+{% include ltr/download_comp.html archive='/static/ghnodes/View System Families.ghuser' name='View System Families' %}
+{% include ltr/download_comp.html archive='/static/ghnodes/Views By System Family.ghuser' name='Views By System Family' %}
+
+## Querying View Types
+
+{% capture api_note %}
+In Revit API, View Types are represented by the {% include api_type.html type='Autodesk.Revit.DB.ViewFamilyType' title='DB.ViewFamilyType' %}
+{% endcapture %}
+{% include ltr/api_note.html note=api_note %}
+
+To collect a list of view types in a model associated with a view system family, use the *View Types* component shared here.
+
+![]({{ "/static/images/guides/revit-views01b.png" | prepend: site.baseurl }})
+
 {% include ltr/download_comp.html archive='/static/ghnodes/View Types.ghuser' name='View Types' %}
+
+## Find Specific View Type
+
+To find a specific view type in a model, use the *Find View Type* component shared here.
+
+![]({{ "/static/images/guides/revit-views01c.png" | prepend: site.baseurl }})
+
+{% include ltr/download_comp.html archive='/static/ghnodes/Find View Type.ghuser' name='Find View Type' %}
+
+## Querying Views by Type
+
+To collect views of a certain type, use a combination of *Find View Type* and *Views By Type* components shared here.
+
+![]({{ "/static/images/guides/revit-views01d.png" | prepend: site.baseurl }})
+
 {% include ltr/download_comp.html archive='/static/ghnodes/Views By Type.ghuser' name='Views By Type' %}
 
 ## Finding Specific Views
