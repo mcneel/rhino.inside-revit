@@ -459,17 +459,17 @@ img.button-icon {
 .kbkey {
     display: inline-block;
     margin: 0px;
-    padding: 3px 10px 0 10px;
-    color: #4b4e51;
-    background: linear-gradient(white, #ececec);
-    border: 1px solid #c7c7c7;
-    border-radius: 2px;
+    margin-bottom: 3px;
+    padding: 3px 10px 4px 10px;
+    color: #fff;
+    background: linear-gradient(225deg, #2f2f2f, #828282);
+    border: none;
+    border-radius: 3px;
     font-size: 1rem;
-    font-weight: 600;
-    line-height: 1;
+    line-height: 1.3;
     text-align: center;
     vertical-align: middle;
-    height: 26px;
+    box-shadow: 2px 2px 0 rgba(30, 30, 30, 0.2),0 0 0 2px #575757 inset;
 }
 
 .kbshortcut li:not(:first-child) {
@@ -479,6 +479,7 @@ img.button-icon {
 .kbshortcut li:not(:first-child)::before {
     content: "+";
     display: inline-block;
+    color: #4b4e51;
     background: none;
     margin-left: -30px;
     padding-right: 15px;
