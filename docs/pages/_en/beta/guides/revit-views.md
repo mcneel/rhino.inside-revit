@@ -90,7 +90,6 @@ To read the view range property of a view, use the *Get View Range* component sh
 
 {% include ltr/download_comp.html archive='/static/ghnodes/Get View Range.ghuser' name='Get View Range' %}
 
-
 ## Collecting Displayed Elements
 
 To collect all the elements owned by a view, use the *Element.OwnerViewFilter* component, passed to the *Document.Elements* as shown below. Keep in mind that the 3D geometry that is usually shown in model views are not "Owned" by that view. All 2d elements e.g. Detail items, detail lines, ... are owned by the view they have created on.
@@ -100,7 +99,6 @@ To collect all the elements owned by a view, use the *Element.OwnerViewFilter* c
 You can use the *Element.SelectableInViewFilter* component to only list the selectable elements on a view.
 
 ![]({{ "/static/images/guides/revit-views05.png" | prepend: site.baseurl }})
-
 
 ## Getting V/G Overrides
 
@@ -119,7 +117,9 @@ To set the Visibility/Graphics overrides for an element on a specific view, use 
 
 ![]({{ "/static/images/guides/revit-views07.png" | prepend: site.baseurl }})
 
-See [Styles and Patterns]({{ site.baseurl }}{% link _en/beta/guides/revit-styles.md %}) on how to use the *Find Line Pattern* and *Find Fill Pattern* custom components.
+See [Styles and Patterns]({{ site.baseurl }}{% link _en/beta/guides/revit-styles.md %}) on how to use the *Find Line Pattern* and *Find Fill Pattern* custom components. Here is an example of running the example above on a series of walls in a 3D view:
+
+![]({{ "/static/images/guides/revit-views08.png" | prepend: site.baseurl }})
 
 {% include ltr/download_comp.html archive='/static/ghnodes/Set Override VG.ghuser' name='Set Override VG' %}
 {% include ltr/download_comp.html archive='/static/ghnodes/VG (Construct).ghuser' name='VG (Construct)' %}
@@ -128,16 +128,127 @@ See [Styles and Patterns]({{ site.baseurl }}{% link _en/beta/guides/revit-styles
 
 ## Creating New Views
 
-### Floor Plans
+{% include ltr/issue_note.html issue_id='149' note='Creating new views corrupts the Project Browser ' %}
 
-### Reflected Ceiling Plans
+### Planar Views
 
-### Elevations
+#### Floor Plans
 
-### Sections
+<!--
+```python
+level = get_view_level()
+view_fam_typeid = \
+    doc.GetDefaultElementTypeId(
+        DB.ElementTypeGroup.ViewTypeFloorPlan
+        )
+new_dest_view = \
+    DB.ViewPlan.Create(doc, view_fam_typeid, level.Id)
+```
+-->
+
+#### Structural Plans
+
+#### Reflected Ceiling Plans
+<!-- 
+```python
+    level = get_view_level()
+    view_fam_typeid = \
+        doc.GetDefaultElementTypeId(
+            DB.ElementTypeGroup.ViewTypeCeilingPlan
+        )
+    new_dest_view = \
+        DB.ViewPlan.Create(doc, view_fam_typeid, level.Id)
+```
+-->
 
 ### Area Plans
+<!-- 
+```python
+    level = get_view_level()
+    areaSchemeId = ?
+    new_dest_view = \
+        DB.ViewPlan.CreateAreaPlan(doc, areaSchemeId, level.Id)
+```
+ -->
 
-### Legends
+### Section Views
+
+#### Elevations
+<!-- 
+```python
+view_fam_typeid = \
+    doc.GetDefaultElementTypeId(
+        DB.ElementTypeGroup.ViewTypeElevation
+        )
+elev_marker = \
+    DB.ElevationMarker.CreateElevationMarker(
+        doc,
+        view_fam_typeid,
+        DB.XYZ(0, 0, 0),
+        1)
+default_floor_plan = find_first_floorplan()
+new_dest_view = \
+    elev_marker.CreateElevation(doc, default_floor_plan.Id, 0)
+scale_param = new_dest_view.Parameter[
+    DB.BuiltInParameter.SECTION_COARSER_SCALE_PULLDOWN_IMPERIAL
+    ]
+scale_param.Set(1)
+```
+ -->
+
+#### Sections
+<!-- 
+```python
+view_fam_typeid = \
+    doc.GetDefaultElementTypeId(
+        DB.ElementTypeGroup.ViewTypeSection
+        )
+view_direction = DB.BoundingBoxXYZ()
+trans_identity = DB.Transform.Identity
+trans_identity.BasisX = -DB.XYZ.BasisX    # x direction
+trans_identity.BasisY = DB.XYZ.BasisZ    # up direction
+trans_identity.BasisZ = DB.XYZ.BasisY    # view direction
+view_direction.Transform = trans_identity
+new_dest_view = \
+    DB.ViewSection.CreateSection(doc,
+                                    view_fam_typeid,
+                                    view_direction)
+scale_param = new_dest_view.Parameter[
+    DB.BuiltInParameter.SECTION_COARSER_SCALE_PULLDOWN_IMPERIAL
+    ]
+scale_param.Set(1)
+```
+ -->
 
 ### Detail Views
+
+#### Legends
+<!-- 
+```python
+def find_first_legend(doc=None):
+    doc = doc or HOST_APP.doc
+    for view in DB.FilteredElementCollector(doc).OfClass(DB.View):
+        if view.ViewType == DB.ViewType.Legend:
+            return view
+    return None
+
+base_legend = find_first_legend()
+
+new_legend = revit.doc.GetElement(
+    base_legend.Duplicate(DB.ViewDuplicateOption.Duplicate)
+    )
+
+new_legend.Scale = scale
+```
+ -->
+
+#### Details
+<!-- 
+```python
+view_fam_typeid = \
+    doc.GetDefaultElementTypeId(
+        DB.ElementTypeGroup.ViewTypeDrafting
+        )
+new_dest_view = DB.ViewDrafting.Create(doc, view_fam_typeid)
+```
+-->
