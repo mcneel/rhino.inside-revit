@@ -128,7 +128,7 @@ See [Styles and Patterns]({{ site.baseurl }}{% link _en/beta/guides/revit-styles
 
 ## Creating New Views
 
-### Floor Plans
+### Creating Planar Views
 
 ```python
 level = get_view_level()

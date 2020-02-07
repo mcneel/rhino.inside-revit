@@ -1,6 +1,7 @@
 ---
-title: Revisions
-order: 66
+title: Schedules & Reports
+order: 64
 ---
 
 {% include ltr/en/wip_note.html %}
+

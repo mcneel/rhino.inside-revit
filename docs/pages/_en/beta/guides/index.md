@@ -50,6 +50,7 @@ These pages guide you through working with Revit views and sheets using {{ site.
 - [Tags and Keynotes]({{ site.baseurl }}{% link _en/beta/guides/revit-tags.md %})
 - [Views]({{ site.baseurl }}{% link _en/beta/guides/revit-views.md %})
 - [View Templates]({{ site.baseurl }}{% link _en/beta/guides/revit-viewtemplates.md %})
+- [Schedules & Reports]({{ site.baseurl }}{% link _en/beta/guides/revit-schedules.md %})
 - [Sheets]({{ site.baseurl }}{% link _en/beta/guides/revit-sheets.md %})
 - [Revisions]({{ site.baseurl }}{% link _en/beta/guides/revit-revisions.md %})
 
