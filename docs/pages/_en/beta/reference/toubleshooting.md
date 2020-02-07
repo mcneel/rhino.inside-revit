@@ -5,6 +5,19 @@ order: 42
 
 This guide provides ways to troubleshoot and collect information about {{ site.terms.rir }} errors. Please see [Known Issues & Bugs]({{ site.baseurl }}{% link _en/beta/reference/known-issues.md %}) for a list of known issues.
 
+## Getting {{ site.terms.rir }} Version
+
+To get the version number of {{ site.terms.rir }} installed on your machine, open Revit, and hover over the Rhino button for a few seconds to see the full tooltip. The extended tooltip shows both {{ site.terms.rhino }} and {{ site.terms.rir }} versions:
+
+![]({{ "/static/images/reference/troubleshooting-about01.png" | prepend: site.baseurl }})
+
+Alternatively, you can use the about window for {{ site.terms.rir }} to get version information:
+
+![]({{ "/static/images/reference/troubleshooting-about02.png" | prepend: site.baseurl }})
+
+![]({{ "/static/images/reference/troubleshooting-about03.png" | prepend: site.baseurl }})
+
+
 ## Submitting Debug Info
 
 In case of any issues when loading {{ site.terms.rir }} you can use the debug information collector to create a debug package and submit to the developers team. This process basically automates the directions under the [Logging and Debugging Messages](#logging-and-debugging-messages) and [SDK Debug Messages](#sdk-debug-messages) sections.
