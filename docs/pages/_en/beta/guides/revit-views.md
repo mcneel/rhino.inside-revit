@@ -128,7 +128,9 @@ See [Styles and Patterns]({{ site.baseurl }}{% link _en/beta/guides/revit-styles
 
 ## Creating New Views
 
-### Creating Planar Views
+### Planar Views
+
+#### Floor Plans
 
 ```python
 level = get_view_level()
@@ -140,7 +142,9 @@ new_dest_view = \
     DB.ViewPlan.Create(doc, view_fam_typeid, level.Id)
 ```
 
-### Reflected Ceiling Plans
+#### Structural Plans
+
+#### Reflected Ceiling Plans
 
 ```python
     level = get_view_level()
@@ -152,7 +156,18 @@ new_dest_view = \
         DB.ViewPlan.Create(doc, view_fam_typeid, level.Id)
 ```
 
-### Elevations
+### Area Plans
+
+```python
+    level = get_view_level()
+    areaSchemeId = ?
+    new_dest_view = \
+        DB.ViewPlan.CreateAreaPlan(doc, areaSchemeId, level.Id)
+```
+
+### Section Views
+
+#### Elevations
 
 ```python
 view_fam_typeid = \
@@ -173,7 +188,8 @@ scale_param = new_dest_view.Parameter[
     ]
 scale_param.Set(1)
 ```
-### Sections
+
+#### Sections
 
 ```python
 view_fam_typeid = \
@@ -196,16 +212,9 @@ scale_param = new_dest_view.Parameter[
 scale_param.Set(1)
 ```
 
-### Area Plans
+### Detail Views
 
-```python
-    level = get_view_level()
-    areaSchemeId = ?
-    new_dest_view = \
-        DB.ViewPlan.CreateAreaPlan(doc, areaSchemeId, level.Id)
-```
-
-### Legends
+#### Legends
 
 ```python
 def find_first_legend(doc=None):
@@ -224,7 +233,7 @@ new_legend = revit.doc.GetElement(
 new_legend.Scale = scale
 ```
 
-### Detail Views
+#### Details
 
 ```python
 view_fam_typeid = \
