@@ -5,11 +5,30 @@ order: 49
 
 {% include ltr/en/wip_note.html %}
 
-## Bones
+## Adding Structure
 
 ### Reference Planes
 
-## Meat
+### Reference Lines
 
+## Adding Geometry
 
-## Muscle
+### Extrusion
+### Blend
+### Revolve
+### Sweep
+### Sweep Blend
+### Voids
+### Model Lines
+### Symbolic Lines
+
+### Connectors
+
+## Constraining Geometry
+
+## Adding Flexibility
+
+## Flexing
+
+## Creating Types
+
