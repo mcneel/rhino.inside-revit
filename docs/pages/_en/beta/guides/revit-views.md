@@ -128,10 +128,13 @@ See [Styles and Patterns]({{ site.baseurl }}{% link _en/beta/guides/revit-styles
 
 ## Creating New Views
 
+{% include ltr/issue_note.html issue_id='149' note='Creating new views corrupts the Project Browser ' %}
+
 ### Planar Views
 
 #### Floor Plans
 
+<!--
 ```python
 level = get_view_level()
 view_fam_typeid = \
@@ -141,11 +144,12 @@ view_fam_typeid = \
 new_dest_view = \
     DB.ViewPlan.Create(doc, view_fam_typeid, level.Id)
 ```
+-->
 
 #### Structural Plans
 
 #### Reflected Ceiling Plans
-
+<!-- 
 ```python
     level = get_view_level()
     view_fam_typeid = \
@@ -155,20 +159,22 @@ new_dest_view = \
     new_dest_view = \
         DB.ViewPlan.Create(doc, view_fam_typeid, level.Id)
 ```
+-->
 
 ### Area Plans
-
+<!-- 
 ```python
     level = get_view_level()
     areaSchemeId = ?
     new_dest_view = \
         DB.ViewPlan.CreateAreaPlan(doc, areaSchemeId, level.Id)
 ```
+ -->
 
 ### Section Views
 
 #### Elevations
-
+<!-- 
 ```python
 view_fam_typeid = \
     doc.GetDefaultElementTypeId(
@@ -188,9 +194,10 @@ scale_param = new_dest_view.Parameter[
     ]
 scale_param.Set(1)
 ```
+ -->
 
 #### Sections
-
+<!-- 
 ```python
 view_fam_typeid = \
     doc.GetDefaultElementTypeId(
@@ -211,11 +218,12 @@ scale_param = new_dest_view.Parameter[
     ]
 scale_param.Set(1)
 ```
+ -->
 
 ### Detail Views
 
 #### Legends
-
+<!-- 
 ```python
 def find_first_legend(doc=None):
     doc = doc or HOST_APP.doc
@@ -232,9 +240,10 @@ new_legend = revit.doc.GetElement(
 
 new_legend.Scale = scale
 ```
+ -->
 
 #### Details
-
+<!-- 
 ```python
 view_fam_typeid = \
     doc.GetDefaultElementTypeId(
@@ -242,3 +251,4 @@ view_fam_typeid = \
         )
 new_dest_view = DB.ViewDrafting.Create(doc, view_fam_typeid)
 ```
+-->
