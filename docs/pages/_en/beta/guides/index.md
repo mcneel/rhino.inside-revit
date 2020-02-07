@@ -39,6 +39,8 @@ Grasshopper addon, included with {{ site.terms.rir }}, provides custom Revit-awa
 - [Levels & Grids]({{ site.baseurl }}{% link _en/beta/guides/revit-levels.md %})
 - [Structural Elements]({{ site.baseurl }}{% link _en/beta/guides/revit-struct.md %})
 - [Materials]({{ site.baseurl }}{% link _en/beta/guides/revit-materials.md %})
+<!-- 49: last -->
+- [Custom Families]({{ site.baseurl }}{% link _en/beta/guides/revit-customfamilies.md %})
 
 <!-- 50 -->
 
@@ -50,6 +52,7 @@ These pages guide you through working with Revit views and sheets using {{ site.
 - [Tags and Keynotes]({{ site.baseurl }}{% link _en/beta/guides/revit-tags.md %})
 - [Views]({{ site.baseurl }}{% link _en/beta/guides/revit-views.md %})
 - [View Templates]({{ site.baseurl }}{% link _en/beta/guides/revit-viewtemplates.md %})
+- [Schedules & Reports]({{ site.baseurl }}{% link _en/beta/guides/revit-schedules.md %})
 - [Sheets]({{ site.baseurl }}{% link _en/beta/guides/revit-sheets.md %})
 - [Revisions]({{ site.baseurl }}{% link _en/beta/guides/revit-revisions.md %})
 
