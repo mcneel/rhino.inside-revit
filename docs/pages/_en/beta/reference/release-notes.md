@@ -5,6 +5,19 @@ order: 40
 
 <!-- most recent release should be on top -->
 
+{% include ltr/release-header.html version="0.0.7341.20715" time="02/06/2020 11:30:30" %}
+
+- Added **Structural Usage** input parameter to *Wall.ByCurve* component
+
+  ![]({{ "/static/images/release_notes/79999999_01.png" | prepend: site.baseurl }}){: class="small-image"}
+
+- Added **Principal Parameter** menu option to parameters
+  
+  ![]({{ "/static/images/release_notes/79999999_02.png" | prepend: site.baseurl }}){: class="small-image"}
+
+- [Fixed Issue #131](https://github.com/mcneel/rhino.inside-revit/issues/131)
+- [Fixed Issue #123](https://github.com/mcneel/rhino.inside-revit/issues/123)
+
 {% include ltr/release-header.html version="0.0.7333.32251" time="1/29/2020 17:55:02 AM" %}
 
 - Added HiDPI images for Grasshopper toolbar buttons
