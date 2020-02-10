@@ -2,20 +2,21 @@
 title: Analytical Model Manipulation
 ---
 
-{% include ltr/en/wip_note.html %}
-
-This sample reviews ways that Rhino and Grasshopper can be used to manipulate the Revit Analytical model in Revit.
-
-It seems that engineers are constantly mixing and matching information from multiple sources to do analysis.  Use Rhino and Grasshopper to collect information from multiple sources to dynamically bring the information together for analysis.
-
+<!-- intro video -->
 {% include youtube_player.html id="E2mIq7g_4Ro" %}
 
-## Open Sample files:
-1. Open the standard *rst_basic_sample_project.rvt* in Revit.
-2. Start Rhino.Inside.Revit and open Rhino and the Grasshopper file [structural_revit_to_rhino.gh]({{ "/static/samples/structural_revit_to_rhino.gh" | prepend: site.baseurl }}) file.
+{% include ltr/download_pkg.html archive='/static/samples/structural_revit_to_rhino.zip' %}
 
-The component covered in this sample:
-1. Analytical Category picker
-1. Simplify Curve component
-1. Set Parameter on Revit Element
-1. [Karamba Grasshopper plugin](https://www.karamba3d.com/)
+## Files
+
+- **rst_basic_sample_project.rvt** Revit sample model. This model is shipped with Revit by default.
+- **structural_revit_to_rhino.gh** Grasshopper definition
+
+Open Sample files:
+
+1. Open the sample Revit model
+2. Start {{ site.terms.rir }} and open Rhino and Grasshopper windows. Open **structural_revit_to_rhino.gh** in Grasshopper
+
+## Description
+
+This example takes a look at working with Revit analytical models using {{ site.terms.rir }}. Often, building engineers, need to bring analytical information together from multiple sources. Rhino and Grasshopper can be used as the platform to extract and convert the data from various sources. {{ site.terms.rir }} specifically help extracting from, and updating information from Revit models.
