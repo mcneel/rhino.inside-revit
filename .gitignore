@@ -337,4 +337,6 @@ ASALocalRun/
 /CPython/rhinoinside/RhinoInsidePythonShim.dll
 /Autodesk/Revit/src/RhinoInside.Revit/RhinoInside.Revit.sln
 
+# remove OS files
 desktop.ini
+.DS_Store
