@@ -39,7 +39,8 @@ Grasshopper addon, included with {{ site.terms.rir }}, provides custom Revit-awa
 - [Levels & Grids]({{ site.baseurl }}{% link _en/beta/guides/revit-levels.md %})
 - [Structural Elements]({{ site.baseurl }}{% link _en/beta/guides/revit-struct.md %})
 - [Materials]({{ site.baseurl }}{% link _en/beta/guides/revit-materials.md %})
-<!-- 49: last -->
+<!-- 48: last -->
+- [Modify Geometry]({{ site.baseurl }}{% link _en/beta/guides/revit-modify.md %})
 - [Custom Families]({{ site.baseurl }}{% link _en/beta/guides/revit-customfamilies.md %})
 
 <!-- 50 -->
