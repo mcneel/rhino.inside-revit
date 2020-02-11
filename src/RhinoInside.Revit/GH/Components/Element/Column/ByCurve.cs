@@ -43,7 +43,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!type.Value.IsActive)
         type.Value.Activate();
 
-      SolveOptionalLevel(ref level, doc, curve.FromZ);
+      SolveOptionalLevel(doc, curve, ref level, out var bbox);
 
       // Type
       ChangeElementTypeId(ref element, type.Value.Id);
