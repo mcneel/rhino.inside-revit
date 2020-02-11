@@ -3,6 +3,11 @@
         max-width: 800px;
     }
 
+    .row-fluid {
+        display: block;
+        justify-content: none;
+    }
+    
     .site-nav .img-button-title{
         display: inline-block;
     }
@@ -38,10 +43,11 @@
         font-size: 13px;
         font-weight: 400;
         padding: 5px 10px 5px 10px;
-        margin-right: 5px;
+        margin-right: 3px;
         background:#f7f7f7;
         border-radius: .25em;
-        margin-bottom: 5px;
+        margin-bottom: 6px;
+        width: unset;
     }
 
     .sidebar a:hover, .nav a:hover {
