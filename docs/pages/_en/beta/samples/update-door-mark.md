@@ -1,24 +1,36 @@
 ---
-title: Managing Parameters with Grasshopper
+title: Update Door Marks
+published: false
 ---
 
-{% include ltr/en/wip_note.html %}
+<!-- intro video -->
+{% include youtube_player.html id="yDZ4y-ZbBkM" %}
+
+
+{% include ltr/download_pkg.html archive='/static/samples/changing-parameters-with-grasshopper.zip' %}
+
+
+## Files
+- **door-param-script.gh** Grasshopper definition for updating door Mark parameter
+- write-sheet-param-humanui.gh
+
+## Description
+
+### Updating Door Mark
+
 
 This sample shows how to read and write the parameters of Revit&reg; elements using Grasshopper and Rhino&reg;. There are two sample files here. 
 
 1. The first sample will simple copy the Mark value from each door and place it in the comments parameter of the same door.
 2. The second sample will change the Edited BY show how HumanUI can be used to create a custom dialog box.
 
-<!--![Revit Geometry brought into Rhino](/static/images/revit-to-rhino-final.jpg)-->
-
-{% include youtube_player.html id="yDZ4y-ZbBkM" %}
 
 ## Reading and Writing Parameters First Sample:
 
 1. Open the standard Revit sample file *RAC_basic_sample_project.rvt*.
 1. Setting the view to the standard Revit 3d view helps see what is happening in this tutorial 
-1. Start Rhino.Inside.Revit by pressing the the Rhino icon under Add-Ins.
-2. In the Rhinoceros Toolbar in Revit, select the Rhino Player icon <img src="{{ "/static/images/ribbon/GrasshopperPlayer.png" | prepend: site.baseurl }}" alt="Grasshopper Player"
+2. Start {{ site.terms.rir }} by pressing the the Rhino icon under Add-Ins.
+3. In the Rhinoceros Toolbar in Revit, select the Rhino Player icon <img src="{{ "/static/images/ribbon/GrasshopperPlayer.png" | prepend: site.baseurl }}" alt="Grasshopper Player"
 	 width="60" height="50" align="middle" float="none">
 	
 3. Open the [Sample Door Parameter Script.gh]({{ "/static/samples/door-param-script.gh" | prepend: site.baseurl }})

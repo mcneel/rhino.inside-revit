@@ -1,5 +1,5 @@
 ---
-title: Column Family Along Curve
+title: Create and Place Column Family Along Curve
 ---
 
 <!-- intro video -->
