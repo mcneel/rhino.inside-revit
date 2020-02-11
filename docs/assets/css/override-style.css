@@ -42,6 +42,11 @@ pre {
     max-width: 1170px;
 }
 
+.row-fluid {
+    display: flex;
+    justify-content: space-between;
+}
+
 /*
     navigation bar ============================================================
 */
@@ -150,8 +155,11 @@ pre {
 }
 
 /* full-screen page contents */
-.wide-content img {
+.wide-content {
     display: block;
+}
+
+.wide-content img {
     margin-left: auto;
     margin-right: auto;
     width: 100%;
@@ -159,7 +167,8 @@ pre {
 
 /* page with sidebar contents */
 .side-content {
-    margin-left: 225px;
+    margin-left: 20px;
+    width: 100%;
 }
 
 .side-content h1 {
@@ -184,8 +193,9 @@ pre {
 
 /* side bar */
 .sidebar {
-    width: 215px;
-    position: fixed;
+    position: sticky;
+    top: 90px;
+    height: 100%;
 }
 
 .sidebar ul {
@@ -206,6 +216,7 @@ pre {
     font-weight: 400;
     padding: 4px 20px 4px 18px;
     display: block;
+    width: 215px;
 }
 
 .sidebar a:hover, .nav a:hover {
@@ -233,6 +244,9 @@ pre {
     color: #111;
 }
 
+.error404 {
+    text-align: center;
+}
 /*
     footer ====================================================================
 */
