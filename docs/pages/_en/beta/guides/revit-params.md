@@ -22,6 +22,10 @@ In Revit API, all the built-in parameters are represented by the {% include api_
 
 Revit allows a user to create a series of custom parameters and apply them globally to selected categories. The *Element Properties* panel displays the project parameters attached to the selected element as well.
 
+### Global Parameters
+
+{% include ltr/en/wip_note.html %}
+
 
 ## Inspecting Parameters
 
