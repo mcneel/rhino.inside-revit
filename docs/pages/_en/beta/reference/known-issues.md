@@ -23,7 +23,7 @@ A common conflict is an older version of the {{ site.terms.pyrevit }} plugin.  W
 
   - DLL is also uploaded here for convenience if you don't know how to download NuGet packages. It's placed inside a ZIP archive for security. Unpack and place under `bin/` directory in pyRevit installation directory. [Microsoft.WindowsAPICodePack.Shell.dll.zip](https://github.com/eirannejad/pyRevit/files/3503717/Microsoft.WindowsAPICodePack.Shell.dll.zip)
 
-If this does not solve the problem, then using the [Search for Conflicting Plugins](#search-for-conflicting-plugins) section.
+If this does not solve the problem, then using the [Search for Conflicting Plugins]({{ site.baseurl }}{% link _en/beta/reference/toubleshooting.md %}#search-for-conflicting-plugins) section.
 
 ## JSON Error
 
@@ -35,5 +35,5 @@ A Long JSON error shows up as shown below
 
 ### Workaround
 
-Like the previous -200 error, this is a conflict with another plugin. See the Error - 200 solution for this problem, and the [Search for Conflicting Plugins](#search-for-conflicting-plugins) section below.
+Like the previous -200 error, this is a conflict with another plugin. See the Error - 200 solution for this problem, and the [Search for Conflicting Plugins]({{ site.baseurl }}{% link _en/beta/reference/toubleshooting.md %}#search-for-conflicting-plugins) section below.
 
