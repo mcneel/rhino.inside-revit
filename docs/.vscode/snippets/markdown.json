@@ -1,8 +1,13 @@
 {
     "RIR Image": {
         "prefix": "ririmg",
-        "description": "Image block for Rhino.Inside.Revit Wiki",
+        "description": "Image tag for Rhino.Inside.Revit Wiki",
         "body": ["![]({{ \"/static/images/guides/$1.png\" | prepend: site.baseurl }})"]
+    },
+    "RIR Link": {
+        "prefix": "rirlnk",
+        "description": "Link tag for Rhino.Inside.Revit Wiki",
+        "body": ["{% link _en/beta/guides/$1.md %}"]
     },
     "RIR WIP Note": {
         "prefix": "rirwip",
