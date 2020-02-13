@@ -73,7 +73,7 @@ namespace RhinoInside.Revit.GH.Components
       )
         ThrowArgumentException(nameof(curve), "Curve must be a C2 continuous planar non closed curve.");
 
-      SolveOptionalLevel(ref level, doc, curve, nameof(level));
+      SolveOptionalLevel(doc, curve, ref level, out var bbox);
 
       var centerLine = curve.ToHost();
 

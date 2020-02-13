@@ -151,8 +151,6 @@ namespace RhinoInside.Revit.GH.Parameters
       Name = "Document.LevelsPicker";
       MutableNickName = false;
       Description = "Provides a Level picker";
-
-      ListMode = GH_ValueListMode.CheckList;
     }
 
     void RefreshList()

@@ -86,12 +86,19 @@ namespace RhinoInside.Revit.GH.Types
       public Proxy(ParameterKey o) : base(o) { (this as IGH_GooProxy).UserString = FormatInstance(); }
 
       public override bool IsParsable() => true;
-      public override string FormatInstance() => ((DB.BuiltInParameter) owner.Value.IntegerValue).ToStringGeneric();
+      public override string FormatInstance()
+      {
+        int value = owner.Value?.IntegerValue ?? -1;
+        if (Enum.IsDefined(typeof(DB.BuiltInParameter), value))
+          return ((DB.BuiltInParameter) value).ToString();
+
+        return value.ToString();
+      }
       public override bool FromString(string str)
       {
         if (Enum.TryParse(str, out DB.BuiltInParameter builtInParameter))
         {
-          owner.Value = new DB.ElementId(builtInParameter);
+          owner.SetValue(owner.Document ?? Revit.ActiveUIDocument.Document, new DB.ElementId(builtInParameter));
           return true;
         }
 

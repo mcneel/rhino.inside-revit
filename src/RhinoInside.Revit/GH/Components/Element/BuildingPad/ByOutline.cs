@@ -48,13 +48,9 @@ namespace RhinoInside.Revit.GH.Components
       var scaleFactor = 1.0 / Revit.ModelUnits;
       boundaries = boundaries.Select(x => x.ChangeUnits(scaleFactor)).ToArray();
 
-      var boundaryBBox = Rhino.Geometry.BoundingBox.Empty;
-      foreach (var boundary in boundaries)
-        boundaryBBox.Union(boundary.GetBoundingBox(true));
+      SolveOptionalLevel(doc, boundaries, ref level, out var boundaryBBox);
 
       var curveLoops = boundaries.Select(region => DB.CurveLoop.Create(region.ToHostMultiple().SelectMany(x => x.ToBoundedCurves()).ToList()));
-
-      SolveOptionalLevel(ref level, doc, boundaryBBox.Min.Z);
 
       if (element is DB.Architecture.BuildingPad buildingPad)
       {
