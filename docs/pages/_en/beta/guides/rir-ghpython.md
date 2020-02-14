@@ -85,11 +85,25 @@ import rhinoscriptsyntax as rs
 import Rhino
 import RhinoInside
 import Grasshopper
+from Grasshopper.Kernel import GH_RuntimeMessageLevel as RML
 from RhinoInside.Revit import Revit, Convert
 from Autodesk.Revit import DB
 
 # access the active document object
 doc = Revit.ActiveDBDocument
+
+# a few utility methods
+def show_warning(msg):
+    ghenv.Component.AddRuntimeMessage(RML.Warning, msg)
+
+def show_error(msg):
+    ghenv.Component.AddRuntimeMessage(RML.Error, msg)
+
+def show_remark(msg):
+    ghenv.Component.AddRuntimeMessage(RML.Remark, msg)
+
+# write your code here
+# ...
 ```
 
 You can download the User Object for this template from this button:
@@ -226,6 +240,25 @@ if Trigger:
     )
 ```
 
+## Handling Transactions
+
+To effectively create new transactions and handle the changes to your model in Grasshopper python components, use the try-catch block example below:
+
+```python
+# create and start the transaction
+t = DB.Transaction(doc, '<give a descriptive name to your transaction>')
+t.Start()
+try:
+    # change Revit document here
+    # commit the changes after all changes has been made
+    t.Commit()
+except Exception as txn_err:
+    # if any errors happen while changing the document, an exception is thrown
+    # make sure to print the exception message for debugging
+    show_error(txn_err)
+    # and rollback the changes made before error
+    t.RollBack()
+```
 ## Inspecting Revit
 
 `revit_version = Revit.ActiveUIApplication.Application.VersionNumber`
