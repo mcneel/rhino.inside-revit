@@ -13,7 +13,7 @@ Since {{ site.terms.rir }} project brings Rhino and Grasshopper into the {{ site
 
 When adding a new python component into the Grasshopper definition, you will get the default imports:
 
-```python
+{% highlight python %}
 """Provides a scripting component.
     Inputs:
         x: The x script variable
@@ -25,10 +25,11 @@ __author__ = ""
 __version__ = ""
 
 import rhinoscriptsyntax as rs
-```
+{% endhighlight %}
+
 In order to access the various APIs we need to import them into the script scope first. To access Revit and {{ site.terms.rir }} we need to first import the CLR (Common-Language-Runtime) module in python and use that to add the necessary library references:
 
-```python
+{% highlight python %}
 # Common-Language-Runtime module provided by IronPython
 import clr
 
@@ -41,11 +42,11 @@ clr.AddReference('RhinoInside.Revit')
 # add reference to Revit API (two DLLs)
 clr.AddReference('RevitAPI') 
 clr.AddReference('RevitAPIUI')
-```
+{% endhighlight %}
 
 Now we can import the namespaces into the script scope:
 
-```python
+{% highlight python %}
 # from System.Core DLL
 from System import Enum
 
@@ -56,7 +57,7 @@ from RhinoInside.Revit import Revit, Convert
 # Revit API
 from Autodesk.Revit import DB
 from Autodesk.Revit import UI
-```
+{% endhighlight %}
 
 ## Custom User Component
 
@@ -72,7 +73,7 @@ After the user object has been created, you can easily create a new python compo
 
 Here is a template script that covers most of the use cases:
 
-```python
+{% highlight python %}
 import clr
 clr.AddReference('System.Core')
 clr.AddReference('RhinoInside.Revit')
@@ -89,6 +90,8 @@ from Grasshopper.Kernel import GH_RuntimeMessageLevel as RML
 from RhinoInside.Revit import Revit, Convert
 from Autodesk.Revit import DB
 
+# access to Revit as host
+REVIT_VERSION = Revit.ActiveUIApplication.Application.VersionNumber
 # access the active document object
 doc = Revit.ActiveDBDocument
 
@@ -104,7 +107,7 @@ def show_remark(msg):
 
 # write your code here
 # ...
-```
+{% endhighlight %}
 
 You can download the User Object for this template from this button:
 
@@ -125,7 +128,7 @@ Once this foundation is ready, then we can continue to create the script.
 
 To show how a geometry that is created in Grasshopper, previews in both Rhino and Revit dynamically we will use the script below. This script will create a sphere based on the `Radius` input value:
 
-```python
+{% highlight python %}
 import clr
 clr.AddReference('System.Core')
 clr.AddReference('RhinoInside.Revit')
@@ -144,7 +147,7 @@ from Autodesk.Revit import DB
 doc = Revit.ActiveDBDocument
 
 Sphere = Rhino.Geometry.Sphere(Rhino.Geometry.Point3d.Origin, Radius)
-```
+{% endhighlight %}
 
 The `Sphere()` method is from the `Rhino.Geometry` namespace and is part of the `RhinoCommon` API.
 
@@ -160,7 +163,7 @@ Because baking objects to Revit can take a long time and many times only should 
 
 First, let's create a bake function:
 
-```python
+{% highlight python %}
 def create_geometry(doc):
     # convert the sphere into Brep
     brep = Sphere.ToBrep()
@@ -183,25 +186,25 @@ def create_geometry(doc):
     # the AppendShape() method expects
     for geom in Convert.ToHost(meshes):
         ds.AppendShape(geom)
-```
+{% endhighlight %}
 
 Once we are done creating this function, we can modify the script to listen for the trigger and call this function.
 
 {% capture api_note %}
-All changes to the Revit model need to be completed inside a *Transaction*. To facilitate this, {{ site.terms.rir }} provides the *Revit.EnqueueAction*< that will wrap our function inside a transaction and calls when Revit is ready to accept changes to active document. This mechanism is designed to ensure only one Revit Add-in can make changes to the document at any time
+All changes to the Revit model need to be completed inside a *Transaction*. To facilitate this, {{ site.terms.rir }} provides the `Revit.EnqueueAction` method that will wrap our function inside a transaction and calls when Revit is ready to accept changes to active document. The transaction mechanism is designed to ensure only one Revit Add-in can make changes to the document at any time. To create your own transactions, see [Handling Transactions](#handling-transactions)
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-```python
+{% highlight python %}
 if Trigger:
     Revit.EnqueueAction(
         Action[DB.Document](create_geometry)
     )
-```
+{% endhighlight %}
 
 And here is the complete sample code:
 
-```python
+{% highlight python %}
 import clr
 clr.AddReference('System.Core')
 clr.AddReference('RhinoInside.Revit')
@@ -238,13 +241,13 @@ if Trigger:
     Revit.EnqueueAction(
         Action[DB.Document](create_geometry)
     )
-```
+{% endhighlight %}
 
 ## Handling Transactions
 
 To effectively create new transactions and handle the changes to your model in Grasshopper python components, use the try-catch block example below:
 
-```python
+{% highlight python %}
 # create and start the transaction
 t = DB.Transaction(doc, '<give a descriptive name to your transaction>')
 t.Start()
@@ -258,10 +261,20 @@ except Exception as txn_err:
     show_error(txn_err)
     # and rollback the changes made before error
     t.RollBack()
-```
+{% endhighlight %}
+
 ## Inspecting Revit
 
-`revit_version = Revit.ActiveUIApplication.Application.VersionNumber`
+To inspect which version of Revit you are using, use the `REVIT_VERSION` global variable provided in the template script above. See example below:
+
+{% highlight python %}
+REVIT_VERSION = Revit.ActiveUIApplication.Application.VersionNumber
+
+if REVIT_VERSION == 2019:
+    # do stuff using Revit 2019 API
+else:
+    # do other stuff
+{% endhighlight %}
 
 ## Additional Resources
 

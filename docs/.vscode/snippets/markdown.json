@@ -9,6 +9,15 @@
         "description": "Link tag for Rhino.Inside.Revit Wiki",
         "body": ["{% link _en/beta/guides/$1.md %}"]
     },
+    "RIR Python": {
+        "prefix": "rirpy",
+        "description": "Link tag for Rhino.Inside.Revit Wiki",
+        "body": [
+            "{% highlight python %}",
+            "$1",
+            "{% endhighlight %}"
+        ]
+    },
     "RIR WIP Note": {
         "prefix": "rirwip",
         "description": "Work-in-progress note block for Rhino.Inside.Revit Wiki",

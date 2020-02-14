@@ -19,12 +19,13 @@ In Revit API, line patterns are represented by the {% include api_type.html type
 
 Notice that the `Solid` line pattern is being provided as a python object. `Solid` is a special line pattern and Revit does not return a normal API type for this specific line pattern. Hence a temporary python wrapper has been defined for this type in the component:
 
-```python
+{% highlight python %}
 class SolidLinePatternElement(object):
     @property
     def Id(self):
         return DB.LinePatternElement.GetSolidPatternId()
-```
+{% endhighlight %}
+
 &nbsp;
 
 {% include ltr/download_comp.html archive='/static/ghnodes/Find Line Pattern.ghuser' name='Find Line Pattern' %}
