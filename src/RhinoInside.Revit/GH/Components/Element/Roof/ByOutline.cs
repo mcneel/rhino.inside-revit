@@ -46,8 +46,7 @@ namespace RhinoInside.Revit.GH.Components
 
       SolveOptionalType(ref type, doc, DB.ElementTypeGroup.RoofType, nameof(type));
 
-      double minZ = boundary.GetBoundingBox(true).Min.Z;
-      SolveOptionalLevel(ref level, doc, minZ);
+      SolveOptionalLevel(doc, boundary, ref level, out var bbox);
 
       var parametersMask = new DB.BuiltInParameter[]
       {
@@ -66,7 +65,7 @@ namespace RhinoInside.Revit.GH.Components
 
       if (element != null)
       {
-        element.get_Parameter(DB.BuiltInParameter.ROOF_LEVEL_OFFSET_PARAM).Set(minZ - level.Value.Elevation);
+        element.get_Parameter(DB.BuiltInParameter.ROOF_LEVEL_OFFSET_PARAM).Set(bbox.Min.Z - level.Value.Elevation);
       }
     }
   }

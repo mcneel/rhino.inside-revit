@@ -404,16 +404,19 @@ namespace RhinoInside.Revit.GH.Components
         Params.UnregisterOutputParameter(output);
       }
 
-      foreach (var group in parameters.GroupBy(x => x.ParameterGroup).OrderBy(x => x.Key))
+      if (parameters is object)
       {
-        foreach (var parameter in group.OrderBy(x => x.ParameterBuiltInId))
+        foreach (var group in parameters.GroupBy(x => x.ParameterGroup).OrderBy(x => x.Key))
         {
-          AddOutputParameter(parameter);
-
-          if (connected.TryGetValue(parameter, out var recipients))
+          foreach (var parameter in group.OrderBy(x => x.ParameterBuiltInId))
           {
-            foreach (var recipient in recipients)
-              recipient.AddSource(parameter);
+            AddOutputParameter(parameter);
+
+            if (connected.TryGetValue(parameter, out var recipients))
+            {
+              foreach (var recipient in recipients)
+                recipient.AddSource(parameter);
+            }
           }
         }
       }

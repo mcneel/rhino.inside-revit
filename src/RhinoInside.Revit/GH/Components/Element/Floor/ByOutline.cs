@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH.Components
 
       SolveOptionalType(ref type, doc, DB.ElementTypeGroup.FloorType, nameof(type));
 
-      SolveOptionalLevel(ref level, doc, boundary, nameof(level));
+      SolveOptionalLevel(doc, boundary, ref level, out var bbox);
 
       var curveArray = boundary.ToHostMultiple().ToCurveArray();
 

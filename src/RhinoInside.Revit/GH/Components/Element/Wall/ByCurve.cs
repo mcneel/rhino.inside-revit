@@ -128,8 +128,7 @@ namespace RhinoInside.Revit.GH.Components
 
       SolveOptionalType(ref type, doc, DB.ElementTypeGroup.WallType, nameof(type));
 
-      double axisMinZ = Math.Min(curve.PointAtStart.Z, curve.PointAtEnd.Z);
-      bool levelIsEmpty = SolveOptionalLevel(ref level, doc, curve, nameof(level));
+      bool levelIsEmpty = SolveOptionalLevel(doc, curve, ref level, out var bbox);
 
       height *= scaleFactor;
       if (height < Revit.VertexTolerance)
@@ -194,7 +193,7 @@ namespace RhinoInside.Revit.GH.Components
           type.Value.Id,
           level.Value.Id,
           height,
-          levelIsEmpty ? axisMinZ - level.Value.Elevation : 0.0,
+          levelIsEmpty ? bbox.Min.Z - level.Value.Elevation : 0.0,
           flipped,
           structuralUsage != DB.Structure.StructuralWallUsage.NonBearing
         );
@@ -207,10 +206,10 @@ namespace RhinoInside.Revit.GH.Components
           DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
           DB.BuiltInParameter.ELEM_FAMILY_PARAM,
           DB.BuiltInParameter.ELEM_TYPE_PARAM,
-          DB.BuiltInParameter.WALL_BASE_CONSTRAINT,
-          DB.BuiltInParameter.WALL_USER_HEIGHT_PARAM,
-          DB.BuiltInParameter.WALL_BASE_OFFSET,
           DB.BuiltInParameter.WALL_KEY_REF_PARAM,
+          DB.BuiltInParameter.WALL_USER_HEIGHT_PARAM,
+          DB.BuiltInParameter.WALL_BASE_CONSTRAINT,
+          DB.BuiltInParameter.WALL_BASE_OFFSET,
           DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT,
           DB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM
         };
@@ -221,7 +220,7 @@ namespace RhinoInside.Revit.GH.Components
       if (newWall != null)
       {
         newWall.get_Parameter(DB.BuiltInParameter.WALL_BASE_CONSTRAINT).Set(level.Value.Id);
-        newWall.get_Parameter(DB.BuiltInParameter.WALL_BASE_OFFSET).Set(levelIsEmpty ? axisMinZ - level.Value.Elevation : 0.0);
+        newWall.get_Parameter(DB.BuiltInParameter.WALL_BASE_OFFSET).Set(levelIsEmpty ? bbox.Min.Z - level.Value.Elevation : 0.0);
         newWall.get_Parameter(DB.BuiltInParameter.WALL_USER_HEIGHT_PARAM).Set(height);
         newWall.get_Parameter(DB.BuiltInParameter.WALL_KEY_REF_PARAM).Set((int) locationLine);
         if(structuralUsage == DB.Structure.StructuralWallUsage.NonBearing)
