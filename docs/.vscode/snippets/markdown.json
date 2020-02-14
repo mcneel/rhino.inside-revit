@@ -38,5 +38,10 @@
         "prefix": "rirghu",
         "description": "Download Component note block for Rhino.Inside.Revit Wiki",
         "body": ["{% include ltr/download_comp.html archive='/static/ghnodes/$1' name='$2.ghuser' %}"]
+    },
+    "RIR Bug Note": {
+        "prefix": "rirbug",
+        "description": "GitHub Issue note block for Rhino.Inside.Revit Wiki",
+        "body": ["{% include ltr/issue_note.html issue_id='$1' note='$2' %}"]
     }
 }
