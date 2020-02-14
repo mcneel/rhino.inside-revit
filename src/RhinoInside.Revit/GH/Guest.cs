@@ -48,11 +48,17 @@ namespace RhinoInside.Revit.GH
       Revit.DocumentChanged += OnDocumentChanged;
       Revit.ApplicationUI.Idling += OnIdle;
 
+      Rhinoceros.ModalScope.Enter += ModalScope_Enter;
+      Rhinoceros.ModalScope.Exit  += ModalScope_Exit;
+
       return LoadReturnCode.Success;
     }
 
     void IGuest.OnCheckOut()
     {
+      Rhinoceros.ModalScope.Exit  -= ModalScope_Exit;
+      Rhinoceros.ModalScope.Enter -= ModalScope_Enter;
+
       Revit.ApplicationUI.Idling -= OnIdle;
       Revit.DocumentChanged -= OnDocumentChanged;
 
@@ -175,6 +181,18 @@ namespace RhinoInside.Revit.GH
 
       GH_ComponentServer.UpdateRibbonUI();
       return true;
+    }
+
+    private void ModalScope_Enter(object sender, EventArgs e)
+    {
+      if (Instances.ActiveCanvas?.Document is GH_Document definition)
+        definition.Enabled = true;
+    }
+
+    private void ModalScope_Exit(object sender, EventArgs e)
+    {
+      if (Instances.ActiveCanvas?.Document is GH_Document definition)
+        definition.Enabled = false;
     }
 
     void OnDocumentChanged(object sender, DocumentChangedEventArgs e)
