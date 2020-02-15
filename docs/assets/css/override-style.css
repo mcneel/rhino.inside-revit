@@ -202,6 +202,9 @@ pre {
     list-style: none;
     padding-left: 0;
     margin-left: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-height: calc(100vh - 8em);
 }
 
 .sidebar li, .nav li {
@@ -247,6 +250,26 @@ pre {
 .error404 {
     text-align: center;
 }
+
+.scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #e8e8e8 #f9f9f9;
+}
+
+.scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scrollbar::-webkit-scrollbar-track {
+    background-color: #f9f9f9;
+    border-radius: 3px;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+    background-color: #e8e8e8;
+}
+
 /*
     footer ====================================================================
 */

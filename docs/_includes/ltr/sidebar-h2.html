@@ -1,4 +1,4 @@
-<ul class="nav">
+<ul class="nav scrollbar">
     <!-- Find the h2 group and any h3 subgroups -->
     {% assign groups = content | split:'<h2 id="' %}
 
@@ -40,7 +40,7 @@
             <li class="nav-item">
                 <a class="nav-link page-link" href="#{{groupHandle}}">{{ groupTitle | truncate: 36 }}</a>
                 {% if include.depth == 2 and group contains '<h3 id="' %}
-                    <ul class="nav">
+                    <ul class="nav scrollbar">
                         {% assign subgroups = group | split:'<h3 id="' %}
 
                         {% for subgroup in subgroups offset:1 %}
