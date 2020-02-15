@@ -179,7 +179,7 @@ Since Rhino is running inside the memory of Revit, potentially all the Rhino and
 
 Take a look at this example python script. It imports symbols from all the mentioned APIs into the script.
 
-```python
+{% highlight python %}
 # adding references to the System, RhinoInside
 import clr
 clr.AddReference('System.Core')
@@ -208,15 +208,15 @@ from RhinoInside.Revit import Revit, Convert
 
 # getting active Revit document
 doc = Revit.ActiveDBDocument
-```
+{% endhighlight %}
 
 So to use the example above, we can add the lines below to our script to read the geometry of input Revit element (`E`) using Revit API (`.Geometry[DB.Options()]`) and the pass that to the utility method provided by {{ site.terms.rir }} API to convert the Revit geometry into Rhino (`Convert.ToRhino()`) and finally pass the Rhino geometry to Grasshopper output.
 
-```python
+{% highlight python %}
 O = Convert.ToRhino(
     E.Geometry[DB.Options()]
     )
-```
+{% endhighlight %}
 
 ![]({{ "/static/images/started/rir-ghpy.png" | prepend: site.baseurl }})
 
