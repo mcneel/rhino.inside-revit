@@ -33,6 +33,13 @@ namespace RhinoInside.Revit.GH
         Instances.CanvasCreated -= CanvasCreated;
         canvas.DocumentChanged += ActiveCanvas_DocumentChanged;
       };
+
+      Instances.CanvasDestroyedEventHandler Canvas_Destroyed = default;
+      Instances.CanvasDestroyed += Canvas_Destroyed = (canvas) =>
+      {
+        Instances.CanvasDestroyed -= Canvas_Destroyed;
+        canvas.DocumentChanged -= ActiveCanvas_DocumentChanged;
+      };
     }
 
     #region IExternalServer
