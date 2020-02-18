@@ -1,6 +1,6 @@
 ---
 title: "Data Model: Types"
-order: 31
+order: 32
 ---
 
 Revit organizes the building components into *Categories*, *Families*, and *Types*. In this article, we will discuss each and guide you in dealing with this organization method when using {{ site.terms.rir }} (or Revit API).
@@ -69,6 +69,11 @@ The *Document.ElementTypes* component can further filter the list of types:
 
 ![]({{ "/static/images/guides/revit-families02.png" | prepend: site.baseurl }})
 
+### Querying Type Info
+
+Use the *ElementType.Identity* to access information about that type. Please note that the *Family Name* parameter, returns the *System Family* name for *System Types* and the *Custom Family* name for Custom Types:
+
+![]({{ "/static/images/guides/revit-families02a.png" | prepend: site.baseurl }})
 
 ## Accessing Family of a Type
 
