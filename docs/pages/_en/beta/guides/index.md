@@ -25,6 +25,7 @@ These pages guide you through converting geometry between Revit and Rhino (or ot
 ## Understanding Revit
 These pages guide you through understanding the underlying concepts in Revit e.g. its data model, and explains the concepts behind *Categories*, *Families*, *Types*, *Elements*, *Parameters*, etc.
 
+- [Data Model: Elements]({{ site.baseurl }}{% link _en/beta/guides/revit-elements.md %})
 - [Data Model: Parameters]({{ site.baseurl }}{% link _en/beta/guides/revit-params.md %})
 - [Data Model: Types]({{ site.baseurl }}{% link _en/beta/guides/revit-types.md %})
 
