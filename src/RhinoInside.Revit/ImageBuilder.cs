@@ -11,7 +11,9 @@ namespace RhinoInside.Revit
     #region System.Drawing
     public static Drawing.Color ToDrawingColor(this Media.Color color)
     {
-      return Drawing.Color.FromArgb(color.A, color.R, color.G, color.B);
+      return (color.A == 0 && color.R == 0 && color.G == 0 && color.B == 0) ?
+        Drawing.Color.Empty :
+        Drawing.Color.FromArgb(color.A, color.R, color.G, color.B);
     }
 
     public static Drawing.Bitmap BuildIcon(string tag, int width = 24, int height = 24)
