@@ -121,12 +121,13 @@ namespace RhinoInside.Revit.UI
 
     public class Availability : IExternalCommandAvailability
     {
-      public virtual bool IsCommandAvailable(UIApplication applicationData, CategorySet selectedCategories)
+      // We can not relay on the UIApplication first argument.
+      // Seams other Add-ins are calling this method with wrong values.
+      // I add the catch just because this is called many times.
+      public virtual bool IsCommandAvailable(UIApplication _, CategorySet selectedCategories)
       {
-        if (Revit.ActiveUIApplication?.IsValidObject != true)
-          return false;
-
-        return applicationData?.ActiveUIDocument?.Document?.IsValidObject ?? false;
+        try  { return Revit.ActiveUIDocument?.Document?.IsValidObject ?? false; }
+        catch (Autodesk.Revit.Exceptions.ApplicationException) { return false; }
       }
     }
 
