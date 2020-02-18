@@ -1,29 +1,130 @@
 using System;
-using System.Reflection;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
+using Drawing = System.Drawing;
+using Media = System.Windows.Media;
 
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Drawing.Drawing2D;
-using Color   = System.Drawing.Color;
-using Brushes = System.Drawing.Brushes;
-
-using System.Windows.Media.Imaging;
-using System.Windows.Media;
-
-namespace RhinoInside
+namespace RhinoInside.Revit
 {
   static class ImageBuilder
   {
-    static internal BitmapImage LoadBitmapImage(string name, bool small = false)
+    #region System.Drawing
+    public static Drawing.Color ToDrawingColor(this Media.Color color)
     {
-      using (var resource = Assembly.GetExecutingAssembly().GetManifestResourceStream(name))
+      return Drawing.Color.FromArgb(color.A, color.R, color.G, color.B);
+    }
+
+    public static Drawing.Bitmap BuildIcon(string tag, int width = 24, int height = 24)
+    {
+      var bitmap = new Drawing.Bitmap(width, height);
+      using (var g = Drawing.Graphics.FromImage(bitmap))
       {
-        var bitmapImage = new BitmapImage();
+        var iconBounds = new Drawing.RectangleF(0, 0, width, height);
+        iconBounds.Inflate(-0.5f, -0.5f);
+
+        using (var capsule = Grasshopper.GUI.Canvas.GH_Capsule.CreateCapsule(iconBounds, Grasshopper.GUI.Canvas.GH_Palette.Transparent))
+          capsule.Render(g, false, false, false);
+
+        g.SmoothingMode = Drawing.Drawing2D.SmoothingMode.AntiAlias;
+        g.InterpolationMode = Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+        g.PixelOffsetMode = Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+        var rect = new Drawing.RectangleF(0.5f, 1.0f, width, height);
+
+        var format = new Drawing.StringFormat()
+        {
+          Alignment = Drawing.StringAlignment.Center,
+          LineAlignment = Drawing.StringAlignment.Center
+        };
+
+        float emSize = ((float) (width) / ((float) tag.Length));
+        if (width == 24)
+        {
+          switch (tag.Length)
+          {
+            case 1: emSize = 20.0f; break;
+            case 2: emSize = 13.0f; break;
+            case 3: emSize = 11.0f; break;
+            case 4: emSize = 8.0f; break;
+          }
+        }
+
+        // Avoid using ClearType rendering on icons that the user can zoom in like icons on Grashopper components.
+        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+
+        using (var Calibri = new System.Drawing.Font("Calibri", emSize, Drawing.GraphicsUnit.Pixel))
+          g.DrawString(tag, Calibri, Drawing.Brushes.Black, rect, format);
+      }
+
+      return bitmap;
+    }
+
+    public static Drawing.Bitmap BuildIcon(Action<Drawing.Graphics, Drawing.Rectangle> action, int width = 24, int height = 24)
+    {
+      var bitmap = new Drawing.Bitmap(width, height);
+      using (var graphics = Drawing.Graphics.FromImage(bitmap))
+        action(graphics, new Drawing.Rectangle(0, 0, width, height));
+
+      return bitmap;
+    }
+
+    public static Drawing.Bitmap BuildImage(string tag, int width, int height, Drawing.Color color)
+    {
+      var bitmap = new Drawing.Bitmap(width, height);
+      using (var g = Drawing.Graphics.FromImage(bitmap))
+      {
+        g.SmoothingMode = Drawing.Drawing2D.SmoothingMode.AntiAlias;
+        g.InterpolationMode = Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+        g.PixelOffsetMode = Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+        var rect = new Drawing.RectangleF(0.5f, 1.0f, width, height);
+
+        var format = new Drawing.StringFormat()
+        {
+          Alignment = Drawing.StringAlignment.Center,
+          LineAlignment = Drawing.StringAlignment.Center
+        };
+
+        if (color.IsEmpty)
+          g.FillEllipse(Drawing.Brushes.Black, 1.0f, 1.0f, width - 2.0f, height - 2.0f);
+        else using (var brush = new Drawing.SolidBrush(color))
+            g.FillEllipse(brush, 1.0f, 1.0f, width - 2.0f, height - 2.0f);
+
+        float emSize = ((float) (width) / ((float) tag.Length));
+        if (width == 24)
+        {
+          switch (tag.Length)
+          {
+            case 1: emSize = 20.0f; break;
+            case 2: emSize = 13.0f; break;
+            case 3: emSize = 11.0f; break;
+            case 4: emSize = 8.0f; break;
+          }
+        }
+
+        // Avoid using ClearType rendering on icons that the user can zoom in like icons on Grashopper components.
+        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+
+        using (var Calibri = new System.Drawing.Font("Calibri", emSize, Drawing.GraphicsUnit.Pixel))
+          g.DrawString(tag, Calibri, Drawing.Brushes.White, rect, format);
+      }
+
+      return bitmap;
+    }
+    #endregion
+
+    #region System.Windows.Media
+    public static Media.Color ToMediaColor(this Drawing.Color color)
+    {
+      return Media.Color.FromArgb(color.A, color.R, color.G, color.B);
+    }
+
+    static internal Media.Imaging.BitmapImage LoadBitmapImage(string name, bool small = false) =>
+      Assembly.GetExecutingAssembly().LoadBitmapImage(name, small);
+
+    static internal Media.Imaging.BitmapImage LoadBitmapImage(this Assembly assembly, string name, bool small = false)
+    {
+      using (var resource = assembly.GetManifestResourceStream(name))
+      {
+        var bitmapImage = new Media.Imaging.BitmapImage();
         bitmapImage.BeginInit();
         bitmapImage.StreamSource = resource;
         bitmapImage.EndInit();
@@ -31,7 +132,7 @@ namespace RhinoInside
         int desiredSize = small ? 16 : 32;
         if ((int) bitmapImage.Height != desiredSize || (int) bitmapImage.Width != desiredSize)
         {
-          var scaledBitmapImage = new BitmapImage();
+          var scaledBitmapImage = new Media.Imaging.BitmapImage();
           scaledBitmapImage.BeginInit();
           scaledBitmapImage.StreamSource = resource;
           scaledBitmapImage.DecodePixelWidth  = (int) Math.Round(bitmapImage.PixelWidth  * (desiredSize / bitmapImage.Width));
@@ -45,7 +146,7 @@ namespace RhinoInside
       }
     }
 
-    public static System.Windows.Media.PixelFormat ToMediaPixelFormat(this System.Drawing.Imaging.PixelFormat pixelFormat)
+    public static Media.PixelFormat ToMediaPixelFormat(this Drawing.Imaging.PixelFormat pixelFormat)
     {
       switch (pixelFormat)
       {
@@ -88,18 +189,18 @@ namespace RhinoInside
       throw new NotSupportedException();
     }
 
-    public static BitmapSource ToBitmapSource(this Icon icon, bool small = false)
+    public static Media.Imaging.BitmapSource ToBitmapSource(this Drawing.Icon icon, bool small = false)
     {
       using (var bitmap = icon.ToBitmap())
       {
         var bitmapData = bitmap.LockBits
         (
-          new Rectangle(0, 0, bitmap.Width, bitmap.Height),
-          ImageLockMode.ReadOnly, bitmap.PixelFormat
+          new Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height),
+          Drawing.Imaging.ImageLockMode.ReadOnly, bitmap.PixelFormat
         );
 
         var mediaPixelFormat = bitmap.PixelFormat.ToMediaPixelFormat();
-        var bitmapSource = BitmapSource.Create
+        var bitmapSource = Media.Imaging.BitmapSource.Create
         (
           bitmapData.Width, bitmapData.Height,
           small ? bitmap.HorizontalResolution * 2 : bitmap.HorizontalResolution,
@@ -113,17 +214,17 @@ namespace RhinoInside
       }
     }
 
-    public static BitmapImage ToBitmapImage(this Bitmap bitmap, int PixelWidth = 0, int PixelHeight = 0)
+    public static Media.Imaging.BitmapImage ToBitmapImage(this Drawing.Bitmap bitmap, int PixelWidth = 0, int PixelHeight = 0)
     {
       using (var memory = new MemoryStream())
       {
-        bitmap.Save(memory, ImageFormat.Png);
+        bitmap.Save(memory, Drawing.Imaging.ImageFormat.Png);
         memory.Position = 0;
 
-        var bitmapImage = new BitmapImage();
+        var bitmapImage = new Media.Imaging.BitmapImage();
         bitmapImage.BeginInit();
         bitmapImage.StreamSource = memory;
-        bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+        bitmapImage.CacheOption = Media.Imaging.BitmapCacheOption.OnLoad;
         bitmapImage.DecodePixelWidth = PixelWidth;
         bitmapImage.DecodePixelHeight = PixelHeight;
         bitmapImage.EndInit();
@@ -133,120 +234,33 @@ namespace RhinoInside
       }
     }
 
-    public static Bitmap BuildIcon(string tag, int width = 24, int height = 24)
+    [Obsolete]
+    public static Media.ImageSource BuildImage(string tag, Drawing.Color color) =>
+      BuildImage(tag, color.ToMediaColor());
+
+    public static Media.ImageSource BuildImage(string tag, Media.Color color = default)
     {
-      var bitmap = new Bitmap(width, height);
-      using (var g = Graphics.FromImage(bitmap))
-      {
-        var iconBounds = new RectangleF(0, 0, width, height);
-        iconBounds.Inflate(-0.5f, -0.5f);
-
-        using (var capsule = Grasshopper.GUI.Canvas.GH_Capsule.CreateCapsule(iconBounds, Grasshopper.GUI.Canvas.GH_Palette.Transparent))
-          capsule.Render(g, false, false, false);
-
-        g.SmoothingMode = SmoothingMode.AntiAlias;
-        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-        g.PixelOffsetMode = PixelOffsetMode.HighQuality;
-        var rect = new RectangleF(0.5f, 1.0f, width, height);
-
-        var format = new StringFormat()
-        {
-          Alignment = StringAlignment.Center,
-          LineAlignment = StringAlignment.Center
-        };
-
-        float emSize = ((float) (width) / ((float) tag.Length));
-        if (width == 24)
-        {
-          switch (tag.Length)
-          {
-            case 1: emSize = 20.0f; break;
-            case 2: emSize = 13.0f; break;
-            case 3: emSize = 11.0f; break;
-            case 4: emSize = 8.0f; break;
-          }
-        }
-
-        // Avoid using ClearType rendering on icons that the user can zoom in like icons on Grashopper components.
-        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-
-        using (var Calibri = new System.Drawing.Font("Calibri", emSize, GraphicsUnit.Pixel))
-          g.DrawString(tag, Calibri, Brushes.Black, rect, format);
-      }
-
-      return bitmap;
-    }
-
-    public static Bitmap BuildIcon(Action<Graphics, Rectangle> action, int width = 24, int height = 24)
-    {
-      var bitmap = new Bitmap(width, height);
-      using (var graphics = Graphics.FromImage(bitmap))
-        action(graphics, new Rectangle(0, 0, width, height));
-
-      return bitmap;
-    }
-
-    public static Bitmap BuildImage(string tag, int width, int height, Color color)
-    {
-      var bitmap = new Bitmap(width, height);
-      using (var g = Graphics.FromImage(bitmap))
-      {
-        g.SmoothingMode = SmoothingMode.AntiAlias;
-        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-        g.PixelOffsetMode = PixelOffsetMode.HighQuality;
-        var rect = new RectangleF(0.5f, 1.0f, width, height);
-
-        var format = new StringFormat()
-        {
-          Alignment = StringAlignment.Center,
-          LineAlignment = StringAlignment.Center
-        };
-
-        if (color.IsEmpty)
-          g.FillEllipse(Brushes.Black, 1.0f, 1.0f, width - 2.0f, height - 2.0f);
-        else using (var brush = new SolidBrush(color))
-          g.FillEllipse(brush, 1.0f, 1.0f, width - 2.0f, height - 2.0f);
-
-        float emSize = ((float) (width) / ((float) tag.Length));
-        if (width == 24)
-        {
-          switch (tag.Length)
-          {
-            case 1: emSize = 20.0f; break;
-            case 2: emSize = 13.0f; break;
-            case 3: emSize = 11.0f; break;
-            case 4: emSize = 8.0f; break;
-          }
-        }
-
-        // Avoid using ClearType rendering on icons that the user can zoom in like icons on Grashopper components.
-        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-
-        using (var Calibri = new System.Drawing.Font("Calibri", emSize, GraphicsUnit.Pixel))
-          g.DrawString(tag, Calibri, Brushes.White, rect, format);
-      }
-
-      return bitmap;
-    }
-
-    public static ImageSource BuildImage(string tag, Color color = default(Color))
-    {
-      using (var g = Graphics.FromHwnd(Revit.Revit.MainWindowHandle))
+      using (var g = Drawing.Graphics.FromHwnd(Revit.MainWindowHandle))
       {
         int pixelX = (int) Math.Round((g.DpiX / 96.0) * 16);
         int pixelY = (int) Math.Round((g.DpiY / 96.0) * 16);
-        return BuildImage(tag, 64, 64, color).ToBitmapImage(pixelX, pixelY);
+        return BuildImage(tag, 64, 64, color.ToDrawingColor()).ToBitmapImage(pixelX, pixelY);
       }
     }
 
-    public static ImageSource BuildLargeImage(string tag, Color color = default(Color))
+    [Obsolete]
+    public static Media.ImageSource BuildLargeImage(string tag, Drawing.Color color) =>
+      BuildLargeImage(tag, color.ToMediaColor());
+
+    public static Media.ImageSource BuildLargeImage(string tag, Media.Color color = default)
     {
-      using (var g = Graphics.FromHwnd(Revit.Revit.MainWindowHandle))
+      using (var g = Drawing.Graphics.FromHwnd(Revit.MainWindowHandle))
       {
         int pixelX = (int) Math.Round((g.DpiX / 96.0) * 32);
         int pixelY = (int) Math.Round((g.DpiY / 96.0) * 32);
-        return BuildImage(tag, 64, 64, color).ToBitmapImage(pixelX, pixelY);
+        return BuildImage(tag, 64, 64, color.ToDrawingColor()).ToBitmapImage(pixelX, pixelY);
       }
     }
+    #endregion
   }
 }
