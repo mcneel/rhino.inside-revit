@@ -234,10 +234,6 @@ namespace RhinoInside.Revit
       }
     }
 
-    [Obsolete]
-    public static Media.ImageSource BuildImage(string tag, Drawing.Color color) =>
-      BuildImage(tag, color.ToMediaColor());
-
     public static Media.ImageSource BuildImage(string tag, Media.Color color = default)
     {
       using (var g = Drawing.Graphics.FromHwnd(Revit.MainWindowHandle))
@@ -247,10 +243,6 @@ namespace RhinoInside.Revit
         return BuildImage(tag, 64, 64, color.ToDrawingColor()).ToBitmapImage(pixelX, pixelY);
       }
     }
-
-    [Obsolete]
-    public static Media.ImageSource BuildLargeImage(string tag, Drawing.Color color) =>
-      BuildLargeImage(tag, color.ToMediaColor());
 
     public static Media.ImageSource BuildLargeImage(string tag, Media.Color color = default)
     {
