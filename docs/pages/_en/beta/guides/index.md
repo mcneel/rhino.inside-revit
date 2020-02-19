@@ -29,7 +29,7 @@ These pages guide you through understanding the underlying concepts in Revit e.g
 - [Data Model: Parameters]({{ site.baseurl }}{% link _en/beta/guides/revit-params.md %})
 - [Data Model: Types]({{ site.baseurl }}{% link _en/beta/guides/revit-types.md %})
 
-<!-- 40 -->
+<!-- 40, 50-->
 ## Modeling in Revit
 Grasshopper addon, included with {{ site.terms.rir }}, provides custom Revit-aware nodes that can create native content in Revit. These pages guide you through generating native Revit elements using {{ site.terms.rir }}
 
@@ -38,13 +38,15 @@ Grasshopper addon, included with {{ site.terms.rir }}, provides custom Revit-awa
 - [Spatial Elements]({{ site.baseurl }}{% link _en/beta/guides/revit-spatial.md %})
 - [Stairs]({{ site.baseurl }}{% link _en/beta/guides/revit-stairs.md %})
 - [Levels & Grids]({{ site.baseurl }}{% link _en/beta/guides/revit-levels.md %})
+- [Floors]({{ site.baseurl }}{% link _en/beta/guides/revit-floors.md %})
+- [Roofs]({{ site.baseurl }}{% link _en/beta/guides/revit-roofs.md %})
+- [Openings]({{ site.baseurl }}{% link _en/beta/guides/revit-openings.md %})
 - [Structural Elements]({{ site.baseurl }}{% link _en/beta/guides/revit-struct.md %})
 - [Materials]({{ site.baseurl }}{% link _en/beta/guides/revit-materials.md %})
-<!-- 48: last -->
+- [Adaptive Components]({{ site.baseurl }}{% link _en/beta/guides/revit-adaptive.md %})
+<!-- 58: last -->
 - [Modify Geometry]({{ site.baseurl }}{% link _en/beta/guides/revit-modify.md %})
 - [Custom Families]({{ site.baseurl }}{% link _en/beta/guides/revit-customfamilies.md %})
-
-<!-- 50 -->
 
 <!-- 60 -->
 ## Documentation in Revit

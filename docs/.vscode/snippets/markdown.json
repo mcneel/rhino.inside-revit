@@ -46,7 +46,7 @@
     "RIR Download Component Note": {
         "prefix": "rirghu",
         "description": "Download Component note block for Rhino.Inside.Revit Wiki",
-        "body": ["{% include ltr/download_comp.html archive='/static/ghnodes/$1' name='$2.ghuser' %}"]
+        "body": ["{% include ltr/download_comp.html archive='/static/ghnodes/$1.ghuser' name='$2' %}"]
     },
     "RIR Bug Note": {
         "prefix": "rirbug",
