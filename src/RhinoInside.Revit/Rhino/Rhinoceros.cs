@@ -4,8 +4,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Input;
-using Autodesk.Revit.UI;
 using Rhino;
+using Rhino.Commands;
+using Rhino.Geometry;
 using Rhino.Input;
 using Rhino.PlugIns;
 using Rhino.Runtime.InProcess;
@@ -33,6 +34,9 @@ namespace RhinoInside
 
 namespace RhinoInside.Revit
 {
+  using Result = Autodesk.Revit.UI.Result;
+  using TaskDialog = Autodesk.Revit.UI.TaskDialog;
+
   public static class Rhinoceros
   {
     #region Revit Interface
@@ -63,16 +67,20 @@ namespace RhinoInside.Revit
           return Result.Failed;
         }
 
-        RhinoDoc.NewDocument += OnNewDocument;
-        Rhino.Commands.Command.BeginCommand += BeginCommand;
-        Rhino.Commands.Command.EndCommand += EndCommand;
-        RhinoApp.MainLoop += MainLoop;
+        RhinoApp.MainLoop                         += MainLoop;
+
+        RhinoDoc.NewDocument                      += OnNewDocument;
+        RhinoDoc.EndOpenDocumentInitialViewUpdate += EndOpenDocumentInitialViewUpdate;
+
+        Command.BeginCommand                      += BeginCommand;
+        Command.EndCommand                        += EndCommand;
 
         // Alternative to /runscript= Rhino command line option
-        Revit.ApplicationUI.Idling += RunScript;
+        Revit.ApplicationUI.Idling                += RunScript;
 
         // Reset document units
         UpdateDocumentUnits(RhinoDoc.ActiveDoc);
+        UpdateDocumentUnits(RhinoDoc.ActiveDoc, Revit.ActiveDBDocument);
 
         Type[] types  = default;
         try { types = Assembly.GetCallingAssembly().GetTypes(); }
@@ -88,7 +96,6 @@ namespace RhinoInside.Revit
         CheckInGuests();
       }
 
-      UpdateDocumentUnits(RhinoDoc.ActiveDoc, Revit.ActiveDBDocument);
       return Result.Succeeded;
     }
 
@@ -114,8 +121,15 @@ namespace RhinoInside.Revit
         // Unload Guests
         CheckOutGuests();
 
-        RhinoApp.MainLoop -= MainLoop;
-        RhinoDoc.NewDocument -= OnNewDocument;
+        Revit.ApplicationUI.Idling                -= RunScript;
+
+        Command.EndCommand                        -= EndCommand;
+        Command.BeginCommand                      -= BeginCommand;
+
+        RhinoDoc.EndOpenDocumentInitialViewUpdate -= EndOpenDocumentInitialViewUpdate;
+        RhinoDoc.NewDocument                      -= OnNewDocument;
+
+        RhinoApp.MainLoop                         -= MainLoop;
 
         // Unload RhinoCore
         try
@@ -230,6 +244,191 @@ namespace RhinoInside.Revit
     }
     #endregion
 
+    #region Document
+    static void OnNewDocument(object sender, DocumentEventArgs e)
+    {
+      // If a new document is created without template it is updated from Revit.ActiveDBDocument
+      Debug.Assert(string.IsNullOrEmpty(e.Document.TemplateFileUsed));
+
+      UpdateDocumentUnits(e.Document);
+      UpdateDocumentUnits(e.Document, Revit.ActiveDBDocument);
+    }
+
+    static void EndOpenDocumentInitialViewUpdate(object sender, DocumentEventArgs e)
+    {
+      if (e.Document.IsOpening)
+        AuditUnits(e.Document);
+    }
+
+    static void AuditTolerances(RhinoDoc doc)
+    {
+      if (doc is object)
+      {
+        var maxDistanceTolerance = Revit.VertexTolerance * RhinoMath.UnitScale(UnitSystem.Feet, doc.ModelUnitSystem);
+        if (doc.ModelAbsoluteTolerance > maxDistanceTolerance)
+          doc.ModelAbsoluteTolerance = maxDistanceTolerance;
+
+        var maxAngleTolerance = Revit.AngleTolerance;
+        if (doc.ModelAngleToleranceRadians > maxAngleTolerance)
+          doc.ModelAngleToleranceRadians = maxAngleTolerance;
+      }
+    }
+
+    static void AuditUnits(RhinoDoc doc)
+    {
+      if (Command.InScriptRunnerCommand())
+        return;
+
+      if (Revit.ActiveUIDocument.Document is DB.Document revitDoc)
+      {
+        var units = revitDoc.GetUnits();
+        var lengthFormatoptions = units.GetFormatOptions(DB.UnitType.UT_Length);
+        var RevitModelUnitSystem = lengthFormatoptions.DisplayUnits.ToRhinoLengthUnits();
+        var GrasshopperModelUnitSystem = GH.Guest.ModelUnitSystem != UnitSystem.Unset ? GH.Guest.ModelUnitSystem : doc.ModelUnitSystem;
+        if (doc.ModelUnitSystem != RevitModelUnitSystem || doc.ModelUnitSystem != GrasshopperModelUnitSystem)
+        {
+          using
+          (
+            var taskDialog = new TaskDialog("Units")
+            {
+              MainIcon = TaskDialogIcons.IconInformation,
+              TitleAutoPrefix = true,
+              AllowCancellation = true,
+              MainInstruction = "Model units mismatch.",
+              MainContent = "What units do you want to use?",
+              ExpandedContent = $"The model you are opening is in {doc.ModelUnitSystem}{Environment.NewLine}Active Revit model '{revitDoc.Title}' units are {RevitModelUnitSystem}",
+              FooterText = "Current version: " + Addin.DisplayVersion
+            }
+          )
+          {
+            taskDialog.AddCommandLink(Autodesk.Revit.UI.TaskDialogCommandLinkId.CommandLink1, $"Continue opening in {doc.ModelUnitSystem}", $"Rhino and Grasshopper will work in {doc.ModelUnitSystem}");
+            taskDialog.AddCommandLink(Autodesk.Revit.UI.TaskDialogCommandLinkId.CommandLink2, $"Adjust Rhino model to {RevitModelUnitSystem} like Revit", $"Scale Rhino model by {RhinoMath.UnitScale(doc.ModelUnitSystem, RevitModelUnitSystem)}");
+            taskDialog.DefaultButton = Autodesk.Revit.UI.TaskDialogResult.CommandLink2;
+
+            if (GH.Guest.ModelUnitSystem != UnitSystem.Unset)
+            {
+              taskDialog.ExpandedContent += $"{Environment.NewLine}Documents opened in Grasshopper were working in {GH.Guest.ModelUnitSystem}";
+              if (GrasshopperModelUnitSystem != doc.ModelUnitSystem && GrasshopperModelUnitSystem != RevitModelUnitSystem)
+              {
+                taskDialog.AddCommandLink(Autodesk.Revit.UI.TaskDialogCommandLinkId.CommandLink3, $"Adjust Rhino model to {GH.Guest.ModelUnitSystem} like Grasshopper", $"Scale Rhino model by {RhinoMath.UnitScale(doc.ModelUnitSystem, GH.Guest.ModelUnitSystem)}");
+                taskDialog.DefaultButton = Autodesk.Revit.UI.TaskDialogResult.CommandLink3;
+              }
+            }
+
+            switch (taskDialog.Show())
+            {
+            case Autodesk.Revit.UI.TaskDialogResult.CommandLink2:
+                doc.ModelAngleToleranceRadians = Revit.AngleTolerance;
+                doc.ModelDistanceDisplayPrecision = ((int) -Math.Log10(lengthFormatoptions.Accuracy)).Clamp(0, 7);
+                doc.ModelAbsoluteTolerance = Revit.VertexTolerance * RhinoMath.UnitScale(UnitSystem.Feet, RevitModelUnitSystem);
+                doc.AdjustModelUnitSystem(RevitModelUnitSystem, true);
+                UpdateViewConstructionPlanesFrom(doc, revitDoc);
+              break;
+              case Autodesk.Revit.UI.TaskDialogResult.CommandLink3:
+                doc.ModelAngleToleranceRadians = Revit.AngleTolerance;
+                doc.ModelDistanceDisplayPrecision = Grasshopper.CentralSettings.FormatDecimalDigits.Clamp(0, 7);
+                doc.ModelAbsoluteTolerance = Revit.VertexTolerance * RhinoMath.UnitScale(UnitSystem.Feet, GH.Guest.ModelUnitSystem);
+                doc.AdjustModelUnitSystem(GH.Guest.ModelUnitSystem, true);
+                UpdateViewConstructionPlanesFrom(doc, revitDoc);
+                break;
+              default:
+                AuditTolerances(doc);
+                break;
+            }
+          }
+        }
+      }
+    }
+
+    static void UpdateDocumentUnits(RhinoDoc rhinoDoc, DB.Document revitDoc = null)
+    {
+      bool docModified = rhinoDoc.Modified;
+      try
+      {
+        if (revitDoc is null)
+        {
+          rhinoDoc.ModelUnitSystem = UnitSystem.None;
+          rhinoDoc.ModelAbsoluteTolerance = Revit.VertexTolerance;
+          rhinoDoc.ModelAngleToleranceRadians = Revit.AngleTolerance;
+        }
+        else if (rhinoDoc.ModelUnitSystem == UnitSystem.None)
+        {
+          var units = revitDoc.GetUnits();
+          var lengthFormatoptions = units.GetFormatOptions(DB.UnitType.UT_Length);
+          rhinoDoc.ModelUnitSystem = lengthFormatoptions.DisplayUnits.ToRhinoLengthUnits();
+          rhinoDoc.ModelAngleToleranceRadians = Revit.AngleTolerance;
+          rhinoDoc.ModelDistanceDisplayPrecision = ((int) -Math.Log10(lengthFormatoptions.Accuracy)).Clamp(0, 7);
+          rhinoDoc.ModelAbsoluteTolerance = Revit.VertexTolerance * RhinoMath.UnitScale(UnitSystem.Feet, rhinoDoc.ModelUnitSystem);
+          //switch (rhinoDoc.ModelUnitSystem)
+          //{
+          //  case UnitSystem.None: break;
+          //  case UnitSystem.Feet:
+          //  case UnitSystem.Inches:
+          //    newDoc.ModelAbsoluteTolerance = (1.0 / 160.0) * RhinoMath.UnitScale(UnitSystem.Inches, newDoc.ModelUnitSystem);
+          //    break;
+          //  default:
+          //    newDoc.ModelAbsoluteTolerance = 0.1 * RhinoMath.UnitScale(UnitSystem.Millimeters, newDoc.ModelUnitSystem);
+          //    break;
+          //}
+
+          UpdateViewConstructionPlanesFrom(rhinoDoc, revitDoc);
+        }
+      }
+      finally
+      {
+        rhinoDoc.Modified = docModified;
+      }
+    }
+
+    static void UpdateViewConstructionPlanesFrom(RhinoDoc rhinoDoc, DB.Document revitDoc)
+    {
+      if (!string.IsNullOrEmpty(rhinoDoc.TemplateFileUsed))
+        return;
+
+      if (rhinoDoc.IsCreating)
+      {
+        Revit.EnqueueAction(doc => UpdateViewConstructionPlanesFrom(rhinoDoc, doc));
+        return;
+      }
+
+      bool imperial = rhinoDoc.ModelUnitSystem == UnitSystem.Feet || rhinoDoc.ModelUnitSystem == UnitSystem.Inches;
+
+      var modelGridSpacing = imperial ?
+      1.0 * RhinoMath.UnitScale(UnitSystem.Yards, rhinoDoc.ModelUnitSystem) :
+      1.0 * RhinoMath.UnitScale(UnitSystem.Meters, rhinoDoc.ModelUnitSystem);
+
+      var modelSnapSpacing = imperial ?
+      1 / 16.0 * RhinoMath.UnitScale(UnitSystem.Inches, rhinoDoc.ModelUnitSystem) :
+      1.0 * RhinoMath.UnitScale(UnitSystem.Millimeters, rhinoDoc.ModelUnitSystem);
+
+      var modelThickLineFrequency = imperial ? 6 : 5;
+
+      // Views
+      {
+        foreach (var view in rhinoDoc.Views)
+        {
+          var cplane = view.MainViewport.GetConstructionPlane();
+
+          cplane.GridSpacing = modelGridSpacing;
+          cplane.SnapSpacing = modelSnapSpacing;
+          cplane.ThickLineFrequency = modelThickLineFrequency;
+
+          view.MainViewport.SetConstructionPlane(cplane);
+
+          var min = cplane.Plane.PointAt(-cplane.GridSpacing * cplane.GridLineCount, -cplane.GridSpacing * cplane.GridLineCount, 0.0);
+          var max = cplane.Plane.PointAt(+cplane.GridSpacing * cplane.GridLineCount, +cplane.GridSpacing * cplane.GridLineCount, 0.0);
+          var bbox = new BoundingBox(min, max);
+
+          // Zoom to grid
+          view.MainViewport.ZoomBoundingBox(bbox);
+
+          // Adjust to extens in case There is anything in the viewports like Grasshopper previews.
+          view.MainViewport.ZoomExtents();
+        }
+      }
+    }
+    #endregion
+
     #region Rhino UI
     internal static void InvokeInHostContext(Action action) => core.InvokeInHostContext(action);
     internal static T InvokeInHostContext<T>(Func<T> func) => core.InvokeInHostContext(func);
@@ -306,9 +505,9 @@ namespace RhinoInside.Revit
     }
     static ExposureSnapshot QuiescentExposure;
 
-    static void BeginCommand(object sender, Rhino.Commands.CommandEventArgs e)
+    static void BeginCommand(object sender, CommandEventArgs e)
     {
-      if (!Rhino.Commands.Command.InScriptRunnerCommand())
+      if (!Command.InScriptRunnerCommand())
       {
         // Capture Rhino Main Window exposure to restore it when user ends picking
         try { QuiescentExposure = new ExposureSnapshot(); }
@@ -319,9 +518,9 @@ namespace RhinoInside.Revit
       }
     }
 
-    static void EndCommand(object sender, Rhino.Commands.CommandEventArgs e)
+    static void EndCommand(object sender, CommandEventArgs e)
     {
-      if (!Rhino.Commands.Command.InScriptRunnerCommand())
+      if (!Command.InScriptRunnerCommand())
       {
         // Reenable Revit main window
         ModalForm.ParentEnabled = true;
@@ -338,130 +537,20 @@ namespace RhinoInside.Revit
 
     static void MainLoop(object sender, EventArgs e)
     {
-      if (!Rhino.Commands.Command.InScriptRunnerCommand())
+      if (!Command.InScriptRunnerCommand()) 
       {
-        // Keep Rhino window exposed to user while in a get operation
-        if (RhinoGet.InGet(RhinoDoc.ActiveDoc))
+        if (RhinoDoc.ActiveDoc is RhinoDoc rhinoDoc)
         {
-          // if there is no floating viewport visible...
-          if (!RhinoDoc.ActiveDoc.Views.Where(x => x.Floating).Any())
+          // Keep Rhino window exposed to user while in a get operation
+          if (RhinoGet.InGet(rhinoDoc))
           {
-            if (!Exposed)
-              Exposed = true;
+            // if there is no floating viewport visible...
+            if (!rhinoDoc.Views.Where(x => x.Floating).Any())
+            {
+              if (!Exposed)
+                Exposed = true;
+            }
           }
-        }
-      }
-    }
-
-    static void OnNewDocument(object sender, DocumentEventArgs e)
-    {
-      // If a new document is created without template it is updated from Revit.ActiveDBDocument
-      Debug.Assert(string.IsNullOrEmpty(e.Document.TemplateFileUsed));
-
-      UpdateDocumentUnits(e.Document);
-      UpdateDocumentUnits(e.Document, Revit.ActiveDBDocument);
-    }
-
-    internal static void UpdateDocumentUnits(RhinoDoc rhinoDoc, DB.Document revitDoc = null)
-    {
-      bool docModified = rhinoDoc.Modified;
-      try
-      {
-        if (revitDoc is null)
-        {
-          rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.None;
-          rhinoDoc.ModelAbsoluteTolerance = Revit.VertexTolerance;
-          rhinoDoc.ModelAngleToleranceRadians = Revit.AngleTolerance;
-        }
-        else if (rhinoDoc.ModelUnitSystem == Rhino.UnitSystem.None)
-        {
-          var units = revitDoc.GetUnits();
-          var lengthFormatoptions = units.GetFormatOptions(DB.UnitType.UT_Length);
-          switch (lengthFormatoptions.DisplayUnits)
-          {
-            case DB.DisplayUnitType.DUT_METERS: rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.Meters; break;
-            case DB.DisplayUnitType.DUT_METERS_CENTIMETERS: rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.Meters; break;
-            case DB.DisplayUnitType.DUT_DECIMETERS: rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.Decimeters; break;
-            case DB.DisplayUnitType.DUT_CENTIMETERS: rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.Centimeters; break;
-            case DB.DisplayUnitType.DUT_MILLIMETERS: rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.Millimeters; break;
-
-            case DB.DisplayUnitType.DUT_FRACTIONAL_INCHES: rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.Inches; break;
-            case DB.DisplayUnitType.DUT_DECIMAL_INCHES: rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.Inches; break;
-            case DB.DisplayUnitType.DUT_FEET_FRACTIONAL_INCHES: rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.Feet; break;
-            case DB.DisplayUnitType.DUT_DECIMAL_FEET: rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.Feet; break;
-            default: rhinoDoc.ModelUnitSystem = Rhino.UnitSystem.None; break;
-          }
-
-          bool imperial = rhinoDoc.ModelUnitSystem == Rhino.UnitSystem.Feet || rhinoDoc.ModelUnitSystem == Rhino.UnitSystem.Inches;
-
-          rhinoDoc.ModelAngleToleranceRadians = Revit.AngleTolerance;
-          rhinoDoc.ModelDistanceDisplayPrecision = ((int) -Math.Log10(lengthFormatoptions.Accuracy)).Clamp(0, 7);
-          rhinoDoc.ModelAbsoluteTolerance = Revit.VertexTolerance * Rhino.RhinoMath.UnitScale(Rhino.UnitSystem.Feet, rhinoDoc.ModelUnitSystem);
-          //switch (rhinoDoc.ModelUnitSystem)
-          //{
-          //  case Rhino.UnitSystem.None: break;
-          //  case Rhino.UnitSystem.Feet:
-          //  case Rhino.UnitSystem.Inches:
-          //    newDoc.ModelAbsoluteTolerance = (1.0 / 160.0) * Rhino.RhinoMath.UnitScale(Rhino.UnitSystem.Inches, newDoc.ModelUnitSystem);
-          //    break;
-          //  default:
-          //    newDoc.ModelAbsoluteTolerance = 0.1 * Rhino.RhinoMath.UnitScale(Rhino.UnitSystem.Millimeters, newDoc.ModelUnitSystem);
-          //    break;
-          //}
-
-          UpdateViewConstructionPlanesFrom(rhinoDoc, revitDoc);
-        }
-      }
-      finally
-      {
-        rhinoDoc.Modified = docModified;
-      }
-    }
-
-    static void UpdateViewConstructionPlanesFrom(RhinoDoc rhinoDoc, DB.Document revitDoc)
-    {
-      if (!string.IsNullOrEmpty(rhinoDoc.TemplateFileUsed))
-        return;
-
-      if (rhinoDoc.IsCreating)
-      {
-        Revit.EnqueueAction(doc => UpdateViewConstructionPlanesFrom(rhinoDoc, doc));
-        return;
-      }
-
-      bool imperial = rhinoDoc.ModelUnitSystem == Rhino.UnitSystem.Feet || rhinoDoc.ModelUnitSystem == Rhino.UnitSystem.Inches;
-
-      var modelGridSpacing = imperial ?
-      1.0 * Rhino.RhinoMath.UnitScale(Rhino.UnitSystem.Yards, rhinoDoc.ModelUnitSystem) :
-      1.0 * Rhino.RhinoMath.UnitScale(Rhino.UnitSystem.Meters, rhinoDoc.ModelUnitSystem);
-
-      var modelSnapSpacing = imperial ?
-      1 / 16.0 * Rhino.RhinoMath.UnitScale(Rhino.UnitSystem.Inches, rhinoDoc.ModelUnitSystem) :
-      1.0 * Rhino.RhinoMath.UnitScale(Rhino.UnitSystem.Millimeters, rhinoDoc.ModelUnitSystem);
-
-      var modelThickLineFrequency = imperial ? 6 : 5;
-
-      // Views
-      {
-        foreach (var view in rhinoDoc.Views)
-        {
-          var cplane = view.MainViewport.GetConstructionPlane();
-
-          cplane.GridSpacing = modelGridSpacing;
-          cplane.SnapSpacing = modelSnapSpacing;
-          cplane.ThickLineFrequency = modelThickLineFrequency;
-
-          view.MainViewport.SetConstructionPlane(cplane);
-
-          var min = cplane.Plane.PointAt(-cplane.GridSpacing * cplane.GridLineCount, -cplane.GridSpacing * cplane.GridLineCount, 0.0);
-          var max = cplane.Plane.PointAt(+cplane.GridSpacing * cplane.GridLineCount, +cplane.GridSpacing * cplane.GridLineCount, 0.0);
-          var bbox = new Rhino.Geometry.BoundingBox(min, max);
-
-          // Zoom to grid
-          view.MainViewport.ZoomBoundingBox(bbox);
-
-          // Adjust to extens in case There is anything in the viewports like Grasshopper previews.
-          view.MainViewport.ZoomExtents();
         }
       }
     }

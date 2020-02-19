@@ -26,8 +26,8 @@ namespace RhinoInside.Revit.UI
 
     public new class Availability : RhinoCommand.Availability
     {
-      public override bool IsCommandAvailable(UIApplication applicationData, CategorySet selectedCategories) =>
-        base.IsCommandAvailable(applicationData, selectedCategories) &&
+      public override bool IsCommandAvailable(UIApplication _, CategorySet selectedCategories) =>
+        base.IsCommandAvailable(_, selectedCategories) &&
         (PlugIn.PlugInExists(PluginId, out bool loaded, out bool loadProtected) & (loaded | !loadProtected));
     }
   }
@@ -70,9 +70,9 @@ namespace RhinoInside.Revit.UI
   {
     public new class Availability : GrasshopperCommand.Availability
     {
-      public override bool IsCommandAvailable(UIApplication applicationData, CategorySet selectedCategories) =>
-        base.IsCommandAvailable(applicationData, selectedCategories) &&
-        Instances.ActiveCanvas?.Document != null;
+      public override bool IsCommandAvailable(UIApplication _, CategorySet selectedCategories) =>
+        base.IsCommandAvailable(_, selectedCategories) &&
+        Instances.ActiveCanvas?.Document is object;
     }
 
     public static void CreateUI(RibbonPanel ribbonPanel)
@@ -124,9 +124,9 @@ namespace RhinoInside.Revit.UI
   {
     public new class Availability : GrasshopperCommand.Availability
     {
-      public override bool IsCommandAvailable(UIApplication applicationData, CategorySet selectedCategories) =>
-        base.IsCommandAvailable(applicationData, selectedCategories) &&
-        Instances.ActiveCanvas?.Document != null &&
+      public override bool IsCommandAvailable(UIApplication _, CategorySet selectedCategories) =>
+        base.IsCommandAvailable(_, selectedCategories) &&
+        Instances.ActiveCanvas?.Document is object &&
         Instances.ActiveCanvas.Document.SelectedCount > 0;
     }
 
@@ -283,10 +283,10 @@ namespace RhinoInside.Revit.UI
 
     public new class Availability : RhinoCommand.Availability
     {
-      public override bool IsCommandAvailable(UIApplication applicationData, CategorySet selectedCategories)
+      public override bool IsCommandAvailable(UIApplication _, CategorySet selectedCategories)
       {
-        return base.IsCommandAvailable(applicationData, selectedCategories) &&
-               !applicationData.ActiveUIDocument.Document.IsFamilyDocument;
+        return base.IsCommandAvailable(_, selectedCategories) &&
+               Revit.ActiveUIDocument?.Document.IsFamilyDocument == false;
       }
     }
   }

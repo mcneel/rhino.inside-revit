@@ -442,5 +442,12 @@ namespace RhinoInside.Revit
       return false;
     }
     #endregion
+
+    #region Curve
+    public static bool IsClosed(this Curve curve, double tolerance)
+    {
+      return curve.IsClosed || curve.PointAtStart.DistanceTo(curve.PointAtEnd) < tolerance;
+    }
+    #endregion
   }
 }
