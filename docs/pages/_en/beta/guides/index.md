@@ -38,6 +38,9 @@ Grasshopper addon, included with {{ site.terms.rir }}, provides custom Revit-awa
 - [Spatial Elements]({{ site.baseurl }}{% link _en/beta/guides/revit-spatial.md %})
 - [Stairs]({{ site.baseurl }}{% link _en/beta/guides/revit-stairs.md %})
 - [Levels & Grids]({{ site.baseurl }}{% link _en/beta/guides/revit-levels.md %})
+- [Floors]({{ site.baseurl }}{% link _en/beta/guides/revit-floors.md %})
+- [Roofs]({{ site.baseurl }}{% link _en/beta/guides/revit-roofs.md %})
+- [Openings]({{ site.baseurl }}{% link _en/beta/guides/revit-openings.md %})
 - [Structural Elements]({{ site.baseurl }}{% link _en/beta/guides/revit-struct.md %})
 - [Materials]({{ site.baseurl }}{% link _en/beta/guides/revit-materials.md %})
 <!-- 48: last -->
