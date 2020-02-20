@@ -284,7 +284,11 @@ namespace RhinoInside.Revit.UI
 
     public override Result Execute(ExternalCommandData data, ref string message, Autodesk.Revit.DB.ElementSet elements)
     {
-      if (Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.LeftShift))
+      if
+      (
+        (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)) &&
+        (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
+      )
         return ShowLoadError(data);
 
       var result = Result.Failed;
@@ -292,7 +296,7 @@ namespace RhinoInside.Revit.UI
 
       if (RhinoCommand.Availability.Available)
       {
-        if (Keyboard.IsKeyDown(Key.LeftCtrl))
+        if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
           return Rhinoceros.RunCommandAbout();
 
         using (var modal = new Rhinoceros.ModalScope())
@@ -501,6 +505,24 @@ namespace RhinoInside.Revit.UI
       }
     }
 
+    static string CLRVersion
+    {
+      get
+      {
+        string subkey = Environment.Version.Major < 4 ?
+          $@"SOFTWARE\Microsoft\NET Framework Setup\NDP\v{Environment.Version.Major}.{Environment.Version.Minor}\" :
+          $@"SOFTWARE\Microsoft\NET Framework Setup\NDP\v{Environment.Version.Major}\Full\";
+
+        using (var ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Default).OpenSubKey(subkey))
+        {
+          if (ndpKey?.GetValue("Version") is string version)
+            return $"{Environment.Version} ({version})";
+        }
+
+        return $"{Environment.Version}";
+      }
+    }
+
     void SendEmail(ExternalCommandData data, bool includeAddinsList)
     {
       var now = DateTime.Now.ToString("yyyyMMddTHHmmssZ");
@@ -528,16 +550,19 @@ namespace RhinoInside.Revit.UI
       if (File.Exists(ReportFilePath))
         mailBody += $"<Please attach '{ReportFilePath}' file here>" + Environment.NewLine + Environment.NewLine;
 
-      mailBody += $"Rhino.Inside Revit: {Addin.DisplayVersion}" + Environment.NewLine;
-      var rhino = Addin.RhinoVersionInfo;
-      mailBody += $"Rhino: {rhino.ProductVersion} ({rhino.FileDescription})" + Environment.NewLine;
-      var revit = data.Application.Application;
+      mailBody += $"OS: {Environment.OSVersion}" + Environment.NewLine;
+      mailBody += $"CLR: {CLRVersion}" + Environment.NewLine;
 
+      var revit = data.Application.Application;
 #if REVIT_2019
       mailBody += $"Revit: {revit.SubVersionNumber} ({revit.VersionBuild})" + Environment.NewLine;
 #else
       mailBody += $"Revit: {revit.VersionNumber} ({revit.VersionBuild})" + Environment.NewLine;
 #endif
+
+      var rhino = Addin.RhinoVersionInfo;
+      mailBody += $"Rhino: {rhino.ProductVersion} ({rhino.FileDescription})" + Environment.NewLine;
+      mailBody += $"Rhino.Inside Revit: {Addin.DisplayVersion}" + Environment.NewLine;
 
       mailBody = Uri.EscapeDataString(mailBody);
 
@@ -580,9 +605,9 @@ namespace RhinoInside.Revit.UI
 
               writer.WriteLine();
               writer.WriteLine($"## Host");
-              writer.WriteLine($"- Rhino.Inside Revit: {Addin.DisplayVersion}");
-              var rhino = Addin.RhinoVersionInfo;
-              writer.WriteLine($"- Rhino: {rhino.ProductVersion} ({rhino.FileDescription})");
+              writer.WriteLine($"- Environment.OSVersion: {Environment.OSVersion}");
+              writer.WriteLine($"  - SystemInformation.TerminalServerSession: {System.Windows.Forms.SystemInformation.TerminalServerSession}");
+              writer.WriteLine($"- Environment.Version: {CLRVersion}");
 
               var revit = data.Application.Application;
               writer.WriteLine($"- {revit.VersionName}");
@@ -594,6 +619,10 @@ namespace RhinoInside.Revit.UI
 #endif
               writer.WriteLine($"  - ProductType: {revit.Product}");
               writer.WriteLine($"  - Language: {revit.Language}");
+
+              var rhino = Addin.RhinoVersionInfo;
+              writer.WriteLine($"- Rhino: {rhino.ProductVersion} ({rhino.FileDescription})");
+              writer.WriteLine($"- Rhino.Inside Revit: {Addin.DisplayVersion}");
 
               if (includeAddinsList)
               {
