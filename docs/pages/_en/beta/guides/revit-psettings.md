@@ -40,7 +40,7 @@ Use the *Project Locations* component shared here to grab a list of all project 
 
 {% include ltr/warning_note.html note='Note that all Revit models return an `Internal` project location. [This is used for internal shared coordinates](https://thebuildingcoder.typepad.com/blog/2017/05/finding-the-right-project-location.html). Avoid using or making changes to this project location' %}
 
-Use the *Project Location (Desctruct)* component shared here, to dig one level deeper and grab information about each project location:
+Use the *Project Location (Desctruct)* component shared here, to dig one level deeper and grab information about each project location. The component has a `XYZ` input parameter that you can use to specify the exact point that the component needs to use to extract project position into `POS` output parameter:
 
 ![]({{ "/static/images/guides/revit-psettings05.png" | prepend: site.baseurl }})
 
@@ -49,4 +49,26 @@ Use the *Project Location (Desctruct)* component shared here, to dig one level d
 
 ### Site Locations
 
+{% capture api_note %}
+In Revit API, Site Location is represented by the {% include api_type.html type='Autodesk.Revit.DB.SiteLocation' title='DB.SiteLocation' %}
+{% endcapture %}
+{% include ltr/api_note.html note=api_note %}
+
+Use the *Site Location (Desctruct)* component shared here, to extract information about the site location associated with each project location:
+
+![]({{ "/static/images/guides/revit-psettings06.png" | prepend: site.baseurl }})
+
+{% include ltr/download_comp.html archive='/static/ghnodes/Site Location (Desctruct).ghuser' name='Site Location (Desctruct)' %}
+
 ### Project Positions
+
+{% capture api_note %}
+In Revit API, Project Position is represented by the {% include api_type.html type='Autodesk.Revit.DB.ProjectPosition' title='DB.ProjectPosition' %}
+{% endcapture %}
+{% include ltr/api_note.html note=api_note %}
+
+Use the *Project Position (Desctruct)* component shared here, to extract information about project position:
+
+![]({{ "/static/images/guides/revit-psettings07.png" | prepend: site.baseurl }})
+
+{% include ltr/download_comp.html archive='/static/ghnodes/Project Position (Desctruct).ghuser' name='Project Position (Desctruct)' %}
