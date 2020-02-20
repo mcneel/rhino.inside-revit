@@ -77,4 +77,12 @@ Output parameters are:
 
 ## Creating Shafts
 
+Use the *Create Shaft* component shared here to create a shaft element from boundary curves and is bounded by two levels:
+
+![]({{ "/static/images/guides/revit-openings05.png" | prepend: site.baseurl }})
+
+&nbsp;
+
+{% include ltr/download_comp.html archive='/static/ghnodes/Create Shaft.ghuser' name='Create Shaft' %}
+
 ## Creating Openings By Face
