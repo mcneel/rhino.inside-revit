@@ -109,20 +109,16 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
-    <Reference Include="WindowsBase" />
-    <Reference Include="Microsoft.VisualBasic" />
-    <Reference Include="PresentationCore" />
-    <Reference Include="System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\WindowsPowerShell\3.0\System.Management.Automation.dll</HintPath>
+    <ProjectReference Include="..\RhinoInside.Revit\RhinoInside.Revit.csproj">
+      <Project>{d6c256d4-b518-464f-9e68-cb282202e846}</Project>
+      <Name>RhinoInside.Revit</Name>
       <Private>False</Private>
-    </Reference>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="$(Configuration.Contains('Debug'))">
@@ -320,13 +316,6 @@
     <None Include="Resources\GH\ModelCategoriesPicker.png" />
     <None Include="Resources\GH\AnalyticalCategoriesPicker.png" />
     <None Include="Resources\GH\TagCategoriesPicker.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\RhinoInside.Revit\RhinoInside.Revit.csproj">
-      <Project>{d6c256d4-b518-464f-9e68-cb282202e846}</Project>
-      <Name>RhinoInside.Revit</Name>
-      <Private>False</Private>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

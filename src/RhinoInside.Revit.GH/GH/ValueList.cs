@@ -539,8 +539,9 @@ namespace RhinoInside.Revit.GH.Parameters
                   if (!ScrollerBounds.IsEmpty)
                     scrolledCanvasLocation.Y += ((Owner.ListItems.Count * ItemHeight) - ListBounds.Height) * ScrollRatio;
 
-                  bool keepSelection = System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftCtrl);
-                  bool rangeSelection = System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftShift);
+                  
+                  bool keepSelection  = (Control.ModifierKeys & Keys.Control) != Keys.None;
+                  bool rangeSelection = (Control.ModifierKeys & Keys.Shift)   != Keys.None;
                   int lastItemIndex = 0;
 
                   bool sel = LastItemIndex < Owner.ListItems.Count ? Owner.ListItems[LastItemIndex].Selected : false;
