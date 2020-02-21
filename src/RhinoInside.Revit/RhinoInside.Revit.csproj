@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -230,66 +230,6 @@
     <EmbeddedResource Include="Resources\Grasshopper.png" />
     <EmbeddedResource Include="Resources\GrasshopperPlayer.png" />
     <EmbeddedResource Include="Resources\Python.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\GH\BeamByCurve.png" />
-    <None Include="Resources\GH\BuildingPadByOutline.png" />
-    <None Include="Resources\GH\BuiltInParameterByName.png" />
-    <None Include="Resources\GH\BuiltInParameterGroup.png" />
-    <None Include="Resources\GH\BuiltInParameterGroups.png" />
-    <None Include="Resources\GH\Category.png" />
-    <None Include="Resources\GH\CategoryTypes.png" />
-    <None Include="Resources\GH\DirectShapeByGeometry.png" />
-    <None Include="Resources\GH\DirectShapeByCurve.png" />
-    <None Include="Resources\GH\DirectShapeByMesh.png" />
-    <None Include="Resources\GH\DirectShapeByPoint.png" />
-    <None Include="Resources\GH\DirectShapeCategories.png" />
-    <None Include="Resources\GH\DocumentCategories.png" />
-    <None Include="Resources\GH\DocumentElements.png" />
-    <None Include="Resources\GH\DocumentElementTypes.png" />
-    <None Include="Resources\GH\DocumentLevels.png" />
-    <None Include="Resources\GH\DocumentLevelsPicker.png" />
-    <None Include="Resources\GH\DocumentParameters.png" />
-    <None Include="Resources\GH\DocumentFamiliesPicker.png" />
-    <None Include="Resources\GH\Edge.png" />
-    <None Include="Resources\GH\GeometricElement.png" />
-    <None Include="Resources\GH\ElementDecompose.png" />
-    <None Include="Resources\GH\ElementGeometry.png" />
-    <None Include="Resources\GH\ElementParameterGet.png" />
-    <None Include="Resources\GH\ElementParameters.png" />
-    <None Include="Resources\GH\ElementParametersSet.png" />
-    <None Include="Resources\GH\ElementPreview.png" />
-    <None Include="Resources\GH\ElementDelete.png" />
-    <None Include="Resources\GH\ElementType.png" />
-    <None Include="Resources\GH\ElementTypeByName.png" />
-    <None Include="Resources\GH\Face.png" />
-    <None Include="Resources\GH\FloorByOutline.png" />
-    <None Include="Resources\GH\FormByCurves.png" />
-    <None Include="Resources\GH\FormByGeometry.png" />
-    <None Include="Resources\GH\ModelLineByCurve.png" />
-    <None Include="Resources\GH\ParameterByName.png" />
-    <None Include="Resources\GH\ParameterKey.png" />
-    <None Include="Resources\GH\ParameterKeyDecompose.png" />
-    <None Include="Resources\GH\ParameterValueDecompose.png" />
-    <None Include="Resources\GH\SketchPlane.png" />
-    <None Include="Resources\GH\SketchPlaneByPlane.png" />
-    <None Include="Resources\GH\TopographyByPoints.png" />
-    <None Include="Resources\GH\Vertex.png" />
-    <None Include="Resources\GH\WallByCurve.png" />
-    <None Include="Resources\GH\RoofByOutline.png" />
-    <None Include="Resources\GH\FamilyInstanceByLocation.png" />
-    <None Include="Resources\GH\ElementIdentity.png" />
-    <None Include="Resources\GH\ColumnByCurve.png" />
-    <None Include="Resources\GH\DirectShapeByBrep.png" />
-    <None Include="Resources\GH\CategorySubCategories.png" />
-    <None Include="Resources\GH\DirectShapeByLocation.png" />
-    <None Include="Resources\GH\LevelByElevation.png" />
-    <None Include="Resources\GH\GridByCurve.png" />
-    <None Include="Resources\GH\AdaptiveComponentByPoints.png" />
-    <None Include="Resources\GH\AnnotationCategoriesPicker.png" />
-    <None Include="Resources\GH\ModelCategoriesPicker.png" />
-    <None Include="Resources\GH\AnalyticalCategoriesPicker.png" />
-    <None Include="Resources\GH\TagCategoriesPicker.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\RVT$(RevitVersion)\KeyboardShortcuts.xml" />
