@@ -6,7 +6,7 @@ using Rhino;
 
 namespace RhinoInside.Revit
 {
-  class ModalForm : System.Windows.Forms.Form
+  /*internal*/ public class ModalForm : System.Windows.Forms.Form
   {
     [DllImport("USER32")]
     [return: MarshalAs(UnmanagedType.Bool)]

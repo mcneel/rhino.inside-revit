@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("RhinoInside.Revit")]
+[assembly: AssemblyTitle("RhinoInside.Revit.GH")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Robert McNeel & Associates")]
@@ -21,7 +21,7 @@ using System.Runtime.InteropServices;
 [assembly: DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory | DllImportSearchPath.UseDllDirectoryForDependencies | DllImportSearchPath.System32)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("C5BC7226-0E13-428C-9361-6F6B83169BD7")]
+[assembly: Guid("C3F12BB4-8B1D-402A-A749-DFA120C0D7B0")]
 
 // Version information for an assembly consists of the following four values:
 //

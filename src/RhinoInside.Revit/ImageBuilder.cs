@@ -6,7 +6,7 @@ using Media = System.Windows.Media;
 
 namespace RhinoInside.Revit
 {
-  static class ImageBuilder
+  /*internal*/ public static class ImageBuilder
   {
     #region System.Drawing
     public static Drawing.Color ToDrawingColor(this Media.Color color)

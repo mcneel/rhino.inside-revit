@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -29,12 +29,12 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{D6C256D4-B518-464F-9E68-CB282202E846}</ProjectGuid>
+    <ProjectGuid>{4F3E6B0F-C644-4A00-8785-11CFBE0C0F94}</ProjectGuid>
     <OutputType>Library</OutputType>
     <LangVersion>7.3</LangVersion>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>RhinoInside</RootNamespace>
-    <AssemblyName>RhinoInside.Revit</AssemblyName>
+    <AssemblyName>RhinoInside.Revit.GH</AssemblyName>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug 2017|AnyCPU' ">
@@ -170,52 +170,89 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="Exceptions.cs" />
-    <Compile Include="Extensions\RevitAPI.cs" />
-    <Compile Include="Extensions\RhinoCommon.cs" />
+    <Compile Include="Extensions\Grasshopper.cs" />
     <Compile Include="Extensions\System.cs" />
     <Compile Include="Extensions\WinForms.cs" />
-    <Compile Include="Rhino\Rhinoceros.cs" />
-    <Compile Include="Rhino\DocumentPreviewServer.cs" />
-    <Compile Include="Samples\Sample4.cs" />
-    <Compile Include="Settings\Addins.cs" />
-    <Compile Include="Settings\KeyboardShortcuts.cs" />
-    <Compile Include="ModalForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="GH\Attributes.cs" />
+    <Compile Include="GH\Components\Category\GraphicsStyle.cs" />
+    <Compile Include="GH\Components\Category\Identity.cs" />
+    <Compile Include="GH\Components\Category\ObjectStyle.cs" />
+    <Compile Include="GH\Components\Category\SubCategories.cs" />
+    <Compile Include="GH\Components\Document\Categories.cs" />
+    <Compile Include="GH\Components\Document\Document.cs" />
+    <Compile Include="GH\Components\Document\Elements.cs" />
+    <Compile Include="GH\Components\Document\ElementTypes.cs" />
+    <Compile Include="GH\Components\Document\Levels.cs" />
+    <Compile Include="GH\Components\Document\Parameters.cs" />
+    <Compile Include="GH\Components\Element\AdaptiveComponent\ByPoints.cs" />
+    <Compile Include="GH\Components\Element\Beam\ByCurve.cs" />
+    <Compile Include="GH\Components\Element\BuildingPad\ByOutline.cs" />
+    <Compile Include="GH\Components\Element\Column\ByCurve.cs" />
+    <Compile Include="GH\Components\Element\DirectShape\ByBrep.cs" />
+    <Compile Include="GH\Components\Element\DirectShape\ByCurve.cs" />
+    <Compile Include="GH\Components\Element\DirectShape\ByGeometry.cs" />
+    <Compile Include="GH\Components\Element\DirectShape\ByMesh.cs" />
+    <Compile Include="GH\Components\Element\DirectShape\ByPoint.cs" />
+    <Compile Include="GH\Components\Element\Element.cs" />
+    <Compile Include="GH\Components\Element\FamilyInstance\ByPointAtHost.cs" />
+    <Compile Include="GH\Components\Element\Floor\ByOutline.cs" />
+    <Compile Include="GH\Components\Element\Form\ByCurves.cs" />
+    <Compile Include="GH\Components\Element\Form\ByGeometry.cs" />
+    <Compile Include="GH\Components\Element\Grid\ByCurve.cs" />
+    <Compile Include="GH\Components\Element\HostObject\GetFaces.cs" />
+    <Compile Include="GH\Components\Element\Level\ByElevation.cs" />
+    <Compile Include="GH\Components\Element\MaterialQuanities.cs" />
+    <Compile Include="GH\Components\Element\Material\ByColor.cs" />
+    <Compile Include="GH\Components\Element\Material\ByName.cs" />
+    <Compile Include="GH\Components\Element\ModelLine\ByCurve.cs" />
+    <Compile Include="GH\Components\Element\Passport.cs" />
+    <Compile Include="GH\Components\Element\Roof\ByOutline.cs" />
+    <Compile Include="GH\Components\Element\SketchPlane\ByPlane.cs" />
+    <Compile Include="GH\Components\Element\Topography\ByPoints.cs" />
+    <Compile Include="GH\Components\Element\Wall\ByCurve.cs" />
+    <Compile Include="GH\Enum.cs" />
+    <Compile Include="GH\Parameters\Category.cs" />
+    <Compile Include="GH\Parameters\CategoryTypes.cs" />
+    <Compile Include="GH\Parameters\DatumPlane.cs" />
+    <Compile Include="GH\Parameters\DirectShapeCategories.cs" />
+    <Compile Include="GH\Parameters\DocumentPicker.cs" />
+    <Compile Include="GH\Parameters\Element.cs" />
+    <Compile Include="GH\Parameters\ElementFilter.cs" />
+    <Compile Include="GH\Parameters\ElementType.cs" />
+    <Compile Include="GH\Parameters\Family.cs" />
+    <Compile Include="GH\Parameters\GeometryObject.cs" />
+    <Compile Include="GH\Parameters\HostObject.cs" />
+    <Compile Include="GH\Parameters\ID.cs" />
+    <Compile Include="GH\Parameters\Material.cs" />
+    <Compile Include="GH\Parameters\Parameter.cs" />
+    <Compile Include="GH\Parameters\SketchPlane.cs" />
+    <Compile Include="GH\Solid.cs" />
+    <Compile Include="GH\Types\Category.cs" />
+    <Compile Include="GH\Types\Element.cs" />
+    <Compile Include="GH\Types\ElementFilter.cs" />
+    <Compile Include="GH\Types\ElementId.cs" />
+    <Compile Include="GH\Types\ElementType.cs" />
+    <Compile Include="GH\Types\Enums.cs" />
+    <Compile Include="GH\Types\Family.cs" />
+    <Compile Include="GH\Types\GeometryObject.cs" />
+    <Compile Include="GH\Types\Parameter.cs" />
+    <Compile Include="GH\Types\DatumPlane.cs" />
+    <Compile Include="GH\Types\SketchPlane.cs" />
+    <Compile Include="GH\Types\Material.cs" />
+    <Compile Include="GH\Types\HostObject.cs" />
+    <Compile Include="GH\Components\Component.cs" />
+    <Compile Include="GH\Components\TransactionalComponent.cs" />
+    <Compile Include="GH\Components\Parameter.cs" />
+    <Compile Include="GH\Components\Family.cs" />
+    <Compile Include="GH\Components\ElementType.cs" />
+    <Compile Include="GH\Components\ElementFilter.cs" />
+    <Compile Include="GH\ValueList.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="UI\Command.cs" />
-    <Compile Include="UI\GrasshopperCommand.cs" />
-    <Compile Include="UI\GrasshopperPlayerCommand.cs" />
-    <Compile Include="UI\HelpCommands.cs" />
-    <Compile Include="UI\RhinoCommand.cs" />
-    <Compile Include="GH\Guest.cs" />
-    <Compile Include="GH\PreviewServer.cs" />
-    <Compile Include="DirectContext3DServer.cs" />
-    <Compile Include="ImageBuilder.cs" />
-    <Compile Include="Operator.cs" />
-    <Compile Include="State.cs" />
-    <Compile Include="Optional.cs" />
-    <Compile Include="Convert.cs" />
-    <Compile Include="Convert.ToHost.cs" />
-    <Compile Include="Convert.ToRhino.cs" />
-    <Compile Include="Revit.cs" />
-    <Compile Include="Revit.FailuresPreprocessor.cs" />
-    <Compile Include="Addin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI\Selection.cs" />
-    <None Include="Properties\RhinoInside.Revit.addin" />
-    <Compile Include="Samples\Sample1.cs" />
-    <None Include="Samples\Sample2.ghx" />
-    <None Include="Samples\Sample3.ghx" />
-    <Compile Include="Samples\Sample6.cs" />
-    <None Include="Samples\Sample4.ghx" />
-    <None Include="Samples\Sample7.py" />
-    <Compile Include="Samples\Sample8.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -223,13 +260,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Rhino-logo.png" />
-    <EmbeddedResource Include="Resources\Rhino.png" />
-    <EmbeddedResource Include="Resources\Grasshopper.png" />
-    <EmbeddedResource Include="Resources\GrasshopperPlayer.png" />
-    <EmbeddedResource Include="Resources\Python.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\GH\BeamByCurve.png" />
@@ -292,28 +322,22 @@
     <None Include="Resources\GH\TagCategoriesPicker.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\RVT$(RevitVersion)\KeyboardShortcuts.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\GH\Toolbar\Bake.png" />
-    <EmbeddedResource Include="Resources\GH\Toolbar\Preview_Off.png" />
-    <EmbeddedResource Include="Resources\GH\Toolbar\Preview_Shaded.png" />
-    <EmbeddedResource Include="Resources\GH\Toolbar\Preview_Wireframe.png" />
-    <EmbeddedResource Include="Resources\GH\Toolbar\Recompute.png" />
-    <EmbeddedResource Include="Resources\GH\Toolbar\SolverOff.png" />
-    <EmbeddedResource Include="Resources\GH\Toolbar\SolverOn.png" />
+    <ProjectReference Include="..\RhinoInside.Revit\RhinoInside.Revit.csproj">
+      <Project>{d6c256d4-b518-464f-9e68-cb282202e846}</Project>
+      <Name>RhinoInside.Revit</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild" Condition="$(Configuration.Contains('Debug'))">
-    <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.dll" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />
-    <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.pdb" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />
-    <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)Properties\RhinoInside.Revit.addin" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)" />
+    <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.dll" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />
+    <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.pdb" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />
+    <Move SourceFiles="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit\RhinoInside.Revit.GH.dll" DestinationFiles="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit\RhinoInside.Revit.GH.gha" />
   </Target>
-  <Target Name="AfterClean" Condition="$(Configuration.Contains('Debug'))">
+  <!--<Target Name="AfterClean" Condition="$(Configuration.Contains('Debug'))">
     <Delete Files="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit.addin" />
     <RemoveDir Directories="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />
-  </Target>
+  </Target>-->
   <PropertyGroup>
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
   </PropertyGroup>

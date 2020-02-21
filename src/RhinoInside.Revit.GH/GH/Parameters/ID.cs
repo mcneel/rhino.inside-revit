@@ -26,17 +26,6 @@ namespace RhinoInside.Revit.GH.Parameters
     { }
   }
 
-  public interface IGH_ElementIdParam : IGH_Param
-  {
-    bool NeedsToBeExpired
-    (
-      DB.Document doc,
-      ICollection<DB.ElementId> added,
-      ICollection<DB.ElementId> deleted,
-      ICollection<DB.ElementId> modified
-    );
-  }
-
   public abstract class ElementIdParam<T, R> : GH_PersistentParam<T>, IGH_ElementIdParam
     where T : class, Types.IGH_ElementId
   {

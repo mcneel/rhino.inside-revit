@@ -7,6 +7,8 @@ using Grasshopper.GUI.Canvas;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Attributes;
 using Grasshopper.Kernel.Types;
+using static System.Math;
+using static Rhino.RhinoMath;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -597,7 +599,7 @@ namespace RhinoInside.Revit.GH.Components
             {
               case bool boolean: parameter.Set(boolean ? 1 : 0); break;
               case int integer: parameter.Set(integer); break;
-              case double real: parameter.Set(Math.Round(ToHost(real, parameter.Definition.ParameterType)).Clamp(int.MinValue, int.MaxValue)); break;
+              case double real: parameter.Set((int) Clamp(Round(ToHost(real, parameter.Definition.ParameterType)), int.MinValue, int.MaxValue)); break;
               case System.Drawing.Color color: parameter.Set(((int) color.R) | ((int) color.G << 8) | ((int) color.B << 16)); break;
               default: element = null; break;
             }
@@ -657,9 +659,9 @@ namespace RhinoInside.Revit.GH.Components
     {
       switch (type)
       {
-        case DB.ParameterType.Length: return value / Math.Pow(Revit.ModelUnits, 1.0);
-        case DB.ParameterType.Area:   return value / Math.Pow(Revit.ModelUnits, 2.0);
-        case DB.ParameterType.Volume: return value / Math.Pow(Revit.ModelUnits, 3.0);
+        case DB.ParameterType.Length: return value / Pow(Revit.ModelUnits, 1.0);
+        case DB.ParameterType.Area:   return value / Pow(Revit.ModelUnits, 2.0);
+        case DB.ParameterType.Volume: return value / Pow(Revit.ModelUnits, 3.0);
       }
 
       return value;

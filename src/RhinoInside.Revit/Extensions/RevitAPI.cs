@@ -7,7 +7,7 @@ using Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit
 {
-  static class TaskDialogIcons
+  public static class TaskDialogIcons
   {
     public const TaskDialogIcon IconNone        = TaskDialogIcon.TaskDialogIconNone;
 #if REVIT_2018
@@ -22,7 +22,7 @@ namespace RhinoInside.Revit
     public const TaskDialogIcon IconWarning     = TaskDialogIcon.TaskDialogIconWarning;
   }
 
-  public static class RevitAPI
+  /*internal*/ public static class RevitAPI
   {
     #region XYZ
     public static bool IsParallelTo(this XYZ a, XYZ b)
@@ -626,7 +626,7 @@ namespace RhinoInside.Revit
 
     static BuiltInCategory[] BuiltInCategoriesWithParameters;
     static Document BuiltInCategoriesWithParametersDocument;
-    internal static ICollection<BuiltInCategory> GetBuiltInCategoriesWithParameters(this Document doc)
+    /*internal*/ public static ICollection<BuiltInCategory> GetBuiltInCategoriesWithParameters(this Document doc)
     {
       if (BuiltInCategoriesWithParameters is null && !BuiltInCategoriesWithParametersDocument.Equals(doc))
       {
@@ -774,7 +774,7 @@ namespace RhinoInside.Revit
     #endregion
   }
 
-  public static class UniqueId
+  /*internal*/ public static class UniqueId
   {
     public static string Format(Guid episodeId, int index) => $"{episodeId:D}-{index,8:x}";
     public static bool TryParse(string s, out Guid episodeId, out int id)
