@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Rhino.Geometry;
 using DB = Autodesk.Revit.DB;
@@ -9,6 +10,48 @@ namespace RhinoInside.Revit
   public static partial class Convert
   {
     #region ToRhino
+
+    static class ToRhinoLengthUnitsStatic
+    {
+      static ToRhinoLengthUnitsStatic()
+      {
+        foreach (var unit in DB.UnitUtils.GetValidDisplayUnits(DB.UnitType.UT_Length))
+        {
+          var revit = DB.UnitUtils.Convert(1.0, DB.DisplayUnitType.DUT_METERS, unit);
+          var rhino = Rhino.RhinoMath.UnitScale(Rhino.UnitSystem.Meters, unit.ToRhinoLengthUnits());
+          Debug.Assert(Rhino.RhinoMath.EpsilonEquals(revit, rhino, Rhino.RhinoMath.ZeroTolerance), $"ToRhinoLengthUnits({unit}) fails!!");
+        }
+      }
+
+      [Conditional("DEBUG")]
+      internal static void Assert() { }
+    }
+
+    public static Rhino.UnitSystem ToRhinoLengthUnits(this DB.DisplayUnitType value)
+    {
+      ToRhinoLengthUnitsStatic.Assert();
+
+      if (!DB.UnitUtils.IsValidDisplayUnit(DB.UnitType.UT_Length, value))
+        throw new ConversionException($"{value} is not a length unit");
+
+      switch (value)
+      {
+        case DB.DisplayUnitType.DUT_METERS:                 return Rhino.UnitSystem.Meters;
+        case DB.DisplayUnitType.DUT_METERS_CENTIMETERS:     return Rhino.UnitSystem.Meters;
+        case DB.DisplayUnitType.DUT_DECIMETERS:             return Rhino.UnitSystem.Decimeters;
+        case DB.DisplayUnitType.DUT_CENTIMETERS:            return Rhino.UnitSystem.Centimeters;
+        case DB.DisplayUnitType.DUT_MILLIMETERS:            return Rhino.UnitSystem.Millimeters;
+
+        case DB.DisplayUnitType.DUT_FRACTIONAL_INCHES:      return Rhino.UnitSystem.Inches;
+        case DB.DisplayUnitType.DUT_DECIMAL_INCHES:         return Rhino.UnitSystem.Inches;
+        case DB.DisplayUnitType.DUT_FEET_FRACTIONAL_INCHES: return Rhino.UnitSystem.Feet;
+        case DB.DisplayUnitType.DUT_DECIMAL_FEET:           return Rhino.UnitSystem.Feet;
+      }
+
+      Debug.Fail($"{value} conversion is not implemented");
+      return Rhino.UnitSystem.Unset;
+    }
+
     public static System.Drawing.Color ToRhino(this DB.Color c)
     {
       return System.Drawing.Color.FromArgb(c.Red, c.Green, c.Blue);

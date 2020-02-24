@@ -35,6 +35,22 @@ Created By [How to Rhino Facebook Group](https://www.facebook.com/groups/howtorh
 
 > This is a short recap of {{ site.terms.rir }} plugin which allows Revit and other apps to run Rhino and Grasshopper within Revit application. Keep in mind that this works only with Rhino 7 work in progress version. With this plugin, you can easily import and export geometry from Revit to Rhino and Grasshopper and the other way around. As this is a native McNeel development tool, it is going to be a gamechanger when it comes to having the ability to use parametric modeling techniques in Grasshopper and have all of that work seamlessly in a BIM tool such as Revit. 
 
+##  SF Computational Design Institute presentation of {{ site.terms.rir }}
+
+{% include youtube_player.html id="KF7JyKuTxzU" %}
+
+Created at [San Fransisco Computational Design Institute](https://www.linkedin.com/company/sfcdi/)
+
+> This is a short recap of {{ site.terms.rir }} plugin and Compute technology in Rhino. 
+
+##  EvolveLAB covers Rhino Inside Revit - Way Faster Wednesday
+
+{% include youtube_player.html id="XsIgliwPBJU" %}
+
+Created by [EvolveLAB](https://www.evolvebim.com/)
+
+> In this video, we highlight the power of Rhino Inside Revit with Grasshopper.  We will place adaptive components and floors using rhino inside with grasshopper. 
+
 ## Solar Analysis with {{ site.terms.rir }}
 
 {% include vimeo_player.html id="363977394" %}

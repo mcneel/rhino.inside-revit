@@ -15,6 +15,7 @@ using Rhino.PlugIns;
 
 using Grasshopper;
 using Grasshopper.Kernel;
+using Grasshopper.GUI.Canvas;
 
 namespace RhinoInside.Revit.GH
 {
@@ -48,11 +49,55 @@ namespace RhinoInside.Revit.GH
       Revit.DocumentChanged += OnDocumentChanged;
       Revit.ApplicationUI.Idling += OnIdle;
 
+      Rhinoceros.ModalScope.Enter += ModalScope_Enter;
+      Rhinoceros.ModalScope.Exit  += ModalScope_Exit;
+
+      RhinoDoc.BeginOpenDocument                += BeginOpenDocument;
+      RhinoDoc.EndOpenDocumentInitialViewUpdate += EndOpenDocumentInitialViewUpdate;
+
+      Instances.CanvasCreatedEventHandler Canvas_Created = default;
+      Instances.CanvasCreated += Canvas_Created = (canvas) =>
+      {
+        Instances.CanvasCreated -= Canvas_Created;
+        canvas.DocumentChanged  += ActiveCanvas_DocumentChanged;
+      };
+
+      Instances.CanvasDestroyedEventHandler Canvas_Destroyed = default;
+      Instances.CanvasDestroyed += Canvas_Destroyed = (canvas) =>
+      {
+        Instances.CanvasDestroyed -= Canvas_Destroyed;
+        canvas.DocumentChanged    -= ActiveCanvas_DocumentChanged;
+      };
+
       return LoadReturnCode.Success;
     }
 
+    static Rhino.UnitSystem modelUnitSystem = Rhino.UnitSystem.Unset;
+    public static Rhino.UnitSystem ModelUnitSystem
+    {
+      get => Instances.ActiveCanvas is null ? Rhino.UnitSystem.Unset : modelUnitSystem;
+      private set => modelUnitSystem = value;
+    }
+
+    void ActiveCanvas_DocumentChanged(GH_Canvas sender, GH_CanvasDocumentChangedEventArgs e)
+    {
+      if (e.OldDocument is object)
+        e.OldDocument.SolutionEnd -= ActiveDefinition_SolutionEnd;
+
+      if (e.NewDocument is object)
+        e.NewDocument.SolutionEnd += ActiveDefinition_SolutionEnd;
+    }
+
+    void ActiveDefinition_SolutionEnd(object sender, GH_SolutionEventArgs e) => ModelUnitSystem = RhinoDoc.ActiveDoc.ModelUnitSystem;
+
     void IGuest.OnCheckOut()
     {
+      RhinoDoc.EndOpenDocumentInitialViewUpdate -= EndOpenDocumentInitialViewUpdate;
+      RhinoDoc.BeginOpenDocument                -= BeginOpenDocument;
+
+      Rhinoceros.ModalScope.Exit  -= ModalScope_Exit;
+      Rhinoceros.ModalScope.Enter -= ModalScope_Enter;
+
       Revit.ApplicationUI.Idling -= OnIdle;
       Revit.DocumentChanged -= OnDocumentChanged;
 
@@ -175,6 +220,37 @@ namespace RhinoInside.Revit.GH
 
       GH_ComponentServer.UpdateRibbonUI();
       return true;
+    }
+
+    private void ModalScope_Enter(object sender, EventArgs e)
+    {
+      if (Instances.ActiveCanvas?.Document is GH_Document definition)
+        definition.Enabled = true;
+    }
+
+    private void ModalScope_Exit(object sender, EventArgs e)
+    {
+      if (Instances.ActiveCanvas?.Document is GH_Document definition)
+        definition.Enabled = false;
+    }
+
+    bool activeDefinitionWasEnabled = false;
+    void BeginOpenDocument(object sender, DocumentOpenEventArgs e)
+    {
+      if (Instances.ActiveCanvas?.Document is GH_Document definition)
+      {
+        activeDefinitionWasEnabled = definition.Enabled;
+        definition.Enabled = false;
+      }
+    }
+
+    void EndOpenDocumentInitialViewUpdate(object sender, DocumentOpenEventArgs e)
+    {
+      if (Instances.ActiveCanvas?.Document is GH_Document definition)
+      {
+        definition.Enabled = activeDefinitionWasEnabled;
+        definition.NewSolution(false);
+      }
     }
 
     void OnDocumentChanged(object sender, DocumentChangedEventArgs e)
