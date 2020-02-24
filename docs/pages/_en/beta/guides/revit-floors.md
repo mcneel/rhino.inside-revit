@@ -10,3 +10,6 @@ order: 45
 ## Querying Floor Types
 
 ## Creating Floors
+
+<!-- not possible to create floors with multiple boundaries -->
+<!-- https://discourse.mcneel.com/t/floor-byoutline-with-internal-opening/96744/2 -->
