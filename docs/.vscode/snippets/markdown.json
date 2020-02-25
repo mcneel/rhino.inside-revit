@@ -1,4 +1,14 @@
 {
+    "RIR Meta": {
+        "prefix": "rirmeta",
+        "description": "Metadata for a Rhino.Inside.Revit Wiki page",
+        "body": [
+            "---",
+            "title: X",
+            "order: 0",
+            "---"
+        ]
+    },
     "RIR Image": {
         "prefix": "ririmg",
         "description": "Image tag for Rhino.Inside.Revit Wiki",
