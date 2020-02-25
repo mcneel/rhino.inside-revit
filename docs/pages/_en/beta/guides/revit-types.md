@@ -102,6 +102,18 @@ You can pass the any of the categories above to the *ElementType.ByName* compone
 ![]({{ "/static/images/guides/revit-families05.png" | prepend: site.baseurl }})
 
 
+## Determining Default Types
+
+When a build tool is launched (e.g. *Place Door*), Revit will automatically select the last-used type for that specific category (e.g. *Doors* for *Place Door* tool). This is called the **Default Type** for that category. This information is helpful when creating elements using the API. Use the component shared below to inspect the default types for the provided category:
+
+![]({{ "/static/images/guides/revit-families05a.png" | prepend: site.baseurl }})
+
+In case of custom types, the component will return the default `DB.FamilySymbol`:
+
+![]({{ "/static/images/guides/revit-families05b.png" | prepend: site.baseurl }})
+
+{% include ltr/download_comp.html archive='/static/ghnodes/Get Default Type.ghuser' name='Get Default Type' %}
+
 ## Modifying Types
 
 Once you have filtered out the desired type, you can query its parameters and apply new values. See [Reading & Writing Revit Parameter Values]({{ site.baseurl }}{% link _en/beta/guides/revit-params.md %}) to learn how to edit parameters of an element. The element parameter components work on element types as well.
