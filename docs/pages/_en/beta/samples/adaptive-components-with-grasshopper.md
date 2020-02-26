@@ -8,7 +8,7 @@ to create and filter the facade grid.
 
 {% include youtube_player.html id="etVbQGZ3myg" %}
 
-## Setting up to use Adaptive comonents:
+## Setting up to use Adaptive components:
 
 1. Setup a standard Revit Adaptive component.
 1. Add the adaptive component to the revit project. 
@@ -22,7 +22,7 @@ To select the adaptive component by Name combine the Model Category selector wit
 
 ![Datatree input for Adaptive]({{ "/static/images/samples/adaptive-component-tree-set.jpg" | prepend: site.baseurl }}){:height="35%" width="35%"}
 
-### Some notes on using adaptive components:
+## Some notes on using adaptive components:
 
 The PanelingTools plugin in Grasshopper makes it easier to find points that make up each cell to insert an adaptive component. The Cellulate component in PanelingTools can order the points correctly.
 
