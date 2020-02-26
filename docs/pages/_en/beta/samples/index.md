@@ -19,3 +19,22 @@ Each sample page listed here, has a ZIP package that might include one or more o
 - Revit Family (`*.rfa`)
 
 You can download the archive for each sample by clicking on the download button included in each sample. Follow the directions provide in the sample article on how and when to open any of these files.
+
+## Current Samples
+
+{% for collection in site.collections %}
+    {% if collection.label == page.collection %}
+        {% assign samples = collection.docs | sort:"order" %}
+<div>
+        <ul>
+            {% for sample in samples %}
+            {% if sample.toc and sample.title and sample.version == page.version and sample.categories == page.categories %}
+                <li>
+                        <a href="{{ sample.url | prepend: site.baseurl }}" title="{{ sample.description }}">{{ sample.title }}</a>
+                </li>
+            {% endif %}
+            {% endfor %}
+        </ul>
+</div>
+    {% endif %}
+{% endfor %}
