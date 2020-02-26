@@ -1,5 +1,5 @@
 ---
-title: Managing Parameters with Grasshopper
+title: Adaptive Component with Grasshopper
 ---
 
 {% include ltr/en/wip_note.html %}
