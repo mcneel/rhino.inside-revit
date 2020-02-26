@@ -20,7 +20,7 @@ The input to the AddAdaptiveComponent is a datatree structure with each set of 4
 
 To select the adaptive component by Name combine the Model Category selector with the ElementTypeByName selector.
 
-![Datatree input for Adaptive]({{ "/static/images/samples/adaptive-component-tree-set.jpg" | prepend: site.baseurl }}){:height="50%" width="50%"}
+![Datatree input for Adaptive]({{ "/static/images/samples/adaptive-component-tree-set.jpg" | prepend: site.baseurl }}){:height="35%" width="35%"}
 
 ### Some notes on using adaptive components:
 
