@@ -83,7 +83,7 @@ When querying the custom types that exist in a Revit model, we can find out the 
 
 {% include ltr/download_comp.html archive='/static/ghnodes/Type Family.ghuser' name='Type Family' %}
 
-Notice that **Duct Systems** for example, is a system types and therefore have no associated family definition. Hence the *Type Family* component is returning `null`.
+Notice that **Duct Systems** for example, is a system type and therefore have no associated custom family definition. Therefore the *Type Family* component is returning `null`.
 
 ![]({{ "/static/images/guides/revit-families04.png" | prepend: site.baseurl }})
 
