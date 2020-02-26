@@ -37,7 +37,7 @@ You can pass a design option to the *Element.DesignOptionFilter* component to co
 
 ## Setting Element Design Option
 
-{% include ltr/warning_note.html note='Currently there is not support in Revit API to set element Design Options' %}
+{% include ltr/warning_note.html note='Currently there is no support in Revit API to set element Design Options' %}
 
 <!-- https://forums.autodesk.com/t5/revit-api-forum/expose-design-options-settings/m-p/6451629/highlight/true#M17496 -->
 <!-- https://thebuildingcoder.typepad.com/blog/2015/03/list-and-switch-design-options-using-ui-automation.html -->

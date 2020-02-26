@@ -89,7 +89,7 @@ Notice that the *Geometry Element* component is only holding a reference to the 
 
 The components under the *Parameter* panel in Grasshopper, allow you to create new Shared Parameters in Revit.
 
-{% include ltr/api_note.html note='Currently Revit API does not support creating project parameters' %}
+{% include ltr/warning_note.html note='Currently Revit API does not support creating project parameters' %}
 
 {% include ltr/warning_note.html note='The current implementation always creates Parameters of type **Text** and places them under the **Data** category in the Revit parameters panel. The parameter will be attached to all the categories in Revit' %}
 
