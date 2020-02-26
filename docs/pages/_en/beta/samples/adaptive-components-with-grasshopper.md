@@ -2,8 +2,6 @@
 title: Adaptive Component with Grasshopper
 ---
 
-{% include ltr/en/wip_note.html %}
-
 This sample shows how to how to drive Revit&reg; adaptive components using Grasshopper&reg; and Rhino&reg;. The advantage to using this workflow is in the ability to use Rhino's goemteric ability to lay out a rational set of points on 
 complex arbitrary geometry.  Grasshopper can also make descisions as condition across the form change. This example uses the Grasshopper [PanelTools plugin](https://www.food4rhino.com/app/panelingtools-rhino-and-grasshopper) 
 to create and filter the facade grid.
