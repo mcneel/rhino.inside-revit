@@ -7,9 +7,9 @@ order: 40
 
 ## Querying Wall Types
 
-## Collecting Walls
+## Querying Walls
 
-### Collecting All Walls
+### Querying All Walls
 
 <!-- mention stacked walls show up as multiple -->
 
@@ -22,14 +22,9 @@ In Revit API,  are represented by the {% include api_type.html type='Autodesk.Re
 
 ### By Wall Type
 
-## Wall Parameters
-
-<!-- 
-- create necessary enum components for param values like DB.WallFunction
-- explain how to set these params and these components are helpers
- -->
-
 ## Analyzing Wall Types
+
+### Reading Type Parameters
 
 ### Basic Wall Structure
 
@@ -39,7 +34,9 @@ In Revit API,  are represented by the {% include api_type.html type='Autodesk.Re
 
 {% include ltr/warning_note.html note='Currently there is no support in Revit API to access Stacked Wall structure data' %}
 
-## Analyzing Wall Instances
+## Analyzing Walls
+
+### Reading Instance Parameters
 
 ### Common Wall Properties
 
@@ -62,21 +59,25 @@ explain challenges of getting geometry from standard approach
 
 ## Modifying Wall Types
 
+### Modifying Type Parameters
+
 ### Modifying Basic Wall Structure
 
 ### Modifying Stacked Wall Structure
 
-## Modify Wall Instances
+## Modifying Walls
 
-### Modify Base Curve
+### Modifying Instance Parameters
 
-### Modify Profile
+### Modifying Base Curve
 
-## Creating New Wall Types
+### Modifying Profile
 
-### Creating New Basic Wall Type
+## Creating Wall Types
 
-### Creating New Stacked Wall Type
+### Creating Basic Wall Type
+
+### Creating Stacked Wall Type
 
 {% include ltr/warning_note.html note='Currently there is no support in Revit API to create new Stacked Wall types' %}
 
