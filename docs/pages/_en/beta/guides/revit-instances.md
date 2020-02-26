@@ -13,6 +13,10 @@ Use a combination of category component, connected to *ElementType.ByName* and *
 
 ![]({{ "/static/images/guides/revit-instances01.png" | prepend: site.baseurl }})
 
+## Filtering Instances by Property
+
+{% include ltr/en/wip_note.html %}
+
 ## Modifying Instances
 
 Once you have filtered out the desired instance, you can query its parameters and apply new values. See [Document Model: Parameters]({{ site.baseurl }}{% link _en/beta/guides/revit-params.md %}) to learn how to edit parameters of an element.
