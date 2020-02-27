@@ -185,7 +185,7 @@ namespace RhinoInside.Revit.UI
 
       if (helpButton != null)
       {
-        helpButton.LargeImage = retCode > 0 ? ImageBuilder.BuildLargeImage(retCode.ToString(), System.Drawing.Color.DarkRed) : ImageBuilder.BuildLargeImage("?");
+        helpButton.LargeImage = retCode > 0 ? ImageBuilder.BuildLargeImage(retCode.ToString(), System.Windows.Media.Colors.DarkRed) : ImageBuilder.BuildLargeImage("?");
         helpButton.ToolTip = retCode > 0 ? string.Format("There are {0} changes in the repository", retCode) : string.Empty;
       }
 
@@ -195,7 +195,7 @@ namespace RhinoInside.Revit.UI
 
       if (helpButton != null)
       {
-        helpButton.LargeImage = Addin.DaysUntilExpiration <= 15 ? ImageBuilder.BuildLargeImage(Addin.DaysUntilExpiration.ToString(), System.Drawing.Color.DarkRed) : ImageBuilder.BuildLargeImage("?");
+        helpButton.LargeImage = Addin.DaysUntilExpiration <= 15 ? ImageBuilder.BuildLargeImage(Addin.DaysUntilExpiration.ToString(), System.Windows.Media.Colors.DarkRed) : ImageBuilder.BuildLargeImage("?");
         helpButton.ToolTip = Addin.DaysUntilExpiration > 1 ? string.Format("This WIP build expires in {0} days", Addin.DaysUntilExpiration) : "This WIP build has expired";
       }
 

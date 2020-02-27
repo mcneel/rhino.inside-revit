@@ -1,6 +1,6 @@
 ---
 title: "Data Model: Parameters"
-order: 30
+order: 31
 ---
 
 In this guide we will take a look at how to read the parameters from a Revit element using Grasshopper. But first let's take a look at various parameter types that we encounter when working with Revit elements.
@@ -21,6 +21,10 @@ In Revit API, all the built-in parameters are represented by the {% include api_
 ### Project/Shared Parameters
 
 Revit allows a user to create a series of custom parameters and apply them globally to selected categories. The *Element Properties* panel displays the project parameters attached to the selected element as well.
+
+### Global Parameters
+
+{% include ltr/en/wip_note.html %}
 
 
 ## Inspecting Parameters

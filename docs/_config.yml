@@ -52,6 +52,8 @@ encoding: utf-8
 markdown: kramdown
 kramdown:
   input: GFM
+  syntax_highlighter: rouge
+highlighter: rouge
 # this directory is the root for all collections
 collections_dir: pages
 simple_search: https://google.com/search

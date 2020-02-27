@@ -140,7 +140,7 @@ namespace RhinoInside.Revit.GH.Components
       return wasMissing;
     }
 
-    public bool SolveOptionalLevel(ref Optional<DB.Level> level, DB.Document doc, double elevation)
+    public bool SolveOptionalLevel(DB.Document doc, double elevation, ref Optional<DB.Level> level)
     {
       bool wasMissing = level.IsMissing;
 
@@ -157,7 +157,34 @@ namespace RhinoInside.Revit.GH.Components
       return wasMissing;
     }
 
-    public void SolveOptionalLevelsFromBase(DB.Document doc, ref Optional<DB.Level> baseLevel, ref Optional<DB.Level> topLevel, double elevation)
+    public bool SolveOptionalLevel(DB.Document doc, Rhino.Geometry.Point3d point, ref Optional<DB.Level> level, out Rhino.Geometry.BoundingBox bbox)
+    {
+      bbox = new Rhino.Geometry.BoundingBox(point, point);
+      return SolveOptionalLevel(doc, point.IsValid ? point.Z : double.NaN, ref level);
+    }
+
+    public bool SolveOptionalLevel(DB.Document doc, Rhino.Geometry.Line line, ref Optional<DB.Level> level, out Rhino.Geometry.BoundingBox bbox)
+    {
+      bbox = line.BoundingBox;
+      return SolveOptionalLevel(doc, bbox.IsValid ? bbox.Min.Z : double.NaN, ref level);
+    }
+
+    public bool SolveOptionalLevel(DB.Document doc, Rhino.Geometry.GeometryBase geometry, ref Optional<DB.Level> level, out Rhino.Geometry.BoundingBox bbox)
+    {
+      bbox = geometry.GetBoundingBox(true);
+      return SolveOptionalLevel(doc, bbox.IsValid ? bbox.Min.Z : double.NaN, ref level);
+    }
+
+    public bool SolveOptionalLevel(DB.Document doc, IEnumerable<Rhino.Geometry.GeometryBase> geometries, ref Optional<DB.Level> level, out Rhino.Geometry.BoundingBox bbox)
+    {
+      bbox = Rhino.Geometry.BoundingBox.Empty;
+      foreach (var geometry in geometries)
+        bbox = geometry.GetBoundingBox(true);
+
+      return SolveOptionalLevel(doc, bbox.IsValid ? bbox.Min.Z : double.NaN, ref level);
+    }
+
+    public void SolveOptionalLevelsFromBase(DB.Document doc, double elevation, ref Optional<DB.Level> baseLevel, ref Optional<DB.Level> topLevel)
     {
       if (baseLevel.IsMissing && topLevel.IsMissing)
       {
@@ -184,7 +211,7 @@ namespace RhinoInside.Revit.GH.Components
         throw new ArgumentException("Failed to assign a level from a diferent document.", nameof(topLevel));
     }
 
-    public void SolveOptionalLevelsFromTop(DB.Document doc, ref Optional<DB.Level> baseLevel, ref Optional<DB.Level> topLevel, double elevation)
+    public void SolveOptionalLevelsFromTop(DB.Document doc, double elevation, ref Optional<DB.Level> baseLevel, ref Optional<DB.Level> topLevel)
     {
       if (baseLevel.IsMissing && topLevel.IsMissing)
       {
@@ -211,17 +238,12 @@ namespace RhinoInside.Revit.GH.Components
         throw new ArgumentException("Failed to assign a level from a diferent document.", nameof(topLevel));
     }
 
-    public bool SolveOptionalLevel(ref Optional<DB.Level> level, DB.Document doc, Rhino.Geometry.Curve curve, string paramName)
-    {
-      return SolveOptionalLevel(ref level, doc, Math.Min(curve.PointAtStart.Z, curve.PointAtEnd.Z));
-    }
-
-    public bool SolveOptionalLevels(ref Optional<DB.Level> topLevel, ref Optional<DB.Level> baseLevel, DB.Document doc, Rhino.Geometry.Curve curve)
+    public bool SolveOptionalLevels(DB.Document doc, Rhino.Geometry.Curve curve, ref Optional<DB.Level> baseLevel, ref Optional<DB.Level> topLevel)
     {
       bool result = true;
 
-      result &= SolveOptionalLevel(ref baseLevel, doc, Math.Min(curve.PointAtStart.Z, curve.PointAtEnd.Z));
-      result &= SolveOptionalLevel(ref topLevel,  doc, Math.Max(curve.PointAtStart.Z, curve.PointAtEnd.Z));
+      result &= SolveOptionalLevel(doc, Math.Min(curve.PointAtStart.Z, curve.PointAtEnd.Z), ref baseLevel);
+      result &= SolveOptionalLevel(doc, Math.Max(curve.PointAtStart.Z, curve.PointAtEnd.Z), ref baseLevel);
 
       return result;
     }

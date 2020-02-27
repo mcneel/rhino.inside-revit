@@ -10,6 +10,25 @@ In Revit API, Spatial Elements are represented by the {% include api_type.html t
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
+## Querying Spatial Elements
+
+## Querying Separation Lines
+
+To find the separation (or boundary) lines associated with a category of spatial elements (e.g. Rooms, Areas, Spaces) use the *Separation Lines* dropdown component shared here. This component helps filtering down the list of categories to the separation lines. The output can be used with *Element.CategoryFilter* and *Document.Elements* components to grab the desired separation lines from the model.
+
+![]({{ "/static/images/guides/revit-spatial02.png" | prepend: site.baseurl }})
+
+{% include ltr/download_comp.html archive='/static/ghnodes/Separation Lines.ghuser' name='Separation Lines' %}
+
+## Creating Separation Lines
+
+### Area Boundary Lines
+
+To create area boundary lines, use the *Create Area Boundaries* component shared here. The component needs an Area Plan and curves as input.
+
+![]({{ "/static/images/guides/revit-spatial04.png" | prepend: site.baseurl }})
+
+{% include ltr/download_comp.html archive='/static/ghnodes/Create Area Boundaries.ghuser' name='Create Area Boundaries' %}
 
 ## Getting Spatial Element Geometry
 
@@ -29,3 +48,4 @@ Make sure that the *Area and Volume* is checked under *Area and Volume Computati
 Here is an example of using this workflow to get geometry of rooms:
 
 ![]({{ "/static/images/guides/revit-spatial02.gif" | prepend: site.baseurl }})
+

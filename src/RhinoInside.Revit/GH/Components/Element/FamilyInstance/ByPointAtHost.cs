@@ -44,7 +44,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!location.IsValid)
         ThrowArgumentException(nameof(location), "Should be a valid point or plane.");
 
-      SolveOptionalLevel(ref level, doc, location.Origin.Z);
+      SolveOptionalLevel(doc, location.Origin, ref level, out var bbox);
 
       if (host == null && type.Family.FamilyPlacementType == DB.FamilyPlacementType.OneLevelBasedHosted)
         ThrowArgumentException(nameof(host), $"This family requires a host.");

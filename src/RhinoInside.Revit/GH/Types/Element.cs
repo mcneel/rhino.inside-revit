@@ -235,7 +235,7 @@ namespace RhinoInside.Revit.GH.Types
       public Proxy(Element e) : base(e) { (this as IGH_GooProxy).UserString = FormatInstance(); }
 
       public override bool IsParsable() => true;
-      public override string FormatInstance() => $"{owner.Value.IntegerValue}:{element?.Name ?? string.Empty}";
+      public override string FormatInstance() => owner.IsValid ? $"{owner.Value.IntegerValue}:{element?.Name ?? string.Empty}" : "-1";
       public override bool FromString(string str)
       {
         int index = str.IndexOf(':');
@@ -245,7 +245,7 @@ namespace RhinoInside.Revit.GH.Types
         str = str.Trim();
         if (int.TryParse(str, out int elementId))
         {
-          owner.Value = new DB.ElementId(elementId);
+          owner.SetValue(owner.Document ?? Revit.ActiveUIDocument.Document, new DB.ElementId(elementId));
           return true;
         }
 

@@ -153,6 +153,7 @@ namespace RhinoInside.Revit
 
     static DB.Curve ToHost(this NurbsCurve curve)
     {
+      curve = curve.DuplicateShallow() as NurbsCurve;
       curve.Knots.RemoveMultipleKnots(1, curve.Degree, Revit.VertexTolerance);
 
       var curve_Degree = curve.Degree;
@@ -212,22 +213,23 @@ namespace RhinoInside.Revit
 
         case NurbsCurve nurbsCurve:
 
-          if (curve.TryGetEllipse(out var ellipse, out var interval, Revit.VertexTolerance) && ellipse.Radius1 <= 30000 && ellipse.Radius2 <= 30000)
+          if (nurbsCurve.TryGetEllipse(out var ellipse, out var interval, Revit.VertexTolerance) && ellipse.Radius1 <= 30000 && ellipse.Radius2 <= 30000)
             return ellipse.ToHost(interval);
 
-          if (curve.IsClosed)
+          // This Geometry crashes Revit
+          var gap = Revit.ShortCurveTolerance * 1.01;
+          if (nurbsCurve.IsClosed(gap))
           {
-            var gap = Revit.ShortCurveTolerance * 1.01;
-            var length = curve.GetLength();
+            var length = nurbsCurve.GetLength();
             if
             (
               length > gap &&
-              curve.LengthParameter((gap / 2.0), out var t0) &&
-              curve.LengthParameter(length - (gap / 2.0), out var t1)
+              nurbsCurve.LengthParameter((gap / 2.0), out var t0) &&
+              nurbsCurve.LengthParameter(length - (gap / 2.0), out var t1)
             )
             {
-              var segments = curve.Split(new double[] { t0, t1 });
-              curve = segments[0] as NurbsCurve ?? curve;
+              var segments = nurbsCurve.Split(new double[] { t0, t1 });
+              nurbsCurve = segments[0] as NurbsCurve ?? nurbsCurve;
             }
             else return null;
           }
@@ -293,15 +295,17 @@ namespace RhinoInside.Revit
 
     static IEnumerable<DB.Curve> ToHostEdge(this ArcCurve curve)
     {
-      if
-      (
-        curve.IsClosed &&
-        curve.GetLength() >= Revit.ShortCurveTolerance * 2.0 &&
-        curve.Split(curve.Domain.Mid) is Curve[] half
-      )
+      if (curve.IsClosed(Revit.ShortCurveTolerance * 1.01))
       {
-        yield return (half[0] as ArcCurve).ToHost();
-        yield return (half[1] as ArcCurve).ToHost();
+        if
+        (
+          curve.GetLength() >= Revit.ShortCurveTolerance * 2.0 &&
+          curve.Split(curve.Domain.Mid) is Curve[] half
+        )
+        {
+          yield return (half[0] as ArcCurve).ToHost();
+          yield return (half[1] as ArcCurve).ToHost();
+        }
       }
       else if (curve.GetLength() >= Revit.ShortCurveTolerance)
       {
@@ -335,19 +339,21 @@ namespace RhinoInside.Revit
 
         yield break;
       }
-      else if
-      (
-        curve.IsClosed &&
-        curve.GetLength() >= Revit.ShortCurveTolerance * 2.0 &&
-        curve.Split(curve.Domain.Mid) is Curve[] half
-      )
+      else if (curve.IsClosed(Revit.ShortCurveTolerance * 1.01))
       {
-        yield return (half[0] as NurbsCurve).ToHost();
-        yield return (half[1] as NurbsCurve).ToHost();
+        if
+        (
+          curve.GetLength() >= Revit.ShortCurveTolerance * 2.0 &&
+          curve.Split(curve.Domain.Mid) is Curve[] half
+        )
+        {
+          yield return (half[0] as NurbsCurve).ToHost();
+          yield return (half[1] as NurbsCurve).ToHost();
+        }
       }
-      else if(curve.GetLength() >= Revit.ShortCurveTolerance)
+      else if (curve.GetLength() >= Revit.ShortCurveTolerance)
       {
-          yield return curve.ToHost();
+        yield return curve.ToHost();
       }
     }
 

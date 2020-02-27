@@ -124,7 +124,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (Enum.TryParse(str, out DB.BuiltInCategory builtInCategory))
         {
-          owner.Value = new DB.ElementId(builtInCategory);
+          owner.SetValue(owner.Document ?? Revit.ActiveUIDocument.Document, new DB.ElementId(builtInCategory));
           return true;
         }
 

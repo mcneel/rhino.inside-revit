@@ -24,8 +24,6 @@ namespace RhinoInside.Revit.UI
         Availability.Available = false;
         throw new Exception("Failed to startup Rhino");
       }
-
-      Rhinoceros.UpdateDocumentUnits(Rhino.RhinoDoc.ActiveDoc, Revit.ActiveDBDocument);
     }
 
     public new class Availability : ExternalCommand.Availability

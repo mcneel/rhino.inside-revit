@@ -1,6 +1,6 @@
 ---
 title: Views
-order: 62
+order: 63
 ---
 
 ## Querying Views
@@ -70,6 +70,19 @@ To find a view by name or by id in the active document, use the *Find View* comp
 As shown above, the *Find View* component, can search for a view by its name (N) or Title on Sheet (TOS).
 
 {% include ltr/download_comp.html archive='/static/ghnodes/Find View.ghuser' name='Find View' %}
+
+## Accessing Active View
+
+{% capture api_note %}
+In Revit API, the active view can be accessed from the {% include api_type.html type='Autodesk.Revit.UI.UIDocument' title='UI.UIDocument' %} object. The `UI.UIDocument` is responsible for handling the GUI operations of a view e.g. view window, zooming and panning, etc. Note that there is a legacy `UI.UIDocument.ActiveView` property that might return non-geometric views e.g. Project Browser (yes that is a *View* into Revit data). Always access the active view through `UI.UIDocument.ActiveGraphicalView` to avoid errors
+{% endcapture %}
+{% include ltr/api_note.html note=api_note %}
+
+Use the *Active View* component shared here to get the active view of the current of given document:
+
+![]({{ "/static/images/guides/revit-views02a.png" | prepend: site.baseurl }})
+
+{% include ltr/download_comp.html archive='/static/ghnodes/Active View.ghuser' name='Active View' %}
 
 ## Reading View Properties
 

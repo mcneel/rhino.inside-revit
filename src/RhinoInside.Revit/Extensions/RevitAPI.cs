@@ -650,16 +650,20 @@ namespace RhinoInside.Revit
     public static Level FindLevelByElevation(this Document doc, double elevation)
     {
       Level level = null;
-      var min = double.PositiveInfinity;
-      using (var collector = new FilteredElementCollector(doc))
+
+      if (!double.IsNaN(elevation))
       {
-        foreach (var levelN in collector.OfClass(typeof(Level)).Cast<Level>().OrderBy(c => c.Elevation))
+        var min = double.PositiveInfinity;
+        using (var collector = new FilteredElementCollector(doc))
         {
-          var distance = Math.Abs(levelN.Elevation - elevation);
-          if (distance < min)
+          foreach (var levelN in collector.OfClass(typeof(Level)).Cast<Level>().OrderBy(c => c.Elevation))
           {
-            level = levelN;
-            min = distance;
+            var distance = Math.Abs(levelN.Elevation - elevation);
+            if (distance < min)
+            {
+              level = levelN;
+              min = distance;
+            }
           }
         }
       }

@@ -1,6 +1,6 @@
 ---
 title: "Data Model: Types"
-order: 31
+order: 32
 ---
 
 Revit organizes the building components into *Categories*, *Families*, and *Types*. In this article, we will discuss each and guide you in dealing with this organization method when using {{ site.terms.rir }} (or Revit API).
@@ -46,7 +46,7 @@ Revit families are a mechanism designed to organize the *System* and *Custom Typ
 
 - *Custom Families* (or [Loadable Families](http://help.autodesk.com/view/RVT/2020/ENU/?guid=GUID-7AEC5D66-C2E0-40E2-9504-3CC13781B87A)) are far more complex. They are a way to create custom types with custom design, and behavior. For example you can create a new table family that looks like a spaceship, is hovering over the floor, and can show 6 to 12 chairs depending on the desired configuration. Revit *Family Editor* can be used to define new custom families based on a family template file (`*.rft`). Custom families can be stored in external family files (`*.rfa`) and be shared with other Revit users. *In-Place Families* are a simplified variation of the custom families, specifically created for geometry that has limited use in a model.
 
-{% include ltr/warning_note.html note='The name, *System Families*, has led to a lot of confusion among Revit users. Remember, **System Families** are just a name given to a related group of **System Types**. They are vastly different from **Custom Families** and can not be stored in external family files. As Revit users or Revit programmers we generally do not deal with *System Families* and Revit API does not support creating or modifying a large portion of the *System Families* as of yet either. Hence when discussing Revit, it is quite common to refer to *Custom Families* simply as *Families*' %}
+{% include ltr/warning_note.html note='The name, *System Families*, has led to a lot of confusion among Revit users. Remember, **System Families** are just a name given to a related group of **System Types**. They are vastly different from **Custom Families** and can not be stored in external family files. As Revit users or Revit programmers we generally do not deal with *System Families* and Revit API does not support creating or modifying the *System Families* as of yet either. Hence when discussing Revit, it is quite common to refer to *Custom Families* simply as *Families*' %}
 
 {% capture api_note %}
 In Revit API, **Custom Families** are represented by the {% include api_type.html type='Autodesk.Revit.DB.Family' title='DB.Family' %}, their various types are represented by {% include api_type.html type='Autodesk.Revit.DB.FamilySymbol' title='DB.FamilySymbol' %}, and each instance is represented by a {% include api_type.html type='Autodesk.Revit.DB.FamilyInstance' title='DB.FamilyInstance' %}
@@ -69,6 +69,11 @@ The *Document.ElementTypes* component can further filter the list of types:
 
 ![]({{ "/static/images/guides/revit-families02.png" | prepend: site.baseurl }})
 
+### Querying Type Info
+
+Use the *ElementType.Identity* to access information about that type. Please note that the *Family Name* parameter, returns the *System Family* name for *System Types* and the *Custom Family* name for Custom Types:
+
+![]({{ "/static/images/guides/revit-families02a.png" | prepend: site.baseurl }})
 
 ## Accessing Family of a Type
 
