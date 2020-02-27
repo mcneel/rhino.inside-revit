@@ -1,5 +1,6 @@
 ---
 title: Analytical Model Manipulation
+published: false
 ---
 
 <!-- intro video -->
