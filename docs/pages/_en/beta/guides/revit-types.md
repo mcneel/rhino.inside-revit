@@ -120,10 +120,9 @@ Once you have filtered out the desired type, you can query its parameters and ap
 
 ![]({{ "/static/images/guides/revit-families06.png" | prepend: site.baseurl }})
 
-
 ## Extracting Type Geometry
 
-Once you have filtered out the desired type, you can extract the geometry for that element type using the *Element.Geometry* component.
+Once you have filtered out the desired type, you can extract the geometry for that element type using the *Element.Geometry* component. The *Level Of Detail* value list component makes it easy to provide correct values for LOD input parameter.
 
 ![]({{ "/static/images/guides/revit-families07.png" | prepend: site.baseurl }})
 
@@ -131,6 +130,7 @@ The *Element.Geometry* component automatically previews the geometry in Rhino wi
 
 ![]({{ "/static/images/guides/revit-families08.png" | prepend: site.baseurl }})
 
+{% include ltr/download_comp.html archive='/static/ghnodes/Level Of Detail.ghuser' name='Level Of Detail' %}
 
 ## Extracting Type Geometry by Category
 

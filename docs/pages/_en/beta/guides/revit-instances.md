@@ -17,6 +17,12 @@ Use a combination of category component, connected to *ElementType.ByName* and *
 
 {% include ltr/en/wip_note.html %}
 
+## Extracting Instance Geometry
+
+{% include ltr/en/wip_note.html %}
+
+{% include ltr/download_comp.html archive='/static/ghnodes/Level Of Detail.ghuser' name='Level Of Detail' %}
+
 ## Modifying Instances
 
 Once you have filtered out the desired instance, you can query its parameters and apply new values. See [Document Model: Parameters]({{ site.baseurl }}{% link _en/beta/guides/revit-params.md %}) to learn how to edit parameters of an element.
