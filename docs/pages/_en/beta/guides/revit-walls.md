@@ -30,7 +30,7 @@ Use a combination of *Element.CategoryFilter* and *Document.Elements* components
 
 ![]({{ "/static/images/guides/revit-walls02.png" | prepend: site.baseurl }})
 
-{% include ltr/warning_note.html note='Note that Revit API will return the individual partial walls on a Stacked Wall when using this workflow' %}
+{% include ltr/warning_note.html note='Note that Revit API will return the individual partial walls on a *Stacked Wall* when using this workflow' %}
 
 ### By Wall Kind
 
@@ -57,7 +57,7 @@ Once you have filtered out the desired wall type using workflows described above
 
 ### Analyzing Basic Walls
 
-Basic Walls are a special *Wall Kind (System Family)* in Revit. They are constructed from a set of layers that are defined as part of the wall type definition. The also have a series of other unique options e.g. *Wrapping at Inserts*. The *Analyse Basic Wall Type* component shared here provide a method to analyze the Basic Wall types in Revit document:
+*Basic Walls* are a special *Wall Kind (System Family)* in Revit. They are constructed from a set of layers that are defined as part of the wall type definition. The also have a series of other unique options e.g. *Wrapping at Inserts*. The *Analyse Basic Wall Type* component shared here provide a method to analyze the *Basic Wall* types in Revit document:
 
 ![]({{ "/static/images/guides/revit-walls05.png" | prepend: site.baseurl }})
 
@@ -78,11 +78,11 @@ Some of the outputs on this component (e.g. **WI** and **WE**) return an integer
 ### Basic Wall Structure
 
 {% capture api_note %}
-In Revit API, {% include api_type.html type='Autodesk.Revit.DB.CompoundStructure' title='DB.CompoundStructure' %} type represents the structure definition of categories that allow such configuration e.g. Basic Walls, Floors, Roofs, Compound Ceilings, etc. The `DB.CompoundStructure` can provide access to individual layers represented by {% include api_type.html type='Autodesk.Revit.DB.CompoundStructureLayer' title='DB.CompoundStructureLayer' %} 
+In Revit API, {% include api_type.html type='Autodesk.Revit.DB.CompoundStructure' title='DB.CompoundStructure' %} type represents the structure definition of categories that allow such configuration e.g. *Basic Walls*, *Floors*, *Roofs*, *Compound Ceilings*, etc. The `DB.CompoundStructure` can provide access to individual layers represented by {% include api_type.html type='Autodesk.Revit.DB.CompoundStructureLayer' title='DB.CompoundStructureLayer' %} 
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-The *Analyse Basic Wall Type* component shared above, provides access to the *Compound Structure* definition of the Basic Wall type. Use the *Compound Structure (Destruct)* component shared here to extract information and *Compound Structure Layers*. Similar to above, a series of Value List components are provided to allow value comparison and filtering of the structure layers:
+The *Analyse Basic Wall Type* component shared above, provides access to the *Compound Structure* definition of the *Basic Wall* type. Use the *Compound Structure (Destruct)* component shared here to extract information and *Compound Structure Layers*. Similar to above, a series of Value List components are provided to allow value comparison and filtering of the structure layers:
 
 ![]({{ "/static/images/guides/revit-walls08.png" | prepend: site.baseurl }})
 
@@ -114,7 +114,7 @@ Use the Compound Structure Layer (Destruct) component to extract information abo
 
 ### Stacked Wall Structure
 
-{% include ltr/warning_note.html note='Currently there is no support in Revit API to access Stacked Wall structure data. However you can use the Stack Wall instance analysis components to extract the partial height Basic Wall instances and analyze their structure layers individually' %}
+{% include ltr/warning_note.html note='Currently there is no support in Revit API to access *Stacked Wall* structure data. However you can use the Stack Wall instance analysis components to extract the partial height *Basic Wall* instances and analyze their structure layers individually' %}
 
 
 ## Analyzing Walls
@@ -149,6 +149,8 @@ In Revit API, *Location Line* of a *Basic* or *Stacked Wall* is represented by t
 *Basic* and *Stacked Walls* have a concept known as Location line. The location line defines the reference axis for the wall instance. The wall stays fixed on this reference axis when it is flipped or its structure is modified. The *Analyse Wall Location* component shared here, can extract information about a wall location line. This component returns the center line curve, location line setting, curve, offset, and offset direction:
 
 ![]({{ "/static/images/guides/revit-walls13.png" | prepend: site.baseurl }})
+
+![]({{ "/static/images/guides/revit-walls13a.png" | prepend: site.baseurl }})
 
 A custom Value List component is also provided to assist in filtering walls by the Location Line value:
 
@@ -231,7 +233,7 @@ Moreover, this component keeps the layers in identical order as other components
 
 ### Creating Stacked Wall Type
 
-{% include ltr/warning_note.html note='Currently there is no support in Revit API to create new Stacked Wall types' %}
+{% include ltr/warning_note.html note='Currently there is no support in Revit API to create new *Stacked Wall* types' %}
 
 ## Creating Walls
 
