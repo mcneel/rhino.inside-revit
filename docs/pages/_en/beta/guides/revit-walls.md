@@ -77,8 +77,6 @@ Some of the outputs on this component (e.g. **WI** and **WE**) return an integer
 
 ### Basic Wall Structure
 
-<!-- https://github.com/mcneel/rhino.inside-revit/issues/42 -->
-
 {% capture api_note %}
 In Revit API, {% include api_type.html type='Autodesk.Revit.DB.CompoundStructure' title='DB.CompoundStructure' %} type represents the structure definition of categories that allow such configuration e.g. Basic Walls, Floors, Roofs, Compound Ceilings, etc. The `DB.CompoundStructure` can provide access to individual layers represented by {% include api_type.html type='Autodesk.Revit.DB.CompoundStructureLayer' title='DB.CompoundStructureLayer' %} 
 {% endcapture %}
@@ -118,6 +116,7 @@ Use the Compound Structure Layer (Destruct) component to extract information abo
 
 {% include ltr/warning_note.html note='Currently there is no support in Revit API to access Stacked Wall structure data. However you can use the Stack Wall instance analysis components to extract the partial height Basic Wall instances and analyze their structure layers individually' %}
 
+
 ## Analyzing Walls
 
 ### Reading Instance Parameters
@@ -142,20 +141,71 @@ The example below uses the shared *Wall Structural Usage* value list component t
 
 ### Wall Location Curve
 
-<!-- https://github.com/mcneel/rhino.inside-revit/issues/90 -->
-
-### Wall Profile
-
-### Wall Geometry
-
 {% capture api_note %}
-explain challenges of getting geometry from standard approach
-- no structure
-- fails on curtain walls
+In Revit API, *Location Line* of a *Basic* or *Stacked Wall* is represented by the {% include api_type.html type='Autodesk.Revit.DB.WallLocationLine' title='DB.WallLocationLine' %} enumeration and is stored in `DB.BuiltInParameter.WALL_KEY_REF_PARAM` parameter on the wall instance
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
+*Basic* and *Stacked Walls* have a concept known as Location line. The location line defines the reference axis for the wall instance. The wall stays fixed on this reference axis when it is flipped or its structure is modified. The *Analyse Wall Location* component shared here, can extract information about a wall location line. This component returns the center line curve, location line setting, curve, offset, and offset direction:
+
+![]({{ "/static/images/guides/revit-walls13.png" | prepend: site.baseurl }})
+
+A custom Value List component is also provided to assist in filtering walls by the Location Line value:
+
+![]({{ "/static/images/guides/revit-walls14.png" | prepend: site.baseurl }})
+
+&nbsp;
+
+{% include ltr/download_comp.html archive='/static/ghnodes/Analyse Wall Location.ghuser' name='Analyse Wall Location' %}
+
+{% include ltr/download_comp.html archive='/static/ghnodes/Wall Location Line.ghuser' name='Wall Location Line' %}
+
+### Wall Profile
+
+![]({{ "/static/images/guides/revit-walls15.png" | prepend: site.baseurl }})
+
+![]({{ "/static/images/guides/revit-walls16.png" | prepend: site.baseurl }})
+
+&nbsp;
+
+{% include ltr/download_comp.html archive='/static/ghnodes/Extract Wall Profile.ghuser' name='Extract Wall Profile' %}
+
+### Wall Geometry
+
+You can use the Element.Geometry component to grab the basic geometry of a wall instance:
+
+![]({{ "/static/images/guides/revit-walls17.png" | prepend: site.baseurl }})
+
 ### Wall Geometry By Structure
+
+{% capture api_note %}
+Normally in Revit API, geometry of an element can be extracted using the `DB.Element.Geometry` property. In case of walls, the extracted geometry does not contain the structural layers of the wall. A [different method described here](https://thebuildingcoder.typepad.com/blog/2011/10/retrieving-detailed-wall-layer-geometry.html), has been used to extract the layer geometry. However this method adds some overhead to the definition runtime due to the temporary transactions that are needed
+{% endcapture %}
+{% include ltr/warning_note.html note=api_note %}
+
+Use the *Extract Compound Structure* Geometry component shared here to extract the layer geometry of a *Basic Wall* instance:
+
+![]({{ "/static/images/guides/revit-walls17a.png" | prepend: site.baseurl }})
+
+This component can be used with *Stack Walls* as well. The component will extract the structure layers of all the partial *Basic Walls* that are part of the given *Stacked Wall*:
+
+![]({{ "/static/images/guides/revit-walls18.png" | prepend: site.baseurl }})
+
+A better method is to extract the *Basic Wall* instances first from the *Stacked Wall*, and then use the component to extract their layer geometry. This method would result in a more appropriate data structure that keeps the layer orders intact:
+
+![]({{ "/static/images/guides/revit-walls19.png" | prepend: site.baseurl }})
+
+Moreover, this component keeps the layers in identical order as other components that deal with layers so you can work on the layer data and geometry easily later on:
+
+![]({{ "/static/images/guides/revit-walls20.png" | prepend: site.baseurl }})
+
+&nbsp;
+
+![]({{ "/static/images/guides/revit-walls20a.gif" | prepend: site.baseurl }})
+
+&nbsp;
+
+{% include ltr/download_comp.html archive='/static/ghnodes/Extract Compound Structure Geometry.ghuser' name='Extract Compound Structure Geometry' %}
 
 
 ## Modifying Wall Types
