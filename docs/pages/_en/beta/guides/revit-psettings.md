@@ -40,12 +40,12 @@ Use the *Project Locations* component shared here to grab a list of all project 
 
 {% include ltr/warning_note.html note='Note that all Revit models return an `Internal` project location. [This is used for internal shared coordinates](https://thebuildingcoder.typepad.com/blog/2017/05/finding-the-right-project-location.html). Avoid using or making changes to this project location' %}
 
-Use the *Project Location (Desctruct)* component shared here, to dig one level deeper and grab information about each project location. The component has a `XYZ` input parameter that you can use to specify the exact point that the component needs to use to extract project position into `POS` output parameter:
+Use the *Project Location (Destruct)* component shared here, to dig one level deeper and grab information about each project location. The component has a `XYZ` input parameter that you can use to specify the exact point that the component needs to use to extract project position into `POS` output parameter:
 
 ![]({{ "/static/images/guides/revit-psettings05.png" | prepend: site.baseurl }})
 
 {% include ltr/download_comp.html archive='/static/ghnodes/Project Locations.ghuser' name='Project Locations' %}
-{% include ltr/download_comp.html archive='/static/ghnodes/Project Location (Desctruct).ghuser' name='Project Location (Desctruct)' %}
+{% include ltr/download_comp.html archive='/static/ghnodes/Project Location (Destruct).ghuser' name='Project Location (Destruct)' %}
 
 ### Site Locations
 
@@ -54,11 +54,11 @@ In Revit API, Site Location is represented by the {% include api_type.html type=
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-Use the *Site Location (Desctruct)* component shared here, to extract information about the site location associated with each project location:
+Use the *Site Location (Destruct)* component shared here, to extract information about the site location associated with each project location:
 
 ![]({{ "/static/images/guides/revit-psettings06.png" | prepend: site.baseurl }})
 
-{% include ltr/download_comp.html archive='/static/ghnodes/Site Location (Desctruct).ghuser' name='Site Location (Desctruct)' %}
+{% include ltr/download_comp.html archive='/static/ghnodes/Site Location (Destruct).ghuser' name='Site Location (Destruct)' %}
 
 ### Project Positions
 
@@ -67,8 +67,8 @@ In Revit API, Project Position is represented by the {% include api_type.html ty
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-Use the *Project Position (Desctruct)* component shared here, to extract information about project position:
+Use the *Project Position (Destruct)* component shared here, to extract information about project position:
 
 ![]({{ "/static/images/guides/revit-psettings07.png" | prepend: site.baseurl }})
 
-{% include ltr/download_comp.html archive='/static/ghnodes/Project Position (Desctruct).ghuser' name='Project Position (Desctruct)' %}
+{% include ltr/download_comp.html archive='/static/ghnodes/Project Position (Destruct).ghuser' name='Project Position (Destruct)' %}

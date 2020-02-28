@@ -11,5 +11,7 @@ There are many challenges in implementing {{ site.terms.rir }} on top of {{ site
 
 ## Transactions
 
+## Element Binding
+
 ## Licensing
 

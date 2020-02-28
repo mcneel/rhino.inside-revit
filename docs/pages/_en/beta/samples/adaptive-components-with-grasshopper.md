@@ -1,38 +1,46 @@
 ---
-title: Adaptive Component with Grasshopper
+title: Create Building Shell Using Adaptive Components
 ---
 
-This sample shows how to how to drive Revit&reg; adaptive components using Grasshopper&reg; and Rhino&reg;. The advantage to using this workflow is in the ability to use Rhino's goemteric ability to lay out a rational set of points on 
-complex arbitrary geometry.  Grasshopper can also make descisions as condition across the form change. This example uses the Grasshopper [PanelTools plugin](https://www.food4rhino.com/app/panelingtools-rhino-and-grasshopper) 
-to create and filter the facade grid.
-
+<!-- intro video -->
 {% include youtube_player.html id="etVbQGZ3myg" %}
 
-## Setting up to use Adaptive components:
+{% include ltr/download_pkg.html archive='/static/samples/adaptive-components-with-grasshopper.zip' %}
 
-1. Setup a standard Revit Adaptive component.
-1. Add the adaptive component to the revit project. 
-1. Use the Grasshopper Add Adaptive Component to insert the points needed to drive each adaptive component in Revit.
+## Files
 
-![Select Type Adaptive  Definition]({{ "/static/images/samples/adaptive-component-type-selection.jpg" | prepend: site.baseurl }})
+- **Building Shell.rvt** Revit model containing the adaptive component family
+- **Adaptive Paneling.gh** Grasshopper definition that creates the 
 
-The input to the AddAdaptiveComponent is a datatree structure with each set of 4 points ordered correctly.
+Open Revit model first, and then open the Grasshopper definition. The building shell should be automatically generated using the existing adaptive component family:
 
-To select the adaptive component by Name combine the Model Category selector with the ElementTypeByName selector.
+![]({{ "/static/images/samples/adaptive-component-final.png" | prepend: site.baseurl }})
 
-![Datatree input for Adaptive]({{ "/static/images/samples/adaptive-component-tree-set.jpg" | prepend: site.baseurl }}){:height="35%" width="35%"}
 
-## Some notes on using adaptive components:
+## Description
 
-The PanelingTools plugin in Grasshopper makes it easier to find points that make up each cell to insert an adaptive component. The Cellulate component in PanelingTools can order the points correctly.
+This sample shows how to how to drive {{ site.terms.revit }} adaptive components using Grasshopper and Rhino. The advantage to using this workflow is in the ability to use Rhino's geometric ability to lay out a rational set of points on complex arbitrary geometry. Grasshopper can also make decisions as condition across the form change. This example uses the Grasshopper [PANELING TOOLS plugin](https://www.food4rhino.com/app/panelingtools-rhino-and-grasshopper) to create and filter the facade grid.
 
-![Datatree input for Adaptive]({{ "/static/images/samples/adaptive-component-cellulate.jpg" | prepend: site.baseurl }})
+###  Setting Up to Use Adaptive Components
 
-A good strategy for complex trimmed forms normally is to grid out the untrimmed version of the form in Rhino, then use the trimmed version of the form to fiter which gridpoints are only on the trimmed version of the surface. 
-Using the Trim Grid component to trim away grid points that do not lie on the trimmed version of the surface.
+The Grasshopper definition is grabbing the existing adaptive component type (Category: *Generic Models* Family: *Frame-Panel* Type: *Frame-Panel*) and passes that to the *AddAdaptiveComponent.ByPoints* component:
 
-![Trim Grid]({{ "/static/images/samples/adaptive-component-trim-grid.jpg" | prepend: site.baseurl }})
+![]({{ "/static/images/samples/adaptive-component-type-selection.jpg" | prepend: site.baseurl }})
 
-Note that the internal parameters in the adaptive component can be driven by grasshopper also by setting the parameters on the component instance.
+The input to the *AddAdaptiveComponent.ByPoints* is a data-tree structure where each branch contains a set of 4 points, ordered correctly:
 
-![Adaptive Parameter]({{ "/static/images/samples/adaptive-component-parameter.jpg" | prepend: site.baseurl }})
+![]({{ "/static/images/samples/adaptive-component-tree-set.jpg" | prepend: site.baseurl }}){:height="35%" width="35%"}
+
+### Using Adaptive Components
+
+The [PANELING TOOLS plugin](https://www.food4rhino.com/app/panelingtools-rhino-and-grasshopper) in Grasshopper makes it easier to find points that make up each cell to insert an adaptive component. The *Cellulate* component in *PanelingTools* can order the points correctly.
+
+![]({{ "/static/images/samples/adaptive-component-cellulate.jpg" | prepend: site.baseurl }}){: class="small-image"}
+
+A good strategy for complex trimmed forms normally is to grid out the untrimmed version of the form in Rhino, then use the trimmed version of the form to filter which grid-points are only on the trimmed version of the surface. Use the *Trim Grid* component to trim away grid points that do not lie on the trimmed version of the surface:
+
+![]({{ "/static/images/samples/adaptive-component-trim-grid.jpg" | prepend: site.baseurl }})
+
+Note that the internal parameters in the adaptive component can be driven by grasshopper also by setting the parameters on the component instance:
+
+![]({{ "/static/images/samples/adaptive-component-parameter.jpg" | prepend: site.baseurl }}){: class="small-image"}
