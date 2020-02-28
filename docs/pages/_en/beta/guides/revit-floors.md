@@ -5,9 +5,22 @@ order: 45
 
 {% include ltr/en/wip_note.html %}
 
+## Querying Floor Types
+
 ## Querying Floors
 
-## Querying Floor Types
+## Analyzing Floor Types
+
+## Analyzing Floors
+
+### Floor Boundary
+
+
+## Modifying Floor Types
+
+## Modifying Floors
+
+## Creating Floor Types
 
 ## Creating Floors
 
