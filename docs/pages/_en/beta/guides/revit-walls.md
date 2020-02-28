@@ -8,7 +8,7 @@ order: 40
 ## Querying Wall Types
 
 {% capture api_note %}
-In Revit API, Wall Types are represented by {% include api_type.html type='Autodesk.Revit.DB.WallType' title='DB.WallType' %}. Walls have three main *System Families* that are represented by {% include api_type.html type='Autodesk.Revit.DB.WallKind' title='DB.WallKind' %} enumeration and could be determined by checking `DB.WallType.Kind`
+In Revit API, Wall Types are represented by {% include api_type.html type='Autodesk.Revit.DB.WallType' title='DB.WallType' %}. Walls have three main *System Families* that are represented by {% include api_type.html type='Autodesk.Revit.DB.WallKind' title='DB.WallKind' %} enumeration and could be determined by checking `DB.WallType.Kind`. In {{ site.terms.rir }}, the term *Wall System Family* is used instead for consistency.
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
@@ -32,15 +32,15 @@ Use a combination of *Element.CategoryFilter* and *Document.Elements* components
 
 {% include ltr/warning_note.html note='Note that Revit API will return the individual partial walls on a *Stacked Wall* when using this workflow' %}
 
-### By Wall Kind
+### By Wall System Family
 
-A better workflow is to collect walls based on they Wall Kind (System Family). Use a combination of components shared here to collect the walls by kind. Notice that the *Walls By Kind* component also returns the wall types of the given kind:
+A better workflow is to collect walls based on they *Wall System Family*. Use a combination of components shared here to collect the walls by their *System Family*. Notice that the *Walls By System Family* component also returns the wall types of the given *System Family*:
 
 ![]({{ "/static/images/guides/revit-walls03.png" | prepend: site.baseurl }})
 
-{% include ltr/download_comp.html archive='/static/ghnodes/Wall Kind.ghuser' name='Wall Kind' %}
+{% include ltr/download_comp.html archive='/static/ghnodes/Wall System Family.ghuser' name='Wall System Family' %}
 
-{% include ltr/download_comp.html archive='/static/ghnodes/Walls By Kind.ghuser' name='Walls By Kind' %}
+{% include ltr/download_comp.html archive='/static/ghnodes/Walls By System Family.ghuser' name='Walls By System Family' %}
 
 ### By Wall Type
 
@@ -57,7 +57,7 @@ Once you have filtered out the desired wall type using workflows described above
 
 ### Analyzing Basic Walls
 
-*Basic Walls* are a special *Wall Kind (System Family)* in Revit. They are constructed from a set of layers that are defined as part of the wall type definition. The also have a series of other unique options e.g. *Wrapping at Inserts*. The *Analyse Basic Wall Type* component shared here provide a method to analyze the *Basic Wall* types in Revit document:
+*Basic Walls* are a special *Wall System Family* in Revit. They are constructed from a set of layers that are defined as part of the wall type definition. The also have a series of other unique options e.g. *Wrapping at Inserts*. The *Analyse Basic Wall Type* component shared here provide a method to analyze the *Basic Wall* types in Revit document:
 
 ![]({{ "/static/images/guides/revit-walls05.png" | prepend: site.baseurl }})
 
@@ -125,7 +125,7 @@ Once you have filtered out the desired wall instance using workflows described a
 
 ### Common Wall Properties
 
-Use the *Analyse Wall* component shared here, to grab the common properties between all Wall Kinds. Custom *Value List* components are also provided for value comparison:
+Use the *Analyse Wall* component shared here, to grab the common properties between all *Wall System Families*. Custom *Value List* components are also provided for value comparison:
 
 ![]({{ "/static/images/guides/revit-walls11.png" | prepend: site.baseurl }})
 
@@ -155,6 +155,11 @@ In Revit API, *Location Line* of a *Basic* or *Stacked Wall* is represented by t
 A custom Value List component is also provided to assist in filtering walls by the Location Line value:
 
 ![]({{ "/static/images/guides/revit-walls14.png" | prepend: site.baseurl }})
+
+If you only need the center line of the wall, an easier and more Grasshopper-like method is to pass the Wall elements to a Curve component:
+
+![]({{ "/static/images/guides/revit-walls14a.png" | prepend: site.baseurl }})
+
 
 &nbsp;
 
