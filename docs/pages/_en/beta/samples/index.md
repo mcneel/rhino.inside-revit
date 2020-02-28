@@ -26,15 +26,15 @@ You can download the archive for each sample by clicking on the download button 
     {% if collection.label == page.collection %}
         {% assign samples = collection.docs | sort:"order" %}
 <div>
-        <ul>
-            {% for sample in samples %}
-            {% if sample.toc and sample.title and sample.version == page.version and sample.categories == page.categories %}
-                <li>
-                        <a href="{{ sample.url | prepend: site.baseurl }}" title="{{ sample.description }}">{{ sample.title }}</a>
-                </li>
-            {% endif %}
-            {% endfor %}
-        </ul>
+    <ul>
+        {% for sample in samples %}
+        {% if sample.toc and sample.title and sample.version == page.version and sample.categories == page.categories %}
+            <li>
+                    <a href="{{ sample.url | prepend: site.baseurl }}" title="{{ sample.description }}">{{ sample.title }}</a>
+            </li>
+        {% endif %}
+        {% endfor %}
+    </ul>
 </div>
     {% endif %}
 {% endfor %}

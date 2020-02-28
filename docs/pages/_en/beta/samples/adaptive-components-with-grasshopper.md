@@ -10,7 +10,7 @@ title: Create Building Shell Using Adaptive Components
 ## Files
 
 - **Building Shell.rvt** Revit model containing the adaptive component family
-- Adaptive Paneling.gh Grasshopper definition that creates the 
+- **Adaptive Paneling.gh** Grasshopper definition that creates the 
 
 Open Revit model first, and then open the Grasshopper definition. The building shell should be automatically generated using the existing adaptive component family:
 
@@ -35,7 +35,7 @@ The input to the *AddAdaptiveComponent.ByPoints* is a data-tree structure where 
 
 The [PANELING TOOLS plugin](https://www.food4rhino.com/app/panelingtools-rhino-and-grasshopper) in Grasshopper makes it easier to find points that make up each cell to insert an adaptive component. The *Cellulate* component in *PanelingTools* can order the points correctly.
 
-![]({{ "/static/images/samples/adaptive-component-cellulate.jpg" | prepend: site.baseurl }})
+![]({{ "/static/images/samples/adaptive-component-cellulate.jpg" | prepend: site.baseurl }}){: class="small-image"}
 
 A good strategy for complex trimmed forms normally is to grid out the untrimmed version of the form in Rhino, then use the trimmed version of the form to filter which grid-points are only on the trimmed version of the surface. Use the *Trim Grid* component to trim away grid points that do not lie on the trimmed version of the surface:
 
@@ -43,4 +43,4 @@ A good strategy for complex trimmed forms normally is to grid out the untrimmed 
 
 Note that the internal parameters in the adaptive component can be driven by grasshopper also by setting the parameters on the component instance:
 
-![]({{ "/static/images/samples/adaptive-component-parameter.jpg" | prepend: site.baseurl }})
+![]({{ "/static/images/samples/adaptive-component-parameter.jpg" | prepend: site.baseurl }}){: class="small-image"}
