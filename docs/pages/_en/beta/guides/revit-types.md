@@ -130,6 +130,8 @@ The *Element.Geometry* component automatically previews the geometry in Rhino wi
 
 ![]({{ "/static/images/guides/revit-families08.png" | prepend: site.baseurl }})
 
+&nbsp;
+
 {% include ltr/download_comp.html archive='/static/ghnodes/Level Of Detail.ghuser' name='Level Of Detail' %}
 
 ## Extracting Type Geometry by Category
