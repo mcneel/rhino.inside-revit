@@ -699,15 +699,19 @@ This block generates keyboard shortcut images. This block can accept three argum
 
 # Sample Pages
 
-To create new sample pages, follow the formatting of `samples/sample-template.md` page. You can duplicate this page and create your own sample document:
+To create new sample pages, follow the formatting of `samples/_template.md` page. You can duplicate this page and create your own sample document:
 
 - Keep it short and to the point. This page is ONLY about the sample
 - Include a banner image for the sample. Choose an image size to be consistent with other samples. This banner might be used to show as cover in sample galleries
 - Make sure the sample files are archived as a ZIP file for easy download and organization. Modify the `download_pkg` button block to point to your sample archive
-- Under Files section, provide a list of sample files with description. After that provide instructions on how to open the samples
-- Under Description section, provide a detailed description of how the sample is structured. Any information about how the generic components work should be included in the Guides and not in sample article. The sample description is intended to help the user understand that specific sample and not the underlying concepts
+- Under **Files** section, provide a list of sample files with description. After that provide instructions on how to open the samples
+- Under **Description** section, provide a detailed description of how the sample is structured. Any information about how the generic components work should be included in the Guides and not in sample article. The sample description is intended to help the user understand that specific sample and not the underlying concepts
 - Sample pages are un-ordered. There is no need to define `order:` on page metadata
 - You can set the `authors: [ 'your-name'] ` page metadata and provide your name or handle
+- Only use H3 headers. The sidebar should only list **Files** and **Description** and subsections.
+
+    ![](static/images/readme/samples-sidebar.png)
+
 
 # Data Sources
 
