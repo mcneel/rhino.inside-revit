@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27428.2043
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29709.97
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RhinoInside.Revit", "RhinoInside.Revit\RhinoInside.Revit.csproj", "{D6C256D4-B518-464F-9E68-CB282202E846}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RhinoInside.Revit.GH", "RhinoInside.Revit.GH\RhinoInside.Revit.GH.csproj", "{4F3E6B0F-C644-4A00-8785-11CFBE0C0F94}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,22 @@ Global
 		{D6C256D4-B518-464F-9E68-CB282202E846}.Release 2019|Any CPU.Build.0 = Release 2019|Any CPU
 		{D6C256D4-B518-464F-9E68-CB282202E846}.Release 2020|Any CPU.ActiveCfg = Release 2020|Any CPU
 		{D6C256D4-B518-464F-9E68-CB282202E846}.Release 2020|Any CPU.Build.0 = Release 2020|Any CPU
+		{4F3E6B0F-C644-4A00-8785-11CFBE0C0F94}.Debug 2017|Any CPU.ActiveCfg = Debug 2017|Any CPU
+		{4F3E6B0F-C644-4A00-8785-11CFBE0C0F94}.Debug 2017|Any CPU.Build.0 = Debug 2017|Any CPU
+		{4F3E6B0F-C644-4A00-8785-11CFBE0C0F94}.Debug 2018|Any CPU.ActiveCfg = Debug 2018|Any CPU
+		{4F3E6B0F-C644-4A00-8785-11CFBE0C0F94}.Debug 2018|Any CPU.Build.0 = Debug 2018|Any CPU
+		{4F3E6B0F-C644-4A00-8785-11CFBE0C0F94}.Debug 2019|Any CPU.ActiveCfg = Debug 2019|Any CPU
+		{4F3E6B0F-C644-4A00-8785-11CFBE0C0F94}.Debug 2019|Any CPU.Build.0 = Debug 2019|Any CPU
+		{4F3E6B0F-C644-4A00-8785-11CFBE0C0F94}.Debug 2020|Any CPU.ActiveCfg = Debug 2020|Any CPU
+		{4F3E6B0F-C644-4A00-8785-11CFBE0C0F94}.Debug 2020|Any CPU.Build.0 = Debug 2020|Any CPU
+		{4F3E6B0F-C644-4A00-8785-11CFBE0C0F94}.Release 2017|Any CPU.ActiveCfg = Release 2017|Any CPU
+		{4F3E6B0F-C644-4A00-8785-11CFBE0C0F94}.Release 2017|Any CPU.Build.0 = Release 2017|Any CPU
+		{4F3E6B0F-C644-4A00-8785-11CFBE0C0F94}.Release 2018|Any CPU.ActiveCfg = Release 2018|Any CPU
+		{4F3E6B0F-C644-4A00-8785-11CFBE0C0F94}.Release 2018|Any CPU.Build.0 = Release 2018|Any CPU
+		{4F3E6B0F-C644-4A00-8785-11CFBE0C0F94}.Release 2019|Any CPU.ActiveCfg = Release 2019|Any CPU
+		{4F3E6B0F-C644-4A00-8785-11CFBE0C0F94}.Release 2019|Any CPU.Build.0 = Release 2019|Any CPU
+		{4F3E6B0F-C644-4A00-8785-11CFBE0C0F94}.Release 2020|Any CPU.ActiveCfg = Release 2020|Any CPU
+		{4F3E6B0F-C644-4A00-8785-11CFBE0C0F94}.Release 2020|Any CPU.Build.0 = Release 2020|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

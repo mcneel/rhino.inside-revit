@@ -10,6 +10,8 @@ using Rhino.Geometry;
 using Rhino.Input;
 using Rhino.PlugIns;
 using Rhino.Runtime.InProcess;
+using static System.Math;
+using static Rhino.RhinoMath;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside
@@ -62,7 +64,7 @@ namespace RhinoInside.Revit
             Rhino.Runtime.InProcess.WindowStyle.Hidden
           );
         }
-        catch (Exception)
+        catch
         {
           return Result.Failed;
         }
@@ -264,7 +266,7 @@ namespace RhinoInside.Revit
     {
       if (doc is object)
       {
-        var maxDistanceTolerance = Revit.VertexTolerance * RhinoMath.UnitScale(UnitSystem.Feet, doc.ModelUnitSystem);
+        var maxDistanceTolerance = Revit.VertexTolerance * UnitScale(UnitSystem.Feet, doc.ModelUnitSystem);
         if (doc.ModelAbsoluteTolerance > maxDistanceTolerance)
           doc.ModelAbsoluteTolerance = maxDistanceTolerance;
 
@@ -302,7 +304,7 @@ namespace RhinoInside.Revit
           )
           {
             taskDialog.AddCommandLink(Autodesk.Revit.UI.TaskDialogCommandLinkId.CommandLink1, $"Continue opening in {doc.ModelUnitSystem}", $"Rhino and Grasshopper will work in {doc.ModelUnitSystem}");
-            taskDialog.AddCommandLink(Autodesk.Revit.UI.TaskDialogCommandLinkId.CommandLink2, $"Adjust Rhino model to {RevitModelUnitSystem} like Revit", $"Scale Rhino model by {RhinoMath.UnitScale(doc.ModelUnitSystem, RevitModelUnitSystem)}");
+            taskDialog.AddCommandLink(Autodesk.Revit.UI.TaskDialogCommandLinkId.CommandLink2, $"Adjust Rhino model to {RevitModelUnitSystem} like Revit", $"Scale Rhino model by {UnitScale(doc.ModelUnitSystem, RevitModelUnitSystem)}");
             taskDialog.DefaultButton = Autodesk.Revit.UI.TaskDialogResult.CommandLink2;
 
             if (GH.Guest.ModelUnitSystem != UnitSystem.Unset)
@@ -310,7 +312,7 @@ namespace RhinoInside.Revit
               taskDialog.ExpandedContent += $"{Environment.NewLine}Documents opened in Grasshopper were working in {GH.Guest.ModelUnitSystem}";
               if (GrasshopperModelUnitSystem != doc.ModelUnitSystem && GrasshopperModelUnitSystem != RevitModelUnitSystem)
               {
-                taskDialog.AddCommandLink(Autodesk.Revit.UI.TaskDialogCommandLinkId.CommandLink3, $"Adjust Rhino model to {GH.Guest.ModelUnitSystem} like Grasshopper", $"Scale Rhino model by {RhinoMath.UnitScale(doc.ModelUnitSystem, GH.Guest.ModelUnitSystem)}");
+                taskDialog.AddCommandLink(Autodesk.Revit.UI.TaskDialogCommandLinkId.CommandLink3, $"Adjust Rhino model to {GH.Guest.ModelUnitSystem} like Grasshopper", $"Scale Rhino model by {UnitScale(doc.ModelUnitSystem, GH.Guest.ModelUnitSystem)}");
                 taskDialog.DefaultButton = Autodesk.Revit.UI.TaskDialogResult.CommandLink3;
               }
             }
@@ -319,15 +321,15 @@ namespace RhinoInside.Revit
             {
             case Autodesk.Revit.UI.TaskDialogResult.CommandLink2:
                 doc.ModelAngleToleranceRadians = Revit.AngleTolerance;
-                doc.ModelDistanceDisplayPrecision = ((int) -Math.Log10(lengthFormatoptions.Accuracy)).Clamp(0, 7);
-                doc.ModelAbsoluteTolerance = Revit.VertexTolerance * RhinoMath.UnitScale(UnitSystem.Feet, RevitModelUnitSystem);
+                doc.ModelDistanceDisplayPrecision = Clamp((int) -Log10(lengthFormatoptions.Accuracy), 0, 7);
+                doc.ModelAbsoluteTolerance = Revit.VertexTolerance * UnitScale(UnitSystem.Feet, RevitModelUnitSystem);
                 doc.AdjustModelUnitSystem(RevitModelUnitSystem, true);
                 UpdateViewConstructionPlanesFrom(doc, revitDoc);
               break;
               case Autodesk.Revit.UI.TaskDialogResult.CommandLink3:
                 doc.ModelAngleToleranceRadians = Revit.AngleTolerance;
-                doc.ModelDistanceDisplayPrecision = Grasshopper.CentralSettings.FormatDecimalDigits.Clamp(0, 7);
-                doc.ModelAbsoluteTolerance = Revit.VertexTolerance * RhinoMath.UnitScale(UnitSystem.Feet, GH.Guest.ModelUnitSystem);
+                doc.ModelDistanceDisplayPrecision = Clamp(Grasshopper.CentralSettings.FormatDecimalDigits, 0, 7);
+                doc.ModelAbsoluteTolerance = Revit.VertexTolerance * UnitScale(UnitSystem.Feet, GH.Guest.ModelUnitSystem);
                 doc.AdjustModelUnitSystem(GH.Guest.ModelUnitSystem, true);
                 UpdateViewConstructionPlanesFrom(doc, revitDoc);
                 break;
@@ -357,17 +359,17 @@ namespace RhinoInside.Revit
           var lengthFormatoptions = units.GetFormatOptions(DB.UnitType.UT_Length);
           rhinoDoc.ModelUnitSystem = lengthFormatoptions.DisplayUnits.ToRhinoLengthUnits();
           rhinoDoc.ModelAngleToleranceRadians = Revit.AngleTolerance;
-          rhinoDoc.ModelDistanceDisplayPrecision = ((int) -Math.Log10(lengthFormatoptions.Accuracy)).Clamp(0, 7);
-          rhinoDoc.ModelAbsoluteTolerance = Revit.VertexTolerance * RhinoMath.UnitScale(UnitSystem.Feet, rhinoDoc.ModelUnitSystem);
+          rhinoDoc.ModelDistanceDisplayPrecision = Clamp((int) -Log10(lengthFormatoptions.Accuracy), 0, 7);
+          rhinoDoc.ModelAbsoluteTolerance = Revit.VertexTolerance * UnitScale(UnitSystem.Feet, rhinoDoc.ModelUnitSystem);
           //switch (rhinoDoc.ModelUnitSystem)
           //{
           //  case UnitSystem.None: break;
           //  case UnitSystem.Feet:
           //  case UnitSystem.Inches:
-          //    newDoc.ModelAbsoluteTolerance = (1.0 / 160.0) * RhinoMath.UnitScale(UnitSystem.Inches, newDoc.ModelUnitSystem);
+          //    newDoc.ModelAbsoluteTolerance = (1.0 / 160.0) * UnitScale(UnitSystem.Inches, newDoc.ModelUnitSystem);
           //    break;
           //  default:
-          //    newDoc.ModelAbsoluteTolerance = 0.1 * RhinoMath.UnitScale(UnitSystem.Millimeters, newDoc.ModelUnitSystem);
+          //    newDoc.ModelAbsoluteTolerance = 0.1 * UnitScale(UnitSystem.Millimeters, newDoc.ModelUnitSystem);
           //    break;
           //}
 
@@ -394,12 +396,12 @@ namespace RhinoInside.Revit
       bool imperial = rhinoDoc.ModelUnitSystem == UnitSystem.Feet || rhinoDoc.ModelUnitSystem == UnitSystem.Inches;
 
       var modelGridSpacing = imperial ?
-      1.0 * RhinoMath.UnitScale(UnitSystem.Yards, rhinoDoc.ModelUnitSystem) :
-      1.0 * RhinoMath.UnitScale(UnitSystem.Meters, rhinoDoc.ModelUnitSystem);
+      1.0 * UnitScale(UnitSystem.Yards, rhinoDoc.ModelUnitSystem) :
+      1.0 * UnitScale(UnitSystem.Meters, rhinoDoc.ModelUnitSystem);
 
       var modelSnapSpacing = imperial ?
-      1 / 16.0 * RhinoMath.UnitScale(UnitSystem.Inches, rhinoDoc.ModelUnitSystem) :
-      1.0 * RhinoMath.UnitScale(UnitSystem.Millimeters, rhinoDoc.ModelUnitSystem);
+      1 / 16.0 * UnitScale(UnitSystem.Inches, rhinoDoc.ModelUnitSystem) :
+      1.0 * UnitScale(UnitSystem.Millimeters, rhinoDoc.ModelUnitSystem);
 
       var modelThickLineFrequency = imperial ? 6 : 5;
 
@@ -430,8 +432,8 @@ namespace RhinoInside.Revit
     #endregion
 
     #region Rhino UI
-    internal static void InvokeInHostContext(Action action) => core.InvokeInHostContext(action);
-    internal static T InvokeInHostContext<T>(Func<T> func) => core.InvokeInHostContext(func);
+    /*internal*/ public static void InvokeInHostContext(Action action) => core.InvokeInHostContext(action);
+    /*internal*/ public static T InvokeInHostContext<T>(Func<T> func) => core.InvokeInHostContext(func);
 
     public static bool WindowVisible
     {

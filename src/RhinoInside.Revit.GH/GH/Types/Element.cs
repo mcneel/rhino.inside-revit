@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel.Types;
 using DB = Autodesk.Revit.DB;
@@ -24,6 +25,21 @@ namespace RhinoInside.Revit.GH.Types
       return null;
     }
 
+    public static readonly Dictionary<Type, Func<DB.Element, Element>> ActivatorDictionary = new Dictionary<Type, Func<DB.Element, Element>>()
+    {
+      { typeof(DB.Family),            (element)=> new Family        (element as DB.Family)            },
+      { typeof(DB.ElementType),       (element)=> new ElementType   (element as DB.ElementType)       },
+      { typeof(DB.ParameterElement),  (element)=> new ParameterKey  (element as DB.ParameterElement)  },
+      { typeof(DB.Material),          (element)=> new Material      (element as DB.Material)          },
+      { typeof(DB.GraphicsStyle),     (element)=> new GraphicsStyle (element as DB.GraphicsStyle)     },
+
+      { typeof(DB.SketchPlane),       (element)=> new SketchPlane   (element as DB.SketchPlane)       },
+      { typeof(DB.DatumPlane),        (element)=> new DatumPlane    (element as DB.DatumPlane)        },
+      { typeof(DB.HostObject),        (element)=> new HostObject    (element as DB.HostObject)        },
+      { typeof(DB.Level),             (element)=> new Level         (element as DB.Level)             },
+      { typeof(DB.Grid),              (element)=> new Grid          (element as DB.Grid)              },
+    };
+
     public static Element FromElement(DB.Element element)
     {
       if (element is null)
@@ -38,40 +54,8 @@ namespace RhinoInside.Revit.GH.Types
         }
         catch (Autodesk.Revit.Exceptions.InternalException) { }
       }
-      else
-      {
-        if (element is DB.ParameterElement parameter)
-          return new ParameterKey(parameter);
-
-        if (element is DB.Material material)
-          return new Material(material);
-
-        if (element is DB.GraphicsStyle graphicsStyle)
-          return new GraphicsStyle(graphicsStyle);
-
-        if (element is DB.Family family)
-          return new Family(family);
-
-        if (element is DB.ElementType elementType)
-          return new ElementType(elementType);
-
-        if (element is DB.SketchPlane sketchPlane)
-          return new SketchPlane(sketchPlane);
-
-        if (element is DB.HostObject host)
-          return new HostObject(host);
-
-        if (element is DB.DatumPlane datumPlane)
-        {
-          if (element is DB.Level level)
-            return new Level(level);
-
-          if (element is DB.Grid grid)
-            return new Grid(grid);
-
-          return new DatumPlane(datumPlane);
-        }
-      }
+      else if (ActivatorDictionary.TryGetValue(element.GetType(), out var activator))
+        return activator(element);
 
       if (GeometricElement.IsValidElement(element))
         return new GeometricElement(element);

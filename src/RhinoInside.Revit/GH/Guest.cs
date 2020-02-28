@@ -141,12 +141,13 @@ namespace RhinoInside.Revit.GH
     {
       // Load This Assembly as a GHA in Grasshopper
       {
-        var bCoff = Instances.Settings.GetValue("Assemblies:COFF", true);
+        var bCoff = Instances.Settings.GetValue("Assemblies:COFF", false);
         try
         {
           Instances.Settings.SetValue("Assemblies:COFF", false);
 
           var location = Assembly.GetExecutingAssembly().Location;
+          location = Path.Combine(Path.GetDirectoryName(location), Path.GetFileNameWithoutExtension(location) + ".GH.gha");
           if (!LoadGHA(location))
           {
             if (!File.Exists(location))
@@ -373,5 +374,27 @@ namespace RhinoInside.Revit.GH
       while (changeQuque.Count > 0)
         changeQuque.Dequeue().Apply();
     }
+  }
+}
+
+namespace RhinoInside.Revit.GH.Parameters
+{
+  public interface IGH_ElementIdParam : IGH_Param
+  {
+    bool NeedsToBeExpired
+    (
+      Document doc,
+      ICollection<ElementId> added,
+      ICollection<ElementId> deleted,
+      ICollection<ElementId> modified
+    );
+  }
+}
+
+namespace RhinoInside.Revit.GH.Components
+{
+  public interface IGH_ElementIdComponent : IGH_Component
+  {
+    bool NeedsToBeExpired(DocumentChangedEventArgs args);
   }
 }

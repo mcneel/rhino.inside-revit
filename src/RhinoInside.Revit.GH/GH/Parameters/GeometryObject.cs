@@ -348,18 +348,15 @@ namespace RhinoInside.Revit.GH.Parameters
     public override void AppendAdditionalElementMenuItems(ToolStripDropDown menu) { }
     protected override GH_GetterResult Prompt_Plural(ref List<Types.Vertex> value)
     {
-      using (new ModalForm.EditScope())
-      {
-        var values = new List<Types.Vertex>();
-        Types.Vertex vertex = null;
-        while(Prompt_Singular(ref vertex) == GH_GetterResult.success)
-          values.Add(vertex);
+      var values = new List<Types.Vertex>();
+      Types.Vertex vertex = null;
+      while(Prompt_Singular(ref vertex) == GH_GetterResult.success)
+        values.Add(vertex);
 
-        if (values.Count > 0)
-        {
-          value = values;
-          return GH_GetterResult.success;
-        }
+      if (values.Count > 0)
+      {
+        value = values;
+        return GH_GetterResult.success;
       }
 
       return GH_GetterResult.cancel;
