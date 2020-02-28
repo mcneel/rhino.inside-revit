@@ -26,7 +26,7 @@ namespace RhinoInside.Revit
 #if REVIT_2019
         MainWindow = new WindowHandle(applicationUI.MainWindowHandle);
 #else
-        MainWindow = new SafeWindowHandle(Process.GetCurrentProcess().MainWindowHandle);
+        MainWindow = new WindowHandle(Process.GetCurrentProcess().MainWindowHandle);
 #endif
 
         result = Rhinoceros.Startup();

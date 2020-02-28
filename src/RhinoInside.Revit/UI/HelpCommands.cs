@@ -223,7 +223,7 @@ namespace RhinoInside.Revit.UI
 #if REVIT_2019
       details.AppendLine($"Revit: {revit.SubVersionNumber} ({revit.VersionBuild})");
 #else
-      builder.AppendLine($"Revit: {revit.VersionNumber} ({revit.VersionBuild})");
+      details.AppendLine($"Revit: {revit.VersionNumber} ({revit.VersionBuild})");
 #endif
 
       details.AppendLine($"CLR: {ErrorReport.CLRVersion}");
