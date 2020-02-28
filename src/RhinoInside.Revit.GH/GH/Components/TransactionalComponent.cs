@@ -8,6 +8,7 @@ using Autodesk.Revit.UI.Events;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
+using RhinoInside.Revit.Exceptions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -649,14 +650,14 @@ namespace RhinoInside.Revit.GH.Components
 
       // Disable Rhino UI if any warning-error dialog popup
       {
-        ModalForm.EditScope editScope = null;
+        External.EditScope editScope = null;
         EventHandler<DialogBoxShowingEventArgs> _ = null;
         try
         {
           Revit.ApplicationUI.DialogBoxShowing += _ = (sender, args) =>
           {
             if (editScope is null)
-              editScope = new ModalForm.EditScope();
+              editScope = new External.EditScope();
           };
 
           if (transaction.GetStatus() == DB.TransactionStatus.Started)
@@ -696,6 +697,9 @@ namespace RhinoInside.Revit.GH.Components
 
     protected void BeginTransaction(DB.Document document)
     {
+      if (document is null)
+        return;
+
       CurrentTransaction = new DB.Transaction(document, Name);
       if (CurrentTransaction.Start() != DB.TransactionStatus.Started)
       {
@@ -714,9 +718,12 @@ namespace RhinoInside.Revit.GH.Components
       if (TransactionalStrategy != TransactionStrategy.PerComponent)
         return;
 
-      BeginTransaction(Revit.ActiveDBDocument);
+      if (Revit.ActiveDBDocument is DB.Document ActiveDBDocument)
+      {
+        BeginTransaction(ActiveDBDocument);
 
-      OnAfterStart(Revit.ActiveDBDocument, CurrentTransaction.GetName());
+        OnAfterStart(ActiveDBDocument, CurrentTransaction.GetName());
+      }
     }
 
     // Step 2.
@@ -879,9 +886,10 @@ namespace RhinoInside.Revit.GH.Components
     // Step 3.
     protected override sealed void TrySolveInstance(IGH_DataAccess DA)
     {
-      var ActiveDBDocument = Revit.ActiveDBDocument;
-
-      Iterate(DA, ActiveDBDocument, (DB.Document doc, ref DB.Element current) => TrySolveInstance(DA, doc, ref current));
+      if (Revit.ActiveDBDocument is DB.Document ActiveDBDocument)
+        Iterate(DA, ActiveDBDocument, (DB.Document doc, ref DB.Element current) => TrySolveInstance(DA, doc, ref current));
+      else
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "There is no active Revit Document");
     }
 
     delegate void CommitAction(DB.Document doc, ref DB.Element element);
@@ -904,7 +912,7 @@ namespace RhinoInside.Revit.GH.Components
         {
           action(doc, ref element);
         }
-        catch (ApplicationException e)
+        catch (CancelException e)
         {
           AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
           element = null;

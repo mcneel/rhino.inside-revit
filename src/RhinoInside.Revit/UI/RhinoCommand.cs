@@ -12,23 +12,21 @@ using Autodesk.Revit.UI;
 
 using Eto.Forms;
 using Rhino.PlugIns;
+using System.Diagnostics;
 
 namespace RhinoInside.Revit.UI
 {
-  abstract public class RhinoCommand : ExternalCommand
+  abstract public class RhinoCommand : DocumentCommand
   {
     public RhinoCommand()
     {
       if (Revit.OnStartup(Revit.ApplicationUI) != Result.Succeeded)
-      {
-        Availability.Available = false;
         throw new Exception("Failed to startup Rhino");
-      }
     }
 
-    public new class Availability : ExternalCommand.Availability
+    public new class Availability : DocumentCommand.Availability
     {
-      internal static bool Available = false;
+      internal static bool Available => Addin.CurrentStatus >= Addin.Status.Available;
 
       public override bool IsCommandAvailable(UIApplication applicationData, CategorySet selectedCategories) =>
         Available &&
@@ -55,10 +53,8 @@ namespace RhinoInside.Revit.UI
 
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
-      using (var modal = new Rhinoceros.ModalScope())
-      {
-        return modal.Run(true);
-      }
+      Rhinoceros.ShowAsync();
+      return Result.Succeeded;
     }
   }
 
@@ -100,13 +96,8 @@ namespace RhinoInside.Revit.UI
 
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
-      using (var modal = new Rhinoceros.ModalScope())
-      {
-        if (!Rhino.RhinoApp.RunScript("!_EditPythonScript", false))
-          return Result.Failed;
-
-        return modal.Run(false);
-      }
+      Rhinoceros.RunScriptAsync("_EditPythonScript", activate: true);
+      return Result.Succeeded;
     }
   }
 }

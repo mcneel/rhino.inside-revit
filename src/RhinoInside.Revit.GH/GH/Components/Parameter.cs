@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using Autodesk.Revit.DB;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
+using RhinoInside.Revit.Exceptions;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -143,7 +144,7 @@ namespace RhinoInside.Revit.GH.Components
                 if (!overwrite)
                 {
                   ReplaceElement(ref element, parameterElement);
-                  throw new WarningException($"A parameter called \"{name}\" is already in the document");
+                  throw new CancelException($"A parameter called \"{name}\" is already in the document");
                 }
                 parameterGUID = parameterElement.GuidValue;
               }

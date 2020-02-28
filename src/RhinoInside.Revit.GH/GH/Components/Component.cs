@@ -63,7 +63,7 @@ namespace RhinoInside.Revit.GH.Components
       {
         TrySolveInstance(DA);
       }
-      catch (ApplicationException e)
+      catch (Exceptions.CancelException e)
       {
         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
       }

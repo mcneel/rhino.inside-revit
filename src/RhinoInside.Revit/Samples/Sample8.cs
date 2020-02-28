@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.InteropExtension;
 
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
@@ -397,7 +398,7 @@ namespace RhinoInside.Revit.Samples
         }
       )
       {
-        switch (openFileDialog.ShowDialog(ModalForm.OwnerWindow))
+        switch (openFileDialog.ShowDialog(Revit.MainWindowHandle))
         {
           case DialogResult.OK:
             return Import3DMFile

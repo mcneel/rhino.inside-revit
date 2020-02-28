@@ -71,7 +71,7 @@ namespace RhinoInside.Revit.UI
     }
   }
 
-  abstract public class ExternalCommand : IExternalCommand
+  abstract public class Command : External.UI.Command
   {
     public static PushButtonData NewPushButtonData<CommandType>(string text = null)
     where CommandType : IExternalCommand
@@ -114,23 +114,33 @@ namespace RhinoInside.Revit.UI
         AvailabilityClassName = typeof(AvailabilityType).FullName
       };
     }
-    internal class AllwaysAvailable : IExternalCommandAvailability
+
+    public class AllwaysAvailable : IExternalCommandAvailability
     {
-      bool IExternalCommandAvailability.IsCommandAvailable(UIApplication applicationData, CategorySet selectedCategories) => true;
+      bool IExternalCommandAvailability.IsCommandAvailable(UIApplication app, CategorySet selectedCategories) => true;
     }
 
-    public class Availability : IExternalCommandAvailability
+    protected override bool CatchException(Exception e, UIApplication app)
+    {
+      if (app.LoadedApplications.OfType<Addin>().FirstOrDefault() is Addin addin)
+        return addin.CatchException(e, app, this);
+
+      return base.CatchException(e, app);
+    }
+  }
+
+  abstract public class DocumentCommand : Command
+  {
+    public class Availability : External.UI.CommandAvailability
     {
       // We can not relay on the UIApplication first argument.
       // Seams other Add-ins are calling this method with wrong values.
-      // I add the catch just because this is called many times.
-      public virtual bool IsCommandAvailable(UIApplication _, CategorySet selectedCategories)
+      // I add the try-catch just because this is called many times.
+      public override bool IsCommandAvailable(UIApplication _, CategorySet selectedCategories)
       {
         try  { return Revit.ActiveUIDocument?.Document?.IsValidObject ?? false; }
         catch (Autodesk.Revit.Exceptions.ApplicationException) { return false; }
       }
     }
-
-    public abstract Result Execute(ExternalCommandData data, ref string message, ElementSet elements);
   }
 }

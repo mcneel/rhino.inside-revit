@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows.Input;
+using System.Windows.Forms.InteropExtension;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
@@ -47,7 +48,7 @@ namespace RhinoInside.Revit.UI
 #endif
         openFileDialog.RestoreDirectory = true;
 
-        switch (openFileDialog.ShowDialog(ModalForm.OwnerWindow))
+        switch (openFileDialog.ShowDialog(Revit.MainWindowHandle))
         {
           case System.Windows.Forms.DialogResult.OK: filePath = openFileDialog.FileName; return Result.Succeeded;
           case System.Windows.Forms.DialogResult.Cancel: filePath = null; return Result.Cancelled;

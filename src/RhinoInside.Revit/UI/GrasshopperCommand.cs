@@ -52,15 +52,8 @@ namespace RhinoInside.Revit.UI
 
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
-      using (var modal = new Rhinoceros.ModalScope())
-      {
-        GH.Guest.Script.ShowEditor();
-
-        if(!GH.Guest.Script.IsEditorLoaded())
-          return Result.Failed;
-
-        return modal.Run(false);
-      }
+      GH.Guest.ShowAsync();
+      return Result.Succeeded;
     }
   }
 

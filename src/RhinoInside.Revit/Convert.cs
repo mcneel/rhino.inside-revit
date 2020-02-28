@@ -9,7 +9,7 @@ namespace RhinoInside.Revit
   {
     #region ConversionException
     /// The exception that is thrown when a geometry conversion error occurs.
-    public class ConversionException : ApplicationException
+    public class ConversionException : Exceptions.CancelException
     {
       public ConversionException() { }
       public ConversionException(string message) : base(message) { }

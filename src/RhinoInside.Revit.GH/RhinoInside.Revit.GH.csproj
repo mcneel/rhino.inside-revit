@@ -159,8 +159,8 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="RhinoCommon" Version="7.0.20028.12435-wip" IncludeAssets="compile; build" />
-        <PackageReference Include="Grasshopper" Version="7.0.20028.12435-wip" IncludeAssets="compile; build" />
+        <PackageReference Include="RhinoCommon" Version="7.0.20056.13055-wip" IncludeAssets="compile; build" />
+        <PackageReference Include="Grasshopper" Version="7.0.20056.13055-wip" IncludeAssets="compile; build" />
         <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitVersion).0.*" IncludeAssets="build; compile" />
       </ItemGroup>
     </Otherwise>
