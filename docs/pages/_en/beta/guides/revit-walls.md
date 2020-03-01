@@ -133,6 +133,12 @@ The example below uses the shared *Wall Structural Usage* value list component t
 
 ![]({{ "/static/images/guides/revit-walls12.png" | prepend: site.baseurl }})
 
+The **OV** output parameter is the wall orientation vector:
+
+![]({{ "/static/images/guides/revit-walls12a.png" | prepend: site.baseurl }})
+
+![]({{ "/static/images/guides/revit-walls12b.png" | prepend: site.baseurl }})
+
 &nbsp;
 
 {% include ltr/download_comp.html archive='/static/ghnodes/Analyse Wall.ghuser' name='Analyse Wall' %}
