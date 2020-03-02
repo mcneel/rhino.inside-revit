@@ -453,6 +453,7 @@ namespace RhinoInside.Revit
     {
       readonly bool Visible             = MainWindow.Visible;
       readonly ProcessWindowStyle Style = MainWindow.WindowStyle;
+
       public void Restore()
       {
         MainWindow.WindowStyle          = Style;
@@ -466,11 +467,10 @@ namespace RhinoInside.Revit
       if (!Command.InScriptRunnerCommand())
       {
         // Capture Rhino Main Window exposure to restore it when user ends picking
-        try { QuiescentExposure = new ExposureSnapshot(); }
-        catch (Exception) { }
+        QuiescentExposure = new ExposureSnapshot();
 
         // Disable Revit Main Window while in Command
-        ModalForm.ParentEnabled = false;
+        Revit.MainWindow.Enabled = false;
       }
     }
 
@@ -479,7 +479,7 @@ namespace RhinoInside.Revit
       if (!Command.InScriptRunnerCommand())
       {
         // Reenable Revit main window
-        ModalForm.ParentEnabled = true;
+        Revit.MainWindow.Enabled = true;
 
         if (MainWindow.WindowStyle != ProcessWindowStyle.Maximized)
         {
@@ -555,25 +555,14 @@ namespace RhinoInside.Revit
     /// Represents a Pseudo-modal loop
     /// This class implements IDisposable, it's been designed to be used in a using statement.
     /// </summary>
-    public class ModalScope : IDisposable
+    internal sealed class ModalScope : IDisposable
     {
       static bool wasExposed = false;
-      ModalForm form;
+      readonly bool wasEnabled = Revit.MainWindow.Enabled;
 
-      public ModalScope()
-      {
-        form = new ModalForm();
-      }
+      public ModalScope() => Revit.MainWindow.Enabled = false;
 
-      void IDisposable.Dispose()
-      {
-        form.Dispose();
-      }
-
-      public void Run()
-      {
-        while (Rhinoceros.Run());
-      }
+      void IDisposable.Dispose() => Revit.MainWindow.Enabled = wasEnabled;
 
       public Result Run(bool exposeMainWindow)
       {
@@ -604,15 +593,10 @@ namespace RhinoInside.Revit
             activePopup.BringToFront();
           }
 
-          while (ModalForm.ActiveForm is object)
+          while (Rhinoceros.Run())
           {
-            while (Rhinoceros.Run())
-            {
-              if (!Exposed && MainWindow.ActivePopup.IsInvalid)
-                break;
-            }
-
-            break;
+            if (!Exposed && MainWindow.ActivePopup.IsInvalid)
+              break;
           }
 
           return Result.Succeeded;

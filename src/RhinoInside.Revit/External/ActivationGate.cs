@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.External
   {
     public class CanOpenEventArgs : EventArgs
     {
-      bool canOpen = false;
+      bool canOpen = true;
       public bool CanOpen
       {
         get => canOpen;
@@ -96,7 +96,7 @@ namespace RhinoInside.Revit.External
           {
             var args = new CanOpenEventArgs();
             canOpen?.Invoke(TopState, args);
-            if (args.CanOpen)
+            if (!args.CanOpen)
               throw new Exceptions.CancelException();
           }
 
@@ -127,8 +127,7 @@ namespace RhinoInside.Revit.External
 
         if (IsActive && state as UI.Application is null)
         {
-          using (var modal = new Rhinoceros.ModalScope())
-            modal.Run();
+          while (Rhinoceros.Run()) { }
         }
 
         return result;
@@ -346,33 +345,28 @@ namespace RhinoInside.Revit.External
     }
   }
 
-  public class EditScope : IDisposable
+  public sealed class EditScope : IDisposable
   {
+    readonly WindowHandle activeWindow = WindowHandle.ActiveWindow;
     readonly bool WasExposed = Rhinoceros.MainWindow.Visible;
-    readonly bool WasVisible = ModalForm.ActiveForm?.Visible ?? false;
     readonly bool WasEnabled = Revit.MainWindow.Enabled;
 
     public EditScope()
     {
-      WindowHandle.ActiveWindow = Revit.MainWindow;
-      if (WasVisible) Rhinoceros.MainWindow.HideOwnedPopups();
+                      Rhinoceros.MainWindow.HideOwnedPopups();
       if (WasExposed) Rhinoceros.MainWindow.Visible = false;
-      if (ModalForm.ActiveForm is object) ModalForm.ActiveForm.Visible = false;
+
       Revit.MainWindow.Enabled = true;
+      WindowHandle.ActiveWindow = Revit.MainWindow;
     }
 
     void IDisposable.Dispose()
     {
-      Revit.MainWindow.Enabled = WasEnabled;
-      if (ModalForm.ActiveForm is object) ModalForm.ActiveForm.Visible = WasVisible;
       if (WasExposed) Rhinoceros.MainWindow.Visible = WasExposed;
-      if (WasVisible) Rhinoceros.MainWindow.ShowOwnedPopups();
+                      Rhinoceros.MainWindow.ShowOwnedPopups();
 
-      var activePopup = Rhinoceros.MainWindow.ActivePopup;
-      if (activePopup.IsInvalid || WasExposed)
-        Rhino.RhinoApp.SetFocusToMainWindow();
-      else
-        activePopup.BringToFront();
+      Revit.MainWindow.Enabled = WasEnabled;
+      WindowHandle.ActiveWindow = activeWindow;
     }
   }
 }
