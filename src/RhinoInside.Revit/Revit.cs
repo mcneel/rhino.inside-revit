@@ -70,33 +70,10 @@ namespace RhinoInside.Revit
       if(ActiveUIApplication?.IsValidObject != true)
         ActiveUIApplication = (sender as UIApplication);
 
-      var addin_name = ActiveUIApplication.ActiveAddInId.GetAddInName();
-      var addin_app = ReferenceEquals(sender, ActiveUIApplication);
-
       if (Addin.CurrentStatus > Addin.Status.Available)
       {
-        try
-        {
-          //External.ActivationGate.TryOpen();
-
-          //if (ProcessIdleActions())
-          //  args.SetRaiseWithoutDelay();
-        }
-        catch
-        {
-          // FATAL EXCEPTION - This should exit Revit!!
-          Addin.CurrentStatus = Addin.Status.Crashed;
-          MainWindow.Enabled = true;
-          WindowHandle.ActiveWindow = MainWindow;
-          throw;
-        }
-      }
-
-      if (Addin.CurrentStatus == Addin.Status.Crashed)
-      {
-        // In case Revit doesn't exit ask the user to exit
-        ActiveUIApplication.PostCommand(RevitCommandId.LookupPostableCommandId(PostableCommand.ExitRevit));
-        args.SetRaiseWithoutDelay();
+        if (ProcessIdleActions())
+          args.SetRaiseWithoutDelay();
       }
     }
 

@@ -114,6 +114,8 @@ namespace RhinoInside.Revit
     #endregion
 
     #region IExternalApplication Members
+    internal static UIControlledApplication ApplicationUI { get; private set; }
+
     protected override Result OnStartup(UIControlledApplication applicationUI)
     {
       if (StartupMode == AddinStartupMode.Cancelled)
@@ -169,7 +171,7 @@ namespace RhinoInside.Revit
       {
         return Revit.OnShutdown(applicationUI);
       }
-      catch (Exception)
+      catch
       {
         return Result.Failed;
       }
@@ -177,6 +179,58 @@ namespace RhinoInside.Revit
       {
         ApplicationUI = null;
       }
+    }
+
+    public override bool CatchException(Exception e, UIApplication app, object sender)
+    {
+      CurrentStatus = Status.Crashed;
+
+      // There is a wild pointer somewhere, is better to close Revit.
+      bool fatal = e is AccessViolationException;
+
+      using
+      (
+        var taskDialog = new TaskDialog("Oops! Something went wrong :(")
+        {
+          Id = $"{MethodBase.GetCurrentMethod().DeclaringType}.{MethodBase.GetCurrentMethod().Name}",
+          MainIcon = TaskDialogIcons.IconError,
+          TitleAutoPrefix = true,
+          AllowCancellation = true,
+          MainInstruction = $"'{e.GetType().FullName}' at {e.Source}.",
+          MainContent = e.Message,
+          ExpandedContent = $"Sender: {sender}{Environment.NewLine}{e.StackTrace}",
+          FooterText = "Current version: " + DisplayVersion,
+        }
+      )
+      {
+        if (fatal)
+          taskDialog.VerificationText = "Ignore that error and continue without saving.";
+
+        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Send report…", "Reports this problem by email to tech@mcneel.com");
+        taskDialog.DefaultButton = TaskDialogResult.CommandLink1;
+
+        if (taskDialog.Show() == TaskDialogResult.CommandLink1)
+        {
+          var RhinoInside_dmp = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RhinoInside.Revit.dmp");
+          MiniDumper.Write(RhinoInside_dmp);
+
+          ErrorReport.SendEmail
+          (
+            app,
+            false,
+            new string[]
+            {
+              app.Application.RecordingJournalFilename,
+              RhinoInside_dmp
+            }
+          );
+        }
+
+        if (fatal && !taskDialog.WasVerificationChecked())
+          Revit.ActiveUIApplication.PostCommand(RevitCommandId.LookupPostableCommandId(PostableCommand.ExitRevit));
+      }
+
+      return true;
     }
     #endregion
 
@@ -258,61 +312,7 @@ namespace RhinoInside.Revit
     public static Version Version => Assembly.GetExecutingAssembly().GetName().Version;
     public static DateTime BuildDate => new DateTime(2000, 1, 1).AddDays(Version.Build).AddSeconds(Version.Revision * 2);
     public static string DisplayVersion => $"{Version} ({BuildDate})";
-#endregion
-
-    internal static UIControlledApplication ApplicationUI { get; private set; }
-
-    public override bool CatchException(Exception e, UIApplication app, object sender)
-    {
-      CurrentStatus = Status.Crashed;
-
-      // There is a wild pointer somewhere, is better to close Revit.
-      bool fatal = e is AccessViolationException;
-
-      using
-      (
-        var taskDialog = new TaskDialog("Oops! Something went wrong :(")
-        {
-          Id = $"{MethodBase.GetCurrentMethod().DeclaringType}.{MethodBase.GetCurrentMethod().Name}",
-          MainIcon = TaskDialogIcons.IconError,
-          TitleAutoPrefix = true,
-          AllowCancellation = true,
-          MainInstruction = $"'{e.GetType().FullName}' at {e.Source}.",
-          MainContent = e.Message,
-          ExpandedContent = $"Sender: {sender}{Environment.NewLine}{e.StackTrace}",
-          FooterText = "Current version: " + DisplayVersion,
-        }
-      )
-      {
-        if (fatal)
-          taskDialog.VerificationText = "Ignore that error and continue without saving.";
-
-        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Send report…", "Reports this problem by email to tech@mcneel.com");
-        taskDialog.DefaultButton = TaskDialogResult.CommandLink1;
-
-        if (taskDialog.Show() == TaskDialogResult.CommandLink1)
-        {
-          var RhinoInside_dmp = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RhinoInside.Revit.dmp");
-          MiniDumper.Write(RhinoInside_dmp);
-
-          ErrorReport.SendEmail
-          (
-            app,
-            false,
-            new string[]
-            {
-              app.Application.RecordingJournalFilename,
-              RhinoInside_dmp
-            }
-          );
-        }
-
-        if (fatal && !taskDialog.WasVerificationChecked())
-          Revit.ActiveUIApplication.PostCommand(RevitCommandId.LookupPostableCommandId(PostableCommand.ExitRevit));
-      }
-
-      return true;
-    }
+    #endregion
   }
 }
 
