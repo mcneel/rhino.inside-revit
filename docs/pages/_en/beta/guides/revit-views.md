@@ -84,13 +84,27 @@ Use the *Active View* component shared here to get the active view of the curren
 
 {% include ltr/download_comp.html archive='/static/ghnodes/Active View.ghuser' name='Active View' %}
 
-## Reading View Properties
+## Analyzing Views
+
+Use the component shared here to get general properties of view elements:
+
+![]({{ "/static/images/guides/revit-views02b.png" | prepend: site.baseurl }})
+
+Outputs parameters are:
+
+- **VD:** View Direction
+
+&nbsp;
+
+{% include ltr/download_comp.html archive='/static/ghnodes/Analyse View.ghuser' name='Analyse View' %}
+
+### Reading View Properties
 
 Use the *Element.Decompose* component to inspect the properties of a view object.
 
 ![]({{ "/static/images/guides/revit-views03.png" | prepend: site.baseurl }})
 
-## View Range
+### View Range
 
 {% capture api_note %}
 In Revit API, View Ranges are represented by the {% include api_type.html type='Autodesk.Revit.DB.PlanViewRange' title='DB.PlanViewRange' %}
@@ -103,7 +117,7 @@ To read the view range property of a view, use the *Get View Range* component sh
 
 {% include ltr/download_comp.html archive='/static/ghnodes/Get View Range.ghuser' name='Get View Range' %}
 
-## Collecting Displayed Elements
+### Collecting Displayed Elements
 
 To collect all the elements owned by a view, use the *Element.OwnerViewFilter* component, passed to the *Document.Elements* as shown below. Keep in mind that the 3D geometry that is usually shown in model views are not "Owned" by that view. All 2d elements e.g. Detail items, detail lines, ... are owned by the view they have created on.
 
@@ -113,7 +127,7 @@ You can use the *Element.SelectableInViewFilter* component to only list the sele
 
 ![]({{ "/static/images/guides/revit-views05.png" | prepend: site.baseurl }})
 
-## Getting V/G Overrides
+### Getting V/G Overrides
 
 To get the Visibility/Graphics overrides for an element on a specific view, use the shared *Get VG* component.
 
@@ -124,7 +138,7 @@ To get the Visibility/Graphics overrides for an element on a specific view, use 
 {% include ltr/download_comp.html archive='/static/ghnodes/Line VG Settings (Destruct).ghuser' name='Line VG Settings (Destruct)' %}
 {% include ltr/download_comp.html archive='/static/ghnodes/Surface VG Settings (Destruct).ghuser' name='Surface VG Settings (Destruct)' %}
 
-## Setting V/G Overrides
+### Setting V/G Overrides
 
 To set the Visibility/Graphics overrides for an element on a specific view, use the shared *Set VG* component.
 
@@ -138,6 +152,18 @@ See [Styles and Patterns]({{ site.baseurl }}{% link _en/beta/guides/revit-styles
 {% include ltr/download_comp.html archive='/static/ghnodes/VG (Construct).ghuser' name='VG (Construct)' %}
 {% include ltr/download_comp.html archive='/static/ghnodes/Line VG Settings (Construct).ghuser' name='Line VG Settings (Construct)' %}
 {% include ltr/download_comp.html archive='/static/ghnodes/Surface VG Settings (Construct).ghuser' name='Surface VG Settings (Construct)' %}
+
+## Modifying View Types
+
+{% include ltr/en/wip_note.html %}
+
+## Modifying Views
+
+{% include ltr/en/wip_note.html %}
+
+## Creating New View Types
+
+{% include ltr/en/wip_note.html %}
 
 ## Creating New Views
 
