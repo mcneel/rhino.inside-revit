@@ -87,7 +87,7 @@ namespace RhinoInside.Revit
                 writer.WriteLine();
                 writer.WriteLine($"## Addins");
                 writer.WriteLine();
-                writer.WriteLine("[Loaded Applications](Addins/AddinsInformation.md)  ");
+                writer.WriteLine("[Loaded Applications](Addins/LoadedApplications.md)  ");
               }
 
               if (attachments.Any())
@@ -107,12 +107,35 @@ namespace RhinoInside.Revit
           // Addins
           if (includeAddinsList)
           {
-            var LoadedApplications = archive.CreateEntry($"{now}/Addins/AddinsInformation.md");
-            using (var writer = new StreamWriter(LoadedApplications.Open()))
+            var LoadedApplicationsCSV = archive.CreateEntry($"{now}/Addins/LoadedApplications.csv");
+            using (var writer = new StreamWriter(LoadedApplicationsCSV.Open()))
+            {
+              writer.WriteLine(@"""Company-Name"",""Product-Name"",""Product-Version"",""AddInType-FullName"",""Assembly-FullName"",""Assembly-Location""");
+
+              foreach (var application in app.LoadedApplications)
+              {
+                var addinType = application.GetType();
+                var versionInfo = File.Exists(addinType.Assembly.Location) ? FileVersionInfo.GetVersionInfo(addinType.Assembly.Location) : null;
+
+                string CompanyName        = (versionInfo?.CompanyName ?? string.Empty).Replace(@"""", @"""""");
+                string ProductName        = (versionInfo?.ProductName ?? string.Empty).Replace(@"""", @"""""");
+                string ProductVersion     = (versionInfo?.ProductVersion ?? string.Empty).Replace(@"""", @"""""");
+                string AddInTypeFullName  = (addinType?.FullName?? string.Empty).Replace(@"""", @"""""");
+                string AssemblyFullName   = (addinType?.Assembly.FullName ?? string.Empty).Replace(@"""", @"""""");
+                string AssemblyLocation   = (addinType?.Assembly.Location ?? string.Empty).Replace(@"""", @"""""");
+
+                writer.WriteLine($@"""{CompanyName}"",""{ProductName}"",""{ProductVersion}"",""{AddInTypeFullName}"",""{AssemblyFullName}"",""{AssemblyLocation}""");
+              }
+            }
+
+            var LoadedApplicationsMD = archive.CreateEntry($"{now}/Addins/LoadedApplications.md");
+            using (var writer = new StreamWriter(LoadedApplicationsMD.Open()))
             {
               writer.WriteLine($"# UIApplication.LoadedApplications");
               writer.WriteLine();
-              writer.WriteLine($"> NOTE: Applications listed in load order");
+              writer.WriteLine($"> NOTE:  ");
+              writer.WriteLine($"> Applications listed in load order.  ");
+              writer.WriteLine($"> Same information in CSV format [here](LoadedApplications.csv).  ");
               writer.WriteLine();
 
               foreach (var application in app.LoadedApplications)
