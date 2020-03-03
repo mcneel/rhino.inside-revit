@@ -167,6 +167,20 @@ namespace Microsoft.Win32.SafeHandles
       }
     }
 
+    public void Flash()
+    {
+      var fInfo = new User32.FLASHWINFO();
+      {
+        fInfo.cbSize = (uint) Marshal.SizeOf(fInfo);
+        fInfo.hwnd = DangerousGetHandle();
+        fInfo.dwFlags = 0x03;// FLASHW_ALL;
+        fInfo.uCount = 8;
+        fInfo.dwTimeout = 70;
+      }
+
+      User32.FlashWindowEx(ref fInfo);
+    }
+
     public static WindowHandle ActiveWindow
     {
       get => User32.GetActiveWindow();
@@ -232,6 +246,7 @@ namespace Microsoft.Win32.SafeHandles
 namespace Microsoft.Win32.SafeHandles.InteropServices
 {
   using DWORD     = UInt32;
+  using UINT      = UInt32;
 
   using HINSTANCE = LibraryHandle;
   using HWND      = WindowHandle;
@@ -324,6 +339,20 @@ namespace Microsoft.Win32.SafeHandles.InteropServices
     [DllImport(USER32, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static extern bool ShowOwnedPopups(HWND hWnd, [MarshalAs(UnmanagedType.Bool)] bool fShow);
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct FLASHWINFO
+    {
+      public UINT cbSize;
+      public IntPtr hwnd;
+      public DWORD dwFlags;
+      public UINT uCount;
+      public DWORD dwTimeout;
+    }
+
+    [DllImport(USER32, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool FlashWindowEx(ref FLASHWINFO pwfi);
     #endregion
 
     #region Hooks API

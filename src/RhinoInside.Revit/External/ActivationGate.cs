@@ -292,7 +292,11 @@ namespace RhinoInside.Revit.External
             {
               windowToActivate = new WindowHandle(wParam);
 
-              gate.Raise();
+              if (gate.IsPending)
+                WindowHandle.ActiveWindow.Flash();
+              else
+                gate.Raise();
+
               return 1; // Prevents activation now.
             }
           }
@@ -322,26 +326,37 @@ namespace RhinoInside.Revit.External
 
     internal static bool CatchException(this UIApplication app, Exception e, object sender)
     {
+      var addinId = app.ActiveAddInId?.GetGUID() ?? Guid.Empty;
+      if (addinId != Guid.Empty)
+      {
+        if (app.LoadedApplications.OfType<UI.Application>().Where(x => x.GetGUID() == addinId).FirstOrDefault() is UI.Application addin)
+          return addin.CatchException(e, app, sender);
+      }
+
+      return false;
+    }
+
+    internal static void ReportException(this UIApplication app, Exception e, object sender)
+    {
       var comment = $@"Managed exception caught from external API application '{e.Source}' in method '{e.TargetSite}' Exception type: '<{e.GetType().FullName}>,' Exception method: '<{e.Message}>,' Stack trace '   {e.StackTrace}";
       comment = comment.Replace(Environment.NewLine, $"{Environment.NewLine}'");
       app.Application.WriteJournalComment(comment, true);
 
-      if (IsOpen)
+      foreach (var hWnd in gates.Keys)
       {
-        foreach (var hWnd in gates.Keys)
+        using (var window = new WindowHandle(hWnd))
         {
-          using (var window = new WindowHandle(hWnd))
-          {
-            window.HideOwnedPopups();
-            window.Hide();
-          }
+          window.HideOwnedPopups();
+          window.Hide();
         }
       }
 
-      if (app.LoadedApplications.OfType<UI.Application>().FirstOrDefault() is UI.Application addin)
-        return addin.CatchException(e, app, sender);
-
-      return false;
+      var addinId = app.ActiveAddInId?.GetGUID() ?? Guid.Empty;
+      if (addinId != Guid.Empty)
+      {
+        if (app.LoadedApplications.OfType<UI.Application>().Where(x => x.GetGUID() == addinId).FirstOrDefault() is UI.Application addin)
+          addin.ReportException(e, app, sender);
+      }
     }
   }
 
