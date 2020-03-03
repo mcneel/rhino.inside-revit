@@ -107,7 +107,7 @@ namespace RhinoInside.Revit
           // Addins
           if (includeAddinsList)
           {
-            var LoadedApplicationsCSV = archive.CreateEntry($"{now}/Addins/LoadedApplications.csv");
+            var LoadedApplicationsCSV = archive.CreateEntry($"{now}/Addins/{now}.csv");
             using (var writer = new StreamWriter(LoadedApplicationsCSV.Open()))
             {
               writer.WriteLine(@"""Company-Name"",""Product-Name"",""Product-Version"",""AddInType-FullName"",""Assembly-FullName"",""Assembly-Location""");
@@ -135,7 +135,7 @@ namespace RhinoInside.Revit
               writer.WriteLine();
               writer.WriteLine($"> NOTE:  ");
               writer.WriteLine($"> Applications listed in load order.  ");
-              writer.WriteLine($"> Same information in CSV format [here](LoadedApplications.csv).  ");
+              writer.WriteLine($"> Same information in CSV format [here]({now}.csv).  ");
               writer.WriteLine();
 
               foreach (var application in app.LoadedApplications)
