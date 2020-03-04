@@ -16,7 +16,10 @@ using System.Diagnostics;
 
 namespace RhinoInside.Revit.UI
 {
-  abstract public class RhinoCommand : DocumentCommand
+  /// <summary>
+  /// Base class for all Rhino.Inside Revit commands that call RhinoCommon
+  /// </summary>
+  abstract public class RhinoCommand : Command
   {
     public RhinoCommand()
     {
@@ -24,14 +27,14 @@ namespace RhinoInside.Revit.UI
         throw new Exception("Failed to startup Rhino");
     }
 
-    public new class Availability : DocumentCommand.Availability
+    /// <summary>
+    /// Available when no Rhino command is currently running
+    /// </summary>
+    protected new class Availability : Command.Availability
     {
-      internal static bool Available => Addin.CurrentStatus >= Addin.Status.Available;
-
-      public override bool IsCommandAvailable(UIApplication applicationData, CategorySet selectedCategories) =>
-        Available &&
-        !Rhino.Commands.Command.InCommand() &&
-        base.IsCommandAvailable(applicationData, selectedCategories);
+      public override bool IsCommandAvailable(UIApplication app, CategorySet selectedCategories) =>
+        base.IsCommandAvailable(app, selectedCategories) &&
+        !Rhino.Commands.Command.InCommand();
     }
   }
 
@@ -58,6 +61,9 @@ namespace RhinoInside.Revit.UI
     }
   }
 
+  /// <summary>
+  /// Base class for all Rhino.Inside Revit commands that call IronPython API
+  /// </summary>
   abstract public class IronPyhtonCommand : RhinoCommand
   {
     protected static readonly Guid PluginId = new Guid("814d908a-e25c-493d-97e9-ee3861957f49");
@@ -67,7 +73,10 @@ namespace RhinoInside.Revit.UI
         throw new Exception("Failed to startup IronPyhton");
     }
 
-    public new class Availability : RhinoCommand.Availability
+    /// <summary>
+    /// Available when IronPython Plugin is available in Rhino
+    /// </summary>
+    protected new class Availability : RhinoCommand.Availability
     {
       public override bool IsCommandAvailable(UIApplication applicationData, CategorySet selectedCategories)
       {

@@ -191,10 +191,10 @@ namespace RhinoInside.Revit
         CurrentStatus = Status.Crashed;
 
       var RhinoInside_dmp = Path.Combine
-                      (
-                        Path.GetDirectoryName(app.Application.RecordingJournalFilename),
-                        Path.GetFileNameWithoutExtension(app.Application.RecordingJournalFilename) + ".RhinoInside.Revit.dmp"
-                      );
+      (
+        Path.GetDirectoryName(app.Application.RecordingJournalFilename),
+        Path.GetFileNameWithoutExtension(app.Application.RecordingJournalFilename) + ".RhinoInside.Revit.dmp"
+      );
 
       return MiniDumper.Write(RhinoInside_dmp);
     }
@@ -324,7 +324,7 @@ namespace RhinoInside.Revit.UI
     {
       const string CommandName = "Rhino";
 
-      var buttonData = NewPushButtonData<CommandRhinoInside, AllwaysAvailable>(CommandName);
+      var buttonData = NewPushButtonData<CommandRhinoInside, Availability>(CommandName);
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         Button = pushButton;
