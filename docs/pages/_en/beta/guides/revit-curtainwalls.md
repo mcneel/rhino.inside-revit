@@ -11,15 +11,15 @@ This guide discusses a special case of Wall System Families. Basic familiarity w
 
 *Curtain Walls* are a special *Wall System Family* in {{ site.terms.revit }}. The geometry of these walls is generated based on an underlying UV *Curtain Grid*. The grid configuration is set in the *Curtain Wall Type*:
 
-![]({{ "/static/images/guides/revit-curtains01.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-curtains01.jpeg" | prepend: site.baseurl }})
 
 *Curtain Grids* have *Grid Lines* on the U and V axes. In Revit API, the U direction is the vertical axis of the wall, and the V direction is the direction of the wall base curve (U line swept over the V curve):
 
-![]({{ "/static/images/guides/revit-curtains02.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-curtains02.jpeg" | prepend: site.baseurl }})
 
 *Grid Lines*  can form angles other than 90° (Currently only on non-curved curtain walls):
 
-![]({{ "/static/images/guides/revit-curtains03.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-curtains03.jpeg" | prepend: site.baseurl }})
 
 *Curtain Mullions* are attached to each *Grid Lines* segment and are joined based on the configurations set in the *Curtain Wall Type*:
 
@@ -35,7 +35,7 @@ This guide discusses a special case of Wall System Families. Basic familiarity w
 
  *Curtain Panels* (system families) or *Curtain Panel Family* (special type of flexible families that are designed to be inserted into *Curtain Cells* and act as custom panels) instances can be inserted into these cells to complete the geometry. *Curtain Panels* can be customized to represent solid panels, glass panels, or even empty (!) areas:
 
-![]({{ "/static/images/guides/revit-curtains07.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-curtains07.jpeg" | prepend: site.baseurl }})
 
 The types of *Curtain Mullions* and *Panels* used for a wall are defined in the Curtain Wall Type and can also be overridden on the wall instance.
 
