@@ -1,11 +1,11 @@
 ---
-title: Curtain Walls
+title: Curtain Walls & Systems
 order: 41
 ---
 
 <!-- Curtain Walls -->
 
-This guide discusses a special case of Wall System Families. Basic familiarity with [Walls]({{ site.baseurl }}{% link _en/beta/guides/revit-walls.md %}) greatly helps in understanding the *Curtain Walls* in {{ site.terms.revit }}.
+This guide discusses a special case of Wall System Families. Basic familiarity with [Walls (Basic & Stacked)]({{ site.baseurl }}{% link _en/beta/guides/revit-walls.md %}) greatly helps in understanding the *Curtain Walls* in {{ site.terms.revit }}.
 
 ## Curtain Grids
 
@@ -13,7 +13,7 @@ This guide discusses a special case of Wall System Families. Basic familiarity w
 
 ![]({{ "/static/images/guides/revit-curtains01.png" | prepend: site.baseurl }})
 
-*Curtain Grids* have *Grid Lines* on the U and V axes. In Revit API, the U direction is the vertical axis of the wall, and the V direction is the direction of the wall base curve. You can think of the *Grid* as the U line being extruded over the V curve:
+*Curtain Grids* have *Grid Lines* on the U and V axes. In Revit API, the U direction is the vertical axis of the wall, and the V direction is the direction of the wall base curve (U line swept over the V curve):
 
 ![]({{ "/static/images/guides/revit-curtains02.png" | prepend: site.baseurl }})
 
@@ -50,7 +50,7 @@ In Revit API, *Curtain Walls* are represented by {% include api_type.html type='
 
 ## Querying Curtain Walls
 
-Similar to collecting *Basic* and *Stacked Walls*, the custom components shared at [Walls]({{ site.baseurl }}{% link _en/beta/guides/revit-walls.md %}#by-wall-system-family) section, can help filtering the Curtain Wall instances and types:
+Similar to collecting *Basic* and *Stacked Walls*, the custom components shared at [Walls (Basic & Stacked)]({{ site.baseurl }}{% link _en/beta/guides/revit-walls.md %}#by-wall-system-family) section, can help filtering the Curtain Wall instances and types:
 
 ![]({{ "/static/images/guides/revit-curtainwalls03.png" | prepend: site.baseurl }})
 
@@ -77,6 +77,7 @@ Now that we can collect the Curtain Wall Types in the mode, use the custom compo
 
 {% include ltr/download_comp.html archive='/static/ghnodes/Analyse Curtain Wall Type.ghuser' name='Analyse Curtain Wall Type' %}
 {% include ltr/download_comp.html archive='/static/ghnodes/Curtain Grid Layout.ghuser' name='Curtain Grid Layout' %}
+{% include ltr/download_comp.html archive='/static/ghnodes/Curtain Join Condition.ghuser' name='Curtain Join Condition' %}
 
 ## Analyzing Curtain Walls
 
@@ -198,19 +199,21 @@ In Revit API, Curtain Mullion Types are represented by the {% include api_type.h
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-The custom component shared here can be used to analyze the *Mullion Types* extracted by the *Analyse Curtain Mullion* component:
+The **Analyse Curtain Mullion Type** custom component shared here can be used to analyze the *Mullion Types* extracted by the *Analyse Curtain Mullion* component:
 
 ![]({{ "/static/images/guides/revit-curtainwalls14.png" | prepend: site.baseurl }})
+
+The **Curtain Mullion System Family** value picker can be used to filter the *Mullions* by their *System Family* e.g. *L Corner Mullions*
+
+![]({{ "/static/images/guides/revit-curtainwalls14a.png" | prepend: site.baseurl }})
 
 &nbsp;
 
 {% include ltr/download_comp.html archive='/static/ghnodes/Analyse Curtain Mullion Type.ghuser' name='Analyse Curtain Mullion Type' %}
 
-## Analyzing Inserts
+## Analyzing Panels
 
-*Curtain Walls* can host two types of inserts. They can be either *Curtain Panels* or instances of families designed to work with *Curtain Walls* like a *Curtain Wall Door* instance. The components shared here help analyzing the Panels. The family instances can be analyzed using the methods and components provided in [Data Model: Types]({{ site.baseurl }}{% link _en/beta/guides/revit-types.md %}) and [Data Model: Instances]({{ site.baseurl }}{% link _en/beta/guides/revit-instances.md %}) guides.
-
-### Analyzing Panels
+*Curtain Walls* can host two types of inserts. They can be either *Curtain Panels* or instances of *Custom Families* designed to work with *Curtain Walls* like a *Curtain Wall Door* instance. The components shared here help analyzing the Panels. The family instances can be analyzed using the methods and components provided in [Data Model: Types]({{ site.baseurl }}{% link _en/beta/guides/revit-types.md %}) and [Data Model: Instances]({{ site.baseurl }}{% link _en/beta/guides/revit-instances.md %}) guides.
 
 {% capture api_note %}
 In Revit API, Curtain Panels are represented by the {% include api_type.html type='Autodesk.Revit.DB.Panel' title='DB.Panel' %}
@@ -224,6 +227,14 @@ The geometry for *Curtain Panels* can be extracted by passing the *Panels* from 
 Notice how the panels are in order from bottom to top row:
 
 ![]({{ "/static/images/guides/revit-curtainwalls15a.png" | prepend: site.baseurl }})
+
+Since the **Curtain Grid Insert (CGN)** output parameter can return both System Panels (`DB.Panel`) and Custom Family Instances (`DB.FamilyInstance`), the same workflow can extract the geometry of all these insert types:
+
+![]({{ "/static/images/guides/revit-curtainwalls15b.png" | prepend: site.baseurl }})
+
+&nbsp;
+
+![]({{ "/static/images/guides/revit-curtainwalls15c.png" | prepend: site.baseurl }})
 
 The custom component shared here can be used to extract information about the individual *Curtain Panels*:
 
@@ -248,23 +259,17 @@ In Revit API, Curtain Panel Types are represented by the {% include api_type.htm
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-The custom component shared here can be used to analyze the *Panel Types* extracted by the *Analyse Curtain Panel* component:
+The **Analyse Curtain Panel Type** custom component shared here can be used to analyze the *Panel Types* extracted by the *Analyse Curtain Panel* component:
 
 ![]({{ "/static/images/guides/revit-curtainwalls19.png" | prepend: site.baseurl }})
+
+Note that **Panel Symbol (PS)** output parameter can return a System Panel Type (`DB.PanelType`) for a Custom Family Symbol (`DB.FamilySymbol`) depending on the type of Panel inserted into the Grid:
+
+![]({{ "/static/images/guides/revit-curtainwalls19a.png" | prepend: site.baseurl }})
 
 &nbsp;
 
 {% include ltr/download_comp.html archive='/static/ghnodes/Analyse Curtain Panel Type.ghuser' name='Analyse Curtain Panel Type' %}
-
-### Analyzing Family Inserts
-
-The geometry for *Family Instances* can be extracted by passing the inserts from *Analyse Curtain Wall* component, to the *Element.Geometry* component:
-
-![]({{ "/static/images/guides/revit-curtainwalls15.png" | prepend: site.baseurl }})
-
-The *Element.Geometry* component can extract the geometries of both *Curtain Panels* described above, and any family instance places on the *Curtain Grid*:
-
-![]({{ "/static/images/guides/revit-curtainwalls19a.png" | prepend: site.baseurl }})
 
 ## Analyzing Grid Lines
 
