@@ -230,7 +230,7 @@ The structure of the source is as explained below:
 - `static/` contains all static files
   - `images/` contains all images used across the wiki contents
   - `samples/` contains sample data files
-  - `clusters/` contains Grasshopper cluster files
+  - `ghnodes/` contains Grasshopper component files
 - `_data/` contains data files used to generate special pages
 - `_config.yml` Jekyll site configs file (see the config file for more information on each available setting)
 - `GemFile*` Ruby gemfile listing the ruby dependencies
