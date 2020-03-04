@@ -1,5 +1,5 @@
 ---
-title: Walls
+title: Walls (Basic & Stacked)
 order: 40
 ---
 
