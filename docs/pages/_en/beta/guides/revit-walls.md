@@ -1,5 +1,5 @@
 ---
-title: Walls
+title: Walls (Basic & Stacked)
 order: 40
 ---
 
@@ -132,6 +132,12 @@ Use the *Analyse Wall* component shared here, to grab the common properties betw
 The example below uses the shared *Wall Structural Usage* value list component to filter for **Shear** walls:
 
 ![]({{ "/static/images/guides/revit-walls12.png" | prepend: site.baseurl }})
+
+The **OV** output parameter is the wall orientation vector:
+
+![]({{ "/static/images/guides/revit-walls12a.png" | prepend: site.baseurl }})
+
+![]({{ "/static/images/guides/revit-walls12b.png" | prepend: site.baseurl }})
 
 &nbsp;
 

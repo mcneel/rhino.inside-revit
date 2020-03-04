@@ -34,8 +34,8 @@ These pages guide you through understanding the underlying concepts in Revit e.g
 ## Modeling in Revit
 Grasshopper addon, included with {{ site.terms.rir }}, provides custom Revit-aware nodes that can create native content in Revit. These pages guide you through generating native Revit elements using {{ site.terms.rir }}
 
-- [Walls]({{ site.baseurl }}{% link _en/beta/guides/revit-walls.md %})
-- [Curtain Walls]({{ site.baseurl }}{% link _en/beta/guides/revit-curtainwalls.md %})
+- [Walls (Basic & Stacked)]({{ site.baseurl }}{% link _en/beta/guides/revit-walls.md %})
+- [Curtain Walls & Systems]({{ site.baseurl }}{% link _en/beta/guides/revit-curtainwalls.md %})
 - [Spatial Elements]({{ site.baseurl }}{% link _en/beta/guides/revit-spatial.md %})
 - [Stairs]({{ site.baseurl }}{% link _en/beta/guides/revit-stairs.md %})
 - [Levels & Grids]({{ site.baseurl }}{% link _en/beta/guides/revit-levels.md %})
