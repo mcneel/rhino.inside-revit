@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Input;
+using Microsoft.Win32.SafeHandles;
 using Rhino;
 using Rhino.Commands;
 using Rhino.Geometry;
@@ -44,6 +45,7 @@ namespace RhinoInside.Revit
     #region Revit Interface
     static RhinoCore core;
     public static readonly string SchemeName = $"Inside-Revit-{Revit.ApplicationUI.ControlledApplication.VersionNumber}";
+    internal static string[] StartupLog;
 
     internal static Result Startup()
     {
@@ -58,16 +60,27 @@ namespace RhinoInside.Revit
             {
               "/nosplash",
               "/notemplate",
+              "/captureprintcalls",
+              "/stopwatch",
               $"/scheme={SchemeName}",
               $"/language={Revit.ApplicationUI.ControlledApplication.Language.ToLCID()}"
             },
-            Rhino.Runtime.InProcess.WindowStyle.Hidden
+            WindowStyle.Hidden
           );
         }
         catch
         {
+          Addin.CurrentStatus = Addin.Status.Failed;
           return Result.Failed;
         }
+        finally
+        {
+          StartupLog = RhinoApp.CapturedCommandWindowStrings(true);
+          RhinoApp.CommandWindowCaptureEnabled = false;
+        }
+
+        MainWindow = new WindowHandle(RhinoApp.MainWindowHandle());
+        External.ActivationGate.AddGateWindow(MainWindow.Handle);
 
         RhinoApp.MainLoop                         += MainLoop;
 
@@ -78,13 +91,17 @@ namespace RhinoInside.Revit
         Command.EndCommand                        += EndCommand;
 
         // Alternative to /runscript= Rhino command line option
-        Revit.ApplicationUI.Idling                += RunScript;
+        RunScriptAsync
+        (
+          script:   Environment.GetEnvironmentVariable("RhinoInside_RunScript"),
+          activate: Addin.StartupMode == AddinStartupMode.AtStartup
+        );
 
         // Reset document units
         UpdateDocumentUnits(RhinoDoc.ActiveDoc);
         UpdateDocumentUnits(RhinoDoc.ActiveDoc, Revit.ActiveDBDocument);
 
-        Type[] types  = default;
+        Type[] types = default;
         try { types = Assembly.GetCallingAssembly().GetTypes(); }
         catch (ReflectionTypeLoadException ex) { types = ex.Types?.Where(x => x is object).ToArray(); }
 
@@ -101,29 +118,12 @@ namespace RhinoInside.Revit
       return Result.Succeeded;
     }
 
-    private static void RunScript(object sender, Autodesk.Revit.UI.Events.IdlingEventArgs e)
-    {
-      Revit.ApplicationUI.Idling -= RunScript;
-
-      var runScript = Environment.GetEnvironmentVariable("RhinoInside_RunScript");
-      if (string.IsNullOrEmpty(runScript))
-        return;
-
-      using (var modal = new ModalScope())
-      {
-        if (RhinoApp.RunScript(runScript, false))
-          modal.Run(Addin.StartupMode == AddinStartupMode.AtStartup);
-      }
-    }
-
     internal static Result Shutdown()
     {
       if (core is object)
       {
         // Unload Guests
         CheckOutGuests();
-
-        Revit.ApplicationUI.Idling                -= RunScript;
 
         Command.EndCommand                        -= EndCommand;
         Command.BeginCommand                      -= BeginCommand;
@@ -149,8 +149,13 @@ namespace RhinoInside.Revit
       return Result.Succeeded;
     }
 
+    internal static WindowHandle MainWindow = WindowHandle.Zero;
+    public static IntPtr MainWindowHandle => MainWindow.Handle;
+
     static bool idlePending = true;
-    static bool Run()
+    internal static void RaiseIdle() => core.RaiseIdle();
+
+    internal static bool Run()
     {
       if (idlePending)
       {
@@ -431,78 +436,36 @@ namespace RhinoInside.Revit
     }
     #endregion
 
+    #region Status
+    private static bool CoreIsLicenseExpired() => !RhinoApp.IsLicenseValidated;
+    public static bool IsLicenseExpired = false;
+    #endregion
+
     #region Rhino UI
     /*internal*/ public static void InvokeInHostContext(Action action) => core.InvokeInHostContext(action);
     /*internal*/ public static T InvokeInHostContext<T>(Func<T> func) => core.InvokeInHostContext(func);
 
-    public static bool WindowVisible
-    {
-      get => 0 != ((int) ModalForm.GetWindowLongPtr(RhinoApp.MainWindowHandle(), -16 /*GWL_STYLE*/) & 0x10000000);
-      set => ModalForm.ShowWindow(RhinoApp.MainWindowHandle(), value ? 8 /*SW_SHOWNA*/ : 0 /*SW_HIDE*/);
-    }
-
-    public static ProcessWindowStyle WindowStyle
-    {
-      get
-      {
-        var hWnd = RhinoApp.MainWindowHandle();
-
-        if (!WindowVisible)
-          return ProcessWindowStyle.Hidden;
-
-        if (ModalForm.IsIconic(hWnd))
-          return ProcessWindowStyle.Minimized;
-
-        if (ModalForm.IsZoomed(hWnd))
-          return ProcessWindowStyle.Maximized;
-
-        return ProcessWindowStyle.Normal;
-      }
-
-      set
-      {
-        if (WindowStyle != value)
-        {
-          var hWnd = RhinoApp.MainWindowHandle();
-          switch (value)
-          {
-            case ProcessWindowStyle.Normal:
-              ModalForm.ShowWindow(hWnd, 1 /*SW_SHOWNORMAL*/);
-              break;
-            case ProcessWindowStyle.Hidden:
-              ModalForm.ShowWindow(hWnd, 0 /*SW_HIDE*/);
-              break;
-            case ProcessWindowStyle.Maximized:
-              ModalForm.ShowWindow(hWnd, 3 /*SW_MAXIMIZE*/);
-              break;
-            case ProcessWindowStyle.Minimized:
-              ModalForm.ShowWindow(hWnd, 6/*SW_MINIMIZE*/);
-              break;
-          }
-        }
-      }
-    }
-
     public static bool Exposed
     {
-      get => WindowVisible && WindowStyle != ProcessWindowStyle.Minimized;
+      get => MainWindow.Visible && MainWindow.WindowStyle != ProcessWindowStyle.Minimized;
       set
       {
-        WindowVisible = value;
+        MainWindow.Visible = value;
 
-        if (value && WindowStyle == ProcessWindowStyle.Minimized)
-          WindowStyle = ProcessWindowStyle.Normal;
+        if (value && MainWindow.WindowStyle == ProcessWindowStyle.Minimized)
+          MainWindow.WindowStyle = ProcessWindowStyle.Normal;
       }
     }
 
     class ExposureSnapshot
     {
-      readonly bool Visible             = WindowVisible;
-      readonly ProcessWindowStyle Style = WindowStyle;
+      readonly bool Visible             = MainWindow.Visible;
+      readonly ProcessWindowStyle Style = MainWindow.WindowStyle;
+
       public void Restore()
       {
-        WindowStyle   = Style;
-        WindowVisible = Visible;
+        MainWindow.WindowStyle          = Style;
+        MainWindow.Visible              = Visible;
       }
     }
     static ExposureSnapshot QuiescentExposure;
@@ -512,11 +475,10 @@ namespace RhinoInside.Revit
       if (!Command.InScriptRunnerCommand())
       {
         // Capture Rhino Main Window exposure to restore it when user ends picking
-        try { QuiescentExposure = new ExposureSnapshot(); }
-        catch (Exception) { }
+        QuiescentExposure = new ExposureSnapshot();
 
         // Disable Revit Main Window while in Command
-        ModalForm.ParentEnabled = false;
+        Revit.MainWindow.Enabled = false;
       }
     }
 
@@ -525,9 +487,9 @@ namespace RhinoInside.Revit
       if (!Command.InScriptRunnerCommand())
       {
         // Reenable Revit main window
-        ModalForm.ParentEnabled = true;
+        Revit.MainWindow.Enabled = true;
 
-        if (WindowStyle != ProcessWindowStyle.Maximized)
+        if (MainWindow.WindowStyle != ProcessWindowStyle.Maximized)
         {
           // Restore Rhino Main Window exposure
           QuiescentExposure?.Restore();
@@ -557,42 +519,60 @@ namespace RhinoInside.Revit
       }
     }
 
+    public static void Show()
+    {
+      Exposed = true;
+      MainWindow.BringToFront();
+    }
+
+    public static async void ShowAsync()
+    {
+      await External.ActivationGate.Yield();
+
+      Show();
+    }
+
+    public static async void RunScriptAsync(string script, bool activate)
+    {
+      if (string.IsNullOrEmpty(script))
+        return;
+
+      await External.ActivationGate.Yield();
+
+      if (activate)
+        RhinoApp.SetFocusToMainWindow();
+
+      RhinoApp.RunScript(script, false);
+    }
+
+    public static Result RunCommandAbout()
+    {
+      var docSerial = RhinoDoc.ActiveDoc.RuntimeSerialNumber;
+      var result = RhinoApp.RunScript("!_About", false) ? Result.Succeeded : Result.Failed;
+
+      if (result == Result.Succeeded && docSerial != RhinoDoc.ActiveDoc.RuntimeSerialNumber)
+      {
+        Exposed = true;
+        return Result.Succeeded;
+      }
+
+      return Result.Cancelled;
+    }
+
     /// <summary>
     /// Represents a Pseudo-modal loop
     /// This class implements IDisposable, it's been designed to be used in a using statement.
     /// </summary>
-    public class ModalScope : IDisposable
+    internal sealed class ModalScope : IDisposable
     {
-      static event EventHandler enter;
-      /// <summary>
-      /// It will be fired before a ModelScope starts
-      /// Enter event handlers will be called in FIFO order
-      /// </summary>
-      public static event EventHandler Enter { add => enter += value; remove => enter -= value; }
-
-      static event EventHandler exit;
-      /// <summary>
-      /// It will be fired after a ModelScope ends
-      /// Exit event handlers will be called in LIFO order
-      /// </summary>
-      public static event EventHandler Exit { add => exit = value + exit; remove => exit -= value; }
-
       static bool wasExposed = false;
-      ModalForm form;
+      readonly bool wasEnabled = Revit.MainWindow.Enabled;
 
-      public ModalScope()
-      {
-        enter?.Invoke(this, EventArgs.Empty);
-        form = new ModalForm();
-      }
+      public ModalScope() => Revit.MainWindow.Enabled = false;
 
-      void IDisposable.Dispose()
-      {
-        form.Dispose();
-        exit?.Invoke(this, EventArgs.Empty);
-      }
+      void IDisposable.Dispose() => Revit.MainWindow.Enabled = wasEnabled;
 
-      public Result Run(bool exposeMainWindow = true)
+      public Result Run(bool exposeMainWindow)
       {
         return Run(exposeMainWindow, !Keyboard.IsKeyDown(Key.LeftCtrl));
       }
@@ -602,14 +582,14 @@ namespace RhinoInside.Revit
         try
         {
           if (exposeMainWindow) Exposed = true;
-          else if (restorePopups) Exposed = wasExposed || WindowStyle == ProcessWindowStyle.Minimized;
+          else if (restorePopups) Exposed = wasExposed || MainWindow.WindowStyle == ProcessWindowStyle.Minimized;
 
           if (restorePopups)
-            ModalForm.ShowOwnedPopups(true);
+            MainWindow.ShowOwnedPopups();
 
           // Activate a Rhino window to keep the loop running
-          var activePopup = ModalForm.GetEnabledPopup();
-          if (activePopup == IntPtr.Zero || exposeMainWindow)
+          var activePopup = MainWindow.ActivePopup;
+          if (activePopup.IsInvalid || exposeMainWindow)
           {
             if (!Exposed)
               return Result.Cancelled;
@@ -618,18 +598,13 @@ namespace RhinoInside.Revit
           }
           else
           {
-            ModalForm.BringWindowToTop(activePopup);
+            activePopup.BringToFront();
           }
 
-          while (ModalForm.ActiveForm is object)
+          while (Rhinoceros.Run())
           {
-            while (Rhinoceros.Run())
-            {
-              if (!Exposed && ModalForm.GetEnabledPopup() == IntPtr.Zero)
-                break;
-            }
-
-            break;
+            if (!Exposed && MainWindow.ActivePopup.IsInvalid)
+              break;
           }
 
           return Result.Succeeded;
@@ -638,25 +613,11 @@ namespace RhinoInside.Revit
         {
           wasExposed = Exposed;
 
-          ModalForm.EnableWindow(Revit.MainWindowHandle, true);
-          ModalForm.SetActiveWindow(Revit.MainWindowHandle);
-          ModalForm.ShowOwnedPopups(false);
+          Revit.MainWindow.Enabled = true;
+          WindowHandle.ActiveWindow = Revit.MainWindow;
+          MainWindow.HideOwnedPopups();
           Exposed = false;
         }
-      }
-    }
-
-    public static Result RunCommandAbout()
-    {
-      using (var modal = new Rhinoceros.ModalScope())
-      {
-        var docSerial = RhinoDoc.ActiveDoc.RuntimeSerialNumber;
-        var result = RhinoApp.RunScript("!_About", false) ? Result.Succeeded : Result.Failed;
-
-        if (result == Result.Succeeded && docSerial != RhinoDoc.ActiveDoc.RuntimeSerialNumber)
-          return modal.Run(true, false);
-
-        return Result.Cancelled;
       }
     }
     #endregion

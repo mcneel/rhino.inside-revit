@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -106,6 +106,7 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -118,11 +119,7 @@
     <Reference Include="WindowsBase" />
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="PresentationCore" />
-    <Reference Include="System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\WindowsPowerShell\3.0\System.Management.Automation.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
+    <Reference Include="System.Management.Automation" />
   </ItemGroup>
   <Choose>
     <When Condition="$(Configuration.Contains('Debug'))">
@@ -163,32 +160,34 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="RhinoCommon" Version="7.0.20028.12435-wip" IncludeAssets="compile; build" />
-        <PackageReference Include="Grasshopper" Version="7.0.20028.12435-wip" IncludeAssets="compile; build" />
+        <PackageReference Include="RhinoCommon" Version="7.0.20056.13055-wip" IncludeAssets="compile; build" />
+        <PackageReference Include="Grasshopper" Version="7.0.20056.13055-wip" IncludeAssets="compile; build" />
         <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitVersion).0.*" IncludeAssets="build; compile" />
       </ItemGroup>
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="ErrorReport.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Extensions\RevitAPI.cs" />
     <Compile Include="Extensions\RhinoCommon.cs" />
     <Compile Include="Extensions\System.cs" />
+    <Compile Include="Extensions\Win32.cs" />
     <Compile Include="Extensions\WinForms.cs" />
+    <Compile Include="External\ActivationGate.cs" />
+    <Compile Include="External\DB.cs" />
+    <Compile Include="External\UI.cs" />
     <Compile Include="Rhino\Rhinoceros.cs" />
     <Compile Include="Rhino\DocumentPreviewServer.cs" />
     <Compile Include="Samples\Sample4.cs" />
     <Compile Include="Settings\Addins.cs" />
     <Compile Include="Settings\KeyboardShortcuts.cs" />
-    <Compile Include="ModalForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="UI\Command.cs" />
+    <Compile Include="UI\DocumentCommand.cs" />
     <Compile Include="UI\GrasshopperCommand.cs" />
     <Compile Include="UI\GrasshopperPlayerCommand.cs" />
     <Compile Include="UI\HelpCommands.cs" />

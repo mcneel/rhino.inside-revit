@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows.Input;
+using System.Windows.Forms.InteropExtension;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
@@ -24,7 +25,7 @@ namespace RhinoInside.Revit.UI
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
       // Create a push button to trigger a command add it to the ribbon panel.
-      var buttonData = NewPushButtonData<CommandGrasshopperPlayer, Availability>("Player");
+      var buttonData = NewPushButtonData<CommandGrasshopperPlayer, NeedsActiveDocument<Availability>>("Player");
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         pushButton.ToolTip = "Loads and evals a Grasshopper definition";
@@ -47,7 +48,7 @@ namespace RhinoInside.Revit.UI
 #endif
         openFileDialog.RestoreDirectory = true;
 
-        switch (openFileDialog.ShowDialog(ModalForm.OwnerWindow))
+        switch (openFileDialog.ShowDialog(Revit.MainWindowHandle))
         {
           case System.Windows.Forms.DialogResult.OK: filePath = openFileDialog.FileName; return Result.Succeeded;
           case System.Windows.Forms.DialogResult.Cancel: filePath = null; return Result.Cancelled;

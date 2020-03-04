@@ -11,6 +11,9 @@ using Rhino.PlugIns;
 
 namespace RhinoInside.Revit.UI
 {
+  /// <summary>
+  /// Base class for all Rhino.Inside Revit commands that call Grasshopper API
+  /// </summary>
   abstract public class GrasshopperCommand : RhinoCommand
   {
     protected static readonly Guid PluginId = new Guid(0xB45A29B1, 0x4343, 0x4035, 0x98, 0x9E, 0x04, 0x4E, 0x85, 0x80, 0xD9, 0xCF);
@@ -24,7 +27,10 @@ namespace RhinoInside.Revit.UI
         throw new Exception("Failed to startup Grasshopper");
     }
 
-    public new class Availability : RhinoCommand.Availability
+    /// <summary>
+    /// Available when Grasshopper Plugin is available in Rhino
+    /// </summary>
+    protected new class Availability : RhinoCommand.Availability
     {
       public override bool IsCommandAvailable(UIApplication _, CategorySet selectedCategories) =>
         base.IsCommandAvailable(_, selectedCategories) &&
@@ -52,15 +58,8 @@ namespace RhinoInside.Revit.UI
 
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
-      using (var modal = new Rhinoceros.ModalScope())
-      {
-        GH.Guest.Script.ShowEditor();
-
-        if(!GH.Guest.Script.IsEditorLoaded())
-          return Result.Failed;
-
-        return modal.Run(false);
-      }
+      GH.Guest.ShowAsync();
+      return Result.Succeeded;
     }
   }
 
@@ -68,7 +67,7 @@ namespace RhinoInside.Revit.UI
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
   class CommandGrasshopperRecompute : GrasshopperCommand
   {
-    public new class Availability : GrasshopperCommand.Availability
+    protected new class Availability : GrasshopperCommand.Availability
     {
       public override bool IsCommandAvailable(UIApplication _, CategorySet selectedCategories) =>
         base.IsCommandAvailable(_, selectedCategories) &&
@@ -122,7 +121,7 @@ namespace RhinoInside.Revit.UI
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
   class CommandGrasshopperBake : GrasshopperCommand
   {
-    public new class Availability : GrasshopperCommand.Availability
+    protected new class Availability : GrasshopperCommand.Availability
     {
       public override bool IsCommandAvailable(UIApplication _, CategorySet selectedCategories) =>
         base.IsCommandAvailable(_, selectedCategories) &&
@@ -135,7 +134,7 @@ namespace RhinoInside.Revit.UI
       var items = ribbonPanel.AddStackedItems
       (
         new ComboBoxData("Category"),
-        NewPushButtonData<CommandGrasshopperBake, Availability>("Bake Selected")
+        NewPushButtonData<CommandGrasshopperBake, NeedsActiveDocument<Availability>>("Bake Selected")
       );
 
       if(items[0] is ComboBox comboBox)
@@ -256,7 +255,7 @@ namespace RhinoInside.Revit.UI
             geometryToBake.Add(new KeyValuePair<string, List<Rhino.Geometry.GeometryBase>>(param.NickName, geometryList));
         }
 
-        Bake(data.Application.ActiveUIDocument.Document, "Grasshopper.Bake", geometryToBake);
+        Bake(data.Application.ActiveUIDocument.Document, "Bake Selected", geometryToBake);
       }
 
       return Result.Succeeded;
@@ -281,13 +280,11 @@ namespace RhinoInside.Revit.UI
 #endif
     }
 
-    public new class Availability : RhinoCommand.Availability
+    protected new class Availability : NeedsActiveDocument<GrasshopperCommand.Availability>
     {
-      public override bool IsCommandAvailable(UIApplication _, CategorySet selectedCategories)
-      {
-        return base.IsCommandAvailable(_, selectedCategories) &&
-               Revit.ActiveUIDocument?.Document.IsFamilyDocument == false;
-      }
+      public override bool IsCommandAvailable(UIApplication _, CategorySet selectedCategories) =>
+        base.IsCommandAvailable(_, selectedCategories) &&
+        Revit.ActiveUIDocument?.Document.IsFamilyDocument == false;
     }
   }
 

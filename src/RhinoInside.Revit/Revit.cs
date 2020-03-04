@@ -8,6 +8,7 @@ using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
 using Grasshopper;
 using Grasshopper.Kernel;
+using Microsoft.Win32.SafeHandles;
 using Rhino;
 
 namespace RhinoInside.Revit
@@ -16,28 +17,30 @@ namespace RhinoInside.Revit
   {
     internal static Result OnStartup(UIControlledApplication applicationUI)
     {
-      if (MainWindowHandle == IntPtr.Zero)
+      if (MainWindow.IsZero)
       {
         var result = Addin.CheckSetup(applicationUI.ControlledApplication);
         if (result != Result.Succeeded)
           return result;
 
 #if REVIT_2019
-        MainWindowHandle = applicationUI.MainWindowHandle;
+        MainWindow = new WindowHandle(applicationUI.MainWindowHandle);
 #else
-        MainWindowHandle = Process.GetCurrentProcess().MainWindowHandle;
+        MainWindow = new WindowHandle(Process.GetCurrentProcess().MainWindowHandle);
 #endif
 
         result = Rhinoceros.Startup();
         if (result != Result.Succeeded)
         {
-          MainWindowHandle = IntPtr.Zero;
+          MainWindow = WindowHandle.Zero;
           return result;
         }
 
         // Register some events
         applicationUI.Idling += OnIdle;
         applicationUI.ControlledApplication.DocumentChanged += OnDocumentChanged;
+
+        Addin.CurrentStatus = Addin.Status.Ready;
       }
 
       return Result.Succeeded;
@@ -45,7 +48,7 @@ namespace RhinoInside.Revit
 
     internal static Result OnShutdown(UIControlledApplication applicationUI)
     {
-      if (MainWindowHandle != IntPtr.Zero)
+      if (!MainWindow.IsZero)
       {
         // Unregister some events
         applicationUI.ControlledApplication.DocumentChanged -= OnDocumentChanged;
@@ -53,7 +56,7 @@ namespace RhinoInside.Revit
 
         Rhinoceros.Shutdown();
 
-        MainWindowHandle = IntPtr.Zero;
+        MainWindow.SetHandleAsInvalid();
       }
 
       return Result.Succeeded;
@@ -67,8 +70,11 @@ namespace RhinoInside.Revit
       if(ActiveUIApplication?.IsValidObject != true)
         ActiveUIApplication = (sender as UIApplication);
 
-      if (ProcessIdleActions())
-        args.SetRaiseWithoutDelay();
+      if (Addin.CurrentStatus > Addin.Status.Available)
+      {
+        if (ProcessIdleActions())
+          args.SetRaiseWithoutDelay();
+      }
     }
 
     public static event EventHandler<DocumentChangedEventArgs> DocumentChanged;
@@ -242,14 +248,14 @@ namespace RhinoInside.Revit
 
                 // Hide Rhino UI in case any warning-error dialog popups
                 {
-                  ModalForm.EditScope editScope = null;
+                  External.EditScope editScope = null;
                   EventHandler<DialogBoxShowingEventArgs> _ = null;
                   try
                   {
                     ApplicationUI.DialogBoxShowing += _ = (sender, args) =>
                     {
                       if (editScope == null)
-                        editScope = new ModalForm.EditScope();
+                        editScope = new External.EditScope();
                     };
 
                     trans.Commit(options);
@@ -323,7 +329,8 @@ namespace RhinoInside.Revit
     #endregion
 
     #region Public Properties
-    public static IntPtr MainWindowHandle { get; private set; }
+    internal static WindowHandle MainWindow { get; private set; } = WindowHandle.Zero;
+    public static IntPtr MainWindowHandle => MainWindow.Handle;
 
 #if REVIT_2019
     public static string CurrentUsersDataFolderPath => ApplicationUI.ControlledApplication.CurrentUsersDataFolderPath;

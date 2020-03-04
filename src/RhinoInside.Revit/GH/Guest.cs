@@ -49,8 +49,8 @@ namespace RhinoInside.Revit.GH
       Revit.DocumentChanged += OnDocumentChanged;
       Revit.ApplicationUI.Idling += OnIdle;
 
-      Rhinoceros.ModalScope.Enter += ModalScope_Enter;
-      Rhinoceros.ModalScope.Exit  += ModalScope_Exit;
+      External.ActivationGate.Enter += ModalScope_Enter;
+      External.ActivationGate.Exit  += ModalScope_Exit;
 
       RhinoDoc.BeginOpenDocument                += BeginOpenDocument;
       RhinoDoc.EndOpenDocumentInitialViewUpdate += EndOpenDocumentInitialViewUpdate;
@@ -95,8 +95,8 @@ namespace RhinoInside.Revit.GH
       RhinoDoc.EndOpenDocumentInitialViewUpdate -= EndOpenDocumentInitialViewUpdate;
       RhinoDoc.BeginOpenDocument                -= BeginOpenDocument;
 
-      Rhinoceros.ModalScope.Exit  -= ModalScope_Exit;
-      Rhinoceros.ModalScope.Enter -= ModalScope_Enter;
+      External.ActivationGate.Exit  -= ModalScope_Exit;
+      External.ActivationGate.Enter -= ModalScope_Enter;
 
       Revit.ApplicationUI.Idling -= OnIdle;
       Revit.DocumentChanged -= OnDocumentChanged;
@@ -104,6 +104,19 @@ namespace RhinoInside.Revit.GH
       // Unregister PreviewServer
       previewServer?.Unregister();
       previewServer = null;
+    }
+
+    public static void Show()
+    {
+      Script.ShowEditor();
+      Rhinoceros.MainWindow.BringToFront();
+    }
+
+    public static async void ShowAsync()
+    {
+      await External.ActivationGate.Yield();
+
+      Show();
     }
 
     static bool LoadGHA(string filePath)

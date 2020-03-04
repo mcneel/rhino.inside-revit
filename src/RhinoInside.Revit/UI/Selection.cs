@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.UI.Selection
   {
     private static Result Pick<TResult>(out TResult value, Func<TResult> picker)
     {
-      using (new ModalForm.EditScope())
+      using (new External.EditScope())
       {
         value = default;
         try { value = Rhinoceros.InvokeInHostContext(picker); }

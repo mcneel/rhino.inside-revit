@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
+using System.Windows.Forms.InteropExtension;
 using Autodesk.Revit.UI;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
@@ -180,7 +181,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
       if (elementIds.Any())
       {
-        using (new ModalForm.EditScope())
+        using (new External.EditScope())
         {
           using
           (
@@ -227,7 +228,7 @@ namespace RhinoInside.Revit.GH.Parameters
                     dataManager.SetData(elementCollection, new Types.Element());
 
                     GH_WindowsFormUtil.CenterFormOnCursor(dataManager, true);
-                    if (dataManager.ShowDialog(ModalForm.OwnerWindow) == System.Windows.Forms.DialogResult.OK)
+                    if (dataManager.ShowDialog(Revit.MainWindowHandle) == System.Windows.Forms.DialogResult.OK)
                       elementIds = dataManager.GetData<IGH_Goo>().AllData(true).OfType<Types.Element>().Select(x => x.Value);
                   }
                   break;

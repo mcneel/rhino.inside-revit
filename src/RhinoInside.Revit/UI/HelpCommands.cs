@@ -13,7 +13,7 @@ using System.IO;
 
 namespace RhinoInside.Revit.UI
 {
-  abstract class HelpCommand : ExternalCommand
+  abstract class HelpCommand : Command
   {
     static protected PulldownButton helpButton = null;
     internal static void CreateUI(RibbonPanel ribbonPanel)
@@ -24,15 +24,15 @@ namespace RhinoInside.Revit.UI
         helpButton.Image = ImageBuilder.BuildImage("?");
         helpButton.LargeImage = ImageBuilder.BuildLargeImage("?");
 
-        helpButton.AddPushButton(typeof(CommandSampleFiles),       "Sample files",      "Opens sample files folder",                   typeof(AllwaysAvailable));
-        helpButton.AddPushButton(typeof(CommandAPIDocs),           "APIDocs",           "Opens apidocs.co website",                   typeof(AllwaysAvailable));
-        helpButton.AddPushButton(typeof(CommandTheBuildingCoder),  "TheBuildingCoder",  "Opens thebuildingcoder.typepad.com website", typeof(AllwaysAvailable));
+        helpButton.AddPushButton(typeof(CommandSampleFiles),       "Sample files",      "Opens sample files folder",                    typeof(AllwaysAvailable));
+        helpButton.AddPushButton(typeof(CommandAPIDocs),           "APIDocs",           "Opens apidocs.co website",                     typeof(AllwaysAvailable));
+        helpButton.AddPushButton(typeof(CommandTheBuildingCoder),  "TheBuildingCoder",  "Opens thebuildingcoder.typepad.com website",   typeof(AllwaysAvailable));
         helpButton.AddSeparator();
-        helpButton.AddPushButton(typeof(CommandRhinoDevDocs),      "Rhino Dev Docs",    "Opens developer.rhino3d.com website",        typeof(AllwaysAvailable));
-        helpButton.AddPushButton(typeof(CommandDiscourse),         "McNeel Discourse",  "Opens discourse.mcneel.com website",         typeof(AllwaysAvailable));
+        helpButton.AddPushButton(typeof(CommandRhinoDevDocs),      "Rhino Dev Docs",    "Opens developer.rhino3d.com website",          typeof(AllwaysAvailable));
+        helpButton.AddPushButton(typeof(CommandDiscourse),         "McNeel Discourse",  "Opens discourse.mcneel.com website",           typeof(AllwaysAvailable));
         helpButton.AddSeparator();
-        helpButton.AddPushButton(typeof(CommandCheckForUpdates),   "Updates",           "Checks if there are updates in GitHub",      typeof(AllwaysAvailable));
-        helpButton.AddPushButton(typeof(CommandAbout),             "About…",            "Shows Rhino.Inside Revit version information",typeof(AllwaysAvailable));
+        helpButton.AddPushButton(typeof(CommandCheckForUpdates),   "Updates",           "Checks if there are updates in GitHub",        typeof(AllwaysAvailable));
+        helpButton.AddPushButton(typeof(CommandAbout),             "About…",            "Shows Rhino.Inside Revit version information", typeof(AllwaysAvailable));
       }
 
       CommandCheckForUpdates.CheckUpdates();
@@ -214,18 +214,35 @@ namespace RhinoInside.Revit.UI
   {
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
+      var details = new StringBuilder();
+
+      var rhino = Addin.RhinoVersionInfo;
+      details.AppendLine($"Rhino: {rhino.ProductVersion} ({rhino.FileDescription})");
+
+      var revit = data.Application.Application;
+#if REVIT_2019
+      details.AppendLine($"Revit: {revit.SubVersionNumber} ({revit.VersionBuild})");
+#else
+      details.AppendLine($"Revit: {revit.VersionNumber} ({revit.VersionBuild})");
+#endif
+
+      details.AppendLine($"CLR: {ErrorReport.CLRVersion}");
+      details.AppendLine($"OS: {Environment.OSVersion}");
+
       using
       (
-        var taskDialog = new TaskDialog(MethodBase.GetCurrentMethod().DeclaringType.FullName)
+        var taskDialog = new TaskDialog("About")
         {
-          Title = "About",
+          Id = MethodBase.GetCurrentMethod().DeclaringType.FullName,
           MainIcon = TaskDialogIcons.IconInformation,
           TitleAutoPrefix = true,
           AllowCancellation = true,
-          MainInstruction = "Rhino.Inside© for Revit",
-          MainContent = $"Version {Addin.DisplayVersion}",
+          MainInstruction = $"Rhino.Inside© for Revit",
+          MainContent = $"Rhino.Inside Revit: {Addin.DisplayVersion}",
+          ExpandedContent = details.ToString(),
           CommonButtons = TaskDialogCommonButtons.Ok,
-          DefaultButton = TaskDialogResult.Ok
+          DefaultButton = TaskDialogResult.Ok,
+          FooterText = "Press CTRL+C to copy this information to Clipboard"
         }
       )
       {

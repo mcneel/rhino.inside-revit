@@ -183,7 +183,7 @@ namespace RhinoInside.Revit.GH.Types
         public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext context, object value, Attribute[] attributes)
         {
           var properties = base.GetProperties(context, value, attributes);
-          if (value is Proxy proxy)
+          if (value is Proxy proxy && proxy.Valid)
           {
             var element = proxy.owner.Document?.GetElement(proxy.owner.Id);
             if (element is object)

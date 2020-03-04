@@ -71,7 +71,10 @@ namespace RhinoInside.Revit.UI
     }
   }
 
-  abstract public class ExternalCommand : IExternalCommand
+  /// <summary>
+  /// Base class for all Rhino.Inside Revit commands
+  /// </summary>
+  abstract public class Command : External.UI.Command
   {
     public static PushButtonData NewPushButtonData<CommandType>(string text = null)
     where CommandType : IExternalCommand
@@ -114,23 +117,56 @@ namespace RhinoInside.Revit.UI
         AvailabilityClassName = typeof(AvailabilityType).FullName
       };
     }
-    internal class AllwaysAvailable : IExternalCommandAvailability
+
+    public class AllwaysAvailable : IExternalCommandAvailability
     {
-      bool IExternalCommandAvailability.IsCommandAvailable(UIApplication applicationData, CategorySet selectedCategories) => true;
+      bool IExternalCommandAvailability.IsCommandAvailable(UIApplication app, CategorySet selectedCategories) =>
+        true;
     }
 
-    public class Availability : IExternalCommandAvailability
+    /// <summary>
+    /// Available when an active Revit document is available
+    /// </summary>
+    public class NeedsActiveDocument<T> : External.UI.CommandAvailability
+      where T : IExternalCommandAvailability, new()
     {
+      T dependency = new T();
+
       // We can not relay on the UIApplication first argument.
       // Seams other Add-ins are calling this method with wrong values.
-      // I add the catch just because this is called many times.
-      public virtual bool IsCommandAvailable(UIApplication _, CategorySet selectedCategories)
+      // I add the try-catch just because this is called many times.
+      public override bool IsCommandAvailable(UIApplication _, CategorySet selectedCategories)
       {
-        try  { return Revit.ActiveUIDocument?.Document?.IsValidObject ?? false; }
-        catch (Autodesk.Revit.Exceptions.ApplicationException) { return false; }
+        if
+        (
+          Revit.ActiveUIApplication is UIApplication app &&
+          dependency.IsCommandAvailable(app, selectedCategories)
+        )
+        {
+          try { return app.ActiveUIDocument?.Document?.IsValidObject ?? false; }
+          catch (Autodesk.Revit.Exceptions.ApplicationException) { }
+        }
+
+        return false;
       }
     }
 
-    public abstract Result Execute(ExternalCommandData data, ref string message, ElementSet elements);
+    /// <summary>
+    /// Available when Rhino.Inside is not expired, crashed or already active
+    /// </summary>
+    protected class Availability : External.UI.CommandAvailability
+    {
+      public override bool IsCommandAvailable(UIApplication app, CategorySet selectedCategories) =>
+        Addin.CurrentStatus >= Addin.Status.Available;
+    }
+  }
+
+  /// <summary>
+  /// Base class for all Rhino.Inside Revit commands that depends on having
+  /// an active Revit document, but do not call RhinoCommon
+  /// </summary>
+  abstract public class DocumentCommand : Command
+  {
+    protected new class Availability : NeedsActiveDocument<Command.Availability> { }
   }
 }

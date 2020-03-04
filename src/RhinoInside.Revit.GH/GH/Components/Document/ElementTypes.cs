@@ -53,13 +53,36 @@ namespace RhinoInside.Revit.GH.Components
         var elementTypes = elementCollector.Cast<DB.ElementType>();
 
         if (familyName is object)
-          elementTypes = elementTypes.Where(x => x.FamilyName == familyName);
+          elementTypes = elementTypes.Where(x => x.FamilyName.IsSymbolNameLike(familyName));
 
         if (name is object)
-          elementTypes = elementTypes.Where(x => x.Name == name);
+          elementTypes = elementTypes.Where(x => x.Name.IsSymbolNameLike(name));
 
         DA.SetDataList("ElementTypes", elementTypes.Select(x => new Types.ElementType(x)));
       }
+    }
+
+    protected override string HtmlHelp_Source()
+    {
+      var nTopic = new Grasshopper.GUI.HTML.GH_HtmlFormatter(this)
+      {
+        Title = Name,
+        Description =
+        @"<p>This component returns all ElementTypes in the document filtered by Filter.</p>" +
+        @"<p>You can also specify a name pattern as a FamilyName and-or TypeName." +
+        @"<p>Several kind of patterns are supported, the method used depends on the first pattern character:</p>" +
+        @"<dl>" +
+        @"<dt><b>></b></dt><dd>Starts with</dd>" +
+        @"<dt><b><</b></dt><dd>Ends with</dd>" +
+        @"<dt><b>?</b></dt><dd>Contains, same as a regular search</dd>" +
+        @"<dt><b>:</b></dt><dd>Wildcards, see Microsoft.VisualBasic " + "<a target=\"_blank\" href=\"https://docs.microsoft.com/en-us/dotnet/visual-basic/language-reference/operators/like-operator#pattern-options\">LikeOperator</a></dd>" +
+        @"<dt><b>;</b></dt><dd>Regular expresion, see " + "<a target=\"_blank\" href=\"https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference\">here</a> as reference</dd>" +
+        @"<dt><b>></b></dt><dd>Else it looks for an exact match</dd>" +
+        @"</dl>",
+        ContactURI = @"https://discourse.mcneel.com/c/rhino-inside/Revit/"
+      };
+
+      return nTopic.HtmlFormat();
     }
   }
 }
