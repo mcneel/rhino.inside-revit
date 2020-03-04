@@ -261,6 +261,12 @@ namespace Microsoft.Win32.SafeHandles.InteropServices
     public static extern DWORD GetCurrentThreadId();
 
     [DllImport(KERNEL32, SetLastError = true)]
+    public static extern DWORD GetCurrentProcessId();
+
+    [DllImport(KERNEL32, SetLastError = true)]
+    public static extern SafeProcessHandle GetCurrentProcess();
+
+    [DllImport(KERNEL32, SetLastError = true)]
     public static extern SafeLibraryHandle LoadLibraryEx(string lpLibFileName, IntPtr hFile, DWORD dwFlags);
 
     [DllImport(KERNEL32, SetLastError = true)]

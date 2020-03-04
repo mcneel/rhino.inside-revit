@@ -4,9 +4,11 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using Microsoft.Win32;
-using Autodesk.Revit.UI;
 using System.Runtime.InteropServices;
+using Autodesk.Revit.UI;
+using Microsoft.Win32;
+using Microsoft.Win32.SafeHandles;
+using static Microsoft.Win32.SafeHandles.InteropServices.Kernel32;
 
 namespace RhinoInside.Revit
 {
@@ -85,10 +87,15 @@ namespace RhinoInside.Revit
               if (includeAddinsList)
               {
                 writer.WriteLine();
-                writer.WriteLine($"## Addins");
+                writer.WriteLine("## Addins");
                 writer.WriteLine();
                 writer.WriteLine("[Loaded Applications](Addins/LoadedApplications.md)  ");
               }
+
+              writer.WriteLine();
+              writer.WriteLine("## Console");
+              writer.WriteLine();
+              writer.WriteLine("[Startup](Console/Startup.txt)  ");
 
               if (attachments.Any())
               {
@@ -163,6 +170,19 @@ namespace RhinoInside.Revit
               CreateReportEntry(archive, $"{now}/Addins/Installed/{Path.GetFileName(addin)}", addin);
           }
 
+          // Console
+          {
+            if (Rhinoceros.StartupLog is string[] log && log.Length > 0)
+            {
+              var StartupTXT = archive.CreateEntry($"{now}/Console/Startup.txt");
+              using (var writer = new StreamWriter(StartupTXT.Open()))
+              {
+                foreach (var line in log)
+                  writer.WriteLine(line.Replace("\n", ""));
+              }
+            }
+          }
+
           // Attachments
           {
             foreach (var attachement in attachments)
@@ -215,13 +235,12 @@ namespace RhinoInside.Revit
 
       using (Process.Start(mailtoURI + mailBody)) { }
     }
-
   }
 
   sealed class MiniDumper
   {
     [Flags]
-    public enum Type : uint
+    public enum MINIDUMP_TYPE : uint
     {
       // From dbghelp.h:
       MiniDumpNormal = 0x00000000,
@@ -246,77 +265,56 @@ namespace RhinoInside.Revit
       MiniDumpValidTypeFlags = 0x0003ffff,
     };
 
-    //typedef struct _MINIDUMP_EXCEPTION_INFORMATION {
-    //    DWORD ThreadId;
-    //    PEXCEPTION_POINTERS ExceptionPointers;
-    //    BOOL ClientPointers;
-    //} MINIDUMP_EXCEPTION_INFORMATION, *PMINIDUMP_EXCEPTION_INFORMATION;
     [StructLayout(LayoutKind.Sequential, Pack = 4)]  // Pack=4 is important! So it works also for x64!
-    struct MiniDumpExceptionInformation
+    struct MINIDUMP_EXCEPTION_INFORMATION
     {
       public uint ThreadId;
-      public IntPtr ExceptioonPointers;
+      public IntPtr ExceptionPointers;
       [MarshalAs(UnmanagedType.Bool)]
       public bool ClientPointers;
     }
 
-    //BOOL
-    //WINAPI
-    //MiniDumpWriteDump(
-    //    __in HANDLE hProcess,
-    //    __in DWORD ProcessId,
-    //    __in HANDLE hFile,
-    //    __in MINIDUMP_TYPE DumpType,
-    //    __in_opt PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
-    //    __in_opt PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam,
-    //    __in_opt PMINIDUMP_CALLBACK_INFORMATION CallbackParam
-    //    );
     [DllImport("DBGHELP",
       EntryPoint = "MiniDumpWriteDump",
       CallingConvention = CallingConvention.StdCall,
       CharSet = CharSet.Unicode,
-      ExactSpelling = true, SetLastError = true)]
-    static extern bool MiniDumpWriteDump(
-      IntPtr hProcess,
-      uint processId,
-      IntPtr hFile,
-      uint dumpType,
-      ref MiniDumpExceptionInformation expParam,
-      IntPtr userStreamParam,
-      IntPtr callbackParam);
+      ExactSpelling = true,
+      SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    static extern bool MiniDumpWriteDump
+    (
+      SafeProcessHandle hProcess,
+      uint ProcessId,
+      SafeFileHandle hFile,
+      MINIDUMP_TYPE DumpType,
+      ref MINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
+      IntPtr UserStreamParam,
+      IntPtr CallbackParam
+    );
 
-    [DllImport("KERNEL32", EntryPoint = "GetCurrentThreadId", ExactSpelling = true)]
-    static extern uint GetCurrentThreadId();
+    public static bool Write(string fileName) => Write(fileName, MINIDUMP_TYPE.MiniDumpNormal);
 
-    [DllImport("KERNEL32", EntryPoint = "GetCurrentProcess", ExactSpelling = true)]
-    static extern IntPtr GetCurrentProcess();
-
-    [DllImport("KERNEL32", EntryPoint = "GetCurrentProcessId", ExactSpelling = true)]
-    static extern uint GetCurrentProcessId();
-
-    public static bool Write(string fileName)
-    {
-      return Write(fileName, Type.MiniDumpNormal);
-    }
-    public static bool Write(string fileName, Type dumpTyp)
+    public static bool Write(string fileName, MINIDUMP_TYPE DumpType)
     {
       using (var fs = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None))
       {
-        MiniDumpExceptionInformation exp;
-        exp.ThreadId = GetCurrentThreadId();
-        exp.ClientPointers = false;
-        exp.ExceptioonPointers = Marshal.GetExceptionPointers();
-        bool bRet = MiniDumpWriteDump
+        var ExceptionParam = new MINIDUMP_EXCEPTION_INFORMATION
+        {
+          ThreadId = GetCurrentThreadId(),
+          ExceptionPointers = Marshal.GetExceptionPointers(),
+          ClientPointers = false
+        };
+
+        return MiniDumpWriteDump
         (
           GetCurrentProcess(),
           GetCurrentProcessId(),
-          fs.SafeFileHandle.DangerousGetHandle(),
-          (uint) dumpTyp,
-          ref exp,
+          fs.SafeFileHandle,
+          DumpType,
+          ref ExceptionParam,
           IntPtr.Zero,
           IntPtr.Zero
         );
-        return bRet;
       }
     }
   }

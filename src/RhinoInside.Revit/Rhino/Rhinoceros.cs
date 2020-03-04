@@ -45,6 +45,7 @@ namespace RhinoInside.Revit
     #region Revit Interface
     static RhinoCore core;
     public static readonly string SchemeName = $"Inside-Revit-{Revit.ApplicationUI.ControlledApplication.VersionNumber}";
+    internal static string[] StartupLog;
 
     internal static Result Startup()
     {
@@ -59,6 +60,8 @@ namespace RhinoInside.Revit
             {
               "/nosplash",
               "/notemplate",
+              "/captureprintcalls",
+              "/stopwatch",
               $"/scheme={SchemeName}",
               $"/language={Revit.ApplicationUI.ControlledApplication.Language.ToLCID()}"
             },
@@ -69,6 +72,11 @@ namespace RhinoInside.Revit
         {
           Addin.CurrentStatus = Addin.Status.Failed;
           return Result.Failed;
+        }
+        finally
+        {
+          StartupLog = RhinoApp.CapturedCommandWindowStrings(true);
+          RhinoApp.CommandWindowCaptureEnabled = false;
         }
 
         MainWindow = new WindowHandle(RhinoApp.MainWindowHandle());
@@ -142,7 +150,7 @@ namespace RhinoInside.Revit
     }
 
     internal static WindowHandle MainWindow = WindowHandle.Zero;
-    public static IntPtr MainWindowHandle = MainWindow.Handle;
+    public static IntPtr MainWindowHandle => MainWindow.Handle;
 
     static bool idlePending = true;
     internal static void RaiseIdle() => core.RaiseIdle();
