@@ -759,10 +759,21 @@ namespace RhinoInside.Revit.GH.Parameters
 
     class GooComparer : IEqualityComparer<IGH_Goo>
     {
+      static bool IsEquatable(Type value)
+      {
+        for (var type = value; type is object; type = type.BaseType)
+        {
+          var IEquatableT = typeof(IEquatable<>).MakeGenericType(type);
+          if (IEquatableT.IsAssignableFrom(value))
+            return true;
+        }
+
+        return false;
+      }
+
       public static bool IsComparable(IGH_Goo goo)
       {
-        return
-        goo is Types.IGH_ElementId id ||
+        return IsEquatable(goo.GetType()) ||
         goo is IGH_GeometricGoo geometry ||
         goo is IGH_QuickCast ||
         goo is GH_StructurePath ||
@@ -778,12 +789,13 @@ namespace RhinoInside.Revit.GH.Parameters
 
       public bool Equals(IGH_Goo x, IGH_Goo y)
       {
-        if (x is Types.IGH_ElementId idX && y is Types.IGH_ElementId idY)
+        if (x.GetType() is Type typeX && y.GetType() is Type typeY && typeX == typeY)
         {
-          if (idX.IsReferencedElement || idY.IsReferencedElement)
-            return idX.DocumentGUID == idY.DocumentGUID && idX.UniqueID == idY.UniqueID;
-
-          return idX.Document.Equals(idY.Document) && idX.Id.IntegerValue == idY.Id.IntegerValue;
+          if (IsEquatable(typeX))
+          {
+            dynamic dynX = x, dynY = y;
+            return dynX.Equals(dynY);
+          }
         }
 
         if (x is IGH_QuickCast qcX && y is IGH_QuickCast qcY)
@@ -818,8 +830,8 @@ namespace RhinoInside.Revit.GH.Parameters
 
       public int GetHashCode(IGH_Goo obj)
       {
-        if (obj is Types.IGH_ElementId id)
-          return id.UniqueID.GetHashCode();
+        if (IsEquatable(obj.GetType()))
+          return obj.GetHashCode();
 
         if (obj is IGH_GeometricGoo geo && geo.IsReferencedGeometry)
           return geo.ReferenceID.GetHashCode();
