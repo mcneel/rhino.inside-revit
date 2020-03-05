@@ -474,12 +474,12 @@ namespace RhinoInside.Revit
       return ExportUtils.GetGBXMLDocumentId(doc);
     }
 
-    private static bool TryGetDocument(this IEnumerable<Document> set, Guid guid, out Document document, Document activeDBDocument = default)
+    private static bool TryGetDocument(this IEnumerable<Document> set, Guid guid, out Document document, Document activeDBDocument)
     {
       if (guid != Guid.Empty)
       {
         // For performance reasons and also in case of conflict the ActiveDBDocument will have priority
-        if (ExportUtils.GetGBXMLDocumentId(activeDBDocument) == guid)
+        if (activeDBDocument is object && ExportUtils.GetGBXMLDocumentId(activeDBDocument) == guid)
         {
           document = activeDBDocument;
           return true;
@@ -497,7 +497,7 @@ namespace RhinoInside.Revit
     }
 
     public static bool TryGetDocument(this Autodesk.Revit.UI.UIApplication app, Guid guid, out Document document) =>
-      TryGetDocument(app.Application.Documents.Cast<Document>(), guid, out document, app.ActiveUIDocument.Document);
+      TryGetDocument(app.Application.Documents.Cast<Document>(), guid, out document, app.ActiveUIDocument?.Document);
 
     public static bool TryGetCategoryId(this Document doc, string uniqueId, out ElementId categoryId)
     {
