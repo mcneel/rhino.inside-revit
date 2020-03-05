@@ -7,7 +7,7 @@ namespace RhinoInside.Revit.GH.Components
   public class DocumentLevels : DocumentComponent
   {
     public override Guid ComponentGuid => new Guid("87715CAF-92A9-4B14-99E5-F8CCB2CC19BD");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.Level));
 
     public DocumentLevels() : base
@@ -21,6 +21,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
+      base.RegisterInputParams(manager);
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
@@ -28,9 +29,9 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.Level(), "Levels", "Levels", "Levels list", GH_ParamAccess.list);
     }
 
-    protected override void TrySolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
     {
-      using (var collector = new DB.FilteredElementCollector(Revit.ActiveDBDocument).OfClass(typeof(DB.Level)))
+      using (var collector = new DB.FilteredElementCollector(doc).OfClass(typeof(DB.Level)))
         DA.SetDataList("Levels", collector);
     }
   }

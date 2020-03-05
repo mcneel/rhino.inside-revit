@@ -5,17 +5,16 @@ using Grasshopper.Kernel;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class DocumentParameters : DocumentComponent
+  public class CategoryParameters : Component
   {
     public override Guid ComponentGuid => new Guid("189F0A94-D077-4B96-8A92-6D5334EF7157");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.ParameterElement));
 
-    public DocumentParameters() : base
+    public CategoryParameters() : base
     (
-      "Document.Parameters", "Parameters",
+      "Category.Parameters", "Parameters",
       "Gets a list of valid parameters for the specified category that can be used in a table view",
-      "Revit", "Document"
+      "Revit", "Category"
     )
     {
     }

@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Components
   public class DocumentElementTypes : DocumentComponent
   {
     public override Guid ComponentGuid => new Guid("7B00F940-4C6E-4F3F-AB81-C3EED430DE96");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override DB.ElementFilter ElementFilter => new DB.ElementIsElementTypeFilter(false);
 
     public DocumentElementTypes() : base
@@ -22,6 +22,8 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
+      base.RegisterInputParams(manager);
+
       manager[manager.AddParameter(new Parameters.ElementFilter(), "Filter", "F", "Filter", GH_ParamAccess.item)].Optional = true;
       manager[manager.AddTextParameter("FamilyName", "F", string.Empty, GH_ParamAccess.item)].Optional = true;
       manager[manager.AddTextParameter("TypeName", "N", string.Empty, GH_ParamAccess.item)].Optional = true;
@@ -32,7 +34,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.ElementType(), "ElementTypes", "T", "Requested element type", GH_ParamAccess.list);
     }
 
-    protected override void TrySolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
     {
       DB.ElementFilter filter = null;
       DA.GetData("Filter", ref filter);
@@ -43,7 +45,7 @@ namespace RhinoInside.Revit.GH.Components
       string name = null;
       DA.GetData("TypeName", ref name);
 
-      using (var collector = new DB.FilteredElementCollector(Revit.ActiveDBDocument))
+      using (var collector = new DB.FilteredElementCollector(doc))
       {
         var elementCollector = collector.WherePasses(ElementFilter);
 

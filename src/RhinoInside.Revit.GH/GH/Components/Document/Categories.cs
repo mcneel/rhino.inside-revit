@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.GH.Components
   public class DocumentCategories : DocumentComponent
   {
     public override Guid ComponentGuid => new Guid("D150E40E-0970-4683-B517-038F8BA8B0D8");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override DB.ElementFilter ElementFilter => null;
 
     public override bool NeedsToBeExpired(DB.Events.DocumentChangedEventArgs e)
@@ -50,6 +50,8 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
+      base.RegisterInputParams(manager);
+
       var type = manager[manager.AddParameter(new Parameters.Param_Enum<Types.CategoryType>(), "Type", "T", "Category type", GH_ParamAccess.item)] as Parameters.Param_Enum<Types.CategoryType>;
       type.SetPersistentData(DB.CategoryType.Model);
       type.Optional = true;
@@ -64,24 +66,28 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.Category(), "Categories", "Categories", "Categories list", GH_ParamAccess.list);
     }
 
-    protected override void TrySolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
     {
       var categoryType = DB.CategoryType.Invalid;
       DA.GetData("Type", ref categoryType);
 
       bool AllowsParameters = false;
-      bool nofilterParams = (!DA.GetData("AllowsParameters", ref AllowsParameters) && Params.Input[1].Sources.Count == 0);
+      var _AllowsParameters_ = Params.IndexOfInputParam("AllowsParameters");
+      bool nofilterParams = (!DA.GetData(_AllowsParameters_, ref AllowsParameters) && Params.Input[_AllowsParameters_].Sources.Count == 0);
 
       bool HasMaterialQuantities = false;
-      bool nofilterMaterials = (!DA.GetData("HasMaterialQuantities", ref HasMaterialQuantities) && Params.Input[2].Sources.Count == 0);
+      var _HasMaterialQuantities_ = Params.IndexOfInputParam("HasMaterialQuantities");
+      bool nofilterMaterials = (!DA.GetData(_HasMaterialQuantities_, ref HasMaterialQuantities) && Params.Input[_HasMaterialQuantities_].Sources.Count == 0);
 
       bool Cuttable = false;
-      bool nofilterCuttable = (!DA.GetData("Cuttable", ref Cuttable) && Params.Input[3].Sources.Count == 0);
+      var _Cuttable_ = Params.IndexOfInputParam("Cuttable");
+      bool nofilterCuttable = (!DA.GetData(_Cuttable_, ref Cuttable) && Params.Input[_Cuttable_].Sources.Count == 0);
 
       bool Hidden = false;
-      bool nofilterHidden = (!DA.GetData("Hidden", ref Hidden) && Params.Input[4].Sources.Count == 0);
+      var _Hidden_ = Params.IndexOfInputParam("Cuttable");
+      bool nofilterHidden = (!DA.GetData(_Hidden_, ref Hidden) && Params.Input[_Hidden_].Sources.Count == 0);
 
-      var categories = Revit.ActiveDBDocument.Settings.Categories.Cast<DB.Category>();
+      var categories = doc.Settings.Categories.Cast<DB.Category>();
 
       if (categoryType != DB.CategoryType.Invalid)
         categories = categories.Where((x) => x.CategoryType == categoryType);

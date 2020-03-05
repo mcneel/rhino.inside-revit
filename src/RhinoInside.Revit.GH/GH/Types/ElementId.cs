@@ -90,7 +90,7 @@ namespace RhinoInside.Revit.GH.Types
     public void UnloadElement() { m_value = null; Document = null; }
     #endregion
 
-    public ElementId() { Value = DB.ElementId.InvalidElementId; }
+    public ElementId() : base(DB.ElementId.InvalidElementId) { }
     protected ElementId(DB.Document doc, DB.ElementId id)    => SetValue(doc, id);
 
     public override bool CastFrom(object source)
@@ -138,9 +138,9 @@ namespace RhinoInside.Revit.GH.Types
       return base.CastTo<Q>(ref target);
     }
 
-    public bool Equals(ElementId id) => id?.UniqueID == UniqueID;
+    public bool Equals(ElementId id) => id?.DocumentGUID == DocumentGUID && id?.UniqueID == UniqueID;
     public override bool Equals(object obj) => (obj is ElementId id) ? Equals(id) : base.Equals(obj);
-    public override int GetHashCode() => UniqueID.GetHashCode();
+    public override int GetHashCode() => (DocumentGUID, UniqueID).GetHashCode();
 
     [TypeConverter(typeof(Proxy.ObjectConverter))]
     protected class Proxy : IGH_GooProxy
@@ -261,12 +261,15 @@ namespace RhinoInside.Revit.GH.Types
         $"Unresolved {TypeName} : {UniqueID}" :
         $"Invalid {TypeName}";
 
-      return
-      (
-        Revit.ActiveDBApplication.Documents.Size > 1 ? 
-        $"{tip} @ {Document?.Title ?? DocumentGUID.ToString()}" :
-        tip
-      );
+      using (var Documents = Revit.ActiveDBApplication.Documents)
+      {
+        return
+        (
+          Documents.Size > 1 ?
+          $"{tip} @ {Document?.Title ?? DocumentGUID.ToString()}" :
+          tip
+        );
+      }
     }
 
     public virtual string DisplayName => Id is null ? UniqueID : $"id {Id.IntegerValue}";
