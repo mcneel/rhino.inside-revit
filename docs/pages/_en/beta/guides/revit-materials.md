@@ -3,9 +3,6 @@ title: Materials
 order: 49
 ---
 
-{% include ltr/en/wip_note.html %}
-
-
 ## Querying Materials
 
 {% capture api_note %}
@@ -14,6 +11,8 @@ In Revit API, Materials are represented by the {% include api_type.html type='Au
 {% include ltr/api_note.html note=api_note %}
 
 ## Reading Material Properties
+
+{% include ltr/en/wip_note.html %}
 
 ## Extracting Materials from Geometry
 
@@ -25,5 +24,8 @@ To extract the set of materials assigned to faces of a geometry, use the *Geomet
 
 ## Modifying Materials
 
+{% include ltr/en/wip_note.html %}
+
 ## Creating Materials
 
+{% include ltr/en/wip_note.html %}

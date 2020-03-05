@@ -3,8 +3,6 @@ title: Links
 order: 74
 ---
 
-{% include ltr/en/wip_note.html %}
-
 ## Querying Linked Documents
 
 {% capture api_note %}
@@ -32,6 +30,12 @@ Use the **T** toggle to list element types as well
 
 ## Unloading/Reloading Links
 
+{% include ltr/en/wip_note.html %}
+
 ## Replacing Links
 
+{% include ltr/en/wip_note.html %}
+
 ## Finding Link Instances
+
+{% include ltr/en/wip_note.html %}

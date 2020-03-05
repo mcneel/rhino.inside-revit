@@ -3,8 +3,6 @@ title: Schedules & Reports
 order: 65
 ---
 
-{% include ltr/en/wip_note.html %}
-
 ## Querying Schedules
 
 {% capture api_note %}
@@ -36,18 +34,34 @@ Since schedules are actually views, we can use the same workflow as for [Views](
 
 ## Key Schedules
 
+{% include ltr/en/wip_note.html %}
+
 ## Embedded Schedules
+
+{% include ltr/en/wip_note.html %}
 
 ## Reports and Graphical Schedules
 
+{% include ltr/en/wip_note.html %}
+
 ## Schedule Definition
 
+{% include ltr/en/wip_note.html %}
+
 ## Collecting Scheduled Elements
+
+{% include ltr/en/wip_note.html %}
 
 <!-- in order! -->
 
 ## Creating New Schedules
 
+{% include ltr/en/wip_note.html %}
+
 ### Create Base Schedule
 
+{% include ltr/en/wip_note.html %}
+
 ### Modify Schedule Definition
+
+{% include ltr/en/wip_note.html %}
