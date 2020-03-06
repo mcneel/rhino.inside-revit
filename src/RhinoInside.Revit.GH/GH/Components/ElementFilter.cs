@@ -227,31 +227,37 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var typeIds = new List<DB.ElementId>();
-      if (!DA.GetDataList("Types", typeIds))
+      var types = new List<DB.ElementType>();
+      if (!DA.GetDataList("Types", types))
         return;
 
       var inverted = false;
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      var provider = new DB.ParameterValueProvider(new DB.ElementId(DB.BuiltInParameter.ELEM_TYPE_PARAM));
-      if (typeIds.Count == 1)
+      types = types.OfType<DB.ElementType>().ToList();
+
+      if (types.Count > 0)
       {
-        var rule = new DB.FilterElementIdRule(provider, new DB.FilterNumericEquals(), typeIds[0]);
-        DA.SetData("Filter", new DB.ElementParameterFilter(rule, inverted));
-      }
-      else
-      {
-        if (inverted)
+        var provider = new DB.ParameterValueProvider(new DB.ElementId(DB.BuiltInParameter.ELEM_TYPE_PARAM));
+
+        if (types.Count == 1)
         {
-          var rules = typeIds.Select(x => new DB.FilterInverseRule(new DB.FilterElementIdRule(provider, new DB.FilterNumericEquals(), x))).ToArray();
-          DA.SetData("Filter", new DB.ElementParameterFilter(rules));
+          var rule = new DB.FilterElementIdRule(provider, new DB.FilterNumericEquals(), types[0].Id);
+          DA.SetData("Filter", new DB.ElementParameterFilter(rule, inverted));
         }
         else
         {
-          var filters = typeIds.Select(x => new DB.FilterElementIdRule(provider, new DB.FilterNumericEquals(), x)).Select(x => new DB.ElementParameterFilter(x)).ToArray();
-          DA.SetData("Filter", new DB.LogicalOrFilter(filters));
+          if (inverted)
+          {
+            var rules = types.Select(x => new DB.FilterInverseRule(new DB.FilterElementIdRule(provider, new DB.FilterNumericEquals(), x.Id))).ToArray();
+            DA.SetData("Filter", new DB.ElementParameterFilter(rules));
+          }
+          else
+          {
+            var filters = types.Select(x => new DB.FilterElementIdRule(provider, new DB.FilterNumericEquals(), x.Id)).Select(x => new DB.ElementParameterFilter(x)).ToArray();
+            DA.SetData("Filter", new DB.LogicalOrFilter(filters));
+          }
         }
       }
     }
