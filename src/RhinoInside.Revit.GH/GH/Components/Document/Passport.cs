@@ -102,18 +102,18 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddTextParameter("CloudServerPath", "CloudServerPath", "Cloud Server Path", GH_ParamAccess.item);
-      manager.AddParameter(new Grasshopper.Kernel.Parameters.Param_Guid(), "CloudProjectGUID", "CloudProjectGUID", "The GUID identifies the Cloud project to which the model is associated", GH_ParamAccess.item);
-      manager.AddParameter(new Grasshopper.Kernel.Parameters.Param_Guid(), "CloudModelGUID", "CloudModelGUID", "The GUID identifies this model in the Cloud project", GH_ParamAccess.item);
+      manager.AddTextParameter("ServerPath", "ServerPath", "Cloud Server Path", GH_ParamAccess.item);
+      manager.AddParameter(new Grasshopper.Kernel.Parameters.Param_Guid(), "ProjectGUID", "ProjectGUID", "The GUID identifies the Cloud project to which the model is associated", GH_ParamAccess.item);
+      manager.AddParameter(new Grasshopper.Kernel.Parameters.Param_Guid(), "ModelGUID", "ModelGUID", "The GUID identifies this model in the Cloud project", GH_ParamAccess.item);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
     {
       if (doc.IsModelInCloud && doc.GetCloudModelPath() is DB.ModelPath cloudPath)
       {
-        DA.SetData("CloudServerPath", cloudPath.ServerPath);
-        DA.SetData("CloudProjectGUID", cloudPath.GetProjectGUID());
-        DA.SetData("CloudModelGUID", cloudPath.GetModelGUID());
+        DA.SetData("ServerPath", cloudPath.ServerPath);
+        DA.SetData("ProjectGUID", cloudPath.GetProjectGUID());
+        DA.SetData("ModelGUID", cloudPath.GetModelGUID());
       }
     }
   }
