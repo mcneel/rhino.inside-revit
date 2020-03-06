@@ -3,8 +3,6 @@ title: Openings
 order: 47
 ---
 
-{% include ltr/en/wip_note.html %}
-
 ## Querying Openings
 
 {% capture api_note %}
@@ -86,3 +84,5 @@ Use the *Create Shaft* component shared here to create a shaft element from boun
 {% include ltr/download_comp.html archive='/static/ghnodes/Create Shaft.ghuser' name='Create Shaft' %}
 
 ## Creating Openings By Face
+
+{% include ltr/en/wip_note.html %}

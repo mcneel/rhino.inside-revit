@@ -3,8 +3,6 @@ title: Walls (Basic & Stacked)
 order: 40
 ---
 
-{% include ltr/en/wip_note.html %}
-
 ## Querying Wall Types
 
 {% capture api_note %}
@@ -222,27 +220,45 @@ Moreover, this component keeps the layers in identical order as other components
 
 {% include ltr/download_comp.html archive='/static/ghnodes/Extract Compound Structure Geometry.ghuser' name='Extract Compound Structure Geometry' %}
 
-
 ## Modifying Wall Types
+
+{% include ltr/en/wip_note.html %}
 
 ### Modifying Type Parameters
 
+{% include ltr/en/wip_note.html %}
+
 ### Modifying Basic Wall Structure
+
+{% include ltr/en/wip_note.html %}
 
 ### Modifying Stacked Wall Structure
 
+{% include ltr/en/wip_note.html %}
+
 ## Modifying Walls
+
+{% include ltr/en/wip_note.html %}
 
 ### Modifying Instance Parameters
 
+{% include ltr/en/wip_note.html %}
+
 ### Modifying Base Curve
+
+{% include ltr/en/wip_note.html %}
 
 ### Modifying Profile
 
+{% include ltr/en/wip_note.html %}
 
 ## Creating Wall Types
 
+{% include ltr/en/wip_note.html %}
+
 ### Creating Basic Wall Type
+
+{% include ltr/en/wip_note.html %}
 
 ### Creating Stacked Wall Type
 
@@ -250,8 +266,14 @@ Moreover, this component keeps the layers in identical order as other components
 
 ## Creating Walls
 
+{% include ltr/en/wip_note.html %}
+
 ### By Base Curve
 
+{% include ltr/en/wip_note.html %}
+
 ### By Profile
+
+{% include ltr/en/wip_note.html %}
 
 <!-- https://github.com/mcneel/rhino.inside-revit/issues/46 -->
