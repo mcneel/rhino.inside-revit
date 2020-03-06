@@ -56,6 +56,8 @@ namespace RhinoInside.Revit.GH.Components
           AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "There is no active Revit document");
           return;
         }
+
+        Message = $"Doc : {Document.Title}";
       }
       else
       {
@@ -85,6 +87,7 @@ namespace RhinoInside.Revit.GH.Components
       Document.NickName = "Document";
       Document.Description = "Document to query elements";
       Document.Access = GH_ParamAccess.item;
+      Message = string.Empty;
 
       return Document;
     }

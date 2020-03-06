@@ -32,7 +32,10 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DA.SetData("Document", Revit.ActiveDBDocument);
+      var Document = Revit.ActiveDBDocument;
+      Message = Document?.Title;
+
+      DA.SetData("Document", Document);
     }
   }
 
