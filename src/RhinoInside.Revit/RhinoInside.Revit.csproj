@@ -8,22 +8,6 @@
     <Rhino7DebugPluginsDir>$([MSBuild]::GetRegistryValueFromView('HKEY_CURRENT_USER\Software\McNeel\Rhinoceros\7.0-WIP-Developer-Debug-trunk\Install', 'Default Plug-ins Folder', null, RegistryView.Registry64))</Rhino7DebugPluginsDir>
     <Rhino7PluginsDir>$([MSBuild]::ValueOrDefault('$(Rhino7DebugPluginsDir)', '$(Rhino7DefaultPluginsDir)'))</Rhino7PluginsDir>
   </PropertyGroup>
-  <PropertyGroup Condition="$(Configuration.Contains('2017'))">
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
-    <RevitVersion>2017</RevitVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition="$(Configuration.Contains('2018'))">
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
-    <RevitVersion>2018</RevitVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition="$(Configuration.Contains('2019'))">
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
-    <RevitVersion>2019</RevitVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition="$(Configuration.Contains('2020'))">
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
-    <RevitVersion>2020</RevitVersion>
-  </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -105,6 +89,24 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+
+  <PropertyGroup Condition="$(Configuration.Contains('2017'))">
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <RevitVersion>2017</RevitVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration.Contains('2018'))">
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <RevitVersion>2018</RevitVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration.Contains('2019'))">
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <RevitVersion>2019</RevitVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration.Contains('2020'))">
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <RevitVersion>2020</RevitVersion>
+  </PropertyGroup>
+
   <ItemGroup>
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />

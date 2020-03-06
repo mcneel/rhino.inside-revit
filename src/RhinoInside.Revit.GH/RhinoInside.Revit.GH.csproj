@@ -8,22 +8,6 @@
     <Rhino7DebugPluginsDir>$([MSBuild]::GetRegistryValueFromView('HKEY_CURRENT_USER\Software\McNeel\Rhinoceros\7.0-WIP-Developer-Debug-trunk\Install', 'Default Plug-ins Folder', null, RegistryView.Registry64))</Rhino7DebugPluginsDir>
     <Rhino7PluginsDir>$([MSBuild]::ValueOrDefault('$(Rhino7DebugPluginsDir)', '$(Rhino7DefaultPluginsDir)'))</Rhino7PluginsDir>
   </PropertyGroup>
-  <PropertyGroup Condition="$(Configuration.Contains('2017'))">
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
-    <RevitVersion>2017</RevitVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition="$(Configuration.Contains('2018'))">
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
-    <RevitVersion>2018</RevitVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition="$(Configuration.Contains('2019'))">
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
-    <RevitVersion>2019</RevitVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition="$(Configuration.Contains('2020'))">
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
-    <RevitVersion>2020</RevitVersion>
-  </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -33,78 +17,116 @@
     <OutputType>Library</OutputType>
     <LangVersion>7.3</LangVersion>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RhinoInside.Revit</RootNamespace>
+    <RootNamespace>RhinoInside.Revit.GH</RootNamespace>
     <AssemblyName>RhinoInside.Revit.GH</AssemblyName>
     <TargetFrameworkProfile />
   </PropertyGroup>
+
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug 2017|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
     <OutputPath>bin\Debug 2017\</OutputPath>
     <DefineConstants>TRACE;DEBUG;REVIT_2017</DefineConstants>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release 2017|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Release 2017\</OutputPath>
     <DefineConstants>REVIT_2017</DefineConstants>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>docs\Release 2017\$(AssemblyName).xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2018|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug 2018\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;REVIT_2017;REVIT_2018</DefineConstants>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2018|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\Debug 2018\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;REVIT_2017; REVIT_2018</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2018|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Release 2018\</OutputPath>
+    <DefineConstants>REVIT_2017;REVIT_2018</DefineConstants>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <DefineConstants>REVIT_2017; REVIT_2018</DefineConstants>
+    <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>docs\Release 2018\$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2019|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug 2019\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;REVIT_2017; REVIT_2018; REVIT_2019</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;REVIT_2017;REVIT_2018;REVIT_2019</DefineConstants>
     <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2019|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Release 2019\</OutputPath>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <DefineConstants>REVIT_2017; REVIT_2018; REVIT_2019</DefineConstants>
+    <DefineConstants>REVIT_2017;REVIT_2018;REVIT_2019</DefineConstants>
+    <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>docs\Release 2019\$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2020|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug 2020\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;REVIT_2017; REVIT_2018; REVIT_2019; REVIT_2020</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020</DefineConstants>
     <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2020|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Release 2020\</OutputPath>
-    <DefineConstants>REVIT_2017; REVIT_2018; REVIT_2019; REVIT_2020</DefineConstants>
+    <DefineConstants>REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020</DefineConstants>
+    <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>docs\Release 2020\$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
+
+  <PropertyGroup Condition="$(Configuration.Contains('2017'))">
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <RevitVersion>2017</RevitVersion>
+    <DefineConstants>$(DefineConstants);NET461</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration.Contains('2018'))">
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <RevitVersion>2018</RevitVersion>
+    <DefineConstants>$(DefineConstants);NET462</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration.Contains('2019'))">
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <RevitVersion>2019</RevitVersion>
+    <DefineConstants>$(DefineConstants);NET47</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration.Contains('2020'))">
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <RevitVersion>2020</RevitVersion>
+    <DefineConstants>$(DefineConstants);NET47</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
