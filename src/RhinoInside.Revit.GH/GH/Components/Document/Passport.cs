@@ -64,10 +64,6 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Grasshopper.Kernel.Parameters.Param_Guid(), "GUID", "GUID", "A unique identifier for the document", GH_ParamAccess.item);
 
       manager.AddParameter(new Grasshopper.Kernel.Parameters.Param_Guid(), "WorksharingCentralGUID", "WorksharingCentralGUID", "The central GUID of the server-based model", GH_ParamAccess.item);
-
-      manager.AddTextParameter("CloudServerPath", "CloudServerPath", "Cloud Server Path", GH_ParamAccess.item);
-      manager.AddParameter(new Grasshopper.Kernel.Parameters.Param_Guid(), "CloudProjectGUID", "CloudProjectGUID", "The GUID identifies the Cloud project to which the model is associated", GH_ParamAccess.item);
-      manager.AddParameter(new Grasshopper.Kernel.Parameters.Param_Guid(), "CloudModelGUID", "CloudModelGUID", "The GUID identifies this model in the Cloud project", GH_ParamAccess.item);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
@@ -80,8 +76,40 @@ namespace RhinoInside.Revit.GH.Components
         try { DA.SetData("WorksharingCentralGUID", doc.WorksharingCentralGUID); }
         catch (Autodesk.Revit.Exceptions.InapplicableDataException) { }
       }
+    }
+  }
 
-      if(doc.IsModelInCloud && doc.GetCloudModelPath() is DB.ModelPath cloudPath)
+#if REVIT_2020
+  public class DocumentCloudPassport : DocumentComponent
+  {
+    public override Guid ComponentGuid => new Guid("2577A55B-A198-4760-9183-ADF8193FB5BD");
+    public override GH_Exposure Exposure => GH_Exposure.obscure;
+    protected override string IconTag => "CLOUD";
+    protected override DB.ElementFilter ElementFilter => null;
+
+    public DocumentCloudPassport() : base
+    (
+      "Document.CloudPassport", "CloudPassport",
+      string.Empty,
+      "Revit", "Document"
+    )
+    { }
+
+    protected override void RegisterInputParams(GH_InputParamManager manager)
+    {
+      base.RegisterInputParams(manager);
+    }
+
+    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    {
+      manager.AddTextParameter("CloudServerPath", "CloudServerPath", "Cloud Server Path", GH_ParamAccess.item);
+      manager.AddParameter(new Grasshopper.Kernel.Parameters.Param_Guid(), "CloudProjectGUID", "CloudProjectGUID", "The GUID identifies the Cloud project to which the model is associated", GH_ParamAccess.item);
+      manager.AddParameter(new Grasshopper.Kernel.Parameters.Param_Guid(), "CloudModelGUID", "CloudModelGUID", "The GUID identifies this model in the Cloud project", GH_ParamAccess.item);
+    }
+
+    protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
+    {
+      if (doc.IsModelInCloud && doc.GetCloudModelPath() is DB.ModelPath cloudPath)
       {
         DA.SetData("CloudServerPath", cloudPath.ServerPath);
         DA.SetData("CloudProjectGUID", cloudPath.GetProjectGUID());
@@ -89,4 +117,5 @@ namespace RhinoInside.Revit.GH.Components
       }
     }
   }
+#endif
 }
