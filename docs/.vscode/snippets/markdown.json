@@ -1,0 +1,66 @@
+{
+    "RIR Meta": {
+        "prefix": "rirmeta",
+        "description": "Metadata for a Rhino.Inside.Revit Wiki page",
+        "body": [
+            "---",
+            "title: X",
+            "order: 0",
+            "---"
+        ]
+    },
+    "RIR Image": {
+        "prefix": "ririmg",
+        "description": "Image tag for Rhino.Inside.Revit Wiki",
+        "body": ["![]({{ \"/static/images/guides/$1.png\" | prepend: site.baseurl }})"]
+    },
+    "RIR Link": {
+        "prefix": "rirlnk",
+        "description": "Link tag for Rhino.Inside.Revit Wiki",
+        "body": ["{% link _en/beta/guides/$1.md %}"]
+    },
+    "RIR Python": {
+        "prefix": "rirpy",
+        "description": "Link tag for Rhino.Inside.Revit Wiki",
+        "body": [
+            "{% highlight python %}",
+            "$1",
+            "{% endhighlight %}"
+        ]
+    },
+    "RIR WIP Note": {
+        "prefix": "rirwip",
+        "description": "Work-in-progress note block for Rhino.Inside.Revit Wiki",
+        "body": ["{% include ltr/en/wip_note.html %}"]
+    },
+    "RIR Warning Note": {
+        "prefix": "rirwarn",
+        "description": "Warning note block for Rhino.Inside.Revit Wiki",
+        "body": ["{% include ltr/warning_note.html note='$1' %}"]
+    },
+    "RIR Bubble Note": {
+        "prefix": "rirbub",
+        "description": "Bubble note block for Rhino.Inside.Revit Wiki",
+        "body": ["{% include ltr/bubble_note.html note='$1' %}"]
+    },
+    "RIR API Note": {
+        "prefix": "rirapi",
+        "description": "API note block for Rhino.Inside.Revit Wiki",
+        "body": [
+            "{% capture api_note %}",
+            "In Revit API, $1 are represented by the {% include api_type.html type='Autodesk.Revit.DB.$2' title='DB.$3' %}",
+            "{% endcapture %}",
+            "{% include ltr/api_note.html note=api_note %}"
+        ]
+    },
+    "RIR Download Component Note": {
+        "prefix": "rirghu",
+        "description": "Download Component note block for Rhino.Inside.Revit Wiki",
+        "body": ["{% include ltr/download_comp.html archive='/static/ghnodes/$1.ghuser' name='$2' %}"]
+    },
+    "RIR Bug Note": {
+        "prefix": "rirbug",
+        "description": "GitHub Issue note block for Rhino.Inside.Revit Wiki",
+        "body": ["{% include ltr/issue_note.html issue_id='$1' note='$2' %}"]
+    }
+}
