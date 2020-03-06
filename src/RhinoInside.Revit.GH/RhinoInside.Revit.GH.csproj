@@ -184,6 +184,7 @@
     <Compile Include="GH\Components\Document\Documents.cs" />
     <Compile Include="GH\Components\Document\Elements.cs" />
     <Compile Include="GH\Components\Document\ElementTypes.cs" />
+    <Compile Include="GH\Components\Document\Passport.cs" />
     <Compile Include="GH\Components\Document\Levels.cs" />
     <Compile Include="GH\Components\Element\AdaptiveComponent\ByPoints.cs" />
     <Compile Include="GH\Components\Element\Beam\ByCurve.cs" />
