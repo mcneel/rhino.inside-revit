@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -177,6 +177,7 @@
     <Compile Include="GH\Components\Category\GraphicsStyle.cs" />
     <Compile Include="GH\Components\Category\Identity.cs" />
     <Compile Include="GH\Components\Category\ObjectStyle.cs" />
+    <Compile Include="GH\Components\Category\Parameters.cs" />
     <Compile Include="GH\Components\Category\SubCategories.cs" />
     <Compile Include="GH\Components\Document\Categories.cs" />
     <Compile Include="GH\Components\Document\Document.cs" />
@@ -184,7 +185,6 @@
     <Compile Include="GH\Components\Document\Elements.cs" />
     <Compile Include="GH\Components\Document\ElementTypes.cs" />
     <Compile Include="GH\Components\Document\Levels.cs" />
-    <Compile Include="GH\Components\Document\Parameters.cs" />
     <Compile Include="GH\Components\Element\AdaptiveComponent\ByPoints.cs" />
     <Compile Include="GH\Components\Element\Beam\ByCurve.cs" />
     <Compile Include="GH\Components\Element\BuildingPad\ByOutline.cs" />
