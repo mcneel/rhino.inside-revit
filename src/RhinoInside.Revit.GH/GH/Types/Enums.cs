@@ -91,4 +91,6 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   public class StructuralWallUsage : GH_Enum<DB.Structure.StructuralWallUsage> { }
+  public class ViewType : GH_Enum<DB.ViewType> { }
+  public class ViewDiscipline : GH_Enum<DB.ViewDiscipline> { }
 }
