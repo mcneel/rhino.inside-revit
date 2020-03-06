@@ -87,7 +87,7 @@ namespace RhinoInside.Revit.GH.Parameters
       Menu_AppendSeparator(menu);
       AppendAdditionalElementMenuItems(menu);
 
-      var doc = Revit.ActiveUIDocument.Document;
+      var doc = Revit.ActiveUIDocument?.Document;
 
       if (Kind == GH_ParamKind.output && Attributes.GetTopLevel.DocObject is Components.ReconstructElementComponent)
       {
@@ -116,7 +116,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     void Menu_PinElements(object sender, EventArgs args)
     {
-      var doc = Revit.ActiveUIDocument.Document;
+      var doc = Revit.ActiveUIDocument?.Document;
       var elements = ToElementIds(VolatileData).
                        Where(x => x.Document.Equals(doc)).
                        Select(x => x.Document.GetElement(x.Id)).
@@ -145,7 +145,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     void Menu_UnpinElements(object sender, EventArgs args)
     {
-      var doc = Revit.ActiveUIDocument.Document;
+      var doc = Revit.ActiveUIDocument?.Document;
       var elements = ToElementIds(VolatileData).
                        Where(x => x.Document.Equals(doc)).
                        Select(x => x.Document.GetElement(x.Id)).
@@ -174,7 +174,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     void Menu_DeleteElements(object sender, EventArgs args)
     {
-      var doc = Revit.ActiveUIDocument.Document;
+      var doc = Revit.ActiveUIDocument?.Document;
       var elementIds = ToElementIds(VolatileData).
                        Where(x => x.Document.Equals(doc)).
                        Select(x => x.Id);
@@ -211,12 +211,12 @@ namespace RhinoInside.Revit.GH.Parameters
               taskDialog.ExpandedContent = $"{elements.Length} elements and its depending elements will be deleted.";
 
               if (highlight)
-                Revit.ActiveUIDocument.Selection.SetElementIds(elements);
+                Revit.ActiveUIDocument?.Selection.SetElementIds(elements);
 
               switch (result = taskDialog.Show())
               {
                 case TaskDialogResult.CommandLink1:
-                  Revit.ActiveUIDocument.ShowElements(elements);
+                  Revit.ActiveUIDocument?.ShowElements(elements);
                   highlight = true;
                   break;
 
