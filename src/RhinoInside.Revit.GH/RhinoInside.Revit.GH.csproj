@@ -215,6 +215,7 @@
     <Compile Include="GH\Components\Element\Topography\ByPoints.cs" />
     <Compile Include="GH\Components\Element\View\Active.cs" />
     <Compile Include="GH\Components\Element\View\Identity.cs" />
+    <Compile Include="GH\Components\Element\View\View3DByPlane.cs" />
     <Compile Include="GH\Components\Element\Wall\ByCurve.cs" />
     <Compile Include="GH\Enum.cs" />
     <Compile Include="GH\Parameters\Category.cs" />
