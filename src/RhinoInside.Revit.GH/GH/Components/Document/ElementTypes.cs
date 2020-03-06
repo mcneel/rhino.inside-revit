@@ -24,9 +24,9 @@ namespace RhinoInside.Revit.GH.Components
     {
       base.RegisterInputParams(manager);
 
-      manager[manager.AddParameter(new Parameters.ElementFilter(), "Filter", "F", "Filter", GH_ParamAccess.item)].Optional = true;
       manager[manager.AddTextParameter("FamilyName", "F", string.Empty, GH_ParamAccess.item)].Optional = true;
       manager[manager.AddTextParameter("TypeName", "N", string.Empty, GH_ParamAccess.item)].Optional = true;
+      manager[manager.AddParameter(new Parameters.ElementFilter(), "Filter", "F", "Filter", GH_ParamAccess.item)].Optional = true;
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
@@ -36,14 +36,14 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
     {
-      DB.ElementFilter filter = null;
-      DA.GetData("Filter", ref filter);
-
       string familyName = null;
       DA.GetData("FamilyName", ref familyName);
 
       string name = null;
       DA.GetData("TypeName", ref name);
+
+      DB.ElementFilter filter = null;
+      DA.GetData("Filter", ref filter);
 
       using (var collector = new DB.FilteredElementCollector(doc))
       {
