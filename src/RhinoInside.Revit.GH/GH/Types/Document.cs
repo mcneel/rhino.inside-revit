@@ -6,40 +6,6 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public interface IGH_ExternalGoo : IGH_Goo
-  {
-    /// <summary>
-    /// SHA256 of Value content
-    /// </summary>
-    byte[] Identity { get; }
-
-    /// <summary>
-    /// External resource URI
-    /// </summary>
-    Uri ReferenceUri { get; set; }
-
-    /// <summary>
-    /// returns true if the external resource is resolved and loaded
-    /// </summary>
-    bool IsLoaded { get; }
-
-    /// <summary>
-    /// Resolve and load the external resource
-    /// </summary>
-    /// <returns></returns>
-    bool Open();
-
-    /// <summary>
-    /// Discards external resource
-    /// </summary>
-    void Close();
-
-    /// <summary>
-    /// returns the external resolved resource
-    /// </summary>
-    object Target { get; }
-  }
-
   public class Document : GH_Goo<DB.Document>, IEquatable<Document>
   {
     public override string TypeName => "Revit Documnent";
@@ -56,7 +22,17 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastFrom(object source)
     {
-      if (source is GH_String str)
+      if (source is DB.Document doc)
+      {
+        Value = doc;
+        return true;
+      }
+      else if (source is Element element)
+      {
+        Value = element.Document;
+        return true;
+      }
+      else if (source is GH_String str)
       {
         using (var Documents = Revit.ActiveDBApplication.Documents)
         {
@@ -85,11 +61,6 @@ namespace RhinoInside.Revit.GH.Types
         }
 
         return false;
-      }
-      if (source is DB.Document doc)
-      {
-        Value = doc;
-        return true;
       }
 
       return false;
