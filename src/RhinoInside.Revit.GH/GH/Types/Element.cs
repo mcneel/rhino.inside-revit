@@ -33,6 +33,7 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(DB.Material),          (element)=> new Material      (element as DB.Material)          },
       { typeof(DB.GraphicsStyle),     (element)=> new GraphicsStyle (element as DB.GraphicsStyle)     },
 
+      { typeof(DB.View),              (element)=> new View          (element as DB.View)              },
       { typeof(DB.SketchPlane),       (element)=> new SketchPlane   (element as DB.SketchPlane)       },
       { typeof(DB.DatumPlane),        (element)=> new DatumPlane    (element as DB.DatumPlane)        },
       { typeof(DB.HostObject),        (element)=> new HostObject    (element as DB.HostObject)        },

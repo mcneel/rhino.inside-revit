@@ -179,6 +179,7 @@
     <Compile Include="GH\Components\Category\ObjectStyle.cs" />
     <Compile Include="GH\Components\Category\Parameters.cs" />
     <Compile Include="GH\Components\Category\SubCategories.cs" />
+    <Compile Include="GH\Components\Document\Active.cs" />
     <Compile Include="GH\Components\Document\Categories.cs" />
     <Compile Include="GH\Components\Document\Document.cs" />
     <Compile Include="GH\Components\Document\Documents.cs" />
@@ -186,6 +187,7 @@
     <Compile Include="GH\Components\Document\ElementTypes.cs" />
     <Compile Include="GH\Components\Document\Passport.cs" />
     <Compile Include="GH\Components\Document\Levels.cs" />
+    <Compile Include="GH\Components\Document\Views.cs" />
     <Compile Include="GH\Components\Element\AdaptiveComponent\ByPoints.cs" />
     <Compile Include="GH\Components\Element\Beam\ByCurve.cs" />
     <Compile Include="GH\Components\Element\BuildingPad\ByOutline.cs" />
@@ -211,6 +213,8 @@
     <Compile Include="GH\Components\Element\Roof\ByOutline.cs" />
     <Compile Include="GH\Components\Element\SketchPlane\ByPlane.cs" />
     <Compile Include="GH\Components\Element\Topography\ByPoints.cs" />
+    <Compile Include="GH\Components\Element\View\Active.cs" />
+    <Compile Include="GH\Components\Element\View\Identity.cs" />
     <Compile Include="GH\Components\Element\Wall\ByCurve.cs" />
     <Compile Include="GH\Enum.cs" />
     <Compile Include="GH\Parameters\Category.cs" />
@@ -229,6 +233,7 @@
     <Compile Include="GH\Parameters\Material.cs" />
     <Compile Include="GH\Parameters\Parameter.cs" />
     <Compile Include="GH\Parameters\SketchPlane.cs" />
+    <Compile Include="GH\Parameters\View.cs" />
     <Compile Include="GH\Solid.cs" />
     <Compile Include="GH\Types\Category.cs" />
     <Compile Include="GH\Types\Document.cs" />
@@ -250,6 +255,7 @@
     <Compile Include="GH\Components\Family.cs" />
     <Compile Include="GH\Components\ElementType.cs" />
     <Compile Include="GH\Components\ElementFilter.cs" />
+    <Compile Include="GH\Types\View.cs" />
     <Compile Include="GH\ValueList.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
