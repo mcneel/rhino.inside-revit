@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
@@ -69,6 +70,14 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
 
+      // Register all the ParamsTypes as params in Grasshopper
+      foreach(var entry in result)
+      {
+        var proxy = Activator.CreateInstance(entry.Value.Item1) as IGH_ObjectProxy;
+        if(!Grasshopper.Instances.ComponentServer.IsObjectCached(proxy.Guid))
+          Grasshopper.Instances.ComponentServer.AddProxy(proxy);
+      }
+      
       return result;
     }
 
@@ -168,7 +177,7 @@ namespace RhinoInside.Revit.GH.Types
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class Param_Enum<T> : GH_PersistentParam<T>
+  public class Param_Enum<T> : GH_PersistentParam<T>, IGH_ObjectProxy
     where T : Types.GH_Enumerate
   {
     protected Param_Enum(string name, string abbreviation, string description, string category, string subcategory) :
@@ -185,6 +194,8 @@ namespace RhinoInside.Revit.GH.Parameters
       string.Empty
     )
     {
+      ProxyExposure = Exposure;
+
       if (GetType().GetTypeInfo().GetCustomAttribute(typeof(DisplayNameAttribute)) is DisplayNameAttribute name)
       {
         Name = name.DisplayName;
@@ -310,5 +321,23 @@ namespace RhinoInside.Revit.GH.Parameters
         }
       }
     }
+
+    #region IGH_ObjectProxy
+    string IGH_ObjectProxy.Location => GetType().Assembly.Location;
+    Guid IGH_ObjectProxy.LibraryGuid => Guid.Empty;
+    bool IGH_ObjectProxy.SDKCompliant => SDKCompliancy(Rhino.RhinoApp.ExeVersion, Rhino.RhinoApp.ExeServiceRelease);
+    bool IGH_ObjectProxy.Obsolete => Obsolete;
+    Type IGH_ObjectProxy.Type => GetType();
+    GH_ObjectType IGH_ObjectProxy.Kind => GH_ObjectType.CompiledObject;
+    Guid IGH_ObjectProxy.Guid => ComponentGuid;
+    Bitmap IGH_ObjectProxy.Icon => Icon;
+    IGH_InstanceDescription IGH_ObjectProxy.Desc => this;
+
+    GH_Exposure ProxyExposure;
+    GH_Exposure IGH_ObjectProxy.Exposure { get => ProxyExposure; set => ProxyExposure = value; }
+
+    IGH_DocumentObject IGH_ObjectProxy.CreateInstance() => new Param_Enum<T>();
+    IGH_ObjectProxy IGH_ObjectProxy.DuplicateProxy() => (IGH_ObjectProxy) MemberwiseClone();
+    #endregion
   }
 }
