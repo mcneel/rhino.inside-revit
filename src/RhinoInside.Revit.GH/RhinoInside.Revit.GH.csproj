@@ -216,7 +216,7 @@
     <Compile Include="_gh\Components\_element\_view\Active.cs" />
     <Compile Include="_gh\Components\_element\_view\Identity.cs" />
     <Compile Include="_gh\Components\_element\_wall\ByCurve.cs" />
-    <Compile Include="_gh\Enum.cs" />
+    <Compile Include="_gh\Types\Enum.cs" />
     <Compile Include="_gh\Parameters\Category.cs" />
     <Compile Include="_gh\Parameters\CategoryTypes.cs" />
     <Compile Include="_gh\Parameters\DatumPlane.cs" />
@@ -234,7 +234,7 @@
     <Compile Include="_gh\Parameters\Parameter.cs" />
     <Compile Include="_gh\Parameters\SketchPlane.cs" />
     <Compile Include="_gh\Parameters\View.cs" />
-    <Compile Include="_gh\Solid.cs" />
+    <Compile Include="_gh\Components\Solid.cs" />
     <Compile Include="_gh\Types\Category.cs" />
     <Compile Include="_gh\Types\Document.cs" />
     <Compile Include="_gh\Types\Element.cs" />
@@ -256,7 +256,7 @@
     <Compile Include="_gh\Components\ElementType.cs" />
     <Compile Include="_gh\Components\ElementFilter.cs" />
     <Compile Include="_gh\Types\View.cs" />
-    <Compile Include="_gh\ValueList.cs" />
+    <Compile Include="_gh\Parameters\ValueList.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
