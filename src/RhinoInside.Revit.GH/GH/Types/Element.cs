@@ -55,8 +55,14 @@ namespace RhinoInside.Revit.GH.Types
         }
         catch (Autodesk.Revit.Exceptions.InternalException) { }
       }
-      else if (ActivatorDictionary.TryGetValue(element.GetType(), out var activator))
-        return activator(element);
+      else
+      {
+        for (var type = element.GetType(); type != typeof(DB.Element); type = type.BaseType)
+        {
+          if (ActivatorDictionary.TryGetValue(type, out var activator))
+            return activator(element);
+        }
+      }
 
       if (GeometricElement.IsValidElement(element))
         return new GeometricElement(element);
