@@ -1,0 +1,148 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
+    <Rhino7DebugInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_CURRENT_USER\Software\McNeel\Rhinoceros\7.0-WIP-Developer-Debug-trunk\Install', 'Path', null, RegistryView.Registry64))</Rhino7DebugInstallDir>
+    <Rhino7InstallDir>$([MSBuild]::ValueOrDefault('$(Rhino7DebugInstallDir)', '$(Rhino7DefaultInstallDir)'))</Rhino7InstallDir>
+    <Rhino7DefaultPluginsDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Default Plug-ins Folder', null, RegistryView.Registry64))</Rhino7DefaultPluginsDir>
+    <Rhino7DebugPluginsDir>$([MSBuild]::GetRegistryValueFromView('HKEY_CURRENT_USER\Software\McNeel\Rhinoceros\7.0-WIP-Developer-Debug-trunk\Install', 'Default Plug-ins Folder', null, RegistryView.Registry64))</Rhino7DebugPluginsDir>
+    <Rhino7PluginsDir>$([MSBuild]::ValueOrDefault('$(Rhino7DebugPluginsDir)', '$(Rhino7DefaultPluginsDir)'))</Rhino7PluginsDir>
+    <HelpTitle>RhinoInside.Revit SDK</HelpTitle>
+    <HelpFileVersion>%2524%2528BuildVersion%2529</HelpFileVersion>
+    <NamingMethod>MemberName</NamingMethod>
+    <ContentPlacement>AboveNamespaces</ContentPlacement>
+    <RootNamespaceContainer>True</RootNamespaceContainer>
+    <NamespaceGrouping>False</NamespaceGrouping>
+    <MaximumGroupParts>2</MaximumGroupParts>
+    <Preliminary>False</Preliminary>
+    <SdkLinkTarget>Blank</SdkLinkTarget>
+    <NamespaceSummaries>
+      <NamespaceSummaryItem name="RhinoInside.Revit" isDocumented="True" xmlns="" />
+    </NamespaceSummaries>
+    <FeedbackEMailLinkText>
+    </FeedbackEMailLinkText>
+    <CopyrightText>Report wishes and bugs at discourse.mcneel.com</CopyrightText>
+    <CopyrightHref>https://discourse.mcneel.com/c/rhino-inside/Revit</CopyrightHref>
+    <FooterText>Rhino %2524%2528BuildVersion%2529 %2528Last updated: %2524%2528[System.DateTime]::Now.ToShortDateString%2528%2529%2529%2529&amp;amp%3bamp%3blt%253bbr /&amp;amp%3bamp%3bgt%253bCopyright &amp;amp%3bamp%3b#169%253b 2009-%2524%2528[System.DateTime]::Now.Year%2529 Robert McNeel &amp;amp%3bamp%3bamp%253bamp%253b Associates</FooterText>
+  </PropertyGroup>
+  <PropertyGroup>
+    <!-- The configuration and platform will be used to determine which assemblies to include from solution and
+				 project documentation sources -->
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>af14c973-b36b-4567-bf49-50248e612bb3</ProjectGuid>
+    <SHFBSchemaVersion>2017.9.26.0</SHFBSchemaVersion>
+    <!-- AssemblyName, Name, and RootNamespace are not used by SHFB but Visual Studio adds them anyway -->
+    <AssemblyName>RhinoInside.Revit_Docs</AssemblyName>
+    <RootNamespace>RhinoInside.Revit_Docs</RootNamespace>
+    <Name>RhinoInside.Revit_Docs</Name>
+    <!-- SHFB properties -->
+    <HtmlHelpName>RhinoInsideRevitSDK</HtmlHelpName>
+    <Language>en-US</Language>
+    <TransformComponentArguments>
+      <Argument Key="logoFile" Value="" xmlns="" />
+      <Argument Key="logoHeight" Value="" xmlns="" />
+      <Argument Key="logoWidth" Value="" xmlns="" />
+      <Argument Key="logoAltText" Value="" xmlns="" />
+      <Argument Key="logoPlacement" Value="left" xmlns="" />
+      <Argument Key="logoAlignment" Value="left" xmlns="" />
+      <Argument Key="maxVersionParts" Value="" xmlns="" />
+    </TransformComponentArguments>
+    <HelpFileFormat>HtmlHelp1, Website</HelpFileFormat>
+    <SyntaxFilters>C#</SyntaxFilters>
+    <PresentationStyle>VS2013</PresentationStyle>
+    <CleanIntermediates>True</CleanIntermediates>
+    <KeepLogFile>True</KeepLogFile>
+    <DisableCodeBlockComponent>False</DisableCodeBlockComponent>
+    <IndentHtml>False</IndentHtml>
+    <BuildAssemblerVerbosity>OnlyWarningsAndErrors</BuildAssemblerVerbosity>
+    <SaveComponentCacheCapacity>100</SaveComponentCacheCapacity>
+    <BuildLogFile>
+    </BuildLogFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release 2017|AnyCPU' ">
+    <TargetFrameworkVersion> .NET Framework 4.6.1</TargetFrameworkVersion>
+    <RevitVersion>2017</RevitVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2018|AnyCPU'">
+    <TargetFrameworkVersion>.NET Framework 4.6.2</TargetFrameworkVersion>
+    <RevitVersion>2017</RevitVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2019|AnyCPU'">
+    <FrameworkVersion>.NET Framework 4.7</FrameworkVersion>
+    <RevitVersion>2019</RevitVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2020|AnyCPU'">
+    <FrameworkVersion>.NET Framework 4.7</FrameworkVersion>
+    <RevitVersion>2020</RevitVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OutputPath>.\Help\Release $(RevitVersion)</OutputPath>
+    <DocumentationSources>
+      <DocumentationSource sourceFile="..\RhinoInside.Revit.GH\bin\Release $(RevitVersion)\RhinoInside.Revit.GH.dll" />
+      <DocumentationSource sourceFile="..\RhinoInside.Revit.GH\bin\Release $(RevitVersion)\RhinoInside.Revit.GH.xml" />
+    </DocumentationSources>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Eto">
+      <HintPath>$(Rhino7InstallDir)Eto.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="RhinoCommon">
+      <HintPath>$(Rhino7InstallDir)RhinoCommon.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="QWhale.Editor">
+      <HintPath>$(Rhino7InstallDir)QWhale.Editor.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="GH_IO">
+      <HintPath>$(Rhino7PluginsDir)Grasshopper\GH_IO.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="GH_Util">
+      <HintPath>$(Rhino7PluginsDir)Grasshopper\GH_Util.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Grasshopper">
+      <HintPath>$(Rhino7PluginsDir)Grasshopper\Grasshopper.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Rhino.UI">
+      <HintPath>$(Rhino7InstallDir)Rhino.UI.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="RevitAPI">
+      <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\RevitAPI.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="RevitAPIUI">
+      <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\RevitAPIUI.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RhinoInside.Revit.GH\RhinoInside.Revit.GH.csproj">
+      <Name>RhinoInside.Revit.GH</Name>
+      <Project>{4f3e6b0f-c644-4a00-8785-11cfbe0c0f94}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RhinoInside.Revit\RhinoInside.Revit.csproj">
+      <Name>RhinoInside.Revit</Name>
+      <Project>{d6c256d4-b518-464f-9e68-cb282202e846}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <!-- Import the SHFB build targets -->
+  <Import Project="$(SHFBROOT)\SandcastleHelpFileBuilder.targets" />
+  <!-- The pre-build and post-build event properties must appear *after* the targets file import in order to be
+			 evaluated correctly. -->
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+  </PropertyGroup>
+</Project>
