@@ -554,12 +554,28 @@ namespace RhinoInside.Revit.GH.Components
       return parameter;
     }
 
-    public static bool SetParameter(IGH_ActiveObject obj, DB.Element element, DB.Parameter parameter, IGH_Goo goo)
+    public static bool SetParameter(IGH_ActiveObject obj, DB.Parameter parameter, IGH_Goo goo)
     {
+      if (goo is null)
+        return false;
+
       try
       {
+        var element = parameter.Element;
         var value = goo.ScriptVariable();
-        switch (parameter?.StorageType)
+        var document = default(DB.Document);
+        if (value is DB.Parameter paramValue)
+        {
+          switch (paramValue.StorageType)
+          {
+            case DB.StorageType.Integer:   value = paramValue.AsInteger(); break;
+            case DB.StorageType.Double:    value = paramValue.AsDouble(); break;
+            case DB.StorageType.String:    value = paramValue.AsString(); break;
+            case DB.StorageType.ElementId: value = paramValue.AsElementId(); document = paramValue.Element.Document; break;
+          }
+        }
+
+        switch (parameter.StorageType)
         {
           case DB.StorageType.Integer:
           {
@@ -596,9 +612,22 @@ namespace RhinoInside.Revit.GH.Components
           {
             switch (value)
             {
-              case DB.Element ele: parameter.Set(ele.Id); break;
-              case DB.Category cat: parameter.Set(cat.Id); break;
-              case int integer: parameter.Set(new DB.ElementId(integer)); break;
+              case DB.Element ele:
+                if (element.Document.Equals(ele.Document)) parameter.Set(ele.Id);
+                else obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Referencing elements from other documents is not valid");
+                break;
+              case DB.Category cat:
+                if (element.Document.Equals(cat.Document())) parameter.Set(cat.Id);
+                else obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Referencing categories from other documents is not valid");
+                break;
+              case DB.ElementId id:
+                if (document is object)
+                {
+                  if (element.Document.Equals(document)) parameter.Set(id);
+                  else obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Referencing elements from other documents is not valid");
+                }
+                else element = null;
+                break;
               default: element = null; break;
             }
             break;
@@ -611,16 +640,18 @@ namespace RhinoInside.Revit.GH.Components
         }
 
         if (element is null && parameter is object)
-          obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, string.Format("Unable to cast 'Value' from {0} to {1}.", value.GetType().Name, parameter.StorageType.ToString()));
-
-        return true;
+        {
+          obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to cast from {value.GetType().Name} to {parameter.StorageType.ToString()}.");
+          return false;
+        }
       }
-      catch (Exception e)
+      catch (Autodesk.Revit.Exceptions.InvalidOperationException e)
       {
-        obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, string.Format("Unable to set 'Value' to parameter {0} : {1}", parameter.Definition.Name, e.Message));
+        obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to set '{parameter.Definition.Name}' value : {e.Message}");
+        return false;
       }
 
-      return false;
+      return true;
     }
 
     static double ToHost(double value, DB.ParameterType type)
@@ -712,7 +743,7 @@ namespace RhinoInside.Revit.GH.Components
 
       BeginTransaction(element.Document);
 
-      if (ParameterUtils.SetParameter(this, element, parameter, value))
+      if (ParameterUtils.SetParameter(this, parameter, value))
         DA.SetData("Element", element);
     }
   }
