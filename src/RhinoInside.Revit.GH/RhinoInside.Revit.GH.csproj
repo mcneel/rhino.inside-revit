@@ -188,6 +188,7 @@
     <Compile Include="GH\Components\Document\Materials.cs" />
     <Compile Include="GH\Components\Document\Passport.cs" />
     <Compile Include="GH\Components\Document\Levels.cs" />
+    <Compile Include="GH\Components\Document\Save.cs" />
     <Compile Include="GH\Components\Document\Views.cs" />
     <Compile Include="GH\Components\ElementType\ElementType.cs" />
     <Compile Include="GH\Components\ElementType\Identity.cs" />

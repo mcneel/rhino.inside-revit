@@ -718,13 +718,13 @@ namespace RhinoInside.Revit.GH.Components
     }
   }
 
-  public class FamilySaveAs : Component
+  public class FamilySave : Component
   {
     public override Guid ComponentGuid => new Guid("C2B9B045-8FD2-4124-9294-D9BA809B44B1");
     protected override string IconTag => "S";
 
-    public FamilySaveAs()
-    : base("Family.SaveAs", "Family.SaveAs", "Saves the Family to a given file path.", "Revit", "Family")
+    public FamilySave()
+    : base("Family.Save", "Family.Save", "Saves the Family to a given file path.", "Revit", "Family")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -738,6 +738,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddBooleanParameter("OverrideFile", "O", "Override file on disk", GH_ParamAccess.item, false);
       manager.AddBooleanParameter("Compact", "C", "Compact the file", GH_ParamAccess.item, false);
       manager.AddIntegerParameter("Backups", "B", "The maximum number of backups to keep on disk", GH_ParamAccess.item, -1);
+      manager[manager.AddParameter(new Parameters.View(), "PreviewView", "PreviewView", "The view that will be used to generate the file preview", GH_ParamAccess.item)].Optional = true;
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
@@ -768,6 +769,16 @@ namespace RhinoInside.Revit.GH.Components
 
       if (Revit.ActiveDBDocument.EditFamily(family) is DB.Document familyDoc) using (familyDoc)
       {
+        var view = default(DB.View);
+        if (DA.GetData("PreviewView", ref view))
+        {
+          if (!view.Document.Equals(familyDoc))
+          {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"View '{view.Title}' is not a valid view in document {familyDoc.Title}");
+            return;
+          }
+        }
+
         try
         {
           if (string.IsNullOrEmpty(filePath))
@@ -775,7 +786,13 @@ namespace RhinoInside.Revit.GH.Components
             if (overrideFile)
             {
               using (var saveOptions = new DB.SaveOptions() { Compact = compact })
+              {
+                if (view is object)
+                  saveOptions.PreviewViewId = view.Id;
+
                 familyDoc.Save(saveOptions);
+                DA.SetData("Family", family);
+              }
             }
             else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to collect data from 'Path'.");
           }
@@ -795,6 +812,9 @@ namespace RhinoInside.Revit.GH.Components
                 if (backups > -1)
                   saveAsOptions.MaximumBackups = backups;
 
+                if (view is object)
+                  saveAsOptions.PreviewViewId = view.Id;
+
                 familyDoc.SaveAs(filePath, saveAsOptions);
                 DA.SetData("Family", family);
               }
@@ -807,10 +827,6 @@ namespace RhinoInside.Revit.GH.Components
         }
         catch(Autodesk.Revit.Exceptions.InvalidOperationException e) { AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message); }
         finally { familyDoc.Close(false); }
-      }
-      else
-      {
-        DA.SetData("Family", null);
       }
     }
   }
