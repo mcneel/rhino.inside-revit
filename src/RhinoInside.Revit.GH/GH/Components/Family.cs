@@ -657,7 +657,7 @@ namespace RhinoInside.Revit.GH.Components
     }
   }
 
-  public class FamilyLoad : Component
+  public class FamilyLoad : DocumentComponent
   {
     public override Guid ComponentGuid => new Guid("0E244846-95AE-4B0E-8218-CB24FD4D34D1");
     protected override string IconTag => "L";
@@ -681,7 +681,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.Family(), "Family", "F", string.Empty, GH_ParamAccess.item);
     }
 
-    protected override void TrySolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
     {
       var filePath = string.Empty;
       if (!DA.GetData("Path", ref filePath))
@@ -695,18 +695,18 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetData("OverrideParameters", ref overrideParameters))
         return;
 
-      using (var transaction = new DB.Transaction(Revit.ActiveDBDocument))
+      using (var transaction = new DB.Transaction(doc))
       {
         transaction.Start(Name);
 
-        if (Revit.ActiveDBDocument.LoadFamily(filePath, new FamilyLoadOptions(overrideFamily, overrideParameters), out var family))
+        if (doc.LoadFamily(filePath, new FamilyLoadOptions(overrideFamily, overrideParameters), out var family))
         {
           transaction.Commit();
         }
         else
         {
           var name = Path.GetFileNameWithoutExtension(filePath);
-          using (var collector = new DB.FilteredElementCollector(Revit.ActiveDBDocument).OfClass(typeof(DB.Family)))
+          using (var collector = new DB.FilteredElementCollector(doc).OfClass(typeof(DB.Family)))
             family = collector.Cast<DB.Family>().Where(x => x.Name == name).FirstOrDefault();
 
           if (family is object && overrideFamily == false)
