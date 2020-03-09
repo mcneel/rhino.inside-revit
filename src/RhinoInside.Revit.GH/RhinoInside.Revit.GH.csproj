@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -21,7 +21,6 @@
     <AssemblyName>RhinoInside.Revit.GH</AssemblyName>
     <TargetFrameworkProfile />
   </PropertyGroup>
-
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug 2017|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
@@ -105,7 +104,6 @@
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>docs\Release 2020\$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
-
   <PropertyGroup Condition="$(Configuration.Contains('2017'))">
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <RevitVersion>2017</RevitVersion>
@@ -126,7 +124,6 @@
     <RevitVersion>2020</RevitVersion>
     <DefineConstants>$(DefineConstants);NET47</DefineConstants>
   </PropertyGroup>
-
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
@@ -207,9 +204,14 @@
     <Compile Include="_gh\Components\_document\Documents.cs" />
     <Compile Include="_gh\Components\_document\Elements.cs" />
     <Compile Include="_gh\Components\_document\ElementTypes.cs" />
+    <Compile Include="_gh\Components\_document\Materials.cs" />
     <Compile Include="_gh\Components\_document\Passport.cs" />
     <Compile Include="_gh\Components\_document\Levels.cs" />
+    <Compile Include="_gh\Components\_document\Save.cs" />
     <Compile Include="_gh\Components\_document\Views.cs" />
+    <Compile Include="_gh\Components\_elementType\ElementType.cs" />
+    <Compile Include="_gh\Components\_elementType\Identity.cs" />
+    <Compile Include="_gh\Components\_element\Parameters.cs" />
     <Compile Include="_gh\Components\_element\_adaptiveComponent\ByPoints.cs" />
     <Compile Include="_gh\Components\_element\_beam\ByCurve.cs" />
     <Compile Include="_gh\Components\_element\_buildingPad\ByOutline.cs" />
@@ -230,6 +232,7 @@
     <Compile Include="_gh\Components\_element\MaterialQuanities.cs" />
     <Compile Include="_gh\Components\_element\_material\ByColor.cs" />
     <Compile Include="_gh\Components\_element\_material\ByName.cs" />
+    <Compile Include="_gh\Components\_element\_material\Identity.cs" />
     <Compile Include="_gh\Components\_element\_modelLine\ByCurve.cs" />
     <Compile Include="_gh\Components\_element\Passport.cs" />
     <Compile Include="_gh\Components\_element\_roof\ByOutline.cs" />
@@ -237,6 +240,7 @@
     <Compile Include="_gh\Components\_element\_topo\ByPoints.cs" />
     <Compile Include="_gh\Components\_element\_view\Active.cs" />
     <Compile Include="_gh\Components\_element\_view\Identity.cs" />
+    <Compile Include="_gh\Components\_element\_view\View3DByPlane.cs" />
     <Compile Include="_gh\Components\_element\_wall\ByCurve.cs" />
     <Compile Include="_gh\Types\Enum.cs" />
     <Compile Include="_gh\Parameters\Category.cs" />
@@ -275,7 +279,6 @@
     <Compile Include="_gh\Components\TransactionalComponent.cs" />
     <Compile Include="_gh\Components\Parameter.cs" />
     <Compile Include="_gh\Components\Family.cs" />
-    <Compile Include="_gh\Components\ElementType.cs" />
     <Compile Include="_gh\Components\ElementFilter.cs" />
     <Compile Include="_gh\Types\View.cs" />
     <Compile Include="_gh\Parameters\ValueList.cs" />
