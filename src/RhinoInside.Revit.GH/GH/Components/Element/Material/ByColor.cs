@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "C";
 
     public MaterialByColor()
-    : base("Material.ByColor", "ByColor", string.Empty, "Revit", "Materials")
+    : base("Material.ByColor", "ByColor", string.Empty, "Revit", "Material")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

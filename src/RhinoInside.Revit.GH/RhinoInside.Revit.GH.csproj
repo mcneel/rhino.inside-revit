@@ -185,6 +185,7 @@
     <Compile Include="GH\Components\Document\Documents.cs" />
     <Compile Include="GH\Components\Document\Elements.cs" />
     <Compile Include="GH\Components\Document\ElementTypes.cs" />
+    <Compile Include="GH\Components\Document\Materials.cs" />
     <Compile Include="GH\Components\Document\Passport.cs" />
     <Compile Include="GH\Components\Document\Levels.cs" />
     <Compile Include="GH\Components\Document\Views.cs" />
@@ -200,6 +201,7 @@
     <Compile Include="GH\Components\Element\DirectShape\ByMesh.cs" />
     <Compile Include="GH\Components\Element\DirectShape\ByPoint.cs" />
     <Compile Include="GH\Components\Element\Element.cs" />
+    <Compile Include="GH\Components\Element\Material\Identity.cs" />
     <Compile Include="GH\Components\Element\Parameters.cs" />
     <Compile Include="GH\Components\Element\FamilyInstance\ByPointAtHost.cs" />
     <Compile Include="GH\Components\Element\Floor\ByOutline.cs" />
