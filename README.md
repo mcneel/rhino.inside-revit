@@ -39,6 +39,9 @@ See [Wiki Readme](docs/readme.md) for more information.
 
 Currently the project does not have any documentation for the API. This is an area that needs improvement. [The Wiki has a reference page for the API](https://www.rhino3d.com/inside/revit/beta/reference/rir-api).
 
+Code documentation project has been setup as `RhinoInside.Revit-Docs` and is setup using [Sandcastle/SHFB](https://github.com/EWSoftware/SHFB). Currently only the Release 2019/2020 builds on the `RhinoInside.Revit.GH` assembly have been configured for docs build. This is solely for testing purposes while v1.0 (`wip-v1`) is under development.
+
+
 ## Known Issues
 
 Known issues with the product are listed at [References > Known Issues](https://www.rhino3d.com/inside/revit/beta/reference/known-issues) on the Wiki. Please keep this page updated when new and persistent issues are identified.
