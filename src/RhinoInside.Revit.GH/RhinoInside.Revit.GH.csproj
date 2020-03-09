@@ -188,6 +188,8 @@
     <Compile Include="GH\Components\Document\Passport.cs" />
     <Compile Include="GH\Components\Document\Levels.cs" />
     <Compile Include="GH\Components\Document\Views.cs" />
+    <Compile Include="GH\Components\ElementType\ElementType.cs" />
+    <Compile Include="GH\Components\ElementType\Identity.cs" />
     <Compile Include="GH\Components\Element\AdaptiveComponent\ByPoints.cs" />
     <Compile Include="GH\Components\Element\Beam\ByCurve.cs" />
     <Compile Include="GH\Components\Element\BuildingPad\ByOutline.cs" />
@@ -255,7 +257,6 @@
     <Compile Include="GH\Components\TransactionalComponent.cs" />
     <Compile Include="GH\Components\Parameter.cs" />
     <Compile Include="GH\Components\Family.cs" />
-    <Compile Include="GH\Components\ElementType.cs" />
     <Compile Include="GH\Components\ElementFilter.cs" />
     <Compile Include="GH\Types\View.cs" />
     <Compile Include="GH\ValueList.cs" />
