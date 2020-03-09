@@ -33,7 +33,7 @@ In order to access the various APIs we need to import them into the script scope
 # Common-Language-Runtime module provided by IronPython
 import clr
 
-# add reference so base system types e.g. Enum
+# add reference to base system types e.g. Enum
 clr.AddReference('System.Core')
 
 # add reference to API provided by {{ site.terms.rir }}
@@ -159,7 +159,7 @@ Now we can change the slider value to adjust the radius. Make sure the slider va
 
 We can add a custom baking function in this script. This can serve as a template to almost an unlimited number of ways and elements that one might want to create Revit objects from Grasshopper.
 
-Because baking objects to Revit can take a long time and many times only should be done once, this bake functions will only execute if the `Trigger` input is set to `True` on the component. This way we can decide to bake the object once we are happy with the results.
+Because baking objects to Revit can take a long time and many times only should be done once, this bake function will only execute if the `Trigger` input is set to `True` on the component. This way we can decide to bake the object once we are happy with the results.
 
 First, let's create a bake function:
 
@@ -245,7 +245,7 @@ if Trigger:
 
 ## Handling Transactions
 
-To effectively create new transactions and handle the changes to your model in Grasshopper python components, use the try-catch block example below:
+To effectively create new transactions and handle the changes to your model in Grasshopper python components, use the try-except block example below:
 
 {% highlight python %}
 # create and start the transaction
