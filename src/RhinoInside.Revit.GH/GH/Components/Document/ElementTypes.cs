@@ -25,7 +25,7 @@ namespace RhinoInside.Revit.GH.Components
       base.RegisterInputParams(manager);
 
       manager[manager.AddTextParameter("FamilyName", "F", string.Empty, GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddTextParameter("TypeName", "N", string.Empty, GH_ParamAccess.item)].Optional = true;
+      manager[manager.AddTextParameter("Name", "N", string.Empty, GH_ParamAccess.item)].Optional = true;
       manager[manager.AddParameter(new Parameters.ElementFilter(), "Filter", "F", "Filter", GH_ParamAccess.item)].Optional = true;
     }
 
@@ -40,7 +40,7 @@ namespace RhinoInside.Revit.GH.Components
       DA.GetData("FamilyName", ref familyName);
 
       string name = null;
-      DA.GetData("TypeName", ref name);
+      DA.GetData("Name", ref name);
 
       DB.ElementFilter filter = null;
       DA.GetData("Filter", ref filter);

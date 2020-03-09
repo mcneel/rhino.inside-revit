@@ -33,6 +33,7 @@ namespace RhinoInside.Revit.GH.Components
       type.SetPersistentData(DB.ViewType.Undefined);
       type.Optional = true;
 
+      manager[manager.AddTextParameter("Name", "N", "View name", GH_ParamAccess.item)].Optional = true;
       manager[manager.AddParameter(new Parameters.ElementFilter(), "Filter", "F", "Filter", GH_ParamAccess.item)].Optional = true;
     }
 
@@ -49,6 +50,9 @@ namespace RhinoInside.Revit.GH.Components
 
       var viewType = DB.ViewType.Undefined;
       DA.GetData("Type", ref viewType);
+
+      string name = null;
+      DA.GetData("Name", ref name);
 
       DB.ElementFilter filter = null;
       DA.GetData("Filter", ref filter);
@@ -71,6 +75,9 @@ namespace RhinoInside.Revit.GH.Components
 
         if (viewType != DB.ViewType.Undefined)
           views = views.Where((x) => x.ViewType == viewType);
+
+        if (!string.IsNullOrEmpty(name))
+          views = views.Where(x => x.Name.IsSymbolNameLike(name));
 
         DA.SetDataList("Views", views);
       }

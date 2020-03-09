@@ -58,7 +58,7 @@ namespace RhinoInside.Revit.GH.Components
       manager[manager.AddBooleanParameter("AllowsParameters", "A", "Allows bound parameters", GH_ParamAccess.item, true)].Optional = true;
       manager[manager.AddBooleanParameter("HasMaterialQuantities", "M", "Has material quantities", GH_ParamAccess.item)].Optional = true;
       manager[manager.AddBooleanParameter("Cuttable", "C", "Has material quantities", GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddBooleanParameter("Hidden", "H", "Is hidden category", GH_ParamAccess.item, false)].Optional = true;
+      manager[manager.AddTextParameter("Name", "N", "Level name", GH_ParamAccess.item)].Optional = true;
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
@@ -83,9 +83,9 @@ namespace RhinoInside.Revit.GH.Components
       var _Cuttable_ = Params.IndexOfInputParam("Cuttable");
       bool nofilterCuttable = (!DA.GetData(_Cuttable_, ref Cuttable) && Params.Input[_Cuttable_].Sources.Count == 0);
 
-      bool Hidden = false;
-      var _Hidden_ = Params.IndexOfInputParam("Cuttable");
-      bool nofilterHidden = (!DA.GetData(_Hidden_, ref Hidden) && Params.Input[_Hidden_].Sources.Count == 0);
+      var Name = default(string);
+      var _Name_ = Params.IndexOfInputParam("Name");
+      bool nofilterName = (!DA.GetData(_Name_, ref Name) && Params.Input[_Name_].Sources.Count == 0);
 
       var categories = doc.Settings.Categories.Cast<DB.Category>();
 
@@ -101,8 +101,8 @@ namespace RhinoInside.Revit.GH.Components
       if (!nofilterCuttable)
         categories = categories.Where((x) => x.IsCuttable == Cuttable);
 
-      if (!nofilterHidden)
-        categories = categories.Where((x) => x.IsHidden() == Hidden);
+      if (!nofilterName)
+        categories = categories.Where((x) => x.Name.IsSymbolNameLike(Name));
 
       IEnumerable<DB.Category> list = null;
       foreach (var group in categories.GroupBy((x) => x.CategoryType).OrderBy((x) => x.Key))

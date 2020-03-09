@@ -1,8 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Grasshopper.Kernel;
 using DB = Autodesk.Revit.DB;
 
@@ -31,7 +27,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       manager.AddParameter(new Parameters.Param_Enum<Types.ViewDiscipline>(), "Discipline", "Discipline", "View discipline", GH_ParamAccess.item);
       manager.AddParameter(new Parameters.Param_Enum<Types.ViewType>(), "Type", "Type", "View type", GH_ParamAccess.item);
-      manager.AddTextParameter("Title", "Title", "View title", GH_ParamAccess.item);
+      manager.AddTextParameter("Name", "Name", "View name", GH_ParamAccess.item);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -44,7 +40,7 @@ namespace RhinoInside.Revit.GH.Components
         DA.SetData("Discipline", view.Discipline);
 
       DA.SetData("Type", view.ViewType);
-      DA.SetData("Title", view.Title);
+      DA.SetData("Name", view.Name);
     }
   }
 }

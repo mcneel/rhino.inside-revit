@@ -13,5 +13,17 @@ namespace RhinoInside.Revit.GH.Types
 
     public View() { }
     public View(DB.View view) : base(view) { }
+
+    public override string DisplayName
+    {
+      get
+      {
+        var element = (DB.View) this;
+        if (element is object && !string.IsNullOrEmpty(element.Title))
+          return element.Title;
+
+        return base.DisplayName;
+      }
+    }
   }
 }
