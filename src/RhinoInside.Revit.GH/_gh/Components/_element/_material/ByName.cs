@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "N";
 
     public MaterialByName()
-    : base("Material.ByName", "ByName", string.Empty, "Revit", "Materials")
+    : base("Material.ByName", "ByName", string.Empty, "Revit", "Material")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

@@ -57,7 +57,9 @@ namespace RhinoInside.Revit.GH.Components
           return;
         }
 
-        Message = $"Doc : {Document.Title}";
+        // In case the user has more than one document open we show which one this component is working on
+        if (Revit.ActiveDBApplication.Documents.Size > 1)
+          Message = $"Doc : {Document.Title}";
       }
       else
       {

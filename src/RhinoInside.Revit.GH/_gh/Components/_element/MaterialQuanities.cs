@@ -12,7 +12,14 @@ namespace RhinoInside.Revit.GH.Components
     public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     public ElementMaterialQuanities()
-    : base("Element.MaterialQuanities", "MaterialQuanities", "Query element material information", "Revit", "Materials")
+    : base
+    (
+      "Element.MaterialQuanities",
+      "MaterialQuanities",
+      "Query element material information",
+      "Revit",
+      "Material"
+    )
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

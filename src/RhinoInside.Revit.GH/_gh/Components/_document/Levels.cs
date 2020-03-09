@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Grasshopper.Kernel;
 using DB = Autodesk.Revit.DB;
 
@@ -22,6 +23,9 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
       base.RegisterInputParams(manager);
+
+      manager[manager.AddIntervalParameter("Elevation", "E", "Level elevation interval", GH_ParamAccess.item)].Optional = true;
+      manager[manager.AddTextParameter("Name", "N", "Level name", GH_ParamAccess.item)].Optional = true;
       manager[manager.AddParameter(new Parameters.ElementFilter(), "Filter", "F", "Filter", GH_ParamAccess.item)].Optional = true;
     }
 
@@ -32,6 +36,12 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
     {
+      var elevation = Rhino.Geometry.Interval.Unset;
+      DA.GetData("Elevation", ref elevation);
+
+      string name = null;
+      DA.GetData("Name", ref name);
+
       DB.ElementFilter filter = null;
       DA.GetData("Filter", ref filter);
 
@@ -42,7 +52,15 @@ namespace RhinoInside.Revit.GH.Components
         if (filter is object)
           levelsCollector = levelsCollector.WherePasses(filter);
 
-        DA.SetDataList("Levels", levelsCollector);
+        var levels = levelsCollector.Cast<DB.Level>();
+
+        if (elevation.IsValid)
+          levels = levels.Where(x => elevation.IncludesParameter(x.Elevation));
+
+        if (!string.IsNullOrEmpty(name))
+          levels = levels.Where(x => x.Name.IsSymbolNameLike(name));
+
+        DA.SetDataList("Levels", levels);
       }
     }
   }
