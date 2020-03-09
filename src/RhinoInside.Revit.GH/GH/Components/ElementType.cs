@@ -7,7 +7,7 @@ namespace RhinoInside.Revit.GH.Components
   public class ElementTypeIdentity : Component
   {
     public override Guid ComponentGuid => new Guid("7DEA1BA3-D9BC-4E94-9E1C-0E527187C9DC");
-    protected override string IconTag => "T";
+    protected override string IconTag => "ID";
 
     public ElementTypeIdentity()
     : base("ElementType.Identity", "ElementType.Identity", "Query type identity information", "Revit", "Type")

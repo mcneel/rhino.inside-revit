@@ -7,6 +7,7 @@ namespace RhinoInside.Revit.GH.Components
   public class CategoryIdentity : Component
   {
     public override Guid ComponentGuid => new Guid("D794361E-DE8C-4D0A-BC77-52293F27D3AA");
+    protected override string IconTag => "ID";
 
     public CategoryIdentity()
     : base("Category.Identity", "Identity", "Query category identity information", "Revit", "Category")
