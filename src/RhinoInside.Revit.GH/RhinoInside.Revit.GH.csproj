@@ -198,6 +198,7 @@
     <Compile Include="GH\Components\Element\DirectShape\ByMesh.cs" />
     <Compile Include="GH\Components\Element\DirectShape\ByPoint.cs" />
     <Compile Include="GH\Components\Element\Element.cs" />
+    <Compile Include="GH\Components\Element\ElementParameter.cs" />
     <Compile Include="GH\Components\Element\FamilyInstance\ByPointAtHost.cs" />
     <Compile Include="GH\Components\Element\Floor\ByOutline.cs" />
     <Compile Include="GH\Components\Element\Form\ByCurves.cs" />
