@@ -429,7 +429,7 @@ namespace RhinoInside.Revit.GH.Components
           continue;
 
         var current = new HashSet<Parameters.ParameterParam>();
-        foreach (var param in element.Parameters.OfType<DB.Parameter>())
+        foreach (var param in element.GetOrderedParameters())
           current.Add(new Parameters.ParameterParam(param));
 
         if (common is null)
@@ -452,7 +452,7 @@ namespace RhinoInside.Revit.GH.Components
         if (element is null)
           continue;
 
-        foreach (var param in element.Parameters.OfType<DB.Parameter>())
+        foreach (var param in element.GetOrderedParameters())
           all.Add(new Parameters.ParameterParam(param));
       }
 
