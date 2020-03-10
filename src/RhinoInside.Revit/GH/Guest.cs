@@ -411,3 +411,25 @@ namespace RhinoInside.Revit.GH.Components
     bool NeedsToBeExpired(DocumentChangedEventArgs args);
   }
 }
+
+namespace RhinoInside.Revit.GH.Bake
+{
+  public struct BakeOptions
+  {
+    public Document Document;
+    public View     View;
+    public Category Category;
+    public Material Material;
+  }
+
+  public interface IGH_ElementIdBakeAwareObject
+  {
+    bool CanBake(BakeOptions options);
+    bool Bake(BakeOptions options, out ICollection<ElementId> ids);
+  }
+
+  public interface IGH_ElementIdBakeAwareData
+  {
+    bool Bake(BakeOptions options, out ElementId id);
+  }
+}

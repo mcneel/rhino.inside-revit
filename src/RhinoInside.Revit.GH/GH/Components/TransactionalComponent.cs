@@ -9,11 +9,15 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.Exceptions;
+using RhinoInside.Revit.GH;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public abstract class TransactionalComponent : Component, DB.IFailuresPreprocessor, DB.ITransactionFinalizer
+  public abstract class TransactionalComponent :
+    Component,
+    DB.IFailuresPreprocessor,
+    DB.ITransactionFinalizer
   {
     protected TransactionalComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
@@ -856,7 +860,9 @@ namespace RhinoInside.Revit.GH.Components
     #endregion
   }
 
-  public abstract class ReconstructElementComponent : TransactionComponent
+  public abstract class ReconstructElementComponent :
+    TransactionComponent,
+    Bake.IGH_ElementIdBakeAwareObject
   {
     protected IGH_Goo[] PreviousStructure;
     System.Collections.IEnumerator PreviousStructureEnumerator;
@@ -907,6 +913,14 @@ namespace RhinoInside.Revit.GH.Components
       if (element?.Pinned != false)
       {
         var previous = element;
+
+        if (element?.DesignOption?.Id is DB.ElementId elementDesignOptionId)
+        {
+          var activeDesignOptionId = DB.DesignOption.GetActiveDesignOptionId(element.Document);
+
+          if (elementDesignOptionId != activeDesignOptionId)
+            element = null;
+        }
 
         try
         {
@@ -964,8 +978,8 @@ namespace RhinoInside.Revit.GH.Components
     void TrySolveInstance
     (
       IGH_DataAccess DA,
-      Autodesk.Revit.DB.Document doc,
-      ref Autodesk.Revit.DB.Element element
+      DB.Document doc,
+      ref DB.Element element
     )
     {
       var type = GetType();
@@ -1004,7 +1018,7 @@ namespace RhinoInside.Revit.GH.Components
         ReconstructInfo.Invoke(this, arguments);
       }
       catch (TargetInvocationException e) { throw e.InnerException; }
-      finally { element = (Autodesk.Revit.DB.Element) arguments[1]; }
+      finally { element = (DB.Element) arguments[1]; }
     }
 
     // Step 4.
@@ -1037,5 +1051,67 @@ namespace RhinoInside.Revit.GH.Components
       // Update previous elements
       PreviousStructure = Params.Output[0].VolatileData.AllData(false).ToArray();
     }
+
+    #region IGH_ElementIdBakeAwareObject
+    bool Bake.IGH_ElementIdBakeAwareObject.CanBake(Bake.BakeOptions options) =>
+      Params?.Output.OfType<Bake.IGH_ElementIdBakeAwareObject>().Where(x => x.CanBake(options)).Any() ?? false;
+
+    bool Bake.IGH_ElementIdBakeAwareObject.Bake(Bake.BakeOptions options, out ICollection<DB.ElementId> ids)
+    {
+      ids = default;
+      using (var trans = new DB.Transaction(options.Document, "Bake"))
+      {
+        if (trans.Start() == DB.TransactionStatus.Started)
+        {
+          var list = new List<DB.ElementId>();
+          var elementsToCopy = new List<DB.ElementId>();
+
+          var newStructure = (IGH_Goo[]) PreviousStructure.Clone();
+          for (int g = 0; g < newStructure.Length; g++)
+          {
+            if (newStructure[g] is Types.IGH_ElementId id)
+            {
+              if (id.Document.Equals(options.Document))
+              {
+                if (id.Document.GetElement(id.Id) is DB.Element element)
+                {
+                  if (element?.DesignOption?.Id is DB.ElementId elementDesignOptionId)
+                  {
+                    var activeDesignOptionId = DB.DesignOption.GetActiveDesignOptionId(element.Document);
+
+                    if (elementDesignOptionId != activeDesignOptionId)
+                    {
+                      elementsToCopy.Add(element.Id);
+                      newStructure[g] = default;
+                      continue;
+                    }
+                  }
+
+                  element.Pinned = false;
+                  list.Add(element.Id);
+                  newStructure[g] = default;
+                }
+              }
+            }
+          }
+
+          if (elementsToCopy.Count > 0)
+          {
+            var elementsCopied = DB.ElementTransformUtils.CopyElements(options.Document, elementsToCopy, DB.XYZ.Zero);
+            options.Document.Delete(elementsToCopy);
+            list.AddRange(elementsCopied);
+          }
+
+          trans.Commit();
+
+          ids = list;
+          PreviousStructure = newStructure;
+          ExpireSolution(false);
+        }
+      }
+
+      return true;
+    }
+    #endregion
   }
 }
