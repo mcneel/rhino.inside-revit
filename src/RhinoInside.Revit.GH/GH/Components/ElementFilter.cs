@@ -235,27 +235,26 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      types = types.OfType<DB.ElementType>().ToList();
-
-      if (types.Count > 0)
+      if (types.Any())
       {
         var provider = new DB.ParameterValueProvider(new DB.ElementId(DB.BuiltInParameter.ELEM_TYPE_PARAM));
 
-        if (types.Count == 1)
+        var typeIds = types.Select(x => x?.Id ?? DB.ElementId.InvalidElementId).ToArray();
+        if (typeIds.Length == 1)
         {
-          var rule = new DB.FilterElementIdRule(provider, new DB.FilterNumericEquals(), types[0].Id);
+          var rule = new DB.FilterElementIdRule(provider, new DB.FilterNumericEquals(), typeIds[0]);
           DA.SetData("Filter", new DB.ElementParameterFilter(rule, inverted));
         }
         else
         {
           if (inverted)
           {
-            var rules = types.Select(x => new DB.FilterInverseRule(new DB.FilterElementIdRule(provider, new DB.FilterNumericEquals(), x.Id))).ToArray();
+            var rules = typeIds.Select(x => new DB.FilterInverseRule(new DB.FilterElementIdRule(provider, new DB.FilterNumericEquals(), x))).ToArray();
             DA.SetData("Filter", new DB.ElementParameterFilter(rules));
           }
           else
           {
-            var filters = types.Select(x => new DB.FilterElementIdRule(provider, new DB.FilterNumericEquals(), x.Id)).Select(x => new DB.ElementParameterFilter(x)).ToArray();
+            var filters = typeIds.Select(x => new DB.FilterElementIdRule(provider, new DB.FilterNumericEquals(), x)).Select(x => new DB.ElementParameterFilter(x)).ToArray();
             DA.SetData("Filter", new DB.LogicalOrFilter(filters));
           }
         }
@@ -545,7 +544,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager[manager.AddParameter(new Parameters.Element(), "View", "V", "View to match", GH_ParamAccess.item)].Optional = true;
+      manager[manager.AddParameter(new Parameters.View(), "View", "V", "View to match", GH_ParamAccess.item)].Optional = true;
       base.RegisterInputParams(manager);
     }
 
@@ -574,30 +573,26 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager[manager.AddParameter(new Parameters.Element(), "View", "V", "View to match", GH_ParamAccess.item)].Optional = true;
+      manager[manager.AddParameter(new Parameters.View(), "View", "V", "View to match", GH_ParamAccess.item)].Optional = true;
       base.RegisterInputParams(manager);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var doc = Revit.ActiveDBDocument;
-      var viewId = doc.ActiveView.Id;
+      var view = doc.ActiveView;
 
-      DB.View view = null;
       if (DA.GetData("View", ref view))
-      {
         doc = view?.Document;
-        viewId = view?.Id;
-      }
 
-      if (doc is null || viewId is null)
+      if (doc is null || view is null)
         return;
 
       var inverted = false;
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      DA.SetData("Filter", new Autodesk.Revit.UI.Selection.SelectableInViewFilter(doc, viewId, inverted));
+      DA.SetData("Filter", new Autodesk.Revit.UI.Selection.SelectableInViewFilter(doc, view.Id, inverted));
     }
   }
   #endregion
