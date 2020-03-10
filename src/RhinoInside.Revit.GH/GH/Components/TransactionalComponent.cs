@@ -1054,63 +1054,54 @@ namespace RhinoInside.Revit.GH.Components
 
     #region IGH_ElementIdBakeAwareObject
     bool Bake.IGH_ElementIdBakeAwareObject.CanBake(Bake.BakeOptions options) =>
-      Params?.Output.OfType<Bake.IGH_ElementIdBakeAwareObject>().Where(x => x.CanBake(options)).Any() ?? false;
+      Params?.Output.OfType<Parameters.IGH_ElementIdParam>().
+      Where
+      (
+        x =>
+        x.VolatileData.AllData(true).
+        OfType<Types.IGH_ElementId>().
+        Where(goo => options.Document.Equals(goo.Document)).
+        Any()
+      ).
+      Any() ?? false;
 
     bool Bake.IGH_ElementIdBakeAwareObject.Bake(Bake.BakeOptions options, out ICollection<DB.ElementId> ids)
     {
-      ids = default;
       using (var trans = new DB.Transaction(options.Document, "Bake"))
       {
         if (trans.Start() == DB.TransactionStatus.Started)
         {
           var list = new List<DB.ElementId>();
-          var elementsToCopy = new List<DB.ElementId>();
-
           var newStructure = (IGH_Goo[]) PreviousStructure.Clone();
           for (int g = 0; g < newStructure.Length; g++)
           {
             if (newStructure[g] is Types.IGH_ElementId id)
             {
-              if (id.Document.Equals(options.Document))
+              if
+              (
+                id.Document.Equals(options.Document) &&
+                id.Document.GetElement(id.Id) is DB.Element element
+              )
               {
-                if (id.Document.GetElement(id.Id) is DB.Element element)
-                {
-                  if (element?.DesignOption?.Id is DB.ElementId elementDesignOptionId)
-                  {
-                    var activeDesignOptionId = DB.DesignOption.GetActiveDesignOptionId(element.Document);
-
-                    if (elementDesignOptionId != activeDesignOptionId)
-                    {
-                      elementsToCopy.Add(element.Id);
-                      newStructure[g] = default;
-                      continue;
-                    }
-                  }
-
-                  element.Pinned = false;
-                  list.Add(element.Id);
-                  newStructure[g] = default;
-                }
+                element.Pinned = false;
+                list.Add(element.Id);
+                newStructure[g] = default;
               }
             }
           }
 
-          if (elementsToCopy.Count > 0)
+          if (trans.Commit() == DB.TransactionStatus.Committed)
           {
-            var elementsCopied = DB.ElementTransformUtils.CopyElements(options.Document, elementsToCopy, DB.XYZ.Zero);
-            options.Document.Delete(elementsToCopy);
-            list.AddRange(elementsCopied);
+            ids = list;
+            PreviousStructure = newStructure;
+            ExpireSolution(false);
+            return true;
           }
-
-          trans.Commit();
-
-          ids = list;
-          PreviousStructure = newStructure;
-          ExpireSolution(false);
         }
       }
 
-      return true;
+      ids = default;
+      return false;
     }
     #endregion
   }
