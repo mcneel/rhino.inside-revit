@@ -32,7 +32,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var material = default(DB.Material);
-      if (!DA.GetData("View", ref material))
+      if (!DA.GetData("Material", ref material))
         return;
 
       DA.SetData("Class", material.MaterialClass);
