@@ -29,8 +29,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
   public abstract class ElementIdParam<T, R> :
     GH_PersistentParam<T>,
-    IGH_ElementIdParam,
-    Bake.IGH_ElementIdBakeAwareObject
+    IGH_ElementIdParam
     where T : class, Types.IGH_ElementId
   {
     public override sealed string TypeName => "Revit " + Name;
@@ -317,15 +316,6 @@ namespace RhinoInside.Revit.GH.Parameters
           return true;
       }
 
-      return false;
-    }
-    #endregion
-
-    #region IGH_ElementIdBakeAwareObject
-    bool Bake.IGH_ElementIdBakeAwareObject.CanBake(Bake.BakeOptions options) => VolatileData.AllData(true).Any();
-    bool Bake.IGH_ElementIdBakeAwareObject.Bake(Bake.BakeOptions options, out ICollection<DB.ElementId> ids)
-    {
-      ids = default;
       return false;
     }
     #endregion
