@@ -1,11 +1,8 @@
-using System;
-using System.Collections.Generic;
-
-namespace RhinoInside.Revit
+namespace System.Collections.Generic.Extensions
 {
-  static partial class Extension
+  static class Extension
   {
-    #region Linq
+    #region IEnumerator
     public static IEnumerable<K> Select<K, T>(this IEnumerator<T> e, Func<T, K> selector)
     {
       while (e.MoveNext())
