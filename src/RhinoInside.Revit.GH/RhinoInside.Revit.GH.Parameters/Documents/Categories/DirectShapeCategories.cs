@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using Autodesk.Revit.DB;
+using DB = Autodesk.Revit.DB;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
 
@@ -26,13 +26,13 @@ namespace RhinoInside.Revit.GH.Parameters.Documents.Categories
       if (ActiveDBDocument is null)
         return;
 
-      var directShapeCategories = ActiveDBDocument.Settings.Categories.Cast<Autodesk.Revit.DB.Category>().Where((x) => DirectShape.IsValidCategoryId(x.Id, ActiveDBDocument));
+      var directShapeCategories = ActiveDBDocument.Settings.Categories.Cast<Autodesk.Revit.DB.Category>().Where((x) => DB.DirectShape.IsValidCategoryId(x.Id, ActiveDBDocument));
       foreach (var group in directShapeCategories.GroupBy((x) => x.CategoryType).OrderBy((x) => x.Key))
       {
         foreach (var category in group.OrderBy(x => x.Name))
         {
           ListItems.Add(new GH_ValueListItem(category.Name, category.Id.IntegerValue.ToString()));
-          if (category.Id.IntegerValue == (int) BuiltInCategory.OST_GenericModel)
+          if (category.Id.IntegerValue == (int) DB.BuiltInCategory.OST_GenericModel)
             SelectItem(ListItems.Count - 1);
         }
       }

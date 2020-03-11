@@ -7,7 +7,7 @@ using System.Diagnostics;
 
 using Grasshopper.Kernel;
 
-using Autodesk.Revit.DB;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Elements.ModelLine
 {
@@ -31,7 +31,7 @@ namespace RhinoInside.Revit.GH.Components.Elements.ModelLine
 
     void ReconstructModelLineByCurve
     (
-      Document doc,
+      DB.Document doc,
       ref Autodesk.Revit.DB.Element element,
 
       Rhino.Geometry.Curve curve,
@@ -53,7 +53,7 @@ namespace RhinoInside.Revit.GH.Components.Elements.ModelLine
       if (curve.IsClosed == centerLine.IsBound)
         AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Unable to keep curve closed.");
 
-      if (element is ModelCurve modelCurve && centerLine.IsSameKindAs(modelCurve.GeometryCurve))
+      if (element is DB.ModelCurve modelCurve && centerLine.IsSameKindAs(modelCurve.GeometryCurve))
         modelCurve.SetSketchPlaneAndCurve(sketchPlane, centerLine);
       else if (doc.IsFamilyDocument)
         ReplaceElement(ref element, doc.FamilyCreate.NewModelCurve(centerLine, sketchPlane));
