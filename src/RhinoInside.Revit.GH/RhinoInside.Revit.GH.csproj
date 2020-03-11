@@ -240,6 +240,7 @@
     <Compile Include="GH\Parameters\Material.cs" />
     <Compile Include="GH\Parameters\Parameter.cs" />
     <Compile Include="GH\Parameters\SketchPlane.cs" />
+    <Compile Include="GH\Parameters\ValueList.cs" />
     <Compile Include="GH\Parameters\View.cs" />
     <Compile Include="GH\Solid.cs" />
     <Compile Include="GH\Types\Category.cs" />
