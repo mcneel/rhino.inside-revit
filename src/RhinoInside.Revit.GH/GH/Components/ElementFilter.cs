@@ -138,7 +138,6 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
       manager.AddTextParameter("Classes", "C", "Classes to match", GH_ParamAccess.list);
-      base.RegisterInputParams(manager);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -147,18 +146,40 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetDataList("Classes", classNames))
         return;
 
-      var inverted = false;
-      if (!DA.GetData("Inverted", ref inverted))
-        return;
+      var filters = new List<DB.ElementFilter>();
+      var classes = new HashSet<string>(classNames);
+      if (classes.Remove("Autodesk.Revit.DB.Area"))
+        filters.Add(new DB.AreaFilter());
+      if (classes.Remove("Autodesk.Revit.DB.AreaTag"))
+        filters.Add(new DB.AreaTagFilter());
+      if (classes.Remove("Autodesk.Revit.DB.Architecture.Room"))
+        filters.Add(new DB.Architecture.RoomFilter());
+      if (classes.Remove("Autodesk.Revit.DB.Architecture.RoomTag"))
+        filters.Add(new DB.Architecture.RoomTagFilter());
 
       try
       {
-        var classes = classNames.Select(x => Type.GetType($"{x},RevitAPI", true)).ToList();
+        var types = classes.Select(x => Type.GetType($"{x},RevitAPI", true)).ToList();
 
-        if (classes.Count == 1)
-          DA.SetData("Filter", new DB.ElementClassFilter(classes[0], inverted));
+        if (types.Count > 0)
+        {
+          if (types.Count == 1)
+            filters.Add(new DB.ElementClassFilter(types[0]));
+          else
+            filters.Add(new DB.ElementMulticlassFilter(types));
+        }
+
+        if (filters.Count == 0)
+        {
+          DA.DisableGapLogic();
+        }
         else
-          DA.SetData("Filter", new DB.ElementMulticlassFilter(classes, inverted));
+        {
+          if (filters.Count == 1)
+            DA.SetData("Filter", filters[0]);
+          else
+            DA.SetData("Filter", new DB.LogicalOrFilter(filters));
+        }
       }
       catch (System.TypeLoadException e)
       {
