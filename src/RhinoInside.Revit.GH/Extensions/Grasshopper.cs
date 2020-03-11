@@ -1,25 +1,25 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Grasshopper.Kernel;
+using RhinoInside.Revit.GH.Types;
 
-namespace RhinoInside.Revit
+namespace Grasshopper.Kernel.Extensions
 {
-  public static partial class Extension
+  static partial class Extension
   {
-    #region Grasshopper
+    #region IGH_Param
     public static IGH_DocumentObject ConnectNewObject(this IGH_Param self, Guid componentGuid)
     {
       var document = self.OnPingDocument();
       if (document is null)
         return null;
 
-      var obj = Grasshopper.Instances.ComponentServer.EmitObject(componentGuid) as IGH_ActiveObject;
+      var obj = Instances.ComponentServer.EmitObject(componentGuid) as IGH_ActiveObject;
       if (obj is null)
         return null;
 
       obj.CreateAttributes();
-      if (Grasshopper.CentralSettings.CanvasFullNames)
+      if (CentralSettings.CanvasFullNames)
       {
         var atts = new List<IGH_Attributes>();
         obj.Attributes.AppendToAttributeTree(atts);
@@ -48,7 +48,7 @@ namespace RhinoInside.Revit
       else if (obj is IGH_Component component)
       {
         var selfType = self.Type;
-        foreach (var input in component.Params.Input.Where(i => typeof(GH.Types.IGH_ElementId).IsAssignableFrom(i.Type)))
+        foreach (var input in component.Params.Input.Where(i => typeof(IGH_ElementId).IsAssignableFrom(i.Type)))
         {
           if (input.GetType() == self.GetType() || input.Type.IsAssignableFrom(selfType))
           {
@@ -68,12 +68,12 @@ namespace RhinoInside.Revit
         var components = new List<IGH_Component>();
         var paramType = param.Type;
 
-        foreach (var proxy in Grasshopper.Instances.ComponentServer.ObjectProxies.Where(x => !x.Obsolete && x.Exposure != GH_Exposure.hidden && x.Exposure < GH_Exposure.tertiary))
+        foreach (var proxy in Instances.ComponentServer.ObjectProxies.Where(x => !x.Obsolete && x.Exposure != GH_Exposure.hidden && x.Exposure < GH_Exposure.tertiary))
         {
           if (typeof(IGH_Component).IsAssignableFrom(proxy.Type))
           {
             var obj = proxy.CreateInstance() as IGH_Component;
-            foreach (var input in obj.Params.Input.Where(i => typeof(GH.Types.IGH_ElementId).IsAssignableFrom(i.Type)))
+            foreach (var input in obj.Params.Input.Where(i => typeof(IGH_ElementId).IsAssignableFrom(i.Type)))
             {
               if (input.GetType() == param.GetType() || input.Type.IsAssignableFrom(paramType))
               {
@@ -88,16 +88,16 @@ namespace RhinoInside.Revit
         var connect = GH_DocumentObject.Menu_AppendItem(menu, "Connect") as System.Windows.Forms.ToolStripMenuItem;
 
         var panedComponentId = new Guid("{59E0B89A-E487-49f8-BAB8-B5BAB16BE14C}");
-        var panel = GH_DocumentObject.Menu_AppendItem(connect.DropDown, "Panel", eventHandler, Grasshopper.Instances.ComponentServer.EmitObjectIcon(panedComponentId));
+        var panel = GH_DocumentObject.Menu_AppendItem(connect.DropDown, "Panel", eventHandler, Instances.ComponentServer.EmitObjectIcon(panedComponentId));
         panel.Tag = panedComponentId;
 
-        var picker = GH_DocumentObject.Menu_AppendItem(connect.DropDown, "Value Set Picker", eventHandler, Grasshopper.Instances.ComponentServer.EmitObjectIcon(GH.Parameters.ValueSetPicker.ComponentClassGuid));
-        picker.Tag = GH.Parameters.ValueSetPicker.ComponentClassGuid;
+        var picker = GH_DocumentObject.Menu_AppendItem(connect.DropDown, "Value Set Picker", eventHandler, Instances.ComponentServer.EmitObjectIcon(External.Special.ValueSetPicker.ComponentClassGuid));
+        picker.Tag = External.Special.ValueSetPicker.ComponentClassGuid;
 
         if (components.Count > 0)
         {
           GH_DocumentObject.Menu_AppendSeparator(connect.DropDown);
-          var maxComponents = Grasshopper.CentralSettings.CanvasMaxSearchResults;
+          var maxComponents = CentralSettings.CanvasMaxSearchResults;
           maxComponents = Math.Min(maxComponents, 30);
           maxComponents = Math.Max(maxComponents, 3);
 
