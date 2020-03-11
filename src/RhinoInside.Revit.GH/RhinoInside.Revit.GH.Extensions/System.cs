@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace RhinoInside.Revit
+namespace RhinoInside.Revit.GH.Extensions
 {
   static partial class Extension
   {

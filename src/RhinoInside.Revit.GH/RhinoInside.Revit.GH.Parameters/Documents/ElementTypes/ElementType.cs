@@ -6,6 +6,7 @@ using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
 using Grasshopper.Kernel.Types;
+using RhinoInside.Revit.GH.Extensions;
 using RhinoInside.Revit.GH.Parameters.Elements;
 using DB = Autodesk.Revit.DB;
 

@@ -10,6 +10,7 @@ using Grasshopper.Kernel.Attributes;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.Exceptions;
+using RhinoInside.Revit.GH.Extensions;
 using RhinoInside.Revit.GH;
 using DB = Autodesk.Revit.DB;
 

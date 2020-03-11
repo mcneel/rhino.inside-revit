@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 
-namespace RhinoInside.Revit
+namespace RhinoInside.Revit.GH.Extensions
 {
   public static partial class Extension
   {
