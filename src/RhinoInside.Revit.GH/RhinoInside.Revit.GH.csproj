@@ -263,13 +263,13 @@
     <Compile Include="GH\Components\Family.cs" />
     <Compile Include="GH\Components\ElementFilter.cs" />
     <Compile Include="GH\Types\View.cs" />
-    <Compile Include="GH\ValueList.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ValueSet.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
