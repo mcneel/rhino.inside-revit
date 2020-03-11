@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Autodesk.Revit.DB;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 
 namespace RhinoInside.Revit.GH.Components
 {

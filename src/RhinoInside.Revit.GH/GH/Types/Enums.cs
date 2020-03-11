@@ -1,23 +1,35 @@
 using System;
 using System.Linq;
-using System.ComponentModel;
-using System.Runtime.InteropServices;
-using Grasshopper.Kernel;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  [
+    ComponentGuid("A3621A84-190A-48C2-9B0C-F5784B78089C"),
+    Name("Storage Type"),
+    Description("Represents a Revit storage type."),
+  ]
   public class StorageType : GH_Enum<DB.StorageType> { }
 
+  [
+    ComponentGuid("A5EA05A9-C17E-48F4-AC4C-34F169AE4F9A"),
+    Name("Parameter Type"),
+    Description("Represents a Revit parameter type."),
+  ]
   public class ParameterType : GH_Enum<DB.ParameterType> { }
 
+  [
+    ComponentGuid("38E9E729-9D9F-461F-A1D7-798CDFA2CD4C"),
+    Name("Unit Type"),
+    Description("Represents a Revit unit type."),
+  ]
   public class UnitType : GH_Enum<DB.UnitType> { }
 
   [
-    Guid("3D9979B4-65C8-447F-BCEA-3705249DF3B6"),
-    DisplayName("Parameter Group"),
+    ComponentGuid("3D9979B4-65C8-447F-BCEA-3705249DF3B6"),
+    Name("Parameter Group"),
     Description("Represents a Revit parameter group."),
-    Exposure(GH_Exposure.quarternary),
   ]
   public class BuiltInParameterGroup : GH_Enum<DB.BuiltInParameterGroup>
   {
@@ -39,10 +51,9 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [
-    Guid("195B9D7E-D4B0-4335-A442-3C2FA40794A2"),
-    DisplayName("Category Type"),
+    ComponentGuid("195B9D7E-D4B0-4335-A442-3C2FA40794A2"),
+    Name("Category Type"),
     Description("Represents a Revit parameter category type."),
-    Exposure(GH_Exposure.septenary),
   ]
   public class CategoryType : GH_Enum<DB.CategoryType>
   {
@@ -64,14 +75,29 @@ namespace RhinoInside.Revit.GH.Types
     }
   }
 
+  [
+    ComponentGuid("1AF2E8BF-5FAF-41AD-9A2F-EB96A706587C"),
+    Name("Graphics Style Type"),
+    Description("Represents a graphics style type."),
+  ]
   public class GraphicsStyleType : GH_Enum<DB.GraphicsStyleType>
   {
     public GraphicsStyleType() : base(DB.GraphicsStyleType.Projection) { }
     public GraphicsStyleType(DB.GraphicsStyleType value) : base(value) { }
   }
 
+  [
+    ComponentGuid("F992A251-4085-4525-A514-298F3155DF8A"),
+    Name("View Detail Level"),
+    Description("Represents a view detail level."),
+  ]
   public class ViewDetailLevel : GH_Enum<DB.ViewDetailLevel> { }
 
+  [
+    ComponentGuid("2A3E4872-EF41-442A-B886-8B7DBA73DFE2"),
+    Name("Wall Location Line"),
+    Description("Represents a Revit wall location line."),
+  ]
   public class WallLocationLine : GH_Enum<DB.WallLocationLine>
   {
     public override string ToString()
@@ -90,7 +116,24 @@ namespace RhinoInside.Revit.GH.Types
     }
   }
 
+  [
+    ComponentGuid("2F1CE55B-FD85-4EC5-8638-8DA06932DE0E"),
+    Name("Structural Wall Usage"),
+    Description("Represents a Revit structural wall usage."),
+  ]
   public class StructuralWallUsage : GH_Enum<DB.Structure.StructuralWallUsage> { }
+
+  [
+    ComponentGuid("BF051011-660D-39E7-86ED-20EEE3A68DB0"),
+    Name("View Type"),
+    Description("Represents a Revit view type."),
+  ]
   public class ViewType : GH_Enum<DB.ViewType> { }
+
+  [
+    ComponentGuid("83380EFC-D2E2-3A9E-A1D7-939EC71852DD"),
+    Name("View Discipline"),
+    Description("Represents a Revit view discipline."),
+  ]
   public class ViewDiscipline : GH_Enum<DB.ViewDiscipline> { }
 }

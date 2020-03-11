@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -9,7 +8,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.Exceptions;
-using RhinoInside.Revit.GH;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -447,7 +446,7 @@ namespace RhinoInside.Revit.GH.Components
         if (!typeof(T).IsEnumDefined(enumValue))
         {
           var param = Params.Input[index];
-          throw new InvalidEnumArgumentException(param.Name, enumValue, typeof(T));
+          throw new System.ComponentModel.InvalidEnumArgumentException(param.Name, enumValue, typeof(T));
         }
 
         value = (T) Enum.ToObject(typeof(T), enumValue);

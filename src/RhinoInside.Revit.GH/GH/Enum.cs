@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
@@ -8,6 +7,7 @@ using System.Windows.Forms;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -43,7 +43,7 @@ namespace RhinoInside.Revit.GH.Types
                 {
                   if (paramType.GetGenericArguments()[0] == type)
                   {
-                    result.Add(valueType, Tuple.Create(param.GetType(), type));
+                    result.Add(valueType, Tuple.Create(param, type));
                     typeFound = true;
                     break;
                   }
@@ -73,9 +73,12 @@ namespace RhinoInside.Revit.GH.Types
       // Register all the ParamsTypes as params in Grasshopper
       foreach(var entry in result)
       {
-        var proxy = Activator.CreateInstance(entry.Value.Item1) as IGH_ObjectProxy;
-        if(!Grasshopper.Instances.ComponentServer.IsObjectCached(proxy.Guid))
-          Grasshopper.Instances.ComponentServer.AddProxy(proxy);
+        if (entry.Value.Item1.IsGenericType)
+        {
+          var proxy = Activator.CreateInstance(entry.Value.Item1) as IGH_ObjectProxy;
+          if (!Grasshopper.Instances.ComponentServer.IsObjectCached(proxy.Guid))
+            Grasshopper.Instances.ComponentServer.AddProxy(proxy);
+        }
       }
       
       return result;
@@ -100,16 +103,16 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var value = GetType().GetTypeInfo().GetCustomAttribute(typeof(DisplayNameAttribute)) as DisplayNameAttribute;
-        return value?.DisplayName ?? typeof(T).Name;
+        var name = GetType().GetTypeInfo().GetCustomAttribute(typeof(System.ComponentModel.DisplayNameAttribute)) as System.ComponentModel.DisplayNameAttribute;
+        return name?.DisplayName ?? typeof(T).Name;
       }
     }
     public override string TypeDescription
     {
       get
       {
-        var value = GetType().GetTypeInfo().GetCustomAttribute(typeof(DescriptionAttribute)) as DescriptionAttribute;
-        return value?.Description ?? $"{typeof(T).Module.Name} {TypeName}";
+        var description = GetType().GetTypeInfo().GetCustomAttribute(typeof(System.ComponentModel.DescriptionAttribute)) as System.ComponentModel.DescriptionAttribute;
+        return description?.Description ?? $"{typeof(T).Module.Name} {TypeName}";
       }
     }
     public override Type UnderlyingEnumType => typeof(T);
@@ -188,7 +191,7 @@ namespace RhinoInside.Revit.GH.Parameters
     base
     (
       typeof(T).Name,
-      typeof(T).Name.Substring(0, 1),
+      typeof(T).Name,
       string.Empty,
       string.Empty,
       string.Empty
@@ -196,26 +199,39 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       ProxyExposure = Exposure;
 
-      if (GetType().GetTypeInfo().GetCustomAttribute(typeof(DisplayNameAttribute)) is DisplayNameAttribute name)
-      {
-        Name = name.DisplayName;
-        NickName = name.DisplayName.Substring(0, 1);
-      }
+      if (typeof(T).GetTypeInfo().GetCustomAttribute(typeof(NameAttribute)) is NameAttribute name)
+        Name = name.Name;
 
-      if (GetType().GetTypeInfo().GetCustomAttribute(typeof(NickNameAttribute)) is NickNameAttribute nick)
-        NickName = nick.NickName;
+      if (typeof(T).GetTypeInfo().GetCustomAttribute(typeof(NickNameAttribute)) is NickNameAttribute nickname)
+        NickName = nickname.NickName;
 
-      if (GetType().GetTypeInfo().GetCustomAttribute(typeof(DescriptionAttribute)) is DescriptionAttribute description)
+      if (typeof(T).GetTypeInfo().GetCustomAttribute(typeof(DescriptionAttribute)) is DescriptionAttribute description)
         Description = description.Description;
+
+      if (typeof(T).GetTypeInfo().GetCustomAttribute(typeof(CategoryAttribute)) is CategoryAttribute category)
+      {
+        Category = category.Category;
+        SubCategory = category.SubCategory;
+      }
     }
 
-    public override Guid ComponentGuid => typeof(T).GUID;
+    public override Guid ComponentGuid
+    {
+      get
+      {
+        if (typeof(T).GetTypeInfo().GetCustomAttribute(typeof(ComponentGuidAttribute)) is ComponentGuidAttribute componentGuid)
+          return componentGuid.Value;
+
+        throw new NotImplementedException($"{typeof(T).FullName} has no {nameof(ComponentGuid)}, please use {typeof(ComponentGuidAttribute).FullName}");
+      }
+    }
+
     public override GH_Exposure Exposure
     {
       get
       {
-        if (GetType().GetTypeInfo().GetCustomAttribute(typeof(ExposureAttribute)) is ExposureAttribute exposure)
-          return exposure.Exposure;
+        if (typeof(T).GetTypeInfo().GetCustomAttribute(typeof(ExposureAttribute)) is ExposureAttribute exposure)
+          return exposure.Value;
 
         return GH_Exposure.hidden;
       }
