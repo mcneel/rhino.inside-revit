@@ -33,7 +33,7 @@
     <OutputType>Library</OutputType>
     <LangVersion>7.3</LangVersion>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RhinoInside.Revit</RootNamespace>
+    <RootNamespace>RhinoInside.Revit.GH</RootNamespace>
     <AssemblyName>RhinoInside.Revit.GH</AssemblyName>
     <TargetFrameworkProfile />
   </PropertyGroup>
