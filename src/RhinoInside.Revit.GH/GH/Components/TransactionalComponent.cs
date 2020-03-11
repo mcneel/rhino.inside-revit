@@ -7,12 +7,13 @@ using Autodesk.Revit.UI.Events;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
-using RhinoInside.Revit.Exceptions;
-using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
+  using Exceptions;
+  using Kernel.Attributes;
+
   public abstract class TransactionalComponent :
     Component,
     DB.IFailuresPreprocessor,
@@ -492,8 +493,18 @@ namespace RhinoInside.Revit.GH.Components
     }
     protected static readonly MethodInfo GetInputDataListInfo = typeof(TransactionalComponent).GetMethod("GetInputDataList", BindingFlags.Instance | BindingFlags.NonPublic);
 
-    protected void ThrowArgumentNullException(string paramName, string description = null) => throw new ArgumentNullException(paramName.FirstCharUpper(), description ?? string.Empty);
-    protected void ThrowArgumentException(string paramName, string description = null) => throw new ArgumentException(description ?? "Invalid value.", paramName.FirstCharUpper());
+    static string FirstCharUpper(string text)
+    {
+      if (char.IsUpper(text, 0))
+        return text;
+
+      var chars = text.ToCharArray();
+      chars[0] = char.ToUpperInvariant(chars[0]);
+      return new string(chars);
+    }
+
+    protected void ThrowArgumentNullException(string paramName, string description = null) => throw new ArgumentNullException(FirstCharUpper(paramName), description ?? string.Empty);
+    protected void ThrowArgumentException(string paramName, string description = null) => throw new ArgumentException(description ?? "Invalid value.", FirstCharUpper(paramName));
     protected void ThrowIfNotValid(string paramName, Rhino.Geometry.Point3d value)
     {
       if (!value.IsValid) ThrowArgumentException(paramName);
