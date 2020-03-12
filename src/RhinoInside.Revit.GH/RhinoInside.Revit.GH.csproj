@@ -173,7 +173,6 @@
     <Compile Include="Extensions\Grasshopper.cs" />
     <Compile Include="Extensions\System.cs" />
     <Compile Include="Extensions\WinForms.cs" />
-    <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Attributes.cs" />
     <Compile Include="Components\Category\GraphicsStyle.cs" />
     <Compile Include="Components\Category\Identity.cs" />

@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Grasshopper.Kernel;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
@@ -35,3 +36,26 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("0.0.*")]
 //[assembly: AssemblyFileVersion("1.0.0.0")]
 [assembly: AssemblyInformationalVersion("WIP")]
+
+namespace RhinoInside.Revit.GH
+{
+  /// <summary>
+  /// Additional information about this library in Grasshopper
+  /// </summary>
+  public class AssemblyInfo : GH_AssemblyInfo
+  {
+    public AssemblyInfo() { }
+
+    public override string Name => "Rhino.Inside for Autodesk Revit";
+    public override string Version => $"{Assembly.GetName().Version.ToString()} (WIP)";
+    public override string Description => "Provides components to interact with Autodesk© Revit©";
+
+    public override string AuthorName => "Robert McNeel & Associates";
+    public override string AuthorContact => WebPageURI;
+
+    public override GH_LibraryLicense License => Addin.IsExpired() ? GH_LibraryLicense.expired : GH_LibraryLicense.opensource;
+
+    public static string ContactURI => @"https://discourse.mcneel.com/c/rhino-inside/Revit";
+    public static string WebPageURI => @"https://www.rhino3d.com/inside/revit/";
+  }
+}
