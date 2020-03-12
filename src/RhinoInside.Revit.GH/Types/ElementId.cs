@@ -53,7 +53,7 @@ namespace RhinoInside.Revit.GH.Types
       UniqueID = doc?.GetElement(id)?.UniqueId ??
                  (
                    id.IntegerValue < DB.ElementId.InvalidElementId.IntegerValue ?
-                     UniqueId.Format(Guid.Empty, id.IntegerValue) : 
+                     UniqueId.Format(Guid.Empty, id.IntegerValue) :
                      string.Empty
                  );
     }
@@ -63,7 +63,7 @@ namespace RhinoInside.Revit.GH.Types
     public DB.Document Document { get => document?.IsValidObject != true ? null : document; protected set { document = value; } }
     public DB.ElementId Id => Value;
     public Guid DocumentGUID { get; protected set; } = Guid.Empty;
-    public string UniqueID   { get; protected set; } = string.Empty;
+    public string UniqueID { get; protected set; } = string.Empty;
     public bool IsReferencedElement => !string.IsNullOrEmpty(UniqueID);
     public bool IsElementLoaded => m_value is object;
     public virtual bool LoadElement()
@@ -91,7 +91,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     public ElementId() : base(DB.ElementId.InvalidElementId) { }
-    protected ElementId(DB.Document doc, DB.ElementId id)    => SetValue(doc, id);
+    protected ElementId(DB.Document doc, DB.ElementId id) => SetValue(doc, id);
 
     public override bool CastFrom(object source)
     {
@@ -113,7 +113,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastTo<Q>(ref Q target)
     {
-      if(target is IGH_ElementId)
+      if (target is IGH_ElementId)
       {
         target = (Q) (object) null;
         return true;
@@ -124,12 +124,12 @@ namespace RhinoInside.Revit.GH.Types
         target = (Q) (object) Value;
         return true;
       }
-      if(typeof(Q).IsAssignableFrom(typeof(GH_Integer)))
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Integer)))
       {
         target = (Q) (object) new GH_Integer(Value.IntegerValue);
         return true;
       }
-      if(typeof(Q).IsAssignableFrom(typeof(GH_String)))
+      if (typeof(Q).IsAssignableFrom(typeof(GH_String)))
       {
         target = (Q) (object) new GH_String(UniqueID);
         return true;
@@ -140,7 +140,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public bool Equals(ElementId id) => id?.DocumentGUID == DocumentGUID && id?.UniqueID == UniqueID;
     public override bool Equals(object obj) => (obj is ElementId id) ? Equals(id) : base.Equals(obj);
-    public override int GetHashCode() => (DocumentGUID, UniqueID).GetHashCode();
+    public override int GetHashCode() => new { DocumentGUID, UniqueID }.GetHashCode();
 
     [TypeConverter(typeof(Proxy.ObjectConverter))]
     protected class Proxy : IGH_GooProxy
