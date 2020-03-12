@@ -243,6 +243,11 @@
     <Compile Include="Parameters\SketchPlane.cs" />
     <Compile Include="Parameters\ValueList.cs" />
     <Compile Include="Parameters\View.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Solid.cs" />
     <Compile Include="Types\Category.cs" />
     <Compile Include="Types\Document.cs" />
@@ -264,11 +269,6 @@
     <Compile Include="Components\Family.cs" />
     <Compile Include="Components\ElementFilter.cs" />
     <Compile Include="Types\View.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ValueSet.cs" />
   </ItemGroup>
@@ -280,64 +280,64 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\BeamByCurve.png" />
-    <None Include="Resources\BuildingPadByOutline.png" />
-    <None Include="Resources\BuiltInParameterByName.png" />
-    <None Include="Resources\BuiltInParameterGroup.png" />
-    <None Include="Resources\BuiltInParameterGroups.png" />
-    <None Include="Resources\Category.png" />
-    <None Include="Resources\CategoryTypes.png" />
-    <None Include="Resources\DirectShapeByGeometry.png" />
-    <None Include="Resources\DirectShapeByCurve.png" />
-    <None Include="Resources\DirectShapeByMesh.png" />
-    <None Include="Resources\DirectShapeByPoint.png" />
-    <None Include="Resources\DirectShapeCategories.png" />
-    <None Include="Resources\DocumentCategories.png" />
-    <None Include="Resources\DocumentElements.png" />
-    <None Include="Resources\DocumentElementTypes.png" />
-    <None Include="Resources\DocumentLevels.png" />
-    <None Include="Resources\DocumentLevelsPicker.png" />
-    <None Include="Resources\DocumentParameters.png" />
-    <None Include="Resources\DocumentFamiliesPicker.png" />
-    <None Include="Resources\Edge.png" />
-    <None Include="Resources\GeometricElement.png" />
-    <None Include="Resources\ElementDecompose.png" />
-    <None Include="Resources\ElementGeometry.png" />
-    <None Include="Resources\ElementParameterGet.png" />
-    <None Include="Resources\ElementParameters.png" />
-    <None Include="Resources\ElementParametersSet.png" />
-    <None Include="Resources\ElementPreview.png" />
-    <None Include="Resources\ElementDelete.png" />
-    <None Include="Resources\ElementType.png" />
-    <None Include="Resources\ElementTypeByName.png" />
-    <None Include="Resources\Face.png" />
-    <None Include="Resources\FloorByOutline.png" />
-    <None Include="Resources\FormByCurves.png" />
-    <None Include="Resources\FormByGeometry.png" />
-    <None Include="Resources\ModelLineByCurve.png" />
-    <None Include="Resources\ParameterByName.png" />
-    <None Include="Resources\ParameterKey.png" />
-    <None Include="Resources\ParameterKeyDecompose.png" />
-    <None Include="Resources\ParameterValueDecompose.png" />
-    <None Include="Resources\SketchPlane.png" />
-    <None Include="Resources\SketchPlaneByPlane.png" />
-    <None Include="Resources\TopographyByPoints.png" />
-    <None Include="Resources\Vertex.png" />
-    <None Include="Resources\WallByCurve.png" />
-    <None Include="Resources\RoofByOutline.png" />
-    <None Include="Resources\FamilyInstanceByLocation.png" />
-    <None Include="Resources\ElementIdentity.png" />
-    <None Include="Resources\ColumnByCurve.png" />
-    <None Include="Resources\DirectShapeByBrep.png" />
-    <None Include="Resources\CategorySubCategories.png" />
-    <None Include="Resources\DirectShapeByLocation.png" />
-    <None Include="Resources\LevelByElevation.png" />
-    <None Include="Resources\GridByCurve.png" />
-    <None Include="Resources\AdaptiveComponentByPoints.png" />
-    <None Include="Resources\AnnotationCategoriesPicker.png" />
-    <None Include="Resources\ModelCategoriesPicker.png" />
-    <None Include="Resources\AnalyticalCategoriesPicker.png" />
-    <None Include="Resources\TagCategoriesPicker.png" />
+    <None Include="Resources\Components\AdaptiveComponentByPoints.png" />
+    <None Include="Resources\Components\BeamByCurve.png" />
+    <None Include="Resources\Components\BuildingPadByOutline.png" />
+    <None Include="Resources\Components\BuiltInParameterGroup.png" />
+    <None Include="Resources\Components\CategorySubCategories.png" />
+    <None Include="Resources\Components\ColumnByCurve.png" />
+    <None Include="Resources\Components\DirectShapeByBrep.png" />
+    <None Include="Resources\Components\DirectShapeByCurve.png" />
+    <None Include="Resources\Components\DirectShapeByGeometry.png" />
+    <None Include="Resources\Components\DirectShapeByLocation.png" />
+    <None Include="Resources\Components\DirectShapeByMesh.png" />
+    <None Include="Resources\Components\DirectShapeByPoint.png" />
+    <None Include="Resources\Components\DocumentCategories.png" />
+    <None Include="Resources\Components\DocumentElements.png" />
+    <None Include="Resources\Components\DocumentElementTypes.png" />
+    <None Include="Resources\Components\DocumentLevels.png" />
+    <None Include="Resources\Components\DocumentParameters.png" />
+    <None Include="Resources\Components\ElementDecompose.png" />
+    <None Include="Resources\Components\ElementDelete.png" />
+    <None Include="Resources\Components\ElementGeometry.png" />
+    <None Include="Resources\Components\ElementIdentity.png" />
+    <None Include="Resources\Components\ElementParameterGet.png" />
+    <None Include="Resources\Components\ElementParameters.png" />
+    <None Include="Resources\Components\ElementParametersSet.png" />
+    <None Include="Resources\Components\ElementPreview.png" />
+    <None Include="Resources\Components\FamilyInstanceByLocation.png" />
+    <None Include="Resources\Components\FloorByOutline.png" />
+    <None Include="Resources\Components\FormByCurves.png" />
+    <None Include="Resources\Components\FormByGeometry.png" />
+    <None Include="Resources\Components\GridByCurve.png" />
+    <None Include="Resources\Components\LevelByElevation.png" />
+    <None Include="Resources\Components\ModelLineByCurve.png" />
+    <None Include="Resources\Components\ParameterByName.png" />
+    <None Include="Resources\Components\ParameterKeyDecompose.png" />
+    <None Include="Resources\Components\ParameterValueDecompose.png" />
+    <None Include="Resources\Components\RoofByOutline.png" />
+    <None Include="Resources\Components\SketchPlaneByPlane.png" />
+    <None Include="Resources\Components\TopographyByPoints.png" />
+    <None Include="Resources\Components\WallByCurve.png" />
+    <None Include="Resources\Parameters\AnalyticalCategoriesPicker.png" />
+    <None Include="Resources\Parameters\AnnotationCategoriesPicker.png" />
+    <None Include="Resources\Parameters\BuiltInParameterByName.png" />
+    <None Include="Resources\Parameters\BuiltInParameterGroups.png" />
+    <None Include="Resources\Parameters\Category.png" />
+    <None Include="Resources\Parameters\CategoryTypes.png" />
+    <None Include="Resources\Parameters\DirectShapeCategories.png" />
+    <None Include="Resources\Parameters\DocumentFamiliesPicker.png" />
+    <None Include="Resources\Parameters\DocumentLevelsPicker.png" />
+    <None Include="Resources\Parameters\Edge.png" />
+    <None Include="Resources\Parameters\ElementType.png" />
+    <None Include="Resources\Parameters\ElementTypeByName.png" />
+    <None Include="Resources\Parameters\Face.png" />
+    <None Include="Resources\Parameters\GeometricElement.png" />
+    <None Include="Resources\Parameters\ModelCategoriesPicker.png" />
+    <None Include="Resources\Parameters\ParameterKey.png" />
+    <None Include="Resources\Parameters\SketchPlane.png" />
+    <None Include="Resources\Parameters\TagCategoriesPicker.png" />
+    <None Include="Resources\Parameters\Vertex.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
