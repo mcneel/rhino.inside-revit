@@ -1064,7 +1064,7 @@ namespace RhinoInside.Revit.GH.Components
 
     #region IGH_ElementIdBakeAwareObject
     bool Bake.IGH_ElementIdBakeAwareObject.CanBake(Bake.BakeOptions options) =>
-      Params?.Output.OfType<Parameters.IGH_ElementIdParam>().
+      Params?.Output.OfType<Kernel.IGH_ElementIdParam>().
       Where
       (
         x =>

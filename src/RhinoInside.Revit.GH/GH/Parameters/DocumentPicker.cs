@@ -7,7 +7,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public abstract class DocumentPicker : GH_ValueList, IGH_ElementIdParam
+  public abstract class DocumentPicker : GH_ValueList, Kernel.IGH_ElementIdParam
   {
     #region IGH_ElementIdParam
     protected virtual DB.ElementFilter ElementFilter => null;
@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Parameters
       return ElementFilter?.PassesFilter(document, id) ?? true;
     }
 
-    bool IGH_ElementIdParam.NeedsToBeExpired
+    bool Kernel.IGH_ElementIdParam.NeedsToBeExpired
     (
       DB.Document doc,
       ICollection<DB.ElementId> added,

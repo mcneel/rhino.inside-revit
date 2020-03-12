@@ -31,7 +31,7 @@ namespace RhinoInside.Revit.GH.Components
         {
           var document = e.GetDocument();
           var empty = new DB.ElementId[0];
-          foreach (var param in Params.Output.OfType<Parameters.IGH_ElementIdParam>())
+          foreach (var param in Params.Output.OfType<Kernel.IGH_ElementIdParam>())
           {
             if (param.NeedsToBeExpired(document, empty, deleted, empty))
               return true;

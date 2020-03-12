@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.GH.Components
     protected virtual string IconTag => GetType().Name.Substring(0, 1);
   }
 
-  public abstract class Component : GH_Component, IGH_ElementIdComponent
+  public abstract class Component : GH_Component, Kernel.IGH_ElementIdComponent
   {
     protected Component(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
@@ -33,7 +33,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       var persistentInputs = Params.Input.
         Where(x => x.DataType == GH_ParamData.local && x.Phase != GH_SolutionPhase.Blank).
-        OfType<Parameters.IGH_ElementIdParam>();
+        OfType<Kernel.IGH_ElementIdParam>();
 
       if (persistentInputs.Any())
       {

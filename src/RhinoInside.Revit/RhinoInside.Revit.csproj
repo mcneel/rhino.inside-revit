@@ -177,6 +177,8 @@
     <Compile Include="External\ActivationGate.cs" />
     <Compile Include="External\DB.cs" />
     <Compile Include="External\UI.cs" />
+    <Compile Include="GH\Bake.cs" />
+    <Compile Include="GH\Kernel.cs" />
     <Compile Include="Rhino\Rhinoceros.cs" />
     <Compile Include="Rhino\DocumentPreviewServer.cs" />
     <Compile Include="Samples\Sample4.cs" />

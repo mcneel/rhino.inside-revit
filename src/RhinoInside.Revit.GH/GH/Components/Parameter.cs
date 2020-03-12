@@ -4,11 +4,12 @@ using System.Runtime.InteropServices;
 using Autodesk.Revit.DB;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using RhinoInside.Revit.Exceptions;
-using RhinoInside.Revit.GH.Kernel.Attributes;
 
 namespace RhinoInside.Revit.GH.Components
 {
+  using Exceptions;
+  using Kernel.Attributes;
+
   public class ParameterKeyDecompose : Component
   {
     public override Guid ComponentGuid => new Guid("A80F4919-2387-4C78-BE2B-2F35B2E60298");

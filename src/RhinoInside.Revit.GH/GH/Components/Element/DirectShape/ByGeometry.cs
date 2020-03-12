@@ -5,10 +5,11 @@ using System.Runtime.InteropServices;
 using Autodesk.Revit.DB;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
-using RhinoInside.Revit.GH.Kernel.Attributes;
 
 namespace RhinoInside.Revit.GH.Components
 {
+  using Kernel.Attributes;
+
   public class DirectShapeByGeometry : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("0bfbda45-49cc-4ac6-8d6d-ecd2cfed062a");

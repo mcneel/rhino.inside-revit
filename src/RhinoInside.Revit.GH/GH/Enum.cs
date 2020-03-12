@@ -7,7 +7,6 @@ using System.Windows.Forms;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
-using RhinoInside.Revit.GH.Kernel.Attributes;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -180,6 +179,8 @@ namespace RhinoInside.Revit.GH.Types
 
 namespace RhinoInside.Revit.GH.Parameters
 {
+  using Kernel.Attributes;
+
   public class Param_Enum<T> : GH_PersistentParam<T>, IGH_ObjectProxy
     where T : Types.GH_Enumerate
   {

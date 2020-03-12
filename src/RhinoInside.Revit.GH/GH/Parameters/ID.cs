@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
   public abstract class ElementIdParam<T, R> :
     GH_PersistentParam<T>,
-    IGH_ElementIdParam
+    Kernel.IGH_ElementIdParam
     where T : class, Types.IGH_ElementId
   {
     public override sealed string TypeName => "Revit " + Name;
@@ -294,7 +294,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #endregion
 
     #region IGH_ElementIdParam
-    bool IGH_ElementIdParam.NeedsToBeExpired
+    bool Kernel.IGH_ElementIdParam.NeedsToBeExpired
     (
       DB.Document doc,
       ICollection<DB.ElementId> added,

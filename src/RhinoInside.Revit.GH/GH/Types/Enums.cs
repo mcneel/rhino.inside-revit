@@ -1,10 +1,11 @@
 using System;
 using System.Linq;
-using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Kernel.Attributes;
+
   [
     ComponentGuid("A3621A84-190A-48C2-9B0C-F5784B78089C"),
     Name("Storage Type"),
