@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Parameters
   {
     public override Guid ComponentGuid => new Guid("F3427D5C-3793-4E32-B219-8172D56EF04C");
     public override GH_Exposure Exposure => GH_Exposure.hidden;
-    protected override Types.Document PreferredCast(object data) => data is DB.Document doc ? new Types.Document(doc) : null;
+    protected override Types.Document PreferredCast(object data) => Types.Document.FromDocument(data as DB.Document);
 
     public Document() : base("Document", "Document", string.Empty, "Params", "Revit")
     { }

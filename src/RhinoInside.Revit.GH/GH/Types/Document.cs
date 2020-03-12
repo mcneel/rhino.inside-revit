@@ -17,8 +17,19 @@ namespace RhinoInside.Revit.GH.Types
     public override bool Equals(object obj) => (obj is Document doc) ? Equals(doc) : base.Equals(obj);
     public override int GetHashCode() => Value.GetFingerprintGUID().GetHashCode();
 
+    public static Document FromDocument(DB.Document document)
+    {
+      if (document is null)
+        return null;
+
+      if (document.IsFamilyDocument)
+        return new FamilyDocument(document);
+
+      return new ProjectDocument(document);
+    }
+
     public Document() { }
-    public Document(DB.Document value) : base(value) { }
+    protected Document(DB.Document value) : base(value) { }
 
     public override bool CastFrom(object source)
     {
@@ -89,5 +100,21 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     public virtual string DisplayName => Value is null ? "<Null>" : Value.Title;
+  }
+
+  public class ProjectDocument : Document
+  {
+    public override string TypeName => "Revit Project Documnent";
+    public override string TypeDescription => "Represents a Revit project document";
+
+    public ProjectDocument(DB.Document value) : base(value) { }
+  }
+
+  public class FamilyDocument : Document
+  {
+    public override string TypeName => "Revit Family Documnent";
+    public override string TypeDescription => "Represents a Revit family document";
+
+    public FamilyDocument(DB.Document value) : base(value) { }
   }
 }
