@@ -81,7 +81,8 @@ namespace RhinoInside.Revit.GH.Components
         @"<dt><b>;</b></dt><dd>Regular expresion, see " + "<a target=\"_blank\" href=\"https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference\">here</a> as reference</dd>" +
         @"<dt><b>></b></dt><dd>Else it looks for an exact match</dd>" +
         @"</dl>",
-        ContactURI = @"https://discourse.mcneel.com/c/rhino-inside/Revit/"
+        ContactURI = AssemblyInfo.ContactURI,
+        WebPageURI = AssemblyInfo.WebPageURI
       };
 
       return nTopic.HtmlFormat();

@@ -603,8 +603,7 @@ namespace Grasshopper.External.Special
         @"<dt><b>?</b></dt><dd>Contains, same as a regular search</dd>" +
         @"<dt><b>:</b></dt><dd>Wildcards, see Microsoft.VisualBasic " + "<a target=\"_blank\" href=\"https://docs.microsoft.com/en-us/dotnet/visual-basic/language-reference/operators/like-operator#pattern-options\">LikeOperator</a></dd>" +
         @"<dt><b>;</b></dt><dd>Regular expresion, see " + "<a target=\"_blank\" href=\"https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference\">here</a> as reference</dd>" +
-        @"</dl>",
-        ContactURI = @"https://discourse.mcneel.com/c/serengeti/inside"
+        @"</dl>"
       };
 
       return nTopic.HtmlFormat();

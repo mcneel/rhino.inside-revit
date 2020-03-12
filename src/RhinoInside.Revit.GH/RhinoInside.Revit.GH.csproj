@@ -173,6 +173,7 @@
     <Compile Include="Extensions\Grasshopper.cs" />
     <Compile Include="Extensions\System.cs" />
     <Compile Include="Extensions\WinForms.cs" />
+    <Compile Include="GH\AssemblyInfo.cs" />
     <Compile Include="GH\Attributes.cs" />
     <Compile Include="GH\Components\Category\GraphicsStyle.cs" />
     <Compile Include="GH\Components\Category\Identity.cs" />
