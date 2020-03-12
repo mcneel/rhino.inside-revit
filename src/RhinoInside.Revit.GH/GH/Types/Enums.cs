@@ -28,6 +28,13 @@ namespace RhinoInside.Revit.GH.Types
   public class UnitType : GH_Enum<DB.UnitType> { }
 
   [
+    ComponentGuid("ABE3F6CB-CE2D-4DBE-AB81-A6CB884D7DE1"),
+    Name("Unit System"),
+    Description("Represents a Revit unit system."),
+  ]
+  public class UnitSystem : GH_Enum<DB.UnitSystem> { }
+
+  [
     ComponentGuid("3D9979B4-65C8-447F-BCEA-3705249DF3B6"),
     Name("Parameter Group"),
     Description("Represents a Revit parameter group."),
