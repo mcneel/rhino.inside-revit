@@ -195,13 +195,17 @@
     <Compile Include="Components\Element\AdaptiveComponent\ByPoints.cs" />
     <Compile Include="Components\Element\Beam\ByCurve.cs" />
     <Compile Include="Components\Element\BuildingPad\ByOutline.cs" />
+    <Compile Include="Components\Element\Delete.cs" />
+    <Compile Include="Components\Element\Geometry.cs" />
+    <Compile Include="Components\Element\Inspect.cs" />
+    <Compile Include="Components\Element\Materials.cs" />
     <Compile Include="Components\Element\Column\ByCurve.cs" />
     <Compile Include="Components\Element\DirectShape\ByBrep.cs" />
     <Compile Include="Components\Element\DirectShape\ByCurve.cs" />
     <Compile Include="Components\Element\DirectShape\ByGeometry.cs" />
     <Compile Include="Components\Element\DirectShape\ByMesh.cs" />
     <Compile Include="Components\Element\DirectShape\ByPoint.cs" />
-    <Compile Include="Components\Element\Element.cs" />
+    <Compile Include="Components\Element\Identity.cs" />
     <Compile Include="Components\Element\Material\Identity.cs" />
     <Compile Include="Components\Element\Parameters.cs" />
     <Compile Include="Components\Element\FamilyInstance\ByPointAtHost.cs" />
@@ -214,6 +218,7 @@
     <Compile Include="Components\Element\Material\ByName.cs" />
     <Compile Include="Components\Element\ModelLine\ByCurve.cs" />
     <Compile Include="Components\Element\Passport.cs" />
+    <Compile Include="Components\Element\Preview.cs" />
     <Compile Include="Components\Element\Roof\ByOutline.cs" />
     <Compile Include="Components\Element\SketchPlane\ByPlane.cs" />
     <Compile Include="Components\Element\Topography\ByPoints.cs" />
