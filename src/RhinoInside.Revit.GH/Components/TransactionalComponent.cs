@@ -511,6 +511,7 @@ namespace RhinoInside.Revit.GH.Components
     }
     protected void ThrowIfNotValid(string paramName, Rhino.Geometry.GeometryBase value)
     {
+      if (value is null) ThrowArgumentException(paramName);
       if (!value.IsValidWithLog(out var log)) ThrowArgumentException(paramName, log);
     }
     #endregion
