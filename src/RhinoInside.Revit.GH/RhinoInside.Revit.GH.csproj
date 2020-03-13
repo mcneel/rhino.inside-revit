@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -189,8 +189,9 @@
     <Compile Include="Components\Document\Save.cs" />
     <Compile Include="Components\Document\Views.cs" />
     <Compile Include="Components\ElementFilter.cs" />
-    <Compile Include="Components\ElementType\ElementType.cs" />
+    <Compile Include="Components\ElementType\Duplicate.cs" />
     <Compile Include="Components\ElementType\Identity.cs" />
+    <Compile Include="Components\ElementType\Similar.cs" />
     <Compile Include="Components\Element\AdaptiveComponent\ByPoints.cs" />
     <Compile Include="Components\Element\Beam\ByCurve.cs" />
     <Compile Include="Components\Element\BuildingPad\ByOutline.cs" />
