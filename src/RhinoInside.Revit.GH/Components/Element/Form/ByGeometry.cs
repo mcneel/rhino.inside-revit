@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components
     (
       "AddForm.ByGeometry", "ByGeometry",
       "Given its Geometry, it adds a Form element to the active Revit document",
-      "Revit", "Mass"
+      "Revit", "Family Element"
     )
     { }
 
@@ -32,7 +32,7 @@ namespace RhinoInside.Revit.GH.Components
     )
     {
       if (!doc.IsFamilyDocument)
-        throw new InvalidOperationException("This component can only run in Family editor");
+        throw new InvalidOperationException("This component can only run on a Family document");
 
       var scaleFactor = 1.0 / Revit.ModelUnits;
       brep = brep.ChangeUnits(scaleFactor);

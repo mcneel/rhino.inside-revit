@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -170,15 +170,13 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="Extensions\Grasshopper.cs" />
-    <Compile Include="Extensions\System.cs" />
-    <Compile Include="Extensions\WinForms.cs" />
     <Compile Include="Attributes.cs" />
     <Compile Include="Components\Category\GraphicsStyle.cs" />
     <Compile Include="Components\Category\Identity.cs" />
     <Compile Include="Components\Category\ObjectStyle.cs" />
     <Compile Include="Components\Category\Parameters.cs" />
     <Compile Include="Components\Category\SubCategories.cs" />
+    <Compile Include="Components\Component.cs" />
     <Compile Include="Components\Document\Active.cs" />
     <Compile Include="Components\Document\Categories.cs" />
     <Compile Include="Components\Document\Document.cs" />
@@ -190,6 +188,7 @@
     <Compile Include="Components\Document\Levels.cs" />
     <Compile Include="Components\Document\Save.cs" />
     <Compile Include="Components\Document\Views.cs" />
+    <Compile Include="Components\ElementFilter.cs" />
     <Compile Include="Components\ElementType\ElementType.cs" />
     <Compile Include="Components\ElementType\Identity.cs" />
     <Compile Include="Components\Element\AdaptiveComponent\ByPoints.cs" />
@@ -223,7 +222,23 @@
     <Compile Include="Components\Element\View\Identity.cs" />
     <Compile Include="Components\Element\View\View3DByPlane.cs" />
     <Compile Include="Components\Element\Wall\ByCurve.cs" />
+    <Compile Include="Components\Family\Geometry\ByBrep.cs" />
+    <Compile Include="Components\Family\Geometry\ByCurve.cs" />
+    <Compile Include="Components\Family\Element\Visibility\Construct.cs" />
+    <Compile Include="Components\Family\Element\Visibility\Deconstruct.cs" />
+    <Compile Include="Components\Family\Types.cs" />
+    <Compile Include="Components\Family\Load.cs" />
+    <Compile Include="Components\Family\LoadOptions.cs" />
+    <Compile Include="Components\Family\New.cs" />
+    <Compile Include="Components\Family\Geometry\OpeningByCurve.cs" />
+    <Compile Include="Components\Family\Save.cs" />
+    <Compile Include="Components\Family\Geometry\VoidByBrep.cs" />
+    <Compile Include="Components\Parameter.cs" />
+    <Compile Include="Components\TransactionalComponent.cs" />
     <Compile Include="Enum.cs" />
+    <Compile Include="Extensions\Grasshopper.cs" />
+    <Compile Include="Extensions\System.cs" />
+    <Compile Include="Extensions\WinForms.cs" />
     <Compile Include="Parameters\Category.cs" />
     <Compile Include="Parameters\CategoryTypes.cs" />
     <Compile Include="Parameters\DatumPlane.cs" />
@@ -242,6 +257,7 @@
     <Compile Include="Parameters\SketchPlane.cs" />
     <Compile Include="Parameters\ValueList.cs" />
     <Compile Include="Parameters\View.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -262,13 +278,7 @@
     <Compile Include="Types\SketchPlane.cs" />
     <Compile Include="Types\Material.cs" />
     <Compile Include="Types\HostObject.cs" />
-    <Compile Include="Components\Component.cs" />
-    <Compile Include="Components\TransactionalComponent.cs" />
-    <Compile Include="Components\Parameter.cs" />
-    <Compile Include="Components\Family.cs" />
-    <Compile Include="Components\ElementFilter.cs" />
     <Compile Include="Types\View.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ValueSet.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -338,6 +348,7 @@
     <None Include="Resources\Parameters\TagCategoriesPicker.png" />
     <None Include="Resources\Parameters\Vertex.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.dll" DestinationFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.gha" />
