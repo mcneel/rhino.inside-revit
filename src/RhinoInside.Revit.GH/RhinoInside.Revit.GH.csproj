@@ -197,6 +197,7 @@
     <Compile Include="Components\Element\BuildingPad\ByOutline.cs" />
     <Compile Include="Components\Element\Delete.cs" />
     <Compile Include="Components\Element\Geometry.cs" />
+    <Compile Include="Components\Element\HostObject\Faces.cs" />
     <Compile Include="Components\Element\Inspect.cs" />
     <Compile Include="Components\Element\Materials.cs" />
     <Compile Include="Components\Element\Column\ByCurve.cs" />
@@ -211,7 +212,6 @@
     <Compile Include="Components\Element\FamilyInstance\ByPointAtHost.cs" />
     <Compile Include="Components\Element\Floor\ByOutline.cs" />
     <Compile Include="Components\Element\Grid\ByCurve.cs" />
-    <Compile Include="Components\Element\HostObject\GetFaces.cs" />
     <Compile Include="Components\Element\Level\ByElevation.cs" />
     <Compile Include="Components\Element\MaterialQuanities.cs" />
     <Compile Include="Components\Element\Material\ByColor.cs" />

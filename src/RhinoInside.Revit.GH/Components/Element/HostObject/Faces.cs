@@ -5,13 +5,13 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class HostObjectGetFaces : Component
+  public class HostObjectFaces : Component
   {
     public override Guid ComponentGuid => new Guid("032AD3F7-9E55-44B6-BE79-3DBF67D98F14");
     protected override string IconTag => "F";
 
-    public HostObjectGetFaces()
-    : base("HostObject.GetFaces", "HostObject.GetFaces", "Obtains a set of types that are owned by Family", "Revit", "Host")
+    public HostObjectFaces()
+    : base("HostObject.Faces", "HostObject.Faces", "Obtains a set of types that are owned by Family", "Revit", "Host")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
