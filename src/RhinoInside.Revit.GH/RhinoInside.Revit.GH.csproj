@@ -205,8 +205,6 @@
     <Compile Include="Components\Element\Parameters.cs" />
     <Compile Include="Components\Element\FamilyInstance\ByPointAtHost.cs" />
     <Compile Include="Components\Element\Floor\ByOutline.cs" />
-    <Compile Include="Components\Element\Form\ByCurves.cs" />
-    <Compile Include="Components\Element\Form\ByGeometry.cs" />
     <Compile Include="Components\Element\Grid\ByCurve.cs" />
     <Compile Include="Components\Element\HostObject\GetFaces.cs" />
     <Compile Include="Components\Element\Level\ByElevation.cs" />
@@ -222,10 +220,12 @@
     <Compile Include="Components\Element\View\Identity.cs" />
     <Compile Include="Components\Element\View\View3DByPlane.cs" />
     <Compile Include="Components\Element\Wall\ByCurve.cs" />
-    <Compile Include="Components\Family\Geometry\ByBrep.cs" />
-    <Compile Include="Components\Family\Geometry\ByCurve.cs" />
+    <Compile Include="Components\Family\Element\Form\ByCurves.cs" />
+    <Compile Include="Components\Family\Element\Form\ByGeometry.cs" />
     <Compile Include="Components\Family\Element\Visibility\Construct.cs" />
     <Compile Include="Components\Family\Element\Visibility\Deconstruct.cs" />
+    <Compile Include="Components\Family\Geometry\ByBrep.cs" />
+    <Compile Include="Components\Family\Geometry\ByCurve.cs" />
     <Compile Include="Components\Family\Types.cs" />
     <Compile Include="Components\Family\Load.cs" />
     <Compile Include="Components\Family\LoadOptions.cs" />
