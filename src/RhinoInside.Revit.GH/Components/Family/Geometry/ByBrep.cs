@@ -7,12 +7,12 @@ namespace RhinoInside.Revit.GH.Components
   public class FamilyGeometryByBrep : Component
   {
     public override Guid ComponentGuid => new Guid("8A51D5A1-F463-492B-AE5B-B4F7870D106B");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.quinary;
 
     protected override string IconTag => "B";
 
     public FamilyGeometryByBrep()
-    : base("FamilyGeometry.ByBrep", "FamilyGeometry.ByBrep", string.Empty, "Revit", "Family")
+    : base("Family Form Geometry", "FamForm", string.Empty, "Revit", "Family")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

@@ -8,13 +8,13 @@ namespace RhinoInside.Revit.GH.Components
   public class DirectShapeByMesh : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("5542506A-A09E-4EC9-92B4-F2B52417511C");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     public DirectShapeByMesh() : base
     (
-      "AddDirectShape.ByMesh", "ByMesh",
+      "Add Mesh DirectShape", "MshDShape",
       "Given a Mesh, it adds a Mesh shape to the active Revit document",
-      "Revit", "Geometry"
+      "Revit", "DirectShape"
     )
     { }
 

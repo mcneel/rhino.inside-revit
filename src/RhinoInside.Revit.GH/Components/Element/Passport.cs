@@ -6,11 +6,11 @@ namespace RhinoInside.Revit.GH.Components
   public class ElementPassport : Component
   {
     public override Guid ComponentGuid => new Guid("BD534A54-B7ED-4D56-AA53-1F446D445DF6");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.obscure;
     protected override string IconTag => "PASS";
 
     public ElementPassport()
-    : base("Element.Passport", "Element.Passport", string.Empty, "Revit", "Element")
+    : base("Element Passport", "Passport", string.Empty, "Revit", "Element")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

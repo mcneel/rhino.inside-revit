@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "ID";
 
     public ElementIdentity()
-    : base("Element.Identity", "Element.Identity", "Query element identity information", "Revit", "Element")
+    : base("Element Identity", "Element.Identity", "Query element identity information", "Revit", "Element")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

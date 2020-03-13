@@ -250,7 +250,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public ElementTypeByName()
     {
-      Name = "ElementType.ByName";
+      Name = "ElementType Picker";
       Description = "Provides an Element type picker";
     }
 

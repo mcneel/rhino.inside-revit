@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Components
 
     public BeamByCurve() : base
     (
-      "AddBeam.ByCurve", "ByCurve",
+      "Add Beam", "Beam",
       "Given its Axis, it adds a Beam element to the active Revit document",
       "Revit", "Build"
     )

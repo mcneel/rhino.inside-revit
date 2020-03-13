@@ -8,13 +8,13 @@ namespace RhinoInside.Revit.GH.Components
   public class DirectShapeByPoint : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("7A889B89-C423-4ED8-91D9-5CECE1EE803D");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     public DirectShapeByPoint() : base
     (
-      "AddDirectShape.ByPoint", "ByPoint",
+      "Add Point DirectShape", "PtDShape",
       "Given a Point, it adds a Point shape to the active Revit document",
-      "Revit", "Geometry"
+      "Revit", "DirectShape"
     )
     { }
 

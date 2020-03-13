@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Components
 
     public TopographyByPoints() : base
     (
-      "AddTopography.ByPoints", "ByPoints",
+      "Add Topography", "Topography",
       "Given a set of Points, it adds a Topography surface to the active Revit document",
       "Revit", "Site"
     )

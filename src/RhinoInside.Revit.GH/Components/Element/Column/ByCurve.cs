@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH.Components
 
     public ColumnByCurve() : base
     (
-      "AddColumn.ByCurve", "ByCurve",
+      "Add Column", "Column",
       "Given its Axis, it adds a structural Column to the active Revit document",
       "Revit", "Build"
     )

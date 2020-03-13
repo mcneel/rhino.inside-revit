@@ -13,10 +13,11 @@ namespace RhinoInside.Revit.GH.Components
   public class ElementInspect : Component, IGH_VariableParameterComponent
   {
     public override Guid ComponentGuid => new Guid("FAD33C4B-A7C3-479B-B309-8F5363B25599");
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "I";
 
     public ElementInspect()
-    : base("Element.Inspect", "Inspect", "Inspects Element parameters", "Revit", "Element")
+    : base("Inspect Element", "Inspect", "Inspects Element parameters", "Revit", "Element")
     { }
 
     public override void AppendAdditionalMenuItems(ToolStripDropDown menu)

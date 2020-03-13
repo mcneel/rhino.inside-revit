@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Components
     public override Guid ComponentGuid => new Guid("1DD8AE78-F7DA-4F26-8353-4CCE6B925DC6");
 
     public CategoryObjectStyle()
-    : base("Category.ObjectStyle", "ObjectStyle", string.Empty, "Revit", "Category")
+    : base("Category ObjectStyle", "ObjectStyle", string.Empty, "Revit", "Category")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

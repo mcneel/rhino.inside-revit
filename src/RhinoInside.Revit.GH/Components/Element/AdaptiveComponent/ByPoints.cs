@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components
 
     public AdaptiveComponentByPoints() : base
     (
-      "AddAdaptiveComponent.ByPoints", "ByPoints",
+      "Add AdaptiveComponent", "AdapComp",
       "Given a collection of Points, it adds an AdaptiveComponent element to the active Revit document",
       "Revit", "Build"
     )

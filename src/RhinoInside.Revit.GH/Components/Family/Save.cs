@@ -9,10 +9,11 @@ namespace RhinoInside.Revit.GH.Components
   public class FamilySave : Component
   {
     public override Guid ComponentGuid => new Guid("C2B9B045-8FD2-4124-9294-D9BA809B44B1");
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "S";
 
     public FamilySave()
-    : base("Family.Save", "Family.Save", "Saves the Family to a given file path.", "Revit", "Family")
+    : base("Save Family", "Save", "Saves the Family to a given file path.", "Revit", "Family")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components
 
     public FormByCurves() : base
     (
-      "AddForm.ByCurves", "ByCurves",
+      "Add LoftForm", "LoftForm",
       "Given a list of curves, it adds a Form element to the active Revit document",
       "Revit", "Family Element"
     )

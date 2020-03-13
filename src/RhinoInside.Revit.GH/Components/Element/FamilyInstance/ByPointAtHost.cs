@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components
 
     public FamilyInstanceByLocation () : base
     (
-      "AddFamilyInstance.ByLocation", "ByLocation",
+      "Add FamilyInstance", "FamilyInstance",
       "Given its location, it reconstructs a FamilyInstance element into the active Revit document",
       "Revit", "Build"
     )

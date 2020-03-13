@@ -9,10 +9,11 @@ namespace RhinoInside.Revit.GH.Components
   public class FamilyLoad : DocumentComponent
   {
     public override Guid ComponentGuid => new Guid("0E244846-95AE-4B0E-8218-CB24FD4D34D1");
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "L";
 
     public FamilyLoad()
-    : base("Family.Load", "Family.Load", "Loads a family into the document", "Revit", "Family")
+    : base("Load Family", "Load", "Loads a family into the document", "Revit", "Family")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

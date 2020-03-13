@@ -13,8 +13,8 @@ namespace RhinoInside.Revit.GH.Components
 
     public DocumentElementTypes() : base
     (
-      "Document.ElementTypes", "ElementTypes",
-      "Get active document element types list",
+      "Document ElementTypes", "ElementTypes",
+      "Get document element types list",
       "Revit", "Document"
     )
     {

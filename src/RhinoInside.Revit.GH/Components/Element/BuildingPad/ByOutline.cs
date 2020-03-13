@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components
 
     public BuildingPadByOutline() : base
     (
-      "AddBuildingPad.ByOutline", "ByOutline",
+      "Add BuildingPad", "BuildingPad",
       "Given a set of contour Curves, it adds a BuildingPad element to the active Revit document",
       "Revit", "Site"
     )

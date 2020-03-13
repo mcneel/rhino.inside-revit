@@ -31,7 +31,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "⊄";
 
     public ElementExclusionFilter()
-    : base("Element.ExclusionFilter", "Exclusion Filter", "Filter used to exclude a set of elements", "Revit", "Filter")
+    : base("Exclusion Filter", "Exclusion", "Filter used to exclude a set of elements", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -60,7 +60,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "∧";
 
     public ElementLogicalAndFilter()
-    : base("Element.LogicalAndFilter", " Logical And Filter", "Filter used to combine a set of filters that pass when any pass", "Revit", "Filter")
+    : base("Logical And Filter", "LogAnd", "Filter used to combine a set of filters that pass when any pass", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -85,7 +85,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "∨";
 
     public ElementLogicalOrFilter()
-    : base("Element.LogicalOrFilter", " Logical Or Filter", "Filter used to combine a set of filters that pass when any pass", "Revit", "Filter")
+    : base("Logical Or Filter", "LogOr", "Filter used to combine a set of filters that pass when any pass", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -112,7 +112,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "T";
 
     public ElementExcludeElementTypeFilter()
-    : base("Element.ExcludeElementType", "Exclude ElementType Filter", "Filter used to exclude element types", "Revit", "Filter")
+    : base("Exclude ElementType", "NotElementType", "Filter used to exclude element types", "Revit", "Filter")
     { }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -132,7 +132,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "C";
 
     public ElementClassFilter()
-    : base("Element.ClassFilter", "Class Filter", "Filter used to match elements by their API class", "Revit", "Filter")
+    : base("Class Filter", "ByClass", "Filter used to match elements by their API class", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -199,7 +199,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "C";
 
     public ElementCategoryFilter()
-    : base("Element.CategoryFilter", "Category Filter", "Filter used to match elements by their category", "Revit", "Filter")
+    : base("Category Filter", "ByCategory", "Filter used to match elements by their category", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -237,7 +237,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "T";
 
     public ElementTypeFilter()
-    : base("Element.TypeFilter", "Type Filter", "Filter used to match elements by their type", "Revit", "Filter")
+    : base("Type Filter", "ByType", "Filter used to match elements by their type", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -292,7 +292,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "B";
 
     public ElementBoundingBoxFilter()
-    : base("Element.BoundingBoxFilter", "BoundingBox Filter", "Filter used to match elements by their BoundingBox", "Revit", "Filter")
+    : base("BoundingBox Filter", "ByBBox", "Filter used to match elements by their BoundingBox", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -397,7 +397,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "I";
 
     public ElementIntersectsElementFilter()
-    : base("Element.IntersectsElementFilter", "Intersects element Filter", "Filter used to match elements that intersect to the given element", "Revit", "Filter")
+    : base("Intersects Element Filter", "IsectsElement", "Filter used to match elements that intersect to the given element", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -427,7 +427,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "I";
 
     public ElementIntersectsBrepFilter()
-    : base("Element.IntersectsBrepFilter", "Intersects brep Filter", "Filter used to match elements that intersect to the given brep", "Revit", "Filter")
+    : base("Intersects Brep Filter", "IsectsBrep", "Filter used to match elements that intersect to the given brep", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -458,7 +458,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "I";
 
     public ElementIntersectsMeshFilter()
-    : base("Element.IntersectsMeshFilter", "Intersects mesh Filter", "Filter used to match elements that intersect to the given mesh", "Revit", "Filter")
+    : base("Intersects Mesh Filter", "IsectsMesh", "Filter used to match elements that intersect to the given mesh", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -491,26 +491,31 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "L";
 
     public ElementLevelFilter()
-    : base("Element.LevelFilter", "Level Filter", "Filter used to match elements associated to the given level", "Revit", "Filter")
+    : base("Level Filter", "ByLevel", "Filter used to match elements associated to the given level", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager.AddParameter(new Parameters.Level(), "Level", "L", "Level to match", GH_ParamAccess.item);
+      manager[manager.AddParameter(new Parameters.Level(), "Level", "L", "Level to match", GH_ParamAccess.item)].Optional = true;
       base.RegisterInputParams(manager);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var levelId = DB.ElementId.InvalidElementId;
-      if (!DA.GetData("Level", ref levelId))
+      var level = default(DB.Level);
+      var _Level_ = Params.IndexOfInputParam("Level");
+      if
+      (
+        Params.Output[_Level_].DataType != GH_ParamData.@void &&
+        !DA.GetData(_Level_, ref level)
+      )
         return;
 
       var inverted = false;
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      DA.SetData("Filter", new DB.ElementLevelFilter(levelId, inverted));
+      DA.SetData("Filter", new DB.ElementLevelFilter(level?.Id ?? DB.ElementId.InvalidElementId, inverted));
     }
   }
 
@@ -521,35 +526,31 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "D";
 
     public ElementDesignOptionFilter()
-    : base("Element.DesignOptionFilter", "Design Option Filter", "Filter used to match elements associated to the given Design Option", "Revit", "Filter")
+    : base("DesignOption Filter", "ByDesignOption", "Filter used to match elements associated to the given Design Option", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager[manager.AddParameter(new Parameters.Element(), "Design Option", "D", "Design Option to match", GH_ParamAccess.item)].Optional = true;
+      manager[manager.AddParameter(new Parameters.Element(), "Design Option", "DO", "Design Option to match", GH_ParamAccess.item)].Optional = true;
       base.RegisterInputParams(manager);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var doc = Revit.ActiveDBDocument;
-      var designOptionId = DB.DesignOption.GetActiveDesignOptionId(doc);
-
       var designOption = default(DB.DesignOption);
-      if (DA.GetData("Design Option", ref designOption))
-      {
-        doc = designOption?.Document;
-        designOptionId = designOption?.Id;
-      }
-
-      if (doc is null || designOptionId is null)
+      var _DesignOption_ = Params.IndexOfInputParam("Design Option");
+      if
+      (
+        Params.Output[_DesignOption_].DataType != GH_ParamData.@void &&
+        !DA.GetData(_DesignOption_, ref designOption)
+      )
         return;
 
       var inverted = false;
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      DA.SetData("Filter", new DB.ElementDesignOptionFilter(designOptionId, inverted));
+      DA.SetData("Filter", new DB.ElementDesignOptionFilter(designOption?.Id ?? DB.ElementId.InvalidElementId, inverted));
     }
   }
 
@@ -560,7 +561,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "V";
 
     public ElementOwnerViewFilter()
-    : base("Element.OwnerViewFilter", "Owner View Filter", "Filter used to match elements associated to the given View", "Revit", "Filter")
+    : base("Owner View Filter", "ByOwnerView", "Filter used to match elements associated to the given View", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -571,14 +572,20 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var viewId = DB.ElementId.InvalidElementId;
-      DA.GetData("View", ref viewId);
+      var view = default(DB.View);
+      var _View_ = Params.IndexOfInputParam("View");
+      if
+      (
+        Params.Output[_View_].DataType != GH_ParamData.@void &&
+        !DA.GetData(_View_, ref view)
+      )
+        return;
 
       var inverted = false;
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      DA.SetData("Filter", new DB.ElementOwnerViewFilter(viewId, inverted));
+      DA.SetData("Filter", new DB.ElementOwnerViewFilter(view?.Id ?? DB.ElementId.InvalidElementId, inverted));
     }
   }
 
@@ -589,36 +596,31 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "S";
 
     public ElementSelectableInViewFilter()
-    : base("Element.SelectableInViewFilter", "Selectable in View Filter", "Filter used to match seletable elements into the given View", "Revit", "Filter")
+    : base("Selectable In View Filter", "SelecInView", "Filter used to match seletable elements into the given View", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager[manager.AddParameter(new Parameters.View(), "View", "V", "View to match", GH_ParamAccess.item)].Optional = true;
+      manager.AddParameter(new Parameters.View(), "View", "V", "View to match", GH_ParamAccess.item);
       base.RegisterInputParams(manager);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var doc = Revit.ActiveDBDocument;
-      var view = doc.ActiveView;
-
-      if (DA.GetData("View", ref view))
-        doc = view?.Document;
-
-      if (doc is null || view is null)
+      var view = default(DB.View);
+      if(!DA.GetData("View", ref view))
         return;
 
       var inverted = false;
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      DA.SetData("Filter", new Autodesk.Revit.UI.Selection.SelectableInViewFilter(doc, view.Id, inverted));
+      DA.SetData("Filter", new Autodesk.Revit.UI.Selection.SelectableInViewFilter(view.Document, view.Id, inverted));
     }
   }
   #endregion
 
-  #region
+  #region Quinary
   public class ElementParameterFilter : ElementFilterComponent
   {
     public override Guid ComponentGuid => new Guid("E6A1F501-BDA4-4B78-8828-084B5EDA926F");
@@ -626,7 +628,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "#";
 
     public ElementParameterFilter()
-    : base("Element.ParameterFilter", "Parameter Filter", "Filter used to match elements by the value of a parameter", "Revit", "Filter")
+    : base("Parameter Filter", "ParaFilter", "Filter used to match elements by the value of a parameter", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -907,7 +909,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override ConditionType Condition => ConditionType.NotEquals;
 
     public ElementFilterRuleNotEquals()
-    : base("Element.RuleNotEquals", "Not Equals", "Filter used to match elements if value of a parameter are not equals to Value", "Revit", "Filter")
+    : base("Not Equals Rule", "NotEquals", "Filter used to match elements if value of a parameter are not equals to Value", "Revit", "Filter")
     { }
   }
 
@@ -918,7 +920,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override ConditionType Condition => ConditionType.Equals;
 
     public ElementFilterRuleEquals()
-    : base("Element.RuleEquals", "Equals", "Filter used to match elements if value of a parameter equals to Value", "Revit", "Filter")
+    : base("Equals Rule", "Equals", "Filter used to match elements if value of a parameter equals to Value", "Revit", "Filter")
     { }
   }
 
@@ -929,7 +931,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override ConditionType Condition => ConditionType.Greater;
 
     public ElementFilterRuleGreater()
-    : base("Element.RuleGreater", "Greater", "Filter used to match elements if value of a parameter greater than Value", "Revit", "Filter")
+    : base("Greater Rule", "Greater", "Filter used to match elements if value of a parameter greater than Value", "Revit", "Filter")
     { }
   }
 
@@ -940,7 +942,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override ConditionType Condition => ConditionType.GreaterOrEqual;
 
     public ElementFilterRuleGreaterOrEqual()
-    : base("Element.RuleGreaterOrEqual", "Greater or Equal", "Filter used to match elements if value of a parameter greater or equal than Value", "Revit", "Filter")
+    : base("Greater Or Equal Rule", "GrtOrEqu", "Filter used to match elements if value of a parameter greater or equal than Value", "Revit", "Filter")
     { }
   }
 
@@ -951,7 +953,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override ConditionType Condition => ConditionType.Less;
 
     public ElementFilterRuleLess()
-    : base("Element.RuleLess", "Less", "Filter used to match elements if value of a parameter less than Value", "Revit", "Filter")
+    : base("Less Rule", "Less", "Filter used to match elements if value of a parameter less than Value", "Revit", "Filter")
     { }
   }
 
@@ -962,7 +964,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override ConditionType Condition => ConditionType.LessOrEqual;
 
     public ElementFilterRuleLessOrEqual()
-    : base("Element.RuleLessOrEqual", "Less or Equal", "Filter used to match elements if value of a parameter less or equal than Value", "Revit", "Filter")
+    : base("Less Or Equal Rule", "LessOrEqu", "Filter used to match elements if value of a parameter less or equal than Value", "Revit", "Filter")
     { }
   }
   #endregion

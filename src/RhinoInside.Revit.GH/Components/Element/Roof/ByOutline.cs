@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH.Components
 
     public RoofByOutline() : base
     (
-      "AddRoof.ByOutline", "ByOutline",
+      "Add Roof", "Roof",
       "Given its outline curve, it adds a Roof element to the active Revit document",
       "Revit", "Build"
     )

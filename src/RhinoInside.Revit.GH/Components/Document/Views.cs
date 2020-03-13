@@ -15,8 +15,8 @@ namespace RhinoInside.Revit.GH.Components
 
     public DocumentViews() : base
     (
-      "Document.Views", "Views",
-      "Get active document views list",
+      "Document Views", "Views",
+      "Get document views list",
       "Revit", "Document"
     )
     {

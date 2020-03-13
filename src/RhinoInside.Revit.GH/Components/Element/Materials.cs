@@ -8,10 +8,11 @@ namespace RhinoInside.Revit.GH.Components
   public class ElementMaterials : Component
   {
     public override Guid ComponentGuid => new Guid("93C18DFD-FAAB-4CF1-A681-C11754C2495D");
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => "M";
 
     public ElementMaterials()
-    : base("Element.Materials", "Element.Materials", "Query element used materials", "Revit", "Element")
+    : base("Element Materials", "Element.Materials", "Query element used materials", "Revit", "Element")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

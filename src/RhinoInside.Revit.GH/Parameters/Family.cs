@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       Category = "Revit";
       SubCategory = "Input";
-      Name = "Document.FamiliesPicker";
+      Name = "Families Picker";
       MutableNickName = false;
       Description = "Provides a Family picker";
 

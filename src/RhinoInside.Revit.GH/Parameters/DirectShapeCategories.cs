@@ -9,16 +9,16 @@ namespace RhinoInside.Revit.GH.Parameters
   public class DirectShapeCategories : GH_ValueList
   {
     public override Guid ComponentGuid => new Guid("7BAFE137-332B-481A-BE22-09E8BD4C86FC");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
     public DirectShapeCategories()
     {
-      Category = "Revit";
-      SubCategory = "Category";
-      Name = "DirectShape.Categories";
+      Name = "DirectShape Categories";
       NickName = "Categories";
       MutableNickName = false;
       Description = "Provides a picker of a valid DirectShape category";
+      Category = "Revit";
+      SubCategory = "DirectShape";
 
       ListItems.Clear();
 

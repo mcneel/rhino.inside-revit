@@ -4,15 +4,15 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class FamilyVoidByBrep : Component
+  public class FamilyGeometryVoidByBrep : Component
   {
     public override Guid ComponentGuid => new Guid("F0887AD5-8ACB-4806-BB12-7596BCEDFFED");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.quinary;
 
     protected override string IconTag => "V";
 
-    public FamilyVoidByBrep()
-    : base("FamilyVoid.ByBrep", "FamilyVoid.ByBrep", string.Empty, "Revit", "Family")
+    public FamilyGeometryVoidByBrep()
+    : base("Family Void Geometry", "FamVoid", string.Empty, "Revit", "Family")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

@@ -13,13 +13,13 @@ namespace RhinoInside.Revit.GH.Components
   public class DirectShapeByGeometry : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("0bfbda45-49cc-4ac6-8d6d-ecd2cfed062a");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
     public DirectShapeByGeometry() : base
     (
-      "AddDirectShape.ByGeometry", "ByGeometry",
+      "Add Geometry DirectShape", "GeoDShape",
       "Given its Geometry, it adds a DirectShape element to the active Revit document",
-      "Revit", "Geometry"
+      "Revit", "DirectShape"
     )
     { }
 
@@ -53,6 +53,7 @@ namespace RhinoInside.Revit.GH.Components
 
         var shape = geometry.
                     Select(x => AsGeometryBase(x)).
+                    //OfType<Rhino.Geometry.GeometryBase>().
                     Select(x => { ThrowIfNotValid(nameof(geometry), x); return x; }).
                     SelectMany(x =>
                     {
@@ -100,13 +101,13 @@ namespace RhinoInside.Revit.GH.Components
   public class DirectShapeTypeByGeometry : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("25DCFE8E-5BE9-460C-80E8-51B7041D8FED");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
 
     public DirectShapeTypeByGeometry() : base
     (
-      "AddDirectShapeType.ByGeometry", "ByGeometry",
+      "Add DirectShapeType", "DShapeTyp",
       "Given its Geometry, it reconstructs a DirectShapeType to the active Revit document",
-      "Revit", "Type"
+      "Revit", "DirectShape"
     )
     { }
 
@@ -187,13 +188,13 @@ namespace RhinoInside.Revit.GH.Components
   public class DirectShapeByLocation : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("A811EFA4-8DE2-46F3-9F88-3D4F13FE40BE");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
 
     public DirectShapeByLocation() : base
     (
-      "AddDirectShape.ByLocation", "ByLocation",
+      "Add DirectShape", "DShape",
       "Given its location, it reconstructs a DirectShape into the active Revit document",
-      "Revit", "Build"
+      "Revit", "DirectShape"
     )
     { }
 

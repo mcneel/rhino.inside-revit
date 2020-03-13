@@ -7,12 +7,12 @@ namespace RhinoInside.Revit.GH.Components
   public class ElementTypeDuplicate : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("5ED7E612-E5C6-4F0E-AA69-814CF2478F7E");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "D";
 
     public ElementTypeDuplicate() : base
     (
-      "ElementType.Duplicate", "Duplicate",
+      "Duplicate ElementType", "Duplicate",
       "Given a Name, it duplicates an ElementType into the active Revit document",
       "Revit", "Type"
     )

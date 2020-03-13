@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components
 
     public DocumentIdentity() : base
     (
-      "Document.Identity", "Identity",
+      "Document Identity", "Identity",
       "Query document identity information",
       "Revit", "Document"
     )
@@ -37,16 +37,16 @@ namespace RhinoInside.Revit.GH.Components
     }
   }
 
-  public class DocumentPassport : DocumentComponent
+  public class DocumentFile : DocumentComponent
   {
     public override Guid ComponentGuid => new Guid("C1C15806-311A-4A07-9DAE-6DBD1D98EC05");
     public override GH_Exposure Exposure => GH_Exposure.obscure;
-    protected override string IconTag => "PASS";
+    protected override string IconTag => "F";
     protected override DB.ElementFilter ElementFilter => null;
 
-    public DocumentPassport() : base
+    public DocumentFile() : base
     (
-      "Document.Passport", "Passport",
+      "Document File", "File",
       string.Empty,
       "Revit", "Document"
     )
@@ -84,7 +84,7 @@ namespace RhinoInside.Revit.GH.Components
 
     public DocumentWorksharing() : base
     (
-      "Document.Worksharing", "Worksharing",
+      "Document Worksharing", "Worksharing",
       string.Empty,
       "Revit", "Document"
     )
@@ -127,7 +127,7 @@ namespace RhinoInside.Revit.GH.Components
 
     public DocumentCloud() : base
     (
-      "Document.Cloud", "Cloud",
+      "Document Cloud", "Cloud",
       string.Empty,
       "Revit", "Document"
     )

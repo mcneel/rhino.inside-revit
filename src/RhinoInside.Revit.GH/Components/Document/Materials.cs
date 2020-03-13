@@ -15,8 +15,8 @@ namespace RhinoInside.Revit.GH.Components
 
     public DocumentMaterials() : base
     (
-      "Document.Materials", "Materials",
-      "Get active document materials list",
+      "Document Materials", "Materials",
+      "Get document materials list",
       "Revit", "Document"
     )
     {

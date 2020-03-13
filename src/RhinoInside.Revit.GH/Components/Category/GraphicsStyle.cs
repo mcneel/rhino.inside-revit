@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "G";
 
     public CategoryGraphicsStyle()
-    : base("Category.GraphicsStyle", "Category.GraphicsStyle", string.Empty, "Revit", "Category")
+    : base("Category GraphicsStyle", "GraphicsStyle", string.Empty, "Revit", "Category")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

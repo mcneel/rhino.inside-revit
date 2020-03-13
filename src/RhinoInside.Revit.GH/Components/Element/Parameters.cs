@@ -221,10 +221,10 @@ namespace RhinoInside.Revit.GH.Components
   public class ElementParameterGet : Component
   {
     public override Guid ComponentGuid => new Guid("D86050F2-C774-49B1-9973-FB3AB188DC94");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
     public ElementParameterGet()
-    : base("Element.ParameterGet", "ParameterGet", "Gets the parameter value of a specified Revit Element", "Revit", "Element")
+    : base("Get Element Parameter", "GetPara", "Gets the parameter value of a specified Revit Element", "Revit", "Element")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -256,10 +256,10 @@ namespace RhinoInside.Revit.GH.Components
   public class ElementParameterSet : TransactionsComponent
   {
     public override Guid ComponentGuid => new Guid("8F1EE110-7FDA-49E0-BED4-E8E0227BC021");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
     public ElementParameterSet()
-    : base("Element.ParameterSet", "ParameterSet", "Sets the parameter value of a specified Revit Element", "Revit", "Element")
+    : base("Set Element Parameter", "SetPara", "Sets the parameter value of a specified Revit Element", "Revit", "Element")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -302,9 +302,10 @@ namespace RhinoInside.Revit.GH.Components
   public class ElementParameters : Component
   {
     public override Guid ComponentGuid => new Guid("44515A6B-84EE-4DBD-8241-17EDBE07C5B6");
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     public ElementParameters()
-    : base("Element.Parameters", "Parameters", "Get the parameters of the specified Element", "Revit", "Element")
+    : base("Element Parameters", "Parameters", "Get the parameters of the specified Element", "Revit", "Element")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

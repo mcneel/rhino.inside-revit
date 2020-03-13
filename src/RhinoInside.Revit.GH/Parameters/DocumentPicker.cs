@@ -65,7 +65,7 @@ namespace RhinoInside.Revit.GH.Parameters
       SubCategory = "Input";
       NickName = "Document";
       MutableNickName = false;
-      Name = $"{NickName}.CategoriesPicker";
+      Name = $"{NickName} Categories Picker";
       Description = $"Provides a {NickName} Category picker";
 
       ListMode = GH_ValueListMode.DropDown;
@@ -148,7 +148,7 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       Category = "Revit";
       SubCategory = "Input";
-      Name = "Document.LevelsPicker";
+      Name = "Document Levels Picker";
       MutableNickName = false;
       Description = "Provides a Level picker";
     }

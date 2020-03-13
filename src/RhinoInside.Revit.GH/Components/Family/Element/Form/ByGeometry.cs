@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Components
 
     public FormByGeometry() : base
     (
-      "AddForm.ByGeometry", "ByGeometry",
+      "Add Form", "Form",
       "Given its Geometry, it adds a Form element to the active Revit document",
       "Revit", "Family Element"
     )

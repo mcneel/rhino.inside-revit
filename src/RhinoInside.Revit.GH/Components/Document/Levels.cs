@@ -13,8 +13,8 @@ namespace RhinoInside.Revit.GH.Components
 
     public DocumentLevels() : base
     (
-      "Document.Levels", "Levels",
-      "Get active document levels list",
+      "Document Levels", "Levels",
+      "Get document levels list",
       "Revit", "Document"
     )
     {

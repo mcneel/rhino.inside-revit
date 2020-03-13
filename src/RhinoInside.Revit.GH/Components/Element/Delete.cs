@@ -7,11 +7,11 @@ namespace RhinoInside.Revit.GH.Components
   public class ElementDelete : TransactionsComponent
   {
     public override Guid ComponentGuid => new Guid("213C1F14-A827-40E2-957E-BA079ECCE700");
-    public override GH_Exposure Exposure => GH_Exposure.septenary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.obscure;
     protected override string IconTag => "X";
 
     public ElementDelete()
-    : base("Element.Delete", "Delete", "Deletes elements from Revit document", "Revit", "Element")
+    : base("Delete Element", "Delete", "Deletes elements from Revit document", "Revit", "Element")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

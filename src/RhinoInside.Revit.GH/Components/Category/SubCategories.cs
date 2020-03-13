@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Components
     public override Guid ComponentGuid => new Guid("4915AB87-0BD5-4541-AC43-3FBC450DD883");
 
     public CategorySubCategories()
-    : base("Category.SubCategories", "SubCategories", "Returns a list of all the subcategories of Category", "Revit", "Category")
+    : base("Category SubCategories", "SubCategories", "Returns a list of all the subcategories of Category", "Revit", "Category")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

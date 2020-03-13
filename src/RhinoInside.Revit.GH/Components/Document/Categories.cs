@@ -41,8 +41,8 @@ namespace RhinoInside.Revit.GH.Components
 
     public DocumentCategories() : base
     (
-      "Document.Categories", "Categories",
-      "Get active document categories list",
+      "Document Categories", "Categories",
+      "Get document categories list",
       "Revit", "Document"
     )
     {

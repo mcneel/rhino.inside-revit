@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Components
     public override Guid ComponentGuid => new Guid("B7E6A82F-684F-4045-A634-A4AA9F7427A8");
 
     public ElementGeometry()
-    : base("Element.Geometry", "Geometry", "Get the geometry of the specified Element", "Revit", "Element")
+    : base("Element Geometry", "Geometry", "Get the geometry of the specified Element", "Revit", "Element")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

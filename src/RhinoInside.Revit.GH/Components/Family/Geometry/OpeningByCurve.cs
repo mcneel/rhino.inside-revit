@@ -3,15 +3,15 @@ using Grasshopper.Kernel;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class FamilyOpeningByCurve : Component
+  public class FamilyGeometryOpeningByCurve : Component
   {
     public override Guid ComponentGuid => new Guid("72FDC627-09C7-4D9F-8D7F-5F6812FB1873");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.quinary;
 
     protected override string IconTag => "O";
 
-    public FamilyOpeningByCurve()
-    : base("FamilyOpening.ByCurve", "FamilyOpening.ByCurve", string.Empty, "Revit", "Family")
+    public FamilyGeometryOpeningByCurve()
+    : base("Family Opening Geometry", "FamOp", string.Empty, "Revit", "Family")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

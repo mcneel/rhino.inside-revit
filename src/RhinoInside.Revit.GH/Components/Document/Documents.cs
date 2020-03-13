@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components
 
     public RevitDocuments() : base
     (
-      "Revit.Documents", "Documents",
+      "All Documents", "Documents",
       "Gets the list of active documents",
       "Revit", "Document"
     )

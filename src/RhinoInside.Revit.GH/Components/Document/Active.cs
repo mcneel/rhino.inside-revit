@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Components
 
     public DocumentActive() : base
     (
-      "Document.Active", "Document.Active",
+      "Active Document", "Active",
       "Gets the active document",
       "Revit", "Document"
     )

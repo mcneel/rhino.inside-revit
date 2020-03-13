@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Components
 
     public MaterialIdentity() : base
     (
-      "Material.Identity", "Material.Identity",
+      "Material Identity", "Identity",
       "Query material identity information",
       "Revit", "Material"
     )

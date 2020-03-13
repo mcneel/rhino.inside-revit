@@ -12,12 +12,12 @@ namespace RhinoInside.Revit.GH.Components
   public class FamilyNew : Component
   {
     public override Guid ComponentGuid => new Guid("82523911-309F-4A66-A4B9-CF21E0AC250E");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
     protected override string IconTag => "N";
 
     public FamilyNew()
-    : base("Family.New", "Family.New", "Creates a new Family from a template.", "Revit", "Family")
+    : base("New Family", "New", "Creates a new Family from a template.", "Revit", "Family")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

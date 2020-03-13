@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "ID";
 
     public CategoryIdentity()
-    : base("Category.Identity", "Identity", "Query category identity information", "Revit", "Category")
+    : base("Category Identity", "Identity", "Query category identity information", "Revit", "Category")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

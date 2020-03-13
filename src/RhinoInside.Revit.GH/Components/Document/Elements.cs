@@ -13,8 +13,8 @@ namespace RhinoInside.Revit.GH.Components
 
     public DocumentElements() : base
     (
-      "Document.Elements", "Elements",
-      "Get active document model elements list",
+      "Document Elements", "Elements",
+      "Get document model elements list",
       "Revit", "Document"
     )
     {

@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH.Components
 
     public SketchPlaneByPlane() : base
     (
-      "AddSketchPlane.ByPlane", "ByPlane",
+      "Add SketchPlane", "SketchPlane",
       "Given a Plane, it adds a SketchPlane element to the active Revit document",
       "Revit", "Model"
     )

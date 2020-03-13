@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Components
 
     public ViewIdentity() : base
     (
-      "View.Identity", "View.Identity",
+      "View Identity", "Identity",
       "Query view identity information",
       "Revit", "View"
     )

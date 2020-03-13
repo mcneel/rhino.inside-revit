@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "V";
 
     public FamilyElementVisibilityDeconstruct()
-    : base("Visibility.Deconstruct", "Visibility.Deconstruct", string.Empty, "Revit", "Family Element")
+    : base("Deconstruct Visibility", "Deconstruct Visibility", string.Empty, "Revit", "Family Element")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "S";
 
     public ElementTypeSimilar()
-    : base("ElementType.Similar", "ElementType.Similar", "Obtains a set of types that are similar to Type", "Revit", "Type")
+    : base("ElementType Similar", "Similar", "Obtains a set of types that are similar to Type", "Revit", "Type")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

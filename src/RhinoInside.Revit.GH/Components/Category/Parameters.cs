@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Components
 
     public CategoryParameters() : base
     (
-      "Category.Parameters", "Parameters",
+      "Category Parameters", "Parameters",
       "Gets a list of valid parameters for the specified category that can be used in a table view",
       "Revit", "Category"
     )

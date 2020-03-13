@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "P";
 
     public ElementPreview()
-    : base("Element.Preview", "Preview", "Get the preview of the specified Element", "Revit", "Element")
+    : base("Element Preview", "Preview", "Get the preview of the specified Element", "Revit", "Element")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

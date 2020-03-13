@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "F";
 
     public HostObjectFaces()
-    : base("HostObject.Faces", "HostObject.Faces", "Obtains a set of types that are owned by Family", "Revit", "Host")
+    : base("HostObject Faces", "Faces", "Obtains a set of types that are owned by Family", "Revit", "Host")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

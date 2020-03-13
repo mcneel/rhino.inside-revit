@@ -8,13 +8,13 @@ namespace RhinoInside.Revit.GH.Components
   public class DirectShapeByBrep : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("5ADE9AE3-588C-4285-ABC5-09DEB92C6660");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     public DirectShapeByBrep() : base
     (
-      "AddDirectShape.ByBrep", "ByBrep",
+      "Add Brep DirectShape", "BrpDShape",
       "Given a Brep, it adds a Brep shape to the active Revit document",
-      "Revit", "Geometry"
+      "Revit", "DirectShape"
     )
     { }
 

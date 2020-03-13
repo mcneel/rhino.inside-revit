@@ -8,10 +8,11 @@ namespace RhinoInside.Revit.GH.Components
   public class MaterialByColor : TransactionComponent
   {
     public override Guid ComponentGuid => new Guid("273FF43D-B771-4EB7-A66D-5DA5F7F2731E");
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
     protected override string IconTag => "C";
 
     public MaterialByColor()
-    : base("Material.ByColor", "ByColor", string.Empty, "Revit", "Material")
+    : base("Add Color Material", "Material", string.Empty, "Revit", "Material")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

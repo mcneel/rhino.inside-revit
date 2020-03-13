@@ -400,7 +400,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public BuiltInParameterByName()
     {
-      Name = "BuiltInParameter.ByName";
+      Name = "BuiltInParameter Picker";
       Description = "Provides a BuiltInParameter picker";
     }
 
