@@ -1,0 +1,29 @@
+---
+layout: ltr/bootstrap
+---
+<!-- 
+    Page with Side bar (automatically generated from H2 tags)
+    ---------------------------------------------------------------------------
+    |       link        /                                                     |
+    |       link        /                                                     |
+    |       link        /                     content                         |
+    |                   /                                                     |
+    |                   /                                                     |
+    ---------------------------------------------------------------------------
+ -->
+<div class="container-fluid">
+    <div class="row-fluid">
+        <!--Nav Bar, with automatic highlighting on scroll -->
+        <nav class="sidebar" id="sidebar-toc">
+            {% include ltr/sidebar-h2.html depth=2 %}
+        </nav>
+
+        <!--Main Content -->
+        <div class="side-content">
+            <h1>{{ page.title }}</h1>
+            <article class="post-content">
+                {{ content }}
+            </article>
+        </div>
+    </div>
+</div>

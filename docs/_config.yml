@@ -1,1 +1,148 @@
-theme: jekyll-theme-minimal
+# Site settings ===============================================================
+# site title, and description
+title: Rhino.Inside®.Revit
+description: Wiki, Guides, Samples, and Documentation for Rhino.Inside.Revit
+
+# site logo file
+logo: assets/img/logo.svg
+
+# github info
+github_username:  mcneel
+repo_url: "https://github.com/mcneel/rhino.inside-revit/"
+# full url: repo_url + editme_github_base_url
+editme_github_base_url: "blob/master/docs/"
+# full url: repo_url + metawiki_url
+metawiki_url: "tree/master/docs/readme.md"
+foodrhino_url: "https://www.food4rhino.com/app/rhinoinside-autodesk-revit"
+
+# forum url
+forum_url: "https://discourse.mcneel.com/c/rhino-inside/Revit"
+# link to a search filter, listing interesting posts on the forum
+forum_wiki_posts_url: "https://discourse.mcneel.com/search?expanded=true&q=%23rhino-inside%3ARevit%20in%3Awiki"
+
+# copyright notice (copyright year is dynamic)
+copyright: Robert McNeel & Associates. All Rights Reserved.
+
+
+# DO NOT CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING ============================
+# urls
+baseurl: "/rhino.inside-revit" # the subpath of your site, e.g. /blog/
+url: "" # the base hostname & protocol for your site
+
+# site default version and language
+version: beta
+language: en
+# revit api version used to generate api links on apidoc.co
+revit_api: 2020
+
+# Ruby and Jekyll Settings
+plugins:
+  - jekyll-sitemap
+
+# Build settings
+# Disable custom plugins, and ignore symbolic links.
+safe: false
+
+encoding: utf-8
+# If we decide that we want to use kramdown over redcarpet, syntax
+# highlighting is performed by turning on the following options and
+# including/running highlight.js (https://highlightjs.org/) at the
+# top of pages that need it (probably just add to head.html)
+#markdown: redcarpet
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+highlighter: rouge
+# this directory is the root for all collections
+collections_dir: pages
+simple_search: https://google.com/search
+
+# activate to test from other devices on the network
+# host: 0.0.0.0
+# =============================================================================
+
+# site dictionary: list of often used terms that need to be consistent
+terms:
+  mcneel: Robert McNeel & Associates
+  rhino: Rhino WIP
+  rir: Rhino.Inside.Revit
+  revit: Autodesk Revit®
+  pyrevit: pyRevit
+
+# site collections (various languages)
+collections:
+  en:
+    output: true
+    permalink: /en/:path
+
+# site versions. ordered from most recent to oldest
+# id: use a valid id for each version. this id is used to retrieve info about
+# the version in liquid tags e.g. {{ site.versions.one.rir_download }}
+#   version: version directory name
+#   name: version pretty name e.g. v1.0
+#   rir_download: download link for rhino inside Revit
+#   rhino_download: download link for Rhino
+versions:
+  # one:
+  #   version: 1.0
+  #   name: v1.0
+  #   rir_download: https://www.rhino3d.com/download/
+  #   rhino_download: https://www.rhino3d.com/download/
+  beta:
+    version: beta
+    name: Beta
+    rir_download: https://www.rhino3d.com/download/rhino.inside-revit/7/wip
+    rhino_download: https://www.rhino3d.com/download/rhino/wip
+
+# default metadata for pages based on their path
+defaults:
+  # default layout for all pages
+  - scope:
+      path: ""
+    values:
+      layout: ltr/page-list-toc
+      # assume a large order for all pages so unorderd pages get sorted last
+      order: 9999
+      # assume all pages can be listed on table of contents
+      toc: true
+
+  # set base metadata for all pages in each collection
+  - scope:
+      path: ""
+      type: en
+    values:
+      language: en
+      authors: ['scott_davidson']
+
+  # set version on pages based on their path
+  - scope:
+      path: "pages/*/beta"
+    values:
+      version: beta
+
+  - scope:
+      path: "pages/*/1.0"
+    values:
+      version: 1.0
+
+  # set category on pages based on their path
+  - scope:
+      path: "pages/*/*/guides"
+    values:
+      categories: ['guides']
+
+  - scope:
+      path: "pages/*/*/reference"
+    values:
+      categories: ['reference']
+
+  - scope:
+      path: "pages/*/*/samples"
+    values:
+      categories: ['samples']
+
+  - scope:
+      path: "pages/*/*/community"
+    values:
+      categories: ['community']

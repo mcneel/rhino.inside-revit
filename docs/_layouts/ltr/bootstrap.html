@@ -1,0 +1,108 @@
+---
+---
+<!DOCTYPE html>
+<html>
+{% include ltr/head.html %}
+
+    <body>
+        {% include googletagmanager.html %}
+
+        <div class="container">
+
+            <!-- Pick the correct header for the language -->
+            {% if page.language %}
+            {% include ltr/{{ page.language }}/header.html %}
+            {% else %}
+            {% include ltr/header.html %}
+            {% endif %}
+
+            <!-- Import child content -->
+            <div class="page-content">
+                {{ content }}
+            </div>
+
+            <!-- Pick the correct footer for the language -->
+            {% if page.language %}
+            {% include ltr/{{page.language}}/footer.html %}
+            {% else %}
+            {% include ltr/footer.html %}
+            {% endif %}
+        </div>
+
+        <!-- Activate bootstrap scrollspy on the sidebar -->
+        <script type="text/javascript">
+            // offset 100 is the size of header nav bar + a little margin (20px)
+            // this value is also set in stylesheet under :target:before
+            $('body').scrollspy({ target: '#sidebar-toc', offset: 100 });
+        </script>
+
+        <!-- Update version selector dropdown with active version -->
+        <script>
+            // determine active page
+            detemineActiveVersion();
+            // set active version on version selector
+            var verSelector = document.querySelector("#versionSelector");
+            if (activeVersion == "beta") {
+                verSelector.innerHTML = "Beta";
+            } else {
+                verSelector.innerHTML = 'v' + activeVersion;
+            }
+        </script>
+
+        <!-- highlight the active category link on navigation bar -->
+        <script>
+            var url = window.location.href;
+            // set nav bar links by selected version
+            $('#cat_homelogo').attr('href', getPageLink(''));
+            $('#cat_homelink').attr('href', getPageLink(''));
+            $('#cat_starting').attr('href', getPageLink('getting-started'));
+            $('#cat_guides').attr('href', getPageLink('guides/'));
+            $('#cat_samples').attr('href', getPageLink('samples/'));
+            $('#cat_reference').attr('href', getPageLink('reference/'));
+            $('#cat_community').attr('href', getPageLink('community/'));
+            // mark current navbar category as active
+            if (url.endsWith('/getting-started') || url.includes('/getting-started/')) {
+                $('#cat_starting').addClass('active');
+            } else if (url.endsWith('/guides') || url.includes('/guides/')) {
+                $('#cat_guides').addClass('active');
+            } else if (url.endsWith('/samples') || url.includes('/samples/')) {
+                $('#cat_samples').addClass('active');
+            } else if (url.endsWith('/reference') || url.includes('/reference/')) {
+                $('#cat_reference').addClass('active');
+            } else if (url.endsWith('/community') || url.includes('/community/')) {
+                $('#cat_community').addClass('active');
+            }
+        </script>
+
+        <script>
+            // apply magnificPopup to all images except svg
+            // svg images are graphics and charts and not screenshots
+            $(document).ready(function() {
+                // grab all images in side content, filter out svg
+                // then apply magnificPopup
+                $('.side-content img').filter(function(){
+                        return ! $(this).attr('src').endsWith(".svg")
+                    }).magnificPopup({
+                    type:'image',
+                    zoom: { enabled: true },
+                    gallery: { enabled: true },
+                    callbacks: {
+                        elementParse: function(item) {
+                            item.src = item.el.attr('src');
+                            }
+                        }
+                    });
+            });
+        </script>
+
+        <script>
+            // add anchor links that show up when hovering over header
+            (function () {
+                'use strict';
+                anchors.options.placement = 'right';
+                anchors.add('.post-content > h2, .post-content > h3, .post-content > h4, .post-content > h5, .post-content > h6');
+                }
+            )();
+        </script>
+    </body>
+</html>

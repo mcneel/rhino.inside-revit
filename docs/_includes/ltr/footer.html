@@ -1,0 +1,20 @@
+<footer class="site-footer">
+    <div class="footer">
+        <!-- Automatic Copyright notice -->
+        <div>
+            Copyright &#169; 1997-20{{ site.time | date: '%y' }}
+            <br/>
+            <a href="https://www.mcneel.com/" target="_blank">{{ site.copyright }}</a>
+        </div>
+        <!-- Edit page on Github: relative url is from jekyll site configs -->
+        <div>
+            {% assign repourl = 'https://github.com/' | append: site.editme_github_base_url %}
+            <a href="{{ repourl }}" target="_blank">
+                <span class="icon">
+                    <img width="16" height="16" style="margin-top: -5px;" src="{{ site.baseurl }}/assets/img/github-gray.svg" />
+                </span>
+                Edit page on GitHub
+            </a>
+        </div>
+    </div>
+</footer>
