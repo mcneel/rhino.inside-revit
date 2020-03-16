@@ -153,6 +153,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap CategoryParameters {
+            get {
+                object obj = ResourceManager.GetObject("CategoryParameters", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap CategorySubCategories {
             get {
                 object obj = ResourceManager.GetObject("CategorySubCategories", resourceCulture);
@@ -306,16 +316,6 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap DocumentLevelsPicker {
             get {
                 object obj = ResourceManager.GetObject("DocumentLevelsPicker", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap DocumentParameters {
-            get {
-                object obj = ResourceManager.GetObject("DocumentParameters", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

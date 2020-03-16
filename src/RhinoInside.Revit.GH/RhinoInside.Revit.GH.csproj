@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -257,6 +257,7 @@
     <Compile Include="Parameters\ID.cs" />
     <Compile Include="Parameters\Material.cs" />
     <Compile Include="Parameters\Parameter.cs" />
+
     <Compile Include="Parameters\SketchPlane.cs" />
     <Compile Include="Parameters\ValueList.cs" />
     <Compile Include="Parameters\View.cs" />
@@ -296,6 +297,7 @@
     <None Include="Resources\Components\BeamByCurve.png" />
     <None Include="Resources\Components\BuildingPadByOutline.png" />
     <None Include="Resources\Components\BuiltInParameterGroup.png" />
+    <None Include="Resources\Components\CategoryParameters.png" />
     <None Include="Resources\Components\CategorySubCategories.png" />
     <None Include="Resources\Components\ColumnByCurve.png" />
     <None Include="Resources\Components\DirectShapeByBrep.png" />
@@ -308,7 +310,6 @@
     <None Include="Resources\Components\DocumentElements.png" />
     <None Include="Resources\Components\DocumentElementTypes.png" />
     <None Include="Resources\Components\DocumentLevels.png" />
-    <None Include="Resources\Components\DocumentParameters.png" />
     <None Include="Resources\Components\ElementDecompose.png" />
     <None Include="Resources\Components\ElementDelete.png" />
     <None Include="Resources\Components\ElementGeometry.png" />
@@ -351,7 +352,6 @@
     <None Include="Resources\Parameters\TagCategoriesPicker.png" />
     <None Include="Resources\Parameters\Vertex.png" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.dll" DestinationFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.gha" />
