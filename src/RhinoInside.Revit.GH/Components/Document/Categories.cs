@@ -55,10 +55,12 @@ namespace RhinoInside.Revit.GH.Components
       var type = manager[manager.AddParameter(new Parameters.Param_Enum<Types.CategoryType>(), "Type", "T", "Category type", GH_ParamAccess.item)] as Parameters.Param_Enum<Types.CategoryType>;
       type.SetPersistentData(DB.CategoryType.Model);
       type.Optional = true;
-      manager[manager.AddBooleanParameter("AllowsParameters", "A", "Allows bound parameters", GH_ParamAccess.item, true)].Optional = true;
+      manager[manager.AddParameter(new Parameters.Category(), "Parent", "P", "Parent category", GH_ParamAccess.item)].Optional = true;
+      manager[manager.AddTextParameter("Name", "N", "Level name", GH_ParamAccess.item)].Optional = true;
+      manager[manager.AddBooleanParameter("AllowsSubcategories", "A", "Allows subcategories to be added", GH_ParamAccess.item)].Optional = true;
+      manager[manager.AddBooleanParameter("AllowsParameters", "A", "Allows bound parameters", GH_ParamAccess.item)].Optional = true;
       manager[manager.AddBooleanParameter("HasMaterialQuantities", "M", "Has material quantities", GH_ParamAccess.item)].Optional = true;
       manager[manager.AddBooleanParameter("Cuttable", "C", "Has material quantities", GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddTextParameter("Name", "N", "Level name", GH_ParamAccess.item)].Optional = true;
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
@@ -71,26 +73,40 @@ namespace RhinoInside.Revit.GH.Components
       var categoryType = DB.CategoryType.Invalid;
       DA.GetData("Type", ref categoryType);
 
-      bool AllowsParameters = false;
-      var _AllowsParameters_ = Params.IndexOfInputParam("AllowsParameters");
-      bool nofilterParams = (!DA.GetData(_AllowsParameters_, ref AllowsParameters) && Params.Input[_AllowsParameters_].Sources.Count == 0);
-
-      bool HasMaterialQuantities = false;
-      var _HasMaterialQuantities_ = Params.IndexOfInputParam("HasMaterialQuantities");
-      bool nofilterMaterials = (!DA.GetData(_HasMaterialQuantities_, ref HasMaterialQuantities) && Params.Input[_HasMaterialQuantities_].Sources.Count == 0);
-
-      bool Cuttable = false;
-      var _Cuttable_ = Params.IndexOfInputParam("Cuttable");
-      bool nofilterCuttable = (!DA.GetData(_Cuttable_, ref Cuttable) && Params.Input[_Cuttable_].Sources.Count == 0);
+      var Parent = default(DB.Category);
+      var _Parent_ = Params.IndexOfInputParam("Parent");
+      bool nofilterParent = (!DA.GetData(_Parent_, ref Parent) && Params.Input[_Parent_].DataType == GH_ParamData.@void);
+      var ParentCategoryId = Parent?.Id ?? DB.ElementId.InvalidElementId;
 
       var Name = default(string);
       var _Name_ = Params.IndexOfInputParam("Name");
-      bool nofilterName = (!DA.GetData(_Name_, ref Name) && Params.Input[_Name_].Sources.Count == 0);
+      bool nofilterName = (!DA.GetData(_Name_, ref Name) && Params.Input[_Name_].DataType == GH_ParamData.@void);
 
-      var categories = doc.Settings.Categories.Cast<DB.Category>();
+      bool AllowsSubcategories = false;
+      var _AllowsSubcategories_ = Params.IndexOfInputParam("AllowsSubcategories");
+      bool nofilterSubcategories = (!DA.GetData(_AllowsSubcategories_, ref AllowsSubcategories) && Params.Input[_AllowsSubcategories_].DataType == GH_ParamData.@void);
+
+      bool AllowsParameters = false;
+      var _AllowsParameters_ = Params.IndexOfInputParam("AllowsParameters");
+      bool nofilterParams = (!DA.GetData(_AllowsParameters_, ref AllowsParameters) && Params.Input[_AllowsParameters_].DataType == GH_ParamData.@void);
+
+      bool HasMaterialQuantities = false;
+      var _HasMaterialQuantities_ = Params.IndexOfInputParam("HasMaterialQuantities");
+      bool nofilterMaterials = (!DA.GetData(_HasMaterialQuantities_, ref HasMaterialQuantities) && Params.Input[_HasMaterialQuantities_].DataType == GH_ParamData.@void);
+
+      bool Cuttable = false;
+      var _Cuttable_ = Params.IndexOfInputParam("Cuttable");
+      bool nofilterCuttable = (!DA.GetData(_Cuttable_, ref Cuttable) && Params.Input[_Cuttable_].DataType == GH_ParamData.@void);
+
+      var categories = nofilterParent || !ParentCategoryId.IsValid() ?
+                       doc.Settings.Categories.Cast<DB.Category>() :
+                       DB.Category.GetCategory(doc, ParentCategoryId).SubCategories.Cast<DB.Category>();
 
       if (categoryType != DB.CategoryType.Invalid)
         categories = categories.Where((x) => x.CategoryType == categoryType);
+
+      if (!nofilterSubcategories)
+        categories = categories.Where((x) => x.CanAddSubcategory == AllowsSubcategories);
 
       if (!nofilterParams)
         categories = categories.Where((x) => x.AllowsBoundParameters == AllowsParameters);
