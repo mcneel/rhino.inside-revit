@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -180,6 +180,7 @@
     <Compile Include="Components\Document\Documents.cs" />
     <Compile Include="Components\Document\Elements.cs" />
     <Compile Include="Components\Document\ElementTypes.cs" />
+    <Compile Include="Components\Document\Families.cs" />
     <Compile Include="Components\Document\Materials.cs" />
     <Compile Include="Components\Document\Passport.cs" />
     <Compile Include="Components\Document\Levels.cs" />
@@ -257,7 +258,6 @@
     <Compile Include="Parameters\ID.cs" />
     <Compile Include="Parameters\Material.cs" />
     <Compile Include="Parameters\Parameter.cs" />
-
     <Compile Include="Parameters\SketchPlane.cs" />
     <Compile Include="Parameters\ValueList.cs" />
     <Compile Include="Parameters\View.cs" />
