@@ -188,7 +188,7 @@ namespace RhinoInside.Revit.GH.Types
             var element = proxy.owner.Document?.GetElement(proxy.owner.Id);
             if (element is object)
             {
-              var parameters = element.GetParameters(RevitAPI.ParameterSet.Any).
+              var parameters = element.GetParameters(RevitAPI.ParameterClass.Any).
                 Select(p => new ParameterPropertyDescriptor(p)).
                 ToArray();
 

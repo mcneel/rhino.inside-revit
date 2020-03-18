@@ -7,6 +7,20 @@ namespace RhinoInside.Revit.GH.Types
   using Kernel.Attributes;
 
   [
+    ComponentGuid("83088978-8B44-4154-ABC9-A7CA53CA65E5"),
+    Name("Parameter Class"),
+    Description("Represents a Revit Parameter class."),
+  ]
+  public class ParameterClass : GH_Enum<RevitAPI.ParameterClass> { }
+
+  [
+    ComponentGuid("2A5D36DD-CD94-4306-963B-D9312DAEB0F9"),
+    Name("Parameter Binding"),
+    Description("Represents a Revit parameter binding type."),
+  ]
+  public class ParameterBinding : GH_Enum<RevitAPI.ParameterBinding> { }
+
+  [
     ComponentGuid("A3621A84-190A-48C2-9B0C-F5784B78089C"),
     Name("Storage Type"),
     Description("Represents a Revit storage type."),

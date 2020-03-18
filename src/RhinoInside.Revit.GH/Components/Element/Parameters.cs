@@ -52,7 +52,7 @@ namespace RhinoInside.Revit.GH.Components
           break;
 
         case string parameterName:
-          parameter = element.GetParameter(parameterName, RevitAPI.ParameterSet.Any);
+          parameter = element.GetParameter(parameterName, RevitAPI.ParameterClass.Any);
           if (parameter is null)
             obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterName}' not defined in 'Element'");
           break;
@@ -340,7 +340,7 @@ namespace RhinoInside.Revit.GH.Components
       if (element is object)
       {
         parameters = new List<DB.Parameter>(element.Parameters.Size);
-        foreach (var group in element.GetParameters(RevitAPI.ParameterSet.Any).GroupBy((x) => x.Definition?.ParameterGroup ?? DB.BuiltInParameterGroup.INVALID).OrderBy((x) => x.Key))
+        foreach (var group in element.GetParameters(RevitAPI.ParameterClass.Any).GroupBy((x) => x.Definition?.ParameterGroup ?? DB.BuiltInParameterGroup.INVALID).OrderBy((x) => x.Key))
         {
           foreach (var param in group.OrderBy(x => x.Id.IntegerValue))
           {

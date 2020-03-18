@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Components
     public override Guid ComponentGuid => new Guid("A80F4919-2387-4C78-BE2B-2F35B2E60298");
 
     public ParameterKeyDecompose()
-    : base("ParameterKey.Decompose", "ParameterKey.Decompose", "Decompose a parameter definition", "Revit", "Parameter")
+    : base("ParameterKey Identity", "Identity", "Decompose a parameter definition", "Revit", "Parameter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       manager.AddTextParameter("Name", "N", "Parameter name", GH_ParamAccess.item);
       manager.AddParameter(new Parameters.Param_Enum<Types.StorageType>(), "StorageType", "S", "Parameter value type", GH_ParamAccess.item);
-      manager.AddBooleanParameter("Visible", "V", "Parameter is visible in UI", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.Param_Enum<Types.ParameterClass>(), "Class", "C", "Identifies where the parameter is defined", GH_ParamAccess.item);
       manager.AddParameter(new Param_Guid(), "Guid", "ID", "Shared Parameter global identifier", GH_ParamAccess.item);
     }
 
@@ -41,7 +41,7 @@ namespace RhinoInside.Revit.GH.Components
       {
         DA.SetData("Name", LabelUtils.GetLabelFor(builtInParameter));
         DA.SetData("StorageType", parameterKey.Document?.get_TypeOfStorage(builtInParameter));
-        DA.SetData("Visible", true);
+        DA.SetData("Class", RevitAPI.ParameterClass.BuiltIn);
         DA.SetData("Guid", null);
       }
       else if (parameterKey.Document?.GetElement(parameterKey.Value) is ParameterElement parameterElement)
@@ -49,8 +49,29 @@ namespace RhinoInside.Revit.GH.Components
         var definition = parameterElement.GetDefinition();
         DA.SetData("Name", definition?.Name);
         DA.SetData("StorageType", definition?.ParameterType.ToStorageType());
-        DA.SetData("Visible", definition?.Visible);
-        DA.SetData("Guid", (parameterElement as SharedParameterElement)?.GuidValue ?? null);
+
+        if (parameterElement is SharedParameterElement shared)
+        {
+          DA.SetData("Class", RevitAPI.ParameterClass.Shared);
+          DA.SetData("Guid", shared.GuidValue);
+        }
+        else
+        {
+          DA.SetData("Guid", null);
+
+          if (parameterElement is GlobalParameter)
+          {
+            DA.SetData("Class", RevitAPI.ParameterClass.Global);
+          }
+          else
+          {
+            switch (parameterElement.get_Parameter(BuiltInParameter.ELEM_DELETABLE_IN_FAMILY).AsInteger())
+            {
+              case 0: DA.SetData("Class", RevitAPI.ParameterClass.Family); break;
+              case 1: DA.SetData("Class", RevitAPI.ParameterClass.Project); break;
+            }
+          }
+        }
       }
     }
   }
@@ -60,7 +81,7 @@ namespace RhinoInside.Revit.GH.Components
     public override Guid ComponentGuid => new Guid("3BDE5890-FB80-4AF2-B9AC-373661756BDA");
 
     public ParameterValueDecompose()
-    : base("ParameterValue.Decompose", "ParameterValue.Decompose", "Decompose a parameter value", "Revit", "Parameter")
+    : base("Deconstruct ParameterValue", "Deconstruct", "Decompose a parameter value", "Revit", "Parameter")
     { }
 
     protected override ElementFilter ElementFilter => new Autodesk.Revit.DB.ElementClassFilter(typeof(ParameterElement));
@@ -72,7 +93,8 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
       manager.AddParameter(new Parameters.Param_Enum<Types.BuiltInParameterGroup>(), "Group", "G", "Parameter group", GH_ParamAccess.item);
-      manager.AddParameter(new Parameters.Param_Enum<Types.ParameterType>(),"Type", "T", "Parameter type", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.Param_Enum<Types.ParameterType>(), "Type", "T", "Parameter type", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.Param_Enum<Types.ParameterBinding>(), "Binding", "B", "Parameter binding", GH_ParamAccess.item);
       manager.AddParameter(new Parameters.Param_Enum<Types.UnitType>(), "Unit", "U", "Unit type", GH_ParamAccess.item);
       manager.AddBooleanParameter("IsReadOnly", "R", "Parameter is Read Only", GH_ParamAccess.item);
       manager.AddBooleanParameter("UserModifiable", "U", "Parameter is UserModifiable ", GH_ParamAccess.item);
@@ -86,21 +108,25 @@ namespace RhinoInside.Revit.GH.Components
 
       DA.SetData("Group", parameter?.Definition.ParameterGroup);
       DA.SetData("Type", parameter?.Definition.ParameterType);
+      if (parameter?.Element is ElementType)   DA.SetData("Binding", RevitAPI.ParameterBinding.Type);
+      else if (parameter?.Element is Element)  DA.SetData("Binding", RevitAPI.ParameterBinding.Instance);
+      else                                     DA.SetData("Binding", null);
       DA.SetData("Unit", parameter?.Definition.UnitType);
       DA.SetData("IsReadOnly", parameter?.IsReadOnly);
       DA.SetData("UserModifiable", parameter?.UserModifiable);
     }
   }
 
-  public class ParameterByName : ReconstructElementComponent
+  public class SharedParameterByName : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("84AB6F3C-BB4B-48E4-9175-B7F40791BB7F");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
-    public ParameterByName() : base
+    public SharedParameterByName() : base
     (
-      "AddParameterKey.ByName", "ByName",
-      "Given its Name, it adds a Parameter definition to the active Revit document",
+      "Add Shared Parameter", "SharedPara" +
+      "",
+      "Given its Name, it adds a Shared Parameter definition to the active Revit document",
       "Revit", "Parameter"
     )
     { }
@@ -110,7 +136,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.ParameterKey(), "ParameterKey", "K", "New Parameter definition", GH_ParamAccess.item);
     }
 
-    void ReconstructParameterByName
+    void ReconstructSharedParameterByName
     (
       Document doc,
       ref SharedParameterElement element,

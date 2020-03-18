@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override Guid ComponentGuid => new Guid("A550F532-8C68-460B-91F3-DA0A5A0D42B5");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
-    public ParameterKey() : base("Parameter Key", "Parameter Key", "Represents a Revit parameter definition.", "Params", "Revit") { }
+    public ParameterKey() : base("ParameterKey", "ParaKey", "Represents a Revit parameter definition.", "Params", "Revit") { }
 
     protected override Types.ParameterKey PreferredCast(object data) => null;
     public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
@@ -229,9 +229,27 @@ namespace RhinoInside.Revit.GH.Parameters
       ParameterBinding = p.Element is DB.ElementType ? RevitAPI.ParameterBinding.Type : RevitAPI.ParameterBinding.Instance;
 
       if (p.IsShared)
+      {
+        ParameterClass = RevitAPI.ParameterClass.Shared;
         ParameterSharedGUID = p.GUID;
+      }
       else if (p.Id.TryGetBuiltInParameter(out var parameterBuiltInId))
+      {
+        ParameterClass = RevitAPI.ParameterClass.BuiltIn;
         ParameterBuiltInId = parameterBuiltInId;
+      }
+      else if(p.Element.Document.GetElement(p.Id) is DB.ParameterElement paramElement)
+      {
+        if (paramElement is DB.GlobalParameter)
+        {
+          ParameterClass = RevitAPI.ParameterClass.Global;
+        }
+        else switch (paramElement.get_Parameter(DB.BuiltInParameter.ELEM_DELETABLE_IN_FAMILY).AsInteger())
+        {
+          case 0: ParameterClass = RevitAPI.ParameterClass.Family;  break;
+          case 1: ParameterClass = RevitAPI.ParameterClass.Project; break;
+        }
+      }
 
       try { Name = $"{DB.LabelUtils.GetLabelFor(ParameterGroup)} : {ParameterName}"; }
       catch (Autodesk.Revit.Exceptions.InvalidOperationException) { Name = ParameterName; }
@@ -243,18 +261,24 @@ namespace RhinoInside.Revit.GH.Parameters
       catch (Autodesk.Revit.Exceptions.InvalidOperationException)
       { Description = p.Definition.UnitType == DB.UnitType.UT_Number ? "Enumerate" : DB.LabelUtils.GetLabelFor(p.Definition.UnitType); }
 
+      if(string.IsNullOrEmpty(Description))
+        Description = ParameterType.ToString();
+
       if (ParameterSharedGUID.HasValue)
         Description = $"Shared parameter {ParameterSharedGUID.Value:B}\n{Description}";
       else if (ParameterBuiltInId != DB.BuiltInParameter.INVALID)
         Description = $"BuiltIn parameter {ParameterBuiltInId.ToStringGeneric()}\n{Description}";
+      else if(ParameterBinding != RevitAPI.ParameterBinding.Unknown)
+        Description = $"{ParameterClass} parameter ({ParameterBinding})\n{Description}";
       else
-        Description = $"{ParameterBinding} project parameter\n{Description}";
+        Description = $"{ParameterClass} parameter\n{Description}";
     }
 
     public string ParameterName                        { get; private set; } = string.Empty;
     public DB.ParameterType ParameterType              { get; private set; } = DB.ParameterType.Invalid;
     public DB.BuiltInParameterGroup ParameterGroup     { get; private set; } = DB.BuiltInParameterGroup.INVALID;
     public RevitAPI.ParameterBinding ParameterBinding  { get; private set; } = RevitAPI.ParameterBinding.Unknown;
+    public RevitAPI.ParameterClass ParameterClass    { get; private set; } = RevitAPI.ParameterClass.Any;
     public DB.BuiltInParameter ParameterBuiltInId      { get; private set; } = DB.BuiltInParameter.INVALID;
     public Guid? ParameterSharedGUID                   { get; private set; } = default;
 
@@ -299,6 +323,16 @@ namespace RhinoInside.Revit.GH.Parameters
       else
         ParameterSharedGUID = default;
 
+      var parameterClass = (int) RevitAPI.ParameterClass.Any;
+      if (reader.TryGetInt32("ParameterClass", ref parameterClass))
+        ParameterClass = (RevitAPI.ParameterClass) parameterClass;
+      else if(ParameterSharedGUID.HasValue)
+        ParameterClass = RevitAPI.ParameterClass.Shared;
+      else if(ParameterBuiltInId != DB.BuiltInParameter.INVALID)
+        ParameterClass = RevitAPI.ParameterClass.BuiltIn;
+      else if(ParameterBinding != RevitAPI.ParameterBinding.Unknown)
+        ParameterClass = RevitAPI.ParameterClass.Project;
+
       return true;
     }
 
@@ -325,6 +359,9 @@ namespace RhinoInside.Revit.GH.Parameters
       if (ParameterSharedGUID.HasValue)
         writer.SetGuid("ParameterSharedGUID", ParameterSharedGUID.Value);
 
+      if (ParameterClass != RevitAPI.ParameterClass.Any)
+        writer.SetInt32("ParameterClass", (int) ParameterClass);
+
       return true;
     }
 
@@ -336,7 +373,7 @@ namespace RhinoInside.Revit.GH.Parameters
       if (ParameterBuiltInId != DB.BuiltInParameter.INVALID)
         return (int) ParameterBuiltInId;
 
-      return new { ParameterName, ParameterType, ParameterBinding }.GetHashCode();
+      return new { ParameterName, ParameterType, ParameterBinding, ParameterClass }.GetHashCode();
     }
 
     public override bool Equals(object obj)
@@ -351,7 +388,8 @@ namespace RhinoInside.Revit.GH.Parameters
 
         return ParameterName == value.ParameterName &&
                ParameterType == value.ParameterType &&
-               ParameterBinding == value.ParameterBinding;
+               ParameterBinding == value.ParameterBinding &&
+               ParameterClass == value.ParameterClass;
       }
 
       return false;
@@ -365,7 +403,7 @@ namespace RhinoInside.Revit.GH.Parameters
       if(ParameterBuiltInId != DB.BuiltInParameter.INVALID)
         return element.get_Parameter(ParameterBuiltInId);
 
-      return element.GetParameter(ParameterName, ParameterType, ParameterBinding, RevitAPI.ParameterSet.Project);
+      return element.GetParameter(ParameterName, ParameterType, ParameterBinding, ParameterClass);
     }
   }
 
