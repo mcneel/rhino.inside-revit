@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using DB = Autodesk.Revit.DB;
@@ -25,12 +26,27 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DB.Category category = null;
-      if (!DA.GetData("Category", ref category))
+      DB.Category parent = null;
+      if (!DA.GetData("Category", ref parent))
         return;
 
-      using (var subCategories = category.SubCategories)
-        DA.SetDataList("SubCategories", subCategories.Cast<DB.Category>());
+      if (parent.Parent is object)
+      {
+        DA.SetDataList("SubCategories", null);
+      }
+      else
+      {
+        using (var subCategories = parent.SubCategories)
+        {
+          var doc = parent.Document();
+          var SubCategories = new HashSet<int>(subCategories.Cast<DB.Category>().Select(x => x.Id.IntegerValue));  
+
+          if (parent.Id.IntegerValue == (int) DB.BuiltInCategory.OST_Stairs)
+            SubCategories.Add((int) DB.BuiltInCategory.OST_StairsStringerCarriage);
+
+          DA.SetDataList("SubCategories", SubCategories.Select(x => new Types.Category(doc, new DB.ElementId(x))));
+        }
+      }
     }
   }
 }
