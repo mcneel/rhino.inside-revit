@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -181,6 +181,7 @@
     <Compile Include="Components\Document\Elements.cs" />
     <Compile Include="Components\Document\ElementTypes.cs" />
     <Compile Include="Components\Document\Families.cs" />
+    <Compile Include="Components\Document\GroupTypes.cs" />
     <Compile Include="Components\Document\Materials.cs" />
     <Compile Include="Components\Document\Passport.cs" />
     <Compile Include="Components\Document\Levels.cs" />
@@ -195,6 +196,7 @@
     <Compile Include="Components\Element\BuildingPad\ByOutline.cs" />
     <Compile Include="Components\Element\Delete.cs" />
     <Compile Include="Components\Element\Geometry.cs" />
+    <Compile Include="Components\Element\Group\ByLocation.cs" />
     <Compile Include="Components\Element\HostObject\Faces.cs" />
     <Compile Include="Components\Element\Inspect.cs" />
     <Compile Include="Components\Element\Materials.cs" />
@@ -221,6 +223,7 @@
     <Compile Include="Components\Element\SketchPlane\ByPlane.cs" />
     <Compile Include="Components\Element\Topography\ByPoints.cs" />
     <Compile Include="Components\Element\View\Active.cs" />
+    <Compile Include="Components\Element\View\ExportImage.cs" />
     <Compile Include="Components\Element\View\Identity.cs" />
     <Compile Include="Components\Element\View\View3DByPlane.cs" />
     <Compile Include="Components\Element\Wall\ByCurve.cs" />

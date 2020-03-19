@@ -116,6 +116,55 @@ namespace RhinoInside.Revit.GH.Types
   public class ViewDetailLevel : GH_Enum<DB.ViewDetailLevel> { }
 
   [
+    ComponentGuid("83380EFC-D2E2-3A9E-A1D7-939EC71852DD"),
+    Name("View Discipline"),
+    Description("Represents a Revit view discipline."),
+  ]
+  public class ViewDiscipline : GH_Enum<DB.ViewDiscipline> { }
+
+  [
+    ComponentGuid("BF051011-660D-39E7-86ED-20EEE3A68DB0"),
+    Name("View Type"),
+    Description("Represents a Revit view type."),
+  ]
+  public class ViewType : GH_Enum<DB.ViewType> { }
+
+  
+  [
+    ComponentGuid("2FDE857C-EDAB-4999-B6AE-DC531DD2AD18"),
+    Name("Image Fit direction type"),
+    Description("Represents a Revit fit direction type."),
+  ]
+  public class FitDirectionType : GH_Enum<DB.FitDirectionType>
+  {
+    public FitDirectionType() : base(DB.FitDirectionType.Horizontal) { }
+    public FitDirectionType(DB.FitDirectionType value) : base(value) { }
+  }
+
+  [
+    ComponentGuid("C6132D3E-1BA4-4BF5-B40C-D08F81A79AB1"),
+    Name("Image Resolution"),
+    Description("Represents a Revit image resolution."),
+  ]
+  public class ImageResolution : GH_Enum<DB.ImageResolution>
+  {
+    public ImageResolution() : base(DB.ImageResolution.DPI_72) { }
+    public ImageResolution(DB.ImageResolution value) : base(value) { }
+  }
+
+  [
+    ComponentGuid("F6BABEFF-C4AD-49D0-81D6-9C3CD021DD45"),
+    Name("Image FileType"),
+    Description("Represents a Revit image file type."),
+  ]
+  public class ImageFileType : GH_Enum<DB.ImageFileType>
+  {
+    public ImageFileType() : base(DB.ImageFileType.BMP) { }
+    public ImageFileType(DB.ImageFileType value) : base(value) { }
+  }
+
+
+  [
     ComponentGuid("2A3E4872-EF41-442A-B886-8B7DBA73DFE2"),
     Name("Wall Location Line"),
     Description("Represents a Revit wall location line."),
@@ -126,12 +175,12 @@ namespace RhinoInside.Revit.GH.Types
     {
       switch (Value)
       {
-        case DB.WallLocationLine.WallCenterline:      return "Wall Centerline";
-        case DB.WallLocationLine.CoreCenterline:      return "Core Centerline";
-        case DB.WallLocationLine.FinishFaceExterior:  return "Finish Face: Exterior";
-        case DB.WallLocationLine.FinishFaceInterior:  return "Finish Face: Interior";
-        case DB.WallLocationLine.CoreExterior:        return "Core Face: Exterior";
-        case DB.WallLocationLine.CoreInterior:        return "Core Face: Interior";
+        case DB.WallLocationLine.WallCenterline: return "Wall Centerline";
+        case DB.WallLocationLine.CoreCenterline: return "Core Centerline";
+        case DB.WallLocationLine.FinishFaceExterior: return "Finish Face: Exterior";
+        case DB.WallLocationLine.FinishFaceInterior: return "Finish Face: Interior";
+        case DB.WallLocationLine.CoreExterior: return "Core Face: Exterior";
+        case DB.WallLocationLine.CoreInterior: return "Core Face: Interior";
       }
 
       return base.ToString();
@@ -145,17 +194,4 @@ namespace RhinoInside.Revit.GH.Types
   ]
   public class StructuralWallUsage : GH_Enum<DB.Structure.StructuralWallUsage> { }
 
-  [
-    ComponentGuid("BF051011-660D-39E7-86ED-20EEE3A68DB0"),
-    Name("View Type"),
-    Description("Represents a Revit view type."),
-  ]
-  public class ViewType : GH_Enum<DB.ViewType> { }
-
-  [
-    ComponentGuid("83380EFC-D2E2-3A9E-A1D7-939EC71852DD"),
-    Name("View Discipline"),
-    Description("Represents a Revit view discipline."),
-  ]
-  public class ViewDiscipline : GH_Enum<DB.ViewDiscipline> { }
 }
