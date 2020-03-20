@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Autodesk.Revit.Attributes;
-using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
 using Grasshopper;
 using Grasshopper.Kernel;
 using Rhino.PlugIns;
+using RhinoInside.Revit.GH.Bake;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.UI
 {
@@ -32,7 +33,7 @@ namespace RhinoInside.Revit.UI
     /// </summary>
     protected new class Availability : RhinoCommand.Availability
     {
-      public override bool IsCommandAvailable(UIApplication _, CategorySet selectedCategories) =>
+      public override bool IsCommandAvailable(UIApplication _, DB.CategorySet selectedCategories) =>
         base.IsCommandAvailable(_, selectedCategories) &&
         (PlugIn.PlugInExists(PluginId, out bool loaded, out bool loadProtected) & (loaded | !loadProtected));
     }
@@ -56,7 +57,7 @@ namespace RhinoInside.Revit.UI
       }
     }
 
-    public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
+    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
     {
       GH.Guest.ShowAsync();
       return Result.Succeeded;
@@ -69,7 +70,7 @@ namespace RhinoInside.Revit.UI
   {
     protected new class Availability : GrasshopperCommand.Availability
     {
-      public override bool IsCommandAvailable(UIApplication _, CategorySet selectedCategories) =>
+      public override bool IsCommandAvailable(UIApplication _, DB.CategorySet selectedCategories) =>
         base.IsCommandAvailable(_, selectedCategories) &&
         Instances.ActiveCanvas?.Document is object;
     }
@@ -87,7 +88,7 @@ namespace RhinoInside.Revit.UI
       }
     }
 
-    public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
+    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
     {
       if (Instances.ActiveCanvas?.Document is GH_Document definition)
       {
@@ -123,10 +124,35 @@ namespace RhinoInside.Revit.UI
   {
     protected new class Availability : GrasshopperCommand.Availability
     {
-      public override bool IsCommandAvailable(UIApplication _, CategorySet selectedCategories) =>
-        base.IsCommandAvailable(_, selectedCategories) &&
-        Instances.ActiveCanvas?.Document is object &&
-        Instances.ActiveCanvas.Document.SelectedCount > 0;
+      public override bool IsCommandAvailable(UIApplication _, DB.CategorySet selectedCategories)
+      {
+        if (!base.IsCommandAvailable(_, selectedCategories))
+          return false;
+
+        if (Instances.ActiveCanvas?.Document is GH_Document definition)
+        {
+          var options = new BakeOptions()
+          {
+            Document = Revit.ActiveUIDocument.Document,
+            View = Revit.ActiveUIDocument.Document.ActiveView,
+            Category = DB.Category.GetCategory(Revit.ActiveUIDocument.Document, ActiveBuiltInCategory),
+            Material = default
+          };
+
+          return ObjectsToBake(definition, options).Any();
+        }
+
+        return false;
+      }
+
+      public static IEnumerable<IGH_ElementIdBakeAwareObject> ObjectsToBake(GH_Document definition, BakeOptions options) =>
+        ElementIdBakeAwareObject.OfType
+        (
+          definition.SelectedObjects().
+          OfType<IGH_ActiveObject>().
+          Where(x => !x.Locked)
+        ).
+        Where(x => x.CanBake(options));
     }
 
     public static void CreateUI(RibbonPanel ribbonPanel)
@@ -148,22 +174,22 @@ namespace RhinoInside.Revit.UI
           if (doc == null)
             return;
 
-          var directShapeCategories = Enum.GetValues(typeof(BuiltInCategory)).Cast<BuiltInCategory>().
-          Where(categoryId => DirectShape.IsValidCategoryId(new ElementId(categoryId), doc)).
-          Select(categoryId => Autodesk.Revit.DB.Category.GetCategory(doc, categoryId)).
+          var directShapeCategories = Enum.GetValues(typeof(DB.BuiltInCategory)).Cast<DB.BuiltInCategory>().
+          Where(categoryId => DB.DirectShape.IsValidCategoryId(new DB.ElementId(categoryId), doc)).
+          Select(categoryId => DB.Category.GetCategory(doc, categoryId)).
           Where(x => x is object);
 
           foreach (var group in directShapeCategories.GroupBy(x => x.CategoryType).OrderBy(x => x.Key.ToString()))
           {
             foreach (var category in group.OrderBy(x => x.Name))
             {
-              var comboBoxMemberData = new ComboBoxMemberData(((BuiltInCategory) category.Id.IntegerValue).ToString(), category.Name)
+              var comboBoxMemberData = new ComboBoxMemberData(((DB.BuiltInCategory) category.Id.IntegerValue).ToString(), category.Name)
               {
                 GroupName = group.Key.ToString()
               };
               var item = categoriesComboBox.AddItem(comboBoxMemberData);
 
-              if ((BuiltInCategory) category.Id.IntegerValue == BuiltInCategory.OST_GenericModel)
+              if ((DB.BuiltInCategory) category.Id.IntegerValue == DB.BuiltInCategory.OST_GenericModel)
                 categoriesComboBox.Current = item;
             }
           }
@@ -174,7 +200,8 @@ namespace RhinoInside.Revit.UI
 
       if (items[1] is PushButton bakeButton)
       {
-        bakeButton.ToolTip = "Bake geometry in all selected objects";
+        bakeButton.ToolTip = "Bakes selected objects content in the active Revit document";
+        bakeButton.LongDescription = "Use CTRL key to group resulting elements";
         bakeButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Bake.png", true);
         bakeButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Bake.png");
         bakeButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
@@ -182,80 +209,186 @@ namespace RhinoInside.Revit.UI
     }
 
     static ComboBox categoriesComboBox = null;
-    public static BuiltInCategory ActiveBuiltInCategory
+    public static DB.BuiltInCategory ActiveBuiltInCategory
     {
-      get => Enum.TryParse(categoriesComboBox.Current.Name, out BuiltInCategory builtInCategory) ?
+      get => Enum.TryParse(categoriesComboBox.Current?.Name ?? string.Empty, out DB.BuiltInCategory builtInCategory) ?
              builtInCategory :
-             BuiltInCategory.OST_GenericModel;
+             DB.BuiltInCategory.OST_GenericModel;
     }
 
-    public static void Bake(Document doc, string transactionName, List<KeyValuePair<string, List<Rhino.Geometry.GeometryBase>>> geometryToBake)
+    class ElementIdBakeAwareObject : IGH_ElementIdBakeAwareObject
     {
-      if (geometryToBake.Count > 0)
+      public static IEnumerable<IGH_ElementIdBakeAwareObject> OfType(IEnumerable<IGH_ActiveObject> values)
       {
-        using (var trans = new Transaction(doc, transactionName))
+        foreach (var value in values)
         {
-          if (trans.Start() == TransactionStatus.Started)
-          {
-            var categoryId = new ElementId(ActiveBuiltInCategory);
+          if (value is IGH_ElementIdBakeAwareObject bakeId)
+            yield return bakeId;
 
-            foreach (var geometry in geometryToBake)
-            {
-              var ds = DirectShape.CreateElement(doc, categoryId);
-              ds.Name = geometry.Key;
-
-              foreach (var geometries in geometry.Value.ToHost())
-              {
-                if (geometries != null)
-                  ds.AppendShape(geometries);
-              }
-            }
-
-            trans.Commit();
-          }
+          else if (value is IGH_BakeAwareObject bake)
+            yield return new ElementIdBakeAwareObject(bake);
         }
       }
-    }
 
-    public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
-    {
-      if (Instances.ActiveCanvas?.Document is GH_Document definition)
+      readonly IGH_BakeAwareObject activeObject;
+      public ElementIdBakeAwareObject(IGH_BakeAwareObject value) { activeObject = value; }
+      bool IGH_ElementIdBakeAwareObject.CanBake(BakeOptions options) => activeObject.IsBakeCapable;
+
+      bool IGH_ElementIdBakeAwareObject.Bake(BakeOptions options, out ICollection<DB.ElementId> ids)
       {
-        var paramsToBake =
-        definition.SelectedObjects().
-        OfType<IGH_ActiveObject>().
-        Where(x => !x.Locked && ((x as IGH_BakeAwareObject)?.IsBakeCapable ?? false)).
-        SelectMany(x =>
+        using (var trans = new DB.Transaction(options.Document, "Bake"))
+        {
+          if (trans.Start() == DB.TransactionStatus.Started)
+          {
+            bool result = false;
+
+            if (activeObject is IGH_Param param)
+            {
+              result = Bake(param, options, out ids);
+            }
+            else if (activeObject is IGH_Component component)
+            {
+              var list = new List<DB.ElementId>();
+              foreach (var outParam in component.Params.Output)
+              {
+                if (Bake(outParam, options, out var partial))
+                {
+                  result = true;
+                  list.AddRange(partial);
+                }
+              }
+
+              ids = result ? list : default;
+            }
+            else ids = default;
+
+            trans.Commit();
+            return result;
+          }
+        }
+
+        ids = default;
+        return false;
+      }
+
+      bool Bake(IGH_Param param, BakeOptions options, out ICollection<DB.ElementId> ids)
+      {
+        var geometryToBake = param.VolatileData.AllData(true).Select(x => x.ScriptVariable()).
+        Select(x =>
         {
           switch (x)
           {
-            case IGH_Component component: return component.Params.Output;
-            case IGH_Param param: return Enumerable.Repeat(x, 1);
+            case Rhino.Geometry.Point3d point:          return new Rhino.Geometry.Point(point);
+            case Rhino.Geometry.GeometryBase geometry:  return geometry;
           }
+
           return null;
-        }).
-        OfType<IGH_Param>().
-        Where(x => x.VolatileDataCount > 0);
+        });
 
-        var geometryToBake = new List<KeyValuePair<string, List<Rhino.Geometry.GeometryBase>>>();
-
-        foreach (var param in paramsToBake)
+        if (geometryToBake.Any())
         {
-          var geometryList = new List<Rhino.Geometry.GeometryBase>();
-          foreach (var value in param.VolatileData.AllData(true).Select(x => x.ScriptVariable()))
+          var scaleFactor = 1.0 / Revit.ModelUnits;
+          var categoryId = options.Category?.Id ?? new DB.ElementId(DB.BuiltInCategory.OST_GenericModel);
+
+          ids = new List<DB.ElementId>();
+          foreach (var geometry in geometryToBake)
           {
-            switch (value)
+            var ds = DB.DirectShape.CreateElement(options.Document, categoryId);
+            ds.Name = param.NickName;
+
+            var shape = geometry.ToHostMultiple(scaleFactor).ToList();
+            ds.SetShape(shape);
+            ids.Add(ds.Id);
+          }
+
+          return true;
+        }
+
+        ids = default;
+        return false;
+      }
+    }
+
+    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
+    {
+      if (Instances.ActiveCanvas?.Document is GH_Document definition)
+      {
+        bool groupResult = (System.Windows.Forms.Control.ModifierKeys & System.Windows.Forms.Keys.Control) != System.Windows.Forms.Keys.None;
+
+        var options = new BakeOptions()
+        {
+          Document = data.Application.ActiveUIDocument.Document,
+          View = data.View,
+          Category = DB.Category.GetCategory(data.Application.ActiveUIDocument.Document, ActiveBuiltInCategory),
+          Material = default
+        };
+
+        var resultingElementIds = new List<DB.ElementId>();
+        using (var transGroup = new DB.TransactionGroup(options.Document))
+        {
+          transGroup.Start("Bake Selected");
+
+          var bakedElementIds = new List<DB.ElementId>();
+          foreach (var obj in Availability.ObjectsToBake(definition, options))
+          {
+            if (obj.Bake(options, out var partial))
+              bakedElementIds.AddRange(partial);
+          }
+
+          {
+            var activeDesignOptionId = DB.DesignOption.GetActiveDesignOptionId(options.Document);
+            var elementIdsToAssignDO = new List<DB.ElementId>();
+            foreach (var elementId in bakedElementIds)
             {
-              case Rhino.Geometry.Point3d point: geometryList.Add(new Rhino.Geometry.Point(point)); break;
-              case Rhino.Geometry.GeometryBase geometry: geometryList.Add(geometry); break;
+              if
+              (
+                options.Document.GetElement(elementId) is DB.Element element &&
+                element.DesignOption?.Id is DB.ElementId elementDesignOptionId &&
+                elementDesignOptionId != activeDesignOptionId
+              )
+              {
+                elementIdsToAssignDO.Add(elementId);
+              }
+              else resultingElementIds?.Add(elementId);
+            }
+
+            if (elementIdsToAssignDO.Count > 0)
+            {
+              using (var trans = new DB.Transaction(options.Document, "Assign to Active Design Option"))
+              {
+                if (trans.Start() == DB.TransactionStatus.Started)
+                {
+                  // Move elements to Active Design Option
+                  var elementIdsCopied = DB.ElementTransformUtils.CopyElements(options.Document, elementIdsToAssignDO, DB.XYZ.Zero);
+                  options.Document.Delete(elementIdsToAssignDO);
+                  resultingElementIds?.AddRange(elementIdsCopied);
+
+                  trans.Commit();
+                }
+              }
             }
           }
 
-          if (geometryList.Count > 0)
-            geometryToBake.Add(new KeyValuePair<string, List<Rhino.Geometry.GeometryBase>>(param.NickName, geometryList));
+          if (groupResult)
+          {
+            using (var trans = new DB.Transaction(options.Document, "Group Bake"))
+            {
+              if (trans.Start() == DB.TransactionStatus.Started)
+              {
+                var group = options.Document.Create.NewGroup(resultingElementIds);
+                trans.Commit();
+
+                resultingElementIds = new List<DB.ElementId>();
+                resultingElementIds.Add(group.Id);
+              }
+            }
+          }
+
+          transGroup.Assimilate();
         }
 
-        Bake(data.Application.ActiveUIDocument.Document, "Bake Selected", geometryToBake);
+        data.Application.ActiveUIDocument.Selection.SetElementIds(resultingElementIds);
+        Instances.RedrawCanvas();
       }
 
       return Result.Succeeded;
@@ -282,7 +415,7 @@ namespace RhinoInside.Revit.UI
 
     protected new class Availability : NeedsActiveDocument<GrasshopperCommand.Availability>
     {
-      public override bool IsCommandAvailable(UIApplication _, CategorySet selectedCategories) =>
+      public override bool IsCommandAvailable(UIApplication _, DB.CategorySet selectedCategories) =>
         base.IsCommandAvailable(_, selectedCategories) &&
         Revit.ActiveUIDocument?.Document.IsFamilyDocument == false;
     }
@@ -308,7 +441,7 @@ namespace RhinoInside.Revit.UI
       }
     }
 
-    public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
+    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
     {
       GH.PreviewServer.PreviewMode = GH_PreviewMode.Disabled;
       data.Application.ActiveUIDocument.RefreshActiveView();
@@ -335,7 +468,7 @@ namespace RhinoInside.Revit.UI
       }
     }
 
-    public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
+    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
     {
       GH.PreviewServer.PreviewMode = GH_PreviewMode.Wireframe;
       data.Application.ActiveUIDocument.RefreshActiveView();
@@ -362,7 +495,7 @@ namespace RhinoInside.Revit.UI
       }
     }
 
-    public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
+    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
     {
       GH.PreviewServer.PreviewMode = GH_PreviewMode.Shaded;
       data.Application.ActiveUIDocument.RefreshActiveView();

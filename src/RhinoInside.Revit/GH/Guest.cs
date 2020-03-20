@@ -294,7 +294,7 @@ namespace RhinoInside.Revit.GH
 
           foreach (var obj in definition.Objects)
           {
-            if (obj is Parameters.IGH_ElementIdParam persistentParam)
+            if (obj is Kernel.IGH_ElementIdParam persistentParam)
             {
               if (persistentParam.DataType == GH_ParamData.remote)
                 continue;
@@ -310,7 +310,7 @@ namespace RhinoInside.Revit.GH
                   change.ExpiredObjects.Add(persistentParam);
               }
             }
-            else if (obj is Components.IGH_ElementIdComponent persistentComponent)
+            else if (obj is Kernel.IGH_ElementIdComponent persistentComponent)
             {
               if (persistentComponent.NeedsToBeExpired(e))
               {
@@ -387,27 +387,5 @@ namespace RhinoInside.Revit.GH
       while (changeQuque.Count > 0)
         changeQuque.Dequeue().Apply();
     }
-  }
-}
-
-namespace RhinoInside.Revit.GH.Parameters
-{
-  public interface IGH_ElementIdParam : IGH_Param
-  {
-    bool NeedsToBeExpired
-    (
-      Document doc,
-      ICollection<ElementId> added,
-      ICollection<ElementId> deleted,
-      ICollection<ElementId> modified
-    );
-  }
-}
-
-namespace RhinoInside.Revit.GH.Components
-{
-  public interface IGH_ElementIdComponent : IGH_Component
-  {
-    bool NeedsToBeExpired(DocumentChangedEventArgs args);
   }
 }

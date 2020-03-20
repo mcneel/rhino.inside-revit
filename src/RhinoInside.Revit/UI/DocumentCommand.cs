@@ -137,13 +137,13 @@ namespace RhinoInside.Revit.UI
       // I add the try-catch just because this is called many times.
       public override bool IsCommandAvailable(UIApplication _, CategorySet selectedCategories)
       {
-        if
-        (
-          Revit.ActiveUIApplication is UIApplication app &&
-          dependency.IsCommandAvailable(app, selectedCategories)
-        )
+        if(Revit.ActiveUIApplication is UIApplication app)
         {
-          try { return app.ActiveUIDocument?.Document?.IsValidObject ?? false; }
+          try
+          {
+            return (app.ActiveUIDocument?.Document?.IsValidObject ?? false) &&
+                   dependency.IsCommandAvailable(app, selectedCategories);
+          }
           catch (Autodesk.Revit.Exceptions.ApplicationException) { }
         }
 
