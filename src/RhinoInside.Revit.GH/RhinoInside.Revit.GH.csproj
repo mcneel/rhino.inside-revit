@@ -188,7 +188,9 @@
     <Compile Include="Components\Document\Save.cs" />
     <Compile Include="Components\Document\Views.cs" />
     <Compile Include="Components\ElementFilter.cs" />
+    <Compile Include="Components\ElementType\Default.cs" />
     <Compile Include="Components\ElementType\Duplicate.cs" />
+    <Compile Include="Components\ElementType\ExportImage.cs" />
     <Compile Include="Components\ElementType\Identity.cs" />
     <Compile Include="Components\ElementType\Similar.cs" />
     <Compile Include="Components\Element\AdaptiveComponent\ByPoints.cs" />
