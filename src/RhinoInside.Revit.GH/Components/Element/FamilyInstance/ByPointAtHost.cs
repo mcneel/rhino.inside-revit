@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.GH.Components
     void ReconstructFamilyInstanceByLocation
     (
       DB.Document doc,
-      ref DB.Element element,
+      ref DB.FamilyInstance element,
 
       [Description("Location where to place the element. Point or plane is accepted.")]
       Rhino.Geometry.Plane location,
@@ -56,10 +56,10 @@ namespace RhinoInside.Revit.GH.Components
       ChangeElementTypeId(ref element, type.Id);
 
       bool hasSameHost = false;
-      if (element is DB.FamilyInstance familyInstance)
+      if (element is DB.FamilyInstance)
       {
-        hasSameHost = (familyInstance.Host?.Id ?? DB.ElementId.InvalidElementId) == (host?.Id ?? DB.ElementId.InvalidElementId);
-        if (familyInstance.Host == null)
+        hasSameHost = (element.Host?.Id ?? DB.ElementId.InvalidElementId) == (host?.Id ?? DB.ElementId.InvalidElementId);
+        if (element.Host == null)
         {
           if (element?.get_Parameter(DB.BuiltInParameter.INSTANCE_FREE_HOST_PARAM) is DB.Parameter freeHostParam)
           {
@@ -121,14 +121,14 @@ namespace RhinoInside.Revit.GH.Components
           DB.BuiltInParameter.FAMILY_LEVEL_PARAM
         };
 
-        ReplaceElement(ref element, doc.GetElement(newElementIds.First()), parametersMask);
+        ReplaceElement(ref element, doc.GetElement(newElementIds.First()) as DB.FamilyInstance, parametersMask);
         doc.Regenerate();
       }
 
-      if (element is DB.FamilyInstance instance && instance.Host is null)
+      if (element is object && element.Host is null)
       {
         element.Pinned = false;
-        instance.SetTransform(location.Origin.ToHost(), location.XAxis.ToHost(), location.YAxis.ToHost());
+        element.SetTransform(location.Origin.ToHost(), location.XAxis.ToHost(), location.YAxis.ToHost());
         element.Pinned = true;
       }
     }
