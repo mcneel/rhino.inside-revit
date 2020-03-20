@@ -1,4 +1,5 @@
 using System;
+using Grasshopper.Kernel.Types;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -37,6 +38,19 @@ namespace RhinoInside.Revit.GH.Types
 
     public Level() { }
     public Level(DB.Level level) : base(level) { }
+
+    public override bool CastFrom(object source)
+    {
+      var value = source;
+
+      if (source is IGH_Goo goo)
+        value = goo.ScriptVariable();
+
+      if (value is DB.View view)
+        return view.GenLevel is null ? false : SetValue(view.GenLevel);
+
+      return base.CastFrom(source);
+    }
 
     public override Rhino.Geometry.Point3d Location
     {

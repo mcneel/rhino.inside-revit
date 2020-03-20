@@ -1,4 +1,5 @@
 using System;
+using Grasshopper.Kernel.Types;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -13,6 +14,19 @@ namespace RhinoInside.Revit.GH.Types
 
     public SketchPlane() : base() { }
     public SketchPlane(DB.SketchPlane sketchPlane) : base(sketchPlane) { }
+
+    public override bool CastFrom(object source)
+    {
+      var value = source;
+
+      if (source is IGH_Goo goo)
+        value = goo.ScriptVariable();
+
+      if (value is DB.View view)
+        return view.SketchPlane is null ? false : SetValue(view.SketchPlane);
+
+      return base.CastFrom(source);
+    }
 
     #region Location
     public override Rhino.Geometry.Point3d Location => Plane.Origin;
