@@ -7,10 +7,16 @@ namespace RhinoInside.Revit.GH.Components
   public class ElementTypeSimilar : Component
   {
     public override Guid ComponentGuid => new Guid("BA9C72C5-EC88-450B-B736-BE6D827FA2F3");
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
+
     protected override string IconTag => "S";
 
-    public ElementTypeSimilar()
-    : base("ElementType Similar", "Similar", "Obtains a set of types that are similar to Type", "Revit", "Type")
+    public ElementTypeSimilar() : base
+    (
+      "ElementType Similar", "Similar",
+      "Obtains a set of types that are similar to Type",
+      "Revit", "Type"
+    )
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
