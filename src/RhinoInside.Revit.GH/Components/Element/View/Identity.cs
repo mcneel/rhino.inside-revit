@@ -27,7 +27,11 @@ namespace RhinoInside.Revit.GH.Components
     {
       manager.AddParameter(new Parameters.Param_Enum<Types.ViewDiscipline>(), "Discipline", "Discipline", "View discipline", GH_ParamAccess.item);
       manager.AddParameter(new Parameters.Param_Enum<Types.ViewType>(), "Type", "Type", "View type", GH_ParamAccess.item);
-      manager.AddTextParameter("Name", "Name", "View name", GH_ParamAccess.item);
+      manager.AddTextParameter("Name", "N", "View name", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.View(), "Template", "T", "View template", GH_ParamAccess.list);
+      manager.AddBooleanParameter("IsTemplate", "T", "View is template", GH_ParamAccess.item);
+      manager.AddBooleanParameter("IsAssembly", "A", "View is assembly", GH_ParamAccess.item);
+      manager.AddBooleanParameter("IsPrintable", "P", "View is printable", GH_ParamAccess.item);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -38,9 +42,15 @@ namespace RhinoInside.Revit.GH.Components
 
       if (view.HasViewDiscipline())
         DA.SetData("Discipline", view.Discipline);
+      else
+        DA.SetData("Discipline", null);
 
       DA.SetData("Type", view.ViewType);
       DA.SetData("Name", view.Name);
+      DA.SetData("Template", view.Document.GetElement(view.ViewTemplateId) as DB.View);
+      DA.SetData("IsTemplate", view.IsTemplate);
+      DA.SetData("IsAssembly", view.IsAssemblyView);
+      DA.SetData("IsPrintable", view.CanBePrinted);
     }
   }
 }
