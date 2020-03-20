@@ -200,6 +200,7 @@
     <Compile Include="Components\Element\Geometry.cs" />
     <Compile Include="Components\Element\Group\ByLocation.cs" />
     <Compile Include="Components\Element\HostObject\Faces.cs" />
+    <Compile Include="Components\Element\HostObject\Inserts.cs" />
     <Compile Include="Components\Element\Inspect.cs" />
     <Compile Include="Components\Element\Materials.cs" />
     <Compile Include="Components\Element\Column\ByCurve.cs" />
