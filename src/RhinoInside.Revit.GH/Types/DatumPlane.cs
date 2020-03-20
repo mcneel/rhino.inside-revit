@@ -6,7 +6,6 @@ namespace RhinoInside.Revit.GH.Types
 {
   public class DatumPlane : GeometricElement
   {
-    public override string TypeName => "Revit DatumPlane";
     public override string TypeDescription => "Represents a Revit DatumPlane";
     protected override Type ScriptVariableType => typeof(DB.DatumPlane);
     public static explicit operator DB.DatumPlane(DatumPlane self) =>
@@ -30,7 +29,6 @@ namespace RhinoInside.Revit.GH.Types
 
   public class Level : DatumPlane
   {
-    public override string TypeName => "Revit Level";
     public override string TypeDescription => "Represents a Revit level";
     protected override Type ScriptVariableType => typeof(DB.Level);
     public static explicit operator DB.Level(Level self) =>
@@ -70,7 +68,7 @@ namespace RhinoInside.Revit.GH.Types
 
   public class Grid : DatumPlane
   {
-    public override string TypeName => "Revit Level";
+
     public override string TypeDescription => "Represents a Revit level";
     protected override Type ScriptVariableType => typeof(DB.Grid);
     public static explicit operator DB.Grid(Grid self) =>

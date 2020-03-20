@@ -5,7 +5,6 @@ namespace RhinoInside.Revit.GH.Types
 {
   public class View : Element
   {
-    public override string TypeName => "Revit View";
     public override string TypeDescription => "Represents a Revit view";
     protected override Type ScriptVariableType => typeof(DB.View);
     public static explicit operator DB.View(View self) =>

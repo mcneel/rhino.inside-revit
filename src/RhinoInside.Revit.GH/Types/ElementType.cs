@@ -5,7 +5,6 @@ namespace RhinoInside.Revit.GH.Types
 {
   public class ElementType : Element
   {
-    public override string TypeName => "Revit Element Type";
     public override string TypeDescription => "Represents a Revit element type";
     protected override Type ScriptVariableType => typeof(DB.ElementType);
     public static explicit operator DB.ElementType(ElementType self) =>

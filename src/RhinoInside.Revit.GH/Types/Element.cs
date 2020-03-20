@@ -8,7 +8,17 @@ namespace RhinoInside.Revit.GH.Types
 {
   public class Element : ElementId
   {
-    public override string TypeName => "Revit Element";
+    public override string TypeName
+    {
+      get
+      {
+        var element = (DB.Element) this;
+        if (element is object)
+          return $"Revit {element.GetType().Name}";
+
+        return $"Revit {GetType().Name}";
+      }
+    }
     public override string TypeDescription => "Represents a Revit element";
     override public object ScriptVariable() => (DB.Element) this;
     protected override Type ScriptVariableType => typeof(DB.Element);

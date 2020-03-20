@@ -17,7 +17,6 @@ namespace RhinoInside.Revit.GH.Types
     IGH_PreviewData,
     IGH_PreviewMeshData
   {
-    public override string TypeName => "Revit Geometric element";
     public override string TypeDescription => "Represents a Revit geometric element";
 
     public override string DisplayName
