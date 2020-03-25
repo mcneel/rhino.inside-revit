@@ -49,10 +49,13 @@ namespace RhinoInside.Revit.GH.Components
 
       using (var collector = new DB.FilteredElementCollector(doc))
       {
-        var viewsCollector = collector.WherePasses(ElementFilter);
+        var materialsCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
-          viewsCollector = viewsCollector.WherePasses(filter);
+          materialsCollector = materialsCollector.WherePasses(filter);
+
+        if (TryGetFilterStringParam(DB.BuiltInParameter.MATERIAL_NAME, ref name, out var nameFilter))
+          materialsCollector = materialsCollector.WherePasses(nameFilter);
 
         var materials = collector.Cast<DB.Material>();
 

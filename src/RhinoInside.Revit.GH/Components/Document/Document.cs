@@ -42,6 +42,110 @@ namespace RhinoInside.Revit.GH.Components
       return false;
     }
 
+    protected static bool TryGetFilterIntegerParam(DB.BuiltInParameter paramId, int pattern, out DB.ElementFilter filter)
+    {
+      var rule = new DB.FilterIntegerRule
+      (
+        new DB.ParameterValueProvider(new DB.ElementId(paramId)),
+        new DB.FilterNumericEquals(),
+        pattern
+      );
+
+      filter = new DB.ElementParameterFilter(rule, false);
+      return true;
+    }
+
+    protected static bool TryGetFilterDoubleParam(DB.BuiltInParameter paramId, double pattern, out DB.ElementFilter filter)
+    {
+      var rule = new DB.FilterDoubleRule
+      (
+        new DB.ParameterValueProvider(new DB.ElementId(paramId)),
+        new DB.FilterNumericEquals(),
+        pattern,
+        1e-6
+      );
+
+      filter = new DB.ElementParameterFilter(rule, false);
+      return true;
+    }
+
+    protected static bool TryGetFilterDoubleParam(DB.BuiltInParameter paramId, double pattern, double tolerance, out DB.ElementFilter filter)
+    {
+      var rule = new DB.FilterDoubleRule
+      (
+        new DB.ParameterValueProvider(new DB.ElementId(paramId)),
+        new DB.FilterNumericEquals(),
+        pattern,
+        tolerance
+      );
+
+      filter = new DB.ElementParameterFilter(rule, false);
+      return true;
+    }
+
+    protected static bool TryGetFilterLengthParam(DB.BuiltInParameter paramId, double pattern, out DB.ElementFilter filter)
+    {
+      var rule = new DB.FilterDoubleRule
+      (
+        new DB.ParameterValueProvider(new DB.ElementId(paramId)),
+        new DB.FilterNumericEquals(),
+        pattern,
+        Revit.VertexTolerance
+      );
+
+      filter = new DB.ElementParameterFilter(rule, false);
+      return true;
+    }
+
+    protected static bool TryGetFilterStringParam(DB.BuiltInParameter paramId, ref string pattern, out DB.ElementFilter filter)
+    {
+      if (pattern is string subPattern)
+      {
+        var inverted = false;
+        var method = Operator.CompareMethodFromPattern(ref subPattern, ref inverted);
+        if (Operator.CompareMethod.Nothing < method && method < Operator.CompareMethod.Wildcard)
+        {
+          var evaluator = default(DB.FilterStringRuleEvaluator);
+          switch (method)
+          {
+            case Operator.CompareMethod.Equals: evaluator = new DB.FilterStringEquals(); break;
+            case Operator.CompareMethod.StartsWith: evaluator = new DB.FilterStringBeginsWith(); break;
+            case Operator.CompareMethod.EndsWith: evaluator = new DB.FilterStringEndsWith(); break;
+            case Operator.CompareMethod.Contains: evaluator = new DB.FilterStringContains(); break;
+          }
+
+          var rule = new DB.FilterStringRule
+          (
+            new DB.ParameterValueProvider(new DB.ElementId(paramId)),
+            evaluator,
+            subPattern,
+            true
+          );
+
+          filter = new DB.ElementParameterFilter(rule, inverted);
+          pattern = default;
+          return true;
+        }
+      }
+
+      filter = default;
+      return false;
+    }
+
+    protected static bool TryGetFilterElementIdParam(DB.BuiltInParameter paramId, DB.ElementId pattern, out DB.ElementFilter filter)
+    {
+      var rule = new DB.FilterElementIdRule
+      (
+        new DB.ParameterValueProvider(new DB.ElementId(paramId)),
+        new DB.FilterNumericEquals(),
+        pattern
+      );
+
+      filter = new DB.ElementParameterFilter(rule, false);
+      pattern = default;
+      return true;
+    }
+
     protected override void RegisterInputParams(GH_InputParamManager manager) { }
 
     protected override sealed void TrySolveInstance(IGH_DataAccess DA)
@@ -76,6 +180,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected abstract void TrySolveInstance(IGH_DataAccess DA, DB.Document doc);
 
+    #region IGH_VariableParameterComponent
     bool IGH_VariableParameterComponent.CanInsertParameter(GH_ParameterSide side, int index) =>
       side == GH_ParameterSide.Input && index == 0 && (Params.Input.Count == 0 || Params.Input[0].Name != "Document");
 
@@ -95,5 +200,6 @@ namespace RhinoInside.Revit.GH.Components
     }
     bool IGH_VariableParameterComponent.DestroyParameter(GH_ParameterSide side, int index) => side == GH_ParameterSide.Input && index == 0;
     void IGH_VariableParameterComponent.VariableParameterMaintenance() { }
+    #endregion
   }
 }

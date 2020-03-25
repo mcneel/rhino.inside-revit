@@ -49,6 +49,9 @@ namespace RhinoInside.Revit.GH.Components
         if (filter is object)
           elementCollector = elementCollector.WherePasses(filter);
 
+        if (TryGetFilterStringParam(DB.BuiltInParameter.SYMBOL_FAMILY_NAME_PARAM, ref name, out var nameFilter))
+          elementCollector = elementCollector.WherePasses(nameFilter);
+
         var elementTypes = elementCollector.Cast<DB.ElementType>();
 
         var familiesSet = new HashSet<string>(elementTypes.Select(x => x.FamilyName));
