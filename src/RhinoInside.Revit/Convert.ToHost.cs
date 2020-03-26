@@ -299,7 +299,7 @@ namespace RhinoInside.Revit
       {
         if
         (
-          curve.GetLength() >= Revit.ShortCurveTolerance * 2.0 &&
+          !curve.IsShort(Revit.ShortCurveTolerance * 2.0) &&
           curve.Split(curve.Domain.Mid) is Curve[] half
         )
         {
@@ -307,7 +307,7 @@ namespace RhinoInside.Revit
           yield return (half[1] as ArcCurve).ToHost();
         }
       }
-      else if (curve.GetLength() >= Revit.ShortCurveTolerance)
+      else if (!curve.IsShort(Revit.ShortCurveTolerance))
       {
         yield return curve.ToHost();
       }
@@ -331,7 +331,7 @@ namespace RhinoInside.Revit
           int count = segments.SegmentCount;
           for (int s = 0; s < count; ++s)
           {
-            Debug.Assert(segments.SegmentCurve(s).GetLength() > Revit.ShortCurveTolerance);
+            Debug.Assert(!segments.SegmentCurve(s).IsShort(Revit.ShortCurveTolerance));
             yield return (segments.SegmentCurve(s) as NurbsCurve).ToHost();
           }
         }
@@ -343,7 +343,7 @@ namespace RhinoInside.Revit
       {
         if
         (
-          curve.GetLength() >= Revit.ShortCurveTolerance * 2.0 &&
+          !curve.IsShort(Revit.ShortCurveTolerance * 2.0) &&
           curve.Split(curve.Domain.Mid) is Curve[] half
         )
         {
@@ -351,7 +351,7 @@ namespace RhinoInside.Revit
           yield return (half[1] as NurbsCurve).ToHost();
         }
       }
-      else if (curve.GetLength() >= Revit.ShortCurveTolerance)
+      else if (!curve.IsShort(Revit.ShortCurveTolerance))
       {
         yield return curve.ToHost();
       }
@@ -421,13 +421,9 @@ namespace RhinoInside.Revit
     {
       using (var nurbsSurface = faceSurface.ToNurbsSurface())
       {
-        {
-          var domainU = nurbsSurface.Domain(0);
-          Debug.Assert(!nurbsSurface.GetNextDiscontinuity(0, Continuity.C2_continuous, domainU.Min, domainU.Max, out var tU));
-          var domainV = nurbsSurface.Domain(1);
-          Debug.Assert(!nurbsSurface.GetNextDiscontinuity(1, Continuity.C2_continuous, domainV.Min, domainV.Max, out var tV));
-        }
-
+        var domainU = nurbsSurface.Domain(0);
+        var domainV = nurbsSurface.Domain(1);
+        var bboxUV = new DB.BoundingBoxUV(domainU.Min, domainV.Min, domainU.Max, domainV.Max); 
         var degreeU = nurbsSurface.Degree(0);
         var degreeV = nurbsSurface.Degree(1);
         var knotsU = nurbsSurface.KnotsU.ToHost();
@@ -439,6 +435,8 @@ namespace RhinoInside.Revit
         Debug.Assert(knotsU.Count >= 2 * (degreeU + 1));
         Debug.Assert(knotsV.Count >= 2 * (degreeV + 1));
         Debug.Assert(controlPoints.Count == (knotsU.Count - degreeU - 1) * (knotsV.Count - degreeV - 1));
+        Debug.Assert(!nurbsSurface.GetNextDiscontinuity(0, Continuity.C2_continuous, domainU.Min, domainU.Max, out var tU));
+        Debug.Assert(!nurbsSurface.GetNextDiscontinuity(1, Continuity.C2_continuous, domainV.Min, domainV.Max, out var tV));
 
         if (nurbsSurface.IsRational)
         {
@@ -446,14 +444,14 @@ namespace RhinoInside.Revit
 
           return DB.BRepBuilderSurfaceGeometry.CreateNURBSSurface
           (
-            degreeU, degreeV, knotsU, knotsV, controlPoints, weights, false, null
+            degreeU, degreeV, knotsU, knotsV, controlPoints, weights, false, bboxUV
           );
         }
         else
         {
           return DB.BRepBuilderSurfaceGeometry.CreateNURBSSurface
           (
-            degreeU, degreeV, knotsU, knotsV, controlPoints, false, null
+            degreeU, degreeV, knotsU, knotsV, controlPoints, false, bboxUV
           );
         }
       }
@@ -469,16 +467,19 @@ namespace RhinoInside.Revit
         brepToSplit = brep;
         foreach (var face in brepToSplit.Faces)
         {
-          face.ShrinkFace(BrepFace.ShrinkDisableSide.ShrinkAllSides);
-
-          var face_IsClosed = new bool[2];
+          var face_IsClosed = new bool[2] { face.IsClosed(0), face.IsClosed(1) };
+          if (face.IsSolid || face_IsClosed[0] && face_IsClosed[1])
+            face.ShrinkFace(BrepFace.ShrinkDisableSide.ShrinkAllSides);
+          else if (face_IsClosed[0])
+            face.ShrinkFace(BrepFace.ShrinkDisableSide.DoNotShrinkSouthSide | BrepFace.ShrinkDisableSide.DoNotShrinkNorthSide);
+          else if (face_IsClosed[1])
+            face.ShrinkFace(BrepFace.ShrinkDisableSide.DoNotShrinkEastSide | BrepFace.ShrinkDisableSide.DoNotShrinkWestSide);
 
           var splitters = new List<Curve>();
 
           // Compute splitters at C2
           for (int d = 0; d < 2; d++)
           {
-            face_IsClosed[d] = face.IsClosed(d);
             var domain = face.Domain(d);
             var t = domain.Min;
             while (face.GetNextDiscontinuity(d, Continuity.C2_continuous, t, domain.Max, out t))
@@ -516,8 +517,19 @@ namespace RhinoInside.Revit
 
     public static DB.Solid ToHost(this Brep brep)
     {
+      var bbox = brep.GetBoundingBox(false);
+      if (!bbox.IsValid || bbox.Diagonal.Length < Revit.VertexTolerance)
+        return null;
+
       DB.Solid solid = null;
       brep = brep.DuplicateBrep();
+
+      double factor = 1000.0 / bbox.Diagonal.Length;
+      var xform = Transform.Translation(Point3d.Origin - bbox.Center)
+                * Transform.Scale(Point3d.Origin, factor);
+
+      if (!brep.Transform(xform))
+        return null;
 
       // MakeValidForV2 converts everything inside brep to NURBS
       if (brep.MakeValidForV2())
@@ -563,8 +575,7 @@ namespace RhinoInside.Revit
                     if (edge is null)
                       continue;
 
-                    double length = edge.GetLength();
-                    if (length < Revit.ShortCurveTolerance)
+                    if (edge.IsShort(Revit.ShortCurveTolerance))
                       continue;
 
                     var edgeIds = brepEdges[edge.EdgeIndex];
@@ -609,6 +620,13 @@ namespace RhinoInside.Revit
         {
           Debug.Fail("SplitClosedFaces", "SplitClosedFaces failed to split a closed surface.");
         }
+      }
+
+      if (solid is object)
+      {
+        var transform = DB.Transform.Identity.ScaleBasis(1.0 / factor) *
+                        DB.Transform.CreateTranslation(bbox.Center.ToHost());
+        solid = DB.SolidUtils.CreateTransformed(solid, transform);
       }
 
       return solid;
