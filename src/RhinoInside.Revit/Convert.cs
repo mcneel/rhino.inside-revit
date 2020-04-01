@@ -9,7 +9,7 @@ namespace RhinoInside.Revit
   {
     #region ConversionException
     /// The exception that is thrown when a geometry conversion error occurs.
-    public class ConversionException : ApplicationException
+    public class ConversionException : Exceptions.CancelException
     {
       public ConversionException() { }
       public ConversionException(string message) : base(message) { }
@@ -43,7 +43,7 @@ namespace RhinoInside.Revit
       return false;
     }
 
-    internal static IEnumerable<Rhino.Display.DisplayMaterial> GetPreviewMaterials
+    /*internal*/ public static IEnumerable<Rhino.Display.DisplayMaterial> GetPreviewMaterials
     (
       this IEnumerable<DB.GeometryObject> geometries,
       DB.Document doc,
@@ -91,7 +91,7 @@ namespace RhinoInside.Revit
     #endregion
 
     #region GetPreviewMeshes
-    internal static IEnumerable<Mesh> GetPreviewMeshes
+    /*internal*/ public static IEnumerable<Mesh> GetPreviewMeshes
     (
       this IEnumerable<DB.GeometryObject> geometries,
       MeshingParameters meshingParameters
@@ -171,7 +171,7 @@ namespace RhinoInside.Revit
     #endregion
 
     #region GetPreviewWires
-    internal static IEnumerable<Curve> GetPreviewWires
+    /*internal*/ public static IEnumerable<Curve> GetPreviewWires
     (
       this IEnumerable<DB.GeometryObject> geometries
     )

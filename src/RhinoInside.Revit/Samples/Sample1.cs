@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.Samples
   {
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      var buttonData = NewPushButtonData<Sample1, Availability>("Sample 1");
+      var buttonData = NewPushButtonData<Sample1, NeedsActiveDocument<Availability>>("Sample 1");
 
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {

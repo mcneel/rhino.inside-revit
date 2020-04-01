@@ -49,8 +49,8 @@ namespace RhinoInside.Revit.GH
       Revit.DocumentChanged += OnDocumentChanged;
       Revit.ApplicationUI.Idling += OnIdle;
 
-      Rhinoceros.ModalScope.Enter += ModalScope_Enter;
-      Rhinoceros.ModalScope.Exit  += ModalScope_Exit;
+      External.ActivationGate.Enter += ModalScope_Enter;
+      External.ActivationGate.Exit  += ModalScope_Exit;
 
       RhinoDoc.BeginOpenDocument                += BeginOpenDocument;
       RhinoDoc.EndOpenDocumentInitialViewUpdate += EndOpenDocumentInitialViewUpdate;
@@ -95,8 +95,8 @@ namespace RhinoInside.Revit.GH
       RhinoDoc.EndOpenDocumentInitialViewUpdate -= EndOpenDocumentInitialViewUpdate;
       RhinoDoc.BeginOpenDocument                -= BeginOpenDocument;
 
-      Rhinoceros.ModalScope.Exit  -= ModalScope_Exit;
-      Rhinoceros.ModalScope.Enter -= ModalScope_Enter;
+      External.ActivationGate.Exit  -= ModalScope_Exit;
+      External.ActivationGate.Enter -= ModalScope_Enter;
 
       Revit.ApplicationUI.Idling -= OnIdle;
       Revit.DocumentChanged -= OnDocumentChanged;
@@ -104,6 +104,19 @@ namespace RhinoInside.Revit.GH
       // Unregister PreviewServer
       previewServer?.Unregister();
       previewServer = null;
+    }
+
+    public static void Show()
+    {
+      Script.ShowEditor();
+      Rhinoceros.MainWindow.BringToFront();
+    }
+
+    public static async void ShowAsync()
+    {
+      await External.ActivationGate.Yield();
+
+      Show();
     }
 
     static bool LoadGHA(string filePath)
@@ -141,12 +154,13 @@ namespace RhinoInside.Revit.GH
     {
       // Load This Assembly as a GHA in Grasshopper
       {
-        var bCoff = Instances.Settings.GetValue("Assemblies:COFF", true);
+        var bCoff = Instances.Settings.GetValue("Assemblies:COFF", false);
         try
         {
           Instances.Settings.SetValue("Assemblies:COFF", false);
 
           var location = Assembly.GetExecutingAssembly().Location;
+          location = Path.Combine(Path.GetDirectoryName(location), Path.GetFileNameWithoutExtension(location) + ".GH.gha");
           if (!LoadGHA(location))
           {
             if (!File.Exists(location))
@@ -280,7 +294,7 @@ namespace RhinoInside.Revit.GH
 
           foreach (var obj in definition.Objects)
           {
-            if (obj is Parameters.IGH_ElementIdParam persistentParam)
+            if (obj is Kernel.IGH_ElementIdParam persistentParam)
             {
               if (persistentParam.DataType == GH_ParamData.remote)
                 continue;
@@ -296,7 +310,7 @@ namespace RhinoInside.Revit.GH
                   change.ExpiredObjects.Add(persistentParam);
               }
             }
-            else if (obj is Components.IGH_ElementIdComponent persistentComponent)
+            else if (obj is Kernel.IGH_ElementIdComponent persistentComponent)
             {
               if (persistentComponent.NeedsToBeExpired(e))
               {

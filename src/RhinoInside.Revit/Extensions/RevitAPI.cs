@@ -7,7 +7,7 @@ using Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit
 {
-  static class TaskDialogIcons
+  public static class TaskDialogIcons
   {
     public const TaskDialogIcon IconNone        = TaskDialogIcon.TaskDialogIconNone;
 #if REVIT_2018
@@ -22,7 +22,7 @@ namespace RhinoInside.Revit
     public const TaskDialogIcon IconWarning     = TaskDialogIcon.TaskDialogIconWarning;
   }
 
-  public static class RevitAPI
+  /*internal*/ public static class RevitAPI
   {
     #region XYZ
     public static bool IsParallelTo(this XYZ a, XYZ b)
@@ -254,12 +254,15 @@ namespace RhinoInside.Revit
     #endregion
 
     #region Parameters
-    public enum ParameterSet
+    [Flags]
+    public enum ParameterClass
     {
-      Any,
-      BuiltIn,
-      Project,
-      Shared
+      Any       = -1,
+      BuiltIn   =  1,
+      Project   =  2,
+      Family    =  4,
+      Shared    =  8,
+      Global    = 16
     }
 
     public enum ParameterBinding
@@ -269,11 +272,11 @@ namespace RhinoInside.Revit
       Type,
     }
 
-    public static IEnumerable<Parameter> GetParameters(this Element element, ParameterSet set)
+    public static IEnumerable<Parameter> GetParameters(this Element element, ParameterClass set)
     {
       switch (set)
       {
-        case ParameterSet.Any:
+        case ParameterClass.Any:
           return Enum.GetValues(typeof(BuiltInParameter)).
             Cast<BuiltInParameter>().
             Select
@@ -288,7 +291,7 @@ namespace RhinoInside.Revit
             Union(element.Parameters.Cast<Parameter>().OrderBy(x => x.Id.IntegerValue)).
             GroupBy(x => x.Id).
             Select(x => x.First());
-        case ParameterSet.BuiltIn:
+        case ParameterClass.BuiltIn:
           return Enum.GetValues(typeof(BuiltInParameter)).
             Cast<BuiltInParameter>().
             GroupBy(x => x).
@@ -302,11 +305,17 @@ namespace RhinoInside.Revit
               }
             ).
             Where(x => x is object);
-        case ParameterSet.Project:
+        case ParameterClass.Project:
           return element.Parameters.Cast<Parameter>().
             Where(p => !p.IsShared && p.Id.IntegerValue > 0).
+            Where(p => (p.Element.Document.GetElement(p.Id) as ParameterElement)?.get_Parameter(BuiltInParameter.ELEM_DELETABLE_IN_FAMILY)?.AsInteger() ==  1).
             OrderBy(x => x.Id.IntegerValue);
-        case ParameterSet.Shared:
+        case ParameterClass.Family:
+          return element.Parameters.Cast<Parameter>().
+            Where(p => !p.IsShared && p.Id.IntegerValue > 0).
+            Where(p => (p.Element.Document.GetElement(p.Id) as ParameterElement)?.get_Parameter(BuiltInParameter.ELEM_DELETABLE_IN_FAMILY)?.AsInteger() == 0).
+            OrderBy(x => x.Id.IntegerValue);
+        case ParameterClass.Shared:
           return element.Parameters.Cast<Parameter>().
             Where(p => p.IsShared).
             OrderBy(x => x.Id.IntegerValue);
@@ -315,7 +324,7 @@ namespace RhinoInside.Revit
       return Enumerable.Empty<Parameter>();
     }
 
-    public static Parameter GetParameter(this Element element, string name, ParameterSet set)
+    public static Parameter GetParameter(this Element element, string name, ParameterClass set)
     {
       var parameters = element.
         GetParameters(set).
@@ -324,7 +333,7 @@ namespace RhinoInside.Revit
       return parameters.FirstOrDefault(x => !x.IsReadOnly) ?? parameters.FirstOrDefault();
     }
 
-    public static Parameter GetParameter(this Element element, string name, ParameterType type, ParameterSet set)
+    public static Parameter GetParameter(this Element element, string name, ParameterType type, ParameterClass set)
     {
       var parameters = element.
         GetParameters(set).
@@ -333,7 +342,7 @@ namespace RhinoInside.Revit
       return parameters.FirstOrDefault(x => !x.IsReadOnly) ?? parameters.FirstOrDefault();
     }
 
-    public static Parameter GetParameter(this Element element, string name, ParameterType type, ParameterBinding parameterBinding, ParameterSet set)
+    public static Parameter GetParameter(this Element element, string name, ParameterType type, ParameterBinding parameterBinding, ParameterClass set)
     {
       if (element is ElementType ? parameterBinding != ParameterBinding.Type : parameterBinding != ParameterBinding.Instance)
         return null;
@@ -349,7 +358,7 @@ namespace RhinoInside.Revit
       if(!from.Document.Equals(to.Document))
         throw new InvalidOperationException();
 
-      foreach (var previousParameter in from.GetParameters(ParameterSet.Any))
+      foreach (var previousParameter in from.GetParameters(ParameterClass.Any))
         using (previousParameter)
         using (var param = to.get_Parameter(previousParameter.Definition))
         {
@@ -418,6 +427,29 @@ namespace RhinoInside.Revit
 
       return value.ToString();
     }
+
+    public static bool ResetValue(this Parameter parameter)
+    {
+      if(parameter.Id.IsBuiltInId())
+        throw new InvalidOperationException("BuiltIn parameters can not be reseted");
+
+      if (parameter.HasValue)
+      {
+#if REVIT_2020
+        if (parameter.IsShared && (parameter.Definition as ExternalDefinition).HideWhenNoValue)
+          return parameter.ClearValue();
+#endif
+        switch (parameter.StorageType)
+        {
+          case StorageType.Integer:   parameter.Set(0); break;
+          case StorageType.Double:    parameter.Set(0.0); break;
+          case StorageType.String:    parameter.Set(string.Empty); break;
+          case StorageType.ElementId: parameter.Set(ElementId.InvalidElementId); break;
+        }
+      }
+
+      return true;
+    }
     #endregion
 
     #region Element
@@ -454,7 +486,6 @@ namespace RhinoInside.Revit
     #endregion
 
     #region Document
-
     public static string GetFilePath(this Document doc)
     {
       if (doc is null)
@@ -474,12 +505,12 @@ namespace RhinoInside.Revit
       return ExportUtils.GetGBXMLDocumentId(doc);
     }
 
-    private static bool TryGetDocument(this IEnumerable<Document> set, Guid guid, out Document document, Document activeDBDocument = default)
+    private static bool TryGetDocument(this IEnumerable<Document> set, Guid guid, out Document document, Document activeDBDocument)
     {
       if (guid != Guid.Empty)
       {
         // For performance reasons and also in case of conflict the ActiveDBDocument will have priority
-        if (ExportUtils.GetGBXMLDocumentId(activeDBDocument) == guid)
+        if (activeDBDocument is object && ExportUtils.GetGBXMLDocumentId(activeDBDocument) == guid)
         {
           document = activeDBDocument;
           return true;
@@ -497,7 +528,7 @@ namespace RhinoInside.Revit
     }
 
     public static bool TryGetDocument(this Autodesk.Revit.UI.UIApplication app, Guid guid, out Document document) =>
-      TryGetDocument(app.Application.Documents.Cast<Document>(), guid, out document, app.ActiveUIDocument.Document);
+      TryGetDocument(app.Application.Documents.Cast<Document>(), guid, out document, app.ActiveUIDocument?.Document);
 
     public static bool TryGetCategoryId(this Document doc, string uniqueId, out ElementId categoryId)
     {
@@ -626,7 +657,7 @@ namespace RhinoInside.Revit
 
     static BuiltInCategory[] BuiltInCategoriesWithParameters;
     static Document BuiltInCategoriesWithParametersDocument;
-    internal static ICollection<BuiltInCategory> GetBuiltInCategoriesWithParameters(this Document doc)
+    /*internal*/ public static ICollection<BuiltInCategory> GetBuiltInCategoriesWithParameters(this Document doc)
     {
       if (BuiltInCategoriesWithParameters is null && !BuiltInCategoriesWithParametersDocument.Equals(doc))
       {
@@ -774,7 +805,7 @@ namespace RhinoInside.Revit
     #endregion
   }
 
-  public static class UniqueId
+  /*internal*/ public static class UniqueId
   {
     public static string Format(Guid episodeId, int index) => $"{episodeId:D}-{index,8:x}";
     public static bool TryParse(string s, out Guid episodeId, out int id)

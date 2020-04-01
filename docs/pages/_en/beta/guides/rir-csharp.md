@@ -7,7 +7,7 @@ Grasshopper has three scripted components. One for C# programming language and a
 
 ![]({{ "/static/images/guides/rir-csharp01.png" | prepend: site.baseurl }})
 
-Since {{ site.terms.rir }} project brings Rhino and Grasshopper into the {{ site.terms.revit }} environment, the scripted components also get access to the Revit API runtime. In this article we will discuss using the python component to create custom components for Revit.
+Since {{ site.terms.rir }} project brings Rhino and Grasshopper into the {{ site.terms.revit }} environment, the scripted components also get access to the Revit API runtime. In this article we will discuss using the C# component to create custom components for Revit.
 
 ## Setting Up
 
@@ -224,7 +224,7 @@ And here is the complete sample code:
 
 ## Handling Transactions
 
-To effectively create new transactions and handle the changes to your model in Grasshopper python components, use the try-catch block example below:
+To effectively create new transactions and handle the changes to your model in Grasshopper C# components, use the try-catch block example below:
 
 {% highlight csharp %}
 // create and start the transaction

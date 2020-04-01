@@ -43,7 +43,7 @@ namespace RhinoInside.Revit.Samples
         mruPullDownButton.LargeImage = ImageBuilder.BuildLargeImage("4");
         mruPullDownButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://github.com/mcneel/rhino.inside-revit/tree/master#sample-4"));
 
-        mruPullDownButton.AddPushButton(typeof(Browse), "Browse...", "Browse for a Grasshopper definition to evaluate", typeof(Availability));
+        mruPullDownButton.AddPushButton(typeof(Browse), "Browse...", "Browse for a Grasshopper definition to evaluate", typeof(NeedsActiveDocument<Availability>));
       }
     }
 
@@ -59,7 +59,7 @@ namespace RhinoInside.Revit.Samples
       {
         mruPullDownButton.AddSeparator();
         mruPushPuttons = new Type[] { typeof(Mru0), typeof(Mru1), typeof(Mru2), typeof(Mru3), typeof(Mru4), typeof(Mru5) }.
-                         Select(x => mruPullDownButton.AddPushButton(x)).ToArray();
+                         Select(x => mruPullDownButton.AddPushButton(x, null, null, typeof(NeedsActiveDocument<Availability>))).ToArray();
         foreach (var mru in mruPushPuttons)
         {
           mru.Visible = false;

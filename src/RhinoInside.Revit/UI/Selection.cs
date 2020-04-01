@@ -6,11 +6,11 @@ using Autodesk.Revit.UI.Selection;
 
 namespace RhinoInside.Revit.UI.Selection
 {
-  static class Selection
+  /*internal*/ public static class Selection
   {
     private static Result Pick<TResult>(out TResult value, Func<TResult> picker)
     {
-      using (new ModalForm.EditScope())
+      using (new External.EditScope())
       {
         value = default;
         try { value = Rhinoceros.InvokeInHostContext(picker); }

@@ -1,0 +1,372 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
+    <Rhino7DebugInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_CURRENT_USER\Software\McNeel\Rhinoceros\7.0-WIP-Developer-Debug-trunk\Install', 'Path', null, RegistryView.Registry64))</Rhino7DebugInstallDir>
+    <Rhino7InstallDir>$([MSBuild]::ValueOrDefault('$(Rhino7DebugInstallDir)', '$(Rhino7DefaultInstallDir)'))</Rhino7InstallDir>
+    <Rhino7DefaultPluginsDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Default Plug-ins Folder', null, RegistryView.Registry64))</Rhino7DefaultPluginsDir>
+    <Rhino7DebugPluginsDir>$([MSBuild]::GetRegistryValueFromView('HKEY_CURRENT_USER\Software\McNeel\Rhinoceros\7.0-WIP-Developer-Debug-trunk\Install', 'Default Plug-ins Folder', null, RegistryView.Registry64))</Rhino7DebugPluginsDir>
+    <Rhino7PluginsDir>$([MSBuild]::ValueOrDefault('$(Rhino7DebugPluginsDir)', '$(Rhino7DefaultPluginsDir)'))</Rhino7PluginsDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration.Contains('2017'))">
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <RevitVersion>2017</RevitVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration.Contains('2018'))">
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <RevitVersion>2018</RevitVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration.Contains('2019'))">
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <RevitVersion>2019</RevitVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration.Contains('2020'))">
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <RevitVersion>2020</RevitVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{4F3E6B0F-C644-4A00-8785-11CFBE0C0F94}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <LangVersion>7.3</LangVersion>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>RhinoInside.Revit.GH</RootNamespace>
+    <AssemblyName>RhinoInside.Revit.GH</AssemblyName>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug 2017|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug 2017\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;REVIT_2017</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release 2017|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release 2017\</OutputPath>
+    <DefineConstants>REVIT_2017</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2018|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug 2018\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;REVIT_2017; REVIT_2018</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2018|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Release 2018\</OutputPath>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <DefineConstants>REVIT_2017; REVIT_2018</DefineConstants>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2019|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug 2019\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;REVIT_2017; REVIT_2018; REVIT_2019</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2019|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Release 2019\</OutputPath>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <DefineConstants>REVIT_2017; REVIT_2018; REVIT_2019</DefineConstants>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2020|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug 2020\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;REVIT_2017; REVIT_2018; REVIT_2019; REVIT_2020</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2020|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Release 2020\</OutputPath>
+    <DefineConstants>REVIT_2017; REVIT_2018; REVIT_2019; REVIT_2020</DefineConstants>
+    <Optimize>true</Optimize>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <ProjectReference Include="..\RhinoInside.Revit\RhinoInside.Revit.csproj">
+      <Project>{d6c256d4-b518-464f-9e68-cb282202e846}</Project>
+      <Name>RhinoInside.Revit</Name>
+      <Private>False</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <Choose>
+    <When Condition="$(Configuration.Contains('Debug'))">
+      <ItemGroup>
+        <Reference Include="Eto">
+          <HintPath>$(Rhino7InstallDir)Eto.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="RhinoCommon">
+          <HintPath>$(Rhino7InstallDir)RhinoCommon.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Rhino.UI">
+          <HintPath>$(Rhino7InstallDir)Rhino.UI.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="GH_IO">
+          <HintPath>$(Rhino7PluginsDir)Grasshopper\GH_IO.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Grasshopper">
+          <HintPath>$(Rhino7PluginsDir)Grasshopper\Grasshopper.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="RevitAPI">
+          <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\RevitAPI.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="RevitAPIUI">
+          <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\RevitAPIUI.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="AdWindows">
+          <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\AdWindows.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <PackageReference Include="RhinoCommon" Version="7.0.20056.13055-wip" IncludeAssets="compile; build" />
+        <PackageReference Include="Grasshopper" Version="7.0.20056.13055-wip" IncludeAssets="compile; build" />
+        <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitVersion).0.*" IncludeAssets="build; compile" />
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
+  <ItemGroup>
+    <Compile Include="Attributes.cs" />
+    <Compile Include="Components\Category\GraphicsStyle.cs" />
+    <Compile Include="Components\Category\Identity.cs" />
+    <Compile Include="Components\Category\ObjectStyle.cs" />
+    <Compile Include="Components\Category\Parameters.cs" />
+    <Compile Include="Components\Category\SubCategories.cs" />
+    <Compile Include="Components\Component.cs" />
+    <Compile Include="Components\Document\Active.cs" />
+    <Compile Include="Components\Document\Categories.cs" />
+    <Compile Include="Components\Document\Document.cs" />
+    <Compile Include="Components\Document\Documents.cs" />
+    <Compile Include="Components\Document\Elements.cs" />
+    <Compile Include="Components\Document\ElementTypes.cs" />
+    <Compile Include="Components\Document\Families.cs" />
+    <Compile Include="Components\Document\GroupTypes.cs" />
+    <Compile Include="Components\Document\Materials.cs" />
+    <Compile Include="Components\Document\Passport.cs" />
+    <Compile Include="Components\Document\Levels.cs" />
+    <Compile Include="Components\Document\Save.cs" />
+    <Compile Include="Components\Document\Views.cs" />
+    <Compile Include="Components\ElementFilter.cs" />
+    <Compile Include="Components\ElementType\Default.cs" />
+    <Compile Include="Components\ElementType\Duplicate.cs" />
+    <Compile Include="Components\ElementType\ExportImage.cs" />
+    <Compile Include="Components\ElementType\Identity.cs" />
+    <Compile Include="Components\ElementType\Similar.cs" />
+    <Compile Include="Components\Element\AdaptiveComponent\ByPoints.cs" />
+    <Compile Include="Components\Element\Beam\ByCurve.cs" />
+    <Compile Include="Components\Element\BuildingPad\ByOutline.cs" />
+    <Compile Include="Components\Element\Delete.cs" />
+    <Compile Include="Components\Element\Geometry.cs" />
+    <Compile Include="Components\Element\Group\ByLocation.cs" />
+    <Compile Include="Components\Element\HostObject\Faces.cs" />
+    <Compile Include="Components\Element\HostObject\Inserts.cs" />
+    <Compile Include="Components\Element\Inspect.cs" />
+    <Compile Include="Components\Element\Materials.cs" />
+    <Compile Include="Components\Element\Column\ByCurve.cs" />
+    <Compile Include="Components\Element\DirectShape\ByBrep.cs" />
+    <Compile Include="Components\Element\DirectShape\ByCurve.cs" />
+    <Compile Include="Components\Element\DirectShape\ByGeometry.cs" />
+    <Compile Include="Components\Element\DirectShape\ByMesh.cs" />
+    <Compile Include="Components\Element\DirectShape\ByPoint.cs" />
+    <Compile Include="Components\Element\Identity.cs" />
+    <Compile Include="Components\Element\Material\Identity.cs" />
+    <Compile Include="Components\Element\Parameters.cs" />
+    <Compile Include="Components\Element\FamilyInstance\ByPointAtHost.cs" />
+    <Compile Include="Components\Element\Floor\ByOutline.cs" />
+    <Compile Include="Components\Element\Grid\ByCurve.cs" />
+    <Compile Include="Components\Element\Level\ByElevation.cs" />
+    <Compile Include="Components\Element\MaterialQuanities.cs" />
+    <Compile Include="Components\Element\Material\ByColor.cs" />
+    <Compile Include="Components\Element\Material\ByName.cs" />
+    <Compile Include="Components\Element\ModelLine\ByCurve.cs" />
+    <Compile Include="Components\Element\Passport.cs" />
+    <Compile Include="Components\Element\Preview.cs" />
+    <Compile Include="Components\Element\Roof\ByOutline.cs" />
+    <Compile Include="Components\Element\SketchPlane\ByPlane.cs" />
+    <Compile Include="Components\Element\Topography\ByPoints.cs" />
+    <Compile Include="Components\Element\View\Active.cs" />
+    <Compile Include="Components\Element\View\ExportImage.cs" />
+    <Compile Include="Components\Element\View\Identity.cs" />
+    <Compile Include="Components\Element\View\View3DByPlane.cs" />
+    <Compile Include="Components\Element\Wall\ByCurve.cs" />
+    <Compile Include="Components\Family\Element\Form\ByCurves.cs" />
+    <Compile Include="Components\Family\Element\Form\ByGeometry.cs" />
+    <Compile Include="Components\Family\Element\Visibility\Construct.cs" />
+    <Compile Include="Components\Family\Element\Visibility\Deconstruct.cs" />
+    <Compile Include="Components\Family\Geometry\ByBrep.cs" />
+    <Compile Include="Components\Family\Geometry\ByCurve.cs" />
+    <Compile Include="Components\Family\Types.cs" />
+    <Compile Include="Components\Family\Load.cs" />
+    <Compile Include="Components\Family\LoadOptions.cs" />
+    <Compile Include="Components\Family\New.cs" />
+    <Compile Include="Components\Family\Geometry\OpeningByCurve.cs" />
+    <Compile Include="Components\Family\Save.cs" />
+    <Compile Include="Components\Family\Geometry\VoidByBrep.cs" />
+    <Compile Include="Components\Parameter.cs" />
+    <Compile Include="Components\TransactionalComponent.cs" />
+    <Compile Include="Enum.cs" />
+    <Compile Include="Extensions\Grasshopper.cs" />
+    <Compile Include="Extensions\System.cs" />
+    <Compile Include="Extensions\WinForms.cs" />
+    <Compile Include="Parameters\Category.cs" />
+    <Compile Include="Parameters\CategoryTypes.cs" />
+    <Compile Include="Parameters\DatumPlane.cs" />
+    <Compile Include="Parameters\DirectShapeCategories.cs" />
+    <Compile Include="Parameters\Document.cs" />
+    <Compile Include="Parameters\DocumentPicker.cs" />
+    <Compile Include="Parameters\Element.cs" />
+    <Compile Include="Parameters\ElementFilter.cs" />
+    <Compile Include="Parameters\ElementType.cs" />
+    <Compile Include="Parameters\Family.cs" />
+    <Compile Include="Parameters\GeometryObject.cs" />
+    <Compile Include="Parameters\HostObject.cs" />
+    <Compile Include="Parameters\ID.cs" />
+    <Compile Include="Parameters\Material.cs" />
+    <Compile Include="Parameters\Parameter.cs" />
+    <Compile Include="Parameters\SketchPlane.cs" />
+    <Compile Include="Parameters\ValueList.cs" />
+    <Compile Include="Parameters\View.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Solid.cs" />
+    <Compile Include="Types\Category.cs" />
+    <Compile Include="Types\Document.cs" />
+    <Compile Include="Types\Element.cs" />
+    <Compile Include="Types\ElementFilter.cs" />
+    <Compile Include="Types\ElementId.cs" />
+    <Compile Include="Types\ElementType.cs" />
+    <Compile Include="Types\Enums.cs" />
+    <Compile Include="Types\Family.cs" />
+    <Compile Include="Types\GeometryObject.cs" />
+    <Compile Include="Types\Parameter.cs" />
+    <Compile Include="Types\DatumPlane.cs" />
+    <Compile Include="Types\SketchPlane.cs" />
+    <Compile Include="Types\Material.cs" />
+    <Compile Include="Types\HostObject.cs" />
+    <Compile Include="Types\View.cs" />
+    <Compile Include="ValueSet.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <SubType>Designer</SubType>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Components\AdaptiveComponentByPoints.png" />
+    <None Include="Resources\Components\BeamByCurve.png" />
+    <None Include="Resources\Components\BuildingPadByOutline.png" />
+    <None Include="Resources\Components\BuiltInParameterGroup.png" />
+    <None Include="Resources\Components\CategoryParameters.png" />
+    <None Include="Resources\Components\CategorySubCategories.png" />
+    <None Include="Resources\Components\ColumnByCurve.png" />
+    <None Include="Resources\Components\DirectShapeByBrep.png" />
+    <None Include="Resources\Components\DirectShapeByCurve.png" />
+    <None Include="Resources\Components\DirectShapeByGeometry.png" />
+    <None Include="Resources\Components\DirectShapeByLocation.png" />
+    <None Include="Resources\Components\DirectShapeByMesh.png" />
+    <None Include="Resources\Components\DirectShapeByPoint.png" />
+    <None Include="Resources\Components\DocumentCategories.png" />
+    <None Include="Resources\Components\DocumentElements.png" />
+    <None Include="Resources\Components\DocumentElementTypes.png" />
+    <None Include="Resources\Components\DocumentLevels.png" />
+    <None Include="Resources\Components\ElementDecompose.png" />
+    <None Include="Resources\Components\ElementDelete.png" />
+    <None Include="Resources\Components\ElementGeometry.png" />
+    <None Include="Resources\Components\ElementIdentity.png" />
+    <None Include="Resources\Components\ElementParameterGet.png" />
+    <None Include="Resources\Components\ElementParameters.png" />
+    <None Include="Resources\Components\ElementParametersSet.png" />
+    <None Include="Resources\Components\ElementPreview.png" />
+    <None Include="Resources\Components\FamilyInstanceByLocation.png" />
+    <None Include="Resources\Components\FloorByOutline.png" />
+    <None Include="Resources\Components\FormByCurves.png" />
+    <None Include="Resources\Components\FormByGeometry.png" />
+    <None Include="Resources\Components\GridByCurve.png" />
+    <None Include="Resources\Components\LevelByElevation.png" />
+    <None Include="Resources\Components\ModelLineByCurve.png" />
+    <None Include="Resources\Components\ParameterByName.png" />
+    <None Include="Resources\Components\ParameterKeyDecompose.png" />
+    <None Include="Resources\Components\ParameterValueDecompose.png" />
+    <None Include="Resources\Components\RoofByOutline.png" />
+    <None Include="Resources\Components\SketchPlaneByPlane.png" />
+    <None Include="Resources\Components\TopographyByPoints.png" />
+    <None Include="Resources\Components\WallByCurve.png" />
+    <None Include="Resources\Parameters\AnalyticalCategoriesPicker.png" />
+    <None Include="Resources\Parameters\AnnotationCategoriesPicker.png" />
+    <None Include="Resources\Parameters\BuiltInParameterByName.png" />
+    <None Include="Resources\Parameters\BuiltInParameterGroups.png" />
+    <None Include="Resources\Parameters\Category.png" />
+    <None Include="Resources\Parameters\CategoryTypes.png" />
+    <None Include="Resources\Parameters\DirectShapeCategories.png" />
+    <None Include="Resources\Parameters\DocumentFamiliesPicker.png" />
+    <None Include="Resources\Parameters\DocumentLevelsPicker.png" />
+    <None Include="Resources\Parameters\Edge.png" />
+    <None Include="Resources\Parameters\ElementType.png" />
+    <None Include="Resources\Parameters\ElementTypeByName.png" />
+    <None Include="Resources\Parameters\Face.png" />
+    <None Include="Resources\Parameters\GeometricElement.png" />
+    <None Include="Resources\Parameters\ModelCategoriesPicker.png" />
+    <None Include="Resources\Parameters\ParameterKey.png" />
+    <None Include="Resources\Parameters\SketchPlane.png" />
+    <None Include="Resources\Parameters\TagCategoriesPicker.png" />
+    <None Include="Resources\Parameters\Vertex.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="AfterBuild">
+    <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.dll" DestinationFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.gha" />
+    <Copy Condition="$(Configuration.Contains('Debug'))" UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.gha;$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.pdb" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />
+  </Target>
+  <Target Name="BeforeClean">
+    <Delete Files="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.gha" />
+  </Target>
+  <PropertyGroup>
+    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+  </PropertyGroup>
+</Project>
