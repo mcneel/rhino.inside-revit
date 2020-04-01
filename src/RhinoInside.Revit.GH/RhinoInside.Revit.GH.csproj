@@ -187,6 +187,7 @@
     <Compile Include="Components\Document\Levels.cs" />
     <Compile Include="Components\Document\Save.cs" />
     <Compile Include="Components\Document\Views.cs" />
+    <Compile Include="Components\Document\Walls.cs" />
     <Compile Include="Components\ElementFilter.cs" />
     <Compile Include="Components\ElementType\Default.cs" />
     <Compile Include="Components\ElementType\Duplicate.cs" />
