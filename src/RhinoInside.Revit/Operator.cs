@@ -4,7 +4,7 @@ namespace RhinoInside.Revit
 {
   public static class Operator
   {
-    enum CompareMethod
+    public enum CompareMethod
     {
       Nothing,
       Equals,
@@ -15,7 +15,7 @@ namespace RhinoInside.Revit
       Regex,      // ;
     }
 
-    static CompareMethod CompareMethodFromPattern(ref string pattern, ref bool not)
+    public static CompareMethod CompareMethodFromPattern(ref string pattern, ref bool not)
     {
       if (pattern is null)
         return CompareMethod.Nothing;

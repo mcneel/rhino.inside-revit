@@ -176,7 +176,7 @@
     <Compile Include="Components\Component.cs" />
     <Compile Include="Components\Document\Active.cs" />
     <Compile Include="Components\Document\Categories.cs" />
-    <Compile Include="Components\Document\Document.cs" />
+    <Compile Include="Components\Document\DocumentComponent.cs" />
     <Compile Include="Components\Document\Documents.cs" />
     <Compile Include="Components\Document\Elements.cs" />
     <Compile Include="Components\Document\ElementTypes.cs" />

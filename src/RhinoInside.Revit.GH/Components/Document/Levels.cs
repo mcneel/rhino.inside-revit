@@ -52,10 +52,13 @@ namespace RhinoInside.Revit.GH.Components
         if (filter is object)
           levelsCollector = levelsCollector.WherePasses(filter);
 
-        var levels = levelsCollector.Cast<DB.Level>();
+        if (TryGetFilterStringParam(DB.BuiltInParameter.DATUM_TEXT, ref name, out var nameFilter))
+          levelsCollector = levelsCollector.WherePasses(nameFilter);
 
-        if (elevation.IsValid)
-          levels = levels.Where(x => elevation.IncludesParameter(x.Elevation));
+        if (elevation.IsValid && TryGetFilterDoubleParam(DB.BuiltInParameter.LEVEL_ELEV, elevation.Mid / Revit.ModelUnits, Revit.VertexTolerance +(elevation.Length * 0.5 / Revit.ModelUnits), out var elevationFilter))
+          levelsCollector = levelsCollector.WherePasses(elevationFilter);
+
+        var levels = levelsCollector.Cast<DB.Level>();
 
         if (!string.IsNullOrEmpty(name))
           levels = levels.Where(x => x.Name.IsSymbolNameLike(name));

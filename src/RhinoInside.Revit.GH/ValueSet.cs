@@ -34,7 +34,7 @@ namespace Grasshopper.External.Special
         using (var capsule = GH_Capsule.CreateCapsule(iconBounds, GH_Palette.Grey))
         {
           capsule.Render(graphics, false, false, false);
-          Attributes.RenderCheckMark(graphics, iconBounds, System.Drawing.Color.Black);
+          Attributes.RenderCheckMark(graphics, iconBounds, Color.Black);
         }
       }
     );
@@ -211,10 +211,10 @@ namespace Grasshopper.External.Special
             {
               canvas.SetSmartTextRenderingHint();
               var style = GH_CapsuleRenderEngine.GetImpliedStyle(palette, this);
-              var textColor = System.Drawing.Color.FromArgb(alpha, style.Text);
+              var textColor = Color.FromArgb(alpha, style.Text);
 
               var captionColor = string.IsNullOrEmpty(Owner.NickName) || !Owner.MutableNickName ?
-                                 System.Drawing.Color.FromArgb(alpha / 2, style.Text) : textColor;
+                                 Color.FromArgb(alpha / 2, style.Text) : textColor;
 
               using (var nameFill = new SolidBrush(captionColor))
                 graphics.DrawString(string.IsNullOrEmpty(Owner.NickName) ? "Filter mask…" : Owner.NickName, GH_FontServer.LargeAdjusted, nameFill, Bounds, GH_TextRenderingConstants.StringFormat(StringAlignment.Center, StringAlignment.Near));
@@ -231,7 +231,7 @@ namespace Grasshopper.External.Special
                 }
                 else
                 {
-                  alternateBrush = new SolidBrush(System.Drawing.Color.FromArgb(70, style.Fill));
+                  alternateBrush = new SolidBrush(Color.FromArgb(70, style.Fill));
                 }
 
                 graphics.SetClip(clip);
@@ -240,34 +240,32 @@ namespace Grasshopper.External.Special
                 if (!ScrollerBounds.IsEmpty)
                   graphics.TranslateTransform(0.0f, -((Owner.ListItems.Count * ItemHeight) - clip.Height) * ScrollRatio);
 
-                var format = new StringFormat(StringFormatFlags.NoWrap)
+                using (var format = new StringFormat(StringFormatFlags.NoWrap) { LineAlignment = StringAlignment.Center })
                 {
-                  LineAlignment = StringAlignment.Center
-                };
-
-                var itemBounds = new System.Drawing.Rectangle((int) clip.X, (int) clip.Y, (int) clip.Width, (int) 18);
-                int index = 0;
-                foreach (var item in Owner.ListItems)
-                {
-                  if (index++ % 2 != 0)
-                    graphics.FillRectangle(alternateBrush, itemBounds);
-
-                  if (item.Selected)
+                  var itemBounds = new Rectangle((int) clip.X, (int) clip.Y, (int) clip.Width, (int) 18);
+                  int index = 0;
+                  foreach (var item in Owner.ListItems)
                   {
-                    if (Owner.DataType == GH_ParamData.remote && GH_Canvas.ZoomFadeMedium > 0)
+                    if (index++ % 2 != 0)
+                      graphics.FillRectangle(alternateBrush, itemBounds);
+
+                    if (item.Selected)
                     {
-                      var highlightBounds = itemBounds;
-                      highlightBounds.Inflate(-1, -1);
-                      GH_GraphicsUtil.RenderHighlightBox(graphics, highlightBounds, 2, true, true);
+                      if (Owner.DataType == GH_ParamData.remote && GH_Canvas.ZoomFadeMedium > 0)
+                      {
+                        var highlightBounds = itemBounds;
+                        highlightBounds.Inflate(-1, -1);
+                        GH_GraphicsUtil.RenderHighlightBox(graphics, highlightBounds, 2, true, true);
+                      }
+
+                      var markBounds = new RectangleF(itemBounds.X, itemBounds.Y, 22, itemBounds.Height);
+                      RenderCheckMark(graphics, markBounds, textColor);
                     }
 
-                    var markBounds = new RectangleF(itemBounds.X, itemBounds.Y, 22, itemBounds.Height);
-                    RenderCheckMark(graphics, markBounds, textColor);
+                    var nameBounds = new RectangleF(itemBounds.X + 22, itemBounds.Y, itemBounds.Width - 22, itemBounds.Height);
+                    graphics.DrawString(item.Name, GH_FontServer.StandardAdjusted, Brushes.Black, nameBounds, format);
+                    itemBounds.Y += itemBounds.Height;
                   }
-
-                  var nameBounds = new RectangleF(itemBounds.X + 22, itemBounds.Y, itemBounds.Width - 22, itemBounds.Height);
-                  graphics.DrawString(item.Name, GH_FontServer.StandardAdjusted, Brushes.Black, nameBounds, format);
-                  itemBounds.Y += itemBounds.Height;
                 }
 
                 graphics.Transform = transform;
@@ -299,7 +297,7 @@ namespace Grasshopper.External.Special
         base.Render(canvas, graphics, channel);
       }
 
-      public static void RenderCheckMark(Graphics graphics, RectangleF bounds, System.Drawing.Color color)
+      public static void RenderCheckMark(Graphics graphics, RectangleF bounds, Color color)
       {
         var x = (int) (bounds.X + 0.5F * bounds.Width) - 2;
         var y = (int) (bounds.Y + 0.5F * bounds.Height);
@@ -313,19 +311,21 @@ namespace Grasshopper.External.Special
           new PointF(x + 6.5F, y - 6.5F)
         };
 
-        var edge = new Pen(color, 1.0F);
-        edge.LineJoin = System.Drawing.Drawing2D.LineJoin.Round;
-        graphics.FillPolygon(new SolidBrush(System.Drawing.Color.FromArgb(150, color)), corners);
-        graphics.DrawPolygon(edge, corners);
+        using (var edge = new Pen(color, 1.0F))
+        {
+          edge.LineJoin = System.Drawing.Drawing2D.LineJoin.Round;
+          graphics.FillPolygon(new SolidBrush(Color.FromArgb(150, color)), corners);
+          graphics.DrawPolygon(edge, corners);
+        }
       }
 
-      System.Drawing.Rectangle ListBounds => new System.Drawing.Rectangle
+      Rectangle ListBounds => new Rectangle
         (
           (int) Bounds.X + 2, (int) Bounds.Y + CaptionHeight,
           (int) Bounds.Width - 4, (int) Bounds.Height - CaptionHeight - FootnoteHeight
         );
 
-      System.Drawing.Rectangle ScrollerBounds
+      Rectangle ScrollerBounds
       {
         get
         {
@@ -338,7 +338,7 @@ namespace Grasshopper.External.Special
             {
               var scrollSize = Math.Max((scrollerBounds.Height) * factor, ItemHeight);
               var position = ((scrollerBounds.Height - scrollSize) * ScrollRatio);
-              return new System.Drawing.Rectangle
+              return new Rectangle
               (
                 scrollerBounds.Right - ScrollerWidth - 2,
                 scrollerBounds.Top + (int) Math.Round(position),
@@ -348,11 +348,11 @@ namespace Grasshopper.External.Special
             }
           }
 
-          return System.Drawing.Rectangle.Empty;
+          return Rectangle.Empty;
         }
       }
 
-      void RenderScrollBar(GH_Canvas canvas, Graphics graphics, System.Drawing.Color color)
+      void RenderScrollBar(GH_Canvas canvas, Graphics graphics, Color color)
       {
         var total = Owner.ListItems.Count * ItemHeight;
         if (total > 0)
@@ -360,16 +360,17 @@ namespace Grasshopper.External.Special
           var scrollerBounds = ScrollerBounds;
           if (!scrollerBounds.IsEmpty)
           {
-            var pen = new Pen(System.Drawing.Color.FromArgb(100, color), ScrollerWidth)
+            using (var pen = new Pen(Color.FromArgb(100, color), ScrollerWidth)
             {
               StartCap = System.Drawing.Drawing2D.LineCap.Round,
-              EndCap = System.Drawing.Drawing2D.LineCap.Round
-            };
+              EndCap   = System.Drawing.Drawing2D.LineCap.Round
+            })
+            {
+              var startPoint = new Point(scrollerBounds.X + (scrollerBounds.Width / 2), scrollerBounds.Top + 5);
+              var endPoint = new Point(scrollerBounds.X + (scrollerBounds.Width / 2), scrollerBounds.Bottom - 5);
 
-            var startPoint = new System.Drawing.Point(scrollerBounds.X + (scrollerBounds.Width / 2), scrollerBounds.Top + 5);
-            var endPoint = new System.Drawing.Point(scrollerBounds.X + (scrollerBounds.Width / 2), scrollerBounds.Bottom - 5);
-
-            graphics.DrawLine(pen, startPoint, endPoint);
+              graphics.DrawLine(pen, startPoint, endPoint);
+            }
           }
         }
       }
@@ -387,7 +388,7 @@ namespace Grasshopper.External.Special
               if (listBounds.Contains(e.CanvasLocation))
               {
                 var scrollerBounds = ScrollerBounds;
-                var canvasLocation = new System.Drawing.Point((int) e.CanvasLocation.X, (int) e.CanvasLocation.Y);
+                var canvasLocation = new Point((int) e.CanvasLocation.X, (int) e.CanvasLocation.Y);
                 if (scrollerBounds.Contains(canvasLocation))
                 {
                   ScrollingY = e.CanvasY;
