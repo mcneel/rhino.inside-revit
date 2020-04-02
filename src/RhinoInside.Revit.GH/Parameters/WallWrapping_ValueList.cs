@@ -22,11 +22,11 @@ namespace RhinoInside.Revit.GH.Parameters
       Description = "Picker for builtin Wall wrapping options";
 
       ListItems.Clear();
-      // Revit API does not have an enum for this (eirannejad: 2020-04-02)
-      ListItems.Add(new GH_ValueListItem("Do Not Wrap", "0"));
-      ListItems.Add(new GH_ValueListItem("Exterior", "1"));
-      ListItems.Add(new GH_ValueListItem("Interior", "2"));
-      ListItems.Add(new GH_ValueListItem("Both", "3"));
+      
+      ListItems.Add(new GH_ValueListItem("Do Not Wrap", ((int) Types.WallWrapping_Enum.DoNotWrap).ToString()));
+      ListItems.Add(new GH_ValueListItem("Exterior", ((int) Types.WallWrapping_Enum.Exterior).ToString()));
+      ListItems.Add(new GH_ValueListItem("Interior", ((int) Types.WallWrapping_Enum.Interior).ToString()));
+      ListItems.Add(new GH_ValueListItem("Both", ((int) Types.WallWrapping_Enum.Both).ToString()));
     }
   }
 }
