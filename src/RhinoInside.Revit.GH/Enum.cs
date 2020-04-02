@@ -149,6 +149,18 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Integer)))
+      {
+        target = (Q) (object) new GH_Integer(base.Value);
+        return true;
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Number)))
+      {
+        target = (Q) (object) new GH_Number(base.Value);
+        return true;
+      }
+
       return base.CastTo<Q>(ref target);
     }
 
@@ -173,7 +185,7 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
-    public override string ToString() => Value.ToString();
+    public override string ToString() => $"{TypeName}: {Value}";
   }
 }
 
