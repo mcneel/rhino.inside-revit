@@ -198,6 +198,7 @@
     <Compile Include="Components\Element\AdaptiveComponent\ByPoints.cs" />
     <Compile Include="Components\Element\Beam\ByCurve.cs" />
     <Compile Include="Components\Element\BuildingPad\ByOutline.cs" />
+    <Compile Include="Components\Element\AnalysisComponent.cs" />
     <Compile Include="Components\Element\Delete.cs" />
     <Compile Include="Components\Element\Geometry.cs" />
     <Compile Include="Components\Element\Group\ByLocation.cs" />
@@ -233,6 +234,7 @@
     <Compile Include="Components\Element\View\Identity.cs" />
     <Compile Include="Components\Element\View\View3DByPlane.cs" />
     <Compile Include="Components\Element\Wall\ByCurve.cs" />
+    <Compile Include="Components\Element\Wall\AnalyseBaseWallType.cs" />
     <Compile Include="Components\Family\Element\Form\ByCurves.cs" />
     <Compile Include="Components\Family\Element\Form\ByGeometry.cs" />
     <Compile Include="Components\Family\Element\Visibility\Construct.cs" />
