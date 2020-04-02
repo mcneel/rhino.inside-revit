@@ -52,7 +52,7 @@ namespace RhinoInside.Revit.GH.Components
         description: "Wrapping at End setting of given Basic Wall type",
         access: GH_ParamAccess.item
         );
-      manager.AddIntegerParameter(
+      manager.AddNumberParameter(
         name: "Width",
         nickname: "W",
         description: "Total width of the given Basic Wall type structure",
