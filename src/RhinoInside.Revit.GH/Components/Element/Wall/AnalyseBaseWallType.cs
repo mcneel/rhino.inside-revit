@@ -40,13 +40,15 @@ namespace RhinoInside.Revit.GH.Components
         description: "Compound Structure definition of given Basic Wall type",
         access: GH_ParamAccess.item
         );
-      manager.AddIntegerParameter(
+      manager.AddParameter(
+        param: new Parameters.WallWrapping_ValueList(),
         name: "Wrapping at Insert",
         nickname: "WI",
         description: "Wrapping at Insert setting of given Basic Wall type",
         access: GH_ParamAccess.item
         );
-      manager.AddIntegerParameter(
+      manager.AddParameter(
+        param: new Parameters.WallWrapping_ValueList(),
         name: "Wrapping at End",
         nickname: "WE",
         description: "Wrapping at End setting of given Basic Wall type",
@@ -58,7 +60,8 @@ namespace RhinoInside.Revit.GH.Components
         description: "Total width of the given Basic Wall type structure",
         access: GH_ParamAccess.item
         );
-      manager.AddIntegerParameter(
+      manager.AddParameter(
+        param: new Parameters.WallFunction_ValueList(),
         name: "Wall Function",
         nickname: "WF",
         description: "Wall Function of given Basic Wall type",
