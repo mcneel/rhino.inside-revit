@@ -715,10 +715,8 @@ namespace RhinoInside.Revit
       if (brep is null)
         return null;
 
-#if REVIT_2018
-      if (!face.OrientationMatchesSurfaceOrientation)
+      if (!face.OrientationMatchesSurface())
         brep.Flip();
-#endif
 
       var loops = face.GetEdgesAsCurveLoops().ToRhino().ToArray();
 
@@ -768,7 +766,7 @@ namespace RhinoInside.Revit
             continue;
 
           var edges = edgeLoop.Cast<DB.Edge>();
-          if (!face.OrientationMatchesSurfaceOrientation)
+          if (!face.OrientationMatchesSurface())
             edges = edges.Reverse();
 
           var loop = new BrepBoundary()
@@ -791,7 +789,7 @@ namespace RhinoInside.Revit
             loop.edges.Add(brepEdge);
             var segment = edge.AsCurveFollowingFace(face).ToRhino();
 
-            if (!face.OrientationMatchesSurfaceOrientation)
+            if (!face.OrientationMatchesSurface())
               segment.Reverse();
 
             loop.orientation.Add(segment.TangentAt(segment.Domain.Mid).IsParallelTo(brepEdge.TangentAt(brepEdge.Domain.Mid)));
@@ -889,7 +887,7 @@ namespace RhinoInside.Revit
         return null;
 
       // Set edges & trims
-      brep.TrimSurface(si, !face.OrientationMatchesSurfaceOrientation, shells);
+      brep.TrimSurface(si, !face.OrientationMatchesSurface(), shells);
 
       // Set vertices
       brep.SetVertices();
@@ -934,7 +932,7 @@ namespace RhinoInside.Revit
           continue;
 
         // Set edges & trims
-        brep.TrimSurface(si, !face.OrientationMatchesSurfaceOrientation, shells);
+        brep.TrimSurface(si, !face.OrientationMatchesSurface(), shells);
       }
 
       // Set vertices
