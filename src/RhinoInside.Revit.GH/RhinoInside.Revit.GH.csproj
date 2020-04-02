@@ -300,6 +300,7 @@
     <Compile Include="Types\SketchPlane.cs" />
     <Compile Include="Types\Material.cs" />
     <Compile Include="Types\HostObject.cs" />
+    <Compile Include="Types\APIDataObject.cs" />
     <Compile Include="Types\View.cs" />
     <Compile Include="ValueSet.cs" />
   </ItemGroup>
