@@ -102,8 +102,8 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var name = GetType().GetTypeInfo().GetCustomAttribute(typeof(System.ComponentModel.DisplayNameAttribute)) as System.ComponentModel.DisplayNameAttribute;
-        return name?.DisplayName ?? typeof(T).Name;
+        var name = GetType().GetTypeInfo().GetCustomAttribute(typeof(RhinoInside.Revit.GH.Kernel.Attributes.NameAttribute)) as RhinoInside.Revit.GH.Kernel.Attributes.NameAttribute;
+        return name?.Name ?? typeof(T).Name;
       }
     }
     public override string TypeDescription
