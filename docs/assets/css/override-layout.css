@@ -1,0 +1,83 @@
+@media only screen and (max-width: 950px) {
+    .container {
+        max-width: 800px;
+    }
+
+    .row-fluid {
+        display: block;
+        justify-content: none;
+    }
+    
+    .site-nav .img-button-title{
+        display: inline-block;
+    }
+    
+    .side-content {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .side-content h1 {
+        font-size: 30px;
+        margin-top: 20px;
+    }
+
+    .sidebar {
+        display: inline;
+        position: inherit;
+    }
+
+    .sidebar li {
+        display: inline-flex;
+    }
+
+    .sidebar #sidebar-toc {
+        display: none;
+    }
+
+    .sidebar a, .nav a {
+        display: block;
+        color: #999;
+        text-decoration: none;
+        border-left: 1px solid transparent;
+        font-size: 13px;
+        font-weight: 400;
+        padding: 5px 10px 5px 10px;
+        margin-right: 3px;
+        background:#f7f7f7;
+        border-radius: .25em;
+        margin-bottom: 6px;
+        width: unset;
+    }
+
+    .sidebar a:hover, .nav a:hover {
+        color: #111;
+        border-left: 1px solid transparent;
+        background:#f7f7f7;
+    }
+
+    .btn {
+        display: inline-block;
+    }
+    
+    .rhino-dl {
+        margin-left: 0;
+    }
+
+    a.btn-dark {
+        margin-top: 10px;
+        width: 100%;
+    }
+
+    pre code {
+        font-size: 12px;
+    }
+
+    h1 {
+        font-size: 30px;
+    }
+
+    .caption {
+        margin-top: 5px;
+    }
+}
