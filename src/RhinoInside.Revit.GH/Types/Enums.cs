@@ -244,7 +244,7 @@ namespace RhinoInside.Revit.GH.Types
   ComponentGuid("7A71E012-6E92-493D-960C-83BE3C50ECAE"),
   Name("Wall Wrapping"),
   Description("Represents a Revit wall wrapping option"),
-]
+  ]
   public class WallWrapping : GH_Enum<WallWrapping_Enum> { }
 
 
@@ -259,13 +259,43 @@ namespace RhinoInside.Revit.GH.Types
     {
       switch (Value)
       {
-        case DB.Structure.StructuralWallUsage.NonBearing: return "Non-bearing";
+        case DB.Structure.StructuralWallUsage.NonBearing: return "Non-Bearing";
         case DB.Structure.StructuralWallUsage.Bearing: return "Bearing";
         case DB.Structure.StructuralWallUsage.Shear: return "Shear";
-        case DB.Structure.StructuralWallUsage.Combined: return "Structural combined";
+        case DB.Structure.StructuralWallUsage.Combined: return "Bearing & Shear (Combined)";
       }
-
       return base.ToString();
     }
   }
+
+  [
+    ComponentGuid("A8122936-6A69-4D78-B1F5-13FD8F2144A5"),
+    Name("End Cap Condition"),
+    Description("Represents end cap condition of a wall compound structure"),
+  ]
+  public class EndCapCondition : GH_Enum<DB.EndCapCondition> { }
+
+
+  [
+    ComponentGuid("68D22DE2-CDD5-4441-9745-462E28030A03"),
+    Name("Deck Embedding Type"),
+    Description("Represents deck embedding type of a wall compound structure layer"),
+  ]
+  public class DeckEmbeddingType : GH_Enum<DB.StructDeckEmbeddingType> { }
+
+
+  [
+    ComponentGuid("4220F183-C273-4342-9885-3DEB13531731"),
+    Name("Layer Function"),
+    Description("Represents layer function of a wall compound structure layer"),
+  ]
+  public class LayerFunction : GH_Enum<DB.MaterialFunctionAssignment> { }
+
+
+  [
+    ComponentGuid("BF8B68B5-4E24-4602-8065-7EE90536B90E"),
+    Name("Opening Wrapping Condition"),
+    Description("Represents compound structure layers wrapping at openings setting"),
+  ]
+  public class OpeningWrappingCondition : GH_Enum<DB.OpeningWrappingCondition> { }
 }
