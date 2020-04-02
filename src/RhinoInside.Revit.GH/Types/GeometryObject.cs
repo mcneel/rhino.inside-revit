@@ -372,7 +372,8 @@ namespace RhinoInside.Revit.GH.Types
   {
     public override string TypeName => "Revit GeometryObject";
     public override string TypeDescription => "Represents a Revit GeometryObject";
-    public override bool IsValid => !(Value is null);
+    public override bool IsValid => (!(Value is null || !Id.IsValid())) && (Document?.IsValidObject ?? false);
+
     public override sealed IGH_Goo Duplicate() => (IGH_Goo) MemberwiseClone();
     protected virtual Type ScriptVariableType => typeof(X);
 
@@ -803,7 +804,7 @@ namespace RhinoInside.Revit.GH.Types
 
         if (typeof(Q).IsAssignableFrom(typeof(GH_Surface)))
         {
-          if (Value.ToRhino(true) is Brep brep)
+          if (Value.ToRhino() is Brep brep)
           {
             if (element is DB.Instance instance)
               brep.Transform(Transform.Scale(Point3d.Origin, Revit.ModelUnits) * instance.GetTransform().ToRhino());
@@ -817,7 +818,7 @@ namespace RhinoInside.Revit.GH.Types
         }
         else if (typeof(Q).IsAssignableFrom(typeof(GH_Brep)))
         {
-          if (Value.ToRhino(false) is Brep brep)
+          if (Value.ToRhino() is Brep brep)
           {
             if (element is DB.Instance instance)
               brep.Transform(Transform.Scale(Point3d.Origin, Revit.ModelUnits) * instance.GetTransform().ToRhino());
