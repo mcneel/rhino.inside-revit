@@ -272,7 +272,11 @@
     <Compile Include="Parameters\SketchPlane.cs" />
     <Compile Include="Parameters\ValueList.cs" />
     <Compile Include="Parameters\View.cs" />
+    <Compile Include="Parameters\WallFunction_ValueList.cs" />
+    <Compile Include="Parameters\WallLocationLine_ValueList.cs" />
+    <Compile Include="Parameters\WallStructuralUsage_ValueList.cs" />
     <Compile Include="Parameters\WallSystemFamily_ValueList.cs" />
+    <Compile Include="Parameters\WallWrapping_ValueList.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
