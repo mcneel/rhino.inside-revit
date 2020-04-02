@@ -209,17 +209,44 @@ namespace RhinoInside.Revit.GH.Types
     {
       switch (Value)
       {
-        case DB.WallLocationLine.WallCenterline: return "Wall Centerline";
-        case DB.WallLocationLine.CoreCenterline: return "Core Centerline";
-        case DB.WallLocationLine.FinishFaceExterior: return "Finish Face: Exterior";
-        case DB.WallLocationLine.FinishFaceInterior: return "Finish Face: Interior";
-        case DB.WallLocationLine.CoreExterior: return "Core Face: Exterior";
-        case DB.WallLocationLine.CoreInterior: return "Core Face: Interior";
+        case DB.WallLocationLine.WallCenterline: return $"{TypeName}: Wall Centerline";
+        case DB.WallLocationLine.CoreCenterline: return $"{TypeName}: Core Centerline";
+        case DB.WallLocationLine.FinishFaceExterior: return $"{TypeName}: Finish (Exterior Face)";
+        case DB.WallLocationLine.FinishFaceInterior: return $"{TypeName}: Finish (Interior Face)";
+        case DB.WallLocationLine.CoreExterior: return $"{TypeName}: Core (Exterior Face)";
+        case DB.WallLocationLine.CoreInterior: return $"{TypeName}: Core (Interior Face)";
       }
 
       return base.ToString();
     }
   }
+
+
+  [
+    ComponentGuid("F069304B-4066-4D23-9542-7AC54CED3C92"),
+    Name("Wall Function"),
+    Description("Represents a Revit wall function"),
+  ]
+  public class WallFunction : GH_Enum<DB.WallFunction> { }
+
+
+  // Revit API does not have an enum for this (eirannejad: 2020-04-02)
+  // replace with Revit API enum when implemented
+  public enum WallWrapping_Enum
+  {
+    DoNotWrap,
+    Exterior,
+    Interior,
+    Both
+  }
+
+  [
+  ComponentGuid("7A71E012-6E92-493D-960C-83BE3C50ECAE"),
+  Name("Wall Wrapping"),
+  Description("Represents a Revit wall wrapping option"),
+]
+  public class WallWrapping : GH_Enum<WallWrapping_Enum> { }
+
 
   [
     ComponentGuid("2F1CE55B-FD85-4EC5-8638-8DA06932DE0E"),
