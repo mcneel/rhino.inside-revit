@@ -267,10 +267,11 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       if (sender is ToolStripMenuItem item && item.Tag is Guid componentGuid)
       {
-        var obj = this.ConnectNewObject(componentGuid);
+        var obj = Grasshopper.Instances.ComponentServer.EmitObject(componentGuid);
         if (obj is null)
           return;
 
+        this.ConnectNewObject(obj);
         obj.ExpireSolution(true);
       }
     }

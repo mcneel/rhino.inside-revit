@@ -179,6 +179,7 @@ namespace RhinoInside.Revit.GH.Types
 
 namespace RhinoInside.Revit.GH.Parameters
 {
+  using Grasshopper.Kernel.Extensions;
   using Kernel.Attributes;
 
   public class Param_Enum<T> : GH_PersistentParam<T>, IGH_ObjectProxy
@@ -304,6 +305,8 @@ namespace RhinoInside.Revit.GH.Parameters
 
       if(Exposure != GH_Exposure.hidden)
         Menu_AppendExtractParameter(menu);
+
+      Menu_AppendItem(menu, $"Expose picker", Menu_ExposePicker, SourceCount == 0);
     }
 
     private void ListBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -336,6 +339,39 @@ namespace RhinoInside.Revit.GH.Parameters
 
           ExpireSolution(true);
         }
+      }
+    }
+
+    protected void Menu_ExposePicker(object sender, EventArgs e)
+    {
+      if (sender is ToolStripMenuItem)
+      {
+        var list = new Grasshopper.Kernel.Special.GH_ValueList();
+        if (list is null)
+          return;
+
+        list.Category = string.Empty;
+        list.SubCategory = string.Empty;
+
+        if (typeof(T).GetTypeInfo().GetCustomAttribute(typeof(NameAttribute)) is NameAttribute name)
+          list.Name = name.Name;
+        else
+          list.Name = typeof(T).Name;
+
+        list.NickName = string.Empty;
+        list.Description = $"A {TypeName} picker";
+
+        list.ListItems.Clear();
+
+        var tag = InstantiateT();
+        foreach (var value in tag.GetEnumValues())
+        {
+          tag.Value = (int) value;
+          list.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(tag.ToString(), tag.Value.ToString()));
+        }
+
+        if(this.ConnectNewObject(list))
+          list.ExpireSolution(true);
       }
     }
 
