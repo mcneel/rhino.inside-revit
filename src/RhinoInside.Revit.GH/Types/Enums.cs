@@ -205,6 +205,9 @@ namespace RhinoInside.Revit.GH.Types
   ]
   public class WallLocationLine : GH_Enum<DB.WallLocationLine>
   {
+    public WallLocationLine() : base() { }
+    public WallLocationLine(DB.WallLocationLine value) : base(value) { }
+
     public override string ToString()
     {
       switch (Value)
@@ -227,7 +230,10 @@ namespace RhinoInside.Revit.GH.Types
     Name("Wall Function"),
     Description("Represents a Revit wall function"),
   ]
-  public class WallFunction : GH_Enum<DB.WallFunction> { }
+  public class WallFunction : GH_Enum<DB.WallFunction> {
+    public WallFunction() : base() { }
+    public WallFunction(DB.WallFunction value) : base(value) { }
+  }
 
 
   // Revit API does not have an enum for this (eirannejad: 2020-04-02)
@@ -244,8 +250,11 @@ namespace RhinoInside.Revit.GH.Types
   ComponentGuid("7A71E012-6E92-493D-960C-83BE3C50ECAE"),
   Name("Wall Wrapping"),
   Description("Represents a Revit wall wrapping option"),
-  ]
-  public class WallWrapping : GH_Enum<WallWrapping_Enum> { }
+]
+  public class WallWrapping : GH_Enum<WallWrapping_Enum> {
+    public WallWrapping() : base() { }
+    public WallWrapping(WallWrapping_Enum value) : base(value) { }
+  }
 
 
   [
@@ -253,8 +262,10 @@ namespace RhinoInside.Revit.GH.Types
     Name("Structural Wall Usage"),
     Description("Represents a Revit structural wall usage."),
   ]
-  public class StructuralWallUsage : GH_Enum<DB.Structure.StructuralWallUsage>
-  {
+  public class StructuralWallUsage : GH_Enum<DB.Structure.StructuralWallUsage> {
+    public StructuralWallUsage() : base() { }
+    public StructuralWallUsage(DB.Structure.StructuralWallUsage value) : base(value) { }
+
     public override string ToString()
     {
       switch (Value)
@@ -273,7 +284,10 @@ namespace RhinoInside.Revit.GH.Types
     Name("End Cap Condition"),
     Description("Represents end cap condition of a wall compound structure"),
   ]
-  public class EndCapCondition : GH_Enum<DB.EndCapCondition> { }
+  public class EndCapCondition : GH_Enum<DB.EndCapCondition> {
+    public EndCapCondition() : base() { }
+    public EndCapCondition(DB.EndCapCondition value) : base(value) { }
+  }
 
 
   [
@@ -281,7 +295,10 @@ namespace RhinoInside.Revit.GH.Types
     Name("Deck Embedding Type"),
     Description("Represents deck embedding type of a wall compound structure layer"),
   ]
-  public class DeckEmbeddingType : GH_Enum<DB.StructDeckEmbeddingType> { }
+  public class DeckEmbeddingType : GH_Enum<DB.StructDeckEmbeddingType> {
+    public DeckEmbeddingType() : base() { }
+    public DeckEmbeddingType(DB.StructDeckEmbeddingType value) : base(value) { }
+  }
 
 
   [
@@ -289,7 +306,10 @@ namespace RhinoInside.Revit.GH.Types
     Name("Layer Function"),
     Description("Represents layer function of a wall compound structure layer"),
   ]
-  public class LayerFunction : GH_Enum<DB.MaterialFunctionAssignment> { }
+  public class LayerFunction : GH_Enum<DB.MaterialFunctionAssignment> {
+    public LayerFunction() : base() { }
+    public LayerFunction(DB.MaterialFunctionAssignment value) : base(value) { }
+  }
 
 
   [
@@ -297,5 +317,8 @@ namespace RhinoInside.Revit.GH.Types
     Name("Opening Wrapping Condition"),
     Description("Represents compound structure layers wrapping at openings setting"),
   ]
-  public class OpeningWrappingCondition : GH_Enum<DB.OpeningWrappingCondition> { }
+  public class OpeningWrappingCondition : GH_Enum<DB.OpeningWrappingCondition> {
+    public OpeningWrappingCondition() : base() { }
+    public OpeningWrappingCondition(DB.OpeningWrappingCondition value) : base(value) { }
+  }
 }
