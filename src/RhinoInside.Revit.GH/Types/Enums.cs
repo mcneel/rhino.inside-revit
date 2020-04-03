@@ -39,7 +39,13 @@ namespace RhinoInside.Revit.GH.Types
     Name("Unit Type"),
     Description("Represents a Revit unit type."),
   ]
-  public class UnitType : GH_Enum<DB.UnitType> { }
+  public class UnitType : GH_Enum<DB.UnitType>
+  {
+    public override string ToString()
+    {
+      return Value.ToString().Substring(2).Replace('_', ' ');
+    }
+  }
 
   [
     ComponentGuid("ABE3F6CB-CE2D-4DBE-AB81-A6CB884D7DE1"),
@@ -150,6 +156,19 @@ namespace RhinoInside.Revit.GH.Types
   {
     public ImageResolution() : base(DB.ImageResolution.DPI_72) { }
     public ImageResolution(DB.ImageResolution value) : base(value) { }
+
+    public override string ToString()
+    {
+      switch (Value)
+      {
+        case DB.ImageResolution.DPI_72: return "72 DPI";
+        case DB.ImageResolution.DPI_150: return "150 DPI";
+        case DB.ImageResolution.DPI_300: return "300 DPI";
+        case DB.ImageResolution.DPI_600: return "600 DPI";
+      }
+
+      return base.ToString();
+    }
   }
 
   [
@@ -161,8 +180,23 @@ namespace RhinoInside.Revit.GH.Types
   {
     public ImageFileType() : base(DB.ImageFileType.BMP) { }
     public ImageFileType(DB.ImageFileType value) : base(value) { }
-  }
 
+    public override string ToString()
+    {
+      switch (Value)
+      {
+        case DB.ImageFileType.BMP: return "BMP";
+        case DB.ImageFileType.JPEGLossless: return "JPEG-Lossless";
+        case DB.ImageFileType.JPEGMedium: return "JPEG-Medium";
+        case DB.ImageFileType.JPEGSmallest: return "JPEG-Smallest";
+        case DB.ImageFileType.PNG: return "PNG";
+        case DB.ImageFileType.TARGA: return "TARGA";
+        case DB.ImageFileType.TIFF: return "TIFF";
+      }
+
+      return base.ToString();
+    }
+  }
 
   [
     ComponentGuid("2A3E4872-EF41-442A-B886-8B7DBA73DFE2"),
@@ -192,6 +226,19 @@ namespace RhinoInside.Revit.GH.Types
     Name("Structural Wall Usage"),
     Description("Represents a Revit structural wall usage."),
   ]
-  public class StructuralWallUsage : GH_Enum<DB.Structure.StructuralWallUsage> { }
+  public class StructuralWallUsage : GH_Enum<DB.Structure.StructuralWallUsage>
+  {
+    public override string ToString()
+    {
+      switch (Value)
+      {
+        case DB.Structure.StructuralWallUsage.NonBearing: return "Non-bearing";
+        case DB.Structure.StructuralWallUsage.Bearing: return "Bearing";
+        case DB.Structure.StructuralWallUsage.Shear: return "Shear";
+        case DB.Structure.StructuralWallUsage.Combined: return "Structural combined";
+      }
 
+      return base.ToString();
+    }
+  }
 }
