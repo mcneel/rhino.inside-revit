@@ -84,7 +84,13 @@ namespace RhinoInside.Revit.GH.Components
       }
 
       // grab compound structure
-      DA.SetData("Compound Structure", new Types.APIDataObject(wallType.GetCompoundStructure()));
+      DA.SetData(
+        "Compound Structure",
+        new Types.APIDataObject(
+          apiObject: wallType.GetCompoundStructure(),
+          srcDocument: wallType.Document
+          )
+        );
       // pipe the wall type parameters directly to component outputs
       PipeHostParameter<Types.WallWrapping>(DA, wallType, DB.BuiltInParameter.WRAPPING_AT_INSERTS_PARAM, "Wrapping at Insert");
       PipeHostParameter<Types.WallWrapping>(DA, wallType, DB.BuiltInParameter.WRAPPING_AT_ENDS_PARAM, "Wrapping at End");

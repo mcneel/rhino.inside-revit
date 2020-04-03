@@ -9,12 +9,14 @@ namespace RhinoInside.Revit.GH.Types
   public class APIDataObject : GH_Goo<object>
   {
     public override bool IsValid => Value != null;
-
     public override string TypeName => "Revit API Data Object";
-
     public override string TypeDescription => "Wraps Revit API Data Objects";
 
-    public APIDataObject(object apiObject): base(apiObject) {}
+    public DB.Document Document { get; private set; } = default;
+
+    public APIDataObject(object apiObject, DB.Document srcDocument): base(apiObject) {
+      Document = srcDocument;
+    }
 
     public override IGH_Goo Duplicate()
     {

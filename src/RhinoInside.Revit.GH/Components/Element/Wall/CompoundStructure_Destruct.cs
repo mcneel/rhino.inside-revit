@@ -147,7 +147,7 @@ namespace RhinoInside.Revit.GH.Components
 
           // destruct the data object into output params
           DA.SetData("Width", cstruct.GetWidth());
-          DA.SetDataList("Layers", cstruct.GetLayers().Select(x => new Types.APIDataObject(x)).ToList());
+          DA.SetDataList("Layers", cstruct.GetLayers().Select(x => new Types.APIDataObject(apiObject: x, srcDocument: apiDataObject.Document)).ToList());
           DA.SetData("Layer Count", cstruct.LayerCount);
           DA.SetData("Cutoff Height", cstruct.CutoffHeight);
           DA.SetData("End Cap Condition", new Types.EndCapCondition(cstruct.EndCap));
