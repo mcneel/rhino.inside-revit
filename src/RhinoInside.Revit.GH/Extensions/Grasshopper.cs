@@ -8,15 +8,17 @@ namespace Grasshopper.Kernel.Extensions
   static partial class Extension
   {
     #region IGH_Param
-    public static IGH_DocumentObject ConnectNewObject(this IGH_Param self, Guid componentGuid)
+    public static bool ConnectNewObject(this IGH_Param self, IGH_DocumentObject obj)
     {
+      if (obj is null)
+        return false;
+
+      if (self.Kind == GH_ParamKind.unknown)
+        return false;
+
       var document = self.OnPingDocument();
       if (document is null)
-        return null;
-
-      var obj = Instances.ComponentServer.EmitObject(componentGuid) as IGH_ActiveObject;
-      if (obj is null)
-        return null;
+        return false;
 
       obj.CreateAttributes();
       if (CentralSettings.CanvasFullNames)
@@ -28,37 +30,61 @@ namespace Grasshopper.Kernel.Extensions
       }
 
       obj.NewInstanceGuid();
-      obj.Attributes.Pivot = new System.Drawing.PointF();
+      obj.Attributes.Pivot = default;
       obj.Attributes.PerformLayout();
 
+      float offsetX = self.Kind == GH_ParamKind.input ? -(obj.Attributes.Bounds.X + obj.Attributes.Bounds.Width) - 94 : -(obj.Attributes.Bounds.X) + 100.0f;
+
       if (obj is IGH_Param)
-        obj.Attributes.Pivot = new System.Drawing.PointF(self.Attributes.Pivot.X + 120, self.Attributes.Pivot.Y - obj.Attributes.Bounds.Height / 2);
+        obj.Attributes.Pivot = new System.Drawing.PointF(self.Attributes.Pivot.X + offsetX, self.Attributes.Pivot.Y - obj.Attributes.Bounds.Height / 2);
       else if (obj is IGH_Component)
-        obj.Attributes.Pivot = new System.Drawing.PointF(self.Attributes.Pivot.X + 120, self.Attributes.Pivot.Y);
+        obj.Attributes.Pivot = new System.Drawing.PointF(self.Attributes.Pivot.X + offsetX, self.Attributes.Pivot.Y);
 
       obj.Attributes.ExpireLayout();
 
       document.AddObject(obj, false);
       document.UndoUtil.RecordAddObjectEvent($"Add {obj.Name}", obj);
 
-      if (obj is IGH_Param param)
+      if (self.Kind == GH_ParamKind.input)
       {
-        param.AddSource(self);
-      }
-      else if (obj is IGH_Component component)
-      {
-        var selfType = self.Type;
-        foreach (var input in component.Params.Input.Where(i => typeof(IGH_ElementId).IsAssignableFrom(i.Type)))
+        if (obj is IGH_Param param)
         {
-          if (input.GetType() == self.GetType() || input.Type.IsAssignableFrom(selfType))
+          self.AddSource(param);
+        }
+        else if (obj is IGH_Component component)
+        {
+          var selfType = self.Type;
+          foreach (var output in component.Params.Output.Where(i => typeof(IGH_ElementId).IsAssignableFrom(i.Type)))
           {
-            input.AddSource(self);
-            break;
+            if (output.GetType() == self.GetType() || output.Type.IsAssignableFrom(selfType))
+            {
+              self.AddSource(output);
+              break;
+            }
+          }
+        }
+      }
+      else
+      {
+        if (obj is IGH_Param param)
+        {
+          param.AddSource(self);
+        }
+        else if (obj is IGH_Component component)
+        {
+          var selfType = self.Type;
+          foreach (var input in component.Params.Input.Where(i => typeof(IGH_ElementId).IsAssignableFrom(i.Type)))
+          {
+            if (input.GetType() == self.GetType() || input.Type.IsAssignableFrom(selfType))
+            {
+              input.AddSource(self);
+              break;
+            }
           }
         }
       }
 
-      return obj;
+      return true;
     }
 
     public static void Menu_AppendConnect(this IGH_Param param, System.Windows.Forms.ToolStripDropDown menu, EventHandler eventHandler)

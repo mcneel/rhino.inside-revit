@@ -84,17 +84,16 @@ namespace RhinoInside.Revit.GH.Components
         if (filter is object)
           viewsCollector = viewsCollector.WherePasses(filter);
 
+        if (!nofilterDiscipline && TryGetFilterIntegerParam(DB.BuiltInParameter.VIEW_DISCIPLINE, (int) viewDiscipline, out var viewDisciplineFilter))
+          viewsCollector = viewsCollector.WherePasses(viewDisciplineFilter);
+
+        if (TryGetFilterStringParam(DB.BuiltInParameter.VIEW_NAME, ref name, out var viewNameFilter))
+          viewsCollector = viewsCollector.WherePasses(viewNameFilter);
+
+        if (!nofilterTemplate && TryGetFilterElementIdParam(DB.BuiltInParameter.VIEW_TEMPLATE, Template?.Id ?? DB.ElementId.InvalidElementId, out var templateFilter))
+          viewsCollector = viewsCollector.WherePasses(templateFilter);
+
         var views = collector.Cast<DB.View>();
-
-        if (!nofilterDiscipline)
-          views = views.Where((x) =>
-          {
-            try { return x.Discipline == viewDiscipline; }
-            catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
-          });
-
-        if (!nofilterTemplate)
-          views = views.Where((x) => x.ViewTemplateId.IntegerValue == Template.Id.IntegerValue);
 
         if (!nofilterIsTemplate)
           views = views.Where((x) => x.IsTemplate == IsTemplate);
@@ -108,7 +107,7 @@ namespace RhinoInside.Revit.GH.Components
         if (viewType != DB.ViewType.Undefined)
           views = views.Where((x) => x.ViewType == viewType);
 
-        if (!string.IsNullOrEmpty(name))
+        if (name is object)
           views = views.Where(x => x.Name.IsSymbolNameLike(name));
 
         DA.SetDataList("Views", views);

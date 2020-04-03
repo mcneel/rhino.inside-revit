@@ -49,6 +49,9 @@ namespace RhinoInside.Revit.GH.Components
         if (filter is object)
           viewsCollector = viewsCollector.WherePasses(filter);
 
+        if (TryGetFilterStringParam(DB.BuiltInParameter.SYMBOL_NAME_PARAM, ref name, out var nameFilter))
+          viewsCollector = viewsCollector.WherePasses(nameFilter);
+
         var groupTypes = collector.Cast<DB.GroupType>();
 
         if (!string.IsNullOrEmpty(name))

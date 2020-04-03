@@ -146,6 +146,15 @@ namespace RhinoInside.Revit
       }
     }
 
+    public static bool OrientationMatchesSurface(this Face face)
+    {
+#if REVIT_2018
+      return face.OrientationMatchesSurfaceOrientation;
+#else
+      return true;
+#endif
+    }
+
     public static IEnumerable<Curve> ToBoundedCurves(this Curve curve)
     {
       switch (curve)

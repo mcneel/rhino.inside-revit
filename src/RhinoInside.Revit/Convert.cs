@@ -179,7 +179,7 @@ namespace RhinoInside.Revit
       var scaleFactor = Revit.ModelUnits;
       foreach (var geometry in geometries)
       {
-        if (geometry.Visibility != DB.Visibility.Visible)
+        if (geometry?.Visibility != DB.Visibility.Visible)
           continue;
 
         switch (geometry)
