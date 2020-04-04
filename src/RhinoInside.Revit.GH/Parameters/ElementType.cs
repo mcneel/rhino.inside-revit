@@ -10,9 +10,9 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class ElementType : ElementIdNonGeometryParam<Types.ElementType, DB.ElementType>
+  public class ElementType : ElementIdWithoutPreviewParam<Types.ElementType, DB.ElementType>
   {
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
     public override Guid ComponentGuid => new Guid("97DD546D-65C3-4D00-A609-3F5FBDA67142");
 
     public ElementType() : base("Element Type", "Element Type", "Represents a Revit document element type.", "Params", "Revit") { }

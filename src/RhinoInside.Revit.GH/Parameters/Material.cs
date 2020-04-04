@@ -8,9 +8,9 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class Material : ElementIdNonGeometryParam<Types.Material, DB.Material>
+  public class Material : ElementIdWithoutPreviewParam<Types.Material, DB.Material>
   {
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
     public override Guid ComponentGuid => new Guid("B18EF2CC-2E67-4A5E-9241-9010FB7D27CE");
     protected override Types.Material PreferredCast(object data) => Types.Material.FromElement(data as DB.Material) as Types.Material;
 

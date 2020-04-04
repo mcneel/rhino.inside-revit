@@ -11,10 +11,10 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class ParameterKey : ElementIdNonGeometryParam<Types.ParameterKey, DB.ElementId>
+  public class ParameterKey : ElementIdWithoutPreviewParam<Types.ParameterKey, DB.ElementId>
   {
     public override Guid ComponentGuid => new Guid("A550F532-8C68-460B-91F3-DA0A5A0D42B5");
-    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    public override GH_Exposure Exposure => GH_Exposure.septenary;
 
     public ParameterKey() : base("ParameterKey", "ParaKey", "Represents a Revit parameter definition.", "Params", "Revit") { }
 
@@ -210,7 +210,7 @@ namespace RhinoInside.Revit.GH.Parameters
                  string.Empty;
         }
       }
-      catch(Exception) { }
+      catch { }
 
       return $"Invalid {TypeName}";
     }

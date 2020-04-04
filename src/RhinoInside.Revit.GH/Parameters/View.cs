@@ -8,9 +8,9 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class View : ElementIdNonGeometryParam<Types.View, DB.View>
+  public class View : ElementIdWithoutPreviewParam<Types.View, DB.View>
   {
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
     public override Guid ComponentGuid => new Guid("2DC4B866-54DB-4CE6-94C0-C51B33D35B49");
     protected override Types.View PreferredCast(object data) => Types.View.FromElement(data as DB.View) as Types.View;
 
@@ -103,9 +103,10 @@ namespace RhinoInside.Revit.GH.Parameters
             current = firstValue.Duplicate() as Types.View;
         }
 
-        using (var collector = new DB.FilteredElementCollector(doc).OfClass(typeof(DB.View)))
+        using (var collector = new DB.FilteredElementCollector(doc))
         {
           var views = collector.
+                      OfClass(typeof(DB.View)).
                       Cast<DB.View>().
                       Where(x => viewType == DB.ViewType.Undefined || x.ViewType == viewType);
 

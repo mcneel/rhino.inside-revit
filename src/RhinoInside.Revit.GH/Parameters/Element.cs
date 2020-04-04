@@ -3,9 +3,9 @@ using Grasshopper.Kernel;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class Element : ElementIdNonGeometryParam<Types.Element, object>
+  public class Element : ElementIdWithoutPreviewParam<Types.Element, object>
   {
-    public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.septenary;
     public override Guid ComponentGuid => new Guid("F3EA4A9C-B24F-4587-A358-6A7E6D8C028B");
 
     public Element() : base("Element", "Element", "Represents a Revit document element.", "Params", "Revit") { }

@@ -25,7 +25,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(new Parameters.GeometricElement(), "DirectShape", "DS", "New DirectShape", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.GraphicalElement(), "DirectShape", "DS", "New DirectShape", GH_ParamAccess.item);
     }
 
     void ReconstructDirectShapeByGeometry
@@ -200,7 +200,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(new Parameters.GeometricElement(), "DirectShape", "DS", "New DirectShape", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.GraphicalElement(), "DirectShape", "DS", "New DirectShape", GH_ParamAccess.item);
     }
 
     void ReconstructDirectShapeByLocation

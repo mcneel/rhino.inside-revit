@@ -12,6 +12,7 @@ using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Grasshopper.Kernel.Extensions;
 using DB = Autodesk.Revit.DB;
+using Rhino.Geometry;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
@@ -323,10 +324,10 @@ namespace RhinoInside.Revit.GH.Parameters
     #endregion
   }
 
-  public abstract class ElementIdNonGeometryParam<T, R> : ElementIdParam<T, R>
+  public abstract class ElementIdWithoutPreviewParam<T, R> : ElementIdParam<T, R>
     where T : class, Types.IGH_ElementId
   {
-    protected ElementIdNonGeometryParam(string name, string nickname, string description, string category, string subcategory) :
+    protected ElementIdWithoutPreviewParam(string name, string nickname, string description, string category, string subcategory) :
       base(name, nickname, description, category, subcategory)
     { }
 
@@ -334,5 +335,21 @@ namespace RhinoInside.Revit.GH.Parameters
     protected override void Menu_AppendPromptMore(ToolStripDropDown menu) { }
     protected override GH_GetterResult Prompt_Plural(ref List<T> values) => GH_GetterResult.cancel;
     protected override GH_GetterResult Prompt_Singular(ref T value) => GH_GetterResult.cancel;
+  }
+
+  public abstract class ElementIdWithPreviewParam<X, R> : ElementIdParam<X, R>, IGH_PreviewObject
+  where X : class, Types.IGH_ElementId, IGH_PreviewData
+  {
+    protected ElementIdWithPreviewParam(string name, string nickname, string description, string category, string subcategory) :
+    base(name, nickname, description, category, subcategory)
+    { }
+
+    #region IGH_PreviewObject
+    bool IGH_PreviewObject.Hidden { get; set; }
+    bool IGH_PreviewObject.IsPreviewCapable => !VolatileData.IsEmpty;
+    BoundingBox IGH_PreviewObject.ClippingBox => Preview_ComputeClippingBox();
+    void IGH_PreviewObject.DrawViewportMeshes(IGH_PreviewArgs args) => Preview_DrawMeshes(args);
+    void IGH_PreviewObject.DrawViewportWires(IGH_PreviewArgs args) => Preview_DrawWires(args);
+    #endregion
   }
 }

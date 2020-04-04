@@ -22,8 +22,8 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(new Parameters.GeometricElement(), "Inserts", "INS", "Embedded inserts", GH_ParamAccess.list);
-      manager.AddParameter(new Parameters.GeometricElement(), "Shared", "SHI", "Embedded shared inserts", GH_ParamAccess.list);
+      manager.AddParameter(new Parameters.GraphicalElement(), "Inserts", "INS", "Embedded inserts", GH_ParamAccess.list);
+      manager.AddParameter(new Parameters.GraphicalElement(), "Shared", "SHI", "Embedded shared inserts", GH_ParamAccess.list);
       manager.AddParameter(new Parameters.Element(), "Shadows", "S", "Embedded shadows", GH_ParamAccess.list);
       manager.AddParameter(new Parameters.Element(), "Openings", "O", "Embedded rectangular openings", GH_ParamAccess.list);
       manager.AddParameter(new Parameters.HostObject(), "Walls", "W", "Embedded walls", GH_ParamAccess.list);

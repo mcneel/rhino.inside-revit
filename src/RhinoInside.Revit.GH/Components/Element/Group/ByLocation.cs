@@ -16,15 +16,15 @@ namespace RhinoInside.Revit.GH.Components
 
     public GroupByLocation() : base
     (
-      "Add Group Instance", "GroupInstance",
-      "Given its location, it reconstructs a Group element into the active Revit document",
-      "Revit", "Build"
+      "Add Model Group", "ModelGroup",
+      "Given its location, it reconstructs a Model Group into the active Revit document",
+      "Revit", "Model"
     )
     { }
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(new Parameters.GeometricElement(), "Group", "G", "New Group Element", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.GraphicalElement(), "Group", "G", "New Group Element", GH_ParamAccess.item);
     }
 
     void ReconstructGroupByLocation
