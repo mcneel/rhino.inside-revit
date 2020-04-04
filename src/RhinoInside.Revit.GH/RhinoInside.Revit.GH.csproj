@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -191,6 +191,7 @@
     <Compile Include="Components\ElementType\Default.cs" />
     <Compile Include="Components\ElementType\Duplicate.cs" />
     <Compile Include="Components\ElementType\ExportImage.cs" />
+    <Compile Include="Components\ElementType\GroupType\Create.cs" />
     <Compile Include="Components\ElementType\Identity.cs" />
     <Compile Include="Components\ElementType\Similar.cs" />
     <Compile Include="Components\Element\AdaptiveComponent\ByPoints.cs" />
@@ -199,6 +200,7 @@
     <Compile Include="Components\Element\Delete.cs" />
     <Compile Include="Components\Element\Geometry.cs" />
     <Compile Include="Components\Element\Group\ByLocation.cs" />
+    <Compile Include="Components\Element\Group\Elements.cs" />
     <Compile Include="Components\Element\HostObject\Faces.cs" />
     <Compile Include="Components\Element\HostObject\Inserts.cs" />
     <Compile Include="Components\Element\Inspect.cs" />
@@ -260,6 +262,8 @@
     <Compile Include="Parameters\ElementType.cs" />
     <Compile Include="Parameters\Family.cs" />
     <Compile Include="Parameters\GeometryObject.cs" />
+    <Compile Include="Parameters\GraphicalElement.cs" />
+    <Compile Include="Parameters\Group.cs" />
     <Compile Include="Parameters\HostObject.cs" />
     <Compile Include="Parameters\ID.cs" />
     <Compile Include="Parameters\Material.cs" />
@@ -283,6 +287,8 @@
     <Compile Include="Types\Enums.cs" />
     <Compile Include="Types\Family.cs" />
     <Compile Include="Types\GeometryObject.cs" />
+    <Compile Include="Types\GraphicalElement.cs" />
+    <Compile Include="Types\Group.cs" />
     <Compile Include="Types\Parameter.cs" />
     <Compile Include="Types\DatumPlane.cs" />
     <Compile Include="Types\SketchPlane.cs" />
