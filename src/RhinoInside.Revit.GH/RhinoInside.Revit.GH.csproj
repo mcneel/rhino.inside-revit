@@ -234,6 +234,7 @@
     <Compile Include="Components\Element\View\Identity.cs" />
     <Compile Include="Components\Element\View\View3DByPlane.cs" />
     <Compile Include="Components\Element\Wall\ByCurve.cs" />
+    <Compile Include="Components\Element\Wall\AnalyseBaseWall.cs" />
     <Compile Include="Components\Element\Wall\AnalyseBaseWallType.cs" />
     <Compile Include="Components\Element\Wall\CompoundStructure_Destruct.cs" />
     <Compile Include="Components\Element\Wall\CompoundStructureLayer_Destruct.cs" />
