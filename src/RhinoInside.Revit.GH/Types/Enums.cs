@@ -226,6 +226,18 @@ namespace RhinoInside.Revit.GH.Types
 
 
   [
+  ComponentGuid("2FEFFADD-BD29-4B19-9682-4CC5947DF11C"),
+  Name("Wall System Family"),
+  Description("Represents a Revit wall system family"),
+]
+  public class WallSystemFamily : GH_Enum<DB.WallKind>
+  {
+    public WallSystemFamily() : base() { }
+    public WallSystemFamily(DB.WallKind value) : base(value) { }
+  }
+
+
+  [
     ComponentGuid("F069304B-4066-4D23-9542-7AC54CED3C92"),
     Name("Wall Function"),
     Description("Represents a Revit wall function"),
