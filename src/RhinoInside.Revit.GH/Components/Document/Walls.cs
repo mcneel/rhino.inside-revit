@@ -43,7 +43,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(
         param: new Parameters.ElementType(),
         name: "Wall Types",
-        nickname: "T",
+        nickname: "WT",
         description: "Wall types, of the given wall system family",
         access: GH_ParamAccess.list
         );
