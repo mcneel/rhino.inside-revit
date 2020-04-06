@@ -34,7 +34,8 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddGenericParameter(
+      manager.AddParameter(
+        param: new Parameters.DataObject<DB.CompoundStructure>(),
         name: "Compound Structure",
         nickname: "CS",
         description: "Compound Structure definition of given Basic Wall type",
@@ -78,15 +79,12 @@ namespace RhinoInside.Revit.GH.Components
 
       // make sure input wall type is a DB.WallKind.Basic
       if(wallType.Kind != DB.WallKind.Basic)
-      {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Input wall type is not Basic Wall type");
         return;
-      }
 
       // grab compound structure
       DA.SetData(
         "Compound Structure",
-        new Types.APIDataObject(
+        new Types.DataObject<DB.CompoundStructure>(
           apiObject: wallType.GetCompoundStructure(),
           srcDocument: wallType.Document
           )

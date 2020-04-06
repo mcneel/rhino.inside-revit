@@ -24,7 +24,8 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager.AddGenericParameter(
+      manager.AddParameter(
+        param: new Parameters.DataObject<DB.CompoundStructureLayer>(),
         name: "Compound Structure Layer",
         nickname: "CSL",
         description: "Compound Structure Layer",
@@ -84,34 +85,21 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      // TODO: eirannejad; improve data getter
       // get input
-      object input = default;
-      if (!DA.GetData("Compound Structure Layer", ref input))
+      Types.DataObject<DB.CompoundStructureLayer> dataObj = default;
+      if (!DA.GetData("Compound Structure Layer", ref dataObj))
         return;
 
-      // ensure data object is of correct type
-      if (input is Types.APIDataObject)
-      {
-        Types.APIDataObject apiDataObject = input as Types.APIDataObject;
-        if (apiDataObject.Value is DB.CompoundStructureLayer)
-        {
-          DB.CompoundStructureLayer cslayer = apiDataObject.Value as DB.CompoundStructureLayer;
+      DB.CompoundStructureLayer cslayer = dataObj.Value;
 
-          // destruct the data object into output params
-          DA.SetData("Layer Id", cslayer.LayerId);
-          DA.SetData("Layer Function", new Types.LayerFunction(cslayer.Function));
-          DA.SetData("Layer Width", cslayer.Width);
-          DA.SetData("Layer Cap Flag", cslayer.LayerCapFlag);
-          DA.SetData("Layer Material", Types.Element.FromElement(apiDataObject.Document.GetElement(cslayer.MaterialId)));
-          DA.SetData("Deck Profile", Types.Element.FromElement(apiDataObject.Document.GetElement(cslayer.DeckProfileId)));
-          DA.SetData("Deck Embedding Type", new Types.DeckEmbeddingType(cslayer.DeckEmbeddingType));
-        }
-        else
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Input is not compound structure layer");
-      }
-      else
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Input is not valid");
+      // destruct the data object into output params
+      DA.SetData("Layer Id", cslayer.LayerId);
+      DA.SetData("Layer Function", new Types.LayerFunction(cslayer.Function));
+      DA.SetData("Layer Width", cslayer.Width);
+      DA.SetData("Layer Cap Flag", cslayer.LayerCapFlag);
+      DA.SetData("Layer Material", Types.Element.FromElement(dataObj.Document.GetElement(cslayer.MaterialId)));
+      DA.SetData("Deck Profile", Types.Element.FromElement(dataObj.Document.GetElement(cslayer.DeckProfileId)));
+      DA.SetData("Deck Embedding Type", new Types.DeckEmbeddingType(cslayer.DeckEmbeddingType));
     }
   }
 }

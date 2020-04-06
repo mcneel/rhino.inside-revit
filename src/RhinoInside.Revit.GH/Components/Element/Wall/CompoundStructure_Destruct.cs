@@ -24,7 +24,8 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager.AddGenericParameter(
+      manager.AddParameter(
+        param: new Parameters.DataObject<DB.CompoundStructure>(),
         name: "Compound Structure",
         nickname: "CS",
         description: "Compound Structure",
@@ -40,8 +41,8 @@ namespace RhinoInside.Revit.GH.Components
           description: "Total width of compound structure",
           access: GH_ParamAccess.item
           );
-      // TODO: eirannejad; fix type
-      manager.AddGenericParameter(
+      manager.AddParameter(
+          param: new Parameters.DataObject<DB.CompoundStructureLayer>(),
           name: "Layers",
           nickname: "L",
           description: "Individual layers of compound structure",
@@ -131,42 +132,29 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      // TODO: eirannejad; improve data getter
       // get input
-      object input = default;
-      if (!DA.GetData("Compound Structure", ref input))
+      Types.DataObject<DB.CompoundStructure> dataObj = default;
+      if (!DA.GetData("Compound Structure", ref dataObj))
         return;
 
-      // ensure data object is of correct type
-      if (input is Types.APIDataObject)
-      {
-        Types.APIDataObject apiDataObject = input as Types.APIDataObject;
-        if (apiDataObject.Value is DB.CompoundStructure)
-        {
-          DB.CompoundStructure cstruct = apiDataObject.Value as DB.CompoundStructure;
+      DB.CompoundStructure cstruct = dataObj.Value;
 
-          // destruct the data object into output params
-          DA.SetData("Width", cstruct.GetWidth());
-          DA.SetDataList("Layers", cstruct.GetLayers().Select(x => new Types.APIDataObject(apiObject: x, srcDocument: apiDataObject.Document)).ToList());
-          DA.SetData("Layer Count", cstruct.LayerCount);
-          DA.SetData("Cutoff Height", cstruct.CutoffHeight);
-          DA.SetData("End Cap Condition", new Types.EndCapCondition(cstruct.EndCap));
-          DA.SetData("Has Structural Deck", cstruct.HasStructuralDeck);
-          DA.SetData("Is Vertically Compound", cstruct.IsVerticallyCompound);
-          DA.SetData("Sample Height", cstruct.SampleHeight);
-          DA.SetData("Minimum Sample Height", cstruct.MinimumSampleHeight);
-          DA.SetData("Opening Wrapping Condition", new Types.OpeningWrappingCondition(cstruct.OpeningWrapping));
-          DA.SetData("Structural Material Index", cstruct.StructuralMaterialIndex);
-          DA.SetData("Variable Layer Index", cstruct.VariableLayerIndex);
-          DA.SetData("First Core Layer Index", cstruct.GetFirstCoreLayerIndex());
-          DA.SetData("Last Core Layer Index", cstruct.GetLastCoreLayerIndex());
-          DA.SetData("Minimum Allowable Layer Thickness", DB.CompoundStructure.GetMinimumLayerThickness());
-        }
-        else
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Input is not compound structure");
-      }
-      else
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Input is not valid");
+      // destruct the data object into output params
+      DA.SetData("Width", cstruct.GetWidth());
+      DA.SetDataList("Layers", cstruct.GetLayers().Select(x => new Types.DataObject<DB.CompoundStructureLayer>(apiObject: x, srcDocument: dataObj.Document)).ToList());
+      DA.SetData("Layer Count", cstruct.LayerCount);
+      DA.SetData("Cutoff Height", cstruct.CutoffHeight);
+      DA.SetData("End Cap Condition", new Types.EndCapCondition(cstruct.EndCap));
+      DA.SetData("Has Structural Deck", cstruct.HasStructuralDeck);
+      DA.SetData("Is Vertically Compound", cstruct.IsVerticallyCompound);
+      DA.SetData("Sample Height", cstruct.SampleHeight);
+      DA.SetData("Minimum Sample Height", cstruct.MinimumSampleHeight);
+      DA.SetData("Opening Wrapping Condition", new Types.OpeningWrappingCondition(cstruct.OpeningWrapping));
+      DA.SetData("Structural Material Index", cstruct.StructuralMaterialIndex);
+      DA.SetData("Variable Layer Index", cstruct.VariableLayerIndex);
+      DA.SetData("First Core Layer Index", cstruct.GetFirstCoreLayerIndex());
+      DA.SetData("Last Core Layer Index", cstruct.GetLastCoreLayerIndex());
+      DA.SetData("Minimum Allowable Layer Thickness", DB.CompoundStructure.GetMinimumLayerThickness());
     }
   }
 }
