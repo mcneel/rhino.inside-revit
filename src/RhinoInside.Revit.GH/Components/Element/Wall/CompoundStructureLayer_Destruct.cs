@@ -40,6 +40,13 @@ namespace RhinoInside.Revit.GH.Components
           description: "Id of the given compound structure layer",
           access: GH_ParamAccess.item
           );
+      manager.AddParameter(
+          param: new Parameters.LayerFunction_ValueList(),
+          name: "Layer Function",
+          nickname: "LF",
+          description: "Function of the given compound structure layer",
+          access: GH_ParamAccess.item
+          );
       manager.AddNumberParameter(
           name: "Layer Width",
           nickname: "W",
@@ -93,6 +100,7 @@ namespace RhinoInside.Revit.GH.Components
 
           // destruct the data object into output params
           DA.SetData("Layer Id", cslayer.LayerId);
+          DA.SetData("Layer Function", new Types.LayerFunction(cslayer.Function));
           DA.SetData("Layer Width", cslayer.Width);
           DA.SetData("Layer Cap Flag", cslayer.LayerCapFlag);
           DA.SetData("Layer Material", Types.Element.FromElement(apiDataObject.Document.GetElement(cslayer.MaterialId)));
