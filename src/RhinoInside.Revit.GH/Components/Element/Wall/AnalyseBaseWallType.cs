@@ -9,11 +9,11 @@ namespace RhinoInside.Revit.GH.Components
   {
     public override Guid ComponentGuid => new Guid("00A650ED-4CC7-4AD3-BF38-491507315AC5");
     public override GH_Exposure Exposure => GH_Exposure.primary;
-    protected override string IconTag => "AW";
+    protected override string IconTag => "ABWT";
 
     public AnalyseBaseWallType() : base(
       name: "Analyse Base Wall Type",
-      nickname: "AZxBWT",
+      nickname: "A-BWT",
       description: "Analyse given Base Wall type",
       category: "Revit",
       subCategory: "Analyse"
