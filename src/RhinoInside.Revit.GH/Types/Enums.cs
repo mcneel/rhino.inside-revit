@@ -270,10 +270,10 @@ namespace RhinoInside.Revit.GH.Types
     {
       switch (Value)
       {
-        case DB.Structure.StructuralWallUsage.NonBearing: return "Non-Bearing";
-        case DB.Structure.StructuralWallUsage.Bearing: return "Bearing";
-        case DB.Structure.StructuralWallUsage.Shear: return "Shear";
-        case DB.Structure.StructuralWallUsage.Combined: return "Bearing & Shear (Combined)";
+        case DB.Structure.StructuralWallUsage.NonBearing: return $"{TypeName}: Non-Bearing";
+        case DB.Structure.StructuralWallUsage.Bearing: return $"{TypeName}: Bearing";
+        case DB.Structure.StructuralWallUsage.Shear: return $"{TypeName}: Shear";
+        case DB.Structure.StructuralWallUsage.Combined: return $"{TypeName}: Bearing & Shear (Combined)";
       }
       return base.ToString();
     }
