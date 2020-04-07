@@ -148,8 +148,8 @@ namespace RhinoInside.Revit
         new ArcCurve
         (
           new Circle(new Plane(arc.Center.ToRhino(), new Vector3d(arc.XDirection.ToRhino()), new Vector3d(arc.YDirection.ToRhino())), arc.Radius),
-          arc.GetEndParameter(0),
-          arc.GetEndParameter(1)
+          0.0,
+          2.0 * Math.PI
         );
     }
 
