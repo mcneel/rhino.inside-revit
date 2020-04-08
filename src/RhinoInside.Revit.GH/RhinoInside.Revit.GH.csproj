@@ -199,6 +199,7 @@
     <Compile Include="Components\Element\Beam\ByCurve.cs" />
     <Compile Include="Components\Element\BuildingPad\ByOutline.cs" />
     <Compile Include="Components\Element\AnalysisComponent.cs" />
+    <Compile Include="Components\Element\CompoundStructureGeometry.cs" />
     <Compile Include="Components\Element\Delete.cs" />
     <Compile Include="Components\Element\Geometry.cs" />
     <Compile Include="Components\Element\Group\ByLocation.cs" />
