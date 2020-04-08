@@ -6,7 +6,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class AnalyseStackedWall : Component
+  public class AnalyseStackedWall : AnalysisComponent
   {
     public override Guid ComponentGuid => new Guid("DF10B918-A30F-4609-AE77-14314E6CDBF1");
     public override GH_Exposure Exposure => GH_Exposure.primary;
