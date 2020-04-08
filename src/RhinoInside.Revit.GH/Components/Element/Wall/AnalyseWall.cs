@@ -5,16 +5,16 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class AnalyseBaseWall : AnalysisComponent
+  public class AnalyseWall : AnalysisComponent
   {
     public override Guid ComponentGuid => new Guid("1169CEB6-381C-4353-8ACE-874938755694");
     public override GH_Exposure Exposure => GH_Exposure.primary;
-    protected override string IconTag => "ABW";
+    protected override string IconTag => "AW";
 
-    public AnalyseBaseWall() : base(
-      name: "Analyse Base Wall",
-      nickname: "A-BW",
-      description: "Analyse given Base Wall element",
+    public AnalyseWall() : base(
+      name: "Analyse Wall",
+      nickname: "A-W",
+      description: "Analyse given Wall element",
       category: "Revit",
       subCategory: "Analyse"
     )
@@ -25,9 +25,9 @@ namespace RhinoInside.Revit.GH.Components
     {
       manager.AddParameter(
         param: new Parameters.Element(),
-        name: "Basic Wall",
-        nickname: "BW",
-        description: "Basic Wall element",
+        name: "Wall",
+        nickname: "W",
+        description: "Wall element",
         access: GH_ParamAccess.item
         );
     }
@@ -49,10 +49,11 @@ namespace RhinoInside.Revit.GH.Components
         access: GH_ParamAccess.item
         );
 
-      manager.AddBooleanParameter(
-        name: "Is Stacked Wall Member",
-        nickname: "SWM?",
-        description: "Whether given wall instance is a member of a Stacked Wall",
+      manager.AddParameter(
+        param: new Parameters.Element(),
+        name: "Parent Stacked Wall",
+        nickname: "PSW",
+        description: "Parent Stacked Wall instance if given wall is a member of a Stacked Wall",
         access: GH_ParamAccess.item
         );
 
@@ -148,26 +149,26 @@ namespace RhinoInside.Revit.GH.Components
         description: "Structural usage of given wall instance",
         access: GH_ParamAccess.item
         );
+
+      manager.AddVectorParameter(
+        name: "Orientation",
+        nickname: "O",
+        description: "Orientation vector of given wall instance",
+        access: GH_ParamAccess.item
+        );
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       // grab input wall type
       DB.Wall wallInstance = default;
-      if (!DA.GetData("Basic Wall", ref wallInstance))
+      if (!DA.GetData("Wall", ref wallInstance))
         return;
-
-      // make sure input wall type is a DB.WallKind.Basic
-      if(wallInstance.WallType.Kind != DB.WallKind.Basic)
-      {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Input wall element is not a Basic Wall");
-        return;
-      }
-
 
       DA.SetData("Wall System Family", new Types.WallSystemFamily(wallInstance.WallType.Kind));
       DA.SetData("Wall Type", Types.ElementType.FromElement(wallInstance.WallType));
-      DA.SetData("Is Stacked Wall Member", wallInstance.IsStackedWallMember);
+      if (wallInstance.IsStackedWallMember)
+        DA.SetData("Parent Stacked Wall", Types.Element.FromElement(wallInstance.Document.GetElement(wallInstance.StackedWallOwnerId)));
 
       PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.WALL_BASE_CONSTRAINT, "Base Level");
       PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.WALL_BASE_OFFSET, "Base Level Offset");
@@ -187,6 +188,11 @@ namespace RhinoInside.Revit.GH.Components
 
       PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT, "Structural");
       PipeHostParameter<Types.StructuralWallUsage>(DA, wallInstance, DB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM, "Structural Usage");
+
+      var wallOrientationVector = new Rhino.Geometry.Vector3d(wallInstance.Orientation.X, wallInstance.Orientation.Y, wallInstance.Orientation.Z);
+      if (wallInstance.Flipped)
+        wallOrientationVector.Reverse();
+      DA.SetData("Orientation", wallOrientationVector);
     }
   }
 }
