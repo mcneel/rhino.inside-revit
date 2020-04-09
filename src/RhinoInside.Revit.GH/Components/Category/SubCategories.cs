@@ -44,6 +44,9 @@ namespace RhinoInside.Revit.GH.Components
           if (parent.Id.IntegerValue == (int) DB.BuiltInCategory.OST_Stairs)
             SubCategories.Add((int) DB.BuiltInCategory.OST_StairsStringerCarriage);
 
+          if (parent.Id.IntegerValue == (int) DB.BuiltInCategory.OST_Walls)
+            SubCategories.Add((int) DB.BuiltInCategory.OST_StackedWalls);
+
           DA.SetDataList("SubCategories", SubCategories.Select(x => new Types.Category(doc, new DB.ElementId(x))));
         }
       }
