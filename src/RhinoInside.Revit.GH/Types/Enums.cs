@@ -243,7 +243,7 @@ namespace RhinoInside.Revit.GH.Types
 ]
   public class WallSystemFamily : GH_Enum<DB.WallKind>
   {
-    public WallSystemFamily() : base() { }
+    public WallSystemFamily() : base(DB.WallKind.Unknown) { }
     public WallSystemFamily(DB.WallKind value) : base(value) { }
   }
 

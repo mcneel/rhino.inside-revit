@@ -384,7 +384,7 @@ namespace RhinoInside.Revit.GH.Parameters
         foreach (var value in tag.GetEnumValues())
         {
           tag.Value = (int) value;
-          list.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(tag.ToString(), tag.Value.ToString()));
+          list.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(tag.Text, tag.Value.ToString()));
         }
 
         if(this.ConnectNewObject(list))
