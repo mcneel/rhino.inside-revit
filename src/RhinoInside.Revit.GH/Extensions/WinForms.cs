@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Windows.Forms
 {
-  static class ComboBoxExtension
+  static class Extension
   {
     [DllImport("USER32", CharSet = CharSet.Unicode, SetLastError = false)]
     [System.Security.SecurityCritical]
