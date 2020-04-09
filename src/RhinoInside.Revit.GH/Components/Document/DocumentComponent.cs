@@ -1,8 +1,7 @@
+using System;
+using System.Collections.Generic.Extensions;
 using System.Linq;
 using Grasshopper.Kernel;
-
-using System.Collections.Generic.Extensions;
-
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -152,49 +151,11 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterInputParams(GH_InputParamManager manager) { }
 
-    /// <summary>
-    /// Register an optional input Document parameter
-    /// Derived components can call this method inside their RegisterInputParams, where they need to add
-    /// an optional input Document parameter. This method ensures the parameters are registered
-    /// consistently.
-    /// </summary>
-    /// <param name="manager">Input parameter manager instance</param>
-    /// <param name="description">Description of what the optional Document parameter is used for</param>
-    /// <returns></returns>
-    protected static int RegisterInputDocumentParam(GH_InputParamManager manager, string description)
-    {
-      // optional source document
-      int docParamIndex = manager.AddParameter(
-        param: new Parameters.Document(),
-        name: "Document",
-        nickname: "D",
-        description: description,
-        access: GH_ParamAccess.item
-        );
-
-      manager[docParamIndex].Optional = true;
-      return docParamIndex;
-    }
-
     protected override sealed void TrySolveInstance(IGH_DataAccess DA)
     {
-      // clear any previously set message
-      Message = default;
-
       DB.Document Document = default;
-      int _Document_ = Params.IndexOfInputParam("Document");
-      // if para exists, and value is set
-      if (_Document_ >= 0 && DA.GetData(_Document_, ref Document))
-      {
-        // verify value is valid
-        if (Document?.IsValidObject != true)
-        {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Input parameter Document failed to collect data");
-          return;
-        }
-      }
-      // otherwise, use active document
-      else
+      var _Document_ = Params.IndexOfInputParam("Document");
+      if (_Document_ < 0)
       {
         Document = Revit.ActiveDBDocument;
         if (Document?.IsValidObject != true)
@@ -205,7 +166,16 @@ namespace RhinoInside.Revit.GH.Components
 
         // In case the user has more than one document open we show which one this component is working on
         if (Revit.ActiveDBApplication.Documents.Size > 1)
-          Message = $"@ {Document.Title}".TripleDot(16);  // make sure the message is max 16 chars, cut and add ... add the end of longer
+          Message = Document.Title.TripleDot(16);
+      }
+      else
+      {
+        DA.GetData(_Document_, ref Document);
+        if (Document?.IsValidObject != true)
+        {
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Input parameter Document failed to collect data");
+          return;
+        }
       }
 
       TrySolveInstance(DA, Document);

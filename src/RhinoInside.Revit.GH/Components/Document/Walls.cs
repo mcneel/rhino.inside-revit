@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Grasshopper.Kernel;
 using DB = Autodesk.Revit.DB;
+using RhinoInside.Revit.GH.Parameters;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -27,15 +28,14 @@ namespace RhinoInside.Revit.GH.Components
       base.RegisterInputParams(manager);
 
       // required system family index value
-      manager.AddIntegerParameter(
+      manager.AddParameter
+      (
+        new Param_Enum<Types.WallSystemFamily>(),
         name: "Wall System Family",
         nickname: "WSF",
         description: "Wall system family (corresponds to interger values of DB.WallKind)",
         access: GH_ParamAccess.item
-        );
-
-      // optional source document
-      RegisterInputDocumentParam(manager, "Source document to query from");
+      );
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
@@ -76,13 +76,8 @@ namespace RhinoInside.Revit.GH.Components
         return;
       }
 
-      // grab document from input, or use active doc provide in method args
-      DB.Document srcDocument = default;
-      if (!DA.GetData("Document", ref srcDocument))
-        srcDocument = doc;
-
       // collect wall types based on the given wallkind
-      using (var collector = new DB.FilteredElementCollector(srcDocument))
+      using (var collector = new DB.FilteredElementCollector(doc))
       {
         DA.SetDataList
         (
@@ -94,7 +89,7 @@ namespace RhinoInside.Revit.GH.Components
       }
 
       // collect wall instances based on the given wallkind
-      using (var collector = new DB.FilteredElementCollector(srcDocument))
+      using (var collector = new DB.FilteredElementCollector(doc))
       {
         IEnumerable<Types.Element> wallInstances;
 
