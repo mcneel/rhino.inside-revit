@@ -17,75 +17,49 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public ElementType() : base("Element Type", "Element Type", "Represents a Revit document element type.", "Params", "Revit") { }
 
-    public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
+    protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
-      if (Kind > GH_ParamKind.input || DataType == GH_ParamData.remote)
-      {
-        base.AppendAdditionalMenuItems(menu);
-        return;
-      }
+      var elementTypesBox = new ListBox();
+      elementTypesBox.BorderStyle = BorderStyle.FixedSingle;
+      elementTypesBox.Width = (int) (300 * GH_GraphicsUtil.UiScale);
+      elementTypesBox.Height = (int) (100 * GH_GraphicsUtil.UiScale);
+      elementTypesBox.SelectedIndexChanged += ElementTypesBox_SelectedIndexChanged;
+      elementTypesBox.Sorted = true;
 
-      Menu_AppendWireDisplay(menu);
-      Menu_AppendDisconnectWires(menu);
+      var familiesBox = new ComboBox();
+      familiesBox.DropDownStyle = ComboBoxStyle.DropDownList;
+      familiesBox.DropDownHeight = familiesBox.ItemHeight * 15;
+      familiesBox.SetCueBanner("Family filter…");
+      familiesBox.Width = (int) (300 * GH_GraphicsUtil.UiScale);
 
-      Menu_AppendPrincipalParameter(menu);
-      Menu_AppendReverseParameter(menu);
-      Menu_AppendFlattenParameter(menu);
-      Menu_AppendGraftParameter(menu);
-      Menu_AppendSimplifyParameter(menu);
+      var categoriesBox = new ComboBox();
+      categoriesBox.DropDownStyle = ComboBoxStyle.DropDownList;
+      categoriesBox.DropDownHeight = categoriesBox.ItemHeight * 15;
+      categoriesBox.SetCueBanner("Category filter…");
+      categoriesBox.Width = (int) (300 * GH_GraphicsUtil.UiScale);
 
-      {
-        var elementTypesBox = new ListBox();
-        elementTypesBox.BorderStyle = BorderStyle.FixedSingle;
-        elementTypesBox.Width = (int) (300 * GH_GraphicsUtil.UiScale);
-        elementTypesBox.Height = (int) (100 * GH_GraphicsUtil.UiScale);
-        elementTypesBox.SelectedIndexChanged += ElementTypesBox_SelectedIndexChanged;
-        elementTypesBox.Sorted = true;
+      familiesBox.Tag = Tuple.Create(elementTypesBox, categoriesBox);
+      familiesBox.SelectedIndexChanged += FamiliesBox_SelectedIndexChanged;
+      categoriesBox.Tag = Tuple.Create(elementTypesBox, familiesBox);
+      categoriesBox.SelectedIndexChanged += CategoriesBox_SelectedIndexChanged;
 
-        var familiesBox = new ComboBox();
-        familiesBox.DropDownStyle = ComboBoxStyle.DropDownList;
-        familiesBox.DropDownHeight = familiesBox.ItemHeight * 15;
-        familiesBox.SetCueBanner("Family filter…");
-        familiesBox.Width = (int) (300 * GH_GraphicsUtil.UiScale);
+      var categoriesTypeBox = new ComboBox();
+      categoriesTypeBox.DropDownStyle = ComboBoxStyle.DropDownList;
+      categoriesTypeBox.Width = (int) (300 * GH_GraphicsUtil.UiScale);
+      categoriesTypeBox.Tag = categoriesBox;
+      categoriesTypeBox.SelectedIndexChanged += CategoryType_SelectedIndexChanged;
+      categoriesTypeBox.Items.Add("All Categories");
+      categoriesTypeBox.Items.Add("Model");
+      categoriesTypeBox.Items.Add("Annotation");
+      categoriesTypeBox.Items.Add("Tags");
+      categoriesTypeBox.Items.Add("Internal");
+      categoriesTypeBox.Items.Add("Analytical");
+      categoriesTypeBox.SelectedIndex = 0;
 
-        var categoriesBox = new ComboBox();
-        categoriesBox.DropDownStyle = ComboBoxStyle.DropDownList;
-        categoriesBox.DropDownHeight = categoriesBox.ItemHeight * 15;
-        categoriesBox.SetCueBanner("Category filter…");
-        categoriesBox.Width = (int) (300 * GH_GraphicsUtil.UiScale);
-
-        familiesBox.Tag = Tuple.Create(elementTypesBox, categoriesBox);
-        familiesBox.SelectedIndexChanged += FamiliesBox_SelectedIndexChanged;
-        categoriesBox.Tag = Tuple.Create(elementTypesBox, familiesBox);
-        categoriesBox.SelectedIndexChanged += CategoriesBox_SelectedIndexChanged;
-
-        var categoriesTypeBox = new ComboBox();
-        categoriesTypeBox.DropDownStyle = ComboBoxStyle.DropDownList;
-        categoriesTypeBox.Width = (int) (300 * GH_GraphicsUtil.UiScale);
-        categoriesTypeBox.Tag = categoriesBox;
-        categoriesTypeBox.SelectedIndexChanged += CategoryType_SelectedIndexChanged;
-        categoriesTypeBox.Items.Add("All Categories");
-        categoriesTypeBox.Items.Add("Model");
-        categoriesTypeBox.Items.Add("Annotation");
-        categoriesTypeBox.Items.Add("Tags");
-        categoriesTypeBox.Items.Add("Internal");
-        categoriesTypeBox.Items.Add("Analytical");
-        categoriesTypeBox.SelectedIndex = 0;
-
-        Menu_AppendCustomItem(menu, categoriesTypeBox);
-        Menu_AppendCustomItem(menu, categoriesBox);
-        Menu_AppendCustomItem(menu, familiesBox);
-        Menu_AppendCustomItem(menu, elementTypesBox);
-      }
-
-      Menu_AppendManageCollection(menu);
-      Menu_AppendSeparator(menu);
-
-      Menu_AppendDestroyPersistent(menu);
-      Menu_AppendInternaliseData(menu);
-
-      if (Exposure != GH_Exposure.hidden)
-        Menu_AppendExtractParameter(menu);
+      Menu_AppendCustomItem(menu, categoriesTypeBox);
+      Menu_AppendCustomItem(menu, categoriesBox);
+      Menu_AppendCustomItem(menu, familiesBox);
+      Menu_AppendCustomItem(menu, elementTypesBox);
     }
 
     private void RefreshCategoryList(ComboBox categoriesBox, DB.CategoryType categoryType)
