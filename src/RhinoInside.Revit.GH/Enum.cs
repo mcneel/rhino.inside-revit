@@ -88,6 +88,8 @@ namespace RhinoInside.Revit.GH.Types
       EnumTypes.TryGetValue(type, out paramTypes);
 
     public virtual Array GetEnumValues() => Enum.GetValues(UnderlyingEnumType);
+    public virtual string Text => Value.ToString();
+
   }
 
   public abstract class GH_Enum<T> : GH_Enumerate
@@ -178,14 +180,16 @@ namespace RhinoInside.Revit.GH.Types
       public string FormatInstance() => Enum.Format(typeof(T), owner.Value, "G");
       public bool FromString(string str) => Enum.TryParse(str, out owner.m_value);
       public string MutateString(string str) => str.Trim();
+      public override string ToString() => Text;
 
       public bool Valid => owner.IsValid;
       public Type Type => typeof(T);
-      public string Name => owner.ToString();
+      public string Text => owner.Text;
     }
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
-    public override string ToString() => $"{TypeName}: {Value}";
+    public override sealed string ToString() => $"{TypeName}: {Text}";
+    public override string Text => $"{Value}";
   }
 }
 
@@ -193,6 +197,7 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   using Grasshopper.Kernel.Extensions;
   using Kernel.Attributes;
+  using RhinoInside.Revit.GH.Types;
 
   public class Param_Enum<T> : GH_PersistentParam<T>, IGH_ObjectProxy
     where T : Types.GH_Enumerate
@@ -287,7 +292,7 @@ namespace RhinoInside.Revit.GH.Parameters
         foreach (var e in values)
         {
           var tag = InstantiateT(); tag.Value = (int) e;
-          var item = Menu_AppendItem(menu, tag.ToString(), Menu_NamedValueClicked, SourceCount == 0, (int) e == current.Value);
+          var item = Menu_AppendItem(menu, tag.Text, Menu_NamedValueClicked, SourceCount == 0, (int) e == current.Value);
           item.Tag = tag;
         }
         Menu_AppendSeparator(menu);
