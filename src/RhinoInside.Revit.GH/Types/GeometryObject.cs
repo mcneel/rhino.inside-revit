@@ -334,6 +334,7 @@ namespace RhinoInside.Revit.GH.Types
   public abstract class GeometryObject<X> :
     GH_Goo<X>,
     IGH_ElementId,
+    IEquatable<GeometryObject<X>>,
     IGH_GeometricGoo,
     IGH_PreviewMeshData
     where X : DB.GeometryObject
@@ -385,7 +386,7 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
     public void UnloadElement() { Value = default; Document = default; }
-    public bool Equals(IGH_ElementId id) => id?.DocumentGUID == DocumentGUID && id?.UniqueID == UniqueID;
+    public bool Equals(GeometryObject<X> id) => id?.DocumentGUID == DocumentGUID && id?.UniqueID == UniqueID;
     #endregion
     public override bool Equals(object obj) => (obj is ElementId id) ? Equals(id) : base.Equals(obj);
     public override int GetHashCode() => new { DocumentGUID, UniqueID }.GetHashCode();

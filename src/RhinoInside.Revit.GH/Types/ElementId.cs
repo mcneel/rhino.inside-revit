@@ -7,7 +7,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public interface IGH_ElementId : IGH_Goo, IEquatable<IGH_ElementId>
+  public interface IGH_ElementId : IGH_Goo
   {
     DB.Reference Reference { get; }
     DB.Document Document { get; }
@@ -22,7 +22,7 @@ namespace RhinoInside.Revit.GH.Types
     void UnloadElement();
   }
 
-  public class ElementId : GH_Goo<DB.ElementId>, IGH_ElementId
+  public class ElementId : GH_Goo<DB.ElementId>, IGH_ElementId, IEquatable<ElementId>
   {
     public override string TypeName => "Revit Model Object";
     public override string TypeDescription => "Represents a Revit model object";
@@ -99,8 +99,9 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
     public void UnloadElement() { m_value = null; Document = null; }
-    public bool Equals(IGH_ElementId id) => id?.DocumentGUID == DocumentGUID && id?.UniqueID == UniqueID;
     #endregion
+
+    public bool Equals(ElementId id) => id?.DocumentGUID == DocumentGUID && id?.UniqueID == UniqueID;
     public override bool Equals(object obj) => (obj is ElementId id) ? Equals(id) : base.Equals(obj);
     public override int GetHashCode() => new { DocumentGUID, UniqueID }.GetHashCode();
 

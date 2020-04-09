@@ -49,12 +49,27 @@ namespace RhinoInside.Revit.GH.Parameters
       set => culling = value & CullingMask;
     }
 
-    public virtual DataCulling CullingMask => DataCulling.Nulls |
-    (
-      typeof(IEquatable<>).MakeGenericType(typeof(T)).IsAssignableFrom(typeof(T)) ?
-      DataCulling.Duplicates :
-      DataCulling.None
-    );
+    public virtual DataCulling CullingMask =>
+      DataCulling.Nulls | DataCulling.Invalids |
+      (
+        CullDuplicates ?
+        DataCulling.Duplicates :
+        DataCulling.None
+      );
+
+    static bool IsEquatable(Type value)
+    {
+      for (var type = value; type is object; type = type.BaseType)
+      {
+        var IEquatableT = typeof(IEquatable<>).MakeGenericType(type);
+        if (IEquatableT.IsAssignableFrom(value))
+          return true;
+      }
+
+      return false;
+    }
+
+    static bool CullDuplicates = IsEquatable(typeof(T));
 
     public override bool Read(GH_IReader reader)
     {
@@ -169,9 +184,14 @@ namespace RhinoInside.Revit.GH.Parameters
       var Cull = Menu_AppendItem(menu, "Cull") as ToolStripMenuItem;
 
       Cull.Checked = Culling != DataCulling.None;
-      Menu_AppendItem(Cull.DropDown, "Nulls", (s, a) => Menu_Culling(DataCulling.Nulls), true, (Culling & DataCulling.Nulls) != 0);
-      Menu_AppendItem(Cull.DropDown, "Invalids", (s, a) => Menu_Culling(DataCulling.Invalids), true, (Culling & DataCulling.Invalids) != 0);
-      Menu_AppendItem(Cull.DropDown, "Duplicates", (s, a) => Menu_Culling(DataCulling.Duplicates), true, (Culling & DataCulling.Duplicates) != 0);
+      if ((CullingMask & DataCulling.Nulls) != 0)
+        Menu_AppendItem(Cull.DropDown, "Nulls", (s, a) => Menu_Culling(DataCulling.Nulls), true, (Culling & DataCulling.Nulls) != 0);
+
+      if ((CullingMask & DataCulling.Nulls) != 0)
+        Menu_AppendItem(Cull.DropDown, "Invalids", (s, a) => Menu_Culling(DataCulling.Invalids), true, (Culling & DataCulling.Invalids) != 0);
+
+      if ((CullingMask & DataCulling.Nulls) != 0)
+        Menu_AppendItem(Cull.DropDown, "Duplicates", (s, a) => Menu_Culling(DataCulling.Duplicates), true, (Culling & DataCulling.Duplicates) != 0);
     }
 
     private void Menu_Culling(DataCulling value)
