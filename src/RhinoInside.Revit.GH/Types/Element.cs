@@ -89,6 +89,25 @@ namespace RhinoInside.Revit.GH.Types
       return null;
     }
 
+    public static Element FromReference(DB.Document doc, DB.Reference reference)
+    {
+      if (doc.GetElement(reference) is DB.Element value)
+      {
+        if (value is DB.RevitLinkInstance link)
+        {
+          if (reference.LinkedElementId != DB.ElementId.InvalidElementId)
+          {
+            var linkedDoc = link.GetLinkDocument();
+            return FromValue(linkedDoc?.GetElement(reference.LinkedElementId));
+          }
+        }
+
+        return FromElement(value);
+      }
+
+      return null;
+    }
+
     protected virtual bool SetValue(DB.Element element)
     {
       if (ScriptVariableType.IsInstanceOfType(element))
