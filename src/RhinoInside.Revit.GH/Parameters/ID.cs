@@ -6,13 +6,14 @@ using System.Reflection;
 using System.Windows.Forms;
 using System.Windows.Forms.InteropExtension;
 using Autodesk.Revit.UI;
+using GH_IO.Serialization;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
-using Grasshopper.Kernel.Types;
 using Grasshopper.Kernel.Extensions;
-using DB = Autodesk.Revit.DB;
+using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
@@ -27,22 +28,229 @@ namespace RhinoInside.Revit.GH.Parameters
     protected GH_PersistentParam(string name, string nickname, string description, string category, string subcategory) :
       base(name, nickname, description, category, subcategory)
     { }
+    public virtual void SetInitCode(string code) => NickName = code;
+  }
+
+  public abstract class PersistentParam<T> : GH_PersistentParam<T>
+    where T : class, IGH_Goo
+  {
+    protected PersistentParam(string name, string nickname, string description, string category, string subcategory) :
+      base(name, nickname, description, category, subcategory)
+    { }
+
+    [Flags]
+    public enum DataCulling
+    {
+      None = 0,
+      Nulls       = 1 << 0,
+      Invalids    = 1 << 1,
+      Duplicates  = 1 << 2,
+    };
+
+    const int a = (int) DataCulling.Duplicates;
+
+    DataCulling culling = DataCulling.None;
+    public DataCulling Culling
+    {
+      get => culling;
+      set => culling = value & CullingMask;
+    }
+
+    public virtual DataCulling CullingMask => DataCulling.Nulls |
+    (
+      typeof(IEquatable<>).MakeGenericType(typeof(T)).IsAssignableFrom(typeof(T)) ?
+      DataCulling.Duplicates :
+      DataCulling.None
+    );
+
+    public override bool Read(GH_IReader reader)
+    {
+      if (!base.Read(reader))
+        return false;
+
+      int grouping = (int) DataCulling.None;
+      reader.TryGetInt32("Culling", ref grouping);
+      Culling = (DataCulling) grouping;
+
+      return true;
+    }
+    public override bool Write(GH_IWriter writer)
+    {
+      if (!base.Write(writer))
+        return false;
+
+      if (Culling != DataCulling.None)
+        writer.SetInt32("Culling", (int) Culling);
+
+      return true;
+    }
+
+    protected virtual void LoadVolatileData() { }
+    protected virtual void PreProcessVolatileData()
+    {
+      if (Culling != DataCulling.None)
+      {
+        if (Kind == GH_ParamKind.floating)
+        {
+          if ((Culling & DataCulling.Nulls) != 0)
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "Nulls culled");
+
+          if ((Culling & DataCulling.Invalids) != 0)
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "Invalids culled");
+
+          if ((Culling & DataCulling.Duplicates) != 0)
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "Duplicates culled");
+        }
+
+        var data = new GH_Structure<T>();
+        var pathCount = m_data.PathCount;
+        for (int p = 0; p < pathCount; ++p)
+        {
+          var path = m_data.Paths[p];
+          var branch = m_data.get_Branch(path);
+
+          var items = branch.Cast<object>();
+          if ((Culling & DataCulling.Nulls) != 0)
+            items = items.Where(x => x != null);
+
+          if ((Culling & DataCulling.Invalids) != 0)
+            items = items.Where(x => (x as IGH_Goo)?.IsValid != false);
+
+          if ((Culling & DataCulling.Duplicates) != 0)
+            items = items.GroupBy(x => x).Select(x => x.Key);
+
+          foreach (var item in items)
+            data.Append((T) item, path);
+        }
+
+        m_data = data;
+      }
+    }
+    protected virtual void ProcessVolatileData() { }
+    protected virtual void PostProcessVolatileData() => base.PostProcessData();
+
+    public override sealed void PostProcessData()
+    {
+      LoadVolatileData();
+
+      PreProcessVolatileData();
+
+      ProcessVolatileData();
+
+      PostProcessVolatileData();
+    }
+
+    #region UI
+    public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
+    {
+      Menu_AppendWireDisplay(menu);
+      this.Menu_AppendConnect(menu);
+      Menu_AppendDisconnectWires(menu);
+
+      Menu_AppendPreProcessParameter(menu);
+      Menu_AppendPrincipalParameter(menu);
+      Menu_AppendReverseParameter(menu);
+      Menu_AppendFlattenParameter(menu);
+      Menu_AppendGraftParameter(menu);
+      Menu_AppendSimplifyParameter(menu);
+      Menu_AppendPostProcessParameter(menu);
+
+      if (Kind == GH_ParamKind.floating || Kind == GH_ParamKind.input)
+      {
+        Menu_AppendSeparator(menu);
+        Menu_AppendPromptOne(menu);
+        Menu_AppendPromptMore(menu);
+        Menu_AppendManageCollection(menu);
+
+        Menu_AppendSeparator(menu);
+        Menu_AppendDestroyPersistent(menu);
+        Menu_AppendInternaliseData(menu);
+
+        if (Exposure != GH_Exposure.hidden)
+          Menu_AppendExtractParameter(menu);
+      }
+    }
+
+    protected virtual void Menu_AppendPreProcessParameter(ToolStripDropDown menu)
+    {
+      var Cull = Menu_AppendItem(menu, "Cull") as ToolStripMenuItem;
+
+      Cull.Checked = Culling != DataCulling.None;
+      Menu_AppendItem(Cull.DropDown, "Nulls",       (s, a) => Menu_Culling(DataCulling.Nulls),      true, (Culling & DataCulling.Nulls) != 0);
+      Menu_AppendItem(Cull.DropDown, "Invalids",    (s, a) => Menu_Culling(DataCulling.Invalids),   true, (Culling & DataCulling.Invalids) != 0);
+      Menu_AppendItem(Cull.DropDown, "Duplicates",  (s, a) => Menu_Culling(DataCulling.Duplicates), true, (Culling & DataCulling.Duplicates) != 0);
+    }
+
+    private void Menu_Culling(DataCulling value)
+    {
+      RecordUndoEvent("Set: Culling");
+
+      if ((Culling & value) != 0)
+        Culling &= ~value;
+      else
+        Culling |= value;
+
+      OnObjectChanged(GH_ObjectEventType.Options);
+
+      if (Kind == GH_ParamKind.output)
+        ExpireOwner();
+
+      ExpireSolution(true);
+    }
+
+    protected virtual void Menu_AppendPostProcessParameter(ToolStripDropDown menu) { }
+    #endregion
   }
 
   public abstract class ElementIdParam<T, R> :
-    GH_PersistentParam<T>,
-    Kernel.IGH_ElementIdParam
-    where T : class, Types.IGH_ElementId
+  PersistentParam<T>,
+  Kernel.IGH_ElementIdParam
+  where T : class, Types.IGH_ElementId
   {
     public override sealed string TypeName => "Revit " + Name;
     protected ElementIdParam(string name, string nickname, string description, string category, string subcategory) :
       base(name, nickname, description, category, subcategory)
     { }
+    protected override T PreferredCast(object data) => data is R ? (T) Activator.CreateInstance(typeof(T), data) : null;
 
     internal static IEnumerable<Types.IGH_ElementId> ToElementIds(IGH_Structure data) =>
       data.AllData(true).
       OfType<Types.IGH_ElementId>().
       Where(x => x.IsValid);
+
+    [Flags]
+    public enum DataGrouping
+    {
+      None = 0,
+      Document = 1,
+      Workset = 2,
+      DesignOption = 4,
+      Category = 8,
+    };
+
+    public DataGrouping Grouping { get; set; } = DataGrouping.None;
+
+    public override sealed bool Read(GH_IReader reader)
+    {
+      if (!base.Read(reader))
+        return false;
+
+      int grouping = (int) DataGrouping.None;
+      reader.TryGetInt32("Grouping", ref grouping);
+      Grouping = (DataGrouping) grouping;
+
+      return true;
+    }
+    public override sealed bool Write(GH_IWriter writer)
+    {
+      if (!base.Write(writer))
+        return false;
+
+      if (Grouping != DataGrouping.None)
+        writer.SetInt32("Grouping", (int) Grouping);
+
+      return true;
+    }
 
     public override void ClearData()
     {
@@ -55,7 +263,7 @@ namespace RhinoInside.Revit.GH.Parameters
         goo?.UnloadElement();
     }
 
-    protected override void OnVolatileDataCollected()
+    protected override void LoadVolatileData()
     {
       if (SourceCount == 0)
       {
@@ -75,22 +283,123 @@ namespace RhinoInside.Revit.GH.Parameters
           }
         }
       }
-
-      base.OnVolatileDataCollected();
     }
 
-    protected override T PreferredCast(object data) => data is R ? (T) Activator.CreateInstance(typeof(T), data) : null;
+    protected override void ProcessVolatileData()
+    {
+      if (Grouping != DataGrouping.None)
+      {
+        if (Kind == GH_ParamKind.floating)
+        {
+          if ((Grouping & DataGrouping.Document) != 0)
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "Grouped by Document");
+
+          if ((Grouping & DataGrouping.Workset) != 0)
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "Grouped by Workset");
+
+          if ((Grouping & DataGrouping.DesignOption) != 0)
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "Grouped by Design Option");
+
+          if ((Grouping & DataGrouping.Category) != 0)
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "Grouped by Category");
+        }
+
+        var data = new GH_Structure<T>();
+        var pathCount = m_data.PathCount;
+        for (int p = 0; p < pathCount; ++p)
+        {
+          var path = m_data.Paths[p];
+          var branch = m_data.get_Branch(path);
+          foreach (var item in branch)
+          {
+            if (item is Types.IGH_ElementId value)
+            {
+              var group = path;
+
+              if ((Grouping & DataGrouping.Document) != 0)
+              {
+                var docId = RevitAPI.DocumentSessionId(value.DocumentGUID);
+                group = group.AppendElement(docId);
+              }
+
+              if (Grouping > DataGrouping.Document)
+              {
+                var element = value.Document?.GetElement(value.Id);
+
+                if ((Grouping & DataGrouping.Workset) != 0)
+                {
+                  var catId = element?.WorksetId?.IntegerValue ?? 0;
+                  group = group.AppendElement(catId);
+                }
+
+                if ((Grouping & DataGrouping.DesignOption) != 0)
+                {
+                  var catId = element?.DesignOption?.Id.IntegerValue ?? 0;
+                  group = group.AppendElement(catId);
+                }
+
+                if ((Grouping & DataGrouping.Category) != 0)
+                {
+                  var catId = element?.Category?.Id.IntegerValue ?? 0;
+                  group = group.AppendElement(catId);
+                }
+              }
+
+              data.Append((T) value, group);
+            }
+            else data.Append(null, path.AppendElement(int.MinValue));
+          }
+        }
+
+        m_data = data;
+      }
+
+      base.ProcessVolatileData();
+    }
 
     #region UI
+    protected override void Menu_AppendPreProcessParameter(ToolStripDropDown menu)
+    {
+      base.Menu_AppendPreProcessParameter(menu);
+
+      var Group = Menu_AppendItem(menu, "Group by") as ToolStripMenuItem;
+
+      Group.Checked = Grouping != DataGrouping.None;
+      Menu_AppendItem(Group.DropDown, "Document",      (s, a) => Menu_GroupBy(DataGrouping.Document),      true, (Grouping & DataGrouping.Document) != 0);
+      Menu_AppendItem(Group.DropDown, "Workset",       (s, a) => Menu_GroupBy(DataGrouping.Workset),       true, (Grouping & DataGrouping.Workset) != 0);
+      Menu_AppendItem(Group.DropDown, "Design Option", (s, a) => Menu_GroupBy(DataGrouping.DesignOption),  true, (Grouping & DataGrouping.DesignOption) != 0);
+      Menu_AppendItem(Group.DropDown, "Category",      (s, a) => Menu_GroupBy(DataGrouping.Category),      true, (Grouping & DataGrouping.Category) != 0);
+    }
+
+    private void Menu_GroupBy(DataGrouping value)
+    {
+      RecordUndoEvent("Set: Grouping");
+
+      if ((Grouping & value) != 0)
+        Grouping &= ~value;
+      else
+        Grouping |= value;
+
+      OnObjectChanged(GH_ObjectEventType.Options);
+
+      if (Kind == GH_ParamKind.output)
+        ExpireOwner();
+
+      ExpireSolution(true);
+    }
+
     protected override void PrepareForPrompt() { }
     protected override void RecoverFromPrompt() { }
-    public virtual void AppendAdditionalElementMenuItems(ToolStripDropDown menu) { }
     public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
     {
       base.AppendAdditionalMenuItems(menu);
-      Menu_AppendSeparator(menu);
-      AppendAdditionalElementMenuItems(menu);
 
+      Menu_AppendSeparator(menu);
+      Menu_AppendActions(menu);
+    }
+
+    public virtual void Menu_AppendActions(ToolStripDropDown menu)
+    {
       var doc = Revit.ActiveUIDocument?.Document;
 
       if (Kind == GH_ParamKind.output && Attributes.GetTopLevel.DocObject is Components.ReconstructElementComponent)
@@ -115,7 +424,6 @@ namespace RhinoInside.Revit.GH.Parameters
       bool delete = ToElementIds(VolatileData).Where(x => x.Document.Equals(doc)).Any();
 
       Menu_AppendItem(menu, $"Delete {GH_Convert.ToPlural(TypeName)}", Menu_DeleteElements, delete, false);
-      this.Menu_AppendConnect(menu, Menu_Connect);
     }
 
     void Menu_PinElements(object sender, EventArgs args)
@@ -261,19 +569,6 @@ namespace RhinoInside.Revit.GH.Parameters
             while (result == TaskDialogResult.CommandLink1 || result == TaskDialogResult.CommandLink2);
           }
         }
-      }
-    }
-
-    void Menu_Connect(object sender, EventArgs e)
-    {
-      if (sender is ToolStripMenuItem item && item.Tag is Guid componentGuid)
-      {
-        var obj = Grasshopper.Instances.ComponentServer.EmitObject(componentGuid);
-        if (obj is null)
-          return;
-
-        this.ConnectNewObject(obj);
-        obj.ExpireSolution(true);
       }
     }
 
