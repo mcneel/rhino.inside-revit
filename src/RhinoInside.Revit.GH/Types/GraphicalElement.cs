@@ -12,7 +12,7 @@ using DB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   /// <summary>
-  /// Represents all elements that have a Graphical representation in Revit
+  /// Base class for all elements that have a Graphical representation in Revit
   /// </summary>
   public class GraphicalElement :
     Element,
@@ -25,12 +25,22 @@ namespace RhinoInside.Revit.GH.Types
     protected override bool SetValue(DB.Element element) => IsValidElement(element) ? base.SetValue(element) : false;
     public static bool IsValidElement(DB.Element element)
     {
+      if (element is DB.ElementType)
+        return false;
+
+      if (element is DB.View)
+        return false;
+
+      if (element.Location is object)
+        return true;
+
       return
       (
         element is DB.DirectShape ||
         element is DB.CurveElement ||
         element is DB.CombinableElement ||
         element is DB.Architecture.TopographySurface ||
+        element is DB.Opening ||
         (element.Category is object && element.CanHaveTypeAssigned())
       );
     }
