@@ -7,8 +7,9 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public interface IGH_ElementId : IGH_Goo
+  public interface IGH_ElementId : IGH_Goo, IEquatable<IGH_ElementId>
   {
+    DB.Reference Reference { get; }
     DB.Document Document { get; }
     DB.ElementId Id { get; }
 
@@ -21,7 +22,7 @@ namespace RhinoInside.Revit.GH.Types
     void UnloadElement();
   }
 
-  public class ElementId : GH_Goo<DB.ElementId>, IEquatable<ElementId>, IGH_ElementId
+  public class ElementId : GH_Goo<DB.ElementId>, IGH_ElementId
   {
     public override string TypeName => "Revit Model Object";
     public override string TypeDescription => "Represents a Revit model object";
@@ -59,6 +60,16 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region IGH_ElementId
+    public DB.Reference Reference
+    {
+      get
+      {
+        try { return DB.Reference.ParseFromStableRepresentation(Document, UniqueID); }
+        catch (Autodesk.Revit.Exceptions.ArgumentNullException) { return null; }
+        catch (Autodesk.Revit.Exceptions.ArgumentException) { return null; }
+      }
+    }
+
     DB.Document document;
     public DB.Document Document { get => document?.IsValidObject != true ? null : document; protected set { document = value; } }
     public DB.ElementId Id => Value;
@@ -88,7 +99,10 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
     public void UnloadElement() { m_value = null; Document = null; }
+    public bool Equals(IGH_ElementId id) => id?.DocumentGUID == DocumentGUID && id?.UniqueID == UniqueID;
     #endregion
+    public override bool Equals(object obj) => (obj is ElementId id) ? Equals(id) : base.Equals(obj);
+    public override int GetHashCode() => new { DocumentGUID, UniqueID }.GetHashCode();
 
     public ElementId() : base(DB.ElementId.InvalidElementId) { }
     protected ElementId(DB.Document doc, DB.ElementId id) => SetValue(doc, id);
@@ -137,10 +151,6 @@ namespace RhinoInside.Revit.GH.Types
 
       return base.CastTo<Q>(ref target);
     }
-
-    public bool Equals(ElementId id) => id?.DocumentGUID == DocumentGUID && id?.UniqueID == UniqueID;
-    public override bool Equals(object obj) => (obj is ElementId id) ? Equals(id) : base.Equals(obj);
-    public override int GetHashCode() => new { DocumentGUID, UniqueID }.GetHashCode();
 
     [TypeConverter(typeof(Proxy.ObjectConverter))]
     protected class Proxy : IGH_GooProxy

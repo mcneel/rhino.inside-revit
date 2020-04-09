@@ -385,7 +385,10 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
     public void UnloadElement() { Value = default; Document = default; }
+    public bool Equals(IGH_ElementId id) => id?.DocumentGUID == DocumentGUID && id?.UniqueID == UniqueID;
     #endregion
+    public override bool Equals(object obj) => (obj is ElementId id) ? Equals(id) : base.Equals(obj);
+    public override int GetHashCode() => new { DocumentGUID, UniqueID }.GetHashCode();
 
     #region IGH_GeometricGoo
     BoundingBox IGH_GeometricGoo.Boundingbox => GetBoundingBox(Transform.Identity);
