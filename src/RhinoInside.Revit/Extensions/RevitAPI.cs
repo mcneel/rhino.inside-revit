@@ -296,7 +296,7 @@ namespace RhinoInside.Revit
                 catch (Autodesk.Revit.Exceptions.InternalException) { return null; }
               }
             ).
-            Where(x => x is object).
+            Where(x => x?.Definition is object).
             Union(element.Parameters.Cast<Parameter>().OrderBy(x => x.Id.IntegerValue)).
             GroupBy(x => x.Id).
             Select(x => x.First());
@@ -313,7 +313,7 @@ namespace RhinoInside.Revit
                 catch (Autodesk.Revit.Exceptions.InternalException) { return null; }
               }
             ).
-            Where(x => x is object);
+            Where(x => x?.Definition is object);
         case ParameterClass.Project:
           return element.Parameters.Cast<Parameter>().
             Where(p => !p.IsShared && p.Id.IntegerValue > 0).
@@ -514,6 +514,21 @@ namespace RhinoInside.Revit
       return ExportUtils.GetGBXMLDocumentId(doc);
     }
 
+    private static int seed = 0;
+    private static readonly Dictionary<Guid, int> DocumentsSessionDictionary = new Dictionary<Guid, int>();
+
+    public static int DocumentSessionId(Guid key)
+    {
+      if (key == Guid.Empty)
+        throw new ArgumentException("Invalid argument value", nameof(key));
+
+      if (DocumentsSessionDictionary.TryGetValue(key, out var value))
+        return value;
+
+      DocumentsSessionDictionary.Add(key, ++seed);
+      return seed;
+    }
+
     private static bool TryGetDocument(this IEnumerable<Document> set, Guid guid, out Document document, Document activeDBDocument)
     {
       if (guid != Guid.Empty)
@@ -641,8 +656,7 @@ namespace RhinoInside.Revit
 
       try
       {
-        var category = Category.GetCategory(doc, id);
-        if (category is object)
+        if (Category.GetCategory(doc, id) is Category category)
           return category;
       }
       catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
