@@ -16,65 +16,39 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public Material() : base("Material", "Material", "Represents a Revit document material.", "Params", "Revit") { }
 
-    public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
+    protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
-      if (Kind > GH_ParamKind.input || DataType == GH_ParamData.remote)
+      var listBox = new ListBox();
+      listBox.BorderStyle = BorderStyle.FixedSingle;
+      listBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
+      listBox.Height = (int) (100 * GH_GraphicsUtil.UiScale);
+      listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
+      listBox.Sorted = true;
+
+      var materialCategoryBox = new ComboBox();
+      materialCategoryBox.DropDownStyle = ComboBoxStyle.DropDownList;
+      materialCategoryBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
+      materialCategoryBox.Tag = listBox;
+      materialCategoryBox.SelectedIndexChanged += MaterialCategoryBox_SelectedIndexChanged;
+      materialCategoryBox.SetCueBanner("Material class filter…");
+
+      using (var collector = new DB.FilteredElementCollector(Revit.ActiveUIDocument.Document))
       {
-        base.AppendAdditionalMenuItems(menu);
-        return;
+        listBox.Items.Clear();
+
+        var materials = collector.
+                        OfClass(typeof(DB.Material)).
+                        Cast<DB.Material>().
+                        GroupBy(x => x.MaterialClass);
+
+        foreach(var cat in materials)
+          materialCategoryBox.Items.Add(cat.Key);
       }
 
-      Menu_AppendWireDisplay(menu);
-      Menu_AppendDisconnectWires(menu);
+      RefreshMaterialsList(listBox, null);
 
-      Menu_AppendPrincipalParameter(menu);
-      Menu_AppendReverseParameter(menu);
-      Menu_AppendFlattenParameter(menu);
-      Menu_AppendGraftParameter(menu);
-      Menu_AppendSimplifyParameter(menu);
-
-      {
-        var listBox = new ListBox();
-        listBox.BorderStyle = BorderStyle.FixedSingle;
-        listBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
-        listBox.Height = (int) (100 * GH_GraphicsUtil.UiScale);
-        listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
-        listBox.Sorted = true;
-
-        var materialCategoryBox = new ComboBox();
-        materialCategoryBox.DropDownStyle = ComboBoxStyle.DropDownList;
-        materialCategoryBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
-        materialCategoryBox.Tag = listBox;
-        materialCategoryBox.SelectedIndexChanged += MaterialCategoryBox_SelectedIndexChanged;
-        materialCategoryBox.SetCueBanner("Material class filter…");
-
-        using (var collector = new DB.FilteredElementCollector(Revit.ActiveUIDocument.Document))
-        {
-          listBox.Items.Clear();
-
-          var materials = collector.
-                          OfClass(typeof(DB.Material)).
-                          Cast<DB.Material>().
-                          GroupBy(x => x.MaterialClass);
-
-          foreach(var cat in materials)
-            materialCategoryBox.Items.Add(cat.Key);
-        }
-
-        RefreshMaterialsList(listBox, null);
-
-        Menu_AppendCustomItem(menu, materialCategoryBox);
-        Menu_AppendCustomItem(menu, listBox);
-      }
-
-      Menu_AppendManageCollection(menu);
-      Menu_AppendSeparator(menu);
-
-      Menu_AppendDestroyPersistent(menu);
-      Menu_AppendInternaliseData(menu);
-
-      if (Exposure != GH_Exposure.hidden)
-        Menu_AppendExtractParameter(menu);
+      Menu_AppendCustomItem(menu, materialCategoryBox);
+      Menu_AppendCustomItem(menu, listBox);
     }
 
     private void MaterialCategoryBox_SelectedIndexChanged(object sender, EventArgs e)
