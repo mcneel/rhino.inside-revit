@@ -1,9 +1,10 @@
 using System;
 using System.Linq;
 using System.Runtime.InteropServices;
-using Autodesk.Revit.DB;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
+
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -39,18 +40,18 @@ namespace RhinoInside.Revit.GH.Components
 
       if (parameterKey.Value.TryGetBuiltInParameter(out var builtInParameter))
       {
-        DA.SetData("Name", LabelUtils.GetLabelFor(builtInParameter));
+        DA.SetData("Name", DB.LabelUtils.GetLabelFor(builtInParameter));
         DA.SetData("StorageType", parameterKey.Document?.get_TypeOfStorage(builtInParameter));
         DA.SetData("Class", RevitAPI.ParameterClass.BuiltIn);
         DA.SetData("Guid", null);
       }
-      else if (parameterKey.Document?.GetElement(parameterKey.Value) is ParameterElement parameterElement)
+      else if (parameterKey.Document?.GetElement(parameterKey.Value) is DB.ParameterElement parameterElement)
       {
         var definition = parameterElement.GetDefinition();
         DA.SetData("Name", definition?.Name);
         DA.SetData("StorageType", definition?.ParameterType.ToStorageType());
 
-        if (parameterElement is SharedParameterElement shared)
+        if (parameterElement is DB.SharedParameterElement shared)
         {
           DA.SetData("Class", RevitAPI.ParameterClass.Shared);
           DA.SetData("Guid", shared.GuidValue);
@@ -59,13 +60,13 @@ namespace RhinoInside.Revit.GH.Components
         {
           DA.SetData("Guid", null);
 
-          if (parameterElement is GlobalParameter)
+          if (parameterElement is DB.GlobalParameter)
           {
             DA.SetData("Class", RevitAPI.ParameterClass.Global);
           }
           else
           {
-            switch (parameterElement.get_Parameter(BuiltInParameter.ELEM_DELETABLE_IN_FAMILY).AsInteger())
+            switch (parameterElement.get_Parameter(DB.BuiltInParameter.ELEM_DELETABLE_IN_FAMILY).AsInteger())
             {
               case 0: DA.SetData("Class", RevitAPI.ParameterClass.Family); break;
               case 1: DA.SetData("Class", RevitAPI.ParameterClass.Project); break;
@@ -84,7 +85,7 @@ namespace RhinoInside.Revit.GH.Components
     : base("Deconstruct ParameterValue", "Deconstruct", "Decompose a parameter value", "Revit", "Parameter")
     { }
 
-    protected override ElementFilter ElementFilter => new Autodesk.Revit.DB.ElementClassFilter(typeof(ParameterElement));
+    protected override DB.ElementFilter ElementFilter => new Autodesk.Revit.DB.ElementClassFilter(typeof(DB.ParameterElement));
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
       manager.AddParameter(new Parameters.ParameterValue(), "ParameterValue", "V", "Parameter value to decompose", GH_ParamAccess.item);
@@ -108,8 +109,8 @@ namespace RhinoInside.Revit.GH.Components
 
       DA.SetData("Group", parameter?.Definition.ParameterGroup);
       DA.SetData("Type", parameter?.Definition.ParameterType);
-      if (parameter?.Element is ElementType)   DA.SetData("Binding", RevitAPI.ParameterBinding.Type);
-      else if (parameter?.Element is Element)  DA.SetData("Binding", RevitAPI.ParameterBinding.Instance);
+      if (parameter?.Element is DB.ElementType)   DA.SetData("Binding", RevitAPI.ParameterBinding.Type);
+      else if (parameter?.Element is DB.Element)  DA.SetData("Binding", RevitAPI.ParameterBinding.Instance);
       else                                     DA.SetData("Binding", null);
       DA.SetData("Unit", parameter?.Definition.UnitType);
       DA.SetData("IsReadOnly", parameter?.IsReadOnly);
@@ -138,16 +139,16 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructSharedParameterByName
     (
-      Document doc,
-      ref SharedParameterElement element,
+      DB.Document doc,
+      ref DB.SharedParameterElement element,
 
       [Description("Parameter Name")] string name,
       [Description("Overwrite Parameter definition if found"), Optional, DefaultValue(false)] bool overwrite
     )
     {
       var parameterGUID = default(Guid?);
-      var parameterType = ParameterType.Text;
-      var parameterGroup = BuiltInParameterGroup.PG_DATA;
+      var parameterType = DB.ParameterType.Text;
+      var parameterGroup = DB.BuiltInParameterGroup.PG_DATA;
       bool instance = true;
       bool visible = true;
 
@@ -155,7 +156,7 @@ namespace RhinoInside.Revit.GH.Components
       {
         while (bindings.MoveNext())
         {
-          if (bindings.Key is InternalDefinition def)
+          if (bindings.Key is DB.InternalDefinition def)
           {
             if
             (
@@ -163,10 +164,10 @@ namespace RhinoInside.Revit.GH.Components
               def.Visible == visible &&
               def.ParameterType == parameterType &&
               def.ParameterGroup == parameterGroup &&
-              (instance ? bindings.Current is InstanceBinding : bindings.Current is TypeBinding)
+              (instance ? bindings.Current is DB.InstanceBinding : bindings.Current is DB.TypeBinding)
             )
             {
-              if (doc.GetElement(def.Id) is SharedParameterElement parameterElement)
+              if (doc.GetElement(def.Id) is DB.SharedParameterElement parameterElement)
               {
                 if (!overwrite)
                 {
@@ -180,22 +181,22 @@ namespace RhinoInside.Revit.GH.Components
         }
       }
 
-      using (var defOptions = new ExternalDefinitionCreationOptions(name, parameterType) { Visible = visible })
+      using (var defOptions = new DB.ExternalDefinitionCreationOptions(name, parameterType) { Visible = visible })
       {
         if (parameterGUID.HasValue)
           defOptions.GUID = parameterGUID.Value;
 
         using (var definitionFile = Revit.ActiveUIApplication.Application.CreateSharedParameterFile())
         {
-          if (definitionFile?.Groups.Create(LabelUtils.GetLabelFor(parameterGroup)).Definitions.Create(defOptions) is ExternalDefinition definition)
+          if (definitionFile?.Groups.Create(DB.LabelUtils.GetLabelFor(parameterGroup)).Definitions.Create(defOptions) is DB.ExternalDefinition definition)
           {
             // TODO : Ask for categories
-            using (var categorySet = new CategorySet())
+            using (var categorySet = new DB.CategorySet())
             {
-              foreach (var category in doc.Settings.Categories.Cast<Category>().Where(category => category.AllowsBoundParameters))
+              foreach (var category in doc.Settings.Categories.Cast<DB.Category>().Where(category => category.AllowsBoundParameters))
                 categorySet.Insert(category);
 
-              var binding = instance ? (ElementBinding) new InstanceBinding(categorySet) : (ElementBinding) new TypeBinding(categorySet);
+              var binding = instance ? (DB.ElementBinding) new DB.InstanceBinding(categorySet) : (DB.ElementBinding) new DB.TypeBinding(categorySet);
 
               if (!doc.ParameterBindings.Insert(definition, binding, parameterGroup))
               {
@@ -209,7 +210,7 @@ namespace RhinoInside.Revit.GH.Components
         }
       }
 
-      ReplaceElement(ref element, SharedParameterElement.Lookup(doc, parameterGUID.Value));
+      ReplaceElement(ref element, DB.SharedParameterElement.Lookup(doc, parameterGUID.Value));
     }
   }
 }
