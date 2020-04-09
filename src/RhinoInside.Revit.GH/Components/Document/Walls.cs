@@ -9,8 +9,9 @@ namespace RhinoInside.Revit.GH.Components
   public class DocumentWalls : DocumentComponent
   {
     public override Guid ComponentGuid => new Guid("118F5744-292F-4BEC-9213-8073219D8563");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "W";
+    protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.Wall));
 
     public DocumentWalls() : base
     (

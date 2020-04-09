@@ -9,14 +9,16 @@ namespace RhinoInside.Revit.GH.Components
   public class DocumentSave : DocumentComponent
   {
     public override Guid ComponentGuid => new Guid("FBB2E4A2-CC2A-470E-B7E8-CB3320166CC5");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
     protected override string IconTag => "S";
 
     public DocumentSave() : base
     (
-      "Save Document", "Save",
-      "Saves a document to a given file path",
-      "Revit", "Document"
+      name: "Save Document",
+      nickname: "Save",
+      description: "Saves a document to a given file path",
+      category: "Revit",
+      subCategory: "Document"
     )
     { }
 

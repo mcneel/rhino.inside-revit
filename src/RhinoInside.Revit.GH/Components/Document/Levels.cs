@@ -8,17 +8,18 @@ namespace RhinoInside.Revit.GH.Components
   public class DocumentLevels : DocumentComponent
   {
     public override Guid ComponentGuid => new Guid("87715CAF-92A9-4B14-99E5-F8CCB2CC19BD");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.Level));
 
     public DocumentLevels() : base
     (
-      "Document Levels", "Levels",
-      "Get document levels list",
-      "Revit", "Document"
+      name: "Document Levels",
+      nickname: "Levels",
+      description: "Get all document levels",
+      category: "Revit",
+      subCategory: "Document"
     )
-    {
-    }
+    { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {

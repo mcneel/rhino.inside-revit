@@ -8,16 +8,17 @@ namespace RhinoInside.Revit.GH.Components
   public class DocumentViews : DocumentComponent
   {
     public override Guid ComponentGuid => new Guid("DF691659-B75B-4455-AF5F-8A5DE485FA05");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "V";
-
     protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.View));
 
     public DocumentViews() : base
     (
-      "Document Views", "Views",
-      "Get document views list",
-      "Revit", "Document"
+      name: "Document Views",
+      nickname: "Views",
+      description: "Get all document views",
+      category: "Revit",
+      subCategory: "Document"
     )
     {
     }
