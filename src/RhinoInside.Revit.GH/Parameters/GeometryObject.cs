@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;
 using Autodesk.Revit.UI.Selection;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Data;
-using Rhino.Geometry;
 using RhinoInside.Revit.UI.Selection;
 using DB = Autodesk.Revit.DB;
 
@@ -18,7 +15,6 @@ namespace RhinoInside.Revit.GH.Parameters
     public Vertex() : base("Vertex", "Vertex", "Represents a Revit vertex.", "Params", "Revit") { }
 
 #region UI methods
-    public override void AppendAdditionalElementMenuItems(ToolStripDropDown menu) { }
     protected override GH_GetterResult Prompt_Plural(ref List<Types.Vertex> value)
     {
       var values = new List<Types.Vertex>();
@@ -70,7 +66,6 @@ namespace RhinoInside.Revit.GH.Parameters
     public Edge() : base("Edge", "Edge", "Represents a Revit edge.", "Params", "Revit") { }
 
 #region UI methods
-    public override void AppendAdditionalElementMenuItems(ToolStripDropDown menu) { }
     protected override GH_GetterResult Prompt_Plural(ref List<Types.Edge> value)
     {
       var uiDocument = Revit.ActiveUIDocument;
@@ -113,7 +108,6 @@ namespace RhinoInside.Revit.GH.Parameters
     public Face() : base("Face", "Face", "Represents a Revit face.", "Params", "Revit") { }
 
 #region UI methods
-    public override void AppendAdditionalElementMenuItems(ToolStripDropDown menu) { }
     protected override GH_GetterResult Prompt_Plural(ref List<Types.Face> value)
     {
       var uiDocument = Revit.ActiveUIDocument;
