@@ -82,9 +82,13 @@ namespace RhinoInside.Revit
           if (document != null) Stop();
           document = value;
           if (value    != null) Start();
+
+          ActiveDocumentChanged?.Invoke(null, EventArgs.Empty);
         }
       }
     }
+
+    public static event EventHandler ActiveDocumentChanged;
 
     static public void Toggle()
     {
@@ -227,7 +231,7 @@ namespace RhinoInside.Revit
           return !add || pco.PointCloudGeometry.Count > 0;
 
         if (rhinoObject is CurveObject co)
-          return !add || co.CurveGeometry.GetLength() > Revit.ShortCurveTolerance * Revit.ModelUnits;
+          return !add || !co.CurveGeometry.IsShort(Revit.ShortCurveTolerance * Revit.ModelUnits);
 
         if (rhinoObject is MeshObject mo)
           return !add || mo.MeshGeometry.Faces.Count > 0;
