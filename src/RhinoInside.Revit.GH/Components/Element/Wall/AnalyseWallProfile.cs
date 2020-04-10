@@ -43,31 +43,9 @@ namespace RhinoInside.Revit.GH.Components
         );
     }
 
-    private List<DB.ElementId> ExtractDependentElemnets(DB.Element element, DB.ElementFilter filter)
-    {
-#if (REVIT_2019)
-      // if Revit 2019 and above
-      return element.GetDependentElements(filter).ToList();
-#else
-      // otherwise
-      var dependentElements = new List<DB.ElementId>();
-      try
-      {
-        // start a dry transaction that will be rolled back later
-        var t = new DB.Transaction(element.Document, "Dry Transaction");
-        t.Start();
-        dependentElements = element.Document.Delete(element.Id)?.ToList();
-        // rollback the changes now
-        t.RollBack();
-      }
-      catch { }
-      return dependentElements.Where(x => filter.PassesFilter(element.Document, x)).ToList();
-#endif
-    }
-
     private List<Rhino.Geometry.Curve> ExtractDependentCurves(DB.Element element)
     {
-      return ExtractDependentElemnets(element, new DB.ElementClassFilter(typeof(DB.CurveElement)))
+      return element.GetDependentElements(new DB.ElementClassFilter(typeof(DB.CurveElement)))
              .Select(x => element.Document.GetElement(x))
              .Cast<DB.CurveElement>()
              .Select(x => x.GeometryCurve.ToRhino())
