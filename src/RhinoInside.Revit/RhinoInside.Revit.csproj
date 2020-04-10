@@ -208,12 +208,12 @@
     <Compile Include="Revit.FailuresPreprocessor.cs" />
     <Compile Include="Addin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UI\Rhinoceros\Sample6.cs" />
     <Compile Include="UI\Selection.cs" />
     <None Include="Properties\RhinoInside.Revit.addin" />
     <Compile Include="Samples\Sample1.cs" />
     <None Include="Samples\Sample2.ghx" />
     <None Include="Samples\Sample3.ghx" />
-    <Compile Include="Samples\Sample6.cs" />
     <None Include="Samples\Sample4.ghx" />
     <None Include="Samples\Sample7.py" />
     <Compile Include="Samples\Sample8.cs" />
@@ -243,6 +243,9 @@
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\Recompute.png" />
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\SolverOff.png" />
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\SolverOn.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Preview_Shaded.png" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
