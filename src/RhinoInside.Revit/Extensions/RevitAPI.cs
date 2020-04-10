@@ -534,6 +534,17 @@ namespace RhinoInside.Revit
 #endif
     #endregion
 
+    #region FilteredElementCollector
+    public static FilteredElementCollector OfTypeId(this FilteredElementCollector collector, ElementId typeId)
+    {
+      using (var provider = new ParameterValueProvider(new ElementId(BuiltInParameter.ELEM_TYPE_PARAM)))
+      using (var evaluator = new FilterNumericEquals())
+      using (var rule = new FilterElementIdRule(provider, evaluator, typeId))
+      using (var filter = new ElementParameterFilter(rule))
+      return collector.WherePasses(filter);
+    }
+    #endregion
+
     #region Document
     public static string GetFilePath(this Document doc)
     {
