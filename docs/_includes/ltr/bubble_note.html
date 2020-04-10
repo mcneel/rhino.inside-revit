@@ -3,10 +3,10 @@
         <tr>
             <td class="msg-icon"><img src="{{ "/assets/img/chat.svg" | prepend: site.baseurl }}"></td>
             <td class="msg-msg">
+                {{ include.note | markdownify }}
                 {% if include.image %}
                     <img src="{{ include.image | prepend: site.baseurl }}">
                 {% endif %}
-                {{ include.note | markdownify }}
             </td>
         </tr>
     </table>
