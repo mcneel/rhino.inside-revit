@@ -8,17 +8,18 @@ namespace RhinoInside.Revit.GH.Components
   public class DocumentElements : DocumentComponent
   {
     public override Guid ComponentGuid => new Guid("0F7DA57E-6C05-4DD0-AABF-69E42DF38859");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override DB.ElementFilter ElementFilter => new Autodesk.Revit.DB.ElementIsElementTypeFilter(true);
 
     public DocumentElements() : base
     (
-      "Document Elements", "Elements",
-      "Get document model elements list",
-      "Revit", "Document"
+      name: "Document Elements",
+      nickname: "Elements",
+      description: "Get document model elements list",
+      category: "Revit",
+      subCategory: "Document"
     )
-    {
-    }
+    { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {

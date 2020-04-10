@@ -108,10 +108,10 @@ namespace RhinoInside.Revit.GH.Components
           DA.SetData("ServerPath", worksharingPath.CentralServerPath);
 
         try { DA.SetData("CentralGUID", doc.WorksharingCentralGUID); }
-        catch (Autodesk.Revit.Exceptions.InapplicableDataException) { }
+        catch (Autodesk.Revit.Exceptions.ApplicationException) { }
 
         try { DA.SetData("Detached", doc.IsDetached); }
-        catch (Autodesk.Revit.Exceptions.InapplicableDataException) { }
+        catch (Autodesk.Revit.Exceptions.ApplicationException) { }
       }
     }
   }

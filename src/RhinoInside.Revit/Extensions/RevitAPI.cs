@@ -296,7 +296,7 @@ namespace RhinoInside.Revit
                 catch (Autodesk.Revit.Exceptions.InternalException) { return null; }
               }
             ).
-            Where(x => x is object).
+            Where(x => x?.Definition is object).
             Union(element.Parameters.Cast<Parameter>().OrderBy(x => x.Id.IntegerValue)).
             GroupBy(x => x.Id).
             Select(x => x.First());
@@ -313,7 +313,7 @@ namespace RhinoInside.Revit
                 catch (Autodesk.Revit.Exceptions.InternalException) { return null; }
               }
             ).
-            Where(x => x is object);
+            Where(x => x?.Definition is object);
         case ParameterClass.Project:
           return element.Parameters.Cast<Parameter>().
             Where(p => !p.IsShared && p.Id.IntegerValue > 0).
@@ -462,6 +462,29 @@ namespace RhinoInside.Revit
     #endregion
 
     #region Element
+#if !REVIT_2019
+    public static IList<ElementId> GetDependentElements(this Element element, ElementFilter filter)
+    {
+      try
+      {
+        // Start a dry transaction that will be rolled back later
+        using (var transaction = new Transaction(element.Document, nameof(GetDependentElements)))
+        {
+          transaction.Start();
+
+          var collection = element.Document.Delete(element.Id);
+          if (filter is null)
+            return collection?.ToList();
+
+          return collection?.Where(x => filter.PassesFilter(element.Document, x)).ToList();
+        }
+      }
+      catch { }
+
+      return default;
+    }
+#endif
+
     public static void SetTransform(this Instance element, XYZ newOrigin, XYZ newBasisX, XYZ newBasisY)
     {
       var current = element.GetTransform();
@@ -494,6 +517,34 @@ namespace RhinoInside.Revit
     }
     #endregion
 
+    #region ParameterFilterElement
+#if !REVIT_2019
+    public static ElementFilter GetElementFilter(this ParameterFilterElement parameterFilter)
+    {
+      var filters = new List<ElementFilter>()
+      {
+        new ElementMulticategoryFilter(parameterFilter.GetCategories())
+      };
+
+      foreach(var rule in parameterFilter.GetRules())
+        filters.Add(new ElementParameterFilter(rule));
+
+      return new LogicalAndFilter(filters);
+    }
+#endif
+    #endregion
+
+    #region FilteredElementCollector
+    public static FilteredElementCollector OfTypeId(this FilteredElementCollector collector, ElementId typeId)
+    {
+      using (var provider = new ParameterValueProvider(new ElementId(BuiltInParameter.ELEM_TYPE_PARAM)))
+      using (var evaluator = new FilterNumericEquals())
+      using (var rule = new FilterElementIdRule(provider, evaluator, typeId))
+      using (var filter = new ElementParameterFilter(rule))
+      return collector.WherePasses(filter);
+    }
+    #endregion
+
     #region Document
     public static string GetFilePath(this Document doc)
     {
@@ -512,6 +563,21 @@ namespace RhinoInside.Revit
         return Guid.Empty;
       
       return ExportUtils.GetGBXMLDocumentId(doc);
+    }
+
+    private static int seed = 0;
+    private static readonly Dictionary<Guid, int> DocumentsSessionDictionary = new Dictionary<Guid, int>();
+
+    public static int DocumentSessionId(Guid key)
+    {
+      if (key == Guid.Empty)
+        throw new ArgumentException("Invalid argument value", nameof(key));
+
+      if (DocumentsSessionDictionary.TryGetValue(key, out var value))
+        return value;
+
+      DocumentsSessionDictionary.Add(key, ++seed);
+      return seed;
     }
 
     private static bool TryGetDocument(this IEnumerable<Document> set, Guid guid, out Document document, Document activeDBDocument)
@@ -641,8 +707,7 @@ namespace RhinoInside.Revit
 
       try
       {
-        var category = Category.GetCategory(doc, id);
-        if (category is object)
+        if (Category.GetCategory(doc, id) is Category category)
           return category;
       }
       catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
@@ -752,7 +817,7 @@ namespace RhinoInside.Revit
       }
       return level;
     }
-    #endregion
+#endregion
 
     #region Application
     public static DefinitionFile CreateSharedParameterFile(this Autodesk.Revit.ApplicationServices.Application app)
@@ -810,7 +875,6 @@ namespace RhinoInside.Revit
 
       return 1033;
     }
-
     #endregion
   }
 

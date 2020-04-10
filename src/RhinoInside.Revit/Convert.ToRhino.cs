@@ -148,8 +148,8 @@ namespace RhinoInside.Revit
         new ArcCurve
         (
           new Circle(new Plane(arc.Center.ToRhino(), new Vector3d(arc.XDirection.ToRhino()), new Vector3d(arc.YDirection.ToRhino())), arc.Radius),
-          arc.GetEndParameter(0),
-          arc.GetEndParameter(1)
+          0.0,
+          2.0 * Math.PI
         );
     }
 
@@ -236,6 +236,7 @@ namespace RhinoInside.Revit
     {
       switch (curve)
       {
+        case null:                      return null;
         case DB.Line line:              return line.ToRhino();
         case DB.Arc arc:                return arc.ToRhino();
         case DB.Ellipse ellipse:        return ellipse.ToRhino();
@@ -446,7 +447,7 @@ namespace RhinoInside.Revit
     {
       var ctol = relativeTolerance * Revit.ShortCurveTolerance;
 
-      var cs = curves.Select
+      var cs = curves.Where(x => x is object).Select
       (
         x =>
         {
@@ -603,6 +604,7 @@ namespace RhinoInside.Revit
     {
       switch (face)
       {
+        case null:                            return null;
         case DB.PlanarFace planar:            return planar.ToRhinoSurface(relativeTolerance);
         case DB.ConicalFace conical:          return conical.ToRhinoSurface(relativeTolerance);
         case DB.CylindricalFace cylindrical:  return cylindrical.ToRhinoSurface(relativeTolerance);
@@ -782,7 +784,11 @@ namespace RhinoInside.Revit
             var brepEdge = default(BrepEdge);
             if (brepEdges?.TryGetValue(edge, out brepEdge) != true)
             {
-              brepEdge = brep.Edges.Add(brep.AddEdgeCurve(edge.AsCurve().ToRhino()));
+              var curve = edge.AsCurve();
+              if (curve is null)
+                continue;
+
+              brepEdge = brep.Edges.Add(brep.AddEdgeCurve(curve.ToRhino()));
               brepEdges?.Add(edge, brepEdge);
             }
 

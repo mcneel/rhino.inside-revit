@@ -264,7 +264,18 @@ namespace RhinoInside.Revit.GH.Components
         if (typeIds.Length == 1)
         {
           var rule = new DB.FilterElementIdRule(provider, new DB.FilterNumericEquals(), typeIds[0]);
-          DA.SetData("Filter", new DB.ElementParameterFilter(rule, inverted));
+          var filter = new DB.ElementParameterFilter(rule, inverted) as DB.ElementFilter;
+
+          if (typeIds[0] == DB.ElementId.InvalidElementId)
+          {
+            filter = new DB.LogicalAndFilter
+            (
+              new DB.ElementClassFilter(typeof(DB.PropertySetElement), inverted),
+              filter
+            );
+          }
+
+          DA.SetData("Filter", filter);
         }
         else
         {

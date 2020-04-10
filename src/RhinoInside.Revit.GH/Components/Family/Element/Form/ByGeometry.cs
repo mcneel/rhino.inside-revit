@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(new Parameters.GeometricElement(), "Form", "F", "New Form", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.GraphicalElement(), "Form", "F", "New Form", GH_ParamAccess.item);
     }
 
     void ReconstructFormByGeometry

@@ -12,9 +12,7 @@ using DB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   public class GeometricElement :
-    Element,
-    IGH_GeometricGoo,
-    IGH_PreviewData,
+    GraphicalElement,
     IGH_PreviewMeshData
   {
     public override string TypeDescription => "Represents a Revit geometric element";
@@ -40,18 +38,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public GeometricElement() { }
     public GeometricElement(DB.Element element) : base(element) { }
-    protected override bool SetValue(DB.Element element) => IsValidElement(element) ? base.SetValue(element) : false;
-    public static bool IsValidElement(DB.Element element)
-    {
-      return
-      (
-        element is DB.DirectShape ||
-        element is DB.CurveElement ||
-        element is DB.CombinableElement ||
-        element is DB.Architecture.TopographySurface ||
-        (element.Category is object && element.CanHaveTypeAssigned())
-      );
-    }
+
     #region Preview
     public static void BuildPreview
     (
@@ -225,27 +212,8 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
-    #region IGH_GeometricGoo
-    public BoundingBox Boundingbox => ClippingBox;
-    Guid IGH_GeometricGoo.ReferenceID
-    {
-      get => Guid.Empty;
-      set { if (value != Guid.Empty) throw new InvalidOperationException(); }
-    }
-    bool IGH_GeometricGoo.IsReferencedGeometry => IsReferencedElement;
-    bool IGH_GeometricGoo.IsGeometryLoaded => IsElementLoaded;
-
-    void IGH_GeometricGoo.ClearCaches() => UnloadElement();
-    IGH_GeometricGoo IGH_GeometricGoo.DuplicateGeometry() => (IGH_GeometricGoo) MemberwiseClone();
-    public BoundingBox GetBoundingBox(Transform xform) => ClippingBox;
-    bool IGH_GeometricGoo.LoadGeometry() => IsElementLoaded || LoadElement();
-    bool IGH_GeometricGoo.LoadGeometry(Rhino.RhinoDoc doc) => IsElementLoaded || LoadElement();
-    IGH_GeometricGoo IGH_GeometricGoo.Transform(Transform xform) => null;
-    IGH_GeometricGoo IGH_GeometricGoo.Morph(SpaceMorph xmorph) => null;
-    #endregion
-
     #region IGH_PreviewData
-    void IGH_PreviewData.DrawViewportMeshes(GH_PreviewMeshArgs args)
+    public override void DrawViewportMeshes(GH_PreviewMeshArgs args)
     {
       if (!IsValid)
         return;
@@ -300,7 +268,7 @@ namespace RhinoInside.Revit.GH.Types
         args.Pipeline.DrawMeshShaded(mesh, material);
     }
 
-    void IGH_PreviewData.DrawViewportWires(GH_PreviewWireArgs args)
+    public override void DrawViewportWires(GH_PreviewWireArgs args)
     {
       if (!IsValid)
         return;
@@ -366,6 +334,7 @@ namespace RhinoInside.Revit.GH.Types
   public abstract class GeometryObject<X> :
     GH_Goo<X>,
     IGH_ElementId,
+    IEquatable<GeometryObject<X>>,
     IGH_GeometricGoo,
     IGH_PreviewMeshData
     where X : DB.GeometryObject
@@ -417,7 +386,10 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
     public void UnloadElement() { Value = default; Document = default; }
+    public bool Equals(GeometryObject<X> id) => id?.DocumentGUID == DocumentGUID && id?.UniqueID == UniqueID;
     #endregion
+    public override bool Equals(object obj) => (obj is ElementId id) ? Equals(id) : base.Equals(obj);
+    public override int GetHashCode() => new { DocumentGUID, UniqueID }.GetHashCode();
 
     #region IGH_GeometricGoo
     BoundingBox IGH_GeometricGoo.Boundingbox => GetBoundingBox(Transform.Identity);

@@ -37,18 +37,19 @@ namespace RhinoInside.Revit.GH.Types
 
     public static readonly Dictionary<Type, Func<DB.Element, Element>> ActivatorDictionary = new Dictionary<Type, Func<DB.Element, Element>>()
     {
+      { typeof(DB.View),              (element)=> new View          (element as DB.View)              },
       { typeof(DB.Family),            (element)=> new Family        (element as DB.Family)            },
       { typeof(DB.ElementType),       (element)=> new ElementType   (element as DB.ElementType)       },
       { typeof(DB.ParameterElement),  (element)=> new ParameterKey  (element as DB.ParameterElement)  },
       { typeof(DB.Material),          (element)=> new Material      (element as DB.Material)          },
       { typeof(DB.GraphicsStyle),     (element)=> new GraphicsStyle (element as DB.GraphicsStyle)     },
 
-      { typeof(DB.View),              (element)=> new View          (element as DB.View)              },
       { typeof(DB.SketchPlane),       (element)=> new SketchPlane   (element as DB.SketchPlane)       },
       { typeof(DB.DatumPlane),        (element)=> new DatumPlane    (element as DB.DatumPlane)        },
-      { typeof(DB.HostObject),        (element)=> new HostObject    (element as DB.HostObject)        },
       { typeof(DB.Level),             (element)=> new Level         (element as DB.Level)             },
       { typeof(DB.Grid),              (element)=> new Grid          (element as DB.Grid)              },
+      { typeof(DB.Group),             (element)=> new Group         (element as DB.Group)             },
+      { typeof(DB.HostObject),        (element)=> new HostObject    (element as DB.HostObject)        },
     };
 
     public static Element FromElement(DB.Element element)
@@ -84,6 +85,25 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (doc.GetElement(Id) is DB.Element value)
         return FromElement(value);
+
+      return null;
+    }
+
+    public static Element FromReference(DB.Document doc, DB.Reference reference)
+    {
+      if (doc.GetElement(reference) is DB.Element value)
+      {
+        if (value is DB.RevitLinkInstance link)
+        {
+          if (reference.LinkedElementId != DB.ElementId.InvalidElementId)
+          {
+            var linkedDoc = link.GetLinkDocument();
+            return FromValue(linkedDoc?.GetElement(reference.LinkedElementId));
+          }
+        }
+
+        return FromElement(value);
+      }
 
       return null;
     }
@@ -180,12 +200,16 @@ namespace RhinoInside.Revit.GH.Types
 
       if (typeof(Q).IsAssignableFrom(typeof(GH_Plane)))
       {
-        var plane = Plane;
-        if (!plane.IsValid || !plane.Origin.IsValid)
-          return false;
+        try
+        {
+          var plane = Plane;
+          if (!plane.IsValid || !plane.Origin.IsValid)
+            return false;
 
-        target = (Q) (object) new GH_Plane(plane);
-        return true;
+          target = (Q) (object) new GH_Plane(plane);
+          return true;
+        }
+        catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
       }
 
       if (typeof(Q).IsAssignableFrom(typeof(GH_Point)))

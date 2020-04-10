@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic.Extensions;
 using System.Linq;
 using Grasshopper.Kernel;
 using DB = Autodesk.Revit.DB;
@@ -12,9 +14,10 @@ namespace RhinoInside.Revit.GH.Components
     public override bool NeedsToBeExpired(DB.Events.DocumentChangedEventArgs e)
     {
       var elementFilter = ElementFilter;
-      var filters = Params.Input.Count > 0 ?
-                    Params.Input[0].VolatileData.AllData(true).OfType<Types.ElementFilter>().Select(x => new DB.LogicalAndFilter(x.Value, elementFilter)) :
-                    Enumerable.Empty<DB.ElementFilter>();
+      var _Filter_ = Params.IndexOfInputParam("Filter");
+      var filters = _Filter_ < 0 ?
+                    Enumerable.Empty<DB.ElementFilter>() :
+                    Params.Input[_Filter_].VolatileData.AllData(true).OfType<Types.ElementFilter>().Select(x => new DB.LogicalAndFilter(x.Value, elementFilter));
 
       foreach (var filter in filters.Any() ? filters : Enumerable.Repeat(elementFilter, 1))
       {
@@ -163,7 +166,7 @@ namespace RhinoInside.Revit.GH.Components
 
         // In case the user has more than one document open we show which one this component is working on
         if (Revit.ActiveDBApplication.Documents.Size > 1)
-          Message = $"Doc : {Document.Title}";
+          Message = Document.Title.TripleDot(16);
       }
       else
       {

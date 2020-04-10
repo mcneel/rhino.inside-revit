@@ -8,73 +8,47 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class View : ElementIdNonGeometryParam<Types.View, DB.View>
+  public class View : ElementIdWithoutPreviewParam<Types.View, DB.View>
   {
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
     public override Guid ComponentGuid => new Guid("2DC4B866-54DB-4CE6-94C0-C51B33D35B49");
     protected override Types.View PreferredCast(object data) => Types.View.FromElement(data as DB.View) as Types.View;
 
     public View() : base("View", "View", "Represents a Revit view.", "Params", "Revit") { }
 
-    public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
+    protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
-      if (Kind > GH_ParamKind.input || DataType == GH_ParamData.remote)
+      var listBox = new ListBox();
+      listBox.BorderStyle = BorderStyle.FixedSingle;
+      listBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
+      listBox.Height = (int) (100 * GH_GraphicsUtil.UiScale);
+      listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
+      listBox.Sorted = true;
+
+      var viewTypeBox = new ComboBox();
+      viewTypeBox.DropDownStyle = ComboBoxStyle.DropDownList;
+      viewTypeBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
+      viewTypeBox.Tag = listBox;
+      viewTypeBox.SelectedIndexChanged += ViewTypeBox_SelectedIndexChanged;
+      viewTypeBox.SetCueBanner("View type filter…");
+
+      using (var collector = new DB.FilteredElementCollector(Revit.ActiveUIDocument.Document))
       {
-        base.AppendAdditionalMenuItems(menu);
-        return;
+        listBox.Items.Clear();
+
+        var views = collector.
+                    OfClass(typeof(DB.View)).
+                    Cast<DB.View>().
+                    GroupBy(x => x.ViewType);
+
+        foreach(var view in views)
+          viewTypeBox.Items.Add(view.Key);
       }
 
-      Menu_AppendWireDisplay(menu);
-      Menu_AppendDisconnectWires(menu);
+      RefreshViewsList(listBox, DB.ViewType.Undefined);
 
-      Menu_AppendPrincipalParameter(menu);
-      Menu_AppendReverseParameter(menu);
-      Menu_AppendFlattenParameter(menu);
-      Menu_AppendGraftParameter(menu);
-      Menu_AppendSimplifyParameter(menu);
-
-      {
-        var listBox = new ListBox();
-        listBox.BorderStyle = BorderStyle.FixedSingle;
-        listBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
-        listBox.Height = (int) (100 * GH_GraphicsUtil.UiScale);
-        listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
-        listBox.Sorted = true;
-
-        var viewTypeBox = new ComboBox();
-        viewTypeBox.DropDownStyle = ComboBoxStyle.DropDownList;
-        viewTypeBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
-        viewTypeBox.Tag = listBox;
-        viewTypeBox.SelectedIndexChanged += ViewTypeBox_SelectedIndexChanged;
-        viewTypeBox.SetCueBanner("View type filter…");
-
-        using (var collector = new DB.FilteredElementCollector(Revit.ActiveUIDocument.Document))
-        {
-          listBox.Items.Clear();
-
-          var views = collector.
-                      OfClass(typeof(DB.View)).
-                      Cast<DB.View>().
-                      GroupBy(x => x.ViewType);
-
-          foreach(var view in views)
-            viewTypeBox.Items.Add(view.Key);
-        }
-
-        RefreshViewsList(listBox, DB.ViewType.Undefined);
-
-        Menu_AppendCustomItem(menu, viewTypeBox);
-        Menu_AppendCustomItem(menu, listBox);
-      }
-
-      Menu_AppendManageCollection(menu);
-      Menu_AppendSeparator(menu);
-
-      Menu_AppendDestroyPersistent(menu);
-      Menu_AppendInternaliseData(menu);
-
-      if (Exposure != GH_Exposure.hidden)
-        Menu_AppendExtractParameter(menu);
+      Menu_AppendCustomItem(menu, viewTypeBox);
+      Menu_AppendCustomItem(menu, listBox);
     }
 
     private void ViewTypeBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -103,9 +77,10 @@ namespace RhinoInside.Revit.GH.Parameters
             current = firstValue.Duplicate() as Types.View;
         }
 
-        using (var collector = new DB.FilteredElementCollector(doc).OfClass(typeof(DB.View)))
+        using (var collector = new DB.FilteredElementCollector(doc))
         {
           var views = collector.
+                      OfClass(typeof(DB.View)).
                       Cast<DB.View>().
                       Where(x => viewType == DB.ViewType.Undefined || x.ViewType == viewType);
 

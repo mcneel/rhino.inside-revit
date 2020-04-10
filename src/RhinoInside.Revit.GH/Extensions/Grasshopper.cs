@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
 using RhinoInside.Revit.GH.Types;
 
 namespace Grasshopper.Kernel.Extensions
@@ -87,7 +88,7 @@ namespace Grasshopper.Kernel.Extensions
       return true;
     }
 
-    public static void Menu_AppendConnect(this IGH_Param param, System.Windows.Forms.ToolStripDropDown menu, EventHandler eventHandler)
+    public static void Menu_AppendConnect(this IGH_Param param, ToolStripDropDown menu, EventHandler eventHandler)
     {
       if ((param.Kind == GH_ParamKind.floating || param.Kind == GH_ParamKind.output) && param.Recipients.Count == 0)
       {
@@ -110,8 +111,7 @@ namespace Grasshopper.Kernel.Extensions
           }
         }
 
-        GH_DocumentObject.Menu_AppendSeparator(menu);
-        var connect = GH_DocumentObject.Menu_AppendItem(menu, "Connect") as System.Windows.Forms.ToolStripMenuItem;
+        var connect = GH_DocumentObject.Menu_AppendItem(menu, "Connect") as ToolStripMenuItem;
 
         var panedComponentId = new Guid("{59E0B89A-E487-49f8-BAB8-B5BAB16BE14C}");
         var panel = GH_DocumentObject.Menu_AppendItem(connect.DropDown, "Panel", eventHandler, Instances.ComponentServer.EmitObjectIcon(panedComponentId));
@@ -144,6 +144,24 @@ namespace Grasshopper.Kernel.Extensions
           }
         }
       }
+    }
+
+    public static void Menu_AppendConnect(this IGH_Param param, ToolStripDropDown menu)
+    {
+      EventHandler DefaultConnectMenuHandler = (sender, e) =>
+      {
+        if (sender is ToolStripMenuItem item && item.Tag is Guid componentGuid)
+        {
+          var obj = Instances.ComponentServer.EmitObject(componentGuid);
+          if (obj is null)
+            return;
+
+          if(param.ConnectNewObject(obj))
+            obj.ExpireSolution(true);
+        }
+      };
+
+      Menu_AppendConnect(param, menu, DefaultConnectMenuHandler);
     }
     #endregion
   }

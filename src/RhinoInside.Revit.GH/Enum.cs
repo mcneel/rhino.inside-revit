@@ -88,6 +88,8 @@ namespace RhinoInside.Revit.GH.Types
       EnumTypes.TryGetValue(type, out paramTypes);
 
     public virtual Array GetEnumValues() => Enum.GetValues(UnderlyingEnumType);
+    public virtual string Text => Value.ToString();
+
   }
 
   public abstract class GH_Enum<T> : GH_Enumerate
@@ -102,8 +104,8 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var name = GetType().GetTypeInfo().GetCustomAttribute(typeof(System.ComponentModel.DisplayNameAttribute)) as System.ComponentModel.DisplayNameAttribute;
-        return name?.DisplayName ?? typeof(T).Name;
+        var name = GetType().GetTypeInfo().GetCustomAttribute(typeof(RhinoInside.Revit.GH.Kernel.Attributes.NameAttribute)) as RhinoInside.Revit.GH.Kernel.Attributes.NameAttribute;
+        return name?.Name ?? typeof(T).Name;
       }
     }
     public override string TypeDescription
@@ -149,6 +151,18 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Integer)))
+      {
+        target = (Q) (object) new GH_Integer(base.Value);
+        return true;
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Number)))
+      {
+        target = (Q) (object) new GH_Number(base.Value);
+        return true;
+      }
+
       return base.CastTo<Q>(ref target);
     }
 
@@ -166,14 +180,16 @@ namespace RhinoInside.Revit.GH.Types
       public string FormatInstance() => Enum.Format(typeof(T), owner.Value, "G");
       public bool FromString(string str) => Enum.TryParse(str, out owner.m_value);
       public string MutateString(string str) => str.Trim();
+      public override string ToString() => Text;
 
       public bool Valid => owner.IsValid;
       public Type Type => typeof(T);
-      public string Name => owner.ToString();
+      public string Text => owner.Text;
     }
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
-    public override string ToString() => Value.ToString();
+    public override sealed string ToString() => $"{TypeName}: {Text}";
+    public override string Text => $"{Value}";
   }
 }
 
@@ -181,6 +197,7 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   using Grasshopper.Kernel.Extensions;
   using Kernel.Attributes;
+  using RhinoInside.Revit.GH.Types;
 
   public class Param_Enum<T> : GH_PersistentParam<T>, IGH_ObjectProxy
     where T : Types.GH_Enumerate
@@ -275,7 +292,7 @@ namespace RhinoInside.Revit.GH.Parameters
         foreach (var e in values)
         {
           var tag = InstantiateT(); tag.Value = (int) e;
-          var item = Menu_AppendItem(menu, tag.ToString(), Menu_NamedValueClicked, SourceCount == 0, (int) e == current.Value);
+          var item = Menu_AppendItem(menu, tag.Text, Menu_NamedValueClicked, SourceCount == 0, (int) e == current.Value);
           item.Tag = tag;
         }
         Menu_AppendSeparator(menu);
@@ -367,7 +384,7 @@ namespace RhinoInside.Revit.GH.Parameters
         foreach (var value in tag.GetEnumValues())
         {
           tag.Value = (int) value;
-          list.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(tag.ToString(), tag.Value.ToString()));
+          list.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(tag.Text, tag.Value.ToString()));
         }
 
         if(this.ConnectNewObject(list))

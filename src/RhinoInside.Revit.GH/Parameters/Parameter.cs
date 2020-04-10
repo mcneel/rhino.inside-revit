@@ -11,73 +11,48 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class ParameterKey : ElementIdNonGeometryParam<Types.ParameterKey, DB.ElementId>
+  public class ParameterKey : ElementIdWithoutPreviewParam<Types.ParameterKey, DB.ElementId>
   {
     public override Guid ComponentGuid => new Guid("A550F532-8C68-460B-91F3-DA0A5A0D42B5");
-    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    public override GH_Exposure Exposure => GH_Exposure.septenary;
 
     public ParameterKey() : base("ParameterKey", "ParaKey", "Represents a Revit parameter definition.", "Params", "Revit") { }
 
     protected override Types.ParameterKey PreferredCast(object data) => null;
-    public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
+
+    protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
-      if (Kind > GH_ParamKind.input || DataType == GH_ParamData.remote)
-      {
-        base.AppendAdditionalMenuItems(menu);
-        return;
-      }
+      var listBox = new ListBox();
+      listBox.BorderStyle = BorderStyle.FixedSingle;
+      listBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
+      listBox.Height = (int) (100 * GH_GraphicsUtil.UiScale);
+      listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
+      listBox.Sorted = true;
 
-      Menu_AppendWireDisplay(menu);
-      Menu_AppendDisconnectWires(menu);
+      var categoriesBox = new ComboBox();
+      categoriesBox.DropDownStyle = ComboBoxStyle.DropDownList;
+      categoriesBox.DropDownHeight = categoriesBox.ItemHeight * 15;
+      categoriesBox.SetCueBanner("Category filter…");
+      categoriesBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
+      categoriesBox.Tag = listBox;
+      categoriesBox.SelectedIndexChanged += CategoriesBox_SelectedIndexChanged;
 
-      Menu_AppendPrincipalParameter(menu);
-      Menu_AppendReverseParameter(menu);
-      Menu_AppendFlattenParameter(menu);
-      Menu_AppendGraftParameter(menu);
-      Menu_AppendSimplifyParameter(menu);
+      var categoriesTypeBox = new ComboBox();
+      categoriesTypeBox.DropDownStyle = ComboBoxStyle.DropDownList;
+      categoriesTypeBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
+      categoriesTypeBox.Tag = categoriesBox;
+      categoriesTypeBox.SelectedIndexChanged += CategoryType_SelectedIndexChanged;
+      categoriesTypeBox.Items.Add("All Categories");
+      categoriesTypeBox.Items.Add("Model");
+      categoriesTypeBox.Items.Add("Annotation");
+      categoriesTypeBox.Items.Add("Tags");
+      categoriesTypeBox.Items.Add("Internal");
+      categoriesTypeBox.Items.Add("Analytical");
+      categoriesTypeBox.SelectedIndex = 0;
 
-      {
-        var listBox = new ListBox();
-        listBox.BorderStyle = BorderStyle.FixedSingle;
-        listBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
-        listBox.Height = (int) (100 * GH_GraphicsUtil.UiScale);
-        listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
-        listBox.Sorted = true;
-
-        var categoriesBox = new ComboBox();
-        categoriesBox.DropDownStyle = ComboBoxStyle.DropDownList;
-        categoriesBox.DropDownHeight = categoriesBox.ItemHeight * 15;
-        categoriesBox.SetCueBanner("Category filter…");
-        categoriesBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
-        categoriesBox.Tag = listBox;
-        categoriesBox.SelectedIndexChanged += CategoriesBox_SelectedIndexChanged;
-
-        var categoriesTypeBox = new ComboBox();
-        categoriesTypeBox.DropDownStyle = ComboBoxStyle.DropDownList;
-        categoriesTypeBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
-        categoriesTypeBox.Tag = categoriesBox;
-        categoriesTypeBox.SelectedIndexChanged += CategoryType_SelectedIndexChanged;
-        categoriesTypeBox.Items.Add("All Categories");
-        categoriesTypeBox.Items.Add("Model");
-        categoriesTypeBox.Items.Add("Annotation");
-        categoriesTypeBox.Items.Add("Tags");
-        categoriesTypeBox.Items.Add("Internal");
-        categoriesTypeBox.Items.Add("Analytical");
-        categoriesTypeBox.SelectedIndex = 0;
-
-        Menu_AppendCustomItem(menu, categoriesTypeBox);
-        Menu_AppendCustomItem(menu, categoriesBox);
-        Menu_AppendCustomItem(menu, listBox);
-      }
-
-      Menu_AppendManageCollection(menu);
-      Menu_AppendSeparator(menu);
-
-      Menu_AppendDestroyPersistent(menu);
-      Menu_AppendInternaliseData(menu);
-
-      if (Exposure != GH_Exposure.hidden)
-        Menu_AppendExtractParameter(menu);
+      Menu_AppendCustomItem(menu, categoriesTypeBox);
+      Menu_AppendCustomItem(menu, categoriesBox);
+      Menu_AppendCustomItem(menu, listBox);
     }
 
     private void RefreshCategoryList(ComboBox categoriesBox, DB.CategoryType categoryType)
@@ -210,7 +185,7 @@ namespace RhinoInside.Revit.GH.Parameters
                  string.Empty;
         }
       }
-      catch(Exception) { }
+      catch { }
 
       return $"Invalid {TypeName}";
     }

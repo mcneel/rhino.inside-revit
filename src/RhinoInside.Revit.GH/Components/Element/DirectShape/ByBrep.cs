@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(new Parameters.GeometricElement(), "Brep", "B", "New BrepShape", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.GraphicalElement(), "Brep", "B", "New BrepShape", GH_ParamAccess.item);
     }
 
     void ReconstructDirectShapeByBrep
@@ -38,12 +38,12 @@ namespace RhinoInside.Revit.GH.Components
       if (element is DirectShape ds) { }
       else ds = DirectShape.CreateElement(doc, new ElementId(BuiltInCategory.OST_GenericModel));
 
-      var shape = brep.
-                  ToHostMultiple(scaleFactor).
-                  SelectMany(x => x.ToDirectShapeGeometry());
+      var shapes = brep.
+                   ToHostMultiple(scaleFactor).
+                   SelectMany(x => x.ToDirectShapeGeometry()).
+                   ToList();
 
-      ds.SetShape(shape.ToList());
-
+      ds.SetShape(shapes);
       ReplaceElement(ref element, ds);
     }
   }

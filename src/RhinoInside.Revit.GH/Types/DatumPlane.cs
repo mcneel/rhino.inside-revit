@@ -4,7 +4,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public class DatumPlane : GeometricElement
+  public class DatumPlane : GraphicalElement
   {
     public override string TypeDescription => "Represents a Revit DatumPlane";
     protected override Type ScriptVariableType => typeof(DB.DatumPlane);

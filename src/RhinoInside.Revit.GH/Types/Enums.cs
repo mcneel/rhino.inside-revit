@@ -41,10 +41,7 @@ namespace RhinoInside.Revit.GH.Types
   ]
   public class UnitType : GH_Enum<DB.UnitType>
   {
-    public override string ToString()
-    {
-      return Value.ToString().Substring(2).Replace('_', ' ');
-    }
+    public override string Text => Value.ToString().Substring(2).Replace('_', ' ');
   }
 
   [
@@ -62,12 +59,15 @@ namespace RhinoInside.Revit.GH.Types
   public class BuiltInParameterGroup : GH_Enum<DB.BuiltInParameterGroup>
   {
     public BuiltInParameterGroup() : base(DB.BuiltInParameterGroup.INVALID) { }
-    public override string ToString()
+    public override string Text
     {
-      try { return DB.LabelUtils.GetLabelFor(Value); }
-      catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
+      get
+      {
+        try { return DB.LabelUtils.GetLabelFor(Value); }
+        catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
 
-      return base.ToString();
+        return base.Text;
+      }
     }
 
     public override Array GetEnumValues() =>
@@ -94,12 +94,15 @@ namespace RhinoInside.Revit.GH.Types
       Where(x => x != DB.CategoryType.Invalid).
       ToArray();
 
-    public override string ToString()
+    public override string Text
     {
-      if (Value == DB.CategoryType.AnalyticalModel)
-        return "Analytical";
+      get
+      {
+        if (Value == DB.CategoryType.AnalyticalModel)
+          return "Analytical";
 
-      return base.ToString();
+        return base.Text;
+      }
     }
   }
 
@@ -157,17 +160,20 @@ namespace RhinoInside.Revit.GH.Types
     public ImageResolution() : base(DB.ImageResolution.DPI_72) { }
     public ImageResolution(DB.ImageResolution value) : base(value) { }
 
-    public override string ToString()
+    public override string Text
     {
-      switch (Value)
+      get
       {
-        case DB.ImageResolution.DPI_72: return "72 DPI";
-        case DB.ImageResolution.DPI_150: return "150 DPI";
-        case DB.ImageResolution.DPI_300: return "300 DPI";
-        case DB.ImageResolution.DPI_600: return "600 DPI";
-      }
+        switch (Value)
+        {
+          case DB.ImageResolution.DPI_72: return "72 DPI";
+          case DB.ImageResolution.DPI_150: return "150 DPI";
+          case DB.ImageResolution.DPI_300: return "300 DPI";
+          case DB.ImageResolution.DPI_600: return "600 DPI";
+        }
 
-      return base.ToString();
+        return base.Text;
+      }
     }
   }
 
@@ -181,20 +187,23 @@ namespace RhinoInside.Revit.GH.Types
     public ImageFileType() : base(DB.ImageFileType.BMP) { }
     public ImageFileType(DB.ImageFileType value) : base(value) { }
 
-    public override string ToString()
+    public override string Text
     {
-      switch (Value)
+      get
       {
-        case DB.ImageFileType.BMP: return "BMP";
-        case DB.ImageFileType.JPEGLossless: return "JPEG-Lossless";
-        case DB.ImageFileType.JPEGMedium: return "JPEG-Medium";
-        case DB.ImageFileType.JPEGSmallest: return "JPEG-Smallest";
-        case DB.ImageFileType.PNG: return "PNG";
-        case DB.ImageFileType.TARGA: return "TARGA";
-        case DB.ImageFileType.TIFF: return "TIFF";
-      }
+        switch (Value)
+        {
+          case DB.ImageFileType.BMP: return "BMP";
+          case DB.ImageFileType.JPEGLossless: return "JPEG-Lossless";
+          case DB.ImageFileType.JPEGMedium: return "JPEG-Medium";
+          case DB.ImageFileType.JPEGSmallest: return "JPEG-Smallest";
+          case DB.ImageFileType.PNG: return "PNG";
+          case DB.ImageFileType.TARGA: return "TARGA";
+          case DB.ImageFileType.TIFF: return "TIFF";
+        }
 
-      return base.ToString();
+        return base.Text;
+      }
     }
   }
 
@@ -205,40 +214,140 @@ namespace RhinoInside.Revit.GH.Types
   ]
   public class WallLocationLine : GH_Enum<DB.WallLocationLine>
   {
-    public override string ToString()
-    {
-      switch (Value)
-      {
-        case DB.WallLocationLine.WallCenterline: return "Wall Centerline";
-        case DB.WallLocationLine.CoreCenterline: return "Core Centerline";
-        case DB.WallLocationLine.FinishFaceExterior: return "Finish Face: Exterior";
-        case DB.WallLocationLine.FinishFaceInterior: return "Finish Face: Interior";
-        case DB.WallLocationLine.CoreExterior: return "Core Face: Exterior";
-        case DB.WallLocationLine.CoreInterior: return "Core Face: Interior";
-      }
+    public WallLocationLine() : base() { }
+    public WallLocationLine(DB.WallLocationLine value) : base(value) { }
 
-      return base.ToString();
+    public override string Text
+    {
+      get
+      {
+        switch (Value)
+        {
+          case DB.WallLocationLine.WallCenterline: return "Wall Centerline";
+          case DB.WallLocationLine.CoreCenterline: return "Core Centerline";
+          case DB.WallLocationLine.FinishFaceExterior: return "Finish Face (Exterior)";
+          case DB.WallLocationLine.FinishFaceInterior: return "Finish Face (Interior)";
+          case DB.WallLocationLine.CoreExterior: return "Core Face (Exterior)";
+          case DB.WallLocationLine.CoreInterior: return "Core Face (Interior)";
+        }
+
+        return base.Text;
+      }
     }
   }
+
+  [
+  ComponentGuid("2FEFFADD-BD29-4B19-9682-4CC5947DF11C"),
+  Name("Wall System Family"),
+  Description("Represents a Revit wall system family"),
+]
+  public class WallSystemFamily : GH_Enum<DB.WallKind>
+  {
+    public WallSystemFamily() : base(DB.WallKind.Unknown) { }
+    public WallSystemFamily(DB.WallKind value) : base(value) { }
+  }
+
+
+  [
+    ComponentGuid("F069304B-4066-4D23-9542-7AC54CED3C92"),
+    Name("Wall Function"),
+    Description("Represents a Revit wall function"),
+  ]
+  public class WallFunction : GH_Enum<DB.WallFunction> {
+    public WallFunction() : base() { }
+    public WallFunction(DB.WallFunction value) : base(value) { }
+  }
+
+
+  // Revit API does not have an enum for this (eirannejad: 2020-04-02)
+  // replace with Revit API enum when implemented
+  public enum WallWrapping_Enum
+  {
+    DoNotWrap,
+    Exterior,
+    Interior,
+    Both
+  }
+
+  [
+    ComponentGuid("7A71E012-6E92-493D-960C-83BE3C50ECAE"),
+    Name("Wall Wrapping"),
+    Description("Represents a Revit wall wrapping option"),
+  ]
+  public class WallWrapping : GH_Enum<WallWrapping_Enum>
+  {
+    public WallWrapping() : base() { }
+    public WallWrapping(WallWrapping_Enum value) : base(value) { }
+  }
+
 
   [
     ComponentGuid("2F1CE55B-FD85-4EC5-8638-8DA06932DE0E"),
     Name("Structural Wall Usage"),
     Description("Represents a Revit structural wall usage."),
   ]
-  public class StructuralWallUsage : GH_Enum<DB.Structure.StructuralWallUsage>
-  {
-    public override string ToString()
-    {
-      switch (Value)
-      {
-        case DB.Structure.StructuralWallUsage.NonBearing: return "Non-bearing";
-        case DB.Structure.StructuralWallUsage.Bearing: return "Bearing";
-        case DB.Structure.StructuralWallUsage.Shear: return "Shear";
-        case DB.Structure.StructuralWallUsage.Combined: return "Structural combined";
-      }
+  public class StructuralWallUsage : GH_Enum<DB.Structure.StructuralWallUsage> {
+    public StructuralWallUsage() : base() { }
+    public StructuralWallUsage(DB.Structure.StructuralWallUsage value) : base(value) { }
 
-      return base.ToString();
+    public override string Text
+    {
+      get
+      {
+        switch (Value)
+        {
+          case DB.Structure.StructuralWallUsage.NonBearing: return "Non-Bearing";
+          case DB.Structure.StructuralWallUsage.Bearing: return "Bearing";
+          case DB.Structure.StructuralWallUsage.Shear: return "Shear";
+          case DB.Structure.StructuralWallUsage.Combined: return $"Structural combined";
+        }
+
+        return base.Text;
+      }
     }
+  }
+
+  [
+    ComponentGuid("A8122936-6A69-4D78-B1F5-13FD8F2144A5"),
+    Name("End Cap Condition"),
+    Description("Represents end cap condition of a wall compound structure"),
+  ]
+  public class EndCapCondition : GH_Enum<DB.EndCapCondition>
+  {
+    public EndCapCondition() : base() { }
+    public EndCapCondition(DB.EndCapCondition value) : base(value) { }
+  }
+
+  [
+    ComponentGuid("68D22DE2-CDD5-4441-9745-462E28030A03"),
+    Name("Deck Embedding Type"),
+    Description("Represents deck embedding type of a wall compound structure layer"),
+  ]
+  public class DeckEmbeddingType : GH_Enum<DB.StructDeckEmbeddingType>
+  {
+    public DeckEmbeddingType() : base() { }
+    public DeckEmbeddingType(DB.StructDeckEmbeddingType value) : base(value) { }
+  }
+
+  [
+    ComponentGuid("4220F183-C273-4342-9885-3DEB13531731"),
+    Name("Layer Function"),
+    Description("Represents layer function of a wall compound structure layer"),
+  ]
+  public class LayerFunction : GH_Enum<DB.MaterialFunctionAssignment>
+  {
+    public LayerFunction() : base() { }
+    public LayerFunction(DB.MaterialFunctionAssignment value) : base(value) { }
+  }
+
+  [
+    ComponentGuid("BF8B68B5-4E24-4602-8065-7EE90536B90E"),
+    Name("Opening Wrapping Condition"),
+    Description("Represents compound structure layers wrapping at openings setting"),
+  ]
+  public class OpeningWrappingCondition : GH_Enum<DB.OpeningWrappingCondition>
+  {
+    public OpeningWrappingCondition() : base() { }
+    public OpeningWrappingCondition(DB.OpeningWrappingCondition value) : base(value) { }
   }
 }
