@@ -34,25 +34,33 @@ namespace RhinoInside.Revit.GH.Components
         return;
 
       var doc = host.Document;
+      try
       {
         var bottom = DB.HostObjectUtils.GetBottomFaces(host).Select(reference => new Types.Face(doc, reference));
         DA.SetDataList("Bottom", bottom);
       }
+      catch (Autodesk.Revit.Exceptions.ApplicationException) { }
 
+      try
       {
         var top = DB.HostObjectUtils.GetTopFaces(host).Select(reference => new Types.Face(doc, reference));
         DA.SetDataList("Top", top);
       }
+      catch (Autodesk.Revit.Exceptions.ApplicationException) { }
 
+      try
       {
         var interior = DB.HostObjectUtils.GetSideFaces(host, DB.ShellLayerType.Interior).Select(reference => new Types.Face(doc, reference));
         DA.SetDataList("Interior", interior);
       }
+      catch (Autodesk.Revit.Exceptions.ApplicationException) { }
 
+      try
       {
         var exterior = DB.HostObjectUtils.GetSideFaces(host, DB.ShellLayerType.Exterior).Select(reference => new Types.Face(doc, reference));
         DA.SetDataList("Exterior", exterior);
       }
+      catch (Autodesk.Revit.Exceptions.ApplicationException) { }
     }
   }
 }
