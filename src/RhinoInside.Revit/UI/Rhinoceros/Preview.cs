@@ -6,7 +6,7 @@ using Autodesk.Revit.UI;
 namespace RhinoInside.Revit.UI
 {
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
-  public class CommandRhinoPreview : UI.RhinoCommand
+  public class CommandRhinoPreview : RhinoCommand
   {
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
@@ -44,12 +44,17 @@ namespace RhinoInside.Revit.UI
 
     private static void DocumentPreviewServer_ActiveDocumentChanged(object sender, EventArgs e) =>
       ButtonSetImages(DocumentPreviewServer.ActiveDocument is object);
+#endif
 
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
+#if REVIT_2018
+
       DocumentPreviewServer.Toggle();
       return Result.Succeeded;
-    }
+#else
+      return Result.Failed;
 #endif
+    }
   }
 }
