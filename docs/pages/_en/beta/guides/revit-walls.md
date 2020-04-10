@@ -82,8 +82,7 @@ Use the *Compound Structure Layer (Deconstruct)* component to extract informatio
 
 ### Stacked Wall Structure
 
-{% include ltr/warning_note.html note='Currently there is no support in Revit API to access *Stacked Wall* structure data. However you can use the Stack Wall instance analysis components to extract the partial height *Basic Wall* instances and analyze their structure layers individually' %}
-
+{% include ltr/warning_note.html image='/static/images/guides/revit-walls10a.png' note='Currently there is no support in Revit API to access *Stacked Wall* structure data. However you can use the *Analyse Stacked Wall* component to extract the embedded *Basic Wall* instances and analyze their structure layers individually' %}
 
 ## Analyzing Walls
 
