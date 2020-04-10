@@ -494,6 +494,23 @@ namespace RhinoInside.Revit
     }
     #endregion
 
+    #region ParameterFilterElement
+#if !REVIT_2019
+    public static ElementFilter GetElementFilter(this ParameterFilterElement parameterFilter)
+    {
+      var filters = new List<ElementFilter>()
+      {
+        new ElementMulticategoryFilter(parameterFilter.GetCategories())
+      };
+
+      foreach(var rule in parameterFilter.GetRules())
+        filters.Add(new ElementParameterFilter(rule));
+
+      return new LogicalAndFilter(filters);
+    }
+#endif
+    #endregion
+
     #region Document
     public static string GetFilePath(this Document doc)
     {
