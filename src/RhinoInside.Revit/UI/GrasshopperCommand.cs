@@ -82,8 +82,8 @@ namespace RhinoInside.Revit.UI
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         pushButton.ToolTip = "Force a complete recompute of all objects";
-        pushButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Recompute.png", true);
-        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Recompute.png");
+        pushButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Ribbon.Grasshopper.Recompute.png", true);
+        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Ribbon.Grasshopper.Recompute.png");
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
       }
     }
@@ -202,8 +202,8 @@ namespace RhinoInside.Revit.UI
       {
         bakeButton.ToolTip = "Bakes selected objects content in the active Revit document";
         bakeButton.LongDescription = "Use CTRL key to group resulting elements";
-        bakeButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Bake.png", true);
-        bakeButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Bake.png");
+        bakeButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Ribbon.Grasshopper.Bake.png", true);
+        bakeButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Ribbon.Grasshopper.Bake.png");
         bakeButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
       }
     }
@@ -432,8 +432,8 @@ namespace RhinoInside.Revit.UI
       if (radioButtonGroup.AddItem(buttonData) is ToggleButton pushButton)
       {
         pushButton.ToolTip = "Don't draw any preview geometry";
-        pushButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Preview_Off.png", true);
-        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Preview_Off.png");
+        pushButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Ribbon.Grasshopper.Preview_Off.png", true);
+        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Ribbon.Grasshopper.Preview_Off.png");
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
 
         if (GH.PreviewServer.PreviewMode == GH_PreviewMode.Disabled)
@@ -459,8 +459,8 @@ namespace RhinoInside.Revit.UI
       if (radioButtonGroup.AddItem(buttonData) is ToggleButton pushButton)
       {
         pushButton.ToolTip = "Draw wireframe preview geometry";
-        pushButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Preview_Wireframe.png", true);
-        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Preview_Wireframe.png");
+        pushButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Ribbon.Grasshopper.Preview_Wireframe.png", true);
+        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Ribbon.Grasshopper.Preview_Wireframe.png");
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
 
         if (GH.PreviewServer.PreviewMode == GH_PreviewMode.Wireframe)
@@ -486,8 +486,8 @@ namespace RhinoInside.Revit.UI
       if (radioButtonGroup.AddItem(buttonData) is ToggleButton pushButton)
       {
         pushButton.ToolTip = "Draw shaded preview geometry";
-        pushButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Preview_Shaded.png", true);
-        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GH.Toolbar.Preview_Shaded.png");
+        pushButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Ribbon.Grasshopper.Preview_Shaded.png", true);
+        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Ribbon.Grasshopper.Preview_Shaded.png");
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
 
         if(GH.PreviewServer.PreviewMode == GH_PreviewMode.Shaded)
