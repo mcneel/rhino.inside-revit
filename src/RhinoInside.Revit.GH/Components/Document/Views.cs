@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       base.RegisterInputParams(manager);
 
-      var discipline = manager[manager.AddParameter(new Parameters.Param_Enum<Types.ViewDiscipline>(), "Discipline", "Discipline", "View discipline", GH_ParamAccess.item)] as Parameters.Param_Enum<Types.ViewDiscipline>;
+      var discipline = manager[manager.AddParameter(new Parameters.Param_Enum<Types.ViewDiscipline>(), "Discipline", "D", "View discipline", GH_ParamAccess.item)] as Parameters.Param_Enum<Types.ViewDiscipline>;
       discipline.Optional = true;
 
       var type = manager[manager.AddParameter(new Parameters.Param_Enum<Types.ViewType>(), "Type", "T", "View type", GH_ParamAccess.item)] as Parameters.Param_Enum<Types.ViewType>;
