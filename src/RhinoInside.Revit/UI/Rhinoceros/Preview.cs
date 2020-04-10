@@ -1,24 +1,17 @@
 using System;
-using System.Diagnostics;
-using System.Reflection;
-using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using Eto.Forms;
 
-namespace RhinoInside.Revit.Samples
+namespace RhinoInside.Revit.UI
 {
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
-  public class Sample6 : UI.RhinoCommand
+  public class CommandRhinoPreview : UI.RhinoCommand
   {
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
 #if REVIT_2018
-      var buttonData = NewPushButtonData<Sample6, NeedsActiveDocument<Availability>>("Preview");
+      var buttonData = NewPushButtonData<CommandRhinoPreview, NeedsActiveDocument<Availability>>("Preview");
 
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {

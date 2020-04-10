@@ -208,7 +208,7 @@
     <Compile Include="Revit.FailuresPreprocessor.cs" />
     <Compile Include="Addin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI\Rhinoceros\Sample6.cs" />
+    <Compile Include="UI\Rhinoceros\Preview.cs" />
     <Compile Include="UI\Selection.cs" />
     <None Include="Properties\RhinoInside.Revit.addin" />
     <Compile Include="Samples\Sample1.cs" />
