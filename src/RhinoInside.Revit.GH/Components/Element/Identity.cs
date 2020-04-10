@@ -8,8 +8,14 @@ namespace RhinoInside.Revit.GH.Components
     public override Guid ComponentGuid => new Guid("D3917D58-7183-4B3F-9D22-03F0FE93B956");
     protected override string IconTag => "ID";
 
-    public ElementIdentity()
-    : base("Element Identity", "Element.Identity", "Query element identity information", "Revit", "Element")
+    public ElementIdentity() : base
+    (
+      name: "Element Identity",
+      nickname: "Identity",
+      description: "Queries element identity information",
+      category: "Revit",
+      subCategory: "Element"
+    )
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
