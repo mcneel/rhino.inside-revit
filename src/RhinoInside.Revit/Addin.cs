@@ -11,6 +11,7 @@ using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
 using Microsoft.Win32;
 using UIX = RhinoInside.Revit.External.UI;
+using RhinoInside.Revit.External.UI.Extensions;
 
 namespace RhinoInside.Revit
 {

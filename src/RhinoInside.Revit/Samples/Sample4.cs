@@ -43,7 +43,7 @@ namespace RhinoInside.Revit.Samples
         mruPullDownButton.LargeImage = ImageBuilder.BuildLargeImage("4");
         mruPullDownButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://github.com/mcneel/rhino.inside-revit/tree/master#sample-4"));
 
-        mruPullDownButton.AddPushButton(typeof(Browse), "Browse...", "Browse for a Grasshopper definition to evaluate", typeof(NeedsActiveDocument<Availability>));
+        AddPushButton<Browse, NeedsActiveDocument<Availability>> (mruPullDownButton, "Browse...", "Browse for a Grasshopper definition to evaluate");
       }
     }
 
@@ -55,11 +55,19 @@ namespace RhinoInside.Revit.Samples
       if (!File.Exists(filePath))
         return false;
 
-      if(mruPushPuttons == null)
+      if(mruPushPuttons is null)
       {
         mruPullDownButton.AddSeparator();
-        mruPushPuttons = new Type[] { typeof(Mru0), typeof(Mru1), typeof(Mru2), typeof(Mru3), typeof(Mru4), typeof(Mru5) }.
-                         Select(x => mruPullDownButton.AddPushButton(x, null, null, typeof(NeedsActiveDocument<Availability>))).ToArray();
+        mruPushPuttons = new PushButton[]
+        {
+          AddPushButton<Mru0, NeedsActiveDocument<Availability>>(mruPullDownButton, null, null),
+          AddPushButton<Mru1, NeedsActiveDocument<Availability>>(mruPullDownButton, null, null),
+          AddPushButton<Mru2, NeedsActiveDocument<Availability>>(mruPullDownButton, null, null),
+          AddPushButton<Mru3, NeedsActiveDocument<Availability>>(mruPullDownButton, null, null),
+          AddPushButton<Mru4, NeedsActiveDocument<Availability>>(mruPullDownButton, null, null),
+          AddPushButton<Mru5, NeedsActiveDocument<Availability>>(mruPullDownButton, null, null),
+        };
+
         foreach (var mru in mruPushPuttons)
         {
           mru.Visible = false;

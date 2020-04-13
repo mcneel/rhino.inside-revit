@@ -4,6 +4,8 @@ using Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit.External.UI
 {
+  using Extensions;
+
   public abstract class Command : IExternalCommand
   {
     public abstract Result Execute(ExternalCommandData data, ref string message, ElementSet elements);

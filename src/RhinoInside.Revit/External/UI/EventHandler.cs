@@ -4,6 +4,8 @@ using Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit.External.UI
 {
+  using Extensions;
+
   public abstract class EventHandler : IExternalEventHandler
   {
     public abstract string GetName();

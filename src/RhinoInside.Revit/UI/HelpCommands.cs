@@ -24,15 +24,15 @@ namespace RhinoInside.Revit.UI
         helpButton.Image = ImageBuilder.BuildImage("?");
         helpButton.LargeImage = ImageBuilder.BuildLargeImage("?");
 
-        helpButton.AddPushButton(typeof(CommandSampleFiles),       "Sample files",      "Opens sample files folder",                    typeof(AllwaysAvailable));
-        helpButton.AddPushButton(typeof(CommandAPIDocs),           "APIDocs",           "Opens apidocs.co website",                     typeof(AllwaysAvailable));
-        helpButton.AddPushButton(typeof(CommandTheBuildingCoder),  "TheBuildingCoder",  "Opens thebuildingcoder.typepad.com website",   typeof(AllwaysAvailable));
+        AddPushButton<CommandSampleFiles,       AllwaysAvailable> (helpButton, "Sample files",      "Opens sample files folder");
+        AddPushButton<CommandAPIDocs,           AllwaysAvailable> (helpButton, "APIDocs",           "Opens apidocs.co website");
+        AddPushButton<CommandTheBuildingCoder,  AllwaysAvailable> (helpButton, "TheBuildingCoder",  "Opens thebuildingcoder.typepad.com website");
         helpButton.AddSeparator();
-        helpButton.AddPushButton(typeof(CommandRhinoDevDocs),      "Rhino Dev Docs",    "Opens developer.rhino3d.com website",          typeof(AllwaysAvailable));
-        helpButton.AddPushButton(typeof(CommandDiscourse),         "McNeel Discourse",  "Opens discourse.mcneel.com website",           typeof(AllwaysAvailable));
+        AddPushButton<CommandRhinoDevDocs,      AllwaysAvailable> (helpButton, "Rhino Dev Docs",    "Opens developer.rhino3d.com website");
+        AddPushButton<CommandDiscourse,         AllwaysAvailable> (helpButton, "McNeel Discourse",  "Opens discourse.mcneel.com website");
         helpButton.AddSeparator();
-        helpButton.AddPushButton(typeof(CommandCheckForUpdates),   "Updates",           "Checks if there are updates in GitHub",        typeof(AllwaysAvailable));
-        helpButton.AddPushButton(typeof(CommandAbout),             "About…",            "Shows Rhino.Inside Revit version information", typeof(AllwaysAvailable));
+        AddPushButton<CommandCheckForUpdates,   AllwaysAvailable> (helpButton, "Updates",           "Checks if there are updates in GitHub");
+        AddPushButton<CommandAbout,             AllwaysAvailable> (helpButton, "About…",            "Shows Rhino.Inside Revit version information");
       }
 
       CommandCheckForUpdates.CheckUpdates();
