@@ -621,7 +621,7 @@ namespace RhinoInside.Revit
       return seed;
     }
 
-    private static bool TryGetDocument(this IEnumerable<Document> set, Guid guid, out Document document, Document activeDBDocument)
+    internal static bool TryGetDocument(this IEnumerable<Document> set, Guid guid, out Document document, Document activeDBDocument)
     {
       if (guid != Guid.Empty)
       {
@@ -642,9 +642,6 @@ namespace RhinoInside.Revit
       document = default;
       return false;
     }
-
-    public static bool TryGetDocument(this Autodesk.Revit.UI.UIApplication app, Guid guid, out Document document) =>
-      TryGetDocument(app.Application.Documents.Cast<Document>(), guid, out document, app.ActiveUIDocument?.Document);
 
     public static bool TryGetCategoryId(this Document doc, string uniqueId, out ElementId categoryId)
     {

@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Microsoft.Win32.SafeHandles;
 
@@ -55,5 +56,8 @@ namespace RhinoInside.Revit.External.UI.Extensions
           addin.ReportException(e, app, sender);
       }
     }
+
+    public static bool TryGetDocument(this UIApplication app, Guid guid, out Document document) =>
+      app.Application.Documents.Cast<Document>().TryGetDocument(guid, out document, app.ActiveUIDocument?.Document);
   }
 }
