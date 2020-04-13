@@ -1,12 +1,12 @@
 using System;
 using System.Linq;
-using System.Runtime.InteropServices;
+using System.Collections.Generic;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  using System.Collections.Generic;
   using Kernel.Attributes;
 
   public class GroupByLocation : ReconstructElementComponent

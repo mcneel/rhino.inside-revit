@@ -1,15 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;
-using Grasshopper.GUI;
-using Grasshopper.GUI.Canvas;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Attributes;
 using Grasshopper.Kernel.Types;
+using RhinoInside.Revit.External.DB.Extensions;
 using static System.Math;
 using static Rhino.RhinoMath;
 using DB = Autodesk.Revit.DB;
+using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -52,7 +50,7 @@ namespace RhinoInside.Revit.GH.Components
           break;
 
         case string parameterName:
-          parameter = element.GetParameter(parameterName, RevitAPI.ParameterClass.Any);
+          parameter = element.GetParameter(parameterName, DBX.ParameterClass.Any);
           if (parameter is null)
             obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterName}' not defined in 'Element'");
           break;
@@ -340,7 +338,7 @@ namespace RhinoInside.Revit.GH.Components
       if (element is object)
       {
         parameters = new List<DB.Parameter>(element.Parameters.Size);
-        foreach (var group in element.GetParameters(RevitAPI.ParameterClass.Any).GroupBy((x) => x.Definition?.ParameterGroup ?? DB.BuiltInParameterGroup.INVALID).OrderBy((x) => x.Key))
+        foreach (var group in element.GetParameters(DBX.ParameterClass.Any).GroupBy((x) => x.Definition?.ParameterGroup ?? DB.BuiltInParameterGroup.INVALID).OrderBy((x) => x.Key))
         {
           foreach (var param in group.OrderBy(x => x.Id.IntegerValue))
           {

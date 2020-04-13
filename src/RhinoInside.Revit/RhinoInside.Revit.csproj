@@ -170,12 +170,17 @@
     <Compile Include="ErrorReport.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Extensions\RevitAPI.cs" />
+    <Compile Include="External\DB\Extensions\Category.cs" />
     <Compile Include="External\DB\Extensions\Curve.cs" />
     <Compile Include="External\DB\Extensions\Element.cs" />
+    <Compile Include="External\DB\Extensions\ElementId.cs" />
     <Compile Include="External\DB\Extensions\Face.cs" />
     <Compile Include="External\DB\Extensions\GeometryObject.cs" />
     <Compile Include="External\DB\Extensions\XYZ.cs" />
+    <Compile Include="External\DB\ParameterBinding.cs" />
+    <Compile Include="External\DB\ParameterClass.cs" />
     <Compile Include="External\DB\UniqueId.cs" />
+    <Compile Include="External\DB\WallWrapping.cs" />
     <Compile Include="External\UI\Application.cs" />
     <Compile Include="External\UI\Command.cs" />
     <Compile Include="External\UI\EventHandler.cs" />

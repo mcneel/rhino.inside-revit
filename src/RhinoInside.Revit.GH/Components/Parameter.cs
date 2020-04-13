@@ -3,12 +3,13 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-
+using RhinoInside.Revit.Exceptions;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
+using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  using Exceptions;
   using Kernel.Attributes;
 
   public class ParameterKeyDecompose : Component
@@ -42,7 +43,7 @@ namespace RhinoInside.Revit.GH.Components
       {
         DA.SetData("Name", DB.LabelUtils.GetLabelFor(builtInParameter));
         DA.SetData("StorageType", parameterKey.Document?.get_TypeOfStorage(builtInParameter));
-        DA.SetData("Class", RevitAPI.ParameterClass.BuiltIn);
+        DA.SetData("Class", DBX.ParameterClass.BuiltIn);
         DA.SetData("Guid", null);
       }
       else if (parameterKey.Document?.GetElement(parameterKey.Value) is DB.ParameterElement parameterElement)
@@ -53,7 +54,7 @@ namespace RhinoInside.Revit.GH.Components
 
         if (parameterElement is DB.SharedParameterElement shared)
         {
-          DA.SetData("Class", RevitAPI.ParameterClass.Shared);
+          DA.SetData("Class", DBX.ParameterClass.Shared);
           DA.SetData("Guid", shared.GuidValue);
         }
         else
@@ -62,14 +63,14 @@ namespace RhinoInside.Revit.GH.Components
 
           if (parameterElement is DB.GlobalParameter)
           {
-            DA.SetData("Class", RevitAPI.ParameterClass.Global);
+            DA.SetData("Class", DBX.ParameterClass.Global);
           }
           else
           {
             switch (parameterElement.get_Parameter(DB.BuiltInParameter.ELEM_DELETABLE_IN_FAMILY).AsInteger())
             {
-              case 0: DA.SetData("Class", RevitAPI.ParameterClass.Family); break;
-              case 1: DA.SetData("Class", RevitAPI.ParameterClass.Project); break;
+              case 0: DA.SetData("Class", DBX.ParameterClass.Family); break;
+              case 1: DA.SetData("Class", DBX.ParameterClass.Project); break;
             }
           }
         }
@@ -109,9 +110,9 @@ namespace RhinoInside.Revit.GH.Components
 
       DA.SetData("Group", parameter?.Definition.ParameterGroup);
       DA.SetData("Type", parameter?.Definition.ParameterType);
-      if (parameter?.Element is DB.ElementType)   DA.SetData("Binding", RevitAPI.ParameterBinding.Type);
-      else if (parameter?.Element is DB.Element)  DA.SetData("Binding", RevitAPI.ParameterBinding.Instance);
-      else                                     DA.SetData("Binding", null);
+      if (parameter?.Element is DB.ElementType)   DA.SetData("Binding", DBX.ParameterBinding.Type);
+      else if (parameter?.Element is DB.Element)  DA.SetData("Binding", DBX.ParameterBinding.Instance);
+      else                                        DA.SetData("Binding", null);
       DA.SetData("Unit", parameter?.Definition.UnitType);
       DA.SetData("IsReadOnly", parameter?.IsReadOnly);
       DA.SetData("UserModifiable", parameter?.UserModifiable);

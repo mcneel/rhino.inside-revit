@@ -1,10 +1,7 @@
 using System;
-
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
-
-using DB = Autodesk.Revit.DB;
-
+using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
@@ -23,10 +20,10 @@ namespace RhinoInside.Revit.GH.Parameters
 
       ListItems.Clear();
       
-      ListItems.Add(new GH_ValueListItem("Do Not Wrap", ((int) Types.WallWrapping_Enum.DoNotWrap).ToString()));
-      ListItems.Add(new GH_ValueListItem("Exterior", ((int) Types.WallWrapping_Enum.Exterior).ToString()));
-      ListItems.Add(new GH_ValueListItem("Interior", ((int) Types.WallWrapping_Enum.Interior).ToString()));
-      ListItems.Add(new GH_ValueListItem("Both", ((int) Types.WallWrapping_Enum.Both).ToString()));
+      ListItems.Add(new GH_ValueListItem("Do Not Wrap", ((int) DBX.WallWrapping.DoNotWrap).ToString()));
+      ListItems.Add(new GH_ValueListItem("Exterior", ((int) DBX.WallWrapping.Exterior).ToString()));
+      ListItems.Add(new GH_ValueListItem("Interior", ((int) DBX.WallWrapping.Interior).ToString()));
+      ListItems.Add(new GH_ValueListItem("Both", ((int) DBX.WallWrapping.Both).ToString()));
     }
   }
 }

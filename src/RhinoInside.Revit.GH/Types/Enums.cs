@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using DB = Autodesk.Revit.DB;
+using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -11,14 +12,14 @@ namespace RhinoInside.Revit.GH.Types
     Name("Parameter Class"),
     Description("Represents a Revit Parameter class."),
   ]
-  public class ParameterClass : GH_Enum<RevitAPI.ParameterClass> { }
+  public class ParameterClass : GH_Enum<DBX.ParameterClass> { }
 
   [
     ComponentGuid("2A5D36DD-CD94-4306-963B-D9312DAEB0F9"),
     Name("Parameter Binding"),
     Description("Represents a Revit parameter binding type."),
   ]
-  public class ParameterBinding : GH_Enum<RevitAPI.ParameterBinding> { }
+  public class ParameterBinding : GH_Enum<DBX.ParameterBinding> { }
 
   [
     ComponentGuid("A3621A84-190A-48C2-9B0C-F5784B78089C"),
@@ -259,25 +260,16 @@ namespace RhinoInside.Revit.GH.Types
   }
 
 
-  // Revit API does not have an enum for this (eirannejad: 2020-04-02)
-  // replace with Revit API enum when implemented
-  public enum WallWrapping_Enum
-  {
-    DoNotWrap,
-    Exterior,
-    Interior,
-    Both
-  }
 
   [
     ComponentGuid("7A71E012-6E92-493D-960C-83BE3C50ECAE"),
     Name("Wall Wrapping"),
     Description("Represents a Revit wall wrapping option"),
   ]
-  public class WallWrapping : GH_Enum<WallWrapping_Enum>
+  public class WallWrapping : GH_Enum<DBX.WallWrapping>
   {
     public WallWrapping() : base() { }
-    public WallWrapping(WallWrapping_Enum value) : base(value) { }
+    public WallWrapping(DBX.WallWrapping value) : base(value) { }
   }
 
 

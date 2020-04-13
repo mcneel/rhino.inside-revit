@@ -10,126 +10,6 @@ namespace RhinoInside.Revit
 {
   /*internal*/ public static class RevitAPI
   {
-    #region ElementId
-    public static bool IsValid(this ElementId id)     => id is object && id != ElementId.InvalidElementId;
-    public static bool IsBuiltInId(this ElementId id) => id is object && id <= ElementId.InvalidElementId;
-
-    /// <summary>
-    /// Checks if id corresponds to a Category in doc
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="doc"></param>
-    /// <returns></returns>
-    public static bool IsCategoryId(this ElementId id, Document doc)
-    {
-      // Check if is not a BuiltIn Category
-      if (id.IntegerValue > ElementId.InvalidElementId.IntegerValue)
-      {
-        try { return Category.GetCategory(doc, id) is object; }
-        catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
-      }
-
-      return IsValid((BuiltInCategory) id.IntegerValue);
-    }
-
-    /// <summary>
-    /// Checks if id corresponds to a Parameter in doc
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="doc"></param>
-    /// <returns></returns>
-    public static bool IsParameterId(this ElementId id, Document doc)
-    {
-      // Check if is not a BuiltIn Parameter
-      if (id.IntegerValue > ElementId.InvalidElementId.IntegerValue)
-      {
-        try { return doc.GetElement(id) is ParameterElement; }
-        catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
-      }
-
-      return IsValid((BuiltInParameter) id.IntegerValue);
-    }
-
-    /// <summary>
-    /// Checks if id corresponds to a valid BuiltIn Category id
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="builtInParameter"></param>
-    /// <returns></returns>
-    public static bool TryGetBuiltInCategory(this ElementId id, out BuiltInCategory builtInParameter)
-    {
-      builtInParameter = (BuiltInCategory) id.IntegerValue;
-      if (builtInParameter.IsValid())
-        return true;
-
-      builtInParameter = BuiltInCategory.INVALID;
-      return false;
-    }
-
-    /// <summary>
-    /// Checks if id corresponds to a valid BuiltIn Parameter id
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="builtInParameter"></param>
-    /// <returns></returns>
-    public static bool TryGetBuiltInParameter(this ElementId id, out BuiltInParameter builtInParameter)
-    {
-      builtInParameter = (BuiltInParameter) id.IntegerValue;
-      if (builtInParameter.IsValid())
-        return true;
-
-      builtInParameter = BuiltInParameter.INVALID;
-      return false;
-    }
-    #endregion
-
-    #region Category
-    /// <summary>
-    /// Set of valid BuiltInCategory enum values
-    /// </summary>
-    static readonly SortedSet<BuiltInCategory> BuiltInCategories =
-      new SortedSet<BuiltInCategory>
-      (
-        Enum.GetValues(typeof(BuiltInCategory)).
-        Cast<BuiltInCategory>().Where(x => Category.IsBuiltInCategoryValid(x))
-      );
-
-    /// <summary>
-    /// Checks if a BuiltInCategory is valid
-    /// </summary>
-    /// <param name="category"></param>
-    /// <returns></returns>
-    public static bool IsValid(this BuiltInCategory category)
-    {
-      if (-3000000 < (int) category && (int) category < -2000000)
-        return BuiltInCategories.Contains(category);
-
-      return false;
-    }
-
-    /// <summary>
-    /// Check if category is in the Document or in its parent CategoryNameMap
-    /// </summary>
-    /// <param name="category"></param>
-    /// <returns>true in case is not found</returns>
-    public static bool IsHidden(this Category category)
-    {
-      var map = (category.Parent is Category parent) ?
-                 parent.SubCategories :
-                 category.Document()?.Settings.Categories;
-
-      if (map is null)
-        return true;
-
-      return !map.Cast<Category>().Where(x => x.Id.IntegerValue == category.Id.IntegerValue).Any();
-    }
-
-    public static Document Document(this Category category)
-    {
-      return category?.GetGraphicsStyle(GraphicsStyleType.Projection).Document;
-    }
-    #endregion
-
     #region Parameter
 
     /// <summary>
@@ -145,23 +25,6 @@ namespace RhinoInside.Revit
       return false;
     }
 
-    [Flags]
-    public enum ParameterClass
-    {
-      Any       = -1,
-      BuiltIn   =  1,
-      Project   =  2,
-      Family    =  4,
-      Shared    =  8,
-      Global    = 16
-    }
-
-    public enum ParameterBinding
-    {
-      Unknown,
-      Instance,
-      Type,
-    }
 
     public static IEnumerable<Parameter> GetParameters(this Element element, ParameterClass set)
     {
@@ -469,7 +332,7 @@ namespace RhinoInside.Revit
       {
         if (EpisodeId == Guid.Empty)
         {
-          if(IsValid((BuiltInCategory) id))
+          if(((BuiltInCategory) id).IsValid())
             categoryId = new ElementId((BuiltInCategory) id);
         }
         else
@@ -529,7 +392,7 @@ namespace RhinoInside.Revit
       {
         if (EpisodeId == Guid.Empty)
         {
-          if (IsValid((BuiltInCategory) id))
+          if (((BuiltInCategory) id).IsValid())
           {
             try { return Category.GetCategory(doc, (BuiltInCategory) id); }
             catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
@@ -588,7 +451,7 @@ namespace RhinoInside.Revit
       {
         BuiltInCategoriesWithParametersDocument = doc;
         BuiltInCategoriesWithParameters =
-          BuiltInCategories.
+          CategoryExtension.BuiltInCategories.
           Where
           (
             bic =>
