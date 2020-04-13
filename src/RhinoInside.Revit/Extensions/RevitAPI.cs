@@ -4,16 +4,13 @@ using System.IO;
 using System.Linq;
 using Autodesk.Revit.DB;
 using RhinoInside.Revit.External.DB;
+using RhinoInside.Revit.External.DB.Extensions;
 
 namespace RhinoInside.Revit
 {
   /*internal*/ public static class RevitAPI
   {
     #region XYZ
-    public static bool IsParallelTo(this XYZ a, XYZ b)
-    {
-      return a.IsAlmostEqualTo(a.DotProduct(b) < 0.0 ? -b : b);
-    }
     #endregion
 
     #region Curves

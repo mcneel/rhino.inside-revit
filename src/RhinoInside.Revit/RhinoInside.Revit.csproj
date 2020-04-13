@@ -170,6 +170,7 @@
     <Compile Include="ErrorReport.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Extensions\RevitAPI.cs" />
+    <Compile Include="External\DB\Extensions\XYZ.cs" />
     <Compile Include="External\DB\UniqueId.cs" />
     <Compile Include="External\UI\Application.cs" />
     <Compile Include="External\UI\Command.cs" />
