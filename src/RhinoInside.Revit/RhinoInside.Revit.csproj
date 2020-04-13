@@ -170,6 +170,9 @@
     <Compile Include="ErrorReport.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Extensions\RevitAPI.cs" />
+    <Compile Include="External\UI\Application.cs" />
+    <Compile Include="External\UI\Command.cs" />
+    <Compile Include="External\UI\EventHandler.cs" />
     <Compile Include="External\UI\Selection.cs" />
     <Compile Include="External\UI\TaskDialogIcons.cs" />
     <Compile Include="Extensions\RhinoCommon.cs" />
@@ -178,7 +181,6 @@
     <Compile Include="Extensions\WinForms.cs" />
     <Compile Include="External\ActivationGate.cs" />
     <Compile Include="External\DB.cs" />
-    <Compile Include="External\UI.cs" />
     <Compile Include="GH\Bake.cs" />
     <Compile Include="GH\Kernel.cs" />
     <Compile Include="Rhino\Rhinoceros.cs" />
