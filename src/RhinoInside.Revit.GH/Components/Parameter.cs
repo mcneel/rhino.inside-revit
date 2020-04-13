@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using RhinoInside.Revit.Exceptions;
+using RhinoInside.Revit.External.ApplicationServices.Extensions;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 using DBX = RhinoInside.Revit.External.DB;

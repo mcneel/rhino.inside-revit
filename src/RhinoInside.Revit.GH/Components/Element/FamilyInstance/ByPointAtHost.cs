@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components

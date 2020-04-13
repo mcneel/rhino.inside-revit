@@ -11,6 +11,7 @@ using Rhino.Geometry;
 using Rhino.Input;
 using Rhino.PlugIns;
 using Rhino.Runtime.InProcess;
+using RhinoInside.Revit.External.ApplicationServices.Extensions;
 using static System.Math;
 using static Rhino.RhinoMath;
 using DB = Autodesk.Revit.DB;
