@@ -4,6 +4,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
 {
   public static class FaceExtenion
   {
+    public static bool OrientationMatchesSurface(this Face face)
+    {
+#if REVIT_2018
+      return face.OrientationMatchesSurfaceOrientation;
+#else
+      return true;
+#endif
+    }
+
 #if !REVIT_2018
     public static Surface GetSurface(this Face face)
     {

@@ -172,6 +172,7 @@
     <Compile Include="Extensions\RevitAPI.cs" />
     <Compile Include="External\DB\Extensions\Curve.cs" />
     <Compile Include="External\DB\Extensions\Face.cs" />
+    <Compile Include="External\DB\Extensions\GeometryObject.cs" />
     <Compile Include="External\DB\Extensions\XYZ.cs" />
     <Compile Include="External\DB\UniqueId.cs" />
     <Compile Include="External\UI\Application.cs" />
