@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DB.Element element = null;
+      var element = default(DB.Element);
       if (!DA.GetData("Element", ref element))
         return;
 
@@ -36,12 +36,31 @@ namespace RhinoInside.Revit.GH.Components
       if (detailLevel == DB.ViewDetailLevel.Undefined)
         detailLevel = DB.ViewDetailLevel.Coarse;
 
-      DB.Options options = null;
-      using (var geometry = element?.GetGeometry(detailLevel, out options)) using (options)
+      if (element.get_BoundingBox(null) is DB.BoundingBoxXYZ)
       {
-        var list = geometry?.ToRhino().Where(x => x is object).ToList();
+        DB.Options options = null;
+        using (var geometry = element?.GetGeometry(detailLevel, out options)) using (options)
+        {
+          var list = geometry?.ToRhino().Where(x => x is object).ToList();
 
-        DA.SetDataList("Geometry", list);
+          if (!list.Any())
+          {
+            foreach (var dependent in element.GetDependentElements(null).Select(x => element.Document.GetElement(x)))
+            {
+              if (dependent.get_BoundingBox(null) is DB.BoundingBoxXYZ)
+              {
+                DB.Options dependentOptions = null;
+                using (var dependentGeometry = dependent?.GetGeometry(detailLevel, out dependentOptions)) using (dependentOptions)
+                {
+                  if (dependentGeometry is object)
+                    list.AddRange(dependentGeometry.ToRhino().Where(x => x is object));
+                }
+              }
+            }
+          }
+
+          DA.SetDataList("Geometry", list);
+        }
       }
     }
   }
