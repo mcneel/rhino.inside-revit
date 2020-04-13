@@ -169,7 +169,7 @@
   <ItemGroup>
     <Compile Include="ErrorReport.cs" />
     <Compile Include="Exceptions.cs" />
-    <Compile Include="Extensions\RevitAPI.cs" />
+    <Compile Include="External\ApplicationServices\Extensions\Application.cs" />
     <Compile Include="External\DB\Extensions\Category.cs" />
     <Compile Include="External\DB\Extensions\Curve.cs" />
     <Compile Include="External\DB\Extensions\Document.cs" />
