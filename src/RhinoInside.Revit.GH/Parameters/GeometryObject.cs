@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Autodesk.Revit.UI.Selection;
+using RhinoInside.Revit.External.UI.Selection;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.UI.Selection;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
