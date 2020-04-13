@@ -189,53 +189,69 @@ namespace RhinoInside.Revit
     public static bool IsValid(this ElementId id)     => id is object && id != ElementId.InvalidElementId;
     public static bool IsBuiltInId(this ElementId id) => id is object && id <= ElementId.InvalidElementId;
 
+    /// <summary>
+    /// Checks if id corresponds to a Category in doc
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="doc"></param>
+    /// <returns></returns>
     public static bool IsCategoryId(this ElementId id, Document doc)
     {
-      if (-3000000 < id.IntegerValue && id.IntegerValue < -2000000)
-        return Enum.IsDefined(typeof(BuiltInCategory), id.IntegerValue);
+      // Check if is not a BuiltIn Category
+      if (id.IntegerValue > ElementId.InvalidElementId.IntegerValue)
+      {
+        try { return Category.GetCategory(doc, id) is object; }
+        catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
+      }
 
-      try { return Category.GetCategory(doc, id) is object; }
-      catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
+      return IsValid((BuiltInCategory) id.IntegerValue);
     }
 
+    /// <summary>
+    /// Checks if id corresponds to a Parameter in doc
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="doc"></param>
+    /// <returns></returns>
     public static bool IsParameterId(this ElementId id, Document doc)
     {
-      if (-2000000 < id.IntegerValue && id.IntegerValue < -1000000)
-        return Enum.IsDefined(typeof(BuiltInParameter), id.IntegerValue);
+      // Check if is not a BuiltIn Parameter
+      if (id.IntegerValue > ElementId.InvalidElementId.IntegerValue)
+      {
+        try { return doc.GetElement(id) is ParameterElement; }
+        catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
+      }
 
-      try { return doc.GetElement(id) is ParameterElement; }
-      catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
+      return IsValid((BuiltInParameter) id.IntegerValue);
     }
 
+    /// <summary>
+    /// Checks if id corresponds to a valid BuiltIn Category id
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="builtInParameter"></param>
+    /// <returns></returns>
     public static bool TryGetBuiltInCategory(this ElementId id, out BuiltInCategory builtInParameter)
     {
-      var IntegerValue = id.IntegerValue;
-      if
-      (
-        -3000000 < IntegerValue && IntegerValue < -2000000 &&
-        Enum.IsDefined(typeof(BuiltInCategory), IntegerValue)
-      )
-      {
-        builtInParameter = (BuiltInCategory) IntegerValue;
+      builtInParameter = (BuiltInCategory) id.IntegerValue;
+      if (builtInParameter.IsValid())
         return true;
-      }
 
       builtInParameter = BuiltInCategory.INVALID;
       return false;
     }
 
+    /// <summary>
+    /// Checks if id corresponds to a valid BuiltIn Parameter id
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="builtInParameter"></param>
+    /// <returns></returns>
     public static bool TryGetBuiltInParameter(this ElementId id, out BuiltInParameter builtInParameter)
     {
-      var IntegerValue = id.IntegerValue;
-      if
-      (
-        -2000000 < IntegerValue && IntegerValue < -1000000 &&
-        Enum.IsDefined(typeof(BuiltInParameter), IntegerValue)
-      )
-      {
-        builtInParameter = (BuiltInParameter) IntegerValue;
+      builtInParameter = (BuiltInParameter) id.IntegerValue;
+      if (builtInParameter.IsValid())
         return true;
-      }
 
       builtInParameter = BuiltInParameter.INVALID;
       return false;
@@ -243,17 +259,44 @@ namespace RhinoInside.Revit
     #endregion
 
     #region Category
-    public static bool IsHidden(this Category category)
-    {
-      return !category.CanAddSubcategory;
-    }
+    /// <summary>
+    /// Set of valid BuiltInCategory enum values
+    /// </summary>
+    static readonly SortedSet<BuiltInCategory> BuiltInCategories =
+      new SortedSet<BuiltInCategory>
+      (
+        Enum.GetValues(typeof(BuiltInCategory)).
+        Cast<BuiltInCategory>().Where(x => Category.IsBuiltInCategoryValid(x))
+      );
 
-    public static bool IsBuiltInCategoryValid(this BuiltInCategory category)
+    /// <summary>
+    /// Checks if a BuiltInCategory is valid
+    /// </summary>
+    /// <param name="category"></param>
+    /// <returns></returns>
+    public static bool IsValid(this BuiltInCategory category)
     {
       if (-3000000 < (int) category && (int) category < -2000000)
-        return Enum.IsDefined(typeof(BuiltInCategory), (int) category);
+        return BuiltInCategories.Contains(category);
 
       return false;
+    }
+
+    /// <summary>
+    /// Check if category is in the Document or in its parent CategoryNameMap
+    /// </summary>
+    /// <param name="category"></param>
+    /// <returns>true in case is not found</returns>
+    public static bool IsHidden(this Category category)
+    {
+      var map = (category.Parent is Category parent) ?
+                 parent.SubCategories :
+                 category.Document()?.Settings.Categories;
+
+      if (map is null)
+        return true;
+
+      return !map.Cast<Category>().Where(x => x.Id.IntegerValue == category.Id.IntegerValue).Any();
     }
 
     public static Document Document(this Category category)
@@ -262,7 +305,21 @@ namespace RhinoInside.Revit
     }
     #endregion
 
-    #region Parameters
+    #region Parameter
+
+    /// <summary>
+    /// Checks if a BuiltInParameter is valid
+    /// </summary>
+    /// <param name="parameter"></param>
+    /// <returns></returns>
+    public static bool IsValid(this BuiltInParameter parameter)
+    {
+      if (-2000000 < (int) parameter && (int) parameter < -1000000)
+        return Enum.IsDefined(typeof(BuiltInParameter), parameter);
+
+      return false;
+    }
+
     [Flags]
     public enum ParameterClass
     {
@@ -613,7 +670,7 @@ namespace RhinoInside.Revit
       {
         if (EpisodeId == Guid.Empty)
         {
-          if (-3000000 < id && id < -2000000 && Enum.IsDefined(typeof(BuiltInCategory), id))
+          if(IsValid((BuiltInCategory) id))
             categoryId = new ElementId((BuiltInCategory) id);
         }
         else
@@ -637,7 +694,7 @@ namespace RhinoInside.Revit
       {
         if (EpisodeId == Guid.Empty)
         {
-          if (-2000000 < id && id < -1000000 && Enum.IsDefined(typeof(BuiltInParameter), id))
+          if (IsValid((BuiltInParameter) id))
             parameterId = new ElementId((BuiltInParameter) id);
         }
         else
@@ -673,7 +730,7 @@ namespace RhinoInside.Revit
       {
         if (EpisodeId == Guid.Empty)
         {
-          if (-3000000 < id && id < -2000000 && Enum.IsDefined(typeof(BuiltInCategory), id))
+          if (IsValid((BuiltInCategory) id))
           {
             try { return Category.GetCategory(doc, (BuiltInCategory) id); }
             catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
@@ -724,11 +781,6 @@ namespace RhinoInside.Revit
       return null;
     }
 
-    public static IEnumerable<BuiltInCategory> GetBuiltInCategories() =>
-      Enum.GetValues(typeof(BuiltInCategory)).
-      Cast<BuiltInCategory>().
-      Where(x => x.IsBuiltInCategoryValid());
-
     static BuiltInCategory[] BuiltInCategoriesWithParameters;
     static Document BuiltInCategoriesWithParametersDocument;
     /*internal*/ public static ICollection<BuiltInCategory> GetBuiltInCategoriesWithParameters(this Document doc)
@@ -737,7 +789,7 @@ namespace RhinoInside.Revit
       {
         BuiltInCategoriesWithParametersDocument = doc;
         BuiltInCategoriesWithParameters =
-          GetBuiltInCategories().
+          BuiltInCategories.
           Where
           (
             bic =>
