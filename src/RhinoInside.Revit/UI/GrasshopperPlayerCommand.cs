@@ -30,8 +30,8 @@ namespace RhinoInside.Revit.UI
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         pushButton.ToolTip = "Loads and evals a Grasshopper definition";
-        pushButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GrasshopperPlayer.png", true);
-        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GrasshopperPlayer.png");
+        pushButton.Image = ImageBuilder.LoadBitmapImage("Resources.GrasshopperPlayer.png", true);
+        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("Resources.GrasshopperPlayer.png");
         pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://www.grasshopper3d.com/"));
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool loaded, out bool loadProtected);
       }
