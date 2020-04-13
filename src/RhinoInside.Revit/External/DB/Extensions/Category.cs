@@ -6,7 +6,7 @@ using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
-  public static class CategoryExtension
+  public static class BuiltInCategoryExtension
   {
     /// <summary>
     /// Set of valid BuiltInCategory enum values
@@ -30,7 +30,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return false;
     }
+  }
 
+  public static class CategoryExtension
+  {
     /// <summary>
     /// Check if category is in the Document or in its parent CategoryNameMap
     /// </summary>
