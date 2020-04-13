@@ -178,6 +178,7 @@
     <Compile Include="External\DB\Extensions\Face.cs" />
     <Compile Include="External\DB\Extensions\GeometryObject.cs" />
     <Compile Include="External\DB\Extensions\Parameter.cs" />
+    <Compile Include="External\DB\Extensions\ParameterFilterElement.cs" />
     <Compile Include="External\DB\Extensions\XYZ.cs" />
     <Compile Include="External\DB\ParameterBinding.cs" />
     <Compile Include="External\DB\ParameterClass.cs" />
