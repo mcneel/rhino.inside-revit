@@ -5,6 +5,7 @@ using GH_IO.Serialization;
 using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.External.UI.Extensions;
 using DB = Autodesk.Revit.DB;
+using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -55,7 +56,7 @@ namespace RhinoInside.Revit.GH.Types
       UniqueID = doc?.GetElement(id)?.UniqueId ??
                  (
                    id.IntegerValue < DB.ElementId.InvalidElementId.IntegerValue ?
-                     UniqueId.Format(Guid.Empty, id.IntegerValue) :
+                     DBX.UniqueId.Format(Guid.Empty, id.IntegerValue) :
                      string.Empty
                  );
     }
