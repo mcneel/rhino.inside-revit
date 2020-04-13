@@ -16,6 +16,7 @@ using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using Rhino.PlugIns;
+using RhinoInside.Revit.External.DB.Extensions;
 
 namespace RhinoInside.Revit.UI
 {
