@@ -11,6 +11,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
@@ -131,7 +132,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
               if ((Grouping & DataGrouping.Document) != 0)
               {
-                var docId = RevitAPI.DocumentSessionId(value.DocumentGUID);
+                var docId = DocumentExtension.DocumentSessionId(value.DocumentGUID);
                 group = group.AppendElement(docId);
               }
 
