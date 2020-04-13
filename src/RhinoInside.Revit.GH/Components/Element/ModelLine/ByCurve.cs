@@ -1,13 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Diagnostics;
-
 using Grasshopper.Kernel;
-
-using Autodesk.Revit.DB;
+using RhinoInside.Revit.External.DB.Extensions;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -31,11 +25,11 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructModelLineByCurve
     (
-      Document doc,
-      ref Autodesk.Revit.DB.Element element,
+      DB.Document doc,
+      ref DB.Element element,
 
       Rhino.Geometry.Curve curve,
-      Autodesk.Revit.DB.SketchPlane sketchPlane
+      DB.SketchPlane sketchPlane
     )
     {
       var scaleFactor = 1.0 / Revit.ModelUnits;
@@ -53,7 +47,7 @@ namespace RhinoInside.Revit.GH.Components
       if (curve.IsClosed == centerLine.IsBound)
         AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Unable to keep curve closed.");
 
-      if (element is ModelCurve modelCurve && centerLine.IsSameKindAs(modelCurve.GeometryCurve))
+      if (element is DB.ModelCurve modelCurve && centerLine.IsSameKindAs(modelCurve.GeometryCurve))
         modelCurve.SetSketchPlaneAndCurve(sketchPlane, centerLine);
       else if (doc.IsFamilyDocument)
         ReplaceElement(ref element, doc.FamilyCreate.NewModelCurve(centerLine, sketchPlane));

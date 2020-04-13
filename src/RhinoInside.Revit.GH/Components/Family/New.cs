@@ -3,9 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using DB = Autodesk.Revit.DB;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
+using RhinoInside.Revit.External.DB.Extensions;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {

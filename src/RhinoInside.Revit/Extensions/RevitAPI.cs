@@ -10,16 +10,6 @@ namespace RhinoInside.Revit
 {
   /*internal*/ public static class RevitAPI
   {
-    #region XYZ
-    #endregion
-
-    #region Curves
-    public static bool IsSameKindAs(this Curve self, Curve other)
-    {
-      return self.IsBound == other.IsBound && self.GetType() == other.GetType();
-    }
-    #endregion
-
     #region Geometry
     public static GeometryElement GetGeometry(this Element element, ViewDetailLevel viewDetailLevel, out Options options)
     {
