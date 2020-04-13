@@ -334,8 +334,8 @@ namespace RhinoInside.Revit.UI
         if (Addin.RhinoVersionInfo is null)
         {
           pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://www.rhino3d.com/download/rhino/wip"));
-          pushButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Rhino-logo.png", true);
-          pushButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Rhino-logo.png");
+          pushButton.Image = ImageBuilder.LoadBitmapImage("Resources.Rhino-logo.png", true);
+          pushButton.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Rhino-logo.png");
         }
         else
         {

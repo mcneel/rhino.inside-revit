@@ -120,7 +120,7 @@ namespace RhinoInside.Revit
     }
 
     static internal Media.Imaging.BitmapImage LoadBitmapImage(string name, bool small = false) =>
-      Assembly.GetExecutingAssembly().LoadBitmapImage(name, small);
+      Assembly.GetExecutingAssembly().LoadBitmapImage($"RhinoInside.Revit.{name}", small);
 
     static internal Media.Imaging.BitmapImage LoadBitmapImage(this Assembly assembly, string name, bool small = false)
     {
