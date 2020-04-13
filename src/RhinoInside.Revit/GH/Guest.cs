@@ -216,7 +216,7 @@ namespace RhinoInside.Revit.GH
               var taskDialog = new TaskDialog(MethodBase.GetCurrentMethod().DeclaringType.FullName)
               {
                 Title = "Grasshopper Assembly Failure",
-                MainIcon = TaskDialogIcons.IconError,
+                MainIcon = External.UI.TaskDialogIcons.IconError,
                 TitleAutoPrefix = false,
                 AllowCancellation = false,
                 MainInstruction = $"Grasshopper cannot load the external assembly {assemblyFile.Name}. Please contact the provider for assistance.",

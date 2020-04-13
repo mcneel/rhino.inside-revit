@@ -312,7 +312,7 @@ namespace RhinoInside.Revit.GH.Parameters
           (
             var taskDialog = new TaskDialog(MethodBase.GetCurrentMethod().DeclaringType.FullName)
             {
-              MainIcon = TaskDialogIcons.IconWarning,
+              MainIcon = External.UI.TaskDialogIcons.IconWarning,
               TitleAutoPrefix = false,
               Title = "Delete Elements",
               MainInstruction = "Are you sure you want to delete those elements?",

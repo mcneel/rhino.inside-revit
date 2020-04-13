@@ -219,7 +219,7 @@ namespace RhinoInside.Revit
             var taskDialog = new TaskDialog(MethodBase.GetCurrentMethod().DeclaringType.FullName)
             {
               Title = guestInfo.Guest.Name,
-              MainIcon = TaskDialogIcons.IconError,
+              MainIcon = External.UI.TaskDialogIcons.IconError,
               AllowCancellation = false,
               MainInstruction = $"{guestInfo.Guest.Name} failed to load",
               MainContent = complainMessage
@@ -298,7 +298,7 @@ namespace RhinoInside.Revit
           (
             var taskDialog = new TaskDialog("Units")
             {
-              MainIcon = TaskDialogIcons.IconInformation,
+              MainIcon = External.UI.TaskDialogIcons.IconInformation,
               TitleAutoPrefix = true,
               AllowCancellation = true,
               MainInstruction = "Model units mismatch.",

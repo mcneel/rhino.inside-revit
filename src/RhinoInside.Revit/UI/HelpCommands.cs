@@ -123,7 +123,7 @@ namespace RhinoInside.Revit.UI
             var taskDialog = new TaskDialog(MethodBase.GetCurrentMethod().DeclaringType.FullName)
             {
               Title = "Updates",
-              MainIcon = TaskDialogIcons.IconInformation,
+              MainIcon = External.UI.TaskDialogIcons.IconInformation,
               TitleAutoPrefix = true,
               AllowCancellation = true,
               FooterText = Addin.SourceCodePath
@@ -145,7 +145,7 @@ namespace RhinoInside.Revit.UI
 
             if (forceFetch && powerShell.HadErrors)
             {
-              taskDialog.MainIcon = TaskDialogIcons.IconError;
+              taskDialog.MainIcon = External.UI.TaskDialogIcons.IconError;
               taskDialog.MainInstruction = "Failed to fetch changes from the repository";
 
               foreach (var f in powerShell.Streams.Error)
@@ -234,7 +234,7 @@ namespace RhinoInside.Revit.UI
         var taskDialog = new TaskDialog("About")
         {
           Id = MethodBase.GetCurrentMethod().DeclaringType.FullName,
-          MainIcon = TaskDialogIcons.IconInformation,
+          MainIcon = External.UI.TaskDialogIcons.IconInformation,
           TitleAutoPrefix = true,
           AllowCancellation = true,
           MainInstruction = $"Rhino.Inside© for Revit",

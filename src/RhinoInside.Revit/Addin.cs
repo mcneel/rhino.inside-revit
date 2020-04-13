@@ -10,6 +10,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
 using Microsoft.Win32;
+using UIX = RhinoInside.Revit.External.UI;
 
 namespace RhinoInside.Revit
 {
@@ -23,7 +24,7 @@ namespace RhinoInside.Revit
     Scripting = 3
   }
 
-  public class Addin : External.UI.Application
+  public class Addin : UIX.Application
   {
     #region Status
     internal enum Status
@@ -243,7 +244,7 @@ namespace RhinoInside.Revit
         var taskDialog = new TaskDialog("Days left")
         {
           Id = $"{MethodBase.GetCurrentMethod().DeclaringType}.{MethodBase.GetCurrentMethod().Name}",
-          MainIcon = TaskDialogIcons.IconInformation,
+          MainIcon = UIX.TaskDialogIcons.IconInformation,
           TitleAutoPrefix = true,
           AllowCancellation = true,
           MainInstruction = DaysUntilExpiration < 1 ?
@@ -272,7 +273,7 @@ namespace RhinoInside.Revit
         var taskDialog = new TaskDialog("Update Rhino")
         {
           Id = $"{MethodBase.GetCurrentMethod().DeclaringType}.{MethodBase.GetCurrentMethod().Name}",
-          MainIcon = TaskDialogIcons.IconInformation,
+          MainIcon = UIX.TaskDialogIcons.IconInformation,
           AllowCancellation = true,
           MainInstruction = "Unsupported Rhino WIP version",
           MainContent = $"Expected Rhino version is ({MinimumRhinoVersion}) or above.",
@@ -454,7 +455,7 @@ namespace RhinoInside.Revit.UI
           var taskDialog = new TaskDialog("New Shortcut")
           {
             Id = $"{MethodBase.GetCurrentMethod().DeclaringType}.{MethodBase.GetCurrentMethod().Name}",
-            MainIcon = TaskDialogIcons.IconInformation,
+            MainIcon = UIX.TaskDialogIcons.IconInformation,
             TitleAutoPrefix = true,
             AllowCancellation = true,
             MainInstruction = $"Keyboard shortcut 'R' is now assigned to Rhino",
@@ -479,7 +480,7 @@ namespace RhinoInside.Revit.UI
         var taskDialog = new TaskDialog("Oops! Something went wrong :(")
         {
           Id = $"{MethodBase.GetCurrentMethod().DeclaringType}.{MethodBase.GetCurrentMethod().Name}",
-          MainIcon = TaskDialogIcons.IconError,
+          MainIcon = UIX.TaskDialogIcons.IconError,
           TitleAutoPrefix = true,
           AllowCancellation = true,
           MainInstruction = "Rhino.Inside failed to load",
