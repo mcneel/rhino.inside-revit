@@ -48,6 +48,11 @@
       <ComponentGroupRef Id="ProductAddin2020" />
     </Feature>
 
+    <Feature Id="_2021_RhinoInside.Revit" Title="Rhino.Inside for Revit 2021" Level="1">
+      <ComponentGroupRef Id="ProductComponents2021" />
+      <ComponentGroupRef Id="ProductAddin2021" />
+    </Feature>
+
     <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
     <WixVariable Id="WixUIDialogBmp" Value="Dialog.png" />
     <WixVariable Id="WixUIBannerBmp" Value="Banner.png" />
@@ -97,6 +102,9 @@
         </Directory>
         <Directory Id="_2020Directory" Name="2020">
           <Directory Id="INSTALLFOLDER2020" Name="RhinoInside.Revit" />
+        </Directory>
+        <Directory Id="_2021Directory" Name="2021">
+          <Directory Id="INSTALLFOLDER2021" Name="RhinoInside.Revit" />
         </Directory>
       </Directory>
     </Directory>
@@ -186,6 +194,28 @@
       <Component Guid="{F35F4F5C-B259-4E02-A615-807630BB23C4}">
         <File Id="_2020_RhinoInside.Revit.addin" Source="..\RhinoInside.Revit\Properties\RhinoInside.Revit.addin" KeyPath="yes"/>
         <RemoveFile Id="_2020_RhinoInside.Revit.addin" Name="RhinoInside.Revit.addin" On="both"/>
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="ProductComponents2021" Directory="INSTALLFOLDER2021">
+      <Component Guid="{31B9D2CF-D920-463F-9C5B-F3FFB4EC97E1}">
+        <File Id="_2021_RhinoInside.Revit.dll" Source="..\RhinoInside.Revit\bin\$(var.Configuration) 2021\RhinoInside.Revit.dll" KeyPath="yes"/>
+        <File Id="_2021_RhinoInside.Revit.GH.gha" Source="..\RhinoInside.Revit.GH\bin\$(var.Configuration) 2021\RhinoInside.Revit.GH.gha"/>
+        <File Id="_2021_Sample2" Source="..\RhinoInside.Revit\Samples\Sample2.ghx"/>
+        <File Id="_2021_Sample3" Source="..\RhinoInside.Revit\Samples\Sample3.ghx"/>
+        <File Id="_2021_Sample4" Source="..\RhinoInside.Revit\Samples\Sample4.ghx"/>
+        <File Id="_2021_Sample5" Source="..\RhinoInside.Revit\Samples\Sample5.ghx"/>
+        <File Id="_2021_Sample7" Source="..\RhinoInside.Revit\Samples\Sample7.py"/>
+        <RemoveFile Id="_2021_RhinoInside.Revit_AnyFile" Name="*.*" On="both"/>
+        <RemoveFolder Id="_2021_RhinoInside.Revit" On="both"/>
+      </Component>
+    </ComponentGroup>
+    <ComponentGroup Id="ProductAddin2021" Directory="_2021Directory">
+      <Component Guid="{973A5BCA-285D-4A43-BA31-EC261E4A4246}">
+        <File Id="_2021_RhinoInside.Revit.addin" Source="..\RhinoInside.Revit\Properties\RhinoInside.Revit.addin" KeyPath="yes"/>
+        <RemoveFile Id="_2021_RhinoInside.Revit.addin" Name="RhinoInside.Revit.addin" On="both"/>
       </Component>
     </ComponentGroup>
   </Fragment>
