@@ -121,7 +121,7 @@ namespace RhinoInside.Revit.GH.Components
           // curtain walls don't have layers
           if (wall.WallType.Kind != DB.WallKind.Curtain)
           {
-            // stacked walls have multiple base walls, let's process all of them
+            // stacked walls have multiple basic walls, let's process all of them
             if (wall.WallType.Kind == DB.WallKind.Stacked)
               foreach (DB.Wall wallPart in wall.GetStackedWallMemberIds().Select(x => wall.Document.GetElement(x)))
                 layerGeoms.AddRange(GetWallLayerGeometry(wallPart));

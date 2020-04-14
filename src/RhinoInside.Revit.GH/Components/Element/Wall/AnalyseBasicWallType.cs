@@ -12,9 +12,9 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "ABWT";
 
     public AnalyzeBasicWallType() : base(
-      name: "Analyze Base Wall Type",
+      name: "Analyze Basic Wall Type",
       nickname: "A-BWT",
-      description: "Analyze given Base Wall type",
+      description: "Analyze given Basic Wall type",
       category: "Revit",
       subCategory: "Analyze"
     )
