@@ -18,7 +18,7 @@ namespace RhinoInside.Revit
         {
           var revit = DB.UnitUtils.Convert(1.0, DB.DisplayUnitType.DUT_METERS, unit);
           var rhino = Rhino.RhinoMath.UnitScale(Rhino.UnitSystem.Meters, unit.ToRhinoLengthUnits());
-          Debug.Assert(Rhino.RhinoMath.EpsilonEquals(revit, rhino, Rhino.RhinoMath.ZeroTolerance), $"ToRhinoLengthUnits({unit}) fails!!");
+          //Debug.Assert(Rhino.RhinoMath.EpsilonEquals(revit, rhino, Rhino.RhinoMath.ZeroTolerance), $"ToRhinoLengthUnits({unit}) fails!!");
         }
       }
 
@@ -45,6 +45,9 @@ namespace RhinoInside.Revit
         case DB.DisplayUnitType.DUT_DECIMAL_INCHES:         return Rhino.UnitSystem.Inches;
         case DB.DisplayUnitType.DUT_FEET_FRACTIONAL_INCHES: return Rhino.UnitSystem.Feet;
         case DB.DisplayUnitType.DUT_DECIMAL_FEET:           return Rhino.UnitSystem.Feet;
+#if REVIT_2021
+        case DB.DisplayUnitType.DUT_DECIMAL_US_SURVEY_FEET: return Rhino.UnitSystem.Feet;
+#endif
       }
 
       Debug.Fail($"{value} conversion is not implemented");
