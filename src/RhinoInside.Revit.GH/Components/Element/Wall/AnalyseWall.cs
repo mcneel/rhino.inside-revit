@@ -1,6 +1,8 @@
 using System;
 using Grasshopper.Kernel;
 
+using RhinoInside.Revit.External.DB.Extensions;
+
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -180,7 +182,7 @@ namespace RhinoInside.Revit.GH.Components
 
       PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.WALL_USER_HEIGHT_PARAM, "Height");
       PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.CURVE_ELEM_LENGTH, "Length");
-      DA.SetData("Width", wallInstance.Width);
+      DA.SetData("Width", wallInstance.GetWidth());
       PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.HOST_AREA_COMPUTED, "Area");
       PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.HOST_VOLUME_COMPUTED, "Volume");
 
@@ -189,10 +191,7 @@ namespace RhinoInside.Revit.GH.Components
       PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT, "Structural");
       PipeHostParameter<Types.StructuralWallUsage>(DA, wallInstance, DB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM, "Structural Usage");
 
-      var wallOrientationVector = new Rhino.Geometry.Vector3d(wallInstance.Orientation.X, wallInstance.Orientation.Y, wallInstance.Orientation.Z);
-      if (wallInstance.Flipped)
-        wallOrientationVector.Reverse();
-      DA.SetData("Orientation", wallOrientationVector);
+      DA.SetData("Orientation", wallInstance.GetOrientationVector());
     }
   }
 }
