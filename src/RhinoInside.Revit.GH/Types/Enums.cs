@@ -353,4 +353,32 @@ namespace RhinoInside.Revit.GH.Types
     public CurtainGridAlignType() : base() { }
     public CurtainGridAlignType(DB.CurtainGridAlignType value) : base(value) { }
   }
+
+  [
+  ComponentGuid("A734FF65-D9E6-4C8C-A413-B5EACD6E3062"),
+  Name("Curtain Grid Layout"),
+  Description("Represents layout for curtain grids at either direction"),
+  ]
+  public class CurtainGridLayout : GH_Enum<DBX.CurtainGridLayout>
+  {
+    public CurtainGridLayout() : base() { }
+    public CurtainGridLayout(DBX.CurtainGridLayout value) : base(value) { }
+
+    public override string Text
+    {
+      get
+      {
+        switch (Value)
+        {
+          case DBX.CurtainGridLayout.None: return "None";
+          case DBX.CurtainGridLayout.FixedDistance: return "Fixed Distance";
+          case DBX.CurtainGridLayout.FixedNumber: return "Fixed Number";
+          case DBX.CurtainGridLayout.MaximumSpacing: return $"Maximum Spacing";
+          case DBX.CurtainGridLayout.MinimumSpacing: return $"Minimum Spacing";
+        }
+
+        return base.Text;
+      }
+    }
+  }
 }
