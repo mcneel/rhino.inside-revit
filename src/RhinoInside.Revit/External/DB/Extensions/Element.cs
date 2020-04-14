@@ -98,21 +98,47 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return Enumerable.Empty<Parameter>();
     }
 
+    public static IEnumerable<Parameter> GetParameters(this Element element, string name, ParameterClass set)
+    {
+      switch (set)
+      {
+        case ParameterClass.Any:
+          return element.GetParameters(name, ParameterClass.BuiltIn).
+            Union(element.GetParameters(name).OrderBy(x => x.Id.IntegerValue)).
+            GroupBy(x => x.Id).
+            Select(x => x.First());
+        case ParameterClass.BuiltIn:
+          return BuiltInParameterExtension.BuiltInParameterMap.TryGetValue(name, out var parameters) ?
+            parameters.Select(x => element.get_Parameter(x)).Where(x => x?.Definition is object) :
+            Enumerable.Empty<Parameter>();
+        case ParameterClass.Project:
+          return element.GetParameters(name).
+            Where(p => !p.IsShared && p.Id.IntegerValue > 0).
+            Where(p => (p.Element.Document.GetElement(p.Id) as ParameterElement)?.get_Parameter(BuiltInParameter.ELEM_DELETABLE_IN_FAMILY)?.AsInteger() == 1).
+            OrderBy(x => x.Id.IntegerValue);
+        case ParameterClass.Family:
+          return element.GetParameters(name).
+            Where(p => !p.IsShared && p.Id.IntegerValue > 0).
+            Where(p => (p.Element.Document.GetElement(p.Id) as ParameterElement)?.get_Parameter(BuiltInParameter.ELEM_DELETABLE_IN_FAMILY)?.AsInteger() == 0).
+            OrderBy(x => x.Id.IntegerValue);
+        case ParameterClass.Shared:
+          return element.GetParameters(name).
+            Where(p => p.IsShared).
+            OrderBy(x => x.Id.IntegerValue);
+      }
+
+      return Enumerable.Empty<Parameter>();
+    }
+
     public static Parameter GetParameter(this Element element, string name, ParameterClass set)
     {
-      var parameters = element.
-        GetParameters(set).
-        Where(x => x.Definition.Name == name);
-
+      var parameters = element.GetParameters(name, set);
       return parameters.FirstOrDefault(x => !x.IsReadOnly) ?? parameters.FirstOrDefault();
     }
 
     public static Parameter GetParameter(this Element element, string name, ParameterType type, ParameterClass set)
     {
-      var parameters = element.
-        GetParameters(set).
-        Where(x => x.Definition.ParameterType == type && x.Definition.Name == name);
-
+      var parameters = element.GetParameters(name, set).Where(x => x.Definition.ParameterType == type);
       return parameters.FirstOrDefault(x => !x.IsReadOnly) ?? parameters.FirstOrDefault();
     }
 

@@ -21,6 +21,20 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return false;
     }
 
+    internal static readonly IDictionary<string, BuiltInParameter[]> BuiltInParameterMap =
+      Enum.GetValues(typeof(BuiltInParameter)).
+      Cast<BuiltInParameter>().
+      Where
+      (
+        x =>
+        {
+          try { return !string.IsNullOrEmpty(LabelUtils.GetLabelFor(x)); }
+          catch { return false; }
+        }
+      ).
+      GroupBy(x => LabelUtils.GetLabelFor(x)).
+      ToDictionary(x => x.Key, x=> x.ToArray());
+
     public static string ToStringGeneric(this BuiltInParameter value)
     {
       switch (value)
