@@ -7,16 +7,16 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class WallBoundingGeometry : AnalysisComponent
+  public class ElementBoundingGeometry : AnalysisComponent
   {
     public override Guid ComponentGuid => new Guid("3396DBC4-0E8F-4402-969A-EF5A0E30E093");
     public override GH_Exposure Exposure => GH_Exposure.primary;
-    protected override string IconTag => "WBG";
+    protected override string IconTag => "EBG";
 
-    public WallBoundingGeometry() : base(
-      name: "Wall Bounding Geometry",
-      nickname: "WBG",
-      description: "Bounding geometry of given Wall element",
+    public ElementBoundingGeometry() : base(
+      name: "Element Bounding Geometry",
+      nickname: "EBG",
+      description: "Bounding geometry of given element",
       category: "Revit",
       subCategory: "Element"
     )
@@ -27,9 +27,9 @@ namespace RhinoInside.Revit.GH.Components
     {
       manager.AddParameter(
         param: new Parameters.Element(),
-        name: "Wall",
-        nickname: "W",
-        description: "Wall element",
+        name: "Element",
+        nickname: "E",
+        description: "Element with complex geometry",
         access: GH_ParamAccess.item
         );
     }
@@ -39,7 +39,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddBrepParameter(
         name: "Bounding Geometry",
         nickname: "BG",
-        description: "Wall bounding geometry",
+        description: "Element Bounding geometry",
         access: GH_ParamAccess.item
         );
     }
@@ -47,12 +47,19 @@ namespace RhinoInside.Revit.GH.Components
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       // grab input wall type
-      DB.Wall wallInstance = default;
-      if (!DA.GetData("Wall", ref wallInstance))
+      DB.Element element = default;
+      if (!DA.GetData("Element", ref element))
         return;
 
-      // extract the bounding geometry of the wall and set on output
-      DA.SetData("Bounding Geometry", wallInstance.ComputeWallBoundingGeometry());
+      switch (element)
+      {
+        case DB.Wall wall:
+          // extract the bounding geometry of the wall and set on output
+          DA.SetData("Bounding Geometry", wall.ComputeWallBoundingGeometry());
+          break;
+
+        // TODO: implement other elements that might have interesting bounding geometries e.g. floors, roofs, ...
+      }
     }
   }
 }

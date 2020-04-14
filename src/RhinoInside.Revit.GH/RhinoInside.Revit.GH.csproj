@@ -223,6 +223,7 @@
     <Compile Include="Components\Element\BuildingPad\ByOutline.cs" />
     <Compile Include="Components\Element\AnalysisComponent.cs" />
     <Compile Include="Components\Element\CompoundStructureGeometry.cs" />
+    <Compile Include="Components\Element\BoundingGeometry.cs" />
     <Compile Include="Components\Element\Delete.cs" />
     <Compile Include="Components\Element\Dependents.cs" />
     <Compile Include="Components\Element\Geometry.cs" />
@@ -267,7 +268,6 @@
     <Compile Include="Components\Element\Wall\CompoundStructure_Destruct.cs" />
     <Compile Include="Components\Element\Wall\CompoundStructureLayer_Destruct.cs" />
     <Compile Include="Components\Element\Wall\AnalyseWallProfile.cs" />
-    <Compile Include="Components\Element\Wall\WallBoundingGeometry.cs" />
     <Compile Include="Components\Element\CurtainWall\AnalyseCurtainWall.cs" />
     <Compile Include="Components\Family\Element\Form\ByCurves.cs" />
     <Compile Include="Components\Family\Element\Form\ByGeometry.cs" />
