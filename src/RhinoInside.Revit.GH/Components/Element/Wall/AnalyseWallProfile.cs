@@ -7,19 +7,19 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  // TODO: improve AnalyseWallProfile to work on curtain walls
-  // TODO: improve AnalyseWallProfile to work on curved walls
-  // TODO: improve AnalyseWallProfile to return profile curves at WallLocationLine
-  public class AnalyseWallProfile : Component
+  // TODO: improve AnalyzeWallProfile to work on curtain walls
+  // TODO: improve AnalyzeWallProfile to work on curved walls
+  // TODO: improve AnalyzeWallProfile to return profile curves at WallLocationLine
+  public class AnalyzeWallProfile : Component
   {
     public override Guid ComponentGuid => new Guid("9D2E9D8D-E794-4202-B725-82E78317892F");
 
-    public AnalyseWallProfile() : base(
-      name:"Analyse Wall Profile",
+    public AnalyzeWallProfile() : base(
+      name:"Analyze Wall Profile",
       nickname: "A-WP",
       description: "Get the vertical profile of the given wall",
       category: "Revit",
-      subCategory: "Analyse"
+      subCategory: "Analyze"
     )
     { }
 

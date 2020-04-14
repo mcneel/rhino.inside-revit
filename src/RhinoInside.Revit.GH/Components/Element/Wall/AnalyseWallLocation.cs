@@ -6,18 +6,18 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class AnalyseWallLocation : AnalysisComponent
+  public class AnalyzeWallLocation : AnalysisComponent
   {
     public override Guid ComponentGuid => new Guid("4C5260C3-B15E-482B-8A1D-38CD868E3E72");
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "AWLC";
 
-    public AnalyseWallLocation() : base(
-      name: "Analyse Wall Location Curve",
+    public AnalyzeWallLocation() : base(
+      name: "Analyze Wall Location Curve",
       nickname: "A-WLC",
-      description: "Analyse location curve of given wall instance",
+      description: "Analyze location curve of given wall instance",
       category: "Revit",
-      subCategory: "Analyse"
+      subCategory: "Analyze"
     )
     {
     }

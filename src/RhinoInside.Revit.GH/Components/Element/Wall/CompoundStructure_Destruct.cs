@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Components
       nickname: "CS(D)",
       description: "Deconstructs given compound structure into its properties",
       category: "Revit",
-      subCategory: "Analyse"
+      subCategory: "Analyze"
     )
     {
     }

@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Components
       nickname: "CSL(D)",
       description: "Deconstructs given compound structure layer into its properties",
       category: "Revit",
-      subCategory: "Analyse"
+      subCategory: "Analyze"
     )
     {
     }
