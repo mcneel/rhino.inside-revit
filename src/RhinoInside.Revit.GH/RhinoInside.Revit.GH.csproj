@@ -269,6 +269,7 @@
     <Compile Include="Components\Element\Wall\CompoundStructureLayer_Destruct.cs" />
     <Compile Include="Components\Element\Wall\AnalyseWallProfile.cs" />
     <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainWall.cs" />
+    <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainWallType.cs" />
     <Compile Include="Components\Family\Element\Form\ByCurves.cs" />
     <Compile Include="Components\Family\Element\Form\ByGeometry.cs" />
     <Compile Include="Components\Family\Element\Visibility\Construct.cs" />
