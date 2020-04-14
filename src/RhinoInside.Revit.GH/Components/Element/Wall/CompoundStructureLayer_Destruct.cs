@@ -13,9 +13,9 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "CSLd";
 
     public CompoundStructureLayer_Destruct() : base(
-      name: "Compound Structure Layer (Destruct)",
+      name: "Compound Structure Layer (Deconstruct)",
       nickname: "CSL(D)",
-      description: "Destructs given compound structure layer into its properties",
+      description: "Deconstructs given compound structure layer into its properties",
       category: "Revit",
       subCategory: "Analyse"
     )
@@ -92,7 +92,7 @@ namespace RhinoInside.Revit.GH.Components
 
       DB.CompoundStructureLayer cslayer = dataObj.Value;
 
-      // destruct the data object into output params
+      // Deconstruct the data object into output params
       DA.SetData("Layer Id", cslayer.LayerId);
       DA.SetData("Layer Function", new Types.LayerFunction(cslayer.Function));
       DA.SetData("Layer Width", cslayer.Width);

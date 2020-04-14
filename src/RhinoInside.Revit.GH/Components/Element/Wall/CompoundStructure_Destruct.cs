@@ -13,9 +13,9 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "CSd";
 
     public CompoundStructure_Destruct() : base(
-      name: "Compound Structure (Destruct)",
+      name: "Compound Structure (Deconstruct)",
       nickname: "CS(D)",
-      description: "Destructs given compound structure into its properties",
+      description: "Deconstructs given compound structure into its properties",
       category: "Revit",
       subCategory: "Analyse"
     )
@@ -139,7 +139,7 @@ namespace RhinoInside.Revit.GH.Components
 
       DB.CompoundStructure cstruct = dataObj.Value;
 
-      // destruct the data object into output params
+      // Deconstruct the data object into output params
       DA.SetData("Width", cstruct.GetWidth());
       DA.SetDataList("Layers", cstruct.GetLayers().Select(x => new Types.DataObject<DB.CompoundStructureLayer>(apiObject: x, srcDocument: dataObj.Document)).ToList());
       DA.SetData("Layer Count", cstruct.LayerCount);
