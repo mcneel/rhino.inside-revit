@@ -158,6 +158,25 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return null;
     }
 
+    public static Category GetCategory(this Document doc, BuiltInCategory categoryId)
+    {
+      if (doc is null || categoryId == BuiltInCategory.INVALID)
+        return null;
+
+      try
+      {
+        if (Category.GetCategory(doc, categoryId) is Category category)
+          return category;
+      }
+      catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
+
+      using (var collector = new FilteredElementCollector(doc))
+      {
+        var element = collector.OfCategory(categoryId).FirstElement();
+        return element?.Category;
+      }
+    }
+
     public static Category GetCategory(this Document doc, ElementId id)
     {
       if (doc is null || id is null)

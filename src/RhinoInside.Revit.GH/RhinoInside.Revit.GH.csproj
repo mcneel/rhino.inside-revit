@@ -24,6 +24,10 @@
     <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <RevitVersion>2020</RevitVersion>
   </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration.Contains('2021'))">
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <RevitVersion>2021</RevitVersion>
+  </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -57,7 +61,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2018|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug 2018\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;REVIT_2017; REVIT_2018</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;REVIT_2017;REVIT_2018</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
@@ -68,13 +72,13 @@
     <OutputPath>bin\Release 2018\</OutputPath>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <DefineConstants>REVIT_2017; REVIT_2018</DefineConstants>
+    <DefineConstants>REVIT_2017;REVIT_2018</DefineConstants>
     <Optimize>true</Optimize>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2019|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug 2019\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;REVIT_2017; REVIT_2018; REVIT_2019</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;REVIT_2017;REVIT_2018;REVIT_2019</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
@@ -91,7 +95,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2020|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug 2020\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;REVIT_2017; REVIT_2018; REVIT_2019; REVIT_2020</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
@@ -100,7 +104,24 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2020|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Release 2020\</OutputPath>
-    <DefineConstants>REVIT_2017; REVIT_2018; REVIT_2019; REVIT_2020</DefineConstants>
+    <DefineConstants>REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020</DefineConstants>
+    <Optimize>true</Optimize>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2021|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug 2021\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2021|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Release 2021\</OutputPath>
+    <DefineConstants>REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021</DefineConstants>
     <Optimize>true</Optimize>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>

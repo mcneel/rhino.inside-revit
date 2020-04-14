@@ -515,8 +515,13 @@ namespace RhinoInside.Revit
       NurbsSurface nurbsSurface = default;
       try
       {
+#if REVIT_2021
+        using (var surface = DB.ExportUtils.GetNurbsSurfaceDataForSurface(face.GetSurface()))
+          nurbsSurface = surface.ToRhino(face.GetBoundingBox());
+#else
         using (var surface = DB.ExportUtils.GetNurbsSurfaceDataForFace(face))
           nurbsSurface = surface.ToRhino(face.GetBoundingBox());
+#endif
       }
       catch (Autodesk.Revit.Exceptions.ApplicationException) { }
 
