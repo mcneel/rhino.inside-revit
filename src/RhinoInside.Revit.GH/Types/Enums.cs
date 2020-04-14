@@ -342,4 +342,15 @@ namespace RhinoInside.Revit.GH.Types
     public OpeningWrappingCondition() : base() { }
     public OpeningWrappingCondition(DB.OpeningWrappingCondition value) : base(value) { }
   }
+
+  [
+  ComponentGuid("621785D8-363C-46EF-A920-B8CF0026B4CF"),
+  Name("Curtain Grid Align Type"),
+  Description("Represents alignment type for curtain grids at either direction"),
+  ]
+  public class CurtainGridAlignType : GH_Enum<DB.CurtainGridAlignType>
+  {
+    public CurtainGridAlignType() : base() { }
+    public CurtainGridAlignType(DB.CurtainGridAlignType value) : base(value) { }
+  }
 }
