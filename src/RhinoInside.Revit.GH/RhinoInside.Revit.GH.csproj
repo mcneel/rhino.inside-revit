@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -404,7 +404,7 @@
     <None Include="Resources\Parameters\ElementType.png" />
     <None Include="Resources\Parameters\ElementTypeByName.png" />
     <None Include="Resources\Parameters\Face.png" />
-    <None Include="Resources\Parameters\GeometricElement.png" />
+    <None Include="Resources\Parameters\GraphicalElement.png" />
     <None Include="Resources\Parameters\ModelCategoriesPicker.png" />
     <None Include="Resources\Parameters\ParameterKey.png" />
     <None Include="Resources\Parameters\SketchPlane.png" />
