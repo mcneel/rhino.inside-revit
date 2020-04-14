@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.GH.Components
         param: new Parameters.DataObject<DB.CurtainGrid>(),
         name: "Curtain Grid",
         nickname: "CG",
-        description: "Curtain Grid definition associated with input Curtain Wall",
+        description: "Curtain Grid",
         access: GH_ParamAccess.item
         );
     }
