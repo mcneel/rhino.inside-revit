@@ -210,6 +210,7 @@
     <Compile Include="External\DB\UniqueId.cs" />
     <Compile Include="External\DB\WallWrapping.cs" />
     <Compile Include="External\DB\CurtainGridLayout.cs" />
+    <Compile Include="External\DB\CurtainGridJoinCondition.cs" />
     <Compile Include="External\UI\Application.cs" />
     <Compile Include="External\UI\Command.cs" />
     <Compile Include="External\UI\EventHandler.cs" />

@@ -381,4 +381,32 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
   }
+
+  [
+  ComponentGuid("371E482B-BB95-4D9D-962F-00867E01AB35"),
+  Name("Curtain Grid Join Condition"),
+  Description("Represents join condition for curtain grids at either direction"),
+  ]
+  public class CurtainGridJoinCondition : GH_Enum<DBX.CurtainGridJoinCondition>
+  {
+    public CurtainGridJoinCondition() : base() { }
+    public CurtainGridJoinCondition(DBX.CurtainGridJoinCondition value) : base(value) { }
+
+    public override string Text
+    {
+      get
+      {
+        switch (Value)
+        {
+          case DBX.CurtainGridJoinCondition.NotDefined: return "Not Defined";
+          case DBX.CurtainGridJoinCondition.VerticalGridContinuous: return "Vertical Grid Continuous";
+          case DBX.CurtainGridJoinCondition.HorizontalGridContinuous: return "Horizontal Grid Continuous";
+          case DBX.CurtainGridJoinCondition.BorderAndVerticalGridContinuous: return $"Border & Vertical Grid Continuous";
+          case DBX.CurtainGridJoinCondition.BorderAndHorizontalGridContinuous: return $"Border & Horizontal Grid Continuous";
+        }
+
+        return base.Text;
+      }
+    }
+  }
 }
