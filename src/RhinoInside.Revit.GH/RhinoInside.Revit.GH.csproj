@@ -243,6 +243,7 @@
     <Compile Include="Components\Element\Material\Identity.cs" />
     <Compile Include="Components\Element\Parameters.cs" />
     <Compile Include="Components\Element\FamilyInstance\ByPointAtHost.cs" />
+    <Compile Include="Components\Element\FamilyInstance\AnalyzeInstanceSpace.cs" />
     <Compile Include="Components\Element\Floor\ByOutline.cs" />
     <Compile Include="Components\Element\Grid\ByCurve.cs" />
     <Compile Include="Components\Element\Level\ByElevation.cs" />
