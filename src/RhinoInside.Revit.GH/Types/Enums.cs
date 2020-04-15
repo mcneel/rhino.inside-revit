@@ -409,4 +409,59 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
   }
+
+  [
+  ComponentGuid("C61AA1B8-4CB2-44A0-9217-091E151D1D0A"),
+  Name("Curtain Mullion System Family"),
+  Description("Represents builtin curtain mullion system families"),
+  ]
+  public class CurtainMullionSystemFamily : GH_Enum<DBX.CurtainMullionSystemFamily>
+  {
+    public CurtainMullionSystemFamily() : base() { }
+    public CurtainMullionSystemFamily(DBX.CurtainMullionSystemFamily value) : base(value) { }
+
+    public override string Text
+    {
+      get
+      {
+        switch (Value)
+        {
+          case DBX.CurtainMullionSystemFamily.Unknown: return "Unknown";
+          case DBX.CurtainMullionSystemFamily.Rectangular: return "Rectangular";
+          case DBX.CurtainMullionSystemFamily.Circular: return "Circular";
+          case DBX.CurtainMullionSystemFamily.LCorner: return "L Corner";
+          case DBX.CurtainMullionSystemFamily.TrapezoidCorner: return "Trapezoid Corner";
+          case DBX.CurtainMullionSystemFamily.QuadCorner: return "Quad Corner";
+          case DBX.CurtainMullionSystemFamily.VCorner: return "V Corner";
+        }
+
+        return base.Text;
+      }
+    }
+  }
+
+  [
+  ComponentGuid("5A459A8D-4B20-4E3A-B6FF-DFA3B262C30E"),
+  Name("Curtain Mullion Position"),
+  Description("Represents available mullion positions"),
+  ]
+  public class CurtainMullionPosition : GH_Enum<DBX.CurtainMullionPosition>
+  {
+    public CurtainMullionPosition() : base() { }
+    public CurtainMullionPosition(DBX.CurtainMullionPosition value) : base(value) { }
+
+    public override string Text
+    {
+      get
+      {
+        switch (Value)
+        {
+          case DBX.CurtainMullionPosition.ParallelToGround: return "Parallel to Ground";
+          case DBX.CurtainMullionPosition.PerpendicularToFace: return "Perpendicular to Face";
+        }
+
+        return base.Text;
+      }
+    }
+  }
 }
