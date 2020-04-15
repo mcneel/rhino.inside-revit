@@ -277,6 +277,7 @@
     <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainGridMullion.cs" />
     <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainGridMullionType.cs" />
     <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainGridPanel.cs" />
+    <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainGridPanelType.cs" />
     <Compile Include="Components\Family\Element\Form\ByCurves.cs" />
     <Compile Include="Components\Family\Element\Form\ByGeometry.cs" />
     <Compile Include="Components\Family\Element\Visibility\Construct.cs" />
