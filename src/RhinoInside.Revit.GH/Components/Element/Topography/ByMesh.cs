@@ -4,18 +4,21 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using DB = Autodesk.Revit.DB;
 using Grasshopper.Kernel;
+using Rhino.Geometry;
+using Rhino;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class TopographyByPoints : ReconstructElementComponent
+#if REVIT_2020
+  public class TopographyByMesh : ReconstructElementComponent
   {
-    public override Guid ComponentGuid => new Guid("E8D8D05A-8703-4F75-B106-12B40EC9DF7B");
+    public override Guid ComponentGuid => new Guid("E6EA0A85-E118-4BFD-B01E-86BA22155938");
     public override GH_Exposure Exposure => GH_Exposure.primary;
 
-    public TopographyByPoints() : base
+    public TopographyByMesh() : base
     (
-      "Add Topography (Points)", "Topography",
-      "Given a set of Points, it adds a Topography surface to the active Revit document",
+      "Add Topography (Mesh)", "Topography",
+      "Given a Mesh, it adds a Topography surface to the active Revit document",
       "Revit", "Site"
     )
     { }
@@ -25,17 +28,32 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.GraphicalElement(), "Topography", "T", "New Topography", GH_ParamAccess.item);
     }
 
-    void ReconstructTopographyByPoints
+    void ReconstructTopographyByMesh
     (
       DB.Document doc,
       ref DB.Architecture.TopographySurface element,
 
-      IList<Rhino.Geometry.Point3d> points,
+      Rhino.Geometry.Mesh mesh,
       [Optional] IList<Rhino.Geometry.Curve> regions
     )
     {
       var scaleFactor = 1.0 / Revit.ModelUnits;
-      var xyz = points.Select(x => x.ChangeUnits(scaleFactor).ToHost()).ToArray();
+      mesh = mesh.ChangeUnits(scaleFactor);
+      mesh.Vertices.CombineIdentical(true, true);
+      mesh.Vertices.CullUnused();
+
+      var xyz = mesh.Vertices.Select(x => x.ToHost()).ToArray();
+      var facets = new List<DB.PolymeshFacet>(mesh.Faces.Count);
+
+      var faceCount = mesh.Faces.Count;
+      for (int f = 0; f < faceCount; ++f)
+      {
+        var face = mesh.Faces[f];
+
+        facets.Add(new DB.PolymeshFacet(face.A, face.B, face.C));
+        if (face.IsQuad)
+          facets.Add(new DB.PolymeshFacet(face.C, face.D, face.A));
+      }
 
       //if (element is DB.Architecture.TopographySurface topography)
       //{
@@ -53,7 +71,12 @@ namespace RhinoInside.Revit.GH.Components
       //}
       //else
       {
-        ReplaceElement(ref element, DB.Architecture.TopographySurface.Create(doc, xyz));
+        if (!DB.Architecture.TopographySurface.ArePointsDistinct(xyz))
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"At least two vertices have coincident XY values");
+        else if (!DB.Architecture.TopographySurface.IsValidFaceSet(facets, xyz))
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"At least one face is not valid for {typeof(DB.Architecture.TopographySurface).Name}");
+        else
+          ReplaceElement(ref element, DB.Architecture.TopographySurface.Create(doc, xyz, facets));
       }
 
       if (element is object && regions?.Count > 0)
@@ -63,4 +86,5 @@ namespace RhinoInside.Revit.GH.Components
       }
     }
   }
+#endif
 }
