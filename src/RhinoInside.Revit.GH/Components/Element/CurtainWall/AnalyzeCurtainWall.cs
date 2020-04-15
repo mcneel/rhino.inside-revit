@@ -52,7 +52,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      // grab input wall type
+      // grab input
       DB.Wall wallInstance = default;
       if (!DA.GetData("Curtain Wall", ref wallInstance))
         return;
