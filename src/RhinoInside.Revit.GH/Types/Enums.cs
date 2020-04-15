@@ -291,7 +291,7 @@ namespace RhinoInside.Revit.GH.Types
           case DB.Structure.StructuralWallUsage.NonBearing: return "Non-Bearing";
           case DB.Structure.StructuralWallUsage.Bearing: return "Bearing";
           case DB.Structure.StructuralWallUsage.Shear: return "Shear";
-          case DB.Structure.StructuralWallUsage.Combined: return $"Structural combined";
+          case DB.Structure.StructuralWallUsage.Combined: return "Structural combined";
         }
 
         return base.Text;
@@ -373,8 +373,8 @@ namespace RhinoInside.Revit.GH.Types
           case DBX.CurtainGridLayout.None: return "None";
           case DBX.CurtainGridLayout.FixedDistance: return "Fixed Distance";
           case DBX.CurtainGridLayout.FixedNumber: return "Fixed Number";
-          case DBX.CurtainGridLayout.MaximumSpacing: return $"Maximum Spacing";
-          case DBX.CurtainGridLayout.MinimumSpacing: return $"Minimum Spacing";
+          case DBX.CurtainGridLayout.MaximumSpacing: return "Maximum Spacing";
+          case DBX.CurtainGridLayout.MinimumSpacing: return "Minimum Spacing";
         }
 
         return base.Text;
@@ -401,8 +401,8 @@ namespace RhinoInside.Revit.GH.Types
           case DBX.CurtainGridJoinCondition.NotDefined: return "Not Defined";
           case DBX.CurtainGridJoinCondition.VerticalGridContinuous: return "Vertical Grid Continuous";
           case DBX.CurtainGridJoinCondition.HorizontalGridContinuous: return "Horizontal Grid Continuous";
-          case DBX.CurtainGridJoinCondition.BorderAndVerticalGridContinuous: return $"Border & Vertical Grid Continuous";
-          case DBX.CurtainGridJoinCondition.BorderAndHorizontalGridContinuous: return $"Border & Horizontal Grid Continuous";
+          case DBX.CurtainGridJoinCondition.BorderAndVerticalGridContinuous: return "Border & Vertical Grid Continuous";
+          case DBX.CurtainGridJoinCondition.BorderAndHorizontalGridContinuous: return "Border & Horizontal Grid Continuous";
         }
 
         return base.Text;
