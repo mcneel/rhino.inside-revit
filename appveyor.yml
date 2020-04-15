@@ -3,20 +3,16 @@ version: '{build}'
 image: Visual Studio 2017
 
 build_script:
-- cmd: >-
-    set sln=src/RhinoInside.Revit.sln
+- cmd: msbuild script\cibuild.msbuild
 
-    msbuild %sln% /t:restore;build /p:Configuration="Release 2017"
+# disabled (see #110)
+#artifacts:
+#- path: RhinoInside.Revit.msi
 
-    msbuild %sln% /t:restore;build /p:Configuration="Release 2018"
-
-    msbuild %sln% /t:restore;build /p:Configuration="Release 2019"
-
-    msbuild %sln% /t:restore;build /p:Configuration="Release 2020"
-
-    msbuild src/RhinoInside.Revit.Setup.sln /p:Configuration=Release
-
-    copy src\RhinoInside.Revit.Setup\bin\x64\Release\RhinoInside.Revit.msi .
-
-artifacts:
-- path: RhinoInside.Revit.msi
+notifications:
+- provider: Slack
+  incoming_webhook:
+    secure: /omQg66gmFLwrvmMHBol9b0rcJBZvL6QY5USTJrO8bGnnCfL0pW/cZfDvo01GJxJKCUzjooc16cRUl9mgRoSl9TSrduEh0uOEyGJZnuL5yI=
+  on_build_success: false
+  on_build_failure: true
+  on_build_status_changed: true
