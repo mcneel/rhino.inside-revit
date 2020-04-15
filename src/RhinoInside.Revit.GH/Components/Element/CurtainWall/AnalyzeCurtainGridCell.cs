@@ -26,9 +26,9 @@ namespace RhinoInside.Revit.GH.Components
     {
       manager.AddParameter(
         param: new Parameters.DataObject<DB.CurtainCell>(),
-        name: "Curtain Grid Cells",
+        name: "Curtain Grid Cell",
         nickname: "CGC",
-        description: "Curtain Grid Cells",
+        description: "Curtain Grid Cell",
         access: GH_ParamAccess.item
         );
     }
@@ -53,7 +53,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       // get input
       Types.DataObject<DB.CurtainCell> dataObj = default;
-      if (!DA.GetData("Curtain Grid Cells", ref dataObj))
+      if (!DA.GetData("Curtain Grid Cell", ref dataObj))
         return;
 
       DB.CurtainCell cell = dataObj.Value;
