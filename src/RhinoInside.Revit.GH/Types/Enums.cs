@@ -464,4 +464,15 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
   }
+
+  [
+  ComponentGuid("9F9D90FC-06FF-4908-B67E-ED63B089937E"),
+  Name("Curtain Panel System Family"),
+  Description("Represents builtin curtain panel system families"),
+  ]
+  public class CurtainPanelSystemFamily : GH_Enum<DBX.CurtainPanelSystemFamily>
+  {
+    public CurtainPanelSystemFamily() : base() { }
+    public CurtainPanelSystemFamily(DBX.CurtainPanelSystemFamily value) : base(value) { }
+  }
 }
