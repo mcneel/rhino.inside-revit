@@ -108,8 +108,8 @@ namespace RhinoInside.Revit.GH.Components
 
           DA.SetData("Is Lockable?", panel.Lockable);
           // look at that parameter naming. just great...
-          PipeHostParameter(DA, panel, DB.BuiltInParameter.FURNITURE_WIDTH, "Width");
-          PipeHostParameter(DA, panel, DB.BuiltInParameter.WINDOW_HEIGHT, "Height");
+          PipeHostParameter(DA, panel, DB.BuiltInParameter.FURNITURE_WIDTH, "Panel Width");
+          PipeHostParameter(DA, panel, DB.BuiltInParameter.WINDOW_HEIGHT, "Panel Height");
           break;
         case DB.FamilyInstance famInst:
           DA.SetData("Curtain Grid Panel Symbol", Types.ElementType.FromElement(famInst.Symbol));
