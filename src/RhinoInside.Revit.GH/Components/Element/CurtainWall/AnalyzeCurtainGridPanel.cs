@@ -38,26 +38,26 @@ namespace RhinoInside.Revit.GH.Components
         param: new Parameters.Element(),
         name: "Host Panel",
         nickname: "HP",
-        description: "",
+        description: "Finds the host panel (i.e., wall) associated with this panel",
         access: GH_ParamAccess.item
         );
       manager.AddParameter(
         param: new Parameters.ElementType(),
         name: "Curtain Grid Panel Symbol",
         nickname: "PS",
-        description: "",
+        description: "Panel Symbol. This can be a DB.PanelType of a DB.FamilySymbol depending on the type of panel hosted on the curtain wall.",
         access: GH_ParamAccess.item
         );
       manager.AddPointParameter(
         name: "Curtain Grid Panel Base Point",
         nickname: "PBP",
-        description: "",
+        description: "Base point/anchor of the curtain panel",
         access: GH_ParamAccess.item
         );
       manager.AddVectorParameter(
         name: "Curtain Grid Panel Orientation Vector",
         nickname: "POV",
-        description: "",
+        description: "Orientation vector of the curtain panel",
         access: GH_ParamAccess.item
         );
       // DB.Panel is missing a .Locked property ?!
