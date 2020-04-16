@@ -87,12 +87,6 @@ namespace RhinoInside.Revit.GH.Components
         description: "Panel height",
         access: GH_ParamAccess.item
         );
-      manager.AddNumberParameter(
-        name: "Panel Depth",
-        nickname: "D",
-        description: "Panel depth",
-        access: GH_ParamAccess.item
-        );
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -113,9 +107,9 @@ namespace RhinoInside.Revit.GH.Components
           DA.SetData("Curtain Grid Panel Orientation Vector", new Rhino.Geometry.Vector3d(panel.FacingOrientation.ToRhino()));
 
           DA.SetData("Is Lockable?", panel.Lockable);
-          DA.SetData("Panel Width", panel.LookupParameter("Width")?.AsDouble());
-          DA.SetData("Panel Height", panel.LookupParameter("Height")?.AsDouble());
-          DA.SetData("Panel Depth", panel.LookupParameter("Thickness")?.AsDouble());
+          // look at that parameter naming. just great...
+          PipeHostParameter(DA, panel, DB.BuiltInParameter.FURNITURE_WIDTH, "Width");
+          PipeHostParameter(DA, panel, DB.BuiltInParameter.WINDOW_HEIGHT, "Height");
           break;
         case DB.FamilyInstance famInst:
           DA.SetData("Curtain Grid Panel Symbol", Types.ElementType.FromElement(famInst.Symbol));
