@@ -29,6 +29,8 @@ You can pass an instance into a *Box* component to extract the bounding box of t
 
 ### Instance Bounding Geometry
 
+{% include ltr/warning_note.html note='Currently, Bounding Geometry component only works with Walls but will be extended to work with other Revit categories in the future.' %}
+
 Sometimes it is necessary to extract the *Bounding Geometry* of an instance. *Bounding Geometry* is a geometry that wraps the instance geometry as close as possible and generally follows the instance geometry topology. You can use the *Extract Bounding Geometry* component to extract this geometry. In the example below, the bounding geometry of a *Stacked Wall* is extracted. Notice that the bounding geometry is as thick as the thickest part of the *Stacked Wall*:
 
 ![]({{ "/static/images/guides/revit-instances04.png" | prepend: site.baseurl }})
