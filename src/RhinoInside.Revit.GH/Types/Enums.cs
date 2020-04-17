@@ -291,7 +291,7 @@ namespace RhinoInside.Revit.GH.Types
           case DB.Structure.StructuralWallUsage.NonBearing: return "Non-Bearing";
           case DB.Structure.StructuralWallUsage.Bearing: return "Bearing";
           case DB.Structure.StructuralWallUsage.Shear: return "Shear";
-          case DB.Structure.StructuralWallUsage.Combined: return $"Structural combined";
+          case DB.Structure.StructuralWallUsage.Combined: return "Structural combined";
         }
 
         return base.Text;
@@ -341,5 +341,138 @@ namespace RhinoInside.Revit.GH.Types
   {
     public OpeningWrappingCondition() : base() { }
     public OpeningWrappingCondition(DB.OpeningWrappingCondition value) : base(value) { }
+  }
+
+  [
+  ComponentGuid("621785D8-363C-46EF-A920-B8CF0026B4CF"),
+  Name("Curtain Grid Align Type"),
+  Description("Represents alignment type for curtain grids at either direction"),
+  ]
+  public class CurtainGridAlignType : GH_Enum<DB.CurtainGridAlignType>
+  {
+    public CurtainGridAlignType() : base() { }
+    public CurtainGridAlignType(DB.CurtainGridAlignType value) : base(value) { }
+  }
+
+  [
+  ComponentGuid("A734FF65-D9E6-4C8C-A413-B5EACD6E3062"),
+  Name("Curtain Grid Layout"),
+  Description("Represents layout for curtain grids at either direction"),
+  ]
+  public class CurtainGridLayout : GH_Enum<DBX.CurtainGridLayout>
+  {
+    public CurtainGridLayout() : base() { }
+    public CurtainGridLayout(DBX.CurtainGridLayout value) : base(value) { }
+
+    public override string Text
+    {
+      get
+      {
+        switch (Value)
+        {
+          case DBX.CurtainGridLayout.None: return "None";
+          case DBX.CurtainGridLayout.FixedDistance: return "Fixed Distance";
+          case DBX.CurtainGridLayout.FixedNumber: return "Fixed Number";
+          case DBX.CurtainGridLayout.MaximumSpacing: return "Maximum Spacing";
+          case DBX.CurtainGridLayout.MinimumSpacing: return "Minimum Spacing";
+        }
+
+        return base.Text;
+      }
+    }
+  }
+
+  [
+  ComponentGuid("371E482B-BB95-4D9D-962F-00867E01AB35"),
+  Name("Curtain Grid Join Condition"),
+  Description("Represents join condition for curtain grids at either direction"),
+  ]
+  public class CurtainGridJoinCondition : GH_Enum<DBX.CurtainGridJoinCondition>
+  {
+    public CurtainGridJoinCondition() : base() { }
+    public CurtainGridJoinCondition(DBX.CurtainGridJoinCondition value) : base(value) { }
+
+    public override string Text
+    {
+      get
+      {
+        switch (Value)
+        {
+          case DBX.CurtainGridJoinCondition.NotDefined: return "Not Defined";
+          case DBX.CurtainGridJoinCondition.VerticalGridContinuous: return "Vertical Grid Continuous";
+          case DBX.CurtainGridJoinCondition.HorizontalGridContinuous: return "Horizontal Grid Continuous";
+          case DBX.CurtainGridJoinCondition.BorderAndVerticalGridContinuous: return "Border & Vertical Grid Continuous";
+          case DBX.CurtainGridJoinCondition.BorderAndHorizontalGridContinuous: return "Border & Horizontal Grid Continuous";
+        }
+
+        return base.Text;
+      }
+    }
+  }
+
+  [
+  ComponentGuid("C61AA1B8-4CB2-44A0-9217-091E151D1D0A"),
+  Name("Curtain Mullion System Family"),
+  Description("Represents builtin curtain mullion system families"),
+  ]
+  public class CurtainMullionSystemFamily : GH_Enum<DBX.CurtainMullionSystemFamily>
+  {
+    public CurtainMullionSystemFamily() : base() { }
+    public CurtainMullionSystemFamily(DBX.CurtainMullionSystemFamily value) : base(value) { }
+
+    public override string Text
+    {
+      get
+      {
+        switch (Value)
+        {
+          case DBX.CurtainMullionSystemFamily.Unknown: return "Unknown";
+          case DBX.CurtainMullionSystemFamily.Rectangular: return "Rectangular";
+          case DBX.CurtainMullionSystemFamily.Circular: return "Circular";
+          case DBX.CurtainMullionSystemFamily.LCorner: return "L Corner";
+          case DBX.CurtainMullionSystemFamily.TrapezoidCorner: return "Trapezoid Corner";
+          case DBX.CurtainMullionSystemFamily.QuadCorner: return "Quad Corner";
+          case DBX.CurtainMullionSystemFamily.VCorner: return "V Corner";
+        }
+
+        return base.Text;
+      }
+    }
+  }
+
+  [
+  ComponentGuid("5A459A8D-4B20-4E3A-B6FF-DFA3B262C30E"),
+  Name("Curtain Mullion Position"),
+  Description("Represents available mullion positions"),
+  ]
+  public class CurtainMullionPosition : GH_Enum<DBX.CurtainMullionPosition>
+  {
+    public CurtainMullionPosition() : base() { }
+    public CurtainMullionPosition(DBX.CurtainMullionPosition value) : base(value) { }
+
+    public override string Text
+    {
+      get
+      {
+        switch (Value)
+        {
+          case DBX.CurtainMullionPosition.ParallelToGround: return "Parallel to Ground";
+          case DBX.CurtainMullionPosition.PerpendicularToFace: return "Perpendicular to Face";
+        }
+
+        return base.Text;
+      }
+    }
+  }
+
+  [
+  ComponentGuid("9F9D90FC-06FF-4908-B67E-ED63B089937E"),
+  Name("Curtain Panel System Family"),
+  Description("Represents builtin curtain panel system families"),
+  ]
+  public class CurtainPanelSystemFamily : GH_Enum<DBX.CurtainPanelSystemFamily>
+  {
+    public CurtainPanelSystemFamily() : base() { }
+    public CurtainPanelSystemFamily(DBX.CurtainPanelSystemFamily value) : base(value) { }
   }
 }

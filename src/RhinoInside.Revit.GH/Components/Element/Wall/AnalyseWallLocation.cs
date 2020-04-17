@@ -2,6 +2,8 @@ using System;
 using System.Linq;
 using Grasshopper.Kernel;
 
+using RhinoInside.Revit.External.DB.Extensions;
+
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -22,6 +24,7 @@ namespace RhinoInside.Revit.GH.Components
     {
     }
 
+    // in and out params
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
       manager.AddParameter(
@@ -62,6 +65,7 @@ namespace RhinoInside.Revit.GH.Components
         );
     }
 
+    // support methods
     private DB.WallType GetApplicableType(DB.Wall wall)
     {
       if (wall.WallType.Kind == DB.WallKind.Stacked)
@@ -95,11 +99,12 @@ namespace RhinoInside.Revit.GH.Components
         return 0;
     }
 
-    private DB.Curve ComputeLocationCurve(DB.Curve centerCurve, double offsetValue, DB.XYZ offsetPlaneNormal)
+    private DB.Curve OffsetLocationCurve(DB.Curve centerCurve, double offsetValue, DB.XYZ offsetPlaneNormal)
     {
       return centerCurve.CreateOffset(offsetValue, offsetPlaneNormal);
     }
 
+    // solver
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       // grab input wall type
@@ -107,13 +112,12 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetData("Wall", ref wallInstance))
         return;
 
-      var centerCurve = wallInstance.Location as DB.LocationCurve;
-      DA.SetData("Center Curve", centerCurve.Curve.ToRhino());
+      DA.SetData("Center Curve", wallInstance.GetCenterCurve());
       PipeHostParameter<Types.WallLocationLine>(DA, wallInstance, DB.BuiltInParameter.WALL_KEY_REF_PARAM, "Location Line");
 
       var offsetPlaneNormal = GetOffsetPlaneNormal(wallInstance);
       var offsetValue = GetOffsetForLocationCurve(wallInstance);
-      var locationCurve = ComputeLocationCurve(centerCurve.Curve, offsetValue, offsetPlaneNormal);
+      var locationCurve = OffsetLocationCurve(wallInstance.GetLocationCurve().Curve, offsetValue, offsetPlaneNormal);
       DA.SetData("Offset Value", offsetValue);
       DA.SetData("Location Curve", locationCurve.ToRhino());
     }

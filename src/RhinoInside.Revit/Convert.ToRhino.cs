@@ -255,6 +255,47 @@ namespace RhinoInside.Revit
     {
       return new PolylineCurve(polyline.GetCoordinates().ToRhino());
     }
+
+    /// <summary>
+    /// Convert curve loop into a list of Rhino curves
+    /// </summary>
+    /// <returns>List of Rhino curves</returns>
+    public static IEnumerable<Curve> ToRhino(this DB.CurveLoop curveLoop)
+    {
+      var curves = new List<Curve>();
+      foreach (DB.Curve c in curveLoop)
+        curves.Add(c.ToRhino());
+      return curves;
+    }
+
+    /// <summary>
+    /// Convert curve array into a list of Rhino curves
+    /// </summary>
+    /// <returns></returns>
+    public static IEnumerable<Curve> ToRhino(this DB.CurveArray curveArray)
+    {
+      var curves = new List<Curve>();
+      foreach (DB.Curve c in curveArray)
+        curves.Add(c.ToRhino());
+      return curves;
+    }
+
+    /// <summary>
+    /// Convert array of curve arrays into a list of Rhino curves
+    /// </summary>
+    /// <returns></returns>
+    public static IEnumerable<IEnumerable<Curve>> ToRhino(this DB.CurveArrArray curveArrayArray)
+    {
+      var curveLists = new List<List<Curve>>();
+      foreach (DB.CurveArray curveArray in curveArrayArray)
+      {
+        var curves = new List<Curve>();
+        foreach (DB.Curve c in curveArray)
+          curves.Add(c.ToRhino());
+        curveLists.Add(curves);
+      }
+      return curveLists;
+    }
     #endregion
 
     #region Surfaces

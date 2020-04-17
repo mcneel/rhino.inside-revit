@@ -204,10 +204,16 @@
     <Compile Include="External\DB\Extensions\Parameter.cs" />
     <Compile Include="External\DB\Extensions\ParameterFilterElement.cs" />
     <Compile Include="External\DB\Extensions\XYZ.cs" />
+    <Compile Include="External\DB\Extensions\Wall.cs" />
     <Compile Include="External\DB\ParameterBinding.cs" />
     <Compile Include="External\DB\ParameterClass.cs" />
     <Compile Include="External\DB\UniqueId.cs" />
     <Compile Include="External\DB\WallWrapping.cs" />
+    <Compile Include="External\DB\CurtainGridLayout.cs" />
+    <Compile Include="External\DB\CurtainGridJoinCondition.cs" />
+    <Compile Include="External\DB\CurtainMullionSystemFamily.cs" />
+    <Compile Include="External\DB\CurtainMullionPosition.cs" />
+    <Compile Include="External\DB\CurtainPanelSystemFamily.cs" />
     <Compile Include="External\UI\Application.cs" />
     <Compile Include="External\UI\Command.cs" />
     <Compile Include="External\UI\EventHandler.cs" />
