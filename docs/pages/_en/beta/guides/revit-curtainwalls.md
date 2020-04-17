@@ -84,7 +84,8 @@ The full geometry of a *Curtain Wall* instance can be extracted using the *Eleme
 
 ![]({{ "/static/images/guides/revit-curtainwalls05.png" | prepend: site.baseurl }})
 
-{% include ltr/issue_note.html issue_id='176' note='Element.Geometry does not extract Curtain Wall and System Geometries' %}
+![]({{ "/static/images/guides/revit-curtainwalls05a.png" | prepend: site.baseurl }})
+
 
 The *Element Bounding Geometry* component shown here, can be used to extract bounding geometry of a given *Curtain Wall* instance:
 
@@ -165,17 +166,17 @@ The geometry for *Curtain Mullions* can be extracted by passing the *Mullions* f
 
 ![]({{ "/static/images/guides/revit-curtainwalls11a.png" | prepend: site.baseurl }})
 
-The *Mullion* location curve can also be extracted by passing the *Mullion* to a *Curve* component:
-
-![]({{ "/static/images/guides/revit-curtainwalls12.png" | prepend: site.baseurl }})
-
 The component shown here can be used to extract information about the individual *Curtain Mullions*:
 
 ![]({{ "/static/images/guides/revit-curtainwalls13.png" | prepend: site.baseurl }})
 
-The **AC** output provides all the base curve of the *Mullion*. Notice how the horizontal curves are not intersecting the vertical curves, as the curves follow the join settings for the associated *Mullions*:
+The **C** output provides the base curve of the *Mullion*. Notice how the horizontal curves are not intersecting the vertical curves, as the curves follow the join settings for the associated *Mullions*:
 
 ![]({{ "/static/images/guides/revit-curtainwalls13a.png" | prepend: site.baseurl }})
+
+The *Mullion* location curve can also be extracted by passing the *Mullion* to a *Curve* component. Note that some of the mullions might have a length of zero and are not visible as geometries on the curtain walls:
+
+![]({{ "/static/images/guides/revit-curtainwalls12.png" | prepend: site.baseurl }})
 
 ### Analyzing Mullion Types
 
@@ -282,10 +283,6 @@ The *Analyze Curtain Grid Line* component also provides the Mullions and Panels 
 ![]({{ "/static/images/guides/revit-curtainwalls24a.png" | prepend: site.baseurl }})
 
 *Panel* association is slightly different from *Mullions*. Each *Mullion* is associated with a single *Grid Line*, however a single *Panel* (since it has two sides) is associated with a *Grid Line* along the U axis and also another *Grid Line* along the V:
-
-![]({{ "/static/images/guides/revit-curtainwalls25.png" | prepend: site.baseurl }})
-
-&nbsp;
 
 ![]({{ "/static/images/guides/revit-curtainwalls25a.gif" | prepend: site.baseurl }})
 
