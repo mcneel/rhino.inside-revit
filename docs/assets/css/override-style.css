@@ -82,7 +82,7 @@ pre {
     display: none;
 }
 
-.site-nav .page-link:last-child {
+.site-nav .page-link:nth-last-child(-n + 2) {
     margin-left: 10px;
 }
 
