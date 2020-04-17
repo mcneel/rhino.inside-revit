@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
       manager.AddParameter(
-        param: new Parameters.Element(),
+        param: new Parameters.CurtainGridMullion(),
         name: "Curtain Grid Mullion",
         nickname: "CGM",
         description: "Curtain Grid Mullion",
@@ -43,8 +43,14 @@ namespace RhinoInside.Revit.GH.Components
         );
       manager.AddCurveParameter(
         name: "Curtain Grid Mullion Axis Curve",
-        nickname: "AC",
+        nickname: "C",
         description: "Axis curve of the given curtain grid mullion instance",
+        access: GH_ParamAccess.item
+        );
+      manager.AddPointParameter(
+        name: "Curtain Grid Mullion Base Point",
+        nickname: "MBP",
+        description: "Base point of given given curtain grid mullion instance",
         access: GH_ParamAccess.item
         );
       manager.AddBooleanParameter(
@@ -59,6 +65,12 @@ namespace RhinoInside.Revit.GH.Components
         description: "Whether curtain grid mullion line is lockable",
         access: GH_ParamAccess.item
         );
+      //manager.AddNumberParameter(
+      //  name: "Mullion Length",
+      //  nickname: "L",
+      //  description: "Mullion Length",
+      //  access: GH_ParamAccess.item
+      //  );
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -70,8 +82,12 @@ namespace RhinoInside.Revit.GH.Components
 
       DA.SetData("Curtain Grid Mullion Type", Types.ElementType.FromElement(mullionInstance.MullionType));
       DA.SetData("Curtain Grid Mullion Axis Curve", mullionInstance.LocationCurve?.ToRhino());
+      DA.SetData("Curtain Grid Mullion Base Point", ((DB.LocationPoint) mullionInstance.Location).Point.ToRhino());
       DA.SetData("Locked?", mullionInstance.Lock);
       DA.SetData("Is Lockable?", mullionInstance.Lockable);
+      // Length can be acquired from axis curve
+      // Conversion to GH_Curve results in a zero length curve
+      //PipeHostParameter(DA, mullionInstance, DB.BuiltInParameter.CURVE_ELEM_LENGTH, "Mullion Length");
     }
   }
 }

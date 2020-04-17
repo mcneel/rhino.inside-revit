@@ -62,7 +62,7 @@ namespace RhinoInside.Revit.GH.Components
         access: GH_ParamAccess.item
         );
       manager.AddParameter(
-        param: new Parameters.Element(),
+        param: new Parameters.CurtainGridMullion(),
         name: "Attached Mullions",
         nickname: "ACGM",
         description: "All curtain grid mullions attached to the curtain grid line",
@@ -107,7 +107,7 @@ namespace RhinoInside.Revit.GH.Components
           var mend = mcurve.GetEndPoint(1);
           // if the distance is less than EPSILON, the DB.Mullion axis and DB.CurtainGridLine axis are almost overlapping
           if (gridLine.FullCurve.Distance(mstart) < EPSILON && gridLine.FullCurve.Distance(mend) < EPSILON)
-                attachedMullions.Add(Types.Element.FromElement(mullion));
+                attachedMullions.Add(Types.CurtainGridMullion.FromElement(mullion));
         }
       }
       DA.SetDataList("Attached Mullions", attachedMullions);

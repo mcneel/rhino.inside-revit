@@ -336,6 +336,7 @@
     <Compile Include="Parameters\SpatialElement.cs" />
     <Compile Include="Parameters\CurtainMullionPosition_ValueList.cs" />
     <Compile Include="Parameters\CurtainMullionSystemFamily_ValueList.cs" />
+    <Compile Include="Parameters\CurtainGridMullion.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -363,6 +364,7 @@
     <Compile Include="Types\View.cs" />
     <Compile Include="Types\CurtainGridLine.cs" />
     <Compile Include="Types\SpatialElement.cs" />
+    <Compile Include="Types\CurtainGridMullion.cs" />
     <Compile Include="ValueSet.cs" />
   </ItemGroup>
   <ItemGroup>
