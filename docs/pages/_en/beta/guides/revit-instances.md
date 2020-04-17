@@ -17,9 +17,21 @@ Use a combination of category component, connected to *ElementType.ByName* and *
 
 ## Extracting Instance Geometry
 
-{% include ltr/en/wip_note.html %}
+The *Element Geometry* component can be used to extract the geometry of an instance. In the example below, the complete geometry of a *Stacked Wall* instance has been extracted. The *Level Of Detail* value picker can be used to select the level of detail for geometry extraction:
 
-{% include ltr/download_comp.html archive='/static/ghnodes/Level Of Detail.ghuser' name='Level Of Detail' %}
+![]({{ "/static/images/guides/revit-instances02.png" | prepend: site.baseurl }})
+
+### Instance Bounding Box
+
+You can pass an instance into a *Box* component to extract the bounding box of the geometry very easily:
+
+![]({{ "/static/images/guides/revit-instances03.png" | prepend: site.baseurl }})
+
+### Instance Bounding Geometry
+
+Sometimes it is necessary to extract the *Bounding Geometry* of an instance. *Bounding Geometry* is a geometry that wraps the instance geometry as close as possible and generally follows the instance geometry topology. You can use the *Extract Bounding Geometry* component to extract this geometry. In the example below, the bounding geometry of a *Stacked Wall* is extracted. Notice that the bounding geometry is as thick as the thickest part of the *Stacked Wall*:
+
+![]({{ "/static/images/guides/revit-instances04.png" | prepend: site.baseurl }})
 
 ## Modifying Instances
 
