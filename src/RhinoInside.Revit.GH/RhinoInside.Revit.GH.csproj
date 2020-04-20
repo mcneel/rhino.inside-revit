@@ -210,6 +210,7 @@
     <Compile Include="Components\Document\Views.cs" />
     <Compile Include="Components\Document\Walls.cs" />
     <Compile Include="Components\Document\WallTypes.cs" />
+    <Compile Include="Components\Document\LinkedDocuments.cs" />
     <Compile Include="Components\ElementFilter.cs" />
     <Compile Include="Components\ElementType\Default.cs" />
     <Compile Include="Components\ElementType\Duplicate.cs" />
