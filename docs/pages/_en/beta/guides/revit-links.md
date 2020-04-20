@@ -10,23 +10,19 @@ When Revit loads a model, it also loads all the linked models into the memory as
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-Use the *Get Linked Docs* component shared here to get all the documents that are linked into the active (or given) document
+Use the *Document Links* component shown here to get all the documents that are linked into the active (or given) document
 
 ![]({{ "/static/images/guides/revit-links01.png" | prepend: site.baseurl }})
 
-{% include ltr/download_comp.html archive='/static/ghnodes/Get Linked Docs.ghuser' name='Get Linked Docs' %}
-
 ## Accessing Linked Document Elements
 
-The build in *Document.Elements* component does not accept an input document and only works on the active document. Use the *Get Doc Elements* component shared here to access elements if a given document. The input document can be a linked document as well.
+Use the *Document Elements* component shown here to access elements if a given document. The input document can be a linked document as well.
 
 ![]({{ "/static/images/guides/revit-links02.png" | prepend: site.baseurl }})
 
-Use the **T** toggle to list element types as well
+You can chain the *All Documents* component into the *Document Links* component to grab all the linked documents from all the open documents:
 
 ![]({{ "/static/images/guides/revit-links02a.png" | prepend: site.baseurl }})
-
-{% include ltr/download_comp.html archive='/static/ghnodes/Get Doc Elements.ghuser' name='Get Doc Elements' %}
 
 ## Unloading/Reloading Links
 
