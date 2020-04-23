@@ -1,4 +1,8 @@
-This directory contains the graphic files associated with this project
+This directory contains the graphic files associated with this project.
+
+- Source files are generated using [Affinity Designer](https://affinity.serif.com/en-gb/designer/) and is exported to PNG and SVG
+- The windows icon file is generated using [IcoFX](https://icofx.ro/)
+
 
 ## Project Logo
 
