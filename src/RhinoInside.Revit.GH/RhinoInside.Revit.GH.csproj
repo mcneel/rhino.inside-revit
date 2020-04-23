@@ -224,6 +224,7 @@
     <Compile Include="Components\ElementType\WallType\CompoundStructureLayer_Destruct.cs" />
     <Compile Include="Components\ElementType\WallType\AnalyseStackedWall.cs" />
     <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainWallType.cs" />
+    <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainSystemType.cs" />
     <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainGridMullionType.cs" />
     <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainGridPanelType.cs" />
     <Compile Include="Components\Element\AdaptiveComponent\ByPoints.cs" />
