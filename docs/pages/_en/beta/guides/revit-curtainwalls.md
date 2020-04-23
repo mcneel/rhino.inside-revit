@@ -330,11 +330,21 @@ In Revit API, Curtain Systems are represented by {% include api_type.html type='
 
 ## Analyzing Curtain System Types
 
-{% include ltr/en/wip_note.html %}
+*Analyze Curtain System Type* component shown here can be used to extract information about curtain system types. Note the similarity between the *Curtain System Type* and *Curtain Wall Types*:
+
+![]({{ "/static/images/guides/revit-curtainsystems03.png" | prepend: site.baseurl }})
 
 ## Analyzing Curtain Systems
 
-{% include ltr/en/wip_note.html %}
+Extracting information from Curtain System instances are very similar to Curtain Wall instances. Similar to Analyze Curtain Wall component, the Analyze Curtain System component provides access to the Curtain Grid definition:
+
+{% include ltr/bubble_note.html note='Note that *Curtain Systems* can have multiple *Curtain Grids*, each associated with a single face of the source geometry. These curtain grids have independent boundaries and are generated based on the *Curtain System Type* definition' %}
+
+![]({{ "/static/images/guides/revit-curtainsystems04.png" | prepend: site.baseurl }})
+
+Once you gain access to the *Curtain Grid* definition, you can use the *Analyze Curtain Grid* to extract information, very similar to grids on Curtain Walls:
+
+![]({{ "/static/images/guides/revit-curtainsystems05.png" | prepend: site.baseurl }})
 
 ## Modifying Curtain System Types
 
