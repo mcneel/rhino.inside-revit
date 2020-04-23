@@ -274,6 +274,7 @@
     <Compile Include="Components\Element\Wall\AnalyseWallLocation.cs" />
     <Compile Include="Components\Element\Wall\AnalyseWallProfile.cs" />
     <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainWall.cs" />
+    <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainSystem.cs" />
     <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainGridCell.cs" />
     <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainGrid.cs" />
     <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainGridLine.cs" />
