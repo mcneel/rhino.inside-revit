@@ -3,7 +3,7 @@ title: Update Door Marks
 ---
 
 <!-- intro video -->
-{% include youtube_player.html id="yDZ4y-ZbBkM" %}
+{% include youtube_player.html id="MxhpnDY8D2Q" %}
 
 {% include ltr/download_pkg.html archive='/static/samples/update-door-mark.zip' %}
 

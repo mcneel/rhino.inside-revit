@@ -5,7 +5,7 @@ order: 10
 
 {% include ltr/en/wip_note.html %}
 
-{% include youtube_player.html id="mYSSoOD3QVM" %}
+{% include youtube_player.html id="VsE5uWQ-_oM" %}
 
 
 ## Picking Elements
