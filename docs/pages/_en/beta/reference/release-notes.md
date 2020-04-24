@@ -3,11 +3,29 @@ title: Release Notes
 order: 40
 ---
 
+{% capture breaking_changes_notes %}
+Some of the changes mentioned in sections below, might break your existing Grasshopper definitions. We hope this should not be causing a lot of trouble and rework for you, since in most cases the older components can easily be replaced by new ones without changes to the actual workflow. As always, if you have any issues with loading **Rhino.Inside.Revit** or any of the components, take a look at the [Troubleshooting Guide]({{ site.baseurl }}{% link _en/beta/reference/toubleshooting.md %}) or head out to the [Discussion Forum]({{ site.forum_url }}) to reach out to us. We do our best to resolve the bugs and software conflicts and need your help to make this product better for everyone.
+{% endcapture %}
+{% include ltr/warning_note.html note=breaking_changes_notes %}
+
 <!-- most recent release should be on top -->
 
 {% include ltr/release-header.html version="0.0.?.?" time="" %}
 
 {% include youtube_player.html id="3OKoTQt-a28" %}
+
+- One of the major additions in this release is the Document-aware components. These components can query information from all the active documents at the same time so you can analyze and compare projects easier.
+
+![]({{ "/static/images/release_notes/2019-04-0103.png" | prepend: site.baseurl }})
+
+- The new Rhino.Inside.Revit have also improved the geometry transfer logic between Rhino and Revit in both directions and improved the edge tolerance and trimmed curve conversion as well. This will allow more geometry to pass between Rhino and Revit as a Brep Solids.
+
+- If you have been following the project closely, you might have noticed that we had included a large collection of python components to get you started with different workflows using the Revit API. In the meantime, we have been testing out the methods and ideas behind these components and happy to announce that we have started porting them into the Rhino.Inside.Revit source code. This would standardize the workflows and improve the performance of your Grasshopper definitions.
+
+![]({{ "/static/images/release_notes/2019-04-0102.png" | prepend: site.baseurl }})
+
+![]({{ "/static/images/release_notes/2019-04-0101.png" | prepend: site.baseurl }})
+
 
 {% include ltr/release-header.html version="0.0.7348.18192" time="02/13/2020 10:06:24" %}
 
