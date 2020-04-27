@@ -10,13 +10,13 @@ In Revit API, Spatial Elements are represented by the {% include api_type.html t
 
 ## Querying Spatial Elements
 
-Use a combination of category component, connected *Element.CategoryFilter* to collect specific *Spatial Elements*:
+Use a combination of category component, connected {% include ltr/comp.html uuid="d08f7ab1-" %} to collect specific *Spatial Elements*:
 
 ![]({{ "/static/images/guides/revit-spatial01.png" | prepend: site.baseurl }})
 
 ## Querying Separation Lines
 
-To find the separation (or boundary) lines associated with a category of spatial elements (e.g. Rooms, Areas, Spaces) use the *Separation Lines* dropdown component shared here. This component helps filtering down the list of categories to the separation lines. The output can be used with *Element.CategoryFilter* and *Document.Elements* components to grab the desired separation lines from the model.
+To find the separation (or boundary) lines associated with a category of spatial elements (e.g. Rooms, Areas, Spaces) use the *Separation Lines* dropdown component shared here. This component helps filtering down the list of categories to the separation lines. The output can be used with {% include ltr/comp.html uuid="d08f7ab1-" %} and {% include ltr/comp.html uuid="0f7da57e-" %} components to grab the desired separation lines from the model.
 
 ![]({{ "/static/images/guides/revit-spatial02.png" | prepend: site.baseurl }})
 

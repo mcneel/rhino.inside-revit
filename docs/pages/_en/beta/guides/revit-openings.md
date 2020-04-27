@@ -10,7 +10,7 @@ In Revit API, Openings of all types are represented by the {% include api_type.h
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-You can use the combination of the Openings component shared here, passed to *Element.CategoryFilter* and *Document.Elements* components to collect the openings in a model:
+You can use the combination of the Openings component shared here, passed to {% include ltr/comp.html uuid="d08f7ab1-" %} and {% include ltr/comp.html uuid="0f7da57e-" %} components to collect the openings in a model:
 
 ![]({{ "/static/images/guides/revit-openings01.png" | prepend: site.baseurl }})
 
