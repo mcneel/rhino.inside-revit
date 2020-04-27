@@ -1,0 +1,2 @@
+{% assign c = site.data.components | where_exp: "item", "item.uuid contains include.uuid" %}
+<strong>{{ c.first.title }}</strong>
