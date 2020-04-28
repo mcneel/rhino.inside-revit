@@ -387,6 +387,7 @@ a.btn-dark:hover {
     vertical-align: top;
     padding-top: 5px;
     padding-bottom: 5px;
+    vertical-align: middle;
 }
 
 .comp-table td.comp-icon {
