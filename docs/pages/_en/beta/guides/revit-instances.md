@@ -7,7 +7,7 @@ order: 33
 
 ## Querying Instance of a Type
 
-Use a combination of category component, connected to *ElementType.ByName* and *Element.TypeFilter*, to query all the instances of a specific type. The example below is collecting all the instance of the **My Basic Wall** type:
+Use a combination of category component, connected to {% include ltr/comp.html uuid="d3fb53d3-9" %} and *Element.TypeFilter*, to query all the instances of a specific type. The example below is collecting all the instance of the **My Basic Wall** type:
 
 ![]({{ "/static/images/guides/revit-instances01.png" | prepend: site.baseurl }})
 
