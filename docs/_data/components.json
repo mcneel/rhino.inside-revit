@@ -450,24 +450,6 @@
     "uuid": "6d845cbd-1962-4912-80c1-f47fe99ad54a"
   }, 
   {
-    "desc": "Picker for builtin view system families", 
-    "iconsrc": null, 
-    "icontag": "V", 
-    "panel": "Input", 
-    "tab": "Revit", 
-    "title": "View System Family", 
-    "uuid": "e4256d4b-f3f1-4229-940d-68da13569103"
-  }, 
-  {
-    "desc": "Picker for builtin view discipline", 
-    "iconsrc": null, 
-    "icontag": "V", 
-    "panel": "Input", 
-    "tab": "Revit", 
-    "title": "View Discipline", 
-    "uuid": "b336a87e-aa97-417c-8af1-8a7263b3d97a"
-  }, 
-  {
     "desc": "", 
     "iconsrc": null, 
     "icontag": "C", 
@@ -1402,96 +1384,6 @@
     "tab": "Revit", 
     "title": "Add View3D", 
     "uuid": "f7b775c9-05e0-40f7-85e9-5cc2ef79731e"
-  }, 
-  {
-    "desc": "Analyze given 3D view", 
-    "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Analyze", 
-    "tab": "Revit", 
-    "title": "Analyze 3D View", 
-    "uuid": "88c2ce5b-a7f4-475f-99f6-3bf4d9a4fe2f"
-  }, 
-  {
-    "desc": "Analyze given planar view", 
-    "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Analyze", 
-    "tab": "Revit", 
-    "title": "Analyze Planar View", 
-    "uuid": "f1a5b1be-2b4d-4b60-bd3c-984bcf29cf6e"
-  }, 
-  {
-    "desc": "Analyze given schedule", 
-    "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Analyze", 
-    "tab": "Revit", 
-    "title": "Analyze Schedule", 
-    "uuid": "5075a07e-6de0-4a22-b220-fc934d66be5a"
-  }, 
-  {
-    "desc": "Analyze given sheet", 
-    "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Analyze", 
-    "tab": "Revit", 
-    "title": "Analyze Sheet", 
-    "uuid": "4c50d1af-8f69-443f-b1e1-0a960775ecad"
-  }, 
-  {
-    "desc": "Analyze given sectional view", 
-    "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Analyze", 
-    "tab": "Revit", 
-    "title": "Analyze Sectional View", 
-    "uuid": "dc084baa-7c7d-4b5c-baa9-7f31f962c637"
-  }, 
-  {
-    "desc": "Analyze given View element", 
-    "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Analyze", 
-    "tab": "Revit", 
-    "title": "Analyze View", 
-    "uuid": "de11ea5f-eb91-4fd6-880b-ed0b3cb3ed53"
-  }, 
-  {
-    "desc": "Analyze cropbox configuration of given View element", 
-    "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Analyze", 
-    "tab": "Revit", 
-    "title": "Analyze View (Crop Settings)", 
-    "uuid": "b0ab80e3-6eb0-44b5-9136-648dd87452b9"
-  }, 
-  {
-    "desc": "Analyze render settings of given View element", 
-    "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Analyze", 
-    "tab": "Revit", 
-    "title": "Analyze View (Render Settings)", 
-    "uuid": "9c1a91cf-3750-4cce-98f9-c7fa93703d43"
-  }, 
-  {
-    "desc": "Analyze Visibility/Graphics settings of given View element", 
-    "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Analyze", 
-    "tab": "Revit", 
-    "title": "Analyze View (Visibility/Graphics)", 
-    "uuid": "b32867d4-8508-476c-b85d-29507c8e20d1"
-  }, 
-  {
-    "desc": "Analyze display settings of given View element", 
-    "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Analyze", 
-    "tab": "Revit", 
-    "title": "Analyze View (Display Settings)", 
-    "uuid": "0b3da675-51cd-430b-90f9-f314b954d4f0"
   }, 
   {
     "desc": "Given a curve, it adds a Wall element to the active Revit document", 
