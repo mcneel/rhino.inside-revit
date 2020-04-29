@@ -25,7 +25,8 @@ __version__ = '1.0'
 
 # cli configs =================================================================
 DEFAULT_JRN_NAME = 'debug.txt'
-DEFAULT_JRN_ARTIFACT_PATTERN = r'journal\.\d{4}'
+DEFAULT_JRN_ARTIFACT_PATTERN = r'^journal\.\d{4}'
+DEFAULT_ADDIN_MANIFEST_PATTERN = r'.+\.addin$'
 DEFAULT_CACHE_DIR = '.debug'
 DEFAULT_REVIT_BIN_PATH = r'%PROGRAMFILES%\Autodesk\Revit {year}\Revit.exe'
 DEFAULT_ADDON_MANIFEST = r"""<?xml version="1.0" encoding="utf-8"?>
@@ -155,7 +156,10 @@ def clean_cache(cache_dir):
     for entry in os.listdir(cache_dir):
         entry_path = op.join(cache_dir, entry)
         if op.isfile(entry_path) \
-                and re.match(DEFAULT_JRN_ARTIFACT_PATTERN, entry):
+                and (
+                    re.match(DEFAULT_JRN_ARTIFACT_PATTERN, entry)
+                    or re.match(DEFAULT_ADDIN_MANIFEST_PATTERN, entry)
+                ):
             try:
                 os.remove(entry_path)
             except Exception as del_ex:
