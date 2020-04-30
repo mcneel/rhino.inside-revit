@@ -96,6 +96,8 @@ Use the {% include ltr/comp.html uuid="1169ceb6-" %} component shown here, to gr
 
 ![]({{ "/static/images/guides/revit-walls11.png" | prepend: site.baseurl }})
 
+{% include ltr/api_note.html note="Slant Angle property is only supported on Revit >= 2021" %}
+
 The example below uses the shared *Wall Structural Usage* value list component to filter for **Shear** walls:
 
 ![]({{ "/static/images/guides/revit-walls12.png" | prepend: site.baseurl }})

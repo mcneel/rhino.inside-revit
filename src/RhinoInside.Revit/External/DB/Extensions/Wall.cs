@@ -59,7 +59,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static Brep ComputeWallBoundingGeometry(this Wall wall)
     {
       // TODO: brep creation might be crude and could use performance improvements
-      // TODO: update for 2021 and slanted walls
 
       // extract global properties
       // e.g. base height, thickness, ...
@@ -67,40 +66,94 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var thickness = wall.GetWidth();
       // construct a base offset plane that is used later to offset base curves
       var offsetPlane = Rhino.Geometry.Plane.WorldXY;
-      var baseTransform = new Vector3d(0, 0, 0);
-      baseTransform.Z = wall.get_Parameter(BuiltInParameter.WALL_BASE_OFFSET).AsDouble();
+      var baseElevation = wall.get_Parameter(BuiltInParameter.WALL_BASE_OFFSET).AsDouble();
+
+      // calculate slant
+      double topOffset = double.NaN;
+#if REVIT_2021
+      // if wall slant is supported grab the slant angle
+      var slantParam = wall.get_Parameter(BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL);
+      if (slantParam is Parameter)
+      {
+        // and calculate the cuvre offset at the top based on the curve slant angle
+        //     O = top offset distance
+        // ---------
+        //  \      |
+        //   \  S = slant angle
+        //    \    |
+        //     \   | H = wall height
+        //      \  |
+        //       \ |
+        //        \|
+        var slantAngle = slantParam.AsDouble();
+        if (slantAngle > 0)
+          topOffset = height * (Math.Sin(slantAngle) / Math.Abs(Math.Cos(slantAngle)));
+      }
+#endif
 
 
       // get the base curve of wall (center curve), and wall thickness
       // this will be used to create a bottom-profile of the wall
       var baseCurve = Convert.ToRhino(((LocationCurve) wall.Location).Curve);
       // transform to where the wall base is
-      baseCurve.Translate(baseTransform);
+      baseCurve.Translate(0, 0, baseElevation);
 
-      // create the base surface (loft from start and end curves, offset from wall center curve)
-      var startCurve = baseCurve.Offset(offsetPlane, thickness / 2.0, 0.1, CurveOffsetCornerStyle.None)[0];
-      var endCurve = baseCurve.Offset(offsetPlane, thickness / -2.0, 0.1, CurveOffsetCornerStyle.None)[0];
+      // create the base curves on boths sides
+      var side1BottomCurve = baseCurve.Offset(offsetPlane, thickness / 2.0, 0.1, CurveOffsetCornerStyle.None)[0];
+      var side2BottomCurve = baseCurve.Offset(offsetPlane, thickness / -2.0, 0.1, CurveOffsetCornerStyle.None)[0];
 
-      var bloft = Brep.CreateFromLoft(
-          curves: new List<Rhino.Geometry.Curve>() { startCurve, endCurve },
-          start: Point3d.Unset,
-          end: Point3d.Unset,
-          loftType: LoftType.Normal,
-          closed: false
-          )[0]; // grab the first loft
-      // grab the face of the base surface
-      var bface = bloft.Faces[0];
+      // create top curves, by moving a duplicate of base curves to top
+      var fromPoint = side1BottomCurve.PointAtStart;
+      var side1TopCurve = side1BottomCurve.DuplicateCurve();
+      side1TopCurve.Translate(0, 0, fromPoint.Z + height);
+      var side2TopCurve = side2BottomCurve.DuplicateCurve();
+      side2TopCurve.Translate(0, 0, fromPoint.Z + height);
 
-      // calculate extrusion height
-      var fromPoint = startCurve.PointAtStart;
-      var toPoint = new Point3d(fromPoint);
-      toPoint.Z += height;
+      // offset the top curves to get the slanted wall top curves, based on the previously calculated offset distance
+      if (topOffset > 0)
+      {
+        side1TopCurve = side1TopCurve.Offset(offsetPlane, topOffset, 0.1, CurveOffsetCornerStyle.None)[0];
+        side2TopCurve = side2TopCurve.Offset(offsetPlane, topOffset, 0.1, CurveOffsetCornerStyle.None)[0];
+      }
 
-      // and extrude the surface, and return
-      return bface.CreateExtrusion(
-        pathCurve: new Rhino.Geometry.Line(fromPoint, toPoint).ToNurbsCurve(),
-        cap: true
-        );
+      // build a list of curve-pairs for the 6 sides
+      var sideCurvePairs = new List<Tuple<Rhino.Geometry.Curve, Rhino.Geometry.Curve>>()
+      {
+        // side 1
+        new Tuple<Rhino.Geometry.Curve, Rhino.Geometry.Curve>(side1BottomCurve, side1TopCurve),
+        // side 2
+        new Tuple<Rhino.Geometry.Curve, Rhino.Geometry.Curve>(side2BottomCurve, side2TopCurve),
+        // bottom
+        new Tuple<Rhino.Geometry.Curve, Rhino.Geometry.Curve>(side1BottomCurve, side2BottomCurve),
+        // start side
+        new Tuple<Rhino.Geometry.Curve, Rhino.Geometry.Curve>(
+          new Rhino.Geometry.Line(side1BottomCurve.PointAtStart, side1TopCurve.PointAtStart).ToNurbsCurve(),
+          new Rhino.Geometry.Line(side2BottomCurve.PointAtStart, side2TopCurve.PointAtStart).ToNurbsCurve()
+        ),
+        // top
+        new Tuple<Rhino.Geometry.Curve, Rhino.Geometry.Curve>(side1TopCurve, side2TopCurve),
+        // end side
+        new Tuple<Rhino.Geometry.Curve, Rhino.Geometry.Curve>(
+          new Rhino.Geometry.Line(side1TopCurve.PointAtEnd, side1BottomCurve.PointAtEnd).ToNurbsCurve(),
+          new Rhino.Geometry.Line(side2TopCurve.PointAtEnd, side2BottomCurve.PointAtEnd).ToNurbsCurve()
+        )
+      };
+
+      // build breps for each side and add to list
+      var finalBreps = new List<Brep>();
+      foreach (var curvePair in sideCurvePairs)
+      {
+        var loft = Brep.CreateFromLoft(
+            curves: new List<Rhino.Geometry.Curve>() { curvePair.Item1, curvePair.Item2 },
+            start: Point3d.Unset,
+            end: Point3d.Unset,
+            loftType: LoftType.Normal,
+            closed: false
+            ).First(); // grab the first loft
+        finalBreps.Add(loft);
+      }
+      // join all the breps into one
+      return Brep.JoinBreps(finalBreps, 0.1).First();
     }
   }
 }
