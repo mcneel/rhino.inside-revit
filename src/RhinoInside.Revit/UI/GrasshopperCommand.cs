@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
@@ -59,7 +60,15 @@ namespace RhinoInside.Revit.UI
 
     public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
     {
-      GH.Guest.ShowAsync();
+      // check to see if any document path is provided in journal data
+      // if yes, open the document
+      string filename = null;
+      if (data.JournalData.TryGetValue("Open", out filename) && File.Exists(filename))
+        GH.Guest.ShowAndOpenDocumentAsync(filename);
+      // otherwise, just open the GH window
+      else
+        GH.Guest.ShowAsync();
+      // whatever happens say success so Revit does not prompt errors
       return Result.Succeeded;
     }
   }
