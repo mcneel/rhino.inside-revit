@@ -1,6 +1,8 @@
 # Utility Scripts
 
-Python scripts in this folder might have dependencies. Install `pipenv` and run `pipenv install` to get all the dependencies for these scripts.
+Support scripts for this project, loosely following the [Github's Script to Rule Them All](https://github.blog/2015-06-30-scripts-to-rule-them-all/) convention.
+
+- Python scripts in this folder might have dependencies. Install `pipenv` and run `pipenv install` to get all the dependencies for these scripts. 
 
 ## `script/cibuild.msbuild`
 
