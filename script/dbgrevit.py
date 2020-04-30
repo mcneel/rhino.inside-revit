@@ -2,12 +2,14 @@
 """Open Rhino.Inside.Revit inside Revit for debugging
 
 Usage:
-    {} <revit_year> [<model_path>] [--rps] [--dryrun]
+    {} <revit_year> [<model_path>] [<ghdoc_path>] [--rps] [--dryrun]
 
 Options:
     -h, --help                          Show this help
     --rps                               Add RevitPythonShell addon
     --dryrun                            Create runtime env but do not start Revit
+    <model_path>                        Revit model to be opened
+    <ghdoc_path>                        Grasshopper document to be opened
 """
 import sys
 import os
@@ -58,12 +60,47 @@ RPS_ADDON_INFO = {
 }
 # =============================================================================
 
+class CLIArgs:
+    """Data type to hold command line args"""
+    def __init__(self, args):
+        self.revit_year = args['<revit_year>']
+        self.model_path = args['<model_path>']
+        self.ghdoc_path = args['<ghdoc_path>']
+        self.add_rps = args['--rps']
+        self.start_revit = not args['--dryrun']
+
+
 def ensure_cache_dir():
     """Ensure debug cache directory exists"""
     pwd = op.dirname(__file__)
     cache_dir = op.join(pwd, DEFAULT_CACHE_DIR)
     if not op.isdir(cache_dir):
         os.mkdir(cache_dir)
+    return cache_dir
+
+
+def clean_cache(cache_dir):
+    """Clear cache files"""
+    # find journal files and delete
+    for entry in os.listdir(cache_dir):
+        entry_path = op.join(cache_dir, entry)
+        if op.isfile(entry_path) \
+                and (
+                    re.match(DEFAULT_JRN_ARTIFACT_PATTERN, entry)
+                    or re.match(DEFAULT_ADDIN_MANIFEST_PATTERN, entry)
+                ):
+            try:
+                os.remove(entry_path)
+            except Exception as del_ex:
+                print('Error removing {} | {}'.format(entry_path, str(del_ex)))
+
+
+def prepare_cache():
+    """Make sure cache dir exists and is clean"""
+    # make sure cache dir exists
+    cache_dir = ensure_cache_dir()
+    # cleanup
+    clean_cache(cache_dir)
     return cache_dir
 
 
@@ -79,7 +116,10 @@ def create_rir_journal(journal_dir, model_path='', journal_name=DEFAULT_JRN_NAME
     jm = rjm.JournalMaker(permissive=True)
     # open model
     if model_path:
-        jm.open_model(model_path)
+        if op.isfile(model_path):
+            jm.open_model(model_path)
+        else:
+            raise Exception("Revit model does not exist: {}".format(model_path))
     # ask to open Rhinoceros tab
     jm.execute_command(
         tab_name='Add-Ins',
@@ -92,7 +132,10 @@ def create_rir_journal(journal_dir, model_path='', journal_name=DEFAULT_JRN_NAME
         tab_name='Rhinoceros',
         panel_name='Grasshopper',
         command_module='RhinoInside.Revit.UI',
-        command_class='CommandGrasshopper'
+        command_class='CommandGrasshopper',
+        command_data={
+            "Open": r"Z:\LEO-WX\Documents\Rhino.Inside\Dev\Walls_Native.gh"
+        }
         )
     # write journal to file
     journal_filepath = op.join(journal_dir, journal_name)
@@ -150,46 +193,36 @@ def run_revit(revit_year, journal_file):
     subprocess.run([revit_path, journal_file])
 
 
-def clean_cache(cache_dir):
-    """Clear cache files"""
-    # find journal files and delete
-    for entry in os.listdir(cache_dir):
-        entry_path = op.join(cache_dir, entry)
-        if op.isfile(entry_path) \
-                and (
-                    re.match(DEFAULT_JRN_ARTIFACT_PATTERN, entry)
-                    or re.match(DEFAULT_ADDIN_MANIFEST_PATTERN, entry)
-                ):
-            try:
-                os.remove(entry_path)
-            except Exception as del_ex:
-                print('Error removing {} | {}'.format(entry_path, str(del_ex)))
-
-
-if __name__ == '__main__':
-    # process command line args
-    args = docopt(
-        __doc__.format(__binname__),
-        version='{} {}'.format(__binname__, __version__)
-        )
-
-    revit_year = args['<revit_year>']
-    model_path = args['<model_path>']
-    add_rps = args['--rps']
-    start_revit = not args['--dryrun']
-
+def run_command(cfg: CLIArgs):
     # prepare cache -------------------
-    # make sure cache dir exists
-    cache_dir = ensure_cache_dir()
-    # cleanup
-    clean_cache(cache_dir)
+    cache_dir = prepare_cache()
 
     # prepare env ---------------------
     # make journal
-    journal_file = create_rir_journal(cache_dir, model_path=model_path)
+    journal_file = create_rir_journal(cache_dir, model_path=cfg.model_path)
     # create addon manifests
-    add_addons(revit_year, cache_dir, add_rps=add_rps)
+    add_addons(cfg.revit_year, cache_dir, add_rps=cfg.add_rps)
 
     # run revit -----------------------
-    if start_revit:
-        run_revit(revit_year, journal_file)
+    if cfg.start_revit:
+        run_revit(cfg.revit_year, journal_file)
+
+
+if __name__ == '__main__':
+    try:
+        # do the work
+        run_command(
+            # make settings from cli args
+            cfg=CLIArgs(
+                # process args
+                docopt(
+                    __doc__.format(__binname__),
+                    version='{} {}'.format(__binname__, __version__
+                    )
+                )
+            )
+        )
+    # gracefully handle exceptions and print results
+    except Exception as run_ex:
+        print(str(run_ex))
+        sys.exit(1)
