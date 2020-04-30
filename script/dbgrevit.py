@@ -104,7 +104,7 @@ def prepare_cache():
     return cache_dir
 
 
-def create_rir_journal(journal_dir, model_path='', journal_name=DEFAULT_JRN_NAME):
+def create_rir_journal(journal_dir, model_path='', ghdoc_path='', journal_name=DEFAULT_JRN_NAME):
     """Create a new Revit journal to lauch Revit and open Rhino.Inside.Revit
 
     Args:
@@ -114,12 +114,14 @@ def create_rir_journal(journal_dir, model_path='', journal_name=DEFAULT_JRN_NAME
     """
     # start a clean journal
     jm = rjm.JournalMaker(permissive=True)
+
     # open model
     if model_path:
         if op.isfile(model_path):
             jm.open_model(model_path)
         else:
             raise Exception("Revit model does not exist: {}".format(model_path))
+
     # ask to open Rhinoceros tab
     jm.execute_command(
         tab_name='Add-Ins',
@@ -127,16 +129,24 @@ def create_rir_journal(journal_dir, model_path='', journal_name=DEFAULT_JRN_NAME
         command_module='RhinoInside.Revit.UI',
         command_class='CommandRhinoInside'
         )
+
+    # make sure ghd ocument exists
+    cmd_data = {}
+    if ghdoc_path:
+        if op.isfile(ghdoc_path):
+            cmd_data["Open"] = ghdoc_path
+        else:
+            raise Exception("GH document does not exist: {}".format(ghdoc_path))
+
     # ask to open Grasshopper
     jm.execute_command(
         tab_name='Rhinoceros',
         panel_name='Grasshopper',
         command_module='RhinoInside.Revit.UI',
         command_class='CommandGrasshopper',
-        command_data={
-            "Open": r"Z:\LEO-WX\Documents\Rhino.Inside\Dev\Walls_Native.gh"
-        }
+        command_data=cmd_data
         )
+
     # write journal to file
     journal_filepath = op.join(journal_dir, journal_name)
     jm.write_journal(journal_filepath)
@@ -199,7 +209,11 @@ def run_command(cfg: CLIArgs):
 
     # prepare env ---------------------
     # make journal
-    journal_file = create_rir_journal(cache_dir, model_path=cfg.model_path)
+    journal_file = create_rir_journal(
+        cache_dir,
+        model_path=cfg.model_path,
+        ghdoc_path=cfg.ghdoc_path
+        )
     # create addon manifests
     add_addons(cfg.revit_year, cache_dir, add_rps=cfg.add_rps)
 
