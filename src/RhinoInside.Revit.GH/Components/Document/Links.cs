@@ -9,11 +9,13 @@ namespace RhinoInside.Revit.GH.Components
   {
     public override Guid ComponentGuid => new Guid("EBCCFDD8-9F3B-44F4-A209-72D06C8082A5");
     public override GH_Exposure Exposure => GH_Exposure.primary;
+    protected override string IconTag => "L";
+
 
     public DocumentLinks() : base
     (
       name: "Document Links",
-      nickname: "L",
+      nickname: "Links",
       description: "Gets Revit documents that are linked into given document",
       category: "Revit",
       subCategory: "Document"

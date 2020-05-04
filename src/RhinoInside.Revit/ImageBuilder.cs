@@ -35,7 +35,9 @@ namespace RhinoInside.Revit
         var format = new Drawing.StringFormat()
         {
           Alignment = Drawing.StringAlignment.Center,
-          LineAlignment = Drawing.StringAlignment.Center
+          LineAlignment = Drawing.StringAlignment.Center,
+          Trimming = Drawing.StringTrimming.Character,
+          FormatFlags = Drawing.StringFormatFlags.LineLimit
         };
 
         float emSize = ((float) (width) / ((float) tag.Length));

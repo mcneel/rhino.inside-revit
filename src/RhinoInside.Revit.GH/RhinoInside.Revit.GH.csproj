@@ -223,7 +223,6 @@
     <Compile Include="Components\ElementType\WallType\AnalyseBasicWallType.cs" />
     <Compile Include="Components\ElementType\WallType\CompoundStructure_Destruct.cs" />
     <Compile Include="Components\ElementType\WallType\CompoundStructureLayer_Destruct.cs" />
-    <Compile Include="Components\ElementType\WallType\AnalyseStackedWall.cs" />
     <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainWallType.cs" />
     <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainSystemType.cs" />
     <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainGridMullionType.cs" />
@@ -271,6 +270,7 @@
     <Compile Include="Components\Element\View\ExportImage.cs" />
     <Compile Include="Components\Element\View\Identity.cs" />
     <Compile Include="Components\Element\View\View3DByPlane.cs" />
+    <Compile Include="Components\Element\Wall\AnalyseStackedWall.cs" />
     <Compile Include="Components\Element\Wall\ByCurve.cs" />
     <Compile Include="Components\Element\Wall\AnalyseWall.cs" />
     <Compile Include="Components\Element\Wall\AnalyseWallLocation.cs" />
