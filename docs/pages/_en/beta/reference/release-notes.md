@@ -10,7 +10,7 @@ Some of the changes mentioned in sections below, might break your existing Grass
 
 <!-- most recent release should be on top -->
 
-{% include ltr/release-header.html version="0.0.?.?" time="" %}
+{% include ltr/release-header.html version="0.0.7429.17299" time="5/4/2020 9:36:38 AM" %}
 
 {% include youtube_player.html id="3OKoTQt-a28" %}
 
@@ -19,6 +19,9 @@ Some of the changes mentioned in sections below, might break your existing Grass
 ![]({{ "/static/images/release_notes/2019-04-0103.png" | prepend: site.baseurl }})
 
 - The new Rhino.Inside.Revit have also improved the geometry transfer logic between Rhino and Revit in both directions and improved the edge tolerance and trimmed curve conversion as well. This will allow more geometry to pass between Rhino and Revit as a Brep Solids.
+  - Degree 2 curves with more than 3 points are upgraded to degree 3 to fulfill the Revit requirements
+  - And Curves that are not C2 are approximated moving the knots near the discontinuity
+  - Curves are scaled on the fly without copying to improve performance. This means on Rhino models in mm that should be converted to feet in Revit is done without duplicating the curve
 
 - If you have been following the project closely, you might have noticed that we had included a large collection of python components to get you started with different workflows using the Revit API. In the meantime, we have been testing out the methods and ideas behind these components and happy to announce that we have started porting them into the Rhino.Inside.Revit source code. This would standardize the workflows and improve the performance of your Grasshopper definitions.
 
