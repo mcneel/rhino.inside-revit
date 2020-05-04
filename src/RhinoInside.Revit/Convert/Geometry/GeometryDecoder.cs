@@ -87,6 +87,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <summary>
     /// Converts a <see cref="DB.CurveArray"/> into a Rhino <see cref="Curve"/>[]
     /// </summary>
+    /// <seealso cref="ToPolyCurves(DB.CurveArrArray)"/>
     public static Curve[] ToCurves(this DB.CurveArray value)
     {
       var count = value.Size;
@@ -97,6 +98,29 @@ namespace RhinoInside.Revit.Convert.Geometry
         curves[index++] = curve.ToCurve();
 
       return curves;
+    }
+
+    /// <summary>
+    /// Converts a <see cref="DB.CurveArrArray"/> into a <see cref="PolyCurve"/>[]
+    /// </summary>
+    /// <seealso cref="ToCurves(DB.CurveArrArray)"/>
+    public static PolyCurve[] ToPolyCurves(this DB.CurveArrArray value)
+    {
+      var count = value.Size;
+      var list = new PolyCurve[count];
+
+      int index = 0;
+      foreach (var curveArray in value.Cast<DB.CurveArray>())
+      {
+        var polycurve = new PolyCurve();
+
+        foreach (var curve in curveArray.Cast<DB.Curve>())
+          polycurve.AppendSegment(curve.ToCurve());
+
+        list[index++] = polycurve;
+      }
+
+      return list;
     }
 
     public static IEnumerable<GeometryBase> ToGeometryBaseMany(this DB.GeometryObject geometry)

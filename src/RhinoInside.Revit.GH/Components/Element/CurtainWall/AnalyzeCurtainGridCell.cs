@@ -1,7 +1,6 @@
 using System;
-using System.Linq;
 using Grasshopper.Kernel;
-
+using RhinoInside.Revit.Convert.Geometry;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -64,10 +63,10 @@ namespace RhinoInside.Revit.GH.Components
       // same might happen with .PlanarizedCurveLoops but not fully tested
       try
       {
-        DA.SetDataList("Curves", cell.CurveLoops?.ToRhino().SelectMany(x => x));
-        DA.SetDataList("Planarized Curves", cell.PlanarizedCurveLoops?.ToRhino().SelectMany(x => x));
+        DA.SetDataList("Curves", cell.CurveLoops?.ToPolyCurves());
+        DA.SetDataList("Planarized Curves", cell.PlanarizedCurveLoops?.ToPolyCurves());
       }
-      // silence the empty exception 
+      // silence the empty exception
       catch { }
     }
   }

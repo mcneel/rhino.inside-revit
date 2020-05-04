@@ -69,24 +69,6 @@ namespace RhinoInside.Revit
 
     [Obsolete("\r - For previous behaviour use RhinoInside.Revit.Convert.Geometry.Raw.RawDecoder.ToRhino\r - For a full conversion including units consider RhinoInside.Revit.Convert.Geometry.GeometryDecoder extension methods")]
     public static PolylineCurve ToRhino(this DB.PolyLine polyline) => RawDecoder.ToRhino(polyline);
-
-
-    /// <summary>
-    /// Convert array of curve arrays into a list of Rhino curves
-    /// </summary>
-    /// <returns></returns>
-    public static IEnumerable<IEnumerable<Curve>> ToRhino(this DB.CurveArrArray curveArrayArray)
-    {
-      var curveLists = new List<List<Curve>>();
-      foreach (DB.CurveArray curveArray in curveArrayArray)
-      {
-        var curves = new List<Curve>();
-        foreach (DB.Curve c in curveArray)
-          curves.Add(c.ToCurve());
-        curveLists.Add(curves);
-      }
-      return curveLists;
-    }
     #endregion
 
     #region Surfaces
