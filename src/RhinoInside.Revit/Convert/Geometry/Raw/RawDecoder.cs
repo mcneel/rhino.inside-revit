@@ -415,7 +415,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
     {
       using (var surface = face.GetSurface() as DB.RuledSurface)
       {
-        if (surface.OrientationMatchesParametricOrientation)
+        if (surface.MatchesParametricOrientation())
         {
           return FromRuledSurface
           (
@@ -613,7 +613,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
             continue;
 
           var edges = edgeLoop.Cast<DB.Edge>();
-          if (!face.OrientationMatchesSurface())
+          if (!face.MatchesSurfaceOrientation())
             edges = edges.Reverse();
 
           var loop = new BrepBoundary()
@@ -640,7 +640,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
             loop.edges.Add(brepEdge);
             var segment = ToRhino(edge.AsCurveFollowingFace(face));
 
-            if (!face.OrientationMatchesSurface())
+            if (!face.MatchesSurfaceOrientation())
               segment.Reverse();
 
             loop.orientation.Add(segment.TangentAt(segment.Domain.Mid).IsParallelTo(brepEdge.TangentAt(brepEdge.Domain.Mid)));
@@ -738,7 +738,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
         return null;
 
       // Set edges & trims
-      TrimSurface(brep, si, !face.OrientationMatchesSurface(), shells);
+      TrimSurface(brep, si, !face.MatchesSurfaceOrientation(), shells);
 
       // Set vertices
       brep.SetVertices();
@@ -783,7 +783,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
           continue;
 
         // Set edges & trims
-        TrimSurface(brep, si, !face.OrientationMatchesSurface(), shells);
+        TrimSurface(brep, si, !face.MatchesSurfaceOrientation(), shells);
       }
 
       // Set vertices

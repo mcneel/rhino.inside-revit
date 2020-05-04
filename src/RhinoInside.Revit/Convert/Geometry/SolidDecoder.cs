@@ -113,7 +113,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       if (brep is null)
         return null;
 
-      if (!face.OrientationMatchesSurface())
+      if (!face.MatchesSurfaceOrientation())
         brep.Flip();
 
       var loops = ToCurveMany(face.GetEdgesAsCurveLoops()).ToArray();

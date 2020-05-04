@@ -213,6 +213,7 @@
     <Compile Include="External\DB\Application.cs" />
     <Compile Include="External\DB\Extensions\Category.cs" />
     <Compile Include="External\DB\Extensions\Curve.cs" />
+    <Compile Include="External\DB\Extensions\CurveLoop.cs" />
     <Compile Include="External\DB\Extensions\Document.cs" />
     <Compile Include="External\DB\Extensions\Element.cs" />
     <Compile Include="External\DB\Extensions\ElementId.cs" />
@@ -222,6 +223,7 @@
     <Compile Include="External\DB\Extensions\Instance.cs" />
     <Compile Include="External\DB\Extensions\Parameter.cs" />
     <Compile Include="External\DB\Extensions\ParameterFilterElement.cs" />
+    <Compile Include="External\DB\Extensions\Surface.cs" />
     <Compile Include="External\DB\Extensions\XYZ.cs" />
     <Compile Include="External\DB\Extensions\Wall.cs" />
     <Compile Include="External\DB\ParameterBinding.cs" />

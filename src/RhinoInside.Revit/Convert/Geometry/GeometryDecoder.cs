@@ -6,6 +6,7 @@ using DB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.Convert.Geometry
 {
   using Raw;
+  using RhinoInside.Revit.External.DB.Extensions;
 
   /// <summary>
   /// Methods in this class do a full geometry conversion.
