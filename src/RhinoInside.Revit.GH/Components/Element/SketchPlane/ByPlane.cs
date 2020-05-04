@@ -1,5 +1,6 @@
 using System;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
@@ -34,16 +35,13 @@ namespace RhinoInside.Revit.GH.Components
       if (!plane.IsValid)
         ThrowArgumentException(nameof(plane), "Plane is not valid.");
 
-      var scaleFactor = 1.0 / Revit.ModelUnits;
-      plane = plane.ChangeUnits(scaleFactor);
-
       if (element is DB.SketchPlane sketchPlane)
       {
         bool pinned = element.Pinned;
         element.Pinned = false;
 
         var plane0 = sketchPlane.GetPlane();
-        using (var plane1 = plane.ToHost())
+        using (var plane1 = plane.ToPlane())
         {
           if (!plane0.Normal.IsParallelTo(plane1.Normal))
           {
@@ -73,7 +71,7 @@ namespace RhinoInside.Revit.GH.Components
         element.Pinned = pinned;
       }
       else
-        ReplaceElement(ref element, DB.SketchPlane.Create(doc, plane.ToHost()));
+        ReplaceElement(ref element, DB.SketchPlane.Create(doc, plane.ToPlane()));
     }
   }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
@@ -41,9 +42,9 @@ namespace RhinoInside.Revit.GH.Components
         DB.Options options = null;
         using (var geometry = element?.GetGeometry(detailLevel, out options)) using (options)
         {
-          var list = geometry?.ToRhino().Where(x => x is object).ToList();
+          var list = geometry?.ToGeometryBaseMany().OfType<Rhino.Geometry.GeometryBase>().ToList();
 
-          if (!list.Any())
+          if (list.Count == 0)
           {
             foreach (var dependent in element.GetDependentElements(null).Select(x => element.Document.GetElement(x)))
             {
@@ -53,7 +54,7 @@ namespace RhinoInside.Revit.GH.Components
                 using (var dependentGeometry = dependent?.GetGeometry(detailLevel, out dependentOptions)) using (dependentOptions)
                 {
                   if (dependentGeometry is object)
-                    list.AddRange(dependentGeometry.ToRhino().Where(x => x is object));
+                    list.AddRange(dependentGeometry.ToGeometryBaseMany().OfType<Rhino.Geometry.GeometryBase>());
                 }
               }
             }
@@ -64,5 +65,4 @@ namespace RhinoInside.Revit.GH.Components
       }
     }
   }
-
 }

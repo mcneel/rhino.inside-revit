@@ -1,5 +1,6 @@
 using System;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
@@ -32,17 +33,14 @@ namespace RhinoInside.Revit.GH.Components
       DB.SketchPlane sketchPlane
     )
     {
-      var scaleFactor = 1.0 / Revit.ModelUnits;
-
-      var plane = sketchPlane.GetPlane().ToRhino().ChangeUnits(scaleFactor);
+      var plane = sketchPlane.GetPlane().ToPlane();
       if
       (
-        ((curve = curve.ChangeUnits(scaleFactor)) is null) ||
         ((curve = Rhino.Geometry.Curve.ProjectToPlane(curve, plane)) == null)
       )
         ThrowArgumentException(nameof(curve), "Failed to project curve in the sketchPlane.");
 
-      var centerLine = curve.ToHost();
+      var centerLine = curve.ToCurve();
 
       if (curve.IsClosed == centerLine.IsBound)
         AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Unable to keep curve closed.");

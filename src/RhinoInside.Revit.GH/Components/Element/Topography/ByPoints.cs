@@ -2,8 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using DB = Autodesk.Revit.DB;
 using Grasshopper.Kernel;
+using Rhino.Geometry;
+using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.Convert.System.Collections.Generic;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -30,12 +33,11 @@ namespace RhinoInside.Revit.GH.Components
       DB.Document doc,
       ref DB.Architecture.TopographySurface element,
 
-      IList<Rhino.Geometry.Point3d> points,
-      [Optional] IList<Rhino.Geometry.Curve> regions
+      IList<Point3d> points,
+      [Optional] IList<Curve> regions
     )
     {
-      var scaleFactor = 1.0 / Revit.ModelUnits;
-      var xyz = points.Select(x => x.ChangeUnits(scaleFactor).ToHost()).ToArray();
+      var xyz = points.ConvertAll(GeometryEncoder.ToXYZ);
 
       //if (element is DB.Architecture.TopographySurface topography)
       //{
@@ -58,8 +60,8 @@ namespace RhinoInside.Revit.GH.Components
 
       if (element is object && regions?.Count > 0)
       {
-        var curveLoops = regions.Select(region => DB.CurveLoop.Create(region.ChangeUnits(scaleFactor).ToHostMultiple().ToArray())).ToArray();
-        DB.Architecture.SiteSubRegion.Create(doc, curveLoops, element.Id);
+        var curveLoops = regions.Select(region => region.ToCurveLoop());
+        DB.Architecture.SiteSubRegion.Create(doc, curveLoops.ToList(), element.Id);
       }
     }
   }

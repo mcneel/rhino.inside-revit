@@ -27,7 +27,8 @@ using Cursor = System.Windows.Forms.Cursor;
 using Cursors = System.Windows.Forms.Cursors;
 
 using RhinoInside.Revit.UI;
-using Autodesk.Revit.UI.Events;
+using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.Convert.System.Collections.Generic;
 
 namespace RhinoInside.Revit.Samples
 {
@@ -248,8 +249,8 @@ namespace RhinoInside.Revit.Samples
                 {
                   switch (value)
                   {
-                    case Rhino.Geometry.Point3d point:          output.Add(new Rhino.Geometry.Point(point)); break;
-                    case Rhino.Geometry.GeometryBase geometry:  output.Add(geometry); break;
+                    case Point3d point:          output.Add(new Rhino.Geometry.Point(point)); break;
+                    case GeometryBase geometry:  output.Add(geometry); break;
                   }
                 }
               }
@@ -289,10 +290,10 @@ namespace RhinoInside.Revit.Samples
               var ds = DirectShape.CreateElement(doc, categoryId);
               ds.Name = output.Key;
 
-              foreach (var geometries in output.Value.ToHost())
+              foreach (var shape in output.Value.ConvertAll(ShapeEncoder.ToShape))
               {
-                if (geometries != null)
-                  ds.AppendShape(geometries);
+                if (shape.Length > 0)
+                  ds.AppendShape(shape);
               }
             }
 

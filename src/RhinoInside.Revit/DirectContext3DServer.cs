@@ -8,6 +8,7 @@ using Autodesk.Revit.DB.ExternalService;
 using Autodesk.Revit.DB.DirectContext3D;
 
 using Rhino;
+using RhinoInside.Revit.Convert.Geometry.Raw;
 
 namespace RhinoInside.Revit
 {
@@ -148,7 +149,7 @@ namespace RhinoInside.Revit
               {
                 var c = !color.IsEmpty ? color : colors[v];
                 uint T = Math.Max(1, 255u - c.A);
-                stream.AddVertex(new VertexPositionNormalColored(vertices[v].ToHost(), normals[v].ToHost(), new ColorWithTransparency(c.R, c.G, c.B, T)));
+                stream.AddVertex(new VertexPositionNormalColored(RawEncoder.ToHost(vertices[v]), RawEncoder.ToHost(normals[v]), new ColorWithTransparency(c.R, c.G, c.B, T)));
               }
             }
             vb.Unmap();
@@ -162,7 +163,7 @@ namespace RhinoInside.Revit
             using (var stream = vb.GetVertexStreamPositionNormal())
             {
               for (int v = part.StartVertexIndex; v < part.EndVertexIndex; ++v)
-                stream.AddVertex(new VertexPositionNormal(vertices[v].ToHost(), normals[v].ToHost()));
+                stream.AddVertex(new VertexPositionNormal(RawEncoder.ToHost(vertices[v]), RawEncoder.ToHost(normals[v])));
             }
             vb.Unmap();
             return vb;
@@ -182,7 +183,7 @@ namespace RhinoInside.Revit
               {
                 var c = !color.IsEmpty ? color : colors[v];
                 uint T = Math.Max(1, 255u - c.A);
-                stream.AddVertex(new VertexPositionColored(vertices[v].ToHost(), new ColorWithTransparency(c.R, c.G, c.B, T)));
+                stream.AddVertex(new VertexPositionColored(RawEncoder.ToHost(vertices[v]), new ColorWithTransparency(c.R, c.G, c.B, T)));
               }
             }
             vb.Unmap();
@@ -196,7 +197,7 @@ namespace RhinoInside.Revit
             using (var stream = vb.GetVertexStreamPosition())
             {
               for (int v = part.StartVertexIndex; v < part.EndVertexIndex; ++v)
-                stream.AddVertex(new VertexPosition(vertices[v].ToHost()));
+                stream.AddVertex(new VertexPosition(RawEncoder.ToHost(vertices[v])));
             }
             vb.Unmap();
             return vb;
@@ -371,7 +372,7 @@ namespace RhinoInside.Revit
         using (var vstream = vb.GetVertexStreamPosition())
         {
           foreach (var v in polyline)
-            vstream.AddVertex(new VertexPosition(v.ToHost()));
+            vstream.AddVertex(new VertexPosition(RawEncoder.ToHost(v)));
         }
         vb.Unmap();
 
@@ -407,7 +408,7 @@ namespace RhinoInside.Revit
         vb.Map(pointsCount * VertexPosition.GetSizeInFloats());
         using (var vstream = vb.GetVertexStreamPosition())
         {
-          vstream.AddVertex(new VertexPosition(point.Location.ToHost()));
+          vstream.AddVertex(new VertexPosition(RawEncoder.ToHost(point.Location)));
         }
         vb.Unmap();
 
@@ -456,7 +457,7 @@ namespace RhinoInside.Revit
               {
                 var point = pointCloud[p];
                 var c = new ColorWithTransparency(point.Color.R, point.Color.G, point.Color.B, 255u - point.Color.A);
-                vstream.AddVertex(new VertexPositionNormalColored(point.Location.ToHost(), point.Normal.ToHost(), c));
+                vstream.AddVertex(new VertexPositionNormalColored(RawEncoder.ToHost(point.Location), RawEncoder.ToHost(point.Normal), c));
               }
             }
 
@@ -473,7 +474,7 @@ namespace RhinoInside.Revit
               for (int p = part.StartVertexIndex; p < part.EndVertexIndex; ++p)
               {
                 var point = pointCloud[p];
-                vstream.AddVertex(new VertexPositionNormal(point.Location.ToHost(), point.Normal.ToHost()));
+                vstream.AddVertex(new VertexPositionNormal(RawEncoder.ToHost(point.Location), RawEncoder.ToHost(point.Normal)));
               }
             }
 
@@ -494,7 +495,7 @@ namespace RhinoInside.Revit
               {
                 var point = pointCloud[p];
                 var c = new ColorWithTransparency(point.Color.R, point.Color.G, point.Color.B, 255u - point.Color.A);
-                vstream.AddVertex(new VertexPositionColored(point.Location.ToHost(), c));
+                vstream.AddVertex(new VertexPositionColored(RawEncoder.ToHost(point.Location), c));
               }
             }
 
@@ -511,7 +512,7 @@ namespace RhinoInside.Revit
               for (int p = part.StartVertexIndex; p < part.EndVertexIndex; ++p)
               {
                 var point = pointCloud[p];
-                vstream.AddVertex(new VertexPosition(point.Location.ToHost()));
+                vstream.AddVertex(new VertexPosition(RawEncoder.ToHost(point.Location)));
               }
             }
 

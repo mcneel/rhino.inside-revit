@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Autodesk.Revit.DB;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.Convert.Geometry;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -25,20 +26,19 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructDirectShapeByPoint
     (
-      Document doc,
-      ref Autodesk.Revit.DB.Element element,
+      DB.Document doc,
+      ref DB.Element element,
 
       Rhino.Geometry.Point3d point
     )
     {
-      var scaleFactor = 1.0 / Revit.ModelUnits;
-
       ThrowIfNotValid(nameof(point), point);
 
-      if (element is DirectShape ds) { }
-      else ds = DirectShape.CreateElement(doc, new ElementId(BuiltInCategory.OST_GenericModel));
+      if (element is DB.DirectShape ds) { }
+      else ds = DB.DirectShape.CreateElement(doc, new DB.ElementId(DB.BuiltInCategory.OST_GenericModel));
 
-      ds.SetShape(new List<GeometryObject> { Point.Create((point * scaleFactor).ToHost()) });
+      var shape = new DB.Point[] { DB.Point.Create(point.ToXYZ()) };
+      ds.SetShape(shape);
 
       ReplaceElement(ref element, ds);
     }

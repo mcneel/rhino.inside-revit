@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.Convert.Geometry;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -49,7 +49,7 @@ namespace RhinoInside.Revit.GH.Components
       return element.GetDependentElements(new DB.ElementClassFilter(typeof(DB.CurveElement)))
              .Select(x => element.Document.GetElement(x))
              .Cast<DB.CurveElement>()
-             .Select(x => x.GeometryCurve.ToRhino())
+             .Select(x => x.GeometryCurve.ToCurve())
              .ToList();
     }
 

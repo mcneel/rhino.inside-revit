@@ -2,7 +2,7 @@ using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
-  public static class FaceExtenion
+  public static class FaceExtension
   {
     public static bool OrientationMatchesSurface(this Face face)
     {

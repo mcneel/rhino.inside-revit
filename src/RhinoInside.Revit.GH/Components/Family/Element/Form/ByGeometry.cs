@@ -2,6 +2,8 @@ using System;
 using System.Linq;
 using Autodesk.Revit.DB;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.Geometry.Extensions;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -34,18 +36,16 @@ namespace RhinoInside.Revit.GH.Components
       if (!doc.IsFamilyDocument)
         throw new InvalidOperationException("This component can only run on a Family document");
 
-      var scaleFactor = 1.0 / Revit.ModelUnits;
-      brep = brep.ChangeUnits(scaleFactor);
       brep.GetUserBoolean(BuiltInParameter.ELEMENT_IS_CUTTING.ToString(), out var cutting);
 
       if (brep.Faces.Count == 1 && brep.Faces[0].Loops.Count == 1 && brep.Faces[0].TryGetPlane(out var capPlane))
       {
-        using (var sketchPlane = SketchPlane.Create(doc, capPlane.ToHost()))
+        using (var sketchPlane = SketchPlane.Create(doc, capPlane.ToPlane()))
         using (var referenceArray = new ReferenceArray())
         {
           try
           {
-            foreach (var curve in brep.Faces[0].OuterLoop.To3dCurve().ToHostMultiple())
+            foreach (var curve in brep.Faces[0].OuterLoop.To3dCurve().ToCurveMany())
               referenceArray.Append(new Reference(doc.FamilyCreate.NewModelCurve(curve, sketchPlane)));
 
             ReplaceElement
@@ -68,12 +68,12 @@ namespace RhinoInside.Revit.GH.Components
       }
       else if ( brep.TryGetExtrusion(out var extrusion) && (extrusion.CapCount == 2 || !extrusion.IsClosed(0)))
       {
-        using (var sketchPlane = SketchPlane.Create(doc, extrusion.GetProfilePlane(0.0).ToHost()))
+        using (var sketchPlane = SketchPlane.Create(doc, extrusion.GetProfilePlane(0.0).ToPlane()))
         using (var referenceArray = new ReferenceArray())
         {
           try
           {
-            foreach (var curve in extrusion.Profile3d(new Rhino.Geometry.ComponentIndex(Rhino.Geometry.ComponentIndexType.ExtrusionBottomProfile, 0)).ToHostMultiple())
+            foreach (var curve in extrusion.Profile3d(new Rhino.Geometry.ComponentIndex(Rhino.Geometry.ComponentIndexType.ExtrusionBottomProfile, 0)).ToCurveMany())
               referenceArray.Append(new Reference(doc.FamilyCreate.NewModelCurve(curve, sketchPlane)));
 
             ReplaceElement
@@ -82,7 +82,8 @@ namespace RhinoInside.Revit.GH.Components
               doc.FamilyCreate.NewExtrusionForm
               (
                 !cutting,
-                referenceArray, extrusion.PathLineCurve().Line.Direction.ToHost()
+                referenceArray,
+                extrusion.PathLineCurve().Line.Direction.ToXYZ()
               )
             );
             return;
@@ -95,7 +96,7 @@ namespace RhinoInside.Revit.GH.Components
       }
 
       {
-        var solid = brep.ToHost();
+        var solid = brep.ToSolid();
         if (solid != null)
         {
           if (element is FreeFormElement freeFormElement)
@@ -112,6 +113,7 @@ namespace RhinoInside.Revit.GH.Components
 
           element.get_Parameter(BuiltInParameter.ELEMENT_IS_CUTTING)?.Set(cutting ? 1 : 0);
         }
+        else AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Failed to convert Brep to Form");
       }
     }
   }

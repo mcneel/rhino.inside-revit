@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
@@ -32,15 +33,12 @@ namespace RhinoInside.Revit.GH.Components
       DB.Document doc,
       ref DB.Group element,
 
-      [Description("Location where to place the group. Point or plane is accepted.")]
+      [Description("Location where to place the group.")]
       Rhino.Geometry.Point3d location,
       DB.GroupType type,
       Optional<DB.Level> level
     )
     {
-      var scaleFactor = 1.0 / Revit.ModelUnits;
-      location = location.ChangeUnits(scaleFactor);
-
       if (!location.IsValid)
         ThrowArgumentException(nameof(location), "Should be a valid point.");
 
@@ -48,26 +46,26 @@ namespace RhinoInside.Revit.GH.Components
 
       ChangeElementTypeId(ref element, type.Id);
 
+      var newLocation = location.ToXYZ();
       if
       (
         element is DB.Group &&
         element.Location is DB.LocationPoint locationPoint &&
-        locationPoint.Point.Z == location.Z
+        locationPoint.Point.Z == newLocation.Z
       )
       {
-        var newOrigin = location.ToHost();
-        if (!newOrigin.IsAlmostEqualTo(locationPoint.Point))
+        if (!newLocation.IsAlmostEqualTo(locationPoint.Point))
         {
           element.Pinned = false;
-          locationPoint.Point = newOrigin;
+          locationPoint.Point = newLocation;
           element.Pinned = true;
         }
       }
       else
       {
         var newGroup = doc.IsFamilyDocument ?
-                       doc.FamilyCreate.PlaceGroup(location.ToHost(), type) :
-                       doc.Create.PlaceGroup(location.ToHost(), type);
+                       doc.FamilyCreate.PlaceGroup(newLocation, type) :
+                       doc.Create.PlaceGroup(newLocation, type);
 
         var parametersMask = new DB.BuiltInParameter[]
         {
@@ -87,7 +85,7 @@ namespace RhinoInside.Revit.GH.Components
         using (var offsetFromLevel = element.get_Parameter(DB.BuiltInParameter.GROUP_OFFSET_FROM_LEVEL))
         {
           var oldOffset = offsetFromLevel.AsDouble();
-          var newOffset = location.Z - level.Value.Elevation;
+          var newOffset = newLocation.Z - level.Value.Elevation;
           if (levelParam.AsElementId() != level.Value.Id || !Rhino.RhinoMath.EpsilonEquals(oldOffset, newOffset, Rhino.RhinoMath.SqrtEpsilon))
           {
             var groupType = element.GroupType;

@@ -147,18 +147,6 @@ namespace RhinoInside.Revit.GH.Types
     public override bool IsValid => Value is object;
     public override sealed IGH_Goo Duplicate() => (IGH_Goo) MemberwiseClone();
 
-    double ToRhino(double value, DB.ParameterType type)
-    {
-      switch (type)
-      {
-        case DB.ParameterType.Length: return value * Math.Pow(Revit.ModelUnits, 1.0);
-        case DB.ParameterType.Area:   return value * Math.Pow(Revit.ModelUnits, 2.0);
-        case DB.ParameterType.Volume: return value * Math.Pow(Revit.ModelUnits, 3.0);
-      }
-
-      return value;
-    }
-
     public override bool CastFrom(object source)
     {
       if (source is DB.Parameter parameter)
@@ -227,14 +215,14 @@ namespace RhinoInside.Revit.GH.Types
           if (typeof(Q).IsAssignableFrom(typeof(GH_Number)))
           {
             target = Value.Element is null ? (Q) (object) null :
-                     (Q) (object) new GH_Number(ToRhino(Value.AsDouble(), Value.Definition.ParameterType));
+                     (Q) (object) new GH_Number(Value.AsDoubleInRhinoUnits());
             return true;
           }
           else if (typeof(Q).IsAssignableFrom(typeof(GH_Integer)))
           {
             if (Value.Element is object)
             {
-              var value = Math.Round(ToRhino(Value.AsDouble(), Value.Definition.ParameterType));
+              var value = Math.Round(Value.AsDoubleInRhinoUnits());
               if (int.MinValue <= value && value <= int.MaxValue)
               {
                 target = (Q) (object) new GH_Integer((int) value);
@@ -286,10 +274,10 @@ namespace RhinoInside.Revit.GH.Types
 
           switch (Value.StorageType)
           {
-            case DB.StorageType.None:    return true;
-            case DB.StorageType.Integer: return paramValue.Value.AsInteger() == Value.AsInteger();
-            case DB.StorageType.Double:  return paramValue.Value.AsDouble() == Value.AsDouble();
-            case DB.StorageType.String:   return paramValue.Value.AsString() == Value.AsString();
+            case DB.StorageType.None:      return true;
+            case DB.StorageType.Integer:   return paramValue.Value.AsInteger() == Value.AsInteger();
+            case DB.StorageType.Double:    return paramValue.Value.AsDouble()  == Value.AsDouble();
+            case DB.StorageType.String:    return paramValue.Value.AsString()  == Value.AsString();
             case DB.StorageType.ElementId: return paramValue.Value.AsElementId().IntegerValue == Value.AsElementId().IntegerValue;
           }
         }
@@ -318,7 +306,7 @@ namespace RhinoInside.Revit.GH.Types
               else
                 value = Value.AsInteger().ToString();
               break;
-            case DB.StorageType.Double: value = ToRhino(Value.AsDouble(), Value.Definition.ParameterType).ToString(); break;
+            case DB.StorageType.Double: value = Value.AsDoubleInRhinoUnits().ToString(); break;
             case DB.StorageType.String: value = Value.AsString(); break;
             case DB.StorageType.ElementId:
 

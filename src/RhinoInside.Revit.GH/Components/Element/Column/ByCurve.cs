@@ -1,6 +1,7 @@
 using System;
 using Autodesk.Revit.DB;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.Convert.Geometry;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -35,9 +36,6 @@ namespace RhinoInside.Revit.GH.Components
       if (curve.FromZ > curve.ToZ)
         curve.Flip();
 
-      var scaleFactor = 1.0 / Revit.ModelUnits;
-      curve = curve.ChangeUnits(scaleFactor);
-
       SolveOptionalType(ref type, doc, BuiltInCategory.OST_StructuralColumns, nameof(type));
 
       if (!type.Value.IsActive)
@@ -50,13 +48,13 @@ namespace RhinoInside.Revit.GH.Components
 
       if (element is FamilyInstance familyInstance && element.Location is LocationCurve locationCurve)
       {
-        locationCurve.Curve = curve.ToHost();
+        locationCurve.Curve = curve.ToLine();
       }
       else
       {
         var newColumn = doc.Create.NewFamilyInstance
         (
-          curve.ToHost(),
+          curve.ToLine(),
           type.Value,
           level.Value,
           Autodesk.Revit.DB.Structure.StructuralType.Column

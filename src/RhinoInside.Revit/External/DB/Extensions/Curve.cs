@@ -39,5 +39,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
         case Curve c: yield return c; yield break;
       }
     }
+
+    public static CurveArray ToCurveArray(this IEnumerable<Curve> curves)
+    {
+      var curveArray = new CurveArray();
+      foreach (var curve in curves)
+        curveArray.Append(curve);
+
+      return curveArray;
+    }
   }
 }

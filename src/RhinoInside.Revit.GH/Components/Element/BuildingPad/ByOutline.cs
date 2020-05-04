@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.Convert.Units;
+using RhinoInside.Revit.Convert.Geometry;
 using DB = Autodesk.Revit.DB;
+using RhinoInside.Revit.Convert.System.Collections.Generic;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -46,18 +48,15 @@ namespace RhinoInside.Revit.GH.Components
     {
       ChangeElementType(ref element, type);
 
-      var scaleFactor = 1.0 / Revit.ModelUnits;
-      boundaries = boundaries.Select(x => x.ChangeUnits(scaleFactor)).ToArray();
-
       SolveOptionalLevel(doc, boundaries, ref level, out var boundaryBBox);
 
-      var curveLoops = boundaries.Select(region => DB.CurveLoop.Create(region.ToHostMultiple().SelectMany(x => x.ToBoundedCurves()).ToList()));
+      var curveLoops = boundaries.ConvertAll(GeometryEncoder.ToCurveLoop);
 
       if (element is DB.Architecture.BuildingPad buildingPad)
       {
         element.get_Parameter(DB.BuiltInParameter.LEVEL_PARAM).Set(level.Value.Id);
 
-        buildingPad.SetBoundary(curveLoops.ToList());
+        buildingPad.SetBoundary(curveLoops);
       }
       else
       {
@@ -68,13 +67,13 @@ namespace RhinoInside.Revit.GH.Components
           doc,
           type.Value.Id,
           level.Value.Id,
-          curveLoops.ToList()
+          curveLoops
         );
 
         ReplaceElement(ref element, newPad, ParametersMask);
       }
 
-      element?.get_Parameter(DB.BuiltInParameter.BUILDINGPAD_HEIGHTABOVELEVEL_PARAM).Set(boundaryBBox.Min.Z - level.Value.Elevation);
+      element?.get_Parameter(DB.BuiltInParameter.BUILDINGPAD_HEIGHTABOVELEVEL_PARAM).Set(boundaryBBox.Min.Z / Revit.ModelUnits - level.Value.Elevation);
     }
   }
 }

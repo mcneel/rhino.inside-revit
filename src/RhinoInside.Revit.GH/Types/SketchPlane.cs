@@ -1,5 +1,6 @@
 using System;
 using Grasshopper.Kernel.Types;
+using RhinoInside.Revit.Convert.Geometry;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -37,11 +38,9 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var element = (Autodesk.Revit.DB.SketchPlane) this;
-        if (element != null)
-          return element.GetPlane().ToRhino().ChangeUnits(Revit.ModelUnits);
-
-        return new Rhino.Geometry.Plane(new Rhino.Geometry.Point3d(double.NaN, double.NaN, double.NaN), Rhino.Geometry.Vector3d.Zero, Rhino.Geometry.Vector3d.Zero);
+        var element = (DB.SketchPlane) this;
+        return element?.GetPlane().ToPlane() ??
+          new Rhino.Geometry.Plane(new Rhino.Geometry.Point3d(double.NaN, double.NaN, double.NaN), Rhino.Geometry.Vector3d.Zero, Rhino.Geometry.Vector3d.Zero);
       }
     }
     #endregion

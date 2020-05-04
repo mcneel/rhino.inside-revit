@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
+using RhinoInside.Revit.Convert.Units;
+using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
@@ -344,8 +346,6 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      var scaleFactor = 1.0 / Revit.ModelUnits;
-
       var targets = new List<Rhino.Geometry.Box>();
       DB.ElementFilter filter = null;
 
@@ -358,38 +358,37 @@ namespace RhinoInside.Revit.GH.Components
           targets.Add(box);
         }
 
-        pointsBBox = pointsBBox.ChangeUnits(scaleFactor);
-        var outline = new DB.Outline(pointsBBox.Min.ToHost(), pointsBBox.Max.ToHost());
+        var outline = new DB.Outline(pointsBBox.Min.ToXYZ(), pointsBBox.Max.ToXYZ());
 
         if (strict)
-          filter = new DB.BoundingBoxIsInsideFilter(outline, tolerance * scaleFactor, inverted);
+          filter = new DB.BoundingBoxIsInsideFilter(outline, tolerance / Revit.ModelUnits, inverted);
         else
-          filter = new DB.BoundingBoxIntersectsFilter(outline, tolerance * scaleFactor, inverted);
+          filter = new DB.BoundingBoxIntersectsFilter(outline, tolerance / Revit.ModelUnits, inverted);
       }
       else
       {
         var filters = points.Select<Rhino.Geometry.Point3d, DB.ElementFilter>
-                     (x =>
-                     {
-                       var pointsBBox = new Rhino.Geometry.BoundingBox(x, x);
-                       {
-                         var box = new Rhino.Geometry.Box(pointsBBox);
-                         box.Inflate(tolerance);
-                         targets.Add(box);
-                       }
+        (
+          x =>
+          {
+            var pointsBBox = new Rhino.Geometry.BoundingBox(x, x);
+            {
+              var box = new Rhino.Geometry.Box(pointsBBox);
+              box.Inflate(tolerance);
+              targets.Add(box);
+            }
 
-                       x = x.ChangeUnits(scaleFactor);
-
-                       if (strict)
-                       {
-                         var outline = new DB.Outline(x.ToHost(), x.ToHost());
-                         return new DB.BoundingBoxIsInsideFilter(outline, tolerance * scaleFactor, inverted);
-                       }
-                       else
-                       {
-                         return new DB.BoundingBoxContainsPointFilter(x.ToHost(), tolerance * scaleFactor, inverted);
-                       }
-                     });
+            if (strict)
+            {
+              var outline = new DB.Outline(x.ToXYZ(), x.ToXYZ());
+              return new DB.BoundingBoxIsInsideFilter(outline, tolerance / Revit.ModelUnits, inverted);
+            }
+            else
+            {
+              return new DB.BoundingBoxContainsPointFilter(x.ToXYZ(), tolerance / Revit.ModelUnits, inverted);
+            }
+          }
+        );
 
         var filterList = filters.ToArray();
         filter = filterList.Length == 1 ?
@@ -458,8 +457,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      var scaleFactor = 1.0 / Revit.ModelUnits;
-      DA.SetData("Filter", new DB.ElementIntersectsSolidFilter(brep.ChangeUnits(scaleFactor).ToHost(), inverted));
+      DA.SetData("Filter", new DB.ElementIntersectsSolidFilter(brep.ToSolid(), inverted));
     }
   }
 
@@ -489,8 +487,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      var scaleFactor = 1.0 / Revit.ModelUnits;
-      DA.SetData("Filter", new DB.ElementIntersectsSolidFilter(Rhino.Geometry.Brep.CreateFromMesh(mesh.ChangeUnits(scaleFactor), true).ToHost(), inverted));
+      DA.SetData("Filter", new DB.ElementIntersectsSolidFilter(mesh.ToSolid(), inverted));
     }
   }
   #endregion
@@ -682,18 +679,6 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.FilterRule(), "Rule", "R", string.Empty, GH_ParamAccess.item);
     }
 
-    static double ToHost(double value, DB.ParameterType parameterType)
-    {
-      switch (parameterType)
-      {
-        case DB.ParameterType.Length:  return value / Math.Pow(Revit.ModelUnits, 1.0);
-        case DB.ParameterType.Area:    return value / Math.Pow(Revit.ModelUnits, 2.0);
-        case DB.ParameterType.Volume:  return value / Math.Pow(Revit.ModelUnits, 3.0);
-      }
-
-      return value;
-    }
-
     static readonly Dictionary<DB.BuiltInParameter, DB.ParameterType> BuiltInParametersTypes = new Dictionary<DB.BuiltInParameter, DB.ParameterType>();
 
     static bool TryGetParameterDefinition(DB.Document doc, DB.ElementId id, out DB.StorageType storageType, out DB.ParameterType parameterType)
@@ -857,12 +842,12 @@ namespace RhinoInside.Revit.GH.Components
                 if (Condition == ConditionType.Equals || Condition == ConditionType.NotEquals)
                 {
                   if (parameterType == DB.ParameterType.Length || parameterType == DB.ParameterType.Area || parameterType == DB.ParameterType.Volume)
-                    rule = new DB.FilterDoubleRule(provider, ruleEvaluator, ToHost(goo.Value, parameterType), ToHost(Revit.VertexTolerance, parameterType));
+                    rule = new DB.FilterDoubleRule(provider, ruleEvaluator, UnitConverter.InHostUnits(goo.Value, parameterType), UnitConverter.InHostUnits(Revit.VertexTolerance, parameterType));
                   else
-                    rule = new DB.FilterDoubleRule(provider, ruleEvaluator, ToHost(goo.Value, parameterType), 1e-6);
+                    rule = new DB.FilterDoubleRule(provider, ruleEvaluator, UnitConverter.InHostUnits(goo.Value, parameterType), 1e-6);
                 }
                 else
-                  rule = new DB.FilterDoubleRule(provider, ruleEvaluator, ToHost(goo.Value, parameterType), 0.0);
+                  rule = new DB.FilterDoubleRule(provider, ruleEvaluator, UnitConverter.InHostUnits(goo.Value, parameterType), 0.0);
               }
             }
             break;

@@ -1,7 +1,8 @@
 using System;
 using Grasshopper.Kernel.Types;
-using RhinoInside.Revit.External.UI.Extensions;
+using RhinoInside.Revit.Convert.System.Drawing;
 using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.External.UI.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -153,7 +154,7 @@ namespace RhinoInside.Revit.GH.Types
       public bool IsCuttable => category?.IsCuttable ?? false;
 
       [System.ComponentModel.Category("Display"), System.ComponentModel.Description("The color of lines shown for elements of this category.")]
-      public System.Drawing.Color LineColor => category?.LineColor.ToRhino() ?? System.Drawing.Color.Empty;
+      public System.Drawing.Color LineColor => category?.LineColor.ToColor() ?? System.Drawing.Color.Empty;
     }
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);

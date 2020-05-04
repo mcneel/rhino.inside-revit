@@ -1,5 +1,7 @@
 using System;
 using Grasshopper.Kernel.Types;
+using RhinoInside.Revit.Convert.Units;
+using RhinoInside.Revit.Convert.Geometry;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -55,13 +57,10 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         var level = (DB.Level) this;
-        if (level is object)
-        {
-          var p = new Rhino.Geometry.Point3d(0.0, 0.0, level.Elevation);
-          return p.ChangeUnits(Revit.ModelUnits);
-        }
 
-        return new Rhino.Geometry.Point3d(double.NaN, double.NaN, double.NaN);
+        return level is object ?
+          new Rhino.Geometry.Point3d(0.0, 0.0, level.Elevation / Revit.ModelUnits) :
+          new Rhino.Geometry.Point3d(double.NaN, double.NaN, double.NaN);
       }
     }
   }
@@ -82,10 +81,8 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         var grid = (DB.Grid) this;
-        if(grid is object)
-          return grid.Curve.ToRhino().ChangeUnits(Revit.ModelUnits);
 
-        return null;
+        return grid?.Curve.ToCurve();
       }
     }
   }

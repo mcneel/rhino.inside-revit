@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
+using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.Geometry.Extensions;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
@@ -192,7 +194,7 @@ namespace RhinoInside.Revit.GH.Components
     )
     {
       forms.MoveNext();
-      if (brep.ToHost() is DB.Solid solid)
+      if (brep.ToSolid() is DB.Solid solid)
       {
         if (forms.Current is DB.FreeFormElement freeForm)
         {
@@ -263,7 +265,7 @@ namespace RhinoInside.Revit.GH.Components
         int index = planesSet.BinarySearch(new KeyValuePair<double[], DB.SketchPlane>(abcd, null), PlaneComparer.Instance);
         if (index < 0)
         {
-          var entry = new KeyValuePair<double[], DB.SketchPlane>(abcd, DB.SketchPlane.Create(familyDoc, plane.ToHost()));
+          var entry = new KeyValuePair<double[], DB.SketchPlane>(abcd, DB.SketchPlane.Create(familyDoc, plane.ToPlane()));
           index = ~index;
           planesSet.Insert(index, entry);
         }
@@ -304,7 +306,7 @@ namespace RhinoInside.Revit.GH.Components
         curve.GetUserBoolean(DB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), out var visible, true);
         curve.GetUserInteger(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility, 57406);
 
-        foreach (var c in curve.ToHostMultiple())
+        foreach (var c in curve.ToCurveMany())
         {
           curves.MoveNext();
 
@@ -351,7 +353,7 @@ namespace RhinoInside.Revit.GH.Components
       DeleteElementEnumerator<DB.Opening> openings
     )
     {
-      var profile = loops.SelectMany(x => x.ToHostMultiple()).ToCurveArray();
+      var profile = loops.SelectMany(x => x.ToCurveMany()).ToCurveArray();
       var opening = familyDoc.FamilyCreate.NewOpening(host, profile);
     }
 
@@ -519,7 +521,7 @@ namespace RhinoInside.Revit.GH.Components
                     var planesSetComparer = new PlaneComparer();
                     var loops = new List<Rhino.Geometry.Curve>();
 
-                    foreach (var geo in geometry.Select(x => AsGeometryBase(x)?.ChangeUnits(scaleFactor)))
+                    foreach (var geo in geometry.Select(x => AsGeometryBase(x)))
                     {
                       try
                       {

@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
-
+using RhinoInside.Revit.Convert.Geometry;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -108,14 +108,14 @@ namespace RhinoInside.Revit.GH.Components
         return;
 
       var centerCurve = wallInstance.Location as DB.LocationCurve;
-      DA.SetData("Center Curve", centerCurve.Curve.ToRhino());
+      DA.SetData("Center Curve", centerCurve.Curve.ToCurve());
       PipeHostParameter<Types.WallLocationLine>(DA, wallInstance, DB.BuiltInParameter.WALL_KEY_REF_PARAM, "Location Line");
 
       var offsetPlaneNormal = GetOffsetPlaneNormal(wallInstance);
       var offsetValue = GetOffsetForLocationCurve(wallInstance);
       var locationCurve = ComputeLocationCurve(centerCurve.Curve, offsetValue, offsetPlaneNormal);
       DA.SetData("Offset Value", offsetValue);
-      DA.SetData("Location Curve", locationCurve.ToRhino());
+      DA.SetData("Location Curve", locationCurve.ToCurve());
     }
   }
 }

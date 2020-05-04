@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
@@ -27,23 +28,18 @@ namespace RhinoInside.Revit.GH.Components
     void ReconstructDirectShapeByCurve
     (
       DB.Document doc,
-      ref DB.Element element,
+      ref DB.DirectShape element,
 
       Rhino.Geometry.Curve curve
     )
     {
-      var scaleFactor = 1.0 / Revit.ModelUnits;
-
       ThrowIfNotValid(nameof(curve), curve);
 
       if (element is DB.DirectShape ds) { }
       else ds = DB.DirectShape.CreateElement(doc, new DB.ElementId(DB.BuiltInCategory.OST_GenericModel));
 
-      var shape = curve.
-                  ToHostMultiple(scaleFactor).
-                  SelectMany(x => x.ToDirectShapeGeometry());
-
-      ds.SetShape(shape.ToList());
+      var shape = curve.ToShape();
+      ds.SetShape(shape);
 
       ReplaceElement(ref element, ds);
     }

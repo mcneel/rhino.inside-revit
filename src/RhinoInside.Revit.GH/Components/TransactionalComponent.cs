@@ -151,7 +151,7 @@ namespace RhinoInside.Revit.GH.Components
       bool wasMissing = level.IsMissing;
 
       if (wasMissing)
-        level = doc.FindLevelByElevation(elevation) ??
+        level = doc.FindLevelByElevation(elevation / Revit.ModelUnits) ??
                 throw new ArgumentException("No suitable level has been found.", nameof(elevation));
 
       else if (level.Value == null)
@@ -194,7 +194,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       if (baseLevel.IsMissing && topLevel.IsMissing)
       {
-        var b = doc.FindBaseLevelByElevation(elevation, out var t) ??
+        var b = doc.FindBaseLevelByElevation(elevation / Revit.ModelUnits, out var t) ??
                 t ?? throw new ArgumentException("No suitable base level has been found.", nameof(elevation));
 
         if (!baseLevel.HasValue)
@@ -221,7 +221,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       if (baseLevel.IsMissing && topLevel.IsMissing)
       {
-        var t = doc.FindTopLevelByElevation(elevation, out var b) ??
+        var t = doc.FindTopLevelByElevation(elevation / Revit.ModelUnits, out var b) ??
                 b ?? throw new ArgumentException("No suitable top level has been found.", nameof(elevation));
 
         if (!topLevel.HasValue)
@@ -302,13 +302,13 @@ namespace RhinoInside.Revit.GH.Components
 
       if (!ParamTypes.TryGetValue(type, out paramTypes))
       {
-        if (typeof(Autodesk.Revit.DB.ElementType).IsAssignableFrom(type))
+        if (typeof(DB.ElementType).IsAssignableFrom(type))
         {
           paramTypes = Tuple.Create(typeof(Parameters.ElementType), typeof(Types.ElementType));
           return true;
         }
 
-        if (typeof(Autodesk.Revit.DB.Element).IsAssignableFrom(type))
+        if (typeof(DB.Element).IsAssignableFrom(type))
         {
           paramTypes = Tuple.Create(typeof(Parameters.Element), typeof(Types.Element));
           return true;
@@ -505,15 +505,20 @@ namespace RhinoInside.Revit.GH.Components
     }
 
     protected void ThrowArgumentNullException(string paramName, string description = null) => throw new ArgumentNullException(FirstCharUpper(paramName), description ?? string.Empty);
+
     protected void ThrowArgumentException(string paramName, string description = null) => throw new ArgumentException(description ?? "Invalid value.", FirstCharUpper(paramName));
-    protected void ThrowIfNotValid(string paramName, Rhino.Geometry.Point3d value)
+
+    protected bool ThrowIfNotValid(string paramName, Rhino.Geometry.Point3d value)
     {
       if (!value.IsValid) ThrowArgumentException(paramName);
+      return true;
     }
-    protected void ThrowIfNotValid(string paramName, Rhino.Geometry.GeometryBase value)
+
+    protected bool ThrowIfNotValid(string paramName, Rhino.Geometry.GeometryBase value)
     {
       if (value is null) ThrowArgumentException(paramName);
       if (!value.IsValidWithLog(out var log)) ThrowArgumentException(paramName, log);
+      return true;
     }
     #endregion
 

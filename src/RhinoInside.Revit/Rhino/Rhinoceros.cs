@@ -11,6 +11,7 @@ using Rhino.Geometry;
 using Rhino.Input;
 using Rhino.PlugIns;
 using Rhino.Runtime.InProcess;
+using RhinoInside.Revit.Convert.Units;
 using RhinoInside.Revit.External.ApplicationServices.Extensions;
 using static System.Math;
 using static Rhino.RhinoMath;
@@ -291,7 +292,7 @@ namespace RhinoInside.Revit
       {
         var units = revitDoc.GetUnits();
         var lengthFormatoptions = units.GetFormatOptions(DB.UnitType.UT_Length);
-        var RevitModelUnitSystem = lengthFormatoptions.DisplayUnits.ToRhinoLengthUnits();
+        var RevitModelUnitSystem = lengthFormatoptions.DisplayUnits.ToUnitSystem();
         var GrasshopperModelUnitSystem = GH.Guest.ModelUnitSystem != UnitSystem.Unset ? GH.Guest.ModelUnitSystem : doc.ModelUnitSystem;
         if (doc.ModelUnitSystem != RevitModelUnitSystem || doc.ModelUnitSystem != GrasshopperModelUnitSystem)
         {
@@ -363,7 +364,7 @@ namespace RhinoInside.Revit
         {
           var units = revitDoc.GetUnits();
           var lengthFormatoptions = units.GetFormatOptions(DB.UnitType.UT_Length);
-          rhinoDoc.ModelUnitSystem = lengthFormatoptions.DisplayUnits.ToRhinoLengthUnits();
+          rhinoDoc.ModelUnitSystem = lengthFormatoptions.DisplayUnits.ToUnitSystem();
           rhinoDoc.ModelAngleToleranceRadians = Revit.AngleTolerance;
           rhinoDoc.ModelDistanceDisplayPrecision = Clamp((int) -Log10(lengthFormatoptions.Accuracy), 0, 7);
           rhinoDoc.ModelAbsoluteTolerance = Revit.VertexTolerance * UnitScale(UnitSystem.Feet, rhinoDoc.ModelUnitSystem);

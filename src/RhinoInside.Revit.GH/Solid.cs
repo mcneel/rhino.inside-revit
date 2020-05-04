@@ -81,7 +81,7 @@ namespace RhinoInside.Revit.GH.Components
       if (orientation == Rhino.Geometry.BrepSolidOrientation.Unknown)
         return;
 
-      if (orientation != Rhino.Geometry.BrepSolidOrientation.None)
+      if (brep.SolidOrientation != Rhino.Geometry.BrepSolidOrientation.None)
       {
         if (orientation != brep.SolidOrientation)
           brep.Flip();

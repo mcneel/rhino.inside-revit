@@ -1,9 +1,8 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
-
+using System.Linq;
 using Grasshopper.Kernel;
-
+using RhinoInside.Revit.Convert.Geometry;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -72,7 +71,7 @@ namespace RhinoInside.Revit.GH.Components
               DB.GeometryElement partGeom = part.get_Geometry(new DB.Options());
               if (partGeom != null)
                 foreach (DB.GeometryObject geom in partGeom)
-                  layerGeoms.AddRange(geom.ToRhino().Cast<Rhino.Geometry.Brep>());
+                  layerGeoms.AddRange(geom.ToGeometryBaseMany().Cast<Rhino.Geometry.Brep>());
             }
           }
 
@@ -98,7 +97,7 @@ namespace RhinoInside.Revit.GH.Components
       DB.XYZ wallEndPoint = wallLocationCurve.GetEndPoint(0);
       DB.XYZ wallOrientation = wall.Orientation;
       DB.XYZ anchor = wallEndPoint + (wallOrientation * wallLocationCurve.Length);
-      Rhino.Geometry.Point3d basePoint = anchor.ToRhino();
+      Rhino.Geometry.Point3d basePoint = anchor.ToPoint3d();
 
       return GetCompoundStructureLayerGeom(wall)
              .OrderBy(x => Rhino.Geometry.VolumeMassProperties.Compute(x, volume: true, firstMoments: true, secondMoments: false, productMoments: false).Centroid.DistanceTo(basePoint))

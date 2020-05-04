@@ -10,6 +10,8 @@ using Grasshopper;
 using Grasshopper.Kernel;
 using Microsoft.Win32.SafeHandles;
 using Rhino;
+using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.Convert.System.Collections.Generic;
 
 namespace RhinoInside.Revit
 {
@@ -102,26 +104,20 @@ namespace RhinoInside.Revit
       (
         (doc) =>
         {
-          foreach (var geometryToBake in geometries.ToHost())
-          {
-            if (geometryToBake == null)
-              continue;
-
-            BakeGeometry(doc, geometryToBake, categoryToBakeInto);
-          }
+          foreach (var shapes in geometries.Convert(ShapeEncoder.ToShape))
+            BakeGeometry(doc, shapes, categoryToBakeInto);
         }
       );
     }
 
-    static partial void TraceGeometry(IEnumerable<Rhino.Geometry.GeometryBase> geometries);
-#if DEBUG
-    static partial void TraceGeometry(IEnumerable<Rhino.Geometry.GeometryBase> geometries)
+    [Conditional("DEBUG")]
+    static void TraceGeometry(IEnumerable<Rhino.Geometry.GeometryBase> geometries)
     {
       EnqueueAction
       (
         (doc) =>
         {
-          using (var ctx = Convert.Context.Push())
+          using (var ctx = GeometryEncoder.Context.Push())
           {
             using (var collector = new FilteredElementCollector(ActiveDBDocument))
             {
@@ -129,18 +125,12 @@ namespace RhinoInside.Revit
               ctx.MaterialId = (materials.Where((x) => x.Name == "Debug").FirstOrDefault()?.Id) ?? ElementId.InvalidElementId;
             }
 
-            foreach (var geometryToBake in geometries.ToHost())
-            {
-              if (geometryToBake == null)
-                continue;
-
-              BakeGeometry(doc, geometryToBake, BuiltInCategory.OST_GenericModel);
-            }
+            foreach (var shape in geometries.Convert(ShapeEncoder.ToShape))
+              BakeGeometry(doc, shape, BuiltInCategory.OST_GenericModel);
           }
         }
       );
     }
-#endif
 
     static void BakeGeometry(Document doc, IEnumerable<GeometryObject> geometryToBake, BuiltInCategory categoryToBakeInto)
     {

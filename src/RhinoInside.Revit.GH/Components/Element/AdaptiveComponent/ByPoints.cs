@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Autodesk.Revit.DB;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.Convert.System.Collections.Generic;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -33,8 +35,7 @@ namespace RhinoInside.Revit.GH.Components
       Autodesk.Revit.DB.FamilySymbol type
     )
     {
-      var scaleFactor = 1.0 / Revit.ModelUnits;
-      var adaptivePoints = points.Select(x => x.ChangeUnits(scaleFactor).ToHost()).ToArray();
+      var adaptivePoints = points.ConvertAll(GeometryEncoder.ToXYZ);
 
       if (!type.IsActive)
         type.Activate();
@@ -45,7 +46,7 @@ namespace RhinoInside.Revit.GH.Components
       if (element is FamilyInstance instance && AdaptiveComponentInstanceUtils.IsAdaptiveComponentInstance(instance))
       {
         var adaptivePointIds = AdaptiveComponentInstanceUtils.GetInstancePlacementPointElementRefIds(instance);
-        if (adaptivePointIds.Count == adaptivePoints.Length)
+        if (adaptivePointIds.Count == adaptivePoints.Count)
         {
           int index = 0;
           foreach (var vertex in adaptivePointIds.Select(id => doc.GetElement(id)).Cast<ReferencePoint>())

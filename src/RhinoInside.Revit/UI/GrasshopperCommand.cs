@@ -7,6 +7,7 @@ using Autodesk.Revit.UI.Events;
 using Grasshopper;
 using Grasshopper.Kernel;
 using Rhino.PlugIns;
+using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.GH.Bake;
 using DB = Autodesk.Revit.DB;
 
@@ -287,7 +288,6 @@ namespace RhinoInside.Revit.UI
 
         if (geometryToBake.Any())
         {
-          var scaleFactor = 1.0 / Revit.ModelUnits;
           var categoryId = options.Category?.Id ?? new DB.ElementId(DB.BuiltInCategory.OST_GenericModel);
 
           ids = new List<DB.ElementId>();
@@ -296,7 +296,7 @@ namespace RhinoInside.Revit.UI
             var ds = DB.DirectShape.CreateElement(options.Document, categoryId);
             ds.Name = param.NickName;
 
-            var shape = geometry.ToHostMultiple(scaleFactor).ToList();
+            var shape = geometry.ToShape().ToList();
             ds.SetShape(shape);
             ids.Add(ds.Id);
           }

@@ -3,17 +3,30 @@ using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
-using RhinoInside.Revit.External.DB.Extensions;
 using static System.Math;
 using static Rhino.RhinoMath;
 using DB = Autodesk.Revit.DB;
 using DBX = RhinoInside.Revit.External.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH
 {
-  static class ParameterUtils
+  using Convert.Units;
+  using Convert.Geometry;
+  using External.DB.Extensions;
+
+  internal static class ParameterUtils
   {
-    public static DB.Parameter GetParameter(IGH_ActiveObject obj, DB.Element element, IGH_Goo key)
+    internal static double AsDoubleInRhinoUnits(this DB.Parameter parameter)
+    {
+      return UnitConverter.InRhinoUnits(parameter.AsDouble(), parameter.Definition.ParameterType);
+    }
+
+    internal static bool SetDoubleInRhinoUnits(this DB.Parameter parameter, double value)
+    {
+      return parameter.Set(UnitConverter.InHostUnits(value, parameter.Definition.ParameterType));
+    }
+
+    internal static DB.Parameter GetParameter(IGH_ActiveObject obj, DB.Element element, IGH_Goo key)
     {
       DB.Parameter parameter = null;
       switch (key as Types.ParameterKey ?? key.ScriptVariable())
@@ -103,7 +116,7 @@ namespace RhinoInside.Revit.GH.Components
       return parameter;
     }
 
-    public static bool SetParameter(IGH_ActiveObject obj, DB.Parameter parameter, IGH_Goo goo)
+    internal static bool SetParameter(IGH_ActiveObject obj, DB.Parameter parameter, IGH_Goo goo)
     {
       if (goo is null)
         return false;
@@ -118,7 +131,7 @@ namespace RhinoInside.Revit.GH.Components
           switch (paramValue.StorageType)
           {
             case DB.StorageType.Integer: value = paramValue.AsInteger(); break;
-            case DB.StorageType.Double: value = paramValue.AsDouble(); break;
+            case DB.StorageType.Double: value = paramValue.AsDoubleInRhinoUnits(); break;
             case DB.StorageType.String: value = paramValue.AsString(); break;
             case DB.StorageType.ElementId: value = paramValue.AsElementId(); document = paramValue.Element.Document; break;
           }
@@ -132,7 +145,7 @@ namespace RhinoInside.Revit.GH.Components
             {
               case bool boolean: parameter.Set(boolean ? 1 : 0); break;
               case int integer: parameter.Set(integer); break;
-              case double real: parameter.Set((int) Clamp(Round(ToHost(real, parameter.Definition.ParameterType)), int.MinValue, int.MaxValue)); break;
+              case double real: parameter.SetDoubleInRhinoUnits((int) Clamp(Round(real), int.MinValue, int.MaxValue)); break;
               case System.Drawing.Color color: parameter.Set(((int) color.R) | ((int) color.G << 8) | ((int) color.B << 16)); break;
               default: element = null; break;
             }
@@ -143,7 +156,7 @@ namespace RhinoInside.Revit.GH.Components
             switch (value)
             {
               case int integer: parameter.Set((double) integer); break;
-              case double real: parameter.Set(ToHost(real, parameter.Definition.ParameterType)); break;
+              case double real: parameter.SetDoubleInRhinoUnits(real); break;
               default: element = null; break;
             }
             break;
@@ -202,20 +215,12 @@ namespace RhinoInside.Revit.GH.Components
 
       return true;
     }
-
-    static double ToHost(double value, DB.ParameterType type)
-    {
-      switch (type)
-      {
-        case DB.ParameterType.Length: return value / Pow(Revit.ModelUnits, 1.0);
-        case DB.ParameterType.Area: return value / Pow(Revit.ModelUnits, 2.0);
-        case DB.ParameterType.Volume: return value / Pow(Revit.ModelUnits, 3.0);
-      }
-
-      return value;
-    }
   }
+}
 
+namespace RhinoInside.Revit.GH.Components
+{
+  using External.DB.Extensions;
   public class ElementParameterGet : Component
   {
     public override Guid ComponentGuid => new Guid("D86050F2-C774-49B1-9973-FB3AB188DC94");
