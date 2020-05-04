@@ -12,7 +12,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class FamilyNew : Component
+  public class FamilyNew : DocumentComponent
   {
     public override Guid ComponentGuid => new Guid("82523911-309F-4A66-A4B9-CF21E0AC250E");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
@@ -433,9 +433,8 @@ namespace RhinoInside.Revit.GH.Components
       );
     }
 
-    protected override void TrySolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
     {
-      var doc = Revit.ActiveDBDocument;
       var scaleFactor = 1.0 / Revit.ModelUnits;
 
       var overrideFamily = false;
@@ -563,7 +562,7 @@ namespace RhinoInside.Revit.GH.Components
                   }
                 }
 
-                transaction.Commit();
+                CommitTransaction(familyDoc, transaction);
               }
 
               family = familyDoc.LoadFamily(doc, new FamilyLoadOptions(overrideFamily, overrideParameters));
@@ -585,7 +584,7 @@ namespace RhinoInside.Revit.GH.Components
                 if (doc.GetElement(family.GetFamilySymbolIds().First()) is DB.FamilySymbol symbol)
                   symbol.Name = name;
 
-                transaction.Commit();
+                CommitTransaction(doc, transaction);
               }
             }
           }
