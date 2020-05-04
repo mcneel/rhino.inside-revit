@@ -1,6 +1,8 @@
 using System;
 using Grasshopper.Kernel;
 
+using RhinoInside.Revit.External.DB.Extensions;
+
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -116,6 +118,12 @@ namespace RhinoInside.Revit.GH.Components
         access: GH_ParamAccess.item
         );
       manager.AddNumberParameter(
+        name: "Slant Angle",
+        nickname: "SA",
+        description: "Slant angle of the wall",
+        access: GH_ParamAccess.item
+        );
+      manager.AddNumberParameter(
         name: "Area",
         nickname: "A",
         description: "Area of given wall instance",
@@ -180,7 +188,13 @@ namespace RhinoInside.Revit.GH.Components
 
       PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.WALL_USER_HEIGHT_PARAM, "Height");
       PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.CURVE_ELEM_LENGTH, "Length");
-      DA.SetData("Width", wallInstance.Width);
+      DA.SetData("Width", wallInstance.GetWidth());
+#if REVIT_2021
+     PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL, "Slant Angle");
+#else
+      // if slant is not supported, it is 0
+      DA.SetData("Slant Angle", 0.0);
+#endif
       PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.HOST_AREA_COMPUTED, "Area");
       PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.HOST_VOLUME_COMPUTED, "Volume");
 
@@ -189,10 +203,7 @@ namespace RhinoInside.Revit.GH.Components
       PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT, "Structural");
       PipeHostParameter<Types.StructuralWallUsage>(DA, wallInstance, DB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM, "Structural Usage");
 
-      var wallOrientationVector = new Rhino.Geometry.Vector3d(wallInstance.Orientation.X, wallInstance.Orientation.Y, wallInstance.Orientation.Z);
-      if (wallInstance.Flipped)
-        wallOrientationVector.Reverse();
-      DA.SetData("Orientation", wallOrientationVector);
+      DA.SetData("Orientation", wallInstance.GetOrientationVector());
     }
   }
 }

@@ -340,3 +340,6 @@ ASALocalRun/
 # remove OS files
 desktop.ini
 .DS_Store
+
+# discard debug files
+script/.debug

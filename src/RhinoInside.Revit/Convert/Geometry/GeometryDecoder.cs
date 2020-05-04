@@ -68,6 +68,37 @@ namespace RhinoInside.Revit.Convert.Geometry
     { var rhino = RawDecoder.ToRhino(value); UnitConverter.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
     #endregion
 
+    /// <summary>
+    /// Converts a <see cref="DB.CurveLoop"/> into a Rhino <see cref="Curve"/>
+    /// </summary>
+    public static Curve ToCurve(this DB.CurveLoop value)
+    {
+      if (value.NumberOfCurves() == 1)
+        return value.First().ToCurve();
+
+      var polycurve = new PolyCurve();
+
+      foreach (var curve in value)
+        polycurve.AppendSegment(curve.ToCurve());
+
+      return polycurve;
+    }
+
+    /// <summary>
+    /// Converts a <see cref="DB.CurveArray"/> into a Rhino <see cref="Curve"/>[]
+    /// </summary>
+    public static Curve[] ToCurves(this DB.CurveArray value)
+    {
+      var count = value.Size;
+      var curves = new Curve[count];
+
+      int index = 0;
+      foreach (var curve in value.Cast<DB.Curve>())
+        curves[index++] = curve.ToCurve();
+
+      return curves;
+    }
+
     public static IEnumerable<GeometryBase> ToGeometryBaseMany(this DB.GeometryObject geometry)
     {
       switch (geometry)

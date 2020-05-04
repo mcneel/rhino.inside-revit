@@ -203,6 +203,11 @@ namespace RhinoInside.Revit
 
     public override void ReportException(Exception e, UIApplication app, object sender)
     {
+      // A serious error has occurred. The current action has ben cancelled.
+      // It is stringly recommended that you save your work in a new file before continuing.
+      //
+      // Would you like to save a recovery file? "{TileName}(Recovery)".rvt
+
       if (MessageBox.Show
       (
         caption: $"{app.ActiveAddInId.GetAddInName()} {Version} - Oops! Something went wrong :(",

@@ -29,6 +29,7 @@ These pages guide you through understanding the underlying concepts in Revit e.g
 - [Data Model: Parameters]({{ site.baseurl }}{% link _en/beta/guides/revit-params.md %})
 - [Data Model: Types]({{ site.baseurl }}{% link _en/beta/guides/revit-types.md %})
 - [Data Model: Instances]({{ site.baseurl }}{% link _en/beta/guides/revit-instances.md %})
+- [Data Model: Documents]({{ site.baseurl }}{% link _en/beta/guides/revit-docs.md %})
 
 <!-- 40, 50-->
 ## Modeling in Revit

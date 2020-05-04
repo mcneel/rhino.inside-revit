@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.GH.Types
 {
   public class Document : GH_Goo<DB.Document>, IEquatable<Document>
   {
-    public override string TypeName => "Revit Documnent";
+    public override string TypeName => "Revit Document";
     public override string TypeDescription => "Represents a Revit document";
     public override bool IsValid => Value is object;
     public override sealed IGH_Goo Duplicate() => (IGH_Goo) MemberwiseClone();
@@ -105,7 +105,7 @@ namespace RhinoInside.Revit.GH.Types
 
   public class ProjectDocument : Document
   {
-    public override string TypeName => "Revit Project Documnent";
+    public override string TypeName => "Revit Project Document";
     public override string TypeDescription => "Represents a Revit project document";
 
     public ProjectDocument(DB.Document value) : base(value) { }
@@ -113,7 +113,7 @@ namespace RhinoInside.Revit.GH.Types
 
   public class FamilyDocument : Document
   {
-    public override string TypeName => "Revit Family Documnent";
+    public override string TypeName => "Revit Family Document";
     public override string TypeDescription => "Represents a Revit family document";
 
     public FamilyDocument(DB.Document value) : base(value) { }

@@ -27,6 +27,7 @@
   - [Linking Images](#linking-images)
   - [Grasshopper Screenshots](#grasshopper-screenshots)
   - [Linking Videos](#linking-videos)
+  - [Referencing Grasshopper Components](#referencing-grasshopper-components)
   - [Adding Email Links](#adding-email-links)
   - [Pre-defined Blocks](#pre-defined-blocks)
     - [Work-in-Progress Block](#work-in-progress-block)
@@ -236,6 +237,7 @@ The structure of the source is as explained below:
 - `GemFile*` Ruby gemfile listing the ruby dependencies
 - `index.md` Root of the Wiki. It redirects the visitor to default language and Wiki version (defaults are set in the site configs file)
 - `readme.md`: This Markdown document
+- `update_components_data.gh`: This is a grasshopper definition file, used to generate component data file under `_data/`
 
 ## Page Metadata
 
@@ -477,6 +479,22 @@ For YouTube playlists use:
 {% include youtube_list.html id="DZ4y-ZbBkM" %}
 ```
 
+## Referencing Grasshopper Components
+
+To reference any component that is part of this project, use the pre-defined block shown below:
+
+```markdown
+{% include ltr/comp.html uuid="15545e80-" %}
+```
+
+The `15545e80-` is the first part of the component uuid. This information is stored in the component data file generated from the actual components in this project.
+
+The site builder, automatically finds the component data based on the provided uuid part, and places the component title instead:
+
+```
+Wall System Family
+```
+
 ## Adding Email Links
 
 Emails links (`mailto:`) need to be obfuscated to avoid crawlers to extract email from the Wiki pages. Use the method described below:
@@ -565,7 +583,7 @@ This block can accept two argument:
 This block is for showing code-related issues on the GitHub repo. Below is an example of using an issue note block:
 
 ```
-{% include ltr/issue_note.html issue_id='142' note='Add Views to category pickers so an Element.CategoryFilter can be used to list views' %}
+{% include ltr/issue_note.html issue_id='142' note='Add Views to category pickers so an {% include ltr/comp.html uuid="d08f7ab1-" %} can be used to list views' %}
 ```
 
 This block can accept two argument:

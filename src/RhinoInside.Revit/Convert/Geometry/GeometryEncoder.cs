@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Rhino.Geometry;
+using RhinoInside.Revit.Convert.System.Collections.Generic;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.Geometry.Extensions;
 using DB = Autodesk.Revit.DB;
@@ -300,7 +301,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       value = value.InOtherUnits(UnitConverter.ToHostUnits);
       value.RemoveShortSegments(Revit.ShortCurveTolerance);
 
-      return DB.CurveLoop.Create(value.ToCurveMany().SelectMany(x => x.ToBoundedCurves()).ToList());
+      return DB.CurveLoop.Create(value.ToCurveMany(UnitConverter.NoScale).SelectMany(x => x.ToBoundedCurves()).ToList());
     }
 
     public static DB.CurveArray ToCurveArray(this Curve value)
@@ -308,7 +309,16 @@ namespace RhinoInside.Revit.Convert.Geometry
       value = value.InOtherUnits(UnitConverter.ToHostUnits);
       value.RemoveShortSegments(Revit.ShortCurveTolerance);
 
-      return value.ToCurveMany().SelectMany(x => x.ToBoundedCurves()).ToCurveArray();
+      return value.ToCurveMany(UnitConverter.NoScale).SelectMany(x => x.ToBoundedCurves()).ToCurveArray();
+    }
+
+    public static DB.CurveArrArray ToCurveArrayArray(this IList<Curve> value)
+    {
+      var curveArrayArray = new DB.CurveArrArray();
+      foreach (var curve in value)
+        curveArrayArray.Append(curve.ToCurveArray());
+
+      return curveArrayArray;
     }
 
     public static DB.Solid ToSolid(this Brep value) => BrepEncoder.ToSolid(BrepEncoder.ToRawBrep(value, UnitConverter.ToHostUnits));

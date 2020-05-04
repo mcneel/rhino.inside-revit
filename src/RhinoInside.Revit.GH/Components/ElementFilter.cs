@@ -515,7 +515,7 @@ namespace RhinoInside.Revit.GH.Components
       var _Level_ = Params.IndexOfInputParam("Level");
       if
       (
-        Params.Output[_Level_].DataType != GH_ParamData.@void &&
+        Params.Input[_Level_].DataType != GH_ParamData.@void &&
         !DA.GetData(_Level_, ref level)
       )
         return;
@@ -550,7 +550,7 @@ namespace RhinoInside.Revit.GH.Components
       var _DesignOption_ = Params.IndexOfInputParam("Design Option");
       if
       (
-        Params.Output[_DesignOption_].DataType != GH_ParamData.@void &&
+        Params.Input[_DesignOption_].DataType != GH_ParamData.@void &&
         !DA.GetData(_DesignOption_, ref designOption)
       )
         return;
@@ -585,7 +585,7 @@ namespace RhinoInside.Revit.GH.Components
       var _View_ = Params.IndexOfInputParam("View");
       if
       (
-        Params.Output[_View_].DataType != GH_ParamData.@void &&
+        Params.Input[_View_].DataType != GH_ParamData.@void &&
         !DA.GetData(_View_, ref view)
       )
         return;

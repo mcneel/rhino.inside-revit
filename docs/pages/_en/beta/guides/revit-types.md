@@ -61,11 +61,11 @@ When working with Revit or Revit API, we are mostly dealing with Revit **Types**
 
 ## Querying Types
 
-You can use the combination of a category picker components e.g. *Model.CategoriesPicker*, the *Element.CategoryFilter* component, and *Document.ElementTypes* component to collect types in a certain Revit category:
+You can use the combination of a category picker components e.g. {% include ltr/comp.html uuid="eb266925-" %}, the {% include ltr/comp.html uuid="d08f7ab1-" %} component, and {% include ltr/comp.html uuid="7b00f940-" %} component to collect types in a certain Revit category:
 
 ![]({{ "/static/images/guides/revit-families01.png" | prepend: site.baseurl }})
 
-The *Document.ElementTypes* component can further filter the list of types:
+The {% include ltr/comp.html uuid="7b00f940-" %} component can further filter the list of types:
 
 ![]({{ "/static/images/guides/revit-families02.png" | prepend: site.baseurl }})
 
@@ -92,12 +92,12 @@ Notice that **Duct Systems** for example, is a system type and therefore have no
 
 {{ site.terms.rir }} includes a few components that can help you pick a specific element type from a Revit category:
 
-- *Model.CategoriesPicker*: Allows selecting a specific model category e.g. Walls
+- {% include ltr/comp.html uuid="eb266925-" %}: Allows selecting a specific model category e.g. Walls
 - *Analytical.CategoriesPicker*: Allows selecting a specific analytical category e.g. Analytical Walls
 - *Annotation.CategoriesPicker*: Allows selecting a specific annotation category e.g. Dimensions
   - *Tag.CategoriesPicker*: Allows selecting a specific tag category e.g. Room Tags
 
-You can pass the any of the categories above to the *ElementType.ByName* component to select a specific type from that category:
+You can pass the any of the categories above to the {% include ltr/comp.html uuid="d3fb53d3-9" %} component to select a specific type from that category:
 
 ![]({{ "/static/images/guides/revit-families05.png" | prepend: site.baseurl }})
 
@@ -122,11 +122,11 @@ Once you have filtered out the desired type, you can query its parameters and ap
 
 ## Extracting Type Geometry
 
-Once you have filtered out the desired type, you can extract the geometry for that element type using the *Element.Geometry* component. The *Level Of Detail* value list component makes it easy to provide correct values for LOD input parameter.
+Once you have filtered out the desired type, you can extract the geometry for that element type using the {% include ltr/comp.html uuid="b7e6a82f-" %} component. The *Level Of Detail* value list component makes it easy to provide correct values for LOD input parameter.
 
 ![]({{ "/static/images/guides/revit-families07.png" | prepend: site.baseurl }})
 
-The *Element.Geometry* component automatically previews the geometry in Rhino window.
+The {% include ltr/comp.html uuid="b7e6a82f-" %} component automatically previews the geometry in Rhino window.
 
 ![]({{ "/static/images/guides/revit-families08.png" | prepend: site.baseurl }})
 
@@ -200,7 +200,7 @@ Under current {{ site.terms.rir }} implementation, you can use the *Family.New* 
 
 Revit *Project Browser* now lists the new family under *Families*
 
-You can also pass the **Generic Model** template to the *Family.New* component and set the category manually using the *Model.CategoriesPicker* component.
+You can also pass the **Generic Model** template to the *Family.New* component and set the category manually using the {% include ltr/comp.html uuid="eb266925-" %} component.
 
 ![]({{ "/static/images/guides/revit-families13.png" | prepend: site.baseurl }})
 

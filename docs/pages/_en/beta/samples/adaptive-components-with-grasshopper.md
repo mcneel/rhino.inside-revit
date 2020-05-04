@@ -3,7 +3,7 @@ title: Create Building Shell Using Adaptive Components
 ---
 
 <!-- intro video -->
-{% include youtube_player.html id="etVbQGZ3myg" %}
+{% include youtube_player.html id="f3s84WP1MhI" %}
 
 {% include ltr/download_pkg.html archive='/static/samples/adaptive-components-with-grasshopper.zip' %}
 

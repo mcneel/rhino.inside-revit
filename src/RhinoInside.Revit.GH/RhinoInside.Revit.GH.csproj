@@ -210,6 +210,7 @@
     <Compile Include="Components\Document\Views.cs" />
     <Compile Include="Components\Document\Walls.cs" />
     <Compile Include="Components\Document\WallTypes.cs" />
+    <Compile Include="Components\Document\LinkedDocuments.cs" />
     <Compile Include="Components\ElementFilter.cs" />
     <Compile Include="Components\ElementType\Default.cs" />
     <Compile Include="Components\ElementType\Duplicate.cs" />
@@ -218,11 +219,20 @@
     <Compile Include="Components\ElementType\Identity.cs" />
     <Compile Include="Components\ElementType\Instances.cs" />
     <Compile Include="Components\ElementType\Similar.cs" />
+    <Compile Include="Components\ElementType\WallType\AnalyseBasicWallType.cs" />
+    <Compile Include="Components\ElementType\WallType\CompoundStructure_Destruct.cs" />
+    <Compile Include="Components\ElementType\WallType\CompoundStructureLayer_Destruct.cs" />
+    <Compile Include="Components\ElementType\WallType\AnalyseStackedWall.cs" />
+    <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainWallType.cs" />
+    <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainSystemType.cs" />
+    <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainGridMullionType.cs" />
+    <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainGridPanelType.cs" />
     <Compile Include="Components\Element\AdaptiveComponent\ByPoints.cs" />
     <Compile Include="Components\Element\Beam\ByCurve.cs" />
     <Compile Include="Components\Element\BuildingPad\ByOutline.cs" />
     <Compile Include="Components\Element\AnalysisComponent.cs" />
     <Compile Include="Components\Element\CompoundStructureGeometry.cs" />
+    <Compile Include="Components\Element\BoundingGeometry.cs" />
     <Compile Include="Components\Element\Delete.cs" />
     <Compile Include="Components\Element\Dependents.cs" />
     <Compile Include="Components\Element\Geometry.cs" />
@@ -242,6 +252,7 @@
     <Compile Include="Components\Element\Material\Identity.cs" />
     <Compile Include="Components\Element\Parameters.cs" />
     <Compile Include="Components\Element\FamilyInstance\ByPointAtHost.cs" />
+    <Compile Include="Components\Element\FamilyInstance\AnalyzeInstanceSpace.cs" />
     <Compile Include="Components\Element\Floor\ByOutline.cs" />
     <Compile Include="Components\Element\Grid\ByCurve.cs" />
     <Compile Include="Components\Element\Level\ByElevation.cs" />
@@ -262,11 +273,14 @@
     <Compile Include="Components\Element\Wall\ByCurve.cs" />
     <Compile Include="Components\Element\Wall\AnalyseWall.cs" />
     <Compile Include="Components\Element\Wall\AnalyseWallLocation.cs" />
-    <Compile Include="Components\Element\Wall\AnalyseBasicWallType.cs" />
-    <Compile Include="Components\Element\Wall\AnalyseStackedWall.cs" />
-    <Compile Include="Components\Element\Wall\CompoundStructure_Destruct.cs" />
-    <Compile Include="Components\Element\Wall\CompoundStructureLayer_Destruct.cs" />
     <Compile Include="Components\Element\Wall\AnalyseWallProfile.cs" />
+    <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainWall.cs" />
+    <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainSystem.cs" />
+    <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainGridCell.cs" />
+    <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainGrid.cs" />
+    <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainGridLine.cs" />
+    <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainGridMullion.cs" />
+    <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainGridPanel.cs" />
     <Compile Include="Components\Family\Element\Form\ByCurves.cs" />
     <Compile Include="Components\Family\Element\Form\ByGeometry.cs" />
     <Compile Include="Components\Family\Element\Visibility\Construct.cs" />
@@ -318,6 +332,14 @@
     <Compile Include="Parameters\OpeningWrappingCondition_ValueList.cs" />
     <Compile Include="Parameters\DeckEmbeddingType_ValueList.cs" />
     <Compile Include="Parameters\ViewDetailLevel_ValueList.cs" />
+    <Compile Include="Parameters\CurtainGridAlignType_ValueList.cs" />
+    <Compile Include="Parameters\CurtainGridLayout_ValueList.cs" />
+    <Compile Include="Parameters\CurtianGridJoinCondition_ValueList.cs" />
+    <Compile Include="Parameters\CurtainGridLine.cs" />
+    <Compile Include="Parameters\SpatialElement.cs" />
+    <Compile Include="Parameters\CurtainMullionPosition_ValueList.cs" />
+    <Compile Include="Parameters\CurtainMullionSystemFamily_ValueList.cs" />
+    <Compile Include="Parameters\CurtainGridMullion.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -343,6 +365,9 @@
     <Compile Include="Types\HostObject.cs" />
     <Compile Include="Types\DataObject.cs" />
     <Compile Include="Types\View.cs" />
+    <Compile Include="Types\CurtainGridLine.cs" />
+    <Compile Include="Types\SpatialElement.cs" />
+    <Compile Include="Types\CurtainGridMullion.cs" />
     <Compile Include="ValueSet.cs" />
   </ItemGroup>
   <ItemGroup>
