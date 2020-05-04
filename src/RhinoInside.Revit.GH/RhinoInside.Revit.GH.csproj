@@ -203,6 +203,7 @@
     <Compile Include="Components\Document\ElementTypes.cs" />
     <Compile Include="Components\Document\Families.cs" />
     <Compile Include="Components\Document\GroupTypes.cs" />
+    <Compile Include="Components\Document\Links.cs" />
     <Compile Include="Components\Document\Materials.cs" />
     <Compile Include="Components\Document\Passport.cs" />
     <Compile Include="Components\Document\Levels.cs" />
@@ -211,7 +212,6 @@
     <Compile Include="Components\Document\ViewTypes.cs" />
     <Compile Include="Components\Document\Walls.cs" />
     <Compile Include="Components\Document\WallTypes.cs" />
-    <Compile Include="Components\Document\LinkedDocuments.cs" />
     <Compile Include="Components\ElementFilter.cs" />
     <Compile Include="Components\ElementType\Default.cs" />
     <Compile Include="Components\ElementType\Duplicate.cs" />
