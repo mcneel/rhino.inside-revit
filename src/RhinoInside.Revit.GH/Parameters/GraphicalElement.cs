@@ -175,13 +175,13 @@ namespace RhinoInside.Revit.GH.Parameters
         if (multiple)
         {
           if(preSelect)
-            result = uiDocument.PickObjects(out references, objectType, this, null, activeElements);
+            result = uiDocument.PickObjects(out references, objectType, this, string.Empty, activeElements);
           else
-            result = uiDocument.PickObjects(out references, objectType, this, null);
+            result = uiDocument.PickObjects(out references, objectType, this);
         }
         else
         {
-          result = uiDocument.PickObject(out var reference, objectType, this, null);
+          result = uiDocument.PickObject(out var reference, objectType, this);
           if (result == Autodesk.Revit.UI.Result.Succeeded)
             references = new DB.Reference[] { reference };
         }
