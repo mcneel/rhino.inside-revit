@@ -62,8 +62,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       // extract global properties
       // e.g. base height, thickness, ...
-      var height = wall.get_Parameter(BuiltInParameter.WALL_USER_HEIGHT_PARAM).AsDouble();
-      var thickness = wall.GetWidth();
+      var height = wall.get_Parameter(BuiltInParameter.WALL_USER_HEIGHT_PARAM).AsDouble() * Revit.ModelUnits;
+      var thickness = wall.GetWidth() * Revit.ModelUnits;
       // construct a base offset plane that is used later to offset base curves
       var offsetPlane = Rhino.Geometry.Plane.WorldXY;
       var baseElevation = wall.get_Parameter(BuiltInParameter.WALL_BASE_OFFSET).AsDouble();
