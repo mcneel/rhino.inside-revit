@@ -208,6 +208,7 @@
     <Compile Include="Components\Document\Levels.cs" />
     <Compile Include="Components\Document\Save.cs" />
     <Compile Include="Components\Document\Views.cs" />
+    <Compile Include="Components\Document\ViewTypes.cs" />
     <Compile Include="Components\Document\Walls.cs" />
     <Compile Include="Components\Document\WallTypes.cs" />
     <Compile Include="Components\Document\LinkedDocuments.cs" />

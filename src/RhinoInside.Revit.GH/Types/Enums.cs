@@ -133,13 +133,19 @@ namespace RhinoInside.Revit.GH.Types
   public class ViewDiscipline : GH_Enum<DB.ViewDiscipline> { }
 
   [
+    ComponentGuid("485C3278-0D1A-445D-B3DA-75FB8CD38CF9"),
+    Name("View Family"),
+    Description("Represents a Revit view family."),
+  ]
+  public class ViewFamily : GH_Enum<DB.ViewFamily> { }
+
+  [
     ComponentGuid("BF051011-660D-39E7-86ED-20EEE3A68DB0"),
     Name("View Type"),
     Description("Represents a Revit view type."),
   ]
   public class ViewType : GH_Enum<DB.ViewType> { }
 
-  
   [
     ComponentGuid("2FDE857C-EDAB-4999-B6AE-DC531DD2AD18"),
     Name("Image Fit direction type"),
