@@ -228,6 +228,7 @@ namespace RhinoInside.Revit
         ErrorReport.SendEmail
         (
           app,
+          $"Rhino.Inside Revit failed - {e.GetType().FullName}",
           false,
           new string[]
           {
@@ -512,6 +513,7 @@ namespace RhinoInside.Revit.UI
               ErrorReport.SendEmail
               (
                 data.Application,
+                "Rhino.Inside Revit failed to load",
                 !taskDialog.WasVerificationChecked(),
                 new string[]
                 {

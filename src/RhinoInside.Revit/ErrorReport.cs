@@ -192,7 +192,7 @@ namespace RhinoInside.Revit
       }
     }
 
-    public static void SendEmail(UIApplication app, bool includeAddinsList, IEnumerable<string> attachments)
+    public static void SendEmail(UIApplication app, string subject, bool includeAddinsList, IEnumerable<string> attachments)
     {
       var now = DateTime.Now.ToString("yyyyMMddTHHmmssZ");
       var ReportFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), $"RhinoInside-Revit-Report-{now}.zip");
@@ -211,7 +211,8 @@ namespace RhinoInside.Revit
         catch (IOException) { }
       }
 
-      var mailtoURI = @"mailto:tech@mcneel.com?subject=Rhino.Inside%20Revit%20failed%20to%20load&body=";
+      subject = Uri.EscapeUriString(subject);
+      var mailtoURI = $"mailto:tech@mcneel.com?subject={subject}&body=";
 
       var mailBody = @"Please give us any additional info you see fit here..." + Environment.NewLine + Environment.NewLine;
       if (File.Exists(ReportFilePath))
