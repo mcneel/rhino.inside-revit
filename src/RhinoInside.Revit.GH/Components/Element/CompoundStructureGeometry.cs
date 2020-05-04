@@ -54,29 +54,33 @@ namespace RhinoInside.Revit.GH.Components
       {
         try
         {
-          // start a dry transaction that will be rolled back later
-          var t = new DB.Transaction(element.Document, "Dry Transaction");
-          t.Start();
-
-          // explode the element into parts
-          DB.PartUtils.CreateParts(element.Document, elementIds);
-          element.Document.Regenerate();
-          // get the exploded parts
-          foreach(DB.ElementId partId in DB.PartUtils.GetAssociatedParts(element.Document, element.Id, includePartsWithAssociatedParts: true, includeAllChildren: true))
+          // start a dry transaction that will be rolled back automatically
+          // when execution goes out of next using statment
+          using (var transaction = new DB.Transaction(element.Document, nameof(GetCompoundStructureLayerGeom)))
           {
-            DB.Element part = element.Document.GetElement(partId);
-            if (part != null)
+            transaction.Start();
+
+            // explode the element into parts
+            DB.PartUtils.CreateParts(element.Document, elementIds);
+            element.Document.Regenerate();
+
+            // get the exploded parts
+            foreach (DB.ElementId partId in DB.PartUtils.GetAssociatedParts(element.Document, element.Id, includePartsWithAssociatedParts: true, includeAllChildren: true))
             {
-              // extract geometry for each part
-              DB.GeometryElement partGeom = part.get_Geometry(new DB.Options());
-              if (partGeom != null)
-                foreach (DB.GeometryObject geom in partGeom)
-                  layerGeoms.AddRange(geom.ToGeometryBaseMany().Cast<Rhino.Geometry.Brep>());
+              if (element.Document.GetElement(partId) is DB.Element part)
+              {
+                using (var options = new DB.Options())
+                {
+                  // extract geometry for each part
+                  if (part.get_Geometry(options) is DB.GeometryElement partGeom)
+                  {
+                    foreach (DB.GeometryObject geom in partGeom)
+                      layerGeoms.AddRange(geom.ToGeometryBaseMany().Cast<Rhino.Geometry.Brep>());
+                  }
+                }
+              }
             }
           }
-
-          // rollback the changes now
-          t.RollBack();
         }
         catch {}
       }
