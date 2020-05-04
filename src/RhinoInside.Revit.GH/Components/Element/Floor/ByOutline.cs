@@ -1,11 +1,9 @@
 using System;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.Convert.Units;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
-using System.Collections.Generic;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -38,13 +36,13 @@ namespace RhinoInside.Revit.GH.Components
       [Optional] bool structural
     )
     {
-      //if
-      //(
-      //  !boundary.IsClosed ||
-      //  !boundary.TryGetPlane(out var boundaryPlane, Revit.VertexTolerance) ||
-      //  boundaryPlane.ZAxis.IsParallelTo(Rhino.Geometry.Vector3d.ZAxis) == 0
-      //)
-      //  ThrowArgumentException(nameof(boundary), "Boundary must be an horizontal planar closed curve.");
+      if
+      (
+        !boundary.IsClosed ||
+        !boundary.TryGetPlane(out var boundaryPlane, Revit.VertexTolerance) ||
+        boundaryPlane.ZAxis.IsParallelTo(Rhino.Geometry.Vector3d.ZAxis) == 0
+      )
+        ThrowArgumentException(nameof(boundary), "Boundary must be an horizontal planar closed curve.");
 
       SolveOptionalType(ref type, doc, DB.ElementTypeGroup.FloorType, nameof(type));
 
