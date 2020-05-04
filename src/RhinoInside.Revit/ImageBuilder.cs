@@ -37,7 +37,7 @@ namespace RhinoInside.Revit
           Alignment = Drawing.StringAlignment.Center,
           LineAlignment = Drawing.StringAlignment.Center,
           Trimming = Drawing.StringTrimming.Character,
-          FormatFlags = Drawing.StringFormatFlags.LineLimit
+          FormatFlags = Drawing.StringFormatFlags.NoWrap
         };
 
         float emSize = ((float) (width) / ((float) tag.Length));
@@ -49,6 +49,7 @@ namespace RhinoInside.Revit
             case 2: emSize = 13.0f; break;
             case 3: emSize = 11.0f; break;
             case 4: emSize = 8.0f; break;
+            default: emSize = 7.0f; break;
           }
         }
 
