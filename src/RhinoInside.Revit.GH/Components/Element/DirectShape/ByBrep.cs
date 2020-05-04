@@ -1,7 +1,9 @@
 using System;
 using System.Linq;
-using Autodesk.Revit.DB;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -25,25 +27,20 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructDirectShapeByBrep
     (
-      Document doc,
-      ref Autodesk.Revit.DB.Element element,
+      DB.Document doc,
+      ref DB.DirectShape element,
 
       Rhino.Geometry.Brep brep
     )
     {
-      var scaleFactor = 1.0 / Revit.ModelUnits;
-
       ThrowIfNotValid(nameof(brep), brep);
 
-      if (element is DirectShape ds) { }
-      else ds = DirectShape.CreateElement(doc, new ElementId(BuiltInCategory.OST_GenericModel));
+      if (element is DB.DirectShape ds) { }
+      else ds = DB.DirectShape.CreateElement(doc, new DB.ElementId(DB.BuiltInCategory.OST_GenericModel));
 
-      var shapes = brep.
-                   ToHostMultiple(scaleFactor).
-                   SelectMany(x => x.ToDirectShapeGeometry()).
-                   ToList();
+      var shape = brep.ToShape();
+      ds.SetShape(shape);
 
-      ds.SetShape(shapes);
       ReplaceElement(ref element, ds);
     }
   }

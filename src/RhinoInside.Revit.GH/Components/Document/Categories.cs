@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -99,7 +100,7 @@ namespace RhinoInside.Revit.GH.Components
       bool nofilterCuttable = (!DA.GetData(_Cuttable_, ref Cuttable) && Params.Input[_Cuttable_].DataType == GH_ParamData.@void);
 
       var categories = nofilterParent || !ParentCategoryId.IsValid() ?
-                       doc.Settings.Categories.Cast<DB.Category>() :
+                       BuiltInCategoryExtension.BuiltInCategories.Select(x => doc.GetCategory(x)).Where(x => x is object && x.Parent is null) :
                        DB.Category.GetCategory(doc, ParentCategoryId).SubCategories.Cast<DB.Category>();
 
       if (categoryType != DB.CategoryType.Invalid)

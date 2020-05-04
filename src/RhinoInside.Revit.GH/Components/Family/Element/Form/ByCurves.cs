@@ -1,8 +1,8 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using Autodesk.Revit.DB;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.Convert.Geometry;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -35,9 +35,6 @@ namespace RhinoInside.Revit.GH.Components
       if (!doc.IsFamilyDocument)
         throw new InvalidOperationException("This component can only run in Family editor");
 
-      var scaleFactor = 1.0 / Revit.ModelUnits;
-      profiles = profiles.Select(x => x.ChangeUnits(scaleFactor)).ToArray();
-
       var planes = new List<Rhino.Geometry.Plane>();
       foreach (var profile in profiles)
       {
@@ -53,10 +50,10 @@ namespace RhinoInside.Revit.GH.Components
         var profile = profiles[0];
         var plane = planes[0];
 
-        using (var sketchPlane = SketchPlane.Create(doc, plane.ToHost()))
+        using (var sketchPlane = SketchPlane.Create(doc, plane.ToPlane()))
         using (var referenceArray = new ReferenceArray())
         {
-          foreach (var curve in profile.ToHostMultiple())
+          foreach (var curve in profile.ToCurveMany())
             referenceArray.Append(new Reference(doc.FamilyCreate.NewModelCurve(curve, sketchPlane)));
 
           ReplaceElement(ref element, doc.FamilyCreate.NewFormByCap(true, referenceArray));
@@ -69,11 +66,11 @@ namespace RhinoInside.Revit.GH.Components
           int index = 0;
           foreach (var profile in profiles)
           {
-            using (var sketchPlane = SketchPlane.Create(doc, planes[index++].ToHost()))
+            using (var sketchPlane = SketchPlane.Create(doc, planes[index++].ToPlane()))
             {
               var referenceArray = new ReferenceArray();
 
-              foreach (var curve in profile.ToHostMultiple())
+              foreach (var curve in profile.ToCurveMany())
                 referenceArray.Append(new Reference(doc.FamilyCreate.NewModelCurve(curve, sketchPlane)));
 
               referenceArrayArray.Append(referenceArray);

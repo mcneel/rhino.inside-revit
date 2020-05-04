@@ -7,7 +7,7 @@ order: 33
 
 ## Querying Instance of a Type
 
-Use a combination of category component, connected to *ElementType.ByName* and *Element.TypeFilter*, to query all the instances of a specific type. The example below is collecting all the instance of the **My Basic Wall** type:
+Use a combination of category component, connected to {% include ltr/comp.html uuid="d3fb53d3-9" %} and *Element.TypeFilter*, to query all the instances of a specific type. The example below is collecting all the instance of the **My Basic Wall** type:
 
 ![]({{ "/static/images/guides/revit-instances01.png" | prepend: site.baseurl }})
 
@@ -17,9 +17,23 @@ Use a combination of category component, connected to *ElementType.ByName* and *
 
 ## Extracting Instance Geometry
 
-{% include ltr/en/wip_note.html %}
+The *Element Geometry* component can be used to extract the geometry of an instance. In the example below, the complete geometry of a *Stacked Wall* instance has been extracted. The *Level Of Detail* value picker can be used to select the level of detail for geometry extraction:
 
-{% include ltr/download_comp.html archive='/static/ghnodes/Level Of Detail.ghuser' name='Level Of Detail' %}
+![]({{ "/static/images/guides/revit-instances02.png" | prepend: site.baseurl }})
+
+### Instance Bounding Box
+
+You can pass an instance into a *Box* component to extract the bounding box of the geometry very easily:
+
+![]({{ "/static/images/guides/revit-instances03.png" | prepend: site.baseurl }})
+
+### Instance Bounding Geometry
+
+{% include ltr/warning_note.html note='Currently, Bounding Geometry component only works with Walls but will be extended to work with other Revit categories in the future.' %}
+
+Sometimes it is necessary to extract the *Bounding Geometry* of an instance. *Bounding Geometry* is a geometry that wraps the instance geometry as close as possible and generally follows the instance geometry topology. You can use the *Extract Bounding Geometry* component to extract this geometry. In the example below, the bounding geometry of a *Stacked Wall* is extracted. Notice that the bounding geometry is as thick as the thickest part of the *Stacked Wall*:
+
+![]({{ "/static/images/guides/revit-instances04.png" | prepend: site.baseurl }})
 
 ## Modifying Instances
 

@@ -1,5 +1,6 @@
 using System;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.Convert.Geometry;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -33,16 +34,13 @@ namespace RhinoInside.Revit.GH.Components
       Optional<bool> perspective
     )
     {
-      var scaleFactor = 1.0 / Revit.ModelUnits;
-      plane = plane.ChangeUnits(scaleFactor);
-
       SolveOptionalType(ref type, doc, DB.ElementTypeGroup.ViewType3D, nameof(type));
 
       var orientation = new DB.ViewOrientation3D
       (
-        plane.Origin.ToHost(),
-        plane.YAxis.ToHost(),
-        plane.ZAxis.ToHost()
+        plane.Origin.ToXYZ(),
+        plane.YAxis.ToXYZ(),
+        plane.ZAxis.ToXYZ()
       );
 
       if (view is null)

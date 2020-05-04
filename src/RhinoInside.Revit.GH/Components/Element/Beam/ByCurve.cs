@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -62,20 +64,17 @@ namespace RhinoInside.Revit.GH.Components
       Optional<DB.Level> level
     )
     {
-      var scaleFactor = 1.0 / Revit.ModelUnits;
-
       if
       (
-        ((curve = curve.ChangeUnits(scaleFactor)) is null) ||
         curve.IsClosed ||
-        !curve.TryGetPlane(out var axisPlane, Revit.VertexTolerance) ||
+        !curve.IsPlanar(Revit.VertexTolerance * Revit.ModelUnits) ||
         curve.GetNextDiscontinuity(Rhino.Geometry.Continuity.C2_continuous, curve.Domain.Min, curve.Domain.Max, out var _)
       )
         ThrowArgumentException(nameof(curve), "Curve must be a C2 continuous planar non closed curve.");
 
       SolveOptionalLevel(doc, curve, ref level, out var bbox);
 
-      var centerLine = curve.ToHost();
+      var centerLine = curve.ToCurve();
 
       if (type.HasValue)
         ChangeElementTypeId(ref element, type.Value.Id);

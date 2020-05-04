@@ -24,6 +24,10 @@
     <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <RevitVersion>2020</RevitVersion>
   </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration.Contains('2021'))">
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <RevitVersion>2021</RevitVersion>
+  </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -57,7 +61,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2018|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug 2018\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;REVIT_2017; REVIT_2018</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;REVIT_2017;REVIT_2018</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
@@ -68,13 +72,13 @@
     <OutputPath>bin\Release 2018\</OutputPath>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <DefineConstants>REVIT_2017; REVIT_2018</DefineConstants>
+    <DefineConstants>REVIT_2017;REVIT_2018</DefineConstants>
     <Optimize>true</Optimize>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2019|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug 2019\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;REVIT_2017; REVIT_2018; REVIT_2019</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;REVIT_2017;REVIT_2018;REVIT_2019</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
@@ -91,7 +95,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2020|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug 2020\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;REVIT_2017; REVIT_2018; REVIT_2019; REVIT_2020</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
@@ -100,7 +104,24 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2020|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Release 2020\</OutputPath>
-    <DefineConstants>REVIT_2017; REVIT_2018; REVIT_2019; REVIT_2020</DefineConstants>
+    <DefineConstants>REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020</DefineConstants>
+    <Optimize>true</Optimize>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2021|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug 2021\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2021|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Release 2021\</OutputPath>
+    <DefineConstants>REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021</DefineConstants>
     <Optimize>true</Optimize>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
@@ -182,11 +203,13 @@
     <Compile Include="Components\Document\ElementTypes.cs" />
     <Compile Include="Components\Document\Families.cs" />
     <Compile Include="Components\Document\GroupTypes.cs" />
+    <Compile Include="Components\Document\Links.cs" />
     <Compile Include="Components\Document\Materials.cs" />
     <Compile Include="Components\Document\Passport.cs" />
     <Compile Include="Components\Document\Levels.cs" />
     <Compile Include="Components\Document\Save.cs" />
     <Compile Include="Components\Document\Views.cs" />
+    <Compile Include="Components\Document\ViewTypes.cs" />
     <Compile Include="Components\Document\Walls.cs" />
     <Compile Include="Components\Document\WallTypes.cs" />
     <Compile Include="Components\ElementFilter.cs" />
@@ -197,11 +220,19 @@
     <Compile Include="Components\ElementType\Identity.cs" />
     <Compile Include="Components\ElementType\Instances.cs" />
     <Compile Include="Components\ElementType\Similar.cs" />
+    <Compile Include="Components\ElementType\WallType\AnalyseBasicWallType.cs" />
+    <Compile Include="Components\ElementType\WallType\CompoundStructure_Destruct.cs" />
+    <Compile Include="Components\ElementType\WallType\CompoundStructureLayer_Destruct.cs" />
+    <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainWallType.cs" />
+    <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainSystemType.cs" />
+    <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainGridMullionType.cs" />
+    <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainGridPanelType.cs" />
     <Compile Include="Components\Element\AdaptiveComponent\ByPoints.cs" />
     <Compile Include="Components\Element\Beam\ByCurve.cs" />
     <Compile Include="Components\Element\BuildingPad\ByOutline.cs" />
     <Compile Include="Components\Element\AnalysisComponent.cs" />
     <Compile Include="Components\Element\CompoundStructureGeometry.cs" />
+    <Compile Include="Components\Element\BoundingGeometry.cs" />
     <Compile Include="Components\Element\Delete.cs" />
     <Compile Include="Components\Element\Dependents.cs" />
     <Compile Include="Components\Element\Geometry.cs" />
@@ -221,6 +252,7 @@
     <Compile Include="Components\Element\Material\Identity.cs" />
     <Compile Include="Components\Element\Parameters.cs" />
     <Compile Include="Components\Element\FamilyInstance\ByPointAtHost.cs" />
+    <Compile Include="Components\Element\FamilyInstance\AnalyzeInstanceSpace.cs" />
     <Compile Include="Components\Element\Floor\ByOutline.cs" />
     <Compile Include="Components\Element\Grid\ByCurve.cs" />
     <Compile Include="Components\Element\Level\ByElevation.cs" />
@@ -232,19 +264,24 @@
     <Compile Include="Components\Element\Preview.cs" />
     <Compile Include="Components\Element\Roof\ByOutline.cs" />
     <Compile Include="Components\Element\SketchPlane\ByPlane.cs" />
+    <Compile Include="Components\Element\Topography\ByMesh.cs" />
     <Compile Include="Components\Element\Topography\ByPoints.cs" />
     <Compile Include="Components\Element\View\Active.cs" />
     <Compile Include="Components\Element\View\ExportImage.cs" />
     <Compile Include="Components\Element\View\Identity.cs" />
     <Compile Include="Components\Element\View\View3DByPlane.cs" />
+    <Compile Include="Components\Element\Wall\AnalyseStackedWall.cs" />
     <Compile Include="Components\Element\Wall\ByCurve.cs" />
     <Compile Include="Components\Element\Wall\AnalyseWall.cs" />
     <Compile Include="Components\Element\Wall\AnalyseWallLocation.cs" />
-    <Compile Include="Components\Element\Wall\AnalyseBasicWallType.cs" />
-    <Compile Include="Components\Element\Wall\AnalyseStackedWall.cs" />
-    <Compile Include="Components\Element\Wall\CompoundStructure_Destruct.cs" />
-    <Compile Include="Components\Element\Wall\CompoundStructureLayer_Destruct.cs" />
     <Compile Include="Components\Element\Wall\AnalyseWallProfile.cs" />
+    <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainWall.cs" />
+    <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainSystem.cs" />
+    <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainGridCell.cs" />
+    <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainGrid.cs" />
+    <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainGridLine.cs" />
+    <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainGridMullion.cs" />
+    <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainGridPanel.cs" />
     <Compile Include="Components\Family\Element\Form\ByCurves.cs" />
     <Compile Include="Components\Family\Element\Form\ByGeometry.cs" />
     <Compile Include="Components\Family\Element\Visibility\Construct.cs" />
@@ -296,6 +333,14 @@
     <Compile Include="Parameters\OpeningWrappingCondition_ValueList.cs" />
     <Compile Include="Parameters\DeckEmbeddingType_ValueList.cs" />
     <Compile Include="Parameters\ViewDetailLevel_ValueList.cs" />
+    <Compile Include="Parameters\CurtainGridAlignType_ValueList.cs" />
+    <Compile Include="Parameters\CurtainGridLayout_ValueList.cs" />
+    <Compile Include="Parameters\CurtianGridJoinCondition_ValueList.cs" />
+    <Compile Include="Parameters\CurtainGridLine.cs" />
+    <Compile Include="Parameters\SpatialElement.cs" />
+    <Compile Include="Parameters\CurtainMullionPosition_ValueList.cs" />
+    <Compile Include="Parameters\CurtainMullionSystemFamily_ValueList.cs" />
+    <Compile Include="Parameters\CurtainGridMullion.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -321,6 +366,9 @@
     <Compile Include="Types\HostObject.cs" />
     <Compile Include="Types\DataObject.cs" />
     <Compile Include="Types\View.cs" />
+    <Compile Include="Types\CurtainGridLine.cs" />
+    <Compile Include="Types\SpatialElement.cs" />
+    <Compile Include="Types\CurtainGridMullion.cs" />
     <Compile Include="ValueSet.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -383,7 +431,7 @@
     <None Include="Resources\Parameters\ElementType.png" />
     <None Include="Resources\Parameters\ElementTypeByName.png" />
     <None Include="Resources\Parameters\Face.png" />
-    <None Include="Resources\Parameters\GeometricElement.png" />
+    <None Include="Resources\Parameters\GraphicalElement.png" />
     <None Include="Resources\Parameters\ModelCategoriesPicker.png" />
     <None Include="Resources\Parameters\ParameterKey.png" />
     <None Include="Resources\Parameters\SketchPlane.png" />

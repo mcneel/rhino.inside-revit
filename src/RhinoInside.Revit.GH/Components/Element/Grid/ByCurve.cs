@@ -1,6 +1,9 @@
 using System;
 using Autodesk.Revit.DB;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.Convert.Units;
+using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.Geometry.Extensions;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -32,9 +35,6 @@ namespace RhinoInside.Revit.GH.Components
       Optional<string> name
     )
     {
-      var scaleFactor = 1.0 / Revit.ModelUnits;
-      curve = curve.ChangeUnits(scaleFactor);
-
       SolveOptionalType(ref type, doc, ElementTypeGroup.GridType, nameof(type));
 
       var parametersMask = name.IsMissing ?
@@ -52,20 +52,20 @@ namespace RhinoInside.Revit.GH.Components
           BuiltInParameter.DATUM_TEXT
         };
 
-      if (curve.TryGetLine(out var line, Revit.VertexTolerance))
+      if (curve.TryGetLine(out var line, Revit.VertexTolerance * Revit.ModelUnits))
       {
-        ReplaceElement(ref element, Grid.Create(doc, line.ToHost()), parametersMask);
+        ReplaceElement(ref element, Grid.Create(doc, line.ToLine()), parametersMask);
         ChangeElementTypeId(ref element, type.Value.Id);
       }
-      else if (curve.TryGetArc(out var arc, Revit.VertexTolerance))
+      else if (curve.TryGetArc(out var arc, Revit.VertexTolerance * Revit.ModelUnits))
       {
-        ReplaceElement(ref element, Grid.Create(doc, arc.ToHost()), parametersMask);
+        ReplaceElement(ref element, Grid.Create(doc, arc.ToArc()), parametersMask);
         ChangeElementTypeId(ref element, type.Value.Id);
       }
       else
       {
         using (var curveLoop = new CurveLoop())
-        using (var polyline = curve.ToArcsAndLines(Revit.VertexTolerance, Revit.AngleTolerance, Revit.ShortCurveTolerance, double.PositiveInfinity))
+        using (var polyline = curve.ToArcsAndLines(Revit.VertexTolerance * Revit.ModelUnits, Revit.AngleTolerance, Revit.ShortCurveTolerance * Revit.ModelUnits, double.PositiveInfinity))
         {
           int count = polyline.SegmentCount;
           for (int s = 0; s < count; ++s)
@@ -73,15 +73,15 @@ namespace RhinoInside.Revit.GH.Components
             var segment = polyline.SegmentCurve(s);
 
             if (segment is Rhino.Geometry.LineCurve l)
-              curveLoop.Append(l.ToHost());
+              curveLoop.Append(l.ToCurve());
             else if (segment is Rhino.Geometry.ArcCurve a)
-              curveLoop.Append(a.ToHost());
+              curveLoop.Append(a.ToCurve());
             else
               ThrowArgumentException(nameof(curve), "Invalid curve type.");
           }
 
           curve.TryGetPlane(out var plane);
-          var sketchPlane = SketchPlane.Create(doc, plane.ToHost());
+          var sketchPlane = SketchPlane.Create(doc, plane.ToPlane());
 
           ReplaceElement(ref element, doc.GetElement(MultiSegmentGrid.Create(doc, type.Value.Id, curveLoop, sketchPlane.Id)), parametersMask);
         }

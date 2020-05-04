@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel.Types;
+using RhinoInside.Revit.Convert.Display;
+using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -304,7 +307,7 @@ namespace RhinoInside.Revit.GH.Types
         {
           var element = (DB.Element) this;
           if (element is object)
-            clippingBox = element.get_BoundingBox(null).ToRhino().ChangeUnits(Revit.ModelUnits);
+            clippingBox = element.get_BoundingBox(null).ToBoundingBox();
         }
 
         return clippingBox;
@@ -320,8 +323,8 @@ namespace RhinoInside.Revit.GH.Types
         var element = (DB.Element) this;
         if (element?.get_BoundingBox(null) is DB.BoundingBoxXYZ bbox)
         {
-          b = new Rhino.Geometry.Box(new Rhino.Geometry.BoundingBox(bbox.Min.ToRhino(), bbox.Max.ToRhino()));
-          if (!b.Transform(Rhino.Geometry.Transform.Scale(Rhino.Geometry.Point3d.Origin, Revit.ModelUnits) * bbox.Transform.ToRhino()))
+          b = new Rhino.Geometry.Box(new Rhino.Geometry.BoundingBox(bbox.Min.ToPoint3d(), bbox.Max.ToPoint3d()));
+          if (!b.Transform(Rhino.Geometry.Transform.Scale(Rhino.Geometry.Point3d.Origin, Revit.ModelUnits) * bbox.Transform.ToTransform()))
             b = new Rhino.Geometry.Box(ClippingBox);
         }
 
@@ -339,19 +342,18 @@ namespace RhinoInside.Revit.GH.Types
         if (element is object)
         {
           if (element is DB.Instance instance)
-            p = instance.GetTransform().Origin.ToRhino();
+          {
+            p = instance.GetTransform().Origin.ToPoint3d();
+          }
           else switch (element.Location)
           {
-            case DB.LocationPoint pointLocation: p = pointLocation.Point.ToRhino(); break;
-            case DB.LocationCurve curveLocation: p = curveLocation.Curve.Evaluate(0.0, curveLocation.Curve.IsBound).ToRhino(); break;
+            case DB.LocationPoint pointLocation: p = pointLocation.Point.ToPoint3d(); break;
+            case DB.LocationCurve curveLocation: p = curveLocation.Curve.Evaluate(0.0, curveLocation.Curve.IsBound).ToPoint3d(); break;
             default:
-                var bbox = element.get_BoundingBox(null);
-                if(bbox is object)
-                  p = bbox.Min.ToRhino(); break;
+              if (element.get_BoundingBox(null) is DB.BoundingBoxXYZ bbox)
+                p = bbox.Min.ToPoint3d();
+              break;
           }
-
-          if (p.IsValid)
-            return p.ChangeUnits(Revit.ModelUnits);
         }
 
         return p;
@@ -368,10 +370,10 @@ namespace RhinoInside.Revit.GH.Types
         if (element is object)
         {
           if (element is DB.Instance instance)
-            x = (Rhino.Geometry.Vector3d) instance.GetTransform().BasisX.ToRhino();
+            x = (Rhino.Geometry.Vector3d) instance.GetTransform().BasisX.ToPoint3d();
           else if (element.Location is DB.LocationCurve curveLocation)
           {
-            var c = curveLocation.Curve.ToRhino();
+            var c = curveLocation.Curve.ToCurve();
             x = c.TangentAt(c.Domain.Min);
           }
           else if (element.Location is DB.LocationPoint pointLocation)
@@ -398,10 +400,10 @@ namespace RhinoInside.Revit.GH.Types
         if (element is object)
         {
           if (element is DB.Instance instance)
-            y = (Rhino.Geometry.Vector3d) instance.GetTransform().BasisY.ToRhino();
+            y = (Rhino.Geometry.Vector3d) instance.GetTransform().BasisY.ToPoint3d();
           else if (element.Location is DB.LocationCurve curveLocation)
           {
-            var c = curveLocation.Curve.ToRhino();
+            var c = curveLocation.Curve.ToCurve();
             y = c.CurvatureAt(c.Domain.Min);
           }
           else if (element.Location is DB.LocationPoint pointLocation)
@@ -437,10 +439,10 @@ namespace RhinoInside.Revit.GH.Types
         if (element is object)
         {
           if (element is DB.Instance instance)
-            z = (Rhino.Geometry.Vector3d) instance.GetTransform().BasisZ.ToRhino();
+            z = (Rhino.Geometry.Vector3d) instance.GetTransform().BasisZ.ToPoint3d();
           else if (element.Location is DB.LocationCurve curveLocation)
           {
-            var c = curveLocation.Curve.ToRhino();
+            var c = curveLocation.Curve.ToCurve();
             z = Rhino.Geometry.Vector3d.CrossProduct(c.TangentAt(c.Domain.Min), c.CurvatureAt(c.Domain.Min));
           }
           else if (element.Location is DB.LocationPoint pointLocation)
@@ -466,12 +468,10 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         var element = (DB.Element) this;
-        Rhino.Geometry.Curve c = null;
 
-        if(element?.Location is DB.LocationCurve curveLocation)
-          c = curveLocation.Curve.ToRhino();
-
-        return c?.ChangeUnits(Revit.ModelUnits);
+        return element?.Location is DB.LocationCurve curveLocation ?
+          curveLocation.Curve.ToCurve() :
+          null;
       }
     }
     #endregion

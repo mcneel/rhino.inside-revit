@@ -3,7 +3,7 @@ namespace RhinoInside.Revit.Extended
   using static System.Math;
   using static System.Double;
 
-  public static class Math
+  static class Math
   {
     //public static int Clamp(this int v, int lo, int hi)
     //{

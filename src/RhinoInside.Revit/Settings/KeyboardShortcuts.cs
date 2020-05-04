@@ -40,7 +40,7 @@ namespace RhinoInside.Revit.Settings
 
     internal static void LoadFromResources(string keyboardShortcutsId, out Shortcuts shortcuts)
     {
-      using (var ReadFileStream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream(keyboardShortcutsId))
+      using (var ReadFileStream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream($"RhinoInside.Revit.{keyboardShortcutsId}"))
       {
         var serializer = new XmlSerializer(typeof(Shortcuts));
         shortcuts = serializer.Deserialize(ReadFileStream) as Shortcuts;
@@ -76,7 +76,7 @@ namespace RhinoInside.Revit.Settings
         keyboardShortcutsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Autodesk", $"RVT {Revit.ApplicationUI.ControlledApplication.VersionNumber}", "UserDataCache", "KeyboardShortcuts.xml");
 
       if (!LoadFrom(keyboardShortcutsPath, out var shortcuts))
-        LoadFromResources($"RhinoInside.Resources.RVT{Revit.ApplicationUI.ControlledApplication.VersionNumber}.KeyboardShortcuts.xml", out shortcuts);
+        LoadFromResources($"Resources.RVT{Revit.ApplicationUI.ControlledApplication.VersionNumber}.KeyboardShortcuts.xml", out shortcuts);
 
 #if DEBUG
       // Those lines generate the KeyboardShortcuts.xml template file when new Revit version is supported

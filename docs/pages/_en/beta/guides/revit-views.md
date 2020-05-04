@@ -10,13 +10,16 @@ In Revit API, Views of all types are represented by the {% include api_type.html
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-You can use the combination of *Element.ClassFilter*, and *Document.ElementTypes* components to collect views:
+You can use the combination of *Element.ClassFilter*, and {% include ltr/comp.html uuid="7b00f940-" %} components to collect views:
 
 ![]({{ "/static/images/guides/revit-views01.png" | prepend: site.baseurl }})
 
 Notice that the *Element.ClassFilter* requires the full name of the API class as string input e.g. `Autodesk.Revit.DB.View`
 
-{% include ltr/issue_note.html issue_id='142' note='Add Views to category pickers so an Element.CategoryFilter can be used to list views' %}
+{% capture issue_note %}
+Add Views to category pickers so an {% include ltr/comp.html uuid="d08f7ab1-" %} can be used to list views
+{% endcapture %}
+{% include ltr/issue_note.html issue_id='142' note=issue_note %}
 
 ## Querying Views by System Family
 
@@ -119,7 +122,7 @@ To read the view range property of a view, use the *Get View Range* component sh
 
 ### Collecting Displayed Elements
 
-To collect all the elements owned by a view, use the *Element.OwnerViewFilter* component, passed to the *Document.Elements* as shown below. Keep in mind that the 3D geometry that is usually shown in model views are not "Owned" by that view. All 2d elements e.g. Detail items, detail lines, ... are owned by the view they have created on.
+To collect all the elements owned by a view, use the *Element.OwnerViewFilter* component, passed to the {% include ltr/comp.html uuid="0f7da57e-" %} as shown below. Keep in mind that the 3D geometry that is usually shown in model views are not "Owned" by that view. All 2d elements e.g. Detail items, detail lines, ... are owned by the view they have created on.
 
 ![]({{ "/static/images/guides/revit-views04.png" | prepend: site.baseurl }})
 

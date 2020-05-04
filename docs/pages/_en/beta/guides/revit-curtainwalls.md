@@ -41,7 +41,7 @@ The types of *Curtain Mullions* and *Panels* used for a wall are defined in the 
 
 ## Walls vs Systems
 
-*Curtain Walls* and *Systems* are almost identical in definition. The only difference is that *Curtain Walls* are vertical and have directionality so the *Grid* configuration is set for **Vertical** and **Horizontal** grid lines. *Curtain Systems* can be created from *Mass* surfaces and thus are not bounded to a certain direction. Hence the *Grid* configurations is set for **Grid 1** and **Grid 2** axes.
+*Curtain Walls* and *Curtain Systems* are almost identical in definition. The only difference is that *Curtain Walls* are vertical and have directionality so the *Grid* configuration is set for **Vertical** and **Horizontal** grid lines. *Curtain Systems* can be created from *Mass* surfaces and thus are not flowing in a certain direction. Hence the *Grid* configurations is set for **Grid 1** and **Grid 2** axes.
 
 {% capture api_note %}
 In Revit API, *Curtain Walls* are represented by {% include api_type.html type='Autodesk.Revit.DB.Wall' title='DB.Wall' %} and *Curtain Systems* are represented by {% include api_type.html type='Autodesk.Revit.DB.CurtainSystem' title='DB.CurtainSystem' %} 
@@ -50,12 +50,12 @@ In Revit API, *Curtain Walls* are represented by {% include api_type.html type='
 
 ## Querying Curtain Walls
 
-Similar to collecting *Basic* and *Stacked Walls*, the custom components shared at [Walls (Basic & Stacked)]({{ site.baseurl }}{% link _en/beta/guides/revit-walls.md %}#by-wall-system-family) section, can help filtering the Curtain Wall instances and types:
+Similar to collecting *Basic* and *Stacked Walls*, the components shown at [Walls (Basic & Stacked)]({{ site.baseurl }}{% link _en/beta/guides/revit-walls.md %}#by-wall-system-family) section, can help filtering the Curtain Wall instances and types:
 
 ![]({{ "/static/images/guides/revit-curtainwalls03.png" | prepend: site.baseurl }})
 
 {% capture bubble_note %}
-As shown in the images below, a combination of category picker, *Element.CategoryFilter*, and *Document.ElementTypes* can be used to filter the *Curtain Panel* and *Curtain Mullion* types and instances in a model. However, the collector does not return anything for *Curtain Grids*. See [Analyzing Curtain Walls](#analyzing-curtain-walls) for better workflows to extract *Panel* and *Mullion* information. As you can see, the *Curtain Grids* graph does not return any results for Grid Types. The Panel and Mullion types can be collected:
+As shown in the images below, a combination of category picker, {% include ltr/comp.html uuid="d08f7ab1-" %}, and {% include ltr/comp.html uuid="7b00f940-" %} can be used to filter the *Curtain Panel* and *Curtain Mullion* types and instances in a model. However, the collector does not return anything for *Curtain Grids*. See [Analyzing Curtain Walls](#analyzing-curtain-walls) for better workflows to extract *Panel* and *Mullion* information. As you can see, the *Curtain Grids* graph does not return any results for Grid Types. The Panel and Mullion types can be collected however:
 
 &nbsp;
 
@@ -71,25 +71,23 @@ And the same for collecting instances:
 
 ## Analyzing Curtain Wall Types
 
-Now that we can collect the Curtain Wall Types in the mode, use the custom component shared here to analyze the properties:
+Now that we can collect the *Curtain Wall Types*, use the components shown here to analyze their properties:
 
 ![]({{ "/static/images/guides/revit-curtainwalls04.png" | prepend: site.baseurl }})
 
-{% include ltr/download_comp.html archive='/static/ghnodes/Analyse Curtain Wall Type.ghuser' name='Analyse Curtain Wall Type' %}
-{% include ltr/download_comp.html archive='/static/ghnodes/Curtain Grid Layout.ghuser' name='Curtain Grid Layout' %}
-{% include ltr/download_comp.html archive='/static/ghnodes/Curtain Join Condition.ghuser' name='Curtain Join Condition' %}
 
 ## Analyzing Curtain Walls
 
 ### Extracting Curtain Wall Geometry
 
-The full geometry of a Curtain Wall instance can be extracted using the *Element.Geometry* component:
+The full geometry of a *Curtain Wall* instance can be extracted using the {% include ltr/comp.html uuid="b7e6a82f-" %} component:
 
 ![]({{ "/static/images/guides/revit-curtainwalls05.png" | prepend: site.baseurl }})
 
-{% include ltr/issue_note.html issue_id='176' note='Element.Geometry does not extract Curtain Wall and System Geometries' %}
+![]({{ "/static/images/guides/revit-curtainwalls05a.png" | prepend: site.baseurl }})
 
-The custom component shared here, can be used to extract bounding geometry of a given Curtain Wall instance:
+
+The {% include ltr/comp.html uuid="3396dbc4-" %} component shown here, can be used to extract bounding geometry of a given *Curtain Wall* instance:
 
 ![]({{ "/static/images/guides/revit-curtainwalls06.png" | prepend: site.baseurl }})
 
@@ -97,11 +95,10 @@ The custom component shared here, can be used to extract bounding geometry of a 
 
 ![]({{ "/static/images/guides/revit-curtainwalls06a.png" | prepend: site.baseurl }})
 
-{% include ltr/download_comp.html archive='/static/ghnodes/Analyse Curtain Wall.ghuser' name='Analyse Curtain Wall' %}
 
 ### Embedded Curtain Walls
 
-Curtain Walls can be embedded inside other walls. The *Analyse Curtain Wall* component shared above, can provide access the to the parent wall (**HW**), embedding the given *Curtain Wall* instance. If *Curtain Wall* is not embedded, `null` is returned:
+*Curtain Walls* can be embedded inside other walls. The {% include ltr/comp.html uuid="734b2dac-" %} component shown above, can provide access the to the parent/host wall (**HW**), embedding the given *Curtain Wall* instance. If *Curtain Wall* is not embedded, `null` is returned:
 
 ![]({{ "/static/images/guides/revit-curtainwalls06c.png" | prepend: site.baseurl }})
 
@@ -112,25 +109,22 @@ In Revit API, Curtain Grids are represented by the {% include api_type.html type
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-The *Analyse Curtain Wall* component shared above, can provide access to the *Curtain Grid* of a *Curtain Wall* instance. *Curtain Grid* can be used to extract information about the *Grid*, and access the individual *Cells*, *Mullions*, and *Panels* on the *Curtain Wall*:
+The {% include ltr/comp.html uuid="734b2dac-" %} component shown above, can provide access to the *Curtain Grid* of a *Curtain Wall* instance. *Curtain Grid* can be used to extract information about the *Grid*, and access the individual *Cells*, *Mullions*, and *Panels* on the *Curtain Wall*:
 
 ![]({{ "/static/images/guides/revit-curtainwalls06b.png" | prepend: site.baseurl }})
 
 ## Analyzing Curtain Grids
 
-Using the component shared here, the *Curtain Grid* can be further broken down to its properties and hosted elements:
+Using the component shown here, the *Curtain Grid* can be further broken down to its properties and hosted elements:
 
 - **Curtain Cells**: Returns all the individual *Curtain Cells*. Cells are the bounded areas between the grid lines
 - **Curtain Mullions**: Returns all the individual *Curtain Mullions*
-- **Curtain Inserts**:Returns all the individual *Curtain Panels* or *Family Instances* (e.g. *Curtain Wall Door*) hosted on the *Curtain Cells*
+- **Curtain Panels**: Returns all the individual *Curtain Panels* or *Family Instances* (e.g. *Curtain Wall Door*) hosted on the *Curtain Cells*
 - **Curtain Grid Lines**: Returns all the individual *Curtain Grid Lines* along U and V directions and their properties
 
 &nbsp;
 
 ![]({{ "/static/images/guides/revit-curtainwalls07.png" | prepend: site.baseurl }})
-
-{% include ltr/download_comp.html archive='/static/ghnodes/Analyse Curtain Grid.ghuser' name='Analyse Curtain Grid' %}
-{% include ltr/download_comp.html archive='/static/ghnodes/Curtain Grid Align Type.ghuser' name='Curtain Grid Align Type' %}
 
 ## Analyzing Cells
 
@@ -139,7 +133,7 @@ In Revit API, Curtain Cells are represented by the {% include api_type.html type
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-The component shared here, can analyze each curtain cell and extract the cell curves (**CL**) and the panelized curves (**PCL**):
+The component shown here, can analyze each curtain cell and extract the cell curves (**CL**) and the panelized curves (**PCL**):
 
 ![]({{ "/static/images/guides/revit-curtainwalls08.png" | prepend: site.baseurl }})
 
@@ -157,10 +151,6 @@ The panelized curves can be used to create faces. Notice that each cell is marke
 
 ![]({{ "/static/images/guides/revit-curtainwalls10a.png" | prepend: site.baseurl }})
 
-&nbsp;
-
-{% include ltr/download_comp.html archive='/static/ghnodes/Analyse Curtain Cell.ghuser' name='Analyse Curtain Cell' %}
-
 ## Analyzing Mullions
 
 {% capture api_note %}
@@ -168,7 +158,7 @@ In Revit API, Curtain Mullions are represented by the {% include api_type.html t
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-The geometry for *Curtain Mullions* can be extracted by passing the *Mullions* from *Analyse Curtain Wall* component, to the *Element.Geometry* component:
+The geometry for *Curtain Mullions* can be extracted by passing the *Mullions* from {% include ltr/comp.html uuid="734b2dac-" %} component, to the {% include ltr/comp.html uuid="b7e6a82f-" %} component:
 
 ![]({{ "/static/images/guides/revit-curtainwalls11.png" | prepend: site.baseurl }})
 
@@ -176,21 +166,17 @@ The geometry for *Curtain Mullions* can be extracted by passing the *Mullions* f
 
 ![]({{ "/static/images/guides/revit-curtainwalls11a.png" | prepend: site.baseurl }})
 
-The *Mullion* location curve can also be extracted by passing the *Mullion* to a *Curve* component:
-
-![]({{ "/static/images/guides/revit-curtainwalls12.png" | prepend: site.baseurl }})
-
-{% include ltr/issue_note.html issue_id='177' note='Passing a Curtain Mullion (DB.Mullion) to Curve component should output the location curve of the mullion' %}
-
-The custom component shared here can be used to extract information about the individual *Curtain Mullions*:
+The component shown here can be used to extract information about the individual *Curtain Mullions*:
 
 ![]({{ "/static/images/guides/revit-curtainwalls13.png" | prepend: site.baseurl }})
 
-The C output provides the base curve of the *Mullion*. Notice how the horizontal curves are not intersecting the vertical curves, as the curves follow the join settings for the associated *Mullions*:
+The **C** output provides the base curve of the *Mullion*. Notice how the horizontal curves are not intersecting the vertical curves, as the curves follow the join settings for the associated *Mullions*:
 
 ![]({{ "/static/images/guides/revit-curtainwalls13a.png" | prepend: site.baseurl }})
 
-{% include ltr/download_comp.html archive='/static/ghnodes/Analyse Curtain Mullion.ghuser' name='Analyse Curtain Mullion' %}
+The *Mullion* location curve can also be extracted by passing the *Mullion* to a *Curve* component. Note that some of the mullions might have a length of zero and are not visible as geometries on the curtain walls:
+
+![]({{ "/static/images/guides/revit-curtainwalls12.png" | prepend: site.baseurl }})
 
 ### Analyzing Mullion Types
 
@@ -199,28 +185,24 @@ In Revit API, Curtain Mullion Types are represented by the {% include api_type.h
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-The **Analyse Curtain Mullion Type** custom component shared here can be used to analyze the *Mullion Types* extracted by the *Analyse Curtain Mullion* component:
+The {% include ltr/comp.html uuid="66a9f189-" %} component shown here can be used to analyze the *Mullion Types* extracted by the {% include ltr/comp.html uuid="4eeca86b-" %} component:
 
 ![]({{ "/static/images/guides/revit-curtainwalls14.png" | prepend: site.baseurl }})
 
-The **Curtain Mullion System Family** value picker can be used to filter the *Mullions* by their *System Family* e.g. *L Corner Mullions*
+The *Curtain Mullion System Family* value picker can be used to filter the *Mullions* by their *System Family* e.g. *L Corner Mullions*
 
 ![]({{ "/static/images/guides/revit-curtainwalls14a.png" | prepend: site.baseurl }})
 
-&nbsp;
-
-{% include ltr/download_comp.html archive='/static/ghnodes/Analyse Curtain Mullion Type.ghuser' name='Analyse Curtain Mullion Type' %}
-
 ## Analyzing Panels
 
-*Curtain Walls* can host two types of inserts. They can be either *Curtain Panels* or instances of *Custom Families* designed to work with *Curtain Walls* like a *Curtain Wall Door* instance. The components shared here help analyzing the Panels. The family instances can be analyzed using the methods and components provided in [Data Model: Types]({{ site.baseurl }}{% link _en/beta/guides/revit-types.md %}) and [Data Model: Instances]({{ site.baseurl }}{% link _en/beta/guides/revit-instances.md %}) guides.
+*Curtain Walls* can host two types of inserts. They can be either *Curtain Panels* or instances of *Custom Families* designed to work with *Curtain Walls* like a *Curtain Wall Door* instance. The components shown here help analyzing the *Curtain Panels*. The family instances can be analyzed using the methods and components provided in [Data Model: Types]({{ site.baseurl }}{% link _en/beta/guides/revit-types.md %}) and [Data Model: Instances]({{ site.baseurl }}{% link _en/beta/guides/revit-instances.md %}) guides.
 
 {% capture api_note %}
 In Revit API, Curtain Panels are represented by the {% include api_type.html type='Autodesk.Revit.DB.Panel' title='DB.Panel' %}
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-The geometry for *Curtain Panels* can be extracted by passing the *Panels* from *Analyse Curtain Wall* component, to the *Element.Geometry* component:
+The geometry for *Curtain Panels* can be extracted by passing the *Panels* from {% include ltr/comp.html uuid="734b2dac-" %} component, to the {% include ltr/comp.html uuid="b7e6a82f-" %} component:
 
 ![]({{ "/static/images/guides/revit-curtainwalls15.png" | prepend: site.baseurl }})
 
@@ -228,7 +210,7 @@ Notice how the panels are in order from bottom to top row:
 
 ![]({{ "/static/images/guides/revit-curtainwalls15a.png" | prepend: site.baseurl }})
 
-Since the **Curtain Grid Insert (CGN)** output parameter can return both System Panels (`DB.Panel`) and Custom Family Instances (`DB.FamilyInstance`), the same workflow can extract the geometry of all these insert types:
+Since the **Curtain Grid Panel (CGP)** output parameter can return both System Panels (`DB.Panel`) and Custom Family Instances (`DB.FamilyInstance`), the same workflow can extract the geometry of all these insert types:
 
 ![]({{ "/static/images/guides/revit-curtainwalls15b.png" | prepend: site.baseurl }})
 
@@ -236,21 +218,17 @@ Since the **Curtain Grid Insert (CGN)** output parameter can return both System 
 
 ![]({{ "/static/images/guides/revit-curtainwalls15c.png" | prepend: site.baseurl }})
 
-The custom component shared here can be used to extract information about the individual *Curtain Panels*:
+The component shown here can be used to extract information about the individual *Curtain Panels*:
 
 ![]({{ "/static/images/guides/revit-curtainwalls16.png" | prepend: site.baseurl }})
 
-This custom component also provides access to the Panel base point(**PB**) and normal/orientation vectors (**PN**):
+This component also provides access to the Panel base point(**PBP**) and normal/orientation vectors (**POV**):
 
 ![]({{ "/static/images/guides/revit-curtainwalls17.png" | prepend: site.baseurl }})
 
 &nbsp;
 
 ![]({{ "/static/images/guides/revit-curtainwalls18.png" | prepend: site.baseurl }})
-
-&nbsp;
-
-{% include ltr/download_comp.html archive='/static/ghnodes/Analyse Curtain Panel.ghuser' name='Analyse Curtain Panel' %}
 
 ### Analyzing Panel Types
 
@@ -259,17 +237,13 @@ In Revit API, Curtain Panel Types are represented by the {% include api_type.htm
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-The **Analyse Curtain Panel Type** custom component shared here can be used to analyze the *Panel Types* extracted by the *Analyse Curtain Panel* component:
+The {% include ltr/comp.html uuid="6f11977f-" %} component shown here can be used to analyze the *Panel Types* extracted by the {% include ltr/comp.html uuid="08507225-" %} component:
 
 ![]({{ "/static/images/guides/revit-curtainwalls19.png" | prepend: site.baseurl }})
 
-Note that **Panel Symbol (PS)** output parameter can return a System Panel Type (`DB.PanelType`) for a Custom Family Symbol (`DB.FamilySymbol`) depending on the type of Panel inserted into the Grid:
+Note that **Panel Symbol (PS)** output parameter can return a *System Panel Type* (`DB.PanelType`) or a *Custom Family Symbol* (`DB.FamilySymbol`) depending on the type of Panel inserted into the Grid:
 
 ![]({{ "/static/images/guides/revit-curtainwalls19a.png" | prepend: site.baseurl }})
-
-&nbsp;
-
-{% include ltr/download_comp.html archive='/static/ghnodes/Analyse Curtain Panel Type.ghuser' name='Analyse Curtain Panel Type' %}
 
 ## Analyzing Grid Lines
 
@@ -278,21 +252,19 @@ In Revit API, Curtain Grid Lines are represented by the {% include api_type.html
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-The curve for *Curtain Grid Lines* can be extracted by passing the *Grid Lines* from *Analyse Curtain Wall* component, to the *Curve* component:
+The curve for *Curtain Grid Lines* can be extracted by passing the *Grid Lines* from {% include ltr/comp.html uuid="d7b5c58e-" %} component, to the *Curve* component:
 
 ![]({{ "/static/images/guides/revit-curtainwalls20.png" | prepend: site.baseurl }})
 
-{% include ltr/issue_note.html issue_id='178' note='Passing a Curtain Grid Line to Curve component should output the curve of the grid line' %}
-
-The custom component shared here can be used to extract info about each individual **Curtain Grid Line**:
+The component shown here can be used to extract info about each individual **Curtain Grid Line**:
 
 ![]({{ "/static/images/guides/revit-curtainwalls21.png" | prepend: site.baseurl }})
 
-Notice the difference between the *Curtain Grid Line* curves and segments. The **CGLC** provide access to a single curve for each line:
+Notice the difference between the *Curtain Grid Line* curves and segments. The **C** output parameter provide access to a single curve for each *Curtain Grid Line* along the U or V axes:
 
 ![]({{ "/static/images/guides/revit-curtainwalls22.png" | prepend: site.baseurl }})
 
-Where as the **CGLAS** provides access to all the line segments per each *Curtain Grid Line* and it also includes the unused segments outside of the wall boundaries:
+Whereas the **S** output parameter provides access to all the line segments per each *Curtain Grid Line* and it also includes the unused segments outside of the wall boundaries:
 
 ![]({{ "/static/images/guides/revit-curtainwalls23.png" | prepend: site.baseurl }})
 
@@ -302,7 +274,7 @@ Where as the **CGLAS** provides access to all the line segments per each *Curtai
 
 ### Extract Associated Mullions and Panels
 
-The *Analyse Curtain Grid Line* component also provides the Mullions and Panels that are associated with each *Grid Line*. Notice that the *Mullions* and *Panels* on the wall borders are not included since they are not part of the *Curtain Grid* definition:
+The {% include ltr/comp.html uuid="face5e7d-" %} component also provides the Mullions and Panels that are associated with each *Grid Line*. Notice that the *Mullions* and *Panels* on the wall borders are not included since they are not part of the *Curtain Grid* definition:
 
 ![]({{ "/static/images/guides/revit-curtainwalls24.png" | prepend: site.baseurl }})
 
@@ -312,15 +284,7 @@ The *Analyse Curtain Grid Line* component also provides the Mullions and Panels 
 
 *Panel* association is slightly different from *Mullions*. Each *Mullion* is associated with a single *Grid Line*, however a single *Panel* (since it has two sides) is associated with a *Grid Line* along the U axis and also another *Grid Line* along the V:
 
-![]({{ "/static/images/guides/revit-curtainwalls25.png" | prepend: site.baseurl }})
-
-&nbsp;
-
 ![]({{ "/static/images/guides/revit-curtainwalls25a.gif" | prepend: site.baseurl }})
-
-&nbsp;
-
-{% include ltr/download_comp.html archive='/static/ghnodes/Analyse Curtain Grid Line.ghuser' name='Analyse Curtain Grid Line' %}
 
 ## Modifying Curtain Wall Types
 
@@ -366,11 +330,21 @@ In Revit API, Curtain Systems are represented by {% include api_type.html type='
 
 ## Analyzing Curtain System Types
 
-{% include ltr/en/wip_note.html %}
+{% include ltr/comp.html uuid="83d08b81-" %} component shown here can be used to extract information about curtain system types. Note the similarity between the *Curtain System Type* and *Curtain Wall Types*:
+
+![]({{ "/static/images/guides/revit-curtainsystems03.png" | prepend: site.baseurl }})
 
 ## Analyzing Curtain Systems
 
-{% include ltr/en/wip_note.html %}
+Extracting information from Curtain System instances are very similar to Curtain Wall instances. Similar to {% include ltr/comp.html uuid="734b2dac-" %} component, the Analyze Curtain System component provides access to the Curtain Grid definition:
+
+{% include ltr/bubble_note.html note='Note that *Curtain Systems* can have multiple *Curtain Grids*, each associated with a single face of the source geometry. These curtain grids have independent boundaries and are generated based on the *Curtain System Type* definition' %}
+
+![]({{ "/static/images/guides/revit-curtainsystems04.png" | prepend: site.baseurl }})
+
+Once you gain access to the *Curtain Grid* definition, you can use the {% include ltr/comp.html uuid="d7b5c58e-" %} to extract information, very similar to grids on Curtain Walls:
+
+![]({{ "/static/images/guides/revit-curtainsystems05.png" | prepend: site.baseurl }})
 
 ## Modifying Curtain System Types
 

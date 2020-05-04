@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
@@ -93,7 +94,7 @@ namespace RhinoInside.Revit.GH.Parameters
           {
             if (item is Types.Document doc)
             {
-              var id = RevitAPI.DocumentSessionId(doc.Value.GetFingerprintGUID());
+              var id = DocumentExtension.DocumentSessionId(doc.Value.GetFingerprintGUID());
               data.Append(doc, path.AppendElement(id));
             }
             else

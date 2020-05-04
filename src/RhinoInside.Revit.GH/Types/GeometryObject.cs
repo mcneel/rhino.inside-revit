@@ -7,6 +7,11 @@ using Grasshopper;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
+using RhinoInside.Revit.Convert.Display;
+using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.Convert.System.Drawing;
+using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.External.UI.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -57,8 +62,8 @@ namespace RhinoInside.Revit.GH.Types
         }
         else
         {
-          var categoryMaterial = element.Category?.Material.ToRhino(null);
-          var elementMaterial = geometry.MaterialElement.ToRhino(categoryMaterial);
+          var categoryMaterial = element.Category?.Material.ToDisplayMaterial(null);
+          var elementMaterial = geometry.MaterialElement.ToDisplayMaterial(categoryMaterial);
 
           meshes = geometry.GetPreviewMeshes(meshingParameters).Where(x => x is object).ToArray();
           wires = geometry.GetPreviewWires().Where(x => x is object).ToArray();
@@ -254,7 +259,7 @@ namespace RhinoInside.Revit.GH.Types
           {
             material = new Rhino.Display.DisplayMaterial(material)
             {
-              Diffuse = element.Category?.LineColor.ToRhino() ?? System.Drawing.Color.White,
+              Diffuse = element.Category?.LineColor.ToColor() ?? System.Drawing.Color.White,
               Transparency = 0.0
             };
 
@@ -545,11 +550,11 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (point is null && IsValid)
         {
-          point = new Point(Value.Coord.ToRhino().ChangeUnits(Revit.ModelUnits));
+          point = new Point(Value.Coord.ToPoint3d());
 
           if(/*Value.IsElementGeometry && */Document?.GetElement(Reference) is DB.Instance instance)
           {
-            var xform = instance.GetTransform().ToRhino().ChangeUnits(Revit.ModelUnits);
+            var xform = instance.GetTransform().ToTransform();
             point.Transform(xform);
           }
         }
@@ -562,7 +567,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (source is GH_Point point)
       {
-        Value = DB.Point.Create(point.Value.ChangeUnits(1.0 / Revit.ModelUnits).ToHost());
+        Value = DB.Point.Create(point.Value.ToXYZ());
         UniqueID = string.Empty;
         return true;
       }
@@ -644,7 +649,7 @@ namespace RhinoInside.Revit.GH.Types
 
           if (Value.IsElementGeometry && Document?.GetElement(Reference) is DB.Instance instance)
           {
-            var xform = instance.GetTransform().ToRhino().ChangeUnits(Revit.ModelUnits);
+            var xform = instance.GetTransform().ToTransform();
             foreach (var wire in wires)
               wire.Transform(xform);
           }
@@ -728,7 +733,7 @@ namespace RhinoInside.Revit.GH.Types
 
           if (Value.IsElementGeometry && Document?.GetElement(Reference) is DB.Instance instance)
           {
-            var xform = instance.GetTransform().ToRhino().ChangeUnits(Revit.ModelUnits);
+            var xform = instance.GetTransform().ToTransform();
             foreach (var wire in wires)
               wire.Transform(xform);
           }
@@ -746,7 +751,7 @@ namespace RhinoInside.Revit.GH.Types
 
         if (Value.IsElementGeometry && Document?.GetElement(Reference) is DB.Instance instance)
         {
-          var xform = instance.GetTransform().ToRhino().ChangeUnits(Revit.ModelUnits);
+          var xform = instance.GetTransform().ToTransform();
           foreach (var mesh in meshes)
             mesh.Transform(xform);
         }
@@ -776,10 +781,10 @@ namespace RhinoInside.Revit.GH.Types
 
         if (typeof(Q).IsAssignableFrom(typeof(GH_Surface)))
         {
-          if (Value.ToRhino() is Brep brep)
+          if (Value.ToBrep() is Brep brep)
           {
             if (element is DB.Instance instance)
-              brep.Transform(Transform.Scale(Point3d.Origin, Revit.ModelUnits) * instance.GetTransform().ToRhino());
+              brep.Transform(Transform.Scale(Point3d.Origin, Revit.ModelUnits) * instance.GetTransform().ToTransform());
             else
               brep.Scale(Revit.ModelUnits);
 
@@ -790,10 +795,10 @@ namespace RhinoInside.Revit.GH.Types
         }
         else if (typeof(Q).IsAssignableFrom(typeof(GH_Brep)))
         {
-          if (Value.ToRhino() is Brep brep)
+          if (Value.ToBrep() is Brep brep)
           {
             if (element is DB.Instance instance)
-              brep.Transform(Transform.Scale(Point3d.Origin, Revit.ModelUnits) * instance.GetTransform().ToRhino());
+              brep.Transform(Transform.Scale(Point3d.Origin, Revit.ModelUnits) * instance.GetTransform().ToTransform());
             else
               brep.Scale(Revit.ModelUnits);
 
@@ -804,10 +809,10 @@ namespace RhinoInside.Revit.GH.Types
         }
         if (typeof(Q).IsAssignableFrom(typeof(GH_Mesh)))
         {
-          if (Value.Triangulate()?.ToRhino() is Mesh mesh)
+          if (Value.Triangulate()?.ToMesh() is Mesh mesh)
           {
             if (element is DB.Instance instance)
-              mesh.Transform(Transform.Scale(Point3d.Origin, Revit.ModelUnits) * instance.GetTransform().ToRhino());
+              mesh.Transform(Transform.Scale(Point3d.Origin, Revit.ModelUnits) * instance.GetTransform().ToTransform());
             else
               mesh.Scale(Revit.ModelUnits);
 

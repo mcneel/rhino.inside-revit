@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.Convert.Units;
+using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -106,23 +109,19 @@ namespace RhinoInside.Revit.GH.Components
       [Optional] DB.Structure.StructuralWallUsage structuralUsage
     )
     {
-      var scaleFactor = 1.0 / Revit.ModelUnits;
-
 #if REVIT_2020
       if
       (
-        ((curve = curve.ChangeUnits(scaleFactor)) is null) ||
-        !(curve.IsLinear(Revit.VertexTolerance) || curve.IsArc(Revit.VertexTolerance) || curve.IsEllipse(Revit.VertexTolerance)) ||
-        !curve.TryGetPlane(out var axisPlane, Revit.VertexTolerance) ||
+        !(curve.IsLinear(Revit.VertexTolerance * Revit.ModelUnits) || curve.IsArc(Revit.VertexTolerance * Revit.ModelUnits) || curve.IsEllipse(Revit.VertexTolerance * Revit.ModelUnits)) ||
+        !curve.TryGetPlane(out var axisPlane, Revit.VertexTolerance * Revit.ModelUnits) ||
         axisPlane.ZAxis.IsParallelTo(Rhino.Geometry.Vector3d.ZAxis) == 0
       )
         ThrowArgumentException(nameof(curve), "Curve must be a horizontal line, arc or ellipse curve.");
 #else
       if
       (
-        ((curve = curve.ChangeUnits(scaleFactor)) is null) ||
-        !(curve.IsLinear(Revit.VertexTolerance) || curve.IsArc(Revit.VertexTolerance)) ||
-        !curve.TryGetPlane(out var axisPlane, Revit.VertexTolerance) ||
+        !(curve.IsLinear(Revit.VertexTolerance * Revit.ModelUnits) || curve.IsArc(Revit.VertexTolerance * Revit.ModelUnits)) ||
+        !curve.TryGetPlane(out var axisPlane, Revit.VertexTolerance * Revit.ModelUnits) ||
         axisPlane.ZAxis.IsParallelTo(Rhino.Geometry.Vector3d.ZAxis) == 0
       )
         ThrowArgumentException(nameof(curve), "Curve must be a horizontal line or arc curve.");
@@ -132,15 +131,14 @@ namespace RhinoInside.Revit.GH.Components
 
       bool levelIsEmpty = SolveOptionalLevel(doc, curve, ref level, out var bbox);
 
-      height *= scaleFactor;
-      if (height < Revit.VertexTolerance)
-        height = type.GetValueOrDefault()?.GetCompoundStructure()?.SampleHeight ?? LiteralLengthValue(6.0) / Revit.ModelUnits;
+      if (height < Revit.VertexTolerance * Revit.ModelUnits)
+        height = type.GetValueOrDefault()?.GetCompoundStructure()?.SampleHeight * Revit.ModelUnits ?? LiteralLengthValue(6.0);
 
       // Axis
-      var levelPlane = new Rhino.Geometry.Plane(new Rhino.Geometry.Point3d(0.0, 0.0, level.Value.Elevation), Rhino.Geometry.Vector3d.ZAxis);
+      var levelPlane = new Rhino.Geometry.Plane(new Rhino.Geometry.Point3d(0.0, 0.0, level.Value.Elevation * Revit.ModelUnits), Rhino.Geometry.Vector3d.ZAxis);
       curve = Rhino.Geometry.Curve.ProjectToPlane(curve, levelPlane);
 
-      var centerLine = curve.ToHost();
+      var centerLine = curve.ToCurve();
 
       // LocationLine
       if (locationLine != DB.WallLocationLine.WallCenterline)
@@ -194,8 +192,8 @@ namespace RhinoInside.Revit.GH.Components
           centerLine,
           type.Value.Id,
           level.Value.Id,
-          height,
-          levelIsEmpty ? bbox.Min.Z - level.Value.Elevation : 0.0,
+          height / Revit.ModelUnits,
+          levelIsEmpty ? bbox.Min.Z / Revit.ModelUnits - level.Value.Elevation : 0.0,
           flipped,
           structuralUsage != DB.Structure.StructuralWallUsage.NonBearing
         );
@@ -222,8 +220,8 @@ namespace RhinoInside.Revit.GH.Components
       if (newWall != null)
       {
         newWall.get_Parameter(DB.BuiltInParameter.WALL_BASE_CONSTRAINT).Set(level.Value.Id);
-        newWall.get_Parameter(DB.BuiltInParameter.WALL_BASE_OFFSET).Set(levelIsEmpty ? bbox.Min.Z - level.Value.Elevation : 0.0);
-        newWall.get_Parameter(DB.BuiltInParameter.WALL_USER_HEIGHT_PARAM).Set(height);
+        newWall.get_Parameter(DB.BuiltInParameter.WALL_BASE_OFFSET).Set(bbox.Min.Z / Revit.ModelUnits - level.Value.Elevation);
+        newWall.get_Parameter(DB.BuiltInParameter.WALL_USER_HEIGHT_PARAM).Set(height / Revit.ModelUnits);
         newWall.get_Parameter(DB.BuiltInParameter.WALL_KEY_REF_PARAM).Set((int) locationLine);
         if(structuralUsage == DB.Structure.StructuralWallUsage.NonBearing)
         {

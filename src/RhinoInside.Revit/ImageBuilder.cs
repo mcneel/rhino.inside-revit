@@ -35,7 +35,9 @@ namespace RhinoInside.Revit
         var format = new Drawing.StringFormat()
         {
           Alignment = Drawing.StringAlignment.Center,
-          LineAlignment = Drawing.StringAlignment.Center
+          LineAlignment = Drawing.StringAlignment.Center,
+          Trimming = Drawing.StringTrimming.Character,
+          FormatFlags = Drawing.StringFormatFlags.NoWrap
         };
 
         float emSize = ((float) (width) / ((float) tag.Length));
@@ -47,6 +49,7 @@ namespace RhinoInside.Revit
             case 2: emSize = 13.0f; break;
             case 3: emSize = 11.0f; break;
             case 4: emSize = 8.0f; break;
+            default: emSize = 7.0f; break;
           }
         }
 
@@ -120,7 +123,7 @@ namespace RhinoInside.Revit
     }
 
     static internal Media.Imaging.BitmapImage LoadBitmapImage(string name, bool small = false) =>
-      Assembly.GetExecutingAssembly().LoadBitmapImage(name, small);
+      Assembly.GetExecutingAssembly().LoadBitmapImage($"RhinoInside.Revit.{name}", small);
 
     static internal Media.Imaging.BitmapImage LoadBitmapImage(this Assembly assembly, string name, bool small = false)
     {

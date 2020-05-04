@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using Autodesk.Revit.DB;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
+using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -30,47 +32,44 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructDirectShapeByGeometry
     (
-      Document doc,
-      ref Autodesk.Revit.DB.Element element,
+      DB.Document doc,
+      ref DB.Element element,
 
       [Optional] string name,
-      Optional<Autodesk.Revit.DB.Category> category,
+      Optional<DB.Category> category,
       IList<IGH_GeometricGoo> geometry,
-      [Optional] IList<Autodesk.Revit.DB.Material> material
+      [Optional] IList<DB.Material> material
     )
     {
-      var scaleFactor = 1.0 / Revit.ModelUnits;
+      SolveOptionalCategory(ref category, doc, DB.BuiltInCategory.OST_GenericModel, nameof(geometry));
 
-      SolveOptionalCategory(ref category, doc, BuiltInCategory.OST_GenericModel, nameof(geometry));
+      if (element is DB.DirectShape ds && ds.Category.Id == category.Value.Id) { }
+      else ds = DB.DirectShape.CreateElement(doc, category.Value.Id);
 
-      if (element is DirectShape ds && ds.Category.Id == category.Value.Id) { }
-      else ds = DirectShape.CreateElement(doc, category.Value.Id);
-
-      using (var ga = Convert.Context.Push())
+      using (var ga = GeometryEncoder.Context.Push())
       {
         var materialIndex = 0;
         var materialCount = material?.Count ?? 0;
 
         var shape = geometry.
                     Select(x => AsGeometryBase(x)).
-                    //OfType<Rhino.Geometry.GeometryBase>().
-                    Select(x => { ThrowIfNotValid(nameof(geometry), x); return x; }).
+                    Where(x => ThrowIfNotValid(nameof(geometry), x)).
                     SelectMany(x =>
                     {
                       if (materialCount > 0)
                       {
-                        ga.MaterialId = (
-                                         materialIndex < materialCount ?
-                                         material[materialIndex++]?.Id :
-                                         material[materialCount - 1]?.Id
-                                        ) ??
-                                        ElementId.InvalidElementId;
+                        ga.MaterialId =
+                        (
+                          materialIndex < materialCount ?
+                          material[materialIndex++]?.Id :
+                          material[materialCount - 1]?.Id
+                        ) ??
+                        DB.ElementId.InvalidElementId;
                       }
 
-                      return x.ToHostMultiple(scaleFactor);
+                      return x.ToShape();
                     }).
-                    SelectMany(x => x.ToDirectShapeGeometry()).
-                    ToArray();
+                    ToList();
 
         ds.SetShape(shape);
       }
@@ -82,6 +81,18 @@ namespace RhinoInside.Revit.GH.Components
 
     Rhino.Geometry.GeometryBase AsGeometryBase(IGH_GeometricGoo obj)
     {
+      if (obj is GH_Curve curve)
+        return curve.Value;
+
+      if (obj is GH_Brep brep)
+        return brep.Value;
+
+      if (obj is GH_SubD subD)
+        return subD.Value;
+
+      if (obj is GH_Mesh mesh)
+        return mesh.Value;
+
       var scriptVariable = obj.ScriptVariable();
       switch (scriptVariable)
       {
@@ -118,30 +129,28 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructDirectShapeTypeByGeometry
     (
-      Document doc,
-      ref Autodesk.Revit.DB.ElementType elementType,
+      DB.Document doc,
+      ref DB.ElementType elementType,
 
       string name,
-      Optional<Autodesk.Revit.DB.Category> category,
+      Optional<DB.Category> category,
       IList<IGH_GeometricGoo> geometry,
-      [Optional] IList<Autodesk.Revit.DB.Material> material
+      [Optional] IList<DB.Material> material
     )
     {
-      var scaleFactor = 1.0 / Revit.ModelUnits;
+      SolveOptionalCategory(ref category, doc, DB.BuiltInCategory.OST_GenericModel, nameof(geometry));
 
-      SolveOptionalCategory(ref category, doc, BuiltInCategory.OST_GenericModel, nameof(geometry));
+      if (elementType is DB.DirectShapeType directShapeType && directShapeType.Category.Id == category.Value.Id) { }
+      else directShapeType = DB.DirectShapeType.Create(doc, name, category.Value.Id);
 
-      if (elementType is DirectShapeType directShapeType && directShapeType.Category.Id == category.Value.Id) { }
-      else directShapeType = DirectShapeType.Create(doc, name, category.Value.Id);
-
-      using (var ga = Convert.Context.Push())
+      using (var ga = GeometryEncoder.Context.Push())
       {
         var materialIndex = 0;
         var materialCount = material?.Count ?? 0;
 
         var shape = geometry.
                     Select(x => AsGeometryBase(x)).
-                    Select(x => { ThrowIfNotValid(nameof(geometry), x); return x; }).
+                    Where(x => ThrowIfNotValid(nameof(geometry), x)).
                     SelectMany(x =>
                     {
                       if (materialCount > 0)
@@ -151,13 +160,12 @@ namespace RhinoInside.Revit.GH.Components
                                          material[materialIndex++]?.Id :
                                          material[materialCount - 1]?.Id
                                         ) ??
-                                        ElementId.InvalidElementId;
+                                        DB.ElementId.InvalidElementId;
                       }
 
-                      return x.ToHostMultiple(scaleFactor);
+                      return x.ToShape();
                     }).
-                    SelectMany(x => x.ToDirectShapeGeometry()).
-                    ToArray();
+                    ToList();
 
         directShapeType.SetShape(shape);
       }
@@ -205,34 +213,36 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructDirectShapeByLocation
     (
-      Document doc,
-      ref Autodesk.Revit.DB.Element element,
+      DB.Document doc,
+      ref DB.Element element,
 
       [Description("Location where to place the element. Point or plane is accepted.")]
       Rhino.Geometry.Plane location,
-      Autodesk.Revit.DB.DirectShapeType type
+      DB.DirectShapeType type
     )
     {
-      var scaleFactor = 1.0 / Revit.ModelUnits;
-
-      if (element is DirectShape ds && ds.Category.Id == type.Category.Id) { }
-      else ds = DirectShape.CreateElement(doc, type.Category.Id);
+      if (element is DB.DirectShape ds && ds.Category.Id == type.Category.Id) { }
+      else ds = DB.DirectShape.CreateElement(doc, type.Category.Id);
 
       if(ds.TypeId != type.Id)
         ds.SetTypeId(type.Id);
 
-      var library = DirectShapeLibrary.GetDirectShapeLibrary(doc);
-      if (!library.ContainsType(type.UniqueId))
-        library.AddDefinitionType(type.UniqueId, type.Id);
-
-      var transform = Rhino.Geometry.Transform.PlaneToPlane(Rhino.Geometry.Plane.WorldXY, location.ChangeUnits(scaleFactor)).ToHost();
-      ds.SetShape(DirectShape.CreateGeometryInstance(doc, type.UniqueId, transform));
-
-      var parametersMask = new BuiltInParameter[]
+      using (var library = DB.DirectShapeLibrary.GetDirectShapeLibrary(doc))
       {
-        BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-        BuiltInParameter.ELEM_FAMILY_PARAM,
-        BuiltInParameter.ELEM_TYPE_PARAM
+        if (!library.ContainsType(type.UniqueId))
+          library.AddDefinitionType(type.UniqueId, type.Id);
+      }
+
+      using (var transform = Rhino.Geometry.Transform.PlaneToPlane(Rhino.Geometry.Plane.WorldXY, location).ToTransform())
+      {
+        ds.SetShape(DB.DirectShape.CreateGeometryInstance(doc, type.UniqueId, transform));
+      }
+
+      var parametersMask = new DB.BuiltInParameter[]
+      {
+        DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+        DB.BuiltInParameter.ELEM_FAMILY_PARAM,
+        DB.BuiltInParameter.ELEM_TYPE_PARAM
       };
 
       ReplaceElement(ref element, ds, parametersMask);

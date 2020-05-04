@@ -5,7 +5,7 @@ layout: ltr/page-fullwidth
 
 <!-- intro video -->
 <!-- ![](https://via.placeholder.com/1024x600.png?text=Intro+Video) -->
-{% include youtube_player.html id="x_MU3vO1_II" %}
+{% include youtube_player.html id="KUHdJqVyhZI" %}
 
 <!-- download links -->
 {% include ltr/download_buttons.html version=site.versions.beta %}

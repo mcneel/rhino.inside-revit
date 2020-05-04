@@ -3,7 +3,7 @@ title: Analytical Model Manipulation
 ---
 
 <!-- intro video -->
-{% include youtube_player.html id="E2mIq7g_4Ro" %}
+{% include youtube_player.html id="dpMFnJcvO5E" %}
 
 {% include ltr/download_pkg.html archive='/static/samples/structural_revit_to_rhino.zip' %}
 

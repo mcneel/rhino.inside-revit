@@ -2,23 +2,25 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.Convert.Geometry;
 using DB = Autodesk.Revit.DB;
+using RhinoInside.Revit.External.DB.Extensions;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  // TODO: improve AnalyseWallProfile to work on curtain walls
-  // TODO: improve AnalyseWallProfile to work on curved walls
-  // TODO: improve AnalyseWallProfile to return profile curves at WallLocationLine
-  public class AnalyseWallProfile : Component
+  // TODO: improve AnalyzeWallProfile to work on curtain walls
+  // TODO: improve AnalyzeWallProfile to work on curved walls
+  // TODO: improve AnalyzeWallProfile to return profile curves at WallLocationLine
+  public class AnalyzeWallProfile : Component
   {
     public override Guid ComponentGuid => new Guid("9D2E9D8D-E794-4202-B725-82E78317892F");
 
-    public AnalyseWallProfile() : base(
-      name:"Analyse Wall Profile",
+    public AnalyzeWallProfile() : base(
+      name:"Analyze Wall Profile",
       nickname: "A-WP",
       description: "Get the vertical profile of the given wall",
       category: "Revit",
-      subCategory: "Analyse"
+      subCategory: "Analyze"
     )
     { }
 
@@ -48,7 +50,7 @@ namespace RhinoInside.Revit.GH.Components
       return element.GetDependentElements(new DB.ElementClassFilter(typeof(DB.CurveElement)))
              .Select(x => element.Document.GetElement(x))
              .Cast<DB.CurveElement>()
-             .Select(x => x.GeometryCurve.ToRhino())
+             .Select(x => x.GeometryCurve.ToCurve())
              .ToList();
     }
 

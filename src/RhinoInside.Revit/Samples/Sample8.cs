@@ -11,17 +11,19 @@ using System.Windows.Forms.InteropExtension;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+#if REVIT_2018
+using Autodesk.Revit.DB.Visual;
+#else
+using Autodesk.Revit.Utility;
+#endif
 
 using Rhino;
 using Rhino.Geometry;
 using Rhino.FileIO;
 using Rhino.DocObjects;
 using RhinoInside.Revit.UI;
-#if REVIT_2018
-using Autodesk.Revit.DB.Visual;
-#else
-using Autodesk.Revit.Utility;
-#endif
+using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.Convert.System.Drawing;
 
 namespace RhinoInside.Revit.Samples
 {
@@ -254,7 +256,7 @@ namespace RhinoInside.Revit.Samples
           id = Autodesk.Revit.DB.Material.Create(doc, matName);
           var newMaterial = doc.GetElement(id) as Autodesk.Revit.DB.Material;
 
-          newMaterial.Color         = mat.PreviewColor.ToHost();
+          newMaterial.Color         = mat.PreviewColor.ToColor();
           newMaterial.Shininess     = (int) Math.Round(mat.Shine / Rhino.DocObjects.Material.MaxShine * 128.0);
           newMaterial.Smoothness    = (int) Math.Round(mat.Reflectivity * 100.0);
           newMaterial.Transparency  = (int) Math.Round(mat.Transparency * 100.0);
@@ -272,7 +274,7 @@ namespace RhinoInside.Revit.Samples
       var layer = model.AllLayers.FindIndex(attributes.LayerIndex);
       if (layer?.IsVisible ?? false)
       {
-        using (var ctx = Convert.Context.Push())
+        using (var ctx = GeometryEncoder.Context.Push())
         {
           switch (attributes.MaterialSource)
           {
@@ -308,11 +310,10 @@ namespace RhinoInside.Revit.Samples
                 library.AddDefinition(definitionId, GNodes.ToArray());
               }
 
-              var xform = instance.Xform.ChangeUnits(scaleFactor);
-              return DirectShape.CreateGeometryInstance(doc, definitionId, xform.ToHost());
+              return DirectShape.CreateGeometryInstance(doc, definitionId, instance.Xform.ToTransform(scaleFactor));
             }
           }
-          else return geometry.ToHostMultiple(scaleFactor).ToList();
+          else return geometry.ToShape(scaleFactor);
         }
       }
 

@@ -82,5 +82,27 @@ namespace RhinoInside.Revit.GH.Components
       }
     }
     protected abstract void TrySolveInstance(IGH_DataAccess DA);
+
+    public override Rhino.Geometry.BoundingBox ClippingBox
+    {
+      get
+      {
+        var clippingBox = Rhino.Geometry.BoundingBox.Empty;
+
+        foreach (var param in Params)
+        {
+          if (param.SourceCount > 0)
+            continue;
+
+          if (param is IGH_PreviewObject previewObject)
+          {
+            if (!previewObject.Hidden && previewObject.IsPreviewCapable)
+              clippingBox.Union(previewObject.ClippingBox);
+          }
+        }
+
+        return clippingBox;
+      }
+    }
   }
 }

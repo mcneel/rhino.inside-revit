@@ -7,6 +7,7 @@ using System.Linq;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.DirectContext3D;
 using Autodesk.Revit.DB.ExternalService;
+using RhinoInside.Revit.Convert.Geometry;
 
 using Grasshopper;
 using Grasshopper.Kernel;
@@ -250,8 +251,8 @@ namespace RhinoInside.Revit.GH
 
     public override Outline GetBoundingBox(View dBView)
     {
-      var bbox = primitivesBoundingBox.ChangeUnits(1.0 / Revit.ModelUnits);
-      return new Outline(bbox.Min.ToHost(), bbox.Max.ToHost());
+      var bbox = primitivesBoundingBox;
+      return new Outline(bbox.Min.ToXYZ(), bbox.Max.ToXYZ());
     }
 
     public override void RenderScene(View dBView, DisplayStyle displayStyle)
@@ -260,9 +261,9 @@ namespace RhinoInside.Revit.GH
       {
         BuildScene(dBView);
 
-        DrawContext.SetWorldTransform(Transform.Identity.ScaleBasis(1.0 / Revit.ModelUnits));
+        DrawContext.SetWorldTransform(Transform.Identity.ScaleBasis(UnitConverter.ToHostUnits));
 
-        var CropBox = dBView.CropBox.ToRhino().ChangeUnits(Revit.ModelUnits);
+        var CropBox = dBView.CropBox.ToBoundingBox();
 
         foreach (var primitive in primitives)
         {

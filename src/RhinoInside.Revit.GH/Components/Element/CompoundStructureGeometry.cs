@@ -1,9 +1,8 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
-
+using System.Linq;
 using Grasshopper.Kernel;
-
+using RhinoInside.Revit.Convert.Geometry;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -55,29 +54,33 @@ namespace RhinoInside.Revit.GH.Components
       {
         try
         {
-          // start a dry transaction that will be rolled back later
-          var t = new DB.Transaction(element.Document, "Dry Transaction");
-          t.Start();
-
-          // explode the element into parts
-          DB.PartUtils.CreateParts(element.Document, elementIds);
-          element.Document.Regenerate();
-          // get the exploded parts
-          foreach(DB.ElementId partId in DB.PartUtils.GetAssociatedParts(element.Document, element.Id, includePartsWithAssociatedParts: true, includeAllChildren: true))
+          // start a dry transaction that will be rolled back automatically
+          // when execution goes out of next using statment
+          using (var transaction = new DB.Transaction(element.Document, nameof(GetCompoundStructureLayerGeom)))
           {
-            DB.Element part = element.Document.GetElement(partId);
-            if (part != null)
+            transaction.Start();
+
+            // explode the element into parts
+            DB.PartUtils.CreateParts(element.Document, elementIds);
+            element.Document.Regenerate();
+
+            // get the exploded parts
+            foreach (DB.ElementId partId in DB.PartUtils.GetAssociatedParts(element.Document, element.Id, includePartsWithAssociatedParts: true, includeAllChildren: true))
             {
-              // extract geometry for each part
-              DB.GeometryElement partGeom = part.get_Geometry(new DB.Options());
-              if (partGeom != null)
-                foreach (DB.GeometryObject geom in partGeom)
-                  layerGeoms.AddRange(geom.ToRhino().Cast<Rhino.Geometry.Brep>());
+              if (element.Document.GetElement(partId) is DB.Element part)
+              {
+                using (var options = new DB.Options())
+                {
+                  // extract geometry for each part
+                  if (part.get_Geometry(options) is DB.GeometryElement partGeom)
+                  {
+                    foreach (DB.GeometryObject geom in partGeom)
+                      layerGeoms.AddRange(geom.ToGeometryBaseMany().Cast<Rhino.Geometry.Brep>());
+                  }
+                }
+              }
             }
           }
-
-          // rollback the changes now
-          t.RollBack();
         }
         catch {}
       }
@@ -98,7 +101,7 @@ namespace RhinoInside.Revit.GH.Components
       DB.XYZ wallEndPoint = wallLocationCurve.GetEndPoint(0);
       DB.XYZ wallOrientation = wall.Orientation;
       DB.XYZ anchor = wallEndPoint + (wallOrientation * wallLocationCurve.Length);
-      Rhino.Geometry.Point3d basePoint = anchor.ToRhino();
+      Rhino.Geometry.Point3d basePoint = anchor.ToPoint3d();
 
       return GetCompoundStructureLayerGeom(wall)
              .OrderBy(x => Rhino.Geometry.VolumeMassProperties.Compute(x, volume: true, firstMoments: true, secondMoments: false, productMoments: false).Centroid.DistanceTo(basePoint))
@@ -121,7 +124,7 @@ namespace RhinoInside.Revit.GH.Components
           // curtain walls don't have layers
           if (wall.WallType.Kind != DB.WallKind.Curtain)
           {
-            // stacked walls have multiple base walls, let's process all of them
+            // stacked walls have multiple basic walls, let's process all of them
             if (wall.WallType.Kind == DB.WallKind.Stacked)
               foreach (DB.Wall wallPart in wall.GetStackedWallMemberIds().Select(x => wall.Document.GetElement(x)))
                 layerGeoms.AddRange(GetWallLayerGeometry(wallPart));

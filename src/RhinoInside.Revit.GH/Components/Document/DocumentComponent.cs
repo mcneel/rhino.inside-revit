@@ -1,12 +1,11 @@
 using System;
-using System.Collections.Generic.Extensions;
 using System.Linq;
 using Grasshopper.Kernel;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public abstract class DocumentComponent : Component, IGH_VariableParameterComponent
+  public abstract class DocumentComponent : TransactionalComponent, IGH_VariableParameterComponent
   {
     protected DocumentComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }

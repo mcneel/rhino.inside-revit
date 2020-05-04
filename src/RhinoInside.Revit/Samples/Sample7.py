@@ -1,12 +1,15 @@
 import clr
-clr.AddReference('System.Core')
-clr.AddReference('RhinoInside.Revit')
-clr.AddReference('RevitAPI')
 
-from System.Linq import Enumerable
-from Autodesk.Revit.DB import *
-from Rhino.Geometry import *
-from RhinoInside.Revit import Revit, Convert
+clr.AddReference('RevitAPI')
+clr.AddReference('RhinoCommon')
+clr.AddReference('RhinoInside.Revit')
+
+from Autodesk.Revit.DB import Transaction, ElementId, BuiltInCategory, DirectShape
+from Rhino.Geometry import Point3d, Vector3d, Mesh, MeshingParameters, Sphere
+from RhinoInside.Revit import Revit
+
+import RhinoInside.Revit
+clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
 
 doc = Revit.ActiveDBDocument
 
@@ -20,7 +23,7 @@ with Transaction(doc, "Sample7") as trans:
     category = ElementId(BuiltInCategory.OST_GenericModel)
     ds = DirectShape.CreateElement(doc, category)
 
-    for geometry in Enumerable.ToList(Convert.ToHost(meshes)):
-        ds.AppendShape(geometry)
+    for mesh in meshes :
+        ds.AppendShape(mesh.ToShape())
 
     trans.Commit()

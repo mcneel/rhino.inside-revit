@@ -1,6 +1,8 @@
 using System;
-using Autodesk.Revit.DB;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -24,8 +26,8 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructSketchPlaneByPlane
     (
-      Document doc,
-      ref Autodesk.Revit.DB.Element element,
+      DB.Document doc,
+      ref DB.Element element,
 
       Rhino.Geometry.Plane plane
     )
@@ -33,24 +35,21 @@ namespace RhinoInside.Revit.GH.Components
       if (!plane.IsValid)
         ThrowArgumentException(nameof(plane), "Plane is not valid.");
 
-      var scaleFactor = 1.0 / Revit.ModelUnits;
-      plane = plane.ChangeUnits(scaleFactor);
-
-      if (element is SketchPlane sketchPlane)
+      if (element is DB.SketchPlane sketchPlane)
       {
         bool pinned = element.Pinned;
         element.Pinned = false;
 
         var plane0 = sketchPlane.GetPlane();
-        using (var plane1 = plane.ToHost())
+        using (var plane1 = plane.ToPlane())
         {
           if (!plane0.Normal.IsParallelTo(plane1.Normal))
           {
             var axisDirection = plane0.Normal.CrossProduct(plane1.Normal);
             double angle = plane0.Normal.AngleTo(plane1.Normal);
 
-            using (var axis = Line.CreateUnbound(plane0.Origin, axisDirection))
-              ElementTransformUtils.RotateElement(doc, element.Id, axis, angle);
+            using (var axis = DB.Line.CreateUnbound(plane0.Origin, axisDirection))
+              DB.ElementTransformUtils.RotateElement(doc, element.Id, axis, angle);
 
             plane0 = sketchPlane.GetPlane();
           }
@@ -59,20 +58,20 @@ namespace RhinoInside.Revit.GH.Components
             double angle = plane0.XVec.AngleOnPlaneTo(plane1.XVec, plane1.Normal);
             if (angle != 0.0)
             {
-              using (var axis = Line.CreateUnbound(plane0.Origin, plane1.Normal))
-                ElementTransformUtils.RotateElement(doc, element.Id, axis, angle);
+              using (var axis = DB.Line.CreateUnbound(plane0.Origin, plane1.Normal))
+                DB.ElementTransformUtils.RotateElement(doc, element.Id, axis, angle);
             }
           }
 
           var trans = plane1.Origin - plane0.Origin;
           if (!trans.IsZeroLength())
-            ElementTransformUtils.MoveElement(doc, element.Id, trans);
+            DB.ElementTransformUtils.MoveElement(doc, element.Id, trans);
         }
 
         element.Pinned = pinned;
       }
       else
-        ReplaceElement(ref element, SketchPlane.Create(doc, plane.ToHost()));
+        ReplaceElement(ref element, DB.SketchPlane.Create(doc, plane.ToPlane()));
     }
   }
 }

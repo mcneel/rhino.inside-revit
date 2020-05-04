@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.GH.Components
             break;
 
           case DB.StorageType.Double:
-            DA.SetData(paramName, param.AsDouble());
+            DA.SetData(paramName, param.AsDoubleInRhinoUnits());
             break;
 
           case DB.StorageType.ElementId:

@@ -10,6 +10,11 @@
       iconsrc: /static/images/ribbon/Rhino.png
       icontag: 
 
+    - title: Preview
+      desc: Previews geometry that is open in Rhino, inside Revit
+      iconsrc: /static/images/ribbon/Preview.png
+      icontag: 
+
     - title: Python
       desc: Run the Rhino.Python editor that can be used to write Python scripts that combine both the Rhino and Revit API in the same script. See <a href="Autodesk/Revit/src/RhinoInside.Revit/Samples/Sample7.py">Sample 7</a> for a detailed look at the Python code
       iconsrc: /static/images/ribbon/Python.png
@@ -68,11 +73,6 @@
       desc: Sample 4 will run an external Grasshopper definition
       iconsrc: 
       icontag: 4
-
-    - title: Sample 6
-      desc: Sample 6 will toggle the visibility of Rhino geometry in Revit
-      iconsrc: 
-      icontag: 6
 
     - title: Sample 8
       desc: Sample 8 will allow Revit to open Rhino .3DM files directly

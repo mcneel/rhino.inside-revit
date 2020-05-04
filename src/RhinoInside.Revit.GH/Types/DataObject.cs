@@ -16,9 +16,6 @@ namespace RhinoInside.Revit.GH.Types
 
     public DataObject() { }
 
-    public DataObject(T apiObject) : base(apiObject)
-    { }
-
     public DataObject(T apiObject, DB.Document srcDocument) : base(apiObject)
     {
       Document = srcDocument;

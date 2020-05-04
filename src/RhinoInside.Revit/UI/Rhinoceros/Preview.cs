@@ -32,13 +32,13 @@ namespace RhinoInside.Revit.UI
     {
       if (status)
       {
-        Button.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Ribbon.Rhinoceros.Preview_Shaded.png", true);
-        Button.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Ribbon.Rhinoceros.Preview_Shaded.png");
+        Button.Image = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Rhinoceros.Preview_Shaded.png", true);
+        Button.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Rhinoceros.Preview_Shaded.png");
       }
       else
       {
-        Button.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Ribbon.Grasshopper.Preview_Off.png", true);
-        Button.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Ribbon.Grasshopper.Preview_Off.png");
+        Button.Image = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Preview_Off.png", true);
+        Button.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Preview_Off.png");
       }
     }
 

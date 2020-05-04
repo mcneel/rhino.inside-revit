@@ -119,6 +119,29 @@ namespace RhinoInside.Revit.GH
       Show();
     }
 
+    /// <summary>
+    /// Show Grasshopper window and open the given definition document
+    /// </summary>
+    /// <param name="filename">Full path to GH definition file</param>
+    public static void ShowAndOpenDocument(string filename)
+    {
+      Script.ShowEditor();
+      Script.OpenDocument(filename);
+      Rhinoceros.MainWindow.BringToFront();
+    }
+
+    /// <summary>
+    /// Show Grasshopper window asynchronously and open the given definition document
+    /// </summary>
+    /// <param name="filename">Full path to GH definition file</param>
+    public static async void ShowAndOpenDocumentAsync(string filename)
+    {
+      // wait for the gate to open!
+      await External.ActivationGate.Yield();
+      // now show the window
+      ShowAndOpenDocument(filename);
+    }
+
     static bool LoadGHA(string filePath)
     {
       var LoadGHAProc = typeof(GH_ComponentServer).GetMethod("LoadGHA", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -216,7 +239,7 @@ namespace RhinoInside.Revit.GH
               var taskDialog = new TaskDialog(MethodBase.GetCurrentMethod().DeclaringType.FullName)
               {
                 Title = "Grasshopper Assembly Failure",
-                MainIcon = TaskDialogIcons.IconError,
+                MainIcon = External.UI.TaskDialogIcons.IconError,
                 TitleAutoPrefix = false,
                 AllowCancellation = false,
                 MainInstruction = $"Grasshopper cannot load the external assembly {assemblyFile.Name}. Please contact the provider for assistance.",

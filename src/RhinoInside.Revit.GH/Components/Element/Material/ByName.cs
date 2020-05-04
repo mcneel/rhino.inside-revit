@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Types;
+using RhinoInside.Revit.Convert.System.Drawing;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -62,7 +62,7 @@ namespace RhinoInside.Revit.GH.Components
         material.UseRenderAppearanceForShading = color.IsEmpty;
         if (!color.IsEmpty)
         {
-          var newColor = color.ToHost();
+          var newColor = color.ToColor();
           if (newColor.Red != material.Color.Red || newColor.Green != material.Color.Green || newColor.Blue != material.Color.Blue)
             material.Color = newColor;
 

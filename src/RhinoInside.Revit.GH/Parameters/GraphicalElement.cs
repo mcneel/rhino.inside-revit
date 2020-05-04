@@ -6,7 +6,8 @@ using Autodesk.Revit.UI.Selection;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
-using RhinoInside.Revit.UI.Selection;
+using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.External.UI.Selection;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
@@ -192,9 +193,9 @@ namespace RhinoInside.Revit.GH.Parameters
           value = new GH_Structure<T>();
 
           foreach (var document in documents.Where(x => x.Key != docGUID))
-            value.AppendRange(document, new GH_Path(RevitAPI.DocumentSessionId(document.Key)));
+            value.AppendRange(document, new GH_Path(DocumentExtension.DocumentSessionId(document.Key)));
 
-          value.AppendRange(references.Select(r => (T) Types.Element.FromReference(doc, r)), new GH_Path(RevitAPI.DocumentSessionId(docGUID)));
+          value.AppendRange(references.Select(r => (T) Types.Element.FromReference(doc, r)), new GH_Path(DocumentExtension.DocumentSessionId(docGUID)));
 
           return GH_GetterResult.success;
         case Autodesk.Revit.UI.Result.Cancelled:

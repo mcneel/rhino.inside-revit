@@ -1,6 +1,8 @@
 using System;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -34,11 +36,8 @@ namespace RhinoInside.Revit.GH.Components
       [Optional] bool structural
     )
     {
-      var scaleFactor = 1.0 / Revit.ModelUnits;
-
       if
       (
-        ((boundary = boundary.ChangeUnits(scaleFactor)) is null) ||
         !boundary.IsClosed ||
         !boundary.TryGetPlane(out var boundaryPlane, Revit.VertexTolerance) ||
         boundaryPlane.ZAxis.IsParallelTo(Rhino.Geometry.Vector3d.ZAxis) == 0
@@ -47,9 +46,9 @@ namespace RhinoInside.Revit.GH.Components
 
       SolveOptionalType(ref type, doc, DB.ElementTypeGroup.FloorType, nameof(type));
 
-      SolveOptionalLevel(doc, boundary, ref level, out var bbox);
+      SolveOptionalLevel(doc, boundary, ref level, out var _);
 
-      var curveArray = boundary.ToHostMultiple().ToCurveArray();
+      var curveArray = boundary.ToCurveArray();
 
       var parametersMask = new DB.BuiltInParameter[]
       {
@@ -68,7 +67,7 @@ namespace RhinoInside.Revit.GH.Components
       if (element != null)
       {
         var boundaryBBox = boundary.GetBoundingBox(true);
-        element.get_Parameter(DB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM).Set(boundaryBBox.Min.Z - level.Value.Elevation);
+        element.get_Parameter(DB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM).Set(boundaryBBox.Min.Z / Revit.ModelUnits - level.Value.Elevation);
       }
     }
   }

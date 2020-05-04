@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
 using Grasshopper;
 using Grasshopper.Kernel;
 using Rhino.PlugIns;
+using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.GH.Bake;
 using DB = Autodesk.Revit.DB;
 
@@ -50,8 +52,8 @@ namespace RhinoInside.Revit.UI
       {
         pushButton.ToolTip = "Shows Grasshopper window";
         pushButton.LongDescription = $"Use CTRL key to open only Grasshopper window without restoring other tool windows";
-        pushButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Grasshopper.png", true);
-        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Grasshopper.png");
+        pushButton.Image = ImageBuilder.LoadBitmapImage("Resources.Grasshopper.png", true);
+        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Grasshopper.png");
         pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://www.grasshopper3d.com/"));
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
       }
@@ -59,7 +61,15 @@ namespace RhinoInside.Revit.UI
 
     public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
     {
-      GH.Guest.ShowAsync();
+      // check to see if any document path is provided in journal data
+      // if yes, open the document
+      string filename = null;
+      if (data.JournalData.TryGetValue("Open", out filename) && File.Exists(filename))
+        GH.Guest.ShowAndOpenDocumentAsync(filename);
+      // otherwise, just open the GH window
+      else
+        GH.Guest.ShowAsync();
+      // whatever happens say success so Revit does not prompt errors
       return Result.Succeeded;
     }
   }
@@ -82,8 +92,8 @@ namespace RhinoInside.Revit.UI
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         pushButton.ToolTip = "Force a complete recompute of all objects";
-        pushButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Ribbon.Grasshopper.Recompute.png", true);
-        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Ribbon.Grasshopper.Recompute.png");
+        pushButton.Image = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Recompute.png", true);
+        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Recompute.png");
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
       }
     }
@@ -202,8 +212,8 @@ namespace RhinoInside.Revit.UI
       {
         bakeButton.ToolTip = "Bakes selected objects content in the active Revit document";
         bakeButton.LongDescription = "Use CTRL key to group resulting elements";
-        bakeButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Ribbon.Grasshopper.Bake.png", true);
-        bakeButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Ribbon.Grasshopper.Bake.png");
+        bakeButton.Image = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Bake.png", true);
+        bakeButton.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Bake.png");
         bakeButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
       }
     }
@@ -287,7 +297,6 @@ namespace RhinoInside.Revit.UI
 
         if (geometryToBake.Any())
         {
-          var scaleFactor = 1.0 / Revit.ModelUnits;
           var categoryId = options.Category?.Id ?? new DB.ElementId(DB.BuiltInCategory.OST_GenericModel);
 
           ids = new List<DB.ElementId>();
@@ -296,7 +305,7 @@ namespace RhinoInside.Revit.UI
             var ds = DB.DirectShape.CreateElement(options.Document, categoryId);
             ds.Name = param.NickName;
 
-            var shape = geometry.ToHostMultiple(scaleFactor).ToList();
+            var shape = geometry.ToShape().ToList();
             ds.SetShape(shape);
             ids.Add(ds.Id);
           }
@@ -432,8 +441,8 @@ namespace RhinoInside.Revit.UI
       if (radioButtonGroup.AddItem(buttonData) is ToggleButton pushButton)
       {
         pushButton.ToolTip = "Don't draw any preview geometry";
-        pushButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Ribbon.Grasshopper.Preview_Off.png", true);
-        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Ribbon.Grasshopper.Preview_Off.png");
+        pushButton.Image = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Preview_Off.png", true);
+        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Preview_Off.png");
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
 
         if (GH.PreviewServer.PreviewMode == GH_PreviewMode.Disabled)
@@ -459,8 +468,8 @@ namespace RhinoInside.Revit.UI
       if (radioButtonGroup.AddItem(buttonData) is ToggleButton pushButton)
       {
         pushButton.ToolTip = "Draw wireframe preview geometry";
-        pushButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Ribbon.Grasshopper.Preview_Wireframe.png", true);
-        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Ribbon.Grasshopper.Preview_Wireframe.png");
+        pushButton.Image = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Preview_Wireframe.png", true);
+        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Preview_Wireframe.png");
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
 
         if (GH.PreviewServer.PreviewMode == GH_PreviewMode.Wireframe)
@@ -486,8 +495,8 @@ namespace RhinoInside.Revit.UI
       if (radioButtonGroup.AddItem(buttonData) is ToggleButton pushButton)
       {
         pushButton.ToolTip = "Draw shaded preview geometry";
-        pushButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Ribbon.Grasshopper.Preview_Shaded.png", true);
-        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.Ribbon.Grasshopper.Preview_Shaded.png");
+        pushButton.Image = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Preview_Shaded.png", true);
+        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Preview_Shaded.png");
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
 
         if(GH.PreviewServer.PreviewMode == GH_PreviewMode.Shaded)

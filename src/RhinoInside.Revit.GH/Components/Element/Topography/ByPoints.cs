@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.Architecture;
 using Grasshopper.Kernel;
+using Rhino.Geometry;
+using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.Convert.System.Collections.Generic;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -15,7 +17,7 @@ namespace RhinoInside.Revit.GH.Components
 
     public TopographyByPoints() : base
     (
-      "Add Topography", "Topography",
+      "Add Topography (Points)", "Topography",
       "Given a set of Points, it adds a Topography surface to the active Revit document",
       "Revit", "Site"
     )
@@ -28,39 +30,38 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructTopographyByPoints
     (
-      Document doc,
-      ref Autodesk.Revit.DB.Element element,
+      DB.Document doc,
+      ref DB.Architecture.TopographySurface element,
 
-      IList<Rhino.Geometry.Point3d> points,
-      [Optional] IList<Rhino.Geometry.Curve> regions
+      IList<Point3d> points,
+      [Optional] IList<Curve> regions
     )
     {
-      var scaleFactor = 1.0 / Revit.ModelUnits;
-      var xyz = points.Select(x => x.ChangeUnits(scaleFactor).ToHost()).ToArray();
+      var xyz = points.ConvertAll(GeometryEncoder.ToXYZ);
 
-      //if (element is TopographySurface topography)
+      //if (element is DB.Architecture.TopographySurface topography)
       //{
-      //  using (var editScope = new TopographyEditScope(doc, "TopographyByPoints"))
+      //  using (var editScope = new DB.Architecture.TopographyEditScope(doc, GetType().Name))
       //  {
       //    editScope.Start(element.Id);
       //    topography.DeletePoints(topography.GetPoints());
-      //    topography.AddPoints(points.ToHost().ToList());
+      //    topography.AddPoints(xyz);
 
       //    foreach (var subRegionId in topography.GetHostedSubRegionIds())
       //      doc.Delete(subRegionId);
 
-      //    editScope.Commit(new Revit.FailuresPreprocessor());
+      //    editScope.Commit(this);
       //  }
       //}
       //else
       {
-        ReplaceElement(ref element, TopographySurface.Create(doc, xyz));
+        ReplaceElement(ref element, DB.Architecture.TopographySurface.Create(doc, xyz));
       }
 
       if (element is object && regions?.Count > 0)
       {
-        var curveLoops = regions.Select(region => CurveLoop.Create(region.ChangeUnits(scaleFactor).ToHostMultiple().ToArray())).ToArray();
-        SiteSubRegion.Create(doc, curveLoops, element.Id);
+        var curveLoops = regions.Select(region => region.ToCurveLoop());
+        DB.Architecture.SiteSubRegion.Create(doc, curveLoops.ToList(), element.Id);
       }
     }
   }

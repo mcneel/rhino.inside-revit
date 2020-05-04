@@ -13,6 +13,8 @@ using Autodesk.Revit.UI;
 using Rhino.Geometry;
 
 using RhinoInside.Revit.UI;
+using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.Convert.System;
 
 namespace RhinoInside.Revit.Samples
 {
@@ -51,10 +53,16 @@ namespace RhinoInside.Revit.Samples
         {
           var categoryId = new ElementId(BuiltInCategory.OST_GenericModel);
 
-          var ds = DirectShape.CreateElement(doc, categoryId);
-          ds.Name = "Sphere";
-          foreach (var geometryList in meshes.ToHost().ToList())
-            ds.AppendShape(geometryList);
+          {
+            var ds = DirectShape.CreateElement(doc, categoryId);
+            ds.Name = "Sphere";
+            
+            foreach (var shape in meshes.ConvertAll(ShapeEncoder.ToShape))
+            {
+              if (shape.Length > 0)
+                ds.AppendShape(shape);
+            }
+          }
 
           trans.Commit();
         }

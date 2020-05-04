@@ -16,6 +16,8 @@ using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using Rhino.PlugIns;
+using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
 
 namespace RhinoInside.Revit.UI
 {
@@ -29,8 +31,8 @@ namespace RhinoInside.Revit.UI
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         pushButton.ToolTip = "Loads and evals a Grasshopper definition";
-        pushButton.Image = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GrasshopperPlayer.png", true);
-        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("RhinoInside.Resources.GrasshopperPlayer.png");
+        pushButton.Image = ImageBuilder.LoadBitmapImage("Resources.GrasshopperPlayer.png", true);
+        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("Resources.GrasshopperPlayer.png");
         pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://www.grasshopper3d.com/"));
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool loaded, out bool loadProtected);
       }
@@ -239,7 +241,7 @@ namespace RhinoInside.Revit.UI
       IGH_Goo goo = null;
 
       if (PickPoint(doc, prompt + " : ", out var point))
-        goo = new GH_Point(point.ToRhino().ChangeUnits(Revit.ModelUnits));
+        goo = new GH_Point(point.ToPoint3d());
 
       yield return goo;
     }
@@ -254,7 +256,7 @@ namespace RhinoInside.Revit.UI
         PickPoint(doc, prompt + " : End pont - ", out var to)
       )
       {
-        goo = new GH_Line(new Rhino.Geometry.Line(from.ToRhino().ChangeUnits(Revit.ModelUnits), to.ToRhino().ChangeUnits(Revit.ModelUnits)));
+        goo = new GH_Line(new Rhino.Geometry.Line(from.ToPoint3d(), to.ToPoint3d()));
       }
 
       yield return goo;
@@ -270,10 +272,10 @@ namespace RhinoInside.Revit.UI
         PickPointOnFace(doc, prompt + " : Second box corner - ", out var to)
       )
       {
-        var min = new Point3d(Math.Min(from.X, to.X), Math.Min(from.Y, to.Y), Math.Min(from.Z, to.Z));
-        var max = new Point3d(Math.Max(from.X, to.X), Math.Max(from.Y, to.Y), Math.Max(from.Z, to.Z));
+        var min = new XYZ(Math.Min(from.X, to.X), Math.Min(from.Y, to.Y), Math.Min(from.Z, to.Z));
+        var max = new XYZ(Math.Max(from.X, to.X), Math.Max(from.Y, to.Y), Math.Max(from.Z, to.Z));
 
-        goo = new GH_Box(new BoundingBox(min.ChangeUnits(Revit.ModelUnits), max.ChangeUnits(Revit.ModelUnits)));
+        goo = new GH_Box(new BoundingBox(min.ToPoint3d(), max.ToPoint3d()));
       }
 
       yield return goo;
@@ -290,7 +292,7 @@ namespace RhinoInside.Revit.UI
         {
           var element = doc.Document.GetElement(reference);
           var edge = element.GetGeometryObjectFromReference(reference) as Edge;
-          var curve = edge.AsCurve().ToRhino().ChangeUnits(Revit.ModelUnits);
+          var curve = edge.AsCurve().ToCurve();
           goo = new GH_Curve(curve);
         }
       }
@@ -308,7 +310,7 @@ namespace RhinoInside.Revit.UI
         {
           var element = doc.Document.GetElement(reference);
           var face = element.GetGeometryObjectFromReference(reference) as Face;
-          var surface = face.ToRhino().ChangeUnits(Revit.ModelUnits);
+          var surface = face.ToBrep();
           return new GH_Surface[] { new GH_Surface(surface) };
         }
       }
@@ -328,7 +330,7 @@ namespace RhinoInside.Revit.UI
 
           Options options = null;
           using (var geometry = element.GetGeometry(ViewDetailLevel.Fine, out options)) using (options)
-            return geometry.ToRhino().OfType<Brep>().Select((x) => new GH_Brep(x));
+            return geometry.ToGeometryBaseMany().OfType<Brep>().Select((x) => new GH_Brep(x));
         }
       }
       catch (Autodesk.Revit.Exceptions.OperationCanceledException) { }

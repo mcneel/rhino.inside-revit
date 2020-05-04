@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -24,6 +24,10 @@
     <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <RevitVersion>2020</RevitVersion>
   </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration.Contains('2021'))">
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <RevitVersion>2021</RevitVersion>
+  </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -33,7 +37,7 @@
     <OutputType>Library</OutputType>
     <LangVersion>7.3</LangVersion>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RhinoInside</RootNamespace>
+    <RootNamespace>RhinoInside.Revit</RootNamespace>
     <AssemblyName>RhinoInside.Revit</AssemblyName>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -57,7 +61,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2018|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug 2018\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;REVIT_2017; REVIT_2018</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;REVIT_2017;REVIT_2018</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
@@ -68,13 +72,13 @@
     <OutputPath>bin\Release 2018\</OutputPath>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <DefineConstants>REVIT_2017; REVIT_2018</DefineConstants>
+    <DefineConstants>REVIT_2017;REVIT_2018</DefineConstants>
     <Optimize>true</Optimize>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2019|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug 2019\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;REVIT_2017; REVIT_2018; REVIT_2019</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;REVIT_2017;REVIT_2018;REVIT_2019</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
@@ -85,13 +89,13 @@
     <OutputPath>bin\Release 2019\</OutputPath>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <DefineConstants>REVIT_2017; REVIT_2018; REVIT_2019</DefineConstants>
+    <DefineConstants>REVIT_2017;REVIT_2018;REVIT_2019</DefineConstants>
     <Optimize>true</Optimize>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2020|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug 2020\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;REVIT_2017; REVIT_2018; REVIT_2019; REVIT_2020</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
@@ -100,7 +104,24 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2020|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Release 2020\</OutputPath>
-    <DefineConstants>REVIT_2017; REVIT_2018; REVIT_2019; REVIT_2020</DefineConstants>
+    <DefineConstants>REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020</DefineConstants>
+    <Optimize>true</Optimize>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2021|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug 2021\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2021|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Release 2021\</OutputPath>
+    <DefineConstants>REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021</DefineConstants>
     <Optimize>true</Optimize>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
@@ -167,16 +188,64 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Convert\ConversionException.cs" />
+    <Compile Include="Convert\Display\DisplayMaterialConverter.cs" />
+    <Compile Include="Convert\Display\PreviewConverter.cs" />
+    <Compile Include="Convert\Geometry\ExtrusionEncoder.cs" />
+    <Compile Include="Convert\Geometry\GeometryEncoder.cs" />
+    <Compile Include="Convert\Geometry\Raw\RawDecoder.cs" />
+    <Compile Include="Convert\Geometry\MeshEncoder.cs" />
+    <Compile Include="Convert\Geometry\NurbsSplineEncoder.cs" />
+    <Compile Include="Convert\Geometry\Raw\RawEncoder.cs" />
+    <Compile Include="Convert\Geometry\ShapeEncoder.cs" />
+    <Compile Include="Convert\Geometry\SolidDecoder.cs" />
+    <Compile Include="Convert\Geometry\BrepEncoder.cs" />
+    <Compile Include="Convert\Geometry\SubDEncoder.cs" />
+    <Compile Include="Convert\System.Collections.Generic.cs" />
+    <Compile Include="Convert\System.cs" />
+    <Compile Include="Convert\Units\DisplayUnitTypeConverter.cs" />
+    <Compile Include="Convert\Geometry\UnitConverter.cs" />
+    <Compile Include="Convert\System.Drawing.cs" />
+    <Compile Include="Convert\System.Windows.Media.cs" />
     <Compile Include="ErrorReport.cs" />
     <Compile Include="Exceptions.cs" />
-    <Compile Include="Extensions\RevitAPI.cs" />
+    <Compile Include="External\ApplicationServices\Extensions\Application.cs" />
+    <Compile Include="External\DB\Application.cs" />
+    <Compile Include="External\DB\Extensions\Category.cs" />
+    <Compile Include="External\DB\Extensions\Curve.cs" />
+    <Compile Include="External\DB\Extensions\CurveLoop.cs" />
+    <Compile Include="External\DB\Extensions\Document.cs" />
+    <Compile Include="External\DB\Extensions\Element.cs" />
+    <Compile Include="External\DB\Extensions\ElementId.cs" />
+    <Compile Include="External\DB\Extensions\Face.cs" />
+    <Compile Include="External\DB\Extensions\FilteredElementCollector.cs" />
+    <Compile Include="External\DB\Extensions\GeometryObject.cs" />
+    <Compile Include="External\DB\Extensions\Instance.cs" />
+    <Compile Include="External\DB\Extensions\Parameter.cs" />
+    <Compile Include="External\DB\Extensions\ParameterFilterElement.cs" />
+    <Compile Include="External\DB\Extensions\Surface.cs" />
+    <Compile Include="External\DB\Extensions\XYZ.cs" />
+    <Compile Include="External\DB\Extensions\Wall.cs" />
+    <Compile Include="External\DB\ParameterBinding.cs" />
+    <Compile Include="External\DB\ParameterClass.cs" />
+    <Compile Include="External\DB\UniqueId.cs" />
+    <Compile Include="External\DB\WallWrapping.cs" />
+    <Compile Include="External\DB\CurtainGridLayout.cs" />
+    <Compile Include="External\DB\CurtainGridJoinCondition.cs" />
+    <Compile Include="External\DB\CurtainMullionSystemFamily.cs" />
+    <Compile Include="External\DB\CurtainMullionPosition.cs" />
+    <Compile Include="External\DB\CurtainPanelSystemFamily.cs" />
+    <Compile Include="External\UI\Application.cs" />
+    <Compile Include="External\UI\Command.cs" />
+    <Compile Include="External\UI\EventHandler.cs" />
+    <Compile Include="External\UI\Extensions\UIApplication.cs" />
+    <Compile Include="External\UI\Selection.cs" />
+    <Compile Include="External\UI\TaskDialogIcons.cs" />
     <Compile Include="Extensions\RhinoCommon.cs" />
     <Compile Include="Extensions\System.cs" />
     <Compile Include="Extensions\Win32.cs" />
     <Compile Include="Extensions\WinForms.cs" />
     <Compile Include="External\ActivationGate.cs" />
-    <Compile Include="External\DB.cs" />
-    <Compile Include="External\UI.cs" />
     <Compile Include="GH\Bake.cs" />
     <Compile Include="GH\Kernel.cs" />
     <Compile Include="Rhino\Rhinoceros.cs" />
@@ -209,7 +278,8 @@
     <Compile Include="Addin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\Rhinoceros\Preview.cs" />
-    <Compile Include="UI\Selection.cs" />
+    <Compile Include="Convert\Eto.Drawing.cs" />
+    <Compile Include="Convert\Geometry\GeometryDecoder.cs" />
     <None Include="Properties\RhinoInside.Revit.addin" />
     <Compile Include="Samples\Sample1.cs" />
     <None Include="Samples\Sample2.ghx" />

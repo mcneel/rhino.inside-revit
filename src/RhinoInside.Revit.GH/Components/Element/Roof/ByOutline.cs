@@ -1,5 +1,8 @@
 using System;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.Convert.Units;
+using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -32,14 +35,11 @@ namespace RhinoInside.Revit.GH.Components
       Optional<DB.Level> level
     )
     {
-      var scaleFactor = 1.0 / Revit.ModelUnits;
-
       if
       (
-        ((boundary = boundary.ChangeUnits(scaleFactor)) is null) ||
-        boundary.IsShort(Revit.ShortCurveTolerance) ||
+        boundary.IsShort(Revit.ShortCurveTolerance * Revit.ModelUnits) ||
         !boundary.IsClosed ||
-        !boundary.TryGetPlane(out var boundaryPlane, Revit.VertexTolerance) ||
+        !boundary.TryGetPlane(out var boundaryPlane, Revit.VertexTolerance * Revit.ModelUnits) ||
         boundaryPlane.ZAxis.IsParallelTo(Rhino.Geometry.Vector3d.ZAxis) == 0
       )
         ThrowArgumentException(nameof(boundary), "Boundary should be an horizontal planar closed curve.");
@@ -53,11 +53,11 @@ namespace RhinoInside.Revit.GH.Components
         DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
         DB.BuiltInParameter.ELEM_FAMILY_PARAM,
         DB.BuiltInParameter.ELEM_TYPE_PARAM,
-        DB.BuiltInParameter.LEVEL_PARAM,
+        DB.BuiltInParameter.ROOF_BASE_LEVEL_PARAM,
         DB.BuiltInParameter.ROOF_LEVEL_OFFSET_PARAM
       };
 
-      using (var curveArray = boundary.ToHostMultiple().ToCurveArray())
+      using (var curveArray = boundary.ToCurveArray())
       {
         var footPrintToModelCurvesMapping = new DB.ModelCurveArray();
         ReplaceElement(ref element, doc.Create.NewFootPrintRoof(curveArray, level.Value, type.Value, out footPrintToModelCurvesMapping), parametersMask);
@@ -65,7 +65,7 @@ namespace RhinoInside.Revit.GH.Components
 
       if (element != null)
       {
-        element.get_Parameter(DB.BuiltInParameter.ROOF_LEVEL_OFFSET_PARAM).Set(bbox.Min.Z - level.Value.Elevation);
+        element.get_Parameter(DB.BuiltInParameter.ROOF_LEVEL_OFFSET_PARAM).Set(bbox.Min.Z / Revit.ModelUnits - level.Value.Elevation);
       }
     }
   }

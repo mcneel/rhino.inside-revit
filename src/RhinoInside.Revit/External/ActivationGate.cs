@@ -48,6 +48,8 @@ namespace RhinoInside.Revit.External
 
     [ThreadStatic]
     static readonly Dictionary<IntPtr, ExternalEvent> gates = new Dictionary<IntPtr, ExternalEvent>();
+
+    public static IEnumerable<IntPtr> GateWindows = gates.Select(x => x.Key);
     public static bool AddGateWindow(IntPtr hWnd)
     {
       using (var window = new WindowHandle(hWnd))
@@ -323,41 +325,6 @@ namespace RhinoInside.Revit.External
 
     [ThreadStatic]
     static Hook hook = default;
-
-    internal static bool CatchException(this UIApplication app, Exception e, object sender)
-    {
-      var addinId = app.ActiveAddInId?.GetGUID() ?? Guid.Empty;
-      if (addinId != Guid.Empty)
-      {
-        if (app.LoadedApplications.OfType<UI.Application>().Where(x => x.GetGUID() == addinId).FirstOrDefault() is UI.Application addin)
-          return addin.CatchException(e, app, sender);
-      }
-
-      return false;
-    }
-
-    internal static void ReportException(this UIApplication app, Exception e, object sender)
-    {
-      var comment = $@"Managed exception caught from external API application '{e.Source}' in method '{e.TargetSite}' Exception type: '<{e.GetType().FullName}>,' Exception method: '<{e.Message}>,' Stack trace '   {e.StackTrace}";
-      comment = comment.Replace(Environment.NewLine, $"{Environment.NewLine}'");
-      app.Application.WriteJournalComment(comment, true);
-
-      foreach (var hWnd in gates.Keys)
-      {
-        using (var window = new WindowHandle(hWnd))
-        {
-          window.HideOwnedPopups();
-          window.Hide();
-        }
-      }
-
-      var addinId = app.ActiveAddInId?.GetGUID() ?? Guid.Empty;
-      if (addinId != Guid.Empty)
-      {
-        if (app.LoadedApplications.OfType<UI.Application>().Where(x => x.GetGUID() == addinId).FirstOrDefault() is UI.Application addin)
-          addin.ReportException(e, app, sender);
-      }
-    }
   }
 
   public sealed class EditScope : IDisposable

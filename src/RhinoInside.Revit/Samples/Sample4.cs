@@ -27,7 +27,8 @@ using Cursor = System.Windows.Forms.Cursor;
 using Cursors = System.Windows.Forms.Cursors;
 
 using RhinoInside.Revit.UI;
-using Autodesk.Revit.UI.Events;
+using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.Convert.System.Collections.Generic;
 
 namespace RhinoInside.Revit.Samples
 {
@@ -43,7 +44,7 @@ namespace RhinoInside.Revit.Samples
         mruPullDownButton.LargeImage = ImageBuilder.BuildLargeImage("4");
         mruPullDownButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://github.com/mcneel/rhino.inside-revit/tree/master#sample-4"));
 
-        mruPullDownButton.AddPushButton(typeof(Browse), "Browse...", "Browse for a Grasshopper definition to evaluate", typeof(NeedsActiveDocument<Availability>));
+        AddPushButton<Browse, NeedsActiveDocument<Availability>> (mruPullDownButton, "Browse...", "Browse for a Grasshopper definition to evaluate");
       }
     }
 
@@ -55,11 +56,19 @@ namespace RhinoInside.Revit.Samples
       if (!File.Exists(filePath))
         return false;
 
-      if(mruPushPuttons == null)
+      if(mruPushPuttons is null)
       {
         mruPullDownButton.AddSeparator();
-        mruPushPuttons = new Type[] { typeof(Mru0), typeof(Mru1), typeof(Mru2), typeof(Mru3), typeof(Mru4), typeof(Mru5) }.
-                         Select(x => mruPullDownButton.AddPushButton(x, null, null, typeof(NeedsActiveDocument<Availability>))).ToArray();
+        mruPushPuttons = new PushButton[]
+        {
+          AddPushButton<Mru0, NeedsActiveDocument<Availability>>(mruPullDownButton, null, null),
+          AddPushButton<Mru1, NeedsActiveDocument<Availability>>(mruPullDownButton, null, null),
+          AddPushButton<Mru2, NeedsActiveDocument<Availability>>(mruPullDownButton, null, null),
+          AddPushButton<Mru3, NeedsActiveDocument<Availability>>(mruPullDownButton, null, null),
+          AddPushButton<Mru4, NeedsActiveDocument<Availability>>(mruPullDownButton, null, null),
+          AddPushButton<Mru5, NeedsActiveDocument<Availability>>(mruPullDownButton, null, null),
+        };
+
         foreach (var mru in mruPushPuttons)
         {
           mru.Visible = false;
@@ -240,8 +249,8 @@ namespace RhinoInside.Revit.Samples
                 {
                   switch (value)
                   {
-                    case Rhino.Geometry.Point3d point:          output.Add(new Rhino.Geometry.Point(point)); break;
-                    case Rhino.Geometry.GeometryBase geometry:  output.Add(geometry); break;
+                    case Point3d point:          output.Add(new Rhino.Geometry.Point(point)); break;
+                    case GeometryBase geometry:  output.Add(geometry); break;
                   }
                 }
               }
@@ -281,10 +290,10 @@ namespace RhinoInside.Revit.Samples
               var ds = DirectShape.CreateElement(doc, categoryId);
               ds.Name = output.Key;
 
-              foreach (var geometries in output.Value.ToHost())
+              foreach (var shape in output.Value.ConvertAll(ShapeEncoder.ToShape))
               {
-                if (geometries != null)
-                  ds.AppendShape(geometries);
+                if (shape.Length > 0)
+                  ds.AppendShape(shape);
               }
             }
 

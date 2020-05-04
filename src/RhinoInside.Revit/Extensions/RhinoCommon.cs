@@ -4,46 +4,10 @@ using System.Linq;
 using Rhino;
 using Rhino.Geometry;
 
-namespace RhinoInside.Revit
+namespace RhinoInside.Revit.Geometry.Extensions
 {
-  public static partial class Extension
+  public static class ExtrusionExtension
   {
-    #region Scale
-    public static Point3d ChangeUnits(this Point3d p, double factor)
-    {
-      return p * factor;
-    }
-    public static Vector3d ChangeUnits(this Vector3d p, double factor)
-    {
-      return p * factor;
-    }
-    public static Transform ChangeUnits(this Transform t, double factor)
-    {
-      t.M03 *= factor;
-      t.M13 *= factor;
-      t.M23 *= factor;
-      return t;
-    }
-    public static Line ChangeUnits(this Line l, double factor)
-    {
-      return new Line(l.From * factor, l.To * factor);
-    }
-    public static Plane ChangeUnits(this Plane p, double factor)
-    {
-      return new Plane(p.Origin * factor, p.XAxis, p.YAxis);
-    }
-    public static BoundingBox ChangeUnits(this BoundingBox bbox, double factor)
-    {
-      return new BoundingBox(bbox.Min * factor, bbox.Max * factor);
-    }
-    public static G ChangeUnits<G>(this G geometry, double factor) where G : GeometryBase
-    {
-      geometry = (G) geometry?.DuplicateShallow();
-      return factor != 1.0 && !geometry.Scale(factor) ? null : geometry;
-    }
-    #endregion
-
-    #region TryGetExtrusion
     public static bool TryGetExtrusion(this Surface surface, out Extrusion extrusion)
     {
       extrusion = null;
@@ -325,9 +289,10 @@ namespace RhinoInside.Revit
 
       return false;
     }
-    #endregion
+  }
 
-    #region TryGetLine
+  public static class LineExtension
+  {
     public static bool TryGetLine(this Curve curve, out Line line, double tolerance)
     {
       if (curve is LineCurve lineCurve)
@@ -341,12 +306,13 @@ namespace RhinoInside.Revit
         return true;
       }
 
-      line = default(Line);
+      line = default;
       return false;
     }
-    #endregion
+  }
 
-    #region TryGetEllipise
+  static class EllipseExtension
+  {
     public static Ellipse Reverse(this Ellipse ellipse)
     {
       var plane = ellipse.Plane;
@@ -397,14 +363,48 @@ namespace RhinoInside.Revit
         }
       }
 
-      ellipse = default(Ellipse);
+      ellipse = default;
       interval = Interval.Unset;
       return false;
     }
-    #endregion
 
-    #region GeometryBase
-    public static bool GetUserBoolean(this GeometryBase geometry, string key, out bool value, bool def = default(bool))
+    public static bool IsClosed(this Ellipse ellipse, Interval interval, double tolerance)
+    {
+      var nurb = ellipse.ToNurbsCurve();
+      return nurb.PointAt(interval.Min).DistanceTo(nurb.PointAt(interval.Max)) < tolerance;
+    }
+  }
+
+  static class CurveExtension
+  {
+    public static bool IsClosed(this Curve curve, double tolerance)
+    {
+      return curve.IsClosed || curve.PointAtStart.DistanceTo(curve.PointAtEnd) < tolerance;
+    }
+
+    public static IEnumerable<Curve> SplitClosed(this Curve curve, double tolerance)
+    {
+      if (curve is PolyCurve polyCurve)
+      {
+        int segmentCount = polyCurve.SegmentCount;
+        for (int s = 0; s < segmentCount; ++s)
+        {
+          foreach (var c in polyCurve.SegmentCurve(s).SplitClosed(tolerance))
+            yield return c;
+        }
+      }
+      if ((curve is ArcCurve || curve is NurbsCurve) && curve.IsClosed(tolerance))
+      {
+        foreach (var c in curve.Split(curve.Domain.Mid))
+          yield return c;
+      }
+      else yield return curve;
+    }
+  }
+
+  public static class GeometryBaseExtension
+  {
+    public static bool GetUserBoolean(this GeometryBase geometry, string key, out bool value, bool def = default)
     {
       if (geometry.GetUserInteger(key, out var idx))
       {
@@ -416,13 +416,13 @@ namespace RhinoInside.Revit
       return false;
     }
 
-    public static bool GetUserInteger(this GeometryBase geometry, string key, out int value, int def = default(int))
+    public static bool GetUserInteger(this GeometryBase geometry, string key, out int value, int def = default)
     {
       value = def;
       return geometry.GetUserString(key) is string stringValue && int.TryParse(stringValue, out value);
     }
 
-    public static bool GetUserEnum<E>(this GeometryBase geometry, string key, out E value, E def = default(E)) where E : struct
+    public static bool GetUserEnum<E>(this GeometryBase geometry, string key, out E value, E def = default) where E : struct
     {
       value = def;
       return geometry.GetUserString(key) is string stringValue && Enum.TryParse<E>(stringValue, out value);
@@ -441,13 +441,5 @@ namespace RhinoInside.Revit
       value = def;
       return false;
     }
-    #endregion
-
-    #region Curve
-    public static bool IsClosed(this Curve curve, double tolerance)
-    {
-      return curve.IsClosed || curve.PointAtStart.DistanceTo(curve.PointAtEnd) < tolerance;
-    }
-    #endregion
   }
 }

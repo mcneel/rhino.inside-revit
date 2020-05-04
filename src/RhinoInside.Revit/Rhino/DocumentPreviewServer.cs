@@ -17,6 +17,9 @@ using Rhino.Geometry;
 using Rhino.DocObjects;
 using Rhino.DocObjects.Tables;
 
+using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.Convert.System.Drawing;
+
 namespace RhinoInside.Revit
 {
   class DocumentPreviewServer : DirectContext3DServer
@@ -201,8 +204,7 @@ namespace RhinoInside.Revit
     public override Autodesk.Revit.DB.Outline GetBoundingBox(View dBView)
     {
       var bbox = rhinoObject.Geometry.GetBoundingBox(false);
-      bbox = bbox.ChangeUnits(1.0 / Revit.ModelUnits);
-      return new Autodesk.Revit.DB.Outline(bbox.Min.ToHost(), bbox.Max.ToHost());
+      return new Autodesk.Revit.DB.Outline(bbox.Min.ToXYZ(), bbox.Max.ToXYZ());
     }
 
     class ObjectPrimitive : Primitive
@@ -336,12 +338,12 @@ namespace RhinoInside.Revit
           }
         }
 
-        ei.SetAmbientColor(ambient.ToHost());
-        ei.SetColor(color.ToHost());
-        ei.SetDiffuseColor(diffuse.ToHost());
-        ei.SetEmissiveColor(emissive.ToHost());
+        ei.SetAmbientColor(ambient.ToColor());
+        ei.SetColor(color.ToColor());
+        ei.SetDiffuseColor(diffuse.ToColor());
+        ei.SetEmissiveColor(emissive.ToColor());
         ei.SetGlossiness(glossiness * 100.0);
-        ei.SetSpecularColor(specular.ToHost());
+        ei.SetSpecularColor(specular.ToColor());
         ei.SetTransparency(transparency);
 
         return ei;

@@ -3,7 +3,10 @@ using System.ComponentModel;
 using System.Linq;
 using GH_IO.Serialization;
 using Grasshopper.Kernel.Types;
+using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.External.UI.Extensions;
 using DB = Autodesk.Revit.DB;
+using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -54,7 +57,7 @@ namespace RhinoInside.Revit.GH.Types
       UniqueID = doc?.GetElement(id)?.UniqueId ??
                  (
                    id.IntegerValue < DB.ElementId.InvalidElementId.IntegerValue ?
-                     UniqueId.Format(Guid.Empty, id.IntegerValue) :
+                     DBX.UniqueId.Format(Guid.Empty, id.IntegerValue) :
                      string.Empty
                  );
     }
@@ -199,7 +202,7 @@ namespace RhinoInside.Revit.GH.Types
             var element = proxy.owner.Document?.GetElement(proxy.owner.Id);
             if (element is object)
             {
-              var parameters = element.GetParameters(RevitAPI.ParameterClass.Any).
+              var parameters = element.GetParameters(DBX.ParameterClass.Any).
                 Select(p => new ParameterPropertyDescriptor(p)).
                 ToArray();
 

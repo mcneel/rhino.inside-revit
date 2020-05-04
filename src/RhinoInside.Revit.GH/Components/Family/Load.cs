@@ -51,7 +51,7 @@ namespace RhinoInside.Revit.GH.Components
 
         if (doc.LoadFamily(filePath, new FamilyLoadOptions(overrideFamily, overrideParameters), out var family))
         {
-          transaction.Commit();
+          CommitTransaction(doc, transaction);
         }
         else
         {

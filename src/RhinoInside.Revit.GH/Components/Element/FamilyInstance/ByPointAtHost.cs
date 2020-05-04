@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -39,9 +41,6 @@ namespace RhinoInside.Revit.GH.Components
       [Optional] DB.Element host
     )
     {
-      var scaleFactor = 1.0 / Revit.ModelUnits;
-      location = location.ChangeUnits(scaleFactor);
-
       if (!location.IsValid)
         ThrowArgumentException(nameof(location), "Should be a valid point or plane.");
 
@@ -87,7 +86,7 @@ namespace RhinoInside.Revit.GH.Components
 
         if (host is object)
         {
-          var newOrigin = location.Origin.ToHost();
+          var newOrigin = location.Origin.ToXYZ();
           if (!newOrigin.IsAlmostEqualTo(locationPoint.Point))
           {
             element.Pinned = false;
@@ -100,7 +99,7 @@ namespace RhinoInside.Revit.GH.Components
       {
         var creationData = new List<Autodesk.Revit.Creation.FamilyInstanceCreationData>()
         {
-          new Autodesk.Revit.Creation.FamilyInstanceCreationData(location.Origin.ToHost(), type, host, level.Value, DB.Structure.StructuralType.NonStructural)
+          new Autodesk.Revit.Creation.FamilyInstanceCreationData(location.Origin.ToXYZ(), type, host, level.Value, DB.Structure.StructuralType.NonStructural)
         };
 
         var newElementIds = doc.IsFamilyDocument ?
@@ -128,7 +127,7 @@ namespace RhinoInside.Revit.GH.Components
       if (element is object && element.Host is null)
       {
         element.Pinned = false;
-        element.SetTransform(location.Origin.ToHost(), location.XAxis.ToHost(), location.YAxis.ToHost());
+        element.SetTransform(location.Origin.ToXYZ(), location.XAxis.ToXYZ(), location.YAxis.ToXYZ());
         element.Pinned = true;
       }
     }
