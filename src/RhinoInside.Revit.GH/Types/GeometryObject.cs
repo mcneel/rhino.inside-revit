@@ -69,6 +69,34 @@ namespace RhinoInside.Revit.GH.Types
           wires = geometry.GetPreviewWires().Where(x => x is object).ToArray();
           materials = geometry.GetPreviewMaterials(element.Document, elementMaterial).Where(x => x is object).ToArray();
 
+          if (meshes.Length == 0 && wires.Length == 0 && element.get_BoundingBox(null) is DB.BoundingBoxXYZ)
+          {
+            var subMeshes = new List<Mesh>();
+            var subWires = new List<Curve>();
+            var subMaterials = new List<Rhino.Display.DisplayMaterial>();
+
+            foreach (var dependent in element.GetDependentElements(null).Select(x => element.Document.GetElement(x)))
+            {
+              if (dependent.get_BoundingBox(null) is null)
+                continue;
+
+              DB.Options dependentOptions = null;
+              using (var dependentGeometry = dependent?.GetGeometry(DetailLevel == DB.ViewDetailLevel.Undefined ? DB.ViewDetailLevel.Medium : DetailLevel, out dependentOptions)) using (dependentOptions)
+              {
+                if (dependentGeometry is object)
+                {
+                  subMeshes.AddRange(dependentGeometry.GetPreviewMeshes(meshingParameters).Where(x => x is object));
+                  subWires.AddRange(dependentGeometry.GetPreviewWires().Where(x => x is object));
+                  subMaterials.AddRange(dependentGeometry.GetPreviewMaterials(element.Document, elementMaterial).Where(x => x is object));
+                }
+              }
+            }
+
+            meshes = subMeshes.ToArray();
+            wires = subWires.ToArray();
+            materials = subMaterials.ToArray();
+          }
+
           foreach (var mesh in meshes)
             mesh.Normals.ComputeNormals();
         }
