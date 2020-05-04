@@ -174,15 +174,13 @@ namespace RhinoInside.Revit.GH.Components
 
         if (filters.Count == 0)
         {
-          DA.DisableGapLogic();
+          var nothing = new DB.ElementFilter[] { new DB.ElementIsElementTypeFilter(true), new DB.ElementIsElementTypeFilter(false) };
+          DA.SetData("Filter", new DB.LogicalAndFilter(nothing));
         }
+        else if (filters.Count == 1)
+          DA.SetData("Filter", filters[0]);
         else
-        {
-          if (filters.Count == 1)
-            DA.SetData("Filter", filters[0]);
-          else
-            DA.SetData("Filter", new DB.LogicalOrFilter(filters));
-        }
+          DA.SetData("Filter", new DB.LogicalOrFilter(filters));
       }
       catch (System.TypeLoadException e)
       {
@@ -222,14 +220,18 @@ namespace RhinoInside.Revit.GH.Components
         return;
 
       var ids = categoryIds.Select(x => x is null ? DB.ElementId.InvalidElementId : x).ToArray();
-      if (ids.Length > 0)
+      if (ids.Length == 0)
+      {
+        var nothing = new DB.ElementFilter[] { new DB.ElementIsElementTypeFilter(true), new DB.ElementIsElementTypeFilter(false) };
+        DA.SetData("Filter", new DB.LogicalAndFilter(nothing));
+      }
+      else
       {
         if (ids.Length == 1)
           DA.SetData("Filter", new DB.ElementCategoryFilter(ids[0], inverted));
         else
           DA.SetData("Filter", new DB.ElementMulticategoryFilter(ids, inverted));
       }
-      else DA.DisableGapLogic();
     }
   }
 
@@ -505,26 +507,34 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager[manager.AddParameter(new Parameters.Level(), "Level", "L", "Level to match", GH_ParamAccess.item)].Optional = true;
+      manager.AddParameter(new Parameters.Level(), "Levels", "L", "Levels to match", GH_ParamAccess.list);
       base.RegisterInputParams(manager);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var level = default(DB.Level);
-      var _Level_ = Params.IndexOfInputParam("Level");
-      if
-      (
-        Params.Input[_Level_].DataType != GH_ParamData.@void &&
-        !DA.GetData(_Level_, ref level)
-      )
+      var levels = new List<DB.Level>();
+      if (!DA.GetDataList("Levels", levels))
         return;
 
       var inverted = false;
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      DA.SetData("Filter", new DB.ElementLevelFilter(level?.Id ?? DB.ElementId.InvalidElementId, inverted));
+      if (levels.Count == 0)
+      {
+        var nothing = new DB.ElementFilter[] { new DB.ElementIsElementTypeFilter(true), new DB.ElementIsElementTypeFilter(false) };
+        DA.SetData("Filter", new DB.LogicalAndFilter(nothing));
+      }
+      else if (levels.Count == 1)
+      {
+        DA.SetData("Filter", new DB.ElementLevelFilter(levels[0]?.Id ?? DB.ElementId.InvalidElementId, inverted));
+      }
+      else
+      {
+        var filters = levels.Select(x => new DB.ElementLevelFilter(x?.Id ?? DB.ElementId.InvalidElementId, inverted)).ToList<DB.ElementFilter>();
+        DA.SetData("Filter", new DB.LogicalOrFilter(filters));
+      }
     }
   }
 
