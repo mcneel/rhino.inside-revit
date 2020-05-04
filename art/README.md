@@ -9,20 +9,28 @@ This directory contains the graphic files associated with this project.
 - `logo.png`
 - `logo.svg`
 
-## Newsletters
+## Newsletters (`newsletters/`)
 
 Highlighting new components:
 
 - `new-components-highlight.afphoto`
 
-![](new-components-highlight.png)
+![](newsletters/new-components-highlight.png)
 
-## YouTube Channel
+## YouTube Channel (`yt-channel/`)
 
-Banner files are:
+Banner files are
+
 - `youtube-banner.afphoto`
 - `youtube-banner.png`
 
-## Video Thumbnails
+Video thumbnails source file is
 
 - `video-thumbnails.afphoto`
+
+
+## Grasshopper Component Icons  (`gh-component-icons/`)
+
+- `gh-font.svg`: the basic font vector graphics for component icons
+
+![](gh-component-icons/gh-font.png)
