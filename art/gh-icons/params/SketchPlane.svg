@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;">
+    <rect id="Artboard1" x="0" y="0" width="24" height="24" style="fill:none;"/>
+    <clipPath id="_clip1">
+        <rect id="Artboard11" serif:id="Artboard1" x="0" y="0" width="24" height="24"/>
+    </clipPath>
+    <g clip-path="url(#_clip1)">
+        <g id="_-Curve-" serif:id="(Curve)">
+            <use xlink:href="#_Image2" x="1.759" y="0.361" width="21.911px" height="23.644px" transform="matrix(0.995965,0,0,0.985186,0,0)"/>
+            <g transform="matrix(0.24869,0.143581,-0.143581,0.24869,65.0111,-144.429)">
+                <path d="M94.531,532.812L76.562,564.062L94.531,595.312L130.469,595.312L148.438,564.062L130.469,532.812L94.531,532.812Z" style="fill:url(#_Radial3);"/>
+            </g>
+        </g>
+        <g id="_-Curve-1" serif:id="(Curve)">
+            <use xlink:href="#_Image4" x="16.326" y="12.871" width="4.908px" height="6.611px" transform="matrix(0.981512,0,0,0.944421,0,0)"/>
+            <g transform="matrix(0.160208,0.0924959,-0.0924959,0.160208,46.1501,-81.8215)">
+                <path d="M125.871,524.816L130.469,532.812" style="fill:none;stroke:white;stroke-width:4.89px;"/>
+            </g>
+        </g>
+        <g id="_-Curve-2" serif:id="(Curve)">
+            <use xlink:href="#_Image4" x="4.563" y="12.831" width="4.916px" height="6.631px" transform="matrix(0.983113,0,0,0.947323,0,0)"/>
+            <g transform="matrix(0.160208,0.0924959,-0.0924959,0.160208,46.1501,-81.8215)">
+                <path d="M76.562,564.062L71.844,556.008" style="fill:none;stroke:white;stroke-width:4.89px;"/>
+            </g>
+        </g>
+        <g id="_-Curve-3" serif:id="(Curve)" transform="matrix(0.160208,0.0924959,-0.0924959,0.160208,46.1618,-88.4901)">
+            <path d="M94.531,595.312L130.469,595.312L148.438,564.062" style="fill:none;stroke:white;stroke-width:4.89px;stroke-linecap:butt;"/>
+        </g>
+        <g transform="matrix(1,0,0,1,0,6.95124)">
+            <path d="M12.006,12L12.006,9.812" style="fill:none;stroke:white;stroke-width:0.9px;"/>
+        </g>
+        <g id="_-Curve-4" serif:id="(Curve)">
+            <use xlink:href="#_Image5" x="2.717" y="6.449" width="19.028px" height="11.656px" transform="matrix(0.951376,0,0,0.971373,0,0)"/>
+            <g transform="matrix(1.51722,0,0,1.51722,-6.20967,-1.14781)">
+                <path d="M6.242,8.676L12.012,5.331L17.769,8.656L12,12L6.242,8.676Z" style="fill:url(#_Radial6);stroke:rgb(0,76,156);stroke-width:0.67px;stroke-linecap:butt;"/>
+            </g>
+        </g>
+        <g id="_-Curve-5" serif:id="(Curve)">
+            <use xlink:href="#_Image7" x="4.645" y="3.719" width="16.437px" height="11.573px" transform="matrix(0.966895,0,0,0.964425,0,0)"/>
+            <g transform="matrix(0.160208,0.0924959,-0.0924959,0.160208,46.1501,-88.7728)">
+                <path d="M139.481,548.485L130.469,532.812L94.531,532.812L76.562,564.062L85.519,579.639" style="fill:none;stroke:white;stroke-width:4.89px;"/>
+            </g>
+        </g>
+        <g id="_-Curve-6" serif:id="(Curve)" transform="matrix(0.160208,0.0924959,-0.0924959,0.160208,46.1618,-95.4413)">
+            <path d="M94.531,595.312L130.469,595.312L148.438,564.062" style="fill:none;stroke:white;stroke-width:4.89px;stroke-linecap:butt;"/>
+        </g>
+        <path d="M12.006,12L12.006,14.884" style="fill:none;stroke:white;stroke-width:0.9px;"/>
+    </g>
+    <defs>
+        <image id="_Image2" width="22px" height="24px" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAYCAYAAAD+vg1LAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABXklEQVRIibWV0W6DMAxFTyCwdu3/f+m6FgrJHrCpayWMTp0lSxHBx7nB2IFtC84BsvNq4BawAVogyhogARMwy7qYoAS2wA7oxTvZn4ABGIG7S7BaWwBGgRyAT+AEnGV9kCSqoKZ4BQdzwg8HPDloJ+AoMaUEWTeiBB0LwKOBtTzuvAbPGEmdgXrJLc9V4T+qfodOnmcgK7gX4FkS9BsybflpAk2uFTMpOMrdqit0y6yKXqAjcAWaWMjc7IBaU/nKaICgUu39/cX8Hxoat/k2e0XyK5b/C/z2E6/9Yi1oNlrgTmA26yfwTKVT/WLJ+BofBTKxFPfA43r8r1w75WxiR2ElG1zrzX6twMTSjwfgBlyAb1lPrXk5Oc8GGNx7qvAqsC8DveuJFaB3NKscl8Ce8ibQSwkKpGigXqLKHFkak747CUTdjqi1OrZmnu21HjyIV2fenimtk8JOaQtMJcAPlgqIwYbHGwUAAAAASUVORK5CYII="/>
+        <radialGradient id="_Radial3" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(-55.4193,2.13163e-14,2.13163e-14,55.4193,129.365,576.528)"><stop offset="0" style="stop-color:rgb(224,224,224);stop-opacity:1"/><stop offset="1" style="stop-color:rgb(130,130,130);stop-opacity:1"/></radialGradient>
+        <image id="_Image4" width="5px" height="7px" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAHCAYAAADAp4fuAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAN0lEQVQImW3NUQrAMAwC0Be3+x+56cdWCGOCiKJYKA8KDfdrMsI1w2Ch82kGlTOZeo2jPqy/9w1kKw4VV9G3LwAAAABJRU5ErkJggg=="/>
+        <image id="_Image5" width="20px" height="12px" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAMCAYAAABiDJ37AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAA/UlEQVQokY3T207DQAxF0dVMKS3lWh74/88DAZVKG3pNeMCjDFGrYClK5NjH2x7PyGWrcIUZ7tFijRoHNOeS0hnfKITmeMYLHnGLm8hpC8G2n1x+J1wH0VOITorCDXZB+YkvbHHKwqkn9BBEiyCaFDGjGMM4YmeYFoXaTDUJkgXuInBciFyyBscgXGGJdQqhPKcsVg2IZZh8cNOgPlaBOpQ8ZG08TQrsXTiqgm6oSG75Gx94xybFj73fWWz/IdzqZrfEa7xrnFIvaBcV9+HPc8qije4Q3oJso1j0c23l1Zjq9jGvR6ZaReGT3o25NKfcar568+iiDqGD7iD+2A+z4kw2+BQx4wAAAABJRU5ErkJggg=="/>
+        <radialGradient id="_Radial6" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(15.6629,5.72102,3.80627,-10.4207,10.1506,7.43561)"><stop offset="0" style="stop-color:rgb(0,138,255);stop-opacity:1"/><stop offset="1" style="stop-color:rgb(0,28,96);stop-opacity:1"/></radialGradient>
+        <image id="_Image7" width="17px" height="12px" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAAMCAYAAACEJVa/AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAApUlEQVQokY2SUQ7DIAxDDXT3P/AI7CcPuS1IQ4qoqP0c0hbtV3nUfNRLvDNXSS13IENS5H6DlY0ZAOWQbqAFawZoki5Jn9y9E9dU63wqxbzEXE0QZgCIpud5cHBZOmZqWpAXQZNOmIXS+M2kYZ1EBnEDPAVIMWG3Afrn5JnQNaumexfjAPDloUNS+LSZBZ/vtPwHXBBv9x8AWvTTW4Muna/ioKX/Ab5hQDfXXeD2AAAAAElFTkSuQmCC"/>
+    </defs>
+</svg>
