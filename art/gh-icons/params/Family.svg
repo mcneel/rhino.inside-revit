@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:10;">
+    <rect id="Artboard1" x="0" y="0" width="24" height="24" style="fill:none;"/>
+    <clipPath id="_clip1">
+        <rect id="Artboard11" serif:id="Artboard1" x="0" y="0" width="24" height="24"/>
+    </clipPath>
+    <g clip-path="url(#_clip1)">
+        <g id="_-Curve-" serif:id="(Curve)">
+            <use xlink:href="#_Image2" x="1.759" y="0.361" width="21.911px" height="23.644px" transform="matrix(0.995965,0,0,0.985186,0,0)"/>
+            <g transform="matrix(0.24869,0.143581,-0.143581,0.24869,65.0111,-144.429)">
+                <path d="M94.531,532.812L76.562,564.062L94.531,595.312L130.469,595.312L148.438,564.062L130.469,532.812L94.531,532.812Z" style="fill:url(#_Radial3);"/>
+            </g>
+        </g>
+        <g id="_-Curve-1" serif:id="(Curve)">
+            <use xlink:href="#_Image4" x="2.331" y="6.315" width="10.77px" height="17.324px" transform="matrix(0.979057,0,0,0.962438,0,0)"/>
+            <g transform="matrix(-0.5,-0.866025,-0.866025,0.5,31.113,43.4038)">
+                <path d="M45.69,6.009L36.734,11.203L27.796,6.041L28.105,6.04L27.796,6.041L36.752,0.849L45.69,6.009Z" style="fill:url(#_Radial5);stroke:rgb(152,84,0);stroke-width:1px;"/>
+            </g>
+        </g>
+        <g transform="matrix(0.246148,0,0,0.231587,-21.7473,-17.4318)">
+            <path d="M116.779,131.406L116.779,148.678L112.707,148.678L112.707,127.088L124.914,127.088L124.914,131.406L116.779,131.406Z" style="fill:white;"/>
+        </g>
+        <g transform="matrix(0.307742,0,0,0.246148,-28.9209,-19.5802)">
+            <rect x="113.46" y="136.423" width="8.144" height="4.063" style="fill:white;"/>
+        </g>
+    </g>
+    <defs>
+        <image id="_Image2" width="22px" height="24px" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAYCAYAAAD+vg1LAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABXklEQVRIibWV0W6DMAxFTyCwdu3/f+m6FgrJHrCpayWMTp0lSxHBx7nB2IFtC84BsvNq4BawAVogyhogARMwy7qYoAS2wA7oxTvZn4ABGIG7S7BaWwBGgRyAT+AEnGV9kCSqoKZ4BQdzwg8HPDloJ+AoMaUEWTeiBB0LwKOBtTzuvAbPGEmdgXrJLc9V4T+qfodOnmcgK7gX4FkS9BsybflpAk2uFTMpOMrdqit0y6yKXqAjcAWaWMjc7IBaU/nKaICgUu39/cX8Hxoat/k2e0XyK5b/C/z2E6/9Yi1oNlrgTmA26yfwTKVT/WLJ+BofBTKxFPfA43r8r1w75WxiR2ElG1zrzX6twMTSjwfgBlyAb1lPrXk5Oc8GGNx7qvAqsC8DveuJFaB3NKscl8Ce8ibQSwkKpGigXqLKHFkak747CUTdjqi1OrZmnu21HjyIV2fenimtk8JOaQtMJcAPlgqIwYbHGwUAAAAASUVORK5CYII="/>
+        <radialGradient id="_Radial3" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(-55.4193,2.13163e-14,2.13163e-14,55.4193,129.365,576.528)"><stop offset="0" style="stop-color:rgb(224,224,224);stop-opacity:1"/><stop offset="1" style="stop-color:rgb(130,130,130);stop-opacity:1"/></radialGradient>
+        <image id="_Image4" width="11px" height="18px" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAASCAYAAACNdSR1AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAv0lEQVQokY3S206EQBBF0TXQ48jEROPl///QN2MYBHywyjQtOlZy0mnYu7q49HjAHQrWKj+qxwseMaCL62uzbuD7gG9xxAHLHvyMM064ifUU97L7mvBTwCXGKI2Uo82leYZDlXMlDXht4Vrqo2tm7H6BW6mgXIM3o/0H/q7OH19sD75E5mtSb/u6umaf9YG3Pjpm93VH2sBrbC4YMQVQnzAnLIQlpDEyV9KC94SzlsgUQo4G08F+5fFHX7/tgOkTR2MxzjaUozwAAAAASUVORK5CYII="/>
+        <radialGradient id="_Radial5" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(-14.1293,-4.6996,-3.1273,9.40223,39.4587,6.46702)"><stop offset="0" style="stop-color:rgb(255,179,0);stop-opacity:1"/><stop offset="1" style="stop-color:rgb(215,89,0);stop-opacity:1"/></radialGradient>
+    </defs>
+</svg>

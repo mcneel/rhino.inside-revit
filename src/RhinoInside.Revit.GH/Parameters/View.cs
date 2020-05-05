@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override Guid ComponentGuid => new Guid("2DC4B866-54DB-4CE6-94C0-C51B33D35B49");
     protected override Types.View PreferredCast(object data) => Types.View.FromElement(data as DB.View) as Types.View;
 
-    public View() : base("View", "View", "Represents a Revit view.", "Params", "Revit") { }
+    public View() : base("View", "View", "Represents a Revit view.", "Params", "Revit Primitives") { }
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {

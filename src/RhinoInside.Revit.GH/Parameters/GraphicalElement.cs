@@ -606,7 +606,7 @@ namespace RhinoInside.Revit.GH.Parameters
       "Graphical Element",
       "Graphical Element",
       "Represents a Revit graphical element.",
-      "Params", "Revit"
+      "Params", "Revit Primitives"
     )
     {
     }

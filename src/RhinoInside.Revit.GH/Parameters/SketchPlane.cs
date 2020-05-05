@@ -8,6 +8,6 @@ namespace RhinoInside.Revit.GH.Parameters
     public override Guid ComponentGuid => new Guid("93BF1F61-69AD-433F-A202-352C14E4CED8");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
-    public SketchPlane() : base("Sketch Plane", "Sketch Plane", "Represents a Revit document sketch plane.", "Params", "Revit") { }
+    public SketchPlane() : base("Sketch Plane", "Sketch Plane", "Represents a Revit document sketch plane.", "Params", "Revit Primitives") { }
   }
 }

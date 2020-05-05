@@ -3,19 +3,10 @@
     "desc": "Represents a Revit document category.", 
     "iconsrc": "/static/images/GH/Category.png", 
     "icontag": null, 
-    "panel": "Revit", 
+    "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Category", 
     "uuid": "6722c7a5-efd3-4119-a7fd-6c8be892fd04"
-  }, 
-  {
-    "desc": "Represents a Revit graphics style.", 
-    "iconsrc": null, 
-    "icontag": "G", 
-    "panel": "Revit", 
-    "tab": "Params", 
-    "title": "Graphics Style", 
-    "uuid": "833e6207-ba60-4c6b-ab8b-96fda0f91822"
   }, 
   {
     "desc": "Provides a picker of a CategoryType", 
@@ -28,18 +19,18 @@
   }, 
   {
     "desc": "Represents a Revit document level.", 
-    "iconsrc": null, 
-    "icontag": "L", 
-    "panel": "Revit", 
+    "iconsrc": "/static/images/GH/Level.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Level", 
     "uuid": "3238f8bc-8483-4584-b47c-48b4933e478e"
   }, 
   {
     "desc": "Represents a Revit document grid.", 
-    "iconsrc": null, 
-    "icontag": "G", 
-    "panel": "Revit", 
+    "iconsrc": "/static/images/GH/Grid.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Grid", 
     "uuid": "7d2fb886-a184-41b8-a7d6-a6fdb85cf4e4"
@@ -52,15 +43,6 @@
     "tab": "Revit", 
     "title": "DirectShape Categories", 
     "uuid": "7bafe137-332b-481a-be22-09e8bd4c86fc"
-  }, 
-  {
-    "desc": "", 
-    "iconsrc": null, 
-    "icontag": "D", 
-    "panel": "Revit", 
-    "tab": "Params", 
-    "title": "Document", 
-    "uuid": "f3427d5c-3793-4e32-b219-8172d56ef04c"
   }, 
   {
     "desc": "Provides a Model Category picker", 
@@ -109,44 +91,26 @@
   }, 
   {
     "desc": "Represents a Revit document element.", 
-    "iconsrc": null, 
-    "icontag": "E", 
-    "panel": "Revit", 
+    "iconsrc": "/static/images/GH/Element.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Element", 
     "uuid": "f3ea4a9c-b24f-4587-a358-6a7e6d8c028b"
   }, 
   {
-    "desc": "Represents a Revit element filter.", 
-    "iconsrc": null, 
-    "icontag": "E", 
-    "panel": "Revit", 
-    "tab": "Params", 
-    "title": "ElementFilter", 
-    "uuid": "bfcfc49c-747e-40d9-aaee-93ce06eaaf2b"
-  }, 
-  {
-    "desc": "Represents a Revit filter rule.", 
-    "iconsrc": null, 
-    "icontag": "F", 
-    "panel": "Revit", 
-    "tab": "Params", 
-    "title": "FilterRule", 
-    "uuid": "f08e1292-f855-48c7-9921-bd12ef0f67d2"
-  }, 
-  {
     "desc": "Represents a Revit document element type.", 
     "iconsrc": "/static/images/GH/ElementType.png", 
     "icontag": null, 
-    "panel": "Revit", 
+    "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Element Type", 
     "uuid": "97dd546d-65c3-4d00-a609-3f5fbda67142"
   }, 
   {
     "desc": "Provides an Element type picker", 
-    "iconsrc": null, 
-    "icontag": "E", 
+    "iconsrc": "/static/images/GH/ElementTypeByName.png", 
+    "icontag": null, 
     "panel": "Input", 
     "tab": "Revit", 
     "title": "ElementType Picker", 
@@ -154,17 +118,17 @@
   }, 
   {
     "desc": "Represents a Revit document family.", 
-    "iconsrc": null, 
-    "icontag": "F", 
-    "panel": "Revit", 
+    "iconsrc": "/static/images/GH/Family.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Family", 
     "uuid": "3966add8-07c0-43e7-874b-6eff95598eb0"
   }, 
   {
     "desc": "Provides a Family picker", 
-    "iconsrc": null, 
-    "icontag": "F", 
+    "iconsrc": "/static/images/GH/DocumentFamiliesPicker.png", 
+    "icontag": null, 
     "panel": "Input", 
     "tab": "Revit", 
     "title": "Families Picker", 
@@ -174,7 +138,7 @@
     "desc": "Represents a Revit vertex.", 
     "iconsrc": "/static/images/GH/Vertex.png", 
     "icontag": null, 
-    "panel": "Revit", 
+    "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Vertex", 
     "uuid": "bc1b160a-dc04-4139-ab7d-1aecbde7ff88"
@@ -183,7 +147,7 @@
     "desc": "Represents a Revit edge.", 
     "iconsrc": "/static/images/GH/Edge.png", 
     "icontag": null, 
-    "panel": "Revit", 
+    "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Edge", 
     "uuid": "b79fd0fd-63ae-4776-a0a7-6392a3a58b0d"
@@ -192,43 +156,43 @@
     "desc": "Represents a Revit face.", 
     "iconsrc": "/static/images/GH/Face.png", 
     "icontag": null, 
-    "panel": "Revit", 
+    "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Face", 
     "uuid": "759700ed-bc79-4986-a6ab-84921a7c9293"
   }, 
   {
     "desc": "Represents a Revit graphical element.", 
-    "iconsrc": null, 
-    "icontag": "G", 
-    "panel": "Revit", 
+    "iconsrc": "/static/images/GH/GraphicalElement.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Graphical Element", 
     "uuid": "ef607c2a-2f44-43f4-9c39-369ce114b51f"
   }, 
   {
     "desc": "Represents a Revit document group element.", 
-    "iconsrc": null, 
-    "icontag": "G", 
-    "panel": "Revit", 
+    "iconsrc": "/static/images/GH/Group.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Group", 
     "uuid": "2674b9ff-e463-426b-8a8c-ccb5a7f4c84e"
   }, 
   {
     "desc": "Represents a Revit document host element.", 
-    "iconsrc": null, 
-    "icontag": "H", 
-    "panel": "Revit", 
+    "iconsrc": "/static/images/GH/HostObject.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Host", 
     "uuid": "e3462915-3c4d-4864-9dd4-5a73f91c6543"
   }, 
   {
     "desc": "Represents a Revit document material.", 
-    "iconsrc": null, 
-    "icontag": "M", 
-    "panel": "Revit", 
+    "iconsrc": "/static/images/GH/Material.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Material", 
     "uuid": "b18ef2cc-2e67-4a5e-9241-9010fb7d27ce"
@@ -237,19 +201,10 @@
     "desc": "Represents a Revit parameter definition.", 
     "iconsrc": "/static/images/GH/ParameterKey.png", 
     "icontag": null, 
-    "panel": "Revit", 
+    "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "ParameterKey", 
     "uuid": "a550f532-8c68-460b-91f3-da0a5a0d42b5"
-  }, 
-  {
-    "desc": "Represents a Revit parameter value on an element.", 
-    "iconsrc": null, 
-    "icontag": "P", 
-    "panel": "Revit", 
-    "tab": "Params", 
-    "title": "ParameterValue", 
-    "uuid": "3e13d360-4b29-42c7-8f3e-2ab8f74b4ea8"
   }, 
   {
     "desc": "Provides a picker of a BuiltInParameterGroup", 
@@ -262,8 +217,8 @@
   }, 
   {
     "desc": "Provides a BuiltInParameter picker", 
-    "iconsrc": null, 
-    "icontag": "B", 
+    "iconsrc": "/static/images/GH/BuiltInParameterByName.png", 
+    "icontag": null, 
     "panel": "Input", 
     "tab": "Revit", 
     "title": "BuiltInParameter Picker", 
@@ -273,16 +228,16 @@
     "desc": "Represents a Revit document sketch plane.", 
     "iconsrc": "/static/images/GH/SketchPlane.png", 
     "icontag": null, 
-    "panel": "Revit", 
+    "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Sketch Plane", 
     "uuid": "93bf1f61-69ad-433f-a202-352c14e4ced8"
   }, 
   {
     "desc": "Represents a Revit view.", 
-    "iconsrc": null, 
-    "icontag": "V", 
-    "panel": "Revit", 
+    "iconsrc": "/static/images/GH/View.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "View", 
     "uuid": "2dc4b866-54db-4ce6-94c0-c51b33d35b49"
@@ -405,24 +360,6 @@
     "uuid": "9c2d116d-516c-4825-bb6b-67111b9100b1"
   }, 
   {
-    "desc": "Represents a Revit CurtainGridLine element.", 
-    "iconsrc": null, 
-    "icontag": "C", 
-    "panel": "Revit", 
-    "tab": "Params", 
-    "title": "CurtainGridLine", 
-    "uuid": "a2dd571e-729c-4f69-bd34-2769583d329b"
-  }, 
-  {
-    "desc": "Represents a Revit Spatial element.", 
-    "iconsrc": null, 
-    "icontag": "S", 
-    "panel": "Revit", 
-    "tab": "Params", 
-    "title": "SpatialElement", 
-    "uuid": "8774acf3-7b77-474f-b12b-03d4cbbc3c15"
-  }, 
-  {
     "desc": "Picker for curtain mullion position options", 
     "iconsrc": null, 
     "icontag": "C", 
@@ -439,24 +376,6 @@
     "tab": "Revit", 
     "title": "Curtain Mullion System Family", 
     "uuid": "4bbe14f2-f46b-4d2e-9e44-51e20aa32e59"
-  }, 
-  {
-    "desc": "Represents a Revit CurtainGridMullion element.", 
-    "iconsrc": null, 
-    "icontag": "C", 
-    "panel": "Revit", 
-    "tab": "Params", 
-    "title": "CurtainGridMullion", 
-    "uuid": "6d845cbd-1962-4912-80c1-f47fe99ad54a"
-  }, 
-  {
-    "desc": "", 
-    "iconsrc": null, 
-    "icontag": "C", 
-    "panel": "Category", 
-    "tab": "Revit", 
-    "title": "Category GraphicsStyle", 
-    "uuid": "46139967-74fc-4820-ba20-b1dc7f30abde"
   }, 
   {
     "desc": "Query category identity information", 
@@ -558,6 +477,15 @@
     "uuid": "97e9c6bb-8442-4f77-bca1-6be8aafbdc96"
   }, 
   {
+    "desc": "Gets Revit documents that are linked into given document", 
+    "iconsrc": null, 
+    "icontag": "D", 
+    "panel": "Document", 
+    "tab": "Revit", 
+    "title": "Document Links", 
+    "uuid": "ebccfdd8-9f3b-44f4-a209-72d06c8082a5"
+  }, 
+  {
     "desc": "Get document materials list", 
     "iconsrc": null, 
     "icontag": "D", 
@@ -621,6 +549,15 @@
     "uuid": "df691659-b75b-4455-af5f-8a5de485fa05"
   }, 
   {
+    "desc": "Get document view types list", 
+    "iconsrc": null, 
+    "icontag": "D", 
+    "panel": "Document", 
+    "tab": "Revit", 
+    "title": "Document ViewTypes", 
+    "uuid": "51e306bd-4736-4b7d-b2ff-b23e0717eebb"
+  }, 
+  {
     "desc": "Get all document walls", 
     "iconsrc": null, 
     "icontag": "D", 
@@ -637,15 +574,6 @@
     "tab": "Revit", 
     "title": "Document WallTypes", 
     "uuid": "e37bb2db-e096-45a1-9771-94ce7dbccdb8"
-  }, 
-  {
-    "desc": "Get Revit documents that are linked into given document", 
-    "iconsrc": null, 
-    "icontag": "D", 
-    "panel": "Document", 
-    "tab": "Revit", 
-    "title": "Document Links", 
-    "uuid": "ebccfdd8-9f3b-44f4-a209-72d06c8082a5"
   }, 
   {
     "desc": "Filter used to exclude a set of elements", 
@@ -936,15 +864,6 @@
     "uuid": "bc64525a-10b6-46db-a134-cf803738b1a0"
   }, 
   {
-    "desc": "Analyze given Stacked Wall element", 
-    "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Analyze", 
-    "tab": "Revit", 
-    "title": "Analyze Stacked Wall", 
-    "uuid": "df10b918-a30f-4609-ae77-14314e6cdbf1"
-  }, 
-  {
     "desc": "Analyze given Curtain Wall Type", 
     "iconsrc": null, 
     "icontag": "A", 
@@ -982,8 +901,8 @@
   }, 
   {
     "desc": "Given a collection of Points, it adds an AdaptiveComponent element to the active Revit document", 
-    "iconsrc": null, 
-    "icontag": "A", 
+    "iconsrc": "/static/images/GH/AdaptiveComponentByPoints.png", 
+    "icontag": null, 
     "panel": "Build", 
     "tab": "Revit", 
     "title": "Add AdaptiveComponent", 
@@ -991,8 +910,8 @@
   }, 
   {
     "desc": "Given its Axis, it adds a Beam element to the active Revit document", 
-    "iconsrc": null, 
-    "icontag": "A", 
+    "iconsrc": "/static/images/GH/BeamByCurve.png", 
+    "icontag": null, 
     "panel": "Build", 
     "tab": "Revit", 
     "title": "Add Beam", 
@@ -1000,8 +919,8 @@
   }, 
   {
     "desc": "Given a set of contour Curves, it adds a BuildingPad element to the active Revit document", 
-    "iconsrc": null, 
-    "icontag": "A", 
+    "iconsrc": "/static/images/GH/BuildingPadByOutline.png", 
+    "icontag": null, 
     "panel": "Site", 
     "tab": "Revit", 
     "title": "Add BuildingPad", 
@@ -1027,8 +946,8 @@
   }, 
   {
     "desc": "Deletes elements from Revit document", 
-    "iconsrc": null, 
-    "icontag": "D", 
+    "iconsrc": "/static/images/GH/ElementDelete.png", 
+    "icontag": null, 
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Delete Element", 
@@ -1108,8 +1027,8 @@
   }, 
   {
     "desc": "Given its Axis, it adds a structural Column to the active Revit document", 
-    "iconsrc": null, 
-    "icontag": "A", 
+    "iconsrc": "/static/images/GH/ColumnByCurve.png", 
+    "icontag": null, 
     "panel": "Build", 
     "tab": "Revit", 
     "title": "Add Column", 
@@ -1117,8 +1036,8 @@
   }, 
   {
     "desc": "Given a Brep, it adds a Brep shape to the active Revit document", 
-    "iconsrc": null, 
-    "icontag": "A", 
+    "iconsrc": "/static/images/GH/DirectShapeByBrep.png", 
+    "icontag": null, 
     "panel": "DirectShape", 
     "tab": "Revit", 
     "title": "Add Brep DirectShape", 
@@ -1126,8 +1045,8 @@
   }, 
   {
     "desc": "Given a Curve, it adds a Curve shape to the active Revit document", 
-    "iconsrc": null, 
-    "icontag": "A", 
+    "iconsrc": "/static/images/GH/DirectShapeByCurve.png", 
+    "icontag": null, 
     "panel": "DirectShape", 
     "tab": "Revit", 
     "title": "Add Curve DirectShape", 
@@ -1135,8 +1054,8 @@
   }, 
   {
     "desc": "Given its Geometry, it adds a DirectShape element to the active Revit document", 
-    "iconsrc": null, 
-    "icontag": "A", 
+    "iconsrc": "/static/images/GH/DirectShapeByGeometry.png", 
+    "icontag": null, 
     "panel": "DirectShape", 
     "tab": "Revit", 
     "title": "Add Geometry DirectShape", 
@@ -1153,8 +1072,8 @@
   }, 
   {
     "desc": "Given its location, it reconstructs a DirectShape into the active Revit document", 
-    "iconsrc": null, 
-    "icontag": "A", 
+    "iconsrc": "/static/images/GH/DirectShapeByLocation.png", 
+    "icontag": null, 
     "panel": "DirectShape", 
     "tab": "Revit", 
     "title": "Add DirectShape", 
@@ -1162,8 +1081,8 @@
   }, 
   {
     "desc": "Given a Mesh, it adds a Mesh shape to the active Revit document", 
-    "iconsrc": null, 
-    "icontag": "A", 
+    "iconsrc": "/static/images/GH/DirectShapeByMesh.png", 
+    "icontag": null, 
     "panel": "DirectShape", 
     "tab": "Revit", 
     "title": "Add Mesh DirectShape", 
@@ -1171,8 +1090,8 @@
   }, 
   {
     "desc": "Given a Point, it adds a Point shape to the active Revit document", 
-    "iconsrc": null, 
-    "icontag": "A", 
+    "iconsrc": "/static/images/GH/DirectShapeByPoint.png", 
+    "icontag": null, 
     "panel": "DirectShape", 
     "tab": "Revit", 
     "title": "Add Point DirectShape", 
@@ -1198,8 +1117,8 @@
   }, 
   {
     "desc": "Gets the parameter value of a specified Revit Element", 
-    "iconsrc": null, 
-    "icontag": "G", 
+    "iconsrc": "/static/images/GH/ElementParameterGet.png", 
+    "icontag": null, 
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Get Element Parameter", 
@@ -1225,8 +1144,8 @@
   }, 
   {
     "desc": "Given its location, it reconstructs a FamilyInstance element into the active Revit document", 
-    "iconsrc": null, 
-    "icontag": "A", 
+    "iconsrc": "/static/images/GH/FamilyInstanceByLocation.png", 
+    "icontag": null, 
     "panel": "Build", 
     "tab": "Revit", 
     "title": "Add FamilyInstance", 
@@ -1243,8 +1162,8 @@
   }, 
   {
     "desc": "Given its outline curve, it adds a Floor element to the active Revit document", 
-    "iconsrc": null, 
-    "icontag": "A", 
+    "iconsrc": "/static/images/GH/FloorByOutline.png", 
+    "icontag": null, 
     "panel": "Build", 
     "tab": "Revit", 
     "title": "Add Floor", 
@@ -1252,8 +1171,8 @@
   }, 
   {
     "desc": "Given its Axis, it adds a Grid element to the active Revit document", 
-    "iconsrc": null, 
-    "icontag": "A", 
+    "iconsrc": "/static/images/GH/GridByCurve.png", 
+    "icontag": null, 
     "panel": "Datum", 
     "tab": "Revit", 
     "title": "Add Grid", 
@@ -1261,8 +1180,8 @@
   }, 
   {
     "desc": "Given its Elevation, it adds a Level to the active Revit document", 
-    "iconsrc": null, 
-    "icontag": "A", 
+    "iconsrc": "/static/images/GH/LevelByElevation.png", 
+    "icontag": null, 
     "panel": "Datum", 
     "tab": "Revit", 
     "title": "Add Level", 
@@ -1297,8 +1216,8 @@
   }, 
   {
     "desc": "Given a Curve, it adds a Curve element to the active Revit document", 
-    "iconsrc": null, 
-    "icontag": "A", 
+    "iconsrc": "/static/images/GH/ModelLineByCurve.png", 
+    "icontag": null, 
     "panel": "Model", 
     "tab": "Revit", 
     "title": "Add ModelLine", 
@@ -1324,8 +1243,8 @@
   }, 
   {
     "desc": "Given its outline curve, it adds a Roof element to the active Revit document", 
-    "iconsrc": null, 
-    "icontag": "A", 
+    "iconsrc": "/static/images/GH/RoofByOutline.png", 
+    "icontag": null, 
     "panel": "Build", 
     "tab": "Revit", 
     "title": "Add Roof", 
@@ -1333,8 +1252,8 @@
   }, 
   {
     "desc": "Given a Plane, it adds a SketchPlane element to the active Revit document", 
-    "iconsrc": null, 
-    "icontag": "A", 
+    "iconsrc": "/static/images/GH/SketchPlaneByPlane.png", 
+    "icontag": null, 
     "panel": "Model", 
     "tab": "Revit", 
     "title": "Add SketchPlane", 
@@ -1342,8 +1261,8 @@
   }, 
   {
     "desc": "Given a set of Points, it adds a Topography surface to the active Revit document", 
-    "iconsrc": null, 
-    "icontag": "A", 
+    "iconsrc": "/static/images/GH/TopographyByPoints.png", 
+    "icontag": null, 
     "panel": "Site", 
     "tab": "Revit", 
     "title": "Add Topography (Points)", 
@@ -1386,9 +1305,18 @@
     "uuid": "f7b775c9-05e0-40f7-85e9-5cc2ef79731e"
   }, 
   {
-    "desc": "Given a curve, it adds a Wall element to the active Revit document", 
+    "desc": "Analyze given Stacked Wall element", 
     "iconsrc": null, 
     "icontag": "A", 
+    "panel": "Analyze", 
+    "tab": "Revit", 
+    "title": "Analyze Stacked Wall", 
+    "uuid": "df10b918-a30f-4609-ae77-14314e6cdbf1"
+  }, 
+  {
+    "desc": "Given a curve, it adds a Wall element to the active Revit document", 
+    "iconsrc": "/static/images/GH/WallByCurve.png", 
+    "icontag": null, 
     "panel": "Build", 
     "tab": "Revit", 
     "title": "Add Wall", 
@@ -1486,8 +1414,8 @@
   }, 
   {
     "desc": "Given a list of curves, it adds a Form element to the active Revit document", 
-    "iconsrc": null, 
-    "icontag": "A", 
+    "iconsrc": "/static/images/GH/FormByCurves.png", 
+    "icontag": null, 
     "panel": "Family Element", 
     "tab": "Revit", 
     "title": "Add LoftForm", 
@@ -1495,8 +1423,8 @@
   }, 
   {
     "desc": "Given its Geometry, it adds a Form element to the active Revit document", 
-    "iconsrc": null, 
-    "icontag": "A", 
+    "iconsrc": "/static/images/GH/FormByGeometry.png", 
+    "icontag": null, 
     "panel": "Family Element", 
     "tab": "Revit", 
     "title": "Add Form", 
@@ -1594,8 +1522,8 @@
   }, 
   {
     "desc": "Decompose a parameter definition", 
-    "iconsrc": null, 
-    "icontag": "P", 
+    "iconsrc": "/static/images/GH/ParameterKeyDecompose.png", 
+    "icontag": null, 
     "panel": "Parameter", 
     "tab": "Revit", 
     "title": "ParameterKey Identity", 
@@ -1603,8 +1531,8 @@
   }, 
   {
     "desc": "Decompose a parameter value", 
-    "iconsrc": null, 
-    "icontag": "D", 
+    "iconsrc": "/static/images/GH/ParameterValueDecompose.png", 
+    "icontag": null, 
     "panel": "Parameter", 
     "tab": "Revit", 
     "title": "Deconstruct ParameterValue", 
