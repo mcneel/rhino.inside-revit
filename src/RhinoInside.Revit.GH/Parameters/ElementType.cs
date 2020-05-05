@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
     public override Guid ComponentGuid => new Guid("97DD546D-65C3-4D00-A609-3F5FBDA67142");
 
-    public ElementType() : base("Element Type", "Element Type", "Represents a Revit document element type.", "Params", "Revit") { }
+    public ElementType() : base("Element Type", "Element Type", "Represents a Revit document element type.", "Params", "Revit Primitives") { }
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
