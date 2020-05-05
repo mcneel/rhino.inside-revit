@@ -437,6 +437,15 @@
     <None Include="Resources\Parameters\SketchPlane.png" />
     <None Include="Resources\Parameters\TagCategoriesPicker.png" />
     <None Include="Resources\Parameters\Vertex.png" />
+    <None Include="Resources\Parameters\GraphicalElement.png" />
+    <None Include="Resources\Parameters\HostObject.png" />
+    <None Include="Resources\Parameters\Group.png" />
+    <None Include="Resources\Parameters\Element.png" />
+    <None Include="Resources\Parameters\Grid.png" />
+    <None Include="Resources\Parameters\Level.png" />
+    <None Include="Resources\Parameters\Material.png" />
+    <None Include="Resources\Parameters\Family.png" />
+    <None Include="Resources\Parameters\View.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
