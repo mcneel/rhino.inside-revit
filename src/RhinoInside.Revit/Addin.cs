@@ -228,6 +228,7 @@ namespace RhinoInside.Revit
         ErrorReport.SendEmail
         (
           app,
+          $"Rhino.Inside Revit failed - {e.GetType().FullName}",
           false,
           new string[]
           {
@@ -327,6 +328,13 @@ namespace RhinoInside.Revit.UI
   class CommandRhinoInside : Command
   {
     static PushButton Button;
+
+    new class Availability : External.UI.CommandAvailability
+    {
+      public override bool IsCommandAvailable(UIApplication app, CategorySet selectedCategories) =>
+        Addin.CurrentStatus >= Addin.Status.Unavailable;
+    }
+
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
       const string CommandName = "Rhino";
@@ -437,8 +445,15 @@ namespace RhinoInside.Revit.UI
           break;
         case Result.Cancelled:
           Button.Enabled = false;
-          Button.ToolTip = "Rhino.Inside has expired.";
-          Button.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://www.rhino3d.com/download/rhino.inside-revit/7/wip"));
+
+          if (Addin.CurrentStatus == Addin.Status.Unavailable)
+            Button.ToolTip = "Rhino.Inside failed to found a valid copy of Rhino 7 WIP installed.";
+          else if (Addin.CurrentStatus == Addin.Status.Obsolete)
+            Button.ToolTip = "Rhino.Inside has expired.";
+          else
+            Button.ToolTip = "Rhino.Inside load was cancelled.";
+
+          Button.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://www.rhino3d.com/inside/revit"));
           break;
         case Result.Failed:
           Button.Enabled = false;
@@ -512,6 +527,7 @@ namespace RhinoInside.Revit.UI
               ErrorReport.SendEmail
               (
                 data.Application,
+                "Rhino.Inside Revit failed to load",
                 !taskDialog.WasVerificationChecked(),
                 new string[]
                 {
