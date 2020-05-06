@@ -343,3 +343,4 @@ desktop.ini
 
 # discard debug files
 script/.debug
+script/.packages
