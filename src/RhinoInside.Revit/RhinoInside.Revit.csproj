@@ -193,6 +193,7 @@
     <Compile Include="Convert\Display\PreviewConverter.cs" />
     <Compile Include="Convert\Geometry\ExtrusionEncoder.cs" />
     <Compile Include="Convert\Geometry\GeometryEncoder.cs" />
+    <Compile Include="Convert\Geometry\MeshDecoder.cs" />
     <Compile Include="Convert\Geometry\Raw\RawDecoder.cs" />
     <Compile Include="Convert\Geometry\MeshEncoder.cs" />
     <Compile Include="Convert\Geometry\NurbsSplineEncoder.cs" />

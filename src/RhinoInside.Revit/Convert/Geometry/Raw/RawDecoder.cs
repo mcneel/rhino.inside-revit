@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using Rhino.Geometry;
+using RhinoInside.Revit.Convert.System.Collections.Generic;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.Geometry.Extensions;
 using DB = Autodesk.Revit.DB;
@@ -730,6 +733,9 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
     public static Brep ToRhino(DB.Face face)
     {
+      if (face is null)
+        return null;
+
       var brep = new Brep();
 
       // Set surface
@@ -769,45 +775,50 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
     public static Brep ToRhino(DB.Solid solid)
     {
-      if (solid.Faces.IsEmpty)
+      if (solid is null)
         return null;
 
       var brep = new Brep();
-      var brepEdges = new Dictionary<DB.Edge, BrepEdge>();
 
-      foreach (var face in solid.Faces.Cast<DB.Face>())
+      if (!solid.Faces.IsEmpty)
       {
-        // Set surface
-        var si = AddSurface(brep, face, out var shells, brepEdges);
-        if (si < 0)
-          continue;
+        var brepEdges = new Dictionary<DB.Edge, BrepEdge>();
 
-        // Set edges & trims
-        TrimSurface(brep, si, !face.MatchesSurfaceOrientation(), shells);
-      }
+        foreach (var face in solid.Faces.Cast<DB.Face>())
+        {
+          // Set surface
+          var si = AddSurface(brep, face, out var shells, brepEdges);
+          if (si < 0)
+            continue;
 
-      // Set vertices
-      brep.SetVertices();
+          // Set edges & trims
+          TrimSurface(brep, si, !face.MatchesSurfaceOrientation(), shells);
+        }
 
-      // Set flags
-      brep.SetTolerancesBoxesAndFlags
-      (
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true
-      );
+        // Set vertices
+        brep.SetVertices();
 
-      if (!brep.IsValid)
-      {
+        // Set flags
+        brep.SetTolerancesBoxesAndFlags
+        (
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        );
+
+        if (!brep.IsValid)
+        {
 #if DEBUG
-        brep.IsValidWithLog(out var log);
+          brep.IsValidWithLog(out var log);
+          Debug.WriteLine($"{MethodInfo.GetCurrentMethod().DeclaringType.FullName}.{MethodInfo.GetCurrentMethod().Name}()\n{log}");
 #endif
-        brep.Repair(Revit.VertexTolerance);
+          brep.Repair(Revit.VertexTolerance);
+        }
       }
 
       return brep;
@@ -817,25 +828,27 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
     #region Mesh
     public static Mesh ToRhino(DB.Mesh mesh)
     {
-      if (mesh.NumTriangles < 1)
+      if (mesh is null)
         return null;
 
       var result = new Mesh();
 
-      result.Vertices.AddVertices(mesh.Vertices.Select(x => ToRhino(x)));
+      result.Vertices.Capacity = mesh.Vertices.Count;
+      result.Vertices.AddVertices(mesh.Vertices.Convert(ToRhino));
 
-      for (int t = 0; t < mesh.NumTriangles; ++t)
+      var faceCount = mesh.NumTriangles;
+      result.Faces.Capacity = faceCount;
+
+      for (int t = 0; t < faceCount; ++t)
       {
         var triangle = mesh.get_Triangle(t);
 
-        var meshFace = new MeshFace
+        result.Faces.AddFace
         (
           (int) triangle.get_Index(0),
           (int) triangle.get_Index(1),
           (int) triangle.get_Index(2)
         );
-
-        result.Faces.AddFace(meshFace);
       }
 
       return result;

@@ -221,6 +221,7 @@
     <Compile Include="Components\ElementType\Instances.cs" />
     <Compile Include="Components\ElementType\Similar.cs" />
     <Compile Include="Components\ElementType\WallType\AnalyseBasicWallType.cs" />
+    <Compile Include="Components\ElementType\WallType\ByName.cs" />
     <Compile Include="Components\ElementType\WallType\CompoundStructure_Destruct.cs" />
     <Compile Include="Components\ElementType\WallType\CompoundStructureLayer_Destruct.cs" />
     <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainWallType.cs" />

@@ -66,7 +66,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     { var rhino = RawDecoder.ToRhino(value); UnitConverter.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
 
     public static Mesh ToMesh(this DB.Mesh value)
-    { var rhino = RawDecoder.ToRhino(value); UnitConverter.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
+    { var rhino = MeshDecoder.ToRhino(value); UnitConverter.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
     #endregion
 
     /// <summary>

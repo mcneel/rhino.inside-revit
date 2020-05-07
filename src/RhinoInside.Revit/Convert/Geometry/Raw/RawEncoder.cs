@@ -278,7 +278,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
               bool trimReversed = face.OrientationIsReversed ?
                                   !trim.IsReversed() :
-                                    trim.IsReversed();
+                                   trim.IsReversed();
 
               if (trimReversed)
               {
@@ -310,6 +310,9 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
     #region Mesh
     public static DB.Mesh ToHost(Mesh mesh)
     {
+      if (mesh is null)
+        return null;
+
       using
       (
         var builder = new DB.TessellatedShapeBuilder()
@@ -320,12 +323,12 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
         }
       )
       {
+        var isSolid = mesh.SolidOrientation() != 0;
+        builder.OpenConnectedFaceSet(isSolid);
+
         var vertices = mesh.Vertices.ToPoint3dArray();
         var triangle = new DB.XYZ[3];
         var quad = new DB.XYZ[4];
-
-        var isSolid = mesh.SolidOrientation() != 0;
-        builder.OpenConnectedFaceSet(isSolid);
 
         foreach (var face in mesh.Faces)
         {
