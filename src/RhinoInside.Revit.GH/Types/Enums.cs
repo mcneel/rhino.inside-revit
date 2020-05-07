@@ -252,8 +252,22 @@ namespace RhinoInside.Revit.GH.Types
   {
     public WallSystemFamily() : base(DB.WallKind.Unknown) { }
     public WallSystemFamily(DB.WallKind value) : base(value) { }
-  }
 
+    public override string Text
+    {
+      get
+      {
+        switch (Value)
+        {
+          case DB.WallKind.Basic:   return "Basic Wall";
+          case DB.WallKind.Curtain: return "Curtain Wall";
+          case DB.WallKind.Stacked: return "Stacked Wall";
+        }
+
+        return base.Text;
+      }
+    }
+  }
 
   [
     ComponentGuid("F069304B-4066-4D23-9542-7AC54CED3C92"),
