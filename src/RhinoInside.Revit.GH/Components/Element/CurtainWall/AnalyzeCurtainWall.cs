@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
       manager.AddParameter(
-        param: new Parameters.Element(),
+        param: new Parameters.Wall(),
         name: "Curtain Wall",
         nickname: "CW",
         description: "Curtain Wall element",
@@ -42,7 +42,7 @@ namespace RhinoInside.Revit.GH.Components
         access: GH_ParamAccess.item
         );
       manager.AddParameter(
-        param: new Parameters.Element(),
+        param: new Parameters.Wall(),
         name: "Host Wall",
         nickname: "HW",
         description: "Host Wall instance is the input Curtain Wall is embedded",

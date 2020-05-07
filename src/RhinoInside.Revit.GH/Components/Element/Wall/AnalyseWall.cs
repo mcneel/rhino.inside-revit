@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
       manager.AddParameter(
-        param: new Parameters.Element(),
+        param: new Parameters.Wall(),
         name: "Wall",
         nickname: "W",
         description: "Wall element",
@@ -52,7 +52,7 @@ namespace RhinoInside.Revit.GH.Components
         );
 
       manager.AddParameter(
-        param: new Parameters.Element(),
+        param: new Parameters.Wall(),
         name: "Parent Stacked Wall",
         nickname: "PSW",
         description: "Parent Stacked Wall instance if given wall is a member of a Stacked Wall",

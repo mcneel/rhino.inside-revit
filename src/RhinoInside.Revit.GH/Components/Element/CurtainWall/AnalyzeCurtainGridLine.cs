@@ -70,7 +70,7 @@ namespace RhinoInside.Revit.GH.Components
         access: GH_ParamAccess.item
         );
       manager.AddParameter(
-        param: new Parameters.Element(),
+        param: new Parameters.GraphicalElement(),
         name: "Attached Panels",
         nickname: "ACGP",
         description: "All curtain grid panels attached to the curtain grid line",

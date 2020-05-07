@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
       manager.AddParameter(
-        param: new Parameters.Element(),
+        param: new Parameters.Wall(),
         name: "Wall",
         nickname: "W",
         description: "Wall element",

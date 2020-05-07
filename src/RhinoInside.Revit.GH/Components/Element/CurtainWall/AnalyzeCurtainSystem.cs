@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
       manager.AddParameter(
-        param: new Parameters.Element(),
+        param: new Parameters.CurtainSystem(),
         name: "Curtain System",
         nickname: "CS",
         description: "Curtain System element",

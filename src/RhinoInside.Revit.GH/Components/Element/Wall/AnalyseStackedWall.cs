@@ -25,7 +25,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
       manager.AddParameter(
-        param: new Parameters.Element(),
+        param: new Parameters.Wall(),
         name: "Stacked Wall",
         nickname: "SW",
         description: "Stacked Wall element",
@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
       manager.AddParameter(
-        param: new Parameters.Element(),
+        param: new Parameters.Wall(),
         name: "Basic Walls",
         nickname: "BW",
         description: "Basic Wall instances that are part of given Stacked Wall",

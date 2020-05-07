@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
       manager.AddParameter(
-        param: new Parameters.Element(),
+        param: new Parameters.GraphicalElement(),
         name: "Curtain Grid Panel",
         nickname: "CGP",
         description: "Curtain Grid Panel",
@@ -35,7 +35,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
       manager.AddParameter(
-        param: new Parameters.Element(),
+        param: new Parameters.HostObject(),
         name: "Host Panel",
         nickname: "HP",
         description: "Finds the host panel (i.e., wall) associated with this panel",

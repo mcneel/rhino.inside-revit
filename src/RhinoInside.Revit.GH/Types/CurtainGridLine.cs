@@ -4,7 +4,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public class CurtainGridLine : Element
+  public class CurtainGridLine : HostObject
   {
     public override string TypeDescription => "Represents a Revit Curtain Grid Line Element";
     protected override Type ScriptVariableType => typeof(DB.CurtainGridLine);
