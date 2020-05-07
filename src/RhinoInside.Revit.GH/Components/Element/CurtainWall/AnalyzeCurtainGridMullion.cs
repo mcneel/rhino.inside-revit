@@ -24,9 +24,9 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
       manager.AddParameter(
-        param: new Parameters.CurtainGridMullion(),
-        name: "Curtain Grid Mullion",
-        nickname: "CGM",
+        param: new Parameters.Mullion(),
+        name: "Mullion",
+        nickname: "M",
         description: "Curtain Grid Mullion",
         access: GH_ParamAccess.item
         );
@@ -36,32 +36,32 @@ namespace RhinoInside.Revit.GH.Components
     {
       manager.AddParameter(
         param: new Parameters.ElementType(),
-        name: "Curtain Grid Mullion Type",
+        name: "Type",
         nickname: "CGMT",
         description: "Curtain Grid Mullion Type",
         access: GH_ParamAccess.item
         );
       manager.AddCurveParameter(
-        name: "Curtain Grid Mullion Axis Curve",
+        name: "Axis Curve",
         nickname: "C",
         description: "Axis curve of the given curtain grid mullion instance",
         access: GH_ParamAccess.item
         );
       manager.AddPointParameter(
-        name: "Curtain Grid Mullion Base Point",
-        nickname: "MBP",
+        name: "Base Point",
+        nickname: "BP",
         description: "Base point of given given curtain grid mullion instance",
         access: GH_ParamAccess.item
         );
       manager.AddBooleanParameter(
-        name: "Locked?",
-        nickname: "L?",
+        name: "Locked",
+        nickname: "LD",
         description: "Whether curtain grid mullion line is locked",
         access: GH_ParamAccess.item
         );
       manager.AddBooleanParameter(
-        name: "Is Lockable?",
-        nickname: "IL?",
+        name: "Lockable",
+        nickname: "L",
         description: "Whether curtain grid mullion line is lockable",
         access: GH_ParamAccess.item
         );
@@ -77,14 +77,14 @@ namespace RhinoInside.Revit.GH.Components
     {
       // get input
       DB.Mullion mullionInstance = default;
-      if (!DA.GetData("Curtain Grid Mullion", ref mullionInstance))
+      if (!DA.GetData("Mullion", ref mullionInstance))
         return;
 
-      DA.SetData("Curtain Grid Mullion Type", Types.ElementType.FromElement(mullionInstance.MullionType));
-      DA.SetData("Curtain Grid Mullion Axis Curve", mullionInstance.LocationCurve?.ToCurve());
-      DA.SetData("Curtain Grid Mullion Base Point", ((DB.LocationPoint) mullionInstance.Location).Point.ToPoint3d());
-      DA.SetData("Locked?", mullionInstance.Lock);
-      DA.SetData("Is Lockable?", mullionInstance.Lockable);
+      DA.SetData("Type", Types.ElementType.FromElement(mullionInstance.MullionType));
+      DA.SetData("Axis Curve", mullionInstance.LocationCurve?.ToCurve());
+      DA.SetData("Base Point", ((DB.LocationPoint) mullionInstance.Location).Point.ToPoint3d());
+      DA.SetData("Locked", mullionInstance.Lock);
+      DA.SetData("Lockable", mullionInstance.Lockable);
       // Length can be acquired from axis curve
       // Conversion to GH_Curve results in a zero length curve
       //PipeHostParameter(DA, mullionInstance, DB.BuiltInParameter.CURVE_ELEM_LENGTH, "Mullion Length");

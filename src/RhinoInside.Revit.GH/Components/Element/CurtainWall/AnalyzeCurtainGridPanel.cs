@@ -24,9 +24,9 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
       manager.AddParameter(
-        param: new Parameters.GraphicalElement(),
-        name: "Curtain Grid Panel",
-        nickname: "CGP",
+        param: new Parameters.FamilyInstance(),
+        name: "Panel",
+        nickname: "P",
         description: "Curtain Grid Panel",
         access: GH_ParamAccess.item
         );
@@ -35,28 +35,28 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
       manager.AddParameter(
+        param: new Parameters.ElementType(),
+        name: "Type",
+        nickname: "T",
+        description: "Panel Symbol. This can be a DB.PanelType of a DB.FamilySymbol depending on the type of panel hosted on the curtain wall.",
+        access: GH_ParamAccess.item
+        );
+      manager.AddParameter(
         param: new Parameters.HostObject(),
         name: "Host Panel",
         nickname: "HP",
         description: "Finds the host panel (i.e., wall) associated with this panel",
         access: GH_ParamAccess.item
         );
-      manager.AddParameter(
-        param: new Parameters.ElementType(),
-        name: "Curtain Grid Panel Symbol",
-        nickname: "PS",
-        description: "Panel Symbol. This can be a DB.PanelType of a DB.FamilySymbol depending on the type of panel hosted on the curtain wall.",
-        access: GH_ParamAccess.item
-        );
       manager.AddPointParameter(
-        name: "Curtain Grid Panel Base Point",
-        nickname: "PBP",
+        name: "Base Point",
+        nickname: "BP",
         description: "Base point/anchor of the curtain panel",
         access: GH_ParamAccess.item
         );
       manager.AddVectorParameter(
-        name: "Curtain Grid Panel Orientation Vector",
-        nickname: "POV",
+        name: "Orientation",
+        nickname: "O",
         description: "Orientation vector of the curtain panel",
         access: GH_ParamAccess.item
         );
@@ -68,21 +68,21 @@ namespace RhinoInside.Revit.GH.Components
       //  access: GH_ParamAccess.item
       //  );
       manager.AddBooleanParameter(
-        name: "Is Lockable?",
-        nickname: "IL?",
+        name: "Lockable",
+        nickname: "L",
         description: "Whether curtain grid panel is lockable",
         access: GH_ParamAccess.item
         );
 
       // panel properties
       manager.AddNumberParameter(
-        name: "Panel Width",
+        name: "Width",
         nickname: "W",
         description: "Panel width",
         access: GH_ParamAccess.item
         );
       manager.AddNumberParameter(
-        name: "Panel Height",
+        name: "Height",
         nickname: "H",
         description: "Panel height",
         access: GH_ParamAccess.item
@@ -93,26 +93,31 @@ namespace RhinoInside.Revit.GH.Components
     {
       // get input
       DB.FamilyInstance panelInstance = default;
-      if (!DA.GetData("Curtain Grid Panel", ref panelInstance))
+      if (!DA.GetData("Panel", ref panelInstance))
         return;
 
       switch (panelInstance)
       {
         case DB.Panel panel:
-          DA.SetData("Host Panel", Types.Element.FromElement(panel.Document.GetElement(panel.FindHostPanel())));
           // sets either DB.PanelType or DB.FamilySymbol
           // Panels don't always have DB.PanelType assigned
-          DA.SetData("Curtain Grid Panel Symbol", Types.ElementType.FromElement(panel.PanelType ?? panel.Symbol));
-          DA.SetData("Curtain Grid Panel Base Point", panel.Transform.Origin.ToPoint3d());
-          DA.SetData("Curtain Grid Panel Orientation Vector", panel.FacingOrientation.ToVector3d());
+          DA.SetData("Type", Types.ElementType.FromElement(panel.PanelType ?? panel.Symbol));
+          DA.SetData("Host Panel", Types.Element.FromElement(panel.Document.GetElement(panel.FindHostPanel())));
+          DA.SetData("Base Point", panel.Transform.Origin.ToPoint3d());
+          DA.SetData("Orientation", panel.FacingOrientation.ToVector3d());
 
-          DA.SetData("Is Lockable?", panel.Lockable);
-          // look at that parameter naming. just great...
-          PipeHostParameter(DA, panel, DB.BuiltInParameter.FURNITURE_WIDTH, "Panel Width");
-          PipeHostParameter(DA, panel, DB.BuiltInParameter.WINDOW_HEIGHT, "Panel Height");
+          DA.SetData("Lockable", panel.Lockable);
+          PipeHostParameter(DA, panel, DB.BuiltInParameter.GENERIC_WIDTH, "Width");
+          PipeHostParameter(DA, panel, DB.BuiltInParameter.GENERIC_HEIGHT, "Height");
           break;
         case DB.FamilyInstance famInst:
-          DA.SetData("Curtain Grid Panel Symbol", Types.ElementType.FromElement(famInst.Symbol));
+          DA.SetData("Type", Types.ElementType.FromElement(famInst.Symbol));
+          DA.SetData("Base Point", famInst.GetTransform().Origin.ToPoint3d());
+          DA.SetData("Orientation", famInst.FacingOrientation.ToVector3d());
+
+          DA.SetData("Lockable", false);
+          PipeHostParameter(DA, famInst, DB.BuiltInParameter.GENERIC_WIDTH, "Width");
+          PipeHostParameter(DA, famInst, DB.BuiltInParameter.GENERIC_HEIGHT, "Height");
           break;
       }
     }
