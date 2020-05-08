@@ -11,6 +11,8 @@ namespace RhinoInside.Revit.GH.Types
       self.Document?.GetElement(self) as DB.ElementType;
 
     public ElementType() { }
+    protected ElementType(DB.Document doc, DB.ElementId id) : base(doc, id) { }
+
     public ElementType(DB.ElementType elementType) : base(elementType) { }
 
     public override string DisplayName
