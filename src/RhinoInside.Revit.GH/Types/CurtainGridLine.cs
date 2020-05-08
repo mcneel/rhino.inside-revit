@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Types
     public CurtainGridLine() { }
     public CurtainGridLine(DB.CurtainGridLine gridLine) : base(gridLine) { }
 
-    public override Rhino.Geometry.Curve Axis
+    public override Rhino.Geometry.Curve Curve
     {
       get
       {

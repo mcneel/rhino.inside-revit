@@ -193,16 +193,6 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
 
-      if (typeof(Q).IsAssignableFrom(typeof(GH_Curve)))
-      {
-        var axis = Axis;
-        if (axis is null)
-          return false;
-
-        target = (Q) (object) new GH_Curve(axis);
-        return true;
-      }
-
       if (typeof(Q).IsAssignableFrom(typeof(GH_Plane)))
       {
         try
@@ -219,7 +209,7 @@ namespace RhinoInside.Revit.GH.Types
 
       if (typeof(Q).IsAssignableFrom(typeof(GH_Point)))
       {
-        var location = Location;
+        var location = Origin;
         if (!location.IsValid)
           return false;
 
@@ -254,6 +244,26 @@ namespace RhinoInside.Revit.GH.Types
           return false;
 
         target = (Q) (object) new GH_Box(box);
+        return true;
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Curve)))
+      {
+        var axis = Curve;
+        if (axis is null)
+          return false;
+
+        target = (Q) (object) new GH_Curve(axis);
+        return true;
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Surface)))
+      {
+        var surface = Surface;
+        if (surface is null)
+          return false;
+
+        target = (Q) (object) new GH_Surface(surface);
         return true;
       }
 
@@ -334,7 +344,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public virtual Rhino.Geometry.Point3d Location
+    public virtual Rhino.Geometry.Point3d Origin
     {
       get
       {
@@ -463,9 +473,9 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public virtual Rhino.Geometry.Plane Plane => new Rhino.Geometry.Plane(Location, XAxis, YAxis);
+    public virtual Rhino.Geometry.Plane Plane => new Rhino.Geometry.Plane(Origin, XAxis, YAxis);
 
-    public virtual Rhino.Geometry.Curve Axis
+    public virtual Rhino.Geometry.Curve Curve
     {
       get
       {
@@ -476,6 +486,8 @@ namespace RhinoInside.Revit.GH.Types
           null;
       }
     }
+
+    public virtual Rhino.Geometry.Brep Surface => null;
     #endregion
   }
 }

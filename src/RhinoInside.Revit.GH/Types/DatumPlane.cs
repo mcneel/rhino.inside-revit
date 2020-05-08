@@ -52,7 +52,7 @@ namespace RhinoInside.Revit.GH.Types
       return base.CastFrom(source);
     }
 
-    public override Rhino.Geometry.Point3d Location
+    public override Rhino.Geometry.Point3d Origin
     {
       get
       {
@@ -76,7 +76,7 @@ namespace RhinoInside.Revit.GH.Types
     public Grid() { }
     public Grid(DB.Grid grid) : base(grid) { }
 
-    public override Rhino.Geometry.Curve Axis
+    public override Rhino.Geometry.Curve Curve
     {
       get
       {

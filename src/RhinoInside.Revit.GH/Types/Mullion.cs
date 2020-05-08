@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Types
     public Mullion() { }
     public Mullion(DB.Mullion value) : base(value) { }
 
-    public override Rhino.Geometry.Curve Axis
+    public override Rhino.Geometry.Curve Curve
     {
       get
       {

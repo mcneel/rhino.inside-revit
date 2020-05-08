@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region Location
-    public override Rhino.Geometry.Point3d Location => Plane.Origin;
+    public override Rhino.Geometry.Point3d Origin => Plane.Origin;
     public override Rhino.Geometry.Vector3d XAxis => Plane.XAxis;
     public override Rhino.Geometry.Vector3d YAxis => Plane.YAxis;
     public override Rhino.Geometry.Vector3d ZAxis => Plane.ZAxis;
