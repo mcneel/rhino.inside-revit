@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
       manager.AddParameter(
-        param: new Parameters.CurtainMullionSystemFamily_ValueList(),
+        param: new Parameters.Param_Enum<Types.CurtainMullionSystemFamily>(),
         name: "Mullion System Family",
         nickname: "MSF",
         description: "Mullion System Family",
@@ -57,21 +57,20 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(
         param: new Parameters.ElementType(),
         name: "Profile",
-        nickname: "PF",
+        nickname: "PRF",
         description: "Mullion type profile",
         access: GH_ParamAccess.item
         );
       manager.AddParameter(
-        param: new Parameters.CurtainMullionPosition_ValueList(),
+        param: new Parameters.ElementType(),
         name: "Position",
         nickname: "POS",
         description: "Mullion type position",
         access: GH_ParamAccess.item
         );
-      manager.AddParameter(
-        param: new Parameters.CurtainMullionPosition_ValueList(),
-        name: "Corner Mullion?",
-        nickname: "CM?",
+      manager.AddBooleanParameter(
+        name: "Corner Mullion",
+        nickname: "CM",
         description: "Whether mullion type is a corner mullion",
         access: GH_ParamAccess.item
         );
@@ -166,13 +165,18 @@ namespace RhinoInside.Revit.GH.Components
           mullionSystemFamily = DBX.CurtainMullionSystemFamily.VCorner;
       }
 
-      DA.SetData("Mullion System Family", new Types.CurtainMullionSystemFamily(mullionSystemFamily));
+      DA.SetData("Mullion System Family", mullionSystemFamily);
 
       PipeHostParameter(DA, mullionType, DB.BuiltInParameter.MULLION_ANGLE, "Angle");
       PipeHostParameter(DA, mullionType, DB.BuiltInParameter.MULLION_OFFSET, "Offset");
-      PipeHostParameter(DA, mullionType, DB.BuiltInParameter.MULLION_PROFILE, "Profile");
-      PipeHostParameter<Types.CurtainMullionPosition>(DA, mullionType, DB.BuiltInParameter.MULLION_POSITION, "Position");
-      PipeHostParameter(DA, mullionType, DB.BuiltInParameter.MULLION_CORNER_TYPE, "Corner Mullion?");
+
+      var profile = new Types.MullionProfile(mullionType.Document, mullionType.get_Parameter(DB.BuiltInParameter.MULLION_PROFILE).AsElementId());
+      DA.SetData("Profile", profile);
+
+      var position = new Types.MullionPosition(mullionType.Document, mullionType.get_Parameter(DB.BuiltInParameter.MULLION_POSITION).AsElementId());
+      DA.SetData("Position", position);
+
+      PipeHostParameter(DA, mullionType, DB.BuiltInParameter.MULLION_CORNER_TYPE, "Corner Mullion");
 
       // output params are reused for various mullion types
       //

@@ -1,6 +1,7 @@
 using System;
 using RhinoInside.Revit.Convert.Geometry;
 using DB = Autodesk.Revit.DB;
+using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -48,10 +49,10 @@ namespace RhinoInside.Revit.GH.Types
         if (element is object)
           return $"{element.Category?.Name} : {element.FamilyName} : {element.Name}";
 
-        switch (Id.IntegerValue)
+        switch ((DBX.BuiltInMullionPositionId) Id.IntegerValue)
         {
-          case -3: return "Perpendicular To Face";
-          case -2: return "Parallel To Ground";
+          case DBX.BuiltInMullionPositionId.PerpendicularToFace: return "Perpendicular To Face";
+          case DBX.BuiltInMullionPositionId.ParallelToGround: return "Parallel To Ground";
         }
 
         return base.DisplayName;
@@ -77,10 +78,10 @@ namespace RhinoInside.Revit.GH.Types
         if (element is object)
           return $"{element.Category?.Name} : {element.FamilyName} : {element.Name}";
 
-        switch (Id.IntegerValue)
+        switch ((DBX.BuiltInMullionProfileId) Id.IntegerValue)
         {
-          case -3: return "Rectangular";
-          case -2: return "Circular";
+          case DBX.BuiltInMullionProfileId.Rectangular: return "Rectangular";
+          case DBX.BuiltInMullionProfileId.Circular: return "Circular";
         }
 
         return base.DisplayName;

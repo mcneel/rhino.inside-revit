@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Parameters
   public class CurtainMullionPosition_ValueList : GH_ValueList
   {
     public override Guid ComponentGuid => new Guid("3DF76236-A44B-4BDB-89D0-7C2D6024962D");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.hidden;
 
     public CurtainMullionPosition_ValueList()
     {
@@ -20,8 +20,8 @@ namespace RhinoInside.Revit.GH.Parameters
 
       ListItems.Clear();
 
-      ListItems.Add(new GH_ValueListItem("Parallel to Ground", ((int) DBX.CurtainMullionPosition.ParallelToGround).ToString()));
-      ListItems.Add(new GH_ValueListItem("Perpendicular to Face", ((int) DBX.CurtainMullionPosition.PerpendicularToFace).ToString()));
+      ListItems.Add(new GH_ValueListItem("Parallel to Ground", ((int) DBX.BuiltInMullionPositionId.ParallelToGround).ToString()));
+      ListItems.Add(new GH_ValueListItem("Perpendicular to Face", ((int) DBX.BuiltInMullionPositionId.PerpendicularToFace).ToString()));
     }
   }
 }

@@ -489,31 +489,6 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [
-  ComponentGuid("5A459A8D-4B20-4E3A-B6FF-DFA3B262C30E"),
-  Name("Curtain Mullion Position"),
-  Description("Represents available mullion positions"),
-  ]
-  public class CurtainMullionPosition : GH_Enum<DBX.CurtainMullionPosition>
-  {
-    public CurtainMullionPosition() : base() { }
-    public CurtainMullionPosition(DBX.CurtainMullionPosition value) : base(value) { }
-
-    public override string Text
-    {
-      get
-      {
-        switch (Value)
-        {
-          case DBX.CurtainMullionPosition.ParallelToGround: return "Parallel to Ground";
-          case DBX.CurtainMullionPosition.PerpendicularToFace: return "Perpendicular to Face";
-        }
-
-        return base.Text;
-      }
-    }
-  }
-
-  [
   ComponentGuid("9F9D90FC-06FF-4908-B67E-ED63B089937E"),
   Name("Curtain Panel System Family"),
   Description("Represents builtin curtain panel system families"),
