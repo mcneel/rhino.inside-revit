@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
@@ -87,7 +88,7 @@ namespace RhinoInside.Revit.GH.Types
     public static bool TryGetParamTypes(Type type, out Tuple<Type, Type> paramTypes) =>
       EnumTypes.TryGetValue(type, out paramTypes);
 
-    public virtual Array GetEnumValues() => Enum.GetValues(UnderlyingEnumType);
+    public virtual ReadOnlyCollection<int> GetValues() => Array.AsReadOnly(Enum.GetValues(UnderlyingEnumType) as int[]);
     public virtual string Text => Value.ToString();
 
   }
@@ -285,8 +286,8 @@ namespace RhinoInside.Revit.GH.Parameters
           current.Value = firstValue.Value;
       }
 
-      var values = current.GetEnumValues();
-      if (values.Length < 7)
+      var values = current.GetValues();
+      if (values.Count < 7)
       {
         Menu_AppendSeparator(menu);
         foreach (var e in values)
@@ -381,7 +382,7 @@ namespace RhinoInside.Revit.GH.Parameters
         list.ListItems.Clear();
 
         var tag = InstantiateT();
-        foreach (var value in tag.GetEnumValues())
+        foreach (var value in tag.GetValues())
         {
           tag.Value = (int) value;
           list.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(tag.Text, tag.Value.ToString()));

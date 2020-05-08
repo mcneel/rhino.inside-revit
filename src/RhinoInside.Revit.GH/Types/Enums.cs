@@ -5,6 +5,7 @@ using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using System.Collections.ObjectModel;
   using Kernel.Attributes;
 
   [
@@ -60,23 +61,27 @@ namespace RhinoInside.Revit.GH.Types
   public class BuiltInParameterGroup : GH_Enum<DB.BuiltInParameterGroup>
   {
     public BuiltInParameterGroup() : base(DB.BuiltInParameterGroup.INVALID) { }
+
+    public override ReadOnlyCollection<int> GetValues() => Values;
+    static readonly ReadOnlyCollection<int> Values = Array.AsReadOnly
+    (
+      Enum.GetValues(typeof(DB.BuiltInParameterGroup)).Cast<int>().
+      Where(x => x != (int) DB.BuiltInParameterGroup.INVALID).
+      OrderBy(x => DB.LabelUtils.GetLabelFor((DB.BuiltInParameterGroup) x)).
+      ToArray()
+    );
+
     public override string Text
     {
       get
       {
+        if (Value == DB.BuiltInParameterGroup.INVALID) return "Unset";
         try { return DB.LabelUtils.GetLabelFor(Value); }
         catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
 
         return base.Text;
       }
     }
-
-    public override Array GetEnumValues() =>
-      Enum.GetValues(typeof(DB.BuiltInParameterGroup)).
-      Cast<DB.BuiltInParameterGroup>().
-      Where(x => x != DB.BuiltInParameterGroup.INVALID).
-      OrderBy(x => DB.LabelUtils.GetLabelFor(x)).
-      ToArray();
   }
 
   [
@@ -89,16 +94,21 @@ namespace RhinoInside.Revit.GH.Types
     public CategoryType() : base(DB.CategoryType.Invalid) { }
     public CategoryType(DB.CategoryType value) : base(value) { }
 
-    public override Array GetEnumValues() =>
-      Enum.GetValues(typeof(DB.CategoryType)).
-      Cast<DB.CategoryType>().
-      Where(x => x != DB.CategoryType.Invalid).
-      ToArray();
+    public override ReadOnlyCollection<int> GetValues() => Values;
+    static readonly ReadOnlyCollection<int> Values = Array.AsReadOnly
+    (
+      Enum.GetValues(typeof(DB.CategoryType)).Cast<int>().
+      Where(x => x != (int) DB.CategoryType.Invalid).
+      ToArray()
+    );
 
     public override string Text
     {
       get
       {
+        if (Value == DB.CategoryType.Invalid)
+          return "Unset";
+
         if (Value == DB.CategoryType.AnalyticalModel)
           return "Analytical";
 
@@ -130,14 +140,35 @@ namespace RhinoInside.Revit.GH.Types
     Name("View Discipline"),
     Description("Represents a Revit view discipline."),
   ]
-  public class ViewDiscipline : GH_Enum<DB.ViewDiscipline> { }
+  public class ViewDiscipline : GH_Enum<DB.ViewDiscipline>
+  {
+    public override ReadOnlyCollection<int> GetValues() => Values;
+    static readonly ReadOnlyCollection<int> Values = Array.AsReadOnly
+    (
+      new int[]
+      {
+        -1,
+        (int) DB.ViewDiscipline.Architectural,
+        (int) DB.ViewDiscipline.Structural,
+        (int) DB.ViewDiscipline.Mechanical,
+        (int) DB.ViewDiscipline.Electrical,
+        (int) DB.ViewDiscipline.Plumbing,
+        (int) DB.ViewDiscipline.Coordination
+      }
+    );
+
+    public override string Text => (int) Value == -1 ? "Unset" : base.Text;
+  }
 
   [
     ComponentGuid("485C3278-0D1A-445D-B3DA-75FB8CD38CF9"),
     Name("View Family"),
     Description("Represents a Revit view family."),
   ]
-  public class ViewFamily : GH_Enum<DB.ViewFamily> { }
+  public class ViewFamily : GH_Enum<DB.ViewFamily>
+  {
+    public override string Text => Value == DB.ViewFamily.Invalid ? "Unset" : base.Text;
+  }
 
   [
     ComponentGuid("BF051011-660D-39E7-86ED-20EEE3A68DB0"),
@@ -279,8 +310,6 @@ namespace RhinoInside.Revit.GH.Types
     public WallFunction(DB.WallFunction value) : base(value) { }
   }
 
-
-
   [
     ComponentGuid("7A71E012-6E92-493D-960C-83BE3C50ECAE"),
     Name("Wall Wrapping"),
@@ -291,7 +320,6 @@ namespace RhinoInside.Revit.GH.Types
     public WallWrapping() : base() { }
     public WallWrapping(DBX.WallWrapping value) : base(value) { }
   }
-
 
   [
     ComponentGuid("2F1CE55B-FD85-4EC5-8638-8DA06932DE0E"),
