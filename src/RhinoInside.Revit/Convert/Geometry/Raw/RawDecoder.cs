@@ -609,7 +609,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
         }
 
         // Extract and classify Edge Loops
-        var edgeLoops = new List<BrepBoundary>();
+        var edgeLoops = new List<BrepBoundary>(face.EdgeLoops.Size);
         foreach (var edgeLoop in face.EdgeLoops.Cast<DB.EdgeArray>())
         {
           if (edgeLoop.IsEmpty)
@@ -622,9 +622,9 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
           var loop = new BrepBoundary()
           {
             type = BrepLoopType.Unknown,
-            edges = new List<BrepEdge>(),
+            edges = new List<BrepEdge>(edgeLoop.Size),
             trims = new PolyCurve(),
-            orientation = new List<int>()
+            orientation = new List<int>(edgeLoop.Size)
           };
 
           foreach (var edge in edges)
