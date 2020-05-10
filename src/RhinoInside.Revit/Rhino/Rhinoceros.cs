@@ -115,6 +115,9 @@ namespace RhinoInside.Revit
           ToList();
 
         CheckInGuests();
+
+        //Enable Revit window back
+        WindowHandle.ActiveWindow = Revit.MainWindow;
       }
 
       return Result.Succeeded;
