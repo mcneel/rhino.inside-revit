@@ -27,10 +27,10 @@ namespace RhinoInside.Revit
 
     #region Geometry values
     [Obsolete("\r - For a full conversion including units consider RhinoInside.Revit.Convert.Geometry.GeometryDecoder extension methods")]
-    public static Point3d ToRhino(this DB.XYZ p) => RawDecoder.ToRhino(p);
+    public static Point3d ToRhino(this DB.XYZ p) => RawDecoder.AsPoint3d(p);
 
     [Obsolete("\rThis method will be removed")]
-    public static IEnumerable<Point3d> ToRhino(this IEnumerable<DB.XYZ> points) => points.Select(x => RawDecoder.ToRhino(x));
+    public static IEnumerable<Point3d> ToRhino(this IEnumerable<DB.XYZ> points) => points.Select(x => RawDecoder.AsPoint3d(x));
 
     [Obsolete("\r - For previous behaviour use RhinoInside.Revit.Convert.Geometry.Raw.RawDecoder.ToRhino\r - For a full conversion including units consider RhinoInside.Revit.Convert.Geometry.GeometryDecoder extension methods")]
     public static BoundingBox ToRhino(this DB.BoundingBoxXYZ bbox) => RawDecoder.ToRhino(bbox);

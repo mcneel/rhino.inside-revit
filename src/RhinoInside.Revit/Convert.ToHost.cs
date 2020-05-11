@@ -54,7 +54,7 @@ namespace RhinoInside.Revit
     public static DB.Transform ToHost(this Transform transform) => transform.ToTransform(UnitConverter.NoScale);
 
     [Obsolete("\rThis method will be removed")]
-    public static IEnumerable<DB.XYZ> ToHost(this IEnumerable<Point3d> points) => points.Select(p => RawEncoder.ToHost(p));
+    public static IEnumerable<DB.XYZ> ToHost(this IEnumerable<Point3d> points) => points.Select(p => RawEncoder.AsXYZ(p));
 
     [Obsolete("\r - For previous behaviour use RhinoInside.Revit.Convert.Geometry.Raw.RawEncoder.ToHost\r - For a full conversion including units consider RhinoInside.Revit.Convert.Geometry.GeometryEncoder extension methods")]
     public static DB.Point ToHost(this Point point) => point.ToPoint(UnitConverter.NoScale);
