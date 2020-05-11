@@ -18,6 +18,11 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
   static class RawDecoder
   {
     #region Values
+    public static Point2d ToRhino(DB.UV p)
+    {
+      return new Point2d(p.U, p.V);
+    }
+
     public static Point3d ToRhino(DB.XYZ p)
     {
       return new Point3d(p.X, p.Y, p.Z);

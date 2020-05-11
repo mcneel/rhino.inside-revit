@@ -16,10 +16,15 @@ namespace RhinoInside.Revit.Convert.Geometry
   public static class GeometryDecoder
   {
     #region Geometry values
+    public static Point2d ToPoint2d(this DB.UV value)
+    { var rhino = RawDecoder.ToRhino(value); UnitConverter.Scale(ref rhino, UnitConverter.ToRhinoUnits); return rhino; }
+    public static Vector2d ToVector2d(this DB.UV value)
+    { return new Vector2d(value.U, value.V); }
+
     public static Point3d ToPoint3d(this DB.XYZ value)
     { var rhino = RawDecoder.ToRhino(value); UnitConverter.Scale(ref rhino, UnitConverter.ToRhinoUnits); return rhino; }
     public static Vector3d ToVector3d(this DB.XYZ value)
-    { var rhino = RawDecoder.ToRhino(value); UnitConverter.Scale(ref rhino, UnitConverter.ToRhinoUnits); return (Vector3d) rhino; }
+    { return new Vector3d(value.X, value.Y, value.Z); }
 
     public static Transform ToTransform(this DB.Transform value)
     { var rhino = RawDecoder.ToRhino(value); UnitConverter.Scale(ref rhino, UnitConverter.ToRhinoUnits); return rhino; }

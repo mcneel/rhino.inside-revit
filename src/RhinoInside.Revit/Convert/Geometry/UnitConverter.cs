@@ -27,6 +27,27 @@ namespace RhinoInside.Revit.Convert.Geometry
     #endregion
 
     #region Scale
+    public static void Scale(ref Point2f value, double factor)
+    {
+      value.X *= (float) factor;
+      value.Y *= (float) factor;
+    }
+    public static void Scale(ref Point2d value, double factor)
+    {
+      value.X *= factor;
+      value.Y *= factor;
+    }
+    public static void Scale(ref Vector2d value, double factor)
+    {
+      value.X *= factor;
+      value.Y *= factor;
+    }
+    public static void Scale(ref Vector2f value, double factor)
+    {
+      value.X *= (float) factor;
+      value.Y *= (float) factor;
+    }
+
     public static void Scale(ref Point3f value, double factor)
     {
       value.X *= (float) factor;

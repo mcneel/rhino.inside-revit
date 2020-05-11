@@ -26,6 +26,52 @@ namespace RhinoInside.Revit.Convert.Geometry
     #endregion
 
     #region Geometry values
+    public static DB::UV ToUV(this Point2f value)
+    {
+      double factor = UnitConverter.ToHostUnits;
+      return new DB::UV(value.X * factor, value.Y * factor);
+    }
+    public static DB::UV ToUV(this Point2f value, double factor)
+    {
+      return factor == 1.0 ?
+        new DB::UV(value.X, value.Y) :
+        new DB::UV(value.X * factor, value.Y * factor);
+    }
+
+    public static DB::UV ToUV(this Point2d value)
+    {
+      double factor = UnitConverter.ToHostUnits;
+      return new DB::UV(value.X * factor, value.Y * factor);
+    }
+    public static DB::UV ToUV(this Point2d value, double factor)
+    {
+      return factor == 1.0 ?
+        new DB::UV(value.X, value.Y) :
+        new DB::UV(value.X * factor, value.Y * factor);
+    }
+
+    public static DB::UV ToUV(this Vector2f value)
+    {
+      return new DB::UV(value.X, value.Y);
+    }
+    public static DB::UV ToUV(this Vector2f value, double factor)
+    {
+      return factor == 1.0 ?
+        new DB::UV(value.X, value.Y) :
+        new DB::UV(value.X * factor, value.Y * factor);
+    }
+
+    public static DB::UV ToUV(this Vector2d value)
+    {
+      return new DB::UV(value.X, value.Y);
+    }
+    public static DB::UV ToUV(this Vector2d value, double factor)
+    {
+      return factor == 1.0 ?
+        new DB::UV(value.X, value.Y) :
+        new DB::UV(value.X * factor, value.Y * factor);
+    }
+
     public static DB::XYZ ToXYZ(this Point3f value)
     {
       double factor = UnitConverter.ToHostUnits;

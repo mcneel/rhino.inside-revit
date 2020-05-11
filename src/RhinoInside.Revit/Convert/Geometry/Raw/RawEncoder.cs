@@ -16,6 +16,23 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
   static class RawEncoder
   {
     #region Values
+    public static DB::UV ToHost(Point2f value)
+    {
+      return new DB::UV(value.X, value.Y);
+    }
+    public static DB::UV ToHost(Point2d value)
+    {
+      return new DB::UV(value.X, value.Y);
+    }
+    public static DB::UV ToHost(Vector2d value)
+    {
+      return new DB::UV(value.X, value.Y);
+    }
+    public static DB::UV ToHost(Vector2f value)
+    {
+      return new DB::UV(value.X, value.Y);
+    }
+
     public static DB::XYZ ToHost(Point3f value)
     {
       return new DB::XYZ(value.X, value.Y, value.Z);
