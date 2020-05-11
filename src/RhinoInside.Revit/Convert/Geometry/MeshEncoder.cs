@@ -223,7 +223,7 @@ namespace RhinoInside.Revit.Convert.Geometry
               var polyline = loop as PolylineCurve;
               var loopVertices = new DB.XYZ[polyline.PointCount - 1];
               for (int p = 0; p < loopVertices.Length; ++p)
-                loopVertices[p] = Raw.RawEncoder.ToHost(polyline.Point(p));
+                loopVertices[p] = Raw.RawEncoder.AsXYZ(polyline.Point(p));
 
               var orientation = normal.IsZero ? loop.ClosedCurveOrientation() : loop.ClosedCurveOrientation(normal);
               if (orientation == CurveOrientation.CounterClockwise)
@@ -243,7 +243,7 @@ namespace RhinoInside.Revit.Convert.Geometry
         }
         else
         {
-          var outerLoopVertices = Array.ConvertAll(ngon.BoundaryVertexIndexList(), vi => Raw.RawEncoder.ToHost(vertices[vi]));
+          var outerLoopVertices = Array.ConvertAll(ngon.BoundaryVertexIndexList(), vi => Raw.RawEncoder.AsXYZ(vertices[vi]));
           builder.AddFace(new DB.TessellatedFace(outerLoopVertices, GeometryEncoder.Context.Peek.MaterialId));
         }
       }
@@ -267,10 +267,10 @@ namespace RhinoInside.Revit.Convert.Geometry
           fitPoints[2] = vertices[face.C];
           fitPoints[3] = vertices[face.D];
 
-          quad[0] = Raw.RawEncoder.ToHost(fitPoints[0]);
-          quad[1] = Raw.RawEncoder.ToHost(fitPoints[1]);
-          quad[2] = Raw.RawEncoder.ToHost(fitPoints[2]);
-          quad[3] = Raw.RawEncoder.ToHost(fitPoints[3]);
+          quad[0] = Raw.RawEncoder.AsXYZ(fitPoints[0]);
+          quad[1] = Raw.RawEncoder.AsXYZ(fitPoints[1]);
+          quad[2] = Raw.RawEncoder.AsXYZ(fitPoints[2]);
+          quad[3] = Raw.RawEncoder.AsXYZ(fitPoints[3]);
 
           // If is not planar transfer as two triangles
           var fit = Plane.FitPlaneToPoints(fitPoints, out var _, out var deviation);
@@ -298,9 +298,9 @@ namespace RhinoInside.Revit.Convert.Geometry
         }
         else
         {
-          triangle[0] = Raw.RawEncoder.ToHost(vertices[face.A]);
-          triangle[1] = Raw.RawEncoder.ToHost(vertices[face.B]);
-          triangle[2] = Raw.RawEncoder.ToHost(vertices[face.C]);
+          triangle[0] = Raw.RawEncoder.AsXYZ(vertices[face.A]);
+          triangle[1] = Raw.RawEncoder.AsXYZ(vertices[face.B]);
+          triangle[2] = Raw.RawEncoder.AsXYZ(vertices[face.C]);
 
           builder.AddFace(new DB.TessellatedFace(triangle, GeometryEncoder.Context.Peek.MaterialId));
         }
