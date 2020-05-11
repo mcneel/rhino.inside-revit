@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.Convert.System.Collections.Generic
       var output = new List<TOutput>(count);
 
       for(int i = 0; i < count; ++i)
-        output[i] = converter(input[i]);
+        output.Add(converter(input[i]));
 
       return output;
     }
