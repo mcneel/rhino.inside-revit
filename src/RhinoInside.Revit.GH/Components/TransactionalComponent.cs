@@ -340,7 +340,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       bbox = Rhino.Geometry.BoundingBox.Empty;
       foreach (var geometry in geometries)
-        bbox = geometry.GetBoundingBox(true);
+        bbox.Union(geometry.GetBoundingBox(true));
 
       return SolveOptionalLevel(doc, bbox.IsValid ? bbox.Min.Z : double.NaN, ref level);
     }
