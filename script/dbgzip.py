@@ -127,7 +127,7 @@ class DebugFile:
                             .decode(encoding, errors='ignore')
                 return contents
             except Exception as rtxt_ex:
-                sys.stderr.write("[WARN] %s" % str(rtxt_ex))
+                sys.stderr.write("[WARN] %s\n" % str(rtxt_ex))
         return ""
 
     def read_csv(self, filename, headers=True):
@@ -141,7 +141,7 @@ class DebugFile:
                         return list(csv_reader)[1:]
                     return list(csv_reader)
             except Exception as csv_ex:
-                sys.stderr.write("[WARN] %s" % str(csv_ex))
+                sys.stderr.write("[WARN] %s\n" % str(csv_ex))
         return []
 
     def extract(self, filename, to_file):
@@ -247,14 +247,29 @@ def sanitize_report(report):
     return report
 
 
-def process_dbpkg(zip_file, ticket=None):
+def extract_sb_ticket_id(ticket_url):
+    """Extracts the supportbee ticket id from url"""
+    match = re.search(r'\/(\d+)', ticket_url)
+    return match.group(1) if match else None
+
+
+def process_dbpkg(zip_file, ticket_url=None):
     """Process given debug zip file"""
     # open zip file
     new_report = '\n'
     with DebugFile(zip_file) as dfile:
-        if ticket:
-            new_report = '# Ticket Info\n'
-            new_report += "[Support Ticket]({})\n\n".format(ticket)
+        if ticket_url:
+            # make a title
+            ticket_id = extract_sb_ticket_id(ticket_url)
+            if ticket_id:
+                # create a title for the report
+                new_report += 'Load Error (SB %s)\n\n' % ticket_id
+            else:
+                new_report += 'Load Error\n\n'
+            # add ticket link
+            new_report += '# Ticket Info\n'
+            new_report += "[Support Ticket]({})\n\n".format(ticket_url)
+
         # read Report.md
         new_report += '# Host Info\n'
         rinfo = process_report(dfile)
@@ -330,14 +345,15 @@ def run_command(cfg: CLIArgs):
     # if zip file is provided
     if cfg.zip_file:
         # process zip file, include ticket url for reporting
-        process_dbpkg(cfg.zip_file, ticket=cfg.sb_ticket)
+        process_dbpkg(zip_file=cfg.zip_file, ticket_url=cfg.sb_ticket)
     # otherwise if supportbee url is available
     elif cfg.sb_ticket:
         # download the zip file from ticket
-        zip_file = process_sb_ticket(cfg.sb_ticket, cfg.sb_token)
+        zip_file = process_sb_ticket(ticket_url=cfg.sb_ticket,
+                                     api_token=cfg.sb_token)
         if zip_file:
             # process zip file, include ticket url for reporting
-            process_dbpkg(zip_file, ticket=cfg.sb_ticket)
+            process_dbpkg(zip_file=zip_file, ticket_url=cfg.sb_ticket)
         else:
             # or raise error
             raise Exception("No Zip file is attached to the ticket")
@@ -358,5 +374,5 @@ if __name__ == '__main__':
         )
     # gracefully handle exceptions and print results
     except Exception as run_ex:
-        sys.stderr.write("[ERROR] %s" % str(run_ex))
+        sys.stderr.write("[ERROR] %s\n" % str(run_ex))
         sys.exit(1)
