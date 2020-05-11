@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components
     (
       "Add Level", "Level",
       "Given its Elevation, it adds a Level to the active Revit document",
-      "Revit", "Datum"
+      "Revit", "Build"
     )
     { }
 

@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components
   public class FamilyInstanceByLocation : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("0C642D7D-897B-479E-8668-91E09222D7B9");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     public FamilyInstanceByLocation () : base
     (

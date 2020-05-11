@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components
     (
       "Add Grid", "Grid",
       "Given its Axis, it adds a Grid element to the active Revit document",
-      "Revit", "Datum"
+      "Revit", "Build"
     )
     { }
 
