@@ -597,7 +597,6 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       // Extract base surface
       if (ToRhinoSurface(face) is Surface surface)
       {
-        double trimTolerance = Revit.VertexTolerance * 0.1;
         int si = brep.AddSurface(surface);
 
         if (surface is PlaneSurface planar)
@@ -648,7 +647,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
             loop.orientation.Add(segment.TangentAt(segment.Domain.Mid).IsParallelTo(brepEdge.TangentAt(brepEdge.Domain.Mid)));
 
-            var trim = surface.Pullback(segment, trimTolerance);
+            var trim = surface.Pullback(segment, Revit.VertexTolerance);
             loop.trims.Append(trim);
           }
 
