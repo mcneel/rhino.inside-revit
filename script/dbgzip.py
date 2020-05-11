@@ -127,7 +127,7 @@ class DebugFile:
                             .decode(encoding, errors='ignore')
                 return contents
             except Exception as rtxt_ex:
-                sys.stderr.write("[WARN] %s" % str(rtxt_ex))
+                sys.stderr.write("[WARN] %s\n" % str(rtxt_ex))
         return ""
 
     def read_csv(self, filename, headers=True):
@@ -141,7 +141,7 @@ class DebugFile:
                         return list(csv_reader)[1:]
                     return list(csv_reader)
             except Exception as csv_ex:
-                sys.stderr.write("[WARN] %s" % str(csv_ex))
+                sys.stderr.write("[WARN] %s\n" % str(csv_ex))
         return []
 
     def extract(self, filename, to_file):
@@ -358,5 +358,5 @@ if __name__ == '__main__':
         )
     # gracefully handle exceptions and print results
     except Exception as run_ex:
-        sys.stderr.write("[ERROR] %s" % str(run_ex))
+        sys.stderr.write("[ERROR] %s\n" % str(run_ex))
         sys.exit(1)
