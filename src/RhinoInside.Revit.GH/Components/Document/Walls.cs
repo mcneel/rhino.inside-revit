@@ -15,11 +15,11 @@ namespace RhinoInside.Revit.GH.Components
 
     public DocumentWalls() : base
     (
-      name: "Document Walls",
+      name: "Walls",
       nickname: "Walls",
       description: "Get all document walls",
       category: "Revit",
-      subCategory: "Document"
+      subCategory: "Query"
     )
     { }
 

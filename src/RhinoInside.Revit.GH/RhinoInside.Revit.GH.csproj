@@ -202,6 +202,7 @@
     <Compile Include="Components\Document\Elements.cs" />
     <Compile Include="Components\Document\ElementTypes.cs" />
     <Compile Include="Components\Document\Families.cs" />
+    <Compile Include="Components\Document\FloorTypes.cs" />
     <Compile Include="Components\Document\GroupTypes.cs" />
     <Compile Include="Components\Document\Links.cs" />
     <Compile Include="Components\Document\Materials.cs" />

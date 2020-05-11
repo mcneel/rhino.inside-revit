@@ -5,7 +5,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class DocumentViewFamilyTypes : DocumentComponent
+  public class DocumentViewTypes : DocumentComponent
   {
     public override Guid ComponentGuid => new Guid("51E306BD-4736-4B7D-B2FF-B23E0717EEBB");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
@@ -13,13 +13,13 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.ViewFamilyType));
 
-    public DocumentViewFamilyTypes() : base
+    public DocumentViewTypes() : base
     (
-      name: "Document ViewTypes",
+      name: "View Types",
       nickname: "ViewTypes",
       description: "Get document view types list",
       category: "Revit",
-      subCategory: "Document"
+      subCategory: "Query"
     )
     { }
 
@@ -34,7 +34,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(new Parameters.ElementType(), "ViewTypes", "V", "View Types list", GH_ParamAccess.list);
+      manager.AddParameter(new Parameters.ElementType(), "Types", "V", "View Types list", GH_ParamAccess.list);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
@@ -66,7 +66,7 @@ namespace RhinoInside.Revit.GH.Components
         if (!string.IsNullOrEmpty(name))
           elements = elements.Where(x => x.Name.IsSymbolNameLike(name));
 
-        DA.SetDataList("ViewTypes", elements);
+        DA.SetDataList("Types", elements);
       }
     }
   }

@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Components
   public class DocumentCategories : DocumentComponent
   {
     public override Guid ComponentGuid => new Guid("D150E40E-0970-4683-B517-038F8BA8B0D8");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override DB.ElementFilter ElementFilter => null;
 
     public override bool NeedsToBeExpired(DB.Events.DocumentChangedEventArgs e)
@@ -42,9 +42,9 @@ namespace RhinoInside.Revit.GH.Components
 
     public DocumentCategories() : base
     (
-      "Document Categories", "Categories",
+      "Categories", "Categories",
       "Get document categories list",
-      "Revit", "Document"
+      "Revit", "Query"
     )
     {
     }

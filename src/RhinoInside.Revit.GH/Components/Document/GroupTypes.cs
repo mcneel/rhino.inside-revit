@@ -15,9 +15,9 @@ namespace RhinoInside.Revit.GH.Components
 
     public DocumentGroupTypes() : base
     (
-      "Document GroupTypes", "GroupTypes",
+      "Group Types", "GroupTypes",
       "Get document group types list",
-      "Revit", "Document"
+      "Revit", "Query"
     )
     {
     }
@@ -31,7 +31,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(new Parameters.ElementType(), "GroupTypes", "G", "Groups list", GH_ParamAccess.list);
+      manager.AddParameter(new Parameters.ElementType(), "Types", "G", "Groups list", GH_ParamAccess.list);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
@@ -57,7 +57,7 @@ namespace RhinoInside.Revit.GH.Components
         if (!string.IsNullOrEmpty(name))
           groupTypes = groupTypes.Where(x => x.Name.IsSymbolNameLike(name));
 
-        DA.SetDataList("GroupTypes", groupTypes);
+        DA.SetDataList("Types", groupTypes);
       }
     }
   }

@@ -14,11 +14,11 @@ namespace RhinoInside.Revit.GH.Components
 
     public DocumentViews() : base
     (
-      name: "Document Views",
+      name: "Views",
       nickname: "Views",
       description: "Get all document views",
       category: "Revit",
-      subCategory: "Document"
+      subCategory: "Query"
     )
     {
     }

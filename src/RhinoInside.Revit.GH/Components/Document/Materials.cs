@@ -8,16 +8,16 @@ namespace RhinoInside.Revit.GH.Components
   public class DocumentMaterials : DocumentComponent
   {
     public override Guid ComponentGuid => new Guid("94AF13C1-CE70-46B5-9103-24B46E2F7375");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "M";
 
     protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.Material));
 
     public DocumentMaterials() : base
     (
-      "Document Materials", "Materials",
+      "Materials", "Materials",
       "Get document materials list",
-      "Revit", "Document"
+      "Revit", "Query"
     )
     {
     }

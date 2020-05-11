@@ -8,14 +8,14 @@ namespace RhinoInside.Revit.GH.Components
   public class DocumentElementTypes : DocumentComponent
   {
     public override Guid ComponentGuid => new Guid("7B00F940-4C6E-4F3F-AB81-C3EED430DE96");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override DB.ElementFilter ElementFilter => new DB.ElementIsElementTypeFilter(false);
 
     public DocumentElementTypes() : base
     (
-      "Document ElementTypes", "ElementTypes",
+      "Element Types", "ElementTypes",
       "Get document element types list",
-      "Revit", "Document"
+      "Revit", "Query"
     )
     {
     }
@@ -31,7 +31,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(new Parameters.ElementType(), "ElementTypes", "T", "Requested element type", GH_ParamAccess.list);
+      manager.AddParameter(new Parameters.ElementType(), "Types", "T", "Requested element type", GH_ParamAccess.list);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
@@ -66,7 +66,7 @@ namespace RhinoInside.Revit.GH.Components
         if (name is object)
           elementTypes = elementTypes.Where(x => x.Name.IsSymbolNameLike(name));
 
-        DA.SetDataList("ElementTypes", elementTypes.Select(x => new Types.ElementType(x)));
+        DA.SetDataList("Types", elementTypes.Select(x => new Types.ElementType(x)));
       }
     }
 

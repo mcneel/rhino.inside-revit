@@ -498,4 +498,16 @@ namespace RhinoInside.Revit.GH.Types
     public CurtainPanelSystemFamily() : base() { }
     public CurtainPanelSystemFamily(DBX.CurtainPanelSystemFamily value) : base(value) { }
   }
+
+  [
+  ComponentGuid("CF3ACC14-D9F3-4169-985B-C207260250DA"),
+  Name("Floor Function"),
+  Description("Represents builtin floor function"),
+  ]
+  public class FloorFunction : GH_Enum<DBX.FloorFunction>
+  {
+    public FloorFunction() : base() { }
+    public FloorFunction(DBX.FloorFunction value) : base(value) { }
+  }
+  
 }

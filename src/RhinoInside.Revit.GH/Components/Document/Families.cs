@@ -9,14 +9,14 @@ namespace RhinoInside.Revit.GH.Components
   public class DocumentFamilies : DocumentComponent
   {
     public override Guid ComponentGuid => new Guid("B6C377BA-BC46-495C-8250-F09DB0219C91");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override DB.ElementFilter ElementFilter => new DB.ElementIsElementTypeFilter(false);
 
     public DocumentFamilies() : base
     (
-      "Document Families", "Families",
+      "Families", "Families",
       "Get document families list",
-      "Revit", "Document"
+      "Revit", "Query"
     )
     {
     }

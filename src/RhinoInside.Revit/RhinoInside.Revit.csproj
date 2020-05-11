@@ -229,6 +229,7 @@
     <Compile Include="External\DB\Extensions\Surface.cs" />
     <Compile Include="External\DB\Extensions\XYZ.cs" />
     <Compile Include="External\DB\Extensions\Wall.cs" />
+    <Compile Include="External\DB\FloorFunction.cs" />
     <Compile Include="External\DB\ParameterBinding.cs" />
     <Compile Include="External\DB\ParameterClass.cs" />
     <Compile Include="External\DB\UniqueId.cs" />
