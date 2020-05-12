@@ -1,6 +1,6 @@
 [
   {
-    "desc": "Represents a Revit document category.", 
+    "desc": "Represents a Revit document category", 
     "iconsrc": "/static/images/GH/Category.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -18,7 +18,7 @@
     "uuid": "5ffb1339-8521-44a1-9075-2984637725e9"
   }, 
   {
-    "desc": "Represents a Revit document level.", 
+    "desc": "Represents a Revit document level", 
     "iconsrc": "/static/images/GH/Level.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -27,7 +27,7 @@
     "uuid": "3238f8bc-8483-4584-b47c-48b4933e478e"
   }, 
   {
-    "desc": "Represents a Revit document grid.", 
+    "desc": "Represents a Revit document grid", 
     "iconsrc": "/static/images/GH/Grid.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -90,7 +90,7 @@
     "uuid": "bd6a74f3-8c46-4506-87d9-b34bd96747da"
   }, 
   {
-    "desc": "Represents a Revit document element.", 
+    "desc": "Represents a Revit document element", 
     "iconsrc": "/static/images/GH/Element.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -99,7 +99,7 @@
     "uuid": "f3ea4a9c-b24f-4587-a358-6a7e6d8c028b"
   }, 
   {
-    "desc": "Represents a Revit document element type.", 
+    "desc": "Represents a Revit document element type", 
     "iconsrc": "/static/images/GH/ElementType.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -117,7 +117,7 @@
     "uuid": "d3fb53d3-9118-4f11-a32d-aecb30aa418d"
   }, 
   {
-    "desc": "Represents a Revit document family.", 
+    "desc": "Represents a Revit document family", 
     "iconsrc": "/static/images/GH/Family.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -135,7 +135,25 @@
     "uuid": "45cee087-4194-4e55-aa20-9cc5d2193ce0"
   }, 
   {
-    "desc": "Represents a Revit vertex.", 
+    "desc": "Represents a Revit curtain grid mullion element", 
+    "iconsrc": "/static/images/GH/Mullion.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
+    "tab": "Params", 
+    "title": "Mullion", 
+    "uuid": "6d845cbd-1962-4912-80c1-f47fe99ad54a"
+  }, 
+  {
+    "desc": "Represents a Revit curtain grid panel element", 
+    "iconsrc": "/static/images/GH/Panel.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
+    "tab": "Params", 
+    "title": "Panel", 
+    "uuid": "cef5dd61-bc7d-4e66-ae94-e990b193acdc"
+  }, 
+  {
+    "desc": "Represents a Revit vertex", 
     "iconsrc": "/static/images/GH/Vertex.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -144,7 +162,7 @@
     "uuid": "bc1b160a-dc04-4139-ab7d-1aecbde7ff88"
   }, 
   {
-    "desc": "Represents a Revit edge.", 
+    "desc": "Represents a Revit edge", 
     "iconsrc": "/static/images/GH/Edge.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -153,7 +171,7 @@
     "uuid": "b79fd0fd-63ae-4776-a0a7-6392a3a58b0d"
   }, 
   {
-    "desc": "Represents a Revit face.", 
+    "desc": "Represents a Revit face", 
     "iconsrc": "/static/images/GH/Face.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -162,7 +180,7 @@
     "uuid": "759700ed-bc79-4986-a6ab-84921a7c9293"
   }, 
   {
-    "desc": "Represents a Revit graphical element.", 
+    "desc": "Represents a Revit graphical element", 
     "iconsrc": "/static/images/GH/GraphicalElement.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -171,7 +189,7 @@
     "uuid": "ef607c2a-2f44-43f4-9c39-369ce114b51f"
   }, 
   {
-    "desc": "Represents a Revit document group element.", 
+    "desc": "Represents a Revit document group element", 
     "iconsrc": "/static/images/GH/Group.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -180,7 +198,7 @@
     "uuid": "2674b9ff-e463-426b-8a8c-ccb5a7f4c84e"
   }, 
   {
-    "desc": "Represents a Revit document host element.", 
+    "desc": "Represents a Revit document host element", 
     "iconsrc": "/static/images/GH/HostObject.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -189,7 +207,70 @@
     "uuid": "e3462915-3c4d-4864-9dd4-5a73f91c6543"
   }, 
   {
-    "desc": "Represents a Revit document material.", 
+    "desc": "Represents a Revit document building pad element", 
+    "iconsrc": "/static/images/GH/BuildingPad.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
+    "tab": "Params", 
+    "title": "Building Pad", 
+    "uuid": "0d0afe5f-4578-493e-8374-c6bd1c5395be"
+  }, 
+  {
+    "desc": "Represents a Revit document curtain grid line element", 
+    "iconsrc": "/static/images/GH/CurtainGridLine.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
+    "tab": "Params", 
+    "title": "Curtain Grid Line", 
+    "uuid": "a2dd571e-729c-4f69-bd34-2769583d329b"
+  }, 
+  {
+    "desc": "Represents a Revit document curtain system element", 
+    "iconsrc": "/static/images/GH/CurtainSystem.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
+    "tab": "Params", 
+    "title": "Curtain System", 
+    "uuid": "e94b20e9-c2aa-4fc7-939d-ecd071ea45da"
+  }, 
+  {
+    "desc": "Represents a Revit document ceiling element", 
+    "iconsrc": "/static/images/GH/Ceiling.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
+    "tab": "Params", 
+    "title": "Ceiling", 
+    "uuid": "7fcea93d-8cde-446c-9167-e8b590342c66"
+  }, 
+  {
+    "desc": "Represents a Revit document floor element", 
+    "iconsrc": "/static/images/GH/Floor.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
+    "tab": "Params", 
+    "title": "Floor", 
+    "uuid": "45616df6-59bf-4480-a133-8f9b3ba27af1"
+  }, 
+  {
+    "desc": "Represents a Revit document roof element", 
+    "iconsrc": "/static/images/GH/Roof.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
+    "tab": "Params", 
+    "title": "Roof", 
+    "uuid": "d75e33e2-2508-42e6-aef1-b05759a495ab"
+  }, 
+  {
+    "desc": "Represents a Revit document wall element", 
+    "iconsrc": "/static/images/GH/Wall.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
+    "tab": "Params", 
+    "title": "Wall", 
+    "uuid": "15ad6bf9-63ad-462b-985d-f6b8c2299465"
+  }, 
+  {
+    "desc": "Represents a Revit document material", 
     "iconsrc": "/static/images/GH/Material.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -198,7 +279,7 @@
     "uuid": "b18ef2cc-2e67-4a5e-9241-9010fb7d27ce"
   }, 
   {
-    "desc": "Represents a Revit parameter definition.", 
+    "desc": "Represents a Revit parameter definition", 
     "iconsrc": "/static/images/GH/ParameterKey.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -225,7 +306,7 @@
     "uuid": "c1d96f56-f53c-4dfc-8090-ec2050bdbb66"
   }, 
   {
-    "desc": "Represents a Revit document sketch plane.", 
+    "desc": "Represents a Revit document sketch plane", 
     "iconsrc": "/static/images/GH/SketchPlane.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -234,7 +315,7 @@
     "uuid": "93bf1f61-69ad-433f-a202-352c14e4ced8"
   }, 
   {
-    "desc": "Represents a Revit view.", 
+    "desc": "Represents a Revit view", 
     "iconsrc": "/static/images/GH/View.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -360,15 +441,6 @@
     "uuid": "9c2d116d-516c-4825-bb6b-67111b9100b1"
   }, 
   {
-    "desc": "Picker for curtain mullion position options", 
-    "iconsrc": null, 
-    "icontag": "C", 
-    "panel": "Input", 
-    "tab": "Revit", 
-    "title": "Curtain Mullion Position", 
-    "uuid": "3df76236-a44b-4bdb-89d0-7c2d6024962d"
-  }, 
-  {
     "desc": "Picker for curtain mullion system family types", 
     "iconsrc": null, 
     "icontag": "C", 
@@ -426,54 +498,72 @@
     "desc": "Get document categories list", 
     "iconsrc": "/static/images/GH/DocumentCategories.png", 
     "icontag": null, 
-    "panel": "Document", 
+    "panel": "Query", 
     "tab": "Revit", 
-    "title": "Document Categories", 
+    "title": "Categories", 
     "uuid": "d150e40e-0970-4683-b517-038f8ba8b0d8"
   }, 
   {
     "desc": "Gets the list of active documents", 
     "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Document", 
+    "icontag": "D", 
+    "panel": "Query", 
     "tab": "Revit", 
-    "title": "All Documents", 
+    "title": "Documents", 
     "uuid": "5b935ca4-e96d-4e8f-a36e-31708017634b"
   }, 
   {
     "desc": "Get document model elements list", 
     "iconsrc": "/static/images/GH/DocumentElements.png", 
     "icontag": null, 
-    "panel": "Document", 
+    "panel": "Query", 
     "tab": "Revit", 
-    "title": "Document Elements", 
+    "title": "Elements", 
     "uuid": "0f7da57e-6c05-4dd0-aabf-69e42df38859"
   }, 
   {
     "desc": "Get document element types list", 
     "iconsrc": "/static/images/GH/DocumentElementTypes.png", 
     "icontag": null, 
-    "panel": "Document", 
+    "panel": "Query", 
     "tab": "Revit", 
-    "title": "Document ElementTypes", 
+    "title": "Types", 
     "uuid": "7b00f940-4c6e-4f3f-ab81-c3eed430de96"
   }, 
   {
     "desc": "Get document families list", 
     "iconsrc": null, 
-    "icontag": "D", 
-    "panel": "Document", 
+    "icontag": "F", 
+    "panel": "Query", 
     "tab": "Revit", 
-    "title": "Document Families", 
+    "title": "Families", 
     "uuid": "b6c377ba-bc46-495c-8250-f09db0219c91"
+  }, 
+  {
+    "desc": "Get document floor types list", 
+    "iconsrc": null, 
+    "icontag": "F", 
+    "panel": "Query", 
+    "tab": "Revit", 
+    "title": "Floor Types", 
+    "uuid": "e3173eb7-2d53-4f81-beb1-90d0f47343d4"
+  }, 
+  {
+    "desc": "Get document foundation slab types list", 
+    "iconsrc": null, 
+    "icontag": "F", 
+    "panel": "Query", 
+    "tab": "Revit", 
+    "title": "Foundation Slab Types", 
+    "uuid": "8472d50d-7f43-4a2c-828b-8e1c35313eff"
   }, 
   {
     "desc": "Get document group types list", 
     "iconsrc": null, 
-    "icontag": "D", 
-    "panel": "Document", 
+    "icontag": "G", 
+    "panel": "Query", 
     "tab": "Revit", 
-    "title": "Document GroupTypes", 
+    "title": "Group Types", 
     "uuid": "97e9c6bb-8442-4f77-bca1-6be8aafbdc96"
   }, 
   {
@@ -488,10 +578,10 @@
   {
     "desc": "Get document materials list", 
     "iconsrc": null, 
-    "icontag": "D", 
-    "panel": "Document", 
+    "icontag": "M", 
+    "panel": "Query", 
     "tab": "Revit", 
-    "title": "Document Materials", 
+    "title": "Materials", 
     "uuid": "94af13c1-ce70-46b5-9103-24b46e2f7375"
   }, 
   {
@@ -525,9 +615,9 @@
     "desc": "Get all document levels", 
     "iconsrc": "/static/images/GH/DocumentLevels.png", 
     "icontag": null, 
-    "panel": "Document", 
+    "panel": "Query", 
     "tab": "Revit", 
-    "title": "Document Levels", 
+    "title": "Levels", 
     "uuid": "87715caf-92a9-4b14-99e5-f8ccb2cc19bd"
   }, 
   {
@@ -542,38 +632,56 @@
   {
     "desc": "Get all document views", 
     "iconsrc": null, 
-    "icontag": "D", 
-    "panel": "Document", 
+    "icontag": "V", 
+    "panel": "Query", 
     "tab": "Revit", 
-    "title": "Document Views", 
+    "title": "Views", 
     "uuid": "df691659-b75b-4455-af5f-8a5de485fa05"
   }, 
   {
     "desc": "Get document view types list", 
     "iconsrc": null, 
-    "icontag": "D", 
-    "panel": "Document", 
+    "icontag": "V", 
+    "panel": "Query", 
     "tab": "Revit", 
-    "title": "Document ViewTypes", 
+    "title": "View Types", 
     "uuid": "51e306bd-4736-4b7d-b2ff-b23e0717eebb"
   }, 
   {
     "desc": "Get all document walls", 
     "iconsrc": null, 
-    "icontag": "D", 
-    "panel": "Document", 
+    "icontag": "W", 
+    "panel": "Query", 
     "tab": "Revit", 
-    "title": "Document Walls", 
+    "title": "Walls", 
     "uuid": "118f5744-292f-4bec-9213-8073219d8563"
   }, 
   {
-    "desc": "Get document wall types list", 
+    "desc": "Get document basic wall types list", 
     "iconsrc": null, 
-    "icontag": "D", 
-    "panel": "Document", 
+    "icontag": "B", 
+    "panel": "Query", 
     "tab": "Revit", 
-    "title": "Document WallTypes", 
+    "title": "Basic Wall Types", 
     "uuid": "e37bb2db-e096-45a1-9771-94ce7dbccdb8"
+  }, 
+  {
+    "desc": "Get document curatin wall types list", 
+    "iconsrc": null, 
+    "icontag": "C", 
+    "panel": "Query", 
+    "tab": "Revit", 
+    "title": "Curtain Wall Types", 
+    "uuid": "e49700b5-d16a-4d18-9ea7-c03ad64cf03d"
+  }, 
+  {
+    "desc": "Get document curatin stacked types list", 
+    "iconsrc": null, 
+    "icontag": "S", 
+    "panel": "Query", 
+    "tab": "Revit", 
+    "title": "Stacked Wall Types", 
+    "uuid": "82c96794-cd04-444e-a70b-50d2e3f2725d"
   }, 
   {
     "desc": "Filter used to exclude a set of elements", 
@@ -1152,7 +1260,7 @@
     "uuid": "0c642d7d-897b-479e-8668-91e09222d7b9"
   }, 
   {
-    "desc": "Analyze family instance space e.g. spatial elements surrounding the given instance", 
+    "desc": "Analyze family instance space eg spatial elements surrounding the given instance", 
     "iconsrc": null, 
     "icontag": "A", 
     "panel": "Analyze", 
@@ -1173,7 +1281,7 @@
     "desc": "Given its Axis, it adds a Grid element to the active Revit document", 
     "iconsrc": "/static/images/GH/GridByCurve.png", 
     "icontag": null, 
-    "panel": "Datum", 
+    "panel": "Build", 
     "tab": "Revit", 
     "title": "Add Grid", 
     "uuid": "cec2b3df-c6ba-414f-bece-e3daee2a3f2c"
@@ -1182,7 +1290,7 @@
     "desc": "Given its Elevation, it adds a Level to the active Revit document", 
     "iconsrc": "/static/images/GH/LevelByElevation.png", 
     "icontag": null, 
-    "panel": "Datum", 
+    "panel": "Build", 
     "tab": "Revit", 
     "title": "Add Level", 
     "uuid": "c6dec111-eac6-4047-8618-28ee144d55c5"
@@ -1485,7 +1593,7 @@
     "uuid": "0e244846-95ae-4b0e-8218-cb24fd4d34d1"
   }, 
   {
-    "desc": "Creates a new Family from a template.", 
+    "desc": "Creates a new Family from a template", 
     "iconsrc": null, 
     "icontag": "N", 
     "panel": "Family", 
@@ -1503,7 +1611,7 @@
     "uuid": "72fdc627-09c7-4d9f-8d7f-5f6812fb1873"
   }, 
   {
-    "desc": "Saves the Family to a given file path.", 
+    "desc": "Saves the Family to a given file path", 
     "iconsrc": null, 
     "icontag": "S", 
     "panel": "Family", 
