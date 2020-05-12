@@ -13,19 +13,19 @@
             </g>
         </g>
         <g>
-            <use xlink:href="#_Image4" x="6.054" y="3.26" width="11.956px" height="17.815px" transform="matrix(0.996368,0,0,0.989713,0,0)"/>
-            <g transform="matrix(1,0,0,1,-3.93041,-2.26326)">
-                <path d="M20.956,6.808L20.937,17.16L12,22.341L10.659,21.588L10.659,12L19.877,6.186L20.956,6.808Z" style="fill:url(#_Radial5);stroke:rgb(0,76,156);stroke-width:0.9px;"/>
+            <use xlink:href="#_Image4" x="9.999" y="5.557" width="11.956px" height="17.815px" transform="matrix(0.996368,0,0,0.989713,0,0)"/>
+            <g transform="matrix(1,0,0,1,0,0.0105523)">
+                <path d="M20.956,6.808L20.937,17.16L19.004,18.365L18.983,11.989L16,13.725L16,20.022L12,22.341L10.659,21.588L10.659,12L19.877,6.186L20.956,6.808Z" style="fill:url(#_Radial5);stroke:rgb(0,76,156);stroke-width:0.9px;"/>
             </g>
         </g>
-        <g transform="matrix(1,0,0,1,0,0.5)">
+        <g transform="matrix(1,0,0,1,3.93041,2.77381)">
             <path d="M8,10L9,10L12,8L9,11L8,15L8,10Z" style="fill:white;"/>
         </g>
     </g>
     <defs>
         <image id="_Image2" width="22px" height="24px" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAYCAYAAAD+vg1LAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABXklEQVRIibWV0W6DMAxFTyCwdu3/f+m6FgrJHrCpayWMTp0lSxHBx7nB2IFtC84BsvNq4BawAVogyhogARMwy7qYoAS2wA7oxTvZn4ABGIG7S7BaWwBGgRyAT+AEnGV9kCSqoKZ4BQdzwg8HPDloJ+AoMaUEWTeiBB0LwKOBtTzuvAbPGEmdgXrJLc9V4T+qfodOnmcgK7gX4FkS9BsybflpAk2uFTMpOMrdqit0y6yKXqAjcAWaWMjc7IBaU/nKaICgUu39/cX8Hxoat/k2e0XyK5b/C/z2E6/9Yi1oNlrgTmA26yfwTKVT/WLJ+BofBTKxFPfA43r8r1w75WxiR2ElG1zrzX6twMTSjwfgBlyAb1lPrXk5Oc8GGNx7qvAqsC8DveuJFaB3NKscl8Ce8ibQSwkKpGigXqLKHFkak747CUTdjqi1OrZmnu21HjyIV2fenimtk8JOaQtMJcAPlgqIwYbHGwUAAAAASUVORK5CYII="/>
         <radialGradient id="_Radial3" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(-55.4193,2.13163e-14,2.13163e-14,55.4193,129.365,576.528)"><stop offset="0" style="stop-color:rgb(224,224,224);stop-opacity:1"/><stop offset="1" style="stop-color:rgb(130,130,130);stop-opacity:1"/></radialGradient>
-        <image id="_Image4" width="12px" height="18px" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAASCAYAAABvqT8MAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAA0UlEQVQokZWS2w6CMBBET0uRCCrG//9JFRAFig9Mk4ZbwiSbtNudmW23hm0YwAFnIFeuchuFFsiAAriL4AE7J1ip5kAJ3LR2QAdkgWCARKpXFV+0T3Q+BAcLpLIvRciVM4oxtBAuVUaqp0h1AadLPeQQq65hjJ8tVXu7sLK3O6oLwiEcIYxHCJ5pDv3a15ir9sAXeLPxl0KhB35AAzxFaOaEUdEBH+Clwlq5wUkpjhaopFqrnUFnOFlmTINrpVrJoY9cgWlYBdOkrdRa2fu4MOAPsFs3p2mP1U0AAAAASUVORK5CYII="/>
+        <image id="_Image4" width="12px" height="18px" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAASCAYAAABvqT8MAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAA5UlEQVQokXWS6w6CMAyFP+aQiBeI7/+S3gDFDX9wqsuEJQ2lO5dua8H6KgAP7IBatbtfATqgAvZAK0IEXE5wUq2BBjgp98AIVEYogI1UjwIf9L/RfjAHB5Syb0SoVSsUk7Vgh2oS1W2i+re8DnWWQ65qYeQpvbZS7SHQG3gp31pbXvYuayECHXDRfmtijuUVgQG46xtsY4lgfQdFTOtrDinZHAMQlkYjJ7yBpwiPNYK1ZYcPIvY5wUCjwq72qXr0liQxAFfFyO+Gvu/QMQ9ZmYBvQC+H7xzB/Fh75pd2sh6kHHMwwAdfjky9ZzYhCAAAAABJRU5ErkJggg=="/>
         <radialGradient id="_Radial5" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(9.93041,1.26326,2.19142,-17.2266,12,12)"><stop offset="0" style="stop-color:rgb(0,138,255);stop-opacity:1"/><stop offset="1" style="stop-color:rgb(0,28,96);stop-opacity:1"/></radialGradient>
     </defs>
 </svg>
