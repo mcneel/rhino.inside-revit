@@ -44,7 +44,7 @@ namespace RhinoInside.Revit.GH.Components
         {
           var list = geometry?.ToGeometryBaseMany().OfType<Rhino.Geometry.GeometryBase>().ToList();
 
-          if (list.Count == 0)
+          if (list?.Count == 0)
           {
             foreach (var dependent in element.GetDependentElements(null).Select(x => element.Document.GetElement(x)))
             {
