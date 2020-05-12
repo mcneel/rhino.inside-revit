@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
@@ -19,6 +20,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       manager.AddParameter(new Parameters.Element(), "Element", "E", "Element to query", GH_ParamAccess.item);
       manager[manager.AddParameter(new Parameters.Param_Enum<Types.ViewDetailLevel>(), "DetailLevel", "LOD", "Geometry Level of detail LOD [1, 3]", GH_ParamAccess.item)].Optional = true;
+      manager[manager.AddParameter(new Parameters.Element(), "Ignored", "I", "Elements to ignore while extracting the geometry", GH_ParamAccess.list)].Optional = true;
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
@@ -28,9 +30,20 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
+      bool IsEmpty(Rhino.Geometry.GeometryBase geometry)
+      {
+        if (geometry is Rhino.Geometry.Brep brep)
+          return brep.Surfaces.Count == 0;
+
+        return false;
+      }
+
       var element = default(DB.Element);
       if (!DA.GetData("Element", ref element))
         return;
+
+      var ignored = new List<DB.ElementId>();
+      DA.GetDataList("Ignored", ignored);
 
       var detailLevel = DB.ViewDetailLevel.Undefined;
       DA.GetData(1, ref detailLevel);
@@ -39,28 +52,53 @@ namespace RhinoInside.Revit.GH.Components
 
       if (element.get_BoundingBox(null) is DB.BoundingBoxXYZ)
       {
-        DB.Options options = null;
-        using (var geometry = element?.GetGeometry(detailLevel, out options)) using (options)
+        using (var transaction = ignored.Count > 0 ? new DB.Transaction(element.Document, Name) : default)
         {
-          var list = geometry?.ToGeometryBaseMany().OfType<Rhino.Geometry.GeometryBase>().ToList();
-
-          if (list?.Count == 0)
+          if (transaction is object)
           {
-            foreach (var dependent in element.GetDependentElements(null).Select(x => element.Document.GetElement(x)))
+            transaction.Start();
+            if (element.Document.Delete(ignored).Count > 0)
+              element.Document.Regenerate();
+          }
+
+          // Extract the geometry
+          {
+            DB.Options options = null;
+            using (var geometry = element?.GetGeometry(detailLevel, out options)) using (options)
             {
-              if (dependent.get_BoundingBox(null) is DB.BoundingBoxXYZ)
+              var list = geometry?.
+                ToGeometryBaseMany().
+                OfType<Rhino.Geometry.GeometryBase>().
+                Where(x => !IsEmpty(x)).
+                ToList();
+
+              if (list?.Count == 0)
               {
-                DB.Options dependentOptions = null;
-                using (var dependentGeometry = dependent?.GetGeometry(detailLevel, out dependentOptions)) using (dependentOptions)
+                foreach (var dependent in element.GetDependentElements(null).Select(x => element.Document.GetElement(x)))
                 {
-                  if (dependentGeometry is object)
-                    list.AddRange(dependentGeometry.ToGeometryBaseMany().OfType<Rhino.Geometry.GeometryBase>());
+                  if (dependent.get_BoundingBox(null) is DB.BoundingBoxXYZ)
+                  {
+                    DB.Options dependentOptions = null;
+                    using (var dependentGeometry = dependent?.GetGeometry(detailLevel, out dependentOptions)) using (dependentOptions)
+                    {
+                      if (dependentGeometry is object)
+                        list.AddRange(dependentGeometry.ToGeometryBaseMany().OfType<Rhino.Geometry.GeometryBase>());
+                    }
+                  }
                 }
               }
+
+              var valid = list.Where(x => !IsEmpty(x));
+              DA.SetDataList("Geometry", valid);
             }
           }
 
-          DA.SetDataList("Geometry", list);
+          if (transaction is object)
+          {
+            var failure = transaction.GetFailureHandlingOptions();
+            failure.SetClearAfterRollback(true);
+            transaction?.RollBack(failure);
+          }
         }
       }
     }
