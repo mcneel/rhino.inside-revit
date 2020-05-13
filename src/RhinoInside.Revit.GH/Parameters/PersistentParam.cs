@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Parameters
   public abstract class GH_PersistentParam<T> : Grasshopper.Kernel.GH_PersistentParam<T>
     where T : class, IGH_Goo
   {
-    protected override sealed Bitmap Icon => ((Bitmap) Properties.Resources.ResourceManager.GetObject(typeof(T).Name)) ??
+    protected override sealed Bitmap Icon => ((Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
                                              ImageBuilder.BuildIcon(IconTag);
 
     protected virtual string IconTag => typeof(T).Name.Substring(0, 1);
