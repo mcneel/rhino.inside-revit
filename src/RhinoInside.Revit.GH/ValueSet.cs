@@ -194,17 +194,17 @@ namespace Grasshopper.External.Special
           }
           case GH_CanvasChannel.Objects:
           {
+            var bounds = Bounds;
+            if (!canvas.Viewport.IsVisible(ref bounds, 10))
+              return;
+
             var palette = GH_CapsuleRenderEngine.GetImpliedPalette(Owner);
-            using (var capsule = GH_Capsule.CreateCapsule(Bounds, palette))
+            using (var capsule = GH_Capsule.CreateCapsule(bounds, palette))
             {
               capsule.AddInputGrip(InputGrip.Y);
               capsule.AddOutputGrip(OutputGrip.Y);
               capsule.Render(canvas.Graphics, Selected, Owner.Locked, false);
             }
-
-            var bounds = Bounds;
-            if (!canvas.Viewport.IsVisible(ref bounds, 10))
-              return;
 
             var alpha = GH_Canvas.ZoomFadeLow;
             if (alpha > 0)
@@ -635,7 +635,7 @@ namespace Grasshopper.External.Special
       public static bool IsComparable(IGH_Goo goo)
       {
         return IsEquatable(goo.GetType()) ||
-        goo is IGH_GeometricGoo geometry ||
+        goo is IGH_GeometricGoo ||
         goo is IGH_QuickCast ||
         goo is GH_StructurePath ||
         goo is GH_Culture ||
