@@ -242,7 +242,10 @@ namespace RhinoInside.Revit.External
 
     /// <summary>
     /// Creates an awaitable task that asynchronously yields back to the current context when
-    /// gate is open and Revit API is fully available.
+    /// gate is open next time and Revit API is fully available.
+    /// <para>
+    /// Awaitable task result is the current Revit <see cref="Autodesk.Revit.UI.UIApplication"/>.
+    /// </para>
     /// </summary>
     /// <param name="name"><see cref="Autodesk.Revit.UI.IExternalEventHandler"/> name</param>
     /// <returns></returns>
@@ -261,6 +264,7 @@ namespace RhinoInside.Revit.External
         public readonly string Name;
         Action action;
         ExternalEvent external;
+        readonly bool result = !IsOpen;
 
         internal OpenAwaiter(string name)
         {
@@ -271,7 +275,7 @@ namespace RhinoInside.Revit.External
 
         #region Awaiter
         public bool IsCompleted => IsOpen;
-        public void GetResult() { }
+        public bool GetResult() => result;
         #endregion
 
         #region ICriticalNotifyCompletion
@@ -313,6 +317,9 @@ namespace RhinoInside.Revit.External
     /// <summary>
     /// Creates an awaitable task that runs synchronously if gate is already open or
     /// asynchronously waits until gate opens and yields back to the current context.
+    /// <para>
+    /// Awaitable task result is true if the <see cref="ActivationGate"/> is opened here or false if it was already open.
+    /// </para>
     /// </summary>
     /// <param name="name"><see cref="Autodesk.Revit.UI.IExternalEventHandler"/> name</param>
     /// <returns></returns>
