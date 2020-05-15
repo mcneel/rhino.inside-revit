@@ -211,7 +211,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     }
 
     public static DB.Curve ToCurve(this Ellipse value) => value.ToCurve(new Interval(0.0, 2.0 * Math.PI), UnitConverter.ToHostUnits);
-    public static DB.Curve ToCurve(this Ellipse value, double factor) => value.ToCurve(new Interval(0.0, 2.0 * Math.PI), UnitConverter.ToHostUnits);
+    public static DB.Curve ToCurve(this Ellipse value, double factor) => value.ToCurve(new Interval(0.0, 2.0 * Math.PI), factor);
     public static DB.Curve ToCurve(this Ellipse value, Interval interval) => value.ToCurve(interval, UnitConverter.ToHostUnits);
     public static DB.Curve ToCurve(this Ellipse value, Interval interval, double factor)
     {
