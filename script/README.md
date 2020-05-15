@@ -24,7 +24,7 @@ pipenv run python dbgrevit.py 2019 "C:\Views.rvt"
 pipenv run python dbgrevit.py 2019 "C:\Views.rvt" "C:\Definition.gh"
 ```
 
-## `dbgpkg.py`
+## `dbgzip.py`
 
 Utility to process debug packages (ZIP) submitted as load errors to the support ticketing system. Stores temporary artifacts under `script/.packages/`
 
