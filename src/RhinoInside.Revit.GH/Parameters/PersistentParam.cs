@@ -40,8 +40,6 @@ namespace RhinoInside.Revit.GH.Parameters
       Duplicates = 1 << 2,
     };
 
-    const int a = (int) DataCulling.Duplicates;
-
     DataCulling culling = DataCulling.None;
     public DataCulling Culling
     {
