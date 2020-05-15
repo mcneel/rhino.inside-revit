@@ -50,7 +50,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public virtual DataCulling CullingMask =>
       DataCulling.Nulls | DataCulling.Invalids |
       (
-        CullDuplicates ?
+        IsEquatable(typeof(T)) ?
         DataCulling.Duplicates :
         DataCulling.None
       );
@@ -66,8 +66,6 @@ namespace RhinoInside.Revit.GH.Parameters
 
       return false;
     }
-
-    static bool CullDuplicates = IsEquatable(typeof(T));
 
     public override bool Read(GH_IReader reader)
     {
