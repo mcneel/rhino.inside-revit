@@ -2,8 +2,8 @@
 """Analyzes the debug ZIP packages submitteed by customers
 
 Usage:
-    {cliname} <sb_ticket> --token=<api_token>
-    {cliname} <zip_file> --ticket=<ticket_url>
+    {cliname} <sb_ticket> [--token=<api_token>]
+    {cliname} <zip_file> [--ticket=<ticket_url>]
 
 Options:
     -h, --help                          Show this help
@@ -11,6 +11,8 @@ Options:
     --token=<api_token>                 API token to access SupportBee
     <zip_file>                          Debug package zip file path
     --ticket=<ticket_url>               SupportBee ticket url for reporting
+
+SupportBee API token can also be set in SB_TOKEN environment variable.
 """
 import io
 import sys
@@ -84,6 +86,7 @@ class DebugFileParts:
     RIRJournalRibbonEvent = "Jrn.RibbonEvent \"Execute external command:CustomCtrl_%CustomCtrl_%Add-Ins%Rhinoceros%CommandRhinoInside:RhinoInside.Revit.UI.CommandRhinoInside\"" #pylint: disable=line-too-long
     ConsoleLog = "Console/Startup.txt"
     AppsCSV = "Addins/{name}.csv"
+    AttachmentsDir = "Attachments"
 
 
 class DebugFile:
@@ -114,6 +117,13 @@ class DebugFile:
         """Debug file root folder"""
         first_file = self._dfile.namelist()[0]
         return op.dirname(first_file)
+
+    @property
+    def has_dump(self):
+        """Check if package contains a crash dump attachment"""
+        for entry in self._dfile.namelist():
+            if entry.endswith('.dmp'):
+                return True
 
     def read_txt(self, filename, encoding='utf-8'):
         """Read contents of given file"""
@@ -258,14 +268,16 @@ def process_dbpkg(zip_file, ticket_url=None):
     # open zip file
     new_report = '\n'
     with DebugFile(zip_file) as dfile:
+        # determine report type
+        report_type = 'Runtime Error' if dfile.has_dump else 'Load Error'
         if ticket_url:
             # make a title
             ticket_id = extract_sb_ticket_id(ticket_url)
             if ticket_id:
                 # create a title for the report
-                new_report += 'Load Error (SB %s)\n\n' % ticket_id
+                new_report += '%s (SB %s)\n\n' % (report_type, ticket_id)
             else:
-                new_report += 'Load Error\n\n'
+                new_report += '%s\n\n' % report_type
             # add ticket link
             new_report += '# Ticket Info\n'
             new_report += "[Support Ticket]({})\n\n".format(ticket_url)
@@ -348,9 +360,13 @@ def run_command(cfg: CLIArgs):
         process_dbpkg(zip_file=cfg.zip_file, ticket_url=cfg.sb_ticket)
     # otherwise if supportbee url is available
     elif cfg.sb_ticket:
+        # ensure api token
+        API_TOKEN = cfg.sb_token or os.environ.get('SBTOKEN', None)
+        if not API_TOKEN:
+            raise Exception("SupportBee API Token is required")
         # download the zip file from ticket
         zip_file = process_sb_ticket(ticket_url=cfg.sb_ticket,
-                                     api_token=cfg.sb_token)
+                                     api_token=API_TOKEN)
         if zip_file:
             # process zip file, include ticket url for reporting
             process_dbpkg(zip_file=zip_file, ticket_url=cfg.sb_ticket)
