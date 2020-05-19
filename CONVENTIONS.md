@@ -33,5 +33,5 @@ It's a goal to achieve a one to one correspondance betwen what the user can read
 - Component Parameters
   - Use only alphanumeric characters and avoid characters like question or exclamation marks.
   - Use singular when the parameter access is `item`, plural when is `list` or `tree`.
-  - Use the type name as the first choice, For example 'Color' in 'Add Material'.
+  - Use the type name as the first choice, *For example 'Color' in 'Add Material'.*
   - **If it is reflecting a Revit element parameter use the exact same name Revit uses in English.**
