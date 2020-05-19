@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Events;
@@ -47,7 +45,6 @@ namespace RhinoInside.Revit.GH
       previewServer.Register();
 
       Revit.DocumentChanged += OnDocumentChanged;
-      Revit.ApplicationUI.Idling += OnIdle;
 
       External.ActivationGate.Enter += ModalScope_Enter;
       External.ActivationGate.Exit  += ModalScope_Exit;
@@ -98,7 +95,6 @@ namespace RhinoInside.Revit.GH
       External.ActivationGate.Exit  -= ModalScope_Exit;
       External.ActivationGate.Enter -= ModalScope_Enter;
 
-      Revit.ApplicationUI.Idling -= OnIdle;
       Revit.DocumentChanged -= OnDocumentChanged;
 
       // Unregister PreviewServer
@@ -106,14 +102,21 @@ namespace RhinoInside.Revit.GH
       previewServer = null;
     }
 
+    /// <summary>
+    /// Show Grasshopper window
+    /// </summary>
     public static void Show()
     {
       Script.ShowEditor();
       Rhinoceros.MainWindow.BringToFront();
     }
 
+    /// <summary>
+    /// Show Grasshopper window asynchronously
+    /// </summary>
     public static async void ShowAsync()
     {
+      // Yield execution back to Revit and show Grasshopper window asynchronously.
       await External.ActivationGate.Yield();
 
       Show();
@@ -301,12 +304,7 @@ namespace RhinoInside.Revit.GH
       {
         foreach (GH_Document definition in Instances.DocumentServer)
         {
-          bool expireNow =
-          (e.Operation == UndoOperation.TransactionCommitted || e.Operation == UndoOperation.TransactionUndone || e.Operation == UndoOperation.TransactionRedone) &&
-          GH_Document.EnableSolutions &&
-          Instances.ActiveCanvas.Document == definition &&
-          definition.Enabled &&
-          definition.SolutionState != GH_ProcessStep.Process;
+          bool expireNow = definition.SolutionState != GH_ProcessStep.Process;
 
           var change = new DocumentChangedEvent()
           {
@@ -347,7 +345,7 @@ namespace RhinoInside.Revit.GH
 
           if (definition.SolutionState != GH_ProcessStep.Process)
           {
-            changeQuque.Enqueue(change);
+            DocumentChangedEvent.Enqueue(change);
           }
           else if (definition == Instances.ActiveCanvas.Document)
           {
@@ -378,11 +376,30 @@ namespace RhinoInside.Revit.GH
 
     class DocumentChangedEvent
     {
+      static readonly ExternalEvent FlushQueue = ExternalEvent.Create(new FlushQueueHandler());
+      class FlushQueueHandler : External.UI.EventHandler
+      {
+        public override string GetName() => nameof(FlushQueue);
+        protected override void Execute(UIApplication app)
+        {
+          while (changeQueue.Count > 0)
+            changeQueue.Dequeue().NewSolution();
+        }
+      }
+
+      public static readonly Queue<DocumentChangedEvent> changeQueue = new Queue<DocumentChangedEvent>();
+      public static void Enqueue(DocumentChangedEvent value)
+      {
+        changeQueue.Enqueue(value);
+        FlushQueue.Raise();
+      }
+
       public UndoOperation Operation;
-      public Document Document = null;
-      public GH_Document Definition = null;
+      public Document Document;
+      public GH_Document Definition;
       public readonly List<IGH_ActiveObject> ExpiredObjects = new List<IGH_ActiveObject>();
-      public void Apply()
+
+      void NewSolution()
       {
         foreach (var obj in ExpiredObjects)
           obj.ExpireSolution(false);
@@ -401,14 +418,6 @@ namespace RhinoInside.Revit.GH
           }
         }
       }
-    }
-
-    Queue<DocumentChangedEvent> changeQuque = new Queue<DocumentChangedEvent>();
-
-    void OnIdle(object sender, Autodesk.Revit.UI.Events.IdlingEventArgs e)
-    {
-      while (changeQuque.Count > 0)
-        changeQuque.Dequeue().Apply();
     }
   }
 }
