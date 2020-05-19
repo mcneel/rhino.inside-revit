@@ -9,12 +9,12 @@ namespace RhinoInside.Revit.GH.Types
   public class Group : GraphicalElement
   {
     public override string TypeDescription => "Represents a Revit group element";
-    protected override Type ScriptVariableType => typeof(Autodesk.Revit.DB.HostObject);
-    public static explicit operator Autodesk.Revit.DB.Group(Group self) =>
-      self.Document?.GetElement(self) as Autodesk.Revit.DB.Group;
+    protected override Type ScriptVariableType => typeof(DB.Group);
+    public static explicit operator DB.Group(Group self) =>
+      self.Document?.GetElement(self) as DB.Group;
 
     public Group() { }
-    public Group(Autodesk.Revit.DB.Group host) : base(host) { }
+    public Group(DB.Group value) : base(value) { }
 
     #region IGH_PreviewData
     public override void DrawViewportWires(GH_PreviewWireArgs args)
