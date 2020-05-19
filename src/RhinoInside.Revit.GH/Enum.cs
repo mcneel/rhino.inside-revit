@@ -11,7 +11,7 @@ using Grasshopper.Kernel.Types;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public abstract class GH_Enumerate : GH_Integer
+  public abstract class GH_Enumerate : GH_Integer, IComparable
   {
     protected GH_Enumerate() { }
     protected GH_Enumerate(int value) : base(value) { }
@@ -89,8 +89,18 @@ namespace RhinoInside.Revit.GH.Types
       EnumTypes.TryGetValue(type, out paramTypes);
 
     public virtual ReadOnlyCollection<int> GetValues() => Array.AsReadOnly(Enum.GetValues(UnderlyingEnumType) as int[]);
+
     public virtual string Text => Value.ToString();
 
+    #region IComparable
+    int IComparable.CompareTo(object obj)
+    {
+      if (obj is GH_Enumerate other)
+        return Value - other.Value;
+
+      throw new ArgumentException($"{nameof(obj)} is not a {nameof(GH_Enumerate)}", nameof(obj));
+    }
+    #endregion
   }
 
   public abstract class GH_Enum<T> : GH_Enumerate
@@ -198,7 +208,6 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   using Grasshopper.Kernel.Extensions;
   using Kernel.Attributes;
-  using RhinoInside.Revit.GH.Types;
 
   public class Param_Enum<T> : GH_PersistentParam<T>, IGH_ObjectProxy
     where T : Types.GH_Enumerate
