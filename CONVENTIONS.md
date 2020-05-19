@@ -28,7 +28,7 @@ It's a goal to achieve a one to one correspondance betwen what the user can read
   - Use Type Name as Noun when there is a clear primary one.
   - Use `Construct {Type Name}` to components that construct an object from its constituen parts.
   - Use `Deconstruct {Type Name}` to components that deconstruct an object into its constituen parts.
-- Use `{Type Name} {Property Name}` when the component partially deconstruct an object like a property accessor. For example 'Curve Domain' or 'Element Geometry'.
+- Use `{Type Name} {Property Name}` when the component partially deconstruct an object like a property accessor. *For example 'Curve Domain' or 'Element Geometry'.*
 - Use `Add {Type Name}` for components that add a new Element to a Revit model. For example 'Add Level'.
 - Component Parameters
   - Use only alphanumeric characters and avoid characters like question or exclamation marks.
