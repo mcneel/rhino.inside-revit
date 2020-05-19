@@ -24,7 +24,7 @@ It's a goal to achieve a one to one correspondance betwen what the user can read
   
 #### Components naming:
 - **Use singular form for nouns** instead of plural form as your first choice. For example 'Deconstruct Brep' instead of 'Deconstruct Breps'.
-- Use `{Action} {Noun}` as the prefered form. For example 'Divide Curve' instead of 'Curve Divide'.
+- Use `{Action} {Noun}` as the prefered form. *For example 'Divide Curve' instead of 'Curve Divide'.*
   - Use Type Name as Noun when there is a clear primary one.
   - Use `Construct {Type Name}` to components that construct an object from its constituen parts.
   - Use `Deconstruct {Type Name}` to components that deconstruct an object into its constituen parts.
