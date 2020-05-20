@@ -1,12 +1,12 @@
-# Build RhinoInside Revit from source
+# Build Rhino.Inside Revit from source
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
 ### Prerequisites
 * Git ([download](https://git-scm.com/downloads))
 * Visual Studio 2017 (15.9 or above) ([download](https://visualstudio.microsoft.com/downloads/))
-* .NET Framework 4.7 ([download](https://www.microsoft.com/net/download/visual-studio-sdks)): You can also ask the Visual Studio installer to install this framework as well
+* .NET Framework Developer Pack (4.6.1, 4.6.2, 4.7, 4.8) ([download](https://www.microsoft.com/net/download/visual-studio-sdks))
 * Rhino WIP ([download](https://www.rhino3d.com/download/rhino/wip))
-* Autodesk Revit 2018-2021 ([download](https://www.autodesk.com/products/revit/free-trial))
+* Autodesk Revit 2017-2021 ([download](https://www.autodesk.com/products/revit/free-trial))
 * Add this link to your bookmarks ;) ([API docs](https://www.apidocs.co/apps/))
 
 ## Getting Source & Build
