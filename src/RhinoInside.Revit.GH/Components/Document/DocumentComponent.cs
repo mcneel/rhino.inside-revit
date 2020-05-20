@@ -191,11 +191,14 @@ namespace RhinoInside.Revit.GH.Components
 
     IGH_Param IGH_VariableParameterComponent.CreateParameter(GH_ParameterSide side, int index)
     {
-      var Document = new Parameters.Document();
-      Document.Name = "Document";
-      Document.NickName = "Document";
-      Document.Description = "Document to query elements";
-      Document.Access = GH_ParamAccess.item;
+      var Document = new Parameters.Document()
+      {
+        Name = "Document",
+        NickName = "Document",
+        Description = "Document to query elements",
+        Access = GH_ParamAccess.item,
+      };
+
       Message = string.Empty;
 
       return Document;

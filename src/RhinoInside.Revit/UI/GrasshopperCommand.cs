@@ -63,8 +63,7 @@ namespace RhinoInside.Revit.UI
     {
       // check to see if any document path is provided in journal data
       // if yes, open the document
-      string filename = null;
-      if (data.JournalData.TryGetValue("Open", out filename) && File.Exists(filename))
+      if (data.JournalData.TryGetValue("Open", out var filename) && File.Exists(filename))
         GH.Guest.ShowAndOpenDocumentAsync(filename);
       // otherwise, just open the GH window
       else
