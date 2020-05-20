@@ -8,6 +8,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.External.DB.Extensions;
+using DBX = RhinoInside.Revit.External.DB;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -41,6 +42,16 @@ namespace RhinoInside.Revit.GH.Components
     #region IFailuresPreprocessor
     void AddRuntimeMessage(DB.FailureMessageAccessor error, bool? solved = null)
     {
+      if (error.GetFailureDefinitionId() == DBX.ExternalFailures.TransactionFailures.SimulatedTransaction)
+      {
+        // Simulation signal is already reflected in the canvas changing the component color,
+        // So it's up to the component show relevant information about what 'simulation' means.
+        // As an example Purge component shows a remarks that reads like 'No elements were deleted'.
+        //AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, error.GetDescriptionText());
+
+        return;
+      }
+
       var level = GH_RuntimeMessageLevel.Remark;
       switch (error.GetSeverity())
       {
@@ -141,6 +152,9 @@ namespace RhinoInside.Revit.GH.Components
         failuresAccessor.DeleteAllWarnings();
       }
 
+      if(failuresAccessor.GetSeverity() >= DB.FailureSeverity.Error)
+        return DB.FailureProcessingResult.ProceedWithRollBack;
+
       return DB.FailureProcessingResult.Continue;
     }
     #endregion
@@ -158,14 +172,13 @@ namespace RhinoInside.Revit.GH.Components
     }
     #endregion
 
-    protected void CommitTransaction(DB.Document doc, DB.Transaction transaction)
+    protected DB.TransactionStatus CommitTransaction(DB.Document doc, DB.Transaction transaction)
     {
       var options = transaction.GetFailureHandlingOptions();
-#if !DEBUG
       options = options.SetClearAfterRollback(true);
-#endif
-      options = options.SetDelayedMiniWarnings(true);
+      options = options.SetDelayedMiniWarnings(false);
       options = options.SetForcedModalHandling(true);
+
       options = options.SetFailuresPreprocessor(this);
       options = options.SetTransactionFinalizer(this);
 
@@ -185,9 +198,9 @@ namespace RhinoInside.Revit.GH.Components
           {
             OnBeforeCommit(doc, transaction.GetName());
 
-            transaction.Commit(options);
+            return transaction.Commit(options);
           }
-          else transaction.RollBack(options);
+          else return transaction.RollBack(options);
         }
         finally
         {
@@ -441,7 +454,11 @@ namespace RhinoInside.Revit.GH.Components
       }
     }
 
-    protected void CommitTransaction() => base.CommitTransaction(Revit.ActiveDBDocument, CurrentTransaction);
+    protected DB.TransactionStatus CommitTransaction(DB.Document document)
+    {
+      try     { return base.CommitTransaction(document, CurrentTransaction); }
+      finally { CurrentTransaction.Dispose(); CurrentTransaction = default; }
+    }
     #endregion
 
     // Step 1.
@@ -483,7 +500,8 @@ namespace RhinoInside.Revit.GH.Components
 
         if (Phase != GH_SolutionPhase.Failed)
         {
-          CommitTransaction();
+          if (Revit.ActiveDBDocument is DB.Document Document)
+            CommitTransaction(Document);
         }
       }
       finally
