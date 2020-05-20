@@ -263,8 +263,10 @@
     <Compile Include="Components\Element\ModelLine\ByCurve.cs" />
     <Compile Include="Components\Element\Passport.cs" />
     <Compile Include="Components\Element\Preview.cs" />
+    <Compile Include="Components\Element\Purge.cs" />
     <Compile Include="Components\Element\Roof\ByOutline.cs" />
     <Compile Include="Components\Element\SketchPlane\ByPlane.cs" />
+    <Compile Include="Components\Element\Sketch\Deconstruct.cs" />
     <Compile Include="Components\Element\Topography\ByMesh.cs" />
     <Compile Include="Components\Element\Topography\ByPoints.cs" />
     <Compile Include="Components\Element\View\Active.cs" />
@@ -322,6 +324,7 @@
     <Compile Include="Parameters\Material.cs" />
     <Compile Include="Parameters\Parameter.cs" />
     <Compile Include="Parameters\PersistentParam.cs" />
+    <Compile Include="Parameters\Sketch.cs" />
     <Compile Include="Parameters\SketchPlane.cs" />
     <Compile Include="Parameters\ValueList.cs" />
     <Compile Include="Parameters\View.cs" />
@@ -362,10 +365,12 @@
     <Compile Include="Types\Panel.cs" />
     <Compile Include="Types\Parameter.cs" />
     <Compile Include="Types\DatumPlane.cs" />
+    <Compile Include="Types\Sketch.cs" />
     <Compile Include="Types\SketchPlane.cs" />
     <Compile Include="Types\Material.cs" />
     <Compile Include="Types\HostObject.cs" />
     <Compile Include="Types\DataObject.cs" />
+    <Compile Include="Types\TransactionSignal.cs" />
     <Compile Include="Types\View.cs" />
     <Compile Include="Types\CurtainGridLine.cs" />
     <Compile Include="Types\SpatialElement.cs" />

@@ -47,6 +47,7 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(DB.Material),          (element)=> new Material      (element as DB.Material)          },
       { typeof(DB.GraphicsStyle),     (element)=> new GraphicsStyle (element as DB.GraphicsStyle)     },
 
+      { typeof(DB.Sketch),            (element)=> new Sketch        (element as DB.Sketch)            },
       { typeof(DB.SketchPlane),       (element)=> new SketchPlane   (element as DB.SketchPlane)       },
       { typeof(DB.DatumPlane),        (element)=> new DatumPlane    (element as DB.DatumPlane)        },
       { typeof(DB.Level),             (element)=> new Level         (element as DB.Level)             },
@@ -264,6 +265,16 @@ namespace RhinoInside.Revit.GH.Types
           return false;
 
         target = (Q) (object) new GH_Surface(surface);
+        return true;
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Brep)))
+      {
+        var surface = Surface;
+        if (surface is null)
+          return false;
+
+        target = (Q) (object) new GH_Brep(surface);
         return true;
       }
 
