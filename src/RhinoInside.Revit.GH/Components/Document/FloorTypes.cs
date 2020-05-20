@@ -44,7 +44,7 @@ namespace RhinoInside.Revit.GH.Components
       string name = null;
       DA.GetData("Name", ref name);
 
-      var floorFunction = DBX.FloorFunction.Interior;
+      var floorFunction = default(DBX.FloorFunction);
       bool filterFunction = DA.GetData("Function", ref floorFunction);
 
       var defaultThickness = Rhino.Geometry.Interval.Unset;
