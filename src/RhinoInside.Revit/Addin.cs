@@ -113,7 +113,12 @@ namespace RhinoInside.Revit
       }
     }
 
-    public Addin() : base(new Guid("02EFF7F0-4921-4FD3-91F6-A87B6BA9BF74")) { }
+    public Addin() : base(new Guid("02EFF7F0-4921-4FD3-91F6-A87B6BA9BF74")) => Instance = this;
+
+    ~Addin() => Instance = default;
+
+    internal static Addin Instance { get; set; }
+    public static AddInId Id => Instance;
     #endregion
 
     #region IExternalApplication Members
@@ -125,6 +130,9 @@ namespace RhinoInside.Revit
         return Result.Cancelled;
 
       ApplicationUI = applicationUI;
+
+      // Register Revit Failures
+      External.DB.ExternalFailures.CreateFailureDefinitions();
 
       if (applicationUI.IsLateAddinLoading)
       {
@@ -296,7 +304,7 @@ namespace RhinoInside.Revit
           $"• Version: {app.VersionNumber} ({app.VersionBuild})\n" +
 #endif
           $"• Path: {Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName)}\n" +
-          $"• Language: {app.Language.ToString()}",
+          $"• Language: {app.Language}",
           FooterText = $"Current Rhino WIP version: {RhinoVersion}"
         }
       )
@@ -313,10 +321,10 @@ namespace RhinoInside.Revit
 
     static string CallerFilePath([System.Runtime.CompilerServices.CallerFilePath] string CallerFilePath = "") => CallerFilePath;
     public static string SourceCodePath => Path.GetDirectoryName(CallerFilePath());
+    public static DateTime BuildDate => new DateTime(2000, 1, 1).AddDays(Version.Build).AddSeconds(Version.Revision * 2);
     public static int DaysUntilExpiration => Math.Max(0, 45 - (DateTime.Now - BuildDate).Days);
 
     public static Version Version => Assembly.GetExecutingAssembly().GetName().Version;
-    public static DateTime BuildDate => new DateTime(2000, 1, 1).AddDays(Version.Build).AddSeconds(Version.Revision * 2);
     public static string DisplayVersion => $"{Version} ({BuildDate})";
     #endregion
   }
