@@ -1,15 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using GH_IO.Serialization;
-using Grasshopper.GUI.Canvas;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Attributes;
 using Grasshopper.Kernel.Parameters;
-using Grasshopper.Kernel.Types;
 using DB = Autodesk.Revit.DB;
 using DBX = RhinoInside.Revit.External.DB;
 
@@ -20,8 +16,6 @@ namespace RhinoInside.Revit.GH.Components
     public override Guid ComponentGuid => new Guid("05539772-7205-4D58-8093-1715DAF213AF");
     public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.obscure;
     protected override string IconTag => "P";
-
-    protected DBX.TransactionSignal Signal = DBX.TransactionSignal.Effective;
 
     enum ComponentCommand
     {
@@ -78,14 +72,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       new ParamDefinition
       (
-        new Parameters.Param_Enum<Types.TransactionSignal>()
-        {
-          Name = "Signal",
-          NickName = "S",
-          Description = "Transaction Signal",
-          Access = GH_ParamAccess.tree,
-          WireDisplay = GH_ParamWireDisplay.hidden
-        },
+        CreateSignalParam(),
         ParamRelevance.None
       ),
       new ParamDefinition
@@ -195,93 +182,11 @@ namespace RhinoInside.Revit.GH.Components
       }
     }
 
-    static DBX.TransactionSignal? MaxSignal(IEnumerable<IGH_Goo> signals)
-    {
-      if (signals is object)
-      {
-        DBX.TransactionSignal? max = default;
-        foreach (var goo in signals)
-        {
-          if (goo is Types.TransactionSignal signal)
-          {
-            var value = signal.Value;
-            if (!max.HasValue)
-              max = value;
-
-            if (value == DBX.TransactionSignal.Frozen)
-              continue;
-
-            if (Math.Abs((int) value) > (int) max.Value)
-              max = value;
-          }
-        }
-
-        return max;
-      }
-
-      return default;
-    }
-
-    public override void ExpireSolution(bool recompute)
-    {
-      var _Signal_ = Params.IndexOfInputParam("Signal");
-      if (_Signal_ >= 0)
-      {
-        Phase = GH_SolutionPhase.Blank;
-
-        if (Params.Input[_Signal_].DataType == GH_ParamData.@void)
-          Signal = DBX.TransactionSignal.Frozen;
-
-        OnSolutionExpired(recompute);
-      }
-      else
-      {
-        Signal = DBX.TransactionSignal.Effective;
-        base.ExpireSolution(recompute);
-      }
-    }
-
     public override void CollectData()
     {
-      if (Phase == GH_SolutionPhase.Collected)
-        return;
-
       base.CollectData();
 
       Message = Command == ComponentCommand.Purge ? "Purge" : "Delete";
-
-      var _Signal_ = Params.IndexOfInputParam("Signal");
-      if (_Signal_ >= 0)
-      {
-        var signal = Params.Input[_Signal_];
-        Signal = MaxSignal(signal.VolatileData.AllData(false)).GetValueOrDefault();
-
-        if (signal.DataType == GH_ParamData.@void)
-          signal.NickName = "Signal";
-        else
-          signal.NickName = Signal.ToString();
-
-        if (Signal != DBX.TransactionSignal.Frozen)
-        {
-          if (OnPingDocument() is GH_Document doc)
-          {
-            doc.ScheduleSolution
-            (
-              0,
-              x =>
-              {
-                base.ClearData();
-                base.ExpireDownStreamObjects();
-
-                // Mark it as Collected to avoid collect it again
-                Phase = GH_SolutionPhase.Collected;
-              }
-            );
-          }
-        }
-
-        Phase = GH_SolutionPhase.Computed;
-      }
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -397,108 +302,12 @@ namespace RhinoInside.Revit.GH.Components
     }
 
     #region UI
-    new class Attributes : GH_ComponentAttributes
-    {
-      public Attributes(TransactionalComponent owner) : base(owner) { }
-
-      protected override void Render(GH_Canvas canvas, Graphics graphics, GH_CanvasChannel channel)
-      {
-        if (channel == GH_CanvasChannel.Objects && Owner is ElementPurge component)
-        {
-          var basePalette = Owner.Hidden || !Owner.IsPreviewCapable ? GH_Palette.Hidden : GH_Palette.Normal;
-          var baseStyle = GH_CapsuleRenderEngine.GetImpliedStyle(basePalette, Selected, Owner.Locked, Owner.Hidden);
-
-          var palette = GH_CapsuleRenderEngine.GetImpliedPalette(Owner);
-          if (palette == GH_Palette.Normal && !Owner.IsPreviewCapable)
-            palette = GH_Palette.Hidden;
-
-          var style = GH_CapsuleRenderEngine.GetImpliedStyle(palette, Selected, Owner.Locked, Owner.Hidden);
-          var fill = style.Fill;
-          var edge = style.Edge;
-          var text = style.Text;
-
-          try
-          {
-            switch(component.Signal)
-            {
-              case DBX.TransactionSignal.Frozen:
-
-                style.Edge = Color.FromArgb(150, fill.R, fill.G, fill.B);
-                if (Selected)
-                  style.Fill = Color.FromArgb(GH_Skin.palette_trans_selected.Fill.A, baseStyle.Fill.R, baseStyle.Fill.G, baseStyle.Fill.B);
-                else
-                  style.Fill = Color.FromArgb(GH_Skin.palette_trans_standard.Fill.A, baseStyle.Fill.R, baseStyle.Fill.G, baseStyle.Fill.B);
-
-                style.Text = baseStyle.Text;
-                break;
-
-              case DBX.TransactionSignal.Effective:
-
-                if (palette == GH_Palette.Normal || palette == GH_Palette.Hidden)
-                {
-                  if (Selected)
-                  {
-                    style.Fill = GH_Skin.palette_black_selected.Fill;
-                    style.Text = GH_Skin.palette_black_selected.Text;
-                  }
-                  else
-                  {
-                    style.Edge = Color.FromArgb(255, 80, 80, 80);
-                    style.Fill = GH_Skin.palette_black_standard.Fill;
-                    style.Text = GH_Skin.palette_black_standard.Text;
-                  }
-                }
-
-                break;
-              case DBX.TransactionSignal.Simulated:
-
-                if (palette == GH_Palette.Normal || palette == GH_Palette.Hidden)
-                  style.Edge = style.Edge;
-                else
-                  style.Edge = Color.FromArgb(150, fill.R, fill.G, fill.B);
-
-                style.Fill = baseStyle.Fill;
-                style.Text = baseStyle.Text;
-
-                break;
-            }
-
-            base.Render(canvas, graphics, channel);
-          }
-          finally
-          {
-            style.Fill = fill;
-            style.Edge = edge;
-            style.Text = text;
-          }
-        }
-        else base.Render(canvas, graphics, channel);
-      }
-
-      bool CanvasFullNames = Grasshopper.CentralSettings.CanvasFullNames;
-      public override void ExpireLayout()
-      {
-        if (CanvasFullNames != Grasshopper.CentralSettings.CanvasFullNames)
-        {
-          // TODO : convert from short to long names
-          CanvasFullNames = Grasshopper.CentralSettings.CanvasFullNames;
-        }
-
-        base.ExpireLayout();
-      }
-    }
-
-    public override void CreateAttributes() => m_attributes = new Attributes(this);
-
     public bool CanInsertParameter(GH_ParameterSide side, int index)
     {
       if (side == GH_ParameterSide.Input)
       {
         if (index == 0)
-        {
-          var _Signal_ = Params.IndexOfInputParam("Signal");
-          return _Signal_ < 0;
-        }
+          return SignalParamIndex < 0;
       }
 
       return false;
@@ -508,19 +317,8 @@ namespace RhinoInside.Revit.GH.Components
     {
       if (side == GH_ParameterSide.Input)
       {
-        if (Params.IndexOfInputParam("Signal") < 0)
-        {
-          var signal = new Parameters.Param_Enum<Types.TransactionSignal>()
-          {
-            Name = "Signal",
-            NickName = Grasshopper.CentralSettings.CanvasFullNames ? "Signal" : "S",
-            Description = "Transaction signal",
-            Access = GH_ParamAccess.tree,
-            WireDisplay = GH_ParamWireDisplay.hidden
-          };
-
-          return signal;
-        }
+        if (SignalParamIndex < 0)
+          return CreateSignalParam();
       }
 
       return default;
@@ -530,10 +328,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       if (side == GH_ParameterSide.Input)
       {
-        var param = Params.Input[index];
-        var definition = Inputs.Where(x => x.Param.Name == param.Name).FirstOrDefault();
-
-        if (Params.IndexOfInputParam("Signal") == index)
+        if (index == SignalParamIndex)
           return true;
       }
 
