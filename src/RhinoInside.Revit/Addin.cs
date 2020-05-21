@@ -439,10 +439,13 @@ namespace RhinoInside.Revit.UI
 
           var GrasshopperPanel = data.Application.CreateRibbonPanel(rhinoTab, "Grasshopper");
           CommandGrasshopper.CreateUI(GrasshopperPanel);
-          CommandGrasshopperPlayer.CreateUI(GrasshopperPanel);
           CommandGrasshopperPreview.CreateUI(GrasshopperPanel);
+          CommandGrasshopperSolver.CreateUI(GrasshopperPanel);
           CommandGrasshopperRecompute.CreateUI(GrasshopperPanel);
           CommandGrasshopperBake.CreateUI(GrasshopperPanel);
+          GrasshopperPanel.AddSeparator();
+          CommandGrasshopperPlayer.CreateUI(GrasshopperPanel);
+
 
           var SamplesPanel = data.Application.CreateRibbonPanel(rhinoTab, "Samples");
           Samples.Sample1.CreateUI(SamplesPanel);
