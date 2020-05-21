@@ -24,6 +24,57 @@ namespace RhinoInside.Revit.GH.Components
     protected TransactionalComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
 
+    protected DB.Transaction NewTransaction(DB.Document doc) => NewTransaction(doc, Name);
+    protected DB.Transaction NewTransaction(DB.Document doc, string name)
+    {
+      var transaction = new DB.Transaction(doc, name);
+
+      var options = transaction.GetFailureHandlingOptions();
+      options = options.SetClearAfterRollback(true);
+      options = options.SetDelayedMiniWarnings(false);
+      options = options.SetForcedModalHandling(true);
+
+      options = options.SetFailuresPreprocessor(this);
+      options = options.SetTransactionFinalizer(this);
+
+      transaction.SetFailureHandlingOptions(options);
+
+      return transaction;
+    }
+
+    protected DB.TransactionStatus CommitTransaction(DB.Document doc, DB.Transaction transaction)
+    {
+      // Disable Rhino UI if any warning-error dialog popup
+      {
+        External.EditScope editScope = null;
+        EventHandler<DialogBoxShowingEventArgs> _ = null;
+        try
+        {
+          Revit.ApplicationUI.DialogBoxShowing += _ = (sender, args) =>
+          {
+            if (editScope is null)
+              editScope = new External.EditScope();
+          };
+
+          if (transaction.GetStatus() == DB.TransactionStatus.Started)
+          {
+            OnBeforeCommit(doc, transaction.GetName());
+
+            return transaction.Commit();
+          }
+          else return transaction.RollBack();
+        }
+        finally
+        {
+          Revit.ApplicationUI.DialogBoxShowing -= _;
+
+          if (editScope is IDisposable disposable)
+            disposable.Dispose();
+        }
+      }
+    }
+
+    // Setp 1.
     // protected override void BeforeSolveInstance() { }
 
     // Step 2.
@@ -171,46 +222,6 @@ namespace RhinoInside.Revit.GH.Components
         param.Phase = GH_SolutionPhase.Failed;
     }
     #endregion
-
-    protected DB.TransactionStatus CommitTransaction(DB.Document doc, DB.Transaction transaction)
-    {
-      var options = transaction.GetFailureHandlingOptions();
-      options = options.SetClearAfterRollback(true);
-      options = options.SetDelayedMiniWarnings(false);
-      options = options.SetForcedModalHandling(true);
-
-      options = options.SetFailuresPreprocessor(this);
-      options = options.SetTransactionFinalizer(this);
-
-      // Disable Rhino UI if any warning-error dialog popup
-      {
-        External.EditScope editScope = null;
-        EventHandler<DialogBoxShowingEventArgs> _ = null;
-        try
-        {
-          Revit.ApplicationUI.DialogBoxShowing += _ = (sender, args) =>
-          {
-            if (editScope is null)
-              editScope = new External.EditScope();
-          };
-
-          if (transaction.GetStatus() == DB.TransactionStatus.Started)
-          {
-            OnBeforeCommit(doc, transaction.GetName());
-
-            return transaction.Commit(options);
-          }
-          else return transaction.RollBack(options);
-        }
-        finally
-        {
-          Revit.ApplicationUI.DialogBoxShowing -= _;
-
-          if (editScope is IDisposable disposable)
-            disposable.Dispose();
-        }
-      }
-    }
 
     #region Solve Optional values
     protected static double LiteralLengthValue(double meters)
@@ -440,12 +451,14 @@ namespace RhinoInside.Revit.GH.Components
     protected DB.Transaction CurrentTransaction;
     protected DB.TransactionStatus TransactionStatus => CurrentTransaction?.GetStatus() ?? DB.TransactionStatus.Uninitialized;
 
-    protected void BeginTransaction(DB.Document document)
+    [Obsolete("Superseded by 'StartTransaction' since 2020-05-21")]
+    protected void BeginTransaction(DB.Document document) => StartTransaction(document);
+    protected void StartTransaction(DB.Document document)
     {
       if (document is null)
         return;
 
-      CurrentTransaction = new DB.Transaction(document, Name);
+      CurrentTransaction = NewTransaction(document, Name);
       if (CurrentTransaction.Start() != DB.TransactionStatus.Started)
       {
         CurrentTransaction.Dispose();
@@ -469,7 +482,7 @@ namespace RhinoInside.Revit.GH.Components
 
       if (Revit.ActiveDBDocument is DB.Document Document)
       {
-        BeginTransaction(Document);
+        StartTransaction(Document);
 
         OnAfterStart(Document, CurrentTransaction.GetName());
       }
@@ -538,11 +551,13 @@ namespace RhinoInside.Revit.GH.Components
 
     Dictionary<DB.Document, DB.Transaction> CurrentTransactions;
 
-    protected void BeginTransaction(DB.Document document)
+    [Obsolete("Superseded by 'StartTransaction' since 2020-05-21")]
+    protected void BeginTransaction(DB.Document document) => StartTransaction(document);
+    protected void StartTransaction(DB.Document document)
     {
       if (CurrentTransactions?.ContainsKey(document) != true)
       {
-        var transaction = new DB.Transaction(document, Name);
+        var transaction = NewTransaction(document, Name);
         if (transaction.Start() != DB.TransactionStatus.Started)
         {
           transaction.Dispose();
