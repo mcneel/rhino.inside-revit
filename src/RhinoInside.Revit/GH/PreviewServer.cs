@@ -54,6 +54,7 @@ namespace RhinoInside.Revit.GH
       ((ActiveDefinition is null ? GH_PreviewMode.Disabled : PreviewMode) == GH_PreviewMode.Shaded);
 
     public override bool CanExecute(View dBView) =>
+      GH_Document.EnableSolutions &&
       PreviewMode != GH_PreviewMode.Disabled &&
       ActiveDefinition is object &&
       IsModelView(dBView);
