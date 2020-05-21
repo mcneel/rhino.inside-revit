@@ -1,8 +1,9 @@
+using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using DB = Autodesk.Revit.DB;
 using Grasshopper.Kernel;
-using System.Collections.Generic;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -23,7 +24,17 @@ namespace RhinoInside.Revit.GH.Components
   public abstract class Component : GH_Component, Kernel.IGH_ElementIdComponent
   {
     protected Component(string name, string nickname, string description, string category, string subCategory)
-    : base(name, nickname, description, category, subCategory) { }
+    : base(name, nickname, description, category, subCategory)
+    {
+      if (Obsolete)
+      {
+        foreach (var obsolete in GetType().GetCustomAttributes(typeof(ObsoleteAttribute), false).Cast<ObsoleteAttribute>())
+        {
+          if(obsolete.Message != string.Empty)
+            Description = $"{obsolete.Message}\n{Description}";
+        }
+      }
+    }
 
     static string[] keywords = new string[] { "Revit" };
     public override IEnumerable<string> Keywords => base.Keywords is null ? keywords : Enumerable.Concat(base.Keywords, keywords);
