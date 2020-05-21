@@ -295,7 +295,7 @@ namespace RhinoInside.Revit.GH.Components
       if (parameter is null)
         return;
 
-      BeginTransaction(element.Document);
+      StartTransaction(element.Document);
 
       if (ParameterUtils.SetParameter(this, parameter, value))
         DA.SetData("Element", element);

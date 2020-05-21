@@ -4,10 +4,11 @@ using Grasshopper.Kernel;
 
 namespace RhinoInside.Revit.GH.Components
 {
+  [Obsolete("Superseded by 'Purge Element' since 2020-05-21")]
   public class ElementDelete : TransactionsComponent
   {
     public override Guid ComponentGuid => new Guid("213C1F14-A827-40E2-957E-BA079ECCE700");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.hidden;
     protected override string IconTag => "X";
 
     public ElementDelete()
@@ -33,7 +34,7 @@ namespace RhinoInside.Revit.GH.Components
 
       foreach (var group in elementsToDelete)
       {
-        BeginTransaction(group.Key);
+        StartTransaction(group.Key);
 
         try
         {

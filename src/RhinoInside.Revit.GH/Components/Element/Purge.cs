@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Windows.Forms;
+using GH_IO.Serialization;
 using Grasshopper.GUI.Canvas;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Attributes;
@@ -20,6 +22,14 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "P";
 
     protected DBX.TransactionSignal Signal = DBX.TransactionSignal.Effective;
+
+    enum ComponentCommand
+    {
+      Purge,
+      Delete,
+    }
+
+    ComponentCommand Command = ComponentCommand.Purge;
 
     public ElementPurge() : base
     (
@@ -82,10 +92,11 @@ namespace RhinoInside.Revit.GH.Components
       (
         new Parameters.Element()
         {
-          Name = "Element",
+          Name = "Elements",
           NickName = "E",
-          Description = "Element to Purge",
-          Access = GH_ParamAccess.item
+          Description = "Elements to Purge",
+          Access = GH_ParamAccess.list,
+          DataMapping = GH_DataMapping.Graft
         },
         ParamRelevance.Binding
       )
@@ -147,8 +158,10 @@ namespace RhinoInside.Revit.GH.Components
       public ICollection<DB.ElementId> DeletedElementIds { get; private set; }
       public ICollection<DB.ElementId> ModifiedElementIds { get; private set; }
 
-      public PurgeUpdater()
+      bool Delete;
+      public PurgeUpdater(bool delete)
       {
+        Delete = delete;
         DB.UpdaterRegistry.RegisterUpdater(this);
 
         var filter = new DB.ElementCategoryFilter(DB.BuiltInCategory.INVALID, true);
@@ -170,7 +183,7 @@ namespace RhinoInside.Revit.GH.Components
 
         Debug.Assert(AddedElementIds.Count == 0);
 
-        if (ModifiedElementIds.Count > 0)
+        if (!Delete && ModifiedElementIds.Count > 0)
         {
           var message = new DB.FailureMessage(DBX.ExternalFailures.ElementFailures.FailedToPurgeElement);
 
@@ -216,8 +229,10 @@ namespace RhinoInside.Revit.GH.Components
       {
         Phase = GH_SolutionPhase.Blank;
 
-        if(Params.Input[_Signal_].DataType == GH_ParamData.@void)
+        if (Params.Input[_Signal_].DataType == GH_ParamData.@void)
           Signal = DBX.TransactionSignal.Frozen;
+
+        OnSolutionExpired(recompute);
       }
       else
       {
@@ -233,12 +248,19 @@ namespace RhinoInside.Revit.GH.Components
 
       base.CollectData();
 
+      Message = Command == ComponentCommand.Purge ? "Purge" : "Delete";
+
       var _Signal_ = Params.IndexOfInputParam("Signal");
       if (_Signal_ >= 0)
       {
         var signal = Params.Input[_Signal_];
-
         Signal = MaxSignal(signal.VolatileData.AllData(false)).GetValueOrDefault();
+
+        if (signal.DataType == GH_ParamData.@void)
+          signal.NickName = "Signal";
+        else
+          signal.NickName = Signal.ToString();
+
         if (Signal != DBX.TransactionSignal.Frozen)
         {
           if (OnPingDocument() is GH_Document doc)
@@ -264,43 +286,92 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var element = default(Types.Element);
-      if (!DA.GetData("Element", ref element))
+      var elementList = new List<Types.IGH_ElementId>();
+      if (!DA.GetDataList("Elements", elementList))
         return;
+
+      var elementGroups = elementList.
+                          Where(x => x.IsValid).
+                          GroupBy(x => x.Document).
+                          ToArray();
+
+      var transactionGroups = new Queue<DB.TransactionGroup>();
 
       try
       {
-        var doc = element.Document;
-        using (var updater = new PurgeUpdater())
+        var Deleted = new List<Types.Element>();
+        var Modified = new List<Types.Element>();
+
+        foreach (var elementGroup in elementGroups)
         {
-          using (var transaction = new DB.Transaction(doc, Name))
+          var doc = elementGroup.Key;
+          if (Signal >= DBX.TransactionSignal.Effective)
           {
-            transaction.Start();
+            var group = new DB.TransactionGroup(doc, $"{Command} Element");
+            transactionGroups.Enqueue(group);
+            group.Start();
+          }
 
-            if(Signal == DBX.TransactionSignal.Simulated)
-              doc.PostFailure(new DB.FailureMessage(DBX.ExternalFailures.TransactionFailures.SimulatedTransaction));
-
-            var DeletedElementIds = doc.Delete(element.Id);
-
-            if (CommitTransaction(doc, transaction) == DB.TransactionStatus.Committed)
+          using (var updater = new PurgeUpdater(Command == ComponentCommand.Delete))
+          {
+            using (var transaction = NewTransaction(doc, $"{Command} Element"))
             {
-              deletedElements++;
-              DA.SetData("Succeeded", true);
-              DA.SetDataList("Deleted", Enumerable.Empty<Types.Element>());
-            }
-            else
-            {
-              DA.SetData("Succeeded", updater.ModifiedElementIds.Count == 0);
-              DA.SetDataList("Deleted", DeletedElementIds.Where(x => x != element.Id).Select(x => Types.Element.FromElementId(doc, x)));
-            }
+              transaction.Start();
 
-            DA.SetDataList("Modified", updater.ModifiedElementIds.Select(x => Types.Element.FromElementId(doc, x)));
+              if (Signal == DBX.TransactionSignal.Simulated)
+                doc.PostFailure(new DB.FailureMessage(DBX.ExternalFailures.TransactionFailures.SimulatedTransaction));
+
+              var elementIdsSet = new HashSet<DB.ElementId>(elementGroup.Select(x => x.Id));
+              var DeletedElementIds = elementGroup.Key.Delete(elementIdsSet);
+
+              if (CommitTransaction(doc, transaction) == DB.TransactionStatus.Committed)
+              {
+                deletedElements += DeletedElementIds.Count;
+              }
+              else
+              {
+                if (Modified.Capacity < Modified.Count + updater.ModifiedElementIds.Count)
+                  Modified.Capacity = Modified.Count + updater.ModifiedElementIds.Count;
+
+                Modified.AddRange(updater.ModifiedElementIds.Select(x => Types.Element.FromElementId(doc, x)));
+
+                if (Deleted.Capacity < Deleted.Count + updater.DeletedElementIds.Count)
+                  Deleted.Capacity = Deleted.Count + updater.DeletedElementIds.Count;
+
+                Deleted.AddRange(updater.DeletedElementIds.Select(x => Types.Element.FromElementId(doc, x)));
+              }
+            }
           }
         }
+
+        if (Modified.Count == 0 || Command == ComponentCommand.Delete)
+        {
+          while (transactionGroups.Count > 0)
+          using (var group = transactionGroups.Dequeue())
+          {
+            group.Assimilate();
+          }
+
+          DA.SetData("Succeeded", true);
+        }
+        else
+        {
+          DA.SetData("Succeeded", false);
+        }
+
+        DA.SetDataList("Deleted", Deleted);
+        DA.SetDataList("Modified", Modified);
       }
       catch (Autodesk.Revit.Exceptions.ArgumentException)
       {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "One or more of the elements cannot be deleted.");
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "One or many of the elements cannot be deleted or are invalid.");
+        DA.SetData("Succeeded", false);
+      }
+
+      foreach (var group in transactionGroups.Cast<DB.TransactionGroup>().Reverse())
+      using (group)
+      {
+        group.RollBack();
       }
     }
 
@@ -372,6 +443,7 @@ namespace RhinoInside.Revit.GH.Components
                   }
                   else
                   {
+                    style.Edge = Color.FromArgb(255, 80, 80, 80);
                     style.Fill = GH_Skin.palette_black_standard.Fill;
                     style.Text = GH_Skin.palette_black_standard.Text;
                   }
@@ -380,7 +452,11 @@ namespace RhinoInside.Revit.GH.Components
                 break;
               case DBX.TransactionSignal.Simulated:
 
-                style.Edge = Color.FromArgb(150, fill.R, fill.G, fill.B);
+                if (palette == GH_Palette.Normal || palette == GH_Palette.Hidden)
+                  style.Edge = style.Edge;
+                else
+                  style.Edge = Color.FromArgb(150, fill.R, fill.G, fill.B);
+
                 style.Fill = baseStyle.Fill;
                 style.Text = baseStyle.Text;
 
@@ -467,6 +543,56 @@ namespace RhinoInside.Revit.GH.Components
     public bool DestroyParameter(GH_ParameterSide side, int index) => CanRemoveParameter(side, index);
 
     public void VariableParameterMaintenance() { }
+
+    protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
+    {
+      base.AppendAdditionalComponentMenuItems(menu);
+
+      var delete = Menu_AppendItem(menu, "Delete", Menu_CommandClicked, true, Command == ComponentCommand.Delete);
+      delete.Tag = ComponentCommand.Delete;
+
+      var purge = Menu_AppendItem(menu, "Purge", Menu_CommandClicked, true, Command == ComponentCommand.Purge);
+      purge.Tag = ComponentCommand.Purge;
+    }
+
+    private void Menu_CommandClicked(object sender, EventArgs e)
+    {
+      if (sender is ToolStripMenuItem item)
+      {
+        if (item.Tag is ComponentCommand command)
+        {
+          RecordUndoEvent($"Set: {command}");
+          Command = command;
+
+          ExpireSolution(true);
+        }
+      }
+    }
+    #endregion
+
+    #region IO
+    public override bool Read(GH_IReader reader)
+    {
+      if (!base.Read(reader))
+        return false;
+
+      int command = (int) default(ComponentCommand);
+      reader.TryGetInt32("Command", ref command);
+      Command = (ComponentCommand) command;
+
+      return true;
+    }
+
+    public override bool Write(GH_IWriter writer)
+    {
+      if (!base.Write(writer))
+        return false;
+
+      if (Command != default)
+        writer.SetInt32("Command", (int) Command);
+
+      return true;
+    }
     #endregion
 
     //public static bool GetPurgableElements(DB.Document document, out ICollection<DB.ElementId> ids)
@@ -536,7 +662,7 @@ namespace RhinoInside.Revit.GH.Components
     //  if (!DA.GetData("Element", ref element))
     //    return;
 
-    //  BeginTransaction(element.Document);
+    //  StartTransaction(element.Document);
 
     //  try
     //  {

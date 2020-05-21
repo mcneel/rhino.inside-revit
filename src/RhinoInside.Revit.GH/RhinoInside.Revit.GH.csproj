@@ -410,6 +410,7 @@
     <None Include="Resources\Components\ElementParameters.png" />
     <None Include="Resources\Components\ElementParametersSet.png" />
     <None Include="Resources\Components\ElementPreview.png" />
+    <None Include="Resources\Components\ElementPurge.png" />
     <None Include="Resources\Components\FamilyInstanceByLocation.png" />
     <None Include="Resources\Components\FloorByOutline.png" />
     <None Include="Resources\Components\FormByCurves.png" />
