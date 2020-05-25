@@ -153,6 +153,7 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
   public class ElementGeometry : Component
   {
     public override Guid ComponentGuid => new Guid("B7E6A82F-684F-4045-A634-A4AA9F7427A8");
+    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.hidden;
 
     public ElementGeometry()
     : base("Element Geometry", "Geometry", "Get the geometry of the specified Element", "Revit", "Element")
