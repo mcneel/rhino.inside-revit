@@ -151,18 +151,6 @@ namespace RhinoInside.Revit.GH.Components
 
                 style.Text = baseStyle.Text;
                 break;
-
-                //case Kernel.ComponentSignal.Simulated:
-
-                //  if (palette == GH_Palette.Normal || palette == GH_Palette.Hidden)
-                //    style.Edge = style.Edge;
-                //  else
-                //    style.Edge = Color.FromArgb(150, fill.R, fill.G, fill.B);
-
-                //  style.Fill = baseStyle.Fill;
-                //  style.Text = baseStyle.Text;
-
-                //  break;
             }
 
             base.Render(canvas, graphics, channel);
@@ -271,20 +259,6 @@ namespace RhinoInside.Revit.GH.Components
         }
 
         base.Render(canvas, graphics, channel);
-      }
-
-      bool CanvasFullNames = Grasshopper.CentralSettings.CanvasFullNames;
-      public override void ExpireLayout()
-      {
-        if (CanvasFullNames != Grasshopper.CentralSettings.CanvasFullNames)
-        {
-          if (Owner is IGH_VariableParameterComponent variableParameterComponent)
-            variableParameterComponent.VariableParameterMaintenance();
-
-          CanvasFullNames = Grasshopper.CentralSettings.CanvasFullNames;
-        }
-
-        base.ExpireLayout();
       }
     }
 
