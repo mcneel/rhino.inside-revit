@@ -9,6 +9,7 @@ using Grasshopper.GUI;
 using Grasshopper.GUI.Canvas;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Attributes;
+using Grasshopper.Kernel.Types;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -32,20 +33,42 @@ namespace RhinoInside.Revit.GH.Components
 
     protected struct ParamDefinition
     {
-      public ParamDefinition(IGH_Param param)
+      public readonly IGH_Param Param;
+      public readonly ParamVisibility Relevance;
+
+      internal ParamDefinition(IGH_Param param)
       {
         Param = param;
         Relevance = ParamVisibility.Binding;
       }
 
-      public ParamDefinition(IGH_Param param, ParamVisibility relevance)
+      internal ParamDefinition(IGH_Param param, ParamVisibility relevance)
       {
         Param = param;
         Relevance = relevance;
       }
 
-      public readonly IGH_Param Param;
-      public readonly ParamVisibility Relevance;
+      public static ParamDefinition FromParam(IGH_Param param) =>
+        new ParamDefinition(param, ParamVisibility.Binding);
+
+      public static ParamDefinition FromParam(IGH_Param param, ParamVisibility relevance) =>
+        new ParamDefinition(param, relevance);
+
+      public static ParamDefinition FromParam<T>(GH_PersistentParam<T> param, ParamVisibility relevance, object defaultValue)
+        where T : class, IGH_Goo, new()
+      {
+        var def = new ParamDefinition(param, relevance);
+        if (def.Param is GH_PersistentParam<T> persistentParam)
+        {
+          var data = new T();
+          if (!data.CastFrom(defaultValue))
+            throw new InvalidCastException();
+
+          persistentParam.PersistentData.Append(data);
+        }
+
+        return def;
+      }
     }
 
     protected abstract ParamDefinition[] Inputs { get; }
@@ -140,11 +163,11 @@ namespace RhinoInside.Revit.GH.Components
       var templateParams = side == GH_ParameterSide.Input ? Inputs : Outputs;
       var componentParams = side == GH_ParameterSide.Input ? Params.Input : Params.Output;
 
-      if (index == 0)
-        return componentParams[0].Name != templateParams[0].Param.Name;
-
       if (index >= templateParams.Length)
         return false;
+
+      if (index == 0)
+        return componentParams[0].Name != templateParams[0].Param.Name;
 
       if (index >= componentParams.Count)
         return componentParams[componentParams.Count - 1].Name != templateParams[templateParams.Length - 1].Param.Name;
@@ -192,7 +215,7 @@ namespace RhinoInside.Revit.GH.Components
       var componentParams = side == GH_ParameterSide.Input ? Params.Input : Params.Output;
 
       string current = componentParams[index].Name;
-      for (int i = 0; i < Inputs.Length; ++i)
+      for (int i = 0; i < templateParams.Length; ++i)
       {
         if (templateParams[i].Param.Name == current)
           return !templateParams[i].Relevance.HasFlag(ParamVisibility.Mandatory);

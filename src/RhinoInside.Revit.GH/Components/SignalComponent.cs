@@ -14,17 +14,18 @@ namespace RhinoInside.Revit.GH.Components
 
     #region Signal
     protected static readonly string SignalParamName = "Signal";
-    protected int SignalParamIndex => Params.IndexOfInputParam(SignalParamName);
-    protected IGH_Param SignalParam => SignalParamIndex < 0 ? default : Params.Input[SignalParamIndex];
-
     protected static IGH_Param CreateSignalParam() => new Parameters.Param_Enum<Types.ComponentSignal>()
     {
       Name = SignalParamName,
-      NickName = Grasshopper.CentralSettings.CanvasFullNames ? "Signal" : "S",
+      NickName = Grasshopper.CentralSettings.CanvasFullNames ? SignalParamName : "S",
       Description = "Component signal",
       Access = GH_ParamAccess.tree,
       WireDisplay = GH_ParamWireDisplay.hidden
     };
+
+    protected int SignalParamIndex => Params.IndexOfInputParam(SignalParamName);
+    protected IGH_Param SignalParam => SignalParamIndex < 0 ? default : Params.Input[SignalParamIndex];
+
 
     protected Kernel.ComponentSignal Signal { get; set; } = Kernel.ComponentSignal.Active;
     static Kernel.ComponentSignal? MaxSignal(IEnumerable<IGH_Goo> signals)
