@@ -300,7 +300,7 @@
     <Compile Include="Components\Family\Geometry\VoidByBrep.cs" />
     <Compile Include="Components\Parameter.cs" />
     <Compile Include="Components\SignalComponent.cs" />
-    <Compile Include="Components\TransactionalComponent.cs" />
+    <Compile Include="Components\TransactionBaseComponent.cs" />
     <Compile Include="Components\ZuiComponent.cs" />
     <Compile Include="Enum.cs" />
     <Compile Include="Extensions\Grasshopper.cs" />
