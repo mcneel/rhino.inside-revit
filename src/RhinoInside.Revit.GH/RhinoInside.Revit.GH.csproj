@@ -299,7 +299,9 @@
     <Compile Include="Components\Family\Save.cs" />
     <Compile Include="Components\Family\Geometry\VoidByBrep.cs" />
     <Compile Include="Components\Parameter.cs" />
+    <Compile Include="Components\SignalComponent.cs" />
     <Compile Include="Components\TransactionalComponent.cs" />
+    <Compile Include="Components\ZuiComponent.cs" />
     <Compile Include="Enum.cs" />
     <Compile Include="Extensions\Grasshopper.cs" />
     <Compile Include="Extensions\System.cs" />
@@ -352,6 +354,7 @@
     </Compile>
     <Compile Include="Solid.cs" />
     <Compile Include="Types\Category.cs" />
+    <Compile Include="Types\ComponentSignal.cs" />
     <Compile Include="Types\Document.cs" />
     <Compile Include="Types\Element.cs" />
     <Compile Include="Types\ElementFilter.cs" />
@@ -370,7 +373,6 @@
     <Compile Include="Types\Material.cs" />
     <Compile Include="Types\HostObject.cs" />
     <Compile Include="Types\DataObject.cs" />
-    <Compile Include="Types\TransactionSignal.cs" />
     <Compile Include="Types\View.cs" />
     <Compile Include="Types\CurtainGridLine.cs" />
     <Compile Include="Types\SpatialElement.cs" />

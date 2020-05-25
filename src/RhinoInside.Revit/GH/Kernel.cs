@@ -4,6 +4,19 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Kernel
 {
+  public enum ComponentSignal
+  {
+    /// <summary>
+    /// Component should not compute anything nor expire any output
+    /// </summary>
+    Frozen = 0,
+
+    /// <summary>
+    /// Component should execute normaly
+    /// </summary>
+    Active = 1,
+  }
+
   /// <summary>
   /// Base interface for all Parameter types in RhinoInside.Revit.GH that reference Revit elements.
   /// </summary>

@@ -11,19 +11,24 @@ using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class ElementPurge : TransactionalComponent, IGH_VariableParameterComponent
+  public class ElementPurge : TransactionalComponent
   {
     public override Guid ComponentGuid => new Guid("05539772-7205-4D58-8093-1715DAF213AF");
     public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.obscure;
     protected override string IconTag => "P";
 
-    enum ComponentCommand
+    protected ElementPurge(string name, string nickname, string description, string category, string subCategory)
+    : base(name, nickname, description, category, subCategory) { }
+
+    private bool Simulated;
+
+    protected enum ComponentCommand
     {
       Purge,
       Delete,
     }
 
-    ComponentCommand Command = ComponentCommand.Purge;
+    protected virtual ComponentCommand Command => ComponentCommand.Purge;
 
     public ElementPurge() : base
     (
@@ -35,45 +40,13 @@ namespace RhinoInside.Revit.GH.Components
     )
     { }
 
-    [Flags]
-    protected enum ParamRelevance
-    {
-      None      = 0,
-      Mandatory = 1,
-      Default   = 2,
-      Binding   = 3
-    }
-
-    protected struct ParamDefinition
-    {
-      public ParamDefinition(IGH_Param param, ParamRelevance relevance)
-      {
-        Param = param;
-        Relevance = relevance;
-      }
-
-      public readonly ParamRelevance Relevance;
-      public readonly IGH_Param Param;
-    }
-
-    static protected void RegisterParams(GH_InputParamManager manager, IEnumerable<ParamDefinition> definitions)
-    {
-      foreach (var definition in definitions.Where(x => x.Relevance.HasFlag(ParamRelevance.Default)))
-        manager.AddParameter(definition.Param);
-    }
-
-    static protected void RegisterParams(GH_OutputParamManager manager, IEnumerable<ParamDefinition> definitions)
-    {
-      foreach (var definition in definitions.Where(x => x.Relevance.HasFlag(ParamRelevance.Default)))
-        manager.AddParameter(definition.Param);
-    }
-
-    static readonly ParamDefinition[] Inputs =
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
       new ParamDefinition
       (
         CreateSignalParam(),
-        ParamRelevance.None
+        ParamVisibility.Voluntary
       ),
       new ParamDefinition
       (
@@ -85,13 +58,12 @@ namespace RhinoInside.Revit.GH.Components
           Access = GH_ParamAccess.list,
           DataMapping = GH_DataMapping.Graft
         },
-        ParamRelevance.Binding
-      )
+        ParamVisibility.Binding
+      ),
     };
 
-    protected override void RegisterInputParams(GH_InputParamManager manager) => RegisterParams(manager, Inputs);
-
-    static readonly ParamDefinition[] Outputs =
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
       new ParamDefinition
       (
@@ -102,7 +74,7 @@ namespace RhinoInside.Revit.GH.Components
           Description = "Element is been deleted",
           Access = GH_ParamAccess.item
         },
-        ParamRelevance.Binding
+        ParamVisibility.Binding
       ),
       new ParamDefinition
       (
@@ -113,7 +85,7 @@ namespace RhinoInside.Revit.GH.Components
           Description = "Deleted elements. From a logical point of view, are the children of this Element",
           Access = GH_ParamAccess.list
         },
-        ParamRelevance.Binding
+        ParamVisibility.Binding
       ),
       new ParamDefinition
       (
@@ -124,10 +96,9 @@ namespace RhinoInside.Revit.GH.Components
           Description = "Modified elements. Those elements reference Element but not depend on it",
           Access = GH_ParamAccess.list
         },
-        ParamRelevance.Binding
+        ParamVisibility.Binding
       )
     };
-    protected override void RegisterOutputParams(GH_OutputParamManager manager) => RegisterParams(manager, Outputs);
 
     class PurgeUpdater : DB.IUpdater, IDisposable
     {
@@ -182,11 +153,13 @@ namespace RhinoInside.Revit.GH.Components
       }
     }
 
-    public override void CollectData()
+    int deletedElements;
+    protected override void BeforeSolveInstance()
     {
-      base.CollectData();
+      Message = string.Empty;
+      base.BeforeSolveInstance();
 
-      Message = Command == ComponentCommand.Purge ? "Purge" : "Delete";
+      deletedElements = 0;
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -195,172 +168,146 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetDataList("Elements", elementList))
         return;
 
-      var elementGroups = elementList.
-                          Where(x => x.IsValid).
-                          GroupBy(x => x.Document).
-                          ToArray();
-
-      var transactionGroups = new Queue<DB.TransactionGroup>();
-
       try
       {
-        var Deleted = new List<Types.Element>();
-        var Modified = new List<Types.Element>();
+        var elementGroups = elementList.
+                            GroupBy(x => x.Document).
+                            ToArray();
 
-        foreach (var elementGroup in elementGroups)
+        if (elementGroups.Length > 0)
         {
-          var doc = elementGroup.Key;
-          if (Signal >= DBX.TransactionSignal.Effective)
-          {
-            var group = new DB.TransactionGroup(doc, $"{Command} Element");
-            transactionGroups.Enqueue(group);
-            group.Start();
-          }
+          var transactionGroups = new Queue<DB.TransactionGroup>();
 
-          using (var updater = new PurgeUpdater(Command == ComponentCommand.Delete))
+          try
           {
-            using (var transaction = NewTransaction(doc, $"{Command} Element"))
+            var Deleted = new List<Types.ElementId>();
+            var Modified = new List<Types.Element>();
+
+            foreach (var elementGroup in elementGroups)
             {
-              transaction.Start();
+              var doc = elementGroup.Key;
+              var group = new DB.TransactionGroup(doc, $"{Command} Element");
+              transactionGroups.Enqueue(group);
+              group.Start();
 
-              if (Signal == DBX.TransactionSignal.Simulated)
-                doc.PostFailure(new DB.FailureMessage(DBX.ExternalFailures.TransactionFailures.SimulatedTransaction));
-
-              var elementIdsSet = new HashSet<DB.ElementId>(elementGroup.Select(x => x.Id));
-              var DeletedElementIds = elementGroup.Key.Delete(elementIdsSet);
-
-              if (CommitTransaction(doc, transaction) == DB.TransactionStatus.Committed)
+              using (var updater = new PurgeUpdater(Command == ComponentCommand.Delete))
               {
-                deletedElements += DeletedElementIds.Count;
-              }
-              else
-              {
-                if (Modified.Capacity < Modified.Count + updater.ModifiedElementIds.Count)
-                  Modified.Capacity = Modified.Count + updater.ModifiedElementIds.Count;
+                using (var transaction = NewTransaction(doc, $"{Command} Element"))
+                {
+                  transaction.Start();
 
-                Modified.AddRange(updater.ModifiedElementIds.Select(x => Types.Element.FromElementId(doc, x)));
+                  var elementIdsSet = new HashSet<DB.ElementId>(elementGroup.Select(x => x.Id));
+                  var DeletedElementIds = elementGroup.Key.Delete(elementIdsSet);
 
-                if (Deleted.Capacity < Deleted.Count + updater.DeletedElementIds.Count)
-                  Deleted.Capacity = Deleted.Count + updater.DeletedElementIds.Count;
+                  if (CommitTransaction(doc, transaction) == DB.TransactionStatus.Committed)
+                  {
+                    deletedElements += DeletedElementIds.Count;
 
-                Deleted.AddRange(updater.DeletedElementIds.Select(x => Types.Element.FromElementId(doc, x)));
+                    if (Deleted.Capacity < Deleted.Count + updater.DeletedElementIds.Count)
+                      Deleted.Capacity = Deleted.Count + updater.DeletedElementIds.Count;
+
+                    Deleted.AddRange(updater.DeletedElementIds.Select(x => new Types.Element(doc, x)));
+                  }
+                  else
+                  {
+                    if (Deleted.Capacity < Deleted.Count + updater.DeletedElementIds.Count)
+                      Deleted.Capacity = Deleted.Count + updater.DeletedElementIds.Count;
+
+                    Deleted.AddRange(updater.DeletedElementIds.Select(x => Types.ElementId.FromElementId(doc, x)));
+                  }
+
+                  if (Modified.Capacity < Modified.Count + updater.ModifiedElementIds.Count)
+                    Modified.Capacity = Modified.Count + updater.ModifiedElementIds.Count;
+
+                  Modified.AddRange(updater.ModifiedElementIds.Select(x => Types.Element.FromElementId(doc, x)));
+                }
               }
             }
-          }
-        }
 
-        if (Modified.Count == 0 || Command == ComponentCommand.Delete)
-        {
-          while (transactionGroups.Count > 0)
-          using (var group = transactionGroups.Dequeue())
+            if (Modified.Count == 0 || Command == ComponentCommand.Delete)
+            {
+              if (!Simulated)
+              {
+                while (transactionGroups.Count > 0)
+                  using (var group = transactionGroups.Dequeue())
+                  {
+                    group.Assimilate();
+                  }
+              }
+
+              DA.SetData("Succeeded", true);
+            }
+            else
+            {
+              DA.SetData("Succeeded", false);
+            }
+
+            DA.SetDataList("Deleted", Deleted);
+            DA.SetDataList("Modified", Modified);
+          }
+          catch (Autodesk.Revit.Exceptions.ArgumentException)
           {
-            group.Assimilate();
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "One or many of the elements cannot be deleted or are invalid.");
+            DA.SetData("Succeeded", false);
           }
 
-          DA.SetData("Succeeded", true);
+          foreach (var group in transactionGroups.Cast<DB.TransactionGroup>().Reverse())
+            using (group)
+            {
+              group.RollBack();
+            }
         }
-        else
-        {
-          DA.SetData("Succeeded", false);
-        }
-
-        DA.SetDataList("Deleted", Deleted);
-        DA.SetDataList("Modified", Modified);
       }
-      catch (Autodesk.Revit.Exceptions.ArgumentException)
+      catch (NullReferenceException)
       {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "One or many of the elements cannot be deleted or are invalid.");
-        DA.SetData("Succeeded", false);
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "One or many of the elements are Null.");
       }
-
-      foreach (var group in transactionGroups.Cast<DB.TransactionGroup>().Reverse())
-      using (group)
-      {
-        group.RollBack();
-      }
-    }
-
-    int deletedElements;
-    protected override void BeforeSolveInstance()
-    {
-      base.BeforeSolveInstance();
-
-      deletedElements = 0;
     }
 
     protected override void AfterSolveInstance()
     {
       if (RunCount > 0)
       {
-        if (deletedElements == 0)
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "No elements were deleted");
+        if (Simulated && Message == string.Empty)
+          Message = "Simulated";
+
+        if (Simulated)
+        {
+          Status = DB.TransactionStatus.RolledBack;
+        }
         else
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"{deletedElements} elements were deleted.");
+        {
+          if (deletedElements == 0)
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "No elements were deleted");
+          else
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"{deletedElements} elements were deleted.");
+        }
       }
 
       base.AfterSolveInstance();
     }
 
     #region UI
-    public bool CanInsertParameter(GH_ParameterSide side, int index)
-    {
-      if (side == GH_ParameterSide.Input)
-      {
-        if (index == 0)
-          return SignalParamIndex < 0;
-      }
-
-      return false;
-    }
-
-    public IGH_Param CreateParameter(GH_ParameterSide side, int index)
-    {
-      if (side == GH_ParameterSide.Input)
-      {
-        if (SignalParamIndex < 0)
-          return CreateSignalParam();
-      }
-
-      return default;
-    }
-
-    public bool CanRemoveParameter(GH_ParameterSide side, int index)
-    {
-      if (side == GH_ParameterSide.Input)
-      {
-        if (index == SignalParamIndex)
-          return true;
-      }
-
-      return false;
-    }
-
-    public bool DestroyParameter(GH_ParameterSide side, int index) => CanRemoveParameter(side, index);
-
-    public void VariableParameterMaintenance() { }
-
     protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
     {
       base.AppendAdditionalComponentMenuItems(menu);
 
-      var delete = Menu_AppendItem(menu, "Delete", Menu_CommandClicked, true, Command == ComponentCommand.Delete);
-      delete.Tag = ComponentCommand.Delete;
-
-      var purge = Menu_AppendItem(menu, "Purge", Menu_CommandClicked, true, Command == ComponentCommand.Purge);
-      purge.Tag = ComponentCommand.Purge;
+      // TODO : Keep thinking on Simulated Transactions feature
+      //Menu_AppendItem(menu, "Simulated", Menu_SimulatedClicked, true, Simulated);
     }
 
-    private void Menu_CommandClicked(object sender, EventArgs e)
+    private void Menu_SimulatedClicked(object sender, EventArgs e)
     {
       if (sender is ToolStripMenuItem item)
       {
-        if (item.Tag is ComponentCommand command)
-        {
-          RecordUndoEvent($"Set: {command}");
-          Command = command;
+        RecordUndoEvent($"Set: Simulated");
+        Simulated = !Simulated;
 
-          ExpireSolution(true);
-        }
+        Message = Simulated ? "Simulated" : string.Empty;
+
+        ClearData();
+        ExpireDownStreamObjects();
+        ExpireSolution(true);
       }
     }
     #endregion
@@ -371,9 +318,8 @@ namespace RhinoInside.Revit.GH.Components
       if (!base.Read(reader))
         return false;
 
-      int command = (int) default(ComponentCommand);
-      reader.TryGetInt32("Command", ref command);
-      Command = (ComponentCommand) command;
+      Simulated = default;
+      reader.TryGetBoolean("Simulated", ref Simulated);
 
       return true;
     }
@@ -384,7 +330,7 @@ namespace RhinoInside.Revit.GH.Components
         return false;
 
       if (Command != default)
-        writer.SetInt32("Command", (int) Command);
+        writer.SetBoolean("Simulated", Simulated);
 
       return true;
     }

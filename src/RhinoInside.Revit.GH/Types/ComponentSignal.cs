@@ -1,27 +1,24 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.GH.Kernel.Attributes;
-using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
   [
-    ComponentGuid("9C008EDE-6DB1-4460-9CD3-B6D03C3BEEE3"),
-    Name("Transaction Signal"),
-    Description("Represents a Revit Transaction Signal."),
+    ComponentGuid("70B49D97-E636-4470-953B-4878C04E7D64"),
+    Name("Component Signal"),
+    Description("Represents a Component Signal."),
   ]
-  public class TransactionSignal : GH_Enum<DBX.TransactionSignal>
+  public class ComponentSignal : GH_Enum<Kernel.ComponentSignal>
   {
     public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
     (
       new Dictionary<int, string>
       {
-        { (int) DBX.TransactionSignal.Frozen,     "Frozen"    },
-        { (int) DBX.TransactionSignal.Effective,  "Effective" },
-        { (int) DBX.TransactionSignal.Simulated,  "Simulated" },
+        { (int) Kernel.ComponentSignal.Frozen,  "Frozen" },
+        { (int) Kernel.ComponentSignal.Active,  "Active" },
       }
     );
 
@@ -32,7 +29,7 @@ namespace RhinoInside.Revit.GH.Types
 
       if (source is bool booleanValue)
       {
-        Value = booleanValue ? DBX.TransactionSignal.Effective : DBX.TransactionSignal.Frozen;
+        Value = booleanValue ? Kernel.ComponentSignal.Active : Kernel.ComponentSignal.Frozen;
         return true;
       }
 

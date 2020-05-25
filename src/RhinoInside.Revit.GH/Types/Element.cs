@@ -129,7 +129,7 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     public Element() : base() { }
-    protected Element(DB.Document doc, DB.ElementId id) : base(doc, id) { }
+    internal Element(DB.Document doc, DB.ElementId id) : base(doc, id) { }
     protected Element(DB.Element element)               : base(element.Document, element.Id) { }
 
     public override bool CastFrom(object source)

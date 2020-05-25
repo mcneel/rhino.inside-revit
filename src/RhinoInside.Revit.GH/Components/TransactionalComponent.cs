@@ -8,226 +8,21 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.External.DB.Extensions;
-using DBX = RhinoInside.Revit.External.DB;
 using DB = Autodesk.Revit.DB;
+using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  using System.Drawing;
   using Exceptions;
-  using Grasshopper.GUI.Canvas;
-  using Grasshopper.Kernel.Attributes;
   using Kernel.Attributes;
 
-  public abstract class TransactionalComponent :
+  public abstract class TransactionBaseComponent :
     Component,
     DB.IFailuresPreprocessor,
     DB.ITransactionFinalizer
   {
-    protected TransactionalComponent(string name, string nickname, string description, string category, string subCategory)
+    protected TransactionBaseComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
-
-    #region Signal
-    protected static readonly string SignalParamName = "Signal";
-    protected int SignalParamIndex => Params.IndexOfInputParam(SignalParamName);
-    protected IGH_Param SignalParam => SignalParamIndex < 0 ? default : Params.Input[SignalParamIndex];
-    protected DBX.TransactionSignal Signal = DBX.TransactionSignal.Effective;
-
-    protected static IGH_Param CreateSignalParam() => new Parameters.Param_Enum<Types.TransactionSignal>()
-    {
-      Name = SignalParamName,
-      NickName = Grasshopper.CentralSettings.CanvasFullNames ? "Signal" : "S",
-      Description = "Transaction signal",
-      Access = GH_ParamAccess.tree,
-      WireDisplay = GH_ParamWireDisplay.hidden
-    };
-
-    static DBX.TransactionSignal? MaxSignal(IEnumerable<IGH_Goo> signals)
-    {
-      if (signals is object)
-      {
-        DBX.TransactionSignal? max = default;
-        foreach (var goo in signals)
-        {
-          if (goo is Types.TransactionSignal signal)
-          {
-            var value = signal.Value;
-            if (!max.HasValue)
-              max = value;
-
-            if (value == DBX.TransactionSignal.Frozen)
-              continue;
-
-            if (Math.Abs((int) value) > (int) max.Value)
-              max = value;
-          }
-        }
-
-        return max;
-      }
-
-      return default;
-    }
-
-    public override void ExpireSolution(bool recompute)
-    {
-      if (SignalParam is IGH_Param signal)
-      {
-        Phase = GH_SolutionPhase.Blank;
-
-        if (signal.DataType == GH_ParamData.@void)
-          Signal = DBX.TransactionSignal.Frozen;
-
-        OnSolutionExpired(recompute);
-      }
-      else
-      {
-        Signal = DBX.TransactionSignal.Effective;
-        base.ExpireSolution(recompute);
-      }
-    }
-
-    public override void CollectData()
-    {
-      if (Phase == GH_SolutionPhase.Collected)
-        return;
-
-      base.CollectData();
-
-      var _Signal_ = Params.IndexOfInputParam(SignalParamName);
-      if (_Signal_ >= 0)
-      {
-        var signal = Params.Input[_Signal_];
-        Signal = MaxSignal(signal.VolatileData.AllData(false)).GetValueOrDefault();
-
-        if (signal.DataType == GH_ParamData.@void)
-          signal.NickName = SignalParamName;
-        else
-          signal.NickName = Signal.ToString();
-
-        if (Signal != DBX.TransactionSignal.Frozen)
-        {
-          if (OnPingDocument() is GH_Document doc)
-          {
-            doc.ScheduleSolution
-            (
-              0,
-              x =>
-              {
-                base.ClearData();
-                base.ExpireDownStreamObjects();
-
-                // Mark it as Collected to avoid collect it again
-                Phase = GH_SolutionPhase.Collected;
-              }
-            );
-          }
-        }
-
-        Phase = GH_SolutionPhase.Computed;
-      }
-    }
-    #endregion
-
-    #region UI
-    new class Attributes : GH_ComponentAttributes
-    {
-      public Attributes(TransactionalComponent owner) : base(owner) { }
-
-      protected override void Render(GH_Canvas canvas, Graphics graphics, GH_CanvasChannel channel)
-      {
-        if (channel == GH_CanvasChannel.Objects && Owner is TransactionalComponent component)
-        {
-          var basePalette = Owner.Hidden || !Owner.IsPreviewCapable ? GH_Palette.Hidden : GH_Palette.Normal;
-          var baseStyle = GH_CapsuleRenderEngine.GetImpliedStyle(basePalette, Selected, Owner.Locked, Owner.Hidden);
-
-          var palette = GH_CapsuleRenderEngine.GetImpliedPalette(Owner);
-          if (palette == GH_Palette.Normal && !Owner.IsPreviewCapable)
-            palette = GH_Palette.Hidden;
-
-          var style = GH_CapsuleRenderEngine.GetImpliedStyle(palette, Selected, Owner.Locked, Owner.Hidden);
-          var fill = style.Fill;
-          var edge = style.Edge;
-          var text = style.Text;
-
-          try
-          {
-            switch (component.Signal)
-            {
-              case DBX.TransactionSignal.Frozen:
-
-                style.Edge = Color.FromArgb(150, fill.R, fill.G, fill.B);
-                if (Selected)
-                  style.Fill = Color.FromArgb(GH_Skin.palette_trans_selected.Fill.A, baseStyle.Fill.R, baseStyle.Fill.G, baseStyle.Fill.B);
-                else
-                  style.Fill = Color.FromArgb(GH_Skin.palette_trans_standard.Fill.A, baseStyle.Fill.R, baseStyle.Fill.G, baseStyle.Fill.B);
-
-                style.Text = baseStyle.Text;
-                break;
-
-              case DBX.TransactionSignal.Effective:
-
-                if (!Owner.Locked)
-                {
-                  if (palette == GH_Palette.Normal || palette == GH_Palette.Hidden)
-                  {
-                    if (Selected)
-                    {
-                      style.Fill = GH_Skin.palette_black_selected.Fill;
-                      style.Text = GH_Skin.palette_black_selected.Text;
-                    }
-                    else
-                    {
-                      style.Edge = Color.FromArgb(255, 80, 80, 80);
-                      style.Fill = GH_Skin.palette_black_standard.Fill;
-                      style.Text = GH_Skin.palette_black_standard.Text;
-                    }
-                  }
-                }
-
-                break;
-              case DBX.TransactionSignal.Simulated:
-
-                if (palette == GH_Palette.Normal || palette == GH_Palette.Hidden)
-                  style.Edge = style.Edge;
-                else
-                  style.Edge = Color.FromArgb(150, fill.R, fill.G, fill.B);
-
-                style.Fill = baseStyle.Fill;
-                style.Text = baseStyle.Text;
-
-                break;
-            }
-
-            base.Render(canvas, graphics, channel);
-          }
-          finally
-          {
-            style.Fill = fill;
-            style.Edge = edge;
-            style.Text = text;
-          }
-        }
-        else base.Render(canvas, graphics, channel);
-      }
-
-      bool CanvasFullNames = Grasshopper.CentralSettings.CanvasFullNames;
-      public override void ExpireLayout()
-      {
-        if (CanvasFullNames != Grasshopper.CentralSettings.CanvasFullNames)
-        {
-          if (Owner is IGH_VariableParameterComponent variableParameterComponent)
-            variableParameterComponent.VariableParameterMaintenance();
-
-          CanvasFullNames = Grasshopper.CentralSettings.CanvasFullNames;
-        }
-
-        base.ExpireLayout();
-      }
-    }
-
-    public override void CreateAttributes() => m_attributes = new Attributes(this);
-    #endregion
 
     protected DB.Transaction NewTransaction(DB.Document doc) => NewTransaction(doc, Name);
     protected DB.Transaction NewTransaction(DB.Document doc, string name)
@@ -640,7 +435,7 @@ namespace RhinoInside.Revit.GH.Components
     #endregion
   }
 
-  public abstract class TransactionComponent : TransactionalComponent
+  public abstract class TransactionComponent : TransactionBaseComponent
   {
     protected TransactionComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
@@ -741,7 +536,7 @@ namespace RhinoInside.Revit.GH.Components
     }
   }
 
-  public abstract class TransactionsComponent : TransactionalComponent
+  public abstract class TransactionsComponent : TransactionBaseComponent
   {
     protected TransactionsComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }

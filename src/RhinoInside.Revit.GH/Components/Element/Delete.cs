@@ -4,11 +4,33 @@ using Grasshopper.Kernel;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  [Obsolete("Superseded by 'Purge Element' since 2020-05-21")]
+  public class ElementDelete : ElementPurge
+  {
+    public override Guid ComponentGuid => new Guid("3FFC2CB2-48FF-4151-B5CB-511C964B487D");
+    public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.obscure;
+    protected override string IconTag => "X";
+
+    public ElementDelete() : base
+    (
+      name: "Delete Element",
+      nickname: "Delete",
+      description: "Deletes elements from Revit document",
+      category: "Revit",
+      subCategory: "Element"
+    )
+    {}
+
+    protected override ComponentCommand Command => ComponentCommand.Delete;
+  }
+}
+
+namespace RhinoInside.Revit.GH.Components.Obsolete
+{
+  [Obsolete("Obsolete since 2020-05-21")]
   public class ElementDelete : TransactionsComponent
   {
     public override Guid ComponentGuid => new Guid("213C1F14-A827-40E2-957E-BA079ECCE700");
-    public override GH_Exposure Exposure => GH_Exposure.hidden;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.hidden;
     protected override string IconTag => "X";
 
     public ElementDelete()
