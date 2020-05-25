@@ -119,7 +119,7 @@ namespace RhinoInside.Revit.GH.Types
 
   [
     ComponentGuid("F992A251-4085-4525-A514-298F3155DF8A"),
-    Name("View Detail Level"),
+    Name("Detail Level"),
     Description("Represents a view detail level."),
   ]
   public class ViewDetailLevel : GH_Enum<DB.ViewDetailLevel>
