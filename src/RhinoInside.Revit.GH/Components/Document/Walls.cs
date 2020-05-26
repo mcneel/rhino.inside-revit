@@ -6,7 +6,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class DocumentWalls : DocumentComponent
+  public class DocumentWalls : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("118F5744-292F-4BEC-9213-8073219D8563");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
@@ -23,32 +23,30 @@ namespace RhinoInside.Revit.GH.Components
     )
     { }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      base.RegisterInputParams(manager);
-
-      // required system family index value
-      manager.AddParameter
+      ParamDefinition.FromParam(DocumentComponent.CreateDocumentParam(), ParamVisibility.Voluntary),
+      ParamDefinition.Create<Parameters.Param_Enum<Types.WallSystemFamily>>
       (
-        new Parameters.Param_Enum<Types.WallSystemFamily>(),
         name: "Wall System Family",
         nickname: "WSF",
         description: "Wall system family",
         access: GH_ParamAccess.item
-      );
-    }
+      ),
+    };
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      manager.AddParameter
+      ParamDefinition.Create<Parameters.HostObject>
       (
-        param: new Parameters.HostObject(),
         name: "Walls",
         nickname: "W",
         description: "Walls, of the given wall system family",
         access: GH_ParamAccess.list
-      );
-    }
+      )
+    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
     {

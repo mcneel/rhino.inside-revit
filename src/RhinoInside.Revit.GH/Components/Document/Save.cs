@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using System.Linq;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Parameters;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -22,24 +24,32 @@ namespace RhinoInside.Revit.GH.Components
     )
     { }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      base.RegisterInputParams(manager);
+      ParamDefinition.FromParam(CreateDocumentParam(), ParamVisibility.Voluntary),
+      ParamDefinition.FromParam
+      (
+        new Param_FilePath()
+        {
+          Name = "Path",
+          NickName = "P",
+          Access = GH_ParamAccess.item,
+          Optional = true,
+          FileFilter = "Project File (*.rvt)|*.rvt"
+        }
+      ),
+      ParamDefinition.Create<Param_Boolean>("Override File", "OF", "Override file on disk", defaultValue: false, GH_ParamAccess.item),
+      ParamDefinition.Create<Param_Boolean>("Compact", "C", "Compact the file", defaultValue: false, GH_ParamAccess.item),
+      ParamDefinition.Create<Param_Integer>("Backups", "B", "The maximum number of backups to keep on disk", -1, GH_ParamAccess.item),
+      ParamDefinition.Create<Parameters.View>("View", "View", "The view that will be used to generate the file preview", GH_ParamAccess.item, optional: true)
+    };
 
-      var path = new Grasshopper.Kernel.Parameters.Param_FilePath();
-      path.FileFilter = "Project File (*.rvt)|*.rvt";
-      manager[manager.AddParameter(path, "Path", "P", string.Empty, GH_ParamAccess.item)].Optional = true;
-
-      manager.AddBooleanParameter("OverrideFile", "O", "Override file on disk", GH_ParamAccess.item, false);
-      manager.AddBooleanParameter("Compact", "O", "Compact the file", GH_ParamAccess.item, false);
-      manager.AddIntegerParameter("Backups", "B", "The maximum number of backups to keep on disk", GH_ParamAccess.item, -1);
-      manager[manager.AddParameter(new Parameters.View(), "PreviewView", "PreviewView", "The view that will be used to generate the file preview", GH_ParamAccess.item)].Optional = true;
-    }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      manager.AddParameter(new Parameters.Document(), "Document", "Document", string.Empty, GH_ParamAccess.item);
-    }
+      ParamDefinition.Create<Parameters.Document>("Document", "DOC", string.Empty, GH_ParamAccess.list)
+    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
     {
@@ -47,7 +57,7 @@ namespace RhinoInside.Revit.GH.Components
       DA.GetData("Path", ref filePath);
 
       var overrideFile = false;
-      if (!DA.GetData("OverrideFile", ref overrideFile))
+      if (!DA.GetData("Override File", ref overrideFile))
         return;
 
       var compact = false;
@@ -59,7 +69,7 @@ namespace RhinoInside.Revit.GH.Components
         return;
 
       var view = default(DB.View);
-      if (DA.GetData("PreviewView", ref view))
+      if (DA.GetData("View", ref view))
       {
         if (!view.Document.Equals(doc))
         {

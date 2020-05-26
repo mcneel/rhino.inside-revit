@@ -1,12 +1,13 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Parameters;
 using DB = Autodesk.Revit.DB;
 using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class DocumentFloorTypes : DocumentComponent
+  public class DocumentFloorTypes : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("E3173EB7-2D53-4F81-BEB1-90D0F47343D4");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
@@ -24,20 +25,23 @@ namespace RhinoInside.Revit.GH.Components
     )
     { }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      base.RegisterInputParams(manager);
+      ParamDefinition.FromParam(DocumentComponent.CreateDocumentParam(), ParamVisibility.Voluntary),
+      //ParamDefinition.Create<Parameters.Category>("Category", "C",string .Empty, GH_ParamAccess.item, optional: true),
+      //ParamDefinition.Create<Param_String>("Family Name", "FN", string.Empty, GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_String>("Name", "N", string.Empty, GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Parameters.Param_Enum<Types.FloorFunction>>("Function", "F", string.Empty, GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_Interval>("Default Thickness", "T", string.Empty, GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Parameters.ElementFilter>("Filter","F", "Filter",GH_ParamAccess.item ),
+    };
 
-      manager[manager.AddTextParameter("Name", "N", "Wall Type name", GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddParameter(new Parameters.Param_Enum<Types.FloorFunction>(), "Function", "F", string.Empty, GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddIntervalParameter("Default Thickness", "T", string.Empty, GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddParameter(new Parameters.ElementFilter(), "Filter", "F", "Filter", GH_ParamAccess.item)].Optional = true;
-    }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      manager.AddParameter(new Parameters.ElementType(), "Types", "F", "Floor Types list", GH_ParamAccess.list);
-    }
+      ParamDefinition.Create<Parameters.ElementType>("Types", "T", "Types list", GH_ParamAccess.list)
+    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
     {
@@ -84,7 +88,7 @@ namespace RhinoInside.Revit.GH.Components
     }
   }
 
-  public class DocumentFoundationSlabTypes : DocumentComponent
+  public class DocumentFoundationSlabTypes : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("8472D50D-7F43-4A2C-828B-8E1C35313EFF");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
@@ -102,19 +106,22 @@ namespace RhinoInside.Revit.GH.Components
     )
     { }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      base.RegisterInputParams(manager);
+      ParamDefinition.FromParam(DocumentComponent.CreateDocumentParam(), ParamVisibility.Voluntary),
+      //ParamDefinition.Create<Parameters.Category>("Category", "C",string .Empty, GH_ParamAccess.item, optional: true),
+      //ParamDefinition.Create<Param_String>("Family Name", "FN", string.Empty, GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_String>("Name", "N", string.Empty, GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_Interval>("Default Thickness", "T", string.Empty, GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Parameters.ElementFilter>("Filter","F", "Filter",GH_ParamAccess.item ),
+    };
 
-      manager[manager.AddTextParameter("Name", "N", "Wall Type name", GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddIntervalParameter("Default Thickness", "T", string.Empty, GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddParameter(new Parameters.ElementFilter(), "Filter", "F", "Filter", GH_ParamAccess.item)].Optional = true;
-    }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      manager.AddParameter(new Parameters.ElementType(), "Types", "T", "Foundation Slab Types list", GH_ParamAccess.list);
-    }
+      ParamDefinition.Create<Parameters.ElementType>("Types", "T", "Foundation Slab Types list", GH_ParamAccess.list)
+    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
     {

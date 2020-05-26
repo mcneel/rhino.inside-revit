@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Components
     protected static IGH_Param CreateSignalParam() => new Parameters.Param_Enum<Types.ComponentSignal>()
     {
       Name = SignalParamName,
-      NickName = Grasshopper.CentralSettings.CanvasFullNames ? SignalParamName : "S",
+      NickName = "SIG",
       Description = "Component signal",
       Access = GH_ParamAccess.tree,
       WireDisplay = GH_ParamWireDisplay.hidden

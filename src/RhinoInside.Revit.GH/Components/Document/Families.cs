@@ -3,10 +3,11 @@ using System.Linq;
 using DB = Autodesk.Revit.DB;
 using Grasshopper.Kernel;
 using System.Collections.Generic;
+using Grasshopper.Kernel.Parameters;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class DocumentFamilies : DocumentComponent
+  public class DocumentFamilies : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("B6C377BA-BC46-495C-8250-F09DB0219C91");
     public override GH_Exposure Exposure => GH_Exposure.primary;
@@ -14,28 +15,34 @@ namespace RhinoInside.Revit.GH.Components
 
     public DocumentFamilies() : base
     (
-      "Families", "Families",
-      "Get document families list",
-      "Revit", "Query"
+      name: "Families",
+      nickname: "Families",
+      description: "Get document families list",
+      category: "Revit",
+      subCategory: "Query"
     )
-    {
-    }
+    { }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      base.RegisterInputParams(manager);
+      ParamDefinition.FromParam(DocumentComponent.CreateDocumentParam(), ParamVisibility.Voluntary),
+      ParamDefinition.Create<Parameters.Category>("Category", "C", string.Empty, GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_String>("Name", "N", string.Empty, GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item),
+    };
 
-      manager[manager.AddTextParameter("Name", "N", string.Empty, GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddParameter(new Parameters.ElementFilter(), "Filter", "F", "Filter", GH_ParamAccess.item)].Optional = true;
-    }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      manager.AddTextParameter("Families", "F", "Requested families", GH_ParamAccess.list);
-    }
+      ParamDefinition.Create<Parameters.Family>("Families", "F", "Family list", GH_ParamAccess.list)
+    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
     {
+      var categoryId = default(DB.ElementId);
+      DA.GetData("Category", ref categoryId);
+
       string name = null;
       DA.GetData("Name", ref name);
 
@@ -45,6 +52,9 @@ namespace RhinoInside.Revit.GH.Components
       using (var collector = new DB.FilteredElementCollector(doc))
       {
         var elementCollector = collector.WherePasses(ElementFilter);
+
+        if (categoryId is object)
+          elementCollector.OfCategoryId(categoryId);
 
         if (filter is object)
           elementCollector = elementCollector.WherePasses(filter);

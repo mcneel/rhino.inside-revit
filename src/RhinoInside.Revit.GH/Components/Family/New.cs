@@ -9,6 +9,7 @@ using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.Geometry.Extensions;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
+using Grasshopper.Kernel.Parameters;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -19,28 +20,126 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override string IconTag => "N";
 
-    public FamilyNew()
-    : base("New Family", "New", "Creates a new Family from a template.", "Revit", "Family")
+    public FamilyNew() : base
+    (
+      name: "New Family",
+      nickname: "New",
+      description: "Creates a new Family from a template.",
+      category: "Revit",
+      subCategory: "Family"
+    )
     { }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      var templatePath = new Grasshopper.Kernel.Parameters.Param_FilePath();
-      templatePath.FileFilter = "Family Template Files (*.rft)|*.rft";
-      manager[manager.AddParameter(templatePath, "Template", "T", string.Empty, GH_ParamAccess.item)].Optional = true;
+      ParamDefinition.FromParam
+      (
+        CreateDocumentParam(),
+        ParamVisibility.Voluntary
+      ),
+      ParamDefinition.FromParam
+      (
+        new Param_FilePath()
+        {
+          Name = "Template",
+          NickName = "T",
+          Access = GH_ParamAccess.item,
+          Optional = true,
+          FileFilter = "Family Template Files (*.rft)|*.rft"
+        }
+      ),
+      ParamDefinition.FromParam
+      (
+        new Param_Boolean()
+        {
+          Name = "Override Family",
+          NickName = "OF",
+          Description = "Override Family",
+          Access = GH_ParamAccess.item
+        },
+        ParamVisibility.Binding,
+        defaultValue: false
+      ),
+      ParamDefinition.FromParam
+      (
+        new Param_Boolean()
+        {
+          Name = "Override Parameters",
+          NickName = "OP",
+          Description = "Override Parameters",
+          Access = GH_ParamAccess.item
+        },
+        ParamVisibility.Binding,
+        defaultValue: false
+      ),
+      ParamDefinition.FromParam
+      (
+        new Param_String()
+        {
+          Name = "Name",
+          NickName = "N",
+          Description = "Family Name",
+          Access = GH_ParamAccess.item
+        }
+      ),
+      ParamDefinition.FromParam
+      (
+        new Parameters.Category()
+        {
+          Name = "Category",
+          NickName = "C",
+          Description = "Family Category",
+          Access = GH_ParamAccess.item,
+          Optional = true
+        }
+      ),
+      ParamDefinition.FromParam
+      (
+        new Param_Geometry()
+        {
+          Name = "Geometry",
+          NickName = "G",
+          Description = "Family Geometry",
+          Access = GH_ParamAccess.list,
+          Optional = true
+        }
+      ),
+    };
 
-      manager.AddBooleanParameter("OverrideFamily", "O", "Override Family", GH_ParamAccess.item, false);
-      manager.AddBooleanParameter("OverrideParameters", "O", "Override Parameters", GH_ParamAccess.item, false);
-
-      manager.AddTextParameter("Name", "N", string.Empty, GH_ParamAccess.item);
-      manager[manager.AddParameter(new Parameters.Category(), "Category", "C", string.Empty, GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddGeometryParameter("Geometry", "G", string.Empty, GH_ParamAccess.list)].Optional = true;
-    }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      manager.AddParameter(new Parameters.Family(), "Family", "F", string.Empty, GH_ParamAccess.item);
-    }
+      ParamDefinition.FromParam
+      (
+        new Parameters.Family()
+        {
+          Name = "Family",
+          NickName = "F",
+          Description = string.Empty,
+          Access = GH_ParamAccess.item
+        }
+      )
+    };
+
+    //protected override void RegisterInputParams(GH_InputParamManager manager)
+    //{
+    //  var templatePath = new Grasshopper.Kernel.Parameters.Param_FilePath();
+    //  templatePath.FileFilter = "Family Template Files (*.rft)|*.rft";
+    //  manager[manager.AddParameter(templatePath, "Template", "T", string.Empty, GH_ParamAccess.item)].Optional = true;
+
+    //  manager.AddBooleanParameter("OverrideFamily", "O", "Override Family", GH_ParamAccess.item, false);
+    //  manager.AddBooleanParameter("OverrideParameters", "O", "Override Parameters", GH_ParamAccess.item, false);
+
+    //  manager.AddTextParameter("Name", "N", string.Empty, GH_ParamAccess.item);
+    //  manager[manager.AddParameter(new Parameters.Category(), "Category", "C", string.Empty, GH_ParamAccess.item)].Optional = true;
+    //  manager[manager.AddGeometryParameter("Geometry", "G", string.Empty, GH_ParamAccess.list)].Optional = true;
+    //}
+
+    //protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    //{
+    //  manager.AddParameter(new Parameters.Family(), "Family", "F", string.Empty, GH_ParamAccess.item);
+    //}
 
     public static Dictionary<string, DB.ElementId> GetMaterialIdsByName(DB.Document doc)
     {
@@ -438,11 +537,11 @@ namespace RhinoInside.Revit.GH.Components
       var scaleFactor = 1.0 / Revit.ModelUnits;
 
       var overrideFamily = false;
-      if (!DA.GetData("OverrideFamily", ref overrideFamily))
+      if (!DA.GetData("Override Family", ref overrideFamily))
         return;
 
       var overrideParameters = false;
-      if (!DA.GetData("OverrideParameters", ref overrideParameters))
+      if (!DA.GetData("Override Parameters", ref overrideParameters))
         return;
 
       var name = string.Empty;
@@ -495,7 +594,7 @@ namespace RhinoInside.Revit.GH.Components
           {
             try
             {
-              using (var transaction = new DB.Transaction(familyDoc))
+              using (var transaction = NewTransaction(familyDoc))
               {
                 transaction.Start(Name);
 
@@ -575,7 +674,7 @@ namespace RhinoInside.Revit.GH.Components
 
             if (familyIsNew)
             {
-              using (var transaction = new DB.Transaction(doc))
+              using (var transaction = NewTransaction(doc))
               {
                 transaction.Start(Name);
                 try { family.Name = name; }

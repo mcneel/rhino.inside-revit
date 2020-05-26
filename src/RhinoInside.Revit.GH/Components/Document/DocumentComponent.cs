@@ -5,9 +5,66 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public abstract class DocumentComponent : TransactionBaseComponent, IGH_VariableParameterComponent
+  public abstract class DocumentComponent : TransactionalComponent
   {
     protected DocumentComponent(string name, string nickname, string description, string category, string subCategory)
+    : base(name, nickname, description, category, subCategory) { }
+
+    protected static readonly string DocumentParamName = "Document";
+    public static IGH_Param CreateDocumentParam() => new Parameters.Document()
+    {
+      Name = DocumentParamName,
+      NickName = "DOC",
+      Description = "Document",
+      Access = GH_ParamAccess.item
+    };
+
+    protected int DocumentParamIndex => Params.IndexOfInputParam(DocumentParamName);
+    protected IGH_Param DocumentParam => DocumentParamIndex < 0 ? default : Params.Input[DocumentParamIndex];
+
+    public override void ClearData()
+    {
+      Message = string.Empty;
+
+      base.ClearData();
+    }
+
+    protected override sealed void TrySolveInstance(IGH_DataAccess DA)
+    {
+      DB.Document Document = default;
+      var _Document_ = Params.IndexOfInputParam("Document");
+      if (_Document_ < 0)
+      {
+        Document = Revit.ActiveDBDocument;
+        if (Document?.IsValidObject != true)
+        {
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "There is no active Revit document");
+          return;
+        }
+
+        // In case the user has more than one document open we show which one this component is working on
+        if (Revit.ActiveDBApplication.Documents.Size > 1)
+          Message = Document.Title.TripleDot(16);
+      }
+      else
+      {
+        DA.GetData(_Document_, ref Document);
+        if (Document?.IsValidObject != true)
+        {
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Input parameter Document failed to collect data");
+          return;
+        }
+      }
+
+      TrySolveInstance(DA, Document);
+    }
+
+    protected abstract void TrySolveInstance(IGH_DataAccess DA, DB.Document doc);
+  }
+
+  public abstract class ElementCollectorComponent : DocumentComponent
+  {
+    protected ElementCollectorComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
 
     public override bool NeedsToBeExpired(DB.Events.DocumentChangedEventArgs e)
@@ -147,64 +204,5 @@ namespace RhinoInside.Revit.GH.Components
       pattern = default;
       return true;
     }
-
-    protected override void RegisterInputParams(GH_InputParamManager manager) { }
-
-    protected override sealed void TrySolveInstance(IGH_DataAccess DA)
-    {
-      DB.Document Document = default;
-      var _Document_ = Params.IndexOfInputParam("Document");
-      if (_Document_ < 0)
-      {
-        Document = Revit.ActiveDBDocument;
-        if (Document?.IsValidObject != true)
-        {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "There is no active Revit document");
-          return;
-        }
-
-        // In case the user has more than one document open we show which one this component is working on
-        if (Revit.ActiveDBApplication.Documents.Size > 1)
-          Message = Document.Title.TripleDot(16);
-      }
-      else
-      {
-        DA.GetData(_Document_, ref Document);
-        if (Document?.IsValidObject != true)
-        {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Input parameter Document failed to collect data");
-          return;
-        }
-      }
-
-      TrySolveInstance(DA, Document);
-    }
-
-    protected abstract void TrySolveInstance(IGH_DataAccess DA, DB.Document doc);
-
-    #region IGH_VariableParameterComponent
-    bool IGH_VariableParameterComponent.CanInsertParameter(GH_ParameterSide side, int index) =>
-      side == GH_ParameterSide.Input && index == 0 && (Params.Input.Count == 0 || Params.Input[0].Name != "Document");
-
-    bool IGH_VariableParameterComponent.CanRemoveParameter(GH_ParameterSide side, int index) =>
-      side == GH_ParameterSide.Input && index == 0 && (Params.Input.Count > 0 && Params.Input[0].Name == "Document");
-
-    IGH_Param IGH_VariableParameterComponent.CreateParameter(GH_ParameterSide side, int index)
-    {
-      var Document = new Parameters.Document()
-      {
-        Name = "Document",
-        NickName = "Document",
-        Description = "Document to query elements",
-        Access = GH_ParamAccess.item,
-      };
-
-      Message = string.Empty;
-
-      return Document;
-    }
-    bool IGH_VariableParameterComponent.DestroyParameter(GH_ParameterSide side, int index) => side == GH_ParameterSide.Input && index == 0;
-    void IGH_VariableParameterComponent.VariableParameterMaintenance() { }
-    #endregion
   }
 }

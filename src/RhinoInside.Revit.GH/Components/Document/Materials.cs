@@ -1,11 +1,12 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Parameters;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class DocumentMaterials : DocumentComponent
+  public class DocumentMaterials : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("94AF13C1-CE70-46B5-9103-24B46E2F7375");
     public override GH_Exposure Exposure => GH_Exposure.primary;
@@ -15,26 +16,28 @@ namespace RhinoInside.Revit.GH.Components
 
     public DocumentMaterials() : base
     (
-      "Materials", "Materials",
-      "Get document materials list",
-      "Revit", "Query"
+      name: "Materials",
+      nickname: "Materials",
+      description: "Get document materials list",
+      category: "Revit",
+      subCategory: "Query"
     )
-    {
-    }
+    { }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      base.RegisterInputParams(manager);
+      ParamDefinition.FromParam(DocumentComponent.CreateDocumentParam(), ParamVisibility.Voluntary),
+      ParamDefinition.Create<Param_String>("Class", "C", "Material class", GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_String>("Name", "N", "Material name", GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true)
+    };
 
-      manager[manager.AddTextParameter("Class", "C", "Material class", GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddTextParameter("Name", "N", "Material name", GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddParameter(new Parameters.ElementFilter(), "Filter", "F", "Filter", GH_ParamAccess.item)].Optional = true;
-    }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      manager.AddParameter(new Parameters.Material(), "Materials", "Materials", "Materials list", GH_ParamAccess.list);
-    }
+      ParamDefinition.Create<Parameters.Material>("Materials", "M", "Material list", GH_ParamAccess.list)
+    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
     {

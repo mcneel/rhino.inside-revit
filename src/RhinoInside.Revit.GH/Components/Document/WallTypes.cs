@@ -1,11 +1,12 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Parameters;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class DocumentBasicWallTypes : DocumentComponent
+  public class DocumentBasicWallTypes : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("E37BB2DB-E096-45A1-9771-94CE7DBCCDB8");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
@@ -23,20 +24,21 @@ namespace RhinoInside.Revit.GH.Components
     )
     { }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      base.RegisterInputParams(manager);
+      ParamDefinition.FromParam(DocumentComponent.CreateDocumentParam(), ParamVisibility.Voluntary),
+      ParamDefinition.Create<Param_String>("Name", "N", "Wall Type name", GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Parameters.Param_Enum<Types.WallFunction>>("Function", "F", string.Empty, GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_Interval>("Width", "W", string.Empty, GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true),
+    };
 
-      manager[manager.AddTextParameter("Name", "N", "Wall Type name", GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddParameter(new Parameters.Param_Enum<Types.WallFunction>(), "Function", "F", string.Empty, GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddIntervalParameter("Width", "W", string.Empty, GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddParameter(new Parameters.ElementFilter(), "Filter", "F", "Filter", GH_ParamAccess.item)].Optional = true;
-    }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      manager.AddParameter(new Parameters.ElementType(), "Types", "W", "Basic wall Types list", GH_ParamAccess.list);
-    }
+      ParamDefinition.Create<Parameters.ElementType>("Types", "W", "Basic wall Types list", GH_ParamAccess.list)
+    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
     {
@@ -83,7 +85,7 @@ namespace RhinoInside.Revit.GH.Components
     }
   }
 
-  public class DocumentCurtainWallTypes : DocumentComponent
+  public class DocumentCurtainWallTypes : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("E49700B5-D16A-4D18-9EA7-C03AD64CF03D");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
@@ -101,20 +103,21 @@ namespace RhinoInside.Revit.GH.Components
     )
     { }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      base.RegisterInputParams(manager);
+      ParamDefinition.FromParam(DocumentComponent.CreateDocumentParam(), ParamVisibility.Voluntary),
+      ParamDefinition.Create<Param_String>("Name", "N", "Wall Type name", GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Parameters.Param_Enum<Types.WallFunction>>("Function", "F", string.Empty, GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_Interval>("Width", "W", string.Empty, GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true),
+    };
 
-      manager[manager.AddTextParameter("Name", "N", "Wall Type name", GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddParameter(new Parameters.Param_Enum<Types.WallFunction>(), "Function", "F", string.Empty, GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddIntervalParameter("Width", "W", string.Empty, GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddParameter(new Parameters.ElementFilter(), "Filter", "F", "Filter", GH_ParamAccess.item)].Optional = true;
-    }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      manager.AddParameter(new Parameters.ElementType(), "Types", "W", "Curtain wall Types list", GH_ParamAccess.list);
-    }
+      ParamDefinition.Create<Parameters.ElementType>("Types", "W", "Curtain wall Types list", GH_ParamAccess.list)
+    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
     {
@@ -159,7 +162,7 @@ namespace RhinoInside.Revit.GH.Components
     }
   }
 
-  public class DocumentStackedWallTypes : DocumentComponent
+  public class DocumentStackedWallTypes : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("82C96794-CD04-444E-A70B-50D2E3F2725D");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
@@ -177,20 +180,21 @@ namespace RhinoInside.Revit.GH.Components
     )
     { }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      base.RegisterInputParams(manager);
+      ParamDefinition.FromParam(DocumentComponent.CreateDocumentParam(), ParamVisibility.Voluntary),
+      ParamDefinition.Create<Param_String>("Name", "N", "Wall Type name", GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Parameters.Param_Enum<Types.WallFunction>>("Function", "F", string.Empty, GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_Interval>("Width", "W", string.Empty, GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true),
+    };
 
-      manager[manager.AddTextParameter("Name", "N", "Wall Type name", GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddParameter(new Parameters.Param_Enum<Types.WallFunction>(), "Function", "F", string.Empty, GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddIntervalParameter("Width", "W", string.Empty, GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddParameter(new Parameters.ElementFilter(), "Filter", "F", "Filter", GH_ParamAccess.item)].Optional = true;
-    }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      manager.AddParameter(new Parameters.ElementType(), "Types", "W", "Curtain wall Types list", GH_ParamAccess.list);
-    }
+      ParamDefinition.Create<Parameters.ElementType>("Types", "W", "Stacked wall Types list", GH_ParamAccess.list)
+    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
     {

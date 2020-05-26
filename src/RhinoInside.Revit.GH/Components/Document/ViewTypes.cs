@@ -1,11 +1,12 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Parameters;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class DocumentViewTypes : DocumentComponent
+  public class DocumentViewTypes : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("51E306BD-4736-4B7D-B2FF-B23E0717EEBB");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
@@ -23,19 +24,20 @@ namespace RhinoInside.Revit.GH.Components
     )
     { }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      base.RegisterInputParams(manager);
+      ParamDefinition.FromParam(DocumentComponent.CreateDocumentParam(), ParamVisibility.Voluntary),
+      ParamDefinition.Create<Parameters.Param_Enum<Types.ViewFamily>>("Family", "F", string.Empty, GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_String>("Name", "N", "View Type name", GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true),
+    };
 
-      manager[manager.AddParameter(new Parameters.Param_Enum<Types.ViewFamily>(), "Family", "F", string.Empty, GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddTextParameter("Name", "N", "View Type name", GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddParameter(new Parameters.ElementFilter(), "Filter", "F", "Filter", GH_ParamAccess.item)].Optional = true;
-    }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      manager.AddParameter(new Parameters.ElementType(), "Types", "V", "View Types list", GH_ParamAccess.list);
-    }
+      ParamDefinition.Create<Parameters.ElementType>("Types", "T", "Views Types list", GH_ParamAccess.list)
+    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
     {

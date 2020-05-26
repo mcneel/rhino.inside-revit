@@ -1,11 +1,12 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Parameters;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class DocumentGroupTypes : DocumentComponent
+  public class DocumentGroupTypes : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("97E9C6BB-8442-4F77-BCA1-6BE8AAFBDC96");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
@@ -15,24 +16,27 @@ namespace RhinoInside.Revit.GH.Components
 
     public DocumentGroupTypes() : base
     (
-      "Group Types", "GroupTypes",
-      "Get document group types list",
-      "Revit", "Query"
+      name: "Group Types",
+      nickname: "GroupTypes",
+      description: "Get document group types list",
+      category: "Revit",
+      subCategory: "Query"
     )
-    {
-    }
+    { }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      base.RegisterInputParams(manager);
-      manager[manager.AddTextParameter("Name", "N", "Group name", GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddParameter(new Parameters.ElementFilter(), "Filter", "F", "Filter", GH_ParamAccess.item)].Optional = true;
-    }
+      ParamDefinition.FromParam(DocumentComponent.CreateDocumentParam(), ParamVisibility.Voluntary),
+      ParamDefinition.Create<Param_String>("Name", "N", "Group name", GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true)
+    };
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      manager.AddParameter(new Parameters.ElementType(), "Types", "G", "Groups list", GH_ParamAccess.list);
-    }
+      ParamDefinition.Create<Parameters.ElementType>("Types", "T", "Types list", GH_ParamAccess.list)
+    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
     {

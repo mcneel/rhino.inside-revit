@@ -69,17 +69,65 @@ namespace RhinoInside.Revit.GH.Components
 
         return def;
       }
+
+      public static ParamDefinition Create<T>(string name, string nickname, string description, GH_ParamAccess access, bool optional = false, ParamVisibility relevance = ParamVisibility.Binding)
+        where T : class, IGH_Param, new()
+      {
+        var param = new T()
+        {
+          Name = name,
+          NickName = nickname,
+          Description = description,
+          Access = access,
+          Optional = optional
+        };
+
+        return new ParamDefinition(param, relevance);
+      }
+
+      public static ParamDefinition Create<T>(string name, string nickname, string description, object defaultValue, GH_ParamAccess access, bool optional = false, ParamVisibility relevance = ParamVisibility.Binding)
+        where T : class, IGH_Param, new()
+      {
+        var param = new T()
+        {
+          Name = name,
+          NickName = nickname,
+          Description = description,
+          Access = access,
+          Optional = optional
+        };
+
+        bool IsGenericSubclassOf(Type type, Type baseGenericType)
+        {
+          for(; type != typeof(object); type = type.BaseType)
+          {
+            var cur = type.IsGenericType ? type.GetGenericTypeDefinition() : type;
+            if (baseGenericType == cur)
+              return true;
+          }
+
+          return false;
+        }
+
+        if (IsGenericSubclassOf(typeof(T), typeof(GH_PersistentParam<>)))
+        {
+          dynamic persistentParam = param;
+          persistentParam.SetPersistentData.Append(defaultValue);
+        }
+
+        return new ParamDefinition(param, relevance);
+      }
     }
 
     protected abstract ParamDefinition[] Inputs { get; }
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override sealed void RegisterInputParams(GH_InputParamManager manager)
     {
       foreach (var definition in Inputs.Where(x => x.Relevance.HasFlag(ParamVisibility.Default)))
         manager.AddParameter(CreateDuplicateParam(definition.Param));
     }
 
     protected abstract ParamDefinition[] Outputs { get; }
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    protected override sealed void RegisterOutputParams(GH_OutputParamManager manager)
     {
       foreach (var definition in Outputs.Where(x => x.Relevance.HasFlag(ParamVisibility.Default)))
         manager.AddParameter(CreateDuplicateParam(definition.Param));
@@ -167,7 +215,11 @@ namespace RhinoInside.Revit.GH.Components
         return false;
 
       if (index == 0)
+      {
+        if (componentParams.Count == 0) return templateParams.Length > 0;
+
         return componentParams[0].Name != templateParams[0].Param.Name;
+      }
 
       if (index >= componentParams.Count)
         return componentParams[componentParams.Count - 1].Name != templateParams[templateParams.Length - 1].Param.Name;
@@ -191,11 +243,19 @@ namespace RhinoInside.Revit.GH.Components
       int offset = index == 0 ? -1 : +1;
       int reference = index == 0 ? index : index - 1;
 
-      var currentName = componentParams[reference].Name;
-      for (int i = 0; i < templateParams.Length; ++i)
+      if (componentParams.Count == 0)
       {
-        if (templateParams[i].Param.Name == currentName)
-          return templateParams[i + offset].Param;
+        if(templateParams.Length > 0)
+          return templateParams[templateParams.Length + offset].Param;
+      }
+      else
+      {
+        var currentName = componentParams[reference].Name;
+        for (int i = 0; i < templateParams.Length; ++i)
+        {
+          if (templateParams[i].Param.Name == currentName)
+            return templateParams[i + offset].Param;
+        }
       }
 
       return default;
@@ -281,6 +341,8 @@ namespace RhinoInside.Revit.GH.Components
         base.ExpireLayout();
       }
     }
+
+    public override void CreateAttributes() => m_attributes = new Attributes(this);
     #endregion
   }
 }

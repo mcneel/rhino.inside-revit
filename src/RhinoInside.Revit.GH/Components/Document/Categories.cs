@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Parameters;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class DocumentCategories : DocumentComponent
+  public class DocumentCategories : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("D150E40E-0970-4683-B517-038F8BA8B0D8");
     public override GH_Exposure Exposure => GH_Exposure.primary;
@@ -49,25 +50,24 @@ namespace RhinoInside.Revit.GH.Components
     {
     }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      base.RegisterInputParams(manager);
+      ParamDefinition.FromParam(DocumentComponent.CreateDocumentParam(), ParamVisibility.Voluntary),
+      ParamDefinition.Create<Parameters.Param_Enum<Types.CategoryType>>("Type", "T", "Category type", DB.CategoryType.Model, GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Parameters.Category>("Parent", "P", "Parent category", GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_String>("Name", "N", "Category name", GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_Boolean>("Allows Subcategories", "ASC", "Category allows subcategories to be added", GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_Boolean>("Allows Parameters", "AP", "Category allows bound parameters", GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_Boolean>("Has Material Quantities", "HMQ", "Category has material quantities", GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_Boolean>("Cuttable", "C", "Category is cuttable", GH_ParamAccess.item, optional: true),
+    };
 
-      var type = manager[manager.AddParameter(new Parameters.Param_Enum<Types.CategoryType>(), "Type", "T", "Category type", GH_ParamAccess.item)] as Parameters.Param_Enum<Types.CategoryType>;
-      type.SetPersistentData(DB.CategoryType.Model);
-      type.Optional = true;
-      manager[manager.AddParameter(new Parameters.Category(), "Parent", "P", "Parent category", GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddTextParameter("Name", "N", "Level name", GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddBooleanParameter("AllowsSubcategories", "A", "Allows subcategories to be added", GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddBooleanParameter("AllowsParameters", "A", "Allows bound parameters", GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddBooleanParameter("HasMaterialQuantities", "M", "Has material quantities", GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddBooleanParameter("Cuttable", "C", "Has material quantities", GH_ParamAccess.item)].Optional = true;
-    }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      manager.AddParameter(new Parameters.Category(), "Categories", "Categories", "Categories list", GH_ParamAccess.list);
-    }
+      ParamDefinition.Create<Parameters.Category>("Categories", "C", "Categories list", GH_ParamAccess.list)
+    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
     {
@@ -84,15 +84,15 @@ namespace RhinoInside.Revit.GH.Components
       bool nofilterName = (!DA.GetData(_Name_, ref Name) && Params.Input[_Name_].DataType == GH_ParamData.@void);
 
       bool AllowsSubcategories = false;
-      var _AllowsSubcategories_ = Params.IndexOfInputParam("AllowsSubcategories");
+      var _AllowsSubcategories_ = Params.IndexOfInputParam("Allows Subcategories");
       bool nofilterSubcategories = (!DA.GetData(_AllowsSubcategories_, ref AllowsSubcategories) && Params.Input[_AllowsSubcategories_].DataType == GH_ParamData.@void);
 
       bool AllowsParameters = false;
-      var _AllowsParameters_ = Params.IndexOfInputParam("AllowsParameters");
+      var _AllowsParameters_ = Params.IndexOfInputParam("Allows Parameters");
       bool nofilterParams = (!DA.GetData(_AllowsParameters_, ref AllowsParameters) && Params.Input[_AllowsParameters_].DataType == GH_ParamData.@void);
 
       bool HasMaterialQuantities = false;
-      var _HasMaterialQuantities_ = Params.IndexOfInputParam("HasMaterialQuantities");
+      var _HasMaterialQuantities_ = Params.IndexOfInputParam("Has Material Quantities");
       bool nofilterMaterials = (!DA.GetData(_HasMaterialQuantities_, ref HasMaterialQuantities) && Params.Input[_HasMaterialQuantities_].DataType == GH_ParamData.@void);
 
       bool Cuttable = false;
