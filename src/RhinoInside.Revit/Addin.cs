@@ -10,6 +10,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
 using Microsoft.Win32;
+using Microsoft.Win32.SafeHandles;
 using UIX = RhinoInside.Revit.External.UI;
 using RhinoInside.Revit.External.UI.Extensions;
 
@@ -249,7 +250,7 @@ namespace RhinoInside.Revit
     #endregion
 
     #region Version
-    public static bool IsExpired(bool quiet = true)
+    static bool CheckIsExpired(bool quiet = true)
     {
       if (DaysUntilExpiration > 0 && quiet)
         return false;
@@ -278,45 +279,113 @@ namespace RhinoInside.Revit
 
       return DaysUntilExpiration < 1;
     }
-    internal static Result CheckSetup(Autodesk.Revit.ApplicationServices.ControlledApplication app)
-    {
-      if (RhinoVersion >= MinimumRhinoVersion)
-        return IsExpired() ? Result.Cancelled : Result.Succeeded;
 
-      using
-      (
-        var taskDialog = new TaskDialog("Update Rhino")
-        {
-          Id = $"{MethodBase.GetCurrentMethod().DeclaringType}.{MethodBase.GetCurrentMethod().Name}",
-          MainIcon = UIX.TaskDialogIcons.IconInformation,
-          AllowCancellation = true,
-          MainInstruction = "Unsupported Rhino WIP version",
-          MainContent = $"Expected Rhino version is ({MinimumRhinoVersion}) or above.",
-          ExpandedContent =
-          RhinoVersionInfo is null ? "Rhino\n" :
-          $"{RhinoVersionInfo.ProductName} {RhinoVersionInfo.ProductMajorPart}\n" +
-          $"• Version: {RhinoVersion}\n" +
-          $"• Path: '{SystemDir}'" + (!File.Exists(RhinoExePath) ? " (not found)" : string.Empty) + "\n" +
-          $"\n{app.VersionName}\n" +
-#if REVIT_2019
-          $"• Version: {app.SubVersionNumber} ({app.VersionBuild})\n" +
-#else
-          $"• Version: {app.VersionNumber} ({app.VersionBuild})\n" +
-#endif
-          $"• Path: {Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName)}\n" +
-          $"• Language: {app.Language}",
-          FooterText = $"Current Rhino WIP version: {RhinoVersion}"
-        }
-      )
+    internal static Result CheckSetup(UIControlledApplication app)
+    {
+      var revit = app.ControlledApplication;
+
+      // Check if Rhino.Inside is expired
+      if (CheckIsExpired(DaysUntilExpiration > 10))
+        return Result.Cancelled;
+
+      // Check if Rhino.exe is a supported version
+      if (RhinoVersion < MinimumRhinoVersion)
       {
-        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Download latest Rhino WIP…");
-        if (taskDialog.Show() == TaskDialogResult.CommandLink1)
+        using
+        (
+          var taskDialog = new TaskDialog("Update Rhino")
+          {
+            Id = $"{MethodBase.GetCurrentMethod().DeclaringType}.{MethodBase.GetCurrentMethod().Name}.UpdateRhino",
+            MainIcon = UIX.TaskDialogIcons.IconInformation,
+            AllowCancellation = true,
+            MainInstruction = "Unsupported Rhino WIP version",
+            MainContent = $"Expected Rhino version is ({MinimumRhinoVersion}) or above.",
+            ExpandedContent =
+            RhinoVersionInfo is null ? "Rhino\n" :
+            $"{RhinoVersionInfo.ProductName} {RhinoVersionInfo.ProductMajorPart}\n" +
+            $"• Version: {RhinoVersion}\n" +
+            $"• Path: '{SystemDir}'" + (!File.Exists(RhinoExePath) ? " (not found)" : string.Empty) + "\n" +
+            $"\n{revit.VersionName}\n" +
+#if REVIT_2019
+            $"• Version: {revit.SubVersionNumber} ({revit.VersionBuild})\n" +
+#else
+            $"• Version: {revit.VersionNumber} ({revit.VersionBuild})\n" +
+#endif
+            $"• Path: {Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName)}\n" +
+            $"• Language: {revit.Language}",
+            FooterText = $"Current Rhino WIP version: {RhinoVersion}"
+          }
+        )
         {
-          using (Process.Start(@"https://www.rhino3d.com/download/rhino/wip")) { }
+          taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Download latest Rhino WIP…");
+          if (taskDialog.Show() == TaskDialogResult.CommandLink1)
+          {
+            using (Process.Start(@"https://www.rhino3d.com/download/rhino/wip")) { }
+          }
         }
+
+        return Result.Cancelled;
       }
 
-      return Result.Cancelled;
+      // Check if 'opennurbs.dll' is already loaded
+      var openNURBS = LibraryHandle.GetLoadedModule("opennurbs.dll");
+      if (openNURBS != LibraryHandle.Zero)
+      {
+        var openNURBSVersion = FileVersionInfo.GetVersionInfo(openNURBS.ModuleFileName);
+
+        using
+        (
+          var taskDialog = new TaskDialog($"Rhino.Inside {Version} - openNURBS Conflict")
+          {
+            Id = $"{MethodBase.GetCurrentMethod().DeclaringType}.{MethodBase.GetCurrentMethod().Name}.OpenNURBSConflict",
+            MainIcon = UIX.TaskDialogIcons.IconError,
+            TitleAutoPrefix = false,
+            AllowCancellation = true,
+            MainInstruction = "An unsupported openNURBS version is already loaded. Rhino.Inside cannot run.",
+            MainContent = "Please restart Revit and load Rhino.Inside first to work around the problem.",
+            FooterText = $"Currently loaded openNURBS version: {openNURBSVersion.FileMajorPart}.{openNURBSVersion.FileMinorPart}.{openNURBSVersion.FileBuildPart}.{openNURBSVersion.FilePrivatePart}"
+          }
+        )
+        {
+          taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "More information…");
+          taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink2, "Report Error…", "by email to tech@mcneel.com");
+          taskDialog.DefaultButton = TaskDialogResult.CommandLink2;
+          switch(taskDialog.Show())
+          {
+            case TaskDialogResult.CommandLink1:
+              using (Process.Start(@"https://www.rhino3d.com/inside/revit/beta/reference/known-issues")) { }
+              break;
+            case TaskDialogResult.CommandLink2:
+
+              var RhinoInside_dmp = Path.Combine
+              (
+                Path.GetDirectoryName(revit.RecordingJournalFilename),
+                Path.GetFileNameWithoutExtension(revit.RecordingJournalFilename) + ".RhinoInside.Revit.dmp"
+              );
+
+              MiniDumper.Write(RhinoInside_dmp);
+
+              ErrorReport.SendEmail
+              (
+                app,
+                $"Rhino.Inside Revit failed - openNURBS Conflict",
+                true,
+                new string[]
+                {
+                  revit.RecordingJournalFilename,
+                  RhinoInside_dmp
+                }
+              );
+
+              CurrentStatus = Status.Failed;
+              break;
+          }
+        }
+
+        return Result.Cancelled;
+      }
+
+      return Result.Succeeded;
     }
 
     static string CallerFilePath([System.Runtime.CompilerServices.CallerFilePath] string CallerFilePath = "") => CallerFilePath;

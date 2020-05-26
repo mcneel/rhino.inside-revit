@@ -46,7 +46,18 @@ namespace RhinoInside.Revit
       catch (IOException) { }
     }
 
-    static void CreateReportFile(UIApplication app, string reportFilePath, bool includeAddinsList, IEnumerable<string> attachments)
+    static void CreateReportFile
+    (
+      string revitVersionName,
+      string revitVersionBuild,
+      string revitSubVersionNumber,
+      string revitVersionNumber,
+      Autodesk.Revit.ApplicationServices.ProductType revitProduct,
+      Autodesk.Revit.ApplicationServices.LanguageType revitLanguage,
+      ExternalApplicationArray loadedApplications,
+      string reportFilePath,
+      IEnumerable<string> attachments
+    )
     {
       attachments = attachments.Where(x => File.Exists(x)).ToArray();
 
@@ -69,22 +80,21 @@ namespace RhinoInside.Revit
               writer.WriteLine($"  - SystemInformation.TerminalServerSession: {System.Windows.Forms.SystemInformation.TerminalServerSession}");
               writer.WriteLine($"- Environment.Version: {CLRVersion}");
 
-              var revit = app.Application;
-              writer.WriteLine($"- {revit.VersionName}");
-              writer.WriteLine($"  - VersionBuild: {revit.VersionBuild}");
+              writer.WriteLine($"- {revitVersionName}");
+              writer.WriteLine($"  - VersionBuild: {revitVersionBuild}");
 #if REVIT_2019
-              writer.WriteLine($"  - SubVersionNumber: {revit.SubVersionNumber}");
+              writer.WriteLine($"  - SubVersionNumber: {revitSubVersionNumber}");
 #else
-              writer.WriteLine($"  - VersionNumber: {revit.VersionNumber}");
+              writer.WriteLine($"  - VersionNumber: {revitVersionNumber}");
 #endif
-              writer.WriteLine($"  - ProductType: {revit.Product}");
-              writer.WriteLine($"  - Language: {revit.Language}");
+              writer.WriteLine($"  - ProductType: {revitProduct}");
+              writer.WriteLine($"  - Language: {revitLanguage}");
 
               var rhino = Addin.RhinoVersionInfo;
               writer.WriteLine($"- Rhino: {rhino.ProductVersion} ({rhino.FileDescription})");
               writer.WriteLine($"- Rhino.Inside Revit: {Addin.DisplayVersion}");
 
-              if (includeAddinsList)
+              if (loadedApplications is object)
               {
                 writer.WriteLine();
                 writer.WriteLine("## Addins");
@@ -112,14 +122,14 @@ namespace RhinoInside.Revit
           }
 
           // Addins
-          if (includeAddinsList)
+          if (loadedApplications is object)
           {
             var LoadedApplicationsCSV = archive.CreateEntry($"{now}/Addins/{now}.csv");
             using (var writer = new StreamWriter(LoadedApplicationsCSV.Open()))
             {
               writer.WriteLine(@"""Company-Name"",""Product-Name"",""Product-Version"",""AddInType-FullName"",""Assembly-FullName"",""Assembly-Location""");
 
-              foreach (var application in app.LoadedApplications)
+              foreach (var application in loadedApplications)
               {
                 var addinType = application.GetType();
                 var versionInfo = File.Exists(addinType.Assembly.Location) ? FileVersionInfo.GetVersionInfo(addinType.Assembly.Location) : null;
@@ -145,7 +155,7 @@ namespace RhinoInside.Revit
               writer.WriteLine($"> Same information in CSV format [here]({now}.csv).  ");
               writer.WriteLine();
 
-              foreach (var application in app.LoadedApplications)
+              foreach (var application in loadedApplications)
               {
                 var addinType = application.GetType();
 
@@ -161,11 +171,11 @@ namespace RhinoInside.Revit
               }
             }
 
-            Settings.AddIns.GetSystemAddins(app.Application.VersionNumber, out var systemAddins);
+            Settings.AddIns.GetSystemAddins(revitVersionNumber, out var systemAddins);
             foreach (var addin in systemAddins)
               CreateReportEntry(archive, $"{now}/Addins/System/{Path.GetFileName(addin)}", addin);
 
-            Settings.AddIns.GetInstalledAddins(app.Application.VersionNumber, out var installedAddins);
+            Settings.AddIns.GetInstalledAddins(revitVersionNumber, out var installedAddins);
             foreach (var addin in installedAddins)
               CreateReportEntry(archive, $"{now}/Addins/Installed/{Path.GetFileName(addin)}", addin);
           }
@@ -192,19 +202,73 @@ namespace RhinoInside.Revit
       }
     }
 
-    public static void SendEmail(UIApplication app, string subject, bool includeAddinsList, IEnumerable<string> attachments)
+
+    public static void SendEmail(UIControlledApplication app, string subject, bool includeAddinsList, IEnumerable<string> attachments)
     {
+      var revit = app.ControlledApplication;
       var now = DateTime.Now.ToString("yyyyMMddTHHmmssZ");
-      var ReportFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), $"RhinoInside-Revit-Report-{now}.zip");
+      var reportFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), $"RhinoInside-Revit-Report-{now}.zip");
 
       CreateReportFile
       (
-        app,
-        ReportFilePath,
-        includeAddinsList,
+        revit.VersionName,
+        revit.VersionBuild,
+#if REVIT_2019
+        revit.SubVersionNumber,
+#else
+        revit.VersionNumber,
+#endif
+        revit.VersionNumber,
+        revit.Product,
+        revit.Language,
+        includeAddinsList ? app.LoadedApplications : default,
+        reportFilePath,
         attachments
       );
 
+#if REVIT_2019
+      var revitVersion = $"{revit.SubVersionNumber} ({revit.VersionBuild})";
+#else
+      var revitVersion = $"{revit.VersionNumber} ({revit.VersionBuild})";
+#endif
+
+      SendEmail(subject, reportFilePath, revitVersion, includeAddinsList, attachments);
+    }
+
+    public static void SendEmail(UIApplication app, string subject, bool includeAddinsList, IEnumerable<string> attachments)
+    {
+      var revit = app.Application;
+      var now = DateTime.Now.ToString("yyyyMMddTHHmmssZ");
+      var reportFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), $"RhinoInside-Revit-Report-{now}.zip");
+
+      CreateReportFile
+      (
+        revit.VersionName,
+        revit.VersionBuild,
+#if REVIT_2019
+        revit.SubVersionNumber,
+#else
+        revit.VersionNumber,
+#endif
+        revit.VersionNumber,
+        revit.Product,
+        revit.Language,
+        includeAddinsList ? app.LoadedApplications : default,
+        reportFilePath,
+        attachments
+      );
+
+#if REVIT_2019
+      var revitVersion = $"{revit.SubVersionNumber} ({revit.VersionBuild})";
+#else
+      var revitVersion = $"{revit.VersionNumber} ({revit.VersionBuild})";
+#endif
+
+      SendEmail(subject, reportFilePath, revitVersion, includeAddinsList, attachments);
+    }
+
+    static void SendEmail(string subject, string ReportFilePath, string revitVersion, bool includeAddinsList, IEnumerable<string> attachments)
+    {
       foreach (var file in attachments)
       {
         try { File.Delete(file); }
@@ -216,17 +280,11 @@ namespace RhinoInside.Revit
 
       var mailBody = @"Please give us any additional info you see fit here..." + Environment.NewLine + Environment.NewLine;
       if (File.Exists(ReportFilePath))
-        mailBody += $"<Please attach '{ReportFilePath}' file here>" + Environment.NewLine + Environment.NewLine;
+        mailBody += $"!!! Please drag and drop the '{ReportFilePath}' file here to attach the error files !!!" + Environment.NewLine + Environment.NewLine;
 
       mailBody += $"OS: {Environment.OSVersion}" + Environment.NewLine;
       mailBody += $"CLR: {ErrorReport.CLRVersion}" + Environment.NewLine;
-
-      var revit = app.Application;
-#if REVIT_2019
-      mailBody += $"Revit: {revit.SubVersionNumber} ({revit.VersionBuild})" + Environment.NewLine;
-#else
-      mailBody += $"Revit: {revit.VersionNumber} ({revit.VersionBuild})" + Environment.NewLine;
-#endif
+      mailBody += $"Revit: {revitVersion}" + Environment.NewLine;
 
       var rhino = Addin.RhinoVersionInfo;
       mailBody += $"Rhino: {rhino.ProductVersion} ({rhino.FileDescription})" + Environment.NewLine;
@@ -288,7 +346,25 @@ namespace RhinoInside.Revit
       uint ProcessId,
       SafeFileHandle hFile,
       MINIDUMP_TYPE DumpType,
-      ref MINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
+      in MINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
+      IntPtr UserStreamParam,
+      IntPtr CallbackParam
+    );
+
+    [DllImport("DBGHELP",
+      EntryPoint = "MiniDumpWriteDump",
+      CallingConvention = CallingConvention.StdCall,
+      CharSet = CharSet.Unicode,
+      ExactSpelling = true,
+      SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    static extern bool MiniDumpWriteDump
+    (
+      SafeProcessHandle hProcess,
+      uint ProcessId,
+      SafeFileHandle hFile,
+      MINIDUMP_TYPE DumpType,
+      IntPtr ExceptionParam,
       IntPtr UserStreamParam,
       IntPtr CallbackParam
     );
@@ -306,13 +382,25 @@ namespace RhinoInside.Revit
           ClientPointers = false
         };
 
+        if (ExceptionParam.ExceptionPointers == IntPtr.Zero)
+          return MiniDumpWriteDump
+          (
+            GetCurrentProcess(),
+            GetCurrentProcessId(),
+            fs.SafeFileHandle,
+            DumpType,
+            IntPtr.Zero,
+            IntPtr.Zero,
+            IntPtr.Zero
+          );
+
         return MiniDumpWriteDump
         (
           GetCurrentProcess(),
           GetCurrentProcessId(),
           fs.SafeFileHandle,
           DumpType,
-          ref ExceptionParam,
+          in ExceptionParam,
           IntPtr.Zero,
           IntPtr.Zero
         );
