@@ -195,9 +195,9 @@
     <Compile Include="Components\Category\Parameters.cs" />
     <Compile Include="Components\Category\SubCategories.cs" />
     <Compile Include="Components\Component.cs" />
+    <Compile Include="Components\DocumentComponent.cs" />
     <Compile Include="Components\Document\Active.cs" />
     <Compile Include="Components\Document\Categories.cs" />
-    <Compile Include="Components\Document\DocumentComponent.cs" />
     <Compile Include="Components\Document\Documents.cs" />
     <Compile Include="Components\Document\Elements.cs" />
     <Compile Include="Components\Document\ElementTypes.cs" />
@@ -458,6 +458,7 @@
     <None Include="Resources\Parameters\Family.png" />
     <None Include="Resources\Parameters\View.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.dll" DestinationFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.gha" />
