@@ -161,20 +161,6 @@ namespace RhinoInside.Revit.GH.Components
         }
         else base.Render(canvas, graphics, channel);
       }
-
-      bool CanvasFullNames = Grasshopper.CentralSettings.CanvasFullNames;
-      public override void ExpireLayout()
-      {
-        if (CanvasFullNames != Grasshopper.CentralSettings.CanvasFullNames)
-        {
-          if (Owner is IGH_VariableParameterComponent variableParameterComponent)
-            variableParameterComponent.VariableParameterMaintenance();
-
-          CanvasFullNames = Grasshopper.CentralSettings.CanvasFullNames;
-        }
-
-        base.ExpireLayout();
-      }
     }
 
     public override void CreateAttributes() => m_attributes = new Attributes(this);
