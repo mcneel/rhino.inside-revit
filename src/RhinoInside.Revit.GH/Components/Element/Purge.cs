@@ -71,7 +71,7 @@ namespace RhinoInside.Revit.GH.Components
         {
           Name = "Succeeded",
           NickName = "S",
-          Description = "Element is been deleted",
+          Description = "Element delete succeeded",
           Access = GH_ParamAccess.item
         },
         ParamVisibility.Binding

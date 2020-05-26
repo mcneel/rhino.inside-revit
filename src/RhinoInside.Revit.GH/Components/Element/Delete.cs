@@ -21,6 +21,27 @@ namespace RhinoInside.Revit.GH.Components
     {}
 
     protected override ComponentCommand Command => ComponentCommand.Delete;
+
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
+    {
+      new ParamDefinition
+      (
+        CreateSignalParam(),
+        ParamVisibility.Voluntary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.Element()
+        {
+          Name = "Elements",
+          NickName = "E",
+          Description = "Elements to Delete",
+          Access = GH_ParamAccess.list
+        },
+        ParamVisibility.Binding
+      ),
+    };
   }
 }
 
