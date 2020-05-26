@@ -250,7 +250,7 @@ namespace RhinoInside.Revit
     #endregion
 
     #region Version
-    static bool CheckIsExpired(bool quiet = true)
+    internal static bool CheckIsExpired(bool quiet = true)
     {
       if (DaysUntilExpiration > 0 && quiet)
         return false;
