@@ -127,6 +127,9 @@ namespace RhinoInside.Revit
 
     protected override Result OnStartup(UIControlledApplication applicationUI)
     {
+      if(!CanLoad(applicationUI))
+        return Result.Failed;
+
       if (StartupMode == AddinStartupMode.Cancelled)
         return Result.Cancelled;
 
@@ -278,6 +281,28 @@ namespace RhinoInside.Revit
       }
 
       return DaysUntilExpiration < 1;
+    }
+
+    static bool IsValid(UIControlledApplication app)
+    {
+#if REVIT_2021
+      return app.ControlledApplication.VersionNumber == "2021";
+#elif REVIT_2020
+      return app.ControlledApplication.VersionNumber == "2020";
+#elif REVIT_2019
+      return app.ControlledApplication.VersionNumber == "2019";
+#elif REVIT_2018
+      return app.ControlledApplication.VersionNumber == "2018";
+#elif REVIT_2017
+      return app.ControlledApplication.VersionNumber == "2017";
+#else
+      return false;
+#endif
+    }
+
+    static bool CanLoad(UIControlledApplication app)
+    {
+      return IsValid(app);
     }
 
     internal static Result CheckSetup(UIControlledApplication app)
