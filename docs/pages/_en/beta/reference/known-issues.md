@@ -5,6 +5,33 @@ order: 43
 
 This guide looks at errors that can appear with {{ site.terms.rir }}. This address most of the common errors we have seen. [Please Contact Us](https://www.rhino3d.com/support) whether any of these options worked or did not work. We are working to minimize any of these messages.
 
+## An unsupported openNURBS version is allready loaded. Rhino.Inside cannot run.
+
+### Problem
+
+When {{ site.terms.rir }} attempts to load, the error below appears.
+
+![]({{ "/static/images/reference/known-issues-unsupported-opennurbs.jpg" | prepend: site.baseurl }})
+
+This normally appears when there is a conflict when an older version of the Rhino file reader (openNURBS) has been loaded in Revit.  This normally happens because:
+
+1. A Rhino 3DM file was inserted into Revit before {{ site.terms.rir }} was loaded.
+1. Or, more Revit plugins that have loaded already that reference the Rhino file reader.
+
+### Workaround
+
+Please report the error with the Report Error... in the dialog.
+
+Saving the project, then restarting Revit is usually the fastest workaround.  If {{ site.terms.rir }} is loaded first, then everything normally will work.
+
+Some plugins may need to be updated.  Common conflicts are seen with older versions of:
+1. [Conveyer](https://provingground.io/tools/conveyor/)
+1. [Avail](https://getavail.com/avail-adds-integration-with-mcneel-rhino-modeler/)
+1. [{{ site.terms.pyrevit }} ](https://www.notion.so/pyRevit-bd907d6292ed4ce997c46e84b6ef67a0) 
+
+We continue to work with all our partners on this error. Information gathered from the Error Reporting enables us to actively target these conflicts.
+
+
 ## Initialization Error -200
 
 ### Problem
