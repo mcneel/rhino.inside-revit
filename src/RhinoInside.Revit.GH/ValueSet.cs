@@ -25,7 +25,7 @@ namespace Grasshopper.External.Special
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     public override GH_ParamKind Kind => GH_ParamKind.floating;
     protected override Bitmap Icon => ClassIcon;
-    static Bitmap ClassIcon => RhinoInside.Revit.ImageBuilder.BuildIcon
+    static readonly Bitmap ClassIcon = RhinoInside.Revit.ImageBuilder.BuildIcon
     (
       (graphics, bounds) =>
       {
@@ -34,7 +34,7 @@ namespace Grasshopper.External.Special
         using (var capsule = GH_Capsule.CreateCapsule(iconBounds, GH_Palette.Grey))
         {
           capsule.Render(graphics, false, false, false);
-          Attributes.RenderCheckMark(graphics, iconBounds, Color.Black);
+          ComponentAttributes.RenderCheckMark(graphics, iconBounds, Color.Black);
         }
       }
     );
@@ -136,7 +136,7 @@ namespace Grasshopper.External.Special
       ResetPersistentData(ListItems.Select(x => x.Value), "Select all");
     }
 
-    new class Attributes : GH_ResizableAttributes<ValueSet>
+    class ComponentAttributes : GH_ResizableAttributes<ValueSet>
     {
       public override bool HasInputGrip => true;
       public override bool HasOutputGrip => true;
@@ -144,7 +144,7 @@ namespace Grasshopper.External.Special
       protected override Padding SizingBorders => new Padding(4, 6, 4, 6);
       protected override Size MinimumSize => new Size(50, 25 + 18 * 5);
 
-      public Attributes(ValueSet owner) : base(owner)
+      public ComponentAttributes(ValueSet owner) : base(owner)
       {
         Bounds = new RectangleF
         (
@@ -507,7 +507,7 @@ namespace Grasshopper.External.Special
       }
     }
 
-    public override void CreateAttributes() => m_attributes = new Attributes(this);
+    public override void CreateAttributes() => m_attributes = new ComponentAttributes(this);
     public override void AddedToDocument(GH_Document document)
     {
       if (NickName == Name)
