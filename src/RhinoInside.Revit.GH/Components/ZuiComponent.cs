@@ -112,7 +112,7 @@ namespace RhinoInside.Revit.GH.Components
         if (IsGenericSubclassOf(typeof(T), typeof(GH_PersistentParam<>)))
         {
           dynamic persistentParam = param;
-          persistentParam.SetPersistentData.Append(defaultValue);
+          persistentParam.SetPersistentData(defaultValue);
         }
 
         return new ParamDefinition(param, relevance);
