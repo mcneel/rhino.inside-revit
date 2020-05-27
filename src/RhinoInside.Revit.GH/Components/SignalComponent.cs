@@ -97,7 +97,7 @@ namespace RhinoInside.Revit.GH.Components
           {
             doc.ScheduleSolution
             (
-              0,
+              GH_Document.ScheduleRecursive,
               x =>
               {
                 base.ClearData();
