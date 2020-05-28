@@ -38,7 +38,7 @@ namespace Grasshopper.External.Special
     public override Guid ComponentGuid => TriggerComponentID;
     public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.obscure;
     protected override Bitmap Icon => ClassIcon;
-    static /*readonly*/ Bitmap ClassIcon => RhinoInside.Revit.ImageBuilder.BuildIcon
+    static readonly Bitmap ClassIcon = RhinoInside.Revit.ImageBuilder.BuildIcon
     (
       (graphics, bounds) =>
       {
