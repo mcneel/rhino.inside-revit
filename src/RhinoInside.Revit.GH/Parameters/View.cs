@@ -39,6 +39,7 @@ namespace RhinoInside.Revit.GH.Parameters
         var views = collector.
                     OfClass(typeof(DB.View)).
                     Cast<DB.View>().
+                    Where(x => !x.IsTemplate).
                     GroupBy(x => x.ViewType);
 
         foreach(var view in views)
@@ -82,6 +83,7 @@ namespace RhinoInside.Revit.GH.Parameters
           var views = collector.
                       OfClass(typeof(DB.View)).
                       Cast<DB.View>().
+                      Where(x => !x.IsTemplate).
                       Where(x => viewType == DB.ViewType.Undefined || x.ViewType == viewType);
 
           foreach (var view in views)
