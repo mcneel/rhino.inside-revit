@@ -14,6 +14,12 @@ using Grasshopper.GUI.HTML;
 using Grasshopper.Kernel;
 using System.Diagnostics;
 
+///////////////////////////////////////////////////////////////////////////////
+//                                                                           //
+// NOTE: At some point this code may end up in the Grasshopper code base.    //
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
+
 namespace Grasshopper.External.Special
 {
   public class TriggerComponent : GH_ActiveObject, IGH_InstanceGuidDependent
@@ -124,15 +130,24 @@ namespace Grasshopper.External.Special
       }
     }
 
-    //protected override string HtmlHelp_Source()
-    //{
-    //  GH_HtmlFormatter ghHtmlFormatter = new GH_HtmlFormatter();
-    //  ghHtmlFormatter.Title = "Timer Object";
-    //  ghHtmlFormatter.ContactURI = "https://discourse.mcneel.com/";
-    //  ghHtmlFormatter.Description = "Timers are object which fire update events at specified intervals. This process is reasonably dangerous since updates might occur when you do not expect them, so please be careful when using them, and only use a timer when you have no other option. <BR><BR>" + Environment.NewLine + "By default a new timer enabled, but inactive as it is isolated. You can enable/disable a timer by double clicking on the object or via the context menu. However, enabling a timer is no guarantee that it will fire update events. <BR><BR> " + Environment.NewLine + "First, there is a global Timer Abort which has the power to disable all timers in Grasshopper. Whenever a timer is enabled for the first time, the Global Abort will appear in the Windows notification bar. When the icon is green, it means the Global Abort is off and timers are allowed to fire events. When the icon is red, all timers are blocked. Blocked timers are displayed with a red icon instead of the timer icon on the canvas. Double clicking on the notification icon on the windows taskbar will toggle the Global Abort state. <BR><BR>" + Environment.NewLine + "Secondly, timers only fire events when they can make a difference. Before a timer will tell Grasshopper to recompute the solution it will blank certain objects. These are called the targets of the timer object. You can add a target to a timer by click+dragging from the arrow area to the right of the timer. Drag the wire onto another object, and it will be added to the target list. You can remove objects from the target list by tracing over an existing target wire while holding the Control key.";
-    //  ghHtmlFormatter.AddRemark("Timer intervals are specified in milliseconds.", GH_HtmlFormatterPalette.Black, GH_HtmlFormatterPalette.White);
-    //  return ghHtmlFormatter.HtmlFormat();
-    //}
+    protected override string HtmlHelp_Source()
+    {
+      var nTopic = new GH_HtmlFormatter()
+      {
+        Title = "Trigger Object",
+        Description =
+        @"<p>This component is a special interface object that allows to expire and recompute specific objects.</p>" +
+        @"<p>Before a trigger will tell Grasshopper to recompute the solution it will blank certain objects. " +
+        @"These are called the targets of the trigger object. You can add a target to a trigger by click + dragging from the right side of the trigger. " +
+        @"Drag the wire onto another object, and it will be added to the target list. " +
+        @"You can remove objects from the target list by tracing over an existing target wire while holding the Control key." +
+        @"<p>By default a new trigger is enabled. You can enable/disable a trigger by double clicking on the object or via the context menu." +
+        @"When a trigger is enable/disable all the target objects will be enabled/disabled as well.</p>",
+        ContactURI = "https://discourse.mcneel.com/"
+      };
+
+      return nTopic.HtmlFormat();
+    }
 
     public override bool Write(GH_IWriter writer)
     {
@@ -195,17 +210,18 @@ namespace Grasshopper.External.Special
 
       public override void SetupTooltip(PointF point, GH_TooltipDisplayEventArgs e)
       {
-        if (this.TextBox.Contains(GH_Convert.ToPoint(point)))
+        if (TextBox.Contains(GH_Convert.ToPoint(point)))
         {
           base.SetupTooltip(point, e);
         }
         else
         {
-          if (!this.GripBox.Contains(GH_Convert.ToPoint(point)))
+          if (!GripBox.Contains(GH_Convert.ToPoint(point)))
             return;
-          e.Icon = this.Owner.Icon_24x24;
-          e.Title = "Timer targets";
-          e.Text = "Drag from here to assign Timer target objects.";
+
+          e.Icon = Owner.Icon_24x24;
+          e.Title = "Trigger targets";
+          e.Text = "Drag from here to assign Trigger target objects.";
         }
       }
 
