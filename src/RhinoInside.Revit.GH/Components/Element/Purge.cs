@@ -45,11 +45,6 @@ namespace RhinoInside.Revit.GH.Components
     {
       new ParamDefinition
       (
-        CreateSignalParam(),
-        ParamVisibility.Voluntary
-      ),
-      new ParamDefinition
-      (
         new Parameters.Element()
         {
           Name = "Elements",
@@ -210,16 +205,22 @@ namespace RhinoInside.Revit.GH.Components
                   }
                   else
                   {
-                    if (Deleted.Capacity < Deleted.Count + updater.DeletedElementIds.Count)
-                      Deleted.Capacity = Deleted.Count + updater.DeletedElementIds.Count;
+                    if (updater.DeletedElementIds is object)
+                    {
+                      if (Deleted.Capacity < Deleted.Count + updater.DeletedElementIds.Count)
+                        Deleted.Capacity = Deleted.Count + updater.DeletedElementIds.Count;
 
-                    Deleted.AddRange(updater.DeletedElementIds.Select(x => Types.ElementId.FromElementId(doc, x)));
+                      Deleted.AddRange(updater.DeletedElementIds.Select(x => Types.ElementId.FromElementId(doc, x)));
+                    }
                   }
 
-                  if (Modified.Capacity < Modified.Count + updater.ModifiedElementIds.Count)
-                    Modified.Capacity = Modified.Count + updater.ModifiedElementIds.Count;
+                  if (updater.ModifiedElementIds is object)
+                  {
+                    if (Modified.Capacity < Modified.Count + updater.ModifiedElementIds.Count)
+                      Modified.Capacity = Modified.Count + updater.ModifiedElementIds.Count;
 
-                  Modified.AddRange(updater.ModifiedElementIds.Select(x => Types.Element.FromElementId(doc, x)));
+                    Modified.AddRange(updater.ModifiedElementIds.Select(x => Types.Element.FromElementId(doc, x)));
+                  }
                 }
               }
             }

@@ -27,11 +27,6 @@ namespace RhinoInside.Revit.GH.Components
     {
       new ParamDefinition
       (
-        CreateSignalParam(),
-        ParamVisibility.Voluntary
-      ),
-      new ParamDefinition
-      (
         new Parameters.Element()
         {
           Name = "Elements",

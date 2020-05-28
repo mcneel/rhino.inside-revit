@@ -11,7 +11,7 @@ using DBX = RhinoInside.Revit.External.DB;
 namespace RhinoInside.Revit.GH.Components
 {
   public abstract class TransactionalComponent :
-    SignalComponent,
+    ZuiComponent,
     DB.IFailuresPreprocessor,
     DB.ITransactionFinalizer
   {
@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.GH.Components
       }
     }
 
-    internal new class Attributes : SignalComponent.Attributes
+    internal new class Attributes : ZuiComponent.Attributes
     {
       public Attributes(TransactionalComponent owner) : base(owner) { }
 
@@ -38,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components
       {
         if (channel == GH_CanvasChannel.Objects && !Owner.Locked && Owner is TransactionalComponent component)
         {
-          if (component.Status != DB.TransactionStatus.RolledBack)
+          if (component.Status != DB.TransactionStatus.RolledBack && component.Status != DB.TransactionStatus.Uninitialized)
           {
             var palette = GH_CapsuleRenderEngine.GetImpliedPalette(Owner);
             if (palette == GH_Palette.Normal && !Owner.IsPreviewCapable)
