@@ -5,13 +5,13 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class AnalyseCurtainGrid : AnalysisComponent
+  public class AnalyzeCurtainGrid : AnalysisComponent
   {
     public override Guid ComponentGuid => new Guid("D7B5C58E-8EDC-40C5-9BF8-078642090264");
     public override GH_Exposure Exposure => GH_Exposure.septenary;
     protected override string IconTag => "ACG";
 
-    public AnalyseCurtainGrid() : base(
+    public AnalyzeCurtainGrid() : base(
       name: "Analyze Curtain Grid",
       nickname: "A-CG",
       description: "Analyze given curtain grid",

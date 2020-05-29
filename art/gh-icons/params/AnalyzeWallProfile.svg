@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-miterlimit:10;">
+    <rect id="Artboard1" x="0" y="0" width="24" height="24" style="fill:none;"/>
+    <clipPath id="_clip1">
+        <rect id="Artboard11" serif:id="Artboard1" x="0" y="0" width="24" height="24"/>
+    </clipPath>
+    <g clip-path="url(#_clip1)">
+        <g id="_-Curve-" serif:id="(Curve)">
+            <use xlink:href="#_Image2" x="1.759" y="0.361" width="21.911px" height="23.644px" transform="matrix(0.995965,0,0,0.985186,0,0)"/>
+            <g transform="matrix(0.24869,0.143581,-0.143581,0.24869,65.0111,-144.429)">
+                <path d="M94.531,532.812L76.562,564.062L94.531,595.312L130.469,595.312L148.438,564.062L130.469,532.812L94.531,532.812Z" style="fill:url(#_Radial3);"/>
+            </g>
+        </g>
+        <g>
+            <use xlink:href="#_Image4" x="9.76" y="5.371" width="12.261px" height="17.608px" transform="matrix(0.94315,0,0,0.978241,0,0)"/>
+            <g transform="matrix(1,0,0,1,0,0.0105523)">
+                <path d="M20.956,6.808L20.937,17.16L18,18.991L18,12.561L16,13.725L16,20.022L12,22.341L9.449,20.89L9.449,11.302L18.668,5.487L20.956,6.808Z" style="fill:url(#_Radial5);"/>
+            </g>
+        </g>
+        <g>
+            <use xlink:href="#_Image6" x="12.107" y="6.867" width="9.71px" height="16.277px" transform="matrix(0.971038,0,0,0.957457,0,0)"/>
+            <g transform="matrix(1,0,0,1,0,0.0105523)">
+                <path d="M20.956,6.808L20.937,17.16L18,18.989L18,12.561L16,13.725L16,20.022L12,22.33L12,12.462L20.956,6.808ZM18.905,17.36L20.034,16.657L20.048,8.451L12.905,12.961L12.905,20.764L15.095,19.5L15.095,13.204L18.905,10.989L18.905,17.36Z" style="fill:rgb(198,0,123);"/>
+            </g>
+        </g>
+    </g>
+    <defs>
+        <image id="_Image2" width="22px" height="24px" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAYCAYAAAD+vg1LAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABXklEQVRIibWV0W6DMAxFTyCwdu3/f+m6FgrJHrCpayWMTp0lSxHBx7nB2IFtC84BsvNq4BawAVogyhogARMwy7qYoAS2wA7oxTvZn4ABGIG7S7BaWwBGgRyAT+AEnGV9kCSqoKZ4BQdzwg8HPDloJ+AoMaUEWTeiBB0LwKOBtTzuvAbPGEmdgXrJLc9V4T+qfodOnmcgK7gX4FkS9BsybflpAk2uFTMpOMrdqit0y6yKXqAjcAWaWMjc7IBaU/nKaICgUu39/cX8Hxoat/k2e0XyK5b/C/z2E6/9Yi1oNlrgTmA26yfwTKVT/WLJ+BofBTKxFPfA43r8r1w75WxiR2ElG1zrzX6twMTSjwfgBlyAb1lPrXk5Oc8GGNx7qvAqsC8DveuJFaB3NKscl8Ce8ibQSwkKpGigXqLKHFkak747CUTdjqi1OrZmnu21HjyIV2fenimtk8JOaQtMJcAPlgqIwYbHGwUAAAAASUVORK5CYII="/>
+        <radialGradient id="_Radial3" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(-55.4193,2.13163e-14,2.13163e-14,55.4193,129.365,576.528)"><stop offset="0" style="stop-color:rgb(224,224,224);stop-opacity:1"/><stop offset="1" style="stop-color:rgb(130,130,130);stop-opacity:1"/></radialGradient>
+        <image id="_Image4" width="13px" height="18px" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAASCAYAAACAa1QyAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAqElEQVQokY2S2w6DMAxDTyDb/3/vWNs9LEYhXFRLESjYjlNqPMOABVjjvQPNJsgeZUADPn4hqOQ1ejJrWSR3B15BVqzMMY215OyJfBlfhOy+3JGzyIF3yf4ID6KqogOjRvXaSBjAl/8xa4VddIeeRBYmMLHDSLVjavFq8hSvoke1GdHgv1eP560o76IJh3hqWvrQgS2cTwdR75j+zVZEB0iQ75zynyYIPxEcNFf5tI5dAAAAAElFTkSuQmCC"/>
+        <radialGradient id="_Radial5" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(9.93041,1.26326,2.19142,-17.2266,12,12)"><stop offset="0" style="stop-color:rgb(253,48,186);stop-opacity:0.3"/><stop offset="1" style="stop-color:rgb(96,11,67);stop-opacity:0.3"/></radialGradient>
+        <image id="_Image6" width="10px" height="17px" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAARCAYAAADkIz3lAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAvUlEQVQokXWQ0Q6DIAxFTxV1zOz/P3WCA/Zyu3RmI2mEeDjl1vi/JmBRYT8AA2ZgA+5ABmq6ABOQ9DPLNgOTBSjJkoEVaMDL90k3FgE3XToFDaC7aVctsjQ9YRVsbtzVtugZmy4lQR1o/vgTqDIBHDp3T+qpu8rUroYpGMEQlwcYYSIf47iAcWR/jQ472IHiRgvlYFHIAhyJ7xazwngg0GyT2me1cOAMgYaHabIdwFPfdgmIAQ/tq4z9CgG8Ae57O1hMknFYAAAAAElFTkSuQmCC"/>
+    </defs>
+</svg>

@@ -93,6 +93,26 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AnalyzeCurtainGrid {
+            get {
+                object obj = ResourceManager.GetObject("AnalyzeCurtainGrid", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AnalyzeCurtainGridCell {
+            get {
+                object obj = ResourceManager.GetObject("AnalyzeCurtainGridCell", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap AnalyzeCurtainGridLine {
             get {
                 object obj = ResourceManager.GetObject("AnalyzeCurtainGridLine", resourceCulture);
@@ -166,6 +186,26 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap AnalyzeWall {
             get {
                 object obj = ResourceManager.GetObject("AnalyzeWall", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AnalyzeWallLocationCurve {
+            get {
+                object obj = ResourceManager.GetObject("AnalyzeWallLocationCurve", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AnalyzeWallProfile {
+            get {
+                object obj = ResourceManager.GetObject("AnalyzeWallProfile", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
