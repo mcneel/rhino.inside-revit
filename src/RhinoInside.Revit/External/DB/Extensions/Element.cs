@@ -7,9 +7,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
 {
   public static class ElementExtension
   {
+    [Obsolete]
     public static GeometryElement GetGeometry(this Element element, ViewDetailLevel viewDetailLevel, out Options options)
     {
       options = new Options { ComputeReferences = true, DetailLevel = viewDetailLevel };
+      return GetGeometry(element, options);
+    }
+
+    public static GeometryElement GetGeometry(this Element element, Options options)
+    {
+      if (element?.IsValidObject != true)
+        return default;
+
       var geometry = element.get_Geometry(options);
 
       if (!(geometry?.Any() ?? false) && element is GenericForm form && !form.Combinations.IsEmpty)
@@ -22,7 +31,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return geometry;
     }
-
 #if !REVIT_2019
     public static IList<ElementId> GetDependentElements(this Element element, ElementFilter filter)
     {

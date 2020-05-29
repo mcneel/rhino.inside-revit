@@ -47,12 +47,12 @@ namespace RhinoInside.Revit.GH.Types
     #region Preview
     public static void BuildPreview
     (
-      DB.Element element, MeshingParameters meshingParameters, DB.ViewDetailLevel DetailLevel,
+      DB.Element element, MeshingParameters meshingParameters, DB.ViewDetailLevel detailLevel,
       out Rhino.Display.DisplayMaterial[] materials, out Mesh[] meshes, out Curve[] wires
     )
     {
-      DB.Options options = null;
-      using (var geometry = element?.GetGeometry(DetailLevel == DB.ViewDetailLevel.Undefined ? DB.ViewDetailLevel.Medium : DetailLevel, out options)) using (options)
+      using (var options = new DB.Options() { DetailLevel = detailLevel == DB.ViewDetailLevel.Undefined ? DB.ViewDetailLevel.Medium : detailLevel })
+      using (var geometry = element?.GetGeometry(options))
       {
         if (geometry is null)
         {
@@ -80,8 +80,8 @@ namespace RhinoInside.Revit.GH.Types
               if (dependent.get_BoundingBox(null) is null)
                 continue;
 
-              DB.Options dependentOptions = null;
-              using (var dependentGeometry = dependent?.GetGeometry(DetailLevel == DB.ViewDetailLevel.Undefined ? DB.ViewDetailLevel.Medium : DetailLevel, out dependentOptions)) using (dependentOptions)
+              using (var dependentOptions = new DB.Options() { DetailLevel = detailLevel == DB.ViewDetailLevel.Undefined ? DB.ViewDetailLevel.Medium : detailLevel })
+              using (var dependentGeometry = dependent?.GetGeometry(dependentOptions))
               {
                 if (dependentGeometry is object)
                 {

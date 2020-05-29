@@ -176,8 +176,8 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (typeof(Q).IsAssignableFrom(typeof(GH_Mesh)))
         {
-          DB.Options options = null;
-          using (var geometry = element.GetGeometry(DB.ViewDetailLevel.Fine, out options)) using (options)
+          using (var options = new DB.Options() { DetailLevel = DB.ViewDetailLevel.Fine })
+          using (var geometry = element.GetGeometry(options))
           {
             if (geometry is object)
             {
