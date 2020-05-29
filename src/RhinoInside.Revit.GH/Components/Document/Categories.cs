@@ -99,9 +99,46 @@ namespace RhinoInside.Revit.GH.Components
       var _Cuttable_ = Params.IndexOfInputParam("Cuttable");
       bool nofilterCuttable = (!DA.GetData(_Cuttable_, ref Cuttable) && Params.Input[_Cuttable_].DataType == GH_ParamData.@void);
 
-      var categories = nofilterParent || !ParentCategoryId.IsValid() ?
-                       BuiltInCategoryExtension.BuiltInCategories.Select(x => doc.GetCategory(x)).Where(x => x is object && x.Parent is null) :
-                       DB.Category.GetCategory(doc, ParentCategoryId).SubCategories.Cast<DB.Category>();
+      var rootCategories = BuiltInCategoryExtension.BuiltInCategories.Select(x => doc.GetCategory(x)).Where(x => x is object && x.Parent is null);
+      var subCategories = rootCategories.SelectMany(x => x.SubCategories.Cast<DB.Category>());
+
+      var nameIsSubcategoryFullName = Name is string && Name.Substring(1).Contains(':');
+      var excludeSubcategories = AllowsSubcategories || !nameIsSubcategoryFullName;
+
+      // Default path iterate over categories looking for a match
+      var categories = nofilterParent && !excludeSubcategories ?
+                       rootCategories.Concat(subCategories) :     // All categories
+                       (
+                         Parent is null ?
+                         rootCategories :                         // Only root categories
+                         Parent.SubCategories.Cast<DB.Category>() // Only subcategories of Parent
+                       );
+
+      // Fast path for exact match queries
+      if (Operator.CompareMethodFromPattern(Name) == Operator.CompareMethod.Equals)
+      {
+        var components = Name.Split(':');
+        if (components.Length == 1)
+        {
+          if (doc.Settings.Categories.get_Item(components[0]) is DB.Category category)
+          {
+            nofilterName = true;
+            categories = Enumerable.Repeat(category, 1);
+          }
+        }
+        else if (components.Length == 2)
+        {
+          if (doc.Settings.Categories.get_Item(components[0]) is DB.Category category)
+          {
+            nofilterName = true;
+            if (category.SubCategories.get_Item(components[1]) is DB.Category subCategory)
+              categories = Enumerable.Repeat(subCategory, 1);
+            else
+              categories = Enumerable.Empty<DB.Category>();
+          }
+        }
+        else return;
+      }
 
       if (categoryType != DB.CategoryType.Invalid)
         categories = categories.Where((x) => x.CategoryType == categoryType);
@@ -119,7 +156,12 @@ namespace RhinoInside.Revit.GH.Components
         categories = categories.Where((x) => x.IsCuttable == Cuttable);
 
       if (!nofilterName)
-        categories = categories.Where((x) => x.Name.IsSymbolNameLike(Name));
+      {
+        if (nofilterParent)
+          categories = categories.Where((x) => x.FullName().IsSymbolNameLike(Name));
+        else
+          categories = categories.Where((x) => x.Name.IsSymbolNameLike(Name));
+      }
 
       IEnumerable<DB.Category> list = null;
       foreach (var group in categories.GroupBy((x) => x.CategoryType).OrderBy((x) => x.Key))
@@ -128,10 +170,7 @@ namespace RhinoInside.Revit.GH.Components
         list = list?.Concat(orderedGroup) ?? orderedGroup;
       }
 
-      if (list is object)
-        DA.SetDataList("Categories", list);
-      else
-        DA.DisableGapLogic();
+      DA.SetDataList("Categories", list);
     }
   }
 }
