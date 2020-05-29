@@ -15,6 +15,12 @@ namespace RhinoInside.Revit
       Regex,      // ;
     }
 
+    public static CompareMethod CompareMethodFromPattern(string pattern)
+    {
+      bool not = false;
+      return CompareMethodFromPattern(ref pattern, ref not);
+    }
+
     public static CompareMethod CompareMethodFromPattern(ref string pattern, ref bool not)
     {
       if (pattern is null)
