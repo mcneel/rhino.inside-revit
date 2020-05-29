@@ -444,6 +444,7 @@
     <None Include="Resources\Parameters\GraphicalElement.png" />
     <None Include="Resources\Parameters\ModelCategoriesPicker.png" />
     <None Include="Resources\Parameters\ParameterKey.png" />
+    <None Include="Resources\Parameters\Sketch.png" />
     <None Include="Resources\Parameters\SketchPlane.png" />
     <None Include="Resources\Parameters\TagCategoriesPicker.png" />
     <None Include="Resources\Parameters\Vertex.png" />
