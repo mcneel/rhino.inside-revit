@@ -988,9 +988,23 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return !map.Cast<Category>().Where(x => x.Id.IntegerValue == category.Id.IntegerValue).Any();
     }
 
+    /// <summary>
+    /// Returns the <see cref="Autodesk.Revit.DB.Document"/> in which <paramref name="category"/> resides.
+    /// </summary>
+    /// <param name="category"></param>
     public static Document Document(this Category category)
     {
       return category?.GetGraphicsStyle(GraphicsStyleType.Projection).Document;
+    }
+
+    /// <summary>
+    /// Return the <paramref name="category"/> full name. If is a subCategory this will be "{ParentName}:{SubcategoryName}"
+    /// </summary>
+    /// <param name="category"></param>
+    /// <returns></returns>
+    public static string FullName(this Category category)
+    {
+      return category.Parent is null ? category.Name : $"{category.Parent.Name}:{category.Name}";
     }
   }
 }
