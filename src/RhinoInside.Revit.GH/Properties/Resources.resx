@@ -349,4 +349,16 @@
   <data name="Sketch" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Parameters\Sketch.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="AnalyzeWall" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\AnalyzeWall.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AnalyzeBasicWallType" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\AnalyzeBasicWallType.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AnalyzeCurtainGridPanel" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\AnalyzeCurtainGridPanel.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AnalyzeCurtainGridPanelType" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\AnalyzeCurtainGridPanelType.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>

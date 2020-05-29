@@ -83,6 +83,46 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AnalyzeBasicWallType {
+            get {
+                object obj = ResourceManager.GetObject("AnalyzeBasicWallType", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AnalyzeCurtainGridPanel {
+            get {
+                object obj = ResourceManager.GetObject("AnalyzeCurtainGridPanel", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AnalyzeCurtainGridPanelType {
+            get {
+                object obj = ResourceManager.GetObject("AnalyzeCurtainGridPanelType", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AnalyzeWall {
+            get {
+                object obj = ResourceManager.GetObject("AnalyzeWall", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap AnnotationCategoriesPicker {
             get {
                 object obj = ResourceManager.GetObject("AnnotationCategoriesPicker", resourceCulture);
