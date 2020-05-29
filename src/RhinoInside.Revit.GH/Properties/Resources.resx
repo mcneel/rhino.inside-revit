@@ -361,4 +361,16 @@
   <data name="AnalyzeCurtainGridPanelType" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Components\AnalyzeCurtainGridPanelType.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="AnalyzeCurtainGridMullion" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\AnalyzeCurtainGridMullion.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AnalyzeCurtainGridMullionType" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\AnalyzeCurtainGridMullionType.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AnalyzeCurtainSystem" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\AnalyzeCurtainSystem.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AnalyzeCurtainSystemType" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\AnalyzeCurtainSystemType.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>

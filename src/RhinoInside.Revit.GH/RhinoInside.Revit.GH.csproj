@@ -432,6 +432,10 @@
     <None Include="Resources\Components\AnalyzeBasicWallType.png" />
     <None Include="Resources\Components\AnalyzeCurtainGridPanel.png" />
     <None Include="Resources\Components\AnalyzeCurtainGridPanelType.png" />
+    <None Include="Resources\Components\AnalyzeCurtainGridMullion.png" />
+    <None Include="Resources\Components\AnalyzeCurtainGridMullionType.png" />
+    <None Include="Resources\Components\AnalyzeCurtainSystem.png" />
+    <None Include="Resources\Components\AnalyzeCurtainSystemType.png" />
     <None Include="Resources\Parameters\AnalyticalCategoriesPicker.png" />
     <None Include="Resources\Parameters\AnnotationCategoriesPicker.png" />
     <None Include="Resources\Parameters\BuiltInParameterByName.png" />

@@ -93,6 +93,26 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AnalyzeCurtainGridMullion {
+            get {
+                object obj = ResourceManager.GetObject("AnalyzeCurtainGridMullion", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AnalyzeCurtainGridMullionType {
+            get {
+                object obj = ResourceManager.GetObject("AnalyzeCurtainGridMullionType", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap AnalyzeCurtainGridPanel {
             get {
                 object obj = ResourceManager.GetObject("AnalyzeCurtainGridPanel", resourceCulture);
@@ -106,6 +126,26 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap AnalyzeCurtainGridPanelType {
             get {
                 object obj = ResourceManager.GetObject("AnalyzeCurtainGridPanelType", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AnalyzeCurtainSystem {
+            get {
+                object obj = ResourceManager.GetObject("AnalyzeCurtainSystem", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AnalyzeCurtainSystemType {
+            get {
+                object obj = ResourceManager.GetObject("AnalyzeCurtainSystemType", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
