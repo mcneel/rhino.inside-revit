@@ -434,7 +434,7 @@ namespace RhinoInside.Revit.UI
     new class Availability : External.UI.CommandAvailability
     {
       public override bool IsCommandAvailable(UIApplication app, CategorySet selectedCategories) =>
-        Addin.CurrentStatus >= Addin.Status.Unavailable;
+        Addin.CurrentStatus >= Addin.Status.Obsolete;
     }
 
     public static void CreateUI(RibbonPanel ribbonPanel)
