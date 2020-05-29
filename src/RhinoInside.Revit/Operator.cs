@@ -8,8 +8,8 @@ namespace RhinoInside.Revit
     {
       Nothing,
       Equals,
-      StartsWith, // >
-      EndsWith,   // <
+      StartsWith, // <
+      EndsWith,   // >
       Contains,   // ?
       Wildcard,   // :
       Regex,      // ;
@@ -32,8 +32,8 @@ namespace RhinoInside.Revit
       switch (pattern[0])
       {
         case '~': not = !not; pattern = pattern.Substring(1); return CompareMethodFromPattern(ref pattern, ref not);
-        case '>': pattern = pattern.Substring(1); return pattern == string.Empty ? CompareMethod.Equals : CompareMethod.StartsWith;
-        case '<': pattern = pattern.Substring(1); return pattern == string.Empty ? CompareMethod.Equals : CompareMethod.EndsWith;
+        case '<': pattern = pattern.Substring(1); return pattern == string.Empty ? CompareMethod.Equals : CompareMethod.StartsWith;
+        case '>': pattern = pattern.Substring(1); return pattern == string.Empty ? CompareMethod.Equals : CompareMethod.EndsWith;
         case '?': pattern = pattern.Substring(1); return pattern == string.Empty ? CompareMethod.Equals : CompareMethod.Contains;
         case ':': pattern = pattern.Substring(1); return pattern == string.Empty ? CompareMethod.Equals : CompareMethod.Wildcard;
         case ';': pattern = pattern.Substring(1); return pattern == string.Empty ? CompareMethod.Equals : CompareMethod.Regex;

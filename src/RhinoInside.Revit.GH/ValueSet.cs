@@ -599,8 +599,8 @@ namespace Grasshopper.External.Special
         @"If a pattern is used, this param list will be filled up with all the items that match it.</p>" +
         @"<p>Several kind of patterns are supported, the method used depends on the first pattern character:</p>" +
         @"<dl>" +
-        @"<dt><b>></b></dt><dd>Starts with</dd>" +
-        @"<dt><b><</b></dt><dd>Ends with</dd>" +
+        @"<dt><b><</b></dt><dd>Starts with</dd>" +
+        @"<dt><b>></b></dt><dd>Ends with</dd>" +
         @"<dt><b>?</b></dt><dd>Contains, same as a regular search</dd>" +
         @"<dt><b>:</b></dt><dd>Wildcards, see Microsoft.VisualBasic " + "<a target=\"_blank\" href=\"https://docs.microsoft.com/en-us/dotnet/visual-basic/language-reference/operators/like-operator#pattern-options\">LikeOperator</a></dd>" +
         @"<dt><b>;</b></dt><dd>Regular expresion, see " + "<a target=\"_blank\" href=\"https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference\">here</a> as reference</dd>" +
