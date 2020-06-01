@@ -14,11 +14,11 @@ namespace RhinoInside.Revit.GH.Components
 
     public DocumentLevels() : base
     (
-      name: "Levels",
+      name: "Query Levels",
       nickname: "Levels",
       description: "Get all document levels",
       category: "Revit",
-      subCategory: "Query"
+      subCategory: "Model"
     )
     { }
 

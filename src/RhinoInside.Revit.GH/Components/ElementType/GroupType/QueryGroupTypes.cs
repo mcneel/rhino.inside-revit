@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.GH.Components
   public class QueryGroupTypes : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("97E9C6BB-8442-4F77-BCA1-6BE8AAFBDC96");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "G";
 
     protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.GroupType));

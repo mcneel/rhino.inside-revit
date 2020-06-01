@@ -14,9 +14,11 @@ namespace RhinoInside.Revit.GH.Components
 
     public GridByCurve() : base
     (
-      "Add Grid", "Grid",
-      "Given its Axis, it adds a Grid element to the active Revit document",
-      "Revit", "Build"
+      name: "Add Grid",
+      nickname: "Grid",
+      description: "Given its Axis, it adds a Grid element to the active Revit document",
+      category: "Revit",
+      subCategory: "Model"
     )
     { }
 

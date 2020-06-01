@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Components
   public class GroupElements : Component
   {
     public override Guid ComponentGuid => new Guid("7C7D3739-7609-4F7F-BAB5-1E3648508891");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
     public GroupElements() : base
     (

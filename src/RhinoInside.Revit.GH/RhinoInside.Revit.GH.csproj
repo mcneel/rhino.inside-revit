@@ -203,7 +203,6 @@
     <Compile Include="Components\Document\FloorTypes.cs" />
     <Compile Include="Components\Document\Links.cs" />
     <Compile Include="Components\Document\Passport.cs" />
-    <Compile Include="Components\Document\Levels.cs" />
     <Compile Include="Components\Document\Save.cs" />
     <Compile Include="Components\Document\WallTypes.cs" />
     <Compile Include="Components\ElementFilter.cs" />
@@ -240,6 +239,7 @@
     <Compile Include="Components\Element\HostObject\Faces.cs" />
     <Compile Include="Components\Element\HostObject\Inserts.cs" />
     <Compile Include="Components\Element\Inspect.cs" />
+    <Compile Include="Components\Element\Level\QueryLevels.cs" />
     <Compile Include="Components\Element\Materials.cs" />
     <Compile Include="Components\Element\Column\ByCurve.cs" />
     <Compile Include="Components\Element\DirectShape\ByBrep.cs" />

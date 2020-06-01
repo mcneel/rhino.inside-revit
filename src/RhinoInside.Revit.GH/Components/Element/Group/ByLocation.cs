@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components
   public class GroupByLocation : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("DF634530-634D-43F8-9C42-73F4A8D62C1E");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
     public GroupByLocation() : base
     (
