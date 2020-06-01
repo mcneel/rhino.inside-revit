@@ -101,22 +101,28 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       base.PostProcessData();
 
-      if (SourceCount == 0)
-        RefreshList(NickName);
-      else
-        RefreshList(VolatileData.AllData(true));
+      Rhinoceros.InvokeInHostContext
+      (
+        () =>
+        {
+          if (SourceCount == 0)
+            RefreshList(NickName);
+          else
+            RefreshList(VolatileData.AllData(true));
 
-      // Show elements sorted
-      ListItems.Sort((x, y) => string.CompareOrdinal(x.Name, y.Name));
+          // Show elements sorted
+          ListItems.Sort((x, y) => string.CompareOrdinal(x.Name, y.Name));
 
-      //base.CollectVolatileData_Custom();
-      m_data.Clear();
+          //base.CollectVolatileData_Custom();
+          m_data.Clear();
 
-      var path = new GH_Path(0);
-      if (SelectedItems.Count == 0)
-        m_data.AppendRange(new IGH_Goo[0], path);
-      else foreach (var item in SelectedItems)
-          m_data.Append(item.Value, path);
+          var path = new GH_Path(0);
+          if (SelectedItems.Count == 0)
+            m_data.AppendRange(new IGH_Goo[0], path);
+          else foreach (var item in SelectedItems)
+              m_data.Append(item.Value, path);
+        }
+      );
     }
 
     protected override void CollectVolatileData_FromSources()
