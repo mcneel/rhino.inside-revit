@@ -205,7 +205,6 @@
     <Compile Include="Components\Document\Passport.cs" />
     <Compile Include="Components\Document\Levels.cs" />
     <Compile Include="Components\Document\Save.cs" />
-    <Compile Include="Components\Document\ViewTypes.cs" />
     <Compile Include="Components\Document\Walls.cs" />
     <Compile Include="Components\Document\WallTypes.cs" />
     <Compile Include="Components\ElementFilter.cs" />
@@ -213,10 +212,12 @@
     <Compile Include="Components\ElementType\Duplicate.cs" />
     <Compile Include="Components\ElementType\ExportImage.cs" />
     <Compile Include="Components\ElementType\GroupType\Create.cs" />
+    <Compile Include="Components\ElementType\GroupType\QueryGroupTypes.cs" />
     <Compile Include="Components\ElementType\Identity.cs" />
     <Compile Include="Components\ElementType\Instances.cs" />
     <Compile Include="Components\ElementType\QueryTypes.cs" />
     <Compile Include="Components\ElementType\Similar.cs" />
+    <Compile Include="Components\ElementType\ViewType\QueryViewTypes.cs" />
     <Compile Include="Components\ElementType\WallType\AnalyseBasicWallType.cs" />
     <Compile Include="Components\ElementType\WallType\CompoundStructure_Destruct.cs" />
     <Compile Include="Components\ElementType\WallType\CompoundStructureLayer_Destruct.cs" />
@@ -236,7 +237,6 @@
     <Compile Include="Components\Element\Geometry.cs" />
     <Compile Include="Components\Element\Group\ByLocation.cs" />
     <Compile Include="Components\Element\Group\Elements.cs" />
-    <Compile Include="Components\Element\Group\QueryGroupTypes.cs" />
     <Compile Include="Components\Element\HostObject\Faces.cs" />
     <Compile Include="Components\Element\HostObject\Inserts.cs" />
     <Compile Include="Components\Element\Inspect.cs" />

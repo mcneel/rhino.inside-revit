@@ -6,21 +6,21 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class DocumentViewTypes : ElementCollectorComponent
+  public class QueryViewTypes : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("51E306BD-4736-4B7D-B2FF-B23E0717EEBB");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "V";
 
     protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.ViewFamilyType));
 
-    public DocumentViewTypes() : base
+    public QueryViewTypes() : base
     (
-      name: "View Types",
+      name: "Query View Types",
       nickname: "ViewTypes",
       description: "Get document view types list",
       category: "Revit",
-      subCategory: "Query"
+      subCategory: "View"
     )
     { }
 
