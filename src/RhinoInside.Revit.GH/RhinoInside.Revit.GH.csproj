@@ -213,14 +213,14 @@
     <Compile Include="Components\ElementType\GroupType\Create.cs" />
     <Compile Include="Components\ElementType\GroupType\QueryGroupTypes.cs" />
     <Compile Include="Components\ElementType\HostObjectType\CompoundStructure.cs" />
+    <Compile Include="Components\ElementType\HostObjectType\DeconstructCompoundStructure.cs" />
+    <Compile Include="Components\ElementType\HostObjectType\DeconstructCompoundStructureLayer.cs" />
     <Compile Include="Components\ElementType\Identity.cs" />
     <Compile Include="Components\ElementType\Instances.cs" />
     <Compile Include="Components\ElementType\QueryTypes.cs" />
     <Compile Include="Components\ElementType\Similar.cs" />
     <Compile Include="Components\ElementType\ViewType\QueryViewTypes.cs" />
     <Compile Include="Components\ElementType\WallType\AnalyseBasicWallType.cs" />
-    <Compile Include="Components\ElementType\WallType\CompoundStructure_Destruct.cs" />
-    <Compile Include="Components\ElementType\WallType\CompoundStructureLayer_Destruct.cs" />
     <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainWallType.cs" />
     <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainSystemType.cs" />
     <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainGridMullionType.cs" />

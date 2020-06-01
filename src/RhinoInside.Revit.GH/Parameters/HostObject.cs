@@ -14,6 +14,16 @@ namespace RhinoInside.Revit.GH.Parameters
     protected override Types.HostObject PreferredCast(object data) => data is DB.HostObject host ? new Types.HostObject(host) : null;
   }
 
+  public class HostObjectType : ElementIdWithoutPreviewParam<Types.HostObjectType, DB.HostObjAttributes>
+  {
+    public override GH_Exposure Exposure => GH_Exposure.hidden;
+    public override Guid ComponentGuid => new Guid("708AB072-878E-41ED-9B8C-AAB0E1D85A53");
+
+    public HostObjectType() : base("Host Type", "HostType", "Represents a Revit document host element type.", "Params", "Revit Primitives") { }
+
+    protected override Types.HostObjectType PreferredCast(object data) => data is DB.HostObjAttributes type ? new Types.HostObjectType(type) : null;
+  }
+
   public class BuildingPad : GraphicalElementT<Types.HostObject, DB.Architecture.BuildingPad>
   {
     public override GH_Exposure Exposure => GH_Exposure.tertiary;

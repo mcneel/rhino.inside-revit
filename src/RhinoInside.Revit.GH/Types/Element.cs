@@ -43,6 +43,7 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(DB.View),              (element)=> new View          (element as DB.View)              },
       { typeof(DB.Family),            (element)=> new Family        (element as DB.Family)            },
       { typeof(DB.ElementType),       (element)=> new ElementType   (element as DB.ElementType)       },
+      { typeof(DB.HostObjAttributes), (element)=> new HostObjectType(element as DB.HostObjAttributes) },
       { typeof(DB.ParameterElement),  (element)=> new ParameterKey  (element as DB.ParameterElement)  },
       { typeof(DB.Material),          (element)=> new Material      (element as DB.Material)          },
       { typeof(DB.GraphicsStyle),     (element)=> new GraphicsStyle (element as DB.GraphicsStyle)     },

@@ -13,4 +13,15 @@ namespace RhinoInside.Revit.GH.Types
     public HostObject() { }
     public HostObject(DB.HostObject host) : base(host) { }
   }
+
+  public class HostObjectType : ElementType
+  {
+    public override string TypeDescription => "Represents a Revit host element type";
+    protected override Type ScriptVariableType => typeof(DB.HostObjAttributes);
+    public static explicit operator DB.HostObjAttributes(HostObjectType self) =>
+      self.Document?.GetElement(self) as DB.HostObjAttributes;
+
+    public HostObjectType() { }
+    public HostObjectType(DB.HostObjAttributes type) : base(type) { }
+  }
 }
