@@ -17,9 +17,11 @@ namespace RhinoInside.Revit.GH.Components
 
     public GroupByLocation() : base
     (
-      "Add Model Group", "ModelGroup",
-      "Given its location, it reconstructs a Model Group into the active Revit document",
-      "Revit", "Model"
+      name: "Add Model Group",
+      nickname: "ModelGroup",
+      description: "Given its location, it reconstructs a Model Group into the active Revit document",
+      category: "Revit",
+      subCategory: "Model"
     )
     { }
 

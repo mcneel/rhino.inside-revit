@@ -12,9 +12,11 @@ namespace RhinoInside.Revit.GH.Components
 
     public GroupElements() : base
     (
-      "Group Elements", "Group",
-      "Get group elements list",
-      "Revit", "Model"
+      name: "Group Elements",
+      nickname: "Group",
+      description: "Get group elements list",
+      category: "Revit",
+      subCategory: "Model"
     )
     { }
 

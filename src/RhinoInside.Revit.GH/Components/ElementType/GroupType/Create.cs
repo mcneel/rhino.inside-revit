@@ -13,9 +13,11 @@ namespace RhinoInside.Revit.GH.Components
 
     public GroupTypeCreate() : base
     (
-      "Create GroupType", "GroupType",
-      "Given a collection of elements, it adds a GroupType to the active Revit document",
-      "Revit", "Model"
+      name: "Create GroupType",
+      nickname: "GroupType",
+      description: "Given a collection of elements, it adds a GroupType to the active Revit document",
+      category: "Revit",
+      subCategory: "Model"
     )
     { }
 
