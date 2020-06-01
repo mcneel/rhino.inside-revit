@@ -1,5 +1,7 @@
 using System;
+using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 using DBX = RhinoInside.Revit.External.DB;
 
@@ -7,7 +9,7 @@ namespace RhinoInside.Revit.GH.Types
 {
   public class Mullion : GraphicalElement
   {
-    public override string TypeDescription => "Represents a Revit Curtain Grid Mullion Element";
+    public override string TypeDescription => "Represents a Revit Mullion Element";
     protected override Type ScriptVariableType => typeof(DB.Mullion);
     public static explicit operator DB.Mullion(Mullion value) =>
       value.Document?.GetElement(value) as DB.Mullion;
@@ -20,16 +22,23 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         var mullion = (DB.Mullion) this;
-        var axisCurve = mullion?.LocationCurve?.ToCurve();
-
-        // .LocationCurve might be null so let's return a zero-length curve for those
-        // place the curve at mullion base point
-        var basepoint = ((DB.LocationPoint) mullion.Location).Point.ToPoint3d();
-        Rhino.Geometry.Curve zeroLengthCurve = new Rhino.Geometry.Line(basepoint, basepoint).ToNurbsCurve();
-
-        return axisCurve ?? zeroLengthCurve;
+        return mullion?.LocationCurve?.ToCurve();
       }
     }
+
+    #region IGH_PreviewData
+    public override void DrawViewportWires(GH_PreviewWireArgs args)
+    {
+      var bbox = Boundingbox;
+      if (!bbox.IsValid)
+        return;
+
+      if(Curve is Rhino.Geometry.Curve curve)
+        args.Pipeline.DrawCurve(curve, args.Color, args.Thickness);
+    }
+    public override void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
+    #endregion
+
   }
 
   public class MullionPosition : ElementType
@@ -47,7 +56,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         var element = (DB.ElementType) this;
         if (element is object)
-          return $"{element.Category?.Name} : {element.FamilyName} : {element.Name}";
+          return $"{element.Category?.Name} : {element.GetFamilyName()} : {element.Name}";
 
         switch ((DBX.BuiltInMullionPositionId) Id.IntegerValue)
         {
@@ -76,7 +85,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         var element = (DB.FamilySymbol) this;
         if (element is object)
-          return $"{element.Category?.Name} : {element.FamilyName} : {element.Name}";
+          return $"{element.Category?.Name} : {element.GetFamilyName()} : {element.Name}";
 
         switch ((DBX.BuiltInMullionProfileId) Id.IntegerValue)
         {
