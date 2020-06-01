@@ -6,7 +6,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class DocumentMaterials : ElementCollectorComponent
+  public class QueryMaterials : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("94AF13C1-CE70-46B5-9103-24B46E2F7375");
     public override GH_Exposure Exposure => GH_Exposure.primary;
@@ -14,13 +14,13 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.Material));
 
-    public DocumentMaterials() : base
+    public QueryMaterials() : base
     (
-      name: "Materials",
+      name: "Query Materials",
       nickname: "Materials",
       description: "Get document materials list",
       category: "Revit",
-      subCategory: "Query"
+      subCategory: "Material"
     )
     { }
 

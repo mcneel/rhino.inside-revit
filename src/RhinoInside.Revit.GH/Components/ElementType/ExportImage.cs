@@ -15,9 +15,11 @@ namespace RhinoInside.Revit.GH.Components
 
     public ElementTypeExportImage() : base
     (
-      "Export ElementType Image", "Image",
-      "Exports a ElementType preview into an image file",
-      "Revit", "Type"
+      name: "Export Type Image",
+      nickname: "TypImage",
+      description: "Exports a ElementType preview into an image file",
+      category: "Revit",
+      subCategory: "Type"
     )
     { }
 
@@ -28,18 +30,18 @@ namespace RhinoInside.Revit.GH.Components
       var folderPath = new Grasshopper.Kernel.Parameters.Param_FilePath();
       manager[manager.AddParameter(folderPath, "Folder", "F", $"Default is {Environment.GetFolderPath(Environment.SpecialFolder.MyPictures)}\\%ProjectTitle%", GH_ParamAccess.item)].Optional = true;
 
-      manager.AddBooleanParameter("OverrideFile", "O", string.Empty, GH_ParamAccess.item, false);
+      manager.AddBooleanParameter("Override File", "OF", string.Empty, GH_ParamAccess.item, false);
 
       var fileType = new Parameters.Param_Enum<Types.ImageFileType>();
       fileType.PersistentData.Append(new Types.ImageFileType(DB.ImageFileType.PNG));
-      manager.AddParameter(fileType, "FileType", "T", "The file type used for export", GH_ParamAccess.item);
+      manager.AddParameter(fileType, "File Type", "FT", "The file type used for export", GH_ParamAccess.item);
 
       var imageResolution = new Parameters.Param_Enum<Types.ImageResolution>();
       imageResolution.PersistentData.Append(new Types.ImageResolution());
       manager.AddParameter(imageResolution, "Resolution", "R", "The image resolution in dots per inch", GH_ParamAccess.item);
 
-      manager.AddIntegerParameter("PixelSizeX", "X", "The pixel size of an image in X direction", GH_ParamAccess.item, 256);
-      manager.AddIntegerParameter("PixelSizeY", "Y", "The pixel size of an image in Y direction", GH_ParamAccess.item, 256);
+      manager.AddIntegerParameter("Pixel Size X", "FSX", "The pixel size of an image in X direction", GH_ParamAccess.item, 256);
+      manager.AddIntegerParameter("Pixel Size Y", "FSY", "The pixel size of an image in Y direction", GH_ParamAccess.item, 256);
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
@@ -63,11 +65,11 @@ namespace RhinoInside.Revit.GH.Components
       Directory.CreateDirectory(folder);
 
       var overrideFile = default(bool);
-      if (!DA.GetData("OverrideFile", ref overrideFile))
+      if (!DA.GetData("Override File", ref overrideFile))
         return;
 
       var fileType = default(DB.ImageFileType);
-      if (!DA.GetData("FileType", ref fileType))
+      if (!DA.GetData("File Type", ref fileType))
         return;
 
       var resolution = default(DB.ImageResolution);
@@ -75,11 +77,11 @@ namespace RhinoInside.Revit.GH.Components
         return;
 
       var pixelSizeX = default(int);
-      if (!DA.GetData("PixelSizeX", ref pixelSizeX))
+      if (!DA.GetData("Pixel Size X", ref pixelSizeX))
         return;
 
       var pixelSizeY = default(int);
-      if (!DA.GetData("PixelSizeY", ref pixelSizeY))
+      if (!DA.GetData("Pixel Size Y", ref pixelSizeY))
         return;
 
       var size = new System.Drawing.Size(pixelSizeX, pixelSizeY);

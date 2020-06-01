@@ -12,15 +12,17 @@ namespace RhinoInside.Revit.GH.Components
 
     public ElementTypeDuplicate() : base
     (
-      "Duplicate ElementType", "Duplicate",
-      "Given a Name, it duplicates an ElementType into the active Revit document",
-      "Revit", "Type"
+      name: "Duplicate Type",
+      nickname: "TypeDup",
+      description: "Given a Name, it duplicates an ElementType into the active Revit document",
+      category: "Revit",
+      subCategory: "Type"
     )
     { }
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(new Parameters.ElementType(), "Type", "T", "New ElementType", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.ElementType(), "Type", "T", "New Type", GH_ParamAccess.item);
     }
 
     void ReconstructElementTypeDuplicate

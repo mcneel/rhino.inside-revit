@@ -6,19 +6,19 @@ using Grasshopper.Kernel.Parameters;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class DocumentElementTypes : ElementCollectorComponent
+  public class QueryTypes : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("7B00F940-4C6E-4F3F-AB81-C3EED430DE96");
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override DB.ElementFilter ElementFilter => new DB.ElementIsElementTypeFilter(false);
 
-    public DocumentElementTypes() : base
+    public QueryTypes() : base
     (
-      name: "Types",
+      name: "Query Types",
       nickname: "Types",
       description: "Get document element types list",
       category: "Revit",
-      subCategory: "Query"
+      subCategory: "Type"
     )
     { }
 

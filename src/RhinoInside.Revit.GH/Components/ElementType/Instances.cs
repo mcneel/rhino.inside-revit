@@ -15,15 +15,17 @@ namespace RhinoInside.Revit.GH.Components
 
     public ElementTypeInstances() : base
     (
-      "ElementType Instances", "Instances",
-      "Obtains all elements of the specified Type",
-      "Revit", "Type"
+      name: "Type Instances",
+      nickname: "TypInstas",
+      description: "Obtains all elements of the specified Type",
+      category: "Revit",
+      subCategory: "Type"
     )
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager.AddParameter(new Parameters.ElementType(), "Type", "T", "ElementType to query for its instances", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.ElementType(), "Type", "T", "Type to query for its instances", GH_ParamAccess.item);
       manager[manager.AddParameter(new Parameters.ElementFilter(), "Filter", "F", "Filter", GH_ParamAccess.item)].Optional = true;
     }
 

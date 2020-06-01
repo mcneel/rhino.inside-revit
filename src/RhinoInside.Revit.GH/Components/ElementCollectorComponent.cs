@@ -97,7 +97,7 @@ namespace RhinoInside.Revit.GH.Components
       return true;
     }
 
-    protected static bool TryGetFilterStringParam(DB.BuiltInParameter paramId, ref string pattern, out DB.ElementFilter filter)
+    internal static bool TryGetFilterStringParam(DB.BuiltInParameter paramId, ref string pattern, out DB.ElementFilter filter)
     {
       if (pattern is string subPattern)
       {
