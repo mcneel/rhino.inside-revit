@@ -6,17 +6,19 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class RevitDocuments : Component
+  public class QueryDocuments : Component
   {
     public override Guid ComponentGuid => new Guid("5B935CA4-E96D-4E8F-A36E-31708017634B");
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "D";
 
-    public RevitDocuments() : base
+    public QueryDocuments() : base
     (
-      "Documents", "Documents",
-      "Gets the list of active documents",
-      "Revit", "Query"
+      name: "Query Documents",
+      nickname: "Documents",
+      description: "Gets the list of active documents",
+      category: "Revit",
+      subCategory: "Document"
     )
     { }
 
