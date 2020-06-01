@@ -200,12 +200,10 @@
     <Compile Include="Components\Document\Categories.cs" />
     <Compile Include="Components\Document\Documents.cs" />
     <Compile Include="Components\Document\Elements.cs" />
-    <Compile Include="Components\Document\ElementTypes.cs" />
     <Compile Include="Components\Document\Families.cs" />
     <Compile Include="Components\Document\FloorTypes.cs" />
     <Compile Include="Components\Document\GroupTypes.cs" />
     <Compile Include="Components\Document\Links.cs" />
-    <Compile Include="Components\Document\Materials.cs" />
     <Compile Include="Components\Document\Passport.cs" />
     <Compile Include="Components\Document\Levels.cs" />
     <Compile Include="Components\Document\Save.cs" />
@@ -220,6 +218,7 @@
     <Compile Include="Components\ElementType\GroupType\Create.cs" />
     <Compile Include="Components\ElementType\Identity.cs" />
     <Compile Include="Components\ElementType\Instances.cs" />
+    <Compile Include="Components\ElementType\QueryTypes.cs" />
     <Compile Include="Components\ElementType\Similar.cs" />
     <Compile Include="Components\ElementType\WallType\AnalyseBasicWallType.cs" />
     <Compile Include="Components\ElementType\WallType\CompoundStructure_Destruct.cs" />
@@ -252,6 +251,7 @@
     <Compile Include="Components\Element\DirectShape\ByPoint.cs" />
     <Compile Include="Components\Element\Identity.cs" />
     <Compile Include="Components\Element\Material\Identity.cs" />
+    <Compile Include="Components\Element\Material\QueryMaterials.cs" />
     <Compile Include="Components\Element\Parameters.cs" />
     <Compile Include="Components\Element\FamilyInstance\ByPointAtHost.cs" />
     <Compile Include="Components\Element\FamilyInstance\AnalyzeInstanceSpace.cs" />
