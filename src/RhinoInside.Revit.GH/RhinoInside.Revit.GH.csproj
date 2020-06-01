@@ -197,8 +197,8 @@
     <Compile Include="Components\Component.cs" />
     <Compile Include="Components\DocumentComponent.cs" />
     <Compile Include="Components\Document\Active.cs" />
+    <Compile Include="Components\Document\AllDocuments.cs" />
     <Compile Include="Components\Document\Categories.cs" />
-    <Compile Include="Components\Document\Documents.cs" />
     <Compile Include="Components\Document\Elements.cs" />
     <Compile Include="Components\Document\Families.cs" />
     <Compile Include="Components\Document\FloorTypes.cs" />

@@ -6,17 +6,17 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class QueryDocuments : Component
+  public class AllDocuments : Component
   {
     public override Guid ComponentGuid => new Guid("5B935CA4-E96D-4E8F-A36E-31708017634B");
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "D";
 
-    public QueryDocuments() : base
+    public AllDocuments() : base
     (
-      name: "Query Documents",
+      name: "All Documents",
       nickname: "Documents",
-      description: "Gets the list of active documents",
+      description: "Gets the list of all active documents",
       category: "Revit",
       subCategory: "Document"
     )
