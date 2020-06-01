@@ -201,7 +201,6 @@
     <Compile Include="Components\Document\AllDocuments.cs" />
     <Compile Include="Components\Document\Families.cs" />
     <Compile Include="Components\Document\FloorTypes.cs" />
-    <Compile Include="Components\Document\GroupTypes.cs" />
     <Compile Include="Components\Document\Links.cs" />
     <Compile Include="Components\Document\Passport.cs" />
     <Compile Include="Components\Document\Levels.cs" />
@@ -237,6 +236,7 @@
     <Compile Include="Components\Element\Geometry.cs" />
     <Compile Include="Components\Element\Group\ByLocation.cs" />
     <Compile Include="Components\Element\Group\Elements.cs" />
+    <Compile Include="Components\Element\Group\QueryGroupTypes.cs" />
     <Compile Include="Components\Element\HostObject\Faces.cs" />
     <Compile Include="Components\Element\HostObject\Inserts.cs" />
     <Compile Include="Components\Element\Inspect.cs" />

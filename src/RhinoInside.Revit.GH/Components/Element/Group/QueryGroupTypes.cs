@@ -6,7 +6,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class DocumentGroupTypes : ElementCollectorComponent
+  public class QueryGroupTypes : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("97E9C6BB-8442-4F77-BCA1-6BE8AAFBDC96");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
@@ -14,13 +14,13 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.GroupType));
 
-    public DocumentGroupTypes() : base
+    public QueryGroupTypes() : base
     (
-      name: "Group Types",
+      name: "Query Group Types",
       nickname: "GroupTypes",
       description: "Get document group types list",
       category: "Revit",
-      subCategory: "Query"
+      subCategory: "Model"
     )
     { }
 
