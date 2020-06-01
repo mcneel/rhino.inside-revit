@@ -8,7 +8,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class DocumentCategories : ElementCollectorComponent
+  public class QueryCategories : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("D150E40E-0970-4683-B517-038F8BA8B0D8");
     public override GH_Exposure Exposure => GH_Exposure.primary;
@@ -41,14 +41,15 @@ namespace RhinoInside.Revit.GH.Components
       return false;
     }
 
-    public DocumentCategories() : base
+    public QueryCategories() : base
     (
-      "Categories", "Categories",
-      "Get document categories list",
-      "Revit", "Query"
+      name: "Query Categories",
+      nickname: "Categories",
+      description: "Get document categories list",
+      category: "Revit",
+      subCategory: "Category"
     )
-    {
-    }
+    { }
 
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =

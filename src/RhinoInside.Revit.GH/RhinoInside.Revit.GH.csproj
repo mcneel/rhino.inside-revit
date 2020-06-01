@@ -193,12 +193,12 @@
     <Compile Include="Components\Category\Identity.cs" />
     <Compile Include="Components\Category\ObjectStyle.cs" />
     <Compile Include="Components\Category\Parameters.cs" />
+    <Compile Include="Components\Category\QueryCategories.cs" />
     <Compile Include="Components\Category\SubCategories.cs" />
     <Compile Include="Components\Component.cs" />
     <Compile Include="Components\DocumentComponent.cs" />
     <Compile Include="Components\Document\Active.cs" />
     <Compile Include="Components\Document\AllDocuments.cs" />
-    <Compile Include="Components\Document\Categories.cs" />
     <Compile Include="Components\Document\Elements.cs" />
     <Compile Include="Components\Document\Families.cs" />
     <Compile Include="Components\Document\FloorTypes.cs" />
