@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.GH.Components
   public class AnalyseCurtainGridMullionType : AnalysisComponent
   {
     public override Guid ComponentGuid => new Guid("66A9F189-D2BD-4E47-8C97-A469E3DD861B");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "ACGMT";
 
     public AnalyseCurtainGridMullionType() : base(
@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Components
       nickname: "A-CGMT",
       description: "Analyze given curtain grid mullion type",
       category: "Revit",
-      subCategory: "Analyze"
+      subCategory: "Wall"
     )
     {
     }

@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.GH.Components
   public class AnalyzeStackedWall : AnalysisComponent
   {
     public override Guid ComponentGuid => new Guid("DF10B918-A30F-4609-AE77-14314E6CDBF1");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => "ASW";
 
     public AnalyzeStackedWall() : base(
@@ -17,10 +17,9 @@ namespace RhinoInside.Revit.GH.Components
       nickname: "A-SW",
       description: "Analyze given Stacked Wall element",
       category: "Revit",
-      subCategory: "Analyze"
+      subCategory: "Wall"
     )
-    {
-    }
+    { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {

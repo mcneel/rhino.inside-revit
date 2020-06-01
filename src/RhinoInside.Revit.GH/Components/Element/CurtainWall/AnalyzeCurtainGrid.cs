@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Components
   public class AnalyseCurtainGrid : AnalysisComponent
   {
     public override Guid ComponentGuid => new Guid("D7B5C58E-8EDC-40C5-9BF8-078642090264");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.septenary;
     protected override string IconTag => "ACG";
 
     public AnalyseCurtainGrid() : base(
@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components
       nickname: "A-CG",
       description: "Analyze given curtain grid",
       category: "Revit",
-      subCategory: "Analyze"
+      subCategory: "Wall"
     )
     {
     }

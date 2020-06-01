@@ -15,13 +15,15 @@ namespace RhinoInside.Revit.GH.Components
   public class WallByCurve : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("37A8C46F-CB5B-49FD-A483-B03D1FE14A22");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
 
     public WallByCurve() : base
     (
-      "Add Wall", "Wall",
-      "Given a curve, it adds a Wall element to the active Revit document",
-      "Revit", "Build"
+      name: "Add Wall",
+      nickname: "Wall",
+      description: "Given a curve, it adds a Wall element to the active Revit document",
+      category: "Revit",
+      subCategory: "Wall"
     )
     { }
 

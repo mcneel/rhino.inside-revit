@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH.Components
   public class AnalyzeWallLocation : AnalysisComponent
   {
     public override Guid ComponentGuid => new Guid("4C5260C3-B15E-482B-8A1D-38CD868E3E72");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => "AWLC";
 
     public AnalyzeWallLocation() : base(
@@ -19,10 +19,9 @@ namespace RhinoInside.Revit.GH.Components
       nickname: "A-WLC",
       description: "Analyze location curve of given wall instance",
       category: "Revit",
-      subCategory: "Analyze"
+      subCategory: "Wall"
     )
-    {
-    }
+    { }
 
     // in and out params
     protected override void RegisterInputParams(GH_InputParamManager manager)

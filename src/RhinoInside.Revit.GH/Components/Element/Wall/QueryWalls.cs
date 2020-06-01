@@ -6,20 +6,20 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class DocumentWalls : ElementCollectorComponent
+  public class QueryWalls : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("118F5744-292F-4BEC-9213-8073219D8563");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "W";
     protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.Wall));
 
-    public DocumentWalls() : base
+    public QueryWalls() : base
     (
-      name: "Walls",
+      name: "Query Walls",
       nickname: "Walls",
       description: "Get all document walls",
       category: "Revit",
-      subCategory: "Query"
+      subCategory: "Wall"
     )
     { }
 

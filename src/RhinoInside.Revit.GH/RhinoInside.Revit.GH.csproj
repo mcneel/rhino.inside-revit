@@ -205,7 +205,6 @@
     <Compile Include="Components\Document\Passport.cs" />
     <Compile Include="Components\Document\Levels.cs" />
     <Compile Include="Components\Document\Save.cs" />
-    <Compile Include="Components\Document\Walls.cs" />
     <Compile Include="Components\Document\WallTypes.cs" />
     <Compile Include="Components\ElementFilter.cs" />
     <Compile Include="Components\ElementType\Default.cs" />
@@ -286,6 +285,7 @@
     <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainGridLine.cs" />
     <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainGridMullion.cs" />
     <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainGridPanel.cs" />
+    <Compile Include="Components\Element\Wall\QueryWalls.cs" />
     <Compile Include="Components\Family\Element\Form\ByCurves.cs" />
     <Compile Include="Components\Family\Element\Form\ByGeometry.cs" />
     <Compile Include="Components\Family\Element\Visibility\Construct.cs" />
