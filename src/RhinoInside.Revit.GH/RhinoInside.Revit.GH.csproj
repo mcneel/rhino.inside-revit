@@ -212,6 +212,7 @@
     <Compile Include="Components\ElementType\ExportImage.cs" />
     <Compile Include="Components\ElementType\GroupType\Create.cs" />
     <Compile Include="Components\ElementType\GroupType\QueryGroupTypes.cs" />
+    <Compile Include="Components\ElementType\HostObjectType\CompoundStructure.cs" />
     <Compile Include="Components\ElementType\Identity.cs" />
     <Compile Include="Components\ElementType\Instances.cs" />
     <Compile Include="Components\ElementType\QueryTypes.cs" />
