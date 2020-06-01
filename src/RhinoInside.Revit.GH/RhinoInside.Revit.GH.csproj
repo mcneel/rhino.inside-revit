@@ -199,12 +199,9 @@
     <Compile Include="Components\DocumentComponent.cs" />
     <Compile Include="Components\Document\Active.cs" />
     <Compile Include="Components\Document\AllDocuments.cs" />
-    <Compile Include="Components\Document\Families.cs" />
-    <Compile Include="Components\Document\FloorTypes.cs" />
     <Compile Include="Components\Document\Links.cs" />
     <Compile Include="Components\Document\Passport.cs" />
     <Compile Include="Components\Document\Save.cs" />
-    <Compile Include="Components\Document\WallTypes.cs" />
     <Compile Include="Components\ElementFilter.cs" />
     <Compile Include="Components\ElementType\Default.cs" />
     <Compile Include="Components\ElementType\Duplicate.cs" />
@@ -224,6 +221,7 @@
     <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainSystemType.cs" />
     <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainGridMullionType.cs" />
     <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainGridPanelType.cs" />
+    <Compile Include="Components\ElementType\WallType\QueryWallTypes.cs" />
     <Compile Include="Components\Element\AdaptiveComponent\ByPoints.cs" />
     <Compile Include="Components\Element\Beam\ByCurve.cs" />
     <Compile Include="Components\Element\BuildingPad\ByOutline.cs" />
@@ -293,6 +291,7 @@
     <Compile Include="Components\Family\Element\Visibility\Deconstruct.cs" />
     <Compile Include="Components\Family\Geometry\ByBrep.cs" />
     <Compile Include="Components\Family\Geometry\ByCurve.cs" />
+    <Compile Include="Components\Family\QueryFamilies.cs" />
     <Compile Include="Components\Family\Types.cs" />
     <Compile Include="Components\Family\Load.cs" />
     <Compile Include="Components\Family\LoadOptions.cs" />

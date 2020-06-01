@@ -1,9 +1,11 @@
 using System;
+using System.Collections;
 using System.Linq;
 using DB = Autodesk.Revit.DB;
 using Grasshopper.Kernel;
 using System.Collections.Generic;
 using Grasshopper.Kernel.Parameters;
+using RhinoInside.Revit.External.DB.Extensions;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -15,11 +17,11 @@ namespace RhinoInside.Revit.GH.Components
 
     public DocumentFamilies() : base
     (
-      name: "Families",
+      name: "Query Families",
       nickname: "Families",
       description: "Get document families list",
       category: "Revit",
-      subCategory: "Query"
+      subCategory: "Family"
     )
     { }
 
@@ -29,14 +31,38 @@ namespace RhinoInside.Revit.GH.Components
       ParamDefinition.FromParam(DocumentComponent.CreateDocumentParam(), ParamVisibility.Voluntary),
       ParamDefinition.Create<Parameters.Category>("Category", "C", string.Empty, GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_String>("Name", "N", string.Empty, GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item),
+      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.Family>("Families", "F", "Family list", GH_ParamAccess.list)
+      ParamDefinition.Create<Param_String>("Families", "F", "Family list", GH_ParamAccess.list)
     };
+
+    class FamilyNameComparer : IEqualityComparer<DB.ElementType>
+    {
+      public  bool Equals(DB.ElementType x, DB.ElementType y)
+      {
+        if (ReferenceEquals(x, y))
+          return true;
+
+        var familyNameX = x.FamilyName;
+        var isSystemTypeX = x is DB.FamilySymbol;
+
+        var familyNameY = y.FamilyName;
+        var isSystemTypeY = y is DB.FamilySymbol;
+
+        return (isSystemTypeX == isSystemTypeY) && (familyNameX == familyNameY);
+      }
+
+      public int GetHashCode(DB.ElementType obj) => new
+      {
+        IsSystemType = obj is DB.FamilySymbol,
+        FamilyName = obj?.FamilyName
+      }.
+      GetHashCode();
+    }
 
     protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
     {
@@ -62,16 +88,16 @@ namespace RhinoInside.Revit.GH.Components
         if (TryGetFilterStringParam(DB.BuiltInParameter.SYMBOL_FAMILY_NAME_PARAM, ref name, out var nameFilter))
           elementCollector = elementCollector.WherePasses(nameFilter);
 
-        var elementTypes = elementCollector.Cast<DB.ElementType>();
+        var familiesSet = new HashSet<DB.ElementType>(elementCollector.Cast<DB.ElementType>(), new FamilyNameComparer());
 
-        var familiesSet = new HashSet<string>(elementTypes.Select(x => x.FamilyName));
+        var families =
+        (
+          name is null ?
+          familiesSet :
+          familiesSet.Where(x => x.FamilyName.IsSymbolNameLike(name))
+        ).ToList();
 
-        var families = familiesSet.AsEnumerable().Where(x => x != string.Empty);
-
-        if (name is object)
-          families = families.Where(x => x.IsSymbolNameLike(name));
-
-        DA.SetDataList("Families", families);
+        DA.SetDataList("Families", families.Select(x => x.FamilyName));
       }
     }
 
@@ -85,13 +111,13 @@ namespace RhinoInside.Revit.GH.Components
         @"<p>You can also specify a name pattern as Name." +
         @"<p>Several kind of patterns are supported, the method used depends on the first pattern character:</p>" +
         @"<dl>" +
-        @"<dt><b>></b></dt><dd>Starts with</dd>" +
-        @"<dt><b><</b></dt><dd>Ends with</dd>" +
+        @"<dt><b><</b></dt><dd>Starts with</dd>" +
+        @"<dt><b>></b></dt><dd>Ends with</dd>" +
         @"<dt><b>?</b></dt><dd>Contains, same as a regular search</dd>" +
         @"<dt><b>:</b></dt><dd>Wildcards, see Microsoft.VisualBasic " + "<a target=\"_blank\" href=\"https://docs.microsoft.com/en-us/dotnet/visual-basic/language-reference/operators/like-operator#pattern-options\">LikeOperator</a></dd>" +
         @"<dt><b>;</b></dt><dd>Regular expresion, see " + "<a target=\"_blank\" href=\"https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference\">here</a> as reference</dd>" +
-        @"<dt><b>></b></dt><dd>Else it looks for an exact match</dd>" +
-        @"</dl>",
+        @"</dl>" +
+        @"Else it looks for an exact match.",
         ContactURI = AssemblyInfo.ContactURI,
         WebPageURI = AssemblyInfo.WebPageURI
       };
