@@ -59,7 +59,20 @@ namespace Grasshopper.External.Special
 
     HashSet<Guid> Targets { get; set; } = new HashSet<Guid>();
 
-    public int ExpireTargets()
+    void GetAllTargets(ref HashSet<Guid> targets)
+    {
+      var ghDocument = OnPingDocument();
+
+      foreach (var target in Targets)
+      {
+        targets.Add(target);
+
+        if (ghDocument?.FindObject(target, true) is TriggerComponent trigger)
+          trigger.GetAllTargets(ref targets);
+      }
+    }
+
+    int ExpireTargets()
     {
       var count = 0;
       if (OnPingDocument() is GH_Document ghDocument)
@@ -75,6 +88,12 @@ namespace Grasshopper.External.Special
       }
 
       return count;
+    }
+
+    public override void ExpireSolution(bool recompute)
+    {
+      if(ExpireTargets() > 0)
+        base.ExpireSolution(recompute);
     }
 
     public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
@@ -108,20 +127,7 @@ namespace Grasshopper.External.Special
     {
       Locked = !Locked;
 
-      var count = 0;
-      if (OnPingDocument() is GH_Document ghDocument)
-      {
-        foreach (var target in Targets)
-        {
-          if (ghDocument.FindObject(target, true) is IGH_ActiveObject activeObject)
-          {
-            activeObject.Locked = Locked;
-            count++;
-          }
-        }
-      }
-
-      if (count > 0)
+      if (Targets.Count > 0)
       {
         if (Locked)
           Instances.InvalidateCanvas();
@@ -142,7 +148,7 @@ namespace Grasshopper.External.Special
         @"Drag the wire onto another object, and it will be added to the target list. " +
         @"You can remove objects from the target list by tracing over an existing target wire while holding the Control key." +
         @"<p>By default a new trigger is enabled. You can enable/disable a trigger by double clicking on the object or via the context menu." +
-        @"When a trigger is enable/disable all the target objects will be enabled/disabled as well.</p>",
+        @"When a trigger is enable/disable double clicking all the target objects will be enabled/disabled as well.</p>",
         ContactURI = "https://discourse.mcneel.com/"
       };
 
@@ -157,7 +163,7 @@ namespace Grasshopper.External.Special
 
         int index = 0;
         foreach (var target in Targets)
-          writer.SetGuid("Target", index, target);
+          writer.SetGuid("Target", index++, target);
       }
 
       return base.Write(writer);
@@ -196,6 +202,7 @@ namespace Grasshopper.External.Special
 
     class ComponentAttributes : GH_Attributes<TriggerComponent>
     {
+      readonly Dictionary<Guid, bool> TragetsLockStatus = new Dictionary<Guid, bool>();
       bool Captured;
       bool ButtonDown;
       RectangleF TextBox;
@@ -287,7 +294,10 @@ namespace Grasshopper.External.Special
 
             if (Owner.OnPingDocument() is GH_Document ghDocument)
             {
-              foreach (var target in Owner.Targets)
+              var targets = new HashSet<Guid>();
+              Owner.GetAllTargets(ref targets);
+
+              foreach (var target in targets)
               {
                 if (ghDocument.FindObject(target, true) is IGH_ActiveObject docObject)
                   docObject.Locked = Owner.Locked;
@@ -321,6 +331,8 @@ namespace Grasshopper.External.Special
           {
             if (ButtonBox.Contains(e.CanvasLocation))
             {
+              TragetsLockStatus.Clear();
+
               Captured = true;
               ButtonDown = true;
 
@@ -328,15 +340,21 @@ namespace Grasshopper.External.Special
               {
                 if (Owner.Locked)
                 {
-                  foreach (var target in Owner.Targets)
+                  var targets = new HashSet<Guid>();
+                  Owner.GetAllTargets(ref targets);
+
+                  foreach (var target in targets)
                   {
                     if (ghDocument.FindObject(target, true) is IGH_ActiveObject docObject)
+                    {
+                      TragetsLockStatus.Add(target, docObject.Locked);
                       docObject.Locked = false;
+
+                    }
                   }
                 }
 
-                if (Owner.ExpireTargets() > 0)
-                  Owner.ExpireSolution(true);
+                Owner.ExpireSolution(true);
               }
 
               return GH_ObjectResponse.Capture;
@@ -362,15 +380,17 @@ namespace Grasshopper.External.Special
             {
               if (Owner.Locked)
               {
-                foreach (var target in Owner.Targets)
+                foreach (var target in TragetsLockStatus)
                 {
-                  if (ghDocument.FindObject(target, true) is IGH_ActiveObject docObject)
-                    docObject.Locked = true;
+                  if (ghDocument.FindObject(target.Key, true) is IGH_ActiveObject docObject && docObject.Locked != target.Value)
+                    docObject.Locked = target.Value;
                 }
 
                 Instances.InvalidateCanvas();
               }
             }
+
+            TragetsLockStatus.Clear();
 
             return GH_ObjectResponse.Release;
           }
@@ -544,7 +564,7 @@ namespace Grasshopper.External.Special
           Target = default;
           Point = e.CanvasLocation;
 
-          if (Canvas.Document.FindObject(Point, 10f) is IGH_ActiveObject activeObject && !(activeObject is TriggerComponent))
+          if (Canvas.Document.FindObject(Point, 10f) is IGH_ActiveObject activeObject)
             Target = activeObject;
 
           sender.Refresh();
