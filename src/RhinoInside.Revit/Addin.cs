@@ -528,7 +528,7 @@ namespace RhinoInside.Revit.UI
           HelpCommand.CreateUI(RhinocerosPanel);
           RhinocerosPanel.AddSeparator();
           CommandRhino.CreateUI(RhinocerosPanel);
-          Samples.Sample8.CreateUI(RhinocerosPanel);
+          CommandImport.CreateUI(RhinocerosPanel);
           CommandRhinoPreview.CreateUI(RhinocerosPanel);
           CommandPython.CreateUI(RhinocerosPanel);
 

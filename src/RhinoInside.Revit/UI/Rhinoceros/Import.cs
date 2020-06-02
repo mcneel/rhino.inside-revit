@@ -25,20 +25,22 @@ using RhinoInside.Revit.UI;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.Convert.System.Drawing;
 
-namespace RhinoInside.Revit.Samples
+namespace RhinoInside.Revit.UI
 {
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
-  public class Sample8 : RhinoCommand
+  public class CommandImport : RhinoCommand
   {
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      var buttonData = NewPushButtonData<Sample8, NeedsActiveDocument<Availability>>("Import");
+      var buttonData = NewPushButtonData<CommandImport, NeedsActiveDocument<Availability>>("Import");
 
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         pushButton.ToolTip = "Imports geometry from 3dm file to a Revit model or family";
-        pushButton.Image = ImageBuilder.BuildImage("3DM");
-        pushButton.LargeImage = ImageBuilder.BuildLargeImage("3DM");
+        //pushButton.Image = ImageBuilder.BuildImage("3DM");
+        //pushButton.LargeImage = ImageBuilder.BuildLargeImage("3DM");
+        pushButton.Image = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Rhinoceros.Import-3DM.png", true);
+        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Rhinoceros.Import-3DM.png");
         pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://github.com/mcneel/rhino.inside-revit/tree/master#sample-8"));
       }
     }
