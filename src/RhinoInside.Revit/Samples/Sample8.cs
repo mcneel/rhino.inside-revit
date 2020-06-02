@@ -32,13 +32,13 @@ namespace RhinoInside.Revit.Samples
   {
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      var buttonData = NewPushButtonData<Sample8, NeedsActiveDocument<Availability>>("Sample 8");
+      var buttonData = NewPushButtonData<Sample8, NeedsActiveDocument<Availability>>("Import");
 
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         pushButton.ToolTip = "Imports geometry from 3dm file to a Revit model or family";
-        pushButton.Image = ImageBuilder.BuildImage("8");
-        pushButton.LargeImage = ImageBuilder.BuildLargeImage("8");
+        pushButton.Image = ImageBuilder.BuildImage("3DM");
+        pushButton.LargeImage = ImageBuilder.BuildLargeImage("3DM");
         pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://github.com/mcneel/rhino.inside-revit/tree/master#sample-8"));
       }
     }

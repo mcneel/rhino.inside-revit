@@ -528,6 +528,7 @@ namespace RhinoInside.Revit.UI
           HelpCommand.CreateUI(RhinocerosPanel);
           RhinocerosPanel.AddSeparator();
           CommandRhino.CreateUI(RhinocerosPanel);
+          Samples.Sample8.CreateUI(RhinocerosPanel);
           CommandRhinoPreview.CreateUI(RhinocerosPanel);
           CommandPython.CreateUI(RhinocerosPanel);
 
@@ -539,12 +540,6 @@ namespace RhinoInside.Revit.UI
           CommandGrasshopperBake.CreateUI(GrasshopperPanel);
           GrasshopperPanel.AddSeparator();
           CommandGrasshopperPlayer.CreateUI(GrasshopperPanel);
-
-
-          var SamplesPanel = data.Application.CreateRibbonPanel(rhinoTab, "Samples");
-          Samples.Sample1.CreateUI(SamplesPanel);
-          Samples.Sample4.CreateUI(SamplesPanel);
-          Samples.Sample8.CreateUI(SamplesPanel);
 
           result = data.Application.ActivateRibbonTab(rhinoTab) ? Result.Succeeded : Result.Failed;
           break;
