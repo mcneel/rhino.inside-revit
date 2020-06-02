@@ -15,6 +15,16 @@ namespace RhinoInside.Revit.Convert.Geometry
   /// </summary>
   public static class GeometryDecoder
   {
+    #region Context
+    public sealed class Context : State<Context>
+    {
+      public DB.Element Element = default;
+      public DB.Visibility Visibility = DB.Visibility.Invisible;
+      public DB.ElementId GraphicsStyleId = DB.ElementId.InvalidElementId;
+      public DB.ElementId MaterialId = DB.ElementId.InvalidElementId;
+    }
+    #endregion
+
     #region Geometry values
     public static Point2d ToPoint2d(this DB.UV value)
     { var rhino = RawDecoder.AsPoint2d(value); UnitConverter.Scale(ref rhino, UnitConverter.ToRhinoUnits); return rhino; }
@@ -129,39 +139,115 @@ namespace RhinoInside.Revit.Convert.Geometry
       return list;
     }
 
+    /// <summary>
+    /// Update Context from <see cref="DB.GeometryObject"/> <paramref name="geometryObject"/>
+    /// </summary>
+    /// <param name="geometryObject"></param>
+    static void UpdateGraphicAttributes(DB.GeometryObject geometryObject)
+    {
+      if (geometryObject is object)
+      {
+        var context = Context.Peek;
+        if (context.Element is object)
+        {
+          if (geometryObject is DB.GeometryInstance instance)
+            context.Element = instance.Symbol;
+
+          context.Visibility = geometryObject.Visibility;
+
+          if (geometryObject.GraphicsStyleId != DB.ElementId.InvalidElementId)
+          {
+            context.GraphicsStyleId = geometryObject.GraphicsStyleId;
+
+            if (context.Element.Document.GetElement(context.GraphicsStyleId) is DB.GraphicsStyle graphicsStyle)
+            {
+              if (graphicsStyle.GraphicsStyleCategory.Material is DB.Material material)
+                context.MaterialId = material.Id;
+            }
+          }
+
+          if (geometryObject is DB.GeometryElement element)
+          {
+            if (element.MaterialElement is object)
+              context.MaterialId = element.MaterialElement.Id;
+          }
+          else if (geometryObject is DB.Solid solid)
+          {
+            if (!solid.Faces.IsEmpty)
+            {
+              var face0 = solid.Faces.get_Item(0);
+              if (face0.MaterialElementId != DB.ElementId.InvalidElementId)
+                context.MaterialId = face0.MaterialElementId;
+            }
+          }
+          else if (geometryObject is DB.Mesh mesh)
+          {
+            if (mesh.MaterialElementId != DB.ElementId.InvalidElementId)
+              context.MaterialId = mesh.MaterialElementId;
+          }
+        }
+      }
+    }
+
+    /// <summary>
+    /// Set graphic attributes to <see cref="GeometryBase"/> <paramref name="geometry"/> from Context
+    /// </summary>
+    /// <param name="geometry"></param>
+    /// <returns><paramref name="geometry"/> with graphic attributes</returns>
+    static GeometryBase SetGraphicAttributes(GeometryBase geometry)
+    {
+      if (geometry is object)
+      {
+        var context = Context.Peek;
+        if (context.Element is object)
+        {
+          if (context.GraphicsStyleId.IsValid() && context.Element.Document.GetElement(context.GraphicsStyleId) is DB.GraphicsStyle graphicsStyle)
+          {
+            var category = graphicsStyle.GraphicsStyleCategory;
+            geometry.SetUserString(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), category.Id.IntegerValue.ToString());
+          }
+
+          if (context.MaterialId.IsValid() && context.Element.Document.GetElement(context.MaterialId) is DB.Material material)
+          {
+            geometry.SetUserString(DB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), material.Id.IntegerValue.ToString());
+          }
+        }
+      }
+
+      return geometry;
+    }
+
     public static IEnumerable<GeometryBase> ToGeometryBaseMany(this DB.GeometryObject geometry)
     {
+      UpdateGraphicAttributes(geometry);
+
       switch (geometry)
       {
         case DB.GeometryElement element:
-        foreach (var g in element.SelectMany(x => x.ToGeometryBaseMany()))
+          foreach (var g in element.SelectMany(x => x.ToGeometryBaseMany()))
             yield return g;
+          yield break;
 
-            yield break;
         case DB.GeometryInstance instance:
-            var xform = ToTransform(instance.Transform);
-            foreach (var g in instance.SymbolGeometry.ToGeometryBaseMany())
-            {
-                g?.Transform(xform);
-                yield return g;
-            }
-            break;
+          foreach (var g in instance.GetInstanceGeometry().ToGeometryBaseMany())
+            yield return g;
+          yield break;
+
         case DB.Mesh mesh:
+          yield return SetGraphicAttributes(mesh.ToMesh());
+          yield break;
 
-            yield return mesh.ToMesh();
-            yield break;
         case DB.Solid solid:
+          yield return SetGraphicAttributes(solid.ToBrep());
+          yield break;
 
-            yield return solid.ToBrep();
-            yield break;
         case DB.Curve curve:
+          yield return SetGraphicAttributes(curve.ToCurve());
+          yield break;
 
-            yield return curve.ToCurve();
-            yield break;
         case DB.PolyLine polyline:
-
-            yield return polyline.ToPolylineCurve();
-            yield break;
+          yield return SetGraphicAttributes(polyline.ToPolylineCurve());
+          yield break;
       }
     }
   }
