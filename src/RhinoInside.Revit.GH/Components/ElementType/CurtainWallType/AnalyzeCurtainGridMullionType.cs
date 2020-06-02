@@ -6,13 +6,13 @@ using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class AnalyseCurtainGridMullionType : AnalysisComponent
+  public class AnalyzeCurtainGridMullionType : AnalysisComponent
   {
     public override Guid ComponentGuid => new Guid("66A9F189-D2BD-4E47-8C97-A469E3DD861B");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "ACGMT";
 
-    public AnalyseCurtainGridMullionType() : base(
+    public AnalyzeCurtainGridMullionType() : base(
       name: "Analyze Curtain Grid Mullion Type",
       nickname: "A-CGMT",
       description: "Analyze given curtain grid mullion type",

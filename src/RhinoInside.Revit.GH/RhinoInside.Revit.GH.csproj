@@ -428,6 +428,26 @@
     <None Include="Resources\Components\SketchPlaneByPlane.png" />
     <None Include="Resources\Components\TopographyByPoints.png" />
     <None Include="Resources\Components\WallByCurve.png" />
+    <None Include="Resources\Components\AnalyzeWall.png" />
+    <None Include="Resources\Components\AnalyzeBasicWallType.png" />
+    <None Include="Resources\Components\AnalyzeCurtainGridPanel.png" />
+    <None Include="Resources\Components\AnalyzeCurtainGridPanelType.png" />
+    <None Include="Resources\Components\AnalyzeCurtainGridMullion.png" />
+    <None Include="Resources\Components\AnalyzeCurtainGridMullionType.png" />
+    <None Include="Resources\Components\AnalyzeCurtainSystem.png" />
+    <None Include="Resources\Components\AnalyzeCurtainSystemType.png" />
+    <None Include="Resources\Components\AnalyzeCurtainGridLine.png" />
+    <None Include="Resources\Components\AnalyzeCurtainGrid.png" />
+    <None Include="Resources\Components\AnalyzeCurtainGridCell.png" />
+    <None Include="Resources\Components\AnalyzeWallProfile.png" />
+    <None Include="Resources\Components\AnalyzeWallLocationCurve.png" />
+    <None Include="Resources\Components\CompoundStructure_Destruct.png" />
+    <None Include="Resources\Components\CompoundStructureLayer_Destruct.png" />
+    <None Include="Resources\Components\AnalyzeCurtainWall.png" />
+    <None Include="Resources\Components\AnalyzeCurtainWallType.png" />
+    <None Include="Resources\Components\AnalyzeInstanceSpace.png" />
+    <None Include="Resources\Components\AnalyzeStackedWall.png" />
+    <None Include="Resources\Components\AnalyzeStackedWallType.png" />
     <None Include="Resources\Parameters\AnalyticalCategoriesPicker.png" />
     <None Include="Resources\Parameters\AnnotationCategoriesPicker.png" />
     <None Include="Resources\Parameters\BuiltInParameterByName.png" />
@@ -444,6 +464,7 @@
     <None Include="Resources\Parameters\GraphicalElement.png" />
     <None Include="Resources\Parameters\ModelCategoriesPicker.png" />
     <None Include="Resources\Parameters\ParameterKey.png" />
+    <None Include="Resources\Parameters\Sketch.png" />
     <None Include="Resources\Parameters\SketchPlane.png" />
     <None Include="Resources\Parameters\TagCategoriesPicker.png" />
     <None Include="Resources\Parameters\Vertex.png" />
@@ -456,6 +477,8 @@
     <None Include="Resources\Parameters\Material.png" />
     <None Include="Resources\Parameters\Family.png" />
     <None Include="Resources\Parameters\View.png" />
+    <None Include="Resources\Parameters\CurtainWall.png" />
+    <None Include="Resources\Parameters\StackedWall.png" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

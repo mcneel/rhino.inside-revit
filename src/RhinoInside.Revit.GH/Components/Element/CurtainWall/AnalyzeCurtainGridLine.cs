@@ -9,13 +9,13 @@ using RhinoInside.Revit.Convert.Geometry;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class AnalyseCurtainGridLine : AnalysisComponent
+  public class AnalyzeCurtainGridLine : AnalysisComponent
   {
     public override Guid ComponentGuid => new Guid("FACE5E7D-174F-41DA-853E-CDC4B094F57C");
     public override GH_Exposure Exposure => GH_Exposure.septenary;
     protected override string IconTag => "ACGL";
 
-    public AnalyseCurtainGridLine() : base(
+    public AnalyzeCurtainGridLine() : base(
       name: "Analyze Curtain Grid Line",
       nickname: "A-CGL",
       description: "Analyze given curtain grid line",

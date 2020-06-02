@@ -37,7 +37,8 @@ Video thumbnails source file is
 # Grasshopper Component Icons
 
 - `gh-icons/gh-font.svg`: the basic font vector graphics for component icons
-- `gh-icons/rir-style.afstyles`: basic [Affinity](https://affinity.serif.com/en-gb) styles for icons
+- `gh-icons/rir-styles.afdesign`: styles for icons
+  - `gh-icons/rir-styles.svg`: styles for icons in SVG
 - `gh-icons/params`: parameter icons in SVG
   - `gh-icons/params/src`: source files for parameter icons
 - `gh-icons/comps`: component icons in SVG
