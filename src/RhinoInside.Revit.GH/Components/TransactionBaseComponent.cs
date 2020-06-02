@@ -106,8 +106,9 @@ namespace RhinoInside.Revit.GH.Components
       var level = GH_RuntimeMessageLevel.Remark;
       switch (error.GetSeverity())
       {
-        case DB.FailureSeverity.Warning: level = GH_RuntimeMessageLevel.Warning; break;
-        case DB.FailureSeverity.Error: level = GH_RuntimeMessageLevel.Error; break;
+        case DB.FailureSeverity.Warning:            level = GH_RuntimeMessageLevel.Warning; break;
+        case DB.FailureSeverity.Error:              level = GH_RuntimeMessageLevel.Error;   break;
+        case DB.FailureSeverity.DocumentCorruption: level = GH_RuntimeMessageLevel.Error;   break;
       }
 
       string solvedMark = string.Empty;
@@ -166,31 +167,31 @@ namespace RhinoInside.Revit.GH.Components
 
     DB.FailureProcessingResult DB.IFailuresPreprocessor.PreprocessFailures(DB.FailuresAccessor failuresAccessor)
     {
-      if (!failuresAccessor.IsTransactionBeingCommitted())
-        return DB.FailureProcessingResult.Continue;
-
-      if (failuresAccessor.GetSeverity() >= DB.FailureSeverity.DocumentCorruption)
-        return DB.FailureProcessingResult.ProceedWithRollBack;
-
-      if (failuresAccessor.GetSeverity() >= DB.FailureSeverity.Error)
+      if (failuresAccessor.IsTransactionBeingCommitted())
       {
-        // Handled failures in order
+        if (failuresAccessor.GetSeverity() >= DB.FailureSeverity.DocumentCorruption)
+          return DB.FailureProcessingResult.ProceedWithRollBack;
+
+        if (failuresAccessor.GetSeverity() >= DB.FailureSeverity.Error)
         {
-          var failureDefinitionIdsToFix = FailureDefinitionIdsToFix;
-          if (failureDefinitionIdsToFix != null)
+          // Handled failures in order
           {
+            var failureDefinitionIdsToFix = FailureDefinitionIdsToFix;
+            if (failureDefinitionIdsToFix != null)
+            {
+              var result = FixFailures(failuresAccessor, failureDefinitionIdsToFix);
+              if (result != DB.FailureProcessingResult.Continue)
+                return result;
+            }
+          }
+
+          // Unhandled failures in incomming order
+          {
+            var failureDefinitionIdsToFix = failuresAccessor.GetFailureMessages().GroupBy(x => x.GetFailureDefinitionId()).Select(x => x.Key);
             var result = FixFailures(failuresAccessor, failureDefinitionIdsToFix);
             if (result != DB.FailureProcessingResult.Continue)
               return result;
           }
-        }
-
-        // Unhandled failures in incomming order
-        {
-          var failureDefinitionIdsToFix = failuresAccessor.GetFailureMessages().GroupBy(x => x.GetFailureDefinitionId()).Select(x => x.Key);
-          var result = FixFailures(failuresAccessor, failureDefinitionIdsToFix);
-          if (result != DB.FailureProcessingResult.Continue)
-            return result;
         }
       }
 
@@ -203,7 +204,7 @@ namespace RhinoInside.Revit.GH.Components
         failuresAccessor.DeleteAllWarnings();
       }
 
-      if(failuresAccessor.GetSeverity() >= DB.FailureSeverity.Error)
+      if (failuresAccessor.GetSeverity() >= DB.FailureSeverity.Error)
         return DB.FailureProcessingResult.ProceedWithRollBack;
 
       return DB.FailureProcessingResult.Continue;
