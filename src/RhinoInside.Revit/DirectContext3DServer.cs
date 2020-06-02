@@ -652,8 +652,23 @@ namespace RhinoInside.Revit
             }
             else if (geometry is Rhino.Geometry.Curve curve)
             {
-              using (var polyline = curve.ToPolyline(Revit.VertexTolerance * Revit.ModelUnits, Revit.AngleTolerance, Revit.ShortCurveTolerance * Revit.ModelUnits, 0.0))
-                linesCount = ToPolylineBuffer(polyline.ToPolyline(), out vertexFormatBits, out vertexBuffer, out vertexCount, out linesBuffer);
+              using (var polyline = curve.ToPolyline(Revit.ShortCurveTolerance * Revit.ModelUnits, Revit.AngleTolerance * 100.0, Revit.ShortCurveTolerance * Revit.ModelUnits, 0.0))
+              {
+                var pline = polyline.ToPolyline();
+
+                // Reduce too complex polylines.
+                {
+                  var tol = Revit.VertexTolerance * Revit.ModelUnits;
+                  while (pline.Count > 0x4000)
+                  {
+                    tol *= 2.0;
+                    if (pline.ReduceSegments(tol) == 0)
+                      break;
+                  }
+                }
+
+                linesCount = ToPolylineBuffer(pline, out vertexFormatBits, out vertexBuffer, out vertexCount, out linesBuffer);
+              }
             }
             else if (geometry is Rhino.Geometry.Point point)
             {
