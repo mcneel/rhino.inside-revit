@@ -183,6 +183,56 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AnalyzeCurtainWall {
+            get {
+                object obj = ResourceManager.GetObject("AnalyzeCurtainWall", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AnalyzeCurtainWallType {
+            get {
+                object obj = ResourceManager.GetObject("AnalyzeCurtainWallType", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AnalyzeInstanceSpace {
+            get {
+                object obj = ResourceManager.GetObject("AnalyzeInstanceSpace", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AnalyzeStackedWall {
+            get {
+                object obj = ResourceManager.GetObject("AnalyzeStackedWall", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AnalyzeStackedWallType {
+            get {
+                object obj = ResourceManager.GetObject("AnalyzeStackedWallType", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap AnalyzeWall {
             get {
                 object obj = ResourceManager.GetObject("AnalyzeWall", resourceCulture);
@@ -376,6 +426,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap CurtainSystem {
             get {
                 object obj = ResourceManager.GetObject("CurtainSystem", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap CurtainWall {
+            get {
+                object obj = ResourceManager.GetObject("CurtainWall", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -916,6 +976,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap SketchPlaneByPlane {
             get {
                 object obj = ResourceManager.GetObject("SketchPlaneByPlane", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap StackedWall {
+            get {
+                object obj = ResourceManager.GetObject("StackedWall", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

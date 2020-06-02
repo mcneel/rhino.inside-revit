@@ -443,6 +443,11 @@
     <None Include="Resources\Components\AnalyzeWallLocationCurve.png" />
     <None Include="Resources\Components\CompoundStructure_Destruct.png" />
     <None Include="Resources\Components\CompoundStructureLayer_Destruct.png" />
+    <None Include="Resources\Components\AnalyzeCurtainWall.png" />
+    <None Include="Resources\Components\AnalyzeCurtainWallType.png" />
+    <None Include="Resources\Components\AnalyzeInstanceSpace.png" />
+    <None Include="Resources\Components\AnalyzeStackedWall.png" />
+    <None Include="Resources\Components\AnalyzeStackedWallType.png" />
     <None Include="Resources\Parameters\AnalyticalCategoriesPicker.png" />
     <None Include="Resources\Parameters\AnnotationCategoriesPicker.png" />
     <None Include="Resources\Parameters\BuiltInParameterByName.png" />
@@ -472,6 +477,8 @@
     <None Include="Resources\Parameters\Material.png" />
     <None Include="Resources\Parameters\Family.png" />
     <None Include="Resources\Parameters\View.png" />
+    <None Include="Resources\Parameters\CurtainWall.png" />
+    <None Include="Resources\Parameters\StackedWall.png" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
