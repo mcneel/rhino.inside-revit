@@ -54,5 +54,13 @@ See [Grasshopper Icons](https://developer.rhino3d.com/guides/grasshopper/grassho
     ![](gh-icons/revit-primitives.png)
 
 - Colors denote type of operation (Query, Analyze, Modify, Create)
+
+    ![](gh-icons/rir-conventions.png)
+
 - Icons for various categories are differentiated by their shape. The color denotes the type of operation the component performs on that category
+
+    ![](gh-icons/rir-compcolors.png)
+
 - Where possible use shapes similar to Grasshopper icons e.g. Material primitive icon uses the egg shape of Grasshopper materials
+
+    ![](gh-icons/rir-compmat.png)
