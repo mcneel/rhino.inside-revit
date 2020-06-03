@@ -1,15 +1,13 @@
 using System;
-using System.Reflection;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.InteropExtension;
 
 using Autodesk.Revit.Attributes;
-using Autodesk.Revit.DB;
+using DB = Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 #if REVIT_2018
 using Autodesk.Revit.DB.Visual;
@@ -21,7 +19,6 @@ using Rhino;
 using Rhino.Geometry;
 using Rhino.FileIO;
 using Rhino.DocObjects;
-using RhinoInside.Revit.UI;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.Convert.System.Drawing;
 
@@ -37,28 +34,67 @@ namespace RhinoInside.Revit.UI
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         pushButton.ToolTip = "Imports geometry from 3dm file to a Revit model or family";
-        //pushButton.Image = ImageBuilder.BuildImage("3DM");
-        //pushButton.LargeImage = ImageBuilder.BuildLargeImage("3DM");
         pushButton.Image = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Rhinoceros.Import-3DM.png", true);
         pushButton.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Rhinoceros.Import-3DM.png");
         pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://github.com/mcneel/rhino.inside-revit/tree/master#sample-8"));
       }
     }
 
-    static string ByteArrayToString(byte[] data)
+    #region Categories
+    static Dictionary<string, DB.Category> GetCategoriesByName(DB.Document doc)
     {
-      var hex = new StringBuilder(data.Length * 2);
-
-      for (int i = 0; i < data.Length; i++)
-        hex.Append(data[i].ToString("X2"));
-
-      return hex.ToString();
+      return doc.OwnerFamily.FamilyCategory.SubCategories.
+        OfType<DB.Category>().
+        ToDictionary(x => x.Name, x => x);
     }
 
-    public static Dictionary<string, Autodesk.Revit.DB.Material> GetMaterialsByName(Document doc)
+    static DB.ElementId ImportLayer
+    (
+      DB.Document doc,
+      File3dm model,
+      Layer layer,
+      Dictionary<string, DB.Category> categories,
+      Dictionary<string, DB.Material> materials
+    )
     {
-      var collector = new FilteredElementCollector(doc);
-      return collector.OfClass(typeof(Autodesk.Revit.DB.Material)).OfType<Autodesk.Revit.DB.Material>().
+      var id = DB.ElementId.InvalidElementId;
+
+      if (layer.HasName)
+      {
+        var matName = layer.Name;
+        if (categories.TryGetValue(matName, out var category)) id = category.Id;
+        else
+        {
+          var familyCategory = doc.OwnerFamily.FamilyCategory;
+          if (familyCategory.CanAddSubcategory)
+          {
+            if (doc.Settings.Categories.NewSubcategory(familyCategory, layer.Name) is DB.Category subCategory)
+            {
+              subCategory.LineColor = layer.Color.ToColor();
+
+              var modelMaterial = layer.RenderMaterialIndex >= 0 ? model.AllMaterials.FindIndex(layer.RenderMaterialIndex) : default;
+              if (modelMaterial is object)
+              {
+                if (doc.GetElement(ImportMaterial(doc, modelMaterial, materials)) is DB.Material material)
+                  subCategory.Material = material;
+              }
+
+              categories.Add(subCategory.Name, subCategory);
+              id = subCategory.Id;
+            }
+          }
+        }
+      }
+
+      return id;
+    }
+    #endregion
+
+    #region Materials
+    static Dictionary<string, DB.Material> GetMaterialsByName(DB.Document doc)
+    {
+      var collector = new DB.FilteredElementCollector(doc);
+      return collector.OfClass(typeof(DB.Material)).OfType<DB.Material>().
         GroupBy(x => x.Name).
         ToDictionary(x => x.Key, x => x.First());
     }
@@ -92,7 +128,7 @@ namespace RhinoInside.Revit.UI
 
     static string GenericAssetName() => GenericAssetName(Revit.ActiveUIApplication.Application.Language) ?? "Generic";
 
-    public static AppearanceAssetElement GetGenericAppearanceAssetElement(Document doc)
+    static DB.AppearanceAssetElement GetGenericAppearanceAssetElement(DB.Document doc)
     {
       var applicationLanguage = Revit.ActiveUIApplication.Application.Language;
       var languages = Enumerable.Repeat(applicationLanguage, 1).
@@ -105,19 +141,24 @@ namespace RhinoInside.Revit.UI
 
       foreach (var lang in languages)
       {
-        if (AppearanceAssetElement.GetAppearanceAssetElementByName(doc, GenericAssetName(lang)) is AppearanceAssetElement assetElement)
+        if (DB.AppearanceAssetElement.GetAppearanceAssetElementByName(doc, GenericAssetName(lang)) is DB.AppearanceAssetElement assetElement)
           return assetElement;
       }
 
       return null;
     }
 
-    static ElementId ToHost(Rhino.Render.RenderMaterial mat, Document doc, string name)
+    static DB.ElementId ImportMaterial
+    (
+      DB.Document doc,
+      Rhino.Render.RenderMaterial mat
+    )
     {
-      var appearanceAssetId = ElementId.InvalidElementId;
+      string name = mat.Name;
+      var appearanceAssetId = DB.ElementId.InvalidElementId;
 
 #if REVIT_2019
-      if (AppearanceAssetElement.GetAppearanceAssetElementByName(doc, name) is AppearanceAssetElement appearanceAssetElement)
+      if (DB.AppearanceAssetElement.GetAppearanceAssetElementByName(doc, name) is DB.AppearanceAssetElement appearanceAssetElement)
         appearanceAssetId = appearanceAssetElement.Id;
       else
       {
@@ -129,7 +170,7 @@ namespace RhinoInside.Revit.UI
           {
             if (asset.Name == GenericAssetName())
             {
-              appearanceAssetElement = AppearanceAssetElement.Create(doc, name, asset);
+              appearanceAssetElement = DB.AppearanceAssetElement.Create(doc, name, asset);
               appearanceAssetId = appearanceAssetElement.Id;
               break;
             }
@@ -141,7 +182,7 @@ namespace RhinoInside.Revit.UI
           appearanceAssetId = appearanceAssetElement.Id;
         }
 
-        if (appearanceAssetId != ElementId.InvalidElementId)
+        if (appearanceAssetId != DB.ElementId.InvalidElementId)
         {
           using (var editScope = new AppearanceAssetEditScope(doc))
           {
@@ -245,9 +286,14 @@ namespace RhinoInside.Revit.UI
       return appearanceAssetId;
     }
 
-    static ElementId ToHost(Rhino.DocObjects.Material mat, Document doc, Dictionary<string, Autodesk.Revit.DB.Material> materials)
+    static DB.ElementId ImportMaterial
+    (
+      DB.Document doc,
+      Material mat,
+      Dictionary<string, DB.Material> materials
+    )
     {
-      var id = ElementId.InvalidElementId;
+      var id = DB.ElementId.InvalidElementId;
 
       if(mat.HasName)
       {
@@ -255,14 +301,14 @@ namespace RhinoInside.Revit.UI
         if (materials.TryGetValue(matName, out var material)) id = material.Id;
         else
         {
-          id = Autodesk.Revit.DB.Material.Create(doc, matName);
-          var newMaterial = doc.GetElement(id) as Autodesk.Revit.DB.Material;
+          id = DB.Material.Create(doc, matName);
+          var newMaterial = doc.GetElement(id) as DB.Material;
 
           newMaterial.Color         = mat.PreviewColor.ToColor();
-          newMaterial.Shininess     = (int) Math.Round(mat.Shine / Rhino.DocObjects.Material.MaxShine * 128.0);
+          newMaterial.Shininess     = (int) Math.Round(mat.Shine / Material.MaxShine * 128.0);
           newMaterial.Smoothness    = (int) Math.Round(mat.Reflectivity * 100.0);
           newMaterial.Transparency  = (int) Math.Round(mat.Transparency * 100.0);
-          newMaterial.AppearanceAssetId = ToHost(mat.RenderMaterial, doc, matName);
+          newMaterial.AppearanceAssetId = ImportMaterial(doc, mat.RenderMaterial);
 
           materials.Add(matName, newMaterial);
         }
@@ -270,8 +316,18 @@ namespace RhinoInside.Revit.UI
 
       return id;
     }
+    #endregion
 
-    static IList<GeometryObject> ImportObject(File3dm model, GeometryBase geometry, ObjectAttributes attributes, Document doc, Dictionary<string, Autodesk.Revit.DB.Material> materials, double scaleFactor)
+    #region Project
+    static IList<DB.GeometryObject> ImportObject
+    (
+      DB.Document doc,
+      File3dm model,
+      GeometryBase geometry,
+      ObjectAttributes attributes,
+      Dictionary<string, DB.Material> materials,
+      double scaleFactor
+    )
     {
       var layer = model.AllLayers.FindIndex(attributes.LayerIndex);
       if (layer?.IsVisible ?? false)
@@ -282,15 +338,15 @@ namespace RhinoInside.Revit.UI
           {
             case ObjectMaterialSource.MaterialFromObject:
               {
-                var modelMaterial = attributes.MaterialIndex < 0 ? Rhino.DocObjects.Material.DefaultMaterial : model.AllMaterials.FindIndex(attributes.MaterialIndex);
-                ctx.MaterialId = ToHost(modelMaterial, doc, materials);
+                var modelMaterial = attributes.MaterialIndex < 0 ? Material.DefaultMaterial : model.AllMaterials.FindIndex(attributes.MaterialIndex);
+                ctx.MaterialId = ImportMaterial(doc, modelMaterial, materials);
                 break;
               }
             case ObjectMaterialSource.MaterialFromLayer:
               {
                 var modelLayer = model.AllLayers.FindIndex(attributes.LayerIndex);
-                var modelMaterial = modelLayer.RenderMaterialIndex < 0 ? Rhino.DocObjects.Material.DefaultMaterial : model.AllMaterials.FindIndex(modelLayer.RenderMaterialIndex);
-                ctx.MaterialId = ToHost(modelMaterial, doc, materials);
+                var modelMaterial = modelLayer.RenderMaterialIndex < 0 ? Material.DefaultMaterial : model.AllMaterials.FindIndex(modelLayer.RenderMaterialIndex);
+                ctx.MaterialId = ImportMaterial(doc, modelMaterial, materials);
                 break;
               }
           }
@@ -300,72 +356,77 @@ namespace RhinoInside.Revit.UI
             if (model.AllInstanceDefinitions.FindId(instance.ParentIdefId) is InstanceDefinitionGeometry definition)
             {
               var definitionId = definition.Id.ToString();
-              var library = DirectShapeLibrary.GetDirectShapeLibrary(doc);
+              var library = DB.DirectShapeLibrary.GetDirectShapeLibrary(doc);
               if (!library.Contains(definitionId))
               {
                 var objectIds = definition.GetObjectIds();
                 var GNodes = objectIds.
                   Select(x => model.Objects.FindId(x)).
                   Cast<File3dmObject>().
-                  SelectMany(x => ImportObject(model, x.Geometry, x.Attributes, doc, materials, scaleFactor));
+                  SelectMany(x => ImportObject(doc, model, x.Geometry, x.Attributes, materials, scaleFactor));
 
                 library.AddDefinition(definitionId, GNodes.ToArray());
               }
 
-              return DirectShape.CreateGeometryInstance(doc, definitionId, instance.Xform.ToTransform(scaleFactor));
+              return DB.DirectShape.CreateGeometryInstance(doc, definitionId, instance.Xform.ToTransform(scaleFactor));
             }
           }
           else return geometry.ToShape(scaleFactor);
         }
       }
 
-      return new GeometryObject[0];
+      return new DB.GeometryObject[0];
     }
 
-    public static Result Import3DMFile(string filePath, Document doc, BuiltInCategory builtInCategory)
+    static Result Import3DMFileToProject
+    (
+      DB.Document doc,
+      string filePath,
+      DB.BuiltInCategory builtInCategory
+    )
     {
       try
       {
-        DirectShapeLibrary.GetDirectShapeLibrary(doc).Reset();
+        DB.DirectShapeLibrary.GetDirectShapeLibrary(doc).Reset();
 
         using (var model = File3dm.Read(filePath))
         {
           var scaleFactor = RhinoMath.UnitScale(model.Settings.ModelUnitSystem, Revit.ModelUnitSystem);
 
-          using (var trans = new Transaction(doc, "Import 3D Model"))
+          using (var trans = new DB.Transaction(doc, "Import 3D Model"))
           {
-            if (trans.Start() == TransactionStatus.Started)
+            if (trans.Start() == DB.TransactionStatus.Started)
             {
-              var categoryId = new ElementId(builtInCategory);
+              var categoryId = new DB.ElementId(builtInCategory);
               var materials = GetMaterialsByName(doc);
 
-              var type = DirectShapeType.Create(doc, Path.GetFileName(filePath), categoryId);
+              var type = DB.DirectShapeType.Create(doc, Path.GetFileName(filePath), categoryId);
 
               foreach (var obj in model.Objects.Where(x => !x.Attributes.IsInstanceDefinitionObject && x.Attributes.Space == ActiveSpace.ModelSpace))
               {
                 if (!obj.Attributes.Visible)
                   continue;
 
-                var geometryList = ImportObject(model, obj.Geometry, obj.Attributes, doc, materials, scaleFactor).ToArray();
-                if (geometryList == null)
-                  continue;
-
-                try { type.AppendShape(geometryList); }
-                catch (Autodesk.Revit.Exceptions.ArgumentException) { }
+                var geometryList = ImportObject(doc, model, obj.Geometry, obj.Attributes, materials, scaleFactor).ToArray();
+                if (geometryList?.Length > 0)
+                {
+                  try { type.AppendShape(geometryList); }
+                  catch (Autodesk.Revit.Exceptions.ArgumentException) { }
+                }
               }
 
-              var ds = DirectShape.CreateElement(doc, type.Category.Id);
+              var ds = DB.DirectShape.CreateElement(doc, type.Category.Id);
               ds.SetTypeId(type.Id);
 
-              var library = DirectShapeLibrary.GetDirectShapeLibrary(doc);
+              var library = DB.DirectShapeLibrary.GetDirectShapeLibrary(doc);
               if (!library.ContainsType(type.UniqueId))
                 library.AddDefinitionType(type.UniqueId, type.Id);
 
-              ds.SetShape(DirectShape.CreateGeometryInstance(doc, type.UniqueId, Autodesk.Revit.DB.Transform.Identity));
+              ds.SetShape(DB.DirectShape.CreateGeometryInstance(doc, type.UniqueId, DB.Transform.Identity));
 
-              if (trans.Commit() == TransactionStatus.Committed)
+              if (trans.Commit() == DB.TransactionStatus.Committed)
               {
-                var elements = new ElementId[] { ds.Id };
+                var elements = new DB.ElementId[] { ds.Id };
                 Revit.ActiveUIDocument.Selection.SetElementIds(elements);
                 Revit.ActiveUIDocument.ShowElements(elements);
 
@@ -377,17 +438,163 @@ namespace RhinoInside.Revit.UI
       }
       finally
       {
-        DirectShapeLibrary.GetDirectShapeLibrary(doc).Reset();
+        DB.DirectShapeLibrary.GetDirectShapeLibrary(doc).Reset();
       }
 
       return Result.Failed;
     }
+    #endregion
 
-    public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
+    #region Family
+    static Result Import3DMFileToFamily
+    (
+      DB.Document doc,
+      string filePath
+    )
     {
-      if(!DirectShape.IsSupportedDocument(data.Application.ActiveUIDocument.Document))
+      using (var model = File3dm.Read(filePath))
       {
-        message = "Active document can't support DirectShape functionality.";
+        var scaleFactor = RhinoMath.UnitScale(model.Settings.ModelUnitSystem, Revit.ModelUnitSystem);
+
+        using (var trans = new DB.Transaction(doc, "Import 3D Model"))
+        {
+          if (trans.Start() == DB.TransactionStatus.Started)
+          {
+            var materials = GetMaterialsByName(doc);
+            var categories = GetCategoriesByName(doc);
+            var elements = new List<DB.ElementId>();
+
+            var view3D = default(DB.View);
+            using (var collector = new DB.FilteredElementCollector(doc))
+            {
+              var elementCollector = collector.OfClass(typeof(DB.View3D));
+              view3D = elementCollector.Cast<DB.View3D>().Where(x => x.Name == "{3D}").FirstOrDefault();
+            }
+
+            if (view3D is object)
+            {
+              foreach (var cplane in model.AllNamedConstructionPlanes)
+              {
+                var plane = cplane.Plane;
+                var bubbleEnd = plane.Origin.ToXYZ(scaleFactor);
+                var freeEnd = (plane.Origin + plane.XAxis).ToXYZ(scaleFactor);
+                var cutVec = plane.YAxis.ToXYZ();
+
+                var refrencePlane = doc.FamilyCreate.NewReferencePlane(bubbleEnd, freeEnd, cutVec, view3D);
+                refrencePlane.Name = cplane.Name;
+                refrencePlane.Maximize3DExtents();
+              }
+            }
+
+            foreach (var obj in model.Objects.Where(x => !x.Attributes.IsInstanceDefinitionObject && x.Attributes.Space == ActiveSpace.ModelSpace))
+            {
+              if (!obj.Attributes.Visible)
+                continue;
+
+              var layer = model.AllLayers.FindIndex(obj.Attributes.LayerIndex);
+              if (layer?.IsVisible != true)
+                continue;
+
+              var geometry = obj.Geometry;
+              if (geometry is Extrusion extrusion) geometry = extrusion.ToBrep();
+              else if (geometry is SubD subD) geometry = subD.ToBrep();
+
+              try
+              {
+                switch (geometry)
+                {
+                  case Point point:
+                    if (doc.OwnerFamily.IsConceptualMassFamily)
+                    {
+                      var referncePoint = doc.FamilyCreate.NewReferencePoint(point.Location.ToXYZ(scaleFactor));
+                      elements.Add(referncePoint.Id);
+                    }
+                    break;
+                  case Curve curve:
+                    if (curve.TryGetPlane(out var plane, Revit.VertexTolerance))
+                    {
+                      if (curve.ToCurve(scaleFactor) is DB.Curve crv)
+                      {
+                        var sketchPlane = DB.SketchPlane.Create(doc, plane.ToPlane(scaleFactor));
+                        var modelCurve = doc.FamilyCreate.NewModelCurve(crv, sketchPlane);
+
+                        elements.Add(modelCurve.Id);
+
+                        {
+                          var subCategoryId = ImportLayer(doc, model, layer, categories, materials);
+                          if (DB.Category.GetCategory(doc, subCategoryId) is DB.Category subCategory)
+                          {
+                            var familyGraphicsStyle = subCategory?.GetGraphicsStyle(DB.GraphicsStyleType.Projection);
+
+                            if (familyGraphicsStyle is object)
+                              modelCurve.Subcategory = familyGraphicsStyle;
+                          }
+                        }
+                      }
+                    }
+                    else if (DB.DirectShape.IsSupportedDocument(doc) && DB.DirectShape.IsValidCategoryId(doc.OwnerFamily.FamilyCategory.Id, doc))
+                    {
+                      var subCategoryId = ImportLayer(doc, model, layer, categories, materials);
+                      var shape = curve.ToShape();
+                      if (shape.Length > 0)
+                      {
+                        var ds = DB.DirectShape.CreateElement(doc, doc.OwnerFamily.FamilyCategory.Id);
+                        ds.SetShape(shape);
+                        elements.Add(ds.Id);
+                      }
+                    }
+                    break;
+                  case Brep brep:
+                    if (brep.ToSolid(scaleFactor) is DB.Solid solid)
+                    {
+                      if (DB.FreeFormElement.Create(doc, solid) is DB.FreeFormElement freeForm)
+                      {
+                        elements.Add(freeForm.Id);
+
+                        {
+                          var categoryId = ImportLayer(doc, model, layer, categories, materials);
+                          if (categoryId != DB.ElementId.InvalidElementId)
+                            freeForm.get_Parameter(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY).Set(categoryId);
+                        }
+
+                        if (obj.Attributes.MaterialSource == ObjectMaterialSource.MaterialFromObject)
+                        {
+                          if (model.AllMaterials.FindIndex(obj.Attributes.MaterialIndex) is Material material)
+                          {
+                            var categoryId = ImportMaterial(doc, material, materials);
+                            if (categoryId != DB.ElementId.InvalidElementId)
+                              freeForm.get_Parameter(DB.BuiltInParameter.MATERIAL_ID_PARAM).Set(categoryId);
+                          }
+                        }
+                      }
+                    }
+                    break;
+                }
+              }
+              catch (Autodesk.Revit.Exceptions.ArgumentException) { }
+            }
+
+            if (trans.Commit() == DB.TransactionStatus.Committed)
+            {
+              Revit.ActiveUIDocument.Selection.SetElementIds(elements);
+              Revit.ActiveUIDocument.ShowElements(elements);
+
+              return Result.Succeeded;
+            }
+          }
+        }
+      }
+
+      return Result.Failed;
+    }
+    #endregion
+
+    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
+    {
+      var doc = data.Application.ActiveUIDocument.Document;
+      if(!doc.IsFamilyDocument && !DB.DirectShape.IsSupportedDocument(doc))
+      {
+        message = "Active document dont't support DirectShape functionality.";
         return Result.Failed;
       }
 
@@ -401,15 +608,27 @@ namespace RhinoInside.Revit.UI
         }
       )
       {
+
         switch (openFileDialog.ShowDialog(Revit.MainWindowHandle))
         {
           case DialogResult.OK:
-            return Import3DMFile
-            (
-              openFileDialog.FileName,
-              data.Application.ActiveUIDocument.Document,
-              CommandGrasshopperBake.ActiveBuiltInCategory
-            );
+            if (doc.IsFamilyDocument)
+            {
+              return Import3DMFileToFamily
+              (
+                doc,
+                openFileDialog.FileName
+              );
+            }
+            else
+            {
+              return Import3DMFileToProject
+              (
+                doc,
+                openFileDialog.FileName,
+                CommandGrasshopperBake.ActiveBuiltInCategory
+              );
+            }
           case DialogResult.Cancel: return Result.Cancelled;
         }
       }
