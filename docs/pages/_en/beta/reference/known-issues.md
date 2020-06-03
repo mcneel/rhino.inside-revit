@@ -20,7 +20,7 @@ This normally appears when there is a conflict when an older version of the Rhin
 
 ### Workaround
 
-Please follow the instructions on [Submitting Debug Info]({{ site.baseurl }}{% link _en/beta/references/.md %}#submitting-debug-info) to submit the error and debug information to {{ site.terms.rir }} development team.
+Please follow the instructions on [Submitting Debug Info]({{ site.baseurl }}{% link _en/beta/reference/toubleshooting.md %}#submitting-debug-info) to submit the error and debug information to {{ site.terms.rir }} development team.
 
 Saving the project, then restarting Revit is usually the fastest workaround. If {{ site.terms.rir }} is loaded first, then everything should work with no issues.
 
