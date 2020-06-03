@@ -10,7 +10,6 @@ layout: ltr/page-fullwidth
 <!-- download links -->
 {% include ltr/download_buttons.html version=site.versions.beta %}
 
-# {{ site.title }}
 
 The {{ site.terms.rir }} project is an exciting new development sponsored by {{ site.terms.mcneel }}. The {{ site.terms.rir }} brings the power of {{ site.terms.rhino }} and Grasshopper to the {{ site.terms.revit }} environment. The various sections of this Wiki are designed to get you started with the project and help you along the way to become an advanced {{ site.terms.rir }} user.
 
