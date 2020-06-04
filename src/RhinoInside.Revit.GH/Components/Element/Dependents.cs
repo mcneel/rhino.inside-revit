@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(new Parameters.Element(), "Elements", "E", "ElementType of the Element", GH_ParamAccess.list);
+      manager.AddParameter(new Parameters.Element(), "Elements", "E", "Dependent elements. From a logical point of view, are the children of this Element", GH_ParamAccess.list);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -42,7 +42,7 @@ namespace RhinoInside.Revit.GH.Components
 
       var elements = element.GetDependentElements(filter);
 
-      DA.SetDataList("Elements", elements.Select(x => Types.Element.FromElementId(element.Document, x)));
+      DA.SetDataList("Elements", elements.Skip(1).Select(x => Types.Element.FromElementId(element.Document, x)));
     }
   }
 }
