@@ -175,7 +175,7 @@ namespace RhinoInside.Revit.GH.Components
           var branch = geometries.get_Branch(path);
 
           var categoriesList = categories?.EnsurePath(path);
-          var materialsList = materials.EnsurePath(path);
+          var materialsList = materials?.EnsurePath(path);
 
           foreach (var geometry in branch.Cast<IGH_GeometricGoo>())
           {
