@@ -290,5 +290,31 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
       return level;
     }
+
+    static readonly Guid PurgePerformanceAdviserRuleId = new Guid("E8C63650-70B7-435A-9010-EC97660C1BDA");
+    public static bool GetPurgableElementTypes(this Document document, out ICollection<ElementId> purgableTypeIds)
+    {
+      try
+      {
+        using (var adviser = PerformanceAdviser.GetPerformanceAdviser())
+        {
+          var rules = adviser.GetAllRuleIds().Where(x => x.Guid == PurgePerformanceAdviserRuleId).ToList();
+          if (rules.Count > 0)
+          {
+            var results = adviser.ExecuteRules(document, rules);
+            if (results.Count > 0)
+            {
+              purgableTypeIds = new HashSet<ElementId>(results[0].GetFailingElements());
+              return true;
+            }
+          }
+        }
+      }
+      catch (Autodesk.Revit.Exceptions.InternalException) { }
+
+      purgableTypeIds = default;
+      return false;
+    }
+
   }
 }
