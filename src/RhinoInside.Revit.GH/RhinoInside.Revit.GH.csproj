@@ -305,6 +305,7 @@
     <Compile Include="Components\ZuiComponent.cs" />
     <Compile Include="Enum.cs" />
     <Compile Include="Extensions\Grasshopper.cs" />
+    <Compile Include="Extensions\System.Collections.Generic.cs" />
     <Compile Include="Extensions\System.cs" />
     <Compile Include="Extensions\WinForms.cs" />
     <Compile Include="Parameters\DataObject.cs" />
