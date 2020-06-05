@@ -12,9 +12,9 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "ACGM";
 
     public AnalyzeCurtainGridMullion() : base(
-      name: "Analyze Curtain Grid Mullion",
-      nickname: "A-CGM",
-      description: "Analyze given curtain grid mullion",
+      name: "Analyze Mullion",
+      nickname: "A-M",
+      description: "Analyze given mullion element",
       category: "Revit",
       subCategory: "Wall"
     )
@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Components
         param: new Parameters.Mullion(),
         name: "Mullion",
         nickname: "M",
-        description: "Curtain Grid Mullion",
+        description: "Mullion element to analyze",
         access: GH_ParamAccess.item
         );
     }
@@ -37,7 +37,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(
         param: new Parameters.ElementType(),
         name: "Type",
-        nickname: "CGMT",
+        nickname: "T",
         description: "Curtain Grid Mullion Type",
         access: GH_ParamAccess.item
         );

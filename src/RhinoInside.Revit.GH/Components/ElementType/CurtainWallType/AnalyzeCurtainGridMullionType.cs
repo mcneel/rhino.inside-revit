@@ -13,9 +13,9 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "ACGMT";
 
     public AnalyzeCurtainGridMullionType() : base(
-      name: "Analyze Curtain Grid Mullion Type",
-      nickname: "A-CGMT",
-      description: "Analyze given curtain grid mullion type",
+      name: "Analyze Mullion Type",
+      nickname: "A-MT",
+      description: "Analyze given mullion type",
       category: "Revit",
       subCategory: "Wall"
     )
@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       manager.AddParameter(
         param: new Parameters.ElementType(),
-        name: "Curtain Grid Mullion Type",
+        name: "Mullion Type",
         nickname: "CGMT",
         description: "Curtain Grid Mullion Type",
         access: GH_ParamAccess.item
@@ -104,7 +104,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       // get input
       DB.MullionType mullionType = default;
-      if (!DA.GetData("Curtain Grid Mullion Type", ref mullionType))
+      if (!DA.GetData("Mullion Type", ref mullionType))
         return;
 
       // determine the mullion type by looking at parameters

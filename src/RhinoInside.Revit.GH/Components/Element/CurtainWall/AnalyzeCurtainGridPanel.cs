@@ -12,9 +12,9 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "ACGP";
 
     public AnalyzeCurtainGridPanel() : base(
-      name: "Analyze Curtain Grid Panel",
-      nickname: "A-CGP",
-      description: "Analyze given curtain grid panel",
+      name: "Analyze Panel",
+      nickname: "A-P",
+      description: "Analyze given panel element",
       category: "Revit",
       subCategory: "Wall"
     )
@@ -24,10 +24,10 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
       manager.AddParameter(
-        param: new Parameters.FamilyInstance(),
+        param: new Parameters.Panel(),
         name: "Panel",
         nickname: "P",
-        description: "Curtain Grid Panel",
+        description: "Panel element to analyze",
         access: GH_ParamAccess.item
         );
     }
