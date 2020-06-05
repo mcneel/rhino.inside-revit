@@ -443,6 +443,26 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap DeconstructParameterValue {
+            get {
+                object obj = ResourceManager.GetObject("DeconstructParameterValue", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap DefineSharedParameter {
+            get {
+                object obj = ResourceManager.GetObject("DefineSharedParameter", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap DirectShapeByBrep {
             get {
                 object obj = ResourceManager.GetObject("DirectShapeByBrep", resourceCulture);
@@ -893,16 +913,6 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap ParameterByName {
-            get {
-                object obj = ResourceManager.GetObject("ParameterByName", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap ParameterKey {
             get {
                 object obj = ResourceManager.GetObject("ParameterKey", resourceCulture);
@@ -913,19 +923,9 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap ParameterKeyDecompose {
+        internal static System.Drawing.Bitmap ParameterKeyIdentity {
             get {
-                object obj = ResourceManager.GetObject("ParameterKeyDecompose", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ParameterValueDecompose {
-            get {
-                object obj = ResourceManager.GetObject("ParameterValueDecompose", resourceCulture);
+                object obj = ResourceManager.GetObject("ParameterKeyIdentity", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

@@ -208,17 +208,17 @@
   <data name="ModelLineByCurve" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Components\ModelLineByCurve.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ParameterByName" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Components\ParameterByName.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="DefineSharedParameter" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\DefineSharedParameter.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ParameterKey" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Parameters\ParameterKey.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ParameterKeyDecompose" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Components\ParameterKeyDecompose.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ParameterKeyIdentity" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\ParameterKeyIdentity.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ParameterValueDecompose" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Components\ParameterValueDecompose.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="DeconstructParameterValue" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\DeconstructParameterValue.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="SketchPlane" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Parameters\SketchPlane.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>

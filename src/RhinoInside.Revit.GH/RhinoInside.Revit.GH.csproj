@@ -300,7 +300,9 @@
     <Compile Include="Components\Family\Geometry\OpeningByCurve.cs" />
     <Compile Include="Components\Family\Save.cs" />
     <Compile Include="Components\Family\Geometry\VoidByBrep.cs" />
-    <Compile Include="Components\Parameter.cs" />
+    <Compile Include="Components\Parameter\DefineSharedParameter.cs" />
+    <Compile Include="Components\Parameter\DeconstructParameterValue.cs" />
+    <Compile Include="Components\Parameter\ParameterKeyIdentity.cs" />
     <Compile Include="Components\TransactionalComponent.cs" />
     <Compile Include="Components\TransactionBaseComponent.cs" />
     <Compile Include="Components\ZuiComponent.cs" />
@@ -423,9 +425,9 @@
     <None Include="Resources\Components\GridByCurve.png" />
     <None Include="Resources\Components\LevelByElevation.png" />
     <None Include="Resources\Components\ModelLineByCurve.png" />
-    <None Include="Resources\Components\ParameterByName.png" />
-    <None Include="Resources\Components\ParameterKeyDecompose.png" />
-    <None Include="Resources\Components\ParameterValueDecompose.png" />
+    <None Include="Resources\Components\DefineSharedParameter.png" />
+    <None Include="Resources\Components\ParameterKeyIdentity.png" />
+    <None Include="Resources\Components\DeconstructParameterValue.png" />
     <None Include="Resources\Components\RoofByOutline.png" />
     <None Include="Resources\Components\SketchPlaneByPlane.png" />
     <None Include="Resources\Components\TopographyByPoints.png" />
