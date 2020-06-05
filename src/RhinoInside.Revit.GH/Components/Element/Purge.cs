@@ -204,11 +204,14 @@ namespace RhinoInside.Revit.GH.Components
 
             if (CommitTransaction(document, transaction) == DB.TransactionStatus.Committed)
             {
-              deleted.AddRange
-              (
-                updater.DeletedElementIds.Select(x => new Types.Element(document, x)),
-                updater.DeletedElementIds.Count
-              );
+              if (updater?.DeletedElementIds is object)
+              {
+                deleted.AddRange
+                (
+                  updater.DeletedElementIds.Select(x => new Types.Element(document, x)),
+                  updater.DeletedElementIds.Count
+                );
+              }
             }
             else
             {
