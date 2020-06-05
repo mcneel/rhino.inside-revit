@@ -82,6 +82,9 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
 
+      if (Panel.IsValidElement(element))
+        return new Panel(element as DB.FamilyInstance);
+
       if (GeometricElement.IsValidElement(element))
         return new GeometricElement(element);
 
