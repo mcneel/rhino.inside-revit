@@ -1,5 +1,7 @@
 using System;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.Convert.Geometry;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -7,7 +9,7 @@ namespace RhinoInside.Revit.GH.Components
   {
     public override Guid ComponentGuid => new Guid("F9BC3F5E-7415-485E-B74C-5CB855B818B8");
     protected override string IconTag => "S";
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.hidden;
 
     public SketchDeconstruct() : base
     (
@@ -26,20 +28,18 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddPlaneParameter("Plane", "P", "Sketch plane", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.SketchPlane(), "Sketch Plane", "SP", "Sketch plane", GH_ParamAccess.item);
       manager.AddCurveParameter("Profile", "PC", "Sketch profile curves", GH_ParamAccess.list);
-      //manager.AddBrepParameter("Region", "R", "Sketch regions of closed profiles", GH_ParamAccess.item);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      Types.Sketch sketch = null;
-      if (!DA.GetData("Sketch", ref sketch) || sketch is null)
+      DB.Sketch sketch = null;
+      if (!DA.GetData("Sketch", ref sketch))
         return;
 
-      DA.SetData("Plane", sketch.Plane);
-      DA.SetDataList("Profile", sketch.Profile);
-      //DA.SetData("Region", sketch.Region);
+      DA.SetData("Sketch Plane", sketch?.SketchPlane);
+      DA.SetDataList("Profile", sketch?.Profile.ToPolyCurves());
     }
   }
 }

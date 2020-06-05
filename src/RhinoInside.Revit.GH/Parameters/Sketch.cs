@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Parameters
   public class Sketch : ElementIdWithPreviewParam<Types.Sketch, Autodesk.Revit.DB.Sketch>
   {
     public override Guid ComponentGuid => new Guid("2B0684C4-A444-406D-8BEC-69683D146388");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.hidden;
 
     public Sketch() : base("Sketch", "Sketch", "Represents a Revit document sketch.", "Params", "Revit Primitives") { }
 
