@@ -122,25 +122,6 @@ namespace RhinoInside.Revit.GH.Components
       )
     };
 
-    //protected override void RegisterInputParams(GH_InputParamManager manager)
-    //{
-    //  var templatePath = new Grasshopper.Kernel.Parameters.Param_FilePath();
-    //  templatePath.FileFilter = "Family Template Files (*.rft)|*.rft";
-    //  manager[manager.AddParameter(templatePath, "Template", "T", string.Empty, GH_ParamAccess.item)].Optional = true;
-
-    //  manager.AddBooleanParameter("OverrideFamily", "O", "Override Family", GH_ParamAccess.item, false);
-    //  manager.AddBooleanParameter("OverrideParameters", "O", "Override Parameters", GH_ParamAccess.item, false);
-
-    //  manager.AddTextParameter("Name", "N", string.Empty, GH_ParamAccess.item);
-    //  manager[manager.AddParameter(new Parameters.Category(), "Category", "C", string.Empty, GH_ParamAccess.item)].Optional = true;
-    //  manager[manager.AddGeometryParameter("Geometry", "G", string.Empty, GH_ParamAccess.list)].Optional = true;
-    //}
-
-    //protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    //{
-    //  manager.AddParameter(new Parameters.Family(), "Family", "F", string.Empty, GH_ParamAccess.item);
-    //}
-
     public static Dictionary<string, DB.ElementId> GetMaterialIdsByName(DB.Document doc)
     {
       var collector = new DB.FilteredElementCollector(doc);
