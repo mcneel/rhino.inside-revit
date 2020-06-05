@@ -235,6 +235,7 @@
     <Compile Include="Components\Element\Group\ByLocation.cs" />
     <Compile Include="Components\Element\Group\Elements.cs" />
     <Compile Include="Components\Element\HostObject\BoundaryProfile.cs" />
+    <Compile Include="Components\Element\HostObject\ElementHost.cs" />
     <Compile Include="Components\Element\HostObject\Faces.cs" />
     <Compile Include="Components\Element\HostObject\Inserts.cs" />
     <Compile Include="Components\Element\Inspect.cs" />
