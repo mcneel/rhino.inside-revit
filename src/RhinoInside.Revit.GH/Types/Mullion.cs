@@ -7,7 +7,7 @@ using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public class Mullion : GraphicalElement
+  public class Mullion : FamilyInstance
   {
     public override string TypeDescription => "Represents a Revit Mullion Element";
     protected override Type ScriptVariableType => typeof(DB.Mullion);

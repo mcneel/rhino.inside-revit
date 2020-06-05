@@ -368,6 +368,7 @@
     <Compile Include="Types\ElementType.cs" />
     <Compile Include="Types\Enums.cs" />
     <Compile Include="Types\Family.cs" />
+    <Compile Include="Types\FamilyInstance.cs" />
     <Compile Include="Types\GeometryObject.cs" />
     <Compile Include="Types\GraphicalElement.cs" />
     <Compile Include="Types\Group.cs" />
