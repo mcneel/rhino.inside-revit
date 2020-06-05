@@ -65,12 +65,32 @@ namespace RhinoInside.Revit.GH.Components
           var bboxFilter = new DB.BoundingBoxIntersectsFilter(new DB.Outline(bbox.Min, bbox.Max));
           elementCollector = elementCollector.WherePasses(bboxFilter);
 
+          var classFilter = default(DB.ElementFilter);
+          if (element is DB.FamilyInstance instance) classFilter = new DB.FamilyInstanceFilter(element.Document, instance.GetTypeId());
+          else if (element is DB.Area) classFilter = new DB.AreaFilter();
+          else if (element is DB.AreaTag) classFilter = new DB.AreaTagFilter();
+          else if (element is DB.Architecture.Room) classFilter = new DB.Architecture.RoomFilter();
+          else if (element is DB.Architecture.RoomTag) classFilter = new DB.Architecture.RoomTagFilter();
+          else
+          {
+            if (element is DB.CurveElement)
+              classFilter = new DB.ElementClassFilter(typeof(DB.CurveElement));
+            else
+              classFilter = new DB.ElementClassFilter(element.GetType());
+          }
+
           foreach (var host in elementCollector.ToElements().OfType<DB.HostObject>())
           {
             if (host.Id == element.Id)
               continue;
 
             if(host.FindInserts(false, true, true, false).Contains(element.Id))
+            {
+              DA.SetData("Host", Types.HostObject.FromElement(host));
+              break;
+            }
+            // Necessary to found Panel walls ina Curtain Wall
+            else if (host.GetDependentElements(classFilter).Contains(element.Id))
             {
               DA.SetData("Host", Types.HostObject.FromElement(host));
               break;
