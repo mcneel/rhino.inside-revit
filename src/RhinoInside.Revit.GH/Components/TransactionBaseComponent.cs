@@ -753,6 +753,9 @@ namespace RhinoInside.Revit.GH.Components
         var nickname = parameter.Name.First().ToString().ToUpperInvariant();
         var name = nickname + parameter.Name.Substring(1);
 
+        foreach (var nameAttribte in parameter.GetCustomAttributes(typeof(NameAttribute), false).Cast<NameAttribute>())
+          name = nameAttribte.Name;
+
         foreach (var nickNameAttribte in parameter.GetCustomAttributes(typeof(NickNameAttribute), false).Cast<NickNameAttribute>())
           nickname = nickNameAttribte.NickName;
 
@@ -761,6 +764,21 @@ namespace RhinoInside.Revit.GH.Components
           description = (description.Length > 0) ? $"{description}\r\n{descriptionAttribute.Description}" : descriptionAttribute.Description;
 
         var param = manager[manager.AddParameter(CreateParam(parameterType), name, nickname, description, access)];
+
+        var defaultValue = default(object);
+        foreach (var defaultValueAttribute in parameter.GetCustomAttributes(typeof(DefaultValueAttribute), false).Cast<DefaultValueAttribute>())
+          defaultValue = defaultValueAttribute.Value;
+
+        if (defaultValue is object)
+        {
+          TryGetParamTypes(parameter.ParameterType, out var paramTypes);
+
+          if (paramTypes.Item1.IsGenericSubclassOf(typeof(GH_PersistentParam<>)))
+          {
+            dynamic persistentParam = param;
+            persistentParam.SetPersistentData(defaultValue);
+          }
+        }
 
         param.Optional = optional;
 
@@ -1000,7 +1018,7 @@ namespace RhinoInside.Revit.GH.Components
         }
         finally
         {
-          if (previous is object && !ReferenceEquals(previous, element) && previous.IsValidObject)
+          if (previous?.IsValidObject == true && !previous.IsSameElement(element))
             previous.Document.Delete(previous.Id);
 
           if (element?.IsValidObject == true)

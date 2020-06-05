@@ -97,19 +97,7 @@ namespace RhinoInside.Revit.GH.Components
           Optional = optional
         };
 
-        bool IsGenericSubclassOf(Type type, Type baseGenericType)
-        {
-          for(; type != typeof(object); type = type.BaseType)
-          {
-            var cur = type.IsGenericType ? type.GetGenericTypeDefinition() : type;
-            if (baseGenericType == cur)
-              return true;
-          }
-
-          return false;
-        }
-
-        if (IsGenericSubclassOf(typeof(T), typeof(GH_PersistentParam<>)))
+        if (typeof(T).IsGenericSubclassOf(typeof(GH_PersistentParam<>)))
         {
           dynamic persistentParam = param;
           persistentParam.SetPersistentData(defaultValue);
