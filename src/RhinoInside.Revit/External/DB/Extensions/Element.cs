@@ -7,6 +7,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
 {
   public static class ElementExtension
   {
+    public static bool IsSameElement(this Element self, Element other)
+    {
+      if (ReferenceEquals(self, other))
+        return true;
+
+      return self.Id == other?.Id && self.Document.Equals(other?.Document);
+    }
+
     [Obsolete]
     public static GeometryElement GetGeometry(this Element element, ViewDetailLevel viewDetailLevel, out Options options)
     {
@@ -165,6 +173,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       if (!from.Document.Equals(to.Document))
         throw new System.InvalidOperationException();
+
+      if (to.Id == from.Id)
+        return;
 
       foreach (var previousParameter in from.GetParameters(ParameterClass.Any))
         using (previousParameter)
