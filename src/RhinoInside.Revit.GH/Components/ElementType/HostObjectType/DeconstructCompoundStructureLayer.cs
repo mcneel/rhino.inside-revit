@@ -1,26 +1,25 @@
 using System;
-using System.Linq;
 using Grasshopper.Kernel;
 
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class DeconstructCompoundStructureLayer : AnalysisComponent
+  public class DeconstructCompoundStructureLayer : Component
   {
     public override Guid ComponentGuid => new Guid("BC64525A-10B6-46DB-A134-CF803738B1A0");
     public override GH_Exposure Exposure => GH_Exposure.senary;
-    protected override string IconTag => "CSLd";
+    protected override string IconTag => "DCSL";
 
-    public DeconstructCompoundStructureLayer() : base(
+    public DeconstructCompoundStructureLayer() : base
+    (
       name: "Deconstruct Compound Structure Layer",
-      nickname: "CSL(D)",
+      nickname: "DCSL",
       description: "Deconstructs given compound structure layer into its properties",
       category: "Revit",
       subCategory: "Host"
     )
-    {
-    }
+    { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
@@ -36,35 +35,35 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
       manager.AddIntegerParameter(
-          name: "Layer Id",
-          nickname: "ID",
-          description: "Id of the given compound structure layer",
+          name: "Index",
+          nickname: "IDX",
+          description: "Index of the given compound structure layer",
           access: GH_ParamAccess.item
           );
       manager.AddParameter(
-          param: new Parameters.LayerFunction_ValueList(),
-          name: "Layer Function",
-          nickname: "LF",
+          param: new Parameters.Param_Enum<Types.LayerFunction>(),
+          name: "Function",
+          nickname: "F",
           description: "Function of the given compound structure layer",
-          access: GH_ParamAccess.item
-          );
-      manager.AddNumberParameter(
-          name: "Layer Width",
-          nickname: "W",
-          description: "Width of the given compound structure layer",
-          access: GH_ParamAccess.item
-          );
-      manager.AddBooleanParameter(
-          name: "Layer Cap Flag",
-          nickname: "CF?",
-          description: "Whether compound structure layer participates in wrapping at end caps and/or inserts",
           access: GH_ParamAccess.item
           );
       manager.AddParameter(
           param: new Parameters.Material(),
-          name: "Layer Material",
+          name: "Material",
           nickname: "M",
           description: "Material assigned to the given compound structure layer",
+          access: GH_ParamAccess.item
+          );
+      manager.AddNumberParameter(
+          name: "Thickness",
+          nickname: "T",
+          description: "Thickness of the given compound structure layer",
+          access: GH_ParamAccess.item
+          );
+      manager.AddBooleanParameter(
+          name: "Wraps",
+          nickname: "W",
+          description: "Whether compound structure layer participates in wrapping at end caps and/or inserts",
           access: GH_ParamAccess.item
           );
       manager.AddParameter(
@@ -75,7 +74,7 @@ namespace RhinoInside.Revit.GH.Components
           access: GH_ParamAccess.item
           );
       manager.AddParameter(
-          param: new Parameters.DeckEmbeddingType_ValueList(),
+          param: new Parameters.Param_Enum<Types.DeckEmbeddingType>(),
           name: "Deck Embedding Type",
           nickname: "DET",
           description: "Embedding type for structural deck layer",
@@ -90,16 +89,16 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetData("Compound Structure Layer", ref dataObj))
         return;
 
-      DB.CompoundStructureLayer cslayer = dataObj.Value;
+      var cslayer = dataObj.Value;
 
       // Deconstruct the data object into output params
-      DA.SetData("Layer Id", cslayer.LayerId);
-      DA.SetData("Layer Function", new Types.LayerFunction(cslayer.Function));
-      DA.SetData("Layer Width", cslayer.Width);
-      DA.SetData("Layer Cap Flag", cslayer.LayerCapFlag);
-      DA.SetData("Layer Material", Types.Element.FromElement(dataObj.Document.GetElement(cslayer.MaterialId)));
+      DA.SetData("Index", cslayer.LayerId);
+      DA.SetData("Function", cslayer.Function);
+      DA.SetData("Material", Types.Element.FromElement(dataObj.Document.GetElement(cslayer.MaterialId)));
+      DA.SetData("Thickness", cslayer.Width);
+      DA.SetData("Wraps", cslayer.LayerCapFlag);
       DA.SetData("Deck Profile", Types.Element.FromElement(dataObj.Document.GetElement(cslayer.DeckProfileId)));
-      DA.SetData("Deck Embedding Type", new Types.DeckEmbeddingType(cslayer.DeckEmbeddingType));
+      DA.SetData("Deck Embedding Type", cslayer.DeckEmbeddingType);
     }
   }
 }

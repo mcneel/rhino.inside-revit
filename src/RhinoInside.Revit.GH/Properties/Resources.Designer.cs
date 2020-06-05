@@ -393,26 +393,6 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap CompoundStructure_Destruct {
-            get {
-                object obj = ResourceManager.GetObject("CompoundStructure_Destruct", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap CompoundStructureLayer_Destruct {
-            get {
-                object obj = ResourceManager.GetObject("CompoundStructureLayer_Destruct", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap CurtainGridLine {
             get {
                 object obj = ResourceManager.GetObject("CurtainGridLine", resourceCulture);
@@ -436,6 +416,26 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap CurtainWall {
             get {
                 object obj = ResourceManager.GetObject("CurtainWall", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap DeconstructCompoundStructure {
+            get {
+                object obj = ResourceManager.GetObject("DeconstructCompoundStructure", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap DeconstructCompoundStructureLayer {
+            get {
+                object obj = ResourceManager.GetObject("DeconstructCompoundStructureLayer", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

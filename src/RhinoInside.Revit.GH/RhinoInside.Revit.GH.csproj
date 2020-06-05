@@ -442,13 +442,13 @@
     <None Include="Resources\Components\AnalyzeCurtainGridCell.png" />
     <None Include="Resources\Components\AnalyzeWallProfile.png" />
     <None Include="Resources\Components\AnalyzeWallLocationCurve.png" />
-    <None Include="Resources\Components\CompoundStructure_Destruct.png" />
-    <None Include="Resources\Components\CompoundStructureLayer_Destruct.png" />
     <None Include="Resources\Components\AnalyzeCurtainWall.png" />
     <None Include="Resources\Components\AnalyzeCurtainWallType.png" />
     <None Include="Resources\Components\AnalyzeInstanceSpace.png" />
     <None Include="Resources\Components\AnalyzeStackedWall.png" />
     <None Include="Resources\Components\AnalyzeStackedWallType.png" />
+    <None Include="Resources\Components\DeconstructCompoundStructure.png" />
+    <None Include="Resources\Components\DeconstructCompoundStructureLayer.png" />
     <None Include="Resources\Parameters\AnalyticalCategoriesPicker.png" />
     <None Include="Resources\Parameters\AnnotationCategoriesPicker.png" />
     <None Include="Resources\Parameters\BuiltInParameterByName.png" />
@@ -481,7 +481,6 @@
     <None Include="Resources\Parameters\CurtainWall.png" />
     <None Include="Resources\Parameters\StackedWall.png" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.dll" DestinationFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.gha" />
