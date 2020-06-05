@@ -1,8 +1,22 @@
 namespace System
 {
-  static class Extension
+  static class TypeExtensions
   {
-    #region String
+    public static bool IsGenericSubclassOf(this Type type, Type baseGenericType)
+    {
+      for (; type != typeof(object); type = type.BaseType)
+      {
+        var cur = type.IsGenericType ? type.GetGenericTypeDefinition() : type;
+        if (baseGenericType == cur)
+          return true;
+      }
+
+      return false;
+    }
+  }
+
+  static class StringExtensions
+  {
     /// <summary>
     /// Ensures string is no longer than the given length. Cuts the string and adds ellipsis at the end if longer
     /// </summary>
@@ -16,6 +30,5 @@ namespace System
       else
         return sourceString;
     }
-    #endregion
   }
 }
