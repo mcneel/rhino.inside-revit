@@ -7,6 +7,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
 {
   public static class DocumentExtension
   {
+    public static bool Release(this Document doc)
+    {
+      using (var uiDocument = new Autodesk.Revit.UI.UIDocument(doc))
+      {
+        if (uiDocument.GetOpenUIViews().Count == 0)
+          return doc.Close(false);
+      }
+
+      return true;
+    }
+
     public static string GetFilePath(this Document doc)
     {
       if (doc is null)

@@ -649,8 +649,7 @@ namespace RhinoInside.Revit.GH.Components
             }
             finally
             {
-              if (!Revit.ActiveDBApplication.Documents.Contains(familyDoc))
-                familyDoc.Close(false);
+              familyDoc.Release();
             }
 
             if (familyIsNew)
