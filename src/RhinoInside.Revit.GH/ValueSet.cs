@@ -634,7 +634,7 @@ namespace Grasshopper.External.Special
 
       public static bool IsEquatable(IGH_Goo goo)
       {
-        return IsEquatable(goo.GetType()) ||
+        return IsEquatable(goo?.GetType()) ||
         goo is IGH_GeometricGoo ||
         goo is IGH_QuickCast ||
         goo is GH_StructurePath ||
