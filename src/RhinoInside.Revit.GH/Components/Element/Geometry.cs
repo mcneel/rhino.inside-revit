@@ -71,7 +71,7 @@ namespace RhinoInside.Revit.GH.Components
       DB.Document doc,
       List<DB.Element> elements,
       List<DB.Element> exclude,
-      OptionsDelegate optionsDelegate,
+      DB.Options options,
       out GH_Structure<IGH_GeometricGoo> geometries
     )
     {
@@ -113,45 +113,39 @@ namespace RhinoInside.Revit.GH.Components
               continue;
 
             // Extract the geometry
-            using(var options = optionsDelegate())
+            using (var geometry = element.GetGeometry(options))
             {
-              using (var geometry = element.GetGeometry(options))
+              if (geometry is object)
               {
-                if (geometry is object)
+                using (var context = GeometryDecoder.Context.Push())
                 {
-                  using (var context = GeometryDecoder.Context.Push())
+                  context.Element = element;
+                  context.GraphicsStyleId = element.Category.GetGraphicsStyle(DB.GraphicsStyleType.Projection)?.Id ?? DB.ElementId.InvalidElementId;
+                  context.MaterialId = element.Category.Material?.Id ?? DB.ElementId.InvalidElementId;
+
+                  var list = geometry?.
+                      ToGeometryBaseMany().
+                      OfType<GeometryBase>().
+                      Where(x => !IsEmpty(x)).
+                      ToList();
+
+                  if (list?.Count == 0)
                   {
-                    context.Element = element;
-                    context.GraphicsStyleId = element.Category.GetGraphicsStyle(DB.GraphicsStyleType.Projection)?.Id ?? DB.ElementId.InvalidElementId;
-                    context.MaterialId = element.Category.Material?.Id ?? DB.ElementId.InvalidElementId;
-
-                    var list = geometry?.
-                        ToGeometryBaseMany().
-                        OfType<GeometryBase>().
-                        Where(x => !IsEmpty(x)).
-                        ToList();
-
-                    if (list?.Count == 0)
+                    foreach (var dependent in element.GetDependentElements(null).Select(x => element.Document.GetElement(x)))
                     {
-                      foreach (var dependent in element.GetDependentElements(null).Select(x => element.Document.GetElement(x)))
+                      if (dependent.get_BoundingBox(null) is DB.BoundingBoxXYZ)
                       {
-                        if (dependent.get_BoundingBox(null) is DB.BoundingBoxXYZ)
+                        using (var dependentGeometry = dependent?.GetGeometry(options))
                         {
-                          using (var dependentOptions = optionsDelegate())
-                          {
-                            using (var dependentGeometry = dependent?.GetGeometry(dependentOptions))
-                            {
-                              if (dependentGeometry is object)
-                                list.AddRange(dependentGeometry.ToGeometryBaseMany().OfType<GeometryBase>());
-                            }
-                          }
+                          if (dependentGeometry is object)
+                            list.AddRange(dependentGeometry.ToGeometryBaseMany().OfType<GeometryBase>());
                         }
                       }
                     }
-
-                    var valid = list.Where(x => !IsEmpty(x)).Select(x => ToGoo(x));
-                    geometries.AppendRange(valid, new GH_Path(iteration, index++));
                   }
+
+                  var valid = list.Where(x => !IsEmpty(x)).Select(x => ToGoo(x));
+                  geometries.AppendRange(valid, new GH_Path(iteration, index++));
                 }
               }
             }
@@ -315,32 +309,35 @@ namespace RhinoInside.Revit.GH.Components
           detailLevel = DB.ViewDetailLevel.Coarse;
       }
 
-      SolveGeometry
-      (
-        DA.Iteration,
-        doc,
-        elements,
-        exclude,
-        () => new DB.Options() { DetailLevel = detailLevel },
-        out var Geometry
-      );
+      using(var options = new DB.Options() { DetailLevel = detailLevel })
+      {
+        SolveGeometry
+        (
+          DA.Iteration,
+          doc,
+          elements,
+          exclude,
+          options,
+          out var Geometry
+        );
 
-      var _Geometry_ = Params.IndexOfOutputParam("Geometry");
-      DA.SetDataTree(_Geometry_, Geometry);
+        var _Geometry_ = Params.IndexOfOutputParam("Geometry");
+        DA.SetDataTree(_Geometry_, Geometry);
 
-      var _Categories_ = Params.IndexOfOutputParam("Categories");
-      var Categories = _Categories_ >= 0 ? new GH_Structure<Types.Category>() : default;
+        var _Categories_ = Params.IndexOfOutputParam("Categories");
+        var Categories = _Categories_ >= 0 ? new GH_Structure<Types.Category>() : default;
 
-      var _Materials_ = Params.IndexOfOutputParam("Materials");
-      var Materials = _Materials_ >= 0 ? new GH_Structure<Types.Material>() : default;
+        var _Materials_ = Params.IndexOfOutputParam("Materials");
+        var Materials = _Materials_ >= 0 ? new GH_Structure<Types.Material>() : default;
 
-      SolveAttributes(doc, Geometry, Categories, Materials);
+        SolveAttributes(doc, Geometry, Categories, Materials);
 
-      if (Categories is object)
-        DA.SetDataTree(_Categories_, Categories);
+        if (Categories is object)
+          DA.SetDataTree(_Categories_, Categories);
 
-      if (Materials is object)
-        DA.SetDataTree(_Materials_, Materials);
+        if (Materials is object)
+          DA.SetDataTree(_Materials_, Materials);
+      }
     }
   }
 
@@ -446,40 +443,43 @@ namespace RhinoInside.Revit.GH.Components
       if(_Exclude_ >= 0)
         DA.GetDataList(_Exclude_, exclude);
 
-      if (!TryGetCommonDocument(elements.Concat(exclude), out var doc))
-        return;
-
       var view = default(DB.View);
       var _View_ = Params.IndexOfInputParam("View");
       if (!DA.GetData(_View_, ref view))
         return;
 
-      SolveGeometry
-      (
+      if (!TryGetCommonDocument(elements.Concat(exclude).Concat(Enumerable.Repeat(view, 1)), out var doc))
+        return;
+
+      using (var options = new DB.Options() { View = view })
+      {
+        SolveGeometry
+        (
         DA.Iteration,
         doc,
         elements,
         exclude,
-        () => new DB.Options() { View = view },
+        options,
         out var Geometry
       );
 
-      var _Geometry_ = Params.IndexOfOutputParam("Geometry");
-      DA.SetDataTree(_Geometry_, Geometry);
+        var _Geometry_ = Params.IndexOfOutputParam("Geometry");
+        DA.SetDataTree(_Geometry_, Geometry);
 
-      var _Categories_ = Params.IndexOfOutputParam("Categories");
-      var Categories = _Categories_ >= 0 ? new GH_Structure<Types.Category>() : default;
+        var _Categories_ = Params.IndexOfOutputParam("Categories");
+        var Categories = _Categories_ >= 0 ? new GH_Structure<Types.Category>() : default;
 
-      var _Materials_  = Params.IndexOfOutputParam("Materials");
-      var Materials  = _Materials_  >= 0 ? new GH_Structure<Types.Material>() : default;
+        var _Materials_ = Params.IndexOfOutputParam("Materials");
+        var Materials = _Materials_ >= 0 ? new GH_Structure<Types.Material>() : default;
 
-      SolveAttributes(doc, Geometry, Categories, Materials);
+        SolveAttributes(doc, Geometry, Categories, Materials);
 
-      if(Categories is object)
-        DA.SetDataTree(_Categories_, Categories);
+        if (Categories is object)
+          DA.SetDataTree(_Categories_, Categories);
 
-      if(Materials is object)
-        DA.SetDataTree(_Materials_, Materials);
+        if (Materials is object)
+          DA.SetDataTree(_Materials_, Materials);
+      }
     }
   }
 }
