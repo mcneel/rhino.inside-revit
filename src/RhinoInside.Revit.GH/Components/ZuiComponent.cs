@@ -185,6 +185,8 @@ namespace RhinoInside.Revit.GH.Components
         original.Attributes = NullAttributes.Instance;
         var newParam = GH_ComponentParamServer.CreateDuplicate(original);
 
+        newParam.NewInstanceGuid();
+
         if (newParam.MutableNickName && CentralSettings.CanvasFullNames)
           newParam.NickName = newParam.Name;
 
