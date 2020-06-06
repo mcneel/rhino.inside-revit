@@ -28,12 +28,12 @@ namespace RhinoInside.Revit.GH.Components
     {
       ParamDefinition.FromParam(DocumentComponent.CreateDocumentParam(), ParamVisibility.Voluntary),
       ParamDefinition.Create<Parameters.Param_Enum<Types.ViewDiscipline>>("Discipline", "D", "View discipline", GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Parameters.Param_Enum<Types.ViewType>>("Type", "T", "View type", DB.ViewType.Undefined, GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Parameters.Param_Enum<Types.ViewFamily>>("Family", "T", "View family", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_String>("Name", "N", "View name", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Parameters.View>("Template", "T", "Views template", GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Param_Boolean>("Is Template", "T", "View is template", false, GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Param_Boolean>("Is Assembly", "A", "View is assembly", false, GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Param_Boolean>("Is Printable", "P", "View is printable", true, GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_Boolean>("Is Template", "IT", "View is template", false, GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_Boolean>("Is Assembly", "IA", "View is assembly", false, GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_Boolean>("Is Printable", "IP", "View is printable", true, GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true),
     };
 
@@ -49,8 +49,8 @@ namespace RhinoInside.Revit.GH.Components
       var _Discipline_ = Params.IndexOfInputParam("Discipline");
       bool nofilterDiscipline = (!DA.GetData(_Discipline_, ref viewDiscipline) && Params.Input[_Discipline_].Sources.Count == 0);
 
-      var viewType = DB.ViewType.Undefined;
-      DA.GetData("Type", ref viewType);
+      var viewFamily = DB.ViewFamily.Invalid;
+      DA.GetData("Family", ref viewFamily);
 
       string name = null;
       DA.GetData("Name", ref name);
@@ -101,8 +101,8 @@ namespace RhinoInside.Revit.GH.Components
         if (!nofilterIsPrintable)
           views = views.Where((x) => x.CanBePrinted == IsPrintable);
 
-        if (viewType != DB.ViewType.Undefined)
-          views = views.Where((x) => x.ViewType == viewType);
+        if (viewFamily != DB.ViewFamily.Invalid)
+          views = views.Where((x) => (x.Document.GetElement(x.GetTypeId()) as DB.ViewFamilyType).ViewFamily == viewFamily);
 
         if (name is object)
           views = views.Where(x => x.Name.IsSymbolNameLike(name));
