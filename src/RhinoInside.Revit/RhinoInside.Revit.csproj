@@ -244,6 +244,8 @@
     <Compile Include="External\UI\Command.cs" />
     <Compile Include="External\UI\EventHandler.cs" />
     <Compile Include="External\UI\Extensions\UIApplication.cs" />
+    <Compile Include="External\UI\Extensions\UIDocument.cs" />
+    <Compile Include="External\UI\Extensions\UIView.cs" />
     <Compile Include="External\UI\Selection.cs" />
     <Compile Include="External\UI\TaskDialogIcons.cs" />
     <Compile Include="Extensions\RhinoCommon.cs" />
