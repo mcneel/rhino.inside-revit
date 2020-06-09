@@ -13,11 +13,24 @@ namespace RhinoInside.Revit.Convert.System.Drawing
              Color.FromArgb(0, 0, 0, 0);
     }
 
-    public static DB::Color ToColor(this Color c)
+    public static DB.Color ToColor(this Color c)
     {
       return c.ToArgb() == 0 ?
-             DB::Color.InvalidColorValue :
-             new DB::Color(c.R, c.G, c.B);
+             DB.Color.InvalidColorValue :
+             new DB.Color(c.R, c.G, c.B);
+    }
+  }
+
+  public static class RectangleConverter
+  {
+    public static Rectangle ToRectangle(this DB.Rectangle value)
+    {
+      return new Rectangle(value.Left, value.Top, value.Right - value.Left, value.Bottom - value.Top);
+    }
+
+    public static DB.Rectangle ToRectangle(this Rectangle value)
+    {
+      return new DB.Rectangle(value.Left, value.Top, value.Right, value.Bottom);
     }
   }
 }
