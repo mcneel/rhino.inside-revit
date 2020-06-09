@@ -83,7 +83,7 @@ namespace RhinoInside.Revit.Convert.Geometry
         if (Mesh.CreateFromBrep(brep, mp) is Mesh[] meshes)
           brepMesh.Append(meshes);
 
-        yield return brepMesh.ToMesh();
+        yield return brepMesh.ToMesh(UnitConverter.NoScale);
       }
     }
   };
