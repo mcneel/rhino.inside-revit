@@ -454,6 +454,7 @@
     <None Include="Resources\Components\AnalyzeStackedWallType.png" />
     <None Include="Resources\Components\DeconstructCompoundStructure.png" />
     <None Include="Resources\Components\DeconstructCompoundStructureLayer.png" />
+    <None Include="Resources\logo_24x24.png" />
     <None Include="Resources\Parameters\AnalyticalCategoriesPicker.png" />
     <None Include="Resources\Parameters\AnnotationCategoriesPicker.png" />
     <None Include="Resources\Parameters\BuiltInParameterByName.png" />
