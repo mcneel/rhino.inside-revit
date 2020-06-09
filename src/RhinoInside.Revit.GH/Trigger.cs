@@ -1,18 +1,14 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.IO;
 using System.Windows.Forms;
 using GH_IO.Serialization;
-using Grasshopper;
 using Grasshopper.GUI;
 using Grasshopper.GUI.Canvas;
 using Grasshopper.GUI.Canvas.Interaction;
 using Grasshopper.GUI.HTML;
 using Grasshopper.Kernel;
-using System.Diagnostics;
 
 ///////////////////////////////////////////////////////////////////////////////
 //                                                                           //
@@ -34,23 +30,29 @@ namespace Grasshopper.External.Special
     )
     { }
 
-    public static Guid TriggerComponentID => new Guid("11B807B5-F088-46C3-9895-693EA3E54DBE");
-    public override Guid ComponentGuid => TriggerComponentID;
+    static readonly Guid InternalComponentGuid = new Guid("11B807B5-F088-46C3-9895-693EA3E54DBE");
+    public override Guid ComponentGuid => InternalComponentGuid;
     public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.obscure;
-    protected override Bitmap Icon => ClassIcon;
-    static readonly Bitmap ClassIcon = RhinoInside.Revit.ImageBuilder.BuildIcon
-    (
-      (graphics, bounds) =>
+    protected override Bitmap Icon
+    {
+      get
       {
-        var iconBounds = new RectangleF(bounds.Location, bounds.Size);
-        iconBounds.Inflate(-0.5f, -0.5f);
-        using (var capsule = GH_Capsule.CreateCapsule(iconBounds, GH_Palette.Grey))
+        var bitmap = new Bitmap(24, 24);
+        using (var graphics = Graphics.FromImage(bitmap))
         {
-          capsule.Render(graphics, false, false, false);
-          ComponentAttributes.RenderIcon(graphics, iconBounds, Color.Black);
+          var iconBounds = new RectangleF(0.0f, 0.0f, 24.0f, 24.0f);
+          iconBounds.Inflate(-0.5f, -0.5f);
+
+          using (var capsule = GH_Capsule.CreateCapsule(iconBounds, GH_Palette.Grey))
+          {
+            capsule.Render(graphics, false, false, false);
+            ComponentAttributes.RenderIcon(graphics, iconBounds, Color.Black);
+          }
         }
+
+        return bitmap;
       }
-    );
+    }
 
     public override bool IconCapableUI => false;
 
