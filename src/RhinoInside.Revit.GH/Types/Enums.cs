@@ -147,6 +147,32 @@ namespace RhinoInside.Revit.GH.Types
     public ViewFamily() : base(DB.ViewFamily.Invalid) { }
 
     public override bool IsEmpty => Value == DB.ViewFamily.Invalid;
+
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
+      {
+        { (int) DB.ViewFamily.ThreeDimensional,         "3D View"                   },
+        { (int) DB.ViewFamily.FloorPlan,                "Floor Plan"                },
+        { (int) DB.ViewFamily.CeilingPlan,              "Ceiling Plan"              },
+        { (int) DB.ViewFamily.StructuralPlan,           "Structural Plan"           },
+        { (int) DB.ViewFamily.AreaPlan,                 "Area Plan"                 },
+        { (int) DB.ViewFamily.Elevation,                "Elevation"                 },
+        { (int) DB.ViewFamily.Section,                  "Section"                   },
+        { (int) DB.ViewFamily.Detail,                   "Detail View"               },
+        { (int) DB.ViewFamily.Drafting,                 "Drafting View"             },
+        { (int) DB.ViewFamily.ImageView,                "Rendering"                 },
+        { (int) DB.ViewFamily.Walkthrough,              "Walkthrough"               },
+        { (int) DB.ViewFamily.Legend,                   "Legend"                    },
+        { (int) DB.ViewFamily.Sheet,                    "Sheet"                     },
+        { (int) DB.ViewFamily.Schedule,                 "Schedule"                  },
+        { (int) DB.ViewFamily.GraphicalColumnSchedule,  "Graphical Column Schedule" },
+        { (int) DB.ViewFamily.PanelSchedule,            "Panel Schedule"            },
+        { (int) DB.ViewFamily.CostReport,               "Cost Report"               },
+        { (int) DB.ViewFamily.LoadsReport,              "Loads Report"              },
+        { (int) DB.ViewFamily.PressureLossReport,       "Pressure Loss Report"      },
+      }
+    );
   }
 
   [
