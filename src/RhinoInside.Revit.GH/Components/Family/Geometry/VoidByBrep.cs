@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "V";
 
     public FamilyGeometryVoidByBrep()
-    : base("Family Void Geometry", "FamVoid", string.Empty, "Revit", "Family")
+    : base("Component Family Void", "FamVoid", string.Empty, "Revit", "Family")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

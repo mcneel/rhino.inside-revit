@@ -9,13 +9,15 @@ namespace RhinoInside.Revit.GH.Components
   public class FormByCurves : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("42631B6E-505E-4091-981A-E7605AE5A1FF");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
     public FormByCurves() : base
     (
-      "Add LoftForm", "LoftForm",
-      "Given a list of curves, it adds a Form element to the active Revit document",
-      "Revit", "Family Element"
+      name: "Add LoftForm",
+      nickname: "LoftForm",
+      description: "Given a list of curves, it adds a Form element to the active Revit document",
+      category: "Revit",
+      subCategory: "Family"
     )
     { }
 

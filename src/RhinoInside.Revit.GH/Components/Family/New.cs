@@ -22,7 +22,7 @@ namespace RhinoInside.Revit.GH.Components
 
     public FamilyNew() : base
     (
-      name: "New Family",
+      name: "New Component Family",
       nickname: "New",
       description: "Creates a new Family from a template.",
       category: "Revit",
