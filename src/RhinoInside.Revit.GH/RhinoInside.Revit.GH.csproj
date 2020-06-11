@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -293,6 +293,7 @@
     <Compile Include="Components\Family\Element\Visibility\Deconstruct.cs" />
     <Compile Include="Components\Family\Geometry\ByBrep.cs" />
     <Compile Include="Components\Family\Geometry\ByCurve.cs" />
+    <Compile Include="Components\Family\Identity.cs" />
     <Compile Include="Components\Family\QueryFamilies.cs" />
     <Compile Include="Components\Family\Types.cs" />
     <Compile Include="Components\Family\Load.cs" />
