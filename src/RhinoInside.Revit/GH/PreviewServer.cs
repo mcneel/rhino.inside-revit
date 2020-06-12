@@ -126,7 +126,9 @@ namespace RhinoInside.Revit.GH
       public override EffectInstance EffectInstance(DisplayStyle displayStyle, bool IsShadingPass)
       {
         var ei = base.EffectInstance(displayStyle, IsShadingPass);
-        var color = docObject.Attributes.Selected ? ActiveDefinition.PreviewColourSelected : ActiveDefinition.PreviewColour;
+
+        var topAttributes = docObject.Attributes?.GetTopLevel ?? docObject.Attributes;
+        var color = topAttributes.Selected ? ActiveDefinition.PreviewColourSelected : ActiveDefinition.PreviewColour;
 
         if (IsShadingPass)
         {
@@ -146,11 +148,18 @@ namespace RhinoInside.Revit.GH
       {
         if (docObject is IGH_PreviewObject preview)
         {
-          if (preview.Hidden)
+          if (preview.Hidden || !preview.IsPreviewCapable)
             return;
         }
 
-        if (ActiveDefinition.PreviewFilter == GH_PreviewFilter.Selected && !docObject.Attributes.Selected)
+        var topObject = docObject.Attributes?.GetTopLevel?.DocObject ?? docObject;
+        if (topObject is IGH_PreviewObject topPreview)
+        {
+          if (topPreview.Hidden || !topPreview.IsPreviewCapable)
+            return;
+        }
+
+        if (ActiveDefinition.PreviewFilter == GH_PreviewFilter.Selected && !topObject.Attributes.Selected)
           return;
 
         base.Draw(displayStyle);
@@ -236,11 +245,14 @@ namespace RhinoInside.Revit.GH
               if (obj is IGH_Component component)
               {
                 foreach (var param in component.Params.Output)
-                  DrawData(param.VolatileData, obj);
+                {
+                  if(param is IGH_PreviewObject preview)
+                    DrawData(param.VolatileData, param);
+                }
               }
               else if (obj is IGH_Param param)
               {
-                DrawData(param.VolatileData, obj);
+                DrawData(param.VolatileData, param);
               }
             }
           }
