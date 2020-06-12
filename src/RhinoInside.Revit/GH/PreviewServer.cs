@@ -250,11 +250,7 @@ namespace RhinoInside.Revit.GH
       return primitivesBoundingBox;
     }
 
-    public override Outline GetBoundingBox(View dBView)
-    {
-      var bbox = primitivesBoundingBox;
-      return new Outline(bbox.Min.ToXYZ(), bbox.Max.ToXYZ());
-    }
+    public override Outline GetBoundingBox(View dBView) => primitivesBoundingBox.ToOutline();
 
     public override void RenderScene(View dBView, DisplayStyle displayStyle)
     {
