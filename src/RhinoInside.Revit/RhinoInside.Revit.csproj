@@ -228,6 +228,7 @@
     <Compile Include="External\DB\Extensions\Parameter.cs" />
     <Compile Include="External\DB\Extensions\ParameterFilterElement.cs" />
     <Compile Include="External\DB\Extensions\Surface.cs" />
+    <Compile Include="External\DB\Extensions\View.cs" />
     <Compile Include="External\DB\Extensions\XYZ.cs" />
     <Compile Include="External\DB\Extensions\Wall.cs" />
     <Compile Include="External\DB\ExternalFailures.cs" />
