@@ -10,23 +10,15 @@ using Grasshopper.Kernel.Types;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public abstract class GH_PersistentParam<T> : Grasshopper.Kernel.GH_PersistentParam<T>
-    where T : class, IGH_Goo
-  {
-    protected override sealed Bitmap Icon => ((Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
-                                             ImageBuilder.BuildIcon(IconTag);
-
-    protected virtual string IconTag => typeof(T).Name.Substring(0, 1);
-
-    protected GH_PersistentParam(string name, string nickname, string description, string category, string subcategory) :
-      base(name, nickname, description, category, subcategory)
-    { }
-    public virtual void SetInitCode(string code) => NickName = code;
-  }
-
   public abstract class PersistentParam<T> : GH_PersistentParam<T>
     where T : class, IGH_Goo
   {
+    protected override sealed Bitmap Icon => ((Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
+                                              ImageBuilder.BuildIcon(IconTag, Properties.Resources.ObjectFamily_Unknown);
+
+    protected virtual string IconTag => typeof(T).Name.Substring(0, 1);
+    public virtual void SetInitCode(string code) => NickName = code;
+
     protected PersistentParam(string name, string nickname, string description, string category, string subcategory) :
       base(name, nickname, description, category, subcategory)
     { }
@@ -210,6 +202,4 @@ namespace RhinoInside.Revit.GH.Parameters
     protected virtual void Menu_AppendPostProcessParameter(ToolStripDropDown menu) { }
     #endregion
   }
-
-
 }
