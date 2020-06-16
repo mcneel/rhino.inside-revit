@@ -18,9 +18,6 @@ namespace RhinoInside.Revit.GH.Components
     public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.obscure;
     protected override string IconTag => "P";
 
-    protected ElementPurge(string name, string nickname, string description, string category, string subCategory)
-    : base(name, nickname, description, category, subCategory) { }
-
     private bool Simulated;
 
     public ElementPurge() : base
