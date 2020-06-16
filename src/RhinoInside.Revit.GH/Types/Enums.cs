@@ -52,7 +52,7 @@ namespace RhinoInside.Revit.GH.Types
     public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
     (
       Enum.GetValues(typeof(DB.UnitType)).Cast<int>().
-      Where(x => x != (int) DB.UnitType.UT_Custom).      
+      Where(x => x != (int) DB.UnitType.UT_Custom && x != (int) DB.UnitType.UT_Undefined).
       ToDictionary(x => x, x => DB.LabelUtils.GetLabelFor((DB.UnitType) x))
     );
   }
