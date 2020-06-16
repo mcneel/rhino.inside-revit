@@ -1,15 +1,15 @@
-# pylint: disable-all
+#pylint: disable=broad-except,invalid-name
 """Open Rhino.Inside.Revit inside Revit for debugging
 
 Usage:
     {} <revit_year> [<model_path>] [<ghdoc_path>] [--rps] [--dryrun]
 
 Options:
-    -h, --help                          Show this help
-    --rps                               Add RevitPythonShell addon
-    --dryrun                            Create runtime env but do not start Revit
-    <model_path>                        Revit model to be opened
-    <ghdoc_path>                        Grasshopper document to be opened
+    -h, --help          Show this help
+    --rps               Add RevitPythonShell addon
+    --dryrun            Create runtime env but do not start Revit
+    <model_path>        Revit model to be opened
+    <ghdoc_path>        Grasshopper document to be opened
 """
 import sys
 import os
@@ -45,7 +45,7 @@ DEFAULT_ADDON_MANIFEST = r"""<?xml version="1.0" encoding="utf-8"?>
 
 RIR_ADDON_INFO = {
     'addon': 'Rhino.Inside',
-    'dll': r'%APPDATA%\Autodesk\Revit\Addins\{year}\RhinoInside.Revit\RhinoInside.Revit.dll',
+    'dll': r'%APPDATA%\Autodesk\Revit\Addins\{year}\RhinoInside.Revit\RhinoInside.Revit.dll',   #pylint: disable=line-too-long
     'entry': 'RhinoInside.Revit.Addin',
     'uuid': '02EFF7F0-4921-4FD3-91F6-A87B6BA9BF74',
     'vendor': 'com.mcneel'
@@ -85,10 +85,8 @@ def clean_cache(cache_dir):
     for entry in os.listdir(cache_dir):
         entry_path = op.join(cache_dir, entry)
         if op.isfile(entry_path) \
-                and (
-                    re.match(DEFAULT_JRN_ARTIFACT_PATTERN, entry)
-                    or re.match(DEFAULT_ADDIN_MANIFEST_PATTERN, entry)
-                ):
+                and (re.match(DEFAULT_JRN_ARTIFACT_PATTERN, entry)
+                     or re.match(DEFAULT_ADDIN_MANIFEST_PATTERN, entry)):
             try:
                 os.remove(entry_path)
             except Exception as del_ex:
@@ -104,12 +102,15 @@ def prepare_cache():
     return cache_dir
 
 
-def create_rir_journal(journal_dir, model_path='', ghdoc_path='', journal_name=DEFAULT_JRN_NAME):
+def create_rir_journal(journal_dir,
+                       model_path='', ghdoc_path='',
+                       journal_name=DEFAULT_JRN_NAME):
     """Create a new Revit journal to lauch Revit and open Rhino.Inside.Revit
 
     Args:
         journal_dir (str): directory path to create the journal file inside
         model_path (str, optional): request to open this model in journal
+        ghdoc_path (str, optional): request to open this gh document
         journal_name (str, optional): name of the journal file
     """
     # start a clean journal
@@ -154,6 +155,13 @@ def create_rir_journal(journal_dir, model_path='', ghdoc_path='', journal_name=D
 
 
 def write_manifest(revit_year, addon_info, addons_dir):
+    """Write the addin manifest file for given revit version and addon
+
+    Args:
+        revit_year (str): revit version number
+        addon_info (dict): addin info dictionary
+        addons_dir (str): target manifest file directory
+    """
     dll_path = op.expandvars(addon_info['dll'].format(year=revit_year))
     if op.isfile(dll_path):
         manifest_file_contents = \
@@ -168,11 +176,8 @@ def write_manifest(revit_year, addon_info, addons_dir):
         with open(manifest_file_path, 'w') as mf:
             mf.write(manifest_file_contents)
     else:
-        raise Exception(
-                "Can not find {} dll at {}".format(
-                    addon_info['addon'], dll_path
-                    )
-            )
+        raise Exception("Can not find {} dll at {}".format(addon_info['addon'],
+                                                           dll_path))
 
 
 def add_addons(revit_year, addons_dir, add_rps=True):
@@ -188,9 +193,8 @@ def find_revit_binary(revit_year):
     bin_path = op.expandvars(DEFAULT_REVIT_BIN_PATH.format(year=revit_year))
     if op.isfile(bin_path):
         return bin_path
-    raise Exception(
-            "Can not find Revit {} binary at {}".format(revit_year, bin_path)
-        )
+    raise Exception("Can not find Revit {} binary at {}".format(revit_year,
+                                                                bin_path))
 
 
 def run_revit(revit_year, journal_file):
@@ -204,6 +208,7 @@ def run_revit(revit_year, journal_file):
 
 
 def run_command(cfg: CLIArgs):
+    """Orchestrate execution using command line options"""
     # prepare cache -------------------
     cache_dir = prepare_cache()
 
@@ -231,8 +236,7 @@ if __name__ == '__main__':
                 # process args
                 docopt(
                     __doc__.format(__binname__),
-                    version='{} {}'.format(__binname__, __version__
-                    )
+                    version='{} {}'.format(__binname__, __version__)
                 )
             )
         )
