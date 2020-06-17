@@ -812,9 +812,7 @@ namespace RhinoInside.Revit.GH.Types
           if (Value.ToBrep() is Brep brep)
           {
             if (element is DB.Instance instance)
-              brep.Transform(Transform.Scale(Point3d.Origin, Revit.ModelUnits) * instance.GetTransform().ToTransform());
-            else
-              brep.Scale(Revit.ModelUnits);
+              brep.Transform(instance.GetTransform().ToTransform());
 
             target = (Q) (object) new GH_Surface(brep);
           }
@@ -826,9 +824,7 @@ namespace RhinoInside.Revit.GH.Types
           if (Value.ToBrep() is Brep brep)
           {
             if (element is DB.Instance instance)
-              brep.Transform(Transform.Scale(Point3d.Origin, Revit.ModelUnits) * instance.GetTransform().ToTransform());
-            else
-              brep.Scale(Revit.ModelUnits);
+              brep.Transform(instance.GetTransform().ToTransform());
 
             target = (Q) (object) new GH_Brep(brep);
           }
@@ -840,9 +836,7 @@ namespace RhinoInside.Revit.GH.Types
           if (Value.Triangulate()?.ToMesh() is Mesh mesh)
           {
             if (element is DB.Instance instance)
-              mesh.Transform(Transform.Scale(Point3d.Origin, Revit.ModelUnits) * instance.GetTransform().ToTransform());
-            else
-              mesh.Scale(Revit.ModelUnits);
+              mesh.Transform(instance.GetTransform().ToTransform());
 
             mesh.Normals.ComputeNormals();
 
