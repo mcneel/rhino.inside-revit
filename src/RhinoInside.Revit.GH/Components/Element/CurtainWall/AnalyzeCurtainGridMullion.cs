@@ -53,18 +53,18 @@ namespace RhinoInside.Revit.GH.Components
         description: "Base point of given given curtain grid mullion instance",
         access: GH_ParamAccess.item
         );
-      manager.AddBooleanParameter(
-        name: "Locked",
-        nickname: "LD",
-        description: "Whether curtain grid mullion line is locked",
-        access: GH_ParamAccess.item
-        );
-      manager.AddBooleanParameter(
-        name: "Lockable",
-        nickname: "L",
-        description: "Whether curtain grid mullion line is lockable",
-        access: GH_ParamAccess.item
-        );
+      //manager.AddBooleanParameter(
+      //  name: "Locked",
+      //  nickname: "LD",
+      //  description: "Whether curtain grid mullion line is locked",
+      //  access: GH_ParamAccess.item
+      //  );
+      //manager.AddBooleanParameter(
+      //  name: "Lockable",
+      //  nickname: "L",
+      //  description: "Whether curtain grid mullion line is lockable",
+      //  access: GH_ParamAccess.item
+      //  );
       //manager.AddNumberParameter(
       //  name: "Mullion Length",
       //  nickname: "L",
@@ -83,8 +83,8 @@ namespace RhinoInside.Revit.GH.Components
       DA.SetData("Type", Types.ElementType.FromElement(mullionInstance.MullionType));
       DA.SetData("Axis Curve", mullionInstance.LocationCurve?.ToCurve());
       DA.SetData("Base Point", ((DB.LocationPoint) mullionInstance.Location).Point.ToPoint3d());
-      DA.SetData("Locked", mullionInstance.Lock);
-      DA.SetData("Lockable", mullionInstance.Lockable);
+      //DA.SetData("Locked", mullionInstance.Lock);
+      //DA.SetData("Lockable", mullionInstance.Lockable);
       // Length can be acquired from axis curve
       // Conversion to GH_Curve results in a zero length curve
       //PipeHostParameter(DA, mullionInstance, DB.BuiltInParameter.CURVE_ELEM_LENGTH, "Mullion Length");

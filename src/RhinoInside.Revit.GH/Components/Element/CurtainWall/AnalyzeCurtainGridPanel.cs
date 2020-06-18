@@ -62,17 +62,17 @@ namespace RhinoInside.Revit.GH.Components
         );
       // DB.Panel is missing a .Locked property ?!
       //manager.AddBooleanParameter(
-      //  name: "Locked?",
-      //  nickname: "L?",
+      //  name: "Locked",
+      //  nickname: "L",
       //  description: "Whether curtain grid panel is locked",
       //  access: GH_ParamAccess.item
       //  );
-      manager.AddBooleanParameter(
-        name: "Lockable",
-        nickname: "L",
-        description: "Whether curtain grid panel is lockable",
-        access: GH_ParamAccess.item
-        );
+      //manager.AddBooleanParameter(
+      //  name: "Lockable",
+      //  nickname: "L",
+      //  description: "Whether curtain grid panel is lockable",
+      //  access: GH_ParamAccess.item
+      //  );
 
       // panel properties
       manager.AddNumberParameter(
@@ -92,34 +92,29 @@ namespace RhinoInside.Revit.GH.Components
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       // get input
-      DB.FamilyInstance panelInstance = default;
-      if (!DA.GetData("Panel", ref panelInstance))
+      var instance = default(DB.FamilyInstance);
+      if (!DA.GetData("Panel", ref instance))
         return;
 
-      switch (panelInstance)
+      DA.SetData("Type", instance.Symbol);
+      DA.SetData("Base Point", instance.GetTransform().Origin.ToPoint3d());
+      DA.SetData("Orientation", instance.FacingOrientation.ToVector3d());
+
+      if (instance is DB.Panel panel)
       {
-        case DB.Panel panel:
-          // sets either DB.PanelType or DB.FamilySymbol
-          // Panels don't always have DB.PanelType assigned
-          DA.SetData("Type", Types.ElementType.FromElement(panel.PanelType ?? panel.Symbol));
-          DA.SetData("Host Panel", Types.Element.FromElement(panel.Document.GetElement(panel.FindHostPanel())));
-          DA.SetData("Base Point", panel.Transform.Origin.ToPoint3d());
-          DA.SetData("Orientation", panel.FacingOrientation.ToVector3d());
-
-          DA.SetData("Lockable", panel.Lockable);
-          PipeHostParameter(DA, panel, DB.BuiltInParameter.GENERIC_WIDTH, "Width");
-          PipeHostParameter(DA, panel, DB.BuiltInParameter.GENERIC_HEIGHT, "Height");
-          break;
-        case DB.FamilyInstance famInst:
-          DA.SetData("Type", Types.ElementType.FromElement(famInst.Symbol));
-          DA.SetData("Base Point", famInst.GetTransform().Origin.ToPoint3d());
-          DA.SetData("Orientation", famInst.FacingOrientation.ToVector3d());
-
-          DA.SetData("Lockable", false);
-          PipeHostParameter(DA, famInst, DB.BuiltInParameter.GENERIC_WIDTH, "Width");
-          PipeHostParameter(DA, famInst, DB.BuiltInParameter.GENERIC_HEIGHT, "Height");
-          break;
+        //DA.SetData("Locked", panel.Locked);
+        //DA.SetData("Lockable", panel.Lockable);
+        DA.SetData("Host Panel", panel.Document.GetElement(panel.FindHostPanel()));
       }
+      else
+      {
+        //DA.SetData("Locked", false);
+        //DA.SetData("Lockable", false);
+        DA.SetData("Host Panel", null);
+      }
+
+      PipeHostParameter(DA, instance, DB.BuiltInParameter.GENERIC_WIDTH, "Width");
+      PipeHostParameter(DA, instance, DB.BuiltInParameter.GENERIC_HEIGHT, "Height");
     }
   }
 }
