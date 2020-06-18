@@ -59,7 +59,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns>X axis of the corresponding coordinate system</returns>
     public static XYZ PerpVector(this XYZ value, double tolerance = 1e-9)
     {
-      if (XYZ.Zero.IsAlmostEqualTo(new XYZ(value.X, value.Y, 0.0), tolerance))
+      var length = value.GetLength();
+      if (length < tolerance)
+        return XYZ.Zero;
+
+      var normal = new XYZ(value.X / length, value.Y / length, value.Z / length);
+
+      if (XYZ.Zero.IsAlmostEqualTo(new XYZ(normal.X, normal.Y, 0.0), tolerance))
         return new XYZ(value.Z, 0.0, -value.X);
       else
         return new XYZ(-value.Y, value.X, 0.0);
