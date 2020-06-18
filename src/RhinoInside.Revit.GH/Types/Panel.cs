@@ -5,6 +5,8 @@ namespace RhinoInside.Revit.GH.Types
 {
   public class Panel : FamilyInstance
   {
+    public override string TypeName => "Revit Panel";
+
     public override string TypeDescription => "Represents a Revit Curtain Grid Panel Element";
     protected override Type ScriptVariableType => typeof(DB.FamilyInstance);
     public static explicit operator DB.FamilyInstance(Panel self) =>

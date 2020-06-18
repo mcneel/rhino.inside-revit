@@ -9,6 +9,8 @@ namespace RhinoInside.Revit.GH.Types
 {
   public class Mullion : FamilyInstance
   {
+    public override string TypeName => "Revit Mullion";
+
     public override string TypeDescription => "Represents a Revit Mullion Element";
     protected override Type ScriptVariableType => typeof(DB.Mullion);
     public static explicit operator DB.Mullion(Mullion value) =>
