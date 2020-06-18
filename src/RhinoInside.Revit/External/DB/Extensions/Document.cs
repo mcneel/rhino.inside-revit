@@ -133,6 +133,21 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return elementId is object;
     }
 
+    /// <summary>
+    /// Compare two <see cref="Autodesk.Revit.DB.Reference"/> objects to know it are referencing same <see cref="Autodesk.Revit.DB.Element"/>
+    /// </summary>
+    /// <param name="doc"></param>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns>true if both references are equivalent</returns>
+    public static bool AreEquivalentReferences(this Document doc, Reference x, Reference y)
+    {
+      var UniqueIdX = x?.ConvertToStableRepresentation(doc);
+      var UniqueIdY = y?.ConvertToStableRepresentation(doc);
+
+      return UniqueIdX == UniqueIdY;
+    }
+
     public static Category GetCategory(this Document doc, string uniqueId)
     {
       if (doc is null || string.IsNullOrEmpty(uniqueId))
