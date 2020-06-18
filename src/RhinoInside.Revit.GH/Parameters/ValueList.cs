@@ -11,8 +11,9 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   public abstract class GH_ValueList : Grasshopper.Kernel.Special.GH_ValueList
   {
-    protected override Bitmap Icon => ((Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
-                                       ImageBuilder.BuildIcon(GetType().Name.Substring(0, 1));
+    protected override Bitmap Icon =>
+      ((Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
+      base.Icon;
   }
 
   public abstract class ValueList : GH_ValueList, IGH_InitCodeAware

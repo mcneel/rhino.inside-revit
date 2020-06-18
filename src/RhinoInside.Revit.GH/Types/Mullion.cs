@@ -25,20 +25,6 @@ namespace RhinoInside.Revit.GH.Types
         return mullion?.LocationCurve?.ToCurve();
       }
     }
-
-    #region IGH_PreviewData
-    public override void DrawViewportWires(GH_PreviewWireArgs args)
-    {
-      var bbox = Boundingbox;
-      if (!bbox.IsValid)
-        return;
-
-      if(Curve is Rhino.Geometry.Curve curve)
-        args.Pipeline.DrawCurve(curve, args.Color, args.Thickness);
-    }
-    public override void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
-    #endregion
-
   }
 
   public class MullionPosition : ElementType

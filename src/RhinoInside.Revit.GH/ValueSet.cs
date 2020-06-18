@@ -25,19 +25,24 @@ namespace Grasshopper.External.Special
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     public override GH_ParamKind Kind => GH_ParamKind.floating;
     protected override Bitmap Icon => ClassIcon;
-    static readonly Bitmap ClassIcon = RhinoInside.Revit.ImageBuilder.BuildIcon
-    (
-      (graphics, bounds) =>
+    static readonly Bitmap ClassIcon = BuildIcon();
+    static Bitmap BuildIcon()
+    {
+      var bitmap = new Bitmap(24, 24);
+      using (var graphics = Graphics.FromImage(bitmap))
       {
-        var iconBounds = new RectangleF(bounds.Location, bounds.Size);
+        var iconBounds = new RectangleF(0.0f, 0.0f, 24.0f, 24.0f);
         iconBounds.Inflate(-0.5f, -0.5f);
+
         using (var capsule = GH_Capsule.CreateCapsule(iconBounds, GH_Palette.Grey))
         {
           capsule.Render(graphics, false, false, false);
           ComponentAttributes.RenderCheckMark(graphics, iconBounds, Color.Black);
         }
       }
-    );
+
+      return bitmap;
+    }
 
     void IGH_InitCodeAware.SetInitCode(string code) => NickName = code;
 

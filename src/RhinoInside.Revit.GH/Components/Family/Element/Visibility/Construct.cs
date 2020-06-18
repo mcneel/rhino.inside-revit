@@ -6,12 +6,18 @@ namespace RhinoInside.Revit.GH.Components
   public class FamilyElementVisibilityConstruct : Component
   {
     public override Guid ComponentGuid => new Guid("10EA29D4-16AF-4060-89CE-F467F0069675");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.quinary;
 
     protected override string IconTag => "V";
 
-    public FamilyElementVisibilityConstruct()
-    : base("Construct Visibility", "Construct Visibility", string.Empty, "Revit", "Family Element")
+    public FamilyElementVisibilityConstruct() : base
+    (
+      name: "Construct Visibility",
+      nickname: "Visibility",
+      description: string.Empty,
+      category: "Revit",
+      subCategory: "Family"
+    )
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

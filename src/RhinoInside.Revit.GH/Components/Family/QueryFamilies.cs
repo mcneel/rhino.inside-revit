@@ -9,13 +9,13 @@ using RhinoInside.Revit.External.DB.Extensions;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class DocumentFamilies : ElementCollectorComponent
+  public class QueryFamilies : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("B6C377BA-BC46-495C-8250-F09DB0219C91");
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override DB.ElementFilter ElementFilter => new DB.ElementIsElementTypeFilter(false);
 
-    public DocumentFamilies() : base
+    public QueryFamilies() : base
     (
       name: "Query Families",
       nickname: "Families",

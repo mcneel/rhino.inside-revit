@@ -313,11 +313,11 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     static IEnumerable<DB.BRepBuilderEdgeGeometry> ToBRepBuilderEdgeGeometry(BrepEdge edge)
     {
-      var edgeCurve = edge.EdgeCurve.Trim(edge.Domain);
+      var edgeCurve = edge.EdgeCurve.Trim(edge.Domain) ?? edge.EdgeCurve;
 
-      if (edge.IsShort(Revit.ShortCurveTolerance))
+      if (edgeCurve is null || edge.IsShort(Revit.ShortCurveTolerance, edge.Domain))
       {
-        Debug.WriteLine($"Short edge skipped, Length = {edge.GetLength()}");
+        Debug.WriteLine($"Short edge skipped, Length = {edge.GetLength(edge.Domain)}");
         return Enumerable.Empty<DB.BRepBuilderEdgeGeometry>();
       }
 

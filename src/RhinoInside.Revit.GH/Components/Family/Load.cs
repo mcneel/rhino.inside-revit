@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Components
 
     public FamilyLoad() : base
     (
-      name: "Load Family",
+      name: "Load Component Family",
       nickname: "Load",
       description: "Loads a family into the document",
       category: "Revit",

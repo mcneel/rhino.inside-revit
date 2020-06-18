@@ -118,6 +118,12 @@ namespace RhinoInside.Revit.Convert.Geometry
         new DB::XYZ(value.X * factor, value.Y * factor, value.Z * factor);
     }
 
+    public static DB.Plane ToPlane(this Plane value) => ToPlane(value, UnitConverter.ToHostUnits);
+    public static DB.Plane ToPlane(this Plane value, double factor)
+    {
+      return DB.Plane.CreateByOriginAndBasis(value.Origin.ToXYZ(factor), value.XAxis.ToXYZ(), value.YAxis.ToXYZ());
+    }
+
     public static DB.Transform ToTransform(this Transform value) => ToTransform(value, UnitConverter.ToHostUnits);
     public static DB.Transform ToTransform(this Transform value, double factor)
     {
@@ -133,10 +139,33 @@ namespace RhinoInside.Revit.Convert.Geometry
       return result;
     }
 
-    public static DB.Plane ToPlane(this Plane value) => ToPlane(value, UnitConverter.ToHostUnits);
-    public static DB.Plane ToPlane(this Plane value, double factor)
+    public static DB.BoundingBoxXYZ ToBoundingBoxXYZ(this BoundingBox value) => ToBoundingBoxXYZ(value, UnitConverter.ToHostUnits);
+    public static DB.BoundingBoxXYZ ToBoundingBoxXYZ(this BoundingBox value, double factor)
     {
-      return DB.Plane.CreateByOriginAndBasis(value.Origin.ToXYZ(factor), value.XAxis.ToXYZ(), value.YAxis.ToXYZ());
+      return new DB.BoundingBoxXYZ
+      {
+        Min = value.Min.ToXYZ(factor),
+        Max = value.Min.ToXYZ(factor),
+        Enabled = value.IsValid
+      };
+    }
+
+    public static DB.BoundingBoxXYZ ToBoundingBoxXYZ(this Box value) => ToBoundingBoxXYZ(value, UnitConverter.ToHostUnits);
+    public static DB.BoundingBoxXYZ ToBoundingBoxXYZ(this Box value, double factor)
+    {
+      return new DB.BoundingBoxXYZ
+      {
+        Transform = Transform.PlaneToPlane(Plane.WorldXY, value.Plane).ToTransform(factor),
+        Min = new DB.XYZ(value.X.Min * factor, value.Y.Min * factor, value.Z.Min * factor),
+        Max = new DB.XYZ(value.X.Max * factor, value.Y.Max * factor, value.Z.Max * factor),
+        Enabled = value.IsValid
+      };
+    }
+
+    public static DB.Outline ToOutline(this BoundingBox value) => ToOutline(value, UnitConverter.ToHostUnits);
+    public static DB.Outline ToOutline(this BoundingBox value, double factor)
+    {
+      return new DB.Outline(value.Min.ToXYZ(factor), value.Max.ToXYZ(factor));
     }
     #endregion
 

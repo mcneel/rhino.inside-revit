@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "B";
 
     public FamilyGeometryByBrep()
-    : base("Family Form Geometry", "FamForm", string.Empty, "Revit", "Family")
+    : base("Component Family Form", "FamForm", string.Empty, "Revit", "Family")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

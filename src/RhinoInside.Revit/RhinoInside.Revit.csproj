@@ -228,6 +228,7 @@
     <Compile Include="External\DB\Extensions\Parameter.cs" />
     <Compile Include="External\DB\Extensions\ParameterFilterElement.cs" />
     <Compile Include="External\DB\Extensions\Surface.cs" />
+    <Compile Include="External\DB\Extensions\View.cs" />
     <Compile Include="External\DB\Extensions\XYZ.cs" />
     <Compile Include="External\DB\Extensions\Wall.cs" />
     <Compile Include="External\DB\ExternalFailures.cs" />
@@ -244,6 +245,8 @@
     <Compile Include="External\UI\Command.cs" />
     <Compile Include="External\UI\EventHandler.cs" />
     <Compile Include="External\UI\Extensions\UIApplication.cs" />
+    <Compile Include="External\UI\Extensions\UIDocument.cs" />
+    <Compile Include="External\UI\Extensions\UIView.cs" />
     <Compile Include="External\UI\Selection.cs" />
     <Compile Include="External\UI\TaskDialogIcons.cs" />
     <Compile Include="Extensions\RhinoCommon.cs" />

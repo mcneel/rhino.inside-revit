@@ -201,11 +201,7 @@ namespace RhinoInside.Revit
       return IsModelView(dBView);
     }
 
-    public override Autodesk.Revit.DB.Outline GetBoundingBox(View dBView)
-    {
-      var bbox = rhinoObject.Geometry.GetBoundingBox(false);
-      return new Autodesk.Revit.DB.Outline(bbox.Min.ToXYZ(), bbox.Max.ToXYZ());
-    }
+    public override Autodesk.Revit.DB.Outline GetBoundingBox(View dBView) => rhinoObject.Geometry.GetBoundingBox(false).ToOutline();
 
     class ObjectPrimitive : Primitive
     {

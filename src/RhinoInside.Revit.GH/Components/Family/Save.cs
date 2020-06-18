@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "S";
 
     public FamilySave()
-    : base("Save Family", "Save", "Saves the Family to a given file path.", "Revit", "Family")
+    : base("Save Component Family", "Save", "Saves the Family to a given file path.", "Revit", "Family")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

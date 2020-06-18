@@ -293,6 +293,7 @@
     <Compile Include="Components\Family\Element\Visibility\Deconstruct.cs" />
     <Compile Include="Components\Family\Geometry\ByBrep.cs" />
     <Compile Include="Components\Family\Geometry\ByCurve.cs" />
+    <Compile Include="Components\Family\Identity.cs" />
     <Compile Include="Components\Family\QueryFamilies.cs" />
     <Compile Include="Components\Family\Types.cs" />
     <Compile Include="Components\Family\Load.cs" />
@@ -312,6 +313,7 @@
     <Compile Include="Extensions\System.Collections.Generic.cs" />
     <Compile Include="Extensions\System.cs" />
     <Compile Include="Extensions\WinForms.cs" />
+    <Compile Include="Parameters\Param.cs" />
     <Compile Include="Parameters\DataObject.cs" />
     <Compile Include="Parameters\Category.cs" />
     <Compile Include="Parameters\CategoryTypes.cs" />
@@ -359,7 +361,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Solid.cs" />
-    <Compile Include="Trigger.cs" />
     <Compile Include="Types\Category.cs" />
     <Compile Include="Types\Document.cs" />
     <Compile Include="Types\Element.cs" />
@@ -454,6 +455,8 @@
     <None Include="Resources\Components\AnalyzeStackedWallType.png" />
     <None Include="Resources\Components\DeconstructCompoundStructure.png" />
     <None Include="Resources\Components\DeconstructCompoundStructureLayer.png" />
+    <None Include="Resources\logo_24x24.png" />
+    <None Include="Resources\ObjectFamily-Unknown.png" />
     <None Include="Resources\Parameters\AnalyticalCategoriesPicker.png" />
     <None Include="Resources\Parameters\AnnotationCategoriesPicker.png" />
     <None Include="Resources\Parameters\BuiltInParameterByName.png" />

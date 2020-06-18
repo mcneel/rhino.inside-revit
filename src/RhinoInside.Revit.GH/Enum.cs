@@ -416,12 +416,15 @@ namespace RhinoInside.Revit.GH.Parameters
   using Grasshopper.Kernel.Extensions;
   using Kernel.Attributes;
 
-  public class Param_Enum<T> : GH_PersistentParam<T>, IGH_ObjectProxy
+  public class Param_Enum<T> : Grasshopper.Kernel.GH_PersistentParam<T>, IGH_ObjectProxy
     where T : Types.GH_Enumerate
   {
     protected Param_Enum(string name, string abbreviation, string description, string category, string subcategory) :
       base(name, abbreviation, description, category, subcategory)
     { }
+
+    static readonly Guid GenericDataParamComponentGuid = new Guid("{8EC86459-BF01-4409-BAEE-174D0D2B13D0}");
+    protected override Bitmap Icon => Grasshopper.Instances.ComponentServer.EmitObjectIcon(GenericDataParamComponentGuid);
 
     public Param_Enum() :
     base

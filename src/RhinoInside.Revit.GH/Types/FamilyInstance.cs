@@ -4,7 +4,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public class FamilyInstance : GraphicalElement
+  public class FamilyInstance : GeometricElement
   {
     public override string TypeDescription => "Represents a Revit Family Instance";
     protected override Type ScriptVariableType => typeof(DB.FamilyInstance);

@@ -863,6 +863,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap logo_24x24 {
+            get {
+                object obj = ResourceManager.GetObject("logo_24x24", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Material {
             get {
                 object obj = ResourceManager.GetObject("Material", resourceCulture);
@@ -896,6 +906,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap Mullion {
             get {
                 object obj = ResourceManager.GetObject("Mullion", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ObjectFamily_Unknown {
+            get {
+                object obj = ResourceManager.GetObject("ObjectFamily_Unknown", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

@@ -75,6 +75,19 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       return BoundingBox.Empty;
     }
 
+    public static BoundingBox ToRhino(DB.BoundingBoxXYZ bbox, out Transform transform)
+    {
+      if (bbox?.Enabled ?? false)
+      {
+        var box = new BoundingBox(AsPoint3d(bbox.Min), AsPoint3d(bbox.Max));
+        transform = ToRhino(bbox.Transform);
+        return box;
+      }
+
+      transform = Transform.Identity;
+      return BoundingBox.Empty;
+    }
+
     public static Plane ToRhino(DB.Plane plane)
     {
       return new Plane(AsPoint3d(plane.Origin), AsVector3d(plane.XVec), AsVector3d(plane.YVec));

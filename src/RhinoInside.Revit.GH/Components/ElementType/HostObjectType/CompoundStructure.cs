@@ -2,7 +2,7 @@ using System;
 using Grasshopper.Kernel;
 using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.ElementType.HostObjectType
+namespace RhinoInside.Revit.GH.Components
 {
   public class HostObjectTypeCompoundStructure : Component
   {
