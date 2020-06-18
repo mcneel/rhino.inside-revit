@@ -85,7 +85,7 @@ namespace RhinoInside.Revit.GH.Components
               (
                 !cutting,
                 referenceArray,
-                extrusion.PathLineCurve().Line.Direction.ToXYZ()
+                extrusion.PathLineCurve().Line.Direction.ToXYZ(UnitConverter.ToHostUnits)
               )
             );
             return;
