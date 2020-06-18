@@ -271,7 +271,7 @@ namespace RhinoInside.Revit.GH.Components
           return !templateParams[i].Relevance.HasFlag(ParamVisibility.Mandatory);
       }
 
-      return default;
+      return true;
     }
 
     public virtual bool DestroyParameter(GH_ParameterSide side, int index) => CanRemoveParameter(side, index);
