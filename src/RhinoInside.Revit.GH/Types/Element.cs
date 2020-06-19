@@ -55,6 +55,7 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(DB.Grid),              (element)=> new Grid          (element as DB.Grid)              },
       { typeof(DB.Group),             (element)=> new Group         (element as DB.Group)             },
       { typeof(DB.HostObject),        (element)=> new HostObject    (element as DB.HostObject)        },
+      { typeof(DB.CurtainGridLine),   (element)=> new CurtainGridLine(element as DB.CurtainGridLine)  },
       { typeof(DB.FamilyInstance),    (element)=> new FamilyInstance(element as DB.FamilyInstance)    },
       { typeof(DB.Panel),             (element)=> new Panel         (element as DB.Panel)             },
       { typeof(DB.Mullion),           (element)=> new Mullion       (element as DB.Mullion)           },
