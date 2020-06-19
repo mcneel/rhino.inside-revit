@@ -178,6 +178,76 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <returns>Returns a scaled duplicate of the input <paramref name="value"/> in other units.</returns>
     public static G InOtherUnits<G>(this G value, double factor) where G : GeometryBase
     { value = (G) value.DuplicateShallow(); if(factor != 1.0) Scale(value, factor); return value; }
+
+    static double InOtherUnits(double value, DB.ParameterType type, UnitSystem from, UnitSystem to)
+    {
+      switch (type)
+      {
+        #region Length
+
+        case DB.ParameterType.Length:
+        case DB.ParameterType.ForceLengthPerAngle:
+        case DB.ParameterType.LinearForceLengthPerAngle:
+        case DB.ParameterType.ReinforcementLength:
+
+        case DB.ParameterType.AreaForcePerLength:
+        case DB.ParameterType.ReinforcementAreaPerUnitLength:
+
+          return value * RhinoMath.UnitScale(from, to);
+
+        case DB.ParameterType.ForcePerLength:
+        case DB.ParameterType.LinearForcePerLength:
+        case DB.ParameterType.MassPerUnitLength:
+        case DB.ParameterType.WeightPerUnitLength:
+        case DB.ParameterType.PipeMassPerUnitLength:
+
+          return value / RhinoMath.UnitScale(from, to);
+
+        #endregion
+
+        #region Area
+
+        case DB.ParameterType.Area:
+        case DB.ParameterType.AreaForce:
+        case DB.ParameterType.HVACAreaDividedByCoolingLoad:
+        case DB.ParameterType.HVACAreaDividedByHeatingLoad:
+        case DB.ParameterType.SurfaceArea:
+        case DB.ParameterType.ReinforcementArea:
+        case DB.ParameterType.SectionArea:
+
+          return value * Math.Pow(RhinoMath.UnitScale(from, to), 2.0);
+
+        case DB.ParameterType.HVACCoolingLoadDividedByArea:
+        case DB.ParameterType.HVACHeatingLoadDividedByArea:
+        case DB.ParameterType.MassPerUnitArea:
+
+          return value / Math.Pow(RhinoMath.UnitScale(from, to), 2.0);
+
+        #endregion
+
+        #region Volume
+
+        case DB.ParameterType.Volume:
+        case DB.ParameterType.PipingVolume:
+        case DB.ParameterType.ReinforcementVolume:
+
+          return value * Math.Pow(RhinoMath.UnitScale(from, to), 3.0);
+
+        case DB.ParameterType.HVACCoolingLoadDividedByVolume:
+        case DB.ParameterType.HVACHeatingLoadDividedByVolume:
+        case DB.ParameterType.HVACAirflowDividedByVolume:
+
+          return value * Math.Pow(RhinoMath.UnitScale(from, to), 3.0);
+
+        #endregion
+
+        default:
+          Debug.WriteLine($"{nameof(InOtherUnits)} do not implement conversion for {type}");
+          break;
+      }
+
+      return value;
+    }
     #endregion
 
     #region InRhinoUnits
@@ -230,35 +300,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       if (rhinoDoc is null)
         return double.NaN;
 
-      switch (type)
-      {
-        case DB.ParameterType.Length:
-          return value * RhinoMath.UnitScale(UnitSystem.Feet, rhinoDoc.ModelUnitSystem);
-
-        //value = DB.UnitUtils.ConvertFromInternalUnits(value, DB.DisplayUnitType.DUT_MILLIMETERS);
-        //value *= Math.Pow(RhinoMath.UnitScale(UnitSystem.Millimeters, rhinoDoc.ModelUnitSystem), 1.0);
-        //return value;
-
-        case DB.ParameterType.Area:
-          return value * Math.Pow(RhinoMath.UnitScale(UnitSystem.Feet, rhinoDoc.ModelUnitSystem), 2.0);
-
-        //value = DB.UnitUtils.ConvertFromInternalUnits(value, DB.DisplayUnitType.DUT_SQUARE_MILLIMETERS);
-        //value *= Math.Pow(RhinoMath.UnitScale(UnitSystem.Millimeters, rhinoDoc.ModelUnitSystem), 2.0);
-        //return value;
-
-        case DB.ParameterType.Volume:
-          return value * Math.Pow(RhinoMath.UnitScale(UnitSystem.Feet, rhinoDoc.ModelUnitSystem), 3.0);
-
-        //value = DB.UnitUtils.ConvertFromInternalUnits(value, DB.DisplayUnitType.DUT_CUBIC_MILLIMETERS);
-        //value *= Math.Pow(RhinoMath.UnitScale(UnitSystem.Millimeters, rhinoDoc.ModelUnitSystem), 3.0);
-        //return value;
-
-        default:
-          Debug.WriteLine(false, $"{nameof(InRhinoUnits)} do not implement conversion for {type}");
-          break;
-      }
-
-      return value;
+      return InOtherUnits(value, type, UnitSystem.Feet, rhinoDoc.ModelUnitSystem);
     }
     #endregion
 
@@ -312,32 +354,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       if (rhinoDoc is null)
         return double.NaN;
 
-      switch (type)
-      {
-        case DB.ParameterType.Length:
-          return value * RhinoMath.UnitScale(rhinoDoc.ModelUnitSystem, UnitSystem.Feet);
-
-        //value *= Math.Pow(RhinoMath.UnitScale(rhinoDoc.ModelUnitSystem, UnitSystem.Millimeters), 1.0);
-        //return DB.UnitUtils.ConvertToInternalUnits(value, DB.DisplayUnitType.DUT_MILLIMETERS);
-
-        case DB.ParameterType.Area:
-          return value * Math.Pow(RhinoMath.UnitScale(rhinoDoc.ModelUnitSystem, UnitSystem.Feet), 1.0);
-
-        //value *= Math.Pow(RhinoMath.UnitScale(rhinoDoc.ModelUnitSystem, UnitSystem.Millimeters), 2.0);
-        //return DB.UnitUtils.ConvertToInternalUnits(value, DB.DisplayUnitType.DUT_SQUARE_MILLIMETERS);
-
-        case DB.ParameterType.Volume:
-          return value * Math.Pow(RhinoMath.UnitScale(rhinoDoc.ModelUnitSystem, UnitSystem.Feet), 1.0);
-
-        //value *= Math.Pow(RhinoMath.UnitScale(rhinoDoc.ModelUnitSystem, UnitSystem.Millimeters), 3.0);
-        //return DB.UnitUtils.ConvertToInternalUnits(value, DB.DisplayUnitType.DUT_CUBIC_MILLIMETERS);
-
-        default:
-          Debug.WriteLine(false, $"{nameof(InHostUnits)} do not implement conversion for {type}");
-          break;
-      }
-
-      return value;
+      return InOtherUnits(value, type, rhinoDoc.ModelUnitSystem, UnitSystem.Feet);
     }
     #endregion
   }
