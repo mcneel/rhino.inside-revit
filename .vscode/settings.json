@@ -8,4 +8,5 @@
     "python.linting.mypyEnabled": false,
     "python.jediEnabled": true,
     "python.formatting.provider": "black",
+    "python.languageServer": "Jedi",
 }
