@@ -104,9 +104,13 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
     #region Curve
     public static LineCurve ToRhino(DB.Line line)
     {
-      var l = new Line(AsPoint3d(line.GetEndPoint(0)), AsPoint3d(line.GetEndPoint(1)));
       return line.IsBound ?
-        new LineCurve(l, line.GetEndParameter(0), line.GetEndParameter(1)) :
+        new LineCurve
+        (
+          new Line(AsPoint3d(line.GetEndPoint(0)), AsPoint3d(line.GetEndPoint(1))),
+          line.GetEndParameter(0),
+          line.GetEndParameter(1)
+        ) :
         null;
     }
 
