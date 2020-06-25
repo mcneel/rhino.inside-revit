@@ -96,6 +96,19 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Line)))
+      {
+        var curve = Curve;
+        if (curve?.IsValid != true)
+          return false;
+
+        if (!curve.TryGetLine(out var line, Revit.VertexTolerance * Revit.ModelUnits))
+          return false;
+
+        target = (Q) (object) new GH_Line(line);
+        return true;
+      }
+
       if (typeof(Q).IsAssignableFrom(typeof(GH_Vector)))
       {
         var orientation = Orientation;
