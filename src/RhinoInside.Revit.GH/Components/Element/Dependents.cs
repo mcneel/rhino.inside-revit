@@ -42,7 +42,7 @@ namespace RhinoInside.Revit.GH.Components
 
       var elements = element.GetDependentElements(filter);
 
-      DA.SetDataList("Elements", elements.Skip(1).Select(x => Types.Element.FromElementId(element.Document, x)));
+      DA.SetDataList("Elements", elements.Where(x => x != element.Id).Select(x => Types.Element.FromElementId(element.Document, x)));
     }
   }
 }
