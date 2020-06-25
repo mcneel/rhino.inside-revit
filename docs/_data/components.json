@@ -104,7 +104,7 @@
     "icontag": null, 
     "panel": "Revit Primitives", 
     "tab": "Params", 
-    "title": "Element Type", 
+    "title": "Type", 
     "uuid": "97dd546d-65c3-4d00-a609-3f5fbda67142"
   }, 
   {
@@ -407,10 +407,10 @@
   {
     "desc": "Picker for level of detail", 
     "iconsrc": null, 
-    "icontag": "L", 
+    "icontag": "D", 
     "panel": "Input", 
     "tab": "Revit", 
-    "title": "Level of Detail", 
+    "title": "Detail Level", 
     "uuid": "b078e48a-c56f-4d51-a886-04e537445019"
   }, 
   {
@@ -469,12 +469,21 @@
   }, 
   {
     "desc": "Gets a list of valid parameters for the specified category that can be used in a table view", 
-    "iconsrc": null, 
-    "icontag": "C", 
+    "iconsrc": "/static/images/GH/CategoryParameters.png", 
+    "icontag": null, 
     "panel": "Category", 
     "tab": "Revit", 
     "title": "Category Parameters", 
     "uuid": "189f0a94-d077-4b96-8a92-6d5334ef7157"
+  }, 
+  {
+    "desc": "Get document categories list", 
+    "iconsrc": null, 
+    "icontag": "Q", 
+    "panel": "Category", 
+    "tab": "Revit", 
+    "title": "Query Categories", 
+    "uuid": "d150e40e-0970-4683-b517-038f8ba8b0d8"
   }, 
   {
     "desc": "Returns a list of all the subcategories of Category", 
@@ -495,76 +504,13 @@
     "uuid": "ee033516-c1dc-4c72-8fcd-f85f38a0f267"
   }, 
   {
-    "desc": "Get document categories list", 
-    "iconsrc": "/static/images/GH/DocumentCategories.png", 
-    "icontag": null, 
-    "panel": "Query", 
-    "tab": "Revit", 
-    "title": "Categories", 
-    "uuid": "d150e40e-0970-4683-b517-038f8ba8b0d8"
-  }, 
-  {
-    "desc": "Gets the list of active documents", 
+    "desc": "Gets the list of all active documents", 
     "iconsrc": null, 
-    "icontag": "D", 
-    "panel": "Query", 
+    "icontag": "A", 
+    "panel": "Document", 
     "tab": "Revit", 
-    "title": "Documents", 
+    "title": "All Documents", 
     "uuid": "5b935ca4-e96d-4e8f-a36e-31708017634b"
-  }, 
-  {
-    "desc": "Get document model elements list", 
-    "iconsrc": "/static/images/GH/DocumentElements.png", 
-    "icontag": null, 
-    "panel": "Query", 
-    "tab": "Revit", 
-    "title": "Elements", 
-    "uuid": "0f7da57e-6c05-4dd0-aabf-69e42df38859"
-  }, 
-  {
-    "desc": "Get document element types list", 
-    "iconsrc": "/static/images/GH/DocumentElementTypes.png", 
-    "icontag": null, 
-    "panel": "Query", 
-    "tab": "Revit", 
-    "title": "Types", 
-    "uuid": "7b00f940-4c6e-4f3f-ab81-c3eed430de96"
-  }, 
-  {
-    "desc": "Get document families list", 
-    "iconsrc": null, 
-    "icontag": "F", 
-    "panel": "Query", 
-    "tab": "Revit", 
-    "title": "Families", 
-    "uuid": "b6c377ba-bc46-495c-8250-f09db0219c91"
-  }, 
-  {
-    "desc": "Get document floor types list", 
-    "iconsrc": null, 
-    "icontag": "F", 
-    "panel": "Query", 
-    "tab": "Revit", 
-    "title": "Floor Types", 
-    "uuid": "e3173eb7-2d53-4f81-beb1-90d0f47343d4"
-  }, 
-  {
-    "desc": "Get document foundation slab types list", 
-    "iconsrc": null, 
-    "icontag": "F", 
-    "panel": "Query", 
-    "tab": "Revit", 
-    "title": "Foundation Slab Types", 
-    "uuid": "8472d50d-7f43-4a2c-828b-8e1c35313eff"
-  }, 
-  {
-    "desc": "Get document group types list", 
-    "iconsrc": null, 
-    "icontag": "G", 
-    "panel": "Query", 
-    "tab": "Revit", 
-    "title": "Group Types", 
-    "uuid": "97e9c6bb-8442-4f77-bca1-6be8aafbdc96"
   }, 
   {
     "desc": "Gets Revit documents that are linked into given document", 
@@ -574,15 +520,6 @@
     "tab": "Revit", 
     "title": "Document Links", 
     "uuid": "ebccfdd8-9f3b-44f4-a209-72d06c8082a5"
-  }, 
-  {
-    "desc": "Get document materials list", 
-    "iconsrc": null, 
-    "icontag": "M", 
-    "panel": "Query", 
-    "tab": "Revit", 
-    "title": "Materials", 
-    "uuid": "94af13c1-ce70-46b5-9103-24b46e2f7375"
   }, 
   {
     "desc": "Query document identity information", 
@@ -612,15 +549,6 @@
     "uuid": "f7d56db0-f1c1-45bb-aa07-196039fff862"
   }, 
   {
-    "desc": "Get all document levels", 
-    "iconsrc": "/static/images/GH/DocumentLevels.png", 
-    "icontag": null, 
-    "panel": "Query", 
-    "tab": "Revit", 
-    "title": "Levels", 
-    "uuid": "87715caf-92a9-4b14-99e5-f8ccb2cc19bd"
-  }, 
-  {
     "desc": "Saves a document to a given file path", 
     "iconsrc": null, 
     "icontag": "S", 
@@ -628,60 +556,6 @@
     "tab": "Revit", 
     "title": "Save Document", 
     "uuid": "fbb2e4a2-cc2a-470e-b7e8-cb3320166cc5"
-  }, 
-  {
-    "desc": "Get all document views", 
-    "iconsrc": null, 
-    "icontag": "V", 
-    "panel": "Query", 
-    "tab": "Revit", 
-    "title": "Views", 
-    "uuid": "df691659-b75b-4455-af5f-8a5de485fa05"
-  }, 
-  {
-    "desc": "Get document view types list", 
-    "iconsrc": null, 
-    "icontag": "V", 
-    "panel": "Query", 
-    "tab": "Revit", 
-    "title": "View Types", 
-    "uuid": "51e306bd-4736-4b7d-b2ff-b23e0717eebb"
-  }, 
-  {
-    "desc": "Get all document walls", 
-    "iconsrc": null, 
-    "icontag": "W", 
-    "panel": "Query", 
-    "tab": "Revit", 
-    "title": "Walls", 
-    "uuid": "118f5744-292f-4bec-9213-8073219d8563"
-  }, 
-  {
-    "desc": "Get document basic wall types list", 
-    "iconsrc": null, 
-    "icontag": "B", 
-    "panel": "Query", 
-    "tab": "Revit", 
-    "title": "Basic Wall Types", 
-    "uuid": "e37bb2db-e096-45a1-9771-94ce7dbccdb8"
-  }, 
-  {
-    "desc": "Get document curatin wall types list", 
-    "iconsrc": null, 
-    "icontag": "C", 
-    "panel": "Query", 
-    "tab": "Revit", 
-    "title": "Curtain Wall Types", 
-    "uuid": "e49700b5-d16a-4d18-9ea7-c03ad64cf03d"
-  }, 
-  {
-    "desc": "Get document curatin stacked types list", 
-    "iconsrc": null, 
-    "icontag": "S", 
-    "panel": "Query", 
-    "tab": "Revit", 
-    "title": "Stacked Wall Types", 
-    "uuid": "82c96794-cd04-444e-a70b-50d2e3f2725d"
   }, 
   {
     "desc": "Filter used to exclude a set of elements", 
@@ -887,7 +761,7 @@
     "icontag": "D", 
     "panel": "Type", 
     "tab": "Revit", 
-    "title": "Default ElementType", 
+    "title": "Default Type", 
     "uuid": "d67b341f-46e4-4532-980e-42ce035470cf"
   }, 
   {
@@ -896,7 +770,7 @@
     "icontag": "D", 
     "panel": "Type", 
     "tab": "Revit", 
-    "title": "Duplicate ElementType", 
+    "title": "Duplicate Type", 
     "uuid": "5ed7e612-e5c6-4f0e-aa69-814cf2478f7e"
   }, 
   {
@@ -905,7 +779,7 @@
     "icontag": "E", 
     "panel": "Type", 
     "tab": "Revit", 
-    "title": "Export ElementType Image", 
+    "title": "Export Type Image", 
     "uuid": "3a5f6af7-5449-406f-b47e-8a55800d0bee"
   }, 
   {
@@ -918,93 +792,129 @@
     "uuid": "39e42448-1c1c-4140-bc37-7399abf82117"
   }, 
   {
+    "desc": "Get document group types list", 
+    "iconsrc": null, 
+    "icontag": "Q", 
+    "panel": "Model", 
+    "tab": "Revit", 
+    "title": "Query Group Types", 
+    "uuid": "97e9c6bb-8442-4f77-bca1-6be8aafbdc96"
+  }, 
+  {
+    "desc": "Get Host object type compound structure", 
+    "iconsrc": null, 
+    "icontag": "H", 
+    "panel": "Host", 
+    "tab": "Revit", 
+    "title": "Host Type Compound Structure", 
+    "uuid": "024619ef-58ff-47c1-8833-96ba2f2b677b"
+  }, 
+  {
+    "desc": "Deconstructs given compound structure into its properties", 
+    "iconsrc": "/static/images/GH/DeconstructCompoundStructure.png", 
+    "icontag": null, 
+    "panel": "Host", 
+    "tab": "Revit", 
+    "title": "Deconstruct Compound Structure", 
+    "uuid": "d0853b76-49fa-4ba8-869c-293a9c30ffe1"
+  }, 
+  {
+    "desc": "Deconstructs given compound structure layer into its properties", 
+    "iconsrc": "/static/images/GH/DeconstructCompoundStructureLayer.png", 
+    "icontag": null, 
+    "panel": "Host", 
+    "tab": "Revit", 
+    "title": "Deconstruct Compound Structure Layer", 
+    "uuid": "bc64525a-10b6-46db-a134-cf803738b1a0"
+  }, 
+  {
     "desc": "Query type identity information", 
     "iconsrc": null, 
-    "icontag": "E", 
+    "icontag": "T", 
     "panel": "Type", 
     "tab": "Revit", 
-    "title": "ElementType Identity", 
+    "title": "Type Identity", 
     "uuid": "7dea1ba3-d9bc-4e94-9e1c-0e527187c9dc"
   }, 
   {
     "desc": "Obtains all elements of the specified Type", 
     "iconsrc": null, 
-    "icontag": "E", 
+    "icontag": "T", 
     "panel": "Type", 
     "tab": "Revit", 
-    "title": "ElementType Instances", 
+    "title": "Type Instances", 
     "uuid": "9958995f-ccd4-48de-b3b3-ae769f04f4dd"
+  }, 
+  {
+    "desc": "Get document element types list", 
+    "iconsrc": null, 
+    "icontag": "Q", 
+    "panel": "Type", 
+    "tab": "Revit", 
+    "title": "Query Types", 
+    "uuid": "7b00f940-4c6e-4f3f-ab81-c3eed430de96"
   }, 
   {
     "desc": "Obtains a set of types that are similar to Type", 
     "iconsrc": null, 
-    "icontag": "E", 
+    "icontag": "S", 
     "panel": "Type", 
     "tab": "Revit", 
-    "title": "ElementType Similar", 
+    "title": "Similar Types", 
     "uuid": "ba9c72c5-ec88-450b-b736-be6d827fa2f3"
   }, 
   {
-    "desc": "Analyze given Basic Wall type", 
+    "desc": "Get document view types list", 
     "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Analyze", 
+    "icontag": "Q", 
+    "panel": "View", 
+    "tab": "Revit", 
+    "title": "Query View Types", 
+    "uuid": "51e306bd-4736-4b7d-b2ff-b23e0717eebb"
+  }, 
+  {
+    "desc": "Analyze given Basic Wall type", 
+    "iconsrc": "/static/images/GH/AnalyzeBasicWallType.png", 
+    "icontag": null, 
+    "panel": "Wall", 
     "tab": "Revit", 
     "title": "Analyze Basic Wall Type", 
     "uuid": "00a650ed-4cc7-4ad3-bf38-491507315ac5"
   }, 
   {
-    "desc": "Deconstructs given compound structure into its properties", 
-    "iconsrc": null, 
-    "icontag": "C", 
-    "panel": "Analyze", 
-    "tab": "Revit", 
-    "title": "Compound Structure (Deconstruct)", 
-    "uuid": "d0853b76-49fa-4ba8-869c-293a9c30ffe1"
-  }, 
-  {
-    "desc": "Deconstructs given compound structure layer into its properties", 
-    "iconsrc": null, 
-    "icontag": "C", 
-    "panel": "Analyze", 
-    "tab": "Revit", 
-    "title": "Compound Structure Layer (Deconstruct)", 
-    "uuid": "bc64525a-10b6-46db-a134-cf803738b1a0"
-  }, 
-  {
     "desc": "Analyze given Curtain Wall Type", 
-    "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Analyze", 
+    "iconsrc": "/static/images/GH/AnalyzeCurtainWallType.png", 
+    "icontag": null, 
+    "panel": "Wall", 
     "tab": "Revit", 
     "title": "Analyze Curtain Wall Type", 
     "uuid": "d0874f93-0946-42b1-95a9-92c654522bc8"
   }, 
   {
     "desc": "Analyze given Curtain System Type", 
-    "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Analyze", 
+    "iconsrc": "/static/images/GH/AnalyzeCurtainSystemType.png", 
+    "icontag": null, 
+    "panel": "Wall", 
     "tab": "Revit", 
     "title": "Analyze Curtain System Type", 
     "uuid": "83d08b81-b536-4a14-9e2d-f75e9652a824"
   }, 
   {
-    "desc": "Analyze given curtain grid mullion type", 
-    "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Analyze", 
+    "desc": "Analyze given mullion type", 
+    "iconsrc": "/static/images/GH/AnalyzeCurtainGridMullionType.png", 
+    "icontag": null, 
+    "panel": "Wall", 
     "tab": "Revit", 
-    "title": "Analyze Curtain Grid Mullion Type", 
+    "title": "Analyze Mullion Type", 
     "uuid": "66a9f189-d2bd-4e47-8c97-a469e3dd861b"
   }, 
   {
-    "desc": "Analyze given curtain grid panel type", 
-    "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Analyze", 
+    "desc": "Analyze given panel type", 
+    "iconsrc": "/static/images/GH/AnalyzeCurtainGridPanelType.png", 
+    "icontag": null, 
+    "panel": "Wall", 
     "tab": "Revit", 
-    "title": "Analyze Curtain Grid Panel Type", 
+    "title": "Analyze Panel Type", 
     "uuid": "6f11977f-7cf3-41f1-8a69-2f4cd7287def"
   }, 
   {
@@ -1059,7 +969,7 @@
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Delete Element", 
-    "uuid": "213c1f14-a827-40e2-957e-ba079ecce700"
+    "uuid": "3ffc2cb2-48ff-4151-b5cb-511c964b487d"
   }, 
   {
     "desc": "Queries for all elements that, from a logical point of view, are the children of Element", 
@@ -1077,7 +987,16 @@
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Element Geometry", 
-    "uuid": "b7e6a82f-684f-4045-a634-a4aa9f7427a8"
+    "uuid": "b3bcbf5b-2034-414f-b9fb-97626ff37cbe"
+  }, 
+  {
+    "desc": "Get the geometry of the specified Graphical Element on a view", 
+    "iconsrc": null, 
+    "icontag": "G", 
+    "panel": "Element", 
+    "tab": "Revit", 
+    "title": "Graphical Element Geometry", 
+    "uuid": "8b85b1fb-a3df-4924-bc84-58d2b919e664"
   }, 
   {
     "desc": "Given its location, it reconstructs a Model Group into the active Revit document", 
@@ -1098,12 +1017,30 @@
     "uuid": "7c7d3739-7609-4f7f-bab5-1e3648508891"
   }, 
   {
+    "desc": "Get the boundary profile of the given host element", 
+    "iconsrc": null, 
+    "icontag": "H", 
+    "panel": "Host", 
+    "tab": "Revit", 
+    "title": "Host Boundary Profile", 
+    "uuid": "7ce0bd56-a2ac-4d49-a39b-7b34fe897265"
+  }, 
+  {
+    "desc": "Obtains the host of the specified element", 
+    "iconsrc": null, 
+    "icontag": "E", 
+    "panel": "Host", 
+    "tab": "Revit", 
+    "title": "Element Host", 
+    "uuid": "6723beb1-dd99-40be-8da9-13b3812d6b46"
+  }, 
+  {
     "desc": "Obtains a set of types that are owned by Family", 
     "iconsrc": null, 
     "icontag": "H", 
     "panel": "Host", 
     "tab": "Revit", 
-    "title": "HostObject Faces", 
+    "title": "Host Faces", 
     "uuid": "032ad3f7-9e55-44b6-be79-3dbf67d98f14"
   }, 
   {
@@ -1112,7 +1049,7 @@
     "icontag": "H", 
     "panel": "Host", 
     "tab": "Revit", 
-    "title": "HostObject Inserts", 
+    "title": "Host Inserts", 
     "uuid": "70ccf7a6-856c-4d24-a82b-bc1d4fc63078"
   }, 
   {
@@ -1123,6 +1060,15 @@
     "tab": "Revit", 
     "title": "Inspect Element", 
     "uuid": "fad33c4b-a7c3-479b-b309-8f5363b25599"
+  }, 
+  {
+    "desc": "Get all document levels", 
+    "iconsrc": "/static/images/GH/DocumentLevels.png", 
+    "icontag": null, 
+    "panel": "Model", 
+    "tab": "Revit", 
+    "title": "Query Levels", 
+    "uuid": "87715caf-92a9-4b14-99e5-f8ccb2cc19bd"
   }, 
   {
     "desc": "Query element used materials", 
@@ -1224,6 +1170,15 @@
     "uuid": "06e0cf55-b10c-433a-b6f7-aaf3885055db"
   }, 
   {
+    "desc": "Get document materials list", 
+    "iconsrc": null, 
+    "icontag": "Q", 
+    "panel": "Material", 
+    "tab": "Revit", 
+    "title": "Query Materials", 
+    "uuid": "94af13c1-ce70-46b5-9103-24b46e2f7375"
+  }, 
+  {
     "desc": "Gets the parameter value of a specified Revit Element", 
     "iconsrc": "/static/images/GH/ElementParameterGet.png", 
     "icontag": null, 
@@ -1240,6 +1195,15 @@
     "tab": "Revit", 
     "title": "Set Element Parameter", 
     "uuid": "8f1ee110-7fda-49e0-bed4-e8e0227bc021"
+  }, 
+  {
+    "desc": "Resets the parameter value of a specified Revit Element", 
+    "iconsrc": null, 
+    "icontag": "R", 
+    "panel": "Element", 
+    "tab": "Revit", 
+    "title": "Reset Element Parameter", 
+    "uuid": "2c374e6d-a547-45ac-b77d-04dd61317622"
   }, 
   {
     "desc": "Get the parameters of the specified Element", 
@@ -1261,9 +1225,9 @@
   }, 
   {
     "desc": "Analyze family instance space eg spatial elements surrounding the given instance", 
-    "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Analyze", 
+    "iconsrc": "/static/images/GH/AnalyzeInstanceSpace.png", 
+    "icontag": null, 
+    "panel": "Room & Area", 
     "tab": "Revit", 
     "title": "Analyze Instance Space", 
     "uuid": "6ac37380-d14f-46bf-835c-611db8c38e3b"
@@ -1281,7 +1245,7 @@
     "desc": "Given its Axis, it adds a Grid element to the active Revit document", 
     "iconsrc": "/static/images/GH/GridByCurve.png", 
     "icontag": null, 
-    "panel": "Build", 
+    "panel": "Model", 
     "tab": "Revit", 
     "title": "Add Grid", 
     "uuid": "cec2b3df-c6ba-414f-bece-e3daee2a3f2c"
@@ -1290,7 +1254,7 @@
     "desc": "Given its Elevation, it adds a Level to the active Revit document", 
     "iconsrc": "/static/images/GH/LevelByElevation.png", 
     "icontag": null, 
-    "panel": "Build", 
+    "panel": "Model", 
     "tab": "Revit", 
     "title": "Add Level", 
     "uuid": "c6dec111-eac6-4047-8618-28ee144d55c5"
@@ -1350,6 +1314,24 @@
     "uuid": "a95c7b73-6f70-46ca-85fc-a4402a3b6971"
   }, 
   {
+    "desc": "Purge unused elements from Revit document", 
+    "iconsrc": "/static/images/GH/ElementPurge.png", 
+    "icontag": null, 
+    "panel": "Element", 
+    "tab": "Revit", 
+    "title": "Purge Element", 
+    "uuid": "05539772-7205-4d58-8093-1715daf213af"
+  }, 
+  {
+    "desc": "Get document model elements list", 
+    "iconsrc": null, 
+    "icontag": "Q", 
+    "panel": "Element", 
+    "tab": "Revit", 
+    "title": "Query Elements", 
+    "uuid": "0f7da57e-6c05-4dd0-aabf-69e42df38859"
+  }, 
+  {
     "desc": "Given its outline curve, it adds a Roof element to the active Revit document", 
     "iconsrc": "/static/images/GH/RoofByOutline.png", 
     "icontag": null, 
@@ -1377,12 +1359,12 @@
     "uuid": "e8d8d05a-8703-4f75-b106-12b40ec9df7b"
   }, 
   {
-    "desc": "Gets the active document", 
+    "desc": "Gets the active graphical view", 
     "iconsrc": null, 
     "icontag": "A", 
     "panel": "View", 
     "tab": "Revit", 
-    "title": "Active View", 
+    "title": "Active Graphical View", 
     "uuid": "7ccf350c-80cc-42d0-85ba-78544fd59f4a"
   }, 
   {
@@ -1404,6 +1386,15 @@
     "uuid": "b0440885-4af3-4890-8e84-3bc2a8342b9f"
   }, 
   {
+    "desc": "Get all document views", 
+    "iconsrc": null, 
+    "icontag": "Q", 
+    "panel": "View", 
+    "tab": "Revit", 
+    "title": "Query Views", 
+    "uuid": "df691659-b75b-4455-af5f-8a5de485fa05"
+  }, 
+  {
     "desc": "Given a plane, it adds a 3D View to the active Revit document", 
     "iconsrc": null, 
     "icontag": "A", 
@@ -1414,9 +1405,9 @@
   }, 
   {
     "desc": "Analyze given Stacked Wall element", 
-    "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Analyze", 
+    "iconsrc": "/static/images/GH/AnalyzeStackedWall.png", 
+    "icontag": null, 
+    "panel": "Wall", 
     "tab": "Revit", 
     "title": "Analyze Stacked Wall", 
     "uuid": "df10b918-a30f-4609-ae77-14314e6cdbf1"
@@ -1425,106 +1416,115 @@
     "desc": "Given a curve, it adds a Wall element to the active Revit document", 
     "iconsrc": "/static/images/GH/WallByCurve.png", 
     "icontag": null, 
-    "panel": "Build", 
+    "panel": "Wall", 
     "tab": "Revit", 
     "title": "Add Wall", 
     "uuid": "37a8c46f-cb5b-49fd-a483-b03d1fe14a22"
   }, 
   {
     "desc": "Analyze given Wall element", 
-    "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Analyze", 
+    "iconsrc": "/static/images/GH/AnalyzeWall.png", 
+    "icontag": null, 
+    "panel": "Wall", 
     "tab": "Revit", 
     "title": "Analyze Wall", 
     "uuid": "1169ceb6-381c-4353-8ace-874938755694"
   }, 
   {
     "desc": "Analyze location curve of given wall instance", 
-    "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Analyze", 
+    "iconsrc": "/static/images/GH/AnalyzeWallLocationCurve.png", 
+    "icontag": null, 
+    "panel": "Wall", 
     "tab": "Revit", 
     "title": "Analyze Wall Location Curve", 
     "uuid": "4c5260c3-b15e-482b-8a1d-38cd868e3e72"
   }, 
   {
     "desc": "Get the vertical profile of the given wall", 
-    "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Analyze", 
+    "iconsrc": "/static/images/GH/AnalyzeWallProfile.png", 
+    "icontag": null, 
+    "panel": "Wall", 
     "tab": "Revit", 
     "title": "Analyze Wall Profile", 
     "uuid": "9d2e9d8d-e794-4202-b725-82e78317892f"
   }, 
   {
     "desc": "Analyze given Curtain Wall element", 
-    "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Analyze", 
+    "iconsrc": "/static/images/GH/AnalyzeCurtainWall.png", 
+    "icontag": null, 
+    "panel": "Wall", 
     "tab": "Revit", 
     "title": "Analyze Curtain Wall", 
     "uuid": "734b2dac-1cd2-4d51-b7bd-d3d377cf62de"
   }, 
   {
     "desc": "Analyze given Curtain System element", 
-    "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Analyze", 
+    "iconsrc": "/static/images/GH/AnalyzeCurtainSystem.png", 
+    "icontag": null, 
+    "panel": "Wall", 
     "tab": "Revit", 
     "title": "Analyze Curtain System", 
     "uuid": "16ddb8a7-045e-4fed-b48f-93f3a7ae461a"
   }, 
   {
     "desc": "Analyze given curtain grid cell", 
-    "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Analyze", 
+    "iconsrc": "/static/images/GH/AnalyzeCurtainGridCell.png", 
+    "icontag": null, 
+    "panel": "Wall", 
     "tab": "Revit", 
     "title": "Analyze Curtain Grid Cell", 
     "uuid": "fc7d5729-7d27-453a-a4a2-0e150c749083"
   }, 
   {
     "desc": "Analyze given curtain grid", 
-    "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Analyze", 
+    "iconsrc": "/static/images/GH/AnalyzeCurtainGrid.png", 
+    "icontag": null, 
+    "panel": "Wall", 
     "tab": "Revit", 
     "title": "Analyze Curtain Grid", 
     "uuid": "d7b5c58e-8edc-40c5-9bf8-078642090264"
   }, 
   {
     "desc": "Analyze given curtain grid line", 
-    "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Analyze", 
+    "iconsrc": "/static/images/GH/AnalyzeCurtainGridLine.png", 
+    "icontag": null, 
+    "panel": "Wall", 
     "tab": "Revit", 
     "title": "Analyze Curtain Grid Line", 
     "uuid": "face5e7d-174f-41da-853e-cdc4b094f57c"
   }, 
   {
-    "desc": "Analyze given curtain grid mullion", 
-    "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Analyze", 
+    "desc": "Analyze given mullion element", 
+    "iconsrc": "/static/images/GH/AnalyzeCurtainGridMullion.png", 
+    "icontag": null, 
+    "panel": "Wall", 
     "tab": "Revit", 
-    "title": "Analyze Curtain Grid Mullion", 
+    "title": "Analyze Mullion", 
     "uuid": "4eeca86b-551c-4ada-8fda-03b7326735ed"
   }, 
   {
-    "desc": "Analyze given curtain grid panel", 
-    "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Analyze", 
+    "desc": "Analyze given panel element", 
+    "iconsrc": "/static/images/GH/AnalyzeCurtainGridPanel.png", 
+    "icontag": null, 
+    "panel": "Wall", 
     "tab": "Revit", 
-    "title": "Analyze Curtain Grid Panel", 
+    "title": "Analyze Panel", 
     "uuid": "08507225-c8da-44a8-a282-c9b1af1c61f4"
+  }, 
+  {
+    "desc": "Get all document walls", 
+    "iconsrc": null, 
+    "icontag": "Q", 
+    "panel": "Wall", 
+    "tab": "Revit", 
+    "title": "Query Walls", 
+    "uuid": "118f5744-292f-4bec-9213-8073219d8563"
   }, 
   {
     "desc": "Given a list of curves, it adds a Form element to the active Revit document", 
     "iconsrc": "/static/images/GH/FormByCurves.png", 
     "icontag": null, 
-    "panel": "Family Element", 
+    "panel": "Family", 
     "tab": "Revit", 
     "title": "Add LoftForm", 
     "uuid": "42631b6e-505e-4091-981a-e7605ae5a1ff"
@@ -1533,7 +1533,7 @@
     "desc": "Given its Geometry, it adds a Form element to the active Revit document", 
     "iconsrc": "/static/images/GH/FormByGeometry.png", 
     "icontag": null, 
-    "panel": "Family Element", 
+    "panel": "Family", 
     "tab": "Revit", 
     "title": "Add Form", 
     "uuid": "d2fdf2a0-1e48-4075-814a-685d91a6cd94"
@@ -1542,7 +1542,7 @@
     "desc": "", 
     "iconsrc": null, 
     "icontag": "C", 
-    "panel": "Family Element", 
+    "panel": "Family", 
     "tab": "Revit", 
     "title": "Construct Visibility", 
     "uuid": "10ea29d4-16af-4060-89ce-f467f0069675"
@@ -1551,7 +1551,7 @@
     "desc": "", 
     "iconsrc": null, 
     "icontag": "D", 
-    "panel": "Family Element", 
+    "panel": "Family", 
     "tab": "Revit", 
     "title": "Deconstruct Visibility", 
     "uuid": "8065268e-1417-4c1b-8495-122e67721f4d"
@@ -1559,20 +1559,38 @@
   {
     "desc": "", 
     "iconsrc": null, 
-    "icontag": "F", 
+    "icontag": "C", 
     "panel": "Family", 
     "tab": "Revit", 
-    "title": "Family Form Geometry", 
+    "title": "Component Family Form", 
     "uuid": "8a51d5a1-f463-492b-ae5b-b4f7870d106b"
   }, 
   {
     "desc": "", 
     "iconsrc": null, 
+    "icontag": "C", 
+    "panel": "Family", 
+    "tab": "Revit", 
+    "title": "Component Family Curve", 
+    "uuid": "6fbb9200-d725-4a0d-9360-89acbe5b4d9f"
+  }, 
+  {
+    "desc": "Queries family identity information", 
+    "iconsrc": null, 
     "icontag": "F", 
     "panel": "Family", 
     "tab": "Revit", 
-    "title": "Family Curve Geomtry", 
-    "uuid": "6fbb9200-d725-4a0d-9360-89acbe5b4d9f"
+    "title": "Family Identity", 
+    "uuid": "86875ef4-ce53-40f8-b446-97b4c8e2d54e"
+  }, 
+  {
+    "desc": "Get document families list", 
+    "iconsrc": null, 
+    "icontag": "Q", 
+    "panel": "Family", 
+    "tab": "Revit", 
+    "title": "Query Families", 
+    "uuid": "b6c377ba-bc46-495c-8250-f09db0219c91"
   }, 
   {
     "desc": "Obtains a set of types that are owned by Family", 
@@ -1589,7 +1607,7 @@
     "icontag": "L", 
     "panel": "Family", 
     "tab": "Revit", 
-    "title": "Load Family", 
+    "title": "Load Component Family", 
     "uuid": "0e244846-95ae-4b0e-8218-cb24fd4d34d1"
   }, 
   {
@@ -1598,16 +1616,16 @@
     "icontag": "N", 
     "panel": "Family", 
     "tab": "Revit", 
-    "title": "New Family", 
+    "title": "New Component Family", 
     "uuid": "82523911-309f-4a66-a4b9-cf21e0ac250e"
   }, 
   {
     "desc": "", 
     "iconsrc": null, 
-    "icontag": "F", 
+    "icontag": "C", 
     "panel": "Family", 
     "tab": "Revit", 
-    "title": "Family Opening Geometry", 
+    "title": "Component Family Opening", 
     "uuid": "72fdc627-09c7-4d9f-8d7f-5f6812fb1873"
   }, 
   {
@@ -1616,30 +1634,30 @@
     "icontag": "S", 
     "panel": "Family", 
     "tab": "Revit", 
-    "title": "Save Family", 
+    "title": "Save Component Family", 
     "uuid": "c2b9b045-8fd2-4124-9294-d9ba809b44b1"
   }, 
   {
     "desc": "", 
     "iconsrc": null, 
-    "icontag": "F", 
+    "icontag": "C", 
     "panel": "Family", 
     "tab": "Revit", 
-    "title": "Family Void Geometry", 
+    "title": "Component Family Void", 
     "uuid": "f0887ad5-8acb-4806-bb12-7596bcedffed"
   }, 
   {
-    "desc": "Decompose a parameter definition", 
-    "iconsrc": "/static/images/GH/ParameterKeyDecompose.png", 
+    "desc": "Given its Name, it creates a Shared Parameter definition to the active Revit document", 
+    "iconsrc": "/static/images/GH/DefineSharedParameter.png", 
     "icontag": null, 
     "panel": "Parameter", 
     "tab": "Revit", 
-    "title": "ParameterKey Identity", 
-    "uuid": "a80f4919-2387-4c78-be2b-2f35b2e60298"
+    "title": "Define Shared Parameter", 
+    "uuid": "84ab6f3c-bb4b-48e4-9175-b7f40791bb7f"
   }, 
   {
     "desc": "Decompose a parameter value", 
-    "iconsrc": "/static/images/GH/ParameterValueDecompose.png", 
+    "iconsrc": "/static/images/GH/DeconstructParameterValue.png", 
     "icontag": null, 
     "panel": "Parameter", 
     "tab": "Revit", 
@@ -1647,12 +1665,12 @@
     "uuid": "3bde5890-fb80-4af2-b9ac-373661756bda"
   }, 
   {
-    "desc": "Given its Name, it adds a Shared Parameter definition to the active Revit document", 
-    "iconsrc": null, 
-    "icontag": "A", 
+    "desc": "Decompose a parameter definition", 
+    "iconsrc": "/static/images/GH/ParameterKeyIdentity.png", 
+    "icontag": null, 
     "panel": "Parameter", 
     "tab": "Revit", 
-    "title": "Add Shared Parameter", 
-    "uuid": "84ab6f3c-bb4b-48e4-9175-b7f40791bb7f"
+    "title": "ParameterKey Identity", 
+    "uuid": "a80f4919-2387-4c78-be2b-2f35b2e60298"
   }
 ]
