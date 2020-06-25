@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Architecture;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
@@ -60,6 +61,60 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return default;
     }
 #endif
+
+    static ElementFilter CreateElementClassFilter(Type type)
+    {
+      if (type == typeof(Area))
+        return new AreaFilter();
+
+      if (type == typeof(AreaTag))
+        return new AreaTagFilter();
+
+      if (type == typeof(Room))
+        return new RoomFilter();
+
+      if (type == typeof(RoomTag))
+        return new RoomTagFilter();
+
+      if (type.IsSubclassOf(typeof(CurveElement)))
+        type = typeof(CurveElement);
+
+      return new ElementClassFilter(type);
+    }
+
+    public static T[] GetDependents<T>(this Element element) where T : Element
+    {
+      if (typeof(T) == typeof(Element))
+      {
+        var ids = element.GetDependentElements(default);
+        return ids.Select(x => element.Document.GetElement(x)).Where(x => element.Id != element.Id).OfType<T>().ToArray();
+      }
+      else
+      {
+        using (var filter = CreateElementClassFilter(typeof(T)))
+        {
+          var ids = element.GetDependentElements(filter);
+          return ids.Select(x => element.Document.GetElement(x)).Where(x => element.Id != element.Id).OfType<T>().ToArray();
+        }
+      }
+    }
+
+    public static T GetFirstDependent<T>(this Element element) where T : Element
+    {
+      if (typeof(T) == typeof(Element))
+      {
+        var ids = element.GetDependentElements(default);
+        return ids.Select(x => element.Document.GetElement(x)).Where(x => element.Id != element.Id).OfType<T>().FirstOrDefault() as T;
+      }
+      else
+      {
+        using (var filter = CreateElementClassFilter(typeof(T)))
+        {
+          var ids = element.GetDependentElements(filter);
+          return ids.Select(x => element.Document.GetElement(x)).Where(x => element.Id != element.Id).OfType<T>().FirstOrDefault() as T;
+        }
+      }
+    }
 
     #region Parameter
     public static IEnumerable<Parameter> GetParameters(this Element element, ParameterClass set)
@@ -202,6 +257,70 @@ namespace RhinoInside.Revit.External.DB.Extensions
         }
     }
 
+    public static T GetParameterValue<T>(this Element element, BuiltInParameter paramId)
+    {
+      using (var param = element.get_Parameter(paramId))
+      {
+        if (param is null)
+          throw new System.InvalidOperationException();
+
+        if (typeof(T) == typeof(bool))
+        {
+          if (param.StorageType != StorageType.Integer || param.Definition.ParameterType != ParameterType.YesNo)
+            throw new System.InvalidCastException();
+
+          return (T) (object) (param.AsInteger() != 0);
+        }
+        else if (typeof(T) == typeof(int))
+        {
+          if (param.StorageType != StorageType.Integer || param.Definition.ParameterType != ParameterType.Integer)
+            throw new System.InvalidCastException();
+
+          return (T) (object) (param.AsInteger() != 0);
+        }
+        else if (typeof(T).IsSubclassOf(typeof(Enum)))
+        {
+          if (param.StorageType != StorageType.Integer || param.Definition.ParameterType != ParameterType.Invalid)
+            throw new System.InvalidCastException();
+
+          return (T) (object) (param.AsInteger() != 0);
+        }
+        else if (typeof(T) == typeof(double))
+        {
+          if (param.StorageType != StorageType.Double)
+            throw new System.InvalidCastException();
+
+          return (T) (object) param.AsDouble();
+        }
+        else if (typeof(T) == typeof(string))
+        {
+          if (param.StorageType != StorageType.String)
+            throw new System.InvalidCastException();
+
+          return (T) (object) param.AsString();
+        }
+        else if (typeof(T).IsSubclassOf(typeof(Element)))
+        {
+          if (param.StorageType != StorageType.ElementId)
+            throw new System.InvalidCastException();
+
+          var id = param.AsElementId();
+          if (id.IsCategoryId(element.Document))
+            throw new System.InvalidCastException();
+
+          return (T) (object) element.Document.GetElement(param.AsElementId());
+        }
+        else if (typeof(T) == typeof(Category))
+        {
+          if (param.StorageType != StorageType.ElementId)
+            throw new System.InvalidCastException();
+
+          return (T) (object) element.Document.GetCategory(param.AsElementId());
+        }
+      }
+
+      return default;
+    }
     #endregion
   }
 }
