@@ -366,6 +366,7 @@
     <Compile Include="Types\Category.cs" />
     <Compile Include="Types\Ceiling.cs" />
     <Compile Include="Types\CurtainSystem.cs" />
+    <Compile Include="Types\CurveElement.cs" />
     <Compile Include="Types\Dimension.cs" />
     <Compile Include="Types\Document.cs" />
     <Compile Include="Types\Element.cs" />

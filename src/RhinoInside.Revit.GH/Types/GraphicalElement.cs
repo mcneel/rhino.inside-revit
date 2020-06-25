@@ -96,6 +96,19 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Line)))
+      {
+        var curve = Curve;
+        if (curve?.IsValid != true)
+          return false;
+
+        if (!curve.TryGetLine(out var line, Revit.VertexTolerance * Revit.ModelUnits))
+          return false;
+
+        target = (Q) (object) new GH_Line(line);
+        return true;
+      }
+
       if (typeof(Q).IsAssignableFrom(typeof(GH_Vector)))
       {
         var orientation = Orientation;
@@ -204,15 +217,24 @@ namespace RhinoInside.Revit.GH.Types
 
               break;
             case DB.LocationCurve curveLocation:
-              //var cs = curveLocation.Curve.ComputeDerivatives(0.0, normalized: true);
-              //origin = cs.Origin.ToPoint3d();
-              //axis = cs.BasisX.ToVector3d();
-              //perp = (cs.BasisY.IsZeroLength() ? cs.BasisX.PerpVector() : cs.BasisY).ToVector3d();
-              var start = curveLocation.Curve.Evaluate(0.0, normalized: true).ToPoint3d();
-              var end = curveLocation.Curve.Evaluate(1.0, normalized: true).ToPoint3d();
-              axis = end - start;
-              origin = start + (axis * 0.5);
-              perp = axis.PerpVector();
+              var curve = curveLocation.Curve;
+              if (curve.IsBound)
+              {
+                var start = curve.Evaluate(0.0, normalized: true).ToPoint3d();
+                var end = curve.Evaluate(1.0, normalized: true).ToPoint3d();
+                axis = end - start;
+                origin = start + (axis * 0.5);
+                perp = axis.PerpVector();
+              }
+              else if(curve is DB.Arc || curve is DB.Ellipse)
+              {
+                var start = curve.Evaluate(0.0, normalized: false).ToPoint3d();
+                var end = curve.Evaluate(Math.PI, normalized: false).ToPoint3d();
+                axis = end - start;
+                origin = start + (axis * 0.5);
+                perp = axis.PerpVector();
+              }
+
               break;
           }
         }
