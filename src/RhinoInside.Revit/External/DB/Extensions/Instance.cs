@@ -4,31 +4,60 @@ namespace RhinoInside.Revit.External.DB.Extensions
 {
   public static class InstanceExtension
   {
-    public static void SetTransform(this Instance element, XYZ newOrigin, XYZ newBasisX, XYZ newBasisY)
+    public static void GetLocation(this Instance instance, out XYZ origin, out XYZ basisX, out XYZ basisY)
     {
-      var current = element.GetTransform();
-      var BasisZ = newBasisX.CrossProduct(newBasisY);
+      var transform = instance.GetTransform();
+      origin = transform.Origin;
+      basisX = transform.BasisX;
+      basisY = transform.BasisY;
+
+      switch (instance.Location)
       {
-        if (!current.BasisZ.IsParallelTo(BasisZ))
-        {
-          var axisDirection = current.BasisZ.CrossProduct(BasisZ);
-          double angle = current.BasisZ.AngleTo(BasisZ);
+        case LocationPoint pointLocation:
+          origin = pointLocation.Point;
+          break;
 
-          using (var axis = Line.CreateUnbound(current.Origin, axisDirection))
+        case LocationCurve curveLocation:
+          var start = curveLocation.Curve.Evaluate(0.0, normalized: true);
+          var end = curveLocation.Curve.Evaluate(1.0, normalized: true);
+          var axis = end - start;
+          var perp = transform.BasisZ.CrossProduct(transform.BasisX);
+
+          origin = start + (axis * 0.5);
+          basisX = axis.Normalize();
+          basisY = perp.Normalize();
+          break;
+      }
+    }
+
+    public static void SetLocation(this Instance element, XYZ newOrigin, XYZ newBasisX, XYZ newBasisY)
+    {
+      element.GetLocation(out var origin, out var basisX, out var basisY);
+      var basisZ = basisX.CrossProduct(basisY);
+
+      var newBasisZ = newBasisX.CrossProduct(newBasisY);
+      {
+        if (!basisZ.IsParallelTo(newBasisZ))
+        {
+          var axisDirection = basisZ.CrossProduct(newBasisZ);
+          double angle = basisZ.AngleTo(newBasisZ);
+
+          using (var axis = Line.CreateUnbound(origin, axisDirection))
             ElementTransformUtils.RotateElement(element.Document, element.Id, axis, angle);
 
-          current = element.GetTransform();
+          element.GetLocation(out origin, out basisX, out basisY);
+          basisZ = basisX.CrossProduct(basisY);
         }
 
-        if (!current.BasisX.IsAlmostEqualTo(newBasisX))
+        if (!basisX.IsAlmostEqualTo(newBasisX))
         {
-          double angle = current.BasisX.AngleOnPlaneTo(newBasisX, BasisZ);
-          using (var axis = Line.CreateUnbound(current.Origin, BasisZ))
+          double angle = basisX.AngleOnPlaneTo(newBasisX, newBasisZ);
+          using (var axis = Line.CreateUnbound(origin, newBasisZ))
             ElementTransformUtils.RotateElement(element.Document, element.Id, axis, angle);
         }
 
         {
-          var trans = newOrigin - current.Origin;
+          var trans = newOrigin - origin;
           if (!trans.IsZeroLength())
             ElementTransformUtils.MoveElement(element.Document, element.Id, trans);
         }

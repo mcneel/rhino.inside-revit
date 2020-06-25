@@ -22,7 +22,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(new Parameters.GraphicalElement(), "Beam", "B", "New Beam", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.FamilyInstance(), "Beam", "B", "New Beam", GH_ParamAccess.item);
     }
 
     protected override void OnAfterStart(DB.Document document, string strTransactionName)

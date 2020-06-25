@@ -22,7 +22,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(new Parameters.HostObject(), "Floor", "F", "New Floor", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.Floor(), "Floor", "F", "New Floor", GH_ParamAccess.item);
     }
 
     void ReconstructFloorByOutline

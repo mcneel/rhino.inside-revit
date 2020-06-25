@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Components
 
     public AdaptiveComponentByPoints() : base
     (
-      "Add AdaptiveComponent", "AdapComp",
+      "Add Component (Adaptive)", "CompAdap",
       "Given a collection of Points, it adds an AdaptiveComponent element to the active Revit document",
       "Revit", "Build"
     )
@@ -23,7 +23,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(new Parameters.GraphicalElement(), "Component", "C", "New AdaptiveComponent", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.FamilyInstance(), "Component", "C", "New Adaptive Component element", GH_ParamAccess.item);
     }
 
     void ReconstructAdaptiveComponentByPoints

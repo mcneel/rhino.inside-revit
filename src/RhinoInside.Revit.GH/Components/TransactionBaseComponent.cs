@@ -661,6 +661,7 @@ namespace RhinoInside.Revit.GH.Components
       { typeof(Autodesk.Revit.DB.SketchPlane),  Tuple.Create(typeof(Parameters.SketchPlane),  typeof(Types.SketchPlane))  },
       { typeof(Autodesk.Revit.DB.Level),        Tuple.Create(typeof(Parameters.Level),        typeof(Types.Level))        },
       { typeof(Autodesk.Revit.DB.Grid),         Tuple.Create(typeof(Parameters.Grid),         typeof(Types.Grid))         },
+      { typeof(Autodesk.Revit.DB.HostObject),   Tuple.Create(typeof(Parameters.HostObject),   typeof(Types.HostObject))   },
     };
 
     protected bool TryGetParamTypes(Type type, out Tuple<Type, Type> paramTypes)

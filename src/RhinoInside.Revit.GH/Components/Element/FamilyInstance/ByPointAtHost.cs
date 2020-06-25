@@ -18,15 +18,15 @@ namespace RhinoInside.Revit.GH.Components
 
     public FamilyInstanceByLocation () : base
     (
-      "Add FamilyInstance", "FamilyInstance",
-      "Given its location, it reconstructs a FamilyInstance element into the active Revit document",
+      "Add Component (Location)", "CompLoca",
+      "Given its location, it reconstructs a Component element into the active Revit document",
       "Revit", "Build"
     )
     { }
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(new Parameters.GraphicalElement(), "Instance", "I", "New Instance Element", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.FamilyInstance(), "Component", "C", "New Component element", GH_ParamAccess.item);
     }
 
     void ReconstructFamilyInstanceByLocation
@@ -38,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components
       Rhino.Geometry.Plane location,
       DB.FamilySymbol type,
       Optional<DB.Level> level,
-      [Optional] DB.Element host
+      [Optional] DB.HostObject host
     )
     {
       if (!location.IsValid)
@@ -112,7 +112,7 @@ namespace RhinoInside.Revit.GH.Components
         doc.Regenerate();
       }
 
-      element?.SetTransform(location.Origin.ToXYZ(), location.XAxis.ToXYZ(), location.YAxis.ToXYZ());
+      element?.SetLocation(location.Origin.ToXYZ(), location.XAxis.ToXYZ(), location.YAxis.ToXYZ());
     }
   }
 }
