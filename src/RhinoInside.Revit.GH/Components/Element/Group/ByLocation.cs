@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(new Parameters.GraphicalElement(), "Group", "G", "New Group Element", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.Group(), "Group", "G", "New Group Element", GH_ParamAccess.item);
     }
 
     void ReconstructGroupByLocation
