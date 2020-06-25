@@ -9,18 +9,18 @@ using RhinoInside.Revit.Convert.Geometry;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class AnalyseCurtainGridLine : AnalysisComponent
+  public class AnalyzeCurtainGridLine : AnalysisComponent
   {
     public override Guid ComponentGuid => new Guid("FACE5E7D-174F-41DA-853E-CDC4B094F57C");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.septenary;
     protected override string IconTag => "ACGL";
 
-    public AnalyseCurtainGridLine() : base(
+    public AnalyzeCurtainGridLine() : base(
       name: "Analyze Curtain Grid Line",
       nickname: "A-CGL",
       description: "Analyze given curtain grid line",
       category: "Revit",
-      subCategory: "Analyze"
+      subCategory: "Wall"
     )
     {
     }
@@ -63,14 +63,14 @@ namespace RhinoInside.Revit.GH.Components
         access: GH_ParamAccess.item
         );
       manager.AddParameter(
-        param: new Parameters.CurtainGridMullion(),
+        param: new Parameters.Mullion(),
         name: "Attached Mullions",
         nickname: "ACGM",
         description: "All curtain grid mullions attached to the curtain grid line",
         access: GH_ParamAccess.item
         );
       manager.AddParameter(
-        param: new Parameters.Element(),
+        param: new Parameters.GraphicalElement(),
         name: "Attached Panels",
         nickname: "ACGP",
         description: "All curtain grid panels attached to the curtain grid line",
@@ -108,7 +108,7 @@ namespace RhinoInside.Revit.GH.Components
           var mend = mcurve.GetEndPoint(1);
           // if the distance is less than EPSILON, the DB.Mullion axis and DB.CurtainGridLine axis are almost overlapping
           if (gridLine.FullCurve.Distance(mstart) < EPSILON && gridLine.FullCurve.Distance(mend) < EPSILON)
-                attachedMullions.Add(Types.CurtainGridMullion.FromElement(mullion));
+                attachedMullions.Add(Types.Mullion.FromElement(mullion));
         }
       }
       DA.SetDataList("Attached Mullions", attachedMullions);

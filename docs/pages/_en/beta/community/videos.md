@@ -3,6 +3,14 @@ title: Videos
 order: 1
 ---
 
+## {{ site.terms.rir }} Happy Hour webinar by Marcello Sgambelluri PE SE
+
+{% include youtube_player.html id="ko18HhYpjok" %}
+
+Hosted by [The Revit Kid](https://www.youtube.com/channel/UC6TtKCInvnoU7vLNACZRFrQ) featuring [Marcello Sgambelluri PE SE](http://therevitcomplex.blogspot.com/).
+
+Marcello shows "Rhino Inside Revit"... That's right, you can run Rhino (and Grasshopper) inside of Revit.
+
 ## {{ site.terms.rir }} Review by Håvard Vasshaug
 
 {% include youtube_player.html id="J11LIrDIchw" %}

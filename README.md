@@ -23,7 +23,7 @@ McNeel team is using internal [AppVeyor-based](https://www.appveyor.com/docs/) b
 
 ### Building from Source
 
-See [Building from Source](build-source.md) page for instructions on how to build the project from source.
+See [Building from Source](BUILDSOURCE.md) page for instructions on how to build the project from source.
 
 ## Installer
 
@@ -34,6 +34,10 @@ The installer is generated using [WiX toolset](https://wixtoolset.org/) (see `sr
 The `docs/` directory in this repo contains the contents of [Rhino.Inside.Revit Wiki](https://www.rhino3d.com/inside/revit/).
 
 See [Wiki Readme](docs/readme.md) for more information.
+
+## Development Conventions
+
+See [Development Conventions](CONVENTIONS.md) page for conventions and guidelines in contributing to the codebase.
 
 ## API Docs
 

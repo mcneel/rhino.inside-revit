@@ -46,16 +46,17 @@ namespace RhinoInside.Revit.GH
   {
     public AssemblyInfo() { }
 
+    public override System.Drawing.Bitmap Icon => (System.Drawing.Bitmap) Properties.Resources.ResourceManager.GetObject("logo_24x24");
     public override string Name => "Rhino.Inside for Autodesk Revit";
-    public override string Version => $"{Assembly.GetName().Version.ToString()} (WIP)";
+    public override string Version => $"{Assembly.GetName().Version} (WIP)";
     public override string Description => "Provides components to interact with Autodesk© Revit©";
 
     public override string AuthorName => "Robert McNeel & Associates";
     public override string AuthorContact => WebPageURI;
 
-    public override GH_LibraryLicense License => Addin.IsExpired() ? GH_LibraryLicense.expired : GH_LibraryLicense.opensource;
+    public override GH_LibraryLicense License => Addin.DaysUntilExpiration < 0 ? GH_LibraryLicense.expired : GH_LibraryLicense.opensource;
 
-    public static string ContactURI => @"https://discourse.mcneel.com/c/rhino-inside/Revit";
-    public static string WebPageURI => @"https://www.rhino3d.com/inside/revit/";
+    public static readonly string ContactURI = @"https://discourse.mcneel.com/c/rhino-inside/Revit/";
+    public static readonly string WebPageURI = @"https://www.rhino3d.com/inside/revit/";
   }
 }

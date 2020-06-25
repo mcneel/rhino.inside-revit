@@ -21,7 +21,7 @@ namespace RhinoInside.Revit
     {
       if (MainWindow.IsZero)
       {
-        var result = Addin.CheckSetup(applicationUI.ControlledApplication);
+        var result = Addin.CheckSetup(applicationUI);
         if (result != Result.Succeeded)
           return result;
 

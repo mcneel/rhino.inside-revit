@@ -10,13 +10,15 @@ namespace RhinoInside.Revit.GH.Components
   public class FormByGeometry : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("D2FDF2A0-1E48-4075-814A-685D91A6CD94");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
     public FormByGeometry() : base
     (
-      "Add Form", "Form",
-      "Given its Geometry, it adds a Form element to the active Revit document",
-      "Revit", "Family Element"
+      name: "Add Form",
+      nickname: "Form",
+      description: "Given its Geometry, it adds a Form element to the active Revit document",
+      category: "Revit",
+      subCategory: "Family"
     )
     { }
 
@@ -83,7 +85,7 @@ namespace RhinoInside.Revit.GH.Components
               (
                 !cutting,
                 referenceArray,
-                extrusion.PathLineCurve().Line.Direction.ToXYZ()
+                extrusion.PathLineCurve().Line.Direction.ToXYZ(UnitConverter.ToHostUnits)
               )
             );
             return;

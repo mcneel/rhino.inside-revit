@@ -26,7 +26,10 @@ namespace RhinoInside.Revit.GH.Components
             break;
 
           case DB.StorageType.Integer:
-            DA.SetData(paramName, param.AsInteger());
+            if(param.Definition.ParameterType == DB.ParameterType.YesNo)
+              DA.SetData(paramName, param.AsInteger() != 0);
+            else
+              DA.SetData(paramName, param.AsInteger());
             break;
 
           case DB.StorageType.Double:

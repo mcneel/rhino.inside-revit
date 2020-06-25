@@ -191,7 +191,7 @@ namespace RhinoInside.Revit.UI
 
       return retCode;
 #else
-      Addin.IsExpired(quiet);
+      Addin.CheckIsExpired(quiet);
 
       if (helpButton != null)
       {

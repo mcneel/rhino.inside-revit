@@ -9,8 +9,8 @@ namespace RhinoInside.Revit.GH.Types
   public class DataObject<T> : GH_Goo<T>
   {
     public override bool IsValid => Value != null;
-    public override string TypeName => "Revit API Data Object";
-    public override string TypeDescription => "Wraps Revit API Data Objects";
+    public override string TypeName => $"Revit {typeof(T).Name}";
+    public override string TypeDescription => $"Represents a {TypeName}";
 
     public DB.Document Document { get; private set; } = default;
 
@@ -34,6 +34,11 @@ namespace RhinoInside.Revit.GH.Types
       return base.CastTo<Q>(ref target);
     }
 
-    public override string ToString() => $"Revit API Data Object: {Value?.GetType().Name}";
+    public override string ToString()
+    {
+      return IsValid ?
+             TypeName :
+             $"Invalid {TypeName}";
+    }
   }
 }

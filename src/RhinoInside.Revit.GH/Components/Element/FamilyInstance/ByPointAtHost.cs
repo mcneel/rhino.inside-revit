@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components
   public class FamilyInstanceByLocation : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("0C642D7D-897B-479E-8668-91E09222D7B9");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     public FamilyInstanceByLocation () : base
     (
@@ -57,41 +57,22 @@ namespace RhinoInside.Revit.GH.Components
       bool hasSameHost = false;
       if (element is DB.FamilyInstance)
       {
-        hasSameHost = (element.Host?.Id ?? DB.ElementId.InvalidElementId) == (host?.Id ?? DB.ElementId.InvalidElementId);
-        if (element.Host == null)
-        {
-          if (element?.get_Parameter(DB.BuiltInParameter.INSTANCE_FREE_HOST_PARAM) is DB.Parameter freeHostParam)
-          {
-            var freeHostName = freeHostParam.AsString();
-            hasSameHost = freeHostName.EndsWith(host?.Name ?? level.Value.Name);
-          }
-        }
+        if (element.Host is DB.Element elementHost)
+          hasSameHost = elementHost.Id == (host?.Id ?? DB.ElementId.InvalidElementId);
+        else using (var freeHostName = element.get_Parameter(DB.BuiltInParameter.INSTANCE_FREE_HOST_PARAM))
+          hasSameHost = !(freeHostName is null);
       }
 
-      if
-      (
-        hasSameHost &&
-        element is DB.FamilyInstance &&
-        element.Location is DB.LocationPoint locationPoint
-      )
+      if(hasSameHost)
       {
-        using (var levelParam = element.get_Parameter(DB.BuiltInParameter.FAMILY_LEVEL_PARAM))
+        element.Pinned = false;
+
+        if (element.LevelId != level.Value.Id)
         {
-          if (levelParam.AsElementId() != level.Value.Id)
+          using (var levelParam = element.get_Parameter(DB.BuiltInParameter.FAMILY_LEVEL_PARAM))
           {
             levelParam.Set(level.Value.Id);
             doc.Regenerate();
-          }
-        }
-
-        if (host is object)
-        {
-          var newOrigin = location.Origin.ToXYZ();
-          if (!newOrigin.IsAlmostEqualTo(locationPoint.Point))
-          {
-            element.Pinned = false;
-            locationPoint.Point = newOrigin;
-            element.Pinned = true;
           }
         }
       }
@@ -99,7 +80,14 @@ namespace RhinoInside.Revit.GH.Components
       {
         var creationData = new List<Autodesk.Revit.Creation.FamilyInstanceCreationData>()
         {
-          new Autodesk.Revit.Creation.FamilyInstanceCreationData(location.Origin.ToXYZ(), type, host, level.Value, DB.Structure.StructuralType.NonStructural)
+          new Autodesk.Revit.Creation.FamilyInstanceCreationData
+          (
+            location.Origin.ToXYZ(),
+            type,
+            host,
+            level.Value,
+            DB.Structure.StructuralType.NonStructural
+          )
         };
 
         var newElementIds = doc.IsFamilyDocument ?
@@ -124,12 +112,7 @@ namespace RhinoInside.Revit.GH.Components
         doc.Regenerate();
       }
 
-      if (element is object && element.Host is null)
-      {
-        element.Pinned = false;
-        element.SetTransform(location.Origin.ToXYZ(), location.XAxis.ToXYZ(), location.YAxis.ToXYZ());
-        element.Pinned = true;
-      }
+      element?.SetTransform(location.Origin.ToXYZ(), location.XAxis.ToXYZ(), location.YAxis.ToXYZ());
     }
   }
 }

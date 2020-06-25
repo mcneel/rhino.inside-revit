@@ -27,6 +27,8 @@ namespace Microsoft.Win32.SafeHandles
 
     public static LibraryHandle Zero = new LibraryHandle();
 
+    public static LibraryHandle GetLoadedModule(string moduleName) => Kernel32.GetModuleHandle(moduleName);
+
     public string ModuleFileName
     {
       get
@@ -248,6 +250,7 @@ namespace Microsoft.Win32.SafeHandles.InteropServices
   using DWORD     = UInt32;
   using UINT      = UInt32;
 
+  using HMODULE   = LibraryHandle;
   using HINSTANCE = LibraryHandle;
   using HWND      = WindowHandle;
   using HHOOK     = SafeHookHandle;
@@ -276,6 +279,9 @@ namespace Microsoft.Win32.SafeHandles.InteropServices
 
     [DllImport(KERNEL32, SetLastError = true)]
     public static extern DWORD GetModuleFileName(HINSTANCE hInstance, StringBuilder lpFilename, DWORD nSize);
+
+    [DllImport(KERNEL32, SetLastError = true)]
+    public static extern HMODULE GetModuleHandle(string lpModuleName);
   }
 
   [SuppressUnmanagedCodeSecurity]

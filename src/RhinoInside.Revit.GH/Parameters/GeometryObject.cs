@@ -10,9 +10,9 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   public class Vertex : ElementIdWithPreviewParam<Types.Vertex, DB.Point>
   {
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     public override Guid ComponentGuid => new Guid("BC1B160A-DC04-4139-AB7D-1AECBDE7FF88");
-    public Vertex() : base("Vertex", "Vertex", "Represents a Revit vertex.", "Params", "Revit") { }
+    public Vertex() : base("Vertex", "Vertex", "Represents a Revit vertex.", "Params", "Revit Primitives") { }
 
 #region UI methods
     protected override GH_GetterResult Prompt_Plural(ref List<Types.Vertex> value)
@@ -61,9 +61,9 @@ namespace RhinoInside.Revit.GH.Parameters
 
   public class Edge : ElementIdWithPreviewParam<Types.Edge, DB.Edge>
   {
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     public override Guid ComponentGuid => new Guid("B79FD0FD-63AE-4776-A0A7-6392A3A58B0D");
-    public Edge() : base("Edge", "Edge", "Represents a Revit edge.", "Params", "Revit") { }
+    public Edge() : base("Edge", "Edge", "Represents a Revit edge.", "Params", "Revit Primitives") { }
 
 #region UI methods
     protected override GH_GetterResult Prompt_Plural(ref List<Types.Edge> value)
@@ -103,9 +103,9 @@ namespace RhinoInside.Revit.GH.Parameters
 
   public class Face : ElementIdWithPreviewParam<Types.Face, DB.Face>
   {
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     public override Guid ComponentGuid => new Guid("759700ED-BC79-4986-A6AB-84921A7C9293");
-    public Face() : base("Face", "Face", "Represents a Revit face.", "Params", "Revit") { }
+    public Face() : base("Face", "Face", "Represents a Revit face.", "Params", "Revit Primitives") { }
 
 #region UI methods
     protected override GH_GetterResult Prompt_Plural(ref List<Types.Face> value)

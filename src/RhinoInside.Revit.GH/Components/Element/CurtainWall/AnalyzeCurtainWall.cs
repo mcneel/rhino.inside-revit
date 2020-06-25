@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Components
   public class AnalyzeCurtainWall : AnalysisComponent
   {
     public override Guid ComponentGuid => new Guid("734B2DAC-1CD2-4D51-B7BD-D3D377CF62DE");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => "ACW";
 
     public AnalyzeCurtainWall() : base(
@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components
       nickname: "A-CW",
       description: "Analyze given Curtain Wall element",
       category: "Revit",
-      subCategory: "Analyze"
+      subCategory: "Wall"
     )
     {
     }
@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
       manager.AddParameter(
-        param: new Parameters.Element(),
+        param: new Parameters.Wall(),
         name: "Curtain Wall",
         nickname: "CW",
         description: "Curtain Wall element",
@@ -42,7 +42,7 @@ namespace RhinoInside.Revit.GH.Components
         access: GH_ParamAccess.item
         );
       manager.AddParameter(
-        param: new Parameters.Element(),
+        param: new Parameters.Wall(),
         name: "Host Wall",
         nickname: "HW",
         description: "Host Wall instance is the input Curtain Wall is embedded",

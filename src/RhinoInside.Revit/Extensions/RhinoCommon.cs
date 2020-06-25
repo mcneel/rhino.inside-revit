@@ -6,6 +6,31 @@ using Rhino.Geometry;
 
 namespace RhinoInside.Revit.Geometry.Extensions
 {
+  public static class Vector3dExtension
+  {
+    /// <summary>
+    /// Arbitrary Axis Algorithm
+    /// <para>Given a vector to be used as the Z axis of a coordinate system, this algorithm generates a corresponding X axis for the coordinate system.</para>
+    /// <para>The Y axis follows by application of the right-hand rule.</para>
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="tolerance"></param>
+    /// <returns>X axis of the corresponding coordinate system</returns>
+    public static Vector3d PerpVector(this Vector3d value, double tolerance = 1e-9)
+    {
+      var length = value.Length;
+      if (length < tolerance)
+        return Vector3d.Zero;
+
+      var normal = value / length;
+
+      if (Vector3d.Zero.EpsilonEquals(new Vector3d(normal.X, normal.Y, 0.0), tolerance))
+        return new Vector3d(value.Z, 0.0, -value.X);
+      else
+        return new Vector3d(-value.Y, value.X, 0.0);
+    }
+  }
+
   public static class ExtrusionExtension
   {
     public static bool TryGetExtrusion(this Surface surface, out Extrusion extrusion)

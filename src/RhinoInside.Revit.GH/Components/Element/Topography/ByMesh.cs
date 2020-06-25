@@ -38,7 +38,10 @@ namespace RhinoInside.Revit.GH.Components
       [Optional] IList<Curve> regions
     )
     {
-      mesh = MeshEncoder.ToRawMesh(mesh);
+      mesh = mesh.DuplicateMesh();
+      mesh.Scale(UnitConverter.ToHostUnits);
+      while (mesh.CollapseFacesByEdgeLength(false, Revit.VertexTolerance) > 0) ;
+      mesh.Vertices.CombineIdentical(true, true);
       mesh.Vertices.CullUnused();
 
       var xyz = mesh.Vertices.ConvertAll(x => new DB.XYZ(x.X, x.Y, x.Z));

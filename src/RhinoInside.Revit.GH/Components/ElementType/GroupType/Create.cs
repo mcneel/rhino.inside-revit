@@ -9,13 +9,15 @@ namespace RhinoInside.Revit.GH.Components
   public class GroupTypeCreate : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("39E42448-1C1C-4140-BC37-7399ABF82117");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
     public GroupTypeCreate() : base
     (
-      "Create GroupType", "GroupType",
-      "Given a collection of elements, it adds a GroupType to the active Revit document",
-      "Revit", "Model"
+      name: "Create GroupType",
+      nickname: "GroupType",
+      description: "Given a collection of elements, it adds a GroupType to the active Revit document",
+      category: "Revit",
+      subCategory: "Model"
     )
     { }
 

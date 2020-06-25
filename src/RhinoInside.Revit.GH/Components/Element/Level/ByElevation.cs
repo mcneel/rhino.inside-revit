@@ -11,9 +11,11 @@ namespace RhinoInside.Revit.GH.Components
 
     public LevelByElevation() : base
     (
-      "Add Level", "Level",
-      "Given its Elevation, it adds a Level to the active Revit document",
-      "Revit", "Datum"
+      name: "Add Level",
+      nickname: "Level",
+      description: "Given its Elevation, it adds a Level to the active Revit document",
+      category: "Revit",
+      subCategory: "Model"
     )
     { }
 

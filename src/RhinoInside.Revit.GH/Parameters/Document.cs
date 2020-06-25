@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.hidden;
     protected override Types.Document PreferredCast(object data) => Types.Document.FromDocument(data as DB.Document);
 
-    public Document() : base("Document", "Document", string.Empty, "Params", "Revit")
+    public Document() : base("Document", "Document", string.Empty, "Params", "Revit Primitives")
     { }
 
     [Flags]

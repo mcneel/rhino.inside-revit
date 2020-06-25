@@ -133,7 +133,7 @@ In Revit API, Curtain Cells are represented by the {% include api_type.html type
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-The component shown here, can analyze each curtain cell and extract the cell curves (**CL**) and the panelized curves (**PCL**):
+The component shown here, can analyze each curtain cell and extract the cell curves (**C**) and the panelized curves (**PC**):
 
 ![]({{ "/static/images/guides/revit-curtainwalls08.png" | prepend: site.baseurl }})
 
@@ -210,7 +210,7 @@ Notice how the panels are in order from bottom to top row:
 
 ![]({{ "/static/images/guides/revit-curtainwalls15a.png" | prepend: site.baseurl }})
 
-Since the **Curtain Grid Panel (CGP)** output parameter can return both System Panels (`DB.Panel`) and Custom Family Instances (`DB.FamilyInstance`), the same workflow can extract the geometry of all these insert types:
+Since the **Curtain Grid Panel (P)** output parameter can return both Panels (`DB.Panel`) and Custom Family Instances (`DB.FamilyInstance`), the same workflow can extract the geometry of all these insert types:
 
 ![]({{ "/static/images/guides/revit-curtainwalls15b.png" | prepend: site.baseurl }})
 
@@ -218,11 +218,17 @@ Since the **Curtain Grid Panel (CGP)** output parameter can return both System P
 
 ![]({{ "/static/images/guides/revit-curtainwalls15c.png" | prepend: site.baseurl }})
 
-The component shown here can be used to extract information about the individual *Curtain Panels*:
+However when extracting information about individual *Curtain Panels*:, the **P** output needs to be filtered for Panels (`DB.Panel`), otherwise the {% include ltr/comp.html uuid="08507225-" %} will show an error:
 
 ![]({{ "/static/images/guides/revit-curtainwalls16.png" | prepend: site.baseurl }})
 
-This component also provides access to the Panel base point(**PBP**) and normal/orientation vectors (**POV**):
+Use the custom **Filter Elements** component shared here, in combination with other filter components e.g. (Category Filter), to filter for Panels (`DB.Panel`):
+
+![]({{ "/static/images/guides/revit-curtainwalls16a.png" | prepend: site.baseurl }})
+
+{% include ltr/download_comp.html archive='/static/ghnodes/Filter Elements.ghuser' name='Filter Elements' %}
+
+The {% include ltr/comp.html uuid="08507225-" %} component also provides access to the Panel base point(**BP**) and normal/orientation vectors (**O**):
 
 ![]({{ "/static/images/guides/revit-curtainwalls17.png" | prepend: site.baseurl }})
 
@@ -241,7 +247,7 @@ The {% include ltr/comp.html uuid="6f11977f-" %} component shown here can be use
 
 ![]({{ "/static/images/guides/revit-curtainwalls19.png" | prepend: site.baseurl }})
 
-Note that **Panel Symbol (PS)** output parameter can return a *System Panel Type* (`DB.PanelType`) or a *Custom Family Symbol* (`DB.FamilySymbol`) depending on the type of Panel inserted into the Grid:
+Note that **Panel Type (T)** output parameter can return a *System Panel Type* (`DB.PanelType`) or a *Custom Family Symbol* (`DB.FamilySymbol`) depending on the type of Panel inserted into the Grid:
 
 ![]({{ "/static/images/guides/revit-curtainwalls19a.png" | prepend: site.baseurl }})
 

@@ -328,8 +328,8 @@ namespace RhinoInside.Revit.UI
         {
           var element = doc.Document.GetElement(reference);
 
-          Options options = null;
-          using (var geometry = element.GetGeometry(ViewDetailLevel.Fine, out options)) using (options)
+          using (var options = new Options() { DetailLevel = ViewDetailLevel.Fine })
+          using (var geometry = element.GetGeometry(options))
             return geometry.ToGeometryBaseMany().OfType<Brep>().Select((x) => new GH_Brep(x));
         }
       }

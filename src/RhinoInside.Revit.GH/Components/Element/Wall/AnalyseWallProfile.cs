@@ -14,20 +14,21 @@ namespace RhinoInside.Revit.GH.Components
   public class AnalyzeWallProfile : Component
   {
     public override Guid ComponentGuid => new Guid("9D2E9D8D-E794-4202-B725-82E78317892F");
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     public AnalyzeWallProfile() : base(
       name:"Analyze Wall Profile",
       nickname: "A-WP",
       description: "Get the vertical profile of the given wall",
       category: "Revit",
-      subCategory: "Analyze"
+      subCategory: "Wall"
     )
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
       manager.AddParameter(
-        param: new Parameters.Element(),
+        param: new Parameters.Wall(),
         name: "Wall",
         nickname: "W",
         description: "Wall element to extract the profile",

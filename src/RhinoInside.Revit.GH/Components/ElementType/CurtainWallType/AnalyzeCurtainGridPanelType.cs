@@ -5,18 +5,18 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class AnalyseCurtainGridPanelType : AnalysisComponent
+  public class AnalyzeCurtainGridPanelType : AnalysisComponent
   {
     public override Guid ComponentGuid => new Guid("6F11977F-7CF3-41F1-8A69-2F4CD7287DEF");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "ACGPT";
 
-    public AnalyseCurtainGridPanelType() : base(
-      name: "Analyze Curtain Grid Panel Type",
-      nickname: "A-CGPT",
-      description: "Analyze given curtain grid panel type",
+    public AnalyzeCurtainGridPanelType() : base(
+      name: "Analyze Panel Type",
+      nickname: "A-PT",
+      description: "Analyze given panel type",
       category: "Revit",
-      subCategory: "Analyze"
+      subCategory: "Wall"
     )
     {
     }
@@ -25,9 +25,9 @@ namespace RhinoInside.Revit.GH.Components
     {
       manager.AddParameter(
         param: new Parameters.ElementType(),
-        name: "Curtain Grid Panel Type",
-        nickname: "CGPT",
-        description: "Curtain Grid Panel Type",
+        name: "Panel Type",
+        nickname: "PT",
+        description: "Panel Type",
         access: GH_ParamAccess.item
         );
     }
@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       manager.AddParameter(
         param: new Parameters.Param_Enum<Types.CurtainPanelSystemFamily>(),
-        name: "Panel System Family",
+        name: "Family",
         nickname: "PSF",
         description: "Panel system family",
         access: GH_ParamAccess.item
@@ -60,7 +60,7 @@ namespace RhinoInside.Revit.GH.Components
       // get input
       // panel types can be DB.FamilySymbol or DB.PanelType
       DB.FamilySymbol famInst = default;
-      if (!DA.GetData("Curtain Grid Panel Type", ref famInst))
+      if (!DA.GetData("Panel Type", ref famInst))
         return;
 
       var inputType = famInst.GetType();
@@ -70,7 +70,7 @@ namespace RhinoInside.Revit.GH.Components
       {
         // TODO: find a way to determine whether panel type is an Empty type or not
         // maybe the Id/Unique is fixed? Compare across multiple example models of various languages
-        DA.SetData("Panel System Family", new Types.CurtainPanelSystemFamily(External.DB.CurtainPanelSystemFamily.Unknown));
+        DA.SetData("Family", new Types.CurtainPanelSystemFamily(External.DB.CurtainPanelSystemFamily.Unknown));
 
         switch (famInst)
         {

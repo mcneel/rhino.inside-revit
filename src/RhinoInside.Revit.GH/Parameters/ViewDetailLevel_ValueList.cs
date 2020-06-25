@@ -17,8 +17,8 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       Category = "Revit";
       SubCategory = "Input";
-      Name = "Level of Detail";
-      NickName = "LOD";
+      Name = "Detail Level";
+      NickName = "DL";
       Description = "Picker for level of detail";
 
       ListItems.Clear();

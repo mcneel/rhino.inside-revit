@@ -44,7 +44,7 @@ namespace RhinoInside.Revit.Samples
         mruPullDownButton.LargeImage = ImageBuilder.BuildLargeImage("4");
         mruPullDownButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://github.com/mcneel/rhino.inside-revit/tree/master#sample-4"));
 
-        AddPushButton<Browse, NeedsActiveDocument<Availability>> (mruPullDownButton, "Browse...", "Browse for a Grasshopper definition to evaluate");
+        AddPushButton<Browse, NeedsActiveDocument<Availability>> (mruPullDownButton, "Browse…", "Browse for a Grasshopper definition to evaluate");
       }
     }
 

@@ -16,19 +16,36 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
   static class RawEncoder
   {
     #region Values
-    public static DB::XYZ ToHost(Point3f value)
+    public static DB::UV AsUV(Point2f value)
+    {
+      return new DB::UV(value.X, value.Y);
+    }
+    public static DB::UV AsUV(Point2d value)
+    {
+      return new DB::UV(value.X, value.Y);
+    }
+    public static DB::UV AsUV(Vector2d value)
+    {
+      return new DB::UV(value.X, value.Y);
+    }
+    public static DB::UV AsUV(Vector2f value)
+    {
+      return new DB::UV(value.X, value.Y);
+    }
+
+    public static DB::XYZ AsXYZ(Point3f value)
     {
       return new DB::XYZ(value.X, value.Y, value.Z);
     }
-    public static DB::XYZ ToHost(Point3d value)
+    public static DB::XYZ AsXYZ(Point3d value)
     {
       return new DB::XYZ(value.X, value.Y, value.Z);
     }
-    public static DB::XYZ ToHost(Vector3d value)
+    public static DB::XYZ AsXYZ(Vector3d value)
     {
       return new DB::XYZ(value.X, value.Y, value.Z);
     }
-    public static DB::XYZ ToHost(Vector3f value)
+    public static DB::XYZ AsXYZ(Vector3f value)
     {
       return new DB::XYZ(value.X, value.Y, value.Z);
     }
@@ -47,7 +64,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
     public static DB.Plane ToHost(Plane value)
     {
-      return DB.Plane.CreateByOriginAndBasis(ToHost(value.Origin), ToHost((Point3d) value.XAxis), ToHost((Point3d) value.YAxis));
+      return DB.Plane.CreateByOriginAndBasis(AsXYZ(value.Origin), AsXYZ((Point3d) value.XAxis), AsXYZ((Point3d) value.YAxis));
     }
 
     public static DB.PolyLine ToHost(Polyline value)
@@ -56,7 +73,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       var points = new DB.XYZ[count];
 
       for (int p = 0; p < count; ++p)
-        points[p] = ToHost(value[p]);
+        points[p] = AsXYZ(value[p]);
 
       return DB.PolyLine.Create(points);
     }
@@ -65,7 +82,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
     #region Point
     public static DB.Point ToHost(Point value)
     {
-      return DB.Point.Create(ToHost(value.Location));
+      return DB.Point.Create(AsXYZ(value.Location));
     }
     #endregion
 
@@ -73,7 +90,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
     public static DB.Line ToHost(LineCurve value)
     {
       var line = value.Line;
-      return DB.Line.CreateBound(ToHost(line.From), ToHost(line.To));
+      return DB.Line.CreateBound(AsXYZ(line.From), AsXYZ(line.To));
     }
 
     public static DB.Arc ToHost(ArcCurve value)
@@ -82,7 +99,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       if (value.Arc.IsCircle)
         return DB.Arc.Create(ToHost(arc.Plane), value.Radius, 0.0, 2.0 * Math.PI);
       else
-        return DB.Arc.Create(ToHost(arc.StartPoint), ToHost(arc.EndPoint), ToHost(arc.MidPoint));
+        return DB.Arc.Create(AsXYZ(arc.StartPoint), AsXYZ(arc.EndPoint), AsXYZ(arc.MidPoint));
     }
 
     public static double[] ToHost(NurbsCurveKnotList list)
@@ -278,7 +295,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
               bool trimReversed = face.OrientationIsReversed ?
                                   !trim.IsReversed() :
-                                    trim.IsReversed();
+                                   trim.IsReversed();
 
               if (trimReversed)
               {
@@ -310,6 +327,9 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
     #region Mesh
     public static DB.Mesh ToHost(Mesh mesh)
     {
+      if (mesh is null)
+        return null;
+
       using
       (
         var builder = new DB.TessellatedShapeBuilder()
@@ -320,29 +340,29 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
         }
       )
       {
+        var isSolid = mesh.SolidOrientation() != 0;
+        builder.OpenConnectedFaceSet(isSolid);
+
         var vertices = mesh.Vertices.ToPoint3dArray();
         var triangle = new DB.XYZ[3];
         var quad = new DB.XYZ[4];
-
-        var isSolid = mesh.SolidOrientation() != 0;
-        builder.OpenConnectedFaceSet(isSolid);
 
         foreach (var face in mesh.Faces)
         {
           if (face.IsQuad)
           {
-            quad[0] = ToHost(vertices[face.A]);
-            quad[1] = ToHost(vertices[face.B]);
-            quad[2] = ToHost(vertices[face.C]);
-            quad[3] = ToHost(vertices[face.D]);
+            quad[0] = AsXYZ(vertices[face.A]);
+            quad[1] = AsXYZ(vertices[face.B]);
+            quad[2] = AsXYZ(vertices[face.C]);
+            quad[3] = AsXYZ(vertices[face.D]);
 
             builder.AddFace(new DB.TessellatedFace(quad, GeometryEncoder.Context.Peek.MaterialId));
           }
           else
           {
-            triangle[0] = ToHost(vertices[face.A]);
-            triangle[1] = ToHost(vertices[face.B]);
-            triangle[2] = ToHost(vertices[face.C]);
+            triangle[0] = AsXYZ(vertices[face.A]);
+            triangle[1] = AsXYZ(vertices[face.B]);
+            triangle[2] = AsXYZ(vertices[face.C]);
 
             builder.AddFace(new DB.TessellatedFace(triangle, GeometryEncoder.Context.Peek.MaterialId));
           }

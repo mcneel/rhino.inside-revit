@@ -360,12 +360,10 @@ namespace RhinoInside.Revit.GH.Components
           targets.Add(box);
         }
 
-        var outline = new DB.Outline(pointsBBox.Min.ToXYZ(), pointsBBox.Max.ToXYZ());
-
         if (strict)
-          filter = new DB.BoundingBoxIsInsideFilter(outline, tolerance / Revit.ModelUnits, inverted);
+          filter = new DB.BoundingBoxIsInsideFilter(pointsBBox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
         else
-          filter = new DB.BoundingBoxIntersectsFilter(outline, tolerance / Revit.ModelUnits, inverted);
+          filter = new DB.BoundingBoxIntersectsFilter(pointsBBox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
       }
       else
       {
@@ -382,8 +380,7 @@ namespace RhinoInside.Revit.GH.Components
 
             if (strict)
             {
-              var outline = new DB.Outline(x.ToXYZ(), x.ToXYZ());
-              return new DB.BoundingBoxIsInsideFilter(outline, tolerance / Revit.ModelUnits, inverted);
+              return new DB.BoundingBoxIsInsideFilter(pointsBBox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
             }
             else
             {

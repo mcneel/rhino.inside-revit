@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel.Types;
+using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Display;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
@@ -40,19 +41,33 @@ namespace RhinoInside.Revit.GH.Types
 
     public static readonly Dictionary<Type, Func<DB.Element, Element>> ActivatorDictionary = new Dictionary<Type, Func<DB.Element, Element>>()
     {
-      { typeof(DB.View),              (element)=> new View          (element as DB.View)              },
-      { typeof(DB.Family),            (element)=> new Family        (element as DB.Family)            },
-      { typeof(DB.ElementType),       (element)=> new ElementType   (element as DB.ElementType)       },
-      { typeof(DB.ParameterElement),  (element)=> new ParameterKey  (element as DB.ParameterElement)  },
-      { typeof(DB.Material),          (element)=> new Material      (element as DB.Material)          },
-      { typeof(DB.GraphicsStyle),     (element)=> new GraphicsStyle (element as DB.GraphicsStyle)     },
+      { typeof(DB.View),                    (element)=> new View          (element as DB.View)              },
+      { typeof(DB.Family),                  (element)=> new Family        (element as DB.Family)            },
+      { typeof(DB.ElementType),             (element)=> new ElementType   (element as DB.ElementType)       },
+      { typeof(DB.HostObjAttributes),       (element)=> new HostObjectType(element as DB.HostObjAttributes) },
+      { typeof(DB.ParameterElement),        (element)=> new ParameterKey  (element as DB.ParameterElement)  },
+      { typeof(DB.Material),                (element)=> new Material      (element as DB.Material)          },
+      { typeof(DB.GraphicsStyle),           (element)=> new GraphicsStyle (element as DB.GraphicsStyle)     },
 
-      { typeof(DB.SketchPlane),       (element)=> new SketchPlane   (element as DB.SketchPlane)       },
-      { typeof(DB.DatumPlane),        (element)=> new DatumPlane    (element as DB.DatumPlane)        },
-      { typeof(DB.Level),             (element)=> new Level         (element as DB.Level)             },
-      { typeof(DB.Grid),              (element)=> new Grid          (element as DB.Grid)              },
-      { typeof(DB.Group),             (element)=> new Group         (element as DB.Group)             },
-      { typeof(DB.HostObject),        (element)=> new HostObject    (element as DB.HostObject)        },
+      { typeof(DB.Sketch),                  (element)=> new Sketch        (element as DB.Sketch)            },
+      { typeof(DB.SketchPlane),             (element)=> new SketchPlane   (element as DB.SketchPlane)       },
+      { typeof(DB.DatumPlane),              (element)=> new DatumPlane    (element as DB.DatumPlane)        },
+      { typeof(DB.Level),                   (element)=> new Level         (element as DB.Level)             },
+      { typeof(DB.Grid),                    (element)=> new Grid          (element as DB.Grid)              },
+      { typeof(DB.SpatialElement),          (element)=> new SpatialElement(element as DB.SpatialElement)    },
+      { typeof(DB.Group),                   (element)=> new Group         (element as DB.Group)             },
+      { typeof(DB.HostObject),              (element)=> new HostObject    (element as DB.HostObject)        },
+      { typeof(DB.CurtainGridLine),         (element)=> new CurtainGridLine(element as DB.CurtainGridLine)  },
+      { typeof(DB.Floor),                   (element)=> new Floor         (element as DB.Floor)             },
+      { typeof(DB.Architecture.BuildingPad),(element)=> new BuildingPad   (element as DB.Architecture.BuildingPad)             },
+      { typeof(DB.Ceiling),                 (element)=> new Ceiling       (element as DB.Ceiling)           },
+      { typeof(DB.RoofBase),                (element)=> new Roof          (element as DB.RoofBase)          },
+      { typeof(DB.Wall),                    (element)=> new Wall          (element as DB.Wall)              },
+      { typeof(DB.Instance),                (element)=> new Instance      (element as DB.Instance)          },
+      { typeof(DB.FamilyInstance),          (element)=> new FamilyInstance(element as DB.FamilyInstance)    },
+      { typeof(DB.Panel),                   (element)=> new Panel         (element as DB.Panel)             },
+      { typeof(DB.Mullion),                 (element)=> new Mullion       (element as DB.Mullion)           },
+      { typeof(DB.Dimension),               (element)=> new Dimension     (element as DB.Dimension)         },
     };
 
     public static Element FromElement(DB.Element element)
@@ -78,8 +93,18 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
 
-      if (GeometricElement.IsValidElement(element))
-        return new GeometricElement(element);
+      if (GraphicalElement.IsValidElement(element))
+      {
+        if (InstanceElement.IsValidElement(element))
+        {
+          if (Panel.IsValidElement(element))
+            return new Panel(element as DB.FamilyInstance);
+
+          return new InstanceElement(element);
+        }
+
+        return new GraphicalElement(element);
+      }
 
       return new Element(element);
     }
@@ -126,7 +151,7 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     public Element() : base() { }
-    protected Element(DB.Document doc, DB.ElementId id) : base(doc, id) { }
+    internal Element(DB.Document doc, DB.ElementId id) : base(doc, id) { }
     protected Element(DB.Element element)               : base(element.Document, element.Id) { }
 
     public override bool CastFrom(object source)
@@ -173,12 +198,12 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (typeof(Q).IsAssignableFrom(typeof(GH_Mesh)))
         {
-          DB.Options options = null;
-          using (var geometry = element.GetGeometry(DB.ViewDetailLevel.Fine, out options)) using (options)
+          using (var options = new DB.Options() { DetailLevel = DB.ViewDetailLevel.Fine })
+          using (var geometry = element.GetGeometry(options))
           {
             if (geometry is object)
             {
-              var mesh = new Rhino.Geometry.Mesh();
+              var mesh = new Mesh();
               mesh.Append(geometry.GetPreviewMeshes(null).Where(x => x is object));
               mesh.Normals.ComputeNormals();
               if (mesh.Faces.Count > 0)
@@ -189,70 +214,6 @@ namespace RhinoInside.Revit.GH.Types
             }
           }
         }
-      }
-
-      if (typeof(Q).IsAssignableFrom(typeof(GH_Curve)))
-      {
-        var axis = Axis;
-        if (axis is null)
-          return false;
-
-        target = (Q) (object) new GH_Curve(axis);
-        return true;
-      }
-
-      if (typeof(Q).IsAssignableFrom(typeof(GH_Plane)))
-      {
-        try
-        {
-          var plane = Plane;
-          if (!plane.IsValid || !plane.Origin.IsValid)
-            return false;
-
-          target = (Q) (object) new GH_Plane(plane);
-          return true;
-        }
-        catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
-      }
-
-      if (typeof(Q).IsAssignableFrom(typeof(GH_Point)))
-      {
-        var location = Location;
-        if (!location.IsValid)
-          return false;
-
-        target = (Q) (object) new GH_Point(location);
-        return true;
-      }
-
-      if (typeof(Q).IsAssignableFrom(typeof(GH_Vector)))
-      {
-        var normal = ZAxis;
-        if (!normal.IsValid)
-          return false;
-
-        target = (Q) (object) new GH_Vector(normal);
-        return true;
-      }
-
-      if (typeof(Q).IsAssignableFrom(typeof(GH_Transform)))
-      {
-        var plane = Plane;
-        if (!plane.IsValid || !plane.Origin.IsValid)
-          return false;
-
-        target = (Q) (object) new GH_Transform(Rhino.Geometry.Transform.PlaneToPlane(Rhino.Geometry.Plane.WorldXY, plane));
-        return true;
-      }
-
-      if (typeof(Q).IsAssignableFrom(typeof(GH_Box)))
-      {
-        var box = Box;
-        if (!box.IsValid)
-          return false;
-
-        target = (Q) (object) new GH_Box(box);
-        return true;
       }
 
       return false;
@@ -298,180 +259,18 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region Location
-    protected Rhino.Geometry.BoundingBox clippingBox = Rhino.Geometry.BoundingBox.Empty;
-    public Rhino.Geometry.BoundingBox ClippingBox
+    protected BoundingBox clippingBox = BoundingBox.Unset;
+    public virtual BoundingBox ClippingBox
     {
       get
       {
         if (!clippingBox.IsValid)
         {
-          var element = (DB.Element) this;
-          if (element is object)
+          if ((DB.Element) this is DB.Element element)
             clippingBox = element.get_BoundingBox(null).ToBoundingBox();
         }
 
         return clippingBox;
-      }
-    }
-
-    public Rhino.Geometry.Box Box
-    {
-      get
-      {
-        var b = Rhino.Geometry.Box.Empty;
-
-        var element = (DB.Element) this;
-        if (element?.get_BoundingBox(null) is DB.BoundingBoxXYZ bbox)
-        {
-          b = new Rhino.Geometry.Box(new Rhino.Geometry.BoundingBox(bbox.Min.ToPoint3d(), bbox.Max.ToPoint3d()));
-          if (!b.Transform(Rhino.Geometry.Transform.Scale(Rhino.Geometry.Point3d.Origin, Revit.ModelUnits) * bbox.Transform.ToTransform()))
-            b = new Rhino.Geometry.Box(ClippingBox);
-        }
-
-        return b;
-      }
-    }
-
-    public virtual Rhino.Geometry.Point3d Location
-    {
-      get
-      {
-        var p = new Rhino.Geometry.Point3d(double.NaN, double.NaN, double.NaN);
-
-        var element = (DB.Element) this;
-        if (element is object)
-        {
-          if (element is DB.Instance instance)
-          {
-            p = instance.GetTransform().Origin.ToPoint3d();
-          }
-          else switch (element.Location)
-          {
-            case DB.LocationPoint pointLocation: p = pointLocation.Point.ToPoint3d(); break;
-            case DB.LocationCurve curveLocation: p = curveLocation.Curve.Evaluate(0.0, curveLocation.Curve.IsBound).ToPoint3d(); break;
-            default:
-              if (element.get_BoundingBox(null) is DB.BoundingBoxXYZ bbox)
-                p = bbox.Min.ToPoint3d();
-              break;
-          }
-        }
-
-        return p;
-      }
-    }
-
-    public virtual Rhino.Geometry.Vector3d XAxis
-    {
-      get
-      {
-        var x = Rhino.Geometry.Vector3d.Zero;
-
-        var element = (DB.Element) this;
-        if (element is object)
-        {
-          if (element is DB.Instance instance)
-            x = (Rhino.Geometry.Vector3d) instance.GetTransform().BasisX.ToPoint3d();
-          else if (element.Location is DB.LocationCurve curveLocation)
-          {
-            var c = curveLocation.Curve.ToCurve();
-            x = c.TangentAt(c.Domain.Min);
-          }
-          else if (element.Location is DB.LocationPoint pointLocation)
-          {
-            x = Rhino.Geometry.Vector3d.XAxis;
-            x.Rotate(pointLocation.Rotation, Rhino.Geometry.Vector3d.ZAxis);
-          }
-
-          if (x.IsZero || !x.Unitize())
-            x = Rhino.Geometry.Vector3d.XAxis;
-        }
-
-        return x;
-      }
-    }
-
-    public virtual Rhino.Geometry.Vector3d YAxis
-    {
-      get
-      {
-        var y = Rhino.Geometry.Vector3d.Zero;
-
-        var element = (DB.Element) this;
-        if (element is object)
-        {
-          if (element is DB.Instance instance)
-            y = (Rhino.Geometry.Vector3d) instance.GetTransform().BasisY.ToPoint3d();
-          else if (element.Location is DB.LocationCurve curveLocation)
-          {
-            var c = curveLocation.Curve.ToCurve();
-            y = c.CurvatureAt(c.Domain.Min);
-          }
-          else if (element.Location is DB.LocationPoint pointLocation)
-          {
-            y = Rhino.Geometry.Vector3d.YAxis;
-            y.Rotate(pointLocation.Rotation, Rhino.Geometry.Vector3d.ZAxis);
-          }
-
-          if (y.IsZero || !y.Unitize())
-          {
-            var axis = XAxis;
-            if (new Rhino.Geometry.Vector3d(axis.X, axis.Y, 0.0).IsZero)
-              y = new Rhino.Geometry.Vector3d(axis.Z, 0.0, -axis.X);
-            else
-              y = new Rhino.Geometry.Vector3d(-axis.Y, axis.X, 0.0);
-          }
-
-          if (y.IsZero || !y.Unitize())
-            y = Rhino.Geometry.Vector3d.YAxis;
-        }
-
-        return y;
-      }
-    }
-
-    public virtual Rhino.Geometry.Vector3d ZAxis
-    {
-      get
-      {
-        var z = Rhino.Geometry.Vector3d.Zero;
-
-        var element = (DB.Element) this;
-        if (element is object)
-        {
-          if (element is DB.Instance instance)
-            z = (Rhino.Geometry.Vector3d) instance.GetTransform().BasisZ.ToPoint3d();
-          else if (element.Location is DB.LocationCurve curveLocation)
-          {
-            var c = curveLocation.Curve.ToCurve();
-            z = Rhino.Geometry.Vector3d.CrossProduct(c.TangentAt(c.Domain.Min), c.CurvatureAt(c.Domain.Min));
-          }
-          else if (element.Location is DB.LocationPoint pointLocation)
-          {
-            z = Rhino.Geometry.Vector3d.ZAxis;
-          }
-
-          if (z.IsZero || !z.Unitize())
-            z = Rhino.Geometry.Vector3d.CrossProduct(XAxis, YAxis);
-
-          if (z.IsZero || !z.Unitize())
-            z = Rhino.Geometry.Vector3d.ZAxis;
-        }
-
-        return z;
-      }
-    }
-
-    public virtual Rhino.Geometry.Plane Plane => new Rhino.Geometry.Plane(Location, XAxis, YAxis);
-
-    public virtual Rhino.Geometry.Curve Axis
-    {
-      get
-      {
-        var element = (DB.Element) this;
-
-        return element?.Location is DB.LocationCurve curveLocation ?
-          curveLocation.Curve.ToCurve() :
-          null;
       }
     }
     #endregion

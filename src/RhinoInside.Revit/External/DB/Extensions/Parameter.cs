@@ -87,25 +87,23 @@ namespace RhinoInside.Revit.External.DB.Extensions
   {
     public static bool ResetValue(this Parameter parameter)
     {
-      if (parameter.Id.IsBuiltInId())
-        throw new InvalidOperationException("BuiltIn parameters can not be reseted");
+      if (!parameter.HasValue)
+        return true;
 
-      if (parameter.HasValue)
-      {
 #if REVIT_2020
-        if (parameter.IsShared && (parameter.Definition as ExternalDefinition).HideWhenNoValue)
-          return parameter.ClearValue();
+      if (parameter.IsShared && (parameter.Definition as ExternalDefinition).HideWhenNoValue)
+        return parameter.ClearValue();
 #endif
-        switch (parameter.StorageType)
-        {
-          case StorageType.Integer: parameter.Set(0); break;
-          case StorageType.Double: parameter.Set(0.0); break;
-          case StorageType.String: parameter.Set(string.Empty); break;
-          case StorageType.ElementId: parameter.Set(ElementId.InvalidElementId); break;
-        }
+
+      switch (parameter.StorageType)
+      {
+        case StorageType.Integer:   return parameter.AsInteger() == 0                            || parameter.Set(0);
+        case StorageType.Double:    return parameter.AsDouble() == 0.0                           || parameter.Set(0.0);
+        case StorageType.String:    return parameter.AsString() == string.Empty                  || parameter.Set(string.Empty);
+        case StorageType.ElementId: return parameter.AsElementId() == ElementId.InvalidElementId || parameter.Set(ElementId.InvalidElementId);
       }
 
-      return true;
+      return false;
     }
   }
 }

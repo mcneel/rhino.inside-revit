@@ -11,6 +11,7 @@ using Rhino.PlugIns;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.GH.Bake;
 using DB = Autodesk.Revit.DB;
+using Microsoft.Win32.SafeHandles;
 
 namespace RhinoInside.Revit.UI
 {
@@ -63,8 +64,7 @@ namespace RhinoInside.Revit.UI
     {
       // check to see if any document path is provided in journal data
       // if yes, open the document
-      string filename = null;
-      if (data.JournalData.TryGetValue("Open", out filename) && File.Exists(filename))
+      if (data.JournalData.TryGetValue("Open", out var filename) && File.Exists(filename))
         GH.Guest.ShowAndOpenDocumentAsync(filename);
       // otherwise, just open the GH window
       else
@@ -75,6 +75,66 @@ namespace RhinoInside.Revit.UI
   }
 
   #region Solver
+  [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
+  class CommandGrasshopperSolver : GrasshopperCommand
+  {
+    static PushButton Button;
+
+    protected new class Availability : GrasshopperCommand.Availability
+    {
+      public override bool IsCommandAvailable(UIApplication _, DB.CategorySet selectedCategories)
+      {
+        RefreshUI();
+        return base.IsCommandAvailable(_, selectedCategories);
+      }
+    }
+
+    public static void RefreshUI()
+    {
+      if (GH_Document.EnableSolutions)
+      {
+        Button.ToolTip = "Disable the Grasshopper solver";
+        Button.Image = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.SolverOn.png", true);
+        Button.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.SolverOn.png");
+      }
+      else
+      {
+        Button.ToolTip = "Enable the Grasshopper solver";
+        Button.Image = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.SolverOff.png", true);
+        Button.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.SolverOff.png");
+      }
+    }
+
+    public static void CreateUI(RibbonPanel ribbonPanel)
+    {
+      var buttonData = NewPushButtonData<CommandGrasshopperSolver, Availability>("Solver");
+      Button = ribbonPanel.AddItem(buttonData) as PushButton;
+      if (Button is object)
+      {
+        Button.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
+        RefreshUI();
+      }
+    }
+
+    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
+    {
+      GH_Document.EnableSolutions = !GH_Document.EnableSolutions;
+      RefreshUI();
+
+      if (GH_Document.EnableSolutions)
+      {
+        if (Instances.ActiveCanvas?.Document is GH_Document definition)
+          definition.NewSolution(false);
+      }
+      else
+      {
+        Revit.RefreshActiveView();
+      }
+
+      return Result.Succeeded;
+    }
+  }
+
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
   class CommandGrasshopperRecompute : GrasshopperCommand
   {
@@ -102,27 +162,22 @@ namespace RhinoInside.Revit.UI
     {
       if (Instances.ActiveCanvas?.Document is GH_Document definition)
       {
-        using (var modal = new Rhinoceros.ModalScope())
+        if(GH_Document.EnableSolutions) definition.NewSolution(true);
+        else
         {
-          if(GH_Document.EnableSolutions) definition.NewSolution(true);
-          else
-          {
-            GH_Document.EnableSolutions = true;
-            try { definition.NewSolution(false); }
-            finally { GH_Document.EnableSolutions = false; }
-          }
-
-          do
-          {
-            var result = modal.Run(false, false);
-            if (result == Result.Failed)
-              return result;
-
-          } while (definition.ScheduleDelay >= GH_Document.ScheduleRecursive);
-
-          if (definition.SolutionState == GH_ProcessStep.PostProcess)
-            return Result.Succeeded;
+          GH_Document.EnableSolutions = true;
+          try { definition.NewSolution(false); }
+          finally { GH_Document.EnableSolutions = false; }
         }
+
+        // If there are no scheduled solutions return control back to Revit now
+        if (definition.ScheduleDelay > GH_Document.ScheduleRecursive)
+          WindowHandle.ActiveWindow = Rhinoceros.MainWindow;
+
+        if (definition.SolutionState == GH_ProcessStep.PostProcess)
+          return Result.Succeeded;
+        else
+          return Result.Cancelled;
       }
 
       return Result.Failed;

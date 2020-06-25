@@ -1,18 +1,16 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using GH_IO.Serialization;
-using Grasshopper;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
+using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.Geometry.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
   /// <summary>
-  /// Base class for all elements that have a Graphical representation in Revit
+  /// Base class for any <see cref="DB.Element"/> that has a Graphical representation in Revit
   /// </summary>
   public class GraphicalElement :
     Element,
@@ -22,7 +20,7 @@ namespace RhinoInside.Revit.GH.Types
     public GraphicalElement() { }
     public GraphicalElement(DB.Element element) : base(element) { }
 
-    protected override bool SetValue(DB.Element element) => IsValidElement(element) ? base.SetValue(element) : false;
+    protected override bool SetValue(DB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static bool IsValidElement(DB.Element element)
     {
       if (element is DB.ElementType)
@@ -41,7 +39,7 @@ namespace RhinoInside.Revit.GH.Types
         element is DB.CombinableElement ||
         element is DB.Architecture.TopographySurface ||
         element is DB.Opening ||
-        (element.Category is object && element.CanHaveTypeAssigned())
+        InstanceElement.IsValidElement(element)
       );
     }
 
@@ -67,6 +65,214 @@ namespace RhinoInside.Revit.GH.Types
     #region IGH_PreviewData
     public virtual void DrawViewportWires(GH_PreviewWireArgs args) { }
     public virtual void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
+    #endregion
+
+    public override bool CastTo<Q>(ref Q target)
+    {
+      if (base.CastTo<Q>(ref target))
+        return true;
+
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Plane)))
+      {
+        try
+        {
+          var plane = Location;
+          if (!plane.IsValid || !plane.Origin.IsValid)
+            return false;
+
+          target = (Q) (object) new GH_Plane(plane);
+          return true;
+        }
+        catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Point)))
+      {
+        var location = Location.Origin;
+        if (!location.IsValid)
+          return false;
+
+        target = (Q) (object) new GH_Point(location);
+        return true;
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Vector)))
+      {
+        var orientation = Orientation;
+        if (!orientation.IsValid || orientation.IsZero)
+          return false;
+
+        target = (Q) (object) new GH_Vector(orientation);
+        return true;
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Transform)))
+      {
+        var plane = Location;
+        if (!plane.IsValid || !plane.Origin.IsValid)
+          return false;
+
+        target = (Q) (object) new GH_Transform(Transform.PlaneToPlane(Plane.WorldXY, plane));
+        return true;
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Box)))
+      {
+        var box = Box;
+        if (!box.IsValid)
+          return false;
+
+        target = (Q) (object) new GH_Box(box);
+        return true;
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Curve)))
+      {
+        var axis = Curve;
+        if (axis is null)
+          return false;
+
+        target = (Q) (object) new GH_Curve(axis);
+        return true;
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Surface)))
+      {
+        var surface = Surface;
+        if (surface is null)
+          return false;
+
+        target = (Q) (object) new GH_Surface(surface);
+        return true;
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Brep)))
+      {
+        var surface = Surface;
+        if (surface is null)
+          return false;
+
+        target = (Q) (object) new GH_Brep(surface);
+        return true;
+      }
+
+      return false;
+    }
+
+    #region Location
+    public virtual Box Box
+    {
+      get
+      {
+        if ((DB.Element) this is DB.Element element)
+          return element.get_BoundingBox(null).ToBox();
+
+        return new Box(ClippingBox);
+      }
+    }
+
+    public virtual Level Level => default;
+
+    public virtual Plane Location
+    {
+      get
+      {
+        if (!ClippingBox.IsValid) return new Plane
+        (
+          new Point3d(double.NaN, double.NaN, double.NaN),
+          new Vector3d(double.NaN, double.NaN, double.NaN),
+          new Vector3d(double.NaN, double.NaN, double.NaN)
+        );
+
+        var origin = ClippingBox.Center;
+        var axis = Vector3d.XAxis;
+        var perp = Vector3d.YAxis;
+
+        var element = (DB.Element) this;
+        if (element is object)
+        {
+          switch (element.Location)
+          {
+            case DB.LocationPoint pointLocation:
+              origin = pointLocation.Point.ToPoint3d();
+              try
+              {
+                axis.Rotate(pointLocation.Rotation, Vector3d.ZAxis);
+                perp.Rotate(pointLocation.Rotation, Vector3d.ZAxis);
+              }
+              catch { }
+
+              break;
+            case DB.LocationCurve curveLocation:
+              //var cs = curveLocation.Curve.ComputeDerivatives(0.0, normalized: true);
+              //origin = cs.Origin.ToPoint3d();
+              //axis = cs.BasisX.ToVector3d();
+              //perp = (cs.BasisY.IsZeroLength() ? cs.BasisX.PerpVector() : cs.BasisY).ToVector3d();
+              var start = curveLocation.Curve.Evaluate(0.0, normalized: true).ToPoint3d();
+              var end = curveLocation.Curve.Evaluate(1.0, normalized: true).ToPoint3d();
+              axis = end - start;
+              origin = start + (axis * 0.5);
+              perp = axis.PerpVector();
+              break;
+          }
+        }
+
+        return new Plane(origin, axis, perp);
+      }
+    }
+
+    public virtual Vector3d Orientation => Location.YAxis;
+
+    public virtual Vector3d Handing => Location.XAxis;
+
+    public virtual Curve Curve
+    {
+      get
+      {
+        var element = (DB.Element) this;
+
+        if (element is DB.ModelCurve modelCurve)
+        {
+          return modelCurve.GeometryCurve.ToCurve();
+        }
+
+        if (element.Location is DB.LocationPoint location)
+        {
+          if (element is DB.FamilyInstance instance)
+          {
+            if (instance.Symbol.Family.FamilyPlacementType == DB.FamilyPlacementType.TwoLevelsBased)
+            {
+              var baseLevel = element.get_Parameter(DB.BuiltInParameter.FAMILY_BASE_LEVEL_PARAM).AsElementId();
+              var topLevel = element.get_Parameter(DB.BuiltInParameter.FAMILY_TOP_LEVEL_PARAM).AsElementId();
+              var baseLevelOffset = element.get_Parameter(DB.BuiltInParameter.FAMILY_BASE_LEVEL_OFFSET_PARAM).AsDouble();
+              var topLevelOffset = element.get_Parameter(DB.BuiltInParameter.FAMILY_TOP_LEVEL_OFFSET_PARAM).AsDouble();
+
+              var baseElevation = ((element.Document.GetElement(baseLevel) as DB.Level).Elevation + baseLevelOffset) * Revit.ModelUnits;
+              var topElevation = ((element.Document.GetElement(topLevel) as DB.Level).Elevation + topLevelOffset) * Revit.ModelUnits;
+
+              var origin = location.Point.ToPoint3d();
+              return new LineCurve
+              (
+                new Line
+                (
+                  origin + Vector3d.ZAxis * baseElevation,
+                  origin + Vector3d.ZAxis * topElevation
+                )
+                ,
+                baseElevation,
+                topElevation
+              );
+            }
+          }
+        }
+
+        return element?.Location is DB.LocationCurve curveLocation ?
+          curveLocation.Curve.ToCurve() :
+          null;
+      }
+    }
+
+    public virtual Brep Surface => null;
     #endregion
   }
 }

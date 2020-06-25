@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -181,9 +181,9 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="RhinoCommon" Version="7.0.20056.13055-wip" IncludeAssets="compile; build" />
-        <PackageReference Include="Grasshopper" Version="7.0.20056.13055-wip" IncludeAssets="compile; build" />
-        <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitVersion).0.*" IncludeAssets="build; compile" />
+        <PackageReference Include="RhinoCommon" Version="7.0.20140.14505-wip" IncludeAssets="compile; build" />
+        <PackageReference Include="Grasshopper" Version="7.0.20140.14505-wip" IncludeAssets="compile; build" />
+        <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitVersion).0.0" IncludeAssets="build; compile" />
       </ItemGroup>
     </Otherwise>
   </Choose>
@@ -193,6 +193,7 @@
     <Compile Include="Convert\Display\PreviewConverter.cs" />
     <Compile Include="Convert\Geometry\ExtrusionEncoder.cs" />
     <Compile Include="Convert\Geometry\GeometryEncoder.cs" />
+    <Compile Include="Convert\Geometry\MeshDecoder.cs" />
     <Compile Include="Convert\Geometry\Raw\RawDecoder.cs" />
     <Compile Include="Convert\Geometry\MeshEncoder.cs" />
     <Compile Include="Convert\Geometry\NurbsSplineEncoder.cs" />
@@ -211,12 +212,15 @@
     <Compile Include="Exceptions.cs" />
     <Compile Include="External\ApplicationServices\Extensions\Application.cs" />
     <Compile Include="External\DB\Application.cs" />
+    <Compile Include="External\DB\BuiltInMullionPositionId.cs" />
+    <Compile Include="External\DB\BuiltInMullionProfileId.cs" />
     <Compile Include="External\DB\Extensions\Category.cs" />
     <Compile Include="External\DB\Extensions\Curve.cs" />
     <Compile Include="External\DB\Extensions\CurveLoop.cs" />
     <Compile Include="External\DB\Extensions\Document.cs" />
     <Compile Include="External\DB\Extensions\Element.cs" />
     <Compile Include="External\DB\Extensions\ElementId.cs" />
+    <Compile Include="External\DB\Extensions\ElementType.cs" />
     <Compile Include="External\DB\Extensions\Face.cs" />
     <Compile Include="External\DB\Extensions\FilteredElementCollector.cs" />
     <Compile Include="External\DB\Extensions\GeometryObject.cs" />
@@ -224,8 +228,11 @@
     <Compile Include="External\DB\Extensions\Parameter.cs" />
     <Compile Include="External\DB\Extensions\ParameterFilterElement.cs" />
     <Compile Include="External\DB\Extensions\Surface.cs" />
+    <Compile Include="External\DB\Extensions\View.cs" />
     <Compile Include="External\DB\Extensions\XYZ.cs" />
     <Compile Include="External\DB\Extensions\Wall.cs" />
+    <Compile Include="External\DB\ExternalFailures.cs" />
+    <Compile Include="External\DB\FloorFunction.cs" />
     <Compile Include="External\DB\ParameterBinding.cs" />
     <Compile Include="External\DB\ParameterClass.cs" />
     <Compile Include="External\DB\UniqueId.cs" />
@@ -233,12 +240,13 @@
     <Compile Include="External\DB\CurtainGridLayout.cs" />
     <Compile Include="External\DB\CurtainGridJoinCondition.cs" />
     <Compile Include="External\DB\CurtainMullionSystemFamily.cs" />
-    <Compile Include="External\DB\CurtainMullionPosition.cs" />
     <Compile Include="External\DB\CurtainPanelSystemFamily.cs" />
     <Compile Include="External\UI\Application.cs" />
     <Compile Include="External\UI\Command.cs" />
     <Compile Include="External\UI\EventHandler.cs" />
     <Compile Include="External\UI\Extensions\UIApplication.cs" />
+    <Compile Include="External\UI\Extensions\UIDocument.cs" />
+    <Compile Include="External\UI\Extensions\UIView.cs" />
     <Compile Include="External\UI\Selection.cs" />
     <Compile Include="External\UI\TaskDialogIcons.cs" />
     <Compile Include="Extensions\RhinoCommon.cs" />
@@ -262,6 +270,7 @@
     <Compile Include="UI\GrasshopperCommand.cs" />
     <Compile Include="UI\GrasshopperPlayerCommand.cs" />
     <Compile Include="UI\HelpCommands.cs" />
+    <Compile Include="UI\Rhinoceros\Import.cs" />
     <Compile Include="UI\RhinoCommand.cs" />
     <Compile Include="GH\Guest.cs" />
     <Compile Include="GH\PreviewServer.cs" />
@@ -270,9 +279,6 @@
     <Compile Include="Operator.cs" />
     <Compile Include="State.cs" />
     <Compile Include="Optional.cs" />
-    <Compile Include="Convert.cs" />
-    <Compile Include="Convert.ToHost.cs" />
-    <Compile Include="Convert.ToRhino.cs" />
     <Compile Include="Revit.cs" />
     <Compile Include="Revit.FailuresPreprocessor.cs" />
     <Compile Include="Addin.cs" />
@@ -286,7 +292,6 @@
     <None Include="Samples\Sample3.ghx" />
     <None Include="Samples\Sample4.ghx" />
     <None Include="Samples\Sample7.py" />
-    <Compile Include="Samples\Sample8.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -313,11 +318,9 @@
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\Recompute.png" />
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\SolverOff.png" />
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\SolverOn.png" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Preview_Shaded.png" />
+    <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Import-3DM.png" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <Copy Condition="$(Configuration.Contains('Debug'))" UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.dll;$(ProjectDir)$(OutDir)RhinoInside.Revit.pdb" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />

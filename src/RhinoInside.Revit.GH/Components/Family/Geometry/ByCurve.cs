@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "C";
 
     public FamilyGeometryByCurve()
-    : base("Family Curve Geomtry", "FamCrv", string.Empty, "Revit", "Family")
+    : base("Component Family Curve", "FamCrv", string.Empty, "Revit", "Family")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

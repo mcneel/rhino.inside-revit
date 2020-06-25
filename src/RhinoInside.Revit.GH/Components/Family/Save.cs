@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -13,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "S";
 
     public FamilySave()
-    : base("Save Family", "Save", "Saves the Family to a given file path.", "Revit", "Family")
+    : base("Save Component Family", "Save", "Saves the Family to a given file path.", "Revit", "Family")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -115,7 +116,10 @@ namespace RhinoInside.Revit.GH.Components
             }
           }
           catch (Autodesk.Revit.Exceptions.InvalidOperationException e) { AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message); }
-          finally { familyDoc.Close(false); }
+          finally
+          {
+            familyDoc.Release();
+          }
         }
     }
   }

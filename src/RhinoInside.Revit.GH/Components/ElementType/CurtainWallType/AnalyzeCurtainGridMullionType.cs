@@ -6,18 +6,18 @@ using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class AnalyseCurtainGridMullionType : AnalysisComponent
+  public class AnalyzeCurtainGridMullionType : AnalysisComponent
   {
     public override Guid ComponentGuid => new Guid("66A9F189-D2BD-4E47-8C97-A469E3DD861B");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "ACGMT";
 
-    public AnalyseCurtainGridMullionType() : base(
-      name: "Analyze Curtain Grid Mullion Type",
-      nickname: "A-CGMT",
-      description: "Analyze given curtain grid mullion type",
+    public AnalyzeCurtainGridMullionType() : base(
+      name: "Analyze Mullion Type",
+      nickname: "A-MT",
+      description: "Analyze given mullion type",
       category: "Revit",
-      subCategory: "Analyze"
+      subCategory: "Wall"
     )
     {
     }
@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       manager.AddParameter(
         param: new Parameters.ElementType(),
-        name: "Curtain Grid Mullion Type",
+        name: "Mullion Type",
         nickname: "CGMT",
         description: "Curtain Grid Mullion Type",
         access: GH_ParamAccess.item
@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
       manager.AddParameter(
-        param: new Parameters.CurtainMullionSystemFamily_ValueList(),
+        param: new Parameters.Param_Enum<Types.CurtainMullionSystemFamily>(),
         name: "Mullion System Family",
         nickname: "MSF",
         description: "Mullion System Family",
@@ -57,21 +57,20 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(
         param: new Parameters.ElementType(),
         name: "Profile",
-        nickname: "PF",
+        nickname: "PRF",
         description: "Mullion type profile",
         access: GH_ParamAccess.item
         );
       manager.AddParameter(
-        param: new Parameters.CurtainMullionPosition_ValueList(),
+        param: new Parameters.ElementType(),
         name: "Position",
         nickname: "POS",
         description: "Mullion type position",
         access: GH_ParamAccess.item
         );
-      manager.AddParameter(
-        param: new Parameters.CurtainMullionPosition_ValueList(),
-        name: "Corner Mullion?",
-        nickname: "CM?",
+      manager.AddBooleanParameter(
+        name: "Corner Mullion",
+        nickname: "CM",
         description: "Whether mullion type is a corner mullion",
         access: GH_ParamAccess.item
         );
@@ -105,7 +104,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       // get input
       DB.MullionType mullionType = default;
-      if (!DA.GetData("Curtain Grid Mullion Type", ref mullionType))
+      if (!DA.GetData("Mullion Type", ref mullionType))
         return;
 
       // determine the mullion type by looking at parameters
@@ -166,13 +165,18 @@ namespace RhinoInside.Revit.GH.Components
           mullionSystemFamily = DBX.CurtainMullionSystemFamily.VCorner;
       }
 
-      DA.SetData("Mullion System Family", new Types.CurtainMullionSystemFamily(mullionSystemFamily));
+      DA.SetData("Mullion System Family", mullionSystemFamily);
 
       PipeHostParameter(DA, mullionType, DB.BuiltInParameter.MULLION_ANGLE, "Angle");
       PipeHostParameter(DA, mullionType, DB.BuiltInParameter.MULLION_OFFSET, "Offset");
-      PipeHostParameter(DA, mullionType, DB.BuiltInParameter.MULLION_PROFILE, "Profile");
-      PipeHostParameter<Types.CurtainMullionPosition>(DA, mullionType, DB.BuiltInParameter.MULLION_POSITION, "Position");
-      PipeHostParameter(DA, mullionType, DB.BuiltInParameter.MULLION_CORNER_TYPE, "Corner Mullion?");
+
+      var profile = new Types.MullionProfile(mullionType.Document, mullionType.get_Parameter(DB.BuiltInParameter.MULLION_PROFILE).AsElementId());
+      DA.SetData("Profile", profile);
+
+      var position = new Types.MullionPosition(mullionType.Document, mullionType.get_Parameter(DB.BuiltInParameter.MULLION_POSITION).AsElementId());
+      DA.SetData("Position", position);
+
+      PipeHostParameter(DA, mullionType, DB.BuiltInParameter.MULLION_CORNER_TYPE, "Corner Mullion");
 
       // output params are reused for various mullion types
       //
@@ -193,7 +197,7 @@ namespace RhinoInside.Revit.GH.Components
         mullionType.get_Parameter(DB.BuiltInParameter.RECT_MULLION_THICK) ??
         mullionType.get_Parameter(DB.BuiltInParameter.CUST_MULLION_THICK) ??
         mullionType.get_Parameter(DB.BuiltInParameter.TRAP_MULL_WIDTH);
-      DA.SetData("Thickness", thicknessParam?.AsDouble());
+      DA.SetData("Thickness", thicknessParam?.AsDoubleInRhinoUnits());
 
       var depth1Param =
         mullionType.get_Parameter(DB.BuiltInParameter.RECT_MULLION_WIDTH1) ??
@@ -201,20 +205,20 @@ namespace RhinoInside.Revit.GH.Components
         mullionType.get_Parameter(DB.BuiltInParameter.LV_MULLION_LEG1) ??
         mullionType.get_Parameter(DB.BuiltInParameter.MULLION_DEPTH1) ??
         mullionType.get_Parameter(DB.BuiltInParameter.MULLION_DEPTH);
-      DA.SetData("Depth 1", depth1Param?.AsDouble());
+      DA.SetData("Depth 1", depth1Param?.AsDoubleInRhinoUnits());
 
       var depth2Param =
         mullionType.get_Parameter(DB.BuiltInParameter.RECT_MULLION_WIDTH2) ??
         mullionType.get_Parameter(DB.BuiltInParameter.CUST_MULLION_WIDTH2) ??
         mullionType.get_Parameter(DB.BuiltInParameter.LV_MULLION_LEG2) ??
         mullionType.get_Parameter(DB.BuiltInParameter.MULLION_DEPTH2);
-      DA.SetData("Depth 2", depth2Param?.AsDouble());
+      DA.SetData("Depth 2", depth2Param?.AsDoubleInRhinoUnits());
 
       var radiusParam = mullionType.get_Parameter(DB.BuiltInParameter.CIRC_MULLION_RADIUS);
       if (radiusParam != null)
       {
-        DA.SetData("Radius", radiusParam?.AsDouble());
-        DA.SetData("Thickness", radiusParam?.AsDouble() * 2);
+        DA.SetData("Radius", radiusParam?.AsDoubleInRhinoUnits());
+        DA.SetData("Thickness", radiusParam?.AsDoubleInRhinoUnits() * 2);
       }
     }
   }

@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool IsBuiltInId(this ElementId id) => id is object && id <= ElementId.InvalidElementId;
 
     /// <summary>
-    /// Checks if id corresponds to a Category in doc
+    /// Checks if <paramref name="id"/> corresponds to a Category in <paramref name="doc"/>/// 
     /// </summary>
     /// <param name="id"></param>
     /// <param name="doc"></param>
@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
     /// <summary>
-    /// Checks if id corresponds to a Parameter in doc
+    /// Checks if <paramref name="id"/> corresponds to a Parameter in <paramref name="doc"/>/// 
     /// </summary>
     /// <param name="id"></param>
     /// <param name="doc"></param>
@@ -45,6 +45,20 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
 
       return ((BuiltInParameter) id.IntegerValue).IsValid();
+    }
+
+    /// <summary>
+    /// Checks if <paramref name="id"/> corresponds to a ElementType in <paramref name="doc"/>
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="doc"></param>
+    /// <returns></returns>
+    public static bool IsElementTypeId(this ElementId id, Document doc)
+    {
+      using (var filter = new ElementIsElementTypeFilter())
+      {
+        return filter.PassesFilter(doc, id);
+      }
     }
 
     /// <summary>

@@ -6,6 +6,7 @@ using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
 using Grasshopper.Kernel.Types;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
@@ -15,7 +16,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
     public override Guid ComponentGuid => new Guid("97DD546D-65C3-4D00-A609-3F5FBDA67142");
 
-    public ElementType() : base("Element Type", "Element Type", "Represents a Revit document element type.", "Params", "Revit") { }
+    public ElementType() : base("Type", "Type", "Represents a Revit document element type.", "Params", "Revit Primitives") { }
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
@@ -101,7 +102,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
         foreach (var familyName in collector.WhereElementIsElementType().
           WherePasses(new DB.ElementMulticategoryFilter(categories)).
-          ToElements().Cast<DB.ElementType>().GroupBy(x => x.FamilyName).Select(x => x.Key))
+          ToElements().Cast<DB.ElementType>().GroupBy(x => x.GetFamilyName()).Select(x => x.Key))
         {
           familiesBox.Items.Add(familyName);
         }
@@ -152,7 +153,7 @@ namespace RhinoInside.Revit.GH.Parameters
               (
                 !string.IsNullOrEmpty(familyName) &&
                 doc.GetElement(elementType) is DB.ElementType type &&
-                type.FamilyName != familyName
+                type.GetFamilyName() != familyName
               )
                 continue;
 
@@ -236,12 +237,12 @@ namespace RhinoInside.Revit.GH.Parameters
       base.AddedToDocument(document);
     }
 
-    protected override void RefreshList(string FamilyName)
+    protected override void RefreshList(string familyName)
     {
       var selectedItems = ListItems.Where(x => x.Selected).Select(x => x.Expression).ToList();
       ListItems.Clear();
 
-      if (FamilyName.Length == 0 || FamilyName[0] == '\'')
+      if (familyName.Length == 0 || familyName[0] == '\'')
         return;
 
       if (Revit.ActiveDBDocument is object)
@@ -249,16 +250,26 @@ namespace RhinoInside.Revit.GH.Parameters
         int selectedItemsCount = 0;
         using (var collector = new DB.FilteredElementCollector(Revit.ActiveDBDocument))
         {
-          foreach (var elementType in collector.WhereElementIsElementType().Cast<DB.ElementType>())
+          var elementCollector = collector.WhereElementIsElementType();
+
+          if (Components.ElementCollectorComponent.TryGetFilterStringParam(DB.BuiltInParameter.SYMBOL_FAMILY_NAME_PARAM, ref familyName, out var familyNameFilter))
+            elementCollector = elementCollector.WherePasses(familyNameFilter);
+
+          var elementTypes = elementCollector.Cast<DB.ElementType>();
+
+          foreach (var elementType in elementTypes)
           {
-            if (!elementType.FamilyName.IsSymbolNameLike(FamilyName))
-              continue;
+            if (familyName is object)
+            {
+              if (!elementType.GetFamilyName().IsSymbolNameLike(familyName))
+                continue;
+            }
 
             if (SourceCount == 0)
             {
               // If is a no pattern match update NickName case
-              if (string.Equals(elementType.FamilyName, FamilyName, StringComparison.OrdinalIgnoreCase))
-                FamilyName = elementType.FamilyName;
+              if (string.Equals(elementType.FamilyName, familyName, StringComparison.OrdinalIgnoreCase))
+                familyName = elementType.FamilyName;
             }
 
             var item = new GH_ValueListItem(elementType.FamilyName + " : " + elementType.Name, elementType.Id.IntegerValue.ToString());
@@ -272,7 +283,7 @@ namespace RhinoInside.Revit.GH.Parameters
         // If no selection and we are not in CheckList mode try to select default model types
         if (ListItems.Count == 0)
         {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, string.Format("No ElementType found using pattern \"{0}\"", FamilyName));
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, string.Format("No ElementType found using pattern \"{0}\"", familyName));
         }
         else if (selectedItemsCount == 0 && ListMode != GH_ValueListMode.CheckList)
         {
@@ -314,7 +325,7 @@ namespace RhinoInside.Revit.GH.Parameters
                     if (elementType.FamilyName != family.Name)
                       continue;
 
-                    var item = new GH_ValueListItem(elementType.FamilyName + " : " + elementType.Name, elementType.Id.IntegerValue.ToString());
+                    var item = new GH_ValueListItem(elementType.GetFamilyName() + " : " + elementType.Name, elementType.Id.IntegerValue.ToString());
                     item.Selected = selectedItems.Contains(item.Expression);
                     ListItems.Add(item);
 
@@ -323,7 +334,7 @@ namespace RhinoInside.Revit.GH.Parameters
                   break;
                 case DB.ElementType elementType:
                   {
-                    var item = new GH_ValueListItem(elementType.FamilyName + " : " + elementType.Name, elementType.Id.IntegerValue.ToString());
+                    var item = new GH_ValueListItem(elementType.GetFamilyName() + " : " + elementType.Name, elementType.Id.IntegerValue.ToString());
                     item.Selected = selectedItems.Contains(item.Expression);
                     ListItems.Add(item);
 
@@ -333,7 +344,7 @@ namespace RhinoInside.Revit.GH.Parameters
                 case DB.Element element:
                   {
                     var type = Revit.ActiveDBDocument.GetElement(element.GetTypeId()) as DB.ElementType;
-                    var item = new GH_ValueListItem(type.FamilyName + " : " + type.Name, type.Id.IntegerValue.ToString());
+                    var item = new GH_ValueListItem(type.GetFamilyName() + " : " + type.Name, type.Id.IntegerValue.ToString());
                     item.Selected = selectedItems.Contains(item.Expression);
                     ListItems.Add(item);
 
@@ -349,7 +360,7 @@ namespace RhinoInside.Revit.GH.Parameters
               {
                 foreach (var elementType in elementTypeCollector.OfCategoryId(c.Value).Cast<DB.ElementType>())
                 {
-                  var item = new GH_ValueListItem(elementType.FamilyName + " : " + elementType.Name, elementType.Id.IntegerValue.ToString());
+                  var item = new GH_ValueListItem(elementType.GetFamilyName() + " : " + elementType.Name, elementType.Id.IntegerValue.ToString());
                   item.Selected = selectedItems.Contains(item.Expression);
                   ListItems.Add(item);
 

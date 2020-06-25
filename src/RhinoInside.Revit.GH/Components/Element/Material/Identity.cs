@@ -12,9 +12,11 @@ namespace RhinoInside.Revit.GH.Components
 
     public MaterialIdentity() : base
     (
-      "Material Identity", "Identity",
-      "Query material identity information",
-      "Revit", "Material"
+      name: "Material Identity",
+      nickname: "Identity",
+      description: "Query material identity information",
+      category: "Revit",
+      subCategory: "Material"
     )
     { }
 
@@ -35,8 +37,8 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetData("Material", ref material))
         return;
 
-      DA.SetData("Class", material.MaterialClass);
-      DA.SetData("Name", material.Name);
+      DA.SetData("Class", material?.MaterialClass);
+      DA.SetData("Name", material?.Name);
     }
   }
 }

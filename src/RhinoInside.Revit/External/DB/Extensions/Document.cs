@@ -7,6 +7,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
 {
   public static class DocumentExtension
   {
+    public static bool Release(this Document doc)
+    {
+      using (var uiDocument = new Autodesk.Revit.UI.UIDocument(doc))
+      {
+        if (uiDocument.GetOpenUIViews().Count == 0)
+          return doc.Close(false);
+      }
+
+      return true;
+    }
+
     public static string GetFilePath(this Document doc)
     {
       if (doc is null)
@@ -120,6 +131,21 @@ namespace RhinoInside.Revit.External.DB.Extensions
       catch (Autodesk.Revit.Exceptions.ArgumentException) { }
 
       return elementId is object;
+    }
+
+    /// <summary>
+    /// Compare two <see cref="Autodesk.Revit.DB.Reference"/> objects to know it are referencing same <see cref="Autodesk.Revit.DB.Element"/>
+    /// </summary>
+    /// <param name="doc"></param>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns>true if both references are equivalent</returns>
+    public static bool AreEquivalentReferences(this Document doc, Reference x, Reference y)
+    {
+      var UniqueIdX = x?.ConvertToStableRepresentation(doc);
+      var UniqueIdY = y?.ConvertToStableRepresentation(doc);
+
+      return UniqueIdX == UniqueIdY;
     }
 
     public static Category GetCategory(this Document doc, string uniqueId)
@@ -290,5 +316,31 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
       return level;
     }
+
+    static readonly Guid PurgePerformanceAdviserRuleId = new Guid("E8C63650-70B7-435A-9010-EC97660C1BDA");
+    public static bool GetPurgableElementTypes(this Document document, out ICollection<ElementId> purgableTypeIds)
+    {
+      try
+      {
+        using (var adviser = PerformanceAdviser.GetPerformanceAdviser())
+        {
+          var rules = adviser.GetAllRuleIds().Where(x => x.Guid == PurgePerformanceAdviserRuleId).ToList();
+          if (rules.Count > 0)
+          {
+            var results = adviser.ExecuteRules(document, rules);
+            if (results.Count > 0)
+            {
+              purgableTypeIds = new HashSet<ElementId>(results[0].GetFailingElements());
+              return true;
+            }
+          }
+        }
+      }
+      catch (Autodesk.Revit.Exceptions.InternalException) { }
+
+      purgableTypeIds = default;
+      return false;
+    }
+
   }
 }

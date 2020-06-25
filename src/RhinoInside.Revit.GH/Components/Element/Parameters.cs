@@ -221,6 +221,7 @@ namespace RhinoInside.Revit.GH
 namespace RhinoInside.Revit.GH.Components
 {
   using External.DB.Extensions;
+
   public class ElementParameterGet : Component
   {
     public override Guid ComponentGuid => new Guid("D86050F2-C774-49B1-9973-FB3AB188DC94");
@@ -295,10 +296,64 @@ namespace RhinoInside.Revit.GH.Components
       if (parameter is null)
         return;
 
-      BeginTransaction(element.Document);
+      StartTransaction(element.Document);
 
       if (ParameterUtils.SetParameter(this, parameter, value))
         DA.SetData("Element", element);
+    }
+  }
+
+  public class ElementParameterReset : TransactionBaseComponent
+  {
+    public override Guid ComponentGuid => new Guid("2C374E6D-A547-45AC-B77D-04DD61317622");
+    public override GH_Exposure Exposure => GH_Exposure.quarternary | GH_Exposure.obscure;
+    protected override string IconTag => "R";
+
+    public ElementParameterReset()
+    : base("Reset Element Parameter", "ResetPara", "Resets the parameter value of a specified Revit Element", "Revit", "Element")
+    { }
+
+    protected override void RegisterInputParams(GH_InputParamManager manager)
+    {
+      manager.AddParameter(new Parameters.Element(), "Element", "E", "Element to update", GH_ParamAccess.item);
+      manager.AddGenericParameter("ParameterKey", "K", "Element parameter to reset", GH_ParamAccess.item);
+    }
+
+    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    {
+      manager.AddParameter(new Parameters.Element(), "Element", "E", "Updated Element", GH_ParamAccess.item);
+    }
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      DB.Element element = null;
+      if (!DA.GetData("Element", ref element))
+        return;
+
+      IGH_Goo key = null;
+      if (!DA.GetData("ParameterKey", ref key))
+        return;
+
+      var parameter = ParameterUtils.GetParameter(this, element, key);
+      if (parameter is null)
+        return;
+
+      using (var transaction = NewTransaction(element.Document))
+      {
+        transaction.Start();
+
+        if (parameter.ResetValue())
+        {
+          if (CommitTransaction(element.Document, transaction) == DB.TransactionStatus.Committed)
+            DA.SetData("Element", element);
+          else
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to reset '{parameter.Definition.Name}'");
+        }
+        else
+        {
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Unable to reset '{parameter.Definition.Name}'");
+        }
+      }
     }
   }
 

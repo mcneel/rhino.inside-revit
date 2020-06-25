@@ -5,6 +5,8 @@ using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using System.Collections.Generic;
+  using System.Collections.ObjectModel;
   using Kernel.Attributes;
 
   [
@@ -42,7 +44,17 @@ namespace RhinoInside.Revit.GH.Types
   ]
   public class UnitType : GH_Enum<DB.UnitType>
   {
-    public override string Text => Value.ToString().Substring(2).Replace('_', ' ');
+    public UnitType() : base(DB.UnitType.UT_Undefined) { }
+    public UnitType(DB.UnitType value) : base(value) { }
+
+    public override bool IsEmpty => Value == DB.UnitType.UT_Undefined;
+
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      Enum.GetValues(typeof(DB.UnitType)).Cast<int>().
+      Where(x => x != (int) DB.UnitType.UT_Custom && x != (int) DB.UnitType.UT_Undefined).
+      ToDictionary(x => x, x => DB.LabelUtils.GetLabelFor((DB.UnitType) x))
+    );
   }
 
   [
@@ -60,23 +72,15 @@ namespace RhinoInside.Revit.GH.Types
   public class BuiltInParameterGroup : GH_Enum<DB.BuiltInParameterGroup>
   {
     public BuiltInParameterGroup() : base(DB.BuiltInParameterGroup.INVALID) { }
-    public override string Text
-    {
-      get
-      {
-        try { return DB.LabelUtils.GetLabelFor(Value); }
-        catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
 
-        return base.Text;
-      }
-    }
+    public override bool IsEmpty => Value == DB.BuiltInParameterGroup.INVALID;
 
-    public override Array GetEnumValues() =>
-      Enum.GetValues(typeof(DB.BuiltInParameterGroup)).
-      Cast<DB.BuiltInParameterGroup>().
-      Where(x => x != DB.BuiltInParameterGroup.INVALID).
-      OrderBy(x => DB.LabelUtils.GetLabelFor(x)).
-      ToArray();
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      Enum.GetValues(typeof(DB.BuiltInParameterGroup)).Cast<int>().
+      OrderBy(x => DB.LabelUtils.GetLabelFor((DB.BuiltInParameterGroup) x)).
+      ToDictionary(x => x, x => DB.LabelUtils.GetLabelFor((DB.BuiltInParameterGroup) x))
+    );
   }
 
   [
@@ -89,22 +93,17 @@ namespace RhinoInside.Revit.GH.Types
     public CategoryType() : base(DB.CategoryType.Invalid) { }
     public CategoryType(DB.CategoryType value) : base(value) { }
 
-    public override Array GetEnumValues() =>
-      Enum.GetValues(typeof(DB.CategoryType)).
-      Cast<DB.CategoryType>().
-      Where(x => x != DB.CategoryType.Invalid).
-      ToArray();
-
-    public override string Text
-    {
-      get
+    public override bool IsEmpty => Value == DB.CategoryType.Invalid;
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
       {
-        if (Value == DB.CategoryType.AnalyticalModel)
-          return "Analytical";
-
-        return base.Text;
+        { (int) DB.CategoryType.Model,            "Model"       },
+        { (int) DB.CategoryType.Annotation,       "Annotation"  },
+        { (int) DB.CategoryType.Internal,         "Internal"    },
+        { (int) DB.CategoryType.AnalyticalModel,  "Analytical"  },
       }
-    }
+    );
   }
 
   [
@@ -120,31 +119,71 @@ namespace RhinoInside.Revit.GH.Types
 
   [
     ComponentGuid("F992A251-4085-4525-A514-298F3155DF8A"),
-    Name("View Detail Level"),
+    Name("Detail Level"),
     Description("Represents a view detail level."),
   ]
-  public class ViewDetailLevel : GH_Enum<DB.ViewDetailLevel> { }
+  public class ViewDetailLevel : GH_Enum<DB.ViewDetailLevel>
+  {
+    public override bool IsEmpty => Value == DB.ViewDetailLevel.Undefined;
+  }
 
   [
     ComponentGuid("83380EFC-D2E2-3A9E-A1D7-939EC71852DD"),
     Name("View Discipline"),
     Description("Represents a Revit view discipline."),
   ]
-  public class ViewDiscipline : GH_Enum<DB.ViewDiscipline> { }
+  public class ViewDiscipline : GH_Enum<DB.ViewDiscipline>
+  {
+    public override bool IsEmpty => Value == 0;
+  }
 
   [
     ComponentGuid("485C3278-0D1A-445D-B3DA-75FB8CD38CF9"),
     Name("View Family"),
     Description("Represents a Revit view family."),
   ]
-  public class ViewFamily : GH_Enum<DB.ViewFamily> { }
+  public class ViewFamily : GH_Enum<DB.ViewFamily>
+  {
+    public ViewFamily() : base(DB.ViewFamily.Invalid) { }
+
+    public override bool IsEmpty => Value == DB.ViewFamily.Invalid;
+
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
+      {
+        { (int) DB.ViewFamily.ThreeDimensional,         "3D View"                   },
+        { (int) DB.ViewFamily.FloorPlan,                "Floor Plan"                },
+        { (int) DB.ViewFamily.CeilingPlan,              "Ceiling Plan"              },
+        { (int) DB.ViewFamily.StructuralPlan,           "Structural Plan"           },
+        { (int) DB.ViewFamily.AreaPlan,                 "Area Plan"                 },
+        { (int) DB.ViewFamily.Elevation,                "Elevation"                 },
+        { (int) DB.ViewFamily.Section,                  "Section"                   },
+        { (int) DB.ViewFamily.Detail,                   "Detail View"               },
+        { (int) DB.ViewFamily.Drafting,                 "Drafting View"             },
+        { (int) DB.ViewFamily.ImageView,                "Rendering"                 },
+        { (int) DB.ViewFamily.Walkthrough,              "Walkthrough"               },
+        { (int) DB.ViewFamily.Legend,                   "Legend"                    },
+        { (int) DB.ViewFamily.Sheet,                    "Sheet"                     },
+        { (int) DB.ViewFamily.Schedule,                 "Schedule"                  },
+        { (int) DB.ViewFamily.GraphicalColumnSchedule,  "Graphical Column Schedule" },
+        { (int) DB.ViewFamily.PanelSchedule,            "Panel Schedule"            },
+        { (int) DB.ViewFamily.CostReport,               "Cost Report"               },
+        { (int) DB.ViewFamily.LoadsReport,              "Loads Report"              },
+        { (int) DB.ViewFamily.PressureLossReport,       "Pressure Loss Report"      },
+      }
+    );
+  }
 
   [
     ComponentGuid("BF051011-660D-39E7-86ED-20EEE3A68DB0"),
     Name("View Type"),
     Description("Represents a Revit view type."),
   ]
-  public class ViewType : GH_Enum<DB.ViewType> { }
+  public class ViewType : GH_Enum<DB.ViewType>
+  {
+    public override bool IsEmpty => Value == DB.ViewType.Undefined;
+  }
 
   [
     ComponentGuid("2FDE857C-EDAB-4999-B6AE-DC531DD2AD18"),
@@ -167,21 +206,16 @@ namespace RhinoInside.Revit.GH.Types
     public ImageResolution() : base(DB.ImageResolution.DPI_72) { }
     public ImageResolution(DB.ImageResolution value) : base(value) { }
 
-    public override string Text
-    {
-      get
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
       {
-        switch (Value)
-        {
-          case DB.ImageResolution.DPI_72: return "72 DPI";
-          case DB.ImageResolution.DPI_150: return "150 DPI";
-          case DB.ImageResolution.DPI_300: return "300 DPI";
-          case DB.ImageResolution.DPI_600: return "600 DPI";
-        }
-
-        return base.Text;
+        { (int) DB.ImageResolution.DPI_72,   "72 DPI" },
+        { (int) DB.ImageResolution.DPI_150, "150 DPI" },
+        { (int) DB.ImageResolution.DPI_300, "300 DPI" },
+        { (int) DB.ImageResolution.DPI_600, "600 DPI" },
       }
-    }
+    );
   }
 
   [
@@ -194,24 +228,19 @@ namespace RhinoInside.Revit.GH.Types
     public ImageFileType() : base(DB.ImageFileType.BMP) { }
     public ImageFileType(DB.ImageFileType value) : base(value) { }
 
-    public override string Text
-    {
-      get
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
       {
-        switch (Value)
-        {
-          case DB.ImageFileType.BMP: return "BMP";
-          case DB.ImageFileType.JPEGLossless: return "JPEG-Lossless";
-          case DB.ImageFileType.JPEGMedium: return "JPEG-Medium";
-          case DB.ImageFileType.JPEGSmallest: return "JPEG-Smallest";
-          case DB.ImageFileType.PNG: return "PNG";
-          case DB.ImageFileType.TARGA: return "TARGA";
-          case DB.ImageFileType.TIFF: return "TIFF";
-        }
-
-        return base.Text;
+        { (int) DB.ImageFileType.BMP,           "BMP" },
+        { (int) DB.ImageFileType.JPEGLossless,  "JPEG-Lossless" },
+        { (int) DB.ImageFileType.JPEGMedium,    "JPEG-Medium" },
+        { (int) DB.ImageFileType.JPEGSmallest,  "JPEG-Smallest" },
+        { (int) DB.ImageFileType.PNG,           "PNG" },
+        { (int) DB.ImageFileType.TARGA,         "TARGA" },
+        { (int) DB.ImageFileType.TIFF,          "TIFF" },
       }
-    }
+    );
   }
 
   [
@@ -224,36 +253,40 @@ namespace RhinoInside.Revit.GH.Types
     public WallLocationLine() : base() { }
     public WallLocationLine(DB.WallLocationLine value) : base(value) { }
 
-    public override string Text
-    {
-      get
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
       {
-        switch (Value)
-        {
-          case DB.WallLocationLine.WallCenterline: return "Wall Centerline";
-          case DB.WallLocationLine.CoreCenterline: return "Core Centerline";
-          case DB.WallLocationLine.FinishFaceExterior: return "Finish Face (Exterior)";
-          case DB.WallLocationLine.FinishFaceInterior: return "Finish Face (Interior)";
-          case DB.WallLocationLine.CoreExterior: return "Core Face (Exterior)";
-          case DB.WallLocationLine.CoreInterior: return "Core Face (Interior)";
-        }
-
-        return base.Text;
+        { (int) DB.WallLocationLine.WallCenterline,      "Wall Centerline"       },
+        { (int) DB.WallLocationLine.CoreCenterline,      "Core Centerline"       },
+        { (int) DB.WallLocationLine.FinishFaceExterior,  "Finish Face: Exterior" },
+        { (int) DB.WallLocationLine.FinishFaceInterior,  "Finish Face: Interior" },
+        { (int) DB.WallLocationLine.CoreExterior,        "Core Face: Exterior"   },
+        { (int) DB.WallLocationLine.CoreInterior,        "Core Face: Interior"   },
       }
-    }
+    );
   }
 
   [
-  ComponentGuid("2FEFFADD-BD29-4B19-9682-4CC5947DF11C"),
-  Name("Wall System Family"),
-  Description("Represents a Revit wall system family"),
-]
+    ComponentGuid("2FEFFADD-BD29-4B19-9682-4CC5947DF11C"),
+    Name("Wall System Family"),
+    Description("Represents a Revit wall system family"),
+  ]
   public class WallSystemFamily : GH_Enum<DB.WallKind>
   {
     public WallSystemFamily() : base(DB.WallKind.Unknown) { }
     public WallSystemFamily(DB.WallKind value) : base(value) { }
-  }
 
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
+      {
+        { (int) DB.WallKind.Basic,      "Basic Wall"    },
+        { (int) DB.WallKind.Curtain,    "Curtain Wall"  },
+        { (int) DB.WallKind.Stacked,    "Stacked Wall"  },
+      }
+    );
+  }
 
   [
     ComponentGuid("F069304B-4066-4D23-9542-7AC54CED3C92"),
@@ -264,8 +297,6 @@ namespace RhinoInside.Revit.GH.Types
     public WallFunction() : base() { }
     public WallFunction(DB.WallFunction value) : base(value) { }
   }
-
-
 
   [
     ComponentGuid("7A71E012-6E92-493D-960C-83BE3C50ECAE"),
@@ -278,7 +309,6 @@ namespace RhinoInside.Revit.GH.Types
     public WallWrapping(DBX.WallWrapping value) : base(value) { }
   }
 
-
   [
     ComponentGuid("2F1CE55B-FD85-4EC5-8638-8DA06932DE0E"),
     Name("Structural Wall Usage"),
@@ -288,21 +318,16 @@ namespace RhinoInside.Revit.GH.Types
     public StructuralWallUsage() : base() { }
     public StructuralWallUsage(DB.Structure.StructuralWallUsage value) : base(value) { }
 
-    public override string Text
-    {
-      get
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
       {
-        switch (Value)
-        {
-          case DB.Structure.StructuralWallUsage.NonBearing: return "Non-Bearing";
-          case DB.Structure.StructuralWallUsage.Bearing: return "Bearing";
-          case DB.Structure.StructuralWallUsage.Shear: return "Shear";
-          case DB.Structure.StructuralWallUsage.Combined: return "Structural combined";
-        }
-
-        return base.Text;
+        { (int) DB.Structure.StructuralWallUsage.NonBearing,  "Non-Bearing"         },
+        { (int) DB.Structure.StructuralWallUsage.Bearing,     "Bearing"             },
+        { (int) DB.Structure.StructuralWallUsage.Shear,       "Shear"               },
+        { (int) DB.Structure.StructuralWallUsage.Combined,    "Structural combined" },
       }
-    }
+    );
   }
 
   [
@@ -350,9 +375,9 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [
-  ComponentGuid("621785D8-363C-46EF-A920-B8CF0026B4CF"),
-  Name("Curtain Grid Align Type"),
-  Description("Represents alignment type for curtain grids at either direction"),
+    ComponentGuid("621785D8-363C-46EF-A920-B8CF0026B4CF"),
+    Name("Curtain Grid Align Type"),
+    Description("Represents alignment type for curtain grids at either direction"),
   ]
   public class CurtainGridAlignType : GH_Enum<DB.CurtainGridAlignType>
   {
@@ -361,124 +386,95 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [
-  ComponentGuid("A734FF65-D9E6-4C8C-A413-B5EACD6E3062"),
-  Name("Curtain Grid Layout"),
-  Description("Represents layout for curtain grids at either direction"),
+    ComponentGuid("A734FF65-D9E6-4C8C-A413-B5EACD6E3062"),
+    Name("Curtain Grid Layout"),
+    Description("Represents layout for curtain grids at either direction"),
   ]
   public class CurtainGridLayout : GH_Enum<DBX.CurtainGridLayout>
   {
     public CurtainGridLayout() : base() { }
     public CurtainGridLayout(DBX.CurtainGridLayout value) : base(value) { }
 
-    public override string Text
-    {
-      get
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
       {
-        switch (Value)
-        {
-          case DBX.CurtainGridLayout.None: return "None";
-          case DBX.CurtainGridLayout.FixedDistance: return "Fixed Distance";
-          case DBX.CurtainGridLayout.FixedNumber: return "Fixed Number";
-          case DBX.CurtainGridLayout.MaximumSpacing: return "Maximum Spacing";
-          case DBX.CurtainGridLayout.MinimumSpacing: return "Minimum Spacing";
-        }
-
-        return base.Text;
+        { (int) DBX.CurtainGridLayout.None,            "None"             },
+        { (int) DBX.CurtainGridLayout.FixedDistance,   "Fixed Distance"   },
+        { (int) DBX.CurtainGridLayout.FixedNumber,     "Fixed Number"     },
+        { (int) DBX.CurtainGridLayout.MaximumSpacing,  "Maximum Spacing"  },
+        { (int) DBX.CurtainGridLayout.MinimumSpacing,  "Minimum Spacing"  },
       }
-    }
+    );
   }
 
   [
-  ComponentGuid("371E482B-BB95-4D9D-962F-00867E01AB35"),
-  Name("Curtain Grid Join Condition"),
-  Description("Represents join condition for curtain grids at either direction"),
+    ComponentGuid("371E482B-BB95-4D9D-962F-00867E01AB35"),
+    Name("Curtain Grid Join Condition"),
+    Description("Represents join condition for curtain grids at either direction"),
   ]
   public class CurtainGridJoinCondition : GH_Enum<DBX.CurtainGridJoinCondition>
   {
     public CurtainGridJoinCondition() : base() { }
     public CurtainGridJoinCondition(DBX.CurtainGridJoinCondition value) : base(value) { }
 
-    public override string Text
-    {
-      get
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
       {
-        switch (Value)
-        {
-          case DBX.CurtainGridJoinCondition.NotDefined: return "Not Defined";
-          case DBX.CurtainGridJoinCondition.VerticalGridContinuous: return "Vertical Grid Continuous";
-          case DBX.CurtainGridJoinCondition.HorizontalGridContinuous: return "Horizontal Grid Continuous";
-          case DBX.CurtainGridJoinCondition.BorderAndVerticalGridContinuous: return "Border & Vertical Grid Continuous";
-          case DBX.CurtainGridJoinCondition.BorderAndHorizontalGridContinuous: return "Border & Horizontal Grid Continuous";
-        }
-
-        return base.Text;
+        { (int) DBX.CurtainGridJoinCondition.NotDefined,                        "Not Defined" },
+        { (int) DBX.CurtainGridJoinCondition.VerticalGridContinuous,            "Vertical Grid Continuous" },
+        { (int) DBX.CurtainGridJoinCondition.HorizontalGridContinuous,          "Horizontal Grid Continuous" },
+        { (int) DBX.CurtainGridJoinCondition.BorderAndVerticalGridContinuous,   "Border & Vertical Grid Continuous" },
+        { (int) DBX.CurtainGridJoinCondition.BorderAndHorizontalGridContinuous, "Border & Horizontal Grid Continuous" },
       }
-    }
+    );
   }
 
   [
-  ComponentGuid("C61AA1B8-4CB2-44A0-9217-091E151D1D0A"),
-  Name("Curtain Mullion System Family"),
-  Description("Represents builtin curtain mullion system families"),
+    ComponentGuid("C61AA1B8-4CB2-44A0-9217-091E151D1D0A"),
+    Name("Curtain Mullion System Family"),
+    Description("Represents builtin curtain mullion system families"),
   ]
   public class CurtainMullionSystemFamily : GH_Enum<DBX.CurtainMullionSystemFamily>
   {
-    public CurtainMullionSystemFamily() : base() { }
+    public CurtainMullionSystemFamily() : base(DBX.CurtainMullionSystemFamily.Unknown) { }
     public CurtainMullionSystemFamily(DBX.CurtainMullionSystemFamily value) : base(value) { }
 
-    public override string Text
-    {
-      get
-      {
-        switch (Value)
-        {
-          case DBX.CurtainMullionSystemFamily.Unknown: return "Unknown";
-          case DBX.CurtainMullionSystemFamily.Rectangular: return "Rectangular";
-          case DBX.CurtainMullionSystemFamily.Circular: return "Circular";
-          case DBX.CurtainMullionSystemFamily.LCorner: return "L Corner";
-          case DBX.CurtainMullionSystemFamily.TrapezoidCorner: return "Trapezoid Corner";
-          case DBX.CurtainMullionSystemFamily.QuadCorner: return "Quad Corner";
-          case DBX.CurtainMullionSystemFamily.VCorner: return "V Corner";
-        }
+    public override bool IsEmpty => Value == DBX.CurtainMullionSystemFamily.Unknown;
 
-        return base.Text;
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
+      {
+        { (int) DBX.CurtainMullionSystemFamily.Unknown,         "Unknown"         },
+        { (int) DBX.CurtainMullionSystemFamily.Rectangular,     "Rectangular"     },
+        { (int) DBX.CurtainMullionSystemFamily.Circular,        "Circular"        },
+        { (int) DBX.CurtainMullionSystemFamily.LCorner,         "L Corner"        },
+        { (int) DBX.CurtainMullionSystemFamily.TrapezoidCorner, "Trapezoid Corner"},
+        { (int) DBX.CurtainMullionSystemFamily.QuadCorner,      "Quad Corner"     },
+        { (int) DBX.CurtainMullionSystemFamily.VCorner,         "V Corner"        },
       }
-    }
+    );
   }
 
   [
-  ComponentGuid("5A459A8D-4B20-4E3A-B6FF-DFA3B262C30E"),
-  Name("Curtain Mullion Position"),
-  Description("Represents available mullion positions"),
-  ]
-  public class CurtainMullionPosition : GH_Enum<DBX.CurtainMullionPosition>
-  {
-    public CurtainMullionPosition() : base() { }
-    public CurtainMullionPosition(DBX.CurtainMullionPosition value) : base(value) { }
-
-    public override string Text
-    {
-      get
-      {
-        switch (Value)
-        {
-          case DBX.CurtainMullionPosition.ParallelToGround: return "Parallel to Ground";
-          case DBX.CurtainMullionPosition.PerpendicularToFace: return "Perpendicular to Face";
-        }
-
-        return base.Text;
-      }
-    }
-  }
-
-  [
-  ComponentGuid("9F9D90FC-06FF-4908-B67E-ED63B089937E"),
-  Name("Curtain Panel System Family"),
-  Description("Represents builtin curtain panel system families"),
+    ComponentGuid("9F9D90FC-06FF-4908-B67E-ED63B089937E"),
+    Name("Curtain Panel System Family"),
+    Description("Represents builtin curtain panel system families"),
   ]
   public class CurtainPanelSystemFamily : GH_Enum<DBX.CurtainPanelSystemFamily>
   {
     public CurtainPanelSystemFamily() : base() { }
     public CurtainPanelSystemFamily(DBX.CurtainPanelSystemFamily value) : base(value) { }
+  }
+
+  [
+    ComponentGuid("CF3ACC14-D9F3-4169-985B-C207260250DA"),
+    Name("Floor Function"),
+    Description("Represents builtin floor function"),
+  ]
+  public class FloorFunction : GH_Enum<DBX.FloorFunction>
+  {
   }
 }

@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using Rhino.Geometry;
+using RhinoInside.Revit.Convert.System.Collections.Generic;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.Geometry.Extensions;
 using DB = Autodesk.Revit.DB;
@@ -15,9 +18,22 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
   static class RawDecoder
   {
     #region Values
-    public static Point3d ToRhino(DB.XYZ p)
+    public static Point2d AsPoint2d(DB.UV p)
+    {
+      return new Point2d(p.U, p.V);
+    }
+    public static Vector2d AsVector2d(DB.UV p)
+    {
+      return new Vector2d(p.U, p.V);
+    }
+
+    public static Point3d AsPoint3d(DB.XYZ p)
     {
       return new Point3d(p.X, p.Y, p.Z);
+    }
+    public static Vector3d AsVector3d(DB.XYZ p)
+    {
+      return new Vector3d(p.X, p.Y, p.Z);
     }
 
     public static Transform ToRhino(DB.Transform transform)
@@ -52,32 +68,49 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
     {
       if (bbox?.Enabled ?? false)
       {
-        var box = new BoundingBox(ToRhino(bbox.Min), ToRhino(bbox.Max));
+        var box = new BoundingBox(AsPoint3d(bbox.Min), AsPoint3d(bbox.Max));
         return ToRhino(bbox.Transform).TransformBoundingBox(box);
       }
 
       return BoundingBox.Empty;
     }
 
+    public static BoundingBox ToRhino(DB.BoundingBoxXYZ bbox, out Transform transform)
+    {
+      if (bbox?.Enabled ?? false)
+      {
+        var box = new BoundingBox(AsPoint3d(bbox.Min), AsPoint3d(bbox.Max));
+        transform = ToRhino(bbox.Transform);
+        return box;
+      }
+
+      transform = Transform.Identity;
+      return BoundingBox.Empty;
+    }
+
     public static Plane ToRhino(DB.Plane plane)
     {
-      return new Plane(ToRhino(plane.Origin), (Vector3d) ToRhino(plane.XVec), (Vector3d) ToRhino(plane.YVec));
+      return new Plane(AsPoint3d(plane.Origin), AsVector3d(plane.XVec), AsVector3d(plane.YVec));
     }
     #endregion
 
     #region Point
     public static Point ToRhino(DB.Point point)
     {
-      return new Point(ToRhino(point.Coord));
+      return new Point(AsPoint3d(point.Coord));
     }
     #endregion
 
     #region Curve
     public static LineCurve ToRhino(DB.Line line)
     {
-      var l = new Line(ToRhino(line.GetEndPoint(0)), ToRhino(line.GetEndPoint(1)));
       return line.IsBound ?
-        new LineCurve(l, line.GetEndParameter(0), line.GetEndParameter(1)) :
+        new LineCurve
+        (
+          new Line(AsPoint3d(line.GetEndPoint(0)), AsPoint3d(line.GetEndPoint(1))),
+          line.GetEndParameter(0),
+          line.GetEndParameter(1)
+        ) :
         null;
     }
 
@@ -86,13 +119,13 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       return arc.IsBound ?
         new ArcCurve
         (
-          new Arc(ToRhino(arc.GetEndPoint(0)), ToRhino(arc.Evaluate(0.5, true)), ToRhino(arc.GetEndPoint(1))),
+          new Arc(AsPoint3d(arc.GetEndPoint(0)), AsPoint3d(arc.Evaluate(0.5, true)), AsPoint3d(arc.GetEndPoint(1))),
           arc.GetEndParameter(0),
           arc.GetEndParameter(1)
         ) :
         new ArcCurve
         (
-          new Circle(new Plane(ToRhino(arc.Center), (Vector3d) ToRhino(arc.XDirection), (Vector3d) ToRhino(arc.YDirection)), arc.Radius),
+          new Circle(new Plane(AsPoint3d(arc.Center), AsVector3d(arc.XDirection), AsVector3d(arc.YDirection)), arc.Radius),
           0.0,
           2.0 * Math.PI
         );
@@ -100,17 +133,17 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
     public static NurbsCurve ToRhino(DB.Ellipse ellipse)
     {
-      var plane = new Plane(ToRhino(ellipse.Center), (Vector3d) ToRhino(ellipse.XDirection), (Vector3d) ToRhino(ellipse.YDirection));
+      var plane = new Plane(AsPoint3d(ellipse.Center), AsVector3d(ellipse.XDirection), AsVector3d(ellipse.YDirection));
       var e = new Ellipse(plane, ellipse.RadiusX, ellipse.RadiusY);
       var nurbsCurve = e.ToNurbsCurve();
 
       if (ellipse.IsBound)
       {
-        nurbsCurve.ClosestPoint(ToRhino(ellipse.GetEndPoint(0)), out var param0);
+        nurbsCurve.ClosestPoint(AsPoint3d(ellipse.GetEndPoint(0)), out var param0);
         if (!nurbsCurve.ChangeClosedCurveSeam(param0))
           nurbsCurve.Domain = new Interval(param0, param0 + nurbsCurve.Domain.Length);
 
-        nurbsCurve.ClosestPoint(ToRhino(ellipse.GetEndPoint(1)), out var param1);
+        nurbsCurve.ClosestPoint(AsPoint3d(ellipse.GetEndPoint(1)), out var param1);
         nurbsCurve = nurbsCurve.Trim(param0, param1) as NurbsCurve;
         nurbsCurve.Domain = new Interval(ellipse.GetEndParameter(0), ellipse.GetEndParameter(1));
       }
@@ -164,9 +197,9 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
     {
       var nurbsCurve = NurbsCurve.CreateSpiral
       (
-        ToRhino(helix.BasePoint),
-        (Vector3d) ToRhino(helix.ZVector),
-        ToRhino(helix.BasePoint) + (Vector3d) ToRhino(helix.XVector),
+        AsPoint3d(helix.BasePoint),
+        AsVector3d(helix.ZVector),
+        AsPoint3d(helix.BasePoint) + AsVector3d(helix.XVector),
         helix.Pitch,
         helix.IsRightHanded ? +1 : -1,
         helix.Radius,
@@ -194,7 +227,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
     public static PolylineCurve ToRhino(DB.PolyLine polyline)
     {
-      return new PolylineCurve(polyline.GetCoordinates().Select(x => ToRhino(x)));
+      return new PolylineCurve(polyline.GetCoordinates().Select(x => AsPoint3d(x)));
     }
     #endregion
 
@@ -207,9 +240,9 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
       var plane = new Plane
       (
-        ToRhino(origin),
-        (Vector3d) ToRhino(xDir),
-        (Vector3d) ToRhino(yDir)
+        AsPoint3d(origin),
+        AsVector3d(xDir),
+        AsVector3d(yDir)
       );
 
       return new PlaneSurface(plane, uu, vv);
@@ -244,11 +277,11 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
       var plane = new Plane
       (
-        ToRhino(origin),
-        (Vector3d) ToRhino(xDir),
-        (Vector3d) ToRhino(yDir)
+        AsPoint3d(origin),
+        AsVector3d(xDir),
+        AsVector3d(yDir)
       );
-      var axisDir = (Vector3d) ToRhino(zDir);
+      var axisDir = AsVector3d(zDir);
 
       var dir = axisDir + Math.Tan(halfAngle) * plane.XAxis;
       dir.Unitize();
@@ -299,11 +332,11 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
       var plane = new Plane
       (
-        ToRhino(origin),
-        (Vector3d) ToRhino(xDir),
-        (Vector3d) ToRhino(yDir)
+        AsPoint3d(origin),
+        AsVector3d(xDir),
+        AsVector3d(yDir)
       );
-      var axisDir = (Vector3d) ToRhino(zDir);
+      var axisDir = AsVector3d(zDir);
 
       var curve = new LineCurve
       (
@@ -350,11 +383,11 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
       var plane = new Plane
       (
-        ToRhino(origin),
-        (Vector3d) ToRhino(xDir),
-        (Vector3d) ToRhino(yDir)
+        AsPoint3d(origin),
+        AsVector3d(xDir),
+        AsVector3d(yDir)
       );
-      var axisDir = (Vector3d) ToRhino(zDir);
+      var axisDir = AsVector3d(zDir);
 
       using (var ECStoWCS = new DB.Transform(DB.Transform.Identity) { Origin = origin, BasisX = xDir.Normalize(), BasisY = yDir.Normalize(), BasisZ = zDir.Normalize() })
       {
@@ -401,8 +434,8 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
         }
       );
 
-      Point3d p0 = start is null ? Point3d.Unset : ToRhino(start),
-              pN = end is null ? Point3d.Unset : ToRhino(end);
+      Point3d p0 = start is null ? Point3d.Unset : AsPoint3d(start),
+              pN = end is null ? Point3d.Unset : AsPoint3d(end);
 
       var lofts = Brep.CreateFromLoft(cs, p0, pN, LoftType.Straight, false);
       if (lofts.Length == 1 && lofts[0].Faces.Count == 1)
@@ -460,11 +493,11 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       //throw new NotImplementedException();
       //return NurbsSurface.CreateHermiteSurface
       //(
-      //  points.Select(x => ToRhino(x)),
-      //  mixedDerivs.Select(x => (Vector3d) ToRhino(x)),
+      //  points.Select(x => AsPoint3d(x)),
+      //  mixedDerivs.Select(x => AsVector3d(x)),
       //  paramsU, paramsV,
-      //  tangentsU.Select(x => (Vector3d) ToRhino(x)),
-      //  tangentsV.Select(x => (Vector3d) ToRhino(x))
+      //  tangentsU.Select(x => AsVector3d(x)),
+      //  tangentsV.Select(x => AsVector3d(x))
       //);
     }
 
@@ -594,7 +627,6 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       // Extract base surface
       if (ToRhinoSurface(face) is Surface surface)
       {
-        double trimTolerance = Revit.VertexTolerance * 0.1;
         int si = brep.AddSurface(surface);
 
         if (surface is PlaneSurface planar)
@@ -606,7 +638,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
         }
 
         // Extract and classify Edge Loops
-        var edgeLoops = new List<BrepBoundary>();
+        var edgeLoops = new List<BrepBoundary>(face.EdgeLoops.Size);
         foreach (var edgeLoop in face.EdgeLoops.Cast<DB.EdgeArray>())
         {
           if (edgeLoop.IsEmpty)
@@ -619,9 +651,9 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
           var loop = new BrepBoundary()
           {
             type = BrepLoopType.Unknown,
-            edges = new List<BrepEdge>(),
+            edges = new List<BrepEdge>(edgeLoop.Size),
             trims = new PolyCurve(),
-            orientation = new List<int>()
+            orientation = new List<int>(edgeLoop.Size)
           };
 
           foreach (var edge in edges)
@@ -645,7 +677,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
             loop.orientation.Add(segment.TangentAt(segment.Domain.Mid).IsParallelTo(brepEdge.TangentAt(brepEdge.Domain.Mid)));
 
-            var trim = surface.Pullback(segment, trimTolerance);
+            var trim = surface.Pullback(segment, Revit.VertexTolerance);
             loop.trims.Append(trim);
           }
 
@@ -730,6 +762,9 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
     public static Brep ToRhino(DB.Face face)
     {
+      if (face is null)
+        return null;
+
       var brep = new Brep();
 
       // Set surface
@@ -769,45 +804,50 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
     public static Brep ToRhino(DB.Solid solid)
     {
-      if (solid.Faces.IsEmpty)
+      if (solid is null)
         return null;
 
       var brep = new Brep();
-      var brepEdges = new Dictionary<DB.Edge, BrepEdge>();
 
-      foreach (var face in solid.Faces.Cast<DB.Face>())
+      if (!solid.Faces.IsEmpty)
       {
-        // Set surface
-        var si = AddSurface(brep, face, out var shells, brepEdges);
-        if (si < 0)
-          continue;
+        var brepEdges = new Dictionary<DB.Edge, BrepEdge>();
 
-        // Set edges & trims
-        TrimSurface(brep, si, !face.MatchesSurfaceOrientation(), shells);
-      }
+        foreach (var face in solid.Faces.Cast<DB.Face>())
+        {
+          // Set surface
+          var si = AddSurface(brep, face, out var shells, brepEdges);
+          if (si < 0)
+            continue;
 
-      // Set vertices
-      brep.SetVertices();
+          // Set edges & trims
+          TrimSurface(brep, si, !face.MatchesSurfaceOrientation(), shells);
+        }
 
-      // Set flags
-      brep.SetTolerancesBoxesAndFlags
-      (
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true
-      );
+        // Set vertices
+        brep.SetVertices();
 
-      if (!brep.IsValid)
-      {
+        // Set flags
+        brep.SetTolerancesBoxesAndFlags
+        (
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        );
+
+        if (!brep.IsValid)
+        {
 #if DEBUG
-        brep.IsValidWithLog(out var log);
+          brep.IsValidWithLog(out var log);
+          Debug.WriteLine($"{MethodInfo.GetCurrentMethod().DeclaringType.FullName}.{MethodInfo.GetCurrentMethod().Name}()\n{log}");
 #endif
-        brep.Repair(Revit.VertexTolerance);
+          brep.Repair(Revit.VertexTolerance);
+        }
       }
 
       return brep;
@@ -817,25 +857,27 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
     #region Mesh
     public static Mesh ToRhino(DB.Mesh mesh)
     {
-      if (mesh.NumTriangles < 1)
+      if (mesh is null)
         return null;
 
       var result = new Mesh();
 
-      result.Vertices.AddVertices(mesh.Vertices.Select(x => ToRhino(x)));
+      result.Vertices.Capacity = mesh.Vertices.Count;
+      result.Vertices.AddVertices(mesh.Vertices.Convert(AsPoint3d));
 
-      for (int t = 0; t < mesh.NumTriangles; ++t)
+      var faceCount = mesh.NumTriangles;
+      result.Faces.Capacity = faceCount;
+
+      for (int t = 0; t < faceCount; ++t)
       {
         var triangle = mesh.get_Triangle(t);
 
-        var meshFace = new MeshFace
+        result.Faces.AddFace
         (
           (int) triangle.get_Index(0),
           (int) triangle.get_Index(1),
           (int) triangle.get_Index(2)
         );
-
-        result.Faces.AddFace(meshFace);
       }
 
       return result;

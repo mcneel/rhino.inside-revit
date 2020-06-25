@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
     public override Guid ComponentGuid => new Guid("3966ADD8-07C0-43E7-874B-6EFF95598EB0");
 
-    public Family() : base("Family", "Family", "Represents a Revit document family.", "Params", "Revit") { }
+    public Family() : base("Family", "Family", "Represents a Revit document family.", "Params", "Revit Primitives") { }
   }
 
   public class DocumentFamiliesPicker : DocumentPicker

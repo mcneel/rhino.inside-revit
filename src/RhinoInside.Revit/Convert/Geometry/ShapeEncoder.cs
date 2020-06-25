@@ -38,7 +38,7 @@ namespace RhinoInside.Revit.Convert.Geometry
           return ToGeometryObjectMany(SubDEncoder.ToRawBrep(subD, factor)).OfType<DB.GeometryObject>().ToArray(); ;
 
         case Mesh mesh:
-          return ToGeometryObjectMany(MeshEncoder.ToRawMesh(mesh, factor)).OfType<DB.GeometryObject>().ToArray(); ;
+          return new DB.GeometryObject[] { MeshEncoder.ToMesh(MeshEncoder.ToRawMesh(mesh, factor)) };
 
         default:
           if (geometry.HasBrepForm)
@@ -75,7 +75,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
         // Emergency result as a mesh
         var mp = MeshingParameters.Default;
-        mp.MinimumEdgeLength = Revit.VertexTolerance;
+        mp.MinimumEdgeLength = Revit.ShortCurveTolerance;
         mp.ClosedObjectPostProcess = true;
         mp.JaggedSeams = false;
 
@@ -83,68 +83,8 @@ namespace RhinoInside.Revit.Convert.Geometry
         if (Mesh.CreateFromBrep(brep, mp) is Mesh[] meshes)
           brepMesh.Append(meshes);
 
-        foreach (var g in ToGeometryObjectMany(brepMesh))
-          yield return g;
+        yield return brepMesh.ToMesh(UnitConverter.NoScale);
       }
-    }
-
-    internal static IEnumerable<DB.GeometryObject> ToGeometryObjectMany(Mesh mesh)
-    {
-      DB.XYZ ToHost(Point3d p) => new DB.XYZ(p.X, p.Y, p.Z);
-
-      var faceVertices = new List<DB.XYZ>(4);
-
-      try
-      {
-        using
-        (
-          var builder = new DB.TessellatedShapeBuilder()
-          {
-            GraphicsStyleId = GeometryEncoder.Context.Peek.GraphicsStyleId,
-            Target = DB.TessellatedShapeBuilderTarget.Mesh,
-            Fallback = DB.TessellatedShapeBuilderFallback.Salvage
-          }
-        )
-        {
-          var pieces = mesh.DisjointMeshCount > 1 ?
-                       mesh.SplitDisjointPieces() :
-                       new Mesh[] { mesh };
-
-          foreach (var piece in pieces)
-          {
-            piece.Faces.ConvertNonPlanarQuadsToTriangles(Revit.VertexTolerance, RhinoMath.UnsetValue, 5);
-
-            var vertices = piece.Vertices.ToPoint3dArray();
-
-            builder.OpenConnectedFaceSet(piece.SolidOrientation() != 0);
-            foreach (var face in piece.Faces)
-            {
-              faceVertices.Add(ToHost(vertices[face.A]));
-              faceVertices.Add(ToHost(vertices[face.B]));
-              faceVertices.Add(ToHost(vertices[face.C]));
-              if (face.IsQuad)
-                faceVertices.Add(ToHost(vertices[face.D]));
-
-              builder.AddFace(new DB.TessellatedFace(faceVertices, GeometryEncoder.Context.Peek.MaterialId));
-              faceVertices.Clear();
-            }
-            builder.CloseConnectedFaceSet();
-          }
-
-          builder.Build();
-          using (var result = builder.GetBuildResult())
-          {
-            if (result.Outcome != DB.TessellatedShapeBuilderOutcome.Nothing)
-              return result.GetGeometricalObjects();
-          }
-        }
-      }
-      catch (Autodesk.Revit.Exceptions.ApplicationException e)
-      {
-        Debug.Fail(e.Source, e.Message);
-      }
-
-      return Enumerable.Empty<DB.GeometryObject>();
     }
   };
 }

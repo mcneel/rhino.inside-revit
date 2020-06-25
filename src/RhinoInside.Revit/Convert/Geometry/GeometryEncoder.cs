@@ -26,6 +26,52 @@ namespace RhinoInside.Revit.Convert.Geometry
     #endregion
 
     #region Geometry values
+    public static DB::UV ToUV(this Point2f value)
+    {
+      double factor = UnitConverter.ToHostUnits;
+      return new DB::UV(value.X * factor, value.Y * factor);
+    }
+    public static DB::UV ToUV(this Point2f value, double factor)
+    {
+      return factor == 1.0 ?
+        new DB::UV(value.X, value.Y) :
+        new DB::UV(value.X * factor, value.Y * factor);
+    }
+
+    public static DB::UV ToUV(this Point2d value)
+    {
+      double factor = UnitConverter.ToHostUnits;
+      return new DB::UV(value.X * factor, value.Y * factor);
+    }
+    public static DB::UV ToUV(this Point2d value, double factor)
+    {
+      return factor == 1.0 ?
+        new DB::UV(value.X, value.Y) :
+        new DB::UV(value.X * factor, value.Y * factor);
+    }
+
+    public static DB::UV ToUV(this Vector2f value)
+    {
+      return new DB::UV(value.X, value.Y);
+    }
+    public static DB::UV ToUV(this Vector2f value, double factor)
+    {
+      return factor == 1.0 ?
+        new DB::UV(value.X, value.Y) :
+        new DB::UV(value.X * factor, value.Y * factor);
+    }
+
+    public static DB::UV ToUV(this Vector2d value)
+    {
+      return new DB::UV(value.X, value.Y);
+    }
+    public static DB::UV ToUV(this Vector2d value, double factor)
+    {
+      return factor == 1.0 ?
+        new DB::UV(value.X, value.Y) :
+        new DB::UV(value.X * factor, value.Y * factor);
+    }
+
     public static DB::XYZ ToXYZ(this Point3f value)
     {
       double factor = UnitConverter.ToHostUnits;
@@ -72,6 +118,12 @@ namespace RhinoInside.Revit.Convert.Geometry
         new DB::XYZ(value.X * factor, value.Y * factor, value.Z * factor);
     }
 
+    public static DB.Plane ToPlane(this Plane value) => ToPlane(value, UnitConverter.ToHostUnits);
+    public static DB.Plane ToPlane(this Plane value, double factor)
+    {
+      return DB.Plane.CreateByOriginAndBasis(value.Origin.ToXYZ(factor), value.XAxis.ToXYZ(), value.YAxis.ToXYZ());
+    }
+
     public static DB.Transform ToTransform(this Transform value) => ToTransform(value, UnitConverter.ToHostUnits);
     public static DB.Transform ToTransform(this Transform value, double factor)
     {
@@ -87,10 +139,33 @@ namespace RhinoInside.Revit.Convert.Geometry
       return result;
     }
 
-    public static DB.Plane ToPlane(this Plane value) => ToPlane(value, UnitConverter.ToHostUnits);
-    public static DB.Plane ToPlane(this Plane value, double factor)
+    public static DB.BoundingBoxXYZ ToBoundingBoxXYZ(this BoundingBox value) => ToBoundingBoxXYZ(value, UnitConverter.ToHostUnits);
+    public static DB.BoundingBoxXYZ ToBoundingBoxXYZ(this BoundingBox value, double factor)
     {
-      return DB.Plane.CreateByOriginAndBasis(value.Origin.ToXYZ(factor), value.XAxis.ToXYZ(), value.YAxis.ToXYZ());
+      return new DB.BoundingBoxXYZ
+      {
+        Min = value.Min.ToXYZ(factor),
+        Max = value.Min.ToXYZ(factor),
+        Enabled = value.IsValid
+      };
+    }
+
+    public static DB.BoundingBoxXYZ ToBoundingBoxXYZ(this Box value) => ToBoundingBoxXYZ(value, UnitConverter.ToHostUnits);
+    public static DB.BoundingBoxXYZ ToBoundingBoxXYZ(this Box value, double factor)
+    {
+      return new DB.BoundingBoxXYZ
+      {
+        Transform = Transform.PlaneToPlane(Plane.WorldXY, value.Plane).ToTransform(factor),
+        Min = new DB.XYZ(value.X.Min * factor, value.Y.Min * factor, value.Z.Min * factor),
+        Max = new DB.XYZ(value.X.Max * factor, value.Y.Max * factor, value.Z.Max * factor),
+        Enabled = value.IsValid
+      };
+    }
+
+    public static DB.Outline ToOutline(this BoundingBox value) => ToOutline(value, UnitConverter.ToHostUnits);
+    public static DB.Outline ToOutline(this BoundingBox value, double factor)
+    {
+      return new DB.Outline(value.Min.ToXYZ(factor), value.Max.ToXYZ(factor));
     }
     #endregion
 
@@ -165,7 +240,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     }
 
     public static DB.Curve ToCurve(this Ellipse value) => value.ToCurve(new Interval(0.0, 2.0 * Math.PI), UnitConverter.ToHostUnits);
-    public static DB.Curve ToCurve(this Ellipse value, double factor) => value.ToCurve(new Interval(0.0, 2.0 * Math.PI), UnitConverter.ToHostUnits);
+    public static DB.Curve ToCurve(this Ellipse value, double factor) => value.ToCurve(new Interval(0.0, 2.0 * Math.PI), factor);
     public static DB.Curve ToCurve(this Ellipse value, Interval interval) => value.ToCurve(interval, UnitConverter.ToHostUnits);
     public static DB.Curve ToCurve(this Ellipse value, Interval interval, double factor)
     {

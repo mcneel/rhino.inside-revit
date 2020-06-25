@@ -25,19 +25,24 @@ namespace Grasshopper.External.Special
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     public override GH_ParamKind Kind => GH_ParamKind.floating;
     protected override Bitmap Icon => ClassIcon;
-    static Bitmap ClassIcon => RhinoInside.Revit.ImageBuilder.BuildIcon
-    (
-      (graphics, bounds) =>
+    static readonly Bitmap ClassIcon = BuildIcon();
+    static Bitmap BuildIcon()
+    {
+      var bitmap = new Bitmap(24, 24);
+      using (var graphics = Graphics.FromImage(bitmap))
       {
-        var iconBounds = new RectangleF(bounds.Location, bounds.Size);
+        var iconBounds = new RectangleF(0.0f, 0.0f, 24.0f, 24.0f);
         iconBounds.Inflate(-0.5f, -0.5f);
+
         using (var capsule = GH_Capsule.CreateCapsule(iconBounds, GH_Palette.Grey))
         {
           capsule.Render(graphics, false, false, false);
-          Attributes.RenderCheckMark(graphics, iconBounds, Color.Black);
+          ComponentAttributes.RenderCheckMark(graphics, iconBounds, Color.Black);
         }
       }
-    );
+
+      return bitmap;
+    }
 
     void IGH_InitCodeAware.SetInitCode(string code) => NickName = code;
 
@@ -136,7 +141,7 @@ namespace Grasshopper.External.Special
       ResetPersistentData(ListItems.Select(x => x.Value), "Select all");
     }
 
-    new class Attributes : GH_ResizableAttributes<ValueSet>
+    class ComponentAttributes : GH_ResizableAttributes<ValueSet>
     {
       public override bool HasInputGrip => true;
       public override bool HasOutputGrip => true;
@@ -144,7 +149,7 @@ namespace Grasshopper.External.Special
       protected override Padding SizingBorders => new Padding(4, 6, 4, 6);
       protected override Size MinimumSize => new Size(50, 25 + 18 * 5);
 
-      public Attributes(ValueSet owner) : base(owner)
+      public ComponentAttributes(ValueSet owner) : base(owner)
       {
         Bounds = new RectangleF
         (
@@ -194,17 +199,17 @@ namespace Grasshopper.External.Special
           }
           case GH_CanvasChannel.Objects:
           {
+            var bounds = Bounds;
+            if (!canvas.Viewport.IsVisible(ref bounds, 10))
+              return;
+
             var palette = GH_CapsuleRenderEngine.GetImpliedPalette(Owner);
-            using (var capsule = GH_Capsule.CreateCapsule(Bounds, palette))
+            using (var capsule = GH_Capsule.CreateCapsule(bounds, palette))
             {
               capsule.AddInputGrip(InputGrip.Y);
               capsule.AddOutputGrip(OutputGrip.Y);
               capsule.Render(canvas.Graphics, Selected, Owner.Locked, false);
             }
-
-            var bounds = Bounds;
-            if (!canvas.Viewport.IsVisible(ref bounds, 10))
-              return;
 
             var alpha = GH_Canvas.ZoomFadeLow;
             if (alpha > 0)
@@ -507,7 +512,7 @@ namespace Grasshopper.External.Special
       }
     }
 
-    public override void CreateAttributes() => m_attributes = new Attributes(this);
+    public override void CreateAttributes() => m_attributes = new ComponentAttributes(this);
     public override void AddedToDocument(GH_Document document)
     {
       if (NickName == Name)
@@ -599,8 +604,8 @@ namespace Grasshopper.External.Special
         @"If a pattern is used, this param list will be filled up with all the items that match it.</p>" +
         @"<p>Several kind of patterns are supported, the method used depends on the first pattern character:</p>" +
         @"<dl>" +
-        @"<dt><b>></b></dt><dd>Starts with</dd>" +
-        @"<dt><b><</b></dt><dd>Ends with</dd>" +
+        @"<dt><b><</b></dt><dd>Starts with</dd>" +
+        @"<dt><b>></b></dt><dd>Ends with</dd>" +
         @"<dt><b>?</b></dt><dd>Contains, same as a regular search</dd>" +
         @"<dt><b>:</b></dt><dd>Wildcards, see Microsoft.VisualBasic " + "<a target=\"_blank\" href=\"https://docs.microsoft.com/en-us/dotnet/visual-basic/language-reference/operators/like-operator#pattern-options\">LikeOperator</a></dd>" +
         @"<dt><b>;</b></dt><dd>Regular expresion, see " + "<a target=\"_blank\" href=\"https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference\">here</a> as reference</dd>" +
@@ -618,7 +623,7 @@ namespace Grasshopper.External.Special
 
     public ValueSetPicker() { }
 
-    class GooComparer : IEqualityComparer<IGH_Goo>
+    class GooEqualityComparer : IEqualityComparer<IGH_Goo>
     {
       static bool IsEquatable(Type value)
       {
@@ -632,13 +637,14 @@ namespace Grasshopper.External.Special
         return false;
       }
 
-      public static bool IsComparable(IGH_Goo goo)
+      public static bool IsEquatable(IGH_Goo goo)
       {
-        return IsEquatable(goo.GetType()) ||
-        goo is IGH_GeometricGoo geometry ||
+        return IsEquatable(goo?.GetType()) ||
+        goo is IGH_GeometricGoo ||
         goo is IGH_QuickCast ||
         goo is GH_StructurePath ||
         goo is GH_Culture ||
+        goo is IComparable ||
         (
           goo?.ScriptVariable() is object obj &&
           (
@@ -650,6 +656,7 @@ namespace Grasshopper.External.Special
 
       public bool Equals(IGH_Goo x, IGH_Goo y)
       {
+        // Compare at Goo level
         if (x.GetType() is Type typeX && y.GetType() is Type typeY && typeX == typeY)
         {
           if (IsEquatable(typeX))
@@ -657,33 +664,51 @@ namespace Grasshopper.External.Special
             dynamic dynX = x, dynY = y;
             return dynX.Equals(dynY);
           }
+
+          if (x is IGH_QuickCast qcX && y is IGH_QuickCast qcY)
+            return qcX.QC_CompareTo(qcY) == 0;
+
+          if (x is IGH_GeometricGoo geoX && y is IGH_GeometricGoo geoY)
+          {
+            if (geoX.IsReferencedGeometry || geoY.IsReferencedGeometry)
+              return geoX.ReferenceID == geoY.ReferenceID;
+
+            if (geoX.ScriptVariable() is Rhino.Geometry.GeometryBase geometryX && geoY.ScriptVariable() is Rhino.Geometry.GeometryBase geometryY)
+              return Rhino.Geometry.GeometryBase.GeometryEquals(geometryX, geometryY);
+          }
+
+          if (x is GH_StructurePath pathX && y is GH_StructurePath pathY)
+            return pathX.Value == pathX.Value;
+
+          if (x is GH_Culture cultureX && y is GH_Culture cultureY)
+            return cultureX.Value == cultureY.Value;
+
+          if (x is IComparable cX && y is IComparable cY)
+            return cX.CompareTo(cY) == 0;
+
+          // Compare at ScriptVariable level
+          if (x.ScriptVariable() is object objX && y.ScriptVariable() is object objY)
+            return ScriptVariableEquals(objX, objY);
         }
 
-        if (x is IGH_QuickCast qcX && y is IGH_QuickCast qcY)
-          return qcX.QC_CompareTo(qcY) == 0;
+        return false;
+      }
 
-        if (x is IGH_GeometricGoo geoX && y is IGH_GeometricGoo geoY)
+      static bool ScriptVariableEquals(object x, object y)
+      {
+        if (x.GetType() is Type typeX && y.GetType() is Type typeY && typeX == typeY)
         {
-          if (geoX.IsReferencedGeometry || geoY.IsReferencedGeometry)
-            return geoX.ReferenceID == geoY.ReferenceID;
+          if (IsEquatable(typeX))
+          {
+            dynamic dynX = x, dynY = y;
+            return dynX.Equals(dynY);
+          }
 
-          if(geoX.ScriptVariable() is Rhino.Geometry.GeometryBase geometryX && geoY.ScriptVariable() is Rhino.Geometry.GeometryBase geometryY)
-            return Rhino.Geometry.GeometryBase.GeometryEquals(geometryX, geometryY);
-        }
-
-        if (x is GH_StructurePath pathX && y is GH_StructurePath pathY)
-          return pathX.Value == pathX.Value;
-
-        if (x is GH_Culture cultureX && y is GH_Culture cultureY)
-          return cultureX.Value == cultureY.Value;
-
-        if (x.ScriptVariable() is object objX && y.ScriptVariable() is object objY)
-        {
-          if (objX is ValueType valueX && objY is ValueType valueY)
-            return valueX.Equals(valueY);
-
-          if (objX is IComparable comparableX && objY is IComparable comparableY)
+          if (x is IComparable comparableX && y is IComparable comparableY)
             return comparableX.CompareTo(comparableY) == 0;
+
+          if (x is ValueType valueX && y is ValueType valueY)
+            return valueX.Equals(valueY);
         }
 
         return false;
@@ -706,13 +731,19 @@ namespace Grasshopper.External.Special
         if (obj is GH_Culture culture)
           return culture.Value.LCID;
 
+        if (obj is IComparable comparableGoo)
+          return comparableGoo.GetHashCode();
+
         if (obj.ScriptVariable() is object o)
         {
-          if (o is ValueType value)
-            return value.GetHashCode();
-
           if (o is IComparable comparable)
             return comparable.GetHashCode();
+
+          if (IsEquatable(o.GetType()))
+            return o.GetHashCode();
+
+          if (o is ValueType value)
+            return value.GetHashCode();
         }
 
         return 0;
@@ -726,13 +757,13 @@ namespace Grasshopper.External.Special
       var goosSet = new HashSet<IGH_Goo>(VolatileData.AllData(true).
           Where(x =>
           {
-            if (GooComparer.IsComparable(x))
+            if (GooEqualityComparer.IsEquatable(x))
               return true;
 
             nonComparableCount++;
             return false;
           })
-          , new GooComparer());
+          , new GooEqualityComparer());
 
       if (nonComparableCount > 0)
         AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"{nonComparableCount} null or non comparable elements filtered.");
@@ -749,7 +780,7 @@ namespace Grasshopper.External.Special
       }
       else if (DataType == GH_ParamData.remote)
       {
-        var selectSet = new HashSet<IGH_Goo>(PersistentData.Where(x => GooComparer.IsComparable(x)), new GooComparer());
+        var selectSet = new HashSet<IGH_Goo>(PersistentData.Where(x => GooEqualityComparer.IsEquatable(x)), new GooEqualityComparer());
         ListItems = goosSet.Select(goo => new ListItem(goo, selectSet.Contains(goo))).
                     Where(x => string.IsNullOrEmpty(NickName) || RhinoInside.Revit.Operator.IsSymbolNameLike(x.Name, NickName)).
                     ToList();

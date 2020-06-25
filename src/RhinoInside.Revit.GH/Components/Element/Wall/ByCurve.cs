@@ -19,9 +19,11 @@ namespace RhinoInside.Revit.GH.Components
 
     public WallByCurve() : base
     (
-      "Add Wall", "Wall",
-      "Given a curve, it adds a Wall element to the active Revit document",
-      "Revit", "Build"
+      name: "Add Wall",
+      nickname: "Wall",
+      description: "Given a curve, it adds a Wall element to the active Revit document",
+      category: "Revit",
+      subCategory: "Wall"
     )
     { }
 

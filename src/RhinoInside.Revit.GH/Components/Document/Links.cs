@@ -5,12 +5,12 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class DocumentLinks : DocumentComponent
+  public class DocumentLinks : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("EBCCFDD8-9F3B-44F4-A209-72D06C8082A5");
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "L";
-
+    protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.RevitLinkInstance));
 
     public DocumentLinks() : base
     (
@@ -22,32 +22,28 @@ namespace RhinoInside.Revit.GH.Components
     )
     { }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      base.RegisterInputParams(manager);
-    }
+      ParamDefinition.FromParam(DocumentComponent.CreateDocumentParam(), ParamVisibility.Voluntary),
+    };
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      manager.AddParameter(
-        param: new Parameters.Document(),
-        name: "Linked Documents",
-        nickname: "LD",
-        description: "Revit documents that are linked into given document",
-        access: GH_ParamAccess.list
-        );
-
-    }
+      ParamDefinition.Create<Parameters.Document>("Linked Documents", "LD", "Revit documents that are linked into given document", GH_ParamAccess.list)
+    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
     {
       using (var collector = new DB.FilteredElementCollector(doc))
       {
-        DA.SetDataList(
+        DA.SetDataList
+        (
           "Linked Documents",
           // find all link instances in the model, and grab their source document reference
           collector.OfClass(typeof(DB.RevitLinkInstance)).Cast<DB.RevitLinkInstance>().Select(x => Types.Document.FromDocument(x.GetLinkDocument()))
-          );
+        );
       }
     }
   }

@@ -1,4 +1,5 @@
 using System;
+using System.Linq.Expressions;
 using Grasshopper.Kernel;
 using DB = Autodesk.Revit.DB;
 
@@ -13,9 +14,11 @@ namespace RhinoInside.Revit.GH.Components
 
     public ElementTypeSimilar() : base
     (
-      "ElementType Similar", "Similar",
-      "Obtains a set of types that are similar to Type",
-      "Revit", "Type"
+      name: "Similar Types",
+      nickname: "SimTypes",
+      description: "Obtains a set of types that are similar to Type",
+      category: "Revit",
+      subCategory: "Type"
     )
     { }
 

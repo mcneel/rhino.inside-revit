@@ -1,11 +1,12 @@
 using System;
+using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.Convert.Geometry;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public class SketchPlane : Element
+  public class SketchPlane : GraphicalElement
   {
     public override string TypeName => "Revit Sketch Plane";
     public override string TypeDescription => "Represents a Revit sketch plane";
@@ -29,18 +30,26 @@ namespace RhinoInside.Revit.GH.Types
       return base.CastFrom(source);
     }
 
+    #region IGH_PreviewData
+    public override void DrawViewportWires(GH_PreviewWireArgs args)
+    {
+      var location = Location;
+      if (!location.IsValid)
+        return;
+
+      GH_Plane.DrawPlane(args.Pipeline, Location, Grasshopper.CentralSettings.PreviewPlaneRadius, 4, args.Color, System.Drawing.Color.DarkRed, System.Drawing.Color.DarkGreen);
+    }
+
+    public override void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
+    #endregion
+
     #region Location
-    public override Rhino.Geometry.Point3d Location => Plane.Origin;
-    public override Rhino.Geometry.Vector3d XAxis => Plane.XAxis;
-    public override Rhino.Geometry.Vector3d YAxis => Plane.YAxis;
-    public override Rhino.Geometry.Vector3d ZAxis => Plane.ZAxis;
-    public override Rhino.Geometry.Plane Plane
+    public override Rhino.Geometry.Plane Location
     {
       get
       {
-        var element = (DB.SketchPlane) this;
-        return element?.GetPlane().ToPlane() ??
-          new Rhino.Geometry.Plane(new Rhino.Geometry.Point3d(double.NaN, double.NaN, double.NaN), Rhino.Geometry.Vector3d.Zero, Rhino.Geometry.Vector3d.Zero);
+        var sketchPlane = (DB.SketchPlane) this;
+        return sketchPlane?.GetPlane().ToPlane() ?? base.Location;
       }
     }
     #endregion

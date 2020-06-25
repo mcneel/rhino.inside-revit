@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Parameters;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -12,24 +13,74 @@ namespace RhinoInside.Revit.GH.Components
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "L";
 
-    public FamilyLoad()
-    : base("Load Family", "Load", "Loads a family into the document", "Revit", "Family")
+    public FamilyLoad() : base
+    (
+      name: "Load Component Family",
+      nickname: "Load",
+      description: "Loads a family into the document",
+      category: "Revit",
+      subCategory: "Family"
+    )
     { }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      var path = new Grasshopper.Kernel.Parameters.Param_FilePath();
-      path.FileFilter = "Family File (*.rfa)|*.rfa";
-      manager.AddParameter(path, "Path", "P", string.Empty, GH_ParamAccess.item);
+      ParamDefinition.FromParam
+      (
+        CreateDocumentParam(),
+        ParamVisibility.Voluntary
+      ),
+      ParamDefinition.FromParam
+      (
+        new Param_FilePath()
+        {
+          Name = "Path",
+          NickName = "P",
+          Access = GH_ParamAccess.item,
+          FileFilter = "Family File (*.rfa)|*.rfa"
+        }
+      ),
+      ParamDefinition.FromParam
+      (
+        new Param_Boolean()
+        {
+          Name = "Override Family",
+          NickName = "OF",
+          Description = "Override Family",
+          Access = GH_ParamAccess.item
+        },
+        ParamVisibility.Binding,
+        defaultValue: false
+      ),
+      ParamDefinition.FromParam
+      (
+        new Param_Boolean()
+        {
+          Name = "Override Parameters",
+          NickName = "OP",
+          Description = "Override Parameters",
+          Access = GH_ParamAccess.item
+        },
+        ParamVisibility.Binding,
+        defaultValue: false
+      ),
+    };
 
-      manager.AddBooleanParameter("OverrideFamily", "O", "Override Family", GH_ParamAccess.item, false);
-      manager.AddBooleanParameter("OverrideParameters", "O", "Override Parameters", GH_ParamAccess.item, false);
-    }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      manager.AddParameter(new Parameters.Family(), "Family", "F", string.Empty, GH_ParamAccess.item);
-    }
+      ParamDefinition.FromParam
+      (
+        new Parameters.Family()
+        {
+          Name = "Family",
+          NickName = "F",
+          Description = string.Empty,
+          Access = GH_ParamAccess.item
+        }
+      )
+    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
     {
@@ -38,14 +89,14 @@ namespace RhinoInside.Revit.GH.Components
         return;
 
       var overrideFamily = false;
-      if (!DA.GetData("OverrideFamily", ref overrideFamily))
+      if (!DA.GetData("Override Family", ref overrideFamily))
         return;
 
       var overrideParameters = false;
-      if (!DA.GetData("OverrideParameters", ref overrideParameters))
+      if (!DA.GetData("Override Parameters", ref overrideParameters))
         return;
 
-      using (var transaction = new DB.Transaction(doc))
+      using (var transaction = NewTransaction(doc))
       {
         transaction.Start(Name);
 

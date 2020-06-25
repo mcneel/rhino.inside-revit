@@ -169,9 +169,6 @@
   <data name="Edge" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Parameters\Edge.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="GraphicalElement" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Parameters\GraphicalElement.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="ElementDecompose" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Components\ElementDecompose.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -211,17 +208,17 @@
   <data name="ModelLineByCurve" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Components\ModelLineByCurve.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ParameterByName" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Components\ParameterByName.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="DefineSharedParameter" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\DefineSharedParameter.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ParameterKey" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Parameters\ParameterKey.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ParameterKeyDecompose" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Components\ParameterKeyDecompose.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ParameterKeyIdentity" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\ParameterKeyIdentity.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ParameterValueDecompose" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Components\ParameterValueDecompose.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="DeconstructParameterValue" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\DeconstructParameterValue.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="SketchPlane" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Parameters\SketchPlane.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -291,5 +288,137 @@
   </data>
   <data name="TagCategoriesPicker" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Parameters\TagCategoriesPicker.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="GraphicalElement" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Parameters\GraphicalElement.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Group" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Parameters\Group.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="HostObject" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Parameters\HostObject.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Element" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Parameters\Element.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Grid" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Parameters\Grid.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Level" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Parameters\Level.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Family" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Parameters\Family.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Material" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Parameters\Material.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="View" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Parameters\View.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="BuildingPad" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Parameters\BuildingPad.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Ceiling" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Parameters\Ceiling.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="CurtainGridLine" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Parameters\CurtainGridLine.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="CurtainSystem" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Parameters\CurtainSystem.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Floor" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Parameters\Floor.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Mullion" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Parameters\Mullion.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Panel" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Parameters\Panel.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Roof" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Parameters\Roof.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Wall" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Parameters\Wall.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ElementPurge" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\ElementPurge.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Sketch" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Parameters\Sketch.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AnalyzeWall" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\AnalyzeWall.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AnalyzeBasicWallType" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\AnalyzeBasicWallType.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AnalyzeCurtainGridPanel" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\AnalyzeCurtainGridPanel.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AnalyzeCurtainGridPanelType" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\AnalyzeCurtainGridPanelType.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AnalyzeCurtainGridMullion" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\AnalyzeCurtainGridMullion.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AnalyzeCurtainGridMullionType" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\AnalyzeCurtainGridMullionType.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AnalyzeCurtainSystem" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\AnalyzeCurtainSystem.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AnalyzeCurtainSystemType" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\AnalyzeCurtainSystemType.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AnalyzeCurtainGridLine" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\AnalyzeCurtainGridLine.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AnalyzeCurtainGrid" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\AnalyzeCurtainGrid.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AnalyzeCurtainGridCell" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\AnalyzeCurtainGridCell.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AnalyzeWallLocationCurve" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\AnalyzeWallLocationCurve.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AnalyzeWallProfile" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\AnalyzeWallProfile.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="DeconstructCompoundStructure" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\DeconstructCompoundStructure.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="DeconstructCompoundStructureLayer" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\DeconstructCompoundStructureLayer.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AnalyzeCurtainWall" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\AnalyzeCurtainWall.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AnalyzeCurtainWallType" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\AnalyzeCurtainWallType.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AnalyzeInstanceSpace" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\AnalyzeInstanceSpace.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="CurtainWall" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Parameters\CurtainWall.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AnalyzeStackedWall" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\AnalyzeStackedWall.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AnalyzeStackedWallType" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Components\AnalyzeStackedWallType.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="StackedWall" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Parameters\StackedWall.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="logo_24x24" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\logo_24x24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ObjectFamily_Unknown" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ObjectFamily-Unknown.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Components
   public class AnalyzeBasicWallType : AnalysisComponent
   {
     public override Guid ComponentGuid => new Guid("00A650ED-4CC7-4AD3-BF38-491507315AC5");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "ABWT";
 
     public AnalyzeBasicWallType() : base(
@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components
       nickname: "A-BWT",
       description: "Analyze given Basic Wall type",
       category: "Revit",
-      subCategory: "Analyze"
+      subCategory: "Wall"
     )
     {
     }
@@ -36,21 +36,21 @@ namespace RhinoInside.Revit.GH.Components
     {
       manager.AddParameter(
         param: new Parameters.DataObject<DB.CompoundStructure>(),
-        name: "Compound Structure",
-        nickname: "CS",
+        name: "Structure",
+        nickname: "S",
         description: "Compound Structure definition of given Basic Wall type",
         access: GH_ParamAccess.item
         );
       manager.AddParameter(
-        param: new Parameters.WallWrapping_ValueList(),
-        name: "Wrapping at Insert",
+        param: new Parameters.Param_Enum<Types.WallWrapping>(),
+        name: "Wrapping at Inserts",
         nickname: "WI",
         description: "Wrapping at Insert setting of given Basic Wall type",
         access: GH_ParamAccess.item
         );
       manager.AddParameter(
-        param: new Parameters.WallWrapping_ValueList(),
-        name: "Wrapping at End",
+        param: new Parameters.Param_Enum<Types.WallWrapping>(),
+        name: "Wrapping at Ends",
         nickname: "WE",
         description: "Wrapping at End setting of given Basic Wall type",
         access: GH_ParamAccess.item
@@ -62,8 +62,8 @@ namespace RhinoInside.Revit.GH.Components
         access: GH_ParamAccess.item
         );
       manager.AddParameter(
-        param: new Parameters.WallFunction_ValueList(),
-        name: "Wall Function",
+        param: new Parameters.Param_Enum<Types.WallFunction>(),
+        name: "Function",
         nickname: "WF",
         description: "Wall Function of given Basic Wall type",
         access: GH_ParamAccess.item
@@ -82,18 +82,13 @@ namespace RhinoInside.Revit.GH.Components
         return;
 
       // grab compound structure
-      DA.SetData(
-        "Compound Structure",
-        new Types.DataObject<DB.CompoundStructure>(
-          apiObject: wallType.GetCompoundStructure(),
-          srcDocument: wallType.Document
-          )
-        );
+      DA.SetData("Structure", new Types.DataObject<DB.CompoundStructure>(wallType.GetCompoundStructure(),wallType.Document));
+
       // pipe the wall type parameters directly to component outputs
-      PipeHostParameter<Types.WallWrapping>(DA, wallType, DB.BuiltInParameter.WRAPPING_AT_INSERTS_PARAM, "Wrapping at Insert");
-      PipeHostParameter<Types.WallWrapping>(DA, wallType, DB.BuiltInParameter.WRAPPING_AT_ENDS_PARAM, "Wrapping at End");
+      PipeHostParameter<Types.WallWrapping>(DA, wallType, DB.BuiltInParameter.WRAPPING_AT_INSERTS_PARAM, "Wrapping at Inserts");
+      PipeHostParameter<Types.WallWrapping>(DA, wallType, DB.BuiltInParameter.WRAPPING_AT_ENDS_PARAM, "Wrapping at Ends");
       PipeHostParameter(DA, wallType, DB.BuiltInParameter.WALL_ATTR_WIDTH_PARAM, "Width");
-      PipeHostParameter<Types.WallFunction>(DA, wallType, DB.BuiltInParameter.FUNCTION_PARAM, "Wall Function");
+      PipeHostParameter<Types.WallFunction>(DA, wallType, DB.BuiltInParameter.FUNCTION_PARAM, "Function");
     }
   }
 }

@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Components
       nickname: "A-IS",
       description: "Analyze family instance space e.g. spatial elements surrounding the given instance",
       category: "Revit",
-      subCategory: "Analyze"
+      subCategory: "Room & Area"
     )
     {
     }
@@ -25,7 +25,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
       manager.AddParameter(
-        param: new Parameters.Element(),
+        param: new Parameters.FamilyInstance(),
         name: "Family Instance",
         nickname: "FI",
         description: "Family Instance",
