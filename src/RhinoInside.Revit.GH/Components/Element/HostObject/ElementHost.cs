@@ -38,10 +38,9 @@ namespace RhinoInside.Revit.GH.Components
         return;
 
       // Special cases
-      if (element is DB.Panel || element is DB.Mullion)
+      if (element is DB.FamilyInstance familyInstace)
       {
-        var hostId = element.get_Parameter(DB.BuiltInParameter.CURTAIN_WALL_PANEL_HOST_ID).AsElementId();
-        DA.SetData("Host", Types.HostObject.FromElementId(element.Document, hostId));
+        DA.SetData("Host", Types.HostObject.FromElement(familyInstace.Host));
         return;
       }
       else if (element is DB.Opening opening)
@@ -49,7 +48,6 @@ namespace RhinoInside.Revit.GH.Components
         DA.SetData("Host", Types.HostObject.FromElement(opening.Host));
         return;
       }
-      // Door & Windows
       else if (element.get_Parameter(DB.BuiltInParameter.HOST_ID_PARAM) is DB.Parameter hostId)
       {
         DA.SetData("Host", Types.HostObject.FromElementId(element.Document, hostId.AsElementId()));
