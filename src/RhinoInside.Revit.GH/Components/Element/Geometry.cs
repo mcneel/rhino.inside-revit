@@ -273,17 +273,17 @@ namespace RhinoInside.Revit.GH.Components
         },
         ParamVisibility.Voluntary
       ),
-      new ParamDefinition
-      (
-        new Parameters.Material()
-        {
-          Name = "Materials",
-          NickName = "M",
-          Description = "Geometry material",
-          Access = GH_ParamAccess.tree
-        },
-        ParamVisibility.Voluntary
-      ),
+      //new ParamDefinition
+      //(
+      //  new Parameters.Material()
+      //  {
+      //    Name = "Materials",
+      //    NickName = "M",
+      //    Description = "Geometry material",
+      //    Access = GH_ParamAccess.tree
+      //  },
+      //  ParamVisibility.Voluntary
+      //),
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -419,17 +419,17 @@ namespace RhinoInside.Revit.GH.Components
         },
         ParamVisibility.Default
       ),
-      new ParamDefinition
-      (
-        new Parameters.Material()
-        {
-          Name = "Materials",
-          NickName = "M",
-          Description = "Geometry material",
-          Access = GH_ParamAccess.tree
-        },
-        ParamVisibility.Default
-      ),
+      //new ParamDefinition
+      //(
+      //  new Parameters.Material()
+      //  {
+      //    Name = "Materials",
+      //    NickName = "M",
+      //    Description = "Geometry material",
+      //    Access = GH_ParamAccess.tree
+      //  },
+      //  ParamVisibility.Default
+      //),
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
