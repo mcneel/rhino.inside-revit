@@ -10,7 +10,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public class Sketch : Element, IGH_PreviewData
+  public class Sketch : GraphicalElement
   {
     public override string TypeName => "Revit Sketch";
     public override string TypeDescription => "Represents a Revit sketch";
@@ -30,26 +30,20 @@ namespace RhinoInside.Revit.GH.Types
 
       if (value is DB.HostObject host)
       {
-        var sketckIds = host.GetDependentElements(new DB.ElementClassFilter(typeof(DB.Sketch)));
-        var sketch = (DB.Sketch) sketckIds.Select(x => host.Document.GetElement(x)).FirstOrDefault();
-        return sketch is null ? false : SetValue(sketch);
+        var sketch = host.GetFirstDependent<DB.Sketch>();
+        return sketch is object && SetValue(sketch);
       }
 
       return base.CastFrom(source);
     }
 
     #region Location
-    public override Point3d Origin => Plane.Origin;
-    public override Vector3d XAxis => Plane.XAxis;
-    public override Vector3d YAxis => Plane.YAxis;
-    public override Vector3d ZAxis => Plane.ZAxis;
-    public override Plane Plane
+    public override Plane Location
     {
       get
       {
-        var element = (DB.Sketch) this;
-        return element?.SketchPlane.GetPlane().ToPlane() ??
-          new Plane(new Point3d(double.NaN, double.NaN, double.NaN), Vector3d.Zero, Vector3d.Zero);
+        var sketch = (DB.Sketch) this;
+        return sketch?.SketchPlane.GetPlane().ToPlane() ?? base.Location;
       }
     }
     public override Brep Surface => Region;
@@ -345,16 +339,19 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_PreviewData
-    public void DrawViewportWires(GH_PreviewWireArgs args)
+    public override void DrawViewportWires(GH_PreviewWireArgs args)
     {
       var bbox = ClippingBox;
       if (!bbox.IsValid)
         return;
 
+      GH_Plane.DrawPlane(args.Pipeline, Location, Grasshopper.CentralSettings.PreviewPlaneRadius, 4, args.Color, System.Drawing.Color.DarkRed, System.Drawing.Color.DarkGreen);
+
       foreach(var loop in Profile)
         args.Pipeline.DrawCurve(loop, args.Color, args.Thickness);
     }
-    public void DrawViewportMeshes(GH_PreviewMeshArgs args)
+
+    public override void DrawViewportMeshes(GH_PreviewMeshArgs args)
     {
       if(Region is object)
         args.Pipeline.DrawBrepShaded(Region, args.Material);

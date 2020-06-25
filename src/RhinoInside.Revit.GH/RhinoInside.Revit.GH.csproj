@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -240,6 +240,7 @@
     <Compile Include="Components\Element\HostObject\Inserts.cs" />
     <Compile Include="Components\Element\Inspect.cs" />
     <Compile Include="Components\Element\Level\QueryLevels.cs" />
+    <Compile Include="Components\Element\Location.cs" />
     <Compile Include="Components\Element\Materials.cs" />
     <Compile Include="Components\Element\Column\ByCurve.cs" />
     <Compile Include="Components\Element\DirectShape\ByBrep.cs" />
@@ -361,7 +362,11 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Solid.cs" />
+    <Compile Include="Types\BuildingPad.cs" />
     <Compile Include="Types\Category.cs" />
+    <Compile Include="Types\Ceiling.cs" />
+    <Compile Include="Types\CurtainSystem.cs" />
+    <Compile Include="Types\Dimension.cs" />
     <Compile Include="Types\Document.cs" />
     <Compile Include="Types\Element.cs" />
     <Compile Include="Types\ElementFilter.cs" />
@@ -370,12 +375,15 @@
     <Compile Include="Types\Enums.cs" />
     <Compile Include="Types\Family.cs" />
     <Compile Include="Types\FamilyInstance.cs" />
+    <Compile Include="Types\Floor.cs" />
     <Compile Include="Types\GeometryObject.cs" />
     <Compile Include="Types\GraphicalElement.cs" />
     <Compile Include="Types\Group.cs" />
+    <Compile Include="Types\InstanceElement.cs" />
     <Compile Include="Types\Panel.cs" />
     <Compile Include="Types\Parameter.cs" />
     <Compile Include="Types\DatumPlane.cs" />
+    <Compile Include="Types\Roof.cs" />
     <Compile Include="Types\Sketch.cs" />
     <Compile Include="Types\SketchPlane.cs" />
     <Compile Include="Types\Material.cs" />
@@ -385,6 +393,7 @@
     <Compile Include="Types\CurtainGridLine.cs" />
     <Compile Include="Types\SpatialElement.cs" />
     <Compile Include="Types\Mullion.cs" />
+    <Compile Include="Types\Wall.cs" />
     <Compile Include="ValueSet.cs" />
   </ItemGroup>
   <ItemGroup>

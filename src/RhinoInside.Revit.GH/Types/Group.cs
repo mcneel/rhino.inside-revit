@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.GH.Types
         return;
 
       foreach (var edge in bbox.GetEdges() ?? Enumerable.Empty<Line>())
-        args.Pipeline.DrawPatternedLine(edge.From, edge.To, args.Color, 0x00003333, 1 /*args.Thickness*/);
+        args.Pipeline.DrawPatternedLine(edge.From, edge.To, args.Color, 0x00003333, args.Thickness);
     }
     public override void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
     #endregion
