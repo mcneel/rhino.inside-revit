@@ -8,12 +8,13 @@ namespace RhinoInside.Revit.GH.Parameters
   {
     public override GH_Exposure Exposure => GH_Exposure.hidden; //GH_Exposure.tertiary;
     public override Guid ComponentGuid => new Guid("804BD6AC-8A4A-4D79-A734-330534B3C435");
+    protected override string IconTag => "C";
 
     public FamilyInstance() : base
     (
-      name: "Family Instance",
-      nickname: "Family Instance",
-      description: "Represents a Revit family instance element.",
+      name: "Component",
+      nickname: "Component",
+      description: "Represents a Revit Component element.",
       category: "Params",
       subcategory: "Revit Primitives"
     )

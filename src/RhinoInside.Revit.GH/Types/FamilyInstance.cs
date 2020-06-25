@@ -35,29 +35,8 @@ namespace RhinoInside.Revit.GH.Types
         var instance = (DB.Instance) this;
         if (instance is object)
         {
-          var transform = instance.GetTransform();
-          var origin = transform.Origin.ToPoint3d();
-          var axis = transform.BasisX.ToVector3d();
-          var perp = transform.BasisY.ToVector3d();
-          var normal = transform.BasisZ.ToVector3d();
-
-          switch (instance.Location)
-          {
-            case DB.LocationPoint pointLocation:
-              origin = pointLocation.Point.ToPoint3d();
-              axis.Rotate(pointLocation.Rotation, normal);
-              perp.Rotate(pointLocation.Rotation, normal);
-              break;
-            case DB.LocationCurve curveLocation:
-              var start = curveLocation.Curve.Evaluate(0.0, normalized: true).ToPoint3d();
-              var end = curveLocation.Curve.Evaluate(1.0, normalized: true).ToPoint3d();
-              axis = end - start;
-              origin = start + (axis * 0.5);
-              perp = Vector3d.CrossProduct(normal, axis);
-              break;
-          }
-
-          return new Plane(origin, axis, perp);
+          instance.GetLocation(out var origin, out var basisX, out var basisY);
+          return new Plane(origin.ToPoint3d(), basisX.ToVector3d(), basisY.ToVector3d());
         }
 
         return base.Location;
@@ -75,11 +54,11 @@ namespace RhinoInside.Revit.GH.Types
         if (instance is object)
           return $"Revit {instance.Category.Name}";
 
-        return "Revit Family Instance";
+        return "Revit Component";
       }
     }
 
-    public override string TypeDescription => "Represents a Revit Family Instance";
+    public override string TypeDescription => "Represents a Revit Component";
     protected override Type ScriptVariableType => typeof(DB.FamilyInstance);
     public static explicit operator DB.FamilyInstance(FamilyInstance value) =>
       value.Document?.GetElement(value) as DB.FamilyInstance;
