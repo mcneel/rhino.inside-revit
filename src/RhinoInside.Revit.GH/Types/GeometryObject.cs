@@ -44,6 +44,63 @@ namespace RhinoInside.Revit.GH.Types
     public GeometricElement() { }
     public GeometricElement(DB.Element element) : base(element) { }
 
+    public override BoundingBox GetBoundingBox(Transform xform)
+    {
+      var element = (DB.Element) this;
+      if (element is null)
+        return BoundingBox.Unset;
+
+      var bbox = ClippingBox;
+      if (!xform.IsIdentity)
+      {
+        bbox.Transform(xform);
+
+        var meshes = TryGetPreviewMeshes();
+        var wires = TryGetPreviewWires();
+        if (meshes is null && wires is null)
+          BuildPreview(element, default, DB.ViewDetailLevel.Medium, out var _, out meshes, out wires);
+
+        if (meshes?.Length > 0 || wires?.Length > 0)
+        {
+          bbox = BoundingBox.Empty;
+          foreach (var mesh in meshes)
+            bbox.Union(mesh.GetBoundingBox(xform));
+
+          foreach (var wire in wires)
+            bbox.Union(wire.GetBoundingBox(xform));
+        }
+      }
+
+      return bbox;
+    }
+
+    public override Box Box
+    {
+      get
+      {
+        if ((DB.Element) this is DB.Element element)
+        {
+          var plane = Location;
+          if(!Location.IsValid)
+            return element.get_BoundingBox(null).ToBox();
+
+          var xform = Transform.ChangeBasis(Plane.WorldXY, plane);
+          var bbox = GetBoundingBox(xform);
+
+          return new Box
+          (
+            plane,
+            new Interval(bbox.Min.X, bbox.Max.X),
+            new Interval(bbox.Min.Y, bbox.Max.Y),
+            new Interval(bbox.Min.Z, bbox.Max.Z)
+          );
+        }
+
+        return new Box(ClippingBox);
+      }
+    }
+
+
     #region Preview
     public static void BuildPreview
     (

@@ -354,7 +354,7 @@ namespace RhinoInside.Revit.GH
               foreach (var obj in change.ExpiredObjects)
               {
                 obj.ClearData();
-                obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"This object was expired because it contained obsolete Revit elements.");
+                obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"This object was expired because it contained obsolete Revit elements.");
               }
 
               Instances.DocumentEditor.SetStatusBarEvent

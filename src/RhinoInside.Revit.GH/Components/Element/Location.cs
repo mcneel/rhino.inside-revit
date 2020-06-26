@@ -54,7 +54,7 @@ namespace RhinoInside.Revit.GH.Components
         {
           Name = "Box",
           NickName = "B",
-          Description = "Element bounding box",
+          Description = "Element oriented bounding box",
           Access = GH_ParamAccess.item
         },
         ParamVisibility.Voluntary
