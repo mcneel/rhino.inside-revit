@@ -11,8 +11,8 @@ namespace RhinoInside.Revit.GH.Types
   {
     public override string TypeDescription => "Represents a Revit roof element";
     protected override Type ScriptVariableType => typeof(DB.RoofBase);
-    public static explicit operator DB.RoofBase(Roof self) =>
-      self.Document?.GetElement(self) as DB.RoofBase;
+    public static explicit operator DB.RoofBase(Roof value) =>
+      value.IsValid ? value.Document?.GetElement(value) as DB.RoofBase : default;
 
     public Roof() { }
     public Roof(DB.RoofBase roof) : base(roof) { }

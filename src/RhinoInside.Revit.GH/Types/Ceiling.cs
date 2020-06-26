@@ -11,8 +11,8 @@ namespace RhinoInside.Revit.GH.Types
   {
     public override string TypeDescription => "Represents a Revit ceiling element";
     protected override Type ScriptVariableType => typeof(DB.Ceiling);
-    public static explicit operator DB.Ceiling(Ceiling self) =>
-      self.Document?.GetElement(self) as DB.Ceiling;
+    public static explicit operator DB.Ceiling(Ceiling value) =>
+      value.IsValid ? value.Document?.GetElement(value) as DB.Ceiling : default;
 
     public Ceiling() { }
     public Ceiling(DB.Ceiling ceiling) : base(ceiling) { }
