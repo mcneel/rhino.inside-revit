@@ -12,8 +12,8 @@ namespace RhinoInside.Revit.GH.Types
   {
     public override string TypeDescription => "Represents a Revit curtain grid line Element";
     protected override Type ScriptVariableType => typeof(DB.CurtainGridLine);
-    public static explicit operator DB.CurtainGridLine(CurtainGridLine self) =>
-      self.Document?.GetElement(self) as DB.CurtainGridLine;
+    public static explicit operator DB.CurtainGridLine(CurtainGridLine value) =>
+      value.IsValid ? value.Document?.GetElement(value) as DB.CurtainGridLine : default;
 
     public CurtainGridLine() { }
     public CurtainGridLine(DB.CurtainGridLine gridLine) : base(gridLine) { }

@@ -11,8 +11,8 @@ namespace RhinoInside.Revit.GH.Types
   {
     public override string TypeDescription => "Represents a Revit building pad element";
     protected override Type ScriptVariableType => typeof(DB.Architecture.BuildingPad);
-    public static explicit operator DB.Architecture.BuildingPad(BuildingPad self) =>
-      self.Document?.GetElement(self) as DB.Architecture.BuildingPad;
+    public static explicit operator DB.Architecture.BuildingPad(BuildingPad value) =>
+      value.IsValid ? value.Document?.GetElement(value) as DB.Architecture.BuildingPad : default;
 
     public BuildingPad() { }
     public BuildingPad(DB.Architecture.BuildingPad floor) : base(floor) { }

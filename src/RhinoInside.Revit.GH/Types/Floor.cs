@@ -11,8 +11,8 @@ namespace RhinoInside.Revit.GH.Types
   {
     public override string TypeDescription => "Represents a Revit floor element";
     protected override Type ScriptVariableType => typeof(DB.Floor);
-    public static explicit operator DB.Floor(Floor self) =>
-      self.Document?.GetElement(self) as DB.Floor;
+    public static explicit operator DB.Floor(Floor value) =>
+      value.IsValid ? value.Document?.GetElement(value) as DB.Floor : default;
 
     public Floor() { }
     public Floor(DB.Floor floor) : base(floor) { }

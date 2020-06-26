@@ -26,7 +26,8 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeDescription => "Represents a Revit element";
     override public object ScriptVariable() => (DB.Element) this;
     protected override Type ScriptVariableType => typeof(DB.Element);
-    public static explicit operator DB.Element(Element self) => self.IsValid ? self.Document.GetElement(self) : null;
+    public static explicit operator DB.Element(Element value) =>
+      value.IsValid ? value.Document.GetElement(value) : default;
 
     public static Element FromValue(object data)
     {

@@ -11,8 +11,8 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeName => "Revit Sketch Plane";
     public override string TypeDescription => "Represents a Revit sketch plane";
     protected override Type ScriptVariableType => typeof(DB.SketchPlane);
-    public static explicit operator DB.SketchPlane(SketchPlane self) =>
-      self.Document?.GetElement(self) as DB.SketchPlane;
+    public static explicit operator DB.SketchPlane(SketchPlane value) =>
+      value.IsValid ? value.Document?.GetElement(value) as DB.SketchPlane : default;
 
     public SketchPlane() : base() { }
     public SketchPlane(DB.SketchPlane sketchPlane) : base(sketchPlane) { }
