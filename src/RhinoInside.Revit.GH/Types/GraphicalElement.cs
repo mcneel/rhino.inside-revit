@@ -55,7 +55,7 @@ namespace RhinoInside.Revit.GH.Types
 
     void IGH_GeometricGoo.ClearCaches() => UnloadElement();
     IGH_GeometricGoo IGH_GeometricGoo.DuplicateGeometry() => (IGH_GeometricGoo) MemberwiseClone();
-    public BoundingBox GetBoundingBox(Transform xform) => ClippingBox;
+    public virtual BoundingBox GetBoundingBox(Transform xform) => ClippingBox;
     bool IGH_GeometricGoo.LoadGeometry() => IsElementLoaded || LoadElement();
     bool IGH_GeometricGoo.LoadGeometry(Rhino.RhinoDoc doc) => IsElementLoaded || LoadElement();
     IGH_GeometricGoo IGH_GeometricGoo.Transform(Transform xform) => null;
