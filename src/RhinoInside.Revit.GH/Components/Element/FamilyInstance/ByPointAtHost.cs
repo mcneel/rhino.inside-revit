@@ -38,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components
       Rhino.Geometry.Plane location,
       DB.FamilySymbol type,
       Optional<DB.Level> level,
-      [Optional] DB.HostObject host
+      [Optional] DB.Element host
     )
     {
       if (!location.IsValid)
