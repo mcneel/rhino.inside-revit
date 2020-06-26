@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
+using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
@@ -35,60 +36,54 @@ namespace RhinoInside.Revit.GH.Components
       ref DB.FamilyInstance element,
 
       [Description("Location where to place the element. Point or plane is accepted.")]
-      Rhino.Geometry.Plane location,
+      Plane location,
       DB.FamilySymbol type,
       Optional<DB.Level> level,
       [Optional] DB.Element host
     )
     {
       if (!location.IsValid)
-        ThrowArgumentException(nameof(location), "Should be a valid point or plane.");
+        ThrowArgumentException(nameof(location), "Location is not valid.");
 
-      SolveOptionalLevel(doc, location.Origin, ref level, out var bbox);
+      SolveOptionalLevel(doc, location.Origin, ref level, out var _);
 
-      if (host == null && type.Family.FamilyPlacementType == DB.FamilyPlacementType.OneLevelBasedHosted)
+      if (host is null && type.Family.FamilyPlacementType == DB.FamilyPlacementType.OneLevelBasedHosted)
         ThrowArgumentException(nameof(host), $"This family requires a host.");
 
       if (!type.IsActive)
         type.Activate();
 
-      ChangeElementTypeId(ref element, type.Id);
-
-      bool hasSameHost = false;
-      if (element is DB.FamilyInstance)
       {
-        if (element.Host is DB.Element elementHost)
-          hasSameHost = elementHost.Id == (host?.Id ?? DB.ElementId.InvalidElementId);
-        else using (var freeHostName = element.get_Parameter(DB.BuiltInParameter.INSTANCE_FREE_HOST_PARAM))
-          hasSameHost = !(freeHostName is null);
-      }
+        var creationData = new List<Autodesk.Revit.Creation.FamilyInstanceCreationData>();
 
-      if(hasSameHost)
-      {
-        element.Pinned = false;
-
-        if (element.LevelId != level.Value.Id)
+        if (host is null && type.Family.FamilyPlacementType == DB.FamilyPlacementType.WorkPlaneBased)
         {
-          using (var levelParam = element.get_Parameter(DB.BuiltInParameter.FAMILY_LEVEL_PARAM))
-          {
-            levelParam.Set(level.Value.Id);
-            doc.Regenerate();
-          }
-        }
-      }
-      else
-      {
-        var creationData = new List<Autodesk.Revit.Creation.FamilyInstanceCreationData>()
-        {
-          new Autodesk.Revit.Creation.FamilyInstanceCreationData
+          creationData.Add
           (
-            location.Origin.ToXYZ(),
-            type,
-            host,
-            level.Value,
-            DB.Structure.StructuralType.NonStructural
-          )
-        };
+            new Autodesk.Revit.Creation.FamilyInstanceCreationData
+            (
+              location.Origin.ToXYZ(),
+              type,
+              DB.SketchPlane.Create(doc, location.ToPlane()),
+              level.Value,
+              DB.Structure.StructuralType.NonStructural
+            )
+          );
+        }
+        else
+        {
+          creationData.Add
+          (
+           new Autodesk.Revit.Creation.FamilyInstanceCreationData
+           (
+             location.Origin.ToXYZ(),
+             type,
+             host,
+             level.Value,
+             DB.Structure.StructuralType.NonStructural
+           )
+         );
+        }
 
         var newElementIds = doc.IsFamilyDocument ?
                             doc.FamilyCreate.NewFamilyInstances2(creationData) :
@@ -105,11 +100,14 @@ namespace RhinoInside.Revit.GH.Components
           DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
           DB.BuiltInParameter.ELEM_FAMILY_PARAM,
           DB.BuiltInParameter.ELEM_TYPE_PARAM,
-          DB.BuiltInParameter.FAMILY_LEVEL_PARAM
+          DB.BuiltInParameter.FAMILY_LEVEL_PARAM,
+          DB.BuiltInParameter.INSTANCE_SCHEDULE_ONLY_LEVEL_PARAM,
+          DB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM
         };
 
         ReplaceElement(ref element, doc.GetElement(newElementIds.First()) as DB.FamilyInstance, parametersMask);
         doc.Regenerate();
+        element.Pinned = false;
       }
 
       element?.SetLocation(location.Origin.ToXYZ(), location.XAxis.ToXYZ(), location.YAxis.ToXYZ());

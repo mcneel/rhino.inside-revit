@@ -74,7 +74,16 @@ namespace RhinoInside.Revit.GH.Types
           return baseLevel;
 
         var instance = (DB.FamilyInstance) this;
-        return Level.FromElement(instance.Document.GetElement(instance.get_Parameter(DB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM)?.AsElementId() ?? DB.ElementId.InvalidElementId)) as Level;
+        if (instance is null)
+          return default;
+
+        var levelParam = instance.get_Parameter(DB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM);
+        if(levelParam is null || levelParam.AsElementId() == DB.ElementId.InvalidElementId)
+          levelParam = instance.get_Parameter(DB.BuiltInParameter.INSTANCE_SCHEDULE_ONLY_LEVEL_PARAM);
+        if (levelParam is null || levelParam.AsElementId() == DB.ElementId.InvalidElementId)
+          return default;
+
+        return Level.FromElementId(instance.Document, levelParam.AsElementId()) as Level;
       }
     }
 
@@ -85,7 +94,7 @@ namespace RhinoInside.Revit.GH.Types
         var baseLocation = base.Location;
 
         var instance = (DB.FamilyInstance) this;
-        if (instance is object & instance.Mirrored)
+        if (instance?.Mirrored == true)
         {
           baseLocation.XAxis = -baseLocation.XAxis;
           baseLocation.YAxis = -baseLocation.YAxis;

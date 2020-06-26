@@ -252,6 +252,8 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         var element = (DB.Element) this;
+        if (element is null)
+          return default;
 
         if (element is DB.ModelCurve modelCurve)
         {
