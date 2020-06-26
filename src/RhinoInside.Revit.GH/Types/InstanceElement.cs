@@ -38,7 +38,7 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         var element = (DB.Element) this;
-        return Level.FromElement(element.Document.GetElement(element.LevelId)) as Level;
+        return element is null ? null : Level.FromElement(element.Document.GetElement(element.LevelId)) as Level;
       }
     }
 
