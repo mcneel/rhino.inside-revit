@@ -8,6 +8,25 @@ namespace RhinoInside.Revit.External.DB.Extensions
   public static class ViewExtension
   {
     /// <summary>
+    /// Checks if the provided <see cref="Autodesk.Revit.DB.ViewType"/> represents a graphical view.
+    /// </summary>
+    /// <param name="viewType"></param>
+    /// <returns>true if <paramref name="viewType"/> represents a graphical view type.</returns>
+    public static bool IsGraphicalViewType(this ViewType viewType)
+    {
+      switch (viewType)
+      {
+        case ViewType.Undefined:
+        case ViewType.ProjectBrowser:
+        case ViewType.SystemBrowser:
+        case ViewType.Internal:
+          return false;
+      }
+
+      return true;
+    }
+
+    /// <summary>
     /// The bounds of the view in paper space (in pixels).
     /// </summary>
     /// <param name="view"></param>
