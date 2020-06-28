@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -15,6 +16,15 @@ namespace RhinoInside.Revit.GH.Types
 
     public Group() { }
     public Group(DB.Group value) : base(value) { }
+
+    public override Level Level
+    {
+      get
+      {
+        var element = (DB.Group) this;
+        return element is null ? null : FromElement(element.GetParameterValue<DB.Level>(DB.BuiltInParameter.GROUP_LEVEL)) as Level;
+      }
+    }
 
     #region IGH_PreviewData
     public override void DrawViewportWires(GH_PreviewWireArgs args)

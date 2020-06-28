@@ -44,6 +44,12 @@ namespace RhinoInside.Revit.GH.Types
     public GeometricElement() { }
     public GeometricElement(DB.Element element) : base(element) { }
 
+    public static new bool IsValidElement(DB.Element element)
+    {
+      using (var options = new DB.Options())
+        return !(element.get_Geometry(options) is null);
+    }
+
     public override BoundingBox GetBoundingBox(Transform xform)
     {
       var element = (DB.Element) this;
@@ -73,33 +79,6 @@ namespace RhinoInside.Revit.GH.Types
 
       return bbox;
     }
-
-    public override Box Box
-    {
-      get
-      {
-        if ((DB.Element) this is DB.Element element)
-        {
-          var plane = Location;
-          if(!Location.IsValid)
-            return element.get_BoundingBox(null).ToBox();
-
-          var xform = Transform.ChangeBasis(Plane.WorldXY, plane);
-          var bbox = GetBoundingBox(xform);
-
-          return new Box
-          (
-            plane,
-            new Interval(bbox.Min.X, bbox.Max.X),
-            new Interval(bbox.Min.Y, bbox.Max.Y),
-            new Interval(bbox.Min.Z, bbox.Max.Z)
-          );
-        }
-
-        return new Box(ClippingBox);
-      }
-    }
-
 
     #region Preview
     public static void BuildPreview

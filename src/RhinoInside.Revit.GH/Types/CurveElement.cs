@@ -21,6 +21,14 @@ namespace RhinoInside.Revit.GH.Types
     public CurveElement() { }
     public CurveElement(DB.CurveElement value) : base(value) { }
 
+    public override BoundingBox GetBoundingBox(Transform xform)
+    {
+      if (Curve is Curve curve)
+        return curve.GetBoundingBox(xform);
+
+      return base.GetBoundingBox(xform);
+    }
+
     #region IGH_PreviewData
     public override void DrawViewportWires(GH_PreviewWireArgs args)
     {

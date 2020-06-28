@@ -105,7 +105,9 @@ namespace RhinoInside.Revit.GH.Types
           return new InstanceElement(element);
         }
 
-        return new GraphicalElement(element);
+        return GeometricElement.IsValidElement(element) ?
+          new GeometricElement(element) :
+          new GraphicalElement(element);
       }
 
       return new Element(element);

@@ -55,7 +55,7 @@ namespace RhinoInside.Revit.GH.Types
 
     void IGH_GeometricGoo.ClearCaches() => UnloadElement();
     IGH_GeometricGoo IGH_GeometricGoo.DuplicateGeometry() => (IGH_GeometricGoo) MemberwiseClone();
-    public virtual BoundingBox GetBoundingBox(Transform xform) => ClippingBox;
+    public virtual BoundingBox GetBoundingBox(Transform xform) => ClippingBox.GetBoundingBox(xform);
     bool IGH_GeometricGoo.LoadGeometry() => IsElementLoaded || LoadElement();
     bool IGH_GeometricGoo.LoadGeometry(Rhino.RhinoDoc doc) => IsElementLoaded || LoadElement();
     IGH_GeometricGoo IGH_GeometricGoo.Transform(Transform xform) => null;
@@ -178,12 +178,26 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         if ((DB.Element) this is DB.Element element)
-          return element.get_BoundingBox(null).ToBox();
+        {
+          var plane = Location;
+          if (!Location.IsValid)
+            return element.get_BoundingBox(null).ToBox();
+
+          var xform = Transform.ChangeBasis(Plane.WorldXY, plane);
+          var bbox = GetBoundingBox(xform);
+
+          return new Box
+          (
+            plane,
+            new Interval(bbox.Min.X, bbox.Max.X),
+            new Interval(bbox.Min.Y, bbox.Max.Y),
+            new Interval(bbox.Min.Z, bbox.Max.Z)
+          );
+        }
 
         return new Box(ClippingBox);
       }
     }
-
     public virtual Level Level => default;
 
     public virtual Plane Location
