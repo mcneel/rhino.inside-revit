@@ -12,7 +12,7 @@ namespace RhinoInside.Revit
 {
   public partial class Revit
   {
-    class FailuresPreprocessor : IFailuresPreprocessor
+    public class FailuresPreprocessor : IFailuresPreprocessor
     {
       public FailureProcessingResult PreprocessFailures(FailuresAccessor failuresAccessor)
       {
