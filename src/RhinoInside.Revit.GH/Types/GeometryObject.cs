@@ -390,7 +390,7 @@ namespace RhinoInside.Revit.GH.Types
     void IGH_PreviewMeshData.DestroyPreviewMeshes()
     {
       GeometryPreview = null;
-      clippingBox = BoundingBox.Empty;
+      clippingBox = null;
     }
 
     Mesh[] IGH_PreviewMeshData.GetPreviewMeshes()

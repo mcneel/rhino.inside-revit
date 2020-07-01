@@ -263,18 +263,18 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region Location
-    protected BoundingBox clippingBox = BoundingBox.Unset;
+    protected BoundingBox? clippingBox;
     public virtual BoundingBox ClippingBox
     {
       get
       {
-        if (!clippingBox.IsValid)
+        if (!clippingBox.HasValue)
         {
-          if ((DB.Element) this is DB.Element element)
-            clippingBox = element.get_BoundingBox(null).ToBoundingBox();
+          var element = (DB.Element) this;
+          clippingBox = (element?.get_BoundingBox(null)).ToBoundingBox();
         }
 
-        return clippingBox;
+        return clippingBox.Value;
       }
     }
     #endregion
