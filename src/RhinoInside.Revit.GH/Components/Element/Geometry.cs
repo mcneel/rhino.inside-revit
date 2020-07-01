@@ -120,8 +120,8 @@ namespace RhinoInside.Revit.GH.Components
                 using (var context = GeometryDecoder.Context.Push())
                 {
                   context.Element = element;
-                  context.GraphicsStyleId = element.Category.GetGraphicsStyle(DB.GraphicsStyleType.Projection)?.Id ?? DB.ElementId.InvalidElementId;
-                  context.MaterialId = element.Category.Material?.Id ?? DB.ElementId.InvalidElementId;
+                  context.GraphicsStyleId = element.Category?.GetGraphicsStyle(DB.GraphicsStyleType.Projection)?.Id ?? DB.ElementId.InvalidElementId;
+                  context.MaterialId = element.Category?.Material?.Id ?? DB.ElementId.InvalidElementId;
 
                   var list = geometry?.
                       ToGeometryBaseMany().
