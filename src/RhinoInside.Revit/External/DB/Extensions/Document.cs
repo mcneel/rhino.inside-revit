@@ -317,8 +317,31 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return level;
     }
 
+    /// <summary>
+    /// Gets the active Graphical <see cref="Autodesk.Revit.DB.View"/> of the provided <see cref="Autodesk.Revit.DB.Document"/>.
+    /// </summary>
+    /// <param name="doc"></param>
+    /// <returns>The active graphical <see cref="Autodesk.Revit.DB.View"/></returns>
+    public static View GetActiveGraphicalView(this Document doc)
+    {
+      using (var uiDocument = new Autodesk.Revit.UI.UIDocument(doc))
+      {
+        var activeView = uiDocument.ActiveGraphicalView;
+        if (activeView is null)
+        {
+          var openViews = uiDocument.GetOpenUIViews().
+          Select(x => doc.GetElement(x.ViewId) as View).
+          Where(x => x.ViewType.IsGraphicalViewType());
+
+          activeView = openViews.FirstOrDefault();
+        }
+
+        return activeView;
+      }
+    }
+
     static readonly Guid PurgePerformanceAdviserRuleId = new Guid("E8C63650-70B7-435A-9010-EC97660C1BDA");
-    public static bool GetPurgableElementTypes(this Document document, out ICollection<ElementId> purgableTypeIds)
+    public static bool GetPurgableElementTypes(this Document doc, out ICollection<ElementId> purgableTypeIds)
     {
       try
       {
@@ -327,7 +350,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           var rules = adviser.GetAllRuleIds().Where(x => x.Guid == PurgePerformanceAdviserRuleId).ToList();
           if (rules.Count > 0)
           {
-            var results = adviser.ExecuteRules(document, rules);
+            var results = adviser.ExecuteRules(doc, rules);
             if (results.Count > 0)
             {
               purgableTypeIds = new HashSet<ElementId>(results[0].GetFailingElements());
@@ -341,6 +364,5 @@ namespace RhinoInside.Revit.External.DB.Extensions
       purgableTypeIds = default;
       return false;
     }
-
   }
 }

@@ -31,6 +31,46 @@ namespace RhinoInside.Revit.Geometry.Extensions
     }
   }
 
+  public static class BoundingBoxExtension
+  {
+    /// <summary>
+    /// Aligned bounding box solver. Gets the world axis aligned bounding box for the transformed <paramref name="value"/>.
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="xform">Transformation to apply to <paramref name="value"/> prior to the BoundingBox computation. The <paramref name="value"/> itself is not modified</param>
+    /// <returns>The accurate bounding box of the transformed geometry in world coordinates or <see cref="BoundingBox.Unset"/> if not bounding box could be found</returns>
+    public static BoundingBox GetBoundingBox(this BoundingBox value, Transform xform)
+    {
+      if (!value.IsValid)
+        return BoundingBox.Unset;
+
+      if (xform.IsIdentity)
+        return value;
+
+      return new BoundingBox(value.GetCorners(), xform);
+    }
+  }
+
+  public static class BoxExtension
+  {
+    /// <summary>
+    /// Aligned bounding box solver. Gets the world axis aligned bounding box for the transformed <paramref name="value"/>.
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="xform">Transformation to apply to <paramref name="value"/> prior to the BoundingBox computation. The <paramref name="value"/> itself is not modified</param>
+    /// <returns>The accurate bounding box of the transformed geometry in world coordinates or <see cref="BoundingBox.Unset"/> if not bounding box could be found</returns>
+    public static BoundingBox GetBoundingBox(this Box value, Transform xform)
+    {
+      if (!value.IsValid)
+        return BoundingBox.Unset;
+
+      if (xform.IsIdentity)
+        return value.BoundingBox;
+
+      return new BoundingBox(value.GetCorners(), xform);
+    }
+  }
+
   public static class ExtrusionExtension
   {
     public static bool TryGetExtrusion(this Surface surface, out Extrusion extrusion)

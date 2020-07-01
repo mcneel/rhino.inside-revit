@@ -1,6 +1,6 @@
 using System;
-using System.Linq;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -30,39 +30,12 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.View>("Active View", "V", string.Empty, GH_ParamAccess.item)
+      ParamDefinition.Create<Parameters.View>("Active View", "V", "Active graphical view", GH_ParamAccess.item)
     };
-
-    static bool IsGraphicalViewType(DB.ViewType viewType)
-    {
-      switch (viewType)
-      {
-        case DB.ViewType.Undefined:
-        case DB.ViewType.ProjectBrowser:
-        case DB.ViewType.SystemBrowser:
-          return false;
-      }
-
-      return true;
-    }
 
     protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
     {
-      using (var uiDocument = new Autodesk.Revit.UI.UIDocument(doc))
-      {
-        var activeView = uiDocument.ActiveGraphicalView;
-        if (activeView is null)
-        {
-          var openViews = uiDocument.GetOpenUIViews().
-          Select(x => doc.GetElement(x.ViewId)).
-          OfType<DB.View>().
-          Where(x => IsGraphicalViewType(x.ViewType));
-
-          activeView = openViews.FirstOrDefault();
-        }
-
-        DA.SetData("Active View", activeView);
-      }
+      DA.SetData("Active View", doc?.GetActiveGraphicalView());
     }
   }
 }
