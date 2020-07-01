@@ -37,17 +37,17 @@ namespace RhinoInside.Revit.Convert.Geometry
     { return new Vector3d(value.X, value.Y, value.Z); }
 
     public static Plane ToPlane(this DB.Plane value)
-    { var rhino = RawDecoder.ToRhino(value); UnitConverter.Scale(ref rhino, UnitConverter.ToRhinoUnits); return rhino; }
+    { var rhino = RawDecoder.AsPlane(value); UnitConverter.Scale(ref rhino, UnitConverter.ToRhinoUnits); return rhino; }
 
     public static Transform ToTransform(this DB.Transform value)
-    { var rhino = RawDecoder.ToRhino(value); UnitConverter.Scale(ref rhino, UnitConverter.ToRhinoUnits); return rhino; }
+    { var rhino = RawDecoder.AsTransform(value); UnitConverter.Scale(ref rhino, UnitConverter.ToRhinoUnits); return rhino; }
 
     public static BoundingBox ToBoundingBox(this DB.BoundingBoxXYZ value)
-    { var rhino = RawDecoder.ToRhino(value); UnitConverter.Scale(ref rhino, UnitConverter.ToRhinoUnits); return rhino; }
+    { var rhino = RawDecoder.AsBoundingBox(value); UnitConverter.Scale(ref rhino, UnitConverter.ToRhinoUnits); return rhino; }
 
     public static BoundingBox ToBoundingBox(this DB.BoundingBoxXYZ value, out Transform transform)
     {
-      var rhino = RawDecoder.ToRhino(value, out transform);
+      var rhino = RawDecoder.AsBoundingBox(value, out transform);
       UnitConverter.Scale(ref rhino, UnitConverter.ToRhinoUnits);
       UnitConverter.Scale(ref transform, UnitConverter.ToRhinoUnits);
       return rhino;
@@ -60,7 +60,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     public static Box ToBox(this DB.BoundingBoxXYZ value)
     {
-      var rhino = RawDecoder.ToRhino(value, out var transform);
+      var rhino = RawDecoder.AsBoundingBox(value, out var transform);
       UnitConverter.Scale(ref rhino, UnitConverter.ToRhinoUnits);
       UnitConverter.Scale(ref transform, UnitConverter.ToRhinoUnits);
 

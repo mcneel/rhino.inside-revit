@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       return new Vector3d(p.X, p.Y, p.Z);
     }
 
-    public static Transform ToRhino(DB.Transform transform)
+    public static Transform AsTransform(DB.Transform transform)
     {
       var value = new Transform
       {
@@ -64,31 +64,47 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       return value;
     }
 
-    public static BoundingBox ToRhino(DB.BoundingBoxXYZ bbox)
+    public static BoundingBox AsBoundingBox(DB.BoundingBoxXYZ bbox)
     {
       if (bbox?.Enabled ?? false)
       {
         var box = new BoundingBox(AsPoint3d(bbox.Min), AsPoint3d(bbox.Max));
-        return ToRhino(bbox.Transform).TransformBoundingBox(box);
+        return AsTransform(bbox.Transform).TransformBoundingBox(box);
       }
 
-      return BoundingBox.Empty;
+      return BoundingBox.Unset;
     }
 
-    public static BoundingBox ToRhino(DB.BoundingBoxXYZ bbox, out Transform transform)
+    public static BoundingBox AsBoundingBox(DB.BoundingBoxXYZ bbox, out Transform transform)
     {
       if (bbox?.Enabled ?? false)
       {
         var box = new BoundingBox(AsPoint3d(bbox.Min), AsPoint3d(bbox.Max));
-        transform = ToRhino(bbox.Transform);
+        transform = AsTransform(bbox.Transform);
         return box;
       }
 
       transform = Transform.Identity;
-      return BoundingBox.Empty;
+      return BoundingBox.Unset;
     }
 
-    public static Plane ToRhino(DB.Plane plane)
+    public static Box AsBox(DB.BoundingBoxXYZ bbox)
+    {
+      return new Box
+      (
+        new Plane
+        (
+          origin :    AsPoint3d(bbox.Transform.Origin),
+          xDirection: AsVector3d(bbox.Transform.BasisX),
+          yDirection: AsVector3d(bbox.Transform.BasisY)
+        ),
+        xSize: new Interval(bbox.Min.X, bbox.Max.X),
+        ySize: new Interval(bbox.Min.Y, bbox.Max.Y),
+        zSize: new Interval(bbox.Min.Z, bbox.Max.Z)
+      );
+    }
+
+    public static Plane AsPlane(DB.Plane plane)
     {
       return new Plane(AsPoint3d(plane.Origin), AsVector3d(plane.XVec), AsVector3d(plane.YVec));
     }
