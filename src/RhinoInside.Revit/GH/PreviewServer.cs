@@ -104,13 +104,16 @@ namespace RhinoInside.Revit.GH
       if (e.Kind == GH_DocumentSettings.Properties)
         RebuildPrimitives = 1;
 
-      Revit.RefreshActiveView();
+      if (PreviewMode != GH_PreviewMode.Disabled)
+        Revit.RefreshActiveView();
     }
 
     void ActiveDefinition_SolutionEnd(object sender, GH_SolutionEventArgs e)
     {
       RebuildPrimitives = 1;
-      Revit.RefreshActiveView();
+
+      if (PreviewMode != GH_PreviewMode.Disabled)
+        Revit.RefreshActiveView();
     }
 
     protected class ParamPrimitive : Primitive
