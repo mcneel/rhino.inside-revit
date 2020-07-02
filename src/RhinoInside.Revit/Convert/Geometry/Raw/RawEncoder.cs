@@ -50,7 +50,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       return new DB::XYZ(value.X, value.Y, value.Z);
     }
 
-    public static DB.Transform ToHost(Transform value)
+    public static DB.Transform AsTransform(Transform value)
     {
       Debug.Assert(value.IsAffine);
 
@@ -62,12 +62,33 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       return result;
     }
 
-    public static DB.Plane ToHost(Plane value)
+    public static DB.BoundingBoxXYZ AsBoundingBoxXYZ(BoundingBox value)
+    {
+      return new DB.BoundingBoxXYZ
+      {
+        Min = AsXYZ(value.Min),
+        Max = AsXYZ(value.Max),
+        Enabled = value.IsValid
+      };
+    }
+
+    public static DB.BoundingBoxXYZ AsBoundingBoxXYZ(Box value)
+    {
+      return new DB.BoundingBoxXYZ
+      {
+        Transform = AsTransform(Transform.PlaneToPlane(Plane.WorldXY, value.Plane)),
+        Min = new DB.XYZ(value.X.Min, value.Y.Min, value.Z.Min),
+        Max = new DB.XYZ(value.X.Max, value.Y.Max, value.Z.Max),
+        Enabled = value.IsValid
+      };
+    }
+
+    public static DB.Plane AsPlane(Plane value)
     {
       return DB.Plane.CreateByOriginAndBasis(AsXYZ(value.Origin), AsXYZ((Point3d) value.XAxis), AsXYZ((Point3d) value.YAxis));
     }
 
-    public static DB.PolyLine ToHost(Polyline value)
+    public static DB.PolyLine AsPolyLine(Polyline value)
     {
       int count = value.Count;
       var points = new DB.XYZ[count];
@@ -97,7 +118,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
     {
       var arc = value.Arc;
       if (value.Arc.IsCircle)
-        return DB.Arc.Create(ToHost(arc.Plane), value.Radius, 0.0, 2.0 * Math.PI);
+        return DB.Arc.Create(AsPlane(arc.Plane), value.Radius, 0.0, 2.0 * Math.PI);
       else
         return DB.Arc.Create(AsXYZ(arc.StartPoint), AsXYZ(arc.EndPoint), AsXYZ(arc.MidPoint));
     }
