@@ -64,8 +64,11 @@ namespace RhinoInside.Revit.GH
     private void SelectionChanged(object sender, EventArgs e)
     {
       var newSelection = ActiveDefinition.SelectedObjects();
-      if (lastSelection.Count != newSelection.Count || lastSelection.Except(newSelection).Any())
-        Revit.RefreshActiveView();
+      if (PreviewMode != GH_PreviewMode.Disabled)
+      {
+        if (lastSelection.Count != newSelection.Count || lastSelection.Except(newSelection).Any())
+          Revit.RefreshActiveView();
+      }
 
       lastSelection = newSelection;
     }
