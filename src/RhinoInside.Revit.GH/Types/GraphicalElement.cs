@@ -270,39 +270,7 @@ namespace RhinoInside.Revit.GH.Types
           return default;
 
         if (element is DB.ModelCurve modelCurve)
-        {
           return modelCurve.GeometryCurve.ToCurve();
-        }
-
-        if (element.Location is DB.LocationPoint location)
-        {
-          if (element is DB.FamilyInstance instance)
-          {
-            if (instance.Symbol.Family.FamilyPlacementType == DB.FamilyPlacementType.TwoLevelsBased)
-            {
-              var baseLevel = element.get_Parameter(DB.BuiltInParameter.FAMILY_BASE_LEVEL_PARAM).AsElementId();
-              var topLevel = element.get_Parameter(DB.BuiltInParameter.FAMILY_TOP_LEVEL_PARAM).AsElementId();
-              var baseLevelOffset = element.get_Parameter(DB.BuiltInParameter.FAMILY_BASE_LEVEL_OFFSET_PARAM).AsDouble();
-              var topLevelOffset = element.get_Parameter(DB.BuiltInParameter.FAMILY_TOP_LEVEL_OFFSET_PARAM).AsDouble();
-
-              var baseElevation = ((element.Document.GetElement(baseLevel) as DB.Level).Elevation + baseLevelOffset) * Revit.ModelUnits;
-              var topElevation = ((element.Document.GetElement(topLevel) as DB.Level).Elevation + topLevelOffset) * Revit.ModelUnits;
-
-              var origin = location.Point.ToPoint3d();
-              return new LineCurve
-              (
-                new Line
-                (
-                  origin + Vector3d.ZAxis * baseElevation,
-                  origin + Vector3d.ZAxis * topElevation
-                )
-                ,
-                baseElevation,
-                topElevation
-              );
-            }
-          }
-        }
 
         return element?.Location is DB.LocationCurve curveLocation ?
           curveLocation.Curve.ToCurve() :
