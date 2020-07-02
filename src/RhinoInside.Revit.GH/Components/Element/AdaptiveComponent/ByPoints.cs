@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
-using Autodesk.Revit.DB;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.Convert.System.Collections.Generic;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -28,11 +29,11 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructAdaptiveComponentByPoints
     (
-      Document doc,
-      ref Autodesk.Revit.DB.Element element,
+      DB.Document doc,
+      ref DB.Element element,
 
       IList<Rhino.Geometry.Point3d> points,
-      Autodesk.Revit.DB.FamilySymbol type
+      DB.FamilySymbol type
     )
     {
       var adaptivePoints = points.ConvertAll(GeometryEncoder.ToXYZ);
@@ -43,13 +44,13 @@ namespace RhinoInside.Revit.GH.Components
       // Type
       ChangeElementTypeId(ref element, type.Id);
 
-      if (element is FamilyInstance instance && AdaptiveComponentInstanceUtils.IsAdaptiveComponentInstance(instance))
+      if (element is DB.FamilyInstance instance && DB.AdaptiveComponentInstanceUtils.IsAdaptiveComponentInstance(instance))
       {
-        var adaptivePointIds = AdaptiveComponentInstanceUtils.GetInstancePlacementPointElementRefIds(instance);
+        var adaptivePointIds = DB.AdaptiveComponentInstanceUtils.GetInstancePlacementPointElementRefIds(instance);
         if (adaptivePointIds.Count == adaptivePoints.Count)
         {
           int index = 0;
-          foreach (var vertex in adaptivePointIds.Select(id => doc.GetElement(id)).Cast<ReferencePoint>())
+          foreach (var vertex in adaptivePointIds.Select(id => doc.GetElement(id)).Cast<DB.ReferencePoint>())
             vertex.Position = adaptivePoints[index++];
 
           return;
@@ -72,11 +73,11 @@ namespace RhinoInside.Revit.GH.Components
           throw new InvalidOperationException();
         }
 
-        var parametersMask = new BuiltInParameter[]
+        var parametersMask = new DB.BuiltInParameter[]
         {
-          BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-          BuiltInParameter.ELEM_FAMILY_PARAM,
-          BuiltInParameter.ELEM_TYPE_PARAM
+          DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+          DB.BuiltInParameter.ELEM_FAMILY_PARAM,
+          DB.BuiltInParameter.ELEM_TYPE_PARAM
         };
 
         ReplaceElement(ref element, doc.GetElement(newElementIds.First()), parametersMask);

@@ -326,6 +326,25 @@ namespace RhinoInside.Revit.GH.Components
       return wasMissing;
     }
 
+    protected static bool SolveOptionalLevel(DB.Document doc, DB.Element host, ref Optional<DB.Level> level)
+    {
+      bool wasMissing = level.IsMissing;
+
+      if (wasMissing)
+      {
+        if (host?.Document.GetElement(host.LevelId) is DB.Level newLevel)
+          level = newLevel;
+      }
+
+      else if (level.Value == null)
+        throw new ArgumentNullException(nameof(level));
+
+      else if (!level.Value.Document.Equals(doc))
+        throw new ArgumentException("Failed to assign a level from a diferent document.", nameof(level));
+
+      return wasMissing;
+    }
+
     protected static bool SolveOptionalLevel(DB.Document doc, double elevation, ref Optional<DB.Level> level)
     {
       bool wasMissing = level.IsMissing;
