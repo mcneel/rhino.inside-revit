@@ -3,38 +3,39 @@ using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 
-using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.ExternalService;
-using Autodesk.Revit.DB.DirectContext3D;
+using DB = Autodesk.Revit.DB;
+using DBES = Autodesk.Revit.DB.ExternalService;
+using DB3D = Autodesk.Revit.DB.DirectContext3D;
 
 using Rhino;
+using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry.Raw;
 
 namespace RhinoInside.Revit
 {
-  public abstract class DirectContext3DServer : IDirectContext3DServer
+  public abstract class DirectContext3DServer : DB3D.IDirectContext3DServer
   {
     #region IExternalServer
     public abstract string GetDescription();
     public abstract string GetName();
-    string IExternalServer.GetVendorId() => "RMA";
-    ExternalServiceId IExternalServer.GetServiceId() => ExternalServices.BuiltInExternalServices.DirectContext3DService;
+    string DBES.IExternalServer.GetVendorId() => "RMA";
+    DBES.ExternalServiceId DBES.IExternalServer.GetServiceId() => DBES.ExternalServices.BuiltInExternalServices.DirectContext3DService;
     public abstract Guid GetServerId();
     #endregion
 
     #region IDirectContext3DServer
-    string IDirectContext3DServer.GetApplicationId() => string.Empty;
-    string IDirectContext3DServer.GetSourceId() => string.Empty;
-    bool IDirectContext3DServer.UsesHandles() => false;
-    public virtual bool UseInTransparentPass(Autodesk.Revit.DB.View dBView) => false;
-    public abstract bool CanExecute(Autodesk.Revit.DB.View dBView);
-    public abstract Outline GetBoundingBox(Autodesk.Revit.DB.View dBView);
-    public abstract void RenderScene(Autodesk.Revit.DB.View dBView, DisplayStyle displayStyle);
+    string DB3D.IDirectContext3DServer.GetApplicationId() => string.Empty;
+    string DB3D.IDirectContext3DServer.GetSourceId() => string.Empty;
+    bool DB3D.IDirectContext3DServer.UsesHandles() => false;
+    public virtual bool UseInTransparentPass(DB.View dBView) => false;
+    public abstract bool CanExecute(DB.View dBView);
+    public abstract DB.Outline GetBoundingBox(DB.View dBView);
+    public abstract void RenderScene(DB.View dBView, DB.DisplayStyle displayStyle);
     #endregion
 
     virtual public void Register()
     {
-      using (var service = ExternalServiceRegistry.GetService(ExternalServices.BuiltInExternalServices.DirectContext3DService) as MultiServerService)
+      using (var service = DBES.ExternalServiceRegistry.GetService(DBES.ExternalServices.BuiltInExternalServices.DirectContext3DService) as DBES.MultiServerService)
       {
         service.AddServer(this);
 
@@ -46,7 +47,7 @@ namespace RhinoInside.Revit
 
     virtual public void Unregister()
     {
-      using (var service = ExternalServiceRegistry.GetService(ExternalServices.BuiltInExternalServices.DirectContext3DService) as MultiServerService)
+      using (var service = DBES.ExternalServiceRegistry.GetService(DBES.ExternalServices.BuiltInExternalServices.DirectContext3DService) as DBES.MultiServerService)
       {
         var activeServerIds = service.GetActiveServerIds();
         activeServerIds.Remove(GetServerId());
@@ -56,15 +57,15 @@ namespace RhinoInside.Revit
       }
     }
 
-    protected static bool IsModelView(View dBView)
+    protected static bool IsModelView(DB.View dBView)
     {
       if
       (
-        dBView.ViewType == ViewType.FloorPlan ||
-        dBView.ViewType == ViewType.CeilingPlan ||
-        dBView.ViewType == ViewType.Elevation ||
-        dBView.ViewType == ViewType.Section ||
-        dBView.ViewType == ViewType.ThreeD
+        dBView.ViewType == DB.ViewType.FloorPlan ||
+        dBView.ViewType == DB.ViewType.CeilingPlan ||
+        dBView.ViewType == DB.ViewType.Elevation ||
+        dBView.ViewType == DB.ViewType.Section ||
+        dBView.ViewType == DB.ViewType.ThreeD
       )
         return true;
 
@@ -73,19 +74,19 @@ namespace RhinoInside.Revit
 
     public const int VertexThreshold = ushort.MaxValue + 1;
 
-    static IndexBuffer indexPointsBuffer;
-    static IndexBuffer IndexPointsBuffer(int pointsCount)
+    static DB3D.IndexBuffer indexPointsBuffer;
+    static DB3D.IndexBuffer IndexPointsBuffer(int pointsCount)
     {
       Debug.Assert(pointsCount <= VertexThreshold);
 
       if (indexPointsBuffer == null)
       {
-        indexPointsBuffer = new IndexBuffer(VertexThreshold * IndexPoint.GetSizeInShortInts());
-        indexPointsBuffer.Map(VertexThreshold * IndexPoint.GetSizeInShortInts());
+        indexPointsBuffer = new DB3D.IndexBuffer(VertexThreshold * DB3D.IndexPoint.GetSizeInShortInts());
+        indexPointsBuffer.Map(VertexThreshold * DB3D.IndexPoint.GetSizeInShortInts());
         using (var istream = indexPointsBuffer.GetIndexStreamPoint())
         {
           for (int vi = 0; vi < VertexThreshold; ++vi)
-            istream.AddPoint(new IndexPoint(vi));
+            istream.AddPoint(new DB3D.IndexPoint(vi));
         }
         indexPointsBuffer.Unmap();
       }
@@ -94,19 +95,19 @@ namespace RhinoInside.Revit
       return indexPointsBuffer;
     }
 
-    static IndexBuffer indexLinesBuffer;
-    static IndexBuffer IndexLinesBuffer(int pointsCount)
+    static DB3D.IndexBuffer indexLinesBuffer;
+    static DB3D.IndexBuffer IndexLinesBuffer(int pointsCount)
     {
       Debug.Assert(pointsCount <= VertexThreshold);
 
       if (indexLinesBuffer == null)
       {
-        indexLinesBuffer = new IndexBuffer(VertexThreshold * IndexLine.GetSizeInShortInts());
-        indexLinesBuffer.Map(VertexThreshold * IndexLine.GetSizeInShortInts());
+        indexLinesBuffer = new DB3D.IndexBuffer(VertexThreshold * DB3D.IndexLine.GetSizeInShortInts());
+        indexLinesBuffer.Map(VertexThreshold * DB3D.IndexLine.GetSizeInShortInts());
         using (var istream = indexLinesBuffer.GetIndexStreamLine())
         {
           for (int vi = 0; vi < VertexThreshold - 1; ++vi)
-            istream.AddLine(new IndexLine(vi, vi + 1));
+            istream.AddLine(new DB3D.IndexLine(vi, vi + 1));
         }
         indexLinesBuffer.Unmap();
       }
@@ -115,11 +116,12 @@ namespace RhinoInside.Revit
       return indexLinesBuffer;
     }
 
-    protected static VertexBuffer ToVertexBuffer
+
+    protected static DB3D.VertexBuffer ToVertexBuffer
     (
-      Rhino.Geometry.Mesh mesh,
+      Mesh mesh,
       Primitive.Part part,
-      out VertexFormatBits vertexFormatBits,
+      out DB3D.VertexFormatBits vertexFormatBits,
       System.Drawing.Color color = default
     )
     {
@@ -139,17 +141,17 @@ namespace RhinoInside.Revit
           var normals = mesh.Normals;
           if (hasColors)
           {
-            vertexFormatBits = VertexFormatBits.PositionNormalColored;
+            vertexFormatBits = DB3D.VertexFormatBits.PositionNormalColored;
             var colors = mesh.VertexColors;
-            var vb = new VertexBuffer(verticesCount * VertexPositionNormalColored.GetSizeInFloats());
-            vb.Map(verticesCount * VertexPositionNormalColored.GetSizeInFloats());
+            var vb = new DB3D.VertexBuffer(verticesCount * DB3D.VertexPositionNormalColored.GetSizeInFloats());
+            vb.Map(verticesCount * DB3D.VertexPositionNormalColored.GetSizeInFloats());
             using (var stream = vb.GetVertexStreamPositionNormalColored())
             {
               for (int v = part.StartVertexIndex; v < part.EndVertexIndex; ++v)
               {
                 var c = !color.IsEmpty ? color : colors[v];
                 uint T = Math.Max(1, 255u - c.A);
-                stream.AddVertex(new VertexPositionNormalColored(RawEncoder.AsXYZ(vertices[v]), RawEncoder.AsXYZ(normals[v]), new ColorWithTransparency(c.R, c.G, c.B, T)));
+                stream.AddVertex(new DB3D.VertexPositionNormalColored(RawEncoder.AsXYZ(vertices[v]), RawEncoder.AsXYZ(normals[v]), new DB.ColorWithTransparency(c.R, c.G, c.B, T)));
               }
             }
             vb.Unmap();
@@ -157,14 +159,17 @@ namespace RhinoInside.Revit
           }
           else
           {
-            vertexFormatBits = VertexFormatBits.PositionNormal;
-            var vb = new VertexBuffer(verticesCount * VertexPositionNormal.GetSizeInFloats());
-            vb.Map(verticesCount * VertexPositionNormal.GetSizeInFloats());
+            vertexFormatBits = DB3D.VertexFormatBits.PositionNormal;
+            var sizeInFloats = DB3D.VertexPositionNormal.GetSizeInFloats();
+            var vb = new DB3D.VertexBuffer(verticesCount * sizeInFloats);
+            vb.Map(verticesCount * sizeInFloats);
+
             using (var stream = vb.GetVertexStreamPositionNormal())
             {
               for (int v = part.StartVertexIndex; v < part.EndVertexIndex; ++v)
-                stream.AddVertex(new VertexPositionNormal(RawEncoder.AsXYZ(vertices[v]), RawEncoder.AsXYZ(normals[v])));
+                stream.AddVertex(new DB3D.VertexPositionNormal(RawEncoder.AsXYZ(vertices[v]), RawEncoder.AsXYZ(normals[v])));
             }
+
             vb.Unmap();
             return vb;
           }
@@ -173,17 +178,17 @@ namespace RhinoInside.Revit
         {
           if (hasColors)
           {
-            vertexFormatBits = VertexFormatBits.PositionColored;
+            vertexFormatBits = DB3D.VertexFormatBits.PositionColored;
             var colors = mesh.VertexColors;
-            var vb = new VertexBuffer(verticesCount * VertexPositionColored.GetSizeInFloats());
-            vb.Map(verticesCount * VertexPositionColored.GetSizeInFloats());
+            var vb = new DB3D.VertexBuffer(verticesCount * DB3D.VertexPositionColored.GetSizeInFloats());
+            vb.Map(verticesCount * DB3D.VertexPositionColored.GetSizeInFloats());
             using (var stream = vb.GetVertexStreamPositionColored())
             {
               for (int v = part.StartVertexIndex; v < part.EndVertexIndex; ++v)
               {
                 var c = !color.IsEmpty ? color : colors[v];
                 uint T = Math.Max(1, 255u - c.A);
-                stream.AddVertex(new VertexPositionColored(RawEncoder.AsXYZ(vertices[v]), new ColorWithTransparency(c.R, c.G, c.B, T)));
+                stream.AddVertex(new DB3D.VertexPositionColored(RawEncoder.AsXYZ(vertices[v]), new DB.ColorWithTransparency(c.R, c.G, c.B, T)));
               }
             }
             vb.Unmap();
@@ -191,13 +196,13 @@ namespace RhinoInside.Revit
           }
           else
           {
-            vertexFormatBits = VertexFormatBits.Position;
-            var vb = new VertexBuffer(verticesCount * VertexPosition.GetSizeInFloats());
-            vb.Map(verticesCount * VertexPosition.GetSizeInFloats());
+            vertexFormatBits = DB3D.VertexFormatBits.Position;
+            var vb = new DB3D.VertexBuffer(verticesCount * DB3D.VertexPosition.GetSizeInFloats());
+            vb.Map(verticesCount * DB3D.VertexPosition.GetSizeInFloats());
             using (var stream = vb.GetVertexStreamPosition())
             {
               for (int v = part.StartVertexIndex; v < part.EndVertexIndex; ++v)
-                stream.AddVertex(new VertexPosition(RawEncoder.AsXYZ(vertices[v])));
+                stream.AddVertex(new DB3D.VertexPosition(RawEncoder.AsXYZ(vertices[v])));
             }
             vb.Unmap();
             return vb;
@@ -209,9 +214,9 @@ namespace RhinoInside.Revit
       return null;
     }
 
-    protected static IndexBuffer ToTrianglesBuffer
+    protected static DB3D.IndexBuffer ToTrianglesBuffer
     (
-      Rhino.Geometry.Mesh mesh, Primitive.Part part,
+      Mesh mesh, Primitive.Part part,
       out int triangleCount
       )
     {
@@ -227,8 +232,8 @@ namespace RhinoInside.Revit
 
       if (triangleCount > 0)
       {
-        var ib = new IndexBuffer(triangleCount * IndexTriangle.GetSizeInShortInts());
-        ib.Map(triangleCount * IndexTriangle.GetSizeInShortInts());
+        var ib = new DB3D.IndexBuffer(triangleCount * DB3D.IndexTriangle.GetSizeInShortInts());
+        ib.Map(triangleCount * DB3D.IndexTriangle.GetSizeInShortInts());
 
         using (var istream = ib.GetIndexStreamTriangle())
         {
@@ -237,9 +242,9 @@ namespace RhinoInside.Revit
           {
             var face = faces[f];
 
-            istream.AddTriangle(new IndexTriangle(face.A - part.StartVertexIndex, face.B - part.StartVertexIndex, face.C - part.StartVertexIndex));
+            istream.AddTriangle(new DB3D.IndexTriangle(face.A - part.StartVertexIndex, face.B - part.StartVertexIndex, face.C - part.StartVertexIndex));
             if (face.IsQuad)
-              istream.AddTriangle(new IndexTriangle(face.C - part.StartVertexIndex, face.D - part.StartVertexIndex, face.A - part.StartVertexIndex));
+              istream.AddTriangle(new DB3D.IndexTriangle(face.C - part.StartVertexIndex, face.D - part.StartVertexIndex, face.A - part.StartVertexIndex));
           }
         }
 
@@ -250,23 +255,23 @@ namespace RhinoInside.Revit
       return null;
     }
 
-    protected static IndexBuffer ToWireframeBuffer(Rhino.Geometry.Mesh mesh, out int linesCount)
+    protected static DB3D.IndexBuffer ToWireframeBuffer(Mesh mesh, out int linesCount)
     {
       linesCount = (mesh.Faces.Count * 3) + mesh.Faces.QuadCount;
       if (linesCount > 0)
       {
-        var ib = new IndexBuffer(linesCount * IndexLine.GetSizeInShortInts());
-        ib.Map(linesCount * IndexLine.GetSizeInShortInts());
+        var ib = new DB3D.IndexBuffer(linesCount * DB3D.IndexLine.GetSizeInShortInts());
+        ib.Map(linesCount * DB3D.IndexLine.GetSizeInShortInts());
 
         using (var istream = ib.GetIndexStreamLine())
         {
           foreach (var face in mesh.Faces)
           {
-            istream.AddLine(new IndexLine(face.A, face.B));
-            istream.AddLine(new IndexLine(face.B, face.C));
-            istream.AddLine(new IndexLine(face.C, face.D));
+            istream.AddLine(new DB3D.IndexLine(face.A, face.B));
+            istream.AddLine(new DB3D.IndexLine(face.B, face.C));
+            istream.AddLine(new DB3D.IndexLine(face.C, face.D));
             if (face.IsQuad)
-              istream.AddLine(new IndexLine(face.D, face.A));
+              istream.AddLine(new DB3D.IndexLine(face.D, face.A));
           }
         }
 
@@ -277,9 +282,9 @@ namespace RhinoInside.Revit
       return null;
     }
 
-    protected static IndexBuffer ToEdgeBuffer
+    protected static DB3D.IndexBuffer ToEdgeBuffer
     (
-      Rhino.Geometry.Mesh mesh,
+      Mesh mesh,
       Primitive.Part part,
       out int linesCount
     )
@@ -331,15 +336,15 @@ namespace RhinoInside.Revit
         linesCount = edgeIndices.Count;
         if (linesCount > 0)
         {
-          var ib = new IndexBuffer(linesCount * IndexLine.GetSizeInShortInts());
-          ib.Map(linesCount * IndexLine.GetSizeInShortInts());
+          var ib = new DB3D.IndexBuffer(linesCount * DB3D.IndexLine.GetSizeInShortInts());
+          ib.Map(linesCount * DB3D.IndexLine.GetSizeInShortInts());
           using (var istream = ib.GetIndexStreamLine())
           {
             foreach (var edge in edgeIndices)
             {
               Debug.Assert(0 <= edge.I && edge.I < part.VertexCount);
               Debug.Assert(0 <= edge.J && edge.J < part.VertexCount);
-              istream.AddLine(new IndexLine(edge.I, edge.J));
+              istream.AddLine(new DB3D.IndexLine(edge.I, edge.J));
             }
           }
           ib.Unmap();
@@ -353,10 +358,10 @@ namespace RhinoInside.Revit
 
     protected static int ToPolylineBuffer
     (
-      Rhino.Geometry.Polyline polyline,
-      out VertexFormatBits vertexFormatBits,
-      out VertexBuffer vb, out int vertexCount,
-      out IndexBuffer ib
+      Polyline polyline,
+      out DB3D.VertexFormatBits vertexFormatBits,
+      out DB3D.VertexBuffer vb, out int vertexCount,
+      out DB3D.IndexBuffer ib
     )
     {
       int linesCount = 0;
@@ -366,13 +371,13 @@ namespace RhinoInside.Revit
         linesCount = polyline.SegmentCount;
         vertexCount = polyline.Count;
 
-        vertexFormatBits = VertexFormatBits.Position;
-        vb = new VertexBuffer(vertexCount * VertexPosition.GetSizeInFloats());
-        vb.Map(vertexCount * VertexPosition.GetSizeInFloats());
+        vertexFormatBits = DB3D.VertexFormatBits.Position;
+        vb = new DB3D.VertexBuffer(vertexCount * DB3D.VertexPosition.GetSizeInFloats());
+        vb.Map(vertexCount * DB3D.VertexPosition.GetSizeInFloats());
         using (var vstream = vb.GetVertexStreamPosition())
         {
           foreach (var v in polyline)
-            vstream.AddVertex(new VertexPosition(RawEncoder.AsXYZ(v)));
+            vstream.AddVertex(new DB3D.VertexPosition(RawEncoder.AsXYZ(v)));
         }
         vb.Unmap();
 
@@ -390,10 +395,10 @@ namespace RhinoInside.Revit
 
     protected static int ToPointsBuffer
     (
-      Rhino.Geometry.Point point,
-      out VertexFormatBits vertexFormatBits,
-      out VertexBuffer vb, out int vertexCount,
-      out IndexBuffer ib
+      Point point,
+      out DB3D.VertexFormatBits vertexFormatBits,
+      out DB3D.VertexBuffer vb, out int vertexCount,
+      out DB3D.IndexBuffer ib
     )
     {
       int pointsCount = 0;
@@ -403,12 +408,12 @@ namespace RhinoInside.Revit
         pointsCount = 1;
         vertexCount = 1;
 
-        vertexFormatBits = VertexFormatBits.Position;
-        vb = new VertexBuffer(pointsCount * VertexPosition.GetSizeInFloats());
-        vb.Map(pointsCount * VertexPosition.GetSizeInFloats());
+        vertexFormatBits = DB3D.VertexFormatBits.Position;
+        vb = new DB3D.VertexBuffer(pointsCount * DB3D.VertexPosition.GetSizeInFloats());
+        vb.Map(pointsCount * DB3D.VertexPosition.GetSizeInFloats());
         using (var vstream = vb.GetVertexStreamPosition())
         {
-          vstream.AddVertex(new VertexPosition(RawEncoder.AsXYZ(point.Location)));
+          vstream.AddVertex(new DB3D.VertexPosition(RawEncoder.AsXYZ(point.Location)));
         }
         vb.Unmap();
 
@@ -426,11 +431,11 @@ namespace RhinoInside.Revit
 
     protected static int ToPointsBuffer
     (
-      Rhino.Geometry.PointCloud pointCloud,
+      PointCloud pointCloud,
       Primitive.Part part,
-      out VertexFormatBits vertexFormatBits,
-      out VertexBuffer vb, out int vertexCount,
-      out IndexBuffer ib
+      out DB3D.VertexFormatBits vertexFormatBits,
+      out DB3D.VertexBuffer vb, out int vertexCount,
+      out DB3D.IndexBuffer ib
     )
     {
       int pointsCount = part.VertexCount;
@@ -447,17 +452,17 @@ namespace RhinoInside.Revit
         {
           if(hasColors)
           {
-            vertexFormatBits = VertexFormatBits.PositionNormalColored;
-            vb = new VertexBuffer(pointsCount * VertexPositionNormalColored.GetSizeInFloats());
-            vb.Map(pointsCount * VertexPositionNormalColored.GetSizeInFloats());
+            vertexFormatBits = DB3D.VertexFormatBits.PositionNormalColored;
+            vb = new DB3D.VertexBuffer(pointsCount * DB3D.VertexPositionNormalColored.GetSizeInFloats());
+            vb.Map(pointsCount * DB3D.VertexPositionNormalColored.GetSizeInFloats());
 
             using (var vstream = vb.GetVertexStreamPositionNormalColored())
             {
               for(int p = part.StartVertexIndex; p < part.EndVertexIndex; ++p)
               {
                 var point = pointCloud[p];
-                var c = new ColorWithTransparency(point.Color.R, point.Color.G, point.Color.B, 255u - point.Color.A);
-                vstream.AddVertex(new VertexPositionNormalColored(RawEncoder.AsXYZ(point.Location), RawEncoder.AsXYZ(point.Normal), c));
+                var c = new DB.ColorWithTransparency(point.Color.R, point.Color.G, point.Color.B, 255u - point.Color.A);
+                vstream.AddVertex(new DB3D.VertexPositionNormalColored(RawEncoder.AsXYZ(point.Location), RawEncoder.AsXYZ(point.Normal), c));
               }
             }
 
@@ -465,16 +470,16 @@ namespace RhinoInside.Revit
           }
           else
           {
-            vertexFormatBits = VertexFormatBits.PositionNormal;
-            vb = new VertexBuffer(pointsCount * VertexPositionNormal.GetSizeInFloats());
-            vb.Map(pointsCount * VertexPositionNormal.GetSizeInFloats());
+            vertexFormatBits = DB3D.VertexFormatBits.PositionNormal;
+            vb = new DB3D.VertexBuffer(pointsCount * DB3D.VertexPositionNormal.GetSizeInFloats());
+            vb.Map(pointsCount * DB3D.VertexPositionNormal.GetSizeInFloats());
 
             using (var vstream = vb.GetVertexStreamPositionNormal())
             {
               for (int p = part.StartVertexIndex; p < part.EndVertexIndex; ++p)
               {
                 var point = pointCloud[p];
-                vstream.AddVertex(new VertexPositionNormal(RawEncoder.AsXYZ(point.Location), RawEncoder.AsXYZ(point.Normal)));
+                vstream.AddVertex(new DB3D.VertexPositionNormal(RawEncoder.AsXYZ(point.Location), RawEncoder.AsXYZ(point.Normal)));
               }
             }
 
@@ -485,17 +490,17 @@ namespace RhinoInside.Revit
         {
           if (hasColors)
           {
-            vertexFormatBits = VertexFormatBits.PositionColored;
-            vb = new VertexBuffer(pointsCount * VertexPositionColored.GetSizeInFloats());
-            vb.Map(pointsCount * VertexPositionColored.GetSizeInFloats());
+            vertexFormatBits = DB3D.VertexFormatBits.PositionColored;
+            vb = new DB3D.VertexBuffer(pointsCount * DB3D.VertexPositionColored.GetSizeInFloats());
+            vb.Map(pointsCount * DB3D.VertexPositionColored.GetSizeInFloats());
 
             using (var vstream = vb.GetVertexStreamPositionColored())
             {
               for (int p = part.StartVertexIndex; p < part.EndVertexIndex; ++p)
               {
                 var point = pointCloud[p];
-                var c = new ColorWithTransparency(point.Color.R, point.Color.G, point.Color.B, 255u - point.Color.A);
-                vstream.AddVertex(new VertexPositionColored(RawEncoder.AsXYZ(point.Location), c));
+                var c = new DB.ColorWithTransparency(point.Color.R, point.Color.G, point.Color.B, 255u - point.Color.A);
+                vstream.AddVertex(new DB3D.VertexPositionColored(RawEncoder.AsXYZ(point.Location), c));
               }
             }
 
@@ -503,16 +508,16 @@ namespace RhinoInside.Revit
           }
           else
           {
-            vertexFormatBits = VertexFormatBits.Position;
-            vb = new VertexBuffer(pointsCount * VertexPosition.GetSizeInFloats());
-            vb.Map(pointsCount * VertexPosition.GetSizeInFloats());
+            vertexFormatBits = DB3D.VertexFormatBits.Position;
+            vb = new DB3D.VertexBuffer(pointsCount * DB3D.VertexPosition.GetSizeInFloats());
+            vb.Map(pointsCount * DB3D.VertexPosition.GetSizeInFloats());
 
             using (var vstream = vb.GetVertexStreamPosition())
             {
               for (int p = part.StartVertexIndex; p < part.EndVertexIndex; ++p)
               {
                 var point = pointCloud[p];
-                vstream.AddVertex(new VertexPosition(RawEncoder.AsXYZ(point.Location)));
+                vstream.AddVertex(new DB3D.VertexPosition(RawEncoder.AsXYZ(point.Location)));
               }
             }
 
@@ -533,44 +538,44 @@ namespace RhinoInside.Revit
       return pointsCount;
     }
 
-    #region Utils
-    public static bool ShowsEdges(DisplayStyle displayStyle)
+#region Utils
+    public static bool ShowsEdges(DB.DisplayStyle displayStyle)
     {
-      return displayStyle == DisplayStyle.Wireframe ||
-             displayStyle == DisplayStyle.HLR ||
-             displayStyle == DisplayStyle.ShadingWithEdges ||
-             displayStyle == DisplayStyle.FlatColors ||
-             displayStyle == DisplayStyle.RealisticWithEdges;
+      return displayStyle == DB.DisplayStyle.Wireframe ||
+             displayStyle == DB.DisplayStyle.HLR ||
+             displayStyle == DB.DisplayStyle.ShadingWithEdges ||
+             displayStyle == DB.DisplayStyle.FlatColors ||
+             displayStyle == DB.DisplayStyle.RealisticWithEdges;
     }
 
-    public static bool ShowsVertexColors(DisplayStyle displayStyle)
+    public static bool ShowsVertexColors(DB.DisplayStyle displayStyle)
     {
-      return displayStyle == DisplayStyle.Shading ||
-             displayStyle == DisplayStyle.ShadingWithEdges ||
-             displayStyle == DisplayStyle.Realistic ||
-             displayStyle == DisplayStyle.RealisticWithEdges;
+      return displayStyle == DB.DisplayStyle.Shading ||
+             displayStyle == DB.DisplayStyle.ShadingWithEdges ||
+             displayStyle == DB.DisplayStyle.Realistic ||
+             displayStyle == DB.DisplayStyle.RealisticWithEdges;
     }
 
-    public static bool HasVertexNormals(VertexFormatBits vertexFormatBits) => (((int) vertexFormatBits) & 2) != 0;
-    public static bool HasVertexColors (VertexFormatBits vertexFormatBits) => (((int) vertexFormatBits) & 4) != 0;
-    #endregion
+    public static bool HasVertexNormals(DB3D.VertexFormatBits vertexFormatBits) => (((int) vertexFormatBits) & 2) != 0;
+    public static bool HasVertexColors (DB3D.VertexFormatBits vertexFormatBits) => (((int) vertexFormatBits) & 4) != 0;
+#endregion
 
-    #region Primitive
+#region Primitive
     protected class Primitive : IDisposable
     {
-      protected VertexFormatBits vertexFormatBits;
+      protected DB3D.VertexFormatBits vertexFormatBits;
       protected int vertexCount;
-      protected VertexBuffer vertexBuffer;
-      protected VertexFormat vertexFormat;
+      protected DB3D.VertexBuffer vertexBuffer;
+      protected DB3D.VertexFormat vertexFormat;
 
       protected int triangleCount;
-      protected IndexBuffer triangleBuffer;
+      protected DB3D.IndexBuffer triangleBuffer;
 
       protected int linesCount;
-      protected IndexBuffer linesBuffer;
+      protected DB3D.IndexBuffer linesBuffer;
 
-      protected EffectInstance effectInstance;
-      protected Rhino.Geometry.GeometryBase geometry;
+      protected DB3D.EffectInstance effectInstance;
+      protected GeometryBase geometry;
       public struct Part
       {
         public readonly int StartVertexIndex;
@@ -591,29 +596,29 @@ namespace RhinoInside.Revit
 
         public Part(int startVertexIndex, int endVertexIndex) : this(startVertexIndex, endVertexIndex, 0, -1) { }
 
-        public static implicit operator Part(Rhino.Geometry.PointCloud pc)
+        public static implicit operator Part(PointCloud pc)
         {
           return new Part(0, pc?.Count ?? -1);
         }
-        public static implicit operator Part(Rhino.Geometry.Mesh m)
+        public static implicit operator Part(Mesh m)
         {
           return new Part(0, m?.Vertices.Count ?? -1, 0, m?.Faces.Count ?? -1);
         }
-        public static implicit operator Part(Rhino.Geometry.MeshPart p)
+        public static implicit operator Part(MeshPart p)
         {
           return new Part(p?.StartVertexIndex ?? 0, p?.EndVertexIndex ?? -1, p?.StartFaceIndex ?? 0, p?.EndFaceIndex ?? -1);
         }
       }
       protected Part part;
 
-      public readonly Rhino.Geometry.BoundingBox ClippingBox;
+      public readonly BoundingBox ClippingBox;
 
-      public Primitive(Rhino.Geometry.Point p)               { geometry = p; ClippingBox = geometry.GetBoundingBox(false); }
-      public Primitive(Rhino.Geometry.PointCloud pc)         { geometry = pc; ClippingBox = geometry.GetBoundingBox(false); part = pc; }
-      public Primitive(Rhino.Geometry.PointCloud pc, Part p) { geometry = pc; ClippingBox = geometry.GetBoundingBox(false); part = p; }
-      public Primitive(Rhino.Geometry.Curve c)               { geometry = c; ClippingBox = geometry.GetBoundingBox(false); }
-      public Primitive(Rhino.Geometry.Mesh m)                { geometry = m; ClippingBox = geometry.GetBoundingBox(false); part = m; }
-      public Primitive(Rhino.Geometry.Mesh m, Part p)        { geometry = m; ClippingBox = geometry.GetBoundingBox(false); part = p; }
+      public Primitive(Point p)               { geometry = p; ClippingBox = geometry.GetBoundingBox(false); }
+      public Primitive(PointCloud pc)         { geometry = pc; ClippingBox = geometry.GetBoundingBox(false); part = pc; }
+      public Primitive(PointCloud pc, Part p) { geometry = pc; ClippingBox = geometry.GetBoundingBox(false); part = p; }
+      public Primitive(Curve c)               { geometry = c; ClippingBox = geometry.GetBoundingBox(false); }
+      public Primitive(Mesh m)                { geometry = m; ClippingBox = geometry.GetBoundingBox(false); part = m; }
+      public Primitive(Mesh m, Part p)        { geometry = m; ClippingBox = geometry.GetBoundingBox(false); part = p; }
 
       void IDisposable.Dispose()
       {
@@ -625,10 +630,10 @@ namespace RhinoInside.Revit
         vertexBuffer?.Dispose();   vertexBuffer = null; vertexCount = 0;
       }
 
-      public virtual EffectInstance EffectInstance(DisplayStyle displayStyle, bool IsShadingPass)
+      public virtual DB3D.EffectInstance EffectInstance(DB.DisplayStyle displayStyle, bool IsShadingPass)
       {
         if (effectInstance == null)
-          effectInstance = new EffectInstance(vertexFormatBits);
+          effectInstance = new DB3D.EffectInstance(vertexFormatBits);
 
         return effectInstance;
       }
@@ -642,7 +647,7 @@ namespace RhinoInside.Revit
 
           if (geometry.IsValid)
           {
-            if (geometry is Rhino.Geometry.Mesh mesh)
+            if (geometry is Mesh mesh)
             {
               vertexBuffer = ToVertexBuffer(mesh, part, out vertexFormatBits);
               vertexCount = part.VertexCount;
@@ -650,7 +655,7 @@ namespace RhinoInside.Revit
               triangleBuffer = ToTrianglesBuffer(mesh, part, out triangleCount);
               linesBuffer = ToEdgeBuffer(mesh, part, out linesCount);
             }
-            else if (geometry is Rhino.Geometry.Curve curve)
+            else if (geometry is Curve curve)
             {
               using (var polyline = curve.ToPolyline(Revit.ShortCurveTolerance * Revit.ModelUnits, Revit.AngleTolerance * 100.0, Revit.ShortCurveTolerance * Revit.ModelUnits, 0.0))
               {
@@ -670,16 +675,16 @@ namespace RhinoInside.Revit
                 linesCount = ToPolylineBuffer(pline, out vertexFormatBits, out vertexBuffer, out vertexCount, out linesBuffer);
               }
             }
-            else if (geometry is Rhino.Geometry.Point point)
+            else if (geometry is Point point)
             {
               linesCount = -ToPointsBuffer(point, out vertexFormatBits, out vertexBuffer, out vertexCount, out linesBuffer);
             }
-            else if (geometry is Rhino.Geometry.PointCloud pointCloud)
+            else if (geometry is PointCloud pointCloud)
             {
               linesCount = -ToPointsBuffer(pointCloud, part, out vertexFormatBits, out vertexBuffer, out vertexCount, out linesBuffer);
             }
 
-            vertexFormat = new VertexFormat(vertexFormatBits);
+            vertexFormat = new DB3D.VertexFormat(vertexFormatBits);
           }
 
           geometry = null;
@@ -690,13 +695,13 @@ namespace RhinoInside.Revit
         return true;
       }
 
-      public virtual void Draw(DisplayStyle displayStyle)
+      public virtual void Draw(DB.DisplayStyle displayStyle)
       {
         if (!Regen())
           return;
 
         var vc = HasVertexColors(vertexFormatBits) && ShowsVertexColors(displayStyle);
-        if (DrawContext.IsTransparentPass() != vc)
+        if (DB3D.DrawContext.IsTransparentPass() != vc)
         {
           if (vertexCount > 0)
           {
@@ -704,30 +709,30 @@ namespace RhinoInside.Revit
 
             if (triangleCount > 0)
             {
-              DrawContext.FlushBuffer
+              DB3D.DrawContext.FlushBuffer
               (
                 vertexBuffer, vertexCount,
                 triangleBuffer, triangleCount * 3,
                 vertexFormat, ei,
-                PrimitiveType.TriangleList,
+                DB3D.PrimitiveType.TriangleList,
                 0, triangleCount
               );
             }
             else if (linesBuffer != null)
             {
-              DrawContext.FlushBuffer
+              DB3D.DrawContext.FlushBuffer
               (
                 vertexBuffer, vertexCount,
                 linesBuffer, vertexCount,
                 vertexFormat, ei,
-                PrimitiveType.PointList,
+                DB3D.PrimitiveType.PointList,
                 0, vertexCount
               );
             }
           }
         }
 
-        if(!DrawContext.IsTransparentPass())
+        if(!DB3D.DrawContext.IsTransparentPass())
         {
           if (linesCount != 0)
           {
@@ -736,23 +741,23 @@ namespace RhinoInside.Revit
 
             if (linesCount > 0)
             {
-              DrawContext.FlushBuffer
+              DB3D.DrawContext.FlushBuffer
               (
                 vertexBuffer, vertexCount,
                 linesBuffer, linesCount * 2,
                 vertexFormat, EffectInstance(displayStyle, false),
-                PrimitiveType.LineList,
+                DB3D.PrimitiveType.LineList,
                 0, linesCount
               );
             }
             else if(triangleCount == 0)
             {
-              DrawContext.FlushBuffer
+              DB3D.DrawContext.FlushBuffer
               (
                 vertexBuffer, vertexCount,
                 linesBuffer, vertexCount,
                 vertexFormat, EffectInstance(displayStyle, false),
-                PrimitiveType.PointList,
+                DB3D.PrimitiveType.PointList,
                 0, vertexCount
               );
             }
@@ -783,7 +788,7 @@ namespace RhinoInside.Revit
       RegenTime.Reset();
       return ms == 0;
     }
-    #endregion
+#endregion
   }
 }
 #else
