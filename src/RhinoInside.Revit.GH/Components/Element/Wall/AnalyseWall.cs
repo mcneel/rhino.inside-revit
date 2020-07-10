@@ -2,6 +2,7 @@ using System;
 using Grasshopper.Kernel;
 
 using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.Convert.Geometry;
 
 using DB = Autodesk.Revit.DB;
 
@@ -187,7 +188,7 @@ namespace RhinoInside.Revit.GH.Components
 
       PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.WALL_USER_HEIGHT_PARAM, "Height");
       PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.CURVE_ELEM_LENGTH, "Length");
-      DA.SetData("Width", wallInstance.GetWidth());
+      DA.SetData("Width", UnitConverter.InRhinoUnits(wallInstance.GetWidth(), DB.ParameterType.Length));
 #if REVIT_2021
      PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL, "Slant Angle");
 #else
@@ -202,7 +203,7 @@ namespace RhinoInside.Revit.GH.Components
       PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT, "Structural");
       PipeHostParameter<Types.StructuralWallUsage>(DA, wallInstance, DB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM, "Structural Usage");
 
-      DA.SetData("Orientation", wallInstance.GetOrientationVector());
+      DA.SetData("Orientation", UnitConverter.InRhinoUnits(wallInstance.GetOrientationVector()));
     }
   }
 }
