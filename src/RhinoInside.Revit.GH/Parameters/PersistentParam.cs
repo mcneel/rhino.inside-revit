@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Parameters
     where T : class, IGH_Goo
   {
     protected override sealed Bitmap Icon => ((Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
-                                              ImageBuilder.BuildIcon(IconTag, Properties.Resources.ObjectFamily_Unknown);
+                                              ImageBuilder.BuildIcon(IconTag, Properties.Resources.UnknownIcon);
 
     protected virtual string IconTag => typeof(T).Name.Substring(0, 1);
     public virtual void SetInitCode(string code) => NickName = code;
