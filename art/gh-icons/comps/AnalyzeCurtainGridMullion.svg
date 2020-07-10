@@ -23,8 +23,8 @@
         <path d="M3,7L6.413,9.007" style="fill:none;stroke:white;stroke-width:1px;"/>
         <path d="M16.587,14.993L20,17" style="fill:none;stroke:white;stroke-width:1px;"/>
         <g id="_-Curve-2" serif:id="(Curve)">
-            <use xlink:href="#_Image5" x="13.511" y="5.948" width="9.536px" height="14.643px" transform="matrix(0.95363,0,0,0.976211,0,0)"/>
-            <g transform="matrix(0.0416537,0.0240488,-0.0240488,0.0416537,25.4825,-17.5681)">
+            <use xlink:href="#_Image5" x="2.936" y="5.948" width="9.536px" height="14.643px" transform="matrix(0.95363,0,0,0.976211,0,0)"/>
+            <g transform="matrix(0.0416537,0.0240488,-0.0240488,0.0416537,15.398,-17.5681)">
                 <path d="M108.417,561.294L96.525,582.282L158.14,689.122L182.185,689.317L193.984,668.469L132.481,561.522L108.417,561.294Z" style="fill:url(#_Radial6);stroke:rgb(125,17,80);stroke-width:20.79px;stroke-linecap:butt;stroke-miterlimit:10;"/>
             </g>
         </g>

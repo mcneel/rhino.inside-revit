@@ -33,11 +33,11 @@
                 <use xlink:href="#_Image4" x="5" y="0" width="19px" height="16px"/>
             </g>
             <g transform="matrix(0.777778,0,0,0.777778,4.33333,-0.555556)">
-                <rect x="15" y="2" width="9" height="9" style="fill:rgb(163,28,118);"/>
-                <path d="M25.11,0.415L13.89,0.415L13.89,12.585L25.11,12.585L25.11,0.415ZM24,2L15,2L15,11L24,11L24,2Z" style="fill:white;"/>
+                <rect x="15" y="2" width="9" height="9" style="fill:white;"/>
+                <path d="M25.11,0.415L13.89,0.415L13.89,12.585L25.11,12.585L25.11,0.415ZM24,2L15,2L15,11L24,11L24,2Z"/>
             </g>
             <g transform="matrix(0.7,0,0,1,6.9,0)">
-                <path d="M22,6L14,6L14,7L22,7L22,6ZM17,2L14,2L14,5L17,5L17,2ZM22,4L18,4L18,5L22,5L22,4Z" style="fill:white;"/>
+                <path d="M22,6L14,6L14,7L22,7L22,6ZM17,2L14,2L14,5L17,5L17,2ZM22,4L18,4L18,5L22,5L22,4Z"/>
             </g>
         </g>
     </g>

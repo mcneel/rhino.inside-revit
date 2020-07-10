@@ -24,7 +24,7 @@
         <g>
             <use xlink:href="#_Image6" x="8" y="0" width="16px" height="16px"/>
             <g transform="matrix(0.777778,0,0,0.777778,4.33333,-0.555556)">
-                <rect x="15" y="2" width="9" height="9" style="fill:rgb(107,157,1);"/>
+                <rect x="15" y="2" width="9" height="9"/>
                 <path d="M25.286,0.714L13.714,0.714L13.714,12.286L25.286,12.286L25.286,0.714ZM24,2L15,2L15,11L24,11L24,2Z" style="fill:white;"/>
             </g>
             <g transform="matrix(0.212205,0,0,0.199652,-4.88017,-23.3733)">
