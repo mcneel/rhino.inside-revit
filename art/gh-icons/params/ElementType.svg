@@ -13,10 +13,10 @@
             </g>
         </g>
         <g id="_-Curve-1" serif:id="(Curve)">
-            <use xlink:href="#_Image4" x="10.86" y="5.798" width="11.312px" height="17.812px" transform="matrix(0.942691,0,0,0.989572,0,0)"/>
+            <use xlink:href="#_Image4" x="11.068" y="5.804" width="11.427px" height="18.133px" transform="matrix(0.95222,0,0,0.954344,0,0)"/>
             <g transform="matrix(0.28471,-0.493132,0.493132,0.28471,3.16741,31.6483)">
-                <path d="M37.2,-4.58L52.268,3.957L37.059,12.738L21.991,4.201L37.2,-4.58Z" style="fill:url(#_Radial5);"/>
-                <path d="M38.065,-6.108C37.524,-6.415 36.86,-6.412 36.321,-6.101L21.113,2.68C20.567,2.995 20.232,3.578 20.235,4.208C20.237,4.838 20.577,5.418 21.125,5.729L36.193,14.266C36.735,14.573 37.398,14.57 37.937,14.259L53.146,5.478C53.691,5.163 54.026,4.58 54.024,3.95C54.021,3.32 53.682,2.74 53.133,2.429L38.065,-6.108ZM37.2,-4.58L52.268,3.957L37.059,12.738L21.991,4.201L37.2,-4.58Z" style="fill:rgb(78,108,0);"/>
+                <path d="M38.086,-4.078L52.268,3.957L37.059,12.738L22.877,4.703L38.086,-4.078Z" style="fill:url(#_Radial5);"/>
+                <path d="M38.952,-5.606C38.41,-5.913 37.747,-5.91 37.208,-5.599L21.999,3.182C21.453,3.497 21.118,4.08 21.121,4.71C21.123,5.34 21.463,5.921 22.011,6.231L36.193,14.266C36.735,14.573 37.398,14.57 37.937,14.259L53.146,5.478C53.691,5.163 54.027,4.58 54.024,3.95C54.021,3.32 53.682,2.74 53.133,2.429L38.952,-5.606ZM38.086,-4.078L52.268,3.957L37.059,12.738L22.877,4.703L38.086,-4.078Z"/>
             </g>
         </g>
         <g transform="matrix(0.246148,0,0,0.231587,-11.5399,-17.4318)">
@@ -26,7 +26,7 @@
     <defs>
         <image id="_Image2" width="21px" height="24px" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAYCAYAAAAVibZIAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABZUlEQVQ4jdWV23KDMAxEDyaENMn/f2nThEuhD+y2ijGkM32qZjQGYx/LslhX7FslT6FvAmb55qQ9WC0/6H0GRuBTXoTn0BjZAWiAVm1SlAPQqR3VN0VInQENOwJvwEV+1Xur7/XOLr8/Jj0fgRNwFugqqIGN3OAU4E7DXAdgG6IzMMIMyn0FPqjzqOguak/q88S41TznTeAAdF495vCsgYbluXNkKeyyYjmsERi9gg8nbnXzIMJiHtMCPXAHKofsFfMcvbJ4yI68ioC8/a2t5qetkX+x/w3dVJ8NW41P/CjNrpy9AD4xDHXhWtKmEqEAnMMcK9Yc6yv+krmXgA6kBx7AB0vxD3Vhgm2rbh1dz6Krd+AmaAeMdRg48azoMQUGR5G+C3STP/RtyqEGR0WPCw6a7OjeQ4SDx+eS5n/ZknaSt/xcJ53AnbdLdhmWDiHKWsOiXvkd1astXn6v5C2vilhCjm5lXy1te9RNrdK3AAAAAElFTkSuQmCC"/>
         <radialGradient id="_Radial3" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(-63.9235,0.716568,-0.690266,-61.5771,101.108,537.057)"><stop offset="0" style="stop-color:rgb(224,224,224);stop-opacity:1"/><stop offset="1" style="stop-color:rgb(130,130,130);stop-opacity:1"/></radialGradient>
-        <image id="_Image4" width="12px" height="18px" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAASCAYAAABvqT8MAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAA1klEQVQokZXS0W7CMBBE0WPiQGjpQ///M0ugTUjSB9bCjaC0llYrWXdmNs4mj88GGVvskXDKd8BUgS84oMOElFdgg7YCX7ELg0+0OcBNgF2AxXUXJjCUhCZmPOAtwC5cmzCcossR/x6CfSQ1kZrWH5hjzjJvW7k+fLptFf8rXASpqqdn8xfov4Kl6vMzwYIZl6jx3mrU4IQRXzjivBYsUQUccMIH+rVgjn4J8ByuvesejZjzas6pij+GaIz7hesPK9FjAH2MMVRgeSnJbTOXcB8i7QdYzjfXv0FjVC477gAAAABJRU5ErkJggg=="/>
-        <radialGradient id="_Radial5" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(-19.238,33.4134,22.2346,12.8017,54.6667,4.60001)"><stop offset="0" style="stop-color:rgb(174,255,0);stop-opacity:1"/><stop offset="1" style="stop-color:rgb(72,110,0);stop-opacity:1"/></radialGradient>
+        <image id="_Image4" width="12px" height="19px" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAATCAYAAACk9eypAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAA0klEQVQokZWSawvCMAxFT7fM+cL//z8F9279sButZUwNXFqak5tQEtiOIBnQ6IzAGDbgCqgFHoGT7jNwt8K1lpuDZ90NGIDBBFZ6PGSgw40MI1Cb4LYATyr2fNQZ3PUC3AS3cq0FASSf2wRcpWPm6j/1gr2gUZdGcngzqkJhD/aCv+LXguT6VpBYv9SVbAd0eAF6oAOmsqAEJ9aVeAB3oLcNeJZGuT6kDu1SPusoeChBdYy+5w4lzevwoNyiHJa1nqRemjLwY5d63ts4Z2Ck2COAJ78jUxrRT/A9AAAAAElFTkSuQmCC"/>
+        <radialGradient id="_Radial5" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(21.8197,7.89053,5.39986,-14.1185,31.3521,1.25594)"><stop offset="0" style="stop-color:rgb(115,115,115);stop-opacity:1"/><stop offset="1" style="stop-color:black;stop-opacity:1"/></radialGradient>
     </defs>
 </svg>
