@@ -1,0 +1,17 @@
+ElementFilter
+ElementExclusionFilter
+ElementLogicalAndFilter
+ElementLogicalOrFilter
+ElementBoundingBoxFilter
+ElementCategoryFilter
+ElementClassFilter
+ElementDesignOptionFilter
+ElementExcludeElementTypeFilter
+ElementIntersectsBrepFilter
+ElementIntersectsElementFilter
+ElementIntersectsMeshFilter
+ElementLevelFilter
+ElementOwnerViewFilter
+ElementParameterFilter
+ElementSelectableInViewFilter
+ElementTypeFilter
