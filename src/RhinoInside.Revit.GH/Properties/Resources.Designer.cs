@@ -423,6 +423,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap CompoundStructure {
+            get {
+                object obj = ResourceManager.GetObject("CompoundStructure", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap CompoundStructureGeometry {
             get {
                 object obj = ResourceManager.GetObject("CompoundStructureGeometry", resourceCulture);
@@ -433,9 +443,49 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap CompoundStructureLayer {
+            get {
+                object obj = ResourceManager.GetObject("CompoundStructureLayer", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap CurtainCell {
+            get {
+                object obj = ResourceManager.GetObject("CurtainCell", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap CurtainGrid {
+            get {
+                object obj = ResourceManager.GetObject("CurtainGrid", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap CurtainGridAlignType_ValueList {
             get {
                 object obj = ResourceManager.GetObject("CurtainGridAlignType_ValueList", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap CurtainGridJoinCondition_ValueList {
+            get {
+                object obj = ResourceManager.GetObject("CurtainGridJoinCondition_ValueList", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -486,16 +536,6 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap CurtainWall {
             get {
                 object obj = ResourceManager.GetObject("CurtainWall", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap CurtainGridJoinCondition_ValueList {
-            get {
-                object obj = ResourceManager.GetObject("CurtainGridJoinCondition_ValueList", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -836,6 +876,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap ElementExclusionFilter {
             get {
                 object obj = ResourceManager.GetObject("ElementExclusionFilter", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ElementFilter {
+            get {
+                object obj = ResourceManager.GetObject("ElementFilter", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -1356,6 +1406,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap FamilyTypes {
             get {
                 object obj = ResourceManager.GetObject("FamilyTypes", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap FilterRule {
+            get {
+                object obj = ResourceManager.GetObject("FilterRule", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
