@@ -23,6 +23,9 @@
             <path d="M11.5,2L11.5,12.588" style="fill:none;stroke:white;stroke-width:2px;stroke-linecap:round;stroke-miterlimit:1.5;"/>
         </g>
         <path d="M11.5,12L16,9.353" style="fill:none;stroke:white;stroke-width:1px;stroke-linecap:round;stroke-miterlimit:1.5;"/>
+        <g transform="matrix(1,0,0,1,16.9941,-1.42109e-14)">
+            <path d="M-5.494,12L-5.494,18" style="fill:none;stroke:rgb(0,76,156);stroke-width:1.5px;stroke-linecap:round;stroke-miterlimit:1.5;"/>
+        </g>
     </g>
     <defs>
         <image id="_Image2" width="21px" height="24px" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAYCAYAAAAVibZIAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABZUlEQVQ4jdWV23KDMAxEDyaENMn/f2nThEuhD+y2ijGkM32qZjQGYx/LslhX7FslT6FvAmb55qQ9WC0/6H0GRuBTXoTn0BjZAWiAVm1SlAPQqR3VN0VInQENOwJvwEV+1Xur7/XOLr8/Jj0fgRNwFugqqIGN3OAU4E7DXAdgG6IzMMIMyn0FPqjzqOguak/q88S41TznTeAAdF495vCsgYbluXNkKeyyYjmsERi9gg8nbnXzIMJiHtMCPXAHKofsFfMcvbJ4yI68ioC8/a2t5qetkX+x/w3dVJ8NW41P/CjNrpy9AD4xDHXhWtKmEqEAnMMcK9Yc6yv+krmXgA6kBx7AB0vxD3Vhgm2rbh1dz6Krd+AmaAeMdRg48azoMQUGR5G+C3STP/RtyqEGR0WPCw6a7OjeQ4SDx+eS5n/ZknaSt/xcJ53AnbdLdhmWDiHKWsOiXvkd1astXn6v5C2vilhCjm5lXy1te9RNrdK3AAAAAElFTkSuQmCC"/>

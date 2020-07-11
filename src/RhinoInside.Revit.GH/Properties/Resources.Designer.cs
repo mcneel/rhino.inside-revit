@@ -493,9 +493,9 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap CurtianGridJoinCondition_ValueList {
+        internal static System.Drawing.Bitmap CurtainGridJoinCondition_ValueList {
             get {
-                object obj = ResourceManager.GetObject("CurtianGridJoinCondition_ValueList", resourceCulture);
+                object obj = ResourceManager.GetObject("CurtainGridJoinCondition_ValueList", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

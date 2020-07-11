@@ -15,7 +15,7 @@
         </g>
         <path d="M11.5,4L11.5,19" style="fill:none;stroke:white;stroke-width:1px;stroke-linecap:round;stroke-miterlimit:1.5;"/>
         <g transform="matrix(6.12323e-17,1,-1,6.12323e-17,23.5,2.30926e-14)">
-            <path d="M11.5,2L11.5,19.5" style="fill:none;stroke:white;stroke-width:1px;stroke-linecap:round;stroke-miterlimit:1.5;"/>
+            <path d="M11.5,3L11.5,19.5" style="fill:none;stroke:white;stroke-width:1px;stroke-linecap:round;stroke-miterlimit:1.5;"/>
         </g>
         <g transform="matrix(0.692308,0,0,0.692308,3.53846,3.53846)">
             <path d="M11.5,3.556C7.115,3.556 3.556,7.115 3.556,11.5C3.556,15.885 7.115,19.444 11.5,19.444C15.885,19.444 19.444,15.885 19.444,11.5C19.444,7.115 15.885,3.556 11.5,3.556ZM11.5,5C15.087,5 18,7.913 18,11.5C18,15.087 15.087,18 11.5,18C7.913,18 5,15.087 5,11.5C5,7.913 7.913,5 11.5,5Z" style="fill:white;"/>
