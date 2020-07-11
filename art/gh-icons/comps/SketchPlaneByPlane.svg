@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:10;">
+    <rect id="Artboard1" x="0" y="0" width="24" height="24" style="fill:none;"/>
+    <clipPath id="_clip1">
+        <rect id="Artboard11" serif:id="Artboard1" x="0" y="0" width="24" height="24"/>
+    </clipPath>
+    <g clip-path="url(#_clip1)">
+        <g id="_-Curve-" serif:id="(Curve)">
+            <use xlink:href="#_Image2" x="1.707" y="0.729" width="21px" height="23.293px" transform="matrix(1,0,0,0.970537,0,0)"/>
+            <g transform="matrix(0.24869,0.143581,-0.143581,0.24869,65.9667,-143.078)">
+                <path d="M88.345,532.362L71.417,562.241L88.828,592.399L123.169,592.678L140.097,562.799L122.685,532.641L88.345,532.362Z" style="fill:url(#_Radial3);"/>
+            </g>
+        </g>
+        <g id="_-Curve-1" serif:id="(Curve)">
+            <use xlink:href="#_Image4" x="1.752" y="5.917" width="19.818px" height="12.952px" transform="matrix(0.990901,0,0,0.996315,0,0)"/>
+            <g transform="matrix(0.957604,0,0,0.957604,0.247487,-1.19713)">
+                <path d="M2.874,13.845L11.751,8.727L20.627,13.949L11.751,19.31L2.874,13.845Z" style="fill:url(#_Radial5);"/>
+                <path d="M2.353,12.94C2.034,13.124 1.836,13.462 1.83,13.829C1.825,14.197 2.014,14.541 2.327,14.734L11.203,20.199C11.536,20.404 11.956,20.406 12.291,20.204L21.167,14.842C21.482,14.652 21.673,14.31 21.671,13.942C21.669,13.575 21.474,13.235 21.156,13.048L12.28,7.827C11.956,7.636 11.555,7.635 11.229,7.822L2.353,12.94ZM2.874,13.845L11.751,8.727L20.627,13.949L11.751,19.31L2.874,13.845Z" style="fill:rgb(16,75,106);"/>
+            </g>
+        </g>
+        <path d="M14.019,10.518L11.5,9.037L8.981,10.518L14.019,13.482L11.5,14.963L8.981,13.482" style="fill:none;stroke:white;stroke-width:1px;stroke-linecap:round;stroke-miterlimit:1.5;"/>
+    </g>
+    <defs>
+        <image id="_Image2" width="21px" height="24px" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAYCAYAAAAVibZIAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABZUlEQVQ4jdWV23KDMAxEDyaENMn/f2nThEuhD+y2ijGkM32qZjQGYx/LslhX7FslT6FvAmb55qQ9WC0/6H0GRuBTXoTn0BjZAWiAVm1SlAPQqR3VN0VInQENOwJvwEV+1Xur7/XOLr8/Jj0fgRNwFugqqIGN3OAU4E7DXAdgG6IzMMIMyn0FPqjzqOguak/q88S41TznTeAAdF495vCsgYbluXNkKeyyYjmsERi9gg8nbnXzIMJiHtMCPXAHKofsFfMcvbJ4yI68ioC8/a2t5qetkX+x/w3dVJ8NW41P/CjNrpy9AD4xDHXhWtKmEqEAnMMcK9Yc6yv+krmXgA6kBx7AB0vxD3Vhgm2rbh1dz6Krd+AmaAeMdRg48azoMQUGR5G+C3STP/RtyqEGR0WPCw6a7OjeQ4SDx+eS5n/ZknaSt/xcJ53AnbdLdhmWDiHKWsOiXvkd1astXn6v5C2vilhCjm5lXy1te9RNrdK3AAAAAElFTkSuQmCC"/>
+        <radialGradient id="_Radial3" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(11.266,-71.1247,68.514,10.8525,124.66,567.538)"><stop offset="0" style="stop-color:rgb(224,224,224);stop-opacity:1"/><stop offset="1" style="stop-color:rgb(130,130,130);stop-opacity:1"/></radialGradient>
+        <image id="_Image4" width="20px" height="13px" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAANCAYAAACpUE5eAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABC0lEQVQ4jYWT7VKDMBBFD4SACjqt7/+QVbEtUIg/creumdZmZofMJnu4+5GK26sCaqABOqCVfwYm4AJsQLoVWC4DPQE9MABRwQvwDYwF+LpCAY8CvQF7fQfgWf7WmYlJXmnQgaU2CLRzoFbnQRZlnfwefL3QC7IHXoEXgaJKUPFb19rFmdpa0LVR8LtTZGoMUq5K5x5s8NQUzvAA5qGWYVL6C9D4PzVFev9BrREreZTO5M6Pgdz2i8y65WEldJPNwAn4Ag7AJzCZ5FWSZ+19ah5uP5/I83iQjYrdbA6TuzwL/mdgnaoj8OFUnXADfu+lBHKhe/IYdbp7VopH7VeKwb5X9PItR/kXHrzlH+1DT7bgwya5AAAAAElFTkSuQmCC"/>
+        <radialGradient id="_Radial5" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(13.688,6.0156e-16,8.77484e-16,-9.38382,8.4677,11.7627)"><stop offset="0" style="stop-color:rgb(53,245,255);stop-opacity:1"/><stop offset="1" style="stop-color:rgb(17,95,111);stop-opacity:1"/></radialGradient>
+    </defs>
+</svg>
