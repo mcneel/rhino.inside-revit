@@ -115,7 +115,7 @@
       <Component Guid="{ABEFC97A-FC97-4DBA-BCC0-6502A762BB36}">
         <File Id="_2017_RhinoInside.Revit.dll" Source="..\RhinoInside.Revit\bin\x64\$(var.Configuration) 2017\RhinoInside.Revit.dll" KeyPath="yes"/>
         <File Id="_2017_RhinoInside.Revit.GH.gha" Source="..\RhinoInside.Revit.GH\bin\x64\$(var.Configuration) 2017\RhinoInside.Revit.GH.gha"/>
-        <File Id="_2017_RhinoInside.Revit.Native.dll" Source="..\RhinoInside.Revit\bin\x64\$(var.Configuration) 2017\RhinoInside.Revit.Native.dll"/>
+        <File Id="_2017_RhinoInside.Revit.Native.dll" Source="..\RhinoInside.Revit.Native\bin\x64\$(var.Configuration)\RhinoInside.Revit.Native.dll"/>
         <File Id="_2017_Sample2" Source="..\RhinoInside.Revit\Samples\Sample2.ghx"/>
         <File Id="_2017_Sample3" Source="..\RhinoInside.Revit\Samples\Sample3.ghx"/>
         <File Id="_2017_Sample4" Source="..\RhinoInside.Revit\Samples\Sample4.ghx"/>
@@ -138,7 +138,7 @@
       <Component Guid="{425DE5DB-2E76-4EAC-8CA9-F348965000F2}">
         <File Id="_2018_RhinoInside.Revit.dll" Source="..\RhinoInside.Revit\bin\x64\$(var.Configuration) 2018\RhinoInside.Revit.dll" KeyPath="yes"/>
         <File Id="_2018_RhinoInside.Revit.GH.gha" Source="..\RhinoInside.Revit.GH\bin\x64\$(var.Configuration) 2018\RhinoInside.Revit.GH.gha"/>
-        <File Id="_2018_RhinoInside.Revit.Native.dll" Source="..\RhinoInside.Revit\bin\x64\$(var.Configuration) 2018\RhinoInside.Revit.Native.dll"/>
+        <File Id="_2018_RhinoInside.Revit.Native.dll" Source="..\RhinoInside.Revit.Native\bin\x64\$(var.Configuration)\RhinoInside.Revit.Native.dll"/>
         <File Id="_2018_Sample2" Source="..\RhinoInside.Revit\Samples\Sample2.ghx"/>
         <File Id="_2018_Sample3" Source="..\RhinoInside.Revit\Samples\Sample3.ghx"/>
         <File Id="_2018_Sample4" Source="..\RhinoInside.Revit\Samples\Sample4.ghx"/>
@@ -161,7 +161,7 @@
       <Component Guid="{C1D9E7B6-0DE7-4640-82C1-B475065E5024}">
         <File Id="_2019_RhinoInside.Revit.dll" Source="..\RhinoInside.Revit\bin\x64\$(var.Configuration) 2019\RhinoInside.Revit.dll" KeyPath="yes"/>
         <File Id="_2019_RhinoInside.Revit.GH.gha" Source="..\RhinoInside.Revit.GH\bin\x64\$(var.Configuration) 2019\RhinoInside.Revit.GH.gha"/>
-        <File Id="_2019_RhinoInside.Revit.Native.dll" Source="..\RhinoInside.Revit\bin\x64\$(var.Configuration) 2019\RhinoInside.Revit.Native.dll"/>
+        <File Id="_2019_RhinoInside.Revit.Native.dll" Source="..\RhinoInside.Revit.Native\bin\x64\$(var.Configuration)\RhinoInside.Revit.Native.dll"/>
         <File Id="_2019_Sample2" Source="..\RhinoInside.Revit\Samples\Sample2.ghx"/>
         <File Id="_2019_Sample3" Source="..\RhinoInside.Revit\Samples\Sample3.ghx"/>
         <File Id="_2019_Sample4" Source="..\RhinoInside.Revit\Samples\Sample4.ghx"/>
@@ -184,7 +184,7 @@
       <Component Guid="{6C890637-2DFD-4E0A-98BC-D3CAAA4EDE0E}">
         <File Id="_2020_RhinoInside.Revit.dll" Source="..\RhinoInside.Revit\bin\x64\$(var.Configuration) 2020\RhinoInside.Revit.dll" KeyPath="yes"/>
         <File Id="_2020_RhinoInside.Revit.GH.gha" Source="..\RhinoInside.Revit.GH\bin\x64\$(var.Configuration) 2020\RhinoInside.Revit.GH.gha"/>
-        <File Id="_2020_RhinoInside.Revit.Native.dll" Source="..\RhinoInside.Revit\bin\x64\$(var.Configuration) 2020\RhinoInside.Revit.Native.dll"/>
+        <File Id="_2020_RhinoInside.Revit.Native.dll" Source="..\RhinoInside.Revit.Native\bin\x64\$(var.Configuration)\RhinoInside.Revit.Native.dll"/>
         <File Id="_2020_Sample2" Source="..\RhinoInside.Revit\Samples\Sample2.ghx"/>
         <File Id="_2020_Sample3" Source="..\RhinoInside.Revit\Samples\Sample3.ghx"/>
         <File Id="_2020_Sample4" Source="..\RhinoInside.Revit\Samples\Sample4.ghx"/>
@@ -207,7 +207,7 @@
       <Component Guid="{31B9D2CF-D920-463F-9C5B-F3FFB4EC97E1}">
         <File Id="_2021_RhinoInside.Revit.dll" Source="..\RhinoInside.Revit\bin\x64\$(var.Configuration) 2021\RhinoInside.Revit.dll" KeyPath="yes"/>
         <File Id="_2021_RhinoInside.Revit.GH.gha" Source="..\RhinoInside.Revit.GH\bin\x64\$(var.Configuration) 2021\RhinoInside.Revit.GH.gha"/>
-        <File Id="_2021_RhinoInside.Revit.Native.dll" Source="..\RhinoInside.Revit\bin\x64\$(var.Configuration) 2021\RhinoInside.Revit.Native.dll"/>
+        <File Id="_2021_RhinoInside.Revit.Native.dll" Source="..\RhinoInside.Revit.Native\bin\x64\$(var.Configuration)\RhinoInside.Revit.Native.dll"/>
         <File Id="_2021_Sample2" Source="..\RhinoInside.Revit\Samples\Sample2.ghx"/>
         <File Id="_2021_Sample3" Source="..\RhinoInside.Revit\Samples\Sample3.ghx"/>
         <File Id="_2021_Sample4" Source="..\RhinoInside.Revit\Samples\Sample4.ghx"/>
