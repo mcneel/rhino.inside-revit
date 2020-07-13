@@ -211,6 +211,7 @@
     <Compile Include="Convert\System.Windows.Media.cs" />
     <Compile Include="ErrorReport.cs" />
     <Compile Include="Exceptions.cs" />
+    <Compile Include="Extensions\Native.cs" />
     <Compile Include="External\ApplicationServices\Extensions\Application.cs" />
     <Compile Include="External\DB\Application.cs" />
     <Compile Include="External\DB\BuiltInMullionPositionId.cs" />
