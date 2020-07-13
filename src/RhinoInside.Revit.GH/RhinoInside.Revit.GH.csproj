@@ -669,6 +669,8 @@
     <None Include="$(ProjectDir)\..\..\art\gh-icons\params\AdaptiveComponent.png"><Link>Art\Parameters\AdaptiveComponent.png</Link></None>
     <None Include="$(ProjectDir)\..\..\art\gh-icons\params\Beam.png"><Link>Art\Parameters\Beam.png</Link></None>
     <None Include="$(ProjectDir)\..\..\art\gh-icons\params\ModelLine.png"><Link>Art\Parameters\ModelLine.png</Link></None>
+    <None Include="$(ProjectDir)\..\..\art\gh-icons\params\Parameter.png"><Link>Art\Parameters\ModelLine.png</Link></None>
+    <None Include="$(ProjectDir)\..\..\art\gh-icons\params\ParameterValue.png"><Link>Art\Parameters\ModelLine.png</Link></None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
