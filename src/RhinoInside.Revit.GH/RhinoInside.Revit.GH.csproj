@@ -614,7 +614,7 @@
     <None Include="$(ProjectDir)\..\..\art\gh-icons\params\ViewDetailLevel_ValueList.png"><Link>Art\Parameters\ViewDetailLevel_ValueList.png</Link></None>
     <None Include="$(ProjectDir)\..\..\art\gh-icons\params\CurtainGridAlignType_ValueList.png"><Link>Art\Parameters\CurtainGridAlignType_ValueList.png</Link></None>
     <None Include="$(ProjectDir)\..\..\art\gh-icons\params\CurtainGridLayout_ValueList.png"><Link>Art\Parameters\CurtainGridLayout_ValueList.png</Link></None>
-    <None Include="$(ProjectDir)\..\..\art\gh-icons\params\CurtianGridJoinCondition_ValueList.png"><Link>Art\Parameters\CurtianGridJoinCondition_ValueList.png</Link></None>
+    <None Include="$(ProjectDir)\..\..\art\gh-icons\params\CurtainGridJoinCondition_ValueList.png"><Link>Art\Parameters\CurtainGridJoinCondition_ValueList.png</Link></None>
     <None Include="$(ProjectDir)\..\..\art\gh-icons\params\CurtainMullionSystemFamily_ValueList.png"><Link>Art\Parameters\CurtainMullionSystemFamily_ValueList.png</Link></None>
     <None Include="$(ProjectDir)\..\..\art\gh-icons\params\ModelCategoriesPicker.png"><Link>Art\Parameters\ModelCategoriesPicker.png</Link></None>
     <None Include="$(ProjectDir)\..\..\art\gh-icons\params\AnnotationCategoriesPicker.png"><Link>Art\Parameters\AnnotationCategoriesPicker.png</Link></None>
