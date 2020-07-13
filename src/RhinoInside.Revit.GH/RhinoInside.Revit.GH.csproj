@@ -672,6 +672,7 @@
     <None Include="$(ProjectDir)\..\..\art\gh-icons\params\Parameter.png"><Link>Art\Parameters\ModelLine.png</Link></None>
     <None Include="$(ProjectDir)\..\..\art\gh-icons\params\ParameterValue.png"><Link>Art\Parameters\ModelLine.png</Link></None>
     <None Include="$(ProjectDir)\..\..\art\gh-icons\params\DirectShape.png"><Link>Art\Parameters\DirectShape.png</Link></None>
+    <None Include="$(ProjectDir)\..\..\art\gh-icons\params\HostObjectType.png"><Link>Art\Parameters\HostObjectType.png</Link></None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">

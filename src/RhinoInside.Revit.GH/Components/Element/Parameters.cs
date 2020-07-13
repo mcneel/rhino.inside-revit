@@ -360,7 +360,7 @@ namespace RhinoInside.Revit.GH.Components
   public class ElementParameters : Component
   {
     public override Guid ComponentGuid => new Guid("44515A6B-84EE-4DBD-8241-17EDBE07C5B6");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
     public ElementParameters()
     : base("Element Parameters", "Parameters", "Get the parameters of the specified Element", "Revit", "Element")

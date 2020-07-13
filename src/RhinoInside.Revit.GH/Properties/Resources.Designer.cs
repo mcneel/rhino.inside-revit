@@ -1643,6 +1643,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap HostObjectType {
+            get {
+                object obj = ResourceManager.GetObject("HostObjectType", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap HostObjectTypeCompoundStructure {
             get {
                 object obj = ResourceManager.GetObject("HostObjectTypeCompoundStructure", resourceCulture);
