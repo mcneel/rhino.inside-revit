@@ -56,6 +56,7 @@ namespace RhinoInside.Revit
       Autodesk.Revit.ApplicationServices.LanguageType revitLanguage,
       ExternalApplicationArray loadedApplications,
       string reportFilePath,
+      string logFile,
       IEnumerable<string> attachments
     )
     {
@@ -110,12 +111,28 @@ namespace RhinoInside.Revit
               if (attachments.Any())
               {
                 writer.WriteLine();
-                writer.WriteLine($"## Attachments");
+                writer.WriteLine("## Attachments");
                 writer.WriteLine();
                 foreach (var attachment in attachments)
                 {
                   var attachmentName = Path.GetFileName(attachment);
                   writer.WriteLine($"[{attachmentName}](Attachments/{attachmentName})  ");
+                }
+              }
+
+              if (File.Exists(logFile))
+              {
+                writer.WriteLine();
+                writer.WriteLine("## Log");
+                writer.WriteLine();
+
+                using (var log = new StreamReader(logFile))
+                {
+                  string line;
+                  while ((line = log.ReadLine()) != null)
+                  {
+                    writer.WriteLine(line);
+                  }
                 }
               }
             }
@@ -223,6 +240,7 @@ namespace RhinoInside.Revit
         revit.Language,
         includeAddinsList ? app.LoadedApplications : default,
         reportFilePath,
+        Path.ChangeExtension(revit.RecordingJournalFilename, "log.md"),
         attachments
       );
 
@@ -255,6 +273,7 @@ namespace RhinoInside.Revit
         revit.Language,
         includeAddinsList ? app.LoadedApplications : default,
         reportFilePath,
+        Path.ChangeExtension(revit.RecordingJournalFilename, "log.md"),
         attachments
       );
 
