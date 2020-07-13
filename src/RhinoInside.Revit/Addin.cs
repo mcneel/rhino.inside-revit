@@ -13,6 +13,7 @@ using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
 using UIX = RhinoInside.Revit.External.UI;
 using RhinoInside.Revit.External.UI.Extensions;
+using RhinoInside.Revit.Native;
 
 namespace RhinoInside.Revit
 {
@@ -127,11 +128,19 @@ namespace RhinoInside.Revit
 
     protected override Result OnStartup(UIControlledApplication applicationUI)
     {
-      if(!CanLoad(applicationUI))
+      if (!CanLoad(applicationUI))
         return Result.Failed;
 
       if (StartupMode == AddinStartupMode.Cancelled)
         return Result.Cancelled;
+
+      // Report if opennurbs.dll is loaded
+      NativeMethods.SetStackTraceFilePath 
+      (
+        Path.ChangeExtension(applicationUI.ControlledApplication.RecordingJournalFilename, "log.md")
+      );
+
+      NativeMethods.ReportOnLoad("opennurbs.dll", enable: true);
 
       ApplicationUI = applicationUI;
 
@@ -409,6 +418,9 @@ namespace RhinoInside.Revit
 
         return Result.Cancelled;
       }
+
+      // Disable report opennurbs.dll is loaded 
+      NativeMethods.ReportOnLoad("opennurbs.dll", enable: false);
 
       return Result.Succeeded;
     }
