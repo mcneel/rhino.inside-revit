@@ -9,6 +9,22 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html version="0.0.7500.18692" time="07/14/2020 10:23:04" %}
+
+### New Features
+* Now 'Bounding Box' Grasshopper component works with Revit elements.
+* Added support for more `DB.FamilyPlacementType` to the 'Add Component (Location)' component.
+
+### Minor Changes
+* Add more info to the report file about where 'opennurbs.dll' is loaded from.
+
+### Fixes
+* Resolved units conversion issues in 'Analyse Wall' component (#263).
+* Fixed 'Element Geometry' component when managing family geometry. 
+
+### API
+* Added `DB.Document.GetActiveGraphicalView` extension method.
+
 {% include ltr/release-header.html version="0.0.7481.2160" time="06/25/2020 01:12:00" %}
 
 ### New Features
