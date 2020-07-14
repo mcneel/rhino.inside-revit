@@ -22,6 +22,7 @@ class LdrDllTracker
       if(Instance.ReportOnLoad(NotificationData->Loaded.BaseDllName->Buffer))
       {
         std::wstringstream buffer;
+        buffer.imbue(std::locale::classic());
 
         // Timestamp
         {
@@ -55,11 +56,13 @@ class LdrDllTracker
         }
         else
         {
-          std::ofstream trace_file(stack_trace_file_path, std::fstream::app | std::fstream::out);
-          if (trace_file.is_open())
+          std::ofstream log_file(stack_trace_file_path, std::fstream::app | std::fstream::out);
+          log_file.imbue(std::locale::classic());
+
+          if (log_file.is_open())
           {
             std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> conversion;
-            trace_file << conversion.to_bytes(buffer.str());
+            log_file << conversion.to_bytes(buffer.str());
           }
         }
 
@@ -130,7 +133,7 @@ class LdrDllTracker
     for (WORD num = 0; num < count; num++)
     {
       std::wstringstream stream;
-      //stream << "[" << std::setw(3) << std::setfill(L'0') << num << "] ";
+      stream.imbue(std::locale::classic());
 
       TCHAR ModuleName[2048]{};
       if (MixedGetModuleFileName(CallStack[num], ModuleName, _countof(ModuleName)))
