@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Components
     protected ElementGeometryComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
 
-    protected override System.Drawing.Bitmap Icon => ((System.Drawing.Bitmap) Properties.Resources.ResourceManager.GetObject("ElementGeometry")) ??
+    protected override System.Drawing.Bitmap Icon => ((System.Drawing.Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
                                       ImageBuilder.BuildIcon(IconTag);
 
     protected bool TryGetCommonDocument(IEnumerable<DB.Element> elements, out DB.Document document)
