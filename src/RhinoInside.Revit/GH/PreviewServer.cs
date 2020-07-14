@@ -3,15 +3,15 @@ using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
-using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.DirectContext3D;
-using Autodesk.Revit.DB.ExternalService;
+using DB = Autodesk.Revit.DB;
+using DBES = Autodesk.Revit.DB.ExternalService;
+using DB3D = Autodesk.Revit.DB.DirectContext3D;
 using RhinoInside.Revit.Convert.Geometry;
 
 using Grasshopper;
 using Grasshopper.Kernel;
-using System.Threading;
 using Grasshopper.GUI.Canvas;
 
 namespace RhinoInside.Revit.GH
@@ -50,10 +50,10 @@ namespace RhinoInside.Revit.GH
     #endregion
 
     #region IDirectContext3DServer
-    public override bool UseInTransparentPass(View dBView) =>
+    public override bool UseInTransparentPass(DB.View dBView) =>
       ((ActiveDefinition is null ? GH_PreviewMode.Disabled : PreviewMode) == GH_PreviewMode.Shaded);
 
-    public override bool CanExecute(View dBView) =>
+    public override bool CanExecute(DB.View dBView) =>
       GH_Document.EnableSolutions &&
       PreviewMode != GH_PreviewMode.Disabled &&
       ActiveDefinition is object &&
@@ -129,7 +129,7 @@ namespace RhinoInside.Revit.GH
           Revit.RefreshActiveView();
       }
 
-      public override EffectInstance EffectInstance(DisplayStyle displayStyle, bool IsShadingPass)
+      public override DB3D.EffectInstance EffectInstance(DB.DisplayStyle displayStyle, bool IsShadingPass)
       {
         var ei = base.EffectInstance(displayStyle, IsShadingPass);
 
@@ -142,15 +142,15 @@ namespace RhinoInside.Revit.GH
           if (!vc)
           {
             ei.SetTransparency(Math.Max(1.0 / 255.0, (255 - color.A) / 255.0));
-            ei.SetEmissiveColor(new Color(color.R, color.G, color.B));
+            ei.SetEmissiveColor(new DB.Color(color.R, color.G, color.B));
           }
         }
-        else ei.SetColor(new Color(color.R, color.G, color.B));
+        else ei.SetColor(new DB.Color(color.R, color.G, color.B));
 
         return ei;
       }
 
-      public override void Draw(DisplayStyle displayStyle)
+      public override void Draw(DB.DisplayStyle displayStyle)
       {
         if (docObject is IGH_PreviewObject preview)
         {
@@ -220,7 +220,7 @@ namespace RhinoInside.Revit.GH
       }
     }
 
-    Rhino.Geometry.BoundingBox BuildScene(View dBView)
+    Rhino.Geometry.BoundingBox BuildScene(DB.View dBView)
     {
       if (Interlocked.Exchange(ref RebuildPrimitives, 0) != 0)
       {
@@ -268,21 +268,21 @@ namespace RhinoInside.Revit.GH
       return primitivesBoundingBox;
     }
 
-    public override Outline GetBoundingBox(View dBView) => primitivesBoundingBox.ToOutline();
+    public override DB.Outline GetBoundingBox(DB.View dBView) => primitivesBoundingBox.ToOutline();
 
-    public override void RenderScene(View dBView, DisplayStyle displayStyle)
+    public override void RenderScene(DB.View dBView, DB.DisplayStyle displayStyle)
     {
       try
       {
         BuildScene(dBView);
 
-        DrawContext.SetWorldTransform(Transform.Identity.ScaleBasis(UnitConverter.ToHostUnits));
+        DB3D.DrawContext.SetWorldTransform(DB.Transform.Identity.ScaleBasis(UnitConverter.ToHostUnits));
 
         var CropBox = dBView.CropBox.ToBoundingBox();
 
         foreach (var primitive in primitives)
         {
-          if (DrawContext.IsInterrupted())
+          if (DB3D.DrawContext.IsInterrupted())
             break;
 
           if (dBView.CropBoxActive && !Rhino.Geometry.BoundingBox.Intersection(CropBox, primitive.ClippingBox).IsValid)

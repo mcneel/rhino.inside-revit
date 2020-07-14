@@ -1,16 +1,13 @@
 #if REVIT_2018
 using System;
 using System.Diagnostics;
-using System.Reflection;
-using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using Color = System.Drawing.Color;
 
-using Autodesk.Revit.DB.DirectContext3D;
-using Autodesk.Revit.DB.ExternalService;
-using View         = Autodesk.Revit.DB.View;
-using DisplayStyle = Autodesk.Revit.DB.DisplayStyle;
+using DB = Autodesk.Revit.DB;
+using DBES = Autodesk.Revit.DB.ExternalService;
+using DB3D = Autodesk.Revit.DB.DirectContext3D;
 
 using Rhino;
 using Rhino.Geometry;
@@ -128,7 +125,7 @@ namespace RhinoInside.Revit
     {
       objectPreviews = new Dictionary<Guid, DocumentPreviewServer>();
 
-      using (var service = ExternalServiceRegistry.GetService(ExternalServices.BuiltInExternalServices.DirectContext3DService) as MultiServerService)
+      using (var service = DBES.ExternalServiceRegistry.GetService(DBES.ExternalServices.BuiltInExternalServices.DirectContext3DService) as DBES.MultiServerService)
       {
         var activeServerIds = service.GetActiveServerIds();
         foreach (var o in ActiveDocument.Objects)
@@ -150,7 +147,7 @@ namespace RhinoInside.Revit
 
     static void Stop()
     {
-      using (var service = ExternalServiceRegistry.GetService(ExternalServices.BuiltInExternalServices.DirectContext3DService) as MultiServerService)
+      using (var service = DBES.ExternalServiceRegistry.GetService(DBES.ExternalServices.BuiltInExternalServices.DirectContext3DService) as DBES.MultiServerService)
       {
         var activeServerIds = service.GetActiveServerIds();
         foreach (var preview in objectPreviews)
@@ -176,10 +173,10 @@ namespace RhinoInside.Revit
     #endregion
 
     #region IDirectContext3DServer
-    public override bool UseInTransparentPass(View dBView) => rhinoObject.IsMeshable(MeshType.Render);
+    public override bool UseInTransparentPass(DB.View dBView) => rhinoObject.IsMeshable(MeshType.Render);
 
     bool collected = false;
-    public override bool CanExecute(View dBView)
+    public override bool CanExecute(DB.View dBView)
     {
       if (collected)
         return false;
@@ -201,7 +198,7 @@ namespace RhinoInside.Revit
       return IsModelView(dBView);
     }
 
-    public override Autodesk.Revit.DB.Outline GetBoundingBox(View dBView) => rhinoObject.Geometry.GetBoundingBox(false).ToOutline();
+    public override DB.Outline GetBoundingBox(DB.View dBView) => rhinoObject.Geometry.GetBoundingBox(false).ToOutline();
 
     class ObjectPrimitive : Primitive
     {
@@ -243,14 +240,14 @@ namespace RhinoInside.Revit
         return false;
       }
 
-      public override EffectInstance EffectInstance(DisplayStyle displayStyle, bool IsShadingPass)
+      public override DB3D.EffectInstance EffectInstance(DB.DisplayStyle displayStyle, bool IsShadingPass)
       {
         var ei = base.EffectInstance(displayStyle, IsShadingPass);
 
-        bool hlr = displayStyle == DisplayStyle.HLR;
-        bool flatColors = displayStyle == DisplayStyle.FlatColors || displayStyle <= DisplayStyle.HLR;
-        bool useMaterials = displayStyle > DisplayStyle.HLR && displayStyle != DisplayStyle.FlatColors;
-        bool useTextures = displayStyle > DisplayStyle.Rendering && displayStyle != DisplayStyle.FlatColors;
+        bool hlr = displayStyle == DB.DisplayStyle.HLR;
+        bool flatColors = displayStyle == DB.DisplayStyle.FlatColors || displayStyle <= DB.DisplayStyle.HLR;
+        bool useMaterials = displayStyle > DB.DisplayStyle.HLR && displayStyle != DB.DisplayStyle.FlatColors;
+        bool useTextures = displayStyle > DB.DisplayStyle.Rendering && displayStyle != DB.DisplayStyle.FlatColors;
 
         var ambient      = Color.Black;
         var color        = Color.Black;
@@ -262,9 +259,9 @@ namespace RhinoInside.Revit
 
         if (IsShadingPass)
         {
-          if (DrawContext.IsTransparentPass())
+          if (DB3D.DrawContext.IsTransparentPass())
           {
-            transparency = displayStyle == DisplayStyle.Wireframe ? 0.8 : 0.5;
+            transparency = displayStyle == DB.DisplayStyle.Wireframe ? 0.8 : 0.5;
             var previewColor = Color.Silver;
             if (flatColors) emissive = previewColor;
             else
@@ -291,7 +288,7 @@ namespace RhinoInside.Revit
             if (drawColor == Color.Black)
               drawColor = Color.Gray;
 
-            if (displayStyle >= DisplayStyle.HLR)
+            if (displayStyle >= DB.DisplayStyle.HLR)
             {
               if (flatColors) emissive = drawColor;
               else
@@ -407,7 +404,7 @@ namespace RhinoInside.Revit
       else primitives = new Primitive[] { new ObjectPrimitive(rhinoObject, previewMesh) };
     }
 
-    public override void RenderScene(View dBView, Autodesk.Revit.DB.DisplayStyle displayStyle)
+    public override void RenderScene(DB.View dBView, Autodesk.Revit.DB.DisplayStyle displayStyle)
     {
       try
       {
@@ -462,11 +459,11 @@ namespace RhinoInside.Revit
 
         if (primitives != null)
         {
-          DrawContext.SetWorldTransform(Autodesk.Revit.DB.Transform.Identity.ScaleBasis(1.0 / Revit.ModelUnits));
+          DB3D.DrawContext.SetWorldTransform(Autodesk.Revit.DB.Transform.Identity.ScaleBasis(1.0 / Revit.ModelUnits));
 
           foreach (var primitive in primitives)
           {
-            if (DrawContext.IsInterrupted())
+            if (DB3D.DrawContext.IsInterrupted())
               return;
 
             primitive.Draw(displayStyle);
