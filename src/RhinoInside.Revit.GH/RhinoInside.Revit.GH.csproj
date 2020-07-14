@@ -352,7 +352,7 @@
     <Compile Include="Parameters\ViewDetailLevel_ValueList.cs" />
     <Compile Include="Parameters\CurtainGridAlignType_ValueList.cs" />
     <Compile Include="Parameters\CurtainGridLayout_ValueList.cs" />
-    <Compile Include="Parameters\CurtianGridJoinCondition_ValueList.cs" />
+    <Compile Include="Parameters\CurtainGridJoinCondition_ValueList.cs" />
     <Compile Include="Parameters\SpatialElement.cs" />
     <Compile Include="Parameters\CurtainMullionPosition_ValueList.cs" />
     <Compile Include="Parameters\CurtainMullionSystemFamily_ValueList.cs" />
