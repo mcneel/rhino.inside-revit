@@ -1,0 +1,5 @@
+WallFunction_ValueList
+WallLocationLine_ValueList
+WallStructuralUsage_ValueList
+WallSystemFamily_ValueList
+WallWrapping_ValueList

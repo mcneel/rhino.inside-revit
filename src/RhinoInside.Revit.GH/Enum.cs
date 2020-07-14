@@ -424,7 +424,9 @@ namespace RhinoInside.Revit.GH.Parameters
     { }
 
     static readonly Guid GenericDataParamComponentGuid = new Guid("{8EC86459-BF01-4409-BAEE-174D0D2B13D0}");
-    protected override Bitmap Icon => Grasshopper.Instances.ComponentServer.EmitObjectIcon(GenericDataParamComponentGuid);
+    protected override Bitmap Icon => (Bitmap) Properties.Resources.ResourceManager.GetObject(typeof(T).Name) ??                    // try type name first
+                                      (Bitmap) Properties.Resources.ResourceManager.GetObject(typeof(T).Name + "_ValueList") ??     // try with _ValueList e.g. WallFunction_ValueList
+                                      Grasshopper.Instances.ComponentServer.EmitObjectIcon(GenericDataParamComponentGuid);          // default to GH icon
 
     public Param_Enum() :
     base

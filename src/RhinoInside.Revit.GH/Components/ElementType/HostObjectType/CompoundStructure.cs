@@ -7,16 +7,19 @@ namespace RhinoInside.Revit.GH.Components
   public class HostObjectTypeCompoundStructure : Component
   {
     public override Guid ComponentGuid => new Guid("024619EF-58FF-47C1-8833-96BA2F2B677B");
-    public override GH_Exposure Exposure => GH_Exposure.senary;
+    public override GH_Exposure Exposure => GH_Exposure.quinary;
     protected override string IconTag => "CS";
 
+    // Note: although categorized incorrectly by the Revit API,
+    // Compound Structure is not an inherent property of the HostObject
+    // Component is renames and organized under Element
     public HostObjectTypeCompoundStructure() : base
     (
-      name: "Host Type Compound Structure",
+      name: "Element Type Compound Structure",
       nickname: "TypCompStruct",
-      description: "Get Host object type compound structure",
+      description: "Get element type compound structure",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Element"
     )
     { }
 

@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Components
   public class CompoundStructureGeometry : Component
   {
     public override Guid ComponentGuid => new Guid("3DBAAAE8-90D2-465E-A88B-FCC2B64E3BB3");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.quinary;
     protected override string IconTag => "CSG";
 
     public CompoundStructureGeometry() : base(

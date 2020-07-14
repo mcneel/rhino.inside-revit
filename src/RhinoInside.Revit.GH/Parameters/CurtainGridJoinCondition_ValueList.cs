@@ -5,12 +5,12 @@ using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class CurtianGridJoinCondition_ValueList : GH_ValueList
+  public class CurtainGridJoinCondition_ValueList : GH_ValueList
   {
     public override Guid ComponentGuid => new Guid("9C2D116D-516C-4825-BB6B-67111B9100B1");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
-    public CurtianGridJoinCondition_ValueList()
+    public CurtainGridJoinCondition_ValueList()
     {
       Category = "Revit";
       SubCategory = "Input";

@@ -13,14 +13,13 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "N";
 
     public MaterialByName()
-    : base("Add Named Material", "Material", string.Empty, "Revit", "Material")
+    : base("Add Material", "Material", string.Empty, "Revit", "Material")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager.AddBooleanParameter("Override", "O", "Override Material", GH_ParamAccess.item, false);
-
       manager.AddTextParameter("Name", "N", string.Empty, GH_ParamAccess.item);
+      manager.AddBooleanParameter("Override", "O", "Override Material", GH_ParamAccess.item, false);
       manager[manager.AddColourParameter("Color", "C", "Material color", GH_ParamAccess.item, System.Drawing.Color.White)].Optional = true;
       //manager[manager.AddParameter(new Grasshopper.Kernel.Parameters.Param_OGLShader(), "Shader", "S", "Material shading attributes", GH_ParamAccess.item)].Optional = true;
     }

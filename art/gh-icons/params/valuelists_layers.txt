@@ -1,0 +1,4 @@
+DeckEmbeddingType_ValueList
+EndCapCondition_ValueList
+LayerFunction_ValueList
+OpeningWrappingCondition_ValueList
