@@ -143,7 +143,7 @@ namespace RhinoInside.Revit.GH.Parameters
   {
     public override Guid ComponentGuid => new Guid("BD6A74F3-8C46-4506-87D9-B34BD96747DA");
     public override GH_Exposure Exposure => GH_Exposure.primary;
-    protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(Level));
+    protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.Level));
 
     public DocumentLevelsPicker()
     {
