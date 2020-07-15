@@ -39,7 +39,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.HostObject>
+      ParamDefinition.Create<Parameters.Wall>
       (
         name: "Walls",
         nickname: "W",
