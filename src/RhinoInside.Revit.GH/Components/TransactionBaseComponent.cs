@@ -1042,7 +1042,10 @@ namespace RhinoInside.Revit.GH.Components
             previous.Document.Delete(previous.Id);
 
           if (element?.IsValidObject == true)
-            element.Pinned = true;
+          {
+            try { element.Pinned = true; }
+            catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
+          }
         }
       }
 
@@ -1157,7 +1160,9 @@ namespace RhinoInside.Revit.GH.Components
                 id.Document.GetElement(id.Id) is DB.Element element
               )
               {
-                element.Pinned = false;
+                try { element.Pinned = false; }
+                catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
+
                 list.Add(element.Id);
                 newStructure[g] = default;
               }
