@@ -298,6 +298,36 @@ namespace RhinoInside.Revit.GH.Components
       }
     }
   }
+
+  public class ElementParameterFilter : ElementFilterComponent
+  {
+    public override Guid ComponentGuid => new Guid("E6A1F501-BDA4-4B78-8828-084B5EDA926F");
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    protected override string IconTag => "#";
+
+    public ElementParameterFilter()
+    : base("Parameter Filter", "ParaFilter", "Filter used to match elements by the value of a parameter", "Revit", "Filter")
+    { }
+
+    protected override void RegisterInputParams(GH_InputParamManager manager)
+    {
+      manager.AddParameter(new Parameters.FilterRule(), "Rules", "R", "Rules to check", GH_ParamAccess.list);
+      base.RegisterInputParams(manager);
+    }
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      var rules = new List<DB.FilterRule>();
+      if (!DA.GetDataList("Rules", rules))
+        return;
+
+      var inverted = false;
+      if (!DA.GetData("Inverted", ref inverted))
+        return;
+
+      DA.SetData("Filter", new DB.ElementParameterFilter(rules, inverted));
+    }
+  }
   #endregion
 
   #region Tertiary
@@ -637,36 +667,6 @@ namespace RhinoInside.Revit.GH.Components
   #endregion
 
   #region Quinary
-  public class ElementParameterFilter : ElementFilterComponent
-  {
-    public override Guid ComponentGuid => new Guid("E6A1F501-BDA4-4B78-8828-084B5EDA926F");
-    public override GH_Exposure Exposure => GH_Exposure.quinary;
-    protected override string IconTag => "#";
-
-    public ElementParameterFilter()
-    : base("Parameter Filter", "ParaFilter", "Filter used to match elements by the value of a parameter", "Revit", "Filter")
-    { }
-
-    protected override void RegisterInputParams(GH_InputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.FilterRule(), "Rules", "R", "Rules to check", GH_ParamAccess.list);
-      base.RegisterInputParams(manager);
-    }
-
-    protected override void TrySolveInstance(IGH_DataAccess DA)
-    {
-      var rules = new List<DB.FilterRule>();
-      if (!DA.GetDataList("Rules", rules))
-        return;
-
-      var inverted = false;
-      if (!DA.GetData("Inverted", ref inverted))
-        return;
-
-      DA.SetData("Filter", new DB.ElementParameterFilter(rules, inverted));
-    }
-  }
-
   public abstract class ElementFilterRule : Component
   {
     public override GH_Exposure Exposure => GH_Exposure.quinary;
