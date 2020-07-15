@@ -1,0 +1,30 @@
+<!--
+    Populates the sidebar by grabbing all the pages that match
+    the categories, language, and version of the current page
+-->
+{% assign prev_group = "" %}
+{% for collection in site.collections %}
+    {% if collection.label == page.collection %}
+        {% assign guides = collection.docs | sort:"order" %}
+        <ul class="nav scrollbar">
+            {% for guide in guides %}
+            {% if guide.toc and guide.title and guide.version == page.version and guide.categories == page.categories %}
+            {% if guide.group and guide.group != prev_group %}
+            <div class="nav-category">{{ guide.group }}</div>
+            {% assign prev_group = guide.group %}
+            {% endif %}
+                <li class="nav-item">
+                    {% if guide.path == page.path %}
+                        <a class="nav-link page-link active" href="{{ guide.url | prepend: site.baseurl }}" title="{{ guide.description }}">{{ guide.title }}</a>
+                        <nav id="sidebar-toc">
+                            {% include ltr/sidebar-h2.html depth=1 %}
+                        </nav>
+                    {% else %}
+                        <a class="nav-link page-link" href="{{ guide.url | prepend: site.baseurl }}" title="{{ guide.description }}">{{ guide.title }}</a>
+                    {% endif %}
+                </li>
+            {% endif %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endfor %}

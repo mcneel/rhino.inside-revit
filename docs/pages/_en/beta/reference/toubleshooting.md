@@ -1,6 +1,7 @@
 ---
 title: Troubleshooting
 order: 42
+group: Deployment & Configs
 ---
 
 This guide provides ways to troubleshoot and collect information about {{ site.terms.rir }} errors. Please see [Known Issues & Bugs]({{ site.baseurl }}{% link _en/beta/reference/known-issues.md %}) for a list of known issues.

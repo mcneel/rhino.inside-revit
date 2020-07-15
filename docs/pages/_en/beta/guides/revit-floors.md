@@ -1,6 +1,7 @@
 ---
 title: Floors
 order: 45
+group: Modeling
 ---
 
 ## Querying Floor Types

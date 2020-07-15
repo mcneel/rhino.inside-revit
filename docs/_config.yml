@@ -104,7 +104,7 @@ defaults:
   - scope:
       path: ""
     values:
-      layout: ltr/page-list-toc
+      layout: ltr/page-list-grouped-toc
       # assume a large order for all pages so unorderd pages get sorted last
       order: 9999
       # assume all pages can be listed on table of contents

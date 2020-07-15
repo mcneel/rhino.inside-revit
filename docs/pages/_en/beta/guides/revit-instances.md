@@ -1,6 +1,7 @@
 ---
 title: "Data Model: Instances"
 order: 33
+group: Revit Basics
 ---
 
 *Instances* are individual elements places in a Revit model e.g. a single Wall, or a single Door, or any other single element. Instances have *Categories* and might also have *Type* e.g. each Door has a Door type. Instances inherit a series of *Parameters* from their *Category* and *Type* and might have instance parameters as well that only belongs to that single instance.

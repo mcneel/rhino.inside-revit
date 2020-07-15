@@ -1,0 +1,29 @@
+---
+layout: ltr/bootstrap
+---
+<!-- 
+    Page with Side bar (automatically generated from similar pages)
+    ---------------------------------------------------------------------------
+    |     group:        /                                                     |
+    |       link        /                                                     |
+    |       link        /                     content                         |
+    |                   /                                                     |
+    |                   /                                                     |
+    ---------------------------------------------------------------------------
+ -->
+ <div class="container-fluid">
+    <div class="row-fluid">
+        <!--Nav Bar -->
+        <nav class="sidebar">
+            {% include ltr/sidebar-list-grouped.html %}
+        </nav>
+
+        <!--Main Content -->
+        <div class="side-content">
+            <h1>{{ page.title }}</h1>
+            <article class="post-content">
+                {{ content }}
+            </article>
+        </div>
+    </div>
+</div>

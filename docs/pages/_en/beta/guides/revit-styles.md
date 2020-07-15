@@ -1,6 +1,7 @@
 ---
 title: Styles and Patterns
 order: 91
+group: Configurations
 ---
 
 {% include ltr/en/wip_note.html %}

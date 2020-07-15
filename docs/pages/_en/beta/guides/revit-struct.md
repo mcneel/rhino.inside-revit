@@ -1,6 +1,7 @@
 ---
 title: Structural Elements
 order: 48
+group: Modeling
 ---
 
 {% include ltr/en/wip_note.html %}

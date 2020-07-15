@@ -197,6 +197,8 @@ pre {
     position: sticky;
     top: 90px;
     height: 100%;
+    min-width: 240px;
+    max-width: 240px;
 }
 
 .sidebar ul {
@@ -227,6 +229,18 @@ pre {
     color: #111;
     border-left: 1px #111 solid;
     background: transparent;
+}
+
+/* side bar groups */
+.sidebar .nav-category{
+    color: #828282;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 12px;
+    background: #f6f6f6;
+    text-align: center;
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
 /* side bar second level depth links */
