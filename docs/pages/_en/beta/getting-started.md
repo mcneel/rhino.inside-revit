@@ -116,17 +116,9 @@ Now open Grasshopper and add a curve component. Right-Click the component and se
 
 ![]({{ "/static/images/started/rir-rhino2.png" | prepend: site.baseurl }})
 
-Now from the *Revit > Input* panel and a {% include ltr/comp.html uuid="eb266925-" %} component,
+Now from the *Revit > Input* panel and {% include ltr/comp.html uuid="eb266925-" %}, {% include ltr/comp.html uuid="d3fb53d3-9" %} and {% include ltr/comp.html uuid="bd6a74f3-" %} components as well:
 
 ![]({{ "/static/images/started/rir-rhino3.png" | prepend: site.baseurl }})
-
-and also let's add an {% include ltr/comp.html uuid="d3fb53d3-9" %}, 
-
-![]({{ "/static/images/started/rir-rhino4.png" | prepend: site.baseurl }})
-
-and a {% include ltr/comp.html uuid="bd6a74f3-" %} component as well.
-
-![]({{ "/static/images/started/rir-rhino5.png" | prepend: site.baseurl }})
 
 Finally let's add a Grasshopper integer slider as well to provide the height for our new wall
 
@@ -203,6 +195,9 @@ from Autodesk.Revit import DB
 # rhino.inside utilities
 import RhinoInside API
 from RhinoInside.Revit import Revit, Convert
+# add extensions methods as well
+# this allows calling .ToXXX() convertor methods on Revit objects
+clr.ImportExtensions(Convert.Geometry)
 
 # getting active Revit document
 doc = Revit.ActiveDBDocument
@@ -211,9 +206,7 @@ doc = Revit.ActiveDBDocument
 So to use the example above, we can add the lines below to our script to read the geometry of input Revit element (`E`) using Revit API (`.Geometry[DB.Options()]`) and the pass that to the utility method provided by {{ site.terms.rir }} API to convert the Revit geometry into Rhino (`Convert.ToRhino()`) and finally pass the Rhino geometry to Grasshopper output.
 
 {% highlight python %}
-O = Convert.ToRhino(
-    E.Geometry[DB.Options()]
-    )
+G = [x.ToBrep() for x in E.Geometry[DB.Options()]]
 {% endhighlight %}
 
 ![]({{ "/static/images/started/rir-ghpy.png" | prepend: site.baseurl }})
