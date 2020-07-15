@@ -26,9 +26,18 @@ namespace RhinoInside.Revit.GH.Types
         return;
 
       var gridLine = (DB.CurtainGridLine) this;
-      var points = gridLine?.FullCurve?.Tessellate();
-      if (points is object)
-        args.Pipeline.DrawPatternedPolyline(points.Convert(GeometryDecoder.ToPoint3d), args.Color, 0x00003333, args.Thickness, false);
+      if (gridLine is object)
+      {
+        var points = gridLine.FullCurve?.Tessellate();
+        if (points is object)
+          args.Pipeline.DrawPatternedPolyline(points.Convert(GeometryDecoder.ToPoint3d), args.Color, 0x00000101, args.Thickness, false);
+
+        foreach (var segment in gridLine.ExistingSegmentCurves.ToCurves())
+        {
+          if(segment is object)
+            args.Pipeline.DrawCurve(segment, args.Color, args.Thickness);
+        }
+      }
     }
     public override void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
     #endregion
