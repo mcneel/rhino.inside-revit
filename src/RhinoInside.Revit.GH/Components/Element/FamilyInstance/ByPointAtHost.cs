@@ -106,7 +106,12 @@ namespace RhinoInside.Revit.GH.Components
 
         ReplaceElement(ref element, doc.GetElement(newElementIds.First()) as DB.FamilyInstance, parametersMask);
         doc.Regenerate();
-        element.Pinned = false;
+
+        if (element.Pinned)
+        {
+          try { element.Pinned = false; }
+          catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
+        }
       }
 
       element?.SetLocation(location.Origin.ToXYZ(), location.XAxis.ToXYZ(), location.YAxis.ToXYZ());
