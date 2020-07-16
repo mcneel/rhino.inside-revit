@@ -55,6 +55,10 @@ from System import Enum
 import RhinoInside
 from RhinoInside.Revit import Revit, Convert
 
+# add extensions methods as well
+# this allows calling .ToXXX() convertor methods on Revit objects
+clr.ImportExtensions(Convert.Geometry)
+
 # Revit API
 from Autodesk.Revit import DB
 from Autodesk.Revit import UI
@@ -89,6 +93,9 @@ import RhinoInside
 import Grasshopper
 from Grasshopper.Kernel import GH_RuntimeMessageLevel as RML
 from RhinoInside.Revit import Revit, Convert
+# add extensions methods as well
+# this allows calling .ToXXX() convertor methods on Revit objects
+clr.ImportExtensions(Convert.Geometry)
 from Autodesk.Revit import DB
 
 # access to Revit as host
@@ -168,25 +175,19 @@ First, let's create a bake function:
 def create_geometry(doc):
     # convert the sphere into Brep
     brep = Sphere.ToBrep()
-    # let's create a mesh from the Brep
-    meshes = Rhino.Geometry.Mesh.CreateFromBrep(
-        brep,
-        Rhino.Geometry.MeshingParameters.Default
-        )
 
     # now let's pick the Generic Model category for
     # our baked geometry in Revit
     revit_category = DB.ElementId(DB.BuiltInCategory.OST_GenericModel)
 
     # Finally we can create a DirectShape using Revit API
-    # inside the Revit document and add the sphere mesh
+    # inside the Revit document and add the sphere brep
     # to the DirectShape
     ds = DB.DirectShape.CreateElement(doc, revit_category)
-    # we will use Convert.ToHost method to convert the
-    # Rhino mesh to Revit mesh because that is what
-    # the AppendShape() method expects
-    for geom in Convert.ToHost(meshes):
-        ds.AppendShape(geom)
+    # we will use the .ToSolid() extension method to convert
+    # Rhino Brep to Revit Solid. Then we will add the solid to
+    # the directshape using the .AppendShape() method
+    ds.AppendShape([brep.ToSolid()])
 {% endhighlight %}
 
 Once we are done creating this function, we can modify the script to listen for the trigger and call this function.
@@ -225,16 +226,9 @@ doc = Revit.ActiveDBDocument
 
 def create_geometry(doc):
     brep = Sphere.ToBrep()
-    meshes = Rhino.Geometry.Mesh.CreateFromBrep(
-        brep,
-        Rhino.Geometry.MeshingParameters.Default
-        )
-
     revit_category = DB.ElementId(DB.BuiltInCategory.OST_GenericModel)
     ds = DB.DirectShape.CreateElement(doc, revit_category)
-
-    for geom in Convert.ToHost(meshes):
-        ds.AppendShape(geom)
+    ds.AppendShape([brep.ToSolid()])
 
 Sphere = Rhino.Geometry.Sphere(Rhino.Geometry.Point3d.Origin, Radius)
 
