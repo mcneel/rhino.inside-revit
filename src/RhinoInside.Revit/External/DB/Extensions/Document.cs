@@ -148,6 +148,16 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return UniqueIdX == UniqueIdY;
     }
 
+    public static T GetElement<T>(this Document doc, ElementId elementId) where T : Element
+    {
+      return doc.GetElement(elementId) as T;
+    }
+
+    public static T GetElement<T>(this Document doc, Reference reference) where T : Element
+    {
+      return doc.GetElement(reference) as T;
+    }
+
     public static Category GetCategory(this Document doc, string uniqueId)
     {
       if (doc is null || string.IsNullOrEmpty(uniqueId))
