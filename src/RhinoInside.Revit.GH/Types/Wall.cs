@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeDescription => "Represents a Revit wall element";
     protected override Type ScriptVariableType => typeof(DB.Wall);
     public static explicit operator DB.Wall(Wall value) =>
-      value.IsValid ? value.Document?.GetElement(value) as DB.Wall : default;
+      value?.IsValid == true ? value.Document.GetElement(value) as DB.Wall : default;
 
     public Wall() { }
     public Wall(DB.Wall host) : base(host) { }

@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeDescription => "Represents a Revit DatumPlane";
     protected override Type ScriptVariableType => typeof(DB.DatumPlane);
     public static explicit operator DB.DatumPlane(DatumPlane value) =>
-      value.IsValid ? value.Document?.GetElement(value) as DB.DatumPlane : default;
+      value?.IsValid == true ? value.Document.GetElement(value) as DB.DatumPlane : default;
 
     public DatumPlane() { }
     public DatumPlane(DB.DatumPlane plane) : base(plane) { }
@@ -37,7 +37,7 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeDescription => "Represents a Revit level";
     protected override Type ScriptVariableType => typeof(DB.Level);
     public static explicit operator DB.Level(Level value) =>
-      value.IsValid ? value.Document?.GetElement(value) as DB.Level : default;
+      value?.IsValid == true ? value.Document.GetElement(value) as DB.Level : default;
 
     public Level() { }
     public Level(DB.Level level) : base(level) { }
@@ -111,7 +111,7 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeDescription => "Represents a Revit grid";
     protected override Type ScriptVariableType => typeof(DB.Grid);
     public static explicit operator DB.Grid(Grid value) =>
-      value.IsValid ? value.Document?.GetElement(value) as DB.Grid : default;
+      value?.IsValid == true ? value.Document.GetElement(value) as DB.Grid : default;
 
     public Grid() { }
     public Grid(DB.Grid grid) : base(grid) { }

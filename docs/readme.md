@@ -247,6 +247,7 @@ Each page must contain some required metadata at the top of the page.
 ---
 title: Components for Revit
 order: 2
+group: Modeling    <- this is optional but provide on most pages
 ---
 ```
 

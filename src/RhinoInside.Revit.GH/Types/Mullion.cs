@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeDescription => "Represents a Revit Mullion Element";
     protected override Type ScriptVariableType => typeof(DB.Mullion);
     public static explicit operator DB.Mullion(Mullion value) =>
-      value.IsValid ? value.Document?.GetElement(value) as DB.Mullion : default;
+      value?.IsValid == true ? value.Document.GetElement(value) as DB.Mullion : default;
 
     public Mullion() { }
     public Mullion(DB.Mullion value) : base(value) { }

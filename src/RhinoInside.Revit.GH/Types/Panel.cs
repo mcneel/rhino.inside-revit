@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeDescription => "Represents a Revit Curtain Grid Panel Element";
     protected override Type ScriptVariableType => typeof(DB.FamilyInstance);
     public static explicit operator DB.FamilyInstance(Panel value) =>
-      value.IsValid ? value.Document?.GetElement(value) as DB.FamilyInstance : default;
+      value?.IsValid == true ? value.Document.GetElement(value) as DB.FamilyInstance : default;
 
     protected override bool SetValue(DB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(DB.Element element)
