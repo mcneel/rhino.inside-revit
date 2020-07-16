@@ -4,8 +4,9 @@ using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.System.Drawing;
 using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Obsolete
 {
+  [Obsolete("Obsolete since 2020-07-15")]
   public class MaterialByColor : TransactionComponent
   {
     public override Guid ComponentGuid => new Guid("273FF43D-B771-4EB7-A66D-5DA5F7F2731E");
