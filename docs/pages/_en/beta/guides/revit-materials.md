@@ -1,6 +1,7 @@
 ---
 title: Materials
 order: 49
+group: Modeling
 ---
 
 ## Querying Materials

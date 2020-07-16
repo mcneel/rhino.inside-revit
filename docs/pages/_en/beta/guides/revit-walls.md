@@ -1,6 +1,7 @@
 ---
 title: Walls (Basic & Stacked)
 order: 40
+group: Modeling
 ---
 
 ## Querying Wall Types

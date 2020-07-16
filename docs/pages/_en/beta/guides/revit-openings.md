@@ -1,6 +1,7 @@
 ---
 title: Openings
 order: 47
+group: Modeling
 ---
 
 ## Querying Openings

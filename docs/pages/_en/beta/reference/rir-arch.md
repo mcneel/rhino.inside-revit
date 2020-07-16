@@ -1,6 +1,7 @@
 ---
 title: Architecture & Design Challenges
 order: 30
+group: Architecture
 ---
 
 {% include ltr/en/wip_note.html %}

@@ -10,6 +10,11 @@
       iconsrc: /static/images/ribbon/Rhino.png
       icontag: 
 
+    - title: Import
+      desc: Import Rhino 3dm files into Revit
+      iconsrc: /static/images/ribbon/Import-3DM.png
+      icontag: 
+
     - title: Preview
       desc: Previews geometry that is open in Rhino, inside Revit
       iconsrc: /static/images/ribbon/Preview.png

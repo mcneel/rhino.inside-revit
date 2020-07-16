@@ -1,6 +1,7 @@
 ---
 title: "Data Model: Documents"
 order: 34
+group: Revit Basics
 ---
 
 In simplest terms, Revit *Documents* are collections of Revit *Elements*. When using Revit, we call them *Revit Projects* and *Revit Families*.

@@ -1,6 +1,7 @@
 ---
 title: Interacting with Revit
 order: 10
+group: Basics
 ---
 
 {% include ltr/en/wip_note.html %}

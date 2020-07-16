@@ -1,6 +1,7 @@
 ---
 title: Rhino.Inside.Revit Interface
 order: 10
+group: User Interface
 ---
 
 ## Loading {{ site.terms.rir }}

@@ -1,6 +1,7 @@
 ---
 title: Schedules & Reports
 order: 65
+group: Documentation
 ---
 
 ## Querying Schedules
