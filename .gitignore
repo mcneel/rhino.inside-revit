@@ -364,3 +364,8 @@ $RECYCLE.BIN/
 # discard debug files
 script/.debug
 script/.packages
+
+# discard RhinoInside.Revit.Native MIDL artifacts
+# ignored here since deleting the artifact in VS will cause
+# the project to rebuild on every build
+src/RhinoInside.Revit.Native/xclrdata_h.h
