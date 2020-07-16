@@ -9,11 +9,11 @@ namespace RhinoInside.Revit.GH.Components
   public class MaterialByName : TransactionComponent
   {
     public override Guid ComponentGuid => new Guid("0D9F07E2-3A21-4E85-96CC-BC0E6A607AF1");
-    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => "N";
 
     public MaterialByName()
-    : base("Add Material", "Material", string.Empty, "Revit", "Material")
+    : base("Add Material", "Material", "Create a new Revit material by name and color", "Revit", "Material")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
