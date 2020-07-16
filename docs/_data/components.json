@@ -1287,7 +1287,16 @@
     "uuid": "8a162ee6-812e-459b-9123-8f7735aaac0c"
   }, 
   {
-    "desc": "", 
+    "desc": "Quickly create a new Revit material from color", 
+    "iconsrc": "/static/images/GH/MaterialByColor.png", 
+    "icontag": null, 
+    "panel": "Material", 
+    "tab": "Revit", 
+    "title": "Add Color Material", 
+    "uuid": "273ff43d-b771-4eb7-a66d-5da5f7f2731e"
+  }, 
+  {
+    "desc": "Create a new Revit material by name and color", 
     "iconsrc": "/static/images/GH/MaterialByName.png", 
     "icontag": null, 
     "panel": "Material", 
