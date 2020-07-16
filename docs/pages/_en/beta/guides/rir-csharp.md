@@ -1,6 +1,7 @@
 ---
 title: C# Component in Revit
 order: 101
+group: Scripting
 ---
 
 Grasshopper has three scripted components. One for C# programming language and another two for VB.NET and python (IronPython to be specific). These scripted components allows a user to create custom logic for a Grasshopper component. The component, therefore, can accept a configurable number of input and output connection points.

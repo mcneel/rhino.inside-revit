@@ -67,6 +67,20 @@ See [{{ site.terms.rir }} Interface]({{ site.baseurl }}{% link _en/beta/referenc
 
 If you encountered any errors, please consult the [Known Issues]({{ site.baseurl }}{% link _en/beta/reference/known-issues.md %}) page for a list of already known issues and their temporary workarounds.
 
+## Grasshopper inside Revit
+
+Arguably one of the most features of {{ site.terms.rir }} is Grasshopper. Open it by clicking on the Grasshopper button in the new *Rhinoceros* tab. Note the extra *Revit* tab in Grasshopper window, with many Revit-aware components:
+
+![]({{ "/static/images/started/rir-gh01.png" | prepend: site.baseurl }})
+
+There is also a *Revit Primitives* panel on the default *Params* tab:
+
+![]({{ "/static/images/started/rir-gh02.png" | prepend: site.baseurl }})
+
+The Revit-aware component icons help identifying the action that the component performs. As shown below, the base color shows the type of action (Query, Analyze, Modify, Create). There are a series of badges applied to icons as well, that show Type, Identity, or other aspects of the data that the component is designed to work with:
+
+![]({{ "/static/images/started/rir-icons.png" | prepend: site.baseurl }}){: class="small-image"}
+
 ## Extracting Revit Geometry
 
 To get started, let's create a simple definition in Grasshopper to extract geometry of a Revit element. Grasshopper is by far one of the most exciting add-ons for Rhino and as part of the {{ site.terms.rir }} project has the potential to improve the design and documentation in {{ site.terms.revit }} dramatically.
@@ -74,10 +88,6 @@ To get started, let's create a simple definition in Grasshopper to extract geome
 Open a simple Revit model and draw an single wall
 
 ![]({{ "/static/images/started/revit-doc.png" | prepend: site.baseurl }})
-
-Now open Grasshopper by clicking on the Grasshopper button in the new *Rhinoceros* tab
-
-![]({{ "/static/images/started/rir-gh.png" | prepend: site.baseurl }})
 
 From the *Params > Revit* panel, add a {% include ltr/comp.html uuid="ef607c2a-" %} parameter
 
@@ -128,17 +138,9 @@ Now open Grasshopper and add a curve component. Right-Click the component and se
 
 ![]({{ "/static/images/started/rir-rhino2.png" | prepend: site.baseurl }})
 
-Now from the *Revit > Input* panel and a {% include ltr/comp.html uuid="eb266925-" %} component,
+Now from the *Revit > Input* panel and {% include ltr/comp.html uuid="eb266925-" %}, {% include ltr/comp.html uuid="d3fb53d3-9" %} and {% include ltr/comp.html uuid="bd6a74f3-" %} components as well:
 
 ![]({{ "/static/images/started/rir-rhino3.png" | prepend: site.baseurl }})
-
-and also let's add an {% include ltr/comp.html uuid="d3fb53d3-9" %}, 
-
-![]({{ "/static/images/started/rir-rhino4.png" | prepend: site.baseurl }})
-
-and a {% include ltr/comp.html uuid="bd6a74f3-" %} component as well.
-
-![]({{ "/static/images/started/rir-rhino5.png" | prepend: site.baseurl }})
 
 Finally let's add a Grasshopper integer slider as well to provide the height for our new wall
 
@@ -215,6 +217,9 @@ from Autodesk.Revit import DB
 # rhino.inside utilities
 import RhinoInside API
 from RhinoInside.Revit import Revit, Convert
+# add extensions methods as well
+# this allows calling .ToXXX() convertor methods on Revit objects
+clr.ImportExtensions(Convert.Geometry)
 
 # getting active Revit document
 doc = Revit.ActiveDBDocument
@@ -223,9 +228,7 @@ doc = Revit.ActiveDBDocument
 So to use the example above, we can add the lines below to our script to read the geometry of input Revit element (`E`) using Revit API (`.Geometry[DB.Options()]`) and the pass that to the utility method provided by {{ site.terms.rir }} API to convert the Revit geometry into Rhino (`Convert.ToRhino()`) and finally pass the Rhino geometry to Grasshopper output.
 
 {% highlight python %}
-O = Convert.ToRhino(
-    E.Geometry[DB.Options()]
-    )
+G = [x.ToBrep() for x in E.Geometry[DB.Options()]]
 {% endhighlight %}
 
 ![]({{ "/static/images/started/rir-ghpy.png" | prepend: site.baseurl }})

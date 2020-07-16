@@ -1,6 +1,7 @@
 ---
 title: Release Notes
 order: 40
+group: Deployment & Configs
 ---
 
 {% capture breaking_changes_notes %}

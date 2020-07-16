@@ -1,6 +1,7 @@
 ---
 title: Spatial Elements
 order: 42
+group: Modeling
 ---
 
 {% capture api_note %}

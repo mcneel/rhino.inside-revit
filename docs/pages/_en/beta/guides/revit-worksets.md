@@ -1,6 +1,7 @@
 ---
 title: Worksets
 order: 71
+group: Geometry Containers
 ---
 
 <!-- https://github.com/mcneel/rhino.inside-revit/issues/92 -->

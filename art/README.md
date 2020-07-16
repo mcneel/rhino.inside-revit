@@ -38,7 +38,7 @@ Video thumbnails source file is
 
 - `gh-icons/gh-font.svg`: the basic font vector graphics for component icons
 - `gh-icons/rir-styles.afdesign`: styles for icons
-  - `gh-icons/rir-styles.svg`: styles for icons in SVG
+  - `gh-icons/rir-styles.svg`: templates and styles for icons in SVG
 - `gh-icons/params`: parameter icons in SVG
   - `gh-icons/params/src`: source files for parameter icons
 - `gh-icons/comps`: component icons in SVG
@@ -48,6 +48,8 @@ Video thumbnails source file is
 
 See [Grasshopper Icons](https://developer.rhino3d.com/guides/grasshopper/grasshopper-icons/) on general guidelines for designing parameter and component icons for Grasshopper
 
+These are general guidelines for designing icons for this project. When a new icon is needed, duplicate an existing similar icon and make changes. Templates and styles are available inside `gh-icons/rir-styles.afdesign`
+
 - Use the font file listed above to grab vector graphics for the fonts. It is ok to adjust the final font vector graphics to be pixel perfect
 - Revit Primitives have a cube-like frame that resembles the primitives in Grasshopper. The cube is grayed-out and looks like a space when dealing with 3d primitives. The blue cube is used for 2d or conceptual primitives. Category, Family, and Type are represented conceptually as 3 sides of the Revit data organization with different colors
 
@@ -55,12 +57,12 @@ See [Grasshopper Icons](https://developer.rhino3d.com/guides/grasshopper/grassho
 
 - Colors denote type of operation (Query, Analyze, Modify, Create)
 
-    ![](gh-icons/rir-conventions.png)
+    ![](gh-icons/rir-conventions@2x.png)
 
 - Icons for various categories are differentiated by their shape. The color denotes the type of operation the component performs on that category
 
-    ![](gh-icons/rir-compcolors.png)
+    ![](gh-icons/rir-compcolors@2x.png)
 
 - Where possible use shapes similar to Grasshopper icons e.g. Material primitive icon uses the egg shape of Grasshopper materials
 
-    ![](gh-icons/rir-compmat.png)
+    ![](gh-icons/rir-compmat@2x.png)

@@ -1,6 +1,7 @@
 ---
 title: Drafting
 order: 62
+group: Documentation
 ---
 
 {% include ltr/en/wip_note.html %}

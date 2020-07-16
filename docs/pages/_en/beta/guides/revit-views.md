@@ -1,6 +1,7 @@
 ---
 title: Views
 order: 63
+group: Documentation
 ---
 
 ## Querying Views

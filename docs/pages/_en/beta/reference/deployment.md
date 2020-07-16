@@ -1,6 +1,7 @@
 ---
 title: Deployment
 order: 41
+group: Deployment & Configs
 ---
 
 ## Required installers

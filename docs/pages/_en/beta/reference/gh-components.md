@@ -1,6 +1,7 @@
 ---
 title: Components for Revit
 order: 11
+group: User Interface
 ---
 
 This guide documents the Grasshopper components that support Revit interaction. It is important to have a basic understanding of the Revit Data Hierarchy when working with Revit-aware components to create and edit Revit content.

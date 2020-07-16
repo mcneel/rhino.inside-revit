@@ -1,6 +1,7 @@
 ---
 title: Curtain Walls & Systems
 order: 41
+group: Modeling
 ---
 
 <!-- Curtain Walls -->

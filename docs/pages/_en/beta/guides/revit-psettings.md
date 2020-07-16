@@ -1,6 +1,7 @@
 ---
 title: Project Settings
 order: 90
+group: Configurations
 ---
 
 {% include ltr/en/wip_note.html %}
