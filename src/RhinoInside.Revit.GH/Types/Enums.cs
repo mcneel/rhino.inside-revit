@@ -145,6 +145,7 @@ namespace RhinoInside.Revit.GH.Types
   public class ViewFamily : GH_Enum<DB.ViewFamily>
   {
     public ViewFamily() : base(DB.ViewFamily.Invalid) { }
+    public ViewFamily(DB.ViewFamily value) : base(value) { }
 
     public override bool IsEmpty => Value == DB.ViewFamily.Invalid;
 
