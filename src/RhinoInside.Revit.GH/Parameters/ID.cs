@@ -27,6 +27,15 @@ namespace RhinoInside.Revit.GH.Parameters
     { }
     protected override T PreferredCast(object data) => data is R ? (T) Activator.CreateInstance(typeof(T), data) : null;
 
+    protected T Current
+    {
+      get
+      {
+        var current = (SourceCount == 0 && PersistentDataCount == 1) ? PersistentData.get_FirstItem(true) : default;
+        return current?.LoadElement() == true ? current : default;
+      }
+    }
+
     internal static IEnumerable<Types.IGH_ElementId> ToElementIds(IGH_Structure data) =>
       data.AllData(true).
       OfType<Types.IGH_ElementId>().
