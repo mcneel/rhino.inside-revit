@@ -32,6 +32,11 @@ namespace RhinoInside.Revit.GH.Components
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var doc = Revit.ActiveDBDocument;
+      if (doc is null)
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Failed to access the active Revit doument");
+        return;
+      }
 
       var overrideMaterial = false;
       if (!DA.GetData("Override", ref overrideMaterial))
