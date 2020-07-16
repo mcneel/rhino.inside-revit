@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Types
     override public object ScriptVariable() => (DB.Category) this;
     protected override Type ScriptVariableType => typeof(DB.Category);
     public static explicit operator DB.Category(Category value) =>
-      value.IsValid ? value.Document?.GetCategory(value.Value) : default;
+      value?.IsValid == true ? value.Document.GetCategory(value.Value) : default;
 
     #region IGH_ElementId
     public override bool LoadElement()
@@ -192,7 +192,7 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeDescription => "Represents a Revit graphics style";
     protected override Type ScriptVariableType => typeof(DB.GraphicsStyle);
     public static explicit operator DB.GraphicsStyle(GraphicsStyle value) =>
-      value.IsValid ? value.Document?.GetElement(value) as DB.GraphicsStyle : default;
+      value?.IsValid == true ? value.Document.GetElement(value) as DB.GraphicsStyle : default;
 
     public GraphicsStyle() { }
     public GraphicsStyle(DB.GraphicsStyle graphicsStyle) : base(graphicsStyle) { }

@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeDescription => "Represents a Revit view";
     protected override Type ScriptVariableType => typeof(DB.View);
     public static explicit operator DB.View(View value) =>
-      value.IsValid ? value.Document?.GetElement(value) as DB.View : default;
+      value?.IsValid == true ? value.Document.GetElement(value) as DB.View : default;
 
     public View() { }
     public View(DB.View view) : base(view) { }

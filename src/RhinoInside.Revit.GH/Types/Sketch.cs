@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeDescription => "Represents a Revit sketch";
     protected override Type ScriptVariableType => typeof(DB.Sketch);
     public static explicit operator DB.Sketch(Sketch value) =>
-      value.IsValid ? value.Document?.GetElement(value) as DB.Sketch : default;
+      value?.IsValid == true ? value.Document.GetElement(value) as DB.Sketch : default;
 
     public Sketch() : base() { }
     public Sketch(DB.Sketch sketchPlane) : base(sketchPlane) { }

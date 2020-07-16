@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeDescription => "Represents a Revit host element";
     protected override Type ScriptVariableType => typeof(DB.HostObject);
     public static explicit operator DB.HostObject(HostObject value) =>
-      value.IsValid ? value.Document?.GetElement(value) as DB.HostObject : default;
+      value?.IsValid == true ? value.Document.GetElement(value) as DB.HostObject : default;
 
     public HostObject() { }
     public HostObject(DB.HostObject host) : base(host) { }
@@ -85,7 +85,7 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeDescription => "Represents a Revit host element type";
     protected override Type ScriptVariableType => typeof(DB.HostObjAttributes);
     public static explicit operator DB.HostObjAttributes(HostObjectType value) =>
-      value.IsValid ? value.Document?.GetElement(value) as DB.HostObjAttributes : default;
+      value?.IsValid == true ? value.Document.GetElement(value) as DB.HostObjAttributes : default;
 
     public HostObjectType() { }
     public HostObjectType(DB.HostObjAttributes type) : base(type) { }

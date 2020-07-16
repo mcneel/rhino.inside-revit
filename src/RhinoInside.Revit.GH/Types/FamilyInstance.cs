@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH.Types
   {
     protected override Type ScriptVariableType => typeof(DB.Instance);
     public static explicit operator DB.Instance(Instance value) =>
-      value.IsValid ? value.Document?.GetElement(value) as DB.Instance : default;
+      value?.IsValid == true ? value.Document.GetElement(value) as DB.Instance : default;
 
     public Instance() { }
     public Instance(DB.Instance instance) : base(instance) { }
@@ -61,7 +61,7 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeDescription => "Represents a Revit Component";
     protected override Type ScriptVariableType => typeof(DB.FamilyInstance);
     public static explicit operator DB.FamilyInstance(FamilyInstance value) =>
-      value.IsValid ? value.Document?.GetElement(value) as DB.FamilyInstance : default;
+      value?.IsValid == true ? value.Document.GetElement(value) as DB.FamilyInstance : default;
 
     public FamilyInstance() { }
     public FamilyInstance(DB.FamilyInstance value) : base(value) { }

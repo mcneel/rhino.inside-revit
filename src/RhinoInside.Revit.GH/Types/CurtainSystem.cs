@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeDescription => "Represents a Revit curtain system element";
     protected override Type ScriptVariableType => typeof(DB.CurtainSystem);
     public static explicit operator DB.CurtainSystem(CurtainSystem value) =>
-      value.IsValid ? value.Document?.GetElement(value) as DB.CurtainSystem : default;
+      value?.IsValid == true ? value.Document.GetElement(value) as DB.CurtainSystem : default;
 
     public CurtainSystem() { }
     public CurtainSystem(DB.CurtainSystem host) : base(host) { }

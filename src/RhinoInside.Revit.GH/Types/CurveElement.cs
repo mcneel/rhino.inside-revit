@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeDescription => "Represents a Revit Curve Element";
     protected override Type ScriptVariableType => typeof(DB.CurveElement);
     public static explicit operator DB.CurveElement(CurveElement value) =>
-      value.IsValid ? value.Document?.GetElement(value) as DB.CurveElement : default;
+      value?.IsValid == true ? value.Document.GetElement(value) as DB.CurveElement : default;
 
     public CurveElement() { }
     public CurveElement(DB.CurveElement value) : base(value) { }

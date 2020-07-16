@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeDescription => "Represents a Revit Dimension";
     protected override Type ScriptVariableType => typeof(DB.Dimension);
     public static explicit operator DB.Dimension(Dimension value) =>
-      value.IsValid ? value.Document?.GetElement(value) as DB.Dimension : default;
+      value?.IsValid == true ? value.Document.GetElement(value) as DB.Dimension : default;
 
     public Dimension() { }
     public Dimension(DB.Dimension dimension) : base(dimension) { }

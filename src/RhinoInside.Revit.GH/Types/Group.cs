@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeDescription => "Represents a Revit group element";
     protected override Type ScriptVariableType => typeof(DB.Group);
     public static explicit operator DB.Group(Group value) =>
-      value.IsValid ? value.Document?.GetElement(value) as DB.Group : default;
+      value?.IsValid == true ? value.Document.GetElement(value) as DB.Group : default;
 
     public Group() { }
     public Group(DB.Group value) : base(value) { }

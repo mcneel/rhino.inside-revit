@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Types
     override public object ScriptVariable() => (DB.Element) this;
     protected override Type ScriptVariableType => typeof(DB.Element);
     public static explicit operator DB.Element(Element value) =>
-      value.IsValid ? value.Document.GetElement(value) : default;
+      value?.IsValid == true ? value.Document.GetElement(value) : default;
 
     public static Element FromValue(object data)
     {
