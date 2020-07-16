@@ -72,40 +72,39 @@ namespace RhinoInside.Revit.GH.Parameters
       if (doc is null)
         return;
 
-      var selectedIndex = -1;
+      listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
+      listBox.Items.Clear();
 
-      try
+      var current = default(Types.Category);
+      if (SourceCount == 0 && PersistentDataCount == 1)
       {
-        listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
-        listBox.Items.Clear();
+        if (PersistentData.get_FirstItem(true) is Types.Category firstValue)
+          current = firstValue as Types.Category;
+      }
 
-        var current = default(Types.Category);
-        if (SourceCount == 0 && PersistentDataCount == 1)
+      using (var collector = doc.Settings.Categories)
+      {
+        var categories = collector.
+                          Cast<DB.Category>().
+                          Where(x => 3 == (int) categoryType ? x.IsTagCategory : x.CategoryType == categoryType && !x.IsTagCategory);
+
+        listBox.DisplayMember = "DisplayName";
+        foreach (var category in categories)
+          listBox.Items.Add(Types.Category.FromCategory(category));
+
+        int index = 0;
+        foreach (var item in listBox.Items.OfType<Types.Category>())
         {
-          if (PersistentData.get_FirstItem(true) is Types.Category firstValue)
-            current = firstValue as Types.Category;
-        }
-
-        using (var collector = doc.Settings.Categories)
-        {
-          var categories = collector.
-                           Cast<DB.Category>().
-                           Where(x => 3 == (int) categoryType ? x.IsTagCategory : x.CategoryType == categoryType && !x.IsTagCategory);
-
-          foreach (var category in categories)
+          if (item.UniqueID == current?.UniqueID)
           {
-            var tag = Types.Category.FromCategory(category);
-            int index = listBox.Items.Add(tag.EmitProxy());
-            if (tag.UniqueID == current?.UniqueID)
-              selectedIndex = index;
+            listBox.SelectedIndex = index;
+            break;
           }
+          index++;
         }
       }
-      finally
-      {
-        listBox.SelectedIndex = selectedIndex;
-        listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
-      }
+
+      listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
     }
 
     private void ListBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -114,11 +113,11 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         if (listBox.SelectedIndex != -1)
         {
-          if (listBox.Items[listBox.SelectedIndex] is IGH_GooProxy value)
+          if (listBox.Items[listBox.SelectedIndex] is Types.Category value)
           {
             RecordUndoEvent($"Set: {value}");
             PersistentData.Clear();
-            PersistentData.Append(value.ProxyOwner as Types.Category);
+            PersistentData.Append(value);
           }
         }
 
