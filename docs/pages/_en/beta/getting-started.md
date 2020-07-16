@@ -55,6 +55,20 @@ See [{{ site.terms.rir }} Interface]({{ site.baseurl }}{% link _en/beta/referenc
 
 If you encountered any errors, please consult the [Known Issues]({{ site.baseurl }}{% link _en/beta/reference/known-issues.md %}) page for a list of already known issues and their temporary workarounds.
 
+## Grasshopper inside Revit
+
+Arguably one of the most features of {{ site.terms.rir }} is Grasshopper. Open it by clicking on the Grasshopper button in the new *Rhinoceros* tab. Note the extra *Revit* tab in Grasshopper window, with many Revit-aware components:
+
+![]({{ "/static/images/started/rir-gh01.png" | prepend: site.baseurl }})
+
+There is also a *Revit Primitives* panel on the default *Params* tab:
+
+![]({{ "/static/images/started/rir-gh02.png" | prepend: site.baseurl }})
+
+The Revit-aware component icons help identifying the action that the component performs. As shown below, the base color shows the type of action (Query, Analyze, Modify, Create). There are a series of badges applied to icons as well, that show Type, Identity, or other aspects of the data that the component is designed to work with:
+
+![]({{ "/static/images/started/rir-icons.png" | prepend: site.baseurl }}){: class="small-image"}
+
 ## Extracting Revit Geometry
 
 To get started, let's create a simple definition in Grasshopper to extract geometry of a Revit element. Grasshopper is by far one of the most exciting add-ons for Rhino and as part of the {{ site.terms.rir }} project has the potential to improve the design and documentation in {{ site.terms.revit }} dramatically.
@@ -62,10 +76,6 @@ To get started, let's create a simple definition in Grasshopper to extract geome
 Open a simple Revit model and draw an single wall
 
 ![]({{ "/static/images/started/revit-doc.png" | prepend: site.baseurl }})
-
-Now open Grasshopper by clicking on the Grasshopper button in the new *Rhinoceros* tab
-
-![]({{ "/static/images/started/rir-gh.png" | prepend: site.baseurl }})
 
 From the *Params > Revit* panel, add a {% include ltr/comp.html uuid="ef607c2a-" %} parameter
 
