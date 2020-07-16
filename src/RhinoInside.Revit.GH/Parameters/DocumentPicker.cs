@@ -83,6 +83,9 @@ namespace RhinoInside.Revit.GH.Parameters
         {
           foreach (var category in group.OrderBy(x => x.Name).Where(x => CategoryIsInSet(x)))
           {
+            if (!category.Id.IsBuiltInId())
+              continue;
+
             if (category.CategoryType == DB.CategoryType.Invalid)
               continue;
 
