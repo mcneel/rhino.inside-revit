@@ -530,6 +530,7 @@ namespace RhinoInside.Revit.GH.Parameters
             listBox.SelectedIndex = index;
         }
 
+        listBox.DisplayMember = "Text";
         listBox.BorderStyle = BorderStyle.FixedSingle;
 
         listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
