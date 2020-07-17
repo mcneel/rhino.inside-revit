@@ -10,7 +10,5 @@ namespace RhinoInside.Revit.GH.Parameters
     public override Guid ComponentGuid => new Guid("2674B9FF-E463-426B-8A8C-CCB5A7F4C84E");
 
     public Group() : base("Group", "Group", "Represents a Revit document group element.", "Params", "Revit Primitives") { }
-
-    protected override Types.Group PreferredCast(object data) => data is DB.Group group ? new Types.Group(group) : null;
   }
 }

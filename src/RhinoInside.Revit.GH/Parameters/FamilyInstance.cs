@@ -19,8 +19,6 @@ namespace RhinoInside.Revit.GH.Parameters
       subcategory: "Revit Primitives"
     )
     { }
-
-    protected override Types.GraphicalElement PreferredCast(object data) => Types.GraphicalElement.FromValue(data as DB.FamilyInstance) as Types.GraphicalElement;
   }
 
   public class Mullion : GraphicalElementT<Types.Mullion, DB.Mullion>
@@ -37,8 +35,6 @@ namespace RhinoInside.Revit.GH.Parameters
       subcategory: "Revit Primitives"
     )
     { }
-
-    protected override Types.Mullion PreferredCast(object data) => Types.Mullion.FromValue(data as DB.Mullion) as Types.Mullion;
   }
 
   public class Panel : GraphicalElementT<Types.Panel, DB.Panel>
@@ -55,7 +51,5 @@ namespace RhinoInside.Revit.GH.Parameters
       subcategory: "Revit Primitives"
     )
     { }
-
-    protected override Types.Panel PreferredCast(object data) => Types.Panel.FromValue(data as DB.Panel) as Types.Panel;
   }
 }

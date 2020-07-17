@@ -151,7 +151,7 @@ namespace RhinoInside.Revit.GH.Parameters
       return GH_GetterResult.success;
     }
 
-    protected GH_GetterResult Prompt_Elements(ref GH_Structure<T> value, ObjectType objectType, bool multiple, bool preSelect)
+    protected GH_GetterResult Prompt_Elements(ref GH_Structure<Types.IGH_ElementId> value, ObjectType objectType, bool multiple, bool preSelect)
     {
       var uiDocument = Revit.ActiveUIDocument;
       var doc = uiDocument.Document;
@@ -190,7 +190,7 @@ namespace RhinoInside.Revit.GH.Parameters
       switch(result)
       {
         case Autodesk.Revit.UI.Result.Succeeded:
-          value = new GH_Structure<T>();
+          value = new GH_Structure<Types.IGH_ElementId>();
 
           foreach (var document in documents.Where(x => x.Key != docGUID))
             value.AppendRange(document, new GH_Path(DocumentExtension.DocumentSessionId(document.Key)));
@@ -611,7 +611,7 @@ namespace RhinoInside.Revit.GH.Parameters
     {
     }
 
-    protected override Types.GraphicalElement PreferredCast(object data)
+    protected override Types.IGH_ElementId PreferredCast(object data)
     {
       return data is DB.Element element && AllowElement(element) ?
              Types.GraphicalElement.FromElement(element) as Types.GraphicalElement:

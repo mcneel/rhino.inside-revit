@@ -12,7 +12,6 @@ namespace RhinoInside.Revit.GH.Parameters
   {
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
     public override Guid ComponentGuid => new Guid("B18EF2CC-2E67-4A5E-9241-9010FB7D27CE");
-    protected override Types.Material PreferredCast(object data) => Types.Material.FromElement(data as DB.Material) as Types.Material;
 
     public Material() : base("Material", "Material", "Represents a Revit document material.", "Params", "Revit Primitives") { }
 

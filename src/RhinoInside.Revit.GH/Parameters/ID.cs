@@ -17,7 +17,7 @@ using DB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Parameters
 {
   public abstract class ElementIdParam<T, R> :
-  PersistentParam<T>,
+  PersistentParam<Types.IGH_ElementId>,
   Kernel.IGH_ElementIdParam
   where T : class, Types.IGH_ElementId
   {
@@ -25,14 +25,15 @@ namespace RhinoInside.Revit.GH.Parameters
     protected ElementIdParam(string name, string nickname, string description, string category, string subcategory) :
       base(name, nickname, description, category, subcategory)
     { }
-    protected override T PreferredCast(object data) => data is R ? (T) Activator.CreateInstance(typeof(T), data) : null;
+    protected override Types.IGH_ElementId PreferredCast(object data) => data is R ? Types.Element.FromValue(data) : null;
+    protected override Types.IGH_ElementId InstantiateT() => new Types.Element();
 
     protected T Current
     {
       get
       {
         var current = (SourceCount == 0 && PersistentDataCount == 1) ? PersistentData.get_FirstItem(true) : default;
-        return current?.LoadElement() == true ? current : default;
+        return (current?.LoadElement() == true ? current : default) as T;
       }
     }
 
@@ -127,7 +128,7 @@ namespace RhinoInside.Revit.GH.Parameters
             AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "Grouped by Category");
         }
 
-        var data = new GH_Structure<T>();
+        var data = new GH_Structure<Types.IGH_ElementId>();
         var pathCount = m_data.PathCount;
         for (int p = 0; p < pathCount; ++p)
         {
@@ -395,7 +396,28 @@ namespace RhinoInside.Revit.GH.Parameters
       }
     }
 
-    protected override bool Prompt_ManageCollection(GH_Structure<T> values)
+    protected sealed override GH_GetterResult Prompt_Plural(ref List<Types.IGH_ElementId> values)
+    {
+      var list = new List<T>();
+      var result = Prompt_Plural(ref list);
+      values.AddRange(list);
+
+      return result;
+    }
+
+    protected sealed override GH_GetterResult Prompt_Singular(ref Types.IGH_ElementId value)
+    {
+      T item = default;
+      var result =  Prompt_Singular(ref item);
+      value = item;
+
+      return result;
+    }
+
+    protected virtual GH_GetterResult Prompt_Plural(ref List<T> values) => GH_GetterResult.cancel;
+    protected virtual GH_GetterResult Prompt_Singular(ref T value) => GH_GetterResult.cancel;
+
+    protected override bool Prompt_ManageCollection(GH_Structure<Types.IGH_ElementId> values)
     {
       foreach (var item in values.AllData(true))
       {
