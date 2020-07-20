@@ -66,3 +66,21 @@ These are general guidelines for designing icons for this project. When a new ic
 - Where possible use shapes similar to Grasshopper icons e.g. Material primitive icon uses the egg shape of Grasshopper materials
 
     ![](gh-icons/rir-compmat@2x.png)
+
+
+## Adding/Creating Icons for Components/Parameters
+
+- [ ] Create the icon design source file (maybe duplicate a similar existing icon and change) inside the appropriate `src/` directory
+- [ ] Export a .png of the icon into the `comps/` or `params/` directory
+- [ ] Add the icon to the `RhinoInside.Revit.GH.csproj` references. Follow the same pattern as the existing reference lines:
+
+```xml
+    <None Include="$(ProjectDir)\..\..\art\gh-icons\params\ElementTypeByName.png"><Link>Art\Parameters\ElementTypeByName.png</Link></None>
+```
+- [ ] Open RhinoInside.Revit.GH project in VisualStudio, browse to Resources, and drag-drop the icon into it. This will generate the necessary access codes to `Resources.resx` and `Resources.Designer.cs` files
+- [ ] Build the project, Load Revit, and make sure the component or parameter is showing the icon.
+- [ ] Open the `update_components_data.ghx` file inside grasshopper. This will update the data file containing information about the components (`docs/_data/components.json`). The script will also make a copy of the .png file inside `docs/static/images/GH`
+- [ ] Build the wiki, browse to References > Components and make sure the component is listed with its icon
+- [ ] Commit the changes
+
+
