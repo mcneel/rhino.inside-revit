@@ -22,13 +22,6 @@ These pages provide detailed information on {{ site.terms.rir }} APIs:
 - [{{ site.terms.rir }} API]({{ site.baseurl }}{% link _en/beta/reference/rir-api.md %})
 
 <!-- 30 -->
-## Architecture
-
-These pages provide details information about the design and architecture of {{ site.terms.rir }} and the many challenges to make it work inside {{ site.terms.revit }}:
-
-- [Architecture & Design Challenges]({{ site.baseurl }}{% link _en/beta/reference/rir-arch.md %})
-- [Roadmap]({{ site.baseurl }}{% link _en/beta/reference/rir-roadmap.md %})
-
 <!-- 40 -->
 ## Deployment & Configs
 
