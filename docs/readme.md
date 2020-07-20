@@ -763,21 +763,23 @@ This is how the data file is formatted:
 
 This is how the data file is formatted:
 
-```yaml
-  # component panel name
-- title: Parameter
-  # list of components under this panel
-  comps:
-      # component uuid
-    - uuid: 273ff43d-b771-4eb7-a66d-5da5f7f2731e_1
-      # component title
-      title: Geometric Element
-      # component description
-      desc: Select one or more persistent element(s) in Revit.
-      # component icon image file, or icon tag name (e.g. "G") for automatic icons
-      # only specify one of these
-      iconsrc: /static/images/gh/GeometricElement.png
-      icontag: 
+```json
+  {
+    // component title
+    "title": "CategoryTypes",
+    // component uuid
+    "uuid": "5ffb1339-8521-44a1-9075-2984637725e9",
+    // component description
+    "desc": "Provides a picker of a CategoryType",
+    // component icon image file, or icon tag name (e.g. "G") for automatic icons
+    // only specify one of these
+    "iconsrc": "/static/images/GH/CategoryTypes.png",
+    "icontag": null,
+    "tab": "Revit",
+    // component panel name
+    "panel": "Category",
+  }, 
+
 ```
 
 Currently, the grasshopper definition `update_components_data.ghx` is used to generate this data file and perform other necessary tasks to update the components list for the wiki.
