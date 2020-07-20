@@ -97,13 +97,9 @@ Now Right-Click on the component and click on **Select One Revit Graphical Eleme
 
 ![]({{ "/static/images/started/rir-gcomp2.png" | prepend: site.baseurl }})
 
-Now drop a *Panel* component into the definition and connect the {% include ltr/comp.html uuid="ef607c2a-" %} output to its input
+Now drop a *Panel* component into the definition and connect the {% include ltr/comp.html uuid="ef607c2a-" %} output to its input. You can see that this parameter now contains the selected wall element:
 
 ![]({{ "/static/images/started/rir-gcomp3.png" | prepend: site.baseurl }})
-
-You can see that this parameter now contains the selected wall element.
-
-![]({{ "/static/images/started/rir-gcomp4.png" | prepend: site.baseurl }})
 
 Let's grab the Wall geometry by using a Revit-specific component. From *Revit > Elements* add an {% include ltr/comp.html uuid="b7e6a82f-" %} component.
 
