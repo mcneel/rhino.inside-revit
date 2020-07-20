@@ -779,3 +779,5 @@ This is how the data file is formatted:
       iconsrc: /static/images/gh/GeometricElement.png
       icontag: 
 ```
+
+Currently, the grasshopper definition `update_components_data.ghx` is used to generate this data file and perform other necessary tasks to update the components list for the wiki.
