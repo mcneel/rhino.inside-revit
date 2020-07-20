@@ -10,24 +10,19 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public class Element : ElementId
+  public interface IGH_Element : IGH_ElementId
   {
-    public override string TypeName
-    {
-      get
-      {
-        var element = (DB.Element) this;
-        if (element is object)
-          return $"Revit {element.GetType().Name}";
+    DB.Element APIElement { get; }
+  }
 
-        return $"Revit {GetType().Name}";
-      }
-    }
+  public class Element : ElementId, IGH_Element
+  {
+    public override string TypeName => $"Revit {APIElement?.GetType().Name ?? GetType().Name}";
     public override string TypeDescription => "Represents a Revit element";
-    override public object ScriptVariable() => (DB.Element) this;
+    override public object ScriptVariable() => APIElement;
     protected override Type ScriptVariableType => typeof(DB.Element);
-    public static explicit operator DB.Element(Element value) =>
-      value?.IsValid == true ? value.Document.GetElement(value) : default;
+    public DB.Element APIElement => IsValid ? Document.GetElement(Value) : default;
+    public static explicit operator DB.Element(Element value) => value?.APIElement;
 
     public static Element FromValue(object data)
     {
@@ -115,7 +110,7 @@ namespace RhinoInside.Revit.GH.Types
 
     new public static Element FromElementId(DB.Document doc, DB.ElementId Id)
     {
-      if (doc.GetElement(Id) is DB.Element value)
+      if (doc?.GetElement(Id ?? DB.ElementId.InvalidElementId) is DB.Element value)
         return FromElement(value);
 
       return null;
@@ -180,7 +175,7 @@ namespace RhinoInside.Revit.GH.Types
       if (base.CastTo<Q>(ref target))
         return true;
 
-      var element = (DB.Element) this;
+      var element = APIElement as DB.Element;
       if (typeof(DB.Element).IsAssignableFrom(typeof(Q)))
       {
         if (element is null)
@@ -254,29 +249,11 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var element = (DB.Element) this;
-        if (element is object && !string.IsNullOrEmpty(element.Name))
+        if (APIElement is DB.Element element && !string.IsNullOrEmpty(element.Name))
           return element.Name;
 
         return base.DisplayName;
       }
     }
-
-    #region Location
-    protected BoundingBox? clippingBox;
-    public virtual BoundingBox ClippingBox
-    {
-      get
-      {
-        if (!clippingBox.HasValue)
-        {
-          var element = (DB.Element) this;
-          clippingBox = (element?.get_BoundingBox(null)).ToBoundingBox();
-        }
-
-        return clippingBox.Value;
-      }
-    }
-    #endregion
   }
 }

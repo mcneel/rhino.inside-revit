@@ -3,12 +3,17 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public class View : Element
+  public interface IGH_View : IGH_Element
+  {
+    DB.View APIView { get; }
+  }
+
+  public class View : Element, IGH_View
   {
     public override string TypeDescription => "Represents a Revit view";
     protected override Type ScriptVariableType => typeof(DB.View);
-    public static explicit operator DB.View(View value) =>
-      value?.IsValid == true ? value.Document.GetElement(value) as DB.View : default;
+    public DB.View APIView => IsValid ? Document.GetElement(Value) as DB.View : default;
+    public static explicit operator DB.View(View value) => value?.APIView;
 
     public View() { }
     public View(DB.View view) : base(view) { }
@@ -17,9 +22,8 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var element = (DB.View) this;
-        if (element is object && !string.IsNullOrEmpty(element.Title))
-          return element.Title;
+        if(APIView is DB.View view && !string.IsNullOrEmpty(view.Title))
+          return view.Title;
 
         return base.DisplayName;
       }

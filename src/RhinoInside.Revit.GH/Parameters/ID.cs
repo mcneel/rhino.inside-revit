@@ -17,7 +17,7 @@ using DB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Parameters
 {
   public abstract class ElementIdParam<T, R> :
-  PersistentParam<Types.IGH_ElementId>,
+  PersistentParam<T>,
   Kernel.IGH_ElementIdParam
   where T : class, Types.IGH_ElementId
   {
@@ -25,8 +25,7 @@ namespace RhinoInside.Revit.GH.Parameters
     protected ElementIdParam(string name, string nickname, string description, string category, string subcategory) :
       base(name, nickname, description, category, subcategory)
     { }
-    protected override Types.IGH_ElementId PreferredCast(object data) => data is R ? Types.Element.FromValue(data) : null;
-    protected override Types.IGH_ElementId InstantiateT() => new Types.Element();
+    protected override T PreferredCast(object data) => data is R ? Types.Element.FromValue(data) as T : null;
 
     protected T Current
     {
@@ -128,7 +127,7 @@ namespace RhinoInside.Revit.GH.Parameters
             AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "Grouped by Category");
         }
 
-        var data = new GH_Structure<Types.IGH_ElementId>();
+        var data = new GH_Structure<T>();
         var pathCount = m_data.PathCount;
         for (int p = 0; p < pathCount; ++p)
         {
@@ -396,28 +395,7 @@ namespace RhinoInside.Revit.GH.Parameters
       }
     }
 
-    protected sealed override GH_GetterResult Prompt_Plural(ref List<Types.IGH_ElementId> values)
-    {
-      var list = new List<T>();
-      var result = Prompt_Plural(ref list);
-      values.AddRange(list);
-
-      return result;
-    }
-
-    protected sealed override GH_GetterResult Prompt_Singular(ref Types.IGH_ElementId value)
-    {
-      T item = default;
-      var result =  Prompt_Singular(ref item);
-      value = item;
-
-      return result;
-    }
-
-    protected virtual GH_GetterResult Prompt_Plural(ref List<T> values) => GH_GetterResult.cancel;
-    protected virtual GH_GetterResult Prompt_Singular(ref T value) => GH_GetterResult.cancel;
-
-    protected override bool Prompt_ManageCollection(GH_Structure<Types.IGH_ElementId> values)
+    protected override bool Prompt_ManageCollection(GH_Structure<T> values)
     {
       foreach (var item in values.AllData(true))
       {
@@ -478,7 +456,7 @@ namespace RhinoInside.Revit.GH.Parameters
   }
 
   public abstract class ElementIdWithPreviewParam<X, R> : ElementIdParam<X, R>, IGH_PreviewObject
-  where X : class, Types.IGH_ElementId, IGH_PreviewData
+  where X : class, Types.IGH_ElementId
   {
     protected ElementIdWithPreviewParam(string name, string nickname, string description, string category, string subcategory) :
     base(name, nickname, description, category, subcategory)

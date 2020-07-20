@@ -3,9 +3,16 @@ using DB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   /// <summary>
-  /// Class that represents any <see cref="DB.Element"/> that is an instance of a <see cref="DB.ElementType"/>
+  /// Interface that represents any <see cref="DB.Element"/> that is an instance of a <see cref="DB.ElementType"/>
   /// </summary>
-  public class InstanceElement : GeometricElement
+  public interface IGH_InstanceElement : IGH_GeometricElement
+  {
+    ElementType ElementType { get; }
+    Level Level { get; }
+    View OwnerView { get; }
+  }
+
+  public class InstanceElement : GeometricElement, IGH_InstanceElement
   {
     public override string TypeDescription => "Represents a Revit Instance";
 
@@ -15,40 +22,27 @@ namespace RhinoInside.Revit.GH.Types
     protected override bool SetValue(DB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(DB.Element element)
     {
-      if (element is DB.ElementType)
+      // DB.ElementType CanHaveTypeAssigned return false.
+      //if (element is DB.ElementType)
+      //  return false;
+
+      // DB.View do not have category.
+      //if (element is DB.View)
+      //  return false;
+
+      if (element.Category is null)
         return false;
 
-      if (element is DB.View)
-        return false;
-
-      return element.Category is object && element.CanHaveTypeAssigned();
+      return element.CanHaveTypeAssigned();
     }
 
-    public ElementType ElementType
-    {
-      get
-      {
-        var element = (DB.Element) this;
-        return ElementType.FromElement(element.Document.GetElement(element.GetTypeId())) as ElementType;
-      }
-    }
+    public ElementType ElementType =>
+      ElementType.FromElementId(Document, (APIElement as DB.Element)?.GetTypeId()) as ElementType;
 
-    public override Level Level
-    {
-      get
-      {
-        var element = (DB.Element) this;
-        return element is null ? null : Level.FromElement(element.Document.GetElement(element.LevelId)) as Level;
-      }
-    }
+    public override Level Level =>
+      Level.FromElementId(Document, (APIElement as DB.Element)?.LevelId) as Level;
 
-    public View View
-    {
-      get
-      {
-        var element = (DB.Element) this;
-        return View.FromElement(element.Document.GetElement(element.OwnerViewId)) as View;
-      }
-    }
+    public View OwnerView =>
+      View.FromElementId(Document, (APIElement as DB.Element)?.OwnerViewId) as View;
   }
 }

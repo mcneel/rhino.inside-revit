@@ -4,20 +4,24 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class HostObject : GraphicalElementT<Types.HostObject, DB.HostObject>
+  public class HostObject : GraphicalElementT<Types.IGH_HostObject, DB.HostObject>
   {
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     public override Guid ComponentGuid => new Guid("E3462915-3C4D-4864-9DD4-5A73F91C6543");
 
     public HostObject() : base("Host", "Host", "Represents a Revit document host element.", "Params", "Revit Primitives") { }
+
+    protected override Types.IGH_HostObject InstantiateT() => new Types.HostObject();
   }
 
-  public class HostObjectType : ElementIdWithoutPreviewParam<Types.HostObjectType, DB.HostObjAttributes>
+  public class HostObjectType : ElementIdWithoutPreviewParam<Types.IGH_HostObjectType, DB.HostObjAttributes>
   {
     public override GH_Exposure Exposure => GH_Exposure.hidden;
     public override Guid ComponentGuid => new Guid("708AB072-878E-41ED-9B8C-AAB0E1D85A53");
 
     public HostObjectType() : base("Host Type", "HostType", "Represents a Revit document host element type.", "Params", "Revit Primitives") { }
+
+    protected override Types.IGH_HostObjectType InstantiateT() => new Types.HostObjectType();
   }
 
   public class BuildingPad : GraphicalElementT<Types.BuildingPad, DB.Architecture.BuildingPad>

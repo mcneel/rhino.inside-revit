@@ -4,12 +4,17 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public class ElementType : Element
+  public interface IGH_ElementType : IGH_Element
+  {
+    DB.ElementType APIElementType { get; }
+  }
+
+  public class ElementType : Element, IGH_ElementType
   {
     public override string TypeDescription => "Represents a Revit element type";
     protected override Type ScriptVariableType => typeof(DB.ElementType);
-    public static explicit operator DB.ElementType(ElementType value) =>
-      value?.IsValid == true ? value.Document.GetElement(value) as DB.ElementType : default;
+    public DB.ElementType APIElementType => ((IGH_Element)this).APIElement as DB.ElementType;
+    public static explicit operator DB.ElementType(ElementType value) => value?.APIElementType;      
 
     public ElementType() { }
     protected ElementType(DB.Document doc, DB.ElementId id) : base(doc, id) { }
@@ -20,8 +25,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var elementType = (DB.ElementType) this;
-        if (elementType is object)
+        if(APIElementType is DB.ElementType elementType)
            return $"{elementType.GetFamilyName()} : {elementType.Name}";
 
         return base.DisplayName;
