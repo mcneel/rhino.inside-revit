@@ -60,7 +60,7 @@ using UI = Autodesk.Revit.UI;
 
 #### {{ site.terms.rir }} API
 
-{{ site.terms.rir }} provides a few utility methods as well. Later on this guide, we are going to use one of these utility functions to bake a sphere into a Revit model. To access these methods, we need to add another binding to `RhinoInside.Revit` assembly which is shipped with {{ site.terms.rir }}.
+{{ site.terms.rir }} provides a few utility methods as well. Later on this guide, we are going to use one of these utility functions to bake a sphere into a Revit model. To access these methods, we need to add another binding to `RhinoInside.Revit.dll` assembly which is shipped with {{ site.terms.rir }}.
 
 Please follow the steps described above, and add a reference to this assembly as well. You can find the DLL under `%APPDATA%/Autodesk/Revit/Addins/XXXX/RhinoInside.Revit/` where `XXXX` is the Revit version e.g. `2019`
 
@@ -69,9 +69,13 @@ Please follow the steps described above, and add a reference to this assembly as
 Then modify the lines shown above to add a reference to this assembly as well:
 
 {% highlight csharp %}
-using RIR = RhinoInside.Revit;
 using DB = Autodesk.Revit.DB;
 using UI = Autodesk.Revit.UI;
+
+using RIR = RhinoInside.Revit;
+// add extensions methods as well
+// this allows calling .ToXXX() convertor methods on Revit objects
+using RhinoInside.Revit.Convert.Geometry
 {% endhighlight %}
 
 ### Implement RunScript
@@ -131,11 +135,6 @@ First, let's create a bake method:
   private void CreateGeometry(DB.Document doc) {
     // convert the sphere into Brep
     var brep = _sphere.ToBrep();
-    // let's create a mesh from the Brep
-    var meshes = Rhino.Geometry.Mesh.CreateFromBrep(
-      brep,
-      Rhino.Geometry.MeshingParameters.Default
-      );
 
     // now let's pick the Generic Model category for
     // our baked geometry in Revit
@@ -145,11 +144,11 @@ First, let's create a bake method:
     // inside the Revit document and add the sphere mesh
     // to the DirectShape
     var ds = DB.DirectShape.CreateElement(doc, revitCategory);
-    // we will use Convert.ToHost method to convert the
-    // Rhino mesh to Revit mesh because that is what
+    // we will use .ToBrep() method to convert the
+    // Rhino brep to Revit DB.Solid because that is what
     // the AppendShape() method expects
-    foreach(var geom in RIR.Convert.ToHost(meshes))
-      ds.AppendShape(geom);
+    var shapeList = new List<DB.GeometryObject>() { brep.ToSolid() };
+    ds.AppendShape(shapeList);
   }
 {% endhighlight %}
 
@@ -198,27 +197,13 @@ And here is the complete sample code:
   }
 
   private void CreateGeometry(DB.Document doc) {
-    // convert the sphere into Brep
     var brep = _sphere.ToBrep();
-    // let's create a mesh from the Brep
-    var meshes = Rhino.Geometry.Mesh.CreateFromBrep(
-      brep,
-      Rhino.Geometry.MeshingParameters.Default
-      );
 
-    // now let's pick the Generic Model category for
-    // our baked geometry in Revit
     var revitCategory = new DB.ElementId((int) DB.BuiltInCategory.OST_GenericModel);
 
-    // Finally we can create a DirectShape using Revit API
-    // inside the Revit document and add the sphere mesh
-    // to the DirectShape
     var ds = DB.DirectShape.CreateElement(doc, revitCategory);
-    // we will use Convert.ToHost method to convert the
-    // Rhino mesh to Revit mesh because that is what
-    // the AppendShape() method expects
-    foreach(var geom in RIR.Convert.ToHost(meshes))
-      ds.AppendShape(geom);
+    var shapeList = new List<DB.GeometryObject>() { brep.ToSolid() };
+    ds.AppendShape(shapeList);
   }
 }
 {% endhighlight %}
