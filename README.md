@@ -8,14 +8,13 @@
 
 ## Overview
 
-The Rhino.Inside® Technology allows Rhino, Grasshopper, and their addons to be embedded within other products. This repository is the Rhino.Inside® for Autodesk Revit®, named Rhino.Inside.Revit
+The Rhino.Inside® Technology allows Rhino, Grasshopper, and their add-ons to be embedded within other products. This repository is the Rhino.Inside® for Autodesk Revit®, named Rhino.Inside.Revit
 
 ## Architecture
 
 See Wiki pages below for more information about the architecture of this project.
 
 - [Architecture](https://www.rhino3d.com/inside/revit/beta/reference/rir-arch) for more information
-- [Design Challenges](https://www.rhino3d.com/inside/revit/beta/reference/rir-design) for more information
 
 ## Build Process
 
@@ -34,6 +33,12 @@ The installer is generated using [WiX toolset](https://wixtoolset.org/) (see `sr
 The `docs/` directory in this repo contains the contents of [Rhino.Inside.Revit Wiki](https://www.rhino3d.com/inside/revit/).
 
 See [Wiki Readme](docs/readme.md) for more information.
+
+## Artwork
+
+All the artwork source and exported files are under `art/` directory.
+
+See [Artwork Readme](art/README.md) for more information.
 
 ## Development Conventions
 
