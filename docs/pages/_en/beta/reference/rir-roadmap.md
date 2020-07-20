@@ -1,7 +1,7 @@
 ---
 title: Roadmap
 order: 39
-group: Deployment & Configs
+group: Architecture
 ---
 
 This document attempts to provide a roadmap for the {{ site.terms.rir }} project to help the development teams plan accordingly for the upcoming versions, features, and bug fixes.
