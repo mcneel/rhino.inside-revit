@@ -765,18 +765,12 @@ This is how the data file is formatted:
 
 ```json
   {
-    // component title
     "title": "CategoryTypes",
-    // component uuid
     "uuid": "5ffb1339-8521-44a1-9075-2984637725e9",
-    // component description
     "desc": "Provides a picker of a CategoryType",
-    // component icon image file, or icon tag name (e.g. "G") for automatic icons
-    // only specify one of these
     "iconsrc": "/static/images/GH/CategoryTypes.png",
     "icontag": null,
     "tab": "Revit",
-    // component panel name
     "panel": "Category",
   }, 
 
