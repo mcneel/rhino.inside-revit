@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Linq;
 using GH_IO.Serialization;
+using Grasshopper.Kernel.Graphs;
 using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.External.UI.Extensions;
@@ -25,7 +26,7 @@ namespace RhinoInside.Revit.GH.Types
     void UnloadElement();
   }
 
-  public class ElementId : GH_Goo<DB.ElementId>, IGH_ElementId, IEquatable<ElementId>
+  public abstract class ElementId : GH_Goo<DB.ElementId>, IGH_ElementId, IEquatable<ElementId>
   {
     public override string TypeName => "Revit Model Object";
     public override string TypeDescription => "Represents a Revit model object";
@@ -45,7 +46,10 @@ namespace RhinoInside.Revit.GH.Types
       if (ParameterKey.FromElementId(doc, id) is ParameterKey p)
         return p;
 
-      return Element.FromElementId(doc, id);
+      if (Element.FromElementId(doc, id) is Element e)
+        return e;
+
+      return null;
     }
 
     public void SetValue(DB.Document doc, DB.ElementId id)
@@ -74,7 +78,11 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     DB.Document document;
-    public DB.Document Document { get => document?.IsValidObject != true ? null : document; protected set { document = value; } }
+    public DB.Document Document
+    {
+      get => document?.IsValidObject != true ? null : document;
+      protected set { document = value; }
+    }
     public DB.ElementId Id => Value;
     public Guid DocumentGUID { get; protected set; } = Guid.Empty;
     public string UniqueID { get; protected set; } = string.Empty;

@@ -15,8 +15,6 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public Category() : base("Category", "Category", "Represents a Revit document category.", "Params", "Revit Primitives") { }
 
-    protected override Types.Category PreferredCast(object data) => Types.Category.FromValue(data);
-
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
       var listBox = new ListBox

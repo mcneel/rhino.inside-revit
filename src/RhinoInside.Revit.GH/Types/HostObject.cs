@@ -7,12 +7,17 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public class HostObject : InstanceElement
+  public interface IGH_HostObject : IGH_InstanceElement
+  {
+    DB.HostObject APIHostObject { get; }
+  }
+
+  public class HostObject : InstanceElement, IGH_HostObject
   {
     public override string TypeDescription => "Represents a Revit host element";
     protected override Type ScriptVariableType => typeof(DB.HostObject);
-    public static explicit operator DB.HostObject(HostObject value) =>
-      value?.IsValid == true ? value.Document.GetElement(value) as DB.HostObject : default;
+    public DB.HostObject APIHostObject => IsValid ? Document.GetElement(Value) as DB.HostObject : default;
+    public static explicit operator DB.HostObject(HostObject value) => value?.APIHostObject;
 
     public HostObject() { }
     public HostObject(DB.HostObject host) : base(host) { }
@@ -21,7 +26,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var host = (DB.HostObject) this;
+        var host = APIHostObject;
 
         if (!(host.Location is DB.LocationPoint) && !(host.Location is DB.LocationCurve))
         {
@@ -79,13 +84,17 @@ namespace RhinoInside.Revit.GH.Types
     public override Vector3d Orientation => base.Orientation;
   }
 
+  public interface IGH_HostObjectType : IGH_ElementType
+  {
+    DB.HostObjAttributes HostObjAttributes { get; }
+  }
 
-  public class HostObjectType : ElementType
+  public class HostObjectType : ElementType, IGH_HostObjectType
   {
     public override string TypeDescription => "Represents a Revit host element type";
     protected override Type ScriptVariableType => typeof(DB.HostObjAttributes);
-    public static explicit operator DB.HostObjAttributes(HostObjectType value) =>
-      value?.IsValid == true ? value.Document.GetElement(value) as DB.HostObjAttributes : default;
+    public DB.HostObjAttributes HostObjAttributes => IsValid ? Document.GetElement(Value) as DB.HostObjAttributes : default;
+    public static explicit operator DB.HostObjAttributes(HostObjectType value) => value?.HostObjAttributes;
 
     public HostObjectType() { }
     public HostObjectType(DB.HostObjAttributes type) : base(type) { }

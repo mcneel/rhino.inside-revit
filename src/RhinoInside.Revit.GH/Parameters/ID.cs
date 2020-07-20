@@ -25,14 +25,14 @@ namespace RhinoInside.Revit.GH.Parameters
     protected ElementIdParam(string name, string nickname, string description, string category, string subcategory) :
       base(name, nickname, description, category, subcategory)
     { }
-    protected override T PreferredCast(object data) => data is R ? (T) Activator.CreateInstance(typeof(T), data) : null;
+    protected override T PreferredCast(object data) => data is R ? Types.Element.FromValue(data) as T : null;
 
     protected T Current
     {
       get
       {
         var current = (SourceCount == 0 && PersistentDataCount == 1) ? PersistentData.get_FirstItem(true) : default;
-        return current?.LoadElement() == true ? current : default;
+        return (current?.LoadElement() == true ? current : default) as T;
       }
     }
 
@@ -456,7 +456,7 @@ namespace RhinoInside.Revit.GH.Parameters
   }
 
   public abstract class ElementIdWithPreviewParam<X, R> : ElementIdParam<X, R>, IGH_PreviewObject
-  where X : class, Types.IGH_ElementId, IGH_PreviewData
+  where X : class, Types.IGH_ElementId
   {
     protected ElementIdWithPreviewParam(string name, string nickname, string description, string category, string subcategory) :
     base(name, nickname, description, category, subcategory)

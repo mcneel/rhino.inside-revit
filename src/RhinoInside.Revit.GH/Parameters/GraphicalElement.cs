@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Parameters
   public abstract class GraphicalElementT<T, R> :
     ElementIdWithPreviewParam<T, R>,
     ISelectionFilter
-    where T : Types.GraphicalElement, new()
+    where T : class, Types.IGH_GraphicalElement
   {
     protected GraphicalElementT(string name, string nickname, string description, string category, string subcategory) :
     base(name, nickname, description, category, subcategory)
@@ -48,7 +48,7 @@ namespace RhinoInside.Revit.GH.Parameters
       switch (uiDocument.PickObject(out var reference, objectType, this))
       {
         case Autodesk.Revit.UI.Result.Succeeded:
-          value = (T) Types.Element.FromReference(uiDocument.Document, reference);
+          value = Types.Element.FromReference(uiDocument.Document, reference) as T;
           return GH_GetterResult.success;
         case Autodesk.Revit.UI.Result.Cancelled:
           return GH_GetterResult.cancel;
@@ -72,7 +72,7 @@ namespace RhinoInside.Revit.GH.Parameters
           if (doc.GetElement(reference.ElementId) is DB.RevitLinkInstance instance)
           {
             var linkedDoc = instance.GetLinkDocument();
-            var element = (T) Types.Element.FromElementId(linkedDoc, reference.LinkedElementId);
+            var element = Types.Element.FromElementId(linkedDoc, reference.LinkedElementId) as T;
             value.Append(element, new GH_Path(0));
 
             return GH_GetterResult.success;
@@ -95,7 +95,7 @@ namespace RhinoInside.Revit.GH.Parameters
       if (selection?.Count > 0)
       {
         value = selection.Select(id => doc.GetElement(id)).Where(element => AllowElement(element)).
-                Select(element => (T) Types.Element.FromElementId(element.Document, element.Id)).ToList();
+                Select(element => Types.Element.FromElementId(element.Document, element.Id) as T).ToList();
 
         return GH_GetterResult.success;
       }
@@ -104,7 +104,7 @@ namespace RhinoInside.Revit.GH.Parameters
         switch (uiDocument.PickObjects(out var references, ObjectType.Element, this))
         {
           case Autodesk.Revit.UI.Result.Succeeded:
-            value = references.Select(r => (T) Types.Element.FromReference(doc, r)).ToList();
+            value = references.Select(r => Types.Element.FromReference(doc, r) as T).ToList();
             return GH_GetterResult.success;
           case Autodesk.Revit.UI.Result.Cancelled:
             return GH_GetterResult.cancel;
@@ -133,7 +133,7 @@ namespace RhinoInside.Revit.GH.Parameters
               var instance = doc.GetElement(r.ElementId) as DB.RevitLinkInstance;
               var linkedDoc = instance.GetLinkDocument();
 
-              return (T) Types.Element.FromElementId(linkedDoc, r.LinkedElementId);
+              return Types.Element.FromElementId(linkedDoc, r.LinkedElementId) as T;
             }
           ).GroupBy(x => x.Document);
 
@@ -195,7 +195,7 @@ namespace RhinoInside.Revit.GH.Parameters
           foreach (var document in documents.Where(x => x.Key != docGUID))
             value.AppendRange(document, new GH_Path(DocumentExtension.DocumentSessionId(document.Key)));
 
-          value.AppendRange(references.Select(r => (T) Types.Element.FromReference(doc, r)), new GH_Path(DocumentExtension.DocumentSessionId(docGUID)));
+          value.AppendRange(references.Select(r => Types.Element.FromReference(doc, r) as T), new GH_Path(DocumentExtension.DocumentSessionId(docGUID)));
 
           return GH_GetterResult.success;
         case Autodesk.Revit.UI.Result.Cancelled:
@@ -596,7 +596,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #endregion
   }
 
-  public class GraphicalElement : GraphicalElementT<Types.GraphicalElement, DB.Element>
+  public class GraphicalElement : GraphicalElementT<Types.IGH_GraphicalElement, DB.Element>
   {
     public override GH_Exposure Exposure => GH_Exposure.primary;
     public override Guid ComponentGuid => new Guid("EF607C2A-2F44-43F4-9C39-369CE114B51F");
@@ -608,10 +608,11 @@ namespace RhinoInside.Revit.GH.Parameters
       "Represents a Revit graphical element.",
       "Params", "Revit Primitives"
     )
-    {
-    }
+    { }
 
-    protected override Types.GraphicalElement PreferredCast(object data)
+    protected override Types.IGH_GraphicalElement InstantiateT() => new Types.GraphicalElement();
+
+    protected override Types.IGH_GraphicalElement PreferredCast(object data)
     {
       return data is DB.Element element && AllowElement(element) ?
              Types.GraphicalElement.FromElement(element) as Types.GraphicalElement:

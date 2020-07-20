@@ -29,6 +29,11 @@ namespace RhinoInside.Revit.GH.Components
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var doc = Revit.ActiveDBDocument;
+      if (doc is null)
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Failed to access the active Revit doument");
+        return;
+      }
 
       var color = default(System.Drawing.Color);
       if (!DA.GetData("Color", ref color))

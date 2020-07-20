@@ -10,10 +10,13 @@ using DB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   /// <summary>
-  /// Base class for any <see cref="DB.Element"/> that has a Graphical representation in Revit
+  /// Iterface that represents any <see cref="DB.Element"/> that has a Graphical representation in Revit
   /// </summary>
+  public interface IGH_GraphicalElement : IGH_Element { }
+
   public class GraphicalElement :
     Element,
+    IGH_GraphicalElement, 
     IGH_GeometricGoo,
     IGH_PreviewData
   {
@@ -63,6 +66,18 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_PreviewData
+    protected BoundingBox? clippingBox;
+    public virtual BoundingBox ClippingBox
+    {
+      get
+      {
+        if (!clippingBox.HasValue && APIElement is DB.Element element)
+          clippingBox = (element.get_BoundingBox(null)).ToBoundingBox();
+
+        return clippingBox.Value;
+      }
+    }
+
     public virtual void DrawViewportWires(GH_PreviewWireArgs args) { }
     public virtual void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
     #endregion
@@ -177,7 +192,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if ((DB.Element) this is DB.Element element)
+        if (APIElement is DB.Element element)
         {
           var plane = Location;
           if (!Location.IsValid)
@@ -215,8 +230,7 @@ namespace RhinoInside.Revit.GH.Types
         var axis = Vector3d.XAxis;
         var perp = Vector3d.YAxis;
 
-        var element = (DB.Element) this;
-        if (element is object)
+        if (APIElement is DB.Element element)
         {
           switch (element.Location)
           {
@@ -265,8 +279,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var element = (DB.Element) this;
-        if (element is null)
+        if (!(APIElement is DB.Element element))
           return default;
 
         if (element is DB.ModelCurve modelCurve)

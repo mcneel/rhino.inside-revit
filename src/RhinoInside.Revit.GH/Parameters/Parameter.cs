@@ -20,8 +20,6 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public ParameterKey() : base("ParameterKey", "ParaKey", "Represents a Revit parameter definition.", "Params", "Revit Primitives") { }
 
-    protected override Types.ParameterKey PreferredCast(object data) => null;
-
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
       var listBox = new ListBox();

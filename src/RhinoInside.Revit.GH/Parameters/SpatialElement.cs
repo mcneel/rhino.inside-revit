@@ -17,7 +17,5 @@ namespace RhinoInside.Revit.GH.Parameters
       subcategory: "Revit"
       )
     { }
-
-    protected override Types.SpatialElement PreferredCast(object data) => Types.SpatialElement.FromValue(data as DB.SpatialElement) as Types.SpatialElement;
   }
 }

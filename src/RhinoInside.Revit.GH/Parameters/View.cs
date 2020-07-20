@@ -9,13 +9,14 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class View : ElementIdWithoutPreviewParam<Types.View, DB.View>
+  public class View : ElementIdWithoutPreviewParam<Types.IGH_View, DB.View>
   {
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
     public override Guid ComponentGuid => new Guid("2DC4B866-54DB-4CE6-94C0-C51B33D35B49");
-    protected override Types.View PreferredCast(object data) => Types.View.FromElement(data as DB.View) as Types.View;
 
     public View() : base("View", "View", "Represents a Revit view.", "Params", "Revit Primitives") { }
+
+    protected override Types.IGH_View InstantiateT() => new Types.View();
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
@@ -50,7 +51,7 @@ namespace RhinoInside.Revit.GH.Parameters
             viewTypeBox.Items.Add(new Types.ViewFamily(view.Key));
         }
 
-        if ((DB.View) Current is DB.View current)
+        if (Current?.APIView is DB.View current)
         {
           var familyIndex = 0;
           foreach (var viewFamily in viewTypeBox.Items.Cast<Types.ViewFamily>())

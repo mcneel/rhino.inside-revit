@@ -16,9 +16,9 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public class GeometricElement :
-    GraphicalElement,
-    IGH_PreviewMeshData
+  public interface IGH_GeometricElement : IGH_GraphicalElement, IGH_PreviewMeshData { }
+
+  public class GeometricElement : GraphicalElement, IGH_GeometricElement
   {
     public override string TypeDescription => "Represents a Revit geometric element";
 
@@ -26,8 +26,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var element = (DB.Element) this;
-        if (element is object)
+        if (APIElement is DB.Element element)
         {
           if (element.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MARK) is DB.Parameter parameter && parameter.HasValue)
           {
@@ -52,8 +51,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override BoundingBox GetBoundingBox(Transform xform)
     {
-      var element = (DB.Element) this;
-      if (element is null)
+      if (!(APIElement is DB.Element element))
         return BoundingBox.Unset;
 
       var bbox = ClippingBox;
