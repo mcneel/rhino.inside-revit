@@ -25,10 +25,6 @@ namespace RhinoInside.Revit.UI
     {
       if (!PlugIn.LoadPlugIn(PluginId, true, true))
         throw new Exception("Failed to load Grasshopper");
-
-      GH.Guest.Script.LoadEditor();
-      if(!GH.Guest.Script.IsEditorLoaded())
-        throw new Exception("Failed to startup Grasshopper");
     }
 
     /// <summary>
@@ -62,14 +58,16 @@ namespace RhinoInside.Revit.UI
 
     public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
     {
-      // check to see if any document path is provided in journal data
-      // if yes, open the document
-      if (data.JournalData.TryGetValue("Open", out var filename) && File.Exists(filename))
-        GH.Guest.ShowAndOpenDocumentAsync(filename);
-      // otherwise, just open the GH window
-      else
-        GH.Guest.ShowAsync();
-      // whatever happens say success so Revit does not prompt errors
+      // Check to see if any document path is provided in journal data
+      // if yes, open the document.
+      if (data.JournalData.TryGetValue("Open", out var filename))
+      {
+        if (!GH.Guest.OpenDocument(filename))
+          return Result.Failed;
+       }
+
+      GH.Guest.ShowEditorAsync();
+
       return Result.Succeeded;
     }
   }
