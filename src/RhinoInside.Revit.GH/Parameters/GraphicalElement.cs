@@ -209,13 +209,17 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
-      var comboBox = BuildFilterList();
-      comboBox.DropDownStyle = ComboBoxStyle.DropDownList;
-      comboBox.Width = (int) (250 * GH_GraphicsUtil.UiScale);
-      comboBox.SelectedIndexChanged += ComboBox_SelectedIndexChanged;
-      comboBox.Tag = menu;
+      if (SourceCount == 0)
+      {
+        var comboBox = BuildFilterList();
+        comboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+        comboBox.Width = (int) (250 * GH_GraphicsUtil.UiScale);
+        comboBox.SelectedIndexChanged += ComboBox_SelectedIndexChanged;
+        comboBox.Tag = menu;
 
-      Menu_AppendCustomItem(menu, comboBox);
+        Menu_AppendCustomItem(menu, comboBox);
+      }
+
       Menu_AppendItem(menu, $"Set one {TypeName}", Menu_PromptOne, SourceCount == 0, false);
     }
 
