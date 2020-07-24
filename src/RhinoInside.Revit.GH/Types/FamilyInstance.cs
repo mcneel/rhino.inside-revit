@@ -2,12 +2,13 @@ using System;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.Parameters;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public class Instance : InstanceElement
+  public interface IGH_Instane : IGH_InstanceElement { }
+
+  public class Instance : InstanceElement, IGH_Instane
   {
     protected override Type ScriptVariableType => typeof(DB.Instance);
     public static explicit operator DB.Instance(Instance value) =>
@@ -44,7 +45,9 @@ namespace RhinoInside.Revit.GH.Types
     }
   }
 
-  public class FamilyInstance : Instance
+  public interface IGH_FamilyInstance : IGH_Instane { }
+
+  public class FamilyInstance : Instance, IGH_FamilyInstance
   {
     public override string TypeName
     {
