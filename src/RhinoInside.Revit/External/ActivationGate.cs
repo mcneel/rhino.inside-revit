@@ -381,9 +381,10 @@ namespace RhinoInside.Revit.External
         {
           case 5: // HCBT_ACTIVATE
           {
+            windowToActivate = new WindowHandle(wParam);
+
             if (IsOpen)
             {
-              windowToActivate = new WindowHandle(wParam);
               if (windowToActivate == Revit.MainWindow && !windowToActivate.Enabled)
               {
                 foreach (var gate in gates)
