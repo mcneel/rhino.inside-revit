@@ -10,6 +10,28 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html version="0.0.7513.21931" time="07/27/2020 12:11:02" %}
+
+### New Features
+* Updated Installer bitmaps.
+* Added 'Filter Element' component.
+* Added 'Query Graphical Elements' component.
+* Added 'Element Name', 'Element Category' and 'Element Type' components.
+
+### Minor Changes
+* Renamed 'Exclude ElementType' Filter component to 'Exclude Types'.
+* Renamed 'Document Levels Picker' to 'Levels Picker'.
+* Renamed 'All documents' to 'Open Documents'
+
+### Fixes
+* Fixed a bug in ActivationGate that provokes Grassopper window not to activate once is deactivated.
+* Fixed Parameters UI when have no connected inputs.
+* Fixed RhinoInside.Revit.GH.Types.Panel.IsValidElement to recognize DB.Panel as a Types.Panel.
+* Fixed 'Document Links' component. Now it works even when there is no instance to the link placed in the model.
+
+### API
+* Added Extension method DB.Document.HasModelPath to check if a DB.Document has the specified path.
+
 {% include ltr/release-header.html version="0.0.7500.18692" time="07/14/2020 10:23:04" %}
 
 ### New Features
