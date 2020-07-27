@@ -31,8 +31,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static bool HasModelPath(this Document doc, ModelPath modelPath)
     {
+#if REVIT_2020
       if (modelPath.CloudPath)
         return doc.IsModelInCloud && modelPath.Compare(doc.GetCloudModelPath()) == 0;
+#endif
 
       if (modelPath.ServerPath)
         return doc.IsWorkshared && modelPath.Compare(doc.GetWorksharingCentralModelPath()) == 0;
