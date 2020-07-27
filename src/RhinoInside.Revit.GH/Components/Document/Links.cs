@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -10,7 +12,7 @@ namespace RhinoInside.Revit.GH.Components
     public override Guid ComponentGuid => new Guid("EBCCFDD8-9F3B-44F4-A209-72D06C8082A5");
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "L";
-    protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.RevitLinkInstance));
+    protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.RevitLinkType));
 
     public DocumentLinks() : base
     (
@@ -31,19 +33,25 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.Document>("Linked Documents", "LD", "Revit documents that are linked into given document", GH_ParamAccess.list)
+      ParamDefinition.Create<Parameters.Document>("Documents", "D", "Revit documents that are linked into given document", GH_ParamAccess.list)
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
     {
-      using (var collector = new DB.FilteredElementCollector(doc))
+      var docs = new List<DB.Document>();
+      using (var documents = Revit.ActiveDBApplication.Documents)
       {
-        DA.SetDataList
-        (
-          "Linked Documents",
-          // find all link instances in the model, and grab their source document reference
-          collector.OfClass(typeof(DB.RevitLinkInstance)).Cast<DB.RevitLinkInstance>().Select(x => Types.Document.FromDocument(x.GetLinkDocument()))
-        );
+        foreach (var id in DB.ExternalFileUtils.GetAllExternalFileReferences(doc))
+        {
+          var reference = DB.ExternalFileUtils.GetExternalFileReference(doc, id);
+          if (reference.ExternalFileReferenceType == DB.ExternalFileReferenceType.RevitLink)
+          {
+            var modelPath = reference.PathType == DB.PathType.Relative ? reference.GetAbsolutePath() : reference.GetPath();
+            docs.Add(documents.Cast<DB.Document>().Where(x => x.IsLinked && x.HasModelPath(modelPath)).FirstOrDefault());
+          }
+        }
+
+        DA.SetDataList("Documents", docs);
       }
     }
   }
