@@ -29,6 +29,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return doc.PathName;
     }
 
+    public static bool HasModelPath(this Document doc, ModelPath modelPath)
+    {
+      if (modelPath.CloudPath)
+        return doc.IsModelInCloud && modelPath.Compare(doc.GetCloudModelPath()) == 0;
+
+      if (modelPath.ServerPath)
+        return doc.IsWorkshared && modelPath.Compare(doc.GetWorksharingCentralModelPath()) == 0;
+
+      return modelPath.Compare(new FilePath(doc.PathName)) == 0;
+    }
+
     public static Guid GetFingerprintGUID(this Document doc)
     {
       if (doc?.IsValidObject != true)
