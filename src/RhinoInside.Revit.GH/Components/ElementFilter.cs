@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
-using RhinoInside.Revit.Convert.Units;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
@@ -115,7 +114,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "T";
 
     public ElementExcludeElementTypeFilter()
-    : base("Exclude ElementType", "NotElementType", "Filter used to exclude element types", "Revit", "Filter")
+    : base("Exclude Types", "NotTypes", "Filter used to exclude element types", "Revit", "Filter")
     { }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -270,15 +269,6 @@ namespace RhinoInside.Revit.GH.Components
         {
           var rule = new DB.FilterElementIdRule(provider, new DB.FilterNumericEquals(), typeIds[0]);
           var filter = new DB.ElementParameterFilter(rule, inverted) as DB.ElementFilter;
-
-          if (typeIds[0] == DB.ElementId.InvalidElementId)
-          {
-            filter = new DB.LogicalAndFilter
-            (
-              new DB.ElementClassFilter(typeof(DB.PropertySetElement), inverted),
-              filter
-            );
-          }
 
           DA.SetData("Filter", filter);
         }
@@ -572,7 +562,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "D";
 
     public ElementDesignOptionFilter()
-    : base("DesignOption Filter", "ByDesignOption", "Filter used to match elements associated to the given Design Option", "Revit", "Filter")
+    : base("Design Option Filter", "ByDesignOption", "Filter used to match elements associated to the given Design Option", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
