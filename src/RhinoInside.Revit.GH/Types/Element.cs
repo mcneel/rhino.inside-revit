@@ -13,6 +13,7 @@ namespace RhinoInside.Revit.GH.Types
   public interface IGH_Element : IGH_ElementId
   {
     DB.Element APIElement { get; }
+    ElementType Type { get; set; }
   }
 
   public class Element : ElementId, IGH_Element
@@ -253,6 +254,38 @@ namespace RhinoInside.Revit.GH.Types
           return element.Name;
 
         return base.DisplayName;
+      }
+    }
+
+    protected void AssertValidDocument(DB.Document doc, string paramName)
+    {
+      if (!(doc?.Equals(Document) ?? false))
+        throw new System.ArgumentException("Invalid Document", paramName);
+    }
+
+    public string Name
+    {
+      get => APIElement?.Name;
+      set
+      {
+        if(APIElement is DB.Element element)
+         element.Name = value;
+      }
+    }
+
+    public Category Category
+    {
+      get => Types.Category.FromValue(APIElement?.Category);
+    }
+
+    public virtual ElementType Type
+    {
+      get => Types.ElementType.FromElementId(Document, APIElement?.GetTypeId()) as ElementType;
+      set
+      {
+        AssertValidDocument(value?.Document, nameof(Type));
+
+        APIElement?.ChangeTypeId(value.Id);
       }
     }
   }

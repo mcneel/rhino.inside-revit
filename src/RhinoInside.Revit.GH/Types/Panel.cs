@@ -21,5 +21,36 @@ namespace RhinoInside.Revit.GH.Types
 
     public Panel() { }
     public Panel(DB.FamilyInstance value) : base(value) { }
+
+    public override ElementType Type
+    {
+      get
+      {
+        if
+        (
+          APIElement is DB.Panel panel &&
+          panel.Document.GetElement(panel.FindHostPanel()) is DB.HostObject host
+        )
+        {
+          return ElementType.FromElementId(panel.Document, host.GetTypeId()) as ElementType;
+        }
+        else return base.Type;
+      }
+      set
+      {
+        if
+        (
+          APIElement is DB.Panel panel &&
+          panel.Document.GetElement(panel.FindHostPanel()) is DB.HostObject host &&
+          value?.APIElementType is DB.HostObjAttributes hostType
+        )
+        {
+          AssertValidDocument(value.Document, nameof(Type));
+
+          host.ChangeTypeId(hostType.Id);
+        }
+        else base.Type = value;
+      }
+    }
   }
 }
