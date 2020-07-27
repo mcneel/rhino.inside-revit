@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Linq;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -14,9 +15,9 @@ namespace RhinoInside.Revit.GH.Components
 
     public AllDocuments() : base
     (
-      name: "All Documents",
+      name: "Open Documents",
       nickname: "Documents",
-      description: "Gets the list of all active documents",
+      description: "Gets the list of all open documents",
       category: "Revit",
       subCategory: "Document"
     )
@@ -34,8 +35,8 @@ namespace RhinoInside.Revit.GH.Components
     {
       using (var Documents = Revit.ActiveDBApplication.Documents)
       {
-        IList projects = Documents.Cast<DB.Document>().Where(x => !x.IsFamilyDocument && !x.IsLinked).ToArray();
-        IList families = Documents.Cast<DB.Document>().Where(x =>  x.IsFamilyDocument && !x.IsLinked).ToArray();
+        IList projects = Documents.Cast<DB.Document>().Where(x => !x.IsFamilyDocument && !x.IsLinked && x.GetActiveGraphicalView() is object).ToArray();
+        IList families = Documents.Cast<DB.Document>().Where(x =>  x.IsFamilyDocument && !x.IsLinked && x.GetActiveGraphicalView() is object).ToArray();
 
         DA.SetDataList("Projects", projects);
         DA.SetDataList("Families", families);

@@ -4,7 +4,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class FamilyInstance : GraphicalElementT<Types.GraphicalElement, DB.FamilyInstance>
+  public class FamilyInstance : GraphicalElementT<Types.IGH_FamilyInstance, DB.FamilyInstance>
   {
     public override GH_Exposure Exposure => GH_Exposure.hidden; //GH_Exposure.tertiary;
     public override Guid ComponentGuid => new Guid("804BD6AC-8A4A-4D79-A734-330534B3C435");

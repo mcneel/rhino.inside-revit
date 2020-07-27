@@ -17,6 +17,9 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
+      if (SourceCount != 0)
+        return;
+
       var listBox = new ListBox();
       listBox.BorderStyle = BorderStyle.FixedSingle;
       listBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
@@ -44,7 +47,7 @@ namespace RhinoInside.Revit.GH.Parameters
         foreach(var cat in materials)
           materialCategoryBox.Items.Add(cat.Key);
 
-        if ((DB.Material) Current is DB.Material current)
+        if (Current?.APIElement is DB.Material current)
         {
           var familyIndex = 0;
           foreach (var materialClass in materialCategoryBox.Items.Cast<string>())

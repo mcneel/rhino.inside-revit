@@ -1,11 +1,14 @@
 using System;
 using Grasshopper.Kernel;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Obsolete
 {
+  [Obsolete("Obsolete since 2020-07-27")]
   public class ElementIdentity : Component
   {
     public override Guid ComponentGuid => new Guid("D3917D58-7183-4B3F-9D22-03F0FE93B956");
+    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.hidden;
+
     protected override string IconTag => "ID";
 
     public ElementIdentity() : base

@@ -7,7 +7,6 @@ namespace RhinoInside.Revit.GH.Types
   /// </summary>
   public interface IGH_InstanceElement : IGH_GeometricElement
   {
-    ElementType ElementType { get; }
     Level Level { get; }
     View OwnerView { get; }
   }
@@ -22,27 +21,16 @@ namespace RhinoInside.Revit.GH.Types
     protected override bool SetValue(DB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(DB.Element element)
     {
-      // DB.ElementType CanHaveTypeAssigned return false.
-      //if (element is DB.ElementType)
-      //  return false;
-
-      // DB.View do not have category.
-      //if (element is DB.View)
-      //  return false;
-
       if (element.Category is null)
         return false;
 
       return element.CanHaveTypeAssigned();
     }
 
-    public ElementType ElementType =>
-      ElementType.FromElementId(Document, (APIElement as DB.Element)?.GetTypeId()) as ElementType;
-
     public override Level Level =>
-      Level.FromElementId(Document, (APIElement as DB.Element)?.LevelId) as Level;
+      Level.FromElementId(Document, APIElement?.LevelId) as Level;
 
     public View OwnerView =>
-      View.FromElementId(Document, (APIElement as DB.Element)?.OwnerViewId) as View;
+      View.FromElementId(Document, APIElement?.OwnerViewId) as View;
   }
 }

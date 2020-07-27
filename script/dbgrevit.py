@@ -114,7 +114,13 @@ def create_rir_journal(journal_dir,
         journal_name (str, optional): name of the journal file
     """
     # start a clean journal
-    jm = rjm.JournalMaker(permissive=True)
+    # note on `take_default_action=False`
+    # activating PerformAutomaticActionInErrorDialog causes an issue when
+    # closing a Revit in journal-mode with a modified open document,
+    # will cause Revit to automatically hit Yes to the "Do you want to save?"
+    # pop up and shows the Save file pop up. Thus, user can not close Revit
+    # unless they save the file which could take time depending on the size
+    jm = rjm.JournalMaker(permissive=True, take_default_action=False)
 
     # open model
     if model_path:

@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Permissions;
 using Autodesk.Revit.UI;
 using Microsoft.Win32.SafeHandles;
+using Microsoft.Win32.SafeHandles.InteropServices;
 
 namespace RhinoInside.Revit.External
 {
@@ -58,8 +60,17 @@ namespace RhinoInside.Revit.External
     [ThreadStatic]
     static WindowHandle windowToActivate = default;
 
+    class Gate
+    {
+      public readonly WindowHandle Window;
+      public readonly ExternalEvent ExternalEvent = ExternalEvent.Create(new TryActivateEventHandler());
+      public readonly HashSet<IntPtr> ExternalWindows = new HashSet<IntPtr>();
+
+      public Gate(IntPtr gate) { Window = new WindowHandle(gate); }
+    }
+
     [ThreadStatic]
-    static readonly Dictionary<IntPtr, ExternalEvent> gates = new Dictionary<IntPtr, ExternalEvent>();
+    static readonly Dictionary<IntPtr, Gate> gates = new Dictionary<IntPtr, Gate>();
 
     /// <summary>
     /// Returns an <see cref="IEnumerable{IntPtr}"/> of currently registered windows as Gate windows.
@@ -80,20 +91,41 @@ namespace RhinoInside.Revit.External
       if (hook is null)
         hook = new Hook();
 
-      if (gates.ContainsKey(hWnd))
+      if (HasGate(hWnd, out var _))
         return false;
 
-      gates.Add(hWnd, ExternalEvent.Create(new TryActivateEventHandler()));
+      gates.Add(hWnd, new Gate(hWnd));
       return true;
     }
 
-    static bool IsExternalWindow(IntPtr hWnd, out ExternalEvent gate)
+    static bool HasGate(IntPtr hWnd, out Gate gate)
     {
       for (var window = new WindowHandle(hWnd); !window.IsInvalid; window = window.Owner)
+      {
         if (gates.TryGetValue(window.Handle, out gate))
           return true;
+      }
 
       gate = default;
+      return false;
+    }
+
+    static bool IsExternalWindow(IntPtr hWnd, out ExternalEvent externalEvent)
+    {
+      for (var window = new WindowHandle(hWnd); !window.IsInvalid; window = window.Owner)
+      {
+        if
+        (
+          gates.TryGetValue(window.Handle, out var gate) &&
+          (window.Handle == hWnd || gate.ExternalWindows.Contains(hWnd))
+        )
+        {
+          externalEvent = gate.ExternalEvent;
+          return true;
+        }
+      }
+
+      externalEvent = default;
       return false;
     }
 
@@ -349,30 +381,60 @@ namespace RhinoInside.Revit.External
         {
           case 5: // HCBT_ACTIVATE
           {
-            if (!IsOpen && IsExternalWindow(wParam, out var gate))
+            windowToActivate = new WindowHandle(wParam);
+
+            if (IsOpen)
             {
-              windowToActivate = new WindowHandle(wParam);
+              if (windowToActivate == Revit.MainWindow && !windowToActivate.Enabled)
+              {
+                foreach (var gate in gates)
+                {
+                  try { gate.Value.Window.BringToFront(); }
+                  catch { }
+                }
+              }
+            }
+            else
+            {
+              if (IsExternalWindow(wParam, out var externalEvent))
+              {
+                if (externalEvent.IsPending)
+                  WindowHandle.ActiveWindow.Flash();
+                else
+                  externalEvent.Raise();
 
-              if (gate.IsPending)
-                WindowHandle.ActiveWindow.Flash();
-              else
-                gate.Raise();
+                return 1; // Prevents activation now.
+              }
+            }
+          }
+          break;
+          case 3: // HCBT_CREATEWND
+          {
+            if (IsOpen)
+            {
+              var createWnd = Marshal.PtrToStructure<User32.CBT_CREATEWND>(lParam);
+              var createStruct = Marshal.PtrToStructure<User32.CREATESTRUCT>(createWnd.lpcs);
 
-              return 1; // Prevents activation now.
+              if ((createStruct.style & 0x40000000/*WS_CHILD*/) == 0 && HasGate(createStruct.hwndParent, out var gate))
+                gate.ExternalWindows.Add(wParam);
             }
           }
           break;
           case 4: // HCBT_DESTROYWND
           {
-            if (gates.TryGetValue(wParam, out var gate))
+            if (HasGate(wParam, out var gate))
             {
-              gate.Dispose();
-
-              if (gates.Remove(wParam) && gates.Count == 0)
+              if (wParam == gate.Window.Handle)
               {
-                try { return base.DispatchHook(nCode, wParam, lParam); }
-                finally { Dispose(); hook = default; }
+                gate.ExternalEvent.Dispose();
+
+                if (gates.Remove(wParam) && gates.Count == 0)
+                {
+                  try { return base.DispatchHook(nCode, wParam, lParam); }
+                  finally { Dispose(); hook = default; }
+                }
               }
+              else gate.ExternalWindows.Remove(wParam);
             }
           }
           break;

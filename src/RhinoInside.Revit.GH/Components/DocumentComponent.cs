@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.GH.Components
       base.ClearData();
     }
 
-    protected override sealed void TrySolveInstance(IGH_DataAccess DA)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       DB.Document Document = default;
       var _Document_ = Params.IndexOfInputParam("Document");
@@ -58,6 +58,6 @@ namespace RhinoInside.Revit.GH.Components
       TrySolveInstance(DA, Document);
     }
 
-    protected abstract void TrySolveInstance(IGH_DataAccess DA, DB.Document doc);
+    protected virtual void TrySolveInstance(IGH_DataAccess DA, DB.Document doc) { }
   }
 }

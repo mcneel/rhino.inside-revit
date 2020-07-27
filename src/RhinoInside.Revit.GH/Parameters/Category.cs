@@ -17,6 +17,9 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
+      if (SourceCount != 0)
+        return;
+
       var listBox = new ListBox
       {
         Sorted = true,
@@ -39,7 +42,7 @@ namespace RhinoInside.Revit.GH.Parameters
       categoriesTypeBox.Items.Add("Internal");
       categoriesTypeBox.Items.Add("Analytical");
 
-      if((DB.Category) Current is DB.Category current)
+      if(Current?.APICategory is DB.Category current)
       {
         if (current.IsTagCategory)
           categoriesTypeBox.SelectedIndex = 2;

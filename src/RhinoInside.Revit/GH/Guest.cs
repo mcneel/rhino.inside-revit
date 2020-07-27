@@ -103,9 +103,33 @@ namespace RhinoInside.Revit.GH
     }
 
     /// <summary>
-    /// Show Grasshopper window
+    /// Returns the loaded state of the Grasshopper Main window.
     /// </summary>
-    public static void Show()
+    /// <returns>True if the Main Grasshopper Window has been loaded.</returns>
+    public static bool IsEditorLoaded() => Script.IsEditorLoaded();
+
+    /// <summary>
+    /// Load the main Grasshopper Editor. If the editor has already been loaded nothing
+    /// will happen.
+    /// </summary>
+    public static void LoadEditor()
+    {
+      Script.LoadEditor();
+      if (!Script.IsEditorLoaded())
+        throw new Exception("Failed to startup Grasshopper");
+    }
+
+    /// <summary>
+    /// Returns the visible state of the Grasshopper Main window.
+    /// </summary>
+    /// <returns>True if the Main Grasshopper Window has been loaded and is visible.</returns>
+    public static bool IsEditorVisible() => Script.IsEditorVisible();
+
+    /// <summary>
+    /// Show the main Grasshopper Editor. The editor will be loaded first if needed.
+    /// If the Editor is already on screen, nothing will happen.
+    /// </summary>
+    public static void ShowEditor()
     {
       Script.ShowEditor();
       Rhinoceros.MainWindow.BringToFront();
@@ -114,35 +138,41 @@ namespace RhinoInside.Revit.GH
     /// <summary>
     /// Show Grasshopper window asynchronously
     /// </summary>
-    public static async void ShowAsync()
+    public static async void ShowEditorAsync()
     {
       // Yield execution back to Revit and show Grasshopper window asynchronously.
       await External.ActivationGate.Yield();
 
-      Show();
+      ShowEditor();
     }
 
     /// <summary>
-    /// Show Grasshopper window and open the given definition document
+    /// Hide the main Grasshopper Editor. If the editor hasn't been loaded or if the
+    /// Editor is already hidden, nothing will happen.
     /// </summary>
-    /// <param name="filename">Full path to GH definition file</param>
-    public static void ShowAndOpenDocument(string filename)
-    {
-      Script.ShowEditor();
-      Script.OpenDocument(filename);
-      Rhinoceros.MainWindow.BringToFront();
-    }
+    public static void HideEditor() => Script.HideEditor();
 
     /// <summary>
-    /// Show Grasshopper window asynchronously and open the given definition document
+    /// Open a Grasshopper document. The editor will be loaded if necessary, but it will not be automatically shown.
+    /// </summary>
+    /// <param name="filename">Path of file to open (must be a *.gh or *.ghx extension).</param>
+    /// <returns>True on success, false on failure.</returns>
+    public static bool OpenDocument(string filename) => Script.OpenDocument(filename);
+
+    /// <summary>
+    /// Open a Grasshopper document. The editor will be loaded and shown if necessary.
     /// </summary>
     /// <param name="filename">Full path to GH definition file</param>
-    public static async void ShowAndOpenDocumentAsync(string filename)
+    /// <param name="showEditor">True to force the Main Grasshopper Window visible.</param>
+    public static async void OpenDocumentAsync(string filename, bool showEditor = true)
     {
-      // wait for the gate to open!
+      // Yield execution back to Revit and show Grasshopper window asynchronously.
       await External.ActivationGate.Yield();
-      // now show the window
-      ShowAndOpenDocument(filename);
+
+      if (showEditor)
+        ShowEditor();
+
+      OpenDocument(filename);
     }
 
     static bool LoadGHA(string filePath)
