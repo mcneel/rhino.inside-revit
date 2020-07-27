@@ -152,7 +152,7 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       Category = "Revit";
       SubCategory = "Input";
-      Name = "Document Levels Picker";
+      Name = "Levels Picker";
       MutableNickName = false;
       Description = "Provides a Level picker";
     }
