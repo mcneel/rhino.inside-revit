@@ -71,8 +71,8 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (!clippingBox.HasValue && APIElement is DB.Element element)
-          clippingBox = (element.get_BoundingBox(null)).ToBoundingBox();
+        if (!clippingBox.HasValue)
+          clippingBox = APIElement?.get_BoundingBox(null).ToBoundingBox() ?? BoundingBox.Unset;
 
         return clippingBox.Value;
       }
