@@ -271,6 +271,145 @@ else:
     # do other stuff
 {% endhighlight %}
 
+
+## Node In Code
+
+You can also use the Grasshopper components that you love, inside your code, as functions and therefore create much more complex and powerful scripted components without writing the necessary complicated codes. The Grasshopper components basically become like powerful library functions that help you get your job done and have a smaller script to maintain. Here is what you need to add to use the Grasshopper components in your code. First we need to import the Node-in-Code handle:
+
+{% highlight python %}
+from Rhino.NodeInCode import Components
+{% endhighlight %}
+
+Now you can access the component, like a function. These function names are prefixed with the name of their Grasshopper plugin to avoid naming conflicts. The example below shows how we can access the {% include ltr/comp.html uuid="0d9f07e2-" %} inside the code:
+
+{% highlight python %}
+Components.NodeInCodeFunctions.RhinoInside_AddMaterial()
+
+# alternatively you can use a finder function to find
+# the component by name.
+Components.FindComponent("RhinoInside_AddMaterial")
+{% endhighlight %}
+
+Now lets put this knowledge into use and create a custom scripted component that imports a Brep geometry into Revit and assigns a material to it. This scripted component effectively combines 3 different Grasshopper components into one. Note that there are obviously easier ways to do the same task, however this is a simple example of how components can be chained together in a script.
+
+We will start with the [template script component that we created above](#custom-user-component). Add it to your Grasshopper definition and modify the variable parameters to make it look like this:
+
+![]({{ "/static/images/guides/rir-ghpython06.png" | prepend: site.baseurl }})
+
+Let's find our components first, and notify the user if any of them does not exist.
+
+{% highlight python %}
+# AddMaterial component to create a material
+add_material = Components.FindComponent("RhinoInside_AddMaterial")
+# and AddGeometryDirectShape to create a DirectShape element in Revit
+add_geom_directshape = Components.FindComponent("RhinoInside_AddGeometryDirectShape")
+{% endhighlight %}
+
+Let's also notify the user if any of these components do not exist:
+
+{% highlight python %}
+if not (add_material and add_geom_directshape):
+    show_error("One or more of the necessary components are not available as node-in-code")
+{% endhighlight %}
+
+Now let's create the main logic of our script:
+
+{% highlight python %}
+# create a color object. modify the logic as you wish
+color = System.Drawing.Color.FromName("DeepSkyBlue")
+
+# now create the material using the node-in-code
+# note that just like the Grasshopper component, the node-in-code also
+# takes 3 inputs in the exact same order (top to bottom)
+new_materials = add_material.Invoke("Sky Material", True, color)
+
+# and now use the AddGeometryDirectShape node-in-code to
+# create the DirectShape element in Revit
+# Notes:
+#    - BREP is our input Brep object
+#    - new_materials is a list of new materials so we are grabbing the first element
+#    - get_category is a function that finds a Revit category from its name
+ds_element = add_geom_directshape.Invoke(
+    "Custom DS",
+    get_category("Walls"),
+    BREP,
+    new_materials[0]
+    )
+
+# assign the new DirectShape element to output
+DS = ds_element[0]
+{% endhighlight %}
+
+And here is the complete script:
+
+{% highlight python %}
+import clr
+clr.AddReference('System.Core')
+clr.AddReference('RhinoInside.Revit')
+clr.AddReference('RevitAPI') 
+clr.AddReference('RevitAPIUI')
+
+import System
+import Rhino
+from Grasshopper.Kernel import GH_RuntimeMessageLevel as RML
+
+# bring in the node-in-code handle
+from Rhino.NodeInCode import Components
+
+# Revit API
+from Autodesk.Revit import DB
+
+from RhinoInside.Revit import Revit
+
+def show_warning(msg):
+    ghenv.Component.AddRuntimeMessage(RML.Warning, msg)
+
+def show_error(msg):
+    ghenv.Component.AddRuntimeMessage(RML.Error, msg)
+
+def show_remark(msg):
+    ghenv.Component.AddRuntimeMessage(RML.Remark, msg)
+
+def get_category(category_name):
+    doc = Revit.ActiveDBDocument
+    for cat in doc.Settings.Categories:
+        if cat.Name == category_name:
+            return cat
+
+
+# AddMaterial component to create a material
+add_material = Components.FindComponent("RhinoInside_AddMaterial")
+# and AddGeometryDirectShape to create a DirectShape element in Revit
+add_geom_directshape = Components.FindComponent("RhinoInside_AddGeometryDirectShape")
+
+if not (add_material and add_geom_directshape):
+    show_error("One or more of the necessary components are not available as node-in-code")
+
+if BREP:
+    # create a color object. modify the logic as you wish
+    color = System.Drawing.Color.FromName("DeepSkyBlue")
+    
+    # now create the material using the node-in-code
+    # note that just like the Grasshopper component, the node-in-code also
+    # takes 3 inputs in the exact same order (top to bottom)
+    new_material = add_material.Invoke("Sky Material", True, color)
+
+    # and now use the AddGeometryDirectShape node-in-code to
+    # create the DirectShape element in Revit
+    # note that BREP is our input Brep object
+    ds_element = add_geom_directshape.Invoke(
+        "Custom DS",
+        get_category("Walls"),
+        BREP,
+        new_material[0]
+        )
+    
+    # assign the new DirectShape element to output
+    DS = ds_element[0]
+{% endhighlight %}
+
+![]({{ "/static/images/guides/rir-ghpython07.png" | prepend: site.baseurl }})
+
 ## Additional Resources
 
 Here are a few links to more resources about all the APIs mentioned here:
