@@ -287,7 +287,9 @@ Components.NodeInCodeFunctions.RhinoInside_AddMaterial()
 
 # alternatively you can use a finder function to find
 # the component by name.
-Components.FindComponent("RhinoInside_AddMaterial")
+comp = Components.FindComponent("RhinoInside_AddMaterial")
+# and call the .Invoke function
+comp.Invoke()
 {% endhighlight %}
 
 Now lets put this knowledge into use and create a custom scripted component that imports a Brep geometry into Revit and assigns a material to it. This scripted component effectively combines 3 different Grasshopper components into one. Note that there are obviously easier ways to do the same task, however this is a simple example of how components can be chained together in a script.
@@ -329,7 +331,7 @@ new_materials = add_material.Invoke("Sky Material", True, color)
 #    - BREP is our input Brep object
 #    - new_materials is a list of new materials so we are grabbing the first element
 #    - get_category is a function that finds a Revit category from its name
-ds_element = add_geom_directshape.Invoke(
+ds_elements = add_geom_directshape.Invoke(
     "Custom DS",
     get_category("Walls"),
     BREP,
@@ -337,7 +339,7 @@ ds_element = add_geom_directshape.Invoke(
     )
 
 # assign the new DirectShape element to output
-DS = ds_element[0]
+DS = ds_elements[0]
 {% endhighlight %}
 
 And here is the complete script:
@@ -397,7 +399,7 @@ if BREP:
     # and now use the AddGeometryDirectShape node-in-code to
     # create the DirectShape element in Revit
     # note that BREP is our input Brep object
-    ds_element = add_geom_directshape.Invoke(
+    ds_elements = add_geom_directshape.Invoke(
         "Custom DS",
         get_category("Walls"),
         BREP,
@@ -405,7 +407,7 @@ if BREP:
         )
     
     # assign the new DirectShape element to output
-    DS = ds_element[0]
+    DS = ds_elements[0]
 {% endhighlight %}
 
 ![]({{ "/static/images/guides/rir-ghpython07.png" | prepend: site.baseurl }})
