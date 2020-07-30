@@ -347,6 +347,9 @@ namespace RhinoInside.Revit.GH
           {
             if (obj is Kernel.IGH_ElementIdParam persistentParam)
             {
+              if (persistentParam.Locked)
+                continue;
+
               if (persistentParam.DataType == GH_ParamData.remote)
                 continue;
 
@@ -363,6 +366,9 @@ namespace RhinoInside.Revit.GH
             }
             else if (obj is Kernel.IGH_ElementIdComponent persistentComponent)
             {
+              if (persistentComponent.Locked)
+                continue;
+
               if (persistentComponent.NeedsToBeExpired(e))
               {
                 if (expireNow)
