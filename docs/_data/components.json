@@ -6,6 +6,7 @@
     "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Category", 
+    "typename": "Category", 
     "uuid": "6722c7a5-efd3-4119-a7fd-6c8be892fd04"
   }, 
   {
@@ -15,6 +16,7 @@
     "panel": "Category", 
     "tab": "Revit", 
     "title": "CategoryTypes", 
+    "typename": "CategoryTypes", 
     "uuid": "5ffb1339-8521-44a1-9075-2984637725e9"
   }, 
   {
@@ -24,6 +26,7 @@
     "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Level", 
+    "typename": "Level", 
     "uuid": "3238f8bc-8483-4584-b47c-48b4933e478e"
   }, 
   {
@@ -33,6 +36,7 @@
     "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Grid", 
+    "typename": "Grid", 
     "uuid": "7d2fb886-a184-41b8-a7d6-a6fdb85cf4e4"
   }, 
   {
@@ -42,6 +46,7 @@
     "panel": "DirectShape", 
     "tab": "Revit", 
     "title": "DirectShape Categories", 
+    "typename": "DirectShapeCategories", 
     "uuid": "7bafe137-332b-481a-be22-09e8bd4c86fc"
   }, 
   {
@@ -51,6 +56,7 @@
     "panel": "Input", 
     "tab": "Revit", 
     "title": "Model Categories Picker", 
+    "typename": "ModelCategoriesPicker", 
     "uuid": "eb266925-f1aa-4729-b5c0-b978937f51a3"
   }, 
   {
@@ -60,6 +66,7 @@
     "panel": "Input", 
     "tab": "Revit", 
     "title": "Annotation Categories Picker", 
+    "typename": "AnnotationCategoriesPicker", 
     "uuid": "b1d1ca45-3771-49ca-8540-9a916a743c1b"
   }, 
   {
@@ -69,6 +76,7 @@
     "panel": "Input", 
     "tab": "Revit", 
     "title": "Tag Categories Picker", 
+    "typename": "TagCategoriesPicker", 
     "uuid": "30f6da06-35f9-4e83-ae9e-080af26c8326"
   }, 
   {
@@ -78,6 +86,7 @@
     "panel": "Input", 
     "tab": "Revit", 
     "title": "Analytical Categories Picker", 
+    "typename": "AnalyticalCategoriesPicker", 
     "uuid": "4120c5ed-4329-4f42-b8d3-fa518e6e6807"
   }, 
   {
@@ -86,7 +95,8 @@
     "icontag": null, 
     "panel": "Input", 
     "tab": "Revit", 
-    "title": "Document Levels Picker", 
+    "title": "Levels Picker", 
+    "typename": "DocumentLevelsPicker", 
     "uuid": "bd6a74f3-8c46-4506-87d9-b34bd96747da"
   }, 
   {
@@ -96,6 +106,7 @@
     "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Element", 
+    "typename": "Element", 
     "uuid": "f3ea4a9c-b24f-4587-a358-6a7e6d8c028b"
   }, 
   {
@@ -105,6 +116,7 @@
     "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Type", 
+    "typename": "ElementType", 
     "uuid": "97dd546d-65c3-4d00-a609-3f5fbda67142"
   }, 
   {
@@ -114,6 +126,7 @@
     "panel": "Input", 
     "tab": "Revit", 
     "title": "ElementType Picker", 
+    "typename": "ElementTypeByName", 
     "uuid": "d3fb53d3-9118-4f11-a32d-aecb30aa418d"
   }, 
   {
@@ -123,6 +136,7 @@
     "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Family", 
+    "typename": "Family", 
     "uuid": "3966add8-07c0-43e7-874b-6eff95598eb0"
   }, 
   {
@@ -132,6 +146,7 @@
     "panel": "Input", 
     "tab": "Revit", 
     "title": "Families Picker", 
+    "typename": "DocumentFamiliesPicker", 
     "uuid": "45cee087-4194-4e55-aa20-9cc5d2193ce0"
   }, 
   {
@@ -141,6 +156,7 @@
     "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Mullion", 
+    "typename": "Mullion", 
     "uuid": "6d845cbd-1962-4912-80c1-f47fe99ad54a"
   }, 
   {
@@ -150,6 +166,7 @@
     "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Panel", 
+    "typename": "Panel", 
     "uuid": "cef5dd61-bc7d-4e66-ae94-e990b193acdc"
   }, 
   {
@@ -159,6 +176,7 @@
     "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Vertex", 
+    "typename": "Vertex", 
     "uuid": "bc1b160a-dc04-4139-ab7d-1aecbde7ff88"
   }, 
   {
@@ -168,6 +186,7 @@
     "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Edge", 
+    "typename": "Edge", 
     "uuid": "b79fd0fd-63ae-4776-a0a7-6392a3a58b0d"
   }, 
   {
@@ -177,6 +196,7 @@
     "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Face", 
+    "typename": "Face", 
     "uuid": "759700ed-bc79-4986-a6ab-84921a7c9293"
   }, 
   {
@@ -186,6 +206,7 @@
     "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Graphical Element", 
+    "typename": "GraphicalElement", 
     "uuid": "ef607c2a-2f44-43f4-9c39-369ce114b51f"
   }, 
   {
@@ -195,6 +216,7 @@
     "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Group", 
+    "typename": "Group", 
     "uuid": "2674b9ff-e463-426b-8a8c-ccb5a7f4c84e"
   }, 
   {
@@ -204,6 +226,7 @@
     "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Host", 
+    "typename": "HostObject", 
     "uuid": "e3462915-3c4d-4864-9dd4-5a73f91c6543"
   }, 
   {
@@ -213,6 +236,7 @@
     "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Building Pad", 
+    "typename": "BuildingPad", 
     "uuid": "0d0afe5f-4578-493e-8374-c6bd1c5395be"
   }, 
   {
@@ -222,6 +246,7 @@
     "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Curtain Grid Line", 
+    "typename": "CurtainGridLine", 
     "uuid": "a2dd571e-729c-4f69-bd34-2769583d329b"
   }, 
   {
@@ -231,6 +256,7 @@
     "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Curtain System", 
+    "typename": "CurtainSystem", 
     "uuid": "e94b20e9-c2aa-4fc7-939d-ecd071ea45da"
   }, 
   {
@@ -240,6 +266,7 @@
     "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Ceiling", 
+    "typename": "Ceiling", 
     "uuid": "7fcea93d-8cde-446c-9167-e8b590342c66"
   }, 
   {
@@ -249,6 +276,7 @@
     "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Floor", 
+    "typename": "Floor", 
     "uuid": "45616df6-59bf-4480-a133-8f9b3ba27af1"
   }, 
   {
@@ -258,6 +286,7 @@
     "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Roof", 
+    "typename": "Roof", 
     "uuid": "d75e33e2-2508-42e6-aef1-b05759a495ab"
   }, 
   {
@@ -267,6 +296,7 @@
     "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Wall", 
+    "typename": "Wall", 
     "uuid": "15ad6bf9-63ad-462b-985d-f6b8c2299465"
   }, 
   {
@@ -276,6 +306,7 @@
     "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Material", 
+    "typename": "Material", 
     "uuid": "b18ef2cc-2e67-4a5e-9241-9010fb7d27ce"
   }, 
   {
@@ -285,6 +316,7 @@
     "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "ParameterKey", 
+    "typename": "ParameterKey", 
     "uuid": "a550f532-8c68-460b-91f3-da0a5a0d42b5"
   }, 
   {
@@ -294,6 +326,7 @@
     "panel": "Parameter", 
     "tab": "Revit", 
     "title": "BuiltInParameterGroups", 
+    "typename": "BuiltInParameterGroups", 
     "uuid": "5d331b12-da6c-46a7-aa13-f463e42650d1"
   }, 
   {
@@ -303,6 +336,7 @@
     "panel": "Input", 
     "tab": "Revit", 
     "title": "BuiltInParameter Picker", 
+    "typename": "BuiltInParameterByName", 
     "uuid": "c1d96f56-f53c-4dfc-8090-ec2050bdbb66"
   }, 
   {
@@ -312,6 +346,7 @@
     "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "Sketch Plane", 
+    "typename": "SketchPlane", 
     "uuid": "93bf1f61-69ad-433f-a202-352c14e4ced8"
   }, 
   {
@@ -321,6 +356,7 @@
     "panel": "Revit Primitives", 
     "tab": "Params", 
     "title": "View", 
+    "typename": "View", 
     "uuid": "2dc4b866-54db-4ce6-94c0-c51b33d35b49"
   }, 
   {
@@ -330,6 +366,7 @@
     "panel": "Input", 
     "tab": "Revit", 
     "title": "Wall Function", 
+    "typename": "WallFunction_ValueList", 
     "uuid": "c84653dd-3b44-4059-820e-127761665305"
   }, 
   {
@@ -339,6 +376,7 @@
     "panel": "Input", 
     "tab": "Revit", 
     "title": "Wall Location Line", 
+    "typename": "WallLocationLine_ValueList", 
     "uuid": "a4eb9313-a38b-4794-b13b-133d3d4c872d"
   }, 
   {
@@ -348,6 +386,7 @@
     "panel": "Input", 
     "tab": "Revit", 
     "title": "Wall Structural Usage", 
+    "typename": "WallStructuralUsage_ValueList", 
     "uuid": "1f3053c0-bd22-49f9-be93-635e0bd24864"
   }, 
   {
@@ -357,6 +396,7 @@
     "panel": "Input", 
     "tab": "Revit", 
     "title": "Wall System Family", 
+    "typename": "WallSystemFamily_ValueList", 
     "uuid": "15545e80-87ab-4510-925d-d52e2ce5d839"
   }, 
   {
@@ -366,6 +406,7 @@
     "panel": "Input", 
     "tab": "Revit", 
     "title": "Wall Wrapping", 
+    "typename": "WallWrapping_ValueList", 
     "uuid": "141f0da4-659e-47e4-8033-3b61057f860b"
   }, 
   {
@@ -375,6 +416,7 @@
     "panel": "Input", 
     "tab": "Revit", 
     "title": "End Cap Condition", 
+    "typename": "EndCapCondition_ValueList", 
     "uuid": "8d73d533-9ef9-4923-a025-b040110ad9dd"
   }, 
   {
@@ -384,6 +426,7 @@
     "panel": "Input", 
     "tab": "Revit", 
     "title": "Layer Function", 
+    "typename": "LayerFunction_ValueList", 
     "uuid": "439ba763-7b63-4701-bcb3-764f4d9748bd"
   }, 
   {
@@ -393,6 +436,7 @@
     "panel": "Input", 
     "tab": "Revit", 
     "title": "Opening Wrapping Condition", 
+    "typename": "OpeningWrappingCondition_ValueList", 
     "uuid": "55b31952-fae4-41a1-92b4-b59e80f8223c"
   }, 
   {
@@ -402,6 +446,7 @@
     "panel": "Input", 
     "tab": "Revit", 
     "title": "Deck Embedding Type", 
+    "typename": "DeckEmbeddingType_ValueList", 
     "uuid": "db470316-67c1-45e0-904d-9d0137c847b2"
   }, 
   {
@@ -411,6 +456,7 @@
     "panel": "Input", 
     "tab": "Revit", 
     "title": "Detail Level", 
+    "typename": "ViewDetailLevel_ValueList", 
     "uuid": "b078e48a-c56f-4d51-a886-04e537445019"
   }, 
   {
@@ -420,6 +466,7 @@
     "panel": "Input", 
     "tab": "Revit", 
     "title": "Curtain Grid Align Type", 
+    "typename": "CurtainGridAlignType_ValueList", 
     "uuid": "3cbc9e4c-7d94-4ad3-acec-ab0d2611c847"
   }, 
   {
@@ -429,6 +476,7 @@
     "panel": "Input", 
     "tab": "Revit", 
     "title": "Curtain Grid Layout", 
+    "typename": "CurtainGridLayout_ValueList", 
     "uuid": "cd3e68b2-2bd5-4cdb-80b7-f8cb5a313fef"
   }, 
   {
@@ -438,6 +486,7 @@
     "panel": "Input", 
     "tab": "Revit", 
     "title": "Curtain Grid Join Condition", 
+    "typename": "CurtainGridJoinCondition_ValueList", 
     "uuid": "9c2d116d-516c-4825-bb6b-67111b9100b1"
   }, 
   {
@@ -447,6 +496,7 @@
     "panel": "Input", 
     "tab": "Revit", 
     "title": "Curtain Mullion System Family", 
+    "typename": "CurtainMullionSystemFamily_ValueList", 
     "uuid": "4bbe14f2-f46b-4d2e-9e44-51e20aa32e59"
   }, 
   {
@@ -456,6 +506,7 @@
     "panel": "Category", 
     "tab": "Revit", 
     "title": "Category Identity", 
+    "typename": "CategoryIdentity", 
     "uuid": "d794361e-de8c-4d0a-bc77-52293f27d3aa"
   }, 
   {
@@ -465,6 +516,7 @@
     "panel": "Category", 
     "tab": "Revit", 
     "title": "Category ObjectStyle", 
+    "typename": "CategoryObjectStyle", 
     "uuid": "1dd8ae78-f7da-4f26-8353-4cce6b925dc6"
   }, 
   {
@@ -474,6 +526,7 @@
     "panel": "Category", 
     "tab": "Revit", 
     "title": "Category Parameters", 
+    "typename": "CategoryParameters", 
     "uuid": "189f0a94-d077-4b96-8a92-6d5334ef7157"
   }, 
   {
@@ -483,6 +536,7 @@
     "panel": "Category", 
     "tab": "Revit", 
     "title": "Query Categories", 
+    "typename": "QueryCategories", 
     "uuid": "d150e40e-0970-4683-b517-038f8ba8b0d8"
   }, 
   {
@@ -492,6 +546,7 @@
     "panel": "Category", 
     "tab": "Revit", 
     "title": "Category SubCategories", 
+    "typename": "CategorySubCategories", 
     "uuid": "4915ab87-0bd5-4541-ac43-3fbc450dd883"
   }, 
   {
@@ -501,15 +556,17 @@
     "panel": "Document", 
     "tab": "Revit", 
     "title": "Active Document", 
+    "typename": "DocumentActive", 
     "uuid": "ee033516-c1dc-4c72-8fcd-f85f38a0f267"
   }, 
   {
-    "desc": "Gets the list of all active documents", 
+    "desc": "Gets the list of all open documents", 
     "iconsrc": "/static/images/GH/AllDocuments.png", 
     "icontag": null, 
     "panel": "Document", 
     "tab": "Revit", 
-    "title": "All Documents", 
+    "title": "Open Documents", 
+    "typename": "AllDocuments", 
     "uuid": "5b935ca4-e96d-4e8f-a36e-31708017634b"
   }, 
   {
@@ -519,6 +576,7 @@
     "panel": "Document", 
     "tab": "Revit", 
     "title": "Document Links", 
+    "typename": "DocumentLinks", 
     "uuid": "ebccfdd8-9f3b-44f4-a209-72d06c8082a5"
   }, 
   {
@@ -528,6 +586,7 @@
     "panel": "Document", 
     "tab": "Revit", 
     "title": "Document Identity", 
+    "typename": "DocumentIdentity", 
     "uuid": "94bd655c-77dd-4a88-bddb-b9456c45f06c"
   }, 
   {
@@ -537,6 +596,7 @@
     "panel": "Document", 
     "tab": "Revit", 
     "title": "Document File", 
+    "typename": "DocumentFile", 
     "uuid": "c1c15806-311a-4a07-9dae-6dbd1d98ec05"
   }, 
   {
@@ -546,6 +606,7 @@
     "panel": "Document", 
     "tab": "Revit", 
     "title": "Document Worksharing", 
+    "typename": "DocumentWorksharing", 
     "uuid": "f7d56db0-f1c1-45bb-aa07-196039fff862"
   }, 
   {
@@ -555,6 +616,7 @@
     "panel": "Document", 
     "tab": "Revit", 
     "title": "Document Cloud", 
+    "typename": "DocumentCloud", 
     "uuid": "2577a55b-a198-4760-9183-adf8193fb5bd"
   }, 
   {
@@ -564,7 +626,18 @@
     "panel": "Document", 
     "tab": "Revit", 
     "title": "Save Document", 
+    "typename": "DocumentSave", 
     "uuid": "fbb2e4a2-cc2a-470e-b7e8-cb3320166cc5"
+  }, 
+  {
+    "desc": "Evaluate if an Element pass a Filter", 
+    "iconsrc": null, 
+    "icontag": "F", 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Filter Element", 
+    "typename": "FilterElement", 
+    "uuid": "36180a9e-04ca-4b38-82fe-c6707b32c680"
   }, 
   {
     "desc": "Filter used to exclude a set of elements", 
@@ -573,6 +646,7 @@
     "panel": "Filter", 
     "tab": "Revit", 
     "title": "Exclusion Filter", 
+    "typename": "ElementExclusionFilter", 
     "uuid": "396f7e91-7f08-4a3d-9b9b-b6aa91ac0a2b"
   }, 
   {
@@ -582,6 +656,7 @@
     "panel": "Filter", 
     "tab": "Revit", 
     "title": "Logical And Filter", 
+    "typename": "ElementLogicalAndFilter", 
     "uuid": "754c40d7-5ae8-4027-921c-0210bbdfab37"
   }, 
   {
@@ -591,6 +666,7 @@
     "panel": "Filter", 
     "tab": "Revit", 
     "title": "Logical Or Filter", 
+    "typename": "ElementLogicalOrFilter", 
     "uuid": "61f75de1-ee65-4aa8-b9f8-40516be46c8d"
   }, 
   {
@@ -599,7 +675,8 @@
     "icontag": null, 
     "panel": "Filter", 
     "tab": "Revit", 
-    "title": "Exclude ElementType", 
+    "title": "Exclude Types", 
+    "typename": "ElementExcludeElementTypeFilter", 
     "uuid": "f69d485f-b262-4297-a496-93f5653f5d19"
   }, 
   {
@@ -609,6 +686,7 @@
     "panel": "Filter", 
     "tab": "Revit", 
     "title": "Class Filter", 
+    "typename": "ElementClassFilter", 
     "uuid": "6bd34014-cd73-42d8-94db-658be8f42254"
   }, 
   {
@@ -618,6 +696,7 @@
     "panel": "Filter", 
     "tab": "Revit", 
     "title": "Category Filter", 
+    "typename": "ElementCategoryFilter", 
     "uuid": "d08f7ab1-be36-45fa-b006-0078022db140"
   }, 
   {
@@ -627,6 +706,7 @@
     "panel": "Filter", 
     "tab": "Revit", 
     "title": "Type Filter", 
+    "typename": "ElementTypeFilter", 
     "uuid": "4434c470-4caf-4178-929d-284c3b5a24b5"
   }, 
   {
@@ -636,6 +716,7 @@
     "panel": "Filter", 
     "tab": "Revit", 
     "title": "Parameter Filter", 
+    "typename": "ElementParameterFilter", 
     "uuid": "e6a1f501-bda4-4b78-8828-084b5eda926f"
   }, 
   {
@@ -645,6 +726,7 @@
     "panel": "Filter", 
     "tab": "Revit", 
     "title": "BoundingBox Filter", 
+    "typename": "ElementBoundingBoxFilter", 
     "uuid": "f5a32842-b18e-470f-8bd3-bae1373ad982"
   }, 
   {
@@ -654,6 +736,7 @@
     "panel": "Filter", 
     "tab": "Revit", 
     "title": "Intersects Element Filter", 
+    "typename": "ElementIntersectsElementFilter", 
     "uuid": "d1e4c98d-e550-4f25-991a-5061ef845c37"
   }, 
   {
@@ -663,6 +746,7 @@
     "panel": "Filter", 
     "tab": "Revit", 
     "title": "Intersects Brep Filter", 
+    "typename": "ElementIntersectsBrepFilter", 
     "uuid": "a8889824-f607-4465-b84f-16df79dd08ab"
   }, 
   {
@@ -672,6 +756,7 @@
     "panel": "Filter", 
     "tab": "Revit", 
     "title": "Intersects Mesh Filter", 
+    "typename": "ElementIntersectsMeshFilter", 
     "uuid": "09f9e451-f6c9-42fb-90e3-85e9923998a2"
   }, 
   {
@@ -681,6 +766,7 @@
     "panel": "Filter", 
     "tab": "Revit", 
     "title": "Level Filter", 
+    "typename": "ElementLevelFilter", 
     "uuid": "b534489b-1367-4aca-8fd8-d4b365ceee0d"
   }, 
   {
@@ -689,7 +775,8 @@
     "icontag": null, 
     "panel": "Filter", 
     "tab": "Revit", 
-    "title": "DesignOption Filter", 
+    "title": "Design Option Filter", 
+    "typename": "ElementDesignOptionFilter", 
     "uuid": "1b197e82-3a65-43d4-ae47-fd25e4e6f2e5"
   }, 
   {
@@ -699,6 +786,7 @@
     "panel": "Filter", 
     "tab": "Revit", 
     "title": "Owner View Filter", 
+    "typename": "ElementOwnerViewFilter", 
     "uuid": "cfb42d90-f9d4-4601-9eef-c624e92a424d"
   }, 
   {
@@ -708,6 +796,7 @@
     "panel": "Filter", 
     "tab": "Revit", 
     "title": "Selectable In View Filter", 
+    "typename": "ElementSelectableInViewFilter", 
     "uuid": "ac546f16-c917-4cd1-9f8a-fbdd6330eb80"
   }, 
   {
@@ -717,6 +806,7 @@
     "panel": "Filter", 
     "tab": "Revit", 
     "title": "Not Equals Rule", 
+    "typename": "ElementFilterRuleNotEquals", 
     "uuid": "6bbe9731-ef71-42e8-a880-1d2adfeb9f79"
   }, 
   {
@@ -726,6 +816,7 @@
     "panel": "Filter", 
     "tab": "Revit", 
     "title": "Equals Rule", 
+    "typename": "ElementFilterRuleEquals", 
     "uuid": "0f9139ac-2a21-474c-9c5b-6864b2f2313c"
   }, 
   {
@@ -735,6 +826,7 @@
     "panel": "Filter", 
     "tab": "Revit", 
     "title": "Greater Rule", 
+    "typename": "ElementFilterRuleGreater", 
     "uuid": "bb7d39da-97ad-4277-82c7-010af857ff03"
   }, 
   {
@@ -744,6 +836,7 @@
     "panel": "Filter", 
     "tab": "Revit", 
     "title": "Greater Or Equal Rule", 
+    "typename": "ElementFilterRuleGreaterOrEqual", 
     "uuid": "05bbaedd-027b-40da-8390-f826b63fd100"
   }, 
   {
@@ -753,6 +846,7 @@
     "panel": "Filter", 
     "tab": "Revit", 
     "title": "Less Rule", 
+    "typename": "ElementFilterRuleLess", 
     "uuid": "be2c5afe-7d56-4f63-9a23-20560e3675b9"
   }, 
   {
@@ -762,6 +856,7 @@
     "panel": "Filter", 
     "tab": "Revit", 
     "title": "Less Or Equal Rule", 
+    "typename": "ElementFilterRuleLessOrEqual", 
     "uuid": "bb69852f-6a39-4adc-b9b8-d16a8862b4c7"
   }, 
   {
@@ -771,6 +866,7 @@
     "panel": "Type", 
     "tab": "Revit", 
     "title": "Default Type", 
+    "typename": "ElementTypeDefault", 
     "uuid": "d67b341f-46e4-4532-980e-42ce035470cf"
   }, 
   {
@@ -780,6 +876,7 @@
     "panel": "Type", 
     "tab": "Revit", 
     "title": "Duplicate Type", 
+    "typename": "ElementTypeDuplicate", 
     "uuid": "5ed7e612-e5c6-4f0e-aa69-814cf2478f7e"
   }, 
   {
@@ -789,6 +886,7 @@
     "panel": "Type", 
     "tab": "Revit", 
     "title": "Export Type Image", 
+    "typename": "ElementTypeExportImage", 
     "uuid": "3a5f6af7-5449-406f-b47e-8a55800d0bee"
   }, 
   {
@@ -798,6 +896,7 @@
     "panel": "Model", 
     "tab": "Revit", 
     "title": "Create GroupType", 
+    "typename": "GroupTypeCreate", 
     "uuid": "39e42448-1c1c-4140-bc37-7399abf82117"
   }, 
   {
@@ -807,6 +906,7 @@
     "panel": "Model", 
     "tab": "Revit", 
     "title": "Query Group Types", 
+    "typename": "QueryGroupTypes", 
     "uuid": "97e9c6bb-8442-4f77-bca1-6be8aafbdc96"
   }, 
   {
@@ -816,6 +916,7 @@
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Element Type Compound Structure", 
+    "typename": "HostObjectTypeCompoundStructure", 
     "uuid": "024619ef-58ff-47c1-8833-96ba2f2b677b"
   }, 
   {
@@ -825,6 +926,7 @@
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Deconstruct Compound Structure", 
+    "typename": "DeconstructCompoundStructure", 
     "uuid": "d0853b76-49fa-4ba8-869c-293a9c30ffe1"
   }, 
   {
@@ -834,6 +936,7 @@
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Deconstruct Compound Structure Layer", 
+    "typename": "DeconstructCompoundStructureLayer", 
     "uuid": "bc64525a-10b6-46db-a134-cf803738b1a0"
   }, 
   {
@@ -843,6 +946,7 @@
     "panel": "Type", 
     "tab": "Revit", 
     "title": "Type Identity", 
+    "typename": "ElementTypeIdentity", 
     "uuid": "7dea1ba3-d9bc-4e94-9e1c-0e527187c9dc"
   }, 
   {
@@ -852,6 +956,7 @@
     "panel": "Type", 
     "tab": "Revit", 
     "title": "Type Instances", 
+    "typename": "ElementTypeInstances", 
     "uuid": "9958995f-ccd4-48de-b3b3-ae769f04f4dd"
   }, 
   {
@@ -861,6 +966,7 @@
     "panel": "Type", 
     "tab": "Revit", 
     "title": "Query Types", 
+    "typename": "QueryTypes", 
     "uuid": "7b00f940-4c6e-4f3f-ab81-c3eed430de96"
   }, 
   {
@@ -870,6 +976,7 @@
     "panel": "Type", 
     "tab": "Revit", 
     "title": "Similar Types", 
+    "typename": "ElementTypeSimilar", 
     "uuid": "ba9c72c5-ec88-450b-b736-be6d827fa2f3"
   }, 
   {
@@ -879,6 +986,7 @@
     "panel": "View", 
     "tab": "Revit", 
     "title": "Query View Types", 
+    "typename": "QueryViewTypes", 
     "uuid": "51e306bd-4736-4b7d-b2ff-b23e0717eebb"
   }, 
   {
@@ -888,6 +996,7 @@
     "panel": "Wall", 
     "tab": "Revit", 
     "title": "Analyze Basic Wall Type", 
+    "typename": "AnalyzeBasicWallType", 
     "uuid": "00a650ed-4cc7-4ad3-bf38-491507315ac5"
   }, 
   {
@@ -897,6 +1006,7 @@
     "panel": "Wall", 
     "tab": "Revit", 
     "title": "Analyze Curtain Wall Type", 
+    "typename": "AnalyzeCurtainWallType", 
     "uuid": "d0874f93-0946-42b1-95a9-92c654522bc8"
   }, 
   {
@@ -906,6 +1016,7 @@
     "panel": "Wall", 
     "tab": "Revit", 
     "title": "Analyze Curtain System Type", 
+    "typename": "AnalyzeCurtainSystemType", 
     "uuid": "83d08b81-b536-4a14-9e2d-f75e9652a824"
   }, 
   {
@@ -915,6 +1026,7 @@
     "panel": "Wall", 
     "tab": "Revit", 
     "title": "Analyze Mullion Type", 
+    "typename": "AnalyzeCurtainGridMullionType", 
     "uuid": "66a9f189-d2bd-4e47-8c97-a469e3dd861b"
   }, 
   {
@@ -924,6 +1036,7 @@
     "panel": "Wall", 
     "tab": "Revit", 
     "title": "Analyze Panel Type", 
+    "typename": "AnalyzeCurtainGridPanelType", 
     "uuid": "6f11977f-7cf3-41f1-8a69-2f4cd7287def"
   }, 
   {
@@ -933,6 +1046,7 @@
     "panel": "Build", 
     "tab": "Revit", 
     "title": "Add Component (Adaptive)", 
+    "typename": "AdaptiveComponentByPoints", 
     "uuid": "e8ddc0e4-97e9-4659-9945-e8c77114273d"
   }, 
   {
@@ -942,6 +1056,7 @@
     "panel": "Build", 
     "tab": "Revit", 
     "title": "Add Beam", 
+    "typename": "BeamByCurve", 
     "uuid": "26411aa6-8187-49df-a908-a292a07918f1"
   }, 
   {
@@ -951,6 +1066,7 @@
     "panel": "Site", 
     "tab": "Revit", 
     "title": "Add BuildingPad", 
+    "typename": "BuildingPadByOutline", 
     "uuid": "ade71474-5f00-4bd5-9d1e-d518b42137f2"
   }, 
   {
@@ -960,6 +1076,7 @@
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Element Compound Structure Geometry", 
+    "typename": "CompoundStructureGeometry", 
     "uuid": "3dbaaae8-90d2-465e-a88b-fcc2b64e3bb3"
   }, 
   {
@@ -969,6 +1086,7 @@
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Element Bounding Geometry", 
+    "typename": "ElementBoundingGeometry", 
     "uuid": "3396dbc4-0e8f-4402-969a-ef5a0e30e093"
   }, 
   {
@@ -978,6 +1096,7 @@
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Delete Element", 
+    "typename": "ElementDelete", 
     "uuid": "3ffc2cb2-48ff-4151-b5cb-511c964b487d"
   }, 
   {
@@ -987,6 +1106,7 @@
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Element Dependents", 
+    "typename": "ElementDependents", 
     "uuid": "97d71aa8-6987-45b9-8f25-b92671e20ef4"
   }, 
   {
@@ -996,6 +1116,7 @@
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Element Geometry", 
+    "typename": "ElementGeometry", 
     "uuid": "b3bcbf5b-2034-414f-b9fb-97626ff37cbe"
   }, 
   {
@@ -1005,6 +1126,7 @@
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Graphical Element Geometry", 
+    "typename": "GraphicalElementGeometry", 
     "uuid": "8b85b1fb-a3df-4924-bc84-58d2b919e664"
   }, 
   {
@@ -1014,6 +1136,7 @@
     "panel": "Model", 
     "tab": "Revit", 
     "title": "Add Model Group", 
+    "typename": "GroupByLocation", 
     "uuid": "df634530-634d-43f8-9c42-73f4a8d62c1e"
   }, 
   {
@@ -1023,6 +1146,7 @@
     "panel": "Model", 
     "tab": "Revit", 
     "title": "Group Elements", 
+    "typename": "GroupElements", 
     "uuid": "7c7d3739-7609-4f7f-bab5-1e3648508891"
   }, 
   {
@@ -1032,6 +1156,7 @@
     "panel": "Host", 
     "tab": "Revit", 
     "title": "Host Boundary Profile", 
+    "typename": "HostObjectBoundaryProfile", 
     "uuid": "7ce0bd56-a2ac-4d49-a39b-7b34fe897265"
   }, 
   {
@@ -1041,6 +1166,7 @@
     "panel": "Host", 
     "tab": "Revit", 
     "title": "Element Host", 
+    "typename": "ElementHost", 
     "uuid": "6723beb1-dd99-40be-8da9-13b3812d6b46"
   }, 
   {
@@ -1050,6 +1176,7 @@
     "panel": "Host", 
     "tab": "Revit", 
     "title": "Host Faces", 
+    "typename": "HostObjectFaces", 
     "uuid": "032ad3f7-9e55-44b6-be79-3dbf67d98f14"
   }, 
   {
@@ -1059,6 +1186,7 @@
     "panel": "Host", 
     "tab": "Revit", 
     "title": "Host Inserts", 
+    "typename": "HostObjectInserts", 
     "uuid": "70ccf7a6-856c-4d24-a82b-bc1d4fc63078"
   }, 
   {
@@ -1068,6 +1196,7 @@
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Inspect Element", 
+    "typename": "ElementInspect", 
     "uuid": "fad33c4b-a7c3-479b-b309-8f5363b25599"
   }, 
   {
@@ -1077,6 +1206,7 @@
     "panel": "Model", 
     "tab": "Revit", 
     "title": "Query Levels", 
+    "typename": "DocumentLevels", 
     "uuid": "87715caf-92a9-4b14-99e5-f8ccb2cc19bd"
   }, 
   {
@@ -1086,6 +1216,7 @@
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Graphical Element Location", 
+    "typename": "GraphicalElementLocation", 
     "uuid": "71f196f1-59e8-4714-b9c2-45fafeedf426"
   }, 
   {
@@ -1095,6 +1226,7 @@
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Element Materials", 
+    "typename": "ElementMaterials", 
     "uuid": "93c18dfd-faab-4cf1-a681-c11754c2495d"
   }, 
   {
@@ -1104,6 +1236,7 @@
     "panel": "Build", 
     "tab": "Revit", 
     "title": "Add Column", 
+    "typename": "ColumnByCurve", 
     "uuid": "47b560ac-1e1d-4576-9f17-bccf612974d8"
   }, 
   {
@@ -1113,6 +1246,7 @@
     "panel": "DirectShape", 
     "tab": "Revit", 
     "title": "Add Brep DirectShape", 
+    "typename": "DirectShapeByBrep", 
     "uuid": "5ade9ae3-588c-4285-abc5-09deb92c6660"
   }, 
   {
@@ -1122,6 +1256,7 @@
     "panel": "DirectShape", 
     "tab": "Revit", 
     "title": "Add Curve DirectShape", 
+    "typename": "DirectShapeByCurve", 
     "uuid": "77f4fbdd-8a05-44a3-ac54-e52a79cf3e5a"
   }, 
   {
@@ -1131,6 +1266,7 @@
     "panel": "DirectShape", 
     "tab": "Revit", 
     "title": "Add Geometry DirectShape", 
+    "typename": "DirectShapeByGeometry", 
     "uuid": "0bfbda45-49cc-4ac6-8d6d-ecd2cfed062a"
   }, 
   {
@@ -1140,6 +1276,7 @@
     "panel": "DirectShape", 
     "tab": "Revit", 
     "title": "Add DirectShapeType", 
+    "typename": "DirectShapeTypeByGeometry", 
     "uuid": "25dcfe8e-5be9-460c-80e8-51b7041d8fed"
   }, 
   {
@@ -1149,6 +1286,7 @@
     "panel": "DirectShape", 
     "tab": "Revit", 
     "title": "Add DirectShape", 
+    "typename": "DirectShapeByLocation", 
     "uuid": "a811efa4-8de2-46f3-9f88-3d4f13fe40be"
   }, 
   {
@@ -1158,6 +1296,7 @@
     "panel": "DirectShape", 
     "tab": "Revit", 
     "title": "Add Mesh DirectShape", 
+    "typename": "DirectShapeByMesh", 
     "uuid": "5542506a-a09e-4ec9-92b4-f2b52417511c"
   }, 
   {
@@ -1167,16 +1306,8 @@
     "panel": "DirectShape", 
     "tab": "Revit", 
     "title": "Add Point DirectShape", 
+    "typename": "DirectShapeByPoint", 
     "uuid": "7a889b89-c423-4ed8-91d9-5cece1ee803d"
-  }, 
-  {
-    "desc": "Queries element identity information", 
-    "iconsrc": "/static/images/GH/ElementIdentity.png", 
-    "icontag": null, 
-    "panel": "Element", 
-    "tab": "Revit", 
-    "title": "Element Identity", 
-    "uuid": "d3917d58-7183-4b3f-9d22-03f0fe93b956"
   }, 
   {
     "desc": "Query material identity information", 
@@ -1185,6 +1316,7 @@
     "panel": "Material", 
     "tab": "Revit", 
     "title": "Material Identity", 
+    "typename": "MaterialIdentity", 
     "uuid": "06e0cf55-b10c-433a-b6f7-aaf3885055db"
   }, 
   {
@@ -1194,6 +1326,7 @@
     "panel": "Material", 
     "tab": "Revit", 
     "title": "Query Materials", 
+    "typename": "QueryMaterials", 
     "uuid": "94af13c1-ce70-46b5-9103-24b46e2f7375"
   }, 
   {
@@ -1203,6 +1336,7 @@
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Get Element Parameter", 
+    "typename": "ElementParameterGet", 
     "uuid": "d86050f2-c774-49b1-9973-fb3ab188dc94"
   }, 
   {
@@ -1212,6 +1346,7 @@
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Set Element Parameter", 
+    "typename": "ElementParameterSet", 
     "uuid": "8f1ee110-7fda-49e0-bed4-e8e0227bc021"
   }, 
   {
@@ -1221,6 +1356,7 @@
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Reset Element Parameter", 
+    "typename": "ElementParameterReset", 
     "uuid": "2c374e6d-a547-45ac-b77d-04dd61317622"
   }, 
   {
@@ -1230,6 +1366,7 @@
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Element Parameters", 
+    "typename": "ElementParameters", 
     "uuid": "44515a6b-84ee-4dbd-8241-17edbe07c5b6"
   }, 
   {
@@ -1239,6 +1376,7 @@
     "panel": "Build", 
     "tab": "Revit", 
     "title": "Add Component (Location)", 
+    "typename": "FamilyInstanceByLocation", 
     "uuid": "0c642d7d-897b-479e-8668-91e09222d7b9"
   }, 
   {
@@ -1248,6 +1386,7 @@
     "panel": "Room & Area", 
     "tab": "Revit", 
     "title": "Analyze Instance Space", 
+    "typename": "AnalyzeInstanceSpace", 
     "uuid": "6ac37380-d14f-46bf-835c-611db8c38e3b"
   }, 
   {
@@ -1257,6 +1396,7 @@
     "panel": "Build", 
     "tab": "Revit", 
     "title": "Add Floor", 
+    "typename": "FloorByOutline", 
     "uuid": "dc8daf4f-cc93-43e2-a871-3a01a920a722"
   }, 
   {
@@ -1266,6 +1406,7 @@
     "panel": "Model", 
     "tab": "Revit", 
     "title": "Add Grid", 
+    "typename": "GridByCurve", 
     "uuid": "cec2b3df-c6ba-414f-bece-e3daee2a3f2c"
   }, 
   {
@@ -1275,6 +1416,7 @@
     "panel": "Model", 
     "tab": "Revit", 
     "title": "Add Level", 
+    "typename": "LevelByElevation", 
     "uuid": "c6dec111-eac6-4047-8618-28ee144d55c5"
   }, 
   {
@@ -1284,6 +1426,7 @@
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Element MaterialQuanities", 
+    "typename": "ElementMaterialQuanities", 
     "uuid": "8a162ee6-812e-459b-9123-8f7735aaac0c"
   }, 
   {
@@ -1293,6 +1436,7 @@
     "panel": "Material", 
     "tab": "Revit", 
     "title": "Add Color Material", 
+    "typename": "MaterialByColor", 
     "uuid": "273ff43d-b771-4eb7-a66d-5da5f7f2731e"
   }, 
   {
@@ -1302,6 +1446,7 @@
     "panel": "Material", 
     "tab": "Revit", 
     "title": "Add Material", 
+    "typename": "MaterialByName", 
     "uuid": "0d9f07e2-3a21-4e85-96cc-bc0e6a607af1"
   }, 
   {
@@ -1311,6 +1456,7 @@
     "panel": "Model", 
     "tab": "Revit", 
     "title": "Add ModelLine", 
+    "typename": "ModelLineByCurve", 
     "uuid": "240127b1-94ee-47c9-98f8-05de32447b01"
   }, 
   {
@@ -1320,6 +1466,7 @@
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Element Passport", 
+    "typename": "ElementPassport", 
     "uuid": "bd534a54-b7ed-4d56-aa53-1f446d445df6"
   }, 
   {
@@ -1329,6 +1476,7 @@
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Element Preview", 
+    "typename": "ElementPreview", 
     "uuid": "a95c7b73-6f70-46ca-85fc-a4402a3b6971"
   }, 
   {
@@ -1338,6 +1486,7 @@
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Purge Element", 
+    "typename": "ElementPurge", 
     "uuid": "05539772-7205-4d58-8093-1715daf213af"
   }, 
   {
@@ -1347,7 +1496,18 @@
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Query Elements", 
+    "typename": "QueryElements", 
     "uuid": "0f7da57e-6c05-4dd0-aabf-69e42df38859"
+  }, 
+  {
+    "desc": "Get document model elements list", 
+    "iconsrc": null, 
+    "icontag": "Q", 
+    "panel": "Element", 
+    "tab": "Revit", 
+    "title": "Query Graphical Elements", 
+    "typename": "QueryGraphicalElements", 
+    "uuid": "79daea3a-13a3-49bf-8beb-aa28e3be4515"
   }, 
   {
     "desc": "Given its outline curve, it adds a Roof element to the active Revit document", 
@@ -1356,6 +1516,7 @@
     "panel": "Build", 
     "tab": "Revit", 
     "title": "Add Roof", 
+    "typename": "RoofByOutline", 
     "uuid": "198e152b-6636-4d90-9443-ae77b8b1475e"
   }, 
   {
@@ -1365,6 +1526,7 @@
     "panel": "Model", 
     "tab": "Revit", 
     "title": "Add SketchPlane", 
+    "typename": "SketchPlaneByPlane", 
     "uuid": "1fa679e4-1821-483a-99f8-dc166b0595f4"
   }, 
   {
@@ -1374,6 +1536,7 @@
     "panel": "Site", 
     "tab": "Revit", 
     "title": "Add Topography (Mesh)", 
+    "typename": "TopographyByMesh", 
     "uuid": "e6ea0a85-e118-4bfd-b01e-86ba22155938"
   }, 
   {
@@ -1383,7 +1546,38 @@
     "panel": "Site", 
     "tab": "Revit", 
     "title": "Add Topography (Points)", 
+    "typename": "TopographyByPoints", 
     "uuid": "e8d8d05a-8703-4f75-b106-12b40ec9df7b"
+  }, 
+  {
+    "desc": "Element Name Property Get-Set accessor to Element Name property", 
+    "iconsrc": null, 
+    "icontag": "E", 
+    "panel": "Element", 
+    "tab": "Revit", 
+    "title": "Element Name", 
+    "typename": "ElementPropertyName", 
+    "uuid": "01934ad1-f31b-43e5-add9-c196f4a2467e"
+  }, 
+  {
+    "desc": "Element Category Property Get-Set accessor to Element Category property", 
+    "iconsrc": null, 
+    "icontag": "E", 
+    "panel": "Element", 
+    "tab": "Revit", 
+    "title": "Element Category", 
+    "typename": "ElementPropertyCategory", 
+    "uuid": "5ac48de6-f706-4e88-a4ad-7a4439f1dab5"
+  }, 
+  {
+    "desc": "Element Type Property Get-Set accessor to Element Type property", 
+    "iconsrc": null, 
+    "icontag": "E", 
+    "panel": "Element", 
+    "tab": "Revit", 
+    "title": "Element Type", 
+    "typename": "ElementPropertyType", 
+    "uuid": "fe427d04-1d8f-48be-bfba-eb28ad23fc03"
   }, 
   {
     "desc": "Gets the active graphical view", 
@@ -1392,6 +1586,7 @@
     "panel": "View", 
     "tab": "Revit", 
     "title": "Active Graphical View", 
+    "typename": "ViewActive", 
     "uuid": "7ccf350c-80cc-42d0-85ba-78544fd59f4a"
   }, 
   {
@@ -1401,6 +1596,7 @@
     "panel": "View", 
     "tab": "Revit", 
     "title": "Export View Image", 
+    "typename": "ViewExportImage", 
     "uuid": "4a962a0c-46a0-4a5f-b727-6747b715a975"
   }, 
   {
@@ -1410,6 +1606,7 @@
     "panel": "View", 
     "tab": "Revit", 
     "title": "View Identity", 
+    "typename": "ViewIdentity", 
     "uuid": "b0440885-4af3-4890-8e84-3bc2a8342b9f"
   }, 
   {
@@ -1419,6 +1616,7 @@
     "panel": "View", 
     "tab": "Revit", 
     "title": "Query Views", 
+    "typename": "QueryViews", 
     "uuid": "df691659-b75b-4455-af5f-8a5de485fa05"
   }, 
   {
@@ -1428,6 +1626,7 @@
     "panel": "View", 
     "tab": "Revit", 
     "title": "Add View3D", 
+    "typename": "View3DByPlane", 
     "uuid": "f7b775c9-05e0-40f7-85e9-5cc2ef79731e"
   }, 
   {
@@ -1437,6 +1636,7 @@
     "panel": "Wall", 
     "tab": "Revit", 
     "title": "Analyze Stacked Wall", 
+    "typename": "AnalyzeStackedWall", 
     "uuid": "df10b918-a30f-4609-ae77-14314e6cdbf1"
   }, 
   {
@@ -1446,6 +1646,7 @@
     "panel": "Wall", 
     "tab": "Revit", 
     "title": "Add Wall", 
+    "typename": "WallByCurve", 
     "uuid": "37a8c46f-cb5b-49fd-a483-b03d1fe14a22"
   }, 
   {
@@ -1455,6 +1656,7 @@
     "panel": "Wall", 
     "tab": "Revit", 
     "title": "Analyze Wall", 
+    "typename": "AnalyzeWall", 
     "uuid": "1169ceb6-381c-4353-8ace-874938755694"
   }, 
   {
@@ -1464,6 +1666,7 @@
     "panel": "Wall", 
     "tab": "Revit", 
     "title": "Analyze Wall Location Curve", 
+    "typename": "AnalyzeWallLocationCurve", 
     "uuid": "4c5260c3-b15e-482b-8a1d-38cd868e3e72"
   }, 
   {
@@ -1473,6 +1676,7 @@
     "panel": "Wall", 
     "tab": "Revit", 
     "title": "Analyze Wall Profile", 
+    "typename": "AnalyzeWallProfile", 
     "uuid": "9d2e9d8d-e794-4202-b725-82e78317892f"
   }, 
   {
@@ -1482,6 +1686,7 @@
     "panel": "Wall", 
     "tab": "Revit", 
     "title": "Analyze Curtain Wall", 
+    "typename": "AnalyzeCurtainWall", 
     "uuid": "734b2dac-1cd2-4d51-b7bd-d3d377cf62de"
   }, 
   {
@@ -1491,6 +1696,7 @@
     "panel": "Wall", 
     "tab": "Revit", 
     "title": "Analyze Curtain System", 
+    "typename": "AnalyzeCurtainSystem", 
     "uuid": "16ddb8a7-045e-4fed-b48f-93f3a7ae461a"
   }, 
   {
@@ -1500,6 +1706,7 @@
     "panel": "Wall", 
     "tab": "Revit", 
     "title": "Analyze Curtain Grid Cell", 
+    "typename": "AnalyzeCurtainGridCell", 
     "uuid": "fc7d5729-7d27-453a-a4a2-0e150c749083"
   }, 
   {
@@ -1509,6 +1716,7 @@
     "panel": "Wall", 
     "tab": "Revit", 
     "title": "Analyze Curtain Grid", 
+    "typename": "AnalyzeCurtainGrid", 
     "uuid": "d7b5c58e-8edc-40c5-9bf8-078642090264"
   }, 
   {
@@ -1518,6 +1726,7 @@
     "panel": "Wall", 
     "tab": "Revit", 
     "title": "Analyze Curtain Grid Line", 
+    "typename": "AnalyzeCurtainGridLine", 
     "uuid": "face5e7d-174f-41da-853e-cdc4b094f57c"
   }, 
   {
@@ -1527,6 +1736,7 @@
     "panel": "Wall", 
     "tab": "Revit", 
     "title": "Analyze Mullion", 
+    "typename": "AnalyzeCurtainGridMullion", 
     "uuid": "4eeca86b-551c-4ada-8fda-03b7326735ed"
   }, 
   {
@@ -1536,6 +1746,7 @@
     "panel": "Wall", 
     "tab": "Revit", 
     "title": "Analyze Panel", 
+    "typename": "AnalyzeCurtainGridPanel", 
     "uuid": "08507225-c8da-44a8-a282-c9b1af1c61f4"
   }, 
   {
@@ -1545,6 +1756,7 @@
     "panel": "Wall", 
     "tab": "Revit", 
     "title": "Query Walls", 
+    "typename": "QueryWalls", 
     "uuid": "118f5744-292f-4bec-9213-8073219d8563"
   }, 
   {
@@ -1554,6 +1766,7 @@
     "panel": "Family", 
     "tab": "Revit", 
     "title": "Add LoftForm", 
+    "typename": "FormByCurves", 
     "uuid": "42631b6e-505e-4091-981a-e7605ae5a1ff"
   }, 
   {
@@ -1563,6 +1776,7 @@
     "panel": "Family", 
     "tab": "Revit", 
     "title": "Add Form", 
+    "typename": "FormByGeometry", 
     "uuid": "d2fdf2a0-1e48-4075-814a-685d91a6cd94"
   }, 
   {
@@ -1572,6 +1786,7 @@
     "panel": "Family", 
     "tab": "Revit", 
     "title": "Construct Visibility", 
+    "typename": "FamilyElementVisibilityConstruct", 
     "uuid": "10ea29d4-16af-4060-89ce-f467f0069675"
   }, 
   {
@@ -1581,6 +1796,7 @@
     "panel": "Family", 
     "tab": "Revit", 
     "title": "Deconstruct Visibility", 
+    "typename": "FamilyElementVisibilityDeconstruct", 
     "uuid": "8065268e-1417-4c1b-8495-122e67721f4d"
   }, 
   {
@@ -1590,6 +1806,7 @@
     "panel": "Family", 
     "tab": "Revit", 
     "title": "Component Family Form", 
+    "typename": "FamilyGeometryByBrep", 
     "uuid": "8a51d5a1-f463-492b-ae5b-b4f7870d106b"
   }, 
   {
@@ -1599,6 +1816,7 @@
     "panel": "Family", 
     "tab": "Revit", 
     "title": "Component Family Curve", 
+    "typename": "FamilyGeometryByCurve", 
     "uuid": "6fbb9200-d725-4a0d-9360-89acbe5b4d9f"
   }, 
   {
@@ -1608,6 +1826,7 @@
     "panel": "Family", 
     "tab": "Revit", 
     "title": "Family Identity", 
+    "typename": "FamilyIdentity", 
     "uuid": "86875ef4-ce53-40f8-b446-97b4c8e2d54e"
   }, 
   {
@@ -1617,6 +1836,7 @@
     "panel": "Family", 
     "tab": "Revit", 
     "title": "Query Families", 
+    "typename": "QueryFamilies", 
     "uuid": "b6c377ba-bc46-495c-8250-f09db0219c91"
   }, 
   {
@@ -1626,6 +1846,7 @@
     "panel": "Family", 
     "tab": "Revit", 
     "title": "Family Types", 
+    "typename": "FamilyTypes", 
     "uuid": "742836d7-01c4-485a-bfa8-6cda3f121f7b"
   }, 
   {
@@ -1635,6 +1856,7 @@
     "panel": "Family", 
     "tab": "Revit", 
     "title": "Load Component Family", 
+    "typename": "FamilyLoad", 
     "uuid": "0e244846-95ae-4b0e-8218-cb24fd4d34d1"
   }, 
   {
@@ -1644,6 +1866,7 @@
     "panel": "Family", 
     "tab": "Revit", 
     "title": "New Component Family", 
+    "typename": "FamilyNew", 
     "uuid": "82523911-309f-4a66-a4b9-cf21e0ac250e"
   }, 
   {
@@ -1653,6 +1876,7 @@
     "panel": "Family", 
     "tab": "Revit", 
     "title": "Component Family Opening", 
+    "typename": "FamilyGeometryOpeningByCurve", 
     "uuid": "72fdc627-09c7-4d9f-8d7f-5f6812fb1873"
   }, 
   {
@@ -1662,6 +1886,7 @@
     "panel": "Family", 
     "tab": "Revit", 
     "title": "Save Component Family", 
+    "typename": "FamilySave", 
     "uuid": "c2b9b045-8fd2-4124-9294-d9ba809b44b1"
   }, 
   {
@@ -1671,6 +1896,7 @@
     "panel": "Family", 
     "tab": "Revit", 
     "title": "Component Family Void", 
+    "typename": "FamilyGeometryVoidByBrep", 
     "uuid": "f0887ad5-8acb-4806-bb12-7596bcedffed"
   }, 
   {
@@ -1680,6 +1906,7 @@
     "panel": "Parameter", 
     "tab": "Revit", 
     "title": "Define Shared Parameter", 
+    "typename": "DefineSharedParameter", 
     "uuid": "84ab6f3c-bb4b-48e4-9175-b7f40791bb7f"
   }, 
   {
@@ -1689,6 +1916,7 @@
     "panel": "Parameter", 
     "tab": "Revit", 
     "title": "Deconstruct ParameterValue", 
+    "typename": "DeconstructParameterValue", 
     "uuid": "3bde5890-fb80-4af2-b9ac-373661756bda"
   }, 
   {
@@ -1698,6 +1926,7 @@
     "panel": "Parameter", 
     "tab": "Revit", 
     "title": "ParameterKey Identity", 
+    "typename": "ParameterKeyIdentity", 
     "uuid": "a80f4919-2387-4c78-be2b-2f35b2e60298"
   }
 ]
