@@ -18,6 +18,7 @@ Some of the changes mentioned in sections below, might break your existing Grass
 ### Fixes
 * Fixed a bug on NurbsCurve conversion to DB.NurbsSpline when original curve is not C1.
 * Fixed a bug in Types.GraphicalElement.ClippingBox when DB.Element is not available.
+* Fixed a bug in 'Add Beam', now default Cross-Section Rotation is 0.0
 
 ## Minor Changes
 * Disabled Grasshopper previews when Solver is locked.
