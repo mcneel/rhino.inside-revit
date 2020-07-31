@@ -4,7 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 
-using Autodesk.Revit.DB;
+using DB = Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
 
@@ -14,6 +14,7 @@ using Rhino.PlugIns;
 using Grasshopper;
 using Grasshopper.Kernel;
 using Grasshopper.GUI.Canvas;
+using RhinoInside.Revit.External.DB.Extensions;
 
 namespace RhinoInside.Revit.GH
 {
@@ -79,13 +80,60 @@ namespace RhinoInside.Revit.GH
     void ActiveCanvas_DocumentChanged(GH_Canvas sender, GH_CanvasDocumentChangedEventArgs e)
     {
       if (e.OldDocument is object)
+      {
         e.OldDocument.SolutionEnd -= ActiveDefinition_SolutionEnd;
+        e.OldDocument.SolutionStart -= ActiveDefinition_SolutionStart;
+      }
 
       if (e.NewDocument is object)
+      {
+        e.NewDocument.SolutionStart += ActiveDefinition_SolutionStart;
         e.NewDocument.SolutionEnd += ActiveDefinition_SolutionEnd;
+      }
     }
 
-    void ActiveDefinition_SolutionEnd(object sender, GH_SolutionEventArgs e) => ModelUnitSystem = RhinoDoc.ActiveDoc.ModelUnitSystem;
+    Stack<DB.TransactionGroup> OpenTransactionGroups = new Stack<DB.TransactionGroup>();
+
+    private void ActiveDefinition_SolutionStart(object sender, GH_SolutionEventArgs e)
+    {
+      Revit.ActiveDBApplication.GetOpenDocuments(out var projects, out var families);
+
+      var now = DateTime.Now.ToString(System.Globalization.CultureInfo.CurrentUICulture);
+      var name = e.Document.DisplayName;
+
+      foreach (var project in projects)
+      {
+        var group = new DB.TransactionGroup(project, $"Grasshopper {now}: {name}");
+        group.Start();
+
+        OpenTransactionGroups.Push(group);
+      }
+
+      foreach (var family in families)
+      {
+        var group = new DB.TransactionGroup(family, $"Grasshopper {now}: {name}");
+        group.Start();
+
+        OpenTransactionGroups.Push(group);
+      }
+    }
+
+    void ActiveDefinition_SolutionEnd(object sender, GH_SolutionEventArgs e)
+    {
+      while (OpenTransactionGroups.Count > 0)
+      {
+        try
+        {
+          using (var group = OpenTransactionGroups.Pop())
+          {
+            group.Assimilate();
+          }
+        }
+        catch { }
+      }
+
+      ModelUnitSystem = RhinoDoc.ActiveDoc.ModelUnitSystem;
+    }
 
     void IGuest.OnCheckOut()
     {
@@ -431,7 +479,7 @@ namespace RhinoInside.Revit.GH
       }
 
       public UndoOperation Operation;
-      public Document Document;
+      public DB.Document Document;
       public GH_Document Definition;
       public readonly List<IGH_ActiveObject> ExpiredObjects = new List<IGH_ActiveObject>();
 
@@ -443,15 +491,6 @@ namespace RhinoInside.Revit.GH
         if (Operation == UndoOperation.TransactionCommitted)
         {
           Definition.NewSolution(false);
-        }
-        else
-        {
-          // We create a transaction to avoid new changes while undoing or redoing
-          using (var transaction = new Transaction(Document))
-          {
-            transaction.Start(Operation.ToString());
-            Definition.NewSolution(false);
-          }
         }
       }
     }
