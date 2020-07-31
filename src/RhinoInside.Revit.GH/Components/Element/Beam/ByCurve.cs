@@ -68,11 +68,11 @@ namespace RhinoInside.Revit.GH.Components
       (
         curve.IsClosed ||
         !curve.IsPlanar(Revit.VertexTolerance * Revit.ModelUnits) ||
-        curve.GetNextDiscontinuity(Rhino.Geometry.Continuity.C2_continuous, curve.Domain.Min, curve.Domain.Max, out var _)
+        curve.GetNextDiscontinuity(Rhino.Geometry.Continuity.C1_continuous, curve.Domain.Min, curve.Domain.Max, out var _)
       )
-        ThrowArgumentException(nameof(curve), "Curve must be a C2 continuous planar non closed curve.");
+        ThrowArgumentException(nameof(curve), "Curve must be a C1 continuous planar non closed curve.");
 
-      SolveOptionalLevel(doc, curve, ref level, out var bbox);
+      SolveOptionalLevel(doc, curve, ref level, out var _);
 
       var centerLine = curve.ToCurve();
 
@@ -107,10 +107,7 @@ namespace RhinoInside.Revit.GH.Components
           DB.Structure.StructuralType.Beam
         );
 
-        newBeam.get_Parameter(DB.BuiltInParameter.Y_JUSTIFICATION).Set((int) DB.Structure.YJustification.Origin);
-        newBeam.get_Parameter(DB.BuiltInParameter.Z_JUSTIFICATION).Set((int) DB.Structure.ZJustification.Origin);
-
-        if(element is object && DB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(element, 0))
+        if (element is object && DB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(element, 0))
           DB.Structure.StructuralFramingUtils.AllowJoinAtEnd(newBeam, 0);
         else
           DB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(newBeam, 0);
@@ -120,12 +117,18 @@ namespace RhinoInside.Revit.GH.Components
         else
           DB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(newBeam, 1);
 
+        newBeam.get_Parameter(DB.BuiltInParameter.Y_JUSTIFICATION)?.Set((int) DB.Structure.YJustification.Origin);
+        newBeam.get_Parameter(DB.BuiltInParameter.Z_JUSTIFICATION)?.Set((int) DB.Structure.ZJustification.Origin);
+
+        newBeam.Document.Regenerate();
+        newBeam.get_Parameter(DB.BuiltInParameter.STRUCTURAL_BEND_DIR_ANGLE)?.Set(0.0);
+
         var parametersMask = new DB.BuiltInParameter[]
         {
           DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
           DB.BuiltInParameter.ELEM_FAMILY_PARAM,
           DB.BuiltInParameter.ELEM_TYPE_PARAM,
-          DB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM
+          DB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM,
         };
 
         ReplaceElement(ref element, newBeam, parametersMask);
