@@ -33,14 +33,10 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      using (var Documents = Revit.ActiveDBApplication.Documents)
-      {
-        IList projects = Documents.Cast<DB.Document>().Where(x => !x.IsFamilyDocument && !x.IsLinked && x.GetActiveGraphicalView() is object).ToArray();
-        IList families = Documents.Cast<DB.Document>().Where(x =>  x.IsFamilyDocument && !x.IsLinked && x.GetActiveGraphicalView() is object).ToArray();
+      Revit.ActiveDBApplication.GetOpenDocuments(out var projects, out var families);
 
-        DA.SetDataList("Projects", projects);
-        DA.SetDataList("Families", families);
-      }
+      DA.SetDataList("Projects", projects);
+      DA.SetDataList("Families", families);
     }
   }
 }

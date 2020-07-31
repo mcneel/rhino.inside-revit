@@ -513,6 +513,16 @@ namespace RhinoInside.Revit.Convert.Geometry
             yield return NurbsSplineEncoder.ToNurbsSpline(segment as NurbsCurve, factor);
         }
       }
+      else if(value.GetNextDiscontinuity(Continuity.C1_continuous, value.Domain.Min, value.Domain.Max, out var t))
+      {
+        var splitters = new List<double>() { t };
+        while (value.GetNextDiscontinuity(Continuity.C1_continuous, t, value.Domain.Max, out t))
+          splitters.Add(t);
+
+        var segments = value.Split(splitters);
+        foreach (var segment in segments.Cast<NurbsCurve>())
+          yield return NurbsSplineEncoder.ToNurbsSpline(segment, factor);
+      }
       else
       {
         yield return NurbsSplineEncoder.ToNurbsSpline(value, factor);

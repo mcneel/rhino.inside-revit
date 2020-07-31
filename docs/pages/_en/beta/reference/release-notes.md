@@ -10,6 +10,22 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html version="0.0.7517.32978" time="07/31/2020 18:19:16" %}
+
+### New Features
+* Grouped all transactions opened in a Grasshopper solution as one UNDO operation in Revit.
+
+### Fixes
+* Fixed a bug on NurbsCurve conversion to DB.NurbsSpline when original curve is not C1.
+* Fixed a bug in Types.GraphicalElement.ClippingBox when DB.Element is not available.
+
+## Minor Changes
+* Disabled Grasshopper previews when Solver is locked.
+* Now Grasshopper ignores disabled params or components when occurs a change in Revit document in order to expire the solution.
+
+### API
+* Added ApplicationServices.Application.GetOpenDocuments extension method.
+
 {% include ltr/release-header.html version="0.0.7513.21931" time="07/27/2020 12:11:02" %}
 
 ### New Features
