@@ -352,7 +352,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         var activeView = uiDocument.ActiveGraphicalView;
         if (activeView is null)
         {
-          var openViews = uiDocument.GetOpenUIViews().
+          var openViews = Rhinoceros.InvokeInHostContext(() => uiDocument.GetOpenUIViews()).
           Select(x => doc.GetElement(x.ViewId) as View).
           Where(x => x.ViewType.IsGraphicalViewType());
 
