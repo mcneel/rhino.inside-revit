@@ -91,10 +91,8 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DA.DisableGapLogic();
-
       var view = default(Types.View);
-      if (!DA.GetData("View", ref view))
+      if (!DA.GetData("View", ref view) || view?.IsValid != true)
         return;
 
       var Categories = new List<Types.Category>();
