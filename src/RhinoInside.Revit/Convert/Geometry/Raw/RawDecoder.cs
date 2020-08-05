@@ -445,7 +445,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       (
         x =>
         {
-          var c = ToRhino(x); c.Reverse();
+          var c = ToRhino(x);
           return ctol == 0.0 ? c : c.Extend(CurveEnd.Both, ctol, CurveExtensionStyle.Smooth);
         }
       );
@@ -455,7 +455,13 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
       var lofts = Brep.CreateFromLoft(cs, p0, pN, LoftType.Straight, false);
       if (lofts.Length == 1 && lofts[0].Faces.Count == 1)
-        return lofts[0].Faces[0].DuplicateSurface();
+      {
+        // Surface.Transpose is necessary since Brep.CreateFromLoft places the input curves along V,
+        // instead of that Revit Ruled Surface has those Curves along U axis.
+        // This subtle thing also result in the correct normal of the resulting surface.
+        // Transpose also duplicates the underlaying surface, what is a desired side effect of calling Transpose here.
+        return lofts[0].Faces[0].Transpose();
+      }
 
       return null;
     }
