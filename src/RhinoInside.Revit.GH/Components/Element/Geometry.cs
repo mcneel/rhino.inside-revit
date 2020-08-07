@@ -106,11 +106,11 @@ namespace RhinoInside.Revit.GH.Components
               return;
             }
 
-            if (!element.IsValidObject)
+            if (element?.IsValidObject != true || element.get_BoundingBox(null) is null)
+            {
+              geometries.AppendRange(new IGH_GeometricGoo[] {null}, new GH_Path(iteration, index++));
               continue;
-
-            if (element.get_BoundingBox(null) is null)
-              continue;
+            }
 
             // Extract the geometry
             using (var geometry = element.GetGeometry(options))
@@ -173,18 +173,26 @@ namespace RhinoInside.Revit.GH.Components
 
           foreach (var geometry in branch.Cast<IGH_GeometricGoo>())
           {
-            if (geometry.ScriptVariable() is GeometryBase geometryBase)
+            var geometryBase = geometry?.ScriptVariable() as GeometryBase;
             {
               if (categories is object)
               {
-                geometryBase.GetUserElementId(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), out var categoryId);
-                categoriesList.Add(new Types.Category(doc, categoryId));
+                if (geometryBase is null) categoriesList.Add(null);
+                else
+                {
+                  geometryBase.GetUserElementId(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), out var categoryId);
+                  categoriesList.Add(new Types.Category(doc, categoryId));
+                }
               }
 
               if (materials is object)
               {
-                geometryBase.GetUserElementId(DB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), out var materialId);
-                materialsList.Add(Types.Material.FromElementId(doc, materialId) as Types.Material);
+                if (geometryBase is null) materialsList.Add(null);
+                else
+                {
+                  geometryBase.GetUserElementId(DB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), out var materialId);
+                  materialsList.Add(Types.Material.FromElementId(doc, materialId) as Types.Material);
+                }
               }
             }
           }
@@ -344,7 +352,7 @@ namespace RhinoInside.Revit.GH.Components
   public class GraphicalElementGeometry : ElementGeometryComponent
   {
     public override Guid ComponentGuid => new Guid("8B85B1FB-A3DF-4924-BC84-58D2B919E664");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     public GraphicalElementGeometry() : base
     (

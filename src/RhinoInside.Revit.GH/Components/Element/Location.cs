@@ -7,6 +7,7 @@ namespace RhinoInside.Revit.GH.Components
   public class GraphicalElementLocation : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("71F196F1-59E8-4714-B9C2-45FAFEEDF426");
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => "⌖";
 
     public GraphicalElementLocation() : base
