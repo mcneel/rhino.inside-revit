@@ -87,16 +87,16 @@ namespace RhinoInside.Revit.GH.Components
         Title = Name,
         Description =
         @"<p>This component returns all ElementTypes in the document filtered by Filter.</p>" +
-        @"<p>You can also specify a name pattern as a FamilyName and-or TypeName." +
+        @"<p>You can also specify a name pattern as a <i>Family Name</i> and-or <i>Name</i>." +
         @"<p>Several kind of patterns are supported, the method used depends on the first pattern character:</p>" +
         @"<dl>" +
-        @"<dt><b>></b></dt><dd>Starts with</dd>" +
-        @"<dt><b><</b></dt><dd>Ends with</dd>" +
+        @"<dt><b><</b></dt><dd>Starts with</dd>" +
+        @"<dt><b>></b></dt><dd>Ends with</dd>" +
         @"<dt><b>?</b></dt><dd>Contains, same as a regular search</dd>" +
         @"<dt><b>:</b></dt><dd>Wildcards, see Microsoft.VisualBasic " + "<a target=\"_blank\" href=\"https://docs.microsoft.com/en-us/dotnet/visual-basic/language-reference/operators/like-operator#pattern-options\">LikeOperator</a></dd>" +
         @"<dt><b>;</b></dt><dd>Regular expresion, see " + "<a target=\"_blank\" href=\"https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference\">here</a> as reference</dd>" +
-        @"<dt><b>></b></dt><dd>Else it looks for an exact match</dd>" +
-        @"</dl>",
+        @"</dl>" +
+        @"Else it looks for an exact match.",
         ContactURI = AssemblyInfo.ContactURI,
         WebPageURI = AssemblyInfo.WebPageURI
       };
