@@ -10,6 +10,26 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html version="0.0.7524.21907" time="08/07/2020 12:10:14" %}
+
+### New Features
+* Now `DB.Part` is considered a Graphical Element.
+
+### Fixes
+* Added some null checking to 'Query Graphical Elements'
+* Fixed `RawDecoder.FromRuledSurface`. Resulting surface should be transposed.
+* Added `RawDecoder.FromExtrudedSurface` to handle cases where `DB.RuledFace` is an extrusion.
+* Fixed #312: Search Families by using *Asterisk*
+* Fixed a bug in 'Element Geometry' and 'Graphical Element Geometry' managing trees.
+* Fixed 'Element Parts Geometry' when element parts where already created in the document.
+
+### Minor Changes
+* Renamed MaterialQuanities.cs to MaterialQuantities.cs.
+* Renamed ElementMaterialQuanities to ElementMaterialQuantities
+* Moved 'Geometric Element' components as secondary.
+* Renamed 'Element Compound Structure Geometry' to 'Element Parts Geometry'.
+* Moved back 'Compound Structure Layer' components under the 'Host' Panel.
+
 {% include ltr/release-header.html version="0.0.7517.32978" time="07/31/2020 18:19:16" %}
 
 ### New Features
