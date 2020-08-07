@@ -60,7 +60,7 @@ namespace RhinoInside.Revit.GH.Components
   public class QueryGraphicalElements : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("79DAEA3A-13A3-49BF-8BEB-AA28E3BE4515");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override DB.ElementFilter ElementFilter => new DB.ElementIsElementTypeFilter(true);
 
     public QueryGraphicalElements() : base
@@ -91,10 +91,8 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DA.DisableGapLogic();
-
       var view = default(Types.View);
-      if (!DA.GetData("View", ref view))
+      if (!DA.GetData("View", ref view) || view?.IsValid != true)
         return;
 
       var Categories = new List<Types.Category>();

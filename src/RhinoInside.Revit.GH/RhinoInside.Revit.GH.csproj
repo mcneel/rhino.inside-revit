@@ -242,6 +242,7 @@
     <Compile Include="Components\Element\Inspect.cs" />
     <Compile Include="Components\Element\Level\QueryLevels.cs" />
     <Compile Include="Components\Element\Location.cs" />
+    <Compile Include="Components\Element\MaterialQuantities.cs" />
     <Compile Include="Components\Element\Materials.cs" />
     <Compile Include="Components\Element\Column\ByCurve.cs" />
     <Compile Include="Components\Element\DirectShape\ByBrep.cs" />
@@ -258,7 +259,6 @@
     <Compile Include="Components\Element\Floor\ByOutline.cs" />
     <Compile Include="Components\Element\Grid\ByCurve.cs" />
     <Compile Include="Components\Element\Level\ByElevation.cs" />
-    <Compile Include="Components\Element\MaterialQuanities.cs" />
     <Compile Include="Components\Element\Material\ByColor.cs" />
     <Compile Include="Components\Element\Material\ByName.cs" />
     <Compile Include="Components\Element\ModelLine\ByCurve.cs" />

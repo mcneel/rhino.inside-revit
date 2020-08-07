@@ -8,16 +8,16 @@ namespace RhinoInside.Revit.GH.Components
   public class DeconstructCompoundStructureLayer : Component
   {
     public override Guid ComponentGuid => new Guid("BC64525A-10B6-46DB-A134-CF803738B1A0");
-    public override GH_Exposure Exposure => GH_Exposure.quinary;
+    public override GH_Exposure Exposure => GH_Exposure.senary;
     protected override string IconTag => "DCSL";
 
     public DeconstructCompoundStructureLayer() : base
     (
       name: "Deconstruct Compound Structure Layer",
-      nickname: "DCSL",
+      nickname: "DecStructLayer",
       description: "Deconstructs given compound structure layer into its properties",
       category: "Revit",
-      subCategory: "Element"
+      subCategory: "Host"
     )
     { }
 

@@ -105,7 +105,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     internal static Brep ToBrep(DB.Face face)
     {
-      var surface = Raw.RawDecoder.ToRhinoSurface(face, 1.0);
+      var surface = Raw.RawDecoder.ToRhinoSurface(face, out var _, 1.0);
       if (surface is null)
         return null;
 

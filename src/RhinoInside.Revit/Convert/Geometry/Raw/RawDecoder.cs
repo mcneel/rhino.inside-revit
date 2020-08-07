@@ -437,6 +437,31 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       0.0
     );
 
+    static Surface FromExtrudedSurface(IList<DB.Curve> curves, DB.BoundingBoxUV bboxUV, double relativeTolerance)
+    {
+      var ctol = relativeTolerance * Revit.ShortCurveTolerance;
+
+      var axis = new LineCurve
+      (
+        new Line(curves[0].GetEndPoint(0).ToPoint3d(), curves[1].GetEndPoint(0).ToPoint3d()),
+        0.0,
+        1.0
+      );
+
+      Curve curveU = ToRhino(curves[0]);
+      curveU.Translate(axis.PointAt(bboxUV.Min.V) - curveU.PointAtStart);
+
+      Curve curveV = new LineCurve(new Line(axis.PointAt(bboxUV.Min.V), axis.PointAt(bboxUV.Max.V)));
+
+      if (ctol != 0.0)
+      {
+        curveU = curveU.Extend(CurveEnd.Both, ctol, CurveExtensionStyle.Smooth);
+        curveV = curveV.Extend(CurveEnd.Both, ctol, CurveExtensionStyle.Smooth);
+      }
+
+      return SumSurface.Create(curveU, curveV);
+    }
+
     static Surface FromRuledSurface(IList<DB.Curve> curves, DB.XYZ start, DB.XYZ end, DB.BoundingBoxUV bboxUV, double relativeTolerance)
     {
       var ctol = relativeTolerance * Revit.ShortCurveTolerance;
@@ -445,49 +470,42 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       (
         x =>
         {
-          var c = ToRhino(x); c.Reverse();
+          var c = ToRhino(x);
           return ctol == 0.0 ? c : c.Extend(CurveEnd.Both, ctol, CurveExtensionStyle.Smooth);
         }
       );
 
       Point3d p0 = start is null ? Point3d.Unset : AsPoint3d(start),
-              pN = end is null ? Point3d.Unset : AsPoint3d(end);
+              pN = end   is null ? Point3d.Unset : AsPoint3d(end);
 
       var lofts = Brep.CreateFromLoft(cs, p0, pN, LoftType.Straight, false);
       if (lofts.Length == 1 && lofts[0].Faces.Count == 1)
-        return lofts[0].Faces[0].DuplicateSurface();
+      {
+        // Surface.Transpose is necessary since Brep.CreateFromLoft places the input curves along V,
+        // instead of that Revit Ruled Surface has those Curves along U axis.
+        // This subtle thing also result in the correct normal of the resulting surface.
+        // Transpose also duplicates the underlaying surface, what is a desired side effect of calling Transpose here.
+        return lofts[0].Faces[0].Transpose();
+      }
 
       return null;
     }
 
-    public static Surface ToRhinoSurface(DB.RuledFace face, double relativeTolerance)
-    {
-      using (var surface = face.GetSurface() as DB.RuledSurface)
-      {
-        if (surface.MatchesParametricOrientation())
-        {
-          return FromRuledSurface
-          (
-            new DB.Curve[] { surface.GetFirstProfileCurve(), surface.GetSecondProfileCurve() },
-            surface.HasFirstProfilePoint() ? surface.GetFirstProfilePoint() : null,
-            surface.HasSecondProfilePoint() ? surface.GetSecondProfilePoint() : null,
-            face.GetBoundingBox(),
-            relativeTolerance
-          );
-        }
-        else
-        {
-          return FromRuledSurface
-          (
-            new DB.Curve[] { surface.GetFirstProfileCurve().CreateReversed(), surface.GetSecondProfileCurve().CreateReversed() },
-            surface.HasFirstProfilePoint() ? surface.GetFirstProfilePoint() : null,
-            surface.HasSecondProfilePoint() ? surface.GetSecondProfilePoint() : null,
-            face.GetBoundingBox(),
-            relativeTolerance
-          );
-        }
-      }
-    }
+    public static Surface ToRhinoSurface(DB.RuledFace face, double relativeTolerance) => face.IsExtruded ?
+    FromExtrudedSurface
+    (
+      new DB.Curve[] { face.get_Curve(0), face.get_Curve(1) },
+      face.GetBoundingBox(),
+      relativeTolerance
+    ):
+    FromRuledSurface
+    (
+      new DB.Curve[] { face.get_Curve(0), face.get_Curve(1) },
+      face.get_Curve(0) is null ? face.get_Point(0) : null,
+      face.get_Curve(1) is null ? face.get_Point(1) : null,
+      face.GetBoundingBox(),
+      relativeTolerance
+    );
 
     public static Surface ToRhino(DB.RuledSurface surface, DB.BoundingBoxUV bboxUV) => FromRuledSurface
     (
@@ -613,8 +631,11 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       return nurbsSurface;
     }
 
-    public static Surface ToRhinoSurface(DB.Face face, double relativeTolerance = 0.0)
+    public static Surface ToRhinoSurface(DB.Face face, out bool parametricOrientation, double relativeTolerance = 0.0)
     {
+      using (var surface = face.GetSurface())
+        parametricOrientation = surface.MatchesParametricOrientation();
+
       switch (face)
       {
         case null: return null;
@@ -641,7 +662,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
     static int AddSurface(Brep brep, DB.Face face, out List<BrepBoundary>[] shells, Dictionary<DB.Edge, BrepEdge> brepEdges = null)
     {
       // Extract base surface
-      if (ToRhinoSurface(face) is Surface surface)
+      if (ToRhinoSurface(face, out var parametricOrientation) is Surface surface)
       {
         int si = brep.AddSurface(surface);
 
@@ -702,8 +723,8 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
           switch (loop.trims.ClosedCurveOrientation())
           {
             case CurveOrientation.Undefined: loop.type = BrepLoopType.Unknown; break;
-            case CurveOrientation.CounterClockwise: loop.type = BrepLoopType.Outer; break;
-            case CurveOrientation.Clockwise: loop.type = BrepLoopType.Inner; break;
+            case CurveOrientation.CounterClockwise: loop.type = parametricOrientation ? BrepLoopType.Outer : BrepLoopType.Inner; break;
+            case CurveOrientation.Clockwise: loop.type = parametricOrientation ? BrepLoopType.Inner : BrepLoopType.Outer; break;
           }
 
           edgeLoops.Add(loop);
