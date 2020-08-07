@@ -1093,9 +1093,9 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap ElementMaterialQuanities {
+        internal static System.Drawing.Bitmap ElementMaterialQuantities {
             get {
-                object obj = ResourceManager.GetObject("ElementMaterialQuanities", resourceCulture);
+                object obj = ResourceManager.GetObject("ElementMaterialQuantities", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

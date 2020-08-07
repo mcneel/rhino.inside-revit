@@ -6,26 +6,26 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class ElementMaterialQuanities : Component
+  public class ElementMaterialQuantities : Component
   {
     public override Guid ComponentGuid => new Guid("8A162EE6-812E-459B-9123-8F7735AAAC0C");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => "Q";
 
-    public ElementMaterialQuanities()
+    public ElementMaterialQuantities()
     : base
     (
-      "Element MaterialQuanities",
-      "MaterialQuanities",
-      "Query element material information",
-      "Revit",
-      "Element"
+      name: "Element Material Quantities",
+      nickname: "MatQuantities",
+      description: "Query element material information",
+      category: "Revit",
+      subCategory: "Element"
     )
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager.AddParameter(new Parameters.Element(),  "Element",   "E", "Element to query for its material info", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.Element(),  "Element", "E", "Element to query for its material info", GH_ParamAccess.item);
       manager[manager.AddParameter(new Parameters.Material(), "Materials", "M", "Materials used to build this element", GH_ParamAccess.list)].Optional = true;
       manager[manager.AddParameter(new Parameters.Material(), "Paint",     "P", "Material used to paint this element",  GH_ParamAccess.list)].Optional = true;
     }
