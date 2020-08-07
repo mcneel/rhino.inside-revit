@@ -42,6 +42,7 @@ namespace RhinoInside.Revit.GH.Types
         element is DB.CombinableElement ||
         element is DB.Architecture.TopographySurface ||
         element is DB.Opening ||
+        element is DB.Part ||
         InstanceElement.IsValidElement(element)
       );
     }
