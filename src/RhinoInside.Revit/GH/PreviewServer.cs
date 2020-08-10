@@ -26,6 +26,40 @@ namespace RhinoInside.Revit.GH
 
     public static GH_PreviewMode PreviewMode = GH_PreviewMode.Shaded;
 
+    static Rhino.Geometry.MeshingParameters previewCurrentMeshParameters = new Rhino.Geometry.MeshingParameters(0.15, Revit.ShortCurveTolerance);
+    static Rhino.Geometry.MeshingParameters PreviewCurrentMeshParameters
+    {
+      get
+      {
+        previewCurrentMeshParameters.RelativeTolerance = 0.15;
+        previewCurrentMeshParameters.MinimumEdgeLength = Revit.ShortCurveTolerance * Revit.ModelUnits;
+
+        if (ActiveDefinition?.PreviewCurrentMeshParameters() is Rhino.Geometry.MeshingParameters parameters)
+        {
+          previewCurrentMeshParameters.MinimumTolerance = parameters.MinimumTolerance;
+          previewCurrentMeshParameters.RelativeTolerance = parameters.RelativeTolerance;
+          previewCurrentMeshParameters.MinimumEdgeLength = Math.Max(Revit.ShortCurveTolerance * Revit.ModelUnits, parameters.MinimumEdgeLength);
+          previewCurrentMeshParameters.Tolerance = parameters.Tolerance;
+          previewCurrentMeshParameters.GridAmplification = parameters.GridAmplification;
+          previewCurrentMeshParameters.GridAspectRatio = parameters.GridAspectRatio;
+          previewCurrentMeshParameters.GridAngle = parameters.GridAngle;
+          previewCurrentMeshParameters.GridMinCount = parameters.GridMinCount;
+          previewCurrentMeshParameters.JaggedSeams = parameters.JaggedSeams;
+          previewCurrentMeshParameters.SimplePlanes = parameters.SimplePlanes;
+          previewCurrentMeshParameters.RefineGrid = parameters.RefineGrid;
+          previewCurrentMeshParameters.MaximumEdgeLength = parameters.MaximumEdgeLength;
+          previewCurrentMeshParameters.RefineAngle = parameters.RefineAngle;
+          previewCurrentMeshParameters.TextureRange = parameters.TextureRange;
+        }
+
+        previewCurrentMeshParameters.GridMaxCount = 512;
+        previewCurrentMeshParameters.ComputeCurvature = false;
+        previewCurrentMeshParameters.SimplePlanes = true;
+        previewCurrentMeshParameters.ClosedObjectPostProcess = false;
+        return previewCurrentMeshParameters;
+      }
+    }
+
     public PreviewServer()
     {
       Instances.CanvasCreatedEventHandler CanvasCreated = default;
@@ -205,8 +239,7 @@ namespace RhinoInside.Revit.GH
               break;
               case Rhino.Geometry.Brep brep:
               {
-                var meshingParameters = ActiveDefinition.PreviewCurrentMeshParameters() ?? new Rhino.Geometry.MeshingParameters(0.15);
-                if (Rhino.Geometry.Mesh.CreateFromBrep(brep, meshingParameters) is Rhino.Geometry.Mesh[] brepMeshes)
+                if (Rhino.Geometry.Mesh.CreateFromBrep(brep, PreviewCurrentMeshParameters) is Rhino.Geometry.Mesh[] brepMeshes)
                 {
                   var previewMesh = new Rhino.Geometry.Mesh();
                   previewMesh.Append(brepMeshes);
