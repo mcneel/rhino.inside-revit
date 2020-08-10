@@ -45,6 +45,9 @@ namespace RhinoInside.Revit.GH.Types
 
     public static new bool IsValidElement(DB.Element element)
     {
+      if (!GraphicalElement.IsValidElement(element))
+        return false;
+
       using (var options = new DB.Options())
         return !(element.get_Geometry(options) is null);
     }
@@ -258,14 +261,14 @@ namespace RhinoInside.Revit.GH.Types
       return GeometryPreview.materials;
     }
 
-    public Mesh[] TryGetPreviewMeshes(MeshingParameters parameters = default)
+    public Mesh[] TryGetPreviewMeshes(MeshingParameters parameters)
     {
-      if (parameters is object && !ReferenceEquals(meshingParameters, parameters))
+      if (!ReferenceEquals(meshingParameters, parameters))
       {
         meshingParameters = parameters;
         if (geometryPreview is object)
         {
-          if (geometryPreview.MeshingParameters?.RelativeTolerance != meshingParameters.RelativeTolerance)
+          if (geometryPreview.MeshingParameters?.RelativeTolerance != meshingParameters?.RelativeTolerance)
             GeometryPreview = null;
         }
       }
@@ -273,10 +276,9 @@ namespace RhinoInside.Revit.GH.Types
       return GeometryPreview.meshes;
     }
 
-    public Curve[] TryGetPreviewWires()
-    {
-      return GeometryPreview.wires;
-    }
+    public Mesh[] TryGetPreviewMeshes() => GeometryPreview.meshes;
+
+    public Curve[] TryGetPreviewWires() => GeometryPreview.wires;
     #endregion
 
     #region IGH_PreviewData
