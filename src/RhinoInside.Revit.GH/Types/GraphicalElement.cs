@@ -10,9 +10,13 @@ using DB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   /// <summary>
-  /// Iterface that represents any <see cref="DB.Element"/> that has a Graphical representation in Revit
+  /// Interface that represents any <see cref="DB.Element"/> that has a Graphical representation in Revit
   /// </summary>
-  public interface IGH_GraphicalElement : IGH_Element { }
+  public interface IGH_GraphicalElement : IGH_Element
+  {
+    bool? ViewSpecific { get; }
+    View OwnerView { get; }
+  }
 
   public class GraphicalElement :
     Element,
@@ -46,6 +50,11 @@ namespace RhinoInside.Revit.GH.Types
         InstanceElement.IsValidElement(element)
       );
     }
+
+    #region IGH_GraphicalElement
+    public bool? ViewSpecific => APIElement?.ViewSpecific;
+    public View OwnerView => View.FromElementId(Document, APIElement?.OwnerViewId) as View;
+    #endregion
 
     #region IGH_GeometricGoo
     public BoundingBox Boundingbox => ClippingBox;

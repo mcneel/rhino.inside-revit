@@ -8,7 +8,6 @@ namespace RhinoInside.Revit.GH.Types
   public interface IGH_InstanceElement : IGH_GeometricElement
   {
     Level Level { get; }
-    View OwnerView { get; }
   }
 
   public class InstanceElement : GeometricElement, IGH_InstanceElement
@@ -29,8 +28,5 @@ namespace RhinoInside.Revit.GH.Types
 
     public override Level Level =>
       Level.FromElementId(Document, APIElement?.LevelId) as Level;
-
-    public View OwnerView =>
-      View.FromElementId(Document, APIElement?.OwnerViewId) as View;
   }
 }
