@@ -673,6 +673,10 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
           nurbs.KnotsV.InsertKnot(surface.Domain(1).Mid);
           surface = nurbs;
         }
+        else if (surface is SumSurface sum)
+        {
+          surface = sum.ToNurbsSurface();
+        }
 
         // Extract and classify Edge Loops
         var edgeLoops = new List<BrepBoundary>(face.EdgeLoops.Size);
