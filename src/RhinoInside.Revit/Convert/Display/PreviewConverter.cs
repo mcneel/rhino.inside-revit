@@ -74,12 +74,14 @@ Rhino.Display.DisplayMaterial defaultMaterial
     #endregion
 
     #region GetPreviewMeshes
+    static double LevelOfDetail(this MeshingParameters value) => value?.RelativeTolerance ?? 0.15;
+
     /*internal*/
     public static IEnumerable<Mesh> GetPreviewMeshes
-(
-this IEnumerable<DB.GeometryObject> geometries,
-MeshingParameters meshingParameters
-)
+    (
+      this IEnumerable<DB.GeometryObject> geometries,
+      MeshingParameters meshingParameters
+    )
     {
       foreach (var geometry in geometries)
       {
@@ -103,14 +105,19 @@ MeshingParameters meshingParameters
             if (mesh.NumTriangles <= 0)
               continue;
 
-            yield return mesh.ToMesh();
+            var f = Geometry.Raw.RawDecoder.ToRhino(mesh);
+            UnitConverter.Scale(f, UnitConverter.ToRhinoUnits);
+
+            yield return f;
             break;
           }
           case DB.Face face:
           {
-            var faceMesh = (meshingParameters is null ? face.Triangulate() : face.Triangulate(meshingParameters.RelativeTolerance));
+            var faceMesh = face.Triangulate(meshingParameters.LevelOfDetail());
+            var f = Geometry.Raw.RawDecoder.ToRhino(faceMesh);
+            UnitConverter.Scale(f, UnitConverter.ToRhinoUnits);
 
-            yield return faceMesh?.ToMesh();
+            yield return f;
             break;
           }
           case DB.Solid solid:
@@ -123,8 +130,9 @@ MeshingParameters meshingParameters
             var facesMeshes = useMultipleMaterials ? null : new List<Mesh>(solid.Faces.Size);
             foreach (var face in solidFaces)
             {
-              var faceMesh = (meshingParameters is null ? face.Triangulate() : face.Triangulate(meshingParameters.RelativeTolerance));
-              var f = faceMesh?.ToMesh();
+              var faceMesh = face.Triangulate(meshingParameters.LevelOfDetail());
+              var f = Geometry.Raw.RawDecoder.ToRhino(faceMesh);
+              UnitConverter.Scale(f, UnitConverter.ToRhinoUnits);
 
               if (facesMeshes is null)
                 yield return f;
@@ -153,9 +161,9 @@ MeshingParameters meshingParameters
     #region GetPreviewWires
     /*internal*/
     public static IEnumerable<Curve> GetPreviewWires
-(
-this IEnumerable<DB.GeometryObject> geometries
-)
+    (
+      this IEnumerable<DB.GeometryObject> geometries
+    )
     {
       var scaleFactor = Revit.ModelUnits;
       foreach (var geometry in geometries)
