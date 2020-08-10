@@ -205,7 +205,8 @@ namespace RhinoInside.Revit.GH
               break;
               case Rhino.Geometry.Brep brep:
               {
-                if (Rhino.Geometry.Mesh.CreateFromBrep(brep, ActiveDefinition.PreviewCurrentMeshParameters()) is Rhino.Geometry.Mesh[] brepMeshes)
+                var meshingParameters = ActiveDefinition.PreviewCurrentMeshParameters() ?? new Rhino.Geometry.MeshingParameters(0.15);
+                if (Rhino.Geometry.Mesh.CreateFromBrep(brep, meshingParameters) is Rhino.Geometry.Mesh[] brepMeshes)
                 {
                   var previewMesh = new Rhino.Geometry.Mesh();
                   previewMesh.Append(brepMeshes);
