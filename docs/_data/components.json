@@ -910,12 +910,12 @@
     "uuid": "97e9c6bb-8442-4f77-bca1-6be8aafbdc96"
   }, 
   {
-    "desc": "Get element type compound structure", 
+    "desc": "Get host object type compound structure", 
     "iconsrc": "/static/images/GH/HostObjectTypeCompoundStructure.png", 
     "icontag": null, 
-    "panel": "Element", 
+    "panel": "Host", 
     "tab": "Revit", 
-    "title": "Element Type Compound Structure", 
+    "title": "Host Type Compound Structure", 
     "typename": "HostObjectTypeCompoundStructure", 
     "uuid": "024619ef-58ff-47c1-8833-96ba2f2b677b"
   }, 
@@ -923,7 +923,7 @@
     "desc": "Deconstructs given compound structure into its properties", 
     "iconsrc": "/static/images/GH/DeconstructCompoundStructure.png", 
     "icontag": null, 
-    "panel": "Element", 
+    "panel": "Host", 
     "tab": "Revit", 
     "title": "Deconstruct Compound Structure", 
     "typename": "DeconstructCompoundStructure", 
@@ -933,7 +933,7 @@
     "desc": "Deconstructs given compound structure layer into its properties", 
     "iconsrc": "/static/images/GH/DeconstructCompoundStructureLayer.png", 
     "icontag": null, 
-    "panel": "Element", 
+    "panel": "Host", 
     "tab": "Revit", 
     "title": "Deconstruct Compound Structure Layer", 
     "typename": "DeconstructCompoundStructureLayer", 
@@ -1070,12 +1070,12 @@
     "uuid": "ade71474-5f00-4bd5-9d1e-d518b42137f2"
   }, 
   {
-    "desc": "Extracts the geometry of given compound structure layers", 
+    "desc": "Extracts the parts geometry of the given element", 
     "iconsrc": "/static/images/GH/CompoundStructureGeometry.png", 
     "icontag": null, 
     "panel": "Element", 
     "tab": "Revit", 
-    "title": "Element Compound Structure Geometry", 
+    "title": "Element Parts Geometry", 
     "typename": "CompoundStructureGeometry", 
     "uuid": "3dbaaae8-90d2-465e-a88b-fcc2b64e3bb3"
   }, 
@@ -1218,6 +1218,16 @@
     "title": "Graphical Element Location", 
     "typename": "GraphicalElementLocation", 
     "uuid": "71f196f1-59e8-4714-b9c2-45fafeedf426"
+  }, 
+  {
+    "desc": "Query element material information", 
+    "iconsrc": "/static/images/GH/ElementMaterialQuantities.png", 
+    "icontag": null, 
+    "panel": "Element", 
+    "tab": "Revit", 
+    "title": "Element Material Quantities", 
+    "typename": "ElementMaterialQuantities", 
+    "uuid": "8a162ee6-812e-459b-9123-8f7735aaac0c"
   }, 
   {
     "desc": "Query element used materials", 
@@ -1418,16 +1428,6 @@
     "title": "Add Level", 
     "typename": "LevelByElevation", 
     "uuid": "c6dec111-eac6-4047-8618-28ee144d55c5"
-  }, 
-  {
-    "desc": "Query element material information", 
-    "iconsrc": "/static/images/GH/ElementMaterialQuanities.png", 
-    "icontag": null, 
-    "panel": "Element", 
-    "tab": "Revit", 
-    "title": "Element MaterialQuanities", 
-    "typename": "ElementMaterialQuanities", 
-    "uuid": "8a162ee6-812e-459b-9123-8f7735aaac0c"
   }, 
   {
     "desc": "Quickly create a new Revit material from color", 
