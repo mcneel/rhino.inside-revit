@@ -664,6 +664,9 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       // Extract base surface
       if (ToRhinoSurface(face, out var parametricOrientation) is Surface surface)
       {
+        if (!parametricOrientation)
+          surface.Transpose(true);
+
         int si = brep.AddSurface(surface);
 
         if (surface is PlaneSurface planar)
@@ -727,8 +730,8 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
           switch (loop.trims.ClosedCurveOrientation())
           {
             case CurveOrientation.Undefined: loop.type = BrepLoopType.Unknown; break;
-            case CurveOrientation.CounterClockwise: loop.type = parametricOrientation ? BrepLoopType.Outer : BrepLoopType.Inner; break;
-            case CurveOrientation.Clockwise: loop.type = parametricOrientation ? BrepLoopType.Inner : BrepLoopType.Outer; break;
+            case CurveOrientation.CounterClockwise: loop.type = BrepLoopType.Outer; break;
+            case CurveOrientation.Clockwise: loop.type = BrepLoopType.Inner; break;
           }
 
           edgeLoops.Add(loop);
