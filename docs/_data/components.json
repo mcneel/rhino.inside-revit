@@ -631,8 +631,8 @@
   }, 
   {
     "desc": "Evaluate if an Element pass a Filter", 
-    "iconsrc": null, 
-    "icontag": "F", 
+    "iconsrc": "/static/images/GH/FilterElement.png", 
+    "icontag": null, 
     "panel": "Filter", 
     "tab": "Revit", 
     "title": "Filter Element", 
@@ -1551,8 +1551,8 @@
   }, 
   {
     "desc": "Element Name Property Get-Set accessor to Element Name property", 
-    "iconsrc": null, 
-    "icontag": "E", 
+    "iconsrc": "/static/images/GH/ElementPropertyName.png", 
+    "icontag": null, 
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Element Name", 
@@ -1561,8 +1561,8 @@
   }, 
   {
     "desc": "Element Category Property Get-Set accessor to Element Category property", 
-    "iconsrc": null, 
-    "icontag": "E", 
+    "iconsrc": "/static/images/GH/ElementPropertyCategory.png", 
+    "icontag": null, 
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Element Category", 
@@ -1571,8 +1571,8 @@
   }, 
   {
     "desc": "Element Type Property Get-Set accessor to Element Type property", 
-    "iconsrc": null, 
-    "icontag": "E", 
+    "iconsrc": "/static/images/GH/ElementPropertyType.png", 
+    "icontag": null, 
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Element Type", 

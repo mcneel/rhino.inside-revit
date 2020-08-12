@@ -853,6 +853,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ElementPropertyCategory {
+            get {
+                object obj = ResourceManager.GetObject("ElementPropertyCategory", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ElementCategoryFilter {
             get {
                 object obj = ResourceManager.GetObject("ElementCategoryFilter", resourceCulture);
@@ -1113,6 +1123,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ElementPropertyName {
+            get {
+                object obj = ResourceManager.GetObject("ElementPropertyName", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ElementOwnerViewFilter {
             get {
                 object obj = ResourceManager.GetObject("ElementOwnerViewFilter", resourceCulture);
@@ -1216,6 +1236,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap ElementType {
             get {
                 object obj = ResourceManager.GetObject("ElementType", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ElementPropertyType {
+            get {
+                object obj = ResourceManager.GetObject("ElementPropertyType", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -1456,6 +1486,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap FamilyTypes {
             get {
                 object obj = ResourceManager.GetObject("FamilyTypes", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap FilterElement {
+            get {
+                object obj = ResourceManager.GetObject("FilterElement", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
