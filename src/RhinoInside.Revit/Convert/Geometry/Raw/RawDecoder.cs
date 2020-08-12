@@ -491,21 +491,54 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       return null;
     }
 
-    public static Surface ToRhinoSurface(DB.RuledFace face, double relativeTolerance) => face.IsExtruded ?
-    FromExtrudedSurface
-    (
-      new DB.Curve[] { face.get_Curve(0), face.get_Curve(1) },
-      face.GetBoundingBox(),
-      relativeTolerance
-    ):
-    FromRuledSurface
-    (
-      new DB.Curve[] { face.get_Curve(0), face.get_Curve(1) },
-      face.get_Curve(0) is null ? face.get_Point(0) : null,
-      face.get_Curve(1) is null ? face.get_Point(1) : null,
-      face.GetBoundingBox(),
-      relativeTolerance
-    );
+    public static Surface ToRhinoSurface(DB.RuledFace face, double relativeTolerance)
+    {
+      NurbsSurface nurbsSurface = default;
+      try
+      {
+#if REVIT_2021
+        using (var surface = DB.ExportUtils.GetNurbsSurfaceDataForSurface(face.GetSurface()))
+          nurbsSurface = ToRhino(surface, face.GetBoundingBox());
+#else
+        using (var surface = DB.ExportUtils.GetNurbsSurfaceDataForFace(face))
+          nurbsSurface = ToRhino(surface, face.GetBoundingBox());
+#endif
+      }
+      catch (Autodesk.Revit.Exceptions.ApplicationException) { }
+
+      if (nurbsSurface is null)
+      {
+        return face.IsExtruded ?
+          FromExtrudedSurface
+          (
+            new DB.Curve[] { face.get_Curve(0), face.get_Curve(1) },
+            face.GetBoundingBox(),
+            relativeTolerance
+          ):
+          FromRuledSurface
+          (
+            new DB.Curve[] { face.get_Curve(0), face.get_Curve(1) },
+            face.get_Curve(0) is null ? face.get_Point(0) : null,
+            face.get_Curve(1) is null ? face.get_Point(1) : null,
+            face.GetBoundingBox(),
+            relativeTolerance
+          );
+      }
+      else
+      {
+        double ctol = relativeTolerance * Revit.ShortCurveTolerance * 5.0;
+        if (ctol != 0.0)
+        {
+          // Extend using smooth way avoids creating C2 discontinuities
+          nurbsSurface = nurbsSurface.Extend(IsoStatus.West, ctol, true) as NurbsSurface ?? nurbsSurface;
+          nurbsSurface = nurbsSurface.Extend(IsoStatus.East, ctol, true) as NurbsSurface ?? nurbsSurface;
+          nurbsSurface = nurbsSurface.Extend(IsoStatus.South, ctol, true) as NurbsSurface ?? nurbsSurface;
+          nurbsSurface = nurbsSurface.Extend(IsoStatus.North, ctol, true) as NurbsSurface ?? nurbsSurface;
+        }
+      }
+
+      return nurbsSurface;
+    }
 
     public static Surface ToRhino(DB.RuledSurface surface, DB.BoundingBoxUV bboxUV) => FromRuledSurface
     (
