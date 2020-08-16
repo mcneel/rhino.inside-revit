@@ -9,15 +9,19 @@ In this guide we will take a look at how to send Rhino geometry to Revit using G
 
 The 3 main ways to classify Rhino geomtry in Revit are: 
 
-1. Directshapes
-1. Inserted as a part of Loadable Families
-1. Use Rhino geomtry to generate Native Revit elements
+1. [Directshapes](#rhino-objects-as-directshapes)
+1. [Inserted as a part of Loadable Families](#rhino-objects-as-loadable-families)
+1. [Use Rhino geomtry to generate Native Revit elements](#using-revit-built-in-system-families)
+
+![Competition model in Rhino]({{ "/static/images/guides/rhino-office-display.jpg" | prepend: site.baseurl }})
+
+![A Quick Elevation in Revit]({{ "/static/images/guides/revit-office-elevation.jpg" | prepend: site.baseurl }}) ![A Quick Plan in Revit]({{ "/static/images/guides/revit-office-plan.jpg" | prepend: site.baseurl }})
 
 ### Rhino objects as DirectShapes
 
-This is the most obvious and many times the easiest way to get Geometry from Rhino into Revit. It is where everyone starts. 
+Directshapes are the most obvious and many times the easiest way to get Geometry from Rhino into Revit. It is normally where everyone starts.  While it is the easiest, it it is important to understand that DirectShapes may not always be the best way to transfer Rhino Goemetry into Revit. 
 
-Good reasons for Directshapes might be:
+Good reasons for Directshapes include:
 1. Temporary models used in a competition submission for quick drawings.
 1. Placeholders for part of the building that is still changing during design development.  For instance, while the floor plates might be done, the facade might be in flux in Grasshopper.  Using a directshape as a placeholder for elevations and other design development drawings may work well.
 1. A completely bespoke component or assembly that cannot be modeled using Revit native Families.
