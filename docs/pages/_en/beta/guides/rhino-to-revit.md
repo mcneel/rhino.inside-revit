@@ -32,7 +32,10 @@ Directshapes can be placed in top level Categories to control how they draw in v
 
 Directshapes cannot be places in Sub-Categories. For additional graphic controls, View Filters can be apoplied to custom parameter values.
 
-Note: Directshapes created from smooth NURBS surfaces in Rhino may some in as smooth solid or converted to a mesh by Revit.  If the NURBS is converted to a mesh, that is a symptom that the NURBS geometry was rejected by Revit.  There are many reasons for this, but very often this projecm can be fixed in Rhino.
+{% capture api_warning_note %}
+Directshapes created from smooth NURBS surfaces in Rhino may some in as smooth solid or converted to a mesh by Revit.  If the NURBS is converted to a mesh, that is a symptom that the NURBS geometry was rejected by Revit.  There are many reasons for this, but very often this projecm can be fixed in Rhino.
+{% endcapture %}
+{% include ltr/warning_note.html note=api_warning_note %}
 
 ### Rhino objects as Loadable Families
 
