@@ -30,7 +30,11 @@ namespace RhinoInside.Revit.Convert.Geometry
       if (!bbox.IsValid || bbox.Diagonal.Length < Revit.ShortCurveTolerance)
         return default;
 
-      return SplitFaces(ref brep);
+      brep.Faces.SplitKinkyFaces(Revit.AngleTolerance, true);
+      brep.Faces.SplitClosedFaces(1);
+      brep.Faces.ShrinkFaces();
+
+      return brep.IsValid;
     }
 
     static bool SplitFaces(ref Brep brep)
