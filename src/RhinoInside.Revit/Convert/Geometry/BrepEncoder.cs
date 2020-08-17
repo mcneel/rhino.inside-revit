@@ -34,6 +34,14 @@ namespace RhinoInside.Revit.Convert.Geometry
       brep.Faces.SplitClosedFaces(1);
       brep.Faces.ShrinkFaces();
 
+      var Identity = new Interval(0.0, 1.0);
+
+      foreach (var face in brep.Faces)
+      {
+        face.SetDomain(0, Identity);
+        face.SetDomain(1, Identity);
+      }
+
       return brep.IsValid;
     }
 
