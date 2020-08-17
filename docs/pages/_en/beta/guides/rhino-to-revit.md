@@ -39,15 +39,30 @@ Directshapes created from smooth NURBS surfaces in Rhino may some in as smooth s
 
 ### Rhino objects as Loadable Families
 
-Revit defines loadable families as:
+Rhino objects set in a family allow to insert multiple instances of an object and also allow for sub-categories.  You can use subcategories can be used to control the visibility and graphics of portions of a family within a top level category. It is important to undertand this only can be done in a Family.  It is also worth thinking if instances need to be used, or larger more complex Families would be enough?
+
+For example, here is an exterior walkway canopy in Rhino.  It is a structure that will built by a specialty fabricator and brought out to the site.  The small footing will be poored on-site.  So here the footings are part of one family and the rest of the structure part of another family.
+
+![An Exterior Walkway in Rhino]({{ "/static/images/guides/canopy-rhino.png" | prepend: site.baseurl }})
+
+By using mapping layers in Rhino to sub-categories in Revit, graphics and materials can be controlled in Revit per view:
+
+![Plan view with Sub-categories]({{ "/static/images/guides/canopy-plan.png" | prepend: site.baseurl }})
+
+![Elevation view with Sub-categories]({{ "/static/images/guides/canopy-elevation.png" | prepend: site.baseurl }})
+
+Revit recomends loadable families when:
 * Building components that would usually be purchased, delivered, and installed in and around a building, such as windows, doors, casework, fixtures, furniture, and planting.
 * System components that would usually be purchased, delivered, and installed in and around a building, such as boilers, water heaters, air handlers, and plumbing fixtures.
-* Some annotation elements that are routinely customized, such as symbols and title blocks
+* Some annotation elements that are routinely customized, such as symbols and title blocks.
+* Rhino gemeotry that is complex and may need to be placed in Revit for drawings.
 
 Wrapping Rhino gemoetry inside Loadable Families have many advantages:
 * Repeated objects can be inserted mutiple times allowing forms to be scheduled and counted correctly
 * Forms in loadable families can be edited by Revit if needed.
 * Forms placed inside Family/Types can be placed in sub-Categories for further graphics control and scheduling. 
+
+Here is a video on creating a Family with sub-categories.
 
 ### Using Revit built-in System Families
 
