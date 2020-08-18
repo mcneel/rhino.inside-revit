@@ -1033,8 +1033,7 @@ namespace RhinoInside.Revit.GH.Components
         }
         catch (System.Exception e)
         {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
-          DA.AbortComponentSolution();
+          throw e;
         }
         finally
         {
