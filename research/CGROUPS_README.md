@@ -1,6 +1,6 @@
 The `cgroups.py` parses the built-in category text files under the `bic_data/` and attempts to organize based on a predefined grouping logic. The output files are stored as `.json` under the same directory and have the schema as shown below:
 
-```json
+```
 {
     "meta": {
         "version": "2018",                          // revit version
