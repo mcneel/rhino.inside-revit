@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -12,6 +13,7 @@ using Rhino;
 using Rhino.PlugIns;
 
 using Grasshopper;
+using Grasshopper.Plugin;
 using Grasshopper.Kernel;
 using Grasshopper.GUI.Canvas;
 using RhinoInside.Revit.External.DB.Extensions;
@@ -19,17 +21,19 @@ using RhinoInside.Revit.External.DB.Extensions;
 namespace RhinoInside.Revit.GH
 {
   [GuestPlugInId("B45A29B1-4343-4035-989E-044E8580D9CF")]
-  internal class Guest : IGuest
+  class Guest : IGuest
   {
-    public static Grasshopper.Plugin.GH_RhinoScriptInterface Script = new Grasshopper.Plugin.GH_RhinoScriptInterface();
+    #region IGuest
     PreviewServer previewServer;
+
     public string Name => "Grasshopper";
+
     LoadReturnCode IGuest.OnCheckIn(ref string errorMessage)
     {
       string message = null;
       try
       {
-        if(!LoadComponents())
+        if(!LoadStartupAssemblies())
           message = "Failed to load Revit Grasshopper components.";
       }
       catch (FileNotFoundException e) { message = $"{e.Message}{Environment.NewLine}{e.FileName}"; }
@@ -70,71 +74,6 @@ namespace RhinoInside.Revit.GH
       return LoadReturnCode.Success;
     }
 
-    static Rhino.UnitSystem modelUnitSystem = Rhino.UnitSystem.Unset;
-    public static Rhino.UnitSystem ModelUnitSystem
-    {
-      get => Instances.ActiveCanvas is null ? Rhino.UnitSystem.Unset : modelUnitSystem;
-      private set => modelUnitSystem = value;
-    }
-
-    void ActiveCanvas_DocumentChanged(GH_Canvas sender, GH_CanvasDocumentChangedEventArgs e)
-    {
-      if (e.OldDocument is object)
-      {
-        e.OldDocument.SolutionEnd -= ActiveDefinition_SolutionEnd;
-        e.OldDocument.SolutionStart -= ActiveDefinition_SolutionStart;
-      }
-
-      if (e.NewDocument is object)
-      {
-        e.NewDocument.SolutionStart += ActiveDefinition_SolutionStart;
-        e.NewDocument.SolutionEnd += ActiveDefinition_SolutionEnd;
-      }
-    }
-
-    Stack<DB.TransactionGroup> OpenTransactionGroups = new Stack<DB.TransactionGroup>();
-
-    private void ActiveDefinition_SolutionStart(object sender, GH_SolutionEventArgs e)
-    {
-      Revit.ActiveDBApplication.GetOpenDocuments(out var projects, out var families);
-
-      var now = DateTime.Now.ToString(System.Globalization.CultureInfo.CurrentUICulture);
-      var name = e.Document.DisplayName;
-
-      foreach (var project in projects)
-      {
-        var group = new DB.TransactionGroup(project, $"Grasshopper {now}: {name}");
-        group.Start();
-
-        OpenTransactionGroups.Push(group);
-      }
-
-      foreach (var family in families)
-      {
-        var group = new DB.TransactionGroup(family, $"Grasshopper {now}: {name}");
-        group.Start();
-
-        OpenTransactionGroups.Push(group);
-      }
-    }
-
-    void ActiveDefinition_SolutionEnd(object sender, GH_SolutionEventArgs e)
-    {
-      while (OpenTransactionGroups.Count > 0)
-      {
-        try
-        {
-          using (var group = OpenTransactionGroups.Pop())
-          {
-            group.Assimilate();
-          }
-        }
-        catch { }
-      }
-
-      ModelUnitSystem = RhinoDoc.ActiveDoc.ModelUnitSystem;
-    }
-
     void IGuest.OnCheckOut()
     {
       RhinoDoc.EndOpenDocumentInitialViewUpdate -= EndOpenDocumentInitialViewUpdate;
@@ -149,6 +88,10 @@ namespace RhinoInside.Revit.GH
       previewServer?.Unregister();
       previewServer = null;
     }
+    #endregion
+
+    #region Grasshopper Editor
+    static readonly GH_RhinoScriptInterface Script = new GH_RhinoScriptInterface();
 
     /// <summary>
     /// Returns the loaded state of the Grasshopper Main window.
@@ -223,10 +166,43 @@ namespace RhinoInside.Revit.GH
       OpenDocument(filename);
     }
 
+    void ModalScope_Enter(object sender, EventArgs e)
+    {
+      if (Instances.ActiveCanvas?.Document is GH_Document definition)
+        definition.Enabled = true;
+    }
+
+    void ModalScope_Exit(object sender, EventArgs e)
+    {
+      if (Instances.ActiveCanvas?.Document is GH_Document definition)
+        definition.Enabled = false;
+    }
+
+    bool activeDefinitionWasEnabled = false;
+    void BeginOpenDocument(object sender, DocumentOpenEventArgs e)
+    {
+      if (Instances.ActiveCanvas?.Document is GH_Document definition)
+      {
+        activeDefinitionWasEnabled = definition.Enabled;
+        definition.Enabled = false;
+      }
+    }
+
+    void EndOpenDocumentInitialViewUpdate(object sender, DocumentOpenEventArgs e)
+    {
+      if (Instances.ActiveCanvas?.Document is GH_Document definition)
+      {
+        definition.Enabled = activeDefinitionWasEnabled;
+        definition.NewSolution(false);
+      }
+    }
+    #endregion
+
+    #region Grasshopper Assemblies
     static bool LoadGHA(string filePath)
     {
       var LoadGHAProc = typeof(GH_ComponentServer).GetMethod("LoadGHA", BindingFlags.NonPublic | BindingFlags.Instance);
-      if (LoadGHAProc == null)
+      if (LoadGHAProc is null)
       {
         var message = new StringBuilder();
         message.AppendLine("An attempt is made to invoke an invalid target method.");
@@ -254,7 +230,104 @@ namespace RhinoInside.Revit.GH
       }
     }
 
-    bool LoadComponents()
+    static bool EnumGHLink(string filePath, List<string> files)
+    {
+      try
+      {
+        foreach (var fullLine in File.ReadAllLines(filePath))
+        {
+          var line = fullLine.Trim();
+          if (string.IsNullOrEmpty(line)) continue;
+          if (line.StartsWith("#")) continue;
+          if (line.StartsWith("//")) continue;
+
+          if (File.Exists(line)) files.Add(line);
+          else if (Directory.Exists(line))
+          {
+            var folder = new DirectoryInfo(line);
+
+            IEnumerable<FileInfo> assemblyFiles;
+            try { assemblyFiles = folder.EnumerateFiles("*.gha"); }
+            catch (System.IO.DirectoryNotFoundException) { continue; }
+
+            foreach (var assemblyFile in assemblyFiles)
+            {
+              // https://docs.microsoft.com/en-us/dotnet/api/system.io.directory.enumeratefiles?view=netframework-4.8
+              // If the specified extension is exactly three characters long,
+              // the method returns files with extensions that begin with the specified extension.
+              // For example, "*.xls" returns both "book.xls" and "book.xlsx"
+              if (assemblyFile.Extension.ToLower() != ".gha") continue;
+
+              files.Add(assemblyFile.FullName);
+            }
+          }
+        }
+      }
+      catch { return false; }
+
+      return true;
+    }
+
+    static List<string> GetAssembliesList()
+    {
+      DirectoryInfo[] DefaultAssemblyFolders =
+      {
+        // %ProgramData%\Grasshopper\Libraries-Inside-Revit-20XX
+        new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Grasshopper", $"Libraries-{Rhinoceros.SchemeName}")),
+
+        // %APPDATA%\Grasshopper\Libraries-Inside-Revit-20XX
+        new DirectoryInfo(Folders.DefaultAssemblyFolder.Substring(0, Folders.DefaultAssemblyFolder.Length - 1) + '-' + Rhinoceros.SchemeName)
+      };
+
+      var map = new System.Collections.Specialized.OrderedDictionary();
+
+      foreach (var folder in DefaultAssemblyFolders)
+      {
+        IEnumerable<FileInfo> assemblyFiles;
+        try { assemblyFiles = folder.EnumerateFiles("*.gha", SearchOption.AllDirectories); }
+        catch (System.IO.DirectoryNotFoundException) { continue; }
+
+        foreach (var assemblyFile in assemblyFiles)
+        {
+          // https://docs.microsoft.com/en-us/dotnet/api/system.io.directory.enumeratefiles?view=netframework-4.8
+          // If the specified extension is exactly three characters long,
+          // the method returns files with extensions that begin with the specified extension.
+          // For example, "*.xls" returns both "book.xls" and "book.xlsx"
+          if (assemblyFile.Extension.ToLower() != ".gha") continue;
+
+          var key = assemblyFile.FullName.Substring(folder.FullName.Length);
+          if (map.Contains(key))
+            map.Remove(key);
+
+          map.Add(key, assemblyFile);
+        }
+
+        IEnumerable<FileInfo> linkFiles;
+        try { linkFiles = folder.EnumerateFiles("*.ghlink", SearchOption.TopDirectoryOnly); }
+        catch (System.IO.DirectoryNotFoundException) { continue; }
+
+        foreach (var linkFile in linkFiles)
+        {
+          var key = linkFile.FullName.Substring(folder.FullName.Length);
+          if (map.Contains(key))
+            map.Remove(key);
+
+          map.Add(key, linkFile);
+        }
+      }
+
+      var assembliesList = new List<string>();
+      foreach (var entry in map.Values.Cast<FileInfo>())
+      {
+        var extension = entry.Extension.ToLower();
+        if (extension == ".gha")        assembliesList.Add(entry.FullName);
+        else if(extension == ".ghlink") EnumGHLink(entry.FullName, assembliesList);
+      }
+
+      return assembliesList;
+    }
+
+    bool LoadStartupAssemblies()
     {
       // Load This Assembly as a GHA in Grasshopper
       {
@@ -282,56 +355,41 @@ namespace RhinoInside.Revit.GH
         }
       }
 
-      var assemblyFolders = new DirectoryInfo[]
+      var assemblyList = GetAssembliesList();
+      foreach (var assemblyFile in assemblyList)
       {
-        // %ProgramData%\Grasshopper\Libraries-Inside-Revit-20XX
-        new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Grasshopper", $"Libraries-{Rhinoceros.SchemeName}")),
+        bool loaded = false;
+        string mainContent = string.Empty;
+        string expandedContent = string.Empty;
 
-        // %APPDATA%\Grasshopper\Libraries-Inside-Revit-20XX
-        new DirectoryInfo(Folders.DefaultAssemblyFolder.Substring(0, Folders.DefaultAssemblyFolder.Length - 1) + '-' + Rhinoceros.SchemeName)
-      };
-
-      foreach (var folder in assemblyFolders)
-      {
-        IEnumerable<FileInfo> assemblyFiles;
-        try { assemblyFiles = folder.EnumerateFiles("*.gha"); }
-        catch (System.IO.DirectoryNotFoundException) { continue; }
-
-        foreach (var assemblyFile in assemblyFiles)
+        try
         {
-          bool loaded = false;
-          string mainContent = string.Empty;
-          string expandedContent = string.Empty;
+          loaded = LoadGHA(assemblyFile);
+        }
+        catch (Exception e)
+        {
+          mainContent = e.Message;
+          expandedContent = e.Source;
+        }
 
-          try
-          {
-            loaded = LoadGHA(assemblyFile.FullName);
-          }
-          catch (Exception e)
-          {
-            mainContent = e.Message;
-            expandedContent = e.Source;
-          }
-
-          if (!loaded)
-          {
-            using
-            (
-              var taskDialog = new TaskDialog(MethodBase.GetCurrentMethod().DeclaringType.FullName)
-              {
-                Title = "Grasshopper Assembly Failure",
-                MainIcon = External.UI.TaskDialogIcons.IconError,
-                TitleAutoPrefix = false,
-                AllowCancellation = false,
-                MainInstruction = $"Grasshopper cannot load the external assembly {assemblyFile.Name}. Please contact the provider for assistance.",
-                MainContent = mainContent,
-                ExpandedContent = expandedContent,
-                FooterText = assemblyFile.FullName
-              }
-            )
+        if (!loaded)
+        {
+          using
+          (
+            var taskDialog = new TaskDialog(MethodBase.GetCurrentMethod().DeclaringType.FullName)
             {
-              taskDialog.Show();
+              Title = "Grasshopper Assembly Failure",
+              MainIcon = External.UI.TaskDialogIcons.IconError,
+              TitleAutoPrefix = false,
+              AllowCancellation = false,
+              MainInstruction = $"Grasshopper cannot load the external assembly {Path.GetFileName(assemblyFile)}. Please contact the provider for assistance.",
+              MainContent = mainContent,
+              ExpandedContent = expandedContent,
+              FooterText = assemblyFile
             }
+          )
+          {
+            taskDialog.Show();
           }
         }
       }
@@ -339,36 +397,72 @@ namespace RhinoInside.Revit.GH
       GH_ComponentServer.UpdateRibbonUI();
       return true;
     }
+    #endregion
 
-    private void ModalScope_Enter(object sender, EventArgs e)
+    #region Revit Document
+    static UnitSystem modelUnitSystem = UnitSystem.Unset;
+    public static UnitSystem ModelUnitSystem
     {
-      if (Instances.ActiveCanvas?.Document is GH_Document definition)
-        definition.Enabled = true;
+      get => Instances.ActiveCanvas is null ? UnitSystem.Unset : modelUnitSystem;
+      private set => modelUnitSystem = value;
     }
 
-    private void ModalScope_Exit(object sender, EventArgs e)
+    void ActiveCanvas_DocumentChanged(GH_Canvas sender, GH_CanvasDocumentChangedEventArgs e)
     {
-      if (Instances.ActiveCanvas?.Document is GH_Document definition)
-        definition.Enabled = false;
-    }
-
-    bool activeDefinitionWasEnabled = false;
-    void BeginOpenDocument(object sender, DocumentOpenEventArgs e)
-    {
-      if (Instances.ActiveCanvas?.Document is GH_Document definition)
+      if (e.OldDocument is object)
       {
-        activeDefinitionWasEnabled = definition.Enabled;
-        definition.Enabled = false;
+        e.OldDocument.SolutionEnd -= ActiveDefinition_SolutionEnd;
+        e.OldDocument.SolutionStart -= ActiveDefinition_SolutionStart;
+      }
+
+      if (e.NewDocument is object)
+      {
+        e.NewDocument.SolutionStart += ActiveDefinition_SolutionStart;
+        e.NewDocument.SolutionEnd += ActiveDefinition_SolutionEnd;
       }
     }
 
-    void EndOpenDocumentInitialViewUpdate(object sender, DocumentOpenEventArgs e)
+    Stack<DB.TransactionGroup> OpenTransactionGroups = new Stack<DB.TransactionGroup>();
+
+    private void ActiveDefinition_SolutionStart(object sender, GH_SolutionEventArgs e)
     {
-      if (Instances.ActiveCanvas?.Document is GH_Document definition)
+      Revit.ActiveDBApplication.GetOpenDocuments(out var projects, out var families);
+
+      var now = DateTime.Now.ToString(System.Globalization.CultureInfo.CurrentUICulture);
+      var name = e.Document.DisplayName;
+
+      foreach (var project in projects)
       {
-        definition.Enabled = activeDefinitionWasEnabled;
-        definition.NewSolution(false);
+        var group = new DB.TransactionGroup(project, $"Grasshopper {now}: {name}");
+        group.Start();
+
+        OpenTransactionGroups.Push(group);
       }
+
+      foreach (var family in families)
+      {
+        var group = new DB.TransactionGroup(family, $"Grasshopper {now}: {name}");
+        group.Start();
+
+        OpenTransactionGroups.Push(group);
+      }
+    }
+
+    void ActiveDefinition_SolutionEnd(object sender, GH_SolutionEventArgs e)
+    {
+      while (OpenTransactionGroups.Count > 0)
+      {
+        try
+        {
+          using (var group = OpenTransactionGroups.Pop())
+          {
+            group.Assimilate();
+          }
+        }
+        catch { }
+      }
+
+      ModelUnitSystem = RhinoDoc.ActiveDoc.ModelUnitSystem;
     }
 
     void OnDocumentChanged(object sender, DocumentChangedEventArgs e)
@@ -494,5 +588,6 @@ namespace RhinoInside.Revit.GH
         }
       }
     }
+    #endregion
   }
 }

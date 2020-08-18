@@ -18,10 +18,10 @@ See `dbgrevit.py --help` for usage. Stores temporary artifacts under `script/.de
 **Example:**
 ```bash
 # "pipenv run python" ensures the script is executed with the pipenv python
-pipenv run python dbgrevit.py 2019 "C:\Views.rvt"
+pipenv run dbgrevit 2019 "C:\Views.rvt"
 
 # can also open a grasshopper definition
-pipenv run python dbgrevit.py 2019 "C:\Views.rvt" "C:\Definition.gh"
+pipenv run dbgrevit 2019 "C:\Views.rvt" "C:\Definition.gh"
 ```
 
 ## `dbgzip.py`
@@ -30,12 +30,12 @@ Utility to process debug packages (ZIP) submitted as load errors to the support 
 
 **Example:**
 ```bash
-# script prints the report to stdout. using pbcopy on macOS to copy results to pasteboard and then paste into github issue
+# script prints the report to stdout. using pbcopy on macOS to copy results to pasteboard and then manually paste into github issue
 
 # if ticket url is available and ticket has ZIP attached
-pipenv run python dbgzip.py https://mcneel.supportbee.com/tickets/88888888 --token=APITOKEN | pbcopy
+pipenv run dbgzip https://mcneel.supportbee.com/tickets/88888888 --token=APITOKEN | pbcopy
 
 # OR, if zip file is downloaded separately
-pipenv run python dbgzip.py ./RhinoInside-Revit-Report-20200326T104108Z.zip --ticket=https://mcneel.supportbee.com/tickets/88888888 | pbcopy
+pipenv run dbgzip ./RhinoInside-Revit-Report-20200326T104108Z.zip --ticket=https://mcneel.supportbee.com/tickets/88888888 | pbcopy
 
 ```

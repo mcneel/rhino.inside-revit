@@ -161,7 +161,9 @@ namespace RhinoInside.Revit.Geometry.Extensions
       public PlanarBrepFace(BrepFace f)
       {
         Face = f;
-        Face.TryGetPlane(out Plane);
+        if (!Face.TryGetPlane(out Plane))
+          Plane = Plane.Unset;
+
         loop = null;
         area = double.NaN;
         centroid = new Point3d(double.NaN, double.NaN, double.NaN);
@@ -349,7 +351,7 @@ namespace RhinoInside.Revit.Geometry.Extensions
                         +startFace.Plane.DistanceTo(endFace.Plane.Origin);
 
         extrusion = Extrusion.Create(profile, height, true);
-        return true;
+        return extrusion is object;
       }
 
       return false;

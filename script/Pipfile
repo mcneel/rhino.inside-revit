@@ -14,3 +14,7 @@ requests = "*"
 
 [requires]
 python_version = "3.8"
+
+[scripts]
+dbgrevit = "python ./dbgrevit.py"
+dbgzip = "python ./dbgzip.py"

@@ -237,14 +237,12 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
       using (var nurbsSurface = face.ToNurbsSurface())
       {
-        var domainU = nurbsSurface.Domain(0);
-        var domainV = nurbsSurface.Domain(1);
         var degreeU = nurbsSurface.Degree(0);
         var degreeV = nurbsSurface.Degree(1);
         var knotsU = ToHost(nurbsSurface.KnotsU);
         var knotsV = ToHost(nurbsSurface.KnotsV);
         var controlPoints = ToHost(nurbsSurface.Points);
-        var bboxUV = new DB.BoundingBoxUV(domainU.Min, domainV.Min, domainU.Max, domainV.Max);
+        var bboxUV = new DB.BoundingBoxUV(knotsU[0], knotsV[0], knotsU[knotsU.Length - 1], knotsV[knotsV.Length - 1]);
 
         Debug.Assert(!nurbsSurface.IsClosed(0));
         Debug.Assert(!nurbsSurface.IsClosed(1));

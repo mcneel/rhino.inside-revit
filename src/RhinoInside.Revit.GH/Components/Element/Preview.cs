@@ -40,7 +40,7 @@ namespace RhinoInside.Revit.GH.Components
       if (detailLevel == DB.ViewDetailLevel.Undefined)
         detailLevel = DB.ViewDetailLevel.Coarse;
 
-      var relativeTolerance = double.NaN;
+      var relativeTolerance = 0.5;
       if (DA.GetData(2, ref relativeTolerance))
       {
         if (0.0 > relativeTolerance || relativeTolerance > 1.0)

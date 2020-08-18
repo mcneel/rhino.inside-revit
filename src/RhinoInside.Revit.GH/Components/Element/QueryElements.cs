@@ -89,6 +89,39 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc) { }
 
+    static DB.ElementFilter ElementCategoriesFilter(DB.Document doc, DB.ElementId[] ids)
+    {
+      var list = new List<DB.ElementFilter>();
+
+      if (ids.Length == 1)    list.Add(new DB.ElementCategoryFilter(ids[0]));
+      else if(ids.Length > 1) list.Add(new DB.ElementMulticategoryFilter(ids));
+
+      if (doc.IsFamilyDocument)
+      {
+        foreach (var id in ids)
+        {
+          using (var provider = new DB.ParameterValueProvider(new DB.ElementId(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY)))
+          using (var evaluator = new DB.FilterNumericEquals())
+          using (var rule = new DB.FilterElementIdRule(provider, evaluator, id))
+            list.Add(new DB.ElementParameterFilter(rule));
+        }
+      }
+
+      if (list.Count == 0)
+      {
+        var nothing = new DB.ElementFilter[] { new DB.ElementIsElementTypeFilter(true), new DB.ElementIsElementTypeFilter(false) };
+        return new DB.LogicalAndFilter(nothing);
+      }
+      else if (list.Count == 1)
+      {
+        return list[0];
+      }
+      else
+      {
+        return new DB.LogicalOrFilter(list);
+      }
+    }
+
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var view = default(Types.View);
@@ -112,23 +145,8 @@ namespace RhinoInside.Revit.GH.Components
           Where(x => x.IsValid && x.Document.Equals(view.Document)).
           Select(x => x.Id).ToArray();
 
-        if (noFilterCategories)
-        {
-          elementCollector = elementCollector.WherePasses(new DB.ElementCategoryFilter(DB.BuiltInCategory.INVALID, true));
-        }
-        else if (ids.Length == 0)
-        {
-          var nothing = new DB.ElementFilter[] { new DB.ElementIsElementTypeFilter(true), new DB.ElementIsElementTypeFilter(false) };
-          elementCollector = elementCollector.WherePasses(new DB.LogicalAndFilter(nothing));
-        }
-        else if (ids.Length == 1)
-        {
-          elementCollector = elementCollector.WherePasses(new DB.ElementCategoryFilter(ids[0]));
-        }
-        else
-        {
-          elementCollector = elementCollector.WherePasses(new DB.ElementMulticategoryFilter(ids));
-        }
+        if (!noFilterCategories)
+          elementCollector = elementCollector.WherePasses(ElementCategoriesFilter(view.Document, ids));
 
         if (filter is object)
           elementCollector = elementCollector.WherePasses(filter);

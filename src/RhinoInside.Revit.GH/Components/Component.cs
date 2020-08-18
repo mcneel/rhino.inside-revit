@@ -86,6 +86,15 @@ namespace RhinoInside.Revit.GH.Components
       {
         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
       }
+      catch (System.MissingMemberException e)
+      {
+        if (e.Message.Contains("Autodesk.Revit.DB."))
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: Please consider update Revit to the latest revision.{Environment.NewLine}{e.Message.TripleDot(128)}");
+        else
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
+
+        DA.AbortComponentSolution();
+      }
       catch (System.Exception e)
       {
         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");

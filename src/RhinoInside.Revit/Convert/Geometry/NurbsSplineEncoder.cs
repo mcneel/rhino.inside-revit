@@ -45,18 +45,22 @@ namespace RhinoInside.Revit.Convert.Geometry
 
       var min = list[0];
       var max = list[count - 1];
+      var mid = 0.5 * (min + max);
       var factor = 1.0 / (max - min); // normalized
 
       // End knot
-      knots[count + 1] = (list[count - 1] - min) * factor;
+      knots[count + 1] = /*(list[count - 1] - max) * factor +*/ 1.0;
       for (int k = count - 1; k >= count - degree; --k)
-        knots[k + 1] = (list[k] - min) * factor;
+        knots[k + 1] = /*(list[k] - max) * factor +*/ 1.0;
 
       // Interior knots (in reverse order)
       int multiplicity = degree + 1;
       for (int k = count - degree - 1; k >= degree; --k)
       {
-        double current = (list[k] - min) * factor;
+        double current = list[k] <= mid ?
+          (list[k] - min) * factor + 0.0:
+          (list[k] - max) * factor + 1.0;
+
         double next = knots[k + 2];
         if (KnotAlmostEqualTo(next, current))
         {
@@ -73,8 +77,8 @@ namespace RhinoInside.Revit.Convert.Geometry
 
       // Start knot
       for (int k = degree - 1; k >= 0; --k)
-        knots[k + 1] = (list[k] - min) * factor;
-      knots[0] = (list[0] - min) * factor;
+        knots[k + 1] = /*(list[k] - min) * factor +*/ 0.0;
+      knots[0] = /*(list[0] - min) * factor +*/ 0.0;
 
       return knots;
     }
@@ -123,8 +127,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       }
       else
       {
-        var c = DB.NurbSpline.CreateCurve(value.Degree, knots, controlPoints);
-        return c;
+        return DB.NurbSpline.CreateCurve(value.Degree, knots, controlPoints);
       }
     }
   }

@@ -1,17 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.IO;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
 using Grasshopper;
 using Grasshopper.Kernel;
+using Microsoft.Win32.SafeHandles;
 using Rhino.PlugIns;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.GH.Bake;
 using DB = Autodesk.Revit.DB;
-using Microsoft.Win32.SafeHandles;
 
 namespace RhinoInside.Revit.UI
 {
@@ -194,15 +193,18 @@ namespace RhinoInside.Revit.UI
 
         if (Instances.ActiveCanvas?.Document is GH_Document definition)
         {
-          var options = new BakeOptions()
+          if (Revit.ActiveUIDocument?.ActiveGraphicalView is DB.View view)
           {
-            Document = Revit.ActiveUIDocument.Document,
-            View = Revit.ActiveUIDocument.Document.ActiveView,
-            Category = DB.Category.GetCategory(Revit.ActiveUIDocument.Document, ActiveBuiltInCategory),
-            Material = default
-          };
+            var options = new BakeOptions()
+            {
+              Document = view.Document,
+              View = view,
+              Category = DB.Category.GetCategory(view.Document, ActiveBuiltInCategory),
+              Material = default
+            };
 
-          return ObjectsToBake(definition, options).Any();
+            return ObjectsToBake(definition, options).Any();
+          }
         }
 
         return false;

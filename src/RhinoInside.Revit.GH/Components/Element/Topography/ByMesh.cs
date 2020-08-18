@@ -10,7 +10,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-#if REVIT_2020
+#if REVIT_2019
   public class TopographyByMesh : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("E6EA0A85-E118-4BFD-B01E-86BA22155938");
