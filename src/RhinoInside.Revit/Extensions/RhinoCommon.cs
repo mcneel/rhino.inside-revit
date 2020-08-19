@@ -177,7 +177,7 @@ namespace RhinoInside.Revit.Geometry.Extensions
 
       public NurbsCurve Loop
       {
-        get { if (loop is null) loop = Curve.ProjectToPlane(Face.OuterLoop.To3dCurve().ToNurbsCurve(), Plane) as NurbsCurve; return loop; }
+        get { if (loop is null) loop = Curve.ProjectToPlane(Face.OuterLoop.To3dCurve(), Plane).ToNurbsCurve(); return loop; }
       }
       public Point3d Centroid
       {
