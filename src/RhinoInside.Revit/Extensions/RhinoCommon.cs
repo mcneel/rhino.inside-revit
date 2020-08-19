@@ -161,7 +161,7 @@ namespace RhinoInside.Revit.Geometry.Extensions
       public PlanarBrepFace(BrepFace f)
       {
         Face = f;
-        if (!Face.TryGetPlane(out Plane))
+        if (!Face.TryGetPlane(out Plane, RhinoMath.ZeroTolerance))
           Plane = Plane.Unset;
 
         loop = null;
@@ -177,15 +177,15 @@ namespace RhinoInside.Revit.Geometry.Extensions
 
       public NurbsCurve Loop
       {
-        get { if (loop is null) loop = Face.OuterLoop.To3dCurve().ToNurbsCurve(); return loop; }
+        get { if (loop is null) loop = Curve.ProjectToPlane(Face.OuterLoop.To3dCurve().ToNurbsCurve(), Plane) as NurbsCurve; return loop; }
       }
       public Point3d Centroid
       {
-        get { if (!centroid.IsValid) using (var mp = AreaMassProperties.Compute(Loop)) { area = mp.Area; centroid = mp.Centroid; } return centroid; }
+        get { if (!centroid.IsValid) using (var mp = AreaMassProperties.Compute(Loop, RhinoMath.ZeroTolerance)) if(mp is object) { area = mp.Area; centroid = mp.Centroid; } return centroid; }
       }
       public double LoopArea
       {
-        get { if (double.IsNaN(area)) using (var mp = AreaMassProperties.Compute(Loop)) { area = mp.Area; centroid = mp.Centroid; } return area; }
+        get { if (double.IsNaN(area)) using (var mp = AreaMassProperties.Compute(Loop, RhinoMath.ZeroTolerance)) if(mp is object) { area = mp.Area; centroid = mp.Centroid; } return area; }
       }
 
       public bool ProjectionDegenartesToCurve(Surface surface)
@@ -282,7 +282,7 @@ namespace RhinoInside.Revit.Geometry.Extensions
           if (planeF.Normal.IsParallelTo(planarFaces[g].Plane.Normal, RhinoMath.DefaultAngleTolerance / 100.0) == 0)
             continue;
 
-          // Here f, ang are perfect candidates to test adjacent faces for perpendicularity to them,
+          // Here f, and g are perfect candidates to test adjacent faces for perpendicularity to them,
           // but we may try to quick reject some candidates if it's obvious that doesn't match
 
           // A "perfect" curve overlap match may be a test but is too much in this ocasion
