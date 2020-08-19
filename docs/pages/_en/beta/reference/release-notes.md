@@ -10,6 +10,33 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html version="0.0.7536.22136" time="08/19/2020 12:17:52" %}
+
+### New Features
+* Added new icons for 'Element Name', 'Element Category' and 'Element Type' components.
+* Added support for .ghlink files.
+* Enabled 'Add Topography (Mesh)' in Revit 2019.2.
+
+### Fixes
+* Fixed a bug when no `MeshingParameters` is available for Grasshopper previews.
+* Fixed a bug when user selects 'Disable Meshing' in Grasshopper UI for previews.
+* Improved `DB.Elements` meshing for previews. Now uses Grasshopper meshing preview settings and do not compute nGons on those meshes.
+* Fixed bug into `RawDecoder.AddSurface` when surface is a `SumSurface`
+* Fixed bug into `RawDecoder.AddSurface` when `DB.Surface.OrientationMatchesParametricOrientation` is `false`.
+* Now `RhinoInside.Revit.Convert.Geometry.BrepEncoder.EncodeRaw` splits kinky faces before transferring geometry.
+* Improved `RhinoInside.Revit.Convert.Geometry.NurbsSplineEncoder.ToDoubleArray` precision.
+* Now `RhinoInside.Revit.Convert.Geometry.BrepEncoder.EncodeRaw` normalizes brep faces to increase chances of Revit API detects pipe like surfaces as a `DB.CylindricalSurface`.
+* Now `RhinoInside.Revit.Convert.Geometry.Raw.ToHost` from `BrepFace` is a bit more robust to code changes.
+* Fixed a bug in `RhinoInside.Revit.Geometry.Extensions.TryGetExtrusion` from `Brep` when there are faces that are "near" planar.
+* Fixed a bug in 'Query Graphical Elements'. It was not collecting `DB.Element` without category.
+
+### Minor Changes
+* Now component 'Element Preview' extracts meshes using 0.5 as 'Quality' when no value is provided.
+
+### API
+* Moved `OwnerView` property from `IGH_InstanceElement` to `IGH_GraphicalElement`
+* Now `RawDecoder.ToRhinoSurface` from `DB.RuledFace` uses `DB.ExportUtils.GetNurbsSurfaceDataForFace`to extract the surface NURBS form.
+
 {% include ltr/release-header.html version="0.0.7524.21907" time="08/07/2020 12:10:14" %}
 
 ### New Features
