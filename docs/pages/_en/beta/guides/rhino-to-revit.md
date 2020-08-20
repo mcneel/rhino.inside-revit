@@ -13,9 +13,14 @@ The 3 main ways to classify Rhino geometry in Revit are:
 1. [Inserted as a part of Loadable Families](#rhino-objects-as-loadable-families)
 1. [Use Rhino geomtry to generate Native Revit elements](#using-revit-built-in-system-families)
 
+Here is a Rhino model for a competition:
 ![Competition model in Rhino]({{ "/static/images/guides/rhino-office-display.jpg" | prepend: site.baseurl }})
 
-![A Quick Elevation in Revit]({{ "/static/images/guides/revit-office-elevation.jpg" | prepend: site.baseurl }}) ![A Quick Plan in Revit]({{ "/static/images/guides/revit-office-plan.jpg" | prepend: site.baseurl }})
+Through a simple Grasshopper script, objects can be categorized for elevations:
+![A Quick Elevation in Revit]({{ "/static/images/guides/revit-office-elevation.jpg" | prepend: site.baseurl }})
+
+And plan views:
+![A Quick Plan in Revit]({{ "/static/images/guides/revit-office-plan.jpg" | prepend: site.baseurl }})
 
 ### Rhino objects as DirectShapes
 
@@ -26,16 +31,23 @@ Good reasons for Directshapes include:
 1. Placeholders for part of the building that is still changing during design development.  For instance, while the floor plates might be done, the facade might be in flux in Grasshopper.  Using a directshape as a placeholder for elevations and other design development drawings may work well.
 1. A completely bespoke component or assembly that cannot be modeled using Revit native Families.
 
-{% include youtube_player.html id="7kNYSJ3kdqw" %}
+{% include youtube_player.html id="HAMPkiA5_Ug" %}
 
-Directshapes can be placed in top level Categories to control how they draw in various views.  
+Directshapes can be placed in any top level Category enabling graphic and material control thru Graphic Styles.  
+![Create a Directshape]({{ "/static/images/guides/rhino-to-revit-directshape.png" | prepend: site.baseurl }})
 
-Directshapes cannot be places in Sub-Categories. For additional graphic controls, View Filters can be apoplied to custom parameter values.
+For additional graphic controls between elements within a category, View Filters can be applied with custom parameter values. Directshapes cannot be places in Sub-Categories. 
+![Add a Shared Parameter for a filter]({{ "/static/images/guides/directshape-filter-gh.png" | prepend: site.baseurl }})
+
+In addition to pushing Rhino gemoetry into Revit as single direct shapes, it is also possible to create directshape types that can be inserted multiple times for repetative elements.
+![Insert multiple directshape instances]({{ "/static/images/guides/rhino-to-revit-directshape-instance.png" | prepend: site.baseurl }})
+
 
 {% capture api_warning_note %}
 Directshapes created from smooth NURBS surfaces in Rhino may some in as smooth solid or converted to a mesh by Revit.  If the NURBS is converted to a mesh, that is a symptom that the NURBS geometry was rejected by Revit.  There are many reasons for this, but very often this projecm can be fixed in Rhino.
 {% endcapture %}
 {% include ltr/warning_note.html note=api_warning_note %}
+
 
 ### Rhino objects as Loadable Families
 
