@@ -98,3 +98,11 @@ Created By [Rethinking BIM](https://www.youtube.com/channel/UC82U-lpftjA7lCeb9Rh
 Created By [Rethinking BIM](https://www.youtube.com/channel/UC82U-lpftjA7lCeb9Rhdraw)
 
 >This video goes through a workflow that uses Rhino.Inside and the View Rose tool in Ladybug (Grasshopper plugin) in order to demonstrate the process of running a geometry-focused analysis in Rhino/Grasshopper and feeding results back into a Revit parameter.
+
+## Place Beams in {{ site.terms.rir }}
+
+{% include youtube_player.html id="B-Ug2XTV5Wg" %}
+
+Created By [Simply Complex Podcast](http://therevitcomplex.blogspot.com/)
+
+>This this video I show you how to simplify Revit structural beam modeling using an adaptive component and {{ site.terms.rir }}.
