@@ -3,15 +3,15 @@ title: Rhino Geometry to Revit
 order: 21
 ---
 
-In this guide we will take a look at how to send Rhino geometry to {{ site.terms.revit }} using Grasshopper. {{ site.terms.rir }} allows Rhino shapes and forms to be encoded into, and categorized as Revit elements. It is important to note that the easiest and quickest way of moving geometry into Revit may not be the best method. Determining which the final goal of the forms in Revit, can improve the quality of the final Revit data structure and increase project efficiency.
+In this guide we will take a look at how to send Rhino geometry to {{ site.terms.revit }} using Grasshopper. {{ site.terms.rir }} allows Rhino shapes and forms to be encoded into, and categorized as Revit elements. It is important to note that the easiest and quickest way of moving geometry into Revit may not be the best method. Determining which the final goal of the forms in Revit can improve the quality of the final Revit data structure and increase project efficiency.
 
-Revit data model, is based on a categorization system. Determining the best categories and subcategories to use will allow the elements to be drawn and scheduled properly. The challenge is that not every Revit category is available for each method discussed here.
+Revit data model is based on a categorization system. Determining the best categories and subcategories to use will allow the elements to be drawn and scheduled properly. The challenge is that not every Revit category is available for each method discussed here.
 
-There are 3 main ways to classify and move Rhino geometry to Revit. Each successive strategy increases the integration within a BIM model, but each strategy also increasingly takes a bit more planning. The 3 main ways to classify Rhino geometry in Revit are:
+There are 3 main ways to classify and move Rhino geometry to Revit. Each successive strategy increases the integration within a BIM model, but each strategy also takes a bit more planning. The 3 ways are:
 
-1. Using [DirectShapes](#rhino-objects-as-directshapes) can be quite fast and takes the least amount of organizing. The limited organization and speed make the DirectShapes process best for temporary drawing sets such as competitions and early design presentations. But DirectShapes are not the best for later project phases.
-2. Developing [Loadable Families with Subcategories](#rhino-objects-as-loadable-families) works well for standalone elements in a model or elements that might be ordered or customer fabricated. Being part of a Family, these objects could have their own set of drawings in the set in addition to being part of the larger project drawings.
-3. Use [Rhino geometry to generate Native Revit elements](#using-revit-built-in-system-families) is the best way to generate final Revit elements. While it is not always possible to create everything with native elements, they normally integrate best with the rest of the Revit team. These objects can potentially be edited without any dependency on {{ site.terms.rir }}. While the creating elements in this way can be limited, the resulting elements are native Revit elements.
+1. Using [DirectShapes](#rhino-objects-as-directshapes) can be quite fast and takes the least amount of organizing. The limited organization and speed make DirectShapes best for temporary drawing sets such as competitions and early design presentations. DirectShapes may not the best for late project phases.
+2. Developing [Loadable Families with Subcategories](#rhino-objects-as-loadable-families) works well for standalone elements in a model or elements that might be ordered or built by an independant fabricator. Being part of a Family, these objects could have their own set of drawings in addition to being part of the larger project drawings.
+3. Use [Rhino geometry to generate Native Revit elements](#using-revit-built-in-system-families) is the best way to generate final Revit elements. While it is not always possible to create everything with native elements, native elements normally integrate best with the rest of the Revit team. These objects can potentially be edited without any dependency on {{ site.terms.rir }}. While the creating elements in this way can be limited, the resulting elements are native Revit elements.
 
 Here is a Rhino model and quick Revit drawings for a competition model:
 
