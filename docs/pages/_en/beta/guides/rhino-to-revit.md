@@ -13,7 +13,7 @@ There are 3 main ways to classify and move Rhino geometry to Revit. Each success
 2. Developing [Loadable Families with Subcategories](#rhino-objects-as-loadable-families) works well for standalone elements in a model or elements that might be ordered or built by an independant fabricator. Being part of a Family, these objects could have their own set of drawings in addition to being part of the larger project drawings.
 3. Use [Rhino geometry to generate Native Revit elements](#using-revit-built-in-system-families) is the best way to generate final Revit elements. While it is not always possible to create everything with native elements, native elements normally integrate best with the rest of the Revit team. These objects can potentially be edited without any dependency on {{ site.terms.rir }}. While the creating elements in this way can be limited, the resulting elements are native Revit elements.
 
-Here is a Rhino model and quick Revit drawings for a competition model:
+Here is a Rhino model and quick Revit drawings for a competition model using DirectShapes:
 
 ![Competition model in Rhino]({{ "/static/images/guides/rhino-office-display.jpg" | prepend: site.baseurl }})
 
@@ -21,17 +21,17 @@ Through a simple Grasshopper script, objects can be categorized for elevations:
 
 ![A Quick Elevation in Revit]({{ "/static/images/guides/revit-office-elevation.jpg" | prepend: site.baseurl }})
 
-And plan views:
+And plan views using the categories to control graphics:
 
 ![A Quick Plan in Revit]({{ "/static/images/guides/revit-office-plan.jpg" | prepend: site.baseurl }})
 
 ### Rhino objects as DirectShapes
 
-DirectShapes are the most obvious and many times the easiest way to get Geometry from Rhino into Revit. While it is the easiest, it is important to understand that DirectShapes may not always be the best way to transfer Rhino Geometry into Revit. DirectShapes are generic Revit elements that can contain and categorize arbitrary non-parametric geometry inside the Revit model. However, since the geometry is not parametric, Revit does not know how they are created and can not resolved interactions between DirectShapes and other native elements. An example is that native Revit walls can not be extended to reach a DirectShape roof geometry.
+DirectShapes are the most obvious and many times the easiest way to get Geometry from Rhino into Revit. DirectShapes are generic Revit elements that can contain and categorize arbitrary non-parametric geometry inside the Revit model. However, since the geometry is not parametric, Revit does not know how they are created and can not resolved interactions between DirectShapes and other native elements. An example is that native Revit walls can not be extended to reach a DirectShape roof geometry.
 
 Good reasons for using DirectShapes include:
 1. Temporary models used in a competition or early design study submission for quick drawings.
-1. Placeholders for part of the building that is still changing during design development. For instance, while the floor plates might be done, the façade might be in flux in Grasshopper. Using a DirectShape as a placeholder for elevations and other design development drawings may work well.
+1. Placeholders for part of the building that is still changing during design development. For instance, while the floor plates might be finished, the façade might be in flux in Grasshopper. Using a DirectShape as a placeholder for elevations and other design development drawings may work well.
 1. A completely bespoke component or assembly that cannot be modeled using Revit native Families.
 
 {% include youtube_player.html id="HAMPkiA5_Ug" %}
@@ -55,14 +55,14 @@ DirectShapes created from smooth NURBS surfaces in Rhino may be imported as smoo
 
 ### Rhino objects as Loadable Families
 
-Rhino objects imported as forms inside a Revit family, allow for inserting multiple instances of an object and also assigning [subcategories](https://knowledge.autodesk.com/support/revit-products/learn-explore/caas/CloudHelp/cloudhelp/2018/ENU/Revit-Customize/files/GUID-8C1F9882-E4AB-4E03-A735-8C44F19E194B-htm.html). You can use subcategories to control the visibility and graphics of portions of a family within a top level category.
+Rhino objects imported as forms inside a Revit family allow for inserting multiple instances of an object and also assigning [subcategories](https://knowledge.autodesk.com/support/revit-products/learn-explore/caas/CloudHelp/cloudhelp/2018/ENU/Revit-Customize/files/GUID-8C1F9882-E4AB-4E03-A735-8C44F19E194B-htm.html). You can use subcategories to control the visibility and graphics of portions of a family within a top level category.
 
 Wrapping Rhino geometry inside Loadable Families have many advantages:
 * Repeated objects can be inserted multiple times allowing forms to be scheduled and counted correctly
 * Forms in loadable families can be edited by Revit if needed.
 * Forms placed inside Family/Types can be placed in subcategories for further graphics control and scheduling.
 
-As an example, here is an exterior walkway canopy in Rhino. It is a structure that will be built by a specialty fabricator. The small footing will be poured on-site and the rest of the walkway assembled above. Therefore, the footings are part of one family and the rest of the structure part of another family.
+As an example, here is an exterior walkway canopy in Rhino. It is a structure that will be built by a specialty fabricator. The small footings will be poured on-site and the rest of the walkway assembled above. Therefore, the footings are part of one family and the rest of the structure part of another family.
 
 ![An Exterior Walkway in Rhino]({{ "/static/images/guides/canopy-rhino.png" | prepend: site.baseurl }})
 
