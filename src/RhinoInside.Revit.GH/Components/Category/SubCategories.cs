@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Parameters;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
@@ -50,6 +51,69 @@ namespace RhinoInside.Revit.GH.Components
 
           DA.SetDataList("SubCategories", SubCategories.Select(x => new Types.Category(doc, new DB.ElementId(x))));
         }
+      }
+    }
+  }
+
+  public class AddSubCategory : DocumentComponent
+  {
+    public override Guid ComponentGuid => new Guid("8de336fb-e764-4a8e-bb12-9aecda19769f");
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
+
+    public AddSubCategory()
+      : base("Add SubCategory", "Add SubCat", "Add a new subcategory to the given category", "Revit", "Category")
+    { }
+
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
+    {
+      ParamDefinition.FromParam(DocumentComponent.CreateDocumentParam(), ParamVisibility.Voluntary),
+      ParamDefinition.Create<Parameters.Category>("Parent", "P", "Parent category", GH_ParamAccess.item),
+      ParamDefinition.Create<Param_String>("Name", "N", "SubCategory name", GH_ParamAccess.item),
+    };
+
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
+    {
+      ParamDefinition.Create<Parameters.Category>("SubCategory", "S", "New SubCategory", GH_ParamAccess.item)
+    };
+
+
+    protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
+    {
+      DB.Category parent = null;
+      if (!DA.GetData("Parent", ref parent))
+        return;
+
+      string newSubcatName = default;
+      if (!DA.GetData("Name", ref newSubcatName))
+        return;
+
+      if (parent.Parent is object)
+      {
+        DA.SetDataList("SubCategory", null);
+      }
+      else
+      {
+        DB.Category newSubcat = null;
+
+        // find existing subcat if exists
+        foreach (DB.Category subcat in parent.SubCategories)
+          if (subcat.Name == newSubcatName)
+            newSubcat = subcat;
+
+        // if not found, create one
+        if (newSubcat is null)
+        {
+          var t = new DB.Transaction(doc, this.Name);
+          t.Start();
+          newSubcat =
+            doc.Settings.Categories.NewSubcategory(parent, newSubcatName);
+          t.Commit();
+        }
+
+        // return data to DA
+        DA.SetData("SubCategory", newSubcat);
       }
     }
   }
