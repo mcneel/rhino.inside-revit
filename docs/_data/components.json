@@ -550,6 +550,16 @@
     "uuid": "4915ab87-0bd5-4541-ac43-3fbc450dd883"
   }, 
   {
+    "desc": "Add a new subcategory to the given category", 
+    "iconsrc": "/static/images/GH/AddSubCategory.png", 
+    "icontag": null, 
+    "panel": "Category", 
+    "tab": "Revit", 
+    "title": "Add SubCategory", 
+    "typename": "AddSubCategory", 
+    "uuid": "8de336fb-e764-4a8e-bb12-9aecda19769f"
+  }, 
+  {
     "desc": "Gets the active document", 
     "iconsrc": "/static/images/GH/DocumentActive.png", 
     "icontag": null, 
@@ -1501,8 +1511,8 @@
   }, 
   {
     "desc": "Get document model elements list", 
-    "iconsrc": null, 
-    "icontag": "Q", 
+    "iconsrc": "/static/images/GH/QueryGraphicalElements.png", 
+    "icontag": null, 
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Query Graphical Elements", 
