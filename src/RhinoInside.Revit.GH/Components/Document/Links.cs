@@ -38,9 +38,21 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
     {
+      // Note: linked documents that are not loaded in Revit memory,
+      // are not reported since no interaction can be done if not loaded
       var docs = new List<DB.Document>();
       using (var documents = Revit.ActiveDBApplication.Documents)
       {
+        /* NOTES:
+         * 1) On a cloud host model with links (that are also on cloud)
+         *    .GetAllExternalFileReferences does not return the "File" references
+         *    to the linked cloud models
+         * 2) doc.PathName is not equal to DB.ExternalResourceReference.InSessionPath
+         *    e.g. Same modle but reported paths are different. Respectively:
+         *    "BIM 360://Default Test/Host_Model1.rvt"
+         *    vs
+         *    "BIM 360://Default Test/Project Files/Linked_Project2.rvt"
+         */
         foreach (var id in DB.ExternalFileUtils.GetAllExternalFileReferences(doc))
         {
           var reference = DB.ExternalFileUtils.GetExternalFileReference(doc, id);
@@ -50,6 +62,32 @@ namespace RhinoInside.Revit.GH.Components
             docs.Add(documents.Cast<DB.Document>().Where(x => x.IsLinked && x.HasModelPath(modelPath)).FirstOrDefault());
           }
         }
+
+#if REVIT_2020
+        // if no document is reported using DB.ExternalFileUtils then links
+        // are in the cloud. try getting linked documents from DB.RevitLinkType
+        // element types inside the host model
+        if (docs.Count() == 0)
+        {
+          // find all the revit link types in the host model
+          foreach(var revitLinkType in new DB.FilteredElementCollector(doc).OfClass(typeof(DB.RevitLinkType)).ToElements())
+          {
+            // extract the path of external document that is wrapped by the revit link type
+            var linkInfo = revitLinkType.GetExternalResourceReferences().FirstOrDefault();
+            if (linkInfo.Key != null && linkInfo.Value.HasValidDisplayPath())
+            {
+              // stores custom info about the reference (project::model ids)
+              IDictionary<string, string> refInfo = linkInfo.Value.GetReferenceInformation();
+              var linkedDoc = documents.Cast<DB.Document>()
+                                       .Where(x => x.IsLinked
+                                                   && x.GetCloudModelPath().GetModelGUID() == Guid.Parse(refInfo["LinkedModelModelId"]))
+                                       .FirstOrDefault();
+              if (linkedDoc != null)
+                docs.Add(linkedDoc);
+            }
+          }
+        }
+#endif
 
         DA.SetDataList("Documents", docs);
       }
