@@ -12,8 +12,14 @@ namespace RhinoInside.Revit.GH.Components
   {
     public override Guid ComponentGuid => new Guid("4915AB87-0BD5-4541-AC43-3FBC450DD883");
 
-    public CategorySubCategories()
-    : base("Category SubCategories", "SubCategories", "Returns a list of all the subcategories of Category", "Revit", "Category")
+    public CategorySubCategories() : base
+    (
+      name: "Category SubCategories",
+      nickname: "SubCats",
+      description: "Returns a list of all the subcategories of Category",
+      category: "Revit",
+      subCategory: "Category"
+    )
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -55,19 +61,24 @@ namespace RhinoInside.Revit.GH.Components
     }
   }
 
-  public class AddSubCategory : DocumentComponent
+  public class AddSubCategory : TransactionalComponent
   {
-    public override Guid ComponentGuid => new Guid("8de336fb-e764-4a8e-bb12-9aecda19769f");
+    public override Guid ComponentGuid => new Guid("8DE336FB-E764-4A8E-BB12-9AECDA19769F");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
 
-    public AddSubCategory()
-      : base("Add SubCategory", "Add SubCat", "Add a new subcategory to the given category", "Revit", "Category")
+    public AddSubCategory() : base
+    (
+      name: "Add SubCategory",
+      nickname: "SubCat",
+      description: "Add a new subcategory to the given category",
+      category: "Revit",
+      subCategory: "Category"
+    )
     { }
 
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.FromParam(DocumentComponent.CreateDocumentParam(), ParamVisibility.Voluntary),
       ParamDefinition.Create<Parameters.Category>("Parent", "P", "Parent category", GH_ParamAccess.item),
       ParamDefinition.Create<Param_String>("Name", "N", "SubCategory name", GH_ParamAccess.item),
     };
@@ -78,8 +89,7 @@ namespace RhinoInside.Revit.GH.Components
       ParamDefinition.Create<Parameters.Category>("SubCategory", "S", "New SubCategory", GH_ParamAccess.item)
     };
 
-
-    protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       DB.Category parent = null;
       if (!DA.GetData("Parent", ref parent))
@@ -89,32 +99,28 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetData("Name", ref newSubcatName))
         return;
 
-      if (parent.Parent is object)
-      {
-        DA.SetDataList("SubCategory", null);
-      }
-      else
-      {
-        DB.Category newSubcat = null;
+      // find existing subcat if exists
+      var newSubcat = parent.SubCategories.Cast<DB.Category>().
+        Where(x => x.Name == newSubcatName).
+        FirstOrDefault();
 
-        // find existing subcat if exists
-        foreach (DB.Category subcat in parent.SubCategories)
-          if (subcat.Name == newSubcatName)
-            newSubcat = subcat;
-
-        // if not found, create one
-        if (newSubcat is null)
+      // if not found, create one
+      if (newSubcat is null && newSubcatName != string.Empty)
+      {
+        var doc = parent.Document();
+        using (var transaction = NewTransaction(doc))
         {
-          var t = new DB.Transaction(doc, this.Name);
-          t.Start();
-          newSubcat =
-            doc.Settings.Categories.NewSubcategory(parent, newSubcatName);
-          t.Commit();
-        }
+          transaction.Start();
 
-        // return data to DA
-        DA.SetData("SubCategory", newSubcat);
+          using (var categories = doc.Settings.Categories)
+            newSubcat = categories.NewSubcategory(parent, newSubcatName);
+
+          CommitTransaction(doc, transaction);
+        }
       }
+
+      // return data to DA
+      DA.SetData("SubCategory", newSubcat);
     }
   }
 }
