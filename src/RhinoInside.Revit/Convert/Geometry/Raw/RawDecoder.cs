@@ -514,7 +514,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
             new DB.Curve[] { face.get_Curve(0), face.get_Curve(1) },
             face.GetBoundingBox(),
             relativeTolerance
-          ):
+          ) :
           FromRuledSurface
           (
             new DB.Curve[] { face.get_Curve(0), face.get_Curve(1) },
@@ -556,16 +556,27 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       IList<DB.XYZ> tangentsU, IList<DB.XYZ> tangentsV
     )
     {
-      return null;
-      //throw new NotImplementedException();
-      //return NurbsSurface.CreateHermiteSurface
-      //(
-      //  points.Select(x => AsPoint3d(x)),
-      //  mixedDerivs.Select(x => AsVector3d(x)),
-      //  paramsU, paramsV,
-      //  tangentsU.Select(x => AsVector3d(x)),
-      //  tangentsV.Select(x => AsVector3d(x))
-      //);
+      var hermiteSurface = new HermiteSurface(paramsU.Count, paramsV.Count);
+      {
+        for (int u = 0; u < paramsU.Count; ++u)
+          hermiteSurface.SetUParameterAt(u, paramsU[u]);
+
+        for (int v = 0; v < paramsV.Count; ++v)
+          hermiteSurface.SetVParameterAt(v, paramsV[v]);
+
+        for (int v = 0; v < paramsV.Count; ++v)
+        {
+          for (int u = 0; u < paramsU.Count; ++u)
+          {
+            hermiteSurface.SetPointAt(u, v, AsPoint3d(points[v * paramsU.Count + u]));
+            hermiteSurface.SetTwistAt(u, v, AsVector3d(mixedDerivs[v * paramsU.Count + u]));
+            hermiteSurface.SetUTangentAt(u, v, AsVector3d(tangentsU[v * paramsU.Count + u]));
+            hermiteSurface.SetVTangentAt(u, v, AsVector3d(tangentsV[v * paramsU.Count + u]));
+          }
+        }
+      }
+
+      return hermiteSurface.ToNurbsSurface();
     }
 
     public static NurbsSurface ToRhinoSurface(DB.HermiteFace face, double relativeTolerance)
@@ -594,6 +605,15 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
           face.get_Tangents(0),
           face.get_Tangents(1)
         );
+      }
+
+      using (var bboxUV = face.GetBoundingBox())
+      {
+        nurbsSurface = nurbsSurface.Trim
+        (
+          new Interval(bboxUV.Min.U, bboxUV.Max.U),
+          new Interval(bboxUV.Min.V, bboxUV.Max.V)
+        ) as NurbsSurface;
       }
 
       if (nurbsSurface is object)
@@ -672,12 +692,12 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       switch (face)
       {
         case null: return null;
-        case DB.PlanarFace planar: return ToRhinoSurface(planar, relativeTolerance);
-        case DB.ConicalFace conical: return ToRhinoSurface(conical, relativeTolerance);
-        case DB.CylindricalFace cylindrical: return ToRhinoSurface(cylindrical, relativeTolerance);
-        case DB.RevolvedFace revolved: return ToRhinoSurface(revolved, relativeTolerance);
-        case DB.RuledFace ruled: return ToRhinoSurface(ruled, relativeTolerance);
-        case DB.HermiteFace hermite: return ToRhinoSurface(hermite, relativeTolerance);
+        case DB.PlanarFace planar:            return ToRhinoSurface(planar, relativeTolerance);
+        case DB.ConicalFace conical:          return ToRhinoSurface(conical, relativeTolerance);
+        case DB.CylindricalFace cylindrical:  return ToRhinoSurface(cylindrical, relativeTolerance);
+        case DB.RevolvedFace revolved:        return ToRhinoSurface(revolved, relativeTolerance);
+        case DB.RuledFace ruled:              return ToRhinoSurface(ruled, relativeTolerance);
+        case DB.HermiteFace hermite:          return ToRhinoSurface(hermite, relativeTolerance);
         default: throw new NotImplementedException();
       }
     }
