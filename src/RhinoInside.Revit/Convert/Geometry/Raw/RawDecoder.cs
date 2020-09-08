@@ -551,27 +551,30 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
     static NurbsSurface FromHermiteSurface
     (
+      DB.DoubleArray paramsU, DB.DoubleArray paramsV,
       IList<DB.XYZ> points, IList<DB.XYZ> mixedDerivs,
-      IList<double> paramsU, IList<double> paramsV,
       IList<DB.XYZ> tangentsU, IList<DB.XYZ> tangentsV
     )
     {
-      var hermiteSurface = new HermiteSurface(paramsU.Count, paramsV.Count);
+      var uCount = paramsU.Size;
+      var vCount = paramsV.Size;
+
+      var hermiteSurface = new HermiteSurface(uCount, vCount);
       {
-        for (int u = 0; u < paramsU.Count; ++u)
-          hermiteSurface.SetUParameterAt(u, paramsU[u]);
+        for (int u = 0; u < uCount; ++u)
+          hermiteSurface.SetUParameterAt(u, paramsU.get_Item(u));
 
-        for (int v = 0; v < paramsV.Count; ++v)
-          hermiteSurface.SetVParameterAt(v, paramsV[v]);
+        for (int v = 0; v < vCount; ++v)
+          hermiteSurface.SetVParameterAt(v, paramsV.get_Item(v));
 
-        for (int v = 0; v < paramsV.Count; ++v)
+        for (int v = 0; v < vCount; ++v)
         {
-          for (int u = 0; u < paramsU.Count; ++u)
+          for (int u = 0; u < uCount; ++u)
           {
-            hermiteSurface.SetPointAt(u, v, AsPoint3d(points[v * paramsU.Count + u]));
-            hermiteSurface.SetTwistAt(u, v, AsVector3d(mixedDerivs[v * paramsU.Count + u]));
-            hermiteSurface.SetUTangentAt(u, v, AsVector3d(tangentsU[v * paramsU.Count + u]));
-            hermiteSurface.SetVTangentAt(u, v, AsVector3d(tangentsV[v * paramsU.Count + u]));
+            hermiteSurface.SetPointAt(u, v, AsPoint3d(points[v * uCount + u]));
+            hermiteSurface.SetTwistAt(u, v, AsVector3d(mixedDerivs[v * uCount + u]));
+            hermiteSurface.SetUTangentAt(u, v, AsVector3d(tangentsU[v * uCount + u]));
+            hermiteSurface.SetVTangentAt(u, v, AsVector3d(tangentsV[v * uCount + u]));
           }
         }
       }
@@ -596,15 +599,19 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
       if (nurbsSurface is null)
       {
-        nurbsSurface = FromHermiteSurface
-        (
-          face.Points,
-          face.MixedDerivs,
-          face.get_Params(0).Cast<double>().ToArray(),
-          face.get_Params(1).Cast<double>().ToArray(),
-          face.get_Tangents(0),
-          face.get_Tangents(1)
-        );
+        using (var paramsU = face.get_Params(0))
+        using (var paramsV = face.get_Params(1))
+        {
+          nurbsSurface = FromHermiteSurface
+          (
+            paramsU,
+            paramsV,
+            face.Points,
+            face.MixedDerivs,
+            face.get_Tangents(0),
+            face.get_Tangents(1)
+          );
+        }
       }
 
       using (var bboxUV = face.GetBoundingBox())
