@@ -1,10 +1,5 @@
 using System;
 using System.Reflection;
-using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
@@ -14,7 +9,7 @@ using Rhino.Geometry;
 
 using RhinoInside.Revit.UI;
 using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.Convert.System;
+using RhinoInside.Revit.Convert.System.Collections.Generic;
 
 namespace RhinoInside.Revit.Samples
 {
@@ -39,29 +34,25 @@ namespace RhinoInside.Revit.Samples
       // RhinoCommon code
       var sphere = new Sphere(Point3d.Origin, 12 * Revit.ModelUnits);
       var brep = sphere.ToBrep();
-      var mp = MeshingParameters.Default;
-      mp.MinimumEdgeLength = Revit.VertexTolerance;
-      var meshes = Rhino.Geometry.Mesh.CreateFromBrep(brep, mp);
+      var meshes = Rhino.Geometry.Mesh.CreateFromBrep(brep, MeshingParameters.Default);
 
       // Revit code
       var uiApp = data.Application;
       var doc = uiApp.ActiveUIDocument.Document;
 
-      using (var trans = new Transaction(doc))
+      using (var trans = new Transaction(doc, MethodBase.GetCurrentMethod().DeclaringType.FullName))
       {
-        if (trans.Start(MethodBase.GetCurrentMethod().DeclaringType.FullName) == TransactionStatus.Started)
+        if (trans.Start() == TransactionStatus.Started)
         {
           var categoryId = new ElementId(BuiltInCategory.OST_GenericModel);
 
-          {
-            var ds = DirectShape.CreateElement(doc, categoryId);
-            ds.Name = "Sphere";
+          var ds = DirectShape.CreateElement(doc, categoryId);
+          ds.Name = "Sphere";
             
-            foreach (var shape in meshes.ConvertAll(ShapeEncoder.ToShape))
-            {
-              if (shape.Length > 0)
-                ds.AppendShape(shape);
-            }
+          foreach (var shape in meshes.ConvertAll(ShapeEncoder.ToShape))
+          {
+            if (shape?.Length > 0)
+              ds.AppendShape(shape);
           }
 
           trans.Commit();

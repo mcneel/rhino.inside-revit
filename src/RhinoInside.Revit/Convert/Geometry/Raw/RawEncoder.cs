@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using Rhino.Geometry;
 using Rhino.Geometry.Collections;
+using RhinoInside.Revit.Convert.System.Collections.Generic;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.Convert.Geometry.Raw
@@ -165,13 +166,12 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
       if (value.IsRational)
       {
-        var weights = value.Points.Select(p => p.Weight).ToArray();
+        var weights = value.Points.ConvertAll(p => p.Weight);
         return DB.NurbSpline.CreateCurve(value.Degree, knots, controlPoints, weights);
       }
       else
       {
-        var c = DB.NurbSpline.CreateCurve(value.Degree, knots, controlPoints);
-        return c;
+        return DB.NurbSpline.CreateCurve(value.Degree, knots, controlPoints);
       }
     }
     #endregion

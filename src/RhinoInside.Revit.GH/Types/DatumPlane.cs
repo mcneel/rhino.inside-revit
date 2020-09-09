@@ -131,7 +131,9 @@ namespace RhinoInside.Revit.GH.Types
           var points = grid.Curve?.Tessellate().ConvertAll(GeometryDecoder.ToPoint3d);
           if (points is object)
           {
-            points = points.ConvertAll(x => cplane.ClosestPoint(x));
+            for (int i = 0; i < points.Length; ++i)
+              points[i] = cplane.ClosestPoint(points[i]);
+
             args.Pipeline.DrawPatternedPolyline(points, args.Color, 0x0007E30, args.Thickness, false);
 
             args.Viewport.GetFrustumNearPlane(out var near);

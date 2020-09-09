@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using DB = Autodesk.Revit.DB;
@@ -22,16 +23,19 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(new Parameters.Element(), "Railing", "R", "New Railing", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.GraphicalElement(), "Railing", "R", "New Railing", GH_ParamAccess.item);
     }
 
     void ReconstructRailingByCurve
     (
       DB.Document doc,
       ref DB.Architecture.Railing element,
+
       Rhino.Geometry.Curve curve,
       Optional<DB.Architecture.RailingType> type,
-      Optional<DB.Level> level
+      Optional<DB.Level> level,
+      [Optional] DB.Element host,
+      [Optional] bool flipped
     )
     {
       SolveOptionalType(ref type, doc, DB.ElementTypeGroup.StairsRailingType, nameof(type));
@@ -40,30 +44,58 @@ namespace RhinoInside.Revit.GH.Components
       // Axis
       var levelPlane = new Rhino.Geometry.Plane(new Rhino.Geometry.Point3d(0.0, 0.0, level.Value.Elevation * Revit.ModelUnits), Rhino.Geometry.Vector3d.ZAxis);
       curve = Rhino.Geometry.Curve.ProjectToPlane(curve, levelPlane);
+      curve = curve.Simplify(Rhino.Geometry.CurveSimplifyOptions.All, Revit.VertexTolerance * Revit.ModelUnits, Revit.AngleTolerance) ?? curve;
 
       // Type
       ChangeElementTypeId(ref element, type.Value.Id);
 
-      var newRail = DB.Architecture.Railing.Create
-      (
-        doc,
-        curve.ToCurveLoop(),
-        type.Value.Id,
-        level.Value.Id
-      );
-
-      var parametersMask = new DB.BuiltInParameter[]
+      DB.Architecture.Railing newRail = null;
+      if (element is DB.Architecture.Railing previousRail)
       {
-        DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-        DB.BuiltInParameter.ELEM_FAMILY_PARAM,
-        DB.BuiltInParameter.ELEM_TYPE_PARAM,
-        DB.BuiltInParameter.STAIRS_RAILING_BASE_LEVEL_PARAM,
-      };
+        newRail = previousRail;
 
-      ReplaceElement(ref element, newRail, parametersMask);
+        newRail.SetPath(curve.ToCurveLoop());
+      }
+      else
+      {
+        newRail = DB.Architecture.Railing.Create
+        (
+          doc,
+          curve.ToCurveLoop(),
+          type.Value.Id,
+          level.Value.Id
+        );
 
-      newRail?.get_Parameter(DB.BuiltInParameter.STAIRS_RAILING_HEIGHT_OFFSET).Set(bbox.Min.Z / Revit.ModelUnits - level.Value.Elevation);
+        var parametersMask = new DB.BuiltInParameter[]
+        {
+          DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+          DB.BuiltInParameter.ELEM_FAMILY_PARAM,
+          DB.BuiltInParameter.ELEM_TYPE_PARAM,
+          DB.BuiltInParameter.STAIRS_RAILING_BASE_LEVEL_PARAM,
+          DB.BuiltInParameter.STAIRS_RAILING_HEIGHT_OFFSET,
+        };
+
+        ReplaceElement(ref element, newRail, parametersMask);
+      }
+
+      if (newRail is object)
+      {
+        using (var baseLevel = newRail.get_Parameter(DB.BuiltInParameter.STAIRS_RAILING_BASE_LEVEL_PARAM))
+        {
+          if (!baseLevel.IsReadOnly)
+            baseLevel.Set(level.Value.Id);
+        }
+        using (var heightOffset = newRail.get_Parameter(DB.BuiltInParameter.STAIRS_RAILING_HEIGHT_OFFSET))
+        {
+          if (!heightOffset.IsReadOnly)
+            heightOffset.Set(bbox.Min.Z / Revit.ModelUnits - level.Value.Elevation);
+        }
+
+        newRail.HostId = host?.Id ?? DB.ElementId.InvalidElementId;
+
+        if (newRail.Flipped != flipped)
+          newRail.Flip();
+      }
     }
   }
 }
-

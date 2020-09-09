@@ -10,6 +10,16 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html version="0.0.7557.24227" time="09/019/2020 13:27:34" %}
+
+## New Features
+* Added 'Add SubCategory' component.
+* Added 'Add Railing' component.
+
+## Fixes
+* Fixed 'Document Links' component to make it work with BIM 360 linked files.
+* Improved `DB.HemiteSurface` conversion to `NurbsSurface`.
+
 {% include ltr/release-header.html version="0.0.7536.22136" time="08/19/2020 12:17:52" %}
 
 ### New Features

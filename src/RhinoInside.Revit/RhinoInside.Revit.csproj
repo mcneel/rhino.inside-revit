@@ -204,7 +204,6 @@
     <Compile Include="Convert\Geometry\BrepEncoder.cs" />
     <Compile Include="Convert\Geometry\SubDEncoder.cs" />
     <Compile Include="Convert\System.Collections.Generic.cs" />
-    <Compile Include="Convert\System.cs" />
     <Compile Include="Convert\Units\DisplayUnitTypeConverter.cs" />
     <Compile Include="Convert\Geometry\UnitConverter.cs" />
     <Compile Include="Convert\System.Drawing.cs" />

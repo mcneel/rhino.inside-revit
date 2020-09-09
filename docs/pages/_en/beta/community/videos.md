@@ -51,6 +51,22 @@ Created at [San Fransisco Computational Design Institute](https://www.linkedin.c
 
 > This is a short recap of {{ site.terms.rir }} plugin and Compute technology in Rhino. 
 
+## AIA Detroit co.de.D {{ site.terms.rir }} Presentation - June 2020
+
+{% include youtube_player.html id="L0ENhTxSstA" %}
+
+Created at [AIA Detroit co.DE.D Group](https://www.youtube.com/playlist?list=PLqBgpCSFupaqlDV0ZYcEPWCgYmeg1PHmA)
+
+> Rhino.Inside allows you to use Grasshopper directly within Revit. Will this replace Dynamo or enhance it? Join co.de.D as we discuss what Rhino.Inside means for our industry.
+
+##  Creating Windows with {{ site.terms.rir }}
+
+{% include youtube_player.html id="g-Kfhq1EImc" %}
+
+Created by [How To Rhino](https://www.youtube.com/channel/UCwImuwbI4lKk544-FS7A2Yw)
+
+In this Rhino Inside Revit tutorial, we’re going to create windows in Revit based on geometry input from Rhino and Grasshopper. This method allows the use of both parametric and manual positioning for our families that are being created directly from Grasshopper. 
+
 ##  EvolveLAB covers {{ site.terms.rir }} - Way Faster Wednesday
 
 {% include youtube_player.html id="XsIgliwPBJU" %}
@@ -74,3 +90,19 @@ Created By [Paul Wintour Parametric & BIM specialist, founder of Parametric Monk
 Created By [Rethinking BIM](https://www.youtube.com/channel/UC82U-lpftjA7lCeb9Rhdraw)
 
 > This video provides an intro to some of the capabilities of {{ site.terms.rir }}
+
+## Room Data and View Analysis with {{ site.terms.rir }}
+
+{% include youtube_player.html id="WRbbJlURzoo" %}
+
+Created By [Rethinking BIM](https://www.youtube.com/channel/UC82U-lpftjA7lCeb9Rhdraw)
+
+>This video goes through a workflow that uses Rhino.Inside and the View Rose tool in Ladybug (Grasshopper plugin) in order to demonstrate the process of running a geometry-focused analysis in Rhino/Grasshopper and feeding results back into a Revit parameter.
+
+## Place Beams in {{ site.terms.rir }}
+
+{% include youtube_player.html id="B-Ug2XTV5Wg" %}
+
+Created By [Simply Complex Podcast](http://therevitcomplex.blogspot.com/)
+
+>This this video I show you how to simplify Revit structural beam modeling using an adaptive component and {{ site.terms.rir }}.
