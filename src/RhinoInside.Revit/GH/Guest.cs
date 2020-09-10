@@ -433,7 +433,7 @@ namespace RhinoInside.Revit.GH
 
       foreach (var project in projects)
       {
-        var group = new DB.TransactionGroup(project, $"Grasshopper {now}: {name}");
+        var group = new DB.TransactionGroup(project, $"Grasshopper {now}: {name.TripleDot(16)}");
         group.Start();
 
         OpenTransactionGroups.Push(group);
@@ -441,7 +441,7 @@ namespace RhinoInside.Revit.GH
 
       foreach (var family in families)
       {
-        var group = new DB.TransactionGroup(family, $"Grasshopper {now}: {name}");
+        var group = new DB.TransactionGroup(family, $"Grasshopper {now}: {name.TripleDot(16)}");
         group.Start();
 
         OpenTransactionGroups.Push(group);
