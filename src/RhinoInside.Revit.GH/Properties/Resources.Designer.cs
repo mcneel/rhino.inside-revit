@@ -1993,6 +1993,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap RailingByCurve {
+            get {
+                object obj = ResourceManager.GetObject("RailingByCurve", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Roof {
             get {
                 object obj = ResourceManager.GetObject("Roof", resourceCulture);

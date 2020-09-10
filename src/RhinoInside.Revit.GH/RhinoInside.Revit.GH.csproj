@@ -394,6 +394,9 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.dll" DestinationFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.gha" />
