@@ -240,6 +240,8 @@
     <Compile Include="Components\Element\DirectShape\ByPoint.cs" />
     <Compile Include="Components\Element\Identity.cs" />
     <Compile Include="Components\Element\Material\Graphics.cs" />
+    <Compile Include="Components\Element\Material\ConstructBitmapTexture.cs" />
+    <Compile Include="Components\Element\Material\DeconstructBitmapTexture.cs" />
     <Compile Include="Components\Element\Material\Identity.cs" />
     <Compile Include="Components\Element\Material\QueryMaterials.cs" />
     <Compile Include="Components\Element\Parameters.cs" />
