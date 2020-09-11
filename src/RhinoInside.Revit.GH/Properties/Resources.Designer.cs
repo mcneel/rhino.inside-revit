@@ -493,6 +493,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ConstructBitmapTexture {
+            get {
+                object obj = ResourceManager.GetObject("ConstructBitmapTexture", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap CurtainCell {
             get {
                 object obj = ResourceManager.GetObject("CurtainCell", resourceCulture);
@@ -586,6 +596,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap DeckEmbeddingType_ValueList {
             get {
                 object obj = ResourceManager.GetObject("DeckEmbeddingType_ValueList", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap DeconstructBitmapTexture {
+            get {
+                object obj = ResourceManager.GetObject("DeconstructBitmapTexture", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
