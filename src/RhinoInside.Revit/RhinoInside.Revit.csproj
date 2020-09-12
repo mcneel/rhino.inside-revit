@@ -235,6 +235,7 @@
     <Compile Include="External\DB\Extensions\Wall.cs" />
     <Compile Include="External\DB\ExternalFailures.cs" />
     <Compile Include="External\DB\FloorFunction.cs" />
+    <Compile Include="External\DB\Materials.cs" />
     <Compile Include="External\DB\ParameterBinding.cs" />
     <Compile Include="External\DB\ParameterClass.cs" />
     <Compile Include="External\DB\ProceduralTextures.cs" />
