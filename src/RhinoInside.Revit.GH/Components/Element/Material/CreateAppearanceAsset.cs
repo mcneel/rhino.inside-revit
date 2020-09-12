@@ -13,7 +13,8 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
 {
   public class CreateAppearanceAsset : DocumentComponent
   {
-    public override Guid ComponentGuid => new Guid("0f251f87-317b-4669-bc70-22b29d3eba6a");
+    public override Guid ComponentGuid =>
+      new Guid("0f251f87-317b-4669-bc70-22b29d3eba6a");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
     protected override ParamDefinition[] Inputs => inputs;
