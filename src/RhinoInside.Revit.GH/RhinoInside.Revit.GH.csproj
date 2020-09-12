@@ -240,7 +240,15 @@
     <Compile Include="Components\Element\DirectShape\ByPoint.cs" />
     <Compile Include="Components\Element\Identity.cs" />
     <Compile Include="Components\Element\Material\Graphics.cs" />
+    <Compile Include="Components\Element\Material\AnalyzeAppearanceAsset.cs" />
+    <Compile Include="Components\Element\Material\AnalyzeStructuralAsset.cs" />
+    <Compile Include="Components\Element\Material\AnalyzeThermalAsset.cs" />
+    <Compile Include="Components\Element\Material\CreateStructuralAsset.cs" />
+    <Compile Include="Components\Element\Material\CreateThermalAsset.cs" />
+    <Compile Include="Components\Element\Material\QueryAssetsOfMaterial.cs" />
+    <Compile Include="Components\Element\Material\ModifyAssetsOfMaterial.cs" />
     <Compile Include="Components\Element\Material\ConstructBitmapTexture.cs" />
+    <Compile Include="Components\Element\Material\CreateAppearanceAsset.cs" />
     <Compile Include="Components\Element\Material\DeconstructBitmapTexture.cs" />
     <Compile Include="Components\Element\Material\Identity.cs" />
     <Compile Include="Components\Element\Material\QueryMaterials.cs" />
@@ -308,6 +316,7 @@
     <Compile Include="Extensions\Grasshopper.cs" />
     <Compile Include="Extensions\System.Collections.Generic.cs" />
     <Compile Include="Extensions\WinForms.cs" />
+    <Compile Include="Parameters\AppearanceAsset.cs" />
     <Compile Include="Parameters\Param.cs" />
     <Compile Include="Parameters\DataObject.cs" />
     <Compile Include="Parameters\Category.cs" />
@@ -356,6 +365,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Solid.cs" />
+    <Compile Include="Types\AppearanceAsset.cs" />
     <Compile Include="Types\BuildingPad.cs" />
     <Compile Include="Types\Category.cs" />
     <Compile Include="Types\Ceiling.cs" />
