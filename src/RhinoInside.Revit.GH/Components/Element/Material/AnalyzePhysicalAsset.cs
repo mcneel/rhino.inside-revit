@@ -9,15 +9,16 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Element.Material
 {
-  public class AnalyzeStructuralAsset : AnalysisComponent
+  public class AnalyzePhysicalAsset : AnalysisComponent
   {
-    public override Guid ComponentGuid => new Guid("ec93f8e0-d2af-4a44-a040-89a7c40b9fc7");
+    public override Guid ComponentGuid =>
+      new Guid("ec93f8e0-d2af-4a44-a040-89a7c40b9fc7");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
-    public AnalyzeStructuralAsset() : base(
-      name: "Analyze Structural Asset",
-      nickname: "A-STAST",
-      description: "Analyze given structural asset",
+    public AnalyzePhysicalAsset() : base(
+      name: "Analyze Physical Asset",
+      nickname: "A-PHAST",
+      description: "Analyze given physical asset",
       category: "Revit",
       subCategory: "Material"
     )

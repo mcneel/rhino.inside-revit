@@ -241,9 +241,9 @@
     <Compile Include="Components\Element\Identity.cs" />
     <Compile Include="Components\Element\Material\Graphics.cs" />
     <Compile Include="Components\Element\Material\AnalyzeAppearanceAsset.cs" />
-    <Compile Include="Components\Element\Material\AnalyzeStructuralAsset.cs" />
+    <Compile Include="Components\Element\Material\AnalyzePhysicalAsset.cs" />
     <Compile Include="Components\Element\Material\AnalyzeThermalAsset.cs" />
-    <Compile Include="Components\Element\Material\CreateStructuralAsset.cs" />
+    <Compile Include="Components\Element\Material\CreatePhysicalAsset.cs" />
     <Compile Include="Components\Element\Material\CreateThermalAsset.cs" />
     <Compile Include="Components\Element\Material\QueryAssetsOfMaterial.cs" />
     <Compile Include="Components\Element\Material\ModifyAssetsOfMaterial.cs" />
@@ -340,6 +340,8 @@
     <Compile Include="Parameters\PersistentParam.cs" />
     <Compile Include="Parameters\Sketch.cs" />
     <Compile Include="Parameters\SketchPlane.cs" />
+    <Compile Include="Parameters\PhysicalAsset.cs" />
+    <Compile Include="Parameters\ThermalAsset.cs" />
     <Compile Include="Parameters\ValueList.cs" />
     <Compile Include="Parameters\View.cs" />
     <Compile Include="Parameters\WallFunction_ValueList.cs" />
@@ -394,6 +396,8 @@
     <Compile Include="Types\Material.cs" />
     <Compile Include="Types\HostObject.cs" />
     <Compile Include="Types\DataObject.cs" />
+    <Compile Include="Types\PhysicalAsset.cs" />
+    <Compile Include="Types\ThermalAsset.cs" />
     <Compile Include="Types\View.cs" />
     <Compile Include="Types\CurtainGridLine.cs" />
     <Compile Include="Types\SpatialElement.cs" />
