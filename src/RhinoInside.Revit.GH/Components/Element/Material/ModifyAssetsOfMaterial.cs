@@ -9,6 +9,7 @@ using Grasshopper.Kernel.Parameters;
 using DB = Autodesk.Revit.DB;
 using RhinoInside.Revit.External.DB;
 using RhinoInside.Revit.External.DB.Extensions;
+using Autodesk.Revit.DB.Structure;
 
 namespace RhinoInside.Revit.GH.Components.Element.Material
 {
@@ -97,6 +98,8 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
         material.ThermalAssetId = thermalAsset is null ? material.ThermalAssetId : thermalAsset.Id;
         CommitTransaction(doc, transaction);
       }
+
+      DA.SetData("Material", material);
     }
   }
 }
