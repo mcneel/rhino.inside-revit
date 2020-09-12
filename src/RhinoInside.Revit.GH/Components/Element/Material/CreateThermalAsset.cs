@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     };
 
     public CreateThermalAsset() : base(
-      name: "Add Thermal Asset",
+      name: "Create Thermal Asset",
       nickname: "C-THAST",
       description: "Create a new instance of thermal asset inside document",
       category: "Revit",
