@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     };
 
     public CreateAppearanceAsset() : base(
-      name: "Add Appearance Asset",
+      name: "Create Appearance Asset",
       nickname: "C-APAST",
       description: "Create a new instance of appearance asset inside document",
       category: "Revit",

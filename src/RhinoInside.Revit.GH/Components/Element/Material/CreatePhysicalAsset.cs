@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     };
 
     public CreatePhysicalAsset() : base(
-      name: "Add Physical Asset",
+      name: "Create Physical Asset",
       nickname: "C-PHAST",
       description: "Create a new instance of physical asset inside document",
       category: "Revit",
