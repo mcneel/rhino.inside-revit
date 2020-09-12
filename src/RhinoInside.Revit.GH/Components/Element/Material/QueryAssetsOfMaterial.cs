@@ -13,7 +13,8 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
 {
   public class QueryAssetsOfMaterial : AnalysisComponent
   {
-    public override Guid ComponentGuid => new Guid("1f644064-035a-4fa1-971b-64d7da824f09");
+    public override Guid ComponentGuid =>
+      new Guid("1f644064-035a-4fa1-971b-64d7da824f09");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
     public QueryAssetsOfMaterial() : base(
@@ -47,14 +48,14 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
         access: GH_ParamAccess.item
         );
       pManager.AddParameter(
-        param: new Parameters.DataObject<DB.StructuralAsset>(),
-        name: "Structural Asset",
-        nickname: "SA",
+        param: new Parameters.PhysicalAsset(),
+        name: "Physical Asset",
+        nickname: "PA",
         description: string.Empty,
         access: GH_ParamAccess.item
         );
       pManager.AddParameter(
-        param: new Parameters.DataObject<DB.ThermalAsset>(),
+        param: new Parameters.ThermalAsset(),
         name: "Thermal Asset",
         nickname: "TA",
         description: string.Empty,
@@ -79,18 +80,14 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
       // structural asset
       if (doc.GetElement(material.StructuralAssetId) is DB.PropertySetElement sae)
         DA.SetData(
-          "Structural Asset",
-          new Types.DataObject<DB.StructuralAsset>(
-            sae.GetStructuralAsset(),
-            srcDocument: doc)
+          "Physical Asset",
+          new Types.PhysicalAsset(sae)
           );
       // thermal asset
       if (doc.GetElement(material.ThermalAssetId) is DB.PropertySetElement tae)
         DA.SetData(
           "Thermal Asset",
-          new Types.DataObject<DB.ThermalAsset>(
-            tae.GetThermalAsset(),
-            srcDocument: doc)
+          new Types.ThermalAsset(tae)
           );
     }
   }

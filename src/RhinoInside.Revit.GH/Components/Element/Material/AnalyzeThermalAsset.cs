@@ -11,7 +11,8 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
 {
   public class AnalyzeThermalAsset : AnalysisComponent
   {
-    public override Guid ComponentGuid => new Guid("c3be363d-c01d-4cf3-b8d2-c345734ae66d");
+    public override Guid ComponentGuid =>
+      new Guid("c3be363d-c01d-4cf3-b8d2-c345734ae66d");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
     public AnalyzeThermalAsset() : base(
