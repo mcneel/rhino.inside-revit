@@ -97,39 +97,35 @@ namespace RhinoInside.Revit
     #region Bake Recipe
     public static void BakeGeometry(IEnumerable<Rhino.Geometry.GeometryBase> geometries, BuiltInCategory categoryToBakeInto = BuiltInCategory.OST_GenericModel)
     {
+      var doc = ActiveDBDocument;
+      if (doc is null)
+        throw new ArgumentNullException(nameof(ActiveDBDocument));
+
       if (categoryToBakeInto == BuiltInCategory.INVALID)
         return;
 
-      EnqueueAction
-      (
-        (doc) =>
-        {
-          foreach (var shapes in geometries.Convert(ShapeEncoder.ToShape))
-            BakeGeometry(doc, shapes, categoryToBakeInto);
-        }
-      );
+      foreach (var shapes in geometries.Convert(ShapeEncoder.ToShape))
+        BakeGeometry(doc, shapes, categoryToBakeInto);
     }
 
     [Conditional("DEBUG")]
     static void TraceGeometry(IEnumerable<Rhino.Geometry.GeometryBase> geometries)
     {
-      EnqueueAction
-      (
-        (doc) =>
-        {
-          using (var ctx = GeometryEncoder.Context.Push())
-          {
-            using (var collector = new FilteredElementCollector(ActiveDBDocument))
-            {
-              var materials = collector.OfClass(typeof(Material)).Cast<Material>();
-              ctx.MaterialId = (materials.Where((x) => x.Name == "Debug").FirstOrDefault()?.Id) ?? ElementId.InvalidElementId;
-            }
+      var doc = ActiveDBDocument;
+      if (doc is null)
+        return;
 
-            foreach (var shape in geometries.Convert(ShapeEncoder.ToShape))
-              BakeGeometry(doc, shape, BuiltInCategory.OST_GenericModel);
-          }
+      using (var ctx = GeometryEncoder.Context.Push())
+      {
+        using (var collector = new FilteredElementCollector(doc))
+        {
+          var materials = collector.OfClass(typeof(Material)).Cast<Material>();
+          ctx.MaterialId = (materials.Where((x) => x.Name == "Debug").FirstOrDefault()?.Id) ?? ElementId.InvalidElementId;
         }
-      );
+
+        foreach (var shape in geometries.Convert(ShapeEncoder.ToShape))
+          BakeGeometry(doc, shape, BuiltInCategory.OST_GenericModel);
+      }
     }
 
     static void BakeGeometry(Document doc, IEnumerable<GeometryObject> geometryToBake, BuiltInCategory categoryToBakeInto)
@@ -167,8 +163,14 @@ namespace RhinoInside.Revit
     }
     #endregion
 
-    #region Actions
-    static bool isCommitting = false;
+    #region Idling Actions
+    private static Queue<Action> idlingActions = new Queue<Action>();
+    internal static void EnqueueIdlingAction(Action action)
+    {
+      lock (idlingActions)
+        idlingActions.Enqueue(action);
+    }
+
     internal static bool ProcessIdleActions()
     {
       bool pendingIdleActions = false;
@@ -201,16 +203,28 @@ namespace RhinoInside.Revit
           pendingIdleActions = true;
       }
 
+      // Non document dependant tasks
+      lock (idlingActions)
+      {
+        while (idlingActions.Count > 0)
+        {
+          try { idlingActions.Dequeue().Invoke(); }
+          catch (Exception e) { Debug.Fail(e.Source, e.Message); }
+        }
+      }
+
       return pendingIdleActions;
     }
 
-    private static Queue<Action<Document>> docWriteActions = new Queue<Action<Document>>();
+    static Queue<Action<Document>> docWriteActions = new Queue<Action<Document>>();
+    [Obsolete("Since 2020-09-14")]
     public static void EnqueueAction(Action<Document> action)
     {
       lock (docWriteActions)
         docWriteActions.Enqueue(action);
     }
 
+    static bool isCommitting = false;
     static void ProcessWriteActions()
     {
       lock (docWriteActions)
@@ -284,13 +298,13 @@ namespace RhinoInside.Revit
     }
 
     static Queue<Action<Document, bool>> docReadActions = new Queue<Action<Document, bool>>();
-    public static void EnqueueReadAction(Action<Document, bool> action)
+    internal static void EnqueueReadAction(Action<Document, bool> action)
     {
       lock (docReadActions)
         docReadActions.Enqueue(action);
     }
 
-    public static void CancelReadActions() => ProcessReadActions(true);
+    internal static void CancelReadActions() => ProcessReadActions(true);
     static bool ProcessReadActions(bool cancel = false)
     {
       lock (docReadActions)

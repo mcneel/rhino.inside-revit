@@ -334,14 +334,14 @@ namespace RhinoInside.Revit
                 doc.ModelDistanceDisplayPrecision = Clamp((int) -Log10(lengthFormatoptions.Accuracy), 0, 7);
                 doc.ModelAbsoluteTolerance = Revit.VertexTolerance * UnitScale(UnitSystem.Feet, RevitModelUnitSystem);
                 doc.AdjustModelUnitSystem(RevitModelUnitSystem, true);
-                UpdateViewConstructionPlanesFrom(doc, revitDoc);
+                AdjustViewConstructionPlanes(doc);
               break;
               case Autodesk.Revit.UI.TaskDialogResult.CommandLink3:
                 doc.ModelAngleToleranceRadians = Revit.AngleTolerance;
                 doc.ModelDistanceDisplayPrecision = Clamp(Grasshopper.CentralSettings.FormatDecimalDigits, 0, 7);
                 doc.ModelAbsoluteTolerance = Revit.VertexTolerance * UnitScale(UnitSystem.Feet, GH.Guest.ModelUnitSystem);
                 doc.AdjustModelUnitSystem(GH.Guest.ModelUnitSystem, true);
-                UpdateViewConstructionPlanesFrom(doc, revitDoc);
+                AdjustViewConstructionPlanes(doc);
                 break;
               default:
                 AuditTolerances(doc);
@@ -383,7 +383,7 @@ namespace RhinoInside.Revit
           //    break;
           //}
 
-          UpdateViewConstructionPlanesFrom(rhinoDoc, revitDoc);
+          AdjustViewConstructionPlanes(rhinoDoc);
         }
       }
       finally
@@ -392,14 +392,14 @@ namespace RhinoInside.Revit
       }
     }
 
-    static void UpdateViewConstructionPlanesFrom(RhinoDoc rhinoDoc, DB.Document revitDoc)
+    static void AdjustViewConstructionPlanes(RhinoDoc rhinoDoc)
     {
       if (!string.IsNullOrEmpty(rhinoDoc.TemplateFileUsed))
         return;
 
       if (rhinoDoc.IsCreating)
       {
-        Revit.EnqueueAction(doc => UpdateViewConstructionPlanesFrom(rhinoDoc, doc));
+        Revit.EnqueueIdlingAction(() => AdjustViewConstructionPlanes(rhinoDoc));
         return;
       }
 
