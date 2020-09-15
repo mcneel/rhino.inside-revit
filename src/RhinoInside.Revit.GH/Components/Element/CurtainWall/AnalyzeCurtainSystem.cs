@@ -58,7 +58,7 @@ namespace RhinoInside.Revit.GH.Components
         foreach (DB.CurtainGrid cgrid in curtainSystemInstance.CurtainGrids)
           cGrids.Add(cgrid);
 
-        DA.SetDataList("Curtain Grids", cGrids.Select(x => new Types.DataObject<DB.CurtainGrid>(x, srcDocument: curtainSystemInstance.Document))) ;
+        DA.SetDataList("Curtain Grids", cGrids.Select(x => new Types.DataObject<DB.CurtainGrid>(x, sourceDoc: curtainSystemInstance.Document))) ;
       }
     }
   }

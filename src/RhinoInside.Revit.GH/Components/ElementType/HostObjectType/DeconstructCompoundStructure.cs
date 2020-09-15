@@ -145,7 +145,7 @@ namespace RhinoInside.Revit.GH.Components
       DA.SetData("Cutoff Height", cstruct.CutoffHeight);
       DA.SetData("Minimum Sample Height", cstruct.MinimumSampleHeight);
       DA.SetData("Minimum Layer Thickness", DB.CompoundStructure.GetMinimumLayerThickness());
-      DA.SetDataList("Layers", cstruct.GetLayers().Select(x => new Types.DataObject<DB.CompoundStructureLayer>(apiObject: x, srcDocument: dataObj.Document)));
+      DA.SetDataList("Layers", cstruct.GetLayers().Select(x => new Types.DataObject<DB.CompoundStructureLayer>(apiObject: x, sourceDoc: dataObj.Document)));
       DA.SetData("First Core Layer Index", cstruct.GetFirstCoreLayerIndex());
       DA.SetData("Last Core Layer Index", cstruct.GetLastCoreLayerIndex());
       DA.SetData("Structural Material Index", cstruct.StructuralMaterialIndex);

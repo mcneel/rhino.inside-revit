@@ -128,7 +128,7 @@ namespace RhinoInside.Revit.GH.Components
 
       DB.CurtainGrid cgrid = dataObj.Value;
 
-      DA.SetDataList("Cells", cgrid.GetCurtainCells().Select(x => new Types.DataObject<DB.CurtainCell>(x, srcDocument: dataObj.Document)));
+      DA.SetDataList("Cells", cgrid.GetCurtainCells().Select(x => new Types.DataObject<DB.CurtainCell>(x, sourceDoc: dataObj.Document)));
       DA.SetDataList("Mullions", cgrid.GetMullionIds().Select(x => Types.Mullion.FromElement(dataObj.Document.GetElement(x))));
       DA.SetDataList("Panels", cgrid.GetPanelIds().Select(x => Types.Element.FromElement(dataObj.Document.GetElement(x))));
 
