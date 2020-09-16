@@ -9,6 +9,7 @@ using DBX = RhinoInside.Revit.External.DB;
 using DB = Autodesk.Revit.DB;
 using Rhino.Geometry;
 using UIFramework;
+using RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -31,8 +32,8 @@ namespace RhinoInside.Revit.GH.Types
           Value = prop;
           return true;
 
-        case TextureData tdata:
-          Value = new DBX.AssetParameterDouble1DMap(tdata.Value);
+        case DBX.TextureData tdata:
+          Value = new DBX.AssetParameterDouble1DMap(tdata);
           return true;
 
         case GH_Number number:
