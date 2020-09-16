@@ -33,8 +33,8 @@ namespace RhinoInside.Revit.GH.Types
           Value = prop;
           return true;
 
-        case TextureData tdata:
-          Value = new DBX.AssetParameterDouble4DMap(tdata.Value);
+        case DBX.TextureData tdata:
+          Value = new DBX.AssetParameterDouble4DMap(tdata);
           return true;
 
         case GH_Number number:

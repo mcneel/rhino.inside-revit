@@ -373,6 +373,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap UnifiedBitmapData {
+            get {
+                object obj = ResourceManager.GetObject("UnifiedBitmapData", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap BuildingPad {
             get {
                 object obj = ResourceManager.GetObject("BuildingPad", resourceCulture);
@@ -483,6 +493,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap CheckerData {
+            get {
+                object obj = ResourceManager.GetObject("CheckerData", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Column {
             get {
                 object obj = ResourceManager.GetObject("Column", resourceCulture);
@@ -536,6 +556,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap ConstructBitmapTexture {
             get {
                 object obj = ResourceManager.GetObject("ConstructBitmapTexture", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ConstructCheckerTexture {
+            get {
+                object obj = ResourceManager.GetObject("ConstructCheckerTexture", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -676,6 +706,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap DeconstructBitmapTexture {
             get {
                 object obj = ResourceManager.GetObject("DeconstructBitmapTexture", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap DeconstructCheckerTexture {
+            get {
+                object obj = ResourceManager.GetObject("DeconstructCheckerTexture", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
