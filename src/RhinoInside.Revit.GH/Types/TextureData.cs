@@ -10,7 +10,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public class TextureData :GH_Goo<DBX.TextureData>
+  public class TextureData<T> :GH_Goo<T> where T: DBX.TextureData, new()
   {
     public override bool IsValid => Value != null;
     public override string TypeName
@@ -26,13 +26,13 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeDescription => $"Represents a {TypeName}";
 
     public TextureData() : base () { }
-    public TextureData(DBX.TextureData textureData) : base (textureData) { }
+    public TextureData(T textureData) : base (textureData) { }
 
     public override IGH_Goo Duplicate() => (IGH_Goo) MemberwiseClone();
 
     public override bool CastFrom(object source)
     {
-      if (source is DBX.TextureData tdata)
+      if (source is T tdata)
       {
         Value = tdata;
         return true;
