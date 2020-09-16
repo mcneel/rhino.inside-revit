@@ -238,7 +238,7 @@
     <Compile Include="External\DB\Materials.cs" />
     <Compile Include="External\DB\ParameterBinding.cs" />
     <Compile Include="External\DB\ParameterClass.cs" />
-    <Compile Include="External\DB\ProceduralTextures.cs" />
+    <Compile Include="External\DB\MaterialAssets.cs" />
     <Compile Include="External\DB\UniqueId.cs" />
     <Compile Include="External\DB\WallWrapping.cs" />
     <Compile Include="External\DB\CurtainGridLayout.cs" />

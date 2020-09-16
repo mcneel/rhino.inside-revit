@@ -241,15 +241,20 @@
     <Compile Include="Components\Element\Identity.cs" />
     <Compile Include="Components\Element\Material\Graphics.cs" />
     <Compile Include="Components\Element\Material\AnalyzeAppearanceAsset.cs" />
+    <Compile Include="Components\Element\Material\AnalyzeAppearanceAssets.cs" />
     <Compile Include="Components\Element\Material\AnalyzePhysicalAsset.cs" />
     <Compile Include="Components\Element\Material\AnalyzeThermalAsset.cs" />
+    <Compile Include="Components\Element\Material\AssetComponent.cs" />
     <Compile Include="Components\Element\Material\CreatePhysicalAsset.cs" />
     <Compile Include="Components\Element\Material\CreateThermalAsset.cs" />
+    <Compile Include="Components\Element\Material\ModifyAppearanceAssets.cs" />
+    <Compile Include="Components\Element\Material\ModifyPhysicalAsset.cs" />
+    <Compile Include="Components\Element\Material\ModifyThermalAsset.cs" />
     <Compile Include="Components\Element\Material\QueryAssetsOfMaterial.cs" />
     <Compile Include="Components\Element\Material\ModifyAssetsOfMaterial.cs" />
-    <Compile Include="Components\Element\Material\ConstructBitmapTexture.cs" />
-    <Compile Include="Components\Element\Material\CreateAppearanceAsset.cs" />
-    <Compile Include="Components\Element\Material\DeconstructBitmapTexture.cs" />
+    <Compile Include="Components\Element\Material\ConstructProceduralAssets.cs" />
+    <Compile Include="Components\Element\Material\CreateAppearanceAssets.cs" />
+    <Compile Include="Components\Element\Material\DeconstructProceduralAssets.cs" />
     <Compile Include="Components\Element\Material\Identity.cs" />
     <Compile Include="Components\Element\Material\QueryMaterials.cs" />
     <Compile Include="Components\Element\Parameters.cs" />
@@ -309,6 +314,9 @@
     <Compile Include="Components\Parameter\DefineSharedParameter.cs" />
     <Compile Include="Components\Parameter\DeconstructParameterValue.cs" />
     <Compile Include="Components\Parameter\ParameterKeyIdentity.cs" />
+    <Compile Include="Parameters\AssetPropertyDouble1DMap.cs" />
+    <Compile Include="Parameters\AssetPropertyDouble4DMap.cs" />
+    <Compile Include="Parameters\TextureData.cs" />
     <Compile Include="Components\TransactionalComponent.cs" />
     <Compile Include="Components\TransactionBaseComponent.cs" />
     <Compile Include="Components\ZuiComponent.cs" />
@@ -368,6 +376,8 @@
     </Compile>
     <Compile Include="Solid.cs" />
     <Compile Include="Types\AppearanceAsset.cs" />
+    <Compile Include="Types\AssetPropertyDouble1DMap.cs" />
+    <Compile Include="Types\AssetPropertyDouble4DMap.cs" />
     <Compile Include="Types\BuildingPad.cs" />
     <Compile Include="Types\Category.cs" />
     <Compile Include="Types\Ceiling.cs" />
@@ -397,6 +407,7 @@
     <Compile Include="Types\HostObject.cs" />
     <Compile Include="Types\DataObject.cs" />
     <Compile Include="Types\PhysicalAsset.cs" />
+    <Compile Include="Types\TextureData.cs" />
     <Compile Include="Types\ThermalAsset.cs" />
     <Compile Include="Types\View.cs" />
     <Compile Include="Types\CurtainGridLine.cs" />
