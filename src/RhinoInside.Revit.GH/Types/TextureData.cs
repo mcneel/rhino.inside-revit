@@ -11,9 +11,10 @@ using RhinoInside.Revit.GH.Components.Element.Material;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public class TextureData<T> :GH_Goo<T> where T: MAT.TextureData, new()
+  public class TextureData :GH_Goo<MAT.TextureData>
   {
     public override bool IsValid => Value != null;
+
     public override string TypeName
     {
       get
@@ -24,16 +25,17 @@ namespace RhinoInside.Revit.GH.Types
           return $"Revit Texture (Unset)";
       }
     }
+
     public override string TypeDescription => $"Represents a {TypeName}";
 
     public TextureData() : base () { }
-    public TextureData(T textureData) : base (textureData) { }
+    public TextureData(MAT.TextureData textureData) : base (textureData) { }
 
     public override IGH_Goo Duplicate() => (IGH_Goo) MemberwiseClone();
 
     public override bool CastFrom(object source)
     {
-      if (source is T tdata)
+      if (source is MAT.TextureData tdata)
       {
         Value = tdata;
         return true;
@@ -44,20 +46,13 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastTo<Q>(ref Q target)
     {
-      if (typeof(Q).IsAssignableFrom(typeof(T)))
+      if (typeof(Q).IsAssignableFrom(typeof(MAT.TextureData)))
       {
         target = (Q) (object) Value;
         return true;
       }
 
       return base.CastTo<Q>(ref target);
-    }
-
-    public static implicit operator TextureData<T>(TextureData<MAT.TextureData> target)
-    {
-      if (target.Value is T tValue)
-        return new TextureData<T>(tValue);
-      throw new System.InvalidCastException();
     }
 
     public override string ToString()
