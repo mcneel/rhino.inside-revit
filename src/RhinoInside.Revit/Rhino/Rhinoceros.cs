@@ -286,12 +286,12 @@ namespace RhinoInside.Revit
       }
     }
 
-    static void AuditUnits(RhinoDoc doc)
+    internal static void AuditUnits(RhinoDoc doc)
     {
       if (Command.InScriptRunnerCommand())
         return;
 
-      if (Revit.ActiveUIDocument.Document is DB.Document revitDoc)
+      if (Revit.ActiveUIDocument?.Document is DB.Document revitDoc)
       {
         var units = revitDoc.GetUnits();
         var lengthFormatoptions = units.GetFormatOptions(DB.UnitType.UT_Length);
@@ -299,23 +299,48 @@ namespace RhinoInside.Revit
         var GrasshopperModelUnitSystem = GH.Guest.ModelUnitSystem != UnitSystem.Unset ? GH.Guest.ModelUnitSystem : doc.ModelUnitSystem;
         if (doc.ModelUnitSystem != RevitModelUnitSystem || doc.ModelUnitSystem != GrasshopperModelUnitSystem)
         {
+          var hasUnits = doc.ModelUnitSystem != UnitSystem.Unset && doc.ModelUnitSystem != UnitSystem.None;
+          var expandedContent = doc.IsOpening ?
+            $"The Rhino model you are opening is in {doc.ModelUnitSystem}{Environment.NewLine}Revit document '{revitDoc.Title}' length units are {RevitModelUnitSystem}" :
+            string.Empty;
+
           using
           (
             var taskDialog = new TaskDialog("Units")
             {
               MainIcon = External.UI.TaskDialogIcons.IconInformation,
               TitleAutoPrefix = true,
-              AllowCancellation = true,
-              MainInstruction = "Model units mismatch.",
-              MainContent = "What units do you want to use?",
-              ExpandedContent = $"The model you are opening is in {doc.ModelUnitSystem}{Environment.NewLine}Active Revit model '{revitDoc.Title}' units are {RevitModelUnitSystem}",
+              AllowCancellation = hasUnits,
+              MainInstruction = hasUnits ? (doc.IsOpening ? "Model units mismatch." : "Model units mismatch warning.") : "Rhino model has no units.",
+              MainContent = doc.IsOpening ? "What units do you want to use?" : $"Revit document '{revitDoc.Title}' length units are {RevitModelUnitSystem}." + (hasUnits ? $"{Environment.NewLine}Rhino is working in {doc.ModelUnitSystem}." : string.Empty),
+              ExpandedContent = expandedContent,
               FooterText = "Current version: " + Addin.DisplayVersion
             }
           )
           {
-            taskDialog.AddCommandLink(Autodesk.Revit.UI.TaskDialogCommandLinkId.CommandLink1, $"Continue opening in {doc.ModelUnitSystem}", $"Rhino and Grasshopper will work in {doc.ModelUnitSystem}");
-            taskDialog.AddCommandLink(Autodesk.Revit.UI.TaskDialogCommandLinkId.CommandLink2, $"Adjust Rhino model to {RevitModelUnitSystem} like Revit", $"Scale Rhino model by {UnitScale(doc.ModelUnitSystem, RevitModelUnitSystem)}");
-            taskDialog.DefaultButton = Autodesk.Revit.UI.TaskDialogResult.CommandLink2;
+            if (!doc.IsOpening && hasUnits)
+            {
+              taskDialog.EnableDoNotShowAgain("RhinoInside.Revit.DocumentUnitsMismatch", true, "Do not show again");
+            }
+            else
+            {
+              taskDialog.AddCommandLink(Autodesk.Revit.UI.TaskDialogCommandLinkId.CommandLink2, $"Use {RevitModelUnitSystem} like Revit", $"Scale Rhino model by {UnitScale(doc.ModelUnitSystem, RevitModelUnitSystem)}");
+              taskDialog.DefaultButton = Autodesk.Revit.UI.TaskDialogResult.CommandLink2;
+            }
+
+            if (hasUnits)
+            {
+              if (doc.IsOpening)
+              {
+                taskDialog.AddCommandLink(Autodesk.Revit.UI.TaskDialogCommandLinkId.CommandLink1, $"Continue in {doc.ModelUnitSystem}", $"Rhino and Grasshopper will work in {doc.ModelUnitSystem}");
+                taskDialog.DefaultButton = Autodesk.Revit.UI.TaskDialogResult.CommandLink1;
+              }
+              else
+              {
+                taskDialog.CommonButtons = Autodesk.Revit.UI.TaskDialogCommonButtons.Ok;
+                taskDialog.DefaultButton = Autodesk.Revit.UI.TaskDialogResult.Ok;
+              }
+            }
 
             if (GH.Guest.ModelUnitSystem != UnitSystem.Unset)
             {
@@ -439,11 +464,6 @@ namespace RhinoInside.Revit
         }
       }
     }
-    #endregion
-
-    #region Status
-    private static bool CoreIsLicenseExpired() => !RhinoApp.IsLicenseValidated;
-    public static bool IsLicenseExpired = false;
     #endregion
 
     #region Rhino UI
