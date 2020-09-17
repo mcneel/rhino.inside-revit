@@ -469,7 +469,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
 
     [APIAssetProp("UnifiedbitmapRGBAmount", typeof(DB.Visual.AssetPropertyDouble))]
     [APIAssetPropValueRange(min: 0, max: 1)]
-    [AssetGHParameter(typeof(Param_Boolean), "Brightness", "B", "Texture brightness")]
+    [AssetGHParameter(typeof(Param_Number), "Brightness", "B", "Texture brightness")]
     public double Brightness { get; set; } = 0;
 
     public override string ToString()
