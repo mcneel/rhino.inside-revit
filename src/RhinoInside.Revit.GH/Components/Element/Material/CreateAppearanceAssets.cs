@@ -20,9 +20,9 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
 
     public CreateAppearanceAsset() : base()
     {
-      this.Name = $"Create {ComponentInfo.Name}";
-      this.NickName = $"C-{ComponentInfo.NickName}";
-      this.Description = $"Create a new instance of {ComponentInfo.Description} inside document";
+      Name = $"Create {ComponentInfo.Name}";
+      NickName = $"C-{ComponentInfo.NickName}";
+      Description = $"Create a new instance of {ComponentInfo.Description} inside document";
     }
 
     protected override void RegisterInputParams(GH_InputParamManager pManager)
@@ -40,24 +40,10 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
-    {
-      T assetInfo = CreateAssetDataFromInputs(DA);
-
-      var doc = Revit.ActiveDBDocument;
-
-      // create new doc asset
-      var assetElement = EnsureAsset(assetInfo.Schema, doc, assetInfo.Name);
-
-      // open asset for editing
-      var scope = new DB.Visual.AppearanceAssetEditScope(doc);
-      var editableAsset = scope.Start(assetElement.Id);
-
-      // commit the changes after all changes has been made
-      scope.Commit(true);
-
-      // and send it out
-      DA.SetData("Appearance Asset", new Types.AppearanceAsset(assetElement));
-    }
+      => DA.SetData(
+        ComponentInfo.Name,
+        new Types.AppearanceAsset(CreateAssetFromInputs(DA))
+        );
   }
 
   public class CreateGenericShader

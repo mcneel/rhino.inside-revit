@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Grasshopper.Kernel.Types;
-using DBX = RhinoInside.Revit.External.DB;
+using MAT = RhinoInside.Revit.GH.Components.Element.Material;
 using DB = Autodesk.Revit.DB;
 using Rhino.Geometry;
 using UIFramework;
@@ -13,7 +13,7 @@ using RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public class AssetPropertyDouble1DMap : GH_Goo<DBX.AssetParameterDouble1DMap>
+  public class AssetPropertyDouble1DMap : GH_Goo<MAT.AssetPropertyDouble1DMap>
   {
     public override string TypeName => "Mappable Asset Property 1D";
     public override string TypeDescription
@@ -22,22 +22,26 @@ namespace RhinoInside.Revit.GH.Types
     public override sealed IGH_Goo Duplicate() => (IGH_Goo) MemberwiseClone();
 
     public AssetPropertyDouble1DMap() { }
-    public AssetPropertyDouble1DMap(DBX.AssetParameterDouble1DMap prop): base(prop) { }
+    public AssetPropertyDouble1DMap(MAT.AssetPropertyDouble1DMap prop): base(prop) { }
 
     public override bool CastFrom(object source)
     {
       switch (source)
       {
-        case DBX.AssetParameterDouble1DMap prop:
+        case double dblValue:
+          Value = new MAT.AssetPropertyDouble1DMap(dblValue);
+          return true;
+
+        case MAT.AssetPropertyDouble1DMap prop:
           Value = prop;
           return true;
 
-        case DBX.TextureData tdata:
-          Value = new DBX.AssetParameterDouble1DMap(tdata);
+        case MAT.TextureData tdata:
+          Value = new MAT.AssetPropertyDouble1DMap(tdata);
           return true;
 
         case GH_Number number:
-          Value = new DBX.AssetParameterDouble1DMap(number.Value);
+          Value = new MAT.AssetPropertyDouble1DMap(number.Value);
           return true;
       }
 
@@ -46,7 +50,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastTo<Q>(ref Q target)
     {
-      if (typeof(Q).IsAssignableFrom(typeof(DBX.AssetParameterDouble1DMap)))
+      if (typeof(Q).IsAssignableFrom(typeof(MAT.AssetPropertyDouble1DMap)))
       {
         target = (Q) (object) Value;
         return true;
@@ -66,7 +70,10 @@ namespace RhinoInside.Revit.GH.Types
       if (!IsValid)
         return $"Invalid {TypeName}";
 
-      return $"{Value.GetType().Name}";
+      if (Value.HasTexture)
+        return $"{Value.TextureValue}";
+      else
+        return $"{Value.Value}";
     }
   }
 }

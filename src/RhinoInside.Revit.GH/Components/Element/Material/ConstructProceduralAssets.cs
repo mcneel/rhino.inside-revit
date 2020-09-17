@@ -19,9 +19,9 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
 
     public ConstructTextureAsset() : base()
     {
-      this.Name = $"Construct {ComponentInfo.Name}";
-      this.NickName = $"C-{ComponentInfo.NickName}";
-      this.Description = $"Construct {ComponentInfo.Description}";
+      Name = $"Construct {ComponentInfo.Name}";
+      NickName = $"C-{ComponentInfo.NickName}";
+      Description = $"Construct {ComponentInfo.Description}";
     }
 
     protected override void RegisterInputParams(GH_InputParamManager pManager)

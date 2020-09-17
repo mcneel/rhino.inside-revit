@@ -784,6 +784,9 @@
   <data name="AnalyzeAppearanceAsset" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\..\..\art\gh-icons\comps\AnalyzeAppearanceAsset.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="AnalyzeGenericShader" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\..\..\art\gh-icons\comps\AnalyzeGenericShader.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="AnalyzePhysicalAsset" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\..\..\art\gh-icons\comps\AnalyzePhysicalAsset.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -793,14 +796,14 @@
   <data name="QueryAssetsOfMaterial" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\..\..\art\gh-icons\comps\QueryAssetsOfMaterial.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="CreateAppearanceAsset" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\..\..\art\gh-icons\comps\AddAppearanceAsset.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="CreateGenericShader" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\..\..\art\gh-icons\comps\CreateGenericShader.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="CreatePhysicalAsset" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\..\..\art\gh-icons\comps\AddPhysicalAsset.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\..\..\art\gh-icons\comps\CreatePhysicalAsset.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="CreateThermalAsset" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\..\..\art\gh-icons\comps\AddThermalAsset.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\..\..\art\gh-icons\comps\CreateThermalAsset.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ModifyAssetsOfMaterial" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\..\..\art\gh-icons\comps\ModifyAssetsOfMaterial.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -825,6 +828,18 @@
   </data>
   <data name="CheckerData" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\..\..\art\gh-icons\params\CheckerData.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="TextureData" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\..\..\art\gh-icons\params\TextureData.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ModifyGenericShader" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\..\..\art\gh-icons\comps\ModifyGenericShader.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ModifyPhysicalAsset" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\..\..\art\gh-icons\comps\ModifyPhysicalAsset.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ModifyThermalAsset" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\..\..\art\gh-icons\comps\ModifyThermalAsset.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="FlipUnflipElement" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\..\..\art\gh-icons\comps\FlipUnflipElement.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
