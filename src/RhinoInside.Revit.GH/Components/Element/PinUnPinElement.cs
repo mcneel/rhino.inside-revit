@@ -4,7 +4,7 @@ using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.System.Drawing;
 using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Element
+namespace RhinoInside.Revit.GH.Components
 {
   public class PinUnPinElement: TransactionComponent
   {
