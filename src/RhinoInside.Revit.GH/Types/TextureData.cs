@@ -20,9 +20,9 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         if (IsValid)
-          return Value.ToString();
+          return Value.GetGHComponentInfo().Name;
         else
-          return $"Revit Texture (Unset)";
+          return $"Invalid Asset";
       }
     }
 
@@ -58,7 +58,7 @@ namespace RhinoInside.Revit.GH.Types
     public override string ToString()
     {
       return IsValid ?
-             TypeName :
+             Value.ToString() :
              $"Invalid {TypeName}";
     }
   }

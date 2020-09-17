@@ -317,6 +317,7 @@
     <Compile Include="Components\Parameter\ParameterKeyIdentity.cs" />
     <Compile Include="Parameters\AssetPropertyDouble1DMap.cs" />
     <Compile Include="Parameters\AssetPropertyDouble4DMap.cs" />
+    <Compile Include="Parameters\StructuralAssetClass_ValueList.cs" />
     <Compile Include="Parameters\TextureData.cs" />
     <Compile Include="Components\TransactionalComponent.cs" />
     <Compile Include="Components\TransactionBaseComponent.cs" />
@@ -351,6 +352,7 @@
     <Compile Include="Parameters\SketchPlane.cs" />
     <Compile Include="Parameters\PhysicalAsset.cs" />
     <Compile Include="Parameters\ThermalAsset.cs" />
+    <Compile Include="Parameters\ThermalMaterialType_ValueList.cs" />
     <Compile Include="Parameters\ValueList.cs" />
     <Compile Include="Parameters\View.cs" />
     <Compile Include="Parameters\WallFunction_ValueList.cs" />

@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Types
 {
   public class AssetPropertyDouble4DMap : GH_Goo<MAT.AssetPropertyDouble4DMap>
   {
-    public override string TypeName => "Mappable Asset Property 4D";
+    public override string TypeName => "Mappable Color";
     public override string TypeDescription
       => "Represents a double[4] property that accepts a texture map";
     public override bool IsValid => Value != null;
@@ -45,6 +45,10 @@ namespace RhinoInside.Revit.GH.Types
           Value = new MAT.AssetPropertyDouble4DMap(tdata);
           return true;
 
+        case TextureData ttype:
+          Value = new MAT.AssetPropertyDouble4DMap(ttype.Value);
+          return true;
+
         case GH_Number number:
           Value = new MAT.AssetPropertyDouble4DMap(number.Value);
           return true;
@@ -60,6 +64,12 @@ namespace RhinoInside.Revit.GH.Types
     public override bool CastTo<Q>(ref Q target)
     {
       if (typeof(Q).IsAssignableFrom(typeof(MAT.AssetPropertyDouble4DMap)))
+      {
+        target = (Q) (object) Value;
+        return true;
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(MAT.TextureData)))
       {
         target = (Q) (object) Value;
         return true;

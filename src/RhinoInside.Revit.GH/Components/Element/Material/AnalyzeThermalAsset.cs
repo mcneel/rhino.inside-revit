@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
   {
     public override Guid ComponentGuid =>
       new Guid("c3be363d-c01d-4cf3-b8d2-c345734ae66d");
-    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    public override GH_Exposure Exposure => GH_Exposure.quinary;
 
     public AnalyzeThermalAsset() : base(
       name: "Analyze Thermal Asset",
@@ -27,7 +27,13 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
 
     protected override void RegisterInputParams(GH_InputParamManager pManager)
     {
-
+      pManager.AddParameter(
+        param: new Parameters.ThermalAsset(),
+        name: "Thermal Asset",
+        nickname: "TA",
+        description: string.Empty,
+        access: GH_ParamAccess.item
+        );
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -37,7 +43,11 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
+      DB.PropertySetElement psetElement = default;
+      if (!DA.GetData("Thermal Asset", ref psetElement))
+        return;
 
+      var thermalAsset = psetElement.GetThermalAsset();
     }
   }
 }
