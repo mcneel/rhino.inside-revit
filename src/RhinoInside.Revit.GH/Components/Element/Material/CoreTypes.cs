@@ -9,9 +9,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 
 using DB = Autodesk.Revit.DB;
-using Autodesk.Private.Windows;
-using Eto.Forms;
-using Eto.Drawing;
+using RhinoInside.Revit.Convert.Geometry;
 
 namespace RhinoInside.Revit.GH.Components.Element.Material
 {
@@ -39,6 +37,12 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     public AssetPropertyDouble1DMap(TextureData tdata) : base(tdata) { }
     public AssetPropertyDouble1DMap(double value) : base()
       => Value = value;
+
+    public static implicit operator AssetPropertyDouble1DMap(double val)
+      => new AssetPropertyDouble1DMap(val);
+
+    public static implicit operator double(AssetPropertyDouble1DMap val)
+      => val.Value;
   }
 
   /// <summary>
@@ -80,6 +84,12 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     }
 
     public double Average => (Value1 + Value2 + Value3 + Value4) / 4;
+
+    public static implicit operator AssetPropertyDouble4DMap(System.Drawing.Color val)
+    => new AssetPropertyDouble4DMap(val);
+
+    public static implicit operator System.Drawing.Color(AssetPropertyDouble4DMap val)
+      => val.ValueAsColor;
   }
 
   #endregion
@@ -335,7 +345,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     [APIAssetProp("GenericDiffuseImageFade", typeof(DB.Visual.AssetPropertyDouble))]
     [APIAssetPropValueRange(min: 0, max: 1)]
     [AssetGHParameter(typeof(Param_Number), "Image Fade", "IF", "Diffuse image fade")]
-    public double ImageFade { get; set; } = 0;
+    public double ImageFade { get; set; } = 1;
 
     [APIAssetProp("GenericGlossiness", typeof(DB.Visual.AssetPropertyDouble), connectable: true)]
     [AssetGHParameter(typeof(Parameters.AssetPropertyDouble1DMap), "Glossiness", "G", "Glossiness")]
@@ -347,11 +357,11 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
 
     [APIAssetProp("GenericReflectivityAt0deg", typeof(DB.Visual.AssetPropertyDouble), connectable: true)]
     [AssetGHParameter(typeof(Parameters.AssetPropertyDouble1DMap), "Reflectivity (Direct)", "RD", "Direct property of Reflectivity")]
-    public AssetPropertyDouble1DMap ReflectivityDirect { get; set; }
+    public AssetPropertyDouble1DMap ReflectivityDirect { get; set; } = 0;
 
     [APIAssetProp("GenericReflectivityAt90deg", typeof(DB.Visual.AssetPropertyDouble), connectable: true)]
     [AssetGHParameter(typeof(Parameters.AssetPropertyDouble1DMap), "Reflectivity (Oblique)", "RO", "Oblique property of Reflectivity")]
-    public AssetPropertyDouble1DMap ReflectivityOblique { get; set; }
+    public AssetPropertyDouble1DMap ReflectivityOblique { get; set; } = 0;
 
     [APIAssetProp("GenericTransparency", typeof(DB.Visual.AssetPropertyDouble), connectable: true)]
     [APIAssetPropValueRange(min: 0, max: 1)]
@@ -365,25 +375,25 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     [APIAssetProp("GenericTransparencyImageFade", typeof(DB.Visual.AssetPropertyDouble))]
     [APIAssetPropValueRange(min: 0, max: 1)]
     [AssetGHParameter(typeof(Param_Number), "Transparency Image Fade", "TIF", "Transparency image fade")]
-    public double TransparencyImageFade { get; set; } = 0;
+    public double TransparencyImageFade { get; set; } = 1;
 
     [APIAssetProp("GenericRefractionTranslucencyWeight", typeof(DB.Visual.AssetPropertyDouble), connectable: true)]
     [APIAssetPropValueRange(min: 0, max: 1)]
     [AssetGHParameter(typeof(Parameters.AssetPropertyDouble1DMap), "Translucency", "TL", "Translucency amount")]
-    public AssetPropertyDouble1DMap Translucency { get; set; }
+    public AssetPropertyDouble1DMap Translucency { get; set; } = 0;
 
     [APIAssetProp("GenericRefractionIndex", typeof(DB.Visual.AssetPropertyDouble))]
     [APIAssetPropValueRange(min: 0.01, max: 5)]
     [AssetGHParameter(typeof(Param_Number), "Refraction Index", "RI", "Refraction index")]
-    public double RefractionIndex { get; set; } = 0.01;
+    public double RefractionIndex { get; set; } = 1.52;  // Revit defaults to Glass
 
     [APIAssetProp("GenericCutoutOpacity", typeof(DB.Visual.AssetPropertyDouble), connectable: true)]
     [AssetGHParameter(typeof(Parameters.AssetPropertyDouble1DMap), "Cutout", "CO", "Cutout image")]
-    public AssetPropertyDouble1DMap Cutout { get; set; }
+    public AssetPropertyDouble1DMap Cutout { get; set; } = 0;
 
     [APIAssetProp("GenericSelfIllumFilterMap", typeof(DB.Visual.AssetPropertyDoubleArray4d), connectable: true)]
     [AssetGHParameter(typeof(Parameters.AssetPropertyDouble4DMap), "Illumination Filter Color", "LF", "Self-illumination filter color")]
-    public AssetPropertyDouble4DMap IlluminationFilter { get; set; }
+    public AssetPropertyDouble4DMap IlluminationFilter { get; set; } = System.Drawing.Color.White;
 
     [APIAssetProp("GenericSelfIllumLuminance", typeof(DB.Visual.AssetPropertyDouble))]
     [AssetGHParameter(typeof(Param_Number), "Luminance", "L", "Self-illumination luminance amount")]
@@ -391,15 +401,15 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
 
     [APIAssetProp("GenericSelfIllumColorTemperature", typeof(DB.Visual.AssetPropertyDouble))]
     [AssetGHParameter(typeof(Param_Number), "Color Temperature", "CT", "Self-illumination color temperature")]
-    public double ColorTemperature { get; set; } = 6500;
+    public double ColorTemperature { get; set; } = 6500;  // Revit default
 
     [APIAssetProp("GenericBumpMap", typeof(DB.Visual.AssetPropertyDoubleArray4d), connectable: true)]
     [AssetGHParameter(typeof(Parameters.AssetPropertyDouble4DMap), "Bump Image", "BI", "Bump image")]
-    public AssetPropertyDouble4DMap BumpImage { get; set; }
+    public AssetPropertyDouble4DMap BumpImage { get; set; } = System.Drawing.Color.White;
 
     [APIAssetProp("GenericBumpAmount", typeof(DB.Visual.AssetPropertyDouble), connectable: true)]
     [AssetGHParameter(typeof(Parameters.AssetPropertyDouble1DMap), "Bump Amount", "B", "Bump amount")]
-    public AssetPropertyDouble1DMap Bump { get; set; }
+    public AssetPropertyDouble1DMap Bump { get; set; } = 0;
 
     [APIAssetProp("CommonTintColor", typeof(DB.Visual.AssetPropertyDoubleArray4d), connectable: true)]
     [AssetGHParameter(typeof(Param_Colour), "Tint Color", "TC", "Tint color")]
@@ -431,23 +441,23 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     [APIAssetProp("TextureRealWorldScaleX", typeof(DB.Visual.AssetPropertyDistance))]
     [APIAssetPropValueRange(min: 0.01)]
     [AssetGHParameter(typeof(Param_Number), "SizeU", "SU", "Texture size along U axis")]
-    public double SizeU { get; set; } = 0.01;
+    public double SizeU { get; set; } = 1;
 
     [APIAssetProp("TextureRealWorldScaleY", typeof(DB.Visual.AssetPropertyDistance))]
     [APIAssetPropValueRange(min: 0.01)]
     [AssetGHParameter(typeof(Param_Number), "SizeV", "SV", "Texture size along V axis")]
-    public double SizeV { get; set; } = 0.01;
+    public double SizeV { get; set; } = 1;
 
     [APIAssetProp("TextureScaleLock", typeof(DB.Visual.AssetPropertyBoolean))]
     public bool SizeLock { get; set; } = false;
 
     [APIAssetProp("TextureURepeat", typeof(DB.Visual.AssetPropertyBoolean))]
     [AssetGHParameter(typeof(Param_Boolean), "RepeatU", "RU", "Texture repeat along U axis")]
-    public bool RepeatU { get; set; } = false;
+    public bool RepeatU { get; set; } = true;
 
     [APIAssetProp("TextureVRepeat", typeof(DB.Visual.AssetPropertyBoolean))]
     [AssetGHParameter(typeof(Param_Boolean), "RepeatV", "RV", "Texture repeat along V axis")]
-    public bool RepeatV { get; set; } = false;
+    public bool RepeatV { get; set; } = true;
 
     [APIAssetProp("TextureWAngle", typeof(DB.Visual.AssetPropertyDouble))]
     [APIAssetPropValueRange(min: 0, max: 360)]
@@ -456,7 +466,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
   }
 
   [APIAsset(typeof(DB.Visual.UnifiedBitmap))]
-  [AssetGHComponent("Bitmap Texture", "BT", "Bitmap Texture Data")]
+  [AssetGHComponent("Bitmap Asset", "BT", "Bitmap Asset")]
   public class UnifiedBitmapData : TextureData2D
   {
     [APIAssetProp("UnifiedbitmapBitmap", typeof(DB.Visual.AssetPropertyString))]
@@ -470,7 +480,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     [APIAssetProp("UnifiedbitmapRGBAmount", typeof(DB.Visual.AssetPropertyDouble))]
     [APIAssetPropValueRange(min: 0, max: 1)]
     [AssetGHParameter(typeof(Param_Number), "Brightness", "B", "Texture brightness")]
-    public double Brightness { get; set; } = 0;
+    public double Brightness { get; set; } = 1;
 
     public override string ToString()
     {
@@ -479,16 +489,16 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
   }
 
   [APIAsset(typeof(DB.Visual.Checker))]
-  [AssetGHComponent("Checker Texture", "CT", "Checker Texture Data")]
+  [AssetGHComponent("Checker Asset", "CT", "Checker Asset")]
   public class CheckerData : TextureData2D
   {
 
     [APIAssetProp("CheckerColor1", typeof(DB.Visual.AssetPropertyDoubleArray4d))]
-    [AssetGHParameter(typeof(Param_Colour), "Color1", "C1", "First color", optional: false)]
+    [AssetGHParameter(typeof(Param_Colour), "Color1", "C1", "First color")]
     public System.Drawing.Color Color1 { get; set; } = System.Drawing.Color.White;
 
     [APIAssetProp("CheckerColor2", typeof(DB.Visual.AssetPropertyDoubleArray4d))]
-    [AssetGHParameter(typeof(Param_Colour), "Color2", "C2", "Second color", optional: false)]
+    [AssetGHParameter(typeof(Param_Colour), "Color2", "C2", "Second color")]
     public System.Drawing.Color Color2 { get; set; } = System.Drawing.Color.Black;
 
     [APIAssetProp("CheckerSoften", typeof(DB.Visual.AssetPropertyDouble))]
