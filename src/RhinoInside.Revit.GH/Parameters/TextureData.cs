@@ -12,14 +12,13 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  class TextureData<T>
-    : GH_Param<Types.TextureData<T>> where T: MAT.TextureData, new()
+  class TextureData: GH_Param<Types.TextureData>
   {
     public override Guid ComponentGuid
       => new Guid("a7c7ecef-066d-4b39-b2e8-01b6d53adfeb");
 
     protected override Bitmap Icon
-      => (Bitmap) Properties.Resources.ResourceManager.GetObject(typeof(T).Name);
+      => (Bitmap) Properties.Resources.ResourceManager.GetObject(typeof(MAT.TextureData).Name);
 
     public override GH_Exposure Exposure => GH_Exposure.hidden;
 

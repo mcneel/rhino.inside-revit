@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     protected override void RegisterOutputParams(GH_OutputParamManager pManager)
     {
       pManager.AddParameter(
-        param: new Parameters.TextureData<T>(),
+        param: new Parameters.TextureData(),
         name: ComponentInfo.Name,
         nickname: ComponentInfo.NickName,
         description: ComponentInfo.Description,
@@ -41,7 +41,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     protected override void TrySolveInstance(IGH_DataAccess DA)
       => DA.SetData(
         ComponentInfo.Name,
-        new Types.TextureData<T>(CreateAssetDataFromInputs(DA))
+        new Types.TextureData(CreateAssetDataFromInputs(DA))
         );
   }
 

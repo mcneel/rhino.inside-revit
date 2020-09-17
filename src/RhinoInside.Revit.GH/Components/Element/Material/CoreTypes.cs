@@ -329,7 +329,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     public System.Drawing.Color Color { get; set; } = System.Drawing.Color.Black;
 
     [APIAssetProp("GenericDiffuse", typeof(DB.Visual.AssetPropertyDoubleArray4d), connectable: true)]
-    [AssetGHParameter(typeof(Parameters.TextureData<TextureData>), "Image", "I", "Diffuse image", method: ExtractMethod.AssetOnly)]
+    [AssetGHParameter(typeof(Parameters.TextureData), "Image", "I", "Diffuse image", method: ExtractMethod.AssetOnly)]
     public TextureData Image { get; set; }
 
     [APIAssetProp("GenericDiffuseImageFade", typeof(DB.Visual.AssetPropertyDouble))]
@@ -359,7 +359,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     public double Transparency { get; set; } = 0;
 
     [APIAssetProp("GenericTransparency", typeof(DB.Visual.AssetPropertyDouble), connectable: true)]
-    [AssetGHParameter(typeof(Parameters.TextureData<TextureData>), "Transparency Image", "TI", "Transparency image", method: ExtractMethod.AssetOnly)]
+    [AssetGHParameter(typeof(Parameters.TextureData), "Transparency Image", "TI", "Transparency image", method: ExtractMethod.AssetOnly)]
     public TextureData TransparencyImage { get; set; }
 
     [APIAssetProp("GenericTransparencyImageFade", typeof(DB.Visual.AssetPropertyDouble))]
@@ -426,20 +426,20 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     public double OffsetV { get; set; } = 0;
 
     [APIAssetProp("TextureOffsetLock", typeof(DB.Visual.AssetPropertyBoolean))]
-    public bool OffsetLock { get; set; }
+    public bool OffsetLock { get; set; } = false;
 
     [APIAssetProp("TextureRealWorldScaleX", typeof(DB.Visual.AssetPropertyDistance))]
     [APIAssetPropValueRange(min: 0.01)]
     [AssetGHParameter(typeof(Param_Number), "SizeU", "SU", "Texture size along U axis")]
-    public double SizeU { get; set; }
+    public double SizeU { get; set; } = 0.01;
 
     [APIAssetProp("TextureRealWorldScaleY", typeof(DB.Visual.AssetPropertyDistance))]
     [APIAssetPropValueRange(min: 0.01)]
     [AssetGHParameter(typeof(Param_Number), "SizeV", "SV", "Texture size along V axis")]
-    public double SizeV { get; set; }
+    public double SizeV { get; set; } = 0.01;
 
     [APIAssetProp("TextureScaleLock", typeof(DB.Visual.AssetPropertyBoolean))]
-    public bool SizeLock { get; set; }
+    public bool SizeLock { get; set; } = false;
 
     [APIAssetProp("TextureURepeat", typeof(DB.Visual.AssetPropertyBoolean))]
     [AssetGHParameter(typeof(Param_Boolean), "RepeatU", "RU", "Texture repeat along U axis")]
@@ -452,7 +452,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     [APIAssetProp("TextureWAngle", typeof(DB.Visual.AssetPropertyDouble))]
     [APIAssetPropValueRange(min: 0, max: 360)]
     [AssetGHParameter(typeof(Param_Number), "Angle", "A", "Texture angle")]
-    public double Angle { get; set; }
+    public double Angle { get; set; } = 0;
   }
 
   [APIAsset(typeof(DB.Visual.UnifiedBitmap))]
@@ -465,7 +465,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
 
     [APIAssetProp("UnifiedbitmapInvert", typeof(DB.Visual.AssetPropertyBoolean))]
     [AssetGHParameter(typeof(Param_Boolean), "Invert", "I", "Invert source image colors")]
-    public bool Invert { get; set; }
+    public bool Invert { get; set; } = false;
 
     [APIAssetProp("UnifiedbitmapRGBAmount", typeof(DB.Visual.AssetPropertyDouble))]
     [APIAssetPropValueRange(min: 0, max: 1)]
@@ -485,16 +485,16 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
 
     [APIAssetProp("CheckerColor1", typeof(DB.Visual.AssetPropertyDoubleArray4d))]
     [AssetGHParameter(typeof(Param_Colour), "Color1", "C1", "First color", optional: false)]
-    public System.Drawing.Color Color1 { get; set; }
+    public System.Drawing.Color Color1 { get; set; } = System.Drawing.Color.White;
 
     [APIAssetProp("CheckerColor2", typeof(DB.Visual.AssetPropertyDoubleArray4d))]
     [AssetGHParameter(typeof(Param_Colour), "Color2", "C2", "Second color", optional: false)]
-    public System.Drawing.Color Color2 { get; set; }
+    public System.Drawing.Color Color2 { get; set; } = System.Drawing.Color.Black;
 
     [APIAssetProp("CheckerSoften", typeof(DB.Visual.AssetPropertyDouble))]
     [APIAssetPropValueRange(min: 0, max: 5)]
     [AssetGHParameter(typeof(Param_Number), "Soften Amount", "S", "Amount of softening")]
-    public double SoftenAmount { get; set; }
+    public double SoftenAmount { get; set; } = 0;
   }
 
   #endregion

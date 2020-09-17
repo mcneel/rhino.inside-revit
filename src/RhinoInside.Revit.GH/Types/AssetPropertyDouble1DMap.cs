@@ -40,6 +40,10 @@ namespace RhinoInside.Revit.GH.Types
           Value = new MAT.AssetPropertyDouble1DMap(tdata);
           return true;
 
+        case TextureData ttype:
+          Value = new MAT.AssetPropertyDouble1DMap(ttype.Value);
+          return true;
+
         case GH_Number number:
           Value = new MAT.AssetPropertyDouble1DMap(number.Value);
           return true;
@@ -51,6 +55,12 @@ namespace RhinoInside.Revit.GH.Types
     public override bool CastTo<Q>(ref Q target)
     {
       if (typeof(Q).IsAssignableFrom(typeof(MAT.AssetPropertyDouble1DMap)))
+      {
+        target = (Q) (object) Value;
+        return true;
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(MAT.TextureData)))
       {
         target = (Q) (object) Value;
         return true;
