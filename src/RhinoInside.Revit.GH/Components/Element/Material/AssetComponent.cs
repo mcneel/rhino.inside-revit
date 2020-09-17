@@ -191,6 +191,9 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
             case System.Drawing.Color colorVal:
               SetAssetParamValue(editableAsset, schemaPropName, colorVal);
               break;
+            case TextureData textureVal:
+              SetAssetParamTexture(editableAsset, schemaPropName, textureVal);
+              break;
             case AssetPropertyDouble1DMap d1dMapVal:
               if (d1dMapVal.HasTexture)
                 SetAssetParamTexture(editableAsset, schemaPropName, d1dMapVal.TextureValue);
@@ -455,6 +458,9 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
             break;
           case double doubleVal:
             SetAssetParamValue(textureAsset, schemaPropName, doubleVal);
+            break;
+          case System.Drawing.Color colorVal:
+            SetAssetParamValue(textureAsset, schemaPropName, colorVal);
             break;
         }
       }
