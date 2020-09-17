@@ -7,13 +7,13 @@ using System.Drawing;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 
-using DBX = RhinoInside.Revit.External.DB;
+using MAT = RhinoInside.Revit.GH.Components.Element.Material;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
   class TextureData<T>
-    : GH_Param<Types.TextureData<T>> where T: DBX.TextureData, new()
+    : GH_Param<Types.TextureData<T>> where T: MAT.TextureData, new()
   {
     public override Guid ComponentGuid
       => new Guid("a7c7ecef-066d-4b39-b2e8-01b6d53adfeb");

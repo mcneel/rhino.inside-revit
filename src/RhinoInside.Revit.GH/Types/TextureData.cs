@@ -5,12 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using Grasshopper.Kernel.Types;
 
-using DBX = RhinoInside.Revit.External.DB;
+using MAT = RhinoInside.Revit.GH.Components.Element.Material;
 using DB = Autodesk.Revit.DB;
+using RhinoInside.Revit.GH.Components.Element.Material;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public class TextureData<T> :GH_Goo<T> where T: DBX.TextureData, new()
+  public class TextureData<T> :GH_Goo<T> where T: MAT.TextureData, new()
   {
     public override bool IsValid => Value != null;
     public override string TypeName
@@ -18,7 +19,7 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         if (IsValid)
-          return $"Revit Texture ({Value.Schema})";
+          return Value.ToString();
         else
           return $"Revit Texture (Unset)";
       }
@@ -43,13 +44,20 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastTo<Q>(ref Q target)
     {
-      if (typeof(Q).IsAssignableFrom(typeof(DBX.TextureData)))
+      if (typeof(Q).IsAssignableFrom(typeof(T)))
       {
         target = (Q) (object) Value;
         return true;
       }
 
       return base.CastTo<Q>(ref target);
+    }
+
+    public static implicit operator TextureData<T>(TextureData<MAT.TextureData> target)
+    {
+      if (target.Value is T tValue)
+        return new TextureData<T>(tValue);
+      throw new System.InvalidCastException();
     }
 
     public override string ToString()

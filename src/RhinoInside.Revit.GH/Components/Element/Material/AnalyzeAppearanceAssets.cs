@@ -20,9 +20,9 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
 
     public AnalyzeAppearanceAsset() : base()
     {
-      this.Name = $"Analyze {ComponentInfo.Name}";
-      this.NickName = $"A-{ComponentInfo.NickName}";
-      this.Description = $"Analyze given {ComponentInfo.Description}";
+      Name = $"Analyze {ComponentInfo.Name}";
+      NickName = $"A-{ComponentInfo.NickName}";
+      Description = $"Analyze given {ComponentInfo.Description}";
     }
 
     protected override void RegisterInputParams(GH_InputParamManager pManager)
