@@ -320,7 +320,12 @@ namespace RhinoInside.Revit
           {
             if (!doc.IsOpening && hasUnits)
             {
+#if REVIT_2020
               taskDialog.EnableDoNotShowAgain("RhinoInside.Revit.DocumentUnitsMismatch", true, "Do not show again");
+#else
+              // Without the ability of checking DoNotShowAgain this may be too anoying.
+              return;
+#endif
             }
             else
             {
