@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
   {
     public override Guid ComponentGuid =>
       new Guid("bd9164c4-effb-4145-bb96-006daeaeb99a");
-    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    public override GH_Exposure Exposure => GH_Exposure.quinary;
 
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
@@ -24,6 +24,12 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
+      ParamDefinition.Create<Parameters.ThermalAsset>(
+        name: "Thermal Asset",
+        nickname: "TA",
+        description: string.Empty,
+        access: GH_ParamAccess.item
+        )
     };
 
     public CreateThermalAsset() : base(

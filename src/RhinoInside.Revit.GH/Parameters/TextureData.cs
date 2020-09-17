@@ -18,7 +18,8 @@ namespace RhinoInside.Revit.GH.Parameters
       => new Guid("a7c7ecef-066d-4b39-b2e8-01b6d53adfeb");
 
     protected override Bitmap Icon
-      => (Bitmap) Properties.Resources.ResourceManager.GetObject(typeof(MAT.TextureData).Name);
+      => (Bitmap) Properties.Resources.ResourceManager
+                            .GetObject(typeof(MAT.TextureData).Name);
 
     public override GH_Exposure Exposure => GH_Exposure.hidden;
 

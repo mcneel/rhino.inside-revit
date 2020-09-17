@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Types
 {
   public class AssetPropertyDouble1DMap : GH_Goo<MAT.AssetPropertyDouble1DMap>
   {
-    public override string TypeName => "Mappable Asset Property 1D";
+    public override string TypeName => "Mappable Double";
     public override string TypeDescription
       => "Represents a double[1] property that accepts a texture map";
     public override bool IsValid => Value != null;

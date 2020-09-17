@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
   {
     public override Guid ComponentGuid =>
       new Guid("af2678c8-2a53-4056-9399-5a06dd9ac14d");
-    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    public override GH_Exposure Exposure => GH_Exposure.quinary;
 
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
@@ -24,6 +24,12 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
+      ParamDefinition.Create<Parameters.PhysicalAsset>(
+        name: "Physical Asset",
+        nickname: "PA",
+        description: string.Empty,
+        access: GH_ParamAccess.item
+        )
     };
 
     public CreatePhysicalAsset() : base(

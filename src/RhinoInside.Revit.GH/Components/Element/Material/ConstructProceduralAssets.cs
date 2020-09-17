@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
   public abstract class ConstructTextureAsset<T>
     : AssetComponent<T> where T : TextureData, new()
   {
-    public override GH_Exposure Exposure => GH_Exposure.quinary;
+    public override GH_Exposure Exposure => GH_Exposure.senary;
 
     public ConstructTextureAsset() : base()
     {
