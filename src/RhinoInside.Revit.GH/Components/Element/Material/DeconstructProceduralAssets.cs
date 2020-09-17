@@ -42,10 +42,14 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       Types.TextureData<T> textureAsset = default;
-      if(DA.GetData(ComponentInfo.Name, ref textureAsset)
-             && textureAsset.Value is T textureData)
+      if(DA.GetData(ComponentInfo.Name, ref textureAsset))
       {
-        SetOutputsFromAssetData(DA, textureData);
+        if (textureAsset.Value is T textureData)
+          SetOutputsFromAssetData(DA, textureData);
+        //if (textureAsset.Value is TextureData genericTextureData)
+        //  AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Can not deconstruct \"{genericTextureData.Schema}\"");
+        //else
+        //  AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Can not convert input to ");
       }
     }
   }
