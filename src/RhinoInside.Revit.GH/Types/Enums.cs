@@ -478,4 +478,31 @@ namespace RhinoInside.Revit.GH.Types
   public class FloorFunction : GH_Enum<DBX.FloorFunction>
   {
   }
+
+  [
+    ComponentGuid("07b212f2-3e72-4f1a-a178-54481fcf3df3"),
+    Name("Physical Asset Class"),
+    Description("Represents physical asset class"),
+  ]
+  public class StructuralAssetClass : GH_Enum<DB.StructuralAssetClass>
+  {
+  }
+
+  [
+    ComponentGuid("cf6a7af7-f588-486a-95e0-a398a5410e24"),
+    Name("Material Behavior"),
+    Description("Represents material behavior of physical or thermal assets"),
+  ]
+  public class StructuralBehavior : GH_Enum<DB.StructuralBehavior>
+  {
+  }
+
+  [
+    ComponentGuid("6a2b7564-9dd1-4cfc-a539-a352cb39cb7c"),
+    Name("Thermal Material Type"),
+    Description("Represents thermal material type"),
+  ]
+  public class ThermalMaterialType : GH_Enum<DB.ThermalMaterialType>
+  {
+  }
 }

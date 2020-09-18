@@ -2,4 +2,5 @@ BuiltInParameterByName
 BuiltInParameterGroups
 ViewDetailLevel_ValueList
 StructuralAssetClass_ValueList
+StructuralAssetBehaviour_ValueList
 ThermalMaterialType_ValueList
