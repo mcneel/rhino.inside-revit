@@ -317,6 +317,7 @@
     <Compile Include="Components\Parameter\ParameterKeyIdentity.cs" />
     <Compile Include="Parameters\AssetPropertyDouble1DMap.cs" />
     <Compile Include="Parameters\AssetPropertyDouble4DMap.cs" />
+    <Compile Include="Parameters\StructuralAssetBehaviour_ValueList.cs" />
     <Compile Include="Parameters\StructuralAssetClass_ValueList.cs" />
     <Compile Include="Parameters\TextureData.cs" />
     <Compile Include="Components\TransactionalComponent.cs" />

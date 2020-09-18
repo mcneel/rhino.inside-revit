@@ -2289,7 +2289,17 @@ namespace RhinoInside.Revit.GH.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap StructuralAssetBehaviour_ValueList {
+            get {
+                object obj = ResourceManager.GetObject("StructuralAssetBehaviour_ValueList", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
