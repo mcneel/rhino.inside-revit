@@ -122,12 +122,14 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     public string Name;
     public bool Connectable;
     public Type DataType;
+    public string Toggle;
 
-    public APIAssetProp(string name, Type type, bool connectable = false)
+    public APIAssetProp(string name, Type type, bool connectable = false, string toggle = null)
     {
       Name = name;
       Connectable = connectable;
       DataType = type;
+      Toggle = toggle;
     }
   }
 
@@ -411,7 +413,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     [AssetGHParameter(typeof(Parameters.AssetPropertyDouble1DMap), "Bump Amount", "B", "Bump amount")]
     public AssetPropertyDouble1DMap Bump { get; set; } = 0;
 
-    [APIAssetProp("CommonTintColor", typeof(DB.Visual.AssetPropertyDoubleArray4d), connectable: true)]
+    [APIAssetProp("CommonTintColor", typeof(DB.Visual.AssetPropertyDoubleArray4d), connectable: true, toggle: "CommonTintToggle")]
     [AssetGHParameter(typeof(Param_Colour), "Tint Color", "TC", "Tint color")]
     public System.Drawing.Color Tint { get; set; } = System.Drawing.Color.Black;
   }
