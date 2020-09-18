@@ -122,14 +122,12 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     public string Name;
     public bool Connectable;
     public Type DataType;
-    public string Toggle;
 
-    public APIAssetProp(string name, Type type, bool connectable = false, string toggle = null)
+    public APIAssetProp(string name, Type type, bool connectable = false)
     {
       Name = name;
       Connectable = connectable;
       DataType = type;
-      Toggle = toggle;
     }
   }
 
@@ -178,12 +176,14 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     public string Description;
     public GH_ParamAccess ParamAccess;
     public ExtractMethod ExtractMethod;
+    public string Toggle;
     public bool Optional;
 
     public AssetGHParameter(Type param,
                             string name, string nickname, string description,
                             GH_ParamAccess access = GH_ParamAccess.item,
-                            ExtractMethod method = ExtractMethod.AssetFirst,
+                            ExtractMethod method = ExtractMethod.ValueOnly,
+                            string toggle = null,
                             bool optional = true)
     {
       ParamType = param;
@@ -192,8 +192,11 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
       Description = description;
       ParamAccess = access;
       ExtractMethod = method;
+      Toggle = toggle;
       Optional = optional;
     }
+
+    public bool HasToggle => Toggle != null && Toggle != string.Empty;
   }
 
   #endregion
@@ -234,6 +237,9 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
 #endif
       return GetType().Name;
     }
+
+    public PropertyInfo GetAssetProperty(string name)
+      => GetType().GetProperty(name);
 
     public PropertyInfo[] GetAssetProperties()
       => GetType().GetProperties();
@@ -333,7 +339,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     public string Description { get; set; }
 
     [NoAPIAssetProp("keyword", typeof(DB.Visual.AssetPropertyString))]
-    [AssetGHParameter(typeof(Param_String), "Keywords", "KW", "Asset keywords")]
+    [AssetGHParameter(typeof(Param_String), "Keywords", "KW", "Asset keywords (Separated by :)")]
     public string Keywords { get; set; }
 
     [APIAssetProp("GenericDiffuse", typeof(DB.Visual.AssetPropertyDoubleArray4d), connectable: true)]
@@ -350,7 +356,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     public double ImageFade { get; set; } = 1;
 
     [APIAssetProp("GenericGlossiness", typeof(DB.Visual.AssetPropertyDouble), connectable: true)]
-    [AssetGHParameter(typeof(Parameters.AssetPropertyDouble1DMap), "Glossiness", "G", "Glossiness")]
+    [AssetGHParameter(typeof(Parameters.AssetPropertyDouble1DMap), "Glossiness", "G", "Glossiness", method: ExtractMethod.AssetFirst)]
     public AssetPropertyDouble1DMap Glossiness { get; set; }
 
     [APIAssetProp("GenericIsMetal", typeof(DB.Visual.AssetPropertyBoolean))]
@@ -358,16 +364,16 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     public bool Metallic { get; set; } = false;
 
     [APIAssetProp("GenericReflectivityAt0deg", typeof(DB.Visual.AssetPropertyDouble), connectable: true)]
-    [AssetGHParameter(typeof(Parameters.AssetPropertyDouble1DMap), "Reflectivity (Direct)", "RD", "Direct property of Reflectivity")]
+    [AssetGHParameter(typeof(Parameters.AssetPropertyDouble1DMap), "Reflectivity (Direct)", "RD", "Direct property of Reflectivity", method: ExtractMethod.AssetFirst)]
     public AssetPropertyDouble1DMap ReflectivityDirect { get; set; } = 0;
 
     [APIAssetProp("GenericReflectivityAt90deg", typeof(DB.Visual.AssetPropertyDouble), connectable: true)]
-    [AssetGHParameter(typeof(Parameters.AssetPropertyDouble1DMap), "Reflectivity (Oblique)", "RO", "Oblique property of Reflectivity")]
+    [AssetGHParameter(typeof(Parameters.AssetPropertyDouble1DMap), "Reflectivity (Oblique)", "RO", "Oblique property of Reflectivity", method: ExtractMethod.AssetFirst)]
     public AssetPropertyDouble1DMap ReflectivityOblique { get; set; } = 0;
 
     [APIAssetProp("GenericTransparency", typeof(DB.Visual.AssetPropertyDouble), connectable: true)]
     [APIAssetPropValueRange(min: 0, max: 1)]
-    [AssetGHParameter(typeof(Param_Number), "Transparency", "T", "Transparency amount")]
+    [AssetGHParameter(typeof(Param_Number), "Transparency", "T", "Transparency amount", method: ExtractMethod.ValueOnly)]
     public double Transparency { get; set; } = 0;
 
     [APIAssetProp("GenericTransparency", typeof(DB.Visual.AssetPropertyDouble), connectable: true)]
@@ -381,7 +387,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
 
     [APIAssetProp("GenericRefractionTranslucencyWeight", typeof(DB.Visual.AssetPropertyDouble), connectable: true)]
     [APIAssetPropValueRange(min: 0, max: 1)]
-    [AssetGHParameter(typeof(Parameters.AssetPropertyDouble1DMap), "Translucency", "TL", "Translucency amount")]
+    [AssetGHParameter(typeof(Parameters.AssetPropertyDouble1DMap), "Translucency", "TL", "Translucency amount", method: ExtractMethod.AssetFirst)]
     public AssetPropertyDouble1DMap Translucency { get; set; } = 0;
 
     [APIAssetProp("GenericRefractionIndex", typeof(DB.Visual.AssetPropertyDouble))]
@@ -390,11 +396,11 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     public double RefractionIndex { get; set; } = 1.52;  // Revit defaults to Glass
 
     [APIAssetProp("GenericCutoutOpacity", typeof(DB.Visual.AssetPropertyDouble), connectable: true)]
-    [AssetGHParameter(typeof(Parameters.AssetPropertyDouble1DMap), "Cutout", "CO", "Cutout image")]
+    [AssetGHParameter(typeof(Parameters.AssetPropertyDouble1DMap), "Cutout", "CO", "Cutout image", method: ExtractMethod.AssetFirst)]
     public AssetPropertyDouble1DMap Cutout { get; set; } = 0;
 
     [APIAssetProp("GenericSelfIllumFilterMap", typeof(DB.Visual.AssetPropertyDoubleArray4d), connectable: true)]
-    [AssetGHParameter(typeof(Parameters.AssetPropertyDouble4DMap), "Illumination Filter Color", "LF", "Self-illumination filter color")]
+    [AssetGHParameter(typeof(Parameters.AssetPropertyDouble4DMap), "Illumination Filter Color", "LF", "Self-illumination filter color", method: ExtractMethod.AssetFirst)]
     public AssetPropertyDouble4DMap IlluminationFilter { get; set; } = System.Drawing.Color.White;
 
     [APIAssetProp("GenericSelfIllumLuminance", typeof(DB.Visual.AssetPropertyDouble))]
@@ -406,15 +412,18 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     public double ColorTemperature { get; set; } = 6500;  // Revit default
 
     [APIAssetProp("GenericBumpMap", typeof(DB.Visual.AssetPropertyDoubleArray4d), connectable: true)]
-    [AssetGHParameter(typeof(Parameters.AssetPropertyDouble4DMap), "Bump Image", "BI", "Bump image")]
+    [AssetGHParameter(typeof(Parameters.AssetPropertyDouble4DMap), "Bump Image", "BI", "Bump image", method: ExtractMethod.AssetFirst)]
     public AssetPropertyDouble4DMap BumpImage { get; set; } = System.Drawing.Color.White;
 
     [APIAssetProp("GenericBumpAmount", typeof(DB.Visual.AssetPropertyDouble), connectable: true)]
-    [AssetGHParameter(typeof(Parameters.AssetPropertyDouble1DMap), "Bump Amount", "B", "Bump amount")]
+    [AssetGHParameter(typeof(Parameters.AssetPropertyDouble1DMap), "Bump Amount", "B", "Bump amount", method: ExtractMethod.AssetFirst)]
     public AssetPropertyDouble1DMap Bump { get; set; } = 0;
 
-    [APIAssetProp("CommonTintColor", typeof(DB.Visual.AssetPropertyDoubleArray4d), connectable: true, toggle: "CommonTintToggle")]
-    [AssetGHParameter(typeof(Param_Colour), "Tint Color", "TC", "Tint color")]
+    [APIAssetProp("CommonTintToggle", typeof(DB.Visual.AssetPropertyBoolean))]
+    public bool TintToggle { get; set; } = false;
+
+    [APIAssetProp("CommonTintColor", typeof(DB.Visual.AssetPropertyDoubleArray4d))]
+    [AssetGHParameter(typeof(Param_Colour), "Tint Color", "TC", "Tint color", toggle: "TintToggle")]
     public System.Drawing.Color Tint { get; set; } = System.Drawing.Color.Black;
   }
   #endregion

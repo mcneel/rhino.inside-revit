@@ -103,12 +103,55 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
         if (paramInfo is null)
           continue;
 
-        if (paramInfo.ExtractMethod == ExtractMethod.AssetOnly)
-          // set the value from asset to the output param
-          SetTextureDataFromAssetParam(DA, paramInfo.Name, asset, schemaPropName);
+        // check the toggle if available and output only when toggle
+        // is active. otherwise we assume that the property has no value
+        bool sendValueToOutput = true;
+        if (paramInfo.HasToggle)
+        {
+          // find the toggle property name on the asset
+          var togglePropInfo = _assetData.GetAssetProperty(paramInfo.Toggle);
+          if (togglePropInfo != null)
+          {
+            // find the schema name associated with the toglle
+            string toggleSchemaPropName =
+              _assetData.GetSchemaPropertyName(togglePropInfo);
+            if (schemaPropName != null)
+            {
+              // then get the asset property object and check its boolean value
+              // if false, the output will not be set
+              sendValueToOutput =
+                (bool) GetAssetParamValue(asset, toggleSchemaPropName);
+            }
+          }
+        }
+
+        if (sendValueToOutput)
+        {
+          switch (paramInfo.ExtractMethod)
+          {
+            case ExtractMethod.AssetOnly:
+              // set the value from asset to the output param
+              SetTextureDataFromAssetParam(DA, paramInfo.Name, asset, schemaPropName);
+              break;
+
+            case ExtractMethod.ValueOnly:
+            // to the same to value first
+            case ExtractMethod.ValueFirst:
+              // set the value from asset to the output param
+              SetDataFromAssetParam(DA, paramInfo.Name, asset, schemaPropName);
+              break;
+
+            case ExtractMethod.AssetFirst:
+              // first check whether asset param has a nested asset
+              if (AssetParamHasNestedAsset(asset, schemaPropName))
+                SetTextureDataFromAssetParam(DA, paramInfo.Name, asset, schemaPropName);
+              else
+                SetDataFromAssetParam(DA, paramInfo.Name, asset, schemaPropName);
+              break;
+          }
+        }
         else
-          // set the value from asset to the output param
-          SetDataFromAssetParam(DA, paramInfo.Name, asset, schemaPropName);
+          DA.SetData(paramInfo.Name, null);
       }
     }
 
@@ -125,7 +168,8 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
           continue;
 
         IGH_Goo inputGHType = default;
-        if (DA.GetData(paramInfo.Name, ref inputGHType))
+        bool hasInput = DA.GetData(paramInfo.Name, ref inputGHType);
+        if (hasInput)
         {
           object inputValue = inputGHType.ScriptVariable();
 
@@ -134,6 +178,15 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
             inputValue = VerifyInputValue(paramInfo.Name, inputValue, valueRange);
 
           assetPropInfo.SetValue(output, inputValue);
+
+        }
+
+        // set the toggle state if available
+        if (paramInfo.HasToggle)
+        {
+          var togglePropInfo = _assetData.GetAssetProperty(paramInfo.Toggle);
+          if (togglePropInfo != null)
+            togglePropInfo.SetValue(output, hasInput);
         }
       }
 
@@ -264,6 +317,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     public static object
     ConvertFromAssetPropertyValue(DB.Visual.AssetProperty prop)
     {
+      // TODO: implement all prop types
       switch (prop)
       {
         case DB.Visual.AssetPropertyBoolean boolProp:
@@ -357,6 +411,24 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
         return existingAsset;
       var baseAsset = FindLibraryAsset(DB.Visual.AssetType.Appearance, schemaName);
       return DB.AppearanceAssetElement.Create(doc, name, baseAsset);
+    }
+
+    public static bool
+    AssetParamHasNestedAsset(DB.Visual.Asset asset, string name)
+    {
+      // find param
+      var prop = asset.FindByName(name);
+      return prop != null && prop.GetSingleConnectedAsset() != null;
+    }
+
+    public static object
+    GetAssetParamValue(DB.Visual.Asset asset, string name)
+    {
+      // find param
+      var prop = asset.FindByName(name);
+      if (prop != null)
+        return ConvertFromAssetPropertyValue(prop);
+      return null;
     }
 
     public static void
