@@ -1120,6 +1120,16 @@
     "uuid": "97d71aa8-6987-45b9-8f25-b92671e20ef4"
   }, 
   {
+    "desc": "Flips/Unflips facing/orientation of hand of elements from Revit document", 
+    "iconsrc": "/static/images/GH/FlipUnflipElement.png", 
+    "icontag": null, 
+    "panel": "Element", 
+    "tab": "Revit", 
+    "title": "Flip/Unflip Element", 
+    "typename": "FlipUnflipElement", 
+    "uuid": "b0f068d0-f160-4f80-86b9-67b7830f1cc2"
+  }, 
+  {
     "desc": "Get the geometry of the specified Element", 
     "iconsrc": "/static/images/GH/ElementGeometry.png", 
     "icontag": null, 
