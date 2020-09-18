@@ -14,7 +14,7 @@ using DB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Components.Element.Material
 {
   public abstract class CreateAppearanceAsset<T>
-    : AssetComponent<T> where T : ShaderData, new()
+    : BaseAssetComponent<T> where T : ShaderData, new()
   {
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
 

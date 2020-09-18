@@ -17,7 +17,7 @@ using System.Linq.Expressions;
 
 namespace RhinoInside.Revit.GH.Components.Element.Material
 {
-  public abstract class AssetComponent<T>
+  public abstract class BaseAssetComponent<T>
     : TransactionComponent where T : AssetData, new()
   {
     protected AssetGHComponent ComponentInfo
@@ -34,7 +34,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
       }
     }
 
-    public AssetComponent() : base("", "", "", "Revit", "Material") { }
+    public BaseAssetComponent() : base("", "", "", "Revit", "Material") { }
 
     private readonly T _assetData = new T();
     private AssetGHComponent _compInfo;

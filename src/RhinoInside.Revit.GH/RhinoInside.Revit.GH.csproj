@@ -244,10 +244,10 @@
     <Compile Include="Components\Element\Material\AnalyzeAppearanceAssets.cs" />
     <Compile Include="Components\Element\Material\AnalyzePhysicalAsset.cs" />
     <Compile Include="Components\Element\Material\AnalyzeThermalAsset.cs" />
-    <Compile Include="Components\Element\Material\AssetComponent.cs" />
+    <Compile Include="Components\Element\Material\BaseAssetComponent.cs" />
     <Compile Include="Components\Element\Material\CreatePhysicalAsset.cs" />
     <Compile Include="Components\Element\Material\CreateThermalAsset.cs" />
-    <Compile Include="Components\Element\Material\CoreTypes.cs" />
+    <Compile Include="Components\Element\Material\BaseMaterialTypes.cs" />
     <Compile Include="Components\Element\Material\ModifyAppearanceAssets.cs" />
     <Compile Include="Components\Element\Material\ModifyPhysicalAsset.cs" />
     <Compile Include="Components\Element\Material\ModifyThermalAsset.cs" />
