@@ -1120,6 +1120,16 @@
     "uuid": "97d71aa8-6987-45b9-8f25-b92671e20ef4"
   }, 
   {
+    "desc": "Flips/Unflips facing/orientation of hand of elements from Revit document", 
+    "iconsrc": "/static/images/GH/FlipUnflipElement.png", 
+    "icontag": null, 
+    "panel": "Element", 
+    "tab": "Revit", 
+    "title": "Flip/Unflip Element", 
+    "typename": "FlipUnflipElement", 
+    "uuid": "b0f068d0-f160-4f80-86b9-67b7830f1cc2"
+  }, 
+  {
     "desc": "Get the geometry of the specified Element", 
     "iconsrc": "/static/images/GH/ElementGeometry.png", 
     "icontag": null, 
@@ -1478,6 +1488,16 @@
     "title": "Element Passport", 
     "typename": "ElementPassport", 
     "uuid": "bd534a54-b7ed-4d56-aa53-1f446d445df6"
+  }, 
+  {
+    "desc": "Pins or Unpins elements from Revit document", 
+    "iconsrc": "/static/images/GH/PinUnPinElement.png", 
+    "icontag": null, 
+    "panel": "Element", 
+    "tab": "Revit", 
+    "title": "Pin/Unpin Element", 
+    "typename": "PinUnPinElement", 
+    "uuid": "cc205221-1583-47d1-a715-226c39c3fb34"
   }, 
   {
     "desc": "Get the preview of the specified Element", 
