@@ -242,14 +242,12 @@
     <Compile Include="Components\Element\Material\Graphics.cs" />
     <Compile Include="Components\Element\Material\AnalyzeAppearanceAsset.cs" />
     <Compile Include="Components\Element\Material\AnalyzeAppearanceAssets.cs" />
-    <Compile Include="Components\Element\Material\AnalyzePhysicalAsset.cs" />
     <Compile Include="Components\Element\Material\AnalyzeThermalAsset.cs" />
     <Compile Include="Components\Element\Material\BaseAssetComponent.cs" />
-    <Compile Include="Components\Element\Material\CreatePhysicalAsset.cs" />
+    <Compile Include="Components\Element\Material\StructuralAssetComponents.cs" />
     <Compile Include="Components\Element\Material\CreateThermalAsset.cs" />
     <Compile Include="Components\Element\Material\BaseMaterialTypes.cs" />
     <Compile Include="Components\Element\Material\ModifyAppearanceAssets.cs" />
-    <Compile Include="Components\Element\Material\ModifyPhysicalAsset.cs" />
     <Compile Include="Components\Element\Material\ModifyThermalAsset.cs" />
     <Compile Include="Components\Element\Material\QueryAssetsOfMaterial.cs" />
     <Compile Include="Components\Element\Material\ModifyAssetsOfMaterial.cs" />
@@ -351,7 +349,7 @@
     <Compile Include="Parameters\PersistentParam.cs" />
     <Compile Include="Parameters\Sketch.cs" />
     <Compile Include="Parameters\SketchPlane.cs" />
-    <Compile Include="Parameters\PhysicalAsset.cs" />
+    <Compile Include="Parameters\StructuralAsset.cs" />
     <Compile Include="Parameters\ThermalAsset.cs" />
     <Compile Include="Parameters\ThermalMaterialType_ValueList.cs" />
     <Compile Include="Parameters\ValueList.cs" />

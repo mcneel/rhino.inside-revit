@@ -48,7 +48,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
         access: GH_ParamAccess.item
         );
       pManager.AddParameter(
-        param: new Parameters.PhysicalAsset(),
+        param: new Parameters.StructuralAsset(),
         name: "Physical Asset",
         nickname: "PA",
         description: string.Empty,
