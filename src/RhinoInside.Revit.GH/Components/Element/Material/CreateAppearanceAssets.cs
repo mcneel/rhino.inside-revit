@@ -25,25 +25,52 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
       Description = $"Create a new instance of {ComponentInfo.Description} inside document";
     }
 
-    protected override void RegisterInputParams(GH_InputParamManager pManager)
-      => SetFieldsAsInputs(pManager);
-
-    protected override void RegisterOutputParams(GH_OutputParamManager pManager)
+    protected override ParamDefinition[] Inputs => GetAssetDataAsInputs();
+    protected override ParamDefinition[] Outputs => new ParamDefinition[]
     {
-      pManager.AddParameter(
-        param: new Parameters.AppearanceAsset(),
+      ParamDefinition.Create<Parameters.AppearanceAsset>(
         name: ComponentInfo.Name,
         nickname: ComponentInfo.NickName,
         description: ComponentInfo.Description,
         access: GH_ParamAccess.item
-      );
-    }
+        ),
+    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
-      => DA.SetData(
-        ComponentInfo.Name,
-        new Types.AppearanceAsset(CreateAssetFromInputs(DA))
+    {
+      // lets process all the inputs into a data structure
+      // this step also verifies the input data
+      var assetData = CreateAssetDataFromInputs(DA);
+
+      if (assetData.Name is null || assetData.Name == string.Empty)
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Bad Name");
+        return;
+      }
+
+      var doc = Revit.ActiveDBDocument;
+      using (var transaction = NewTransaction(doc))
+      {
+        transaction.Start();
+
+        var assetElement = EnsureThisAsset(doc, assetData.Name);
+        if (assetElement is null)
+        {
+          transaction.RollBack();
+          return;
+        }
+
+        // update asset properties
+        UpdateAssetElementFromInputs(assetElement, assetData);
+
+        DA.SetData(
+          ComponentInfo.Name,
+          new Types.AppearanceAsset(assetElement)
         );
+
+        transaction.Commit();
+      }
+    }
   }
 
   public class CreateGenericShader

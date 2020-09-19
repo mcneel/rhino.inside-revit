@@ -25,19 +25,16 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
       Description = $"Analyze given {ComponentInfo.Description}";
     }
 
-    protected override void RegisterInputParams(GH_InputParamManager pManager)
+    protected override ParamDefinition[] Inputs => new ParamDefinition[]
     {
-      pManager.AddParameter(
-        param: new Parameters.AppearanceAsset(),
+      ParamDefinition.Create<Parameters.AppearanceAsset>(
         name: ComponentInfo.Name,
         nickname: ComponentInfo.NickName,
         description: ComponentInfo.Description,
         access: GH_ParamAccess.item
-      );
-    }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager pManager)
-      => SetFieldsAsOutputs(pManager);
+        ),
+    };
+    protected override ParamDefinition[] Outputs => GetAssetDataAsOutputs(); 
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {

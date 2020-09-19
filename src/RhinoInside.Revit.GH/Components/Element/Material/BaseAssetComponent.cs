@@ -18,7 +18,7 @@ using System.Linq.Expressions;
 namespace RhinoInside.Revit.GH.Components.Element.Material
 {
   public abstract class BaseAssetComponent<T>
-    : TransactionComponent where T : AssetData, new()
+    : TransactionalComponent where T : AssetData, new()
   {
     protected AssetGHComponent ComponentInfo
     {
@@ -39,39 +39,52 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     private readonly T _assetData = new T();
     private AssetGHComponent _compInfo;
 
-    protected void SetFieldsAsInputs(GH_InputParamManager pManager)
+    protected ParamDefinition[] GetAssetDataAsInputs(bool skipUnchangable = false)
     {
+      List<ParamDefinition> inputs = new List<ParamDefinition>();
+
       foreach (var assetPropInfo in _assetData.GetAssetProperties())
       {
         var paramInfo = _assetData.GetGHParameterInfo(assetPropInfo);
         if (paramInfo is null)
           continue;
-        int idx = pManager.AddParameter(
-          param: (IGH_Param) Activator.CreateInstance(paramInfo.ParamType),
-          name: paramInfo.Name,
-          nickname: paramInfo.NickName,
-          description: paramInfo.Description,
-          access: paramInfo.ParamAccess
-          );
-        pManager[idx].Optional = paramInfo.Optional;
+
+        if (skipUnchangable && paramInfo.Unchangable)
+          continue;
+
+        var param = (IGH_Param) Activator.CreateInstance(paramInfo.ParamType);
+        param.Name = paramInfo.Name;
+        param.NickName = paramInfo.NickName;
+        param.Description = paramInfo.Description;
+        param.Access = paramInfo.ParamAccess;
+        param.Optional = paramInfo.Optional;
+
+        inputs.Add(ParamDefinition.FromParam(param));
       }
+
+      return inputs.ToArray();
     }
 
-    protected void SetFieldsAsOutputs(GH_OutputParamManager pManager)
+    protected ParamDefinition[] GetAssetDataAsOutputs()
     {
+      List<ParamDefinition> outputs = new List<ParamDefinition>();
+
       foreach (var assetPropInfo in _assetData.GetAssetProperties())
       {
         var paramInfo = _assetData.GetGHParameterInfo(assetPropInfo);
         if (paramInfo is null)
           continue;
-        pManager.AddParameter(
-          param: (IGH_Param) Activator.CreateInstance(paramInfo.ParamType),
-          name: paramInfo.Name,
-          nickname: paramInfo.NickName,
-          description: paramInfo.Description,
-          access: paramInfo.ParamAccess
-          );
+
+        var param = (IGH_Param) Activator.CreateInstance(paramInfo.ParamType);
+        param.Name = paramInfo.Name;
+        param.NickName = paramInfo.NickName;
+        param.Description = paramInfo.Description;
+        param.Access = paramInfo.ParamAccess;
+
+        outputs.Add(ParamDefinition.FromParam(param));
       }
+
+      return outputs.ToArray();
     }
 
     protected void SetOutputsFromAssetData(IGH_DataAccess DA, T input)
@@ -91,6 +104,16 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
 
     protected void SetOutputsFromAsset(IGH_DataAccess DA, DB.Visual.Asset asset)
     {
+      // make sure the schemas match
+      if (asset.Name.Replace("Schema", "") != _assetData.Schema)
+      {
+        AddRuntimeMessage(
+          GH_RuntimeMessageLevel.Warning,
+          $"Incorrect asset schema \"{asset.Name}\""
+          );
+        return;
+      }
+
       foreach (var assetPropInfo in _assetData.GetAssetProperties())
       {
         // determine schema prop name associated with with asset property
@@ -106,24 +129,12 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
         // check the toggle if available and output only when toggle
         // is active. otherwise we assume that the property has no value
         bool sendValueToOutput = true;
-        if (paramInfo.HasToggle)
-        {
-          // find the toggle property name on the asset
-          var togglePropInfo = _assetData.GetAssetProperty(paramInfo.Toggle);
-          if (togglePropInfo != null)
-          {
-            // find the schema name associated with the toglle
-            string toggleSchemaPropName =
-              _assetData.GetSchemaPropertyName(togglePropInfo);
-            if (schemaPropName != null)
-            {
-              // then get the asset property object and check its boolean value
-              // if false, the output will not be set
-              sendValueToOutput =
-                (bool) GetAssetParamValue(asset, toggleSchemaPropName);
-            }
-          }
-        }
+        var schemaTogglePropName = _assetData.GetSchemaTogglePropertyName(assetPropInfo);
+        if (schemaTogglePropName != null)
+          // then get the asset property object and check its boolean value
+          // if false, the output will not be set
+          sendValueToOutput =
+            (bool) GetAssetParamValue(asset, schemaTogglePropName);
 
         if (sendValueToOutput)
         {
@@ -168,6 +179,10 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
           continue;
 
         IGH_Goo inputGHType = default;
+        var paramIdx = Params.IndexOfInputParam(paramInfo.Name);
+        if (paramIdx < 0)
+          continue;
+
         bool hasInput = DA.GetData(paramInfo.Name, ref inputGHType);
         if (hasInput)
         {
@@ -178,43 +193,15 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
             inputValue = VerifyInputValue(paramInfo.Name, inputValue, valueRange);
 
           assetPropInfo.SetValue(output, inputValue);
-
-        }
-
-        // set the toggle state if available
-        if (paramInfo.HasToggle)
-        {
-          var togglePropInfo = _assetData.GetAssetProperty(paramInfo.Toggle);
-          if (togglePropInfo != null)
-            togglePropInfo.SetValue(output, hasInput);
+          output.Mark(assetPropInfo.Name);
         }
       }
 
       return output;
     }
 
-    protected DB.AppearanceAssetElement CreateAssetFromInputs(IGH_DataAccess DA)
+    private void UpdateAssetFromData(DB.Visual.Asset editableAsset, T assetData)
     {
-      // lets process all the inputs into a data structure
-      // this step also verifies the input data
-      var assetInfo = CreateAssetDataFromInputs(DA);
-
-      // create new doc asset
-      var doc = Revit.ActiveDBDocument;
-      if (assetInfo.Name is null || assetInfo.Name == string.Empty)
-      {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Bad Name");
-        return null;
-      }
-
-      var assetElement = EnsureAsset(_assetData.Schema, doc, assetInfo.Name);
-      if (assetElement is null)
-        return null;
-
-      // open asset for editing
-      var scope = new DB.Visual.AppearanceAssetEditScope(doc);
-      var editableAsset = scope.Start(assetElement.Id);
-
       foreach (var assetPropInfo in _assetData.GetAssetProperties())
       {
         // skip name because it is already set
@@ -226,56 +213,70 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
         if (schemaPropName is null)
           continue;
 
-        object inputValue = assetPropInfo.GetValue(assetInfo);
-
-        try
+        bool hasValue = assetData.IsMarked(assetPropInfo.Name);
+        if (hasValue)
         {
-          switch (inputValue)
+          object inputValue = assetPropInfo.GetValue(assetData);
+
+          try
           {
-            case bool boolVal:
-              SetAssetParamValue(editableAsset, schemaPropName, boolVal);
-              break;
-            case string stringVal:
-              SetAssetParamValue(editableAsset, schemaPropName, stringVal);
-              break;
-            case double dblVal:
-              SetAssetParamValue(editableAsset, schemaPropName, dblVal);
-              break;
-            case System.Drawing.Color colorVal:
-              SetAssetParamValue(editableAsset, schemaPropName, colorVal);
-              break;
-            case TextureData textureVal:
-              SetAssetParamTexture(editableAsset, schemaPropName, textureVal);
-              break;
-            case AssetPropertyDouble1DMap d1dMapVal:
-              if (d1dMapVal.HasTexture)
-                SetAssetParamTexture(editableAsset, schemaPropName, d1dMapVal.TextureValue);
-              else
-                SetAssetParamValue(editableAsset, schemaPropName, d1dMapVal.Value);
-              break;
-            case AssetPropertyDouble4DMap d4dMapVal:
-              if (d4dMapVal.HasTexture)
-                SetAssetParamTexture(editableAsset, schemaPropName, d4dMapVal.TextureValue);
-              else
-                SetAssetParamValue(editableAsset, schemaPropName, d4dMapVal.ValueAsColor);
-              break;
+            switch (inputValue)
+            {
+              case bool boolVal:
+                SetAssetParamValue(editableAsset, schemaPropName, boolVal);
+                break;
+              case string stringVal:
+                SetAssetParamValue(editableAsset, schemaPropName, stringVal);
+                break;
+              case double dblVal:
+                SetAssetParamValue(editableAsset, schemaPropName, dblVal);
+                break;
+              case System.Drawing.Color colorVal:
+                SetAssetParamValue(editableAsset, schemaPropName, colorVal);
+                break;
+              case TextureData textureVal:
+                SetAssetParamTexture(editableAsset, schemaPropName, textureVal);
+                break;
+              case AssetPropertyDouble1DMap d1dMapVal:
+                if (d1dMapVal.HasTexture)
+                  SetAssetParamTexture(editableAsset, schemaPropName, d1dMapVal.TextureValue);
+                else
+                  SetAssetParamValue(editableAsset, schemaPropName, d1dMapVal.Value);
+                break;
+              case AssetPropertyDouble4DMap d4dMapVal:
+                if (d4dMapVal.HasTexture)
+                  SetAssetParamTexture(editableAsset, schemaPropName, d4dMapVal.TextureValue);
+                else
+                  SetAssetParamValue(editableAsset, schemaPropName, d4dMapVal.ValueAsColor);
+                break;
+            }
+          }
+          catch (Exception ex)
+          {
+            AddRuntimeMessage(
+              GH_RuntimeMessageLevel.Error,
+              $"Can not set value of {inputValue} on schema property {schemaPropName}"
+              + $" | Revit API Error: {ex.Message}"
+              );
           }
         }
-        catch (Exception ex)
-        {
-          AddRuntimeMessage(
-            GH_RuntimeMessageLevel.Error,
-            $"Can not set value of {inputValue} on schema property {schemaPropName}"
-            + $" | Revit API Error: {ex.Message}"
-            );
-        }
+
+        var schemaTogglePropName = _assetData.GetSchemaTogglePropertyName(assetPropInfo);
+        if (schemaTogglePropName != null)
+          SetAssetParamValue(editableAsset, schemaTogglePropName, hasValue);
       }
+    }
+
+    protected void UpdateAssetElementFromInputs(DB.AppearanceAssetElement assetElement, T assetData)
+    {
+      // open asset for editing
+      var scope = new DB.Visual.AppearanceAssetEditScope(assetElement.Document);
+      var editableAsset = scope.Start(assetElement.Id);
+
+      UpdateAssetFromData(editableAsset, assetData);
 
       // commit the changes after all changes has been made
       scope.Commit(true);
-
-      // and send it out
-      return assetElement;
     }
 
     #region Asset Utility Methods
@@ -306,7 +307,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
               );
             return (object) valueRangeInfo.Max;
           }
-          
+
           break;
       }
 
@@ -412,6 +413,9 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
       var baseAsset = FindLibraryAsset(DB.Visual.AssetType.Appearance, schemaName);
       return DB.AppearanceAssetElement.Create(doc, name, baseAsset);
     }
+
+    public DB.AppearanceAssetElement EnsureThisAsset(DB.Document doc, string name)
+     => EnsureAsset(_assetData.Schema, doc, name);
 
     public static bool
     AssetParamHasNestedAsset(DB.Visual.Asset asset, string name)
