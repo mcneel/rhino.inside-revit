@@ -26,28 +26,32 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
       this.Description = $"Modify given {ComponentInfo.Description}";
     }
 
-    protected override void RegisterInputParams(GH_InputParamManager pManager)
+    protected override ParamDefinition[] Inputs => GetFieldsAsInputs();
+    protected override ParamDefinition[] Outputs => new ParamDefinition[]
     {
-      pManager.AddParameter(
-        param: new Parameters.AppearanceAsset(),
+      ParamDefinition.Create<Parameters.AppearanceAsset>(
         name: ComponentInfo.Name,
         nickname: ComponentInfo.NickName,
         description: ComponentInfo.Description,
         access: GH_ParamAccess.item
-      );
+        ),
+    };
 
-      SetFieldsAsInputs(pManager);
-    }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager pManager)
+    private ParamDefinition[] GetFieldsAsInputs()
     {
-      pManager.AddParameter(
-        param: new Parameters.AppearanceAsset(),
-        name: ComponentInfo.Name,
-        nickname: ComponentInfo.NickName,
-        description: ComponentInfo.Description,
-        access: GH_ParamAccess.item
-    );
+      List<ParamDefinition> inputs = new List<ParamDefinition>();
+
+      var param = new Parameters.AppearanceAsset();
+      param.Name = ComponentInfo.Name;
+      param.NickName = ComponentInfo.NickName;
+      param.Description = ComponentInfo.Description;
+      param.Access = GH_ParamAccess.item;
+
+      inputs.Add(ParamDefinition.FromParam(param));
+      inputs.AddRange(
+        base.GetAssetDataAsInputs(skipUnchangable: true)
+        );
+      return inputs.ToArray();
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -55,11 +59,25 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
       var appearanceAsset = default(DB.AppearanceAssetElement);
       if (DA.GetData(ComponentInfo.Name, ref appearanceAsset))
       {
-        var asset = appearanceAsset.GetRenderingAsset();
-        if (asset != null)
+        // lets process all the inputs into a data structure
+        // this step also verifies the input data
+        var assetData = CreateAssetDataFromInputs(DA);
+
+
+        var doc = Revit.ActiveDBDocument;
+        using (var transaction = NewTransaction(doc))
         {
-          // TODO: modify asset here
+          transaction.Start();
+
+          // update the asset parameters
+          // update asset properties
+          UpdateAssetElementFromInputs(appearanceAsset, assetData);
+
+          transaction.Commit();
         }
+
+        // send it to output
+        DA.SetData(ComponentInfo.Name, appearanceAsset);
       }
     }
   }

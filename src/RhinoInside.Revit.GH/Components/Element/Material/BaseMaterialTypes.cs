@@ -140,6 +140,17 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
   }
 
   [AttributeUsage(AttributeTargets.Property)]
+  public class APIAssetToggleProp : Attribute
+  {
+    public string Name;
+
+    public APIAssetToggleProp(string name)
+    {
+      Name = name;
+    }
+  }
+
+  [AttributeUsage(AttributeTargets.Property)]
   public class APIAssetPropValueRange : Attribute
   {
     public double Min = double.NaN;
@@ -176,14 +187,14 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     public string Description;
     public GH_ParamAccess ParamAccess;
     public ExtractMethod ExtractMethod;
-    public string Toggle;
+    public bool Unchangable;
     public bool Optional;
 
     public AssetGHParameter(Type param,
                             string name, string nickname, string description,
                             GH_ParamAccess access = GH_ParamAccess.item,
                             ExtractMethod method = ExtractMethod.ValueOnly,
-                            string toggle = null,
+                            bool unchangable = false,
                             bool optional = true)
     {
       ParamType = param;
@@ -192,11 +203,9 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
       Description = description;
       ParamAccess = access;
       ExtractMethod = method;
-      Toggle = toggle;
+      Unchangable = unchangable;
       Optional = optional;
     }
-
-    public bool HasToggle => Toggle != null && Toggle != string.Empty;
   }
 
   #endregion
@@ -208,6 +217,9 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
   /// </summary>
   public abstract class AssetData
   {
+    // list of properties that contain value
+    private HashSet<string> _markedProps = new HashSet<string>();
+
     public static AssetData GetSchemaDataType(string schema)
     {
       var rootType = typeof(AssetData);
@@ -265,10 +277,17 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
                      .FirstOrDefault();
     }
 
-    public APIAssetProp GetAPIAssetPropertyInfo(PropertyInfo propInfo)
+    private APIAssetProp GetAPIAssetPropertyInfo(PropertyInfo propInfo)
     {
       return propInfo.GetCustomAttributes(typeof(APIAssetProp), false)
                      .Cast<APIAssetProp>()
+                     .FirstOrDefault();
+    }
+
+    private APIAssetToggleProp GetAPIAssetTogglePropertyInfo(PropertyInfo propInfo)
+    {
+      return propInfo.GetCustomAttributes(typeof(APIAssetToggleProp), false)
+                     .Cast<APIAssetToggleProp>()
                      .FirstOrDefault();
     }
 
@@ -279,14 +298,14 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
                      .FirstOrDefault();
     }
 
-    private string GetSchemaPropertyName(APIAssetProp apiAssetPropInfo)
+    private string GetSchemaPropertyName(string apiPropName)
     {
       var apiAssetInfo = GetAPIAssetInfo();
       if (apiAssetInfo != null)
       {
         var dataPropInfo =
           apiAssetInfo.DataType.GetProperty(
-            apiAssetPropInfo.Name,
+            apiPropName,
             BindingFlags.Public | BindingFlags.Static
             );
         if (dataPropInfo != null)
@@ -304,8 +323,20 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
       if (apiAssetPropInfo is NoAPIAssetProp noApiAssetPropInfo)
         return noApiAssetPropInfo.Name;
       else
-        return GetSchemaPropertyName(apiAssetPropInfo);
+        return GetSchemaPropertyName(apiAssetPropInfo.Name);
     }
+
+    public string GetSchemaTogglePropertyName(PropertyInfo propInfo)
+    {
+      var apiAssetTogglePropInfo = GetAPIAssetTogglePropertyInfo(propInfo);
+      if (apiAssetTogglePropInfo is null)
+        return null;
+      return GetSchemaPropertyName(apiAssetTogglePropInfo.Name);
+    }
+
+    public void Mark(string propName) => _markedProps.Add(propName);
+    public void UnMark(string propName) => _markedProps.Remove(propName);
+    public bool IsMarked(string propName) => _markedProps.Contains(propName);
   }
 
   /// <summary>
@@ -331,7 +362,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
   public class GenericData : ShaderData
   {
     [NoAPIAssetProp("UIName", typeof(DB.Visual.AssetPropertyString))]
-    [AssetGHParameter(typeof(Param_String), "Name", "N", "Asset name", optional: false)]
+    [AssetGHParameter(typeof(Param_String), "Name", "N", "Asset name", optional: false, unchangable: true)]
     public override string Name { get; set; }
 
     [NoAPIAssetProp("description", typeof(DB.Visual.AssetPropertyString))]
@@ -419,11 +450,9 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     [AssetGHParameter(typeof(Parameters.AssetPropertyDouble1DMap), "Bump Amount", "B", "Bump amount", method: ExtractMethod.AssetFirst)]
     public AssetPropertyDouble1DMap Bump { get; set; } = 0;
 
-    [APIAssetProp("CommonTintToggle", typeof(DB.Visual.AssetPropertyBoolean))]
-    public bool TintToggle { get; set; } = false;
-
     [APIAssetProp("CommonTintColor", typeof(DB.Visual.AssetPropertyDoubleArray4d))]
-    [AssetGHParameter(typeof(Param_Colour), "Tint Color", "TC", "Tint color", toggle: "TintToggle")]
+    [APIAssetToggleProp("CommonTintToggle")]
+    [AssetGHParameter(typeof(Param_Colour), "Tint Color", "TC", "Tint color")]
     public System.Drawing.Color Tint { get; set; } = System.Drawing.Color.Black;
   }
   #endregion
