@@ -50,7 +50,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
         if (paramInfo is null)
           continue;
 
-        if (skipUnchangable && paramInfo.Unchangable)
+        if (skipUnchangable && !paramInfo.Modifiable)
           continue;
 
         var param = (IGH_Param) Activator.CreateInstance(paramInfo.ParamType);
