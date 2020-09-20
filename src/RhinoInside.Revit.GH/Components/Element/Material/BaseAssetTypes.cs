@@ -203,14 +203,14 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     public string Description;
     public GH_ParamAccess ParamAccess;
     public ExtractMethod ExtractMethod;
-    public bool Unchangable;
+    public bool Modifiable;
     public bool Optional;
 
     public AssetGHParameter(Type param,
                             string name, string nickname, string description,
                             GH_ParamAccess access = GH_ParamAccess.item,
                             ExtractMethod method = ExtractMethod.ValueOnly,
-                            bool unchangable = false,
+                            bool modifiable = true,
                             bool optional = true)
     {
       ParamType = param;
@@ -219,7 +219,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
       Description = description;
       ParamAccess = access;
       ExtractMethod = method;
-      Unchangable = unchangable;
+      Modifiable = modifiable;
       Optional = optional;
     }
   }
@@ -298,12 +298,6 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
       return propInfo.GetCustomAttributes(typeof(APIAssetProp), false)
                      .Cast<APIAssetProp>()
                      .FirstOrDefault();
-    }
-
-    public IEnumerable<APIAssetBuiltInProp> GetAPIAssetBuiltInPropertyInfos(PropertyInfo propInfo)
-    {
-      return propInfo.GetCustomAttributes(typeof(APIAssetBuiltInProp), false)
-                     .Cast<APIAssetBuiltInProp>();
     }
 
     private APIAssetToggleProp GetAPIAssetTogglePropertyInfo(PropertyInfo propInfo)
@@ -390,6 +384,13 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
   public class PhysicalMaterialData : AssetData
   {
     public override string Name { get => ""; set { } }
+    public DB.StructuralBehavior Behaviour { get; set; }
+
+    public IEnumerable<APIAssetBuiltInProp> GetAPIAssetBuiltInPropertyInfos(PropertyInfo propInfo)
+    {
+      return propInfo.GetCustomAttributes(typeof(APIAssetBuiltInProp), false)
+                     .Cast<APIAssetBuiltInProp>();
+    }
   }
 
   #endregion
@@ -400,7 +401,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
   public class GenericData : ShaderData
   {
     [NoAPIAssetProp("UIName", typeof(DB.Visual.AssetPropertyString))]
-    [AssetGHParameter(typeof(Param_String), "Name", "N", "Asset name", optional: false, unchangable: true)]
+    [AssetGHParameter(typeof(Param_String), "Name", "N", "Asset name", optional: false, modifiable: false)]
     public override string Name { get; set; }
 
     [NoAPIAssetProp("description", typeof(DB.Visual.AssetPropertyString))]
@@ -610,28 +611,30 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
   ////DA.SetData("Construction", );
 
   [APIAsset(typeof(DB.StructuralAsset))]
-  [AssetGHComponent("Physical Asset", "PHAST", "physical asset")]
+  [AssetGHComponent("Physical Asset", "PHAST", "Physical Asset")]
   public class StructuralAssetData: PhysicalMaterialData
   {
     [APIAssetBuiltInProp(BuiltInParameter.PROPERTY_SET_NAME, typeof(string))]
-    [AssetGHParameter(typeof(Param_String), "Name", "N", "Physical asset name", optional: false, unchangable: true)]
+    [AssetGHParameter(typeof(Param_String), "Name", "N", "Physical asset name", optional: false, modifiable: false)]
     public new string Name { get; set; }
 
     [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_CLASS, typeof(DB.StructuralAssetClass))]
-    [AssetGHParameter(typeof(Parameters.Param_Enum<Types.StructuralAssetClass>), "Type", "T", "Physical asset type", optional: false, unchangable: true)]
+    [AssetGHParameter(typeof(Parameters.Param_Enum<Types.StructuralAssetClass>), "Type", "T", "Physical asset type", optional: false, modifiable: false)]
     public DB.StructuralAssetClass Type { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_CLASS, typeof(DB.StructuralAssetClass))]
+    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_CLASS, typeof(string))]
     [AssetGHParameter(typeof(Param_String), "Subclass", "SC", "Physical asset subclass")]
     public string SubClass { get; set; }
 
     [APIAssetBuiltInProp(BuiltInParameter.PROPERTY_SET_DESCRIPTION, typeof(string))]
-    [AssetGHParameter(typeof(Param_String), "Description", "D", "")]
+    [AssetGHParameter(typeof(Param_String), "Description", "D", "Physical asset description")]
     public string Description { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PROPERTY_SET_KEYWORDS, typeof(string))]
-    [AssetGHParameter(typeof(Param_String), "Keywords", "K", "")]
-    public string Keywords { get; set; }
+    // Note: Keywords are not exposed by the API for the structural asset consistently
+    // the parameter is only available when value is set
+    //[APIAssetBuiltInProp(BuiltInParameter.PROPERTY_SET_KEYWORDS, typeof(string))]
+    //[AssetGHParameter(typeof(Param_String), "Keywords", "K", "")]
+    //public string Keywords { get; set; }
 
     [APIAssetBuiltInProp(BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE, typeof(string))]
     [AssetGHParameter(typeof(Param_String), "Source", "S", "Physical asset source")]
@@ -643,14 +646,14 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
 
     // behaviour
     [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_BEHAVIOR, typeof(DB.StructuralBehavior))]
-    [AssetGHParameter(typeof(Parameters.Param_Enum<Types.StructuralBehavior>), "Behaviour", "B", "Physical asset behaviour")]
-    public DB.StructuralBehavior Behaviour { get; set; }
+    [AssetGHParameter(typeof(Parameters.Param_Enum<Types.StructuralBehavior>), "Behaviour", "B", "Physical asset behaviour", modifiable: false)]
+    public new DB.StructuralBehavior Behaviour { get; set; }
 
     // basic thermal
     [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_EXP_COEFF, typeof(double))]
     [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_EXP_COEFF1, typeof(double))]
     [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_EXP_COEFF_1, typeof(double))]
-    [APIAssetPropValueRange(min:0.0, max: 0.00028)]
+    [APIAssetPropValueRange(min: 0.0, max: 0.00028)]
     [AssetGHParameter(typeof(Param_Number), "Thermal Expansion Coefficient X", "TECX", "The only, X or 1 component of thermal expansion coefficient (depending on behaviour)")]
     public double ThermalExpansionCoefficientX { get; set; }
 
@@ -721,9 +724,9 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     [AssetGHParameter(typeof(Param_Number), "Concrete Shear Strength Modification", "CSSM", "Physical asset concrete shear strength modification")]
     public double ConcreteShearStrengthModification { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_LIGHT_WEIGHT, typeof(double))]
-    [AssetGHParameter(typeof(Param_Number), "Concrete Lightweight", "CL", "Physical asset lightweight concrete")]
-    public double ConcreteLightweight { get; set; }
+    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_LIGHT_WEIGHT, typeof(bool))]
+    [AssetGHParameter(typeof(Param_Boolean), "Concrete Lightweight", "CL", "Physical asset lightweight concrete")]
+    public bool ConcreteLightweight { get; set; }
 
     // wood
     [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_SPECIES, typeof(double), generic: false)]
@@ -764,6 +767,101 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     public double TensileStrength { get; set; }
   }
 
+  [APIAsset(typeof(DB.ThermalAsset))]
+  [AssetGHComponent("Thermal Asset", "THAST", "Thermal Asset")]
+  public class ThermalAssetData: PhysicalMaterialData
+  {
+    [APIAssetBuiltInProp(BuiltInParameter.PROPERTY_SET_NAME, typeof(string))]
+    [AssetGHParameter(typeof(Param_String), "Name", "N", "Thermal asset name", optional: false, modifiable: false)]
+    public new string Name { get; set; }
+
+    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_CLASS, typeof(DB.ThermalMaterialType))]
+    [AssetGHParameter(typeof(Parameters.Param_Enum<Types.ThermalMaterialType>), "Type", "T", "Thermal asset material asset type", optional: false, modifiable: false)]
+    public DB.StructuralAssetClass Type { get; set; }
+
+    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_CLASS, typeof(string))]
+    [AssetGHParameter(typeof(Param_String), "Subclass", "SC", "Thermal asset subclass")]
+    public string SubClass { get; set; }
+
+    [APIAssetBuiltInProp(BuiltInParameter.PROPERTY_SET_DESCRIPTION, typeof(string))]
+    [AssetGHParameter(typeof(Param_String), "Description", "D", "Thermal asset description")]
+    public string Description { get; set; }
+
+    // Note: Keywords are not exposed by the API for the structural asset
+    // Disabling thermal asset keywords for consistency
+    //[APIAssetBuiltInProp(BuiltInParameter.PROPERTY_SET_KEYWORDS, typeof(string))]
+    //[AssetGHParameter(typeof(Param_String), "Keywords", "K", "")]
+    //public string Keywords { get; set; }
+
+    [APIAssetBuiltInProp(BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE, typeof(string))]
+    [AssetGHParameter(typeof(Param_String), "Source", "S", "Thermal asset source")]
+    public string Source { get; set; }
+
+    [APIAssetBuiltInProp(BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE_URL, typeof(string))]
+    [AssetGHParameter(typeof(Param_String), "Source URL", "SU", "Thermal asset source url")]
+    public string SourceURL { get; set; }
+
+    // behaviour
+    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_BEHAVIOR, typeof(DB.StructuralBehavior))]
+    [AssetGHParameter(typeof(Parameters.Param_Enum<Types.StructuralBehavior>), "Behaviour", "B", "Thermal asset behaviour", modifiable: false)]
+    public new DB.StructuralBehavior Behaviour { get; set; }
+
+    [APIAssetBuiltInProp(BuiltInParameter.THERMAL_MATERIAL_PARAM_TRANSMITS_LIGHT, typeof(bool), generic: false)]
+    [AssetGHParameter(typeof(Param_Boolean), "Transmits Light", "TL", "Thermal asset transmits light")]
+    public bool TransmitsLight { get; set; }
+
+    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_THERMAL_CONDUCTIVITY, typeof(double))]
+    [AssetGHParameter(typeof(Param_Number), "Thermal Conductivity", "TC", "Thermal asset thermal conductivity")]
+    public double ThermalConductivity { get; set; }
+
+    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_STRUCTURAL_SPECIFIC_HEAT, typeof(double))]
+    [AssetGHParameter(typeof(Param_Number), "Specific Heat", "SH", "Thermal asset specific heat")]
+    public double SpecificHeat { get; set; }
+
+    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_STRUCTURAL_DENSITY, typeof(double))]
+    [AssetGHParameter(typeof(Param_Number), "Density", "D", "Thermal asset density")]
+    public double Density { get; set; }
+
+    [APIAssetBuiltInProp(BuiltInParameter.THERMAL_MATERIAL_PARAM_EMISSIVITY, typeof(double), generic: false)]
+    [AssetGHParameter(typeof(Param_Number), "Emissivity", "E", "Thermal asset emissivity")]
+    public double Emissivity { get; set; }
+
+    [APIAssetBuiltInProp(BuiltInParameter.THERMAL_MATERIAL_PARAM_PERMEABILITY, typeof(double), generic: false)]
+    [AssetGHParameter(typeof(Param_Number), "Permeability", "PE", "Thermal asset permeability")]
+    public double Permeability { get; set; }
+
+    [APIAssetBuiltInProp(BuiltInParameter.THERMAL_MATERIAL_PARAM_POROSITY, typeof(double), generic: false)]
+    [AssetGHParameter(typeof(Param_Number), "Porosity", "PO", "Thermal asset porosity")]
+    public double Porosity { get; set; }
+
+    [APIAssetBuiltInProp(BuiltInParameter.THERMAL_MATERIAL_PARAM_REFLECTIVITY, typeof(double), generic: false)]
+    [AssetGHParameter(typeof(Param_Number), "Reflectivity", "R", "Thermal asset reflectivity")]
+    public double Reflectivity { get; set; }
+
+    [APIAssetBuiltInProp(BuiltInParameter.THERMAL_MATERIAL_PARAM_GAS_VISCOSITY, typeof(double), generic: false)]
+    [AssetGHParameter(typeof(Param_Number), "Gas Viscosity", "GV", "Thermal asset gas viscosity")]
+    public double GasViscosity { get; set; }
+
+    [APIAssetBuiltInProp(BuiltInParameter.THERMAL_MATERIAL_PARAM_ELECTRICAL_RESISTIVITY, typeof(double), generic: false)]
+    [AssetGHParameter(typeof(Param_Number), "Electrical Resistivity", "ER", "Thermal asset electrical resistivity")]
+    public double ElectricalResistivity { get; set; }
+
+    [APIAssetBuiltInProp(BuiltInParameter.THERMAL_MATERIAL_PARAM_LIQUID_VISCOSITY, typeof(double), generic: false)]
+    [AssetGHParameter(typeof(Param_Number), "Liquid Viscosity", "LV", "Thermal asset liquid viscosity")]
+    public double LiquidViscosity { get; set; }
+
+    [APIAssetBuiltInProp(BuiltInParameter.THERMAL_MATERIAL_PARAM_SPECIFIC_HEAT_OF_VAPORIZATION, typeof(double), generic: false)]
+    [AssetGHParameter(typeof(Param_Number), "Specific Heat Of Vaporization", "SHV", "Thermal asset specific heat of vaporization")]
+    public double SpecificHeatVaporization { get; set; }
+
+    [APIAssetBuiltInProp(BuiltInParameter.THERMAL_MATERIAL_PARAM_VAPOR_PRESSURE, typeof(double), generic: false)]
+    [AssetGHParameter(typeof(Param_Number), "Vapor Pressure", "VP", "Thermal asset vapor pressure")]
+    public double VaporPressure { get; set; }
+
+    [APIAssetBuiltInProp(BuiltInParameter.THERMAL_MATERIAL_PARAM_COMPRESSIBILITY, typeof(double), generic: false)]
+    [AssetGHParameter(typeof(Param_Number), "Compressibility", "C", "Thermal asset compressibility")]
+    public double Compressibility { get; set; }
+  }
   #endregion
 
   #endregion

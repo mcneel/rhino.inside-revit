@@ -50,7 +50,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
         if (paramInfo is null)
           continue;
 
-        if (skipUnchangable && paramInfo.Unchangable)
+        if (skipUnchangable && !paramInfo.Modifiable)
           continue;
 
         var param = (IGH_Param) Activator.CreateInstance(paramInfo.ParamType);
@@ -133,6 +133,69 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
       return output;
     }
 
+    protected void SetOutputsFromPropertySetElement(IGH_DataAccess DA, DB.PropertySetElement psetElement)
+    {
+      foreach (var assetPropInfo in _assetData.GetAssetProperties())
+      {
+        // determine which output parameter to set the value on
+        var paramInfo = _assetData.GetGHParameterInfo(assetPropInfo);
+        if (paramInfo is null)
+          continue;
+
+        // grab the value from the first valid builtin param and set on the ouput
+        foreach (var builtInPropInfo in
+            _assetData.GetAPIAssetBuiltInPropertyInfos(assetPropInfo))
+          if (SetOutputFromPropertySetElementParam(DA, psetElement, builtInPropInfo.ParamId, paramInfo.Name))
+            break;
+      }
+    }
+
+    protected bool
+    SetOutputFromPropertySetElementParam(IGH_DataAccess DA, DB.PropertySetElement srcElement,
+                                         DB.BuiltInParameter srcParam, string paramName)
+    {
+      if (srcElement is null)
+      {
+        DA.SetData(paramName, null);
+        return false;
+      }
+
+      bool valueFound = false;
+      var param = srcElement.get_Parameter(srcParam);
+      if (param != null)
+      {
+        valueFound = true;
+        switch (param.StorageType)
+        {
+          case DB.StorageType.None: break;
+
+          case DB.StorageType.String:
+            DA.SetData(paramName, param.AsString());
+            break;
+
+          case DB.StorageType.Integer:
+            if (param.Definition.ParameterType == DB.ParameterType.YesNo)
+              DA.SetData(paramName, param.AsInteger() != 0);
+            else
+              DA.SetData(paramName, param.AsInteger());
+            break;
+
+          case DB.StorageType.Double:
+            DA.SetData(paramName, param.AsDoubleInRhinoUnits());
+            break;
+
+          case DB.StorageType.ElementId:
+            DA.SetData(
+              paramName,
+              Types.Element.FromElementId(doc: srcElement.Document, Id: param.AsElementId())
+              );
+            break;
+        }
+      }
+
+      return valueFound;
+    }
+
     protected void UpdatePropertySetElementFromData(DB.PropertySetElement psetElement, T assetData)
     {
       foreach (var assetPropInfo in _assetData.GetAssetProperties())
@@ -191,6 +254,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     #endregion
   }
 
+  // structural asset
   public class CreateStructuralAsset : BasePhysicalAssetComponent<StructuralAssetData>
   {
     public override Guid ComponentGuid =>
@@ -251,6 +315,15 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
 
           // creaet asset from input data
           var structAsset = new DB.StructuralAsset(name, assetClass);
+
+          // we need to apply the behaviour here manually
+          // otherwise the resultant DB.PropertySetElement will be missing parameters
+          DB.StructuralBehavior behaviour = default;
+          if (DA.GetData("Behaviour", ref behaviour))
+            structAsset.Behavior = behaviour;
+          else
+            structAsset.Behavior = DB.StructuralBehavior.Isotropic;
+
           // set the asset on psetelement
           psetElement = DB.PropertySetElement.Create(doc, structAsset);
 
@@ -275,416 +348,369 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     }
   }
 
-  //  public class ModifyStructuralAsset : TransactionalComponent
-  //  {
-  //    public override Guid ComponentGuid =>
-  //      new Guid("67a74d31-0878-4b48-8efb-f4ca97389f74");
-
-  //    // modifying and setting a new asset of a DB.PropertySetElement
-  //    // return an "internal API error" in Revit
-  //    // hiding the modify component for now
-  //    // possible solution is to avoid using the DB.StructuralAsset API and
-  //    // implement the schema property names manually. These assets however
-  //    // are not widely used in the industry so we'll wait for customer feedback
-  //#if DEBUG
-  //    public override GH_Exposure Exposure => GH_Exposure.hidden;
-  //#else
-  //    public override GH_Exposure Exposure => GH_Exposure.quinary;
-  //#endif
-
-  //    protected override ParamDefinition[] Inputs => GetInputs();
-  //    protected override ParamDefinition[] Outputs => new ParamDefinition[]
-  //    {
-  //      ParamDefinition.FromParam(StructuralAssetSchema.SchemaTypeParam)
-  //    };
-
-  //    public ModifyStructuralAsset() : base(
-  //      name: "Modify Physical Asset",
-  //      nickname: "M-PHAST",
-  //      description: "Modify given physical asset",
-  //      category: "Revit",
-  //      subCategory: "Material"
-  //    )
-  //    {
-  //    }
-
-  //    private ParamDefinition[] GetInputs()
-  //    {
-  //      var inputs = new List<ParamDefinition>()
-  //      {
-  //        ParamDefinition.FromParam(StructuralAssetSchema.SchemaTypeParam)
-  //      };
-
-  //      foreach (IGH_Param param in StructuralAssetSchema.SchemaParams)
-  //        if (param.Name != "Name" && param.Name != "Type")
-  //          inputs.Add(ParamDefinition.FromParam(param));
-
-  //      return inputs.ToArray();
-  //    }
-
-  //    protected override void TrySolveInstance(IGH_DataAccess DA)
-  //    {
-  //      // get input structural asset
-  //      DB.PropertySetElement psetElement = default;
-  //      if (!DA.GetData(StructuralAssetSchema.SchemaTypeParam.Name, ref psetElement))
-  //        return;
-
-  //      var doc = Revit.ActiveDBDocument;
-  //      using (var transaction = NewTransaction(doc))
-  //      {
-  //        transaction.Start();
-
-  //        // update the asset properties from input data
-  //        try
-  //        {
-  //          StructuralAssetSchema.SetAssetParamsFromInput(DA, psetElement);
-  //        }
-  //        catch (Exception ex)
-  //        {
-  //          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Revit API Error | {ex.Message}");
-  //        }
-
-
-  //        // send the modified asset to output
-  //        DA.SetData(
-  //          StructuralAssetSchema.SchemaTypeParam.Name,
-  //          psetElement
-  //        );
-
-  //        transaction.Commit();
-  //      }
-  //    }
-  //  }
-
-  //  public class AnalyzeStructuralAsset : AnalysisComponent
-  //  {
-  //    public override Guid ComponentGuid =>
-  //      new Guid("ec93f8e0-d2af-4a44-a040-89a7c40b9fc7");
-  //    public override GH_Exposure Exposure => GH_Exposure.quinary;
-
-  //    public AnalyzeStructuralAsset() : base(
-  //      name: "Analyze Physical Asset",
-  //      nickname: "A-PHAST",
-  //      description: "Analyze given physical asset",
-  //      category: "Revit",
-  //      subCategory: "Material"
-  //    )
-  //    {
-  //    }
-
-  //    protected override void RegisterInputParams(GH_InputParamManager pManager)
-  //      => pManager.AddParameter(StructuralAssetSchema.SchemaTypeParam);
-
-  //    protected override void RegisterOutputParams(GH_OutputParamManager pManager)
-  //    {
-  //      foreach (IGH_Param param in StructuralAssetSchema.SchemaParams)
-  //        pManager.AddParameter(param);
-  //    }
-
-  //    protected override void TrySolveInstance(IGH_DataAccess DA)
-  //    {
-  //      DB.PropertySetElement psetElement = default;
-  //      if (!DA.GetData("Physical Asset", ref psetElement))
-  //        return;
-
-  //      var structAsset = psetElement.GetStructuralAsset();
-
-  //      // information
-  //      PipeHostParameter(DA, psetElement, DB.BuiltInParameter.PROPERTY_SET_NAME, "Name");
-  //      PipeHostParameter(DA, psetElement, DB.BuiltInParameter.PROPERTY_SET_DESCRIPTION, "Description");
-  //      PipeHostParameter(DA, psetElement, DB.BuiltInParameter.PROPERTY_SET_KEYWORDS, "Keywords");
-  //      PipeHostParameter<Types.StructuralAssetClass>(DA, psetElement, DB.BuiltInParameter.PHY_MATERIAL_PARAM_CLASS, "Type");
-  //      PipeHostParameter(DA, psetElement, DB.BuiltInParameter.PHY_MATERIAL_PARAM_SUBCLASS, "Subclass");
-  //      PipeHostParameter(DA, psetElement, DB.BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE, "Source");
-  //      PipeHostParameter(DA, psetElement, DB.BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE_URL, "Source URL");
-
-  //      // behaviour
-  //      PipeHostParameter<Types.StructuralBehavior>(DA, psetElement, DB.BuiltInParameter.PHY_MATERIAL_PARAM_BEHAVIOR, "Behaviour");
-
-  //      // basic thermal
-  //      DA.SetData("Thermal Expansion Coefficient X", structAsset?.ThermalExpansionCoefficient.X);
-  //      DA.SetData("Thermal Expansion Coefficient Y", structAsset?.ThermalExpansionCoefficient.Y);
-  //      DA.SetData("Thermal Expansion Coefficient Z", structAsset?.ThermalExpansionCoefficient.Z);
-
-  //      // mechanical
-  //      DA.SetData("Youngs Modulus X", structAsset?.YoungModulus.X);
-  //      DA.SetData("Youngs Modulus Y", structAsset?.YoungModulus.Y);
-  //      DA.SetData("Youngs Modulus Z", structAsset?.YoungModulus.Z);
-
-  //      DA.SetData("Poissons Ratio X", structAsset?.PoissonRatio.X);
-  //      DA.SetData("Poissons Ratio Y", structAsset?.PoissonRatio.Y);
-  //      DA.SetData("Poissons Ratio Z", structAsset?.PoissonRatio.Z);
-
-  //      DA.SetData("Shear Modulus X", structAsset?.ShearModulus.X);
-  //      DA.SetData("Shear Modulus Y", structAsset?.ShearModulus.Y);
-  //      DA.SetData("Shear Modulus Z", structAsset?.ShearModulus.Z);
-
-  //      DA.SetData("Density", structAsset?.Density);
-
-  //      // concrete
-  //      DA.SetData("Concrete Compression", structAsset?.ConcreteCompression);
-  //      DA.SetData("Concrete Shear Strength Modification", structAsset?.ConcreteShearStrengthReduction);
-  //      DA.SetData("Concrete Lightweight", structAsset?.Lightweight);
-
-  //      // metal
-  //      // API: Values are not represented in the material editor
-  //      //DA.SetData("", structAsset?.MetalReductionFactor);
-  //      //DA.SetData("", structAsset?.MetalResistanceCalculationStrength);
-
-  //      // wood
-  //      DA.SetData("Wood Species", structAsset?.WoodSpecies);
-  //      DA.SetData("Wood Strength Grade", structAsset?.WoodGrade);
-  //      DA.SetData("Wood Bending", structAsset?.WoodBendingStrength);
-  //      DA.SetData("Wood Compression Parallel to Grain", structAsset?.WoodParallelCompressionStrength);
-  //      DA.SetData("Wood Compression Perpendicular to Grain", structAsset?.WoodPerpendicularCompressionStrength);
-  //      DA.SetData("Wood Shear Parallel to Grain", structAsset?.WoodParallelShearStrength);
-  //      DA.SetData("Wood Tension Perpendicular to Grain", structAsset?.WoodPerpendicularShearStrength);
-  //      // API: Values are not represented in the API
-  //      //DA.SetData("Tension Parallel to Grain", );
-  //      //DA.SetData("Tension Perpendicular to Grain", );
-  //      //DA.SetData("Average Modulus", );
-  //      //DA.SetData("Construction", );
-
-  //      // shared
-  //      DA.SetData("Yield Strength", structAsset?.MinimumYieldStress);
-  //      DA.SetData("Tensile Strength", structAsset?.MinimumTensileStrength);
-  //    }
-  //  }
-
-  //  public class CreateThermalAsset : DocumentComponent
-  //  {
-  //    public override Guid ComponentGuid =>
-  //      new Guid("bd9164c4-effb-4145-bb96-006daeaeb99a");
-  //    public override GH_Exposure Exposure => GH_Exposure.quinary;
-
-  //    protected override ParamDefinition[] Inputs => GetInputs();
-  //    protected override ParamDefinition[] Outputs => new ParamDefinition[]
-  //    {
-  //      ParamDefinition.FromParam(ThermalAssetSchema.SchemaTypeParam)
-  //    };
-
-  //    public CreateThermalAsset() : base(
-  //      name: "Create Thermal Asset",
-  //      nickname: "C-THAST",
-  //      description: "Create a new instance of thermal asset inside document",
-  //      category: "Revit",
-  //      subCategory: "Material"
-  //    )
-  //    {
-  //    }
-
-  //    private ParamDefinition[] GetInputs()
-  //    {
-  //      var inputs = new List<ParamDefinition>()
-  //      {
-  //        ParamDefinition.FromParam(DocumentComponent.CreateDocumentParam(), ParamVisibility.Voluntary),
-  //      };
-
-  //      foreach (IGH_Param param in ThermalAssetSchema.SchemaParams)
-  //        inputs.Add(ParamDefinition.FromParam(param));
-
-  //      return inputs.ToArray();
-  //    }
-
-  //    protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
-  //    {
-  //      // get required input (name, class)
-  //      string name = default;
-  //      if (!DA.GetData("Name", ref name))
-  //        return;
-
-  //      DB.ThermalMaterialType materialType = default;
-  //      if (!DA.GetData("Type", ref materialType))
-  //        return;
-
-  //      using (var transaction = NewTransaction(doc))
-  //      {
-  //        try
-  //        {
-  //          // check naming conflicts with other asset types
-  //          if (doc.FindAppearanceAssetElement(name) != null)
-  //          {
-  //            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Shader asset with same name exists already. Use a different name for this asset");
-  //            return;
-  //          }
-  //          else if (doc.FindStructuralAssetElement(name) != null)
-  //          {
-  //            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Physical asset with same name exists already. Use a different name for this asset");
-  //            return;
-  //          }
-
-  //          transaction.Start();
-
-  //          // delete existing if asset with same name already exists
-  //          DB.PropertySetElement psetElement = doc.FindThermalAssetElement(name);
-  //          if (psetElement != null && psetElement.Id != DB.ElementId.InvalidElementId)
-  //            doc.Delete(psetElement.Id);
-
-  //          // creaet asset from input data
-  //          var thermalAsset = new DB.ThermalAsset(name, materialType);
-  //          ThermalAssetSchema.SetAssetParamsFromInput(DA, thermalAsset);
-  //          // set the asset on psetelement
-  //          psetElement = DB.PropertySetElement.Create(doc, thermalAsset);
-  //          // set other properties that are not accessible through the schema
-  //          ThermalAssetSchema.SetPropertySetElementParamsFromInput(DA, psetElement);
-
-  //          // send the new asset to output
-  //          DA.SetData(
-  //            ThermalAssetSchema.SchemaTypeParam.Name,
-  //            psetElement
-  //          );
-  //        }
-  //        catch (Exception ex)
-  //        {
-  //          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Revit API Error | {ex.Message}");
-  //        }
-
-  //        transaction.Commit();
-  //      }
-  //    }
-  //  }
-
-  //  public class ModifyThermalAsset : TransactionalComponent
-  //  {
-  //    public override Guid ComponentGuid =>
-  //      new Guid("2c8f541a-f831-41e1-9e19-3c5a9b07aed4");
-
-  //    // modifying and setting a new asset of a DB.PropertySetElement
-  //    // return an "internal API error" in Revit
-  //    // hiding the modify component for now
-  //    // possible solution is to avoid using the DB.StructuralAsset API and
-  //    // implement the schema property names manually. These assets however
-  //    // are not widely used in the industry so we'll wait for customer feedback
-  //#if DEBUG
-  //    public override GH_Exposure Exposure => GH_Exposure.hidden;
-  //#else
-  //    public override GH_Exposure Exposure => GH_Exposure.quinary;
-  //#endif
-
-  //    protected override ParamDefinition[] Inputs => GetInputs();
-  //    protected override ParamDefinition[] Outputs => new ParamDefinition[]
-  //    {
-  //      ParamDefinition.FromParam(ThermalAssetSchema.SchemaTypeParam)
-  //    };
-
-  //    public ModifyThermalAsset() : base(
-  //      name: "Modify Thermal Asset",
-  //      nickname: "M-THAST",
-  //      description: "Modify given thermal asset",
-  //      category: "Revit",
-  //      subCategory: "Material"
-  //    )
-  //    {
-  //    }
-
-  //    private ParamDefinition[] GetInputs()
-  //    {
-  //      var inputs = new List<ParamDefinition>()
-  //      {
-  //        ParamDefinition.FromParam(ThermalAssetSchema.SchemaTypeParam)
-  //      };
-
-  //      foreach (IGH_Param param in ThermalAssetSchema.SchemaParams)
-  //        if (param.Name != "Name" && param.Name != "Type")
-  //          inputs.Add(ParamDefinition.FromParam(param));
-
-  //      return inputs.ToArray();
-  //    }
-
-  //    protected override void TrySolveInstance(IGH_DataAccess DA)
-  //    {
-  //      // get input Thermal asset
-  //      DB.PropertySetElement psetElement = default;
-  //      if (!DA.GetData(ThermalAssetSchema.SchemaTypeParam.Name, ref psetElement))
-  //        return;
-
-  //      var doc = Revit.ActiveDBDocument;
-  //      using (var transaction = NewTransaction(doc))
-  //      {
-  //        transaction.Start();
-
-  //        // update the asset properties from input data
-  //        try
-  //        {
-  //          ThermalAssetSchema.SetAssetParamsFromInput(DA, psetElement);
-  //        }
-  //        catch (Exception ex)
-  //        {
-  //          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Revit API Error | {ex.Message}");
-  //        }
-
-
-  //        // send the modified asset to output
-  //        DA.SetData(
-  //          ThermalAssetSchema.SchemaTypeParam.Name,
-  //          psetElement
-  //        );
-
-  //        transaction.Commit();
-  //      }
-  //    }
-  //  }
-
-  //  public class AnalyzeThermalAsset : AnalysisComponent
-  //  {
-  //    public override Guid ComponentGuid =>
-  //      new Guid("c3be363d-c01d-4cf3-b8d2-c345734ae66d");
-  //    public override GH_Exposure Exposure => GH_Exposure.quinary;
-
-  //    public AnalyzeThermalAsset() : base(
-  //      name: "Analyze Thermal Asset",
-  //      nickname: "A-THAST",
-  //      description: "Analyze given thermal asset",
-  //      category: "Revit",
-  //      subCategory: "Material"
-  //    )
-  //    {
-  //    }
-
-  //    protected override void RegisterInputParams(GH_InputParamManager pManager)
-  //      => pManager.AddParameter(ThermalAssetSchema.SchemaTypeParam);
-
-  //    protected override void RegisterOutputParams(GH_OutputParamManager pManager)
-  //    {
-  //      foreach (IGH_Param param in ThermalAssetSchema.SchemaParams)
-  //        pManager.AddParameter(param);
-  //    }
-
-  //    protected override void TrySolveInstance(IGH_DataAccess DA)
-  //    {
-  //      DB.PropertySetElement psetElement = default;
-  //      if (!DA.GetData("Thermal Asset", ref psetElement))
-  //        return;
-
-  //      var thermalAsset = psetElement.GetThermalAsset();
-
-  //      // information
-  //      PipeHostParameter(DA, psetElement, DB.BuiltInParameter.PROPERTY_SET_NAME, "Name");
-  //      PipeHostParameter(DA, psetElement, DB.BuiltInParameter.PROPERTY_SET_DESCRIPTION, "Description");
-  //      PipeHostParameter(DA, psetElement, DB.BuiltInParameter.PROPERTY_SET_KEYWORDS, "Keywords");
-  //      DA.SetData("Type", thermalAsset?.ThermalMaterialType);
-  //      PipeHostParameter(DA, psetElement, DB.BuiltInParameter.PHY_MATERIAL_PARAM_SUBCLASS, "Subclass");
-  //      PipeHostParameter(DA, psetElement, DB.BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE, "Source");
-  //      PipeHostParameter(DA, psetElement, DB.BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE_URL, "Source URL");
-
-  //      // behaviour
-  //      PipeHostParameter<Types.StructuralBehavior>(DA, psetElement, DB.BuiltInParameter.PHY_MATERIAL_PARAM_BEHAVIOR, "Behaviour");
-
-  //      DA.SetData("Transmits Light", thermalAsset?.TransmitsLight);
-  //      DA.SetData("Thermal Conductivity", thermalAsset?.ThermalConductivity);
-  //      DA.SetData("Specific Heat", thermalAsset?.SpecificHeat);
-  //      DA.SetData("Density", thermalAsset?.Density);
-  //      DA.SetData("Emissivity", thermalAsset?.Emissivity);
-  //      DA.SetData("Permeability", thermalAsset?.Permeability);
-  //      DA.SetData("Porosity", thermalAsset?.Porosity);
-  //      DA.SetData("Reflectivity", thermalAsset?.Reflectivity);
-  //      DA.SetData("Gas Viscosity", thermalAsset?.GasViscosity);
-  //      DA.SetData("Electrical Resistivity", thermalAsset?.ElectricalResistivity);
-  //      DA.SetData("Liquid Viscosity", thermalAsset?.LiquidViscosity);
-  //      DA.SetData("Specific Heat Of Vaporization", thermalAsset?.SpecificHeatOfVaporization);
-  //      DA.SetData("Vapor Pressure", thermalAsset?.VaporPressure);
-  //      DA.SetData("Compressibility", thermalAsset?.Compressibility);
-  //    }
-  //  }
-
+  public class ModifyStructuralAsset : BasePhysicalAssetComponent<StructuralAssetData>
+  {
+    public override Guid ComponentGuid =>
+      new Guid("67a74d31-0878-4b48-8efb-f4ca97389f74");
+
+    public override GH_Exposure Exposure => GH_Exposure.quinary;
+
+    public ModifyStructuralAsset() : base()
+    {
+      Name = $"Modify {ComponentInfo.Name}";
+      NickName = $"M-{ComponentInfo.NickName}";
+      Description = $"Modify an existing instance of {ComponentInfo.Description}";
+    }
+
+    protected override ParamDefinition[] Inputs => GetInputs();
+    protected override ParamDefinition[] Outputs => new ParamDefinition[]
+    {
+      ParamDefinition.Create<Parameters.StructuralAsset>(
+        name: ComponentInfo.Name,
+        nickname: ComponentInfo.NickName,
+        description: ComponentInfo.Description,
+        access: GH_ParamAccess.item
+        ),
+    };
+
+    private ParamDefinition[] GetInputs()
+    {
+      var inputs = new List<ParamDefinition>()
+        {
+          ParamDefinition.Create<Parameters.StructuralAsset>(
+            name: ComponentInfo.Name,
+            nickname: ComponentInfo.NickName,
+            description: ComponentInfo.Description,
+            access: GH_ParamAccess.item
+          ),
+        };
+
+      foreach (ParamDefinition param in GetAssetDataAsInputs(skipUnchangable: true))
+        if (param.Param.Name != "Name" && param.Param.Name != "Type")
+          inputs.Add(param);
+
+      return inputs.ToArray();
+    }
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      // get input structural asset
+      DB.PropertySetElement psetElement = default;
+      if (!DA.GetData(ComponentInfo.Name, ref psetElement))
+        return;
+
+      var doc = Revit.ActiveDBDocument;
+      using (var transaction = NewTransaction(doc))
+      {
+        // update the asset properties from input data
+        try
+        {
+          // check asset type
+          if (!MatchesPhysicalAssetType(psetElement))
+          {
+            AddRuntimeMessage(
+              GH_RuntimeMessageLevel.Error,
+              $"Incompatible asset type"
+            );
+            return;
+          }
+
+          transaction.Start();
+
+          // grab asset data from inputs
+          var assetData = CreateAssetDataFromInputs(DA);
+          UpdatePropertySetElementFromData(psetElement, assetData);
+
+          transaction.Commit();
+
+          // send the modified asset to output
+          DA.SetData(
+            ComponentInfo.Name,
+            psetElement
+          );
+        }
+        catch (Exception ex)
+        {
+          transaction.RollBack();
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Revit API Error | {ex.Message}");
+        }
+      }
+    }
+  }
+
+  public class AnalyzeStructuralAsset : BasePhysicalAssetComponent<StructuralAssetData>
+  {
+    public override Guid ComponentGuid =>
+      new Guid("ec93f8e0-d2af-4a44-a040-89a7c40b9fc7");
+
+    public override GH_Exposure Exposure => GH_Exposure.quinary;
+
+    public AnalyzeStructuralAsset() : base()
+    {
+      Name = $"Analyze {ComponentInfo.Name}";
+      NickName = $"A-{ComponentInfo.NickName}";
+      Description = $"Analyzes given instance of {ComponentInfo.Description}";
+
+    }
+
+    protected override ParamDefinition[] Inputs => new ParamDefinition[]
+    {
+      ParamDefinition.Create<Parameters.StructuralAsset>(
+        name: ComponentInfo.Name,
+        nickname: ComponentInfo.NickName,
+        description: ComponentInfo.Description,
+        access: GH_ParamAccess.item
+        ),
+    };
+    protected override ParamDefinition[] Outputs => GetAssetDataAsOutputs();
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      DB.PropertySetElement psetElement = default;
+      if (!DA.GetData(ComponentInfo.Name, ref psetElement))
+        return;
+
+      // check asset type
+      if (!MatchesPhysicalAssetType(psetElement))
+      {
+        AddRuntimeMessage(
+          GH_RuntimeMessageLevel.Error,
+          $"Incompatible asset type"
+        );
+        return;
+      }
+
+      SetOutputsFromPropertySetElement(DA, psetElement);
+    }
+  }
+
+  // thermal asset
+  public class CreateThermalAsset : BasePhysicalAssetComponent<ThermalAssetData>
+  {
+    public override Guid ComponentGuid =>
+      new Guid("bd9164c4-effb-4145-bb96-006daeaeb99a");
+    public override GH_Exposure Exposure => GH_Exposure.quinary;
+
+    public CreateThermalAsset() : base()
+    {
+      Name = $"Create {ComponentInfo.Name}";
+      NickName = $"C-{ComponentInfo.NickName}";
+      Description = $"Create a new instance of {ComponentInfo.Description}";
+    }
+
+    protected override ParamDefinition[] Inputs => GetAssetDataAsInputs();
+    protected override ParamDefinition[] Outputs => new ParamDefinition[]
+    {
+      ParamDefinition.Create<Parameters.ThermalAsset>(
+        name: ComponentInfo.Name,
+        nickname: ComponentInfo.NickName,
+        description: ComponentInfo.Description,
+        access: GH_ParamAccess.item
+        ),
+    };
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      // get required input (name, class)
+      string name = default;
+      if (!DA.GetData("Name", ref name))
+        return;
+
+      DB.ThermalMaterialType materialType = default;
+      if (!DA.GetData("Type", ref materialType))
+        return;
+
+      var doc = Revit.ActiveDBDocument;
+      using (var transaction = NewTransaction(doc))
+      {
+        try
+        {
+          // check naming conflicts with other asset types
+          DB.PropertySetElement psetElement = doc.FindPropertySetElement(name);
+          if (psetElement != null && psetElement.Id != DB.ElementId.InvalidElementId)
+            if (!MatchesPhysicalAssetType(psetElement))
+            {
+              AddRuntimeMessage(
+                GH_RuntimeMessageLevel.Error,
+                $"Thermal asset with same name exists already. Use a different name for this asset"
+              );
+              return;
+            }
+
+          transaction.Start();
+
+          // delete existing matching psetelement
+          if (psetElement != null && psetElement.Id != DB.ElementId.InvalidElementId)
+            doc.Delete(psetElement.Id);
+
+          // creaet asset from input data
+          var thermalAsset = new DB.ThermalAsset(name, materialType);
+
+          // we need to apply the behaviour here manually
+          // otherwise the resultant DB.PropertySetElement will be missing parameters
+          DB.StructuralBehavior behaviour = default;
+          if (DA.GetData("Behaviour", ref behaviour))
+            thermalAsset.Behavior = behaviour;
+          else
+            thermalAsset.Behavior = DB.StructuralBehavior.Isotropic;
+
+          // set the asset on psetelement
+          psetElement = DB.PropertySetElement.Create(doc, thermalAsset);
+
+          // grab asset data from inputs
+          var assetData = CreateAssetDataFromInputs(DA);
+          UpdatePropertySetElementFromData(psetElement, assetData);
+
+          // send the new asset to output
+          DA.SetData(
+            ComponentInfo.Name,
+            psetElement
+          );
+        }
+        catch (Exception ex)
+        {
+          transaction.RollBack();
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Revit API Error | {ex.Message}");
+        }
+
+        transaction.Commit();
+      }
+    }
+  }
+
+  public class ModifyThermalAsset : BasePhysicalAssetComponent<ThermalAssetData>
+  {
+    public override Guid ComponentGuid =>
+      new Guid("2c8f541a-f831-41e1-9e19-3c5a9b07aed4");
+
+    public override GH_Exposure Exposure => GH_Exposure.quinary;
+
+    public ModifyThermalAsset() : base()
+    {
+      Name = $"Modify {ComponentInfo.Name}";
+      NickName = $"M-{ComponentInfo.NickName}";
+      Description = $"Modify an existing instance of {ComponentInfo.Description}";
+    }
+
+    protected override ParamDefinition[] Inputs => GetInputs();
+    protected override ParamDefinition[] Outputs => new ParamDefinition[]
+    {
+      ParamDefinition.Create<Parameters.ThermalAsset>(
+        name: ComponentInfo.Name,
+        nickname: ComponentInfo.NickName,
+        description: ComponentInfo.Description,
+        access: GH_ParamAccess.item
+        ),
+    };
+
+    private ParamDefinition[] GetInputs()
+    {
+      var inputs = new List<ParamDefinition>()
+        {
+          ParamDefinition.Create<Parameters.ThermalAsset>(
+            name: ComponentInfo.Name,
+            nickname: ComponentInfo.NickName,
+            description: ComponentInfo.Description,
+            access: GH_ParamAccess.item
+          ),
+        };
+
+      foreach (ParamDefinition param in GetAssetDataAsInputs(skipUnchangable: true))
+        if (param.Param.Name != "Name" && param.Param.Name != "Type")
+          inputs.Add(param);
+
+      return inputs.ToArray();
+    }
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      // get input structural asset
+      DB.PropertySetElement psetElement = default;
+      if (!DA.GetData(ComponentInfo.Name, ref psetElement))
+        return;
+
+      var doc = Revit.ActiveDBDocument;
+      using (var transaction = NewTransaction(doc))
+      {
+        // update the asset properties from input data
+        try
+        {
+          // check asset type
+          if (!MatchesPhysicalAssetType(psetElement))
+          {
+            AddRuntimeMessage(
+              GH_RuntimeMessageLevel.Error,
+              $"Incompatible asset type"
+            );
+            return;
+          }
+
+          transaction.Start();
+
+          // grab asset data from inputs
+          var assetData = CreateAssetDataFromInputs(DA);
+          UpdatePropertySetElementFromData(psetElement, assetData);
+
+          transaction.Commit();
+
+          // send the modified asset to output
+          DA.SetData(
+            ComponentInfo.Name,
+            psetElement
+          );
+        }
+        catch (Exception ex)
+        {
+          transaction.RollBack();
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Revit API Error | {ex.Message}");
+        }
+      }
+    }
+  }
+
+  public class AnalyzeThermalAsset : BasePhysicalAssetComponent<ThermalAssetData>
+  {
+    public override Guid ComponentGuid =>
+      new Guid("c3be363d-c01d-4cf3-b8d2-c345734ae66d");
+
+    public override GH_Exposure Exposure => GH_Exposure.quinary;
+
+    public AnalyzeThermalAsset() : base()
+    {
+      Name = $"Analyze {ComponentInfo.Name}";
+      NickName = $"A-{ComponentInfo.NickName}";
+      Description = $"Analyzes given instance of {ComponentInfo.Description}";
+
+    }
+
+    protected override ParamDefinition[] Inputs => new ParamDefinition[]
+    {
+      ParamDefinition.Create<Parameters.ThermalAsset>(
+        name: ComponentInfo.Name,
+        nickname: ComponentInfo.NickName,
+        description: ComponentInfo.Description,
+        access: GH_ParamAccess.item
+        ),
+    };
+    protected override ParamDefinition[] Outputs => GetAssetDataAsOutputs();
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      DB.PropertySetElement psetElement = default;
+      if (!DA.GetData(ComponentInfo.Name, ref psetElement))
+        return;
+
+      // check asset type
+      if (!MatchesPhysicalAssetType(psetElement))
+      {
+        AddRuntimeMessage(
+          GH_RuntimeMessageLevel.Error,
+          $"Incompatible asset type"
+        );
+        return;
+      }
+
+      SetOutputsFromPropertySetElement(DA, psetElement);
+    }
+  }
 }
