@@ -11,6 +11,7 @@ using Grasshopper.Kernel.Types;
 using DB = Autodesk.Revit.DB;
 using RhinoInside.Revit.Convert.System.Drawing;
 using Rhino.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.Convert.Geometry;
 using System.Reflection;
 using System.Linq.Expressions;
@@ -18,7 +19,7 @@ using System.Linq.Expressions;
 namespace RhinoInside.Revit.GH.Components.Element.Material
 {
   public abstract class BaseAssetComponent<T>
-    : TransactionalComponent where T : AssetData, new()
+    : TransactionalComponent where T : AppearanceAssetData, new()
   {
     protected AssetGHComponent ComponentInfo
     {
@@ -398,16 +399,12 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     }
 
     public static DB.AppearanceAssetElement
-    FindAppearanceAssetElement(DB.Document doc, string name)
-      => DB.AppearanceAssetElement.GetAppearanceAssetElementByName(doc, name);
-
-    public static DB.AppearanceAssetElement
     EnsureAsset(string schemaName, DB.Document doc, string name)
     {
       if (name is null || name == string.Empty)
         return null;
 
-      var existingAsset = FindAppearanceAssetElement(doc, name);
+      var existingAsset = doc.FindAppearanceAssetElement(name);
       if (existingAsset != null)
         return existingAsset;
       var baseAsset = FindLibraryAsset(DB.Visual.AssetType.Appearance, schemaName);
