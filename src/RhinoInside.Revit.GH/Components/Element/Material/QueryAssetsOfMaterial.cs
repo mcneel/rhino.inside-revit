@@ -9,7 +9,7 @@ using DB = Autodesk.Revit.DB;
 using RhinoInside.Revit.External.DB;
 using Autodesk.Private.InfoCenter;
 
-namespace RhinoInside.Revit.GH.Components.Element.Material
+namespace RhinoInside.Revit.GH.Components
 {
 #if REVIT_2019
   public class QueryAssetsOfMaterial : AnalysisComponent
