@@ -1,5 +1,25 @@
 [
   {
+    "desc": "Picker material behaviour options of physical or thermal assets", 
+    "iconsrc": "/static/images/GH/StructuralAssetBehaviour_ValueList.png", 
+    "icontag": null, 
+    "panel": "Material", 
+    "tab": "Revit", 
+    "title": "Physical/Thermal Material Behaviour", 
+    "typename": "StructuralAssetBehaviour_ValueList", 
+    "uuid": "c907b51e-eea7-4ecf-a110-79ef1b7069ec"
+  }, 
+  {
+    "desc": "Picker for physical material type options", 
+    "iconsrc": "/static/images/GH/StructuralAssetClass_ValueList.png", 
+    "icontag": null, 
+    "panel": "Material", 
+    "tab": "Revit", 
+    "title": "Physical Material Type", 
+    "typename": "StructuralAssetClass_ValueList", 
+    "uuid": "6f5d09c7-797f-4ffe-afae-b9c0ddc5905f"
+  }, 
+  {
     "desc": "Represents a Revit document category", 
     "iconsrc": "/static/images/GH/Category.png", 
     "icontag": null, 
@@ -348,6 +368,16 @@
     "title": "Sketch Plane", 
     "typename": "SketchPlane", 
     "uuid": "93bf1f61-69ad-433f-a202-352c14e4ced8"
+  }, 
+  {
+    "desc": "Picker for thermal material type options", 
+    "iconsrc": "/static/images/GH/ThermalMaterialType_ValueList.png", 
+    "icontag": null, 
+    "panel": "Material", 
+    "tab": "Revit", 
+    "title": "Thermal Material Type", 
+    "typename": "ThermalMaterialType_ValueList", 
+    "uuid": "9d9d0211-4598-4f50-921e-ad1208944e7c"
   }, 
   {
     "desc": "Represents a Revit view", 
@@ -1340,6 +1370,156 @@
     "uuid": "7a889b89-c423-4ed8-91d9-5cece1ee803d"
   }, 
   {
+    "desc": "Analyze given Shader asset of \"Generic\" schema", 
+    "iconsrc": "/static/images/GH/AnalyzeGenericShader.png", 
+    "icontag": null, 
+    "panel": "Material", 
+    "tab": "Revit", 
+    "title": "Analyze Shader Asset (Generic)", 
+    "typename": "AnalyzeGenericShader", 
+    "uuid": "5b18389b-5e25-4428-b1a6-1a55109a7a3c"
+  }, 
+  {
+    "desc": "Create a new instance of Physical Asset", 
+    "iconsrc": "/static/images/GH/CreateStructuralAsset.png", 
+    "icontag": null, 
+    "panel": "Material", 
+    "tab": "Revit", 
+    "title": "Create Physical Asset", 
+    "typename": "CreateStructuralAsset", 
+    "uuid": "af2678c8-2a53-4056-9399-5a06dd9ac14d"
+  }, 
+  {
+    "desc": "Modify an existing instance of Physical Asset", 
+    "iconsrc": "/static/images/GH/ModifyStructuralAsset.png", 
+    "icontag": null, 
+    "panel": "Material", 
+    "tab": "Revit", 
+    "title": "Modify Physical Asset", 
+    "typename": "ModifyStructuralAsset", 
+    "uuid": "67a74d31-0878-4b48-8efb-f4ca97389f74"
+  }, 
+  {
+    "desc": "Analyzes given instance of Physical Asset", 
+    "iconsrc": "/static/images/GH/AnalyzeStructuralAsset.png", 
+    "icontag": null, 
+    "panel": "Material", 
+    "tab": "Revit", 
+    "title": "Analyze Physical Asset", 
+    "typename": "AnalyzeStructuralAsset", 
+    "uuid": "ec93f8e0-d2af-4a44-a040-89a7c40b9fc7"
+  }, 
+  {
+    "desc": "Create a new instance of Thermal Asset", 
+    "iconsrc": "/static/images/GH/CreateThermalAsset.png", 
+    "icontag": null, 
+    "panel": "Material", 
+    "tab": "Revit", 
+    "title": "Create Thermal Asset", 
+    "typename": "CreateThermalAsset", 
+    "uuid": "bd9164c4-effb-4145-bb96-006daeaeb99a"
+  }, 
+  {
+    "desc": "Modify an existing instance of Thermal Asset", 
+    "iconsrc": "/static/images/GH/ModifyThermalAsset.png", 
+    "icontag": null, 
+    "panel": "Material", 
+    "tab": "Revit", 
+    "title": "Modify Thermal Asset", 
+    "typename": "ModifyThermalAsset", 
+    "uuid": "2c8f541a-f831-41e1-9e19-3c5a9b07aed4"
+  }, 
+  {
+    "desc": "Analyzes given instance of Thermal Asset", 
+    "iconsrc": "/static/images/GH/AnalyzeThermalAsset.png", 
+    "icontag": null, 
+    "panel": "Material", 
+    "tab": "Revit", 
+    "title": "Analyze Thermal Asset", 
+    "typename": "AnalyzeThermalAsset", 
+    "uuid": "c3be363d-c01d-4cf3-b8d2-c345734ae66d"
+  }, 
+  {
+    "desc": "Modify given Shader asset of \"Generic\" schema", 
+    "iconsrc": "/static/images/GH/ModifyGenericShader.png", 
+    "icontag": null, 
+    "panel": "Material", 
+    "tab": "Revit", 
+    "title": "Modify Shader Asset (Generic)", 
+    "typename": "ModifyGenericShader", 
+    "uuid": "73b2376b-d6c8-4095-b7ce-a66ef4c931e6"
+  }, 
+  {
+    "desc": "Queries appearance, structural, and other assets from given material", 
+    "iconsrc": "/static/images/GH/QueryAssetsOfMaterial.png", 
+    "icontag": null, 
+    "panel": "Material", 
+    "tab": "Revit", 
+    "title": "Extract Material's Assets", 
+    "typename": "QueryAssetsOfMaterial", 
+    "uuid": "1f644064-035a-4fa1-971b-64d7da824f09"
+  }, 
+  {
+    "desc": "Replace existing assets on the given material, with given assets", 
+    "iconsrc": "/static/images/GH/ModifyAssetsOfMaterial.png", 
+    "icontag": null, 
+    "panel": "Material", 
+    "tab": "Revit", 
+    "title": "Replace Material's Assets", 
+    "typename": "ModifyAssetsOfMaterial", 
+    "uuid": "2f1ec561-2c4b-4c44-9587-12b32c6b8351"
+  }, 
+  {
+    "desc": "Construct Bitmap Asset", 
+    "iconsrc": "/static/images/GH/ConstructBitmapTexture.png", 
+    "icontag": null, 
+    "panel": "Material", 
+    "tab": "Revit", 
+    "title": "Construct Bitmap Asset", 
+    "typename": "ConstructBitmapTexture", 
+    "uuid": "37b63660-c083-45e3-9b98-cfdd2b539055"
+  }, 
+  {
+    "desc": "Construct Checker Asset", 
+    "iconsrc": "/static/images/GH/ConstructCheckerTexture.png", 
+    "icontag": null, 
+    "panel": "Material", 
+    "tab": "Revit", 
+    "title": "Construct Checker Asset", 
+    "typename": "ConstructCheckerTexture", 
+    "uuid": "2332c031-de18-43a9-b41f-6405e1460c06"
+  }, 
+  {
+    "desc": "Create a new instance of Shader asset of \"Generic\" schema inside document", 
+    "iconsrc": "/static/images/GH/CreateGenericShader.png", 
+    "icontag": null, 
+    "panel": "Material", 
+    "tab": "Revit", 
+    "title": "Create Shader Asset (Generic)", 
+    "typename": "CreateGenericShader", 
+    "uuid": "0f251f87-317b-4669-bc70-22b29d3eba6a"
+  }, 
+  {
+    "desc": "Deconstruct Bitmap Asset", 
+    "iconsrc": "/static/images/GH/DeconstructBitmapTexture.png", 
+    "icontag": null, 
+    "panel": "Material", 
+    "tab": "Revit", 
+    "title": "Deconstruct Bitmap Asset", 
+    "typename": "DeconstructBitmapTexture", 
+    "uuid": "77b391db-014a-4964-8810-5927df0dd7bb"
+  }, 
+  {
+    "desc": "Deconstruct Checker Asset", 
+    "iconsrc": "/static/images/GH/DeconstructCheckerTexture.png", 
+    "icontag": null, 
+    "panel": "Material", 
+    "tab": "Revit", 
+    "title": "Deconstruct Checker Asset", 
+    "typename": "DeconstructCheckerTexture", 
+    "uuid": "d44a1497-ae52-4e4d-ab8e-962195177fbb"
+  }, 
+  {
     "desc": "Query material identity information", 
     "iconsrc": "/static/images/GH/MaterialIdentity.png", 
     "icontag": null, 
@@ -1495,7 +1675,7 @@
     "icontag": null, 
     "panel": "Element", 
     "tab": "Revit", 
-    "title": "Pin/Unpin Element", 
+    "title": "Element Pin", 
     "typename": "PinUnPinElement", 
     "uuid": "cc205221-1583-47d1-a715-226c39c3fb34"
   }, 
