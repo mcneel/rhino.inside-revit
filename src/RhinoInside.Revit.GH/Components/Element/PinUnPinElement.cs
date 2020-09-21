@@ -12,8 +12,8 @@ namespace RhinoInside.Revit.GH.Components
 
     public PinUnPinElement() : base
     (
-      name: "Element Pin",
-      nickname: "ElemPin",
+      name: "Pin Element",
+      nickname: "PinElem",
       description: "Pins or Unpins elements from Revit document",
       category: "Revit",
       subCategory: "Element"
@@ -37,7 +37,7 @@ namespace RhinoInside.Revit.GH.Components
       (
         new Param_Boolean()
         {
-          Name = "Pin",
+          Name = "Pinned",
           NickName = "P",
           Description = "New state for Element Pin",
           Access = GH_ParamAccess.item,
@@ -64,7 +64,7 @@ namespace RhinoInside.Revit.GH.Components
       (
         new Param_Boolean()
         {
-          Name = "Pin",
+          Name = "Pinned",
           NickName = "P",
           Description = "State for Element Pin",
           Access = GH_ParamAccess.item
@@ -78,11 +78,11 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetData("Element", ref element))
         return;
 
-      var _Pin_ = Params.IndexOfInputParam("Pin");
-      if (_Pin_ >= 0 && Params.Input[_Pin_].DataType != GH_ParamData.@void)
+      var _Pinned_ = Params.IndexOfInputParam("Pinned");
+      if (_Pinned_ >= 0 && Params.Input[_Pinned_].DataType != GH_ParamData.@void)
       {
         bool pinned = false;
-        if (!DA.GetData(_Pin_, ref pinned))
+        if (!DA.GetData(_Pinned_, ref pinned))
           return;
 
         var doc = element.Document;
@@ -95,7 +95,7 @@ namespace RhinoInside.Revit.GH.Components
       }
 
       DA.SetData("Element", element);
-      DA.SetData("Pin", element.APIElement.Pinned);
+      DA.SetData("Pinned", element.APIElement.Pinned);
     }
   }
 }
