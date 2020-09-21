@@ -8,6 +8,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+#if REVIT_2019
   public class ThermalAsset : Element
   {
     public override string TypeName => "Revit Thermal Asset";
@@ -19,4 +20,5 @@ namespace RhinoInside.Revit.GH.Types
     public ThermalAsset() { }
     public ThermalAsset(DB.PropertySetElement asset) : base(asset) { }
   }
+#endif
 }

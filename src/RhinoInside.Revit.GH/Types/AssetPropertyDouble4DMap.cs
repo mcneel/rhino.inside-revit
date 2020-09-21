@@ -13,6 +13,7 @@ using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+#if REVIT_2019
   public class AssetPropertyDouble4DMap : GH_Goo<MAT.AssetPropertyDouble4DMap>
   {
     public override string TypeName => "Mappable Color";
@@ -101,4 +102,5 @@ namespace RhinoInside.Revit.GH.Types
         return $"{new GH_Colour(Value.ValueAsColor)}";
     }
   }
+#endif
 }

@@ -8,15 +8,17 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public class PhysicalAsset : Element
+#if REVIT_2019
+  public class StructuralAsset : Element
   {
     public override string TypeName => "Revit Physical Asset";
     public override string TypeDescription => "Represents a Revit Physical Asset";
     protected override Type ScriptVariableType => typeof(DB.PropertySetElement);
-    public static explicit operator DB.PropertySetElement(PhysicalAsset value) =>
+    public static explicit operator DB.PropertySetElement(StructuralAsset value) =>
       value?.IsValid == true ? value.APIElement as DB.PropertySetElement : default;
 
-    public PhysicalAsset() { }
-    public PhysicalAsset(DB.PropertySetElement asset) : base(asset) { }
+    public StructuralAsset() { }
+    public StructuralAsset(DB.PropertySetElement asset) : base(asset) { }
   }
+#endif
 }
