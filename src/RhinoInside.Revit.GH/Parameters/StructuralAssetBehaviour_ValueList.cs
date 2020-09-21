@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       Category = "Revit";
       SubCategory = "Material";
-      Name = "Material Behaviour";
+      Name = "Physical/Thermal Material Behaviour";
       NickName = "PAMB";
       Description = "Picker material behaviour options of physical or thermal assets";
 
