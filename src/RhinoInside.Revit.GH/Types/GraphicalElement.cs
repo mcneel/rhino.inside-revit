@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
@@ -20,7 +21,7 @@ namespace RhinoInside.Revit.GH.Types
 
   public class GraphicalElement :
     Element,
-    IGH_GraphicalElement, 
+    IGH_GraphicalElement,
     IGH_GeometricGoo,
     IGH_PreviewData
   {
@@ -264,7 +265,7 @@ namespace RhinoInside.Revit.GH.Types
                 origin = start + (axis * 0.5);
                 perp = axis.PerpVector();
               }
-              else if(curve is DB.Arc || curve is DB.Ellipse)
+              else if (curve is DB.Arc || curve is DB.Ellipse)
               {
                 var start = curve.Evaluate(0.0, normalized: false).ToPoint3d();
                 var end = curve.Evaluate(Math.PI, normalized: false).ToPoint3d();
@@ -302,6 +303,75 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     public virtual Brep Surface => null;
+    #endregion
+
+    #region Flip
+    public virtual bool CanFlipFacing
+    {
+      get
+      {
+        return APIElement?.GetType() is Type type &&
+          type.GetMethod("Flip") is MethodInfo &&
+          type.GetProperty("Flipped") is PropertyInfo;
+      }
+    }
+    public virtual bool? FacingFlipped
+    {
+      get
+      {
+        return APIElement is DB.Element element && element.GetType().GetProperty("Flipped") is PropertyInfo Flipped ?
+          (bool?) Flipped.GetValue(element):
+          default;
+      }
+      set
+      {
+        if (value.HasValue && APIElement is DB.Element element)
+        {
+          var Flip = element.GetType().GetMethod("Flip");
+          var Flipped = element.GetType().GetProperty("Flipped");
+
+          if (Flip is null || Flipped is null)
+            throw new InvalidOperationException("Facing can not be flipped for this element.");
+
+          if ((bool) Flipped.GetValue(element) != value)
+            Flip.Invoke(element, new object[] { });
+        }
+      }
+    }
+
+    public virtual bool CanFlipHand => false;
+    public virtual bool? HandFlipped
+    {
+      get => default;
+      set
+      {
+        if (value.HasValue && APIElement is DB.Element element)
+        {
+          if (!CanFlipHand)
+            throw new InvalidOperationException("Hand can not be flipped for this element.");
+
+          if (HandFlipped != value)
+            throw new MissingMemberException(element.GetType().FullName, nameof(HandFlipped));
+        }
+      }
+    }
+
+    public virtual bool CanFlipWorkPlane => false;
+    public virtual bool? WorkPlaneFlipped
+    {
+      get => default;
+      set
+      {
+        if (value.HasValue && APIElement is DB.Element element)
+        {
+          if (!CanFlipWorkPlane)
+            throw new InvalidOperationException("Work Plane can not be flipped for this element.");
+
+          if (WorkPlaneFlipped != value)
+            throw new MissingMemberException(element.GetType().FullName, nameof(WorkPlaneFlipped));
+        }
+      }
+    }
     #endregion
   }
 }
