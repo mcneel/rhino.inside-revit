@@ -108,7 +108,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override Vector3d Orientation
+    public override Vector3d FacingOrientation
     {
       get
       {
@@ -116,11 +116,11 @@ namespace RhinoInside.Revit.GH.Types
         if (instance?.CanFlipFacing == true)
           return instance.FacingOrientation.ToVector3d();
 
-        return base.Orientation;
+        return base.FacingOrientation;
       }
     }
 
-    public override Vector3d Handing
+    public override Vector3d HandOrientation
     {
       get
       {
@@ -128,7 +128,7 @@ namespace RhinoInside.Revit.GH.Types
         if (instance?.CanFlipHand == true)
           return instance.HandOrientation.ToVector3d();
 
-        return base.Handing;
+        return base.HandOrientation;
       }
     }
 

@@ -137,7 +137,7 @@ namespace RhinoInside.Revit.GH.Types
 
       if (typeof(Q).IsAssignableFrom(typeof(GH_Vector)))
       {
-        var orientation = Orientation;
+        var orientation = FacingOrientation;
         if (!orientation.IsValid || orientation.IsZero)
           return false;
 
@@ -282,9 +282,9 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public virtual Vector3d Orientation => Location.YAxis;
+    public virtual Vector3d FacingOrientation => Location.YAxis;
 
-    public virtual Vector3d Handing => Location.XAxis;
+    public virtual Vector3d HandOrientation => Location.XAxis;
 
     public virtual Curve Curve
     {

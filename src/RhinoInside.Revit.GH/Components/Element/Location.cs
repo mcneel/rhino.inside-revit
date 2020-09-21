@@ -75,9 +75,9 @@ namespace RhinoInside.Revit.GH.Components
       (
         new Param_Vector()
         {
-          Name = "Orientation",
-          NickName = "O",
-          Description = "Element orientation direction",
+          Name = "Facing Orientation",
+          NickName = "F",
+          Description = "Element facing orientation",
           Access = GH_ParamAccess.item
         },
         ParamVisibility.Default
@@ -86,9 +86,9 @@ namespace RhinoInside.Revit.GH.Components
       (
         new Param_Vector()
         {
-          Name = "Handing",
+          Name = "Hand Orientation",
           NickName = "H",
-          Description = "Element handing direction",
+          Description = "Element hand orientation",
           Access = GH_ParamAccess.item
         },
         ParamVisibility.Default
@@ -132,18 +132,18 @@ namespace RhinoInside.Revit.GH.Components
           DA.SetData(_Location_, element.Location);
       }
 
-      var _Orientation_ = Params.IndexOfOutputParam("Orientation");
+      var _Orientation_ = Params.IndexOfOutputParam("Facing Orientation");
       if (_Orientation_ >= 0)
       {
-        var orientation = element.Orientation;
+        var orientation = element.FacingOrientation;
         if (orientation.IsValid && !orientation.IsZero)
           DA.SetData(_Orientation_, orientation);
       }
 
-      var _Handing_ = Params.IndexOfOutputParam("Handing");
+      var _Handing_ = Params.IndexOfOutputParam("Hand Orientation");
       if (_Handing_ >= 0)
       {
-        var handing = element.Orientation;
+        var handing = element.HandOrientation;
         if (handing.IsValid && !handing.IsZero)
           DA.SetData(_Handing_, handing);
       }
