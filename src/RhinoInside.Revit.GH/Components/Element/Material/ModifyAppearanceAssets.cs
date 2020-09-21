@@ -9,10 +9,11 @@ using Grasshopper.Kernel.Parameters;
 using RhinoInside.Revit.External;
 using RhinoInside.Revit.External.DB;
 using RhinoInside.Revit.GH.Parameters;
+using RhinoInside.Revit.GH.Components.Element.Material;
 using DB = Autodesk.Revit.DB;
 
 
-namespace RhinoInside.Revit.GH.Components.Element.Material
+namespace RhinoInside.Revit.GH.Components
 {
 #if REVIT_2019
   public abstract class ModifyAppearanceAssets<T>
