@@ -12,6 +12,7 @@ using RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components.Element.Material
 {
+#if REVIT_2019
   public abstract class ConstructTextureAsset<T>
     : BaseAssetComponent<T> where T : TextureData, new()
   {
@@ -55,4 +56,5 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     public override Guid ComponentGuid
       => new Guid("2332c031-de18-43a9-b41f-6405e1460c06");
   }
+#endif
 }

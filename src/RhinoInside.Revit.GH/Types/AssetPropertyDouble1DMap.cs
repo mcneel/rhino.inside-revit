@@ -13,6 +13,7 @@ using RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+#if REVIT_2019
   public class AssetPropertyDouble1DMap : GH_Goo<MAT.AssetPropertyDouble1DMap>
   {
     public override string TypeName => "Mappable Double";
@@ -22,7 +23,7 @@ namespace RhinoInside.Revit.GH.Types
     public override sealed IGH_Goo Duplicate() => (IGH_Goo) MemberwiseClone();
 
     public AssetPropertyDouble1DMap() { }
-    public AssetPropertyDouble1DMap(MAT.AssetPropertyDouble1DMap prop): base(prop) { }
+    public AssetPropertyDouble1DMap(MAT.AssetPropertyDouble1DMap prop) : base(prop) { }
 
     public override bool CastFrom(object source)
     {
@@ -86,4 +87,5 @@ namespace RhinoInside.Revit.GH.Types
         return $"{Value.Value}";
     }
   }
+#endif
 }

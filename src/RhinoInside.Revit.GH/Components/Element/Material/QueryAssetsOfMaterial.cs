@@ -11,6 +11,7 @@ using Autodesk.Private.InfoCenter;
 
 namespace RhinoInside.Revit.GH.Components.Element.Material
 {
+#if REVIT_2019
   public class QueryAssetsOfMaterial : AnalysisComponent
   {
     public override Guid ComponentGuid =>
@@ -81,7 +82,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
       if (doc.GetElement(material.StructuralAssetId) is DB.PropertySetElement sae)
         DA.SetData(
           "Physical Asset",
-          new Types.PhysicalAsset(sae)
+          new Types.StructuralAsset(sae)
           );
       // thermal asset
       if (doc.GetElement(material.ThermalAssetId) is DB.PropertySetElement tae)
@@ -91,4 +92,5 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
           );
     }
   }
+#endif
 }

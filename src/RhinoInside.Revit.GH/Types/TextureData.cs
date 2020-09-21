@@ -11,7 +11,8 @@ using RhinoInside.Revit.GH.Components.Element.Material;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public class TextureData :GH_Goo<MAT.TextureData>
+#if REVIT_2019
+  public class TextureData : GH_Goo<MAT.TextureData>
   {
     public override bool IsValid => Value != null;
 
@@ -28,8 +29,8 @@ namespace RhinoInside.Revit.GH.Types
 
     public override string TypeDescription => $"Represents a {TypeName}";
 
-    public TextureData() : base () { }
-    public TextureData(MAT.TextureData textureData) : base (textureData) { }
+    public TextureData() : base() { }
+    public TextureData(MAT.TextureData textureData) : base(textureData) { }
 
     public override IGH_Goo Duplicate() => (IGH_Goo) MemberwiseClone();
 
@@ -62,4 +63,5 @@ namespace RhinoInside.Revit.GH.Types
              $"Invalid {TypeName}";
     }
   }
+#endif
 }

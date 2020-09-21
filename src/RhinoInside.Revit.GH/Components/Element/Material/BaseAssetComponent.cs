@@ -18,6 +18,7 @@ using System.Linq.Expressions;
 
 namespace RhinoInside.Revit.GH.Components.Element.Material
 {
+#if REVIT_2019
   public abstract class BaseAssetComponent<T>
     : TransactionalComponent where T : AppearanceAssetData, new()
   {
@@ -601,4 +602,5 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     }
     #endregion
   }
+#endif
 }

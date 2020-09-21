@@ -13,6 +13,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Element.Material
 {
+#if REVIT_2019
   public abstract class AnalyzeAppearanceAsset<T>
   : BaseAssetComponent<T> where T : ShaderData, new()
   {
@@ -34,7 +35,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
         access: GH_ParamAccess.item
         ),
     };
-    protected override ParamDefinition[] Outputs => GetAssetDataAsOutputs(); 
+    protected override ParamDefinition[] Outputs => GetAssetDataAsOutputs();
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
@@ -54,4 +55,5 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     public override Guid ComponentGuid =>
       new Guid("5b18389b-5e25-4428-b1a6-1a55109a7a3c");
   }
+#endif
 }

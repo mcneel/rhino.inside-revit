@@ -14,6 +14,8 @@ using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Element.Material
 {
+#if REVIT_2019
+
   #region Custom Asset GH Type Data
 
   /// <summary>
@@ -32,7 +34,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
   /// <summary>
   /// Parameter that accepts a single double value or a texture
   /// </summary>
-  public class AssetPropertyDouble1DMap: AssetParameterFlex
+  public class AssetPropertyDouble1DMap : AssetParameterFlex
   {
     public double Value = 0;
     public AssetPropertyDouble1DMap(TextureData tdata) : base(tdata) { }
@@ -49,7 +51,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
   /// <summary>
   /// Parameter that can accept a single double 4d value or texture
   /// </summary>
-  public class AssetPropertyDouble4DMap: AssetParameterFlex
+  public class AssetPropertyDouble4DMap : AssetParameterFlex
   {
     public double Value1 = 0;
     public double Value2 = 0;
@@ -69,10 +71,10 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
       get
       {
         return System.Drawing.Color.FromArgb(
-          (int)(Value1 * 255),
-          (int)(Value2 * 255),
-          (int)(Value3 * 255),
-          (int)(Value4 * 255)
+          (int) (Value1 * 255),
+          (int) (Value2 * 255),
+          (int) (Value3 * 255),
+          (int) (Value4 * 255)
           );
       }
       set
@@ -259,7 +261,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
       var ghCompInfo = GetGHComponentInfo();
       if (ghCompInfo != null)
 #if DEBUG
-          return $"{ghCompInfo.Name} ({Schema} Schema)";
+        return $"{ghCompInfo.Name} ({Schema} Schema)";
 #else
           return ghCompInfo.Name;
 #endif
@@ -613,7 +615,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
 
   [APIAsset(typeof(DB.StructuralAsset))]
   [AssetGHComponent("Physical Asset", "PHAST", "Physical Asset")]
-  public class StructuralAssetData: PhysicalMaterialData
+  public class StructuralAssetData : PhysicalMaterialData
   {
     [APIAssetBuiltInProp(BuiltInParameter.PROPERTY_SET_NAME, typeof(string))]
     [AssetGHParameter(typeof(Param_String), "Name", "N", "Physical asset name", optional: false, modifiable: false)]
@@ -785,7 +787,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
 
   [APIAsset(typeof(DB.ThermalAsset))]
   [AssetGHComponent("Thermal Asset", "THAST", "Thermal Asset")]
-  public class ThermalAssetData: PhysicalMaterialData
+  public class ThermalAssetData : PhysicalMaterialData
   {
     [APIAssetBuiltInProp(BuiltInParameter.PROPERTY_SET_NAME, typeof(string))]
     [AssetGHParameter(typeof(Param_String), "Name", "N", "Thermal asset name", optional: false, modifiable: false)]
@@ -894,4 +896,6 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
   #endregion
 
   #endregion
+
+#endif
 }
