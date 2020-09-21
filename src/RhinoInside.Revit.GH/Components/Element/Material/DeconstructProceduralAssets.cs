@@ -13,6 +13,7 @@ using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Element.Material
 {
+#if REVIT_2019
   public abstract class DeconstructTextureAsset<T>
     : BaseAssetComponent<T> where T : TextureData, new()
   {
@@ -39,7 +40,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       Types.TextureData textureAsset = default;
-      if(DA.GetData(ComponentInfo.Name, ref textureAsset))
+      if (DA.GetData(ComponentInfo.Name, ref textureAsset))
       {
         if (textureAsset.Value is T textureData)
           SetOutputsFromAssetData(DA, textureData);
@@ -65,4 +66,5 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     public override Guid ComponentGuid
       => new Guid("d44a1497-ae52-4e4d-ab8e-962195177fbb");
   }
+#endif
 }

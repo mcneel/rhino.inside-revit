@@ -11,6 +11,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
+#if REVIT_2019
   public class AssetPropertyDouble1DMap : GH_Param<Types.AssetPropertyDouble1DMap>
   {
     public override Guid ComponentGuid
@@ -31,4 +32,5 @@ namespace RhinoInside.Revit.GH.Parameters
       )
     { }
   }
+#endif
 }

@@ -12,7 +12,8 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  class TextureData: GH_Param<Types.TextureData>
+#if REVIT_2019
+  class TextureData : GH_Param<Types.TextureData>
   {
     public override Guid ComponentGuid
       => new Guid("a7c7ecef-066d-4b39-b2e8-01b6d53adfeb");
@@ -32,4 +33,5 @@ namespace RhinoInside.Revit.GH.Parameters
       access: GH_ParamAccess.item)
     { }
   }
+#endif
 }

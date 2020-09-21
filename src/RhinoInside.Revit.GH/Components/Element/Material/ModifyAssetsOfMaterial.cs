@@ -13,6 +13,7 @@ using Autodesk.Revit.DB.Structure;
 
 namespace RhinoInside.Revit.GH.Components.Element.Material
 {
+#if REVIT_2019
   public class ModifyAssetsOfMaterial : TransactionalComponent
   {
     public override Guid ComponentGuid =>
@@ -102,4 +103,5 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
       DA.SetData("Material", material);
     }
   }
+#endif
 }

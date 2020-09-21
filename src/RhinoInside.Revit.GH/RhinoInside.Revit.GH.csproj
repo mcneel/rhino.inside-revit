@@ -405,7 +405,7 @@
     <Compile Include="Types\Material.cs" />
     <Compile Include="Types\HostObject.cs" />
     <Compile Include="Types\DataObject.cs" />
-    <Compile Include="Types\PhysicalAsset.cs" />
+    <Compile Include="Types\StructuralAsset.cs" />
     <Compile Include="Types\TextureData.cs" />
     <Compile Include="Types\ThermalAsset.cs" />
     <Compile Include="Types\View.cs" />

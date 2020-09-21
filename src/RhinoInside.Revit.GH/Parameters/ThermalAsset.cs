@@ -10,6 +10,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
+#if REVIT_2019
   public class ThermalAsset : ElementIdWithoutPreviewParam<Types.ThermalAsset, DB.PropertySetElement>
   {
     public override GH_Exposure Exposure => GH_Exposure.hidden;
@@ -24,4 +25,5 @@ namespace RhinoInside.Revit.GH.Parameters
       )
     { }
   }
+#endif
 }

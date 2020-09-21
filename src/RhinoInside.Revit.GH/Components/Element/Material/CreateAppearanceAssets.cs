@@ -13,6 +13,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Element.Material
 {
+#if REVIT_2019
   public abstract class CreateAppearanceAsset<T>
     : BaseAssetComponent<T> where T : ShaderData, new()
   {
@@ -79,4 +80,6 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     public override Guid ComponentGuid
       => new Guid("0f251f87-317b-4669-bc70-22b29d3eba6a");
   }
+
+#endif
 }
