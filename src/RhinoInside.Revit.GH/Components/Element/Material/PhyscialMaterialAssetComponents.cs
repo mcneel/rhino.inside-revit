@@ -9,14 +9,10 @@ using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 
 using DB = Autodesk.Revit.DB;
-using RhinoInside.Revit.Convert.System.Drawing;
-using Rhino.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.Convert.Geometry;
-using System.Reflection;
-using System.Linq.Expressions;
+using RhinoInside.Revit.GH.Components.Element.Material;
 
-namespace RhinoInside.Revit.GH.Components.Element.Material
+namespace RhinoInside.Revit.GH.Components
 {
 #if REVIT_2019
   public abstract class BasePhysicalAssetComponent<T>

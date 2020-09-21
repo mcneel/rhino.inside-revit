@@ -11,7 +11,7 @@ using RhinoInside.Revit.External.DB;
 using RhinoInside.Revit.External.DB.Extensions;
 using Autodesk.Revit.DB.Structure;
 
-namespace RhinoInside.Revit.GH.Components.Element.Material
+namespace RhinoInside.Revit.GH.Components
 {
 #if REVIT_2019
   public class ModifyAssetsOfMaterial : TransactionalComponent

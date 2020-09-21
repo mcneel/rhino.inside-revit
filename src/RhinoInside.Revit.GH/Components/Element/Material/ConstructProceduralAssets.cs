@@ -9,8 +9,9 @@ using Grasshopper.Kernel.Parameters;
 
 using DB = Autodesk.Revit.DB;
 using RhinoInside.Revit.External.DB;
+using RhinoInside.Revit.GH.Components.Element.Material;
 
-namespace RhinoInside.Revit.GH.Components.Element.Material
+namespace RhinoInside.Revit.GH.Components
 {
 #if REVIT_2019
   public abstract class ConstructTextureAsset<T>
