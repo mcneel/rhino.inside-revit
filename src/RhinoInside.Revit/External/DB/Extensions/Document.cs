@@ -345,23 +345,47 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// </summary>
     /// <param name="doc"></param>
     /// <returns>The active graphical <see cref="Autodesk.Revit.DB.View"/></returns>
-    public static View GetActiveGraphicalView(this Document doc)
+    public static View GetActiveGraphicalView(this Document doc) => Rhinoceros.InvokeInHostContext(() =>
     {
       using (var uiDocument = new Autodesk.Revit.UI.UIDocument(doc))
       {
         var activeView = uiDocument.ActiveGraphicalView;
+
         if (activeView is null)
         {
-          var openViews = Rhinoceros.InvokeInHostContext(() => uiDocument.GetOpenUIViews()).
-          Select(x => doc.GetElement(x.ViewId) as View).
-          Where(x => x.ViewType.IsGraphicalViewType());
+          var openViews = uiDocument.GetOpenUIViews().
+              Select(x => doc.GetElement(x.ViewId) as View).
+              Where(x => x.ViewType.IsGraphicalViewType());
 
           activeView = openViews.FirstOrDefault();
         }
 
         return activeView;
       }
-    }
+    });
+
+    /// <summary>
+    /// Gets the active <see cref="Autodesk.Revit.DB.View"/> of the provided <see cref="Autodesk.Revit.DB.Document"/>.
+    /// </summary>
+    /// <param name="doc"></param>
+    /// <returns>The active <see cref="Autodesk.Revit.DB.View"/></returns>
+    public static View GetActiveView(this Document doc) => Rhinoceros.InvokeInHostContext(() =>
+    {
+      using (var uiDocument = new Autodesk.Revit.UI.UIDocument(doc))
+      {
+        var activeView = uiDocument.ActiveView;
+
+        if (activeView is null)
+        {
+          var openViews = uiDocument.GetOpenUIViews().
+              Select(x => doc.GetElement(x.ViewId) as View);
+
+          activeView = openViews.FirstOrDefault();
+        }
+
+        return activeView;
+      }
+    });
 
     static readonly Guid PurgePerformanceAdviserRuleId = new Guid("E8C63650-70B7-435A-9010-EC97660C1BDA");
     public static bool GetPurgableElementTypes(this Document doc, out ICollection<ElementId> purgableTypeIds)

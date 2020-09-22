@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           if (doc.IsLinked)
             continue;
 
-          if (doc.GetActiveGraphicalView() is null)
+          if (doc.GetActiveView() is null)
             continue;
 
           if (doc.IsFamilyDocument)
