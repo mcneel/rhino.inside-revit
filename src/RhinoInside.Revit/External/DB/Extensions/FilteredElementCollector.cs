@@ -16,5 +16,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
       using (var filter = new ElementParameterFilter(rule))
         return collector.WherePasses(filter);
     }
+
+    public static FilteredElementCollector WhereParameterEqualsTo(this FilteredElementCollector collector, BuiltInParameter paramId, string value, bool caseSensitive = true)
+    {
+      using (var provider = new ParameterValueProvider(new ElementId(paramId)))
+      using (var evaluator = new FilterStringEquals())
+      using (var rule = new FilterStringRule(provider, evaluator, value, caseSensitive))
+      using (var filter = new ElementParameterFilter(rule))
+        return collector.WherePasses(filter);
+    }
   }
 }
