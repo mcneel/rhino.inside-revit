@@ -82,20 +82,20 @@ namespace RhinoInside.Revit.GH.Components
       if (_Pinned_ >= 0 && Params.Input[_Pinned_].DataType != GH_ParamData.@void)
       {
         bool pinned = false;
-        if (!DA.GetData(_Pinned_, ref pinned))
-          return;
-
-        var doc = element.Document;
-        using (var transaction = NewTransaction(doc))
+        if (DA.GetData(_Pinned_, ref pinned))
         {
-          transaction.Start();
-          element.APIElement.Pinned = pinned;
-          transaction.Commit();
+          var doc = element.Document;
+          using (var transaction = NewTransaction(doc))
+          {
+            transaction.Start();
+            element.Pinned = pinned;
+            transaction.Commit();
+          }
         }
       }
 
       DA.SetData("Element", element);
-      DA.SetData("Pinned", element.APIElement.Pinned);
+      DA.SetData("Pinned", element.Pinned);
     }
   }
 }
