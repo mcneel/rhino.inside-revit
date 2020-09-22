@@ -21,39 +21,10 @@ namespace RhinoInside.Revit.GH.Components
     protected int DocumentParamIndex => Params.IndexOfInputParam(DocumentParamName);
     protected IGH_Param DocumentParam => DocumentParamIndex < 0 ? default : Params.Input[DocumentParamIndex];
 
-    public override void ClearData()
-    {
-      Message = string.Empty;
-
-      base.ClearData();
-    }
-
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DB.Document Document = default;
-      var _Document_ = Params.IndexOfInputParam("Document");
-      if (_Document_ < 0)
-      {
-        Document = Revit.ActiveDBDocument;
-        if (Document?.IsValidObject != true)
-        {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "There is no active Revit document");
-          return;
-        }
-
-        // In case the user has more than one document open we show which one this component is working on
-        if (Revit.ActiveDBApplication.Documents.Size > 1)
-          Message = Document.Title.TripleDot(16);
-      }
-      else
-      {
-        DA.GetData(_Document_, ref Document);
-        if (Document?.IsValidObject != true)
-        {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Input parameter Document failed to collect data");
-          return;
-        }
-      }
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var Document))
+        return;
 
       TrySolveInstance(DA, Document);
     }
