@@ -6,7 +6,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class DocumentIdentity : DocumentComponent
+  public class DocumentIdentity : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("94BD655C-77DD-4A88-BDDB-B9456C45F06C");
     public override GH_Exposure Exposure => GH_Exposure.primary;
@@ -25,7 +25,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.FromParam(DocumentComponent.CreateDocumentParam(), ParamVisibility.Voluntary),
+      ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -37,8 +37,11 @@ namespace RhinoInside.Revit.GH.Components
       //ParamDefinition.Create<Parameters.Element>("Project Information", "I", "The Document ProjectInformation element", GH_ParamAccess.item)
     };
 
-    protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
+        return;
+
       DA.SetData("Title", doc.Title);
       DA.SetData("Is Family", doc.IsFamilyDocument);
       DA.SetData("Unit System", (DB.UnitSystem) doc.DisplayUnitSystem);
@@ -46,7 +49,7 @@ namespace RhinoInside.Revit.GH.Components
     }
   }
 
-  public class DocumentFile : DocumentComponent
+  public class DocumentFile : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("C1C15806-311A-4A07-9DAE-6DBD1D98EC05");
     public override GH_Exposure Exposure => GH_Exposure.obscure;
@@ -66,7 +69,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.FromParam(DocumentComponent.CreateDocumentParam(), ParamVisibility.Voluntary),
+      ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -80,8 +83,11 @@ namespace RhinoInside.Revit.GH.Components
       ParamDefinition.Create<Param_Guid>("VersionGUID", "VGUID", "A unique identifier for the document version", GH_ParamAccess.item),
     };
 
-    protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
+        return;
+
       var version = DB.Document.GetDocumentVersion(doc);
 
       DA.SetData("DocumentGUID", doc.GetFingerprintGUID());
@@ -93,7 +99,7 @@ namespace RhinoInside.Revit.GH.Components
     }
   }
 
-  public class DocumentWorksharing : DocumentComponent
+  public class DocumentWorksharing : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("F7D56DB0-F1C1-45BB-AA07-196039FFF862");
     public override GH_Exposure Exposure => GH_Exposure.obscure;
@@ -112,7 +118,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.FromParam(CreateDocumentParam(), ParamVisibility.Voluntary),
+      ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -124,8 +130,11 @@ namespace RhinoInside.Revit.GH.Components
       ParamDefinition.Create<Param_Boolean>("Detached", "D", "Identifies if a workshared document is detached", GH_ParamAccess.item),
     };
 
-    protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
+        return;
+
       DA.SetData("IsWorkshared", doc.IsWorkshared);
 
       if (doc.IsWorkshared)
@@ -144,7 +153,7 @@ namespace RhinoInside.Revit.GH.Components
 
 
 #if REVIT_2020
-  public class DocumentCloud : DocumentComponent
+  public class DocumentCloud : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("2577A55B-A198-4760-9183-ADF8193FB5BD");
     public override GH_Exposure Exposure => GH_Exposure.obscure;
@@ -163,7 +172,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.FromParam(CreateDocumentParam(), ParamVisibility.Voluntary),
+      ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -174,8 +183,11 @@ namespace RhinoInside.Revit.GH.Components
       ParamDefinition.Create<Param_Guid>("ModelGUID", "MID", "The GUID identifies this model in the Cloud project", GH_ParamAccess.item),
     };
 
-    protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
+        return;
+
       DA.SetData("IsInCloud", doc.IsModelInCloud);
 
       if (doc.IsModelInCloud)

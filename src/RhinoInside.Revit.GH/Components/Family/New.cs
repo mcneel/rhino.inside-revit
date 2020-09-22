@@ -13,7 +13,7 @@ using Grasshopper.Kernel.Parameters;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class FamilyNew : DocumentComponent
+  public class FamilyNew : TransactionalComponent
   {
     public override Guid ComponentGuid => new Guid("82523911-309F-4A66-A4B9-CF21E0AC250E");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
@@ -35,7 +35,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       ParamDefinition.FromParam
       (
-        CreateDocumentParam(),
+        new Parameters.Document(),
         ParamVisibility.Voluntary
       ),
       ParamDefinition.FromParam
@@ -513,8 +513,11 @@ namespace RhinoInside.Revit.GH.Components
       );
     }
 
-    protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
+        return;
+
       var scaleFactor = 1.0 / Revit.ModelUnits;
 
       var overrideFamily = false;

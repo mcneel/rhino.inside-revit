@@ -185,7 +185,6 @@
     <Compile Include="Components\Category\QueryCategories.cs" />
     <Compile Include="Components\Category\SubCategories.cs" />
     <Compile Include="Components\Component.cs" />
-    <Compile Include="Components\DocumentComponent.cs" />
     <Compile Include="Components\Document\Active.cs" />
     <Compile Include="Components\Document\AllDocuments.cs" />
     <Compile Include="Components\Document\Links.cs" />

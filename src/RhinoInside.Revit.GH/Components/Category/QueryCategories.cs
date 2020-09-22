@@ -54,7 +54,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.FromParam(DocumentComponent.CreateDocumentParam(), ParamVisibility.Voluntary),
+      ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
       ParamDefinition.Create<Parameters.Param_Enum<Types.CategoryType>>("Type", "T", "Category type", DB.CategoryType.Model, GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Parameters.Category>("Parent", "P", "Parent category", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_String>("Name", "N", "Category name", GH_ParamAccess.item, optional: true),
@@ -70,8 +70,11 @@ namespace RhinoInside.Revit.GH.Components
       ParamDefinition.Create<Parameters.Category>("Categories", "C", "Categories list", GH_ParamAccess.list)
     };
 
-    protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
+        return;
+
       var categoryType = DB.CategoryType.Invalid;
       DA.GetData("Type", ref categoryType);
 
