@@ -25,7 +25,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.FromParam(DocumentComponent.CreateDocumentParam(), ParamVisibility.Voluntary),
+      ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item),
     };
 
@@ -35,8 +35,11 @@ namespace RhinoInside.Revit.GH.Components
       ParamDefinition.Create<Parameters.Element>("Elements", "E", "Elements list", GH_ParamAccess.list)
     };
 
-    protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
+        return;
+
       DA.DisableGapLogic();
 
       DB.ElementFilter filter = null;
@@ -86,8 +89,6 @@ namespace RhinoInside.Revit.GH.Components
     {
       ParamDefinition.Create<Parameters.GraphicalElement>("Elements", "E", "Elements list", GH_ParamAccess.list)
     };
-
-    protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc) { }
 
     static DB.ElementFilter ElementCategoriesFilter(DB.Document doc, DB.ElementId[] ids)
     {

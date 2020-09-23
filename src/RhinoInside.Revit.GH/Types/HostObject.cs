@@ -80,8 +80,6 @@ namespace RhinoInside.Revit.GH.Types
         return base.Location;
       }
     }
-
-    public override Vector3d Orientation => base.Orientation;
   }
 
   public interface IGH_HostObjectType : IGH_ElementType

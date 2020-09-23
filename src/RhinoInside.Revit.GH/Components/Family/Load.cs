@@ -7,7 +7,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class FamilyLoad : DocumentComponent
+  public class FamilyLoad : TransactionalComponent
   {
     public override Guid ComponentGuid => new Guid("0E244846-95AE-4B0E-8218-CB24FD4D34D1");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       ParamDefinition.FromParam
       (
-        CreateDocumentParam(),
+        new Parameters.Document(),
         ParamVisibility.Voluntary
       ),
       ParamDefinition.FromParam
@@ -82,8 +82,11 @@ namespace RhinoInside.Revit.GH.Components
       )
     };
 
-    protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
+        return;
+
       var filePath = string.Empty;
       if (!DA.GetData("Path", ref filePath))
         return;

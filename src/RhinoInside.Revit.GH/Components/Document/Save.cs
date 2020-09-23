@@ -8,7 +8,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class DocumentSave : DocumentComponent
+  public class DocumentSave : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("FBB2E4A2-CC2A-470E-B7E8-CB3320166CC5");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.FromParam(CreateDocumentParam(), ParamVisibility.Voluntary),
+      ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
       ParamDefinition.FromParam
       (
         new Param_FilePath()
@@ -51,8 +51,11 @@ namespace RhinoInside.Revit.GH.Components
       ParamDefinition.Create<Parameters.Document>("Document", "DOC", string.Empty, GH_ParamAccess.list)
     };
 
-    protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
+        return;
+
       var filePath = string.Empty;
       DA.GetData("Path", ref filePath);
 

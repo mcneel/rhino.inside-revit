@@ -17,6 +17,7 @@ using Grasshopper.Plugin;
 using Grasshopper.Kernel;
 using Grasshopper.GUI.Canvas;
 using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.Convert.Units;
 
 namespace RhinoInside.Revit.GH
 {
@@ -61,6 +62,7 @@ namespace RhinoInside.Revit.GH
       Instances.CanvasCreated += Canvas_Created = (canvas) =>
       {
         Instances.CanvasCreated -= Canvas_Created;
+        Instances.DocumentEditor.Activated += DocumentEditor_Activated;
         canvas.DocumentChanged  += ActiveCanvas_DocumentChanged;
       };
 
@@ -69,6 +71,7 @@ namespace RhinoInside.Revit.GH
       {
         Instances.CanvasDestroyed -= Canvas_Destroyed;
         canvas.DocumentChanged    -= ActiveCanvas_DocumentChanged;
+        Instances.DocumentEditor.Activated -= DocumentEditor_Activated;
       };
 
       return LoadReturnCode.Success;
@@ -400,11 +403,34 @@ namespace RhinoInside.Revit.GH
     #endregion
 
     #region Revit Document
+    static UnitSystem revitUnitSystem = UnitSystem.Unset;
     static UnitSystem modelUnitSystem = UnitSystem.Unset;
     public static UnitSystem ModelUnitSystem
     {
       get => Instances.ActiveCanvas is null ? UnitSystem.Unset : modelUnitSystem;
       private set => modelUnitSystem = value;
+    }
+
+    private void DocumentEditor_Activated(object sender, EventArgs e)
+    {
+      var revitUS = UnitSystem.Unset;
+
+      if (Revit.ActiveUIDocument?.Document is DB.Document revitDoc)
+      {
+        var units = revitDoc.GetUnits();
+        var lengthFormatoptions = units.GetFormatOptions(DB.UnitType.UT_Length);
+        revitUS = lengthFormatoptions.DisplayUnits.ToUnitSystem();
+      }
+
+      if (RhinoDoc.ActiveDoc is RhinoDoc doc)
+      {
+        var hasUnits = doc.ModelUnitSystem != UnitSystem.Unset && doc.ModelUnitSystem != UnitSystem.None;
+        if (revitUnitSystem != revitUS || !hasUnits)
+        {
+          revitUnitSystem = revitUS;
+          Rhinoceros.AuditUnits(doc);
+        }
+      }
     }
 
     void ActiveCanvas_DocumentChanged(GH_Canvas sender, GH_CanvasDocumentChangedEventArgs e)
@@ -433,7 +459,7 @@ namespace RhinoInside.Revit.GH
 
       foreach (var project in projects)
       {
-        var group = new DB.TransactionGroup(project, $"Grasshopper {now}: {name}");
+        var group = new DB.TransactionGroup(project, $"Grasshopper {now}: {name.TripleDot(16)}");
         group.Start();
 
         OpenTransactionGroups.Push(group);
@@ -441,7 +467,7 @@ namespace RhinoInside.Revit.GH
 
       foreach (var family in families)
       {
-        var group = new DB.TransactionGroup(family, $"Grasshopper {now}: {name}");
+        var group = new DB.TransactionGroup(family, $"Grasshopper {now}: {name.TripleDot(16)}");
         group.Start();
 
         OpenTransactionGroups.Push(group);
@@ -582,7 +608,7 @@ namespace RhinoInside.Revit.GH
         foreach (var obj in ExpiredObjects)
           obj.ExpireSolution(false);
 
-        if (Operation == UndoOperation.TransactionCommitted)
+        if(ExpiredObjects.Count > 0 && Operation == UndoOperation.TransactionCommitted)
         {
           Definition.NewSolution(false);
         }

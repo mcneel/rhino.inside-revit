@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -185,7 +185,6 @@
     <Compile Include="Components\Category\QueryCategories.cs" />
     <Compile Include="Components\Category\SubCategories.cs" />
     <Compile Include="Components\Component.cs" />
-    <Compile Include="Components\DocumentComponent.cs" />
     <Compile Include="Components\Document\Active.cs" />
     <Compile Include="Components\Document\AllDocuments.cs" />
     <Compile Include="Components\Document\Links.cs" />
@@ -220,6 +219,7 @@
     <Compile Include="Components\Element\Delete.cs" />
     <Compile Include="Components\Element\Dependents.cs" />
     <Compile Include="Components\ElementCollectorComponent.cs" />
+    <Compile Include="Components\Element\FlipUnflipElement.cs" />
     <Compile Include="Components\Element\Geometry.cs" />
     <Compile Include="Components\Element\Group\ByLocation.cs" />
     <Compile Include="Components\Element\Group\Elements.cs" />
@@ -251,6 +251,7 @@
     <Compile Include="Components\Element\Material\ByName.cs" />
     <Compile Include="Components\Element\ModelLine\ByCurve.cs" />
     <Compile Include="Components\Element\Passport.cs" />
+    <Compile Include="Components\Element\PinUnPinElement.cs" />
     <Compile Include="Components\Element\Preview.cs" />
     <Compile Include="Components\Element\Purge.cs" />
     <Compile Include="Components\Element\QueryElements.cs" />
@@ -303,7 +304,6 @@
     <Compile Include="Enum.cs" />
     <Compile Include="Extensions\Grasshopper.cs" />
     <Compile Include="Extensions\System.Collections.Generic.cs" />
-    <Compile Include="Extensions\System.cs" />
     <Compile Include="Extensions\WinForms.cs" />
     <Compile Include="Parameters\Param.cs" />
     <Compile Include="Parameters\DataObject.cs" />
@@ -394,6 +394,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">

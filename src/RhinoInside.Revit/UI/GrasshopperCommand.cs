@@ -76,6 +76,10 @@ namespace RhinoInside.Revit.UI
   class CommandGrasshopperSolver : GrasshopperCommand
   {
     static PushButton Button;
+    static readonly System.Windows.Media.ImageSource SolverOnSmall = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.SolverOn.png", true);
+    static readonly System.Windows.Media.ImageSource SolverOnLarge = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.SolverOn.png", false);
+    static readonly System.Windows.Media.ImageSource SolverOffSmall = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.SolverOff.png", true);
+    static readonly System.Windows.Media.ImageSource SolverOffLarge = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.SolverOff.png", false);
 
     protected new class Availability : GrasshopperCommand.Availability
     {
@@ -91,14 +95,14 @@ namespace RhinoInside.Revit.UI
       if (GH_Document.EnableSolutions)
       {
         Button.ToolTip = "Disable the Grasshopper solver";
-        Button.Image = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.SolverOn.png", true);
-        Button.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.SolverOn.png");
+        Button.Image = SolverOnSmall;
+        Button.LargeImage = SolverOnLarge;
       }
       else
       {
         Button.ToolTip = "Enable the Grasshopper solver";
-        Button.Image = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.SolverOff.png", true);
-        Button.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.SolverOff.png");
+        Button.Image = SolverOffSmall;
+        Button.LargeImage = SolverOffLarge;
       }
     }
 

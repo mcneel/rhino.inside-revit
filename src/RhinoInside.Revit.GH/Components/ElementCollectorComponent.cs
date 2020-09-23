@@ -3,7 +3,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public abstract class ElementCollectorComponent : DocumentComponent
+  public abstract class ElementCollectorComponent : ZuiComponent
   {
     protected ElementCollectorComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }

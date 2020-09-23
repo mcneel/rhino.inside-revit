@@ -57,5 +57,20 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return System.Drawing.Rectangle.Empty;
     }
+
+    public static ElementId GetAssociatedLevelId(this ViewPlan view)
+    {
+      if (view.get_Parameter(BuiltInParameter.PLAN_VIEW_LEVEL)?.AsString() is string levelName)
+      {
+        using (var collector = new FilteredElementCollector(view.Document))
+        {
+          return collector.OfClass(typeof(Level)).
+                 WhereParameterEqualsTo(BuiltInParameter.DATUM_TEXT, levelName).
+                 FirstElementId();
+        }
+      }
+
+      return ElementId.InvalidElementId;
+    }
   }
 }

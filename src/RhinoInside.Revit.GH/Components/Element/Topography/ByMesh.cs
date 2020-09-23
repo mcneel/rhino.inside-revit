@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.Convert.Geometry.Raw;
 using RhinoInside.Revit.Convert.System.Collections.Generic;
 using DB = Autodesk.Revit.DB;
 
@@ -38,13 +39,12 @@ namespace RhinoInside.Revit.GH.Components
       [Optional] IList<Curve> regions
     )
     {
-      mesh = mesh.DuplicateMesh();
-      mesh.Scale(UnitConverter.ToHostUnits);
+      mesh = mesh.InHostUnits();
       while (mesh.CollapseFacesByEdgeLength(false, Revit.VertexTolerance) > 0) ;
       mesh.Vertices.CombineIdentical(true, true);
       mesh.Vertices.CullUnused();
 
-      var xyz = mesh.Vertices.ConvertAll(x => new DB.XYZ(x.X, x.Y, x.Z));
+      var xyz = mesh.Vertices.ConvertAll(RawEncoder.AsXYZ);
       var facets = new List<DB.PolymeshFacet>(mesh.Faces.Count);
 
       var faceCount = mesh.Faces.Count;

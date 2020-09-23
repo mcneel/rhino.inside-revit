@@ -263,12 +263,22 @@ namespace RhinoInside.Revit.GH.Types
         throw new System.ArgumentException("Invalid Document", paramName);
     }
 
+    public bool? Pinned
+    {
+      get => APIElement?.Pinned;
+      set
+      {
+        if (value.HasValue && APIElement is DB.Element element && element.Pinned != value.Value)
+          element.Pinned = value.Value;
+      }
+    }
+
     public string Name
     {
       get => APIElement?.Name;
       set
       {
-        if(APIElement is DB.Element element)
+        if(value is object && APIElement is DB.Element element && element.Name != value)
          element.Name = value;
       }
     }
@@ -283,9 +293,12 @@ namespace RhinoInside.Revit.GH.Types
       get => Types.ElementType.FromElementId(Document, APIElement?.GetTypeId()) as ElementType;
       set
       {
-        AssertValidDocument(value?.Document, nameof(Type));
+        if (value is object)
+        {
+          AssertValidDocument(value?.Document, nameof(Type));
 
-        APIElement?.ChangeTypeId(value.Id);
+          APIElement?.ChangeTypeId(value.Id);
+        }
       }
     }
   }

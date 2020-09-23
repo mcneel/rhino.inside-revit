@@ -40,6 +40,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return geometry;
     }
+
 #if !REVIT_2019
     public static IList<ElementId> GetDependentElements(this Element element, ElementFilter filter)
     {
@@ -48,17 +49,33 @@ namespace RhinoInside.Revit.External.DB.Extensions
         using (var transaction = new Transaction(element.Document, nameof(GetDependentElements)))
         {
           transaction.Start();
-
-          var collection = element.Document.Delete(element.Id);
-          if (filter is null)
-            return collection?.ToList();
-
-          return collection?.Where(x => filter.PassesFilter(element.Document, x)).ToList();
+          return Body();
         }
       }
-      catch { }
+      catch (Autodesk.Revit.Exceptions.InvalidOperationException)
+      {
+        try
+        {
+          using (var subTransaction = new SubTransaction(element.Document))
+          {
+            subTransaction.Start();
+            return Body();
+          }
+        }
+        catch (Autodesk.Revit.Exceptions.InvalidOperationException)
+        {
+          return Body();
+        }
+      }
 
-      return default;
+      IList<ElementId> Body()
+      {
+        var collection = element.Document.Delete(element.Id);
+        if (filter is null)
+          return collection?.ToList();
+
+        return collection?.Where(x => filter.PassesFilter(element.Document, x)).ToList();
+      }
     }
 #endif
 
