@@ -1,10 +1,12 @@
 using System;
+using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class ElementPropertyName : TransactionalComponent
+  public class ElementPropertyName : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("01934AD1-F31B-43E5-ADD9-C196F4A2467E");
     public override GH_Exposure Exposure => GH_Exposure.primary;
@@ -73,6 +75,21 @@ namespace RhinoInside.Revit.GH.Components
       ),
     };
 
+    protected override void OnAfterStart(DB.Document document, DB.Transaction transaction)
+    {
+      base.OnAfterStart(document, transaction);
+
+      if (TransactionExtent == TransactionExtent.Component)
+      {
+        var _Element_ = Params.IndexOfInputParam("Element");
+        foreach (var element in Params.Input[_Element_].VolatileData.AllData(true).Cast<Types.Element>())
+        {
+          if (element.IsValid && element.Document.Equals(document))
+            element.Name = Guid.NewGuid().ToString();
+        }
+      }
+    }
+
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var element = default(Types.Element);
@@ -80,32 +97,22 @@ namespace RhinoInside.Revit.GH.Components
         return;
 
       var _Name_ = Params.IndexOfInputParam("Name");
-      if (_Name_ < 0 || Params.Input[_Name_].DataType == GH_ParamData.@void)
-      {
-        DA.SetData("Element", element);
-        DA.SetData("Name", element.Name);
-      }
-      else
+      if (_Name_ >= 0 && Params.Input[_Name_].DataType != GH_ParamData.@void)
       {
         var name = default(string);
-        if (!DA.GetData(_Name_, ref name))
-          return;
-
-        var doc = element.Document;
-        using (var transaction = NewTransaction(doc))
+        if (DA.GetData(_Name_, ref name))
         {
-          transaction.Start();
+          StartTransaction(element.Document);
           element.Name = name;
-          transaction.Commit();
-
-          DA.SetData("Element", element);
-          DA.SetData("Name", element.Name);
         }
       }
+
+      DA.SetData("Element", element);
+      DA.SetData("Name", element.Name);
     }
   }
 
-  public class ElementPropertyCategory : TransactionalComponent
+  public class ElementPropertyCategory : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("5AC48DE6-F706-4E88-A4AD-7A4439F1DAB5");
     public override GH_Exposure Exposure => GH_Exposure.primary;
@@ -173,7 +180,7 @@ namespace RhinoInside.Revit.GH.Components
     }
   }
 
-  public class ElementPropertyType : TransactionalComponent
+  public class ElementPropertyType : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("FE427D04-1D8F-48BE-BFBA-EB28AD23FC03");
     public override GH_Exposure Exposure => GH_Exposure.primary;
@@ -249,28 +256,22 @@ namespace RhinoInside.Revit.GH.Components
         return;
 
       var _Type_ = Params.IndexOfInputParam("Type");
-      if (_Type_ < 0 || Params.Input[_Type_].DataType == GH_ParamData.@void)
-      {
-        DA.SetData("Element", element);
-        DA.SetData("Type", element.Type);
-      }
-      else
+      if (_Type_ >= 0 && Params.Input[_Type_].DataType != GH_ParamData.@void)
       {
         var type = default(Types.ElementType);
-        if (!DA.GetData(_Type_, ref type))
-          return;
-
-        var doc = element.Document;
-        using (var transaction = NewTransaction(doc))
+        if (DA.GetData(_Type_, ref type))
         {
-          transaction.Start();
-          element.Type = type;
-          transaction.Commit();
+          StartTransaction(element.Document);
 
-          DA.SetData("Element", element);
-          DA.SetData("Type", element.Type);
+          element.Type = type;
+
+          if (element is IGH_PreviewMeshData preview)
+            preview.DestroyPreviewMeshes();
         }
       }
+
+      DA.SetData("Element", element);
+      DA.SetData("Type", element.Type);
     }
   }
 }

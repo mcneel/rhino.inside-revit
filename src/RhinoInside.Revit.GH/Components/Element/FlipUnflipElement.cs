@@ -4,7 +4,7 @@ using Grasshopper.Kernel.Parameters;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class FlipUnflipElement : TransactionalComponent
+  public class FlipUnflipElement : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("4CADC9AA-27D9-4804-87AC-477203862AFA");
     public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.obscure;
@@ -173,14 +173,11 @@ namespace RhinoInside.Revit.GH.Components
 
       if (facing.HasValue || hand.HasValue || workplane.HasValue)
       {
-        var doc = element.Document;
-        using (var transaction = NewTransaction(doc))
+        StartTransaction(element.Document);
         {
-          transaction.Start();
           element.FacingFlipped = facing;
           element.HandFlipped = hand;
           element.WorkPlaneFlipped = workplane;
-          transaction.Commit();
 
           if (element is IGH_PreviewMeshData preview)
             preview.DestroyPreviewMeshes();

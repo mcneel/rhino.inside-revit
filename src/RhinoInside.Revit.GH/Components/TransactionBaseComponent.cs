@@ -16,6 +16,7 @@ namespace RhinoInside.Revit.GH.Components
   using Exceptions;
   using Kernel.Attributes;
 
+  [Obsolete]
   public abstract class TransactionBaseComponent :
     Component,
     DB.IFailuresPreprocessor,
@@ -455,24 +456,16 @@ namespace RhinoInside.Revit.GH.Components
     #endregion
   }
 
+  [Obsolete("Please use TransactionalComponent")]
   public abstract class TransactionComponent : TransactionBaseComponent
   {
     protected TransactionComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
 
     #region Autodesk.Revit.DB.Transacion support
-    protected enum TransactionStrategy
-    {
-      PerSolution,
-      PerComponent
-    }
-    protected virtual TransactionStrategy TransactionalStrategy => TransactionStrategy.PerComponent;
-
     protected DB.Transaction CurrentTransaction;
     protected DB.TransactionStatus TransactionStatus => CurrentTransaction?.GetStatus() ?? DB.TransactionStatus.Uninitialized;
 
-    [Obsolete("Superseded by 'StartTransaction' since 2020-05-21")]
-    protected void BeginTransaction(DB.Document document) => StartTransaction(document);
     protected void StartTransaction(DB.Document document)
     {
       if (document is null)
@@ -497,9 +490,6 @@ namespace RhinoInside.Revit.GH.Components
     // Step 1.
     protected override void BeforeSolveInstance()
     {
-      if (TransactionalStrategy != TransactionStrategy.PerComponent)
-        return;
-
       if (Revit.ActiveDBDocument is DB.Document Document)
       {
         StartTransaction(Document);
@@ -520,9 +510,6 @@ namespace RhinoInside.Revit.GH.Components
     // Step 5.
     protected override void AfterSolveInstance()
     {
-      if (TransactionalStrategy != TransactionStrategy.PerComponent)
-        return;
-
       try
       {
         if (RunCount <= 0)
@@ -556,23 +543,15 @@ namespace RhinoInside.Revit.GH.Components
     }
   }
 
+  [Obsolete("Please use TransactionalChainComponent")]
   public abstract class TransactionsComponent : TransactionBaseComponent
   {
     protected TransactionsComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
 
     #region Autodesk.Revit.DB.Transacion support
-    protected enum TransactionStrategy
-    {
-      PerSolution,
-      PerComponent
-    }
-    protected virtual TransactionStrategy TransactionalStrategy => TransactionStrategy.PerComponent;
-
     Dictionary<DB.Document, DB.Transaction> CurrentTransactions;
 
-    [Obsolete("Superseded by 'StartTransaction' since 2020-05-21")]
-    protected void BeginTransaction(DB.Document document) => StartTransaction(document);
     protected void StartTransaction(DB.Document document)
     {
       if (CurrentTransactions?.ContainsKey(document) != true)
@@ -594,9 +573,6 @@ namespace RhinoInside.Revit.GH.Components
     // Step 5.
     protected override void AfterSolveInstance()
     {
-      if (TransactionalStrategy != TransactionStrategy.PerComponent)
-        return;
-
       if (CurrentTransactions is null)
         return;
 
