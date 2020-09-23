@@ -61,7 +61,7 @@ namespace RhinoInside.Revit.GH.Components
     }
   }
 
-  public class AddSubCategory : TransactionalComponent
+  public class AddSubCategory : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("8DE336FB-E764-4A8E-BB12-9AECDA19769F");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
@@ -108,15 +108,10 @@ namespace RhinoInside.Revit.GH.Components
       if (newSubcat is null && newSubcatName != string.Empty)
       {
         var doc = parent.Document();
-        using (var transaction = NewTransaction(doc))
-        {
-          transaction.Start();
+        StartTransaction(doc);
 
-          using (var categories = doc.Settings.Categories)
-            newSubcat = categories.NewSubcategory(parent, newSubcatName);
-
-          CommitTransaction(doc, transaction);
-        }
+        using (var categories = doc.Settings.Categories)
+          newSubcat = categories.NewSubcategory(parent, newSubcatName);
       }
 
       // return data to DA

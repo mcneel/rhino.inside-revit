@@ -4,7 +4,7 @@ using Grasshopper.Kernel.Parameters;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class PinUnPinElement: TransactionalComponent
+  public class PinUnPinElement: TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("CC205221-1583-47D1-A715-226C39C3FB34");
     public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.obscure;
@@ -84,13 +84,9 @@ namespace RhinoInside.Revit.GH.Components
         bool pinned = false;
         if (DA.GetData(_Pinned_, ref pinned))
         {
-          var doc = element.Document;
-          using (var transaction = NewTransaction(doc))
-          {
-            transaction.Start();
-            element.Pinned = pinned;
-            transaction.Commit();
-          }
+          StartTransaction(element.Document);
+
+          element.Pinned = pinned;
         }
       }
 
