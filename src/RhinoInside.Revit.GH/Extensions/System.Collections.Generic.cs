@@ -23,6 +23,12 @@ namespace System.Collections.Generic
 
   internal static class EnumerableExtensions
   {
+    public static IEnumerable<T> As<T>(this IEnumerable values)
+    {
+      foreach (var value in values)
+        yield return value is T t ? t : default;
+    }
+
     public static T FirstOr<T>(this IEnumerable<T> values, T value)
     {
       if (values is IList<T> list)
