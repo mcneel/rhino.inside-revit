@@ -10,7 +10,25 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
-{% include ltr/release-header.html version="0.0.7557.24227" time="09/019/2020 13:27:34" %}
+{% include ltr/release-header.html version="0.0.7571.33757" time="09/23/2020 18:45:14" %}
+## New features
+* Added icon for 'Add Railing' component.
+* Added 'Pin Element' component
+* Added 'Flip Element' component.
+
+## Fixes
+* Fixed 'Add 3d View' component.
+
+## Minor Changes
+* Added a warning message that warns the user that Rhino and Active Revit model are in different units.
+
+## API
+* Implemented GetDependentElements in more robust way. Now can be called while a DB.Transaction or DB.SubTransaction is open on the element document.
+* Added extension method `WhereParameterEqualsTo` to `FilteredElementCollector`.
+* Added extension method `GetAssociatedLevelId` to `ViewPlan`.
+* Added extension method `GetActiveView` to `DB.Document`.
+
+{% include ltr/release-header.html version="0.0.7557.24227" time="09/19/2020 13:27:34" %}
 
 ## New Features
 * Added 'Add SubCategory' component.
