@@ -30,8 +30,8 @@ namespace RhinoInside.Revit.GH.Components
       {
         foreach (var obsolete in GetType().GetCustomAttributes(typeof(ObsoleteAttribute), false).Cast<ObsoleteAttribute>())
         {
-          if(obsolete.Message != string.Empty)
-            Description = $"{obsolete.Message}\n{Description}";
+          if(!string.IsNullOrEmpty(obsolete.Message))
+            Description = obsolete.Message + Environment.NewLine + Description;
         }
       }
     }
@@ -39,6 +39,107 @@ namespace RhinoInside.Revit.GH.Components
     static string[] keywords = new string[] { "Revit" };
     public override IEnumerable<string> Keywords => base.Keywords is null ? keywords : Enumerable.Concat(base.Keywords, keywords);
 
+    #region IGH_ActiveObject
+    Exception unhandledException;
+    protected bool IsAborted => unhandledException is object;
+    protected virtual bool AbortOnUnhandledException => false;
+    public override sealed void ComputeData()
+    {
+      Rhinoceros.InvokeInHostContext(() => base.ComputeData());
+
+      if (unhandledException is object)
+      {
+        unhandledException = default;
+        ResetData();
+      }
+    }
+
+    protected virtual void ResetData()
+    {
+      Phase = GH_SolutionPhase.Failed;
+
+      foreach (var param in Params.Output)
+      {
+        param.ClearData();
+        param.Phase = GH_SolutionPhase.Failed;
+      }
+    }
+
+    protected override void SolveInstance(IGH_DataAccess DA)
+    {
+      try
+      {
+        TrySolveInstance(DA);
+      }
+      catch (Exceptions.CancelException e)
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
+      }
+      catch (Exceptions.FailException e)
+      {
+        OnPingDocument()?.RequestAbortSolution();
+
+        unhandledException = e;
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
+      }
+      catch (Autodesk.Revit.Exceptions.ApplicationException e)
+      {
+        if(AbortOnUnhandledException)
+          unhandledException = e;
+
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
+      }
+      catch (System.MissingMemberException e)
+      {
+        unhandledException = e;
+
+        if (e.Message.Contains("Autodesk.Revit.DB."))
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: Please consider update Revit to the latest revision.{Environment.NewLine}{e.Message.TripleDot(128)}");
+        else
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
+      }
+      catch (System.Exception e)
+      {
+        if (AbortOnUnhandledException)
+          unhandledException = e;
+
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
+      }
+
+      if (unhandledException is object)
+      {
+        DA.AbortComponentSolution();
+        Phase = GH_SolutionPhase.Failed;
+      }
+    }
+    protected abstract void TrySolveInstance(IGH_DataAccess DA);
+    #endregion
+
+    #region IGH_PreviewObject
+    public override Rhino.Geometry.BoundingBox ClippingBox
+    {
+      get
+      {
+        var clippingBox = Rhino.Geometry.BoundingBox.Empty;
+
+        foreach (var param in Params)
+        {
+          if (param.SourceCount > 0)
+            continue;
+
+          if (param is IGH_PreviewObject previewObject)
+          {
+            if (!previewObject.Hidden && previewObject.IsPreviewCapable)
+              clippingBox.Union(previewObject.ClippingBox);
+          }
+        }
+
+        return clippingBox;
+      }
+    }
+    #endregion
+
+    #region IGH_ElementIdComponent
     protected virtual DB.ElementFilter ElementFilter { get; }
     public virtual bool NeedsToBeExpired(DB.Events.DocumentChangedEventArgs e)
     {
@@ -68,61 +169,6 @@ namespace RhinoInside.Revit.GH.Components
 
       return false;
     }
-
-    public override sealed void ComputeData() =>
-      Rhinoceros.InvokeInHostContext(() => base.ComputeData());
-
-    protected override sealed void SolveInstance(IGH_DataAccess DA)
-    {
-      try
-      {
-        TrySolveInstance(DA);
-      }
-      catch (Exceptions.CancelException e)
-      {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
-      }
-      catch (Autodesk.Revit.Exceptions.ApplicationException e)
-      {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
-      }
-      catch (System.MissingMemberException e)
-      {
-        if (e.Message.Contains("Autodesk.Revit.DB."))
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: Please consider update Revit to the latest revision.{Environment.NewLine}{e.Message.TripleDot(128)}");
-        else
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
-
-        DA.AbortComponentSolution();
-      }
-      catch (System.Exception e)
-      {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
-        DA.AbortComponentSolution();
-      }
-    }
-    protected abstract void TrySolveInstance(IGH_DataAccess DA);
-
-    public override Rhino.Geometry.BoundingBox ClippingBox
-    {
-      get
-      {
-        var clippingBox = Rhino.Geometry.BoundingBox.Empty;
-
-        foreach (var param in Params)
-        {
-          if (param.SourceCount > 0)
-            continue;
-
-          if (param is IGH_PreviewObject previewObject)
-          {
-            if (!previewObject.Hidden && previewObject.IsPreviewCapable)
-              clippingBox.Union(previewObject.ClippingBox);
-          }
-        }
-
-        return clippingBox;
-      }
-    }
+    #endregion
   }
 }
