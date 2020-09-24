@@ -11,18 +11,18 @@ Some of the changes mentioned in sections below, might break your existing Grass
 
 <!-- most recent release should be on top -->
 {% include ltr/release-header.html version="0.0.7571.33757" time="09/23/2020 18:45:14" %}
-## New features
+### New features
 * Added icon for 'Add Railing' component.
 * Added 'Pin Element' component
 * Added 'Flip Element' component.
 
-## Fixes
+### Fixes
 * Fixed 'Add 3d View' component.
 
-## Minor Changes
+### Minor Changes
 * Added a warning message that warns the user that Rhino and Active Revit model are in different units.
 
-## API
+### API
 * Implemented GetDependentElements in more robust way. Now can be called while a DB.Transaction or DB.SubTransaction is open on the element document.
 * Added extension method `WhereParameterEqualsTo` to `FilteredElementCollector`.
 * Added extension method `GetAssociatedLevelId` to `ViewPlan`.
@@ -30,11 +30,11 @@ Some of the changes mentioned in sections below, might break your existing Grass
 
 {% include ltr/release-header.html version="0.0.7557.24227" time="09/19/2020 13:27:34" %}
 
-## New Features
+### New Features
 * Added 'Add SubCategory' component.
 * Added 'Add Railing' component.
 
-## Fixes
+### Fixes
 * Fixed 'Document Links' component to make it work with BIM 360 linked files.
 * Improved `DB.HemiteSurface` conversion to `NurbsSurface`.
 
@@ -95,7 +95,7 @@ Some of the changes mentioned in sections below, might break your existing Grass
 * Fixed a bug in Types.GraphicalElement.ClippingBox when DB.Element is not available.
 * Fixed a bug in 'Add Beam', now default Cross-Section Rotation is 0.0
 
-## Minor Changes
+### Minor Changes
 * Disabled Grasshopper previews when Solver is locked.
 * Now Grasshopper ignores disabled params or components when occurs a change in Revit document in order to expire the solution.
 
