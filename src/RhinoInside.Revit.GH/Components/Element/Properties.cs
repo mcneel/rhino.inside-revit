@@ -1,7 +1,9 @@
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Extensions;
 using Grasshopper.Kernel.Parameters;
+using Grasshopper.Kernel.Types;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -71,23 +73,34 @@ namespace RhinoInside.Revit.GH.Components
           NickName = "N",
           Description = "Element Name",
           Access = GH_ParamAccess.item
-        }
+        },
+        ParamVisibility.Default
       ),
     };
 
-    protected override void OnAfterStart(DB.Document document, DB.Transaction transaction)
+    Dictionary<Types.Element, string> renames;
+    protected void ElementSetName(Types.Element element, string value)
     {
-      base.OnAfterStart(document, transaction);
-
       if (TransactionExtent == TransactionExtent.Component)
       {
-        var _Element_ = Params.IndexOfInputParam("Element");
-        foreach (var element in Params.Input[_Element_].VolatileData.AllData(true).Cast<Types.Element>())
+        if (string.IsNullOrEmpty(value))
+          return;
+
+        if (renames is null)
+          renames = new Dictionary<Types.Element, string>();
+
+        if (renames.TryGetValue(element, out var name))
         {
-          if (element.IsValid && element.Document.Equals(document))
-            element.Name = Guid.NewGuid().ToString();
+          if (name == value)
+            return;
+
+          renames.Remove(element);
         }
+        else element.Name = Guid.NewGuid().ToString();
+
+        renames.Add(element, value);
       }
+      else element.Name = value;
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -96,19 +109,74 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetData("Element", ref element))
         return;
 
-      var _Name_ = Params.IndexOfInputParam("Name");
-      if (_Name_ >= 0 && Params.Input[_Name_].DataType != GH_ParamData.@void)
+      // Set
       {
-        var name = default(string);
-        if (DA.GetData(_Name_, ref name))
+        var _Name_ = Params.IndexOfInputParam("Name");
+        if (_Name_ >= 0 && Params.Input[_Name_].DataType != GH_ParamData.@void)
         {
-          StartTransaction(element.Document);
-          element.Name = name;
+          var name = default(string);
+          if (DA.GetData(_Name_, ref name) && name != string.Empty)
+          {
+            StartTransaction(element.Document);
+            ElementSetName(element, name);
+          }
         }
       }
 
-      DA.SetData("Element", element);
-      DA.SetData("Name", element.Name);
+      // Get
+      {
+        DA.SetData("Element", element);
+
+        var _Name_ = Params.IndexOfOutputParam("Name");
+        if(_Name_ >= 0)
+          DA.SetData(_Name_, element.Name);
+      }
+    }
+
+    protected override void OnBeforeCommit(IReadOnlyDictionary<DB.Document, DB.Transaction> transactions)
+    {
+      base.OnBeforeCommit(transactions);
+
+      if (renames is object)
+      {
+        try
+        {
+          if (!IsAborted)
+          {
+            // Update elements to the final names
+            foreach (var rename in renames)
+              rename.Key.Name = rename.Value;
+          }
+        }
+        finally
+        {
+          renames = default;
+        }
+      }
+    }
+
+    protected override void OnAfterCommit()
+    {
+      if (Status == DB.TransactionStatus.Committed)
+      {
+        // Update output 'Name' with final values from 'Element'
+        var _Element_ = Params.IndexOfOutputParam("Element");
+        var _Name_ = Params.IndexOfOutputParam("Name");
+        if (_Element_ >= 0 && _Name_ >= 0)
+        {
+          var materialParam = Params.Output[_Element_];
+          var nameParam = Params.Output[_Name_];
+
+          nameParam.VolatileData.ClearData();
+          nameParam.AddVolatileDataTree
+          (
+            materialParam.VolatileData,
+            (Types.Element x) => x is null ? null : new GH_String(x.Name)
+          );
+        }
+      }
+
+      base.OnAfterCommit();
     }
   }
 
