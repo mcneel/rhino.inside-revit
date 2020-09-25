@@ -11,6 +11,20 @@ namespace Grasshopper.Kernel.Extensions
   static partial class Extension
   {
     #region IGH_Param
+    public static void AddVolatileDataTree<T1, T2>(this IGH_Param result, IGH_Structure structure, Converter<T1, T2> converter)
+    where T1 : IGH_Goo
+    where T2 : IGH_Goo
+    {
+      for (int p = 0; p < structure.PathCount; ++p)
+      {
+        var path = structure.get_Path(p);
+        var srcBranch = structure.get_Branch(path);
+
+        var data = srcBranch.As<T1>().Select(x => x == null ? default : converter(x));
+        result.AddVolatileDataList(path, data);
+      }
+    }
+
     public static bool ConnectNewObject(this IGH_Param self, IGH_DocumentObject obj)
     {
       if (obj is null)
@@ -158,7 +172,7 @@ namespace Grasshopper.Kernel.Extensions
           if (obj is null)
             return;
 
-          if(param.ConnectNewObject(obj))
+          if (param.ConnectNewObject(obj))
             obj.ExpireSolution(true);
         }
       };
