@@ -54,7 +54,10 @@ namespace RhinoInside.Revit.GH.Components
         structuralUsage != DB.Structure.StructuralWallUsage.NonBearing
       );
 
-      ReplaceElement(ref element, newWall);
+      // swap the element without matching parameters
+      // otherwise the new wall will be stretched along its height
+      // to match the previous wall
+      SwapElement(ref element, newWall);
     }
   }
 }
