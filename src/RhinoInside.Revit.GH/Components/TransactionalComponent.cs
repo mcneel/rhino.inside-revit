@@ -396,41 +396,44 @@ namespace RhinoInside.Revit.GH.Components
     // Step 5.
     protected virtual void OnBeforeCommit(IReadOnlyDictionary<DB.Document, DB.Transaction> transactions) { }
 
-    protected override void AfterSolveInstance()
+    protected override sealed void AfterSolveInstance()
     {
-      OnBeforeCommit(CurrentTransactions);
-
-      if (CurrentTransactions is object)
+      try
       {
-        try
+        OnBeforeCommit(CurrentTransactions);
+
+        if (!IsAborted && CurrentTransactions is object)
         {
+          var transactionStatus = DB.TransactionStatus.Uninitialized;
 
-          if (!IsAborted)
+          try
           {
-            var transactionStatus = DB.TransactionStatus.Uninitialized;
-
-            try
+            if (CurrentTransactions.Count > 0)
+              transactionStatus = CommitTransactions();
+          }
+          finally
+          {
+            switch (transactionStatus)
             {
-              if (CurrentTransactions.Count > 0)
-                transactionStatus = CommitTransactions();
-            }
-            finally
-            {
-              switch (transactionStatus)
-              {
-                case DB.TransactionStatus.Uninitialized:
-                case DB.TransactionStatus.Started:
-                case DB.TransactionStatus.Committed:
-                  break;
-                default:
-                  AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Transaction {transactionStatus} and aborted.");
-                  ResetData();
-                  break;
-              }
+              case DB.TransactionStatus.Uninitialized:
+              case DB.TransactionStatus.Started:
+              case DB.TransactionStatus.Committed:
+                break;
+              default:
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Transaction {transactionStatus} and aborted.");
+                ResetData();
+                break;
             }
           }
         }
-        finally
+      }
+      catch (Exception e)
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
+      }
+      finally
+      {
+        if (CurrentTransactions is object)
         {
           foreach (var transaction in CurrentTransactions)
             transaction.Value.Dispose();
@@ -439,8 +442,12 @@ namespace RhinoInside.Revit.GH.Components
         }
       }
 
+      OnAfterCommit();
+
       base.AfterSolveInstance();
     }
+
+    protected virtual void OnAfterCommit() { }
 
     IEnumerator<KeyValuePair<DB.Document, DB.Transaction>> currentTransactionsEnumerator;
 
