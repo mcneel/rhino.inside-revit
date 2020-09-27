@@ -83,6 +83,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+#if REVIT_2019
     public Element SurfaceForegroundPattern
     {
       get => Element.FromElementId(Document, SurfaceForegroundPatternId);
@@ -238,6 +239,121 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
     }
+#else
+    public Element SurfaceForegroundPattern
+    {
+      get => Element.FromElementId(Document, SurfaceForegroundPatternId);
+      set
+      {
+        if (value is object && APIMaterial is DB.Material material && value.Id != material.SurfacePatternId)
+        {
+          AssertValidDocument(value.Document, nameof(SurfaceForegroundPattern));
+          material.SurfacePatternId = value.Id;
+        }
+      }
+    }
+
+    public DB.ElementId SurfaceForegroundPatternId
+    {
+      get => APIMaterial?.SurfacePatternId;
+      set
+      {
+        if (value is object && APIMaterial is DB.Material material && value != material.SurfacePatternId)
+          material.SurfacePatternId = value;
+      }
+    }
+
+    public System.Drawing.Color? SurfaceForegroundPatternColor
+    {
+      get => APIMaterial?.SurfacePatternColor.ToColor();
+      set
+      {
+        if (value is object && APIMaterial is DB.Material material)
+        {
+          using (var color = value.Value.ToColor())
+          {
+            if (color != material.SurfacePatternColor)
+              material.SurfacePatternColor = color;
+          }
+        }
+      }
+    }
+
+    public Element SurfaceBackgroundPattern
+    {
+      get => default;
+      set { }
+    }
+
+    public DB.ElementId SurfaceBackgroundPatternId
+    {
+      get => default;
+      set { }
+    }
+
+    public System.Drawing.Color? SurfaceBackgroundPatternColor
+    {
+      get => default;
+      set { }
+    }
+
+    public Element CutForegroundPattern
+    {
+      get => Element.FromElementId(Document, CutForegroundPatternId);
+      set
+      {
+        if (value is object && APIMaterial is DB.Material material && value.Id != material.CutPatternId)
+        {
+          AssertValidDocument(value.Document, nameof(CutForegroundPattern));
+          material.CutPatternId = value.Id;
+        }
+      }
+    }
+
+    public DB.ElementId CutForegroundPatternId
+    {
+      get => APIMaterial?.CutPatternId;
+      set
+      {
+        if (value is object && APIMaterial is DB.Material material && value != material.CutPatternId)
+          material.CutPatternId = value;
+      }
+    }
+
+    public System.Drawing.Color? CutForegroundPatternColor
+    {
+      get => APIMaterial?.CutPatternColor.ToColor();
+      set
+      {
+        if (value is object && APIMaterial is DB.Material material)
+        {
+          using (var color = value.Value.ToColor())
+          {
+            if (color != material.CutPatternColor)
+              material.CutPatternColor = color;
+          }
+        }
+      }
+    }
+
+    public Element CutBackgroundPattern
+    {
+      get => default;
+      set { }
+    }
+
+    public DB.ElementId CutBackgroundPatternId
+    {
+      get => default;
+      set { }
+    }
+
+    public System.Drawing.Color? CutBackgroundPatternColor
+    {
+      get => default;
+      set { }
+    }
+#endif
     #endregion
   }
 }
