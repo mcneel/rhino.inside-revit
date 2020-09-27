@@ -70,7 +70,7 @@ namespace RhinoInside.Revit.GH.Components
         return def;
       }
 
-      public static ParamDefinition Create<T>(string name, string nickname, string description, GH_ParamAccess access, bool optional = false, ParamVisibility relevance = ParamVisibility.Binding)
+      public static ParamDefinition Create<T>(string name, string nickname, string description = "", GH_ParamAccess access = GH_ParamAccess.item, bool optional = false, ParamVisibility relevance = ParamVisibility.Binding)
         where T : class, IGH_Param, new()
       {
         var param = new T()
@@ -85,7 +85,7 @@ namespace RhinoInside.Revit.GH.Components
         return new ParamDefinition(param, relevance);
       }
 
-      public static ParamDefinition Create<T>(string name, string nickname, string description, object defaultValue, GH_ParamAccess access, bool optional = false, ParamVisibility relevance = ParamVisibility.Binding)
+      public static ParamDefinition Create<T>(string name, string nickname, string description, object defaultValue, GH_ParamAccess access = GH_ParamAccess.item, bool optional = false, ParamVisibility relevance = ParamVisibility.Binding)
         where T : class, IGH_Param, new()
       {
         var param = new T()

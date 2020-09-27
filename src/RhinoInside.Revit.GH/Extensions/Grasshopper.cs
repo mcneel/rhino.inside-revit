@@ -210,5 +210,38 @@ namespace Grasshopper.Kernel.Extensions
       return result;
     }
     #endregion
+
+    #region IGH_DataAccess
+    static int IndexOf(this IList<IGH_Param> list, string name, out IGH_Param value)
+    {
+      value = default;
+      int index = 0;
+      for (; index < list.Count; ++index)
+      {
+        var item = list[index];
+        if (item.Name == name)
+        {
+          value = item;
+          return index;
+        }
+      }
+
+      return -1;
+    }
+
+    public static bool TryGetData<T>(this IGH_DataAccess DA, IList<IGH_Param> list, string name, out T value)
+    {
+      value = default;
+
+      var index = list.IndexOf(name, out var param);
+      return param?.DataType > GH_ParamData.@void && DA.GetData(index, ref value);
+    }
+
+    public static bool TrySetData(this IGH_DataAccess DA, IList<IGH_Param> list, string name, Func<object> value)
+    {
+      var index = list.IndexOf(name, out var param);
+      return index >= 0 && DA.SetData(index, value());
+    }
+    #endregion
   }
 }

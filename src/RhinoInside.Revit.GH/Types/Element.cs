@@ -301,5 +301,87 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
     }
+
+    #region Identity Data
+    public string Description
+    {
+      get => APIElement?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.AsString();
+      set
+      {
+        if (value is object)
+          APIElement?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.Set(value);
+      }
+    }
+
+    public string Comments
+    {
+      get => APIElement?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS)?.AsString();
+      set
+      {
+        if (value is object)
+          APIElement?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS)?.Set(value);
+      }
+    }
+
+    public string Manufacturer
+    {
+      get => APIElement?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MANUFACTURER)?.AsString();
+      set
+      {
+        if (value is object)
+          APIElement?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MANUFACTURER)?.Set(value);
+      }
+    }
+
+    public string Model
+    {
+      get => APIElement?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MODEL)?.AsString();
+      set
+      {
+        if (value is object)
+          APIElement?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MODEL)?.Set(value);
+      }
+    }
+
+    public string Cost
+    {
+      get => APIElement?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_COST)?.AsString();
+      set
+      {
+        if (value is object)
+          APIElement?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_COST)?.Set(value);
+      }
+    }
+
+    public string Url
+    {
+      get => APIElement?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_URL)?.AsString();
+      set
+      {
+        if (value is object)
+          APIElement?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_URL)?.Set(value);
+      }
+    }
+
+    public string Keynote
+    {
+      get => APIElement?.get_Parameter(DB.BuiltInParameter.KEYNOTE_PARAM)?.AsString();
+      set
+      {
+        if (value is object)
+          APIElement?.get_Parameter(DB.BuiltInParameter.KEYNOTE_PARAM)?.Set(value);
+      }
+    }
+
+    public string Mark
+    {
+      get => APIElement?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MARK)?.AsString();
+      set
+      {
+        if (value is object)
+          APIElement?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MARK)?.Set(value);
+      }
+    }
+    #endregion
   }
 }

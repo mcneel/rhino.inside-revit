@@ -239,6 +239,7 @@
     <Compile Include="Components\Element\DirectShape\ByMesh.cs" />
     <Compile Include="Components\Element\DirectShape\ByPoint.cs" />
     <Compile Include="Components\Element\Identity.cs" />
+    <Compile Include="Components\Element\Material\Graphics.cs" />
     <Compile Include="Components\Element\Material\Identity.cs" />
     <Compile Include="Components\Element\Material\QueryMaterials.cs" />
     <Compile Include="Components\Element\Parameters.cs" />
