@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public StructuralAsset() : base(
       "Physical Asset",
       "PHAST",
-      "Represents a Revit Physical Asset",
+      "Represents a Revit Physical (Structural) Asset",
       "Params",
       "Revit Primitives"
       )
