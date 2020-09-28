@@ -16,9 +16,9 @@ namespace RhinoInside.Revit.GH.Parameters
     public override Guid ComponentGuid => new Guid("941b2ee3-5423-4fee-9df6-27c77fdb53c9");
 
     public AppearanceAsset() : base(
-      "Appearance Asset",
+      "Shader Asset",
       "APAST",
-      "Represents a Revit Appearance Asset",
+      "Represents a Revit Shader (Appearance) Asset",
       "Params",
       "Revit Primitives"
       ) { }
