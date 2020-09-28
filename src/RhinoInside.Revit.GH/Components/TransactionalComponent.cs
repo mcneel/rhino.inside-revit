@@ -332,7 +332,7 @@ namespace RhinoInside.Revit.GH.Components
           {
             base.SolveInstance(DA);
 
-            if (CurrentTransactions?.Count > 0)
+            if (transactionChain?.Count > 0)
               Status = CommitTransactions();
           }
           finally
@@ -352,22 +352,23 @@ namespace RhinoInside.Revit.GH.Components
         }
         finally
         {
-          if (CurrentTransactions is object)
+          if (transactionChain is object)
           {
-            foreach (var transaction in CurrentTransactions)
-              transaction.Value.Dispose();
+            foreach (var link in transactionChain)
+              link.Value.Dispose();
 
-            CurrentTransactions = null;
+            transactionChain = null;
           }
         }
       }
     }
 
-    Dictionary<DB.Document, DB.Transaction> CurrentTransactions;
+    Dictionary<DB.Document, DB.Transaction> transactionChain;
+    IEnumerator<KeyValuePair<DB.Document, DB.Transaction>> transactionLinks;
 
     protected void StartTransaction(DB.Document document)
     {
-      if (CurrentTransactions?.ContainsKey(document) != true)
+      if (transactionChain?.ContainsKey(document) != true)
       {
         var transaction = base.NewTransaction(document, Name);
         if (transaction.Start() != DB.TransactionStatus.Started)
@@ -380,10 +381,10 @@ namespace RhinoInside.Revit.GH.Components
         {
           OnAfterStart(document, transaction);
 
-          if (CurrentTransactions is null)
-            CurrentTransactions = new Dictionary<DB.Document, DB.Transaction>();
+          if (transactionChain is null)
+            transactionChain = new Dictionary<DB.Document, DB.Transaction>();
 
-          CurrentTransactions.Add(document, transaction);
+          transactionChain.Add(document, transaction);
         }
         catch (Exception e)
         {
@@ -400,15 +401,15 @@ namespace RhinoInside.Revit.GH.Components
     {
       try
       {
-        OnBeforeCommit(CurrentTransactions);
+        OnBeforeCommit(transactionChain);
 
-        if (!IsAborted && CurrentTransactions is object)
+        if (!IsAborted && transactionChain is object)
         {
           var transactionStatus = DB.TransactionStatus.Uninitialized;
 
           try
           {
-            if (CurrentTransactions.Count > 0)
+            if (transactionChain.Count > 0)
               transactionStatus = CommitTransactions();
           }
           finally
@@ -433,12 +434,12 @@ namespace RhinoInside.Revit.GH.Components
       }
       finally
       {
-        if (CurrentTransactions is object)
+        if (transactionChain is object)
         {
-          foreach (var transaction in CurrentTransactions)
-            transaction.Value.Dispose();
+          foreach (var link in transactionChain)
+            link.Value.Dispose();
 
-          CurrentTransactions = null;
+          transactionChain = null;
         }
       }
 
@@ -449,7 +450,6 @@ namespace RhinoInside.Revit.GH.Components
 
     protected virtual void OnAfterCommit() { }
 
-    IEnumerator<KeyValuePair<DB.Document, DB.Transaction>> currentTransactionsEnumerator;
 
     protected DB.TransactionStatus CommitTransactions()
     {
@@ -464,14 +464,12 @@ namespace RhinoInside.Revit.GH.Components
             editScope = new External.EditScope();
         };
 
-        using (currentTransactionsEnumerator = CurrentTransactions.GetEnumerator())
-        {
+        using (transactionLinks = transactionChain.GetEnumerator())
           return CommitNextTransaction();
-        }
       }
       finally
       {
-        currentTransactionsEnumerator = default;
+        transactionLinks = default;
 
         Revit.ApplicationUI.DialogBoxShowing -= _;
 
@@ -482,35 +480,40 @@ namespace RhinoInside.Revit.GH.Components
 
     DB.TransactionStatus CommitNextTransaction()
     {
-      if (currentTransactionsEnumerator is null)
-        return DB.TransactionStatus.Uninitialized;
-
-      if (currentTransactionsEnumerator.MoveNext())
+      switch(transactionLinks?.MoveNext())
       {
-        var doc = currentTransactionsEnumerator.Current.Key;
-        var transaction = currentTransactionsEnumerator.Current.Value;
+        default: return DB.TransactionStatus.Uninitialized;
+        case false: return DB.TransactionStatus.Committed;
+        case true:
+          var link = transactionLinks.Current;
+          var transaction = link.Value;
 
-        if (transaction.GetStatus() == DB.TransactionStatus.Started)
-        {
-          OnBeforeCommit(doc, transaction);
+          if (transaction.GetStatus() == DB.TransactionStatus.Started)
+          {
+            OnBeforeCommit(link.Key, transaction);
 
-          return transaction.Commit();
-        }
-        else return transaction.RollBack();
+            return transaction.Commit();
+          }
+          else return transaction.RollBack();
       }
-
-      return DB.TransactionStatus.Committed;
     }
 
     public override DB.FailureProcessingResult PreprocessFailures(DB.FailuresAccessor failuresAccessor)
     {
       var result = base.PreprocessFailures(failuresAccessor);
-      if (result > DB.FailureProcessingResult.ProceedWithCommit)
-        return result;
 
-      return failuresAccessor.IsTransactionBeingCommitted() && CommitNextTransaction() == DB.TransactionStatus.Committed ?
-        DB.FailureProcessingResult.Continue :
-        DB.FailureProcessingResult.ProceedWithRollBack;
+      if (transactionChain?.ContainsKey(failuresAccessor.GetDocument()) == true)
+      {
+        if (result < DB.FailureProcessingResult.ProceedWithRollBack)
+        {
+          result = failuresAccessor.IsTransactionBeingCommitted() &&
+                   CommitNextTransaction() == DB.TransactionStatus.Committed ?
+            DB.FailureProcessingResult.Continue :
+            DB.FailureProcessingResult.ProceedWithRollBack;
+        }
+      }
+
+      return result;
     }
   }
 }
