@@ -43,7 +43,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       pManager.AddParameter(
         param: new Parameters.AppearanceAsset(),
-        name: "Appearance Asset",
+        name: "Shader Asset",
         nickname: "AA",
         description: string.Empty,
         access: GH_ParamAccess.item
