@@ -86,7 +86,7 @@ namespace RhinoInside.Revit.UI
       public override bool IsCommandAvailable(UIApplication _, DB.CategorySet selectedCategories)
       {
         RefreshUI();
-        return base.IsCommandAvailable(_, selectedCategories);
+        return GH.Guest.IsEditorLoaded() && base.IsCommandAvailable(_, selectedCategories);
       }
     }
 
