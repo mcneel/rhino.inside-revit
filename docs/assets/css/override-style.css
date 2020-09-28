@@ -3,8 +3,10 @@
 :target:before {
     content: "";
     display: block;
-    height: 90px;      /* fixed header height*/
-    margin: -90px 0 0; /* negative fixed header height */
+    height: 90px;
+    /* fixed header height*/
+    margin: -90px 0 0;
+    /* negative fixed header height */
 }
 
 /*
@@ -20,20 +22,27 @@ body {
     overflow: scroll;
 }
 
-a.site-title, a.page-link, a.dropdown-toggle
-a.site-title:hover, a.page-link:hover, a.dropdown-toggle:hover {
+a.site-title,
+a.page-link,
+a.dropdown-toggle a.site-title:hover,
+a.page-link:hover,
+a.dropdown-toggle:hover {
     color: #111;
     text-decoration: none;
     cursor: pointer;
 }
 
-[type=button], [type=reset], [type=submit], button {
+[type=button],
+[type=reset],
+[type=submit],
+button {
     -webkit-appearance: none;
 }
 
 pre {
     padding: 0px;
 }
+
 /*
     site content ==============================================================
 */
@@ -77,7 +86,7 @@ pre {
     margin-top: -4px;
 }
 
-.site-nav .img-button-title{
+.site-nav .img-button-title {
     display: none;
 }
 
@@ -149,7 +158,8 @@ pre {
     min-height: 50em;
 }
 
-.page-content a, .page-content a:hover {
+.page-content a,
+.page-content a:hover {
     text-decoration: none;
 }
 
@@ -210,11 +220,13 @@ pre {
     max-height: calc(100vh - 8em);
 }
 
-.sidebar li, .nav li {
+.sidebar li,
+.nav li {
     display: block;
 }
 
-.sidebar a, .nav a {
+.sidebar a,
+.nav a {
     color: #999;
     text-decoration: none;
     border-left: 1px solid transparent;
@@ -225,14 +237,15 @@ pre {
     width: 215px;
 }
 
-.sidebar a:hover, .nav a:hover {
+.sidebar a:hover,
+.nav a:hover {
     color: #111;
     border-left: 1px #111 solid;
     background: transparent;
 }
 
 /* side bar groups */
-.sidebar .nav-category{
+.sidebar .nav-category {
     color: #828282;
     margin-top: 10px;
     margin-bottom: 10px;
@@ -300,11 +313,11 @@ pre {
 }
 
 .footer a {
-    color:#828282;
+    color: #828282;
 }
 
 .footer a:visited {
-    color:#828282;
+    color: #828282;
 }
 
 /* list of languages on footer */
@@ -339,9 +352,9 @@ pre {
 */
 
 .scale-half {
-    -moz-transform:scale(0.5);
-    -webkit-transform:scale(0.5);
-    transform:scale(0.5);
+    -moz-transform: scale(0.5);
+    -webkit-transform: scale(0.5);
+    transform: scale(0.5);
     outline: 1px solid transparent;
 }
 
@@ -372,9 +385,9 @@ pre {
 
 a.btn-danger {
     color: white;
-    -webkit-box-shadow:0 1px 0 rgba(255, 255, 255, .5) inset, 0 -1px 0 rgba(255, 255, 255, .1) inset, 0 4px 0 #880000, 0 4px 2px rgba(0, 0, 0, .5);
-    -moz-box-shadow:0 1px 0 rgba(255, 255, 255, .5) inset, 0 -1px 0 rgba(255, 255, 255, .1) inset, 0 4px 0 #880000, 0 4px 2px rgba(0, 0, 0, .5);
-    box-shadow:0 1px 0 rgba(255, 255, 255, .5) inset, 0 -1px 0 rgba(255, 255, 255, .1) inset, 0 4px 0 #880000, 0 4px 2px rgba(0, 0, 0, .5);
+    -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset, 0 -1px 0 rgba(255, 255, 255, .1) inset, 0 4px 0 #880000, 0 4px 2px rgba(0, 0, 0, .5);
+    -moz-box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset, 0 -1px 0 rgba(255, 255, 255, .1) inset, 0 4px 0 #880000, 0 4px 2px rgba(0, 0, 0, .5);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset, 0 -1px 0 rgba(255, 255, 255, .1) inset, 0 4px 0 #880000, 0 4px 2px rgba(0, 0, 0, .5);
 }
 
 a.btn-danger:hover {
@@ -421,7 +434,8 @@ a.btn-danger:hover {
 
 .icontag {
     display: block;
-    background: linear-gradient(white, #e8e8e8);;
+    background: linear-gradient(white, #e8e8e8);
+    ;
     border: 1px solid #828282;
     border-radius: 5px;
     width: 24px;
@@ -525,7 +539,7 @@ img.button-icon {
     line-height: 1.3;
     text-align: center;
     vertical-align: middle;
-    box-shadow: 2px 2px 0 rgba(30, 30, 30, 0.2),0 0 0 2px #575757 inset;
+    box-shadow: 2px 2px 0 rgba(30, 30, 30, 0.2), 0 0 0 2px #575757 inset;
 }
 
 .kbshortcut li:not(:first-child) {
@@ -555,7 +569,8 @@ img.button-icon {
     line-height: 1;
 }
 
-.kbnote, .kbnote p {
+.kbnote,
+.kbnote p {
     display: inline-block;
     height: 26px;
     vertical-align: text-top;
@@ -565,4 +580,21 @@ img.button-icon {
 .kbnote-heavy {
     font-weight: 600;
     color: #4b4e51;
+}
+
+/* inline component tags */
+
+.comp-tag {
+    display: inline;
+    border: none;
+    border-radius: 10px;
+    background-color: #f6f6f6;
+    margin-right: 4px;
+}
+
+.comp-tag img {
+    display: inline;
+    margin-top: -4px;
+    margin-right: 2px;
+    vertical-align: middle;
 }
