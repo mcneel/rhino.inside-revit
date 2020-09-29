@@ -584,17 +584,27 @@ img.button-icon {
 
 /* inline component tags */
 
-.comp-tag {
+.comp-doc {
     display: inline;
-    border: none;
+}
+
+.comp-tag {
+    display: inline-block;
     border-radius: 10px;
-    background-color: #f6f6f6;
-    margin-right: 4px;
+    border: 1px solid #dbdbdb;
+    background: #ffffff;
+    padding: 1px 6px 1px 3px;
 }
 
 .comp-tag img {
-    display: inline;
+    display: inline-block;
     margin-top: -4px;
     margin-right: 2px;
     vertical-align: middle;
+}
+
+.comp-tag strong {
+    font-weight: bold;
+    font-size: .9em;
+    white-space: nowrap;
 }

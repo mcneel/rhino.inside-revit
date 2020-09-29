@@ -4,19 +4,37 @@ order: 49
 group: Modeling
 ---
 
+Materials are one of the more complicated data types in Revit. They are regularly used to (a) assign graphical properties to Revit elements for drafting (e.g. tile pattern on a bathroom wall), (b) embed architectural finish information in the building model for the purpose of scheduling and takeouts, (c) assign rendering properties to surfaces for architectural visualizations, and (d) assign physical and (e) thermal properties to elements for mathematical analysis of all kinds.
+
+Therefore a single Material in Revit has 5 main aspects:
+
+- **Identity**
+- **Graphics**
+- **Rendering Appearance**
+- **Physical Properties**
+- **Thermal Properties**
+
+Each one of these aspects is represented by a tab in the Revit material editor window:
+
+![](https://via.placeholder.com/800x100.png?text=Material+Aspects+Tabs)
+
+In the sections below, we will discuss how to deal with all of these 5 aspects using {{ site.terms.rir }}
+
 ## Querying Materials
 
 {% capture api_note %}
-In Revit API, Materials are represented by the {% include api_type.html type='Autodesk.Revit.DB.Material' title='DB.Material' %}
+In Revit API, Materials are represented by the {% include api_type.html type='Autodesk.Revit.DB.Material' title='DB.Material' %}. The {% include api_type.html type='Autodesk.Revit.DB.Material' title='DB.Material' %} type in Revit API, handles the *Identity* and *Graphics* of a material and provides methods to query and modify the *Rendering*, *Physical*, and *Thermal* properties.
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-- explain {% include ltr/comp.html uuid='94af13c1-' %} component
-- name can filter for a specific material and accepts text filters e.g. ";Glass"
-- class to filter by class, same as name
-- accepts more complex filters
+The first challenge is to be able to query available materials in a Revit model or find a specific we want to work with. For this we use the {% include ltr/comp.html uuid='94af13c1-' %} component. The component outputs all the materials in a Revit model by default, and also has optional inputs to filter the existing materials by class or name, and also accepts customs filters as well:
 
 ![](https://via.placeholder.com/800x300.png?text=Query+Materials)
+
+{% capture tip_note %}
+The Class and Name inputs accept Grasshopper string filtering patterns. See ************
+{% endcapture %}
+{% include ltr/bubble_note.html note=tip_note %}
 
 ### Extracting Materials from Geometry
 
@@ -30,19 +48,23 @@ To extract the set of materials assigned to faces of a geometry, use the *Geomet
 
 {% include ltr/en/wip_note.html %}
 
-- explain using {% include ltr/comp.html uuid='06e0cf55-' %} to get material identity and graphics
+Use the {% include ltr/comp.html uuid='06e0cf55-' %} component to access the material identity and graphics:
 
 ![](https://via.placeholder.com/800x300.png?text=Material+Id)
 
 ![](https://via.placeholder.com/800x300.png?text=Material+Graphics)
 
+### Modifying Material Identity
+
+### Customizing Material Graphics
+
 ## Creating Materials
 
-- explain {% include ltr/comp.html uuid='273ff43d-' %} for quick materials. explain the pitfalls
+To quickly create a material using a single color input use the {% include ltr/comp.html uuid='273ff43d-' %} component. This component has been created to help with quickly color coding Revit elements. Avoid using this component on final BIM models since the material is named by the color that is used to create it. {% include ltr/comp_doc.html uuid='273ff43d-' %}
 
 ![](https://via.placeholder.com/800x300.png?text=Add+Color+Material)
 
-- explain {% include ltr/comp.html uuid='0d9f07e2-' %}
+A better way to create materials is to use the {% include ltr/comp.html uuid='0d9f07e2-' %} component. This ways you can assign an appropriate name to the component:
 
 ![](https://via.placeholder.com/800x300.png?text=Add+Material)
 
@@ -104,7 +126,7 @@ explain struct assets
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-{% include ltr/comp.html uuid='af2678c8-' %} explain creating assets and assigning to a material using {% include ltr/comp.html uuid='2f1ec561-' %}. Show that the {% include ltr/comp.html uuid='6f5d09c7-' %} and {% include ltr/comp.html uuid='c907b51e-' %} could be used as inputs
+uhm {% include ltr/comp.html uuid='af2678c8-' %} explain creating assets and assigning to a material using {% include ltr/comp.html uuid='2f1ec561-' %}. Show that the {% include ltr/comp.html uuid='6f5d09c7-' %} and {% include ltr/comp.html uuid='c907b51e-' %} could be used as inputs
 
 ![](https://via.placeholder.com/800x300.png?text=Create+Asset)
 
