@@ -589,11 +589,12 @@ img.button-icon {
 }
 
 .comp-tag {
-    display: inline-block;
+    display: inline;
+    /* display: inline-block;
     border-radius: 10px;
     border: 1px solid #dbdbdb;
     background: #ffffff;
-    padding: 1px 6px 1px 3px;
+    padding: 1px 6px 1px 3px; */
 }
 
 .comp-tag img {

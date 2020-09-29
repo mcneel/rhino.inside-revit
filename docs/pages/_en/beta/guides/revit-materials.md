@@ -23,16 +23,16 @@ In the sections below, we will discuss how to deal with all of these 5 aspects u
 ## Querying Materials
 
 {% capture api_note %}
-In Revit API, Materials are represented by the {% include api_type.html type='Autodesk.Revit.DB.Material' title='DB.Material' %}. The {% include api_type.html type='Autodesk.Revit.DB.Material' title='DB.Material' %} type in Revit API, handles the *Identity* and *Graphics* of a material and provides methods to query and modify the *Shading*, *Physical*, and *Thermal* properties.
+In Revit API, Materials are represented by the {% include api_type.html type='Autodesk.Revit.DB.Material' title='DB.Material' %}. This type, handles the *Identity* and *Graphics* of a material and provides methods to query and modify the *Shading*, *Physical*, and *Thermal* properties.
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-The first challenge is to be able to query available materials in a Revit model or find a specific we want to work with. For this we use the {% include ltr/comp.html uuid='94af13c1-' %} component. The component outputs all the materials in a Revit model by default, and also has optional inputs to filter the existing materials by class or name, and also accepts customs filters as well:
+The first challenge is to be able to query available materials in a Revit model or find a specific one that we want to work with. For this we use the {% include ltr/comp.html uuid='94af13c1-' %} component. The component outputs all the materials in a Revit model by default, and also has optional inputs to filter the existing materials by class or name, and also accepts customs filters as well:
 
 ![](https://via.placeholder.com/800x300.png?text=Query+Materials)
 
 {% capture tip_note %}
-The Class and Name inputs accept Grasshopper string filtering patterns. See ************
+The Class and Name inputs accept Grasshopper string filtering patterns. See the documentation of ******
 {% endcapture %}
 {% include ltr/bubble_note.html note=tip_note %}
 
@@ -141,14 +141,19 @@ The {% include ltr/comp.html uuid='5b18389b-' %} and {% include ltr/comp.html uu
 
 Shading assets have a series of properties that can accept a nested asset (called *Texture* assets in this guide). For example, the diffuse property of a **Generic** shading asset can either have a color value, or be connected to another asset of type **Bitmap** (or other *Texture* assets).
 
-{{ site.terms.rir }} provides component to construct and destruct these asset types. The *Shading* asset component also accept a *Texture* asset where applicable. For example, use {% include ltr/comp.html uuid='37b63660-' %} and {% include ltr/comp.html uuid='77b391db-' %} to construct and destruct **Bitmap** texture assets:
+{{ site.terms.rir }} provides component to construct and destruct these asset types. The *Shading* asset component also accepts a *Texture* asset where applicable. For example, use {% include ltr/comp.html uuid='37b63660-' %} and {% include ltr/comp.html uuid='77b391db-' %} to construct and destruct **Bitmap** texture assets:
 
 ![](https://via.placeholder.com/800x300.png?text=Construct+Apply+Texture)
 
-{% include ltr/bubble_note.html note='Note that texture components only add the asset to the Revit model when they are connected to the input property of a Shading asset component' %}
+{% capture param_note %}
+The {% include ltr/param.html uuid='49a94c44-' title='Glossiness' %} and {% include ltr/param.html uuid='c2fc2e60-' title='Bump' %} parameters of **Generic** shading components accept both a double or color value, or a texture map respectively. Note the parameter icons show a double or color value and a checker map in background
+{% endcapture %}
+{% include ltr/bubble_note.html note=param_note %}
+
+{% include ltr/warning_note.html note='Note that texture components only add the asset to the Revit model when they are connected to the input property of a Shading asset component' %}
 
 
-## Physical (Structural) Assets
+## Physical Assets
 
 Use {% include ltr/comp.html uuid='af2678c8-' %} to create a *Physical* asset and assign to a material using {% include ltr/comp.html uuid='2f1ec561-' %} component. Use {% include ltr/comp.html uuid='6f5d09c7-' %} and {% include ltr/comp.html uuid='c907b51e-' %} as inputs, to set the type and behavior of the *Physical* asset, respectively:
 
