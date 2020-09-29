@@ -1,0 +1,6 @@
+<!-- download sample button -->
+<a type="button" class="btn btn-danger" href="{{ include.archive | prepend: site.baseurl }}">
+    <img class="button-icon" src="{{ "/assets/img/package.svg" | prepend: site.baseurl }}">
+    <strong>{{ include.name }}</strong>
+</a><br/>
+<small class="caption">Open using Grasshopper in {{ site.terms.rir }}</small>
