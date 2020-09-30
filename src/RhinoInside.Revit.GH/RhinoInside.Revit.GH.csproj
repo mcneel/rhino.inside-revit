@@ -240,7 +240,6 @@
     <Compile Include="Components\Element\DirectShape\ByPoint.cs" />
     <Compile Include="Components\Element\Identity.cs" />
     <Compile Include="Components\Element\Material\Graphics.cs" />
-    <Compile Include="Components\Element\Material\AnalyzeAppearanceAsset.cs" />
     <Compile Include="Components\Element\Material\AnalyzeAppearanceAssets.cs" />
     <Compile Include="Components\Element\Material\BaseAssetComponent.cs" />
     <Compile Include="Components\Element\Material\PhyscialMaterialAssetComponents.cs" />
