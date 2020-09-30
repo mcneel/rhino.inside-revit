@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Components
   public abstract class BasePhysicalAssetComponent<T>
     : TransactionalComponent where T : PhysicalMaterialData, new()
   {
-    protected AssetGHComponent ComponentInfo
+    protected AssetGHComponentAttribute ComponentInfo
     {
       get
       {
@@ -35,7 +35,7 @@ namespace RhinoInside.Revit.GH.Components
     public BasePhysicalAssetComponent() : base("", "", "", "Revit", "Material") { }
 
     private readonly T _assetData = new T();
-    private AssetGHComponent _compInfo;
+    private AssetGHComponentAttribute _compInfo;
 
     protected ParamDefinition[] GetAssetDataAsInputs(bool skipUnchangable = false)
     {
@@ -215,7 +215,7 @@ namespace RhinoInside.Revit.GH.Components
 
     #region Asset Utility Methods
     public object
-    VerifyInputValue(string inputName, object inputValue, APIAssetPropValueRange valueRangeInfo)
+    VerifyInputValue(string inputName, object inputValue, APIAssetPropValueRangeAttribute valueRangeInfo)
     {
       switch (inputValue)
       {

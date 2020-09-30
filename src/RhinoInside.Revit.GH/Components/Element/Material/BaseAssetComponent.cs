@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.GH.Components
   public abstract class BaseAssetComponent<T>
     : TransactionalComponent where T : AppearanceAssetData, new()
   {
-    protected AssetGHComponent ComponentInfo
+    protected AssetGHComponentAttribute ComponentInfo
     {
       get
       {
@@ -38,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components
     public BaseAssetComponent() : base("", "", "", "Revit", "Material") { }
 
     private readonly T _assetData = new T();
-    private AssetGHComponent _compInfo;
+    private AssetGHComponentAttribute _compInfo;
 
     protected ParamDefinition[] GetAssetDataAsInputs(bool skipUnchangable = false)
     {
@@ -271,18 +271,20 @@ namespace RhinoInside.Revit.GH.Components
     protected void UpdateAssetElementFromInputs(DB.AppearanceAssetElement assetElement, T assetData)
     {
       // open asset for editing
-      var scope = new DB.Visual.AppearanceAssetEditScope(assetElement.Document);
-      var editableAsset = scope.Start(assetElement.Id);
+      using (var scope = new DB.Visual.AppearanceAssetEditScope(assetElement.Document))
+      {
+        var editableAsset = scope.Start(assetElement.Id);
 
-      UpdateAssetFromData(editableAsset, assetData);
+        UpdateAssetFromData(editableAsset, assetData);
 
-      // commit the changes after all changes has been made
-      scope.Commit(true);
+        // commit the changes after all changes has been made
+        scope.Commit(true);
+      }
     }
 
     #region Asset Utility Methods
     public object
-    VerifyInputValue(string inputName, object inputValue, APIAssetPropValueRange valueRangeInfo)
+    VerifyInputValue(string inputName, object inputValue, APIAssetPropValueRangeAttribute valueRangeInfo)
     {
       switch (inputValue)
       {
@@ -393,7 +395,6 @@ namespace RhinoInside.Revit.GH.Components
       return new DB.FilteredElementCollector(doc)
                     .OfClass(typeof(DB.AppearanceAssetElement))
                     .WhereElementIsNotElementType()
-                    .ToElements()
                     .Cast<DB.AppearanceAssetElement>()
                     .ToList();
     }
