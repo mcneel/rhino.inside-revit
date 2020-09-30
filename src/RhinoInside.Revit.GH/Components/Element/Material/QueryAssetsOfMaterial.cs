@@ -75,7 +75,7 @@ namespace RhinoInside.Revit.GH.Components
       // appearance asset
       if (doc.GetElement(material.AppearanceAssetId) is DB.AppearanceAssetElement aae)
         DA.SetData(
-          "Appearance Asset",
+          "Shader Asset",
           new Types.AppearanceAsset(aae)
           );
       // structural asset
