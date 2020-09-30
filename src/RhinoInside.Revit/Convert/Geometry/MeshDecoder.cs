@@ -5,18 +5,27 @@ namespace RhinoInside.Revit.Convert.Geometry
 {
   static class MeshDecoder
   {
-    /// <summary>
-    /// Replaces <see cref="Raw.RawDecoder.ToRhino(DB.Mesh)"/> to unweld vertices and recreate Ngons
-    /// </summary>
-    /// <param name="mesh"></param>
-    /// <returns></returns>
     internal static Mesh ToRhino(DB.Mesh mesh)
     {
-      var result = Raw.RawDecoder.ToRhino(mesh);
+      return Raw.RawDecoder.ToRhino(mesh);
+    }
 
-      result.Ngons.AddPlanarNgons(Revit.VertexTolerance, 4, 2, true);
+    internal static Mesh FromRawMesh(Mesh mesh, double scaleFactor)
+    {
+      if (scaleFactor != 1.0 && !mesh.Scale(scaleFactor))
+        return default;
 
-      return result;
+      if (!mesh.IsValidWithLog(out var log))
+      {
+        if (log.Contains("has degenerate double precision vertex locations"))
+        {
+          var fixedFaceCount = 0;
+          mesh.Faces.RemoveZeroAreaFaces(ref fixedFaceCount);
+        }
+      }
+
+      mesh.Ngons.AddPlanarNgons(Revit.VertexTolerance, 4, 2, true);
+      return mesh;
     }
   }
 }

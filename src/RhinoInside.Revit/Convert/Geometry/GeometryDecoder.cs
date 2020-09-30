@@ -113,8 +113,8 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static Brep ToBrep(this DB.Solid value)
     { var rhino = RawDecoder.ToRhino(value); UnitConverter.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
 
-    public static Mesh ToMesh(this DB.Mesh value)
-    { var rhino = MeshDecoder.ToRhino(value); UnitConverter.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
+    public static Mesh ToMesh(this DB.Mesh value) =>
+      MeshDecoder.FromRawMesh(MeshDecoder.ToRhino(value), UnitConverter.ToRhinoUnits);
     #endregion
 
     /// <summary>

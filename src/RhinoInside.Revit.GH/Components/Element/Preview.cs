@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
+using RhinoInside.Revit.Convert.Geometry;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -52,6 +53,9 @@ namespace RhinoInside.Revit.GH.Components
 
       var meshingParameters = !double.IsNaN(relativeTolerance) ? new Rhino.Geometry.MeshingParameters(relativeTolerance, Revit.VertexTolerance) : null;
       Types.GeometricElement.BuildPreview(element, meshingParameters, detailLevel, out var materials, out var meshes, out var wires);
+
+      for (int m = 0; m < meshes.Length; ++m)
+        meshes[m] = MeshDecoder.FromRawMesh(meshes[m], UnitConverter.NoScale);
 
       DA.SetDataList(0, meshes?.Select((x) => new GH_Mesh(x)));
       DA.SetDataList(1, materials?.Select((x) => new GH_Material(x)));
