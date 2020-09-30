@@ -29,18 +29,17 @@ In Revit API, Materials are represented by the {% include api_type.html type='Au
 
 The first challenge is to be able to query available materials in a Revit model or find a specific one that we want to work with. For this we use the {% include ltr/comp.html uuid='94af13c1-' %} component. The component outputs all the materials in a Revit model by default, and also has optional inputs to filter the existing materials by class or name, and also accepts customs filters as well:
 
-![](https://via.placeholder.com/800x300.png?text=Query+Materials)
+![]({{ "/static/images/guides/revit-materials01.png" | prepend: site.baseurl }})
 
-{% capture tip_note %}
-The Class and Name inputs accept Grasshopper string filtering patterns. See the documentation of ******
-{% endcapture %}
-{% include ltr/bubble_note.html note=tip_note %}
+{% include ltr/filter_note.html note='The Class and Name inputs accept Grasshopper string filtering patterns' %}
+
+![]({{ "/static/images/guides/revit-materials02.png" | prepend: site.baseurl }})
 
 ### Extracting Materials from Geometry
 
 To extract the set of materials assigned to faces of a geometry, use the *Geometry Materials* component shared here. In this example, a custom component is used to extract the geometry objects from Revit API ({% include api_type.html type='Autodesk.Revit.DB.Solid' title='DB.Solid' %} - See [Extracting Type Geometry by Category]({{ site.baseurl }}{% link _en/beta/guides/revit-types.md %}#extracting-type-geometry-by-category)). These objects are then passed to the *Geometry Materials* component to extract materials. Finally the *Element.Decompose* component is used to extract the material name.
 
-![]({{ "/static/images/guides/revit-materials01.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-materials-extract.png" | prepend: site.baseurl }})
 
 {% include ltr/download_comp.html archive='/static/ghnodes/Geometry Materials.ghuser' name='Geometry Materials' %}
 
@@ -64,11 +63,11 @@ Use the {% include ltr/comp.html uuid='06e0cf55-' %} component to access the mat
 
 To quickly create a material using a single color input use the {% include ltr/comp.html uuid='273ff43d-' %} component. This component has been created to help with quickly color coding Revit elements. Avoid using this component on final BIM models since the material is named by the color that is used to create it. {% include ltr/comp_doc.html uuid='273ff43d-' %}
 
-![](https://via.placeholder.com/800x300.png?text=Add+Color+Material)
+![]({{ "/static/images/guides/revit-materials03.png" | prepend: site.baseurl }})
 
 A better way to create materials is to use the {% include ltr/comp.html uuid='0d9f07e2-' %} component. This ways you can assign an appropriate name to the component:
 
-![](https://via.placeholder.com/800x300.png?text=Add+Material)
+![]({{ "/static/images/guides/revit-materials04.png" | prepend: site.baseurl }})
 
 ## Material Assets
 
@@ -120,12 +119,11 @@ The Grasshopper definition provided here, has custom python components that help
 
 Use the {% include ltr/comp.html uuid='1f644064-' %} to extract assets of a material:
 
-![](https://via.placeholder.com/800x300.png?text=Extract+Assets)
-
+![]({{ "/static/images/guides/revit-materials05.png" | prepend: site.baseurl }})
 
 To replace assets of a material with a different asset, use the {% include ltr/comp.html uuid='2f1ec561-' %} component:
 
-![](https://via.placeholder.com/800x300.png?text=Replace+Assets)
+![]({{ "/static/images/guides/revit-materials06.png" | prepend: site.baseurl }})
 
 ## Shader (Appearance) Assets
 

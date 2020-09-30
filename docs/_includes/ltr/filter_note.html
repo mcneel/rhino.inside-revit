@@ -1,0 +1,14 @@
+<div class="msg-block">
+    <table class="msg-table">
+        <tr>
+            <td class="msg-icon"><img src="{{ "/assets/img/filter.svg" | prepend: site.baseurl }}"></td>
+            <td class="msg-msg">
+                {{ include.note | markdownify }}
+                {{ '`<` Starts with<br/>`>` Ends with<br/>`?` Contains, same as a regular search<br/>`:` Wildcards<br/>`;` Regular expression' | markdownify }}
+                {% if include.image %}
+                    <img class="msg-img" src="{{ include.image | prepend: site.baseurl }}">
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+</div>
