@@ -16,7 +16,7 @@ Therefore a single Material in Revit has 5 main aspects:
 
 Each one of these aspects is represented by a tab in the Revit material editor window:
 
-![](https://via.placeholder.com/800x100.png?text=Material+Aspects+Tabs)
+![]({{ "/static/images/guides/revit-materials-editortabs.png" | prepend: site.baseurl }})
 
 In the sections below, we will discuss how to deal with all of these 5 aspects using {{ site.terms.rir }}
 
@@ -109,7 +109,7 @@ The Grasshopper definition provided here, has custom python components that help
 
 &nbsp;
 
-![](https://via.placeholder.com/800x300.png?text=Interrogate+Assets)
+![]({{ "/static/images/guides/revit-materials-assetpg.png" | prepend: site.baseurl }})
 
 &nbsp;
 
@@ -150,7 +150,10 @@ The {% include ltr/param.html uuid='49a94c44-' title='Glossiness' %} and {% incl
 {% endcapture %}
 {% include ltr/bubble_note.html note=param_note %}
 
-{% include ltr/warning_note.html note='Note that texture components only add the asset to the Revit model when they are connected to the input property of a Shading asset component' %}
+{% capture construct_note %}
+Note that *Construct* an *Deconstruct* texture components only pass around a data structure containing the configuration of the texture asset. They do not create anything inside the Revit model by themselves. It is the *Create Shading Asset* component that actually creates the texture asset (when connected to an input parameter) and connects it to properties of the shading asset it is creating. This behavior mirrors the inner-workings of 'connected' (nested) assets in Revit API.
+{% endcapture %}
+{% include ltr/api_note.html note=construct_note %}
 
 
 ## Physical Assets
