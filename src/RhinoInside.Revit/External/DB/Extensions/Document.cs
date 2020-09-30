@@ -421,10 +421,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       return new FilteredElementCollector(doc)
                  .OfClass(typeof(PropertySetElement))
-                 .ToElements()
-                 .Cast<PropertySetElement>()
-                 .Where(x => x.GetParameterValue<string>(BuiltInParameter.PROPERTY_SET_NAME) == name)
-                 .FirstOrDefault();
+                 .WhereParameterEqualsTo(BuiltInParameter.PROPERTY_SET_NAME, name)
+                 .FirstElement() as PropertySetElement;
     }
   }
 }
