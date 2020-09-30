@@ -84,7 +84,7 @@ namespace RhinoInside.Revit.GH.Components
 
       // get assets
       var appearanceAsset = default(DB.AppearanceAssetElement);
-      DA.GetData("Appearance Asset", ref appearanceAsset);
+      DA.GetData("Shader Asset", ref appearanceAsset);
       var structuralAsset = default(DB.PropertySetElement);
       DA.GetData("Physical Asset", ref structuralAsset);
       var thermalAsset = default(DB.PropertySetElement);
