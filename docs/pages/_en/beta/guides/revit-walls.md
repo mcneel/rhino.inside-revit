@@ -33,7 +33,7 @@ Use a combination of {% include ltr/comp.html uuid="d08f7ab1-" %} and {% include
 
 ### By Wall System Family
 
-A better workflow is to collect walls based on the *Wall System Family*. Use a combination of components shown here to collect the walls by their *System Family*:
+A better workflow is to collect walls based on the *Wall System Family*. Use the {% include ltr/comp.html uuid="15545e80-" %} component to select any combination of the builtin **Basic**, **Stacked**, or **Curtain** walls in Revit. You can then pass this selection as the input to the {% include ltr/comp.html uuid="118f5744-" %} as shown below:
 
 ![]({{ "/static/images/guides/revit-walls03.png" | prepend: site.baseurl }})
 
