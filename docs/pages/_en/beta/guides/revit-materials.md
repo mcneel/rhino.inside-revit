@@ -4,13 +4,13 @@ order: 49
 group: Modeling
 ---
 
-Materials are one of the more complicated data types in Revit. They are regularly used to (a) assign graphical properties to Revit elements for drafting (e.g. tile pattern on a bathroom wall), (b) embed architectural finish information in the building model for the purpose of scheduling and takeouts, (c) assign shading (rendering) properties to surfaces for architectural visualizations, and (d) assign physical and (e) thermal properties to elements for mathematical analysis of all kinds.
+Materials are one of the more complicated data types in Revit. They are regularly used to (a) assign graphical properties to Revit elements for drafting (e.g. tile pattern on a bathroom wall), (b) embed architectural finish information in the building model for the purpose of scheduling and takeouts, (c) assign appearance properties to surfaces for architectural visualizations, and (d) assign physical and (e) thermal properties to elements for mathematical analysis of all kinds.
 
 Therefore a single Material in Revit has 5 main aspects:
 
 - **Identity**
 - **Graphics**
-- **Shading (Rendering) Properties**
+- **Appearance Properties**
 - **Physical Properties**
 - **Thermal Properties**
 
@@ -23,7 +23,7 @@ In the sections below, we will discuss how to deal with all of these 5 aspects u
 ## Querying Materials
 
 {% capture api_note %}
-In Revit API, Materials are represented by the {% include api_type.html type='Autodesk.Revit.DB.Material' title='DB.Material' %}. This type, handles the *Identity* and *Graphics* of a material and provides methods to query and modify the *Shading*, *Physical*, and *Thermal* properties.
+In Revit API, Materials are represented by the {% include api_type.html type='Autodesk.Revit.DB.Material' title='DB.Material' %}. This type, handles the *Identity* and *Graphics* of a material and provides methods to query and modify the *Appearance*, *Physical*, and *Thermal* properties.
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
@@ -71,32 +71,32 @@ A better way to create materials is to use the {% include ltr/comp.html uuid='0d
 
 ## Material Assets
 
-So far, we have learned how to analyze material identify and graphics, and to create simple materials. To be able to take full advantage of the materials in Revit, we need to be familiar with the underlying concepts behind the other three aspects of a material: *Shading*, *Physical*, and *Thermal* properties.
+So far, we have learned how to analyze material identify and graphics, and to create simple materials. To be able to take full advantage of the materials in Revit, we need to be familiar with the underlying concepts behind the other three aspects of a material: *Appearance*, *Physical*, and *Thermal* properties.
 
 ### Assets
 
-Assets are the underlying concept behind the *Shading*, *Physical*, and *Thermal* aspects of a material in Revit. {{ site.terms.rir }} provides a series of components to Create, Modify, and Analyze these assets in a Grasshopper-friendly manner. It also provides components to extract and replace these assets on a Revit material.
+Assets are the underlying concept behind the *Appearance*, *Physical*, and *Thermal* aspects of a material in Revit. {{ site.terms.rir }} provides a series of components to Create, Modify, and Analyze these assets in a Grasshopper-friendly manner. It also provides components to extract and replace these assets on a Revit material.
 
-Remember that Assets and Materials are different data types. Each Revit Material had identity and graphics properties, and also can be assigned Assets to apply *Shading*, *Physical*, and *Thermal* properties to the Material. Having *Physical*, and *Thermal* assets is completely optional.
+Remember that Assets and Materials are different data types. Each Revit Material had identity and graphics properties, and also can be assigned Assets to apply *Appearance*, *Physical*, and *Thermal* properties to the Material. Having *Physical*, and *Thermal* assets is completely optional.
 
 {% capture api_note %}
 Revit API support for assets is very limited. This note section, attempts to describe the inner-workings of Revit Visual API
 
-#### Shading Assets
+#### Appearance Assets
 
-All *Shading* assets are of type {% include api_type.html type='Autodesk.Revit.DB.Visual.Asset' title='DB.Visual.Asset' %} and are basically a collection of visual properties that have a name e.g. `generic_diffuse`, a type, and a value. The {% include api_type.html type='Autodesk.Revit.DB.Visual.Asset' title='DB.Visual.Asset' %} has lookup methods to find and return these properties. These properties are wrapped by the type {% include api_type.html type='Autodesk.Revit.DB.Visual.AssetProperty' title='DB.Visual.AssetProperty' %} in Revit API. This type provides getters to extract the value from the property.
-
-&nbsp;
-
-There are many different *Shading* assets in Revit e.g. **Generic**, **Ceramic**, **Metal**, **Layered**, **Glazing** to name a few. Each asset has a different set of properties. To work with these *Shading* assets, we need a way to know the name of the properties that are available for each of the asset types. Revit API provides static classes with static readonly string properties that provide an easy(?) way to get the name of these properties. For example the `GenericDiffuse` property of {% include api_type.html type='Autodesk.Revit.DB.Visual.Generic' title='DB.Visual.Generic' %}, returns the name `generic_diffuse` which is the name of the diffuse property for a **Generic** Shading asset.
+All *Appearance* assets are of type {% include api_type.html type='Autodesk.Revit.DB.Visual.Asset' title='DB.Visual.Asset' %} and are basically a collection of visual properties that have a name e.g. `generic_diffuse`, a type, and a value. The {% include api_type.html type='Autodesk.Revit.DB.Visual.Asset' title='DB.Visual.Asset' %} has lookup methods to find and return these properties. These properties are wrapped by the type {% include api_type.html type='Autodesk.Revit.DB.Visual.AssetProperty' title='DB.Visual.AssetProperty' %} in Revit API. This type provides getters to extract the value from the property.
 
 &nbsp;
 
-*Shading* assets are then wrapped by {% include api_type.html type='Autodesk.Revit.DB.AppearanceAssetElement' title='DB.AppearanceAssetElement' %} so they can be assigned to a Revit Material ({% include api_type.html type='Autodesk.Revit.DB.Material' title='DB.Material' %})
+There are many different *Appearance* assets in Revit e.g. **Generic**, **Ceramic**, **Metal**, **Layered**, **Glazing** to name a few. Each asset has a different set of properties. To work with these *Appearance* assets, we need a way to know the name of the properties that are available for each of the asset types. Revit API provides static classes with static readonly string properties that provide an easy(?) way to get the name of these properties. For example the `GenericDiffuse` property of {% include api_type.html type='Autodesk.Revit.DB.Visual.Generic' title='DB.Visual.Generic' %}, returns the name `generic_diffuse` which is the name of the diffuse property for a **Generic** Appearance asset.
+
+&nbsp;
+
+*Appearance* assets are then wrapped by {% include api_type.html type='Autodesk.Revit.DB.AppearanceAssetElement' title='DB.AppearanceAssetElement' %} so they can be assigned to a Revit Material ({% include api_type.html type='Autodesk.Revit.DB.Material' title='DB.Material' %})
 
 #### Physical and Thermal Assets
 
-*Physical*, and *Thermal* assets are completely different although operating very similarly to *Shading* assets. They are still a collection of properties, however, the properties are modeled as Revit parameters ({% include api_type.html type='Autodesk.Revit.DB.Parameter' title='DB.Parameter' %}) and are collected by an instance of {% include api_type.html type='Autodesk.Revit.DB.PropertySetElement' title='DB.PropertySetElement' %}. Instead of having static classes as accessors for the names, they must be accessed by looking up the parameter based on a built-in Revit parameter e.g. `THERMAL_MATERIAL_PARAM_REFLECTIVITY` of {% include api_type.html type='Autodesk.Revit.DB.BuiltInParameter' title='DB.BuiltInParameter' %}
+*Physical*, and *Thermal* assets are completely different although operating very similarly to *Appearance* assets. They are still a collection of properties, however, the properties are modeled as Revit parameters ({% include api_type.html type='Autodesk.Revit.DB.Parameter' title='DB.Parameter' %}) and are collected by an instance of {% include api_type.html type='Autodesk.Revit.DB.PropertySetElement' title='DB.PropertySetElement' %}. Instead of having static classes as accessors for the names, they must be accessed by looking up the parameter based on a built-in Revit parameter e.g. `THERMAL_MATERIAL_PARAM_REFLECTIVITY` of {% include api_type.html type='Autodesk.Revit.DB.BuiltInParameter' title='DB.BuiltInParameter' %}
 
 &nbsp;
 
@@ -125,31 +125,31 @@ To replace assets of a material with a different asset, use the {% include ltr/c
 
 ![]({{ "/static/images/guides/revit-materials06.png" | prepend: site.baseurl }})
 
-## Shader (Appearance) Assets
+## Appearance Assets
 
-There are many *Shading* assets in Revit API. As an example, you can use {% include ltr/comp.html uuid='0f251f87-' %} to create a *Generic* shader asset and assign that to a Revit material using the {% include ltr/comp.html uuid='2f1ec561-' %} component:
+There are many *Appearance* assets in Revit API. As an example, you can use {% include ltr/comp.html uuid='0f251f87-' %} to create a *Generic* appearance asset and assign that to a Revit material using the {% include ltr/comp.html uuid='2f1ec561-' %} component:
 
-![](https://via.placeholder.com/800x300.png?text=Create+Shader)
+![](https://via.placeholder.com/800x300.png?text=Create+Appearance)
 
 The {% include ltr/comp.html uuid='5b18389b-' %} and {% include ltr/comp.html uuid='73b2376b-' %} components can be used to easily manipulate an existing asset, or analyze and extract the known property values:
 
-![](https://via.placeholder.com/800x300.png?text=Modify+Analyze+Shader)
+![](https://via.placeholder.com/800x300.png?text=Modify+Analyze+Appearance)
 
 ## Texture Assets
 
-Shading assets have a series of properties that can accept a nested asset (called *Texture* assets in this guide). For example, the diffuse property of a **Generic** shading asset can either have a color value, or be connected to another asset of type **Bitmap** (or other *Texture* assets).
+Appearance assets have a series of properties that can accept a nested asset (called *Texture* assets in this guide). For example, the diffuse property of a **Generic** appearance asset can either have a color value, or be connected to another asset of type **Bitmap** (or other *Texture* assets).
 
-{{ site.terms.rir }} provides component to construct and destruct these asset types. The *Shading* asset component also accepts a *Texture* asset where applicable. For example, use {% include ltr/comp.html uuid='37b63660-' %} and {% include ltr/comp.html uuid='77b391db-' %} to construct and destruct **Bitmap** texture assets:
+{{ site.terms.rir }} provides component to construct and destruct these asset types. The *Appearance* asset component also accepts a *Texture* asset where applicable. For example, use {% include ltr/comp.html uuid='37b63660-' %} and {% include ltr/comp.html uuid='77b391db-' %} to construct and destruct **Bitmap** texture assets:
 
 ![](https://via.placeholder.com/800x300.png?text=Construct+Apply+Texture)
 
 {% capture param_note %}
-The {% include ltr/param.html uuid='49a94c44-' title='Glossiness' %} and {% include ltr/param.html uuid='c2fc2e60-' title='Bump' %} parameters of **Generic** shading components accept both a double or color value, or a texture map respectively. Note the parameter icons show a double or color value and a checker map in background
+The {% include ltr/param.html uuid='49a94c44-' title='Glossiness' %} and {% include ltr/param.html uuid='c2fc2e60-' title='Bump' %} parameters of **Generic** appearance components accept both a double or color value, or a texture map respectively. Note the parameter icons show a double or color value and a checker map in background
 {% endcapture %}
 {% include ltr/bubble_note.html note=param_note %}
 
 {% capture construct_note %}
-Note that *Construct* an *Deconstruct* texture components only pass around a data structure containing the configuration of the texture asset. They do not create anything inside the Revit model by themselves. It is the *Create Shading Asset* component that actually creates the texture asset (when connected to an input parameter) and connects it to properties of the shading asset it is creating. This behavior mirrors the inner-workings of 'connected' (nested) assets in Revit API.
+Note that *Construct* an *Deconstruct* texture components only pass around a data structure containing the configuration of the texture asset. They do not create anything inside the Revit model by themselves. It is the *Create Appearance Asset* component that actually creates the texture asset (when connected to an input parameter) and connects it to properties of the appearance asset it is creating. This behavior mirrors the inner-workings of 'connected' (nested) assets in Revit API.
 {% endcapture %}
 {% include ltr/api_note.html note=construct_note %}
 
