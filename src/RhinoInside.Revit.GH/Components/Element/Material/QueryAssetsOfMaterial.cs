@@ -43,7 +43,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       pManager.AddParameter(
         param: new Parameters.AppearanceAsset(),
-        name: "Shader Asset",
+        name: "Appearance Asset",
         nickname: "AA",
         description: string.Empty,
         access: GH_ParamAccess.item
@@ -75,7 +75,7 @@ namespace RhinoInside.Revit.GH.Components
       // appearance asset
       if (doc.GetElement(material.AppearanceAssetId) is DB.AppearanceAssetElement aae)
         DA.SetData(
-          "Shader Asset",
+          "Appearance Asset",
           new Types.AppearanceAsset(aae)
           );
       // structural asset

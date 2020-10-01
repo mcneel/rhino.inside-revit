@@ -365,7 +365,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
   }
 
   /// <summary>
-  /// Base class for all shader assets
+  /// Base class for all material appearance assets
   /// </summary>
   public class ShaderData : AppearanceAssetData
   {
@@ -397,9 +397,9 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
 
   #endregion
 
-  #region Shader Assets
+  #region Appearance Assets
   [APIAsset(typeof(DB.Visual.Generic))]
-  [AssetGHComponent("Shader Asset (Generic)", "GA", "Shader asset of \"Generic\" schema")]
+  [AssetGHComponent("Appearance Asset (Generic)", "GA", "Appearance asset of \"Generic\" schema")]
   public class GenericData : ShaderData
   {
     [NoAPIAssetProp("UIName", typeof(DB.Visual.AssetPropertyString))]

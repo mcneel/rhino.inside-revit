@@ -40,7 +40,7 @@ namespace RhinoInside.Revit.GH.Components
         access: GH_ParamAccess.item
         ),
       ParamDefinition.Create<Parameters.AppearanceAsset>(
-        name: "Shader Asset",
+        name: "Appearance Asset",
         nickname: "AA",
         description: string.Empty,
         access: GH_ParamAccess.item,
@@ -84,7 +84,7 @@ namespace RhinoInside.Revit.GH.Components
 
       // get assets
       var appearanceAsset = default(DB.AppearanceAssetElement);
-      DA.GetData("Shader Asset", ref appearanceAsset);
+      DA.GetData("Appearance Asset", ref appearanceAsset);
       var structuralAsset = default(DB.PropertySetElement);
       DA.GetData("Physical Asset", ref structuralAsset);
       var thermalAsset = default(DB.PropertySetElement);
