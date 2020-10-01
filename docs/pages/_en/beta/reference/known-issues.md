@@ -41,15 +41,22 @@ When {{ site.terms.rir }} loads, the error below appears.
 
 ![]({{ "/static/images/reference/known-issues-error-200.png" | prepend: site.baseurl }})
 
+The underlying issue is that one of the `Microsoft.WindowsAPICodePack` or `Microsoft.WindowsAPICodePack.Shell` dlls that are shipped with the conflicting Revit add-in, does not have a public key, and the conflicting add-in is not compiled to use the exact version of these dlls that are shipped with the product. The latest version of both these dlls are installed by Rhino into the Global Assembly Cache (GAC) when Rhino is installed. When {{ site.terms.rir }} and the conflicting add-in are both loaded into Revit, one of them ends up using the incompatible dll version and this causes the error.
+
 ### Workaround
 
-This normally appears when there is a conflict between Rhino.inside and one or more Revit plugins that have loaded already. 
+This normally appears when there is a conflict between Rhino.inside and one or more Revit plugins that have loaded already:
 
-A common conflict is an older version of the {{ site.terms.pyrevit }} plugin.  While the newer versions to {{ site.terms.pyrevit }} do not cause a problem, an older version might.  Information on the {{ site.terms.pyrevit }} site can be found [{{ site.terms.pyrevit }} issue #628](https://github.com/eirannejad/pyRevit/issues/628). To update the older version of {{ site.terms.pyrevit }} use these steps:
+#### pyRevit Add-in
+A common conflict is an older version (older than 4.7) of the {{ site.terms.pyrevit }} plugin.  While the newer versions to {{ site.terms.pyrevit }} do not cause a problem, an older version might.  Information on the {{ site.terms.pyrevit }} site can be found [{{ site.terms.pyrevit }} issue #628](https://github.com/eirannejad/pyRevit/issues/628). To update the older version of {{ site.terms.pyrevit }} use these steps:
 
-  - Download [Microsoft.WindowsAPICodePack.Shell](https://www.nuget.org/packages/Microsoft.WindowsAPICodePack.Shell/) and place under `bin/` directory in pyRevit installation directory. This fix will be shipped with the next pyRevit version
+  - Download [Microsoft.WindowsAPICodePack.Shell](https://www.nuget.org/packages/Microsoft.WindowsAPICodePack-Shell/1.1.0) and place under `bin/` directory in pyRevit installation directory. This fix will be shipped with the next pyRevit version
 
   - DLL is also uploaded here for convenience if you don't know how to download NuGet packages. It's placed inside a ZIP archive for security. Unpack and place under `bin/` directory in pyRevit installation directory. [Microsoft.WindowsAPICodePack.Shell.dll.zip](https://github.com/eirannejad/pyRevit/files/3503717/Microsoft.WindowsAPICodePack.Shell.dll.zip)
+
+#### Naviate Add-ins
+Another common conflict is with the suite of Naviate tools for Revit. The workaround is very similar to workaround mentioned above. Download both the [Microsoft.WindowsAPICodePack](https://www.nuget.org/packages/Microsoft.WindowsAPICodePack-Core/1.1.0) and [Microsoft.WindowsAPICodePack.Shell](https://www.nuget.org/packages/Microsoft.WindowsAPICodePack-Shell/1.1.0) dlls and replace the existing ones inside the Naviate installation path (usually `C:\Program Files\Symetri\Naviate\Revit 20XX\Dll\`)
+
 
 If this does not solve the problem, then using the [Search for Conflicting Plugins]({{ site.baseurl }}{% link _en/beta/reference/toubleshooting.md %}#search-for-conflicting-plugins) section.
 
