@@ -58,9 +58,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return ExportUtils.GetGBXMLDocumentId(doc);
     }
 
-    public static bool IsSameDocumentAs(this Document doc, Document otherDoc)
-      => doc.GetFingerprintGUID() == otherDoc.GetFingerprintGUID();
-
     private static int seed = 0;
     private static readonly Dictionary<Guid, int> DocumentsSessionDictionary = new Dictionary<Guid, int>();
 

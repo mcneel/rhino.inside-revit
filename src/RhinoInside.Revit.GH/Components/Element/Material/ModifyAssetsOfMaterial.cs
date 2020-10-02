@@ -94,9 +94,28 @@ namespace RhinoInside.Revit.GH.Components
       using (var transaction = NewTransaction(doc))
       {
         transaction.Start();
-        material.AppearanceAssetId = appearanceAsset is null ? material.AppearanceAssetId : appearanceAsset.Id;
-        material.StructuralAssetId = structuralAsset is null ? material.StructuralAssetId : structuralAsset.Id;
-        material.ThermalAssetId = thermalAsset is null ? material.ThermalAssetId : thermalAsset.Id;
+
+        // validate and apply appearance asset if provided
+        if (appearanceAsset != null)
+          if (!doc.Equals(appearanceAsset.Document))
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Document mismatch: Skipping Appearance Asset since it is not in the same document as Material");
+          else
+            material.AppearanceAssetId = appearanceAsset.Id;
+
+        // validate and apply structural asset if provided
+        if (structuralAsset != null)
+          if (!doc.Equals(structuralAsset.Document))
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Document mismatch: Skipping Physical Asset since it is not in the same document as Material");
+          else
+            material.StructuralAssetId = structuralAsset.Id;
+
+        // validate and apply thermal asset if provided
+        if (thermalAsset != null)
+          if (!doc.Equals(thermalAsset.Document))
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Document mismatch: Skipping Thermal Asset since it is not in the same document as Material");
+          else
+            material.ThermalAssetId = thermalAsset.Id;
+
         CommitTransaction(doc, transaction);
       }
 

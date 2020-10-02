@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Components
       Description = $"Create a new instance of {ComponentInfo.Description} inside document";
     }
 
-    protected override ParamDefinition[] Inputs => GetAssetDataAsInputs();
+    protected override ParamDefinition[] Inputs => GetInputs();
     protected override ParamDefinition[] Outputs => new ParamDefinition[]
     {
       ParamDefinition.Create<Parameters.AppearanceAsset>(
@@ -37,6 +37,28 @@ namespace RhinoInside.Revit.GH.Components
         access: GH_ParamAccess.item
         ),
     };
+
+    private ParamDefinition[] GetInputs()
+    {
+      // build a list of inputs based on the shader data type
+      // add optional document parameter as first
+      var inputs = new List<ParamDefinition>()
+      {
+        new ParamDefinition(
+            new Parameters.Document()
+            {
+              Name = "Document",
+              NickName = "DOC",
+              Description = "Document",
+              Access = GH_ParamAccess.item,
+              Optional = true
+            },
+            ParamVisibility.Voluntary
+          )
+      };
+      inputs.AddRange(GetAssetDataAsInputs());
+      return inputs.ToArray();
+    }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
@@ -50,7 +72,9 @@ namespace RhinoInside.Revit.GH.Components
         return;
       }
 
-      var doc = Revit.ActiveDBDocument;
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
+        return;
+
       using (var transaction = NewTransaction(doc))
       {
         transaction.Start();
