@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeDescription => "Represents a Revit Physical Asset";
     protected override Type ScriptVariableType => typeof(DB.PropertySetElement);
     public static explicit operator DB.PropertySetElement(StructuralAsset value) =>
-      value?.IsValid == true ? value.APIElement as DB.PropertySetElement : default;
+      value?.IsValid == true ? value.Value as DB.PropertySetElement : default;
 
     public StructuralAsset() { }
     public StructuralAsset(DB.PropertySetElement asset) : base(asset) { }
