@@ -12,7 +12,7 @@ using Grasshopper.GUI.Canvas;
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace Grasshopper.External.Special
+namespace Grasshopper.Special.External
 {
   using Kernel;
   using Kernel.Attributes;
@@ -618,7 +618,7 @@ namespace Grasshopper.External.Special
 
   public class ValueSetPicker : ValueSet
   {
-    public static readonly Guid ComponentClassGuid = new Guid("AFB12752-3ACB-4ACF-8102-16982A69CDAE");
+    static readonly Guid ComponentClassGuid = new Guid("AFB12752-3ACB-4ACF-8102-16982A69CDAE");
     public override Guid ComponentGuid => ComponentClassGuid;
 
     public ValueSetPicker() { }
@@ -648,6 +648,7 @@ namespace Grasshopper.External.Special
         (
           goo?.ScriptVariable() is object obj &&
           (
+            IsEquatable(obj.GetType()) ||
             obj is ValueType ||
             obj is IComparable
           )
