@@ -86,6 +86,8 @@ Remember that Assets and Materials are different data types. Each Revit Material
 {% capture api_note %}
 Revit API support for assets is very limited. This note section, attempts to describe the inner-workings of Revit Visual API
 
+&nbsp;
+
 **Appearance Assets**
 
 All *Appearance* assets are of type {% include api_type.html type='Autodesk.Revit.DB.Visual.Asset' title='DB.Visual.Asset' %} and are basically a collection of visual properties that have a name e.g. `generic_diffuse`, a type, and a value. The {% include api_type.html type='Autodesk.Revit.DB.Visual.Asset' title='DB.Visual.Asset' %} has lookup methods to find and return these properties. These properties are wrapped by the type {% include api_type.html type='Autodesk.Revit.DB.Visual.AssetProperty' title='DB.Visual.AssetProperty' %} in Revit API. This type provides getters to extract the value from the property.
@@ -98,6 +100,8 @@ There are many different *Appearance* assets in Revit e.g. **Generic**, **Cerami
 
 *Appearance* assets are then wrapped by {% include api_type.html type='Autodesk.Revit.DB.AppearanceAssetElement' title='DB.AppearanceAssetElement' %} so they can be assigned to a Revit Material ({% include api_type.html type='Autodesk.Revit.DB.Material' title='DB.Material' %})
 
+&nbsp;
+
 **Physical and Thermal Assets**
 
 *Physical*, and *Thermal* assets are completely different although operating very similarly to *Appearance* assets. They are still a collection of properties, however, the properties are modeled as Revit parameters ({% include api_type.html type='Autodesk.Revit.DB.Parameter' title='DB.Parameter' %}) and are collected by an instance of {% include api_type.html type='Autodesk.Revit.DB.PropertySetElement' title='DB.PropertySetElement' %}. Instead of having static classes as accessors for the names, they must be accessed by looking up the parameter based on a built-in Revit parameter e.g. `THERMAL_MATERIAL_PARAM_REFLECTIVITY` of {% include api_type.html type='Autodesk.Revit.DB.BuiltInParameter' title='DB.BuiltInParameter' %}
@@ -106,7 +110,9 @@ There are many different *Appearance* assets in Revit e.g. **Generic**, **Cerami
 
 Revit API provides {% include api_type.html type='Autodesk.Revit.DB.StructuralAsset' title='DB.StructuralAsset' %} and {% include api_type.html type='Autodesk.Revit.DB.ThermalAsset' title='DB.ThermalAsset' %} types to provide easy access to the *Physical*, and *Thermal* properties, however, not all the properties are included in these types and the property values are not checked for validity either.
 
-#### Grasshopper as Playground
+&nbsp;
+
+**Grasshopper as Playground**
 
 The Grasshopper definition provided here, has custom python components that help you interrogate the properties of these assets:
 
