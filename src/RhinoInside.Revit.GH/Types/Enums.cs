@@ -486,6 +486,7 @@ namespace RhinoInside.Revit.GH.Types
   ]
   public class StructuralAssetClass : GH_Enum<DB.StructuralAssetClass>
   {
+    public override bool IsEmpty => Value == DB.StructuralAssetClass.Undefined;
   }
 
   [
@@ -504,5 +505,6 @@ namespace RhinoInside.Revit.GH.Types
   ]
   public class ThermalMaterialType : GH_Enum<DB.ThermalMaterialType>
   {
+    public override bool IsEmpty => Value == DB.ThermalMaterialType.Undefined;
   }
 }

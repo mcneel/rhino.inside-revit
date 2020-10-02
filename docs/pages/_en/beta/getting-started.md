@@ -101,11 +101,11 @@ Now drop a *Panel* component into the definition and connect the {% include ltr/
 
 ![]({{ "/static/images/started/rir-gcomp3.png" | prepend: site.baseurl }})
 
-Let's grab the Wall geometry by using a Revit-specific component. From *Revit > Elements* add an {% include ltr/comp.html uuid="b7e6a82f-" %} component.
+Let's grab the Wall geometry by using a Revit-specific component. From *Revit > Elements* add an {% include ltr/comp.html uuid="b3bcbf5b-" %} component.
 
 ![]({{ "/static/images/started/rir-gcomp5.png" | prepend: site.baseurl }})
 
-After passing the {% include ltr/comp.html uuid="ef607c2a-" %} output to the input of the {% include ltr/comp.html uuid="b7e6a82f-" %}, the new Revit-specific component extracts the Wall geometry from the Wall element using the Revit API. The geometry is then converted to Rhino Breps (since other Grasshopper components might not be familiar with Revit geometry) so it can be passed to other Grasshopper components for further processing.
+After passing the {% include ltr/comp.html uuid="ef607c2a-" %} output to the input of the {% include ltr/comp.html uuid="b3bcbf5b-" %}, the new Revit-specific component extracts the Wall geometry from the Wall element using the Revit API. The geometry is then converted to Rhino Breps (since other Grasshopper components might not be familiar with Revit geometry) so it can be passed to other Grasshopper components for further processing.
 
 ![]({{ "/static/images/started/rir-gcomp6.png" | prepend: site.baseurl }})
 

@@ -11,6 +11,7 @@ using Grasshopper.Kernel.Parameters;
 using DB = Autodesk.Revit.DB;
 using RhinoInside.Revit.Convert.Geometry;
 using Autodesk.Revit.DB;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 
 namespace RhinoInside.Revit.GH.Components.Element.Material
 {
@@ -509,45 +510,45 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     public bool TxLock { get; set; } = false;
 
     [APIAssetProp("TextureRealWorldOffsetX", typeof(DB.Visual.AssetPropertyDistance))]
-    [AssetGHParameter(typeof(Param_Number), "OffsetU", "OU", "Texture offset along U axis")]
-    public double OffsetU { get; set; } = 0;
+    [AssetGHParameter(typeof(Param_Number), "Offset X", "OX", "Texture offset along X axis")]
+    public double OffsetX { get; set; } = 0;
 
     [APIAssetProp("TextureRealWorldOffsetY", typeof(DB.Visual.AssetPropertyDistance))]
-    [AssetGHParameter(typeof(Param_Number), "OffsetV", "OV", "Texture offset along V axis")]
-    public double OffsetV { get; set; } = 0;
+    [AssetGHParameter(typeof(Param_Number), "Offset Y", "OY", "Texture offset along Y axis")]
+    public double OffsetY { get; set; } = 0;
 
     [APIAssetProp("TextureOffsetLock", typeof(DB.Visual.AssetPropertyBoolean))]
     public bool OffsetLock { get; set; } = false;
 
     [APIAssetProp("TextureRealWorldScaleX", typeof(DB.Visual.AssetPropertyDistance))]
     [APIAssetPropValueRange(min: 0.01)]
-    [AssetGHParameter(typeof(Param_Number), "SizeU", "SU", "Texture size along U axis")]
+    [AssetGHParameter(typeof(Param_Number), "Width", "SU", "Texture size along X axis")]
     public double SizeU { get; set; } = 1;
 
     [APIAssetProp("TextureRealWorldScaleY", typeof(DB.Visual.AssetPropertyDistance))]
     [APIAssetPropValueRange(min: 0.01)]
-    [AssetGHParameter(typeof(Param_Number), "SizeV", "SV", "Texture size along V axis")]
+    [AssetGHParameter(typeof(Param_Number), "Height", "SV", "Texture size along Y axis")]
     public double SizeV { get; set; } = 1;
 
     [APIAssetProp("TextureScaleLock", typeof(DB.Visual.AssetPropertyBoolean))]
     public bool SizeLock { get; set; } = false;
 
     [APIAssetProp("TextureURepeat", typeof(DB.Visual.AssetPropertyBoolean))]
-    [AssetGHParameter(typeof(Param_Boolean), "RepeatU", "RU", "Texture repeat along U axis")]
+    [AssetGHParameter(typeof(Param_Boolean), "Repeat Horizontal", "RH", "Texture repeat along the X axis")]
     public bool RepeatU { get; set; } = true;
 
     [APIAssetProp("TextureVRepeat", typeof(DB.Visual.AssetPropertyBoolean))]
-    [AssetGHParameter(typeof(Param_Boolean), "RepeatV", "RV", "Texture repeat along V axis")]
+    [AssetGHParameter(typeof(Param_Boolean), "Repeat Vertical", "RV", "Texture repeat along the Y axis")]
     public bool RepeatV { get; set; } = true;
 
     [APIAssetProp("TextureWAngle", typeof(DB.Visual.AssetPropertyDouble))]
     [APIAssetPropValueRange(min: 0, max: 360)]
-    [AssetGHParameter(typeof(Param_Number), "Angle", "A", "Texture angle")]
+    [AssetGHParameter(typeof(Param_Number), "Rotation", "R", "Texture rotation")]
     public double Angle { get; set; } = 0;
   }
 
   [APIAsset(typeof(DB.Visual.UnifiedBitmap))]
-  [AssetGHComponent("Bitmap Asset", "BT", "Bitmap Asset")]
+  [AssetGHComponent("Bitmap Asset", "BmpAsset", "Bitmap Asset")]
   public class UnifiedBitmapData : TextureData2D
   {
     [APIAssetProp("UnifiedbitmapBitmap", typeof(DB.Visual.AssetPropertyString))]
@@ -555,7 +556,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     public string SourceFile { get; set; }
 
     [APIAssetProp("UnifiedbitmapInvert", typeof(DB.Visual.AssetPropertyBoolean))]
-    [AssetGHParameter(typeof(Param_Boolean), "Invert", "I", "Invert source image colors")]
+    [AssetGHParameter(typeof(Param_Boolean), "Invert Image", "I", "Invert source image colors")]
     public bool Invert { get; set; } = false;
 
     [APIAssetProp("UnifiedbitmapRGBAmount", typeof(DB.Visual.AssetPropertyDouble))]
@@ -575,16 +576,16 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
   {
 
     [APIAssetProp("CheckerColor1", typeof(DB.Visual.AssetPropertyDoubleArray4d))]
-    [AssetGHParameter(typeof(Param_Colour), "Color1", "C1", "First color")]
+    [AssetGHParameter(typeof(Param_Colour), "Color 1", "C1", "First color")]
     public System.Drawing.Color Color1 { get; set; } = System.Drawing.Color.White;
 
     [APIAssetProp("CheckerColor2", typeof(DB.Visual.AssetPropertyDoubleArray4d))]
-    [AssetGHParameter(typeof(Param_Colour), "Color2", "C2", "Second color")]
+    [AssetGHParameter(typeof(Param_Colour), "Color 2", "C2", "Second color")]
     public System.Drawing.Color Color2 { get; set; } = System.Drawing.Color.Black;
 
     [APIAssetProp("CheckerSoften", typeof(DB.Visual.AssetPropertyDouble))]
     [APIAssetPropValueRange(min: 0, max: 5)]
-    [AssetGHParameter(typeof(Param_Number), "Soften Amount", "S", "Amount of softening")]
+    [AssetGHParameter(typeof(Param_Number), "Soften", "S", "Amount of softening")]
     public double SoftenAmount { get; set; } = 0;
   }
 

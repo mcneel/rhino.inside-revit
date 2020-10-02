@@ -135,7 +135,7 @@ namespace RhinoInside.Revit.GH.Components
           // then get the asset property object and check its boolean value
           // if false, the output will not be set
           sendValueToOutput =
-            (bool) GetAssetParamValue(asset, schemaTogglePropName);
+            ((bool?) GetAssetParamValue(asset, schemaTogglePropName)) == true;
 
         if (sendValueToOutput)
         {
@@ -545,12 +545,11 @@ namespace RhinoInside.Revit.GH.Components
                           DB.Visual.Asset asset, string schemaPropName)
     {
       // find param
-      var prop = asset.FindByName(schemaPropName);
-      if (prop is null)
-        DA.SetData(schemaPropName, null);
-
-      // determine data type, and set output
-      DA.SetData(paramName, ConvertFromAssetPropertyValue(prop));
+      if (asset.FindByName(schemaPropName) is DB.Visual.AssetProperty prop)
+      {
+        // determine data type, and set output
+        DA.SetData(paramName, ConvertFromAssetPropertyValue(prop));
+      }
     }
 
     public static void
@@ -558,25 +557,24 @@ namespace RhinoInside.Revit.GH.Components
                                  DB.Visual.Asset asset, string schemaPropName)
     {
       // find param
-      var prop = asset.FindByName(schemaPropName);
-      if (prop is null)
-        DA.SetData(schemaPropName, null);
-
-      var connectedAsset = prop.GetSingleConnectedAsset();
-      if (connectedAsset != null)
+      if (asset.FindByName(schemaPropName) is DB.Visual.AssetProperty prop)
       {
-        var assetData =
-          AssetData.GetSchemaDataType(
-            // Asset schema names end in "Schema" e.g. "UnifiedBitmapSchema"
-            // They do not match the names for API wrapper
-            // types e.g. "DB.Visual.UnifiedBitmap"
-            // lets remove the extra stuff
-            connectedAsset.Name.Replace("Schema", "")
-            );
-        if (assetData != null)
+        var connectedAsset = prop.GetSingleConnectedAsset();
+        if (connectedAsset != null)
         {
-          SetAssetDataFromAsset(assetData, connectedAsset);
-          DA.SetData(paramName, assetData);
+          var assetData =
+            AssetData.GetSchemaDataType(
+              // Asset schema names end in "Schema" e.g. "UnifiedBitmapSchema"
+              // They do not match the names for API wrapper
+              // types e.g. "DB.Visual.UnifiedBitmap"
+              // lets remove the extra stuff
+              connectedAsset.Name.Replace("Schema", "")
+              );
+          if (assetData != null)
+          {
+            SetAssetDataFromAsset(assetData, connectedAsset);
+            DA.SetData(paramName, assetData);
+          }
         }
       }
     }

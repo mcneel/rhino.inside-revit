@@ -452,25 +452,33 @@ namespace RhinoInside.Revit.GH
 
     private void ActiveDefinition_SolutionStart(object sender, GH_SolutionEventArgs e)
     {
-      Revit.ActiveDBApplication.GetOpenDocuments(out var projects, out var families);
-
       var now = DateTime.Now.ToString(System.Globalization.CultureInfo.CurrentUICulture);
       var name = e.Document.DisplayName;
 
-      foreach (var project in projects)
+      using (var documents = Revit.ActiveDBApplication.Documents)
       {
-        var group = new DB.TransactionGroup(project, $"Grasshopper {now}: {name.TripleDot(16)}");
-        group.Start();
+        foreach (var doc in documents.Cast<DB.Document>())
+        {
+          // Linked document do not allow transactions.
+          if (doc.IsLinked)
+            continue;
 
-        OpenTransactionGroups.Push(group);
-      }
+          // Document can not be modified during transaction recovering.
+          if (doc.IsReadOnly)
+            continue;
 
-      foreach (var family in families)
-      {
-        var group = new DB.TransactionGroup(family, $"Grasshopper {now}: {name.TripleDot(16)}");
-        group.Start();
+          // This document has already a transaction in course.
+          if (doc.IsModifiable)
+            continue;
 
-        OpenTransactionGroups.Push(group);
+          var group = new DB.TransactionGroup(doc, $"Grasshopper {now}: {name.TripleDot(16)}")
+          {
+            IsFailureHandlingForcedModal = true
+          };
+          group.Start();
+
+          OpenTransactionGroups.Push(group);
+        }
       }
     }
 
@@ -482,7 +490,8 @@ namespace RhinoInside.Revit.GH
         {
           using (var group = OpenTransactionGroups.Pop())
           {
-            group.Assimilate();
+            if(group.IsValidObject)
+              group.Assimilate();
           }
         }
         catch { }
