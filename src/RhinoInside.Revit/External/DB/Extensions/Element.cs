@@ -44,37 +44,22 @@ namespace RhinoInside.Revit.External.DB.Extensions
 #if !REVIT_2019
     public static IList<ElementId> GetDependentElements(this Element element, ElementFilter filter)
     {
-      try
+      // If there is no active transaction we start a new one.
+      using (var transaction = element.Document.IsModifiable ? default : new Transaction(element.Document, nameof(GetDependentElements)))
       {
-        using (var transaction = new Transaction(element.Document, nameof(GetDependentElements)))
-        {
-          transaction.Start();
-          return Body();
-        }
-      }
-      catch (Autodesk.Revit.Exceptions.InvalidOperationException)
-      {
-        try
-        {
-          using (var subTransaction = new SubTransaction(element.Document))
-          {
-            subTransaction.Start();
-            return Body();
-          }
-        }
-        catch (Autodesk.Revit.Exceptions.InvalidOperationException)
-        {
-          return Body();
-        }
-      }
+        transaction?.Start();
 
-      IList<ElementId> Body()
-      {
-        var collection = element.Document.Delete(element.Id);
-        if (filter is null)
-          return collection?.ToList();
+        // If we are running nested in the caller transaction we start a SubTransaction to be able to rollback.
+        using (var subTransaction = transaction is null ? new SubTransaction(element.Document) : default)
+        {
+          subTransaction?.Start();
 
-        return collection?.Where(x => filter.PassesFilter(element.Document, x)).ToList();
+          var collection = element.Document.Delete(element.Id);
+          if (filter is null)
+            return collection?.ToList();
+
+          return collection?.Where(x => filter.PassesFilter(element.Document, x)).ToList();
+        }
       }
     }
 #endif
