@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Types
   {
     public override string TypeDescription => "Represents a Revit view";
     protected override Type ScriptVariableType => typeof(DB.View);
-    public DB.View APIView => IsValid ? Document.GetElement(Value) as DB.View : default;
+    public DB.View APIView => IsValid ? Document.GetElement(Id) as DB.View : default;
     public static explicit operator DB.View(View value) => value?.APIView;
 
     public View() { }

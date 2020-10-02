@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (Document is null)
       {
-        Value = null;
+        Id = null;
         if (!Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var doc))
         {
           Document = null;
@@ -32,7 +32,7 @@ namespace RhinoInside.Revit.GH.Types
 
       if (Document is object && Document.TryGetParameterId(UniqueID, out var value))
       {
-        Value = value;
+        Id = value;
         return true;
       }
 
@@ -79,7 +79,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (typeof(Q).IsAssignableFrom(typeof(GH_Guid)))
       {
-        target = (Q) (object) (Document.GetElement(Value) as DB.SharedParameterElement)?.GuidValue;
+        target = (Q) (object) (Document.GetElement(Id) as DB.SharedParameterElement)?.GuidValue;
         return true;
       }
 
@@ -93,7 +93,7 @@ namespace RhinoInside.Revit.GH.Types
       public override bool IsParsable() => true;
       public override string FormatInstance()
       {
-        int value = owner.Value?.IntegerValue ?? -1;
+        int value = owner.Id?.IntegerValue ?? -1;
         if (Enum.IsDefined(typeof(DB.BuiltInParameter), value))
           return ((DB.BuiltInParameter) value).ToString();
 

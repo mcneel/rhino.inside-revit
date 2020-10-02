@@ -22,7 +22,7 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeDescription => "Represents a Revit element";
     override public object ScriptVariable() => APIElement;
     protected override Type ScriptVariableType => typeof(DB.Element);
-    public DB.Element APIElement => IsValid ? Document.GetElement(Value) : default;
+    public DB.Element APIElement => IsValid ? Document.GetElement(Id) : default;
     public static explicit operator DB.Element(Element value) => value?.APIElement;
 
     public static Element FromValue(object data)
@@ -142,7 +142,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         Document     = element.Document;
         DocumentGUID = Document.GetFingerprintGUID();
-        Value        = element.Id;
+        Id           = element.Id;
         UniqueID     = element.UniqueId;
         return true;
       }
@@ -224,7 +224,7 @@ namespace RhinoInside.Revit.GH.Types
       public Proxy(Element e) : base(e) { (this as IGH_GooProxy).UserString = FormatInstance(); }
 
       public override bool IsParsable() => true;
-      public override string FormatInstance() => owner.IsValid ? $"{owner.Value.IntegerValue}:{element?.Name ?? string.Empty}" : "-1";
+      public override string FormatInstance() => owner.IsValid ? $"{owner.Id.IntegerValue}:{element?.Name ?? string.Empty}" : "-1";
       public override bool FromString(string str)
       {
         int index = str.IndexOf(':');

@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeDescription => "Represents a Revit category";
     override public object ScriptVariable() => (DB.Category) this;
     protected override Type ScriptVariableType => typeof(DB.Category);
-    public DB.Category APICategory => IsValid ? Document.GetCategory(Value) : default;
+    public DB.Category APICategory => IsValid ? Document.GetCategory(Id) : default;
     public static explicit operator DB.Category(Category value) => value?.APICategory;
 
     #region IGH_ElementId
@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (Document is null)
       {
-        Value = null;
+        Id = null;
         if (!Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var doc))
         {
           Document = null;
@@ -35,7 +35,7 @@ namespace RhinoInside.Revit.GH.Types
 
       if (Document is object && Document.TryGetCategoryId(UniqueID, out var value))
       {
-        Value = value;
+        Id = value;
         return true;
       }
 
@@ -119,7 +119,7 @@ namespace RhinoInside.Revit.GH.Types
       public override bool IsParsable() => true;
       public override string FormatInstance()
       {
-        int value = owner.Value?.IntegerValue ?? -1;
+        int value = owner.Id?.IntegerValue ?? -1;
         if (Enum.IsDefined(typeof(DB.BuiltInCategory), value))
           return ((DB.BuiltInCategory)value).ToString();
 

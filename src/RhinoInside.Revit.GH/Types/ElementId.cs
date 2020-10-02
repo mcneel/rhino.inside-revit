@@ -28,17 +28,15 @@ namespace RhinoInside.Revit.GH.Types
 
   public abstract class ElementId : IGH_Goo, IGH_ElementId, IEquatable<ElementId>
   {
-    public DB.ElementId Value { get; set; }
-
     #region IGH_Goo
     public virtual string TypeName => "Revit Model Object";
     public virtual string TypeDescription => "Represents a Revit model object";
-    public virtual bool IsValid => (!(Value is null || Value == DB.ElementId.InvalidElementId)) && (Document?.IsValidObject ?? false);
+    public virtual bool IsValid => Id.IsValid() && Document.IsValid();
     public virtual string IsValidWhyNot => IsValid ? string.Empty : "Not Valid";
-    public IGH_Goo Duplicate() => (IGH_Goo) MemberwiseClone();
+    IGH_Goo IGH_Goo.Duplicate() => (IGH_Goo) MemberwiseClone();
     public virtual object ScriptVariable() => Id;
     protected virtual Type ScriptVariableType => typeof(DB.ElementId);
-    public static implicit operator DB.ElementId(ElementId self) { return self.Value; }
+    public static implicit operator DB.ElementId(ElementId self) { return self.Id; }
     #endregion
 
     public static ElementId FromElementId(DB.Document doc, DB.ElementId id)
@@ -63,7 +61,7 @@ namespace RhinoInside.Revit.GH.Types
       Document = doc;
       DocumentGUID = doc.GetFingerprintGUID();
 
-      Value = id;
+      Id = id;
       UniqueID = doc?.GetElement(id)?.UniqueId ??
                  (
                    id.IntegerValue < DB.ElementId.InvalidElementId.IntegerValue ?
@@ -90,16 +88,16 @@ namespace RhinoInside.Revit.GH.Types
       protected set { document = value; }
     }
 
-    public DB.ElementId Id => Value;
+    public DB.ElementId Id { get; protected set; }
     public Guid DocumentGUID { get; protected set; } = Guid.Empty;
     public string UniqueID { get; protected set; } = string.Empty;
     public bool IsReferencedElement => !string.IsNullOrEmpty(UniqueID);
-    public bool IsElementLoaded => Value is object;
+    public bool IsElementLoaded => Id is object;
     public virtual bool LoadElement()
     {
       if (Document is null)
       {
-        Value = null;
+        Id = null;
         if (!Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var doc))
         {
           Document = null;
@@ -113,20 +111,20 @@ namespace RhinoInside.Revit.GH.Types
 
       if (Document is object && Document.TryGetElementId(UniqueID, out var value))
       {
-        Value = value;
+        Id = value;
         return true;
       }
 
       return false;
     }
-    public void UnloadElement() { Value = null; Document = null; }
+    public void UnloadElement() { Id = null; Document = null; }
     #endregion
 
     public bool Equals(ElementId id) => id?.DocumentGUID == DocumentGUID && id?.UniqueID == UniqueID;
     public override bool Equals(object obj) => (obj is ElementId id) ? Equals(id) : base.Equals(obj);
     public override int GetHashCode() => new { DocumentGUID, UniqueID }.GetHashCode();
 
-    public ElementId() => Value = DB.ElementId.InvalidElementId;
+    public ElementId() => Id = DB.ElementId.InvalidElementId;
 
     protected ElementId(DB.Document doc, DB.ElementId id) => SetValue(doc, id);
 
@@ -134,13 +132,13 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (source is GH_Integer integer)
       {
-        Value = new DB.ElementId(integer.Value);
+        Id = new DB.ElementId(integer.Value);
         UniqueID = string.Empty;
         return true;
       }
       if (source is DB.ElementId id)
       {
-        Value = id;
+        Id = id;
         UniqueID = string.Empty;
         return true;
       }
@@ -152,12 +150,12 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (typeof(Q).IsAssignableFrom(typeof(DB.ElementId)))
       {
-        target = (Q) (object) Value;
+        target = (Q) (object) Id;
         return true;
       }
       if (typeof(Q).IsAssignableFrom(typeof(GH_Integer)))
       {
-        target = (Q) (object) new GH_Integer(Value.IntegerValue);
+        target = (Q) (object) new GH_Integer(Id.IntegerValue);
         return true;
       }
       if (typeof(Q).IsAssignableFrom(typeof(GH_String)))
@@ -304,7 +302,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public virtual bool Read(GH_IReader reader)
     {
-      Value = null;
+      Id = null;
       Document = null;
 
       var documentGUID = Guid.Empty;

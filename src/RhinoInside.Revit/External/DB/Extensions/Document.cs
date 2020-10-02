@@ -7,6 +7,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 {
   public static class DocumentExtension
   {
+    public static bool IsValid(this Document doc) => doc?.IsValidObject == true;
+
     public static bool Release(this Document doc)
     {
       using (var uiDocument = new Autodesk.Revit.UI.UIDocument(doc))

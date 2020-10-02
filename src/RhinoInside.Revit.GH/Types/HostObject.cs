@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Types
   {
     public override string TypeDescription => "Represents a Revit host element";
     protected override Type ScriptVariableType => typeof(DB.HostObject);
-    public DB.HostObject APIHostObject => IsValid ? Document.GetElement(Value) as DB.HostObject : default;
+    public DB.HostObject APIHostObject => IsValid ? Document.GetElement(Id) as DB.HostObject : default;
     public static explicit operator DB.HostObject(HostObject value) => value?.APIHostObject;
 
     public HostObject() { }
@@ -91,7 +91,7 @@ namespace RhinoInside.Revit.GH.Types
   {
     public override string TypeDescription => "Represents a Revit host element type";
     protected override Type ScriptVariableType => typeof(DB.HostObjAttributes);
-    public DB.HostObjAttributes HostObjAttributes => IsValid ? Document.GetElement(Value) as DB.HostObjAttributes : default;
+    public DB.HostObjAttributes HostObjAttributes => IsValid ? Document.GetElement(Id) as DB.HostObjAttributes : default;
     public static explicit operator DB.HostObjAttributes(HostObjectType value) => value?.HostObjAttributes;
 
     public HostObjectType() { }
