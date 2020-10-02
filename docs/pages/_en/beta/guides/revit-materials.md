@@ -43,17 +43,21 @@ To extract the set of materials assigned to faces of a geometry, use the *Geomet
 
 {% include ltr/download_comp.html archive='/static/ghnodes/Geometry Materials.ghuser' name='Geometry Materials' %}
 
-## Material Identity and Graphics
+## Material Identity
 
-Use the {% include ltr/comp.html uuid='06e0cf55-' %} component to access the material identity and graphics:
+Use the {% include ltr/comp.html uuid='222b42df-' %} component to access the material identity:
 
 ![](https://via.placeholder.com/800x300.png?text=Material+Id)
-
-![](https://via.placeholder.com/800x300.png?text=Material+Graphics)
 
 ### Modifying Material Identity
 
 {% include ltr/en/wip_note.html %}
+
+## Material Graphics
+
+Use the {% include ltr/comp.html uuid='8c5cd6fb-' %} component to access the material identity:
+
+![](https://via.placeholder.com/800x300.png?text=Material+Graphics)
 
 ### Customizing Material Graphics
 
@@ -61,13 +65,9 @@ Use the {% include ltr/comp.html uuid='06e0cf55-' %} component to access the mat
 
 ## Creating Materials
 
-To quickly create a material using a single color input use the {% include ltr/comp.html uuid='273ff43d-' %} component. This component has been created to help with quickly color coding Revit elements. Avoid using this component on final BIM models since the material is named by the color that is used to create it. {% include ltr/comp_doc.html uuid='273ff43d-' %}
+Use the {% include ltr/comp.html uuid='3aedba3c-' %} component to create a new material in the Revit model. You must assign a unique name to the new material:
 
-![]({{ "/static/images/guides/revit-materials03.png" | prepend: site.baseurl }})
-
-A better way to create materials is to use the {% include ltr/comp.html uuid='0d9f07e2-' %} component. This ways you can assign an appropriate name to the component:
-
-![]({{ "/static/images/guides/revit-materials04.png" | prepend: site.baseurl }})
+![](https://via.placeholder.com/800x300.png?text=Create+Material)
 
 ## Material Assets
 
