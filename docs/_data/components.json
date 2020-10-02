@@ -5,7 +5,7 @@
     "icontag": null, 
     "panel": "Material", 
     "tab": "Revit", 
-    "title": "Material Behaviour", 
+    "title": "Physical/Thermal Asset Behaviour", 
     "typename": "StructuralAssetBehaviour_ValueList", 
     "uuid": "c907b51e-eea7-4ecf-a110-79ef1b7069ec"
   }, 
@@ -15,7 +15,7 @@
     "icontag": null, 
     "panel": "Material", 
     "tab": "Revit", 
-    "title": "Physical Material Type", 
+    "title": "Physical Asset Type", 
     "typename": "StructuralAssetClass_ValueList", 
     "uuid": "6f5d09c7-797f-4ffe-afae-b9c0ddc5905f"
   }, 
@@ -375,7 +375,7 @@
     "icontag": null, 
     "panel": "Material", 
     "tab": "Revit", 
-    "title": "Thermal Material Type", 
+    "title": "Thermal Asset Type", 
     "typename": "ThermalMaterialType_ValueList", 
     "uuid": "9d9d0211-4598-4f50-921e-ad1208944e7c"
   }, 

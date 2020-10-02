@@ -15,8 +15,8 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       Category = "Revit";
       SubCategory = "Material";
-      Name = "Thermal Material Type";
-      NickName = "TMT";
+      Name = "Thermal Asset Type";
+      NickName = "TAMT";
       Description = "Picker for thermal material type options";
 
       ListItems.Clear();
