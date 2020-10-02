@@ -61,15 +61,15 @@ namespace RhinoInside.Revit.GH.Parameters
       categoriesTypeBox.Items.Add("Internal");
       categoriesTypeBox.Items.Add("Analytical");
 
-      if (Current?.APIElementType is DB.ElementType current)
+      if (Current is Types.ElementType current)
       {
-        if (current.Category.IsTagCategory)
+        if (current.Category.Value.IsTagCategory)
           categoriesTypeBox.SelectedIndex = 3;
         else
-          categoriesTypeBox.SelectedIndex = (int) current.Category.CategoryType;
+          categoriesTypeBox.SelectedIndex = (int) current.Category.Value.CategoryType;
 
         var categoryIndex = 0;
-        var currentCategory = Types.Category.FromCategory(current.Category);
+        var currentCategory = current.Category;
         foreach (var category in categoriesBox.Items.Cast<Types.Category>())
         {
           if (currentCategory.Equals(category))
@@ -83,7 +83,7 @@ namespace RhinoInside.Revit.GH.Parameters
         var familyIndex = 0;
         foreach (var familyName in familiesBox.Items.Cast<string>())
         {
-          if (current.GetFamilyName() == familyName)
+          if (current.FamilyName == familyName)
           {
             familiesBox.SelectedIndex = familyIndex;
             break;
@@ -336,7 +336,7 @@ namespace RhinoInside.Revit.GH.Parameters
             var e = new Types.Element();
             if (e.CastFrom(goo))
             {
-              switch (e.APIElement)
+              switch (e.Value)
               {
                 case DB.Family family:
                   foreach (var elementType in elementTypeCollector.Cast<DB.ElementType>())

@@ -5,15 +5,14 @@ namespace RhinoInside.Revit.GH.Types
 {
   public interface IGH_View : IGH_Element
   {
-    DB.View APIView { get; }
   }
 
   public class View : Element, IGH_View
   {
     public override string TypeDescription => "Represents a Revit view";
     protected override Type ScriptVariableType => typeof(DB.View);
-    public DB.View APIView => IsValid ? Document.GetElement(Id) as DB.View : default;
-    public static explicit operator DB.View(View value) => value?.APIView;
+    public static explicit operator DB.View(View value) => value?.Value;
+    public new DB.View Value => value as DB.View;
 
     public View() { }
     public View(DB.View view) : base(view) { }
@@ -22,7 +21,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if(APIView is DB.View view && !string.IsNullOrEmpty(view.Title))
+        if(Value is DB.View view && !string.IsNullOrEmpty(view.Title))
           return view.Title;
 
         return base.DisplayName;

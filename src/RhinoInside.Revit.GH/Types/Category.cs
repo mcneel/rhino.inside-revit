@@ -13,8 +13,10 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeDescription => "Represents a Revit category";
     override public object ScriptVariable() => (DB.Category) this;
     protected override Type ScriptVariableType => typeof(DB.Category);
-    public DB.Category APICategory => IsValid ? Document.GetCategory(Id) : default;
-    public static explicit operator DB.Category(Category value) => value?.APICategory;
+
+    public static explicit operator DB.Category(Category value) => value?.Value;
+    protected override object value => IsValid ? Document.GetCategory(Id) : default;
+    public new DB.Category Value => value as DB.Category;
 
     #region IGH_ElementId
     public override bool LoadElement()

@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (APIElement is DB.Element element)
+        if (Value is DB.Element element)
         {
           if (element.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MARK) is DB.Parameter parameter && parameter.HasValue)
           {
@@ -54,7 +54,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override BoundingBox GetBoundingBox(Transform xform)
     {
-      if (!(APIElement is DB.Element element))
+      if (!(Value is DB.Element element))
         return BoundingBox.Unset;
 
       var bbox = ClippingBox;

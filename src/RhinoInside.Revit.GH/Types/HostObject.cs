@@ -7,17 +7,14 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public interface IGH_HostObject : IGH_InstanceElement
-  {
-    DB.HostObject APIHostObject { get; }
-  }
+  public interface IGH_HostObject : IGH_InstanceElement { }
 
   public class HostObject : InstanceElement, IGH_HostObject
   {
     public override string TypeDescription => "Represents a Revit host element";
     protected override Type ScriptVariableType => typeof(DB.HostObject);
-    public DB.HostObject APIHostObject => IsValid ? Document.GetElement(Id) as DB.HostObject : default;
-    public static explicit operator DB.HostObject(HostObject value) => value?.APIHostObject;
+    public static explicit operator DB.HostObject(HostObject value) => value?.Value;
+    public new DB.HostObject Value => value as DB.HostObject;
 
     public HostObject() { }
     public HostObject(DB.HostObject host) : base(host) { }
@@ -26,7 +23,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var host = APIHostObject;
+        var host = Value;
 
         if (!(host.Location is DB.LocationPoint) && !(host.Location is DB.LocationCurve))
         {

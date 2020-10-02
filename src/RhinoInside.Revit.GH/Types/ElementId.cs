@@ -71,6 +71,10 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region IGH_ElementId
+
+    protected abstract object value { get; }
+    public object Value => value;
+
     public DB.Reference Reference
     {
       get

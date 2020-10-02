@@ -27,6 +27,6 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     public override Level Level =>
-      Level.FromElementId(Document, APIElement?.LevelId) as Level;
+      Level.FromElementId(Document, Value?.LevelId) as Level;
   }
 }
