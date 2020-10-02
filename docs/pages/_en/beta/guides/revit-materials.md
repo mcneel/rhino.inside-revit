@@ -29,11 +29,11 @@ In Revit API, Materials are represented by the {% include api_type.html type='Au
 
 The first challenge is to be able to query available materials in a Revit model or find a specific one that we want to work with. For this we use the {% include ltr/comp.html uuid='94af13c1-' %} component. The component outputs all the materials in a Revit model by default, and also has optional inputs to filter the existing materials by class or name, and also accepts customs filters as well:
 
-![]({{ "/static/images/guides/revit-materials01.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-materials-query.png" | prepend: site.baseurl }})
 
 {% include ltr/filter_note.html note='The Class and Name inputs accept Grasshopper string filtering patterns' %}
 
-![]({{ "/static/images/guides/revit-materials02.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-materials-filter.png" | prepend: site.baseurl }})
 
 ### Extracting Materials from Geometry
 
@@ -47,27 +47,31 @@ To extract the set of materials assigned to faces of a geometry, use the *Geomet
 
 Use the {% include ltr/comp.html uuid='222b42df-' %} component to access the material identity:
 
-![](https://via.placeholder.com/800x300.png?text=Material+Id)
+![]({{ "/static/images/guides/revit-materials-id.png" | prepend: site.baseurl }})
 
-### Modifying Material Identity
+You can make changes to the identity properties using the same component:
 
-{% include ltr/en/wip_note.html %}
+![]({{ "/static/images/guides/revit-materials-id-mod.png" | prepend: site.baseurl }})
 
 ## Material Graphics
 
-Use the {% include ltr/comp.html uuid='8c5cd6fb-' %} component to access the material identity:
+Use the {% include ltr/comp.html uuid='8c5cd6fb-' %} component to access the material graphics:
 
-![](https://via.placeholder.com/800x300.png?text=Material+Graphics)
+![]({{ "/static/images/guides/revit-materials-graphics.png" | prepend: site.baseurl }})
 
-### Customizing Material Graphics
+You can make changes to the graphic properties using the same component. See [Styles and Patterns]({{ site.baseurl }}{% link _en/beta/guides/revit-styles.md %}#find-specific-fill-pattern) page for the **Find Fill Pattern** component:
 
-{% include ltr/en/wip_note.html %}
+![]({{ "/static/images/guides/revit-materials-graphics-mod.png" | prepend: site.baseurl }})
 
 ## Creating Materials
 
-Use the {% include ltr/comp.html uuid='3aedba3c-' %} component to create a new material in the Revit model. You must assign a unique name to the new material:
+Use the {% include ltr/comp.html uuid='3aedba3c-' %} document-aware component to create a new material in the Revit model. You must assign a unique name to the new material:
 
-![](https://via.placeholder.com/800x300.png?text=Create+Material)
+![]({{ "/static/images/guides/revit-materials-create.png" | prepend: site.baseurl }})
+
+After creating the material, use the {% include ltr/comp.html uuid='8c5cd6fb-' %} component to assign graphic properties to the new material:
+
+![]({{ "/static/images/guides/revit-materials-create-color.png" | prepend: site.baseurl }})
 
 ## Material Assets
 
@@ -82,7 +86,7 @@ Remember that Assets and Materials are different data types. Each Revit Material
 {% capture api_note %}
 Revit API support for assets is very limited. This note section, attempts to describe the inner-workings of Revit Visual API
 
-#### Appearance Assets
+**Appearance Assets**
 
 All *Appearance* assets are of type {% include api_type.html type='Autodesk.Revit.DB.Visual.Asset' title='DB.Visual.Asset' %} and are basically a collection of visual properties that have a name e.g. `generic_diffuse`, a type, and a value. The {% include api_type.html type='Autodesk.Revit.DB.Visual.Asset' title='DB.Visual.Asset' %} has lookup methods to find and return these properties. These properties are wrapped by the type {% include api_type.html type='Autodesk.Revit.DB.Visual.AssetProperty' title='DB.Visual.AssetProperty' %} in Revit API. This type provides getters to extract the value from the property.
 
@@ -94,7 +98,7 @@ There are many different *Appearance* assets in Revit e.g. **Generic**, **Cerami
 
 *Appearance* assets are then wrapped by {% include api_type.html type='Autodesk.Revit.DB.AppearanceAssetElement' title='DB.AppearanceAssetElement' %} so they can be assigned to a Revit Material ({% include api_type.html type='Autodesk.Revit.DB.Material' title='DB.Material' %})
 
-#### Physical and Thermal Assets
+**Physical and Thermal Assets**
 
 *Physical*, and *Thermal* assets are completely different although operating very similarly to *Appearance* assets. They are still a collection of properties, however, the properties are modeled as Revit parameters ({% include api_type.html type='Autodesk.Revit.DB.Parameter' title='DB.Parameter' %}) and are collected by an instance of {% include api_type.html type='Autodesk.Revit.DB.PropertySetElement' title='DB.PropertySetElement' %}. Instead of having static classes as accessors for the names, they must be accessed by looking up the parameter based on a built-in Revit parameter e.g. `THERMAL_MATERIAL_PARAM_REFLECTIVITY` of {% include api_type.html type='Autodesk.Revit.DB.BuiltInParameter' title='DB.BuiltInParameter' %}
 
@@ -119,21 +123,23 @@ The Grasshopper definition provided here, has custom python components that help
 
 Use the {% include ltr/comp.html uuid='1f644064-' %} to extract assets of a material:
 
-![]({{ "/static/images/guides/revit-materials05.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-materials-explode.png" | prepend: site.baseurl }})
 
 To replace assets of a material with a different asset, use the {% include ltr/comp.html uuid='2f1ec561-' %} component:
 
-![]({{ "/static/images/guides/revit-materials06.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-materials-replace.png" | prepend: site.baseurl }})
 
 ## Appearance Assets
 
 There are many *Appearance* assets in Revit API. As an example, you can use {% include ltr/comp.html uuid='0f251f87-' %} to create a *Generic* appearance asset and assign that to a Revit material using the {% include ltr/comp.html uuid='2f1ec561-' %} component:
 
-![](https://via.placeholder.com/800x300.png?text=Create+Appearance)
+![]({{ "/static/images/guides/revit-materials-appasset-create.png" | prepend: site.baseurl }})
 
 The {% include ltr/comp.html uuid='5b18389b-' %} and {% include ltr/comp.html uuid='73b2376b-' %} components can be used to easily manipulate an existing asset, or analyze and extract the known property values:
 
-![](https://via.placeholder.com/800x300.png?text=Modify+Analyze+Appearance)
+![]({{ "/static/images/guides/revit-materials-appasset-mod.png" | prepend: site.baseurl }})
+
+![]({{ "/static/images/guides/revit-materials-appasset-analyze.png" | prepend: site.baseurl }})
 
 ## Texture Assets
 
@@ -141,7 +147,9 @@ Appearance assets have a series of properties that can accept a nested asset (ca
 
 {{ site.terms.rir }} provides component to construct and destruct these asset types. The *Appearance* asset component also accepts a *Texture* asset where applicable. For example, use {% include ltr/comp.html uuid='37b63660-' %} and {% include ltr/comp.html uuid='77b391db-' %} to construct and destruct **Bitmap** texture assets:
 
-![](https://via.placeholder.com/800x300.png?text=Construct+Apply+Texture)
+![]({{ "/static/images/guides/revit-materials-appasset-create-texture.png" | prepend: site.baseurl }})
+
+![]({{ "/static/images/guides/revit-materials-appasset-create-texture.gif" | prepend: site.baseurl }})
 
 {% capture param_note %}
 The {% include ltr/param.html uuid='49a94c44-' title='Glossiness' %} and {% include ltr/param.html uuid='c2fc2e60-' title='Bump' %} parameters of **Generic** appearance components accept both a double or color value, or a texture map respectively. Note the parameter icons show a double or color value and a checker map in background
@@ -156,20 +164,16 @@ Note that *Construct* an *Deconstruct* texture components only pass around a dat
 
 ## Physical Assets
 
-Use {% include ltr/comp.html uuid='af2678c8-' %} to create a *Physical* asset and assign to a material using {% include ltr/comp.html uuid='2f1ec561-' %} component. Use {% include ltr/comp.html uuid='6f5d09c7-' %} and {% include ltr/comp.html uuid='c907b51e-' %} as inputs, to set the type and behavior of the *Physical* asset, respectively:
+Use {% include ltr/comp.html uuid='af2678c8-' %} document-aware component to create a *Physical* asset and assign to a material using {% include ltr/comp.html uuid='2f1ec561-' %} component. Use {% include ltr/comp.html uuid='6f5d09c7-' %} and {% include ltr/comp.html uuid='c907b51e-' %} as inputs, to set the type and behavior of the *Physical* asset, respectively:
 
-![](https://via.placeholder.com/800x300.png?text=Create+Asset)
+![]({{ "/static/images/guides/revit-materials-phyasset-create.png" | prepend: site.baseurl }})
 
-Use {% include ltr/comp.html uuid='ec93f8e0-' %} and {% include ltr/comp.html uuid='67a74d31-' %} to modify or analyze existing *Physical* assets:
-
-![](https://via.placeholder.com/800x300.png?text=Modify+Analyze+Asset)
+Similar to the modify and analyze components discussed above, you can use {% include ltr/comp.html uuid='ec93f8e0-' %} and {% include ltr/comp.html uuid='67a74d31-' %} to modify or analyze existing *Physical* assets.
 
 ## Thermal Assets
 
-Use {% include ltr/comp.html uuid='bd9164c4-' %} to create a *Thermal* asset and assign to a material using {% include ltr/comp.html uuid='2f1ec561-' %} component. Use {% include ltr/comp.html uuid='9d9d0211-' %} and {% include ltr/comp.html uuid='c907b51e-' %} as inputs, to set the type and behavior of the *Thermal* asset, respectively:
+Use {% include ltr/comp.html uuid='bd9164c4-' %} document-aware component to create a *Thermal* asset and assign to a material using {% include ltr/comp.html uuid='2f1ec561-' %} component. Use {% include ltr/comp.html uuid='9d9d0211-' %} and {% include ltr/comp.html uuid='c907b51e-' %} as inputs, to set the type and behavior of the *Thermal* asset, respectively:
 
-![](https://via.placeholder.com/800x300.png?text=Create+Asset)
+![]({{ "/static/images/guides/revit-materials-therasset-create.png" | prepend: site.baseurl }})
 
-Use {% include ltr/comp.html uuid='c3be363d-' %} and {% include ltr/comp.html uuid='2c8f541a-' %} to modify or analyze existing *Thermal* assets:
-
-![](https://via.placeholder.com/800x300.png?text=Modify+Analyze+Asset)
+Similar to the modify and analyze components discussed above, you can use {% include ltr/comp.html uuid='c3be363d-' %} and {% include ltr/comp.html uuid='2c8f541a-' %} to modify or analyze existing *Thermal* assets.
