@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Types
     void UnloadElement();
   }
 
-  public abstract class ElementId : IGH_Goo, IGH_ElementId, IEquatable<ElementId>
+  public abstract class ElementId : IGH_ElementId, IEquatable<ElementId>
   {
     #region IGH_Goo
     public virtual string TypeName => "Revit Model Object";
@@ -88,7 +88,7 @@ namespace RhinoInside.Revit.GH.Types
       protected set { document = value; }
     }
 
-    public DB.ElementId Id { get; protected set; }
+    public DB.ElementId Id { get; protected set; } = DB.ElementId.InvalidElementId;
     public Guid DocumentGUID { get; protected set; } = Guid.Empty;
     public string UniqueID { get; protected set; } = string.Empty;
     public bool IsReferencedElement => !string.IsNullOrEmpty(UniqueID);
@@ -122,9 +122,9 @@ namespace RhinoInside.Revit.GH.Types
 
     public bool Equals(ElementId id) => id?.DocumentGUID == DocumentGUID && id?.UniqueID == UniqueID;
     public override bool Equals(object obj) => (obj is ElementId id) ? Equals(id) : base.Equals(obj);
-    public override int GetHashCode() => new { DocumentGUID, UniqueID }.GetHashCode();
+    public override int GetHashCode() => DocumentGUID.GetHashCode() ^ UniqueID.GetHashCode();
 
-    public ElementId() => Id = DB.ElementId.InvalidElementId;
+    public ElementId() { }
 
     protected ElementId(DB.Document doc, DB.ElementId id) => SetValue(doc, id);
 
