@@ -1150,14 +1150,14 @@
     "uuid": "97d71aa8-6987-45b9-8f25-b92671e20ef4"
   }, 
   {
-    "desc": "Flips/Unflips facing/orientation of hand of elements from Revit document", 
+    "desc": "Flips or Unflips elements from Revit document", 
     "iconsrc": "/static/images/GH/FlipUnflipElement.png", 
     "icontag": null, 
     "panel": "Element", 
     "tab": "Revit", 
-    "title": "Flip/Unflip Element", 
+    "title": "Flip Element", 
     "typename": "FlipUnflipElement", 
-    "uuid": "b0f068d0-f160-4f80-86b9-67b7830f1cc2"
+    "uuid": "4cadc9aa-27d9-4804-87ac-477203862afa"
   }, 
   {
     "desc": "Get the geometry of the specified Element", 
@@ -1370,12 +1370,22 @@
     "uuid": "7a889b89-c423-4ed8-91d9-5cece1ee803d"
   }, 
   {
-    "desc": "Analyze given Shader asset of \"Generic\" schema", 
+    "desc": "Material Graphics Data", 
+    "iconsrc": "/static/images/GH/MaterialGraphics.png", 
+    "icontag": null, 
+    "panel": "Material", 
+    "tab": "Revit", 
+    "title": "Material Graphics", 
+    "typename": "MaterialGraphics", 
+    "uuid": "8c5cd6fb-4f48-4f35-b0b8-42b5a3636b5c"
+  }, 
+  {
+    "desc": "Analyze given Appearance asset of \"Generic\" schema", 
     "iconsrc": "/static/images/GH/AnalyzeGenericShader.png", 
     "icontag": null, 
     "panel": "Material", 
     "tab": "Revit", 
-    "title": "Analyze Shader Asset (Generic)", 
+    "title": "Analyze Appearance Asset (Generic)", 
     "typename": "AnalyzeGenericShader", 
     "uuid": "5b18389b-5e25-4428-b1a6-1a55109a7a3c"
   }, 
@@ -1440,12 +1450,12 @@
     "uuid": "c3be363d-c01d-4cf3-b8d2-c345734ae66d"
   }, 
   {
-    "desc": "Modify given Shader asset of \"Generic\" schema", 
+    "desc": "Modify given Appearance asset of \"Generic\" schema", 
     "iconsrc": "/static/images/GH/ModifyGenericShader.png", 
     "icontag": null, 
     "panel": "Material", 
     "tab": "Revit", 
-    "title": "Modify Shader Asset (Generic)", 
+    "title": "Modify Appearance Asset (Generic)", 
     "typename": "ModifyGenericShader", 
     "uuid": "73b2376b-d6c8-4095-b7ce-a66ef4c931e6"
   }, 
@@ -1490,12 +1500,12 @@
     "uuid": "2332c031-de18-43a9-b41f-6405e1460c06"
   }, 
   {
-    "desc": "Create a new instance of Shader asset of \"Generic\" schema inside document", 
+    "desc": "Create a new instance of Appearance asset of \"Generic\" schema inside document", 
     "iconsrc": "/static/images/GH/CreateGenericShader.png", 
     "icontag": null, 
     "panel": "Material", 
     "tab": "Revit", 
-    "title": "Create Shader Asset (Generic)", 
+    "title": "Create Appearance Asset (Generic)", 
     "typename": "CreateGenericShader", 
     "uuid": "0f251f87-317b-4669-bc70-22b29d3eba6a"
   }, 
@@ -1520,14 +1530,14 @@
     "uuid": "d44a1497-ae52-4e4d-ab8e-962195177fbb"
   }, 
   {
-    "desc": "Query material identity information", 
+    "desc": "Material Identity Data", 
     "iconsrc": "/static/images/GH/MaterialIdentity.png", 
     "icontag": null, 
     "panel": "Material", 
     "tab": "Revit", 
     "title": "Material Identity", 
     "typename": "MaterialIdentity", 
-    "uuid": "06e0cf55-b10c-433a-b6f7-aaf3885055db"
+    "uuid": "222b42df-16f6-4866-b065-fb77aadbd973"
   }, 
   {
     "desc": "Get document materials list", 
@@ -1630,24 +1640,14 @@
     "uuid": "c6dec111-eac6-4047-8618-28ee144d55c5"
   }, 
   {
-    "desc": "Quickly create a new Revit material from color", 
-    "iconsrc": "/static/images/GH/MaterialByColor.png", 
-    "icontag": null, 
-    "panel": "Material", 
-    "tab": "Revit", 
-    "title": "Add Color Material", 
-    "typename": "MaterialByColor", 
-    "uuid": "273ff43d-b771-4eb7-a66d-5da5f7f2731e"
-  }, 
-  {
-    "desc": "Create a new Revit material by name and color", 
+    "desc": "Create a Revit material by name", 
     "iconsrc": "/static/images/GH/MaterialByName.png", 
     "icontag": null, 
     "panel": "Material", 
     "tab": "Revit", 
-    "title": "Add Material", 
+    "title": "Create Material", 
     "typename": "MaterialByName", 
-    "uuid": "0d9f07e2-3a21-4e85-96cc-bc0e6a607af1"
+    "uuid": "3aedba3c-1b77-4c52-a7fc-7ca7095f730e"
   }, 
   {
     "desc": "Given a Curve, it adds a Curve element to the active Revit document", 
@@ -1675,7 +1675,7 @@
     "icontag": null, 
     "panel": "Element", 
     "tab": "Revit", 
-    "title": "Element Pin", 
+    "title": "Pin Element", 
     "typename": "PinUnPinElement", 
     "uuid": "cc205221-1583-47d1-a715-226c39c3fb34"
   }, 
@@ -1838,16 +1838,6 @@
     "title": "Query Views", 
     "typename": "QueryViews", 
     "uuid": "df691659-b75b-4455-af5f-8a5de485fa05"
-  }, 
-  {
-    "desc": "Given a plane, it adds a 3D View to the active Revit document", 
-    "iconsrc": "/static/images/GH/View3DByPlane.png", 
-    "icontag": null, 
-    "panel": "View", 
-    "tab": "Revit", 
-    "title": "Add View3D", 
-    "typename": "View3DByPlane", 
-    "uuid": "f7b775c9-05e0-40f7-85e9-5cc2ef79731e"
   }, 
   {
     "desc": "Analyze given Stacked Wall element", 
