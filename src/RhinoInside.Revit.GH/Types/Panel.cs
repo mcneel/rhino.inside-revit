@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if
         (
-          APIElement is DB.Panel panel &&
+          Value is DB.Panel panel &&
           panel.Document.GetElement(panel.FindHostPanel()) is DB.HostObject host
         )
         {
@@ -40,9 +40,9 @@ namespace RhinoInside.Revit.GH.Types
       {
         if
         (
-          APIElement is DB.Panel panel &&
+          Value is DB.Panel panel &&
           panel.Document.GetElement(panel.FindHostPanel()) is DB.HostObject host &&
-          value?.APIElementType is DB.HostObjAttributes hostType
+          value?.Value is DB.HostObjAttributes hostType
         )
         {
           AssertValidDocument(value.Document, nameof(Type));

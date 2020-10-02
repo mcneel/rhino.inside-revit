@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH.Parameters
         foreach(var cat in materials)
           materialCategoryBox.Items.Add(cat.Key);
 
-        if (Current?.APIElement is DB.Material current)
+        if (Current?.Value is DB.Material current)
         {
           var familyIndex = 0;
           foreach (var materialClass in materialCategoryBox.Items.Cast<string>())

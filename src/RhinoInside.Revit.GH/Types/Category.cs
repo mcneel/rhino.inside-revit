@@ -13,15 +13,17 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeDescription => "Represents a Revit category";
     override public object ScriptVariable() => (DB.Category) this;
     protected override Type ScriptVariableType => typeof(DB.Category);
-    public DB.Category APICategory => IsValid ? Document.GetCategory(Value) : default;
-    public static explicit operator DB.Category(Category value) => value?.APICategory;
+
+    public static explicit operator DB.Category(Category value) => value?.Value;
+    protected override object value => IsValid ? Document.GetCategory(Id) : default;
+    public new DB.Category Value => value as DB.Category;
 
     #region IGH_ElementId
     public override bool LoadElement()
     {
       if (Document is null)
       {
-        Value = null;
+        Id = null;
         if (!Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var doc))
         {
           Document = null;
@@ -33,8 +35,11 @@ namespace RhinoInside.Revit.GH.Types
       else if (IsElementLoaded)
         return true;
 
-      if (Document is object)
-        return Document.TryGetCategoryId(UniqueID, out m_value);
+      if (Document is object && Document.TryGetCategoryId(UniqueID, out var value))
+      {
+        Id = value;
+        return true;
+      }
 
       return false;
     }
@@ -90,15 +95,13 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    public override bool CastTo<Q>(ref Q target)
+    public override bool CastTo<Q>(out Q target)
     {
       if (typeof(Q).IsAssignableFrom(typeof(DB.Category)))
       {
+        target = (Q) (object) null;
         if (!IsValid)
-        {
-          target = (Q) (object) null;
           return true;
-        }
 
         var category = (DB.Category) this;
         if (category is null)
@@ -108,7 +111,7 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
-      return base.CastTo<Q>(ref target);
+      return base.CastTo<Q>(out target);
     }
 
     new class Proxy : ElementId.Proxy
@@ -118,7 +121,7 @@ namespace RhinoInside.Revit.GH.Types
       public override bool IsParsable() => true;
       public override string FormatInstance()
       {
-        int value = owner.Value?.IntegerValue ?? -1;
+        int value = owner.Id?.IntegerValue ?? -1;
         if (Enum.IsDefined(typeof(DB.BuiltInCategory), value))
           return ((DB.BuiltInCategory)value).ToString();
 

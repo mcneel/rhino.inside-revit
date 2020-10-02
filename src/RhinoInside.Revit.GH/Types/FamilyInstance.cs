@@ -63,8 +63,8 @@ namespace RhinoInside.Revit.GH.Types
 
     public override string TypeDescription => "Represents a Revit Component";
     protected override Type ScriptVariableType => typeof(DB.FamilyInstance);
-    public DB.FamilyInstance APIFamilyInstance => APIElement as DB.FamilyInstance;
-    public static explicit operator DB.FamilyInstance(FamilyInstance value) => value?.APIFamilyInstance;
+    public static explicit operator DB.FamilyInstance(FamilyInstance value) => value?.Value;
+    public new DB.FamilyInstance Value => value as DB.FamilyInstance;
 
     public FamilyInstance() { }
     public FamilyInstance(DB.FamilyInstance value) : base(value) { }
@@ -172,18 +172,18 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Flip
-    public override bool CanFlipFacing => APIFamilyInstance?.CanFlipFacing ?? false;
+    public override bool CanFlipFacing => Value?.CanFlipFacing ?? false;
     public override bool? FacingFlipped
     {
       get
       {
-        return APIFamilyInstance is DB.FamilyInstance instance && instance.CanFlipFacing ?
+        return Value is DB.FamilyInstance instance && instance.CanFlipFacing ?
           (bool?) instance.FacingFlipped :
           default;
       }
       set
       {
-        if (value.HasValue && APIFamilyInstance is DB.FamilyInstance instance)
+        if (value.HasValue && Value is DB.FamilyInstance instance)
         {
           if (!instance.CanFlipFacing)
             throw new InvalidOperationException("Facing can not be flipped for this element.");
@@ -194,18 +194,18 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override bool CanFlipHand => APIFamilyInstance?.CanFlipHand ?? false;
+    public override bool CanFlipHand => Value?.CanFlipHand ?? false;
     public override bool? HandFlipped
     {
       get
       {
-        return APIFamilyInstance is DB.FamilyInstance instance && instance.CanFlipHand ?
+        return Value is DB.FamilyInstance instance && instance.CanFlipHand ?
           (bool?) instance.HandFlipped :
           default;
       }
       set
       {
-        if (value.HasValue && APIFamilyInstance is DB.FamilyInstance instance)
+        if (value.HasValue && Value is DB.FamilyInstance instance)
         {
           if (!instance.CanFlipHand)
             throw new InvalidOperationException("Hand can not be flipped for this element.");
@@ -216,18 +216,18 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override bool CanFlipWorkPlane => APIFamilyInstance?.CanFlipWorkPlane ?? false;
+    public override bool CanFlipWorkPlane => Value?.CanFlipWorkPlane ?? false;
     public override bool? WorkPlaneFlipped
     {
       get
       {
-        return APIFamilyInstance is DB.FamilyInstance instance && instance.CanFlipWorkPlane ?
+        return Value is DB.FamilyInstance instance && instance.CanFlipWorkPlane ?
           (bool?) instance.IsWorkPlaneFlipped :
           default;
       }
       set
       {
-        if (value.HasValue && APIFamilyInstance is DB.FamilyInstance instance)
+        if (value.HasValue && Value is DB.FamilyInstance instance)
         {
           if (!instance.CanFlipWorkPlane)
             throw new InvalidOperationException("Work Plane can not be flipped for this element.");

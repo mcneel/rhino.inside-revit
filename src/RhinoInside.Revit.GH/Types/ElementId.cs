@@ -26,14 +26,18 @@ namespace RhinoInside.Revit.GH.Types
     void UnloadElement();
   }
 
-  public abstract class ElementId : GH_Goo<DB.ElementId>, IGH_ElementId, IEquatable<ElementId>
+  public abstract class ElementId : IGH_ElementId, IEquatable<ElementId>
   {
-    public override string TypeName => "Revit Model Object";
-    public override string TypeDescription => "Represents a Revit model object";
-    public override bool IsValid => (!(Value is null || Value == DB.ElementId.InvalidElementId)) && (Document?.IsValidObject ?? false);
-    public override sealed IGH_Goo Duplicate() => (IGH_Goo) MemberwiseClone();
+    #region IGH_Goo
+    public virtual string TypeName => "Revit Model Object";
+    public virtual string TypeDescription => "Represents a Revit model object";
+    public virtual bool IsValid => Id.IsValid() && Document.IsValid();
+    public virtual string IsValidWhyNot => IsValid ? string.Empty : "Not Valid";
+    IGH_Goo IGH_Goo.Duplicate() => (IGH_Goo) MemberwiseClone();
+    public virtual object ScriptVariable() => Id;
     protected virtual Type ScriptVariableType => typeof(DB.ElementId);
-    public static implicit operator DB.ElementId(ElementId self) { return self.Value; }
+    public static implicit operator DB.ElementId(ElementId self) { return self.Id; }
+    #endregion
 
     public static ElementId FromElementId(DB.Document doc, DB.ElementId id)
     {
@@ -57,7 +61,7 @@ namespace RhinoInside.Revit.GH.Types
       Document = doc;
       DocumentGUID = doc.GetFingerprintGUID();
 
-      Value = id;
+      Id = id;
       UniqueID = doc?.GetElement(id)?.UniqueId ??
                  (
                    id.IntegerValue < DB.ElementId.InvalidElementId.IntegerValue ?
@@ -67,6 +71,10 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region IGH_ElementId
+
+    protected abstract object value { get; }
+    public object Value => value;
+
     public DB.Reference Reference
     {
       get
@@ -83,16 +91,17 @@ namespace RhinoInside.Revit.GH.Types
       get => document?.IsValidObject != true ? null : document;
       protected set { document = value; }
     }
-    public DB.ElementId Id => Value;
+
+    public DB.ElementId Id { get; protected set; } = DB.ElementId.InvalidElementId;
     public Guid DocumentGUID { get; protected set; } = Guid.Empty;
     public string UniqueID { get; protected set; } = string.Empty;
     public bool IsReferencedElement => !string.IsNullOrEmpty(UniqueID);
-    public bool IsElementLoaded => m_value is object;
+    public bool IsElementLoaded => Id is object;
     public virtual bool LoadElement()
     {
       if (Document is null)
       {
-        Value = null;
+        Id = null;
         if (!Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var doc))
         {
           Document = null;
@@ -104,32 +113,36 @@ namespace RhinoInside.Revit.GH.Types
       else if (IsElementLoaded)
         return true;
 
-      if (Document is object)
-        return Document.TryGetElementId(UniqueID, out m_value);
+      if (Document is object && Document.TryGetElementId(UniqueID, out var value))
+      {
+        Id = value;
+        return true;
+      }
 
       return false;
     }
-    public void UnloadElement() { m_value = null; Document = null; }
+    public void UnloadElement() { Id = null; Document = null; }
     #endregion
 
     public bool Equals(ElementId id) => id?.DocumentGUID == DocumentGUID && id?.UniqueID == UniqueID;
     public override bool Equals(object obj) => (obj is ElementId id) ? Equals(id) : base.Equals(obj);
-    public override int GetHashCode() => new { DocumentGUID, UniqueID }.GetHashCode();
+    public override int GetHashCode() => DocumentGUID.GetHashCode() ^ UniqueID.GetHashCode();
 
-    public ElementId() : base(DB.ElementId.InvalidElementId) { }
+    public ElementId() { }
+
     protected ElementId(DB.Document doc, DB.ElementId id) => SetValue(doc, id);
 
-    public override bool CastFrom(object source)
+    public virtual bool CastFrom(object source)
     {
       if (source is GH_Integer integer)
       {
-        Value = new DB.ElementId(integer.Value);
+        Id = new DB.ElementId(integer.Value);
         UniqueID = string.Empty;
         return true;
       }
       if (source is DB.ElementId id)
       {
-        Value = id;
+        Id = id;
         UniqueID = string.Empty;
         return true;
       }
@@ -137,22 +150,16 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    public override bool CastTo<Q>(ref Q target)
+    public virtual bool CastTo<Q>(out Q target)
     {
-      if (target is IGH_ElementId)
-      {
-        target = (Q) (object) null;
-        return true;
-      }
-
       if (typeof(Q).IsAssignableFrom(typeof(DB.ElementId)))
       {
-        target = (Q) (object) Value;
+        target = (Q) (object) Id;
         return true;
       }
       if (typeof(Q).IsAssignableFrom(typeof(GH_Integer)))
       {
-        target = (Q) (object) new GH_Integer(Value.IntegerValue);
+        target = (Q) (object) new GH_Integer(Id.IntegerValue);
         return true;
       }
       if (typeof(Q).IsAssignableFrom(typeof(GH_String)))
@@ -161,7 +168,8 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
-      return base.CastTo<Q>(ref target);
+      target = default;
+      return false;
     }
 
     [TypeConverter(typeof(Proxy.ObjectConverter))]
@@ -273,7 +281,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override IGH_GooProxy EmitProxy() => new Proxy(this);
+    public virtual IGH_GooProxy EmitProxy() => new Proxy(this);
 
     public override sealed string ToString()
     {
@@ -296,9 +304,9 @@ namespace RhinoInside.Revit.GH.Types
 
     public virtual string DisplayName => Id is null ? UniqueID : $"id {Id.IntegerValue}";
 
-    public override sealed bool Read(GH_IReader reader)
+    public virtual bool Read(GH_IReader reader)
     {
-      Value = null;
+      Id = null;
       Document = null;
 
       var documentGUID = Guid.Empty;
@@ -312,7 +320,7 @@ namespace RhinoInside.Revit.GH.Types
       return true;
     }
 
-    public override sealed bool Write(GH_IWriter writer)
+    public virtual bool Write(GH_IWriter writer)
     {
       if(DocumentGUID != Guid.Empty)
         writer.SetGuid("DocumentGUID", DocumentGUID);

@@ -8,9 +8,8 @@ using RhinoInside.Revit.GH.Types;
 
 namespace Grasshopper.Kernel.Extensions
 {
-  static partial class Extension
+  static class IGH_ParamExtension
   {
-    #region IGH_Param
     public static void AddVolatileDataTree<T1, T2>(this IGH_Param result, IGH_Structure structure, Converter<T1, T2> converter)
     where T1 : IGH_Goo
     where T2 : IGH_Goo
@@ -133,8 +132,9 @@ namespace Grasshopper.Kernel.Extensions
         var panel = GH_DocumentObject.Menu_AppendItem(connect.DropDown, "Panel", eventHandler, Instances.ComponentServer.EmitObjectIcon(panedComponentId));
         panel.Tag = panedComponentId;
 
-        var picker = GH_DocumentObject.Menu_AppendItem(connect.DropDown, "Value Set Picker", eventHandler, Instances.ComponentServer.EmitObjectIcon(External.Special.ValueSetPicker.ComponentClassGuid));
-        picker.Tag = External.Special.ValueSetPicker.ComponentClassGuid;
+        var valueSetComponentId = new Guid("{AFB12752-3ACB-4ACF-8102-16982A69CDAE}");
+        var picker = GH_DocumentObject.Menu_AppendItem(connect.DropDown, "Value Set Picker", eventHandler, Instances.ComponentServer.EmitObjectIcon(valueSetComponentId));
+        picker.Tag = valueSetComponentId;
 
         if (components.Count > 0)
         {
@@ -179,9 +179,10 @@ namespace Grasshopper.Kernel.Extensions
 
       Menu_AppendConnect(param, menu, DefaultConnectMenuHandler);
     }
-    #endregion
+  }
 
-    #region IGH_Structure
+  static class IGH_StructureExtension
+  {
     public static GH_Structure<T> DuplicateAs<T>(this IGH_Structure structure, bool shallowCopy)
       where T : IGH_Goo
     {
@@ -209,9 +210,10 @@ namespace Grasshopper.Kernel.Extensions
 
       return result;
     }
-    #endregion
+  }
 
-    #region IGH_DataAccess
+  static class IGH_DataAccessExtension
+  {
     static int IndexOf(this IList<IGH_Param> list, string name, out IGH_Param value)
     {
       value = default;
@@ -242,6 +244,5 @@ namespace Grasshopper.Kernel.Extensions
       var index = list.IndexOf(name, out var param);
       return index >= 0 && DA.SetData(index, value());
     }
-    #endregion
   }
 }

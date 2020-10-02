@@ -12,18 +12,19 @@ namespace RhinoInside.Revit.GH.Types
 {
   public interface IGH_Element : IGH_ElementId
   {
-    DB.Element APIElement { get; }
     ElementType Type { get; set; }
   }
 
   public class Element : ElementId, IGH_Element
   {
-    public override string TypeName => $"Revit {APIElement?.GetType().Name ?? GetType().Name}";
+    public override string TypeName => $"Revit {Value?.GetType().Name ?? GetType().Name}";
     public override string TypeDescription => "Represents a Revit element";
-    override public object ScriptVariable() => APIElement;
+    override public object ScriptVariable() => Value;
     protected override Type ScriptVariableType => typeof(DB.Element);
-    public DB.Element APIElement => IsValid ? Document.GetElement(Value) : default;
-    public static explicit operator DB.Element(Element value) => value?.APIElement;
+    public static explicit operator DB.Element(Element value) => value?.Value;
+
+    protected override object value => IsValid ? Document.GetElement(Id) : default;
+    public new DB.Element Value => value as DB.Element;
 
     public static Element FromValue(object data)
     {
@@ -142,7 +143,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         Document     = element.Document;
         DocumentGUID = Document.GetFingerprintGUID();
-        Value        = element.Id;
+        Id           = element.Id;
         UniqueID     = element.UniqueId;
         return true;
       }
@@ -171,12 +172,12 @@ namespace RhinoInside.Revit.GH.Types
       return SetValue(element);
     }
 
-    public override bool CastTo<Q>(ref Q target)
+    public override bool CastTo<Q>(out Q target)
     {
-      if (base.CastTo<Q>(ref target))
+      if (base.CastTo<Q>(out target))
         return true;
 
-      var element = APIElement as DB.Element;
+      var element = Value as DB.Element;
       if (typeof(DB.Element).IsAssignableFrom(typeof(Q)))
       {
         if (element is null)
@@ -224,7 +225,7 @@ namespace RhinoInside.Revit.GH.Types
       public Proxy(Element e) : base(e) { (this as IGH_GooProxy).UserString = FormatInstance(); }
 
       public override bool IsParsable() => true;
-      public override string FormatInstance() => owner.IsValid ? $"{owner.Value.IntegerValue}:{element?.Name ?? string.Empty}" : "-1";
+      public override string FormatInstance() => owner.IsValid ? $"{owner.Id.IntegerValue}:{element?.Name ?? string.Empty}" : "-1";
       public override bool FromString(string str)
       {
         int index = str.IndexOf(':');
@@ -250,7 +251,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (APIElement is DB.Element element && !string.IsNullOrEmpty(element.Name))
+        if (Value is DB.Element element && !string.IsNullOrEmpty(element.Name))
           return element.Name;
 
         return base.DisplayName;
@@ -265,39 +266,39 @@ namespace RhinoInside.Revit.GH.Types
 
     public bool? Pinned
     {
-      get => APIElement?.Pinned;
+      get => Value?.Pinned;
       set
       {
-        if (value.HasValue && APIElement is DB.Element element && element.Pinned != value.Value)
+        if (value.HasValue && Value is DB.Element element && element.Pinned != value.Value)
           element.Pinned = value.Value;
       }
     }
 
     public string Name
     {
-      get => APIElement?.Name;
+      get => Value?.Name;
       set
       {
-        if(value is object && APIElement is DB.Element element && element.Name != value)
+        if(value is object && Value is DB.Element element && element.Name != value)
          element.Name = value;
       }
     }
 
     public Category Category
     {
-      get => Types.Category.FromValue(APIElement?.Category);
+      get => Types.Category.FromValue(Value?.Category);
     }
 
     public virtual ElementType Type
     {
-      get => Types.ElementType.FromElementId(Document, APIElement?.GetTypeId()) as ElementType;
+      get => Types.ElementType.FromElementId(Document, Value?.GetTypeId()) as ElementType;
       set
       {
         if (value is object)
         {
           AssertValidDocument(value?.Document, nameof(Type));
 
-          APIElement?.ChangeTypeId(value.Id);
+          Value?.ChangeTypeId(value.Id);
         }
       }
     }
@@ -305,81 +306,81 @@ namespace RhinoInside.Revit.GH.Types
     #region Identity Data
     public string Description
     {
-      get => APIElement?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.AsString();
+      get => Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.AsString();
       set
       {
         if (value is object)
-          APIElement?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.Set(value);
+          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.Set(value);
       }
     }
 
     public string Comments
     {
-      get => APIElement?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS)?.AsString();
+      get => Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS)?.AsString();
       set
       {
         if (value is object)
-          APIElement?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS)?.Set(value);
+          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS)?.Set(value);
       }
     }
 
     public string Manufacturer
     {
-      get => APIElement?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MANUFACTURER)?.AsString();
+      get => Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MANUFACTURER)?.AsString();
       set
       {
         if (value is object)
-          APIElement?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MANUFACTURER)?.Set(value);
+          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MANUFACTURER)?.Set(value);
       }
     }
 
     public string Model
     {
-      get => APIElement?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MODEL)?.AsString();
+      get => Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MODEL)?.AsString();
       set
       {
         if (value is object)
-          APIElement?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MODEL)?.Set(value);
+          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MODEL)?.Set(value);
       }
     }
 
     public string Cost
     {
-      get => APIElement?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_COST)?.AsString();
+      get => Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_COST)?.AsString();
       set
       {
         if (value is object)
-          APIElement?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_COST)?.Set(value);
+          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_COST)?.Set(value);
       }
     }
 
     public string Url
     {
-      get => APIElement?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_URL)?.AsString();
+      get => Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_URL)?.AsString();
       set
       {
         if (value is object)
-          APIElement?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_URL)?.Set(value);
+          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_URL)?.Set(value);
       }
     }
 
     public string Keynote
     {
-      get => APIElement?.get_Parameter(DB.BuiltInParameter.KEYNOTE_PARAM)?.AsString();
+      get => Value?.get_Parameter(DB.BuiltInParameter.KEYNOTE_PARAM)?.AsString();
       set
       {
         if (value is object)
-          APIElement?.get_Parameter(DB.BuiltInParameter.KEYNOTE_PARAM)?.Set(value);
+          Value?.get_Parameter(DB.BuiltInParameter.KEYNOTE_PARAM)?.Set(value);
       }
     }
 
     public string Mark
     {
-      get => APIElement?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MARK)?.AsString();
+      get => Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MARK)?.AsString();
       set
       {
         if (value is object)
-          APIElement?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MARK)?.Set(value);
+          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MARK)?.Set(value);
       }
     }
     #endregion

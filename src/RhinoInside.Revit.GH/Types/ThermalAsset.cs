@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeDescription => "Represents a Revit Thermal Asset";
     protected override Type ScriptVariableType => typeof(DB.PropertySetElement);
     public static explicit operator DB.PropertySetElement(ThermalAsset value) =>
-      value?.IsValid == true ? value.APIElement as DB.PropertySetElement : default;
+      value?.IsValid == true ? value.Value as DB.PropertySetElement : default;
 
     public ThermalAsset() { }
     public ThermalAsset(DB.PropertySetElement asset) : base(asset) { }

@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (Document is null)
       {
-        Value = null;
+        Id = null;
         if (!Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var doc))
         {
           Document = null;
@@ -30,8 +30,11 @@ namespace RhinoInside.Revit.GH.Types
       else if (IsElementLoaded)
         return true;
 
-      if (Document is object)
-        return Document.TryGetParameterId(UniqueID, out m_value);
+      if (Document is object && Document.TryGetParameterId(UniqueID, out var value))
+      {
+        Id = value;
+        return true;
+      }
 
       return false;
     }
@@ -72,15 +75,15 @@ namespace RhinoInside.Revit.GH.Types
       return base.CastFrom(source);
     }
 
-    public override bool CastTo<Q>(ref Q target)
+    public override bool CastTo<Q>(out Q target)
     {
       if (typeof(Q).IsAssignableFrom(typeof(GH_Guid)))
       {
-        target = (Q) (object) (Document.GetElement(Value) as DB.SharedParameterElement)?.GuidValue;
+        target = (Q) (object) (Document.GetElement(Id) as DB.SharedParameterElement)?.GuidValue;
         return true;
       }
 
-      return base.CastTo<Q>(ref target);
+      return base.CastTo<Q>(out target);
     }
 
     new class Proxy : Element.Proxy
@@ -90,7 +93,7 @@ namespace RhinoInside.Revit.GH.Types
       public override bool IsParsable() => true;
       public override string FormatInstance()
       {
-        int value = owner.Value?.IntegerValue ?? -1;
+        int value = owner.Id?.IntegerValue ?? -1;
         if (Enum.IsDefined(typeof(DB.BuiltInParameter), value))
           return ((DB.BuiltInParameter) value).ToString();
 

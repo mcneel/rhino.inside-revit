@@ -53,8 +53,8 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region IGH_GraphicalElement
-    public bool? ViewSpecific => APIElement?.ViewSpecific;
-    public View OwnerView => View.FromElementId(Document, APIElement?.OwnerViewId) as View;
+    public bool? ViewSpecific => Value?.ViewSpecific;
+    public View OwnerView => View.FromElementId(Document, Value?.OwnerViewId) as View;
     #endregion
 
     #region IGH_GeometricGoo
@@ -83,7 +83,7 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         if (!clippingBox.HasValue)
-          clippingBox = APIElement?.get_BoundingBox(null).ToBoundingBox() ?? BoundingBox.Unset;
+          clippingBox = Value?.get_BoundingBox(null).ToBoundingBox() ?? BoundingBox.Unset;
 
         return clippingBox.Value;
       }
@@ -93,9 +93,9 @@ namespace RhinoInside.Revit.GH.Types
     public virtual void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
     #endregion
 
-    public override bool CastTo<Q>(ref Q target)
+    public override bool CastTo<Q>(out Q target)
     {
-      if (base.CastTo<Q>(ref target))
+      if (base.CastTo<Q>(out target))
         return true;
 
       if (typeof(Q).IsAssignableFrom(typeof(GH_Plane)))
@@ -203,7 +203,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (APIElement is DB.Element element)
+        if (Value is DB.Element element)
         {
           var plane = Location;
           if (!Location.IsValid)
@@ -241,7 +241,7 @@ namespace RhinoInside.Revit.GH.Types
         var axis = Vector3d.XAxis;
         var perp = Vector3d.YAxis;
 
-        if (APIElement is DB.Element element)
+        if (Value is DB.Element element)
         {
           switch (element.Location)
           {
@@ -290,7 +290,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (!(APIElement is DB.Element element))
+        if (!(Value is DB.Element element))
           return default;
 
         if (element is DB.ModelCurve modelCurve)
@@ -310,7 +310,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        return APIElement?.GetType() is Type type &&
+        return Value?.GetType() is Type type &&
           type.GetMethod("Flip") is MethodInfo &&
           type.GetProperty("Flipped") is PropertyInfo;
       }
@@ -319,13 +319,13 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        return APIElement is DB.Element element && element.GetType().GetProperty("Flipped") is PropertyInfo Flipped ?
+        return Value is DB.Element element && element.GetType().GetProperty("Flipped") is PropertyInfo Flipped ?
           (bool?) Flipped.GetValue(element):
           default;
       }
       set
       {
-        if (value.HasValue && APIElement is DB.Element element)
+        if (value.HasValue && Value is DB.Element element)
         {
           var Flip = element.GetType().GetMethod("Flip");
           var Flipped = element.GetType().GetProperty("Flipped");
@@ -345,7 +345,7 @@ namespace RhinoInside.Revit.GH.Types
       get => default;
       set
       {
-        if (value.HasValue && APIElement is DB.Element element)
+        if (value.HasValue && Value is DB.Element element)
         {
           if (!CanFlipHand)
             throw new InvalidOperationException("Hand can not be flipped for this element.");
@@ -362,7 +362,7 @@ namespace RhinoInside.Revit.GH.Types
       get => default;
       set
       {
-        if (value.HasValue && APIElement is DB.Element element)
+        if (value.HasValue && Value is DB.Element element)
         {
           if (!CanFlipWorkPlane)
             throw new InvalidOperationException("Work Plane can not be flipped for this element.");
