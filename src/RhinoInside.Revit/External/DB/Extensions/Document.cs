@@ -45,19 +45,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return modelPath.Compare(new FilePath(doc.PathName)) == 0;
     }
 
+    /// <summary>
+    /// Retrieves a GUID representing this document in RhinoInside.Revit to reference it persitently.
+    /// </summary>
+    /// <param name="doc"></param>
+    /// <returns>A persistent unique Id for this document.</returns>
     public static Guid GetFingerprintGUID(this Document doc)
     {
       if (doc?.IsValidObject != true)
         return Guid.Empty;
 
       return ExportUtils.GetGBXMLDocumentId(doc);
-
-      // possible alternative implementation is to get the
-      // underlying unmanaged MFC document pointer as document id
-      //MethodInfo getMFCDocMethod = doc.GetType().GetMethod("getMFCDoc", BindingFlags.Instance | BindingFlags.NonPublic);
-      //object mfcDoc = getMFCDocMethod.Invoke(doc, new object[] { });
-      //MethodInfo ptfValMethod = mfcDoc.GetType().GetMethod("GetPointerValue", BindingFlags.Instance | BindingFlags.NonPublic);
-      //return ((IntPtr) ptfValMethod.Invoke(mfcDoc, new object[] { })).ToInt64();
     }
 
     public static bool IsSameDocumentAs(this Document doc, Document otherDoc)
