@@ -14,28 +14,40 @@ namespace RhinoInside.Revit.GH.Types
     Name("Parameter Class"),
     Description("Represents a Revit Parameter class."),
   ]
-  public class ParameterClass : GH_Enum<DBX.ParameterClass> { }
+  public class ParameterClass : GH_Enum<DBX.ParameterClass>
+  {
+    public override bool IsEmpty => Value == DBX.ParameterClass.Any;
+  }
 
   [
     ComponentGuid("2A5D36DD-CD94-4306-963B-D9312DAEB0F9"),
     Name("Parameter Binding"),
     Description("Represents a Revit parameter binding type."),
   ]
-  public class ParameterBinding : GH_Enum<DBX.ParameterBinding> { }
+  public class ParameterBinding : GH_Enum<DBX.ParameterBinding>
+  {
+    public override bool IsEmpty => Value == DBX.ParameterBinding.Unknown;
+  }
 
   [
     ComponentGuid("A3621A84-190A-48C2-9B0C-F5784B78089C"),
     Name("Storage Type"),
     Description("Represents a Revit storage type."),
   ]
-  public class StorageType : GH_Enum<DB.StorageType> { }
+  public class StorageType : GH_Enum<DB.StorageType>
+  {
+    public override bool IsEmpty => Value == DB.StorageType.None;
+  }
 
   [
     ComponentGuid("A5EA05A9-C17E-48F4-AC4C-34F169AE4F9A"),
     Name("Parameter Type"),
     Description("Represents a Revit parameter type."),
   ]
-  public class ParameterType : GH_Enum<DB.ParameterType> { }
+  public class ParameterType : GH_Enum<DB.ParameterType>
+  {
+    public override bool IsEmpty => Value == DB.ParameterType.Invalid;
+  }
 
   [
     ComponentGuid("38E9E729-9D9F-461F-A1D7-798CDFA2CD4C"),
@@ -146,7 +158,6 @@ namespace RhinoInside.Revit.GH.Types
   {
     public ViewFamily() : base(DB.ViewFamily.Invalid) { }
     public ViewFamily(DB.ViewFamily value) : base(value) { }
-
     public override bool IsEmpty => Value == DB.ViewFamily.Invalid;
 
     public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
@@ -277,6 +288,7 @@ namespace RhinoInside.Revit.GH.Types
   {
     public WallSystemFamily() : base(DB.WallKind.Unknown) { }
     public WallSystemFamily(DB.WallKind value) : base(value) { }
+    public override bool IsEmpty => Value == DB.WallKind.Unknown;
 
     public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
     (
@@ -362,6 +374,8 @@ namespace RhinoInside.Revit.GH.Types
   {
     public LayerFunction() : base() { }
     public LayerFunction(DB.MaterialFunctionAssignment value) : base(value) { }
+
+    public override bool IsEmpty => Value == DB.MaterialFunctionAssignment.None;
   }
 
   [
@@ -418,6 +432,7 @@ namespace RhinoInside.Revit.GH.Types
   {
     public CurtainGridJoinCondition() : base() { }
     public CurtainGridJoinCondition(DBX.CurtainGridJoinCondition value) : base(value) { }
+    public override bool IsEmpty => Value == DBX.CurtainGridJoinCondition.NotDefined;
 
     public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
     (
@@ -441,7 +456,6 @@ namespace RhinoInside.Revit.GH.Types
   {
     public CurtainMullionSystemFamily() : base(DBX.CurtainMullionSystemFamily.Unknown) { }
     public CurtainMullionSystemFamily(DBX.CurtainMullionSystemFamily value) : base(value) { }
-
     public override bool IsEmpty => Value == DBX.CurtainMullionSystemFamily.Unknown;
 
     public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
@@ -468,6 +482,7 @@ namespace RhinoInside.Revit.GH.Types
   {
     public CurtainPanelSystemFamily() : base() { }
     public CurtainPanelSystemFamily(DBX.CurtainPanelSystemFamily value) : base(value) { }
+    public override bool IsEmpty => Value == DBX.CurtainPanelSystemFamily.Unknown;
   }
 
   [
