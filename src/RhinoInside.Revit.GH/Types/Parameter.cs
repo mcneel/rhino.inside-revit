@@ -30,8 +30,11 @@ namespace RhinoInside.Revit.GH.Types
       else if (IsElementLoaded)
         return true;
 
-      if (Document is object)
-        return Document.TryGetParameterId(UniqueID, out m_value);
+      if (Document is object && Document.TryGetParameterId(UniqueID, out var value))
+      {
+        Value = value;
+        return true;
+      }
 
       return false;
     }
@@ -72,7 +75,7 @@ namespace RhinoInside.Revit.GH.Types
       return base.CastFrom(source);
     }
 
-    public override bool CastTo<Q>(ref Q target)
+    public override bool CastTo<Q>(out Q target)
     {
       if (typeof(Q).IsAssignableFrom(typeof(GH_Guid)))
       {
@@ -80,7 +83,7 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
-      return base.CastTo<Q>(ref target);
+      return base.CastTo<Q>(out target);
     }
 
     new class Proxy : Element.Proxy

@@ -364,7 +364,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
                     GH_WindowsFormUtil.CenterFormOnCursor(dataManager, true);
                     if (dataManager.ShowDialog(Revit.MainWindowHandle) == System.Windows.Forms.DialogResult.OK)
-                      elementIds = dataManager.GetData<IGH_Goo>().AllData(true).OfType<Types.Element>().Select(x => x.Value);
+                      elementIds = dataManager.GetData<IGH_Goo>().AllData(true).OfType<Types.Element>().Select(x => x.Id);
                   }
                   break;
 

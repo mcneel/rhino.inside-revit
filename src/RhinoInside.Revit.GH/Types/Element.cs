@@ -171,9 +171,9 @@ namespace RhinoInside.Revit.GH.Types
       return SetValue(element);
     }
 
-    public override bool CastTo<Q>(ref Q target)
+    public override bool CastTo<Q>(out Q target)
     {
-      if (base.CastTo<Q>(ref target))
+      if (base.CastTo<Q>(out target))
         return true;
 
       var element = APIElement as DB.Element;

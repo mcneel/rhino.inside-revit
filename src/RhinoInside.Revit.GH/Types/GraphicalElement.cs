@@ -93,9 +93,9 @@ namespace RhinoInside.Revit.GH.Types
     public virtual void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
     #endregion
 
-    public override bool CastTo<Q>(ref Q target)
+    public override bool CastTo<Q>(out Q target)
     {
-      if (base.CastTo<Q>(ref target))
+      if (base.CastTo<Q>(out target))
         return true;
 
       if (typeof(Q).IsAssignableFrom(typeof(GH_Plane)))
