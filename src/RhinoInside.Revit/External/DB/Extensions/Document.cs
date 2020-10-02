@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Mechanical;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
@@ -50,7 +51,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
         return Guid.Empty;
 
       return ExportUtils.GetGBXMLDocumentId(doc);
+
+      // possible alternative implementation is to get the
+      // underlying unmanaged MFC document pointer as document id
+      //MethodInfo getMFCDocMethod = doc.GetType().GetMethod("getMFCDoc", BindingFlags.Instance | BindingFlags.NonPublic);
+      //object mfcDoc = getMFCDocMethod.Invoke(doc, new object[] { });
+      //MethodInfo ptfValMethod = mfcDoc.GetType().GetMethod("GetPointerValue", BindingFlags.Instance | BindingFlags.NonPublic);
+      //return ((IntPtr) ptfValMethod.Invoke(mfcDoc, new object[] { })).ToInt64();
     }
+
+    public static bool IsSameDocumentAs(this Document doc, Document otherDoc)
+      => doc.GetFingerprintGUID() == otherDoc.GetFingerprintGUID();
 
     private static int seed = 0;
     private static readonly Dictionary<Guid, int> DocumentsSessionDictionary = new Dictionary<Guid, int>();
