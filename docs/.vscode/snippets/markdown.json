@@ -27,7 +27,7 @@
         "prefix": "rirlnk",
         "description": "Link tag for Rhino.Inside.Revit Wiki",
         "body": [
-            "{% link _en/beta/guides/$1.md %}"
+            "{{ site.baseurl }}{% link _en/beta/guides/$1.md %}"
         ]
     },
     "RIR Python": {
