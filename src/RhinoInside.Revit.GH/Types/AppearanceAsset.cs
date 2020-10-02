@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeDescription => "Represents a Revit Appearance Asset";
     protected override Type ScriptVariableType => typeof(DB.AppearanceAssetElement);
     public static explicit operator DB.AppearanceAssetElement(AppearanceAsset value) =>
-      value?.IsValid == true ? value.APIElement as DB.AppearanceAssetElement : default;
+      value?.IsValid == true ? value.Value as DB.AppearanceAssetElement : default;
 
     public AppearanceAsset() { }
     public AppearanceAsset(DB.AppearanceAssetElement asset) : base(asset) { }
