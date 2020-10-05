@@ -402,12 +402,10 @@ namespace RhinoInside.Revit.GH.Components
     public static DB.AppearanceAssetElement
     EnsureAsset(string schemaName, DB.Document doc, string name)
     {
-      if (name is null || name == string.Empty)
-        return null;
-
       var existingAsset = doc.FindAppearanceAssetElement(name);
       if (existingAsset != null)
         return existingAsset;
+
       var baseAsset = FindLibraryAsset(DB.Visual.AssetType.Appearance, schemaName);
       return DB.AppearanceAssetElement.Create(doc, name, baseAsset);
     }

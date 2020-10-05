@@ -300,6 +300,9 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
+        return;
+
       // get required input (name, class)
       string name = default;
       if (!DA.GetData("Name", ref name))
@@ -307,9 +310,6 @@ namespace RhinoInside.Revit.GH.Components
 
       DB.StructuralAssetClass assetClass = default;
       if (!DA.GetData("Type", ref assetClass))
-        return;
-
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
         return;
 
       using (var transaction = NewTransaction(doc))
@@ -554,6 +554,9 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
+        return;
+
       // get required input (name, class)
       string name = default;
       if (!DA.GetData("Name", ref name))
@@ -561,9 +564,6 @@ namespace RhinoInside.Revit.GH.Components
 
       DB.ThermalMaterialType materialType = default;
       if (!DA.GetData("Type", ref materialType))
-        return;
-
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
         return;
 
       using (var transaction = NewTransaction(doc))

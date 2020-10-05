@@ -62,29 +62,24 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
+        return;
+
       // lets process all the inputs into a data structure
       // this step also verifies the input data
       var assetData = CreateAssetDataFromInputs(DA);
 
-      if (assetData.Name is null || assetData.Name == string.Empty)
+      if (string.IsNullOrEmpty(assetData.Name))
       {
         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Bad Name");
         return;
       }
-
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
-        return;
 
       using (var transaction = NewTransaction(doc))
       {
         transaction.Start();
 
         var assetElement = EnsureThisAsset(doc, assetData.Name);
-        if (assetElement is null)
-        {
-          transaction.RollBack();
-          return;
-        }
 
         // update asset properties
         UpdateAssetElementFromInputs(assetElement, assetData);
