@@ -56,7 +56,7 @@ namespace RhinoInside.Revit.GH.Types
         if (Value is DB.Material material)
         {
           var color = material.Color.ToColor();
-          return System.Drawing.Color.FromArgb(material.Transparency * 255 / 100, color);
+          return System.Drawing.Color.FromArgb(255 - (material.Transparency * 255 / 100), color);
         }
 
         return default;
@@ -67,7 +67,7 @@ namespace RhinoInside.Revit.GH.Types
         {
           var color = value.Value.ToColor();
           Value.Color = color;
-          Value.Transparency = value.Value.A * 100 / 255;
+          Value.Transparency = 100 - (value.Value.A * 100 / 255);
         }
       }
     }
