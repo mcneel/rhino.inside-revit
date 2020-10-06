@@ -7,9 +7,9 @@ using Microsoft.PowerShell.Commands;
 
 namespace RhinoInside.Revit.External.DB
 {
-  public interface ITransactionChainNotification
+  public interface ITransactionNotification
   {
-    void OnChain(Document document);
+    void OnStarted(Document document);
     void OnPrepare(IReadOnlyCollection<Document> documents);
     void OnDone(TransactionStatus status);
   }
@@ -22,7 +22,7 @@ namespace RhinoInside.Revit.External.DB
     public bool ForcedModalHandling;
     public IFailuresPreprocessor FailuresPreprocessor;
     public ITransactionFinalizer TransactionFinalizer;
-    public ITransactionChainNotification TransactionChainNotification;
+    public ITransactionNotification TransactionNotification;
   }
 
   /// <summary>
@@ -130,7 +130,7 @@ namespace RhinoInside.Revit.External.DB
             SetTransactionFinalizer(this)
           );
 
-          HandlingOptions.TransactionChainNotification?.OnChain(doc);
+          HandlingOptions.TransactionNotification?.OnStarted(doc);
 
           transactionChain.Add(doc, transaction);
         }
@@ -154,7 +154,7 @@ namespace RhinoInside.Revit.External.DB
       {
         using (this)
         {
-          HandlingOptions.TransactionChainNotification?.OnPrepare(transactionChain.Keys);
+          HandlingOptions.TransactionNotification?.OnPrepare(transactionChain.Keys);
 
           using (transactionLinks = transactionChain.Values.GetEnumerator())
             status = CommitNextTransaction();
@@ -162,7 +162,7 @@ namespace RhinoInside.Revit.External.DB
       }
       finally
       {
-        HandlingOptions.TransactionChainNotification?.OnDone(status);
+        HandlingOptions.TransactionNotification?.OnDone(status);
       }
 
       return status;
@@ -186,7 +186,7 @@ namespace RhinoInside.Revit.External.DB
       }
       finally
       {
-        HandlingOptions.TransactionChainNotification?.OnDone(status);
+        HandlingOptions.TransactionNotification?.OnDone(status);
       }
 
       return status;
