@@ -240,22 +240,15 @@ if Trigger:
 
 ## Handling Transactions
 
-To effectively create new transactions and handle the changes to your model in Grasshopper python components, use the try-except block example below:
+To effectively create new transactions and handle the changes to your model in Grasshopper python components, use the with pattern example below:
 
 {% highlight python %}
 # create and start the transaction
-t = DB.Transaction(doc, '<give a descriptive name to your transaction>')
-t.Start()
-try:
+with DB.Transaction(doc, '<give a descriptive name to your transaction>') as t:
+    t.Start()
     # change Revit document here
     # commit the changes after all changes has been made
     t.Commit()
-except Exception as txn_err:
-    # if any errors happen while changing the document, an exception is thrown
-    # make sure to print the exception message for debugging
-    show_error(txn_err)
-    # and rollback the changes made before error
-    t.RollBack()
 {% endhighlight %}
 
 ## Inspecting Revit
