@@ -60,17 +60,17 @@ namespace RhinoInside.Revit.GH.Components
     }
   }
 
-  public class QueryGraphicalElements : ElementCollectorComponent
+  public class QueryViewElements : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("79DAEA3A-13A3-49BF-8BEB-AA28E3BE4515");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override DB.ElementFilter ElementFilter => new DB.ElementIsElementTypeFilter(true);
 
-    public QueryGraphicalElements() : base
+    public QueryViewElements() : base
     (
-      name: "Query Graphical Elements",
-      nickname: "GraphElem",
-      description: "Get document model elements list",
+      name: "Query View Elements",
+      nickname: "ViewEles",
+      description: "Get elements visible in a view",
       category: "Revit",
       subCategory: "Element"
     )

@@ -1343,6 +1343,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ElementViewGeometry {
+            get {
+                object obj = ResourceManager.GetObject("ElementViewGeometry", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap EndCapCondition_ValueList {
             get {
                 object obj = ResourceManager.GetObject("EndCapCondition_ValueList", resourceCulture);
@@ -1576,16 +1586,6 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap GraphicalElement {
             get {
                 object obj = ResourceManager.GetObject("GraphicalElement", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap GraphicalElementGeometry {
-            get {
-                object obj = ResourceManager.GetObject("GraphicalElementGeometry", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -1943,16 +1943,6 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap QueryGraphicalElements {
-            get {
-                object obj = ResourceManager.GetObject("QueryGraphicalElements", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap QueryGroupTypes {
             get {
                 object obj = ResourceManager.GetObject("QueryGroupTypes", resourceCulture);
@@ -1976,6 +1966,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap QueryTypes {
             get {
                 object obj = ResourceManager.GetObject("QueryTypes", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap QueryViewElements {
+            get {
+                object obj = ResourceManager.GetObject("QueryViewElements", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
