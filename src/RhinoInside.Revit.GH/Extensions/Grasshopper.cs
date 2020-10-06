@@ -231,18 +231,32 @@ namespace Grasshopper.Kernel.Extensions
       return -1;
     }
 
-    public static bool TryGetData<T>(this IGH_DataAccess DA, IList<IGH_Param> list, string name, out T value)
+    public static bool TryGetData<T>(this IGH_DataAccess DA, IList<IGH_Param> parameters, string name, out T value)
     {
       value = default;
 
-      var index = list.IndexOf(name, out var param);
+      var index = parameters.IndexOf(name, out var param);
       return param?.DataType > GH_ParamData.@void && DA.GetData(index, ref value);
     }
 
-    public static bool TrySetData(this IGH_DataAccess DA, IList<IGH_Param> list, string name, Func<object> value)
+    public static bool TryGetDataList<T>(this IGH_DataAccess DA, IList<IGH_Param> parameters, string name, out List<T> list)
     {
-      var index = list.IndexOf(name, out var param);
+      list = new List<T>();
+
+      var index = parameters.IndexOf(name, out var param);
+      return param?.DataType > GH_ParamData.@void && DA.GetDataList(index, list);
+    }
+
+    public static bool TrySetData<T>(this IGH_DataAccess DA, IList<IGH_Param> parameters, string name, Func<T> value)
+    {
+      var index = parameters.IndexOf(name, out var _);
       return index >= 0 && DA.SetData(index, value());
+    }
+
+    public static bool TrySetDataList<T>(this IGH_DataAccess DA, IList<IGH_Param> parameters, string name, Func<IEnumerable<T>> list)
+    {
+      var index = parameters.IndexOf(name, out var _);
+      return index >= 0 && DA.SetDataList(index, list());
     }
   }
 }

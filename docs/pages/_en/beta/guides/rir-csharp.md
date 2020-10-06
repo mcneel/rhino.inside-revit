@@ -210,24 +210,17 @@ And here is the complete sample code:
 
 ## Handling Transactions
 
-To effectively create new transactions and handle the changes to your model in Grasshopper C# components, use the try-catch block example below:
+To effectively create new transactions and handle the changes to your model in Grasshopper C# components, use the using pattern example below:
 
 {% highlight csharp %}
 // create and start the transaction
 var doc = RIR.Revit.ActiveDBDocument;
-var t = new DB.Transaction(doc, "<give a descriptive name to your transaction>");
-t.Start();
-try {
+using(var t = new DB.Transaction(doc, "<give a descriptive name to your transaction>"))
+{
+    t.Start();
     // change Revit document here
     // commit the changes after all changes has been made
     t.Commit();
-}
-catch (Exception txnErr) {
-    // if any errors happen while changing the document, an exception is thrown
-    // make sure to print the exception message for debugging
-    Print(txnErr.Message);
-    // and rollback the changes made before error
-    t.RollBack();
 }
 {% endhighlight %}
 
@@ -236,9 +229,12 @@ catch (Exception txnErr) {
 To inspect which version of Revit you are using, check the Revit version number as shown below. Remember that your script still needs to compile against the active Revit API without errors:
 
 {% highlight csharp %}
-if (RIR.Revit.ActiveUIApplication.Application.VersionNumber == 2019) {
+if (RIR.Revit.ActiveUIApplication.Application.VersionNumber == 2019)
+{
     // do stuff that is related to Revit 2019
-} else {
+}
+else
+{
     // do other stuff
 }
 {% endhighlight %}

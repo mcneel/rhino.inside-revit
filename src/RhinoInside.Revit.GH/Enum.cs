@@ -514,6 +514,8 @@ namespace RhinoInside.Revit.GH.Parameters
         foreach (var e in values)
         {
           var tag = InstantiateT(); tag.Value = e.Key;
+          if (tag.IsEmpty) continue;
+
           var item = Menu_AppendItem(menu, tag.Text, Menu_NamedValueClicked, SourceCount == 0, e.Key == current.Value);
           item.Tag = tag;
         }
@@ -525,6 +527,8 @@ namespace RhinoInside.Revit.GH.Parameters
         foreach (var e in values)
         {
           var tag = InstantiateT(); tag.Value = e.Key;
+          if (tag.IsEmpty) continue;
+
           int index = listBox.Items.Add(tag);
           if (e.Key == current.Value)
             listBox.SelectedIndex = index;

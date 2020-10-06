@@ -1168,15 +1168,15 @@
     "title": "Element Geometry", 
     "typename": "ElementGeometry", 
     "uuid": "b3bcbf5b-2034-414f-b9fb-97626ff37cbe"
-  }, 
+  },
   {
-    "desc": "Get the geometry of the specified Graphical Element on a view", 
-    "iconsrc": "/static/images/GH/GraphicalElementGeometry.png", 
-    "icontag": null, 
-    "panel": "Element", 
-    "tab": "Revit", 
-    "title": "Graphical Element Geometry", 
-    "typename": "GraphicalElementGeometry", 
+    "desc": "Get the geometry of the given Element on a view",
+    "iconsrc": "/static/images/GH/ElementViewGeometry.png",
+    "icontag": null,
+    "panel": "Element",
+    "tab": "Revit",
+    "title": "Element View Geometry",
+    "typename": "ElementViewGeometry",
     "uuid": "8b85b1fb-a3df-4924-bc84-58d2b919e664"
   }, 
   {
@@ -1708,15 +1708,15 @@
     "title": "Query Elements", 
     "typename": "QueryElements", 
     "uuid": "0f7da57e-6c05-4dd0-aabf-69e42df38859"
-  }, 
+  },
   {
-    "desc": "Get document model elements list", 
-    "iconsrc": "/static/images/GH/QueryGraphicalElements.png", 
-    "icontag": null, 
-    "panel": "Element", 
-    "tab": "Revit", 
-    "title": "Query Graphical Elements", 
-    "typename": "QueryGraphicalElements", 
+    "desc": "Get elements visible in a view",
+    "iconsrc": "/static/images/GH/QueryViewElements.png",
+    "icontag": null,
+    "panel": "Element",
+    "tab": "Revit",
+    "title": "Query View Elements",
+    "typename": "QueryViewElements",
     "uuid": "79daea3a-13a3-49bf-8beb-aa28e3be4515"
   }, 
   {
