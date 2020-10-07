@@ -254,14 +254,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     static BuiltInCategory[] BuiltInCategoriesWithParameters;
     static Document BuiltInCategoriesWithParametersDocument;
-    /*internal*/
-    public static ICollection<BuiltInCategory> GetBuiltInCategoriesWithParameters(this Document doc)
+    internal static ICollection<BuiltInCategory> GetBuiltInCategoriesWithParameters(this Document doc)
     {
-      if (BuiltInCategoriesWithParameters is null && !BuiltInCategoriesWithParametersDocument.Equals(doc))
+      if (BuiltInCategoriesWithParameters is null || !doc.Equals(BuiltInCategoriesWithParametersDocument))
       {
         BuiltInCategoriesWithParametersDocument = doc;
-        BuiltInCategoriesWithParameters =
-          BuiltInCategoryExtension.BuiltInCategories.
+        BuiltInCategoriesWithParameters = BuiltInCategoryExtension.BuiltInCategories.
           Where
           (
             bic =>
