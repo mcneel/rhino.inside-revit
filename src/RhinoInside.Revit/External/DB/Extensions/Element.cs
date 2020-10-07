@@ -127,7 +127,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
               }
             ).
             Where(x => x?.Definition is object).
-            Union(element.Parameters.Cast<Parameter>().OrderBy(x => x.Id.IntegerValue)).
+            Union(element.Parameters.Cast<Parameter>().Where(x => x.StorageType != StorageType.None).OrderBy(x => x.Id.IntegerValue)).
             GroupBy(x => x.Id).
             Select(x => x.First());
         case ParameterClass.BuiltIn:
