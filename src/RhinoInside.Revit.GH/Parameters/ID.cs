@@ -21,7 +21,6 @@ namespace RhinoInside.Revit.GH.Parameters
   Kernel.IGH_ElementIdParam
   where T : class, Types.IGH_ElementId
   {
-    public override sealed string TypeName => "Revit " + Name;
     protected ElementIdParam(string name, string nickname, string description, string category, string subcategory) :
       base(name, nickname, description, category, subcategory)
     { }
