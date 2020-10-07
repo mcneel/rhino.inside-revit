@@ -110,19 +110,25 @@ namespace Grasshopper.Kernel.Extensions
         var components = new List<IGH_Component>();
         var paramType = param.Type;
 
-        foreach (var proxy in Instances.ComponentServer.ObjectProxies.Where(x => !x.Obsolete && x.Exposure != GH_Exposure.hidden && x.Exposure < GH_Exposure.tertiary))
+        foreach (var proxy in Instances.ComponentServer.ObjectProxies.Where(x => !x.Obsolete && x.Kind == GH_ObjectType.CompiledObject && x.Exposure != GH_Exposure.hidden && x.Exposure < GH_Exposure.tertiary))
         {
           if (typeof(IGH_Component).IsAssignableFrom(proxy.Type))
           {
-            var obj = proxy.CreateInstance() as IGH_Component;
-            foreach (var input in obj.Params.Input.Where(i => typeof(IGH_ElementId).IsAssignableFrom(i.Type)))
+            try
             {
-              if (input.GetType() == param.GetType() || input.Type.IsAssignableFrom(paramType))
+              if (proxy.CreateInstance() is IGH_Component compoennt)
               {
-                components.Add(obj);
-                break;
+                foreach (var input in compoennt.Params.Input.Where(i => typeof(IGH_ElementId).IsAssignableFrom(i.Type)))
+                {
+                  if (input.GetType() == param.GetType() || input.Type.IsAssignableFrom(paramType))
+                  {
+                    components.Add(compoennt);
+                    break;
+                  }
+                }
               }
             }
+            catch { }
           }
         }
 
