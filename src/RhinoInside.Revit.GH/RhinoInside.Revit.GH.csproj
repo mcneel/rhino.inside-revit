@@ -306,6 +306,7 @@
     <Compile Include="Extensions\Grasshopper.cs" />
     <Compile Include="Extensions\System.Collections.Generic.cs" />
     <Compile Include="Extensions\WinForms.cs" />
+    <Compile Include="Parameters\FillPatternElement.cs" />
     <Compile Include="Parameters\Param.cs" />
     <Compile Include="Parameters\DataObject.cs" />
     <Compile Include="Parameters\Category.cs" />
@@ -368,6 +369,7 @@
     <Compile Include="Types\Enums.cs" />
     <Compile Include="Types\Family.cs" />
     <Compile Include="Types\FamilyInstance.cs" />
+    <Compile Include="Types\FillPatternElement.cs" />
     <Compile Include="Types\Floor.cs" />
     <Compile Include="Types\GeometryObject.cs" />
     <Compile Include="Types\GraphicalElement.cs" />

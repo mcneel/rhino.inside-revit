@@ -83,9 +83,9 @@ namespace RhinoInside.Revit.GH.Types
     }
 
 #if REVIT_2019
-    public Element SurfaceForegroundPattern
+    public FillPatternElement SurfaceForegroundPattern
     {
-      get => Element.FromElementId(Document, SurfaceForegroundPatternId);
+      get => FillPatternElement.FromElementId(Document, SurfaceForegroundPatternId) as FillPatternElement;
       set
       {
         if (value is object && Value is DB.Material material && value.Id != material.SurfaceForegroundPatternId)
@@ -122,9 +122,9 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public Element SurfaceBackgroundPattern
+    public FillPatternElement SurfaceBackgroundPattern
     {
-      get => Element.FromElementId(Document, SurfaceBackgroundPatternId);
+      get => FillPatternElement.FromElementId(Document, SurfaceBackgroundPatternId) as FillPatternElement;
       set
       {
         if (value is object && Value is DB.Material material && value.Id != material.SurfaceBackgroundPatternId)
@@ -161,9 +161,9 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public Element CutForegroundPattern
+    public FillPatternElement CutForegroundPattern
     {
-      get => Element.FromElementId(Document, CutForegroundPatternId);
+      get => FillPatternElement.FromElementId(Document, CutForegroundPatternId) as FillPatternElement;
       set
       {
         if (value is object && Value is DB.Material material && value.Id != material.CutForegroundPatternId)
@@ -200,9 +200,9 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public Element CutBackgroundPattern
+    public FillPatternElement CutBackgroundPattern
     {
-      get => Element.FromElementId(Document, CutForegroundPatternId);
+      get => FillPatternElement.FromElementId(Document, CutBackgroundPatternId) as FillPatternElement;
       set
       {
         if (value is object && Value is DB.Material material && value.Id != material.CutBackgroundPatternId)
@@ -239,9 +239,9 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 #else
-    public Element SurfaceForegroundPattern
+    public FillPatternElement SurfaceForegroundPattern
     {
-      get => Element.FromElementId(Document, SurfaceForegroundPatternId);
+      get => FillPatternElement.FromElementId(Document, SurfaceForegroundPatternId) as FillPatternElement;
       set
       {
         if (value is object && Value is DB.Material material && value.Id != material.SurfacePatternId)
@@ -278,7 +278,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public Element SurfaceBackgroundPattern
+    public FillPatternElement SurfaceBackgroundPattern
     {
       get => default;
       set { }
@@ -296,9 +296,9 @@ namespace RhinoInside.Revit.GH.Types
       set { }
     }
 
-    public Element CutForegroundPattern
+    public FillPatternElement CutForegroundPattern
     {
-      get => Element.FromElementId(Document, CutForegroundPatternId);
+      get => FillPatternElement.FromElementId(Document, CutForegroundPatternId) as FillPatternElement;
       set
       {
         if (value is object && Value is DB.Material material && value.Id != material.CutPatternId)
@@ -335,7 +335,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public Element CutBackgroundPattern
+    public FillPatternElement CutBackgroundPattern
     {
       get => default;
       set { }
