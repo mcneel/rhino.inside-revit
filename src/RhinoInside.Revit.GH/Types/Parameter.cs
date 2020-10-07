@@ -95,7 +95,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         int value = owner.Id?.IntegerValue ?? -1;
         if (Enum.IsDefined(typeof(DB.BuiltInParameter), value))
-          return ((DB.BuiltInParameter) value).ToString();
+          return ((DB.BuiltInParameter) value).ToStringGeneric();
 
         return value.ToString();
       }
