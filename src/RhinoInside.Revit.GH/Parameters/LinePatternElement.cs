@@ -44,6 +44,8 @@ namespace RhinoInside.Revit.GH.Parameters
                         Cast<DB.LinePatternElement>();
 
         listBox.DisplayMember = "DisplayName";
+
+        listBox.Items.Add(new Types.LinePatternElement(doc, new DB.ElementId(-3000010)));
         foreach (var pattern in patterns)
           listBox.Items.Add(new Types.LinePatternElement(pattern));
       }
