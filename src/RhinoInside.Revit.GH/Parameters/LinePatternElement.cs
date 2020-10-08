@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   public class LinePatternElement : ElementIdWithoutPreviewParam<Types.LinePatternElement, DB.LinePatternElement>
   {
-    public override GH_Exposure Exposure => GH_Exposure.quarternary /*| GH_Exposure.hidden*/;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
     public override Guid ComponentGuid => new Guid("EB5AB657-AE01-42F0-BF98-071DA6D7A2D2");
 
     public LinePatternElement() : base("Line Pattern", "Line Pattern", "Represents a Revit document line pattern.", "Params", "Revit Primitives") { }
