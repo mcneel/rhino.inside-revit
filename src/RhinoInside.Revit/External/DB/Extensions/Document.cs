@@ -134,6 +134,27 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return parameterId is object;
     }
 
+    public static bool TryGetLinePatternId(this Document doc, string uniqueId, out ElementId patternId)
+    {
+      patternId = default;
+
+      if (UniqueId.TryParse(uniqueId, out var EpisodeId, out var id))
+      {
+        if (EpisodeId == Guid.Empty)
+        {
+          if (id == -3000010)
+            patternId = new ElementId(id);
+        }
+        else
+        {
+          if (doc.GetElement(uniqueId) is LinePatternElement pattern)
+            patternId = pattern.Id;
+        }
+      }
+
+      return patternId is object;
+    }
+
     public static bool TryGetElementId(this Document doc, string uniqueId, out ElementId elementId)
     {
       elementId = default;

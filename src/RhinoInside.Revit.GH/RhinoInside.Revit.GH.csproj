@@ -307,6 +307,7 @@
     <Compile Include="Extensions\System.Collections.Generic.cs" />
     <Compile Include="Extensions\WinForms.cs" />
     <Compile Include="Parameters\FillPatternElement.cs" />
+    <Compile Include="Parameters\LinePatternElement.cs" />
     <Compile Include="Parameters\Param.cs" />
     <Compile Include="Parameters\DataObject.cs" />
     <Compile Include="Parameters\Category.cs" />
@@ -375,6 +376,7 @@
     <Compile Include="Types\GraphicalElement.cs" />
     <Compile Include="Types\Group.cs" />
     <Compile Include="Types\InstanceElement.cs" />
+    <Compile Include="Types\LinePatternElement.cs" />
     <Compile Include="Types\Panel.cs" />
     <Compile Include="Types\Parameter.cs" />
     <Compile Include="Types\DatumPlane.cs" />

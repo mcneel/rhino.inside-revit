@@ -48,6 +48,25 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
     /// <summary>
+    /// Checks if <paramref name="id"/> corresponds to a <see cref="Autodesk.Revit.DB.LinePatternElement"/> in <paramref name="doc"/>.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="doc"></param>
+    /// <returns></returns>
+    public static bool IsLinePatternId(this ElementId id, Document doc)
+    {
+      // Check if is not a BuiltIn Parameter
+      if (id.IntegerValue > ElementId.InvalidElementId.IntegerValue)
+      {
+        try { return doc.GetElement(id) is LinePatternElement; }
+        catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
+      }
+
+      // Solid line pattern.
+      return id.IntegerValue == -3000010;
+    }
+
+    /// <summary>
     /// Checks if <paramref name="id"/> corresponds to an <see cref="Autodesk.Revit.DB.ElementType"/> in <paramref name="doc"/>.
     /// </summary>
     /// <param name="id"></param>

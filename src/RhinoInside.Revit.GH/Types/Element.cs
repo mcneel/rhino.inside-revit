@@ -46,6 +46,7 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(DB.ParameterElement),        (element)=> new ParameterKey      (element as DB.ParameterElement)  },
       { typeof(DB.Material),                (element)=> new Material          (element as DB.Material)          },
       { typeof(DB.GraphicsStyle),           (element)=> new GraphicsStyle     (element as DB.GraphicsStyle)     },
+      { typeof(DB.LinePatternElement),      (element)=> new LinePatternElement(element as DB.LinePatternElement)},
       { typeof(DB.FillPatternElement),      (element)=> new FillPatternElement(element as DB.FillPatternElement)},
 
       { typeof(DB.Sketch),                  (element)=> new Sketch            (element as DB.Sketch)            },
