@@ -82,9 +82,16 @@ namespace RhinoInside.Revit.GH.Components
         unhandledException = e;
         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
       }
+      catch (Autodesk.Revit.Exceptions.ArgumentOutOfRangeException e)
+      {
+        if (AbortOnUnhandledException)
+          unhandledException = e;
+
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.ParamName} value is out of range");
+      }
       catch (Autodesk.Revit.Exceptions.ApplicationException e)
       {
-        if(AbortOnUnhandledException)
+        if (AbortOnUnhandledException)
           unhandledException = e;
 
         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
