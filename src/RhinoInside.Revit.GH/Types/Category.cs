@@ -187,6 +187,135 @@ namespace RhinoInside.Revit.GH.Types
         return base.DisplayName;
       }
     }
+
+    public System.Drawing.Color? LineColor
+    {
+      get => Value?.LineColor.ToColor();
+      set
+      {
+        if (value is object && Value is DB.Category category)
+        {
+          using (var color = value.Value.ToColor())
+          {
+            if (color != category.LineColor)
+              category.LineColor = color;
+          }
+        }
+      }
+    }
+
+    public Material Material
+    {
+      get => Material.FromElement(Value?.Material) as Material;
+      set
+      {
+        if (value is object && Value is DB.Category category)
+        {
+          if (category.Material.Id != value.Id)
+            category.Material = value.Value;
+        }
+      }
+    }
+
+    public int? ProjectionLineWeight
+    {
+      get
+      {
+        if (Value is DB.Category category)
+        {
+          if (category.GetGraphicsStyle(DB.GraphicsStyleType.Projection) is DB.GraphicsStyle _)
+            return category.GetLineWeight(DB.GraphicsStyleType.Projection);
+        }
+
+        return default;
+      }
+      set
+      {
+        if (value is object && Value is DB.Category category)
+        {
+          if (category.GetGraphicsStyle(DB.GraphicsStyleType.Projection) is DB.GraphicsStyle _)
+          {
+            if (category.GetLineWeight(DB.GraphicsStyleType.Projection) != value)
+              category.SetLineWeight(value.Value, DB.GraphicsStyleType.Projection);
+          }
+        }
+      }
+    }
+
+    public int? CutLineWeight
+    {
+      get
+      {
+        if (Value is DB.Category category)
+        {
+          if (category.GetGraphicsStyle(DB.GraphicsStyleType.Cut) is DB.GraphicsStyle _)
+            return category.GetLineWeight(DB.GraphicsStyleType.Cut);
+        }
+
+        return default;
+      }
+      set
+      {
+        if (value is object && Value is DB.Category category)
+        {
+          if (category.GetGraphicsStyle(DB.GraphicsStyleType.Cut) is DB.GraphicsStyle _)
+          {
+            if (category.GetLineWeight(DB.GraphicsStyleType.Cut) != value)
+              category.SetLineWeight(value.Value, DB.GraphicsStyleType.Cut);
+          }
+        }
+      }
+    }
+
+    public LinePatternElement ProjectionLinePattern
+    {
+      get
+      {
+        if (Value is DB.Category category)
+        {
+          if (category.GetGraphicsStyle(DB.GraphicsStyleType.Projection) is DB.GraphicsStyle style)
+            return LinePatternElement.FromElementId(style.Document, category.GetLinePatternId(DB.GraphicsStyleType.Projection));
+        }
+
+        return default;
+      }
+      set
+      {
+        if (value is object && Value is DB.Category category)
+        {
+          if (category.GetGraphicsStyle(DB.GraphicsStyleType.Projection) is DB.GraphicsStyle style)
+          {
+            if (category.GetLinePatternId(DB.GraphicsStyleType.Projection) != value.Id)
+              category.SetLinePatternId(value.Id, DB.GraphicsStyleType.Projection);
+          }
+        }
+      }
+    }
+
+    public LinePatternElement CutLinePattern
+    {
+      get
+      {
+        if (Value is DB.Category category)
+        {
+          if (category.GetGraphicsStyle(DB.GraphicsStyleType.Cut) is DB.GraphicsStyle style)
+            return LinePatternElement.FromElementId(style.Document, category.GetLinePatternId(DB.GraphicsStyleType.Cut));
+        }
+
+        return default;
+      }
+      set
+      {
+        if (value is object && Value is DB.Category category)
+        {
+          if (category.GetGraphicsStyle(DB.GraphicsStyleType.Cut) is DB.GraphicsStyle style)
+          {
+            if (category.GetLinePatternId(DB.GraphicsStyleType.Cut) != value.Id)
+              category.SetLinePatternId(value.Id, DB.GraphicsStyleType.Cut);
+          }
+        }
+      }
+    }
   }
 
   public class GraphicsStyle : Element
