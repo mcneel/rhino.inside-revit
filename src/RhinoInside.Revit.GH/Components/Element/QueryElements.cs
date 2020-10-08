@@ -51,8 +51,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetData("Filter", ref filter))
         return;
 
-      int limit;
-      if (!DA.TryGetData(Params.Input, "Limit", out limit))
+      if (!DA.TryGetData(Params.Input, "Limit", out int? limit))
         limit = int.MaxValue;
 
       using (var collector = new DB.FilteredElementCollector(doc))
@@ -69,7 +68,7 @@ namespace RhinoInside.Revit.GH.Components
           DA.SetDataList
           (
             _Elements_,
-            elementCollector.Take(limit).Convert(Types.Element.FromElement)
+            elementCollector.Take(limit.Value).Convert(Types.Element.FromElement)
           );
         }
 

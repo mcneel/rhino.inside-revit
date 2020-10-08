@@ -237,7 +237,7 @@ namespace Grasshopper.Kernel.Extensions
       return -1;
     }
 
-    public static bool TryGetData<T>(this IGH_DataAccess DA, IList<IGH_Param> parameters, string name, out T value)
+    public static bool TryGetData<T>(this IGH_DataAccess DA, IList<IGH_Param> parameters, string name, out T? value) where T : struct
     {
       value = default;
 
@@ -245,7 +245,23 @@ namespace Grasshopper.Kernel.Extensions
       return param?.DataType > GH_ParamData.@void && DA.GetData(index, ref value);
     }
 
-    public static bool TryGetDataList<T>(this IGH_DataAccess DA, IList<IGH_Param> parameters, string name, out List<T> list)
+    public static bool TryGetData<T>(this IGH_DataAccess DA, IList<IGH_Param> parameters, string name, out T value) where T : class
+    {
+      value = default;
+
+      var index = parameters.IndexOf(name, out var param);
+      return param?.DataType > GH_ParamData.@void && DA.GetData(index, ref value);
+    }
+
+    public static bool TryGetDataList<T>(this IGH_DataAccess DA, IList<IGH_Param> parameters, string name, out List<T?> list) where T : struct
+    {
+      list = new List<T?>();
+
+      var index = parameters.IndexOf(name, out var param);
+      return param?.DataType > GH_ParamData.@void && DA.GetDataList(index, list);
+    }
+
+    public static bool TryGetDataList<T>(this IGH_DataAccess DA, IList<IGH_Param> parameters, string name, out List<T> list) where T : class
     {
       list = new List<T>();
 

@@ -69,19 +69,19 @@ namespace RhinoInside.Revit.GH.Components
         return;
 
       bool update = false;
-      update |= DA.TryGetData(Params.Input, "Use Render Appearance", out bool appearance);
-      update |= DA.TryGetData(Params.Input, "Color", out System.Drawing.Color color);
-      update |= DA.TryGetData(Params.Input, "Smoothness", out double smootness);
+      update |= DA.TryGetData(Params.Input, "Use Render Appearance", out bool? appearance);
+      update |= DA.TryGetData(Params.Input, "Color", out System.Drawing.Color? color);
+      update |= DA.TryGetData(Params.Input, "Smoothness", out double? smootness);
 
       update |= DA.TryGetData(Params.Input, "Surface Foreground Pattern", out Types.FillPatternElement sfp);
-      update |= DA.TryGetData(Params.Input, "Surface Foreground Color", out System.Drawing.Color sfc);
+      update |= DA.TryGetData(Params.Input, "Surface Foreground Color", out System.Drawing.Color? sfc);
       update |= DA.TryGetData(Params.Input, "Surface Background Pattern", out Types.FillPatternElement sbp);
-      update |= DA.TryGetData(Params.Input, "Surface Background Color", out System.Drawing.Color sbc);
+      update |= DA.TryGetData(Params.Input, "Surface Background Color", out System.Drawing.Color? sbc);
 
       update |= DA.TryGetData(Params.Input, "Cut Foreground Pattern", out Types.FillPatternElement cfp);
-      update |= DA.TryGetData(Params.Input, "Cut Foreground Color", out System.Drawing.Color cfc);
+      update |= DA.TryGetData(Params.Input, "Cut Foreground Color", out System.Drawing.Color? cfc);
       update |= DA.TryGetData(Params.Input, "Cut Background Pattern", out Types.FillPatternElement cbp);
-      update |= DA.TryGetData(Params.Input, "Cut Background Color", out System.Drawing.Color cbc);
+      update |= DA.TryGetData(Params.Input, "Cut Background Color", out System.Drawing.Color? cbc);
 
       if (update)
       {
