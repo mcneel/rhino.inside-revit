@@ -51,34 +51,59 @@ namespace RhinoInside.Revit.GH.Types
 
     public System.Drawing.Color? Color
     {
-      get
-      {
-        if (Value is DB.Material material)
-        {
-          var color = material.Color.ToColor();
-          return System.Drawing.Color.FromArgb(material.Transparency * 255 / 100, color);
-        }
-
-        return default;
-      }
+      get => Value?.Color.ToColor();
       set
       {
-        if (value is object && Color != value)
+        if (value is object && Value is DB.Material material)
         {
-          var color = value.Value.ToColor();
-          Value.Color = color;
-          Value.Transparency = value.Value.A * 100 / 255;
+          var materialColor = material.Color;
+          var valueColor = value.Value;
+
+          if (materialColor.Red != valueColor.R || materialColor.Green != valueColor.G || materialColor.Blue != valueColor.B)
+            material.Color = valueColor.ToColor();
         }
       }
     }
+
+    public double? Transparency
+    {
+      get => Value?.Transparency / 100.0;
+      set
+      {
+        if (value is object && Value is DB.Material material)
+        {
+          var intValue = (int) Math.Round(value.Value * 100.0);
+          if (material.Transparency != intValue)
+            material.Transparency = intValue;
+        }
+      }
+    }
+
+    public double? Shininess
+    {
+      get => Value?.Shininess / 128.0;
+      set
+      {
+        if (value is object && Value is DB.Material material)
+        {
+          var intValue = (int) Math.Round(value.Value * 128.0);
+          if (material.Shininess != intValue)
+            material.Shininess = intValue;
+        }
+      }
+    }    
 
     public double? Smoothness
     {
       get => Value?.Smoothness / 100.0;
       set
       {
-        if (value is object && Value is DB.Material material && material.Smoothness / 100.0 != value.Value)
-          material.Smoothness = (int) Math.Round(value.Value * 100.0);
+        if (value is object && Value is DB.Material material)
+        {
+          var intValue = (int) Math.Round(value.Value * 100.0);
+          if (material.Smoothness != intValue)
+            material.Smoothness = intValue;
+        }
       }
     }
 
