@@ -7,18 +7,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
 {
   public static class BuiltInCategoryExtension
   {
-    /// <summary>
-    /// Set of valid BuiltInCategory enum values
-    /// </summary>
 #if REVIT_2020
-    public static readonly SortedSet<BuiltInCategory> BuiltInCategories =
+    private static readonly SortedSet<BuiltInCategory> builtInCategories =
       new SortedSet<BuiltInCategory>
       (
         Enum.GetValues(typeof(BuiltInCategory)).
         Cast<BuiltInCategory>().Where(x => Category.IsBuiltInCategoryValid(x))
       );
 #else
-    static readonly BuiltInCategory[] ValidBuiltInCategories =
+    static readonly BuiltInCategory[] validBuiltInCategories =
     {
       BuiltInCategory.OST_PointClouds,
       BuiltInCategory.OST_AssemblyOrigin_Lines,
@@ -951,19 +948,24 @@ namespace RhinoInside.Revit.External.DB.Extensions
       BuiltInCategory.OST_IOSRegenerationFailure,
     };
 
-    public static readonly SortedSet<BuiltInCategory> BuiltInCategories =
-      new SortedSet<BuiltInCategory>(ValidBuiltInCategories);
+    public static readonly SortedSet<BuiltInCategory> builtInCategories =
+      new SortedSet<BuiltInCategory>(validBuiltInCategories);
 #endif
 
     /// <summary>
-    /// Checks if a BuiltInCategory is valid
+    /// Set of valid <see cref="Autodesk.Revit.DB.BuiltInCategory"/> enum values.
     /// </summary>
-    /// <param name="category"></param>
+    public static IReadOnlyCollection<BuiltInCategory> BuiltInCategories => builtInCategories;
+
+    /// <summary>
+    /// Checks if a <see cref="Autodesk.Revit.DB.BuiltInCategory"/> is valid.
+    /// </summary>
+    /// <param name="value"></param>
     /// <returns></returns>
-    public static bool IsValid(this BuiltInCategory category)
+    public static bool IsValid(this BuiltInCategory value)
     {
-      if (-3000000 < (int) category && (int) category < -2000000)
-        return BuiltInCategories.Contains(category);
+      if (-3000000 < (int) value && (int) value < -2000000)
+        return builtInCategories.Contains(value);
 
       return false;
     }
