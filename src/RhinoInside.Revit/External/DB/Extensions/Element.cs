@@ -78,34 +78,36 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static T[] GetDependents<T>(this Element element) where T : Element
     {
+      var doc = element.Document;
       if (typeof(T) == typeof(Element))
       {
         var ids = element.GetDependentElements(default);
-        return ids.Select(x => element.Document.GetElement(x)).Where(x => element.Id != element.Id).OfType<T>().ToArray();
+        return ids.Where(x => x != element.Id).Select(x => doc.GetElement(x)).ToArray() as T[];
       }
       else
       {
         using (var filter = CreateElementClassFilter(typeof(T)))
         {
           var ids = element.GetDependentElements(filter);
-          return ids.Select(x => element.Document.GetElement(x)).Where(x => element.Id != element.Id).OfType<T>().ToArray();
+          return ids.Where(x => x != element.Id).Select(x => doc.GetElement(x)).OfType<T>().ToArray();
         }
       }
     }
 
     public static T GetFirstDependent<T>(this Element element) where T : Element
     {
+      var doc = element.Document;
       if (typeof(T) == typeof(Element))
       {
         var ids = element.GetDependentElements(default);
-        return ids.Select(x => element.Document.GetElement(x)).Where(x => element.Id != element.Id).OfType<T>().FirstOrDefault() as T;
+        return ids.Where(x => x != element.Id).Select(x => doc.GetElement(x)).FirstOrDefault() as T;
       }
       else
       {
         using (var filter = CreateElementClassFilter(typeof(T)))
         {
           var ids = element.GetDependentElements(filter);
-          return ids.Select(x => element.Document.GetElement(x)).Where(x => element.Id != element.Id).OfType<T>().FirstOrDefault() as T;
+          return ids.Where(x => x != element.Id).Select(x => doc.GetElement(x)).OfType<T>().FirstOrDefault();
         }
       }
     }
