@@ -60,13 +60,13 @@ namespace RhinoInside.Revit.GH.Types
       var parameterId = DB.ElementId.InvalidElementId;
       switch (source)
       {
+        case int integer:            parameterId = new DB.ElementId(integer); break;
+        case DB.ElementId id:        parameterId = id; break;
         case DB.ParameterElement     parameterElement: SetValue(parameterElement.Document, parameterElement.Id); return true;
         case DB.Parameter            parameter:        SetValue(parameter.Element.Document, parameter.Id); return true;
-        case DB.ElementId id:        parameterId = id; break;
-        case int integer:            parameterId = new DB.ElementId(integer); break;
       }
 
-      if (parameterId.IsParameterId(Revit.ActiveDBDocument))
+      if (parameterId.TryGetBuiltInParameter(out var _))
       {
         SetValue(Revit.ActiveDBDocument, parameterId);
         return true;
