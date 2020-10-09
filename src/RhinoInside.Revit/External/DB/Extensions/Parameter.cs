@@ -7,20 +7,36 @@ namespace RhinoInside.Revit.External.DB.Extensions
 {
   public static class BuiltInParameterExtension
   {
+    private static readonly SortedSet<BuiltInParameter> builtInParameters =
+      new SortedSet<BuiltInParameter>
+      (
+        Enum.GetValues(typeof(BuiltInParameter)).
+        Cast<BuiltInParameter>().Where( x => x != BuiltInParameter.INVALID)
+      );
+
     /// <summary>
-    /// Checks if a BuiltInParameter is valid
+    /// Set of valid <see cref="Autodesk.Revit.DB.BuiltInParameter"/> enum values.
     /// </summary>
-    /// <param name="parameter"></param>
+    public static IReadOnlyCollection<BuiltInParameter> BuiltInParameters => builtInParameters;
+
+    /// <summary>
+    /// Checks if a <see cref="Autodesk.Revit.DB.BuiltInParameter"/> is valid.
+    /// </summary>
+    /// <param name="value"></param>
     /// <returns></returns>
-    public static bool IsValid(this BuiltInParameter parameter)
+    public static bool IsValid(this BuiltInParameter value)
     {
-      if (-2000000 < (int) parameter && (int) parameter < -1000000)
-        return Enum.IsDefined(typeof(BuiltInParameter), parameter);
+      if (-2000000 < (int) value && (int) value < -1000000)
+        return builtInParameters.Contains(value);
 
       return false;
     }
 
-    internal static readonly IDictionary<string, BuiltInParameter[]> BuiltInParameterMap =
+    /// <summary>
+    /// Internal Dictionary that maps <see cref="BuiltInParameter"/> by name.
+    /// Results are implicitly orderd by value in the <see cref="BuiltInParameter"/> enum.
+    /// </summary>
+    internal static readonly IReadOnlyDictionary<string, BuiltInParameter[]> BuiltInParameterMap =
       Enum.GetValues(typeof(BuiltInParameter)).
       Cast<BuiltInParameter>().
       Where
@@ -34,6 +50,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
       GroupBy(x => LabelUtils.GetLabelFor(x)).
       ToDictionary(x => x.Key, x=> x.ToArray());
 
+    /// <summary>
+    /// <see cref="Autodesk.Revit.DB.BuiltInParameter"/> has duplicate values.
+    /// This method returns the string representatiopn of the most generic form.
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
     public static string ToStringGeneric(this BuiltInParameter value)
     {
       switch (value)
