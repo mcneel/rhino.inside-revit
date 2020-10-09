@@ -39,23 +39,6 @@ namespace RhinoInside.Revit.GH.Types
     public static implicit operator DB.ElementId(ElementId self) { return self.Id; }
     #endregion
 
-    public static ElementId FromElementId(DB.Document doc, DB.ElementId id)
-    {
-      if (id == DB.ElementId.InvalidElementId)
-        return null;
-
-      if (Category.FromElementId(doc, id) is Category c)
-        return c;
-
-      if (ParameterKey.FromElementId(doc, id) is ParameterKey p)
-        return p;
-
-      if (Element.FromElementId(doc, id) is Element e)
-        return e;
-
-      return null;
-    }
-
     public void SetValue(DB.Document doc, DB.ElementId id)
     {
       Document = doc;

@@ -251,7 +251,7 @@ namespace RhinoInside.Revit.GH.Types
           if (typeof(Q).IsSubclassOf(typeof(ElementId)))
           {
             target = Value.Element is null ? (Q) (object) null :
-                     (Q) (object) ElementId.FromElementId(Value.Element.Document, Value.AsElementId());
+                     (Q) (object) Element.FromElementId(Value.Element.Document, Value.AsElementId());
             return true;
           }
           break;
@@ -319,7 +319,7 @@ namespace RhinoInside.Revit.GH.Types
                   return Value.AsElementId().IntegerValue.ToString();
               }
 
-              if (ElementId.FromElementId(Value.Element.Document, Value.AsElementId()) is ElementId goo)
+              if (Element.FromElementId(Value.Element.Document, Value.AsElementId()) is ElementId goo)
                 return goo.ToString();
 
               value = string.Empty;

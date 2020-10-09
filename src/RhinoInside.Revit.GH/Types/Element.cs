@@ -76,23 +76,14 @@ namespace RhinoInside.Revit.GH.Types
       if (element is null)
         return null;
 
-      if (element.GetType() == typeof(DB.Element))
+      for (var type = element.GetType(); type != typeof(DB.Element); type = type.BaseType)
       {
-        try
-        {
-          if (DB.Category.GetCategory(element.Document, element.Id) is DB.Category category)
-            return new Category(category);
-        }
-        catch (Autodesk.Revit.Exceptions.InternalException) { }
+        if (ActivatorDictionary.TryGetValue(type, out var activator))
+          return activator(element);
       }
-      else
-      {
-        for (var type = element.GetType(); type != typeof(DB.Element); type = type.BaseType)
-        {
-          if (ActivatorDictionary.TryGetValue(type, out var activator))
-            return activator(element);
-        }
-      }
+
+      if (DocumentExtension.AsCategory(element) is DB.Category category)
+        return new Category(category);
 
       if (GraphicalElement.IsValidElement(element))
       {
@@ -104,20 +95,30 @@ namespace RhinoInside.Revit.GH.Types
           return new InstanceElement(element);
         }
 
-        return GeometricElement.IsValidElement(element) ?
-          new GeometricElement(element) :
-          new GraphicalElement(element);
+        if (GeometricElement.IsValidElement(element))
+          return new GeometricElement(element);
+
+        return new GraphicalElement(element);
       }
 
       return new Element(element);
     }
 
-    new public static Element FromElementId(DB.Document doc, DB.ElementId Id)
+    public static Element FromElementId(DB.Document doc, DB.ElementId id)
     {
-      if (doc?.GetElement(Id ?? DB.ElementId.InvalidElementId) is DB.Element value)
-        return FromElement(value);
+      if (doc is null || !id.IsValid())
+        return null;
 
-      return null;
+      if (Category.FromElementId(doc, id) is Category c)
+        return c;
+
+      if (ParameterKey.FromElementId(doc, id) is ParameterKey p)
+        return p;
+
+      if (LinePatternElement.FromElementId(doc, id) is LinePatternElement l)
+        return l;
+
+      return FromElement(doc.GetElement(id));
     }
 
     public static Element FromReference(DB.Document doc, DB.Reference reference)
@@ -288,12 +289,12 @@ namespace RhinoInside.Revit.GH.Types
 
     public Category Category
     {
-      get => Types.Category.FromValue(Value?.Category);
+      get => Category.FromCategory(Value?.Category);
     }
 
     public virtual ElementType Type
     {
-      get => Types.ElementType.FromElementId(Document, Value?.GetTypeId()) as ElementType;
+      get => ElementType.FromElementId(Document, Value?.GetTypeId()) as ElementType;
       set
       {
         if (value is object)
