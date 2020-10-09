@@ -22,8 +22,16 @@ namespace RhinoInside.Revit.External.DB.Extensions
       // Check if is not a BuiltIn Category
       if (id.IntegerValue > ElementId.InvalidElementId.IntegerValue)
       {
+        // 1. We try with the regular way calling Category.GetCategory
         try { return Category.GetCategory(doc, id) is object; }
-        catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
+        catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
+
+        // 2. Try looking for any GraphicsStyle that points to the Category we are looking for.
+        if (doc.GetElement(id) is Element element && element.GetType() == typeof(Element))
+        {
+          if (element.GetFirstDependent<GraphicsStyle>() is GraphicsStyle style)
+            return style.GraphicsStyleCategory.Id == id;
+        }
       }
 
       return ((BuiltInCategory) id.IntegerValue).IsValid();
