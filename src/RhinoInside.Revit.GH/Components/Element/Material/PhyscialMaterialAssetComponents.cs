@@ -85,12 +85,14 @@ namespace RhinoInside.Revit.GH.Components
       return outputs.ToArray();
     }
 
+    // determines matching assets based on any builtin properties
+    // that are marked exclusive
     protected bool MatchesPhysicalAssetType(DB.PropertySetElement psetElement)
     {
       foreach (var assetPropInfo in _assetData.GetAssetProperties())
         foreach (var builtInPropInfo in
           _assetData.GetAPIAssetBuiltInPropertyInfos(assetPropInfo))
-          if (!builtInPropInfo.Generic
+          if (builtInPropInfo.Exclusive
                 && psetElement.get_Parameter(builtInPropInfo.ParamId) is null)
             return false;
       return true;
