@@ -634,13 +634,18 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     [AssetGHParameter(typeof(Param_String), "Description", "D", "Physical asset description")]
     public string Description { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE, typeof(string))]
-    [AssetGHParameter(typeof(Param_String), "Source", "S", "Physical asset source")]
-    public string Source { get; set; }
+    // Note: Keywords are not exposed by the API for the structural asset
+    //[APIAssetBuiltInProp(BuiltInParameter.PROPERTY_SET_KEYWORDS, typeof(string))]
+    //[AssetGHParameter(typeof(Param_String), "Keywords", "K", "")]
+    //public string Keywords { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE_URL, typeof(string))]
-    [AssetGHParameter(typeof(Param_String), "Source URL", "SU", "Physical asset source url")]
-    public string SourceURL { get; set; }
+    //[APIAssetBuiltInProp(BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE, typeof(string))]
+    //[AssetGHParameter(typeof(Param_String), "Source", "S", "Physical asset source")]
+    //public string Source { get; set; }
+
+    //[APIAssetBuiltInProp(BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE_URL, typeof(string))]
+    //[AssetGHParameter(typeof(Param_String), "Source URL", "SU", "Physical asset source url")]
+    //public string SourceURL { get; set; }
 
     // behaviour
     [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_BEHAVIOR, typeof(DB.StructuralBehavior))]
@@ -812,13 +817,13 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     //[AssetGHParameter(typeof(Param_String), "Keywords", "K", "")]
     //public string Keywords { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE, typeof(string))]
-    [AssetGHParameter(typeof(Param_String), "Source", "S", "Thermal asset source")]
-    public string Source { get; set; }
+    //[APIAssetBuiltInProp(BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE, typeof(string))]
+    //[AssetGHParameter(typeof(Param_String), "Source", "S", "Thermal asset source")]
+    //public string Source { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE_URL, typeof(string))]
-    [AssetGHParameter(typeof(Param_String), "Source URL", "SU", "Thermal asset source url")]
-    public string SourceURL { get; set; }
+    //[APIAssetBuiltInProp(BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE_URL, typeof(string))]
+    //[AssetGHParameter(typeof(Param_String), "Source URL", "SU", "Thermal asset source url")]
+    //public string SourceURL { get; set; }
 
     // behaviour
     [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_BEHAVIOR, typeof(DB.StructuralBehavior))]
