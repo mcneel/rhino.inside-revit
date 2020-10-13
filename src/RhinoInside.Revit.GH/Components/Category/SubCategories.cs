@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components
     (
       name: "Category SubCategories",
       nickname: "SubCats",
-      description: "Returns a list of all the subcategories of Category",
+      description: "Returns a list containing the subcategories of Category",
       category: "Revit",
       subCategory: "Category"
     )
@@ -34,28 +34,16 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DB.Category parent = null;
-      if (!DA.GetData("Category", ref parent))
+      var category = default(DB.Category);
+      if (!DA.GetData("Category", ref category))
         return;
 
-      if (parent.Parent is object)
+      if (category.Document() is DB.Document doc)
       {
-        DA.SetDataList("SubCategories", null);
-      }
-      else
-      {
-        using (var subCategories = parent.SubCategories)
+        using (var subCategories = category.SubCategories)
         {
-          var doc = parent.Document();
-          var SubCategories = new HashSet<int>(subCategories.Cast<DB.Category>().Select(x => x.Id.IntegerValue));  
-
-          if (parent.Id.IntegerValue == (int) DB.BuiltInCategory.OST_Stairs)
-            SubCategories.Add((int) DB.BuiltInCategory.OST_StairsStringerCarriage);
-
-          if (parent.Id.IntegerValue == (int) DB.BuiltInCategory.OST_Walls)
-            SubCategories.Add((int) DB.BuiltInCategory.OST_StackedWalls);
-
-          DA.SetDataList("SubCategories", SubCategories.Select(x => new Types.Category(doc, new DB.ElementId(x))));
+          var list = subCategories.Cast<DB.Category>();
+          DA.SetDataList("SubCategories", list.Select(x => new Types.Category(doc, x.Id)));
         }
       }
     }
