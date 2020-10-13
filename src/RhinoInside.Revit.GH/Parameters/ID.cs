@@ -222,38 +222,39 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public virtual void Menu_AppendActions(ToolStripDropDown menu)
     {
-      var doc = Revit.ActiveUIDocument?.Document;
-
-      if (Kind == GH_ParamKind.output && Attributes.GetTopLevel.DocObject is Components.ReconstructElementComponent)
+      if (Revit.ActiveUIDocument?.Document is DB.Document doc)
       {
-        var pinned = ToElementIds(VolatileData).
-                     Where(x => x.Document.Equals(doc)).
-                     Select(x => x.Document.GetElement(x.Id)).
-                     Where(x => x?.Pinned == true).Any();
+        if (Kind == GH_ParamKind.output && Attributes.GetTopLevel.DocObject is Components.ReconstructElementComponent)
+        {
+          var pinned = ToElementIds(VolatileData).
+                       Where(x => doc.Equals(x.Document)).
+                       Select(x => doc.GetElement(x.Id)).
+                       Where(x => x?.Pinned == true).Any();
 
-        if (pinned)
-          Menu_AppendItem(menu, $"Unpin {GH_Convert.ToPlural(TypeName)}", Menu_UnpinElements, DataType != GH_ParamData.remote, false);
+          if (pinned)
+            Menu_AppendItem(menu, $"Unpin {GH_Convert.ToPlural(TypeName)}", Menu_UnpinElements, DataType != GH_ParamData.remote, false);
 
-        var unpinned = ToElementIds(VolatileData).
-                     Where(x => x.Document.Equals(doc)).
-                     Select(x => x.Document.GetElement(x.Id)).
-                     Where(x => x?.Pinned == false).Any();
+          var unpinned = ToElementIds(VolatileData).
+                       Where(x => doc.Equals(x.Document)).
+                       Select(x => doc.GetElement(x.Id)).
+                       Where(x => x?.Pinned == false).Any();
 
-        if (unpinned)
-          Menu_AppendItem(menu, $"Pin {GH_Convert.ToPlural(TypeName)}", Menu_PinElements, DataType != GH_ParamData.remote, false);
+          if (unpinned)
+            Menu_AppendItem(menu, $"Pin {GH_Convert.ToPlural(TypeName)}", Menu_PinElements, DataType != GH_ParamData.remote, false);
+        }
+
+        bool delete = ToElementIds(VolatileData).Where(x => doc.Equals(x.Document)).Any();
+
+        Menu_AppendItem(menu, $"Delete {GH_Convert.ToPlural(TypeName)}", Menu_DeleteElements, delete, false);
       }
-
-      bool delete = ToElementIds(VolatileData).Where(x => x.Document.Equals(doc)).Any();
-
-      Menu_AppendItem(menu, $"Delete {GH_Convert.ToPlural(TypeName)}", Menu_DeleteElements, delete, false);
     }
 
     void Menu_PinElements(object sender, EventArgs args)
     {
-      var doc = Revit.ActiveUIDocument?.Document;
+      var doc = Revit.ActiveUIDocument.Document;
       var elements = ToElementIds(VolatileData).
-                       Where(x => x.Document.Equals(doc)).
-                       Select(x => x.Document.GetElement(x.Id)).
+                       Where(x => doc.Equals(x.Document)).
+                       Select(x => doc.GetElement(x.Id)).
                        Where(x => x.Pinned == false);
 
       if (elements.Any())
@@ -279,10 +280,10 @@ namespace RhinoInside.Revit.GH.Parameters
 
     void Menu_UnpinElements(object sender, EventArgs args)
     {
-      var doc = Revit.ActiveUIDocument?.Document;
+      var doc = Revit.ActiveUIDocument.Document;
       var elements = ToElementIds(VolatileData).
-                       Where(x => x.Document.Equals(doc)).
-                       Select(x => x.Document.GetElement(x.Id)).
+                       Where(x => doc.Equals(x.Document)).
+                       Select(x => doc.GetElement(x.Id)).
                        Where(x => x.Pinned == true);
 
       if (elements.Any())
@@ -308,9 +309,9 @@ namespace RhinoInside.Revit.GH.Parameters
 
     void Menu_DeleteElements(object sender, EventArgs args)
     {
-      var doc = Revit.ActiveUIDocument?.Document;
+      var doc = Revit.ActiveUIDocument.Document;
       var elementIds = ToElementIds(VolatileData).
-                       Where(x => x.Document.Equals(doc)).
+                       Where(x => doc.Equals(x.Document)).
                        Select(x => x.Id);
 
       if (elementIds.Any())
