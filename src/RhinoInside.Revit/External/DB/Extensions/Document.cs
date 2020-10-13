@@ -97,29 +97,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
       {
         if (EpisodeId == Guid.Empty)
         {
-          if (((BuiltInCategory) id).IsValid())
+          if(((BuiltInCategory) id).IsValid())
             categoryId = new ElementId((BuiltInCategory) id);
         }
         else
         {
-          if (doc.GetElement(uniqueId) is Element category)
-          {
-            try { categoryId = Category.GetCategory(doc, category.Id)?.Id; }
-            catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
-
-            if (!categoryId.IsValid())
-            {
-              var dependents = category.GetDependentElements(new ElementClassFilter(typeof(GraphicsStyle)));
-              if (dependents.FirstOrDefault() is ElementId styleId)
-              {
-                categoryId = category.Document.GetElement<GraphicsStyle>(styleId)?.
-                  GraphicsStyleCategory.Id;
-
-                if (category.Id != categoryId)
-                  categoryId = default;
-              }
-            }
-          }
+          if (AsCategory(doc?.GetElement(uniqueId)) is Category category)
+            categoryId = category.Id;
         }
       }
 
@@ -139,7 +123,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         }
         else
         {
-          if (doc.GetElement(uniqueId) is ParameterElement parameter)
+          if (doc?.GetElement(uniqueId) is ParameterElement parameter)
             parameterId = parameter.Id;
         }
       }
@@ -155,12 +139,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
       {
         if (EpisodeId == Guid.Empty)
         {
-          if (id == -3000010)
+          if (((BuiltInLinePattern) id).IsValid())
             patternId = new ElementId(id);
         }
         else
         {
-          if (doc.GetElement(uniqueId) is LinePatternElement pattern)
+          if (doc?.GetElement(uniqueId) is LinePatternElement pattern)
             patternId = pattern.Id;
         }
       }
@@ -172,12 +156,29 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       elementId = default;
 
-      try
+      if (UniqueId.TryParse(uniqueId, out var EpisodeId, out var id))
       {
-        if (Reference.ParseFromStableRepresentation(doc, uniqueId) is Reference reference)
-          elementId = reference.ElementId;
+        if (EpisodeId == Guid.Empty)
+        {
+          if (((BuiltInCategory) id).IsValid())
+            elementId = new ElementId((BuiltInCategory) id);
+
+          else if (((BuiltInParameter) id).IsValid())
+            elementId = new ElementId((BuiltInParameter) id);
+
+          else if (((BuiltInLinePattern) id).IsValid())
+            elementId = new ElementId(id);
+        }
+        else
+        {
+          try
+          {
+            if (Reference.ParseFromStableRepresentation(doc, uniqueId) is Reference reference)
+              elementId = reference.ElementId;
+          }
+          catch (Autodesk.Revit.Exceptions.ArgumentException) { }
+        }
       }
-      catch (Autodesk.Revit.Exceptions.ArgumentException) { }
 
       return elementId is object;
     }
@@ -230,19 +231,40 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return null;
     }
 
-    public static Category GetCategory(this Document doc, string uniqueId)
+    /// <summary>
+    /// IEqualityComparer for <see cref="DB.Category"/> that assumes all categories are from the same <see cref="DB.Document"/>.
+    /// </summary>
+    struct CategoryEqualityComparer : IEqualityComparer<Category>
     {
-      if (doc is null || string.IsNullOrEmpty(uniqueId))
-        return null;
+      public bool Equals(Category x, Category y) => x.Id == y.Id;
+      public int GetHashCode(Category obj) => obj.Id.IntegerValue;
+    }
 
-      if (UniqueId.TryParse(uniqueId, out var EpisodeId, out var id))
+    /// <summary>
+    /// Query all <see cref="Autodesk.Revit.DB.Category"/> objects in <paramref name="doc"/>
+    /// that are sub categories of <paramref name="parentId"/> or
+    /// root categories if <paramref name="parentId"/> is <see cref="Autodesk.Revit.DB.ElementId.InvalidElementId"/>.
+    /// </summary>
+    /// <param name="doc"></param>
+    /// <param name="parent"></param>
+    /// <returns>An <see cref="ICollection{T}"/> of <see cref="Autodesk.Revit.DB.Category"/></returns>
+    /// <remarks>This method will return all categories and sub categories if <paramref name="parentId"/> is null.</remarks>
+    public static ICollection<Category> GetCategories(this Document doc, ElementId parentId = default)
+    {
+      using (var collector = new FilteredElementCollector(doc))
       {
-        return (EpisodeId == Guid.Empty) ?
-          GetCategory(doc, (BuiltInCategory) id) :
-          AsCategory(doc.GetElement(uniqueId));
-      }
+        var categories =
+        (
+          collector.OfClass(typeof(GraphicsStyle)).Cast<GraphicsStyle>().
+          Select(x => x.GraphicsStyleCategory).
+          Where(x => x.Name != string.Empty)
+        );
 
-      return null;
+        if (parentId is object)
+          categories = categories.Where(x => parentId == (x.Parent?.Id ?? ElementId.InvalidElementId));
+
+        return new HashSet<Category>(categories, new CategoryEqualityComparer());
+      }
     }
 
     public static Category GetCategory(this Document doc, BuiltInCategory categoryId)
@@ -258,25 +280,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
       catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
 
-      // 2. Try if there is any Element in doc that belongs to that Category.
+      // 2. Try looking for any GraphicsStyle that points to the Category we are looking for.
+      using (var collector = new FilteredElementCollector(doc).OfClass(typeof(GraphicsStyle)))
       {
-        using (var collector = new FilteredElementCollector(doc).OfCategory(categoryId))
+        foreach (var style in collector.Cast<GraphicsStyle>())
         {
-          if(collector.FirstElement() is Element element)
-            return element.Category;
-        }
-      }
-
-      // 3. Try looking for any GraphicsStyle that points to the Category we are looking for.
-      {
-        using (var collector = new FilteredElementCollector(doc).OfClass(typeof(GraphicsStyle)))
-        {
-          foreach (var style in collector.Cast<GraphicsStyle>())
-          {
-            var category = style.GraphicsStyleCategory;
-            if (category.Id.IntegerValue == (int) categoryId)
-              return style.GraphicsStyleCategory;
-          }
+          var category = style.GraphicsStyleCategory;
+          if (category.Id.IntegerValue == (int) categoryId)
+            return style.GraphicsStyleCategory;
         }
       }
 

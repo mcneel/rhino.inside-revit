@@ -119,5 +119,21 @@ namespace RhinoInside.Revit.External.DB.Extensions
       builtInParameter = BuiltInParameter.INVALID;
       return false;
     }
+
+    /// <summary>
+    /// Checks if id corresponds to a valid <see cref="RhinoInside.Revit.External.DB.BuiltInLinePattern"/> id.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="builtInPattern"></param>
+    /// <returns></returns>
+    public static bool TryGetBuiltInLinePattern(this ElementId id, out BuiltInLinePattern builtInPattern)
+    {
+      builtInPattern = (BuiltInLinePattern) id.IntegerValue;
+      if (builtInPattern.IsValid())
+        return true;
+
+      builtInPattern = BuiltInLinePattern.INVALID;
+      return false;
+    }
   }
 }
