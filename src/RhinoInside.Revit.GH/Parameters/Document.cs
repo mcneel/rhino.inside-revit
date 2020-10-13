@@ -128,8 +128,10 @@ namespace RhinoInside.Revit.GH.Parameters
       else
       {
         document = default;
-        DA.GetData(_Document_, ref document);
-        if (document?.IsValidObject != true)
+        if (!DA.GetData(_Document_, ref document) || document is null)
+          return false;
+
+        if (document.IsValidObject != true)
         {
           component.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Input parameter Document failed to collect data");
           return false;
