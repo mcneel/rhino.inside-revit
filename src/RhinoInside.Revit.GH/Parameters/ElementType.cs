@@ -377,7 +377,7 @@ namespace RhinoInside.Revit.GH.Parameters
               var c = new Types.Category();
               if (c.CastFrom(goo))
               {
-                foreach (var elementType in elementTypeCollector.OfCategoryId(c.Id).Cast<DB.ElementType>())
+                foreach (var elementType in elementTypeCollector.WhereCategoryIdEqualsTo(c.Id).Cast<DB.ElementType>())
                 {
                   var item = new GH_ValueListItem(elementType.GetFamilyName() + " : " + elementType.Name, elementType.Id.IntegerValue.ToString());
                   item.Selected = selectedItems.Contains(item.Expression);
