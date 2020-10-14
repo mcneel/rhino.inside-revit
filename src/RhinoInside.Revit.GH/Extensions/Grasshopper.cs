@@ -239,10 +239,20 @@ namespace Grasshopper.Kernel.Extensions
 
     public static bool TryGetData<T>(this IGH_DataAccess DA, IList<IGH_Param> parameters, string name, out T? value) where T : struct
     {
-      value = default;
-
       var index = parameters.IndexOf(name, out var param);
-      return param?.DataType > GH_ParamData.@void && DA.GetData(index, ref value);
+
+      if (param?.DataType > GH_ParamData.@void)
+      {
+        T valueT = default;
+        if (DA.GetData(index, ref valueT))
+        {
+          value = valueT;
+          return true;
+        }
+      }
+
+      value = default;
+      return false;
     }
 
     public static bool TryGetData<T>(this IGH_DataAccess DA, IList<IGH_Param> parameters, string name, out T value) where T : class
@@ -251,6 +261,17 @@ namespace Grasshopper.Kernel.Extensions
 
       var index = parameters.IndexOf(name, out var param);
       return param?.DataType > GH_ParamData.@void && DA.GetData(index, ref value);
+    }
+
+    public static bool TryGetData<T>(this IGH_DataAccess DA, IList<IGH_Param> parameters, string name, out T? value, out bool isVoid) where T : struct
+    {
+      value = default;
+
+      var index = parameters.IndexOf(name, out var param);
+      if (isVoid = !(param?.DataType > GH_ParamData.@void))
+        return false;
+
+      return DA.GetData(index, ref value);
     }
 
     public static bool TryGetDataList<T>(this IGH_DataAccess DA, IList<IGH_Param> parameters, string name, out List<T?> list) where T : struct
