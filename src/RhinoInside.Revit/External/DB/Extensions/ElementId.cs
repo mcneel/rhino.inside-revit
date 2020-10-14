@@ -63,15 +63,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns></returns>
     public static bool IsLinePatternId(this ElementId id, Document doc)
     {
-      // Check if is not a BuiltIn Parameter
+      // Check if is not a BuiltIn Line Pattern
       if (id.IntegerValue > ElementId.InvalidElementId.IntegerValue)
       {
         try { return doc.GetElement(id) is LinePatternElement; }
         catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
       }
 
-      // Solid line pattern.
-      return id.IntegerValue == -3000010;
+      return ((BuiltInLinePattern) id.IntegerValue).IsValid();
     }
 
     /// <summary>

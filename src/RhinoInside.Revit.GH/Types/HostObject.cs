@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeDescription => "Represents a Revit host element";
     protected override Type ScriptVariableType => typeof(DB.HostObject);
     public static explicit operator DB.HostObject(HostObject value) => value?.Value;
-    public new DB.HostObject Value => value as DB.HostObject;
+    public new DB.HostObject Value => base.Value as DB.HostObject;
 
     public HostObject() { }
     public HostObject(DB.HostObject host) : base(host) { }

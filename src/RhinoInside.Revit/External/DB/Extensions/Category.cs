@@ -974,7 +974,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
   public static class CategoryExtension
   {
     /// <summary>
-    /// Check if category is in the Document or in its parent CategoryNameMap
+    /// Check if <paramref name="category"/> is in the Document or in its parent CategoryNameMap
     /// </summary>
     /// <param name="category"></param>
     /// <returns>true in case is not found</returns>
@@ -1006,7 +1006,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns></returns>
     public static string FullName(this Category category)
     {
-      return category.Parent is null ? category.Name : $"{category.Parent.Name}:{category.Name}";
+      return category.Parent is null ? category.Name : $"{category.Parent.Name}\\{category.Name}";
     }
   }
 }

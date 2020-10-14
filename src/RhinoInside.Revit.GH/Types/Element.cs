@@ -5,6 +5,7 @@ using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Display;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
@@ -23,14 +24,13 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ScriptVariableType => typeof(DB.Element);
     public static explicit operator DB.Element(Element value) => value?.Value;
 
-    protected override object value => IsValid ? Document.GetElement(Id) : default;
-    public new DB.Element Value => value as DB.Element;
+    public new DB.Element Value => base.Value as DB.Element;
 
     public static Element FromValue(object data)
     {
       switch (data)
       {
-        case DB.Category category: return Category.FromCategory(category);
+        case DB.Category category: return new Category(category);
         case DB.Element  element:  return Element.FromElement(element);
       }
 
@@ -156,23 +156,22 @@ namespace RhinoInside.Revit.GH.Types
 
     public Element() : base() { }
     internal Element(DB.Document doc, DB.ElementId id) : base(doc, id) { }
-    protected Element(DB.Element element)               : base(element.Document, element.Id) { }
+    protected Element(DB.Element element)              : base(element) { }
 
     public override bool CastFrom(object source)
     {
-      if (source is IGH_Goo goo)
-        source = goo.ScriptVariable();
-
-      var element = default(DB.Element);
-      switch (source)
+      if (source is IGH_ElementId goo)
       {
-        case DB.Element e:    element = e; break;
-        case DB.ElementId id: element = Revit.ActiveDBDocument.GetElement(id); break;
-        case int integer:     element = Revit.ActiveDBDocument.GetElement(new DB.ElementId(integer)); break;
-        default:              return false;
+        if (goo.Id == DB.ElementId.InvalidElementId)
+        {
+          SetValue(goo.Document, goo.Id);
+          return true;
+        }
+
+        source = goo.ScriptVariable();
       }
 
-      return SetValue(element);
+      return source is DB.Element element && SetValue(element);
     }
 
     public override bool CastTo<Q>(out Q target)
@@ -180,7 +179,7 @@ namespace RhinoInside.Revit.GH.Types
       if (base.CastTo<Q>(out target))
         return true;
 
-      var element = Value as DB.Element;
+      var element = Value;
       if (typeof(DB.Element).IsAssignableFrom(typeof(Q)))
       {
         if (element is null)
@@ -223,29 +222,19 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    new class Proxy : ElementId.Proxy
+    protected new class Proxy : ElementId.Proxy
     {
+      protected new Element owner => base.owner as Element;
+
       public Proxy(Element e) : base(e) { (this as IGH_GooProxy).UserString = FormatInstance(); }
 
-      public override bool IsParsable() => true;
-      public override string FormatInstance() => owner.IsValid ? $"{owner.Id.IntegerValue}:{element?.Name ?? string.Empty}" : "-1";
-      public override bool FromString(string str)
+      public override string FormatInstance()
       {
-        int index = str.IndexOf(':');
-        if(index >= 0)
-          str = str.Substring(0, index);
-
-        str = str.Trim();
-        if (int.TryParse(str, out int elementId))
-        {
-          owner.SetValue(owner.Document ?? Revit.ActiveUIDocument.Document, new DB.ElementId(elementId));
-          return true;
-        }
-
-        return false;
+        return owner.DisplayName;
       }
 
-      DB.Element element => owner.IsElementLoaded ? owner.Document?.GetElement(owner.Id) : null;
+      [System.ComponentModel.Description("A human readable name for the Element.")]
+      public string Name => owner.Name;
     }
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
@@ -254,8 +243,8 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is DB.Element element && !string.IsNullOrEmpty(element.Name))
-          return element.Name;
+        if (Name is string name && name != string.Empty)
+          return name;
 
         return base.DisplayName;
       }
@@ -267,6 +256,7 @@ namespace RhinoInside.Revit.GH.Types
         throw new System.ArgumentException("Invalid Document", paramName);
     }
 
+    #region Properties
     public bool? Pinned
     {
       get => Value?.Pinned;
@@ -277,12 +267,12 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public string Name
+    public virtual string Name
     {
       get => Value?.Name;
       set
       {
-        if(value is object && Value is DB.Element element && element.Name != value)
+        if (value is object && Value is DB.Element element && element.Name != value)
          element.Name = value;
       }
     }
@@ -305,6 +295,7 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
     }
+    #endregion
 
     #region Identity Data
     public string Description

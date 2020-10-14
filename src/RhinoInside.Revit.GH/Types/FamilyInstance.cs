@@ -64,7 +64,7 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeDescription => "Represents a Revit Component";
     protected override Type ScriptVariableType => typeof(DB.FamilyInstance);
     public static explicit operator DB.FamilyInstance(FamilyInstance value) => value?.Value;
-    public new DB.FamilyInstance Value => value as DB.FamilyInstance;
+    public new DB.FamilyInstance Value => base.Value as DB.FamilyInstance;
 
     public FamilyInstance() { }
     public FamilyInstance(DB.FamilyInstance value) : base(value) { }

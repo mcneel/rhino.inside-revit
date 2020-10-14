@@ -11,43 +11,48 @@ namespace RhinoInside.Revit.GH.Types
   {
     public override string TypeName => "Revit Category";
     public override string TypeDescription => "Represents a Revit category";
-    override public object ScriptVariable() => (DB.Category) this;
     protected override Type ScriptVariableType => typeof(DB.Category);
-
+    override public object ScriptVariable() => Value;
     public static explicit operator DB.Category(Category value) => value?.Value;
-    protected override object value => IsValid ? Document.GetCategory(Id) : default;
-    public new DB.Category Value => value as DB.Category;
 
     #region IGH_ElementId
+    DB.Category category = default;
+    public new DB.Category Value
+    {
+      get
+      {
+        if (category is null && IsReferencedElement && IsElementLoaded)
+          category = Document.GetCategory(Id);
+
+        return category;
+      }
+    }
+
+    protected override void ResetValue()
+    {
+      base.ResetValue();
+      category = default;
+    }
+
     public override bool LoadElement()
     {
-      if (Document is null)
+      if (IsReferencedElement && !IsElementLoaded)
       {
-        Id = null;
-        if (!Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var doc))
-        {
-          Document = null;
-          return false;
-        }
-
+        Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var doc);
         Document = doc;
-      }
-      else if (IsElementLoaded)
-        return true;
 
-      if (Document is object && Document.TryGetCategoryId(UniqueID, out var value))
-      {
-        Id = value;
-        return true;
+        Document.TryGetCategoryId(UniqueID, out var id);
+        Id = id;
       }
 
-      return false;
+      return IsElementLoaded;
     }
     #endregion
 
     public Category() : base() { }
     public Category(DB.Document doc, DB.ElementId id) : base(doc, id) { }
-    public Category(DB.Category category)             : base(category.Document(), category.Id) { }
+    public Category(DB.Category value) : base(value.Document(), value.Id) =>
+      category = value;
 
     public static Category FromCategory(DB.Category category)
     {
@@ -67,15 +72,24 @@ namespace RhinoInside.Revit.GH.Types
 
     public override sealed bool CastFrom(object source)
     {
-      if (source is IGH_Goo goo)
+      if (base.CastFrom(source))
+        return true;
+
+      var document = Revit.ActiveDBDocument;
+      var categoryId = DB.ElementId.InvalidElementId;
+
+      if (source is IGH_ElementId elementId)
+      {
+        document = elementId.Document;
+        source = elementId.Id;
+      }
+      else if (source is IGH_Goo goo)
         source = goo.ScriptVariable();
 
-      var categoryId = DB.ElementId.InvalidElementId;
       switch (source)
       {
         case int integer:         categoryId = new DB.ElementId(integer); break;
         case DB.ElementId id:     categoryId = id; break;
-        case DB.Category c:       SetValue(c.Document(), c.Id); return true;
         case DB.GraphicsStyle s:  SetValue(s.Document, s.GraphicsStyleCategory.Id); return true;
         case DB.Family f:         SetValue(f.Document, f.FamilyCategoryId); return true;
         case DB.Element element:
@@ -94,7 +108,7 @@ namespace RhinoInside.Revit.GH.Types
 
       if (categoryId.TryGetBuiltInCategory(out var _))
       {
-        SetValue(Revit.ActiveDBDocument, categoryId);
+        SetValue(document, categoryId);
         return true;
       }
 
@@ -105,66 +119,92 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (typeof(Q).IsAssignableFrom(typeof(DB.Category)))
       {
-        target = (Q) (object) null;
-        if (!IsValid)
-          return true;
-
-        var category = (DB.Category) this;
-        if (category is null)
-          return false;
-
-        target = (Q) (object) category;
+        target = (Q) (object) Value;
         return true;
       }
 
       return base.CastTo<Q>(out target);
     }
 
-    new class Proxy : ElementId.Proxy
+    new class Proxy : Element.Proxy
     {
+      protected new Category owner => base.owner as Category;
+
       public Proxy(Category c) : base(c) { (this as IGH_GooProxy).UserString = FormatInstance(); }
 
-      public override bool IsParsable() => true;
+      public override bool IsParsable() => !owner.IsReferencedElement || owner.Document is object;
       public override string FormatInstance()
       {
-        int value = owner.Id?.IntegerValue ?? -1;
-        if (Enum.IsDefined(typeof(DB.BuiltInCategory), value))
-          return ((DB.BuiltInCategory)value).ToString();
+        if (owner.IsReferencedElement && owner.IsElementLoaded)
+        {
+          return owner.DisplayName;
+          //if (owner.Id.TryGetBuiltInCategory(out var builtInCategory))
+          //  return builtInCategory.ToString();
+        }
 
-        return value.ToString();
+        return base.FormatInstance();
       }
       public override bool FromString(string str)
       {
-        if (Enum.TryParse(str, out DB.BuiltInCategory builtInCategory))
-        {
-          owner.SetValue(owner.Document ?? Revit.ActiveUIDocument.Document, new DB.ElementId(builtInCategory));
-          return true;
-        }
+        var doc = owner.Document ?? Revit.ActiveUIDocument.Document;
 
-        return false;
+        if (Enum.TryParse(str, out DB.BuiltInCategory builtInCategory))
+          owner.SetValue(doc, new DB.ElementId(builtInCategory));
+        else if (str == string.Empty)
+          owner.SetValue(default, new DB.ElementId(DB.BuiltInCategory.INVALID));
+        else if (doc is object)
+        {
+          foreach (var category in doc.GetCategories())
+          {
+            if (category.FullName() == str)
+            {
+              owner.SetValue(doc, category.Id);
+              break;
+            }
+          }
+        }
+        else
+          return false;
+
+        owner.UnloadElement();
+        return owner.LoadElement();
       }
 
-      DB.Category category => owner.IsElementLoaded ? owner.Document?.GetCategory(owner.Id) : null;
+      #region Misc
+      protected override bool IsValidId(DB.Document doc, DB.ElementId id) => id.IsCategoryId(doc);
 
-      [System.ComponentModel.Category("Other"), System.ComponentModel.Description("Parent category of this category.")]
+      public override Type ObjectType => IsBuiltIn ? typeof(DB.BuiltInCategory) : base.ObjectType;
+      #endregion
+
+      #region Category
+      const string Category = "Category";
+
+      DB.Category category => owner.Value;
+
+      [System.ComponentModel.Category(Category), System.ComponentModel.Description("Parent category of this category.")]
       public string Parent => category?.Parent?.Name;
-      [System.ComponentModel.Category("Other"), System.ComponentModel.Description("Category can have project parameters.")]
-      public bool AllowsParameters => category?.AllowsBoundParameters ?? false;
-      [System.ComponentModel.Category("Other"), System.ComponentModel.Description("Identifies if the category is associated with a type of tag for a different category.")]
-      public bool IsTag => category?.IsTagCategory ?? false;
 
-      [System.ComponentModel.Category("Material"), System.ComponentModel.Description("Material of the category.")]
+      [System.ComponentModel.Category(Category), System.ComponentModel.Description("Category can have project parameters.")]
+      public bool? AllowsParameters => category?.AllowsBoundParameters;
+
+      [System.ComponentModel.Category(Category), System.ComponentModel.Description("Identifies if the category is associated with a type of tag for a different category.")]
+      public bool? IsTag => category?.IsTagCategory;
+
+      [System.ComponentModel.Category(Category), System.ComponentModel.Description("Material of the category.")]
       public string Material => category?.Material?.Name;
-      [System.ComponentModel.Category("Material"), System.ComponentModel.Description("Identifies if elements of the category are able to report what materials they contain in what quantities.")]
-      public bool HasMaterialQuantities => category?.HasMaterialQuantities ?? false;
 
-      [System.ComponentModel.Category("Geometry"), System.ComponentModel.Description("Category type of this category.")]
-      public DB.CategoryType CategoryType => category?.CategoryType ?? DB.CategoryType.Invalid;
-      [System.ComponentModel.Category("Geometry"), System.ComponentModel.Description("Indicates if the category is cuttable or not.")]
-      public bool IsCuttable => category?.IsCuttable ?? false;
+      [System.ComponentModel.Category(Category), System.ComponentModel.Description("Identifies if elements of the category are able to report what materials they contain in what quantities.")]
+      public bool? HasMaterialQuantities => category?.HasMaterialQuantities;
 
-      [System.ComponentModel.Category("Display"), System.ComponentModel.Description("The color of lines shown for elements of this category.")]
+      [System.ComponentModel.Category(Category), System.ComponentModel.Description("Category type of this category.")]
+      public DB.CategoryType? CategoryType => category?.CategoryType;
+
+      [System.ComponentModel.Category(Category), System.ComponentModel.Description("Indicates if the category is cuttable or not.")]
+      public bool? IsCuttable => category?.IsCuttable;
+
+      [System.ComponentModel.Category(Category), System.ComponentModel.Description("The color of lines shown for elements of this category.")]
       public System.Drawing.Color LineColor => category?.LineColor.ToColor() ?? System.Drawing.Color.Empty;
+      #endregion
     }
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
@@ -173,24 +213,26 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var category = (DB.Category) this;
-        if (category is object)
-        {
-          var tip = string.Empty;
-          if (category.Parent is DB.Category parent)
-            tip = $"{parent.Name} : ";
+        if (Value is DB.Category category)
+          return category.FullName();
 
-          return $"{tip}{category.Name}";
-        }
-
-#if REVIT_2020
-        if (Id is object)
-        {
-          if (Id.TryGetBuiltInCategory(out var builtInCategory) == true)
-            return DB.LabelUtils.GetLabelFor(builtInCategory) ?? base.DisplayName;
-        }
-#endif
         return base.DisplayName;
+      }
+    }
+
+    #region Properties
+    public override string Name
+    {
+      get => Value?.Name;
+      set
+      {
+        if (value is object && Value is DB.Category category && category.Name != value)
+        {
+          if (Id.IsBuiltInId())
+            throw new InvalidOperationException($"BuiltIn category '{category.FullName()}' does not support assignment of a user-specified name.");
+
+          base.Name = value;
+        }
       }
     }
 
@@ -212,12 +254,12 @@ namespace RhinoInside.Revit.GH.Types
 
     public Material Material
     {
-      get => Material.FromElement(Value?.Material) as Material;
+      get => new Material(Value?.Material);
       set
       {
         if (value is object && Value is DB.Category category)
         {
-          if (category.Material.Id != value.Id)
+          if ((category.Material?.Id ?? DB.ElementId.InvalidElementId) != value.Id)
             category.Material = value.Value;
         }
       }
@@ -280,7 +322,7 @@ namespace RhinoInside.Revit.GH.Types
         if (Value is DB.Category category)
         {
           if (category.GetGraphicsStyle(DB.GraphicsStyleType.Projection) is DB.GraphicsStyle style)
-            return LinePatternElement.FromElementId(style.Document, category.GetLinePatternId(DB.GraphicsStyleType.Projection));
+            return new LinePatternElement(style.Document, category.GetLinePatternId(DB.GraphicsStyleType.Projection));
         }
 
         return default;
@@ -305,7 +347,7 @@ namespace RhinoInside.Revit.GH.Types
         if (Value is DB.Category category)
         {
           if (category.GetGraphicsStyle(DB.GraphicsStyleType.Cut) is DB.GraphicsStyle style)
-            return LinePatternElement.FromElementId(style.Document, category.GetLinePatternId(DB.GraphicsStyleType.Cut));
+            return new LinePatternElement(style.Document, category.GetLinePatternId(DB.GraphicsStyleType.Cut));
         }
 
         return default;
@@ -322,6 +364,7 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
     }
+    #endregion
   }
 
   public class GraphicsStyle : Element
