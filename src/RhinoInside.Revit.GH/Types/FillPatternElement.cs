@@ -13,6 +13,7 @@ namespace RhinoInside.Revit.GH.Types
       value?.IsValid == true ? value.Document.GetElement(value) as DB.FillPatternElement : default;
 
     public FillPatternElement() { }
+    public FillPatternElement(DB.Document doc, DB.ElementId id) : base(doc, id) { }
     public FillPatternElement(DB.FillPatternElement value) : base(value) { }
   }
 }
