@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using DB = Autodesk.Revit.DB;
+using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
@@ -45,7 +46,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
         listBox.DisplayMember = "DisplayName";
 
-        listBox.Items.Add(new Types.LinePatternElement(doc, new DB.ElementId(-3000010)));
+        listBox.Items.Add(new Types.LinePatternElement(doc, new DB.ElementId((int) DBX.BuiltInLinePattern.Solid)));
         foreach (var pattern in patterns)
           listBox.Items.Add(new Types.LinePatternElement(pattern));
       }
