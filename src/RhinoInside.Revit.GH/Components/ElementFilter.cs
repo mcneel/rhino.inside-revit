@@ -203,6 +203,10 @@ namespace RhinoInside.Revit.GH.Components
         filters.Add(new DB.Architecture.RoomFilter());
       if (classes.Remove("Autodesk.Revit.DB.Architecture.RoomTag"))
         filters.Add(new DB.Architecture.RoomTagFilter());
+      if (classes.Remove("Autodesk.Revit.DB.Mechanical.Space"))
+        filters.Add(new DB.Mechanical.SpaceFilter());
+      if (classes.Remove("Autodesk.Revit.DB.Mechanical.SpaceTag"))
+        filters.Add(new DB.Mechanical.SpaceTagFilter());
 
       try
       {
