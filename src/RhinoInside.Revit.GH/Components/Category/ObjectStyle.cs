@@ -34,7 +34,7 @@ namespace RhinoInside.Revit.GH.Components
       ParamDefinition.Create<Param_Colour>("Line Color", "LC", optional: true, relevance: ParamVisibility.Default),
 
       ParamDefinition.Create<Parameters.LinePatternElement>("Line Pattern [projection]", "LPP", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Parameters.LinePatternElement>("Line Pattern [cut]", "LPC", optional: true, relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Parameters.LinePatternElement>("Line Pattern [cut]", "LPC", optional: true, relevance: ParamVisibility.Voluntary),
 
       ParamDefinition.Create<Parameters.Material>("Material", "M", optional: true, relevance: ParamVisibility.Default),
     };
@@ -50,7 +50,7 @@ namespace RhinoInside.Revit.GH.Components
       ParamDefinition.Create<Param_Colour>("Line Color", "LC", relevance: ParamVisibility.Default),
 
       ParamDefinition.Create<Parameters.LinePatternElement>("Line Pattern [projection]", "LPP", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Parameters.LinePatternElement>("Line Pattern [cut]", "LPC", relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Parameters.LinePatternElement>("Line Pattern [cut]", "LPC", relevance: ParamVisibility.Voluntary),
 
       ParamDefinition.Create<Parameters.Material>("Material", "M", relevance: ParamVisibility.Default),
     };
