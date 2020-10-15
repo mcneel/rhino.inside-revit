@@ -422,12 +422,18 @@ namespace RhinoInside.Revit.GH.Parameters
       ICollection<DB.ElementId> modified
     )
     {
-      if (DataType == GH_ParamData.remote)
+      if (DataType != GH_ParamData.local)
         return false;
+
+      if (Phase == GH_SolutionPhase.Blank)
+        CollectData();
 
       foreach (var data in VolatileData.AllData(true).OfType<Types.IGH_ElementId>())
       {
         if (!data.IsElementLoaded)
+          continue;
+
+        if (!doc.Equals(data.Document))
           continue;
 
         if (modified.Contains(data.Id))

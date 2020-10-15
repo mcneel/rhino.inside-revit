@@ -151,7 +151,7 @@ namespace RhinoInside.Revit.GH.Components
     public virtual bool NeedsToBeExpired(DB.Events.DocumentChangedEventArgs e)
     {
       var persistentInputs = Params.Input.
-        Where(x => x.DataType == GH_ParamData.local && x.Phase != GH_SolutionPhase.Blank).
+        Where(x => x.DataType == GH_ParamData.local).
         OfType<Kernel.IGH_ElementIdParam>();
 
       if (persistentInputs.Any())

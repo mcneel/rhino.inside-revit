@@ -62,7 +62,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (value?.IsValidObject != true && IsReferencedElement && IsElementLoaded)
+        if (value?.IsValidObject != true && IsElementLoaded)
           value = Document.GetElement(Id);
 
         return value;
@@ -100,7 +100,7 @@ namespace RhinoInside.Revit.GH.Types
     public Guid DocumentGUID { get; protected set; } = Guid.Empty;
     public string UniqueID { get; protected set; } = string.Empty;
     public bool IsReferencedElement => DocumentGUID != Guid.Empty;
-    public bool IsElementLoaded => Id is object;
+    public bool IsElementLoaded => Document is object && Id is object;
     #region IGH_ElementId
     public virtual bool LoadElement()
     {
@@ -119,6 +119,8 @@ namespace RhinoInside.Revit.GH.Types
 
     public void UnloadElement()
     {
+      ResetValue();
+
       if (IsReferencedElement)
       {
         Document = default;

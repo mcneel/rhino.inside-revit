@@ -18,6 +18,7 @@ using Grasshopper.Kernel;
 using Grasshopper.GUI.Canvas;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.Convert.Units;
+using System.Diagnostics;
 
 namespace RhinoInside.Revit.GH
 {
@@ -511,8 +512,6 @@ namespace RhinoInside.Revit.GH
       {
         foreach (GH_Document definition in Instances.DocumentServer)
         {
-          bool expireNow = definition.SolutionState != GH_ProcessStep.Process;
-
           var change = new DocumentChangedEvent()
           {
             Operation = e.Operation,
@@ -530,16 +529,8 @@ namespace RhinoInside.Revit.GH
               if (persistentParam.DataType == GH_ParamData.remote)
                 continue;
 
-              if (persistentParam.Phase == GH_SolutionPhase.Blank)
-                continue;
-
               if (persistentParam.NeedsToBeExpired(document, added, deleted, modified))
-              {
-                if (expireNow)
-                  persistentParam.ExpireSolution(false);
-                else
-                  change.ExpiredObjects.Add(persistentParam);
-              }
+                change.ExpiredObjects.Add(persistentParam);
             }
             else if (obj is Kernel.IGH_ElementIdComponent persistentComponent)
             {
@@ -547,23 +538,20 @@ namespace RhinoInside.Revit.GH
                 continue;
 
               if (persistentComponent.NeedsToBeExpired(e))
-              {
-                if (expireNow)
-                  persistentComponent.ExpireSolution(false);
-                else
-                  change.ExpiredObjects.Add(persistentComponent);
-              }
+                change.ExpiredObjects.Add(persistentComponent);
             }
           }
 
-          if (definition.SolutionState != GH_ProcessStep.Process)
+          if (change.ExpiredObjects.Count > 0)
           {
-            DocumentChangedEvent.Enqueue(change);
-          }
-          else if (definition == Instances.ActiveCanvas.Document)
-          {
-            if (change.ExpiredObjects.Count > 0)
+            if (definition.SolutionState != GH_ProcessStep.Process)
             {
+              // Change made from Revit
+              DocumentChangedEvent.Enqueue(change);
+            }
+            else if (definition == Instances.ActiveCanvas.Document)
+            {
+              // Change made from Grasshopper
               foreach (var obj in change.ExpiredObjects)
               {
                 obj.ClearData();
@@ -614,13 +602,13 @@ namespace RhinoInside.Revit.GH
 
       void NewSolution()
       {
+        Debug.Assert(ExpiredObjects.Count > 0, "An empty change is been enqueued.");
+
         foreach (var obj in ExpiredObjects)
           obj.ExpireSolution(false);
 
-        if(ExpiredObjects.Count > 0 && Operation == UndoOperation.TransactionCommitted)
-        {
+        if(Operation == UndoOperation.TransactionCommitted)
           Definition.NewSolution(false);
-        }
       }
     }
     #endregion
