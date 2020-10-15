@@ -172,8 +172,10 @@ namespace RhinoInside.Revit.GH.Types
 
       #region Misc
       protected override bool IsValidId(DB.Document doc, DB.ElementId id) => id.IsCategoryId(doc);
-
       public override Type ObjectType => IsBuiltIn ? typeof(DB.BuiltInCategory) : base.ObjectType;
+
+      [System.ComponentModel.Description("BuiltIn category Id.")]
+      public DB.BuiltInCategory? BuiltInId => owner.Id.TryGetBuiltInCategory(out var bic) ? bic : default;
       #endregion
 
       #region Category

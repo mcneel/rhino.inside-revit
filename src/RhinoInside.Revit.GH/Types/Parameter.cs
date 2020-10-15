@@ -112,16 +112,15 @@ namespace RhinoInside.Revit.GH.Types
 
       #region Misc
       protected override bool IsValidId(DB.Document doc, DB.ElementId id) => id.IsParameterId(doc);
-
       public override Type ObjectType => IsBuiltIn ? typeof(DB.BuiltInParameter) : base.ObjectType;
+
+      [System.ComponentModel.Description("BuiltIn parameter Id.")]
+      public DB.BuiltInParameter? BuiltInId => owner.Id.TryGetBuiltInParameter(out var bip) ? bip : default;
       #endregion
 
       #region Definition
       const string Definition = "Definition";
       DB.ParameterElement parameter => owner.Value as DB.ParameterElement;
-
-      [System.ComponentModel.Category(Definition), System.ComponentModel.Description("BuiltIn parameter Id.")]
-      public DB.BuiltInParameter? BuiltInId => owner.Id.TryGetBuiltInParameter(out var bip) ? bip : default;
 
       [System.ComponentModel.Category(Definition), System.ComponentModel.Description("The Guid that identifies this parameter as a shared parameter.")]
       public Guid? Guid => (parameter as DB.SharedParameterElement)?.GuidValue;
