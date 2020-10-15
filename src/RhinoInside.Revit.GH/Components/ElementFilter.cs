@@ -78,7 +78,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "⊄";
 
     public ElementExclusionFilter()
-    : base("Exclusion Filter", "Exclusion", "Filter used to exclude a set of elements", "Revit", "Filter")
+    : base("Exclusion Filter", "Exclude", "Filter used to exclude a set of elements", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -107,7 +107,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "∧";
 
     public ElementLogicalAndFilter()
-    : base("Logical And Filter", "LogAnd", "Filter used to combine a set of filters that pass when any pass", "Revit", "Filter")
+    : base("Logical And Filter", "AndFltr", "Filter used to combine a set of filters that pass when any pass", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -132,7 +132,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "∨";
 
     public ElementLogicalOrFilter()
-    : base("Logical Or Filter", "LogOr", "Filter used to combine a set of filters that pass when any pass", "Revit", "Filter")
+    : base("Logical Or Filter", "OrFltr", "Filter used to combine a set of filters that pass when any pass", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -159,7 +159,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "T";
 
     public ElementExcludeElementTypeFilter()
-    : base("Exclude Types", "NotTypes", "Filter used to exclude element types", "Revit", "Filter")
+    : base("Exclude Types", "NoTypes", "Filter used to exclude element types", "Revit", "Filter")
     { }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -179,7 +179,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "C";
 
     public ElementClassFilter()
-    : base("Class Filter", "ByClass", "Filter used to match elements by their API class", "Revit", "Filter")
+    : base("Class Filter", "ClassFltr", "Filter used to match elements by their API class", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -248,7 +248,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "C";
 
     public ElementCategoryFilter()
-    : base("Category Filter", "ByCategory", "Filter used to match elements by their category", "Revit", "Filter")
+    : base("Category Filter", "CatFltr", "Filter used to match elements by their category", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -290,7 +290,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "T";
 
     public ElementTypeFilter()
-    : base("Type Filter", "ByType", "Filter used to match elements by their type", "Revit", "Filter")
+    : base("Type Filter", "TypeFltr", "Filter used to match elements by their type", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -345,7 +345,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "#";
 
     public ElementParameterFilter()
-    : base("Parameter Filter", "ParaFilter", "Filter used to match elements by the value of a parameter", "Revit", "Filter")
+    : base("Parameter Filter", "ParaFltr", "Filter used to match elements by the value of a parameter", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -372,20 +372,20 @@ namespace RhinoInside.Revit.GH.Components
   #region Tertiary
   public class ElementBoundingBoxFilter : ElementFilterComponent
   {
-    public override Guid ComponentGuid => new Guid("F5A32842-B18E-470F-8BD3-BAE1373AD982");
+    public override Guid ComponentGuid => new Guid("3B8BE676-390B-4BE1-B6DA-C02FFA3234B6");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "B";
 
     public ElementBoundingBoxFilter()
-    : base("BoundingBox Filter", "ByBBox", "Filter used to match elements by their BoundingBox", "Revit", "Filter")
+    : base("Bounding Box Filter", "BBoxFltr", "Filter used to match elements by their BoundingBox", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager.AddPointParameter("Points", "C", "Points to query", GH_ParamAccess.list);
-      manager.AddNumberParameter("Tolerance", "T", "Tolerance used to query", GH_ParamAccess.item, 0.0);
-      manager.AddBooleanParameter("BoundingBox", "B", "Query as a BoundingBox", GH_ParamAccess.item, true);
+      manager.AddGeometryParameter("Bounding Box", "B", "World aligned bounding box to query", GH_ParamAccess.list);
+      manager.AddBooleanParameter("Union", "U", "Target union of bounding boxes.", GH_ParamAccess.item, true);
       manager.AddBooleanParameter("Strict", "S", "True means element should be strictly contained", GH_ParamAccess.item, false);
+      manager.AddNumberParameter("Tolerance", "T", "Tolerance used to query", GH_ParamAccess.item, 0.0);
       base.RegisterInputParams(manager);
     }
 
@@ -397,20 +397,20 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var points = new List<Rhino.Geometry.Point3d>();
-      if (!DA.GetDataList("Points", points))
+      var geometries = new List<IGH_GeometricGoo>();
+      if (!DA.GetDataList("Bounding Box", geometries))
         return;
 
-      var tolerance = 0.0;
-      if (!DA.GetData("Tolerance", ref tolerance))
-        return;
-
-      var boundingBox = true;
-      if (!DA.GetData("BoundingBox", ref boundingBox))
+      var union = true;
+      if (!DA.GetData("Union", ref union))
         return;
 
       var strict = true;
       if (!DA.GetData("Strict", ref strict))
+        return;
+
+      var tolerance = 0.0;
+      if (!DA.GetData("Tolerance", ref tolerance))
         return;
 
       var inverted = false;
@@ -420,48 +420,56 @@ namespace RhinoInside.Revit.GH.Components
       var targets = new List<Rhino.Geometry.Box>();
       DB.ElementFilter filter = null;
 
-      if (boundingBox)
+      var boundingBoxes = geometries.Select(x => x?.Boundingbox ?? Rhino.Geometry.BoundingBox.Empty).Where(x => x.IsDegenerate(0.0) < 4);
+      if (boundingBoxes.Any())
       {
-        var pointsBBox = new Rhino.Geometry.BoundingBox(points);
+        if (union)
         {
-          var box = new Rhino.Geometry.Box(pointsBBox);
-          box.Inflate(tolerance);
-          targets.Add(box);
-        }
+          var bbox = Rhino.Geometry.BoundingBox.Empty;
+          foreach (var boundingBox in boundingBoxes)
+            bbox.Union(boundingBox);
 
-        if (strict)
-          filter = new DB.BoundingBoxIsInsideFilter(pointsBBox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
-        else
-          filter = new DB.BoundingBoxIntersectsFilter(pointsBBox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
-      }
-      else
-      {
-        var filters = points.Select<Rhino.Geometry.Point3d, DB.ElementFilter>
-        (
-          x =>
           {
-            var pointsBBox = new Rhino.Geometry.BoundingBox(x, x);
-            {
-              var box = new Rhino.Geometry.Box(pointsBBox);
-              box.Inflate(tolerance);
-              targets.Add(box);
-            }
-
-            if (strict)
-            {
-              return new DB.BoundingBoxIsInsideFilter(pointsBBox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
-            }
-            else
-            {
-              return new DB.BoundingBoxContainsPointFilter(x.ToXYZ(), tolerance / Revit.ModelUnits, inverted);
-            }
+            var target = new Rhino.Geometry.Box(bbox);
+            target.Inflate(tolerance);
+            targets.Add(target);
           }
-        );
 
-        var filterList = filters.ToArray();
-        filter = filterList.Length == 1 ?
-                 filterList[0] :
-                 new DB.LogicalOrFilter(filterList);
+          if (bbox.IsDegenerate(0.0) == 3)
+            filter = new DB.BoundingBoxContainsPointFilter(bbox.Center.ToXYZ(), Math.Abs(tolerance) / Revit.ModelUnits, inverted);
+          else if (strict)
+            filter = new DB.BoundingBoxIsInsideFilter(bbox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
+          else
+            filter = new DB.BoundingBoxIntersectsFilter(bbox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
+        }
+        else
+        {
+          var filters = boundingBoxes.Select<Rhino.Geometry.BoundingBox, DB.ElementFilter>
+          (
+            x =>
+            {
+              {
+                var target = new Rhino.Geometry.Box(x);
+                target.Inflate(tolerance);
+                targets.Add(target);
+              }
+
+              var bbox = x;
+              var degenerate = bbox.IsDegenerate(0.0);
+              if (degenerate == 3)
+                return new DB.BoundingBoxContainsPointFilter(bbox.Center.ToXYZ(), Math.Abs(tolerance) / Revit.ModelUnits, inverted);
+              else if (strict)
+                return new DB.BoundingBoxIsInsideFilter(bbox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
+              else
+                return new DB.BoundingBoxIntersectsFilter(bbox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
+            }
+          );
+
+          var filterList = filters.ToArray();
+          filter = filterList.Length == 1 ?
+                   filterList[0] :
+                   new DB.LogicalOrFilter(filterList);
+        }
       }
 
       DA.SetData("Filter", filter);
@@ -476,7 +484,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "I";
 
     public ElementIntersectsElementFilter()
-    : base("Intersects Element Filter", "IsectsElement", "Filter used to match elements that intersect to the given element", "Revit", "Filter")
+    : base("Intersects Element Filter", "ElemFltr", "Filter used to match elements that intersect to the given element", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -506,7 +514,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "I";
 
     public ElementIntersectsBrepFilter()
-    : base("Intersects Brep Filter", "IsectsBrep", "Filter used to match elements that intersect to the given brep", "Revit", "Filter")
+    : base("Intersects Brep Filter", "BrepFltr", "Filter used to match elements that intersect to the given brep", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -536,7 +544,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "I";
 
     public ElementIntersectsMeshFilter()
-    : base("Intersects Mesh Filter", "IsectsMesh", "Filter used to match elements that intersect to the given mesh", "Revit", "Filter")
+    : base("Intersects Mesh Filter", "MeshFltr", "Filter used to match elements that intersect to the given mesh", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -568,7 +576,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "L";
 
     public ElementLevelFilter()
-    : base("Level Filter", "ByLevel", "Filter used to match elements associated to the given level", "Revit", "Filter")
+    : base("Level Filter", "LevelFltr", "Filter used to match elements associated to the given level", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -611,7 +619,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "D";
 
     public ElementDesignOptionFilter()
-    : base("Design Option Filter", "ByDesignOption", "Filter used to match elements associated to the given Design Option", "Revit", "Filter")
+    : base("Design Option Filter", "DOptFiltr", "Filter used to match elements associated to the given Design Option", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -646,7 +654,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "V";
 
     public ElementOwnerViewFilter()
-    : base("Owner View Filter", "ByOwnerView", "Filter used to match elements associated to the given View", "Revit", "Filter")
+    : base("Owner View Filter", "OViewFltr", "Filter used to match elements associated to the given View", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -681,7 +689,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override string IconTag => "S";
 
     public ElementSelectableInViewFilter()
-    : base("Selectable In View Filter", "SelecInView", "Filter used to match seletable elements into the given View", "Revit", "Filter")
+    : base("Selectable In View Filter", "SelFltr", "Filter used to match seletable elements into the given View", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -1011,4 +1019,107 @@ namespace RhinoInside.Revit.GH.Components
     { }
   }
   #endregion
+}
+
+namespace RhinoInside.Revit.GH.Components.Obsolete
+{
+  [Obsolete("Obsolete since 2020-10-15")]
+  public class ElementBoundingBoxFilter : ElementFilterComponent
+  {
+    public override Guid ComponentGuid => new Guid("F5A32842-B18E-470F-8BD3-BAE1373AD982");
+    public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.hidden;
+    protected override string IconTag => "B";
+
+    public ElementBoundingBoxFilter()
+    : base("BoundingBox Filter", "BBoxFltr", "Filter used to match elements by their BoundingBox", "Revit", "Filter")
+    { }
+
+    protected override void RegisterInputParams(GH_InputParamManager manager)
+    {
+      manager.AddPointParameter("Points", "C", "Points to query", GH_ParamAccess.list);
+      manager.AddNumberParameter("Tolerance", "T", "Tolerance used to query", GH_ParamAccess.item, 0.0);
+      manager.AddBooleanParameter("BoundingBox", "B", "Query as a BoundingBox", GH_ParamAccess.item, true);
+      manager.AddBooleanParameter("Strict", "S", "True means element should be strictly contained", GH_ParamAccess.item, false);
+      base.RegisterInputParams(manager);
+    }
+
+    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    {
+      base.RegisterOutputParams(manager);
+      manager.AddBoxParameter("Target", "T", string.Empty, GH_ParamAccess.list);
+    }
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      var points = new List<Rhino.Geometry.Point3d>();
+      if (!DA.GetDataList("Points", points))
+        return;
+
+      var tolerance = 0.0;
+      if (!DA.GetData("Tolerance", ref tolerance))
+        return;
+
+      var boundingBox = true;
+      if (!DA.GetData("BoundingBox", ref boundingBox))
+        return;
+
+      var strict = true;
+      if (!DA.GetData("Strict", ref strict))
+        return;
+
+      var inverted = false;
+      if (!DA.GetData("Inverted", ref inverted))
+        return;
+
+      var targets = new List<Rhino.Geometry.Box>();
+      DB.ElementFilter filter = null;
+
+      if (boundingBox)
+      {
+        var pointsBBox = new Rhino.Geometry.BoundingBox(points);
+        {
+          var box = new Rhino.Geometry.Box(pointsBBox);
+          box.Inflate(tolerance);
+          targets.Add(box);
+        }
+
+        if (strict)
+          filter = new DB.BoundingBoxIsInsideFilter(pointsBBox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
+        else
+          filter = new DB.BoundingBoxIntersectsFilter(pointsBBox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
+      }
+      else
+      {
+        var filters = points.Select<Rhino.Geometry.Point3d, DB.ElementFilter>
+        (
+          x =>
+          {
+            var pointsBBox = new Rhino.Geometry.BoundingBox(x, x);
+            {
+              var box = new Rhino.Geometry.Box(pointsBBox);
+              box.Inflate(tolerance);
+              targets.Add(box);
+            }
+
+            if (strict)
+            {
+              return new DB.BoundingBoxIsInsideFilter(pointsBBox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
+            }
+            else
+            {
+              return new DB.BoundingBoxContainsPointFilter(x.ToXYZ(), tolerance / Revit.ModelUnits, inverted);
+            }
+          }
+        );
+
+        var filterList = filters.ToArray();
+        filter = filterList.Length == 1 ?
+                 filterList[0] :
+                 new DB.LogicalOrFilter(filterList);
+      }
+
+      DA.SetData("Filter", filter);
+      DA.SetDataList("Target", targets);
+    }
+  }
 }
