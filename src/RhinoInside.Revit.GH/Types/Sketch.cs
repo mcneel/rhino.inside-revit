@@ -15,8 +15,8 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeName => "Revit Sketch";
     public override string TypeDescription => "Represents a Revit sketch";
     protected override Type ScriptVariableType => typeof(DB.Sketch);
-    public static explicit operator DB.Sketch(Sketch value) =>
-      value?.IsValid == true ? value.Document.GetElement(value) as DB.Sketch : default;
+    public static explicit operator DB.Sketch(Sketch value) => value?.Value;
+    public new DB.Sketch Value => base.Value as DB.Sketch;
 
     public Sketch() : base() { }
     public Sketch(DB.Sketch sketchPlane) : base(sketchPlane) { }
@@ -38,14 +38,7 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region Location
-    public override Plane Location
-    {
-      get
-      {
-        var sketch = (DB.Sketch) this;
-        return sketch?.SketchPlane.GetPlane().ToPlane() ?? base.Location;
-      }
-    }
+    public override Plane Location => Value?.SketchPlane.GetPlane().ToPlane() ?? base.Location;
     public override Brep Surface => Region;
 
     bool profileIsValid;
@@ -56,8 +49,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (!profileIsValid)
         {
-          var element = (DB.Sketch) this;
-          profile = element?.Profile.ToPolyCurves();
+          profile = Value?.Profile.ToPolyCurves();
           profileIsValid = true;
         }
 
@@ -71,12 +63,8 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (!regionIsValid)
+        if (!regionIsValid && Value is DB.Sketch sketch)
         {
-          var sketch = (DB.Sketch) this;
-          if (sketch is null)
-            return null;
-
           var loops = sketch.Profile.ToPolyCurves().Where(x => x.IsClosed).ToArray();
           var plane = sketch.SketchPlane.GetPlane().ToPlane();
 
