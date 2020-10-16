@@ -11,8 +11,8 @@ namespace RhinoInside.Revit.GH.Types
   {
     public override string TypeDescription => "Represents a Revit floor element";
     protected override Type ScriptVariableType => typeof(DB.Floor);
-    public static explicit operator DB.Floor(Floor value) =>
-      value?.IsValid == true ? value.Document.GetElement(value) as DB.Floor : default;
+    public static explicit operator DB.Floor(Floor value) => value?.Value;
+    public new DB.Floor Value => base.Value as DB.Floor;
 
     public Floor() { }
     public Floor(DB.Floor floor) : base(floor) { }
@@ -21,9 +21,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var floor = (DB.Floor) this;
-
-        if (floor.GetFirstDependent<DB.Sketch>() is DB.Sketch sketch)
+        if (Value is DB.Floor floor && floor.GetFirstDependent<DB.Sketch>() is DB.Sketch sketch)
         {
           var center = Point3d.Origin;
           var count = 0;
