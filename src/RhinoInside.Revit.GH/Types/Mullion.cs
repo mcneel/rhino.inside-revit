@@ -13,20 +13,13 @@ namespace RhinoInside.Revit.GH.Types
 
     public override string TypeDescription => "Represents a Revit Mullion Element";
     protected override Type ScriptVariableType => typeof(DB.Mullion);
-    public static explicit operator DB.Mullion(Mullion value) =>
-      value?.IsValid == true ? value.Document.GetElement(value) as DB.Mullion : default;
+    public static explicit operator DB.Mullion(Mullion value) => value?.Value;
+    public new DB.Mullion Value => base.Value as DB.Mullion;
 
     public Mullion() { }
     public Mullion(DB.Mullion value) : base(value) { }
 
-    public override Rhino.Geometry.Curve Curve
-    {
-      get
-      {
-        var mullion = (DB.Mullion) this;
-        return mullion?.LocationCurve?.ToCurve();
-      }
-    }
+    public override Rhino.Geometry.Curve Curve => Value?.LocationCurve.ToCurve();
   }
 
   public class MullionPosition : ElementType
@@ -38,21 +31,17 @@ namespace RhinoInside.Revit.GH.Types
     public MullionPosition() { }
     public MullionPosition(DB.Document doc, DB.ElementId id) : base(doc, id) { }
 
-    public override string DisplayName
+    public override string Name
     {
       get
       {
-        var element = (DB.ElementType) this;
-        if (element is object)
-          return $"{element.Category?.Name} : {element.GetFamilyName()} : {element.Name}";
-
         switch ((DBX.BuiltInMullionPositionId) Id.IntegerValue)
         {
           case DBX.BuiltInMullionPositionId.PerpendicularToFace: return "Perpendicular To Face";
-          case DBX.BuiltInMullionPositionId.ParallelToGround: return "Parallel To Ground";
+          case DBX.BuiltInMullionPositionId.ParallelToGround:    return "Parallel To Ground";
         }
 
-        return base.DisplayName;
+        return base.Name;
       }
     }
   }
@@ -60,28 +49,23 @@ namespace RhinoInside.Revit.GH.Types
   public class MullionProfile : ElementType
   {
     public override string TypeName => "Revit Mullion Profile";
-
     public override string TypeDescription => "Represents a Revit Mullion Profile";
     protected override Type ScriptVariableType => typeof(DB.ElementType);
 
     public MullionProfile() { }
     public MullionProfile(DB.Document doc, DB.ElementId id) : base(doc, id) { }
 
-    public override string DisplayName
+    public override string Name
     {
       get
       {
-        var element = (DB.FamilySymbol) this;
-        if (element is object)
-          return $"{element.Category?.Name} : {element.GetFamilyName()} : {element.Name}";
-
         switch ((DBX.BuiltInMullionProfileId) Id.IntegerValue)
         {
           case DBX.BuiltInMullionProfileId.Rectangular: return "Rectangular";
-          case DBX.BuiltInMullionProfileId.Circular: return "Circular";
+          case DBX.BuiltInMullionProfileId.Circular:    return "Circular";
         }
 
-        return base.DisplayName;
+        return base.Name;
       }
     }
   }
