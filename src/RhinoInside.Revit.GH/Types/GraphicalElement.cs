@@ -26,6 +26,7 @@ namespace RhinoInside.Revit.GH.Types
     IGH_PreviewData
   {
     public GraphicalElement() { }
+    public GraphicalElement(DB.Document doc, DB.ElementId id) : base(doc, id) { }
     public GraphicalElement(DB.Element element) : base(element) { }
 
     protected override bool SetValue(DB.Element element) => IsValidElement(element) && base.SetValue(element);
@@ -199,6 +200,8 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region Location
+    public virtual Level Level => default;
+
     public virtual Box Box
     {
       get
@@ -224,7 +227,6 @@ namespace RhinoInside.Revit.GH.Types
         return new Box(ClippingBox);
       }
     }
-    public virtual Level Level => default;
 
     public virtual Plane Location
     {
@@ -280,6 +282,56 @@ namespace RhinoInside.Revit.GH.Types
 
         return new Plane(origin, axis, perp);
       }
+      set
+      {
+        var plane = value.ToPlane();
+        SetLocation(plane.Origin, plane.XVec, plane.YVec);
+      }
+    }
+
+    void GetLocation(out DB.XYZ origin, out DB.XYZ basisX, out DB.XYZ basisY)
+    {
+      var plane = Location.ToPlane();
+      origin = plane.Origin;
+      basisX = plane.XVec;
+      basisY = plane.YVec;
+    }
+
+    void SetLocation(DB.XYZ newOrigin, DB.XYZ newBasisX, DB.XYZ newBasisY)
+    {
+      if (Value is DB.Element element)
+      {
+        GetLocation(out var origin, out var basisX, out var basisY);
+        var basisZ = basisX.CrossProduct(basisY);
+
+        var newBasisZ = newBasisX.CrossProduct(newBasisY);
+        {
+          if (!basisZ.IsParallelTo(newBasisZ))
+          {
+            var axisDirection = basisZ.CrossProduct(newBasisZ);
+            double angle = basisZ.AngleTo(newBasisZ);
+
+            using (var axis = DB.Line.CreateUnbound(origin, axisDirection))
+              DB.ElementTransformUtils.RotateElement(element.Document, element.Id, axis, angle);
+
+            GetLocation(out origin, out basisX, out basisY);
+            basisZ = basisX.CrossProduct(basisY);
+          }
+
+          if (!basisX.IsAlmostEqualTo(newBasisX))
+          {
+            double angle = basisX.AngleOnPlaneTo(newBasisX, newBasisZ);
+            using (var axis = DB.Line.CreateUnbound(origin, newBasisZ))
+              DB.ElementTransformUtils.RotateElement(element.Document, element.Id, axis, angle);
+          }
+
+          {
+            var trans = newOrigin - origin;
+            if (!trans.IsZeroLength())
+              DB.ElementTransformUtils.MoveElement(element.Document, element.Id, trans);
+          }
+        }
+      }
     }
 
     public virtual Vector3d FacingOrientation => Location.YAxis;
@@ -292,9 +344,6 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (!(Value is DB.Element element))
           return default;
-
-        if (element is DB.ModelCurve modelCurve)
-          return modelCurve.GeometryCurve.ToCurve();
 
         return element?.Location is DB.LocationCurve curveLocation ?
           curveLocation.Curve.ToCurve() :
