@@ -133,31 +133,21 @@ namespace RhinoInside.Revit.GH.Components
       }
     }
 
-    protected override void OnBeforeCommit(IReadOnlyDictionary<DB.Document, DB.Transaction> transactions)
+    public override void OnPrepare(IReadOnlyCollection<DB.Document> documents)
     {
-      base.OnBeforeCommit(transactions);
-
       if (renames is object)
       {
-        try
-        {
-          if (!IsAborted)
-          {
-            // Update elements to the final names
-            foreach (var rename in renames)
-              rename.Key.Name = rename.Value;
-          }
-        }
-        finally
-        {
-          renames = default;
-        }
+        // Update elements to the final names
+        foreach (var rename in renames)
+          rename.Key.Name = rename.Value;
       }
     }
 
-    protected override void OnAfterCommit()
+    public override void OnDone(DB.TransactionStatus status)
     {
-      if (Status == DB.TransactionStatus.Committed)
+      renames = default;
+
+      if (status == DB.TransactionStatus.Committed)
       {
         // Update output 'Name' with final values from 'Element'
         var _Element_ = Params.IndexOfOutputParam("Element");
@@ -175,8 +165,6 @@ namespace RhinoInside.Revit.GH.Components
           );
         }
       }
-
-      base.OnAfterCommit();
     }
   }
 
