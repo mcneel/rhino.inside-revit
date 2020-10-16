@@ -11,8 +11,8 @@ namespace RhinoInside.Revit.GH.Types
   {
     public override string TypeDescription => "Represents a Revit group element";
     protected override Type ScriptVariableType => typeof(DB.Group);
-    public static explicit operator DB.Group(Group value) =>
-      value?.IsValid == true ? value.Document.GetElement(value) as DB.Group : default;
+    public static explicit operator DB.Group(Group value) => value?.Value;
+    public new DB.Group Value => base.Value as DB.Group;
 
     public Group() { }
     public Group(DB.Group value) : base(value) { }
@@ -21,8 +21,10 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var element = (DB.Group) this;
-        return element is null ? null : FromElement(element.GetParameterValue<DB.Level>(DB.BuiltInParameter.GROUP_LEVEL)) as Level;
+        if(Value is DB.Group group)
+          return Types.Level.FromElement(group.GetParameterValue<DB.Level>(DB.BuiltInParameter.GROUP_LEVEL)) as Level;
+
+        return default;
       }
     }
 
