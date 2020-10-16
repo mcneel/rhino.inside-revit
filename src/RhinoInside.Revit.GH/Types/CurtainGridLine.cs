@@ -12,8 +12,8 @@ namespace RhinoInside.Revit.GH.Types
   {
     public override string TypeDescription => "Represents a Revit curtain grid line Element";
     protected override Type ScriptVariableType => typeof(DB.CurtainGridLine);
-    public static explicit operator DB.CurtainGridLine(CurtainGridLine value) =>
-      value?.IsValid == true ? value.Document.GetElement(value) as DB.CurtainGridLine : default;
+    public static explicit operator DB.CurtainGridLine(CurtainGridLine value) => value?.Value;
+    public new DB.CurtainGridLine Value => base.Value as DB.CurtainGridLine;
 
     public CurtainGridLine() { }
     public CurtainGridLine(DB.CurtainGridLine gridLine) : base(gridLine) { }
@@ -25,8 +25,7 @@ namespace RhinoInside.Revit.GH.Types
       if (!bbox.IsValid)
         return;
 
-      var gridLine = (DB.CurtainGridLine) this;
-      if (gridLine is object)
+      if (Value is DB.CurtainGridLine gridLine)
       {
         var points = gridLine.FullCurve?.Tessellate();
         if (points is object)
@@ -47,9 +46,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var gridLine = (DB.CurtainGridLine) this;
-
-        if (gridLine?.FullCurve is DB.Curve curve)
+        if (Value is DB.CurtainGridLine gridLine && gridLine ?.FullCurve is DB.Curve curve)
         {
           var start = curve.Evaluate(0.0, normalized: true).ToPoint3d();
           var end = curve.Evaluate(1.0, normalized: true).ToPoint3d();
@@ -63,15 +60,6 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override Curve Curve
-    {
-      get
-      {
-        var gridLine = (DB.CurtainGridLine) this;
-        var axisCurve = gridLine?.FullCurve?.ToCurve();
-
-        return axisCurve;
-      }
-    }
+    public override Curve Curve => Value?.FullCurve.ToCurve();
   }
 }

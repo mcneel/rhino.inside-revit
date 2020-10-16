@@ -36,8 +36,6 @@ namespace RhinoInside.Revit.GH.Types
     public override void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
     #endregion
 
-    public override Curve Curve => Value is DB.CurveElement curveElement ?
-      curveElement.GeometryCurve.ToCurve() :
-      default;
+    public override Curve Curve => Value?.GeometryCurve.ToCurve();
   }
 }
