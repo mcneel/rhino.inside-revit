@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (category is null && IsReferencedElement && IsElementLoaded)
+        if (category is null && IsElementLoaded)
           category = Document.GetCategory(Id);
 
         return category;
