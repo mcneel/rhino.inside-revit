@@ -19,6 +19,8 @@ namespace RhinoInside.Revit.GH.Parameters
       subcategory: "Revit Primitives"
     )
     { }
+
+    protected override Types.IGH_FamilyInstance InstantiateT() => new Types.FamilyInstance();
   }
 
   public class Mullion : GraphicalElementT<Types.Mullion, DB.Mullion>

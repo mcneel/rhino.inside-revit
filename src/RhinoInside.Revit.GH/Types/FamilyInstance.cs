@@ -48,19 +48,10 @@ namespace RhinoInside.Revit.GH.Types
 
   public class FamilyInstance : Instance, IGH_FamilyInstance
   {
-    public override string TypeName
-    {
-      get
-      {
-        var instance = (DB.FamilyInstance) this;
-        if (instance is object)
-          return $"Revit {instance.Category.Name}";
-
-        return "Revit Component";
-      }
-    }
-
-    public override string TypeDescription => "Represents a Revit Component";
+    public override string TypeName => Value is DB.FamilyInstance instance ?
+      $"Revit {instance.Category.Name}" :
+      "Revit Component";
+    public override string TypeDescription => "Represents a Revit component";
     protected override Type ScriptVariableType => typeof(DB.FamilyInstance);
     public static explicit operator DB.FamilyInstance(FamilyInstance value) => value?.Value;
     public new DB.FamilyInstance Value => base.Value as DB.FamilyInstance;
@@ -243,7 +234,10 @@ namespace RhinoInside.Revit.GH.Types
 
   public class FamilySymbol : ElementType, IGH_FamilySymbol
   {
-    public override string TypeDescription => "Represents a Revit family type";
+    public override string TypeName => Value is DB.FamilySymbol symbol ?
+      $"Revit {symbol.Category.Name} Type" :
+      "Revit Component Type";
+    public override string TypeDescription => "Represents a Revit component type";
     protected override Type ScriptVariableType => typeof(DB.FamilySymbol);
     public static explicit operator DB.FamilySymbol(FamilySymbol value) => value?.Value;
     public new DB.FamilySymbol Value => base.Value as DB.FamilySymbol;
