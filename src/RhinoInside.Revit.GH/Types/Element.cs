@@ -42,6 +42,7 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(DB.View),                    (element)=> new View              (element as DB.View)              },
       { typeof(DB.Family),                  (element)=> new Family            (element as DB.Family)            },
       { typeof(DB.ElementType),             (element)=> new ElementType       (element as DB.ElementType)       },
+      { typeof(DB.FamilySymbol),            (element)=> new FamilySymbol      (element as DB.FamilySymbol)      },
       { typeof(DB.HostObjAttributes),       (element)=> new HostObjectType    (element as DB.HostObjAttributes) },
       { typeof(DB.ParameterElement),        (element)=> new ParameterKey      (element as DB.ParameterElement)  },
       { typeof(DB.Material),                (element)=> new Material          (element as DB.Material)          },
@@ -257,6 +258,8 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region Properties
+    public bool CanDelete => IsValid && DB.DocumentValidation.CanDeleteElement(Document, Id);
+
     public bool? Pinned
     {
       get => Value?.Pinned;
