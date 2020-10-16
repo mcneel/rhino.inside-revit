@@ -26,7 +26,8 @@ namespace RhinoInside.Revit.GH.Types
       return element.CanHaveTypeAssigned();
     }
 
-    public override Level Level =>
-      Level.FromElementId(Document, Value?.LevelId) as Level;
+    public override Level Level => (Value is DB.Element element) ?
+      new Level(element.Document, element.LevelId) :
+      default;
   }
 }
