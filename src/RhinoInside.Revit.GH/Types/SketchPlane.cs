@@ -11,8 +11,8 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeName => "Revit Sketch Plane";
     public override string TypeDescription => "Represents a Revit sketch plane";
     protected override Type ScriptVariableType => typeof(DB.SketchPlane);
-    public static explicit operator DB.SketchPlane(SketchPlane value) =>
-      value?.IsValid == true ? value.Document.GetElement(value) as DB.SketchPlane : default;
+    public static explicit operator DB.SketchPlane(SketchPlane value) => value?.Value;
+    public new DB.SketchPlane Value => base.Value as DB.SketchPlane;
 
     public SketchPlane() : base() { }
     public SketchPlane(DB.SketchPlane sketchPlane) : base(sketchPlane) { }
@@ -44,14 +44,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Location
-    public override Rhino.Geometry.Plane Location
-    {
-      get
-      {
-        var sketchPlane = (DB.SketchPlane) this;
-        return sketchPlane?.GetPlane().ToPlane() ?? base.Location;
-      }
-    }
+    public override Rhino.Geometry.Plane Location => Value?.GetPlane().ToPlane() ?? base.Location;
     #endregion
   }
 }
