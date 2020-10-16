@@ -62,8 +62,14 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (value?.IsValidObject != true && IsElementLoaded)
-          value = Document.GetElement(Id);
+        if (value?.IsValidObject == false)
+          ResetValue();
+
+        if (value is null)
+        {
+          if (IsElementLoaded)
+            value = document.GetElement(id);
+        }
 
         return value;
       }
