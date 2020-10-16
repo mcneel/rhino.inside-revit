@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -110,8 +111,7 @@ namespace RhinoInside.Revit.GH.Components
         else
         {
           var name = Path.GetFileNameWithoutExtension(filePath);
-          using (var collector = new DB.FilteredElementCollector(doc).OfClass(typeof(DB.Family)))
-            family = collector.Cast<DB.Family>().Where(x => x.Name == name).FirstOrDefault();
+          doc.TryGetFamily(name, out family);
 
           if (family is object && overrideFamily == false)
             AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Family '{name}' already loaded!");

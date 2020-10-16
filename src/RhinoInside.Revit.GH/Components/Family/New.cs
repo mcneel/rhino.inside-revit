@@ -539,11 +539,7 @@ namespace RhinoInside.Revit.GH.Components
       var geometry = new List<IGH_GeometricGoo>();
       var updateGeometry = !(!DA.GetDataList("Geometry", geometry) && Params.Input[Params.IndexOfInputParam("Geometry")].SourceCount == 0);
 
-      var family = default(DB.Family);
-      using (var collector = new DB.FilteredElementCollector(doc).OfClass(typeof(DB.Family)))
-        family = collector.Cast<DB.Family>().Where(x => x.Name == name).FirstOrDefault();
-
-      bool familyIsNew = family is null;
+      bool familyIsNew = !doc.TryGetFamily(name, out var family, categoryId);
 
       var templatePath = string.Empty;
       if (familyIsNew)
