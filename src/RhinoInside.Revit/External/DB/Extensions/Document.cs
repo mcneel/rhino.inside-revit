@@ -20,6 +20,30 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return true;
     }
 
+    public static Guid GetFingerprintGUID(this Document doc)
+    {
+      if (doc?.IsValidObject != true)
+        return Guid.Empty;
+
+      return ExportUtils.GetGBXMLDocumentId(doc);
+    }
+
+    private static int seed = 0;
+    private static readonly Dictionary<Guid, int> DocumentsSessionDictionary = new Dictionary<Guid, int>();
+
+    public static int DocumentSessionId(Guid key)
+    {
+      if (key == Guid.Empty)
+        throw new ArgumentException("Invalid argument value", nameof(key));
+
+      if (DocumentsSessionDictionary.TryGetValue(key, out var value))
+        return value;
+
+      DocumentsSessionDictionary.Add(key, ++seed);
+      return seed;
+    }
+
+    #region File
     public static string GetFilePath(this Document doc)
     {
       if (doc is null)
@@ -44,29 +68,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return modelPath.Compare(new FilePath(doc.PathName)) == 0;
     }
 
-    public static Guid GetFingerprintGUID(this Document doc)
-    {
-      if (doc?.IsValidObject != true)
-        return Guid.Empty;
+    #endregion
 
-      return ExportUtils.GetGBXMLDocumentId(doc);
-    }
-
-    private static int seed = 0;
-    private static readonly Dictionary<Guid, int> DocumentsSessionDictionary = new Dictionary<Guid, int>();
-
-    public static int DocumentSessionId(Guid key)
-    {
-      if (key == Guid.Empty)
-        throw new ArgumentException("Invalid argument value", nameof(key));
-
-      if (DocumentsSessionDictionary.TryGetValue(key, out var value))
-        return value;
-
-      DocumentsSessionDictionary.Add(key, ++seed);
-      return seed;
-    }
-
+    #region ElementId
     internal static bool TryGetDocument(this IEnumerable<Document> set, Guid guid, out Document document, Document activeDBDocument)
     {
       if (guid != Guid.Empty)
@@ -184,7 +188,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
     /// <summary>
-    /// Compare two <see cref="Autodesk.Revit.DB.Reference"/> objects to know it are referencing same <see cref="Autodesk.Revit.DB.Element"/>
+    /// Compare two <see cref="Autodesk.Revit.DB.Reference"/> objects to know it are referencing same <see cref="Autodesk.Revit.Element"/>
     /// </summary>
     /// <param name="doc"></param>
     /// <param name="x"></param>
@@ -207,7 +211,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       return doc.GetElement(reference) as T;
     }
+    #endregion
 
+    #region Category
     internal static Category AsCategory(Element element)
     {
       if (element?.GetType() == typeof(Element))
@@ -325,7 +331,44 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return BuiltInCategoriesWithParameters;
     }
+    #endregion
 
+    #region Family
+    public static bool TryGetFamily(this Document doc, string name, out Family family, ElementId clueCategoryId = default)
+    {
+      if (clueCategoryId.IsValid())
+      {
+        {
+          // We use categoryId as a clue too speed up search.
+          using (var smallSet = new ElementCategoryFilter(clueCategoryId, false))
+          {
+            using (var collector = new FilteredElementCollector(doc).OfClass(typeof(Family)).WherePasses(smallSet))
+              family = collector.Where(x => x.Name == name).FirstOrDefault() as Family;
+          }
+        }
+
+        if (family is null)
+        {
+          // We look into other categories that are not 'clueCategoryId'.
+          using (var bigSet = new ElementCategoryFilter(clueCategoryId, true))
+          {
+            // We use categoryId as a clue too speed up search.
+            using (var collector = new FilteredElementCollector(doc).OfClass(typeof(Family)).WherePasses(bigSet))
+              family = collector.Where(x => x.Name == name).FirstOrDefault() as Family;
+          }
+        }
+      }
+      else
+      {
+        using (var collector = new FilteredElementCollector(doc).OfClass(typeof(Family)))
+          family = collector.Where(x => x.Name == name).FirstOrDefault() as Family;
+      }
+
+      return family is object;
+    }
+    #endregion
+
+    #region Level
     public static Level FindLevelByElevation(this Document doc, double elevation)
     {
       Level level = null;
@@ -391,7 +434,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
       return level;
     }
+    #endregion
 
+    #region View
     /// <summary>
     /// Gets the active Graphical <see cref="Autodesk.Revit.DB.View"/> of the provided <see cref="Autodesk.Revit.DB.Document"/>.
     /// </summary>
@@ -438,7 +483,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
         return activeView;
       }
     });
+    #endregion
 
+    #region ElementType
     static readonly Guid PurgePerformanceAdviserRuleId = new Guid("E8C63650-70B7-435A-9010-EC97660C1BDA");
     public static bool GetPurgableElementTypes(this Document doc, out ICollection<ElementId> purgableTypeIds)
     {
@@ -463,5 +510,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
       purgableTypeIds = default;
       return false;
     }
+    #endregion
   }
 }
