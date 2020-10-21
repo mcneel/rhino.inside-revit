@@ -127,7 +127,6 @@ namespace RhinoInside.Revit.GH.Parameters
       }
       else
       {
-        document = default;
         if (!DA.GetData(_Document_, ref document) || document is null)
           return false;
 

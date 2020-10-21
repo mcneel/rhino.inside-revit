@@ -78,7 +78,7 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       base.ClearData();
 
-      if (PersistentDataCount == 0)
+      if (PersistentData.IsEmpty)
         return;
 
       foreach (var goo in PersistentData.OfType<T>())
