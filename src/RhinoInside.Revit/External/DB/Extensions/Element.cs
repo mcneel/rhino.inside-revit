@@ -6,22 +6,36 @@ using Autodesk.Revit.DB.Architecture;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
-  public static class ElementExtension
+  internal static class ElementEqualityComparer
   {
-    public static bool IsSameElement(this Element self, Element other)
+    public static readonly IEqualityComparer<Element> InterDocument = new InterDocumentComparer();
+    public static readonly IEqualityComparer<Element> SameDocument = new SameDocumentComparer();
+
+    struct SameDocumentComparer : IEqualityComparer<Element>
+    {
+      bool IEqualityComparer<Element>.Equals(Element x, Element y) => ReferenceEquals(x, y) || x.Id == y.Id;
+      int IEqualityComparer<Element>.GetHashCode(Element obj) => obj.Id.IntegerValue;
+    }
+
+    struct InterDocumentComparer : IEqualityComparer<Element>
+    {
+      bool IEqualityComparer<Element>.Equals(Element x, Element y) => (ReferenceEquals(x, y) || x.Id == y.Id) && x.Document.Equals(y.Document);
+      int IEqualityComparer<Element>.GetHashCode(Element obj) => obj.Id.IntegerValue ^ obj.Document.GetHashCode();
+    }
+
+    public static bool Equivalent(this Element self, Element other)
     {
       if (ReferenceEquals(self, other))
         return true;
 
       return self.Id == other?.Id && self.Document.Equals(other?.Document);
     }
+  }
 
-    [Obsolete]
-    public static GeometryElement GetGeometry(this Element element, ViewDetailLevel viewDetailLevel, out Options options)
-    {
-      options = new Options { ComputeReferences = true, DetailLevel = viewDetailLevel };
-      return GetGeometry(element, options);
-    }
+  public static class ElementExtension
+  {
+    [Obsolete("Obsolete since 2020-10-21. Please use ElementEqualityComparer.Equivalent.")]
+    public static bool IsSameElement(this Element self, Element other) => ElementEqualityComparer.Equivalent(self, other);
 
     public static GeometryElement GetGeometry(this Element element, Options options)
     {
