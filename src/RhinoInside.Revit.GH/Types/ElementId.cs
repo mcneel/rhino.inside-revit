@@ -2,7 +2,6 @@ using System;
 using System.ComponentModel;
 using System.Linq;
 using GH_IO.Serialization;
-using Grasshopper.Kernel.Graphs;
 using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.External.UI.Extensions;
@@ -74,6 +73,7 @@ namespace RhinoInside.Revit.GH.Types
         return value;
       }
     }
+
     protected virtual void ResetValue()
     {
       value = default;

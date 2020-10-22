@@ -52,6 +52,13 @@ namespace RhinoInside.Revit.GH.Types
         return !(element.get_Geometry(options) is null);
     }
 
+    protected override void SubInvalidateGraphics()
+    {
+      GeometryPreview = null;
+
+      base.SubInvalidateGraphics();
+    }
+
     public override BoundingBox GetBoundingBox(Transform xform)
     {
       if (!(Value is DB.Element element))
@@ -387,11 +394,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_PreviewMeshData
-    void IGH_PreviewMeshData.DestroyPreviewMeshes()
-    {
-      GeometryPreview = null;
-      clippingBox = null;
-    }
+    void IGH_PreviewMeshData.DestroyPreviewMeshes() => SubInvalidateGraphics();
 
     Mesh[] IGH_PreviewMeshData.GetPreviewMeshes()
     {

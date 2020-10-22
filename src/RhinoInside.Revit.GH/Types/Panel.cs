@@ -46,6 +46,7 @@ namespace RhinoInside.Revit.GH.Types
         )
         {
           AssertValidDocument(value.Document, nameof(Type));
+          InvalidateGraphics();
 
           host.ChangeTypeId(hostType.Id);
         }

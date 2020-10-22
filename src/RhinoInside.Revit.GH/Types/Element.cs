@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Display;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
@@ -25,6 +24,21 @@ namespace RhinoInside.Revit.GH.Types
     public static explicit operator DB.Element(Element value) => value?.Value;
 
     public new DB.Element Value => base.Value as DB.Element;
+
+    protected void InvalidateGraphics()
+    {
+      Debug.Assert(Document.IsModifiable);
+
+      SubInvalidateGraphics();
+    }
+
+    protected virtual void SubInvalidateGraphics() { }
+
+    protected void AssertValidDocument(DB.Document doc, string paramName)
+    {
+      if (!(doc?.Equals(Document) ?? false))
+        throw new System.ArgumentException("Invalid Document", paramName);
+    }
 
     public static Element FromValue(object data)
     {
@@ -155,6 +169,13 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
+    protected override void ResetValue()
+    {
+      SubInvalidateGraphics();
+
+      base.ResetValue();
+    }
+
     public Element() : base() { }
     internal Element(DB.Document doc, DB.ElementId id) : base(doc, id) { }
     protected Element(DB.Element element)              : base(element) { }
@@ -251,12 +272,6 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    protected void AssertValidDocument(DB.Document doc, string paramName)
-    {
-      if (!(doc?.Equals(Document) ?? false))
-        throw new System.ArgumentException("Invalid Document", paramName);
-    }
-
     #region Properties
     public bool CanDelete => IsValid && DB.DocumentValidation.CanDeleteElement(Document, Id);
 
@@ -276,7 +291,7 @@ namespace RhinoInside.Revit.GH.Types
       set
       {
         if (value is object && Value is DB.Element element && element.Name != value)
-         element.Name = value;
+          element.Name = value;
       }
     }
 
@@ -290,11 +305,12 @@ namespace RhinoInside.Revit.GH.Types
       get => ElementType.FromElementId(Document, Value?.GetTypeId()) as ElementType;
       set
       {
-        if (value is object)
+        if (value is object && Value is DB.Element element)
         {
-          AssertValidDocument(value?.Document, nameof(Type));
+          AssertValidDocument(value.Document, nameof(Type));
+          InvalidateGraphics();
 
-          Value?.ChangeTypeId(value.Id);
+          element.ChangeTypeId(value.Id);
         }
       }
     }
