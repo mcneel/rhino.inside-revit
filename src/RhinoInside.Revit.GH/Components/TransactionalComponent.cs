@@ -187,6 +187,7 @@ namespace RhinoInside.Revit.GH.Components
 
     // Override to add handled failures to your component (Order is important).
     protected virtual IEnumerable<DB.FailureDefinitionId> FailureDefinitionIdsToFix => null;
+    protected virtual bool FixUnhandledFailures => true;
 
     DB.FailureProcessingResult FixFailures(DB.FailuresAccessor failuresAccessor, IEnumerable<DB.FailureDefinitionId> failureIds)
     {
@@ -227,20 +228,18 @@ namespace RhinoInside.Revit.GH.Components
       if (failuresAccessor.GetSeverity() >= DB.FailureSeverity.Error)
       {
         // Handled failures in order
+        if (FailureDefinitionIdsToFix is IEnumerable<DB.FailureDefinitionId> failureDefinitionIdsToFix)
         {
-          var failureDefinitionIdsToFix = FailureDefinitionIdsToFix;
-          if (failureDefinitionIdsToFix != null)
-          {
-            var result = FixFailures(failuresAccessor, failureDefinitionIdsToFix);
-            if (result != DB.FailureProcessingResult.Continue)
-              return result;
-          }
+          var result = FixFailures(failuresAccessor, failureDefinitionIdsToFix);
+          if (result != DB.FailureProcessingResult.Continue)
+            return result;
         }
 
         // Unhandled failures in incomming order
+        if(FixUnhandledFailures)
         {
-          var failureDefinitionIdsToFix = failuresAccessor.GetFailureMessages().GroupBy(x => x.GetFailureDefinitionId()).Select(x => x.Key);
-          var result = FixFailures(failuresAccessor, failureDefinitionIdsToFix);
+          var unhandledFailureDefinitionIds = failuresAccessor.GetFailureMessages().GroupBy(x => x.GetFailureDefinitionId()).Select(x => x.Key);
+          var result = FixFailures(failuresAccessor, unhandledFailureDefinitionIds);
           if (result != DB.FailureProcessingResult.Continue)
             return result;
         }
