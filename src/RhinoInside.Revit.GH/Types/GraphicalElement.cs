@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
@@ -53,6 +55,13 @@ namespace RhinoInside.Revit.GH.Types
       );
     }
 
+    protected override void SubInvalidateGraphics()
+    {
+      clippingBox = default;
+
+      base.SubInvalidateGraphics();
+    }
+
     #region IGH_GraphicalElement
     public bool? ViewSpecific => Value?.ViewSpecific;
     public View OwnerView => View.FromElementId(Document, Value?.OwnerViewId) as View;
@@ -78,7 +87,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_PreviewData
-    protected BoundingBox? clippingBox;
+    private BoundingBox? clippingBox;
     public virtual BoundingBox ClippingBox
     {
       get
@@ -301,6 +310,8 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (Value is DB.Element element)
       {
+        InvalidateGraphics();
+
         GetLocation(out var origin, out var basisX, out var basisY);
         var basisZ = basisX.CrossProduct(basisY);
 
@@ -340,14 +351,20 @@ namespace RhinoInside.Revit.GH.Types
 
     public virtual Curve Curve
     {
-      get
-      {
-        if (!(Value is DB.Element element))
-          return default;
-
-        return element?.Location is DB.LocationCurve curveLocation ?
+      get => Value?.Location is DB.LocationCurve curveLocation ?
           curveLocation.Curve.ToCurve() :
-          null;
+          default;
+      set
+      {
+        if (value is object && Value is DB.Element element)
+        {
+          if (element.Location is DB.LocationCurve locationCurve)
+          {
+            InvalidateGraphics();
+            locationCurve.Curve = value.ToCurve();
+          }
+          else throw new InvalidOperationException("Curve can not be set for this element.");
+        }
       }
     }
 
@@ -369,7 +386,7 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         return Value is DB.Element element && element.GetType().GetProperty("Flipped") is PropertyInfo Flipped ?
-          (bool?) Flipped.GetValue(element):
+          (bool?) Flipped.GetValue(element) :
           default;
       }
       set
@@ -383,7 +400,10 @@ namespace RhinoInside.Revit.GH.Types
             throw new InvalidOperationException("Facing can not be flipped for this element.");
 
           if ((bool) Flipped.GetValue(element) != value)
+          {
+            InvalidateGraphics();
             Flip.Invoke(element, new object[] { });
+          }
         }
       }
     }
@@ -421,6 +441,118 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
     }
+    #endregion
+
+    #region Joins
+    public virtual bool? IsJoinAllowedAtStart
+    {
+      get => default;
+      set { if (value is object) throw new InvalidOperationException("Join at start is not valid for this elemenmt."); }
+    }
+    public virtual bool? IsJoinAllowedAtEnd
+    {
+      get => default;
+      set { if (value is object) throw new InvalidOperationException("Join at end is not valid for this elemenmt."); }
+    }
+
+    HashSet<DB.Element> GetJoinedElements()
+    {
+      bool IsJoinedTo(DB.Element element, DB.ElementId id)
+      {
+        if (element.Location is DB.LocationCurve elementLocation)
+        {
+          for (int i = 0; i < 2; i++)
+          {
+            foreach (var joinned in elementLocation.get_ElementsAtJoin(i).Cast<DB.Element>())
+            {
+              if (joinned.Id == id)
+                return true;
+            }
+          }
+        }
+
+        return false;
+      }
+
+      var result = new HashSet<DB.Element>(ElementEqualityComparer.SameDocument);
+
+      if (Value.Location is DB.LocationCurve valueLocation)
+      {
+        // Get joins at ends
+        for (int i = 0; i < 2; i++)
+        {
+          foreach (var join in valueLocation.get_ElementsAtJoin(i).Cast<DB.Element>())
+          {
+            if (join.Id != Id)
+              result.Add(join);
+          }
+        }
+
+        // Find joins at mid
+        using (var collector = new DB.FilteredElementCollector(Document))
+        {
+          var elementCollector = collector.OfClass(Value.GetType()).OfCategoryId(Value.Category.Id).
+            WherePasses(new DB.BoundingBoxIntersectsFilter(Boundingbox.ToOutline()));
+
+          foreach (var element in elementCollector)
+          {
+            if(!result.Contains(element) && element.Id != Id && IsJoinedTo(element, Id))
+              result.Add(element);
+          }
+        }
+      }
+
+      return result;
+    }
+
+    class DisableJoinsDisposable : IDisposable
+    {
+      readonly List<(GraphicalElement, bool?, bool?)> items = new List<(GraphicalElement, bool?, bool?)>();
+
+      internal DisableJoinsDisposable(GraphicalElement e)
+      {
+        foreach (var joinElement in e.GetJoinedElements())
+        {
+          if (GraphicalElement.FromElement(joinElement) is GraphicalElement join)
+          {
+            var start = join.IsJoinAllowedAtStart;
+            var end = join.IsJoinAllowedAtEnd;
+            if (start.HasValue || end.HasValue)
+            {
+              if (start.HasValue) join.IsJoinAllowedAtStart = false;
+              if (end.HasValue) join.IsJoinAllowedAtEnd = false;
+              items.Add((join, start, end));
+            }
+          }
+        }
+
+        {
+          var start = e.IsJoinAllowedAtStart;
+          var end = e.IsJoinAllowedAtEnd;
+          if (start.HasValue || end.HasValue)
+          {
+            if (start.HasValue) e.IsJoinAllowedAtStart = false;
+            if (end.HasValue) e.IsJoinAllowedAtEnd = false;
+            items.Add((e, start, end));
+          }
+        }
+      }
+
+      void IDisposable.Dispose()
+      {
+        foreach (var item in items)
+        {
+          item.Item1.IsJoinAllowedAtStart = item.Item2;
+          item.Item1.IsJoinAllowedAtEnd   = item.Item3;
+        }
+      }
+    }
+
+    /// <summary>
+    /// Disables this element joins until returned <see cref="IDisposable"/> is disposed.
+    /// </summary>
+    /// <returns>An <see cref="IDisposable"/> that should be disposed to restore this element joins state.</returns>
+    public IDisposable DisableJoinsScope() => new DisableJoinsDisposable(this); 
     #endregion
   }
 }

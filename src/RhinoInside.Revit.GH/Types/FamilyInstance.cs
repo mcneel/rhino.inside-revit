@@ -175,8 +175,11 @@ namespace RhinoInside.Revit.GH.Types
           if (!instance.CanFlipFacing)
             throw new InvalidOperationException("Facing can not be flipped for this element.");
 
-          if(instance.FacingFlipped != value)
+          if (instance.FacingFlipped != value)
+          {
+            InvalidateGraphics();
             instance.flipFacing();
+          }
         }
       }
     }
@@ -198,7 +201,10 @@ namespace RhinoInside.Revit.GH.Types
             throw new InvalidOperationException("Hand can not be flipped for this element.");
 
           if (instance.HandFlipped != value)
+          {
+            InvalidateGraphics();
             instance.flipHand();
+          }
         }
       }
     }
@@ -220,7 +226,58 @@ namespace RhinoInside.Revit.GH.Types
             throw new InvalidOperationException("Work Plane can not be flipped for this element.");
 
           if (instance.IsWorkPlaneFlipped != value)
+          {
+            InvalidateGraphics();
             instance.IsWorkPlaneFlipped = value.Value;
+          }
+        }
+      }
+    }
+    #endregion
+
+    #region Joins
+    public override bool? IsJoinAllowedAtStart
+    {
+      get => Value is DB.FamilyInstance frame && frame.StructuralType != DB.Structure.StructuralType.NonStructural ?
+        (bool?) DB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(frame, 0) :
+        default;
+
+      set
+      {
+        if (value is object &&  Value is DB.FamilyInstance frame)
+        {
+          if (frame.StructuralType != DB.Structure.StructuralType.NonStructural)
+            throw new InvalidOperationException("Join at start can not be set for this element.");
+
+          InvalidateGraphics();
+
+          if (value == true)
+            DB.Structure.StructuralFramingUtils.AllowJoinAtEnd(frame, 0);
+          else
+            DB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(frame, 0);
+        }
+      }
+    }
+
+    public override bool? IsJoinAllowedAtEnd
+    {
+      get => Value is DB.FamilyInstance frame && frame.StructuralType != DB.Structure.StructuralType.NonStructural ?
+        (bool?) DB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(frame, 1) :
+        default;
+
+      set
+      {
+        if (value is object && Value is DB.FamilyInstance frame)
+        {
+          if (frame.StructuralType != DB.Structure.StructuralType.NonStructural)
+            throw new InvalidOperationException("Join at end can not be set for this element.");
+
+          InvalidateGraphics();
+
+          if (value == true)
+            DB.Structure.StructuralFramingUtils.AllowJoinAtEnd(frame, 1);
+          else
+            DB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(frame, 1);
         }
       }
     }

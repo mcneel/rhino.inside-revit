@@ -16,6 +16,7 @@ namespace RhinoInside.Revit.GH.Types
     public Wall() { }
     public Wall(DB.Wall host) : base(host) { }
 
+    #region Location
     public override Plane Location
     {
       get
@@ -32,41 +33,112 @@ namespace RhinoInside.Revit.GH.Types
 
         return base.Location;
       }
+    }
 
+    public override Vector3d FacingOrientation => Value?.Flipped == true ? -Location.YAxis : Location.YAxis;
+
+    public static bool IsValidCurve(Curve curve, out string log)
+    {
+      if (!curve.IsValidWithLog(out log)) return false;
+
+#if REVIT_2020
+      if
+      (
+        !(curve.IsLinear(Revit.VertexTolerance * Revit.ModelUnits) || curve.IsArc(Revit.VertexTolerance * Revit.ModelUnits) || curve.IsEllipse(Revit.VertexTolerance * Revit.ModelUnits)) ||
+        !curve.TryGetPlane(out var axisPlane, Revit.VertexTolerance * Revit.ModelUnits) ||
+        axisPlane.ZAxis.IsParallelTo(Vector3d.ZAxis) == 0
+      )
+      {
+        log = "Curve should be a horizontal line, arc or ellipse curve.";
+        return false;
+      }
+#else
+      if
+      (
+        !(curve.IsLinear(Revit.VertexTolerance * Revit.ModelUnits) || curve.IsArc(Revit.VertexTolerance * Revit.ModelUnits)) ||
+        !curve.TryGetPlane(out var axisPlane, Revit.VertexTolerance * Revit.ModelUnits) ||
+        axisPlane.ZAxis.IsParallelTo(Vector3d.ZAxis) == 0
+      )
+      {
+        log = "Curve should be a horizontal line or arc curve.";
+        return false;
+      }
+#endif
+
+      return true;
+    }
+
+    public override Curve Curve
+    {
       set
       {
-        var joinTypes = new DB.JoinType[2] { DB.JoinType.None, DB.JoinType.None };
-
-        if (Value is DB.Wall wall && wall.Location is DB.LocationCurve location)
+        if (value is object && Value is DB.Wall wall && wall.Location is DB.LocationCurve)
         {
-          for (int end = 0; end < 2; ++end)
-          {
-            if (DB.WallUtils.IsWallJoinAllowedAtEnd(wall, end))
-            {
-              joinTypes[end] = location.get_JoinType(end);
-              DB.WallUtils.DisallowWallJoinAtEnd(wall, end);
-            }
-          }
-        }
+          if (!IsValidCurve(value, out var log))
+            throw new ArgumentException(nameof(Curve), log);
 
-        base.Location = value;
-
-        if (Value is DB.Wall newWall && newWall.Location is DB.LocationCurve newLocation)
-        {
-          for (int end = 0; end < 2; ++end)
+          switch (Curve)
           {
-            if(joinTypes[end] != DB.JoinType.None)
-            {
-              DB.WallUtils.AllowWallJoinAtEnd(newWall, end);
-              newLocation.set_JoinType(end, joinTypes[end]);
-            }
+            case LineCurve _:
+              if (value.TryGetLine(out var valueLine, Revit.VertexTolerance * Revit.ModelUnits))
+                base.Curve = new LineCurve(valueLine);
+              else
+                throw new ArgumentException(nameof(Curve), "Curve should be a line like curve.");
+              break;
+            case ArcCurve _:
+              if (value.TryGetArc(out var valueArc, Revit.VertexTolerance * Revit.ModelUnits))
+                base.Curve = new ArcCurve(valueArc);
+              else
+                throw new ArgumentException(nameof(Curve), "Curve should be an arc like curve.");
+              break;
+            case NurbsCurve _:
+              if (value.TryGetEllipse(out var _, Revit.VertexTolerance * Revit.ModelUnits))
+                base.Curve = value;
+              else
+                throw new ArgumentException(nameof(Curve), "Curve should be an ellipse like curve.");
+              break;
           }
         }
       }
     }
+    #endregion
 
-    public override Curve Curve => Value?.Location is DB.LocationCurve curveLocation ?
-      curveLocation.Curve.ToCurve() :
-      default;
+    #region Joins
+    public override bool? IsJoinAllowedAtStart
+    {
+      get =>  Value is DB.Wall wall ?
+        DB.WallUtils.IsWallJoinAllowedAtEnd(wall, 0) :
+        default;
+
+      set
+      {
+        if (value is object && Value is DB.Wall wall && value != IsJoinAllowedAtEnd)
+        {
+          if (value == true)
+            DB.WallUtils.AllowWallJoinAtEnd(wall, 0);
+          else
+            DB.WallUtils.DisallowWallJoinAtEnd(wall, 0);
+        }
+      }
+    }
+
+    public override bool? IsJoinAllowedAtEnd
+    {
+      get => Value is DB.Wall wall ?
+        DB.WallUtils.IsWallJoinAllowedAtEnd(wall, 1) :
+        default;
+
+      set
+      {
+        if (value is object && Value is DB.Wall wall && value != IsJoinAllowedAtEnd)
+        {
+          if (value == true)
+            DB.WallUtils.AllowWallJoinAtEnd(wall, 1);
+          else
+            DB.WallUtils.DisallowWallJoinAtEnd(wall, 1);
+        }
+      }
+    }
+    #endregion
   }
 }
