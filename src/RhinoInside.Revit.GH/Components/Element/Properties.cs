@@ -320,9 +320,6 @@ namespace RhinoInside.Revit.GH.Components
           StartTransaction(element.Document);
 
           element.Type = type;
-
-          if (element is IGH_PreviewMeshData preview)
-            preview.DestroyPreviewMeshes();
         }
       }
 

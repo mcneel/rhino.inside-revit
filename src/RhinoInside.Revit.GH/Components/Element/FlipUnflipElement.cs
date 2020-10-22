@@ -174,14 +174,10 @@ namespace RhinoInside.Revit.GH.Components
       if (facing.HasValue || hand.HasValue || workplane.HasValue)
       {
         StartTransaction(element.Document);
-        {
-          element.FacingFlipped = facing;
-          element.HandFlipped = hand;
-          element.WorkPlaneFlipped = workplane;
 
-          if (element is IGH_PreviewMeshData preview)
-            preview.DestroyPreviewMeshes();
-        }
+        element.FacingFlipped = facing;
+        element.HandFlipped = hand;
+        element.WorkPlaneFlipped = workplane;
       }
 
       DA.SetData("Element", element);
