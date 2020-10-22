@@ -30,15 +30,15 @@ Revit allows a user to create a series of custom parameters and apply them globa
 
 ## Inspecting Parameters
 
-Let's bring a single element into a new Grasshopper definition. We can use the *Element.Decompose* component to inspect the element properties.
+Let's bring a single element into a new Grasshopper definition. We can use the {% include ltr/comp.html uuid='fad33c4b' %} component to inspect the element properties.
 
 ![]({{ "/static/images/guides/revit-params02.png" | prepend: site.baseurl }})
 
-Now hold {% include ltr/kb_key.html key='Shift' %} and double-click on the *Element.Decompose* component to see a list of all parameters associated with given element
+Now hold {% include ltr/kb_key.html key='Shift' %} and double-click on the {% include ltr/comp.html uuid='fad33c4b' %} component to see a list of all parameters associated with given element
 
 ![]({{ "/static/images/guides/revit-params03.png" | prepend: site.baseurl }})
 
-You can connect any of these properties, then {% include ltr/kb_key.html key='Ctrl' %} and double-click on the *Element.Decompose* component to collapse it to normal size. The component is smart to keep the connected parameters shown in collapsed mode.
+You can connect any of these properties, then {% include ltr/kb_key.html key='Ctrl' %} and double-click on the {% include ltr/comp.html uuid='fad33c4b' %} component to collapse it to normal size. The component is smart to keep the connected parameters shown in collapsed mode.
 
 ![]({{ "/static/images/guides/revit-params04.png" | prepend: site.baseurl }})
 
@@ -52,7 +52,7 @@ To find a built-in parameter associated with an element parameter, pass the elem
 
 ## Reading Parameter Values
 
-A language-safe way to query the values for specific parameter is to use the *Parameter Key* component from the Revit Parameters panel
+A language-safe way to query the values for specific parameter is to use the {% include ltr/comp.html uuid='a550f532' %} parameter from the Revit Parameters panel
 
 ![]({{ "/static/images/guides/revit-params07a.png" | prepend: site.baseurl }})
 
@@ -60,28 +60,27 @@ After adding this component to the canvas, you can Right-Click on the component 
 
 ![]({{ "/static/images/guides/revit-params07b.png" | prepend: site.baseurl }})
 
-The output of this component can be passed to the *Element.ParameterGet* to query the value
+The output of this component can be passed to the {% include ltr/comp.html uuid='d86050f2' %} to query the value
 
 ![]({{ "/static/images/guides/revit-params07c.png" | prepend: site.baseurl }})
 
-Another way of reading parameter values is by specifying the parameter name to the *Element.ParameterGet* component to get the parameter value.
+Another way of reading parameter values is by specifying the parameter name to the {% include ltr/comp.html uuid='d86050f2' %} component to get the parameter value.
 
 ![]({{ "/static/images/guides/revit-params05.png" | prepend: site.baseurl }})
 
 {% include ltr/locale_note.html note='Since we are specifying the name of parameter in a specific language, the definition will break if opened on a Revit with a different language' %}
 
-When working with Shared parameters, you can also pass the parameter GUID to the component
+When working with Shared parameters, you can also pass the parameter UUID to the component
 
 ![]({{ "/static/images/guides/revit-params07.png" | prepend: site.baseurl }})
 
 ## Updating Parameters
 
-Use the *Element.ParameterSet* component to set a parameter value on a Revit element. The component is similar to *Element.ParameterGet* except that is also takes a value to be applied to the parameter. Keep in mind that some parameters are Read-only and their value can not be overridden.
-
+Use the {% include ltr/comp.html uuid='8f1ee110' %} component to set a parameter value on a Revit element. The component is similar to {% include ltr/comp.html uuid='d86050f2' %} except that is also takes a value to be applied to the parameter. Keep in mind that some parameters are Read-only and their value can not be overridden.
 
 ![]({{ "/static/images/guides/revit-params08.png" | prepend: site.baseurl }})
 
-Notice that the *Geometry Element* component is only holding a reference to the Revit element. So when the parameter value is updated by the *Element.ParameterGet* component, it is updated for all the components that is referencing that same element. This is different from what you might be used to when working with Grasshopper outside of Revit context.
+Notice that the {% include ltr/comp.html uuid='ef607c2a' %} component is only holding a reference to the Revit element. So when the parameter value is updated by the {% include ltr/comp.html uuid='d86050f2' %} component, it is updated for all the components that is referencing that same element. This is different from what you might be used to when working with Grasshopper outside of Revit context.
 
 ![]({{ "/static/images/guides/revit-params09.png" | prepend: site.baseurl }})
 
@@ -96,7 +95,7 @@ The components under the *Parameter* panel in Grasshopper, allow you to create n
 
 ![]({{ "/static/images/guides/revit-params10.png" | prepend: site.baseurl }})
 
-Create a new parameter by connecting the parameter name to the *AddParameterKey.ByName* component on the canvas. You can inspect the created parameter using the *ParameterKey.Decompose* component.
+Create a new parameter by connecting the parameter name to the {% include ltr/comp.html uuid='84ab6f3c' %} component on the canvas. You can inspect the created parameter using the {% include ltr/comp.html uuid='3bde5890' %} component.
 
 ![]({{ "/static/images/guides/revit-params11.png" | prepend: site.baseurl }})
 
@@ -104,6 +103,6 @@ Here is how the parameter configuration in Shared Parameters:
 
 ![]({{ "/static/images/guides/revit-params12.png" | prepend: site.baseurl }})
 
-The value of this parameter can later be read by passing the parameter name to the *Element.ParameterGet* component. You can inspect the parameter value using the *ParameterValue.Decompose* component.
+The value of this parameter can later be read by passing the parameter name to the {% include ltr/comp.html uuid='d86050f2' %} component. You can inspect the parameter value using the {% include ltr/comp.html uuid='3bde5890' %} component.
 
 ![]({{ "/static/images/guides/revit-params13.png" | prepend: site.baseurl }})
