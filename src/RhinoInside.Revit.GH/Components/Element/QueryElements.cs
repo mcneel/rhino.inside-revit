@@ -45,8 +45,6 @@ namespace RhinoInside.Revit.GH.Components
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
         return;
 
-      DA.DisableGapLogic();
-
       DB.ElementFilter filter = null;
       if (!DA.GetData("Filter", ref filter))
         return;
