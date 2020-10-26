@@ -69,6 +69,7 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(DB.DatumPlane),              (element)=> new DatumPlane        (element as DB.DatumPlane)        },
       { typeof(DB.Level),                   (element)=> new Level             (element as DB.Level)             },
       { typeof(DB.Grid),                    (element)=> new Grid              (element as DB.Grid)              },
+      { typeof(DB.ReferencePlane),          (element)=> new ReferencePlane    (element as DB.ReferencePlane)    },
       { typeof(DB.SpatialElement),          (element)=> new SpatialElement    (element as DB.SpatialElement)    },
       { typeof(DB.Group),                   (element)=> new Group             (element as DB.Group)             },
       { typeof(DB.HostObject),              (element)=> new HostObject        (element as DB.HostObject)        },

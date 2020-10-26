@@ -40,7 +40,7 @@ namespace RhinoInside.Revit.GH.Components
       if (PreviousStructure is object)
       {
         var unjoinedWalls = PreviousStructure.OfType<Types.Element>().
-                            Select(x => document.GetElement(x)).
+                            Select(x => document.GetElement(x.Id)).
                             OfType<DB.Wall>().
                             Where(x => x.Pinned).
                             Select

@@ -27,6 +27,65 @@ namespace RhinoInside.Revit.GH.Types
 
   public abstract class ElementId : IGH_ElementId, IEquatable<ElementId>
   {
+    #region System.Object
+    public bool Equals(ElementId id) => id?.DocumentGUID == DocumentGUID && id?.UniqueID == UniqueID;
+    public override bool Equals(object obj) => (obj is ElementId id) ? Equals(id) : base.Equals(obj);
+    public override int GetHashCode() => DocumentGUID.GetHashCode() ^ UniqueID.GetHashCode();
+
+    public override sealed string ToString()
+    {
+      if (!IsReferencedElement)
+        return $"{TypeName} : {DisplayName}";
+
+      var tip = IsValid ?
+      (
+        IsElementLoaded ?
+        $"{TypeName} : {DisplayName}" :
+        $"Unresolved {TypeName} : {UniqueID}"
+      ) :
+      $"Invalid {TypeName}";
+
+      using (var Documents = Revit.ActiveDBApplication.Documents)
+      {
+        return
+        (
+          Documents.Size > 1 ?
+          $"{tip} @ {Document?.Title ?? DocumentGUID.ToString()}" :
+          tip
+        );
+      }
+    }
+    #endregion
+
+    #region GH_ISerializable
+    public virtual bool Read(GH_IReader reader)
+    {
+      Id = DB.ElementId.InvalidElementId;
+      Document = null;
+
+      var documentGUID = Guid.Empty;
+      reader.TryGetGuid("DocumentGUID", ref documentGUID);
+      DocumentGUID = documentGUID;
+
+      string uniqueID = string.Empty;
+      reader.TryGetString("UniqueID", ref uniqueID);
+      UniqueID = uniqueID;
+
+      return true;
+    }
+
+    public virtual bool Write(GH_IWriter writer)
+    {
+      if (DocumentGUID != Guid.Empty)
+        writer.SetGuid("DocumentGUID", DocumentGUID);
+
+      if (!string.IsNullOrEmpty(UniqueID))
+        writer.SetString("UniqueID", UniqueID);
+
+      return true;
+    }
+    #endregion
+
     #region IGH_Goo
     public virtual string TypeName => "Revit Model Object";
     public virtual string TypeDescription => "Represents a Revit model object";
@@ -35,119 +94,7 @@ namespace RhinoInside.Revit.GH.Types
     IGH_Goo IGH_Goo.Duplicate() => (IGH_Goo) MemberwiseClone();
     public virtual object ScriptVariable() => Id;
     protected virtual Type ScriptVariableType => typeof(DB.ElementId);
-    public static implicit operator DB.ElementId(ElementId self) { return self.Id; }
-    #endregion
-
-    public void SetValue(DB.Document doc, DB.ElementId id)
-    {
-      if (id == DB.ElementId.InvalidElementId)
-        doc = null;
-
-      Document = doc;
-      DocumentGUID = doc.GetFingerprintGUID();
-
-      Id = id;
-      UniqueID = doc?.GetElement(id)?.UniqueId ??
-                  (
-                    id.IntegerValue < DB.ElementId.InvalidElementId.IntegerValue ?
-                      DBX.UniqueId.Format(Guid.Empty, id.IntegerValue) :
-                      string.Empty
-                  );
-    }
-
-    #region IGH_ElementId
-    DB.Element value = default;
-    public object Value
-    {
-      get
-      {
-        if (value?.IsValidObject == false)
-          ResetValue();
-
-        if (value is null)
-        {
-          if (IsElementLoaded)
-            value = document.GetElement(id);
-        }
-
-        return value;
-      }
-    }
-
-    protected virtual void ResetValue()
-    {
-      value = default;
-    }
-
-    public DB.Reference Reference
-    {
-      get
-      {
-        try { return DB.Reference.ParseFromStableRepresentation(Document, UniqueID); }
-        catch (Autodesk.Revit.Exceptions.ArgumentNullException) { return null; }
-        catch (Autodesk.Revit.Exceptions.ArgumentException) { return null; }
-      }
-    }
-
-    DB.Document document = default;
-    public DB.Document Document
-    {
-      get => document?.IsValidObject != true ? null : document;
-      protected set { document = value; ResetValue(); }
-    }
-
-    DB.ElementId id = DB.ElementId.InvalidElementId;
-    public DB.ElementId Id
-    {
-      get => id;
-      protected set { id = value; ResetValue(); }
-    }
-
-    public Guid DocumentGUID { get; protected set; } = Guid.Empty;
-    public string UniqueID { get; protected set; } = string.Empty;
-    public bool IsReferencedElement => DocumentGUID != Guid.Empty;
-    public bool IsElementLoaded => Document is object && Id is object;
-    #region IGH_ElementId
-    public virtual bool LoadElement()
-    {
-      if (IsReferencedElement && !IsElementLoaded)
-      {
-        Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var doc);
-        Document = doc;
-
-        Document.TryGetElementId(UniqueID, out var id);
-        Id = id;
-      }
-
-      return IsElementLoaded;
-    }
-    #endregion
-
-    public void UnloadElement()
-    {
-      ResetValue();
-
-      if (IsReferencedElement)
-      {
-        Document = default;
-        Id = default;
-      }
-    }
-    #endregion
-
-    public bool Equals(ElementId id) => id?.DocumentGUID == DocumentGUID && id?.UniqueID == UniqueID;
-    public override bool Equals(object obj) => (obj is ElementId id) ? Equals(id) : base.Equals(obj);
-    public override int GetHashCode() => DocumentGUID.GetHashCode() ^ UniqueID.GetHashCode();
-
-    public ElementId() { }
-
-    protected ElementId(DB.Document doc, DB.ElementId id) => SetValue(doc, id);
-
-    protected ElementId(DB.Element element)
-    {
-      SetValue(element?.Document, element?.Id ?? DB.ElementId.InvalidElementId);
-      value = element;
-    }
+    public static explicit operator DB.ElementId(ElementId self) { return self.Id; }
 
     public virtual bool CastFrom(object source)
     {
@@ -313,60 +260,118 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     public virtual IGH_GooProxy EmitProxy() => new Proxy(this);
+    #endregion
 
-    public override sealed string ToString()
+    #region IGH_ElementId
+    DB.Element value = default;
+    public object Value
     {
-      if (!IsReferencedElement)
-        return $"{TypeName} : {DisplayName}";
-
-      var tip = IsValid ?
-      (
-        IsElementLoaded ?
-        $"{TypeName} : {DisplayName}" :
-        $"Unresolved {TypeName} : {UniqueID}"
-      ) :
-      $"Invalid {TypeName}";
-
-      using (var Documents = Revit.ActiveDBApplication.Documents)
+      get
       {
-        return
-        (
-          Documents.Size > 1 ?
-          $"{tip} @ {Document?.Title ?? DocumentGUID.ToString()}" :
-          tip
-        );
+        if (value?.IsValidObject == false)
+          ResetValue();
+
+        if (value is null)
+        {
+          if (IsElementLoaded)
+            value = document.GetElement(id);
+        }
+
+        return value;
       }
     }
 
+    protected internal void SetValue(DB.Document doc, DB.ElementId id)
+    {
+      if (id == DB.ElementId.InvalidElementId)
+        doc = null;
+
+      Document = doc;
+      DocumentGUID = doc.GetFingerprintGUID();
+
+      Id = id;
+      UniqueID = doc?.GetElement(id)?.UniqueId ??
+                  (
+                    id.IntegerValue < DB.ElementId.InvalidElementId.IntegerValue ?
+                      DBX.UniqueId.Format(Guid.Empty, id.IntegerValue) :
+                      string.Empty
+                  );
+    }
+
+    protected virtual void ResetValue()
+    {
+      value = default;
+    }
+
+    public DB.Reference Reference
+    {
+      get
+      {
+        try { return DB.Reference.ParseFromStableRepresentation(Document, UniqueID); }
+        catch (Autodesk.Revit.Exceptions.ArgumentNullException) { return null; }
+        catch (Autodesk.Revit.Exceptions.ArgumentException) { return null; }
+      }
+    }
+
+    DB.Document document = default;
+    public DB.Document Document
+    {
+      get => document?.IsValidObject != true ? null : document;
+      protected set { document = value; ResetValue(); }
+    }
+
+    DB.ElementId id = DB.ElementId.InvalidElementId;
+    public DB.ElementId Id
+    {
+      get => id;
+      protected set { id = value; ResetValue(); }
+    }
+
+    public Guid DocumentGUID { get; protected set; } = Guid.Empty;
+    public string UniqueID { get; protected set; } = string.Empty;
+    public bool IsReferencedElement => DocumentGUID != Guid.Empty;
+    public bool IsElementLoaded => Document is object && Id is object;
+
+    public virtual bool LoadElement()
+    {
+      if (IsReferencedElement && !IsElementLoaded)
+      {
+        Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var doc);
+        Document = doc;
+
+        Document.TryGetElementId(UniqueID, out var id);
+        Id = id;
+      }
+
+      return IsElementLoaded;
+    }
+
+    public void UnloadElement()
+    {
+      ResetValue();
+
+      if (IsReferencedElement)
+      {
+        Document = default;
+        Id = default;
+      }
+    }
+    #endregion
+
+    public ElementId() { }
+
+    protected ElementId(DB.Document doc, DB.ElementId id) => SetValue(doc, id);
+
+    protected ElementId(DB.Element element)
+    {
+      SetValue(element?.Document, element?.Id ?? DB.ElementId.InvalidElementId);
+      value = element;
+    }
+
+    #region Properties
     public virtual string DisplayName => IsReferencedElement ?
       Id is null ? "INVALID" : Id.IntegerValue.ToString() :
       "<None>";
-
-    public virtual bool Read(GH_IReader reader)
-    {
-      Id = DB.ElementId.InvalidElementId;
-      Document = null;
-
-      var documentGUID = Guid.Empty;
-      reader.TryGetGuid("DocumentGUID", ref documentGUID);
-      DocumentGUID = documentGUID;
-
-      string uniqueID = string.Empty;
-      reader.TryGetString("UniqueID", ref uniqueID);
-      UniqueID = uniqueID;
-
-      return true;
-    }
-
-    public virtual bool Write(GH_IWriter writer)
-    {
-      if(DocumentGUID != Guid.Empty)
-        writer.SetGuid("DocumentGUID", DocumentGUID);
-
-      if(!string.IsNullOrEmpty(UniqueID))
-        writer.SetString("UniqueID", UniqueID);
-
-      return true;
-    }
+    #endregion
   }
 }

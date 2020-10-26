@@ -15,8 +15,8 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeName => "Revit Sketch";
     public override string TypeDescription => "Represents a Revit sketch";
     protected override Type ScriptVariableType => typeof(DB.Sketch);
-    public static explicit operator DB.Sketch(Sketch value) => value?.Value;
     public new DB.Sketch Value => base.Value as DB.Sketch;
+    public static explicit operator DB.Sketch(Sketch value) => value?.Value;
 
     public Sketch() : base() { }
     public Sketch(DB.Sketch sketchPlane) : base(sketchPlane) { }
@@ -36,6 +36,26 @@ namespace RhinoInside.Revit.GH.Types
 
       return base.CastFrom(source);
     }
+
+    #region IGH_PreviewData
+    public override void DrawViewportWires(GH_PreviewWireArgs args)
+    {
+      var location = Location;
+      if (!location.IsValid)
+        return;
+
+      GH_Plane.DrawPlane(args.Pipeline, location, Grasshopper.CentralSettings.PreviewPlaneRadius, 4, args.Color, System.Drawing.Color.DarkRed, System.Drawing.Color.DarkGreen);
+
+      foreach(var loop in Profile)
+        args.Pipeline.DrawCurve(loop, args.Color, args.Thickness);
+    }
+
+    public override void DrawViewportMeshes(GH_PreviewMeshArgs args)
+    {
+      if(Region is object)
+        args.Pipeline.DrawBrepShaded(Region, args.Material);
+    }
+    #endregion
 
     #region Location
     public override Plane Location => Value?.SketchPlane.GetPlane().ToPlane() ?? base.Location;
@@ -323,26 +343,6 @@ namespace RhinoInside.Revit.GH.Types
       );
 
       return brep;
-    }
-    #endregion
-
-    #region IGH_PreviewData
-    public override void DrawViewportWires(GH_PreviewWireArgs args)
-    {
-      var bbox = ClippingBox;
-      if (!bbox.IsValid)
-        return;
-
-      GH_Plane.DrawPlane(args.Pipeline, Location, Grasshopper.CentralSettings.PreviewPlaneRadius, 4, args.Color, System.Drawing.Color.DarkRed, System.Drawing.Color.DarkGreen);
-
-      foreach(var loop in Profile)
-        args.Pipeline.DrawCurve(loop, args.Color, args.Thickness);
-    }
-
-    public override void DrawViewportMeshes(GH_PreviewMeshArgs args)
-    {
-      if(Region is object)
-        args.Pipeline.DrawBrepShaded(Region, args.Material);
     }
     #endregion
   }

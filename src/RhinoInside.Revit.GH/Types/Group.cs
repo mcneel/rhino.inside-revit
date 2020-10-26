@@ -11,8 +11,8 @@ namespace RhinoInside.Revit.GH.Types
   {
     public override string TypeDescription => "Represents a Revit group element";
     protected override Type ScriptVariableType => typeof(DB.Group);
-    public static explicit operator DB.Group(Group value) => value?.Value;
     public new DB.Group Value => base.Value as DB.Group;
+    public static explicit operator DB.Group(Group value) => value?.Value;
 
     public Group() { }
     public Group(DB.Group value) : base(value) { }
@@ -31,14 +31,13 @@ namespace RhinoInside.Revit.GH.Types
     #region IGH_PreviewData
     public override void DrawViewportWires(GH_PreviewWireArgs args)
     {
-      var bbox = Boundingbox;
+      var bbox = ClippingBox;
       if (!bbox.IsValid)
         return;
 
       foreach (var edge in bbox.GetEdges() ?? Enumerable.Empty<Line>())
         args.Pipeline.DrawPatternedLine(edge.From, edge.To, args.Color, 0x00003333, args.Thickness);
     }
-    public override void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
     #endregion
   }
 }

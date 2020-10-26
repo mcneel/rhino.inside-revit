@@ -68,7 +68,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_GeometricGoo
-    public BoundingBox Boundingbox => ClippingBox;
+    BoundingBox IGH_GeometricGoo.Boundingbox => BoundingBox;
     Guid IGH_GeometricGoo.ReferenceID
     {
       get => Guid.Empty;
@@ -79,7 +79,18 @@ namespace RhinoInside.Revit.GH.Types
 
     void IGH_GeometricGoo.ClearCaches() => UnloadElement();
     IGH_GeometricGoo IGH_GeometricGoo.DuplicateGeometry() => (IGH_GeometricGoo) MemberwiseClone();
-    public virtual BoundingBox GetBoundingBox(Transform xform) => ClippingBox.GetBoundingBox(xform);
+    public virtual BoundingBox GetBoundingBox(Transform xform)
+    {
+      if (Value is DB.Element)
+      {
+        var bbox = BoundingBox;
+
+        return xform.IsIdentity ? bbox : new BoundingBox(new Point3d[] { bbox.Min, bbox.Max }, xform);
+      }
+
+      return BoundingBox.Unset;
+    }
+
     bool IGH_GeometricGoo.LoadGeometry() => IsElementLoaded || LoadElement();
     bool IGH_GeometricGoo.LoadGeometry(Rhino.RhinoDoc doc) => IsElementLoaded || LoadElement();
     IGH_GeometricGoo IGH_GeometricGoo.Transform(Transform xform) => null;
@@ -88,16 +99,21 @@ namespace RhinoInside.Revit.GH.Types
 
     #region IGH_PreviewData
     private BoundingBox? clippingBox;
-    public virtual BoundingBox ClippingBox
+    BoundingBox IGH_PreviewData.ClippingBox
     {
       get
       {
         if (!clippingBox.HasValue)
-          clippingBox = Value?.get_BoundingBox(null).ToBoundingBox() ?? BoundingBox.Unset;
+          clippingBox = ClippingBox;
 
         return clippingBox.Value;
       }
     }
+
+    /// <summary>
+    /// Not necessarily accurate axis aligned <see cref="Rhino.Geometry.BoundingBox"/> for display.
+    /// </summary>
+    public virtual BoundingBox ClippingBox => BoundingBox;
 
     public virtual void DrawViewportWires(GH_PreviewWireArgs args) { }
     public virtual void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
@@ -211,6 +227,16 @@ namespace RhinoInside.Revit.GH.Types
     #region Location
     public virtual Level Level => default;
 
+    /// <summary>
+    /// Accurate axis aligned <see cref="Rhino.Geometry.BoundingBox"/> for computation.
+    /// </summary>
+    public virtual BoundingBox BoundingBox => Value is DB.Element element ?
+      element.get_BoundingBox(null).ToBoundingBox() :
+      BoundingBox.Unset;
+
+    /// <summary>
+    /// Box aligned to <see cref="Location"/>
+    /// </summary>
     public virtual Box Box
     {
       get
@@ -233,24 +259,20 @@ namespace RhinoInside.Revit.GH.Types
           );
         }
 
-        return new Box(ClippingBox);
+        return Box.Unset;
       }
     }
 
+    /// <summary>
+    /// <see cref="Rhino.Geometry.Plane"/> where this element is located.
+    /// </summary>
     public virtual Plane Location
     {
       get
       {
-        if (!ClippingBox.IsValid) return new Plane
-        (
-          new Point3d(double.NaN, double.NaN, double.NaN),
-          new Vector3d(double.NaN, double.NaN, double.NaN),
-          new Vector3d(double.NaN, double.NaN, double.NaN)
-        );
-
-        var origin = ClippingBox.Center;
-        var axis = Vector3d.XAxis;
-        var perp = Vector3d.YAxis;
+        var origin = new Point3d(double.NaN, double.NaN, double.NaN);
+        var axis = new Vector3d(double.NaN, double.NaN, double.NaN);
+        var perp = new Vector3d(double.NaN, double.NaN, double.NaN);
 
         if (Value is DB.Element element)
         {
@@ -258,6 +280,8 @@ namespace RhinoInside.Revit.GH.Types
           {
             case DB.LocationPoint pointLocation:
               origin = pointLocation.Point.ToPoint3d();
+              axis = Vector3d.XAxis;
+              perp = Vector3d.YAxis;
               try
               {
                 axis.Rotate(pointLocation.Rotation, Vector3d.ZAxis);
@@ -285,6 +309,11 @@ namespace RhinoInside.Revit.GH.Types
                 perp = axis.PerpVector();
               }
 
+              break;
+            default:
+              origin = BoundingBox.Center;
+              axis = Vector3d.XAxis;
+              perp = Vector3d.YAxis;
               break;
           }
         }
@@ -492,7 +521,7 @@ namespace RhinoInside.Revit.GH.Types
         using (var collector = new DB.FilteredElementCollector(Document))
         {
           var elementCollector = collector.OfClass(Value.GetType()).OfCategoryId(Value.Category.Id).
-            WherePasses(new DB.BoundingBoxIntersectsFilter(Boundingbox.ToOutline()));
+            WherePasses(new DB.BoundingBoxIntersectsFilter(BoundingBox.ToOutline()));
 
           foreach (var element in elementCollector)
           {

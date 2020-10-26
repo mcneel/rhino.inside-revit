@@ -1,6 +1,7 @@
 using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
+using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
 using DB = Autodesk.Revit.DB;
 
@@ -30,6 +31,8 @@ namespace RhinoInside.Revit.GH.Types
       return base.CastFrom(source);
     }
 
+    public override BoundingBox GetBoundingBox(Transform xform) => BoundingBox.Unset;
+
     #region IGH_PreviewData
     public override void DrawViewportWires(GH_PreviewWireArgs args)
     {
@@ -37,14 +40,14 @@ namespace RhinoInside.Revit.GH.Types
       if (!location.IsValid)
         return;
 
-      GH_Plane.DrawPlane(args.Pipeline, Location, Grasshopper.CentralSettings.PreviewPlaneRadius, 4, args.Color, System.Drawing.Color.DarkRed, System.Drawing.Color.DarkGreen);
+      GH_Plane.DrawPlane(args.Pipeline, location, Grasshopper.CentralSettings.PreviewPlaneRadius, 4, args.Color, System.Drawing.Color.DarkRed, System.Drawing.Color.DarkGreen);
     }
-
-    public override void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
     #endregion
 
     #region Location
-    public override Rhino.Geometry.Plane Location => Value?.GetPlane().ToPlane() ?? base.Location;
+    public override BoundingBox BoundingBox => BoundingBox.Unset;
+
+    public override Plane Location => Value?.GetPlane().ToPlane() ?? base.Location;
     #endregion
   }
 }

@@ -16,9 +16,9 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public interface IGH_GeometricElement : IGH_GraphicalElement, IGH_PreviewMeshData { }
+  public interface IGH_GeometricElement : IGH_GraphicalElement { }
 
-  public class GeometricElement : GraphicalElement, IGH_GeometricElement
+  public class GeometricElement : GraphicalElement, IGH_GeometricElement, IGH_PreviewMeshData
   {
     public override string TypeDescription => "Represents a Revit geometric element";
 
@@ -61,31 +61,30 @@ namespace RhinoInside.Revit.GH.Types
 
     public override BoundingBox GetBoundingBox(Transform xform)
     {
-      if (!(Value is DB.Element element))
-        return BoundingBox.Unset;
-
-      var bbox = ClippingBox;
-      if (!xform.IsIdentity)
+      if (Value is DB.Element element)
       {
-        bbox.Transform(xform);
-
-        var meshes = TryGetPreviewMeshes();
-        var wires = TryGetPreviewWires();
-        if (meshes is null && wires is null)
-          BuildPreview(element, default, DB.ViewDetailLevel.Medium, out var _, out meshes, out wires);
-
-        if (meshes?.Length > 0 || wires?.Length > 0)
+        if (!xform.IsIdentity)
         {
-          bbox = BoundingBox.Empty;
-          foreach (var mesh in meshes)
-            bbox.Union(mesh.GetBoundingBox(xform));
+          var meshes = TryGetPreviewMeshes();
+          var wires = TryGetPreviewWires();
+          if (meshes is null && wires is null)
+            BuildPreview(element, default, DB.ViewDetailLevel.Medium, out var _, out meshes, out wires);
 
-          foreach (var wire in wires)
-            bbox.Union(wire.GetBoundingBox(xform));
+          if (meshes?.Length > 0 || wires?.Length > 0)
+          {
+            var bbox = BoundingBox.Empty;
+            foreach (var mesh in meshes)
+              bbox.Union(mesh.GetBoundingBox(xform));
+
+            foreach (var wire in wires)
+              bbox.Union(wire.GetBoundingBox(xform));
+
+            return bbox;
+          }
         }
       }
 
-      return bbox;
+      return base.GetBoundingBox(xform);
     }
 
     #region Preview
@@ -408,6 +407,7 @@ namespace RhinoInside.Revit.GH.Types
     IGH_ElementId,
     IEquatable<GeometryObject<X>>,
     IGH_GeometricGoo,
+    IGH_PreviewData,
     IGH_PreviewMeshData
     where X : DB.GeometryObject
   {
@@ -550,6 +550,23 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
+    #region IGH_PreviewData
+    private BoundingBox? clippingBox;
+    BoundingBox IGH_PreviewData.ClippingBox
+    {
+      get
+      {
+        if (!clippingBox.HasValue)
+          clippingBox = ClippingBox;
+
+        return clippingBox.Value;
+      }
+    }
+
+    public virtual void DrawViewportWires(GH_PreviewWireArgs args) { }
+    public virtual void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
+    #endregion
+
     #region IGH_PreviewMeshData
     protected Point   point = null;
     protected Curve[] wires = null;
@@ -572,6 +589,16 @@ namespace RhinoInside.Revit.GH.Types
       DocumentGUID = doc.GetFingerprintGUID();
       UniqueID = reference.ConvertToStableRepresentation(doc);
     }
+
+    /// <summary>
+    /// Accurate axis aligned <see cref="Rhino.Geometry.BoundingBox"/> for computation.
+    /// </summary>
+    public virtual BoundingBox BoundingBox => GetBoundingBox(Transform.Identity);
+
+    /// <summary>
+    /// Not necessarily accurate axis aligned <see cref="Rhino.Geometry.BoundingBox"/> for display.
+    /// </summary>
+    public virtual BoundingBox ClippingBox => BoundingBox;
   }
 
   public class Vertex : GeometryObject<DB.Point>, IGH_PreviewData
@@ -682,8 +709,6 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region IGH_PreviewData
-    BoundingBox IGH_PreviewData.ClippingBox => GetBoundingBox(Transform.Identity);
-
     void IGH_PreviewData.DrawViewportWires(GH_PreviewWireArgs args)
     {
       if (!IsValid)
@@ -692,8 +717,6 @@ namespace RhinoInside.Revit.GH.Types
       if (Point is Point point)
         args.Pipeline.DrawPoint(point.Location, CentralSettings.PreviewPointStyle, CentralSettings.PreviewPointRadius, args.Color);
     }
-
-    void IGH_PreviewData.DrawViewportMeshes(GH_PreviewMeshArgs args) { }
     #endregion
   }
 
@@ -766,8 +789,6 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region IGH_PreviewData
-    BoundingBox IGH_PreviewData.ClippingBox => GetBoundingBox(Transform.Identity);
-
     void IGH_PreviewData.DrawViewportWires(GH_PreviewWireArgs args)
     {
       if (!IsValid)
@@ -776,8 +797,6 @@ namespace RhinoInside.Revit.GH.Types
       if(Curve is Curve curve)
         args.Pipeline.DrawCurve(curve, args.Color, args.Thickness);
     }
-
-    void IGH_PreviewData.DrawViewportMeshes(GH_PreviewMeshArgs args) { }
     #endregion
   }
 
@@ -915,8 +934,6 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region IGH_PreviewData
-    BoundingBox IGH_PreviewData.ClippingBox => GetBoundingBox(Transform.Identity);
-
     void IGH_PreviewData.DrawViewportWires(GH_PreviewWireArgs args)
     {
       if (!IsValid)

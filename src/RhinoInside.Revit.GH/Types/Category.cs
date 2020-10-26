@@ -377,8 +377,8 @@ namespace RhinoInside.Revit.GH.Types
     public override string TypeName => "Revit Graphics Style";
     public override string TypeDescription => "Represents a Revit graphics style";
     protected override Type ScriptVariableType => typeof(DB.GraphicsStyle);
-    public static explicit operator DB.GraphicsStyle(GraphicsStyle value) =>
-      value?.IsValid == true ? value.Document.GetElement(value) as DB.GraphicsStyle : default;
+    public new DB.GraphicsStyle Value => base.Value as DB.GraphicsStyle;
+    public static explicit operator DB.GraphicsStyle(GraphicsStyle value) => value?.Value;
 
     public GraphicsStyle() { }
     public GraphicsStyle(DB.GraphicsStyle graphicsStyle) : base(graphicsStyle) { }

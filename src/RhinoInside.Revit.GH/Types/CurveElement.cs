@@ -32,10 +32,10 @@ namespace RhinoInside.Revit.GH.Types
       if (Curve is Curve curve)
         args.Pipeline.DrawCurve(curve, args.Color, args.Thickness);
     }
-
-    public override void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
     #endregion
 
+    #region Properties
     public override Curve Curve => Value?.GeometryCurve.ToCurve();
+    #endregion
   }
 }

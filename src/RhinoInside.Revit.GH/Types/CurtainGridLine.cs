@@ -12,8 +12,8 @@ namespace RhinoInside.Revit.GH.Types
   {
     public override string TypeDescription => "Represents a Revit curtain grid line Element";
     protected override Type ScriptVariableType => typeof(DB.CurtainGridLine);
-    public static explicit operator DB.CurtainGridLine(CurtainGridLine value) => value?.Value;
     public new DB.CurtainGridLine Value => base.Value as DB.CurtainGridLine;
+    public static explicit operator DB.CurtainGridLine(CurtainGridLine value) => value?.Value;
 
     public CurtainGridLine() { }
     public CurtainGridLine(DB.CurtainGridLine gridLine) : base(gridLine) { }
@@ -21,10 +21,6 @@ namespace RhinoInside.Revit.GH.Types
     #region IGH_PreviewData
     public override void DrawViewportWires(GH_PreviewWireArgs args)
     {
-      var bbox = Boundingbox;
-      if (!bbox.IsValid)
-        return;
-
       if (Value is DB.CurtainGridLine gridLine)
       {
         var points = gridLine.FullCurve?.Tessellate();
@@ -38,10 +34,9 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
     }
-    public override void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
     #endregion
 
-
+    #region Properties
     public override Plane Location
     {
       get
@@ -61,5 +56,6 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     public override Curve Curve => Value?.FullCurve.ToCurve();
+    #endregion
   }
 }

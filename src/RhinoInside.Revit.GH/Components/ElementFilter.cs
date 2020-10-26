@@ -928,7 +928,7 @@ namespace RhinoInside.Revit.GH.Components
         return;
       }
 
-      var provider = new DB.ParameterValueProvider(parameterKey);
+      var provider = new DB.ParameterValueProvider(parameterKey.Id);
 
       DB.FilterRule rule = null;
       if (storageType == DB.StorageType.String)
@@ -995,28 +995,28 @@ namespace RhinoInside.Revit.GH.Components
                   {
                     var value = default(Types.Category);
                     if (DA.GetData("Value", ref value))
-                      rule = new DB.FilterElementIdRule(provider, ruleEvaluator, value);
+                      rule = new DB.FilterElementIdRule(provider, ruleEvaluator, value.Id);
                   }
                   break;
                 case DB.ParameterType.Material:
                   {
                     var value = default(Types.Material);
                     if (DA.GetData("Value", ref value))
-                      rule = new DB.FilterElementIdRule(provider, ruleEvaluator, value);
+                      rule = new DB.FilterElementIdRule(provider, ruleEvaluator, value.Id);
                   }
                   break;
                 case DB.ParameterType.FamilyType:
                   {
                     var value = default(Types.ElementType);
                     if (DA.GetData("Value", ref value))
-                      rule = new DB.FilterElementIdRule(provider, ruleEvaluator, value);
+                      rule = new DB.FilterElementIdRule(provider, ruleEvaluator, value.Id);
                   }
                   break;
                 default:
                   {
                     var value = default(Types.Element);
                     if (DA.GetData("Value", ref value))
-                      rule = new DB.FilterElementIdRule(provider, ruleEvaluator, value);
+                      rule = new DB.FilterElementIdRule(provider, ruleEvaluator, value.Id);
                   }
                   break;
               }
