@@ -1,7 +1,9 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Extensions;
 using Grasshopper.Kernel.Parameters;
+using Rhino.Geometry;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -28,6 +30,8 @@ namespace RhinoInside.Revit.GH.Components
       ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
       ParamDefinition.Create<Param_Interval>("Elevation", "E", "Level elevation interval", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_String>("Name", "N", "Level name", GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_Boolean>("Structural", "S", "Level is structural", GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_Boolean>("Building Story", "BS", "Level is building story", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true)
     };
 
@@ -42,14 +46,15 @@ namespace RhinoInside.Revit.GH.Components
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
         return;
 
-      var elevation = Rhino.Geometry.Interval.Unset;
-      DA.GetData("Elevation", ref elevation);
-
-      string name = null;
-      DA.GetData("Name", ref name);
-
-      DB.ElementFilter filter = null;
-      DA.GetData("Filter", ref filter);
+      if (DA.TryGetData(Params.Input, "Elevation", out Interval? elevation) && !elevation.Value.IsValid)
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Elevation value is not valid.");
+        return;
+      }
+      DA.TryGetData(Params.Input, "Name", out string name);
+      DA.TryGetData(Params.Input, "Structural", out bool? structural);
+      DA.TryGetData(Params.Input, "Building Story", out bool? buildingStory);
+      DA.TryGetData(Params.Input, "Filter", out DB.ElementFilter filter);
 
       using (var collector = new DB.FilteredElementCollector(doc))
       {
@@ -58,11 +63,17 @@ namespace RhinoInside.Revit.GH.Components
         if (filter is object)
           levelsCollector = levelsCollector.WherePasses(filter);
 
+        if (elevation.HasValue && TryGetFilterDoubleParam(DB.BuiltInParameter.LEVEL_ELEV, elevation.Value.Mid / Revit.ModelUnits, Revit.VertexTolerance + (elevation.Value.Length * 0.5 / Revit.ModelUnits), out var elevationFilter))
+          levelsCollector = levelsCollector.WherePasses(elevationFilter);
+
         if (TryGetFilterStringParam(DB.BuiltInParameter.DATUM_TEXT, ref name, out var nameFilter))
           levelsCollector = levelsCollector.WherePasses(nameFilter);
 
-        if (elevation.IsValid && TryGetFilterDoubleParam(DB.BuiltInParameter.LEVEL_ELEV, elevation.Mid / Revit.ModelUnits, Revit.VertexTolerance + (elevation.Length * 0.5 / Revit.ModelUnits), out var elevationFilter))
-          levelsCollector = levelsCollector.WherePasses(elevationFilter);
+        if (structural.HasValue && TryGetFilterIntegerParam(DB.BuiltInParameter.LEVEL_IS_STRUCTURAL, structural.Value ? 1 : 0, out var structuralFilter))
+          levelsCollector = levelsCollector.WherePasses(structuralFilter);
+
+        if (structural.HasValue && TryGetFilterIntegerParam(DB.BuiltInParameter.LEVEL_IS_BUILDING_STORY, buildingStory.Value ? 1 : 0, out var buildingStoryilter))
+          levelsCollector = levelsCollector.WherePasses(buildingStoryilter);
 
         var levels = levelsCollector.Cast<DB.Level>();
 
