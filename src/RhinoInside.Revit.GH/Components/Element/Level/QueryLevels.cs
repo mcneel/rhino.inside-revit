@@ -31,7 +31,7 @@ namespace RhinoInside.Revit.GH.Components
       ParamDefinition.Create<Param_Interval>("Elevation", "E", "Level elevation interval", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_String>("Name", "N", "Level name", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_Boolean>("Structural", "S", "Level is structural", GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Param_Boolean>("Building Story", "BS", "Level is building story", GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_Boolean>("Building Story", "BS", "Level is building story", defaultValue: true, GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true)
     };
 
@@ -72,7 +72,7 @@ namespace RhinoInside.Revit.GH.Components
         if (structural.HasValue && TryGetFilterIntegerParam(DB.BuiltInParameter.LEVEL_IS_STRUCTURAL, structural.Value ? 1 : 0, out var structuralFilter))
           levelsCollector = levelsCollector.WherePasses(structuralFilter);
 
-        if (structural.HasValue && TryGetFilterIntegerParam(DB.BuiltInParameter.LEVEL_IS_BUILDING_STORY, buildingStory.Value ? 1 : 0, out var buildingStoryilter))
+        if (buildingStory.HasValue && TryGetFilterIntegerParam(DB.BuiltInParameter.LEVEL_IS_BUILDING_STORY, buildingStory.Value ? 1 : 0, out var buildingStoryilter))
           levelsCollector = levelsCollector.WherePasses(buildingStoryilter);
 
         var levels = levelsCollector.Cast<DB.Level>();
