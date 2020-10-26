@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Windows.Forms;
 using Rhino;
 using Rhino.Geometry;
 
@@ -44,8 +46,9 @@ namespace RhinoInside.Revit.Geometry.Extensions
       if (!value.IsValid)
         return BoundingBox.Unset;
 
-      if (xform.IsIdentity)
-        return value;
+      // BoundingBox constructor already checks for Identity xform
+      //if (xform.IsIdentity)
+      //  return value;
 
       return new BoundingBox(value.GetCorners(), xform);
     }
@@ -64,8 +67,9 @@ namespace RhinoInside.Revit.Geometry.Extensions
       if (!value.IsValid)
         return BoundingBox.Unset;
 
-      if (xform.IsIdentity)
-        return value.BoundingBox;
+      // BoundingBox constructor already checks for Identity xform
+      //if (xform.IsIdentity)
+      //  return value.BoundingBox;
 
       return new BoundingBox(value.GetCorners(), xform);
     }
@@ -471,35 +475,48 @@ namespace RhinoInside.Revit.Geometry.Extensions
 
   public static class GeometryBaseExtension
   {
-    public static bool GetUserBoolean(this GeometryBase geometry, string key, out bool value, bool def = default)
+    public static bool TryGetUserValue<T>(this GeometryBase geometry, string key, out T value, T def = default)
     {
-      if (geometry.GetUserInteger(key, out var idx))
+      if (geometry.GetUserString(key) is string stringValue)
       {
-        value = idx != 0;
-        return true;
+        if (TypeDescriptor.GetConverter(typeof(T)) is TypeConverter converter)
+        {
+          if (converter.CanConvertFrom(typeof(string)))
+          {
+            value = (T) converter.ConvertFromInvariantString(stringValue);
+          }
+        }
+
+        throw new InvalidCastException($"Failed to convert from {typeof(string)} to {typeof(T)}");
       }
 
       value = def;
       return false;
     }
 
-    public static bool GetUserInteger(this GeometryBase geometry, string key, out int value, int def = default)
+    public static bool TrySetUserValue<T>(this GeometryBase geometry, string key, T value, T def = default)
     {
-      value = def;
-      return geometry.GetUserString(key) is string stringValue && int.TryParse(stringValue, out value);
+      if (TypeDescriptor.GetConverter(typeof(T)) is TypeConverter converter)
+      {
+        if (converter.CanConvertTo(typeof(string)))
+        {
+          if (value.Equals(def))
+            return geometry.SetUserString(key, null);
+
+          var stringValue = converter.ConvertToInvariantString(value);
+          return geometry.SetUserString(key, stringValue);
+        }
+      }
+
+      throw new InvalidCastException($"Failed to convert from {typeof(string)} to {typeof(T)}");
     }
 
-    public static bool GetUserEnum<E>(this GeometryBase geometry, string key, out E value, E def = default) where E : struct
-    {
-      value = def;
-      return geometry.GetUserString(key) is string stringValue && Enum.TryParse<E>(stringValue, out value);
-    }
+    public static bool TryGetUserValue(this GeometryBase geometry, string key, out Autodesk.Revit.DB.ElementId value) =>
+      TryGetUserValue(geometry, key, out value, Autodesk.Revit.DB.ElementId.InvalidElementId);
 
-    public static bool GetUserElementId(this GeometryBase geometry, string key, out Autodesk.Revit.DB.ElementId value) =>
-      GetUserElementId(geometry, key, out value, Autodesk.Revit.DB.ElementId.InvalidElementId);
-    public static bool GetUserElementId(this GeometryBase geometry, string key, out Autodesk.Revit.DB.ElementId value, Autodesk.Revit.DB.ElementId def)
+    public static bool TryGetUserValue(this GeometryBase geometry, string key, out Autodesk.Revit.DB.ElementId value, Autodesk.Revit.DB.ElementId def)
     {
-      if (geometry.GetUserInteger(key, out var idx))
+      if (geometry.TryGetUserValue(key, out int idx, def.IntegerValue))
       {
         value = new Autodesk.Revit.DB.ElementId(idx);
         return true;
@@ -508,5 +525,11 @@ namespace RhinoInside.Revit.Geometry.Extensions
       value = def;
       return false;
     }
+
+    public static bool TrySetUserValue(this GeometryBase geometry, string key, Autodesk.Revit.DB.ElementId value) =>
+      geometry.TrySetUserValue(key, value.IntegerValue, Autodesk.Revit.DB.ElementId.InvalidElementId.IntegerValue);
+
+    public static bool TrySetUserValue(this GeometryBase geometry, string key, Autodesk.Revit.DB.ElementId value, Autodesk.Revit.DB.ElementId def) =>
+      geometry.TrySetUserValue(key, value.IntegerValue, def.IntegerValue);
   }
 }

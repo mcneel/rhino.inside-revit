@@ -1,5 +1,6 @@
 using System;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.Geometry.Extensions;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -17,7 +18,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
       manager.AddCurveParameter("Curve", "C", string.Empty, GH_ParamAccess.item);
-      manager[manager.AddBooleanParameter("Opening", "O", string.Empty, GH_ParamAccess.item, true)].Optional = true;
+      manager.AddBooleanParameter("Opening", "O", string.Empty, GH_ParamAccess.item, true);
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
@@ -33,9 +34,9 @@ namespace RhinoInside.Revit.GH.Components
 
       curve = curve.DuplicateCurve();
 
-      var opening = true;
+      var opening = default(bool);
       if (DA.GetData("Opening", ref opening))
-        curve.SetUserString("IS_OPENING_PARAM", opening ? "1" : null);
+        curve.TrySetUserValue("IS_OPENING_PARAM", opening);
 
       DA.SetData("Curve", curve);
     }
