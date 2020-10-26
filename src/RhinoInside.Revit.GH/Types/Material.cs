@@ -4,10 +4,9 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  [Kernel.Attributes.Name("Material")]
   public class Material : Element
   {
-    public override string TypeName => "Revit Material";
-    public override string TypeDescription => "Represents a Revit material";
     protected override Type ScriptVariableType => typeof(DB.Material);
     public static explicit operator DB.Material(Material value) => value?.Value;
     public new DB.Material Value => base.Value as DB.Material;

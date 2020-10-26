@@ -3,11 +3,9 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  [Kernel.Attributes.Name("Panel")]
   public class Panel : FamilyInstance
   {
-    public override string TypeName => "Revit Panel";
-
-    public override string TypeDescription => "Represents a Revit Curtain Grid Panel Element";
     protected override Type ScriptVariableType => typeof(DB.FamilyInstance);
     public static explicit operator DB.FamilyInstance(Panel value) => value?.Value;
     public new DB.FamilyInstance Value => base.Value as DB.FamilyInstance;

@@ -10,10 +10,9 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  [Kernel.Attributes.Name("Sketch")]
   public class Sketch : GraphicalElement
   {
-    public override string TypeName => "Revit Sketch";
-    public override string TypeDescription => "Represents a Revit sketch";
     protected override Type ScriptVariableType => typeof(DB.Sketch);
     public new DB.Sketch Value => base.Value as DB.Sketch;
     public static explicit operator DB.Sketch(Sketch value) => value?.Value;

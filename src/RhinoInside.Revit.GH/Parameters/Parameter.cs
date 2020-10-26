@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override Guid ComponentGuid => new Guid("A550F532-8C68-460B-91F3-DA0A5A0D42B5");
     public override GH_Exposure Exposure => GH_Exposure.septenary;
 
-    public ParameterKey() : base("ParameterKey", "ParaKey", "Represents a Revit parameter definition.", "Params", "Revit Primitives") { }
+    public ParameterKey() : base("Parameter Key", "ParaKey", "Represents a Revit parameter definition.", "Params", "Revit Primitives") { }
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {

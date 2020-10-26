@@ -5,15 +5,15 @@ namespace RhinoInside.Revit.GH.Types
   /// <summary>
   /// Interface that represents any <see cref="DB.Element"/> that is an instance of a <see cref="DB.ElementType"/>
   /// </summary>
+  [Kernel.Attributes.Name("Instance")]
   public interface IGH_InstanceElement : IGH_GeometricElement
   {
     Level Level { get; }
   }
 
+  [Kernel.Attributes.Name("Instance")]
   public class InstanceElement : GeometricElement, IGH_InstanceElement
   {
-    public override string TypeDescription => "Represents a Revit Instance";
-
     public InstanceElement() { }
     public InstanceElement(DB.Element element) : base(element) { }
 

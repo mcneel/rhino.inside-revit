@@ -6,9 +6,9 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  [Kernel.Attributes.Name("Wall")]
   public class Wall : HostObject
   {
-    public override string TypeDescription => "Represents a Revit wall element";
     protected override Type ScriptVariableType => typeof(DB.Wall);
     public static explicit operator DB.Wall(Wall value) => value?.Value;
     public new DB.Wall Value => base.Value as DB.Wall;

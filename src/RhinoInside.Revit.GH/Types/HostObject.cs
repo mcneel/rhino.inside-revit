@@ -7,11 +7,12 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  [Kernel.Attributes.Name("Host")]
   public interface IGH_HostObject : IGH_InstanceElement { }
 
+  [Kernel.Attributes.Name("Host")]
   public class HostObject : InstanceElement, IGH_HostObject
   {
-    public override string TypeDescription => "Represents a Revit host element";
     protected override Type ScriptVariableType => typeof(DB.HostObject);
     public static explicit operator DB.HostObject(HostObject value) => value?.Value;
     public new DB.HostObject Value => base.Value as DB.HostObject;
@@ -77,11 +78,12 @@ namespace RhinoInside.Revit.GH.Types
     }
   }
 
+  [Kernel.Attributes.Name("Host Type")]
   public interface IGH_HostObjectType : IGH_ElementType { }
 
+  [Kernel.Attributes.Name("Host Type")]
   public class HostObjectType : ElementType, IGH_HostObjectType
   {
-    public override string TypeDescription => "Represents a Revit host element type";
     protected override Type ScriptVariableType => typeof(DB.HostObjAttributes);
     public static explicit operator DB.HostObjAttributes(HostObjectType value) => value?.Value;
     public new DB.HostObjAttributes Value => base.Value as DB.HostObjAttributes;

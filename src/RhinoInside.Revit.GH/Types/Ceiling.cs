@@ -7,9 +7,9 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  [Kernel.Attributes.Name("Ceiling")]
   public class Ceiling : HostObject
   {
-    public override string TypeDescription => "Represents a Revit ceiling element";
     protected override Type ScriptVariableType => typeof(DB.Ceiling);
     public static explicit operator DB.Ceiling(Ceiling value) => value?.Value;
     public new DB.Ceiling Value => base.Value as DB.Ceiling;

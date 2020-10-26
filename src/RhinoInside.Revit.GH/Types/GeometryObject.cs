@@ -16,12 +16,12 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  [Kernel.Attributes.Name("Geometric Element")]
   public interface IGH_GeometricElement : IGH_GraphicalElement { }
 
+  [Kernel.Attributes.Name("Geometric Element")]
   public class GeometricElement : GraphicalElement, IGH_GeometricElement, IGH_PreviewMeshData
   {
-    public override string TypeDescription => "Represents a Revit geometric element";
-
     public override string DisplayName
     {
       get
@@ -411,8 +411,8 @@ namespace RhinoInside.Revit.GH.Types
     IGH_PreviewMeshData
     where X : DB.GeometryObject
   {
-    public override string TypeName => "Revit GeometryObject";
-    public override string TypeDescription => "Represents a Revit GeometryObject";
+    public override string TypeName => "Revit Geometry Object";
+    public override string TypeDescription => "Represents a Revit Geometry Object";
     public override bool IsValid => (!(Value is null || !Id.IsValid())) && (Document?.IsValidObject ?? false);
 
     public override sealed IGH_Goo Duplicate() => (IGH_Goo) MemberwiseClone();

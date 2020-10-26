@@ -7,11 +7,9 @@ using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  [Kernel.Attributes.Name("Mullion")]
   public class Mullion : FamilyInstance
   {
-    public override string TypeName => "Revit Mullion";
-
-    public override string TypeDescription => "Represents a Revit Mullion Element";
     protected override Type ScriptVariableType => typeof(DB.Mullion);
     public static explicit operator DB.Mullion(Mullion value) => value?.Value;
     public new DB.Mullion Value => base.Value as DB.Mullion;
@@ -22,10 +20,9 @@ namespace RhinoInside.Revit.GH.Types
     public override Rhino.Geometry.Curve Curve => Value?.LocationCurve.ToCurve();
   }
 
+  [Kernel.Attributes.Name("Mullion Position")]
   public class MullionPosition : ElementType
   {
-    public override string TypeName => "Revit Mullion Position";
-    public override string TypeDescription => "Represents a Revit Mullion Postion";
     protected override Type ScriptVariableType => typeof(DB.ElementType);
 
     public MullionPosition() { }
@@ -46,10 +43,9 @@ namespace RhinoInside.Revit.GH.Types
     }
   }
 
+  [Kernel.Attributes.Name("Mullion Profile")]
   public class MullionProfile : ElementType
   {
-    public override string TypeName => "Revit Mullion Profile";
-    public override string TypeDescription => "Represents a Revit Mullion Profile";
     protected override Type ScriptVariableType => typeof(DB.ElementType);
 
     public MullionProfile() { }
