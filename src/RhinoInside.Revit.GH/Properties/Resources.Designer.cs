@@ -2213,6 +2213,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap WallByProfile {
+            get {
+                object obj = ResourceManager.GetObject("WallByProfile", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap WallFunction_ValueList {
             get {
                 object obj = ResourceManager.GetObject("WallFunction_ValueList", resourceCulture);
