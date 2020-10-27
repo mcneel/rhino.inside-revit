@@ -227,6 +227,7 @@
     <Compile Include="Components\Element\HostObject\BoundaryProfile.cs" />
     <Compile Include="Components\Element\HostObject\ElementHost.cs" />
     <Compile Include="Components\Element\HostObject\Faces.cs" />
+    <Compile Include="Components\Element\HostObject\Grids.cs" />
     <Compile Include="Components\Element\HostObject\Inserts.cs" />
     <Compile Include="Components\Element\Inspect.cs" />
     <Compile Include="Components\Element\Level\QueryLevels.cs" />
@@ -361,6 +362,7 @@
     <Compile Include="Types\BuildingPad.cs" />
     <Compile Include="Types\Category.cs" />
     <Compile Include="Types\Ceiling.cs" />
+    <Compile Include="Types\CurtainGrid.cs" />
     <Compile Include="Types\CurtainSystem.cs" />
     <Compile Include="Types\CurveElement.cs" />
     <Compile Include="Types\Dimension.cs" />
@@ -374,6 +376,7 @@
     <Compile Include="Types\FamilyInstance.cs" />
     <Compile Include="Types\FillPatternElement.cs" />
     <Compile Include="Types\Floor.cs" />
+    <Compile Include="Types\GeometricElement.cs" />
     <Compile Include="Types\GeometryObject.cs" />
     <Compile Include="Types\GraphicalElement.cs" />
     <Compile Include="Types\Group.cs" />
