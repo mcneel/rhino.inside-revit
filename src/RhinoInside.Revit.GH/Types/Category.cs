@@ -7,10 +7,9 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  [Kernel.Attributes.Name("Category")]
   public class Category : Element
   {
-    public override string TypeName => "Revit Category";
-    public override string TypeDescription => "Represents a Revit category";
     protected override Type ScriptVariableType => typeof(DB.Category);
     override public object ScriptVariable() => Value;
     public static explicit operator DB.Category(Category value) => value?.Value;
@@ -372,10 +371,9 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
   }
 
+  [Kernel.Attributes.Name("Graphics Style")]
   public class GraphicsStyle : Element
   {
-    public override string TypeName => "Revit Graphics Style";
-    public override string TypeDescription => "Represents a Revit graphics style";
     protected override Type ScriptVariableType => typeof(DB.GraphicsStyle);
     public new DB.GraphicsStyle Value => base.Value as DB.GraphicsStyle;
     public static explicit operator DB.GraphicsStyle(GraphicsStyle value) => value?.Value;

@@ -7,9 +7,9 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  [Kernel.Attributes.Name("Roof")]
   public class Roof : HostObject
   {
-    public override string TypeDescription => "Represents a Revit roof element";
     protected override Type ScriptVariableType => typeof(DB.RoofBase);
     public static explicit operator DB.RoofBase(Roof value) => value?.Value;
     public new DB.RoofBase Value => base.Value as DB.RoofBase;

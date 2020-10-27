@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -221,11 +221,13 @@
     <Compile Include="Components\ElementCollectorComponent.cs" />
     <Compile Include="Components\Element\FlipUnflipElement.cs" />
     <Compile Include="Components\Element\Geometry.cs" />
+    <Compile Include="Components\Element\Grid\QueryGrids.cs" />
     <Compile Include="Components\Element\Group\ByLocation.cs" />
     <Compile Include="Components\Element\Group\Elements.cs" />
     <Compile Include="Components\Element\HostObject\BoundaryProfile.cs" />
     <Compile Include="Components\Element\HostObject\ElementHost.cs" />
     <Compile Include="Components\Element\HostObject\Faces.cs" />
+    <Compile Include="Components\Element\HostObject\Grids.cs" />
     <Compile Include="Components\Element\HostObject\Inserts.cs" />
     <Compile Include="Components\Element\Inspect.cs" />
     <Compile Include="Components\Element\Level\QueryLevels.cs" />
@@ -280,6 +282,7 @@
     <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainGridLine.cs" />
     <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainGridMullion.cs" />
     <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainGridPanel.cs" />
+    <Compile Include="Components\Element\Wall\ByProfile.cs" />
     <Compile Include="Components\Element\Wall\QueryWalls.cs" />
     <Compile Include="Components\Family\Element\Form\ByCurves.cs" />
     <Compile Include="Components\Family\Element\Form\ByGeometry.cs" />
@@ -359,6 +362,7 @@
     <Compile Include="Types\BuildingPad.cs" />
     <Compile Include="Types\Category.cs" />
     <Compile Include="Types\Ceiling.cs" />
+    <Compile Include="Types\CurtainGrid.cs" />
     <Compile Include="Types\CurtainSystem.cs" />
     <Compile Include="Types\CurveElement.cs" />
     <Compile Include="Types\Dimension.cs" />
@@ -372,6 +376,7 @@
     <Compile Include="Types\FamilyInstance.cs" />
     <Compile Include="Types\FillPatternElement.cs" />
     <Compile Include="Types\Floor.cs" />
+    <Compile Include="Types\GeometricElement.cs" />
     <Compile Include="Types\GeometryObject.cs" />
     <Compile Include="Types\GraphicalElement.cs" />
     <Compile Include="Types\Group.cs" />

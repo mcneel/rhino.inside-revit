@@ -7,10 +7,9 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  [Kernel.Attributes.Name("Sketch Plane")]
   public class SketchPlane : GraphicalElement
   {
-    public override string TypeName => "Revit Sketch Plane";
-    public override string TypeDescription => "Represents a Revit sketch plane";
     protected override Type ScriptVariableType => typeof(DB.SketchPlane);
     public static explicit operator DB.SketchPlane(SketchPlane value) => value?.Value;
     public new DB.SketchPlane Value => base.Value as DB.SketchPlane;

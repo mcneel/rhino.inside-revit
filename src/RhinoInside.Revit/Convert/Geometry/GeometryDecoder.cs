@@ -7,6 +7,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 {
   using Raw;
   using RhinoInside.Revit.External.DB.Extensions;
+  using RhinoInside.Revit.Geometry.Extensions;
 
   /// <summary>
   /// Methods in this class do a full geometry conversion.
@@ -237,12 +238,12 @@ namespace RhinoInside.Revit.Convert.Geometry
           if (context.GraphicsStyleId.IsValid() && context.Element.Document.GetElement(context.GraphicsStyleId) is DB.GraphicsStyle graphicsStyle)
           {
             var category = graphicsStyle.GraphicsStyleCategory;
-            geometry.SetUserString(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), category.Id.IntegerValue.ToString());
+            geometry.TrySetUserValue(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), category.Id);
           }
 
           if (context.MaterialId.IsValid() && context.Element.Document.GetElement(context.MaterialId) is DB.Material material)
           {
-            geometry.SetUserString(DB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), material.Id.IntegerValue.ToString());
+            geometry.TrySetUserValue(DB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), material.Id);
           }
         }
       }

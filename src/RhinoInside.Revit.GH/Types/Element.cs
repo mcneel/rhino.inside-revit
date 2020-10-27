@@ -10,15 +10,17 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Kernel.Attributes;
+
+  [Name("Element")]
   public interface IGH_Element : IGH_ElementId
   {
     ElementType Type { get; set; }
   }
 
+  [Name("Element")]
   public class Element : ElementId, IGH_Element
   {
-    public override string TypeName => $"Revit {Value?.GetType().Name ?? GetType().Name}";
-    public override string TypeDescription => "Represents a Revit element";
     override public object ScriptVariable() => Value;
     protected override Type ScriptVariableType => typeof(DB.Element);
     public static explicit operator DB.Element(Element value) => value?.Value;

@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using GH_IO.Serialization;
 using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.External.DB.Extensions;
@@ -34,6 +35,8 @@ namespace RhinoInside.Revit.GH.Types
 
     public override sealed string ToString()
     {
+      var TypeName = $"Revit {((IGH_Goo) this).TypeName}";
+
       if (!IsReferencedElement)
         return $"{TypeName} : {DisplayName}";
 
@@ -87,8 +90,17 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_Goo
-    public virtual string TypeName => "Revit Model Object";
-    public virtual string TypeDescription => "Represents a Revit model object";
+    string IGH_Goo.TypeName
+    {
+      get
+      {
+        var type = GetType();
+        var name = type.GetTypeInfo().GetCustomAttribute(typeof(Kernel.Attributes.NameAttribute)) as Kernel.Attributes.NameAttribute;
+        return name?.Name ?? type.Name;
+      }
+    }
+
+    string IGH_Goo.TypeDescription => $"Represents a Revit {((IGH_Goo) this).TypeName.ToLowerInvariant()}";
     public virtual bool IsValid => Document.IsValid() && (Id.IsBuiltInId() || Value is object);
     public virtual string IsValidWhyNot => IsValid ? string.Empty : "Not Valid";
     IGH_Goo IGH_Goo.Duplicate() => (IGH_Goo) MemberwiseClone();
@@ -260,6 +272,8 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     public virtual IGH_GooProxy EmitProxy() => new Proxy(this);
+
+    string IGH_Goo.ToString() => DisplayName;
     #endregion
 
     #region IGH_ElementId

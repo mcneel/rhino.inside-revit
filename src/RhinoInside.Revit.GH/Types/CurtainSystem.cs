@@ -6,9 +6,9 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  [Kernel.Attributes.Name("Curtain System")]
   public class CurtainSystem : HostObject
   {
-    public override string TypeDescription => "Represents a Revit curtain system element";
     protected override Type ScriptVariableType => typeof(DB.CurtainSystem);
     public static explicit operator DB.CurtainSystem(CurtainSystem value) => value?.Value;
     public new DB.CurtainSystem Value => base.Value as DB.CurtainSystem;

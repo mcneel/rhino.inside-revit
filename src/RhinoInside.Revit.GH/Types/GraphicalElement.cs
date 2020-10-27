@@ -15,12 +15,14 @@ namespace RhinoInside.Revit.GH.Types
   /// <summary>
   /// Interface that represents any <see cref="DB.Element"/> that has a Graphical representation in Revit
   /// </summary>
+  [Kernel.Attributes.Name("Graphical Element")]
   public interface IGH_GraphicalElement : IGH_Element
   {
     bool? ViewSpecific { get; }
     View OwnerView { get; }
   }
 
+  [Kernel.Attributes.Name("Graphical Element")]
   public class GraphicalElement :
     Element,
     IGH_GraphicalElement,

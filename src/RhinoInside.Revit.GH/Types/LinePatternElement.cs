@@ -7,11 +7,9 @@ using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  [Kernel.Attributes.Name("Line Pattern")]
   public class LinePatternElement : Element
   {
-    public override string TypeName => "Revit Line Pattern";
-    public override string TypeDescription => "Represents a Revit Line Pattern Element";
-    public override string DisplayName => base.DisplayName;
     protected override Type ScriptVariableType => typeof(DB.LinePatternElement);
 
     public LinePatternElement() { }

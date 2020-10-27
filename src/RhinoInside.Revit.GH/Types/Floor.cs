@@ -7,9 +7,9 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  [Kernel.Attributes.Name("Floor")]
   public class Floor : HostObject
   {
-    public override string TypeDescription => "Represents a Revit floor element";
     protected override Type ScriptVariableType => typeof(DB.Floor);
     public static explicit operator DB.Floor(Floor value) => value?.Value;
     public new DB.Floor Value => base.Value as DB.Floor;

@@ -168,7 +168,7 @@ namespace RhinoInside.Revit.GH.Components
                 if (geometryBase is null) categoriesList.Add(null);
                 else
                 {
-                  geometryBase.GetUserElementId(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), out var categoryId);
+                  geometryBase.TryGetUserValue(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), out DB.ElementId categoryId);
                   categoriesList.Add(new Types.Category(doc, categoryId));
                 }
               }
@@ -178,7 +178,7 @@ namespace RhinoInside.Revit.GH.Components
                 if (geometryBase is null) materialsList.Add(null);
                 else
                 {
-                  geometryBase.GetUserElementId(DB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), out var materialId);
+                  geometryBase.TryGetUserValue(DB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), out DB.ElementId materialId);
                   materialsList.Add(Types.Material.FromElementId(doc, materialId) as Types.Material);
                 }
               }

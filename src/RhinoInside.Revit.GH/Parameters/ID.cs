@@ -21,6 +21,15 @@ namespace RhinoInside.Revit.GH.Parameters
   Kernel.IGH_ElementIdParam
   where T : class, Types.IGH_ElementId
   {
+    public override string TypeName
+    {
+      get
+      {
+        var name = typeof(T).GetTypeInfo().GetCustomAttribute(typeof(Kernel.Attributes.NameAttribute)) as Kernel.Attributes.NameAttribute;
+        return name?.Name ?? typeof(T).Name;
+      }
+    }
+
     protected ElementIdParam(string name, string nickname, string description, string category, string subcategory) :
       base(name, nickname, description, category, subcategory)
     { }

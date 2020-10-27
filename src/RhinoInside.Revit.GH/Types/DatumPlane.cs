@@ -11,9 +11,9 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  [Kernel.Attributes.Name("Datum")]
   public class DatumPlane : GraphicalElement
   {
-    public override string TypeDescription => "Represents a Revit Datum Element";
     protected override Type ScriptVariableType => typeof(DB.DatumPlane);
     public new DB.DatumPlane Value => base.Value as DB.DatumPlane;
     public static explicit operator DB.DatumPlane(DatumPlane value) => value?.Value;
@@ -23,9 +23,9 @@ namespace RhinoInside.Revit.GH.Types
     public DatumPlane(DB.DatumPlane plane) : base(plane) { }
   }
 
+  [Kernel.Attributes.Name("Level")]
   public class Level : DatumPlane
   {
-    public override string TypeDescription => "Represents a Revit level";
     protected override Type ScriptVariableType => typeof(DB.Level);
     public new DB.Level Value => base.Value as DB.Level;
     public static explicit operator DB.Level(Level value) => value?.Value;
@@ -101,9 +101,9 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
   }
 
+  [Kernel.Attributes.Name("Grid")]
   public class Grid : DatumPlane
   {
-    public override string TypeDescription => "Represents a Revit grid";
     protected override Type ScriptVariableType => typeof(DB.Grid);
     public new DB.Grid Value => base.Value as DB.Grid;
     public static explicit operator DB.Grid(Grid value) => value?.Value;
@@ -285,9 +285,9 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
   }
 
+  [Kernel.Attributes.Name("Reference Plane")]
   public class ReferencePlane : DatumPlane
   {
-    public override string TypeDescription => "Represents a Revit reference plane";
     protected override Type ScriptVariableType => typeof(DB.ReferencePlane);
     public new DB.ReferencePlane Value => base.Value as DB.ReferencePlane;
     public static explicit operator DB.ReferencePlane(ReferencePlane value) => value?.Value;

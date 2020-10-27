@@ -6,10 +6,9 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  [Kernel.Attributes.Name("Parameter Key")]
   public class ParameterKey : Element
   {
-    public override string TypeName => "Revit ParameterKey";
-    public override string TypeDescription => "Represents a Revit parameter definition";
     protected override Type ScriptVariableType => typeof(DB.ParameterElement);
     override public object ScriptVariable() => null;
 
@@ -189,7 +188,7 @@ namespace RhinoInside.Revit.GH.Types
 
   public class ParameterValue : GH_Goo<DB.Parameter>
   {
-    public override string TypeName => "Revit ParameterValue";
+    public override string TypeName => "Revit Parameter Value";
     public override string TypeDescription => "Represents a Revit parameter value on an element";
     protected Type ScriptVariableType => typeof(DB.Parameter);
     public override bool IsValid => Value is object;
