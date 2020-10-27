@@ -933,16 +933,6 @@ namespace RhinoInside.Revit.GH.Components
       previous = next;
     }
 
-    /// <summary>
-    /// Swaps previous element with new element without copying parameters
-    /// </summary>
-    /// <param name="previous">Previous element</param>
-    /// <param name="next">New Element</param>
-    protected static void SwapElement<T>(ref T previous, T next) where T : DB.Element
-    {
-      previous = next;
-    }
-
     // Step 2.
     protected override void OnAfterStart(DB.Document document, string strTransactionName)
     {
