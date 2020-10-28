@@ -40,16 +40,16 @@ namespace RhinoInside.Revit.UI
 
     public static Result BrowseForFile(out string filePath)
     {
-      using (var openFileDialog = new System.Windows.Forms.OpenFileDialog())
+      using
+      (
+        var openFileDialog = new System.Windows.Forms.OpenFileDialog()
+        {
+          Title = "Open Grasshopper file",
+          Filter = "All Grasshopper files (*.gh, *.ghx)|*.gh;*.ghx|Grasshopper Binary (*.gh)|*.gh|Grasshopper Xml (*.ghx)|*.ghx",
+          RestoreDirectory = true
+        }
+      )
       {
-        openFileDialog.Filter = "Grasshopper Binary (*.gh)|*.gh|Grasshopper Xml (*.ghx)|*.ghx";
-#if DEBUG
-        openFileDialog.FilterIndex = 2;
-#else
-        openFileDialog.FilterIndex = 1;
-#endif
-        openFileDialog.RestoreDirectory = true;
-
         switch (openFileDialog.ShowDialog(Revit.MainWindowHandle))
         {
           case System.Windows.Forms.DialogResult.OK: filePath = openFileDialog.FileName; return Result.Succeeded;
