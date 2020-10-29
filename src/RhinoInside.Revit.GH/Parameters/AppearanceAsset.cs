@@ -1,10 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using DB = Autodesk.Revit.DB;
 

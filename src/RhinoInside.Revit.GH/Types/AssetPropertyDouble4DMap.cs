@@ -1,15 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
+using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
-using MAT = RhinoInside.Revit.GH.Components.Element.Material;
-using DB = Autodesk.Revit.DB;
-using Rhino.Geometry;
-using UIFramework;
-using Autodesk.Revit.DB;
+using MAT = RhinoInside.Revit.GH.Components.Material;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -34,6 +26,10 @@ namespace RhinoInside.Revit.GH.Types
           Value = new MAT.AssetPropertyDouble4DMap(dblValue);
           return true;
 
+        case Rhino.Display.ColorRGBA rgbaValue:
+          Value = new MAT.AssetPropertyDouble4DMap(rgbaValue);
+          return true;
+
         case System.Drawing.Color colValue:
           Value = new MAT.AssetPropertyDouble4DMap(colValue);
           return true;
@@ -52,6 +48,10 @@ namespace RhinoInside.Revit.GH.Types
 
         case GH_Number number:
           Value = new MAT.AssetPropertyDouble4DMap(number.Value);
+          return true;
+
+        case GH_ColorRGBA colorRGBA:
+          Value = new MAT.AssetPropertyDouble4DMap(colorRGBA.Value);
           return true;
 
         case GH_Colour color:
@@ -82,9 +82,15 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
+      if (typeof(Q).IsAssignableFrom(typeof(GH_ColorRGBA)))
+      {
+        target = (Q) (object) new GH_ColorRGBA(Value.ToColorRGBA());
+        return true;
+      }
+
       if (typeof(Q).IsAssignableFrom(typeof(GH_Colour)))
       {
-        target = (Q) (object) new GH_Colour(Value.ValueAsColor);
+        target = (Q) (object) new GH_Colour((System.Drawing.Color) Value.ToColorRGBA());
         return true;
       }
 
@@ -99,7 +105,7 @@ namespace RhinoInside.Revit.GH.Types
       if (Value.HasTexture)
         return $"{Value.TextureValue}";
       else
-        return $"{new GH_Colour(Value.ValueAsColor)}";
+        return GH_Format.FormatColour((System.Drawing.Color) Value.ToColorRGBA());
     }
   }
 #endif

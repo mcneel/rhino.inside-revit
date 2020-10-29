@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Grasshopper.Kernel.Types;
 using DB = Autodesk.Revit.DB;
 using DBX = RhinoInside.Revit.External.DB;
 

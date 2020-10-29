@@ -1,18 +1,8 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Parameters;
 
-using DB = Autodesk.Revit.DB;
-using RhinoInside.Revit.External.DB;
-using RhinoInside.Revit.GH.Components.Element.Material;
-using Autodesk.Revit.DB;
-
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Material
 {
 #if REVIT_2019
   public abstract class DeconstructTextureAsset<T>

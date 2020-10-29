@@ -4,7 +4,7 @@ using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.System.Drawing;
 using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Obsolete
+namespace RhinoInside.Revit.GH.Components.Material.Obsolete
 {
   [Obsolete("Since 2020-09-25")]
   public class MaterialByColor : TransactionComponent

@@ -1,14 +1,8 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Drawing;
-using System.Windows.Forms;
 using Grasshopper.Kernel;
 
-using MAT = RhinoInside.Revit.GH.Components.Element.Material;
-using DB = Autodesk.Revit.DB;
+using MAT = RhinoInside.Revit.GH.Components.Material;
 
 namespace RhinoInside.Revit.GH.Parameters
 {

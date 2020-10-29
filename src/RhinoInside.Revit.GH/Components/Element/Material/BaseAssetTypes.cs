@@ -1,19 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+using System.Reflection;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-
 using DB = Autodesk.Revit.DB;
-using RhinoInside.Revit.Convert.Geometry;
-using Autodesk.Revit.DB;
-using RhinoInside.Revit.GH.Kernel.Attributes;
 
-namespace RhinoInside.Revit.GH.Components.Element.Material
+namespace RhinoInside.Revit.GH.Components.Material
 {
 #if REVIT_2019
 
@@ -54,48 +47,26 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
   /// </summary>
   public class AssetPropertyDouble4DMap : AssetParameterFlex
   {
-    public double Value1 = 0;
-    public double Value2 = 0;
-    public double Value3 = 0;
-    public double Value4 = 0;
+    public double Value1;
+    public double Value2;
+    public double Value3;
+    public double Value4;
+
+    public double Average => (Value1 + Value1 + Value3 + Value4) / 4.0;
+
     public AssetPropertyDouble4DMap(TextureData tdata) : base(tdata) { }
-    public AssetPropertyDouble4DMap(double one, double two, double three, double four)
+    public AssetPropertyDouble4DMap(double val) : this(val, val, val, val) {}
+    public AssetPropertyDouble4DMap(double val1, double val2, double val3, double val4)
     {
-      Value1 = one; Value2 = two; Value3 = three; Value4 = four;
-    }
-    public AssetPropertyDouble4DMap(double val) : this(val, val, val, val) { }
-    public AssetPropertyDouble4DMap(System.Drawing.Color color)
-      => ValueAsColor = color;
-
-    public System.Drawing.Color ValueAsColor
-    {
-      get
-      {
-        return System.Drawing.Color.FromArgb(
-          (int) (Value1 * 255),
-          (int) (Value2 * 255),
-          (int) (Value3 * 255),
-          (int) (Value4 * 255)
-          );
-      }
-      set
-      {
-        Value1 = value.A / 255.0;
-        Value2 = value.R / 255.0;
-        Value3 = value.G / 255.0;
-        Value4 = value.B / 255.0;
-      }
+      Value1 = val1;
+      Value2 = val2;
+      Value3 = val3;
+      Value4 = val4;
     }
 
-    public double Average => (Value1 + Value2 + Value3 + Value4) / 4;
-
-    public static implicit operator AssetPropertyDouble4DMap(System.Drawing.Color val)
-    => new AssetPropertyDouble4DMap(val);
-
-    public static implicit operator System.Drawing.Color(AssetPropertyDouble4DMap val)
-      => val.ValueAsColor;
+    public AssetPropertyDouble4DMap(Rhino.Display.ColorRGBA color) : this(color.R, color.G, color.B, color.A) { }
+    public Rhino.Display.ColorRGBA ToColorRGBA() => new Rhino.Display.ColorRGBA(Value1, Value2, Value3, Value4);
   }
-
   #endregion
 
   #region Wrappers for Revit Assets
@@ -146,11 +117,11 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
   [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
   public class APIAssetBuiltInPropAttribute : Attribute
   {
-    public BuiltInParameter ParamId;
+    public DB.BuiltInParameter ParamId;
     public Type DataType;
     public bool Exclusive;
 
-    public APIAssetBuiltInPropAttribute(BuiltInParameter paramId, Type type, bool exclusive = false)
+    public APIAssetBuiltInPropAttribute(DB.BuiltInParameter paramId, Type type, bool exclusive = false)
     {
       ParamId = paramId;
       DataType = type;
@@ -416,8 +387,8 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
     public string Keywords { get; set; }
 
     [APIAssetProp("GenericDiffuse", typeof(DB.Visual.AssetPropertyDoubleArray4d), connectable: true)]
-    [AssetGHParameter(typeof(Param_Colour), "Color", "C", "Diffuse color", method: ExtractMethod.ValueOnly)]
-    public System.Drawing.Color Color { get; set; } = System.Drawing.Color.Black;
+    [AssetGHParameter(typeof(Param_ColorRGBA), "Color", "C", "Diffuse color", method: ExtractMethod.ValueOnly)]
+    public Rhino.Display.ColorRGBA Color { get; set; } = Rhino.Display.ColorRGBA.Black;
 
     [APIAssetProp("GenericDiffuse", typeof(DB.Visual.AssetPropertyDoubleArray4d), connectable: true)]
     [AssetGHParameter(typeof(Parameters.TextureData), "Image", "I", "Diffuse image", method: ExtractMethod.AssetOnly)]
@@ -474,7 +445,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
 
     [APIAssetProp("GenericSelfIllumFilterMap", typeof(DB.Visual.AssetPropertyDoubleArray4d), connectable: true)]
     [AssetGHParameter(typeof(Parameters.AssetPropertyDouble4DMap), "Illumination Filter Color", "LF", "Self-illumination filter color", method: ExtractMethod.AssetFirst)]
-    public AssetPropertyDouble4DMap IlluminationFilter { get; set; } = System.Drawing.Color.White;
+    public AssetPropertyDouble4DMap IlluminationFilter { get; set; } = new AssetPropertyDouble4DMap(Rhino.Display.ColorRGBA.White);
 
     [APIAssetProp("GenericSelfIllumLuminance", typeof(DB.Visual.AssetPropertyDouble))]
     [AssetGHParameter(typeof(Param_Number), "Luminance", "L", "Self-illumination luminance amount")]
@@ -486,7 +457,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
 
     [APIAssetProp("GenericBumpMap", typeof(DB.Visual.AssetPropertyDoubleArray4d), connectable: true)]
     [AssetGHParameter(typeof(Parameters.AssetPropertyDouble4DMap), "Bump Image", "BI", "Bump image", method: ExtractMethod.AssetFirst)]
-    public AssetPropertyDouble4DMap BumpImage { get; set; } = System.Drawing.Color.White;
+    public AssetPropertyDouble4DMap BumpImage { get; set; } = new AssetPropertyDouble4DMap(Rhino.Display.ColorRGBA.White);
 
     [APIAssetProp("GenericBumpAmount", typeof(DB.Visual.AssetPropertyDouble), connectable: true)]
     [AssetGHParameter(typeof(Parameters.AssetPropertyDouble1DMap), "Bump Amount", "B", "Bump amount", method: ExtractMethod.AssetFirst)]
@@ -494,8 +465,8 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
 
     [APIAssetProp("CommonTintColor", typeof(DB.Visual.AssetPropertyDoubleArray4d))]
     [APIAssetToggleProp("CommonTintToggle")]
-    [AssetGHParameter(typeof(Param_Colour), "Tint Color", "TC", "Tint color")]
-    public System.Drawing.Color Tint { get; set; } = System.Drawing.Color.Black;
+    [AssetGHParameter(typeof(Param_ColorRGBA), "Tint Color", "TC", "Tint color")]
+    public Rhino.Display.ColorRGBA Tint { get; set; } = Rhino.Display.ColorRGBA.Black;
   }
   #endregion
 
@@ -552,7 +523,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
   public class UnifiedBitmapData : TextureData2D
   {
     [APIAssetProp("UnifiedbitmapBitmap", typeof(DB.Visual.AssetPropertyString))]
-    [AssetGHParameter(typeof(Param_String), "Source", "S", "Full path of bitmap texture source image file", optional: false)]
+    [AssetGHParameter(typeof(Param_FilePath), "Source", "S", "Full path of bitmap texture source image file", optional: false)]
     public string SourceFile { get; set; }
 
     [APIAssetProp("UnifiedbitmapInvert", typeof(DB.Visual.AssetPropertyBoolean))]
@@ -576,12 +547,12 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
   {
 
     [APIAssetProp("CheckerColor1", typeof(DB.Visual.AssetPropertyDoubleArray4d))]
-    [AssetGHParameter(typeof(Param_Colour), "Color 1", "C1", "First color")]
-    public System.Drawing.Color Color1 { get; set; } = System.Drawing.Color.White;
+    [AssetGHParameter(typeof(Param_ColorRGBA), "Color 1", "C1", "First color")]
+    public Rhino.Display.ColorRGBA Color1 { get; set; } = Rhino.Display.ColorRGBA.White;
 
     [APIAssetProp("CheckerColor2", typeof(DB.Visual.AssetPropertyDoubleArray4d))]
-    [AssetGHParameter(typeof(Param_Colour), "Color 2", "C2", "Second color")]
-    public System.Drawing.Color Color2 { get; set; } = System.Drawing.Color.Black;
+    [AssetGHParameter(typeof(Param_ColorRGBA), "Color 2", "C2", "Second color")]
+    public Rhino.Display.ColorRGBA Color2 { get; set; } = Rhino.Display.ColorRGBA.Black;
 
     [APIAssetProp("CheckerSoften", typeof(DB.Visual.AssetPropertyDouble))]
     [APIAssetPropValueRange(min: 0, max: 5)]
@@ -608,7 +579,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
   //DA.SetData("", structAsset?.MetalResistanceCalculationStrength);
 
   // API: Values are not represented in the API
-  // BuiltInParameter.PROPERTY_SET_KEYWORDS
+  // DB.BuiltInParameter.PROPERTY_SET_KEYWORDS
   //DA.SetData("Tension Parallel to Grain", );
   //DA.SetData("Tension Perpendicular to Grain", );
   //DA.SetData("Average Modulus", );
@@ -618,174 +589,174 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
   [AssetGHComponent("Physical Asset", "PHAST", "Physical Asset")]
   public class StructuralAssetData : PhysicalMaterialData
   {
-    [APIAssetBuiltInProp(BuiltInParameter.PROPERTY_SET_NAME, typeof(string))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PROPERTY_SET_NAME, typeof(string))]
     [AssetGHParameter(typeof(Param_String), "Name", "N", "Physical asset name", optional: false, modifiable: false)]
     public new string Name { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_CLASS, typeof(DB.StructuralAssetClass))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_CLASS, typeof(DB.StructuralAssetClass))]
     [AssetGHParameter(typeof(Parameters.Param_Enum<Types.StructuralAssetClass>), "Type", "T", "Physical asset type", optional: false, modifiable: false)]
     public DB.StructuralAssetClass Type { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_SUBCLASS, typeof(string))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_SUBCLASS, typeof(string))]
     [AssetGHParameter(typeof(Param_String), "Subclass", "SC", "Physical asset subclass")]
     public string SubClass { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PROPERTY_SET_DESCRIPTION, typeof(string))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PROPERTY_SET_DESCRIPTION, typeof(string))]
     [AssetGHParameter(typeof(Param_String), "Description", "D", "Physical asset description")]
     public string Description { get; set; }
 
     // Note: Keywords are not exposed by the API for the structural asset
-    //[APIAssetBuiltInProp(BuiltInParameter.PROPERTY_SET_KEYWORDS, typeof(string))]
+    //[APIAssetBuiltInProp(DB.BuiltInParameter.PROPERTY_SET_KEYWORDS, typeof(string))]
     //[AssetGHParameter(typeof(Param_String), "Keywords", "K", "")]
     //public string Keywords { get; set; }
 
-    //[APIAssetBuiltInProp(BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE, typeof(string))]
+    //[APIAssetBuiltInProp(DB.BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE, typeof(string))]
     //[AssetGHParameter(typeof(Param_String), "Source", "S", "Physical asset source")]
     //public string Source { get; set; }
 
-    //[APIAssetBuiltInProp(BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE_URL, typeof(string))]
+    //[APIAssetBuiltInProp(DB.BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE_URL, typeof(string))]
     //[AssetGHParameter(typeof(Param_String), "Source URL", "SU", "Physical asset source url")]
     //public string SourceURL { get; set; }
 
     // behaviour
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_BEHAVIOR, typeof(DB.StructuralBehavior))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_BEHAVIOR, typeof(DB.StructuralBehavior))]
     [AssetGHParameter(typeof(Parameters.Param_Enum<Types.StructuralBehavior>), "Behaviour", "B", "Physical asset behaviour", modifiable: false)]
     public new DB.StructuralBehavior Behaviour { get; set; }
 
     // basic thermal
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_EXP_COEFF, typeof(double))]
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_EXP_COEFF1, typeof(double))]
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_EXP_COEFF_1, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_EXP_COEFF, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_EXP_COEFF1, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_EXP_COEFF_1, typeof(double))]
     [APIAssetPropValueRange(min: 0.0, max: 0.00028)]
     [AssetGHParameter(typeof(Param_Number), "Thermal Expansion Coefficient X", "TECX", "The only, X or 1 component of thermal expansion coefficient (depending on behaviour) [The value is in inverse Kelvin]")]
     public double ThermalExpansionCoefficientX { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_EXP_COEFF2, typeof(double))]
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_EXP_COEFF_2, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_EXP_COEFF2, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_EXP_COEFF_2, typeof(double))]
     [APIAssetPropValueRange(min: 0.0, max: 0.00028)]
     [AssetGHParameter(typeof(Param_Number), "Thermal Expansion Coefficient Y", "TECY", "Y or 2 component of thermal expansion coefficient (depending on behaviour) [The value is in inverse Kelvin]")]
     public double ThermalExpansionCoefficientY { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_EXP_COEFF3, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_EXP_COEFF3, typeof(double))]
     [APIAssetPropValueRange(min: 0.0, max: 0.00028)]
     [AssetGHParameter(typeof(Param_Number), "Thermal Expansion Coefficient Z", "TECZ", "Z component of thermal expansion coefficient (depending on behaviour) [The value is in inverse Kelvin]")]
     public double ThermalExpansionCoefficientZ { get; set; }
 
     // mechanical
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_YOUNG_MOD, typeof(double))]
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_YOUNG_MOD1, typeof(double))]
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_YOUNG_MOD_1, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_YOUNG_MOD, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_YOUNG_MOD1, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_YOUNG_MOD_1, typeof(double))]
     [APIAssetPropValueRange(min: 0.0, max: 188549.06)]
     [AssetGHParameter(typeof(Param_Number), "Youngs Modulus X", "YMX", "The only, X, or 1 component of young's modulus (depending on behaviour) [The value is in Newtons per foot meter]")]
     public double YoungsModulusX { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_YOUNG_MOD2, typeof(double))]
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_YOUNG_MOD_2, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_YOUNG_MOD2, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_YOUNG_MOD_2, typeof(double))]
     [APIAssetPropValueRange(min: 0.0, max: 188549.06)]
     [AssetGHParameter(typeof(Param_Number), "Youngs Modulus Y", "YMY", "Y, or 1 component of young's modulus (depending on behaviour) [The value is in Newtons per foot meter]")]
     public double YoungsModulusY { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_YOUNG_MOD3, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_YOUNG_MOD3, typeof(double))]
     [APIAssetPropValueRange(min: 0.0, max: 188549.06)]
     [AssetGHParameter(typeof(Param_Number), "Youngs Modulus Z", "YMZ", "Z component of young's modulus (depending on behaviour) [The value is in Newtons per foot meter]")]
     public double YoungsModulusZ { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_POISSON_MOD, typeof(double))]
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_POISSON_MOD1, typeof(double))]
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_POISSON_MOD_12, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_POISSON_MOD, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_POISSON_MOD1, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_POISSON_MOD_12, typeof(double))]
     [APIAssetPropValueRange(min: 0.0, max: 1.0)]
     [AssetGHParameter(typeof(Param_Number), "Poissons Ratio X", "PRX", "The only, X, or 12 component of poisson's ratio (depending on behaviour)")]
     public double PoissonsRatioX { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_POISSON_MOD2, typeof(double))]
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_POISSON_MOD_23, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_POISSON_MOD2, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_POISSON_MOD_23, typeof(double))]
     [APIAssetPropValueRange(min: 0.0, max: 1.0)]
     [AssetGHParameter(typeof(Param_Number), "Poissons Ratio Y", "PRY", "Y, or 23 component of poisson's ratio (depending on behaviour)")]
     public double PoissonsRatioY { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_POISSON_MOD3, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_POISSON_MOD3, typeof(double))]
     [APIAssetPropValueRange(min: 0.0, max: 1.0)]
     [AssetGHParameter(typeof(Param_Number), "Poissons Ratio Z", "PRZ", "Z component of poisson's ratio (depending on behaviour)")]
     public double PoissonsRatioZ { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_SHEAR_MOD, typeof(double))]
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_SHEAR_MOD1, typeof(double))]
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_SHEAR_MOD_12, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_SHEAR_MOD, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_SHEAR_MOD1, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_SHEAR_MOD_12, typeof(double))]
     [APIAssetPropValueRange(min: 0.0, max: 72518.87)]
     [AssetGHParameter(typeof(Param_Number), "Shear Modulus X", "SMX", "The only, X, or 12 component of poisson's ratio (depending on behaviour) [The value is in Newtons per foot meter]")]
     public double ShearModulusX { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_SHEAR_MOD2, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_SHEAR_MOD2, typeof(double))]
     [APIAssetPropValueRange(min: 0.0, max: 72518.87)]
     [AssetGHParameter(typeof(Param_Number), "Shear Modulus Y", "SMY", "Y component of poisson's ratio (depending on behaviour) [The value is in Newtons per foot meter]")]
     public double ShearModulusY { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_SHEAR_MOD3, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_SHEAR_MOD3, typeof(double))]
     [APIAssetPropValueRange(min: 0.0, max: 72518.87)]
     [AssetGHParameter(typeof(Param_Number), "Shear Modulus Z", "SMZ", "Z component of poisson's ratio (depending on behaviour) [The value is in Newtons per foot meter]")]
     public double ShearModulusZ { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_STRUCTURAL_DENSITY, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_STRUCTURAL_DENSITY, typeof(double))]
     [APIAssetPropValueRange(min: -9.39E+15, max: 3.75E+19)]
     [AssetGHParameter(typeof(Param_Number), "Density", "D", "Physical asset density")]
     public double Density { get; set; }
 
     // concrete
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_CONCRETE_COMPRESSION, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_CONCRETE_COMPRESSION, typeof(double))]
     [APIAssetPropValueRange(min: 0.01, max: 116.03)]
     [AssetGHParameter(typeof(Param_Number), "Concrete Compression", "CC", "Physical asset concrete compression [The value is in Newtons per foot meter]")]
     public double ConcreteCompression { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_SHEAR_STRENGTH_REDUCTION, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_SHEAR_STRENGTH_REDUCTION, typeof(double))]
     [APIAssetPropValueRange(min: -2.94E12, max: 9.49E14)]
     [AssetGHParameter(typeof(Param_Number), "Concrete Shear Strength Modification", "CSSM", "Physical asset concrete shear strength modification")]
     public double ConcreteShearStrengthModification { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_LIGHT_WEIGHT, typeof(bool))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_LIGHT_WEIGHT, typeof(bool))]
     [AssetGHParameter(typeof(Param_Boolean), "Concrete Lightweight", "CL", "Physical asset lightweight concrete")]
     public bool ConcreteLightweight { get; set; }
 
     // wood
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_SPECIES, typeof(double), exclusive: false)]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_SPECIES, typeof(double), exclusive: false)]
     [AssetGHParameter(typeof(Param_String), "Wood Species", "WS", "Physical asset wood species")]
     public string WoodSpecies { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_GRADE, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_GRADE, typeof(double))]
     [AssetGHParameter(typeof(Param_String), "Wood Strength Grade", "WSG", "Physical asset wood strength grade")]
     public string WoodStrengthGrade { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_BENDING, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_BENDING, typeof(double))]
     [APIAssetPropValueRange(min: 0, max: 145.04)]
     [AssetGHParameter(typeof(Param_Number), "Wood Bending", "WB", "Physical asset wood bending strength")]
     public double WoodBending { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_COMPRESSION_PARALLEL, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_COMPRESSION_PARALLEL, typeof(double))]
     [APIAssetPropValueRange(min: 0, max: 145.04)]
     [AssetGHParameter(typeof(Param_Number), "Wood Compression Parallel to Grain", "WCLG", "Physical asset wood compression parallel to grain")]
     public double WoodCompressionParallelGrain { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_COMPRESSION_PERPENDICULAR, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_COMPRESSION_PERPENDICULAR, typeof(double))]
     [APIAssetPropValueRange(min: 0, max: 14.50)]
     [AssetGHParameter(typeof(Param_Number), "Wood Compression Perpendicular to Grain", "WCPG", "Physical asset wood compression perpendicular to grain")]
     public double WoodCompressionPerpendicularGrain { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_SHEAR_PARALLEL, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_SHEAR_PARALLEL, typeof(double))]
     [APIAssetPropValueRange(min: 0, max: 145.04)]
     [AssetGHParameter(typeof(Param_Number), "Wood Shear Parallel to Grain", "WSLG", "Physical asset wood shear parallel to grain")]
     public double WoodShearParallelGrain { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_SHEAR_PERPENDICULAR, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_SHEAR_PERPENDICULAR, typeof(double))]
     [APIAssetPropValueRange(min: 0, max: 14.50)]
     [AssetGHParameter(typeof(Param_Number), "Wood Tension Perpendicular to Grain", "WTPG", "Physical asset wood tension perpendicular to grain")]
     public double WoodTensionPerpendicularGrain { get; set; }
 
     // shared
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_MINIMUM_YIELD_STRESS, typeof(double), exclusive: true)]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_MINIMUM_YIELD_STRESS, typeof(double), exclusive: true)]
     [APIAssetPropValueRange(min: 0.0, max: 1450.38)]
     [AssetGHParameter(typeof(Param_Number), "Yield Strength", "YS", "Physical asset yield strength [The value is in Newtons per foot meter]")]
     public double YieldStrength { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_MINIMUM_TENSILE_STRENGTH, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_MINIMUM_TENSILE_STRENGTH, typeof(double))]
     [APIAssetPropValueRange(min: 0.0, max: 14503.77)]
     [AssetGHParameter(typeof(Param_Number), "Tensile Strength", "TS", "Physical asset tensile strength [The value is in Newtons per foot meter]")]
     public double TensileStrength { get; set; }
@@ -795,106 +766,106 @@ namespace RhinoInside.Revit.GH.Components.Element.Material
   [AssetGHComponent("Thermal Asset", "THAST", "Thermal Asset")]
   public class ThermalAssetData : PhysicalMaterialData
   {
-    [APIAssetBuiltInProp(BuiltInParameter.PROPERTY_SET_NAME, typeof(string))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PROPERTY_SET_NAME, typeof(string))]
     [AssetGHParameter(typeof(Param_String), "Name", "N", "Thermal asset name", optional: false, modifiable: false)]
     public new string Name { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_CLASS, typeof(DB.ThermalMaterialType))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_CLASS, typeof(DB.ThermalMaterialType))]
     [AssetGHParameter(typeof(Parameters.Param_Enum<Types.ThermalMaterialType>), "Type", "T", "Thermal asset material asset type", optional: false, modifiable: false)]
     public DB.StructuralAssetClass Type { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_SUBCLASS, typeof(string))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_SUBCLASS, typeof(string))]
     [AssetGHParameter(typeof(Param_String), "Subclass", "SC", "Thermal asset subclass")]
     public string SubClass { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PROPERTY_SET_DESCRIPTION, typeof(string))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PROPERTY_SET_DESCRIPTION, typeof(string))]
     [AssetGHParameter(typeof(Param_String), "Description", "D", "Thermal asset description")]
     public string Description { get; set; }
 
     // Note: Keywords are not exposed by the API for the structural asset
     // Disabling thermal asset keywords for consistency
-    //[APIAssetBuiltInProp(BuiltInParameter.PROPERTY_SET_KEYWORDS, typeof(string))]
+    //[APIAssetBuiltInProp(DB.BuiltInParameter.PROPERTY_SET_KEYWORDS, typeof(string))]
     //[AssetGHParameter(typeof(Param_String), "Keywords", "K", "")]
     //public string Keywords { get; set; }
 
-    //[APIAssetBuiltInProp(BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE, typeof(string))]
+    //[APIAssetBuiltInProp(DB.BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE, typeof(string))]
     //[AssetGHParameter(typeof(Param_String), "Source", "S", "Thermal asset source")]
     //public string Source { get; set; }
 
-    //[APIAssetBuiltInProp(BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE_URL, typeof(string))]
+    //[APIAssetBuiltInProp(DB.BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE_URL, typeof(string))]
     //[AssetGHParameter(typeof(Param_String), "Source URL", "SU", "Thermal asset source url")]
     //public string SourceURL { get; set; }
 
     // behaviour
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_BEHAVIOR, typeof(DB.StructuralBehavior))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_BEHAVIOR, typeof(DB.StructuralBehavior))]
     [AssetGHParameter(typeof(Parameters.Param_Enum<Types.StructuralBehavior>), "Behaviour", "B", "Thermal asset behaviour", modifiable: false)]
     public new DB.StructuralBehavior Behaviour { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.THERMAL_MATERIAL_PARAM_TRANSMITS_LIGHT, typeof(bool), exclusive: true)]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.THERMAL_MATERIAL_PARAM_TRANSMITS_LIGHT, typeof(bool), exclusive: true)]
     [AssetGHParameter(typeof(Param_Boolean), "Transmits Light", "TL", "Thermal asset transmits light")]
     public bool TransmitsLight { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_THERMAL_CONDUCTIVITY, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_THERMAL_CONDUCTIVITY, typeof(double))]
     [APIAssetPropValueRange(min: 0, max: 2888.9466)]
     [AssetGHParameter(typeof(Param_Number), "Thermal Conductivity", "TC", "Thermal asset thermal conductivity [The value is in feet-kilograms per Kelvin-cubed-second]")]
     public double ThermalConductivity { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_STRUCTURAL_SPECIFIC_HEAT, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_STRUCTURAL_SPECIFIC_HEAT, typeof(double))]
     [APIAssetPropValueRange(min: 0, max: 3.5827)]
     [AssetGHParameter(typeof(Param_Number), "Specific Heat", "SH", "Thermal asset specific heat [The value is in squared-feet per Kelvin, squared-second]")]
     public double SpecificHeat { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.PHY_MATERIAL_PARAM_STRUCTURAL_DENSITY, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_STRUCTURAL_DENSITY, typeof(double))]
     [APIAssetPropValueRange(min: -8.24E+16, max: 3.75E+23)]
     [AssetGHParameter(typeof(Param_Number), "Density", "D", "Thermal asset density [The value is in kilograms per cubed feet]")]
     public double Density { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.THERMAL_MATERIAL_PARAM_EMISSIVITY, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.THERMAL_MATERIAL_PARAM_EMISSIVITY, typeof(double))]
     [APIAssetPropValueRange(min: 0.01, max: 1.0)]
     [AssetGHParameter(typeof(Param_Number), "Emissivity", "E", "Thermal asset emissivity")]
     public double Emissivity { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.THERMAL_MATERIAL_PARAM_PERMEABILITY, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.THERMAL_MATERIAL_PARAM_PERMEABILITY, typeof(double))]
     [APIAssetPropValueRange(min: 0, max: 87.3920)]
     [AssetGHParameter(typeof(Param_Number), "Permeability", "PE", "Thermal asset permeability [The value is in seconds per foot]")]
     public double Permeability { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.THERMAL_MATERIAL_PARAM_POROSITY, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.THERMAL_MATERIAL_PARAM_POROSITY, typeof(double))]
     [APIAssetPropValueRange(min: 0.01, max: 1.0)]
     [AssetGHParameter(typeof(Param_Number), "Porosity", "PO", "Thermal asset porosity")]
     public double Porosity { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.THERMAL_MATERIAL_PARAM_REFLECTIVITY, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.THERMAL_MATERIAL_PARAM_REFLECTIVITY, typeof(double))]
     [APIAssetPropValueRange(min: 0, max: 1.0)]
     [AssetGHParameter(typeof(Param_Number), "Reflectivity", "R", "Thermal asset reflectivity")]
     public double Reflectivity { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.THERMAL_MATERIAL_PARAM_GAS_VISCOSITY, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.THERMAL_MATERIAL_PARAM_GAS_VISCOSITY, typeof(double))]
     [APIAssetPropValueRange(min: 0, max: 100000.00)]
     [AssetGHParameter(typeof(Param_Number), "Gas Viscosity", "GV", "Thermal asset gas viscosity [The value is in kilograms per feet-second]")]
     public double GasViscosity { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.THERMAL_MATERIAL_PARAM_ELECTRICAL_RESISTIVITY, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.THERMAL_MATERIAL_PARAM_ELECTRICAL_RESISTIVITY, typeof(double))]
     [APIAssetPropValueRange(min: 0, max: 1.0000E+24)]
     [AssetGHParameter(typeof(Param_Number), "Electrical Resistivity", "ER", "Thermal asset electrical resistivity [The value is in ohm-meters]")]
     public double ElectricalResistivity { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.THERMAL_MATERIAL_PARAM_LIQUID_VISCOSITY, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.THERMAL_MATERIAL_PARAM_LIQUID_VISCOSITY, typeof(double))]
     [APIAssetPropValueRange(min: 0, max: 100000.00)]
     [AssetGHParameter(typeof(Param_Number), "Liquid Viscosity", "LV", "Thermal asset liquid viscosity [The value is in kilograms per feet-second]")]
     public double LiquidViscosity { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.THERMAL_MATERIAL_PARAM_SPECIFIC_HEAT_OF_VAPORIZATION, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.THERMAL_MATERIAL_PARAM_SPECIFIC_HEAT_OF_VAPORIZATION, typeof(double))]
     [APIAssetPropValueRange(min: 0, max: 1289.7678)]
     [AssetGHParameter(typeof(Param_Number), "Specific Heat Of Vaporization", "SHV", "Thermal asset specific heat of vaporization [The value is in feet per squared-second]")]
     public double SpecificHeatVaporization { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.THERMAL_MATERIAL_PARAM_VAPOR_PRESSURE, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.THERMAL_MATERIAL_PARAM_VAPOR_PRESSURE, typeof(double))]
     [APIAssetPropValueRange(min: 0, max: 14.50)]
     [AssetGHParameter(typeof(Param_Number), "Vapor Pressure", "VP", "Thermal asset vapor pressure [The value is in kilograms per feet, squared-second]")]
     public double VaporPressure { get; set; }
 
-    [APIAssetBuiltInProp(BuiltInParameter.THERMAL_MATERIAL_PARAM_COMPRESSIBILITY, typeof(double))]
+    [APIAssetBuiltInProp(DB.BuiltInParameter.THERMAL_MATERIAL_PARAM_COMPRESSIBILITY, typeof(double))]
     [APIAssetPropValueRange(min: 0.0, max: 1.0)]
     [AssetGHParameter(typeof(Param_Number), "Compressibility", "C", "Thermal asset compressibility")]
     public double Compressibility { get; set; }

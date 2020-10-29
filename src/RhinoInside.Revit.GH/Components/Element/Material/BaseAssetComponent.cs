@@ -1,21 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
-
-using DB = Autodesk.Revit.DB;
-using RhinoInside.Revit.Convert.System.Drawing;
 using Rhino.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.GH.Components.Element.Material;
+using RhinoInside.Revit.External.DB.Extensions;
+using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Material
 {
 #if REVIT_2019
   public abstract class BaseAssetComponent<T>
@@ -232,7 +225,7 @@ namespace RhinoInside.Revit.GH.Components
               case double dblVal:
                 SetAssetParamValue(editableAsset, schemaPropName, dblVal);
                 break;
-              case System.Drawing.Color colorVal:
+              case Rhino.Display.ColorRGBA colorVal:
                 SetAssetParamValue(editableAsset, schemaPropName, colorVal);
                 break;
               case TextureData textureVal:
@@ -248,7 +241,7 @@ namespace RhinoInside.Revit.GH.Components
                 if (d4dMapVal.HasTexture)
                   SetAssetParamTexture(editableAsset, schemaPropName, d4dMapVal.TextureValue);
                 else
-                  SetAssetParamValue(editableAsset, schemaPropName, d4dMapVal.ValueAsColor);
+                  SetAssetParamValue(editableAsset, schemaPropName, d4dMapVal.ToColorRGBA());
                 break;
             }
           }
@@ -345,7 +338,8 @@ namespace RhinoInside.Revit.GH.Components
           return d3dProp.GetValueAsXYZ().ToVector3d();
 
         case DB.Visual.AssetPropertyDoubleArray4d colorProp:
-          return colorProp.GetValueAsColor().ToColor();
+          var list = colorProp.GetValueAsDoubles();
+          return new Rhino.Display.ColorRGBA(list[0], list[1], list[2], list[3]);
 
         //case DB.Visual.AssetPropertyDoubleMatrix44 matrixProp:
         //  break;
@@ -479,7 +473,7 @@ namespace RhinoInside.Revit.GH.Components
     }
 
     public static void
-    SetAssetParamValue(DB.Visual.Asset asset, string name, System.Drawing.Color value, bool removeAsset = true)
+    SetAssetParamValue(DB.Visual.Asset asset, string name, Rhino.Display.ColorRGBA value, bool removeAsset = true)
     {
       var prop = asset.FindByName(name);
       switch (prop)
@@ -488,19 +482,19 @@ namespace RhinoInside.Revit.GH.Components
           if (removeAsset)
             tdProp.RemoveConnectedAsset();
           tdProp.SetValueAsXYZ(new DB.XYZ(
-            value.R / 255.0,
-            value.G / 255.0,
-            value.B / 255.0
+            value.R,
+            value.G,
+            value.B
           ));
           break;
         case DB.Visual.AssetPropertyDoubleArray4d fdProp:
           if (removeAsset)
             fdProp.RemoveConnectedAsset();
           fdProp.SetValueAsDoubles(new double[] {
-            value.R / 255.0,
-            value.G / 255.0,
-            value.B / 255.0,
-            value.A / 255.0
+            value.R,
+            value.G,
+            value.B,
+            value.A
           });
           break;
       }
@@ -531,7 +525,7 @@ namespace RhinoInside.Revit.GH.Components
           case double doubleVal:
             SetAssetParamValue(textureAsset, schemaPropName, doubleVal);
             break;
-          case System.Drawing.Color colorVal:
+          case Rhino.Display.ColorRGBA colorVal:
             SetAssetParamValue(textureAsset, schemaPropName, colorVal);
             break;
         }

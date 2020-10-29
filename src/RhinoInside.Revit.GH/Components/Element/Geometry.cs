@@ -11,7 +11,6 @@ using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 using RhinoInside.Revit.External.DB;
-using Grasshopper.Kernel.Extensions;
 
 namespace RhinoInside.Revit.GH.Components
 {
