@@ -84,7 +84,7 @@ namespace RhinoInside.Revit.GH.Components
           continue;
 
         var current = new HashSet<Parameters.ParameterParam>();
-        foreach (var param in element.GetOrderedParameters())
+        foreach (var param in element.GetOrderedParameters().Where(x => x.Definition is object && x.StorageType != DB.StorageType.None))
           current.Add(new Parameters.ParameterParam(param));
 
         if (common is null)
@@ -107,7 +107,7 @@ namespace RhinoInside.Revit.GH.Components
         if (element is null)
           continue;
 
-        foreach (var param in element.GetOrderedParameters())
+        foreach (var param in element.GetOrderedParameters().Where(x => x.Definition is object && x.StorageType != DB.StorageType.None))
           all.Add(new Parameters.ParameterParam(param));
       }
 

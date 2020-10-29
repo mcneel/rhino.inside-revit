@@ -19,8 +19,8 @@ namespace RhinoInside.Revit.GH.Components
 
     public WallByCurve() : base
     (
-      name: "Add Wall",
-      nickname: "Wall",
+      name: "Add Wall (Curve)",
+      nickname: "WallCrv",
       description: "Given a curve, it adds a Wall element to the active Revit document",
       category: "Revit",
       subCategory: "Wall"
@@ -40,7 +40,7 @@ namespace RhinoInside.Revit.GH.Components
       if (PreviousStructure is object)
       {
         var unjoinedWalls = PreviousStructure.OfType<Types.Element>().
-                            Select(x => document.GetElement(x)).
+                            Select(x => document.GetElement(x.Id)).
                             OfType<DB.Wall>().
                             Where(x => x.Pinned).
                             Select

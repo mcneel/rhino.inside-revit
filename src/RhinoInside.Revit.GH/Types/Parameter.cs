@@ -6,37 +6,25 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  [Kernel.Attributes.Name("Parameter Key")]
   public class ParameterKey : Element
   {
-    public override string TypeName => "Revit ParameterKey";
-    public override string TypeDescription => "Represents a Revit parameter definition";
-    override public object ScriptVariable() => null;
     protected override Type ScriptVariableType => typeof(DB.ParameterElement);
+    override public object ScriptVariable() => null;
 
     #region IGH_ElementId
     public override bool LoadElement()
     {
-      if (Document is null)
+      if (IsReferencedElement && !IsElementLoaded)
       {
-        Id = null;
-        if (!Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var doc))
-        {
-          Document = null;
-          return false;
-        }
-
+        Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var doc);
         Document = doc;
-      }
-      else if (IsElementLoaded)
-        return true;
 
-      if (Document is object && Document.TryGetParameterId(UniqueID, out var value))
-      {
-        Id = value;
-        return true;
+        Document.TryGetParameterId(UniqueID, out var id);
+        Id = id;
       }
 
-      return false;
+      return IsElementLoaded;
     }
     #endregion
 
@@ -54,21 +42,30 @@ namespace RhinoInside.Revit.GH.Types
 
     public override sealed bool CastFrom(object source)
     {
-      if (source is IGH_Goo goo)
+      if (base.CastFrom(source))
+        return true;
+
+      var document = Revit.ActiveDBDocument;
+      var parameterId = DB.ElementId.InvalidElementId;
+
+      if (source is IGH_ElementId elementId)
+      {
+        document = elementId.Document;
+        source = elementId.Id;
+      }
+      else if (source is IGH_Goo goo)
         source = goo.ScriptVariable();
 
-      var parameterId = DB.ElementId.InvalidElementId;
       switch (source)
       {
-        case DB.ParameterElement     parameterElement: SetValue(parameterElement.Document, parameterElement.Id); return true;
-        case DB.Parameter            parameter:        SetValue(parameter.Element.Document, parameter.Id); return true;
-        case DB.ElementId id:        parameterId = id; break;
         case int integer:            parameterId = new DB.ElementId(integer); break;
+        case DB.ElementId id:        parameterId = id; break;
+        case DB.Parameter parameter: SetValue(parameter.Element.Document, parameter.Id); return true;
       }
 
-      if (parameterId.IsParameterId(Revit.ActiveDBDocument))
+      if (parameterId.TryGetBuiltInParameter(out var _))
       {
-        SetValue(Revit.ActiveDBDocument, parameterId);
+        SetValue(document, parameterId);
         return true;
       }
 
@@ -88,6 +85,8 @@ namespace RhinoInside.Revit.GH.Types
 
     new class Proxy : Element.Proxy
     {
+      protected new ParameterKey owner => base.owner as ParameterKey;
+
       public Proxy(ParameterKey o) : base(o) { (this as IGH_GooProxy).UserString = FormatInstance(); }
 
       public override bool IsParsable() => true;
@@ -95,7 +94,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         int value = owner.Id?.IntegerValue ?? -1;
         if (Enum.IsDefined(typeof(DB.BuiltInParameter), value))
-          return ((DB.BuiltInParameter) value).ToString();
+          return ((DB.BuiltInParameter) value).ToStringGeneric();
 
         return value.ToString();
       }
@@ -110,18 +109,36 @@ namespace RhinoInside.Revit.GH.Types
         return false;
       }
 
-      DB.BuiltInParameter builtInParameter => owner.Id.TryGetBuiltInParameter(out var bip) ? bip : DB.BuiltInParameter.INVALID;
-      DB.ParameterElement parameter => IsBuiltIn ? null : owner.Document?.GetElement(owner.Id) as DB.ParameterElement;
+      #region Misc
+      protected override bool IsValidId(DB.Document doc, DB.ElementId id) => id.IsParameterId(doc);
+      public override Type ObjectType => IsBuiltIn ? typeof(DB.BuiltInParameter) : base.ObjectType;
 
-      [System.ComponentModel.Description("The Guid that identifies this parameter as a shared parameter.")]
-      public Guid Guid => (parameter as DB.SharedParameterElement)?.GuidValue ?? Guid.Empty;
-      [System.ComponentModel.Description("API Object Type.")]
-      public override Type ObjectType => IsBuiltIn ? typeof(DB.BuiltInParameter) : parameter?.GetType();
+      [System.ComponentModel.Description("BuiltIn parameter Id.")]
+      public DB.BuiltInParameter? BuiltInId => owner.Id.TryGetBuiltInParameter(out var bip) ? bip : default;
+      #endregion
 
-      [System.ComponentModel.Category("Other"), System.ComponentModel.Description("Internal parameter data storage type.")]
-      public DB.StorageType StorageType => builtInParameter != DB.BuiltInParameter.INVALID ? Revit.ActiveDBDocument.get_TypeOfStorage(builtInParameter) : parameter?.GetDefinition().ParameterType.ToStorageType() ?? DB.StorageType.None;
-      [System.ComponentModel.Category("Other"), System.ComponentModel.Description("Visible in UI.")]
-      public bool Visible => IsBuiltIn ? Valid : parameter?.GetDefinition().Visible ?? false;
+      #region Definition
+      const string Definition = "Definition";
+      DB.ParameterElement parameter => owner.Value as DB.ParameterElement;
+
+      [System.ComponentModel.Category(Definition), System.ComponentModel.Description("The Guid that identifies this parameter as a shared parameter.")]
+      public Guid? Guid => (parameter as DB.SharedParameterElement)?.GuidValue;
+
+      [System.ComponentModel.Category(Definition), System.ComponentModel.Description("Internal parameter data storage type.")]
+      public DB.StorageType? StorageType => BuiltInId.HasValue ? Revit.ActiveDBDocument?.get_TypeOfStorage(BuiltInId.Value) : parameter?.GetDefinition()?.ParameterType.ToStorageType();
+
+      [System.ComponentModel.Category(Definition), System.ComponentModel.Description("Visible in UI.")]
+      public bool? Visible => parameter?.GetDefinition()?.Visible;
+
+      [System.ComponentModel.Category(Definition), System.ComponentModel.Description("Whether or not the parameter values can vary across group members.")]
+      public bool? VariesAcrossGroups => parameter?.GetDefinition()?.VariesAcrossGroups;
+
+      [System.ComponentModel.Category(Definition)]
+      public DB.ParameterType? Type => parameter?.GetDefinition()?.ParameterType;
+
+      [System.ComponentModel.Category(Definition)]
+      public DB.BuiltInParameterGroup? Group => parameter?.GetDefinition()?.ParameterGroup;
+      #endregion
     }
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
@@ -140,11 +157,38 @@ namespace RhinoInside.Revit.GH.Types
         return base.DisplayName;
       }
     }
+
+    #region Properties
+    public override string Name
+    {
+      get
+      {
+        try
+        {
+          if (Id is object && Id.TryGetBuiltInParameter(out var builtInParameter))
+            return DB.LabelUtils.GetLabelFor(builtInParameter) ?? base.Name;
+        }
+        catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
+
+        return base.Name;
+      }
+      set
+      {
+        if (value is object && value != Name)
+        {
+          if (Id.IsBuiltInId())
+            throw new InvalidOperationException($"BuiltIn paramater '{Name}' does not support assignment of a user-specified name.");
+
+          base.Name = value;
+        }
+      }
+    }
+    #endregion
   }
 
   public class ParameterValue : GH_Goo<DB.Parameter>
   {
-    public override string TypeName => "Revit ParameterValue";
+    public override string TypeName => "Revit Parameter Value";
     public override string TypeDescription => "Represents a Revit parameter value on an element";
     protected Type ScriptVariableType => typeof(DB.Parameter);
     public override bool IsValid => Value is object;
@@ -251,7 +295,7 @@ namespace RhinoInside.Revit.GH.Types
           if (typeof(Q).IsSubclassOf(typeof(ElementId)))
           {
             target = Value.Element is null ? (Q) (object) null :
-                     (Q) (object) ElementId.FromElementId(Value.Element.Document, Value.AsElementId());
+                     (Q) (object) Element.FromElementId(Value.Element.Document, Value.AsElementId());
             return true;
           }
           break;
@@ -319,7 +363,7 @@ namespace RhinoInside.Revit.GH.Types
                   return Value.AsElementId().IntegerValue.ToString();
               }
 
-              if (ElementId.FromElementId(Value.Element.Document, Value.AsElementId()) is ElementId goo)
+              if (Element.FromElementId(Value.Element.Document, Value.AsElementId()) is ElementId goo)
                 return goo.ToString();
 
               value = string.Empty;

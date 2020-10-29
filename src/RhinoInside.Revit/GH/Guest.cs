@@ -18,6 +18,7 @@ using Grasshopper.Kernel;
 using Grasshopper.GUI.Canvas;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.Convert.Units;
+using System.Diagnostics;
 
 namespace RhinoInside.Revit.GH
 {
@@ -52,8 +53,8 @@ namespace RhinoInside.Revit.GH
 
       Revit.DocumentChanged += OnDocumentChanged;
 
-      External.ActivationGate.Enter += ModalScope_Enter;
-      External.ActivationGate.Exit  += ModalScope_Exit;
+      External.ActivationGate.Enter += ActivationGate_Enter;
+      External.ActivationGate.Exit  += ActivationGate_Exit;
 
       RhinoDoc.BeginOpenDocument                += BeginOpenDocument;
       RhinoDoc.EndOpenDocumentInitialViewUpdate += EndOpenDocumentInitialViewUpdate;
@@ -82,8 +83,8 @@ namespace RhinoInside.Revit.GH
       RhinoDoc.EndOpenDocumentInitialViewUpdate -= EndOpenDocumentInitialViewUpdate;
       RhinoDoc.BeginOpenDocument                -= BeginOpenDocument;
 
-      External.ActivationGate.Exit  -= ModalScope_Exit;
-      External.ActivationGate.Enter -= ModalScope_Enter;
+      External.ActivationGate.Exit  -= ActivationGate_Exit;
+      External.ActivationGate.Enter -= ActivationGate_Enter;
 
       Revit.DocumentChanged -= OnDocumentChanged;
 
@@ -169,13 +170,13 @@ namespace RhinoInside.Revit.GH
       OpenDocument(filename);
     }
 
-    void ModalScope_Enter(object sender, EventArgs e)
+    void ActivationGate_Enter(object sender, EventArgs e)
     {
       if (Instances.ActiveCanvas?.Document is GH_Document definition)
         definition.Enabled = true;
     }
 
-    void ModalScope_Exit(object sender, EventArgs e)
+    void ActivationGate_Exit(object sender, EventArgs e)
     {
       if (Instances.ActiveCanvas?.Document is GH_Document definition)
         definition.Enabled = false;
@@ -497,6 +498,37 @@ namespace RhinoInside.Revit.GH
         catch { }
       }
 
+      // Expire objects that contain elements modified by Grasshopper.
+      {
+        var expiredObjectsCount = 0;
+        while (DocumentChangedEvent.changeQueue.Count > 0)
+        {
+          var change = DocumentChangedEvent.changeQueue.Dequeue();
+          expiredObjectsCount += change.ExpiredObjects.Count;
+
+          foreach (var obj in change.ExpiredObjects)
+          {
+            obj.ClearData();
+            obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"This object expired because it contained obsolete Revit elements.");
+          }
+        }
+
+        if (expiredObjectsCount > 0)
+        {
+          Instances.DocumentEditor.SetStatusBarEvent
+          (
+            new GH_RuntimeMessage
+            (
+              expiredObjectsCount == 1 ?
+              $"An object expired because it contained obsolete Revit elements." :
+              $"{expiredObjectsCount} objects expired because them contained obsolete Revit elements.",
+              GH_RuntimeMessageLevel.Remark,
+              "Document"
+            )
+          );
+        }
+      }
+
       ModelUnitSystem = RhinoDoc.ActiveDoc.ModelUnitSystem;
     }
 
@@ -511,8 +543,6 @@ namespace RhinoInside.Revit.GH
       {
         foreach (GH_Document definition in Instances.DocumentServer)
         {
-          bool expireNow = definition.SolutionState != GH_ProcessStep.Process;
-
           var change = new DocumentChangedEvent()
           {
             Operation = e.Operation,
@@ -530,16 +560,8 @@ namespace RhinoInside.Revit.GH
               if (persistentParam.DataType == GH_ParamData.remote)
                 continue;
 
-              if (persistentParam.Phase == GH_SolutionPhase.Blank)
-                continue;
-
               if (persistentParam.NeedsToBeExpired(document, added, deleted, modified))
-              {
-                if (expireNow)
-                  persistentParam.ExpireSolution(false);
-                else
-                  change.ExpiredObjects.Add(persistentParam);
-              }
+                change.ExpiredObjects.Add(persistentParam);
             }
             else if (obj is Kernel.IGH_ElementIdComponent persistentComponent)
             {
@@ -547,42 +569,12 @@ namespace RhinoInside.Revit.GH
                 continue;
 
               if (persistentComponent.NeedsToBeExpired(e))
-              {
-                if (expireNow)
-                  persistentComponent.ExpireSolution(false);
-                else
-                  change.ExpiredObjects.Add(persistentComponent);
-              }
+                change.ExpiredObjects.Add(persistentComponent);
             }
           }
 
-          if (definition.SolutionState != GH_ProcessStep.Process)
-          {
+          if (change.ExpiredObjects.Count > 0)
             DocumentChangedEvent.Enqueue(change);
-          }
-          else if (definition == Instances.ActiveCanvas.Document)
-          {
-            if (change.ExpiredObjects.Count > 0)
-            {
-              foreach (var obj in change.ExpiredObjects)
-              {
-                obj.ClearData();
-                obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"This object was expired because it contained obsolete Revit elements.");
-              }
-
-              Instances.DocumentEditor.SetStatusBarEvent
-              (
-                new GH_RuntimeMessage
-                (
-                  change.ExpiredObjects.Count == 1 ?
-                  $"An object was expired because it contained obsolete Revit elements." :
-                  $"{change.ExpiredObjects.Count} objects were expired because them contained obsolete Revit elements.",
-                  GH_RuntimeMessageLevel.Remark,
-                  "Document"
-                )
-              );
-            }
-          }
         }
       }
     }
@@ -604,7 +596,12 @@ namespace RhinoInside.Revit.GH
       public static void Enqueue(DocumentChangedEvent value)
       {
         changeQueue.Enqueue(value);
-        FlushQueue.Raise();
+
+        if (value.Definition.SolutionState != GH_ProcessStep.Process)
+        {
+          // Change NOT made by Grasshopper.
+          FlushQueue.Raise();
+        }
       }
 
       public UndoOperation Operation;
@@ -614,13 +611,13 @@ namespace RhinoInside.Revit.GH
 
       void NewSolution()
       {
+        Debug.Assert(ExpiredObjects.Count > 0, "An empty change is been enqueued.");
+
         foreach (var obj in ExpiredObjects)
           obj.ExpireSolution(false);
 
-        if(ExpiredObjects.Count > 0 && Operation == UndoOperation.TransactionCommitted)
-        {
+        if(Operation == UndoOperation.TransactionCommitted)
           Definition.NewSolution(false);
-        }
       }
     }
     #endregion

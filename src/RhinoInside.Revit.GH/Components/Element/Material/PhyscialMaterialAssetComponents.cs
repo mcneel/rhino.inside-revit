@@ -1,15 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 
-using DB = Autodesk.Revit.DB;
 using RhinoInside.Revit.External.DB.Extensions;
+
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Material
 {
@@ -185,7 +182,7 @@ namespace RhinoInside.Revit.GH.Components.Material
           case DB.StorageType.ElementId:
             DA.SetData(
               paramName,
-              Types.Element.FromElementId(doc: srcElement.Document, Id: param.AsElementId())
+              Types.Element.FromElementId(srcElement.Document, param.AsElementId())
               );
             break;
         }
@@ -209,7 +206,7 @@ namespace RhinoInside.Revit.GH.Components.Material
 
           foreach (var builtInPropInfo in
             _assetData.GetAPIAssetBuiltInPropertyInfos(assetPropInfo))
-            psetElement.SetParameter(builtInPropInfo.ParamId, inputValue);
+            psetElement.SetParameterValue(builtInPropInfo.ParamId, inputValue);
         }
       }
     }

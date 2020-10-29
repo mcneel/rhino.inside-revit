@@ -4,13 +4,12 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  [Kernel.Attributes.Name("Material")]
   public class Material : Element
   {
-    public override string TypeName => "Revit Material";
-    public override string TypeDescription => "Represents a Revit material";
     protected override Type ScriptVariableType => typeof(DB.Material);
     public static explicit operator DB.Material(Material value) => value?.Value;
-    public new DB.Material Value => value as DB.Material;
+    public new DB.Material Value => base.Value as DB.Material;
 
     public Material() { }
     public Material(DB.Material material) : base(material) { }
@@ -51,41 +50,66 @@ namespace RhinoInside.Revit.GH.Types
 
     public System.Drawing.Color? Color
     {
-      get
-      {
-        if (Value is DB.Material material)
-        {
-          var color = material.Color.ToColor();
-          return System.Drawing.Color.FromArgb(255 - (material.Transparency * 255 / 100), color);
-        }
-
-        return default;
-      }
+      get => Value?.Color.ToColor();
       set
       {
-        if (value is object && Color != value)
+        if (value is object && Value is DB.Material material)
         {
-          var color = value.Value.ToColor();
-          Value.Color = color;
-          Value.Transparency = 100 - (value.Value.A * 100 / 255);
+          var materialColor = material.Color;
+          var valueColor = value.Value;
+
+          if (materialColor.Red != valueColor.R || materialColor.Green != valueColor.G || materialColor.Blue != valueColor.B)
+            material.Color = valueColor.ToColor();
         }
       }
     }
+
+    public double? Transparency
+    {
+      get => Value?.Transparency / 100.0;
+      set
+      {
+        if (value is object && Value is DB.Material material)
+        {
+          var intValue = (int) Math.Round(value.Value * 100.0);
+          if (material.Transparency != intValue)
+            material.Transparency = intValue;
+        }
+      }
+    }
+
+    public double? Shininess
+    {
+      get => Value?.Shininess / 128.0;
+      set
+      {
+        if (value is object && Value is DB.Material material)
+        {
+          var intValue = (int) Math.Round(value.Value * 128.0);
+          if (material.Shininess != intValue)
+            material.Shininess = intValue;
+        }
+      }
+    }    
 
     public double? Smoothness
     {
       get => Value?.Smoothness / 100.0;
       set
       {
-        if (value is object && Value is DB.Material material && material.Smoothness / 100.0 != value.Value)
-          material.Smoothness = (int) Math.Round(value.Value * 100.0);
+        if (value is object && Value is DB.Material material)
+        {
+          var intValue = (int) Math.Round(value.Value * 100.0);
+          if (material.Smoothness != intValue)
+            material.Smoothness = intValue;
+        }
       }
     }
 
 #if REVIT_2019
-    public Element SurfaceForegroundPattern
+    public FillPatternElement SurfaceForegroundPattern
     {
-      get => Element.FromElementId(Document, SurfaceForegroundPatternId);
+      get => new FillPatternElement(Document, SurfaceForegroundPatternId);
       set
       {
         if (value is object && Value is DB.Material material && value.Id != material.SurfaceForegroundPatternId)
@@ -122,9 +146,9 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public Element SurfaceBackgroundPattern
+    public FillPatternElement SurfaceBackgroundPattern
     {
-      get => Element.FromElementId(Document, SurfaceBackgroundPatternId);
+      get => new FillPatternElement(Document, SurfaceBackgroundPatternId);
       set
       {
         if (value is object && Value is DB.Material material && value.Id != material.SurfaceBackgroundPatternId)
@@ -161,9 +185,9 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public Element CutForegroundPattern
+    public FillPatternElement CutForegroundPattern
     {
-      get => Element.FromElementId(Document, CutForegroundPatternId);
+      get => new FillPatternElement(Document, CutForegroundPatternId);
       set
       {
         if (value is object && Value is DB.Material material && value.Id != material.CutForegroundPatternId)
@@ -200,9 +224,9 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public Element CutBackgroundPattern
+    public FillPatternElement CutBackgroundPattern
     {
-      get => Element.FromElementId(Document, CutForegroundPatternId);
+      get => new FillPatternElement(Document, CutBackgroundPatternId);
       set
       {
         if (value is object && Value is DB.Material material && value.Id != material.CutBackgroundPatternId)
@@ -239,9 +263,9 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 #else
-    public Element SurfaceForegroundPattern
+    public FillPatternElement SurfaceForegroundPattern
     {
-      get => Element.FromElementId(Document, SurfaceForegroundPatternId);
+      get => new FillPatternElement(Document, SurfaceForegroundPatternId);
       set
       {
         if (value is object && Value is DB.Material material && value.Id != material.SurfacePatternId)
@@ -278,7 +302,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public Element SurfaceBackgroundPattern
+    public FillPatternElement SurfaceBackgroundPattern
     {
       get => default;
       set { }
@@ -296,9 +320,9 @@ namespace RhinoInside.Revit.GH.Types
       set { }
     }
 
-    public Element CutForegroundPattern
+    public FillPatternElement CutForegroundPattern
     {
-      get => Element.FromElementId(Document, CutForegroundPatternId);
+      get => new FillPatternElement(Document, CutForegroundPatternId);
       set
       {
         if (value is object && Value is DB.Material material && value.Id != material.CutPatternId)
@@ -335,7 +359,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public Element CutBackgroundPattern
+    public FillPatternElement CutBackgroundPattern
     {
       get => default;
       set { }

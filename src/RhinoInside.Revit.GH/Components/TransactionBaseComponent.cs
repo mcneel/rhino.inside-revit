@@ -652,6 +652,7 @@ namespace RhinoInside.Revit.GH.Components
       { typeof(Autodesk.Revit.DB.Category),     Tuple.Create(typeof(Parameters.Category),     typeof(Types.Category))     },
       { typeof(Autodesk.Revit.DB.Element),      Tuple.Create(typeof(Parameters.Element),      typeof(Types.Element))      },
       { typeof(Autodesk.Revit.DB.ElementType),  Tuple.Create(typeof(Parameters.ElementType),  typeof(Types.ElementType))  },
+      { typeof(Autodesk.Revit.DB.FamilySymbol), Tuple.Create(typeof(Parameters.FamilySymbol), typeof(Types.FamilySymbol)) },
       { typeof(Autodesk.Revit.DB.Material),     Tuple.Create(typeof(Parameters.Material),     typeof(Types.Material))     },
       { typeof(Autodesk.Revit.DB.SketchPlane),  Tuple.Create(typeof(Parameters.SketchPlane),  typeof(Types.SketchPlane))  },
       { typeof(Autodesk.Revit.DB.Level),        Tuple.Create(typeof(Parameters.Level),        typeof(Types.Level))        },
@@ -767,7 +768,7 @@ namespace RhinoInside.Revit.GH.Components
 
         if (defaultValue is object)
         {
-          TryGetParamTypes(parameter.ParameterType, out var paramTypes);
+          TryGetParamTypes(parameterType, out var paramTypes);
 
           if (paramTypes.Item1.IsGenericSubclassOf(typeof(GH_PersistentParam<>)))
           {
@@ -1013,7 +1014,7 @@ namespace RhinoInside.Revit.GH.Components
         }
         finally
         {
-          if (previous?.IsValidObject == true && !previous.IsSameElement(element))
+          if (previous?.IsValidObject == true && !previous.Equivalent(element))
             previous.Document.Delete(previous.Id);
 
           if (element?.IsValidObject == true)

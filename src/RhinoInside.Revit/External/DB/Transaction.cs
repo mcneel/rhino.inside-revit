@@ -217,10 +217,8 @@ namespace RhinoInside.Revit.External.DB
       {
         if (result < FailureProcessingResult.ProceedWithRollBack)
         {
-          result = failuresAccessor.IsTransactionBeingCommitted() &&
-                   CommitNextTransaction() == TransactionStatus.Committed ?
-            FailureProcessingResult.Continue :
-            FailureProcessingResult.ProceedWithRollBack;
+          if(!failuresAccessor.IsTransactionBeingCommitted() || CommitNextTransaction() != TransactionStatus.Committed)
+            result = FailureProcessingResult.ProceedWithRollBack;
         }
       }
 

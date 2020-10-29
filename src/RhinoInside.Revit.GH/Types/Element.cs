@@ -1,36 +1,52 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Display;
-using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Kernel.Attributes;
+
+  [Name("Element")]
   public interface IGH_Element : IGH_ElementId
   {
     ElementType Type { get; set; }
   }
 
+  [Name("Element")]
   public class Element : ElementId, IGH_Element
   {
-    public override string TypeName => $"Revit {Value?.GetType().Name ?? GetType().Name}";
-    public override string TypeDescription => "Represents a Revit element";
     override public object ScriptVariable() => Value;
     protected override Type ScriptVariableType => typeof(DB.Element);
     public static explicit operator DB.Element(Element value) => value?.Value;
 
-    protected override object value => IsValid ? Document.GetElement(Id) : default;
-    public new DB.Element Value => value as DB.Element;
+    public new DB.Element Value => base.Value as DB.Element;
+
+    protected void InvalidateGraphics()
+    {
+      Debug.Assert(Document.IsModifiable);
+
+      SubInvalidateGraphics();
+    }
+
+    protected virtual void SubInvalidateGraphics() { }
+
+    protected void AssertValidDocument(DB.Document doc, string paramName)
+    {
+      if (!(doc?.Equals(Document) ?? false))
+        throw new System.ArgumentException("Invalid Document", paramName);
+    }
 
     public static Element FromValue(object data)
     {
       switch (data)
       {
-        case DB.Category category: return Category.FromCategory(category);
+        case DB.Category category: return new Category(category);
         case DB.Element  element:  return Element.FromElement(element);
       }
 
@@ -39,34 +55,38 @@ namespace RhinoInside.Revit.GH.Types
 
     public static readonly Dictionary<Type, Func<DB.Element, Element>> ActivatorDictionary = new Dictionary<Type, Func<DB.Element, Element>>()
     {
-      { typeof(DB.View),                    (element)=> new View          (element as DB.View)              },
-      { typeof(DB.Family),                  (element)=> new Family        (element as DB.Family)            },
-      { typeof(DB.ElementType),             (element)=> new ElementType   (element as DB.ElementType)       },
-      { typeof(DB.HostObjAttributes),       (element)=> new HostObjectType(element as DB.HostObjAttributes) },
-      { typeof(DB.ParameterElement),        (element)=> new ParameterKey  (element as DB.ParameterElement)  },
-      { typeof(DB.Material),                (element)=> new Material      (element as DB.Material)          },
-      { typeof(DB.GraphicsStyle),           (element)=> new GraphicsStyle (element as DB.GraphicsStyle)     },
+      { typeof(DB.View),                    (element)=> new View              (element as DB.View)              },
+      { typeof(DB.Family),                  (element)=> new Family            (element as DB.Family)            },
+      { typeof(DB.ElementType),             (element)=> new ElementType       (element as DB.ElementType)       },
+      { typeof(DB.FamilySymbol),            (element)=> new FamilySymbol      (element as DB.FamilySymbol)      },
+      { typeof(DB.HostObjAttributes),       (element)=> new HostObjectType    (element as DB.HostObjAttributes) },
+      { typeof(DB.ParameterElement),        (element)=> new ParameterKey      (element as DB.ParameterElement)  },
+      { typeof(DB.Material),                (element)=> new Material          (element as DB.Material)          },
+      { typeof(DB.GraphicsStyle),           (element)=> new GraphicsStyle     (element as DB.GraphicsStyle)     },
+      { typeof(DB.LinePatternElement),      (element)=> new LinePatternElement(element as DB.LinePatternElement)},
+      { typeof(DB.FillPatternElement),      (element)=> new FillPatternElement(element as DB.FillPatternElement)},
 
-      { typeof(DB.Sketch),                  (element)=> new Sketch        (element as DB.Sketch)            },
-      { typeof(DB.SketchPlane),             (element)=> new SketchPlane   (element as DB.SketchPlane)       },
-      { typeof(DB.DatumPlane),              (element)=> new DatumPlane    (element as DB.DatumPlane)        },
-      { typeof(DB.Level),                   (element)=> new Level         (element as DB.Level)             },
-      { typeof(DB.Grid),                    (element)=> new Grid          (element as DB.Grid)              },
-      { typeof(DB.SpatialElement),          (element)=> new SpatialElement(element as DB.SpatialElement)    },
-      { typeof(DB.Group),                   (element)=> new Group         (element as DB.Group)             },
-      { typeof(DB.HostObject),              (element)=> new HostObject    (element as DB.HostObject)        },
-      { typeof(DB.CurtainGridLine),         (element)=> new CurtainGridLine(element as DB.CurtainGridLine)  },
-      { typeof(DB.Floor),                   (element)=> new Floor         (element as DB.Floor)             },
-      { typeof(DB.Architecture.BuildingPad),(element)=> new BuildingPad   (element as DB.Architecture.BuildingPad)             },
-      { typeof(DB.Ceiling),                 (element)=> new Ceiling       (element as DB.Ceiling)           },
-      { typeof(DB.RoofBase),                (element)=> new Roof          (element as DB.RoofBase)          },
-      { typeof(DB.Wall),                    (element)=> new Wall          (element as DB.Wall)              },
-      { typeof(DB.Instance),                (element)=> new Instance      (element as DB.Instance)          },
-      { typeof(DB.FamilyInstance),          (element)=> new FamilyInstance(element as DB.FamilyInstance)    },
-      { typeof(DB.Panel),                   (element)=> new Panel         (element as DB.Panel)             },
-      { typeof(DB.Mullion),                 (element)=> new Mullion       (element as DB.Mullion)           },
-      { typeof(DB.Dimension),               (element)=> new Dimension     (element as DB.Dimension)         },
-      { typeof(DB.CurveElement),            (element)=> new CurveElement  (element as DB.CurveElement)      },
+      { typeof(DB.Sketch),                  (element)=> new Sketch            (element as DB.Sketch)            },
+      { typeof(DB.SketchPlane),             (element)=> new SketchPlane       (element as DB.SketchPlane)       },
+      { typeof(DB.DatumPlane),              (element)=> new DatumPlane        (element as DB.DatumPlane)        },
+      { typeof(DB.Level),                   (element)=> new Level             (element as DB.Level)             },
+      { typeof(DB.Grid),                    (element)=> new Grid              (element as DB.Grid)              },
+      { typeof(DB.ReferencePlane),          (element)=> new ReferencePlane    (element as DB.ReferencePlane)    },
+      { typeof(DB.SpatialElement),          (element)=> new SpatialElement    (element as DB.SpatialElement)    },
+      { typeof(DB.Group),                   (element)=> new Group             (element as DB.Group)             },
+      { typeof(DB.HostObject),              (element)=> new HostObject        (element as DB.HostObject)        },
+      { typeof(DB.CurtainGridLine),         (element)=> new CurtainGridLine   (element as DB.CurtainGridLine)   },
+      { typeof(DB.Floor),                   (element)=> new Floor             (element as DB.Floor)             },
+      { typeof(DB.Architecture.BuildingPad),(element)=> new BuildingPad       (element as DB.Architecture.BuildingPad) },
+      { typeof(DB.Ceiling),                 (element)=> new Ceiling           (element as DB.Ceiling)           },
+      { typeof(DB.RoofBase),                (element)=> new Roof              (element as DB.RoofBase)          },
+      { typeof(DB.Wall),                    (element)=> new Wall              (element as DB.Wall)              },
+      { typeof(DB.Instance),                (element)=> new Instance          (element as DB.Instance)          },
+      { typeof(DB.FamilyInstance),          (element)=> new FamilyInstance    (element as DB.FamilyInstance)    },
+      { typeof(DB.Panel),                   (element)=> new Panel             (element as DB.Panel)             },
+      { typeof(DB.Mullion),                 (element)=> new Mullion           (element as DB.Mullion)           },
+      { typeof(DB.Dimension),               (element)=> new Dimension         (element as DB.Dimension)         },
+      { typeof(DB.CurveElement),            (element)=> new CurveElement      (element as DB.CurveElement)      },
     };
 
     public static Element FromElement(DB.Element element)
@@ -74,23 +94,14 @@ namespace RhinoInside.Revit.GH.Types
       if (element is null)
         return null;
 
-      if (element.GetType() == typeof(DB.Element))
+      for (var type = element.GetType(); type != typeof(DB.Element); type = type.BaseType)
       {
-        try
-        {
-          if (DB.Category.GetCategory(element.Document, element.Id) is DB.Category category)
-            return new Category(category);
-        }
-        catch (Autodesk.Revit.Exceptions.InternalException) { }
+        if (ActivatorDictionary.TryGetValue(type, out var activator))
+          return activator(element);
       }
-      else
-      {
-        for (var type = element.GetType(); type != typeof(DB.Element); type = type.BaseType)
-        {
-          if (ActivatorDictionary.TryGetValue(type, out var activator))
-            return activator(element);
-        }
-      }
+
+      if (DocumentExtension.AsCategory(element) is DB.Category category)
+        return new Category(category);
 
       if (GraphicalElement.IsValidElement(element))
       {
@@ -102,20 +113,30 @@ namespace RhinoInside.Revit.GH.Types
           return new InstanceElement(element);
         }
 
-        return GeometricElement.IsValidElement(element) ?
-          new GeometricElement(element) :
-          new GraphicalElement(element);
+        if (GeometricElement.IsValidElement(element))
+          return new GeometricElement(element);
+
+        return new GraphicalElement(element);
       }
 
       return new Element(element);
     }
 
-    new public static Element FromElementId(DB.Document doc, DB.ElementId Id)
+    public static Element FromElementId(DB.Document doc, DB.ElementId id)
     {
-      if (doc?.GetElement(Id ?? DB.ElementId.InvalidElementId) is DB.Element value)
-        return FromElement(value);
+      if (doc is null || !id.IsValid())
+        return null;
 
-      return null;
+      if (Category.FromElementId(doc, id) is Category c)
+        return c;
+
+      if (ParameterKey.FromElementId(doc, id) is ParameterKey p)
+        return p;
+
+      if (LinePatternElement.FromElementId(doc, id) is LinePatternElement l)
+        return l;
+
+      return FromElement(doc.GetElement(id));
     }
 
     public static Element FromReference(DB.Document doc, DB.Reference reference)
@@ -151,25 +172,31 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
+    protected override void ResetValue()
+    {
+      SubInvalidateGraphics();
+
+      base.ResetValue();
+    }
+
     public Element() : base() { }
     internal Element(DB.Document doc, DB.ElementId id) : base(doc, id) { }
-    protected Element(DB.Element element)               : base(element.Document, element.Id) { }
+    protected Element(DB.Element element)              : base(element) { }
 
     public override bool CastFrom(object source)
     {
-      if (source is IGH_Goo goo)
-        source = goo.ScriptVariable();
-
-      var element = default(DB.Element);
-      switch (source)
+      if (source is IGH_ElementId goo)
       {
-        case DB.Element e:    element = e; break;
-        case DB.ElementId id: element = Revit.ActiveDBDocument.GetElement(id); break;
-        case int integer:     element = Revit.ActiveDBDocument.GetElement(new DB.ElementId(integer)); break;
-        default:              return false;
+        if (goo.Id == DB.ElementId.InvalidElementId)
+        {
+          SetValue(goo.Document, goo.Id);
+          return true;
+        }
+
+        source = goo.ScriptVariable();
       }
 
-      return SetValue(element);
+      return source is DB.Element element && SetValue(element);
     }
 
     public override bool CastTo<Q>(out Q target)
@@ -177,7 +204,7 @@ namespace RhinoInside.Revit.GH.Types
       if (base.CastTo<Q>(out target))
         return true;
 
-      var element = Value as DB.Element;
+      var element = Value;
       if (typeof(DB.Element).IsAssignableFrom(typeof(Q)))
       {
         if (element is null)
@@ -220,29 +247,19 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    new class Proxy : ElementId.Proxy
+    protected new class Proxy : ElementId.Proxy
     {
+      protected new Element owner => base.owner as Element;
+
       public Proxy(Element e) : base(e) { (this as IGH_GooProxy).UserString = FormatInstance(); }
 
-      public override bool IsParsable() => true;
-      public override string FormatInstance() => owner.IsValid ? $"{owner.Id.IntegerValue}:{element?.Name ?? string.Empty}" : "-1";
-      public override bool FromString(string str)
+      public override string FormatInstance()
       {
-        int index = str.IndexOf(':');
-        if(index >= 0)
-          str = str.Substring(0, index);
-
-        str = str.Trim();
-        if (int.TryParse(str, out int elementId))
-        {
-          owner.SetValue(owner.Document ?? Revit.ActiveUIDocument.Document, new DB.ElementId(elementId));
-          return true;
-        }
-
-        return false;
+        return owner.DisplayName;
       }
 
-      DB.Element element => owner.IsElementLoaded ? owner.Document?.GetElement(owner.Id) : null;
+      [System.ComponentModel.Description("A human readable name for the Element.")]
+      public string Name => owner.Name;
     }
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
@@ -251,18 +268,15 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is DB.Element element && !string.IsNullOrEmpty(element.Name))
-          return element.Name;
+        if (Name is string name && name != string.Empty)
+          return name;
 
         return base.DisplayName;
       }
     }
 
-    protected void AssertValidDocument(DB.Document doc, string paramName)
-    {
-      if (!(doc?.Equals(Document) ?? false))
-        throw new System.ArgumentException("Invalid Document", paramName);
-    }
+    #region Properties
+    public bool CanDelete => IsValid && DB.DocumentValidation.CanDeleteElement(Document, Id);
 
     public bool? Pinned
     {
@@ -274,34 +288,36 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public string Name
+    public virtual string Name
     {
       get => Value?.Name;
       set
       {
-        if(value is object && Value is DB.Element element && element.Name != value)
-         element.Name = value;
+        if (value is object && Value is DB.Element element && element.Name != value)
+          element.Name = value;
       }
     }
 
     public Category Category
     {
-      get => Types.Category.FromValue(Value?.Category);
+      get => Category.FromCategory(Value?.Category);
     }
 
     public virtual ElementType Type
     {
-      get => Types.ElementType.FromElementId(Document, Value?.GetTypeId()) as ElementType;
+      get => ElementType.FromElementId(Document, Value?.GetTypeId()) as ElementType;
       set
       {
-        if (value is object)
+        if (value is object && Value is DB.Element element)
         {
-          AssertValidDocument(value?.Document, nameof(Type));
+          AssertValidDocument(value.Document, nameof(Type));
+          InvalidateGraphics();
 
-          Value?.ChangeTypeId(value.Id);
+          element.ChangeTypeId(value.Id);
         }
       }
     }
+    #endregion
 
     #region Identity Data
     public string Description

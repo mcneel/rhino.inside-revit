@@ -7,12 +7,12 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  [Kernel.Attributes.Name("Ceiling")]
   public class Ceiling : HostObject
   {
-    public override string TypeDescription => "Represents a Revit ceiling element";
     protected override Type ScriptVariableType => typeof(DB.Ceiling);
-    public static explicit operator DB.Ceiling(Ceiling value) =>
-      value?.IsValid == true ? value.Document.GetElement(value) as DB.Ceiling : default;
+    public static explicit operator DB.Ceiling(Ceiling value) => value?.Value;
+    public new DB.Ceiling Value => base.Value as DB.Ceiling;
 
     public Ceiling() { }
     public Ceiling(DB.Ceiling ceiling) : base(ceiling) { }
@@ -21,9 +21,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var floor = (DB.Ceiling) this;
-
-        if (floor.GetFirstDependent<DB.Sketch>() is DB.Sketch sketch)
+        if (Value is DB.Ceiling ceiling && ceiling.GetFirstDependent<DB.Sketch>() is DB.Sketch sketch)
         {
           var center = Point3d.Origin;
           var count = 0;
@@ -39,10 +37,10 @@ namespace RhinoInside.Revit.GH.Types
           }
           center /= count;
 
-          if (floor.Document.GetElement(floor.LevelId) is DB.Level level)
+          if (ceiling.Document.GetElement(ceiling.LevelId) is DB.Level level)
             center.Z = level.Elevation * Revit.ModelUnits;
 
-          center.Z += floor.get_Parameter(DB.BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM)?.AsDoubleInRhinoUnits() ?? 0.0;
+          center.Z += ceiling.get_Parameter(DB.BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM)?.AsDoubleInRhinoUnits() ?? 0.0;
 
           var plane = sketch.SketchPlane.GetPlane().ToPlane();
           var origin = center;

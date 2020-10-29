@@ -102,9 +102,9 @@ namespace RhinoInside.Revit.GH.Components.Material
 
         // Try to duplicate template
         var template = default(DB.Material);
-        if (DA.GetData("Template", ref template))
+        if (DA.GetData("Template", ref template) && template is object)
         {
-          if (template.Document.Equals(doc))
+          if (doc.Equals(template.Document))
           {
             material = template.Duplicate(name);
           }

@@ -7,12 +7,12 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  [Kernel.Attributes.Name("Building Pad")]
   public class BuildingPad : HostObject
   {
-    public override string TypeDescription => "Represents a Revit building pad element";
     protected override Type ScriptVariableType => typeof(DB.Architecture.BuildingPad);
-    public static explicit operator DB.Architecture.BuildingPad(BuildingPad value) =>
-      value?.IsValid == true ? value.Document.GetElement(value) as DB.Architecture.BuildingPad : default;
+    public static explicit operator DB.Architecture.BuildingPad(BuildingPad value) => value?.Value;
+    public new DB.Architecture.BuildingPad Value => base.Value as DB.Architecture.BuildingPad;
 
     public BuildingPad() { }
     public BuildingPad(DB.Architecture.BuildingPad floor) : base(floor) { }
@@ -21,9 +21,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var pad = (DB.Architecture.BuildingPad) this;
-
-        if (pad.GetFirstDependent<DB.Sketch>() is DB.Sketch sketch)
+        if (Value is DB.Architecture.BuildingPad pad && pad.GetFirstDependent<DB.Sketch>() is DB.Sketch sketch)
         {
           var center = Point3d.Origin;
           var count = 0;

@@ -283,7 +283,7 @@ namespace RhinoInside.Revit.GH.Components
         }
         else freeForm = DB.FreeFormElement.Create(familyDoc, solid);
 
-        brep.GetUserBoolean(DB.BuiltInParameter.ELEMENT_IS_CUTTING.ToString(), out var cutting);
+        brep.TryGetUserValue(DB.BuiltInParameter.ELEMENT_IS_CUTTING.ToString(), out bool cutting);
         freeForm.get_Parameter(DB.BuiltInParameter.ELEMENT_IS_CUTTING).Set(cutting ? 1 : 0);
 
         if (!cutting)
@@ -291,7 +291,7 @@ namespace RhinoInside.Revit.GH.Components
           DB.Category familySubCategory = null;
           if
           (
-            brep.GetUserElementId(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), out var subCategoryId) &&
+            brep.TryGetUserValue(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), out DB.ElementId subCategoryId) &&
             DB.Category.GetCategory(doc, subCategoryId) is DB.Category subCategory
           )
           {
@@ -313,13 +313,13 @@ namespace RhinoInside.Revit.GH.Components
           else
             freeForm.Subcategory = familySubCategory;
 
-          brep.GetUserBoolean(DB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), out var visible, true);
+          brep.TryGetUserValue(DB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), out var visible, true);
           freeForm.get_Parameter(DB.BuiltInParameter.IS_VISIBLE_PARAM).Set(visible ? 1 : 0);
 
-          brep.GetUserInteger(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility, 57406);
+          brep.TryGetUserValue(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility, 57406);
           freeForm.get_Parameter(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Set(visibility);
 
-          brep.GetUserElementId(DB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), out var materialId);
+          brep.TryGetUserValue(DB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), out DB.ElementId materialId);
           var familyMaterialId = MapMaterial(doc, familyDoc, materialId, true);
           freeForm.get_Parameter(DB.BuiltInParameter.MATERIAL_ID_PARAM).Set(familyMaterialId);
         }
@@ -356,7 +356,7 @@ namespace RhinoInside.Revit.GH.Components
           DB.Category familySubCategory = null;
           if
           (
-            curve.GetUserElementId(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), out var subCategoryId) &&
+            curve.TryGetUserValue(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), out DB.ElementId subCategoryId) &&
             DB.Category.GetCategory(doc, subCategoryId) is DB.Category subCategory
           )
           {
@@ -377,14 +377,14 @@ namespace RhinoInside.Revit.GH.Components
             }
           }
 
-          curve.GetUserEnum(DB.BuiltInParameter.FAMILY_CURVE_GSTYLE_PLUS_INVISIBLE.ToString(), out var graphicsStyleType, DB.GraphicsStyleType.Projection);
+          curve.TryGetUserValue(DB.BuiltInParameter.FAMILY_CURVE_GSTYLE_PLUS_INVISIBLE.ToString(), out var graphicsStyleType, DB.GraphicsStyleType.Projection);
 
           familyGraphicsStyle = familySubCategory?.GetGraphicsStyle(graphicsStyleType);
         }
 
-        curve.GetUserBoolean(DB.BuiltInParameter.MODEL_OR_SYMBOLIC.ToString(), out var symbolic);
-        curve.GetUserBoolean(DB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), out var visible, true);
-        curve.GetUserInteger(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility, 57406);
+        curve.TryGetUserValue(DB.BuiltInParameter.MODEL_OR_SYMBOLIC.ToString(), out bool symbolic);
+        curve.TryGetUserValue(DB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), out var visible, true);
+        curve.TryGetUserValue(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility, 57406);
 
         foreach (var c in curve.ToCurveMany())
         {
@@ -539,11 +539,7 @@ namespace RhinoInside.Revit.GH.Components
       var geometry = new List<IGH_GeometricGoo>();
       var updateGeometry = !(!DA.GetDataList("Geometry", geometry) && Params.Input[Params.IndexOfInputParam("Geometry")].SourceCount == 0);
 
-      var family = default(DB.Family);
-      using (var collector = new DB.FilteredElementCollector(doc).OfClass(typeof(DB.Family)))
-        family = collector.Cast<DB.Family>().Where(x => x.Name == name).FirstOrDefault();
-
-      bool familyIsNew = family is null;
+      bool familyIsNew = !doc.TryGetFamily(name, out var family, categoryId);
 
       var templatePath = string.Empty;
       if (familyIsNew)
@@ -607,7 +603,7 @@ namespace RhinoInside.Revit.GH.Components
                     {
                       try
                       {
-                        if (geo is Rhino.Geometry.Curve loop && geo.GetUserBoolean("IS_OPENING_PARAM", out var opening) && opening)
+                        if (geo is Rhino.Geometry.Curve loop && geo.TryGetUserValue("IS_OPENING_PARAM", out bool opening) && opening)
                         {
                           loops.Add(loop);
                         }

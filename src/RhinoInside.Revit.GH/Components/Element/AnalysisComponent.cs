@@ -1,7 +1,4 @@
-using System;
 using Grasshopper.Kernel;
-
-using RhinoInside.Revit.GH.Types;
 
 using DB = Autodesk.Revit.DB;
 
@@ -45,14 +42,14 @@ namespace RhinoInside.Revit.GH.Components
           case DB.StorageType.ElementId:
             DA.SetData(
               paramName,
-              Types.Element.FromElementId(doc: srcElement.Document, Id: param.AsElementId())
+              Types.Element.FromElementId(srcElement.Document, param.AsElementId())
               );
             break;
         }
       }
     }
 
-    protected void PipeHostParameter<T>(IGH_DataAccess DA, DB.Element srcElement, DB.BuiltInParameter srcParam, string paramName) where T: GH_Enumerate, new()
+    protected void PipeHostParameter<T>(IGH_DataAccess DA, DB.Element srcElement, DB.BuiltInParameter srcParam, string paramName) where T: Types.GH_Enumerate, new()
     {
       if (srcElement is null)
       {

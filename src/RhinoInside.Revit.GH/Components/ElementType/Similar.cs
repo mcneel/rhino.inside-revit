@@ -1,5 +1,5 @@
 using System;
-using System.Linq.Expressions;
+using System.Linq;
 using Grasshopper.Kernel;
 using DB = Autodesk.Revit.DB;
 
@@ -35,10 +35,10 @@ namespace RhinoInside.Revit.GH.Components
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var elementType = default(DB.ElementType);
-      if (!DA.GetData("Type", ref elementType))
+      if (!DA.GetData("Type", ref elementType) || elementType is null)
         return;
 
-      DA.SetDataList("Types", elementType?.GetSimilarTypes());
+      DA.SetDataList("Types", elementType.GetSimilarTypes().Select(x => Types.ElementType.FromElementId(elementType.Document, x)));
     }
   }
 }

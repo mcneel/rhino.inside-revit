@@ -7,14 +7,15 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  [Kernel.Attributes.Name("Host")]
   public interface IGH_HostObject : IGH_InstanceElement { }
 
+  [Kernel.Attributes.Name("Host")]
   public class HostObject : InstanceElement, IGH_HostObject
   {
-    public override string TypeDescription => "Represents a Revit host element";
     protected override Type ScriptVariableType => typeof(DB.HostObject);
     public static explicit operator DB.HostObject(HostObject value) => value?.Value;
-    public new DB.HostObject Value => value as DB.HostObject;
+    public new DB.HostObject Value => base.Value as DB.HostObject;
 
     public HostObject() { }
     public HostObject(DB.HostObject host) : base(host) { }
@@ -23,9 +24,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var host = Value;
-
-        if (!(host.Location is DB.LocationPoint) && !(host.Location is DB.LocationCurve))
+        if (Value is DB.HostObject host && !(host.Location is DB.LocationPoint) && !(host.Location is DB.LocationCurve))
         {
           if (host.GetFirstDependent<DB.Sketch>() is DB.Sketch sketch)
           {
@@ -79,17 +78,15 @@ namespace RhinoInside.Revit.GH.Types
     }
   }
 
-  public interface IGH_HostObjectType : IGH_ElementType
-  {
-    DB.HostObjAttributes HostObjAttributes { get; }
-  }
+  [Kernel.Attributes.Name("Host Type")]
+  public interface IGH_HostObjectType : IGH_ElementType { }
 
+  [Kernel.Attributes.Name("Host Type")]
   public class HostObjectType : ElementType, IGH_HostObjectType
   {
-    public override string TypeDescription => "Represents a Revit host element type";
     protected override Type ScriptVariableType => typeof(DB.HostObjAttributes);
-    public DB.HostObjAttributes HostObjAttributes => IsValid ? Document.GetElement(Id) as DB.HostObjAttributes : default;
-    public static explicit operator DB.HostObjAttributes(HostObjectType value) => value?.HostObjAttributes;
+    public static explicit operator DB.HostObjAttributes(HostObjectType value) => value?.Value;
+    public new DB.HostObjAttributes Value => base.Value as DB.HostObjAttributes;
 
     public HostObjectType() { }
     public HostObjectType(DB.HostObjAttributes type) : base(type) { }

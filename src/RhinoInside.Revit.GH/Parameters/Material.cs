@@ -82,6 +82,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
       listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
       listBox.Items.Clear();
+      listBox.Items.Add(new Types.Material());
 
       using (var collector = new DB.FilteredElementCollector(doc).OfClass(typeof(DB.Material)))
       {

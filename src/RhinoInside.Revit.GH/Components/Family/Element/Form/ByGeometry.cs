@@ -38,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!doc.IsFamilyDocument)
         throw new InvalidOperationException("This component can only run on a Family document");
 
-      brep.GetUserBoolean(BuiltInParameter.ELEMENT_IS_CUTTING.ToString(), out var cutting);
+      brep.TryGetUserValue(BuiltInParameter.ELEMENT_IS_CUTTING.ToString(), out bool cutting);
 
       if (brep.Faces.Count == 1 && brep.Faces[0].Loops.Count == 1 && brep.Faces[0].TryGetPlane(out var capPlane))
       {

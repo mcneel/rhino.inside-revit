@@ -6,13 +6,13 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public interface IGH_Instane : IGH_InstanceElement { }
+  public interface IGH_Instance : IGH_InstanceElement { }
 
-  public class Instance : InstanceElement, IGH_Instane
+  public class Instance : InstanceElement, IGH_Instance
   {
     protected override Type ScriptVariableType => typeof(DB.Instance);
-    public static explicit operator DB.Instance(Instance value) =>
-      value?.IsValid == true ? value.Document.GetElement(value) as DB.Instance : default;
+    public static explicit operator DB.Instance(Instance value) => value?.Value;
+    public new DB.Instance Value => base.Value as DB.Instance;
 
     public Instance() { }
     public Instance(DB.Instance instance) : base(instance) { }
@@ -33,8 +33,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var instance = (DB.Instance) this;
-        if (instance is object)
+        if (Value is DB.Instance instance)
         {
           instance.GetLocation(out var origin, out var basisX, out var basisY);
           return new Plane(origin.ToPoint3d(), basisX.ToVector3d(), basisY.ToVector3d());
@@ -45,26 +44,15 @@ namespace RhinoInside.Revit.GH.Types
     }
   }
 
-  public interface IGH_FamilyInstance : IGH_Instane { }
+  [Kernel.Attributes.Name("Component")]
+  public interface IGH_FamilyInstance : IGH_Instance { }
 
+  [Kernel.Attributes.Name("Component")]
   public class FamilyInstance : Instance, IGH_FamilyInstance
   {
-    public override string TypeName
-    {
-      get
-      {
-        var instance = (DB.FamilyInstance) this;
-        if (instance is object)
-          return $"Revit {instance.Category.Name}";
-
-        return "Revit Component";
-      }
-    }
-
-    public override string TypeDescription => "Represents a Revit Component";
     protected override Type ScriptVariableType => typeof(DB.FamilyInstance);
     public static explicit operator DB.FamilyInstance(FamilyInstance value) => value?.Value;
-    public new DB.FamilyInstance Value => value as DB.FamilyInstance;
+    public new DB.FamilyInstance Value => base.Value as DB.FamilyInstance;
 
     public FamilyInstance() { }
     public FamilyInstance(DB.FamilyInstance value) : base(value) { }
@@ -74,20 +62,22 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (base.Level is Level baseLevel)
-          return baseLevel;
+        if (Value is DB.FamilyInstance instance)
+        {
+          var levelId = instance.LevelId;
+          if (levelId == DB.ElementId.InvalidElementId)
+          {
+            var levelParam = instance.get_Parameter(DB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM);
+            if (levelParam is null)
+              levelParam = instance.get_Parameter(DB.BuiltInParameter.INSTANCE_SCHEDULE_ONLY_LEVEL_PARAM);
+            if (levelParam is object)
+              levelId = levelParam.AsElementId();
+          }
 
-        var instance = (DB.FamilyInstance) this;
-        if (instance is null)
-          return default;
+          return new Level(instance.Document, levelId);
+        }
 
-        var levelParam = instance.get_Parameter(DB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM);
-        if(levelParam is null || levelParam.AsElementId() == DB.ElementId.InvalidElementId)
-          levelParam = instance.get_Parameter(DB.BuiltInParameter.INSTANCE_SCHEDULE_ONLY_LEVEL_PARAM);
-        if (levelParam is null || levelParam.AsElementId() == DB.ElementId.InvalidElementId)
-          return default;
-
-        return Level.FromElementId(instance.Document, levelParam.AsElementId()) as Level;
+        return default;
       }
     }
 
@@ -97,8 +87,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         var baseLocation = base.Location;
 
-        var instance = (DB.FamilyInstance) this;
-        if (instance?.Mirrored == true)
+        if (Value?.Mirrored == true)
         {
           baseLocation.XAxis = -baseLocation.XAxis;
           baseLocation.YAxis = -baseLocation.YAxis;
@@ -112,9 +101,8 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var instance = (DB.FamilyInstance) this;
-        if (instance?.CanFlipFacing == true)
-          return instance.FacingOrientation.ToVector3d();
+        if (Value?.CanFlipFacing == true)
+          return Value.FacingOrientation.ToVector3d();
 
         return base.FacingOrientation;
       }
@@ -124,9 +112,8 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var instance = (DB.FamilyInstance) this;
-        if (instance?.CanFlipHand == true)
-          return instance.HandOrientation.ToVector3d();
+        if (Value?.CanFlipHand == true)
+          return Value.HandOrientation.ToVector3d();
 
         return base.HandOrientation;
       }
@@ -136,9 +123,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var instance = (DB.FamilyInstance) this;
-
-        if (instance?.Location is DB.LocationPoint location)
+        if(Value is DB.FamilyInstance instance && instance.Location is DB.LocationPoint location)
         {
           if (instance.Symbol.Family.FamilyPlacementType == DB.FamilyPlacementType.TwoLevelsBased)
           {
@@ -188,8 +173,11 @@ namespace RhinoInside.Revit.GH.Types
           if (!instance.CanFlipFacing)
             throw new InvalidOperationException("Facing can not be flipped for this element.");
 
-          if(instance.FacingFlipped != value)
+          if (instance.FacingFlipped != value)
+          {
+            InvalidateGraphics();
             instance.flipFacing();
+          }
         }
       }
     }
@@ -211,7 +199,10 @@ namespace RhinoInside.Revit.GH.Types
             throw new InvalidOperationException("Hand can not be flipped for this element.");
 
           if (instance.HandFlipped != value)
+          {
+            InvalidateGraphics();
             instance.flipHand();
+          }
         }
       }
     }
@@ -233,10 +224,81 @@ namespace RhinoInside.Revit.GH.Types
             throw new InvalidOperationException("Work Plane can not be flipped for this element.");
 
           if (instance.IsWorkPlaneFlipped != value)
+          {
+            InvalidateGraphics();
             instance.IsWorkPlaneFlipped = value.Value;
+          }
         }
       }
     }
     #endregion
+
+    #region Joins
+    public override bool? IsJoinAllowedAtStart
+    {
+      get => Value is DB.FamilyInstance frame && frame.StructuralType != DB.Structure.StructuralType.NonStructural ?
+        (bool?) DB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(frame, 0) :
+        default;
+
+      set
+      {
+        if (value is object &&  Value is DB.FamilyInstance frame)
+        {
+          if (frame.StructuralType != DB.Structure.StructuralType.NonStructural)
+            throw new InvalidOperationException("Join at start can not be set for this element.");
+
+          InvalidateGraphics();
+
+          if (value == true)
+            DB.Structure.StructuralFramingUtils.AllowJoinAtEnd(frame, 0);
+          else
+            DB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(frame, 0);
+        }
+      }
+    }
+
+    public override bool? IsJoinAllowedAtEnd
+    {
+      get => Value is DB.FamilyInstance frame && frame.StructuralType != DB.Structure.StructuralType.NonStructural ?
+        (bool?) DB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(frame, 1) :
+        default;
+
+      set
+      {
+        if (value is object && Value is DB.FamilyInstance frame)
+        {
+          if (frame.StructuralType != DB.Structure.StructuralType.NonStructural)
+            throw new InvalidOperationException("Join at end can not be set for this element.");
+
+          InvalidateGraphics();
+
+          if (value == true)
+            DB.Structure.StructuralFramingUtils.AllowJoinAtEnd(frame, 1);
+          else
+            DB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(frame, 1);
+        }
+      }
+    }
+    #endregion
+  }
+
+  [Kernel.Attributes.Name("Component Type")]
+  public interface IGH_FamilySymbol : IGH_ElementType
+  {
+    Family Family { get; }
+  }
+
+  [Kernel.Attributes.Name("Component Type")]
+  public class FamilySymbol : ElementType, IGH_FamilySymbol
+  {
+    protected override Type ScriptVariableType => typeof(DB.FamilySymbol);
+    public static explicit operator DB.FamilySymbol(FamilySymbol value) => value?.Value;
+    public new DB.FamilySymbol Value => base.Value as DB.FamilySymbol;
+
+    public FamilySymbol() { }
+    protected FamilySymbol(DB.Document doc, DB.ElementId id) : base(doc, id) { }
+    public FamilySymbol(DB.FamilySymbol elementType) : base(elementType) { }
+
+    public Family Family => Value is DB.FamilySymbol symbol ? new Family(symbol.Family) : default;
   }
 }

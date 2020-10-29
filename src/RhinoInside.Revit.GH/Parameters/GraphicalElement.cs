@@ -396,12 +396,9 @@ namespace RhinoInside.Revit.GH.Parameters
 
       if (elementIds.Any())
       {
-        Rhinoceros.InvokeInHostContext(() =>
-        {
-          var ids = elementIds.ToArray();
-          uiDocument.Selection.SetElementIds(ids);
-          uiDocument.ShowElements(ids);
-        });
+        var ids = elementIds.ToArray();
+        uiDocument.Selection.SetElementIds(ids);
+        uiDocument.ShowElements(ids);
       }
     }
 
