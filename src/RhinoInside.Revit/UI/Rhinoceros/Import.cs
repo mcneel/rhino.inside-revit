@@ -497,7 +497,7 @@ namespace RhinoInside.Revit.UI
 
               var geometry = obj.Geometry;
               if (geometry is Extrusion extrusion) geometry = extrusion.ToBrep();
-              else if (geometry is SubD subD) geometry = subD.ToBrep();
+              else if (geometry is SubD subD) geometry = subD.ToBrep(SubDToBrepOptions.Default);
 
               try
               {

@@ -425,7 +425,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
         case SubD subD:
         {
-          var brep = subD.ToBrep();
+          var brep = subD.ToBrep(SubDToBrepOptions.Default);
           if (BrepEncoder.EncodeRaw(ref brep, scaleFactor))
             return BrepEncoder.ToSolid(brep);
         }
