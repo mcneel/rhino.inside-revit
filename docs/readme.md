@@ -28,6 +28,7 @@
   - [Grasshopper Screenshots](#grasshopper-screenshots)
   - [Linking Videos](#linking-videos)
   - [Referencing Grasshopper Components](#referencing-grasshopper-components)
+  - [Referencing Grasshopper Parameters](#referencing-grasshopper-parameters)
   - [Adding Email Links](#adding-email-links)
   - [Pre-defined Blocks](#pre-defined-blocks)
     - [Work-in-Progress Block](#work-in-progress-block)
@@ -37,8 +38,10 @@
     - [Bubble Note Block](#bubble-note-block)
     - [API Note Block](#api-note-block)
     - [Locale Note Block](#locale-note-block)
+    - [Filter Note Block](#filter-note-block)
     - [Download Package Block](#download-package-block)
     - [Download Component Block](#download-component-block)
+    - [Download Definition Block](#download-definition-block)
     - [Release Header Block](#release-header-block)
     - [Keyboard Key (Inline)](#keyboard-key-inline)
     - [Keyboard Shortcut Block](#keyboard-shortcut-block)
@@ -46,6 +49,7 @@
 - [Data Sources](#data-sources)
   - [Rhinoceros Tab Button List](#rhinoceros-tab-button-list)
   - [Grasshopper Component List](#grasshopper-component-list)
+  - [Grasshopper Parameter List](#grasshopper-parameter-list)
 
 # Rhino.Inside.Revit Wiki
 
@@ -490,11 +494,20 @@ To reference any component that is part of this project, use the pre-defined blo
 
 The `15545e80-` is the first part of the component uuid. This information is stored in the component data file generated from the actual components in this project.
 
-The site builder, automatically finds the component data based on the provided uuid part, and places the component title instead:
+The site builder, automatically finds the component data based on the provided uuid part, and places the component title and icon instead. The image below shows how the **Query Materials** component reference looks like on the wiki:
 
+![](static/images/readme/ghcomp-ref.png)
+
+
+## Referencing Grasshopper Parameters
+
+To reference any parameter that is part of this project, use the pre-defined block shown below:
+
+```markdown
+{% include ltr/param.html uuid="15545e80-" %}
 ```
-Wall System Family
-```
+
+It works exactly the same as the reference components block.
 
 ## Adding Email Links
 
@@ -645,6 +658,27 @@ This is the code used to generate the example locale block shown in the image ab
 {% include ltr/locale_note.html note='Since we are specifying the name of parameter in a specific language, the definition will break if opened on a Revit with a different language. A better way (but a lot less intuitive) is to specify the API integer value of the built-in parameter as input value. You can get this value by converting the DB.BuiltInParameter value to an int in python.' image='/static/images/guides/revit-params06.png' %}
 ```
 
+### Filter Note Block
+
+![](static/images/readme/filter-block.png)
+
+This block is to add string filtering documentation, particularly for components that take a string input that can also act as a string filter:
+
+```
+{% include ltr/filter_note.html note='Note text' %}
+```
+
+This block can accept two argument:
+
+- `note=` for the note message
+- `image=` for the header image above the note
+
+This is the code used to generate the example locale block shown in the image above.
+
+```
+{% include ltr/filter_note.html note='The Class and Name inputs accept Grasshopper string filtering patterns' %}
+```
+
 ### Download Package Block
 
 ![](static/images/readme/dl-pkg.png)
@@ -676,6 +710,20 @@ This block can accept two argument:
 - `archive=` link to the downloadable file
 - `name=` of the Grasshopper component
 - `panel=` name of the panel in Grasshopper interface formatted as `Tab name > panel name` (Optional: defaults to `Revit > Custom`). Panel name shows up on the note below the button.
+
+### Download Definition Block
+
+![](static/images/readme/dl-def.png)
+
+This block is for buttons to download Grasshopper definitions
+
+```
+{% include ltr/download_def.html archive='/static/ghdefs/AssetsPlayground.ghx' name='Assets Playground' %}
+```
+
+This block can accept two argument:
+
+- `name=` name if the downloadable definition
 
 ### Release Header Block
 
@@ -759,21 +807,42 @@ This is how the data file is formatted:
 
 ## Grasshopper Component List
 
-`components.yaml` file contains a list of all components in the project and is generated automatically on every new build. The wiki uses this information to generate a documentation page for all the available components.
+`components.json` file contains a list of all components in the project and is generated automatically on every new build. The wiki uses this information to generate a documentation page for all the available components, and to safely reference the components on the wiki pages, using the uuid:
 
 This is how the data file is formatted:
 
 ```json
   {
-    "title": "CategoryTypes",
-    "uuid": "5ffb1339-8521-44a1-9075-2984637725e9",
-    "desc": "Provides a picker of a CategoryType",
-    "iconsrc": "/static/images/GH/CategoryTypes.png",
-    "icontag": null,
-    "tab": "Revit",
-    "panel": "Category",
+    "desc": "Picker for physical material type options", 
+    "iconsrc": "/static/images/GH/StructuralAssetClass_ValueList.png", 
+    "icontag": null, 
+    "panel": "Material", 
+    "tab": "Revit", 
+    "title": "Physical Material Type", 
+    "typename": "StructuralAssetClass_ValueList", 
+    "uuid": "6f5d09c7-797f-4ffe-afae-b9c0ddc5905f"
   }, 
-
 ```
 
 Currently, the grasshopper definition `update_components_data.ghx` is used to generate this data file and perform other necessary tasks to update the components list for the wiki.
+
+## Grasshopper Parameter List
+
+`parameters.json` file contains a list of all parameters in the project and is generated automatically on every new build. The wiki uses this information to safely reference the parameters on the wiki pages, using the uuid:
+
+This is how the data file is formatted:
+
+```json
+    {
+        "desc": "Represents an asset property that can be connected to a texture map as well",
+        "iconsrc": "/static/images/GH/AssetPropertyDouble1DMap.png",
+        "icontag": null,
+        "panel": "Params",
+        "tab": "Revit Primitives",
+        "title": "AssetPropertyDouble1DMap",
+        "typename": "AssetPropertyDouble1DMap",
+        "uuid": "49a94c44-26ec-4ee8-b9e7-37581968c3bf"
+    },
+```
+
+Currently, this file is generated manually until there is a need to reference more parameters on the wiki.

@@ -5,7 +5,7 @@
             <td class="msg-msg">
                 {{ include.note | markdownify }}
                 {% if include.image %}
-                    <img src="{{ include.image | prepend: site.baseurl }}">
+                    <img class="msg-img" src="{{ include.image | prepend: site.baseurl }}">
                 {% endif %}
             </td>
         </tr>

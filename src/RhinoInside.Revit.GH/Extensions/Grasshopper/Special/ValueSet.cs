@@ -1,10 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using Grasshopper.GUI;
 using Grasshopper.GUI.Canvas;
+using Grasshopper.GUI.HTML;
+using Grasshopper.Kernel;
+using Grasshopper.Kernel.Attributes;
+using Grasshopper.Kernel.Data;
+using Grasshopper.Kernel.Types;
 
 ///////////////////////////////////////////////////////////////////////////////
 //                                                                           //
@@ -12,13 +19,9 @@ using Grasshopper.GUI.Canvas;
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace Grasshopper.Special.External
+namespace Grasshopper.Special
 {
-  using Kernel;
-  using Kernel.Attributes;
-  using Kernel.Data;
-  using Kernel.Types;
-
+  [EditorBrowsable(EditorBrowsableState.Never)]
   public abstract class ValueSet : GH_PersistentParam<IGH_Goo>, IGH_InitCodeAware
   {
     public override string TypeName => "Data";
@@ -595,7 +598,7 @@ namespace Grasshopper.Special.External
 
     protected override string HtmlHelp_Source()
     {
-      var nTopic = new Grasshopper.GUI.HTML.GH_HtmlFormatter(this)
+      var nTopic = new GH_HtmlFormatter(this)
       {
         Title = Name,
         Description =
@@ -616,6 +619,7 @@ namespace Grasshopper.Special.External
     }
   }
 
+  [EditorBrowsable(EditorBrowsableState.Never)]
   public class ValueSetPicker : ValueSet
   {
     static readonly Guid ComponentClassGuid = new Guid("AFB12752-3ACB-4ACF-8102-16982A69CDAE");

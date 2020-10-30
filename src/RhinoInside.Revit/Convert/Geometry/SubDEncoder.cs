@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     #region Encode
     internal static Brep ToRawBrep(/*const*/ SubD subD, double scaleFactor)
     {
-      var brep = subD.ToBrep();
+      var brep = subD.ToBrep(SubDToBrepOptions.Default);
       return BrepEncoder.EncodeRaw(ref brep, scaleFactor) ? brep : default;
     }
     #endregion

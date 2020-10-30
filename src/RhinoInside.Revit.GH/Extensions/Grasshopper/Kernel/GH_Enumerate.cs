@@ -1,16 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
+using Grasshopper;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  [EditorBrowsable(EditorBrowsableState.Never)]
   public abstract class GH_Enumerate : GH_Integer, IComparable
   {
     protected GH_Enumerate() { }
@@ -50,7 +53,7 @@ namespace RhinoInside.Revit.GH.Types
               var paramType = param;
               while (paramType != typeof(GH_ActiveObject))
               {
-                if (paramType.IsConstructedGenericType && paramType.GetGenericTypeDefinition() == typeof(Parameters.Param_Enum<>))
+                if (paramType.IsConstructedGenericType && paramType.GetGenericTypeDefinition() == typeof(RhinoInside.Revit.GH.Parameters.Param_Enum<>))
                 {
                   if (paramType.GetGenericArguments()[0] == type)
                   {
@@ -69,7 +72,7 @@ namespace RhinoInside.Revit.GH.Types
 
             if (!typeFound)
             {
-              result.Add(valueType, Tuple.Create(typeof(Parameters.Param_Enum<>).MakeGenericType(type), type));
+              result.Add(valueType, Tuple.Create(typeof(RhinoInside.Revit.GH.Parameters.Param_Enum<>).MakeGenericType(type), type));
               typeFound = true;
             }
           }
@@ -87,8 +90,8 @@ namespace RhinoInside.Revit.GH.Types
         if (entry.Value.Item1.IsGenericType)
         {
           var proxy = Activator.CreateInstance(entry.Value.Item1) as IGH_ObjectProxy;
-          if (!Grasshopper.Instances.ComponentServer.IsObjectCached(proxy.Guid))
-            Grasshopper.Instances.ComponentServer.AddProxy(proxy);
+          if (!Instances.ComponentServer.IsObjectCached(proxy.Guid))
+            Instances.ComponentServer.AddProxy(proxy);
         }
       }
       
@@ -413,7 +416,6 @@ namespace RhinoInside.Revit.GH.Types
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  using Grasshopper.Kernel.Extensions;
   using Kernel.Attributes;
 
   public class Param_Enum<T> : Grasshopper.Kernel.GH_PersistentParam<T>, IGH_ObjectProxy
@@ -426,7 +428,7 @@ namespace RhinoInside.Revit.GH.Parameters
     static readonly Guid GenericDataParamComponentGuid = new Guid("{8EC86459-BF01-4409-BAEE-174D0D2B13D0}");
     protected override Bitmap Icon => (Bitmap) Properties.Resources.ResourceManager.GetObject(typeof(T).Name) ??                    // try type name first
                                       (Bitmap) Properties.Resources.ResourceManager.GetObject(typeof(T).Name + "_ValueList") ??     // try with _ValueList e.g. WallFunction_ValueList
-                                      Grasshopper.Instances.ComponentServer.EmitObjectIcon(GenericDataParamComponentGuid);          // default to GH icon
+                                      Instances.ComponentServer.EmitObjectIcon(GenericDataParamComponentGuid);          // default to GH icon
 
     public Param_Enum() :
     base
@@ -438,7 +440,7 @@ namespace RhinoInside.Revit.GH.Parameters
       string.Empty
     )
     {
-      ProxyExposure = Exposure;
+      exposure = Exposure;
 
       if (typeof(T).GetTypeInfo().GetCustomAttribute(typeof(NameAttribute)) is NameAttribute name)
         Name = name.Name;
@@ -626,8 +628,8 @@ namespace RhinoInside.Revit.GH.Parameters
     Bitmap IGH_ObjectProxy.Icon => Icon;
     IGH_InstanceDescription IGH_ObjectProxy.Desc => this;
 
-    GH_Exposure ProxyExposure;
-    GH_Exposure IGH_ObjectProxy.Exposure { get => ProxyExposure; set => ProxyExposure = value; }
+    GH_Exposure exposure;
+    GH_Exposure IGH_ObjectProxy.Exposure { get => exposure; set => exposure = value; }
 
     IGH_DocumentObject IGH_ObjectProxy.CreateInstance() => new Param_Enum<T>();
     IGH_ObjectProxy IGH_ObjectProxy.DuplicateProxy() => (IGH_ObjectProxy) MemberwiseClone();

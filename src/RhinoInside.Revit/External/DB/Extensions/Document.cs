@@ -511,5 +511,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return false;
     }
     #endregion
+
+    #region AppearanceAsset
+    public static AppearanceAssetElement FindAppearanceAssetElement(this Document doc, string name)
+      => AppearanceAssetElement.GetAppearanceAssetElementByName(doc, name);
+
+    public static PropertySetElement FindPropertySetElement(this Document doc, string name)
+    {
+      return new FilteredElementCollector(doc)
+                 .OfClass(typeof(PropertySetElement))
+                 .WhereParameterEqualsTo(BuiltInParameter.PROPERTY_SET_NAME, name)
+                 .FirstElement() as PropertySetElement;
+    }
+    #endregion
   }
 }

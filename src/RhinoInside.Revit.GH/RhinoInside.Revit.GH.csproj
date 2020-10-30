@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -171,8 +171,8 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="RhinoCommon" Version="7.0.20140.14505-wip" IncludeAssets="compile; build" />
-        <PackageReference Include="Grasshopper" Version="7.0.20140.14505-wip" IncludeAssets="compile; build" />
+        <PackageReference Include="RhinoCommon" Version="7.0.20301.12003-beta" IncludeAssets="compile; build" />
+        <PackageReference Include="Grasshopper" Version="7.0.20301.12003-beta" IncludeAssets="compile; build" />
       </ItemGroup>
     </Otherwise>
   </Choose>
@@ -242,6 +242,16 @@
     <Compile Include="Components\Element\DirectShape\ByPoint.cs" />
     <Compile Include="Components\Element\Identity.cs" />
     <Compile Include="Components\Element\Material\Graphics.cs" />
+    <Compile Include="Components\Element\Material\AnalyzeAppearanceAssets.cs" />
+    <Compile Include="Components\Element\Material\BaseAssetComponent.cs" />
+    <Compile Include="Components\Element\Material\PhyscialMaterialAssetComponents.cs" />
+    <Compile Include="Components\Element\Material\BaseAssetTypes.cs" />
+    <Compile Include="Components\Element\Material\ModifyAppearanceAssets.cs" />
+    <Compile Include="Components\Element\Material\QueryAssetsOfMaterial.cs" />
+    <Compile Include="Components\Element\Material\ModifyAssetsOfMaterial.cs" />
+    <Compile Include="Components\Element\Material\ConstructProceduralAssets.cs" />
+    <Compile Include="Components\Element\Material\CreateAppearanceAssets.cs" />
+    <Compile Include="Components\Element\Material\DeconstructProceduralAssets.cs" />
     <Compile Include="Components\Element\Material\Identity.cs" />
     <Compile Include="Components\Element\Material\QueryMaterials.cs" />
     <Compile Include="Components\Element\Parameters.cs" />
@@ -302,13 +312,24 @@
     <Compile Include="Components\Parameter\DefineSharedParameter.cs" />
     <Compile Include="Components\Parameter\DeconstructParameterValue.cs" />
     <Compile Include="Components\Parameter\ParameterKeyIdentity.cs" />
+    <Compile Include="Extensions\Grasshopper\Kernel\GH_Enumerate.cs" />
+    <Compile Include="Extensions\Grasshopper\Kernel\IGH_DataAccessExtension.cs" />
+    <Compile Include="Extensions\Grasshopper\Kernel\IGH_ParamExtension.cs" />
+    <Compile Include="Extensions\Grasshopper\Kernel\Data\IGH_StructureExtension.cs" />
+    <Compile Include="Extensions\Grasshopper\Kernel\Types\GH_ColorRGBA.cs" />
+    <Compile Include="Extensions\Grasshopper\Special\ValueSet.cs" />
+    <Compile Include="Parameters\AssetPropertyDouble1DMap.cs" />
+    <Compile Include="Parameters\AssetPropertyDouble4DMap.cs" />
+    <Compile Include="Extensions\Grasshopper\Kernel\Parameters\Param_ColorRGBA.cs" />
+    <Compile Include="Parameters\StructuralAssetBehaviour_ValueList.cs" />
+    <Compile Include="Parameters\StructuralAssetClass_ValueList.cs" />
+    <Compile Include="Parameters\TextureData.cs" />
     <Compile Include="Components\TransactionalComponent.cs" />
     <Compile Include="Components\TransactionBaseComponent.cs" />
     <Compile Include="Components\ZuiComponent.cs" />
-    <Compile Include="Enum.cs" />
-    <Compile Include="Extensions\Grasshopper.cs" />
     <Compile Include="Extensions\System.Collections.Generic.cs" />
     <Compile Include="Extensions\WinForms.cs" />
+    <Compile Include="Parameters\AppearanceAsset.cs" />
     <Compile Include="Parameters\FillPatternElement.cs" />
     <Compile Include="Parameters\LinePatternElement.cs" />
     <Compile Include="Parameters\Param.cs" />
@@ -334,6 +355,9 @@
     <Compile Include="Parameters\PersistentParam.cs" />
     <Compile Include="Parameters\Sketch.cs" />
     <Compile Include="Parameters\SketchPlane.cs" />
+    <Compile Include="Parameters\StructuralAsset.cs" />
+    <Compile Include="Parameters\ThermalAsset.cs" />
+    <Compile Include="Parameters\ThermalMaterialType_ValueList.cs" />
     <Compile Include="Parameters\ValueList.cs" />
     <Compile Include="Parameters\View.cs" />
     <Compile Include="Parameters\WallFunction_ValueList.cs" />
@@ -359,6 +383,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Solid.cs" />
+    <Compile Include="Types\AppearanceAsset.cs" />
+    <Compile Include="Types\AssetPropertyDouble1DMap.cs" />
+    <Compile Include="Types\AssetPropertyDouble4DMap.cs" />
     <Compile Include="Types\BuildingPad.cs" />
     <Compile Include="Types\Category.cs" />
     <Compile Include="Types\Ceiling.cs" />
@@ -391,12 +418,14 @@
     <Compile Include="Types\Material.cs" />
     <Compile Include="Types\HostObject.cs" />
     <Compile Include="Types\DataObject.cs" />
+    <Compile Include="Types\StructuralAsset.cs" />
+    <Compile Include="Types\TextureData.cs" />
+    <Compile Include="Types\ThermalAsset.cs" />
     <Compile Include="Types\View.cs" />
     <Compile Include="Types\CurtainGridLine.cs" />
     <Compile Include="Types\SpatialElement.cs" />
     <Compile Include="Types\Mullion.cs" />
     <Compile Include="Types\Wall.cs" />
-    <Compile Include="ValueSet.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -407,6 +436,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Extensions\README.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">

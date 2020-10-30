@@ -331,6 +331,47 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return default;
     }
+
+    public static void SetParameterValue(this Element element, BuiltInParameter paramId, bool value)
+    {
+      using (var param = element.get_Parameter(paramId))
+      {
+        if (param is null)
+          throw new System.InvalidOperationException();
+
+        if(param.StorageType != StorageType.Integer || param.Definition.ParameterType != ParameterType.YesNo)
+          throw new System.InvalidCastException();
+
+        param.Set(value ? 1 : 0);
+      }
+    }
+
+    public static void SetParameterValue(this Element element, BuiltInParameter paramId, object value)
+    {
+      var param = element.get_Parameter(paramId);
+      if (param != null)
+      {
+        switch (value)
+        {
+          case int intVal:
+            if (StorageType.Integer == param.StorageType)
+              param.Set(intVal);
+            break;
+          case string strVal:
+            if (StorageType.String == param.StorageType)
+              param.Set(strVal);
+            break;
+          case double dblVal:
+            if (StorageType.Double == param.StorageType)
+              param.Set(dblVal);
+            break;
+          case ElementId idVal:
+            if (StorageType.ElementId == param.StorageType)
+              param.Set(idVal);
+            break;
+        }
+      }
+    }
     #endregion
   }
 }

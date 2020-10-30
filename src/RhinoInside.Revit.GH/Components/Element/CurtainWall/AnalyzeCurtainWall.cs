@@ -60,7 +60,7 @@ namespace RhinoInside.Revit.GH.Components
       // only process curtain walls
       if (wallInstance.WallType.Kind == DB.WallKind.Curtain)
       {
-        DA.SetData("Curtain Grid", new Types.DataObject<DB.CurtainGrid>(wallInstance.CurtainGrid, srcDocument: wallInstance.Document));
+        DA.SetData("Curtain Grid", new Types.DataObject<DB.CurtainGrid>(wallInstance.CurtainGrid, sourceDoc: wallInstance.Document));
 
         // determine if curtain wall is embeded in another wall
         // find all the wall elements that are intersecting the bbox of this wall

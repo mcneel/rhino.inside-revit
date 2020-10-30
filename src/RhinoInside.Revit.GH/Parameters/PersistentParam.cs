@@ -5,7 +5,6 @@ using System.Windows.Forms;
 using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
-using Grasshopper.Kernel.Extensions;
 using Grasshopper.Kernel.Types;
 
 namespace RhinoInside.Revit.GH.Parameters

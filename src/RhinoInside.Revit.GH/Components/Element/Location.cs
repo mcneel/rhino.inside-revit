@@ -2,7 +2,6 @@ using System;
 using System.Windows.Forms;
 using GH_IO.Serialization;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Extensions;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 

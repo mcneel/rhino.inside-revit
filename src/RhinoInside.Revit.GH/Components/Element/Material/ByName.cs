@@ -6,7 +6,7 @@ using RhinoInside.Revit.Convert.System.Drawing;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Material
 {
   public class MaterialByName : TransactionalChainComponent
   {
@@ -132,91 +132,91 @@ namespace RhinoInside.Revit.GH.Components
       DA.SetData("Material", material);
     }
   }
-}
 
-namespace RhinoInside.Revit.GH.Components.Obsolete
-{
-  [Obsolete("Since 2020-09-24")]
-  public class MaterialByName : TransactionComponent
+  namespace Obsolete
   {
-    public override Guid ComponentGuid => new Guid("0D9F07E2-3A21-4E85-96CC-BC0E6A607AF1");
-    public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.hidden;
-
-    public MaterialByName() : base
-    (
-      name: "Add Material",
-      nickname: "Material",
-      description: "Create a new Revit material by name and color",
-      category: "Revit",
-      subCategory: "Material"
-    )
-    { }
-
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    [Obsolete("Since 2020-09-24")]
+    public class MaterialByName : TransactionComponent
     {
-      manager.AddTextParameter("Name", "N", string.Empty, GH_ParamAccess.item);
-      manager.AddBooleanParameter("Override", "O", "Override Material", GH_ParamAccess.item, false);
-      manager[manager.AddColourParameter("Color", "C", "Material color", GH_ParamAccess.item, System.Drawing.Color.White)].Optional = true;
-    }
+      public override Guid ComponentGuid => new Guid("0D9F07E2-3A21-4E85-96CC-BC0E6A607AF1");
+      public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.hidden;
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.Material(), "Material", "M", string.Empty, GH_ParamAccess.item);
-    }
+      public MaterialByName() : base
+      (
+        name: "Add Material",
+        nickname: "Material",
+        description: "Create a new Revit material by name and color",
+        category: "Revit",
+        subCategory: "Material"
+      )
+      { }
 
-    protected override void TrySolveInstance(IGH_DataAccess DA)
-    {
-      var doc = Revit.ActiveDBDocument;
-      if (doc is null)
+      protected override void RegisterInputParams(GH_InputParamManager manager)
       {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Failed to access the active Revit doument");
-        return;
+        manager.AddTextParameter("Name", "N", string.Empty, GH_ParamAccess.item);
+        manager.AddBooleanParameter("Override", "O", "Override Material", GH_ParamAccess.item, false);
+        manager[manager.AddColourParameter("Color", "C", "Material color", GH_ParamAccess.item, System.Drawing.Color.White)].Optional = true;
       }
 
-      var overrideMaterial = false;
-      if (!DA.GetData("Override", ref overrideMaterial))
-        return;
-
-      var name = string.Empty;
-      if (!DA.GetData("Name", ref name))
-        return;
-
-      var color = System.Drawing.Color.Empty;
-      DA.GetData("Color", ref color);
-
-      var material = default(DB.Material);
-      using (var collector = new DB.FilteredElementCollector(doc))
+      protected override void RegisterOutputParams(GH_OutputParamManager manager)
       {
-        material = collector.OfClass(typeof(DB.Material)).
-               WhereParameterEqualsTo(DB.BuiltInParameter.MATERIAL_NAME, name).
-               FirstElement() as DB.Material;
+        manager.AddParameter(new Parameters.Material(), "Material", "M", string.Empty, GH_ParamAccess.item);
       }
 
-      bool materialIsNew = material is null;
-      if (materialIsNew)
-        material = doc.GetElement(DB.Material.Create(doc, name)) as DB.Material;
-
-      if (materialIsNew || overrideMaterial)
+      protected override void TrySolveInstance(IGH_DataAccess DA)
       {
-        material.UseRenderAppearanceForShading = color.IsEmpty;
-        if (!color.IsEmpty)
+        var doc = Revit.ActiveDBDocument;
+        if (doc is null)
         {
-          var newColor = color.ToColor();
-          if (newColor.Red != material.Color.Red || newColor.Green != material.Color.Green || newColor.Blue != material.Color.Blue)
-            material.Color = newColor;
-
-          var newTransparency = (int) Math.Round((255 - color.A) * 100.0 / 255.0);
-          if (material.Transparency != newTransparency)
-            material.Transparency = newTransparency;
-
-          var newShininess = (int) Math.Round(0.5 * 128.0);
-          if (newShininess != material.Shininess)
-            material.Shininess = newShininess;
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Failed to access the active Revit doument");
+          return;
         }
-      }
-      else AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Material '{name}' already exist!");
 
-      DA.SetData("Material", material);
+        var overrideMaterial = false;
+        if (!DA.GetData("Override", ref overrideMaterial))
+          return;
+
+        var name = string.Empty;
+        if (!DA.GetData("Name", ref name))
+          return;
+
+        var color = System.Drawing.Color.Empty;
+        DA.GetData("Color", ref color);
+
+        var material = default(DB.Material);
+        using (var collector = new DB.FilteredElementCollector(doc))
+        {
+          material = collector.OfClass(typeof(DB.Material)).
+                 WhereParameterEqualsTo(DB.BuiltInParameter.MATERIAL_NAME, name).
+                 FirstElement() as DB.Material;
+        }
+
+        bool materialIsNew = material is null;
+        if (materialIsNew)
+          material = doc.GetElement(DB.Material.Create(doc, name)) as DB.Material;
+
+        if (materialIsNew || overrideMaterial)
+        {
+          material.UseRenderAppearanceForShading = color.IsEmpty;
+          if (!color.IsEmpty)
+          {
+            var newColor = color.ToColor();
+            if (newColor.Red != material.Color.Red || newColor.Green != material.Color.Green || newColor.Blue != material.Color.Blue)
+              material.Color = newColor;
+
+            var newTransparency = (int) Math.Round((255 - color.A) * 100.0 / 255.0);
+            if (material.Transparency != newTransparency)
+              material.Transparency = newTransparency;
+
+            var newShininess = (int) Math.Round(0.5 * 128.0);
+            if (newShininess != material.Shininess)
+              material.Shininess = newShininess;
+          }
+        }
+        else AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Material '{name}' already exist!");
+
+        DA.SetData("Material", material);
+      }
     }
   }
 }
