@@ -340,7 +340,6 @@ namespace RhinoInside.Revit.GH.Types
       if (!IsValid)
         return null;
 
-      string value = default;
       try
       {
         if (Value.HasValue)
@@ -349,25 +348,26 @@ namespace RhinoInside.Revit.GH.Types
           {
             case DB.StorageType.Integer:
               if (Value.Definition.ParameterType == DB.ParameterType.YesNo)
-                value = Value.AsInteger() == 0 ? "False" : "True";
+                return (Value.AsInteger() != 0).ToString();
               else
-                value = Value.AsInteger().ToString();
-              break;
-            case DB.StorageType.Double: value = Value.AsDoubleInRhinoUnits().ToString(); break;
-            case DB.StorageType.String: value = Value.AsString(); break;
+                return Value.AsInteger().ToString();
+
+            case DB.StorageType.Double: return Value.AsDoubleInRhinoUnits().ToString();
+            case DB.StorageType.String: return Value.AsString();
             case DB.StorageType.ElementId:
 
+              var id = Value.AsElementId();
               if (Value.Id.TryGetBuiltInParameter(out var builtInParameter))
               {
                 if (builtInParameter == DB.BuiltInParameter.ID_PARAM || builtInParameter == DB.BuiltInParameter.SYMBOL_ID_PARAM)
-                  return Value.AsElementId().IntegerValue.ToString();
+                  return id.IntegerValue.ToString();
               }
 
-              if (Element.FromElementId(Value.Element.Document, Value.AsElementId()) is ElementId goo)
-                return goo.ToString();
+              if (Element.FromElementId(Value.Element.Document, id) is Element element)
+                return element.ToString();
 
-              value = string.Empty;
-              break;
+              return id.IntegerValue.ToString();
+
             default:
               throw new NotImplementedException();
           }
@@ -375,7 +375,7 @@ namespace RhinoInside.Revit.GH.Types
       }
       catch (Autodesk.Revit.Exceptions.InternalException) { }
 
-      return value;
+      return default;
     }
   }
 }
