@@ -1,6 +1,6 @@
 namespace System
 {
-  static class TypeExtensions
+  static class TypeExtension
   {
     public static bool IsGenericSubclassOf(this Type type, Type baseGenericType)
     {
@@ -15,10 +15,10 @@ namespace System
     }
   }
 
-  static class StringExtensions
+  static class StringExtension
   {
     /// <summary>
-    /// Ensures string is no longer than the given length. Cuts the string and adds ellipsis at the end if longer
+    /// Ensures string is no longer than the given length. Cuts the string and adds ellipsis at the end if longer.
     /// </summary>
     /// <param name="sourceString"></param>
     /// <param name="maxLength">Maxmium length of the string</param>
@@ -30,47 +30,6 @@ namespace System
       return sourceString.Length > maxLength ?
         sourceString.Substring(0, maxLength - 1) + '…' :
         sourceString;
-    }
-  }
-}
-
-namespace RhinoInside.Revit.Extended
-{
-  using static System.Math;
-  using static System.Double;
-
-  static class Math
-  {
-    //public static int Clamp(this int v, int lo, int hi)
-    //{
-    //  return hi < v ? hi : v < lo ? lo : v;
-    //}
-
-    //public static double Clamp(this double v, double lo, double hi)
-    //{
-    //  return hi < v ? hi : v < lo ? lo : v;
-    //}
-
-    public static bool IsPositive(double value)
-    {
-      switch (Sign(value))
-      {
-        case -1: return false;
-        case +1: return true;
-      }
-
-      return IsPositiveInfinity(1.0 / value);
-    }
-
-    public static bool IsNegative(double value)
-    {
-      switch (Sign(value))
-      {
-        case -1: return true;
-        case +1: return false;
-      }
-
-      return IsNegativeInfinity(1.0 / value);
     }
   }
 }
