@@ -15,19 +15,94 @@ namespace RhinoInside.Revit.GH.Types
 {
   public abstract class GeometryObject<X> :
     GH_Goo<X>,
-    IGH_ElementId,
     IEquatable<GeometryObject<X>>,
+    IGH_ElementId,
     IGH_GeometricGoo,
     IGH_PreviewData,
     IGH_PreviewMeshData
     where X : DB.GeometryObject
   {
+    #region System.Object
+    public bool Equals(GeometryObject<X> id) => id?.DocumentGUID == DocumentGUID && id?.UniqueID == UniqueID;
+    public override bool Equals(object obj) => (obj is GeometryObject<X> id) ? Equals(id) : base.Equals(obj);
+    public override int GetHashCode() => DocumentGUID.GetHashCode() ^ UniqueID.GetHashCode();
+
+    public override sealed string ToString()
+    {
+      if (!IsValid)
+        return "Null " + TypeName;
+
+      try
+      {
+        string typeName = TypeName;
+        if (Document?.GetElement(Reference) is DB.Element element)
+        {
+          typeName = "Referenced ";
+          switch (Reference.ElementReferenceType)
+          {
+            case DB.ElementReferenceType.REFERENCE_TYPE_NONE: typeName += "geometry"; break;
+            case DB.ElementReferenceType.REFERENCE_TYPE_LINEAR: typeName += "edge"; break;
+            case DB.ElementReferenceType.REFERENCE_TYPE_SURFACE: typeName += "face"; break;
+            case DB.ElementReferenceType.REFERENCE_TYPE_FOREIGN: typeName += "external geometry"; break;
+            case DB.ElementReferenceType.REFERENCE_TYPE_INSTANCE: typeName += "instance"; break;
+            case DB.ElementReferenceType.REFERENCE_TYPE_CUT_EDGE: typeName += "trim"; break;
+            case DB.ElementReferenceType.REFERENCE_TYPE_MESH: typeName += "mesh"; break;
+#if REVIT_2018
+            case DB.ElementReferenceType.REFERENCE_TYPE_SUBELEMENT: typeName += "subelement"; break;
+#endif
+          }
+
+          typeName += " at Revit " + element.GetType().Name + " \"" + element.Name + "\"";
+        }
+
+#if DEBUG
+        typeName += " (" + Reference.ConvertToStableRepresentation(Document) + ")";
+#endif
+        return typeName;
+      }
+      catch (Autodesk.Revit.Exceptions.ApplicationException)
+      {
+        return "Invalid" + TypeName;
+      }
+    }
+    #endregion
+
+    #region GH_ISerializable
+    public override sealed bool Read(GH_IReader reader)
+    {
+      Value = null;
+      Document = null;
+
+      var documentGUID = Guid.Empty;
+      reader.TryGetGuid("DocumentGUID", ref documentGUID);
+      DocumentGUID = documentGUID;
+
+      string uniqueID = string.Empty;
+      reader.TryGetString("UniqueID", ref uniqueID);
+      UniqueID = uniqueID;
+
+      return true;
+    }
+
+    public override sealed bool Write(GH_IWriter writer)
+    {
+      if (DocumentGUID != Guid.Empty)
+        writer.SetGuid("DocumentGUID", DocumentGUID);
+
+      if(!string.IsNullOrEmpty(UniqueID))
+        writer.SetString("UniqueID", UniqueID);
+
+      return true;
+    }
+    #endregion
+
+    #region IGH_Goo
     public override string TypeName => "Revit Geometry Object";
     public override string TypeDescription => "Represents a Revit Geometry Object";
     public override bool IsValid => (!(Value is null || !Id.IsValid())) && (Document?.IsValidObject ?? false);
-
     public override sealed IGH_Goo Duplicate() => (IGH_Goo) MemberwiseClone();
     protected virtual Type ScriptVariableType => typeof(X);
+    #endregion
 
     #region IGH_ElementId
     public DB.Reference Reference { get; protected set; }
@@ -69,10 +144,7 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
     public void UnloadElement() { Value = default; Document = default; }
-    public bool Equals(GeometryObject<X> id) => id?.DocumentGUID == DocumentGUID && id?.UniqueID == UniqueID;
     #endregion
-    public override bool Equals(object obj) => (obj is ElementId id) ? Equals(id) : base.Equals(obj);
-    public override int GetHashCode() => new { DocumentGUID, UniqueID }.GetHashCode();
 
     #region IGH_GeometricGoo
     BoundingBox IGH_GeometricGoo.Boundingbox => GetBoundingBox(Transform.Identity);
@@ -91,74 +163,6 @@ namespace RhinoInside.Revit.GH.Types
     bool IGH_GeometricGoo.LoadGeometry(Rhino.RhinoDoc doc) => IsElementLoaded || LoadElement();
     IGH_GeometricGoo IGH_GeometricGoo.Transform(Transform xform) => null;
     IGH_GeometricGoo IGH_GeometricGoo.Morph(SpaceMorph xmorph) => null;
-    #endregion
-
-    #region IGH_Goo
-    public override sealed string ToString()
-    {
-      if (!IsValid)
-        return "Null " + TypeName;
-
-      try
-      {
-        string typeName = TypeName;
-        if (Document?.GetElement(Reference) is DB.Element element)
-        {
-          typeName = "Referenced ";
-          switch (Reference.ElementReferenceType)
-          {
-            case DB.ElementReferenceType.REFERENCE_TYPE_NONE: typeName += "geometry"; break;
-            case DB.ElementReferenceType.REFERENCE_TYPE_LINEAR: typeName += "edge"; break;
-            case DB.ElementReferenceType.REFERENCE_TYPE_SURFACE: typeName += "face"; break;
-            case DB.ElementReferenceType.REFERENCE_TYPE_FOREIGN: typeName += "external geometry"; break;
-            case DB.ElementReferenceType.REFERENCE_TYPE_INSTANCE: typeName += "instance"; break;
-            case DB.ElementReferenceType.REFERENCE_TYPE_CUT_EDGE: typeName += "trim"; break;
-            case DB.ElementReferenceType.REFERENCE_TYPE_MESH: typeName += "mesh"; break;
-#if REVIT_2018
-            case DB.ElementReferenceType.REFERENCE_TYPE_SUBELEMENT: typeName += "subelement"; break;
-#endif
-          }
-
-          typeName += " at Revit " + element.GetType().Name + " \"" + element.Name + "\"";
-        }
-
-#if DEBUG
-        typeName += " (" + Reference.ConvertToStableRepresentation(Document) + ")";
-#endif
-        return typeName;
-      }
-      catch (Autodesk.Revit.Exceptions.ApplicationException)
-      {
-        return "Invalid" + TypeName;
-      }
-    }
-
-    public override sealed bool Read(GH_IReader reader)
-    {
-      Value = null;
-      Document = null;
-
-      var documentGUID = Guid.Empty;
-      reader.TryGetGuid("DocumentGUID", ref documentGUID);
-      DocumentGUID = documentGUID;
-
-      string uniqueID = string.Empty;
-      reader.TryGetString("UniqueID", ref uniqueID);
-      UniqueID = uniqueID;
-
-      return true;
-    }
-
-    public override sealed bool Write(GH_IWriter writer)
-    {
-      if (DocumentGUID != Guid.Empty)
-        writer.SetGuid("DocumentGUID", DocumentGUID);
-
-      if(!string.IsNullOrEmpty(UniqueID))
-        writer.SetString("UniqueID", UniqueID);
-
-      return true;
-    }
     #endregion
 
     #region IGH_PreviewData
