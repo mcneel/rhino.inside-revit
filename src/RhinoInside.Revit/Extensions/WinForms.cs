@@ -1,6 +1,6 @@
-namespace System.Windows.Forms.InteropExtension
+namespace System.Windows.Forms.Interop
 {
-  public static class FormExtension
+  static class FormExtension
   {
     class OwnerWindow : IWin32Window
     {
@@ -10,36 +10,36 @@ namespace System.Windows.Forms.InteropExtension
       IntPtr IWin32Window.Handle => handle;
     }
 
-    public static void Show(this Form form, IntPtr hOwnerWnd) =>
+    internal static void Show(this Form form, IntPtr hOwnerWnd) =>
       form.Show(new OwnerWindow(hOwnerWnd));
 
-    public static DialogResult ShowDialog(this Form form, IntPtr hOwnerWnd) =>
+    internal static DialogResult ShowDialog(this Form form, IntPtr hOwnerWnd) =>
       form.ShowDialog(new OwnerWindow(hOwnerWnd));
 
-    public static DialogResult ShowDialog(this CommonDialog form, IntPtr hOwnerWnd) =>
+    internal static DialogResult ShowDialog(this CommonDialog form, IntPtr hOwnerWnd) =>
       form.ShowDialog(new OwnerWindow(hOwnerWnd));
   }
 }
 
-namespace System.Windows.InteropExtension
+namespace System.Windows.Interop
 {
-  public static class WindowExtension
+  static class WindowExtension
   {
-    public static void Show(this Window form, IntPtr hOwnerWnd)
+    internal static void Show(this Window form, IntPtr hOwnerWnd)
     {
-      var iform = new Interop.WindowInteropHelper(form);
-      iform.Owner = hOwnerWnd;
-      form.Show();
+      var interop = new Interop.WindowInteropHelper(form) { Owner = hOwnerWnd };
+      try { form.Show(); }
+      finally { GC.KeepAlive(interop); }
     }
 
-    public static bool? ShowDialog(this Window form, IntPtr hOwnerWnd)
+    internal static bool? ShowDialog(this Window form, IntPtr hOwnerWnd)
     {
-      var iform = new Interop.WindowInteropHelper(form);
-      iform.Owner = hOwnerWnd;
-      return form.ShowDialog();
+      var interop = new Interop.WindowInteropHelper(form) { Owner = hOwnerWnd };
+      try { return form.ShowDialog(); }
+      finally { GC.KeepAlive(interop); }
     }
 
-    public static bool? ShowDialog(this Microsoft.Win32.CommonDialog form, IntPtr hOwnerWnd)
+    internal static bool? ShowDialog(this Microsoft.Win32.CommonDialog form, IntPtr hOwnerWnd)
     {
       var source = Interop.HwndSource.FromHwnd(hOwnerWnd);
       return form.ShowDialog(source.RootVisual as Window);

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using System.Windows.Forms.InteropExtension;
+using System.Windows.Forms.Interop;
 
 using Autodesk.Revit.Attributes;
 using DB = Autodesk.Revit.DB;
