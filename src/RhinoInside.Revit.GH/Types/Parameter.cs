@@ -292,7 +292,7 @@ namespace RhinoInside.Revit.GH.Types
           }
           break;
         case DB.StorageType.ElementId:
-          if (typeof(Q).IsSubclassOf(typeof(ElementId)))
+          if (typeof(Q).IsAssignableFrom(typeof(Element)))
           {
             target = Value.Element is null ? (Q) (object) null :
                      (Q) (object) Element.FromElementId(Value.Element.Document, Value.AsElementId());
