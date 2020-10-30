@@ -138,12 +138,12 @@ namespace RhinoInside.Revit
         return Result.Cancelled;
 
       // Report if opennurbs.dll is loaded
-      NativeMethods.SetStackTraceFilePath 
+      NativeLoader.SetStackTraceFilePath 
       (
         Path.ChangeExtension(applicationUI.ControlledApplication.RecordingJournalFilename, "log.md")
       );
 
-      NativeMethods.ReportOnLoad("opennurbs.dll", enable: true);
+      NativeLoader.ReportOnLoad("opennurbs.dll", enable: true);
 
       ApplicationUI = applicationUI;
 
@@ -423,7 +423,7 @@ namespace RhinoInside.Revit
       }
 
       // Disable report opennurbs.dll is loaded 
-      NativeMethods.ReportOnLoad("opennurbs.dll", enable: false);
+      NativeLoader.ReportOnLoad("opennurbs.dll", enable: false);
 
       return Result.Succeeded;
     }

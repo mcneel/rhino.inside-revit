@@ -4,7 +4,7 @@ using System.Security;
 namespace RhinoInside.Revit.Native
 {
   [SuppressUnmanagedCodeSecurity]
-  internal static class NativeMethods
+  static class NativeLoader
   {
     [
       DllImport("RhinoInside.Revit.Native.dll",
