@@ -3,10 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Rhino.Geometry;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.Geometry.Extensions;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 using Grasshopper.Kernel.Parameters;
@@ -283,7 +283,7 @@ namespace RhinoInside.Revit.GH.Components
         }
         else freeForm = DB.FreeFormElement.Create(familyDoc, solid);
 
-        brep.TryGetUserValue(DB.BuiltInParameter.ELEMENT_IS_CUTTING.ToString(), out bool cutting);
+        brep.TryGetUserString(DB.BuiltInParameter.ELEMENT_IS_CUTTING.ToString(), out bool cutting, false);
         freeForm.get_Parameter(DB.BuiltInParameter.ELEMENT_IS_CUTTING).Set(cutting ? 1 : 0);
 
         if (!cutting)
@@ -291,7 +291,7 @@ namespace RhinoInside.Revit.GH.Components
           DB.Category familySubCategory = null;
           if
           (
-            brep.TryGetUserValue(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), out DB.ElementId subCategoryId) &&
+            brep.TryGetUserString(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), out DB.ElementId subCategoryId) &&
             DB.Category.GetCategory(doc, subCategoryId) is DB.Category subCategory
           )
           {
@@ -313,13 +313,13 @@ namespace RhinoInside.Revit.GH.Components
           else
             freeForm.Subcategory = familySubCategory;
 
-          brep.TryGetUserValue(DB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), out var visible, true);
+          brep.TryGetUserString(DB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), out var visible, true);
           freeForm.get_Parameter(DB.BuiltInParameter.IS_VISIBLE_PARAM).Set(visible ? 1 : 0);
 
-          brep.TryGetUserValue(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility, 57406);
+          brep.TryGetUserString(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility, 57406);
           freeForm.get_Parameter(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Set(visibility);
 
-          brep.TryGetUserValue(DB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), out DB.ElementId materialId);
+          brep.TryGetUserString(DB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), out DB.ElementId materialId);
           var familyMaterialId = MapMaterial(doc, familyDoc, materialId, true);
           freeForm.get_Parameter(DB.BuiltInParameter.MATERIAL_ID_PARAM).Set(familyMaterialId);
         }
@@ -356,7 +356,7 @@ namespace RhinoInside.Revit.GH.Components
           DB.Category familySubCategory = null;
           if
           (
-            curve.TryGetUserValue(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), out DB.ElementId subCategoryId) &&
+            curve.TryGetUserString(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), out DB.ElementId subCategoryId) &&
             DB.Category.GetCategory(doc, subCategoryId) is DB.Category subCategory
           )
           {
@@ -377,14 +377,14 @@ namespace RhinoInside.Revit.GH.Components
             }
           }
 
-          curve.TryGetUserValue(DB.BuiltInParameter.FAMILY_CURVE_GSTYLE_PLUS_INVISIBLE.ToString(), out var graphicsStyleType, DB.GraphicsStyleType.Projection);
+          curve.TryGetUserString(DB.BuiltInParameter.FAMILY_CURVE_GSTYLE_PLUS_INVISIBLE.ToString(), out var graphicsStyleType, DB.GraphicsStyleType.Projection);
 
           familyGraphicsStyle = familySubCategory?.GetGraphicsStyle(graphicsStyleType);
         }
 
-        curve.TryGetUserValue(DB.BuiltInParameter.MODEL_OR_SYMBOLIC.ToString(), out bool symbolic);
-        curve.TryGetUserValue(DB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), out var visible, true);
-        curve.TryGetUserValue(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility, 57406);
+        curve.TryGetUserString(DB.BuiltInParameter.MODEL_OR_SYMBOLIC.ToString(), out bool symbolic, false);
+        curve.TryGetUserString(DB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), out var visible, true);
+        curve.TryGetUserString(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility, 57406);
 
         foreach (var c in curve.ToCurveMany())
         {
@@ -603,7 +603,7 @@ namespace RhinoInside.Revit.GH.Components
                     {
                       try
                       {
-                        if (geo is Rhino.Geometry.Curve loop && geo.TryGetUserValue("IS_OPENING_PARAM", out bool opening) && opening)
+                        if (geo is Rhino.Geometry.Curve loop && geo.TryGetUserString("IS_OPENING_PARAM", out bool opening, false) && opening)
                         {
                           loops.Add(loop);
                         }

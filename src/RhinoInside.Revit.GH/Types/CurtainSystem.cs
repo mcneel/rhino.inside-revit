@@ -1,7 +1,6 @@
 using System;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.Geometry.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -10,8 +9,8 @@ namespace RhinoInside.Revit.GH.Types
   public class CurtainSystem : HostObject
   {
     protected override Type ScriptVariableType => typeof(DB.CurtainSystem);
-    public static explicit operator DB.CurtainSystem(CurtainSystem value) => value?.Value;
     public new DB.CurtainSystem Value => base.Value as DB.CurtainSystem;
+    public static explicit operator DB.CurtainSystem(CurtainSystem value) => value?.Value;
 
     public CurtainSystem() { }
     public CurtainSystem(DB.CurtainSystem host) : base(host) { }

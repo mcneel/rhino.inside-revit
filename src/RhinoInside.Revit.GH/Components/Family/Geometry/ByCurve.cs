@@ -1,7 +1,6 @@
 using System;
+using Rhino.Geometry;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.Geometry.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -42,23 +41,23 @@ namespace RhinoInside.Revit.GH.Components
 
       var visible = default(bool);
       if (DA.GetData("Visible", ref visible))
-        curve.TrySetUserValue(DB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), visible, true);
+        curve.TrySetUserString(DB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), visible, true);
 
       var subCategoryId = default(DB.ElementId);
       if (DA.GetData("Subcategory", ref subCategoryId))
-        curve.TrySetUserValue(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), subCategoryId);
+        curve.TrySetUserString(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), subCategoryId);
 
       var graphicsStyleType = default(DB.GraphicsStyleType);
       if (DA.GetData("GraphicsStyle", ref graphicsStyleType))
-        curve.TrySetUserValue(DB.BuiltInParameter.FAMILY_CURVE_GSTYLE_PLUS_INVISIBLE.ToString(), graphicsStyleType, DB.GraphicsStyleType.Projection);
+        curve.TrySetUserString(DB.BuiltInParameter.FAMILY_CURVE_GSTYLE_PLUS_INVISIBLE.ToString(), graphicsStyleType, DB.GraphicsStyleType.Projection);
 
       var visibility = default(int);
       if (DA.GetData("Visibility", ref visibility))
-        curve.TrySetUserValue(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), visibility, 57406);
+        curve.TrySetUserString(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), visibility, 57406);
 
       var symbolic = default(bool);
       if (DA.GetData("Symbolic", ref symbolic))
-        curve.TrySetUserValue(DB.BuiltInParameter.MODEL_OR_SYMBOLIC.ToString(), symbolic);
+        curve.TrySetUserString(DB.BuiltInParameter.MODEL_OR_SYMBOLIC.ToString(), symbolic, false);
 
       DA.SetData("Curve", curve);
     }

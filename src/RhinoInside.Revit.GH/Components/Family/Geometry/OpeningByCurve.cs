@@ -1,6 +1,6 @@
 using System;
+using Rhino.Geometry;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.Geometry.Extensions;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.GH.Components
 
       var opening = default(bool);
       if (DA.GetData("Opening", ref opening))
-        curve.TrySetUserValue("IS_OPENING_PARAM", opening);
+        curve.TrySetUserString("IS_OPENING_PARAM", opening, false);
 
       DA.SetData("Curve", curve);
     }

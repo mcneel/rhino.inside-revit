@@ -211,6 +211,7 @@
     <Compile Include="ErrorReport.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Extensions\Native.cs" />
+    <Compile Include="Extensions\WinForms.cs" />
     <Compile Include="External\ApplicationServices\Extensions\Application.cs" />
     <Compile Include="External\DB\Application.cs" />
     <Compile Include="External\DB\BuiltInLinePattern.cs" />
@@ -257,7 +258,6 @@
     <Compile Include="Extensions\RhinoCommon.cs" />
     <Compile Include="Extensions\System.cs" />
     <Compile Include="Extensions\Win32.cs" />
-    <Compile Include="Extensions\WinForms.cs" />
     <Compile Include="External\ActivationGate.cs" />
     <Compile Include="GH\Bake.cs" />
     <Compile Include="GH\Kernel.cs" />

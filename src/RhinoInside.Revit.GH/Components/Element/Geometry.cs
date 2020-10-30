@@ -6,7 +6,6 @@ using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
-using RhinoInside.Revit.Geometry.Extensions;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
@@ -167,7 +166,7 @@ namespace RhinoInside.Revit.GH.Components
                 if (geometryBase is null) categoriesList.Add(null);
                 else
                 {
-                  geometryBase.TryGetUserValue(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), out DB.ElementId categoryId);
+                  geometryBase.TryGetUserString(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), out DB.ElementId categoryId);
                   categoriesList.Add(new Types.Category(doc, categoryId));
                 }
               }
@@ -177,7 +176,7 @@ namespace RhinoInside.Revit.GH.Components
                 if (geometryBase is null) materialsList.Add(null);
                 else
                 {
-                  geometryBase.TryGetUserValue(DB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), out DB.ElementId materialId);
+                  geometryBase.TryGetUserString(DB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), out DB.ElementId materialId);
                   materialsList.Add(Types.Material.FromElementId(doc, materialId) as Types.Material);
                 }
               }
