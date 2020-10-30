@@ -291,6 +291,7 @@
     <Compile Include="UI\Rhinoceros\Preview.cs" />
     <Compile Include="Convert\Eto.Drawing.cs" />
     <Compile Include="Convert\Geometry\GeometryDecoder.cs" />
+    <None Include="Extensions\README.md" />
     <None Include="Properties\RhinoInside.Revit.addin" />
     <Compile Include="Samples\Sample1.cs" />
     <None Include="Samples\Sample2.ghx" />
