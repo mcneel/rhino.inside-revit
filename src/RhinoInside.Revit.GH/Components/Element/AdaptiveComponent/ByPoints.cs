@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH.Components
       if (element is DB.FamilyInstance instance && DB.AdaptiveComponentInstanceUtils.IsAdaptiveComponentInstance(instance))
       {
         var adaptivePointIds = DB.AdaptiveComponentInstanceUtils.GetInstancePlacementPointElementRefIds(instance);
-        if (adaptivePointIds.Count == adaptivePoints.Length)
+        if (adaptivePointIds.Count == adaptivePoints.Count)
         {
           int index = 0;
           foreach (var vertex in adaptivePointIds.Select(id => doc.GetElement(id)).Cast<DB.ReferencePoint>())

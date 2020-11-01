@@ -140,14 +140,14 @@ namespace RhinoInside.Revit.GH.Types
           if (points is object)
           {
             var bbox = BoundingBox;
-            var polyline = new List<Point3d>(points.Length * 2);
+            var polyline = new List<Point3d>(points.Count * 2);
 
-            for (int p = 0; p < points.Length; ++p)
+            for (int p = 0; p < points.Count; ++p)
               points[p] = new Point3d(points[p].X, points[p].Y, bbox.Min.Z);
 
             polyline.AddRange(points);
 
-            for (int p = 0; p < points.Length; ++p)
+            for (int p = 0; p < points.Count; ++p)
               points[p] = new Point3d(points[p].X, points[p].Y, bbox.Max.Z);
 
             polyline.AddRange(points.Reverse());
