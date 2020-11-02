@@ -81,6 +81,16 @@ namespace RhinoInside.Revit.GH.Components.Material
       return outputs.ToArray();
     }
 
+    protected static DB.PropertySetElement FindPropertySetElement(DB.Document doc, string name)
+    {
+      using (var collector = new DB.FilteredElementCollector(doc).
+             OfClass(typeof(DB.PropertySetElement)).
+             WhereParameterEqualsTo(DB.BuiltInParameter.PROPERTY_SET_NAME, name))
+      {
+        return collector.FirstElement() as DB.PropertySetElement;
+      }
+    }
+
     // determines matching assets based on any builtin properties
     // that are marked exclusive
     protected bool MatchesPhysicalAssetType(DB.PropertySetElement psetElement)
@@ -315,7 +325,7 @@ namespace RhinoInside.Revit.GH.Components.Material
         try
         {
           // check naming conflicts with other asset types
-          DB.PropertySetElement psetElement = doc.FindPropertySetElement(name);
+          DB.PropertySetElement psetElement = FindPropertySetElement(doc, name);
           if (psetElement != null && psetElement.Id != DB.ElementId.InvalidElementId)
             if (!MatchesPhysicalAssetType(psetElement))
             {
@@ -569,7 +579,7 @@ namespace RhinoInside.Revit.GH.Components.Material
         try
         {
           // check naming conflicts with other asset types
-          DB.PropertySetElement psetElement = doc.FindPropertySetElement(name);
+          DB.PropertySetElement psetElement = FindPropertySetElement(doc, name);
           if (psetElement != null && psetElement.Id != DB.ElementId.InvalidElementId)
             if (!MatchesPhysicalAssetType(psetElement))
             {

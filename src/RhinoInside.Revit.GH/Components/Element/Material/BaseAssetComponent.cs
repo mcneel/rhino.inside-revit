@@ -396,7 +396,7 @@ namespace RhinoInside.Revit.GH.Components.Material
     public static DB.AppearanceAssetElement
     EnsureAsset(string schemaName, DB.Document doc, string name)
     {
-      var existingAsset = doc.FindAppearanceAssetElement(name);
+      var existingAsset = DB.AppearanceAssetElement.GetAppearanceAssetElementByName(doc, name);
       if (existingAsset != null)
         return existingAsset;
 

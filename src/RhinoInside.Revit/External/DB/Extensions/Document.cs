@@ -160,28 +160,25 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       elementId = default;
 
-      if (UniqueId.TryParse(uniqueId, out var EpisodeId, out var id))
+      if (UniqueId.TryParse(uniqueId, out var EpisodeId, out var id) && EpisodeId == Guid.Empty)
       {
-        if (EpisodeId == Guid.Empty)
-        {
-          if (((BuiltInCategory) id).IsValid())
-            elementId = new ElementId((BuiltInCategory) id);
+        if (((BuiltInCategory) id).IsValid())
+          elementId = new ElementId((BuiltInCategory) id);
 
-          else if (((BuiltInParameter) id).IsValid())
-            elementId = new ElementId((BuiltInParameter) id);
+        else if (((BuiltInParameter) id).IsValid())
+          elementId = new ElementId((BuiltInParameter) id);
 
-          else if (((BuiltInLinePattern) id).IsValid())
-            elementId = new ElementId(id);
-        }
-        else
+        else if (((BuiltInLinePattern) id).IsValid())
+          elementId = new ElementId(id);
+      }
+      else
+      {
+        try
         {
-          try
-          {
-            if (Reference.ParseFromStableRepresentation(doc, uniqueId) is Reference reference)
-              elementId = reference.ElementId;
-          }
-          catch (Autodesk.Revit.Exceptions.ArgumentException) { }
+          if (Reference.ParseFromStableRepresentation(doc, uniqueId) is Reference reference)
+            elementId = reference.ElementId;
         }
+        catch (Autodesk.Revit.Exceptions.ArgumentException) { }
       }
 
       return elementId is object;
@@ -509,19 +506,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       purgableTypeIds = default;
       return false;
-    }
-    #endregion
-
-    #region AppearanceAsset
-    public static AppearanceAssetElement FindAppearanceAssetElement(this Document doc, string name)
-      => AppearanceAssetElement.GetAppearanceAssetElementByName(doc, name);
-
-    public static PropertySetElement FindPropertySetElement(this Document doc, string name)
-    {
-      return new FilteredElementCollector(doc)
-                 .OfClass(typeof(PropertySetElement))
-                 .WhereParameterEqualsTo(BuiltInParameter.PROPERTY_SET_NAME, name)
-                 .FirstElement() as PropertySetElement;
     }
     #endregion
   }
