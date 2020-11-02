@@ -70,7 +70,7 @@ namespace Grasshopper.Kernel
         else if (obj is IGH_Component component)
         {
           var selfType = param.Type;
-          foreach (var output in component.Params.Output.Where(i => typeof(IGH_ElementId).IsAssignableFrom(i.Type)))
+          foreach (var output in component.Params.Output)
           {
             if (output.GetType() == param.GetType() || output.Type.IsAssignableFrom(selfType))
             {
@@ -89,7 +89,7 @@ namespace Grasshopper.Kernel
         else if (obj is IGH_Component component)
         {
           var selfType = param.Type;
-          foreach (var input in component.Params.Input.Where(i => typeof(IGH_ElementId).IsAssignableFrom(i.Type)))
+          foreach (var input in component.Params.Input)
           {
             if (input.GetType() == param.GetType() || input.Type.IsAssignableFrom(selfType))
             {
@@ -118,7 +118,7 @@ namespace Grasshopper.Kernel
             {
               if (proxy.CreateInstance() is IGH_Component compoennt)
               {
-                foreach (var input in compoennt.Params.Input.Where(i => typeof(IGH_ElementId).IsAssignableFrom(i.Type)))
+                foreach (var input in compoennt.Params.Input)
                 {
                   if (input.GetType() == param.GetType() || input.Type.IsAssignableFrom(paramType))
                   {
