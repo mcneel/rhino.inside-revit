@@ -75,13 +75,13 @@ namespace RhinoInside.Revit.GH.Components
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
         return;
 
-      DA.TryGetData(Params.Input, "Type", out DB.CategoryType? categoryType);
-      DA.TryGetData(Params.Input, "Parent", out Types.Category Parent);
-      DA.TryGetData(Params.Input, "Name", out string Name);
-      DA.TryGetData(Params.Input, "Allows Subcategories", out bool? AllowsSubcategories);
-      DA.TryGetData(Params.Input, "Allows Parameters", out bool? AllowsParameters);
-      DA.TryGetData(Params.Input, "Has Material Quantities", out bool? HasMaterialQuantities);
-      DA.TryGetData(Params.Input, "Cuttable", out bool? Cuttable);
+      Params.TryGetData(DA, "Type", out DB.CategoryType? categoryType);
+      Params.TryGetData(DA, "Parent", out Types.Category Parent);
+      Params.TryGetData(DA, "Name", out string Name);
+      Params.TryGetData(DA, "Allows Subcategories", out bool? AllowsSubcategories);
+      Params.TryGetData(DA, "Allows Parameters", out bool? AllowsParameters);
+      Params.TryGetData(DA, "Has Material Quantities", out bool? HasMaterialQuantities);
+      Params.TryGetData(DA, "Cuttable", out bool? Cuttable);
 
       if(!(Parent?.Document is null || doc.Equals(Parent.Document)))
         throw new System.ArgumentException("Wrong Document.", nameof(Parent));

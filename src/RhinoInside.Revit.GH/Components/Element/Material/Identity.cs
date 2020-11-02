@@ -60,22 +60,22 @@ namespace RhinoInside.Revit.GH.Components.Material
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!DA.TryGetData(Params.Input, "Material", out Types.Material material))
+      if (!Params.TryGetData(DA, "Material", out Types.Material material))
         return;
 
       bool update = false;
-      update |= DA.TryGetData(Params.Input, "Name", out string name);
-      update |= DA.TryGetData(Params.Input, "Description", out string descritpion);
-      update |= DA.TryGetData(Params.Input, "Class", out string materialClass);
-      update |= DA.TryGetData(Params.Input, "Comments", out string comments);
+      update |= Params.TryGetData(DA, "Name", out string name);
+      update |= Params.TryGetData(DA, "Description", out string descritpion);
+      update |= Params.TryGetData(DA, "Class", out string materialClass);
+      update |= Params.TryGetData(DA, "Comments", out string comments);
 
-      update |= DA.TryGetData(Params.Input, "Manufacturer", out string manufacturer);
-      update |= DA.TryGetData(Params.Input, "Model", out string model);
-      update |= DA.TryGetData(Params.Input, "Cost", out string cost);
-      update |= DA.TryGetData(Params.Input, "URL", out string url);
+      update |= Params.TryGetData(DA, "Manufacturer", out string manufacturer);
+      update |= Params.TryGetData(DA, "Model", out string model);
+      update |= Params.TryGetData(DA, "Cost", out string cost);
+      update |= Params.TryGetData(DA, "URL", out string url);
 
-      update |= DA.TryGetData(Params.Input, "Keynote", out string keynote);
-      update |= DA.TryGetData(Params.Input, "Mark", out string mark);
+      update |= Params.TryGetData(DA, "Keynote", out string keynote);
+      update |= Params.TryGetData(DA, "Mark", out string mark);
 
       if (update)
       {
@@ -91,20 +91,20 @@ namespace RhinoInside.Revit.GH.Components.Material
         material.Mark = mark;
       }
 
-      DA.TrySetData(Params.Output, "Material", () => material);
+      Params.TrySetData(DA, "Material", () => material);
 
-      DA.TrySetData(Params.Output, "Name", () => material.Name);
-      DA.TrySetData(Params.Output, "Description", () => material.Description);
-      DA.TrySetData(Params.Output, "Class", () => material.MaterialClass);
-      DA.TrySetData(Params.Output, "Comments", () => material.Comments);
+      Params.TrySetData(DA, "Name", () => material.Name);
+      Params.TrySetData(DA, "Description", () => material.Description);
+      Params.TrySetData(DA, "Class", () => material.MaterialClass);
+      Params.TrySetData(DA, "Comments", () => material.Comments);
 
-      DA.TrySetData(Params.Output, "Manufacturer", () => material.Manufacturer);
-      DA.TrySetData(Params.Output, "Model", () => material.Model);
-      DA.TrySetData(Params.Output, "Cost", () => material.Cost);
-      DA.TrySetData(Params.Output, "URL", () => material.Url);
+      Params.TrySetData(DA, "Manufacturer", () => material.Manufacturer);
+      Params.TrySetData(DA, "Model", () => material.Model);
+      Params.TrySetData(DA, "Cost", () => material.Cost);
+      Params.TrySetData(DA, "URL", () => material.Url);
 
-      DA.TrySetData(Params.Output, "Keynote", () => material.Keynote);
-      DA.TrySetData(Params.Output, "Mark", () => material.Mark);
+      Params.TrySetData(DA, "Keynote", () => material.Keynote);
+      Params.TrySetData(DA, "Mark", () => material.Mark);
     }
   }
 

@@ -68,25 +68,25 @@ namespace RhinoInside.Revit.GH.Components.Material
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!DA.TryGetData(Params.Input, "Material", out Types.Material material))
+      if (!Params.TryGetData(DA, "Material", out Types.Material material))
         return;
 
       bool update = false;
-      update |= DA.TryGetData(Params.Input, "Use Render Appearance", out bool? appearance);
-      update |= DA.TryGetData(Params.Input, "Color", out System.Drawing.Color? color);
-      update |= DA.TryGetData(Params.Input, "Transparency", out double? transparency);
-      update |= DA.TryGetData(Params.Input, "Shininess", out double? shininess);
-      update |= DA.TryGetData(Params.Input, "Smoothness", out double? smoothness);
+      update |= Params.TryGetData(DA, "Use Render Appearance", out bool? appearance);
+      update |= Params.TryGetData(DA, "Color", out System.Drawing.Color? color);
+      update |= Params.TryGetData(DA, "Transparency", out double? transparency);
+      update |= Params.TryGetData(DA, "Shininess", out double? shininess);
+      update |= Params.TryGetData(DA, "Smoothness", out double? smoothness);
 
-      update |= DA.TryGetData(Params.Input, "Surface Foreground Pattern", out Types.FillPatternElement sfp);
-      update |= DA.TryGetData(Params.Input, "Surface Foreground Color", out System.Drawing.Color? sfc);
-      update |= DA.TryGetData(Params.Input, "Surface Background Pattern", out Types.FillPatternElement sbp);
-      update |= DA.TryGetData(Params.Input, "Surface Background Color", out System.Drawing.Color? sbc);
+      update |= Params.TryGetData(DA, "Surface Foreground Pattern", out Types.FillPatternElement sfp);
+      update |= Params.TryGetData(DA, "Surface Foreground Color", out System.Drawing.Color? sfc);
+      update |= Params.TryGetData(DA, "Surface Background Pattern", out Types.FillPatternElement sbp);
+      update |= Params.TryGetData(DA, "Surface Background Color", out System.Drawing.Color? sbc);
 
-      update |= DA.TryGetData(Params.Input, "Cut Foreground Pattern", out Types.FillPatternElement cfp);
-      update |= DA.TryGetData(Params.Input, "Cut Foreground Color", out System.Drawing.Color? cfc);
-      update |= DA.TryGetData(Params.Input, "Cut Background Pattern", out Types.FillPatternElement cbp);
-      update |= DA.TryGetData(Params.Input, "Cut Background Color", out System.Drawing.Color? cbc);
+      update |= Params.TryGetData(DA, "Cut Foreground Pattern", out Types.FillPatternElement cfp);
+      update |= Params.TryGetData(DA, "Cut Foreground Color", out System.Drawing.Color? cfc);
+      update |= Params.TryGetData(DA, "Cut Background Pattern", out Types.FillPatternElement cbp);
+      update |= Params.TryGetData(DA, "Cut Background Color", out System.Drawing.Color? cbc);
 
       if (update)
       {
@@ -108,23 +108,23 @@ namespace RhinoInside.Revit.GH.Components.Material
         material.CutBackgroundPatternColor = cbc;
       }
 
-      DA.TrySetData(Params.Output, "Material", () => material);
+      Params.TrySetData(DA, "Material", () => material);
 
-      DA.TrySetData(Params.Output, "Use Render Appearance", () => material.UseRenderAppearanceForShading);
-      DA.TrySetData(Params.Output, "Color", () => material.Color);
-      DA.TrySetData(Params.Output, "Transparency", () => material.Transparency);
-      DA.TrySetData(Params.Output, "Shininess", () => material.Shininess);
-      DA.TrySetData(Params.Output, "Smoothness", () => material.Smoothness);
+      Params.TrySetData(DA, "Use Render Appearance", () => material.UseRenderAppearanceForShading);
+      Params.TrySetData(DA, "Color", () => material.Color);
+      Params.TrySetData(DA, "Transparency", () => material.Transparency);
+      Params.TrySetData(DA, "Shininess", () => material.Shininess);
+      Params.TrySetData(DA, "Smoothness", () => material.Smoothness);
 
-      DA.TrySetData(Params.Output, "Surface Foreground Pattern", () => material.SurfaceForegroundPattern);
-      DA.TrySetData(Params.Output, "Surface Foreground Color", () => material.SurfaceForegroundPatternColor);
-      DA.TrySetData(Params.Output, "Surface Background Pattern", () => material.SurfaceBackgroundPattern);
-      DA.TrySetData(Params.Output, "Surface Background Color", () => material.SurfaceBackgroundPatternColor);
+      Params.TrySetData(DA, "Surface Foreground Pattern", () => material.SurfaceForegroundPattern);
+      Params.TrySetData(DA, "Surface Foreground Color", () => material.SurfaceForegroundPatternColor);
+      Params.TrySetData(DA, "Surface Background Pattern", () => material.SurfaceBackgroundPattern);
+      Params.TrySetData(DA, "Surface Background Color", () => material.SurfaceBackgroundPatternColor);
 
-      DA.TrySetData(Params.Output, "Cut Foreground Pattern", () => material.CutForegroundPattern);
-      DA.TrySetData(Params.Output, "Cut Foreground Color", () => material.CutForegroundPatternColor);
-      DA.TrySetData(Params.Output, "Cut Background Pattern", () => material.CutBackgroundPattern);
-      DA.TrySetData(Params.Output, "Cut Background Color", () => material.CutBackgroundPatternColor);
+      Params.TrySetData(DA, "Cut Foreground Pattern", () => material.CutForegroundPattern);
+      Params.TrySetData(DA, "Cut Foreground Color", () => material.CutForegroundPatternColor);
+      Params.TrySetData(DA, "Cut Background Pattern", () => material.CutBackgroundPattern);
+      Params.TrySetData(DA, "Cut Background Color", () => material.CutBackgroundPatternColor);
     }
   }
 }

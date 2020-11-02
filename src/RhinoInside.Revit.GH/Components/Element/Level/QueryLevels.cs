@@ -45,15 +45,15 @@ namespace RhinoInside.Revit.GH.Components
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
         return;
 
-      if (DA.TryGetData(Params.Input, "Elevation", out Interval? elevation) && !elevation.Value.IsValid)
+      if (Params.TryGetData(DA, "Elevation", out Interval? elevation) && !elevation.Value.IsValid)
       {
         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Elevation value is not valid.");
         return;
       }
-      DA.TryGetData(Params.Input, "Name", out string name);
-      DA.TryGetData(Params.Input, "Structural", out bool? structural);
-      DA.TryGetData(Params.Input, "Building Story", out bool? buildingStory);
-      DA.TryGetData(Params.Input, "Filter", out DB.ElementFilter filter);
+      Params.TryGetData(DA, "Name", out string name);
+      Params.TryGetData(DA, "Structural", out bool? structural);
+      Params.TryGetData(DA, "Building Story", out bool? buildingStory);
+      Params.TryGetData(DA, "Filter", out DB.ElementFilter filter);
 
       using (var collector = new DB.FilteredElementCollector(doc))
       {

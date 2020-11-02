@@ -7,9 +7,10 @@ using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.Convert.System.Collections.Generic;
+using RhinoInside.Revit.External.DB;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
-using RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -66,8 +67,8 @@ namespace RhinoInside.Revit.GH.Components
     (
       GH_Path basePath,
       DB.Document doc,
-      List<DB.Element> elements,
-      List<DB.Element> exclude,
+      IList<DB.Element> elements,
+      IList<DB.Element> exclude,
       DB.Options options,
       out GH_Structure<IGH_GeometricGoo> geometries
     )
@@ -315,7 +316,7 @@ namespace RhinoInside.Revit.GH.Components
 
       using(var options = new DB.Options() { DetailLevel = detailLevel })
       {
-        DA.TrySetDataList(Params.Output, "Elements", () => elements);
+        Params.TrySetDataList(DA, "Elements", () => elements);
 
         var _Geometry_ = Params.IndexOfOutputParam("Geometry");
         SolveGeometry
@@ -450,26 +451,16 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var elements = new List<DB.Element>();
-      if (!DA.GetDataList("Elements", elements) || elements.Count == 0)
-        return;
-
-      var exclude = new List<DB.Element>();
-      var _Exclude_ = Params.IndexOfInputParam("Exclude");
-      if(_Exclude_ >= 0)
-        DA.GetDataList(_Exclude_, exclude);
-
-      var view = default(DB.View);
-      var _View_ = Params.IndexOfInputParam("View");
-      if (!DA.GetData(_View_, ref view))
-        return;
+      if (!Params.TryGetData(DA, "View", out DB.View view) || view is null) return;
+      if (!Params.TryGetDataList(DA, "Elements", out DB.Element[] elements) || elements.Length == 0) return;
+      Params.TryGetDataList(DA, "Exclude", out DB.Element[] exclude);
 
       if (!TryGetCommonDocument(elements.Concat(exclude).Concat(Enumerable.Repeat(view, 1)), out var doc))
         return;
 
       using (var options = new DB.Options() { View = view })
       {
-        DA.TrySetDataList(Params.Output, "Elements", () => elements);
+        Params.TrySetDataList(DA, "Elements", () => elements);
 
         var _Geometry_ = Params.IndexOfOutputParam("Geometry");
         SolveGeometry

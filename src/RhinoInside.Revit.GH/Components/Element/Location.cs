@@ -170,7 +170,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetData("Element", ref element))
         return;
 
-      if(DA.TryGetData(Params.Input, "Location", out Plane? location) && location.HasValue)
+      if(Params.TryGetData(DA, "Location", out Plane? location) && location.HasValue)
       {
         StartTransaction(element.Document);
 
@@ -185,9 +185,9 @@ namespace RhinoInside.Revit.GH.Components
 
       DA.SetData("Element", element);
       DA.SetData("Location", element.Location);
-      DA.TrySetData(Params.Output, "Hand", () => element.HandOrientation);
-      DA.TrySetData(Params.Output, "Facing", () => element.FacingOrientation);
-      DA.TrySetData(Params.Output, "Work Plane", () => element.Location.ZAxis);
+      Params.TrySetData(DA, "Hand", () => element.HandOrientation);
+      Params.TrySetData(DA, "Facing", () => element.FacingOrientation);
+      Params.TrySetData(DA, "Work Plane", () => element.Location.ZAxis);
     }
   }
 
@@ -249,7 +249,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetData("Element", ref element))
         return;
 
-      if (DA.TryGetData(Params.Input, "Curve", out Curve curve))
+      if (Params.TryGetData(DA, "Curve", out Curve curve))
       {
         StartTransaction(element.Document);
 

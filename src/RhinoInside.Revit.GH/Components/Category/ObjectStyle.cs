@@ -56,16 +56,16 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!DA.TryGetData(Params.Input, "Category", out Types.Category category))
+      if (!Params.TryGetData(DA, "Category", out Types.Category category))
         return;
 
       bool update = false;
-      update |= DA.TryGetData(Params.Input, "Line Weight [projection]", out int? lwp);
-      update |= DA.TryGetData(Params.Input, "Line Weight [cut]", out int? lwc);
-      update |= DA.TryGetData(Params.Input, "Line Color", out System.Drawing.Color? color);
-      update |= DA.TryGetData(Params.Input, "Line Pattern [projection]", out Types.LinePatternElement lpp);
-      update |= DA.TryGetData(Params.Input, "Line Pattern [cut]", out Types.LinePatternElement lpc);
-      update |= DA.TryGetData(Params.Input, "Material", out Types.Material material);
+      update |= Params.TryGetData(DA, "Line Weight [projection]", out int? lwp);
+      update |= Params.TryGetData(DA, "Line Weight [cut]", out int? lwc);
+      update |= Params.TryGetData(DA, "Line Color", out System.Drawing.Color? color);
+      update |= Params.TryGetData(DA, "Line Pattern [projection]", out Types.LinePatternElement lpp);
+      update |= Params.TryGetData(DA, "Line Pattern [cut]", out Types.LinePatternElement lpc);
+      update |= Params.TryGetData(DA, "Material", out Types.Material material);
 
       if (update)
       {
@@ -78,13 +78,13 @@ namespace RhinoInside.Revit.GH.Components
         category.Material = material;
       }
 
-      DA.TrySetData(Params.Output, "Category", () => category);
-      DA.TrySetData(Params.Output, "Line Weight [projection]", () => category.ProjectionLineWeight);
-      DA.TrySetData(Params.Output, "Line Weight [cut]", () => category.CutLineWeight);
-      DA.TrySetData(Params.Output, "Line Color", () => category.LineColor);
-      DA.TrySetData(Params.Output, "Line Pattern [projection]", () => category.ProjectionLinePattern);
-      DA.TrySetData(Params.Output, "Line Pattern [cut]", () => category.CutLinePattern);
-      DA.TrySetData(Params.Output, "Material", () => category.Material);
+      Params.TrySetData(DA, "Category", () => category);
+      Params.TrySetData(DA, "Line Weight [projection]", () => category.ProjectionLineWeight);
+      Params.TrySetData(DA, "Line Weight [cut]", () => category.CutLineWeight);
+      Params.TrySetData(DA, "Line Color", () => category.LineColor);
+      Params.TrySetData(DA, "Line Pattern [projection]", () => category.ProjectionLinePattern);
+      Params.TrySetData(DA, "Line Pattern [cut]", () => category.CutLinePattern);
+      Params.TrySetData(DA, "Material", () => category.Material);
     }
   }
 }

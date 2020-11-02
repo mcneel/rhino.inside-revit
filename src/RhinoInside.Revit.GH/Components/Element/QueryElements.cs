@@ -41,40 +41,28 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
-        return;
-
-      DB.ElementFilter filter = null;
-      if (!DA.GetData("Filter", ref filter))
-        return;
-
-      if (!DA.TryGetData(Params.Input, "Limit", out int? limit))
-        limit = int.MaxValue;
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
+      if (!Params.TryGetData(DA, "Filter", out DB.ElementFilter filter) || filter is null) return;
+      if (!Params.TryGetData(DA, "Limit", out int? limit)) limit = int.MaxValue;
+      else if (limit is null) return;
 
       using (var collector = new DB.FilteredElementCollector(doc))
       {
         var elementCollector = collector.WherePasses(ElementFilter).WherePasses(filter);
         var elementCount = elementCollector.GetElementCount();
 
-        var _Elements_ = Params.IndexOfOutputParam("Elements");
-        if (_Elements_ >= 0)
+        Params.TrySetDataList(DA, "Elements", () =>
         {
-          if(elementCount > limit)
+          if (elementCount > limit)
+          {
+            var _Elements_ = Params.IndexOfOutputParam("Elements");
             AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"'{Params.Output[_Elements_].NickName}' contains only first {limit} of {elementCount} total elements.");
+          }
 
-          DA.SetDataList
-          (
-            _Elements_,
-            elementCollector.Take(limit.Value).Convert(Types.Element.FromElement)
-          );
-        }
+          return elementCollector.Take(limit.Value).Convert(Types.Element.FromElement);
+        });
 
-        DA.TrySetData
-        (
-          Params.Output,
-          "Count",
-          () => elementCount
-        );
+        Params.TrySetData(DA, "Count", () => elementCount);
       }
     }
   }
@@ -144,26 +132,17 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var view = default(Types.View);
-      if (!DA.GetData("View", ref view) || view?.IsValid != true)
-        return;
-
-      var Categories = new List<Types.Category>();
-      var _Categories_ = Params.IndexOfInputParam("Categories");
-      var noFilterCategories = Params.Input[_Categories_].DataType == GH_ParamData.@void;
-      if (!noFilterCategories)
-        DA.GetDataList(_Categories_, Categories);
-
-      var filter = default(DB.ElementFilter);
-      DA.GetData("Filter", ref filter);
+      if (!Params.TryGetData(DA, "View", out Types.View view) || view?.Value is null) return;
+      if (Params.TryGetData(DA, "Categories", out Types.Category[] categories) && categories is null) return;
+      if (Params.TryGetData(DA, "Filter", out DB.ElementFilter filter) && filter is null) return;
 
       using (var collector = new DB.FilteredElementCollector(view.Document, view.Id))
       {
         var elementCollector = collector.WherePasses(ElementFilter);
 
-        if (!noFilterCategories)
+        if (categories is object)
         {
-          var ids = Categories.
+          var ids = categories.
             Where(x => x.IsValid && x.Document.Equals(view.Document)).
             Select(x => x.Id).ToArray();
 
