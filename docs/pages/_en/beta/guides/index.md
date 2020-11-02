@@ -37,6 +37,7 @@ Grasshopper addon, included with {{ site.terms.rir }}, provides custom Revit-awa
 
 - [Walls (Basic & Stacked)]({{ site.baseurl }}{% link _en/beta/guides/revit-walls.md %})
 - [Curtain Walls & Systems]({{ site.baseurl }}{% link _en/beta/guides/revit-curtainwalls.md %})
+- [Doors & Windows]({{ site.baseurl }}{% link _en/beta/guides/revit-doorswindows.md %})
 - [Spatial Elements]({{ site.baseurl }}{% link _en/beta/guides/revit-spatial.md %})
 - [Stairs]({{ site.baseurl }}{% link _en/beta/guides/revit-stairs.md %})
 - [Levels & Grids]({{ site.baseurl }}{% link _en/beta/guides/revit-levels.md %})
