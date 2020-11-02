@@ -1112,7 +1112,7 @@ namespace RhinoInside.Revit.GH.Components
       (
         x =>
         x.VolatileData.AllData(true).
-        OfType<Types.IGH_ElementId>().
+        OfType<Types.IGH_Element>().
         Where(goo => options.Document.Equals(goo.Document)).
         Any()
       ).
@@ -1128,7 +1128,7 @@ namespace RhinoInside.Revit.GH.Components
           var newStructure = (IGH_Goo[]) PreviousStructure.Clone();
           for (int g = 0; g < newStructure.Length; g++)
           {
-            if (newStructure[g] is Types.IGH_ElementId id)
+            if (newStructure[g] is Types.IGH_Element id)
             {
               if
               (
