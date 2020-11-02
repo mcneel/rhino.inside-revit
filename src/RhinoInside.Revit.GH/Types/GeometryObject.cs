@@ -105,8 +105,8 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_ElementId
-    public DB.Reference Reference { get; protected set; }
     public DB.Document Document { get; protected set; }
+    public DB.Reference Reference { get; protected set; }
     public DB.ElementId Id => Reference?.ElementId;
     public Guid DocumentGUID { get; private set; } = Guid.Empty;
     public string UniqueID { get; protected set; } = string.Empty;
