@@ -32,13 +32,15 @@ namespace RhinoInside.Revit.GH.Types
       var document = Revit.ActiveDBDocument;
       var patternId = DB.ElementId.InvalidElementId;
 
-      if (source is IGH_ElementId elementId)
+      if (source is IGH_Goo goo)
       {
-        document = elementId.Document;
-        source = elementId.Id;
+        if (source is IGH_Element element)
+        {
+          document = element.Document;
+          source = element.Id;
+        }
+        else source = goo.ScriptVariable();
       }
-      else if (source is IGH_Goo goo)
-        source = goo.ScriptVariable();
 
       switch (source)
       {
@@ -52,7 +54,7 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
-      return base.CastFrom(source);
+      return false;
     }
 
     #region IGH_ElementId

@@ -5,7 +5,9 @@ using System.Linq;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Display;
+using RhinoInside.Revit.External.DB;
 using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.External.UI.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -75,6 +77,7 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(DB.SpatialElement),          (element)=> new SpatialElement    (element as DB.SpatialElement)    },
       { typeof(DB.Group),                   (element)=> new Group             (element as DB.Group)             },
       { typeof(DB.HostObject),              (element)=> new HostObject        (element as DB.HostObject)        },
+      { typeof(DB.CurtainSystem),           (element)=> new CurtainSystem     (element as DB.CurtainSystem)     },
       { typeof(DB.CurtainGridLine),         (element)=> new CurtainGridLine   (element as DB.CurtainGridLine)   },
       { typeof(DB.Floor),                   (element)=> new Floor             (element as DB.Floor)             },
       { typeof(DB.Architecture.BuildingPad),(element)=> new BuildingPad       (element as DB.Architecture.BuildingPad) },
@@ -185,18 +188,36 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastFrom(object source)
     {
-      if (source is IGH_ElementId goo)
+      if (source is IGH_Goo goo)
       {
-        if (goo.Id == DB.ElementId.InvalidElementId)
+        if (source is IGH_Element element)
         {
-          SetValue(goo.Document, goo.Id);
-          return true;
-        }
+          var document = element.Document;
+          var id = element.Id;
 
-        source = goo.ScriptVariable();
+          if (id == DB.ElementId.InvalidElementId)
+          {
+            SetValue(document, id);
+            return true;
+          }
+          else source = document?.GetElement(id);
+        }
+        else source = goo.ScriptVariable();
       }
 
-      return source is DB.Element element && SetValue(element);
+      if (source is string uniqueid)
+      {
+        if (FullUniqueId.TryParse(uniqueid, out var documentId, out var uniqueId))
+        {
+          if (Revit.ActiveUIApplication.TryGetDocument(documentId, out var doc))
+          {
+            try { source = doc.GetElement(uniqueId); }
+            catch { }
+          }
+        }
+      }
+
+      return SetValue(source as DB.Element);
     }
 
     public override bool CastTo<Q>(out Q target)

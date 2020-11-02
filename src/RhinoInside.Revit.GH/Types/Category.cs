@@ -50,8 +50,21 @@ namespace RhinoInside.Revit.GH.Types
 
     public Category() : base() { }
     public Category(DB.Document doc, DB.ElementId id) : base(doc, id) { }
-    public Category(DB.Category value) : base(value.Document(), value.Id) =>
-      category = value;
+    public Category(DB.Category value) : base(value.Document(), value.Id) => category = value;
+
+    protected override bool SetValue(DB.Element element)
+    {
+      if (DocumentExtension.AsCategory(element) is DB.Category)
+      {
+        Document = element.Document;
+        DocumentGUID = Document.GetFingerprintGUID();
+        Id = element.Id;
+        UniqueID = element.UniqueId;
+        return true;
+      }
+
+      return false;
+    }
 
     public static Category FromCategory(DB.Category category)
     {
@@ -74,40 +87,34 @@ namespace RhinoInside.Revit.GH.Types
       if (base.CastFrom(source))
         return true;
 
-      var document = Revit.ActiveDBDocument;
       var categoryId = DB.ElementId.InvalidElementId;
 
-      if (source is IGH_ElementId elementId)
+      if (source is IGH_Goo goo)
       {
-        document = elementId.Document;
-        source = elementId.Id;
+        if (source is IGH_Element element)
+          source = element.Document?.GetCategory(element.Id);
+        else
+          source = goo.ScriptVariable();
       }
-      else if (source is IGH_Goo goo)
-        source = goo.ScriptVariable();
 
       switch (source)
       {
-        case int integer:         categoryId = new DB.ElementId(integer); break;
+        case int i:               categoryId = new DB.ElementId(i); break;
         case DB.ElementId id:     categoryId = id; break;
+        case DB.Category c:       SetValue(c.Document(), c.Id); return true;
         case DB.GraphicsStyle s:  SetValue(s.Document, s.GraphicsStyleCategory.Id); return true;
         case DB.Family f:         SetValue(f.Document, f.FamilyCategoryId); return true;
-        case DB.Element element:
-          if (DocumentExtension.AsCategory(element) is DB.Category)
-          {
-            SetValue(element.Document, element.Id);
-            return true;
-          }
-          else if(element.Category is DB.Category category)
-          {
-            SetValue(element.Document, category.Id);
-            return true;
-          }
+        case DB.Element e:        if(e.Category is DB.Category category)
+                                  {
+                                    SetValue(e.Document, category.Id);
+                                    return true;
+                                  }
           break;
       }
 
       if (categoryId.TryGetBuiltInCategory(out var _))
       {
-        SetValue(document, categoryId);
+        SetValue(Revit.ActiveDBDocument, categoryId);
         return true;
       }
 

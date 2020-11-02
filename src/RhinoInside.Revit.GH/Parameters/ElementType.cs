@@ -6,6 +6,7 @@ using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
 using Grasshopper.Kernel.Types;
+using RhinoInside.Revit.External.DB;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
@@ -286,10 +287,10 @@ namespace RhinoInside.Revit.GH.Parameters
       if (familyName.Length == 0 || familyName[0] == '\'')
         return;
 
-      if (Revit.ActiveDBDocument is object)
+      if (Revit.ActiveDBDocument is DB.Document doc)
       {
         int selectedItemsCount = 0;
-        using (var collector = new DB.FilteredElementCollector(Revit.ActiveDBDocument))
+        using (var collector = new DB.FilteredElementCollector(doc))
         {
           var elementCollector = collector.WhereElementIsElementType();
 
@@ -313,7 +314,8 @@ namespace RhinoInside.Revit.GH.Parameters
                 familyName = elementType.GetFamilyName();
             }
 
-            var item = new GH_ValueListItem(elementType.GetFamilyName() + " : " + elementType.Name, elementType.Id.IntegerValue.ToString());
+            var referenceId = FullUniqueId.Format(doc.GetFingerprintGUID(), elementType.UniqueId);
+            var item = new GH_ValueListItem($"{elementType.GetFamilyName()}  : {elementType.Name}", $"\"{referenceId}\"");
             item.Selected = selectedItems.Contains(item.Expression);
             ListItems.Add(item);
 
@@ -347,10 +349,10 @@ namespace RhinoInside.Revit.GH.Parameters
       var selectedItems = ListItems.Where(x => x.Selected).Select(x => x.Expression).ToList();
       ListItems.Clear();
 
-      if (Revit.ActiveDBDocument is object)
+      if (Revit.ActiveDBDocument is DB.Document doc)
       {
         int selectedItemsCount = 0;
-        using (var collector = new DB.FilteredElementCollector(Revit.ActiveDBDocument))
+        using (var collector = new DB.FilteredElementCollector(doc))
         using (var elementTypeCollector = collector.WhereElementIsElementType())
         {
           foreach (var goo in goos)
@@ -366,7 +368,8 @@ namespace RhinoInside.Revit.GH.Parameters
                     if (elementType.GetFamilyName() != family.Name)
                       continue;
 
-                    var item = new GH_ValueListItem(elementType.GetFamilyName() + " : " + elementType.Name, elementType.Id.IntegerValue.ToString());
+                    var referenceId = FullUniqueId.Format(doc.GetFingerprintGUID(), elementType.UniqueId);
+                    var item = new GH_ValueListItem($"{elementType.GetFamilyName()} : {elementType.Name}", $"\"{referenceId}\"");
                     item.Selected = selectedItems.Contains(item.Expression);
                     ListItems.Add(item);
 
@@ -375,7 +378,8 @@ namespace RhinoInside.Revit.GH.Parameters
                   break;
                 case DB.ElementType elementType:
                   {
-                    var item = new GH_ValueListItem(elementType.GetFamilyName() + " : " + elementType.Name, elementType.Id.IntegerValue.ToString());
+                  var referenceId = FullUniqueId.Format(doc.GetFingerprintGUID(), elementType.UniqueId);
+                  var item = new GH_ValueListItem(elementType.GetFamilyName() + " : " + elementType.Name, $"\"{referenceId}\"");
                     item.Selected = selectedItems.Contains(item.Expression);
                     ListItems.Add(item);
 
@@ -384,8 +388,9 @@ namespace RhinoInside.Revit.GH.Parameters
                   break;
                 case DB.Element element:
                   {
-                    var type = Revit.ActiveDBDocument.GetElement(element.GetTypeId()) as DB.ElementType;
-                    var item = new GH_ValueListItem(type.GetFamilyName() + " : " + type.Name, type.Id.IntegerValue.ToString());
+                    var type = doc.GetElement(element.GetTypeId()) as DB.ElementType;
+                    var referenceId = FullUniqueId.Format(doc.GetFingerprintGUID(), type.UniqueId);
+                    var item = new GH_ValueListItem(type.GetFamilyName() + " : " + type.Name, $"\"{referenceId}\"");
                     item.Selected = selectedItems.Contains(item.Expression);
                     ListItems.Add(item);
 
@@ -401,7 +406,8 @@ namespace RhinoInside.Revit.GH.Parameters
               {
                 foreach (var elementType in elementTypeCollector.WhereCategoryIdEqualsTo(c.Id).Cast<DB.ElementType>())
                 {
-                  var item = new GH_ValueListItem(elementType.GetFamilyName() + " : " + elementType.Name, elementType.Id.IntegerValue.ToString());
+                  var referenceId = FullUniqueId.Format(doc.GetFingerprintGUID(), elementType.UniqueId);
+                  var item = new GH_ValueListItem(elementType.GetFamilyName() + " : " + elementType.Name, $"\"{referenceId}\"");
                   item.Selected = selectedItems.Contains(item.Expression);
                   ListItems.Add(item);
 
@@ -422,9 +428,13 @@ namespace RhinoInside.Revit.GH.Parameters
           var defaultElementTypeIds = new HashSet<string>();
           foreach (var typeGroup in Enum.GetValues(typeof(DB.ElementTypeGroup)).Cast<DB.ElementTypeGroup>())
           {
-            var elementTypeId = Revit.ActiveDBDocument.GetDefaultElementTypeId(typeGroup);
+            var elementTypeId = doc.GetDefaultElementTypeId(typeGroup);
             if (elementTypeId != DB.ElementId.InvalidElementId)
+            {
+              var type = doc.GetElement(elementTypeId);
+              var referenceId = FullUniqueId.Format(doc.GetFingerprintGUID(), type.UniqueId);
               defaultElementTypeIds.Add(elementTypeId.IntegerValue.ToString());
+            }
           }
 
           foreach (var item in ListItems)

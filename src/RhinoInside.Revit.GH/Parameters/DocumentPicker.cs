@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
+using RhinoInside.Revit.External.DB;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
@@ -162,13 +163,14 @@ namespace RhinoInside.Revit.GH.Parameters
       var selectedItems = ListItems.Where(x => x.Selected).Select(x => x.Expression).ToList();
       ListItems.Clear();
 
-      if (Revit.ActiveDBDocument != null)
+      if (Revit.ActiveDBDocument is DB.Document doc)
       {
-        using (var collector = new DB.FilteredElementCollector(Revit.ActiveDBDocument))
+        using (var collector = new DB.FilteredElementCollector(doc))
         {
           foreach (var level in collector.OfClass(typeof(DB.Level)).Cast<DB.Level>().OrderByDescending((x) => x.Elevation))
           {
-            var item = new GH_ValueListItem(level.Name, level.Id.IntegerValue.ToString());
+            var referenceId = FullUniqueId.Format(doc.GetFingerprintGUID(), level.UniqueId);
+            var item = new GH_ValueListItem(level.Name, $"\"{ referenceId }\"");
             item.Selected = selectedItems.Contains(item.Expression);
             ListItems.Add(item);
           }
