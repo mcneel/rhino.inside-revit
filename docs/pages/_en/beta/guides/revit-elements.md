@@ -30,4 +30,6 @@ Use the context menu on the {% include ltr/comp.html uuid='ef607c2a' %} paramete
 
 You can use the {% include ltr/comp.html uuid='f3ea4a9c' %} parameter and add the element Ids into the *Manage Revit Element Collection* on the component context menu:
 
-![]({{ "/static/images/guides/revit-elements01.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-elements-byid.png" | prepend: site.baseurl }})
+
+![]({{ "/static/images/guides/revit-elements-byid.gif" | prepend: site.baseurl }})
