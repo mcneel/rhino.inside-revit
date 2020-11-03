@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Types
     public override bool IsValid => Value is object;
     public override sealed IGH_Goo Duplicate() => (IGH_Goo) MemberwiseClone();
 
-    public bool Equals(Document goo) => Value.Equals(goo.Value);
+    public bool Equals(Document other) => other is object && Equals(Value, other.Value);
     public override bool Equals(object obj) => (obj is Document doc) ? Equals(doc) : base.Equals(obj);
     public override int GetHashCode() => Value.GetFingerprintGUID().GetHashCode();
 

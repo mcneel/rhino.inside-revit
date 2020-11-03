@@ -166,6 +166,10 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.hidden;
     protected override System.Drawing.Bitmap Icon => ((System.Drawing.Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
                                                      ImageBuilder.BuildIcon("#");
+    protected override Types.ParameterValue PreferredCast(object data)
+    {
+      return data is DB.Parameter parameter ? new Types.ParameterValue(parameter) : default;
+    }
 
     public ParameterValue() : base("ParameterValue", "ParameterValue", "Represents a Revit parameter value on an element.", "Params", "Revit Primitives", GH_ParamAccess.item) { }
     protected ParameterValue(string name, string nickname, string description, string category, string subcategory, GH_ParamAccess access) :
@@ -182,8 +186,8 @@ namespace RhinoInside.Revit.GH.Parameters
         if (data.Value is DB.Parameter parameter)
         {
           return parameter.HasValue ?
-                 parameter.AsValueString() :
-                 string.Empty;
+            $"{parameter.Definition.Name} : {parameter.AsValueString()}" :
+            string.Empty;
         }
       }
       catch { }

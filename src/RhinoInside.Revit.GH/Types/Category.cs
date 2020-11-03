@@ -10,77 +10,9 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Category")]
   public class Category : Element
   {
+    #region IGH_Goo
     protected override Type ScriptVariableType => typeof(DB.Category);
     override public object ScriptVariable() => Value;
-    public static explicit operator DB.Category(Category value) => value?.Value;
-
-    #region IGH_ElementId
-    DB.Category category = default;
-    public new DB.Category Value
-    {
-      get
-      {
-        if (category is null && IsElementLoaded)
-          category = Document.GetCategory(Id);
-
-        return category;
-      }
-    }
-
-    protected override void ResetValue()
-    {
-      base.ResetValue();
-      category = default;
-    }
-
-    public override bool LoadElement()
-    {
-      if (IsReferencedElement && !IsElementLoaded)
-      {
-        Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var doc);
-        Document = doc;
-
-        Document.TryGetCategoryId(UniqueID, out var id);
-        Id = id;
-      }
-
-      return IsElementLoaded;
-    }
-    #endregion
-
-    public Category() : base() { }
-    public Category(DB.Document doc, DB.ElementId id) : base(doc, id) { }
-    public Category(DB.Category value) : base(value.Document(), value.Id) => category = value;
-
-    protected override bool SetValue(DB.Element element)
-    {
-      if (DocumentExtension.AsCategory(element) is DB.Category)
-      {
-        Document = element.Document;
-        DocumentGUID = Document.GetFingerprintGUID();
-        Id = element.Id;
-        UniqueID = element.UniqueId;
-        return true;
-      }
-
-      return false;
-    }
-
-    public static Category FromCategory(DB.Category category)
-    {
-      if (category is null)
-        return null;
-
-      return new Category(category);
-    }
-
-    new public static Category FromElementId(DB.Document doc, DB.ElementId id)
-    {
-      if (id.IsCategoryId(doc))
-        return new Category(doc, id);
-
-      return null;
-    }
 
     public override sealed bool CastFrom(object source)
     {
@@ -142,11 +74,7 @@ namespace RhinoInside.Revit.GH.Types
       public override string FormatInstance()
       {
         if (owner.IsReferencedElement && owner.IsElementLoaded)
-        {
           return owner.DisplayName;
-          //if (owner.Id.TryGetBuiltInCategory(out var builtInCategory))
-          //  return builtInCategory.ToString();
-        }
 
         return base.FormatInstance();
       }
@@ -216,6 +144,20 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
+    #endregion
+
+    #region DocumentObject
+    DB.Category category = default;
+    public new DB.Category Value
+    {
+      get
+      {
+        if (category is null && IsElementLoaded)
+          category = Document.GetCategory(Id);
+
+        return category;
+      }
+    }
 
     public override string DisplayName
     {
@@ -226,6 +168,61 @@ namespace RhinoInside.Revit.GH.Types
 
         return base.DisplayName;
       }
+    }
+    #endregion
+
+    #region IGH_ElementId
+    protected override void ResetValue()
+    {
+      category = default;
+
+      base.ResetValue();
+    }
+
+    public override bool LoadElement()
+    {
+      if (IsReferencedElement && !IsElementLoaded)
+      {
+        Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var doc);
+        doc.TryGetCategoryId(UniqueID, out var id);
+
+        SetValue(doc, id);
+      }
+
+      return IsElementLoaded;
+    }
+    #endregion
+
+    public Category() : base() { }
+    public Category(DB.Document doc, DB.ElementId id) : base(doc, id) { }
+    public Category(DB.Category value) : base(value.Document(), value.Id) => category = value;
+
+    protected override bool SetValue(DB.Element element)
+    {
+      if (DocumentExtension.AsCategory(element) is DB.Category cat)
+      {
+        SetValue(element.Document, element.Id);
+        category = cat;
+        return true;
+      }
+
+      return false;
+    }
+
+    public static Category FromCategory(DB.Category category)
+    {
+      if (category is null)
+        return null;
+
+      return new Category(category);
+    }
+
+    new public static Category FromElementId(DB.Document doc, DB.ElementId id)
+    {
+      if (id.IsCategoryId(doc))
+        return new Category(doc, id);
+
+      return null;
     }
 
     #region Properties

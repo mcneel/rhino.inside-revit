@@ -13,6 +13,22 @@ namespace System
 
       return false;
     }
+
+    public static bool IsGenericSubclassOf(this Type type, Type baseGenericType, out Type genericType)
+    {
+      for (; type != typeof(object); type = type.BaseType)
+      {
+        var cur = type.IsGenericType ? type.GetGenericTypeDefinition() : type;
+        if (baseGenericType == cur)
+        {
+          genericType = type;
+          return true;
+        }
+      }
+
+      genericType = default;
+      return false;
+    }
   }
 
   static class StringExtension

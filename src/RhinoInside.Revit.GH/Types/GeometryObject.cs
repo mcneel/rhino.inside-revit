@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Reflection;
 using GH_IO.Serialization;
 using Grasshopper;
 using Grasshopper.Kernel;
@@ -9,32 +10,33 @@ using RhinoInside.Revit.Convert.Display;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.External.UI.Extensions;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
   public abstract class GeometryObject<X> :
-    GH_Goo<X>,
+    ElementId,
     IEquatable<GeometryObject<X>>,
-    IGH_ElementId,
     IGH_GeometricGoo,
     IGH_PreviewData,
     IGH_PreviewMeshData
     where X : DB.GeometryObject
   {
     #region System.Object
-    public bool Equals(GeometryObject<X> id) => id?.DocumentGUID == DocumentGUID && id?.UniqueID == UniqueID;
+    public bool Equals(GeometryObject<X> other) => other is object &&
+      other.DocumentGUID == DocumentGUID && other.UniqueID == UniqueID;
     public override bool Equals(object obj) => (obj is GeometryObject<X> id) ? Equals(id) : base.Equals(obj);
     public override int GetHashCode() => DocumentGUID.GetHashCode() ^ UniqueID.GetHashCode();
 
     public override sealed string ToString()
     {
+      string typeName = ((IGH_Goo) this).TypeName;
       if (!IsValid)
-        return "Null " + TypeName;
+        return "Null " + typeName;
 
       try
       {
-        string typeName = TypeName;
         if (Document?.GetElement(Reference) is DB.Element element)
         {
           typeName = "Referenced ";
@@ -62,16 +64,15 @@ namespace RhinoInside.Revit.GH.Types
       }
       catch (Autodesk.Revit.Exceptions.ApplicationException)
       {
-        return "Invalid" + TypeName;
+        return "Invalid" + typeName;
       }
     }
     #endregion
 
     #region GH_ISerializable
-    public override sealed bool Read(GH_IReader reader)
+    bool GH_IO.GH_ISerializable.Read(GH_IReader reader)
     {
-      Value = null;
-      Document = null;
+      UnloadElement();
 
       var documentGUID = Guid.Empty;
       reader.TryGetGuid("DocumentGUID", ref documentGUID);
@@ -84,7 +85,7 @@ namespace RhinoInside.Revit.GH.Types
       return true;
     }
 
-    public override sealed bool Write(GH_IWriter writer)
+    bool GH_IO.GH_ISerializable.Write(GH_IWriter writer)
     {
       if (DocumentGUID != Guid.Empty)
         writer.SetGuid("DocumentGUID", DocumentGUID);
@@ -97,53 +98,48 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_Goo
-    public override string TypeName => "Revit Geometry Object";
-    public override string TypeDescription => "Represents a Revit Geometry Object";
-    public override bool IsValid => (!(Value is null || !Id.IsValid())) && (Document?.IsValidObject ?? false);
-    public override sealed IGH_Goo Duplicate() => (IGH_Goo) MemberwiseClone();
-    protected virtual Type ScriptVariableType => typeof(X);
+    public override bool IsValid => Value is X;
+    #endregion
+
+    #region ReferenceObject
+    public override DB.ElementId Id => reference?.ElementId;
     #endregion
 
     #region IGH_ElementId
-    public DB.Document Document { get; protected set; }
-    public DB.Reference Reference { get; protected set; }
-    public DB.ElementId Id => Reference?.ElementId;
-    public Guid DocumentGUID { get; private set; } = Guid.Empty;
-    public string UniqueID { get; protected set; } = string.Empty;
-    public bool IsReferencedElement => !string.IsNullOrEmpty(UniqueID);
-    public bool IsElementLoaded => !(Value is default(X));
-    public virtual bool LoadElement()
+    DB.Reference reference;
+    public override DB.Reference Reference => reference;
+
+    public override bool IsElementLoaded => Document is object && Reference is object;
+    public override bool LoadElement()
     {
-      if (Document is null)
+      if (IsReferencedElement && !IsElementLoaded)
       {
-        Value = null;
-        if (!Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var doc))
-        {
-          Document = null;
-          return false;
-        }
-
+        Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var doc);
         Document = doc;
-      }
-      else if (IsElementLoaded)
-        return true;
 
-      if (Document is object)
-      {
-        try
-        {
-          Reference = Reference ?? DB.Reference.ParseFromStableRepresentation(Document, UniqueID);
-          var element = Document.GetElement(Reference);
-          m_value = element?.GetGeometryObjectFromReference(Reference) as X;
-        }
+        try { reference = DB.Reference.ParseFromStableRepresentation(Document, UniqueID); }
+        catch { reference = default; }
+      }
+
+      return IsElementLoaded;
+    }
+
+    public override void UnloadElement()
+    {
+      base.UnloadElement();
+
+      if (IsReferencedElement)
+        reference = default;
+    }
+
+    protected override object FetchValue()
+    {
+      if (Document is DB.Document doc && Reference is DB.Reference reference)
+        try { return doc.GetElement(reference)?.GetGeometryObjectFromReference(reference); }
         catch (Autodesk.Revit.Exceptions.ArgumentException) { }
 
-        return IsElementLoaded;
-      }
-
-      return false;
+      return default;
     }
-    public void UnloadElement() { Value = default; Document = default; }
     #endregion
 
     #region IGH_GeometricGoo
@@ -198,12 +194,13 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     protected GeometryObject() { }
-    protected GeometryObject(X data) : base(data) { }
+    protected GeometryObject(X data) : base(default, data) { }
     protected GeometryObject(DB.Document doc, DB.Reference reference)
     {
       DocumentGUID = doc.GetFingerprintGUID();
       UniqueID = reference.ConvertToStableRepresentation(doc);
     }
+    public new X Value => base.Value as X;
 
     /// <summary>
     /// Accurate axis aligned <see cref="Rhino.Geometry.BoundingBox"/> for computation.
@@ -216,37 +213,25 @@ namespace RhinoInside.Revit.GH.Types
     public virtual BoundingBox ClippingBox => BoundingBox;
   }
 
+  [Name("Revit Vertex")]
   public class Vertex : GeometryObject<DB.Point>, IGH_PreviewData
   {
-    public override string TypeName => "Revit Vertex";
-    public override string TypeDescription => "Represents a Revit Vertex";
-
     readonly int VertexIndex = -1;
-    public override bool LoadElement()
+    protected override object FetchValue()
     {
-      Document = default;
-      Value = default;
-
-      if (Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var doc))
-      {
-        Document = doc;
-
+      if (Document is DB.Document doc && Reference is DB.Reference reference)
         try
         {
-          Reference = DB.Reference.ParseFromStableRepresentation(doc, UniqueID);
-          var element = doc.GetElement(Reference);
-          var geometry = element?.GetGeometryObjectFromReference(Reference);
-          if (geometry is DB.Edge edge)
+          if (doc.GetElement(reference)?.GetGeometryObjectFromReference(reference) is DB.Edge edge)
           {
             var curve = edge.AsCurve();
             var points = new DB.XYZ[] { curve.GetEndPoint(0), curve.GetEndPoint(1) };
-            Value = DB.Point.Create(points[VertexIndex]);
+            return DB.Point.Create(points[VertexIndex]);
           }
         }
         catch (Autodesk.Revit.Exceptions.ArgumentException) { }
-      }
 
-      return IsValid;
+      return default;
     }
 
     public Vertex() { }
@@ -272,19 +257,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override bool CastFrom(object source)
-    {
-      if (source is GH_Point point)
-      {
-        Value = DB.Point.Create(point.Value.ToXYZ());
-        UniqueID = string.Empty;
-        return true;
-      }
-
-      return false;
-    }
-
-    public override bool CastTo<Q>(ref Q target)
+    public override bool CastTo<Q>(out Q target)
     {
       if (typeof(Q).IsAssignableFrom(typeof(DB.Reference)))
       {
@@ -310,7 +283,7 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
 
-      return base.CastTo(ref target);
+      return base.CastTo(out target);
     }
 
     public override BoundingBox GetBoundingBox(Transform xform)
@@ -335,11 +308,9 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
   }
 
+  [Name("Edge")]
   public class Edge : GeometryObject<DB.Edge>, IGH_PreviewData
   {
-    public override string TypeName => "Revit Edge";
-    public override string TypeDescription => "Represents a Revit Edge";
-
     public Edge() { }
     public Edge(DB.Edge edge) : base(edge) { }
     public Edge(DB.Document doc, DB.Reference reference) : base(doc, reference) { }
@@ -364,7 +335,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override bool CastTo<Q>(ref Q target)
+    public override bool CastTo<Q>(out Q target)
     {
       if (typeof(Q).IsAssignableFrom(typeof(DB.Reference)))
       {
@@ -390,7 +361,7 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
 
-      return base.CastTo(ref target);
+      return base.CastTo(out target);
     }
 
     public override BoundingBox GetBoundingBox(Transform xform)
@@ -415,11 +386,9 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
   }
 
+  [Name("Face")]
   public class Face : GeometryObject<DB.Face>, IGH_PreviewData
   {
-    public override string TypeName => "Revit Face";
-    public override string TypeDescription => "Represents a Revit Face";
-
     public Face() { }
     public Face(DB.Face face) : base(face) { }
     public Face(DB.Document doc, DB.Reference reference) : base(doc, reference) { }
@@ -464,7 +433,7 @@ namespace RhinoInside.Revit.GH.Types
       return meshes;
     }
 
-    public override bool CastTo<Q>(ref Q target)
+    public override bool CastTo<Q>(out Q target)
     {
       if (typeof(Q).IsAssignableFrom(typeof(DB.Reference)))
       {
@@ -525,7 +494,7 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
 
-      return base.CastTo(ref target);
+      return base.CastTo(out target);
     }
 
     public override BoundingBox GetBoundingBox(Transform xform)

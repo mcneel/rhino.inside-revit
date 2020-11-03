@@ -23,11 +23,64 @@ namespace RhinoInside.Revit.GH.Types
   [Name("Element")]
   public class Element : ElementId, IGH_Element
   {
-    override public object ScriptVariable() => Value;
-    protected override Type ScriptVariableType => typeof(DB.Element);
-    public static explicit operator DB.Element(Element value) => value?.Value;
+    #region IGH_Goo
+    protected virtual Type ScriptVariableType => typeof(DB.Element);
+    #endregion
 
-    public new DB.Element Value => base.Value as DB.Element;
+    #region DocumentObject
+    DB.Element value => base.Value as DB.Element;
+    public new DB.Element Value
+    {
+      get
+      {
+        if (value?.IsValidObject == false)
+          ResetValue();
+
+        return value;
+      }
+    }
+    #endregion
+
+    #region ReferenceObject
+    DB.ElementId id = DB.ElementId.InvalidElementId;
+    public override DB.ElementId Id => id;
+    #endregion
+
+    #region IGH_ElementId
+    public override DB.Reference Reference
+    {
+      get
+      {
+        try { return DB.Reference.ParseFromStableRepresentation(Document, UniqueID); }
+        catch (Autodesk.Revit.Exceptions.ArgumentNullException) { return null; }
+        catch (Autodesk.Revit.Exceptions.ArgumentException) { return null; }
+      }
+    }
+
+    public override bool IsElementLoaded => Document is object && Id is object;
+    public override bool LoadElement()
+    {
+      if (IsReferencedElement && !IsElementLoaded)
+      {
+        Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var doc);
+        doc.TryGetElementId(UniqueID, out id);
+
+        SetValue(doc, id);
+      }
+
+      return IsElementLoaded;
+    }
+
+    public override void UnloadElement()
+    {
+      base.UnloadElement();
+
+      if (IsReferencedElement)
+        id = default;
+    }
+
+    protected override object FetchValue() => Document.GetElement(Id);
+    #endregion
 
     protected void InvalidateGraphics()
     {
@@ -161,14 +214,32 @@ namespace RhinoInside.Revit.GH.Types
       return null;
     }
 
+    protected internal void SetValue(DB.Document doc, DB.ElementId id)
+    {
+      if (id == DB.ElementId.InvalidElementId)
+        doc = null;
+
+      Document = doc;
+      DocumentGUID = doc.GetFingerprintGUID();
+
+      this.id = id;
+      UniqueID = doc?.GetElement(id)?.UniqueId ??
+      (
+        id.IntegerValue < DB.ElementId.InvalidElementId.IntegerValue ?
+          UniqueId.Format(Guid.Empty, id.IntegerValue) :
+          string.Empty
+      );
+    }
+
     protected virtual bool SetValue(DB.Element element)
     {
       if (ScriptVariableType.IsInstanceOfType(element))
       {
         Document     = element.Document;
         DocumentGUID = Document.GetFingerprintGUID();
-        Id           = element.Id;
+        this.id      = element.Id;
         UniqueID     = element.UniqueId;
+        base.Value   = element;
         return true;
       }
 
@@ -182,9 +253,9 @@ namespace RhinoInside.Revit.GH.Types
       base.ResetValue();
     }
 
-    public Element() : base() { }
-    internal Element(DB.Document doc, DB.ElementId id) : base(doc, id) { }
-    protected Element(DB.Element element)              : base(element) { }
+    public Element() { }
+    internal Element(DB.Document doc, DB.ElementId id) => SetValue(doc, id);
+    protected Element(DB.Element element) => SetValue(element);
 
     public override bool CastFrom(object source)
     {
@@ -277,6 +348,25 @@ namespace RhinoInside.Revit.GH.Types
       public override string FormatInstance()
       {
         return owner.DisplayName;
+      }
+
+      [System.ComponentModel.Description("The element identifier in this session.")]
+      [System.ComponentModel.RefreshProperties(System.ComponentModel.RefreshProperties.All)]
+      public virtual int? Id
+      {
+        get => owner.Id?.IntegerValue;
+        set
+        {
+          if (!value.HasValue || value == DB.ElementId.InvalidElementId.IntegerValue)
+            owner.SetValue(default, DB.ElementId.InvalidElementId);
+          else
+          {
+            var doc = owner.Document ?? Revit.ActiveDBDocument;
+            var id = new DB.ElementId(value.Value);
+
+            if (IsValidId(doc, id)) owner.SetValue(doc, id);
+          }
+        }
       }
 
       [System.ComponentModel.Description("A human readable name for the Element.")]

@@ -321,6 +321,7 @@
     <Compile Include="Parameters\AssetPropertyDouble1DMap.cs" />
     <Compile Include="Parameters\AssetPropertyDouble4DMap.cs" />
     <Compile Include="Extensions\Grasshopper\Kernel\Parameters\Param_ColorRGBA.cs" />
+    <Compile Include="Parameters\CurtainGrid.cs" />
     <Compile Include="Parameters\StructuralAssetBehaviour_ValueList.cs" />
     <Compile Include="Parameters\StructuralAssetClass_ValueList.cs" />
     <Compile Include="Parameters\TextureData.cs" />
@@ -394,6 +395,7 @@
     <Compile Include="Types\CurveElement.cs" />
     <Compile Include="Types\Dimension.cs" />
     <Compile Include="Types\Document.cs" />
+    <Compile Include="Types\DocumentObject.cs" />
     <Compile Include="Types\Element.cs" />
     <Compile Include="Types\ElementFilter.cs" />
     <Compile Include="Types\ElementId.cs" />

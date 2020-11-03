@@ -63,10 +63,9 @@ namespace RhinoInside.Revit.GH.Types
       if (IsReferencedElement && !IsElementLoaded)
       {
         Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var doc);
-        Document = doc;
+        doc.TryGetLinePatternId(UniqueID, out var id);
 
-        Document.TryGetLinePatternId(UniqueID, out var id);
-        Id = id;
+        SetValue(doc, id);
       }
 
       return IsElementLoaded;
