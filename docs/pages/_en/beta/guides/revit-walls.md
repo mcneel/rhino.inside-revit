@@ -119,33 +119,33 @@ In Revit API, *Location Line* of a *Basic* or *Stacked Wall* is represented by t
 
 *Basic* and *Stacked Walls* have a concept known as *Location Line*. The location line defines the vertical reference plane for the wall instance. The wall stays fixed on this vertical reference plane when it is flipped or its structure is modified. The {% include ltr/comp.html uuid="4c5260c3-" %} component shown here, can extract information about a wall location line. This component returns the center line curve, location line setting, curve, offset, and offset direction:
 
-![]({{ "/static/images/guides/revit-walls13.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-walls-walllocation.png" | prepend: site.baseurl }})
 
-![]({{ "/static/images/guides/revit-walls13a.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-walls-walllocationlines.png" | prepend: site.baseurl }})
 
 A custom Value List component is also provided to assist in filtering walls by the Location Line value:
 
-![]({{ "/static/images/guides/revit-walls14.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-walls-walllocation-filter.png" | prepend: site.baseurl }})
 
 If you only need the center line of the wall, an easier and more Grasshopper-like method is to pass the Wall elements to a Curve component:
 
-![]({{ "/static/images/guides/revit-walls14a.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-walls-convertcurve.png" | prepend: site.baseurl }})
 
 
 ### Wall Profile
 
 Use the {% include ltr/comp.html uuid="9d2e9d8d-" %} component shown here to extract the profile curves for a *Basic* or *Stacked Wall* element. Note that these profile curves are extracted along the center plane of the wall:
 
-![]({{ "/static/images/guides/revit-walls15.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-walls-profile.png" | prepend: site.baseurl }})
 
-![]({{ "/static/images/guides/revit-walls16.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-walls-profilelines.png" | prepend: site.baseurl }})
 
 
 ### Wall Geometry
 
-You can use the {% include ltr/comp.html uuid="b7e6a82f-" %} component to grab the basic geometry of a wall instance:
+You can use the {% include ltr/comp.html uuid="b3bcbf5b-" %} component to grab the basic geometry of a wall instance:
 
-![]({{ "/static/images/guides/revit-walls17.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-walls-geometry.png" | prepend: site.baseurl }})
 
 ### Wall Geometry By Structure
 
@@ -156,23 +156,23 @@ Normally in Revit API, geometry of an element can be extracted using the `DB.Ele
 
 Use the {% include ltr/comp.html uuid="3dbaaae8-" %} component shown here to extract the layer geometry of a *Basic Wall* instance:
 
-![]({{ "/static/images/guides/revit-walls17a.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-walls-walllayers.png" | prepend: site.baseurl }})
 
 This component can be used with *Stack Walls* as well. The component will extract the structure layers of all the partial *Basic Walls* that are part of the given *Stacked Wall*:
 
-![]({{ "/static/images/guides/revit-walls18.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-walls-stackedwalllayers.png" | prepend: site.baseurl }})
 
 A better method is to extract the *Basic Wall* instances first from the *Stacked Wall*, and then use the component to extract their layer geometry. This method would result in a more appropriate data structure that keeps the layer orders intact:
 
-![]({{ "/static/images/guides/revit-walls19.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-walls-everybasicwall.png" | prepend: site.baseurl }})
 
 Moreover, this component keeps the layers in identical order as other components that deal with layers so you can work on the layer data and geometry easily later on:
 
-![]({{ "/static/images/guides/revit-walls20.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-walls-layersinorder.png" | prepend: site.baseurl }})
 
 &nbsp;
 
-![]({{ "/static/images/guides/revit-walls20a.gif" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-walls-layersinorder.gif" | prepend: site.baseurl }})
 
 
 ## Modifying Wall Types
