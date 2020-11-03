@@ -79,18 +79,17 @@ namespace RhinoInside.Revit.GH.Components
       var common = default(HashSet<Parameters.ParameterParam>);
       foreach (var goo in Params.Input[0].VolatileData.AllData(true).OfType<Types.Element>())
       {
-        var element = (DB.Element) goo;
-        if (element is null)
-          continue;
+        if (goo.Value is DB.Element element)
+        {
+          var current = new HashSet<Parameters.ParameterParam>();
+          foreach (var param in element.GetOrderedParameters().Where(x => x.Definition is object && x.StorageType != DB.StorageType.None))
+            current.Add(new Parameters.ParameterParam(param));
 
-        var current = new HashSet<Parameters.ParameterParam>();
-        foreach (var param in element.GetOrderedParameters().Where(x => x.Definition is object && x.StorageType != DB.StorageType.None))
-          current.Add(new Parameters.ParameterParam(param));
-
-        if (common is null)
-          common = current;
-        else
-          common.IntersectWith(current);
+          if (common is null)
+            common = current;
+          else
+            common.IntersectWith(current);
+        }
       }
 
       RecordUndoEvent("Get Common Parameters");
@@ -103,12 +102,11 @@ namespace RhinoInside.Revit.GH.Components
       var all = new HashSet<Parameters.ParameterParam>();
       foreach (var goo in Params.Input[0].VolatileData.AllData(true).OfType<Types.Element>())
       {
-        var element = (DB.Element) goo;
-        if (element is null)
-          continue;
-
-        foreach (var param in element.GetOrderedParameters().Where(x => x.Definition is object && x.StorageType != DB.StorageType.None))
-          all.Add(new Parameters.ParameterParam(param));
+        if (goo.Value is DB.Element element)
+        {
+          foreach (var param in element.GetOrderedParameters().Where(x => x.Definition is object && x.StorageType != DB.StorageType.None))
+            all.Add(new Parameters.ParameterParam(param));
+        }
       }
 
       RecordUndoEvent("Get All Parameters");
