@@ -63,7 +63,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region GH_ISerializable
-    public virtual bool Read(GH_IReader reader)
+    protected override bool Read(GH_IReader reader)
     {
       UnloadElement();
 
@@ -78,7 +78,7 @@ namespace RhinoInside.Revit.GH.Types
       return true;
     }
 
-    public virtual bool Write(GH_IWriter writer)
+    protected override bool Write(GH_IWriter writer)
     {
       if (DocumentGUID != Guid.Empty)
         writer.SetGuid("DocumentGUID", DocumentGUID);

@@ -7,7 +7,7 @@ using DB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Curve Element")]
-  class CurveElement : GraphicalElement
+  public class CurveElement : GraphicalElement
   {
     protected override Type ScriptVariableType => typeof(DB.CurveElement);
     public static explicit operator DB.CurveElement(CurveElement value) => value?.Value;
