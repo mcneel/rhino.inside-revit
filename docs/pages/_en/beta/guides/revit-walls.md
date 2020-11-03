@@ -13,7 +13,7 @@ In Revit API, Wall Types are represented by {% include api_type.html type='Autod
 
 Use a combination of {% include ltr/comp.html uuid="d08f7ab1-" %} and {% include ltr/comp.html uuid="7b00f940-" %} components to collect all the wall types in a Revit model:
 
-![]({{ "/static/images/guides/revit-walls01.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-walls-querywalltypes.png" | prepend: site.baseurl }})
 
 
 ## Querying Walls
@@ -27,7 +27,7 @@ In Revit API, Walls are represented by {% include api_type.html type='Autodesk.R
 
 Use a combination of {% include ltr/comp.html uuid="d08f7ab1-" %} and {% include ltr/comp.html uuid="0f7da57e-" %} components to collect all the wall instances in a Revit model:
 
-![]({{ "/static/images/guides/revit-walls02.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-walls-querywalls.png" | prepend: site.baseurl }})
 
 {% include ltr/warning_note.html note='Note that Revit API will return the individual partial walls on a *Stacked Wall* when using this workflow' %}
 
@@ -35,13 +35,13 @@ Use a combination of {% include ltr/comp.html uuid="d08f7ab1-" %} and {% include
 
 A better workflow is to collect walls based on the *Wall System Family*. Use the {% include ltr/comp.html uuid="15545e80-" %} component to select any combination of the builtin **Basic**, **Stacked**, or **Curtain** walls in Revit. You can then pass this selection as the input to the {% include ltr/comp.html uuid="118f5744-" %} as shown below:
 
-![]({{ "/static/images/guides/revit-walls03.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-walls-querybysystem.png" | prepend: site.baseurl }})
 
 ### By Wall Type
 
 You can also collect walls of a specific type very easily using a workflow described in [Data Model: Instances]({{ site.baseurl }}{% link _en/beta/guides/revit-instances.md %})
 
-![]({{ "/static/images/guides/revit-walls04.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-walls-querywalltype.png" | prepend: site.baseurl }})
 
 
 ## Analyzing Wall Types
@@ -54,11 +54,11 @@ Once you have filtered out the desired wall type using workflows described above
 
 *Basic Walls* are a special *Wall System Family* in Revit. They are constructed from a set of layers that are defined as part of the wall type definition. The also have a series of other unique options e.g. *Wrapping at Inserts*. The {% include ltr/comp.html uuid="00a650ed-" %} component shown here provide a method to analyze the *Basic Wall* types in Revit document:
 
-![]({{ "/static/images/guides/revit-walls05.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-walls-analyzebasictype.png" | prepend: site.baseurl }})
 
 Some of the outputs on this component (e.g. **WI** and **WE**) return an integer value that corresponds to an enumeration in the Revit API. You can use the *Value List* components (shown above in front of the parameter values panel) to determine which value is set on the parameter and filter the source wall types. The examples below show how these *Value List* components are used to filter the wall types by *Wrapping* and *Function*:
 
-![]({{ "/static/images/guides/revit-walls06.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-walls-analyzebasictype-filter.png" | prepend: site.baseurl }})
 
 ### Basic Wall Structure
 
@@ -69,21 +69,21 @@ In Revit API, {% include api_type.html type='Autodesk.Revit.DB.CompoundStructure
 
 The {% include ltr/comp.html uuid="00a650ed-" %} component shown above, provides access to the *Compound Structure* definition of the *Basic Wall* type. Use the {% include ltr/comp.html uuid="d0853b76-" %} component shown here to extract information on *Compound Structure Layers*. Similar to above, a series of *Value List* components are provided to allow value comparison and filtering of the structure layers:
 
-![]({{ "/static/images/guides/revit-walls08.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-walls-compstruct.png" | prepend: site.baseurl }})
 
 As shown above, layers are ordered from **Exterior** to **Interior**, matching the Revit GUI layer ordering. The example below shows a workflow to access individual layers by their index:
 
-![]({{ "/static/images/guides/revit-walls09.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-walls-compstructlayer.png" | prepend: site.baseurl }})
 
 ### Basic Wall Structure Layers
 
 Use the {% include ltr/comp.html uuid="bc64525a-" %} component to extract information about each individual *Compound Structure Layer*. Custom *Value List* components are also provide for value comparison:
 
-![]({{ "/static/images/guides/revit-walls10.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-walls-analyzecompstructlayer.png" | prepend: site.baseurl }})
 
 ### Stacked Wall Structure
 
-{% include ltr/warning_note.html image='/static/images/guides/revit-walls10a.png' note='Currently there is no support in Revit API to access *Stacked Wall* structure data. However you can use the *Analyse Stacked Wall* component to extract the embedded *Basic Wall* instances and analyze their structure layers individually' %}
+{% include ltr/warning_note.html image='/static/images/guides/revit-walls-stackedwallstruct.png' note='Currently there is no support in Revit API to access *Stacked Wall* structure data. However you can use the *Analyse Stacked Wall* component to extract the embedded *Basic Wall* instances and analyze their structure layers individually' %}
 
 ## Analyzing Walls
 
@@ -95,19 +95,19 @@ Once you have filtered out the desired wall instance using workflows described a
 
 Use the {% include ltr/comp.html uuid="1169ceb6-" %} component shown here, to grab the common properties between all *Wall System Families*. Custom *Value List* components are also provided for value comparison:
 
-![]({{ "/static/images/guides/revit-walls11.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-walls-analyzewall.png" | prepend: site.baseurl }})
 
 {% include ltr/api_note.html note="Slant Angle property is only supported on Revit >= 2021" %}
 
 The example below uses the shared *Wall Structural Usage* value list component to filter for **Shear** walls:
 
-![]({{ "/static/images/guides/revit-walls12.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-walls-analyzewall-filter.png" | prepend: site.baseurl }})
 
-The **OV** output parameter is the wall orientation vector:
+The **Orientation** output parameter is the wall orientation vector:
 
-![]({{ "/static/images/guides/revit-walls12a.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-walls-analyzewall-orient.png" | prepend: site.baseurl }})
 
-![]({{ "/static/images/guides/revit-walls12b.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-walls-analyzewall-orientvectors.png" | prepend: site.baseurl }})
 
 
 ### Wall Location Curve
