@@ -52,11 +52,11 @@ Once you have filtered out the desired wall type using workflows described above
 
 ### Analyzing Basic Walls
 
-*Basic Walls* are a special *Wall System Family* in Revit. They are constructed from a set of layers that are defined as part of the wall type definition. The also have a series of other unique options e.g. *Wrapping at Inserts*. The {% include ltr/comp.html uuid="00a650ed-" %} component shown here provide a method to analyze the *Basic Wall* types in Revit document:
+*Basic Walls* are a special *Wall System Family* in Revit. They are constructed from a set of layers that are defined as part of the wall type definition. The also have a series of other unique options e.g. **Wrapping at Inserts**. The {% include ltr/comp.html uuid="00a650ed-" %} component shown here provide a method to analyze the *Basic Wall* types in Revit document:
 
 ![]({{ "/static/images/guides/revit-walls-analyzebasictype.png" | prepend: site.baseurl }})
 
-Some of the outputs on this component (e.g. **WI** and **WE**) return an integer value that corresponds to an enumeration in the Revit API. You can use the *Value List* components (shown above in front of the parameter values panel) to determine which value is set on the parameter and filter the source wall types. The examples below show how these *Value List* components are used to filter the wall types by *Wrapping* and *Function*:
+Some of the outputs on this component (e.g. **Wrapping at Inserts** and **Wrapping at Ends**) return an integer value that corresponds to an enumeration in the Revit API. You can use the {% include ltr/comp.html uuid='141f0da4' %} and {% include ltr/comp.html uuid='c84653dd' %} components (shown above in front of the parameter values panel) to determine which value is set on the parameter and filter the source wall types. The examples below show how this component are used to filter the wall types by *Wrapping* and *Function*:
 
 ![]({{ "/static/images/guides/revit-walls-analyzebasictype-filter.png" | prepend: site.baseurl }})
 
@@ -67,7 +67,7 @@ In Revit API, {% include api_type.html type='Autodesk.Revit.DB.CompoundStructure
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-The {% include ltr/comp.html uuid="00a650ed-" %} component shown above, provides access to the *Compound Structure* definition of the *Basic Wall* type. Use the {% include ltr/comp.html uuid="d0853b76-" %} component shown here to extract information on *Compound Structure Layers*. Similar to above, a series of *Value List* components are provided to allow value comparison and filtering of the structure layers:
+The {% include ltr/comp.html uuid="00a650ed-" %} component shown above, provides access to the *Compound Structure* definition of the *Basic Wall* type. Use the {% include ltr/comp.html uuid="d0853b76-" %} component shown here to extract information on *Compound Structure Layers*. Similar to above, {% include ltr/comp.html uuid='55b31952' %} and {% include ltr/comp.html uuid='8d73d533' %} components are provided to allow value comparison and filtering of the structure layers:
 
 ![]({{ "/static/images/guides/revit-walls-compstruct.png" | prepend: site.baseurl }})
 
@@ -77,7 +77,7 @@ As shown above, layers are ordered from **Exterior** to **Interior**, matching t
 
 ### Basic Wall Structure Layers
 
-Use the {% include ltr/comp.html uuid="bc64525a-" %} component to extract information about each individual *Compound Structure Layer*. Custom *Value List* components are also provide for value comparison:
+Use the {% include ltr/comp.html uuid="bc64525a-" %} component to extract information about each individual *Compound Structure Layer*. {% include ltr/comp.html uuid='439ba763' %} and {% include ltr/comp.html uuid='db470316' %} components are also provide for value comparison:
 
 ![]({{ "/static/images/guides/revit-walls-analyzecompstructlayer.png" | prepend: site.baseurl }})
 
@@ -93,7 +93,7 @@ Once you have filtered out the desired wall instance using workflows described a
 
 ### Common Wall Properties
 
-Use the {% include ltr/comp.html uuid="1169ceb6-" %} component shown here, to grab the common properties between all *Wall System Families*. Custom *Value List* components are also provided for value comparison:
+Use the {% include ltr/comp.html uuid="1169ceb6-" %} component shown here, to grab the common properties between all *Wall System Families*. {% include ltr/comp.html uuid='15545e80' %} and {% include ltr/comp.html uuid='1f3053c0' %} components are also provided for value comparison:
 
 ![]({{ "/static/images/guides/revit-walls-analyzewall.png" | prepend: site.baseurl }})
 
@@ -123,7 +123,7 @@ In Revit API, *Location Line* of a *Basic* or *Stacked Wall* is represented by t
 
 ![]({{ "/static/images/guides/revit-walls-walllocationlines.png" | prepend: site.baseurl }})
 
-A custom Value List component is also provided to assist in filtering walls by the Location Line value:
+{% include ltr/comp.html uuid='a4eb9313' %} component is also provided to assist in filtering walls by the **Location Line** value:
 
 ![]({{ "/static/images/guides/revit-walls-walllocation-filter.png" | prepend: site.baseurl }})
 
@@ -166,7 +166,7 @@ A better method is to extract the *Basic Wall* instances first from the *Stacked
 
 ![]({{ "/static/images/guides/revit-walls-everybasicwall.png" | prepend: site.baseurl }})
 
-Moreover, this component keeps the layers in identical order as other components that deal with layers so you can work on the layer data and geometry easily later on:
+To keeps the geometry list extracted from layers in identical order as other components that deal with layers, you can sort the geometry list by the distance from the wall orientation vector. This works best with flat walls of course but similar methods can be used to sort the layer geometry on other walls (think of basic walls stacked in a stacked wall instance with different structures):
 
 ![]({{ "/static/images/guides/revit-walls-layersinorder.png" | prepend: site.baseurl }})
 
@@ -176,10 +176,6 @@ Moreover, this component keeps the layers in identical order as other components
 
 
 ## Modifying Wall Types
-
-{% include ltr/en/wip_note.html %}
-
-### Modifying Type Parameters
 
 {% include ltr/en/wip_note.html %}
 
@@ -195,17 +191,16 @@ Moreover, this component keeps the layers in identical order as other components
 
 {% include ltr/en/wip_note.html %}
 
-### Modifying Instance Parameters
-
-{% include ltr/en/wip_note.html %}
-
 ### Modifying Base Curve
 
 {% include ltr/en/wip_note.html %}
 
 ### Modifying Profile
 
-{% include ltr/en/wip_note.html %}
+{% capture api_note %}
+Modifying wall profile curves are not supported by the API at the moment
+{% endcapture %}
+{% include ltr/api_note.html note=api_note %}
 
 ## Creating Wall Types
 
@@ -221,14 +216,17 @@ Moreover, this component keeps the layers in identical order as other components
 
 ## Creating Walls
 
-{% include ltr/en/wip_note.html %}
-
 ### By Base Curve
 
-{% include ltr/en/wip_note.html %}
+Use the {% include ltr/comp.html uuid='37a8c46f' %} component to create a new wall based on the given curve. In this example the {% include ltr/comp.html uuid='ef607c2a' %} parameter is referencing a series of Revit model lines:
+
+![]({{ "/static/images/guides/revit-walls-bycurve.png" | prepend: site.baseurl }})
 
 ### By Profile
 
-{% include ltr/en/wip_note.html %}
+Use the {% include ltr/comp.html uuid='78b02ae8' %} component to create a new wall based on the given profile curves. Note that the profile must be a closed loop. In this example the {% include ltr/comp.html uuid='ef607c2a' %} parameter is referencing a series of Revit model lines:
+
+![]({{ "/static/images/guides/revit-walls-byprofile.png" | prepend: site.baseurl }})
+
 
 <!-- https://github.com/mcneel/rhino.inside-revit/issues/46 -->
