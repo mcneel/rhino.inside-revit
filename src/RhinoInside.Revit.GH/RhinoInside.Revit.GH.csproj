@@ -9,19 +9,19 @@
     <Rhino7PluginsDir>$([MSBuild]::ValueOrDefault('$(Rhino7DebugPluginsDir)', '$(Rhino7DefaultPluginsDir)'))</Rhino7PluginsDir>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.Contains('2017'))">
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <RevitVersion>2017</RevitVersion>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.Contains('2018'))">
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <RevitVersion>2018</RevitVersion>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.Contains('2019'))">
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <RevitVersion>2019</RevitVersion>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.Contains('2020'))">
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <RevitVersion>2020</RevitVersion>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.Contains('2021'))">
@@ -171,8 +171,8 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="RhinoCommon" Version="7.0.20140.14505-wip" IncludeAssets="compile; build" />
-        <PackageReference Include="Grasshopper" Version="7.0.20140.14505-wip" IncludeAssets="compile; build" />
+        <PackageReference Include="RhinoCommon" Version="7.0.20301.12003-beta" IncludeAssets="compile; build" />
+        <PackageReference Include="Grasshopper" Version="7.0.20301.12003-beta" IncludeAssets="compile; build" />
       </ItemGroup>
     </Otherwise>
   </Choose>
@@ -221,11 +221,13 @@
     <Compile Include="Components\ElementCollectorComponent.cs" />
     <Compile Include="Components\Element\FlipUnflipElement.cs" />
     <Compile Include="Components\Element\Geometry.cs" />
+    <Compile Include="Components\Element\Grid\QueryGrids.cs" />
     <Compile Include="Components\Element\Group\ByLocation.cs" />
     <Compile Include="Components\Element\Group\Elements.cs" />
     <Compile Include="Components\Element\HostObject\BoundaryProfile.cs" />
     <Compile Include="Components\Element\HostObject\ElementHost.cs" />
     <Compile Include="Components\Element\HostObject\Faces.cs" />
+    <Compile Include="Components\Element\HostObject\Grids.cs" />
     <Compile Include="Components\Element\HostObject\Inserts.cs" />
     <Compile Include="Components\Element\Inspect.cs" />
     <Compile Include="Components\Element\Level\QueryLevels.cs" />
@@ -239,6 +241,17 @@
     <Compile Include="Components\Element\DirectShape\ByMesh.cs" />
     <Compile Include="Components\Element\DirectShape\ByPoint.cs" />
     <Compile Include="Components\Element\Identity.cs" />
+    <Compile Include="Components\Element\Material\Graphics.cs" />
+    <Compile Include="Components\Element\Material\AnalyzeAppearanceAssets.cs" />
+    <Compile Include="Components\Element\Material\BaseAssetComponent.cs" />
+    <Compile Include="Components\Element\Material\PhyscialMaterialAssetComponents.cs" />
+    <Compile Include="Components\Element\Material\BaseAssetTypes.cs" />
+    <Compile Include="Components\Element\Material\ModifyAppearanceAssets.cs" />
+    <Compile Include="Components\Element\Material\QueryAssetsOfMaterial.cs" />
+    <Compile Include="Components\Element\Material\ModifyAssetsOfMaterial.cs" />
+    <Compile Include="Components\Element\Material\ConstructProceduralAssets.cs" />
+    <Compile Include="Components\Element\Material\CreateAppearanceAssets.cs" />
+    <Compile Include="Components\Element\Material\DeconstructProceduralAssets.cs" />
     <Compile Include="Components\Element\Material\Identity.cs" />
     <Compile Include="Components\Element\Material\QueryMaterials.cs" />
     <Compile Include="Components\Element\Parameters.cs" />
@@ -279,6 +292,7 @@
     <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainGridLine.cs" />
     <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainGridMullion.cs" />
     <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainGridPanel.cs" />
+    <Compile Include="Components\Element\Wall\ByProfile.cs" />
     <Compile Include="Components\Element\Wall\QueryWalls.cs" />
     <Compile Include="Components\Family\Element\Form\ByCurves.cs" />
     <Compile Include="Components\Family\Element\Form\ByGeometry.cs" />
@@ -298,13 +312,27 @@
     <Compile Include="Components\Parameter\DefineSharedParameter.cs" />
     <Compile Include="Components\Parameter\DeconstructParameterValue.cs" />
     <Compile Include="Components\Parameter\ParameterKeyIdentity.cs" />
+    <Compile Include="Extensions\Grasshopper\Kernel\GH_ComponentParamServerExtension.cs" />
+    <Compile Include="Extensions\Grasshopper\Kernel\GH_Enumerate.cs" />
+    <Compile Include="Extensions\Grasshopper\Kernel\IGH_ParamExtension.cs" />
+    <Compile Include="Extensions\Grasshopper\Kernel\Data\IGH_StructureExtension.cs" />
+    <Compile Include="Extensions\Grasshopper\Kernel\Types\GH_ColorRGBA.cs" />
+    <Compile Include="Extensions\Grasshopper\Special\ValueSet.cs" />
+    <Compile Include="Parameters\AssetPropertyDouble1DMap.cs" />
+    <Compile Include="Parameters\AssetPropertyDouble4DMap.cs" />
+    <Compile Include="Extensions\Grasshopper\Kernel\Parameters\Param_ColorRGBA.cs" />
+    <Compile Include="Parameters\CurtainGrid.cs" />
+    <Compile Include="Parameters\StructuralAssetBehaviour_ValueList.cs" />
+    <Compile Include="Parameters\StructuralAssetClass_ValueList.cs" />
+    <Compile Include="Parameters\TextureData.cs" />
     <Compile Include="Components\TransactionalComponent.cs" />
     <Compile Include="Components\TransactionBaseComponent.cs" />
     <Compile Include="Components\ZuiComponent.cs" />
-    <Compile Include="Enum.cs" />
-    <Compile Include="Extensions\Grasshopper.cs" />
     <Compile Include="Extensions\System.Collections.Generic.cs" />
     <Compile Include="Extensions\WinForms.cs" />
+    <Compile Include="Parameters\AppearanceAsset.cs" />
+    <Compile Include="Parameters\FillPatternElement.cs" />
+    <Compile Include="Parameters\LinePatternElement.cs" />
     <Compile Include="Parameters\Param.cs" />
     <Compile Include="Parameters\DataObject.cs" />
     <Compile Include="Parameters\Category.cs" />
@@ -328,6 +356,9 @@
     <Compile Include="Parameters\PersistentParam.cs" />
     <Compile Include="Parameters\Sketch.cs" />
     <Compile Include="Parameters\SketchPlane.cs" />
+    <Compile Include="Parameters\StructuralAsset.cs" />
+    <Compile Include="Parameters\ThermalAsset.cs" />
+    <Compile Include="Parameters\ThermalMaterialType_ValueList.cs" />
     <Compile Include="Parameters\ValueList.cs" />
     <Compile Include="Parameters\View.cs" />
     <Compile Include="Parameters\WallFunction_ValueList.cs" />
@@ -353,13 +384,18 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Solid.cs" />
+    <Compile Include="Types\AppearanceAsset.cs" />
+    <Compile Include="Types\AssetPropertyDouble1DMap.cs" />
+    <Compile Include="Types\AssetPropertyDouble4DMap.cs" />
     <Compile Include="Types\BuildingPad.cs" />
     <Compile Include="Types\Category.cs" />
     <Compile Include="Types\Ceiling.cs" />
+    <Compile Include="Types\CurtainGrid.cs" />
     <Compile Include="Types\CurtainSystem.cs" />
     <Compile Include="Types\CurveElement.cs" />
     <Compile Include="Types\Dimension.cs" />
     <Compile Include="Types\Document.cs" />
+    <Compile Include="Types\DocumentObject.cs" />
     <Compile Include="Types\Element.cs" />
     <Compile Include="Types\ElementFilter.cs" />
     <Compile Include="Types\ElementId.cs" />
@@ -367,11 +403,14 @@
     <Compile Include="Types\Enums.cs" />
     <Compile Include="Types\Family.cs" />
     <Compile Include="Types\FamilyInstance.cs" />
+    <Compile Include="Types\FillPatternElement.cs" />
     <Compile Include="Types\Floor.cs" />
+    <Compile Include="Types\GeometricElement.cs" />
     <Compile Include="Types\GeometryObject.cs" />
     <Compile Include="Types\GraphicalElement.cs" />
     <Compile Include="Types\Group.cs" />
     <Compile Include="Types\InstanceElement.cs" />
+    <Compile Include="Types\LinePatternElement.cs" />
     <Compile Include="Types\Panel.cs" />
     <Compile Include="Types\Parameter.cs" />
     <Compile Include="Types\DatumPlane.cs" />
@@ -381,12 +420,14 @@
     <Compile Include="Types\Material.cs" />
     <Compile Include="Types\HostObject.cs" />
     <Compile Include="Types\DataObject.cs" />
+    <Compile Include="Types\StructuralAsset.cs" />
+    <Compile Include="Types\TextureData.cs" />
+    <Compile Include="Types\ThermalAsset.cs" />
     <Compile Include="Types\View.cs" />
     <Compile Include="Types\CurtainGridLine.cs" />
     <Compile Include="Types\SpatialElement.cs" />
     <Compile Include="Types\Mullion.cs" />
     <Compile Include="Types\Wall.cs" />
-    <Compile Include="ValueSet.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -397,6 +438,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Extensions\README.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">

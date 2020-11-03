@@ -6,20 +6,18 @@ using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
-using RhinoInside.Revit.Geometry.Extensions;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.Convert.System.Collections.Generic;
+using RhinoInside.Revit.External.DB;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public abstract class ElementGeometryComponent : TransactionalComponent
+  public abstract class ElementGeometryComponent : ZuiComponent
   {
     protected ElementGeometryComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
-
-    protected override System.Drawing.Bitmap Icon => ((System.Drawing.Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
-                                      ImageBuilder.BuildIcon(IconTag);
 
     protected bool TryGetCommonDocument(IEnumerable<DB.Element> elements, out DB.Document document)
     {
@@ -69,8 +67,8 @@ namespace RhinoInside.Revit.GH.Components
     (
       GH_Path basePath,
       DB.Document doc,
-      List<DB.Element> elements,
-      List<DB.Element> exclude,
+      IList<DB.Element> elements,
+      IList<DB.Element> exclude,
       DB.Options options,
       out GH_Structure<IGH_GeometricGoo> geometries
     )
@@ -80,12 +78,10 @@ namespace RhinoInside.Revit.GH.Components
       // Fill data tree
       if (doc is object)
       {
-        using (var transaction = exclude.Count > 0 ? NewTransaction(doc) : default)
+        using (var scope = exclude.Count > 0 ? doc.RollBackScope() : default)
         {
-          if (transaction is object)
+          if (scope is object)
           {
-            transaction.Start();
-
             if (doc.Delete(exclude.ConvertAll(x => x?.Id ?? DB.ElementId.InvalidElementId)).Count > 0)
               doc.Regenerate();
           }
@@ -171,7 +167,7 @@ namespace RhinoInside.Revit.GH.Components
                 if (geometryBase is null) categoriesList.Add(null);
                 else
                 {
-                  geometryBase.GetUserElementId(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), out var categoryId);
+                  geometryBase.TryGetUserString(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), out DB.ElementId categoryId);
                   categoriesList.Add(new Types.Category(doc, categoryId));
                 }
               }
@@ -181,7 +177,7 @@ namespace RhinoInside.Revit.GH.Components
                 if (geometryBase is null) materialsList.Add(null);
                 else
                 {
-                  geometryBase.GetUserElementId(DB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), out var materialId);
+                  geometryBase.TryGetUserString(DB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), out DB.ElementId materialId);
                   materialsList.Add(Types.Material.FromElementId(doc, materialId) as Types.Material);
                 }
               }
@@ -196,7 +192,6 @@ namespace RhinoInside.Revit.GH.Components
   {
     public override Guid ComponentGuid => new Guid("B3BCBF5B-2034-414F-B9FB-97626FF37CBE");
     public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
-    protected override string IconTag => "G";
 
     public ElementGeometry() : base
     (
@@ -250,6 +245,17 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
+      new ParamDefinition
+      (
+        new Parameters.Element()
+        {
+          Name = "Elements",
+          NickName = "E",
+          Description = "Elements geometry is extracted from",
+          Access = GH_ParamAccess.list
+        },
+        ParamVisibility.Voluntary
+      ),
       new ParamDefinition
       (
         new Param_Geometry()
@@ -310,6 +316,8 @@ namespace RhinoInside.Revit.GH.Components
 
       using(var options = new DB.Options() { DetailLevel = detailLevel })
       {
+        Params.TrySetDataList(DA, "Elements", () => elements);
+
         var _Geometry_ = Params.IndexOfOutputParam("Geometry");
         SolveGeometry
         (
@@ -339,16 +347,16 @@ namespace RhinoInside.Revit.GH.Components
     }
   }
 
-  public class GraphicalElementGeometry : ElementGeometryComponent
+  public class ElementViewGeometry : ElementGeometryComponent
   {
     public override Guid ComponentGuid => new Guid("8B85B1FB-A3DF-4924-BC84-58D2B919E664");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
 
-    public GraphicalElementGeometry() : base
+    public ElementViewGeometry() : base
     (
-      name: "Graphical Element Geometry",
-      nickname: "Geometry",
-      description: "Get the geometry of the specified Graphical Element on a view",
+      name: "Element View Geometry",
+      nickname: "ViewGeom",
+      description: "Get the geometry of the given Element on a view",
       category: "Revit",
       subCategory: "Element"
     )
@@ -397,6 +405,17 @@ namespace RhinoInside.Revit.GH.Components
     {
       new ParamDefinition
       (
+        new Parameters.Element()
+        {
+          Name = "Elements",
+          NickName = "E",
+          Description = "Elements geometry is extracted from",
+          Access = GH_ParamAccess.list
+        },
+        ParamVisibility.Voluntary
+      ),
+      new ParamDefinition
+      (
         new Param_Geometry()
         {
           Name = "Geometry",
@@ -432,25 +451,17 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var elements = new List<DB.Element>();
-      if (!DA.GetDataList("Elements", elements) || elements.Count == 0)
-        return;
-
-      var exclude = new List<DB.Element>();
-      var _Exclude_ = Params.IndexOfInputParam("Exclude");
-      if(_Exclude_ >= 0)
-        DA.GetDataList(_Exclude_, exclude);
-
-      var view = default(DB.View);
-      var _View_ = Params.IndexOfInputParam("View");
-      if (!DA.GetData(_View_, ref view))
-        return;
+      if (!Params.TryGetData(DA, "View", out DB.View view) || view is null) return;
+      if (!Params.TryGetDataList(DA, "Elements", out DB.Element[] elements) || elements.Length == 0) return;
+      Params.TryGetDataList(DA, "Exclude", out DB.Element[] exclude);
 
       if (!TryGetCommonDocument(elements.Concat(exclude).Concat(Enumerable.Repeat(view, 1)), out var doc))
         return;
 
       using (var options = new DB.Options() { View = view })
       {
+        Params.TrySetDataList(DA, "Elements", () => elements);
+
         var _Geometry_ = Params.IndexOfOutputParam("Geometry");
         SolveGeometry
         (
@@ -477,78 +488,6 @@ namespace RhinoInside.Revit.GH.Components
 
         if (Materials is object)
           DA.SetDataTree(_Materials_, Materials);
-      }
-    }
-  }
-}
-
-namespace RhinoInside.Revit.GH.Components.Obsolete
-{
-  [Obsolete("Obsolete since 2020-05-25")]
-  public class ElementGeometry : Component
-  {
-    public override Guid ComponentGuid => new Guid("B7E6A82F-684F-4045-A634-A4AA9F7427A8");
-    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.hidden;
-
-    public ElementGeometry()
-    : base("Element Geometry", "Geometry", "Get the geometry of the specified Element", "Revit", "Element")
-    { }
-
-    protected override void RegisterInputParams(GH_InputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.Element(), "Element", "E", "Element to query", GH_ParamAccess.item);
-      manager[manager.AddParameter(new Parameters.Param_Enum<Types.ViewDetailLevel>(), "DetailLevel", "LOD", "Geometry Level of detail LOD [1, 3]", GH_ParamAccess.item)].Optional = true;
-    }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddGeometryParameter("Geometry", "G", "Element geometry", GH_ParamAccess.list);
-    }
-
-    protected override void TrySolveInstance(IGH_DataAccess DA)
-    {
-      var element = default(DB.Element);
-      if (!DA.GetData("Element", ref element))
-        return;
-
-      var detailLevel = DB.ViewDetailLevel.Undefined;
-      DA.GetData("DetailLevel", ref detailLevel);
-      if (detailLevel == DB.ViewDetailLevel.Undefined)
-        detailLevel = DB.ViewDetailLevel.Coarse;
-
-      if (element.get_BoundingBox(null) is DB.BoundingBoxXYZ)
-      {
-        // Extract the geometry
-        {
-          using (var options = new DB.Options() { DetailLevel = detailLevel })
-          using (var geometry = element?.GetGeometry(options))
-          {
-            var list = geometry?.
-              ToGeometryBaseMany().
-              OfType<GeometryBase>().
-              Where(x => !ElementGeometryComponent.IsEmpty(x)).
-              ToList();
-
-            if (list?.Count == 0)
-            {
-              foreach (var dependent in element.GetDependentElements(null).Select(x => element.Document.GetElement(x)))
-              {
-                if (dependent.get_BoundingBox(null) is DB.BoundingBoxXYZ)
-                {
-                  using (var dependentOptions = new DB.Options() { DetailLevel = detailLevel })
-                  using (var dependentGeometry = dependent?.GetGeometry(dependentOptions))
-                  {
-                    if (dependentGeometry is object)
-                      list.AddRange(dependentGeometry.ToGeometryBaseMany().OfType<GeometryBase>());
-                  }
-                }
-              }
-            }
-
-            var valid = list.Where(x => !ElementGeometryComponent.IsEmpty(x));
-            DA.SetDataList("Geometry", valid);
-          }
-        }
       }
     }
   }

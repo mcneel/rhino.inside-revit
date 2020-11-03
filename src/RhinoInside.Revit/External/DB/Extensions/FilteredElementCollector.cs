@@ -8,11 +8,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
 {
   public static class FilteredElementCollectorExtension
   {
-    public static FilteredElementCollector OfTypeId(this FilteredElementCollector collector, ElementId typeId)
+    public static FilteredElementCollector WhereCategoryIdEqualsTo(this FilteredElementCollector collector, ElementId value)
+    {
+      using (var filter = new ElementCategoryFilter(value))
+        return collector.WherePasses(filter);
+    }
+
+    public static FilteredElementCollector WhereTypeIdEqualsTo(this FilteredElementCollector collector, ElementId value)
     {
       using (var provider = new ParameterValueProvider(new ElementId(BuiltInParameter.ELEM_TYPE_PARAM)))
       using (var evaluator = new FilterNumericEquals())
-      using (var rule = new FilterElementIdRule(provider, evaluator, typeId))
+      using (var rule = new FilterElementIdRule(provider, evaluator, value))
       using (var filter = new ElementParameterFilter(rule))
         return collector.WherePasses(filter);
     }

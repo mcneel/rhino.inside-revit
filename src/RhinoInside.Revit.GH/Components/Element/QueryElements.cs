@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Parameters;
+using RhinoInside.Revit.Convert.System.Collections.Generic;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -27,50 +29,55 @@ namespace RhinoInside.Revit.GH.Components
     {
       ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item),
+      ParamDefinition.Create<Param_Integer>("Limit", "L", $"Max number of Elements to query for.{Environment.NewLine}For an unlimited query remove this parameter.", defaultValue: 100, GH_ParamAccess.item, relevance: ParamVisibility.Default),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.Element>("Elements", "E", "Elements list", GH_ParamAccess.list)
+      ParamDefinition.Create<Parameters.Element>("Elements", "E", "Elements list", GH_ParamAccess.list, relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Param_Integer>("Count", "C", $"Elements count.{Environment.NewLine}For a more performant way of knowing how many elements this query returns remove the Elements output.", GH_ParamAccess.item, relevance: ParamVisibility.Default),
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
-        return;
-
-      DA.DisableGapLogic();
-
-      DB.ElementFilter filter = null;
-      if (!DA.GetData("Filter", ref filter))
-        return;
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
+      if (!Params.TryGetData(DA, "Filter", out DB.ElementFilter filter) || filter is null) return;
+      if (!Params.TryGetData(DA, "Limit", out int? limit)) limit = int.MaxValue;
+      else if (limit is null) return;
 
       using (var collector = new DB.FilteredElementCollector(doc))
       {
-        DA.SetDataList
-        (
-          "Elements",
-          collector.
-          WherePasses(ElementFilter).
-          WherePasses(filter).
-          Select(x => Types.Element.FromElement(x))
-        );
+        var elementCollector = collector.WherePasses(ElementFilter).WherePasses(filter);
+        var elementCount = elementCollector.GetElementCount();
+
+        Params.TrySetDataList(DA, "Elements", () =>
+        {
+          if (elementCount > limit)
+          {
+            var _Elements_ = Params.IndexOfOutputParam("Elements");
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"'{Params.Output[_Elements_].NickName}' contains only first {limit} of {elementCount} total elements.");
+          }
+
+          return elementCollector.Take(limit.Value).Convert(Types.Element.FromElement);
+        });
+
+        Params.TrySetData(DA, "Count", () => elementCount);
       }
     }
   }
 
-  public class QueryGraphicalElements : ElementCollectorComponent
+  public class QueryViewElements : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("79DAEA3A-13A3-49BF-8BEB-AA28E3BE4515");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override DB.ElementFilter ElementFilter => new DB.ElementIsElementTypeFilter(true);
 
-    public QueryGraphicalElements() : base
+    public QueryViewElements() : base
     (
-      name: "Query Graphical Elements",
-      nickname: "GraphElem",
-      description: "Get document model elements list",
+      name: "Query View Elements",
+      nickname: "ViewEles",
+      description: "Get elements visible in a view",
       category: "Revit",
       subCategory: "Element"
     )
@@ -125,29 +132,22 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var view = default(Types.View);
-      if (!DA.GetData("View", ref view) || view?.IsValid != true)
-        return;
-
-      var Categories = new List<Types.Category>();
-      var _Categories_ = Params.IndexOfInputParam("Categories");
-      var noFilterCategories = Params.Input[_Categories_].DataType == GH_ParamData.@void;
-      if (!noFilterCategories)
-        DA.GetDataList(_Categories_, Categories);
-
-      var filter = default(DB.ElementFilter);
-      DA.GetData("Filter", ref filter);
+      if (!Params.TryGetData(DA, "View", out Types.View view) || view?.Value is null) return;
+      if (Params.TryGetData(DA, "Categories", out Types.Category[] categories) && categories is null) return;
+      if (Params.TryGetData(DA, "Filter", out DB.ElementFilter filter) && filter is null) return;
 
       using (var collector = new DB.FilteredElementCollector(view.Document, view.Id))
       {
         var elementCollector = collector.WherePasses(ElementFilter);
 
-        var ids = Categories.
-          Where(x => x.IsValid && x.Document.Equals(view.Document)).
-          Select(x => x.Id).ToArray();
+        if (categories is object)
+        {
+          var ids = categories.
+            Where(x => x.IsValid && x.Document.Equals(view.Document)).
+            Select(x => x.Id).ToArray();
 
-        if (!noFilterCategories)
           elementCollector = elementCollector.WherePasses(ElementCategoriesFilter(view.Document, ids));
+        }
 
         if (filter is object)
           elementCollector = elementCollector.WherePasses(filter);
@@ -157,7 +157,7 @@ namespace RhinoInside.Revit.GH.Components
           "Elements",
           elementCollector.
           Where(x => Types.GraphicalElement.IsValidElement(x)).
-          Select(x => Types.Element.FromElement(x))
+          Convert(Types.Element.FromElement)
         );
       }
     }

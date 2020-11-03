@@ -48,7 +48,7 @@ namespace RhinoInside.Revit.GH.Components
         var elementCollector = collector.WhereElementIsNotElementType();
 
         if(elementType.Category?.Id is DB.ElementId categoryId)
-          elementCollector = elementCollector.OfCategoryId(categoryId);
+          elementCollector = elementCollector.WhereCategoryIdEqualsTo(categoryId);
 
         if (filter is object)
           elementCollector = elementCollector.WherePasses(filter);
@@ -57,7 +57,7 @@ namespace RhinoInside.Revit.GH.Components
         (
           "Elements",
           elementCollector.
-          OfTypeId(elementType.Id).
+          WhereTypeIdEqualsTo(elementType.Id).
           Select(x => Types.Element.FromElement(x))
         );
       }

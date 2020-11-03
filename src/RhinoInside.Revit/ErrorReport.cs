@@ -18,6 +18,18 @@ namespace RhinoInside.Revit
     {
       get
       {
+        var location = typeof(object).Assembly.Location;
+        if (File.Exists(location) && FileVersionInfo.GetVersionInfo(location) is FileVersionInfo info)
+          return $"{Environment.Version} ({info.ProductVersion})";
+
+        return $"{Environment.Version}";
+      }
+    }
+
+    public static string CLRMaxVersion
+    {
+      get
+      {
         string subkey = Environment.Version.Major < 4 ?
           $@"SOFTWARE\Microsoft\NET Framework Setup\NDP\v{Environment.Version.Major}.{Environment.Version.Minor}\" :
           $@"SOFTWARE\Microsoft\NET Framework Setup\NDP\v{Environment.Version.Major}\Full\";
@@ -25,10 +37,10 @@ namespace RhinoInside.Revit
         using (var ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Default).OpenSubKey(subkey))
         {
           if (ndpKey?.GetValue("Version") is string version)
-            return $"{Environment.Version} ({version})";
+            return version;
         }
 
-        return $"{Environment.Version}";
+        return string.Empty;
       }
     }
 
@@ -80,6 +92,7 @@ namespace RhinoInside.Revit
               writer.WriteLine($"- Environment.OSVersion: {Environment.OSVersion}");
               writer.WriteLine($"  - SystemInformation.TerminalServerSession: {System.Windows.Forms.SystemInformation.TerminalServerSession}");
               writer.WriteLine($"- Environment.Version: {CLRVersion}");
+              writer.WriteLine($"- Environment.MaxVersion: {CLRMaxVersion}");
 
               writer.WriteLine($"- {revitVersionName}");
               writer.WriteLine($"  - VersionBuild: {revitVersionBuild}");

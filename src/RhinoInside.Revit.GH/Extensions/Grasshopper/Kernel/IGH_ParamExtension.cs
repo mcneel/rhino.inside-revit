@@ -6,12 +6,11 @@ using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.GH.Types;
 
-namespace Grasshopper.Kernel.Extensions
+namespace Grasshopper.Kernel
 {
-  static partial class Extension
+  static class IGH_ParamExtension
   {
-    #region IGH_Param
-    public static void AddVolatileDataTree<T1, T2>(this IGH_Param result, IGH_Structure structure, Converter<T1, T2> converter)
+    public static void AddVolatileDataTree<T1, T2>(this IGH_Param param, IGH_Structure structure, Converter<T1, T2> converter)
     where T1 : IGH_Goo
     where T2 : IGH_Goo
     {
@@ -21,19 +20,19 @@ namespace Grasshopper.Kernel.Extensions
         var srcBranch = structure.get_Branch(path);
 
         var data = srcBranch.As<T1>().Select(x => x == null ? default : converter(x));
-        result.AddVolatileDataList(path, data);
+        param.AddVolatileDataList(path, data);
       }
     }
 
-    public static bool ConnectNewObject(this IGH_Param self, IGH_DocumentObject obj)
+    public static bool ConnectNewObject(this IGH_Param param, IGH_DocumentObject obj)
     {
       if (obj is null)
         return false;
 
-      if (self.Kind == GH_ParamKind.unknown)
+      if (param.Kind == GH_ParamKind.unknown)
         return false;
 
-      var document = self.OnPingDocument();
+      var document = param.OnPingDocument();
       if (document is null)
         return false;
 
@@ -50,32 +49,32 @@ namespace Grasshopper.Kernel.Extensions
       obj.Attributes.Pivot = default;
       obj.Attributes.PerformLayout();
 
-      float offsetX = self.Kind == GH_ParamKind.input ? -(obj.Attributes.Bounds.X + obj.Attributes.Bounds.Width) - 94 : -(obj.Attributes.Bounds.X) + 100.0f;
+      float offsetX = param.Kind == GH_ParamKind.input ? -(obj.Attributes.Bounds.X + obj.Attributes.Bounds.Width) - 94 : -(obj.Attributes.Bounds.X) + 100.0f;
 
       if (obj is IGH_Param)
-        obj.Attributes.Pivot = new System.Drawing.PointF(self.Attributes.Pivot.X + offsetX, self.Attributes.Pivot.Y - obj.Attributes.Bounds.Height / 2);
+        obj.Attributes.Pivot = new System.Drawing.PointF(param.Attributes.Pivot.X + offsetX, param.Attributes.Pivot.Y - obj.Attributes.Bounds.Height / 2);
       else if (obj is IGH_Component)
-        obj.Attributes.Pivot = new System.Drawing.PointF(self.Attributes.Pivot.X + offsetX, self.Attributes.Pivot.Y);
+        obj.Attributes.Pivot = new System.Drawing.PointF(param.Attributes.Pivot.X + offsetX, param.Attributes.Pivot.Y);
 
       obj.Attributes.ExpireLayout();
 
       document.AddObject(obj, false);
       document.UndoUtil.RecordAddObjectEvent($"Add {obj.Name}", obj);
 
-      if (self.Kind == GH_ParamKind.input)
+      if (param.Kind == GH_ParamKind.input)
       {
-        if (obj is IGH_Param param)
+        if (obj is IGH_Param parameter)
         {
-          self.AddSource(param);
+          param.AddSource(parameter);
         }
         else if (obj is IGH_Component component)
         {
-          var selfType = self.Type;
-          foreach (var output in component.Params.Output.Where(i => typeof(IGH_ElementId).IsAssignableFrom(i.Type)))
+          var selfType = param.Type;
+          foreach (var output in component.Params.Output)
           {
-            if (output.GetType() == self.GetType() || output.Type.IsAssignableFrom(selfType))
+            if (output.GetType() == param.GetType() || output.Type.IsAssignableFrom(selfType))
             {
-              self.AddSource(output);
+              param.AddSource(output);
               break;
             }
           }
@@ -83,18 +82,18 @@ namespace Grasshopper.Kernel.Extensions
       }
       else
       {
-        if (obj is IGH_Param param)
+        if (obj is IGH_Param parameter)
         {
-          param.AddSource(self);
+          parameter.AddSource(param);
         }
         else if (obj is IGH_Component component)
         {
-          var selfType = self.Type;
-          foreach (var input in component.Params.Input.Where(i => typeof(IGH_ElementId).IsAssignableFrom(i.Type)))
+          var selfType = param.Type;
+          foreach (var input in component.Params.Input)
           {
-            if (input.GetType() == self.GetType() || input.Type.IsAssignableFrom(selfType))
+            if (input.GetType() == param.GetType() || input.Type.IsAssignableFrom(selfType))
             {
-              input.AddSource(self);
+              input.AddSource(param);
               break;
             }
           }
@@ -111,19 +110,28 @@ namespace Grasshopper.Kernel.Extensions
         var components = new List<IGH_Component>();
         var paramType = param.Type;
 
-        foreach (var proxy in Instances.ComponentServer.ObjectProxies.Where(x => !x.Obsolete && x.Exposure != GH_Exposure.hidden && x.Exposure < GH_Exposure.tertiary))
+        foreach (var proxy in Instances.ComponentServer.ObjectProxies.Where(x => !x.Obsolete && x.Kind == GH_ObjectType.CompiledObject && x.Exposure != GH_Exposure.hidden && x.Exposure < GH_Exposure.tertiary))
         {
           if (typeof(IGH_Component).IsAssignableFrom(proxy.Type))
           {
-            var obj = proxy.CreateInstance() as IGH_Component;
-            foreach (var input in obj.Params.Input.Where(i => typeof(IGH_ElementId).IsAssignableFrom(i.Type)))
+            try
             {
-              if (input.GetType() == param.GetType() || input.Type.IsAssignableFrom(paramType))
+              if (proxy.CreateInstance() is IGH_Component compoennt)
               {
-                components.Add(obj);
-                break;
+                foreach (var input in compoennt.Params.Input)
+                {
+                  if (input.Type == typeof(IGH_Goo) || input.Type == typeof(IGH_GeometricGoo))
+                    continue;
+
+                  if (input.GetType() == param.GetType() || input.Type.IsAssignableFrom(paramType))
+                  {
+                    components.Add(compoennt);
+                    break;
+                  }
+                }
               }
             }
+            catch { }
           }
         }
 
@@ -133,8 +141,9 @@ namespace Grasshopper.Kernel.Extensions
         var panel = GH_DocumentObject.Menu_AppendItem(connect.DropDown, "Panel", eventHandler, Instances.ComponentServer.EmitObjectIcon(panedComponentId));
         panel.Tag = panedComponentId;
 
-        var picker = GH_DocumentObject.Menu_AppendItem(connect.DropDown, "Value Set Picker", eventHandler, Instances.ComponentServer.EmitObjectIcon(External.Special.ValueSetPicker.ComponentClassGuid));
-        picker.Tag = External.Special.ValueSetPicker.ComponentClassGuid;
+        var valueSetComponentId = new Guid("{AFB12752-3ACB-4ACF-8102-16982A69CDAE}");
+        var picker = GH_DocumentObject.Menu_AppendItem(connect.DropDown, "Value Set Picker", eventHandler, Instances.ComponentServer.EmitObjectIcon(valueSetComponentId));
+        picker.Tag = valueSetComponentId;
 
         if (components.Count > 0)
         {
@@ -179,36 +188,5 @@ namespace Grasshopper.Kernel.Extensions
 
       Menu_AppendConnect(param, menu, DefaultConnectMenuHandler);
     }
-    #endregion
-
-    #region IGH_Structure
-    public static GH_Structure<T> DuplicateAs<T>(this IGH_Structure structure, bool shallowCopy)
-      where T : IGH_Goo
-    {
-      // GH_Structure<T> constructor is a bit faster if shallowCopy is true because
-      // it doesn't need to cast on each item.
-      if (structure is GH_Structure<T> structureT)
-        return new GH_Structure<T>(structureT, shallowCopy);
-
-      var result = new GH_Structure<T>();
-
-      for (int p = 0; p < structure.PathCount; ++p)
-      {
-        var path = structure.get_Path(p);
-        var srcBranch = structure.get_Branch(path);
-
-        var destBranch = result.EnsurePath(path);
-        destBranch.Capacity = srcBranch.Count;
-
-        var data = srcBranch.As<T>();
-        if (!shallowCopy)
-          data = data.Select(x => x?.Duplicate() is T t ? t : default);
-
-        destBranch.AddRange(data);
-      }
-
-      return result;
-    }
-    #endregion
   }
 }

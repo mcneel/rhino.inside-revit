@@ -83,7 +83,7 @@ namespace RhinoInside.Revit.GH.Components
         var elementCollector = collector.WherePasses(ElementFilter);
 
         if (categoryId is object)
-          elementCollector.OfCategoryId(categoryId);
+          elementCollector.WhereCategoryIdEqualsTo(categoryId);
 
         if (filter is object)
           elementCollector = elementCollector.WherePasses(filter);

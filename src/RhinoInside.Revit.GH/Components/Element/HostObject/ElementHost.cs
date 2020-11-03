@@ -60,6 +60,10 @@ namespace RhinoInside.Revit.GH.Components
         using (var collector = new DB.FilteredElementCollector(element.Document))
         {
           var elementCollector = collector.OfClass(typeof(DB.HostObject));
+
+          if (element.Category.Parent is DB.Category hostCategory)
+            elementCollector = elementCollector.OfCategoryId(hostCategory.Id);
+
           var bboxFilter = new DB.BoundingBoxIntersectsFilter(new DB.Outline(bbox.Min, bbox.Max));
           elementCollector = elementCollector.WherePasses(bboxFilter);
 
@@ -69,6 +73,8 @@ namespace RhinoInside.Revit.GH.Components
           else if (element is DB.AreaTag) classFilter = new DB.AreaTagFilter();
           else if (element is DB.Architecture.Room) classFilter = new DB.Architecture.RoomFilter();
           else if (element is DB.Architecture.RoomTag) classFilter = new DB.Architecture.RoomTagFilter();
+          else if (element is DB.Mechanical.Space) classFilter = new DB.Mechanical.SpaceFilter();
+          else if (element is DB.Mechanical.SpaceTag) classFilter = new DB.Mechanical.SpaceTagFilter();
           else
           {
             if (element is DB.CurveElement)
@@ -77,7 +83,7 @@ namespace RhinoInside.Revit.GH.Components
               classFilter = new DB.ElementClassFilter(element.GetType());
           }
 
-          foreach (var host in elementCollector.ToElements().OfType<DB.HostObject>())
+          foreach (var host in elementCollector.Cast<DB.HostObject>())
           {
             if (host.Id == element.Id)
               continue;
@@ -87,7 +93,7 @@ namespace RhinoInside.Revit.GH.Components
               DA.SetData("Host", Types.HostObject.FromElement(host));
               break;
             }
-            // Necessary to found Panel walls ina Curtain Wall
+            // Necessary to found Panel walls in a Curtain Wall
             else if (host.GetDependentElements(classFilter).Contains(element.Id))
             {
               DA.SetData("Host", Types.HostObject.FromElement(host));

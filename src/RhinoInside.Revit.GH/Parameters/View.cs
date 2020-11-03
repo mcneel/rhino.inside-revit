@@ -54,12 +54,12 @@ namespace RhinoInside.Revit.GH.Parameters
             viewTypeBox.Items.Add(new Types.ViewFamily(view.Key));
         }
 
-        if (Current?.APIView is DB.View current)
+        if (Current is Types.View current)
         {
           var familyIndex = 0;
           foreach (var viewFamily in viewTypeBox.Items.Cast<Types.ViewFamily>())
           {
-            var type = current.Document.GetElement<DB.ViewFamilyType>(current.GetTypeId());
+            var type = (DB.ViewFamilyType) current.Type;
             if (type.ViewFamily == viewFamily.Value)
             {
               viewTypeBox.SelectedIndex = familyIndex;

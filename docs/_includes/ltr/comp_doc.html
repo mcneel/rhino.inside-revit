@@ -1,0 +1,12 @@
+{% for collection in site.collections %}
+    {% if collection.label == page.collection %}
+        {% for cdoc in collection.docs %}
+            {% if cdoc.title and cdoc.version == page.version and cdoc.url contains include.uuid %}
+                {% assign compdoc = cdoc%}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+{% endfor %}
+<span class="comp-doc">
+    <a href="{{ compdoc.url | prepend: site.baseurl }}">See component documentation for more info.</a>
+</span>

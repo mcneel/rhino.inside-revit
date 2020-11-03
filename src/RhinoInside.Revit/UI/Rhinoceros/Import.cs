@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using System.Windows.Forms.InteropExtension;
+using System.Windows.Forms.Interop;
 
 using Autodesk.Revit.Attributes;
 using DB = Autodesk.Revit.DB;
@@ -497,7 +497,7 @@ namespace RhinoInside.Revit.UI
 
               var geometry = obj.Geometry;
               if (geometry is Extrusion extrusion) geometry = extrusion.ToBrep();
-              else if (geometry is SubD subD) geometry = subD.ToBrep();
+              else if (geometry is SubD subD) geometry = subD.ToBrep(SubDToBrepOptions.Default);
 
               try
               {

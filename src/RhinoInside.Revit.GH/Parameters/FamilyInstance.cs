@@ -19,6 +19,8 @@ namespace RhinoInside.Revit.GH.Parameters
       subcategory: "Revit Primitives"
     )
     { }
+
+    protected override Types.IGH_FamilyInstance InstantiateT() => new Types.FamilyInstance();
   }
 
   public class Mullion : GraphicalElementT<Types.Mullion, DB.Mullion>
@@ -51,5 +53,15 @@ namespace RhinoInside.Revit.GH.Parameters
       subcategory: "Revit Primitives"
     )
     { }
+  }
+
+  public class FamilySymbol : ElementType<Types.IGH_FamilySymbol, DB.FamilySymbol>
+  {
+    public override GH_Exposure Exposure => GH_Exposure.hidden;
+    public override Guid ComponentGuid => new Guid("786D9097-DF9C-4513-9B5F-278667FBE999");
+
+    public FamilySymbol() : base("Family Type", "FamType", "Represents a Revit document family type.", "Params", "Revit Primitives") { }
+
+    protected override Types.IGH_FamilySymbol InstantiateT() => new Types.FamilySymbol();
   }
 }

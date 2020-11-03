@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH.Parameters
         foreach(var cat in materials)
           materialCategoryBox.Items.Add(cat.Key);
 
-        if (Current?.APIElement is DB.Material current)
+        if (Current?.Value is DB.Material current)
         {
           var familyIndex = 0;
           foreach (var materialClass in materialCategoryBox.Items.Cast<string>())
@@ -82,6 +82,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
       listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
       listBox.Items.Clear();
+      listBox.Items.Add(new Types.Material());
 
       using (var collector = new DB.FilteredElementCollector(doc).OfClass(typeof(DB.Material)))
       {

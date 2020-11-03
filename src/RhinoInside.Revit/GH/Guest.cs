@@ -18,6 +18,7 @@ using Grasshopper.Kernel;
 using Grasshopper.GUI.Canvas;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.Convert.Units;
+using System.Diagnostics;
 
 namespace RhinoInside.Revit.GH
 {
@@ -29,12 +30,22 @@ namespace RhinoInside.Revit.GH
 
     public string Name => "Grasshopper";
 
+    internal static Guest Instance;
+
+    public Guest()
+    {
+      if (Instance is object)
+        throw new InvalidOperationException();
+
+      Instance = this;
+    }
+
     LoadReturnCode IGuest.OnCheckIn(ref string errorMessage)
     {
       string message = null;
       try
       {
-        if(!LoadStartupAssemblies())
+        if (!LoadStartupAssemblies())
           message = "Failed to load Revit Grasshopper components.";
       }
       catch (FileNotFoundException e) { message = $"{e.Message}{Environment.NewLine}{e.FileName}"; }
@@ -52,8 +63,8 @@ namespace RhinoInside.Revit.GH
 
       Revit.DocumentChanged += OnDocumentChanged;
 
-      External.ActivationGate.Enter += ModalScope_Enter;
-      External.ActivationGate.Exit  += ModalScope_Exit;
+      External.ActivationGate.Enter += ActivationGate_Enter;
+      External.ActivationGate.Exit  += ActivationGate_Exit;
 
       RhinoDoc.BeginOpenDocument                += BeginOpenDocument;
       RhinoDoc.EndOpenDocumentInitialViewUpdate += EndOpenDocumentInitialViewUpdate;
@@ -63,27 +74,31 @@ namespace RhinoInside.Revit.GH
       {
         Instances.CanvasCreated -= Canvas_Created;
         Instances.DocumentEditor.Activated += DocumentEditor_Activated;
-        canvas.DocumentChanged  += ActiveCanvas_DocumentChanged;
+        canvas.DocumentChanged             += ActiveCanvas_DocumentChanged;
       };
 
       Instances.CanvasDestroyedEventHandler Canvas_Destroyed = default;
       Instances.CanvasDestroyed += Canvas_Destroyed = (canvas) =>
       {
         Instances.CanvasDestroyed -= Canvas_Destroyed;
-        canvas.DocumentChanged    -= ActiveCanvas_DocumentChanged;
+        canvas.DocumentChanged             -= ActiveCanvas_DocumentChanged;
         Instances.DocumentEditor.Activated -= DocumentEditor_Activated;
       };
+
+      Instances.DocumentServer.DocumentAdded += DocumentServer_DocumentAdded;
 
       return LoadReturnCode.Success;
     }
 
     void IGuest.OnCheckOut()
     {
+      Instances.DocumentServer.DocumentAdded -= DocumentServer_DocumentAdded;
+
       RhinoDoc.EndOpenDocumentInitialViewUpdate -= EndOpenDocumentInitialViewUpdate;
       RhinoDoc.BeginOpenDocument                -= BeginOpenDocument;
 
-      External.ActivationGate.Exit  -= ModalScope_Exit;
-      External.ActivationGate.Enter -= ModalScope_Enter;
+      External.ActivationGate.Exit  -= ActivationGate_Exit;
+      External.ActivationGate.Enter -= ActivationGate_Enter;
 
       Revit.DocumentChanged -= OnDocumentChanged;
 
@@ -169,16 +184,35 @@ namespace RhinoInside.Revit.GH
       OpenDocument(filename);
     }
 
-    void ModalScope_Enter(object sender, EventArgs e)
+    void ActivationGate_Enter(object sender, EventArgs e)
     {
       if (Instances.ActiveCanvas?.Document is GH_Document definition)
         definition.Enabled = true;
+
+      if (EnableSolutions.HasValue)
+      {
+        GH_Document.EnableSolutions = EnableSolutions.Value;
+        EnableSolutions = null;
+      }
     }
 
-    void ModalScope_Exit(object sender, EventArgs e)
+    void ActivationGate_Exit(object sender, EventArgs e)
     {
       if (Instances.ActiveCanvas?.Document is GH_Document definition)
         definition.Enabled = false;
+    }
+
+    static bool? EnableSolutions;
+    private void DocumentServer_DocumentAdded(GH_DocumentServer sender, GH_Document doc)
+    {
+      if (!External.ActivationGate.IsOpen)
+      {
+        if (GH_Document.EnableSolutions)
+        {
+          GH_Document.EnableSolutions = false;
+          EnableSolutions = true;
+        }
+      }
     }
 
     bool activeDefinitionWasEnabled = false;
@@ -227,7 +261,7 @@ namespace RhinoInside.Revit.GH
           new object[] { new GH_ExternalFile(filePath), false }
         );
       }
-      catch(TargetInvocationException e)
+      catch (TargetInvocationException e)
       {
         throw e.InnerException;
       }
@@ -323,8 +357,8 @@ namespace RhinoInside.Revit.GH
       foreach (var entry in map.Values.Cast<FileInfo>())
       {
         var extension = entry.Extension.ToLower();
-        if (extension == ".gha")        assembliesList.Add(entry.FullName);
-        else if(extension == ".ghlink") EnumGHLink(entry.FullName, assembliesList);
+        if (extension == ".gha")         assembliesList.Add(entry.FullName);
+        else if (extension == ".ghlink") EnumGHLink(entry.FullName, assembliesList);
       }
 
       return assembliesList;
@@ -346,7 +380,7 @@ namespace RhinoInside.Revit.GH
             if (!File.Exists(location))
               throw new FileNotFoundException("File Not Found.", location);
 
-            if(CentralSettings.IsLoadProtected(location))
+            if (CentralSettings.IsLoadProtected(location))
               throw new InvalidOperationException($"Assembly '{location}' is load protected.");
 
             return false;
@@ -411,7 +445,7 @@ namespace RhinoInside.Revit.GH
       private set => modelUnitSystem = value;
     }
 
-    private void DocumentEditor_Activated(object sender, EventArgs e)
+    void DocumentEditor_Activated(object sender, EventArgs e)
     {
       var revitUS = UnitSystem.Unset;
 
@@ -448,49 +482,6 @@ namespace RhinoInside.Revit.GH
       }
     }
 
-    Stack<DB.TransactionGroup> OpenTransactionGroups = new Stack<DB.TransactionGroup>();
-
-    private void ActiveDefinition_SolutionStart(object sender, GH_SolutionEventArgs e)
-    {
-      Revit.ActiveDBApplication.GetOpenDocuments(out var projects, out var families);
-
-      var now = DateTime.Now.ToString(System.Globalization.CultureInfo.CurrentUICulture);
-      var name = e.Document.DisplayName;
-
-      foreach (var project in projects)
-      {
-        var group = new DB.TransactionGroup(project, $"Grasshopper {now}: {name.TripleDot(16)}");
-        group.Start();
-
-        OpenTransactionGroups.Push(group);
-      }
-
-      foreach (var family in families)
-      {
-        var group = new DB.TransactionGroup(family, $"Grasshopper {now}: {name.TripleDot(16)}");
-        group.Start();
-
-        OpenTransactionGroups.Push(group);
-      }
-    }
-
-    void ActiveDefinition_SolutionEnd(object sender, GH_SolutionEventArgs e)
-    {
-      while (OpenTransactionGroups.Count > 0)
-      {
-        try
-        {
-          using (var group = OpenTransactionGroups.Pop())
-          {
-            group.Assimilate();
-          }
-        }
-        catch { }
-      }
-
-      ModelUnitSystem = RhinoDoc.ActiveDoc.ModelUnitSystem;
-    }
-
     void OnDocumentChanged(object sender, DocumentChangedEventArgs e)
     {
       var document = e.GetDocument();
@@ -502,8 +493,6 @@ namespace RhinoInside.Revit.GH
       {
         foreach (GH_Document definition in Instances.DocumentServer)
         {
-          bool expireNow = definition.SolutionState != GH_ProcessStep.Process;
-
           var change = new DocumentChangedEvent()
           {
             Operation = e.Operation,
@@ -521,16 +510,8 @@ namespace RhinoInside.Revit.GH
               if (persistentParam.DataType == GH_ParamData.remote)
                 continue;
 
-              if (persistentParam.Phase == GH_SolutionPhase.Blank)
-                continue;
-
               if (persistentParam.NeedsToBeExpired(document, added, deleted, modified))
-              {
-                if (expireNow)
-                  persistentParam.ExpireSolution(false);
-                else
-                  change.ExpiredObjects.Add(persistentParam);
-              }
+                change.ExpiredObjects.Add(persistentParam);
             }
             else if (obj is Kernel.IGH_ElementIdComponent persistentComponent)
             {
@@ -538,42 +519,12 @@ namespace RhinoInside.Revit.GH
                 continue;
 
               if (persistentComponent.NeedsToBeExpired(e))
-              {
-                if (expireNow)
-                  persistentComponent.ExpireSolution(false);
-                else
-                  change.ExpiredObjects.Add(persistentComponent);
-              }
+                change.ExpiredObjects.Add(persistentComponent);
             }
           }
 
-          if (definition.SolutionState != GH_ProcessStep.Process)
-          {
+          if (change.ExpiredObjects.Count > 0)
             DocumentChangedEvent.Enqueue(change);
-          }
-          else if (definition == Instances.ActiveCanvas.Document)
-          {
-            if (change.ExpiredObjects.Count > 0)
-            {
-              foreach (var obj in change.ExpiredObjects)
-              {
-                obj.ClearData();
-                obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"This object was expired because it contained obsolete Revit elements.");
-              }
-
-              Instances.DocumentEditor.SetStatusBarEvent
-              (
-                new GH_RuntimeMessage
-                (
-                  change.ExpiredObjects.Count == 1 ?
-                  $"An object was expired because it contained obsolete Revit elements." :
-                  $"{change.ExpiredObjects.Count} objects were expired because them contained obsolete Revit elements.",
-                  GH_RuntimeMessageLevel.Remark,
-                  "Document"
-                )
-              );
-            }
-          }
         }
       }
     }
@@ -595,7 +546,12 @@ namespace RhinoInside.Revit.GH
       public static void Enqueue(DocumentChangedEvent value)
       {
         changeQueue.Enqueue(value);
-        FlushQueue.Raise();
+
+        if (value.Definition.SolutionState != GH_ProcessStep.Process)
+        {
+          // Change NOT made by Grasshopper.
+          FlushQueue.Raise();
+        }
       }
 
       public UndoOperation Operation;
@@ -605,15 +561,113 @@ namespace RhinoInside.Revit.GH
 
       void NewSolution()
       {
+        Debug.Assert(ExpiredObjects.Count > 0, "An empty change is been enqueued.");
+
         foreach (var obj in ExpiredObjects)
           obj.ExpireSolution(false);
 
-        if(ExpiredObjects.Count > 0 && Operation == UndoOperation.TransactionCommitted)
-        {
+        if (Operation == UndoOperation.TransactionCommitted)
           Definition.NewSolution(false);
-        }
       }
     }
     #endregion
+
+    #region Transaction Groups
+    readonly Stack<DB.TransactionGroup> ActiveTransactionGroups = new Stack<DB.TransactionGroup>();
+    readonly Stack<GH_Document> ActiveDocuments = new Stack<GH_Document>();
+
+    internal void StartTransactionGroups()
+    {
+      var now = DateTime.Now.ToString(System.Globalization.CultureInfo.CurrentUICulture);
+      var name = ActiveDocuments.Peek().DisplayName;
+
+      using (var documents = Revit.ActiveDBApplication.Documents)
+      {
+        foreach (var doc in documents.Cast<DB.Document>())
+        {
+          // Linked document do not allow transactions.
+          if (doc.IsLinked)
+            continue;
+
+          // Document can not be modified during transaction recovering.
+          if (doc.IsReadOnly)
+            continue;
+
+          // This document has already a transaction in course.
+          if (doc.IsModifiable)
+            continue;
+
+          var group = new DB.TransactionGroup(doc, $"Grasshopper {now}: {name.TripleDot(16)}")
+          {
+            IsFailureHandlingForcedModal = true
+          };
+          group.Start();
+
+          ActiveTransactionGroups.Push(group);
+        }
+      }
+    }
+
+    internal void CommitTransactionGroups()
+    {
+      while (ActiveTransactionGroups.Count > 0)
+      {
+        try
+        {
+          using (var group = ActiveTransactionGroups.Pop())
+          {
+            if (group.IsValidObject)
+              group.Assimilate();
+          }
+        }
+        catch { }
+      }
+    }
+    #endregion
+
+    void ActiveDefinition_SolutionStart(object sender, GH_SolutionEventArgs e)
+    {
+      ActiveDocuments.Push(e.Document);
+      StartTransactionGroups();
+    }
+
+    void ActiveDefinition_SolutionEnd(object sender, GH_SolutionEventArgs e)
+    {
+      CommitTransactionGroups();
+      ActiveDocuments.Pop();
+
+      // Expire objects that contain elements modified by Grasshopper.
+      {
+        var expiredObjectsCount = 0;
+        while (DocumentChangedEvent.changeQueue.Count > 0)
+        {
+          var change = DocumentChangedEvent.changeQueue.Dequeue();
+          expiredObjectsCount += change.ExpiredObjects.Count;
+
+          foreach (var obj in change.ExpiredObjects)
+          {
+            obj.ClearData();
+            obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"This object expired because it contained obsolete Revit elements.");
+          }
+        }
+
+        if (expiredObjectsCount > 0)
+        {
+          Instances.DocumentEditor.SetStatusBarEvent
+          (
+            new GH_RuntimeMessage
+            (
+              expiredObjectsCount == 1 ?
+              $"An object expired because it contained obsolete Revit elements." :
+              $"{expiredObjectsCount} objects expired because them contained obsolete Revit elements.",
+              GH_RuntimeMessageLevel.Remark,
+              "Document"
+            )
+          );
+        }
+      }
+
+      ModelUnitSystem = RhinoDoc.ActiveDoc.ModelUnitSystem;
+    }
   }
 }

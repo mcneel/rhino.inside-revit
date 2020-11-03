@@ -1,5 +1,6 @@
 using System;
 using Grasshopper.Kernel;
+using Rhino.Geometry;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -34,9 +35,9 @@ namespace RhinoInside.Revit.GH.Components
 
       brep = brep.DuplicateBrep();
 
-      var cutting = true;
+      var cutting = default(bool);
       if (DA.GetData("Void", ref cutting))
-        brep.SetUserString(DB.BuiltInParameter.ELEMENT_IS_CUTTING.ToString(), cutting ? "1" : null);
+        brep.TrySetUserString(DB.BuiltInParameter.ELEMENT_IS_CUTTING.ToString(), cutting, false);
 
       DA.SetData("Brep", brep);
     }

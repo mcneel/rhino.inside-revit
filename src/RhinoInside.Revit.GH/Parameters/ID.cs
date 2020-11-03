@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
-using System.Windows.Forms.InteropExtension;
+using System.Windows.Forms.Interop;
 using Autodesk.Revit.UI;
 using GH_IO.Serialization;
 using Grasshopper.GUI;
@@ -21,7 +21,15 @@ namespace RhinoInside.Revit.GH.Parameters
   Kernel.IGH_ElementIdParam
   where T : class, Types.IGH_ElementId
   {
-    public override sealed string TypeName => "Revit " + Name;
+    public override string TypeName
+    {
+      get
+      {
+        var name = typeof(T).GetTypeInfo().GetCustomAttribute(typeof(Kernel.Attributes.NameAttribute)) as Kernel.Attributes.NameAttribute;
+        return name?.Name ?? typeof(T).Name;
+      }
+    }
+
     protected ElementIdParam(string name, string nickname, string description, string category, string subcategory) :
       base(name, nickname, description, category, subcategory)
     { }
@@ -79,7 +87,7 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       base.ClearData();
 
-      if (PersistentDataCount == 0)
+      if (PersistentData.IsEmpty)
         return;
 
       foreach (var goo in PersistentData.OfType<T>())
@@ -223,38 +231,39 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public virtual void Menu_AppendActions(ToolStripDropDown menu)
     {
-      var doc = Revit.ActiveUIDocument?.Document;
-
-      if (Kind == GH_ParamKind.output && Attributes.GetTopLevel.DocObject is Components.ReconstructElementComponent)
+      if (Revit.ActiveUIDocument?.Document is DB.Document doc)
       {
-        var pinned = ToElementIds(VolatileData).
-                     Where(x => x.Document.Equals(doc)).
-                     Select(x => x.Document.GetElement(x.Id)).
-                     Where(x => x?.Pinned == true).Any();
+        if (Kind == GH_ParamKind.output && Attributes.GetTopLevel.DocObject is Components.ReconstructElementComponent)
+        {
+          var pinned = ToElementIds(VolatileData).
+                       Where(x => doc.Equals(x.Document)).
+                       Select(x => doc.GetElement(x.Id)).
+                       Where(x => x?.Pinned == true).Any();
 
-        if (pinned)
-          Menu_AppendItem(menu, $"Unpin {GH_Convert.ToPlural(TypeName)}", Menu_UnpinElements, DataType != GH_ParamData.remote, false);
+          if (pinned)
+            Menu_AppendItem(menu, $"Unpin {GH_Convert.ToPlural(TypeName)}", Menu_UnpinElements, DataType != GH_ParamData.remote, false);
 
-        var unpinned = ToElementIds(VolatileData).
-                     Where(x => x.Document.Equals(doc)).
-                     Select(x => x.Document.GetElement(x.Id)).
-                     Where(x => x?.Pinned == false).Any();
+          var unpinned = ToElementIds(VolatileData).
+                       Where(x => doc.Equals(x.Document)).
+                       Select(x => doc.GetElement(x.Id)).
+                       Where(x => x?.Pinned == false).Any();
 
-        if (unpinned)
-          Menu_AppendItem(menu, $"Pin {GH_Convert.ToPlural(TypeName)}", Menu_PinElements, DataType != GH_ParamData.remote, false);
+          if (unpinned)
+            Menu_AppendItem(menu, $"Pin {GH_Convert.ToPlural(TypeName)}", Menu_PinElements, DataType != GH_ParamData.remote, false);
+        }
+
+        bool delete = ToElementIds(VolatileData).Where(x => doc.Equals(x.Document)).Any();
+
+        Menu_AppendItem(menu, $"Delete {GH_Convert.ToPlural(TypeName)}", Menu_DeleteElements, delete, false);
       }
-
-      bool delete = ToElementIds(VolatileData).Where(x => x.Document.Equals(doc)).Any();
-
-      Menu_AppendItem(menu, $"Delete {GH_Convert.ToPlural(TypeName)}", Menu_DeleteElements, delete, false);
     }
 
     void Menu_PinElements(object sender, EventArgs args)
     {
-      var doc = Revit.ActiveUIDocument?.Document;
+      var doc = Revit.ActiveUIDocument.Document;
       var elements = ToElementIds(VolatileData).
-                       Where(x => x.Document.Equals(doc)).
-                       Select(x => x.Document.GetElement(x.Id)).
+                       Where(x => doc.Equals(x.Document)).
+                       Select(x => doc.GetElement(x.Id)).
                        Where(x => x.Pinned == false);
 
       if (elements.Any())
@@ -280,10 +289,10 @@ namespace RhinoInside.Revit.GH.Parameters
 
     void Menu_UnpinElements(object sender, EventArgs args)
     {
-      var doc = Revit.ActiveUIDocument?.Document;
+      var doc = Revit.ActiveUIDocument.Document;
       var elements = ToElementIds(VolatileData).
-                       Where(x => x.Document.Equals(doc)).
-                       Select(x => x.Document.GetElement(x.Id)).
+                       Where(x => doc.Equals(x.Document)).
+                       Select(x => doc.GetElement(x.Id)).
                        Where(x => x.Pinned == true);
 
       if (elements.Any())
@@ -309,9 +318,9 @@ namespace RhinoInside.Revit.GH.Parameters
 
     void Menu_DeleteElements(object sender, EventArgs args)
     {
-      var doc = Revit.ActiveUIDocument?.Document;
+      var doc = Revit.ActiveUIDocument.Document;
       var elementIds = ToElementIds(VolatileData).
-                       Where(x => x.Document.Equals(doc)).
+                       Where(x => doc.Equals(x.Document)).
                        Select(x => x.Id);
 
       if (elementIds.Any())
@@ -364,7 +373,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
                     GH_WindowsFormUtil.CenterFormOnCursor(dataManager, true);
                     if (dataManager.ShowDialog(Revit.MainWindowHandle) == System.Windows.Forms.DialogResult.OK)
-                      elementIds = dataManager.GetData<IGH_Goo>().AllData(true).OfType<Types.Element>().Select(x => x.Value);
+                      elementIds = dataManager.GetData<IGH_Goo>().AllData(true).OfType<Types.Element>().Select(x => x.Id);
                   }
                   break;
 
@@ -422,12 +431,18 @@ namespace RhinoInside.Revit.GH.Parameters
       ICollection<DB.ElementId> modified
     )
     {
-      if (DataType == GH_ParamData.remote)
+      if (DataType != GH_ParamData.local)
         return false;
+
+      if (Phase == GH_SolutionPhase.Blank)
+        CollectData();
 
       foreach (var data in VolatileData.AllData(true).OfType<Types.IGH_ElementId>())
       {
         if (!data.IsElementLoaded)
+          continue;
+
+        if (!doc.Equals(data.Document))
           continue;
 
         if (modified.Contains(data.Id))

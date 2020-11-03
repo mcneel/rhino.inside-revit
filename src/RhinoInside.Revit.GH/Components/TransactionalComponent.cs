@@ -119,8 +119,6 @@ namespace RhinoInside.Revit.GH.Components
 
         if (transaction.GetStatus() == DB.TransactionStatus.Started)
         {
-          OnBeforeCommit(doc, transaction);
-
           return transaction.Commit();
         }
         else return transaction.RollBack();
@@ -139,18 +137,11 @@ namespace RhinoInside.Revit.GH.Components
     protected override void BeforeSolveInstance() => status = DB.TransactionStatus.Uninitialized;
 
     // Step 2.
-    protected virtual void OnAfterStart(DB.Document document, DB.Transaction transaction) { }
-
-    // Step 3.
     //protected override void TrySolveInstance(IGH_DataAccess DA) { }
 
-    // Step 4.
-    protected virtual void OnBeforeCommit(DB.Document document, DB.Transaction transaction) { }
-
-    // Step 5.
+    // Step 3.
     //protected override void AfterSolveInstance() {}
 
-    // Step 5.1
     #region IFailuresPreprocessor
     void AddRuntimeMessage(DB.FailureMessageAccessor error, bool? solved = null)
     {
@@ -196,6 +187,7 @@ namespace RhinoInside.Revit.GH.Components
 
     // Override to add handled failures to your component (Order is important).
     protected virtual IEnumerable<DB.FailureDefinitionId> FailureDefinitionIdsToFix => null;
+    protected virtual bool FixUnhandledFailures => true;
 
     DB.FailureProcessingResult FixFailures(DB.FailuresAccessor failuresAccessor, IEnumerable<DB.FailureDefinitionId> failureIds)
     {
@@ -236,20 +228,18 @@ namespace RhinoInside.Revit.GH.Components
       if (failuresAccessor.GetSeverity() >= DB.FailureSeverity.Error)
       {
         // Handled failures in order
+        if (FailureDefinitionIdsToFix is IEnumerable<DB.FailureDefinitionId> failureDefinitionIdsToFix)
         {
-          var failureDefinitionIdsToFix = FailureDefinitionIdsToFix;
-          if (failureDefinitionIdsToFix != null)
-          {
-            var result = FixFailures(failuresAccessor, failureDefinitionIdsToFix);
-            if (result != DB.FailureProcessingResult.Continue)
-              return result;
-          }
+          var result = FixFailures(failuresAccessor, failureDefinitionIdsToFix);
+          if (result != DB.FailureProcessingResult.Continue)
+            return result;
         }
 
         // Unhandled failures in incomming order
+        if(FixUnhandledFailures)
         {
-          var failureDefinitionIdsToFix = failuresAccessor.GetFailureMessages().GroupBy(x => x.GetFailureDefinitionId()).Select(x => x.Key);
-          var result = FixFailures(failuresAccessor, failureDefinitionIdsToFix);
+          var unhandledFailureDefinitionIds = failuresAccessor.GetFailureMessages().GroupBy(x => x.GetFailureDefinitionId()).Select(x => x.Key);
+          var result = FixFailures(failuresAccessor, unhandledFailureDefinitionIds);
           if (result != DB.FailureProcessingResult.Continue)
             return result;
         }
@@ -271,16 +261,13 @@ namespace RhinoInside.Revit.GH.Components
     }
     #endregion
 
-    // Step 5.2
     #region ITransactionFinalizer
-    // Step 5.2.A
     public virtual void OnCommitted(DB.Document document, string strTransactionName)
     {
       if (Status < DB.TransactionStatus.Pending)
         Status = DB.TransactionStatus.Committed;
     }
 
-    // Step 5.2.B
     public virtual void OnRolledBack(DB.Document document, string strTransactionName)
     {
       if (Status < DB.TransactionStatus.Pending)
@@ -296,7 +283,7 @@ namespace RhinoInside.Revit.GH.Components
     Component,
   }
 
-  public abstract class TransactionalChainComponent : TransactionalComponent
+  public abstract class TransactionalChainComponent : TransactionalComponent, DBX.ITransactionNotification
   {
     protected TransactionalChainComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
@@ -316,7 +303,27 @@ namespace RhinoInside.Revit.GH.Components
       }
     }
 
-    protected override void SolveInstance(IGH_DataAccess DA)
+    DBX.TransactionChain chain;
+    protected void StartTransaction(DB.Document document) => chain.Start(document);
+
+    // Setp 1.
+    protected override void BeforeSolveInstance()
+    {
+      base.BeforeSolveInstance();
+
+      chain = new DBX.TransactionChain
+      (
+        new DBX.TransactionHandlingOptions
+        {
+          FailuresPreprocessor = this,
+          TransactionNotification = this
+        },
+        Name
+      );
+    }
+
+    // Step 2.
+    protected override sealed void SolveInstance(IGH_DataAccess DA)
     {
       if (TransactionExtent == TransactionExtent.Component)
       {
@@ -324,193 +331,96 @@ namespace RhinoInside.Revit.GH.Components
       }
       else
       {
+        Status = DB.TransactionStatus.Uninitialized;
+
         try
         {
-          Status = DB.TransactionStatus.Uninitialized;
+          base.SolveInstance(DA);
 
-          try
-          {
-            base.SolveInstance(DA);
-
-            if (CurrentTransactions?.Count > 0)
-              Status = CommitTransactions();
-          }
-          finally
-          {
-            switch (Status)
-            {
-              case DB.TransactionStatus.Uninitialized:
-              case DB.TransactionStatus.Started:
-              case DB.TransactionStatus.Committed:
-                break;
-              default:
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Transaction {Status} and aborted.");
-                ResetData();
-                break;
-            }
-          }
+          Status = chain.Commit();
         }
         finally
         {
-          if (CurrentTransactions is object)
+          switch (Status)
           {
-            foreach (var transaction in CurrentTransactions)
-              transaction.Value.Dispose();
-
-            CurrentTransactions = null;
+            case DB.TransactionStatus.Uninitialized:
+            case DB.TransactionStatus.Started:
+            case DB.TransactionStatus.Committed:
+              break;
+            default:
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Transaction {Status} and aborted.");
+              ResetData();
+              break;
           }
         }
       }
     }
 
-    Dictionary<DB.Document, DB.Transaction> CurrentTransactions;
-
-    protected void StartTransaction(DB.Document document)
+    // Step 3.
+    protected override sealed void AfterSolveInstance()
     {
-      if (CurrentTransactions?.ContainsKey(document) != true)
+      if (!IsAborted)
       {
-        var transaction = base.NewTransaction(document, Name);
-        if (transaction.Start() != DB.TransactionStatus.Started)
-        {
-          transaction.Dispose();
-          throw new InvalidOperationException($"Unable to start Transaction '{Name}'");
-        }
+        Status = DB.TransactionStatus.Error;
 
         try
         {
-          OnAfterStart(document, transaction);
-
-          if (CurrentTransactions is null)
-            CurrentTransactions = new Dictionary<DB.Document, DB.Transaction>();
-
-          CurrentTransactions.Add(document, transaction);
+          Status = chain.Commit();
         }
         catch (Exception e)
         {
-          transaction.Dispose();
-          throw e;
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
         }
-      }
-    }
-
-    // Step 5.
-    protected virtual void OnBeforeCommit(IReadOnlyDictionary<DB.Document, DB.Transaction> transactions) { }
-
-    protected override sealed void AfterSolveInstance()
-    {
-      try
-      {
-        OnBeforeCommit(CurrentTransactions);
-
-        if (!IsAborted && CurrentTransactions is object)
+        finally
         {
-          var transactionStatus = DB.TransactionStatus.Uninitialized;
-
-          try
+          switch (Status)
           {
-            if (CurrentTransactions.Count > 0)
-              transactionStatus = CommitTransactions();
-          }
-          finally
-          {
-            switch (transactionStatus)
-            {
-              case DB.TransactionStatus.Uninitialized:
-              case DB.TransactionStatus.Started:
-              case DB.TransactionStatus.Committed:
-                break;
-              default:
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Transaction {transactionStatus} and aborted.");
-                ResetData();
-                break;
-            }
+            case DB.TransactionStatus.Uninitialized:
+            case DB.TransactionStatus.Started:
+            case DB.TransactionStatus.Committed:
+              break;
+            default:
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Transaction {Status} and aborted.");
+              ResetData();
+              break;
           }
         }
       }
-      catch (Exception e)
-      {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
-      }
-      finally
-      {
-        if (CurrentTransactions is object)
-        {
-          foreach (var transaction in CurrentTransactions)
-            transaction.Value.Dispose();
-
-          CurrentTransactions = null;
-        }
-      }
-
-      OnAfterCommit();
 
       base.AfterSolveInstance();
     }
 
-    protected virtual void OnAfterCommit() { }
+    #region DBX.ITransactionNotification
+    External.EditScope editScope = null;
+    EventHandler<DialogBoxShowingEventArgs> dialogBoxShowing = null;
 
-    IEnumerator<KeyValuePair<DB.Document, DB.Transaction>> currentTransactionsEnumerator;
+    // Step 2.1
+    public virtual void OnStarted(DB.Document document) { }
 
-    protected DB.TransactionStatus CommitTransactions()
+    // Step 3.1
+    public virtual void OnPrepare(IReadOnlyCollection<DB.Document> documents)
     {
-      // Disable Rhino UI if any warning-error dialog popup
-      External.EditScope editScope = null;
-      EventHandler<DialogBoxShowingEventArgs> _ = null;
-      try
+      // Disable Rhino UI in case any warning-error dialog popups
+      Revit.ApplicationUI.DialogBoxShowing += dialogBoxShowing = (sender, args) =>
       {
-        Revit.ApplicationUI.DialogBoxShowing += _ = (sender, args) =>
-        {
-          if (editScope is null)
-            editScope = new External.EditScope();
-        };
+        if (editScope is null)
+          editScope = new External.EditScope();
+      };
+    }
 
-        using (currentTransactionsEnumerator = CurrentTransactions.GetEnumerator())
-        {
-          return CommitNextTransaction();
-        }
-      }
-      finally
+    // Step 3.2
+    public virtual void OnDone(DB.TransactionStatus status)
+    {
+      Status = status;
+
+      // Restore Rhino UI in case any warning-error dialog popups
       {
-        currentTransactionsEnumerator = default;
-
-        Revit.ApplicationUI.DialogBoxShowing -= _;
+        Revit.ApplicationUI.DialogBoxShowing -= dialogBoxShowing;
 
         if (editScope is IDisposable disposable)
           disposable.Dispose();
       }
     }
-
-    DB.TransactionStatus CommitNextTransaction()
-    {
-      if (currentTransactionsEnumerator is null)
-        return DB.TransactionStatus.Uninitialized;
-
-      if (currentTransactionsEnumerator.MoveNext())
-      {
-        var doc = currentTransactionsEnumerator.Current.Key;
-        var transaction = currentTransactionsEnumerator.Current.Value;
-
-        if (transaction.GetStatus() == DB.TransactionStatus.Started)
-        {
-          OnBeforeCommit(doc, transaction);
-
-          return transaction.Commit();
-        }
-        else return transaction.RollBack();
-      }
-
-      return DB.TransactionStatus.Committed;
-    }
-
-    public override DB.FailureProcessingResult PreprocessFailures(DB.FailuresAccessor failuresAccessor)
-    {
-      var result = base.PreprocessFailures(failuresAccessor);
-      if (result > DB.FailureProcessingResult.ProceedWithCommit)
-        return result;
-
-      return failuresAccessor.IsTransactionBeingCommitted() && CommitNextTransaction() == DB.TransactionStatus.Committed ?
-        DB.FailureProcessingResult.Continue :
-        DB.FailureProcessingResult.ProceedWithRollBack;
-    }
+    #endregion
   }
 }

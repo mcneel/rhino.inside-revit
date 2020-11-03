@@ -6,34 +6,26 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Kernel.Attributes;
+
+  [Name("Parameter Key")]
   public class ParameterKey : Element
   {
-    public override string TypeName => "Revit ParameterKey";
-    public override string TypeDescription => "Represents a Revit parameter definition";
-    override public object ScriptVariable() => null;
     protected override Type ScriptVariableType => typeof(DB.ParameterElement);
+    override public object ScriptVariable() => null;
 
     #region IGH_ElementId
     public override bool LoadElement()
     {
-      if (Document is null)
+      if (IsReferencedElement && !IsElementLoaded)
       {
-        Value = null;
-        if (!Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var doc))
-        {
-          Document = null;
-          return false;
-        }
+        Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var doc);
+        doc.TryGetParameterId(UniqueID, out var id);
 
-        Document = doc;
+        SetValue(doc, id);
       }
-      else if (IsElementLoaded)
-        return true;
 
-      if (Document is object)
-        return Document.TryGetParameterId(UniqueID, out m_value);
-
-      return false;
+      return IsElementLoaded;
     }
     #endregion
 
@@ -51,48 +43,59 @@ namespace RhinoInside.Revit.GH.Types
 
     public override sealed bool CastFrom(object source)
     {
-      if (source is IGH_Goo goo)
-        source = goo.ScriptVariable();
+      if (base.CastFrom(source))
+        return true;
 
+      var document = Revit.ActiveDBDocument;
       var parameterId = DB.ElementId.InvalidElementId;
-      switch (source)
+
+      if (source is IGH_Goo goo)
       {
-        case DB.ParameterElement     parameterElement: SetValue(parameterElement.Document, parameterElement.Id); return true;
-        case DB.Parameter            parameter:        SetValue(parameter.Element.Document, parameter.Id); return true;
-        case DB.ElementId id:        parameterId = id; break;
-        case int integer:            parameterId = new DB.ElementId(integer); break;
+        if (source is IGH_Element element)
+          source = element.Document?.GetElement(element.Id);
+        else
+          source = goo.ScriptVariable();
       }
 
-      if (parameterId.IsParameterId(Revit.ActiveDBDocument))
+      switch (source)
       {
-        SetValue(Revit.ActiveDBDocument, parameterId);
+        case int integer:            parameterId = new DB.ElementId(integer); break;
+        case DB.ElementId id:        parameterId = id; break;
+        case DB.Parameter parameter: SetValue(parameter.Element.Document, parameter.Id); return true;
+      }
+
+      if (parameterId.TryGetBuiltInParameter(out var _))
+      {
+        SetValue(document, parameterId);
         return true;
       }
 
       return base.CastFrom(source);
     }
 
-    public override bool CastTo<Q>(ref Q target)
+    public override bool CastTo<Q>(out Q target)
     {
       if (typeof(Q).IsAssignableFrom(typeof(GH_Guid)))
       {
-        target = (Q) (object) (Document.GetElement(Value) as DB.SharedParameterElement)?.GuidValue;
+        target = (Q) (object) (Document.GetElement(Id) as DB.SharedParameterElement)?.GuidValue;
         return true;
       }
 
-      return base.CastTo<Q>(ref target);
+      return base.CastTo<Q>(out target);
     }
 
     new class Proxy : Element.Proxy
     {
+      protected new ParameterKey owner => base.owner as ParameterKey;
+
       public Proxy(ParameterKey o) : base(o) { (this as IGH_GooProxy).UserString = FormatInstance(); }
 
       public override bool IsParsable() => true;
       public override string FormatInstance()
       {
-        int value = owner.Value?.IntegerValue ?? -1;
+        int value = owner.Id?.IntegerValue ?? -1;
         if (Enum.IsDefined(typeof(DB.BuiltInParameter), value))
-          return ((DB.BuiltInParameter) value).ToString();
+          return ((DB.BuiltInParameter) value).ToStringGeneric();
 
         return value.ToString();
       }
@@ -107,18 +110,36 @@ namespace RhinoInside.Revit.GH.Types
         return false;
       }
 
-      DB.BuiltInParameter builtInParameter => owner.Id.TryGetBuiltInParameter(out var bip) ? bip : DB.BuiltInParameter.INVALID;
-      DB.ParameterElement parameter => IsBuiltIn ? null : owner.Document?.GetElement(owner.Id) as DB.ParameterElement;
+      #region Misc
+      protected override bool IsValidId(DB.Document doc, DB.ElementId id) => id.IsParameterId(doc);
+      public override Type ObjectType => IsBuiltIn ? typeof(DB.BuiltInParameter) : base.ObjectType;
 
-      [System.ComponentModel.Description("The Guid that identifies this parameter as a shared parameter.")]
-      public Guid Guid => (parameter as DB.SharedParameterElement)?.GuidValue ?? Guid.Empty;
-      [System.ComponentModel.Description("API Object Type.")]
-      public override Type ObjectType => IsBuiltIn ? typeof(DB.BuiltInParameter) : parameter?.GetType();
+      [System.ComponentModel.Description("BuiltIn parameter Id.")]
+      public DB.BuiltInParameter? BuiltInId => owner.Id.TryGetBuiltInParameter(out var bip) ? bip : default;
+      #endregion
 
-      [System.ComponentModel.Category("Other"), System.ComponentModel.Description("Internal parameter data storage type.")]
-      public DB.StorageType StorageType => builtInParameter != DB.BuiltInParameter.INVALID ? Revit.ActiveDBDocument.get_TypeOfStorage(builtInParameter) : parameter?.GetDefinition().ParameterType.ToStorageType() ?? DB.StorageType.None;
-      [System.ComponentModel.Category("Other"), System.ComponentModel.Description("Visible in UI.")]
-      public bool Visible => IsBuiltIn ? Valid : parameter?.GetDefinition().Visible ?? false;
+      #region Definition
+      const string Definition = "Definition";
+      DB.ParameterElement parameter => owner.Value as DB.ParameterElement;
+
+      [System.ComponentModel.Category(Definition), System.ComponentModel.Description("The Guid that identifies this parameter as a shared parameter.")]
+      public Guid? Guid => (parameter as DB.SharedParameterElement)?.GuidValue;
+
+      [System.ComponentModel.Category(Definition), System.ComponentModel.Description("Internal parameter data storage type.")]
+      public DB.StorageType? StorageType => BuiltInId.HasValue ? Revit.ActiveDBDocument?.get_TypeOfStorage(BuiltInId.Value) : parameter?.GetDefinition()?.ParameterType.ToStorageType();
+
+      [System.ComponentModel.Category(Definition), System.ComponentModel.Description("Visible in UI.")]
+      public bool? Visible => parameter?.GetDefinition()?.Visible;
+
+      [System.ComponentModel.Category(Definition), System.ComponentModel.Description("Whether or not the parameter values can vary across group members.")]
+      public bool? VariesAcrossGroups => parameter?.GetDefinition()?.VariesAcrossGroups;
+
+      [System.ComponentModel.Category(Definition)]
+      public DB.ParameterType? Type => parameter?.GetDefinition()?.ParameterType;
+
+      [System.ComponentModel.Category(Definition)]
+      public DB.BuiltInParameterGroup? Group => parameter?.GetDefinition()?.ParameterGroup;
+      #endregion
     }
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
@@ -137,36 +158,153 @@ namespace RhinoInside.Revit.GH.Types
         return base.DisplayName;
       }
     }
+
+    #region Properties
+    public override string Name
+    {
+      get
+      {
+        try
+        {
+          if (Id is object && Id.TryGetBuiltInParameter(out var builtInParameter))
+            return DB.LabelUtils.GetLabelFor(builtInParameter) ?? base.Name;
+        }
+        catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
+
+        return base.Name;
+      }
+      set
+      {
+        if (value is object && value != Name)
+        {
+          if (Id.IsBuiltInId())
+            throw new InvalidOperationException($"BuiltIn paramater '{Name}' does not support assignment of a user-specified name.");
+
+          base.Name = value;
+        }
+      }
+    }
+    #endregion
   }
 
-  public class ParameterValue : GH_Goo<DB.Parameter>
+  [Name("Parameter Value")]
+  public class ParameterValue : ReferenceObject, IEquatable<ParameterValue>
   {
-    public override string TypeName => "Revit ParameterValue";
-    public override string TypeDescription => "Represents a Revit parameter value on an element";
-    protected Type ScriptVariableType => typeof(DB.Parameter);
-    public override bool IsValid => Value is object;
-    public override sealed IGH_Goo Duplicate() => (IGH_Goo) MemberwiseClone();
+    #region System.Object
+    public bool Equals(ParameterValue other)
+    {
+      if (other is null) return false;
+      if (Value is DB.Parameter A && other.Value is DB.Parameter B)
+      {
+        if
+        (
+          A.Id.IntegerValue == B.Id.IntegerValue &&
+          A.StorageType == B.StorageType &&
+          A.HasValue == B.HasValue
+        )
+        {
+          if (!Value.HasValue)
+            return true;
 
+          switch (Value.StorageType)
+          {
+            case DB.StorageType.None: return true;
+            case DB.StorageType.Integer: return A.AsInteger() == B.AsInteger();
+            case DB.StorageType.Double: return A.AsDouble() == B.AsDouble();
+            case DB.StorageType.String: return A.AsString() == B.AsString();
+            case DB.StorageType.ElementId: return A.AsElementId() == B.AsElementId();
+          }
+        }
+      }
+
+      return false;
+    }
+    public override bool Equals(object obj) => (obj is ElementId id) ? Equals(id) : base.Equals(obj);
+    public override int GetHashCode()
+    {
+      int hashCode = 0;
+      if (Value is DB.Parameter value)
+      {
+        hashCode ^= value.Id.GetHashCode();
+        hashCode ^= value.StorageType.GetHashCode();
+
+        if (value.HasValue)
+        {
+          switch (value.StorageType)
+          {
+            case DB.StorageType.Integer: hashCode ^= value.AsInteger().GetHashCode(); break;
+            case DB.StorageType.Double: hashCode ^= value.AsDouble().GetHashCode(); break;
+            case DB.StorageType.String: hashCode ^= value.AsString().GetHashCode(); break;
+            case DB.StorageType.ElementId: hashCode ^= value.AsElementId().GetHashCode(); break;
+          }
+        }
+      }
+
+      return hashCode;
+    }
+    public override string ToString()
+    {
+      if (!IsValid)
+        return null;
+
+      try
+      {
+        if (Value.HasValue)
+        {
+          switch (Value.StorageType)
+          {
+            case DB.StorageType.Integer:
+              if (Value.Definition.ParameterType == DB.ParameterType.YesNo)
+                return (Value.AsInteger() != 0).ToString();
+              else
+                return Value.AsInteger().ToString();
+
+            case DB.StorageType.Double: return Value.AsDoubleInRhinoUnits().ToString();
+            case DB.StorageType.String: return Value.AsString();
+            case DB.StorageType.ElementId:
+
+              var id = Value.AsElementId();
+              if (Value.Id.TryGetBuiltInParameter(out var builtInParameter))
+              {
+                if (builtInParameter == DB.BuiltInParameter.ID_PARAM || builtInParameter == DB.BuiltInParameter.SYMBOL_ID_PARAM)
+                  return id.IntegerValue.ToString();
+              }
+
+              if (Element.FromElementId(Value.Element.Document, id) is Element element)
+                return element.ToString();
+
+              if (id == DB.ElementId.InvalidElementId)
+                return new Types.Element().ToString();
+
+              return id.IntegerValue.ToString();
+
+            default:
+              throw new NotImplementedException();
+          }
+        }
+      }
+      catch (Autodesk.Revit.Exceptions.InternalException) { }
+
+      return default;
+    }
+    #endregion
+
+    #region IGH_Goo
+    public override bool IsValid => base.IsValid && Value is object;
     public override bool CastFrom(object source)
     {
       if (source is DB.Parameter parameter)
       {
-        Value = parameter;
+        base.Value = parameter;
         return true;
       }
 
       return false;
     }
 
-    public override bool CastTo<Q>(ref Q target)
+    public override bool CastTo<Q>(out Q target)
     {
-      if (typeof(Q).IsSubclassOf(ScriptVariableType))
-      {
-        target = (Q) (object) Value;
-        return true;
-      }
-
-      if (typeof(Q).IsAssignableFrom(ScriptVariableType))
+      if (typeof(Q).IsAssignableFrom(typeof(DB.Parameter)))
       {
         target = (Q) (object) Value;
         return true;
@@ -245,90 +383,39 @@ namespace RhinoInside.Revit.GH.Types
           }
           break;
         case DB.StorageType.ElementId:
-          if (typeof(Q).IsSubclassOf(typeof(ElementId)))
+          if (typeof(Q).IsAssignableFrom(typeof(Element)))
           {
             target = Value.Element is null ? (Q) (object) null :
-                     (Q) (object) ElementId.FromElementId(Value.Element.Document, Value.AsElementId());
+                     (Q) (object) Element.FromElementId(Value.Element.Document, Value.AsElementId());
             return true;
           }
           break;
       }
 
-      return base.CastTo<Q>(ref target);
+      return base.CastTo<Q>(out target);
     }
+    #endregion
 
-    public override bool Equals(object obj)
+    #region DocumentObject
+    public new DB.Parameter Value => base.Value as DB.Parameter;
+
+    public override string DisplayName
     {
-      if (obj is ParameterValue paramValue)
+      get
       {
-        if
-        (
-          paramValue.Value.Id.IntegerValue == Value.Id.IntegerValue &&
-          paramValue.Value.Element.Id.IntegerValue == Value.Element.Id.IntegerValue &&
-          paramValue.Value.StorageType == Value.StorageType &&
-          paramValue.Value.HasValue == Value.HasValue
-        )
-        {
-          if (!Value.HasValue)
-            return true;
+        if (Value is DB.Parameter param)
+          return param.Definition?.Name;
 
-          switch (Value.StorageType)
-          {
-            case DB.StorageType.None:      return true;
-            case DB.StorageType.Integer:   return paramValue.Value.AsInteger() == Value.AsInteger();
-            case DB.StorageType.Double:    return paramValue.Value.AsDouble()  == Value.AsDouble();
-            case DB.StorageType.String:    return paramValue.Value.AsString()  == Value.AsString();
-            case DB.StorageType.ElementId: return paramValue.Value.AsElementId().IntegerValue == Value.AsElementId().IntegerValue;
-          }
-        }
+        return default;
       }
-
-      return base.Equals(obj);
     }
+    #endregion
 
-    public override int GetHashCode() => Value.Id.IntegerValue;
-    
-    public override string ToString()
-    {
-      if (!IsValid)
-        return null;
+    #region ReferenceObject
+    public override DB.ElementId Id => Value?.Element.Id;
+    #endregion
 
-      string value = default;
-      try
-      {
-        if (Value.HasValue)
-        {
-          switch (Value.StorageType)
-          {
-            case DB.StorageType.Integer:
-              if (Value.Definition.ParameterType == DB.ParameterType.YesNo)
-                value = Value.AsInteger() == 0 ? "False" : "True";
-              else
-                value = Value.AsInteger().ToString();
-              break;
-            case DB.StorageType.Double: value = Value.AsDoubleInRhinoUnits().ToString(); break;
-            case DB.StorageType.String: value = Value.AsString(); break;
-            case DB.StorageType.ElementId:
-
-              if (Value.Id.TryGetBuiltInParameter(out var builtInParameter))
-              {
-                if (builtInParameter == DB.BuiltInParameter.ID_PARAM || builtInParameter == DB.BuiltInParameter.SYMBOL_ID_PARAM)
-                  return Value.AsElementId().IntegerValue.ToString();
-              }
-
-              if (ElementId.FromElementId(Value.Element.Document, Value.AsElementId()) is ElementId goo)
-                return goo.ToString();
-
-              value = string.Empty;
-              break;
-            default:
-              throw new NotImplementedException();
-          }
-        }
-      }
-      catch (Autodesk.Revit.Exceptions.InternalException) { }
-
-      return value;
-    }
+    public ParameterValue() { }
+    public ParameterValue(DB.Parameter value) : base(value.Element.Document, value) { }
   }
 }

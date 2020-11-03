@@ -81,53 +81,62 @@ namespace RhinoInside.Revit.GH.Components
         }
       }
 
-      if (string.IsNullOrEmpty(filePath))
+      try
       {
-        if (overrideFile)
+        Guest.Instance.CommitTransactionGroups();
+
+        if (string.IsNullOrEmpty(filePath))
         {
-          using (var saveOptions = new DB.SaveOptions() { Compact = compact })
+          if (overrideFile)
           {
-            if (view is object)
-              saveOptions.PreviewViewId = view.Id;
+            using (var saveOptions = new DB.SaveOptions() { Compact = compact })
+            {
+              if (view is object)
+                saveOptions.PreviewViewId = view.Id;
 
-            doc.Save(saveOptions);
-          }
+              doc.Save(saveOptions);
+            }
 
-          DA.SetData("Document", doc);
-        }
-        else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to collect data from 'Path'.");
-      }
-      else
-      {
-        if (filePath.Last() == Path.DirectorySeparatorChar)
-          filePath = Path.Combine(filePath, doc.Title);
-
-        if (Path.IsPathRooted(filePath) && filePath.Contains(Path.DirectorySeparatorChar))
-        {
-          if (!Path.HasExtension(filePath))
-          {
-            if (doc.IsFamilyDocument)
-              filePath += ".rfa";
-            else
-              filePath += ".rvt";
-          }
-
-          using (var saveAsOptions = new DB.SaveAsOptions() { OverwriteExistingFile = overrideFile, Compact = compact })
-          {
-            if (backups > -1)
-              saveAsOptions.MaximumBackups = backups;
-
-            if (view is object)
-              saveAsOptions.PreviewViewId = view.Id;
-
-            doc.SaveAs(filePath, saveAsOptions);
             DA.SetData("Document", doc);
           }
+          else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to collect data from 'Path'.");
         }
         else
         {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Path should be absolute.");
+          if (filePath.Last() == Path.DirectorySeparatorChar)
+            filePath = Path.Combine(filePath, doc.Title);
+
+          if (Path.IsPathRooted(filePath) && filePath.Contains(Path.DirectorySeparatorChar))
+          {
+            if (!Path.HasExtension(filePath))
+            {
+              if (doc.IsFamilyDocument)
+                filePath += ".rfa";
+              else
+                filePath += ".rvt";
+            }
+
+            using (var saveAsOptions = new DB.SaveAsOptions() { OverwriteExistingFile = overrideFile, Compact = compact })
+            {
+              if (backups > -1)
+                saveAsOptions.MaximumBackups = backups;
+
+              if (view is object)
+                saveAsOptions.PreviewViewId = view.Id;
+
+              doc.SaveAs(filePath, saveAsOptions);
+              DA.SetData("Document", doc);
+            }
+          }
+          else
+          {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Path should be absolute.");
+          }
         }
+      }
+      finally
+      {
+        Guest.Instance.StartTransactionGroups();
       }
     }
   }

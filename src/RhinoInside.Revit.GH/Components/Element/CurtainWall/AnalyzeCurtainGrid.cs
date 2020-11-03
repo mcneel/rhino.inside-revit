@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
       manager.AddParameter(
-        param: new Parameters.DataObject<DB.CurtainGrid>(),
+        param: new Parameters.CurtainGrid(),
         name: "Curtain Grid",
         nickname: "CG",
         description: "Curtain Grid",
@@ -122,27 +122,28 @@ namespace RhinoInside.Revit.GH.Components
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       // get input
-      Types.DataObject<DB.CurtainGrid> dataObj = default;
-      if (!DA.GetData("Curtain Grid", ref dataObj))
+      var curtainGridGoo = default(Types.CurtainGrid);
+      if (!DA.GetData("Curtain Grid", ref curtainGridGoo))
         return;
 
-      DB.CurtainGrid cgrid = dataObj.Value;
+      if (curtainGridGoo.Document is DB.Document doc && curtainGridGoo.Value is DB.CurtainGrid cgrid)
+      {
+        DA.SetDataList("Cells", cgrid.GetCurtainCells().Select(x => new Types.DataObject<DB.CurtainCell>(x, sourceDoc: doc)));
+        DA.SetDataList("Mullions", cgrid.GetMullionIds().Select(x => Types.Mullion.FromElementId(doc, x)));
+        DA.SetDataList("Panels", cgrid.GetPanelIds().Select(x => Types.Element.FromElementId(doc, x)));
 
-      DA.SetDataList("Cells", cgrid.GetCurtainCells().Select(x => new Types.DataObject<DB.CurtainCell>(x, srcDocument: dataObj.Document)));
-      DA.SetDataList("Mullions", cgrid.GetMullionIds().Select(x => Types.Mullion.FromElement(dataObj.Document.GetElement(x))));
-      DA.SetDataList("Panels", cgrid.GetPanelIds().Select(x => Types.Element.FromElement(dataObj.Document.GetElement(x))));
+        // GetVGridLineIds returns grid lines perpendicular to V
+        DA.SetDataList("Vertical Lines", cgrid.GetVGridLineIds().Select(x => Types.CurtainGridLine.FromElementId(doc, x)));
+        DA.SetData("Vertical Angle", cgrid.Grid1Angle);
+        DA.SetData("Vertical Justification", cgrid.Grid1Justification);
+        DA.SetData("Vertical Offset", cgrid.Grid1Offset * Revit.ModelUnits);
 
-      // GetVGridLineIds returns grid lines perpendicular to V
-      DA.SetDataList("Vertical Lines", cgrid.GetVGridLineIds().Select(x => Types.CurtainGridLine.FromElement(dataObj.Document.GetElement(x))));
-      DA.SetData("Vertical Angle", cgrid.Grid1Angle);
-      DA.SetData("Vertical Justification", cgrid.Grid1Justification);
-      DA.SetData("Vertical Offset", cgrid.Grid1Offset * Revit.ModelUnits);
-
-      // GetUGridLineIds returns grid lines perpendicular to U
-      DA.SetDataList("Horizontal Lines", cgrid.GetUGridLineIds().Select(x => Types.CurtainGridLine.FromElement(dataObj.Document.GetElement(x))));
-      DA.SetData("Horizontal Angle", cgrid.Grid2Angle);
-      DA.SetData("Horizontal Justification", cgrid.Grid2Justification);
-      DA.SetData("Horizontal Offset", cgrid.Grid2Offset * Revit.ModelUnits);
+        // GetUGridLineIds returns grid lines perpendicular to U
+        DA.SetDataList("Horizontal Lines", cgrid.GetUGridLineIds().Select(x => Types.CurtainGridLine.FromElementId(doc, x)));
+        DA.SetData("Horizontal Angle", cgrid.Grid2Angle);
+        DA.SetData("Horizontal Justification", cgrid.Grid2Justification);
+        DA.SetData("Horizontal Offset", cgrid.Grid2Offset * Revit.ModelUnits);
+      }
     }
   }
 }

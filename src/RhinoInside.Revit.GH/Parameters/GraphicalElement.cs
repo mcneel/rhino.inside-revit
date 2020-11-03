@@ -6,6 +6,7 @@ using Autodesk.Revit.UI.Selection;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
+using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.External.UI.Selection;
 using DB = Autodesk.Revit.DB;
@@ -395,12 +396,9 @@ namespace RhinoInside.Revit.GH.Parameters
 
       if (elementIds.Any())
       {
-        Rhinoceros.InvokeInHostContext(() =>
-        {
-          var ids = elementIds.ToArray();
-          uiDocument.Selection.SetElementIds(ids);
-          uiDocument.ShowElements(ids);
-        });
+        var ids = elementIds.ToArray();
+        uiDocument.Selection.SetElementIds(ids);
+        uiDocument.ShowElements(ids);
       }
     }
 

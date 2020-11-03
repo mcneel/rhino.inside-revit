@@ -73,12 +73,15 @@ namespace RhinoInside.Revit
 
     #region Constructor
     static readonly string SystemDir =
+#if DEBUG
+      Registry.GetValue(@"HKEY_CURRENT_USER\SOFTWARE\McNeel\Rhinoceros\7.0-WIP-Developer-Debug-trunk\Install", "Path", null) as string ??
+#endif
       Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install", "Path", null) as string ??
       Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Rhino WIP", "System");
 
     internal static readonly string RhinoExePath = Path.Combine(SystemDir, "Rhino.exe");
     internal static readonly FileVersionInfo RhinoVersionInfo = File.Exists(RhinoExePath) ? FileVersionInfo.GetVersionInfo(RhinoExePath) : null;
-    static readonly Version MinimumRhinoVersion = new Version(7, 0, 20140);
+    static readonly Version MinimumRhinoVersion = new Version(7, 0, 20301);
     static readonly Version RhinoVersion = new Version
     (
       RhinoVersionInfo?.FileMajorPart ?? 0,
@@ -135,12 +138,12 @@ namespace RhinoInside.Revit
         return Result.Cancelled;
 
       // Report if opennurbs.dll is loaded
-      NativeMethods.SetStackTraceFilePath 
+      NativeLoader.SetStackTraceFilePath 
       (
         Path.ChangeExtension(applicationUI.ControlledApplication.RecordingJournalFilename, "log.md")
       );
 
-      NativeMethods.ReportOnLoad("opennurbs.dll", enable: true);
+      NativeLoader.ReportOnLoad("opennurbs.dll", enable: true);
 
       ApplicationUI = applicationUI;
 
@@ -420,7 +423,7 @@ namespace RhinoInside.Revit
       }
 
       // Disable report opennurbs.dll is loaded 
-      NativeMethods.ReportOnLoad("opennurbs.dll", enable: false);
+      NativeLoader.ReportOnLoad("opennurbs.dll", enable: false);
 
       return Result.Succeeded;
     }

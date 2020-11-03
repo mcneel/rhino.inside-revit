@@ -85,14 +85,13 @@ namespace RhinoInside.Revit.UI
     {
       public override bool IsCommandAvailable(UIApplication _, DB.CategorySet selectedCategories)
       {
-        RefreshUI();
-        return base.IsCommandAvailable(_, selectedCategories);
+        return GH.Guest.IsEditorLoaded() && base.IsCommandAvailable(_, selectedCategories);
       }
     }
 
-    public static void RefreshUI()
+    static void EnableSolutionsChanged(bool EnableSolutions)
     {
-      if (GH_Document.EnableSolutions)
+      if (EnableSolutions)
       {
         Button.ToolTip = "Disable the Grasshopper solver";
         Button.Image = SolverOnSmall;
@@ -113,14 +112,14 @@ namespace RhinoInside.Revit.UI
       if (Button is object)
       {
         Button.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
-        RefreshUI();
+        EnableSolutionsChanged(GH_Document.EnableSolutions);
+        GH_Document.EnableSolutionsChanged += EnableSolutionsChanged;
       }
     }
 
     public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
     {
       GH_Document.EnableSolutions = !GH_Document.EnableSolutions;
-      RefreshUI();
 
       if (GH_Document.EnableSolutions)
       {

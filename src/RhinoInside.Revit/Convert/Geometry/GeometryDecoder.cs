@@ -113,8 +113,8 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static Brep ToBrep(this DB.Solid value)
     { var rhino = RawDecoder.ToRhino(value); UnitConverter.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
 
-    public static Mesh ToMesh(this DB.Mesh value)
-    { var rhino = MeshDecoder.ToRhino(value); UnitConverter.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
+    public static Mesh ToMesh(this DB.Mesh value) =>
+      MeshDecoder.FromRawMesh(MeshDecoder.ToRhino(value), UnitConverter.ToRhinoUnits);
     #endregion
 
     /// <summary>
@@ -237,12 +237,12 @@ namespace RhinoInside.Revit.Convert.Geometry
           if (context.GraphicsStyleId.IsValid() && context.Element.Document.GetElement(context.GraphicsStyleId) is DB.GraphicsStyle graphicsStyle)
           {
             var category = graphicsStyle.GraphicsStyleCategory;
-            geometry.SetUserString(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), category.Id.IntegerValue.ToString());
+            geometry.TrySetUserString(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), category.Id);
           }
 
           if (context.MaterialId.IsValid() && context.Element.Document.GetElement(context.MaterialId) is DB.Material material)
           {
-            geometry.SetUserString(DB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), material.Id.IntegerValue.ToString());
+            geometry.TrySetUserString(DB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), material.Id);
           }
         }
       }
