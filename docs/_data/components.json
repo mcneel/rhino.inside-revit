@@ -20,6 +20,26 @@
     "uuid": "6f5d09c7-797f-4ffe-afae-b9c0ddc5905f"
   }, 
   {
+    "desc": "Represents a Revit document fill pattern", 
+    "iconsrc": "/static/images/GH/FillPatternElement.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
+    "tab": "Params", 
+    "title": "Fill Pattern", 
+    "typename": "FillPatternElement", 
+    "uuid": "efddb3d7-cf2a-4972-b1c4-29374bb89149"
+  }, 
+  {
+    "desc": "Represents a Revit document line pattern", 
+    "iconsrc": "/static/images/GH/LinePatternElement.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
+    "tab": "Params", 
+    "title": "Line Pattern", 
+    "typename": "LinePatternElement", 
+    "uuid": "eb5ab657-ae01-42f0-bf98-071da6d7a2d2"
+  }, 
+  {
     "desc": "Represents a Revit document category", 
     "iconsrc": "/static/images/GH/Category.png", 
     "icontag": null, 
@@ -165,7 +185,7 @@
     "icontag": null, 
     "panel": "Input", 
     "tab": "Revit", 
-    "title": "Families Picker", 
+    "title": "Component Families Picker", 
     "typename": "DocumentFamiliesPicker", 
     "uuid": "45cee087-4194-4e55-aa20-9cc5d2193ce0"
   }, 
@@ -335,7 +355,7 @@
     "icontag": null, 
     "panel": "Revit Primitives", 
     "tab": "Params", 
-    "title": "ParameterKey", 
+    "title": "Parameter Key", 
     "typename": "ParameterKey", 
     "uuid": "a550f532-8c68-460b-91f3-da0a5a0d42b5"
   }, 
@@ -545,9 +565,9 @@
     "icontag": null, 
     "panel": "Category", 
     "tab": "Revit", 
-    "title": "Category ObjectStyle", 
+    "title": "Category Object Styles", 
     "typename": "CategoryObjectStyle", 
-    "uuid": "1dd8ae78-f7da-4f26-8353-4cce6b925dc6"
+    "uuid": "ca3c1cf9-bf5d-4b20-adce-3307943a1a51"
   }, 
   {
     "desc": "Gets a list of valid parameters for the specified category that can be used in a table view", 
@@ -570,7 +590,7 @@
     "uuid": "d150e40e-0970-4683-b517-038f8ba8b0d8"
   }, 
   {
-    "desc": "Returns a list of all the subcategories of Category", 
+    "desc": "Returns a list containing the subcategories of Category", 
     "iconsrc": "/static/images/GH/CategorySubCategories.png", 
     "icontag": null, 
     "panel": "Category", 
@@ -697,7 +717,7 @@
     "tab": "Revit", 
     "title": "Logical And Filter", 
     "typename": "ElementLogicalAndFilter", 
-    "uuid": "754c40d7-5ae8-4027-921c-0210bbdfab37"
+    "uuid": "0e534afb-7264-4aff-99f3-7f7ea7db9f3d"
   }, 
   {
     "desc": "Filter used to combine a set of filters that pass when any pass", 
@@ -707,7 +727,7 @@
     "tab": "Revit", 
     "title": "Logical Or Filter", 
     "typename": "ElementLogicalOrFilter", 
-    "uuid": "61f75de1-ee65-4aa8-b9f8-40516be46c8d"
+    "uuid": "3804757f-3f4c-469d-8788-fca26f477a9c"
   }, 
   {
     "desc": "Filter used to exclude element types", 
@@ -765,9 +785,9 @@
     "icontag": null, 
     "panel": "Filter", 
     "tab": "Revit", 
-    "title": "BoundingBox Filter", 
+    "title": "Bounding Box Filter", 
     "typename": "ElementBoundingBoxFilter", 
-    "uuid": "f5a32842-b18e-470f-8bd3-bae1373ad982"
+    "uuid": "3b8be676-390b-4be1-b6da-c02ffa3234b6"
   }, 
   {
     "desc": "Filter used to match elements that intersect to the given element", 
@@ -1170,14 +1190,24 @@
     "uuid": "b3bcbf5b-2034-414f-b9fb-97626ff37cbe"
   }, 
   {
-    "desc": "Get the geometry of the specified Graphical Element on a view", 
-    "iconsrc": null, 
-    "icontag": "G", 
+    "desc": "Get the geometry of the given Element on a view", 
+    "iconsrc": "/static/images/GH/ElementViewGeometry.png", 
+    "icontag": null, 
     "panel": "Element", 
     "tab": "Revit", 
-    "title": "Graphical Element Geometry", 
-    "typename": "GraphicalElementGeometry", 
+    "title": "Element View Geometry", 
+    "typename": "ElementViewGeometry", 
     "uuid": "8b85b1fb-a3df-4924-bc84-58d2b919e664"
+  }, 
+  {
+    "desc": "Get all document grids", 
+    "iconsrc": null, 
+    "icontag": "Q", 
+    "panel": "Model", 
+    "tab": "Revit", 
+    "title": "Query Grids", 
+    "typename": "QueryGrids", 
+    "uuid": "218fdacd-15ce-4b3a-8d70-f7f41362a4f4"
   }, 
   {
     "desc": "Given its location, it reconstructs a Model Group into the active Revit document", 
@@ -1260,14 +1290,24 @@
     "uuid": "87715caf-92a9-4b14-99e5-f8ccb2cc19bd"
   }, 
   {
-    "desc": "Queries element location information", 
+    "desc": "Element Get-Set location", 
     "iconsrc": "/static/images/GH/GraphicalElementLocation.png", 
     "icontag": null, 
     "panel": "Element", 
     "tab": "Revit", 
-    "title": "Graphical Element Location", 
+    "title": "Element Location", 
     "typename": "GraphicalElementLocation", 
-    "uuid": "71f196f1-59e8-4714-b9c2-45fafeedf426"
+    "uuid": "a5c63076-679c-4083-abf2-882a2eee3016"
+  }, 
+  {
+    "desc": "Element Get-Set curve", 
+    "iconsrc": null, 
+    "icontag": "G", 
+    "panel": "Element", 
+    "tab": "Revit", 
+    "title": "Element Curve", 
+    "typename": "GraphicalElementCurve", 
+    "uuid": "dcc82eca-74cd-4b2e-98a2-d655af06836a"
   }, 
   {
     "desc": "Query element material information", 
@@ -1370,96 +1410,6 @@
     "uuid": "7a889b89-c423-4ed8-91d9-5cece1ee803d"
   }, 
   {
-    "desc": "Material Graphics Data", 
-    "iconsrc": "/static/images/GH/MaterialGraphics.png", 
-    "icontag": null, 
-    "panel": "Material", 
-    "tab": "Revit", 
-    "title": "Material Graphics", 
-    "typename": "MaterialGraphics", 
-    "uuid": "8c5cd6fb-4f48-4f35-b0b8-42b5a3636b5c"
-  }, 
-  {
-    "desc": "Analyze given Appearance asset of \"Generic\" schema", 
-    "iconsrc": "/static/images/GH/AnalyzeGenericShader.png", 
-    "icontag": null, 
-    "panel": "Material", 
-    "tab": "Revit", 
-    "title": "Analyze Appearance Asset (Generic)", 
-    "typename": "AnalyzeGenericShader", 
-    "uuid": "5b18389b-5e25-4428-b1a6-1a55109a7a3c"
-  }, 
-  {
-    "desc": "Create a new instance of Physical Asset", 
-    "iconsrc": "/static/images/GH/CreateStructuralAsset.png", 
-    "icontag": null, 
-    "panel": "Material", 
-    "tab": "Revit", 
-    "title": "Create Physical Asset", 
-    "typename": "CreateStructuralAsset", 
-    "uuid": "af2678c8-2a53-4056-9399-5a06dd9ac14d"
-  }, 
-  {
-    "desc": "Modify an existing instance of Physical Asset", 
-    "iconsrc": "/static/images/GH/ModifyStructuralAsset.png", 
-    "icontag": null, 
-    "panel": "Material", 
-    "tab": "Revit", 
-    "title": "Modify Physical Asset", 
-    "typename": "ModifyStructuralAsset", 
-    "uuid": "67a74d31-0878-4b48-8efb-f4ca97389f74"
-  }, 
-  {
-    "desc": "Analyzes given instance of Physical Asset", 
-    "iconsrc": "/static/images/GH/AnalyzeStructuralAsset.png", 
-    "icontag": null, 
-    "panel": "Material", 
-    "tab": "Revit", 
-    "title": "Analyze Physical Asset", 
-    "typename": "AnalyzeStructuralAsset", 
-    "uuid": "ec93f8e0-d2af-4a44-a040-89a7c40b9fc7"
-  }, 
-  {
-    "desc": "Create a new instance of Thermal Asset", 
-    "iconsrc": "/static/images/GH/CreateThermalAsset.png", 
-    "icontag": null, 
-    "panel": "Material", 
-    "tab": "Revit", 
-    "title": "Create Thermal Asset", 
-    "typename": "CreateThermalAsset", 
-    "uuid": "bd9164c4-effb-4145-bb96-006daeaeb99a"
-  }, 
-  {
-    "desc": "Modify an existing instance of Thermal Asset", 
-    "iconsrc": "/static/images/GH/ModifyThermalAsset.png", 
-    "icontag": null, 
-    "panel": "Material", 
-    "tab": "Revit", 
-    "title": "Modify Thermal Asset", 
-    "typename": "ModifyThermalAsset", 
-    "uuid": "2c8f541a-f831-41e1-9e19-3c5a9b07aed4"
-  }, 
-  {
-    "desc": "Analyzes given instance of Thermal Asset", 
-    "iconsrc": "/static/images/GH/AnalyzeThermalAsset.png", 
-    "icontag": null, 
-    "panel": "Material", 
-    "tab": "Revit", 
-    "title": "Analyze Thermal Asset", 
-    "typename": "AnalyzeThermalAsset", 
-    "uuid": "c3be363d-c01d-4cf3-b8d2-c345734ae66d"
-  }, 
-  {
-    "desc": "Modify given Appearance asset of \"Generic\" schema", 
-    "iconsrc": "/static/images/GH/ModifyGenericShader.png", 
-    "icontag": null, 
-    "panel": "Material", 
-    "tab": "Revit", 
-    "title": "Modify Appearance Asset (Generic)", 
-    "typename": "ModifyGenericShader", 
-    "uuid": "73b2376b-d6c8-4095-b7ce-a66ef4c931e6"
-  }, 
-  {
     "desc": "Queries appearance, structural, and other assets from given material", 
     "iconsrc": "/static/images/GH/QueryAssetsOfMaterial.png", 
     "icontag": null, 
@@ -1468,86 +1418,6 @@
     "title": "Extract Material's Assets", 
     "typename": "QueryAssetsOfMaterial", 
     "uuid": "1f644064-035a-4fa1-971b-64d7da824f09"
-  }, 
-  {
-    "desc": "Replace existing assets on the given material, with given assets", 
-    "iconsrc": "/static/images/GH/ModifyAssetsOfMaterial.png", 
-    "icontag": null, 
-    "panel": "Material", 
-    "tab": "Revit", 
-    "title": "Replace Material's Assets", 
-    "typename": "ModifyAssetsOfMaterial", 
-    "uuid": "2f1ec561-2c4b-4c44-9587-12b32c6b8351"
-  }, 
-  {
-    "desc": "Construct Bitmap Asset", 
-    "iconsrc": "/static/images/GH/ConstructBitmapTexture.png", 
-    "icontag": null, 
-    "panel": "Material", 
-    "tab": "Revit", 
-    "title": "Construct Bitmap Asset", 
-    "typename": "ConstructBitmapTexture", 
-    "uuid": "37b63660-c083-45e3-9b98-cfdd2b539055"
-  }, 
-  {
-    "desc": "Construct Checker Asset", 
-    "iconsrc": "/static/images/GH/ConstructCheckerTexture.png", 
-    "icontag": null, 
-    "panel": "Material", 
-    "tab": "Revit", 
-    "title": "Construct Checker Asset", 
-    "typename": "ConstructCheckerTexture", 
-    "uuid": "2332c031-de18-43a9-b41f-6405e1460c06"
-  }, 
-  {
-    "desc": "Create a new instance of Appearance asset of \"Generic\" schema inside document", 
-    "iconsrc": "/static/images/GH/CreateGenericShader.png", 
-    "icontag": null, 
-    "panel": "Material", 
-    "tab": "Revit", 
-    "title": "Create Appearance Asset (Generic)", 
-    "typename": "CreateGenericShader", 
-    "uuid": "0f251f87-317b-4669-bc70-22b29d3eba6a"
-  }, 
-  {
-    "desc": "Deconstruct Bitmap Asset", 
-    "iconsrc": "/static/images/GH/DeconstructBitmapTexture.png", 
-    "icontag": null, 
-    "panel": "Material", 
-    "tab": "Revit", 
-    "title": "Deconstruct Bitmap Asset", 
-    "typename": "DeconstructBitmapTexture", 
-    "uuid": "77b391db-014a-4964-8810-5927df0dd7bb"
-  }, 
-  {
-    "desc": "Deconstruct Checker Asset", 
-    "iconsrc": "/static/images/GH/DeconstructCheckerTexture.png", 
-    "icontag": null, 
-    "panel": "Material", 
-    "tab": "Revit", 
-    "title": "Deconstruct Checker Asset", 
-    "typename": "DeconstructCheckerTexture", 
-    "uuid": "d44a1497-ae52-4e4d-ab8e-962195177fbb"
-  }, 
-  {
-    "desc": "Material Identity Data", 
-    "iconsrc": "/static/images/GH/MaterialIdentity.png", 
-    "icontag": null, 
-    "panel": "Material", 
-    "tab": "Revit", 
-    "title": "Material Identity", 
-    "typename": "MaterialIdentity", 
-    "uuid": "222b42df-16f6-4866-b065-fb77aadbd973"
-  }, 
-  {
-    "desc": "Get document materials list", 
-    "iconsrc": "/static/images/GH/QueryMaterials.png", 
-    "icontag": null, 
-    "panel": "Material", 
-    "tab": "Revit", 
-    "title": "Query Materials", 
-    "typename": "QueryMaterials", 
-    "uuid": "94af13c1-ce70-46b5-9103-24b46e2f7375"
   }, 
   {
     "desc": "Gets the parameter value of a specified Revit Element", 
@@ -1640,16 +1510,6 @@
     "uuid": "c6dec111-eac6-4047-8618-28ee144d55c5"
   }, 
   {
-    "desc": "Create a Revit material by name", 
-    "iconsrc": "/static/images/GH/MaterialByName.png", 
-    "icontag": null, 
-    "panel": "Material", 
-    "tab": "Revit", 
-    "title": "Create Material", 
-    "typename": "MaterialByName", 
-    "uuid": "3aedba3c-1b77-4c52-a7fc-7ca7095f730e"
-  }, 
-  {
     "desc": "Given a Curve, it adds a Curve element to the active Revit document", 
     "iconsrc": "/static/images/GH/ModelLineByCurve.png", 
     "icontag": null, 
@@ -1710,13 +1570,13 @@
     "uuid": "0f7da57e-6c05-4dd0-aabf-69e42df38859"
   }, 
   {
-    "desc": "Get document model elements list", 
-    "iconsrc": null, 
-    "icontag": "Q", 
+    "desc": "Get elements visible in a view", 
+    "iconsrc": "/static/images/GH/QueryViewElements.png", 
+    "icontag": null, 
     "panel": "Element", 
     "tab": "Revit", 
-    "title": "Query Graphical Elements", 
-    "typename": "QueryGraphicalElements", 
+    "title": "Query View Elements", 
+    "typename": "QueryViewElements", 
     "uuid": "79daea3a-13a3-49bf-8beb-aa28e3be4515"
   }, 
   {
@@ -1728,16 +1588,6 @@
     "title": "Add Railing", 
     "typename": "RailingByCurve", 
     "uuid": "601ac666-e369-464e-ae6f-34e01b9dba3b"
-  }, 
-  {
-    "desc": "Analyze given Sloped Glazing Roof element", 
-    "iconsrc": null, 
-    "icontag": "A", 
-    "panel": "Roof", 
-    "tab": "Revit", 
-    "title": "Analyze Sloped Glazing Roof", 
-    "typename": "AnalyzeFootPrintRoof", 
-    "uuid": "d7800083-7950-4c3f-8b86-f162ba36144c"
   }, 
   {
     "desc": "Given its outline curve, it adds a Roof element to the active Revit document", 
@@ -1865,7 +1715,7 @@
     "icontag": null, 
     "panel": "Wall", 
     "tab": "Revit", 
-    "title": "Add Wall", 
+    "title": "Add Wall (Curve)", 
     "typename": "WallByCurve", 
     "uuid": "37a8c46f-cb5b-49fd-a483-b03d1fe14a22"
   }, 
@@ -1968,6 +1818,16 @@
     "title": "Analyze Panel", 
     "typename": "AnalyzeCurtainGridPanel", 
     "uuid": "08507225-c8da-44a8-a282-c9b1af1c61f4"
+  }, 
+  {
+    "desc": "Given a base curve and profile curves, it adds a Wall element to the active Revit document", 
+    "iconsrc": "/static/images/GH/WallByProfile.png", 
+    "icontag": null, 
+    "panel": "Wall", 
+    "tab": "Revit", 
+    "title": "Add Wall (Profile)", 
+    "typename": "WallByProfile", 
+    "uuid": "78b02ae8-2b78-45a7-962e-92e7d9097598"
   }, 
   {
     "desc": "Get all document walls", 
