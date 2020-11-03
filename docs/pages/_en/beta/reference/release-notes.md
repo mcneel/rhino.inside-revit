@@ -10,10 +10,68 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html version="0.0.7612.19612" time="11/03/2020 10:53:44" %}
+### New features
+* Added 'Material Identity' component.
+* Added 'Material Graphics' component.
+* Added 'Extract Material Assets' component.
+* Added 'Replace Material Assets' component.
+* Added 'Crate-Analyze-Modify Appearance Asset' components.
+* Added 'Crate-Analyze-Modify Physical Asset' components.
+* Added 'Crate-Analyze-Modify Thermal Asset' components.
+* Added 'Construct-Deconstruct Bitmap Asset' components.
+* Added 'Construct-Deconstruct Checker Asset' components.
+* Added 'Add Wall (Profile)' component.
+* Added 'Fill Pattern' parameter.
+* Added 'Line Pattern' parameter.
+* Added modify capabilities to the 'Categories Object Styles' component.
+* Added context menu pickers to 'Level' and 'Grid' parameters.
+* Implemented `Name` property in to `Types.Category` this enables subCategory renaming.
+* Improved 'Query Categories', now is faster and able to report internal categories.
+* Added 'Element Location' component.
+* Added 'Element Curve' component.
+* Added 'Host Curtain Grids' component.
+* Added 'Query Grids' component.
+* Added more params to 'Query Levels' component.
+
+### Fixes
+* Fixed 'Similar Types' to work with multiple documents.
+* Now every *Parameter* that references Revit elements will be expired when the user modify the Revit document. If the modify operation is not UNDO or REDO the Grasshopper solution will be computed again.
+* Now 'Bounding Box Filter' accepts any 'Geometry' to extract the bounding box.
+* Fixed 'Document Save' component.
+
+### Minor Changes
+* Added at 'Query Elements' an input parameter 'Limit' and an output parameter 'Count' to help on big models.
+* Renamed 'Graphical Element Geometry' by 'Element View Geometry'
+* Renamed 'Query Graphical Elements' by 'Query View Elements'
+* Component 'Inspect' now ignores Parameters that are not basic types.
+* Rewritten 'Logical And Filter' and 'Logical Or Filter' to take multiple filters.
+* Added support for `DB.ReferencePlane`.
+* Improved non-axis-aligned bounding box support.
+* Improved `Types.Grid` preview on Rhino.
+* Improved `Types.CurtainGrid` preview on Rhino.
+
+### API
+* Now Rhino.Inside Revit requires Rhino 7.0.20301.12003-beta
+* Added *DEBUG* Rhino System folder to `Addin.SystemDir`
+* Added `TransactionChain` class.
+* Added `AdaptiveTransaction` class.
+* Added `CommitScope` extension method to `DB.Document` class.
+* Added `RollBackScope` extension method to `DB.Document` class.
+* Now `DB.Element.GetParameters` ignores parameters that are not basic types.
+* Added `WhereCategoryIdEqualsTo` extension method to `DB.FilteredElementCollector`. `DB.FilteredElementCollector.OfCategoryId` ignores `DB.ElementId.InvalidElementId`.
+* Added `RhinoInside.Revit.External.DB.BuiltInLinePattern` enum.
+* Added `DB.Document.GetCategories` extension method to enumerate all `DB.Category` instances.
+* Added concept of <None> elements.
+* Now `Types.ElementId` caches the `DB.Element` value. This improve performance specially for `Types.Category`.
+* Now `ErrorReport.CLRVersion` returns the running CLR Product version. `ErrorReport.CLRMaxVersion` returns the maximum installed CLR version.
+* Added `Types.Element.Value` to access the internal `DB.Element`.
+* Added `Types.GraphicalElement.DisableJoinsScope` to temporary disallow joins on and from this element.
+
 {% include ltr/release-header.html version="0.0.7571.33757" time="09/23/2020 18:45:14" %}
 ### New features
 * Added icon for 'Add Railing' component.
-* Added 'Pin Element' component
+* Added 'Pin Element' component.
 * Added 'Flip Element' component.
 
 ### Fixes
