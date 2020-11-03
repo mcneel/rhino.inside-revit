@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
@@ -14,11 +15,10 @@ namespace RhinoInside.Revit.GH.Types
   public class HostObject : InstanceElement, IGH_HostObject
   {
     protected override Type ScriptVariableType => typeof(DB.HostObject);
-    public static explicit operator DB.HostObject(HostObject value) => value?.Value;
     public new DB.HostObject Value => base.Value as DB.HostObject;
 
-    public HostObject() { }
-    public HostObject(DB.HostObject host) : base(host) { }
+    protected internal HostObject() { }
+    protected internal HostObject(DB.HostObject host) : base(host) { }
 
     public override Plane Location
     {
@@ -76,6 +76,23 @@ namespace RhinoInside.Revit.GH.Types
         return base.Location;
       }
     }
+
+    public IList<CurtainGrid> CurtainGrids
+    {
+      get
+      {
+        var grids = default(IEnumerable<DB.CurtainGrid>);
+        switch (Value)
+        {
+          case DB.CurtainSystem curtainSystem: grids = curtainSystem.CurtainGrids?.Cast<DB.CurtainGrid>(); break;
+          case DB.ExtrusionRoof extrusionRoof: grids = extrusionRoof.CurtainGrids?.Cast<DB.CurtainGrid>(); break;
+          case DB.FootPrintRoof footPrintRoof: grids = footPrintRoof.CurtainGrids?.Cast<DB.CurtainGrid>(); break;
+          case DB.Wall wall: grids = wall.CurtainGrid is null ? null : Enumerable.Repeat(wall.CurtainGrid, 1); break;
+        }
+
+        return grids.Select(x => new CurtainGrid(Value, x)).ToArray();
+      }
+    }
   }
 
   [Kernel.Attributes.Name("Host Type")]
@@ -85,10 +102,9 @@ namespace RhinoInside.Revit.GH.Types
   public class HostObjectType : ElementType, IGH_HostObjectType
   {
     protected override Type ScriptVariableType => typeof(DB.HostObjAttributes);
-    public static explicit operator DB.HostObjAttributes(HostObjectType value) => value?.Value;
     public new DB.HostObjAttributes Value => base.Value as DB.HostObjAttributes;
 
-    public HostObjectType() { }
-    public HostObjectType(DB.HostObjAttributes type) : base(type) { }
+    protected internal HostObjectType() { }
+    protected internal HostObjectType(DB.HostObjAttributes type) : base(type) { }
   }
 }

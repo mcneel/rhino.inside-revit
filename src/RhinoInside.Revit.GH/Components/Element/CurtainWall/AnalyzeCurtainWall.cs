@@ -35,7 +35,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
       manager.AddParameter(
-        param: new Parameters.DataObject<DB.CurtainGrid>(),
+        param: new Parameters.CurtainGrid(),
         name: "Curtain Grid",
         nickname: "CG",
         description: "Curtain Grid definition associated with input Curtain Wall",
@@ -60,7 +60,7 @@ namespace RhinoInside.Revit.GH.Components
       // only process curtain walls
       if (wallInstance.WallType.Kind == DB.WallKind.Curtain)
       {
-        DA.SetData("Curtain Grid", new Types.DataObject<DB.CurtainGrid>(wallInstance.CurtainGrid, sourceDoc: wallInstance.Document));
+        DA.SetData("Curtain Grid", new Types.CurtainGrid(wallInstance, wallInstance.CurtainGrid));
 
         // determine if curtain wall is embeded in another wall
         // find all the wall elements that are intersecting the bbox of this wall

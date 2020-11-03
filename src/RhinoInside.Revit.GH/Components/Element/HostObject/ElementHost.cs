@@ -60,6 +60,10 @@ namespace RhinoInside.Revit.GH.Components
         using (var collector = new DB.FilteredElementCollector(element.Document))
         {
           var elementCollector = collector.OfClass(typeof(DB.HostObject));
+
+          if (element.Category.Parent is DB.Category hostCategory)
+            elementCollector = elementCollector.OfCategoryId(hostCategory.Id);
+
           var bboxFilter = new DB.BoundingBoxIntersectsFilter(new DB.Outline(bbox.Min, bbox.Max));
           elementCollector = elementCollector.WherePasses(bboxFilter);
 

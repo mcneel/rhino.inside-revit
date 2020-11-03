@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.GH.Components.Element.HostObject
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(new Parameters.DataObject<DB.CurtainGrid>(), "Curtain Grids", "CG", "Curtain grids hosted on Host element", GH_ParamAccess.list);
+      manager.AddParameter(new Parameters.CurtainGrid(), "Curtain Grids", "CG", "Curtain grids hosted on Host element", GH_ParamAccess.list);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -37,17 +37,7 @@ namespace RhinoInside.Revit.GH.Components.Element.HostObject
       if (!DA.GetData("Host", ref host) || host is null)
         return;
 
-      var curtainGrids = default(IEnumerable<DB.CurtainGrid>);
-      switch (host.Value)
-      {
-        case DB.CurtainSystem curtainSystem: curtainGrids = curtainSystem.CurtainGrids?.Cast<DB.CurtainGrid>(); break;
-        case DB.ExtrusionRoof extrusionRoof: curtainGrids = extrusionRoof.CurtainGrids?.Cast<DB.CurtainGrid>(); break;
-        case DB.FootPrintRoof footPrintRoof: curtainGrids = footPrintRoof.CurtainGrids?.Cast<DB.CurtainGrid>(); break;
-        case DB.Wall wall: curtainGrids = wall.CurtainGrid is null ? null : Enumerable.Repeat(wall.CurtainGrid, 1); break;
-      }
-
-      if(curtainGrids is object)
-        DA.SetDataList("Curtain Grids", curtainGrids.Select(x => new Types.DataObject<DB.CurtainGrid>(x, host.Document)));
+      DA.SetDataList("Curtain Grids", host.CurtainGrids);
     }
   }
 }
