@@ -78,8 +78,10 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    bool GH_IO.GH_ISerializable.Write(GH_IWriter writer) => false;
-    bool GH_IO.GH_ISerializable.Read(GH_IReader reader) => false;
+    bool GH_IO.GH_ISerializable.Write(GH_IWriter writer) => Write(writer);
+    bool GH_IO.GH_ISerializable.Read(GH_IReader reader) => Read(reader);
+    protected virtual bool Write(GH_IWriter writer) => false;
+    protected virtual bool Read(GH_IReader reader) => false;
     #endregion
 
     protected DocumentObject() { }

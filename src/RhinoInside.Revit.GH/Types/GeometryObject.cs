@@ -69,34 +69,6 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
-    #region GH_ISerializable
-    bool GH_IO.GH_ISerializable.Read(GH_IReader reader)
-    {
-      UnloadElement();
-
-      var documentGUID = Guid.Empty;
-      reader.TryGetGuid("DocumentGUID", ref documentGUID);
-      DocumentGUID = documentGUID;
-
-      string uniqueID = string.Empty;
-      reader.TryGetString("UniqueID", ref uniqueID);
-      UniqueID = uniqueID;
-
-      return true;
-    }
-
-    bool GH_IO.GH_ISerializable.Write(GH_IWriter writer)
-    {
-      if (DocumentGUID != Guid.Empty)
-        writer.SetGuid("DocumentGUID", DocumentGUID);
-
-      if(!string.IsNullOrEmpty(UniqueID))
-        writer.SetString("UniqueID", UniqueID);
-
-      return true;
-    }
-    #endregion
-
     #region IGH_Goo
     public override bool IsValid => Value is X;
     #endregion
