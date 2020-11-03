@@ -120,6 +120,9 @@ namespace Grasshopper.Kernel
               {
                 foreach (var input in compoennt.Params.Input)
                 {
+                  if (input.Type == typeof(IGH_Goo) || input.Type == typeof(IGH_GeometricGoo))
+                    continue;
+
                   if (input.GetType() == param.GetType() || input.Type.IsAssignableFrom(paramType))
                   {
                     components.Add(compoennt);
