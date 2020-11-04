@@ -16,9 +16,9 @@ Some of the changes mentioned in sections below, might break your existing Grass
 * Added 'Material Graphics' component.
 * Added 'Extract Material Assets' component.
 * Added 'Replace Material Assets' component.
-* Added 'Crate-Analyze-Modify Appearance Asset' components.
-* Added 'Crate-Analyze-Modify Physical Asset' components.
-* Added 'Crate-Analyze-Modify Thermal Asset' components.
+* Added 'Create-Analyze-Modify Appearance Asset' components.
+* Added 'Create-Analyze-Modify Physical Asset' components.
+* Added 'Create-Analyze-Modify Thermal Asset' components.
 * Added 'Construct-Deconstruct Bitmap Asset' components.
 * Added 'Construct-Deconstruct Checker Asset' components.
 * Added 'Add Wall (Profile)' component.
