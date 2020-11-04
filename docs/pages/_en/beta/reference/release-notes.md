@@ -39,6 +39,7 @@ Some of the changes mentioned in sections below, might break your existing Grass
 * Now every *Parameter* that references Revit elements will be expired when the user modify the Revit document. If the modify operation is not UNDO or REDO the Grasshopper solution will be computed again.
 * Now 'Bounding Box Filter' accepts any 'Geometry' to extract the bounding box.
 * Fixed 'Document Save' component.
+* Fixed #331: Set Linked Levels/Grids not working
 
 ### Minor Changes
 * Added at 'Query Elements' an input parameter 'Limit' and an output parameter 'Count' to help on big models.
