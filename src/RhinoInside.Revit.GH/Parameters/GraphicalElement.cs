@@ -152,6 +152,24 @@ namespace RhinoInside.Revit.GH.Parameters
       return GH_GetterResult.success;
     }
 
+    class LinkedElementSelectionFilter : ISelectionFilter
+    {
+      readonly ISelectionFilter SelectionFilter;
+      public LinkedElementSelectionFilter(ISelectionFilter filter) => SelectionFilter = filter;
+
+      public bool AllowElement(DB.Element elem) => elem is DB.RevitLinkInstance;
+      public bool AllowReference(DB.Reference reference, DB.XYZ position)
+      {
+        if (reference.ElementReferenceType == DB.ElementReferenceType.REFERENCE_TYPE_NONE)
+        {
+          if (Revit.ActiveUIDocument.Document.GetElement(reference) is DB.RevitLinkInstance link)
+            return SelectionFilter.AllowElement(link.GetLinkDocument().GetElement(reference.LinkedElementId));
+        }
+
+        return false;
+      }
+    }
+
     protected GH_GetterResult Prompt_Elements(ref GH_Structure<T> value, ObjectType objectType, bool multiple, bool preSelect)
     {
       var uiDocument = Revit.ActiveUIDocument;
@@ -173,16 +191,20 @@ namespace RhinoInside.Revit.GH.Parameters
       var result = Autodesk.Revit.UI.Result.Failed;
       var references = default(IList<DB.Reference>);
       {
+        var selectionFilter = objectType == ObjectType.LinkedElement ?
+          new LinkedElementSelectionFilter(this) :
+          (ISelectionFilter) this;
+
         if (multiple)
         {
           if(preSelect)
-            result = uiDocument.PickObjects(out references, objectType, this, string.Empty, activeElements);
+            result = uiDocument.PickObjects(out references, objectType, selectionFilter, string.Empty, activeElements);
           else
-            result = uiDocument.PickObjects(out references, objectType, this);
+            result = uiDocument.PickObjects(out references, objectType, selectionFilter);
         }
         else
         {
-          result = uiDocument.PickObject(out var reference, objectType, this);
+          result = uiDocument.PickObject(out var reference, objectType, selectionFilter);
           if (result == Autodesk.Revit.UI.Result.Succeeded)
             references = new DB.Reference[] { reference };
         }
