@@ -21,6 +21,8 @@ Each one of these aspects is represented by a tab in the Revit material editor w
 
 In the sections below, we will discuss how to deal with all of these 5 aspects using {{ site.terms.rir }}
 
+{% include youtube_player.html id="8CdhieEi6Os" %}
+
 ## Querying Materials
 
 {% capture api_note %}
