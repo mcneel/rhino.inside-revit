@@ -143,8 +143,6 @@ To replace assets of a material with a different asset, use the {% include ltr/c
 
 *Appearance* Assets are called the rendering material in other products. There are many components in Grasshopper to manipulate *Appearance* assets.
 
-&nbsp;
-
 {% include youtube_player.html id="0fZVXCWRPr0" %}
 
 There are many *Appearance* assets in Revit API. As an example, you can use {% include ltr/comp.html uuid='0f251f87-' %} to create a *Generic* appearance asset and assign that to a Revit material using the {% include ltr/comp.html uuid='2f1ec561-' %} component:
