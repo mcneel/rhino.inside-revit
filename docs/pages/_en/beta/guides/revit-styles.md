@@ -2,6 +2,7 @@
 title: Styles and Patterns
 order: 91
 group: Configurations
+ghdef: revit-styles.ghx
 ---
 
 ## Line Patterns

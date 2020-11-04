@@ -2,6 +2,7 @@
 title: Materials
 order: 50
 group: Modeling
+ghdef: revit-materials.ghx
 ---
 
 Materials are one of the more complicated data types in Revit. They are regularly used to (a) assign graphical properties to Revit elements for drafting (e.g. tile pattern on a bathroom wall), (b) embed architectural finish information in the building model for the purpose of scheduling and takeouts, (c) assign appearance properties to surfaces for architectural visualizations, and (d) assign physical and (e) thermal properties to elements for mathematical analysis of all kinds.

@@ -192,6 +192,12 @@ pre {
     image-rendering: -webkit-optimize-contrast;
 }
 
+.page-gh-download {
+    display: inline;
+    float: right;
+    margin-top: 12px;
+}
+
 /* post article contents */
 .post-content h2 {
     border-bottom: 1px dashed #d0d0d0;

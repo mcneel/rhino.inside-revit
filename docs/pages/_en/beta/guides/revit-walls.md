@@ -2,6 +2,7 @@
 title: Walls (Basic & Stacked)
 order: 40
 group: Modeling
+ghdef: revit-walls.ghx
 ---
 
 ## Querying Wall Types
@@ -227,6 +228,5 @@ Use the {% include ltr/comp.html uuid='37a8c46f' %} component to create a new wa
 Use the {% include ltr/comp.html uuid='78b02ae8' %} component to create a new wall based on the given profile curves. Note that the profile must be a closed loop. In this example the {% include ltr/comp.html uuid='ef607c2a' %} parameter is referencing a series of Revit model lines:
 
 ![]({{ "/static/images/guides/revit-walls-byprofile.png" | prepend: site.baseurl }})
-
 
 <!-- https://github.com/mcneel/rhino.inside-revit/issues/46 -->

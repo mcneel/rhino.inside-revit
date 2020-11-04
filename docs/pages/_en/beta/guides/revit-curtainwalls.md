@@ -2,6 +2,7 @@
 title: Curtain Walls & Systems
 order: 41
 group: Modeling
+ghdef: revit-curtainwalls.ghx
 ---
 
 <!-- Curtain Walls -->

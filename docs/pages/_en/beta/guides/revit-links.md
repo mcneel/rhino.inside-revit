@@ -2,6 +2,7 @@
 title: Links
 order: 74
 group: Geometry Containers
+ghdef: revit-links.ghx
 ---
 
 ## Querying Linked Documents

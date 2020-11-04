@@ -2,6 +2,7 @@
 title: "Data Model: Parameters"
 order: 31
 group: Revit Basics
+ghdef: revit-params.ghx
 ---
 
 In this guide we will take a look at how to read the parameters from a Revit element using Grasshopper. But first let's take a look at various parameter types that we encounter when working with Revit elements.
