@@ -3,7 +3,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
 using DBX = RhinoInside.Revit.External.DB;
 
-namespace RhinoInside.Revit.GH.Parameters
+namespace RhinoInside.Revit.GH.Parameters.Input
 {
   public class CurtainGridLayout_ValueList : GH_ValueList
   {

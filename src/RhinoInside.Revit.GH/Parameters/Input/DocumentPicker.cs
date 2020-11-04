@@ -7,7 +7,7 @@ using RhinoInside.Revit.External.DB;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Parameters
+namespace RhinoInside.Revit.GH.Parameters.Input
 {
   public abstract class DocumentPicker : GH_ValueList, Kernel.IGH_ElementIdParam
   {

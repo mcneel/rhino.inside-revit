@@ -3,7 +3,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
 using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Parameters
+namespace RhinoInside.Revit.GH.Parameters.Input
 {
 #if REVIT_2019
   public class ThermalMaterialType_ValueList : GH_ValueList

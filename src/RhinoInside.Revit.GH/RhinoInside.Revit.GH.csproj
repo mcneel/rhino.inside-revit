@@ -322,12 +322,14 @@
     <Compile Include="Parameters\AssetPropertyDouble4DMap.cs" />
     <Compile Include="Extensions\Grasshopper\Kernel\Parameters\Param_ColorRGBA.cs" />
     <Compile Include="Parameters\CurtainGrid.cs" />
+    <Compile Include="Parameters\Input\BuiltInParameter.cs" />
     <Compile Include="Parameters\Input\CurtainGridAlignType_ValueList.cs" />
     <Compile Include="Parameters\Input\CurtainGridJoinCondition_ValueList.cs" />
     <Compile Include="Parameters\Input\CurtainGridLayout_ValueList.cs" />
     <Compile Include="Parameters\Input\CurtainMullionPosition_ValueList.cs" />
     <Compile Include="Parameters\Input\CurtainMullionSystemFamily_ValueList.cs" />
     <Compile Include="Parameters\Input\DeckEmbeddingType_ValueList.cs" />
+    <Compile Include="Parameters\Input\DocumentPicker.cs" />
     <Compile Include="Parameters\Input\ElementTypeByName.cs" />
     <Compile Include="Parameters\Input\EndCapCondition_ValueList.cs" />
     <Compile Include="Parameters\Input\LayerFunction_ValueList.cs" />
@@ -357,7 +359,6 @@
     <Compile Include="Parameters\DatumPlane.cs" />
     <Compile Include="Parameters\DirectShapeCategories.cs" />
     <Compile Include="Parameters\Document.cs" />
-    <Compile Include="Parameters\DocumentPicker.cs" />
     <Compile Include="Parameters\Element.cs" />
     <Compile Include="Parameters\ElementFilter.cs" />
     <Compile Include="Parameters\ElementType.cs" />
