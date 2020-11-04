@@ -93,6 +93,10 @@ Revit API support for assets is very limited. This note section, attempts to des
 
 **Appearance Assets**
 
+*Appearance* Assets are called the rendering material in other products. There are many components in Grasshopper to manipulate *Appearance* assets.
+
+{% include youtube_player.html id="0fZVXCWRPr0" %}
+
 All *Appearance* assets are of type {% include api_type.html type='Autodesk.Revit.DB.Visual.Asset' title='DB.Visual.Asset' %} and are basically a collection of visual properties that have a name e.g. `generic_diffuse`, a type, and a value. The {% include api_type.html type='Autodesk.Revit.DB.Visual.Asset' title='DB.Visual.Asset' %} has lookup methods to find and return these properties. These properties are wrapped by the type {% include api_type.html type='Autodesk.Revit.DB.Visual.AssetProperty' title='DB.Visual.AssetProperty' %} in Revit API. This type provides getters to extract the value from the property.
 
 &nbsp;
