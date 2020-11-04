@@ -9,7 +9,7 @@ using RhinoInside.Revit.Convert.Geometry.Raw;
 using RhinoInside.Revit.Convert.System.Collections.Generic;
 using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Site
 {
 #if REVIT_2019
   public class TopographyByMesh : ReconstructElementComponent
