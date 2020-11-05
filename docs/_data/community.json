@@ -51,7 +51,7 @@
         "thumbnail": "http://i3.ytimg.com/vi/fEjVrJuR1ik/maxresdefault.jpg",
         "author": "How to Rhino Facebook Group",
         "authorUrl": "https://www.facebook.com/groups/howtorhino",
-        "description": "his is a short recap of Rhino.Inside.Revit plugin which allows Revit and other apps to run Rhino and Grasshopper within Revit application. Keep in mind that this works only with Rhino 7 work in progress version. With this plugin, you can easily import and export geometry from Revit to Rhino and Grasshopper and the other way around. As this is a native McNeel development tool, it is going to be a game changer when it comes to having the ability to use parametric modeling techniques in Grasshopper and have all of that work seamlessly in a BIM tool such as Revit"
+        "description": "This is a short recap of Rhino.Inside.Revit plugin which allows Revit and other apps to run Rhino and Grasshopper within Revit application. Keep in mind that this works only with Rhino 7 work in progress version. With this plugin, you can easily import and export geometry from Revit to Rhino and Grasshopper and the other way around. As this is a native McNeel development tool, it is going to be a game changer when it comes to having the ability to use parametric modeling techniques in Grasshopper and have all of that work seamlessly in a BIM tool such as Revit"
     },
     {
         "type": "video",
