@@ -1,11 +1,13 @@
 ---
 title: Transfer Rhino to Revit
+description: This sample shows how to take normal Rhino breps, curves and points into Revit. There are a lot of ways to bring in the Rhino geometry, but in this case we will be bringing them in as DirectShape elements
+thumbnail: /static/images/discover/transfer-rhino-to-revit04.jpg
 ---
 
 <!-- intro video -->
 {% include youtube_player.html id="7kNYSJ3kdqw" %}
 
-{% include ltr/download_pkg.html archive='/static/samples/transfer-rhino-to-revit.zip' %}
+{% include ltr/download_pkg.html archive='/static/archives/transfer-rhino-to-revit.zip' %}
 
 
 ## Files
@@ -26,7 +28,7 @@ The component necessary:
 - DirectShape from Geometry
 - Brep Param component in Grasshopper
 
-![]({{ "/static/images/samples/transfer-rhino-to-revit01.jpg" | prepend: site.baseurl }})
+![]({{ "/static/images/discover/transfer-rhino-to-revit01.jpg" | prepend: site.baseurl }})
 Once you select the Breps, those will feed into the Direct component.
 
 ### Live-linking Points
@@ -36,7 +38,7 @@ The component necessary:
 - Curve from Geometry
 - Curve Param component in Grasshopper
 
-![]({{ "/static/images/samples/transfer-rhino-to-revit02.jpg" | prepend: site.baseurl }})
+![]({{ "/static/images/discover/transfer-rhino-to-revit02.jpg" | prepend: site.baseurl }})
 Once you select the curves, those will feed into Revit.
 
 ### Bringing in complex curves
@@ -46,5 +48,5 @@ The component necessary:
 - Curve from Geometry
 - Curve Param component in Grasshopper
 
-![]({{ "/static/images/samples/transfer-rhino-to-revit03.jpg" | prepend: site.baseurl }})
+![]({{ "/static/images/discover/transfer-rhino-to-revit03.jpg" | prepend: site.baseurl }})
 Once you select the points, those will feed into Revit.

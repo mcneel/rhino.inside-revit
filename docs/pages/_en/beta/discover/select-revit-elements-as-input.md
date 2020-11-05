@@ -1,11 +1,13 @@
 ---
 title: Creating Roof From Wall Edges
+description: This sample shows how to Select Revit Element edges as input to a Grasshopper lofted surface. Using Revit objects as input to Grasshopper definitions allows for a dynamic editing directly in Revit and making Grasshopper interactive within the the Revit model
+thumbnail: /static/images/discover/select-revit-elements-as-input04.jpg
 ---
 
 <!-- intro video -->
 {% include youtube_player.html id="VsE5uWQ-_oM" %}
 
-{% include ltr/download_pkg.html archive='/static/samples/select-revit-elements-as-input.zip' %}
+{% include ltr/download_pkg.html archive='/static/archives/select-revit-elements-as-input.zip' %}
 
 
 ## Files
@@ -20,7 +22,7 @@ This sample shows how to Select Revit Element edges as input to a Grasshopper lo
 ### Selecting Revit Elements as Input
 On the Params tool tab is a Revit group which contains Revit element pickers including Revit Elements, Edges, Vertices and Faces.  Also available are the non-model elements such as Category, Type, Family, Grid, Level and Material.
 
-![]({{ "/static/images/samples/select-revit-elements-as-input01.jpg" | prepend: site.baseurl }}){: class="small-image"}
+![]({{ "/static/images/discover/select-revit-elements-as-input01.jpg" | prepend: site.baseurl }}){: class="small-image"}
 
 The components necessary:
 1. Revit Edge params
@@ -34,11 +36,11 @@ The components necessary:
 
 To start the definition, right click on the top Edge component: 
 
-![]({{ "/static/images/samples/select-revit-elements-as-input02.jpg" | prepend: site.baseurl }})
+![]({{ "/static/images/discover/select-revit-elements-as-input02.jpg" | prepend: site.baseurl }})
 
 Then select one of the Yellow edges on one side of the the Wall model. Use the Finish button under the Revit toolbar to finish the selection.
 
-![]({{ "/static/images/samples/select-revit-elements-as-input03.jpg" | prepend: site.baseurl }}){: class="small-image"}
+![]({{ "/static/images/discover/select-revit-elements-as-input03.jpg" | prepend: site.baseurl }}){: class="small-image"}
 
 Then right click and select to opposite edge. A preview loft surface should show up.
 

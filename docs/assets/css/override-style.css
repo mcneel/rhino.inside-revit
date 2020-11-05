@@ -332,14 +332,14 @@ pre {
     display: grid;
     grid-gap: 15px 10px;
     /* grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); */
-    grid-template-columns: auto auto auto;
+    grid-template-columns: auto auto auto auto;
     align-items: start;
-    grid-auto-rows: 230px;
+    grid-auto-rows: 200px;
 }
 
 .gallery-item {
     display: block;
-    min-height: 230px;
+    min-height: 200px;
     background-color: white;
     border: 1px solid #d0d0d0;
     border-radius: 5px;
@@ -363,8 +363,17 @@ pre {
 }
 
 .gallery-thumbnail {
-    height: 140px;
+    height: 110px;
     overflow: hidden;
+}
+
+.gallery-thumbnail-dim {
+    -webkit-filter: saturate(0.5);
+    filter: saturate(0.5);
+}
+
+.gallery-thumbnail-large {
+    height: 160px;
 }
 
 .gallery-info {

@@ -104,5 +104,20 @@
                 }
             )();
         </script>
+
+        <!-- gallery interaction -->
+        <script>
+            $(document).ready(function(){
+              $(".gallery-item").hover(function(){
+                    $(this).addClass("gallery-item-focused");
+                    $(this).find(".gallery-thumbnail").removeClass("gallery-thumbnail-dim");
+                    $(this).find(".extra").css("display", "block");
+                }, function(){
+                    $(this).removeClass("gallery-item-focused");
+                    $(this).find(".gallery-thumbnail").addClass("gallery-thumbnail-dim");
+                    $(this).find(".extra").css("display", "none");
+              });
+            });
+        </script>
     </body>
 </html>

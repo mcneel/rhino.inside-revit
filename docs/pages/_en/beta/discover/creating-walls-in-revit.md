@@ -1,11 +1,13 @@
 ---
 title: Creating Wall in Revit
+description: This sample shows how to take normal Rhino curve and create a set of Revit system family walls
+thumbnail: /static/images/discover/creating-walls-in-revit01.jpg
 ---
 
 <!-- banner image -->
-![]({{ "/static/images/samples/creating-walls-in-revit01.jpg" | prepend: site.baseurl }})
+![]({{ "/static/images/discover/creating-walls-in-revit01.jpg" | prepend: site.baseurl }})
 
-{% include ltr/download_pkg.html archive='/static/samples/creating-walls-in-revit.zip' %}
+{% include ltr/download_pkg.html archive='/static/archives/creating-walls-in-revit.zip' %}
 
 ## Files
 
@@ -25,6 +27,6 @@ This sample shows how to take normal Rhino curve and create a set of Revit syste
 1. Level Input Selector
 1. Slider for Wall Height
 
-![]({{ "/static/images/samples/creating-walls-in-revit02.png" | prepend: site.baseurl }})
+![]({{ "/static/images/discover/creating-walls-in-revit02.png" | prepend: site.baseurl }})
 
 After selecting the curve(s) in Rhino and the typical Wall in Revit for the wall family type, Grasshopper will generate the system family wall types in Revit.

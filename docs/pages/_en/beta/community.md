@@ -1,16 +1,18 @@
 ---
 title: Rhino.Inside.Revit Community
-layout: ltr/gallery-large
+layout: ltr/page-fullwidth
 toc: false
 ---
-
+{% capture community_note %}
 Welcome to the {{ site.terms.rir }} community. On this page, you will find the resources created by, and for the community. Please see the [Discussion Forums]({{ site.forum_url }}){: target='_blank'} to discuss features and potential issues and ask questions
+{% endcapture %}
+{% include ltr/bubble_note.html note=community_note %}
 
 <div class="gallery-large-grid">
     {% for item in site.data.community %}
     <div class="gallery-item" >
     <a href="{{ item.url }}" target="blank">
-        <div class="gallery-thumbnail">
+        <div class="gallery-thumbnail gallery-thumbnail-dim">
         {% if item.thumbnail %}
             <img src="{{ item.thumbnail}}" />
         {% else %}

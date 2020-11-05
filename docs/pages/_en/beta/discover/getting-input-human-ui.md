@@ -1,12 +1,14 @@
 ---
 title: Getting User Input using Human UI
+description: The example here requires the [HumanUI plugin for Grasshopper](https://www.food4rhino.com/app/human-ui). This is a plugin allowing Grasshopper to design and display dialog box interfaces. In this case the dialog interface will help edit the *Drawn by* and the *Checked by* sections of the title block
+thumbnail: /static/images/discover/user-input-humanui01.jpg
 ---
 
 <!-- intro video -->
 {% include youtube_player.html id="MxhpnDY8D2Q" %}
 
 
-{% include ltr/download_pkg.html archive='/static/samples/getting-input-human-ui.zip' %}
+{% include ltr/download_pkg.html archive='/static/archives/getting-input-human-ui.zip' %}
 
 
 ## Files
@@ -24,7 +26,7 @@ The example here requires the [HumanUI plugin for Grasshopper](https://www.food4
 
 This definition will run the *Human UI* dialog immediately without showing Grasshopper.
 
-![]({{ "/static/images/samples/user-input-humanui01.jpg" | prepend: site.baseurl }}){: class="small-image"}
+![]({{ "/static/images/discover/user-input-humanui01.jpg" | prepend: site.baseurl }}){: class="small-image"}
 
 Simply edit the Text filed and click on the update buttons to the right. The Titleblock will change. To see how the definition works, just open the Grasshopper canvas and open the script.
 

@@ -1,11 +1,13 @@
 ---
 title: Transfer Revit to Rhino
+description: This sample shows how to take Revit objects into Rhino
+thumbnail: /static/images/discover/transfer-revit-to-rhino03.jpg
 ---
 
 <!-- intro video -->
 {% include youtube_player.html id="lnKTkVhjztY" %}
 
-{% include ltr/download_pkg.html archive='/static/samples/transfer-revit-to-rhino.zip' %}
+{% include ltr/download_pkg.html archive='/static/archives/transfer-revit-to-rhino.zip' %}
 
 
 ## Files
@@ -30,16 +32,16 @@ The Grasshopper definition is split up in a series of categories with a button t
 
 Zoom into the top section of the definition where `Roofs` are going to be transferred.
 
-![]({{ "/static/images/samples/transfer-revit-to-rhino01.jpg" | prepend: site.baseurl }})
+![]({{ "/static/images/discover/transfer-revit-to-rhino01.jpg" | prepend: site.baseurl }})
 
 Click on the `Button` to the right of the definition.  This will activate and import the Roof geometry on a Layer in Rhino called Roof. 
 Click on the Zoom Extents icon in Rhino to find the Roof geometry.  This will set the view so you can see the rest of the transfers.
 Zoom in the next section in Grasshopper definition on the`Walls` section.
 
-![]({{ "/static/images/samples/transfer-revit-to-rhino02.jpg" | prepend: site.baseurl }})
+![]({{ "/static/images/discover/transfer-revit-to-rhino02.jpg" | prepend: site.baseurl }})
 
 Click on the `Button` to the right of the definition. This will bring in the walls.
 Go to each successive section in Grasshopper to bring in the rest of the categories.
 Set the view type in Rhino to Shaded
 
-![]({{ "/static/images/samples/transfer-revit-to-rhino03.jpg" | prepend: site.baseurl }})
+![]({{ "/static/images/discover/transfer-revit-to-rhino03.jpg" | prepend: site.baseurl }})

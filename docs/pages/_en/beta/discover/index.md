@@ -1,40 +1,46 @@
 ---
-title: Rhino.Inside.Revit Samples
-description: Official developer resources for Rhino and Grasshopper.  Rhino developer tools are royalty free and include support.
+title: Discover Rhino.Inside.Revit
+layout: ltr/page-fullwidth
 toc: false
 ---
 
-This section includes examples of using {{ site.terms.revit }} to solve many {{ site.terms.revit }} challenges.
+{% capture discover_note %}
+Discover more about {{ site.terms.rir }}! The resources here created are by the development team and other contributors, and showcase the power of {{ site.terms.rir }} in different workflows
+{% endcapture %}
+{% include ltr/bubble_note.html note=discover_note %}
 
-{% include ltr/warning_note.html note='Keep in mind that this project is in beta and does not fully cover all functions of the Revit API in its custom Revit components. Many of the guides and examples in this Wiki, use custom python components to create the necessary functionality. You are, however, free to grab the python components in these examples and use them in your own Grasshopper definitions' %}
 
-## Sample Files
-
-Each sample page listed here, has a ZIP package that might include one or more of the files listed here:
-
-- Sample Screenshot (`*.png`)
-- Grasshopper Definition (`*.gh`)
-- Rhino Model (`*.3dm`)
-- Revit Model (`*.rvt`)
-- Revit Family (`*.rfa`)
-
-You can download the archive for each sample by clicking on the download button included in each sample. Follow the directions provide in the sample article on how and when to open any of these files.
-
-## Current Samples
-
+<div class="gallery-large-grid">
 {% for collection in site.collections %}
-    {% if collection.label == page.collection %}
-        {% assign samples = collection.docs | sort:"order" %}
-<div>
-    <ul>
-        {% for sample in samples %}
-        {% if sample.toc and sample.title and sample.version == page.version and sample.categories == page.categories %}
-            <li>
-                    <a href="{{ sample.url | prepend: site.baseurl }}" title="{{ sample.description }}">{{ sample.title }}</a>
-            </li>
-        {% endif %}
-        {% endfor %}
-    </ul>
-</div>
+{% if collection.label == page.collection %}
+{% assign articles = collection.docs | sort:"order" %}
+{% for item in articles %}
+{% if item.toc and item.title and item.version == page.version and item.categories == page.categories %}
+<div class="gallery-item" >
+<a href="{{ item.url | prepend: site.baseurl }}">
+    <div class="gallery-thumbnail gallery-thumbnail-dim gallery-thumbnail-large">
+    {% if item.thumbnail %}
+        <img src="{{ item.thumbnail | prepend: site.baseurl }}" />
+    {% else %}
+        <img src="{{ site.baseurl }}/assets/img/gallery-placeholder.png" />
     {% endif %}
+    </div>
+</a>
+<div class="gallery-info">
+    <a class="title" href="{{ item.url | prepend: site.baseurl }}">{{ item.title }}</a>
+    <div class="extra">
+        {{ item.description | markdownify }}
+    </div>
+</div>
+</div>
+{% endif %}
 {% endfor %}
+{% endif %}
+{% endfor %}
+</div>
+
+## Sharing Your Discoveries
+
+Each discover page listed here, is a self-contained article on a specific topic. They also might have a ZIP package attached that includes one or more files (e.g. Sample Screenshot `*.png`, Grasshopper Definition `*.gh`, Rhino Model `*.3dm`, Revit Model `*.rvt`, Revit Family `*.rfa`)
+
+Visitors can download the archive for each article by clicking on the download button included on the page. You can create your own articles, following a similar format, and send us the markdown file of the article, plus all the images and attachments in a package and we can add them to this page. You can also follow the [wiki guidelines]({{ site.metawiki_url | prepend: site.repo_url }}) and submit a PR with your content.

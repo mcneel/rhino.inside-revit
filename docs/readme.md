@@ -697,7 +697,7 @@ This is the code used to generate the example locale block shown in the image ab
 This block is for buttons to download packages (Zip, ...)
 
 ```
-{% include ltr/download_pkg.html archive='/static/samples/column-family-along-curve.zip' %}
+{% include ltr/download_pkg.html archive='/static/archives/column-family-along-curve.zip' %}
 ```
 
 This block can accept two argument:

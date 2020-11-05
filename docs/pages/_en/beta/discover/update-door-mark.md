@@ -1,11 +1,13 @@
 ---
 title: Update Door Marks
+description: This sample shows how to updated properties on Revit elements
+thumbnail: /static/images/discover/update-door-mark01.jpg
 ---
 
 <!-- intro video -->
 {% include youtube_player.html id="MxhpnDY8D2Q" %}
 
-{% include ltr/download_pkg.html archive='/static/samples/update-door-mark.zip' %}
+{% include ltr/download_pkg.html archive='/static/archives/update-door-mark.zip' %}
 
 
 ## Files
@@ -23,11 +25,11 @@ title: Update Door Marks
 
 This definition will run immediately. Grasshopper will not show, and the player will start and finish. If you select one of the doors, you will see the Mark and Comment are now duplicated.
 
-![]({{ "/static/images/samples/update-door-mark01.jpg" | prepend: site.baseurl }})
+![]({{ "/static/images/discover/update-door-mark01.jpg" | prepend: site.baseurl }})
 
 Now take a look at the definition by selecting the Grasshopper Icon in the Revit Rhinoceros toolbar and opening the **door-param-script.gh** definition.
 
-![]({{ "/static/images/samples/update-door-mark02.jpg" | prepend: site.baseurl }})
+![]({{ "/static/images/discover/update-door-mark02.jpg" | prepend: site.baseurl }})
 
 The definition finds all the Doors setting a Category Filter and finding all the Elements of that Category. Then, using the *ParameterGet* Component each `Mark` is found for each door. Then the `Comments` parameter is set using the *ParameterSet* component.
 

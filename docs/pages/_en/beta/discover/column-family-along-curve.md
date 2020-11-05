@@ -1,12 +1,14 @@
 ---
 title: Create and Place Column Family Along Curve
+description: This sample shows how to create a new Revit family that contains geometry created in Rhino and Grasshopper
+thumbnail: /static/images/discover/column-family-curve01.jpg
 ---
 
 <!-- intro video -->
-![]({{ "/static/images/samples/column-family-curve01.jpg" | prepend: site.baseurl }})
+![]({{ "/static/images/discover/column-family-curve01.jpg" | prepend: site.baseurl }})
 
 
-{% include ltr/download_pkg.html archive='/static/samples/column-family-along-curve.zip' %}
+{% include ltr/download_pkg.html archive='/static/archives/column-family-along-curve.zip' %}
 
 
 ## Files
@@ -37,19 +39,19 @@ There are multiple ways to bring in the Rhino geometry, but in this case we need
 
 The first portion of this example, brings in the column Brep geometry from Rhino. Since Revit families are expected to have their geometry located at origin point, the part of the definition also moves the Brep geometry to the world origin (0,0,0 coordinates).
 
-![]({{ "/static/images/samples/column-family-curve02.png" | prepend: site.baseurl }})
+![]({{ "/static/images/discover/column-family-curve02.png" | prepend: site.baseurl }})
 
 ### Creating Revit Family
 
 The modified Brep geometry is then passed to the *Family.New* component alongside other inputs required to create a new Revit family.
 
-![]({{ "/static/images/samples/column-family-curve03.png" | prepend: site.baseurl }})
+![]({{ "/static/images/discover/column-family-curve03.png" | prepend: site.baseurl }})
 
 
 ### Placing Family Instances
 
 In this step, instances of the newly created family are places along the curve points. To insert a family instance, we use the *AddFamilyInstance.ByLocation* component. The *Family.GetTypes* component is used to get the first (and default) family type from the newly created family.
 
-![]({{ "/static/images/samples/column-family-curve04.png" | prepend: site.baseurl }})
+![]({{ "/static/images/discover/column-family-curve04.png" | prepend: site.baseurl }})
 
 As it is shown in the definition, the points on the curve are passed to the *AddFamilyInstance.ByLocation* component, however, to get the correct orientation for the column, the curve is evaluated at each point to create a rotated plane matching the curvature of the curve at the point.
