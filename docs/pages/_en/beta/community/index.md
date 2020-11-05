@@ -1,14 +1,36 @@
 ---
 title: Rhino.Inside.Revit Community
+layout: ltr/page-fullwidth
 toc: false
 ---
 
-Welcome to the {{ site.terms.rir }} community. On this section, you will find the resources created by and for the community.
+Welcome to the {{ site.terms.rir }} community. On this page, you will find the resources created by, and for the community. Please see the [Discussion Forums]({{ site.forum_url }}){: target='_blank'} to discuss features and potential issues and ask questions
 
-- Please see the [Discussion Forums]({{ site.forum_url }}){: target='_blank'} to discuss features and potential issues and ask questions
-  - [See this link for a list of helpful posts]({{ site.forum_wiki_posts_url }}){: target='_blank'}
-- [Videos]({{ site.baseurl }}{% link _en/beta/community/videos.md %}) contains videos created by community members. These videos help you get started with {{ site.terms.rir }} or tackle specific challenges
-- [Blog Posts]({{ site.baseurl }}{% link _en/beta/community/posts.md %}) contains blog posts written by community members
+<div class="gallery-large-grid">
+{% for item in site.data.community %}
+<div class="gallery-item">
+<a href="{{ item.url }}" target="blank">
+    <div class="gallery-thumbnail">
+    {% if item.thumbnail %}
+        <img src="{{ item.thumbnail}}" />
+    {% else %}
+        <img src="{{ site.baseurl }}/assets/img/image-placeholder.jpg" />
+    {% endif %}
+    </div>
+</a>
+<div class="gallery-info">
+    <!-- {% if item.type == 'video' %}
+        <img width="28" height="28" src="{{ site.baseurl }}/assets/img/youtube.svg" />
+    {% else %}
+        <img width="28" height="28" src="{{ site.baseurl }}/assets/img/chat.svg" />
+    {% endif %} -->
+    <a class="title" href="{{ item.url }}" target="blank">{{ item.title }}</a>
+    <a class="author" href="{{ item.authorUrl }}">{{ item.author }}</a>
+    {{ item.description | markdownify }}
+</div>
+</div>
+{% endfor %}
+</div>
 
 ## Contributing to Community
 

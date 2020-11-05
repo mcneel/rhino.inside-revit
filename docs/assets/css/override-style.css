@@ -305,6 +305,69 @@ pre {
 }
 
 /*
+    gallery ===================================================================
+*/
+
+.gallery-large-grid {
+    display: grid;
+    grid-gap: 15px 10px;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+}
+
+.gallery-item {
+    display: block;
+    background-color: white;
+    border: 1px solid #d0d0d0;
+    border-radius: 5px;
+    color: white;
+    -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset, 0 -1px 0 rgba(255, 255, 255, .1) inset, 0 4px 0 #ccc, 0 4px 2px rgba(0, 0, 0, .2);
+    -moz-box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset, 0 -1px 0 rgba(255, 255, 255, .1) inset, 0 4px 0 #ccc, 0 4px 2px rgba(0, 0, 0, .2);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset, 0 -1px 0 rgba(255, 255, 255, .1) inset, 0 4px 0 #ccc, 0 4px 2px rgba(0, 0, 0, .2);
+    overflow: hidden;
+}
+
+.gallery-item a {
+    text-decoration: none;
+}
+
+.gallery-thumbnail {
+    height: 140px;
+    overflow: hidden;
+}
+
+.gallery-info {
+    padding: 10px;
+}
+
+.gallery-info img {
+    display: block;
+    width: 30px;
+    margin-top: -24px;
+    margin-left: -4px;
+}
+
+.gallery-info .title {
+    display: block;
+    color: #111;
+    font-size: 1em;
+    font-weight: 600;
+}
+
+.gallery-info .author {
+    color: #111;
+    font-size: 13px;
+}
+
+.gallery-info a:hover {
+    text-decoration: underline;
+}
+
+.gallery-info p {
+    color: #828282;
+    font-size: 13px;
+}
+
+/*
     footer ====================================================================
 */
 .site-footer {
