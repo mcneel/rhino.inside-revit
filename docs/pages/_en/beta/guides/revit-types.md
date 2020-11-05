@@ -228,5 +228,5 @@ You can use the *Family.New* component to edit existing families as well. Just p
 
 Examples listed below create various types of families in Revit using {{ site.terms.rir }}
 
-- [Column Family Along Curve]({{ site.baseurl }}{% link _en/beta/samples/column-family-along-curve.md %})
-- [Window Geometry and Material]({{ site.baseurl }}{% link _en/beta/samples/type-geom-material.md %})
+- [Column Family Along Curve]({{ site.baseurl }}{% link _en/beta/discover/column-family-along-curve.md %})
+- [Window Geometry and Material]({{ site.baseurl }}{% link _en/beta/discover/type-geom-material.md %})
