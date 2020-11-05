@@ -225,8 +225,10 @@ Use the {% include ltr/comp.html uuid='37a8c46f' %} component to create a new wa
 
 ### By Profile
 
-Use the {% include ltr/comp.html uuid='78b02ae8' %} component to create a new wall based on the given profile curves. Note that the profile must be a closed loop. In this example the {% include ltr/comp.html uuid='ef607c2a' %} parameter is referencing a series of Revit model lines:
+Use the {% include ltr/comp.html uuid='78b02ae8' %} component to create a new wall based on the given profile curves. Note that the profile must be a closed loop, planar, and __vertical__. In this example we are using the **Join Curves** component from Grasshopper to join the curves. The {% include ltr/comp.html uuid='ef607c2a' %} parameter is referencing a series of Revit model lines that have modeled vertically and on a single plane so we know they are planar:
 
 ![]({{ "/static/images/guides/revit-walls-byprofile.png" | prepend: site.baseurl }})
+
+![]({{ "/static/images/guides/revit-walls-byprofilescap.png" | prepend: site.baseurl }})
 
 <!-- https://github.com/mcneel/rhino.inside-revit/issues/46 -->
