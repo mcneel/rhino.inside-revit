@@ -94,12 +94,22 @@ pre {
     margin-left: 10px;
 }
 
+.site-nav .page-link:hover {
+    border-bottom: 3px solid #e8e8e8;
+}
+
+.site-nav .page-link.active {
+    font-weight: unset;
+    border-bottom: 3px solid #111;
+}
+
 /* page links on navigation bar */
 .page-link {
     display: inline;
     padding: 0;
     margin: 0;
     border: none;
+    padding-bottom: 22px;
 }
 
 .page-link:hover {
@@ -324,16 +334,17 @@ pre {
     border: 1px solid #d0d0d0;
     border-radius: 5px;
     color: white;
-    -webkit-box-shadow: 0 4px 0 #ccc, 0 4px 2px rgba(0, 0, 0, .2);
-    -moz-box-shadow: 0 4px 0 #ccc, 0 4px 2px rgba(0, 0, 0, .2);
-    box-shadow: 0 4px 0 #ccc, 0 4px 2px rgba(0, 0, 0, .2);
+    -webkit-box-shadow: 0 3px 2px rgba(0, 0, 0, .15);
+    -moz-box-shadow: 0 3px 2px rgba(0, 0, 0, .15);
+    box-shadow: 0 3px 2px rgba(0, 0, 0, .15);
     overflow: hidden;
 }
 
 .gallery-item-focused {
-    -webkit-box-shadow: 0 4px 0 #ccc, 0 16px 8px rgba(0, 0, 0, .3);
-    -moz-box-shadow: 0 4px 0 #ccc, 0 16px 8px rgba(0, 0, 0, .3);
-    box-shadow: 0 4px 0 #ccc, 0 16px 8px rgba(0, 0, 0, .3);
+    border: 1px solid #111;
+    -webkit-box-shadow: 0 6px 0 #111, 0 12px 8px rgba(0, 0, 0, .25);
+    -moz-box-shadow: 0 6px 0 #111, 0 12px 8px rgba(0, 0, 0, .25);
+    box-shadow: 0 6px 0 #111, 0 12px 8px rgba(0, 0, 0, .25);
     z-index: 1000;
 }
 
