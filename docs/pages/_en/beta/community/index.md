@@ -19,11 +19,13 @@ Welcome to the {{ site.terms.rir }} community. On this page, you will find the r
     </div>
 </a>
 <div class="gallery-info">
-    <!-- {% if item.type == 'video' %}
-        <img width="28" height="28" src="{{ site.baseurl }}/assets/img/youtube.svg" />
+    {% if item.type == 'video' %}
+        <img width="28" height="28" src="{{ site.baseurl }}/assets/img/video.svg" />
+    {% elsif item.type == 'blogpost' %}
+        <img width="28" height="28" src="{{ site.baseurl }}/assets/img/post.svg" />
     {% else %}
-        <img width="28" height="28" src="{{ site.baseurl }}/assets/img/chat.svg" />
-    {% endif %} -->
+        <img width="28" height="28" src="{{ site.baseurl }}/assets/img/link.svg" />
+    {% endif %}
     <a class="title" href="{{ item.url }}" target="blank">{{ item.title }}</a>
     <a class="author" href="{{ item.authorUrl }}">{{ item.author }}</a>
     {{ item.description | markdownify }}

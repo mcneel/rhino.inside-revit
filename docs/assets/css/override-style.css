@@ -336,14 +336,12 @@ pre {
 }
 
 .gallery-info {
-    padding: 10px;
+    padding: 5px 10px 10px 10px;
 }
 
 .gallery-info img {
-    display: block;
     width: 30px;
-    margin-top: -24px;
-    margin-left: -4px;
+    margin-left: -3px;
 }
 
 .gallery-info .title {
