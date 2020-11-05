@@ -324,12 +324,12 @@ pre {
     /* grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); */
     grid-template-columns: auto auto auto;
     align-items: start;
-    grid-auto-rows: 260px;
+    grid-auto-rows: 230px;
 }
 
 .gallery-item {
     display: block;
-    min-height: 260px;
+    min-height: 230px;
     background-color: white;
     border: 1px solid #d0d0d0;
     border-radius: 5px;
@@ -372,11 +372,24 @@ pre {
     color: #111;
     font-size: 1em;
     font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .gallery-info .author {
     color: #111;
     font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gallery-item.gallery-item-focused .gallery-info .title,
+.gallery-item.gallery-item-focused .gallery-info .author {
+    white-space: unset;
+    overflow: unset;
+    text-overflow: unset;
 }
 
 .gallery-info a:hover {
