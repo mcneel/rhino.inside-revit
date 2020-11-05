@@ -41,19 +41,15 @@ namespace RhinoInside.Revit.GH.Types
       if (element is DB.View)
         return false;
 
-      if (element.Location is object)
-        return true;
+      using (var location = element.Location)
+      {
+        if (location is object) return true;
+      }
 
-      return
-      (
-        element is DB.DirectShape ||
-        element is DB.CurveElement ||
-        element is DB.CombinableElement ||
-        element is DB.Architecture.TopographySurface ||
-        element is DB.Opening ||
-        element is DB.Part ||
-        InstanceElement.IsValidElement(element)
-      );
+      using (var bbox = element.get_BoundingBox(null))
+      {
+        return bbox is object;
+      }
     }
 
     protected override void SubInvalidateGraphics()
@@ -312,9 +308,13 @@ namespace RhinoInside.Revit.GH.Types
 
               break;
             default:
-              origin = BoundingBox.Center;
-              axis = Vector3d.XAxis;
-              perp = Vector3d.YAxis;
+              var bbox = BoundingBox;
+              if (bbox.IsValid)
+              {
+                origin = BoundingBox.Center;
+                axis = Vector3d.XAxis;
+                perp = Vector3d.YAxis;
+              }
               break;
           }
         }
