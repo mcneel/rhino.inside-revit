@@ -4,7 +4,7 @@
         "title": "Parametric Monkey Primer",
         "url": "https://parametricmonkey.com/2019/11/20/rhino-inside-revit/",
         "thumbnail": "https://i2.wp.com/parametricmonkey.com/wp-content/uploads/2019/11/198_Rhino-Inside-Revit_1600x800.jpg?resize=1600%2C800&ssl=1",
-        "author": "Paul Wintour (Parametric & BIM specialist, founder of Parametric Monkey)",
+        "author": "Paul Wintour @ Parametric Monkey",
         "authorUrl": "https://parametricmonkey.com/",
         "description": "With the release of Rhino.Inside.Revit, a whole range of new interoperability possibilities now exist. We've been working with our clients to integrate Grasshopper scripts with Revit, and developed this quick tutorial to help them get up and running. Hopefully it helps you too"
     },
@@ -57,7 +57,7 @@
         "type": "video",
         "title": "SF Computational Design Institute presentation of Rhino.Inside.Revit",
         "url": "https://www.youtube.com/watch?v=KF7JyKuTxzU",
-        "author": "San Fransisco Computational Design Institute",
+        "author": "San Francisco Computational Design Institute",
         "authorUrl": "https://www.linkedin.com/company/sfcdi/",
         "description": "This is a short recap of Rhino.Inside.Revit plugin and Compute technology in Rhino"
     },
@@ -94,7 +94,7 @@
         "title": "Solar Analysis with Rhino.Inside.Revit",
         "url": "https://vimeo.com/363977394",
         "thumbnail": "https://i.vimeocdn.com/video/819279340_1280x720.jpg",
-        "author": "Paul Wintour (Parametric & BIM specialist, founder of Parametric Monkey)",
+        "author": "Paul Wintour @ Parametric Monkey",
         "authorUrl": "https://parametricmonkey.com/",
         "description": "One of the most frequent requests I receive is about running solar access analysis within Revit. Despite the fact that it is still quicker and more accurate to export to Grasshopper, run the analysis and push the results back, many still prefer to stay within Revit. So I decided to do a quick proof-of-concept and I'm proud to announce that it works perfectly using Rhino.Inside.Revit"
     },
@@ -121,8 +121,8 @@
         "title": "Place Beams in Rhino.Inside.Revit",
         "url": "https://www.youtube.com/watch?v=B-Ug2XTV5Wg",
         "thumbnail": "http://i3.ytimg.com/vi/B-Ug2XTV5Wg/maxresdefault.jpg",
-        "author": "Simply Complex Podcast",
+        "author": "Marcello Sgambelluri @ Simply Complex Podcast",
         "authorUrl": "http://therevitcomplex.blogspot.com/",
-        "description": "This this video I show you how to simplify Revit structural beam modeling using an adaptive component and Rhino.Inside.Revit"
+        "description": "In this video I show you how to simplify Revit structural beam modeling using an adaptive component and Rhino.Inside.Revit"
     }
 ]
