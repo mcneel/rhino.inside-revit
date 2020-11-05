@@ -1,0 +1,22 @@
+---
+layout: ltr/bootstrap
+---
+<script>
+    $(document).ready(function(){
+      $(".gallery-item").hover(function(){
+            $(this).addClass("gallery-item-focused");
+            $(this).find(".extra").css("display", "block");
+        }, function(){
+            $(this).removeClass("gallery-item-focused");
+            $(this).find(".extra").css("display", "none");
+      });
+    });
+</script>
+
+<div class="container-fluid">
+    <div class="row-fluid wide-content">
+        <article class="post-content">
+            {{ content }}
+        </article>
+    </div>
+</div>

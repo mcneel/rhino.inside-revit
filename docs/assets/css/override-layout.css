@@ -12,6 +12,17 @@
         display: inline-block;
     }
 
+    .site-nav .page-link:hover {
+        border-bottom: unset;
+        border-right: 4px solid #e8e8e8;
+    }
+
+    .site-nav .page-link.active {
+        font-weight: unset;
+        border-bottom: unset;
+        border-right: 4px solid #111;
+    }
+
     .side-content {
         width: 100%;
         margin-left: 0;

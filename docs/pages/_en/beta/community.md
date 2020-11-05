@@ -1,20 +1,8 @@
 ---
 title: Rhino.Inside.Revit Community
-layout: ltr/page-fullwidth
+layout: ltr/gallery-large
 toc: false
 ---
-
-<script>
-    $(document).ready(function(){
-      $(".gallery-item").hover(function(){
-            $(this).addClass("gallery-item-focused");
-            $(this).find(".extra").css("display", "block");
-        }, function(){
-            $(this).removeClass("gallery-item-focused");
-            $(this).find(".extra").css("display", "none");
-      });
-    });
-</script>
 
 Welcome to the {{ site.terms.rir }} community. On this page, you will find the resources created by, and for the community. Please see the [Discussion Forums]({{ site.forum_url }}){: target='_blank'} to discuss features and potential issues and ask questions
 
