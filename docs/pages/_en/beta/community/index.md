@@ -4,36 +4,50 @@ layout: ltr/page-fullwidth
 toc: false
 ---
 
+<script>
+    $(document).ready(function(){
+      $(".gallery-item").hover(function(){
+            $(this).addClass("gallery-item-focused");
+            $(this).find(".extra").css("display", "block");
+        }, function(){
+            $(this).removeClass("gallery-item-focused");
+            $(this).find(".extra").css("display", "none");
+      });
+    });
+</script>
+
 Welcome to the {{ site.terms.rir }} community. On this page, you will find the resources created by, and for the community. Please see the [Discussion Forums]({{ site.forum_url }}){: target='_blank'} to discuss features and potential issues and ask questions
 
 <div class="gallery-large-grid">
-{% for item in site.data.community %}
-<div class="gallery-item">
-<a href="{{ item.url }}" target="blank">
-    <div class="gallery-thumbnail">
-    {% if item.thumbnail %}
-        <img src="{{ item.thumbnail}}" />
-    {% else %}
-        <img src="{{ site.baseurl }}/assets/img/image-placeholder.jpg" />
-    {% endif %}
+    {% for item in site.data.community %}
+    <div class="gallery-item" >
+    <a href="{{ item.url }}" target="blank">
+        <div class="gallery-thumbnail">
+        {% if item.thumbnail %}
+            <img src="{{ item.thumbnail}}" />
+        {% else %}
+            <img src="{{ site.baseurl }}/assets/img/gallery-placeholder.png" />
+        {% endif %}
+        </div>
+    </a>
+    <div class="gallery-info">
+        {% if item.type == 'video' %}
+            <img width="28" height="28" src="{{ site.baseurl }}/assets/img/video.svg" />
+        {% elsif item.type == 'blogpost' %}
+            <img width="28" height="28" src="{{ site.baseurl }}/assets/img/post.svg" />
+        {% else %}
+            <img width="28" height="28" src="{{ site.baseurl }}/assets/img/link.svg" />
+        {% endif %}
+        <a class="title" href="{{ item.url }}" target="blank">{{ item.title }}</a>
+        <a class="author" href="{{ item.authorUrl }}">{{ item.author }}</a>
+        <div class="extra">
+            {{ item.description | markdownify }}
+        </div>
     </div>
-</a>
-<div class="gallery-info">
-    {% if item.type == 'video' %}
-        <img width="28" height="28" src="{{ site.baseurl }}/assets/img/video.svg" />
-    {% elsif item.type == 'blogpost' %}
-        <img width="28" height="28" src="{{ site.baseurl }}/assets/img/post.svg" />
-    {% else %}
-        <img width="28" height="28" src="{{ site.baseurl }}/assets/img/link.svg" />
-    {% endif %}
-    <a class="title" href="{{ item.url }}" target="blank">{{ item.title }}</a>
-    <a class="author" href="{{ item.authorUrl }}">{{ item.author }}</a>
-    {{ item.description | markdownify }}
+    </div>
+    {% endfor %}
 </div>
-</div>
-{% endfor %}
-</div>
-
+    
 ## Contributing to Community
 
 The {{ site.terms.rir }} community appreciates and benefits from your contributions. In case you have created videos, articles, blog posts, etc or have developed custom scripted components for {{ site.terms.rir }} you can share your creations with the community in a number of ways. Prepare a package containing links and other resources, and
