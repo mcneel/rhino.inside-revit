@@ -126,7 +126,12 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
           line.GetEndParameter(0),
           line.GetEndParameter(1)
         ) :
-        null;
+        new LineCurve
+        (
+          new Line(AsPoint3d(line.Origin) - (15000.0 * AsVector3d(line.Direction)), AsPoint3d(line.Origin) + (15000.0 * AsVector3d(line.Direction))),
+          -15000,
+          +15000
+        );
     }
 
     public static ArcCurve ToRhino(DB.Arc arc)
