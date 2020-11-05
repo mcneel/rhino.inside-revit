@@ -5,7 +5,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Material
 {
-#if REVIT_2019
+#if REVIT_2018
   public abstract class AnalyzeAppearanceAsset<T>
   : BaseAssetComponent<T> where T : ShaderData, new()
   {
@@ -32,9 +32,11 @@ namespace RhinoInside.Revit.GH.Components.Material
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var appearanceAsset = default(DB.AppearanceAssetElement);
-      if (DA.GetData(ComponentInfo.Name, ref appearanceAsset))
+      if (!DA.GetData(ComponentInfo.Name, ref appearanceAsset))
+        return;
+
+      using (var asset = appearanceAsset.GetRenderingAsset())
       {
-        var asset = appearanceAsset.GetRenderingAsset();
         if (asset != null)
           SetOutputsFromAsset(DA, asset);
       }

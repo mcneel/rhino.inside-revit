@@ -48,7 +48,7 @@ namespace RhinoInside.Revit.GH.Types
         $"{TypeName} : {DisplayName}" :
         $"Unresolved {TypeName} : {UniqueID}"
       ) :
-      $"Invalid {TypeName}" + Id is object ? $" : {Id.IntegerValue}" : string.Empty;
+      $"Invalid {TypeName}" + (Id is object ? $" : {Id.IntegerValue}" : string.Empty);
 
       using (var Documents = Revit.ActiveDBApplication.Documents)
       {

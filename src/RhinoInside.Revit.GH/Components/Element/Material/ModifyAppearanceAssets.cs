@@ -2,22 +2,20 @@ using System;
 using System.Collections.Generic;
 
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
-
 
 namespace RhinoInside.Revit.GH.Components.Material
 {
-#if REVIT_2019
+#if REVIT_2018
   public abstract class ModifyAppearanceAssets<T>
 : BaseAssetComponent<T> where T : ShaderData, new()
   {
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
-    public ModifyAppearanceAssets() : base()
+    public ModifyAppearanceAssets()
     {
-      this.Name = $"Modify {ComponentInfo.Name}";
-      this.NickName = $"M-{ComponentInfo.NickName}";
-      this.Description = $"Modify given {ComponentInfo.Description}";
+      Name = $"Modify {ComponentInfo.Name}";
+      NickName = $"M-{ComponentInfo.NickName}";
+      Description = $"Modify given {ComponentInfo.Description}";
     }
 
     protected override ParamDefinition[] Inputs => GetFieldsAsInputs();
@@ -42,37 +40,28 @@ namespace RhinoInside.Revit.GH.Components.Material
       param.Access = GH_ParamAccess.item;
 
       inputs.Add(ParamDefinition.FromParam(param));
-      inputs.AddRange(
-        base.GetAssetDataAsInputs(skipUnchangable: true)
-        );
+      inputs.AddRange(GetAssetDataAsInputs(skipUnchangable: true));
       return inputs.ToArray();
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var appearanceAsset = default(DB.AppearanceAssetElement);
-      if (DA.GetData(ComponentInfo.Name, ref appearanceAsset))
-      {
-        // lets process all the inputs into a data structure
-        // this step also verifies the input data
-        var assetData = CreateAssetDataFromInputs(DA);
+      var appearanceAsset = default(Types.AppearanceAssetElement);
+      if (!DA.GetData(ComponentInfo.Name, ref appearanceAsset) || appearanceAsset.Value is null)
+        return;
 
+      // lets process all the inputs into a data structure
+      // this step also verifies the input data
+      var assetData = CreateAssetDataFromInputs(DA);
 
-        var doc = Revit.ActiveDBDocument;
-        using (var transaction = NewTransaction(doc))
-        {
-          transaction.Start();
+      StartTransaction(appearanceAsset.Document);
 
-          // update the asset parameters
-          // update asset properties
-          UpdateAssetElementFromInputs(appearanceAsset, assetData);
+      // update the asset parameters
+      // update asset properties
+      UpdateAssetElementFromInputs(appearanceAsset.Value, assetData);
 
-          transaction.Commit();
-        }
-
-        // send it to output
-        DA.SetData(ComponentInfo.Name, appearanceAsset);
-      }
+      // send it to output
+      DA.SetData(ComponentInfo.Name, appearanceAsset);
     }
   }
 

@@ -4,7 +4,7 @@ using Grasshopper.Kernel;
 
 namespace RhinoInside.Revit.GH.Components.Material
 {
-#if REVIT_2019
+#if REVIT_2018
   public abstract class ConstructTextureAsset<T>
     : BaseAssetComponent<T> where T : TextureData, new()
   {

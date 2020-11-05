@@ -5,7 +5,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters.Input
 {
-#if REVIT_2019
+#if REVIT_2018
   public class ThermalMaterialType_ValueList : GH_ValueList
   {
     public override Guid ComponentGuid => new Guid("9d9d0211-4598-4f50-921e-ad1208944e7c");

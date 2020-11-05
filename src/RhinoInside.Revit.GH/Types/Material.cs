@@ -8,13 +8,12 @@ namespace RhinoInside.Revit.GH.Types
   public class Material : Element
   {
     protected override Type ScriptVariableType => typeof(DB.Material);
-    public static explicit operator DB.Material(Material value) => value?.Value;
     public new DB.Material Value => base.Value as DB.Material;
 
     public Material() { }
     public Material(DB.Material material) : base(material) { }
 
-    #region Identity Data
+    #region Identity
     public string MaterialClass
     {
       get => Value?.MaterialClass;
@@ -36,8 +35,7 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
-    #region Materials and finshed
-
+    #region Graphics
     public bool? UseRenderAppearanceForShading
     {
       get => Value?.UseRenderAppearanceForShading;
@@ -109,7 +107,7 @@ namespace RhinoInside.Revit.GH.Types
 #if REVIT_2019
     public FillPatternElement SurfaceForegroundPattern
     {
-      get => new FillPatternElement(Document, SurfaceForegroundPatternId);
+      get => SurfaceForegroundPatternId is DB.ElementId id ? new FillPatternElement(Document, id) : default;
       set
       {
         if (value is object && Value is DB.Material material && value.Id != material.SurfaceForegroundPatternId)
@@ -148,7 +146,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public FillPatternElement SurfaceBackgroundPattern
     {
-      get => new FillPatternElement(Document, SurfaceBackgroundPatternId);
+      get => SurfaceBackgroundPatternId is DB.ElementId id ? new FillPatternElement(Document, id) : default;
       set
       {
         if (value is object && Value is DB.Material material && value.Id != material.SurfaceBackgroundPatternId)
@@ -187,7 +185,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public FillPatternElement CutForegroundPattern
     {
-      get => new FillPatternElement(Document, CutForegroundPatternId);
+      get => CutForegroundPatternId is DB.ElementId id ? new FillPatternElement(Document, id) : default;
       set
       {
         if (value is object && Value is DB.Material material && value.Id != material.CutForegroundPatternId)
@@ -226,7 +224,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public FillPatternElement CutBackgroundPattern
     {
-      get => new FillPatternElement(Document, CutBackgroundPatternId);
+      get => CutBackgroundPatternId is DB.ElementId id ? new FillPatternElement(Document, id) : default;
       set
       {
         if (value is object && Value is DB.Material material && value.Id != material.CutBackgroundPatternId)
@@ -377,6 +375,77 @@ namespace RhinoInside.Revit.GH.Types
       set { }
     }
 #endif
+    #endregion
+
+    #region Assets
+    public DB.ElementId AppearanceAssetId
+    {
+      get => Value?.AppearanceAssetId;
+      set
+      {
+        if (value is object && Value is DB.Material material && value != material.AppearanceAssetId)
+          material.AppearanceAssetId = value;
+      }
+    }
+
+    public AppearanceAssetElement AppearanceAsset
+    {
+      get => AppearanceAssetId is DB.ElementId id ? new AppearanceAssetElement(Document, id) : default;
+      set
+      {
+        if (value is object && Value is DB.Material material && value.Id != material.AppearanceAssetId)
+        {
+          AssertValidDocument(value.Document, nameof(AppearanceAssetId));
+          material.AppearanceAssetId = value.Id;
+        }
+      }
+    }
+
+    public DB.ElementId StructuralAssetId
+    {
+      get => Value?.StructuralAssetId;
+      set
+      {
+        if (value is object && Value is DB.Material material && value != material.StructuralAssetId)
+          material.StructuralAssetId = value;
+      }
+    }
+
+    public StructuralAssetElement StructuralAsset
+    {
+      get => StructuralAssetId is DB.ElementId id ? new StructuralAssetElement(Document, id) : default;
+      set
+      {
+        if (value is object && Value is DB.Material material && value.Id != material.StructuralAssetId)
+        {
+          AssertValidDocument(value.Document, nameof(StructuralAssetId));
+          material.StructuralAssetId = value.Id;
+        }
+      }
+    }
+
+    public DB.ElementId ThermalAssetId
+    {
+      get => Value?.ThermalAssetId;
+      set
+      {
+        if (value is object && Value is DB.Material material && value != material.ThermalAssetId)
+          material.ThermalAssetId = value;
+      }
+    }
+
+    public ThermalAssetElement ThermalAsset
+    {
+      get => ThermalAssetId is DB.ElementId id ? new ThermalAssetElement(Document, id) : default;
+      set
+      {
+        if (value is object && Value is DB.Material material && value.Id != material.ThermalAssetId)
+        {
+          AssertValidDocument(value.Document, nameof(ThermalAssetId));
+          material.ThermalAssetId = value.Id;
+        }
+      }
+    }
     #endregion
   }
 }

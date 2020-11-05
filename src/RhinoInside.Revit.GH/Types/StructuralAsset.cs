@@ -4,16 +4,26 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-#if REVIT_2019
   [Name("Structural Asset")]
-  public class StructuralAsset : Element
+  public class StructuralAssetElement : Element
   {
     protected override Type ScriptVariableType => typeof(DB.PropertySetElement);
-    public static explicit operator DB.PropertySetElement(StructuralAsset value) =>
-      value?.IsValid == true ? value.Value as DB.PropertySetElement : default;
+    public new DB.PropertySetElement Value => base.Value as DB.PropertySetElement;
 
-    public StructuralAsset() { }
-    public StructuralAsset(DB.PropertySetElement asset) : base(asset) { }
+    protected override bool SetValue(DB.Element element) => IsValidElement(element) && base.SetValue(element);
+    public static bool IsValidElement(DB.Element element)
+    {
+      if (element is DB.PropertySetElement pset)
+      {
+        try { return pset.GetStructuralAsset() is DB.StructuralAsset; }
+        catch { }
+      }
+
+      return false;
+    }
+
+    public StructuralAssetElement() { }
+    public StructuralAssetElement(DB.Document doc, DB.ElementId id) : base(doc, id) { }
+    public StructuralAssetElement(DB.PropertySetElement asset) : base(asset) { }
   }
-#endif
 }

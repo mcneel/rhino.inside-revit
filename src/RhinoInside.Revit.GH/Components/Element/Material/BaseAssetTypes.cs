@@ -8,8 +8,6 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Material
 {
-#if REVIT_2019
-
   #region Custom Asset GH Type Data
 
   /// <summary>
@@ -369,6 +367,8 @@ namespace RhinoInside.Revit.GH.Components.Material
 
   #endregion
 
+
+#if REVIT_2018
   #region Appearance Assets
   [APIAsset(typeof(DB.Visual.Generic))]
   [AssetGHComponent("Appearance Asset (Generic)", "GA", "Appearance asset of \"Generic\" schema")]
@@ -571,6 +571,8 @@ namespace RhinoInside.Revit.GH.Components.Material
 
   }
   #endregion
+
+#endif
 
   #region Structural and Thermal Assets
 
@@ -872,7 +874,5 @@ namespace RhinoInside.Revit.GH.Components.Material
   }
   #endregion
 
-  #endregion
-
-#endif
+#endregion
 }

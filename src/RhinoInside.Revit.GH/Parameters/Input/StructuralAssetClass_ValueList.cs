@@ -5,7 +5,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters.Input
 {
-#if REVIT_2019
+#if REVIT_2018
   public class StructuralAssetClass_ValueList : GH_ValueList
   {
     public override Guid ComponentGuid => new Guid("6f5d09c7-797f-4ffe-afae-b9c0ddc5905f");

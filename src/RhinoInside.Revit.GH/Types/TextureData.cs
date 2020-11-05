@@ -4,7 +4,7 @@ using MAT = RhinoInside.Revit.GH.Components.Material;
 
 namespace RhinoInside.Revit.GH.Types
 {
-#if REVIT_2019
+#if REVIT_2018
   public class TextureData : GH_Goo<MAT.TextureData>
   {
     public override bool IsValid => Value != null;

@@ -1,17 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
-using RhinoInside.Revit.External.DB;
-using Autodesk.Private.InfoCenter;
 
 namespace RhinoInside.Revit.GH.Components
 {
-#if REVIT_2019
   public class QueryAssetsOfMaterial : AnalysisComponent
   {
     public override Guid ComponentGuid =>
@@ -66,31 +58,13 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      // get input
-      var material = default(DB.Material);
+      var material = default(Types.Material);
       if (!DA.GetData("Material", ref material))
         return;
 
-      var doc = material.Document;
-      // appearance asset
-      if (doc.GetElement(material.AppearanceAssetId) is DB.AppearanceAssetElement aae)
-        DA.SetData(
-          "Appearance Asset",
-          new Types.AppearanceAsset(aae)
-          );
-      // structural asset
-      if (doc.GetElement(material.StructuralAssetId) is DB.PropertySetElement sae)
-        DA.SetData(
-          "Physical Asset",
-          new Types.StructuralAsset(sae)
-          );
-      // thermal asset
-      if (doc.GetElement(material.ThermalAssetId) is DB.PropertySetElement tae)
-        DA.SetData(
-          "Thermal Asset",
-          new Types.ThermalAsset(tae)
-          );
+      DA.SetData("Appearance Asset", material.AppearanceAsset);
+      DA.SetData("Physical Asset", material.StructuralAsset);
+      DA.SetData("Thermal Asset", material.ThermalAsset);
     }
   }
-#endif
 }

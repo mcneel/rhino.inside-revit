@@ -4,7 +4,7 @@ using Grasshopper.Kernel;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-#if REVIT_2019
+#if REVIT_2018
   public class AssetPropertyDouble1DMap : GH_Param<Types.AssetPropertyDouble1DMap>
   {
     public override Guid ComponentGuid

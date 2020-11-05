@@ -110,39 +110,41 @@ namespace RhinoInside.Revit.GH.Types
 
     public static readonly Dictionary<Type, Func<DB.Element, Element>> ActivatorDictionary = new Dictionary<Type, Func<DB.Element, Element>>()
     {
-      { typeof(DB.View),                    (element)=> new View              (element as DB.View)              },
-      { typeof(DB.Family),                  (element)=> new Family            (element as DB.Family)            },
-      { typeof(DB.ElementType),             (element)=> new ElementType       (element as DB.ElementType)       },
-      { typeof(DB.FamilySymbol),            (element)=> new FamilySymbol      (element as DB.FamilySymbol)      },
-      { typeof(DB.HostObjAttributes),       (element)=> new HostObjectType    (element as DB.HostObjAttributes) },
-      { typeof(DB.ParameterElement),        (element)=> new ParameterKey      (element as DB.ParameterElement)  },
-      { typeof(DB.Material),                (element)=> new Material          (element as DB.Material)          },
-      { typeof(DB.GraphicsStyle),           (element)=> new GraphicsStyle     (element as DB.GraphicsStyle)     },
-      { typeof(DB.LinePatternElement),      (element)=> new LinePatternElement(element as DB.LinePatternElement)},
-      { typeof(DB.FillPatternElement),      (element)=> new FillPatternElement(element as DB.FillPatternElement)},
+      { typeof(DB.View),                    (element)=> new View                  (element as DB.View)              },
+      { typeof(DB.Family),                  (element)=> new Family                (element as DB.Family)            },
+      { typeof(DB.ElementType),             (element)=> new ElementType           (element as DB.ElementType)       },
+      { typeof(DB.FamilySymbol),            (element)=> new FamilySymbol          (element as DB.FamilySymbol)      },
+      { typeof(DB.HostObjAttributes),       (element)=> new HostObjectType        (element as DB.HostObjAttributes) },
+      { typeof(DB.ParameterElement),        (element)=> new ParameterKey          (element as DB.ParameterElement)  },
+      { typeof(DB.Material),                (element)=> new Material              (element as DB.Material)          },
+      { typeof(DB.GraphicsStyle),           (element)=> new GraphicsStyle         (element as DB.GraphicsStyle)     },
+      { typeof(DB.LinePatternElement),      (element)=> new LinePatternElement    (element as DB.LinePatternElement)},
+      { typeof(DB.FillPatternElement),      (element)=> new FillPatternElement    (element as DB.FillPatternElement)},
+      { typeof(DB.AppearanceAssetElement),  (element)=> new AppearanceAssetElement(element as DB.AppearanceAssetElement)},
+      
 
-      { typeof(DB.Sketch),                  (element)=> new Sketch            (element as DB.Sketch)            },
-      { typeof(DB.SketchPlane),             (element)=> new SketchPlane       (element as DB.SketchPlane)       },
-      { typeof(DB.DatumPlane),              (element)=> new DatumPlane        (element as DB.DatumPlane)        },
-      { typeof(DB.Level),                   (element)=> new Level             (element as DB.Level)             },
-      { typeof(DB.Grid),                    (element)=> new Grid              (element as DB.Grid)              },
-      { typeof(DB.ReferencePlane),          (element)=> new ReferencePlane    (element as DB.ReferencePlane)    },
-      { typeof(DB.SpatialElement),          (element)=> new SpatialElement    (element as DB.SpatialElement)    },
-      { typeof(DB.Group),                   (element)=> new Group             (element as DB.Group)             },
-      { typeof(DB.HostObject),              (element)=> new HostObject        (element as DB.HostObject)        },
-      { typeof(DB.CurtainSystem),           (element)=> new CurtainSystem     (element as DB.CurtainSystem)     },
-      { typeof(DB.CurtainGridLine),         (element)=> new CurtainGridLine   (element as DB.CurtainGridLine)   },
-      { typeof(DB.Floor),                   (element)=> new Floor             (element as DB.Floor)             },
-      { typeof(DB.Architecture.BuildingPad),(element)=> new BuildingPad       (element as DB.Architecture.BuildingPad) },
-      { typeof(DB.Ceiling),                 (element)=> new Ceiling           (element as DB.Ceiling)           },
-      { typeof(DB.RoofBase),                (element)=> new Roof              (element as DB.RoofBase)          },
-      { typeof(DB.Wall),                    (element)=> new Wall              (element as DB.Wall)              },
-      { typeof(DB.Instance),                (element)=> new Instance          (element as DB.Instance)          },
-      { typeof(DB.FamilyInstance),          (element)=> new FamilyInstance    (element as DB.FamilyInstance)    },
-      { typeof(DB.Panel),                   (element)=> new Panel             (element as DB.Panel)             },
-      { typeof(DB.Mullion),                 (element)=> new Mullion           (element as DB.Mullion)           },
-      { typeof(DB.Dimension),               (element)=> new Dimension         (element as DB.Dimension)         },
-      { typeof(DB.CurveElement),            (element)=> new CurveElement      (element as DB.CurveElement)      },
+      { typeof(DB.Sketch),                  (element)=> new Sketch                (element as DB.Sketch)            },
+      { typeof(DB.SketchPlane),             (element)=> new SketchPlane           (element as DB.SketchPlane)       },
+      { typeof(DB.DatumPlane),              (element)=> new DatumPlane            (element as DB.DatumPlane)        },
+      { typeof(DB.Level),                   (element)=> new Level                 (element as DB.Level)             },
+      { typeof(DB.Grid),                    (element)=> new Grid                  (element as DB.Grid)              },
+      { typeof(DB.ReferencePlane),          (element)=> new ReferencePlane        (element as DB.ReferencePlane)    },
+      { typeof(DB.SpatialElement),          (element)=> new SpatialElement        (element as DB.SpatialElement)    },
+      { typeof(DB.Group),                   (element)=> new Group                 (element as DB.Group)             },
+      { typeof(DB.HostObject),              (element)=> new HostObject            (element as DB.HostObject)        },
+      { typeof(DB.CurtainSystem),           (element)=> new CurtainSystem         (element as DB.CurtainSystem)     },
+      { typeof(DB.CurtainGridLine),         (element)=> new CurtainGridLine       (element as DB.CurtainGridLine)   },
+      { typeof(DB.Floor),                   (element)=> new Floor                 (element as DB.Floor)             },
+      { typeof(DB.Architecture.BuildingPad),(element)=> new BuildingPad           (element as DB.Architecture.BuildingPad) },
+      { typeof(DB.Ceiling),                 (element)=> new Ceiling               (element as DB.Ceiling)           },
+      { typeof(DB.RoofBase),                (element)=> new Roof                  (element as DB.RoofBase)          },
+      { typeof(DB.Wall),                    (element)=> new Wall                  (element as DB.Wall)              },
+      { typeof(DB.Instance),                (element)=> new Instance              (element as DB.Instance)          },
+      { typeof(DB.FamilyInstance),          (element)=> new FamilyInstance        (element as DB.FamilyInstance)    },
+      { typeof(DB.Panel),                   (element)=> new Panel                 (element as DB.Panel)             },
+      { typeof(DB.Mullion),                 (element)=> new Mullion               (element as DB.Mullion)           },
+      { typeof(DB.Dimension),               (element)=> new Dimension             (element as DB.Dimension)         },
+      { typeof(DB.CurveElement),            (element)=> new CurveElement          (element as DB.CurveElement)      },
     };
 
     public static Element FromElement(DB.Element element)
@@ -159,7 +161,14 @@ namespace RhinoInside.Revit.GH.Types
       if (DocumentExtension.AsCategory(element) is DB.Category category)
         return new Category(category);
 
-      if (GraphicalElement.IsValidElement(element))
+      if (element is DB.PropertySetElement pset)
+      {
+        if (StructuralAssetElement.IsValidElement(element))
+          return new StructuralAssetElement(pset);
+        else if (ThermalAssetElement.IsValidElement(element))
+          return new ThermalAssetElement(pset);
+      }
+      else if (GraphicalElement.IsValidElement(element))
       {
         if (InstanceElement.IsValidElement(element))
         {

@@ -4,7 +4,7 @@ using MAT = RhinoInside.Revit.GH.Components.Material;
 
 namespace RhinoInside.Revit.GH.Types
 {
-#if REVIT_2019
+#if REVIT_2018
   public class AssetPropertyDouble1DMap : GH_Goo<MAT.AssetPropertyDouble1DMap>
   {
     public override string TypeName => "Mappable Double";

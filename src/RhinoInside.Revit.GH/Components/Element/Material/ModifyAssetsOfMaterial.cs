@@ -1,12 +1,10 @@
 using System;
 
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Material
 {
-#if REVIT_2019
-  public class ModifyAssetsOfMaterial : TransactionalComponent
+  public class ModifyAssetsOfMaterial : TransactionalChainComponent
   {
     public override Guid ComponentGuid =>
       new Guid("2f1ec561-2c4b-4c44-9587-12b32c6b8351");
@@ -70,49 +68,24 @@ namespace RhinoInside.Revit.GH.Components.Material
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       // get input
-      var material = default(DB.Material);
+      var material = default(Types.Material);
       if (!DA.GetData("Material", ref material))
         return;
 
-      // get assets
-      var appearanceAsset = default(DB.AppearanceAssetElement);
-      DA.GetData("Appearance Asset", ref appearanceAsset);
-      var structuralAsset = default(DB.PropertySetElement);
-      DA.GetData("Physical Asset", ref structuralAsset);
-      var thermalAsset = default(DB.PropertySetElement);
-      DA.GetData("Thermal Asset", ref thermalAsset);
+      bool update = false;
+      update |= Params.TryGetData(DA, "Appearance Asset", out Types.AppearanceAssetElement appearanceAsset);
+      update |= Params.TryGetData(DA, "Physical Asset", out Types.StructuralAssetElement structuralAsset);
+      update |= Params.TryGetData(DA, "Thermal Asset", out Types.ThermalAssetElement thermalAsset);
 
-      var doc = material.Document;
-      using (var transaction = NewTransaction(doc))
+      if (update)
       {
-        transaction.Start();
-
-        // validate and apply appearance asset if provided
-        if (appearanceAsset != null)
-          if (!doc.Equals(appearanceAsset.Document))
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Document mismatch: Skipping Appearance Asset since it is not in the same document as Material");
-          else
-            material.AppearanceAssetId = appearanceAsset.Id;
-
-        // validate and apply structural asset if provided
-        if (structuralAsset != null)
-          if (!doc.Equals(structuralAsset.Document))
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Document mismatch: Skipping Physical Asset since it is not in the same document as Material");
-          else
-            material.StructuralAssetId = structuralAsset.Id;
-
-        // validate and apply thermal asset if provided
-        if (thermalAsset != null)
-          if (!doc.Equals(thermalAsset.Document))
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Document mismatch: Skipping Thermal Asset since it is not in the same document as Material");
-          else
-            material.ThermalAssetId = thermalAsset.Id;
-
-        CommitTransaction(doc, transaction);
+        StartTransaction(material.Document);
+        material.AppearanceAsset = appearanceAsset;
+        material.StructuralAsset = structuralAsset;
+        material.ThermalAsset = thermalAsset;
       }
 
       DA.SetData("Material", material);
     }
   }
-#endif
 }
