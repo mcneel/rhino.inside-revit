@@ -19,11 +19,11 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is DB.Dimension dimension)
+        if (Value is DB.Dimension dimension && dimension.Curve is DB.Curve curve)
         {
-          if (dimension.Curve.Project(dimension.Origin) is DB.IntersectionResult result)
+          if (curve.Project(dimension.Origin) is DB.IntersectionResult result)
           {
-            var transform = dimension.Curve.ComputeDerivatives(result.Parameter, false);
+            var transform = curve.ComputeDerivatives(result.Parameter, false);
             var origin = transform.Origin.ToPoint3d();
             var xAxis = transform.BasisX.ToVector3d();
             var yAxis = transform.BasisY.ToVector3d();
@@ -37,6 +37,28 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override Curve Curve => Value?.Curve?.ToCurve();
+    public override Curve Curve
+    {
+      get
+      {
+        if (Value is DB.Dimension dimension && dimension.Curve is DB.Curve curve)
+        {
+          if (!curve.IsBound && dimension.Value.HasValue)
+          {
+            if (dimension.Curve.Project(dimension.Origin) is DB.IntersectionResult result)
+            {
+              var startParameter = dimension.Value.Value * -0.5;
+              var endParameter   = dimension.Value.Value * +0.5;
+              curve.MakeBound(result.Parameter + startParameter, result.Parameter + endParameter);
+            }
+          }
+
+          return curve.ToCurve();
+
+        }
+
+        return default;
+      }
+    }
   }
 }
