@@ -6,7 +6,7 @@ using Grasshopper.Kernel.Special;
 using DB = Autodesk.Revit.DB;
 
 
-namespace RhinoInside.Revit.GH.Parameters
+namespace RhinoInside.Revit.GH.Parameters.Input
 {
   public class WallLocationLine_ValueList : GH_ValueList
   {

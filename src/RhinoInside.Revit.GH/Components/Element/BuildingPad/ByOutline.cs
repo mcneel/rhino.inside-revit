@@ -7,7 +7,7 @@ using RhinoInside.Revit.Convert.Geometry;
 using DB = Autodesk.Revit.DB;
 using RhinoInside.Revit.Convert.System.Collections.Generic;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Site
 {
   public class BuildingPadByOutline : ReconstructElementComponent
   {

@@ -3,7 +3,7 @@ using DB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   /// <summary>
-  /// Interface that represents any <see cref="DB.Element"/> that is an instance of a <see cref="DB.ElementType"/>
+  /// Interface that represents any <see cref="DB.Element"/> that is a geometric element but is also in a category.
   /// </summary>
   [Kernel.Attributes.Name("Instance")]
   public interface IGH_InstanceElement : IGH_GeometricElement
@@ -23,7 +23,7 @@ namespace RhinoInside.Revit.GH.Types
       if (element.Category is null)
         return false;
 
-      return element.CanHaveTypeAssigned();
+      return GeometricElement.IsValidElement(element);
     }
 
     public override Level Level => (Value is DB.Element element) ?

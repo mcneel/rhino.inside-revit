@@ -5,14 +5,13 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Material
 {
-#if REVIT_2019
+#if REVIT_2018
   public abstract class BaseAssetComponent<T>
-    : TransactionalComponent where T : AppearanceAssetData, new()
+    : TransactionalChainComponent where T : AppearanceAssetData, new()
   {
     protected AssetGHComponentAttribute ComponentInfo
     {
@@ -177,7 +176,7 @@ namespace RhinoInside.Revit.GH.Components.Material
         if (paramIdx < 0)
           continue;
 
-        bool hasInput = DA.GetData(paramInfo.Name, ref inputGHType);
+        bool hasInput = DA.GetData(paramIdx, ref inputGHType);
         if (hasInput)
         {
           object inputValue = inputGHType.ScriptVariable();
@@ -283,7 +282,7 @@ namespace RhinoInside.Revit.GH.Components.Material
       {
         case double dblVal:
           // check double max
-          if (valueRangeInfo.Min != double.NaN && dblVal < valueRangeInfo.Min)
+          if (dblVal < valueRangeInfo.Min)
           {
             AddRuntimeMessage(
               GH_RuntimeMessageLevel.Warning,
@@ -293,7 +292,7 @@ namespace RhinoInside.Revit.GH.Components.Material
               );
             return (object) valueRangeInfo.Min;
           }
-          else if (valueRangeInfo.Max != double.NaN && dblVal > valueRangeInfo.Max)
+          else if (dblVal > valueRangeInfo.Max)
           {
             AddRuntimeMessage(
               GH_RuntimeMessageLevel.Warning,
@@ -377,20 +376,22 @@ namespace RhinoInside.Revit.GH.Components.Material
       return null;
     }
 
-    public static List<DB.Visual.Asset> GetLibrayAssets(DB.Visual.AssetType assetType)
-      => Revit.ActiveDBApplication.GetAssets(assetType).ToList();
-
-    public static DB.Visual.Asset FindLibraryAsset(DB.Visual.AssetType assetType, string schema)
-      => GetLibrayAssets(assetType).Where(x => x.Name == schema).FirstOrDefault();
-
-    public static List<DB.AppearanceAssetElement>
-    QueryAppearanceAssetElements(DB.Document doc)
+    static DB.Visual.Asset FindLibraryAsset
+    (
+      Autodesk.Revit.ApplicationServices.Application app,
+      DB.Visual.AssetType assetType,
+      string schema
+    )
     {
-      return new DB.FilteredElementCollector(doc)
-                    .OfClass(typeof(DB.AppearanceAssetElement))
-                    .WhereElementIsNotElementType()
-                    .Cast<DB.AppearanceAssetElement>()
-                    .ToList();
+      return app.GetAssets(assetType).Where(x => x.Name == schema).FirstOrDefault();
+    }
+
+    public static List<DB.AppearanceAssetElement> QueryAppearanceAssetElements(DB.Document doc)
+    {
+      return new DB.FilteredElementCollector(doc).
+        OfClass(typeof(DB.AppearanceAssetElement)).
+        Cast<DB.AppearanceAssetElement>().
+        ToList();
     }
 
     public static DB.AppearanceAssetElement
@@ -400,7 +401,7 @@ namespace RhinoInside.Revit.GH.Components.Material
       if (existingAsset != null)
         return existingAsset;
 
-      var baseAsset = FindLibraryAsset(DB.Visual.AssetType.Appearance, schemaName);
+      var baseAsset = FindLibraryAsset(doc.Application, DB.Visual.AssetType.Appearance, schemaName);
       return DB.AppearanceAssetElement.Create(doc, name, baseAsset);
     }
 

@@ -10,9 +10,8 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Material
 {
-#if REVIT_2019
   public abstract class BasePhysicalAssetComponent<T>
-    : TransactionalComponent where T : PhysicalMaterialData, new()
+    : TransactionalChainComponent where T : PhysicalMaterialData, new()
   {
     protected AssetGHComponentAttribute ComponentInfo
     {
@@ -229,7 +228,7 @@ namespace RhinoInside.Revit.GH.Components.Material
       {
         case double dblVal:
           // check double max
-          if (valueRangeInfo.Min != double.NaN && dblVal < valueRangeInfo.Min)
+          if (dblVal < valueRangeInfo.Min)
           {
             AddRuntimeMessage(
               GH_RuntimeMessageLevel.Warning,
@@ -239,7 +238,7 @@ namespace RhinoInside.Revit.GH.Components.Material
               );
             return (object) valueRangeInfo.Min;
           }
-          else if (valueRangeInfo.Max != double.NaN && dblVal > valueRangeInfo.Max)
+          else if (dblVal > valueRangeInfo.Max)
           {
             AddRuntimeMessage(
               GH_RuntimeMessageLevel.Warning,
@@ -320,60 +319,44 @@ namespace RhinoInside.Revit.GH.Components.Material
       if (!DA.GetData("Type", ref assetClass))
         return;
 
-      using (var transaction = NewTransaction(doc))
+      // check naming conflicts with other asset types
+      var psetElement = FindPropertySetElement(doc, name);
+      if (psetElement != null && !MatchesPhysicalAssetType(psetElement))
       {
-        try
-        {
-          // check naming conflicts with other asset types
-          DB.PropertySetElement psetElement = FindPropertySetElement(doc, name);
-          if (psetElement != null && psetElement.Id != DB.ElementId.InvalidElementId)
-            if (!MatchesPhysicalAssetType(psetElement))
-            {
-              AddRuntimeMessage(
-                GH_RuntimeMessageLevel.Error,
-                $"Thermal asset with same name exists already. Use a different name for this asset"
-              );
-              return;
-            }
-
-          transaction.Start();
-
-          // delete existing matching psetelement
-          if (psetElement != null && psetElement.Id != DB.ElementId.InvalidElementId)
-            doc.Delete(psetElement.Id);
-
-          // creaet asset from input data
-          var structAsset = new DB.StructuralAsset(name, assetClass);
-
-          // we need to apply the behaviour here manually
-          // otherwise the resultant DB.PropertySetElement will be missing parameters
-          DB.StructuralBehavior behaviour = default;
-          if (DA.GetData("Behaviour", ref behaviour))
-            structAsset.Behavior = behaviour;
-          else
-            structAsset.Behavior = DB.StructuralBehavior.Isotropic;
-
-          // set the asset on psetelement
-          psetElement = DB.PropertySetElement.Create(doc, structAsset);
-
-          // grab asset data from inputs
-          var assetData = CreateAssetDataFromInputs(DA);
-          UpdatePropertySetElementFromData(psetElement, assetData);
-
-          // send the new asset to output
-          DA.SetData(
-            ComponentInfo.Name,
-            psetElement
-          );
-        }
-        catch (Exception ex)
-        {
-          transaction.RollBack();
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Revit API Error | {ex.Message}");
-        }
-
-        transaction.Commit();
+        AddRuntimeMessage(
+          GH_RuntimeMessageLevel.Error,
+          $"Thermal asset with same name exists already. Use a different name for this asset"
+        );
+        return;
       }
+
+      StartTransaction(doc);
+
+      // TODO: reuse psetElement if suitable
+      // delete existing matching psetelement
+      if (psetElement != null)
+        doc.Delete(psetElement.Id);
+
+      // create asset from input data
+      var structAsset = new DB.StructuralAsset(name, assetClass);
+
+      // we need to apply the behaviour here manually
+      // otherwise the resultant DB.PropertySetElement will be missing parameters
+      DB.StructuralBehavior behaviour = default;
+      if (DA.GetData("Behaviour", ref behaviour))
+        structAsset.Behavior = behaviour;
+      else
+        structAsset.Behavior = DB.StructuralBehavior.Isotropic;
+
+      // set the asset on psetelement
+      psetElement = DB.PropertySetElement.Create(doc, structAsset);
+
+      // grab asset data from inputs
+      var assetData = CreateAssetDataFromInputs(DA);
+      UpdatePropertySetElementFromData(psetElement, assetData);
+
+      // send the new asset to output
+      DA.SetData(ComponentInfo.Name, new Types.StructuralAssetElement(psetElement));
     }
   }
 
@@ -424,46 +407,18 @@ namespace RhinoInside.Revit.GH.Components.Material
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       // get input structural asset
-      DB.PropertySetElement psetElement = default;
-      if (!DA.GetData(ComponentInfo.Name, ref psetElement))
+      var structuralAsset = default(Types.StructuralAssetElement);
+      if (!DA.GetData(ComponentInfo.Name, ref structuralAsset) || structuralAsset.Value is null)
         return;
 
-      var doc = Revit.ActiveDBDocument;
-      using (var transaction = NewTransaction(doc))
-      {
-        // update the asset properties from input data
-        try
-        {
-          // check asset type
-          if (!MatchesPhysicalAssetType(psetElement))
-          {
-            AddRuntimeMessage(
-              GH_RuntimeMessageLevel.Error,
-              $"Incompatible asset type"
-            );
-            return;
-          }
+      StartTransaction(structuralAsset.Document);
 
-          transaction.Start();
+      // grab asset data from inputs
+      var assetData = CreateAssetDataFromInputs(DA);
+      UpdatePropertySetElementFromData(structuralAsset.Value, assetData);
 
-          // grab asset data from inputs
-          var assetData = CreateAssetDataFromInputs(DA);
-          UpdatePropertySetElementFromData(psetElement, assetData);
-
-          transaction.Commit();
-
-          // send the modified asset to output
-          DA.SetData(
-            ComponentInfo.Name,
-            psetElement
-          );
-        }
-        catch (Exception ex)
-        {
-          transaction.RollBack();
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Revit API Error | {ex.Message}");
-        }
-      }
+      // send the modified asset to output
+      DA.SetData(ComponentInfo.Name, structuralAsset);
     }
   }
 
@@ -495,21 +450,11 @@ namespace RhinoInside.Revit.GH.Components.Material
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DB.PropertySetElement psetElement = default;
-      if (!DA.GetData(ComponentInfo.Name, ref psetElement))
+      var structuralAsset = default(Types.StructuralAssetElement);
+      if (!DA.GetData(ComponentInfo.Name, ref structuralAsset) || structuralAsset.Value is null)
         return;
 
-      // check asset type
-      if (!MatchesPhysicalAssetType(psetElement))
-      {
-        AddRuntimeMessage(
-          GH_RuntimeMessageLevel.Error,
-          $"Incompatible asset type"
-        );
-        return;
-      }
-
-      SetOutputsFromPropertySetElement(DA, psetElement);
+      SetOutputsFromPropertySetElement(DA, structuralAsset.Value);
     }
   }
 
@@ -574,60 +519,41 @@ namespace RhinoInside.Revit.GH.Components.Material
       if (!DA.GetData("Type", ref materialType))
         return;
 
-      using (var transaction = NewTransaction(doc))
+      // check naming conflicts with other asset types
+      DB.PropertySetElement psetElement = FindPropertySetElement(doc, name);
+      if (psetElement != null && !MatchesPhysicalAssetType(psetElement))
       {
-        try
-        {
-          // check naming conflicts with other asset types
-          DB.PropertySetElement psetElement = FindPropertySetElement(doc, name);
-          if (psetElement != null && psetElement.Id != DB.ElementId.InvalidElementId)
-            if (!MatchesPhysicalAssetType(psetElement))
-            {
-              AddRuntimeMessage(
-                GH_RuntimeMessageLevel.Error,
-                $"Thermal asset with same name exists already. Use a different name for this asset"
-              );
-              return;
-            }
-
-          transaction.Start();
-
-          // delete existing matching psetelement
-          if (psetElement != null && psetElement.Id != DB.ElementId.InvalidElementId)
-            doc.Delete(psetElement.Id);
-
-          // creaet asset from input data
-          var thermalAsset = new DB.ThermalAsset(name, materialType);
-
-          // we need to apply the behaviour here manually
-          // otherwise the resultant DB.PropertySetElement will be missing parameters
-          DB.StructuralBehavior behaviour = default;
-          if (DA.GetData("Behaviour", ref behaviour))
-            thermalAsset.Behavior = behaviour;
-          else
-            thermalAsset.Behavior = DB.StructuralBehavior.Isotropic;
-
-          // set the asset on psetelement
-          psetElement = DB.PropertySetElement.Create(doc, thermalAsset);
-
-          // grab asset data from inputs
-          var assetData = CreateAssetDataFromInputs(DA);
-          UpdatePropertySetElementFromData(psetElement, assetData);
-
-          // send the new asset to output
-          DA.SetData(
-            ComponentInfo.Name,
-            psetElement
-          );
-        }
-        catch (Exception ex)
-        {
-          transaction.RollBack();
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Revit API Error | {ex.Message}");
-        }
-
-        transaction.Commit();
+        AddRuntimeMessage(
+          GH_RuntimeMessageLevel.Error,
+          $"Thermal asset with same name exists already. Use a different name for this asset"
+        );
+        return;
       }
+
+      StartTransaction(doc);
+
+      // TODO: reuse psetElement if suitable
+      // delete existing matching psetelement
+      if (psetElement != null)
+        doc.Delete(psetElement.Id);
+
+      // create asset from input data
+      var thermalAsset = new DB.ThermalAsset(name, materialType);
+
+      // we need to apply the behaviour here manually
+      // otherwise the resultant DB.PropertySetElement will be missing parameters
+      var behaviour = DB.StructuralBehavior.Isotropic;
+      DA.GetData("Behaviour", ref behaviour);
+
+      // set the asset on psetelement
+      psetElement = DB.PropertySetElement.Create(doc, thermalAsset);
+
+      // grab asset data from inputs
+      var assetData = CreateAssetDataFromInputs(DA);
+      UpdatePropertySetElementFromData(psetElement, assetData);
+
+      // send the new asset to output
+      DA.SetData(ComponentInfo.Name, new Types.ThermalAssetElement(psetElement));
     }
   }
 
@@ -678,46 +604,18 @@ namespace RhinoInside.Revit.GH.Components.Material
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       // get input structural asset
-      DB.PropertySetElement psetElement = default;
-      if (!DA.GetData(ComponentInfo.Name, ref psetElement))
+      var thermalAsset = default(Types.ThermalAssetElement);
+      if (!DA.GetData(ComponentInfo.Name, ref thermalAsset) || thermalAsset.Value is null)
         return;
 
-      var doc = Revit.ActiveDBDocument;
-      using (var transaction = NewTransaction(doc))
-      {
-        // update the asset properties from input data
-        try
-        {
-          // check asset type
-          if (!MatchesPhysicalAssetType(psetElement))
-          {
-            AddRuntimeMessage(
-              GH_RuntimeMessageLevel.Error,
-              $"Incompatible asset type"
-            );
-            return;
-          }
+      StartTransaction(thermalAsset.Document);
 
-          transaction.Start();
+      // grab asset data from inputs
+      var assetData = CreateAssetDataFromInputs(DA);
+      UpdatePropertySetElementFromData(thermalAsset.Value, assetData);
 
-          // grab asset data from inputs
-          var assetData = CreateAssetDataFromInputs(DA);
-          UpdatePropertySetElementFromData(psetElement, assetData);
-
-          transaction.Commit();
-
-          // send the modified asset to output
-          DA.SetData(
-            ComponentInfo.Name,
-            psetElement
-          );
-        }
-        catch (Exception ex)
-        {
-          transaction.RollBack();
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Revit API Error | {ex.Message}");
-        }
-      }
+      // send the modified asset to output
+      DA.SetData(ComponentInfo.Name, thermalAsset);
     }
   }
 
@@ -749,22 +647,11 @@ namespace RhinoInside.Revit.GH.Components.Material
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DB.PropertySetElement psetElement = default;
-      if (!DA.GetData(ComponentInfo.Name, ref psetElement))
+      var thermalAsset = default(Types.ThermalAssetElement);
+      if (!DA.GetData(ComponentInfo.Name, ref thermalAsset) || thermalAsset.Value is null)
         return;
 
-      // check asset type
-      if (!MatchesPhysicalAssetType(psetElement))
-      {
-        AddRuntimeMessage(
-          GH_RuntimeMessageLevel.Error,
-          $"Incompatible asset type"
-        );
-        return;
-      }
-
-      SetOutputsFromPropertySetElement(DA, psetElement);
+      SetOutputsFromPropertySetElement(DA, thermalAsset.Value);
     }
   }
-#endif
 }

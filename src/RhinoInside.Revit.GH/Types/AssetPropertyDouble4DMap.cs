@@ -5,7 +5,7 @@ using MAT = RhinoInside.Revit.GH.Components.Material;
 
 namespace RhinoInside.Revit.GH.Types
 {
-#if REVIT_2019
+#if REVIT_2018
   public class AssetPropertyDouble4DMap : GH_Goo<MAT.AssetPropertyDouble4DMap>
   {
     public override string TypeName => "Mappable Color";

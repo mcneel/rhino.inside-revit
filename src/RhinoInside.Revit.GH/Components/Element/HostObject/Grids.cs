@@ -1,17 +1,14 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Element.HostObject
+namespace RhinoInside.Revit.GH.Components.Host
 {
-  public class HostGrids : Component
+  public class HostObjectGrids : Component
   {
     public override Guid ComponentGuid => new Guid("4AD17D89-9044-4438-B468-7F3AB688BA68");
-    protected override string IconTag => "G";
+    protected override string IconTag => "#";
 
-    public HostGrids() : base
+    public HostObjectGrids() : base
     (
       name: "Host Curtain Grids",
       nickname: "HostGrids",

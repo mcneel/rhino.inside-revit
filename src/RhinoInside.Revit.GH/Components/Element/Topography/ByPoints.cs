@@ -8,7 +8,7 @@ using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.Convert.System.Collections.Generic;
 using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Site
 {
   public class TopographyByPoints : ReconstructElementComponent
   {
@@ -28,6 +28,11 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.GraphicalElement(), "Topography", "T", "New Topography", GH_ParamAccess.item);
     }
 
+    //class FailuresPreprocessor : DB.IFailuresPreprocessor
+    //{
+    //  public DB.FailureProcessingResult PreprocessFailures(DB.FailuresAccessor failuresAccessor) => DB.FailureProcessingResult.Continue;
+    //}
+
     void ReconstructTopographyByPoints
     (
       DB.Document doc,
@@ -41,16 +46,36 @@ namespace RhinoInside.Revit.GH.Components
 
       //if (element is DB.Architecture.TopographySurface topography)
       //{
-      //  using (var editScope = new DB.Architecture.TopographyEditScope(doc, GetType().Name))
+      //  using (var scope = new DB.Architecture.TopographyEditScope(topography.Document, NickName))
       //  {
-      //    editScope.Start(element.Id);
-      //    topography.DeletePoints(topography.GetPoints());
-      //    topography.AddPoints(xyz);
+      //    scope.Start(topography.Id);
 
-      //    foreach (var subRegionId in topography.GetHostedSubRegionIds())
-      //      doc.Delete(subRegionId);
+      //    var boundaryPoints = topography.GetBoundaryPoints();
+      //    var bbox = new BoundingBox(boundaryPoints.Convert(GeometryDecoder.ToPoint3d));
+      //    bbox.Inflate(Revit.VertexTolerance * Revit.ModelUnits * 10.0);
+      //    var bboxCorners = bbox.GetCorners().Take(4).Convert(GeometryEncoder.ToXYZ).ToArray();
 
-      //    editScope.Commit(this);
+      //    using (var tx = new DB.Transaction(topography.Document, NickName))
+      //    {
+      //      tx.Start();
+
+      //      topography.AddPoints(bboxCorners);
+      //      topography.DeletePoints(topography.GetPoints());
+
+      //      tx.Commit();
+      //    }
+
+      //    using (var tx = new DB.Transaction(topography.Document, NickName))
+      //    {
+      //      tx.Start();
+
+      //      topography.AddPoints(xyz);
+      //      topography.DeletePoints(bboxCorners);
+
+      //      tx.Commit();
+      //    }
+
+      //    scope.Commit(new FailuresPreprocessor());
       //  }
       //}
       //else

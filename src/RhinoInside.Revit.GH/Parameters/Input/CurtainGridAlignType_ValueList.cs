@@ -3,7 +3,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
 using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Parameters
+namespace RhinoInside.Revit.GH.Parameters.Input
 {
   public class CurtainGridAlignType_ValueList : GH_ValueList
   {

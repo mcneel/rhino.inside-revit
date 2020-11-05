@@ -5,7 +5,7 @@ using Grasshopper.Kernel;
 
 namespace RhinoInside.Revit.GH.Components.Material
 {
-#if REVIT_2019
+#if REVIT_2018
   public abstract class CreateAppearanceAsset<T>
     : BaseAssetComponent<T> where T : ShaderData, new()
   {
@@ -66,22 +66,14 @@ namespace RhinoInside.Revit.GH.Components.Material
         return;
       }
 
-      using (var transaction = NewTransaction(doc))
-      {
-        transaction.Start();
+      StartTransaction(doc);
 
-        var assetElement = EnsureThisAsset(doc, assetData.Name);
+      var assetElement = EnsureThisAsset(doc, assetData.Name);
 
-        // update asset properties
-        UpdateAssetElementFromInputs(assetElement, assetData);
+      // update asset properties
+      UpdateAssetElementFromInputs(assetElement, assetData);
 
-        DA.SetData(
-          ComponentInfo.Name,
-          new Types.AppearanceAsset(assetElement)
-        );
-
-        transaction.Commit();
-      }
+      DA.SetData(ComponentInfo.Name, new Types.AppearanceAssetElement(assetElement));
     }
   }
 

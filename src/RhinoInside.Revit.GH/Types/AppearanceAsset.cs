@@ -5,13 +5,13 @@ using DB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   [Name("Appearance Asset")]
-  public class AppearanceAsset : Element
+  public class AppearanceAssetElement : Element
   {
     protected override Type ScriptVariableType => typeof(DB.AppearanceAssetElement);
-    public static explicit operator DB.AppearanceAssetElement(AppearanceAsset value) =>
-      value?.IsValid == true ? value.Value as DB.AppearanceAssetElement : default;
+    public new DB.AppearanceAssetElement Value => base.Value as DB.AppearanceAssetElement;
 
-    public AppearanceAsset() { }
-    public AppearanceAsset(DB.AppearanceAssetElement asset) : base(asset) { }
+    public AppearanceAssetElement() { }
+    public AppearanceAssetElement(DB.Document doc, DB.ElementId id) : base(doc, id) { }
+    public AppearanceAssetElement(DB.AppearanceAssetElement asset) : base(asset) { }
   }
 }
