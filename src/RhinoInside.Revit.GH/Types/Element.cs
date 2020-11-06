@@ -250,7 +250,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         Document     = element.Document;
         DocumentGUID = Document.GetFingerprintGUID();
-        this.id      = element.Id;
+        id           = element.Id;
         UniqueID     = element.UniqueId;
         base.Value   = element;
         return true;
@@ -268,7 +268,12 @@ namespace RhinoInside.Revit.GH.Types
 
     public Element() { }
     internal Element(DB.Document doc, DB.ElementId id) => SetValue(doc, id);
-    protected Element(DB.Element element) => SetValue(element);
+    protected Element(DB.Element element) : base(element.Document, element)
+    {
+      DocumentGUID = Document.GetFingerprintGUID();
+      UniqueID = element.UniqueId;
+      id = element.Id;
+    }
 
     public override bool CastFrom(object source)
     {
