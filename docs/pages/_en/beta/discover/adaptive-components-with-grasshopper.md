@@ -2,6 +2,7 @@
 title: Create Building Shell Using Adaptive Components
 description: This sample shows how to how to drive adaptive components using Grasshopper and Rhino
 thumbnail: /static/images/discover/adaptive-component-final.png
+tags: ["adaptive-components", "shell"]
 ---
 
 <!-- intro video -->

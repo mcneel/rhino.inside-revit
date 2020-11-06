@@ -2,6 +2,7 @@
 title: Extract Window Geometry and Material by Sub-Categories
 description: The first part of this definition, collects subcategories available on *Windows Category* in the active document
 thumbnail: /static/images/discover/type-geom-material01.png
+tags: ["material", "geometry"]
 ---
 
 

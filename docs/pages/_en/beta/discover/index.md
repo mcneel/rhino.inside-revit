@@ -28,6 +28,11 @@ Discover more about {{ site.terms.rir }}! The resources here created are by the 
 </a>
 <div class="gallery-info">
     <a class="title" href="{{ item.url | prepend: site.baseurl }}">{{ item.title }}</a>
+    <ul class="gallery-info-tags">
+    {% for tag in item.tags %}
+        <li>{{ tag }}</li>
+    {% endfor %}
+    </ul>
     <div class="extra">
         {{ item.description | markdownify }}
     </div>
