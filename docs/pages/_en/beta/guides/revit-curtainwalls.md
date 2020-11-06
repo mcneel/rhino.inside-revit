@@ -308,7 +308,12 @@ The {% include ltr/comp.html uuid="face5e7d-" %} component also provides the *Mu
 
 ## Creating Curtain Walls
 
-{% include ltr/en/wip_note.html %}
+### By Profile
+
+Similar to creating a basic wall based on a profile, you can simply create a curtain wall by passing a *Curtain Wall Type* to the {% include ltr/comp.html uuid='78b02ae8' %} component:
+
+![]({{ "/static/images/guides/revit-curtainwalls-byprofilescap.png" | prepend: site.baseurl }})
+
 
 ### Creating Non-Linear Curtain Walls
 
