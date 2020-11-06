@@ -411,6 +411,7 @@
     <Compile Include="Types\GeometryObject.cs" />
     <Compile Include="Types\GraphicalElement.cs" />
     <Compile Include="Types\Group.cs" />
+    <Compile Include="Types\Instance.cs" />
     <Compile Include="Types\InstanceElement.cs" />
     <Compile Include="Types\LinePatternElement.cs" />
     <Compile Include="Types\Panel.cs" />
