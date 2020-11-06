@@ -50,7 +50,8 @@
         display: none;
     }
 
-    .page-link {
+    .page-link,
+    .extern-link {
         color: $text-color;
         line-height: $base-line-height;
 
@@ -78,7 +79,7 @@
             text-align: center;
             border-style: none;
 
-            > svg {
+            >svg {
                 width: 36px;
 
                 path {
@@ -97,11 +98,12 @@
             width: 200px;
             padding: 10px 0px 10px 0px;
             background-color: white;
-            border: 1px solid rgba(0,0,0,.15);
+            border: 1px solid rgba(0, 0, 0, .15);
             border-radius: .25rem;
         }
 
-        .page-link {
+        .page-link,
+        .extern-link {
             display: block;
             padding: 5px 10px;
             margin: 0px;
@@ -171,7 +173,7 @@
  * Page content
  */
 .page-content {
-    padding: $spacing-unit 0;
+    // padding: $spacing-unit 0;
 }
 
 .page-heading {
@@ -238,4 +240,3 @@
         margin-top: 30px;
     }
 }
-

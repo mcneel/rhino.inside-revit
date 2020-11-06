@@ -1,7 +1,8 @@
 ---
 title: Materials
-order: 49
+order: 50
 group: Modeling
+ghdef: revit-materials.ghx
 ---
 
 Materials are one of the more complicated data types in Revit. They are regularly used to (a) assign graphical properties to Revit elements for drafting (e.g. tile pattern on a bathroom wall), (b) embed architectural finish information in the building model for the purpose of scheduling and takeouts, (c) assign appearance properties to surfaces for architectural visualizations, and (d) assign physical and (e) thermal properties to elements for mathematical analysis of all kinds.
@@ -19,6 +20,8 @@ Each one of these aspects is represented by a tab in the Revit material editor w
 ![]({{ "/static/images/guides/revit-materials-editortabs.png" | prepend: site.baseurl }})
 
 In the sections below, we will discuss how to deal with all of these 5 aspects using {{ site.terms.rir }}
+
+{% include youtube_player.html id="8CdhieEi6Os" %}
 
 ## Querying Materials
 
@@ -90,6 +93,7 @@ Revit API support for assets is very limited. This note section, attempts to des
 
 **Appearance Assets**
 
+
 All *Appearance* assets are of type {% include api_type.html type='Autodesk.Revit.DB.Visual.Asset' title='DB.Visual.Asset' %} and are basically a collection of visual properties that have a name e.g. `generic_diffuse`, a type, and a value. The {% include api_type.html type='Autodesk.Revit.DB.Visual.Asset' title='DB.Visual.Asset' %} has lookup methods to find and return these properties. These properties are wrapped by the type {% include api_type.html type='Autodesk.Revit.DB.Visual.AssetProperty' title='DB.Visual.AssetProperty' %} in Revit API. This type provides getters to extract the value from the property.
 
 &nbsp;
@@ -136,6 +140,10 @@ To replace assets of a material with a different asset, use the {% include ltr/c
 ![]({{ "/static/images/guides/revit-materials-replace.png" | prepend: site.baseurl }})
 
 ## Appearance Assets
+
+*Appearance* Assets are called the rendering material in other products. There are many components in Grasshopper to manipulate *Appearance* assets.
+
+{% include youtube_player.html id="0fZVXCWRPr0" %}
 
 There are many *Appearance* assets in Revit API. As an example, you can use {% include ltr/comp.html uuid='0f251f87-' %} to create a *Generic* appearance asset and assign that to a Revit material using the {% include ltr/comp.html uuid='2f1ec561-' %} component:
 

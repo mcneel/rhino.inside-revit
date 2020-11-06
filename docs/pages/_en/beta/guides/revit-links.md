@@ -2,6 +2,7 @@
 title: Links
 order: 74
 group: Geometry Containers
+ghdef: revit-links.ghx
 ---
 
 ## Querying Linked Documents
@@ -11,19 +12,19 @@ When Revit loads a model, it also loads all the linked models into the memory as
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-Use the *Document Links* component shown here to get all the documents that are linked into the active (or given) document
+Use the {% include ltr/comp.html uuid='ebccfdd8' %} component shown here to get all the documents that are linked into the active (or given) document
 
-![]({{ "/static/images/guides/revit-links01.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-links-doclinks.png" | prepend: site.baseurl }})
 
 ## Accessing Linked Document Elements
 
-Use the *Document Elements* component shown here to access elements if a given document. The input document can be a linked document as well.
+Use the {% include ltr/comp.html uuid='0f7da57e' %} component shown here to access elements if a given document. The input document can be a linked document as well.
 
-![]({{ "/static/images/guides/revit-links02.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-links-querywalls.png" | prepend: site.baseurl }})
 
-You can chain the *All Documents* component into the *Document Links* component to grab all the linked documents from all the open documents:
+You can chain the {% include ltr/comp.html uuid='5b935ca4' %} component into the {% include ltr/comp.html uuid='ebccfdd8' %} component to grab all the linked documents from all the open documents:
 
-![]({{ "/static/images/guides/revit-links02a.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-links-querywalls-alldocs.png" | prepend: site.baseurl }})
 
 ## Unloading/Reloading Links
 

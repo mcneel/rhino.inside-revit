@@ -49,7 +49,7 @@ Now we can import the namespaces into the script scope:
 
 {% highlight python %}
 # from System.Core DLL
-from System import Enum
+from System import Enum, Action
 
 # {{ site.terms.rir }} API
 import RhinoInside
@@ -85,7 +85,7 @@ clr.AddReference('RhinoInside.Revit')
 clr.AddReference('RevitAPI') 
 clr.AddReference('RevitAPIUI')
 
-from System import Enum
+from System import Enum, Action
 
 import rhinoscriptsyntax as rs
 import Rhino
@@ -143,7 +143,7 @@ clr.AddReference('RhinoInside.Revit')
 clr.AddReference('RevitAPI') 
 clr.AddReference('RevitAPIUI')
 
-from System import Enum
+from System import Enum, Action
 
 import rhinoscriptsyntax as rs
 import Rhino
@@ -220,6 +220,9 @@ import Rhino
 import RhinoInside
 import Grasshopper
 from RhinoInside.Revit import Revit, Convert
+from Autodesk.Revit import DB
+
+clr.ImportExtensions(Convert.Geometry)
 from Autodesk.Revit import DB
 
 doc = Revit.ActiveDBDocument

@@ -16,6 +16,13 @@
             "{% include ltr/comp.html uuid='$1' %}"
         ]
     },
+    "RIR Parameter": {
+        "prefix": "rirparam",
+        "description": "Parameter tag for Rhino.Inside.Revit Wiki",
+        "body": [
+            "{% include ltr/param.html uuid='$1' %}"
+        ]
+    },
     "RIR Image": {
         "prefix": "ririmg",
         "description": "Image tag for Rhino.Inside.Revit Wiki",
