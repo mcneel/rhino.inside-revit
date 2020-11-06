@@ -174,7 +174,7 @@ namespace RhinoInside.Revit.GH.Components
       {
         StartTransaction(element.Document);
 
-        using (!KeepJoins ? element.DisableJoinsScope() : default)
+        using (!KeepJoins ? (element as Types.InstanceElement)?.DisableJoinsScope() : default)
         {
           var pinned = element.Pinned;
           element.Pinned = false;
@@ -253,7 +253,7 @@ namespace RhinoInside.Revit.GH.Components
       {
         StartTransaction(element.Document);
 
-        using (!KeepJoins ? element.DisableJoinsScope() : default)
+        using (!KeepJoins ? (element as Types.InstanceElement)?.DisableJoinsScope() : default)
         {
           element.Curve = curve;
         }
