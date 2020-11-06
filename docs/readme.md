@@ -15,6 +15,7 @@
 - [Online Experience](#online-experience)
 - [Understanding Wiki Source Files](#understanding-wiki-source-files)
   - [Page Metadata](#page-metadata)
+    - [Page GH Definition](#page-gh-definition)
   - [Page Layouts](#page-layouts)
   - [Adding a New Language](#adding-a-new-language)
   - [Adding a New Wiki Version](#adding-a-new-wiki-version)
@@ -236,6 +237,7 @@ The structure of the source is as explained below:
   - `images/` contains all images used across the wiki contents
   - `samples/` contains sample data files
   - `ghnodes/` contains Grasshopper component files
+- `static_src` contains all source files used to generate the files under `static/`
 - `_data/` contains data files used to generate special pages
 - `_config.yml` Jekyll site configs file (see the config file for more information on each available setting)
 - `GemFile*` Ruby gemfile listing the ruby dependencies
@@ -264,6 +266,15 @@ Required metadata are
 - **Category** Set automatically by site configuration. do not set manually
 - **Layout** Default layout is set automatically by site configuration. override only when your page layout is different from default. See site config file for default layout
 - **TOC** All pages are set to `toc: true` so they will be included in Side panels. Set to `toc: false` to omit the page from side panel lists e.g. samples/index.md` is omitted from the side panel this way.
+
+### Page GH Definition
+For some pages a GH definition is used to generate screenshots. The page can provide a download link to this GH definition (stored under `static_src/gh-screencaps/`) using the key below:
+
+```
+...
+ghdef: revit-walls.ghx
+---
+```
 
 ## Page Layouts
 
@@ -686,7 +697,7 @@ This is the code used to generate the example locale block shown in the image ab
 This block is for buttons to download packages (Zip, ...)
 
 ```
-{% include ltr/download_pkg.html archive='/static/samples/column-family-along-curve.zip' %}
+{% include ltr/download_pkg.html archive='/static/archives/column-family-along-curve.zip' %}
 ```
 
 This block can accept two argument:

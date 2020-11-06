@@ -1,7 +1,8 @@
 ---
 title: Materials
-order: 49
+order: 50
 group: Modeling
+ghdef: revit-materials.ghx
 ---
 
 Materials are one of the more complicated data types in Revit. They are regularly used to (a) assign graphical properties to Revit elements for drafting (e.g. tile pattern on a bathroom wall), (b) embed architectural finish information in the building model for the purpose of scheduling and takeouts, (c) assign appearance properties to surfaces for architectural visualizations, and (d) assign physical and (e) thermal properties to elements for mathematical analysis of all kinds.
@@ -141,8 +142,6 @@ To replace assets of a material with a different asset, use the {% include ltr/c
 ## Appearance Assets
 
 *Appearance* Assets are called the rendering material in other products. There are many components in Grasshopper to manipulate *Appearance* assets.
-
-&nbsp;
 
 {% include youtube_player.html id="0fZVXCWRPr0" %}
 

@@ -57,7 +57,7 @@
             $('#cat_homelink').attr('href', getPageLink(''));
             $('#cat_starting').attr('href', getPageLink('getting-started'));
             $('#cat_guides').attr('href', getPageLink('guides/'));
-            $('#cat_samples').attr('href', getPageLink('samples/'));
+            $('#cat_discover').attr('href', getPageLink('discover/'));
             $('#cat_reference').attr('href', getPageLink('reference/'));
             $('#cat_community').attr('href', getPageLink('community/'));
             // mark current navbar category as active
@@ -65,8 +65,8 @@
                 $('#cat_starting').addClass('active');
             } else if (url.endsWith('/guides') || url.includes('/guides/')) {
                 $('#cat_guides').addClass('active');
-            } else if (url.endsWith('/samples') || url.includes('/samples/')) {
-                $('#cat_samples').addClass('active');
+            } else if (url.endsWith('/discover') || url.includes('/discover/')) {
+                $('#cat_discover').addClass('active');
             } else if (url.endsWith('/reference') || url.includes('/reference/')) {
                 $('#cat_reference').addClass('active');
             } else if (url.endsWith('/community') || url.includes('/community/')) {
@@ -103,6 +103,21 @@
                 anchors.add('.post-content > h2, .post-content > h3, .post-content > h4, .post-content > h5, .post-content > h6');
                 }
             )();
+        </script>
+
+        <!-- gallery interaction -->
+        <script>
+            $(document).ready(function(){
+              $(".gallery-item").hover(function(){
+                    $(this).addClass("gallery-item-focused");
+                    $(this).find(".gallery-thumbnail").removeClass("gallery-thumbnail-dim");
+                    $(this).find(".extra").css("display", "block");
+                }, function(){
+                    $(this).removeClass("gallery-item-focused");
+                    $(this).find(".gallery-thumbnail").addClass("gallery-thumbnail-dim");
+                    $(this).find(".extra").css("display", "none");
+              });
+            });
         </script>
     </body>
 </html>

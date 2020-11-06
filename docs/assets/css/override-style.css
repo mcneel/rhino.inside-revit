@@ -24,6 +24,7 @@ body {
 
 a.site-title,
 a.page-link,
+a.extern-link,
 a.dropdown-toggle a.site-title:hover,
 a.page-link:hover,
 a.dropdown-toggle:hover {
@@ -94,12 +95,26 @@ pre {
     margin-left: 10px;
 }
 
+.site-nav .extern-link {
+    margin-left: 10px;
+}
+
+.site-nav .page-link:hover {
+    border-bottom: 3px solid #e8e8e8;
+}
+
+.site-nav .page-link.active {
+    font-weight: unset;
+    border-bottom: 3px solid #111;
+}
+
 /* page links on navigation bar */
 .page-link {
     display: inline;
     padding: 0;
     margin: 0;
     border: none;
+    padding-bottom: 22px;
 }
 
 .page-link:hover {
@@ -178,6 +193,7 @@ pre {
 .side-content {
     margin-left: 20px;
     width: 100%;
+    margin-top: 20px;
 }
 
 .side-content h1 {
@@ -188,11 +204,21 @@ pre {
     display: block;
     margin-left: auto;
     margin-right: auto;
-    image-rendering: crisp-edges;
-    image-rendering: -webkit-optimize-contrast;
+    /* image-rendering: crisp-edges;
+    image-rendering: -webkit-optimize-contrast; */
+}
+
+.page-gh-download {
+    display: inline;
+    float: right;
+    margin-top: 12px;
 }
 
 /* post article contents */
+.post-content {
+    margin-top: 20px;
+}
+
 .post-content h2 {
     border-bottom: 1px dashed #d0d0d0;
     padding-bottom: 10px;
@@ -299,6 +325,127 @@ pre {
 }
 
 /*
+    gallery ===================================================================
+*/
+
+.gallery-large-grid {
+    display: grid;
+    grid-gap: 15px 10px;
+    /* grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); */
+    grid-template-columns: auto auto auto auto;
+    align-items: start;
+    grid-auto-rows: 200px;
+}
+
+.gallery-item {
+    display: block;
+    min-height: 200px;
+    background-color: #f6f6f6;
+    border: 1px solid #d0d0d0;
+    border-radius: 5px;
+    color: white;
+    /* -webkit-box-shadow: 0 3px 2px rgba(0, 0, 0, .15);
+    -moz-box-shadow: 0 3px 2px rgba(0, 0, 0, .15);
+    box-shadow: 0 3px 2px rgba(0, 0, 0, .15); */
+    overflow: hidden;
+}
+
+.gallery-item-focused {
+    background-color: white;
+    border: 1px solid #111;
+    -webkit-box-shadow: 0 6px 0 #111, 0 12px 8px rgba(0, 0, 0, .25);
+    -moz-box-shadow: 0 6px 0 #111, 0 12px 8px rgba(0, 0, 0, .25);
+    box-shadow: 0 6px 0 #111, 0 12px 8px rgba(0, 0, 0, .25);
+    z-index: 1000;
+}
+
+.gallery-item a {
+    text-decoration: none;
+}
+
+.gallery-thumbnail {
+    height: 115px;
+    overflow: hidden;
+}
+
+.gallery-thumbnail-dim {
+    -webkit-filter: saturate(0.5);
+    filter: saturate(0.5);
+}
+
+.gallery-thumbnail-large {
+    height: 135px;
+}
+
+.gallery-info {
+    /* border-top: 1px solid #d0d0d0; */
+    padding: 5px 10px 5px 10px;
+}
+
+.gallery-info img {
+    width: 30px;
+    margin-left: -3px;
+}
+
+.gallery-info .title {
+    display: block;
+    color: #111;
+    font-size: 1em;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gallery-info .author {
+    display: block;
+    color: #111;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gallery-item.gallery-item-focused .gallery-info .title,
+.gallery-item.gallery-item-focused .gallery-info .author {
+    white-space: unset;
+    overflow: unset;
+    text-overflow: unset;
+}
+
+.gallery-info a:hover {
+    text-decoration: underline;
+}
+
+.gallery-info div.extra {
+    display: none;
+    margin-top: 5px;
+}
+
+.gallery-info div.extra p {
+    color: #828282;
+    font-size: 13px;
+    margin-bottom: 0;
+}
+
+.gallery-info-tags {
+    display: block;
+    margin: 0;
+    padding: 0;
+}
+
+.gallery-info-tags li {
+    display: inline-block;
+    border: 1px solid #d0d0d0;
+    border-radius: 2px;
+    /* background-color: white; */
+    color: #828282;
+    text-align: center;
+    font-size: 11px;
+    padding: 0 5px 0px 5px;
+}
+
+/*
     footer ====================================================================
 */
 .site-footer {
@@ -365,6 +512,11 @@ pre {
 /*
     content elements  =========================================================
 */
+.highlighter-rouge {
+    color: unset;
+    background-color: #f6f6f6;
+}
+
 .error404 img {
     width: 400px;
     margin-top: 100px;

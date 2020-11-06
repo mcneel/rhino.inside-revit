@@ -1,5 +1,15 @@
 [
     {
+        "desc": "Represents a Revit document",
+        "iconsrc": "/static/images/GH/Document.png",
+        "icontag": null,
+        "panel": "Params",
+        "tab": "Revit Primitives",
+        "title": "Document",
+        "typename": "Document",
+        "uuid": "f3427d5c-3793-4e32-b219-8172d56ef04c"
+    },
+    {
         "desc": "Represents an asset property that can be connected to a texture map as well",
         "iconsrc": "/static/images/GH/AssetPropertyDouble1DMap.png",
         "icontag": null,

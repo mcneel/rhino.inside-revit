@@ -141,9 +141,9 @@ defaults:
       categories: ['reference']
 
   - scope:
-      path: "pages/*/*/samples"
+      path: "pages/*/*/discover"
     values:
-      categories: ['samples']
+      categories: ['discover']
 
   - scope:
       path: "pages/*/*/community"

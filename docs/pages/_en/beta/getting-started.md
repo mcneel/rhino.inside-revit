@@ -81,6 +81,8 @@ The Revit-aware component icons help identifying the action that the component p
 
 ![]({{ "/static/images/started/rir-icons.png" | prepend: site.baseurl }}){: class="small-image"}
 
+See [Basic Interactions Guide]({{ site.baseurl }}{% link _en/beta/guides/rir-grasshopper.md %}) for more info on Revit-aware components.
+
 ## Extracting Revit Geometry
 
 To get started, let's create a simple definition in Grasshopper to extract geometry of a Revit element. Grasshopper is by far one of the most exciting add-ons for Rhino and as part of the {{ site.terms.rir }} project has the potential to improve the design and documentation in {{ site.terms.revit }} dramatically.
