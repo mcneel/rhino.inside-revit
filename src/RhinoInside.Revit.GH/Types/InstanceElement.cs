@@ -10,13 +10,13 @@ namespace RhinoInside.Revit.GH.Types
   /// <summary>
   /// Interface that represents any <see cref="DB.Element"/> that is a geometric element but is also in a category.
   /// </summary>
-  [Kernel.Attributes.Name("Instance")]
+  [Kernel.Attributes.Name("Instance Element")]
   public interface IGH_InstanceElement : IGH_GeometricElement
   {
     Level Level { get; }
   }
 
-  [Kernel.Attributes.Name("Instance")]
+  [Kernel.Attributes.Name("Instance Element")]
   public class InstanceElement : GeometricElement, IGH_InstanceElement
   {
     public InstanceElement() { }

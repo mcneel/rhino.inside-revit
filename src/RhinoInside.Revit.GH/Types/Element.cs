@@ -122,6 +122,11 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(DB.FillPatternElement),      (element)=> new FillPatternElement    (element as DB.FillPatternElement)},
       { typeof(DB.AppearanceAssetElement),  (element)=> new AppearanceAssetElement(element as DB.AppearanceAssetElement)},
       
+      { typeof(DB.Instance),                (element)=> new Instance              (element as DB.Instance)          },
+      { typeof(DB.ProjectLocation),         (element)=> new ProjectLocation       (element as DB.ProjectLocation)   },
+      { typeof(DB.RevitLinkInstance),       (element)=> new RevitLinkInstance     (element as DB.RevitLinkInstance) },
+      { typeof(DB.ImportInstance),          (element)=> new ImportInstance        (element as DB.ImportInstance)    },
+      { typeof(DB.PointCloudInstance),      (element)=> new PointCloudInstance    (element as DB.PointCloudInstance)},
 
       { typeof(DB.Sketch),                  (element)=> new Sketch                (element as DB.Sketch)            },
       { typeof(DB.SketchPlane),             (element)=> new SketchPlane           (element as DB.SketchPlane)       },
@@ -139,7 +144,6 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(DB.Ceiling),                 (element)=> new Ceiling               (element as DB.Ceiling)           },
       { typeof(DB.RoofBase),                (element)=> new Roof                  (element as DB.RoofBase)          },
       { typeof(DB.Wall),                    (element)=> new Wall                  (element as DB.Wall)              },
-      { typeof(DB.Instance),                (element)=> new Instance              (element as DB.Instance)          },
       { typeof(DB.FamilyInstance),          (element)=> new FamilyInstance        (element as DB.FamilyInstance)    },
       { typeof(DB.Panel),                   (element)=> new Panel                 (element as DB.Panel)             },
       { typeof(DB.Mullion),                 (element)=> new Mullion               (element as DB.Mullion)           },

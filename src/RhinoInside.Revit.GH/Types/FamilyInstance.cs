@@ -6,12 +6,13 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public interface IGH_Instance : IGH_InstanceElement { }
+  [Kernel.Attributes.Name("Linked Element")]
+  public interface IGH_Instance : IGH_GraphicalElement { }
 
-  public class Instance : InstanceElement, IGH_Instance
+  [Kernel.Attributes.Name("Linked Element")]
+  public class Instance : GraphicalElement, IGH_Instance
   {
     protected override Type ScriptVariableType => typeof(DB.Instance);
-    public static explicit operator DB.Instance(Instance value) => value?.Value;
     public new DB.Instance Value => base.Value as DB.Instance;
 
     public Instance() { }
@@ -20,13 +21,7 @@ namespace RhinoInside.Revit.GH.Types
     protected override bool SetValue(DB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(DB.Element element)
     {
-      if (element is DB.ElementType)
-        return false;
-
-      if (element is DB.View)
-        return false;
-
-      return element.Category is object && element.CanHaveTypeAssigned();
+      return element is DB.Instance && !(element is DB.FamilyInstance);
     }
 
     public override Plane Location
@@ -44,11 +39,51 @@ namespace RhinoInside.Revit.GH.Types
     }
   }
 
-  [Kernel.Attributes.Name("Component")]
-  public interface IGH_FamilyInstance : IGH_Instance { }
+  [Kernel.Attributes.Name("Project Location")]
+  public class ProjectLocation : Instance, IGH_Instance
+  {
+    protected override Type ScriptVariableType => typeof(DB.ProjectLocation);
+    public new DB.ProjectLocation Value => base.Value as DB.ProjectLocation;
+
+    public ProjectLocation() { }
+    public ProjectLocation(DB.ProjectLocation instance) : base(instance) { }
+  }
+
+  [Kernel.Attributes.Name("Linked Model")]
+  public class RevitLinkInstance : Instance, IGH_Instance
+  {
+    protected override Type ScriptVariableType => typeof(DB.RevitLinkInstance);
+    public new DB.RevitLinkInstance Value => base.Value as DB.RevitLinkInstance;
+
+    public RevitLinkInstance() { }
+    public RevitLinkInstance(DB.RevitLinkInstance instance) : base(instance) { }
+  }
+
+  [Kernel.Attributes.Name("Import Symbol")]
+  public class ImportInstance : Instance, IGH_Instance
+  {
+    protected override Type ScriptVariableType => typeof(DB.ImportInstance);
+    public new DB.ImportInstance Value => base.Value as DB.ImportInstance;
+
+    public ImportInstance() { }
+    public ImportInstance(DB.ImportInstance instance) : base(instance) { }
+  }
+
+  [Kernel.Attributes.Name("Point Cloud")]
+  public class PointCloudInstance : Instance, IGH_Instance
+  {
+    protected override Type ScriptVariableType => typeof(DB.PointCloudInstance);
+    public new DB.PointCloudInstance Value => base.Value as DB.PointCloudInstance;
+
+    public PointCloudInstance() { }
+    public PointCloudInstance(DB.PointCloudInstance instance) : base(instance) { }
+  }
 
   [Kernel.Attributes.Name("Component")]
-  public class FamilyInstance : Instance, IGH_FamilyInstance
+  public interface IGH_FamilyInstance : IGH_InstanceElement { }
+
+  [Kernel.Attributes.Name("Component")]
+  public class FamilyInstance : InstanceElement, IGH_FamilyInstance
   {
     protected override Type ScriptVariableType => typeof(DB.FamilyInstance);
     public static explicit operator DB.FamilyInstance(FamilyInstance value) => value?.Value;
@@ -85,15 +120,21 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var baseLocation = base.Location;
-
-        if (Value?.Mirrored == true)
+        if (Value is DB.FamilyInstance instance)
         {
-          baseLocation.XAxis = -baseLocation.XAxis;
-          baseLocation.YAxis = -baseLocation.YAxis;
+          instance.GetLocation(out var origin, out var basisX, out var basisY);
+          var baseLocation = new Plane(origin.ToPoint3d(), basisX.ToVector3d(), basisY.ToVector3d());
+
+          if (Value?.Mirrored == true)
+          {
+            baseLocation.XAxis = -baseLocation.XAxis;
+            baseLocation.YAxis = -baseLocation.YAxis;
+          }
+
+          return baseLocation;
         }
 
-        return baseLocation;
+        return base.Location;
       }
     }
 
