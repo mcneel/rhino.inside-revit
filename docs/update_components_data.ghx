@@ -10,7 +10,7 @@
       <Revision>2</Revision>
     </item>
   </items>
-  <chunks count="2">
+  <chunks count="1">
     <chunk name="Definition">
       <items count="1">
         <item name="plugin_version" type_name="gh_version" type_code="80">
@@ -73,8 +73,8 @@
           <chunks count="1">
             <chunk name="Library" index="0">
               <items count="6">
-                <item name="AssemblyFullName" type_name="gh_string" type_code="10">GhPython, Version=7.0.20210.12505, Culture=neutral, PublicKeyToken=null</item>
-                <item name="AssemblyVersion" type_name="gh_string" type_code="10">7.0.20210.12505</item>
+                <item name="AssemblyFullName" type_name="gh_string" type_code="10">GhPython, Version=7.0.20309.6003, Culture=neutral, PublicKeyToken=null</item>
+                <item name="AssemblyVersion" type_name="gh_string" type_code="10">7.0.20309.6003</item>
                 <item name="Author" type_name="gh_string" type_code="10"></item>
                 <item name="Id" type_name="gh_guid" type_code="9">00000000-0000-0000-0000-000000000000</item>
                 <item name="Name" type_name="gh_string" type_code="10"></item>
@@ -198,8 +198,7 @@ def get_nodes_from_assm():
     comps = []
     for t in clr.LoadAssemblyByName("RhinoInside.Revit.GH").GetExportedTypes():
         namespace = str(t.Namespace)
-        if namespace in ['RhinoInside.Revit.GH.Components',
-                         'RhinoInside.Revit.GH.Parameters']:
+        if any(namespace.startswith(x) for x in ['RhinoInside.Revit.GH.Components', 'RhinoInside.Revit.GH.Parameters']):
             c = Component(t)
             # if component is valid and not hidden,
             # then filter for the onces in Revit tab or panel only
@@ -425,13 +424,6 @@ with open(op.join(DOCS_PATH, DATA_FILE), 'w') as f:
           </chunks>
         </chunk>
       </chunks>
-    </chunk>
-    <chunk name="Thumbnail">
-      <items count="1">
-        <item name="Thumbnail" type_name="gh_drawing_bitmap" type_code="37">
-          <bitmap length="3848">iVBORw0KGgoAAAANSUhEUgAAAJYAAABkCAIAAADrOV6nAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAADoZJREFUeF7tnOlvVscVh/lb+qFqIjUqqvKpVaW0UpovRUpTgSibiFSKgEJLgLBZGBEwUCAkJIRVLAqJymIogVLAmMXsBpvVeGE1+DVg1rCFtX3Mk9xaNnHh9ZK5ZkavXp87y7n3nt/8Zs6cmdedOsXUASzwn5hSa4Fvux/Pfz6mFFoA4CKEKcStwSNHCNONH08fIYwQpt4CqX+ByMIIYeotkPoXiCyMEKbeAql/gcjCCGHqLZD6F4gsfIkhrK6uvvQ0Xb58OZPJ1NTUXHiaEgEZ81BkJrJFfHtJkfZDQ8MKdXV1TZtYs5H+RGGiNtGDwBNevHgRbTxk0tAKHSllz0LscuDAgVGjRo0bN+7kyZOnT5/WOshgU1tbiwW5XLNmDUJ5eTmmrKiowKZnz549deoUl9TEsjScO3cuOdevX0e+du3axIkTCwsLz507B7Tko4R8boeAqqqqKpHjEpl8vrnjunXrKisr0Ylm6tOQouLi4tWrVy9ZsgS1mzZtOnbs2JkzZzoSfrxL9hDevHkT/DZu3HjixInly5ePGTNm9uzZ48ePz8nJmTRp0qJFixYuXIjhpk2b9uGHH06ePHn+/PnU+eyzz/geO3YsQu/evXfv3g3YCLm5uQDZr1+/vLy8bt26TZkyBT3UGT58+PTp0999993FixffuXOHhu+///7KlSuXLVtG1xk8ePCcOXMGDhxInXnz5tFkwIAB3Jfm7733HhB+9NFHKO/bty856J8wYQLy/v376RwdBsjsIbxx48bUqVOx8tq1a7EdUI0YMQLDwaGZM2d27949Pz8fmIcOHQowGzZsGDJkCAbt378/IAH26NGj3377bcyKNcFpxowZXbp06dGjB6rAG1VU7tmz5yeffIJCQOVet27dotUXX3wxbNgwKgAn+PXq1QvwaDJy5MhBgwYtWLAAJTwV3Qsirlq1ivty+fHHHyOAOnehN/DwEcL6iY1BadasWfR6RkjMtG3bNkjw6aeflpaWImBBxjcyt27digX37dtH0fbt22Ee8ubNm+Hl3r17gXDp0qWwlsEWVTt27Ni5cycVaIJAZVgO0gyJsGrLli2MliAH74uKimi+fv16KiMz9jJUwjAGhj59+nTt2pUnZORkFEXJnj17CgoKuCl4o4rxPEJYPy1hI7ozoyVQITAJMTt+/fXXQLhr1y6woQ7f5FMKAHxziaCXwSUCdZgFSYyoSQXqwGArk4+MoDbvxU3Vc+XKFb71qvRcuARX0KUhldGs20WpN03m6Y6BYvYD6TPfX6cDG4nfC9lIT7VVErABbUM3tVXUhqmklSF8IcwaVWYgLSsrY9g0cZnIUWjGAkFASO8GPFYRDn2MhHyzPEBIBl7kZMBUblRkZguT43AbKW/hs31f81AgPHLkyIMHDxoeIXv8+DGX9+/fb3SuLKn2zTffPHnypI1OnT18+LCNNLeF2h/++BMsPHr06N27d3m9R48eNXxJivBsKWX9zoJdH+rq1auetyPz+PHj5DPtMfAePnwY39jwArRGFTKuEPMipeihIyOgjVZEGGhIzdu3b9Mt8K6RjRPhxxoZaNSr2sL6raIzaAhhAybGy+Wb1JCaFN27d48iEMJ/ESp8TjKR8TyxDqX0DL65pDmgIhMi4BKBVnzDZtRCd2Qwo5TmtEVPQwgb9a1GprfUx2ua7J1tl4KGEBrBuSSYAnWMzTJZIgAYdqHUVQqlFMEt5lTwoA6Z4GRYDp4ZgWPSZU3CN2wzjorg1GuYl0xU0dY1DzV5DOhrRJAi6sNyLsl3+Usmt+C+PACuB4/ELbgdzalGEc/TdsN+0BDSr+nCEIjQjHSEIjCGTIogStLxyQFsKmA7akomMmGS60j7AQIJ5lFEPmrRhiAjaUIOFfgmoQSd3l1Z7kJ3ZCp7iSqUWJMcsEewY9EQFOln3OL7ONpydgYNIQzAIk5RMMBLvkl0fydFDMolFYQhXZ5Iy/ELxSP9PneGngtj6MtgI0ugiLtOPDqXVpBGUAGuwIDELkxRbdf3W8X6raIkaBYygcE24yy6o0DIlAOoOqWJqwkX9Sr5dj7Tm4W1HZ6XQUMIjfRfGDMNdbpS1OHUbzQ6CrTWZAYy+gqoeBA6pa3S2YNVEjSETHI6lrANhJBdWuB2MvZCMvADMACGmsDWdl5fsPiFPhfyfExv7i0gSDtxAlddGPJd0gGtA+zLloJmIestJjZAcoXnTgjUBDNwcs+SZFTTIKpLPXhJE7HH34G7rOSo7w6GsZ5kK4NqKDHuQ3JOpXlaXKGgIXQyY6g0vAIAJMBLpjfyHWCdESl13xFn1dGVbwjKnOqpKvqBixNauccJ6q7nyDfEw/js0rNphDZMfgcNISyEHFjWI1XQC7fFs08eneISswKArKKC4Ak2l0bgjL25guTbCIBK5K5zKvdS8GSGnaP50FoIoAYNISx0n113RosbJAMzjMsYq4khjWsJEHKPXjygHYiCh0Ai67g6CNNFHISlIMnoAdW4C7c2iBMCTs08Q9AQYmKPZWBchjvjn45v7qG78jM6yqUzJdTBr5FzktXYGLKRNhIK3YED0SSi5h6kM649gFYGhjy9aHiW2xkYCiS1CMLvziJwFPi5Po6BjVIzm00wDKuBhOamJut0EMV2FGFHd6DYY6JI+7ppbPRSRPVTIBN3F3LHUh/eWB1ogTpF0DqZL1EIC8nxHAnIoZB7USEoTyd7CImZVFQQDjlVUXui8mxleXnV//mcqGToaopiUwgxEJx7ORd5WTA7SwgzFzJHy48UX/3Xlxvmrhi2et2/vyy5teFQbeGhi1tKMgWltQV8l9QWHL68BfnbT2bz/srtmZraRiyEN3Tthlu+gMfgFtRglYVl261JlhDW1lwqPlmUXzR9+cDP975zeOXvV6xYO/4fd/ovrxu05vaQ/BuD19wasvrWkM+rB6y6PpgP8leP/rJoX87B/YcztZlq3L2nHx0/zgq7ck/2ThtGq9vNFim9UZYQXqyp23lh/ZKxf9/zelnRm3uOd7o87485f6340d8Kf/qnVT/pv/bVfvmv/Hn108+aV/os+3H/f74648rruev+kDttxI5zS7aUfb7t2Mqio1/tLytctzmfk/zOLgmE4fuB4eCdJYSXaur2VBXkbP7V7Dc/ONKpZspbIyds/cXE8z/LPdZ5fFnniVU/H7nvtdzjnflwyfe4Y52nXHztg8J3SouPZ2prqs+zuH76qSdhPQufeXaGiVPvw/1VBEZdPVJauXIn331anRTjbXgcjMboxP0hOuNervvAVKOU+skGMr3H4DhuS7K9bDABDTR0sREOZo2eJFsIM3W7SrblHv117vLf5Q4cPHzFb/JOv5F34K280vrPpJLfTj5UL0x+eulnXPEvFxfn1GVYNeOX+qlPTefC5BFBiwocdDAkhvWJkeqRUgTAhM1w99HAwvHQoUN8exiCfCA0BAMw5HMMgt7AqQiKUEg1PEwWfx4AIJP5GBcUaHVu6R8eADcC4K59mChmCSFvdfI0LmhFRXX5ibojVdWVFeUnKyqrmvmUV1SdPVO/PH/+RQXYYDuYhKFNQKiAHmRs6krco1DyxvU+OSSDZzAJmXwSpAR+WUspHQINZnoyyiZWdhvEAxyu/T1ggeCTIDsqKBuUb2ews4SwfvF7gcVg7Qt9aPJC60I5B5CMY5CGZFCbHEwGBkLlDzA8niQRjci4NqeJ58ShKQKEphSqGfFBCTlwFLUcToSgbGNxO3KMfaMWgsJsapLDL0aQk9g6GhgeQJpWPJ7HGx2l242y2UPYFIzscppZ2jOg0a/p5uAEUZS9xOKy0NlOziXHBp+5pmzJ9n3Ttt6Cb4oYiq2AQA6pPdf+QUPI0GRc200lpz04AVdgkjFuBGhh3/dgWbt1/0BuFDSEzFKeE4RnJi4ZHl1EusOADPlkoQel3CciwVRrduwUNITMMZ67ZWbypJPRTmcaBHKYfpwFmY04k099ZjKaeKjeOGeEMLs57nlbNTMXuqsAydzhQ3bKcfMWmSLP9epYOjk5FTkbUSf8Db8W9rCgWehmLyQ7ePCgW0UuCsEStuFkkuk2k6fc4tmZ5+VN69ZrhoWebvIYhAecXEvYbT17yBQo1Ui4P8jU99LlIIK8dDZFT1KHmua380quhbRrnehMK6LYDIQejwAzF3n+tMVzFc6FEBQ6eurCJZ0/dvEnKSz4/CkabXV/IK4LOFShxzgDlyhMb1Q29IFUFkIdnUwnNgSI5U9kyMH6wMMlsoedIJZU4xIuGnNB9tJVpqtJYzeN+N26LGlrbUFD6I9g4AqBFciEUwpjkPlVMGzz4BqAMbpCREr9B1O4o8RQqAPV/E9QKOFSagI2OUyuMNjAqWdnjJs716YrBQ2hi0IPwsAYD6LJS8yNod1JMF5jNSfL5Mc0eqoQtGGQkyEUJdR3QclwTSvoSG+gLUXGWuUxdzEcangIwfrhwBw0hP4U1H/w5mwHYwzKACEcYmKDeZAMwiFARDBDoKFHY6hAcw8KexoYFkJoNzegJqVMkNLRX4OSIGhJSYk09b9NeEiHS+jrTz4jhP/zh5q6M8xzyWLOs9juURgCTQKhbjs4TbpGTGQ0uPmQTJ/OoElYlQpcyiqnRnJ0btWTbIwkt7BUXgaVQmQhzkWycgjKWGE+TFgQuviDEAnVwrRaUE8VBITJ/50xWh2UgcJ/mCAg9L8/4XHoUBiejul5LEAP++Eh1LHxVIvuH0JMz2mBgCD87mx//PtiFggIwlYMur5UqiKEqYc7QhghTL0FUv8CkYURwtRbIPUvEFkYIUy9BVL/ApGFEcLUWyD1LxBZGCFMvQVS/wKRhRHC1Fsg9S8QWRghTL0FUv8CkYURwtRbIPUvEFkYIUy9BVL/ApGFEcLUWyD1LxBZGCFMvQVS/wKRhRHC1Fsg9S8QWRghTL0FUv8CkYURwtRbIPUvEFnYsSAM/xfJ8QmfaYFvf+Ub/6TaAv8Fawam1E3GmNAAAAAASUVORK5CYII=</bitmap>
-        </item>
-      </items>
     </chunk>
   </chunks>
 </Archive>
