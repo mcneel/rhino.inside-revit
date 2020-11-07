@@ -51,27 +51,34 @@
 
         <!-- highlight the active category link on navigation bar -->
         <script>
-            var url = window.location.href;
-            // set nav bar links by selected version
-            $('#cat_homelogo').attr('href', getPageLink(''));
-            $('#cat_homelink').attr('href', getPageLink(''));
-            $('#cat_starting').attr('href', getPageLink('getting-started'));
-            $('#cat_guides').attr('href', getPageLink('guides/'));
-            $('#cat_discover').attr('href', getPageLink('discover/'));
-            $('#cat_reference').attr('href', getPageLink('reference/'));
-            $('#cat_community').attr('href', getPageLink('community/'));
-            // mark current navbar category as active
-            if (url.endsWith('/getting-started') || url.includes('/getting-started/')) {
-                $('#cat_starting').addClass('active');
-            } else if (url.endsWith('/guides') || url.includes('/guides/')) {
-                $('#cat_guides').addClass('active');
-            } else if (url.endsWith('/discover') || url.includes('/discover/')) {
-                $('#cat_discover').addClass('active');
-            } else if (url.endsWith('/reference') || url.includes('/reference/')) {
-                $('#cat_reference').addClass('active');
-            } else if (url.endsWith('/community') || url.includes('/community/')) {
-                $('#cat_community').addClass('active');
-            }
+            $(document).ready(function(){
+                var url = window.location.href;
+                // set nav bar links by selected version
+                $('#cat_homelogo').attr('href', getPageLink(''));
+                $('#cat_homelink').attr('href', getPageLink(''));
+                $('#cat_starting').attr('href', getPageLink('getting-started'));
+                $('#cat_guides').attr('href', getPageLink('guides/'));
+                $('#cat_discover').attr('href', getPageLink('discover/'));
+                $('#cat_reference').attr('href', getPageLink('reference/'));
+                $('#cat_community').attr('href', getPageLink('community/'));
+                // mark current navbar category as active
+                if (url.endsWith('/getting-started') || url.includes('/getting-started/')) {
+                    console.log("activating getting-started");
+                    $('#cat_starting').addClass('active');
+                } else if (url.endsWith('/guides') || url.includes('/guides/')) {
+                    console.log("activating guides");
+                    $('#cat_guides').addClass('active');
+                } else if (url.endsWith('/discover') || url.includes('/discover/')) {
+                    console.log("activating discover");
+                    $('#cat_discover').addClass('active');
+                } else if (url.endsWith('/community') || url.includes('/community/')) {
+                    console.log("activating community");
+                    $('#cat_community').addClass('active');
+                } else if (url.endsWith('/reference') || url.includes('/reference/')) {
+                    console.log("activating reference");
+                    $('#cat_reference').addClass('active');
+                }
+            });
         </script>
 
         <script>
