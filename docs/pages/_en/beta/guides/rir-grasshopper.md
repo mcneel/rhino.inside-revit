@@ -36,42 +36,42 @@ The pass-through components also have an optional output parameter for the type 
 
 ![]({{ "/static/images/guides/rir-grasshopper-passthruhidden.gif" | prepend: site.baseurl }})
 
-Now it makes more sense why these components are called pass-through. They pass the input element to the output while making modifications and analysis on it. They also encourage chaining the operations in a series instead of parallel. This is very important to ensure the order of operations since all the target elements are actually owned by Revit and {{ site.terms.gh }} can not determine the full implications of these operations:
+Now it makes more sense why these components are called pass-through. They pass the input element to the output while making modifications and analysis on it. They also encourage chaining the operations in a series instead of parallel. This is very important to ensure the order of operations since all the target elements are actually owned by Revit and Grasshopper can not determine the full implications of these operations:
 
 ![]({{ "/static/images/guides/rir-grasshopper-multiplepassthru.png" | prepend: site.baseurl }})
 
 ### Transactional Components
 
-Some of the Revit-aware components need to run *Transactions* on the active document to create new elements or make changes. On each execution of the {{ site.terms.gh }} definition, it is important to know which components contributed to the document changes. This helps understanding and managing the transactions and their implications better (e.g. A developer might change the graph logic to combine many transactional components and improve performance).
+Some of the Revit-aware components need to run *Transactions* on the active document to create new elements or make changes. On each execution of the Grasshopper definition, it is important to know which components contributed to the document changes. This helps understanding and managing the transactions and their implications better (e.g. A developer might change the graph logic to combine many transactional components and improve performance).
 
 These components show a dark background when they execute a transaction:
 
 ![]({{ "/static/images/guides/rir-grasshopper-transcomps.png" | prepend: site.baseurl }})
 
-Note that if the input parameters and the target element does not change, the component is not going to make any changes on the next execution of the {{ site.terms.gh }} definition and the component background will change to default gray
+Note that if the input parameters and the target element does not change, the component is not going to make any changes on the next execution of the Grasshopper definition and the component background will change to default gray
 
-You can also use the {{ site.terms.gh }} **Trigger** component, to control when these components are executed:
+You can also use the Grasshopper **Trigger** component, to control when these components are executed:
 
 ![]({{ "/static/images/guides/rir-grasshopper-transcompstriggered.png" | prepend: site.baseurl }})
 
 ## Previewing Geometry
 
-You can use the toggle preview on {{ site.terms.gh }} components to turn the Revit previews on or off. You can also toggle the preview globally from the *Rhinoceros* tab in Revit:
+You can use the toggle preview on Grasshopper components to turn the Revit previews on or off. You can also toggle the preview globally from the *Rhinoceros* tab in Revit:
 
 ![]({{ "/static/images/guides/rir-grasshopper-preview.png" | prepend: site.baseurl }})
 
 ## Toggling Solver
 
-{{ site.terms.gh }} solver can also be toggled from the *Rhinoceros* tab in Revit. This is especially helpful to reduce wait times on on large Revit models:
+Grasshopper solver can also be toggled from the *Rhinoceros* tab in Revit. This is especially helpful to reduce wait times on on large Revit models:
 
 ![]({{ "/static/images/guides/rir-grasshopper-solver.png" | prepend: site.baseurl }})
 
-## {{ site.terms.gh }} Performance
+## Grasshopper Performance
 
-As mentioned in the sections above, paying close attention to the items below will help increasing the performance of {{ site.terms.gh }} definition:
+As mentioned in the sections above, paying close attention to the items below will help increasing the performance of Grasshopper definition:
 
-- {{ site.terms.gh }} runs on top of Revit. So when Revit gets slow (large models, too many open views, ...) {{ site.terms.gh }} might not get the amount of time it needs to update its resources and previews
-- {{ site.terms.gh }} previous in Revit require geometry conversions. Having too many previews also slows down the Revit view. Keep the preview on for {{ site.terms.gh }} components when necessary. You can also toggle the preview globally from the *Rhinoceros* tab in Revit
+- Grasshopper runs on top of Revit. So when Revit gets slow (large models, too many open views, ...) Grasshopper might not get the amount of time it needs to update its resources and previews
+- Grasshopper previous in Revit require geometry conversions. Having too many previews also slows down the Revit view. Keep the preview on for Grasshopper components when necessary. You can also toggle the preview globally from the *Rhinoceros* tab in Revit
 - Running many transactions on individual elements is slower that running one transaction on many elements at once. Try to design the graph logic in a way that a single transactional component can operate on as many elements as you need to modify at once
-- Toggling the {{ site.terms.gh }} solver can be helpful in reducing wait times on on large Revit models
+- Toggling the Grasshopper solver can be helpful in reducing wait times on on large Revit models
   
