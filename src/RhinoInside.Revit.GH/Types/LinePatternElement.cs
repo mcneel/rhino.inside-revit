@@ -1,9 +1,7 @@
 using System;
 using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.External.UI.Extensions;
 using DB = Autodesk.Revit.DB;
-using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -32,7 +30,11 @@ namespace RhinoInside.Revit.GH.Types
       var document = Revit.ActiveDBDocument;
       var patternId = DB.ElementId.InvalidElementId;
 
-      if (source is IGH_Goo goo)
+      if (source is ValueTuple<DB.Document, DB.ElementId> tuple)
+      {
+        (document, patternId) = tuple;
+      }
+      else if (source is IGH_Goo goo)
       {
         if (source is IGH_Element element)
         {
@@ -56,21 +58,6 @@ namespace RhinoInside.Revit.GH.Types
 
       return false;
     }
-
-    #region IGH_ElementId
-    public override bool LoadElement()
-    {
-      if (IsReferencedElement && !IsElementLoaded)
-      {
-        Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var doc);
-        doc.TryGetLinePatternId(UniqueID, out var id);
-
-        SetValue(doc, id);
-      }
-
-      return IsElementLoaded;
-    }
-    #endregion
 
     #region Properties
     public override string Name

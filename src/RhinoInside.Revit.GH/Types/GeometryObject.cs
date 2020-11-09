@@ -86,11 +86,17 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (IsReferencedElement && !IsElementLoaded)
       {
-        Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var doc);
-        Document = doc;
+        UnloadElement();
 
-        try { reference = DB.Reference.ParseFromStableRepresentation(Document, UniqueID); }
-        catch { reference = default; }
+        if (Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var document))
+        {
+          try
+          {
+            reference = DB.Reference.ParseFromStableRepresentation(document, UniqueID);
+            Document = document;
+          }
+          catch { }
+        }
       }
 
       return IsElementLoaded;
@@ -98,10 +104,10 @@ namespace RhinoInside.Revit.GH.Types
 
     public override void UnloadElement()
     {
-      base.UnloadElement();
-
       if (IsReferencedElement)
         reference = default;
+
+      base.UnloadElement();
     }
 
     protected override object FetchValue()

@@ -14,21 +14,6 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ScriptVariableType => typeof(DB.ParameterElement);
     override public object ScriptVariable() => null;
 
-    #region IGH_ElementId
-    public override bool LoadElement()
-    {
-      if (IsReferencedElement && !IsElementLoaded)
-      {
-        Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var doc);
-        doc.TryGetParameterId(UniqueID, out var id);
-
-        SetValue(doc, id);
-      }
-
-      return IsElementLoaded;
-    }
-    #endregion
-
     public ParameterKey() { }
     public ParameterKey(DB.Document doc, DB.ElementId id) : base(doc, id) { }
     public ParameterKey(DB.ParameterElement element) : base(element) { }
@@ -49,12 +34,18 @@ namespace RhinoInside.Revit.GH.Types
       var document = Revit.ActiveDBDocument;
       var parameterId = DB.ElementId.InvalidElementId;
 
-      if (source is IGH_Goo goo)
+      if (source is ValueTuple<DB.Document, DB.ElementId> tuple)
+      {
+        (document, parameterId) = tuple;
+      }
+      else if (source is IGH_Goo goo)
       {
         if (source is IGH_Element element)
-          source = element.Document?.GetElement(element.Id);
-        else
-          source = goo.ScriptVariable();
+        {
+          document = element.Document;
+          parameterId = element.Id;
+        }
+        else source = goo.ScriptVariable();
       }
 
       switch (source)
@@ -244,48 +235,7 @@ namespace RhinoInside.Revit.GH.Types
     }
     public override string ToString()
     {
-      if (!IsValid)
-        return null;
-
-      try
-      {
-        if (Value.HasValue)
-        {
-          switch (Value.StorageType)
-          {
-            case DB.StorageType.Integer:
-              if (Value.Definition.ParameterType == DB.ParameterType.YesNo)
-                return (Value.AsInteger() != 0).ToString();
-              else
-                return Value.AsInteger().ToString();
-
-            case DB.StorageType.Double: return Value.AsDoubleInRhinoUnits().ToString();
-            case DB.StorageType.String: return Value.AsString();
-            case DB.StorageType.ElementId:
-
-              var id = Value.AsElementId();
-              if (Value.Id.TryGetBuiltInParameter(out var builtInParameter))
-              {
-                if (builtInParameter == DB.BuiltInParameter.ID_PARAM || builtInParameter == DB.BuiltInParameter.SYMBOL_ID_PARAM)
-                  return id.IntegerValue.ToString();
-              }
-
-              if (Element.FromElementId(Value.Element.Document, id) is Element element)
-                return element.ToString();
-
-              if (id == DB.ElementId.InvalidElementId)
-                return new Types.Element().ToString();
-
-              return id.IntegerValue.ToString();
-
-            default:
-              throw new NotImplementedException();
-          }
-        }
-      }
-      catch (Autodesk.Revit.Exceptions.InternalException) { }
-
-      return default;
+      return Value.AsGoo()?.ToString();
     }
     #endregion
 
@@ -310,89 +260,14 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
-      switch (Value.StorageType)
+      var goo = Value.AsGoo();
+      if (goo is Q q)
       {
-        case DB.StorageType.Integer:
-          if (typeof(Q).IsAssignableFrom(typeof(GH_Boolean)))
-          {
-            target = Value.Element is null ? (Q) (object) null :
-                     (Q) (object) new GH_Boolean(Value.AsInteger() != 0);
-            return true;
-          }
-          else if (typeof(Q).IsAssignableFrom(typeof(GH_Integer)))
-          {
-            target = Value.Element is null ? (Q) (object) null :
-                     (Q) (object) new GH_Integer(Value.AsInteger());
-            return true;
-          }
-          else if (typeof(Q).IsAssignableFrom(typeof(GH_Number)))
-          {
-            target = Value.Element is null ? (Q) (object) null :
-                     (Q) (object) new GH_Number((double)Value.AsInteger());
-            return true;
-          }
-          else if (typeof(Q).IsAssignableFrom(typeof(GH_Colour)))
-          {
-            if (Value.Element is object)
-            {
-              int value = Value.AsInteger();
-              int r = value % 256;
-              value /= 256;
-              int g = value % 256;
-              value /= 256;
-              int b = value % 256;
-
-              target = (Q) (object) new GH_Colour(System.Drawing.Color.FromArgb(r, g, b));
-            }
-            else
-              target = (Q) (object) null;
-            return true;
-          }
-          break;
-        case DB.StorageType.Double:
-          if (typeof(Q).IsAssignableFrom(typeof(GH_Number)))
-          {
-            target = Value.Element is null ? (Q) (object) null :
-                     (Q) (object) new GH_Number(Value.AsDoubleInRhinoUnits());
-            return true;
-          }
-          else if (typeof(Q).IsAssignableFrom(typeof(GH_Integer)))
-          {
-            if (Value.Element is object)
-            {
-              var value = Math.Round(Value.AsDoubleInRhinoUnits());
-              if (int.MinValue <= value && value <= int.MaxValue)
-              {
-                target = (Q) (object) new GH_Integer((int) value);
-                return true;
-              }
-            }
-            else
-            {
-              target = (Q) (object) null;
-              return true;
-            }
-          }
-          break;
-        case DB.StorageType.String:
-          if (typeof(Q).IsAssignableFrom(typeof(GH_String)))
-          {
-            target = Value.Element is null ? (Q) (object) null :
-                     (Q) (object) new GH_String(Value.AsString());
-            return true;
-          }
-          break;
-        case DB.StorageType.ElementId:
-          if (typeof(Q).IsAssignableFrom(typeof(Element)))
-          {
-            target = Value.Element is null ? (Q) (object) null :
-                     (Q) (object) Element.FromElementId(Value.Element.Document, Value.AsElementId());
-            return true;
-          }
-          break;
+        target = q;
+        return true;
       }
 
-      return base.CastTo<Q>(out target);
+      return goo.CastTo(out target);
     }
     #endregion
 

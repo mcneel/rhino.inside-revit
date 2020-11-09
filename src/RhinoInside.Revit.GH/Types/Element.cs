@@ -58,14 +58,17 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     public override bool IsElementLoaded => Document is object && Id is object;
-    public override bool LoadElement()
+    public override sealed bool LoadElement()
     {
       if (IsReferencedElement && !IsElementLoaded)
       {
-        Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var doc);
-        doc.TryGetElementId(UniqueID, out id);
+        UnloadElement();
 
-        SetValue(doc, id);
+        if (Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var document))
+        {
+          if (document.TryGetElementId(UniqueID, out id))
+            Document = document;
+        }
       }
 
       return IsElementLoaded;
@@ -73,10 +76,10 @@ namespace RhinoInside.Revit.GH.Types
 
     public override void UnloadElement()
     {
-      base.UnloadElement();
-
       if (IsReferencedElement)
         id = default;
+
+      base.UnloadElement();
     }
 
     protected override object FetchValue() => Document.GetElement(Id);
@@ -193,8 +196,8 @@ namespace RhinoInside.Revit.GH.Types
 
     public static Element FromElementId(DB.Document doc, DB.ElementId id)
     {
-      if (doc is null || !id.IsValid())
-        return null;
+      if (doc is null || id is null)
+        return default;
 
       if (Category.FromElementId(doc, id) is Category c)
         return c;
@@ -205,7 +208,18 @@ namespace RhinoInside.Revit.GH.Types
       if (LinePatternElement.FromElementId(doc, id) is LinePatternElement l)
         return l;
 
-      return FromElement(doc.GetElement(id));
+      if (FromElement(doc.GetElement(id)) is Element e)
+        return e;
+
+      return new Element(doc, id);
+    }
+
+    public static T FromElementId<T>(DB.Document doc, DB.ElementId id) where T : Element, new ()
+    {
+      if (doc is null || id is null) return default;
+      if (id == DB.ElementId.InvalidElementId) return new T();
+
+      return FromElementId(doc, id) as T;
     }
 
     public static Element FromReference(DB.Document doc, DB.Reference reference)
@@ -304,6 +318,12 @@ namespace RhinoInside.Revit.GH.Types
             catch { }
           }
         }
+      }
+
+      if (source is ValueTuple<DB.Document, DB.ElementId> tuple)
+      {
+        try { source = tuple.Item1.GetElement(tuple.Item2); }
+        catch { }
       }
 
       return SetValue(source as DB.Element);

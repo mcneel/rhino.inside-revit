@@ -10,12 +10,74 @@ using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH
 {
-  using Convert.Units;
   using Convert.Geometry;
   using External.DB.Extensions;
 
-  internal static class ParameterUtils
+  static class ParameterUtils
   {
+    internal static IGH_Goo AsGoo(this DB.Parameter parameter)
+    {
+      if (parameter?.HasValue == true)
+      {
+        switch (parameter.StorageType)
+        {
+          case DB.StorageType.Integer:
+            var integer = parameter.AsInteger();
+
+            if (parameter.Definition is DB.Definition definition)
+            {
+              switch (definition.ParameterType)
+              {
+                case DB.ParameterType.Invalid:
+                  if (definition.UnitType == DB.UnitType.UT_Number && parameter.Id.TryGetBuiltInParameter(out var builtInInteger))
+                  {
+                    // TODO: Handle Enums
+
+                    var builtInIntegerName = builtInInteger.ToString();
+                    if (builtInIntegerName.Contains("COLOR_") || builtInIntegerName.Contains("_COLOR_") || builtInIntegerName.Contains("_COLOR"))
+                    {
+                      int r = integer % 256;
+                      integer /= 256;
+                      int g = integer % 256;
+                      integer /= 256;
+                      int b = integer % 256;
+
+                      return new GH_Colour(System.Drawing.Color.FromArgb(r, g, b));
+                    }
+                  } 
+                  break;
+                case DB.ParameterType.YesNo:
+                  return new GH_Boolean(integer != 0);
+              }
+            }
+
+            return new GH_Integer(integer);
+
+          case DB.StorageType.Double:
+            return new GH_Number(parameter.AsDoubleInRhinoUnits());
+
+          case DB.StorageType.String:
+            return new GH_String(parameter.AsString());
+
+          case DB.StorageType.ElementId:
+
+            var elementId = parameter.AsElementId();
+            if (parameter.Id.TryGetBuiltInParameter(out var builtInElementId))
+            {
+              if (builtInElementId == DB.BuiltInParameter.ID_PARAM || builtInElementId == DB.BuiltInParameter.SYMBOL_ID_PARAM)
+                return new GH_Integer(elementId.IntegerValue);
+            }
+
+            return Types.Element.FromElementId(parameter.Element?.Document, parameter.AsElementId());
+
+          default:
+            throw new NotImplementedException();
+        }
+      }
+
+      return default;
+    }
+
     internal static double AsDoubleInRhinoUnits(this DB.Parameter parameter)
     {
       return UnitConverter.InRhinoUnits(parameter.AsDouble(), parameter.Definition.ParameterType);

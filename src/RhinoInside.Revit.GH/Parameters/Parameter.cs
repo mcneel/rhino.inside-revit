@@ -182,11 +182,11 @@ namespace RhinoInside.Revit.GH.Parameters
 
       try
       {
-        if (data.Value is DB.Parameter parameter)
+        if (data.Value is DB.Parameter parameter && parameter.Definition is DB.Definition definition)
         {
           return parameter.HasValue ?
-            $"{parameter.Definition.Name} : {parameter.AsValueString()}" :
-            string.Empty;
+            $"{definition.Name} : {parameter.AsValueString()}" :
+            $"{definition.Name} : <null>";
         }
       }
       catch { }

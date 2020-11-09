@@ -2,7 +2,6 @@ using System;
 using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.Convert.System.Drawing;
 using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.External.UI.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -19,14 +18,21 @@ namespace RhinoInside.Revit.GH.Types
       if (base.CastFrom(source))
         return true;
 
+      var document = Revit.ActiveDBDocument;
       var categoryId = DB.ElementId.InvalidElementId;
 
-      if (source is IGH_Goo goo)
+      if (source is ValueTuple<DB.Document, DB.ElementId> tuple)
+      {
+        (document, categoryId) = tuple;
+      }
+      else if (source is IGH_Goo goo)
       {
         if (source is IGH_Element element)
-          source = element.Document?.GetCategory(element.Id);
-        else
-          source = goo.ScriptVariable();
+        {
+          document = element.Document;
+          categoryId = element.Id;
+        }
+        else source = goo.ScriptVariable();
       }
 
       switch (source)
@@ -46,7 +52,7 @@ namespace RhinoInside.Revit.GH.Types
 
       if (categoryId.TryGetBuiltInCategory(out var _))
       {
-        SetValue(Revit.ActiveDBDocument, categoryId);
+        SetValue(document, categoryId);
         return true;
       }
 
@@ -177,19 +183,6 @@ namespace RhinoInside.Revit.GH.Types
       category = default;
 
       base.ResetValue();
-    }
-
-    public override bool LoadElement()
-    {
-      if (IsReferencedElement && !IsElementLoaded)
-      {
-        Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var doc);
-        doc.TryGetCategoryId(UniqueID, out var id);
-
-        SetValue(doc, id);
-      }
-
-      return IsElementLoaded;
     }
     #endregion
 

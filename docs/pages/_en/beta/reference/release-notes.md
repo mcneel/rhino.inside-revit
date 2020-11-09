@@ -10,7 +10,7 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
-{% include ltr/release-header.html version="0.0.7612.19612" time="11/03/2020 10:53:44" %}
+{% include ltr/release-header.html version="0.0.7618.21861" time="11/09/2020 12:08:42" %}
 ### New features
 * Added 'Material Identity' component.
 * Added 'Material Graphics' component.
