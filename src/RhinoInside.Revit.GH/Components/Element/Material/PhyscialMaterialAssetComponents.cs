@@ -139,6 +139,9 @@ namespace RhinoInside.Revit.GH.Components.Material
 
     protected void SetOutputsFromPropertySetElement(IGH_DataAccess DA, DB.PropertySetElement psetElement)
     {
+      if (psetElement is null)
+        return;
+
       foreach (var assetPropInfo in _assetData.GetAssetProperties())
       {
         // determine which output parameter to set the value on
@@ -147,57 +150,15 @@ namespace RhinoInside.Revit.GH.Components.Material
           continue;
 
         // grab the value from the first valid builtin param and set on the ouput
-        foreach (var builtInPropInfo in
-            _assetData.GetAPIAssetBuiltInPropertyInfos(assetPropInfo))
-          if (SetOutputFromPropertySetElementParam(DA, psetElement, builtInPropInfo.ParamId, paramInfo.Name))
-            break;
-      }
-    }
-
-    protected bool
-    SetOutputFromPropertySetElementParam(IGH_DataAccess DA, DB.PropertySetElement srcElement,
-                                         DB.BuiltInParameter srcParam, string paramName)
-    {
-      if (srcElement is null)
-      {
-        DA.SetData(paramName, null);
-        return false;
-      }
-
-      bool valueFound = false;
-      var param = srcElement.get_Parameter(srcParam);
-      if (param != null)
-      {
-        valueFound = true;
-        switch (param.StorageType)
+        foreach (var builtInPropInfo in _assetData.GetAPIAssetBuiltInPropertyInfos(assetPropInfo))
         {
-          case DB.StorageType.None: break;
-
-          case DB.StorageType.String:
-            DA.SetData(paramName, param.AsString());
+          if (psetElement.get_Parameter(builtInPropInfo.ParamId) is DB.Parameter parameter)
+          {
+            DA.SetData(paramInfo.Name, parameter.AsGoo());
             break;
-
-          case DB.StorageType.Integer:
-            if (param.Definition.ParameterType == DB.ParameterType.YesNo)
-              DA.SetData(paramName, param.AsInteger() != 0);
-            else
-              DA.SetData(paramName, param.AsInteger());
-            break;
-
-          case DB.StorageType.Double:
-            DA.SetData(paramName, param.AsDoubleInRhinoUnits());
-            break;
-
-          case DB.StorageType.ElementId:
-            DA.SetData(
-              paramName,
-              Types.Element.FromElementId(srcElement.Document, param.AsElementId())
-              );
-            break;
+          }
         }
       }
-
-      return valueFound;
     }
 
     protected void UpdatePropertySetElementFromData(DB.PropertySetElement psetElement, T assetData)

@@ -197,7 +197,7 @@ namespace RhinoInside.Revit.GH.Components
         mullionType.get_Parameter(DB.BuiltInParameter.RECT_MULLION_THICK) ??
         mullionType.get_Parameter(DB.BuiltInParameter.CUST_MULLION_THICK) ??
         mullionType.get_Parameter(DB.BuiltInParameter.TRAP_MULL_WIDTH);
-      DA.SetData("Thickness", thicknessParam?.AsDoubleInRhinoUnits());
+      DA.SetData("Thickness", thicknessParam.AsGoo());
 
       var depth1Param =
         mullionType.get_Parameter(DB.BuiltInParameter.RECT_MULLION_WIDTH1) ??
@@ -205,20 +205,20 @@ namespace RhinoInside.Revit.GH.Components
         mullionType.get_Parameter(DB.BuiltInParameter.LV_MULLION_LEG1) ??
         mullionType.get_Parameter(DB.BuiltInParameter.MULLION_DEPTH1) ??
         mullionType.get_Parameter(DB.BuiltInParameter.MULLION_DEPTH);
-      DA.SetData("Depth 1", depth1Param?.AsDoubleInRhinoUnits());
+      DA.SetData("Depth 1", depth1Param.AsGoo());
 
       var depth2Param =
         mullionType.get_Parameter(DB.BuiltInParameter.RECT_MULLION_WIDTH2) ??
         mullionType.get_Parameter(DB.BuiltInParameter.CUST_MULLION_WIDTH2) ??
         mullionType.get_Parameter(DB.BuiltInParameter.LV_MULLION_LEG2) ??
         mullionType.get_Parameter(DB.BuiltInParameter.MULLION_DEPTH2);
-      DA.SetData("Depth 2", depth2Param?.AsDoubleInRhinoUnits());
+      DA.SetData("Depth 2", depth2Param.AsGoo());
 
       var radiusParam = mullionType.get_Parameter(DB.BuiltInParameter.CIRC_MULLION_RADIUS);
       if (radiusParam != null)
       {
-        DA.SetData("Radius", radiusParam?.AsDoubleInRhinoUnits());
-        DA.SetData("Thickness", radiusParam?.AsDoubleInRhinoUnits() * 2);
+        DA.SetData("Radius", radiusParam.AsGoo());
+        DA.SetData("Thickness", radiusParam.AsDoubleInRhinoUnits() * 2);
       }
     }
   }
