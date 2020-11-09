@@ -12,7 +12,7 @@
         "type": "video",
         "title": "Rhino.Inside.Revit Happy Hour Webinar",
         "url": "https://www.youtube.com/watch?v=ko18HhYpjok",
-        "thumbnail": "http://i3.ytimg.com/vi/ko18HhYpjok/maxresdefault.jpg",
+        "thumbnail": "https://i3.ytimg.com/vi/ko18HhYpjok/maxresdefault.jpg",
         "author": "Marcello Sgambelluri, PE, SE",
         "authorUrl": "http://therevitcomplex.blogspot.com/",
         "description": "Marcello shows Rhino.Inside.Revit... That's right, you can run Rhino (and Grasshopper) inside of Revit. Hosted by [The Revit Kid](https://www.youtube.com/channel/UC6TtKCInvnoU7vLNACZRFrQ)"
@@ -21,7 +21,7 @@
         "type": "video",
         "title": "Rhino.Inside.Revit Review",
         "url": "https://www.youtube.com/watch?v=J11LIrDIchw",
-        "thumbnail": "http://i3.ytimg.com/vi/J11LIrDIchw/maxresdefault.jpg",
+        "thumbnail": "https://i3.ytimg.com/vi/J11LIrDIchw/maxresdefault.jpg",
         "author": "Håvard Vasshaug",
         "authorUrl": "https://vasshaug.net/",
         "description": "A 5-star presentation from Håvard Vasshaug of the Bad Monkeys group to [Snøhetta](https://www.snohetta.com/). If you know Revit and want to know how your workflow might be improved, watch this"
@@ -30,7 +30,7 @@
         "type": "video",
         "title": "Aussie BIM Guru Video Series on Rhino.Inside.Revit",
         "url": "https://www.youtube.com/playlist?list=PLBKwx9iS-LumYizAr4cn0kMEhxGfwU7ls",
-        "thumbnail": "http://i3.ytimg.com/vi/4m2Q905iK-E/maxresdefault.jpg",
+        "thumbnail": "https://i3.ytimg.com/vi/4m2Q905iK-E/maxresdefault.jpg",
         "author": "Gavin Crump",
         "authorUrl": "https://www.youtube.com/channel/UCry22yTdpgEDdzIZig7NSMQ",
         "description": "Gavin Crump kicks off a series on Rhino.Inside.Revit with a 5 part series - the new tool which connects Rhino and Revit together! Gavin thinks Grasshopper in Revit is a massive breakthrough for computational designers. In this first part, he covers how to bake out elements from Revit into Rhino using filtering criteria. In the next parts we will cover reading and setting parameter values in Revit"
@@ -39,7 +39,7 @@
         "type": "video",
         "title": "Rhino.Inside.Revit with Geometry Gym",
         "url": "https://www.youtube.com/watch?v=0m1rn6EAI54",
-        "thumbnail": "http://i3.ytimg.com/vi/0m1rn6EAI54/maxresdefault.jpg",
+        "thumbnail": "https://i3.ytimg.com/vi/0m1rn6EAI54/maxresdefault.jpg",
         "author": "Geometry Gym",
         "authorUrl": "https://www.youtube.com/channel/UC01FBzTNN-umc7w1-MYnABw",
         "description": "This video runs through the basics of Rhino.Inside.Revit and how to get up and running with this exciting new technology. Along with Geometry Gym tools with an eye toward facades and structures"
@@ -48,7 +48,7 @@
         "type": "video",
         "title": "How-to-Rhino Tutorial",
         "url": "https://www.youtube.com/watch?v=fEjVrJuR1ik",
-        "thumbnail": "http://i3.ytimg.com/vi/fEjVrJuR1ik/maxresdefault.jpg",
+        "thumbnail": "https://i3.ytimg.com/vi/fEjVrJuR1ik/maxresdefault.jpg",
         "author": "How to Rhino Facebook Group",
         "authorUrl": "https://www.facebook.com/groups/howtorhino",
         "description": "This is a short recap of Rhino.Inside.Revit plugin which allows Revit and other apps to run Rhino and Grasshopper within Revit application. Keep in mind that this works only with Rhino 7 work in progress version. With this plugin, you can easily import and export geometry from Revit to Rhino and Grasshopper and the other way around. As this is a native McNeel development tool, it is going to be a game changer when it comes to having the ability to use parametric modeling techniques in Grasshopper and have all of that work seamlessly in a BIM tool such as Revit"
@@ -66,7 +66,7 @@
         "title": "AIA Detroit co.de.D Rhino.Inside.Revit Presentation",
         "date": "June 2020",
         "url": "https://www.youtube.com/watch?v=L0ENhTxSstA",
-        "thumbnail": "http://i3.ytimg.com/vi/L0ENhTxSstA/maxresdefault.jpg",
+        "thumbnail": "https://i3.ytimg.com/vi/L0ENhTxSstA/maxresdefault.jpg",
         "author": "AIA Detroit co.DE.D Group",
         "authorUrl": "https://www.youtube.com/playlist?list=PLqBgpCSFupaqlDV0ZYcEPWCgYmeg1PHmA",
         "description": "Rhino.Inside allows you to use Grasshopper directly within Revit. Will this replace Dynamo or enhance it? Join co.de.D as we discuss what Rhino.Inside means for our industry"
@@ -75,7 +75,7 @@
         "type": "video",
         "title": "Creating Windows with Rhino.Inside.Revit",
         "url": "https://www.youtube.com/watch?v=g-Kfhq1EImc",
-        "thumbnail": "http://i3.ytimg.com/vi/g-Kfhq1EImc/maxresdefault.jpg",
+        "thumbnail": "https://i3.ytimg.com/vi/g-Kfhq1EImc/maxresdefault.jpg",
         "author": "How To Rhino",
         "authorUrl": "https://www.youtube.com/channel/UCwImuwbI4lKk544-FS7A2Yw",
         "description": "In this Rhino Inside Revit tutorial, we’re going to create windows in Revit based on geometry input from Rhino and Grasshopper. This method allows the use of both parametric and manual positioning for our families that are being created directly from Grasshopper"
@@ -84,7 +84,7 @@
         "type": "video",
         "title": "EvolveLAB covers Rhino.Inside.Revit - Way Faster Wednesday",
         "url": "https://www.youtube.com/watch?v=XsIgliwPBJU",
-        "thumbnail": "http://i3.ytimg.com/vi/XsIgliwPBJU/maxresdefault.jpg",
+        "thumbnail": "https://i3.ytimg.com/vi/XsIgliwPBJU/maxresdefault.jpg",
         "author": "EvolveLAB",
         "authorUrl": "https://www.evolvebim.com/",
         "description": "In this video, we highlight the power of Rhino.Inside.Revit with Grasshopper. We will place adaptive components and floors using rhino inside with grasshopper"
@@ -102,7 +102,7 @@
         "type": "video",
         "title": "Intro to Rhino.Inside.Revit",
         "url": "https://www.youtube.com/watch?v=qFy1XcNcBsc",
-        "thumbnail": "http://i3.ytimg.com/vi/qFy1XcNcBsc/maxresdefault.jpg",
+        "thumbnail": "https://i3.ytimg.com/vi/qFy1XcNcBsc/maxresdefault.jpg",
         "author": "Rethinking BIM",
         "authorUrl": "https://www.youtube.com/channel/UC82U-lpftjA7lCeb9Rhdraw",
         "description": "This video provides an intro to some of the capabilities of Rhino.Inside.Revit"
@@ -111,7 +111,7 @@
         "type": "video",
         "title": "Room Data and View Analysis with Rhino.Inside.Revit",
         "url": "https://www.youtube.com/watch?v=WRbbJlURzoo",
-        "thumbnail": "http://i3.ytimg.com/vi/WRbbJlURzoo/maxresdefault.jpg",
+        "thumbnail": "https://i3.ytimg.com/vi/WRbbJlURzoo/maxresdefault.jpg",
         "author": "Rethinking BIM",
         "authorUrl": "https://www.youtube.com/channel/UC82U-lpftjA7lCeb9Rhdraw",
         "description": "This video goes through a workflow that uses Rhino.Inside and the View Rose tool in Ladybug (Grasshopper plugin) in order to demonstrate the process of running a geometry-focused analysis in Rhino/Grasshopper and feeding results back into a Revit parameter"
@@ -120,7 +120,7 @@
         "type": "video",
         "title": "Place Beams in Rhino.Inside.Revit",
         "url": "https://www.youtube.com/watch?v=B-Ug2XTV5Wg",
-        "thumbnail": "http://i3.ytimg.com/vi/B-Ug2XTV5Wg/maxresdefault.jpg",
+        "thumbnail": "https://i3.ytimg.com/vi/B-Ug2XTV5Wg/maxresdefault.jpg",
         "author": "Marcello Sgambelluri @ Simply Complex Podcast",
         "authorUrl": "http://therevitcomplex.blogspot.com/",
         "description": "In this video I show you how to simplify Revit structural beam modeling using an adaptive component and Rhino.Inside.Revit"
