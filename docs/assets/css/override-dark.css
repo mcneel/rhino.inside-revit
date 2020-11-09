@@ -1,0 +1,225 @@
+@media (prefers-color-scheme: dark) {
+
+    /* overalls */
+    body {
+        color: #fdfdfd;
+        background: #2d2d2d;
+    }
+
+    a {
+        color: #3ca4ff;
+    }
+
+    a:hover,
+    a:visited {
+        color: #378ad3;
+    }
+
+    /* bootstrap and other frameworks */
+    .site-title,
+    .site-title:visited {
+        color: #fdfdfd;
+    }
+
+    .page-link {
+        background-color: transparent;
+    }
+
+    .dropdown-menu {
+        background: #2d2d2d;
+    }
+
+    .btn-danger {
+        background-color: #bb2736;
+        border-color: #bb2736;
+    }
+
+    /* internal overrides */
+    a.site-title,
+    a.page-link,
+    a.extern-link,
+    a.dropdown-toggle a.site-title:hover,
+    a.page-link:hover,
+    a.dropdown-toggle:hover {
+        color: #eee;
+    }
+
+    .site-header {
+        background: #222222;
+    }
+
+    .site-nav .page-link,
+    .site-nav .extern-link {
+        color: #eee;
+    }
+
+    .site-nav .page-link:hover {
+        border-bottom: 3px solid #585858;
+    }
+
+    .site-nav .page-link.active {
+        border-bottom: 3px solid #eee;
+    }
+
+    .version-link {
+        color: #eee;
+    }
+
+    .version-link:hover {
+        background-color: #2d2d2d;
+    }
+
+    .version-link:visited {
+        color: #eee;
+    }
+
+    .version-link:not([href]) {
+        color: #999;
+    }
+
+    .post-content h2 {
+        border-bottom: 1px dashed #a7a7a7;
+    }
+
+    .sidebar a,
+    .nav a {
+        color: #999;
+    }
+
+    .sidebar a:hover,
+    .nav a:hover {
+        color: #bbb;
+        border-left: 1px #eee solid;
+        background: transparent;
+    }
+
+    /* side bar groups */
+    .sidebar .nav-category {
+        color: #828282;
+        background: #222222;
+    }
+
+    .scrollbar {
+        scrollbar-color: #222222 #2b2b2b;
+    }
+
+    .scrollbar::-webkit-scrollbar-track {
+        background-color: #2b2b2b;
+    }
+
+    .scrollbar::-webkit-scrollbar-thumb {
+        background-color: #222222;
+    }
+
+    .gallery-item {
+        background-color: #2d2d2d;
+        border: 1px solid #1d1d1d;
+        color: #111;
+        -webkit-box-shadow: 0 3px 2px rgba(0, 0, 0, .35);
+        -moz-box-shadow: 0 3px 2px rgba(0, 0, 0, .35);
+        box-shadow: 0 3px 2px rgba(0, 0, 0, .35);
+    }
+
+    .gallery-item-focused {
+        border: 1px solid #eee;
+        -webkit-box-shadow: 0 6px 0 #eee, 0 12px 8px rgba(0, 0, 0, .55);
+        -moz-box-shadow: 0 6px 0 #eee, 0 12px 8px rgba(0, 0, 0, .55);
+        box-shadow: 0 6px 0 #eee, 0 12px 8px rgba(0, 0, 0, .55);
+    }
+
+    .gallery-info {
+        border-top: 1px solid #1d1d1d;
+    }
+
+    .gallery-info .title {
+        color: #eee;
+    }
+
+    .gallery-info .author {
+        color: #eee;
+    }
+
+    .gallery-info div.extra p {
+        color: #828282;
+    }
+
+    .footer {
+        color: #e8e8e8;
+    }
+
+    .footer a {
+        color: #e8e8e8;
+    }
+
+    .footer a:visited {
+        color: #e8e8e8;
+    }
+
+    .footer-languages {
+        border-bottom: 1px solid #e8e8e8;
+    }
+
+    .highlighter-rouge {
+        color: #eee;
+        background-color: #9e9e9e;
+    }
+
+    a.btn-danger {
+        color: white;
+        -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset, 0 -1px 0 rgba(255, 255, 255, .1) inset, 0 4px 0 #880000, 0 4px 2px rgba(0, 0, 0, .5);
+        -moz-box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset, 0 -1px 0 rgba(255, 255, 255, .1) inset, 0 4px 0 #880000, 0 4px 2px rgba(0, 0, 0, .5);
+        box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset, 0 -1px 0 rgba(255, 255, 255, .1) inset, 0 4px 0 #880000, 0 4px 2px rgba(0, 0, 0, .5);
+    }
+
+    a.btn-danger:hover {
+        color: white;
+    }
+
+    .comp-table tr {
+        border-top: 1px solid #a7a7a7;
+    }
+
+    .icontag {
+        background: linear-gradient(white, #e8e8e8);
+        border: 1px solid #828282;
+    }
+
+    .icontag_circle {
+        color: white;
+        background-color: black;
+    }
+
+    .msg-block {
+        background-color: #222222;
+    }
+
+    .msg-msg {
+        color: #828282;
+    }
+
+    .issue-block {
+        background-color: gold;
+    }
+
+    .issue-block .msg-msg {
+        color: #111;
+    }
+
+    .caption {
+        color: #828282;
+    }
+
+    .kbkey {
+        color: #fff;
+        background: linear-gradient(225deg, #2f2f2f, #828282);
+        box-shadow: 2px 2px 0 rgba(30, 30, 30, 0.2), 0 0 0 2px #575757 inset;
+    }
+
+    .kbshortcut li:not(:first-child)::before {
+        color: #4b4e51;
+    }
+
+    .kbnote-heavy {
+        color: #4b4e51;
+    }
+}

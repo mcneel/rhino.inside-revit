@@ -1653,6 +1653,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap FillPatternElement {
+            get {
+                object obj = ResourceManager.GetObject("FillPatternElement", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap FilterElement {
             get {
                 object obj = ResourceManager.GetObject("FilterElement", resourceCulture);
@@ -1886,6 +1896,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap LevelByElevation {
             get {
                 object obj = ResourceManager.GetObject("LevelByElevation", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap LinePatternElement {
+            get {
+                object obj = ResourceManager.GetObject("LinePatternElement", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

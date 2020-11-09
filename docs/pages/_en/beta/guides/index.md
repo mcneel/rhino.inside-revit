@@ -11,7 +11,8 @@ This section includes many articles that guide you through solving many {{ site.
 ## Basic Interactions
 These pages guide you through automating some of the basic workflows using {{ site.terms.rir }}
 
-- [Interacting with Revit]({{ site.baseurl }}{% link _en/beta/guides/revit-interact.md %})
+- [Rhino]({{ site.baseurl }}{% link _en/beta/guides/rir-rhino.md %})
+- [Grasshopper]({{ site.baseurl }}{% link _en/beta/guides/rir-grasshopper.md %})
 
 <!-- 20 -->
 ####  Geometry Conversion
@@ -37,6 +38,7 @@ Grasshopper addon, included with {{ site.terms.rir }}, provides custom Revit-awa
 
 - [Walls (Basic & Stacked)]({{ site.baseurl }}{% link _en/beta/guides/revit-walls.md %})
 - [Curtain Walls & Systems]({{ site.baseurl }}{% link _en/beta/guides/revit-curtainwalls.md %})
+- [Doors & Windows]({{ site.baseurl }}{% link _en/beta/guides/revit-doorswindows.md %})
 - [Spatial Elements]({{ site.baseurl }}{% link _en/beta/guides/revit-spatial.md %})
 - [Stairs]({{ site.baseurl }}{% link _en/beta/guides/revit-stairs.md %})
 - [Levels & Grids]({{ site.baseurl }}{% link _en/beta/guides/revit-levels.md %})
