@@ -162,18 +162,18 @@ namespace RhinoInside.Revit.GH.Components
       if (wallType.Kind == DB.WallKind.Curtain)
       {
         // properties of the wall type
-        PipeHostParameter<Types.WallFunction>(DA, wallType, DB.BuiltInParameter.FUNCTION_PARAM, "Function");
+        PipeHostParameter(DA, wallType, DB.BuiltInParameter.FUNCTION_PARAM, "Function");
         PipeHostParameter(DA, wallType, DB.BuiltInParameter.ALLOW_AUTO_EMBED, "Automatically Embed");
         PipeHostParameter(DA, wallType, DB.BuiltInParameter.AUTO_PANEL_WALL, "Curtain Panel");
-        PipeHostParameter<Types.CurtainGridJoinCondition>(DA, wallType, DB.BuiltInParameter.AUTO_JOIN_CONDITION_WALL, "Join Condition");
+        PipeHostParameter(DA, wallType, DB.BuiltInParameter.AUTO_JOIN_CONDITION_WALL, "Join Condition");
 
         // layout (vertical)
-        PipeHostParameter<Types.CurtainGridLayout>(DA, wallType, DB.BuiltInParameter.SPACING_LAYOUT_VERT, "Vertical Grid : Layout");
+        PipeHostParameter(DA, wallType, DB.BuiltInParameter.SPACING_LAYOUT_VERT, "Vertical Grid : Layout");
         PipeHostParameter(DA, wallType, DB.BuiltInParameter.SPACING_LENGTH_VERT, "Vertical Grid : Spacing");
         PipeHostParameter(DA, wallType, DB.BuiltInParameter.CURTAINGRID_ADJUST_BORDER_VERT, "Vertical Grid : Adjust for Mullion Size");
 
         // layout (horizontal)
-        PipeHostParameter<Types.CurtainGridLayout>(DA, wallType, DB.BuiltInParameter.SPACING_LAYOUT_HORIZ, "Horizontal Grid : Layout");
+        PipeHostParameter(DA, wallType, DB.BuiltInParameter.SPACING_LAYOUT_HORIZ, "Horizontal Grid : Layout");
         PipeHostParameter(DA, wallType, DB.BuiltInParameter.SPACING_LENGTH_HORIZ, "Horizontal Grid : Spacing");
         PipeHostParameter(DA, wallType, DB.BuiltInParameter.CURTAINGRID_ADJUST_BORDER_HORIZ, "Horizontal Grid : Adjust for Mullion Size");
 

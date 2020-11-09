@@ -202,7 +202,7 @@ namespace RhinoInside.Revit.GH.Components
       PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.WALL_ATTR_ROOM_BOUNDING, "Is Room Bounding");
 
       PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT, "Structural");
-      PipeHostParameter<Types.StructuralWallUsage>(DA, wallInstance, DB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM, "Structural Usage");
+      PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM, "Structural Usage");
 
       DA.SetData("Orientation", UnitConverter.InRhinoUnits(wallInstance.GetOrientationVector()));
     }

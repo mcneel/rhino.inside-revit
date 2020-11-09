@@ -148,15 +148,15 @@ namespace RhinoInside.Revit.GH.Components
 
       // properties of the system type
       PipeHostParameter(DA, curtainSystemType, DB.BuiltInParameter.AUTO_PANEL, "Curtain Panel");
-      PipeHostParameter<Types.CurtainGridJoinCondition>(DA, curtainSystemType, DB.BuiltInParameter.AUTO_JOIN_CONDITION, "Join Condition");
+      PipeHostParameter(DA, curtainSystemType, DB.BuiltInParameter.AUTO_JOIN_CONDITION, "Join Condition");
 
       // layout (vertical)
-      PipeHostParameter<Types.CurtainGridLayout>(DA, curtainSystemType, DB.BuiltInParameter.SPACING_LAYOUT_VERT, "Grid 1 : Layout");
+      PipeHostParameter(DA, curtainSystemType, DB.BuiltInParameter.SPACING_LAYOUT_VERT, "Grid 1 : Layout");
       PipeHostParameter(DA, curtainSystemType, DB.BuiltInParameter.SPACING_LENGTH_VERT, "Grid 1 : Spacing");
       PipeHostParameter(DA, curtainSystemType, DB.BuiltInParameter.CURTAINGRID_ADJUST_BORDER_VERT, "Grid 1 : Adjust for Mullion Size");
 
       // layout (horizontal)
-      PipeHostParameter<Types.CurtainGridLayout>(DA, curtainSystemType, DB.BuiltInParameter.SPACING_LAYOUT_HORIZ, "Grid 2 : Layout");
+      PipeHostParameter(DA, curtainSystemType, DB.BuiltInParameter.SPACING_LAYOUT_HORIZ, "Grid 2 : Layout");
       PipeHostParameter(DA, curtainSystemType, DB.BuiltInParameter.SPACING_LENGTH_HORIZ, "Grid 2 : Spacing");
       PipeHostParameter(DA, curtainSystemType, DB.BuiltInParameter.CURTAINGRID_ADJUST_BORDER_HORIZ, "Grid 2 : Adjust for Mullion Size");
 

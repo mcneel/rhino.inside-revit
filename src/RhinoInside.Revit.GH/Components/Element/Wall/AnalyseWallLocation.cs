@@ -112,7 +112,7 @@ namespace RhinoInside.Revit.GH.Components
         return;
 
       DA.SetData("Center Curve", wallInstance.GetCenterCurve());
-      PipeHostParameter<Types.WallLocationLine>(DA, wallInstance, DB.BuiltInParameter.WALL_KEY_REF_PARAM, "Location Line");
+      PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.WALL_KEY_REF_PARAM, "Location Line");
 
       var offsetPlaneNormal = GetOffsetPlaneNormal(wallInstance);
       var offsetValue = GetOffsetForLocationCurve(wallInstance);
