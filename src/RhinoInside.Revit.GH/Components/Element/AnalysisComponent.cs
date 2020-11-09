@@ -13,22 +13,5 @@ namespace RhinoInside.Revit.GH.Components
     {
       DA.SetData(paramName, srcElement?.get_Parameter(srcParam).AsGoo());
     }
-
-    protected void PipeHostParameter<T>(IGH_DataAccess DA, DB.Element srcElement, DB.BuiltInParameter srcParam, string paramName) where T: Types.GH_Enumerate, new()
-    {
-      if (srcElement is null)
-      {
-        DA.SetData(paramName, null);
-        return;
-      }
-
-      var param = srcElement.get_Parameter(srcParam);
-      if (param != null && param.StorageType == DB.StorageType.Integer)
-      {
-        var enumType = new T();
-        enumType.Value = param.AsInteger();
-        DA.SetData(paramName, enumType);
-      }
-    }
   }
 }
