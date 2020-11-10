@@ -31,18 +31,6 @@ Now let's install {{ site.terms.rir }}
 
 Now that we have installed both dependencies, we can proceed to loading {{ site.terms.rir }}
 
-## Automated installer for *All Users* in Windows
-
-To determine how to best automate the push of the Rhino 7 installer, follow the [Automating installation of Rhino 6 Guide](https://wiki.mcneel.com/rhino/installingrhino/6)
-
-To push install Rhino.Inside.Revit quietly for all users use this command line:
-
-```
-RhinoInside.Revit.msi ALLUSERS="1" /quiet
-```
-
-For more inforamtion see: https://docs.microsoft.com/windows/win32/msi/single-package-authoring
-
 ## Loading {{ site.terms.rir }}
 
 Launch {{ site.terms.revit }}. You will be prompted to confirm loading {{ site.terms.rir }}. Make sure to press **Always Load** to skip this dialog in the future.
