@@ -68,7 +68,8 @@ simple_search: https://google.com/search
 # site dictionary: list of often used terms that need to be consistent
 terms:
   mcneel: Robert McNeel & Associates
-  rhino: Rhino BETA
+  rhino: Rhino 7
+  rhinoext: (Evaluation)
   rir: Rhino.Inside.Revit
   revit: Autodesk Revit®
   pyrevit: pyRevit
@@ -96,7 +97,7 @@ versions:
     version: beta
     name: Beta
     rir_download: https://www.rhino3d.com/download/rhino.inside-revit/7/wip
-    rhino_download: https://www.rhino3d.com/download/rhino/wip
+    rhino_download: https://www.rhino3d.com/download/rhino-for-windows/7/evaluation
 
 # default metadata for pages based on their path
 defaults:
