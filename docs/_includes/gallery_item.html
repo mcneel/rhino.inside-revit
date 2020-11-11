@@ -1,0 +1,72 @@
+{% assign item = include.item %}
+{% if include.large %}
+<div class="gallery-item" >
+{% else %}
+<div class="gallery-item gallery-item-small" >
+{% endif %}
+    {% if include.extern %}
+    <a href="{{ item.url }}" target="blank">
+    {% else %}
+    <a href="{{ item.url | prepend: site.baseurl }}">
+    {% endif %}
+        {% if item.type %}
+        <div class="gallery-thumbnail gallery-thumbnail-dim gallery-thumbnail-compact">
+        {% elsif include.large %}
+        <div class="gallery-thumbnail gallery-thumbnail-dim">
+        {% else %}
+        <div class="gallery-thumbnail gallery-thumbnail-dim gallery-thumbnail-small">
+        {% endif %}
+            {% if item.thumbnail %}
+                {% if include.extern %}
+                <img class="gallery-img" src="{{ item.thumbnail }}" />
+                {% else %}
+                <img class="gallery-img" src="{{ item.thumbnail | prepend: site.baseurl }}" />
+                {% endif %}
+            {% else %}
+                <img class="gallery-img" src="{{ site.baseurl }}/assets/img/gallery-placeholder.png" />
+            {% endif %}
+        </div>
+    </a>
+    <div class="gallery-info">
+        {% if item.type %}
+            {% if item.type == 'video' %}
+                <img width="28" height="28" src="{{ site.baseurl }}/assets/img/video.svg" />
+            {% elsif item.type == 'blogpost' %}
+                <img width="28" height="28" src="{{ site.baseurl }}/assets/img/post.svg" />
+            {% else %}
+                <img width="28" height="28" src="{{ site.baseurl }}/assets/img/link.svg" />
+            {% endif %}
+        {% endif %}
+    
+        {% if include.extern %}
+        <a class="gallery-info-title" href="{{ item.url }}">{{ item.title }}</a>
+        {% else %}
+        <a class="gallery-info-title" href="{{ item.url | prepend: site.baseurl }}">{{ item.title }}</a>
+        {% endif %}
+    
+        {% if item.author %}
+        <a class="gallery-info-author" href="{{ item.authorUrl }}">{{ item.author }}</a>
+        {% endif %}
+    
+        {% if item.subtitle %}
+        <div class="gallery-info-subtitle">
+            {{ item.subtitle }}
+        </div>
+        {% endif %}
+    
+        {% if item.tags %}
+        <ul class="gallery-info-tags">
+        {% for tag in item.tags %}
+            <li>{{ tag }}</li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+    
+        {% if item.description %}
+        <div class="gallery-info-extra">
+            {{ item.description | markdownify }}
+        </div>
+        {% endif %}
+    </div>
+    </div>
+    

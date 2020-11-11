@@ -10,39 +10,8 @@ Discover more about {{ site.terms.rir }}! The resources here created are by the 
 {% include ltr/bubble_note.html note=discover_note %}
 
 
-<div class="gallery-large-grid">
-{% for collection in site.collections %}
-{% if collection.label == page.collection %}
-{% assign articles = collection.docs | sort:"order" %}
-{% for item in articles %}
-{% if item.toc and item.title and item.version == page.version and item.categories == page.categories %}
-<div class="gallery-item" >
-<a href="{{ item.url | prepend: site.baseurl }}">
-    <div class="gallery-thumbnail gallery-thumbnail-dim gallery-thumbnail-large">
-    {% if item.thumbnail %}
-        <img src="{{ item.thumbnail | prepend: site.baseurl }}" />
-    {% else %}
-        <img src="{{ site.baseurl }}/assets/img/gallery-placeholder.png" />
-    {% endif %}
-    </div>
-</a>
-<div class="gallery-info">
-    <a class="title" href="{{ item.url | prepend: site.baseurl }}">{{ item.title }}</a>
-    <ul class="gallery-info-tags">
-    {% for tag in item.tags %}
-        <li>{{ tag }}</li>
-    {% endfor %}
-    </ul>
-    <div class="extra">
-        {{ item.description | markdownify }}
-    </div>
-</div>
-</div>
-{% endif %}
-{% endfor %}
-{% endif %}
-{% endfor %}
-</div>
+{% include gallery.html large=true %}
+
 
 ## Sharing Your Discoveries
 
