@@ -1,6 +1,9 @@
 ---
-title: Rhino Geometry to Revit
-order: 21
+title: "Rhino to Revit"
+subtitle: How to move geometry and data from Rhino into Revit
+order: 31
+thumbnail: /static/images/guides/rhino-to-revit.png
+group: Essentials
 ---
 
 In this guide we will take a look at how to send Rhino geometry to {{ site.terms.revit }} using Grasshopper. {{ site.terms.rir }} allows Rhino shapes and forms to be encoded into, and categorized as Revit elements. It is important to note that the easiest and quickest way of moving geometry into Revit may not be the best method. Determining which the final goal of the forms in Revit can improve the quality of the final Revit data structure and increase project efficiency.

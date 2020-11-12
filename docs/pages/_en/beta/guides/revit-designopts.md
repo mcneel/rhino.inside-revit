@@ -1,7 +1,8 @@
 ---
 title: Design Options
 order: 72
-group: Geometry Containers
+thumbnail: /static/images/guides/revit-wip.png
+group: Containers
 ---
 
 {% include ltr/warning_note.html note='Currently there is very limited support for design options in Revit API' %}

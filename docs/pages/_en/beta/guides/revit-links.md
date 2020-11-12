@@ -1,7 +1,9 @@
 ---
 title: Links
 order: 74
-group: Geometry Containers
+group: Containers
+thumbnail: /static/images/guides/revit-links.png
+subtitle: Workflows for Revit Linked Models
 ghdef: revit-links.ghx
 ---
 

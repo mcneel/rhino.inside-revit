@@ -1,7 +1,9 @@
 ---
-title: "Data Model: Parameters"
-order: 31
-group: Revit Basics
+title: "Revit: Parameters"
+subtitle: All the different types of Parameters
+order: 22
+group: Essentials
+thumbnail: /static/images/guides/revit-params.png
 ghdef: revit-params.ghx
 ---
 

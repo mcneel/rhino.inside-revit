@@ -1,7 +1,9 @@
 ---
-title: "Data Model: Documents"
-order: 34
-group: Revit Basics
+title: "Revit: Documents"
+subtitle: Where all the elements are stored and shared
+order: 25
+group: Essentials
+thumbnail: /static/images/guides/revit-docs.png
 ghdef: revit-docs.ghx
 ---
 

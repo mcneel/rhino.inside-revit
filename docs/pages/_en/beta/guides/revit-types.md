@@ -1,7 +1,9 @@
 ---
-title: "Data Model: Types"
-order: 32
-group: Revit Basics
+title: "Revit: Types & Families"
+subtitle: Revit's categorization system, Categories, Types, ...
+order: 23
+group: Essentials
+thumbnail: /static/images/guides/revit-types.png
 ---
 
 Revit organizes the building components into *Categories*, *Families*, and *Types*. In this article, we will discuss each and guide you in dealing with this organization method when using {{ site.terms.rir }} (or Revit API).
