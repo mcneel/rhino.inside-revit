@@ -333,7 +333,7 @@ pre {
     grid-gap: 15px 10px;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     align-items: start;
-    grid-auto-rows: 150px;
+    grid-auto-rows: 160px;
 }
 
 .gallery-large-grid {
@@ -348,7 +348,7 @@ pre {
 .gallery-item {
     display: block;
     min-height: 200px;
-    background-color: #f6f6f6;
+    background-color: #fff;
     border: 1px solid #d0d0d0;
     border-radius: 5px;
     color: white;
@@ -359,7 +359,7 @@ pre {
 }
 
 .gallery-item-small {
-    min-height: 150px;
+    min-height: 160px;
 }
 
 .gallery-item-focused {
@@ -385,8 +385,8 @@ pre {
 }
 
 .gallery-thumbnail-dim {
-    -webkit-filter: saturate(0.5);
-    filter: saturate(0.5);
+    -webkit-filter: saturate(0.7);
+    filter: saturate(0.7);
 }
 
 .gallery-info {
