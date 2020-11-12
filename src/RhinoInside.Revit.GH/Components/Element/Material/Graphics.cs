@@ -68,25 +68,25 @@ namespace RhinoInside.Revit.GH.Components.Material
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.TryGetData(DA, "Material", out Types.Material material))
+      if (!Params.GetData(DA, "Material", out Types.Material material, x => x.IsValid))
         return;
 
       bool update = false;
-      update |= Params.TryGetData(DA, "Use Render Appearance", out bool? appearance);
-      update |= Params.TryGetData(DA, "Color", out System.Drawing.Color? color);
-      update |= Params.TryGetData(DA, "Transparency", out double? transparency);
-      update |= Params.TryGetData(DA, "Shininess", out double? shininess);
-      update |= Params.TryGetData(DA, "Smoothness", out double? smoothness);
+      update |= Params.GetData(DA, "Use Render Appearance", out bool? appearance);
+      update |= Params.GetData(DA, "Color", out System.Drawing.Color? color);
+      update |= Params.GetData(DA, "Transparency", out double? transparency);
+      update |= Params.GetData(DA, "Shininess", out double? shininess);
+      update |= Params.GetData(DA, "Smoothness", out double? smoothness);
 
-      update |= Params.TryGetData(DA, "Surface Foreground Pattern", out Types.FillPatternElement sfp);
-      update |= Params.TryGetData(DA, "Surface Foreground Color", out System.Drawing.Color? sfc);
-      update |= Params.TryGetData(DA, "Surface Background Pattern", out Types.FillPatternElement sbp);
-      update |= Params.TryGetData(DA, "Surface Background Color", out System.Drawing.Color? sbc);
+      update |= Params.GetData(DA, "Surface Foreground Pattern", out Types.FillPatternElement sfp);
+      update |= Params.GetData(DA, "Surface Foreground Color", out System.Drawing.Color? sfc);
+      update |= Params.GetData(DA, "Surface Background Pattern", out Types.FillPatternElement sbp);
+      update |= Params.GetData(DA, "Surface Background Color", out System.Drawing.Color? sbc);
 
-      update |= Params.TryGetData(DA, "Cut Foreground Pattern", out Types.FillPatternElement cfp);
-      update |= Params.TryGetData(DA, "Cut Foreground Color", out System.Drawing.Color? cfc);
-      update |= Params.TryGetData(DA, "Cut Background Pattern", out Types.FillPatternElement cbp);
-      update |= Params.TryGetData(DA, "Cut Background Color", out System.Drawing.Color? cbc);
+      update |= Params.GetData(DA, "Cut Foreground Pattern", out Types.FillPatternElement cfp);
+      update |= Params.GetData(DA, "Cut Foreground Color", out System.Drawing.Color? cfc);
+      update |= Params.GetData(DA, "Cut Background Pattern", out Types.FillPatternElement cbp);
+      update |= Params.GetData(DA, "Cut Background Color", out System.Drawing.Color? cbc);
 
       if (update)
       {

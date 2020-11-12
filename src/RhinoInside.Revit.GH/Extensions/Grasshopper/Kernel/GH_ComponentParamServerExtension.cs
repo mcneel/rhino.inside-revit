@@ -26,54 +26,198 @@ namespace Grasshopper.Kernel
     }
 
     public static bool TryGetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T? value)
+      where T : struct => TryGetData(parameters, DA, name, out value, x => true);
+
+    public static bool TryGetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T value)
+      where T : class => TryGetData(parameters, DA, name, out value, x => true);
+
+    public static bool GetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T value)
+      where T : class => GetData(parameters, DA, name, out value, x => true);
+
+    public static bool GetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T? value)
+      where T : struct => GetData(parameters, DA, name, out value, x => true);
+
+    public static bool TryGetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T? value, Func<T, bool> validate)
       where T : struct
     {
       var index = parameters.Input.IndexOf(name, out var param);
       if (param?.DataType > GH_ParamData.@void)
       {
         T val = default;
-        if (DA.GetData(index, ref val))
-          value = val;
-        else
-          value = null;
+        if (!DA.GetData(index, ref val)) { value = default; return false; }
+        if (!validate(val))
+        {
+          parameters.Owner.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{name} value is not valid.");
+          value = default;
+          return false;
+        }
 
+        value = val;
         return true;
       }
 
       value = default;
-      return false;
+      return true;
     }
-    public static bool TryGetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T value)
+
+    public static bool TryGetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T value, Func<T, bool> validate)
+      where T : class
     {
       value = default;
 
       var index = parameters.Input.IndexOf(name, out var param);
       if (param?.DataType > GH_ParamData.@void)
       {
-        DA.GetData(index, ref value);
-        return true;
+        if (!DA.GetData(index, ref value)) return false;
+        if (!validate(value))
+        {
+          parameters.Owner.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{name} value is not valid.");
+          return false;
+        }
       }
 
-      return false;
+      return true;
     }
 
-    public static bool TryGetDataList<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T?[] values)
+    public static bool GetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T? value, Func<T, bool> validate)
       where T : struct
     {
       var index = parameters.Input.IndexOf(name, out var param);
       if (param?.DataType > GH_ParamData.@void)
       {
-        var goos = Activator.CreateInstance(typeof(List<>).MakeGenericType(param.Type)) as ICollection;
-        dynamic da = DA;
-        if (da.GetDataList(index, goos))
+        T val = default;
+        if (!DA.GetData(index, ref val)) { value = default; return false; }
+        if (!validate(val))
+        {
+          parameters.Owner.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{name} value is not valid.");
+          value = default;
+          return false;
+        }
+
+        value = val;
+        return true;
+      }
+
+      value = default;
+      return false;
+    }
+
+    public static bool GetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T value, Func<T, bool> validate)
+      where T : class
+    {
+      value = default;
+
+      var index = parameters.Input.IndexOf(name, out var param);
+      if (param?.DataType > GH_ParamData.@void)
+      {
+        if (!DA.GetData(index, ref value)) return false;
+        if (!validate(value))
+        {
+          parameters.Owner.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{name} value is not valid.");
+          return false;
+        }
+
+        return true;
+      }
+
+      return false;
+    }
+
+    public static bool TryGetDataList<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out IList<T?> values)
+      where T : struct
+    {
+      var index = parameters.Input.IndexOf(name, out var param);
+      if (param?.DataType > GH_ParamData.@void)
+      {
+        var goos = new List<IGH_Goo>();
+        if (DA.GetDataList(index, goos))
         {
           values = new T?[goos.Count];
 
           int i = 0;
           foreach (var goo in goos.Cast<IGH_Goo>())
           {
-            if (goo is object && goo.CastTo<T>(out var data))
-              values[i] = data;
+            if (goo != null)
+            {
+              if (goo is T data) values[i] = data;
+              if (goo.CastTo<T>(out data)) values[i] = data;
+            }
+
+            i++;
+          }
+
+          return true;
+        }
+      }
+
+      values = default;
+      return true;
+    }
+    public static bool TryGetDataList<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out IList<T> values)
+    {
+      var index = parameters.Input.IndexOf(name, out var param);
+      if (param?.DataType > GH_ParamData.@void)
+      {
+        var goos = new List<IGH_Goo>();
+        if (DA.GetDataList(index, goos))
+        {
+          values = new T[goos.Count];
+
+          var TIsGoo = typeof(IGH_Goo).IsAssignableFrom(typeof(T));
+
+          int i = 0;
+          foreach (var goo in goos.Cast<IGH_Goo>())
+          {
+            if (goo != null)
+            {
+              if (goo is T data) values[i] = data;
+              if (goo.CastTo(out data)) values[i] = data;
+              else if (TIsGoo)
+              {
+                var TGoo = (IGH_Goo) Activator.CreateInstance(typeof(T));
+                if (TGoo.CastFrom(goo))
+                  values[i] = (T) TGoo;
+              }
+            }
+
+            i++;
+          }
+
+          return true;
+        }
+      }
+
+      values = default;
+      return true;
+    }
+
+    public static bool GetDataList<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out IList<T?> values)
+      where T : struct
+    {
+      var index = parameters.Input.IndexOf(name, out var param);
+      if (param?.DataType > GH_ParamData.@void)
+      {
+        var goos = new List<IGH_Goo>();
+        if (DA.GetDataList(index, goos))
+        {
+          values = new T?[goos.Count];
+
+          var TIsGoo = typeof(IGH_Goo).IsAssignableFrom(typeof(T));
+
+          int i = 0;
+          foreach (var goo in goos.Cast<IGH_Goo>())
+          {
+            if (goo != null)
+            {
+              if (goo is T?) values[i] = (T?) goo;
+              else if (goo.CastTo(out T data)) values[i] = data;
+              else if (TIsGoo)
+              {
+                var TGoo = (IGH_Goo) Activator.CreateInstance(typeof(T));
+                if (TGoo.CastFrom(goo))
+                  values[i] = (T) TGoo;
+              }
+            }
 
             i++;
           }
@@ -85,30 +229,32 @@ namespace Grasshopper.Kernel
       values = default;
       return false;
     }
-    public static bool TryGetDataList<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T[] values)
+
+    public static bool GetDataList<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out IList<T> values)
     {
       var index = parameters.Input.IndexOf(name, out var param);
       if (param?.DataType > GH_ParamData.@void)
       {
-        var goos = Activator.CreateInstance(typeof(List<>).MakeGenericType(param.Type)) as ICollection;
-        dynamic da = DA;
-        if (da.GetDataList(index, goos))
+        var goos = new List<IGH_Goo>();
+        if (DA.GetDataList(index, goos))
         {
           values = new T[goos.Count];
+
           var TIsGoo = typeof(IGH_Goo).IsAssignableFrom(typeof(T));
 
           int i = 0;
           foreach (var goo in goos.Cast<IGH_Goo>())
           {
-            if (goo is object && goo.CastTo<T>(out var data))
+            if (goo != null)
             {
-              values[i] = data;
-            }
-            else if (TIsGoo)
-            {
-              var TGoo = (IGH_Goo) Activator.CreateInstance(typeof(T));
-              if (TGoo.CastFrom(goo))
-                values[i] = (T) TGoo;
+              if (goo is T data) values[i] = data;
+              else if (goo.CastTo(out data)) values[i] = data;
+              else if (TIsGoo)
+              {
+                var TGoo = (IGH_Goo) Activator.CreateInstance(typeof(T));
+                if (TGoo.CastFrom(goo))
+                  values[i] = (T) TGoo;
+              }
             }
 
             i++;

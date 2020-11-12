@@ -67,15 +67,13 @@ namespace RhinoInside.Revit.GH.Components.Material
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      // get input
-      var material = default(Types.Material);
-      if (!DA.GetData("Material", ref material))
+      if (!Params.GetData(DA, "Material", out Types.Material material, x => x.IsValid))
         return;
 
       bool update = false;
-      update |= Params.TryGetData(DA, "Appearance Asset", out Types.AppearanceAssetElement appearanceAsset);
-      update |= Params.TryGetData(DA, "Physical Asset", out Types.StructuralAssetElement structuralAsset);
-      update |= Params.TryGetData(DA, "Thermal Asset", out Types.ThermalAssetElement thermalAsset);
+      update |= Params.GetData(DA, "Appearance Asset", out Types.AppearanceAssetElement appearanceAsset);
+      update |= Params.GetData(DA, "Physical Asset", out Types.StructuralAssetElement structuralAsset);
+      update |= Params.GetData(DA, "Thermal Asset", out Types.ThermalAssetElement thermalAsset);
 
       if (update)
       {

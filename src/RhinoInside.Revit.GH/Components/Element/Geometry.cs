@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Components
     protected ElementGeometryComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
 
-    protected bool TryGetCommonDocument(IEnumerable<DB.Element> elements, out DB.Document document)
+    protected bool TryGetCommonDocument(IEnumerable<Types.Element> elements, out DB.Document document)
     {
       document = default;
       foreach (var element in elements)
@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.GH.Components
       return true;
     }
 
-    static IGH_GeometricGoo ToGoo(GeometryBase geometry)
+    static IGH_GeometricGoo ToGeometricGoo(GeometryBase geometry)
     {
       switch (geometry)
       {
@@ -67,8 +67,8 @@ namespace RhinoInside.Revit.GH.Components
     (
       GH_Path basePath,
       DB.Document doc,
-      IList<DB.Element> elements,
-      IList<DB.Element> exclude,
+      IList<Types.Element> elements,
+      IList<Types.Element> exclude,
       DB.Options options,
       out GH_Structure<IGH_GeometricGoo> geometries
     )
@@ -78,7 +78,7 @@ namespace RhinoInside.Revit.GH.Components
       // Fill data tree
       if (doc is object)
       {
-        using (var scope = exclude.Count > 0 ? doc.RollBackScope() : default)
+        using (var scope = exclude?.Count > 0 ? doc.RollBackScope() : default)
         {
           if (scope is object)
           {
@@ -87,7 +87,7 @@ namespace RhinoInside.Revit.GH.Components
           }
 
           int index = 0;
-          foreach (var element in elements)
+          foreach (var element in elements.Select(x => x.Value))
           {
             if (GH_Document.IsEscapeKeyDown())
             {
@@ -96,7 +96,7 @@ namespace RhinoInside.Revit.GH.Components
             }
 
             var path = basePath.AppendElement(index++);
-            if (element?.IsValidObject == true && !(element.get_BoundingBox(null) is null))
+            if (element?.IsValidObject == true && element.get_BoundingBox(null) != null)
             {
               // Extract the geometry
               using (var geometry = element.GetGeometry(options))
@@ -130,7 +130,7 @@ namespace RhinoInside.Revit.GH.Components
                       }
                     }
 
-                    var valid = list.Where(x => !IsEmpty(x)).Select(x => ToGoo(x));
+                    var valid = list.Where(x => !IsEmpty(x)).Select(ToGeometricGoo);
                     geometries.AppendRange(valid, path);
                   }
                 }
@@ -293,28 +293,17 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var elements = new List<DB.Element>();
-      if (!DA.GetDataList("Elements", elements) || elements.Count == 0)
+      if (!Params.TryGetData(DA, "Detail Level", out DB.ViewDetailLevel? detailLevel)) return;
+      if (!Params.GetDataList(DA, "Elements", out IList<Types.Element> elements)) return;
+      if (!Params.TryGetDataList(DA, "Exclude", out IList<Types.Element> exclude)) return;
+
+      if (!detailLevel.HasValue)
+        detailLevel = DB.ViewDetailLevel.Coarse;
+
+      if (!TryGetCommonDocument(elements.Concat(exclude ?? Enumerable.Empty<Types.Element>()), out var doc))
         return;
 
-      var exclude = new List<DB.Element>();
-      var _Exclude_ = Params.IndexOfInputParam("Exclude");
-      if(_Exclude_ >= 0)
-        DA.GetDataList(_Exclude_, exclude);
-
-      if (!TryGetCommonDocument(elements.Concat(exclude), out var doc))
-        return;
-
-      var detailLevel = DB.ViewDetailLevel.Undefined;
-      var _DetailLevel_ = Params.IndexOfInputParam("Detail Level");
-      if (_DetailLevel_ >= 0)
-      {
-        DA.GetData(_DetailLevel_, ref detailLevel);
-        if (detailLevel == DB.ViewDetailLevel.Undefined)
-          detailLevel = DB.ViewDetailLevel.Coarse;
-      }
-
-      using(var options = new DB.Options() { DetailLevel = detailLevel })
+      using(var options = new DB.Options() { DetailLevel = detailLevel.Value })
       {
         Params.TrySetDataList(DA, "Elements", () => elements);
 
@@ -451,14 +440,14 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.TryGetData(DA, "View", out DB.View view) || view is null) return;
-      if (!Params.TryGetDataList(DA, "Elements", out DB.Element[] elements) || elements.Length == 0) return;
-      Params.TryGetDataList(DA, "Exclude", out DB.Element[] exclude);
+      if (!Params.GetData(DA, "View", out Types.View view, x => x.IsValid)) return;
+      if (!Params.GetDataList(DA, "Elements", out IList<Types.Element> elements)) return;
+      if (!Params.TryGetDataList(DA, "Exclude", out IList<Types.Element> exclude)) return;
 
-      if (!TryGetCommonDocument(elements.Concat(exclude).Concat(Enumerable.Repeat(view, 1)), out var doc))
+      if (!TryGetCommonDocument(elements.Concat(exclude ?? Enumerable.Empty<Types.Element>()).Concat(Enumerable.Repeat(view, 1)), out var doc))
         return;
 
-      using (var options = new DB.Options() { View = view })
+      using (var options = new DB.Options() { View = view.Value })
       {
         Params.TrySetDataList(DA, "Elements", () => elements);
 

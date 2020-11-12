@@ -55,13 +55,13 @@ namespace RhinoInside.Revit.GH.Components
     static readonly ParamDefinition[] inputs =
     {
       ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
-      ParamDefinition.Create<Parameters.Param_Enum<Types.CategoryType>>("Type", "T", "Category type", DB.CategoryType.Model, GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Parameters.Category>("Parent", "P", "Parent category", GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Parameters.Param_Enum<Types.CategoryType>>("Type", "T", "Category type", DB.CategoryType.Model, GH_ParamAccess.item, optional: true, relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Parameters.Category>("Parent", "P", "Parent category", defaultValue: new Types.Category(), GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_String>("Name", "N", "Category name", GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Param_Boolean>("Allows Subcategories", "ASC", "Category allows subcategories to be added", GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Param_Boolean>("Allows Parameters", "AP", "Category allows bound parameters", GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Param_Boolean>("Has Material Quantities", "HMQ", "Category has material quantities", GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Param_Boolean>("Cuttable", "C", "Category is cuttable", GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_Boolean>("Allows Subcategories", "ASC", "Category allows subcategories to be added", GH_ParamAccess.item, optional: true, relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Param_Boolean>("Allows Parameters", "AP", "Category allows bound parameters", GH_ParamAccess.item, optional: true, relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Param_Boolean>("Has Material Quantities", "HMQ", "Category has material quantities", GH_ParamAccess.item, optional: true, relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Param_Boolean>("Cuttable", "C", "Category is cuttable", GH_ParamAccess.item, optional: true, relevance: ParamVisibility.Default),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -75,13 +75,13 @@ namespace RhinoInside.Revit.GH.Components
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
         return;
 
-      Params.TryGetData(DA, "Type", out DB.CategoryType? categoryType);
-      Params.TryGetData(DA, "Parent", out Types.Category Parent);
-      Params.TryGetData(DA, "Name", out string Name);
-      Params.TryGetData(DA, "Allows Subcategories", out bool? AllowsSubcategories);
-      Params.TryGetData(DA, "Allows Parameters", out bool? AllowsParameters);
-      Params.TryGetData(DA, "Has Material Quantities", out bool? HasMaterialQuantities);
-      Params.TryGetData(DA, "Cuttable", out bool? Cuttable);
+      if (!Params.TryGetData(DA, "Type", out DB.CategoryType? categoryType)) return;
+      if (!Params.TryGetData(DA, "Parent", out Types.Category Parent)) return;
+      if (!Params.TryGetData(DA, "Name", out string Name)) return;
+      if (!Params.TryGetData(DA, "Allows Subcategories", out bool? AllowsSubcategories)) return;
+      if (!Params.TryGetData(DA, "Allows Parameters", out bool? AllowsParameters)) return;
+      if (!Params.TryGetData(DA, "Has Material Quantities", out bool? HasMaterialQuantities)) return;
+      if (!Params.TryGetData(DA, "Cuttable", out bool? Cuttable)) return;
 
       if(!(Parent?.Document is null || doc.Equals(Parent.Document)))
         throw new System.ArgumentException("Wrong Document.", nameof(Parent));

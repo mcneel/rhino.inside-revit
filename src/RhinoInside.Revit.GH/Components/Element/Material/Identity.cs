@@ -60,22 +60,22 @@ namespace RhinoInside.Revit.GH.Components.Material
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.TryGetData(DA, "Material", out Types.Material material))
+      if (!Params.GetData(DA, "Material", out Types.Material material, x => x.IsValid))
         return;
 
       bool update = false;
-      update |= Params.TryGetData(DA, "Name", out string name);
-      update |= Params.TryGetData(DA, "Description", out string descritpion);
-      update |= Params.TryGetData(DA, "Class", out string materialClass);
-      update |= Params.TryGetData(DA, "Comments", out string comments);
+      update |= Params.GetData(DA, "Name", out string name);
+      update |= Params.GetData(DA, "Description", out string descritpion);
+      update |= Params.GetData(DA, "Class", out string materialClass);
+      update |= Params.GetData(DA, "Comments", out string comments);
 
-      update |= Params.TryGetData(DA, "Manufacturer", out string manufacturer);
-      update |= Params.TryGetData(DA, "Model", out string model);
-      update |= Params.TryGetData(DA, "Cost", out string cost);
-      update |= Params.TryGetData(DA, "URL", out string url);
+      update |= Params.GetData(DA, "Manufacturer", out string manufacturer);
+      update |= Params.GetData(DA, "Model", out string model);
+      update |= Params.GetData(DA, "Cost", out string cost);
+      update |= Params.GetData(DA, "URL", out string url);
 
-      update |= Params.TryGetData(DA, "Keynote", out string keynote);
-      update |= Params.TryGetData(DA, "Mark", out string mark);
+      update |= Params.GetData(DA, "Keynote", out string keynote);
+      update |= Params.GetData(DA, "Mark", out string mark);
 
       if (update)
       {

@@ -45,15 +45,11 @@ namespace RhinoInside.Revit.GH.Components
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
         return;
 
-      if (Params.TryGetData(DA, "Elevation", out Interval? elevation) && !elevation.Value.IsValid)
-      {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Elevation value is not valid.");
-        return;
-      }
-      Params.TryGetData(DA, "Name", out string name);
-      Params.TryGetData(DA, "Structural", out bool? structural);
-      Params.TryGetData(DA, "Building Story", out bool? buildingStory);
-      Params.TryGetData(DA, "Filter", out DB.ElementFilter filter);
+      if (!Params.TryGetData(DA, "Elevation", out Interval? elevation, x => x.IsValid)) return;
+      if (!Params.TryGetData(DA, "Name", out string name)) return;
+      if (!Params.TryGetData(DA, "Structural", out bool? structural)) return;
+      if (!Params.TryGetData(DA, "Building Story", out bool? buildingStory)) return;
+      if (!Params.TryGetData(DA, "Filter", out DB.ElementFilter filter, x => x.IsValidObject)) return;
 
       using (var collector = new DB.FilteredElementCollector(doc))
       {
@@ -65,7 +61,7 @@ namespace RhinoInside.Revit.GH.Components
         if (elevation.HasValue && TryGetFilterDoubleParam(DB.BuiltInParameter.LEVEL_ELEV, elevation.Value.Mid / Revit.ModelUnits, Revit.VertexTolerance + (elevation.Value.Length * 0.5 / Revit.ModelUnits), out var elevationFilter))
           levelsCollector = levelsCollector.WherePasses(elevationFilter);
 
-        if (TryGetFilterStringParam(DB.BuiltInParameter.DATUM_TEXT, ref name, out var nameFilter))
+        if (name is string && TryGetFilterStringParam(DB.BuiltInParameter.DATUM_TEXT, ref name, out var nameFilter))
           levelsCollector = levelsCollector.WherePasses(nameFilter);
 
         if (structural.HasValue && TryGetFilterIntegerParam(DB.BuiltInParameter.LEVEL_IS_STRUCTURAL, structural.Value ? 1 : 0, out var structuralFilter))
