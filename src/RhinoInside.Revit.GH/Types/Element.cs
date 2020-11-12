@@ -282,11 +282,15 @@ namespace RhinoInside.Revit.GH.Types
 
     public Element() { }
     internal Element(DB.Document doc, DB.ElementId id) => SetValue(doc, id);
-    protected Element(DB.Element element) : base(element.Document, element)
+    protected Element(DB.Element element) : base(element?.Document, element)
     {
       DocumentGUID = Document.GetFingerprintGUID();
-      UniqueID = element.UniqueId;
-      id = element.Id;
+
+      if (element is object)
+      {
+        UniqueID = element.UniqueId;
+        id = element.Id;
+      }
     }
 
     public override bool CastFrom(object source)
