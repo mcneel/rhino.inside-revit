@@ -42,24 +42,29 @@ namespace RhinoInside.Revit.GH.Components
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
-      if (!Params.TryGetData(DA, "Filter", out DB.ElementFilter filter) || filter is null) return;
-      if (!Params.TryGetData(DA, "Limit", out int? limit)) limit = int.MaxValue;
-      else if (limit is null) return;
+      if (!Params.GetData(DA, "Filter", out Types.ElementFilter filter, x => x.IsValid)) return;
+      if (!Params.TryGetData(DA, "Limit", out int? limit, x => x >= 0)) return;
 
       using (var collector = new DB.FilteredElementCollector(doc))
       {
-        var elementCollector = collector.WherePasses(ElementFilter).WherePasses(filter);
+        var elementCollector = collector.WherePasses(ElementFilter).WherePasses(filter.Value);
         var elementCount = elementCollector.GetElementCount();
 
         Params.TrySetDataList(DA, "Elements", () =>
         {
-          if (elementCount > limit)
+          IEnumerable<DB.Element> elements = elementCollector;
+          if (limit.HasValue)
           {
-            var _Elements_ = Params.IndexOfOutputParam("Elements");
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"'{Params.Output[_Elements_].NickName}' contains only first {limit} of {elementCount} total elements.");
+            if (elementCount > limit)
+            {
+              var _Elements_ = Params.IndexOfOutputParam("Elements");
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"'{Params.Output[_Elements_].NickName}' contains only first {limit} of {elementCount} total elements.");
+            }
+
+            elements = elements.Take(limit.Value);
           }
 
-          return elementCollector.Take(limit.Value).Convert(Types.Element.FromElement);
+          return elements.Convert(Types.Element.FromElement);
         });
 
         Params.TrySetData(DA, "Count", () => elementCount);
@@ -132,9 +137,9 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.TryGetData(DA, "View", out Types.View view) || view?.Value is null) return;
-      if (Params.TryGetData(DA, "Categories", out Types.Category[] categories) && categories is null) return;
-      if (Params.TryGetData(DA, "Filter", out DB.ElementFilter filter) && filter is null) return;
+      if (!Params.GetData(DA, "View", out Types.View view, x => x.IsValid)) return;
+      if (!Params.TryGetDataList(DA, "Categories", out IList<Types.Category> categories)) return;
+      if (!Params.TryGetData(DA, "Filter", out DB.ElementFilter filter, x => x.IsValidObject)) return;
 
       using (var collector = new DB.FilteredElementCollector(view.Document, view.Id))
       {

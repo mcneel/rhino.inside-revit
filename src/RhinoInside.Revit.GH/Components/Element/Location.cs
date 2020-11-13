@@ -170,7 +170,10 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetData("Element", ref element))
         return;
 
-      if(Params.TryGetData(DA, "Location", out Plane? location) && location.HasValue)
+      if (!Params.TryGetData(DA, "Location", out Plane? location, x => x.IsValid) && location.HasValue)
+        return;
+
+      if(location.HasValue)
       {
         StartTransaction(element.Document);
 
@@ -245,11 +248,13 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var element = default(Types.GraphicalElement);
-      if (!DA.GetData("Element", ref element))
+      if (!Params.GetData(DA, "Element", out Types.GraphicalElement element, x => x.IsValid))
         return;
 
-      if (Params.TryGetData(DA, "Curve", out Curve curve))
+      if (!Params.TryGetData(DA, "Curve", out Curve curve, x => x.IsValid) && curve is object)
+        return;
+
+      if(curve is object)
       {
         StartTransaction(element.Document);
 

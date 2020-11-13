@@ -56,16 +56,16 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.TryGetData(DA, "Category", out Types.Category category))
+      if (!Params.GetData(DA, "Category", out Types.Category category, x => x.IsValid))
         return;
 
       bool update = false;
-      update |= Params.TryGetData(DA, "Line Weight [projection]", out int? lwp);
-      update |= Params.TryGetData(DA, "Line Weight [cut]", out int? lwc);
-      update |= Params.TryGetData(DA, "Line Color", out System.Drawing.Color? color);
-      update |= Params.TryGetData(DA, "Line Pattern [projection]", out Types.LinePatternElement lpp);
-      update |= Params.TryGetData(DA, "Line Pattern [cut]", out Types.LinePatternElement lpc);
-      update |= Params.TryGetData(DA, "Material", out Types.Material material);
+      update |= Params.GetData(DA, "Line Weight [projection]", out int? lwp);
+      update |= Params.GetData(DA, "Line Weight [cut]", out int? lwc);
+      update |= Params.GetData(DA, "Line Color", out System.Drawing.Color? color);
+      update |= Params.GetData(DA, "Line Pattern [projection]", out Types.LinePatternElement lpp);
+      update |= Params.GetData(DA, "Line Pattern [cut]", out Types.LinePatternElement lpc);
+      update |= Params.GetData(DA, "Material", out Types.Material material);
 
       if (update)
       {

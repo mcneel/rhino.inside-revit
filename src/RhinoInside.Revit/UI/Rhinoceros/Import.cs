@@ -157,7 +157,7 @@ namespace RhinoInside.Revit.UI
       string name = mat.Name;
       var appearanceAssetId = DB.ElementId.InvalidElementId;
 
-#if REVIT_2019
+#if REVIT_2018
       if (DB.AppearanceAssetElement.GetAppearanceAssetElementByName(doc, name) is DB.AppearanceAssetElement appearanceAssetElement)
         appearanceAssetId = appearanceAssetElement.Id;
       else
