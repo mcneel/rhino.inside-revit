@@ -10,6 +10,26 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html version="0.0.7622.22831" time="11/13/2020 12:41:02" %}
+### New features
+* Added 'Active Design Option' component.
+* Added 'Design Option Identity' component.
+* Added 'Design Option Set Identity' component.
+* Added 'Query Design Options' component.
+* Added 'Query Design Option Sets' component.
+
+### Fixes
+* Fixed `Types.CurveElement` serialization.
+* Fixed `Types.Dimension.Location` and `Types.Dimension.Curve` properties.
+* Fixed `Types.ParameterValue.CastTo<IGH_Goo>`.
+* Fixed error message at 'Add Wall (Profile)'.
+
+### Minor Changes
+* Enabled Materials support in Revit 2018.
+
+### API
+* Added special cases for conversion from `DB.Parameter` integer value to `GH_Enumerate`.
+
 {% include ltr/release-header.html version="0.0.7618.21861" time="11/09/2020 12:08:42" %}
 ### New features
 * Added 'Material Identity' component.

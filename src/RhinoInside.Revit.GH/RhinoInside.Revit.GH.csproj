@@ -219,6 +219,9 @@
     <Compile Include="Components\Element\Delete.cs" />
     <Compile Include="Components\Element\Dependents.cs" />
     <Compile Include="Components\ElementCollectorComponent.cs" />
+    <Compile Include="Components\Element\DesignOption\Active.cs" />
+    <Compile Include="Components\Element\DesignOption\Identity.cs" />
+    <Compile Include="Components\Element\DesignOption\Query.cs" />
     <Compile Include="Components\Element\FlipUnflipElement.cs" />
     <Compile Include="Components\Element\Geometry.cs" />
     <Compile Include="Components\Element\Grid\QueryGrids.cs" />
@@ -395,6 +398,7 @@
     <Compile Include="Types\CurtainGrid.cs" />
     <Compile Include="Types\CurtainSystem.cs" />
     <Compile Include="Types\CurveElement.cs" />
+    <Compile Include="Types\DesignOption.cs" />
     <Compile Include="Types\Dimension.cs" />
     <Compile Include="Types\Document.cs" />
     <Compile Include="Types\DocumentObject.cs" />

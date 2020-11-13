@@ -113,6 +113,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public static readonly Dictionary<Type, Func<DB.Element, Element>> ActivatorDictionary = new Dictionary<Type, Func<DB.Element, Element>>()
     {
+      { typeof(DB.DesignOption),            (element)=> new DesignOption          (element as DB.DesignOption)      },
       { typeof(DB.View),                    (element)=> new View                  (element as DB.View)              },
       { typeof(DB.Family),                  (element)=> new Family                (element as DB.Family)            },
       { typeof(DB.ElementType),             (element)=> new ElementType           (element as DB.ElementType)       },
@@ -189,6 +190,11 @@ namespace RhinoInside.Revit.GH.Types
           return new GeometricElement(element);
 
         return new GraphicalElement(element);
+      }
+      else
+      {
+        if (DesignOptionSet.IsValidElement(element))
+          return new DesignOptionSet(element);
       }
 
       return new Element(element);
