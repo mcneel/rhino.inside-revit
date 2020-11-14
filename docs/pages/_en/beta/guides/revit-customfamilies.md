@@ -1,6 +1,7 @@
 ---
 title: Custom Families
 order: 59
+thumbnail: /static/images/guides/revit-wip.png
 group: Modeling
 ---
 

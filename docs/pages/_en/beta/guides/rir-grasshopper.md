@@ -1,7 +1,9 @@
 ---
-title: Grasshopper
+title: Grasshopper in Revit
+subtitle: How to use Grasshopper inside Revit
 order: 11
-group: Basics
+group: Essentials
+thumbnail: /static/images/guides/rir-grasshopper.png
 ghdef: rir-grasshopper.ghx
 ---
 

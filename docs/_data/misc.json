@@ -28,5 +28,12 @@
         "title": "AssetPropertyDouble4DMap",
         "typename": "AssetPropertyDouble4DMap",
         "uuid": "c2fc2e60-0336-465a-9ff0-1afc4b65d10d"
+    },
+    {
+        "desc": "Represents any building element",
+        "iconsrc": "/static/images/guides/revit-revit-block.png",
+        "icontag": null,
+        "title": "Building Component",
+        "uuid": "11f05ff5-6268-4985-b9a7-c9f4729b594d"
     }
 ]

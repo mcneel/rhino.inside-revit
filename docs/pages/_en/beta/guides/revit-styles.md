@@ -1,7 +1,9 @@
 ---
 title: Styles and Patterns
 order: 91
-group: Configurations
+group: Settings
+thumbnail: /static/images/guides/revit-styles.png
+subtitle: Workflows for Revit Styles, Line & Fill Patterns
 ghdef: revit-styles.ghx
 ---
 

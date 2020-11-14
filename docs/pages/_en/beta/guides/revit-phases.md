@@ -1,7 +1,8 @@
 ---
 title: Phases
 order: 73
-group: Geometry Containers
+thumbnail: /static/images/guides/revit-wip.png
+group: Containers
 ---
 
 {% include ltr/en/wip_note.html %}

@@ -1,7 +1,8 @@
 ---
 title: Project Settings
 order: 90
-group: Configurations
+thumbnail: /static/images/guides/revit-wip.png
+group: Settings
 ---
 
 {% include ltr/en/wip_note.html %}

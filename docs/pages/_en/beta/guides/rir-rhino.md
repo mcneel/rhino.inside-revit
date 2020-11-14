@@ -1,7 +1,9 @@
 ---
-title: Rhino
-order: 10
-group: Basics
+title: Rhino in Revit
+subtitle: How to use Rhino inside Revit
+order: 12
+thumbnail: /static/images/guides/rir-rhino.png
+group: Essentials
 ---
 
 ## Rhino On the Side

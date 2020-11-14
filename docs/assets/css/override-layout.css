@@ -34,7 +34,9 @@
     }
 
     .page-gh-download {
-        margin-top: -12px;
+        display: block;
+        float: unset;
+        margin-top: -18px;
     }
 
     .sidebar {

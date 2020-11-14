@@ -1,0 +1,36 @@
+{% if include.large == true %}
+<div class="gallery-large-grid">
+{% else %}
+<div class="gallery-small-grid">
+{% endif %}
+
+{% if include.data %}
+
+{% for item in include.data %}
+{% if include.group and item.group != include.group %}
+    {% continue %}
+{% else %}
+{% include gallery_item.html item=item extern=include.extern large=include.large %}
+{% endif %}
+{% endfor %}
+
+{% else %}
+
+{% for collection in site.collections %}
+    {% if collection.label == page.collection %}
+        {% assign items = collection.docs | sort:"order" %}
+        {% for item in items %}
+            {% if item.toc and item.title and item.version == page.version and item.categories == page.categories %}
+            {% if include.group and item.group != include.group %}
+            {% continue %}
+            {% else %}
+            {% include gallery_item.html item=item extern=include.extern large=include.large %}
+            {% endif %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+{% endfor %}
+
+{% endif %}
+
+</div>
