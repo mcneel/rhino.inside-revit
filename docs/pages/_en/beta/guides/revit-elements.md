@@ -6,17 +6,6 @@ thumbnail: /static/images/guides/revit-elements.png
 group: Essentials
 ---
 
-Elements are the basic building blocks in Revit data model. Elements are organized into Categories. The list of categories is built into each Revit version and can not be changed. Elements have [Parameters]({{ site.baseurl }}{% link _en/beta/guides/revit-params.md %}) that hold data associated with the Element. Depending on their category, Elements will get a series of built-in parameters and can also accept custom parameters defined by user. Elements might have geometry e.g. Walls (3D) or Detail Components (2D), or might not include any geometry at all e.g. *Project Information* (Yes even that is an Element in Revit data model, although it is not selectable since Revit views are designed around geometric elements, therefore Revit provides a custom window to edit the project information). Elements have [Types]({{ site.baseurl }}{% link _en/beta/guides/revit-types.md %}) that define how the element behaves in the Revit model.
-
-{% capture api_note %}
-In Revit API, Elements are represented by the {% include api_type.html type='Autodesk.Revit.DB.Element' title='DB.Element' %} and each element parameter is represented by {% include api_type.html type='Autodesk.Revit.DB.Parameter' title='DB.Parameter' %}. The {% include api_type.html type='Autodesk.Revit.DB.Element' title='DB.Element' %} has multiple methods to provide access to its collection of properties
-
-&nbsp;
-
-Each element has an Id (`DB.Element.Id`) that is an integer value. However this Id is not stable across upgrades and workset operations such as *Save To Central*, and might change. It is generally safer to access elements by their Unique Id (`DB.Element.UniqueId`) especially if you intend to save a reference to an element outside the Revit model e.g. an external database. Note that although the `DB.Element.UniqueId` looks like a UUID number, it is not. Keep that in mind if you are sending this information to your external databases.
-{% endcapture %}
-{% include ltr/api_note.html note=api_note %}
-
 ## Referencing Elements
 
 There are more elaborate ways to collect various elements in Revit. This section shows how you can manually reference a specific element and bring that into your Grasshopper definition. Later sections discuss the generic ways of collecting elements of various types.
@@ -38,15 +27,15 @@ You can use the {% include ltr/comp.html uuid='f3ea4a9c' %} parameter and add th
 
 ## Instances
 
-*Instances* are individual elements places in a Revit model e.g. a single Wall, or a single Door, or any other single element. Instances have *Categories* and might also have *Type* e.g. each Door has a Door type. Instances inherit a series of *Parameters* from their *Category* and *Type* and might have instance parameters as well that only belongs to that single instance.
+*Instances* are individual graphical/geometric elements placed in a Revit model e.g. a single Wall, or a single Door, or any other single element. As a subset of Revit Elements, Instances inherit a series of *Parameters* from their *Category* and *Type* and might have instance parameters as well that only belongs to that single instance.
 
-## Querying Instance of a Type
+## Querying Instance by Type
 
 Use a combination of category component, connected to {% include ltr/comp.html uuid="d3fb53d3-9" %} and *Element.TypeFilter*, to query all the instances of a specific type. The example below is collecting all the instance of the **My Basic Wall** type:
 
 ![]({{ "/static/images/guides/revit-instances01.png" | prepend: site.baseurl }})
 
-## Filtering Instances by Property
+## Querying Instances by Property
 
 {% include ltr/en/wip_note.html %}
 
@@ -70,10 +59,20 @@ Sometimes it is necessary to extract the *Bounding Geometry* of an instance. *Bo
 
 ![]({{ "/static/images/guides/revit-instances04.png" | prepend: site.baseurl }})
 
-## Modifying Instances
-
-Once you have filtered out the desired instance, you can query its parameters and apply new values. See [Document Model: Parameters]({{ site.baseurl }}{% link _en/beta/guides/revit-params.md %}) to learn how to edit parameters of an element.
-
 ## Changing Instance Type
 
 {% include ltr/en/wip_note.html %}
+
+## Placing Instances of Types
+
+Use the *AddFamilyInstance.ByLocation* component (under *Revit > Build* panel) to place an instance of a type into the Revit model space.
+
+![]({{ "/static/images/guides/revit-families09a.png" | prepend: site.baseurl }})
+
+For types that require a host, you can pass a host element to the *AddFamilyInstance.ByLocation* component as well.
+
+![]({{ "/static/images/guides/revit-families09b.png" | prepend: site.baseurl }})
+
+The component, places the given type on the nearest location along the host element. In the image below, the green sphere is the actual location that is passed to the component. Notice that the door is placed on the closest point on the wall.
+
+![]({{ "/static/images/guides/revit-families09c.png" | prepend: site.baseurl }})

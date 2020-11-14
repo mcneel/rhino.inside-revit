@@ -168,7 +168,7 @@ Appearance assets have a series of properties that can accept a nested asset (ca
 ![]({{ "/static/images/guides/revit-materials-appasset-create-texture.gif" | prepend: site.baseurl }})
 
 {% capture param_note %}
-The {% include ltr/param.html uuid='49a94c44-' title='Glossiness' %} and {% include ltr/param.html uuid='c2fc2e60-' title='Bump' %} parameters of **Generic** appearance components accept both a double or color value, or a texture map respectively. Note the parameter icons show a double or color value and a checker map in background
+The {% include ltr/misc.html uuid='49a94c44-' title='Glossiness' %} and {% include ltr/misc.html uuid='c2fc2e60-' title='Bump' %} parameters of **Generic** appearance components accept both a double or color value, or a texture map respectively. Note the parameter icons show a double or color value and a checker map in background
 {% endcapture %}
 {% include ltr/bubble_note.html note=param_note %}
 
