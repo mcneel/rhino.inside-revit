@@ -225,4 +225,6 @@ G = [x.ToBrep() for x in E.Geometry[DB.Options()]]
 
 The *Guides* section listed on the navigation bar, is a great next point to see how {{ site.terms.rir }} can be used in tackling many design and documentation challenges in {{ site.terms.revit }}. The articles under this page provide many examples on creating Grasshopper definitions and writing your own custom scripts.
 
+Take a look at the [Discover]({{ site.baseurl }}{% link _en/beta/discover/index.md %}) page to find out how Grasshopper and Rhino can be used in Revit workflows.
+
 Reach out to {{ site.terms.rir }} developers and the users community on the [forum]({{ site.forum_url }}) if you came across a special condition that might need a new component or a more detailed explanation.
