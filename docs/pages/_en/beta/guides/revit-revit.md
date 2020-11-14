@@ -1,30 +1,30 @@
 ---
-title: "Revit: Data Model"
+title: "Overview"
 subtitle: Understanding Revit's data model
 order: 10
 thumbnail: /static/images/guides/revit-revit.png
 group: Essentials
 ---
 
-Let's look at how Revit generates and stores building information. Having a firm understanding of Revit's data model is very important when working with the data that is generated and managed by Revit. In this guide we will take a look at Revit's Data Model and discuss it in detail. Other chapters will guide you in working with this data model using the Revit-aware Grasshopper components:
+Let's look at how Revit generates and stores building information. Having a firm understanding of Revit's data model is very important when working with the data that is generated and managed by Revit. In this guide we will take a look at Revit's data model and discuss it in detail. Other chapters will guide you in working with this data model using the Revit-aware Grasshopper components.
 
-## The Big Picture
+## The Element DNA
 
-Imagine a single {% include ltr/misc.html uuid='11f05ff5' title="Element" %} of our BIM model. The graphic below, shows the DNA of Revit elements. It works like a small machine that takes inputs, processes them, and generates geometry and data as outputs. Keep in mind that not every element has geometry. Some of these elements might only carry information.
+The graphic below, shows the DNA of a single {% include ltr/misc.html uuid='11f05ff5' title="Revit Element" %}. It works like a small machine that takes inputs, processes them, and generates geometry and data as outputs. Keep in mind that not every element has geometry. Some of these elements might only carry information.
 
-![]({{ "/static/images/guides/revit-revit-element-dna.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-revit-element-dna.svg" | prepend: site.baseurl }})
 
-So in reality, we feed type and instance information into the family function that generates the element data (including calculated properties) and geometry.
+So practically, we feed type and instance information into the family *function*, to generate the element metadata (including calculated properties) and geometry. Always keep in mind that the data we provide in Revit *Family* definition, and *Type* or *Instance* parameters, are used alongside the family logic to generate BIM data structure.
 
-![]({{ "/static/images/guides/revit-revit-element-func.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-revit-element-func.svg" | prepend: site.baseurl }})
 
-The generated components are stored in a Revit **Document**. They are also organized by a series of 
+The generated elements are then stored in a Revit **Document**. They are also organized by a series of 
 **Containers**, each with a specific purpose.
 
-![]({{ "/static/images/guides/revit-revit-containers.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-revit-containers.svg" | prepend: site.baseurl }})
 
-- subcategory
-- 
+This is also a good place to mention **Subcategories**. They sound like an organization level right under the **Category**, but in practice, it is easier to think of them as a property of geometry rather than an organization level. When a Family function generates geometry, it can group them into subcategories of the main category. Their main purpose it to allow finer control over the graphical representation of each part of the geometry.
+
 
 ## Elements & Instances
 
