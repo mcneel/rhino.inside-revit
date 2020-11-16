@@ -1,0 +1,11 @@
+<!-- {% assign postUrl = {{ site.baseurl }}{% link include.post %} %} -->
+<div class="linkcard" >
+    <table class="msg-table">
+        <tr>
+            <td class="linkcard-image"><img class="no-popup" src="{{ include.thumbnail | prepend: site.baseurl }}" /></td>
+            <td class="linkcard-info">
+                {{ include.note | markdownify }}
+            </td>
+        </tr>
+    </table>
+</div>

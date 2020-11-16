@@ -10,7 +10,7 @@ Discover more about {{ site.terms.rir }}! The resources here created are by the 
 {% include ltr/bubble_note.html note=discover_note %}
 
 
-{% include gallery.html large=true %}
+{% include ltr/gallery.html large=true %}
 
 
 ## Sharing Your Discoveries
