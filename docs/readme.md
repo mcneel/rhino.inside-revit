@@ -50,7 +50,7 @@
 - [Data Sources](#data-sources)
   - [Rhinoceros Tab Button List](#rhinoceros-tab-button-list)
   - [Grasshopper Component List](#grasshopper-component-list)
-  - [Grasshopper Parameter List](#grasshopper-parameter-list)
+  - [Misc List](#misc-list)
 
 # Rhino.Inside.Revit Wiki
 
@@ -515,7 +515,7 @@ The site builder, automatically finds the component data based on the provided u
 To reference any parameter that is part of this project, use the pre-defined block shown below:
 
 ```markdown
-{% include ltr/param.html uuid="15545e80-" %}
+{% include ltr/misc.html uuid="15545e80-" %}
 ```
 
 It works exactly the same as the reference components block.
@@ -837,9 +837,9 @@ This is how the data file is formatted:
 
 Currently, the grasshopper definition `update_components_data.ghx` is used to generate this data file and perform other necessary tasks to update the components list for the wiki.
 
-## Grasshopper Parameter List
+## Misc List
 
-`parameters.json` file contains a list of all parameters in the project and is generated automatically on every new build. The wiki uses this information to safely reference the parameters on the wiki pages, using the uuid:
+`misc.json` file contains misc information e.g. hidden parameters, etc. The wiki uses this information to safely reference this data on the wiki pages, using the uuid:
 
 This is how the data file is formatted:
 
@@ -856,4 +856,4 @@ This is how the data file is formatted:
     },
 ```
 
-Currently, this file is generated manually until there is a need to reference more parameters on the wiki.
+Currently, this file is generated manually.

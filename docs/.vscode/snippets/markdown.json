@@ -20,7 +20,7 @@
         "prefix": "rirparam",
         "description": "Parameter tag for Rhino.Inside.Revit Wiki",
         "body": [
-            "{% include ltr/param.html uuid='$1' %}"
+            "{% include ltr/misc.html uuid='$1' %}"
         ]
     },
     "RIR Image": {

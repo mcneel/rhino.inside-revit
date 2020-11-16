@@ -2,6 +2,8 @@
 title: Curtain Walls & Systems
 order: 41
 group: Modeling
+thumbnail: /static/images/guides/revit-curtainwalls.png
+subtitle: Workflows for Revit Curtain Walls and Systems
 ghdef: revit-curtainwalls.ghx
 ---
 
@@ -199,7 +201,7 @@ The {% include ltr/comp.html uuid='4bbe14f2' %} value picker can be used to filt
 
 ## Analyzing Panels
 
-*Curtain Walls* can host two types of inserts. They can be either *Curtain Panels* or instances of *Custom Families* designed to work with *Curtain Walls* like a *Curtain Wall Door* instance. The components shown here help analyzing the *Curtain Panels*. The family instances can be analyzed using the methods and components provided in [Data Model: Types]({{ site.baseurl }}{% link _en/beta/guides/revit-types.md %}) and [Data Model: Instances]({{ site.baseurl }}{% link _en/beta/guides/revit-instances.md %}) guides.
+*Curtain Walls* can host two types of inserts. They can be either *Curtain Panels* or instances of *Custom Families* designed to work with *Curtain Walls* like a *Curtain Wall Door* instance. The components shown here help analyzing the *Curtain Panels*. The family instances can be analyzed using the methods and components provided in [Data Model: Types]({{ site.baseurl }}{% link _en/beta/guides/revit-types.md %}) and [Data Model: Elements & Instances]({{ site.baseurl }}{% link _en/beta/guides/revit-elements.md %}#instances) guides.
 
 {% capture api_note %}
 In Revit API, Curtain Panels are represented by the {% include api_type.html type='Autodesk.Revit.DB.Panel' title='DB.Panel' %}

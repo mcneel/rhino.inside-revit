@@ -2,6 +2,8 @@
 title: Walls (Basic & Stacked)
 order: 40
 group: Modeling
+thumbnail: /static/images/guides/revit-walls.png
+subtitle: Workflows for Revit Basic and Stacked Walls
 ghdef: revit-walls.ghx
 ---
 
@@ -40,7 +42,7 @@ A better workflow is to collect walls based on the *Wall System Family*. Use the
 
 ### By Wall Type
 
-You can also collect walls of a specific type very easily using a workflow described in [Data Model: Instances]({{ site.baseurl }}{% link _en/beta/guides/revit-instances.md %})
+You can also collect walls of a specific type very easily using a workflow described in [Data Model: Elements & Instances]({{ site.baseurl }}{% link _en/beta/guides/revit-elements.md %}#instances)
 
 ![]({{ "/static/images/guides/revit-walls-querywalltype.png" | prepend: site.baseurl }})
 

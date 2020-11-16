@@ -31,18 +31,6 @@ Now let's install {{ site.terms.rir }}
 
 Now that we have installed both dependencies, we can proceed to loading {{ site.terms.rir }}
 
-## Automated installer for *All Users* in Windows
-
-To determine how to best automate the push of the Rhino 7 installer, follow the [Automating installation of Rhino 6 Guide](https://wiki.mcneel.com/rhino/installingrhino/6)
-
-To push install Rhino.Inside.Revit quietly for all users use this command line:
-
-```
-RhinoInside.Revit.msi ALLUSERS="1" /quiet
-```
-
-For more inforamtion see: https://docs.microsoft.com/windows/win32/msi/single-package-authoring
-
 ## Loading {{ site.terms.rir }}
 
 Launch {{ site.terms.revit }}. You will be prompted to confirm loading {{ site.terms.rir }}. Make sure to press **Always Load** to skip this dialog in the future.
@@ -236,5 +224,7 @@ G = [x.ToBrep() for x in E.Geometry[DB.Options()]]
 ## What's Next
 
 The *Guides* section listed on the navigation bar, is a great next point to see how {{ site.terms.rir }} can be used in tackling many design and documentation challenges in {{ site.terms.revit }}. The articles under this page provide many examples on creating Grasshopper definitions and writing your own custom scripts.
+
+Take a look at the [Discover]({{ site.baseurl }}{% link _en/beta/discover/index.md %}) page to find out how Grasshopper and Rhino can be used in Revit workflows.
 
 Reach out to {{ site.terms.rir }} developers and the users community on the [forum]({{ site.forum_url }}) if you came across a special condition that might need a new component or a more detailed explanation.

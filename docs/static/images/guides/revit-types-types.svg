@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 1280 151" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,0,-401)">
+        <g id="revit-types-types" transform="matrix(1,0,0,1,0,401.758)">
+            <rect x="0" y="-0" width="1280" height="150" style="fill:none;"/>
+            <g transform="matrix(1,0,0,1,0,-38.756)">
+                <g transform="matrix(0.4702,0,0,1,-99.8805,-203.878)">
+                    <rect x="296.713" y="293.099" width="228.858" height="14.053" style="fill:rgb(191,191,191);"/>
+                </g>
+                <g transform="matrix(0.4702,0,0,1,993.243,-203.878)">
+                    <rect x="296.713" y="293.099" width="228.858" height="14.053" style="fill:rgb(191,191,191);"/>
+                </g>
+                <g transform="matrix(1,0,0,1,189.572,-148.419)">
+                    <text x="417.164px" y="219.824px" style="font-family:'LucidaGrande', 'Lucida Grande', sans-serif;font-weight:500;font-size:24px;">Doors</text>
+                </g>
+                <g transform="matrix(4.1839,0,0,1,-1080.14,-203.878)">
+                    <rect x="296.713" y="293.099" width="228.858" height="14.053" style="fill:rgb(191,191,191);"/>
+                </g>
+            </g>
+            <g transform="matrix(1,0,0,1,0,90.936)">
+                <g transform="matrix(0.4702,0,0,1,-99.8805,-269.208)">
+                    <rect x="296.713" y="293.099" width="228.858" height="14.053"/>
+                </g>
+                <g transform="matrix(0.4702,0,0,1,993.243,-269.208)">
+                    <rect x="296.713" y="293.099" width="228.858" height="14.053"/>
+                </g>
+                <g transform="matrix(1,0,0,1,-212.365,-213.136)">
+                    <text x="417.164px" y="219.824px" style="font-family:'LucidaGrande', 'Lucida Grande', sans-serif;font-weight:500;font-size:24px;">3x8 Single</text>
+                </g>
+                <g transform="matrix(1,0,0,1,-13.3199,-213.136)">
+                    <text x="417.164px" y="219.824px" style="font-family:'LucidaGrande', 'Lucida Grande', sans-serif;font-weight:500;font-size:24px;">3x7 Single</text>
+                </g>
+                <g transform="matrix(1,0,0,1,165.721,-213.136)">
+                    <text x="417.164px" y="219.824px" style="font-family:'LucidaGrande', 'Lucida Grande', sans-serif;font-weight:500;font-size:24px;">6x7 Double</text>
+                </g>
+                <g transform="matrix(1,0,0,1,357.143,-213.136)">
+                    <text x="417.164px" y="219.824px" style="font-family:'LucidaGrande', 'Lucida Grande', sans-serif;font-weight:500;font-size:24px;">6x8 Double</text>
+                </g>
+                <g transform="matrix(1,0,0,1,555.263,-213.136)">
+                    <text x="417.164px" y="219.824px" style="font-family:'LucidaGrande', 'Lucida Grande', sans-serif;font-weight:500;font-size:24px;">7x7 Double</text>
+                </g>
+                <g transform="matrix(0.806077,0,0,1,-77.9329,-269.208)">
+                    <rect x="296.713" y="293.099" width="228.858" height="14.053"/>
+                </g>
+                <g transform="matrix(0.775376,0,0,1,129.707,-269.208)">
+                    <rect x="296.713" y="293.099" width="228.858" height="14.053"/>
+                </g>
+                <g transform="matrix(0.775376,0,0,1,321.211,-269.208)">
+                    <rect x="296.713" y="293.099" width="228.858" height="14.053"/>
+                </g>
+                <g transform="matrix(0.775512,0,0,1,512.674,-269.208)">
+                    <rect x="296.713" y="293.099" width="228.858" height="14.053"/>
+                </g>
+                <g transform="matrix(0.806077,0,0,1,695.14,-269.208)">
+                    <rect x="296.713" y="293.099" width="228.858" height="14.053"/>
+                </g>
+            </g>
+            <g transform="matrix(1.66716,0,0,1.5,-3.84659,-5.68434e-14)">
+                <rect x="2.307" y="0" width="149.227" height="100" style="fill:url(#_Linear1);"/>
+            </g>
+            <g transform="matrix(-1.66716,2.04169e-16,-1.83178e-16,-1.49576,1283.85,149.576)">
+                <rect x="2.307" y="0" width="149.227" height="100" style="fill:url(#_Linear2);"/>
+            </g>
+        </g>
+    </g>
+    <defs>
+        <linearGradient id="_Linear1" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(115.713,0,0,77.5418,35.8211,50)"><stop offset="0" style="stop-color:white;stop-opacity:1"/><stop offset="1" style="stop-color:white;stop-opacity:0"/></linearGradient>
+        <linearGradient id="_Linear2" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(115.713,0,0,77.5418,35.8211,50)"><stop offset="0" style="stop-color:white;stop-opacity:1"/><stop offset="1" style="stop-color:white;stop-opacity:0"/></linearGradient>
+    </defs>
+</svg>

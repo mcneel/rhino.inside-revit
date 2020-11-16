@@ -1,6 +1,8 @@
 ---
 title: C# Component in Revit
 order: 101
+thumbnail: /static/images/guides/rir-csharp.png
+subtitle: Writing Scripted Components in C# for Revit API
 group: Scripting
 ---
 

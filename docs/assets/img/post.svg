@@ -1,5 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"  width="32" height="32" viewBox="0 0 24 24">
-   <path fill="#000000" d="M19 5V19H5V5H19M21 3H3V21H21V3M17 17H7V16H17V17M17 15H7V14H17V15M17 12H7V7H17V12Z" />
+<svg width="100%" height="100%" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <path d="M25.333,4L6.667,4C5.187,4 4,5.187 4,6.667L4,25.333C4,26.8 5.2,28 6.667,28L25.333,28C26.8,28 28,26.8 28,25.333L28,6.667C28,5.187 26.8,4 25.333,4Z" style="fill:none;stroke:rgb(208,208,208);stroke-width:1px;"/>
+    <rect x="9.333" y="21.333" width="13.333" height="1.333" style="stroke:black;stroke-width:1px;"/>
+    <rect x="9.333" y="18.667" width="13.333" height="1.333" style="stroke:black;stroke-width:1px;"/>
+    <rect x="9.333" y="9.333" width="13.333" height="6.667" style="stroke:black;stroke-width:1px;"/>
 </svg>

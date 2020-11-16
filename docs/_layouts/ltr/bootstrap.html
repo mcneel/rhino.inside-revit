@@ -88,7 +88,7 @@
                 // grab all images in side content, filter out svg
                 // then apply magnificPopup
                 $('.side-content img').filter(function(){
-                        return ! $(this).attr('src').endsWith(".svg")
+                        return ! ($(this).attr('src').endsWith(".svg") || $(this).hasClass("no-popup"))
                     }).magnificPopup({
                     type:'image',
                     zoom: { enabled: true },
@@ -118,11 +118,11 @@
               $(".gallery-item").hover(function(){
                     $(this).addClass("gallery-item-focused");
                     $(this).find(".gallery-thumbnail").removeClass("gallery-thumbnail-dim");
-                    $(this).find(".extra").css("display", "block");
+                    $(this).find(".gallery-info-extra").css("display", "block");
                 }, function(){
                     $(this).removeClass("gallery-item-focused");
                     $(this).find(".gallery-thumbnail").addClass("gallery-thumbnail-dim");
-                    $(this).find(".extra").css("display", "none");
+                    $(this).find(".gallery-info-extra").css("display", "none");
               });
             });
         </script>

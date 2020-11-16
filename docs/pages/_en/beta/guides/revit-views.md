@@ -1,6 +1,7 @@
 ---
 title: Views
 order: 63
+thumbnail: /static/images/guides/revit-wip.png
 group: Documentation
 ---
 

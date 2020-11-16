@@ -21,13 +21,13 @@ layout: ltr/bootstrap
         <!--Main Content -->
         <div class="side-content">
             {% if page.ghdef %}
+            <h1>{{ page.title }}</h1>
             <div class="page-gh-download" title="Download Grasshopper definition for this page">
                 <a type="button" class="btn btn-danger pagedownload" href="{{ page.ghdef | prepend: '/static/src/gh-screencaps/' | prepend: site.baseurl }}">
                     <img class="button-icon" src="{{ "/assets/img/definition.svg" | prepend: site.baseurl }}">
                     <strong>GH Definition</strong>
                 </a>
             </div>
-            <h1>{{ page.title }}</h1>
             {% else %}
             <h1>{{ page.title }}</h1>
             {% endif %}

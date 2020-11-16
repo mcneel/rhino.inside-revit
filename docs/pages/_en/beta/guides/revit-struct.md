@@ -1,6 +1,7 @@
 ---
 title: Structural Elements
 order: 49
+thumbnail: /static/images/guides/revit-wip.png
 group: Modeling
 ---
 

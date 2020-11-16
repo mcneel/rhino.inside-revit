@@ -1,6 +1,8 @@
 ---
 title: Python Component in Revit
 order: 100
+thumbnail: /static/images/guides/rir-ghpython.png
+subtitle: Writing Scripted Components in Python for Revit API
 group: Scripting
 ---
 
