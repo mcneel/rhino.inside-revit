@@ -39,6 +39,10 @@ Each element has an Id (`DB.Element.Id`) that is an integer value. However this 
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
+{% capture link_note %}
+See [Revit: Elements & Instances]({{ site.baseurl }}{% link _en/beta/guides/revit-elements.md %}) guide on how to work with Revit Elements and Instances using Grasshopper in Revit.
+{% endcapture %}
+{% include ltr/link_card.html note=link_note thumbnail='/static/images/guides/revit-elements.png' %}
 
 ## Parameters
 
@@ -68,6 +72,13 @@ Revit allows a user to create a series of custom parameters and apply them globa
 Global parameters are category-agnostic parameters that could be applied to a range of instance or type parameters across many different Revit categories.
 
 ![]({{ "/static/images/guides/revit-params-global.png" | prepend: site.baseurl }})
+
+&nbsp;
+
+{% capture link_note %}
+See [Revit: Parameters]({{ site.baseurl }}{% link _en/beta/guides/revit-params.md %}) guide on how to inspect, read, and write Revit element instance and type parameters using Grasshopper in Revit.
+{% endcapture %}
+{% include ltr/link_card.html note=link_note thumbnail='/static/images/guides/revit-params.png' %}
 
 
 ## Categories, Families, & Types
@@ -119,11 +130,25 @@ Defining new custom families is not a trivial task especially if they need to be
 
 To get you started, Revit installation provides a default set of these custom families based on the measurement system e.g. Imperial vs Metric and also provides many templates to help with creating new custom families from scratch.
 
+{% capture link_note %}
+See [Revit: Types & Families]({{ site.baseurl }}{% link _en/beta/guides/revit-types.md %}) guide on how to work with Revit Types, and Families using Grasshopper in Revit. To create more advanced families, see [Revit: Custom Families]({{ site.baseurl }}{% link _en/beta/guides/revit-customfamilies.md %}) will guide you through automating creation of such families using Grasshopper in Revit.
+{% endcapture %}
+{% include ltr/link_card.html note=link_note thumbnail='/static/images/guides/revit-types.png' %}
+
 ## Containers
 
 Revit Containers (e.g. *Worksets*, *Design Options*, etc.) are a mechanism to logically group a series of elements, and they each have a very specific usage. For example Worksets allow loading parts of the buildings only so collaboration and conflict resolution becomes easier. When loading a specific workset, the elements that are not part of that workset are not loaded.
 
+{% capture link_note %}
+See [Groups]({{ site.baseurl }}{% link _en/beta/guides/revit-groups.md %}), [Worksets]({{ site.baseurl }}{% link _en/beta/guides/revit-worksets.md %}), [Design Options]({{ site.baseurl }}{% link _en/beta/guides/revit-designopts.md %}), and [Phases]({{ site.baseurl }}{% link _en/beta/guides/revit-phases.md %}) guides on how to work with each container type using Grasshopper in Revit.
+{% endcapture %}
+{% include ltr/link_card.html note=link_note thumbnail='/static/images/guides/revit-wip.png' %}
 
 ## Documents & Links
 
 In simplest terms, Revit *Documents* are collections of Revit *Elements*. A Revit Document can represent a building model (*Revit Projects*) or can represent an *Custom Family* definition (*Revit Families*).
+
+{% capture link_note %}
+See [Revit: Documents]({{ site.baseurl }}{% link _en/beta/guides/revit-docs.md %}) guide on how to work with Revit documents, linked documents, and querying elements inside them using Grasshopper in Revit.
+{% endcapture %}
+{% include ltr/link_card.html note=link_note thumbnail='/static/images/guides/revit-docs.png' %}

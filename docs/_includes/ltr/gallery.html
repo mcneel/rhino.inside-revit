@@ -10,7 +10,7 @@
 {% if include.group and item.group != include.group %}
     {% continue %}
 {% else %}
-{% include gallery_item.html item=item extern=include.extern large=include.large %}
+{% include ltr/gallery_item.html item=item extern=include.extern large=include.large %}
 {% endif %}
 {% endfor %}
 
@@ -24,7 +24,7 @@
             {% if include.group and item.group != include.group %}
             {% continue %}
             {% else %}
-            {% include gallery_item.html item=item extern=include.extern large=include.large %}
+            {% include ltr/gallery_item.html item=item extern=include.extern large=include.large %}
             {% endif %}
             {% endif %}
         {% endfor %}

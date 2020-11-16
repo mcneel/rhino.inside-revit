@@ -465,6 +465,44 @@ pre {
 }
 
 /*
+    linkcard ==================================================================
+*/
+
+.linkcard {
+    display: block;
+    height: 115px;
+    background-color: #fff;
+    border: 1px solid #d0d0d0;
+    border-radius: 5px;
+    color: white;
+    /* -webkit-box-shadow: 0 3px 2px rgba(0, 0, 0, .15);
+    -moz-box-shadow: 0 3px 2px rgba(0, 0, 0, .15);
+    box-shadow: 0 3px 2px rgba(0, 0, 0, .15); */
+    overflow: hidden;
+}
+
+.linkcard-image {
+    width: 230px;
+    vertical-align: top;
+}
+
+.linkcard-info {
+    padding: 10px;
+    vertical-align: top;
+    color: #111;
+}
+
+.linkcard-info p {
+    margin-bottom: 20px;
+}
+
+.linkcard-info p,
+::after,
+::before {
+    box-sizing: unset;
+}
+
+/*
     footer ====================================================================
 */
 .site-footer {

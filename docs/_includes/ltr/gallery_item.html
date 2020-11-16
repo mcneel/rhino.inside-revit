@@ -18,12 +18,12 @@
         {% endif %}
             {% if item.thumbnail %}
                 {% if include.extern %}
-                <img class="gallery-img" src="{{ item.thumbnail }}" />
+                <img class="gallery-img no-popup" src="{{ item.thumbnail }}" />
                 {% else %}
-                <img class="gallery-img" src="{{ item.thumbnail | prepend: site.baseurl }}" />
+                <img class="gallery-img no-popup" src="{{ item.thumbnail | prepend: site.baseurl }}" />
                 {% endif %}
             {% else %}
-                <img class="gallery-img" src="{{ site.baseurl }}/assets/img/gallery-placeholder.png" />
+                <img class="gallery-img no-popup" src="{{ site.baseurl }}/assets/img/gallery-placeholder.png" />
             {% endif %}
         </div>
     </a>

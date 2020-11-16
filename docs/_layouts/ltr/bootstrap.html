@@ -88,7 +88,7 @@
                 // grab all images in side content, filter out svg
                 // then apply magnificPopup
                 $('.side-content img').filter(function(){
-                        return ! ($(this).attr('src').endsWith(".svg") || $(this).hasClass("gallery-img"))
+                        return ! ($(this).attr('src').endsWith(".svg") || $(this).hasClass("no-popup"))
                     }).magnificPopup({
                     type:'image',
                     zoom: { enabled: true },
