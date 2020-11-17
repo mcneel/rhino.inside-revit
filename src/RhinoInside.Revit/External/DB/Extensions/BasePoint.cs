@@ -57,7 +57,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns>The project base point of the document.</returns>
     public static BasePoint GetProjectBasePoint(Document doc)
     {
-#if REVIT_2020
+#if REVIT_2021
       return BasePoint.GetProjectBasePoint(doc);
 #else
       using (var collector = new FilteredElementCollector(doc))
@@ -75,7 +75,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns>The survey point of the document.</returns>
     public static BasePoint GetSurveyPoint(Document doc)
     {
-#if REVIT_2020
+#if REVIT_2021
       return BasePoint.GetSurveyPoint(doc);
 #else
       using (var collector = new FilteredElementCollector(doc))
