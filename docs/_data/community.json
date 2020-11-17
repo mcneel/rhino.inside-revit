@@ -90,6 +90,15 @@
     },
     {
         "type": "video",
+        "title": "Rhino Inside Revit | Creating Walls Tutorial",
+        "url": "https://www.youtube.com/watch?v=5PW2EAAdpME",
+        "thumbnail": "https://i3.ytimg.com/vi/5PW2EAAdpME/maxresdefault.jpg",
+        "author": "How to Rhino",
+        "authorUrl": "https://www.youtube.com/channel/UCwImuwbI4lKk544-FS7A2Yw",
+        "description": "We will also go over a couple of simple Grasshopper definitions that will be used to create walls directly in Revit. You will learn how to completely control the walls component for Rhino Inside and we will use Enscape together with Revit."
+    },
+    {
+        "type": "video",
         "title": "Solar Analysis with Rhino.Inside.Revit",
         "url": "https://vimeo.com/363977394",
         "thumbnail": "https://i.vimeocdn.com/video/819279340_1280x720.jpg",
@@ -154,12 +163,12 @@
     },
     {
         "type": "video",
-        "title": "Rename Multiple Revit Models’ Levels with RhinoInside and Excel Data",
+        "title": "Rename Multiple Revit Models Levels with RhinoInside and Excel Data",
         "url": "https://www.youtube.com/watch?v=a6h_ZwelUgg",
         "thumbnail": "https://i3.ytimg.com/vi/a6h_ZwelUgg/maxresdefault.jpg",
         "author": "Junghwo Park @ PointOneStudio",
         "authorUrl": "https://www.youtube.com/user/POINTONEstudio/featured",
-        "description": "PointOneStudio introduces a workflow of automatically updating the level names and heights of Revit's domain models using RhinoInside and Excel Data."
+        "description": "PointOneStudio introduces a workflow of automatically updating the level names and heights of Revits domain models using RhinoInside and Excel Data."
     },
     {
         "type": "video",
@@ -169,7 +178,6 @@
         "author": "Junghwo Park @ PointOneStudio",
         "authorUrl": "https://www.youtube.com/user/POINTONEstudio/featured",
         "description": "PointOneStudio shows how to create complex hatch for revit by using Rhino's Hatch Maker plug-in."
-        "
     },
     {
         "type": "video",
@@ -178,8 +186,7 @@
         "thumbnail": "https://i3.ytimg.com/vi/GpdpI0Jpl28/maxresdefault.jpg",
         "author": "Lorenzo Lencioni and Alberto Nann",
         "authorUrl": "https://www.youtube.com/channel/UCqq0--GCFjj8yz--KYCzeCg",
-        "description": "The potential of a #parametric modeling software like #Grasshopper is undeniable, like those of Building Information Modeling #BIM offered by #Revit ; the possibilities offered by #RIR further opens the horizons of interoperability for both software."
-        "
+        "description": "The potential of a parametric modeling software like Grasshopper is undeniable, like those of Building Information Modeling BIM offered by Revit."
     },
     {
         "type": "video",
