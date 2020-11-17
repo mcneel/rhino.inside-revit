@@ -1,5 +1,4 @@
-[
-    {
+[{
         "type": "blogpost",
         "title": "Parametric Monkey Primer",
         "url": "https://parametricmonkey.com/2019/11/20/rhino-inside-revit/",
@@ -100,6 +99,25 @@
     },
     {
         "type": "video",
+        "title": "Lands Design running inside Revit",
+        "url": "https://www.youtube.com/watch?v=anFGSYxjVGE",
+        "thumbnail": "https://i3.ytimg.com/vi/anFGSYxjVGE/maxresdefault.jpg",
+        "author": "Lands Design",
+        "authorUrl": "https://www.landsdesign.com/",
+        "description": "This video shows how to generate terrains and plants in Revit using Lands Design, running as a plug-in for Revit with the Rhino Inside technology."
+    },
+    {
+        "type": "video",
+        "title": "Room Data and View Analysis with Rhino.Inside.Revit",
+        "url": "https://www.youtube.com/watch?v=WRbbJlURzoo",
+        "thumbnail": "https://i3.ytimg.com/vi/WRbbJlURzoo/maxresdefault.jpg",
+        "author": "Rethinking BIM",
+        "authorUrl": "https://www.youtube.com/channel/UC82U-lpftjA7lCeb9Rhdraw",
+        "description": "This video goes through a workflow that uses Rhino.Inside and the View Rose tool in Ladybug (Grasshopper plugin) in order to demonstrate the process of running a geometry-focused analysis in Rhino/Grasshopper and feeding results back into a Revit parameter.
+        "
+    },
+    {
+        "type": "video",
         "title": "Intro to Rhino.Inside.Revit",
         "url": "https://www.youtube.com/watch?v=qFy1XcNcBsc",
         "thumbnail": "https://i3.ytimg.com/vi/qFy1XcNcBsc/maxresdefault.jpg",
@@ -115,6 +133,53 @@
         "author": "Rethinking BIM",
         "authorUrl": "https://www.youtube.com/channel/UC82U-lpftjA7lCeb9Rhdraw",
         "description": "This video goes through a workflow that uses Rhino.Inside and the View Rose tool in Ladybug (Grasshopper plugin) in order to demonstrate the process of running a geometry-focused analysis in Rhino/Grasshopper and feeding results back into a Revit parameter"
+    },
+    {
+        "type": "video",
+        "title": "Optimizing your Rhino-to-Revit Workflow",
+        "url": "https://www.youtube.com/watch?v=rEBjwwTNBes",
+        "thumbnail": "https://i3.ytimg.com/vi/rEBjwwTNBes/maxresdefault.jpg",
+        "author": "Joseph Fruend, Microsol @ Philadelphia Dynamo User Group",
+        "authorUrl": "https://www.youtube.com/channel/UC1a2BpQwfR2KKMoxxLJaUCQ",
+        "description": "Microsol AEC Application Specialist Joseph Freund will share tips and tricks for a seamless Rhino-to-Revit workflow, eliminating needless importing/exporting so that models can be cleanly integrated into the final production environment."
+    },
+    {
+        "type": "video",
+        "title": "Adaptive Components driven by Data generated in Ladybug/Grasshopper",
+        "url": "https://www.youtube.com/watch?v=RGr6JhwSwaM",
+        "thumbnail": "https://i3.ytimg.com/vi/RGr6JhwSwaM/maxresdefault.jpg",
+        "author": "Rethinking BIM",
+        "authorUrl": "https://www.youtube.com/channel/UC82U-lpftjA7lCeb9Rhdraw",
+        "description": "This tutorial demonstrates the process of placing an adaptive component and assigning a parameter value to that component using geometry and analysis data generated in Grasshopper."
+    },
+    {
+        "type": "video",
+        "title": "Rename Multiple Revit Models’ Levels with RhinoInside and Excel Data",
+        "url": "https://www.youtube.com/watch?v=a6h_ZwelUgg",
+        "thumbnail": "https://i3.ytimg.com/vi/a6h_ZwelUgg/maxresdefault.jpg",
+        "author": "Junghwo Park @ PointOneStudio",
+        "authorUrl": "https://www.youtube.com/user/POINTONEstudio/featured",
+        "description": "PointOneStudio introduces a workflow of automatically updating the level names and heights of Revit's domain models using RhinoInside and Excel Data."
+    },
+    {
+        "type": "video",
+        "title": "How to create custom Revit region with Rhino",
+        "url": "https://www.youtube.com/watch?v=DiFaWEdyLxo",
+        "thumbnail": "https://i3.ytimg.com/vi/DiFaWEdyLxo/maxresdefault.jpg",
+        "author": "Junghwo Park @ PointOneStudio",
+        "authorUrl": "https://www.youtube.com/user/POINTONEstudio/featured",
+        "description": "PointOneStudio shows how to create complex hatch for revit by using Rhino's Hatch Maker plug-in."
+        "
+    },
+    {
+        "type": "video",
+        "title": "Rhino.Inside.Revit - Parametric Twisting Tower",
+        "url": "https://www.youtube.com/watch?v=GpdpI0Jpl28",
+        "thumbnail": "https://i3.ytimg.com/vi/GpdpI0Jpl28/maxresdefault.jpg",
+        "author": "Lorenzo Lencioni and Alberto Nann",
+        "authorUrl": "https://www.youtube.com/channel/UCqq0--GCFjj8yz--KYCzeCg",
+        "description": "The potential of a #parametric modeling software like #Grasshopper is undeniable, like those of Building Information Modeling #BIM offered by #Revit ; the possibilities offered by #RIR further opens the horizons of interoperability for both software."
+        "
     },
     {
         "type": "video",
