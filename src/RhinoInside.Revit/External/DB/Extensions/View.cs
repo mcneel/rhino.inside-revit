@@ -58,7 +58,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return System.Drawing.Rectangle.Empty;
     }
 
-    public static ElementId GetAssociatedLevelId(this ViewPlan view)
+    /// <summary>
+    /// Finds the id of the first available level associated with this plan view.
+    /// </summary>
+    /// <param name="view"></param>
+    /// <returns>InvalidElementId if no associated level is found.</returns>
+    /// <seealso cref="Autodesk.Revit.DB.Level.FindAssociatedPlanViewId"/>
+    public static ElementId FindAssociatedLevelId(this ViewPlan view)
     {
       if (view.get_Parameter(BuiltInParameter.PLAN_VIEW_LEVEL)?.AsString() is string levelName)
       {

@@ -14,6 +14,7 @@ namespace RhinoInside.Revit.GH.Types
     public new DB.View Value => base.Value as DB.View;
 
     public View() { }
+    public View(DB.Document doc, DB.ElementId id) : base(doc, id) { }
     public View(DB.View view) : base(view) { }
 
     public override string DisplayName

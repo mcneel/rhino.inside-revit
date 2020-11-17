@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
@@ -47,7 +48,7 @@ namespace RhinoInside.Revit.GH.Parameters
       using (var collector = new DB.FilteredElementCollector(doc).OfClass(typeof(DB.Level)))
       {
         var levels = collector.Cast<DB.Level>().
-          OrderBy(x => x.Elevation).
+          OrderBy(x => x.GetHeight()).
           Select(x => new Types.Level(x)).
           ToList();
 

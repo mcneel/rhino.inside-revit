@@ -197,7 +197,7 @@ namespace RhinoInside.Revit.GH.Components
       if (newWall != null)
       {
         newWall.get_Parameter(DB.BuiltInParameter.WALL_BASE_CONSTRAINT).Set(level.Value.Id);
-        newWall.get_Parameter(DB.BuiltInParameter.WALL_BASE_OFFSET).Set(bbox.Min.Z / Revit.ModelUnits - level.Value.Elevation);
+        newWall.get_Parameter(DB.BuiltInParameter.WALL_BASE_OFFSET).Set(bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight());
         newWall.get_Parameter(DB.BuiltInParameter.WALL_KEY_REF_PARAM).Set((int) locationLine);
         if (structuralUsage == DB.Structure.StructuralWallUsage.NonBearing)
         {

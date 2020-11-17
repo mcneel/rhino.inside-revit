@@ -1,8 +1,10 @@
 using System;
-using Autodesk.Revit.DB;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.GH.Kernel.Attributes;
+using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Level
 {
   public class LevelByElevation : ReconstructElementComponent
   {
@@ -13,7 +15,7 @@ namespace RhinoInside.Revit.GH.Components
     (
       name: "Add Level",
       nickname: "Level",
-      description: "Given its Elevation, it adds a Level to the active Revit document",
+      description: "Given its elevation, it adds a Level to the active Revit document",
       category: "Revit",
       subCategory: "Model"
     )
@@ -26,45 +28,46 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructLevelByElevation
     (
-      Document doc,
-      ref Autodesk.Revit.DB.Element element,
+      DB.Document doc,
+      ref DB.Level element,
 
+      [ParamType(typeof(Parameters.Elevation))]
       double elevation,
-      Optional<Autodesk.Revit.DB.LevelType> type,
+      Optional<DB.LevelType> type,
       Optional<string> name
     )
     {
       var scaleFactor = 1.0 / Revit.ModelUnits;
       elevation *= scaleFactor;
+      elevation += doc.GetBasePointLocation(Params.Input<Parameters.Elevation>("Elevation").ElevationBase).Z;
 
-      SolveOptionalType(ref type, doc, ElementTypeGroup.LevelType, nameof(type));
+      SolveOptionalType(ref type, doc, DB.ElementTypeGroup.LevelType, nameof(type));
 
-      if (element is Level level)
+      if (element is DB.Level level)
       {
-        if(level.Elevation != elevation)
-          level.Elevation = elevation;
+        level.SetHeight(elevation);
       }
       else
       {
-        var newLevel = Level.Create
+        var newLevel = DB.Level.Create
         (
           doc,
           elevation
         );
 
         var parametersMask = name.IsMissing ?
-          new BuiltInParameter[]
+          new DB.BuiltInParameter[]
           {
-            BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-            BuiltInParameter.ELEM_FAMILY_PARAM,
-            BuiltInParameter.ELEM_TYPE_PARAM
+            DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+            DB.BuiltInParameter.ELEM_FAMILY_PARAM,
+            DB.BuiltInParameter.ELEM_TYPE_PARAM
           } :
-          new BuiltInParameter[]
+          new DB.BuiltInParameter[]
           {
-            BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-            BuiltInParameter.ELEM_FAMILY_PARAM,
-            BuiltInParameter.ELEM_TYPE_PARAM,
-            BuiltInParameter.DATUM_TEXT
+            DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+            DB.BuiltInParameter.ELEM_FAMILY_PARAM,
+            DB.BuiltInParameter.ELEM_TYPE_PARAM,
+            DB.BuiltInParameter.DATUM_TEXT
           };
 
         ReplaceElement(ref element, newLevel, parametersMask);

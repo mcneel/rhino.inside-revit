@@ -366,18 +366,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #endregion
 
     #region Level
-    public static Level FindLevelByElevation(this Document doc, double elevation)
+    public static Level FindLevelByHeight(this Document doc, double height)
     {
       Level level = null;
 
-      if (!double.IsNaN(elevation))
+      if (!double.IsNaN(height))
       {
         var min = double.PositiveInfinity;
         using (var collector = new FilteredElementCollector(doc))
         {
-          foreach (var levelN in collector.OfClass(typeof(Level)).Cast<Level>().OrderBy(c => c.Elevation))
+          foreach (var levelN in collector.OfClass(typeof(Level)).Cast<Level>().OrderBy(c => c.GetHeight()))
           {
-            var distance = Math.Abs(levelN.Elevation - elevation);
+            var distance = Math.Abs(levelN.GetHeight() - height);
             if (distance < min)
             {
               level = levelN;
@@ -390,17 +390,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return level;
     }
 
-    public static Level FindBaseLevelByElevation(this Document doc, double elevation, out Level topLevel)
+    public static Level FindBaseLevelByHeight(this Document doc, double height, out Level topLevel)
     {
-      elevation += Revit.ShortCurveTolerance;
+      height += Revit.ShortCurveTolerance;
 
       topLevel = null;
       Level level = null;
       using (var collector = new FilteredElementCollector(doc))
       {
-        foreach (var levelN in collector.OfClass(typeof(Level)).Cast<Level>().OrderBy(c => c.Elevation))
+        foreach (var levelN in collector.OfClass(typeof(Level)).Cast<Level>().OrderBy(c => c.GetHeight()))
         {
-          if (levelN.Elevation <= elevation) level = levelN;
+          if (levelN.GetHeight() <= height) level = levelN;
           else
           {
             topLevel = levelN;
@@ -411,17 +411,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return level;
     }
 
-    public static Level FindTopLevelByElevation(this Document doc, double elevation, out Level baseLevel)
+    public static Level FindTopLevelByHeight(this Document doc, double height, out Level baseLevel)
     {
-      elevation -= Revit.ShortCurveTolerance;
+      height -= Revit.ShortCurveTolerance;
 
       baseLevel = null;
       Level level = null;
       using (var collector = new FilteredElementCollector(doc))
       {
-        foreach (var levelN in collector.OfClass(typeof(Level)).Cast<Level>().OrderByDescending(c => c.Elevation))
+        foreach (var levelN in collector.OfClass(typeof(Level)).Cast<Level>().OrderByDescending(c => c.GetHeight()))
         {
-          if (levelN.Elevation >= elevation) level = levelN;
+          if (levelN.GetHeight() >= height) level = levelN;
           else
           {
             baseLevel = levelN;

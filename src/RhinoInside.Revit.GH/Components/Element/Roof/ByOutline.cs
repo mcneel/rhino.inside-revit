@@ -65,7 +65,7 @@ namespace RhinoInside.Revit.GH.Components
 
       if (element != null)
       {
-        element.get_Parameter(DB.BuiltInParameter.ROOF_LEVEL_OFFSET_PARAM).Set(bbox.Min.Z / Revit.ModelUnits - level.Value.Elevation);
+        element.get_Parameter(DB.BuiltInParameter.ROOF_LEVEL_OFFSET_PARAM).Set(bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight());
       }
     }
   }

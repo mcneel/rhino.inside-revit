@@ -38,7 +38,7 @@ namespace RhinoInside.Revit.GH.Types
           center /= count;
 
           if (floor.Document.GetElement(floor.LevelId) is DB.Level level)
-            center.Z = level.Elevation * Revit.ModelUnits;
+            center.Z = level.GetHeight() * Revit.ModelUnits;
 
           center.Z += floor.get_Parameter(DB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM)?.AsDoubleInRhinoUnits() ?? 0.0;
 

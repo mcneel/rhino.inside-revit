@@ -1161,8 +1161,8 @@
   }, 
   {
     "desc": "Get all document grids", 
-    "iconsrc": null, 
-    "icontag": "Q", 
+    "iconsrc": "/static/images/GH/QueryGrids.png", 
+    "icontag": null, 
     "panel": "Model", 
     "tab": "Revit", 
     "title": "Query Grids", 
@@ -2088,6 +2088,56 @@
     "title": "Create Material", 
     "typename": "MaterialByName", 
     "uuid": "3aedba3c-1b77-4c52-a7fc-7ca7095f730e"
+  }, 
+  {
+    "desc": "Gets the active Design Option", 
+    "iconsrc": "/static/images/GH/DesignOptionActive.png", 
+    "icontag": null, 
+    "panel": "Document", 
+    "tab": "Revit", 
+    "title": "Active Design Option", 
+    "typename": "DesignOptionActive", 
+    "uuid": "b6349dda-4486-44eb-9af7-3d13404a3f3e"
+  }, 
+  {
+    "desc": "Design Option Set identity information", 
+    "iconsrc": "/static/images/GH/DesignOptionSetIdentity.png", 
+    "icontag": null, 
+    "panel": "Document", 
+    "tab": "Revit", 
+    "title": "Design Option Set Identity", 
+    "typename": "DesignOptionSetIdentity", 
+    "uuid": "01080b5e-a771-41da-a323-acf16dc176ce"
+  }, 
+  {
+    "desc": "Design Option identity information", 
+    "iconsrc": "/static/images/GH/DesignOptionIdentity.png", 
+    "icontag": null, 
+    "panel": "Document", 
+    "tab": "Revit", 
+    "title": "Design Option Identity", 
+    "typename": "DesignOptionIdentity", 
+    "uuid": "677ddf10-ffe0-4635-a612-35ac17d8a409"
+  }, 
+  {
+    "desc": "Get all document design options", 
+    "iconsrc": "/static/images/GH/QueryDesignOptionSets.png", 
+    "icontag": null, 
+    "panel": "Document", 
+    "tab": "Revit", 
+    "title": "Query Design Option Sets", 
+    "typename": "QueryDesignOptionSets", 
+    "uuid": "b31e7605-87f6-421b-84c5-8b00bfd0bc88"
+  }, 
+  {
+    "desc": "Get all document design options", 
+    "iconsrc": "/static/images/GH/QueryDesignOptions.png", 
+    "icontag": null, 
+    "panel": "Document", 
+    "tab": "Revit", 
+    "title": "Query Design Options", 
+    "typename": "QueryDesignOptions", 
+    "uuid": "6804582b-e6fd-4825-aa71-b59346f149cd"
   }, 
   {
     "desc": "Given a set of contour Curves, it adds a BuildingPad element to the active Revit document", 

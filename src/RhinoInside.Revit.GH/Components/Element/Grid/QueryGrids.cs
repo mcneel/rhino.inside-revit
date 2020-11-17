@@ -3,6 +3,8 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
+using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -27,9 +29,9 @@ namespace RhinoInside.Revit.GH.Components
     static readonly ParamDefinition[] inputs =
     {
       ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
-      ParamDefinition.Create<Param_Interval>("Elevation", "E", "Grid extents interval", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_String>("Name", "N", "Grid name", GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true)
+      ParamDefinition.Create<Parameters.ElevationInterval>("Elevation", "E", "Grid extents interval along z-axis", GH_ParamAccess.item, optional: true, relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamVisibility.Default)
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -43,8 +45,8 @@ namespace RhinoInside.Revit.GH.Components
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
         return;
 
-      if (!Params.TryGetData(DA, "Elevation", out Interval? elevation, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
+      if (!Params.TryGetData(DA, "Elevation", out Interval? elevation, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Filter", out DB.ElementFilter filter, x => x.IsValidObject)) return;
 
       using (var collector = new DB.FilteredElementCollector(doc))
@@ -64,13 +66,16 @@ namespace RhinoInside.Revit.GH.Components
 
         if (elevation.HasValue)
         {
+          var height = elevation.Value.InHostUnits() +
+            doc.GetBasePointLocation(Params.Input<Parameters.ElevationInterval>("Elevation").ElevationBase).Z;
+
           grids = grids.Where
           (
             x =>
             {
               var extents = x.GetExtents();
-              var interval = new Interval(extents.MinimumPoint.Z * Revit.ModelUnits, extents.MaximumPoint.Z * Revit.ModelUnits);
-              return Interval.FromIntersection(elevation.Value, interval).IsValid;
+              var interval = new Interval(extents.MinimumPoint.Z, extents.MaximumPoint.Z);
+              return Interval.FromIntersection(height, interval).IsValid;
             }
           );
         }

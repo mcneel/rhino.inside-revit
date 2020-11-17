@@ -66,7 +66,7 @@ namespace RhinoInside.Revit.GH.Types
             }
 
             var plane = sketch.SketchPlane.GetPlane().ToPlane();
-            var origin = new Point3d(center.X, center.Y, Level.Elevation + levelOffset);
+            var origin = new Point3d(center.X, center.Y, Level.Height + levelOffset);
             var xAxis = plane.XAxis;
             var yAxis = plane.YAxis;
 

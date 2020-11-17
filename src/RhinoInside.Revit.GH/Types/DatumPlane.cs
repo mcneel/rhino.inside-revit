@@ -6,6 +6,7 @@ using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.Convert.System.Collections.Generic;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -51,8 +52,8 @@ namespace RhinoInside.Revit.GH.Types
     #region IGH_PreviewData
     public override void DrawViewportWires(GH_PreviewWireArgs args)
     {
-      var elevation = Elevation;
-      if (double.IsNaN(elevation))
+      var height = Height;
+      if (double.IsNaN(height))
         return;
 
       if (args.Viewport.IsParallelProjection)
@@ -63,7 +64,7 @@ namespace RhinoInside.Revit.GH.Types
           var length = viewportBBox.Diagonal.Length;
           args.Viewport.GetFrustumCenter(out var center);
 
-          var point = new Point3d(center.X, center.Y, elevation);
+          var point = new Point3d(center.X, center.Y, height);
           var from = point - args.Viewport.CameraX * length;
           var to = point + args.Viewport.CameraX * length;
 
@@ -80,14 +81,20 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        return Value is DB.Level level ?
-        new Plane
-        (
-          new Point3d(0.0, 0.0, level.Elevation * Revit.ModelUnits),
-          Vector3d.XAxis,
-          Vector3d.YAxis
-        ) :
-        new Plane
+        if (Value is DB.Level level)
+        {
+          var levelType = level.Document.GetElement(level.GetTypeId()) as DB.LevelType;
+          var position = LevelExtension.GetBasePointLocation(level.Document, levelType.GetElevationBase());
+
+          return new Plane
+          (
+            new Point3d(position.X * Revit.ModelUnits, position.Y * Revit.ModelUnits, level.GetHeight() * Revit.ModelUnits),
+            Vector3d.XAxis,
+            Vector3d.YAxis
+          );
+        }
+
+        return new Plane
         (
           new Point3d(double.NaN, double.NaN, double.NaN),
           Vector3d.Zero,
@@ -96,7 +103,47 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public double Elevation => Value?.Elevation * Revit.ModelUnits ?? double.NaN;
+    /// <summary>
+    /// Signed distance along the Z axis from the World XY plane.
+    /// </summary>
+    /// <remarks>
+    /// World XY plane origin is refered as "Internal Origin" in Revit UI.
+    /// </remarks>
+    public double Height
+    {
+      get => Value?.GetHeight() * Revit.ModelUnits ?? double.NaN;
+      set => Value?.SetHeight(value / Revit.ModelUnits);
+    }
+
+    public double GetElevationAbove(External.DB.ElevationBase elevationBase)
+    {
+      return Height - Document.GetBasePointLocation(elevationBase).Z * Revit.ModelUnits;
+    }
+
+    public void SetElevationAbove(External.DB.ElevationBase elevationBase, double value)
+    {
+      Height = Document.GetBasePointLocation(elevationBase).Z * Revit.ModelUnits + value;
+    }
+
+    public bool? IsStructural
+    {
+      get => Value?.get_Parameter(DB.BuiltInParameter.LEVEL_IS_STRUCTURAL).AsInteger() != 0;
+      set
+      {
+        if (value is null || IsStructural == value) return;
+        Value?.get_Parameter(DB.BuiltInParameter.LEVEL_IS_STRUCTURAL).Set(value.Value ? 1 : 0);
+      }
+    }
+
+    public bool? IsBuildingStory
+    {
+      get => Value?.get_Parameter(DB.BuiltInParameter.LEVEL_IS_BUILDING_STORY).AsInteger() != 0;
+      set
+      {
+        if (value is null || IsBuildingStory == value) return;
+        Value?.get_Parameter(DB.BuiltInParameter.LEVEL_IS_BUILDING_STORY).Set(value.Value ? 1 : 0);
+      }
+    }
     #endregion
   }
 

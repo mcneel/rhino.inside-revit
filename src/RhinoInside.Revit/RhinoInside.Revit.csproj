@@ -217,7 +217,9 @@
     <Compile Include="External\DB\BuiltInLinePattern.cs" />
     <Compile Include="External\DB\BuiltInMullionPositionId.cs" />
     <Compile Include="External\DB\BuiltInMullionProfileId.cs" />
+    <Compile Include="External\DB\ElevationBase.cs" />
     <Compile Include="External\DB\Extensions\Application.cs" />
+    <Compile Include="External\DB\Extensions\BasePoint.cs" />
     <Compile Include="External\DB\Extensions\Category.cs" />
     <Compile Include="External\DB\Extensions\Curve.cs" />
     <Compile Include="External\DB\Extensions\CurveLoop.cs" />
@@ -229,6 +231,7 @@
     <Compile Include="External\DB\Extensions\FilteredElementCollector.cs" />
     <Compile Include="External\DB\Extensions\GeometryObject.cs" />
     <Compile Include="External\DB\Extensions\Instance.cs" />
+    <Compile Include="External\DB\Extensions\Level.cs" />
     <Compile Include="External\DB\Extensions\LinePattern.cs" />
     <Compile Include="External\DB\Extensions\Parameter.cs" />
     <Compile Include="External\DB\Extensions\ParameterFilterElement.cs" />
