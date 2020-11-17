@@ -10,6 +10,15 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html version="0.0.7626.21365" time="11/13/2020 11:52:10" %}
+### New features
+* Added 'Level Identity' component.
+* Added 'Project Information' component.
+* Added special 'Elevation' and 'Elevation Interval' parameter to manage levels elevations from different base points.
+
+### Fixes
+* Fixed 'Element Location' when working with groups.
+
 {% include ltr/release-header.html version="0.0.7622.22831" time="11/13/2020 12:41:02" %}
 ### New features
 * Added 'Active Design Option' component.
