@@ -17,8 +17,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var position = basePoint.Document.ActiveProjectLocation.GetProjectPosition(GetPosition(basePoint));
       return new XYZ(position.EastWest, position.NorthSouth, position.Elevation);
 #else
-      // TODO
-      return XYZ.Zero;
+      var position = basePoint.Document.ActiveProjectLocation.get_ProjectPosition(GetPosition(basePoint));
+      return new XYZ(position.EastWest, position.NorthSouth, position.Elevation);
 #endif
     }
 
