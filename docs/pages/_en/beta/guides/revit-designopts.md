@@ -1,41 +1,53 @@
 ---
 title: Design Options
+subtitle: How to work with Design Options and Sets
 order: 72
-thumbnail: /static/images/guides/revit-wip.png
+thumbnail: /static/images/guides/revit-designopts.png
 group: Containers
+ghdef: revit-designopts.ghx
 ---
 
 {% include ltr/warning_note.html note='Currently there is very limited support for design options in Revit API' %}
 
 ## Querying Design Options
 
-Use the *Document Design Options* component shared here, to query the design options in your model.
-
 {% capture api_note %}
 In Revit API, Design Options are represented by the {% include api_type.html type='Autodesk.Revit.DB.DesignOption' title='DB.DesignOption' %}
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-![]({{ "/static/images/guides/revit-designopts01.png" | prepend: site.baseurl }})
 
-{% include ltr/download_comp.html archive='/static/ghnodes/Document Design Options.ghuser' name='Document Design Options' %}
+Use the {% include ltr/comp.html uuid='b6349dda' %} to find the design option that is currently active in Revit UI.
 
-Use the *Design Options Properties* to read the properties of each design option e.g. Design Option Set
+![]({{ "/static/images/guides/revit-designopts-active.png" | prepend: site.baseurl }})
+
+
+Then you can use the {% include ltr/comp.html uuid='677ddf10' %} and {% include ltr/comp.html uuid='01080b5e' %} to inspect the identity of each *Design Option* or *Design Option Set*.
+
+
+![]({{ "/static/images/guides/revit-designopts-identity.png" | prepend: site.baseurl }})
+
+![]({{ "/static/images/guides/revit-designopts-optsetidentity.png" | prepend: site.baseurl }})
+
+
+To query all the *Design Option Sets* and *Design Options* in a document, use the {% include ltr/comp.html uuid='b31e7605' %} and {% include ltr/comp.html uuid='6804582b' %} components respectively.
+
+![]({{ "/static/images/guides/revit-designopts-queryoptsets.png" | prepend: site.baseurl }})
+
+![]({{ "/static/images/guides/revit-designopts-queryopts.png" | prepend: site.baseurl }})
+
 
 {% capture api_note %}
 Notice that the Design Option Set object is a simple `DB.Element` since there is very limited support for design options in Revit API
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-![]({{ "/static/images/guides/revit-designopts02.png" | prepend: site.baseurl }})
-
-{% include ltr/download_comp.html archive='/static/ghnodes/Design Option Properties.ghuser' name='Design Option Properties' %}
 
 ## Collecting Design Option Elements
 
-You can pass a design option to the *Element.DesignOptionFilter* component to collect the elements belonging to a given design option.
+You can pass a design option to the {% include ltr/comp.html uuid='1b197e82' %} component to collect the elements belonging to a given design option.
 
-![]({{ "/static/images/guides/revit-designopts03.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-designopts-queryelements.png" | prepend: site.baseurl }})
 
 ## Setting Element Design Option
 
