@@ -13,9 +13,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
 #if REVIT_2020
       return basePoint.SharedPosition;
-#else
+#elif REVIT_2018
       var position = basePoint.Document.ActiveProjectLocation.GetProjectPosition(GetPosition(basePoint));
       return new XYZ(position.EastWest, position.NorthSouth, position.Elevation);
+#else
+      // TODO
+      return XYZ.Zero;
 #endif
     }
 
