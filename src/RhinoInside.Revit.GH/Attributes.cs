@@ -52,4 +52,11 @@ namespace RhinoInside.Revit.GH.Kernel.Attributes
     public readonly object Value;
     public DefaultValueAttribute(object value) => Value = value;
   }
+
+  [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
+  public class ParamTypeAttribute : Attribute
+  {
+    public readonly Type Type;
+    public ParamTypeAttribute(Type type) => Type = type;
+  }
 }

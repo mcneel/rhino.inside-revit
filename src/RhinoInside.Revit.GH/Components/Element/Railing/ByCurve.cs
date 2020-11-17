@@ -2,6 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -42,7 +43,7 @@ namespace RhinoInside.Revit.GH.Components
       SolveOptionalLevel(doc, curve, ref level, out var bbox);
 
       // Axis
-      var levelPlane = new Rhino.Geometry.Plane(new Rhino.Geometry.Point3d(0.0, 0.0, level.Value.Elevation * Revit.ModelUnits), Rhino.Geometry.Vector3d.ZAxis);
+      var levelPlane = new Rhino.Geometry.Plane(new Rhino.Geometry.Point3d(0.0, 0.0, level.Value.GetHeight() * Revit.ModelUnits), Rhino.Geometry.Vector3d.ZAxis);
       curve = Rhino.Geometry.Curve.ProjectToPlane(curve, levelPlane);
       curve = curve.Simplify(Rhino.Geometry.CurveSimplifyOptions.All, Revit.VertexTolerance * Revit.ModelUnits, Revit.AngleTolerance) ?? curve;
 
@@ -88,7 +89,7 @@ namespace RhinoInside.Revit.GH.Components
         using (var heightOffset = newRail.get_Parameter(DB.BuiltInParameter.STAIRS_RAILING_HEIGHT_OFFSET))
         {
           if (!heightOffset.IsReadOnly)
-            heightOffset.Set(bbox.Min.Z / Revit.ModelUnits - level.Value.Elevation);
+            heightOffset.Set(bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight());
         }
 
         newRail.HostId = host?.Id ?? DB.ElementId.InvalidElementId;

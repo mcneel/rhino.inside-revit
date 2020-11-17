@@ -3,9 +3,11 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
+using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Level
 {
   public class DocumentLevels : ElementCollectorComponent
   {
@@ -27,11 +29,11 @@ namespace RhinoInside.Revit.GH.Components
     static readonly ParamDefinition[] inputs =
     {
       ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
-      ParamDefinition.Create<Param_Interval>("Elevation", "E", "Level elevation interval", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_String>("Name", "N", "Level name", GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Param_Boolean>("Structural", "S", "Level is structural", GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Param_Boolean>("Building Story", "BS", "Level is building story", defaultValue: true, GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true)
+      ParamDefinition.Create<Parameters.ElevationInterval>("Elevation", "E", "Level elevation interval along z-axis", GH_ParamAccess.item, optional: true, relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Param_Boolean>("Structural", "S", "Level is structural", GH_ParamAccess.item, optional: true, relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Param_Boolean>("Building Story", "BS", "Level is building story", defaultValue: true, GH_ParamAccess.item, optional: true, relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamVisibility.Default)
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -45,8 +47,8 @@ namespace RhinoInside.Revit.GH.Components
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
         return;
 
-      if (!Params.TryGetData(DA, "Elevation", out Interval? elevation, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
+      if (!Params.TryGetData(DA, "Elevation", out Interval? elevation, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Structural", out bool? structural)) return;
       if (!Params.TryGetData(DA, "Building Story", out bool? buildingStory)) return;
       if (!Params.TryGetData(DA, "Filter", out DB.ElementFilter filter, x => x.IsValidObject)) return;
@@ -57,9 +59,6 @@ namespace RhinoInside.Revit.GH.Components
 
         if (filter is object)
           levelsCollector = levelsCollector.WherePasses(filter);
-
-        if (elevation.HasValue && TryGetFilterDoubleParam(DB.BuiltInParameter.LEVEL_ELEV, elevation.Value.Mid / Revit.ModelUnits, Revit.VertexTolerance + (elevation.Value.Length * 0.5 / Revit.ModelUnits), out var elevationFilter))
-          levelsCollector = levelsCollector.WherePasses(elevationFilter);
 
         if (name is string && TryGetFilterStringParam(DB.BuiltInParameter.DATUM_TEXT, ref name, out var nameFilter))
           levelsCollector = levelsCollector.WherePasses(nameFilter);
@@ -74,6 +73,14 @@ namespace RhinoInside.Revit.GH.Components
 
         if (!string.IsNullOrEmpty(name))
           levels = levels.Where(x => x.Name.IsSymbolNameLike(name));
+
+        if (elevation.HasValue)
+        {
+          var height = elevation.Value.InHostUnits() +
+            doc.GetBasePointLocation(Params.Input<Parameters.ElevationInterval>("Elevation").ElevationBase).Z;
+
+          levels = levels.Where(x => height.IncludesParameter(x.GetHeight(), false));
+        }
 
         DA.SetDataList("Levels", levels);
       }

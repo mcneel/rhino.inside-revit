@@ -167,7 +167,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
       {
         using (var collector = new DB.FilteredElementCollector(doc))
         {
-          foreach (var level in collector.OfClass(typeof(DB.Level)).Cast<DB.Level>().OrderByDescending((x) => x.Elevation))
+          foreach (var level in collector.OfClass(typeof(DB.Level)).Cast<DB.Level>().OrderByDescending(x => x.GetHeight()))
           {
             var referenceId = FullUniqueId.Format(doc.GetFingerprintGUID(), level.UniqueId);
             var item = new GH_ValueListItem(level.Name, $"\"{ referenceId }\"");

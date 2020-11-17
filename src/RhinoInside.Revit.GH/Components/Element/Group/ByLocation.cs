@@ -87,7 +87,7 @@ namespace RhinoInside.Revit.GH.Components
         using (var offsetFromLevel = element.get_Parameter(DB.BuiltInParameter.GROUP_OFFSET_FROM_LEVEL))
         {
           var oldOffset = offsetFromLevel.AsDouble();
-          var newOffset = newLocation.Z - level.Value.Elevation;
+          var newOffset = newLocation.Z - level.Value.GetHeight();
           if (levelParam.AsElementId() != level.Value.Id || !Rhino.RhinoMath.EpsilonEquals(oldOffset, newOffset, Rhino.RhinoMath.SqrtEpsilon))
           {
             var groupType = element.GroupType;

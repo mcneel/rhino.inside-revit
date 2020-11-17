@@ -25,6 +25,24 @@ namespace Grasshopper.Kernel
       return -1;
     }
 
+    public static T Input<T>(this GH_ComponentParamServer parameters, string name)
+      where T : class, IGH_Param
+    {
+      if (IndexOf(parameters.Input, name, out var value) >= 0)
+        return value as T;
+
+      return default;
+    }
+
+    public static T Output<T>(this GH_ComponentParamServer parameters, string name)
+      where T : class, IGH_Param
+    {
+      if (IndexOf(parameters.Output, name, out var value) >= 0)
+        return value as T;
+
+      return default;
+    }
+
     public static bool TryGetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T? value)
       where T : struct => TryGetData(parameters, DA, name, out value, x => true);
 

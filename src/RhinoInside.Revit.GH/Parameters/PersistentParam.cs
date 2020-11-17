@@ -153,8 +153,19 @@ namespace RhinoInside.Revit.GH.Parameters
       if (Kind == GH_ParamKind.floating || Kind == GH_ParamKind.input)
       {
         Menu_AppendSeparator(menu);
-        Menu_AppendPromptOne(menu);
-        Menu_AppendPromptMore(menu);
+        if (Menu_CustomSingleValueItem() is ToolStripMenuItem single)
+        {
+          single.Enabled &= SourceCount == 0;
+          menu.Items.Add(single);
+        }
+        else Menu_AppendPromptOne(menu);
+
+        if (Menu_CustomMultiValueItem() is ToolStripMenuItem more)
+        {
+          more.Enabled &= SourceCount == 0;
+          menu.Items.Add(more);
+        }
+        else Menu_AppendPromptMore(menu);
         Menu_AppendManageCollection(menu);
 
         Menu_AppendSeparator(menu);
