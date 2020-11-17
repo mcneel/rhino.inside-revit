@@ -449,27 +449,6 @@
   <ItemGroup>
     <None Include="Extensions\README.md" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\QueryGrids.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\DesignOptionIdentity.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\DesignOptionSetIdentity.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\QueryDesignOptions.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\QueryDesignOptionSets.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\DesignOptionSet.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\DesignOption.png" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.dll" DestinationFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.gha" />
