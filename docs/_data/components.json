@@ -680,6 +680,16 @@
     "uuid": "2577a55b-a198-4760-9183-adf8193fb5bd"
   }, 
   {
+    "desc": "Project information", 
+    "iconsrc": null, 
+    "icontag": "P", 
+    "panel": "Document", 
+    "tab": "Revit", 
+    "title": "Project Information", 
+    "typename": "ProjectInformation", 
+    "uuid": "2f3afcc9-c8a4-4423-b1bf-2a04e8fd2734"
+  }, 
+  {
     "desc": "Saves a document to a given file path", 
     "iconsrc": "/static/images/GH/DocumentSave.png", 
     "icontag": null, 
@@ -1200,16 +1210,6 @@
     "uuid": "fad33c4b-a7c3-479b-b309-8f5363b25599"
   }, 
   {
-    "desc": "Get all document levels", 
-    "iconsrc": "/static/images/GH/DocumentLevels.png", 
-    "icontag": null, 
-    "panel": "Model", 
-    "tab": "Revit", 
-    "title": "Query Levels", 
-    "typename": "DocumentLevels", 
-    "uuid": "87715caf-92a9-4b14-99e5-f8ccb2cc19bd"
-  }, 
-  {
     "desc": "Element Get-Set location", 
     "iconsrc": "/static/images/GH/GraphicalElementLocation.png", 
     "icontag": null, 
@@ -1221,8 +1221,8 @@
   }, 
   {
     "desc": "Element Get-Set curve", 
-    "iconsrc": null, 
-    "icontag": "G", 
+    "iconsrc": "/static/images/GH/GraphicalElementCurve.png", 
+    "icontag": null, 
     "panel": "Element", 
     "tab": "Revit", 
     "title": "Element Curve", 
@@ -1418,16 +1418,6 @@
     "title": "Add Grid", 
     "typename": "GridByCurve", 
     "uuid": "cec2b3df-c6ba-414f-bece-e3daee2a3f2c"
-  }, 
-  {
-    "desc": "Given its Elevation, it adds a Level to the active Revit document", 
-    "iconsrc": "/static/images/GH/LevelByElevation.png", 
-    "icontag": null, 
-    "panel": "Model", 
-    "tab": "Revit", 
-    "title": "Add Level", 
-    "typename": "LevelByElevation", 
-    "uuid": "c6dec111-eac6-4047-8618-28ee144d55c5"
   }, 
   {
     "desc": "Given a Curve, it adds a Curve element to the active Revit document", 
@@ -2090,6 +2080,36 @@
     "uuid": "3aedba3c-1b77-4c52-a7fc-7ca7095f730e"
   }, 
   {
+    "desc": "Query level identity information", 
+    "iconsrc": null, 
+    "icontag": "L", 
+    "panel": "Model", 
+    "tab": "Revit", 
+    "title": "Level Identity", 
+    "typename": "LevelIdentity", 
+    "uuid": "e996b34d-2c86-4496-8e02-c879228c329e"
+  }, 
+  {
+    "desc": "Get all document levels", 
+    "iconsrc": "/static/images/GH/DocumentLevels.png", 
+    "icontag": null, 
+    "panel": "Model", 
+    "tab": "Revit", 
+    "title": "Query Levels", 
+    "typename": "DocumentLevels", 
+    "uuid": "87715caf-92a9-4b14-99e5-f8ccb2cc19bd"
+  }, 
+  {
+    "desc": "Given its elevation, it adds a Level to the active Revit document", 
+    "iconsrc": "/static/images/GH/LevelByElevation.png", 
+    "icontag": null, 
+    "panel": "Model", 
+    "tab": "Revit", 
+    "title": "Add Level", 
+    "typename": "LevelByElevation", 
+    "uuid": "c6dec111-eac6-4047-8618-28ee144d55c5"
+  }, 
+  {
     "desc": "Gets the active Design Option", 
     "iconsrc": "/static/images/GH/DesignOptionActive.png", 
     "icontag": null, 
@@ -2231,8 +2251,8 @@
   }, 
   {
     "desc": "Obtains the curtain grids of the specified host element", 
-    "iconsrc": null, 
-    "icontag": "H", 
+    "iconsrc": "/static/images/GH/HostObjectGrids.png", 
+    "icontag": null, 
     "panel": "Host", 
     "tab": "Revit", 
     "title": "Host Curtain Grids", 

@@ -63,16 +63,6 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap DesignOptionActive {
-            get {
-                object obj = ResourceManager.GetObject("DesignOptionActive", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap AdaptiveComponent {
             get {
                 object obj = ResourceManager.GetObject("AdaptiveComponent", resourceCulture);
@@ -786,6 +776,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap DesignOption {
             get {
                 object obj = ResourceManager.GetObject("DesignOption", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap DesignOptionActive {
+            get {
+                object obj = ResourceManager.GetObject("DesignOptionActive", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -1793,6 +1793,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap GraphicalElementCurve {
+            get {
+                object obj = ResourceManager.GetObject("GraphicalElementCurve", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap GraphicalElementLocation {
             get {
                 object obj = ResourceManager.GetObject("GraphicalElementLocation", resourceCulture);
@@ -1886,6 +1896,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap HostObjectFaces {
             get {
                 object obj = ResourceManager.GetObject("HostObjectFaces", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap HostObjectGrids {
+            get {
+                object obj = ResourceManager.GetObject("HostObjectGrids", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
