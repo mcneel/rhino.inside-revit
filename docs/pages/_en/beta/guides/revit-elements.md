@@ -50,6 +50,13 @@ The {% include ltr/comp.html uuid='b3bcbf5b' %} component can be used to extract
 
 ![]({{ "/static/images/guides/revit-elements-getgeomscap.png" | prepend: site.baseurl }})
 
+### Instance Base Curve
+
+For elements that are constructed on a base curve (e.g. Basic Walls) you can use the {% include ltr/comp.html uuid='dcc82eca' %} to get and set the base curve.
+
+
+![]({{ "/static/images/guides/revit-elements-basecurve.png" | prepend: site.baseurl }})
+
 ### Instance Bounding Box
 
 You can pass an instance into a Grasshopper *Box* component to extract the bounding box of the geometry very easily:
