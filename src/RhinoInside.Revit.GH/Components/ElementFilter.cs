@@ -827,6 +827,12 @@ namespace RhinoInside.Revit.GH.Components
 
         if (storageType == DB.StorageType.ElementId)
         {
+          if (builtInParameter == DB.BuiltInParameter.ID_PARAM || builtInParameter == DB.BuiltInParameter.SYMBOL_ID_PARAM)
+          {
+            parameterType = DB.ParameterType.Integer;
+            return true;
+          }
+
           if (builtInParameter == DB.BuiltInParameter.ELEM_TYPE_PARAM)
           {
             parameterType = DB.ParameterType.FamilyType;
@@ -991,6 +997,13 @@ namespace RhinoInside.Revit.GH.Components
             {
               switch(parameterType)
               {
+                case DB.ParameterType.Integer: // Id
+                  {
+                    var value = new GH_Integer(DB.ElementId.InvalidElementId.IntegerValue);
+                    if (DA.GetData("Value", ref value))
+                      rule = new DB.FilterElementIdRule(provider, ruleEvaluator, new DB.ElementId(value.Value));
+                  }
+                  break;
                 case (DB.ParameterType) int.MaxValue: // Category
                   {
                     var value = default(Types.Category);

@@ -13,6 +13,7 @@ Some of the changes mentioned in sections below, might break your existing Grass
 
 {% include ltr/release-header.html version="0.0.7626.34420" time="11/19/2020 14:00:20" %}
 ### New featues
+* Added 'Query Element' component.
 * Added 'Project Location' component.
 * Added 'Query Shared Sites' component.
 * Added 'Query Site Locations' component.
