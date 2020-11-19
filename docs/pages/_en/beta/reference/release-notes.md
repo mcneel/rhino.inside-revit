@@ -11,7 +11,7 @@ Some of the changes mentioned in sections below, might break your existing Grass
 
 <!-- most recent release should be on top -->
 
-{% include ltr/release-header.html version="0.0.7626.34420" time="11/17/2020 19:07:20" %}
+{% include ltr/release-header.html version="0.0.7626.34420" time="11/19/2020 14:00:20" %}
 ### New featues
 * Added 'Project Location' component.
 * Added 'Query Shared Sites' component.
@@ -21,6 +21,9 @@ Some of the changes mentioned in sections below, might break your existing Grass
 ### Fixes
 * Fixed Level elevation by 'Survey Point'.
 * Fixed 'Export Type Image' for types that do not generate any bitmap.
+
+### API
+* Implemented `IGH_QuickCast` interface at `Types.ElementId` for interoperability with List-Set components.
 
 {% include ltr/release-header.html version="0.0.7626.21365" time="11/13/2020 11:52:10" %}
 ### New features
