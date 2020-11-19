@@ -1,8 +1,12 @@
 using System;
 using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
 using GH_IO.Serialization;
+using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
+using Rhino.Geometry;
+using RhinoInside.Revit.External.DB;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 using DBX = RhinoInside.Revit.External.DB;
@@ -27,7 +31,7 @@ namespace RhinoInside.Revit.GH.Types
     void UnloadElement();
   }
 
-  public abstract class ElementId : ReferenceObject, IGH_ElementId, IEquatable<ElementId>
+  public abstract class ElementId : ReferenceObject, IGH_ElementId, IEquatable<ElementId>, IGH_QuickCast
   {
     #region System.Object
     public bool Equals(ElementId other) => other is object &&
@@ -251,6 +255,56 @@ namespace RhinoInside.Revit.GH.Types
       if (IsReferencedElement)
         Document = default;
     }
+    #endregion
+
+    #region IGH_QuickCast
+    GH_QuickCastType IGH_QuickCast.QC_Type => GH_QuickCastType.text;
+    int IGH_QuickCast.QC_Hash() => FullUniqueId.Format(DocumentGUID, UniqueID).GetHashCode();
+
+    double IGH_QuickCast.QC_Distance(IGH_QuickCast other)
+    {
+      try
+      {
+        switch (other.QC_Type)
+        {
+          case GH_QuickCastType.@bool:    return other.QC_Bool() == ((IGH_QuickCast) this).QC_Bool() ? 0.0 : 1.0;
+          case GH_QuickCastType.@int:     return Math.Abs(other.QC_Int() - ((IGH_QuickCast) this).QC_Int());
+          case GH_QuickCastType.num:      return Math.Abs(other.QC_Num() - ((IGH_QuickCast) this).QC_Num());
+          case GH_QuickCastType.pt:       return other.QC_Pt().DistanceTo(((IGH_QuickCast) this).QC_Pt());
+          case GH_QuickCastType.vec:      return new Point3d(other.QC_Vec()).DistanceTo(new Point3d(((IGH_QuickCast) this).QC_Vec()));
+          case GH_QuickCastType.interval:
+            var otherInterval = other.QC_Interval();
+            var thisInterval = ((IGH_QuickCast) this).QC_Interval();
+            var d0 = Math.Abs(otherInterval.T0 - thisInterval.T0);
+            var d1 = Math.Abs(otherInterval.T1 - thisInterval.T1);
+            return d0 + d1;
+        }
+      }
+      catch { }
+
+      var dist0 = GH_StringMatcher.LevenshteinDistance(FullUniqueId.Format(DocumentGUID, UniqueID), other.QC_Text());
+      var dist1 = GH_StringMatcher.LevenshteinDistance(FullUniqueId.Format(DocumentGUID, UniqueID).ToUpperInvariant(), other.QC_Text().ToUpperInvariant());
+      return 0.5 * (dist0 + dist1);
+    }
+
+    int IGH_QuickCast.QC_CompareTo(IGH_QuickCast other)
+    {
+      if (other.QC_Type != GH_QuickCastType.text)
+        return GH_QuickCastType.text.CompareTo(other.QC_Type);
+
+      return FullUniqueId.Format(DocumentGUID, UniqueID).CompareTo(other.QC_Text());
+    }
+
+    bool IGH_QuickCast.QC_Bool() => IsValid;
+    int IGH_QuickCast.QC_Int() => Id?.IntegerValue ?? throw new InvalidCastException();
+    double IGH_QuickCast.QC_Num() => Id?.IntegerValue ?? throw new InvalidCastException();
+    string IGH_QuickCast.QC_Text() => FullUniqueId.Format(DocumentGUID, UniqueID);
+    Color IGH_QuickCast.QC_Col() => throw new InvalidCastException();
+    Point3d IGH_QuickCast.QC_Pt() => throw new InvalidCastException();
+    Vector3d IGH_QuickCast.QC_Vec() => throw new InvalidCastException();
+    Complex IGH_QuickCast.QC_Complex() => throw new InvalidCastException();
+    Matrix IGH_QuickCast.QC_Matrix() => throw new InvalidCastException();
+    Interval IGH_QuickCast.QC_Interval() => throw new InvalidCastException();
     #endregion
 
     public ElementId() { }

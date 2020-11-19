@@ -359,32 +359,37 @@ namespace RhinoInside.Revit.GH.Components
     // Step 3.
     protected override sealed void AfterSolveInstance()
     {
-      if (!IsAborted)
+      using (chain)
       {
         Status = DB.TransactionStatus.Error;
 
-        try
+        if (!IsAborted)
         {
-          Status = chain.Commit();
-        }
-        catch (Exception e)
-        {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
-        }
-        finally
-        {
-          switch (Status)
+          try
           {
-            case DB.TransactionStatus.Uninitialized:
-            case DB.TransactionStatus.Started:
-            case DB.TransactionStatus.Committed:
-              break;
-            default:
-              AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Transaction {Status} and aborted.");
-              ResetData();
-              break;
+            Status = chain.Commit();
+          }
+          catch (Exception e)
+          {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
+          }
+          finally
+          {
+            switch (Status)
+            {
+              case DB.TransactionStatus.Uninitialized:
+              case DB.TransactionStatus.Started:
+              case DB.TransactionStatus.Committed:
+                break;
+              default:
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Transaction {Status} and aborted.");
+                ResetData();
+                break;
+            }
           }
         }
+
+        chain = default;
       }
 
       base.AfterSolveInstance();

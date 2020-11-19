@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components.Site
   public class BuildingPadByOutline : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("ADE71474-5F00-4BD5-9D1E-D518B42137F2");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
     public BuildingPadByOutline() : base
     (

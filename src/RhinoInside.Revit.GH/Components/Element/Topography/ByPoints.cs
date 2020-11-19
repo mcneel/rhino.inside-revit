@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components.Site
   public class TopographyByPoints : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("E8D8D05A-8703-4F75-B106-12B40EC9DF7B");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
     public TopographyByPoints() : base
     (

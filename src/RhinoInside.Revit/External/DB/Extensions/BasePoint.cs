@@ -17,8 +17,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var position = basePoint.Document.ActiveProjectLocation.GetProjectPosition(GetPosition(basePoint));
       return new XYZ(position.EastWest, position.NorthSouth, position.Elevation);
 #else
-      // TODO
-      return XYZ.Zero;
+      var position = basePoint.Document.ActiveProjectLocation.get_ProjectPosition(GetPosition(basePoint));
+      return new XYZ(position.EastWest, position.NorthSouth, position.Elevation);
 #endif
     }
 
@@ -45,8 +45,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       using (var collector = new FilteredElementCollector(doc))
       {
-        var pointCollector = collector.OfCategory(BuiltInCategory.OST_IOS_GeoSite);
-        return pointCollector.FirstElement() as BasePoint;
+        var pointCollector = System.Linq.Enumerable.Cast<BasePoint>(collector.OfClass(typeof(BasePoint)));
+        pointCollector = System.Linq.Enumerable.Where(pointCollector, x => x.Category.Id.IntegerValue == (int) BuiltInCategory.OST_IOS_GeoSite);
+        return System.Linq.Enumerable.FirstOrDefault(pointCollector);
       }
     }
 

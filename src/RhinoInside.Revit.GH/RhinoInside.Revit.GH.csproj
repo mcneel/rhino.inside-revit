@@ -190,6 +190,7 @@
     <Compile Include="Components\Document\Links.cs" />
     <Compile Include="Components\Document\Passport.cs" />
     <Compile Include="Components\Document\ProjectInformation.cs" />
+    <Compile Include="Components\Document\ProjectLocation.cs" />
     <Compile Include="Components\Document\Save.cs" />
     <Compile Include="Components\ElementFilter.cs" />
     <Compile Include="Components\ElementType\Default.cs" />
@@ -204,6 +205,8 @@
     <Compile Include="Components\ElementType\Instances.cs" />
     <Compile Include="Components\ElementType\QueryTypes.cs" />
     <Compile Include="Components\ElementType\Similar.cs" />
+    <Compile Include="Components\ElementType\SiteLocation\Identity.cs" />
+    <Compile Include="Components\ElementType\SiteLocation\Query.cs" />
     <Compile Include="Components\ElementType\ViewType\QueryViewTypes.cs" />
     <Compile Include="Components\ElementType\WallType\AnalyseBasicWallType.cs" />
     <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainWallType.cs" />
@@ -271,6 +274,7 @@
     <Compile Include="Components\Element\Passport.cs" />
     <Compile Include="Components\Element\PinUnPinElement.cs" />
     <Compile Include="Components\Element\Preview.cs" />
+    <Compile Include="Components\Element\ProjectLocation\Query.cs" />
     <Compile Include="Components\Element\Purge.cs" />
     <Compile Include="Components\Element\QueryElements.cs" />
     <Compile Include="Components\Element\Railing\ByCurve.cs" />
@@ -395,6 +399,7 @@
     <Compile Include="Types\AppearanceAsset.cs" />
     <Compile Include="Types\AssetPropertyDouble1DMap.cs" />
     <Compile Include="Types\AssetPropertyDouble4DMap.cs" />
+    <Compile Include="Types\BasePoint.cs" />
     <Compile Include="Types\BuildingPad.cs" />
     <Compile Include="Types\Category.cs" />
     <Compile Include="Types\Ceiling.cs" />
@@ -424,6 +429,7 @@
     <Compile Include="Types\Panel.cs" />
     <Compile Include="Types\Parameter.cs" />
     <Compile Include="Types\DatumPlane.cs" />
+    <Compile Include="Types\ProjectLocation.cs" />
     <Compile Include="Types\Roof.cs" />
     <Compile Include="Types\Sketch.cs" />
     <Compile Include="Types\SketchPlane.cs" />
