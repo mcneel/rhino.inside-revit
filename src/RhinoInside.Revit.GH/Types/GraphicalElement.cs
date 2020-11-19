@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Types
   /// Interface that represents any <see cref="DB.Element"/> that has a Graphical representation in Revit
   /// </summary>
   [Kernel.Attributes.Name("Graphical Element")]
-  public interface IGH_GraphicalElement : IGH_Element
+  public interface IGH_GraphicalElement : IGH_Element, IGH_QuickCast
   {
     bool? ViewSpecific { get; }
     View OwnerView { get; }
@@ -92,6 +92,33 @@ namespace RhinoInside.Revit.GH.Types
     IGH_GeometricGoo IGH_GeometricGoo.Morph(SpaceMorph xmorph) => null;
     #endregion
 
+    #region IGH_QuickCast
+    Point3d IGH_QuickCast.QC_Pt()
+    {
+      var location = Location;
+      if (location.IsValid)
+        return location.Origin;
+
+      throw new InvalidCastException();
+    }
+    Vector3d IGH_QuickCast.QC_Vec()
+    {
+      var orientation = FacingOrientation;
+      if (orientation.IsValid)
+        return orientation;
+
+      throw new InvalidCastException();
+    }
+    Interval IGH_QuickCast.QC_Interval()
+    {
+      var bbox = BoundingBox;
+      if (bbox.IsValid)
+        return new Interval(bbox.Min.Z, bbox.Max.Z);
+
+      throw new InvalidCastException();
+    }
+    #endregion
+
     #region IGH_PreviewData
     private BoundingBox? clippingBox;
     BoundingBox IGH_PreviewData.ClippingBox
@@ -119,6 +146,26 @@ namespace RhinoInside.Revit.GH.Types
       if (base.CastTo<Q>(out target))
         return true;
 
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Interval)))
+      {
+        var domain = Domain;
+        if (!domain.IsValid)
+          return false;
+
+        target = (Q) (object) new GH_Interval(domain);
+        return true;
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Interval2D)))
+      {
+        var domain = DomainUV;
+        if (!domain.IsValid)
+          return false;
+
+        target = (Q) (object) new GH_Interval2D(domain);
+        return true;
+      }
+
       if (typeof(Q).IsAssignableFrom(typeof(GH_Plane)))
       {
         try
@@ -140,19 +187,6 @@ namespace RhinoInside.Revit.GH.Types
           return false;
 
         target = (Q) (object) new GH_Point(location);
-        return true;
-      }
-
-      if (typeof(Q).IsAssignableFrom(typeof(GH_Line)))
-      {
-        var curve = Curve;
-        if (curve?.IsValid != true)
-          return false;
-
-        if (!curve.TryGetLine(out var line, Revit.VertexTolerance * Revit.ModelUnits))
-          return false;
-
-        target = (Q) (object) new GH_Line(line);
         return true;
       }
 
@@ -183,6 +217,16 @@ namespace RhinoInside.Revit.GH.Types
           return false;
 
         target = (Q) (object) new GH_Box(box);
+        return true;
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Line)))
+      {
+        var curve = Curve;
+        if (curve?.IsValid != true)
+          return false;
+
+        target = (Q) (object) new GH_Line(new Line(curve.PointAtStart, curve.PointAtEnd));
         return true;
       }
 
@@ -255,6 +299,32 @@ namespace RhinoInside.Revit.GH.Types
         }
 
         return Box.Unset;
+      }
+    }
+
+    public virtual Interval Domain
+    {
+      get
+      {
+        var box = BoundingBox;
+        if (!box.IsValid)
+          return Interval.Unset;
+
+        return new Interval(box.Min.Z, box.Max.Z);
+      }
+    }
+
+    public virtual UVInterval DomainUV
+    {
+      get
+      {
+        var box = BoundingBox;
+        if (!box.IsValid)
+          return new UVInterval(Interval.Unset, Interval.Unset);
+
+        var u = new Interval(box.Min.X, box.Max.X);
+        var v = new Interval(box.Min.Y, box.Max.Y);
+        return new UVInterval(u, v);
       }
     }
 

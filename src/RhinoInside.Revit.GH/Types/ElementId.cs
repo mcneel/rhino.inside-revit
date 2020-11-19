@@ -263,6 +263,25 @@ namespace RhinoInside.Revit.GH.Types
 
     double IGH_QuickCast.QC_Distance(IGH_QuickCast other)
     {
+      try
+      {
+        switch (other.QC_Type)
+        {
+          case GH_QuickCastType.@bool:    return other.QC_Bool() == ((IGH_QuickCast) this).QC_Bool() ? 0.0 : 1.0;
+          case GH_QuickCastType.@int:     return Math.Abs(other.QC_Int() - ((IGH_QuickCast) this).QC_Int());
+          case GH_QuickCastType.num:      return Math.Abs(other.QC_Num() - ((IGH_QuickCast) this).QC_Num());
+          case GH_QuickCastType.pt:       return other.QC_Pt().DistanceTo(((IGH_QuickCast) this).QC_Pt());
+          case GH_QuickCastType.vec:      return new Point3d(other.QC_Vec()).DistanceTo(new Point3d(((IGH_QuickCast) this).QC_Vec()));
+          case GH_QuickCastType.interval:
+            var otherInterval = other.QC_Interval();
+            var thisInterval = ((IGH_QuickCast) this).QC_Interval();
+            var d0 = Math.Abs(otherInterval.T0 - thisInterval.T0);
+            var d1 = Math.Abs(otherInterval.T1 - thisInterval.T1);
+            return d0 + d1;
+        }
+      }
+      catch { }
+
       var dist0 = GH_StringMatcher.LevenshteinDistance(FullUniqueId.Format(DocumentGUID, UniqueID), other.QC_Text());
       var dist1 = GH_StringMatcher.LevenshteinDistance(FullUniqueId.Format(DocumentGUID, UniqueID).ToUpperInvariant(), other.QC_Text().ToUpperInvariant());
       return 0.5 * (dist0 + dist1);
@@ -276,9 +295,9 @@ namespace RhinoInside.Revit.GH.Types
       return FullUniqueId.Format(DocumentGUID, UniqueID).CompareTo(other.QC_Text());
     }
 
-    bool IGH_QuickCast.QC_Bool() => throw new InvalidCastException();
-    int IGH_QuickCast.QC_Int() => throw new InvalidCastException();
-    double IGH_QuickCast.QC_Num() => throw new InvalidCastException();
+    bool IGH_QuickCast.QC_Bool() => IsValid;
+    int IGH_QuickCast.QC_Int() => Id?.IntegerValue ?? throw new InvalidCastException();
+    double IGH_QuickCast.QC_Num() => Id?.IntegerValue ?? throw new InvalidCastException();
     string IGH_QuickCast.QC_Text() => FullUniqueId.Format(DocumentGUID, UniqueID);
     Color IGH_QuickCast.QC_Col() => throw new InvalidCastException();
     Point3d IGH_QuickCast.QC_Pt() => throw new InvalidCastException();
