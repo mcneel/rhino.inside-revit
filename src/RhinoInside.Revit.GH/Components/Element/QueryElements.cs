@@ -54,6 +54,13 @@ namespace RhinoInside.Revit.GH.Components
           DA.SetData("Element", Types.Element.FromElementId(doc, new DB.ElementId(i.Value)));
           break;
         case Grasshopper.Kernel.Types.GH_String s:
+          try
+          {
+            DA.SetData("Element", Types.Element.FromElementId(doc, new DB.ElementId(System.Convert.ToInt32(s.Value))));
+            return;
+          }
+          catch { }
+
           DA.SetData("Element", Types.Element.FromElement(doc.GetElement(s.Value)));
           break;
       }
