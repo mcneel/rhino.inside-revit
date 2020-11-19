@@ -8,6 +8,58 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
+  public class QueryElement : ZuiComponent
+  {
+    public override Guid ComponentGuid => new Guid("BBCF5D5C-9ABC-4E28-861A-584644EDFC3D");
+    public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.obscure;
+
+    public QueryElement() : base
+    (
+      name: "Query Element",
+      nickname: "Element",
+      description: "Get element by ID",
+      category: "Revit",
+      subCategory: "Element"
+    )
+    { }
+
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
+    {
+      ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
+      ParamDefinition.Create<Param_GenericObject>("Id", "ID", "Element Id or UniqueId to look for", defaultValue: -1),
+    };
+
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
+    {
+      ParamDefinition.Create<Parameters.Element>("Element", "E", string.Empty),
+    };
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
+      if (!Params.GetData(DA, "Id", out Grasshopper.Kernel.Types.IGH_Goo id)) return;
+
+      switch (id)
+      {
+        case Grasshopper.Kernel.Types.GH_Number n:
+          if (!double.IsNaN(n.Value))
+          {
+            try { DA.SetData("Element", Types.Element.FromElementId(doc, new DB.ElementId(System.Convert.ToInt32(n.Value)))); }
+            catch { }
+          }
+          break;
+        case Grasshopper.Kernel.Types.GH_Integer i:
+          DA.SetData("Element", Types.Element.FromElementId(doc, new DB.ElementId(i.Value)));
+          break;
+        case Grasshopper.Kernel.Types.GH_String s:
+          DA.SetData("Element", Types.Element.FromElement(doc.GetElement(s.Value)));
+          break;
+      }
+    }
+  }
+
   public class QueryElements : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("0F7DA57E-6C05-4DD0-AABF-69E42DF38859");
