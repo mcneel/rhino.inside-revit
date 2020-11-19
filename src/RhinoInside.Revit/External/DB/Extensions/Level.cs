@@ -68,7 +68,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           position = BasePointExtension.GetProjectBasePoint(doc).GetPosition();
           break;
         case ElevationBase.SurveyPoint:
-          position = BasePointExtension.GetSurveyPoint(doc).GetPosition();
+          position = BasePointExtension.GetSurveyPoint(doc).GetPosition() - BasePointExtension.GetSurveyPoint(doc).GetSharedPosition();
           break;
       }
 

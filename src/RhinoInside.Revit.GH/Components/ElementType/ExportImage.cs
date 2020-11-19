@@ -91,14 +91,14 @@ namespace RhinoInside.Revit.GH.Components
       var filePath = Path.Combine(folder, elementTypeName);
 
       if (!overrideFile && File.Exists(filePath))
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"File '{filePath}' already exists.");
-      else
       {
-        var bitmap = elementType.GetPreviewImage(size);
-
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"File '{filePath}' already exists.");
+      }
+      else if (elementType.GetPreviewImage(size) is System.Drawing.Bitmap bitmap)
+      {
         switch (resolution)
         {
-          case DB.ImageResolution.DPI_72:  bitmap.SetResolution( 72,  72); break;
+          case DB.ImageResolution.DPI_72:  bitmap.SetResolution(72,  72); break;
           case DB.ImageResolution.DPI_150: bitmap.SetResolution(150, 150); break;
           case DB.ImageResolution.DPI_300: bitmap.SetResolution(300, 300); break;
           case DB.ImageResolution.DPI_600: bitmap.SetResolution(600, 600); break;
@@ -111,38 +111,38 @@ namespace RhinoInside.Revit.GH.Components
             bitmap.Save(filePath, ImageFormat.Bmp);
             break;
           case DB.ImageFileType.JPEGLossless:
+          {
+            filePath += ".jpg";
+            var codec = ImageCodecInfo.GetImageDecoders().Where(x => x.FormatID == ImageFormat.Jpeg.Guid).FirstOrDefault();
+            using (var parameters = new EncoderParameters(1))
             {
-              filePath += ".jpg";
-              var codec = ImageCodecInfo.GetImageDecoders().Where(x => x.FormatID == ImageFormat.Jpeg.Guid).FirstOrDefault();
-              using (var parameters = new EncoderParameters(1))
-              {
-                parameters.Param[0] = new EncoderParameter(Encoder.Quality, 100);
-                bitmap.Save(filePath, codec, parameters);
-              }
+              parameters.Param[0] = new EncoderParameter(Encoder.Quality, 100);
+              bitmap.Save(filePath, codec, parameters);
             }
-            break;
+          }
+          break;
           case DB.ImageFileType.JPEGMedium:
+          {
+            filePath += ".jpg";
+            var codec = ImageCodecInfo.GetImageDecoders().Where(x => x.FormatID == ImageFormat.Jpeg.Guid).FirstOrDefault();
+            using (var parameters = new EncoderParameters(1))
             {
-              filePath += ".jpg";
-              var codec = ImageCodecInfo.GetImageDecoders().Where(x => x.FormatID == ImageFormat.Jpeg.Guid).FirstOrDefault();
-              using (var parameters = new EncoderParameters(1))
-              {
-                parameters.Param[0] = new EncoderParameter(Encoder.Quality, 50);
-                bitmap.Save(filePath, codec, parameters);
-              }
+              parameters.Param[0] = new EncoderParameter(Encoder.Quality, 50);
+              bitmap.Save(filePath, codec, parameters);
             }
-            break;
+          }
+          break;
           case DB.ImageFileType.JPEGSmallest:
+          {
+            filePath += ".jpg";
+            var codec = ImageCodecInfo.GetImageDecoders().Where(x => x.FormatID == ImageFormat.Jpeg.Guid).FirstOrDefault();
+            using (var parameters = new EncoderParameters(1))
             {
-              filePath += ".jpg";
-              var codec = ImageCodecInfo.GetImageDecoders().Where(x => x.FormatID == ImageFormat.Jpeg.Guid).FirstOrDefault();
-              using(var parameters = new EncoderParameters(1))
-              {
-                parameters.Param[0] = new EncoderParameter(Encoder.Quality, 1);
-                bitmap.Save(filePath, codec, parameters);
-              }
+              parameters.Param[0] = new EncoderParameter(Encoder.Quality, 1);
+              bitmap.Save(filePath, codec, parameters);
             }
-            break;
+          }
+          break;
           case DB.ImageFileType.PNG:
             filePath += ".png";
             bitmap.Save(filePath, ImageFormat.Png);
@@ -157,6 +157,11 @@ namespace RhinoInside.Revit.GH.Components
             bitmap.Save(filePath, ImageFormat.Tiff);
             break;
         }
+      }
+      else
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to export image for '{elementType.Name}' type.");
+        filePath = default;
       }
 
       DA.SetData("Image File", filePath);

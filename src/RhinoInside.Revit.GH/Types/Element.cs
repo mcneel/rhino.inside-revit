@@ -94,7 +94,7 @@ namespace RhinoInside.Revit.GH.Types
 
     protected virtual void SubInvalidateGraphics() { }
 
-    protected void AssertValidDocument(DB.Document doc, string paramName)
+    internal void AssertValidDocument(DB.Document doc, string paramName)
     {
       if (!(doc?.Equals(Document) ?? false))
         throw new System.ArgumentException("Invalid Document", paramName);
@@ -113,6 +113,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public static readonly Dictionary<Type, Func<DB.Element, Element>> ActivatorDictionary = new Dictionary<Type, Func<DB.Element, Element>>()
     {
+      { typeof(DB.BasePoint),               (element)=> new BasePoint             (element as DB.BasePoint)         },
       { typeof(DB.DesignOption),            (element)=> new DesignOption          (element as DB.DesignOption)      },
       { typeof(DB.View),                    (element)=> new View                  (element as DB.View)              },
       { typeof(DB.Family),                  (element)=> new Family                (element as DB.Family)            },
@@ -128,6 +129,7 @@ namespace RhinoInside.Revit.GH.Types
       
       { typeof(DB.Instance),                (element)=> new Instance              (element as DB.Instance)          },
       { typeof(DB.ProjectLocation),         (element)=> new ProjectLocation       (element as DB.ProjectLocation)   },
+      { typeof(DB.SiteLocation),            (element)=> new SiteLocation          (element as DB.SiteLocation)      },
       { typeof(DB.RevitLinkInstance),       (element)=> new RevitLinkInstance     (element as DB.RevitLinkInstance) },
       { typeof(DB.ImportInstance),          (element)=> new ImportInstance        (element as DB.ImportInstance)    },
       { typeof(DB.PointCloudInstance),      (element)=> new PointCloudInstance    (element as DB.PointCloudInstance)},

@@ -36,16 +36,6 @@ namespace RhinoInside.Revit.GH.Types
     }
   }
 
-  [Kernel.Attributes.Name("Project Location")]
-  public class ProjectLocation : Instance
-  {
-    protected override Type ScriptVariableType => typeof(DB.ProjectLocation);
-    public new DB.ProjectLocation Value => base.Value as DB.ProjectLocation;
-
-    public ProjectLocation() { }
-    public ProjectLocation(DB.ProjectLocation instance) : base(instance) { }
-  }
-
   [Kernel.Attributes.Name("Linked Model")]
   public class RevitLinkInstance : Instance
   {

@@ -73,20 +73,23 @@ namespace RhinoInside.Revit.GH.Components
         if (docs.Count() == 0)
         {
           // find all the revit link types in the host model
-          foreach(var revitLinkType in new DB.FilteredElementCollector(doc).OfClass(typeof(DB.RevitLinkType)).ToElements())
+          using (var collector = new DB.FilteredElementCollector(doc).OfClass(typeof(DB.RevitLinkType)))
           {
-            // extract the path of external document that is wrapped by the revit link type
-            var linkInfo = revitLinkType.GetExternalResourceReferences().FirstOrDefault();
-            if (linkInfo.Key != null && linkInfo.Value.HasValidDisplayPath())
+            foreach (var revitLinkType in collector)
             {
-              // stores custom info about the reference (project::model ids)
-              IDictionary<string, string> refInfo = linkInfo.Value.GetReferenceInformation();
-              var linkedDoc = documents.Cast<DB.Document>()
-                                       .Where(x => x.IsLinked
-                                                   && x.GetCloudModelPath().GetModelGUID() == Guid.Parse(refInfo["LinkedModelModelId"]))
-                                       .FirstOrDefault();
-              if (linkedDoc != null)
-                docs.Add(linkedDoc);
+              // extract the path of external document that is wrapped by the revit link type
+              var linkInfo = revitLinkType.GetExternalResourceReferences().FirstOrDefault();
+              if (linkInfo.Key != null && linkInfo.Value.HasValidDisplayPath())
+              {
+                // stores custom info about the reference (project::model ids)
+                var refInfo = linkInfo.Value.GetReferenceInformation();
+                var linkedDoc = documents.Cast<DB.Document>()
+                                         .Where(x => x.IsLinked &&
+                                                     x.GetCloudModelPath().GetModelGUID() == Guid.Parse(refInfo["LinkedModelModelId"]))
+                                         .FirstOrDefault();
+                if (linkedDoc != null)
+                  docs.Add(linkedDoc);
+              }
             }
           }
         }
