@@ -1973,6 +1973,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap LevelIdentity {
+            get {
+                object obj = ResourceManager.GetObject("LevelIdentity", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap LinePatternElement {
             get {
                 object obj = ResourceManager.GetObject("LinePatternElement", resourceCulture);
@@ -2193,6 +2203,26 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ProjectInformation {
+            get {
+                object obj = ResourceManager.GetObject("ProjectInformation", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ProjectLocation {
+            get {
+                object obj = ResourceManager.GetObject("ProjectLocation", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap QueryAssetsOfMaterial {
             get {
                 object obj = ResourceManager.GetObject("QueryAssetsOfMaterial", resourceCulture);
@@ -2226,6 +2256,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap QueryDesignOptionSets {
             get {
                 object obj = ResourceManager.GetObject("QueryDesignOptionSets", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap QueryElement {
+            get {
+                object obj = ResourceManager.GetObject("QueryElement", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -2276,6 +2316,26 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap QueryMaterials {
             get {
                 object obj = ResourceManager.GetObject("QueryMaterials", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap QueryProjectLocations {
+            get {
+                object obj = ResourceManager.GetObject("QueryProjectLocations", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap QuerySiteLocations {
+            get {
+                object obj = ResourceManager.GetObject("QuerySiteLocations", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -2356,6 +2416,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap RoofByOutline {
             get {
                 object obj = ResourceManager.GetObject("RoofByOutline", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SiteLocationIdentity {
+            get {
+                object obj = ResourceManager.GetObject("SiteLocationIdentity", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
