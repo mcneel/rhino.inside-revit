@@ -11,6 +11,9 @@ layout: ltr/page-h2-toc
 
 {{ site.terms.rir }} brings the power of {{ site.terms.rhino }} and Grasshopper to the {{ site.terms.revit }} environment
 
+<!-- intro video -->
+{% include youtube_player.html id="OktVivsMulc" %}
+
 ## Installation
 
 Download {{ site.terms.rir }} and {{ site.terms.rhino }} from the links below
