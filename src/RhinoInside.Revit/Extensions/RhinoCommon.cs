@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Rhino;
-using Rhino.Geometry;
 
 namespace Rhino.Geometry
 {
@@ -511,5 +509,67 @@ namespace Rhino.Geometry
 
     public static bool TrySetUserString(this GeometryBase geometry, string key, Autodesk.Revit.DB.ElementId value, Autodesk.Revit.DB.ElementId def) =>
       geometry.TrySetUserString(key, value.IntegerValue, def.IntegerValue);
+  }
+}
+
+namespace Rhino.DocObjects.Tables
+{
+  static class NamedConstructionPlaneTableExtension
+  {
+    public static int Add(this NamedConstructionPlaneTable table, ConstructionPlane cplane)
+    {
+      if (table.Document != RhinoDoc.ActiveDoc)
+        throw new InvalidOperationException("Invalid Rhino Active Document");
+
+      if (table.Find(cplane.Name) < 0)
+      {
+        var previous = table.Document.Views.ActiveView.MainViewport.GetConstructionPlane();
+
+        try
+        {
+          table.Document.Views.ActiveView.MainViewport.SetConstructionPlane(cplane);
+          //table.Document.Views.ActiveView.MainViewport.PushConstructionPlane(cplane);
+          if (RhinoApp.RunScript($"_-NamedCPlane _Save \"{cplane.Name}\" _Enter", false))
+            return table.Count;
+        }
+        finally
+        {
+          //table.Document.Views.ActiveView.MainViewport.PopConstructionPlane();
+          table.Document.Views.ActiveView.MainViewport.SetConstructionPlane(previous);
+        }
+      }
+
+      return -1;
+    }
+
+    public static bool Modify(this NamedConstructionPlaneTable table, ConstructionPlane cplane, int index, bool quiet)
+    {
+      if (table.Document != RhinoDoc.ActiveDoc)
+        throw new InvalidOperationException("Invalid Rhino Active Document");
+
+      if (index <= table.Count)
+      {
+        var previous = table.Document.Views.ActiveView.MainViewport.GetConstructionPlane();
+
+        try
+        {
+          //table.Document.Views.ActiveView.MainViewport.PushConstructionPlane(cplane);
+          table.Document.Views.ActiveView.MainViewport.SetConstructionPlane(cplane);
+
+          var current = table[index];
+          if (current.Name != cplane.Name)
+            return RhinoApp.RunScript($"_-NamedCPlane _Rename \"{current.Name}\" \"{cplane.Name}\" _Save \"{cplane.Name}\" _Enter", !quiet);
+          else
+            return RhinoApp.RunScript($"_-NamedCPlane _Save \"{cplane.Name}\" _Enter", !quiet);
+        }
+        finally
+        {
+          //table.Document.Views.ActiveView.MainViewport.PopConstructionPlane();
+          table.Document.Views.ActiveView.MainViewport.SetConstructionPlane(previous);
+        }
+      }
+
+      return false;
+    }
   }
 }
