@@ -99,6 +99,22 @@ namespace RhinoInside.Revit
           activate: Addin.StartupMode == AddinStartupMode.AtStartup
         );
 
+        // Add DefaultRenderAppearancePath to Rhino settings if missing
+        {
+          var DefaultRenderAppearancePath = System.IO.Path.Combine
+          (
+            Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFilesX86),
+            "Autodesk Shared",
+            "Materials",
+            "Textures"
+          );
+
+          if (!Rhino.ApplicationSettings.FileSettings.GetSearchPaths().Any(x => x.Equals(DefaultRenderAppearancePath, StringComparison.InvariantCultureIgnoreCase)))
+            Rhino.ApplicationSettings.FileSettings.AddSearchPath(DefaultRenderAppearancePath, -1);
+
+          // TODO: Add also AdditionalRenderAppearancePaths content from Revit.ini if missing ??
+        }
+
         // Reset document units
         UpdateDocumentUnits(RhinoDoc.ActiveDoc);
         UpdateDocumentUnits(RhinoDoc.ActiveDoc, Revit.ActiveDBDocument);
@@ -115,9 +131,6 @@ namespace RhinoInside.Revit
           ToList();
 
         CheckInGuests();
-
-        //Enable Revit window back
-        WindowHandle.ActiveWindow = Revit.MainWindow;
       }
 
       return Result.Succeeded;
@@ -590,9 +603,11 @@ namespace RhinoInside.Revit
     }
 
     /// <summary>
-    /// Represents a Pseudo-modal loop
-    /// This class implements IDisposable, it's been designed to be used in a using statement.
+    /// Represents a Pseudo-modal loop.
     /// </summary>
+    /// <remarks>
+    /// This class implements <see cref="IDisposable"/> interface, it's been designed to be used in a using statement.
+    /// </remarks>
     internal sealed class ModalScope : IDisposable
     {
       static bool wasExposed = false;
