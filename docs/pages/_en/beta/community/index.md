@@ -8,7 +8,7 @@ Welcome to the {{ site.terms.rir }} community. On this page, you will find the r
 {% endcapture %}
 {% include ltr/bubble_note.html note=community_note %}
 
-{% include ltr/gallery.html data=site.data.community large=true extern=true %}
+{% include ltr/gallery.html data=site.data.community large=true %}
 
 ## Contributing to Community
 

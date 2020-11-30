@@ -17,7 +17,7 @@
         <div class="gallery-thumbnail gallery-thumbnail-dim gallery-thumbnail-small">
         {% endif %}
             {% if item.thumbnail %}
-                {% if include.extern %}
+                {% if item.thumbnail contains "http://" or item.thumbnail contains "https://" %}
                 <img class="gallery-img no-popup" src="{{ item.thumbnail }}" />
                 {% else %}
                 <img class="gallery-img no-popup" src="{{ item.thumbnail | prepend: site.baseurl }}" />
