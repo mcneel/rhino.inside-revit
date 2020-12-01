@@ -395,7 +395,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (meshes is null && IsValid)
       {
-        meshes = Enumerable.Repeat(Value, 1).GetPreviewMeshes(meshingParameters).ToArray();
+        meshes = Enumerable.Repeat(Value, 1).GetPreviewMeshes(Document, meshingParameters).ToArray();
 
         if (Value.IsElementGeometry && Document?.GetElement(Reference) is DB.Instance instance)
         {

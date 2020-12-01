@@ -1,12 +1,17 @@
 using System;
+using System.Collections.Generic;
 using Grasshopper.Kernel;
+using Rhino;
+using Rhino.DocObjects;
+using Rhino.DocObjects.Tables;
 using Rhino.Geometry;
 using DB = Autodesk.Revit.DB;
+using static Rhino.RhinoMath;
 
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Shared Site")]
-  public class ProjectLocation : Instance
+  public class ProjectLocation : Instance, Bake.IGH_BakeAwareElement
   {
     protected override Type ScriptVariableType => typeof(DB.ProjectLocation);
     public new DB.ProjectLocation Value => base.Value as DB.ProjectLocation;
@@ -35,6 +40,68 @@ namespace RhinoInside.Revit.GH.Types
         var strokeColor = (System.Drawing.Color) Rhino.Display.ColorRGBA.ApplyGamma(new Rhino.Display.ColorRGBA(args.Color), 2.0);
         args.Pipeline.DrawPoint(location.Origin, Rhino.Display.PointStyle.Pin, strokeColor, args.Color, 12.0f, 2.0f, 7.0f, 0.0f, true, true);
       }
+    }
+    #endregion
+
+    #region IGH_BakeAwareElement
+    bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
+      BakeElement(new Dictionary<DB.ElementId, Guid>(), true, doc, att, out guid);
+
+    public bool BakeElement
+    (
+      IDictionary<DB.ElementId, Guid> idMap,
+      bool overwrite,
+      RhinoDoc doc,
+      ObjectAttributes att,
+      out Guid guid
+    )
+    {
+      // 1. Check if is already cloned
+      if (idMap.TryGetValue(Id, out guid))
+        return true;
+
+      if (Value is DB.ProjectLocation projectLocation)
+      {
+        var name = ToString();
+
+        // 2. Check if already exist
+        var index = doc.NamedConstructionPlanes.Find(name);
+
+        // 3. Update if necessary
+        if (index < 0 || overwrite)
+        {
+          if (projectLocation.GetSiteLocation() is DB.SiteLocation siteLocation)
+          {
+            var location = Location;
+            var anchorPoint = new EarthAnchorPoint()
+            {
+              Name = projectLocation.Name,
+              Description = siteLocation.PlaceName,
+              ModelBasePoint = location.Origin,
+              ModelEast = location.XAxis,
+              ModelNorth = location.YAxis,
+              EarthBasepointElevation = siteLocation.Elevation,
+              EarthBasepointLatitude = Rhino.RhinoMath.ToDegrees(siteLocation.Latitude),
+              EarthBasepointLongitude = Rhino.RhinoMath.ToDegrees(siteLocation.Longitude),
+            };
+
+            doc.EarthAnchorPoint = anchorPoint;
+          }
+
+          var cplane = CreateConstructionPlane(name, Location, doc);
+
+          if (index < 0) index = doc.NamedConstructionPlanes.Add(cplane);
+          else if (overwrite) doc.NamedConstructionPlanes.Modify(cplane, index, true);
+        }
+
+        // TODO: Create a V5 Uuid out of the name
+        //guid = new Guid(0, 0, 0, BitConverter.GetBytes((long) index));
+        //idMap.Add(Id, guid);
+
+        return true;
+      }
+
+      return false;
     }
     #endregion
   }

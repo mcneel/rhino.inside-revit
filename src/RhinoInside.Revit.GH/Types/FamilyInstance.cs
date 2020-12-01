@@ -1,4 +1,9 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using Grasshopper.Kernel;
+using Rhino;
+using Rhino.DocObjects;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
@@ -10,7 +15,7 @@ namespace RhinoInside.Revit.GH.Types
   public interface IGH_FamilyInstance : IGH_InstanceElement { }
 
   [Kernel.Attributes.Name("Component")]
-  public class FamilyInstance : InstanceElement, IGH_FamilyInstance
+  public class FamilyInstance : InstanceElement, IGH_FamilyInstance, Bake.IGH_BakeAwareElement
   {
     protected override Type ScriptVariableType => typeof(DB.FamilyInstance);
     public static explicit operator DB.FamilyInstance(FamilyInstance value) => value?.Value;
@@ -18,6 +23,70 @@ namespace RhinoInside.Revit.GH.Types
 
     public FamilyInstance() { }
     public FamilyInstance(DB.FamilyInstance value) : base(value) { }
+
+    #region IGH_BakeAwareElement
+    bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
+      BakeElement(new Dictionary<DB.ElementId, Guid>(), true, doc, att, out guid);
+
+    public new bool BakeElement
+    (
+      IDictionary<DB.ElementId, Guid> idMap,
+      bool overwrite,
+      RhinoDoc doc,
+      ObjectAttributes att,
+      out Guid guid
+    )
+    {
+      // 1. Check if is already cloned
+      if (idMap.TryGetValue(Id, out guid))
+        return true;
+
+      // 3. Update if necessary
+      if (Value is DB.FamilyInstance element)
+      {
+        using (var options = new DB.Options() { DetailLevel = DB.ViewDetailLevel.Fine })
+        {
+          using (var context = GeometryDecoder.Context.Push())
+          {
+            context.Element = element;
+            context.GraphicsStyleId = element.Category?.GetGraphicsStyle(DB.GraphicsStyleType.Projection)?.Id ?? DB.ElementId.InvalidElementId;
+            context.MaterialId = element.Category?.Material?.Id ?? DB.ElementId.InvalidElementId;
+
+            using (var geometry = element.GetGeometry(options))
+            {
+              if (geometry is DB.GeometryElement geometryElement)
+              {
+                var transform = element.GetTransform();
+                var location = new Plane(transform.Origin.ToPoint3d(), transform.BasisX.ToVector3d(), transform.BasisY.ToVector3d());
+                var worldToElement = Transform.PlaneToPlane(location, Plane.WorldXY);
+
+                if (BakeGeometryElement(idMap, overwrite, doc, att, worldToElement, element, geometry, out var idefIndex))
+                {
+                  att = att.Duplicate();
+                  att.Name = element.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MARK)?.AsString() ?? string.Empty;
+                  att.Url = element.get_Parameter(DB.BuiltInParameter.ALL_MODEL_URL)?.AsString() ?? string.Empty;
+
+                  var category = Category;
+                  if (category is object && category.BakeElement(idMap, false, doc, att, out var layerGuid))
+                    att.LayerIndex = doc.Layers.FindId(layerGuid).Index;
+
+                  guid = doc.Objects.AddInstanceObject(idefIndex, Transform.PlaneToPlane(Plane.WorldXY, location), att);
+                }
+              }
+
+              if (guid != Guid.Empty)
+              {
+                idMap.Add(Id, guid);
+                return true;
+              }
+            }
+          }
+        }
+      }
+
+      return false;
+    }
+    #endregion
 
     #region Location
     public override Level Level
@@ -257,7 +326,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Component Type")]
-  public class FamilySymbol : ElementType, IGH_FamilySymbol
+  public class FamilySymbol : ElementType, IGH_FamilySymbol, Bake.IGH_BakeAwareElement
   {
     protected override Type ScriptVariableType => typeof(DB.FamilySymbol);
     public static explicit operator DB.FamilySymbol(FamilySymbol value) => value?.Value;
@@ -266,6 +335,56 @@ namespace RhinoInside.Revit.GH.Types
     public FamilySymbol() { }
     protected FamilySymbol(DB.Document doc, DB.ElementId id) : base(doc, id) { }
     public FamilySymbol(DB.FamilySymbol elementType) : base(elementType) { }
+
+    #region IGH_BakeAwareElement
+    bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
+      BakeElement(new Dictionary<DB.ElementId, Guid>(), true, doc, att, out guid);
+
+    public bool BakeElement
+    (
+      IDictionary<DB.ElementId, Guid> idMap,
+      bool overwrite,
+      RhinoDoc doc,
+      ObjectAttributes att,
+      out Guid guid
+    )
+    {
+      // 1. Check if is already cloned
+      if (idMap.TryGetValue(Id, out guid))
+        return true;
+
+      // 3. Update if necessary
+      if (Value is DB.FamilySymbol element)
+      {
+        using (var options = new DB.Options() { DetailLevel = DB.ViewDetailLevel.Fine })
+        {
+          using (var context = GeometryDecoder.Context.Push())
+          {
+            context.Element = element;
+            context.GraphicsStyleId = element.Category?.GetGraphicsStyle(DB.GraphicsStyleType.Projection)?.Id ?? DB.ElementId.InvalidElementId;
+            context.MaterialId = element.Category?.Material?.Id ?? DB.ElementId.InvalidElementId;
+
+            using (var geometry = element.GetGeometry(options))
+            {
+              if (geometry is DB.GeometryElement geometryElement)
+              {
+                if (GeometricElement.BakeGeometryElement(idMap, overwrite, doc, att, Transform.Identity, element, geometry, out var idefIndex))
+                  guid = doc.InstanceDefinitions[idefIndex].Id;
+              }
+
+              if (guid != Guid.Empty)
+              {
+                idMap.Add(Id, guid);
+                return true;
+              }
+            }
+          }
+        }
+      }
+
+      return false;
+    }
+    #endregion
 
     public Family Family => Value is DB.FamilySymbol symbol ? new Family(symbol.Family) : default;
   }

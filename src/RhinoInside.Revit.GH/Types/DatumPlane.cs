@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
+using Rhino;
+using Rhino.DocObjects;
+using Rhino.DocObjects.Tables;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.Convert.System.Collections.Generic;
@@ -24,7 +27,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Level")]
-  public class Level : DatumPlane
+  public class Level : DatumPlane, Bake.IGH_BakeAwareElement
   {
     protected override Type ScriptVariableType => typeof(DB.Level);
     public new DB.Level Value => base.Value as DB.Level;
@@ -71,6 +74,50 @@ namespace RhinoInside.Revit.GH.Types
           args.Pipeline.DrawPatternedLine(from, to, args.Color, 0x00000F0F, args.Thickness);
         }
       }
+    }
+    #endregion
+
+    #region IGH_BakeAwareElement
+    bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
+      BakeElement(new Dictionary<DB.ElementId, Guid>(), true, doc, att, out guid);
+
+    public bool BakeElement
+    (
+      IDictionary<DB.ElementId, Guid> idMap,
+      bool overwrite,
+      RhinoDoc doc,
+      ObjectAttributes att,
+      out Guid guid
+    )
+    {
+      // 1. Check if is already cloned
+      if (idMap.TryGetValue(Id, out guid))
+        return true;
+
+      if (Value is DB.Level)
+      {
+        var name = ToString();
+
+        // 2. Check if already exist
+        var index = doc.NamedConstructionPlanes.Find(name);
+
+        // 3. Update if necessary
+        if (index < 0 || overwrite)
+        {
+          var cplane = CreateConstructionPlane(name, Location, doc);
+
+          if (index < 0) index = doc.NamedConstructionPlanes.Add(cplane);
+          else if (overwrite) doc.NamedConstructionPlanes.Modify(cplane, index, true);
+        }
+
+        // TODO: Create a V5 Uuid out of the name
+        //guid = new Guid(0, 0, 0, BitConverter.GetBytes((long) index));
+        //idMap.Add(Id, guid);
+
+        return true;
+      }
+
+      return false;
     }
     #endregion
 
@@ -148,7 +195,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Grid")]
-  public class Grid : DatumPlane
+  public class Grid : DatumPlane, Bake.IGH_BakeAwareElement
   {
     protected override Type ScriptVariableType => typeof(DB.Grid);
     public new DB.Grid Value => base.Value as DB.Grid;
@@ -259,6 +306,67 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
+    #region IGH_BakeAwareElement
+    bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
+      BakeElement(new Dictionary<DB.ElementId, Guid>(), true, doc, att, out guid);
+
+    public bool BakeElement
+    (
+      IDictionary<DB.ElementId, Guid> idMap,
+      bool overwrite,
+      RhinoDoc doc,
+      ObjectAttributes att,
+      out Guid guid
+    )
+    {
+      // 1. Check if is already cloned
+      if (idMap.TryGetValue(Id, out guid))
+        return true;
+
+      if (Value is DB.Grid grid)
+      {
+        att = att.Duplicate();
+        att.Name = grid.Name;
+        att.WireDensity = -1;
+        att.CastsShadows = false;
+        att.ReceivesShadows = false;
+        if (Category.BakeElement(idMap, false, doc, att, out var layerGuid))
+          att.LayerIndex = doc.Layers.FindId(layerGuid).Index;
+
+        // 2. Check if already exist
+        var gridObject = doc.Objects.OfType<SurfaceObject>().Where
+        (
+          x => !x.IsInstanceDefinitionGeometry &&
+          x.Attributes.LayerIndex == att.LayerIndex &&
+          x.ObjectType == ObjectType.Surface &&
+          x.Name == att.Name
+        ).
+        FirstOrDefault();
+
+        // 3. Update if necessary
+        if (gridObject is null || overwrite)
+        {
+          if (gridObject is null)
+          {
+            guid = doc.Objects.Add(Surface, att);
+          }
+          else
+          {
+            guid = gridObject.Id;
+            doc.Objects.ModifyAttributes(guid, att, true);
+            doc.Objects.Replace(guid, Surface);
+          }
+        }
+        else guid = gridObject.Id;
+
+        idMap.Add(Id, guid);
+        return true;
+      }
+
+      return false;
+    }
+    #endregion
+
     #region Properties
     public override BoundingBox BoundingBox
     {
@@ -332,7 +440,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Reference Plane")]
-  public class ReferencePlane : DatumPlane
+  public class ReferencePlane : DatumPlane, Bake.IGH_BakeAwareElement
   {
     protected override Type ScriptVariableType => typeof(DB.ReferencePlane);
     public new DB.ReferencePlane Value => base.Value as DB.ReferencePlane;
@@ -377,6 +485,50 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
+    #region IGH_BakeAwareElement
+    bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
+      BakeElement(new Dictionary<DB.ElementId, Guid>(), true, doc, att, out guid);
+
+    public bool BakeElement
+    (
+      IDictionary<DB.ElementId, Guid> idMap,
+      bool overwrite,
+      RhinoDoc doc,
+      ObjectAttributes att,
+      out Guid guid
+    )
+    {
+      // 1. Check if is already cloned
+      if (idMap.TryGetValue(Id, out guid))
+        return true;
+
+      if (Value is DB.ReferencePlane)
+      {
+        var name = ToString();
+
+        // 2. Check if already exist
+        var index = doc.NamedConstructionPlanes.Find(name);
+
+        // 3. Update if necessary
+        if (index < 0 || overwrite)
+        {
+          var cplane = CreateConstructionPlane(name, Location, doc);
+
+          if (index < 0) index = doc.NamedConstructionPlanes.Add(cplane);
+          else if (overwrite) doc.NamedConstructionPlanes.Modify(cplane, index, true);
+        }
+
+        // TODO: Create a V5 Uuid out of the name
+        //guid = new Guid(0, 0, 0, BitConverter.GetBytes((long) index));
+        //idMap.Add(Id, guid);
+
+        return true;
+      }
+
+      return false;
+    }
+    #endregion
+
     #region Properties
     public override BoundingBox BoundingBox
     {
@@ -418,16 +570,6 @@ namespace RhinoInside.Revit.GH.Types
       get => Value is DB.ReferencePlane referencePlane ?
           new LineCurve(referencePlane.BubbleEnd.ToPoint3d(), referencePlane.FreeEnd.ToPoint3d()) :
         default;
-      //set
-      //{
-      //  if (value is object && Value is DB.ReferencePlane referencePlane)
-      //  {
-      //    if (value.TryGetLine(out var line, Revit.VertexTolerance * Revit.ModelUnits))
-      //    {
-      //      base.Curve = default;
-      //    }
-      //  }
-      //}
     }
     #endregion
   }

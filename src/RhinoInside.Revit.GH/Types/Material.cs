@@ -1,17 +1,161 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using Grasshopper.Kernel;
+using Rhino;
+using Rhino.DocObjects;
 using RhinoInside.Revit.Convert.System.Drawing;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Material")]
-  public class Material : Element
+  public class Material : Element, Bake.IGH_BakeAwareElement
   {
     protected override Type ScriptVariableType => typeof(DB.Material);
     public new DB.Material Value => base.Value as DB.Material;
 
     public Material() { }
+    public Material(DB.Document doc, DB.ElementId id) : base(doc, id) { }
     public Material(DB.Material material) : base(material) { }
+
+    public override bool CastTo<Q>(out Q target)
+    {
+      if (base.CastTo<Q>(out target))
+        return true;
+
+      if (typeof(Q).IsAssignableFrom(typeof(Grasshopper.Kernel.Types.GH_Material)))
+      {
+        if (RhinoDoc.ActiveDoc is RhinoDoc doc)
+        {
+          var renderMaterial = Rhino.Render.RenderMaterial.CreateBasicMaterial(Rhino.DocObjects.Material.DefaultMaterial, doc);
+          renderMaterial.Name = Name;
+
+#if REVIT_2018
+          if (AppearanceAsset?.Value is DB.AppearanceAssetElement appearance)
+          {
+            using (var asset = appearance.GetRenderingAsset())
+              AppearanceAssetElement.SimulateRenderMaterial(renderMaterial, asset, doc);
+          }
+          else if (Value is DB.Material material)
+#endif
+          {
+            renderMaterial.Fields.Set(Rhino.Render.RenderMaterial.BasicMaterialParameterNames.Diffuse, material.Color.ToColor());
+            renderMaterial.Fields.Set(Rhino.Render.RenderMaterial.BasicMaterialParameterNames.Shine, material.Shininess / 128.0 * Rhino.DocObjects.Material.MaxShine);
+            renderMaterial.Fields.Set(Rhino.Render.RenderMaterial.BasicMaterialParameterNames.Reflectivity, 1.0 / Math.Exp((1.0 - (material.Smoothness / 100.0)) * 10));
+            renderMaterial.Fields.Set(Rhino.Render.RenderMaterial.BasicMaterialParameterNames.Transparency, material.Transparency / 100.0);
+          }
+
+          if(renderMaterial is null)
+            target = default(Q);
+          else
+            target = (Q) (object) new Grasshopper.Kernel.Types.GH_Material(renderMaterial);
+
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    #region IGH_BakeAwareElement
+    bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
+      BakeElement(new Dictionary<DB.ElementId, Guid>(), true, doc, att, out guid);
+
+    public bool BakeElement
+    (
+      IDictionary<DB.ElementId, Guid> idMap,
+      bool overwrite,
+      RhinoDoc doc,
+      ObjectAttributes att,
+      out Guid guid
+    )
+    {
+      // 1. Check if is already cloned
+      if (idMap.TryGetValue(Id, out guid))
+        return true;
+
+      if (Value is DB.Material material)
+      {
+        // 2. Check if already exist
+        var index = doc.Materials.Find(material.Name, true);
+        var mat = index < 0 ?
+          new Rhino.DocObjects.Material() { Name = material.Name } :
+          doc.Materials[index];
+
+        // 3. Update if necessary
+        if (index < 0 || overwrite)
+        {
+#if REVIT_2018
+          if (AppearanceAsset is AppearanceAssetElement asset)
+          {
+            if (asset.BakeRenderMaterial(overwrite, doc, material.Name, out var renderMaterialId))
+            {
+              if (Rhino.Render.RenderContent.FromId(doc, renderMaterialId) is Rhino.Render.RenderMaterial renderMaterial)
+              {
+                renderMaterial.SimulateMaterial(ref mat, false);
+
+                if (mat.Name != material.Name)
+                {
+                  mat.Name = material.Name;
+                  mat.RenderMaterialInstanceId = Guid.Empty;
+                }
+                else mat.RenderMaterialInstanceId = renderMaterialId;
+              }
+            }
+          }
+          else
+#endif
+          {
+            mat.DiffuseColor = material.Color.ToColor();
+            mat.Shine = material.Shininess / 128.0 * Rhino.DocObjects.Material.MaxShine;
+            mat.Reflectivity = 1.0 / Math.Exp((1.0 - (material.Smoothness / 100.0)) * 10);
+            mat.Transparency = material.Transparency / 100.0;
+          }
+
+          if (index < 0) { index = doc.Materials.Add(mat); mat = doc.Materials[index]; }
+          else if (overwrite) doc.Materials.Modify(mat, index, true);
+        }
+
+        idMap.Add(Id, guid = mat.Id);
+        return true;
+      }
+
+      return false;
+    }
+
+    internal System.Drawing.Color ObjectColor
+    {
+      get
+      {
+        if (Value is DB.Material material)
+        {
+          var color = System.Drawing.Color.FromArgb
+          (
+            255 - (int) Math.Round(material.Transparency / 100.0 * 255.0),
+            material.Color.ToColor()
+          );
+
+#if REVIT_2018
+          if (material.UseRenderAppearanceForShading && Document.GetElement(material.AppearanceAssetId) is DB.AppearanceAssetElement assetElement)
+          {
+            if (AppearanceAssetElement.TryGetBasicMaterialParameters(assetElement.GetRenderingAsset(), out var renderParams))
+            {
+              color = System.Drawing.Color.FromArgb
+              (
+                255 - (int) Math.Round(renderParams.Transparency * 255.0),
+                renderParams.Diffuse.AsSystemColor()
+              );
+            }
+          }
+#endif
+          return color;
+        }
+
+        return System.Drawing.Color.Black;
+      }
+    }
+    #endregion
 
     #region Identity
     public string MaterialClass

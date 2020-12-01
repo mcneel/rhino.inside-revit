@@ -1,5 +1,9 @@
 using System;
+using System.Collections.Generic;
+using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
+using Rhino;
+using Rhino.DocObjects;
 using RhinoInside.Revit.Convert.System.Drawing;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
@@ -7,7 +11,7 @@ using DB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Category")]
-  public class Category : Element
+  public class Category : Element, Bake.IGH_BakeAwareElement
   {
     #region IGH_Goo
     protected override Type ScriptVariableType => typeof(DB.Category);
@@ -188,7 +192,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public Category() : base() { }
     public Category(DB.Document doc, DB.ElementId id) : base(doc, id) { }
-    public Category(DB.Category value) : base(value.Document(), value.Id) => category = value;
+    public Category(DB.Category value) : base(value.Document(), value?.Id ?? DB.ElementId.InvalidElementId) => category = value;
 
     protected override bool SetValue(DB.Element element)
     {
@@ -217,6 +221,167 @@ namespace RhinoInside.Revit.GH.Types
 
       return null;
     }
+
+    #region IGH_BakeAwareElement
+    bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
+      BakeElement(new Dictionary<DB.ElementId, Guid>(), true, doc, att, out guid);
+
+    static double ToPlotWeight(int? value)
+    {
+      if (!value.HasValue) return -1.0;
+
+      var size = new double[]
+      {
+        0.0,
+        0.003,
+        0.003,
+        0.003,
+        0.004,
+        0.006,
+        0.009,
+        0.013,
+        0.018,
+        0.025,
+        0.035,
+        0.050,
+        0.065,
+        0.085,
+        0.110,
+        0.150,
+        0.200
+      };
+
+      if (0 < value.Value && value.Value < 17)
+        return size[value.Value] * RhinoMath.UnitScale(Rhino.UnitSystem.Inches, Rhino.UnitSystem.Millimeters);
+
+      return 0.0;
+    }
+
+    public bool BakeElement
+    (
+      IDictionary<DB.ElementId, Guid> idMap,
+      bool overwrite,
+      RhinoDoc doc,
+      ObjectAttributes att,
+      out Guid guid
+    )
+    {
+      // 1. Check if is already cloned
+      if (idMap.TryGetValue(Id, out guid))
+        return true;
+
+      const string RootLayerName = "Revit";
+      var PS = Layer.PathSeparator;
+
+      if (Value is DB.Category category)
+      {
+        var linetypeIndex = -1;
+        if (ProjectionLinePattern is LinePatternElement linePattern)
+        {
+          if (linePattern.BakeElement(idMap, false, doc, att, out var linetypeGuid))
+            linetypeIndex = doc.Linetypes.FindId(linetypeGuid).Index;
+        }
+
+        var materialIndex = Rhino.DocObjects.Material.DefaultMaterial.Index;
+        if (Material is Material material)
+        {
+          if (material.BakeElement(idMap, false, doc, att, out var materialGuid))
+            materialIndex = doc.Materials.FindId(materialGuid).Index;
+        }
+
+        var fullLayerName = category.Parent is null ?
+          $"{RootLayerName}{PS}{category.CategoryType}{PS}{category.Name}" :
+          $"{RootLayerName}{PS}{category.CategoryType}{PS}{category.Parent.Name}{PS}{category.Name}";
+
+        // 2. Check if already exist
+        var index = doc.Layers.FindByFullPath(fullLayerName, -1);
+        var layer = index < 0 ?
+          Layer.GetDefaultLayerProperties() :
+          doc.Layers[index];
+
+        // 3. Update if necessary
+        if (index < 0 || overwrite)
+        {
+          if (index < 0)
+          {
+            // Create Root Layer
+            new Category(category.Parent).BakeElement(idMap, false, doc, att, out var parentGuid);
+
+            // Create Category Type Layer
+            if (category.Parent is null)
+            {
+              if (CategoryType.NamedValues.TryGetValue((int) category.CategoryType, out var typeName))
+              {
+                var type = doc.Layers.FindByFullPath($"{RootLayerName}::{category.CategoryType}", -1);
+                if (type < 0)
+                {
+                  var typeLayer = Layer.GetDefaultLayerProperties();
+                  typeLayer.ParentLayerId = parentGuid;
+                  typeLayer.Name = typeName;
+                  type = doc.Layers.Add(typeLayer);
+                }
+
+                parentGuid = doc.Layers[type].Id;
+              }
+            }
+
+            layer.ParentLayerId = parentGuid;
+            layer.Name = category.Name;
+            layer.IsExpanded = false;
+          }
+
+          if (category.CategoryType == DB.CategoryType.Annotation)
+          {
+            layer.Color = category.LineColor.ToColor();
+
+            if
+            (
+              Id.TryGetBuiltInCategory(out var builtInCategory) &&
+              builtInCategory == DB.BuiltInCategory.OST_Grids
+            )
+            {
+              layer.Color = System.Drawing.Color.FromArgb(35, layer.Color);
+              layer.IsLocked = true;
+            }
+          }
+          else
+          {
+            layer.Color = Material.ObjectColor;
+            layer.RenderMaterialIndex = materialIndex;
+            layer.PlotColor = category.LineColor.ToColor();
+
+            // Special case for 
+            if (category.Id.IntegerValue == (int) DB.BuiltInCategory.OST_LightingFixtureSource)
+              layer.IsVisible = false;
+          }
+
+          layer.LinetypeIndex = linetypeIndex;
+          layer.PlotWeight = ToPlotWeight(ProjectionLineWeight);
+
+          if (index < 0) { index = doc.Layers.Add(layer); layer = doc.Layers[index]; }
+          else if (overwrite) doc.Layers.Modify(layer, index, true);
+        }
+
+        idMap.Add(Id, guid = layer.Id);
+        return true;
+      }
+      else
+      {
+        var layerIndex = doc.Layers.FindByFullPath(RootLayerName, -1);
+        if (layerIndex < 0)
+        {
+          var layer = Layer.GetDefaultLayerProperties();
+          {
+            layer.Name = RootLayerName;
+          }
+          layerIndex = doc.Layers.Add(layer);
+        }
+
+        guid = doc.Layers[layerIndex].Id;
+        return true;
+      }
+    }
+    #endregion
 
     #region Properties
     public override string Name

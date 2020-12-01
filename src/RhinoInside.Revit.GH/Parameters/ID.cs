@@ -10,14 +10,32 @@ using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
+using Rhino;
+using Rhino.DocObjects;
 using Rhino.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
+
+namespace RhinoInside.Revit.GH.Bake
+{
+  public interface IGH_BakeAwareElement : IGH_BakeAwareData
+  {
+    bool BakeElement
+    (
+      IDictionary<DB.ElementId, Guid> idMap,
+      bool overwrite,
+      RhinoDoc doc,
+      ObjectAttributes att,
+      out Guid guid
+    );
+  }
+}
 
 namespace RhinoInside.Revit.GH.Parameters
 {
   public abstract class ElementIdParam<T, R> :
   PersistentParam<T>,
+  IGH_BakeAwareObject,
   Kernel.IGH_ElementIdParam
   where T : class, Types.IGH_ElementId
   {
@@ -453,6 +471,44 @@ namespace RhinoInside.Revit.GH.Parameters
       }
 
       return false;
+    }
+    #endregion
+
+    #region IGH_BakeAwareObject
+    public bool IsBakeCapable => DataType != GH_ParamData.@void && VolatileData.AllData(true).Any(x => x is IGH_BakeAwareData);
+
+    public void BakeGeometry(RhinoDoc doc, List<Guid> guids) => BakeGeometry(doc, null, guids);
+    public void BakeGeometry(RhinoDoc doc, ObjectAttributes att, List<Guid> guids) =>
+      Rhinoceros.InvokeInHostContext(() => BakeElements(doc, att, guids));
+      
+    public void BakeElements(RhinoDoc doc, ObjectAttributes att, List<Guid> guids)
+    {
+      if (doc is null) throw new ArgumentNullException(nameof(doc), "Invalid document");
+      if (att is null) att = doc.CreateDefaultAttributes();
+      else att = att.Duplicate();
+
+      var idMap = new Dictionary<DB.ElementId, Guid>();
+
+      // In case some element has no Category it should go to Root 'Revit' layer.
+      if (new Types.Category().BakeElement(idMap, false, doc, att, out var layerGuid))
+        att.LayerIndex = doc.Layers.FindId(layerGuid).Index;
+
+      foreach (var goo in VolatileData.AllData(true))
+      {
+        if (!goo.IsValid)
+          continue;
+
+        if (goo is Bake.IGH_BakeAwareElement bakeAwareElement)
+        {
+          if (bakeAwareElement.BakeElement(idMap, true, doc, att, out var guid))
+            guids.Add(guid);
+        }
+        else if (goo is IGH_BakeAwareData bakeAwareData)
+        {
+          if (bakeAwareData.BakeGeometry(doc, att, out var guid))
+            guids.Add(guid);
+        }
+      }
     }
     #endregion
   }

@@ -13,14 +13,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     struct SameDocumentComparer : IEqualityComparer<Element>
     {
-      bool IEqualityComparer<Element>.Equals(Element x, Element y) => ReferenceEquals(x, y) || x.Id == y.Id;
-      int IEqualityComparer<Element>.GetHashCode(Element obj) => obj.Id.IntegerValue;
+      bool IEqualityComparer<Element>.Equals(Element x, Element y) => ReferenceEquals(x, y) || x?.Id == y?.Id;
+      int IEqualityComparer<Element>.GetHashCode(Element obj) => obj?.Id.IntegerValue ?? -1;
     }
 
     struct InterDocumentComparer : IEqualityComparer<Element>
     {
-      bool IEqualityComparer<Element>.Equals(Element x, Element y) => (ReferenceEquals(x, y) || x.Id == y.Id) && x.Document.Equals(y.Document);
-      int IEqualityComparer<Element>.GetHashCode(Element obj) => obj.Id.IntegerValue ^ obj.Document.GetHashCode();
+      bool IEqualityComparer<Element>.Equals(Element x, Element y) =>  Equivalent(x, y);
+      int IEqualityComparer<Element>.GetHashCode(Element obj) => (obj?.Id.IntegerValue ?? -1) ^ (obj?.Document.GetHashCode() ?? 0);
     }
 
     public static bool Equivalent(this Element self, Element other)
@@ -28,7 +28,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (ReferenceEquals(self, other))
         return true;
 
-      return self.Id == other?.Id && self.Document.Equals(other?.Document);
+      if (self?.Id != other?.Id)
+        return false;
+
+      return self.Document.Equals(other);
     }
   }
 

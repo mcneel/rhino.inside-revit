@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Grasshopper.Kernel;
+using Rhino;
+using Rhino.DocObjects;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Display;
+using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.Convert.System.Drawing;
+using RhinoInside.Revit.External.DB;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
@@ -15,7 +19,7 @@ namespace RhinoInside.Revit.GH.Types
   public interface IGH_GeometricElement : IGH_GraphicalElement { }
 
   [Kernel.Attributes.Name("Geometric Element")]
-  public class GeometricElement : GraphicalElement, IGH_GeometricElement, IGH_PreviewMeshData
+  public class GeometricElement : GraphicalElement, IGH_GeometricElement, IGH_PreviewMeshData, Bake.IGH_BakeAwareElement
   {
     public override string DisplayName
     {
@@ -83,10 +87,10 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region Preview
-    public static void BuildPreview
+    internal static void BuildPreview
     (
       DB.Element element, MeshingParameters meshingParameters, DB.ViewDetailLevel detailLevel,
-      out Rhino.Display.DisplayMaterial[] materials, out Mesh[] meshes, out Curve[] wires
+      out DB.Material[] materials, out Mesh[] meshes, out Curve[] wires
     )
     {
       using (var options = new DB.Options() { DetailLevel = detailLevel == DB.ViewDetailLevel.Undefined ? DB.ViewDetailLevel.Medium : detailLevel })
@@ -100,18 +104,18 @@ namespace RhinoInside.Revit.GH.Types
         }
         else
         {
-          var categoryMaterial = element.Category?.Material.ToDisplayMaterial(null);
-          var elementMaterial = geometry.MaterialElement.ToDisplayMaterial(categoryMaterial);
+          var categoryMaterial = element.Category?.Material;
+          var elementMaterial = geometry.MaterialElement ?? categoryMaterial;
 
-          meshes = geometry.GetPreviewMeshes(meshingParameters).Where(x => x is object).ToArray();
           wires = geometry.GetPreviewWires().Where(x => x is object).ToArray();
-          materials = geometry.GetPreviewMaterials(element.Document, elementMaterial).Where(x => x is object).ToArray();
+          meshes = geometry.GetPreviewMeshes(element.Document, meshingParameters).ToArray();
+          materials = geometry.GetPreviewMaterials(element.Document, elementMaterial).ToArray();
 
-          if (meshes.Length == 0 && wires.Length == 0 && element.get_BoundingBox(null) is DB.BoundingBoxXYZ)
+          if (wires.Length == 0 && meshes.Length == 0 && element.get_BoundingBox(null) is DB.BoundingBoxXYZ)
           {
             var subMeshes = new List<Mesh>();
             var subWires = new List<Curve>();
-            var subMaterials = new List<Rhino.Display.DisplayMaterial>();
+            var subMaterials = new List<DB.Material>();
 
             foreach (var dependent in element.GetDependentElements(null).Select(x => element.Document.GetElement(x)))
             {
@@ -123,9 +127,9 @@ namespace RhinoInside.Revit.GH.Types
               {
                 if (dependentGeometry is object)
                 {
-                  subMeshes.AddRange(dependentGeometry.GetPreviewMeshes(meshingParameters).Where(x => x is object));
                   subWires.AddRange(dependentGeometry.GetPreviewWires().Where(x => x is object));
-                  subMaterials.AddRange(dependentGeometry.GetPreviewMaterials(element.Document, elementMaterial).Where(x => x is object));
+                  subMeshes.AddRange(dependentGeometry.GetPreviewMeshes(element.Document, meshingParameters));
+                  subMaterials.AddRange(dependentGeometry.GetPreviewMaterials(element.Document, elementMaterial));
                 }
               }
             }
@@ -160,7 +164,24 @@ namespace RhinoInside.Revit.GH.Types
           if (element is null)
             return;
 
-          BuildPreview(element, MeshingParameters, DB.ViewDetailLevel.Undefined, out materials, out meshes, out wires);
+          BuildPreview(element, MeshingParameters, DB.ViewDetailLevel.Undefined, out var materialElements, out meshes, out wires);
+
+          // Combine meshes of same material for display performance
+          if (meshes is object && materialElements is object)
+          {
+            var outMesh = new Mesh();
+            var dictionary = Convert.Display.PreviewConverter.ZipByMaterial(materialElements, meshes, outMesh);
+            if (outMesh.Faces.Count > 0)
+            {
+              materials = dictionary.Keys.Select(x => x.ToDisplayMaterial(null)).Concat(Enumerable.Repeat(new Rhino.Display.DisplayMaterial(), 1)).ToArray();
+              meshes = dictionary.Values.Concat(Enumerable.Repeat(outMesh, 1)).ToArray();
+            }
+            else
+            {
+              materials = dictionary.Keys.Select(x => x.ToDisplayMaterial(null)).ToArray();
+              meshes = dictionary.Values.ToArray();
+            }
+          }
         }
       }
 
@@ -393,6 +414,256 @@ namespace RhinoInside.Revit.GH.Types
     Mesh[] IGH_PreviewMeshData.GetPreviewMeshes()
     {
       return TryGetPreviewMeshes();
+    }
+    #endregion
+
+    #region IGH_BakeAwareElement
+    static ObjectAttributes PeekAttributes(IDictionary<DB.ElementId, Guid> idMap, RhinoDoc doc, ObjectAttributes att, DB.Document document)
+    {
+      var context = GeometryDecoder.Context.Peek;
+      var attributes = new ObjectAttributes();
+
+      if (context.GraphicsStyleId.IsValid() && document.GetElement(context.GraphicsStyleId) is DB.GraphicsStyle graphicsStyle)
+      {
+        if (new Category(graphicsStyle.GraphicsStyleCategory).BakeElement(idMap, false, doc, att, out var layerGuid))
+          attributes.LayerIndex = doc.Layers.FindId(layerGuid).Index;
+      }
+
+      if (context.MaterialId.IsValid() && document.GetElement(context.MaterialId) is DB.Material material)
+      {
+        var mat = new Material(material);
+        if (mat.BakeElement(idMap, false, doc, att, out var materialGuid))
+        {
+          attributes.ColorSource = ObjectColorSource.ColorFromObject;
+          attributes.ObjectColor = mat.ObjectColor;
+
+          attributes.MaterialSource = ObjectMaterialSource.MaterialFromObject;
+          attributes.MaterialIndex = doc.Materials.FindId(materialGuid).Index;
+        }
+      }
+
+      return attributes;
+    }
+
+    protected internal static bool BakeGeometryElement
+    (
+      IDictionary<DB.ElementId, Guid> idMap,
+      bool overwrite,
+      RhinoDoc doc,
+      ObjectAttributes att,
+      Transform transform,
+      DB.Element element,
+      DB.GeometryElement geometryElement,
+      out int index
+    )
+    {
+      // 1. Check if is already cloned
+      if (idMap.TryGetValue(element.Id, out var guid))
+      {
+        index = doc.InstanceDefinitions.FindId(guid).Index;
+        return true;
+      }
+
+      var geometryElementContent = geometryElement.ToArray();
+      if (geometryElementContent.Length < 1)
+      {
+        index = -1;
+        return false;
+      }
+      else if
+      (
+        geometryElementContent.Length == 1 &&
+        geometryElementContent[0] is DB.GeometryInstance geometryInstance &&
+        geometryInstance.Symbol is DB.ElementType
+      )
+      {
+        // Special case to simplify DB.FamilyInstance elements.
+        var instanceTransform = geometryInstance.Transform.ToTransform();
+        return BakeGeometryElement(idMap, false, doc, att, instanceTransform * transform, geometryInstance.Symbol, geometryInstance.SymbolGeometry, out index);
+      }
+
+      var idef_name = FullUniqueId.Format(element.Document.GetFingerprintGUID(), element.UniqueId);
+      var idef_description = string.Empty;
+
+      // Decorate idef_name using "Category:FamilyName:TypeName" when posible
+      if (element is DB.ElementType type)
+      {
+        idef_name = $"Revit:{type.Category?.FullName()}:{type.FamilyName}:{type.Name} {{{idef_name}}}";
+        idef_description = element.get_Parameter(DB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.AsString() ?? string.Empty;
+      }
+      else if (element.Document.GetElement(element.GetTypeId()) is DB.ElementType elementType)
+      {
+        idef_name = $"Revit:{elementType.Category?.FullName()}:{elementType.FamilyName}:{elementType.Name} {{{idef_name}}}";
+      }
+      else
+      {
+        idef_name = $"*Revit:{element.Category?.FullName()}:: {{{idef_name}}}";
+      }
+
+      // 2. Check if already exist
+      index = doc.InstanceDefinitions.Find(idef_name)?.Index ?? -1;
+
+      // 3. Update if necessary
+      if (index < 0 || overwrite)
+      {
+        bool identity = transform.IsIdentity;
+
+        GeometryDecoder.UpdateGraphicAttributes(geometryElement);
+
+        var geometry = new List<GeometryBase>(geometryElementContent.Length);
+        var attributes = new List<ObjectAttributes>(geometryElementContent.Length);
+
+        foreach (var g in geometryElementContent)
+        {
+          using (GeometryDecoder.Context.Push())
+          {
+            GeometryDecoder.UpdateGraphicAttributes(g);
+
+            var geo = default(GeometryBase);
+            switch (g)
+            {
+              case DB.Mesh mesh: if(mesh.NumTriangles > 0) geo = mesh.ToMesh(); break;
+              case DB.Solid solid: if(!solid.Faces.IsEmpty) geo = solid.ToBrep(); break;
+              case DB.Curve curve: geo = curve.ToCurve(); break;
+              case DB.PolyLine pline: if (pline.NumberOfCoordinates > 0) geo = pline.ToPolylineCurve(); break;
+              case DB.GeometryInstance instance:
+                using (GeometryDecoder.Context.Push())
+                {
+                  if (BakeGeometryElement(idMap, false, doc, att, Transform.Identity, instance.Symbol, instance.SymbolGeometry, out var idefIndex))
+                    geo = new InstanceReferenceGeometry(doc.InstanceDefinitions[idefIndex].Id, instance.Transform.ToTransform());
+                }
+                break;
+            }
+
+            if (!(geo is null))
+            {
+              if (!identity)
+                geo.Transform(transform);
+
+              geometry.Add(geo);
+              var geoAtt = PeekAttributes(idMap, doc, att, element.Document);
+
+              // In case geo is a Brep and has different materials per face.
+              var context = GeometryDecoder.Context.Peek;
+              if (context.FaceMaterialId?.Length > 0)
+              {
+                bool hasPerFaceMaterials = false;
+                {
+                  for (int f = 1; f < context.FaceMaterialId.Length && !hasPerFaceMaterials; ++f)
+                    hasPerFaceMaterials |= context.FaceMaterialId[f] != context.FaceMaterialId[f - 1];
+                }
+
+                if (hasPerFaceMaterials && geo is Brep brep)
+                {
+                  // Solve baseMaterial
+                  var baseMaterial = Rhino.DocObjects.Material.DefaultMaterial;
+                  if (geoAtt.MaterialSource == ObjectMaterialSource.MaterialFromLayer)
+                    baseMaterial = doc.Materials[doc.Layers[geoAtt.LayerIndex].RenderMaterialIndex];
+                  else if (geoAtt.MaterialSource == ObjectMaterialSource.MaterialFromObject)
+                    baseMaterial = doc.Materials[geoAtt.MaterialIndex];
+
+                  // Create a new material for this brep
+                  var brepMaterial = new Rhino.DocObjects.Material(baseMaterial);
+
+                  var faceIndex = 0;
+                  foreach (var face in brep.Faces)
+                  {
+                    var faceMaterialId = context.FaceMaterialId[face.SurfaceIndex];
+                    if (faceMaterialId != context.MaterialId)
+                    {
+                      if (new Material(element.Document, faceMaterialId).BakeElement(idMap, false, doc, att, out var materialGuid))
+                        face.MaterialChannelIndex = brepMaterial.MaterialChannelIndexFromId(materialGuid, true);
+                    }
+                    else brep.Faces[faceIndex].ClearMaterialChannelIndex();
+
+                    faceIndex++;
+                  }
+
+                  geoAtt.MaterialIndex = doc.Materials.Add(brepMaterial);
+                  geoAtt.MaterialSource = ObjectMaterialSource.MaterialFromObject;
+                }
+                else if (context.FaceMaterialId[0].IsValid())
+                {
+                  if (new Material(element.Document, context.FaceMaterialId[0]).BakeElement(idMap, false, doc, att, out var materialGuid))
+                  {
+                    geoAtt.MaterialIndex = doc.Materials.FindId(materialGuid).Index;
+                    geoAtt.MaterialSource = ObjectMaterialSource.MaterialFromObject;
+                  }
+                }
+              }
+
+              attributes.Add(geoAtt);
+            }
+          }
+        }
+
+        if (index < 0) index = doc.InstanceDefinitions.Add(idef_name, idef_description, Point3d.Origin, geometry, attributes);
+        else if (!doc.InstanceDefinitions.ModifyGeometry(index, geometry, attributes)) index = -1;
+      }
+
+      return index >= 0;
+    }
+
+    bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
+      BakeElement(new Dictionary<DB.ElementId, Guid>(), true, doc, att, out guid);
+
+    public bool BakeElement
+    (
+      IDictionary<DB.ElementId, Guid> idMap,
+      bool overwrite,
+      RhinoDoc doc,
+      ObjectAttributes att,
+      out Guid guid
+    )
+    {
+      // 1. Check if is already cloned
+      if (idMap.TryGetValue(Id, out guid))
+        return true;
+
+      // 3. Update if necessary
+      if (Value is DB.Element element)
+      {
+        using (var options = new DB.Options() { DetailLevel = DB.ViewDetailLevel.Fine })
+        {
+          using (var geometry = element.GetGeometry(options))
+          {
+            if (geometry is object)
+            {
+              using (var context = GeometryDecoder.Context.Push())
+              {
+                context.Element = element;
+                context.GraphicsStyleId = element.Category?.GetGraphicsStyle(DB.GraphicsStyleType.Projection)?.Id ?? DB.ElementId.InvalidElementId;
+                context.MaterialId = element.Category?.Material?.Id ?? DB.ElementId.InvalidElementId;
+
+                var location = element.Category is null || element.Category.Parent is object ?
+                  Plane.WorldXY :
+                  Location;
+
+                var worldToElement = Transform.PlaneToPlane(location, Plane.WorldXY);
+                if (BakeGeometryElement(idMap, overwrite, doc, att, worldToElement, element, geometry, out var idefIndex))
+                {
+                  att = att.Duplicate();
+                  att.Name = element.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MARK)?.AsString() ?? string.Empty;
+                  att.Url = element.get_Parameter(DB.BuiltInParameter.ALL_MODEL_URL)?.AsString() ?? string.Empty;
+
+                  if (Category.BakeElement(idMap, false, doc, att, out var layerGuid))
+                    att.LayerIndex = doc.Layers.FindId(layerGuid).Index;
+
+                  guid = doc.Objects.AddInstanceObject(idefIndex, Transform.PlaneToPlane(Plane.WorldXY, location), att);
+                }
+              }
+
+              if (guid != Guid.Empty)
+              {
+                idMap.Add(Id, guid);
+                return true;
+              }
+            }
+          }
+        }
+      }
+
+      return false;
     }
     #endregion
   }
