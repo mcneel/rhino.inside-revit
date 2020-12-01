@@ -37,8 +37,9 @@ namespace RhinoInside.Revit.GH.Types
             using (var asset = appearance.GetRenderingAsset())
               AppearanceAssetElement.SimulateRenderMaterial(renderMaterial, asset, doc);
           }
-          else if (Value is DB.Material material)
+          else 
 #endif
+          if (Value is DB.Material material)
           {
             renderMaterial.Fields.Set(Rhino.Render.RenderMaterial.BasicMaterialParameterNames.Diffuse, material.Color.ToColor());
             renderMaterial.Fields.Set(Rhino.Render.RenderMaterial.BasicMaterialParameterNames.Shine, material.Shininess / 128.0 * Rhino.DocObjects.Material.MaxShine);

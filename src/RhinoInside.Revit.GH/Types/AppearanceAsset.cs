@@ -32,7 +32,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (base.CastTo<Q>(out target))
         return true;
-
+#if REVIT_2018
       if (typeof(Q).IsAssignableFrom(typeof(Grasshopper.Kernel.Types.GH_Material)))
       {
         if (RhinoDoc.ActiveDoc is RhinoDoc doc)
@@ -49,7 +49,7 @@ namespace RhinoInside.Revit.GH.Types
           }
         }
       }
-
+#endif
       return false;
     }
 
@@ -76,6 +76,8 @@ namespace RhinoInside.Revit.GH.Types
         if (BakeRenderMaterial(overwrite, doc, appearance.Name, out guid))
           idMap.Add(Id, guid);
       }
+#else
+      guid = Guid.Empty; 
 #endif
 
       return false;

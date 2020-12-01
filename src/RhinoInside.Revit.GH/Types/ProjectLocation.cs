@@ -6,6 +6,7 @@ using Rhino.DocObjects;
 using Rhino.DocObjects.Tables;
 using Rhino.Geometry;
 using DB = Autodesk.Revit.DB;
+using RhinoInside.Revit.External.DB.Extensions;
 using static Rhino.RhinoMath;
 
 namespace RhinoInside.Revit.GH.Types
@@ -81,8 +82,8 @@ namespace RhinoInside.Revit.GH.Types
               ModelEast = location.XAxis,
               ModelNorth = location.YAxis,
               EarthBasepointElevation = siteLocation.Elevation,
-              EarthBasepointLatitude = Rhino.RhinoMath.ToDegrees(siteLocation.Latitude),
-              EarthBasepointLongitude = Rhino.RhinoMath.ToDegrees(siteLocation.Longitude),
+              EarthBasepointLatitude = ToDegrees(siteLocation.Latitude),
+              EarthBasepointLongitude = ToDegrees(siteLocation.Longitude),
             };
 
             doc.EarthAnchorPoint = anchorPoint;
