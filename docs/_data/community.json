@@ -122,8 +122,7 @@
         "thumbnail": "https://i3.ytimg.com/vi/WRbbJlURzoo/maxresdefault.jpg",
         "author": "Rethinking BIM",
         "authorUrl": "https://www.youtube.com/channel/UC82U-lpftjA7lCeb9Rhdraw",
-        "description": "This video goes through a workflow that uses Rhino.Inside and the View Rose tool in Ladybug (Grasshopper plugin) in order to demonstrate the process of running a geometry-focused analysis in Rhino/Grasshopper and feeding results back into a Revit parameter.
-        "
+        "description": "This video goes through a workflow that uses Rhino.Inside and the View Rose tool in Ladybug (Grasshopper plugin) in order to demonstrate the process of running a geometry-focused analysis in Rhino/Grasshopper and feeding results back into a Revit parameter."
     },
     {
         "type": "video",
@@ -196,5 +195,14 @@
         "author": "Marcello Sgambelluri @ Simply Complex Podcast",
         "authorUrl": "http://therevitcomplex.blogspot.com/",
         "description": "In this video I show you how to simplify Revit structural beam modeling using an adaptive component and Rhino.Inside.Revit"
+    },
+    {
+        "type": "video",
+        "title": "BIMThoughts on PyRevit and Rhino.Inside.Revit",
+        "url": "https://youtu.be/qTysGOdhHzI",
+        "thumbnail": "https://i3.ytimg.com/vi/qTysGOdhHzI/maxresdefault.jpg",
+        "author": "BIMThoughts Podcast",
+        "authorUrl": "https://bimthoughts.com/",
+        "description": "In this episode we chat with the very busy Ehsan Iran-Nejad about his amazing add-in for Revit call pyRevit. We also chat with Ehsan about his work at McNeel on the Rhino.Inside.Revit integration."
     }
 ]
