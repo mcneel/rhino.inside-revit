@@ -286,50 +286,55 @@ namespace RhinoInside.Revit.GH.Types
       RhinoDoc doc
     )
     {
-      if (simulated is null) return;
-
       var slotName = material.TextureChildSlotName(slot);
 
-      var texture = default(RenderTexture);
-      if (simulated is SimulatedProceduralTexture procedural)
+      if (simulated is null)
       {
-        var content = RenderContentType.NewContentFromTypeId(procedural.ContentType, doc);
-
-        var fields = content.Fields;
-        foreach (var field in procedural.Fields)
-        {
-          switch (field.Value)
-          {
-            case byte[] bb: fields.Set(field.Key, bb); break;
-            case string s: fields.Set(field.Key, s); break;
-            case bool b: fields.Set(field.Key, b); break;
-            case int i: fields.Set(field.Key, i); break;
-            case float f: fields.Set(field.Key, f); break;
-            case double d: fields.Set(field.Key, d); break;
-            case Color4f c: fields.Set(field.Key, c); break;
-            case DateTime dt: fields.Set(field.Key, dt); break;
-            case Guid g: fields.Set(field.Key, g); break;
-            case Rhino.Geometry.Point2d p2: fields.Set(field.Key, p2); break;
-            case Rhino.Geometry.Point3d p3: fields.Set(field.Key, p3); break;
-            case Rhino.Geometry.Point4d p4: fields.Set(field.Key, p4); break;
-            case Rhino.Geometry.Vector2d v2: fields.Set(field.Key, v2); break;
-            case Rhino.Geometry.Vector3d v3: fields.Set(field.Key, v3); break;
-            case Rhino.Geometry.Transform t: fields.Set(field.Key, t); break;
-          }
-        }
-
-        texture = content as RenderTexture;
-        texture.SetProjectionMode((TextureProjectionMode) (int) simulated.ProjectionMode, RenderContent.ChangeContexts.Program);
-        texture.SetRotation(new Rhino.Geometry.Vector3d(0.0, 0.0, simulated.Rotation), RenderContent.ChangeContexts.Program);
-        texture.SetOffset(new Rhino.Geometry.Vector3d(simulated.Offset.X, simulated.Offset.Y, 0.0), RenderContent.ChangeContexts.Program);
-        texture.SetRepeat(new Rhino.Geometry.Vector3d(simulated.Repeat.X, simulated.Repeat.Y, 1.0), RenderContent.ChangeContexts.Program);
+        material.SetChildSlotOn(slotName, false, RenderContent.ChangeContexts.Program);
       }
-      else texture = RenderTexture.NewBitmapTexture(simulated, doc);
-
-      if (material.SetChild(texture, slotName))
+      else
       {
-        material.SetChildSlotOn(slotName, true, RenderContent.ChangeContexts.Program);
-        material.SetChildSlotAmount(slotName, RhinoMath.Clamp(amount, 0.0, 1.0) * 100.0, RenderContent.ChangeContexts.Program);
+        var texture = default(RenderTexture);
+        if (simulated is SimulatedProceduralTexture procedural)
+        {
+          var content = RenderContentType.NewContentFromTypeId(procedural.ContentType, doc);
+
+          var fields = content.Fields;
+          foreach (var field in procedural.Fields)
+          {
+            switch (field.Value)
+            {
+              case byte[] bb: fields.Set(field.Key, bb); break;
+              case string s: fields.Set(field.Key, s); break;
+              case bool b: fields.Set(field.Key, b); break;
+              case int i: fields.Set(field.Key, i); break;
+              case float f: fields.Set(field.Key, f); break;
+              case double d: fields.Set(field.Key, d); break;
+              case Color4f c: fields.Set(field.Key, c); break;
+              case DateTime dt: fields.Set(field.Key, dt); break;
+              case Guid g: fields.Set(field.Key, g); break;
+              case Rhino.Geometry.Point2d p2: fields.Set(field.Key, p2); break;
+              case Rhino.Geometry.Point3d p3: fields.Set(field.Key, p3); break;
+              case Rhino.Geometry.Point4d p4: fields.Set(field.Key, p4); break;
+              case Rhino.Geometry.Vector2d v2: fields.Set(field.Key, v2); break;
+              case Rhino.Geometry.Vector3d v3: fields.Set(field.Key, v3); break;
+              case Rhino.Geometry.Transform t: fields.Set(field.Key, t); break;
+            }
+          }
+
+          texture = content as RenderTexture;
+          texture.SetProjectionMode((TextureProjectionMode) (int) simulated.ProjectionMode, RenderContent.ChangeContexts.Program);
+          texture.SetRotation(new Rhino.Geometry.Vector3d(0.0, 0.0, simulated.Rotation), RenderContent.ChangeContexts.Program);
+          texture.SetOffset(new Rhino.Geometry.Vector3d(simulated.Offset.X, simulated.Offset.Y, 0.0), RenderContent.ChangeContexts.Program);
+          texture.SetRepeat(new Rhino.Geometry.Vector3d(simulated.Repeat.X, simulated.Repeat.Y, 1.0), RenderContent.ChangeContexts.Program);
+        }
+        else texture = RenderTexture.NewBitmapTexture(simulated, doc);
+
+        if (material.SetChild(texture, slotName))
+        {
+          material.SetChildSlotOn(slotName, true, RenderContent.ChangeContexts.Program);
+          material.SetChildSlotAmount(slotName, RhinoMath.Clamp(amount, 0.0, 1.0) * 100.0, RenderContent.ChangeContexts.Program);
+        }
       }
     }
 
@@ -597,8 +602,47 @@ namespace RhinoInside.Revit.GH.Types
 
     static void GetMetalSchemaParameters(Asset asset, ref BasicMaterialParameters material)
     {
-      if (asset.FindByName(Metal.MetalColor) is AssetPropertyDoubleArray4d metalColor)
-        material.DiffuseTexture = ToSimulatedTexture(metalColor.GetSingleConnectedAsset());
+      material.PreviewGeometryType = RenderMaterial.PreviewGeometryType.Cube;
+
+      var metalFinishType = MetalFinishType.Polished;
+      if (asset.FindByName(Metal.MetalFinish) is AssetPropertyInteger finish)
+        metalFinishType = (MetalFinishType) finish.Value;
+
+      if (asset.FindByName(Metal.MetalType) is AssetPropertyInteger metalType)
+      {
+        switch ((MetalType)metalType.Value)
+        {
+          case MetalType.Aluminum: material.Diffuse = new Color4f(System.Drawing.Color.FromArgb(206, 210, 213)); break;
+          case MetalType.GalvanizedAlu: material.Diffuse = new Color4f(System.Drawing.Color.FromArgb(206, 210, 213));
+            if (asset.FindByName(Metal.MetalColor) is AssetPropertyDoubleArray4d metalColor)
+            {
+              material.Diffuse = ToColor4f(metalColor);
+              material.DiffuseTexture = ToSimulatedTexture(metalColor.GetSingleConnectedAsset());
+            }
+            metalFinishType = MetalFinishType.Polished;
+            break;
+          case MetalType.Chrome: material.Diffuse = new Color4f(System.Drawing.Color.FromArgb(244, 244, 244)); break;
+          case MetalType.Copper: material.Diffuse = new Color4f(System.Drawing.Color.FromArgb(187, 80, 46)); break;
+          case MetalType.Brass: material.Diffuse = new Color4f(System.Drawing.Color.FromArgb(202, 154, 58)); break;
+          case MetalType.Bronze: material.Diffuse = new Color4f(System.Drawing.Color.FromArgb(105, 77, 58)); break;
+          case MetalType.StainlessSteel: material.Diffuse = new Color4f(System.Drawing.Color.FromArgb(189, 187, 185)); break;
+          case MetalType.Zinc:
+            material.Diffuse = new Color4f(System.Drawing.Color.FromArgb(164, 172, 176));
+            metalFinishType = MetalFinishType.Brushed;
+            break;
+        }
+      }
+
+      if (asset.FindByName(Metal.CommonTintToggle) is AssetPropertyBoolean tintToggle && tintToggle.Value)
+      {
+        if (asset.FindByName(Metal.CommonTintColor) is AssetPropertyDoubleArray4d tint)
+        {
+          var tintColor = ToColor4f(tint);
+          material.Diffuse = new Color4f(material.Diffuse.R * tintColor.R, material.Diffuse.G * tintColor.G, material.Diffuse.B * tintColor.B, material.Diffuse.A * tintColor.A);
+        }
+      }
+
+      material.ReflectivityColor = material.Diffuse;
 
       if (asset.FindByName(Metal.MetalPattern) is AssetPropertyInteger pattern && pattern.Value == (int) MetalPatternType.Custom)
       {
@@ -612,54 +656,19 @@ namespace RhinoInside.Revit.GH.Types
           material.OpacityTexture = ToSimulatedTexture(perforationsShader.GetSingleConnectedAsset());
       }
 
-      if (asset.FindByName(Metal.MetalType) is AssetPropertyInteger metalType)
-      {
-        switch ((MetalType)metalType.Value)
-        {
-          case MetalType.Aluminum: material.Diffuse = new Color4f(System.Drawing.Color.FromArgb(212, 212, 212)); break;
-          case MetalType.GalvanizedAlu: material.Diffuse = new Color4f(System.Drawing.Color.FromArgb(212, 212, 212));
-            if (asset.FindByName(Metal.MetalColor) is AssetPropertyDoubleArray4d anodizedColor)
-              material.Diffuse = ToColor4f(anodizedColor);
-            break;
-          case MetalType.Chrome: material.Diffuse = new Color4f(System.Drawing.Color.FromArgb(244, 244, 244)); break;
-          case MetalType.Copper: material.Diffuse = new Color4f(System.Drawing.Color.FromArgb(230, 123, 60)); break;
-          case MetalType.Brass: material.Diffuse = new Color4f(System.Drawing.Color.FromArgb(246, 239, 159)); break;
-          case MetalType.Bronze: material.Diffuse = new Color4f(System.Drawing.Color.FromArgb(104, 72, 62)); break;
-          case MetalType.StainlessSteel: material.Diffuse = new Color4f(System.Drawing.Color.FromArgb(247, 247, 247)); break;
-          case MetalType.Zinc: material.Diffuse = new Color4f(System.Drawing.Color.FromArgb(250, 237, 237)); break;
-        }
-      }
-
-      {
-        if (asset.FindByName(Metal.CommonTintToggle) is AssetPropertyBoolean tintToggle && tintToggle.Value)
-        {
-          if (asset.FindByName(Metal.CommonTintColor) is AssetPropertyDoubleArray4d tint)
-          {
-            var tintColor = ToColor4f(tint);
-            material.Diffuse = new Color4f(material.Diffuse.R * tintColor.R, material.Diffuse.G * tintColor.G, material.Diffuse.B * tintColor.B, material.Diffuse.A * tintColor.A);
-          }
-        }
-
-        material.ReflectivityColor = material.Diffuse;
-      }
-
-      material.Diffuse = Color4f.Black;
-      material.Specular = Color4f.Black;
-      material.Reflectivity = 1.0;
-
-      if (asset.FindByName(Metal.MetalFinish) is AssetPropertyInteger finish)
       {
         double polish = 1.0;
-        switch ((MetalFinishType)finish.Value)
+        switch (metalFinishType)
         {
-          case MetalFinishType.Polished: polish = 1.0; break;
-          case MetalFinishType.SemiPolished: polish = 0.85; break;
-          case MetalFinishType.Satin: polish = 0.6; break;
-          case MetalFinishType.Brushed: polish = 0.2; break;
+          case MetalFinishType.Polished: polish = 1.00; break;
+          case MetalFinishType.SemiPolished: polish = 0.80; break;
+          case MetalFinishType.Satin: polish = 0.60; break;
+          case MetalFinishType.Brushed: polish = 0.20; break;
         }
 
         material.Shine = polish;
         material.PolishAmount = polish;
+        material.Reflectivity = polish;
       }
     }
 

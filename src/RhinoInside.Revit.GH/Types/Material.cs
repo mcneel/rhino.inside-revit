@@ -137,19 +137,6 @@ namespace RhinoInside.Revit.GH.Types
             material.Color.ToColor()
           );
 
-#if REVIT_2018
-          if (material.UseRenderAppearanceForShading && Document.GetElement(material.AppearanceAssetId) is DB.AppearanceAssetElement assetElement)
-          {
-            if (AppearanceAssetElement.TryGetBasicMaterialParameters(assetElement.GetRenderingAsset(), out var renderParams))
-            {
-              color = System.Drawing.Color.FromArgb
-              (
-                255 - (int) Math.Round(renderParams.Transparency * 255.0),
-                renderParams.Diffuse.AsSystemColor()
-              );
-            }
-          }
-#endif
           return color;
         }
 

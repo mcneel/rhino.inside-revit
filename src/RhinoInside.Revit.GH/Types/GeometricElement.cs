@@ -434,9 +434,6 @@ namespace RhinoInside.Revit.GH.Types
         var mat = new Material(material);
         if (mat.BakeElement(idMap, false, doc, att, out var materialGuid))
         {
-          attributes.ColorSource = ObjectColorSource.ColorFromObject;
-          attributes.ObjectColor = mat.ObjectColor;
-
           attributes.MaterialSource = ObjectMaterialSource.MaterialFromObject;
           attributes.MaterialIndex = doc.Materials.FindId(materialGuid).Index;
         }
@@ -565,18 +562,23 @@ namespace RhinoInside.Revit.GH.Types
                   // Create a new material for this brep
                   var brepMaterial = new Rhino.DocObjects.Material(baseMaterial);
 
-                  var faceIndex = 0;
                   foreach (var face in brep.Faces)
                   {
                     var faceMaterialId = context.FaceMaterialId[face.SurfaceIndex];
                     if (faceMaterialId != context.MaterialId)
                     {
-                      if (new Material(element.Document, faceMaterialId).BakeElement(idMap, false, doc, att, out var materialGuid))
+                      var faceMaterial = new Material(element.Document, faceMaterialId);
+                      if (faceMaterial.BakeElement(idMap, false, doc, att, out var materialGuid))
+                      {
                         face.MaterialChannelIndex = brepMaterial.MaterialChannelIndexFromId(materialGuid, true);
+                        face.PerFaceColor = faceMaterial.ObjectColor;
+                      }
                     }
-                    else brep.Faces[faceIndex].ClearMaterialChannelIndex();
-
-                    faceIndex++;
+                    else
+                    {
+                      face.ClearMaterialChannelIndex();
+                      face.PerFaceColor = System.Drawing.Color.Empty;
+                    }
                   }
 
                   geoAtt.MaterialIndex = doc.Materials.Add(brepMaterial);
@@ -584,10 +586,22 @@ namespace RhinoInside.Revit.GH.Types
                 }
                 else if (context.FaceMaterialId[0].IsValid())
                 {
-                  if (new Material(element.Document, context.FaceMaterialId[0]).BakeElement(idMap, false, doc, att, out var materialGuid))
+                  var faceMaterial = new Material(element.Document, context.FaceMaterialId[0]);
+
+                  if (faceMaterial.BakeElement(idMap, false, doc, att, out var materialGuid))
                   {
                     geoAtt.MaterialIndex = doc.Materials.FindId(materialGuid).Index;
                     geoAtt.MaterialSource = ObjectMaterialSource.MaterialFromObject;
+
+                    if (geo is Brep b)
+                    {
+                      foreach (var face in b.Faces)
+                        face.PerFaceColor = faceMaterial.ObjectColor;
+                    }
+                    else if (geo is Mesh m)
+                    {
+                      m.VertexColors.SetColors(Enumerable.Repeat(faceMaterial.ObjectColor, m.Vertices.Count).ToArray());
+                    }
                   }
                 }
               }

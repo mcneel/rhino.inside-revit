@@ -330,10 +330,12 @@ namespace RhinoInside.Revit.GH.Types
             layer.IsExpanded = false;
           }
 
+          layer.Color = category.LineColor.ToColor();
+          layer.LinetypeIndex = linetypeIndex;
+          layer.PlotWeight = ToPlotWeight(ProjectionLineWeight);
+
           if (category.CategoryType == DB.CategoryType.Annotation)
           {
-            layer.Color = category.LineColor.ToColor();
-
             if
             (
               Id.TryGetBuiltInCategory(out var builtInCategory) &&
@@ -346,17 +348,12 @@ namespace RhinoInside.Revit.GH.Types
           }
           else
           {
-            layer.Color = Material.ObjectColor;
             layer.RenderMaterialIndex = materialIndex;
-            layer.PlotColor = category.LineColor.ToColor();
 
-            // Special case for 
+            // Special case for "Light Sources"
             if (category.Id.IntegerValue == (int) DB.BuiltInCategory.OST_LightingFixtureSource)
               layer.IsVisible = false;
           }
-
-          layer.LinetypeIndex = linetypeIndex;
-          layer.PlotWeight = ToPlotWeight(ProjectionLineWeight);
 
           if (index < 0) { index = doc.Layers.Add(layer); layer = doc.Layers[index]; }
           else if (overwrite) doc.Layers.Modify(layer, index, true);
