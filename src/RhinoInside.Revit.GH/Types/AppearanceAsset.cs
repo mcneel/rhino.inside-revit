@@ -129,7 +129,7 @@ namespace RhinoInside.Revit.GH.Types
 
     internal class BasicMaterialParameters
     {
-      public Rhino.Render.RenderMaterial.PreviewGeometryType PreviewGeometryType = RenderMaterial.PreviewGeometryType.Scene;
+      public RenderMaterial.PreviewGeometryType PreviewGeometryType = RenderMaterial.PreviewGeometryType.Scene;
 
       public Color4f Ambient = Color4f.Black;
       public Color4f Diffuse = Color4f.White;
@@ -162,7 +162,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       public SimulatedProceduralTexture(Guid contentType) { ContentType = contentType; }
       public readonly Guid ContentType;
-      public Dictionary<string, object> Fields = new Dictionary<string, object>();
+      public readonly Dictionary<string, object> Fields = new Dictionary<string, object>();
     }
 
     static Color4f ToColor4f(AssetPropertyDoubleArray4d value, double f = 1.0)
@@ -172,12 +172,8 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     /// <summary>
-    /// Extracts Parameters from a <see cref="UnifiedBitmap"/> to a <see cref="SimulatedTexture"/>
+    /// Extracts Parameters from a <see cref="UnifiedBitmap"/> Asset to a <see cref="SimulatedTexture"/>
     /// </summary>
-    /// <remarks>
-    /// TODO: <see cref="UnifiedBitmap.UnifiedbitmapInvert"/> and <see cref="UnifiedBitmap.UnifiedbitmapRGBAmount"/>
-    /// are not extracted because SimulatedTexture do not have those propertires.
-    /// </remarks>
     /// <param name="asset"></param>
     /// <returns>A <see cref="SimulatedTexture"/> with the input <paramref name="asset"/> parameters.</returns>
     static SimulatedTexture ToSimulatedTexture(Asset asset)
@@ -185,7 +181,37 @@ namespace RhinoInside.Revit.GH.Types
       if (asset is null)
         return default;
 
-      var texture = new SimulatedTexture() { Filtered = false };
+      if (asset.Name == "UnifiedBitmapSchema") return GetUnifiedBitmapSchemaTexture(asset);
+      else Debug.WriteLine($"Unimplemented Texture Schema: {asset.Name}");
+
+      return default;
+    }
+
+    static SimulatedProceduralTexture GetUnifiedBitmapSchemaTexture(Asset asset)
+    {
+      //bool filtered = true;
+      //if (asset.FindByName("unifiedbitmap_Filtering") is AssetPropertyInteger bitmapFilter)
+      //  filtered = bitmapFilter.Value != 0;
+
+      bool inverted = false;
+      if (asset.FindByName(UnifiedBitmap.UnifiedbitmapInvert) is AssetPropertyBoolean bitmapInverted)
+        inverted = bitmapInverted.Value;
+
+      double multiplier = 1.0;
+      if (asset.FindByName(UnifiedBitmap.UnifiedbitmapRGBAmount) is AssetPropertyDouble RGBAAmount)
+        multiplier = RGBAAmount.Value;
+
+      var texture = new SimulatedProceduralTexture(ContentUuids.BitmapTextureType)
+      {
+        ProjectionMode = SimulatedTexture.ProjectionModes.WcsBox,
+        //Filtered = filtered,
+        Fields =
+        {
+          { "rdk-texture-adjust-invert", inverted },
+          { "rdk-texture-adjust-multiplier", multiplier }
+        }
+      };
+
       if (asset.FindByName(UnifiedBitmap.UnifiedbitmapBitmap) is AssetPropertyString source)
       {
         var entries = source.Value.Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
@@ -214,34 +240,41 @@ namespace RhinoInside.Revit.GH.Types
         texture.Repeating = uRepeat.Value | vRepeat.Value;
 
       if (asset.FindByName(UnifiedBitmap.TextureWAngle) is AssetPropertyDouble angle)
-        texture.Rotation = angle.Value;
-
-      var feetToMeters = RhinoMath.UnitScale(Rhino.UnitSystem.Feet, Rhino.UnitSystem.Meters);
+        texture.Rotation = RhinoMath.ToRadians(angle.Value);
 
       var offset = Rhino.Geometry.Vector2d.Zero;
       if (asset.FindByName(UnifiedBitmap.TextureRealWorldOffsetX) is AssetPropertyDistance offsetX)
-        offset.X = offsetX.Value * feetToMeters;
+        offset.X = DB.UnitUtils.Convert(offsetX.Value, offsetX.DisplayUnitType, DB.DisplayUnitType.DUT_METERS);
       if (asset.FindByName(UnifiedBitmap.TextureRealWorldOffsetY) is AssetPropertyDistance offsetY)
-        offset.Y = offsetY.Value * feetToMeters;
+        offset.Y = DB.UnitUtils.Convert(offsetY.Value, offsetY.DisplayUnitType, DB.DisplayUnitType.DUT_METERS);
       texture.Offset = offset;
 
-      var repeat = Rhino.Geometry.Vector2d.Zero;
+      var repeat = new Rhino.Geometry.Vector2d(1.0, 1.0);
       if (asset.FindByName(UnifiedBitmap.TextureRealWorldScaleX) is AssetPropertyDistance scaleX)
-        repeat.X = 1.0 / (scaleX.Value * feetToMeters);
+        repeat.X = 1.0 / DB.UnitUtils.Convert(scaleX.Value, scaleX.DisplayUnitType, DB.DisplayUnitType.DUT_METERS);
       if (asset.FindByName(UnifiedBitmap.TextureRealWorldScaleY) is AssetPropertyDistance scaleY)
-        repeat.Y = 1.0 / (scaleY.Value * feetToMeters);
+        repeat.Y = 1.0 / DB.UnitUtils.Convert(scaleY.Value, scaleY.DisplayUnitType, DB.DisplayUnitType.DUT_METERS);
       texture.Repeat = repeat;
-      texture.ProjectionMode = SimulatedTexture.ProjectionModes.WcsBox;
 
       return texture;
     }
 
+    static SimulatedTexture ToSimulatedTexture(string path)
+    {
+      return new SimulatedTexture()
+      {
+        Filename = path,
+        ProjectionMode = SimulatedTexture.ProjectionModes.WcsBox,
+        Repeat = new Rhino.Geometry.Vector2d(1.0, 1.0)
+      };
+    }
+
     internal static void SimulateRenderMaterial(RenderMaterial material, Asset asset, RhinoDoc doc)
     {
-      if (asset.FindByName("description") is AssetPropertyString description)
+      if (asset.FindByName(SchemaCommon.Description) is AssetPropertyString description)
         material.Notes = description.Value;
 
-      if (asset.FindByName("keyword") is AssetPropertyString keyword)
+      if (asset.FindByName(SchemaCommon.Keyword) is AssetPropertyString keyword)
       {
         string tags = string.Empty;
         foreach (var tag in (keyword.Value ?? string.Empty).Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries))
@@ -274,7 +307,33 @@ namespace RhinoInside.Revit.GH.Types
         SetChildSlot(material, RenderMaterial.StandardChildSlots.Transparency, materialParams.OpacityTexture, materialParams.OpacityTextureAmount, doc);
         SetChildSlot(material, RenderMaterial.StandardChildSlots.Environment, materialParams.EnvironmentTexture, materialParams.EnvironmentTextureAmount, doc);
       }
-      else Debug.WriteLine($"Unimplemented Schema: {asset.Name}");
+      else Debug.WriteLine($"Unimplemented Material Schema: {asset.Name}");
+    }
+
+    static void SetFieldValues(Rhino.Render.Fields.FieldDictionary fields, Dictionary<string, object> values)
+    {
+      foreach (var field in values)
+      {
+        switch (field.Value)
+        {
+          case byte[] bb: fields.Set(field.Key, bb); break;
+          case string s: fields.Set(field.Key, s); break;
+          case bool b: fields.Set(field.Key, b); break;
+          case int i: fields.Set(field.Key, i); break;
+          case float f: fields.Set(field.Key, f); break;
+          case double d: fields.Set(field.Key, d); break;
+          case Color4f c: fields.Set(field.Key, c); break;
+          case DateTime dt: fields.Set(field.Key, dt); break;
+          case Guid g: fields.Set(field.Key, g); break;
+          case Rhino.Geometry.Point2d p2: fields.Set(field.Key, p2); break;
+          case Rhino.Geometry.Point3d p3: fields.Set(field.Key, p3); break;
+          case Rhino.Geometry.Point4d p4: fields.Set(field.Key, p4); break;
+          case Rhino.Geometry.Vector2d v2: fields.Set(field.Key, v2); break;
+          case Rhino.Geometry.Vector3d v3: fields.Set(field.Key, v3); break;
+          case Rhino.Geometry.Transform t: fields.Set(field.Key, t); break;
+          default: throw new NotImplementedException();
+        }
+      }
     }
 
     static void SetChildSlot
@@ -295,38 +354,23 @@ namespace RhinoInside.Revit.GH.Types
       else
       {
         var texture = default(RenderTexture);
-        if (simulated is SimulatedProceduralTexture procedural)
+        if (simulated is SimulatedProceduralTexture procedural && procedural.ContentType != ContentUuids.SimpleBitmapTextureType)
         {
-          var content = RenderContentType.NewContentFromTypeId(procedural.ContentType, doc);
-
-          var fields = content.Fields;
-          foreach (var field in procedural.Fields)
+          if (procedural.ContentType == ContentUuids.BitmapTextureType)
           {
-            switch (field.Value)
-            {
-              case byte[] bb: fields.Set(field.Key, bb); break;
-              case string s: fields.Set(field.Key, s); break;
-              case bool b: fields.Set(field.Key, b); break;
-              case int i: fields.Set(field.Key, i); break;
-              case float f: fields.Set(field.Key, f); break;
-              case double d: fields.Set(field.Key, d); break;
-              case Color4f c: fields.Set(field.Key, c); break;
-              case DateTime dt: fields.Set(field.Key, dt); break;
-              case Guid g: fields.Set(field.Key, g); break;
-              case Rhino.Geometry.Point2d p2: fields.Set(field.Key, p2); break;
-              case Rhino.Geometry.Point3d p3: fields.Set(field.Key, p3); break;
-              case Rhino.Geometry.Point4d p4: fields.Set(field.Key, p4); break;
-              case Rhino.Geometry.Vector2d v2: fields.Set(field.Key, v2); break;
-              case Rhino.Geometry.Vector3d v3: fields.Set(field.Key, v3); break;
-              case Rhino.Geometry.Transform t: fields.Set(field.Key, t); break;
-            }
+            texture = RenderTexture.NewBitmapTexture(simulated, doc);
+          }
+          else
+          {
+            texture = RenderContentType.NewContentFromTypeId(procedural.ContentType, doc) as RenderTexture;
+            texture.SetProjectionMode((TextureProjectionMode) (int) simulated.ProjectionMode, RenderContent.ChangeContexts.Program);
+            texture.SetMappingChannel(simulated.MappingChannel, RenderContent.ChangeContexts.Program);
+            texture.SetOffset(new Rhino.Geometry.Vector3d(simulated.Offset.X, simulated.Offset.Y, 0.0), RenderContent.ChangeContexts.Program);
+            texture.SetRepeat(new Rhino.Geometry.Vector3d(simulated.Repeat.X, simulated.Repeat.Y, 1.0), RenderContent.ChangeContexts.Program);
+            texture.SetRotation(new Rhino.Geometry.Vector3d(0.0, 0.0, simulated.Rotation), RenderContent.ChangeContexts.Program);
           }
 
-          texture = content as RenderTexture;
-          texture.SetProjectionMode((TextureProjectionMode) (int) simulated.ProjectionMode, RenderContent.ChangeContexts.Program);
-          texture.SetRotation(new Rhino.Geometry.Vector3d(0.0, 0.0, simulated.Rotation), RenderContent.ChangeContexts.Program);
-          texture.SetOffset(new Rhino.Geometry.Vector3d(simulated.Offset.X, simulated.Offset.Y, 0.0), RenderContent.ChangeContexts.Program);
-          texture.SetRepeat(new Rhino.Geometry.Vector3d(simulated.Repeat.X, simulated.Repeat.Y, 1.0), RenderContent.ChangeContexts.Program);
+          SetFieldValues(texture.Fields, procedural.Fields);
         }
         else texture = RenderTexture.NewBitmapTexture(simulated, doc);
 
@@ -346,6 +390,7 @@ namespace RhinoInside.Revit.GH.Types
       else if (asset.Name == "GlazingSchema") GetGlazingSchemaParameters(asset, ref materialParams);
       else if (asset.Name == "SolidGlassSchema") GetSolidGlassSchemaParameters(asset, ref materialParams);
       else if (asset.Name == "ConcreteSchema") GetConcreteSchemaParameters(asset, ref materialParams);
+      else if (asset.Name == "StoneSchema") GetStoneSchemaParameters(asset, ref materialParams);
       else if (asset.Name == "MetalSchema") GetMetalSchemaParameters(asset, ref materialParams);
       else if (asset.Name == "MetallicPaintSchema") GetMetallicPaintSchemaParameters(asset, ref materialParams);
       else if (asset.Name == "WallPaintSchema") GetWallPaintSchemaParameters(asset, ref materialParams);
@@ -353,6 +398,7 @@ namespace RhinoInside.Revit.GH.Types
       else if (asset.Name == "CeramicSchema") GetCeramicSchemaParameters(asset, ref materialParams);
       else if (asset.Name == "PlasticVinylSchema") GetPlasticVinylSchemaParameters(asset, ref materialParams);
       else if (asset.Name == "WaterSchema") GetWaterSchemaParameters(asset, ref materialParams);
+      else if (asset.Name == "MirrorSchema") GetMirrorSchemaParameters(asset, ref materialParams);
       else return false;
 
       return true;
@@ -429,12 +475,12 @@ namespace RhinoInside.Revit.GH.Types
       {
         switch ((GlazingTransmittanceColorType) transmittance.Value)
         {
-          case GlazingTransmittanceColorType.Clear: material.TransparencyColor = Color4f.White; break;
-          case GlazingTransmittanceColorType.Green: material.TransparencyColor = new Color4f(0.0f, 1.0f, 0.0f, 1.0f); break;
-          case GlazingTransmittanceColorType.Gray: material.TransparencyColor = new Color4f(0.3f, 0.3f, 0.3f, 1.0f); break;
-          case GlazingTransmittanceColorType.Blue: material.TransparencyColor = new Color4f(0.0f, 0.0f, 1.0f, 1.0f); break;
-          case GlazingTransmittanceColorType.Bluegreen: material.TransparencyColor = new Color4f(0.0f, 0.4f, 1.0f, 1.0f); break;
-          case GlazingTransmittanceColorType.Bronze: material.TransparencyColor = new Color4f(0.8f, 0.5f, 2.0f, 1.0f); break;
+          case GlazingTransmittanceColorType.Clear: material.TransparencyColor = new Color4f(0.858f, 0.893f, 0.879f, 1.0f); break;
+          case GlazingTransmittanceColorType.Green: material.TransparencyColor = new Color4f(0.676f, 0.797f, 0.737f, 1.0f); break;
+          case GlazingTransmittanceColorType.Gray: material.TransparencyColor = new Color4f(0.451f, 0.449f, 0.472f, 1.0f); break;
+          case GlazingTransmittanceColorType.Blue: material.TransparencyColor = new Color4f(0.367f, 0.514f, 0.651f, 1.0f); break;
+          case GlazingTransmittanceColorType.Bluegreen: material.TransparencyColor = new Color4f(0.654f, 0.788f, 0.772f, 1.0f); break;
+          case GlazingTransmittanceColorType.Bronze: material.TransparencyColor = new Color4f(0.583f, 0.516f, 0.467f, 1.0f); break;
           case GlazingTransmittanceColorType.Custom:
             if (asset.FindByName(Glazing.GlazingTransmittanceMap) is AssetPropertyDoubleArray4d transmittanceCustomColor)
             {
@@ -474,12 +520,12 @@ namespace RhinoInside.Revit.GH.Types
       {
         switch ((SolidglassTransmittanceType) transmittance.Value)
         {
-          case SolidglassTransmittanceType.Clear: material.TransparencyColor = Color4f.White; break;
-          case SolidglassTransmittanceType.Green: material.TransparencyColor = new Color4f(0.0f, 1.0f, 0.0f, 1.0f); break;
-          case SolidglassTransmittanceType.Gray: material.TransparencyColor = new Color4f(0.3f, 0.3f, 0.3f, 1.0f); break;
-          case SolidglassTransmittanceType.Blue: material.TransparencyColor = new Color4f(0.0f, 0.0f, 1.0f, 1.0f); break;
-          case SolidglassTransmittanceType.Bluegreen: material.TransparencyColor = new Color4f(0.0f, 0.4f, 1.0f, 1.0f); break;
-          case SolidglassTransmittanceType.Bronze: material.TransparencyColor = new Color4f(0.8f, 0.5f, 2.0f, 1.0f); break;
+          case SolidglassTransmittanceType.Clear: material.TransparencyColor = new Color4f(0.858f, 0.893f, 0.879f, 1.0f); break;
+          case SolidglassTransmittanceType.Green: material.TransparencyColor = new Color4f(0.676f, 0.797f, 0.737f, 1.0f); break;
+          case SolidglassTransmittanceType.Gray: material.TransparencyColor = new Color4f(0.451f, 0.449f, 0.472f, 1.0f); break;
+          case SolidglassTransmittanceType.Blue: material.TransparencyColor = new Color4f(0.367f, 0.514f, 0.651f, 1.0f); break;
+          case SolidglassTransmittanceType.Bluegreen: material.TransparencyColor = new Color4f(0.654f, 0.788f, 0.772f, 1.0f); break;
+          case SolidglassTransmittanceType.Bronze: material.TransparencyColor = new Color4f(0.583f, 0.516f, 0.467f, 1.0f); break;
           case SolidglassTransmittanceType.CustomColor:
             if (asset.FindByName(SolidGlass.SolidglassTransmittanceCustomColor) is AssetPropertyDoubleArray4d transmittanceCustomColor)
             {
@@ -579,7 +625,7 @@ namespace RhinoInside.Revit.GH.Types
       double polish = 0.0;
       if (asset.FindByName(Concrete.ConcreteFinish) is AssetPropertyInteger finish)
       {
-        switch ((ConcreteFinishType)finish.Value)
+        switch ((ConcreteFinishType) finish.Value)
         {
           case ConcreteFinishType.Straight: polish = 0.1; break;
           case ConcreteFinishType.Curved: polish = 0.2; break;
@@ -598,6 +644,82 @@ namespace RhinoInside.Revit.GH.Types
       material.FresnelEnabled = true;
       material.Shine = polish;
       material.PolishAmount = polish;
+    }
+
+    static void GetStoneSchemaParameters(Asset asset, ref BasicMaterialParameters material)
+    {
+      material.PreviewGeometryType = RenderMaterial.PreviewGeometryType.Cube;
+
+      if (asset.FindByName(Stone.StoneColor) is AssetPropertyReference diffuse)
+      {
+        material.DiffuseTexture = ToSimulatedTexture(diffuse.GetSingleConnectedAsset());
+
+        if (asset.FindByName(Stone.CommonTintToggle) is AssetPropertyBoolean tintToggle && tintToggle.Value)
+        {
+          if (asset.FindByName(Stone.CommonTintColor) is AssetPropertyDoubleArray4d tint)
+          {
+            var tintColor = ToColor4f(tint);
+            material.Diffuse = new Color4f(material.Diffuse.R * tintColor.R, material.Diffuse.G * tintColor.G, material.Diffuse.B * tintColor.B, material.Diffuse.A * tintColor.A);
+          }
+        }
+      }
+
+      if (asset.FindByName(Stone.StoneApplication) is AssetPropertyInteger application)
+      {
+        switch ((StoneApplicationType) application.Value)
+        {
+          case StoneApplicationType.Polished: material.PolishAmount = 1.0; break;
+          case StoneApplicationType.Glossy: material.PolishAmount = 0.8; break;
+          case StoneApplicationType.Matte: material.PolishAmount = 0.6; break;
+          case StoneApplicationType.Unfinished: material.PolishAmount = 0.2; break;
+        }
+      }
+
+      if (asset.FindByName(Stone.StoneBump) is AssetPropertyInteger bumpType)
+      {
+        switch ((StoneBumpType) bumpType.Value)
+        {
+          case StoneBumpType.None: break;
+          case StoneBumpType.Polishedgranite:
+            if (asset.FindByName("granite_tex") is AssetPropertyString granite)
+              material.BumpTexture = ToSimulatedTexture(granite.Value);
+            break;
+          case StoneBumpType.Stonewall:
+            if (asset.FindByName("stonewall_tex") is AssetPropertyString stonewall)
+              material.BumpTexture = ToSimulatedTexture(stonewall.Value);
+            break;
+          case StoneBumpType.Glossymarble:
+            if (asset.FindByName("marble_tex") is AssetPropertyString marble)
+              material.BumpTexture = ToSimulatedTexture(marble.Value);
+            break;
+          case StoneBumpType.Custom:
+            if (asset.FindByName(Stone.StoneBumpMap) is AssetPropertyReference bumpMap)
+              material.BumpTexture = ToSimulatedTexture(bumpMap.GetSingleConnectedAsset());
+
+            if (asset.FindByName(Stone.StoneBumpAmount) is AssetPropertyDouble bumpAmount)
+              material.BumpTextureAmount = bumpAmount.Value;
+            break;
+        }
+      }
+
+      if (asset.FindByName(Stone.StonePattern) is AssetPropertyInteger pattern)
+      {
+        switch ((StonePatternType) pattern.Value)
+        {
+          case StonePatternType.None: break;
+          case StonePatternType.Custom:
+            if (asset.FindByName(Stone.StonePatternMap) is AssetPropertyReference patternMap)
+              material.BumpTexture = ToSimulatedTexture(patternMap.GetSingleConnectedAsset());
+
+            if (asset.FindByName(Stone.StonePatternAmount) is AssetPropertyDouble patternAmount)
+              material.BumpTextureAmount = patternAmount.Value;
+            break;
+        }
+      }
+
+      material.FresnelEnabled = true;
+      material.Reflectivity = 1.0;
+      material.Shine = material.PolishAmount;
     }
 
     static void GetMetalSchemaParameters(Asset asset, ref BasicMaterialParameters material)
@@ -1132,6 +1254,31 @@ namespace RhinoInside.Revit.GH.Types
       }
 
       material.Shine = material.PolishAmount;
+    }
+
+    static void GetMirrorSchemaParameters(Asset asset, ref BasicMaterialParameters material)
+    {
+      material.PreviewGeometryType = RenderMaterial.PreviewGeometryType.Plane;
+
+      material.Shine = 1.0;
+      material.Reflectivity = 1.0;
+      material.PolishAmount = 1.0;
+
+      if (asset.FindByName(Mirror.MirrorTintcolor) is AssetPropertyDoubleArray4d mirrorTintColor)
+      {
+        material.Diffuse = ToColor4f(mirrorTintColor);
+        material.DiffuseTexture = ToSimulatedTexture(mirrorTintColor.GetSingleConnectedAsset());
+        material.ReflectivityColor = material.Diffuse;
+      }
+
+      if (asset.FindByName(Mirror.CommonTintToggle) is AssetPropertyBoolean tintToggle && tintToggle.Value)
+      {
+        if (asset.FindByName(Mirror.CommonTintColor) is AssetPropertyDoubleArray4d tint)
+        {
+          var tintColor = ToColor4f(tint);
+          material.ReflectivityColor = new Color4f(material.Diffuse.R * tintColor.R, material.Diffuse.G * tintColor.G, material.Diffuse.B * tintColor.B, material.Diffuse.A * tintColor.A);
+        }
+      }
     }
 #endif
     #endregion
