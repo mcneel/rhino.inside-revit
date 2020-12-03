@@ -18,7 +18,7 @@ namespace RhinoInside.Revit
     #region IExternalServer
     public abstract string GetDescription();
     public abstract string GetName();
-    string DBES.IExternalServer.GetVendorId() => "RMA";
+    string DBES.IExternalServer.GetVendorId() => "com.mcneel";
     DBES.ExternalServiceId DBES.IExternalServer.GetServiceId() => DBES.ExternalServices.BuiltInExternalServices.DirectContext3DService;
     public abstract Guid GetServerId();
     #endregion
