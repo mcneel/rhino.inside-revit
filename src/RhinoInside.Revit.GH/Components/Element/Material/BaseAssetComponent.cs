@@ -5,6 +5,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.Convert.Units;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Material
@@ -320,7 +321,7 @@ namespace RhinoInside.Revit.GH.Components.Material
           return boolProp.Value;
 
         case DB.Visual.AssetPropertyDistance distProp:
-          return distProp.Value;
+          return distProp.Value * Rhino.RhinoMath.UnitScale(distProp.DisplayUnitType.ToUnitSystem(), Rhino.RhinoDoc.ActiveDoc?.ModelUnitSystem ?? Rhino.UnitSystem.Meters);
 
         case DB.Visual.AssetPropertyDouble doubleProp:
           return doubleProp.Value;
@@ -468,7 +469,7 @@ namespace RhinoInside.Revit.GH.Components.Material
         case DB.Visual.AssetPropertyDistance distProp:
           if (removeAsset)
             distProp.RemoveConnectedAsset();
-          distProp.Value = value;
+          distProp.Value = value * Rhino.RhinoMath.UnitScale(Rhino.RhinoDoc.ActiveDoc?.ModelUnitSystem ?? Rhino.UnitSystem.Meters, distProp.DisplayUnitType.ToUnitSystem());
           break;
       }
     }
