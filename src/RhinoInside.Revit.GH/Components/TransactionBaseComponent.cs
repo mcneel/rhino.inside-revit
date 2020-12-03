@@ -1011,7 +1011,7 @@ namespace RhinoInside.Revit.GH.Components
         }
         finally
         {
-          if (previous?.IsValidObject == true && !previous.Equivalent(element))
+          if (previous?.IsValidObject == true && !previous.IsEquivalent(element))
             previous.Document.Delete(previous.Id);
 
           if (element?.IsValidObject == true)

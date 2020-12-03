@@ -19,11 +19,21 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     struct InterDocumentComparer : IEqualityComparer<Element>
     {
-      bool IEqualityComparer<Element>.Equals(Element x, Element y) =>  Equivalent(x, y);
+      bool IEqualityComparer<Element>.Equals(Element x, Element y) =>  IsEquivalent(x, y);
       int IEqualityComparer<Element>.GetHashCode(Element obj) => (obj?.Id.IntegerValue ?? -1) ^ (obj?.Document.GetHashCode() ?? 0);
     }
 
-    public static bool Equivalent(this Element self, Element other)
+    /// <summary>
+    /// Determines whether the specified <see cref="Autodesk.Revit.DB.Element"/> equals to this <see cref="Autodesk.Revit.DB.Element"/>.
+    /// </summary>
+    /// <remarks>
+    /// Two <see cref="Autodesk.Revit.DB.Element"/> instances are considered equivalent if they represent the same element
+    /// in this Revit session.
+    /// </remarks>
+    /// <param name="self"></param>
+    /// <param name="other"></param>
+    /// <returns></returns>
+    public static bool IsEquivalent(this Element self, Element other)
     {
       if (ReferenceEquals(self, other))
         return true;
@@ -37,9 +47,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   public static class ElementExtension
   {
-    [Obsolete("Obsolete since 2020-10-21. Please use ElementEqualityComparer.Equivalent.")]
-    public static bool IsSameElement(this Element self, Element other) => ElementEqualityComparer.Equivalent(self, other);
-
     public static GeometryElement GetGeometry(this Element element, Options options)
     {
       if (element?.IsValidObject != true)
