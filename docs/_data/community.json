@@ -1,4 +1,5 @@
-[{
+[
+    {
         "type": "blogpost",
         "title": "Parametric Monkey Primer",
         "url": "https://parametricmonkey.com/2019/11/20/rhino-inside-revit/",
@@ -15,6 +16,15 @@
         "author": "Marcello Sgambelluri, PE, SE",
         "authorUrl": "http://therevitcomplex.blogspot.com/",
         "description": "Marcello shows Rhino.Inside.Revit... That's right, you can run Rhino (and Grasshopper) inside of Revit. Hosted by [The Revit Kid](https://www.youtube.com/channel/UC6TtKCInvnoU7vLNACZRFrQ)"
+    },
+    {
+        "type": "video",
+        "title": "101 Class Live Academy with Oliver from BIG",
+        "url": "https://liveacademy.tv/programs/101-class-rhino-inside-revit",
+        "thumbnail": "/static/images/community/liveacademy-oliver-101.jpg",
+        "author": "Oliver Thomas, BIG",
+        "authorUrl": "https://liveacademy.tv/authors/author-pu2uG4McCcc",
+        "description": "In this 1-hour course Olly will cover the basics of the Rhino.Inside interface, components and workflows whilst working on a real-world project workflow"
     },
     {
         "type": "video",
