@@ -8,7 +8,7 @@ using DB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Base Point")]
-  class BasePoint : GraphicalElement
+  public class BasePoint : GraphicalElement
   {
     protected override Type ScriptVariableType => typeof(DB.BasePoint);
     public new DB.BasePoint Value => base.Value as DB.BasePoint;
