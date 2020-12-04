@@ -443,6 +443,28 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+    protected static Rhino.DocObjects.ConstructionPlane CreateConstructionPlane(string name, Plane location, Rhino.RhinoDoc rhinoDoc)
+    {
+      bool imperial = rhinoDoc.ModelUnitSystem == Rhino.UnitSystem.Feet || rhinoDoc.ModelUnitSystem == Rhino.UnitSystem.Inches;
+
+      return new Rhino.DocObjects.ConstructionPlane()
+      {
+        Plane = location,
+        GridSpacing = imperial ?
+        1.0 * Rhino.RhinoMath.UnitScale(Rhino.UnitSystem.Yards, rhinoDoc.ModelUnitSystem) :
+        1.0 * Rhino.RhinoMath.UnitScale(Rhino.UnitSystem.Meters, rhinoDoc.ModelUnitSystem),
+
+        SnapSpacing = imperial ?
+        1 / 16.0 * Rhino.RhinoMath.UnitScale(Rhino.UnitSystem.Inches, rhinoDoc.ModelUnitSystem) :
+        1.0 * Rhino.RhinoMath.UnitScale(Rhino.UnitSystem.Millimeters, rhinoDoc.ModelUnitSystem),
+
+        GridLineCount = 70,
+        ThickLineFrequency = imperial ? 6 : 5,
+        DepthBuffered = true,
+        Name = name
+      };
+    }
+
     public virtual Vector3d FacingOrientation => Location.YAxis;
 
     public virtual Vector3d HandOrientation => Location.XAxis;

@@ -9,31 +9,65 @@ namespace RhinoInside.Revit.Convert.Display
 
   public static class PreviewConverter
   {
-    #region GetPreviewMaterials
-    static bool HasMultipleMaterials(this IEnumerable<DB.Face> faces)
+    static bool SkipGeometryObject(DB.GeometryObject geometryObject, DB.Document doc)
     {
-      if (faces.Any())
-      {
-        var materialId = faces.First()?.MaterialElementId ?? DB.ElementId.InvalidElementId;
-        foreach (var face in faces.Skip(1))
-        {
-          if (face.MaterialElementId != materialId)
-            return true;
-        }
-      }
+      if (doc.GetElement(geometryObject.GraphicsStyleId) is DB.GraphicsStyle style)
+        return style.GraphicsStyleCategory.Id.IntegerValue == (int) DB.BuiltInCategory.OST_LightingFixtureSource;
 
       return false;
     }
 
-    /*internal*/
-    public static IEnumerable<Rhino.Display.DisplayMaterial> GetPreviewMaterials
-(
-this IEnumerable<DB.GeometryObject> geometries,
-DB.Document doc,
-Rhino.Display.DisplayMaterial defaultMaterial
-)
+    #region GetPreviewMaterials
+    internal static Dictionary<DB.Material, Rhino.Geometry.Mesh> ZipByMaterial
+    (
+      DB.Material[] materialElements,
+      Rhino.Geometry.Mesh[] meshes,
+      Rhino.Geometry.Mesh outMesh = default
+    )
     {
-      var scaleFactor = Revit.ModelUnits;
+      if (materialElements is null || meshes is null) return null;
+
+      var dictionary = new Dictionary<DB.Material, Mesh>(External.DB.Extensions.ElementEqualityComparer.SameDocument);
+
+      for (int index = 0; index < materialElements.Length && index < meshes.Length; ++index)
+      {
+        if (materialElements[index] is null)
+        {
+          if (!(outMesh is null))
+            outMesh.Append(meshes[index]);
+        }
+        else
+        {
+          if (!dictionary.TryGetValue(materialElements[index], out var mesh0))
+            dictionary.Add(materialElements[index], mesh0 = new Rhino.Geometry.Mesh());
+
+          mesh0.Append(meshes[index]);
+        }
+      }
+
+      return dictionary;
+    }
+
+    /// <summary>
+    /// Extracts a sequence of <see cref="DB.Material"/> from a sequence of <see cref="DB.GeometryObject"/>.
+    /// </summary>
+    /// <remarks>
+    /// Empty <see cref="DB.Mesh"/> and empty <see cref="DB.Solid"/> will be skipped,
+    /// so output <see cref="IEnumerable{T}"/> may be shorter than the input.
+    /// Output is warranted to be free of nulls.
+    /// </remarks>
+    /// <param name="geometries"></param>
+    /// <param name="doc"></param>
+    /// <param name="currentMaterial"></param>
+    /// <returns>An <see cref="IEnumerable{DB.Material}"/></returns>
+    /// <seealso cref="GetPreviewMeshes(IEnumerable{DB.GeometryObject}, MeshingParameters)"/>
+    internal static IEnumerable<DB.Material> GetPreviewMaterials
+    (
+      this IEnumerable<DB.GeometryObject> geometries,
+      DB.Document doc,
+      DB.Material currentMaterial
+    )
+    {
       foreach (var geometry in geometries)
       {
         if (geometry.Visibility != DB.Visibility.Visible)
@@ -42,31 +76,38 @@ Rhino.Display.DisplayMaterial defaultMaterial
         switch (geometry)
         {
           case DB.GeometryInstance instance:
-            foreach (var g in instance.GetInstanceGeometry().GetPreviewMaterials(doc, instance.GetInstanceGeometry().MaterialElement.ToDisplayMaterial(defaultMaterial)))
+            foreach (var g in instance.SymbolGeometry.GetPreviewMaterials(doc, instance.SymbolGeometry.MaterialElement ?? currentMaterial))
               yield return g;
             break;
+
           case DB.Mesh mesh:
             if (mesh.NumTriangles <= 0)
               continue;
 
-            var sm = doc.GetElement(mesh.MaterialElementId) as DB.Material;
-            yield return sm.ToDisplayMaterial(defaultMaterial);
+            if (SkipGeometryObject(geometry, doc))
+              continue;
+
+            yield return doc.GetElement(mesh.MaterialElementId) as DB.Material ?? currentMaterial;
             break;
+
+          case DB.Face face:
+            if (SkipGeometryObject(geometry, doc))
+              continue;
+
+            yield return doc.GetElement(face.MaterialElementId) as DB.Material ?? currentMaterial;
+            break;
+
           case DB.Solid solid:
             if (solid.Faces.IsEmpty)
               continue;
 
+            if (SkipGeometryObject(geometry, doc))
+              continue;
+
             var solidFaces = solid.Faces.OfType<DB.Face>();
-            bool useMultipleMaterials = solidFaces.HasMultipleMaterials();
-
             foreach (var face in solidFaces)
-            {
-              var fm = doc.GetElement(face.MaterialElementId) as DB.Material;
-              yield return fm.ToDisplayMaterial(defaultMaterial);
+              yield return doc.GetElement(face.MaterialElementId) as DB.Material ?? currentMaterial;
 
-              if (!useMultipleMaterials)
-                break;
-            }
             break;
         }
       }
@@ -76,10 +117,22 @@ Rhino.Display.DisplayMaterial defaultMaterial
     #region GetPreviewMeshes
     static double LevelOfDetail(this MeshingParameters value) => value?.RelativeTolerance ?? 0.15;
 
-    /*internal*/
-    public static IEnumerable<Mesh> GetPreviewMeshes
+    /// <summary>
+    /// Extracts a sequence of <see cref="Mesh"/> from a sequence of <see cref="DB.GeometryObject"/>.
+    /// </summary>
+    /// <remarks>
+    /// Empty <see cref="DB.Mesh"/> and empty <see cref="DB.Solid"/> will be skipped,
+    /// so output <see cref="IEnumerable{T}"/> may be shorter than the input.
+    /// Output is warranted to be free of nulls, an empty <see cref="Mesh"/> is returned in case of error.
+    /// </remarks>
+    /// <param name="geometries"></param>
+    /// <param name="meshingParameters"></param>
+    /// <returns>An <see cref="IEnumerable{Mesh}"/></returns>
+    /// <seealso cref="GetPreviewMaterials(IEnumerable{DB.GeometryObject}, DB.Document, DB.Material)"/>
+    internal static IEnumerable<Mesh> GetPreviewMeshes
     (
       this IEnumerable<DB.GeometryObject> geometries,
+      DB.Document doc,
       MeshingParameters meshingParameters
     )
     {
@@ -93,9 +146,9 @@ Rhino.Display.DisplayMaterial defaultMaterial
           case DB.GeometryInstance instance:
           {
             var xform = instance.Transform.ToTransform();
-            foreach (var g in instance.SymbolGeometry.GetPreviewMeshes(meshingParameters))
+            foreach (var g in instance.SymbolGeometry.GetPreviewMeshes(doc, meshingParameters))
             {
-              g?.Transform(xform);
+              g.Transform(xform);
               yield return g;
             }
             break;
@@ -105,19 +158,25 @@ Rhino.Display.DisplayMaterial defaultMaterial
             if (mesh.NumTriangles <= 0)
               continue;
 
+            if (SkipGeometryObject(geometry, doc))
+              continue;
+
             var f = Geometry.Raw.RawDecoder.ToRhino(mesh);
             UnitConverter.Scale(f, UnitConverter.ToRhinoUnits);
 
-            yield return f;
+            yield return f ?? new Rhino.Geometry.Mesh();
             break;
           }
           case DB.Face face:
           {
+            if (SkipGeometryObject(geometry, doc))
+              continue;
+
             var faceMesh = face.Triangulate(meshingParameters.LevelOfDetail());
             var f = Geometry.Raw.RawDecoder.ToRhino(faceMesh);
             UnitConverter.Scale(f, UnitConverter.ToRhinoUnits);
 
-            yield return f;
+            yield return f ?? new Rhino.Geometry.Mesh();
             break;
           }
           case DB.Solid solid:
@@ -125,31 +184,17 @@ Rhino.Display.DisplayMaterial defaultMaterial
             if (solid.Faces.IsEmpty)
               continue;
 
+            if (SkipGeometryObject(geometry, doc))
+              continue;
+
             var solidFaces = solid.Faces.OfType<DB.Face>();
-            bool useMultipleMaterials = solidFaces.HasMultipleMaterials();
-            var facesMeshes = useMultipleMaterials ? null : new List<Mesh>(solid.Faces.Size);
             foreach (var face in solidFaces)
             {
               var faceMesh = face.Triangulate(meshingParameters.LevelOfDetail());
               var f = Geometry.Raw.RawDecoder.ToRhino(faceMesh);
               UnitConverter.Scale(f, UnitConverter.ToRhinoUnits);
 
-              if (facesMeshes is null)
-                yield return f;
-              else if (f is object)
-                facesMeshes.Add(f);
-            }
-
-            if (facesMeshes is object)
-            {
-              if (facesMeshes.Count > 0)
-              {
-                var mesh = new Mesh();
-
-                mesh.Append(facesMeshes);
-                yield return mesh;
-              }
-              else yield return null;
+              yield return f ?? new Rhino.Geometry.Mesh();
             }
             break;
           }
@@ -159,13 +204,11 @@ Rhino.Display.DisplayMaterial defaultMaterial
     #endregion
 
     #region GetPreviewWires
-    /*internal*/
-    public static IEnumerable<Curve> GetPreviewWires
+    internal static IEnumerable<Curve> GetPreviewWires
     (
       this IEnumerable<DB.GeometryObject> geometries
     )
     {
-      var scaleFactor = Revit.ModelUnits;
       foreach (var geometry in geometries)
       {
         if (geometry?.Visibility != DB.Visibility.Visible)

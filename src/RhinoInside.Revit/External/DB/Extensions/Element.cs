@@ -13,30 +13,40 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     struct SameDocumentComparer : IEqualityComparer<Element>
     {
-      bool IEqualityComparer<Element>.Equals(Element x, Element y) => ReferenceEquals(x, y) || x.Id == y.Id;
-      int IEqualityComparer<Element>.GetHashCode(Element obj) => obj.Id.IntegerValue;
+      bool IEqualityComparer<Element>.Equals(Element x, Element y) => ReferenceEquals(x, y) || x?.Id == y?.Id;
+      int IEqualityComparer<Element>.GetHashCode(Element obj) => obj?.Id.IntegerValue ?? -1;
     }
 
     struct InterDocumentComparer : IEqualityComparer<Element>
     {
-      bool IEqualityComparer<Element>.Equals(Element x, Element y) => (ReferenceEquals(x, y) || x.Id == y.Id) && x.Document.Equals(y.Document);
-      int IEqualityComparer<Element>.GetHashCode(Element obj) => obj.Id.IntegerValue ^ obj.Document.GetHashCode();
+      bool IEqualityComparer<Element>.Equals(Element x, Element y) =>  IsEquivalent(x, y);
+      int IEqualityComparer<Element>.GetHashCode(Element obj) => (obj?.Id.IntegerValue ?? -1) ^ (obj?.Document.GetHashCode() ?? 0);
     }
 
-    public static bool Equivalent(this Element self, Element other)
+    /// <summary>
+    /// Determines whether the specified <see cref="Autodesk.Revit.DB.Element"/> equals to this <see cref="Autodesk.Revit.DB.Element"/>.
+    /// </summary>
+    /// <remarks>
+    /// Two <see cref="Autodesk.Revit.DB.Element"/> instances are considered equivalent if they represent the same element
+    /// in this Revit session.
+    /// </remarks>
+    /// <param name="self"></param>
+    /// <param name="other"></param>
+    /// <returns></returns>
+    public static bool IsEquivalent(this Element self, Element other)
     {
       if (ReferenceEquals(self, other))
         return true;
 
-      return self.Id == other?.Id && self.Document.Equals(other?.Document);
+      if (self?.Id != other?.Id)
+        return false;
+
+      return self.Document.Equals(other);
     }
   }
 
   public static class ElementExtension
   {
-    [Obsolete("Obsolete since 2020-10-21. Please use ElementEqualityComparer.Equivalent.")]
-    public static bool IsSameElement(this Element self, Element other) => ElementEqualityComparer.Equivalent(self, other);
-
     public static GeometryElement GetGeometry(this Element element, Options options)
     {
       if (element?.IsValidObject != true)

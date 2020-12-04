@@ -1,13 +1,16 @@
+using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Rhino;
 using Rhino.Geometry;
 using DB = Autodesk.Revit.DB;
+using RhinoInside.Revit.External.DB;
+using RhinoInside.Revit.External.DB.Extensions;
 
 namespace RhinoInside.Revit.Convert.Geometry
 {
-  using Units;
-
   /// <summary>
   /// Converts a "complex" <see cref="Brep"/> to be transfered to a <see cref="DB.Solid"/>.
   /// </summary>
@@ -134,8 +137,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     }
     #endregion
 
-
     #region Transfer
+    internal static DB.Solid ToSolid(/*const*/Brep brep, double factor)
+    {
+      if (ToSolid(ToRawBrep(brep, factor)) is DB.Solid solid)
+        return solid;
+
+      return ToACIS(brep, factor);
+    }
+
     /// <summary>
     /// Replaces <see cref="Raw.RawEncoder.ToHost(Brep)"/> to catch Revit Exceptions
     /// </summary>
@@ -143,6 +153,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <returns></returns>
     internal static DB.Solid ToSolid(/*const*/ Brep brep)
     {
+      if(brep is object)
       try
       {
         var brepType = DB.BRepType.OpenShell;
@@ -339,6 +350,94 @@ namespace RhinoInside.Revit.Convert.Geometry
         Debug.WriteLine("Short segment removed");
 
       return ToEdgeCurveMany(edgeCurve).Select(x => DB.BRepBuilderEdgeGeometry.Create(x));
+    }
+
+    internal static DB.Solid ToACIS(/*const*/ Brep brep, double factor)
+    {
+      var SATFile = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():B}.sat");
+
+      // Export
+      {
+        var activeModel = RhinoDoc.ActiveDoc;
+        var rhinoWindowEnabled = Rhinoceros.MainWindow.Enabled;
+        var redrawEnabled = activeModel.Views.RedrawEnabled;
+        var objectGUID = default(Guid);
+        try
+        {
+          Rhinoceros.MainWindow.Enabled = false;
+          activeModel.Views.RedrawEnabled = false;
+          activeModel.Objects.UnselectAll();
+
+          objectGUID = activeModel.Objects.Add(brep);
+
+          activeModel.Objects.Select(objectGUID);
+          RhinoApp.RunScript($@"_-Export ""{SATFile}"" ""Default"" _Enter", false);
+        }
+        finally
+        {
+          activeModel.Objects.Delete(objectGUID, true);
+          activeModel.Views.RedrawEnabled = redrawEnabled;
+          Rhinoceros.MainWindow.Enabled = rhinoWindowEnabled;
+        }
+      }
+
+      // Import
+      if (File.Exists(SATFile))
+      {
+        try
+        {
+          var doc = GeometryEncoder.Context.Peek.Document;
+
+          // In case we don't know the destination document we create a new one here.
+          using (doc is null ? doc = Revit.ActiveDBApplication.NewProjectDocument(DB.UnitSystem.Imperial) : default)
+          {
+            // Everything in this scope should be rolledback.
+            using (doc.RollBackScope())
+            {
+              using
+              (
+                var SATOptions = new DB.SATImportOptions()
+                {
+                  ReferencePoint = DB.XYZ.Zero,
+                  Placement = DB.ImportPlacement.Origin,
+                  CustomScale = DB.UnitUtils.Convert(factor, DB.DisplayUnitType.DUT_DECIMAL_FEET, doc.GetUnits().GetFormatOptions(DB.UnitType.UT_Length).DisplayUnits),
+                }
+              )
+              {
+                // Create a 3D view to 
+                var typeId = doc.GetDefaultElementTypeId(DB.ElementTypeGroup.ViewType3D);
+                var view = DB.View3D.CreatePerspective(doc, typeId);
+
+                var instanceId = doc.Import(SATFile, SATOptions, view);
+                if (doc.GetElement(instanceId) is DB.Element element)
+                {
+                  using (var options = new DB.Options() { DetailLevel = DB.ViewDetailLevel.Fine })
+                  {
+                    /// <see cref="DB.GeometryInstance.GetInstanceGeometry"/> is like calling
+                    /// <see cref="DB.SolidUtils.CreateTransformed"/> on <see cref="DB.GeometryInstance.SymbolGeometry"/>.
+                    /// It creates a transformed copy of the solid that will survive the Rollback.
+                    /// Unfortunately Paint information lives in the element so even if we paint the
+                    /// instance before doing the duplicate this information is lost after Rollback.
+                    if
+                    (
+                      element.get_Geometry(options) is DB.GeometryElement geometryElement &&
+                      geometryElement.First() is DB.GeometryInstance instance &&
+                      instance.GetInstanceGeometry().First() is DB.Solid solid
+                    )
+                      return solid;
+                  }
+                }
+              }
+            }
+          }
+        }
+        finally
+        {
+          try { File.Delete(SATFile); } catch { }
+        }
+      }
+
+      return default;
     }
     #endregion
   }

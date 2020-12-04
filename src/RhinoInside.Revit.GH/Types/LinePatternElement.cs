@@ -1,12 +1,17 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
+using Rhino;
+using Rhino.DocObjects;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Line Pattern")]
-  public class LinePatternElement : Element
+  public class LinePatternElement : Element, Bake.IGH_BakeAwareElement
   {
     protected override Type ScriptVariableType => typeof(DB.LinePatternElement);
 
@@ -58,6 +63,74 @@ namespace RhinoInside.Revit.GH.Types
 
       return false;
     }
+
+    #region IGH_BakeAwareElement
+    bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
+      BakeElement(new Dictionary<DB.ElementId, Guid>(), true, doc, att, out guid);
+
+    public bool BakeElement
+    (
+      IDictionary<DB.ElementId, Guid> idMap,
+      bool overwrite,
+      RhinoDoc doc,
+      ObjectAttributes att,
+      out Guid guid
+    )
+    {
+      // 1. Check if is already cloned
+      if (idMap.TryGetValue(Id, out guid))
+        return true;
+
+      if (Id == DB.LinePatternElement.GetSolidPatternId())
+      {
+        idMap.Add(Id, guid = new Guid("{3999bed5-78ee-4d73-a059-032224c6fd55}"));
+        return true;
+      }
+      else if (Value is DB.LinePatternElement linePattern)
+      {
+        // 2. Check if already exist
+        var index = doc.Linetypes.Find(linePattern.Name);
+        var linetype = index < 0 ?
+          new Rhino.DocObjects.Linetype() { Name = linePattern.Name } :
+          doc.Linetypes[index];
+
+        // 3. Update if necessary
+        if (index < 0 || overwrite)
+        {
+          var feet = RhinoMath.UnitScale(Rhino.UnitSystem.Feet, Rhino.UnitSystem.Millimeters);
+
+          using (var pattern = linePattern.GetLinePattern())
+          {
+            var segments = pattern.GetSegments();
+            linetype.SetSegments
+            (
+              pattern.GetSegments().Select
+              (
+                x =>
+                {
+                  switch (x.Type)
+                  {
+                    case DB.LinePatternSegmentType.Dash: return x.Length * +feet;
+                    case DB.LinePatternSegmentType.Space: return x.Length * -feet;
+                    case DB.LinePatternSegmentType.Dot: return 0.0;
+                    default: throw new ArgumentOutOfRangeException();
+                  }
+                }
+              )
+            );
+          }
+
+          if (index < 0) { index = doc.Linetypes.Add(linetype); linetype = doc.Linetypes[index]; }
+          else if (overwrite) doc.Linetypes.Modify(linetype, index, true);
+        }
+
+        idMap.Add(Id, guid = linetype.Id);
+        return true;
+      }
+
+      return false;
+    }
+    #endregion
 
     #region Properties
     public override string Name

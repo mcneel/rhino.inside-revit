@@ -9,6 +9,27 @@ namespace RhinoInside.Revit.External.DB.Extensions
   {
     public static bool IsValid(this Document doc) => doc?.IsValidObject == true;
 
+    /// <summary>
+    /// Determines whether the specified <see cref="Autodesk.Revit.DB.Document"/> equals to this <see cref="Autodesk.Revit.DB.Document"/>.
+    /// </summary>
+    /// <remarks>
+    /// Two <see cref="Autodesk.Revit.DB.Document"/> instances are considered equivalent if they represent the same document
+    /// in this Revit session.
+    /// </remarks>
+    /// <param name="self"></param>
+    /// <param name="other"></param>
+    /// <returns></returns>
+    public static bool IsEquivalent(this Document self, Document other)
+    {
+      if (ReferenceEquals(self, other))
+        return true;
+
+      if (self is null || other is null)
+        return false;
+
+      return self.Equals(other);
+    }
+
     public static bool Release(this Document doc)
     {
       using (var uiDocument = new Autodesk.Revit.UI.UIDocument(doc))

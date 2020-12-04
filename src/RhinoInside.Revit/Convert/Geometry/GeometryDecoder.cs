@@ -22,6 +22,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       public DB.Visibility Visibility = DB.Visibility.Invisible;
       public DB.ElementId GraphicsStyleId = DB.ElementId.InvalidElementId;
       public DB.ElementId MaterialId = DB.ElementId.InvalidElementId;
+      public DB.ElementId[] FaceMaterialId;
     }
     #endregion
 
@@ -176,48 +177,44 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// Update Context from <see cref="DB.GeometryObject"/> <paramref name="geometryObject"/>
     /// </summary>
     /// <param name="geometryObject"></param>
-    static void UpdateGraphicAttributes(DB.GeometryObject geometryObject)
+    internal static void UpdateGraphicAttributes(DB.GeometryObject geometryObject)
     {
       if (geometryObject is object)
       {
         var context = Context.Peek;
         if (context.Element is object)
         {
-          if (geometryObject is DB.GeometryInstance instance)
-            context.Element = instance.Symbol;
-
           context.Visibility = geometryObject.Visibility;
 
-          if (geometryObject.GraphicsStyleId != DB.ElementId.InvalidElementId)
+          if (geometryObject is DB.GeometryInstance instance)
           {
-            context.GraphicsStyleId = geometryObject.GraphicsStyleId;
-
-            if (context.Element.Document.GetElement(context.GraphicsStyleId) is DB.GraphicsStyle graphicsStyle)
-            {
-              if (graphicsStyle.GraphicsStyleCategory.Material is DB.Material material)
-                context.MaterialId = material.Id;
-            }
+            context.Element = instance.Symbol;
+            context.GraphicsStyleId = instance.Symbol.Category?.GetGraphicsStyle(DB.GraphicsStyleType.Projection)?.Id ?? DB.ElementId.InvalidElementId;
+            context.MaterialId = instance.Symbol.Category?.Material?.Id ?? DB.ElementId.InvalidElementId;
           }
-
-          if (geometryObject is DB.GeometryElement element)
+          else if (geometryObject is DB.GeometryElement element)
           {
-            if (element.MaterialElement is object)
-              context.MaterialId = element.MaterialElement.Id;
+            context.MaterialId = element.MaterialElement?.Id ?? DB.ElementId.InvalidElementId;
           }
           else if (geometryObject is DB.Solid solid)
           {
             if (!solid.Faces.IsEmpty)
             {
-              var face0 = solid.Faces.get_Item(0);
-              if (face0.MaterialElementId != DB.ElementId.InvalidElementId)
-                context.MaterialId = face0.MaterialElementId;
+              var faces = solid.Faces;
+              var count = faces.Size;
+
+              context.FaceMaterialId = new DB.ElementId[count];
+              for (int f = 0; f < count; ++f)
+                context.FaceMaterialId[f] = faces.get_Item(f).MaterialElementId;
             }
           }
           else if (geometryObject is DB.Mesh mesh)
           {
-            if (mesh.MaterialElementId != DB.ElementId.InvalidElementId)
-              context.MaterialId = mesh.MaterialElementId;
+            context.FaceMaterialId = new DB.ElementId[] { mesh.MaterialElementId };
           }
+
+          if (geometryObject.GraphicsStyleId != DB.ElementId.InvalidElementId)
+            context.GraphicsStyleId = geometryObject.GraphicsStyleId;
         }
       }
     }

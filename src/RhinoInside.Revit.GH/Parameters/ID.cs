@@ -10,14 +10,32 @@ using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
+using Rhino;
+using Rhino.DocObjects;
 using Rhino.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
+
+namespace RhinoInside.Revit.GH.Bake
+{
+  public interface IGH_BakeAwareElement : IGH_BakeAwareData
+  {
+    bool BakeElement
+    (
+      IDictionary<DB.ElementId, Guid> idMap,
+      bool overwrite,
+      RhinoDoc doc,
+      ObjectAttributes att,
+      out Guid guid
+    );
+  }
+}
 
 namespace RhinoInside.Revit.GH.Parameters
 {
   public abstract class ElementIdParam<T, R> :
   PersistentParam<T>,
+  IGH_BakeAwareObject,
   Kernel.IGH_ElementIdParam
   where T : class, Types.IGH_ElementId
   {
@@ -189,6 +207,95 @@ namespace RhinoInside.Revit.GH.Parameters
     }
 
     #region UI
+
+    public override bool AppendMenuItems(ToolStripDropDown menu)
+    {
+      // Name
+      if (Attributes.IsTopLevel ? false : IconCapableUI)
+        Menu_AppendObjectNameEx(menu);
+      else
+        Menu_AppendObjectName(menu);
+
+      // Preview
+      if (this is IGH_PreviewObject preview)
+      {
+        if (Attributes.IsTopLevel && preview.IsPreviewCapable)
+          Menu_AppendPreviewItem(menu);
+      }
+
+      // Enabled
+      if (this is IGH_Component || (this is IGH_Param param && param.Kind == GH_ParamKind.floating))
+        Menu_AppendEnableItem(menu);
+
+      // Bake
+      if (this is IGH_BakeAwareObject bake)
+        Menu_AppendBakeItem(menu);
+
+      // Runtime messages
+      Menu_AppendRuntimeMessages(menu);
+
+      // Custom items.
+      AppendAdditionalMenuItems(menu);
+      Menu_AppendSeparator(menu);
+
+      // Publish.
+      Menu_AppendPublish(menu);
+
+      // Help.
+      Menu_AppendObjectHelp(menu);
+
+      return true;
+    }
+
+    new void Menu_AppendBakeItem(ToolStripDropDown menu)
+    {
+      var bakeCapable = this is IGH_BakeAwareObject bakeObject && bakeObject.IsBakeCapable;
+
+      if(Grasshopper.Instances.DocumentEditor.MainMenuStrip.Items.Find("mnuBakeSelected", true).
+        OfType<ToolStripMenuItem>().FirstOrDefault() is ToolStripMenuItem menuItem)
+        Menu_AppendItem(menu, "Bake…", Menu_BakeItemClick, menuItem?.Image, bakeCapable, false);
+      else
+        Menu_AppendItem(menu, "Bake…", Menu_BakeItemClick, bakeCapable, false);
+    }
+
+    void Menu_BakeItemClick(object sender, EventArgs e)
+    {
+      if (this is IGH_BakeAwareObject bakeObject)
+      {
+        if (Rhino.Commands.Command.InCommand())
+        {
+          MessageBox.Show
+          (
+            Form.ActiveForm,
+            $"We're sorry but Baking is only possible{Environment.NewLine}" +
+            "when no other Commands are running.",
+            "Bake failure",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Warning
+          );
+        }
+        else if (RhinoDoc.ActiveDoc is RhinoDoc doc)
+        {
+          var ur = doc.BeginUndoRecord("GrasshopperBake");
+          try
+          {
+            Grasshopper.Plugin.Commands.BakeObject = this;
+
+            var guids = new List<Guid>();
+            bakeObject.BakeGeometry(doc, default, guids);
+
+            //foreach (var view in doc.Views)
+            //  view.Redraw();
+          }
+          finally
+          {
+            Grasshopper.Plugin.Commands.BakeObject = default;
+            doc.EndUndoRecord(ur);
+          }
+        }
+      }
+    }
+
     protected override void Menu_AppendPreProcessParameter(ToolStripDropDown menu)
     {
       base.Menu_AppendPreProcessParameter(menu);
@@ -453,6 +560,54 @@ namespace RhinoInside.Revit.GH.Parameters
       }
 
       return false;
+    }
+    #endregion
+
+    #region IGH_BakeAwareObject
+    public bool IsBakeCapable => VolatileData.AllData(true).Any(x => x is IGH_BakeAwareData);
+
+    public void BakeGeometry(RhinoDoc doc, List<Guid> guids) => BakeGeometry(doc, null, guids);
+    public void BakeGeometry(RhinoDoc doc, ObjectAttributes att, List<Guid> guids) =>
+      Rhinoceros.InvokeInHostContext(() => BakeElements(doc, att, guids));
+      
+    public void BakeElements(RhinoDoc doc, ObjectAttributes att, List<Guid> guids)
+    {
+      if (doc is null) throw new ArgumentNullException(nameof(doc));
+      if (att is null) att = doc.CreateDefaultAttributes();
+      else att = att.Duplicate();
+      if (guids is null) throw new ArgumentNullException(nameof(guids));
+
+      var idMap = new Dictionary<DB.ElementId, Guid>();
+
+      // In case some element has no Category it should go to Root 'Revit' layer.
+      if (new Types.Category().BakeElement(idMap, false, doc, att, out var layerGuid))
+        att.LayerIndex = doc.Layers.FindId(layerGuid).Index;
+
+      bool progress = Grasshopper.Plugin.Commands.BakeObject == this &&
+        1 == Rhino.UI.StatusBar.ShowProgressMeter(doc.RuntimeSerialNumber, 0, VolatileData.DataCount, "Baking…", true, true);
+
+      foreach (var goo in VolatileData.AllData(true))
+      {
+        if (progress)
+          Rhino.UI.StatusBar.UpdateProgressMeter(doc.RuntimeSerialNumber, 1, false);
+
+        if (goo is null) continue;
+        if (!goo.IsValid) continue;
+
+        if (goo is Bake.IGH_BakeAwareElement bakeAwareElement)
+        {
+          if (bakeAwareElement.BakeElement(idMap, true, doc, att, out var guid))
+            guids.Add(guid);
+        }
+        else if (goo is IGH_BakeAwareData bakeAwareData)
+        {
+          if (bakeAwareData.BakeGeometry(doc, att, out var guid))
+            guids.Add(guid);
+        }
+      }
+
+      if (progress)
+        Rhino.UI.StatusBar.HideProgressMeter(doc.RuntimeSerialNumber);
     }
     #endregion
   }

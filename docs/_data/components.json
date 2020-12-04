@@ -681,13 +681,23 @@
   }, 
   {
     "desc": "Project information", 
-    "iconsrc": null, 
-    "icontag": "P", 
+    "iconsrc": "/static/images/GH/ProjectInformation.png", 
+    "icontag": null, 
     "panel": "Document", 
     "tab": "Revit", 
     "title": "Project Information", 
     "typename": "ProjectInformation", 
     "uuid": "2f3afcc9-c8a4-4423-b1bf-2a04e8fd2734"
+  }, 
+  {
+    "desc": "Project location", 
+    "iconsrc": "/static/images/GH/ProjectLocation.png", 
+    "icontag": null, 
+    "panel": "Document", 
+    "tab": "Revit", 
+    "title": "Project Location", 
+    "typename": "ProjectLocation", 
+    "uuid": "b8677884-61e8-4d3f-8acb-0873b2a40053"
   }, 
   {
     "desc": "Saves a document to a given file path", 
@@ -1470,6 +1480,16 @@
     "uuid": "05539772-7205-4d58-8093-1715daf213af"
   }, 
   {
+    "desc": "Get element by ID", 
+    "iconsrc": "/static/images/GH/QueryElement.png", 
+    "icontag": null, 
+    "panel": "Element", 
+    "tab": "Revit", 
+    "title": "Query Element", 
+    "typename": "QueryElement", 
+    "uuid": "bbcf5d5c-9abc-4e28-861a-584644edfc3d"
+  }, 
+  {
     "desc": "Get document model elements list", 
     "iconsrc": "/static/images/GH/QueryElements.png", 
     "icontag": null, 
@@ -2081,8 +2101,8 @@
   }, 
   {
     "desc": "Query level identity information", 
-    "iconsrc": null, 
-    "icontag": "L", 
+    "iconsrc": "/static/images/GH/LevelIdentity.png", 
+    "icontag": null, 
     "panel": "Model", 
     "tab": "Revit", 
     "title": "Level Identity", 
@@ -2160,6 +2180,26 @@
     "uuid": "6804582b-e6fd-4825-aa71-b59346f149cd"
   }, 
   {
+    "desc": "Site location identity Data", 
+    "iconsrc": "/static/images/GH/SiteLocationIdentity.png", 
+    "icontag": null, 
+    "panel": "Site", 
+    "tab": "Revit", 
+    "title": "Site Location Identity", 
+    "typename": "SiteLocationIdentity", 
+    "uuid": "6820c2dc-4be5-4a54-884f-5d402cf556b3"
+  }, 
+  {
+    "desc": "Get all document site locations", 
+    "iconsrc": "/static/images/GH/QuerySiteLocations.png", 
+    "icontag": null, 
+    "panel": "Site", 
+    "tab": "Revit", 
+    "title": "Query Site Locations", 
+    "typename": "QuerySiteLocations", 
+    "uuid": "9c352309-f20b-4c9b-af46-3783d1106cdf"
+  }, 
+  {
     "desc": "Given a set of contour Curves, it adds a BuildingPad element to the active Revit document", 
     "iconsrc": "/static/images/GH/BuildingPadByOutline.png", 
     "icontag": null, 
@@ -2168,6 +2208,16 @@
     "title": "Add BuildingPad", 
     "typename": "BuildingPadByOutline", 
     "uuid": "ade71474-5f00-4bd5-9d1e-d518b42137f2"
+  }, 
+  {
+    "desc": "Get all document shared sites", 
+    "iconsrc": "/static/images/GH/QueryProjectLocations.png", 
+    "icontag": null, 
+    "panel": "Site", 
+    "tab": "Revit", 
+    "title": "Query Shared Sites", 
+    "typename": "QueryProjectLocations", 
+    "uuid": "62641279-d4ce-4f93-8430-bd342be123ab"
   }, 
   {
     "desc": "Given a Mesh, it adds a Topography surface to the active Revit document", 

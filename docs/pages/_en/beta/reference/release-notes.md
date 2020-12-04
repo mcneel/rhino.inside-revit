@@ -11,6 +11,24 @@ Some of the changes mentioned in sections below, might break your existing Grass
 
 <!-- most recent release should be on top -->
 
+{% include ltr/release-header.html version="0.0.7643.31783" time="12/04/2020 17:39:26" %}
+
+### New featues
+* Implemented 'Bake…' context menu into Categories, Line patterns, Materials and Graphical Elements into Rhino blocks. Levels and Shared Site are baked as named CPlanes in Rhino.
+* Added 'Activate Element CPlane' to the 'GraphicalElement' parameters.
+
+### Fixes
+* Fixed some geometry conversion problems using SAT file export-import on those cases.
+* Fixed a units conversion problem on 'Bitmap Asset' components.
+* Fixed a bug in `ValueSetPicker` when comparing `GH_StructurePath` objects.
+* Fixed `Types.BasePoint.Location` for shared locations like the 'Survey Point'.
+
+### Minor Changes
+* Now we keep Revit window disabled while Rhino.Inside is loading. This prevents Rhino `MessageBox` windows that appear during startup go behind Revit window.
+
+### API
+* Added `IsEquivalent` extension method for `DB.Document` and `DB.Element` to compare if two references point to the same internal Revit object.
+
 {% include ltr/release-header.html version="0.0.7626.34420" time="11/19/2020 14:00:20" %}
 ### New featues
 * Added 'Query Element' component.

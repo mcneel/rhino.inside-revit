@@ -31,7 +31,24 @@ namespace RhinoInside.Revit
         MainWindow = new WindowHandle(Process.GetCurrentProcess().MainWindowHandle);
 #endif
 
-        result = Rhinoceros.Startup();
+        // Save Revit window status
+        bool wasEnabled = MainWindow.Enabled;
+        var activeWindow = WindowHandle.ActiveWindow ?? MainWindow;
+
+        try
+        {
+          // Disable Revit window
+          MainWindow.Enabled = false;
+
+          result = Rhinoceros.Startup();
+        }
+        finally
+        {
+          //Enable Revit window back
+          MainWindow.Enabled = wasEnabled;
+          WindowHandle.ActiveWindow = activeWindow;
+        }
+
         if (result != Result.Succeeded)
         {
           MainWindow = WindowHandle.Zero;
@@ -115,7 +132,7 @@ namespace RhinoInside.Revit
       if (doc is null)
         return;
 
-      using (var ctx = GeometryEncoder.Context.Push())
+      using (var ctx = GeometryEncoder.Context.Push(doc))
       {
         using (var collector = new FilteredElementCollector(doc))
         {

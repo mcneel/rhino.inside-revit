@@ -374,7 +374,7 @@ namespace RhinoInside.Revit.GH.Types
             if (geometry is object)
             {
               var mesh = new Mesh();
-              mesh.Append(geometry.GetPreviewMeshes(null).Where(x => x is object));
+              mesh.Append(geometry.GetPreviewMeshes(element.Document, null));
               mesh.Normals.ComputeNormals();
               if (mesh.Faces.Count > 0)
               {

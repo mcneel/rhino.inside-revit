@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Rhino;
 using Rhino.Geometry;
 using DB = Autodesk.Revit.DB;
 
@@ -54,37 +53,32 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     internal static IEnumerable<DB.GeometryObject> ToGeometryObjectMany(Brep brep)
     {
-      var solid = BrepEncoder.ToSolid(brep);
-      if (solid is object)
+      // Try using DB.BRepBuilder
+      DB.GeometryObject solid = BrepEncoder.ToSolid(brep);
+
+      if (solid is null)
       {
-        yield return solid;
-        yield break;
+        Debug.WriteLine("Try exporting-importing as ACIS.");
+        solid = BrepEncoder.ToACIS(brep, UnitConverter.NoScale);
+
+        if (solid is null)
+        {
+          Debug.WriteLine("Try meshing the brep.");
+
+          var mp = MeshingParameters.Default;
+          mp.MinimumEdgeLength = Revit.ShortCurveTolerance;
+          mp.ClosedObjectPostProcess = true;
+          mp.JaggedSeams = false;
+
+          var brepMesh = new Mesh();
+          if (Mesh.CreateFromBrep(brep, mp) is Mesh[] meshes)
+            brepMesh.Append(meshes);
+
+          solid = brepMesh.ToMesh(UnitConverter.NoScale);
+        }
       }
 
-      if (brep.Faces.Count > 1)
-      {
-        Debug.WriteLine("Try exploding the brep and converting face by face.");
-
-        var breps = brep.UnjoinEdges(brep.Edges.Select(x => x.EdgeIndex));
-        foreach (var face in breps.SelectMany(x => ToGeometryObjectMany(x)))
-          yield return face;
-      }
-      else
-      {
-        Debug.WriteLine("Try meshing the brep.");
-
-        // Emergency result as a mesh
-        var mp = MeshingParameters.Default;
-        mp.MinimumEdgeLength = Revit.ShortCurveTolerance;
-        mp.ClosedObjectPostProcess = true;
-        mp.JaggedSeams = false;
-
-        var brepMesh = new Mesh();
-        if (Mesh.CreateFromBrep(brep, mp) is Mesh[] meshes)
-          brepMesh.Append(meshes);
-
-        yield return brepMesh.ToMesh(UnitConverter.NoScale);
-      }
+      return new DB.GeometryObject[] { solid };
     }
   };
 }

@@ -280,6 +280,14 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public override void Menu_AppendActions(ToolStripDropDown menu)
     {
+      if (VolatileData.DataCount == 1)
+      {
+        var cplane = VolatileData.AllData(true).FirstOrDefault() is Types.GraphicalElement element &&
+          element.Location.IsValid;
+
+        Menu_AppendItem(menu, $"Activate {TypeName} CPlane", Menu_ActivateCPlane, cplane, false);
+      }
+
       Menu_AppendItem(menu, $"Highlight {GH_Convert.ToPlural(TypeName)}", Menu_HighlightElements, !VolatileData.IsEmpty, false);
       base.Menu_AppendActions(menu);
     }
@@ -421,6 +429,23 @@ namespace RhinoInside.Revit.GH.Parameters
         var ids = elementIds.ToArray();
         uiDocument.Selection.SetElementIds(ids);
         uiDocument.ShowElements(ids);
+      }
+    }
+
+    private void Menu_ActivateCPlane(object sender, EventArgs e)
+    {
+      if (VolatileData.AllData(true).FirstOrDefault() is Types.GraphicalElement element)
+      {
+        if
+        (
+          Rhino.RhinoDoc.ActiveDoc is Rhino.RhinoDoc doc &&
+          doc.Views.ActiveView is Rhino.Display.RhinoView view &&
+          view.ActiveViewport is Rhino.Display.RhinoViewport vport
+        )
+        {
+          vport.SetConstructionPlane(element.Location);
+          view.Redraw();
+        }
       }
     }
 

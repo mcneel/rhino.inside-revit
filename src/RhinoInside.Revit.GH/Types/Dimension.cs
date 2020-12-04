@@ -43,15 +43,19 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (Value is DB.Dimension dimension && dimension.Curve is DB.Curve curve)
         {
-          if (!curve.IsBound && dimension.Value.HasValue)
+          try
           {
-            if (dimension.Curve.Project(dimension.Origin) is DB.IntersectionResult result)
+            if (!curve.IsBound && dimension.Value.HasValue)
             {
-              var startParameter = dimension.Value.Value * -0.5;
-              var endParameter   = dimension.Value.Value * +0.5;
-              curve.MakeBound(result.Parameter + startParameter, result.Parameter + endParameter);
+              if (dimension.Curve.Project(dimension.Origin) is DB.IntersectionResult result)
+              {
+                var startParameter = dimension.Value.Value * -0.5;
+                var endParameter = dimension.Value.Value * +0.5;
+                curve.MakeBound(result.Parameter + startParameter, result.Parameter + endParameter);
+              }
             }
           }
+          catch { }
 
           return curve.ToCurve();
 

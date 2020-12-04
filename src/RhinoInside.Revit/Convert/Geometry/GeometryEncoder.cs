@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.System.Collections.Generic;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
@@ -17,10 +16,55 @@ namespace RhinoInside.Revit.Convert.Geometry
   public static class GeometryEncoder
   {
     #region Context
+    [DebuggerTypeProxy(typeof(DebugView))]
     public sealed class Context : State<Context>
     {
-      public DB.ElementId MaterialId = DB.ElementId.InvalidElementId;
+      public static Context Push(DB.Document document)
+      {
+        var ctx = Push();
+        if (!ctx.Document.IsEquivalent(document))
+        {
+          ctx.GraphicsStyleId = DB.ElementId.InvalidElementId;
+          ctx.MaterialId = DB.ElementId.InvalidElementId;
+          ctx.FaceMaterialId = default;
+        }
+        ctx.Document = document;
+        ctx.Element = default;
+        return ctx;
+      }
+
+      public static Context Push(DB.Element element)
+      {
+        var ctx = Push(element?.Document);
+        ctx.Element = element;
+        return ctx;
+      }
+
+      public DB.Document Document { get; private set; } = default;
+      public DB.Element Element { get; private set; } = default;
+
       public DB.ElementId GraphicsStyleId = DB.ElementId.InvalidElementId;
+      public DB.ElementId MaterialId = DB.ElementId.InvalidElementId;
+      public IReadOnlyList<DB.ElementId> FaceMaterialId;
+
+      class DebugView
+      {
+        readonly Context context;
+        public DebugView(Context value) => context = value;
+        public DB.Document Document => context.Document;
+        public DB.Element Element => context.Element;
+
+        public DB.GraphicsStyle GraphicsStyle => context.Document?.GetElement(context.GraphicsStyleId) as DB.GraphicsStyle;
+        public DB.Material Material => context.Document?.GetElement(context.MaterialId) as DB.Material;
+        public IEnumerable<DB.Material> FaceMaterials
+        {
+          get
+          {
+            if (context.Document is null || context.FaceMaterialId is null) return default;
+            return context.FaceMaterialId.Select(x => context.Document.GetElement(x) as DB.Material);
+          }
+        }
+      }
     }
     #endregion
 
@@ -395,11 +439,11 @@ namespace RhinoInside.Revit.Convert.Geometry
       return curveArrayArray;
     }
 
-    public static DB.Solid ToSolid(this Brep value) => BrepEncoder.ToSolid(BrepEncoder.ToRawBrep(value, UnitConverter.ToHostUnits));
-    public static DB.Solid ToSolid(this Brep value, double factor) => BrepEncoder.ToSolid(BrepEncoder.ToRawBrep(value, factor));
+    public static DB.Solid ToSolid(this Brep value) => BrepEncoder.ToSolid(value, UnitConverter.ToHostUnits);
+    public static DB.Solid ToSolid(this Brep value, double factor) => BrepEncoder.ToSolid(value, factor);
 
     public static DB.Solid ToSolid(this Mesh value) => Raw.RawEncoder.ToHost(MeshEncoder.ToRawBrep(value, UnitConverter.ToHostUnits));
-    public static DB.Solid ToSolid(this Mesh value, double factor) => BrepEncoder.ToSolid(MeshEncoder.ToRawBrep(value, factor));
+    public static DB.Solid ToSolid(this Mesh value, double factor) => Raw.RawEncoder.ToHost(MeshEncoder.ToRawBrep(value, factor));
 
     public static DB.Mesh ToMesh(this Mesh value) => MeshEncoder.ToMesh(MeshEncoder.ToRawMesh(value, UnitConverter.ToHostUnits));
     public static DB.Mesh ToMesh(this Mesh value, double factor) => MeshEncoder.ToMesh(MeshEncoder.ToRawMesh(value, factor));

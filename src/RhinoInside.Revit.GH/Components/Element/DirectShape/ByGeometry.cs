@@ -8,13 +8,113 @@ using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.DirectShapes
 {
   using Kernel.Attributes;
 
-  public class DirectShapeByGeometry : ReconstructElementComponent
+  public abstract class ReconstructDirectShapeComponent : ReconstructElementComponent
   {
-    public override Guid ComponentGuid => new Guid("0bfbda45-49cc-4ac6-8d6d-ecd2cfed062a");
+    protected ReconstructDirectShapeComponent(string name, string nickname, string description, string category, string subCategory) :
+    base(name, nickname, description, category, subCategory) { }
+
+    protected static Rhino.Geometry.GeometryBase AsGeometryBase(IGH_GeometricGoo obj)
+    {
+      var scriptVariable = obj.ScriptVariable();
+      switch (scriptVariable)
+      {
+        case Rhino.Geometry.Point3d point: return new Rhino.Geometry.Point(point);
+        case Rhino.Geometry.Line line: return new Rhino.Geometry.LineCurve(line);
+        case Rhino.Geometry.Rectangle3d rect: return rect.ToNurbsCurve();
+        case Rhino.Geometry.Arc arc: return new Rhino.Geometry.ArcCurve(arc);
+        case Rhino.Geometry.Circle circle: return new Rhino.Geometry.ArcCurve(circle);
+        case Rhino.Geometry.Ellipse ellipse: return ellipse.ToNurbsCurve();
+        case Rhino.Geometry.Box box: return box.ToBrep();
+      }
+
+      return scriptVariable as Rhino.Geometry.GeometryBase;
+    }
+
+    protected IList<DB.GeometryObject> BuildShape
+    (
+      DB.Element element,
+      IList<IGH_GeometricGoo> geometry,
+      IList<DB.Material> materials,
+      out IList<DB.ElementId> paintIds
+    )
+    {
+      bool hasSolids = false;
+      using (var ga = GeometryEncoder.Context.Push(element))
+      {
+        var materialIndex = 0;
+        var materialCount = materials?.Count ?? 0;
+
+        var materialIds = materials is null ? null : new List<DB.ElementId>(geometry.Count);
+        var shape = geometry.
+                    Select(x => AsGeometryBase(x)).
+                    Where(x => ThrowIfNotValid(nameof(geometry), x)).
+                    SelectMany(x =>
+                    {
+                      if (materialCount > 0)
+                      {
+                        ga.MaterialId =
+                        (
+                          materialIndex < materialCount ?
+                          materials[materialIndex++]?.Id :
+                          materials[materialCount - 1]?.Id
+                        ) ??
+                        DB.ElementId.InvalidElementId;
+                      }
+
+                      var subShape = x.ToShape();
+                      materialIds?.AddRange(Enumerable.Repeat(ga.MaterialId, subShape.Length));
+                      if (!hasSolids) hasSolids = subShape.Any(s => s is DB.Solid);
+
+                      return subShape;
+                    }).
+                    ToArray();
+
+        paintIds = hasSolids ? materialIds : default;
+        return shape;
+      }
+    }
+
+    protected void PaintElementSolids(DB.Element element, IList<DB.ElementId> paintIds)
+    {
+      // If there are solids we may need to paint them
+      if (paintIds is object)
+      {
+        var doc = element.Document;
+
+        // Regenerate is necessary here, else 'element' may still have no geometry.
+        doc.Regenerate();
+
+        using (var elementGeometry = element.get_Geometry(new DB.Options() { DetailLevel = DB.ViewDetailLevel.Undefined }))
+        {
+          int index = 0;
+          foreach (var geo in elementGeometry)
+          {
+            if (geo is DB.Solid solid)
+            {
+              var materialId = index < paintIds.Count ? paintIds[index] : DB.ElementId.InvalidElementId;
+              foreach (var face in solid.Faces.Cast<DB.Face>())
+              {
+                if (materialId.IsValid())
+                  doc.Paint(element.Id, face, materialId);
+                else
+                  doc.RemovePaint(element.Id, face);
+              }
+            }
+
+            index++;
+          }
+        }
+      }
+    }
+  }
+
+  public class DirectShapeByGeometry : ReconstructDirectShapeComponent
+  {
+    public override Guid ComponentGuid => new Guid("0BFBDA45-49CC-4AC6-8D6D-ECD2CFED062A");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
     public DirectShapeByGeometry() : base
@@ -43,73 +143,19 @@ namespace RhinoInside.Revit.GH.Components
     {
       SolveOptionalCategory(ref category, doc, DB.BuiltInCategory.OST_GenericModel, nameof(geometry));
 
-      if (element is DB.DirectShape ds && ds.Category.Id == category.Value.Id) { }
-      else ds = DB.DirectShape.CreateElement(doc, category.Value.Id);
+      if (element is DB.DirectShape directShape && directShape.Category.Id == category.Value.Id) { }
+      else directShape = DB.DirectShape.CreateElement(doc, category.Value.Id);
 
-      using (var ga = GeometryEncoder.Context.Push())
-      {
-        var materialIndex = 0;
-        var materialCount = material?.Count ?? 0;
+      directShape.Name = name ?? string.Empty;
+      directShape.SetShape(BuildShape(directShape, geometry, material, out var paintIds));
 
-        var shape = geometry.
-                    Select(x => AsGeometryBase(x)).
-                    Where(x => ThrowIfNotValid(nameof(geometry), x)).
-                    SelectMany(x =>
-                    {
-                      if (materialCount > 0)
-                      {
-                        ga.MaterialId =
-                        (
-                          materialIndex < materialCount ?
-                          material[materialIndex++]?.Id :
-                          material[materialCount - 1]?.Id
-                        ) ??
-                        DB.ElementId.InvalidElementId;
-                      }
+      ReplaceElement(ref element, directShape);
 
-                      return x.ToShape();
-                    }).
-                    ToList();
-
-        ds.SetShape(shape);
-      }
-
-      ds.Name = name ?? string.Empty;
-
-      ReplaceElement(ref element, ds);
-    }
-
-    Rhino.Geometry.GeometryBase AsGeometryBase(IGH_GeometricGoo obj)
-    {
-      if (obj is GH_Curve curve)
-        return curve.Value;
-
-      if (obj is GH_Brep brep)
-        return brep.Value;
-
-      if (obj is GH_SubD subD)
-        return subD.Value;
-
-      if (obj is GH_Mesh mesh)
-        return mesh.Value;
-
-      var scriptVariable = obj.ScriptVariable();
-      switch (scriptVariable)
-      {
-        case Rhino.Geometry.Point3d point: return new Rhino.Geometry.Point(point);
-        case Rhino.Geometry.Line line: return new Rhino.Geometry.LineCurve(line);
-        case Rhino.Geometry.Rectangle3d rect: return rect.ToNurbsCurve();
-        case Rhino.Geometry.Arc arc: return new Rhino.Geometry.ArcCurve(arc);
-        case Rhino.Geometry.Circle circle: return new Rhino.Geometry.ArcCurve(circle);
-        case Rhino.Geometry.Ellipse ellipse: return ellipse.ToNurbsCurve();
-        case Rhino.Geometry.Box box: return box.ToBrep();
-      }
-
-      return scriptVariable as Rhino.Geometry.GeometryBase;
+      PaintElementSolids(directShape, paintIds);
     }
   }
 
-  public class DirectShapeTypeByGeometry : ReconstructElementComponent
+  public class DirectShapeTypeByGeometry : ReconstructDirectShapeComponent
   {
     public override Guid ComponentGuid => new Guid("25DCFE8E-5BE9-460C-80E8-51B7041D8FED");
     public override GH_Exposure Exposure => GH_Exposure.primary;
@@ -143,53 +189,12 @@ namespace RhinoInside.Revit.GH.Components
       if (elementType is DB.DirectShapeType directShapeType && directShapeType.Category.Id == category.Value.Id) { }
       else directShapeType = DB.DirectShapeType.Create(doc, name, category.Value.Id);
 
-      using (var ga = GeometryEncoder.Context.Push())
-      {
-        var materialIndex = 0;
-        var materialCount = material?.Count ?? 0;
-
-        var shape = geometry.
-                    Select(x => AsGeometryBase(x)).
-                    Where(x => ThrowIfNotValid(nameof(geometry), x)).
-                    SelectMany(x =>
-                    {
-                      if (materialCount > 0)
-                      {
-                        ga.MaterialId = (
-                                         materialIndex < materialCount ?
-                                         material[materialIndex++]?.Id :
-                                         material[materialCount - 1]?.Id
-                                        ) ??
-                                        DB.ElementId.InvalidElementId;
-                      }
-
-                      return x.ToShape();
-                    }).
-                    ToList();
-
-        directShapeType.SetShape(shape);
-      }
-
       directShapeType.Name = name;
+      directShapeType.SetShape(BuildShape(directShapeType, geometry, material, out var paintIds));
 
       ReplaceElement(ref elementType, directShapeType);
-    }
 
-    Rhino.Geometry.GeometryBase AsGeometryBase(IGH_GeometricGoo obj)
-    {
-      var scriptVariable = obj.ScriptVariable();
-      switch (scriptVariable)
-      {
-        case Rhino.Geometry.Point3d point: return new Rhino.Geometry.Point(point);
-        case Rhino.Geometry.Line line: return new Rhino.Geometry.LineCurve(line);
-        case Rhino.Geometry.Rectangle3d rect: return rect.ToNurbsCurve();
-        case Rhino.Geometry.Arc arc: return new Rhino.Geometry.ArcCurve(arc);
-        case Rhino.Geometry.Circle circle: return new Rhino.Geometry.ArcCurve(circle);
-        case Rhino.Geometry.Ellipse ellipse: return ellipse.ToNurbsCurve();
-        case Rhino.Geometry.Box box: return box.ToBrep();
-      }
-
-      return scriptVariable as Rhino.Geometry.GeometryBase;
+      PaintElementSolids(directShapeType, paintIds);
     }
   }
 
@@ -221,11 +226,11 @@ namespace RhinoInside.Revit.GH.Components
       DB.DirectShapeType type
     )
     {
-      if (element is DB.DirectShape ds && ds.Category.Id == type.Category.Id) { }
-      else ds = DB.DirectShape.CreateElement(doc, type.Category.Id);
+      if (element is DB.DirectShape directShape && directShape.Category.Id == type.Category.Id) { }
+      else directShape = DB.DirectShape.CreateElement(doc, type.Category.Id);
 
-      if(ds.TypeId != type.Id)
-        ds.SetTypeId(type.Id);
+      if (directShape.TypeId != type.Id)
+        directShape.SetTypeId(type.Id);
 
       using (var library = DB.DirectShapeLibrary.GetDirectShapeLibrary(doc))
       {
@@ -235,7 +240,7 @@ namespace RhinoInside.Revit.GH.Components
 
       using (var transform = Rhino.Geometry.Transform.PlaneToPlane(Rhino.Geometry.Plane.WorldXY, location).ToTransform())
       {
-        ds.SetShape(DB.DirectShape.CreateGeometryInstance(doc, type.UniqueId, transform));
+        directShape.SetShape(DB.DirectShape.CreateGeometryInstance(doc, type.UniqueId, transform));
       }
 
       var parametersMask = new DB.BuiltInParameter[]
@@ -245,7 +250,7 @@ namespace RhinoInside.Revit.GH.Components
         DB.BuiltInParameter.ELEM_TYPE_PARAM
       };
 
-      ReplaceElement(ref element, ds, parametersMask);
+      ReplaceElement(ref element, directShape, parametersMask);
     }
   }
 }

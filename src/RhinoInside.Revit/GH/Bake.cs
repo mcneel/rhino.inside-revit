@@ -1,12 +1,14 @@
+using System;
 using System.Collections.Generic;
+
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Bake
 {
-  public struct BakeOptions
+  public class BakeOptions
   {
     public DB.Document Document;
-    public DB.View View;
+    public DB.View     View;
     public DB.Category Category;
     public DB.Material Material;
   }

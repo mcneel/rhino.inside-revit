@@ -8,7 +8,7 @@ using DB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Base Point")]
-  class BasePoint : GraphicalElement
+  public class BasePoint : GraphicalElement
   {
     protected override Type ScriptVariableType => typeof(DB.BasePoint);
     public new DB.BasePoint Value => base.Value as DB.BasePoint;
@@ -88,12 +88,17 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (Value is DB.BasePoint point)
         {
-          return new Plane
-          (
-            point.GetPosition().ToPoint3d(),
-            Vector3d.XAxis,
-            Vector3d.YAxis
-          );
+          var origin = point.GetPosition().ToPoint3d();
+          var axisX = Vector3d.XAxis;
+          var axisY = Vector3d.YAxis;
+
+          if (point.IsShared)
+          {
+            point.Document.ActiveProjectLocation.GetLocation(out var _, out var basisX, out var basisY);
+            axisX = basisX.ToVector3d();
+            axisY = basisY.ToVector3d();
+          }
+          return new Plane(origin, axisX, axisY);
         }
 
         return base.Location;

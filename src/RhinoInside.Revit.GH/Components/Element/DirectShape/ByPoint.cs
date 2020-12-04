@@ -1,10 +1,9 @@
 using System;
-using System.Collections.Generic;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.DirectShapes
 {
   public class DirectShapeByPoint : ReconstructElementComponent
   {
