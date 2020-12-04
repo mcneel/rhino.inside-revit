@@ -132,7 +132,7 @@ namespace RhinoInside.Revit
       if (doc is null)
         return;
 
-      using (var ctx = GeometryEncoder.Context.Push())
+      using (var ctx = GeometryEncoder.Context.Push(doc))
       {
         using (var collector = new FilteredElementCollector(doc))
         {

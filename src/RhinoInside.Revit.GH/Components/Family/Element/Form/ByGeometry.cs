@@ -1,8 +1,8 @@
 using System;
 using System.Linq;
 using Rhino.Geometry;
-using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
+using Grasshopper.Kernel;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -97,6 +97,7 @@ namespace RhinoInside.Revit.GH.Components
         }
       }
 
+      using (GeometryEncoder.Context.Push(doc))
       {
         var solid = brep.ToSolid();
         if (solid != null)

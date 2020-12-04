@@ -332,7 +332,7 @@ namespace RhinoInside.Revit.UI
       var layer = model.AllLayers.FindIndex(attributes.LayerIndex);
       if (layer?.IsVisible ?? false)
       {
-        using (var ctx = GeometryEncoder.Context.Push())
+        using (var ctx = GeometryEncoder.Context.Push(doc))
         {
           switch (attributes.MaterialSource)
           {
