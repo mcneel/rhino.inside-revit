@@ -4,7 +4,7 @@
 {% else %}
 <div class="gallery-item gallery-item-small" >
 {% endif %}
-    {% if include.extern %}
+    {% if item.url contains "http://" or item.url contains "https://" %}
     <a href="{{ item.url }}" target="blank">
     {% else %}
     <a href="{{ item.url | prepend: site.baseurl }}">
@@ -38,7 +38,7 @@
             {% endif %}
         {% endif %}
     
-        {% if include.extern %}
+        {% if item.url contains "http://" or item.url contains "https://" %}
         <a class="gallery-info-title" href="{{ item.url }}">{{ item.title }}</a>
         {% else %}
         <a class="gallery-info-title" href="{{ item.url | prepend: site.baseurl }}">{{ item.title }}</a>
