@@ -683,7 +683,7 @@ namespace Grasshopper.Special
           }
 
           if (x is GH_StructurePath pathX && y is GH_StructurePath pathY)
-            return pathX.Value == pathX.Value;
+            return pathX.Value == pathY.Value;
 
           if (x is GH_Culture cultureX && y is GH_Culture cultureY)
             return cultureX.Value == cultureY.Value;
