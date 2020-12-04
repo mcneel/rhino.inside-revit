@@ -1,5 +1,4 @@
-[
-    {
+[{
         "type": "blogpost",
         "title": "Parametric Monkey Primer",
         "url": "https://parametricmonkey.com/2019/11/20/rhino-inside-revit/",
@@ -61,6 +60,24 @@
         "author": "How to Rhino Facebook Group",
         "authorUrl": "https://www.facebook.com/groups/howtorhino",
         "description": "This is a short recap of Rhino.Inside.Revit plugin which allows Revit and other apps to run Rhino and Grasshopper within Revit application. Keep in mind that this works only with Rhino 7 work in progress version. With this plugin, you can easily import and export geometry from Revit to Rhino and Grasshopper and the other way around. As this is a native McNeel development tool, it is going to be a game changer when it comes to having the ability to use parametric modeling techniques in Grasshopper and have all of that work seamlessly in a BIM tool such as Revit"
+    },
+    {
+        "type": "video",
+        "title": "Aussie BIM Guru Adding Revit data to Rhino models using Rhino Inside.",
+        "url": "https://youtu.be/Bb0z-2T_4iU",
+        "thumbnail": "https://i3.ytimg.com/vi/Bb0z-2T_4iU/maxresdefault.jpg",
+        "author": "Gavin Crump",
+        "authorUrl": "https://www.youtube.com/channel/UCry22yTdpgEDdzIZig7NSMQ",
+        "description": "Nifty little workflow today, basically using Elefront to 'inject' BIM data from Revit into Rhino, including layers by category. Huge time saver!"
+    },
+    {
+        "type": "video",
+        "title": "Aussie BIM Guru Selecting Rhino elements by Revit properties",
+        "url": "https://youtu.be/SUVaEtoZmfQ",
+        "thumbnail": "https://i3.ytimg.com/vi/SUVaEtoZmfQ/maxresdefault.jpg",
+        "author": "Gavin Crump",
+        "authorUrl": "https://www.youtube.com/channel/UCry22yTdpgEDdzIZig7NSMQ",
+        "description": "Using a data rich Rhino model, we can mine this data to select elements the same way we could in Revit - Rhivit, pwhoah!"
     },
     {
         "type": "video",
