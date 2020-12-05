@@ -45,6 +45,15 @@
     },
     {
         "type": "video",
+        "title": "Seattle SeaRUG presentation of Rhino-to-Revit Workflows",
+        "url": "https://youtu.be/rEBjwwTNBes",
+        "thumbnail": "https://i3.ytimg.com/vi/rEBjwwTNBes/maxresdefault.jpg",
+        "author": "Joseph Fruend, Microsol @ Seattle Revit User Group",
+        "authorUrl": "https://www.youtube.com/channel/UCRq3Hhbea_pji6--xBz6Fuw",
+        "description": "Microsol AEC Application Specialist Joseph Freund shows the Seattle Revit User's Group showing some features of Rhino.Inside Revit and Rhino 7, including Subd."
+    },
+    {
+        "type": "video",
         "title": "Rhino.Inside.Revit with Geometry Gym",
         "url": "https://www.youtube.com/watch?v=0m1rn6EAI54",
         "thumbnail": "https://i3.ytimg.com/vi/0m1rn6EAI54/maxresdefault.jpg",
