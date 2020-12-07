@@ -79,8 +79,8 @@ namespace RhinoInside.Revit.GH.Types
       if (Value is DB.Element)
       {
         var bbox = BoundingBox;
-
-        return xform.IsIdentity ? bbox : new BoundingBox(new Point3d[] { bbox.Min, bbox.Max }, xform);
+        if(bbox.Transform(xform))
+          return bbox;
       }
 
       return BoundingBox.Unset;
@@ -347,6 +347,7 @@ namespace RhinoInside.Revit.GH.Types
               origin = pointLocation.Point.ToPoint3d();
               axis = Vector3d.XAxis;
               perp = Vector3d.YAxis;
+
               try
               {
                 axis.Rotate(pointLocation.Rotation, Vector3d.ZAxis);
@@ -356,29 +357,22 @@ namespace RhinoInside.Revit.GH.Types
 
               break;
             case DB.LocationCurve curveLocation:
-              var curve = curveLocation.Curve;
-              if (curve.IsBound)
-              {
-                var start = curve.Evaluate(0.0, normalized: true).ToPoint3d();
-                var end = curve.Evaluate(1.0, normalized: true).ToPoint3d();
-                axis = end - start;
-                origin = start + (axis * 0.5);
-                perp = axis.PerpVector();
-              }
-              else if (curve is DB.Arc || curve is DB.Ellipse)
-              {
-                var start = curve.Evaluate(0.0, normalized: false).ToPoint3d();
-                var end = curve.Evaluate(Math.PI, normalized: false).ToPoint3d();
-                axis = end - start;
-                origin = start + (axis * 0.5);
-                perp = axis.PerpVector();
-              }
+              if(curveLocation.Curve.TryGetLocation(out var cO, out var cX, out var cY))
+                return new Plane(cO.ToPoint3d(), cX.ToVector3d(), cY.ToVector3d());
 
               break;
             default:
+              // Try with the first non empty geometry object.
+              using (var options = new DB.Options { DetailLevel = DB.ViewDetailLevel.Undefined })
+              {
+                if (element.get_Geometry(options).TryGetLocation(out var gO, out var gX, out var gY))
+                  return new Plane(gO.ToPoint3d(), gX.ToVector3d(), gY.ToVector3d());
+              }
+
               var bbox = BoundingBox;
               if (bbox.IsValid)
               {
+                // If we have nothing better, the center of the BoundingBox will do the job.
                 origin = BoundingBox.Center;
                 axis = Vector3d.XAxis;
                 perp = Vector3d.YAxis;
