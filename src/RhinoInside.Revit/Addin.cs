@@ -115,6 +115,9 @@ namespace RhinoInside.Revit
           AppDomain.CurrentDomain.AssemblyResolve -= OnRhinoCommonResolve;
           return Assembly.LoadFrom(Path.Combine(SystemDir, rhinoCommonAssemblyName + ".dll"));
         };
+
+        // initialize ui framework provided by Rhino
+        RhinoUIFramework.LoadFramework(SystemDir);
       }
     }
 
@@ -435,6 +438,35 @@ namespace RhinoInside.Revit
 
     public static Version Version => Assembly.GetExecutingAssembly().GetName().Version;
     public static string DisplayVersion => $"{Version} ({BuildDate})";
+    #endregion
+
+    #region Rhino-friendly UI Framework
+    static class RhinoUIFramework
+    {
+      /// <summary>
+      /// Loads assemblies related to the Rhino ui framework from given Rhino system directory
+      /// </summary>
+      /// <param name="sysDir"></param>
+      static public void LoadFramework(string sysDir)
+      {
+        Assembly.LoadFrom(Path.Combine(sysDir, "Eto.dll"));
+        Assembly.LoadFrom(Path.Combine(sysDir, "Eto.Wpf.dll"));
+        Assembly.LoadFrom(Path.Combine(sysDir, "Eto.Serialization.Xaml.dll"));
+        Assembly.LoadFrom(Path.Combine(sysDir, "Xceed.Wpf.Toolkit.dll"));
+
+        Init();
+      }
+
+      /// <summary>
+      /// Initialize the ui framework
+      /// </summary>
+      static void Init()
+      {
+        if (Eto.Forms.Application.Instance is null)
+          new Eto.Forms.Application(Eto.Platforms.Wpf).Attach();
+      }
+    }
+
     #endregion
   }
 }

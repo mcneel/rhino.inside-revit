@@ -150,6 +150,10 @@
           <HintPath>$(Rhino7InstallDir)Eto.dll</HintPath>
           <Private>False</Private>
         </Reference>
+        <Reference Include="Eto.Wpf">
+          <HintPath>$(Rhino7InstallDir)Eto.Wpf.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
         <Reference Include="RhinoCommon">
           <HintPath>$(Rhino7InstallDir)RhinoCommon.dll</HintPath>
           <Private>False</Private>
@@ -275,6 +279,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="UI\BaseWindow.cs" />
     <Compile Include="UI\DocumentCommand.cs" />
     <Compile Include="UI\GrasshopperCommand.cs" />
     <Compile Include="UI\GrasshopperPlayerCommand.cs" />
@@ -330,6 +335,9 @@
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\SolverOn.png" />
     <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Preview_Shaded.png" />
     <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Import-3DM.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Rhino-logo.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
