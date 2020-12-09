@@ -79,13 +79,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
               }
               return true;
           }
+        case CylindricalHelix helix:
+          origin = helix.BasePoint;
+          basisX = helix.XVector;
+          basisY = helix.YVector;
+          return true;
         case Curve curve:
-          if (curve is CylindricalHelix helix)
-          {
-            origin = helix.BasePoint;
-            basisX = helix.XVector;
-            basisY = helix.YVector;
-          }
           if (curve.IsBound)
           {
             var start = curve.Evaluate(0.0, normalized: true);
