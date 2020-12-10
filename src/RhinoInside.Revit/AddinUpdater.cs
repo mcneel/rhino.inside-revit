@@ -24,6 +24,7 @@ namespace RhinoInside.Revit
   {
     abstract public Guid Id { get; }
     abstract public string Name { get; }
+    abstract public string Description { get; }
     abstract public int MajorVersion { get; }
     abstract public string Url { get; }
 
@@ -40,6 +41,7 @@ namespace RhinoInside.Revit
   {
     public override Guid Id => new Guid("0b10351c-25e3-4680-9135-6b86cd27bcda");
     public override string Name => "Public Releases";
+    public override string Description => "";
     public override int MajorVersion => 1;
     public override string Url => @"";
   }
@@ -48,6 +50,7 @@ namespace RhinoInside.Revit
   {
     public override Guid Id => new Guid("c63def46-e63d-41e3-8f82-9b5ee1d88251");
     public override string Name => "Release Candidates";
+    public override string Description => "";
     public override int MajorVersion => 1;
     public override string Url => @"";
   }
@@ -55,7 +58,8 @@ namespace RhinoInside.Revit
   class UpdateDailyChannel : AddinUpdateChannel
   {
     public override Guid Id => new Guid("7fc1e535-c7cd-47d8-a969-e01435bacd65");
-    public override string Name => "Daily Builds (WIP)";
+    public override string Name => "Daily Builds (Work in Progress)";
+    public override string Description => "";
     public override int MajorVersion => 1;
     public override string Url => @"";
   }
