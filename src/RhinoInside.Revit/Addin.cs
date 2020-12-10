@@ -14,6 +14,7 @@ using Microsoft.Win32.SafeHandles;
 using UIX = RhinoInside.Revit.External.UI;
 using RhinoInside.Revit.External.UI.Extensions;
 using RhinoInside.Revit.Native;
+using RhinoInside.Revit.Settings;
 
 namespace RhinoInside.Revit
 {
@@ -176,7 +177,13 @@ namespace RhinoInside.Revit
       }
 
       // Add launch RhinoInside push button
-      UI.CommandRhinoInside.CreateUI(applicationUI.CreateRibbonPanel("Rhinoceros"));
+      var addinRibbon = applicationUI.CreateRibbonPanel("Rhinoceros");
+      UI.CommandRhinoInside.CreateUI(addinRibbon);
+      UI.CommandRhinoInsideOptions.CreateUI(addinRibbon);
+
+      // check for updates
+      if (AddinOptions.CheckForAddinUpdates)
+        AddinUpdater.CheckUpdates(SetUpdateState);
 
       return Result.Succeeded;
     }
@@ -264,6 +271,12 @@ namespace RhinoInside.Revit
           }
         );
       }
+    }
+
+    void SetUpdateState(AddinReleaseInfo releaseInfo)
+    {
+      if (releaseInfo.Version > Version)
+        UI.CommandRhinoInsideOptions.Highlight();
     }
     #endregion
 
@@ -800,6 +813,53 @@ namespace RhinoInside.Revit.UI
           try { Registry.CurrentUser.DeleteSubKey(SDKRegistryKeyName); }
           catch (Exception) { }
       }
+    }
+  }
+
+  [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
+  class CommandRhinoInsideOptions : Command
+  {
+    static PushButton Button;
+
+    public static void CreateUI(RibbonPanel ribbonPanel)
+    {
+      const string CommandName = "Options";
+
+      var buttonData = NewPushButtonData<CommandRhinoInsideOptions, AllwaysAvailable>(CommandName);
+      if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
+      {
+        // setup button
+        Button = pushButton;
+        pushButton.Image = ImageBuilder.LoadBitmapImage("Resources.Options.png", true);
+        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Options.png");
+
+        // disable if startup mode is disabled
+        if (Addin.StartupMode == AddinStartupMode.Disabled)
+        {
+          Button.Enabled = false;
+          Button.ToolTip = "Addin Disabled";
+        }
+      }
+    }
+
+    public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
+    {
+      // try opening options window
+      new OptionsWindow(data.Application).Show();
+      return Result.Succeeded;
+    }
+
+    /// <summary>
+    /// Mark button with highlighter dot using Autodesk.Windows api
+    /// </summary>
+    static public void Highlight()
+    {
+      // grab the underlying Autodesk.Windows object from Button
+      var getRibbonItemMethodInfo = Button.GetType().GetMethod("getRibbonItem", BindingFlags.NonPublic | BindingFlags.Instance);
+      var adWndObj = (Autodesk.Windows.RibbonButton) getRibbonItemMethodInfo.Invoke(Button, null);
+      // set highlight state and update tooltip
+      adWndObj.Highlight = Autodesk.Internal.Windows.HighlightMode.New;
+      Button.ToolTip = "New Release Available for Download!\n" + Button.ToolTip;
     }
   }
 }

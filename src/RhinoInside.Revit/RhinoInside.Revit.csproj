@@ -279,11 +279,13 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Settings\Options.cs" />
     <Compile Include="UI\BaseWindow.cs" />
     <Compile Include="UI\DocumentCommand.cs" />
     <Compile Include="UI\GrasshopperCommand.cs" />
     <Compile Include="UI\GrasshopperPlayerCommand.cs" />
     <Compile Include="UI\HelpCommands.cs" />
+    <Compile Include="UI\OptionsWindow.cs" />
     <Compile Include="UI\Rhinoceros\Import.cs" />
     <Compile Include="UI\RhinoCommand.cs" />
     <Compile Include="GH\Guest.cs" />
@@ -300,6 +302,7 @@
     <Compile Include="UI\Rhinoceros\Preview.cs" />
     <Compile Include="Convert\Eto.Drawing.cs" />
     <Compile Include="Convert\Geometry\GeometryDecoder.cs" />
+    <Compile Include="AddinUpdater.cs" />
     <None Include="Extensions\README.md" />
     <None Include="Properties\RhinoInside.Revit.addin" />
     <Compile Include="Samples\Sample1.cs" />
@@ -335,6 +338,9 @@
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\SolverOn.png" />
     <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Preview_Shaded.png" />
     <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Import-3DM.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Options.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Rhino-logo.ico" />
