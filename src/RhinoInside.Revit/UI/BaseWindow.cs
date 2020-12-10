@@ -27,11 +27,11 @@ namespace RhinoInside.Revit.UI
     {
       Owner = Eto.Forms.WpfHelpers.ToEtoWindow(uiApp.MainWindowHandle);
       Icon = Icon.FromResource("RhinoInside.Revit.Resources.Rhino-logo.ico", assembly: Assembly.GetExecutingAssembly());
-      Resizable = false;
 
       // set window size and center on the parent window
       var size = new Size(width, height);
-      MinimumSize = size;
+      Size = size;
+      Resizable = false;
       var windowLocation = uiApp.GetChildWindowCenterLocation(size.Width, size.Height);
       Location = new Point(windowLocation.X, windowLocation.Y);
 

@@ -23,7 +23,7 @@ namespace RhinoInside.Revit.UI
     Label _channelDescription = new Label { Visible = false, Wrap = WrapMode.Word };
     Forms.ComboBox _updateChannelSelector = new Forms.ComboBox();
 
-    public OptionsWindow(UIApplication uiApp) : base(uiApp, width: 400, height: 300)
+    public OptionsWindow(UIApplication uiApp) : base(uiApp, width: 400, height: 250)
     {
       Title = "Options";
       InitLayout();
@@ -100,9 +100,9 @@ namespace RhinoInside.Revit.UI
         Padding = new Padding(5),
         Rows = {
           new TableRow {
-            ScaleHeight = true,
             Cells = { new TableCell { ScaleWidth = true, Control = updateOpts } }
           },
+          null,
           new TableRow { Cells = { applyButton } },
         }
       };
