@@ -20,9 +20,10 @@ namespace RhinoInside.Revit.UI
   class OptionsWindow : BaseWindow
   {
     CheckBox _checkUpdatesOnStartup = new CheckBox { Text = "Check Updates on Startup" };
+    Label _channelDescription = new Label { Visible = false, Wrap = WrapMode.Word };
     Forms.ComboBox _updateChannelSelector = new Forms.ComboBox();
 
-    public OptionsWindow(UIApplication uiApp) : base(uiApp, width: 400, height: 200)
+    public OptionsWindow(UIApplication uiApp) : base(uiApp, width: 400, height: 300)
     {
       Title = "Options";
       InitLayout();
@@ -34,6 +35,7 @@ namespace RhinoInside.Revit.UI
       _checkUpdatesOnStartup.Checked = AddinOptions.CheckForAddinUpdates;
 
       // setup update channel selector
+      _updateChannelSelector.SelectedIndexChanged += _updateChannelSelector_SelectedIndexChanged;
       foreach (AddinUpdateChannel chnl in AddinUpdater.Channels)
         _updateChannelSelector.Items.Add(chnl.Name);
 
@@ -85,7 +87,8 @@ namespace RhinoInside.Revit.UI
                   }
                 }
               }
-            }
+            },
+            _channelDescription
           }
         }
       };
@@ -97,12 +100,22 @@ namespace RhinoInside.Revit.UI
         Padding = new Padding(5),
         Rows = {
           new TableRow {
+            ScaleHeight = true,
             Cells = { new TableCell { ScaleWidth = true, Control = updateOpts } }
           },
-          null,
           new TableRow { Cells = { applyButton } },
         }
       };
+    }
+
+    private void _updateChannelSelector_SelectedIndexChanged(object sender, EventArgs e)
+    {
+      if (sender is Forms.ComboBox channelSelector)
+      {
+        var updaterChannel = AddinUpdater.Channels[channelSelector.SelectedIndex];
+        _channelDescription.Text = updaterChannel.Description;
+        _channelDescription.Visible = true;
+      }  
     }
 
     private void ApplyButton_Click(object sender, EventArgs e)
