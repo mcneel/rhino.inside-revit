@@ -87,5 +87,47 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return ruledSurface.GetSecondProfilePoint() is object;
     }
 #endif
+
+    public static XYZ Evaluate(this Face face, UV param, bool normalized)
+    {
+      return normalized ?
+        face.Evaluate(face.GetBoundingBox().Evaluate(param)) :
+        face.Evaluate(param);
+    }
+
+    public static XYZ ComputeNormal(this Face face, UV uv, bool normalized)
+    {
+      return normalized ?
+        face.ComputeNormal(face.GetBoundingBox().Evaluate(uv)) :
+        face.ComputeNormal(uv);
+    }
+
+    public static Transform ComputeDerivatives(this Face face, UV uv, bool normalized)
+    {
+      return normalized ?
+        face.ComputeDerivatives(face.GetBoundingBox().Evaluate(uv)) :
+        face.ComputeDerivatives(uv);
+    }
+
+    public static FaceSecondDerivatives ComputeSecondDerivatives(this Face face, UV uv, bool normalized)
+    {
+      return normalized ?
+        face.ComputeSecondDerivatives(face.GetBoundingBox().Evaluate(uv)) :
+        face.ComputeSecondDerivatives(uv);
+    }
+
+    public static bool IsInside(this Face face, UV uv, bool normalized)
+    {
+      return normalized ?
+        face.IsInside(face.GetBoundingBox().Evaluate(uv)) :
+        face.IsInside(uv);
+    }
+
+    public static bool IsInside(this Face face, UV uv, bool normalized, out IntersectionResult result)
+    {
+      return normalized ?
+        face.IsInside(face.GetBoundingBox().Evaluate(uv), out result) :
+        face.IsInside(uv, out result);
+    }
   }
 }
