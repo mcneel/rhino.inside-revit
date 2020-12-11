@@ -8,11 +8,12 @@
     <a id="cat_homelink" class="site-title" href="#">{{ site.title }}</a>
 
     <!-- Version selector dropdown -->
-    <a id="versionSelector" class="dropdown-toggle version-selector" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></a>
+    <a id="versionSelector" class="dropdown-toggle version-selector" data-toggle="dropdown" aria-haspopup="true"
+        aria-expanded="false"></a>
     <div class="dropdown-menu" aria-labelledby="versionSelector">
         {% for version in site.versions %}
-            <!-- grab name and link for each version -->
-            <a class="version-link" href="#" onclick="navigateTo('', '{{ version[1].version }}')">{{ version[1].name }}</a>
+        <!-- grab name and link for each version -->
+        <a class="version-link" href="#" onclick="navigateTo('', '{{ version[1].version }}')">{{ version[1].name }}</a>
         {% endfor %}
     </div>
 
@@ -21,20 +22,16 @@
         <img class="menu-icon" src="{{ site.baseurl }}/assets/img/burger.svg" />
         {% assign pages = site.pages | sort:"order"  %}
         <div class="trigger">
-            <!-- Other pages -->
             <a id="cat_starting" class="page-link" href="#">Getting Started</a>
             <a id="cat_guides" class="page-link" href="#">Guides</a>
             <a id="cat_discover" class="page-link" href="#">Discover</a>
             <a id="cat_community" class="page-link" href="#">Community</a>
+            <a class="extern-link" href="{{ site.forum_url }}" target="_blank" title="Discussion Forum">Forums</a>
             <a id="cat_reference" class="page-link" href="#">Reference</a>
-            <!-- External Pages -->
+
             <a class="extern-link" href="{{ site.youtube_url }}" target="_blank" title="YouTube Channel">
                 <span class="img-button-title">YouTube</span>
                 <img class="youtube-link" width="28" height="28" src="{{ site.baseurl }}/assets/img/youtube.svg" />
-            </a>
-            <a class="extern-link" href="{{ site.forum_url }}" target="_blank" title="Discussion Forum">
-                <span class="img-button-title">Forum</span>
-                <img class="discourse-link" width="28" height="28" src="{{ site.baseurl }}/assets/img/forum.svg" />
             </a>
             <a class="extern-link" href="{{ site.repo_url }}" target="_blank" title="Source Code Repository on Github">
                 <span class="img-button-title">Github</span>
