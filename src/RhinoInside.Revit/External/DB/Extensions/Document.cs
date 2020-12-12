@@ -32,13 +32,20 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static bool Release(this Document doc)
     {
-      using (var uiDocument = new Autodesk.Revit.UI.UIDocument(doc))
+      if (doc.IsValid())
       {
-        if (uiDocument.GetOpenUIViews().Count == 0)
-          return doc.Close(false);
+        try
+        {
+          using (var uiDocument = new Autodesk.Revit.UI.UIDocument(doc))
+          {
+            if (uiDocument.GetOpenUIViews().Count == 0)
+              return doc.Close(false);
+          }
+        }
+        catch (Autodesk.Revit.Exceptions.ArgumentException) { }
       }
 
-      return true;
+      return false;
     }
 
     public static Guid GetFingerprintGUID(this Document doc)
