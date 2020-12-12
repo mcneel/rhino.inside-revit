@@ -718,9 +718,9 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
     struct BrepBoundary
     {
       public BrepLoopType type;
-      public List<BrepEdge> edges;
-      public PolyCurve trims;
       public List<int> orientation;
+      public List<GeometryBase> edges;
+      public PolyCurve trims;
     }
 
     static int AddSurface(Brep brep, DB.Face face, out List<BrepBoundary>[] shells, Dictionary<DB.Edge, BrepEdge> brepEdges = null)
@@ -759,11 +759,12 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
           var loop = new BrepBoundary()
           {
             type = BrepLoopType.Unknown,
-            edges = new List<BrepEdge>(edgeLoop.Size),
-            trims = new PolyCurve(),
-            orientation = new List<int>(edgeLoop.Size)
+            orientation = new List<int>(edgeLoop.Size),
+            edges = new List<GeometryBase>(edgeLoop.Size),
+            trims = new PolyCurve()
           };
 
+          var trims = new List<Curve>(edgeLoop.Size);
           foreach (var edge in edges)
           {
             var brepEdge = default(BrepEdge);
@@ -777,16 +778,46 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
               brepEdges?.Add(edge, brepEdge);
             }
 
-            loop.edges.Add(brepEdge);
             var segment = ToRhino(edge.AsCurveFollowingFace(face));
+            if (surface.Pullback(segment, Revit.VertexTolerance) is Curve trim)
+            {
+              trims.Add(trim);
+              loop.edges.Add(brepEdge);
 
-            if (!face.MatchesSurfaceOrientation())
-              segment.Reverse();
+              if (!face.MatchesSurfaceOrientation())
+                segment.Reverse();
 
-            loop.orientation.Add(segment.TangentAt(segment.Domain.Mid).IsParallelTo(brepEdge.TangentAt(brepEdge.Domain.Mid)));
+              loop.orientation.Add(segment.TangentAt(segment.Domain.Mid).IsParallelTo(brepEdge.TangentAt(brepEdge.Domain.Mid)));
+            }
+          }
 
-            var trim = surface.Pullback(segment, Revit.VertexTolerance);
-            loop.trims.Append(trim);
+          for (int ti = 0, ei = 0; ti < trims.Count; ++ti, ++ei)
+          {
+            int tA = ti;
+            int tB = (ti + 1) % trims.Count;
+
+            loop.trims.AppendSegment(trims[tA]);
+
+            int eA = ei;
+            int eB = (ei + 1) % loop.edges.Count;
+
+            var start = loop.orientation[eA] > 0 ? (loop.edges[eA] as BrepEdge).PointAtEnd   : (loop.edges[eA] as BrepEdge).PointAtStart;
+            var end   = loop.orientation[eB] > 0 ? (loop.edges[eB] as BrepEdge).PointAtStart : (loop.edges[eB] as BrepEdge).PointAtEnd;
+
+            if (start.EpsilonEquals(end, Revit.VertexTolerance))
+            {
+              var startTrim = new Point2d(trims[tA].PointAtEnd);
+              var endTrim   = new Point2d(trims[tB].PointAtStart);
+
+              if (!startTrim.EpsilonEquals(endTrim, 1e-9))
+              {
+                loop.orientation.Insert(eA + 1, 0);
+                loop.edges.Insert(eA + 1, brep.Vertices.Add((start + end) * 0.5, (end - start).Length * 0.5));
+                loop.trims.AppendSegment(new LineCurve(startTrim, endTrim));
+
+                ei++;
+              }
+            }
           }
 
           loop.trims.MakeClosed(Revit.VertexTolerance);
@@ -852,14 +883,15 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
           {
             var brepEdge = loop.edges[e];
 
-            int orientation = loop.orientation[e];
-            if (orientation == 0)
-              continue;
-
             if (loop.trims.SegmentCurve(e) is Curve trim)
             {
               var ti = brep.AddTrimCurve(trim);
-              brep.Trims.Add(brepEdge, orientation < 0, brepLoop, ti);
+
+              int orientation = loop.orientation[e];
+              if(orientation == 0)
+                brep.Trims.AddSingularTrim(brepEdge as BrepVertex, brepLoop, IsoStatus.None, ti);
+              else
+                brep.Trims.Add(brepEdge as BrepEdge, orientation < 0, brepLoop, ti);
             }
           }
 
