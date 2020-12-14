@@ -15,5 +15,25 @@ namespace RhinoInside.Revit.Convert.Geometry
       return BrepEncoder.EncodeRaw(ref brep, scaleFactor) ? brep : default;
     }
     #endregion
+
+    #region Transfer
+    internal static DB.Solid ToSolid(/*const*/ Extrusion extrusion, double factor)
+    {
+      return BrepEncoder.ToSolid(extrusion.ToBrep(), factor);
+    }
+
+    internal static DB.Mesh ToMesh(/*const*/ Extrusion extrusion, double factor)
+    {
+      using (var mp = MeshingParameters.Default)
+      {
+        mp.MinimumEdgeLength = Revit.ShortCurveTolerance * factor;
+        mp.ClosedObjectPostProcess = extrusion.IsSolid;
+        mp.JaggedSeams = false;
+
+        using (var mesh = Mesh.CreateFromSurface(extrusion, mp))
+          return MeshEncoder.ToMesh(new Mesh[] { mesh }, factor);
+      }
+    }
+    #endregion
   }
 }
