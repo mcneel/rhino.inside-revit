@@ -439,40 +439,45 @@ namespace RhinoInside.Revit.Convert.Geometry
       return curveArrayArray;
     }
 
+    #region ToSolid
     public static DB.Solid ToSolid(this Brep value) => BrepEncoder.ToSolid(value, UnitConverter.ToHostUnits);
     public static DB.Solid ToSolid(this Brep value, double factor) => BrepEncoder.ToSolid(value, factor);
 
+    public static DB.Solid ToSolid(this Extrusion value) => ExtrusionEncoder.ToSolid(value, UnitConverter.ToHostUnits);
+    public static DB.Solid ToSolid(this Extrusion value, double factor) => ExtrusionEncoder.ToSolid(value, factor);
+
+    public static DB.Solid ToSolid(this SubD value) => SubDEncoder.ToSolid(value, UnitConverter.ToHostUnits);
+    public static DB.Solid ToSolid(this SubD value, double factor) => SubDEncoder.ToSolid(value, factor);
+
     public static DB.Solid ToSolid(this Mesh value) => Raw.RawEncoder.ToHost(MeshEncoder.ToRawBrep(value, UnitConverter.ToHostUnits));
     public static DB.Solid ToSolid(this Mesh value, double factor) => Raw.RawEncoder.ToHost(MeshEncoder.ToRawBrep(value, factor));
+    #endregion
+
+    #region ToMesh
+    public static DB.Mesh ToMesh(this Brep value) => BrepEncoder.ToMesh(value, UnitConverter.NoScale);
+    public static DB.Mesh ToMesh(this Brep value, double factor) => BrepEncoder.ToMesh(value, factor);
+
+    public static DB.Mesh ToMesh(this Extrusion value) => ExtrusionEncoder.ToMesh(value, UnitConverter.NoScale);
+    public static DB.Mesh ToMesh(this Extrusion value, double factor) => ExtrusionEncoder.ToMesh(value, factor);
+
+    public static DB.Mesh ToMesh(this SubD value) => SubDEncoder.ToMesh(value, UnitConverter.NoScale);
+    public static DB.Mesh ToMesh(this SubD value, double factor) => SubDEncoder.ToMesh(value, factor);
 
     public static DB.Mesh ToMesh(this Mesh value) => MeshEncoder.ToMesh(MeshEncoder.ToRawMesh(value, UnitConverter.ToHostUnits));
     public static DB.Mesh ToMesh(this Mesh value, double factor) => MeshEncoder.ToMesh(MeshEncoder.ToRawMesh(value, factor));
+    #endregion
 
     public static DB.GeometryObject ToGeometryObject(this GeometryBase geometry) => ToGeometryObject(geometry, UnitConverter.ToHostUnits);
     public static DB.GeometryObject ToGeometryObject(this GeometryBase geometry, double scaleFactor)
     {
       switch (geometry)
       {
-        case Point point: return point.ToPoint(scaleFactor);
-        case Curve curve: return curve.ToCurve(scaleFactor);
-        case Brep brep: return brep.ToSolid(scaleFactor);
-        case Mesh mesh: return mesh.ToMesh(scaleFactor);
-
-        case Extrusion extrusion:
-        {
-          var brep = extrusion.ToBrep();
-          if (BrepEncoder.EncodeRaw(ref brep, scaleFactor))
-            return BrepEncoder.ToSolid(brep);
-        }
-        break;
-
-        case SubD subD:
-        {
-          var brep = subD.ToBrep(SubDToBrepOptions.Default);
-          if (BrepEncoder.EncodeRaw(ref brep, scaleFactor))
-            return BrepEncoder.ToSolid(brep);
-        }
-        break;
+        case Point point:         return point.ToPoint(scaleFactor);
+        case Curve curve:         return curve.ToCurve(scaleFactor);
+        case Brep brep:           return brep.ToSolid(scaleFactor);
+        case Extrusion extrusion: return extrusion.ToSolid(scaleFactor);
+        case SubD subD:           return subD.ToSolid(scaleFactor);
+        case Mesh mesh:           return mesh.ToMesh(scaleFactor);
 
         default:
           if (geometry.HasBrepForm)

@@ -11,6 +11,20 @@ Some of the changes mentioned in sections below, might break your existing Grass
 
 <!-- most recent release should be on top -->
 
+{% include ltr/release-header.html version="0.0.7653.37544" time="12/14/2020 20:55:12" %}
+
+### New featues
+* Improved 'Element Location' when managing `DB.DirectShape` elements.
+
+### Fixes
+* Fix for `DB.Document.Release` extension method when document is already closed.
+* Fix for `DB.Solid` to `Brep` conversion when there are singular edges.
+* Fixed a problem on faces that have surface orientation reversed.
+
+### Minor changes
+* Improved `BrepEncoder.ToACIS` to reuse the same Internal document.
+* Trim curves are now computed with more precision (1e-5)
+
 {% include ltr/release-header.html version="0.0.7643.31783" time="12/04/2020 17:39:26" %}
 
 ### New featues

@@ -220,6 +220,7 @@
     <Compile Include="External\DB\ElevationBase.cs" />
     <Compile Include="External\DB\Extensions\Application.cs" />
     <Compile Include="External\DB\Extensions\BasePoint.cs" />
+    <Compile Include="External\DB\Extensions\BoundingBoxUV.cs" />
     <Compile Include="External\DB\Extensions\Category.cs" />
     <Compile Include="External\DB\Extensions\Curve.cs" />
     <Compile Include="External\DB\Extensions\CurveLoop.cs" />

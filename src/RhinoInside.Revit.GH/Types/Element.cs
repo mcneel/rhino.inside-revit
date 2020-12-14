@@ -134,6 +134,9 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(DB.ImportInstance),          (element)=> new ImportInstance        (element as DB.ImportInstance)    },
       { typeof(DB.PointCloudInstance),      (element)=> new PointCloudInstance    (element as DB.PointCloudInstance)},
 
+      { typeof(DB.DirectShape),             (element)=> new DirectShape           (element as DB.DirectShape)       },
+      { typeof(DB.DirectShapeType),         (element)=> new DirectShapeType       (element as DB.DirectShapeType)   },
+
       { typeof(DB.Sketch),                  (element)=> new Sketch                (element as DB.Sketch)            },
       { typeof(DB.SketchPlane),             (element)=> new SketchPlane           (element as DB.SketchPlane)       },
       { typeof(DB.DatumPlane),              (element)=> new DatumPlane            (element as DB.DatumPlane)        },

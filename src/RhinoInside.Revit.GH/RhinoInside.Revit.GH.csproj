@@ -408,6 +408,7 @@
     <Compile Include="Types\CurveElement.cs" />
     <Compile Include="Types\DesignOption.cs" />
     <Compile Include="Types\Dimension.cs" />
+    <Compile Include="Types\DirectShape.cs" />
     <Compile Include="Types\Document.cs" />
     <Compile Include="Types\DocumentObject.cs" />
     <Compile Include="Types\Element.cs" />
