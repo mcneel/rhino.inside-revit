@@ -232,6 +232,10 @@ namespace RhinoInside.Revit
       //
       // Would you like to save a recovery file? "{TileName}(Recovery)".rvt
 
+      // Show the most inner exception
+      while (e.InnerException is object)
+        e = e.InnerException;
+
       if (MessageBox.Show
       (
         caption: $"{app.ActiveAddInId.GetAddInName()} {Version} - Oops! Something went wrong :(",
