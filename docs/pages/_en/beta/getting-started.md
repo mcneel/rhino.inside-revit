@@ -23,6 +23,8 @@ Download {{ site.terms.rir }} and {{ site.terms.rhino }} from the links below
 
 The {{ site.terms.rir }} installer is also available on [Food4Rhino Website]({{ site.foodrhino_url }})
 
+Revit {{ site.terms.revit_versions }} is required to install  {{ site.terms.rir }}.
+
 Let's install {{ site.terms.rhino }} first
 
 - Run the installer and go through the setup process until {{ site.terms.rhino }} is fully installed
