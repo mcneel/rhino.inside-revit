@@ -6,7 +6,7 @@ group: Deployment & Configs
 
 ## Required installers
 
-1. Revit 2017-2020
+1. Revit {{ site.terms.revit_versions }}
 2. The current [{{ site.terms.rhino }}]({{ site.versions.beta.rhino_download }}) which requires a Rhino 6 license to run.
 3. Download the [latest {{ site.terms.rir }} installer]({{ site.versions.beta.rir_download }}) 
 
