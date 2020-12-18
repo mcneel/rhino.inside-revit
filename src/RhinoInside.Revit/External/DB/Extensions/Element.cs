@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Architecture;
+using Autodesk.Revit.DB.Mechanical;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
@@ -14,13 +15,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
     struct SameDocumentComparer : IEqualityComparer<Element>
     {
       bool IEqualityComparer<Element>.Equals(Element x, Element y) => ReferenceEquals(x, y) || x?.Id == y?.Id;
-      int IEqualityComparer<Element>.GetHashCode(Element obj) => obj?.Id.IntegerValue ?? -1;
+      int IEqualityComparer<Element>.GetHashCode(Element obj) => obj?.Id.IntegerValue ?? int.MinValue;
     }
 
     struct InterDocumentComparer : IEqualityComparer<Element>
     {
       bool IEqualityComparer<Element>.Equals(Element x, Element y) =>  IsEquivalent(x, y);
-      int IEqualityComparer<Element>.GetHashCode(Element obj) => (obj?.Id.IntegerValue ?? -1) ^ (obj?.Document.GetHashCode() ?? 0);
+      int IEqualityComparer<Element>.GetHashCode(Element obj) => (obj?.Id.IntegerValue ?? int.MinValue) ^ (obj?.Document.GetHashCode() ?? 0);
     }
 
     /// <summary>
@@ -47,6 +48,34 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   public static class ElementExtension
   {
+    public static bool CanBeRenamed(this Element element)
+    {
+      if (element is null) return false;
+
+      using (element.Document.RollBackScope())
+      {
+        try { element.Name = Guid.NewGuid().ToString("N"); }
+        catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
+      }
+
+      return true;
+    }
+
+    public static bool IsNameInUse(this Element element, string name)
+    {
+      if (element is null) return false;
+
+      using (element.Document.RollBackScope())
+      {
+        try { element.Name = name; }
+        // The caller needs to see this exception to know this element can not be renamed.
+        //catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
+        catch (Autodesk.Revit.Exceptions.ArgumentException) { return true; }
+      }
+
+      return element.Name == name;
+    }
+
     public static GeometryElement GetGeometry(this Element element, Options options)
     {
       if (element?.IsValidObject != true)
@@ -80,7 +109,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 #endif
 
-    static ElementFilter CreateElementClassFilter(Type type)
+    internal static ElementFilter CreateElementClassFilter(Type type)
     {
       if (type == typeof(Area))
         return new AreaFilter();
@@ -93,6 +122,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       if (type == typeof(RoomTag))
         return new RoomTagFilter();
+
+      if (type == typeof(Space))
+        return new SpaceFilter();
+
+      if (type == typeof(SpaceTag))
+        return new SpaceTagFilter();
 
       if (type.IsSubclassOf(typeof(CurveElement)))
         type = typeof(CurveElement);
