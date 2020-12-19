@@ -13,19 +13,10 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Line Pattern")]
   public class LinePatternElement : Element, Bake.IGH_BakeAwareElement
   {
+    #region IGH_Goo
+    public override bool IsValid => Id.TryGetBuiltInLinePattern(out var _) || base.IsValid;
+
     protected override Type ScriptVariableType => typeof(DB.LinePatternElement);
-
-    public LinePatternElement() { }
-    public LinePatternElement(DB.Document doc, DB.ElementId id) : base(doc, id) { }
-    public LinePatternElement(DB.LinePatternElement value) : base(value) { }
-
-    new public static LinePatternElement FromElementId(DB.Document doc, DB.ElementId id)
-    {
-      if (id.IsLinePatternId(doc))
-        return new LinePatternElement(doc, id);
-
-      return null;
-    }
 
     public override sealed bool CastFrom(object source)
     {
@@ -62,6 +53,19 @@ namespace RhinoInside.Revit.GH.Types
       }
 
       return false;
+    }
+    #endregion
+
+    public LinePatternElement() { }
+    public LinePatternElement(DB.Document doc, DB.ElementId id) : base(doc, id) { }
+    public LinePatternElement(DB.LinePatternElement value) : base(value) { }
+
+    new public static LinePatternElement FromElementId(DB.Document doc, DB.ElementId id)
+    {
+      if (id.IsLinePatternId(doc))
+        return new LinePatternElement(doc, id);
+
+      return null;
     }
 
     #region IGH_BakeAwareElement
@@ -141,16 +145,6 @@ namespace RhinoInside.Revit.GH.Types
           return $"<{builtInLinePattern}>";
 
         return base.Name;
-      }
-      set
-      {
-        if (value is object && value != Name)
-        {
-          if (Id.IsBuiltInId())
-            throw new InvalidOperationException($"BuiltIn fill pattern '{Name}' does not support assignment of a user-specified name.");
-
-          base.Name = value;
-        }
       }
     }
     #endregion

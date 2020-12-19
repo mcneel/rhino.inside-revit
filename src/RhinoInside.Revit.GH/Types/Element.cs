@@ -24,6 +24,7 @@ namespace RhinoInside.Revit.GH.Types
   public class Element : ElementId, IGH_Element
   {
     #region IGH_Goo
+    public override bool IsValid => base.IsValid && Value is object;
     protected virtual Type ScriptVariableType => typeof(DB.Element);
     #endregion
 
@@ -440,6 +441,12 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region Properties
+    public DB.WorksetId WorksetId
+    {
+      get => Document?.GetWorksetId(Id);
+      set => Value?.get_Parameter(DB.BuiltInParameter.ELEM_PARTITION_PARAM)?.Set(value.IntegerValue);
+    }
+
     public bool CanDelete => IsValid && DB.DocumentValidation.CanDeleteElement(Document, Id);
 
     public bool? Pinned
@@ -452,13 +459,67 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+    public virtual bool CanBeRenamed() => Value.CanBeRenamed();
+
+    static string GetUniqueNameRoot(string name)
+    {
+      if (name?.EndsWith(")") == true)
+      {
+        var start = name.LastIndexOf('(');
+        if (start >= 0)
+        {
+          var number = name.Substring(start + 1, name.Length - start - 2);
+          if (int.TryParse(number, out var _))
+            return name.Substring(0, start - 1);
+        }
+      }
+
+      return name;
+    }
+
+    public bool SetUniqueName(string name)
+    {
+      if (!DB.NamingUtils.IsValidName(name))
+        throw new ArgumentException("Element name contains prohibited characters and is invalid.", nameof(name));
+
+      if (Value is DB.Element element)
+      {
+        name = GetUniqueNameRoot(name);
+
+        int index = 0;
+        while (true)
+        {
+          try
+          {
+            if (index == 0) { index++; element.Name = name; }
+            else element.Name = $"{name} ({index++})";
+            return true;
+          }
+          catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
+          catch (Autodesk.Revit.Exceptions.ArgumentException) { }
+        }
+      }
+
+      return false;
+    }
+
     public virtual string Name
     {
       get => Value?.Name;
       set
       {
-        if (value is object && Value is DB.Element element && element.Name != value)
-          element.Name = value;
+        if (value is object)
+        {
+          if (Id.IsBuiltInId())
+          {
+            if (value == Name) return;
+            throw new InvalidOperationException($"BuiltIn {((IGH_Goo) this).TypeName.ToLowerInvariant()} '{DisplayName}' does not support assignment of a user-specified name.");
+          }
+          else if (Value is DB.Element element && element.Name != value)
+          {
+            element.Name = value;
+          }
+        }
       }
     }
 

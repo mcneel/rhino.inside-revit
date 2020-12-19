@@ -6,25 +6,14 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  using Kernel.Attributes;
-
-  [Name("Parameter Key")]
+  [Kernel.Attributes.Name("Parameter Key")]
   public class ParameterKey : Element
   {
+    #region IGH_Goo
+    public override bool IsValid => Id.TryGetBuiltInParameter(out var _) || base.IsValid;
+
     protected override Type ScriptVariableType => typeof(DB.ParameterElement);
     override public object ScriptVariable() => null;
-
-    public ParameterKey() { }
-    public ParameterKey(DB.Document doc, DB.ElementId id) : base(doc, id) { }
-    public ParameterKey(DB.ParameterElement element) : base(element) { }
-
-    new public static ParameterKey FromElementId(DB.Document doc, DB.ElementId id)
-    {
-      if (id.IsParameterId(doc))
-        return new ParameterKey(doc, id);
-
-      return null;
-    }
 
     public override sealed bool CastFrom(object source)
     {
@@ -134,7 +123,19 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
+    #endregion
 
+    public ParameterKey() { }
+    public ParameterKey(DB.Document doc, DB.ElementId id) : base(doc, id) { }
+    public ParameterKey(DB.ParameterElement element) : base(element) { }
+
+    new public static ParameterKey FromElementId(DB.Document doc, DB.ElementId id)
+    {
+      if (id.IsParameterId(doc))
+        return new ParameterKey(doc, id);
+
+      return null;
+    }
     public override string DisplayName
     {
       get
@@ -164,21 +165,11 @@ namespace RhinoInside.Revit.GH.Types
 
         return base.Name;
       }
-      set
-      {
-        if (value is object && value != Name)
-        {
-          if (Id.IsBuiltInId())
-            throw new InvalidOperationException($"BuiltIn paramater '{Name}' does not support assignment of a user-specified name.");
-
-          base.Name = value;
-        }
-      }
     }
     #endregion
   }
 
-  [Name("Parameter Value")]
+  [Kernel.Attributes.Name("Parameter Value")]
   public class ParameterValue : ReferenceObject, IEquatable<ParameterValue>
   {
     #region System.Object
