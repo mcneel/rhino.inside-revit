@@ -280,15 +280,21 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public override void Menu_AppendActions(ToolStripDropDown menu)
     {
-      if (VolatileData.DataCount == 1)
+      if (Revit.ActiveUIDocument?.Document is DB.Document doc)
       {
-        var cplane = VolatileData.AllData(true).FirstOrDefault() is Types.GraphicalElement element &&
-          element.Location.IsValid;
+        if (VolatileData.DataCount == 1)
+        {
+          var cplane = VolatileData.AllData(true).FirstOrDefault() is Types.GraphicalElement element &&
+            element.Location.IsValid;
 
-        Menu_AppendItem(menu, $"Activate {TypeName} CPlane", Menu_ActivateCPlane, cplane, false);
+          Menu_AppendItem(menu, $"Activate {TypeName} CPlane", Menu_ActivateCPlane, cplane, false);
+        }
+
+        var highlight = ToElementIds(VolatileData).Any(x => doc.Equals(x.Document));
+
+        Menu_AppendItem(menu, $"Highlight {GH_Convert.ToPlural(TypeName)}", Menu_HighlightElements, highlight, false);
       }
 
-      Menu_AppendItem(menu, $"Highlight {GH_Convert.ToPlural(TypeName)}", Menu_HighlightElements, !VolatileData.IsEmpty, false);
       base.Menu_AppendActions(menu);
     }
 
@@ -420,8 +426,9 @@ namespace RhinoInside.Revit.GH.Parameters
     private void Menu_HighlightElements(object sender, EventArgs e)
     {
       var uiDocument = Revit.ActiveUIDocument;
+      var doc = uiDocument.Document;
       var elementIds = ToElementIds(VolatileData).
-                       Where(x => x.Document.Equals(uiDocument.Document)).
+                       Where(x => doc.Equals(x.Document)).
                        Select(x => x.Id);
 
       if (elementIds.Any())

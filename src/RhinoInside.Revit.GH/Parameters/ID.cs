@@ -359,7 +359,7 @@ namespace RhinoInside.Revit.GH.Parameters
             Menu_AppendItem(menu, $"Pin {GH_Convert.ToPlural(TypeName)}", Menu_PinElements, DataType != GH_ParamData.remote, false);
         }
 
-        bool delete = ToElementIds(VolatileData).Where(x => doc.Equals(x.Document)).Any();
+        bool delete = ToElementIds(VolatileData).Any(x => doc.Equals(x.Document));
 
         Menu_AppendItem(menu, $"Delete {GH_Convert.ToPlural(TypeName)}", Menu_DeleteElements, delete, false);
       }
@@ -436,11 +436,11 @@ namespace RhinoInside.Revit.GH.Parameters
         {
           using
           (
-            var taskDialog = new TaskDialog(MethodBase.GetCurrentMethod().DeclaringType.FullName)
+            var taskDialog = new TaskDialog("Delete Elements")
             {
+              Id = MethodBase.GetCurrentMethod().DeclaringType.FullName,
               MainIcon = External.UI.TaskDialogIcons.IconWarning,
               TitleAutoPrefix = false,
-              Title = "Delete Elements",
               MainInstruction = "Are you sure you want to delete those elements?",
               CommonButtons = TaskDialogCommonButtons.Yes | TaskDialogCommonButtons.No,
               DefaultButton = TaskDialogResult.Yes,
