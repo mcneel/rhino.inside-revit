@@ -1,7 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
@@ -14,13 +11,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
     struct AscendingComparer : IComparer<ElementId>
     {
       int IComparer<ElementId>.Compare(ElementId x, ElementId y) =>
-        x?.IntegerValue ?? int.MinValue - y?.IntegerValue ?? int.MinValue;
+        (x?.IntegerValue ?? int.MinValue) - (y?.IntegerValue ?? int.MinValue);
     }
 
     struct DescendingComparer : IComparer<ElementId>
     {
       int IComparer<ElementId>.Compare(ElementId x, ElementId y) =>
-        y?.IntegerValue ?? int.MinValue - x?.IntegerValue ?? int.MinValue;
+        (y?.IntegerValue ?? int.MinValue) - (x?.IntegerValue ?? int.MinValue);
     }
   }
 
