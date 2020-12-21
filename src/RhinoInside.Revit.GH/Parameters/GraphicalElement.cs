@@ -7,6 +7,7 @@ using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
+using Rhino.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.External.UI.Selection;
 using DB = Autodesk.Revit.DB;
@@ -14,7 +15,8 @@ using DB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Parameters
 {
   public abstract class GraphicalElementT<T, R> :
-    ElementIdWithPreviewParam<T, R>,
+    ElementIdParam<T, R>,
+    IGH_PreviewObject,
     ISelectionFilter
     where T : class, Types.IGH_GraphicalElement
   {
@@ -23,6 +25,14 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       ObjectChanged += OnObjectChanged;
     }
+
+    #region IGH_PreviewObject
+    bool IGH_PreviewObject.Hidden { get; set; }
+    bool IGH_PreviewObject.IsPreviewCapable => !VolatileData.IsEmpty;
+    BoundingBox IGH_PreviewObject.ClippingBox => Preview_ComputeClippingBox();
+    void IGH_PreviewObject.DrawViewportMeshes(IGH_PreviewArgs args) => Preview_DrawMeshes(args);
+    void IGH_PreviewObject.DrawViewportWires(IGH_PreviewArgs args) => Preview_DrawWires(args);
+    #endregion
 
     #region ISelectionFilter
     public virtual bool AllowElement(DB.Element elem) => elem is R;

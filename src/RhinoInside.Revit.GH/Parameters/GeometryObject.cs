@@ -5,10 +5,27 @@ using Autodesk.Revit.UI.Selection;
 using RhinoInside.Revit.External.UI.Selection;
 using Grasshopper.Kernel;
 using DB = Autodesk.Revit.DB;
+using Rhino.Geometry;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class Vertex : ElementIdWithPreviewParam<Types.Vertex, DB.Point>
+  public abstract class GeometryObject<X, R> : ElementIdParam<X, R>, IGH_PreviewObject
+  where X : class, Types.IGH_ElementId
+  {
+    protected GeometryObject(string name, string nickname, string description, string category, string subcategory) :
+    base(name, nickname, description, category, subcategory)
+    { }
+
+    #region IGH_PreviewObject
+    bool IGH_PreviewObject.Hidden { get; set; }
+    bool IGH_PreviewObject.IsPreviewCapable => !VolatileData.IsEmpty;
+    BoundingBox IGH_PreviewObject.ClippingBox => Preview_ComputeClippingBox();
+    void IGH_PreviewObject.DrawViewportMeshes(IGH_PreviewArgs args) => Preview_DrawMeshes(args);
+    void IGH_PreviewObject.DrawViewportWires(IGH_PreviewArgs args) => Preview_DrawWires(args);
+    #endregion
+  }
+
+  public class Vertex : GeometryObject<Types.Vertex, DB.Point>
   {
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     public override Guid ComponentGuid => new Guid("BC1B160A-DC04-4139-AB7D-1AECBDE7FF88");
@@ -59,7 +76,7 @@ namespace RhinoInside.Revit.GH.Parameters
 #endregion
   }
 
-  public class Edge : ElementIdWithPreviewParam<Types.Edge, DB.Edge>
+  public class Edge : GeometryObject<Types.Edge, DB.Edge>
   {
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     public override Guid ComponentGuid => new Guid("B79FD0FD-63AE-4776-A0A7-6392A3A58B0D");
@@ -101,7 +118,7 @@ namespace RhinoInside.Revit.GH.Parameters
 #endregion
   }
 
-  public class Face : ElementIdWithPreviewParam<Types.Face, DB.Face>
+  public class Face : GeometryObject<Types.Face, DB.Face>
   {
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     public override Guid ComponentGuid => new Guid("759700ED-BC79-4986-A6AB-84921A7C9293");
