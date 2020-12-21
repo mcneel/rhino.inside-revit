@@ -115,9 +115,9 @@ namespace RhinoInside.Revit.GH.Components
                         Where(x => !IsEmpty(x)).
                         ToList();
 
-                    if (list?.Count == 0)
+                    if (list.Count == 0)
                     {
-                      foreach (var dependent in element.GetDependentElements(null).Select(x => element.Document.GetElement(x)))
+                      foreach (var dependent in element.GetDependentElements(new DB.ExclusionFilter(new DB.ElementId[] { element.Id })).Select(x => element.Document.GetElement(x)))
                       {
                         if (dependent.get_BoundingBox(null) is DB.BoundingBoxXYZ)
                         {
