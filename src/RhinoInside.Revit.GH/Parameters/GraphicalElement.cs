@@ -15,7 +15,7 @@ using DB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Parameters
 {
   public abstract class GraphicalElementT<T, R> :
-    ElementIdParam<T, R>,
+    Element<T, R>,
     IGH_PreviewObject,
     ISelectionFilter
     where T : class, Types.IGH_GraphicalElement
