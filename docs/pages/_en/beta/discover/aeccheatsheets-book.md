@@ -2,7 +2,8 @@
 title: Grasshopper for Revit Cheat Sheet Manual
 description: A collection of side by side defintions on Grasshopper and Dynamo for Revit
 thumbnail: /static/images/discover/gh-dynamo-book.jpg
-tags: ["tutorials", "samples"]
+weight: 10
+tags: ["samples", "book", "purchase"]
 ---
 
 <!-- intro video -->
@@ -20,6 +21,7 @@ Welcome to the Dynamo and Grasshopper for Revit Cheat Sheet Reference Manual. Th
 4. Interoperability - 10 workflows moving geomtry and data between the platforms (20 total)
 
 ## Reviews of the book
+
 Watch the podcasts bellow to understand more about the book and some thoughts from other BIM experts.
 
 {% include youtube_player.html id="9xoP-rruTMw" %}
@@ -35,4 +37,3 @@ In this episode, the BIMThoughts crew is joined by Marcello Sgambelluri to discu
 Marcello has worked in the AEC industry for over 20 years as a structural engineer and BIM Director on various projects that include the Walt Disney Concert Hall in Los Angeles - CA, the Ray and Maria Stata Technology Center at MIT, and the Tom Bradley International Terminal Expansion at LAX.
 
 Marcellos has been awarded the best speaker awards at Autodesk University (8 years) and BILT Conference (6 years). Marcello has presented and training thousands of AEC professionals. This book is a summary of this experience in an effective one-page format for each concept.
-
