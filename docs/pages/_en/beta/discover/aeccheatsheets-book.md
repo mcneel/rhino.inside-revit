@@ -10,7 +10,7 @@ tags: ["tutorials", "samples"]
 
 Welcome to the Dynamo and Grasshopper for Revit Cheat Sheet Reference Manual. This book is a collection of side by side Dynamo and Grasshopper examples in a one-page summary format also referred to as “Cheat Sheets”. Available in Paperback, Ebook, and Hardcover.
 
-{% include ltr/book_buy_now.html archive='/static/archives/structural_revit_to_rhino.zip' %}
+{% include ltr/book_buy_now.html archive='https://www.aeccheatsheets.com/dynamo-and-grasshopper-reference-ma' %}
 
 ## Table of Concepts: examples for both Grasshopper and Dynamo
 
