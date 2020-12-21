@@ -1,7 +1,8 @@
 ---
 title: Grasshopper for Revit Cheat Sheet Manual
-description: A collection of side by side definitions on Grasshopper and Dynamo for Revit
+description: A book with 200+ examples and workflows using side by side defintions on Grasshopper and Dynamo in Revit. A must for anyone that  Revit.
 thumbnail: /static/images/discover/gh-dynamo-book.jpg
+order: 10
 tags: ["samples", "book", "purchase"]
 ---
 
