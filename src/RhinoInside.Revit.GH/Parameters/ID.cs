@@ -207,7 +207,6 @@ namespace RhinoInside.Revit.GH.Parameters
     }
 
     #region UI
-
     public override bool AppendMenuItems(ToolStripDropDown menu)
     {
       // Name
@@ -228,8 +227,7 @@ namespace RhinoInside.Revit.GH.Parameters
         Menu_AppendEnableItem(menu);
 
       // Bake
-      if (this is IGH_BakeAwareObject bake)
-        Menu_AppendBakeItem(menu);
+      Menu_AppendBakeItem(menu);
 
       // Runtime messages
       Menu_AppendRuntimeMessages(menu);
@@ -247,15 +245,16 @@ namespace RhinoInside.Revit.GH.Parameters
       return true;
     }
 
-    new void Menu_AppendBakeItem(ToolStripDropDown menu)
+    protected new virtual void Menu_AppendBakeItem(ToolStripDropDown menu)
     {
-      var bakeCapable = this is IGH_BakeAwareObject bakeObject && bakeObject.IsBakeCapable;
-
-      if(Grasshopper.Instances.DocumentEditor.MainMenuStrip.Items.Find("mnuBakeSelected", true).
-        OfType<ToolStripMenuItem>().FirstOrDefault() is ToolStripMenuItem menuItem)
-        Menu_AppendItem(menu, "Bake…", Menu_BakeItemClick, menuItem?.Image, bakeCapable, false);
-      else
-        Menu_AppendItem(menu, "Bake…", Menu_BakeItemClick, bakeCapable, false);
+      if (this is IGH_BakeAwareObject bakeObject)
+      {
+        if (Grasshopper.Instances.DocumentEditor.MainMenuStrip.Items.Find("mnuBakeSelected", true).
+          OfType<ToolStripMenuItem>().FirstOrDefault() is ToolStripMenuItem menuItem)
+          Menu_AppendItem(menu, "Bake…", Menu_BakeItemClick, menuItem?.Image, bakeObject.IsBakeCapable, false);
+        else
+          Menu_AppendItem(menu, "Bake…", Menu_BakeItemClick, bakeObject.IsBakeCapable, false);
+      }
     }
 
     void Menu_BakeItemClick(object sender, EventArgs e)
@@ -300,7 +299,7 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       base.Menu_AppendPreProcessParameter(menu);
 
-      var Group = Menu_AppendItem(menu, "Group by") as ToolStripMenuItem;
+      var Group = Menu_AppendItem(menu, "Group by");
 
       Group.Checked = Grouping != DataGrouping.None;
       Menu_AppendItem(Group.DropDown, "Document",      (s, a) => Menu_GroupBy(DataGrouping.Document),      true, (Grouping & DataGrouping.Document) != 0);
@@ -323,7 +322,7 @@ namespace RhinoInside.Revit.GH.Parameters
       if (Kind == GH_ParamKind.output)
         ExpireOwner();
 
-      ExpireSolution(true);
+      ExpireSolutionTopLevel(true);
     }
 
     protected override void PrepareForPrompt() { }
@@ -359,9 +358,11 @@ namespace RhinoInside.Revit.GH.Parameters
             Menu_AppendItem(menu, $"Pin {GH_Convert.ToPlural(TypeName)}", Menu_PinElements, DataType != GH_ParamData.remote, false);
         }
 
-        bool delete = ToElementIds(VolatileData).Any(x => doc.Equals(x.Document));
+        {
+          bool delete = ToElementIds(VolatileData).Any(x => doc.Equals(x.Document));
 
-        Menu_AppendItem(menu, $"Delete {GH_Convert.ToPlural(TypeName)}", Menu_DeleteElements, delete, false);
+          Menu_AppendItem(menu, $"Delete {GH_Convert.ToPlural(TypeName)}", Menu_DeleteElements, delete, false);
+        }
       }
     }
 

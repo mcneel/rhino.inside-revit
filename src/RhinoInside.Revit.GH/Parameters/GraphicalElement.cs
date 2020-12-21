@@ -278,18 +278,23 @@ namespace RhinoInside.Revit.GH.Parameters
       //Menu_AppendItem(menu, $"Externalize data", Menu_ExternalizeData, SourceCount == 0, !MutableNickName);
     }
 
+    protected override void Menu_AppendBakeItem(ToolStripDropDown menu)
+    {
+      base.Menu_AppendBakeItem(menu);
+
+      if (VolatileData.DataCount == 1)
+      {
+        var cplane = VolatileData.AllData(true).FirstOrDefault() is Types.GraphicalElement element &&
+          element.Location.IsValid;
+
+        Menu_AppendItem(menu, $"Set CPlane", Menu_SetCPlane, cplane, false);
+      }
+    }
+
     public override void Menu_AppendActions(ToolStripDropDown menu)
     {
       if (Revit.ActiveUIDocument?.Document is DB.Document doc)
       {
-        if (VolatileData.DataCount == 1)
-        {
-          var cplane = VolatileData.AllData(true).FirstOrDefault() is Types.GraphicalElement element &&
-            element.Location.IsValid;
-
-          Menu_AppendItem(menu, $"Activate {TypeName} CPlane", Menu_ActivateCPlane, cplane, false);
-        }
-
         var highlight = ToElementIds(VolatileData).Any(x => doc.Equals(x.Document));
 
         Menu_AppendItem(menu, $"Highlight {GH_Convert.ToPlural(TypeName)}", Menu_HighlightElements, highlight, false);
@@ -439,7 +444,7 @@ namespace RhinoInside.Revit.GH.Parameters
       }
     }
 
-    private void Menu_ActivateCPlane(object sender, EventArgs e)
+    private void Menu_SetCPlane(object sender, EventArgs e)
     {
       if (VolatileData.AllData(true).FirstOrDefault() is Types.GraphicalElement element)
       {
@@ -450,7 +455,13 @@ namespace RhinoInside.Revit.GH.Parameters
           view.ActiveViewport is Rhino.Display.RhinoViewport vport
         )
         {
-          vport.SetConstructionPlane(element.Location);
+          Rhinoceros.Show();
+          Rhino.RhinoApp.SetFocusToMainWindow();
+
+          var cplane = vport.GetConstructionPlane();
+          cplane.Plane = element.Location;
+          vport.PushConstructionPlane(cplane);
+
           view.Redraw();
         }
       }
