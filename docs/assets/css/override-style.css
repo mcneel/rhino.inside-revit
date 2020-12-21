@@ -503,6 +503,45 @@ pre {
 }
 
 /*
+    linkcard ==================================================================
+*/
+
+.profilecard {
+    display: block;
+    background-color: #fff;
+    border: 1px solid #d0d0d0;
+    border-radius: 5px;
+    color: white;
+    overflow: hidden;
+}
+
+.profilecard-image {
+    padding: 20px;
+    width: 230px;
+    vertical-align: top;
+}
+
+.profilecard h3 {
+    margin-top: 10px;
+}
+
+.profilecard-info {
+    padding: 10px;
+    vertical-align: top;
+    color: #111;
+}
+
+.profilecard-info p {
+    margin-bottom: 20px;
+}
+
+.profilecard-info p,
+::after,
+::before {
+    box-sizing: unset;
+}
+
+/*
     footer ====================================================================
 */
 .site-footer {
