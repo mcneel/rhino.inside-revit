@@ -90,8 +90,18 @@
     },
     {
         "type": "video",
+        "title": "Becoming a computational designer with Rhino.Inside.Revit",
+        "url": "https://creativeinsider.podbean.com/e/0030-make-your-big-dreams-buildable/",
+        "thumbnail": "https://pbcdn1.podbean.com/imglogo/image-logo/8287361/20_05_01-Cover-art.jpg",
+        "author": "The Creative Insider Podcast",
+        "authorUrl": "https://www.creativeinsiderpodcast.com/",
+        "description": "Olly Thomas is a BIM Specialist at BIG New York. Olly is also part of the international architectural collective PIXELS Among all the activities he does he also educates people about parametrical design and BIM and how to make your ideas buildable."
+    },
+    {
+        "type": "video",
         "title": "SF Computational Design Institute presentation of Rhino.Inside.Revit",
         "url": "https://www.youtube.com/watch?v=KF7JyKuTxzU",
+        "thumbnail": "https://i3.ytimg.com/vi/KF7JyKuTxzU/maxresdefault.jpg",
         "author": "San Francisco Computational Design Institute",
         "authorUrl": "https://www.linkedin.com/company/sfcdi/",
         "description": "This is a short recap of Rhino.Inside.Revit plugin and Compute technology in Rhino"
