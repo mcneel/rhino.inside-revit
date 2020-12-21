@@ -612,17 +612,4 @@ namespace RhinoInside.Revit.GH.Parameters
     }
     #endregion
   }
-
-  public abstract class ElementIdWithoutPreviewParam<T, R> : ElementIdParam<T, R>
-    where T : class, Types.IGH_ElementId
-  {
-    protected ElementIdWithoutPreviewParam(string name, string nickname, string description, string category, string subcategory) :
-      base(name, nickname, description, category, subcategory)
-    { }
-
-    protected override void Menu_AppendPromptOne(ToolStripDropDown menu) { }
-    protected override void Menu_AppendPromptMore(ToolStripDropDown menu) { }
-    protected override GH_GetterResult Prompt_Plural(ref List<T> values) => GH_GetterResult.cancel;
-    protected override GH_GetterResult Prompt_Singular(ref T value) => GH_GetterResult.cancel;
-  }
 }
