@@ -2,6 +2,7 @@
 title: 101 Class LiveAcademy
 description: In this 1-hour course Oliver Thomas from BIG will cover the basics of the Rhino.Inside interface, components and workflows whilst working on a real-world project workflow.
 thumbnail: /static/images/community/liveacademy-oliver-101.jpg
+order: 30
 tags: ["samples", "course", "purchase"]
 ---
 
@@ -19,12 +20,11 @@ In this 1-hour course Oliver Thomas from BIG will cover the basics of the Rhino.
 3. Use Rhino for design
 4. Use Revit to automate drawings
 5. Create Revit Parametric Families
-4. Be more efficient with design and documentation
+6. Be more efficient with design and documentation
 
 ## Quick look
 
 {% include vimeo_player.html id="493536084" %}
-
 
 {% capture profile_note %}
 Oliver Thomas is a British Architect with experience working on a variety of projects around the world. His work includes world-renowned firms such as FACIT Homes, Aedas, Front and BIG. Oliver works as a BIM & Computational specialist at BIG and is responsible for the implementation of advanced workflows on a range of projects within the office. He also oversees the testing and integration of new and emerging technologies that add to the unique design process at BIG.

@@ -26,6 +26,15 @@
         "description": "In this 1-hour course Olly will cover the basics of the Rhino.Inside interface, components and workflows whilst working on a real-world project workflow"
     },
     {
+        "type": "blogpost",
+        "title": "AECbytes Rhino.Inside.Revit",
+        "url": "http://www.aecbytes.com/feature/2020/Rhino-Inside-Revit.html",
+        "thumbnail": "/static/images/discover/aecbytes.png",
+        "author": "AECBytes Blog",
+        "authorUrl": "http://www.aecbytes.com/index.html",
+        "description": "A 5-star presentation from Håvard Vasshaug of the Bad Monkeys group to [Snøhetta](https://www.snohetta.com/). If you know Revit and want to know how your workflow might be improved, watch this"
+    },
+    {
         "type": "video",
         "title": "Rhino.Inside.Revit Review",
         "url": "https://www.youtube.com/watch?v=J11LIrDIchw",
@@ -60,6 +69,24 @@
         "author": "Geometry Gym",
         "authorUrl": "https://www.youtube.com/channel/UC01FBzTNN-umc7w1-MYnABw",
         "description": "This video runs through the basics of Rhino.Inside.Revit and how to get up and running with this exciting new technology. Along with Geometry Gym tools with an eye toward facades and structures"
+    },
+    {
+        "type": "video",
+        "title": "Structural framing from Grasshopper to Revit",
+        "url": "https://youtu.be/9wW9_ltUKnY",
+        "thumbnail": "https://i3.ytimg.com/vi/9wW9_ltUKnY/maxresdefault.jpg",
+        "author": "Structured Parametrics",
+        "authorUrl": "https://www.youtube.com/channel/UCqgD1Dm9u5dCoi0f5dPcXlA",
+        "description": "Tutorial on how to get grasshopper structural framing into Revit with Rhino.Inside. This shows how quick it can be to get framing into Revit but also shows some of the issues with the current workflow for this Work In Progress project."
+    },
+    {
+        "type": "video",
+        "title": "Rhino.Inside.Revit, Clash Detection, Grasshopper player, SubD",
+        "url": "https://youtu.be/bskTiUdHxW0",
+        "thumbnail": "https://i3.ytimg.com/vi/bskTiUdHxW0/maxresdefault.jpg",
+        "author": "Structured Parametrics",
+        "authorUrl": "https://www.youtube.com/channel/UCqgD1Dm9u5dCoi0f5dPcXlA",
+        "description": "Rhino 7 has been released! See a quick preview of new features with a focus on what will be useful for Engineers."
     },
     {
         "type": "video",
