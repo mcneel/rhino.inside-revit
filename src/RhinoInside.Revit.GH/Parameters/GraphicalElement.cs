@@ -344,7 +344,7 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         PrepareForPrompt();
         var data = PersistentData;
-        if (Prompt_Elements(ref data, ObjectType.LinkedElement, false, false) == GH_GetterResult.success)
+        if (Prompt_SingularLinked(ref data) == GH_GetterResult.success)
         {
           RecordPersistentDataEvent("Change data");
 
@@ -394,7 +394,7 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         PrepareForPrompt();
         var data = PersistentData;
-        if (Prompt_Elements(ref data, ObjectType.LinkedElement, true, false) == GH_GetterResult.success)
+        if (Prompt_PluralLinked(ref data) == GH_GetterResult.success)
         {
           RecordPersistentDataEvent("Change data");
 

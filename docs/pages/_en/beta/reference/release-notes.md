@@ -16,6 +16,7 @@ Some of the changes mentioned in sections below, might break your existing Grass
 * Fixed 'Deconstruct Compound Structure' units conversion.
 * Fixed 'Deconstruct Compound Structure Layer' units conversion.
 * Fixed "Highlight Elements" context menu when there is no active Revit document or not selected elements in the active document.
+* Fixed "Set one linked element" and "Set Multiple linked elements" context menu.
 
 ### Minor Changes
 * Moved 'Set CPlane' context menu item to the Bake area.
