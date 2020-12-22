@@ -3,16 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
-using System.Windows.Forms.Interop;
-using Autodesk.Revit.UI;
 using GH_IO.Serialization;
-using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
-using Grasshopper.Kernel.Types;
 using Rhino;
 using Rhino.DocObjects;
-using Rhino.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
@@ -51,21 +46,6 @@ namespace RhinoInside.Revit.GH.Parameters
     protected ElementIdParam(string name, string nickname, string description, string category, string subcategory) :
       base(name, nickname, description, category, subcategory)
     { }
-    protected override T PreferredCast(object data) => data is R ? Types.Element.FromValue(data) as T : null;
-
-    protected T Current
-    {
-      get
-      {
-        var current = (SourceCount == 0 && PersistentDataCount == 1) ? PersistentData.get_FirstItem(true) : default;
-        return (current?.LoadElement() == true ? current : default) as T;
-      }
-    }
-
-    internal static IEnumerable<Types.IGH_ElementId> ToElementIds(IGH_Structure data) =>
-      data.AllData(true).
-      OfType<Types.IGH_ElementId>().
-      Where(x => x.IsValid);
 
     [Flags]
     public enum DataGrouping
@@ -207,7 +187,6 @@ namespace RhinoInside.Revit.GH.Parameters
     }
 
     #region UI
-
     public override bool AppendMenuItems(ToolStripDropDown menu)
     {
       // Name
@@ -228,8 +207,7 @@ namespace RhinoInside.Revit.GH.Parameters
         Menu_AppendEnableItem(menu);
 
       // Bake
-      if (this is IGH_BakeAwareObject bake)
-        Menu_AppendBakeItem(menu);
+      Menu_AppendBakeItem(menu);
 
       // Runtime messages
       Menu_AppendRuntimeMessages(menu);
@@ -247,15 +225,16 @@ namespace RhinoInside.Revit.GH.Parameters
       return true;
     }
 
-    new void Menu_AppendBakeItem(ToolStripDropDown menu)
+    protected new virtual void Menu_AppendBakeItem(ToolStripDropDown menu)
     {
-      var bakeCapable = this is IGH_BakeAwareObject bakeObject && bakeObject.IsBakeCapable;
-
-      if(Grasshopper.Instances.DocumentEditor.MainMenuStrip.Items.Find("mnuBakeSelected", true).
-        OfType<ToolStripMenuItem>().FirstOrDefault() is ToolStripMenuItem menuItem)
-        Menu_AppendItem(menu, "Bake…", Menu_BakeItemClick, menuItem?.Image, bakeCapable, false);
-      else
-        Menu_AppendItem(menu, "Bake…", Menu_BakeItemClick, bakeCapable, false);
+      if (this is IGH_BakeAwareObject bakeObject)
+      {
+        if (Grasshopper.Instances.DocumentEditor.MainMenuStrip.Items.Find("mnuBakeSelected", true).
+          OfType<ToolStripMenuItem>().FirstOrDefault() is ToolStripMenuItem menuItem)
+          Menu_AppendItem(menu, "Bake…", Menu_BakeItemClick, menuItem?.Image, bakeObject.IsBakeCapable, false);
+        else
+          Menu_AppendItem(menu, "Bake…", Menu_BakeItemClick, bakeObject.IsBakeCapable, false);
+      }
     }
 
     void Menu_BakeItemClick(object sender, EventArgs e)
@@ -300,7 +279,7 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       base.Menu_AppendPreProcessParameter(menu);
 
-      var Group = Menu_AppendItem(menu, "Group by") as ToolStripMenuItem;
+      var Group = Menu_AppendItem(menu, "Group by");
 
       Group.Checked = Grouping != DataGrouping.None;
       Menu_AppendItem(Group.DropDown, "Document",      (s, a) => Menu_GroupBy(DataGrouping.Document),      true, (Grouping & DataGrouping.Document) != 0);
@@ -323,193 +302,11 @@ namespace RhinoInside.Revit.GH.Parameters
       if (Kind == GH_ParamKind.output)
         ExpireOwner();
 
-      ExpireSolution(true);
+      ExpireSolutionTopLevel(true);
     }
 
     protected override void PrepareForPrompt() { }
     protected override void RecoverFromPrompt() { }
-    public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
-    {
-      base.AppendAdditionalMenuItems(menu);
-
-      Menu_AppendSeparator(menu);
-      Menu_AppendActions(menu);
-    }
-
-    public virtual void Menu_AppendActions(ToolStripDropDown menu)
-    {
-      if (Revit.ActiveUIDocument?.Document is DB.Document doc)
-      {
-        if (Kind == GH_ParamKind.output && Attributes.GetTopLevel.DocObject is Components.ReconstructElementComponent)
-        {
-          var pinned = ToElementIds(VolatileData).
-                       Where(x => doc.Equals(x.Document)).
-                       Select(x => doc.GetElement(x.Id)).
-                       Where(x => x?.Pinned == true).Any();
-
-          if (pinned)
-            Menu_AppendItem(menu, $"Unpin {GH_Convert.ToPlural(TypeName)}", Menu_UnpinElements, DataType != GH_ParamData.remote, false);
-
-          var unpinned = ToElementIds(VolatileData).
-                       Where(x => doc.Equals(x.Document)).
-                       Select(x => doc.GetElement(x.Id)).
-                       Where(x => x?.Pinned == false).Any();
-
-          if (unpinned)
-            Menu_AppendItem(menu, $"Pin {GH_Convert.ToPlural(TypeName)}", Menu_PinElements, DataType != GH_ParamData.remote, false);
-        }
-
-        bool delete = ToElementIds(VolatileData).Where(x => doc.Equals(x.Document)).Any();
-
-        Menu_AppendItem(menu, $"Delete {GH_Convert.ToPlural(TypeName)}", Menu_DeleteElements, delete, false);
-      }
-    }
-
-    void Menu_PinElements(object sender, EventArgs args)
-    {
-      var doc = Revit.ActiveUIDocument.Document;
-      var elements = ToElementIds(VolatileData).
-                       Where(x => doc.Equals(x.Document)).
-                       Select(x => doc.GetElement(x.Id)).
-                       Where(x => x.Pinned == false);
-
-      if (elements.Any())
-      {
-        try
-        {
-          using (var transaction = new DB.Transaction(doc, "Pin elements"))
-          {
-            transaction.Start();
-
-            foreach (var element in elements)
-              element.Pinned = true;
-
-            transaction.Commit();
-          }
-        }
-        catch (Autodesk.Revit.Exceptions.ArgumentException)
-        {
-          TaskDialog.Show("Pin elements", $"One or more of the {TypeName} cannot be pinned.");
-        }
-      }
-    }
-
-    void Menu_UnpinElements(object sender, EventArgs args)
-    {
-      var doc = Revit.ActiveUIDocument.Document;
-      var elements = ToElementIds(VolatileData).
-                       Where(x => doc.Equals(x.Document)).
-                       Select(x => doc.GetElement(x.Id)).
-                       Where(x => x.Pinned == true);
-
-      if (elements.Any())
-      {
-        try
-        {
-          using (var transaction = new DB.Transaction(doc, "Unpin elements"))
-          {
-            transaction.Start();
-
-            foreach (var element in elements)
-              element.Pinned = false;
-
-            transaction.Commit();
-          }
-        }
-        catch (Autodesk.Revit.Exceptions.ArgumentException)
-        {
-          TaskDialog.Show("Unpin elements", $"One or more of the {TypeName} cannot be unpinned.");
-        }
-      }
-    }
-
-    void Menu_DeleteElements(object sender, EventArgs args)
-    {
-      var doc = Revit.ActiveUIDocument.Document;
-      var elementIds = ToElementIds(VolatileData).
-                       Where(x => doc.Equals(x.Document)).
-                       Select(x => x.Id);
-
-      if (elementIds.Any())
-      {
-        using (new External.EditScope())
-        {
-          using
-          (
-            var taskDialog = new TaskDialog(MethodBase.GetCurrentMethod().DeclaringType.FullName)
-            {
-              MainIcon = External.UI.TaskDialogIcons.IconWarning,
-              TitleAutoPrefix = false,
-              Title = "Delete Elements",
-              MainInstruction = "Are you sure you want to delete those elements?",
-              CommonButtons = TaskDialogCommonButtons.Yes | TaskDialogCommonButtons.No,
-              DefaultButton = TaskDialogResult.Yes,
-              AllowCancellation = true,
-#if REVIT_2020
-              EnableMarqueeProgressBar = true
-#endif
-            }
-          )
-          {
-            taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Show elements");
-            taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink2, "Manage element collection");
-
-            var result = TaskDialogResult.None;
-            bool highlight = false;
-            do
-            {
-              var elements = elementIds.ToArray();
-              taskDialog.ExpandedContent = $"{elements.Length} elements and its depending elements will be deleted.";
-
-              if (highlight)
-                Revit.ActiveUIDocument?.Selection.SetElementIds(elements);
-
-              switch (result = taskDialog.Show())
-              {
-                case TaskDialogResult.CommandLink1:
-                  Revit.ActiveUIDocument?.ShowElements(elements);
-                  highlight = true;
-                  break;
-
-                case TaskDialogResult.CommandLink2:
-                  using (var dataManager = new GH_PersistentDataEditor())
-                  {
-                    var elementCollection = new GH_Structure<IGH_Goo>();
-                    elementCollection.AppendRange(elementIds.Select(x => Types.Element.FromElementId(doc, x)));
-                    dataManager.SetData(elementCollection, new Types.Element());
-
-                    GH_WindowsFormUtil.CenterFormOnCursor(dataManager, true);
-                    if (dataManager.ShowDialog(Revit.MainWindowHandle) == System.Windows.Forms.DialogResult.OK)
-                      elementIds = dataManager.GetData<IGH_Goo>().AllData(true).OfType<Types.Element>().Select(x => x.Id);
-                  }
-                  break;
-
-                case TaskDialogResult.Yes:
-                  try
-                  {
-                    using (var transaction = new DB.Transaction(doc, "Delete elements"))
-                    {
-                      transaction.Start();
-                      doc.Delete(elements);
-                      transaction.Commit();
-                    }
-
-                    ClearData();
-                    ExpireDownStreamObjects();
-                    OnPingDocument().NewSolution(false);
-                  }
-                  catch (Autodesk.Revit.Exceptions.ArgumentException)
-                  {
-                    TaskDialog.Show("Delete elements", $"One or more of the {TypeName} cannot be deleted.");
-                  }
-                  break;
-              }
-            }
-            while (result == TaskDialogResult.CommandLink1 || result == TaskDialogResult.CommandLink2);
-          }
-        }
-      }
-    }
 
     protected override bool Prompt_ManageCollection(GH_Structure<T> values)
     {
@@ -609,35 +406,6 @@ namespace RhinoInside.Revit.GH.Parameters
       if (progress)
         Rhino.UI.StatusBar.HideProgressMeter(doc.RuntimeSerialNumber);
     }
-    #endregion
-  }
-
-  public abstract class ElementIdWithoutPreviewParam<T, R> : ElementIdParam<T, R>
-    where T : class, Types.IGH_ElementId
-  {
-    protected ElementIdWithoutPreviewParam(string name, string nickname, string description, string category, string subcategory) :
-      base(name, nickname, description, category, subcategory)
-    { }
-
-    protected override void Menu_AppendPromptOne(ToolStripDropDown menu) { }
-    protected override void Menu_AppendPromptMore(ToolStripDropDown menu) { }
-    protected override GH_GetterResult Prompt_Plural(ref List<T> values) => GH_GetterResult.cancel;
-    protected override GH_GetterResult Prompt_Singular(ref T value) => GH_GetterResult.cancel;
-  }
-
-  public abstract class ElementIdWithPreviewParam<X, R> : ElementIdParam<X, R>, IGH_PreviewObject
-  where X : class, Types.IGH_ElementId
-  {
-    protected ElementIdWithPreviewParam(string name, string nickname, string description, string category, string subcategory) :
-    base(name, nickname, description, category, subcategory)
-    { }
-
-    #region IGH_PreviewObject
-    bool IGH_PreviewObject.Hidden { get; set; }
-    bool IGH_PreviewObject.IsPreviewCapable => !VolatileData.IsEmpty;
-    BoundingBox IGH_PreviewObject.ClippingBox => Preview_ComputeClippingBox();
-    void IGH_PreviewObject.DrawViewportMeshes(IGH_PreviewArgs args) => Preview_DrawMeshes(args);
-    void IGH_PreviewObject.DrawViewportWires(IGH_PreviewArgs args) => Preview_DrawWires(args);
     #endregion
   }
 }

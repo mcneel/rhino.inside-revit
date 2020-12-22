@@ -14,6 +14,7 @@ namespace RhinoInside.Revit.GH.Types
   public class Category : Element, Bake.IGH_BakeAwareElement
   {
     #region IGH_Goo
+    public override bool IsValid => (Id.TryGetBuiltInCategory(out var _) && true) || base.IsValid;
     protected override Type ScriptVariableType => typeof(DB.Category);
     override public object ScriptVariable() => Value;
 
@@ -157,17 +158,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region DocumentObject
-    DB.Category category = default;
-    public new DB.Category Value
-    {
-      get
-      {
-        if (category is null && IsElementLoaded)
-          category = Document.GetCategory(Id);
-
-        return category;
-      }
-    }
+    public new DB.Category Value => IsElementLoaded ? Document.GetCategory(Id) : default;
 
     public override string DisplayName
     {
@@ -181,25 +172,15 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
-    #region IGH_ElementId
-    protected override void ResetValue()
-    {
-      category = default;
-
-      base.ResetValue();
-    }
-    #endregion
-
     public Category() : base() { }
     public Category(DB.Document doc, DB.ElementId id) : base(doc, id) { }
-    public Category(DB.Category value) : base(value.Document(), value?.Id ?? DB.ElementId.InvalidElementId) => category = value;
+    public Category(DB.Category value) : base(value.Document(), value?.Id ?? DB.ElementId.InvalidElementId) { }
 
     protected override bool SetValue(DB.Element element)
     {
       if (DocumentExtension.AsCategory(element) is DB.Category cat)
       {
         SetValue(element.Document, element.Id);
-        category = cat;
         return true;
       }
 
@@ -383,17 +364,7 @@ namespace RhinoInside.Revit.GH.Types
     #region Properties
     public override string Name
     {
-      get => Value?.Name;
-      set
-      {
-        if (value is object && Value is DB.Category category && category.Name != value)
-        {
-          if (Id.IsBuiltInId())
-            throw new InvalidOperationException($"BuiltIn category '{category.FullName()}' does not support assignment of a user-specified name.");
-
-          base.Name = value;
-        }
-      }
+      get => base.Value?.Name ?? Value?.Name;
     }
 
     public System.Drawing.Color? LineColor

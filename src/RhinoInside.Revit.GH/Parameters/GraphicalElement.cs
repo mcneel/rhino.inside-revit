@@ -7,6 +7,7 @@ using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
+using Rhino.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.External.UI.Selection;
 using DB = Autodesk.Revit.DB;
@@ -14,7 +15,8 @@ using DB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Parameters
 {
   public abstract class GraphicalElementT<T, R> :
-    ElementIdWithPreviewParam<T, R>,
+    Element<T, R>,
+    IGH_PreviewObject,
     ISelectionFilter
     where T : class, Types.IGH_GraphicalElement
   {
@@ -23,6 +25,14 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       ObjectChanged += OnObjectChanged;
     }
+
+    #region IGH_PreviewObject
+    bool IGH_PreviewObject.Hidden { get; set; }
+    bool IGH_PreviewObject.IsPreviewCapable => !VolatileData.IsEmpty;
+    BoundingBox IGH_PreviewObject.ClippingBox => Preview_ComputeClippingBox();
+    void IGH_PreviewObject.DrawViewportMeshes(IGH_PreviewArgs args) => Preview_DrawMeshes(args);
+    void IGH_PreviewObject.DrawViewportWires(IGH_PreviewArgs args) => Preview_DrawWires(args);
+    #endregion
 
     #region ISelectionFilter
     public virtual bool AllowElement(DB.Element elem) => elem is R;
@@ -278,17 +288,28 @@ namespace RhinoInside.Revit.GH.Parameters
       //Menu_AppendItem(menu, $"Externalize data", Menu_ExternalizeData, SourceCount == 0, !MutableNickName);
     }
 
-    public override void Menu_AppendActions(ToolStripDropDown menu)
+    protected override void Menu_AppendBakeItem(ToolStripDropDown menu)
     {
+      base.Menu_AppendBakeItem(menu);
+
       if (VolatileData.DataCount == 1)
       {
         var cplane = VolatileData.AllData(true).FirstOrDefault() is Types.GraphicalElement element &&
           element.Location.IsValid;
 
-        Menu_AppendItem(menu, $"Activate {TypeName} CPlane", Menu_ActivateCPlane, cplane, false);
+        Menu_AppendItem(menu, $"Set CPlane", Menu_SetCPlane, cplane, false);
+      }
+    }
+
+    public override void Menu_AppendActions(ToolStripDropDown menu)
+    {
+      if (Revit.ActiveUIDocument?.Document is DB.Document doc)
+      {
+        var highlight = ToElementIds(VolatileData).Any(x => doc.Equals(x.Document));
+
+        Menu_AppendItem(menu, $"Highlight {GH_Convert.ToPlural(TypeName)}", Menu_HighlightElements, highlight, false);
       }
 
-      Menu_AppendItem(menu, $"Highlight {GH_Convert.ToPlural(TypeName)}", Menu_HighlightElements, !VolatileData.IsEmpty, false);
       base.Menu_AppendActions(menu);
     }
 
@@ -420,8 +441,9 @@ namespace RhinoInside.Revit.GH.Parameters
     private void Menu_HighlightElements(object sender, EventArgs e)
     {
       var uiDocument = Revit.ActiveUIDocument;
+      var doc = uiDocument.Document;
       var elementIds = ToElementIds(VolatileData).
-                       Where(x => x.Document.Equals(uiDocument.Document)).
+                       Where(x => doc.Equals(x.Document)).
                        Select(x => x.Id);
 
       if (elementIds.Any())
@@ -432,7 +454,7 @@ namespace RhinoInside.Revit.GH.Parameters
       }
     }
 
-    private void Menu_ActivateCPlane(object sender, EventArgs e)
+    private void Menu_SetCPlane(object sender, EventArgs e)
     {
       if (VolatileData.AllData(true).FirstOrDefault() is Types.GraphicalElement element)
       {
@@ -443,7 +465,13 @@ namespace RhinoInside.Revit.GH.Parameters
           view.ActiveViewport is Rhino.Display.RhinoViewport vport
         )
         {
-          vport.SetConstructionPlane(element.Location);
+          Rhinoceros.Show();
+          Rhino.RhinoApp.SetFocusToMainWindow();
+
+          var cplane = vport.GetConstructionPlane();
+          cplane.Plane = element.Location;
+          vport.PushConstructionPlane(cplane);
+
           view.Redraw();
         }
       }

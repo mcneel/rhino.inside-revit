@@ -95,7 +95,7 @@ namespace RhinoInside.Revit.GH.Components.Host
       DA.SetData("Index", cslayer.LayerId);
       DA.SetData("Function", cslayer.Function);
       DA.SetData("Material", Types.Element.FromElement(dataObj.Document.GetElement(cslayer.MaterialId)));
-      DA.SetData("Thickness", cslayer.Width);
+      DA.SetData("Thickness", cslayer.Width * Revit.ModelUnits);
       DA.SetData("Wraps", cslayer.LayerCapFlag);
       DA.SetData("Deck Profile", Types.Element.FromElement(dataObj.Document.GetElement(cslayer.DeckProfileId)));
       DA.SetData("Deck Embedding Type", cslayer.DeckEmbeddingType);

@@ -12,7 +12,7 @@ using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class ParameterKey : ElementIdWithoutPreviewParam<Types.ParameterKey, DB.ElementId>
+  public class ParameterKey : Element<Types.ParameterKey, DB.ElementId>
   {
     public override Guid ComponentGuid => new Guid("A550F532-8C68-460B-91F3-DA0A5A0D42B5");
     public override GH_Exposure Exposure => GH_Exposure.septenary;

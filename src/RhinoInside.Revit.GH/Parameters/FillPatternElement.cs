@@ -8,7 +8,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class FillPatternElement : ElementIdWithoutPreviewParam<Types.FillPatternElement, DB.FillPatternElement>
+  public class FillPatternElement : Element<Types.FillPatternElement, DB.FillPatternElement>
   {
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
     public override Guid ComponentGuid => new Guid("EFDDB3D7-CF2A-4972-B1C4-29374BB89149");

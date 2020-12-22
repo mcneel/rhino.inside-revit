@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Autodesk.Revit.DB;
-using Microsoft.PowerShell.Commands;
 
 namespace RhinoInside.Revit.External.DB
 {
@@ -17,9 +16,9 @@ namespace RhinoInside.Revit.External.DB
   public struct TransactionHandlingOptions
   {
     //public bool CommitOneByOne;
-    public bool ClearAfterRollback;
+    public bool KeepFailuresAfterRollback;
     public bool DelayedMiniWarnings;
-    public bool ForcedModalHandling;
+    public bool AllowModelessHandling;
     public IFailuresPreprocessor FailuresPreprocessor;
     public ITransactionFinalizer TransactionFinalizer;
     public ITransactionNotification TransactionNotification;
@@ -113,22 +112,22 @@ namespace RhinoInside.Revit.External.DB
         var transaction = new Transaction(doc, name);
         try
         {
+          transaction.SetFailureHandlingOptions
+          (
+            transaction.GetFailureHandlingOptions().
+            SetClearAfterRollback(!HandlingOptions.KeepFailuresAfterRollback).
+            SetDelayedMiniWarnings(HandlingOptions.DelayedMiniWarnings).
+            SetForcedModalHandling(!HandlingOptions.AllowModelessHandling).
+            SetFailuresPreprocessor(this).
+            SetTransactionFinalizer(this)
+          );
+
           result = transaction.Start();
           if (result != TransactionStatus.Started)
           {
             transaction.Dispose();
             throw new InvalidOperationException($"Failed to start Transaction '{name}' on document '{doc.Title.TripleDot(16)}'");
           }
-
-          transaction.SetFailureHandlingOptions
-          (
-            transaction.GetFailureHandlingOptions().
-            SetClearAfterRollback(true).
-            SetDelayedMiniWarnings(false).
-            SetForcedModalHandling(true).
-            SetFailuresPreprocessor(this).
-            SetTransactionFinalizer(this)
-          );
 
           HandlingOptions.TransactionNotification?.OnStarted(doc);
 
@@ -217,7 +216,7 @@ namespace RhinoInside.Revit.External.DB
       {
         if (result < FailureProcessingResult.ProceedWithRollBack)
         {
-          if(!failuresAccessor.IsTransactionBeingCommitted() || CommitNextTransaction() != TransactionStatus.Committed)
+          if (!failuresAccessor.IsTransactionBeingCommitted() || CommitNextTransaction() != TransactionStatus.Committed)
             result = FailureProcessingResult.ProceedWithRollBack;
         }
       }
@@ -249,13 +248,20 @@ namespace RhinoInside.Revit.External.DB
   /// </remarks>
   public class AdaptiveTransaction : IDisposable
   {
+    readonly string name;
     readonly Document document;
     Transaction transaction;
     SubTransaction subTransaction;
 
-    public AdaptiveTransaction(Document doc) => document = doc;
+    public AdaptiveTransaction(Document document) : this(document, "Unnamed") {}
+    public AdaptiveTransaction(Document document, string name)
+    {
+      this.document = document;
+      this.name = name;
+    }
 
     public bool IsValidObject => transaction?.IsValidObject != false && subTransaction?.IsValidObject != false;
+    public string GetName() => name;
     public TransactionStatus GetStatus()
     {
       if (transaction is object) return transaction.GetStatus();
@@ -280,7 +286,7 @@ namespace RhinoInside.Revit.External.DB
     public TransactionStatus Start()
     {
       if (HasStarted())
-        throw new InvalidOperationException("AdaptiveTransaction is already started.");
+        throw new InvalidOperationException($"{name} transaction is already started.");
 
       TransactionStatus status;
 
@@ -292,7 +298,7 @@ namespace RhinoInside.Revit.External.DB
       }
       else
       {
-        var trans = new Transaction(document, "Adaptive Transaction");
+        var trans = new Transaction(document, name);
         status = trans.Start();
         transaction = trans;
       }
@@ -339,26 +345,14 @@ namespace RhinoInside.Revit.External.DB
   public static class DisposableScope
   {
     /// <summary>
-    /// Replacement for default(IDisposable).
-    /// </summary>
-    /// <remarks>
-    /// IronPython 'with' keyword implementation doesn't check for null before calling Dispose like C# compiler does.
-    /// </remarks>
-    private class Disposable : IDisposable
-    {
-      internal static readonly IDisposable Default = new Disposable();
-      Disposable() { }
-      void IDisposable.Dispose() {}
-    }
-
-    /// <summary>
     /// Implementation class for <see cref="CommitScope(Document)"/>
     /// </summary>
-    private class AutoScope : IDisposable
+    public readonly struct CommittableScope : IDisposable, ITransactionFinalizer
     {
+      internal static CommittableScope Default;
       readonly Transaction transaction;
 
-      internal AutoScope(Document document)
+      internal CommittableScope(Document document)
       {
         var name = "Commit Scope";
         transaction = new Transaction(document, name);
@@ -366,22 +360,23 @@ namespace RhinoInside.Revit.External.DB
         (
           transaction.GetFailureHandlingOptions().
           SetClearAfterRollback(true).
-          SetClearAfterRollback(false).
-          SetForcedModalHandling(true)
+          SetDelayedMiniWarnings(false).
+          SetForcedModalHandling(true).
+          SetTransactionFinalizer(this)
         );
+
         if (transaction.Start() != TransactionStatus.Started)
           throw new InvalidOperationException($"Failed to start Transaction '{name}' on document '{document.Title.TripleDot(16)}'");
       }
 
-      void IDisposable.Dispose()
+      public void Commit() => transaction?.Commit();
+
+      void IDisposable.Dispose() => transaction?.Dispose();
+
+      void ITransactionFinalizer.OnCommitted(Document document, string strTransactionName) { }
+      void ITransactionFinalizer.OnRolledBack(Document document, string strTransactionName)
       {
-        using (transaction)
-        {
-          if (Marshal.GetExceptionCode() == 0)
-            transaction.Commit();
-          else
-            transaction.RollBack();
-        }
+        throw new Exceptions.FailException($"Failed to commit transaction '{strTransactionName}' on document '{document.Title.TripleDot(16)}'");
       }
     }
 
@@ -392,19 +387,20 @@ namespace RhinoInside.Revit.External.DB
     /// <returns><see cref="IDisposable"/> that should be disposed to maked efective all changes done to <paramref name="document"/> in the scope.</returns>
     /// <remarks>
     /// Use an auto dispose pattern to be sure the returned <see cref="IDisposable"/> is disposed before the calling method returns.
+    /// And call <see cref="CommittableScope.Commit()"/> to commit all changes made to the model during the scope.
     /// <para>
-    /// C# : using(document.CommitScope())
+    /// C# : using(var scope = document.CommitScope())
     /// </para>
     /// <para>
-    /// VB : Using document.CommitScope()
+    /// VB : Using scope [As CommittableScope] = document.CommitScope()
     /// </para>
     /// <para>
-    /// Pyhton: with document.CommitScope() :
+    /// Pyhton: with document.CommitScope() as scope:
     /// </para>
     /// </remarks>
-    public static IDisposable CommitScope(this Document document)
+    public static CommittableScope CommitScope(this Document document)
     {
-      return document.IsModifiable ? Disposable.Default : new AutoScope(document);
+      return document.IsModifiable ? CommittableScope.Default : new CommittableScope(document);
     }
 
     /// <summary>
@@ -415,13 +411,13 @@ namespace RhinoInside.Revit.External.DB
     /// <remarks>
     /// Use an auto dispose pattern to be sure the returned <see cref="IDisposable"/> is disposed before the calling method returns.
     /// <para>
-    /// C# : using(document.CommitScope())
+    /// C# : using(document.RollBackScope())
     /// </para>
     /// <para>
-    /// VB : Using document.CommitScope()
+    /// VB : Using document.RollBackScope()
     /// </para>
     /// <para>
-    /// Pyhton: with document.CommitScope() :
+    /// Pyhton: with document.RollBackScope() :
     /// </para>
     /// </remarks>
     public static IDisposable RollBackScope(this Document document)
@@ -442,7 +438,7 @@ namespace RhinoInside.Revit.External.DB
         (
           transaction.GetFailureHandlingOptions().
           SetClearAfterRollback(true).
-          SetClearAfterRollback(false).
+          SetDelayedMiniWarnings(false).
           SetForcedModalHandling(true)
         );
         if (transaction.Start() != TransactionStatus.Started)

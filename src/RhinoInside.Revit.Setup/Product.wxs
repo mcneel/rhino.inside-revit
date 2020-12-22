@@ -28,10 +28,10 @@
     <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of Rhino.Inside® for Revit is already installed." />
     <MediaTemplate EmbedCab="yes" />
 
-    <Feature Id="_2017_RhinoInside.Revit" Title="Rhino.Inside for Revit 2017" Level="1">
+    <!--<Feature Id="_2017_RhinoInside.Revit" Title="Rhino.Inside for Revit 2017" Level="1">
       <ComponentGroupRef Id="ProductComponents2017" />
       <ComponentGroupRef Id="ProductAddin2017" />
-    </Feature>
+    </Feature>-->
 
     <Feature Id="_2018_RhinoInside.Revit" Title="Rhino.Inside for Revit 2018" Level="1">
       <ComponentGroupRef Id="ProductComponents2018" />
@@ -91,9 +91,9 @@
 
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="APPLICATIONFOLDER">
-        <Directory Id="_2017Directory" Name="2017">
+        <!--<Directory Id="_2017Directory" Name="2017">
           <Directory Id="INSTALLFOLDER2017" Name="RhinoInside.Revit"/>
-        </Directory>
+        </Directory>-->
         <Directory Id="_2018Directory" Name="2018">
           <Directory Id="INSTALLFOLDER2018" Name="RhinoInside.Revit"/>
         </Directory>
@@ -110,7 +110,7 @@
     </Directory>
   </Fragment>
 
-  <Fragment>
+  <!--<Fragment>
     <ComponentGroup Id="ProductComponents2017" Directory="INSTALLFOLDER2017">
       <Component Guid="{ABEFC97A-FC97-4DBA-BCC0-6502A762BB36}">
         <File Id="_2017_RhinoInside.Revit.dll" Source="..\RhinoInside.Revit\bin\x64\$(var.Configuration) 2017\RhinoInside.Revit.dll" KeyPath="yes"/>
@@ -131,7 +131,7 @@
         <RemoveFile Id="_2017_RhinoInside.Revit.addin" Name="RhinoInside.Revit.addin" On="both"/>
       </Component>
     </ComponentGroup>
-  </Fragment>
+  </Fragment>-->
 
   <Fragment>
     <ComponentGroup Id="ProductComponents2018" Directory="INSTALLFOLDER2018">
