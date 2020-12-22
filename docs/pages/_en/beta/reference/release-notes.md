@@ -10,6 +10,19 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html version="0.0.7661.35155" time="12/22/2020 19:31:50" %}
+
+### Fixes
+* Fixed 'Deconstruct Compound Structure' units conversion.
+* Fixed 'Deconstruct Compound Structure Layer' units conversion.
+* Fixed "Highlight Elements" context menu when there is no active Revit document or not selected elements in the active document.
+* Fixed "Set one linked element" and "Set Multiple linked elements" context menu.
+
+### Minor Changes
+* Moved 'Set CPlane' context menu item to the Bake area.
+
+### API
+* Fix: `Types.HostObjectType` constructor should be public for serialization purposes.
 
 {% include ltr/release-header.html version="0.0.7653.37544" time="12/14/2020 20:55:12" %}
 

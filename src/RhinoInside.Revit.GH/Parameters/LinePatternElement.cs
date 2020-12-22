@@ -9,7 +9,7 @@ using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class LinePatternElement : ElementIdWithoutPreviewParam<Types.LinePatternElement, DB.LinePatternElement>
+  public class LinePatternElement : Element<Types.LinePatternElement, DB.LinePatternElement>
   {
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
     public override Guid ComponentGuid => new Guid("EB5AB657-AE01-42F0-BF98-071DA6D7A2D2");

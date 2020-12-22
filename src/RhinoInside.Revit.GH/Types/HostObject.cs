@@ -104,7 +104,7 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ScriptVariableType => typeof(DB.HostObjAttributes);
     public new DB.HostObjAttributes Value => base.Value as DB.HostObjAttributes;
 
-    protected internal HostObjectType() { }
+    public HostObjectType() { }
     protected internal HostObjectType(DB.HostObjAttributes type) : base(type) { }
   }
 }

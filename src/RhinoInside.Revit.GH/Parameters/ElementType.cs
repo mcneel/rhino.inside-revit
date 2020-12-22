@@ -9,7 +9,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public abstract class ElementType<T, R> : ElementIdWithoutPreviewParam<T, R>
+  public abstract class ElementType<T, R> : Element<T, R>
     where T : class, Types.IGH_ElementType
     where R : DB.ElementType
   {
