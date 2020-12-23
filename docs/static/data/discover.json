@@ -5,7 +5,7 @@
         "url": "aeccheatsheets-book",
         "thumbnail": "/static/images/discover/gh-dynamo-book.jpg",
         "author": "Marcello Sgambelluri, PE, SE",
-        "authorUrl": "",
+        "authorUrl": "http://therevitcomplex.blogspot.com/",
         "description": "A book with 200+ examples and workflows using side by side defintions on Grasshopper and Dynamo in Revit. A must for anyone that  Revit",
         "kinds": [
             "book"

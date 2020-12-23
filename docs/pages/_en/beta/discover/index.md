@@ -11,7 +11,7 @@ Welcome to the {{ site.terms.rir }} community. On this page, you will find the r
 <div id="discoverGallery">
     <div class="discover-filters-box">
         <ul class="discover-filters">
-            <li class="discover-filter" v-for="kind in discoverKinds" v-on:click="filterCardsByKind" v-bind:kind="(( kind.cardType ))">(( kind.title ))</li>
+            <li class="discover-filter" v-for="kind in discoverKinds" v-on:click="filterCardsByKind" v-bind:kind="(( kind.keyword ))">(( kind.title ))</li>
             <input class="discover-search" type="text" placeholder="search..." v-model.trim="keyword">
         </ul>
     </div>
@@ -41,7 +41,7 @@ Welcome to the {{ site.terms.rir }} community. On this page, you will find the r
 
 
 <script>
-
+    const urlParams = new URLSearchParams(window.location.search);
     const siteUrl = "{{ site.baseurl }}";
 
     function attachDiscoverItemHover() {
@@ -65,6 +65,8 @@ Welcome to the {{ site.terms.rir }} community. On this page, you will find the r
 
     Vue.options.delimiters = ['((', '))'];
 
+    var app;
+
     getDiscoverCards().then((cards) => {
         // cleanup the links
         cards.forEach((c) => {
@@ -76,36 +78,36 @@ Welcome to the {{ site.terms.rir }} community. On this page, you will find the r
             }
         });
 
-        var app = new Vue({
+        app = new Vue({
             el: '#discoverGallery',
             data: {
                 baseUrl: siteUrl,
-                keyword: null,
-                cardKind: null,
+                keyword: '',
+                pushNewState: true,
                 discoverKinds: [{
                     title: "All",
-                    cardType: "all"
+                    keyword: "all"
                 },{
                     title: "Featured",
-                    cardType: "featured"
+                    keyword: "featured"
                 },{
                     title: "Examples",
-                    cardType: "example"
+                    keyword: "example"
                 },{
                     title: "Blog Posts",
-                    cardType: "blogpost"
+                    keyword: "blogpost"
                 }, {
                     title: "Podcasts",
-                    cardType: "podcast"
+                    keyword: "podcast"
                 }, {
                     title: "Videos",
-                    cardType: "video"
+                    keyword: "video"
                 }, {
                     title: "Courses",
-                    cardType: "course"
+                    keyword: "course"
                 }, {
                     title: "Workshops",
-                    cardType: "workshop"
+                    keyword: "workshop"
                 }],
                 allCards: cards,
                 discoverCards: cards
@@ -114,21 +116,20 @@ Welcome to the {{ site.terms.rir }} community. On this page, you will find the r
                 filterCardsByKind: function (event) {
                     let kind = event.target.getAttribute('kind');
                     this.keyword = 'kind: ' + kind;
-                    $('.discover-filter').removeClass('discover-filter-active');
-                    $(event.target).addClass('discover-filter-active');
                 },
                 filterCardsByTag:  function(event) {
                     let tag = event.target.getAttribute('tag');
                     this.keyword = 'tag: ' + tag;
-                    $('.discover-filter').removeClass('discover-filter-active');
                 }
             },
             watch: {
                 keyword: function(val) {
                     var allCs = this.allCards;
-                    let kwd = val.toLowerCase()
-                    if (kwd.startsWith('kind:')) {
-                        kwd = kwd.replace('kind:', '').trim();
+                    let origKwd = val.toLowerCase();
+                    const pushState = this.pushNewState;
+
+                    if (origKwd.startsWith('kind:')) {
+                        kwd = origKwd.replace('kind:', '').trim();
                         if (kwd == 'featured') {
                             this.discoverCards = allCs.filter(
                                 (c) => c.featured
@@ -142,9 +143,21 @@ Welcome to the {{ site.terms.rir }} community. On this page, you will find the r
                         else {
                             this.discoverCards = allCs;
                         }
+
+                        $('.discover-filter').removeClass('discover-filter-active');
+                        $('.discover-filter').each(function() {
+                            var df = $(this);
+                            if (df.attr('kind') == kwd) {
+                                df.addClass('discover-filter-active');
+                                console.log("push kind state");
+                                if (pushState) {
+                                history.pushState({filterType: 'kind', keyword: origKwd}, `Kind: ${df.text()}`, `?keyword=${origKwd}`);
+                                }
+                            }
+                        });
                     }
-                    else if (kwd.startsWith('tag:')) {
-                        kwd = kwd.replace('tag:', '').trim();
+                    else if (origKwd.startsWith('tag:')) {
+                        kwd = origKwd.replace('tag:', '').trim();
                         if (kwd != '') {
                             this.discoverCards = allCs.filter(
                                 (c) => c.tags.includes(kwd)
@@ -152,24 +165,36 @@ Welcome to the {{ site.terms.rir }} community. On this page, you will find the r
                         } else {
                             this.discoverCards = allCs;
                         }
+
+                        $('.discover-filter').removeClass('discover-filter-active');
+                        if (pushState) {
+                            history.pushState({filterType: 'tag', keyword: origKwd}, `Tag: ${kwd}`, `?keyword=${origKwd}`);
+                        }
                     }
                     else {
                         this.discoverCards = allCs.filter(
-                            (c) => c.title.toLowerCase().includes(kwd)
-                                || c.author.toLowerCase().includes(kwd)
-                                || c.description.toLowerCase().includes(kwd)
+                            (c) => c.title.toLowerCase().includes(origKwd)
+                                || c.author.toLowerCase().includes(origKwd)
+                                || c.description.toLowerCase().includes(origKwd)
                             );
+
+                        $('.discover-filter').removeClass('discover-filter-active');
+                        if (pushState) {
+                            if (history.state && history.state.filterType != 'text') {
+                                history.pushState({filterType: 'text', keyword: origKwd}, `Search: ${origKwd}`, `?keyword=${origKwd}`);
+                            }
+                            else {
+                                history.replaceState({filterType: 'text', keyword: origKwd}, `Search: ${origKwd}`, `?keyword=${origKwd}`);
+                            }
+                        }
                     }
+
+                    this.pushNewState = true;
                 }
             },
             mounted:function() {
-                $('.discover-filter').each(function() {
-                    var thisObj = $(this);
-                    if (thisObj.attr('kind') == 'all') {
-                        thisObj.addClass('discover-filter-active');
-                    }
-                });
-        
+                const urlKeyword = urlParams.get('keyword');
+                this.keyword =  urlKeyword ? urlKeyword: "kind: all";
                 attachDiscoverItemHover();
             },
             updated: function() {
@@ -180,6 +205,12 @@ Welcome to the {{ site.terms.rir }} community. On this page, you will find the r
 
         });
     });
+
+    window.onpopstate = function(event) {
+        app.pushNewState = false;
+        app.keyword = event.state.keyword;
+    };
+
 </script>
 
 ## Contributing to Community
