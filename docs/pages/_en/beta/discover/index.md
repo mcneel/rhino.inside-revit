@@ -16,7 +16,7 @@ Welcome to the {{ site.terms.rir }} community. On this page, you will find the r
         </ul>
     </div>
     <div class="gallery-large-grid">
-        <div v-for="card in discoverCards" class="gallery-item">
+        <div class="gallery-item" v-for="card in discoverCards" >
             <a v-bind:href="card.url" target="blank">
                 <div class="gallery-thumbnail gallery-thumbnail-dim">
                     <img class="gallery-img no-popup" v-bind:src="card.thumbnail" />
@@ -84,6 +84,7 @@ Welcome to the {{ site.terms.rir }} community. On this page, you will find the r
                     } else {
                         this.discoverCards = allCs;
                     }
+                    attachGalleryItemHover();
                 }
             }
         });
