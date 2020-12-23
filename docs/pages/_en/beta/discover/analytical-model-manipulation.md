@@ -1,8 +1,5 @@
 ---
 title: Analytical Model Manipulation
-description: This example takes a look at working with Revit analytical models using Rhino.Inside.Revit
-thumbnail: https://i3.ytimg.com/vi/dpMFnJcvO5E/maxresdefault.jpg
-tags: ["analytical"]
 ---
 
 <!-- intro video -->

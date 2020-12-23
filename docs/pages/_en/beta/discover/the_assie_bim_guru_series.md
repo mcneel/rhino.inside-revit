@@ -1,9 +1,5 @@
 ---
 title: Quick Course on Rhino/Grasshopper
-description: This video serves as a crash course to get you orientated into Rhino, Grasshopper and Revit.  This will help come to terms with the basic interface/functions to get you started with this integrated platform.
-thumbnail: /static/images/discover/aussie_bim_guru_crash_course.jpg
-order: 10
-tags: ["basics", "video series"]
 ---
 
 <!-- intro video -->
