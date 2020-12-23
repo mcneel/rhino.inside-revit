@@ -1,5 +1,6 @@
 using System;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -34,7 +35,26 @@ namespace RhinoInside.Revit.GH.Components
       string name
     )
     {
-      ReplaceElement(ref elementType, type.Duplicate(name));
+      if
+      (
+        elementType is DB.ElementType &&
+        elementType.Category.Id == type.Category.Id &&
+        elementType.FamilyName == type.FamilyName &&
+        elementType.GetType() == type.GetType()
+      )
+      {
+        if (elementType.Name != name)
+          elementType.Name = name;
+
+        if (elementType is DB.HostObjAttributes hostElementType && type is DB.HostObjAttributes hostType)
+          hostElementType.SetCompoundStructure(hostType.GetCompoundStructure());
+
+        elementType.CopyParametersFrom(type);
+      }
+      else
+      {
+        elementType = type.Duplicate(name);
+      }
     }
   }
 }
