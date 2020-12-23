@@ -60,7 +60,6 @@
                 $('#cat_guides').attr('href', getPageLink('guides/'));
                 $('#cat_discover').attr('href', getPageLink('discover/'));
                 $('#cat_reference').attr('href', getPageLink('reference/'));
-                $('#cat_community').attr('href', getPageLink('community/'));
                 // mark current navbar category as active
                 if (url.endsWith('/'+'getting-started') || url.includes('/'+'getting-started'+'/')) {
                     console.log("activating getting-started");
@@ -71,9 +70,6 @@
                 } else if (url.endsWith('/'+'discover') || url.includes('/'+'discover'+'/')) {
                     console.log("activating discover");
                     $('#cat_discover').addClass('active');
-                } else if (url.endsWith('/'+'community') || url.includes('/'+'community'+'/')) {
-                    console.log("activating community");
-                    $('#cat_community').addClass('active');
                 } else if (url.endsWith('/'+'reference') || url.includes('/'+'reference'+'/')) {
                     console.log("activating reference");
                     $('#cat_reference').addClass('active');
