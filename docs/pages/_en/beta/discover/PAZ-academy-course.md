@@ -1,9 +1,5 @@
 ---
 title: Building Systems Specialist Course
-description: A complete cirricullum on Parametric BIM Modeling. This extenive course results in the BSS TITLE focused on Rhino.Inside Revit + Rhinoceros & Grasshopper.
-thumbnail: /static/images/discover/PAZ-Academy-BSS.jpg
-order: 20
-tags: ["workshop", "video"]
 ---
 
 <!-- intro video -->

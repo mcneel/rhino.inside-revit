@@ -145,6 +145,7 @@ defaults:
   - scope:
       path: "pages/*/*/discover"
     values:
+      layout: ltr/page-fullwidth
       categories: ['discover']
 
   - scope:

@@ -1,9 +1,5 @@
 ---
 title: Complete Workshop for Rhino.Inside.Revit
-description: A 3 hour workshop conducted by Scott Davidson and Ehsan Iran-Nejad from Robert McNeel & Asscoiates
-thumbnail: /static/images/discover/core-studio-workshop-thumbnail.jpg
-order: 20
-tags: ["workshop", "video"]
 ---
 
 <!-- intro video -->

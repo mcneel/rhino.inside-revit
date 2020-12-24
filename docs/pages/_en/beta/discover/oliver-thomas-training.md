@@ -1,9 +1,5 @@
 ---
 title: 101 Class LiveAcademy
-description: In this 1-hour course Oliver Thomas from BIG will cover the basics of the Rhino.Inside interface, components and workflows whilst working on a real-world project workflow.
-thumbnail: /static/images/community/liveacademy-oliver-101.jpg
-order: 30
-tags: ["samples", "course", "purchase"]
 ---
 
 <!-- intro video -->
@@ -16,7 +12,7 @@ In this 1-hour course Oliver Thomas from BIG will cover the basics of the Rhino.
 ## Course outline
 
 1. Take a simple mass into a fully formed design
-2. Model in Rhino and Revit simutanously
+2. Model in Rhino and Revit simultaneously
 3. Use Rhino for design
 4. Use Revit to automate drawings
 5. Create Revit Parametric Families
