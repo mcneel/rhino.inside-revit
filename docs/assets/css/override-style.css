@@ -330,7 +330,7 @@ pre {
 
 .gallery-small-grid {
     display: grid;
-    grid-gap: 10px 10px;
+    grid-gap: 15px 10px;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     align-items: start;
     grid-auto-rows: 160px;
@@ -338,7 +338,7 @@ pre {
 
 .gallery-large-grid {
     display: grid;
-    grid-gap: 20px 20px;
+    grid-gap: 15px 10px;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     /* grid-template-columns: auto auto auto auto; */
     align-items: start;
@@ -439,15 +439,29 @@ pre {
 .gallery-info-extra {
     display: none;
     margin-top: 5px;
+}
+
+.gallery-info-extra p {
     color: #828282;
     font-size: 13px;
     margin-bottom: 0;
 }
 
-.gallery-highlight {
-    position: absolute;
-    right: 0px;
-    bottom: 0px;
+.gallery-info-tags {
+    display: block;
+    margin: 0;
+    padding: 0;
+}
+
+.gallery-info-tags li {
+    display: inline-block;
+    border: 1px solid #d0d0d0;
+    border-radius: 2px;
+    /* background-color: white; */
+    color: #828282;
+    text-align: center;
+    font-size: 11px;
+    padding: 0 5px 0px 5px;
 }
 
 /*
@@ -491,6 +505,67 @@ pre {
     border: 1px solid #111;
 }
 
+.discover-highlight {
+    position: absolute;
+    right: 0px;
+    bottom: 0px;
+}
+
+.discover-thumbnail {
+    height: 135px;
+    overflow: hidden;
+}
+
+.discover-thumbnail-dim {
+    -webkit-filter: saturate(0.7);
+    filter: saturate(0.7);
+}
+
+.discover-info {
+    padding: 5px 10px 5px 10px;
+}
+
+.discover-info-title,
+.discover-info-title:visited,
+.discover-info-title:hover {
+    display: block;
+    color: #111;
+    font-size: 1em;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-decoration: none;
+}
+
+.discover-info-author,
+.discover-info-author:visited,
+.discover-info-author:hover {
+    display: block;
+    color: #111;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.discover-item.discover-item-focused .discover-info-title,
+.discover-item.discover-item-focused .discover-info-author {
+    white-space: unset;
+    overflow: unset;
+    text-overflow: unset;
+}
+
+.discover-info-extra {
+    display: none;
+    margin-top: 5px;
+}
+
+.discover-info-extra p {
+    color: #828282;
+    font-size: 13px;
+    margin-bottom: 0;
+}
 
 .discover-info-tags {
     display: block;

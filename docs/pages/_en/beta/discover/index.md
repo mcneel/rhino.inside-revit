@@ -13,22 +13,22 @@ toc: false
     <div class="discover-grid">
         <div class="discover-item" v-for="card in discoverCards" v-bind:class="{ discoverItemHighlight: card.highlight }">
             <a v-bind:href="card.url" target="blank">
-                <div class="gallery-thumbnail gallery-thumbnail-dim">
-                    <img class="gallery-img no-popup" v-bind:src="card.thumbnail" />
+                <div class="discover-thumbnail discover-thumbnail-dim">
+                    <img class="discover-img no-popup" v-bind:src="card.thumbnail" />
                 </div>
             </a>
-            <div class="gallery-info">
-                <a class="gallery-info-title" v-bind:href="card.url" target="blank">(( card.title ))</a>
-                <a class="gallery-info-author" v-bind:href="card.authorUrl" target="blank">(( card.author ))</a>
-                <div class="gallery-info-subtitle" >
+            <div class="discover-info">
+                <a class="discover-info-title" v-bind:href="card.url" target="blank">(( card.title ))</a>
+                <a class="discover-info-author" v-bind:href="card.authorUrl" target="blank">(( card.author ))</a>
+                <div class="discover-info-subtitle" >
                     (( card.subtitle ))
                 </div>
                 <ul class="discover-info-tags">
                     <li v-for="tag in card.tags" v-on:click="filterCardsByTag" v-bind:tag="(( tag ))">(( tag ))</li>
                 </ul>
-                <div class="gallery-info-extra" v-html="card.description"></div>
+                <div class="discover-info-extra" v-html="card.description"></div>
             </div>
-            <svg v-if="card.highlight" class="gallery-highlight" height="16" width="16"><polygon points="16,0 16,16 0,16" style="fill:black" /></svg>
+            <svg v-if="card.highlight" class="discover-highlight" height="16" width="16"><polygon points="16,0 16,16 0,16" style="fill:black" /></svg>
         </div>
     </div>
 </div>
@@ -41,12 +41,12 @@ toc: false
     function attachDiscoverItemHover() {
         $(".discover-item").hover(function(){
             $(this).addClass("discover-item-focused");
-            $(this).find(".gallery-thumbnail").removeClass("gallery-thumbnail-dim");
-            $(this).find(".gallery-info-extra").css("display", "block");
+            $(this).find(".discover-thumbnail").removeClass("discover-thumbnail-dim");
+            $(this).find(".discover-info-extra").css("display", "block");
         }, function(){
             $(this).removeClass("discover-item-focused");
-            $(this).find(".gallery-thumbnail").addClass("gallery-thumbnail-dim");
-            $(this).find(".gallery-info-extra").css("display", "none");
+            $(this).find(".discover-thumbnail").addClass("discover-thumbnail-dim");
+            $(this).find(".discover-info-extra").css("display", "none");
         });
     };
 
