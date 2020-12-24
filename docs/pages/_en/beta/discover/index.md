@@ -3,11 +3,6 @@ title: Rhino.Inside.Revit Community
 toc: false
 ---
 
-<!-- {% capture community_note %}
-Welcome to the {{ site.terms.rir }} community. On this page, you will find the resources created by, and for the community. Please see the [Discussion Forums]({{ site.forum_url }}){: target='_blank'} to discuss features and potential issues and ask questions
-{% endcapture %}
-{% include ltr/bubble_note.html note=community_note %} -->
-
 <div id="discoverGallery">
     <div class="discover-filters-box">
         <ul class="discover-filters">
@@ -16,25 +11,24 @@ Welcome to the {{ site.terms.rir }} community. On this page, you will find the r
         </ul>
     </div>
     <div class="discover-grid">
-        <div class="discover-item" v-for="card in discoverCards" >
+        <div class="discover-item" v-for="card in discoverCards" v-bind:class="{ discoverItemHighlight: card.highlight }">
             <a v-bind:href="card.url" target="blank">
                 <div class="gallery-thumbnail gallery-thumbnail-dim">
                     <img class="gallery-img no-popup" v-bind:src="card.thumbnail" />
                 </div>
             </a>
             <div class="gallery-info">
-                <a class="gallery-info-title" v-bind:href="card.url">(( card.title ))</a>
-                <a class="gallery-info-author" v-bind:href="card.authorUrl">(( card.author ))</a>
-                <div class="gallery-info-subtitle">
+                <a class="gallery-info-title" v-bind:href="card.url" target="blank">(( card.title ))</a>
+                <a class="gallery-info-author" v-bind:href="card.authorUrl" target="blank">(( card.author ))</a>
+                <div class="gallery-info-subtitle" >
                     (( card.subtitle ))
                 </div>
                 <ul class="discover-info-tags">
                     <li v-for="tag in card.tags" v-on:click="filterCardsByTag" v-bind:tag="(( tag ))">(( tag ))</li>
                 </ul>
-                <div class="gallery-info-extra">
-                    (( card.description ))
-                </div>
+                <div class="gallery-info-extra" v-html="card.description"></div>
             </div>
+            <svg v-if="card.highlight" class="gallery-highlight" height="16" width="16"><polygon points="16,0 16,16 0,16" style="fill:black" /></svg>
         </div>
     </div>
 </div>
@@ -70,12 +64,11 @@ Welcome to the {{ site.terms.rir }} community. On this page, you will find the r
     getDiscoverCards().then((cards) => {
         // cleanup the links
         cards.forEach((c) => {
-            // if (!c.url.startsWith("http")) {
-            //     c.url = siteUrl + c.url;
-            // }
             if (!c.thumbnail.startsWith("http")) {
                 c.thumbnail = siteUrl + c.thumbnail;
             }
+
+            c.description = markdown.toHTML(c.description);
         });
 
         app = new Vue({
@@ -106,8 +99,8 @@ Welcome to the {{ site.terms.rir }} community. On this page, you will find the r
                     title: "Courses",
                     keyword: "course"
                 }, {
-                    title: "Workshops",
-                    keyword: "workshop"
+                    title: "Tutorials",
+                    keyword: "tutorial"
                 }],
                 allCards: cards,
                 discoverCards: cards
@@ -132,7 +125,7 @@ Welcome to the {{ site.terms.rir }} community. On this page, you will find the r
                         kwd = origKwd.replace('kind:', '').trim();
                         if (kwd == 'featured') {
                             this.discoverCards = allCs.filter(
-                                (c) => c.featured
+                                (c) => c.highlight
                             );
                         }
                         else if (kwd != 'all') {

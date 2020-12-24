@@ -444,6 +444,12 @@ pre {
     margin-bottom: 0;
 }
 
+.gallery-highlight {
+    position: absolute;
+    right: 0px;
+    bottom: 0px;
+}
+
 /*
     discover gallery ==========================================================
 */
@@ -468,6 +474,7 @@ pre {
     -moz-box-shadow: 0 3px 2px rgba(0, 0, 0, .15);
     box-shadow: 0 3px 2px rgba(0, 0, 0, .15); */
     overflow: hidden;
+    position: relative;
 }
 
 .discover-item-focused {
@@ -478,6 +485,12 @@ pre {
     box-shadow: 0 6px 0 #111, 0 12px 8px rgba(0, 0, 0, .25);
     z-index: 1000;
 }
+
+/* different naming format otherwise vue.js breaks */
+.discoverItemHighlight {
+    border: 1px solid #111;
+}
+
 
 .discover-info-tags {
     display: block;

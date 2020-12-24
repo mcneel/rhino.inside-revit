@@ -1,6 +1,6 @@
 [
     {
-        "featured": true,
+        "highlight": true,
         "title": "Grasshopper for Revit Cheat Sheet Manual",
         "url": "aeccheatsheets-book",
         "thumbnail": "/static/images/discover/gh-dynamo-book.jpg",
@@ -16,7 +16,7 @@
         ]
     },
     {
-        "featured": true,
+        "highlight": true,
         "title": "101 Class LiveAcademy",
         "url": "oliver-thomas-training",
         "thumbnail": "/static/images/community/liveacademy-oliver-101.jpg",
@@ -33,7 +33,7 @@
         ]
     },
     {
-        "featured": true,
+        "highlight": true,
         "title": "Building Systems Specialist Course",
         "url": "PAZ-academy-course",
         "thumbnail": "/static/images/discover/PAZ-Academy-BSS.jpg",
@@ -41,13 +41,13 @@
         "authorUrl": "",
         "description": "A complete cirricullum on Parametric BIM Modeling. This extenive course results in the BSS TITLE focused on Rhino.Inside Revit + Rhinoceros & Grasshopper",
         "kinds": [
-            "workshop",
+            "tutorial",
             "video"
         ],
         "tags": []
     },
     {
-        "featured": true,
+        "highlight": true,
         "title": "Complete Workshop for Rhino.Inside.Revit",
         "url": "core-studio-workshop",
         "thumbnail": "/static/images/discover/core-studio-workshop-thumbnail.jpg",
@@ -55,13 +55,13 @@
         "authorUrl": "",
         "description": "A 3 hour workshop conducted by Scott Davidson and Ehsan Iran-Nejad from Robert McNeel & Associates",
         "kinds": [
-            "workshop",
+            "tutorial",
             "video"
         ],
         "tags": []
     },
     {
-        "featured": true,
+        "highlight": true,
         "title": "Quick Course on Rhino/Grasshopper",
         "url": "the_assie_bim_guru_series",
         "thumbnail": "/static/images/discover/aussie_bim_guru_crash_course.jpg",
