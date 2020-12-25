@@ -1,4 +1,19 @@
 @media only screen and (max-width: 1000px) {
+    .home-cover {
+        height: 30vh;
+        min-height: 100px;
+    }
+
+    .home-download {
+        flex-direction: column;
+        height: unset;
+        max-width: 60%;
+        margin-top: 10px;
+        margin-bottom: 30px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
     .container {
         max-width: 800px;
     }

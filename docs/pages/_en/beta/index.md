@@ -17,6 +17,8 @@ layout: ltr/page-home
 </div>
 
 <div class="home-download">
+    <h3>Power of Rhino and Grasshopper, Inside Revit®</h3>
+
     <a type="button" class="btn btn-danger rir-dl" href="{{ include.version.rir_download }}" target="_blank">
         <img class="button-icon" src="{{ "/assets/img/install.svg" | prepend: site.baseurl }}">
         Download {{ site.terms.rir }} <small>{{ include.version.name }}</small>

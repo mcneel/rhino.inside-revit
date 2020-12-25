@@ -70,6 +70,7 @@ pre {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    filter: invert(1) hue-rotate(92deg) brightness(0.7);
 }
 
 .home-contents {
@@ -89,9 +90,11 @@ pre {
 .home-contents-textbox {
     display: block;
     max-width: 1170px;
+    padding: 0 30px 0 30px;
     margin-bottom: 30px;
     margin-left: auto;
     margin-right: auto;
+    color: white;
 }
 
 .home-contents h1 {}
@@ -105,7 +108,14 @@ pre {
     align-items: center;
     justify-content: center;
     height: 90px;
-    border-bottom: 3px solid lightgray
+    /* border-bottom: 3px solid lightgray */
+}
+
+.home-download h3 {
+    color: gray;
+    font-size: 20px;
+    font-weight: 300;
+    padding: 10px 40px 0px 0px;
 }
 
 /*
