@@ -1,23 +1,35 @@
 ---
 title: {{ site.terms.rir }}
-layout: ltr/page-fullwidth
+layout: ltr/page-home
 ---
 
-<!-- intro video -->
-<!-- ![](https://via.placeholder.com/1024x600.png?text=Intro+Video) -->
-{% include youtube_player.html id="KUHdJqVyhZI" %}
+<div class="home-cover">
+    <div class="home-gallery">
+        <img src="{{ "/static/images/home/background.gif" | prepend: site.baseurl }}" />
+    </div>
 
-<!-- download links -->
-{% include ltr/download_buttons.html version=site.versions.beta %}
+    <div class="home-contents">
+        <div class="home-contents-textbox">
+            <h1>Power of Rhino and Grasshopper, Inside Revit®</h1>
+            <h3>The {{ site.terms.rir }} project is an exciting new development sponsored by {{ site.terms.mcneel }}. The {{ site.terms.rir }} brings the power of {{ site.terms.rhino }} and Grasshopper to the {{ site.terms.revit }} environment</h3>
+        </div>
+    </div>
+</div>
 
+<div class="home-download">
+    <a type="button" class="btn btn-danger rir-dl" href="{{ include.version.rir_download }}" target="_blank">
+        <img class="button-icon" src="{{ "/assets/img/install.svg" | prepend: site.baseurl }}">
+        Download {{ site.terms.rir }} <small>{{ include.version.name }}</small>
+    </a>
+    <a type="button" class="btn btn-danger rhino-dl" href="{{ include.version.rhino_download }}" target="_blank">
+        <img class="button-icon" src="{{ "/assets/img/install.svg" | prepend: site.baseurl }}">
+        Download {{ site.terms.rhino }} {{ site.terms.rhinoext }}
+    </a>
+</div>
 
-The {{ site.terms.rir }} project is an exciting new development sponsored by {{ site.terms.mcneel }}. The {{ site.terms.rir }} brings the power of {{ site.terms.rhino }} and Grasshopper to the {{ site.terms.revit }} environment. The various sections of this Wiki are designed to get you started with the project and help you along the way to become an advanced {{ site.terms.rir }} user.
-
-- **Getting Started** This short article shows you how to install and get started with the {{ site.terms.rir }} project very quickly
-- **Guides** This section contains many articles that showcases the power of the {{ site.terms.rir }} project in tackling many design and documentation challenges in {{ site.terms.revit }}
-- **Samples** This section contains many examples referenced by the Guides section for easier access and sharing with others
-- **Reference** This sections contains advanced and detailed documentation on various aspects of the {{ site.terms.rir }} project
-- **Community** This sections contains the resources created by and for the {{ site.terms.rir }} community
-- **Forum** Takes you to the official {{ site.terms.mcneel }} forums page specific to the {{ site.terms.rir }} project
-- **GitHub** The GitHub link takes you to the {{ site.terms.rir }} source code on GitHub. This repo also contains the source for this Wiki. See the repository home page for more information about contributing to this Wiki
-
+<style>
+    .footer-languages {
+        visibility: hidden;
+        margin: 0px;
+    }
+</style>
