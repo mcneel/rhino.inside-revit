@@ -71,7 +71,10 @@ class CLIArgs:
         self.ghdoc_path = args["<ghdoc_path>"]
         self.add_rps = args["--rps"]
         self.start_revit = not args["--dryrun"]
-        self.lang_code = args["--lang"]
+        # default language to english-US
+        # otherwise revit will somehow remember the last langauge used
+        # while in automation mode
+        self.lang_code = args["--lang"] or "ENU"
 
 
 def ensure_cache_dir():
