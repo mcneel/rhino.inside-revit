@@ -80,27 +80,34 @@ toc: false
                 discoverKinds: [{
                     title: "All",
                     keyword: "all"
-                },{
+                },
+                {
                     title: "Featured",
                     keyword: "featured"
-                },{
-                    title: "Examples",
-                    keyword: "example"
-                },{
-                    title: "Blog Posts",
-                    keyword: "blogpost"
-                }, {
-                    title: "Podcasts",
-                    keyword: "podcast"
-                }, {
-                    title: "Videos",
-                    keyword: "video"
-                }, {
+                },
+                {
                     title: "Courses",
                     keyword: "course"
-                }, {
+                },
+                {
                     title: "Tutorials",
                     keyword: "tutorial"
+                },
+                {
+                    title: "Examples",
+                    keyword: "example"
+                },
+                {
+                    title: "Podcasts",
+                    keyword: "podcast"
+                },
+                {
+                    title: "Articles",
+                    keyword: "article"
+                },
+                {
+                    title: "Videos",
+                    keyword: "video"
                 }],
                 allCards: cards,
                 discoverCards: cards
