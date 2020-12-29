@@ -16,9 +16,9 @@
 
     <Icon Id="RhinoInside.ico" SourceFile="RhinoInside.ico"/>
     <Property Id="ARPPRODUCTICON" Value="RhinoInside.ico" />
-    <Property Id="ARPURLINFOABOUT" Value="https://www.rhino3d.com/inside"/>
-    <Property Id="ARPURLUPDATEINFO" Value="https://github.com/mcneel/rhino.inside.git"/>
-    <Property Id="ARPHELPLINK" Value="https://discourse.mcneel.com/c/rhino-inside" />
+    <Property Id="ARPURLINFOABOUT" Value="https://www.rhino3d.com/inside/revit/"/>
+    <Property Id="ARPURLUPDATEINFO" Value="https://github.com/mcneel/rhino.inside-revit.git"/>
+    <Property Id="ARPHELPLINK" Value="https://discourse.mcneel.com/c/rhino-inside/Revit/" />
     <Property Id="ARPCONTACT" Value="tech@mcneel.com"/>
     <Property Id="ARPHELPTELEPHONE" Value="+1 (206) 545-7000"/>
     <Property Id="ALLUSERS" Value="2" />
