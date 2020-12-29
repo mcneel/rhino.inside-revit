@@ -43,6 +43,19 @@
         // globals
         var activeVersion = '{{ site.version }}';
         var pageLinkTemplate = '{{ site.baseurl }}/{{ page.language }}/VERSION/'
+
+        const proxyBaseUrl = "/static".replace('/' + 'static', '');
+        const siteUrl = "{{ site.baseurl }}";
+
+        function proxifyUrls(href) {
+            if (!href.startsWith("http")) {
+                if (window.location.href.includes('127.0.0.1')) {
+                    return siteUrl + href;
+                }
+                return proxyBaseUrl + href;
+            }
+            return href;
+        }
     </script>
     <script type="text/javascript" src="{{ "/assets/js/versionutils.js" | prepend: site.baseurl }}"></script>
 
