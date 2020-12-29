@@ -50,11 +50,16 @@ toc: false
         });
     };
 
+    function fixRelativeUrls(href) {
+        if (window.location.href.includes('127.0.0.1')) {
+            return siteUrl  + href;
+        }
+        return href;
+    }
+
     async function getDiscoverCards(filter) {
         var dataUrl = '/static/data/discover.json';
-        if (window.location.href.includes('127.0.0.1')) {
-            dataUrl = siteUrl  + dataUrl;
-        }
+        dataUrl = fixRelativeUrls(dataUrl);
 
         console.log(`fetching from ${dataUrl}`)
         const res = await fetch(dataUrl);
@@ -71,7 +76,7 @@ toc: false
         // cleanup the links
         cards.forEach((c) => {
             if (!c.thumbnail.startsWith("http")) {
-                c.thumbnail = siteUrl + c.thumbnail;
+                c.thumbnail = fixRelativeUrls(c.thumbnail);
             }
 
             c.description = markdown.toHTML(c.description);
@@ -80,7 +85,6 @@ toc: false
         app = new Vue({
             el: '#discoverGallery',
             data: {
-                baseUrl: siteUrl,
                 keyword: '',
                 pushNewState: true,
                 discoverKinds: [{
