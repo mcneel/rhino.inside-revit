@@ -1,8 +1,5 @@
 ---
 title: Transfer Revit to Rhino
-description: This sample shows how to take Revit objects into Rhino
-thumbnail: /static/images/discover/transfer-revit-to-rhino03.jpg
-tags: ["convert"]
 ---
 
 <!-- intro video -->

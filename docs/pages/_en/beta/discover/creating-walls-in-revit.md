@@ -1,7 +1,5 @@
 ---
 title: Creating Wall in Revit
-description: This sample shows how to take normal Rhino curve and create a set of Revit system family walls
-thumbnail: /static/images/discover/creating-walls-in-revit01.jpg
 tags: ["wall"]
 ---
 
