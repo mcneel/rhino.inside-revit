@@ -36,7 +36,6 @@ toc: false
 
 <script>
     const urlParams = new URLSearchParams(window.location.search);
-    const siteUrl = "{{ site.baseurl }}";
 
     function attachDiscoverItemHover() {
         $(".discover-item").hover(function(){
@@ -51,7 +50,11 @@ toc: false
     };
 
     async function getDiscoverCards(filter) {
-        const res = await fetch('http://127.0.0.1:4000/rhino.inside-revit/static/data/discover.json');
+        var dataUrl = '/static/data/discover.json';
+        dataUrl = proxifyUrls(dataUrl);
+
+        console.log(`fetching from ${dataUrl}`)
+        const res = await fetch(dataUrl);
         if (res.ok) {
             return await res.json();
         }
@@ -64,48 +67,37 @@ toc: false
     getDiscoverCards().then((cards) => {
         // cleanup the links
         cards.forEach((c) => {
-            if (!c.thumbnail.startsWith("http")) {
-                c.thumbnail = siteUrl + c.thumbnail;
-            }
-
+            c.thumbnail = proxifyUrls(c.thumbnail);
             c.description = markdown.toHTML(c.description);
         });
 
         app = new Vue({
             el: '#discoverGallery',
             data: {
-                baseUrl: siteUrl,
                 keyword: '',
                 pushNewState: true,
                 discoverKinds: [{
                     title: "All",
                     keyword: "all"
-                },
-                {
+                }, {
                     title: "Featured",
                     keyword: "featured"
-                },
-                {
+                }, {
                     title: "Courses",
                     keyword: "course"
-                },
-                {
+                }, {
                     title: "Tutorials",
                     keyword: "tutorial"
-                },
-                {
+                }, {
                     title: "Examples",
                     keyword: "example"
-                },
-                {
+                }, {
                     title: "Podcasts",
                     keyword: "podcast"
-                },
-                {
+                }, {
                     title: "Articles",
                     keyword: "article"
-                },
-                {
+                }, {
                     title: "Videos",
                     keyword: "video"
                 }],
@@ -149,7 +141,6 @@ toc: false
                             var df = $(this);
                             if (df.attr('kind') == kwd) {
                                 df.addClass('discover-filter-active');
-                                console.log("push kind state");
                                 if (pushState) {
                                 history.pushState({filterType: 'kind', keyword: origKwd}, `Kind: ${df.text()}`, `?keyword=${origKwd}`);
                                 }
