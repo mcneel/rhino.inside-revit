@@ -36,6 +36,7 @@ toc: false
 
 <script>
     const urlParams = new URLSearchParams(window.location.search);
+    const proxyBaseUrl = "/";
     const siteUrl = "{{ site.baseurl }}";
 
     function attachDiscoverItemHover() {
@@ -54,11 +55,11 @@ toc: false
         if (window.location.href.includes('127.0.0.1')) {
             return siteUrl  + href;
         }
-        return href;
+        return proxyBaseUrl + href;
     }
 
     async function getDiscoverCards(filter) {
-        var dataUrl = '/static/data/discover.json';
+        var dataUrl = '/' + 'static' + '/' + 'data' + '/' + 'discover.json';
         dataUrl = fixRelativeUrls(dataUrl);
 
         console.log(`fetching from ${dataUrl}`)
