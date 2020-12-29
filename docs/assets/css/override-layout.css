@@ -103,4 +103,20 @@
     .gallery-large-grid {
         grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     }
+
+    .discover-filters {
+        text-align: center;
+        margin: 5px;
+    }
+
+    .discover-filter {
+        margin-bottom: 0px;
+    }
+
+    .discover-search {
+        float: unset;
+        width: -webkit-fill-available;
+        height: 30px;
+        font-size: 14px;
+    }
 }
