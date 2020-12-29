@@ -1,8 +1,5 @@
 ---
 title: Getting User Input using Human UI
-description: The example here requires the [HumanUI plugin for Grasshopper](https://www.food4rhino.com/app/human-ui). This is a plugin allowing Grasshopper to design and display dialog box interfaces. In this case the dialog interface will help edit the *Drawn by* and the *Checked by* sections of the title block
-thumbnail: /static/images/discover/user-input-humanui01.jpg
-tags: ["ui"]
 ---
 
 <!-- intro video -->
