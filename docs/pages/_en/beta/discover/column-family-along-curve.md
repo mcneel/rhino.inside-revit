@@ -1,8 +1,5 @@
 ---
 title: Create and Place Column Family Along Curve
-description: This sample shows how to create a new Revit family that contains geometry created in Rhino and Grasshopper
-thumbnail: /static/images/discover/column-family-curve01.jpg
-tags: ["family"]
 ---
 
 <!-- intro video -->
