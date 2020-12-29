@@ -51,7 +51,7 @@ toc: false
     };
 
     async function getDiscoverCards(filter) {
-        var dataUrl = siteUrl + '/static' + '/data' + '/discover.json';
+        var dataUrl = siteUrl + '/' + 'static' + '/' + 'data' + '/' + 'discover.json';
         console.log(`fetching from ${dataUrl}`)
         const res = await fetch(dataUrl);
         if (res.ok) {
