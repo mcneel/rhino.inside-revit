@@ -80,32 +80,25 @@ toc: false
                 discoverKinds: [{
                     title: "All",
                     keyword: "all"
-                },
-                {
+                }, {
                     title: "Featured",
                     keyword: "featured"
-                },
-                {
+                }, {
                     title: "Courses",
                     keyword: "course"
-                },
-                {
+                }, {
                     title: "Tutorials",
                     keyword: "tutorial"
-                },
-                {
+                }, {
                     title: "Examples",
                     keyword: "example"
-                },
-                {
+                }, {
                     title: "Podcasts",
                     keyword: "podcast"
-                },
-                {
+                }, {
                     title: "Articles",
                     keyword: "article"
-                },
-                {
+                }, {
                     title: "Videos",
                     keyword: "video"
                 }],
