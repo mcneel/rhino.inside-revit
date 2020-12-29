@@ -36,7 +36,7 @@ toc: false
 
 <script>
     const urlParams = new URLSearchParams(window.location.search);
-    const proxyBaseUrl = "/";
+    const proxyBaseUrl = "/static".replace('/' + 'static', '');
     const siteUrl = "{{ site.baseurl }}";
 
     function attachDiscoverItemHover() {
@@ -52,14 +52,17 @@ toc: false
     };
 
     function fixRelativeUrls(href) {
-        if (window.location.href.includes('127.0.0.1')) {
-            return siteUrl  + href;
+        if (!href.startsWith("http")) {
+            if (window.location.href.includes('127.0.0.1')) {
+                return siteUrl + href;
+            }
+            return proxyBaseUrl + href;
         }
-        return proxyBaseUrl + href;
+        return href;
     }
 
     async function getDiscoverCards(filter) {
-        var dataUrl = '/' + 'static' + '/' + 'data' + '/' + 'discover.json';
+        var dataUrl = '/static/data/discover.json';
         dataUrl = fixRelativeUrls(dataUrl);
 
         console.log(`fetching from ${dataUrl}`)
@@ -76,10 +79,7 @@ toc: false
     getDiscoverCards().then((cards) => {
         // cleanup the links
         cards.forEach((c) => {
-            if (!c.thumbnail.startsWith("http")) {
-                c.thumbnail = fixRelativeUrls(c.thumbnail);
-            }
-
+            c.thumbnail = fixRelativeUrls(c.thumbnail);
             c.description = markdown.toHTML(c.description);
         });
 
