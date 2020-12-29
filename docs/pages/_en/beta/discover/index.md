@@ -51,7 +51,9 @@ toc: false
     };
 
     async function getDiscoverCards(filter) {
-        const res = await fetch('http://127.0.0.1:4000/rhino.inside-revit/static/data/discover.json');
+        var dataUrl = siteUrl + '/static/data/discover.json';
+        console.log(`fetching from ${dataUrl}`)
+        const res = await fetch(dataUrl);
         if (res.ok) {
             return await res.json();
         }
@@ -142,7 +144,6 @@ toc: false
                             var df = $(this);
                             if (df.attr('kind') == kwd) {
                                 df.addClass('discover-filter-active');
-                                console.log("push kind state");
                                 if (pushState) {
                                 history.pushState({filterType: 'kind', keyword: origKwd}, `Kind: ${df.text()}`, `?keyword=${origKwd}`);
                                 }
