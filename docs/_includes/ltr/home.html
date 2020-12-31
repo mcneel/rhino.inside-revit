@@ -1,0 +1,100 @@
+<style>
+    .footer-languages {
+        visibility: hidden;
+        margin: 0px;
+    }
+</style>
+
+<div class="home-cover">
+    <div class="home-gallery">
+        <!-- <img src="{{ "/static/images/home/background.gif" | prepend: site.baseurl }}" /> -->
+        <img src="https://via.placeholder.com/1024x600.png?text=%20" />
+    </div>
+
+    <div class="home-contents-box">
+        <div class="home-contents">
+            <h1>Introducing {{ site.terms.rir }} {{ include.version.name }}</h1>
+            <h3>The {{ site.terms.rir }} project is an exciting new development sponsored by {{ site.terms.mcneel }}
+                that brings the power of {{ site.terms.rhino }} and Grasshopper to the {{ site.terms.revit }}
+                environment
+            </h3>
+        </div>
+    </div>
+</div>
+
+<div class="home-dependencies">
+    <div class="container">
+        <a type="button" class="btn btn-danger block-center" style="width: 40%; min-width: 300px;"
+            href="{{ include.version.rir_download }}" target="_blank">
+            <img class="button-icon" src="{{ "/assets/img/install.svg" | prepend: site.baseurl }}">
+            Download {{ site.terms.rir }} <small>{{ include.version.name }}</small>
+        </a>
+        <small class="block-center" style="margin-top: 20px; margin-bottom: 10px;">
+            {{ site.terms.rir }} requires new technology introduced in Rhinoceros 7
+            <br />
+            Download the latest version of Rhino and evaluate freely for 90 days
+        </small>
+        <a type="button" class="btn btn-danger block-center" style="width: 30%; min-width: 300px;"
+            href="{{ include.version.rhino_download }}" target="_blank">
+            <img class="button-icon" src="{{ "/assets/img/install.svg" | prepend: site.baseurl }}">
+            Download {{ site.terms.rhino }} {{ site.terms.rhinoext }}
+        </a>
+    </div>
+</div>
+
+
+<div class="home-features">
+    <div class="home-feature home-feature-rhino">
+        <div class="container">
+            <div class="home-feature-content">
+                <h2>Rhinoceros 7<small>Inside.Revit</small></h2>
+                <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+                    labore et
+                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+                    aliquip
+                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
+                    dolore eu
+                    fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+                    deserunt mollit anim id est laborum.</span>
+            </div>
+        </div>
+    </div>
+    <div class="home-feature home-feature-gh">
+        <div class="container">
+            <div class="home-feature-content">
+                <h2>Grasshopper<small>Inside.Revit</small></h2>
+                <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+                    labore et
+                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+                    aliquip
+                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
+                    dolore eu
+                    fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+                    deserunt mollit anim id est laborum.</span>
+            </div>
+        </div>
+    </div>
+    <div class="home-feature home-feature-api">
+        <div class="container">
+            <div class="home-feature-content">
+                <h2>Automation Interface</h2>
+                <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+                    labore et
+                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+                    aliquip
+                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
+                    dolore eu
+                    fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+                    deserunt mollit anim id est laborum.</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="home-discover">
+    <div class="container">
+        <div class="home-discover-content block-center">
+            <h2>Discover More</h2>
+        </div>
+    </div>
+</div>

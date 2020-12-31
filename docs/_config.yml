@@ -69,7 +69,7 @@ simple_search: https://google.com/search
 terms:
   mcneel: Robert McNeel & Associates
   rhino: Rhino 7
-  rhinoext: (Evaluation - free for 90 days)
+  rhinoext:
   rir: Rhino.Inside.Revit
   revit: Autodesk Revit®
   revit_versions: 2018-2021
