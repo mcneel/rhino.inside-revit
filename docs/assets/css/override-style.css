@@ -129,7 +129,6 @@ pre {
 
 .home-features {
     background-color: #e8e8e8;
-    height: 1200px;
 }
 
 .home-feature {
@@ -160,7 +159,7 @@ pre {
 }
 
 .home-feature-content {
-    width: 540px
+    width: 540px;
 }
 
 .home-discover {
