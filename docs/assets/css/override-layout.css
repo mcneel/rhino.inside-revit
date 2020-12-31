@@ -134,4 +134,12 @@
         height: 30px;
         font-size: 14px;
     }
+
+    .discover-grid {
+        grid-auto-rows: unset;
+    }
+
+    .discover-info-extra {
+        display: block;
+    }
 }

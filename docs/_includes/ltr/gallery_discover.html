@@ -1,4 +1,4 @@
-<div id="discoverGallery">
+<div id="discoverGallery" class="container block-center">
     <div class="discover-filters-box">
         <ul class="discover-filters">
             <li class="discover-filter" v-for="kind in discoverKinds" v-on:click="filterCardsByKind"
@@ -26,11 +26,10 @@
                 <div class="discover-info-extra" v-html="card.description"></div>
             </div>
             <svg v-if="card.highlight" class="discover-highlight" height="16" width="16">
-                <polygon points="16,0 16,16 0,16" style="fill:#b2b0b0" /></svg>
+                <polygon points="16,0 16,16 0,16" style="fill:#b0b0b0" /></svg>
         </div>
     </div>
 </div>
-
 
 <script>
     const urlParams = new URLSearchParams(window.location.search);
@@ -39,11 +38,11 @@
         $(".discover-item").hover(function () {
             $(this).addClass("discover-item-focused");
             $(this).find(".discover-thumbnail").removeClass("discover-thumbnail-dim");
-            $(this).find(".discover-info-extra").css("display", "block");
+            $(this).find(".discover-info-extra").addClass("discover-info-extra-open");
         }, function () {
             $(this).removeClass("discover-item-focused");
             $(this).find(".discover-thumbnail").addClass("discover-thumbnail-dim");
-            $(this).find(".discover-info-extra").css("display", "none");
+            $(this).find(".discover-info-extra").removeClass("discover-info-extra-open");
         });
     };
 

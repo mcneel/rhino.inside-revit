@@ -1,10 +1,10 @@
 ---
 title: Rhino.Inside.Revit Community
 toc: false
+layout: ltr/page-full
 ---
 
-{% include ltr/gallery_discover.html keyword='' %}
-
+{% capture community_note %}
 ## Contributing to Community
 
 The {{ site.terms.rir }} community appreciates and benefits from your contributions. In case you have created videos, articles, blog posts, etc or have developed custom scripted components for {{ site.terms.rir }} you can share your creations with the community in a number of ways. Prepare a package containing links and other resources, and
@@ -19,3 +19,5 @@ The {{ site.terms.rir }} community appreciates and benefits from your contributi
 Each feature page listed here, is a self-contained article on a specific topic. They also might have a ZIP package attached that includes one or more files (e.g. Sample Screenshot `*.png`, Grasshopper Definition `*.gh`, Rhino Model `*.3dm`, Revit Model `*.rvt`, Revit Family `*.rfa`)
 
 Visitors can download the archive for each article by clicking on the download button included on the page. You can create your own articles, following a similar format, and send us the markdown file of the article, plus all the images and attachments in a package and we can add them to this page. You can also follow the [wiki guidelines]({{ site.metawiki_url | prepend: site.repo_url }}) and submit a PR with your content.
+{% endcapture %}
+{% include ltr/discover.html contents=community_note%}
