@@ -1,4 +1,5 @@
-<div id="discoverGallery" class="container block-center">
+<div id="discoverGallery" class="block-center">
+    {% if include.show_filters %}
     <div class="discover-filters-box">
         <ul class="discover-filters">
             <li class="discover-filter" v-for="kind in discoverKinds" v-on:click="filterCardsByKind"
@@ -6,6 +7,7 @@
             <input class="discover-search" type="text" placeholder="search..." v-model.trim="keyword">
         </ul>
     </div>
+    {% endif %}
     <div class="discover-grid">
         <div class="discover-item" v-for="card in discoverCards"
             v-bind:class="{ discoverItemHighlight: card.highlight }">
@@ -31,6 +33,11 @@
     </div>
 </div>
 
+{% if include.nonlocal %}
+<script>
+    window.nonLocal = true;
+</script>
+{% endif %}
 <script>
     const urlParams = new URLSearchParams(window.location.search);
 
@@ -66,6 +73,9 @@
         cards.forEach((c) => {
             c.thumbnail = proxifyUrls(c.thumbnail);
             c.description = markdown.toHTML(c.description);
+            if (window.nonLocal && !c.url.startsWith('http')) {
+                c.url = 'discover' + '/' + c.url;
+            }
         });
 
         app = new Vue({
@@ -189,7 +199,7 @@
             },
             mounted: function () {
                 const urlKeyword = urlParams.get('keyword');
-                this.keyword = urlKeyword ? urlKeyword : "kind: all";
+                this.keyword = urlKeyword ? urlKeyword : '{{ include.keyword }}';
                 attachDiscoverItemHover();
             },
             updated: function () {

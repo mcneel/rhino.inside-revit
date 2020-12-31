@@ -164,15 +164,14 @@ pre {
 }
 
 .home-discover {
-    height: 400px;
+    margin-bottom: 30px;
 }
 
-.home-discover-content {
-    text-align: center;
-}
+.home-discover-content {}
 
 .home-discover h2 {
-    padding-top: 20px;
+    text-align: center;
+    padding: 20px 0 20px 0;
     font-size: 40px;
 }
 
