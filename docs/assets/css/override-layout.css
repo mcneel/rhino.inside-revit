@@ -30,6 +30,12 @@
         width: unset;
     }
 
+    .home-feature-rhino,
+    .home-feature-gh,
+    .home-feature-api {
+        background-position: -300px;
+    }
+
     .home-discover h2 {
         font-size: 36px;
     }

@@ -138,14 +138,20 @@ pre {
 }
 
 .home-feature-rhino {
-    background-image: url(https://via.placeholder.com/1024x200.png/000/?text=%20);
+    background-size: cover;
+    background-position: center;
+    background-image: url(../../static/images/home/home_feature_rhino.png);
 }
 
 .home-feature-gh {
-    background-image: url(https://via.placeholder.com/1024x200.png/222/?text=%20);
+    background-size: cover;
+    background-position: center;
+    background-image: url(../../static/images/home/home_feature_gh.png);
 }
 
 .home-feature-api {
+    background-size: cover;
+    background-position: center;
     background-image: url(https://via.placeholder.com/1024x200.png/444/?text=%20);
 }
 
