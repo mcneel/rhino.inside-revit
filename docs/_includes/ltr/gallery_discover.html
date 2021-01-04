@@ -38,8 +38,23 @@
     window.nonLocal = true;
 </script>
 {% endif %}
+
+{% if include.max_items %}
+<script>
+    window.maxItems = Number("{{ include.max_items }}");
+</script>
+{% endif %}
+
 <script>
     const urlParams = new URLSearchParams(window.location.search);
+
+    function selectItems(items) {
+        if (window.maxItems != undefined && items.length >= window.maxItems) {
+            return items.slice(0, window.maxItems);
+        }
+
+        return items;
+    }
 
     function attachDiscoverItemHover() {
         $(".discover-item").hover(function () {
@@ -130,15 +145,15 @@
                     if (origKwd.startsWith('kind:')) {
                         kwd = origKwd.replace('kind:', '').trim();
                         if (kwd == 'featured') {
-                            this.discoverCards = allCs.filter(
+                            this.discoverCards = selectItems(allCs.filter(
                                 (c) => c.highlight
-                            );
+                            ));
                         } else if (kwd != 'all') {
-                            this.discoverCards = allCs.filter(
+                            this.discoverCards = selectItems(allCs.filter(
                                 (c) => c.kinds.includes(kwd)
-                            );
+                            ));
                         } else {
-                            this.discoverCards = allCs;
+                            this.discoverCards = selectItems(allCs);
                         }
 
                         $('.discover-filter').removeClass('discover-filter-active');
@@ -157,11 +172,11 @@
                     } else if (origKwd.startsWith('tag:')) {
                         kwd = origKwd.replace('tag:', '').trim();
                         if (kwd != '') {
-                            this.discoverCards = allCs.filter(
+                            this.discoverCards = selectItems(allCs.filter(
                                 (c) => c.tags.includes(kwd)
-                            );
+                            ));
                         } else {
-                            this.discoverCards = allCs;
+                            this.discoverCards = selectItems(allCs);
                         }
 
                         $('.discover-filter').removeClass('discover-filter-active');
@@ -172,11 +187,11 @@
                             }, `Tag: ${kwd}`, `?keyword=${origKwd}`);
                         }
                     } else {
-                        this.discoverCards = allCs.filter(
+                        this.discoverCards = selectItems(allCs.filter(
                             (c) => c.title.toLowerCase().includes(origKwd) ||
                             c.author.toLowerCase().includes(origKwd) ||
                             c.description.toLowerCase().includes(origKwd)
-                        );
+                        ));
 
                         $('.discover-filter').removeClass('discover-filter-active');
                         if (pushState) {

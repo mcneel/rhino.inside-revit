@@ -32,7 +32,7 @@
         <small class="block-center" style="margin-top: 20px; margin-bottom: 10px;">
             {{ site.terms.rir }} requires new technology introduced in Rhinoceros 7
             <br />
-            Download the latest version of Rhino and evaluate freely for 90 days
+            Download the latest version of {{ site.terms.rhino }} and evaluate freely for 90 days
         </small>
         <a type="button" class="btn btn-danger block-center" style="width: 30%; min-width: 300px;"
             href="{{ include.version.rhino_download }}" target="_blank">
@@ -47,45 +47,85 @@
     <div class="home-feature home-feature-rhino">
         <div class="container">
             <div class="home-feature-content">
-                <h2>Rhinoceros 7<small>Inside.Revit</small></h2>
-                <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-                    labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-                    aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-                    dolore eu
-                    fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
-                    deserunt mollit anim id est laborum.</span>
+                <div>
+                    <h2><a href="https://www.rhino3d.com" target="blank">Rhinoceros 7</a><small>Inside.Revit</small>
+                    </h2>
+                    <p>{{ site.terms.rhino }} is a parametric surface 3d modelling application with an incredibly
+                        powerful and fast geometry engine that also supports meshes and point clouds. It stores all the
+                        geometric data in an open file format (.3dm) and provides libraries to read and write from other
+                        applications. Rhino has a <a href="https://www.food4rhino.com" target="blank">very strong
+                            third-party ecosystem</a> with over a thousand addons providing lots of additional
+                        capabilities</p>
+                    <div class="home-feature-rhino-grid">
+                        <div class="home-feature-grid-item">NURBS</div>
+                        <div class="home-feature-grid-item">SubD</div>
+                        <div class="home-feature-grid-item">Mesh</div>
+                        <div class="home-feature-grid-item">.3dm</div>
+                        <div class="home-feature-grid-item" style="grid-column: 2 / 4;">1000+ Addons</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
     <div class="home-feature home-feature-gh">
         <div class="container">
             <div class="home-feature-content">
-                <h2>Grasshopper<small>Inside.Revit</small></h2>
-                <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-                    labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-                    aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-                    dolore eu
-                    fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
-                    deserunt mollit anim id est laborum.</span>
+                <div>
+                    <h2><a href="https://www.grasshopper3d.com"
+                            target="blank">Grasshopper</a><small>Inside.Revit</small>
+                    </h2>
+                    <p>Grasshopper is a visual programming environment tightly integrated with Rhino’s 3d modeling
+                        tools. Grasshopper requires no knowledge of programming or scripting, but still allows designers
+                        to build generative forms from the simple to the awe-inspiring</p>
+                </div>
+                <div class="home-feature-gh-grid">
+                    <div class="home-feature-grid-item" style="grid-column: 1 / span 2;">Components</div>
+                    <div class="home-feature-grid-item" style="grid-column: 3 / span 2; grid-row: 1 / span 2;">
+                        Revit-aware Components</div>
+                    <div class="home-feature-grid-item" style="grid-column: 1 / span 2;">1000+ Addons</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="home-feature home-feature-formats">
+        <div class="container">
+            <div class="home-feature-content">
+                <h2>Work with Everyone</h2>
+                <p>{{ site.terms.rhino }} and Grasshopper, together support over 40 file
+                    formats. All of this is now accessible to Revit throught {{ site.terms.rir }}</p>
+                <div class="home-feature-formats-grid" style="grid-column: 1 / -1;">
+                    <div class="home-feature-formats-grid-item">
+                        <div class="home-feature-grid-item">XXX</div>
+                        <div class="home-feature-grid-item">XXX</div>
+                        <div class="home-feature-grid-item">XXX</div>
+                    </div>
+                    <div class="home-feature-formats-grid-item">
+                        <div class="home-feature-grid-item">XXX</div>
+                        <div class="home-feature-grid-item">XXX</div>
+                        <div class="home-feature-grid-item">XXX</div>
+                    </div>
+                    <div class="home-feature-formats-grid-item">
+                        <div class="home-feature-grid-item">XXX</div>
+                        <div class="home-feature-grid-item">XXX</div>
+                        <div class="home-feature-grid-item">XXX</div>
+                    </div>
+                    <div class="home-feature-formats-grid-item">
+                        <div class="home-feature-grid-item">XXX</div>
+                        <div class="home-feature-grid-item">XXX</div>
+                        <div class="home-feature-grid-item">XXX</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
     <div class="home-feature home-feature-api">
         <div class="container">
             <div class="home-feature-content">
-                <h2>Automation Interface</h2>
-                <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-                    labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-                    aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-                    dolore eu
-                    fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
-                    deserunt mollit anim id est laborum.</span>
+                <h2>Automation API</h2>
+                <p>{{ site.terms.rir }} provides translation API to allow creating custom convertion workflows between
+                    your Revit data and Rhino geometry. This includes an advanced geometry conversion API to safely
+                    translate advanced Rhino shapes into Revit. The API is easily accessible from Grasshopper's Python
+                    or C# scripting components</p>
             </div>
         </div>
     </div>
@@ -94,6 +134,6 @@
 <div class="home-discover">
     <div class="container">
         <h2>Discover More</h2>
-        {% include ltr/gallery_discover.html keyword='kind: featured' show_filters=false nonlocal=true %}
+        {% include ltr/gallery_discover.html keyword='kind: featured' max_items="6" show_filters=false nonlocal=true %}
     </div>
 </div>

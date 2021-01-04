@@ -27,7 +27,7 @@
     }
 
     .home-feature-content {
-        width: unset;
+        grid-template-columns: 1fr;
     }
 
     .home-feature-rhino,
