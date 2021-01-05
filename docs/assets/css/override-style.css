@@ -230,12 +230,15 @@ pre {
     margin-bottom: 30px;
 }
 
-.home-discover-content {}
-
 .home-discover h2 {
     text-align: center;
     padding: 20px 0 20px 0;
     font-size: 40px;
+}
+
+.home-discover a,
+.home-discover a:visited {
+    color: #111;
 }
 
 
@@ -673,7 +676,7 @@ pre {
     display: block;
     min-height: 250px;
     background-color: #fff;
-    border: 1px solid #e0e0e0;
+    /* border: 1px solid #e0e0e0; */
     border-radius: 5px;
     color: white;
     box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 4px 0px, rgba(0, 0, 0, 0.025) 0px 15px 20px -1px;

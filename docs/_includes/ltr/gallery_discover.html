@@ -22,16 +22,32 @@
                 <div class="discover-info-subtitle">
                     (( card.subtitle ))
                 </div>
+                {% if include.notags != true %}
                 <ul class="discover-info-tags">
                     <li v-for="tag in card.tags" v-on:click="filterCardsByTag" v-bind:tag="(( tag ))">(( tag ))</li>
                 </ul>
+                {% endif %}
                 <div class="discover-info-extra" v-html="card.description"></div>
             </div>
+            {% if include.nohighlight != true %}
             <svg v-if="card.highlight" class="discover-highlight" height="16" width="16">
                 <polygon points="16,0 16,16 0,16" style="fill:#b0b0b0" /></svg>
+            {% endif %}
         </div>
     </div>
 </div>
+
+{% if include.notags %}
+<style>
+    .discover-grid {
+        grid-auto-rows: 230px;
+    }
+
+    .discover-item {
+        min-height: 230px;
+    }
+</style>
+{% endif %}
 
 {% if include.nonlocal %}
 <script>
