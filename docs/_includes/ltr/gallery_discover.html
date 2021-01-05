@@ -8,9 +8,20 @@
         </ul>
     </div>
     {% endif %}
+    {% if include.notags %}
+    <div class="discover-grid discover-grid-compact">
+    {% else %}
     <div class="discover-grid">
-        <div class="discover-item" v-for="card in discoverCards"
-            v-bind:class="{ discoverItemHighlight: card.highlight }">
+    {% endif %}
+        {% if include.notags %}
+        <div class="discover-item discover-item-compact"
+             v-for="card in discoverCards"
+             v-bind:class="{ discoverItemHighlight: card.highlight }">
+        {% else %}
+        <div class="discover-item"
+             v-for="card in discoverCards"
+             v-bind:class="{ discoverItemHighlight: card.highlight }">
+        {% endif %}
             <a v-bind:href="card.url" target="blank">
                 <div class="discover-thumbnail discover-thumbnail-dim">
                     <img class="discover-img no-popup" v-bind:src="card.thumbnail" />
@@ -37,17 +48,6 @@
     </div>
 </div>
 
-{% if include.notags %}
-<style>
-    .discover-grid {
-        grid-auto-rows: 230px;
-    }
-
-    .discover-item {
-        min-height: 230px;
-    }
-</style>
-{% endif %}
 
 {% if include.nonlocal %}
 <script>

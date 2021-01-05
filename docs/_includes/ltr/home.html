@@ -48,20 +48,35 @@
         <div class="container">
             <div class="home-feature-content">
                 <div>
-                    <h2><a href="https://www.rhino3d.com" target="blank">Rhinoceros 7</a><small>Inside.Revit</small>
+                    <h2><a href="https://www.rhino3d.com" target="blank">Rhinoceros 7</a><small>.Inside.Revit</small>
                     </h2>
-                    <p>{{ site.terms.rhino }} is a parametric surface 3d modelling application with an incredibly
+                    <p>{{ site.terms.rhino }} is a parametric 3d surface modeling application with an incredibly
                         powerful and fast geometry engine that also supports meshes and point clouds. It stores all the
-                        geometric data in an open file format (.3dm) and provides libraries to read and write from other
-                        applications. Rhino has a <a href="https://www.food4rhino.com" target="blank">very strong
-                            third-party ecosystem</a> with over a thousand addons providing lots of additional
-                        capabilities</p>
+                        geometric data in 3dm and provides libraries to read and write from other applications. Rhino
+                        has a <a href="https://www.food4rhino.com" target="blank">very strong third-party ecosystem</a>
+                        with over a thousand addons providing lots of additional capabilities</p>
                     <div class="home-feature-rhino-grid">
-                        <div class="home-feature-grid-item">NURBS</div>
-                        <div class="home-feature-grid-item">SubD</div>
-                        <div class="home-feature-grid-item">Mesh</div>
-                        <div class="home-feature-grid-item">.3dm</div>
-                        <div class="home-feature-grid-item" style="grid-column: 2 / 4;">1000+ Addons</div>
+                        <div class="home-feature-grid-item">
+                            <img src="{{ "/assets/img/cube.svg" | prepend: site.baseurl }}" />
+                            <span>NURBS</span>
+                        </div>
+                        <div class="home-feature-grid-item">
+                            <img src="{{ "/assets/img/cube.svg" | prepend: site.baseurl }}" />
+                            <span>SubD</span>
+                        </div>
+                        <div class="home-feature-grid-item">
+                            <img src="{{ "/assets/img/cube.svg" | prepend: site.baseurl }}" />
+                            <span>Mesh</span>
+                        </div>
+                        <div class="home-feature-grid-item">
+                            <img src="{{ "/assets/img/cube.svg" | prepend: site.baseurl }}" />
+                            <span>3dm</span>
+                        </div>
+                        <div class="home-feature-grid-item" style="grid-column: 2 / span 2;">
+                            <img src="{{ "/assets/img/cube.svg" | prepend: site.baseurl }}" />
+                            <span>1000+ Addons</span>
+                        </div>
+                        <!-- <div class="home-feature-grid-item" style="grid-column: span 3;">40+ Formats</div> -->
                     </div>
                 </div>
             </div>
@@ -72,17 +87,27 @@
             <div class="home-feature-content">
                 <div>
                     <h2><a href="https://www.grasshopper3d.com"
-                            target="blank">Grasshopper</a><small>Inside.Revit</small>
+                            target="blank">Grasshopper</a><small>.Inside.Revit</small>
                     </h2>
                     <p>Grasshopper is a visual programming environment tightly integrated with Rhino’s 3d modeling
                         tools. Grasshopper requires no knowledge of programming or scripting, but still allows designers
-                        to build generative forms from the simple to the awe-inspiring</p>
+                        to build generative forms from the simple to the awe-inspiring. {{ site.terms.rir }} adds over
+                        300 Revit-aware components to Grasshopper that can query, modify, analyze, and create native
+                        Revit elements</p>
                 </div>
                 <div class="home-feature-gh-grid">
-                    <div class="home-feature-grid-item" style="grid-column: 1 / span 2;">Components</div>
+                    <div class="home-feature-grid-item" style="grid-column: 1 / span 2;">
+                        <img src="{{ "/assets/img/cube.svg" | prepend: site.baseurl }}" />
+                        <span>Components</span>
+                    </div>
                     <div class="home-feature-grid-item" style="grid-column: 3 / span 2; grid-row: 1 / span 2;">
-                        Revit-aware Components</div>
-                    <div class="home-feature-grid-item" style="grid-column: 1 / span 2;">1000+ Addons</div>
+                        <img src="{{ "/assets/img/cube.svg" | prepend: site.baseurl }}" />
+                        <span>Revit-aware Components</span>
+                    </div>
+                    <div class="home-feature-grid-item" style="grid-column: 1 / span 2;">
+                        <img src="{{ "/assets/img/cube.svg" | prepend: site.baseurl }}" />
+                        <span>1000+ Addons</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -90,29 +115,53 @@
     <div class="home-feature home-feature-formats">
         <div class="container">
             <div class="home-feature-content">
-                <h2>Work with Everyone</h2>
+                <h3>Work with Everyone</h3>
                 <p>{{ site.terms.rhino }} and Grasshopper, together support over 40 file
                     formats. All of this is now accessible to Revit throught {{ site.terms.rir }}</p>
                 <div class="home-feature-formats-grid" style="grid-column: 1 / -1;">
                     <div class="home-feature-formats-grid-item">
-                        <div class="home-feature-grid-item">XXX</div>
-                        <div class="home-feature-grid-item">XXX</div>
-                        <div class="home-feature-grid-item">XXX</div>
+                        <div class="home-feature-grid-item">
+                            <img src="{{ "/assets/img/ext-abc.svg" | prepend: site.baseurl }}" />
+                        </div>
+                        <div class="home-feature-grid-item">
+                            <img src="{{ "/assets/img/ext-abc.svg" | prepend: site.baseurl }}" />
+                        </div>
+                        <div class="home-feature-grid-item">
+                            <img src="{{ "/assets/img/ext-abc.svg" | prepend: site.baseurl }}" />
+                        </div>
                     </div>
                     <div class="home-feature-formats-grid-item">
-                        <div class="home-feature-grid-item">XXX</div>
-                        <div class="home-feature-grid-item">XXX</div>
-                        <div class="home-feature-grid-item">XXX</div>
+                        <div class="home-feature-grid-item">
+                            <img src="{{ "/assets/img/ext-abc.svg" | prepend: site.baseurl }}" />
+                        </div>
+                        <div class="home-feature-grid-item">
+                            <img src="{{ "/assets/img/ext-abc.svg" | prepend: site.baseurl }}" />
+                        </div>
+                        <div class="home-feature-grid-item">
+                            <img src="{{ "/assets/img/ext-abc.svg" | prepend: site.baseurl }}" />
+                        </div>
                     </div>
                     <div class="home-feature-formats-grid-item">
-                        <div class="home-feature-grid-item">XXX</div>
-                        <div class="home-feature-grid-item">XXX</div>
-                        <div class="home-feature-grid-item">XXX</div>
+                        <div class="home-feature-grid-item">
+                            <img src="{{ "/assets/img/ext-abc.svg" | prepend: site.baseurl }}" />
+                        </div>
+                        <div class="home-feature-grid-item">
+                            <img src="{{ "/assets/img/ext-abc.svg" | prepend: site.baseurl }}" />
+                        </div>
+                        <div class="home-feature-grid-item">
+                            <img src="{{ "/assets/img/ext-abc.svg" | prepend: site.baseurl }}" />
+                        </div>
                     </div>
                     <div class="home-feature-formats-grid-item">
-                        <div class="home-feature-grid-item">XXX</div>
-                        <div class="home-feature-grid-item">XXX</div>
-                        <div class="home-feature-grid-item">XXX</div>
+                        <div class="home-feature-grid-item">
+                            <img src="{{ "/assets/img/ext-abc.svg" | prepend: site.baseurl }}" />
+                        </div>
+                        <div class="home-feature-grid-item">
+                            <img src="{{ "/assets/img/ext-abc.svg" | prepend: site.baseurl }}" />
+                        </div>
+                        <div class="home-feature-grid-item">
+                            <img src="{{ "/assets/img/ext-abc.svg" | prepend: site.baseurl }}" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -121,7 +170,7 @@
     <div class="home-feature home-feature-api">
         <div class="container">
             <div class="home-feature-content">
-                <h2>Automation API</h2>
+                <h3>Make It Yours</h3>
                 <p>{{ site.terms.rir }} provides translation API to allow creating custom convertion workflows between
                     your Revit data and Rhino geometry. This includes an advanced geometry conversion API to safely
                     translate advanced Rhino shapes into Revit. The API is easily accessible from Grasshopper's Python

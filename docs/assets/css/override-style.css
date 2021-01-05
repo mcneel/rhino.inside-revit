@@ -146,29 +146,33 @@ pre {
     background-size: cover;
     background-position: center;
     background-image: url(../../static/images/home/home_feature_gh.png);
-}
-
-.home-feature-api {
-    background-size: cover;
-    background-position: center;
-    background-image: url(https://via.placeholder.com/1024x200.png/444/?text=%20);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 .home-feature-formats {
     background-size: cover;
     background-position: center;
-    background-image: url(https://via.placeholder.com/1024x200.png/666/?text=%20);
+    /* background-image: url(https://via.placeholder.com/1024x200.png/666/?text=%20); */
+    color: #111;
+}
+
+.home-feature-api {
+    background-size: cover;
+    background-position: center;
+    /* background-image: url(https://via.placeholder.com/1024x200.png/444/?text=%20); */
+    color: #111;
 }
 
 .home-feature-grid-item {
     display: flex;
+    flex-flow: column;
     align-items: center;
     justify-content: center;
-    border: 1px solid white;
     border-radius: 8px;
-    color: white;
+    color: #111;
+    background-color: white;
     padding: 15px;
-    font-size: 36px;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1);
 }
 
 .home-feature-rhino-grid {
@@ -204,6 +208,10 @@ pre {
     font-size: 45px;
 }
 
+.home-feature h3 {
+    font-size: 36px;
+}
+
 .home-feature p {
     font-size: 18px;
     margin-top: 20px;
@@ -228,6 +236,7 @@ pre {
 
 .home-discover {
     margin-bottom: 30px;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.1);
 }
 
 .home-discover h2 {
@@ -676,7 +685,7 @@ pre {
     display: block;
     min-height: 250px;
     background-color: #fff;
-    /* border: 1px solid #e0e0e0; */
+    border: 1px solid #b0b0b0;
     border-radius: 5px;
     color: white;
     box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 4px 0px, rgba(0, 0, 0, 0.025) 0px 15px 20px -1px;
