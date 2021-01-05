@@ -681,6 +681,10 @@ pre {
     grid-auto-rows: 250px;
 }
 
+.discover-grid-compact {
+    grid-auto-rows: 230px;
+}
+
 .discover-item {
     display: block;
     min-height: 250px;
@@ -691,6 +695,10 @@ pre {
     box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 4px 0px, rgba(0, 0, 0, 0.025) 0px 15px 20px -1px;
     overflow: hidden;
     position: relative;
+}
+
+.discover-item-compact {
+    min-height: 230px;
 }
 
 /* different naming format otherwise vue.js breaks */

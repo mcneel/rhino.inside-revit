@@ -1,4 +1,5 @@
-<div id="discoverGallery" class="block-center">
+<div id="discoverSpinner" style="text-align: center;">Fetching awesome content...</div>
+<div id="discoverGallery" class="block-center" style="visibility: collapse;">
     {% if include.show_filters %}
     <div class="discover-filters-box">
         <ul class="discover-filters">
@@ -229,6 +230,8 @@
                 }
             },
             mounted: function () {
+                $('#discoverSpinner').css('display', 'none');
+                $('#discoverGallery').css('visibility', 'visible');
                 const urlKeyword = urlParams.get('keyword');
                 this.keyword = urlKeyword ? urlKeyword : '{{ include.keyword }}';
                 attachDiscoverItemHover();
