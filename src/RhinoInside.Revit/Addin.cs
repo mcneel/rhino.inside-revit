@@ -219,6 +219,8 @@ namespace RhinoInside.Revit
 
       if (DaysUntilExpiration < 1)
         status = Status.Obsolete;
+
+      NativeLoader.IsolateOpenNurbs();
     }
 
     public Addin() : base(new Guid("02EFF7F0-4921-4FD3-91F6-A87B6BA9BF74")) => Instance = this;
