@@ -56,13 +56,19 @@ namespace RhinoInside.Revit.GH.Components
          *    vs
          *    "BIM 360://Default Test/Project Files/Linked_Project2.rvt"
          */
+        // get all external model references
         foreach (var id in DB.ExternalFileUtils.GetAllExternalFileReferences(doc))
         {
+          // inspect the reference, and ...
           var reference = DB.ExternalFileUtils.GetExternalFileReference(doc, id);
           if (reference.ExternalFileReferenceType == DB.ExternalFileReferenceType.RevitLink)
           {
+            // grab the model path
             var modelPath = reference.PathType == DB.PathType.Relative ? reference.GetAbsolutePath() : reference.GetPath();
-            docs.Add(documents.Cast<DB.Document>().Where(x => x.IsLinked && x.HasModelPath(modelPath)).FirstOrDefault());
+            // look into the loaded documents and find the one with the same path
+            if (documents.Cast<DB.Document>().Where(x => x.IsLinked && x.HasModelPath(modelPath)).FirstOrDefault() is DB.Document linkedDoc)
+              // if found, add that to the output list
+              docs.Add(linkedDoc);
           }
         }
 
@@ -70,23 +76,28 @@ namespace RhinoInside.Revit.GH.Components
         // if no document is reported using DB.ExternalFileUtils then links
         // are in the cloud. try getting linked documents from DB.RevitLinkType
         // element types inside the host model
-        if (docs.Count() == 0)
+
+        // find all the revit link types in the host model
+        using (var collector = new DB.FilteredElementCollector(doc).OfClass(typeof(DB.RevitLinkType)))
         {
-          // find all the revit link types in the host model
-          using (var collector = new DB.FilteredElementCollector(doc).OfClass(typeof(DB.RevitLinkType)))
+          foreach (var revitLinkType in collector)
           {
-            foreach (var revitLinkType in collector)
+            // extract the path of external document that is wrapped by the revit link type
+            var linkInfo = revitLinkType.GetExternalResourceReferences().FirstOrDefault();
+            if (linkInfo.Key != null && linkInfo.Value.HasValidDisplayPath())
             {
-              // extract the path of external document that is wrapped by the revit link type
-              var linkInfo = revitLinkType.GetExternalResourceReferences().FirstOrDefault();
-              if (linkInfo.Key != null && linkInfo.Value.HasValidDisplayPath())
+              // stores custom info about the reference (project::model ids)
+              var refInfo = linkInfo.Value.GetReferenceInformation();
+              // try to grab the linked cloud doc id from the info dict
+              string linkedDocId;
+              if (refInfo.TryGetValue("LinkedModelModelId", out linkedDocId))
               {
-                // stores custom info about the reference (project::model ids)
-                var refInfo = linkInfo.Value.GetReferenceInformation();
+                // look into the loaded documents and find the one with the same 'cloud' path
                 var linkedDoc = documents.Cast<DB.Document>()
                                          .Where(x => x.IsLinked &&
-                                                     x.GetCloudModelPath().GetModelGUID() == Guid.Parse(refInfo["LinkedModelModelId"]))
+                                                     x.GetCloudModelPath().GetModelGUID() == Guid.Parse(linkedDocId))
                                          .FirstOrDefault();
+                // if found add that to the output list
                 if (linkedDoc != null)
                   docs.Add(linkedDoc);
               }

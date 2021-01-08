@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Include xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Fragment>
+
+    <Property Id="REVIT2017_INSTALLLOCATION">
+      <RegistrySearch Id="Revit2017InstallLocation" Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-1700-0510-0000-705C0D862004}" Name="InstallLocation" Type="directory"/>
+    </Property>
+
+    <Property Id="REVIT2018_INSTALLLOCATION">
+      <RegistrySearch Id="Revit2018InstallLocation" Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-1800-0510-0000-705C0D862004}" Name="InstallLocation" Type="directory"/>
+    </Property>
+
+    <Property Id="REVIT2019_INSTALLLOCATION">
+      <RegistrySearch Id="Revit2019InstallLocation" Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-1900-0510-0000-705C0D862004}" Name="InstallLocation" Type="directory"/>
+    </Property>
+
+    <Property Id="REVIT2020_INSTALLLOCATION">
+      <RegistrySearch Id="Revit2020InstallLocation" Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-2000-0510-0000-705C0D862004}" Name="InstallLocation" Type="directory"/>
+    </Property>
+
+    <Property Id="REVIT2021_INSTALLLOCATION">
+      <RegistrySearch Id="Revit2021InstallLocation" Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-2100-0510-0000-705C0D862004}" Name="InstallLocation" Type="directory"/>
+    </Property>
+
+    <SetProperty Id="Revit2017Folder" Value="[REVIT2017_INSTALLLOCATION]" After="CostFinalize"/>
+    <SetProperty Id="Revit2018Folder" Value="[REVIT2018_INSTALLLOCATION]" After="CostFinalize"/>
+    <SetProperty Id="Revit2019Folder" Value="[REVIT2019_INSTALLLOCATION]" After="CostFinalize"/>
+    <SetProperty Id="Revit2020Folder" Value="[REVIT2020_INSTALLLOCATION]" After="CostFinalize"/>
+    <SetProperty Id="Revit2021Folder" Value="[REVIT2021_INSTALLLOCATION]" After="CostFinalize"/>
+
+    <DirectoryRef Id="TARGETDIR">
+      <Directory Id="ProgramFiles64Folder">
+        <Directory Id="AutodeskProgramFilesFolder" Name="Autodesk">
+          <Directory Id="Revit2017Folder" Name="Revit 2017"/>
+          <Directory Id="Revit2018Folder" Name="Revit 2018"/>
+          <Directory Id="Revit2019Folder" Name="Revit 2019"/>
+          <Directory Id="Revit2020Folder" Name="Revit 2020"/>
+          <Directory Id="Revit2021Folder" Name="Revit 2021"/>
+        </Directory>
+      </Directory>
+    </DirectoryRef>
+
+  </Fragment>
+</Include>

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -11,12 +12,130 @@ using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
 using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
-using UIX = RhinoInside.Revit.External.UI;
 using RhinoInside.Revit.External.UI.Extensions;
 using RhinoInside.Revit.Native;
+using UIX = RhinoInside.Revit.External.UI;
 
 namespace RhinoInside.Revit
 {
+  static class AssemblyResolver
+  {
+    static readonly string InstallPath =
+#if DEBUG
+      Registry.GetValue(@"HKEY_CURRENT_USER\SOFTWARE\McNeel\Rhinoceros\7.0-WIP-Developer-Debug-trunk\Install", "InstallPath", null) as string ??
+#endif
+      Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install", "InstallPath", null) as string ??
+      Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Rhino WIP");
+
+    static readonly FieldInfo _AssemblyResolve = typeof(AppDomain).GetField("_AssemblyResolve", BindingFlags.Instance | BindingFlags.NonPublic);
+
+    struct AssemblyLocation
+    {
+      public AssemblyLocation(AssemblyName name, string location) { Name = name; Location = location; Assembly = default; }
+      public readonly AssemblyName Name;
+      public readonly string Location;
+      public Assembly Assembly;
+    }
+
+    static readonly Dictionary<string, AssemblyLocation> AssemblyLocations = new Dictionary<string, AssemblyLocation>();
+    static AssemblyResolver()
+    {
+      try
+      {
+        var installFolder = new DirectoryInfo(InstallPath);
+        foreach (var dll in installFolder.EnumerateFiles("*.dll", SearchOption.AllDirectories))
+        {
+          try
+          {
+            if (dll.Extension.ToLower() != ".dll") continue;
+
+            var assemblyName = AssemblyName.GetAssemblyName(dll.FullName);
+
+            if (AssemblyLocations.TryGetValue(assemblyName.Name, out var location))
+            {
+              if (location.Name.Version > assemblyName.Version) continue;
+              AssemblyLocations.Remove(assemblyName.Name);
+            }
+
+            AssemblyLocations.Add(assemblyName.Name, new AssemblyLocation(assemblyName, dll.FullName));
+          }
+          catch { }
+        }
+      }
+      catch { }
+    }
+
+    static bool enabled;
+    public static bool Enabled
+    {
+      get => enabled;
+      set
+      {
+        if (enabled != value)
+        {
+          if (value)
+          {
+            if (_AssemblyResolve is null) AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve;
+            else
+            {
+              External.ActivationGate.Enter += ActivationGate_Enter;
+              External.ActivationGate.Exit += ActivationGate_Exit;
+            }
+          }
+          else
+          {
+            if (_AssemblyResolve is null) AppDomain.CurrentDomain.AssemblyResolve -= AssemblyResolve;
+            else
+            {
+              External.ActivationGate.Exit -= ActivationGate_Exit;
+              External.ActivationGate.Enter -= ActivationGate_Enter;
+            }
+          }
+          enabled = value;
+        }
+      }
+    }
+
+    static void ActivationGate_Enter(object sender, EventArgs e)
+    {
+      var domain = AppDomain.CurrentDomain;
+      var assemblyResolve = _AssemblyResolve.GetValue(domain) as ResolveEventHandler;
+      var invocationList = assemblyResolve.GetInvocationList();
+
+      foreach (var invocation in invocationList)
+        domain.AssemblyResolve -= invocation as ResolveEventHandler;
+
+      domain.AssemblyResolve += AssemblyResolve;
+
+      foreach (var invocation in invocationList)
+        AppDomain.CurrentDomain.AssemblyResolve += invocation as ResolveEventHandler;
+    }
+
+    static void ActivationGate_Exit(object sender, EventArgs e)
+    {
+      AppDomain.CurrentDomain.AssemblyResolve -= AssemblyResolve;
+    }
+
+    static Assembly AssemblyResolve(object sender, ResolveEventArgs args)
+    {
+      var assemblyName = new AssemblyName(args.Name).Name;
+      if (!AssemblyLocations.TryGetValue(assemblyName, out var location))
+        return null;
+
+      if (location.Assembly is null)
+      {
+        // Remove it to not try again if it fails
+        AssemblyLocations.Remove(assemblyName);
+
+        // Add again loaded assembly
+        location.Assembly = Assembly.LoadFrom(location.Location);
+        AssemblyLocations.Add(assemblyName, location);
+      }
+
+      return location.Assembly;
+    }
+  }
+
   enum AddinStartupMode
   {
     Cancelled = -2,
@@ -101,21 +220,7 @@ namespace RhinoInside.Revit
       if (DaysUntilExpiration < 1)
         status = Status.Obsolete;
 
-      if (CurrentStatus == Status.Available)
-      {
-        ResolveEventHandler OnRhinoCommonResolve = null;
-        AppDomain.CurrentDomain.AssemblyResolve += OnRhinoCommonResolve = (sender, args) =>
-        {
-          const string rhinoCommonAssemblyName = "RhinoCommon";
-          var assemblyName = new AssemblyName(args.Name).Name;
-
-          if (assemblyName != rhinoCommonAssemblyName)
-            return null;
-
-          AppDomain.CurrentDomain.AssemblyResolve -= OnRhinoCommonResolve;
-          return Assembly.LoadFrom(Path.Combine(SystemDir, rhinoCommonAssemblyName + ".dll"));
-        };
-      }
+      NativeLoader.IsolateOpenNurbs();
     }
 
     public Addin() : base(new Guid("02EFF7F0-4921-4FD3-91F6-A87B6BA9BF74")) => Instance = this;
@@ -138,13 +243,14 @@ namespace RhinoInside.Revit
         return Result.Cancelled;
 
       // Report if opennurbs.dll is loaded
-      NativeLoader.SetStackTraceFilePath 
+      NativeLoader.SetStackTraceFilePath
       (
         Path.ChangeExtension(applicationUI.ControlledApplication.RecordingJournalFilename, "log.md")
       );
 
       NativeLoader.ReportOnLoad("opennurbs.dll", enable: true);
 
+      AssemblyResolver.Enabled = true;
       ApplicationUI = applicationUI;
 
       // Register Revit Failures
@@ -205,6 +311,7 @@ namespace RhinoInside.Revit
       finally
       {
         ApplicationUI = null;
+        AssemblyResolver.Enabled = false;
       }
     }
 
@@ -545,20 +652,29 @@ namespace RhinoInside.Revit.UI
 
           var RhinocerosPanel = data.Application.CreateRibbonPanel(rhinoTab, "Rhinoceros");
           HelpCommand.CreateUI(RhinocerosPanel);
-          RhinocerosPanel.AddSeparator();
-          CommandRhino.CreateUI(RhinocerosPanel);
-          CommandImport.CreateUI(RhinocerosPanel);
-          CommandRhinoPreview.CreateUI(RhinocerosPanel);
-          CommandPython.CreateUI(RhinocerosPanel);
 
-          var GrasshopperPanel = data.Application.CreateRibbonPanel(rhinoTab, "Grasshopper");
-          CommandGrasshopper.CreateUI(GrasshopperPanel);
-          CommandGrasshopperPreview.CreateUI(GrasshopperPanel);
-          CommandGrasshopperSolver.CreateUI(GrasshopperPanel);
-          CommandGrasshopperRecompute.CreateUI(GrasshopperPanel);
-          CommandGrasshopperBake.CreateUI(GrasshopperPanel);
-          GrasshopperPanel.AddSeparator();
-          CommandGrasshopperPlayer.CreateUI(GrasshopperPanel);
+          var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+          if (assemblies.Any(x => x.GetName().Name == "RhinoCommon"))
+          {
+            RhinocerosPanel.AddSeparator();
+            CommandRhino.CreateUI(RhinocerosPanel);
+            CommandImport.CreateUI(RhinocerosPanel);
+            CommandRhinoPreview.CreateUI(RhinocerosPanel);
+            CommandPython.CreateUI(RhinocerosPanel);
+          }
+
+          if (assemblies.Any(x => x.GetName().Name == "Grasshopper"))
+          {
+            var GrasshopperPanel = data.Application.CreateRibbonPanel(rhinoTab, "Grasshopper");
+            CommandGrasshopper.CreateUI(GrasshopperPanel);
+            CommandGrasshopperPreview.CreateUI(GrasshopperPanel);
+            CommandGrasshopperSolver.CreateUI(GrasshopperPanel);
+            CommandGrasshopperRecompute.CreateUI(GrasshopperPanel);
+            CommandGrasshopperBake.CreateUI(GrasshopperPanel);
+            GrasshopperPanel.AddSeparator();
+            CommandGrasshopperPlayer.CreateUI(GrasshopperPanel);
+          }
 
           result = data.Application.ActivateRibbonTab(rhinoTab) ? Result.Succeeded : Result.Failed;
           break;

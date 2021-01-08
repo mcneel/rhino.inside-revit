@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Windows.Input;
 using Microsoft.Win32.SafeHandles;
 using Rhino;
@@ -126,7 +127,7 @@ namespace RhinoInside.Revit
         // Look for Guests
         guests = types.
           Where(x => typeof(IGuest).IsAssignableFrom(x)).
-          Where(x => !x.IsInterface).
+          Where(x => !x.IsInterface && !x.IsAbstract && !x.ContainsGenericParameters).
           Select(x => new GuestInfo(x)).
           ToList();
 
@@ -203,6 +204,25 @@ namespace RhinoInside.Revit
     }
     static List<GuestInfo> guests;
 
+    static void AppendExceptionExpandedContent(StringBuilder builder, Exception e)
+    {
+      switch (e)
+      {
+        case System.BadImageFormatException badImageFormatException:
+          if (badImageFormatException.FileName != null) builder.AppendLine($"FileName: {badImageFormatException.FileName}");
+          if (badImageFormatException.FusionLog != null) builder.AppendLine($"FusionLog: {badImageFormatException.FusionLog}");
+          break;
+        case System.IO.FileNotFoundException fileNotFoundException:
+          if (fileNotFoundException.FileName != null) builder.AppendLine($"FileName: {fileNotFoundException.FileName}");
+          if (fileNotFoundException.FusionLog != null) builder.AppendLine($"FusionLog: {fileNotFoundException.FusionLog}");
+          break;
+        case System.IO.FileLoadException fileLoadException:
+          if (fileLoadException.FileName != null) builder.AppendLine($"FileName: {fileLoadException.FileName}");
+          if (fileLoadException.FusionLog != null) builder.AppendLine($"FusionLog: {fileLoadException.FusionLog}");
+          break;
+      }
+    }
+
     static void CheckInGuests()
     {
       if (guests is null)
@@ -220,31 +240,74 @@ namespace RhinoInside.Revit
         if (!load)
           continue;
 
-        guestInfo.Guest = Activator.CreateInstance(guestInfo.ClassType) as IGuest;
-
-        string complainMessage = string.Empty;
-        try { guestInfo.LoadReturnCode = guestInfo.Guest.OnCheckIn(ref complainMessage); }
+        string mainContent = string.Empty;
+        string expandedContent = string.Empty;
+        try
+        {
+          guestInfo.Guest = Activator.CreateInstance(guestInfo.ClassType) as IGuest;
+          guestInfo.LoadReturnCode = guestInfo.Guest.OnCheckIn(ref mainContent);
+        }
         catch (Exception e)
         {
           guestInfo.LoadReturnCode = LoadReturnCode.ErrorShowDialog;
-          complainMessage = e.Message;
+
+          var mainContentBuilder = new StringBuilder();
+          var expandedContentBuilder = new StringBuilder();
+          while (e.InnerException != default)
+          {
+            mainContentBuilder.AppendLine($"· {e.Message}");
+            AppendExceptionExpandedContent(expandedContentBuilder, e);
+            e = e.InnerException;
+          }
+          mainContentBuilder.AppendLine($"· {e.Message}");
+          AppendExceptionExpandedContent(expandedContentBuilder, e);
+
+          mainContent = mainContentBuilder.ToString();
+          expandedContent = expandedContentBuilder.ToString();
         }
 
         if (guestInfo.LoadReturnCode == LoadReturnCode.ErrorShowDialog)
         {
+          var guestName = guestInfo.Guest?.Name ?? guestInfo.ClassType.Namespace;
+
+          {
+            var journalContent = new StringBuilder();
+            journalContent.AppendLine($"{guestName} failed to load");
+            journalContent.AppendLine(mainContent);
+            journalContent.AppendLine(expandedContent);
+            Revit.ActiveDBApplication.WriteJournalComment(journalContent.ToString(), false);
+          }
+
           using
           (
-            var taskDialog = new TaskDialog(MethodBase.GetCurrentMethod().DeclaringType.FullName)
+            var taskDialog = new TaskDialog(Addin.DisplayVersion)
             {
-              Title = guestInfo.Guest.Name,
+              Id = $"{MethodBase.GetCurrentMethod().DeclaringType.FullName}.{MethodBase.GetCurrentMethod().Name}",
               MainIcon = External.UI.TaskDialogIcons.IconError,
               AllowCancellation = false,
-              MainInstruction = $"{guestInfo.Guest.Name} failed to load",
-              MainContent = complainMessage
+              MainInstruction = $"{guestName} failed to load",
+              MainContent = mainContent +
+                            Environment.NewLine + "Do you want to report this problem by email to tech@mcneel.com?",
+              ExpandedContent = expandedContent,
+              FooterText = "Press CTRL+C to copy this information to Clipboard",
+              CommonButtons = Autodesk.Revit.UI.TaskDialogCommonButtons.Yes | Autodesk.Revit.UI.TaskDialogCommonButtons.Cancel,
+              DefaultButton = Autodesk.Revit.UI.TaskDialogResult.Yes
             }
           )
           {
-            taskDialog.Show();
+            if (taskDialog.Show() == Autodesk.Revit.UI.TaskDialogResult.Yes)
+            {
+              ErrorReport.SendEmail
+              (
+                Revit.ActiveUIApplication,
+                taskDialog.MainInstruction,
+                false,
+                new string[]
+                {
+                  Revit.ActiveUIApplication.Application.RecordingJournalFilename
+                }
+              );
+            }
           }
         }
       }
