@@ -19,8 +19,6 @@ Some of the changes mentioned in sections below, might break your existing Grass
 ### Changes
 * Now installer needs admin privileges. Please remember to manually uninstall any previous version of Rhino.Inside Revit you already have installed before applying this new one.
 
-{% include ltr/release-header.html version="0.0.7661.35155" time="12/22/2020 19:31:50" %}
-
 ### Important Note
 
 This release is a major update to {{ site.terms.rir }}. This build attempts to resolve the loading and runtime errors some have experienced in Revit. It would be great if you could download and install this new version to see if it solves all the load problems.
