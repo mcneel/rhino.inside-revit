@@ -521,6 +521,22 @@
         ]
     },
     {
+        "title": "Structural drawings, Calculations & Model from Architectural design",
+        "url": "https://youtu.be/kFn2FCtHHFo",
+        "thumbnail": "https://i3.ytimg.com/vi/kFn2FCtHHFo/maxresdefault.jpg",
+        "author": "Structured Parametrics",
+        "authorUrl": "https://www.youtube.com/channel/UCqgD1Dm9u5dCoi0f5dPcXlA",
+        "description": "An example of modern parametric workflow for structural engineering. Takes Architectural concept through to structural model, calculations and drawings. Modern workflows can cut engineering time to a fraction of traditional methods allowing responsive collaboration with others.",
+        "kinds": [
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "structural",
+            "tutorial"
+        ]
+    },
+    {
         "title": "Analytical Model Manipulation",
         "url": "analytical-model-manipulation",
         "thumbnail": "https://i3.ytimg.com/vi/dpMFnJcvO5E/maxresdefault.jpg",
