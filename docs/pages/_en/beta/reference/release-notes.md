@@ -21,6 +21,30 @@ Some of the changes mentioned in sections below, might break your existing Grass
 
 {% include ltr/release-header.html version="0.0.7661.35155" time="12/22/2020 19:31:50" %}
 
+### Important Note
+
+This release is a major update to {{ site.terms.rir }}. This build attempts to resolve the loading and runtime errors some have experienced in Revit. It would be great if you could download and install this new version to see if it solves all the load problems.
+
+Because this is a major change, it does require additional steps to install properly:
+
+1. Make sure Revit is closed
+2. This step is quite important 👉: Uninstall any previous versions of {{ site.terms.rir }} through **Windows Control Panel > Programs & Features**
+3. [Download the latest {{ site.terms.rir }}](https://www.rhino3d.com/inside/revit/beta/)
+4. Install the new {{ site.terms.rir }}. This new installer requires administrator privileges to install properly
+
+Any feedback to this new build is welcome on the [{{ site.terms.rir }} Forum]({{ site.forum_url }})
+
+### Why are admin privileges required to install now?
+
+In order to isolate OpenNURBS Library (`opennurbs.dll`) that is deployed by Revit from the library deployed by Rhino we do need to install a manifest file (`opennurbs_private.manifest`) inside the Revit main folder, and this requires administrator privileges. This change does not affect the Revit installation or behavior in any other way. It only directs Revit to use its own version of the OpenNURBS library when importing 3DM files. Please remember to manually uninstall any previous version of {{ site.terms.rir }} you already have installed before applying this new one.
+
+### What’s new about .NET conflicts in this release?
+
+Normally users have a myriad of Revit add-ons installed to support their specific workflows. Since we can not test every possible setup the user may have, we have tried in this release to make the Rhino.Inside load process more robust to handle “any” unexpected circumstance like conflicts with other installed add-ons.
+
+
+{% include ltr/release-header.html version="0.0.7661.35155" time="12/22/2020 19:31:50" %}
+
 ### Fixes
 * Fixed 'Deconstruct Compound Structure' units conversion.
 * Fixed 'Deconstruct Compound Structure Layer' units conversion.
