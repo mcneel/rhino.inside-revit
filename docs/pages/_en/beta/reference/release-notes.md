@@ -10,7 +10,14 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
-{% include ltr/release-header.html version="0.0.7661.35155" time="12/22/2020 19:31:50" %}
+{% include ltr/release-header.html version="0.0.7679.63" time="01/09/2021 00:02:06" %}
+
+### Fixes
+* Now Rhino.Inside Revit resolves at load time any dependency on assemblies installed with Rhino.
+* Isolated 'opennurbs.dll' installed with Revit from 'opennurbs.dll' installed with Rhino.
+
+### Changes
+* Now installer needs admin privileges. Please remember to manually uninstall any previous version of Rhino.Inside Revit you already have installed before applying this new one.
 
 ### Important Note
 
