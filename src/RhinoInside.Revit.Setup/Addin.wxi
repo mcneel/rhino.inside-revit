@@ -46,7 +46,7 @@
   <Fragment>
     <ComponentGroup Id="Addins.2017.RhinoInsideRevit">
       
-      <Component Id="Revit.2017.opennurbs_private.manifest" Guid="{644A5E45-7C05-4DFB-B8B8-77233E3C7D5A}" Directory="Revit2017Folder">
+      <Component Id="Revit.2017.opennurbs_private.manifest" Guid="{644A5E45-7C05-4DFB-B8B8-77233E3C7D5A}" Directory="REVIT2017_INSTALLLOCATION">
         <Condition>Privileged</Condition>
         <File Id="Revit.2017.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
       </Component>
@@ -67,7 +67,7 @@
   <Fragment>
     <ComponentGroup Id="Addins.2018.RhinoInsideRevit">
 
-      <Component Id="Revit.2018.opennurbs_private.manifest" Guid="{172FFC5B-958B-4CAC-9D67-BDE312C82278}" Directory="Revit2018Folder">
+      <Component Id="Revit.2018.opennurbs_private.manifest" Guid="{172FFC5B-958B-4CAC-9D67-BDE312C82278}" Directory="REVIT2018_INSTALLLOCATION">
         <Condition>Privileged</Condition>
         <File Id="Revit.2018.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
       </Component>
@@ -88,7 +88,7 @@
   <Fragment>
     <ComponentGroup Id="Addins.2019.RhinoInsideRevit">
       
-      <Component Id="Revit.2019.opennurbs_private.manifest" Guid="{904FA473-D10E-4B6D-B5CF-F8593240EEA7}" Directory="Revit2019Folder">
+      <Component Id="Revit.2019.opennurbs_private.manifest" Guid="{904FA473-D10E-4B6D-B5CF-F8593240EEA7}" Directory="REVIT2019_INSTALLLOCATION">
         <Condition>Privileged</Condition>
         <File Id="Revit.2019.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
       </Component>
@@ -109,7 +109,7 @@
   <Fragment>
     <ComponentGroup Id="Addins.2020.RhinoInsideRevit">
       
-      <Component Id="Revit.2020.opennurbs_private.manifest" Guid="{AFA79A11-2862-4BFC-BF9E-EF9F16520EC5}" Directory="Revit2020Folder">
+      <Component Id="Revit.2020.opennurbs_private.manifest" Guid="{AFA79A11-2862-4BFC-BF9E-EF9F16520EC5}" Directory="REVIT2020_INSTALLLOCATION">
         <Condition>Privileged</Condition>
         <File Id="Revit.2020.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
       </Component>
@@ -130,7 +130,7 @@
   <Fragment>
     <ComponentGroup Id="Addins.2021.RhinoInsideRevit">
 
-      <Component Id="Revit.2021.opennurbs_private.manifest" Guid="{83BE2293-231A-4C7A-B6DD-B6D8D7494E11}" Directory="Revit2021Folder">
+      <Component Id="Revit.2021.opennurbs_private.manifest" Guid="{83BE2293-231A-4C7A-B6DD-B6D8D7494E11}" Directory="REVIT2021_INSTALLLOCATION">
         <Condition>Privileged</Condition>
         <File Id="Revit.2021.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
       </Component>
