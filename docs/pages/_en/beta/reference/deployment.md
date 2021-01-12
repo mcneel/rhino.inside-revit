@@ -7,12 +7,11 @@ group: Deployment & Configs
 ## Required installers
 
 1. [Autodesk Revit {{ site.terms.revit_versions }}](https://www.autodesk.com/products/revit/free-trial)
-2. [{{ site.terms.rhino }}]({{ site.versions.beta.rhino_download }}).
-3. [Latest {{ site.terms.rir }} installer]({{ site.versions.beta.rir_download }}) 
+2. [{{ site.terms.rhino }}]({{ site.versions.beta.rhino_download }})
+3. [{{ site.terms.rir }}]({{ site.versions.beta.rir_download }}) 
 
 ## Automated installer for *All Users* in Windows
-
-To determine how to best automate the push of the {{ site.terms.rhino }} installer, follow the [Automating installation of Rhino 7 Guide](https://wiki.mcneel.com/rhino/installingrhino/7)
+To determine how to best automate the push of the {{ site.terms.rhino }} installer, follow the [Automating installation of Rhino 7 Guide](https://wiki.mcneel.com/rhino/installingrhino/7).
 
 To push install {{ site.terms.rir }} quietly for all users use this command line:
 
