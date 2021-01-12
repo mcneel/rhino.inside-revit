@@ -25,7 +25,7 @@ For more information see [Single Package Authoring](https://docs.microsoft.com/w
 
 ## Installing & Uninstalling
 
-The installer copies the necessary files to the `%APPDATA%\Autodesk\Revit\Addins\<revit_version>\` folder (for each supported version). Restart {{ site.terms.revit }} to load the add-on. To uninstall, open *Programs and Features*, select "RhinoInside.Revit" and click "Uninstall".
+The installer copies the necessary files to the `%ProgramData%\Autodesk\Revit\Addins\<revit_version>\RhinoInside.Revit` folder (for each supported version). Restart {{ site.terms.revit }} to load the add-on. To uninstall, at Windows settings, open [*Apps & features*](ms-settings:appsfeatures), select "RhinoInside.Revit" and click "Uninstall".
 
 
 
