@@ -390,13 +390,14 @@ namespace RhinoInside.Revit
           TitleAutoPrefix = true,
           AllowCancellation = true,
           MainInstruction = DaysUntilExpiration < 1 ?
-          "This WIP build has expired" :
-          $"This WIP build expires in {DaysUntilExpiration} days",
+          "Rhino.Inside WIP has expired" :
+          $"Rhino.Inside WIP expires in {DaysUntilExpiration} days",
+          MainContent = "While in WIP phase, you do need to update Rhino.Inside addin at least every 45 days.",
           FooterText = "Current version: " + DisplayVersion
         }
       )
       {
-        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Check for updates…");
+        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Check for updates…", "Open Rhino.Inside download page");
         if (taskDialog.Show() == TaskDialogResult.CommandLink1)
         {
           using (Process.Start(@"https://www.rhino3d.com/download/rhino.inside-revit/7/wip")) { }
