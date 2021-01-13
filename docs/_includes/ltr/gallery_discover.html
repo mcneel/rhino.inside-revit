@@ -5,7 +5,7 @@
         <ul class="discover-filters">
             <li class="discover-filter" v-for="kind in discoverKinds" v-on:click="filterCardsByKind"
                 v-bind:kind="(( kind.keyword ))">(( kind.title ))</li>
-            <input class="discover-search" type="text" placeholder="search..." v-model.trim="keyword">
+            <input id="searchbox" class="discover-search" type="text" placeholder="search..." v-model.trim="keyword">
         </ul>
     </div>
     {% endif %}
@@ -151,6 +151,8 @@
                 filterCardsByTag: function (event) {
                     let tag = event.target.getAttribute('tag');
                     this.keyword = 'tag: ' + tag;
+                    window.scrollTo(0,0);
+                    $("#searchbox").focus();
                 }
             },
             watch: {
