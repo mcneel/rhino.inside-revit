@@ -10,6 +10,12 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html version="0.0.7683.19842" time="01/13/2021 11:01:24" %}
+
+### Fixes
+* Fixed 'Set Element Parameter' casting from integer.
+
+
 {% include ltr/release-header.html version="0.0.7679.63" time="01/09/2021 00:02:06" %}
 
 ### Fixes
