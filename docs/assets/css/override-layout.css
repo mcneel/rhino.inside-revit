@@ -28,12 +28,15 @@
 
     .home-feature-content {
         grid-template-columns: 1fr;
+        grid-row-gap: 20px;
     }
 
-    .home-feature-rhino,
-    .home-feature-gh,
-    .home-feature-api {
+    .home-feature-rhino {
         background-position: -300px;
+    }
+
+    .home-feature-gh {
+        background-position: -200px;
     }
 
     .home-discover h2 {
