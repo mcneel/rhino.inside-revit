@@ -11,6 +11,9 @@ layout: ltr/page-h2-toc
 
 {{ site.terms.rir }} brings the power of {{ site.terms.rhino }} and Grasshopper to the {{ site.terms.revit }} environment
 
+<!-- intro video -->
+{% include youtube_player.html id="OktVivsMulc" %}
+
 ## Installation
 
 Download {{ site.terms.rir }} and {{ site.terms.rhino }} from the links below
@@ -19,6 +22,8 @@ Download {{ site.terms.rir }} and {{ site.terms.rhino }} from the links below
 {% include ltr/download_buttons.html version=site.versions.beta %}
 
 The {{ site.terms.rir }} installer is also available on [Food4Rhino Website]({{ site.foodrhino_url }})
+
+Revit {{ site.terms.revit_versions }} is required to install  {{ site.terms.rir }}.
 
 Let's install {{ site.terms.rhino }} first
 
@@ -30,18 +35,6 @@ Now let's install {{ site.terms.rir }}
 - Run the installer and go through the setup process until {{ site.terms.rir }} is fully installed
 
 Now that we have installed both dependencies, we can proceed to loading {{ site.terms.rir }}
-
-## Automated installer for *All Users* in Windows
-
-To determine how to best automate the push of the Rhino 7 installer, follow the [Automating installation of Rhino 6 Guide](https://wiki.mcneel.com/rhino/installingrhino/6)
-
-To push install Rhino.Inside.Revit quietly for all users use this command line:
-
-```
-RhinoInside.Revit.msi ALLUSERS="1" /quiet
-```
-
-For more inforamtion see: https://docs.microsoft.com/windows/win32/msi/single-package-authoring
 
 ## Loading {{ site.terms.rir }}
 
@@ -81,6 +74,8 @@ The Revit-aware component icons help identifying the action that the component p
 
 ![]({{ "/static/images/started/rir-icons.png" | prepend: site.baseurl }}){: class="small-image"}
 
+See [Basic Interactions Guide]({{ site.baseurl }}{% link _en/beta/guides/rir-grasshopper.md %}) for more info on Revit-aware components.
+
 ## Extracting Revit Geometry
 
 To get started, let's create a simple definition in Grasshopper to extract geometry of a Revit element. Grasshopper is by far one of the most exciting add-ons for Rhino and as part of the {{ site.terms.rir }} project has the potential to improve the design and documentation in {{ site.terms.revit }} dramatically.
@@ -101,11 +96,11 @@ Now drop a *Panel* component into the definition and connect the {% include ltr/
 
 ![]({{ "/static/images/started/rir-gcomp3.png" | prepend: site.baseurl }})
 
-Let's grab the Wall geometry by using a Revit-specific component. From *Revit > Elements* add an {% include ltr/comp.html uuid="b7e6a82f-" %} component.
+Let's grab the Wall geometry by using a Revit-specific component. From *Revit > Elements* add an {% include ltr/comp.html uuid="b3bcbf5b-" %} component.
 
 ![]({{ "/static/images/started/rir-gcomp5.png" | prepend: site.baseurl }})
 
-After passing the {% include ltr/comp.html uuid="ef607c2a-" %} output to the input of the {% include ltr/comp.html uuid="b7e6a82f-" %}, the new Revit-specific component extracts the Wall geometry from the Wall element using the Revit API. The geometry is then converted to Rhino Breps (since other Grasshopper components might not be familiar with Revit geometry) so it can be passed to other Grasshopper components for further processing.
+After passing the {% include ltr/comp.html uuid="ef607c2a-" %} output to the input of the {% include ltr/comp.html uuid="b3bcbf5b-" %}, the new Revit-specific component extracts the Wall geometry from the Wall element using the Revit API. The geometry is then converted to Rhino Breps (since other Grasshopper components might not be familiar with Revit geometry) so it can be passed to other Grasshopper components for further processing.
 
 ![]({{ "/static/images/started/rir-gcomp6.png" | prepend: site.baseurl }})
 
@@ -234,5 +229,7 @@ G = [x.ToBrep() for x in E.Geometry[DB.Options()]]
 ## What's Next
 
 The *Guides* section listed on the navigation bar, is a great next point to see how {{ site.terms.rir }} can be used in tackling many design and documentation challenges in {{ site.terms.revit }}. The articles under this page provide many examples on creating Grasshopper definitions and writing your own custom scripts.
+
+Take a look at the [Discover]({{ site.baseurl }}{% link _en/beta/discover/index.md %}) page to find out how Grasshopper and Rhino can be used in Revit workflows.
 
 Reach out to {{ site.terms.rir }} developers and the users community on the [forum]({{ site.forum_url }}) if you came across a special condition that might need a new component or a more detailed explanation.

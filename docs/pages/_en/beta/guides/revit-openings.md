@@ -1,6 +1,7 @@
 ---
 title: Openings
-order: 47
+order: 48
+thumbnail: /static/images/guides/revit-wip.png
 group: Modeling
 ---
 

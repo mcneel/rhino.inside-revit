@@ -13,13 +13,13 @@ namespace RhinoInside.Revit.Convert.Geometry
   static class MeshEncoder
   {
     #region Encode
-    internal static Mesh ToRawMesh(Mesh mesh, double scaleFactor)
+    internal static Mesh ToRawMesh(/*const*/ Mesh mesh, double scaleFactor)
     {
       mesh = mesh.DuplicateShallow() as Mesh;
       return EncodeRaw(ref mesh, scaleFactor) ? mesh : default;
     }
 
-    internal static Brep ToRawBrep(Mesh mesh, double scaleFactor)
+    internal static Brep ToRawBrep(/*const*/ Mesh mesh, double scaleFactor)
     {
       mesh = mesh.DuplicateShallow() as Mesh;
       if (EncodeRaw(ref mesh, scaleFactor))
@@ -58,7 +58,12 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="mesh"></param>
     /// <returns></returns>
-    internal static DB.Mesh ToMesh(/*const*/ Mesh mesh)
+    internal static DB.Mesh ToMesh(/*const*/ Mesh mesh, double factor = UnitConverter.NoScale)
+    {
+      return ToMesh(mesh.ExplodeAtUnweldedEdges(), factor);
+    }
+
+    internal static DB.Mesh ToMesh(Mesh[] shells, double factor = UnitConverter.NoScale)
     {
       try
       {
@@ -72,12 +77,11 @@ namespace RhinoInside.Revit.Convert.Geometry
           }
         )
         {
-          var shells = mesh.ExplodeAtUnweldedEdges();
           foreach (var shell in shells)
           {
             shell.Ngons.Count = 0;
-            shell.Ngons.AddPlanarNgons(Revit.VertexTolerance, 4, 2, true);
-            AddConnectedFaceSet(builder, shell, UnitConverter.NoScale, true);
+            shell.Ngons.AddPlanarNgons(Revit.VertexTolerance * factor, 4, 2, true);
+            AddConnectedFaceSet(builder, shell, factor, true);
           }
 
           builder.Build();

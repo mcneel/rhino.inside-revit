@@ -1,6 +1,6 @@
 using System;
+using Rhino.Geometry;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -19,9 +19,9 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
       manager.AddBrepParameter("Brep", "B", string.Empty, GH_ParamAccess.item);
-      manager[manager.AddBooleanParameter("Visible", "V", string.Empty, GH_ParamAccess.item, true)].Optional = true;
+      manager[manager.AddBooleanParameter("Visible", "V", string.Empty, GH_ParamAccess.item)].Optional = true;
       manager[manager.AddParameter(new Parameters.Category(), "Subcategory", "S", string.Empty, GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddIntegerParameter("Visibility", "S", string.Empty, GH_ParamAccess.item, -1)].Optional = true;
+      manager[manager.AddIntegerParameter("Visibility", "S", string.Empty, GH_ParamAccess.item)].Optional = true;
       manager[manager.AddParameter(new Parameters.Material(), "Material", "M", string.Empty, GH_ParamAccess.item)].Optional = true;
     }
 
@@ -38,21 +38,21 @@ namespace RhinoInside.Revit.GH.Components
 
       brep = brep.DuplicateBrep();
 
-      var visible = true;
+      var visible = default(bool);
       if (DA.GetData("Visible", ref visible))
-        brep.SetUserString(DB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), visible ? null : "0");
+        brep.TrySetUserString(DB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), visible, true);
 
-      var subCategoryId = DB.ElementId.InvalidElementId;
+      var subCategoryId = default(DB.ElementId);
       if (DA.GetData("Subcategory", ref subCategoryId))
-        brep.SetUserString(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), subCategoryId.IsValid() ? subCategoryId.ToString() : null);
+        brep.TrySetUserString(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), subCategoryId);
 
-      var visibility = -1;
+      var visibility = default(int);
       if (DA.GetData("Visibility", ref visibility))
-        brep.SetUserString(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), visibility == -1 ? null : visibility.ToString());
+        brep.TrySetUserString(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), visibility, 57406);
 
-      var materialId = DB.ElementId.InvalidElementId;
+      var materialId = default(DB.ElementId);
       if (DA.GetData("Material", ref materialId))
-        brep.SetUserString(DB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), materialId.IsValid() ? materialId.ToString() : null);
+        brep.TrySetUserString(DB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), materialId);
 
       DA.SetData("Brep", brep);
     }

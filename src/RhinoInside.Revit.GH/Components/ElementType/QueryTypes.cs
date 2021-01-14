@@ -3,6 +3,7 @@ using System.Linq;
 using DB = Autodesk.Revit.DB;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
+using RhinoInside.Revit.External.DB.Extensions;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -25,7 +26,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.FromParam(DocumentComponent.CreateDocumentParam(), ParamVisibility.Voluntary),
+      ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
       ParamDefinition.Create<Parameters.Category>("Category", "C", string.Empty, GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_String>("Family Name", "FN", string.Empty, GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_String>("Name", "N",string.Empty, GH_ParamAccess.item,optional: true),
@@ -38,8 +39,11 @@ namespace RhinoInside.Revit.GH.Components
       ParamDefinition.Create<Parameters.ElementType>("Types", "E", "Element types list", GH_ParamAccess.list)
     };
 
-    protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
+        return;
+
       var categoryId = default(DB.ElementId);
       DA.GetData("Category", ref categoryId);
 
@@ -57,7 +61,7 @@ namespace RhinoInside.Revit.GH.Components
         var elementCollector = collector.WherePasses(ElementFilter);
 
         if (categoryId is object)
-          elementCollector.OfCategoryId(categoryId);
+          elementCollector.WhereCategoryIdEqualsTo(categoryId);
 
         if (filter is object)
           elementCollector = elementCollector.WherePasses(filter);

@@ -10,13 +10,12 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  [Kernel.Attributes.Name("Sketch")]
   public class Sketch : GraphicalElement
   {
-    public override string TypeName => "Revit Sketch";
-    public override string TypeDescription => "Represents a Revit sketch";
     protected override Type ScriptVariableType => typeof(DB.Sketch);
-    public static explicit operator DB.Sketch(Sketch value) =>
-      value?.IsValid == true ? value.Document.GetElement(value) as DB.Sketch : default;
+    public new DB.Sketch Value => base.Value as DB.Sketch;
+    public static explicit operator DB.Sketch(Sketch value) => value?.Value;
 
     public Sketch() : base() { }
     public Sketch(DB.Sketch sketchPlane) : base(sketchPlane) { }
@@ -37,15 +36,28 @@ namespace RhinoInside.Revit.GH.Types
       return base.CastFrom(source);
     }
 
-    #region Location
-    public override Plane Location
+    #region IGH_PreviewData
+    public override void DrawViewportWires(GH_PreviewWireArgs args)
     {
-      get
-      {
-        var sketch = (DB.Sketch) this;
-        return sketch?.SketchPlane.GetPlane().ToPlane() ?? base.Location;
-      }
+      var location = Location;
+      if (!location.IsValid)
+        return;
+
+      GH_Plane.DrawPlane(args.Pipeline, location, Grasshopper.CentralSettings.PreviewPlaneRadius, 4, args.Color, System.Drawing.Color.DarkRed, System.Drawing.Color.DarkGreen);
+
+      foreach(var loop in Profile)
+        args.Pipeline.DrawCurve(loop, args.Color, args.Thickness);
     }
+
+    public override void DrawViewportMeshes(GH_PreviewMeshArgs args)
+    {
+      if(Region is object)
+        args.Pipeline.DrawBrepShaded(Region, args.Material);
+    }
+    #endregion
+
+    #region Location
+    public override Plane Location => Value?.SketchPlane.GetPlane().ToPlane() ?? base.Location;
     public override Brep Surface => Region;
 
     bool profileIsValid;
@@ -56,8 +68,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (!profileIsValid)
         {
-          var element = (DB.Sketch) this;
-          profile = element?.Profile.ToPolyCurves();
+          profile = Value?.Profile.ToPolyCurves();
           profileIsValid = true;
         }
 
@@ -71,12 +82,8 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (!regionIsValid)
+        if (!regionIsValid && Value is DB.Sketch sketch)
         {
-          var sketch = (DB.Sketch) this;
-          if (sketch is null)
-            return null;
-
           var loops = sketch.Profile.ToPolyCurves().Where(x => x.IsClosed).ToArray();
           var plane = sketch.SketchPlane.GetPlane().ToPlane();
 
@@ -335,26 +342,6 @@ namespace RhinoInside.Revit.GH.Types
       );
 
       return brep;
-    }
-    #endregion
-
-    #region IGH_PreviewData
-    public override void DrawViewportWires(GH_PreviewWireArgs args)
-    {
-      var bbox = ClippingBox;
-      if (!bbox.IsValid)
-        return;
-
-      GH_Plane.DrawPlane(args.Pipeline, Location, Grasshopper.CentralSettings.PreviewPlaneRadius, 4, args.Color, System.Drawing.Color.DarkRed, System.Drawing.Color.DarkGreen);
-
-      foreach(var loop in Profile)
-        args.Pipeline.DrawCurve(loop, args.Color, args.Thickness);
-    }
-
-    public override void DrawViewportMeshes(GH_PreviewMeshArgs args)
-    {
-      if(Region is object)
-        args.Pipeline.DrawBrepShaded(Region, args.Material);
     }
     #endregion
   }

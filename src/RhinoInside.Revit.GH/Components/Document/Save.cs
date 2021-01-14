@@ -8,7 +8,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class DocumentSave : DocumentComponent
+  public class DocumentSave : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("FBB2E4A2-CC2A-470E-B7E8-CB3320166CC5");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.FromParam(CreateDocumentParam(), ParamVisibility.Voluntary),
+      ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
       ParamDefinition.FromParam
       (
         new Param_FilePath()
@@ -51,8 +51,11 @@ namespace RhinoInside.Revit.GH.Components
       ParamDefinition.Create<Parameters.Document>("Document", "DOC", string.Empty, GH_ParamAccess.list)
     };
 
-    protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
+        return;
+
       var filePath = string.Empty;
       DA.GetData("Path", ref filePath);
 
@@ -78,53 +81,62 @@ namespace RhinoInside.Revit.GH.Components
         }
       }
 
-      if (string.IsNullOrEmpty(filePath))
+      try
       {
-        if (overrideFile)
+        Guest.Instance.CommitTransactionGroups();
+
+        if (string.IsNullOrEmpty(filePath))
         {
-          using (var saveOptions = new DB.SaveOptions() { Compact = compact })
+          if (overrideFile)
           {
-            if (view is object)
-              saveOptions.PreviewViewId = view.Id;
+            using (var saveOptions = new DB.SaveOptions() { Compact = compact })
+            {
+              if (view is object)
+                saveOptions.PreviewViewId = view.Id;
 
-            doc.Save(saveOptions);
-          }
+              doc.Save(saveOptions);
+            }
 
-          DA.SetData("Document", doc);
-        }
-        else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to collect data from 'Path'.");
-      }
-      else
-      {
-        if (filePath.Last() == Path.DirectorySeparatorChar)
-          filePath = Path.Combine(filePath, doc.Title);
-
-        if (Path.IsPathRooted(filePath) && filePath.Contains(Path.DirectorySeparatorChar))
-        {
-          if (!Path.HasExtension(filePath))
-          {
-            if (doc.IsFamilyDocument)
-              filePath += ".rfa";
-            else
-              filePath += ".rvt";
-          }
-
-          using (var saveAsOptions = new DB.SaveAsOptions() { OverwriteExistingFile = overrideFile, Compact = compact })
-          {
-            if (backups > -1)
-              saveAsOptions.MaximumBackups = backups;
-
-            if (view is object)
-              saveAsOptions.PreviewViewId = view.Id;
-
-            doc.SaveAs(filePath, saveAsOptions);
             DA.SetData("Document", doc);
           }
+          else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to collect data from 'Path'.");
         }
         else
         {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Path should be absolute.");
+          if (filePath.Last() == Path.DirectorySeparatorChar)
+            filePath = Path.Combine(filePath, doc.Title);
+
+          if (Path.IsPathRooted(filePath) && filePath.Contains(Path.DirectorySeparatorChar))
+          {
+            if (!Path.HasExtension(filePath))
+            {
+              if (doc.IsFamilyDocument)
+                filePath += ".rfa";
+              else
+                filePath += ".rvt";
+            }
+
+            using (var saveAsOptions = new DB.SaveAsOptions() { OverwriteExistingFile = overrideFile, Compact = compact })
+            {
+              if (backups > -1)
+                saveAsOptions.MaximumBackups = backups;
+
+              if (view is object)
+                saveAsOptions.PreviewViewId = view.Id;
+
+              doc.SaveAs(filePath, saveAsOptions);
+              DA.SetData("Document", doc);
+            }
+          }
+          else
+          {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Path should be absolute.");
+          }
         }
+      }
+      finally
+      {
+        Guest.Instance.StartTransactionGroups();
       }
     }
   }

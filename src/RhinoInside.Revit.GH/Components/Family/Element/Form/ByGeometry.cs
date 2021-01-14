@@ -1,9 +1,9 @@
 using System;
 using System.Linq;
-using Autodesk.Revit.DB;
-using Grasshopper.Kernel;
+using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.Geometry.Extensions;
+using Grasshopper.Kernel;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -29,26 +29,26 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructFormByGeometry
     (
-      Document doc,
-      ref Autodesk.Revit.DB.Element element,
+      DB.Document doc,
+      ref DB.Element element,
 
-      Rhino.Geometry.Brep brep
+      Brep brep
     )
     {
       if (!doc.IsFamilyDocument)
         throw new InvalidOperationException("This component can only run on a Family document");
 
-      brep.GetUserBoolean(BuiltInParameter.ELEMENT_IS_CUTTING.ToString(), out var cutting);
+      brep.TryGetUserString(DB.BuiltInParameter.ELEMENT_IS_CUTTING.ToString(), out bool cutting, false);
 
       if (brep.Faces.Count == 1 && brep.Faces[0].Loops.Count == 1 && brep.Faces[0].TryGetPlane(out var capPlane))
       {
-        using (var sketchPlane = SketchPlane.Create(doc, capPlane.ToPlane()))
-        using (var referenceArray = new ReferenceArray())
+        using (var sketchPlane = DB.SketchPlane.Create(doc, capPlane.ToPlane()))
+        using (var referenceArray = new DB.ReferenceArray())
         {
           try
           {
             foreach (var curve in brep.Faces[0].OuterLoop.To3dCurve().ToCurveMany())
-              referenceArray.Append(new Reference(doc.FamilyCreate.NewModelCurve(curve, sketchPlane)));
+              referenceArray.Append(new DB.Reference(doc.FamilyCreate.NewModelCurve(curve, sketchPlane)));
 
             ReplaceElement
             (
@@ -64,19 +64,19 @@ namespace RhinoInside.Revit.GH.Components
           }
           catch (Autodesk.Revit.Exceptions.InvalidOperationException)
           {
-            doc.Delete(referenceArray.OfType<Reference>().Select(x => x.ElementId).ToArray());
+            doc.Delete(referenceArray.OfType<DB.Reference>().Select(x => x.ElementId).ToArray());
           }
         }
       }
       else if ( brep.TryGetExtrusion(out var extrusion) && (extrusion.CapCount == 2 || !extrusion.IsClosed(0)))
       {
-        using (var sketchPlane = SketchPlane.Create(doc, extrusion.GetProfilePlane(0.0).ToPlane()))
-        using (var referenceArray = new ReferenceArray())
+        using (var sketchPlane = DB.SketchPlane.Create(doc, extrusion.GetProfilePlane(0.0).ToPlane()))
+        using (var referenceArray = new DB.ReferenceArray())
         {
           try
           {
             foreach (var curve in extrusion.Profile3d(new Rhino.Geometry.ComponentIndex(Rhino.Geometry.ComponentIndexType.ExtrusionBottomProfile, 0)).ToCurveMany())
-              referenceArray.Append(new Reference(doc.FamilyCreate.NewModelCurve(curve, sketchPlane)));
+              referenceArray.Append(new DB.Reference(doc.FamilyCreate.NewModelCurve(curve, sketchPlane)));
 
             ReplaceElement
             (
@@ -92,28 +92,29 @@ namespace RhinoInside.Revit.GH.Components
           }
           catch(Autodesk.Revit.Exceptions.InvalidOperationException)
           {
-             doc.Delete(referenceArray.OfType<Reference>().Select(x => x.ElementId).ToArray());
+             doc.Delete(referenceArray.OfType<DB.Reference>().Select(x => x.ElementId).ToArray());
           }
         }
       }
 
+      using (GeometryEncoder.Context.Push(doc))
       {
         var solid = brep.ToSolid();
         if (solid != null)
         {
-          if (element is FreeFormElement freeFormElement)
+          if (element is DB.FreeFormElement freeFormElement)
           {
             freeFormElement.UpdateSolidGeometry(solid);
           }
           else
           {
-            ReplaceElement(ref element, FreeFormElement.Create(doc, solid));
+            ReplaceElement(ref element, DB.FreeFormElement.Create(doc, solid));
 
             if (doc.OwnerFamily.IsConceptualMassFamily)
-              element.get_Parameter(BuiltInParameter.FAMILY_ELEM_SUBCATEGORY).Set(new ElementId(BuiltInCategory.OST_MassForm));
+              element.get_Parameter(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY).Set(new DB.ElementId(DB.BuiltInCategory.OST_MassForm));
           }
 
-          element.get_Parameter(BuiltInParameter.ELEMENT_IS_CUTTING)?.Set(cutting ? 1 : 0);
+          element.get_Parameter(DB.BuiltInParameter.ELEMENT_IS_CUTTING)?.Set(cutting ? 1 : 0);
         }
         else AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Failed to convert Brep to Form");
       }

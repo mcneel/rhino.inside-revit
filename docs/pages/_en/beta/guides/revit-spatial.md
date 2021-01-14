@@ -1,6 +1,7 @@
 ---
 title: Spatial Elements
-order: 42
+order: 43
+thumbnail: /static/images/guides/revit-wip.png
 group: Modeling
 ---
 

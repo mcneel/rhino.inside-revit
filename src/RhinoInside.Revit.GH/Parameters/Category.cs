@@ -8,7 +8,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class Category : ElementIdWithoutPreviewParam<Types.Category, DB.Category>
+  public class Category : Element<Types.Category, DB.Category>
   {
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
     public override Guid ComponentGuid => new Guid("6722C7A5-EFD3-4119-A7FD-6C8BE892FD04");
@@ -42,7 +42,7 @@ namespace RhinoInside.Revit.GH.Parameters
       categoriesTypeBox.Items.Add("Internal");
       categoriesTypeBox.Items.Add("Analytical");
 
-      if(Current?.APICategory is DB.Category current)
+      if(Current?.Value is DB.Category current)
       {
         if (current.IsTagCategory)
           categoriesTypeBox.SelectedIndex = 2;
@@ -107,7 +107,7 @@ namespace RhinoInside.Revit.GH.Parameters
     }
   }
 
-  public class GraphicsStyle : ElementIdWithoutPreviewParam<Types.GraphicsStyle, DB.GraphicsStyle>
+  public class GraphicsStyle : Element<Types.GraphicsStyle, DB.GraphicsStyle>
   {
     public override GH_Exposure Exposure => GH_Exposure.hidden;
     public override Guid ComponentGuid => new Guid("833E6207-BA60-4C6B-AB8B-96FDA0F91822");

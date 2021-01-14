@@ -1,6 +1,7 @@
 ---
 title: Schedules & Reports
 order: 65
+thumbnail: /static/images/guides/revit-wip.png
 group: Documentation
 ---
 

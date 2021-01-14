@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Kernel.Attributes
     public ComponentGuidAttribute(string value) => Value = new Guid(value);
   }
 
-  [AttributeUsage(AttributeTargets.Class | AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
+  [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface| AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
   public class NameAttribute : Attribute
   {
     public readonly string Name;
@@ -51,5 +51,12 @@ namespace RhinoInside.Revit.GH.Kernel.Attributes
   {
     public readonly object Value;
     public DefaultValueAttribute(object value) => Value = value;
+  }
+
+  [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
+  public class ParamTypeAttribute : Attribute
+  {
+    public readonly Type Type;
+    public ParamTypeAttribute(Type type) => Type = type;
   }
 }

@@ -4,7 +4,7 @@ using Grasshopper.Kernel;
 
 using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Host
 {
   public class DeconstructCompoundStructure : Component
   {
@@ -140,12 +140,12 @@ namespace RhinoInside.Revit.GH.Components
       var cstruct = dataObj.Value;
 
       // Deconstruct the data object into output params
-      DA.SetData("Total Thickness", cstruct.GetWidth());
-      DA.SetData("Sample Height", cstruct.SampleHeight);
-      DA.SetData("Cutoff Height", cstruct.CutoffHeight);
-      DA.SetData("Minimum Sample Height", cstruct.MinimumSampleHeight);
-      DA.SetData("Minimum Layer Thickness", DB.CompoundStructure.GetMinimumLayerThickness());
-      DA.SetDataList("Layers", cstruct.GetLayers().Select(x => new Types.DataObject<DB.CompoundStructureLayer>(apiObject: x, srcDocument: dataObj.Document)));
+      DA.SetData("Total Thickness", cstruct.GetWidth() * Revit.ModelUnits);
+      DA.SetData("Sample Height", cstruct.SampleHeight * Revit.ModelUnits);
+      DA.SetData("Cutoff Height", cstruct.CutoffHeight * Revit.ModelUnits);
+      DA.SetData("Minimum Sample Height", cstruct.MinimumSampleHeight * Revit.ModelUnits);
+      DA.SetData("Minimum Layer Thickness", DB.CompoundStructure.GetMinimumLayerThickness() * Revit.ModelUnits);
+      DA.SetDataList("Layers", cstruct.GetLayers().Select(x => new Types.DataObject<DB.CompoundStructureLayer>(apiObject: x, sourceDoc: dataObj.Document)));
       DA.SetData("First Core Layer Index", cstruct.GetFirstCoreLayerIndex());
       DA.SetData("Last Core Layer Index", cstruct.GetLastCoreLayerIndex());
       DA.SetData("Structural Material Index", cstruct.StructuralMaterialIndex);

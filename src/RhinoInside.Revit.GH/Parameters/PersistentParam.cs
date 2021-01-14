@@ -5,7 +5,6 @@ using System.Windows.Forms;
 using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
-using Grasshopper.Kernel.Extensions;
 using Grasshopper.Kernel.Types;
 
 namespace RhinoInside.Revit.GH.Parameters
@@ -13,7 +12,7 @@ namespace RhinoInside.Revit.GH.Parameters
   public abstract class PersistentParam<T> : GH_PersistentParam<T>
     where T : class, IGH_Goo
   {
-    protected override sealed Bitmap Icon => ((Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
+    protected override /*sealed*/ Bitmap Icon => ((Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
                                               ImageBuilder.BuildIcon(IconTag, Properties.Resources.UnknownIcon);
 
     protected virtual string IconTag => typeof(T).Name.Substring(0, 1);
@@ -154,8 +153,19 @@ namespace RhinoInside.Revit.GH.Parameters
       if (Kind == GH_ParamKind.floating || Kind == GH_ParamKind.input)
       {
         Menu_AppendSeparator(menu);
-        Menu_AppendPromptOne(menu);
-        Menu_AppendPromptMore(menu);
+        if (Menu_CustomSingleValueItem() is ToolStripMenuItem single)
+        {
+          single.Enabled &= SourceCount == 0;
+          menu.Items.Add(single);
+        }
+        else Menu_AppendPromptOne(menu);
+
+        if (Menu_CustomMultiValueItem() is ToolStripMenuItem more)
+        {
+          more.Enabled &= SourceCount == 0;
+          menu.Items.Add(more);
+        }
+        else Menu_AppendPromptMore(menu);
         Menu_AppendManageCollection(menu);
 
         Menu_AppendSeparator(menu);

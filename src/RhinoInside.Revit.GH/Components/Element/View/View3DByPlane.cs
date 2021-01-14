@@ -3,7 +3,7 @@ using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Obsolete
 {
   public class View3DByPlane : ReconstructElementComponent
   {
@@ -12,9 +12,11 @@ namespace RhinoInside.Revit.GH.Components
 
     public View3DByPlane() : base
     (
-      "Add View3D", "View3D",
+      "Add View3D",
+      "View3D",
       "Given a plane, it adds a 3D View to the active Revit document",
-      "Revit", "View"
+      "Revit",
+      "View"
     )
     { }
 
@@ -40,7 +42,7 @@ namespace RhinoInside.Revit.GH.Components
       (
         plane.Origin.ToXYZ(),
         plane.YAxis.ToXYZ(),
-        plane.ZAxis.ToXYZ()
+        -plane.ZAxis.ToXYZ()
       );
 
       if (view is null)
@@ -65,14 +67,14 @@ namespace RhinoInside.Revit.GH.Components
         };
 
         newView.SetOrientation(orientation);
-        view.get_Parameter(DB.BuiltInParameter.VIEWER_CROP_REGION).Set(0);
+        newView.get_Parameter(DB.BuiltInParameter.VIEWER_CROP_REGION).Set(0);
         ReplaceElement(ref view, newView, parametersMask);
       }
       else
       {
         view.SetOrientation(orientation);
 
-        if(perspective.HasValue)
+        if (perspective.HasValue)
           view.get_Parameter(DB.BuiltInParameter.VIEWER_PERSPECTIVE).Set(perspective.Value ? 1 : 0);
 
         ChangeElementTypeId(ref view, type.Value.Id);

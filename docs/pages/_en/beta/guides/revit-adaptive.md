@@ -1,6 +1,7 @@
 ---
 title: Adaptive Components
-order: 50
+order: 51
+thumbnail: /static/images/guides/revit-wip.png
 group: Modeling
 ---
 

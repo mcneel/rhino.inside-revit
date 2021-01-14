@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -182,8 +182,8 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="RhinoCommon" Version="7.0.20140.14505-wip" IncludeAssets="compile; build" />
-        <PackageReference Include="Grasshopper" Version="7.0.20140.14505-wip" IncludeAssets="compile; build" />
+        <PackageReference Include="RhinoCommon" Version="7.0.20314.3001" IncludeAssets="compile; build" />
+        <PackageReference Include="Grasshopper" Version="7.0.20314.3001" IncludeAssets="compile; build" />
         <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitVersion).0.0" IncludeAssets="build; compile" />
       </ItemGroup>
     </Otherwise>
@@ -204,7 +204,6 @@
     <Compile Include="Convert\Geometry\BrepEncoder.cs" />
     <Compile Include="Convert\Geometry\SubDEncoder.cs" />
     <Compile Include="Convert\System.Collections.Generic.cs" />
-    <Compile Include="Convert\System.cs" />
     <Compile Include="Convert\Units\DisplayUnitTypeConverter.cs" />
     <Compile Include="Convert\Geometry\UnitConverter.cs" />
     <Compile Include="Convert\System.Drawing.cs" />
@@ -212,11 +211,16 @@
     <Compile Include="ErrorReport.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Extensions\Native.cs" />
+    <Compile Include="Extensions\WinForms.cs" />
     <Compile Include="External\ApplicationServices\Extensions\Application.cs" />
     <Compile Include="External\DB\Application.cs" />
+    <Compile Include="External\DB\BuiltInLinePattern.cs" />
     <Compile Include="External\DB\BuiltInMullionPositionId.cs" />
     <Compile Include="External\DB\BuiltInMullionProfileId.cs" />
+    <Compile Include="External\DB\ElevationBase.cs" />
     <Compile Include="External\DB\Extensions\Application.cs" />
+    <Compile Include="External\DB\Extensions\BasePoint.cs" />
+    <Compile Include="External\DB\Extensions\BoundingBoxUV.cs" />
     <Compile Include="External\DB\Extensions\Category.cs" />
     <Compile Include="External\DB\Extensions\Curve.cs" />
     <Compile Include="External\DB\Extensions\CurveLoop.cs" />
@@ -228,8 +232,11 @@
     <Compile Include="External\DB\Extensions\FilteredElementCollector.cs" />
     <Compile Include="External\DB\Extensions\GeometryObject.cs" />
     <Compile Include="External\DB\Extensions\Instance.cs" />
+    <Compile Include="External\DB\Extensions\Level.cs" />
+    <Compile Include="External\DB\Extensions\LinePattern.cs" />
     <Compile Include="External\DB\Extensions\Parameter.cs" />
     <Compile Include="External\DB\Extensions\ParameterFilterElement.cs" />
+    <Compile Include="External\DB\Extensions\ProjectLocation.cs" />
     <Compile Include="External\DB\Extensions\Surface.cs" />
     <Compile Include="External\DB\Extensions\View.cs" />
     <Compile Include="External\DB\Extensions\XYZ.cs" />
@@ -238,6 +245,7 @@
     <Compile Include="External\DB\FloorFunction.cs" />
     <Compile Include="External\DB\ParameterBinding.cs" />
     <Compile Include="External\DB\ParameterClass.cs" />
+    <Compile Include="External\DB\Transaction.cs" />
     <Compile Include="External\DB\UniqueId.cs" />
     <Compile Include="External\DB\WallWrapping.cs" />
     <Compile Include="External\DB\CurtainGridLayout.cs" />
@@ -255,7 +263,6 @@
     <Compile Include="Extensions\RhinoCommon.cs" />
     <Compile Include="Extensions\System.cs" />
     <Compile Include="Extensions\Win32.cs" />
-    <Compile Include="Extensions\WinForms.cs" />
     <Compile Include="External\ActivationGate.cs" />
     <Compile Include="GH\Bake.cs" />
     <Compile Include="GH\Kernel.cs" />
@@ -289,6 +296,7 @@
     <Compile Include="UI\Rhinoceros\Preview.cs" />
     <Compile Include="Convert\Eto.Drawing.cs" />
     <Compile Include="Convert\Geometry\GeometryDecoder.cs" />
+    <None Include="Extensions\README.md" />
     <None Include="Properties\RhinoInside.Revit.addin" />
     <Compile Include="Samples\Sample1.cs" />
     <None Include="Samples\Sample2.ghx" />

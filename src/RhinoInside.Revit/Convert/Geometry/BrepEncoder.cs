@@ -1,14 +1,16 @@
+using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Rhino;
 using Rhino.Geometry;
-using RhinoInside.Revit.Geometry.Extensions;
 using DB = Autodesk.Revit.DB;
+using RhinoInside.Revit.External.DB;
+using RhinoInside.Revit.External.DB.Extensions;
 
 namespace RhinoInside.Revit.Convert.Geometry
 {
-  using Units;
-
   /// <summary>
   /// Converts a "complex" <see cref="Brep"/> to be transfered to a <see cref="DB.Solid"/>.
   /// </summary>
@@ -135,8 +137,33 @@ namespace RhinoInside.Revit.Convert.Geometry
     }
     #endregion
 
-
     #region Transfer
+    internal static DB.Solid ToSolid(/*const*/Brep brep, double factor)
+    {
+      // Try using DB.BRepBuilder
+      if (ToSolid(ToRawBrep(brep, factor)) is DB.Solid solid)
+        return solid;
+
+      Debug.WriteLine("Try exporting-importing as ACIS.");
+      return ToACIS(brep, factor);
+    }
+
+    internal static DB.Mesh ToMesh(/*const*/ Brep brep, double factor)
+    {
+      using (var mp = MeshingParameters.Default)
+      {
+        mp.MinimumEdgeLength = Revit.ShortCurveTolerance * factor;
+        mp.ClosedObjectPostProcess = brep.IsManifold;
+        mp.JaggedSeams = false;
+
+        if (Mesh.CreateFromBrep(brep, mp) is Mesh[] shells)
+          return MeshEncoder.ToMesh(shells, factor);
+
+        return default;
+      }
+    }
+
+
     /// <summary>
     /// Replaces <see cref="Raw.RawEncoder.ToHost(Brep)"/> to catch Revit Exceptions
     /// </summary>
@@ -144,6 +171,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <returns></returns>
     internal static DB.Solid ToSolid(/*const*/ Brep brep)
     {
+      if(brep is object)
       try
       {
         var brepType = DB.BRepType.OpenShell;
@@ -341,6 +369,161 @@ namespace RhinoInside.Revit.Convert.Geometry
 
       return ToEdgeCurveMany(edgeCurve).Select(x => DB.BRepBuilderEdgeGeometry.Create(x));
     }
+
+    static DB.Document acisDocument;
+    static DB.Document ACISDocument => acisDocument.IsValid() ? acisDocument :
+      acisDocument = Revit.ActiveDBApplication.NewProjectDocument(DB.UnitSystem.Imperial);
+
+    internal static DB.Solid ToACIS(/*const*/ Brep brep, double factor)
+    {
+      var TempFolder = Path.Combine(Path.GetTempPath(), "McNeel", "Rhino.Inside", $"V{RhinoApp.ExeVersion}", "SATCaches");
+      Directory.CreateDirectory(TempFolder);
+
+      var SATFile = Path.Combine(TempFolder, $"{Guid.NewGuid():N}.sat");
+
+      // Export
+      {
+        var activeModel = RhinoDoc.ActiveDoc;
+        var rhinoWindowEnabled = Rhinoceros.MainWindow.Enabled;
+        var redrawEnabled = activeModel.Views.RedrawEnabled;
+        var objectGUID = default(Guid);
+        try
+        {
+          Rhinoceros.MainWindow.Enabled = false;
+          activeModel.Views.RedrawEnabled = false;
+          activeModel.Objects.UnselectAll();
+
+          objectGUID = activeModel.Objects.Add(brep);
+
+          activeModel.Objects.Select(objectGUID);
+          RhinoApp.RunScript($@"_-Export ""{SATFile}"" ""Default"" _Enter", false);
+        }
+        finally
+        {
+          activeModel.Objects.Delete(objectGUID, true);
+          activeModel.Views.RedrawEnabled = redrawEnabled;
+          Rhinoceros.MainWindow.Enabled = rhinoWindowEnabled;
+        }
+      }
+
+      // Import
+      if (File.Exists(SATFile))
+      {
+        try
+        {
+          var doc = GeometryEncoder.Context.Peek.Document ?? ACISDocument;
+
+          // In case we don't have a  destination document we create a new one here.
+          using (doc.IsValid() ? default : doc = Revit.ActiveDBApplication.NewProjectDocument(DB.UnitSystem.Imperial))
+          {
+            try
+            {
+              // Everything in this scope should be rolledback.
+              using (doc.RollBackScope())
+              {
+                using
+                (
+                  var SATOptions = new DB.SATImportOptions()
+                  {
+                    ReferencePoint = DB.XYZ.Zero,
+                    Placement = DB.ImportPlacement.Origin,
+                    CustomScale = DB.UnitUtils.Convert(factor, DB.DisplayUnitType.DUT_DECIMAL_FEET, doc.GetUnits().GetFormatOptions(DB.UnitType.UT_Length).DisplayUnits),
+                  }
+                )
+                {
+                  // Create a 3D view to 
+                  var typeId = doc.GetDefaultElementTypeId(DB.ElementTypeGroup.ViewType3D);
+                  var view = DB.View3D.CreatePerspective(doc, typeId);
+
+                  var instanceId = doc.Import(SATFile, SATOptions, view);
+                  if (doc.GetElement(instanceId) is DB.Element element)
+                  {
+                    using (var options = new DB.Options() { DetailLevel = DB.ViewDetailLevel.Fine })
+                    {
+                      /// <see cref="DB.GeometryInstance.GetInstanceGeometry"/> is like calling
+                      /// <see cref="DB.SolidUtils.CreateTransformed"/> on <see cref="DB.GeometryInstance.SymbolGeometry"/>.
+                      /// It creates a transformed copy of the solid that will survive the Rollback.
+                      /// Unfortunately Paint information lives in the element so even if we paint the
+                      /// instance before doing the duplicate this information is lost after Rollback.
+                      if
+                      (
+                        element.get_Geometry(options) is DB.GeometryElement geometryElement &&
+                        geometryElement.First() is DB.GeometryInstance instance &&
+                        instance.GetInstanceGeometry().First() is DB.Solid solid
+                      )
+                      {
+                        return solid;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            finally
+            {
+              if (doc != ACISDocument && doc != GeometryEncoder.Context.Peek.Document)
+                doc.Close(false);
+            }
+          }
+        }
+        finally
+        {
+          try { File.Delete(SATFile); } catch { }
+        }
+      }
+
+      return default;
+    }
+
+    internal static bool IsEquivalent(this DB.Solid solid, Brep brep)
+    {
+      var hit = new bool[brep.Faces.Count];
+
+      foreach (var face in solid.Faces.Cast<DB.Face>())
+      {
+        double[] samples = { 0.0, 1.0 / 5.0, 2.0 / 5.0, 3.0 / 5.0, 4.0 / 5.0, 1.0};
+
+        foreach (var edges in face.EdgeLoops.Cast<DB.EdgeArray>())
+        {
+          foreach (var edge in edges.Cast<DB.Edge>())
+          {
+            foreach (var sample in samples)
+            {
+              var point = edge.Evaluate(sample).ToPoint3d();
+
+              if (!brep.ClosestPoint(point, out var closest, out var ci, out var s, out var t, Revit.VertexTolerance * Revit.ModelUnits, out var normal))
+                return false;
+            }
+          }
+        }
+
+        // Get some samples
+        using (var mesh = face.Triangulate(0.0))
+        {
+          foreach (var vertex in mesh.Vertices)
+          {
+            // Recover real position on face
+            if (face.Project(vertex) is DB.IntersectionResult result)
+            {
+              using (result)
+              {
+                var point = result.XYZPoint.ToPoint3d();
+
+                // Check if is on Brep
+                if (!brep.ClosestPoint(point, out var closest, out var ci, out var s, out var t, Revit.VertexTolerance * Revit.ModelUnits, out var normal))
+                  return false;
+
+                if (ci.ComponentIndexType == ComponentIndexType.BrepFace)
+                  hit[ci.Index] = true;
+              }
+            }
+          }
+        }
+      }
+
+      return !hit.Any(x => !x);
+    }
+
     #endregion
   }
 }

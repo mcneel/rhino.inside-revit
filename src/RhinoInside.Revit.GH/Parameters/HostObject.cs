@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Parameters
     protected override Types.IGH_HostObject InstantiateT() => new Types.HostObject();
   }
 
-  public class HostObjectType : ElementIdWithoutPreviewParam<Types.IGH_HostObjectType, DB.HostObjAttributes>
+  public class HostObjectType : Element<Types.IGH_HostObjectType, DB.HostObjAttributes>
   {
     public override GH_Exposure Exposure => GH_Exposure.hidden;
     public override Guid ComponentGuid => new Guid("708AB072-878E-41ED-9B8C-AAB0E1D85A53");

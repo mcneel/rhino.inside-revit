@@ -67,7 +67,7 @@ namespace RhinoInside.Revit.GH.Components
       if (element != null)
       {
         var boundaryBBox = boundary.GetBoundingBox(true);
-        element.get_Parameter(DB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM).Set(boundaryBBox.Min.Z / Revit.ModelUnits - level.Value.Elevation);
+        element.get_Parameter(DB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM).Set(boundaryBBox.Min.Z / Revit.ModelUnits - level.Value.GetHeight());
       }
     }
   }

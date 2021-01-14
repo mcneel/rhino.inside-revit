@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Rhino;
-using Rhino.Geometry;
 
-namespace RhinoInside.Revit.Geometry.Extensions
+namespace Rhino.Geometry
 {
-  public static class Vector3dExtension
+  static class Vector3dExtension
   {
     /// <summary>
     /// Arbitrary Axis Algorithm
@@ -31,7 +29,7 @@ namespace RhinoInside.Revit.Geometry.Extensions
     }
   }
 
-  public static class BoundingBoxExtension
+  static class BoundingBoxExtension
   {
     /// <summary>
     /// Aligned bounding box solver. Gets the world axis aligned bounding box for the transformed <paramref name="value"/>.
@@ -44,14 +42,15 @@ namespace RhinoInside.Revit.Geometry.Extensions
       if (!value.IsValid)
         return BoundingBox.Unset;
 
-      if (xform.IsIdentity)
-        return value;
+      // BoundingBox constructor already checks for Identity xform
+      //if (xform.IsIdentity)
+      //  return value;
 
       return new BoundingBox(value.GetCorners(), xform);
     }
   }
 
-  public static class BoxExtension
+  static class BoxExtension
   {
     /// <summary>
     /// Aligned bounding box solver. Gets the world axis aligned bounding box for the transformed <paramref name="value"/>.
@@ -64,14 +63,15 @@ namespace RhinoInside.Revit.Geometry.Extensions
       if (!value.IsValid)
         return BoundingBox.Unset;
 
-      if (xform.IsIdentity)
-        return value.BoundingBox;
+      // BoundingBox constructor already checks for Identity xform
+      //if (xform.IsIdentity)
+      //  return value.BoundingBox;
 
       return new BoundingBox(value.GetCorners(), xform);
     }
   }
 
-  public static class ExtrusionExtension
+  static class ExtrusionExtension
   {
     public static bool TryGetExtrusion(this Surface surface, out Extrusion extrusion)
     {
@@ -358,8 +358,49 @@ namespace RhinoInside.Revit.Geometry.Extensions
     }
   }
 
-  public static class LineExtension
+  static class EllipseExtension
   {
+    public static Ellipse Reverse(this Ellipse ellipse)
+    {
+      var plane = ellipse.Plane;
+      plane.Flip();
+
+      return new Ellipse(plane, ellipse.Radius2, ellipse.Radius1);
+    }
+
+    public static bool IsClosed(this Ellipse ellipse, Interval interval, double tolerance)
+    {
+      var nurb = ellipse.ToNurbsCurve();
+      return nurb.PointAt(interval.Min).DistanceTo(nurb.PointAt(interval.Max)) < tolerance;
+    }
+  }
+
+  static class CurveExtension
+  {
+    public static bool IsClosed(this Curve curve, double tolerance)
+    {
+      return curve.IsClosed || curve.PointAtStart.DistanceTo(curve.PointAtEnd) < tolerance;
+    }
+
+    public static IEnumerable<Curve> SplitClosed(this Curve curve, double tolerance)
+    {
+      if (curve is PolyCurve polyCurve)
+      {
+        int segmentCount = polyCurve.SegmentCount;
+        for (int s = 0; s < segmentCount; ++s)
+        {
+          foreach (var c in polyCurve.SegmentCurve(s).SplitClosed(tolerance))
+            yield return c;
+        }
+      }
+      if ((curve is ArcCurve || curve is NurbsCurve) && curve.IsClosed(tolerance))
+      {
+        foreach (var c in curve.Split(curve.Domain.Mid))
+          yield return c;
+      }
+      else yield return curve;
+    }
+
     public static bool TryGetLine(this Curve curve, out Line line, double tolerance)
     {
       if (curve is LineCurve lineCurve)
@@ -375,17 +416,6 @@ namespace RhinoInside.Revit.Geometry.Extensions
 
       line = default;
       return false;
-    }
-  }
-
-  static class EllipseExtension
-  {
-    public static Ellipse Reverse(this Ellipse ellipse)
-    {
-      var plane = ellipse.Plane;
-      plane.Flip();
-
-      return new Ellipse(plane, ellipse.Radius2, ellipse.Radius1);
     }
 
     public static bool TryGetEllipse(this Curve curve, out Ellipse ellipse, out Interval interval, double tolerance)
@@ -434,48 +464,15 @@ namespace RhinoInside.Revit.Geometry.Extensions
       interval = Interval.Unset;
       return false;
     }
-
-    public static bool IsClosed(this Ellipse ellipse, Interval interval, double tolerance)
-    {
-      var nurb = ellipse.ToNurbsCurve();
-      return nurb.PointAt(interval.Min).DistanceTo(nurb.PointAt(interval.Max)) < tolerance;
-    }
   }
 
-  static class CurveExtension
+  static class GeometryBaseExtension
   {
-    public static bool IsClosed(this Curve curve, double tolerance)
+    public static bool TryGetUserString<T>(this GeometryBase geometry, string key, out T value, T def) where T : IConvertible
     {
-      return curve.IsClosed || curve.PointAtStart.DistanceTo(curve.PointAtEnd) < tolerance;
-    }
-
-    public static IEnumerable<Curve> SplitClosed(this Curve curve, double tolerance)
-    {
-      if (curve is PolyCurve polyCurve)
+      if (geometry.GetUserString(key) is string stringValue)
       {
-        int segmentCount = polyCurve.SegmentCount;
-        for (int s = 0; s < segmentCount; ++s)
-        {
-          foreach (var c in polyCurve.SegmentCurve(s).SplitClosed(tolerance))
-            yield return c;
-        }
-      }
-      if ((curve is ArcCurve || curve is NurbsCurve) && curve.IsClosed(tolerance))
-      {
-        foreach (var c in curve.Split(curve.Domain.Mid))
-          yield return c;
-      }
-      else yield return curve;
-    }
-  }
-
-  public static class GeometryBaseExtension
-  {
-    public static bool GetUserBoolean(this GeometryBase geometry, string key, out bool value, bool def = default)
-    {
-      if (geometry.GetUserInteger(key, out var idx))
-      {
-        value = idx != 0;
+        value = (T) System.Convert.ChangeType(stringValue, typeof(T), System.Globalization.CultureInfo.InvariantCulture);
         return true;
       }
 
@@ -483,29 +480,95 @@ namespace RhinoInside.Revit.Geometry.Extensions
       return false;
     }
 
-    public static bool GetUserInteger(this GeometryBase geometry, string key, out int value, int def = default)
+    public static bool TrySetUserString<T>(this GeometryBase geometry, string key, T value, T def) where T : IConvertible
     {
-      value = def;
-      return geometry.GetUserString(key) is string stringValue && int.TryParse(stringValue, out value);
+      if (value.Equals(def))
+        return geometry.SetUserString(key, null);
+
+      var stringValue = (string) System.Convert.ChangeType(value, typeof(string), System.Globalization.CultureInfo.InvariantCulture);
+      return geometry.SetUserString(key, stringValue);
     }
 
-    public static bool GetUserEnum<E>(this GeometryBase geometry, string key, out E value, E def = default) where E : struct
-    {
-      value = def;
-      return geometry.GetUserString(key) is string stringValue && Enum.TryParse<E>(stringValue, out value);
-    }
+    public static bool TryGetUserString(this GeometryBase geometry, string key, out Autodesk.Revit.DB.ElementId value) =>
+      TryGetUserString(geometry, key, out value, Autodesk.Revit.DB.ElementId.InvalidElementId);
 
-    public static bool GetUserElementId(this GeometryBase geometry, string key, out Autodesk.Revit.DB.ElementId value) =>
-      GetUserElementId(geometry, key, out value, Autodesk.Revit.DB.ElementId.InvalidElementId);
-    public static bool GetUserElementId(this GeometryBase geometry, string key, out Autodesk.Revit.DB.ElementId value, Autodesk.Revit.DB.ElementId def)
+    public static bool TryGetUserString(this GeometryBase geometry, string key, out Autodesk.Revit.DB.ElementId value, Autodesk.Revit.DB.ElementId def)
     {
-      if (geometry.GetUserInteger(key, out var idx))
+      if (geometry.TryGetUserString(key, out int id, def.IntegerValue))
       {
-        value = new Autodesk.Revit.DB.ElementId(idx);
+        value = new Autodesk.Revit.DB.ElementId(id);
         return true;
       }
 
       value = def;
+      return false;
+    }
+
+    public static bool TrySetUserString(this GeometryBase geometry, string key, Autodesk.Revit.DB.ElementId value) =>
+      geometry.TrySetUserString(key, value.IntegerValue, Autodesk.Revit.DB.ElementId.InvalidElementId.IntegerValue);
+
+    public static bool TrySetUserString(this GeometryBase geometry, string key, Autodesk.Revit.DB.ElementId value, Autodesk.Revit.DB.ElementId def) =>
+      geometry.TrySetUserString(key, value.IntegerValue, def.IntegerValue);
+  }
+}
+
+namespace Rhino.DocObjects.Tables
+{
+  static class NamedConstructionPlaneTableExtension
+  {
+    public static int Add(this NamedConstructionPlaneTable table, ConstructionPlane cplane)
+    {
+      if (table.Document != RhinoDoc.ActiveDoc)
+        throw new InvalidOperationException("Invalid Rhino Active Document");
+
+      if (table.Find(cplane.Name) < 0)
+      {
+        var previous = table.Document.Views.ActiveView.MainViewport.GetConstructionPlane();
+
+        try
+        {
+          table.Document.Views.ActiveView.MainViewport.SetConstructionPlane(cplane);
+          //table.Document.Views.ActiveView.MainViewport.PushConstructionPlane(cplane);
+          if (RhinoApp.RunScript($"_-NamedCPlane _Save \"{cplane.Name}\" _Enter", false))
+            return table.Count;
+        }
+        finally
+        {
+          //table.Document.Views.ActiveView.MainViewport.PopConstructionPlane();
+          table.Document.Views.ActiveView.MainViewport.SetConstructionPlane(previous);
+        }
+      }
+
+      return -1;
+    }
+
+    public static bool Modify(this NamedConstructionPlaneTable table, ConstructionPlane cplane, int index, bool quiet)
+    {
+      if (table.Document != RhinoDoc.ActiveDoc)
+        throw new InvalidOperationException("Invalid Rhino Active Document");
+
+      if (index <= table.Count)
+      {
+        var previous = table.Document.Views.ActiveView.MainViewport.GetConstructionPlane();
+
+        try
+        {
+          //table.Document.Views.ActiveView.MainViewport.PushConstructionPlane(cplane);
+          table.Document.Views.ActiveView.MainViewport.SetConstructionPlane(cplane);
+
+          var current = table[index];
+          if (current.Name != cplane.Name)
+            return RhinoApp.RunScript($"_-NamedCPlane _Rename \"{current.Name}\" \"{cplane.Name}\" _Save \"{cplane.Name}\" _Enter", !quiet);
+          else
+            return RhinoApp.RunScript($"_-NamedCPlane _Save \"{cplane.Name}\" _Enter", !quiet);
+        }
+        finally
+        {
+          //table.Document.Views.ActiveView.MainViewport.PopConstructionPlane();
+          table.Document.Views.ActiveView.MainViewport.SetConstructionPlane(previous);
+        }
+      }
+
       return false;
     }
   }

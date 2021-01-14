@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using System.Windows.Forms.InteropExtension;
+using System.Windows.Forms.Interop;
 
 using Autodesk.Revit.Attributes;
 using DB = Autodesk.Revit.DB;
@@ -157,7 +157,7 @@ namespace RhinoInside.Revit.UI
       string name = mat.Name;
       var appearanceAssetId = DB.ElementId.InvalidElementId;
 
-#if REVIT_2019
+#if REVIT_2018
       if (DB.AppearanceAssetElement.GetAppearanceAssetElementByName(doc, name) is DB.AppearanceAssetElement appearanceAssetElement)
         appearanceAssetId = appearanceAssetElement.Id;
       else
@@ -332,7 +332,7 @@ namespace RhinoInside.Revit.UI
       var layer = model.AllLayers.FindIndex(attributes.LayerIndex);
       if (layer?.IsVisible ?? false)
       {
-        using (var ctx = GeometryEncoder.Context.Push())
+        using (var ctx = GeometryEncoder.Context.Push(doc))
         {
           switch (attributes.MaterialSource)
           {
@@ -497,7 +497,7 @@ namespace RhinoInside.Revit.UI
 
               var geometry = obj.Geometry;
               if (geometry is Extrusion extrusion) geometry = extrusion.ToBrep();
-              else if (geometry is SubD subD) geometry = subD.ToBrep();
+              else if (geometry is SubD subD) geometry = subD.ToBrep(SubDToBrepOptions.Default);
 
               try
               {

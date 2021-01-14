@@ -15,10 +15,10 @@ namespace RhinoInside.Revit.GH.Types
     public DB.Document Document { get; private set; } = default;
 
     public DataObject() { }
-
-    public DataObject(T apiObject, DB.Document srcDocument) : base(apiObject)
+    public DataObject(T apiObject) : base(apiObject) {}
+    public DataObject(T apiObject, DB.Document sourceDoc) : base(apiObject)
     {
-      Document = srcDocument;
+      Document = sourceDoc;
     }
 
     public override IGH_Goo Duplicate() => throw new NotImplementedException();

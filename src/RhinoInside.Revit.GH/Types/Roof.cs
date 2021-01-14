@@ -7,12 +7,12 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  [Kernel.Attributes.Name("Roof")]
   public class Roof : HostObject
   {
-    public override string TypeDescription => "Represents a Revit roof element";
     protected override Type ScriptVariableType => typeof(DB.RoofBase);
-    public static explicit operator DB.RoofBase(Roof value) =>
-      value?.IsValid == true ? value.Document.GetElement(value) as DB.RoofBase : default;
+    public static explicit operator DB.RoofBase(Roof value) => value?.Value;
+    public new DB.RoofBase Value => base.Value as DB.RoofBase;
 
     public Roof() { }
     public Roof(DB.RoofBase roof) : base(roof) { }
@@ -21,10 +21,10 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        switch ((DB.RoofBase) this)
+        switch (Value)
         {
           case DB.ExtrusionRoof extrusionRoof:
-            return Level.FromElement(extrusionRoof.Document.GetElement(extrusionRoof.get_Parameter(DB.BuiltInParameter.ROOF_CONSTRAINT_LEVEL_PARAM).AsElementId())) as Level;
+            return new Level(extrusionRoof.Document, extrusionRoof.get_Parameter(DB.BuiltInParameter.ROOF_CONSTRAINT_LEVEL_PARAM).AsElementId());
         }
 
         return base.Level;
@@ -35,9 +35,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var roof = (DB.RoofBase) this;
-
-        if (!(roof.Location is DB.LocationPoint) && !(roof.Location is DB.LocationCurve))
+        if(Value is DB.RoofBase roof && !(roof.Location is DB.LocationPoint) && !(roof.Location is DB.LocationCurve))
         {
           if (roof.GetFirstDependent<DB.Sketch>() is DB.Sketch sketch)
           {
@@ -68,7 +66,7 @@ namespace RhinoInside.Revit.GH.Types
             }
 
             var plane = sketch.SketchPlane.GetPlane().ToPlane();
-            var origin = new Point3d(center.X, center.Y, Level.Elevation + levelOffset);
+            var origin = new Point3d(center.X, center.Y, Level.Height + levelOffset);
             var xAxis = plane.XAxis;
             var yAxis = plane.YAxis;
 

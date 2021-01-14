@@ -162,7 +162,7 @@ namespace RhinoInside.Revit.GH.Components
       deletedElements = 0;
     }
 
-    static void ClassifyElementIds(IGrouping<DB.Document, Types.IGH_ElementId> group, out HashSet<DB.ElementId> elements, out HashSet<DB.ElementId> types)
+    static void ClassifyElementIds(IGrouping<DB.Document, Types.IGH_Element> group, out HashSet<DB.ElementId> elements, out HashSet<DB.ElementId> types)
     {
       elements = new HashSet<DB.ElementId>();
       types = new HashSet<DB.ElementId>();
@@ -184,7 +184,7 @@ namespace RhinoInside.Revit.GH.Components
     (
       DB.Document document,
       ICollection<DB.ElementId> elementIds,
-      List<Types.ElementId> deleted,
+      List<Types.Element> deleted,
       List<Types.Element> modified
     )
     {
@@ -241,7 +241,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var elementList = new List<Types.IGH_ElementId>();
+      var elementList = new List<Types.IGH_Element>();
       if (!DA.GetDataList("Elements", elementList))
         return;
 
@@ -258,7 +258,7 @@ namespace RhinoInside.Revit.GH.Components
           try
           {
             var Succeeded = true;
-            var Deleted = new List<Types.ElementId>();
+            var Deleted = new List<Types.Element>();
             var Modified = new List<Types.Element>();
 
             foreach (var elementGroup in elementGroups)

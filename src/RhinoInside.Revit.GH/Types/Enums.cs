@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Grasshopper.Kernel.Types;
 using DB = Autodesk.Revit.DB;
 using DBX = RhinoInside.Revit.External.DB;
 
@@ -14,28 +15,40 @@ namespace RhinoInside.Revit.GH.Types
     Name("Parameter Class"),
     Description("Represents a Revit Parameter class."),
   ]
-  public class ParameterClass : GH_Enum<DBX.ParameterClass> { }
+  public class ParameterClass : GH_Enum<DBX.ParameterClass>
+  {
+    public override bool IsEmpty => Value == DBX.ParameterClass.Any;
+  }
 
   [
     ComponentGuid("2A5D36DD-CD94-4306-963B-D9312DAEB0F9"),
     Name("Parameter Binding"),
     Description("Represents a Revit parameter binding type."),
   ]
-  public class ParameterBinding : GH_Enum<DBX.ParameterBinding> { }
+  public class ParameterBinding : GH_Enum<DBX.ParameterBinding>
+  {
+    public override bool IsEmpty => Value == DBX.ParameterBinding.Unknown;
+  }
 
   [
     ComponentGuid("A3621A84-190A-48C2-9B0C-F5784B78089C"),
     Name("Storage Type"),
     Description("Represents a Revit storage type."),
   ]
-  public class StorageType : GH_Enum<DB.StorageType> { }
+  public class StorageType : GH_Enum<DB.StorageType>
+  {
+    public override bool IsEmpty => Value == DB.StorageType.None;
+  }
 
   [
     ComponentGuid("A5EA05A9-C17E-48F4-AC4C-34F169AE4F9A"),
     Name("Parameter Type"),
     Description("Represents a Revit parameter type."),
   ]
-  public class ParameterType : GH_Enum<DB.ParameterType> { }
+  public class ParameterType : GH_Enum<DB.ParameterType>
+  {
+    public override bool IsEmpty => Value == DB.ParameterType.Invalid;
+  }
 
   [
     ComponentGuid("38E9E729-9D9F-461F-A1D7-798CDFA2CD4C"),
@@ -146,7 +159,6 @@ namespace RhinoInside.Revit.GH.Types
   {
     public ViewFamily() : base(DB.ViewFamily.Invalid) { }
     public ViewFamily(DB.ViewFamily value) : base(value) { }
-
     public override bool IsEmpty => Value == DB.ViewFamily.Invalid;
 
     public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
@@ -277,6 +289,7 @@ namespace RhinoInside.Revit.GH.Types
   {
     public WallSystemFamily() : base(DB.WallKind.Unknown) { }
     public WallSystemFamily(DB.WallKind value) : base(value) { }
+    public override bool IsEmpty => Value == DB.WallKind.Unknown;
 
     public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
     (
@@ -362,6 +375,8 @@ namespace RhinoInside.Revit.GH.Types
   {
     public LayerFunction() : base() { }
     public LayerFunction(DB.MaterialFunctionAssignment value) : base(value) { }
+
+    public override bool IsEmpty => Value == DB.MaterialFunctionAssignment.None;
   }
 
   [
@@ -418,6 +433,7 @@ namespace RhinoInside.Revit.GH.Types
   {
     public CurtainGridJoinCondition() : base() { }
     public CurtainGridJoinCondition(DBX.CurtainGridJoinCondition value) : base(value) { }
+    public override bool IsEmpty => Value == DBX.CurtainGridJoinCondition.NotDefined;
 
     public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
     (
@@ -441,7 +457,6 @@ namespace RhinoInside.Revit.GH.Types
   {
     public CurtainMullionSystemFamily() : base(DBX.CurtainMullionSystemFamily.Unknown) { }
     public CurtainMullionSystemFamily(DBX.CurtainMullionSystemFamily value) : base(value) { }
-
     public override bool IsEmpty => Value == DBX.CurtainMullionSystemFamily.Unknown;
 
     public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
@@ -468,6 +483,7 @@ namespace RhinoInside.Revit.GH.Types
   {
     public CurtainPanelSystemFamily() : base() { }
     public CurtainPanelSystemFamily(DBX.CurtainPanelSystemFamily value) : base(value) { }
+    public override bool IsEmpty => Value == DBX.CurtainPanelSystemFamily.Unknown;
   }
 
   [
@@ -477,5 +493,34 @@ namespace RhinoInside.Revit.GH.Types
   ]
   public class FloorFunction : GH_Enum<DBX.FloorFunction>
   {
+  }
+
+  [
+    ComponentGuid("07b212f2-3e72-4f1a-a178-54481fcf3df3"),
+    Name("Physical Asset Class"),
+    Description("Represents physical asset class"),
+  ]
+  public class StructuralAssetClass : GH_Enum<DB.StructuralAssetClass>
+  {
+    public override bool IsEmpty => Value == DB.StructuralAssetClass.Undefined;
+  }
+
+  [
+    ComponentGuid("cf6a7af7-f588-486a-95e0-a398a5410e24"),
+    Name("Material Behavior"),
+    Description("Represents material behavior of physical or thermal assets"),
+  ]
+  public class StructuralBehavior : GH_Enum<DB.StructuralBehavior>
+  {
+  }
+
+  [
+    ComponentGuid("6a2b7564-9dd1-4cfc-a539-a352cb39cb7c"),
+    Name("Thermal Material Type"),
+    Description("Represents thermal material type"),
+  ]
+  public class ThermalMaterialType : GH_Enum<DB.ThermalMaterialType>
+  {
+    public override bool IsEmpty => Value == DB.ThermalMaterialType.Undefined;
   }
 }

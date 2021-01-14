@@ -27,6 +27,12 @@ namespace RhinoInside.Revit.Convert.Geometry
     #endregion
 
     #region Scale
+    public static void Scale(ref Interval value, double factor)
+    {
+      value.T0 *= (float) factor;
+      value.T1 *= (float) factor;
+    }
+
     public static void Scale(ref Point2f value, double factor)
     {
       value.X *= (float) factor;
@@ -136,6 +142,9 @@ namespace RhinoInside.Revit.Convert.Geometry
     #endregion
 
     #region InOtherUnits
+    public static Interval InOtherUnits(this Interval value, double factor)
+    { Scale(ref value, factor); return value; }
+
     public static Point3f InOtherUnits(this Point3f value, double factor)
     { Scale(ref value, factor); return value; }
 
@@ -251,6 +260,9 @@ namespace RhinoInside.Revit.Convert.Geometry
     #endregion
 
     #region InRhinoUnits
+    public static Interval InRhinoUnits(this Interval value)
+    { Scale(ref value, ToRhinoUnits); return value; }
+
     public static Point3f InRhinoUnits(this Point3f value)
     { Scale(ref value, ToRhinoUnits); return value; }
 
@@ -305,6 +317,9 @@ namespace RhinoInside.Revit.Convert.Geometry
     #endregion
 
     #region InHostUnits
+    public static Interval InHostUnits(this Interval value)
+    { Scale(ref value, ToHostUnits); return value; }
+
     public static Point3f InHostUnits(this Point3f value)
     { Scale(ref value, ToHostUnits); return value; }
 

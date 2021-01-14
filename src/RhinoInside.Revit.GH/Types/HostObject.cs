@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
@@ -7,28 +8,23 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public interface IGH_HostObject : IGH_InstanceElement
-  {
-    DB.HostObject APIHostObject { get; }
-  }
+  [Kernel.Attributes.Name("Host")]
+  public interface IGH_HostObject : IGH_InstanceElement { }
 
+  [Kernel.Attributes.Name("Host")]
   public class HostObject : InstanceElement, IGH_HostObject
   {
-    public override string TypeDescription => "Represents a Revit host element";
     protected override Type ScriptVariableType => typeof(DB.HostObject);
-    public DB.HostObject APIHostObject => IsValid ? Document.GetElement(Value) as DB.HostObject : default;
-    public static explicit operator DB.HostObject(HostObject value) => value?.APIHostObject;
+    public new DB.HostObject Value => base.Value as DB.HostObject;
 
-    public HostObject() { }
-    public HostObject(DB.HostObject host) : base(host) { }
+    protected internal HostObject() { }
+    protected internal HostObject(DB.HostObject host) : base(host) { }
 
     public override Plane Location
     {
       get
       {
-        var host = APIHostObject;
-
-        if (!(host.Location is DB.LocationPoint) && !(host.Location is DB.LocationCurve))
+        if (Value is DB.HostObject host && !(host.Location is DB.LocationPoint) && !(host.Location is DB.LocationCurve))
         {
           if (host.GetFirstDependent<DB.Sketch>() is DB.Sketch sketch)
           {
@@ -51,7 +47,7 @@ namespace RhinoInside.Revit.GH.Types
               hostLevelId = host.get_Parameter(DB.BuiltInParameter.ROOF_CONSTRAINT_LEVEL_PARAM)?.AsElementId() ?? hostLevelId;
 
             if (host.Document.GetElement(hostLevelId) is DB.Level level)
-              center.Z = level.Elevation * Revit.ModelUnits;
+              center.Z = level.GetHeight() * Revit.ModelUnits;
 
             var plane = sketch.SketchPlane.GetPlane().ToPlane();
             var origin = center;
@@ -81,22 +77,34 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override Vector3d Orientation => base.Orientation;
+    public IList<CurtainGrid> CurtainGrids
+    {
+      get
+      {
+        var grids = default(IEnumerable<DB.CurtainGrid>);
+        switch (Value)
+        {
+          case DB.CurtainSystem curtainSystem: grids = curtainSystem.CurtainGrids?.Cast<DB.CurtainGrid>(); break;
+          case DB.ExtrusionRoof extrusionRoof: grids = extrusionRoof.CurtainGrids?.Cast<DB.CurtainGrid>(); break;
+          case DB.FootPrintRoof footPrintRoof: grids = footPrintRoof.CurtainGrids?.Cast<DB.CurtainGrid>(); break;
+          case DB.Wall wall: grids = wall.CurtainGrid is null ? null : Enumerable.Repeat(wall.CurtainGrid, 1); break;
+        }
+
+        return grids.Select(x => new CurtainGrid(Value, x)).ToArray();
+      }
+    }
   }
 
-  public interface IGH_HostObjectType : IGH_ElementType
-  {
-    DB.HostObjAttributes HostObjAttributes { get; }
-  }
+  [Kernel.Attributes.Name("Host Type")]
+  public interface IGH_HostObjectType : IGH_ElementType { }
 
+  [Kernel.Attributes.Name("Host Type")]
   public class HostObjectType : ElementType, IGH_HostObjectType
   {
-    public override string TypeDescription => "Represents a Revit host element type";
     protected override Type ScriptVariableType => typeof(DB.HostObjAttributes);
-    public DB.HostObjAttributes HostObjAttributes => IsValid ? Document.GetElement(Value) as DB.HostObjAttributes : default;
-    public static explicit operator DB.HostObjAttributes(HostObjectType value) => value?.HostObjAttributes;
+    public new DB.HostObjAttributes Value => base.Value as DB.HostObjAttributes;
 
     public HostObjectType() { }
-    public HostObjectType(DB.HostObjAttributes type) : base(type) { }
+    protected internal HostObjectType(DB.HostObjAttributes type) : base(type) { }
   }
 }

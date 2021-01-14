@@ -1,0 +1,4 @@
+{% assign c = site.data.misc | where_exp: "item", "item.uuid contains include.uuid" %}
+<span class="comp-tag">
+    <strong><img src="{{ c.first.iconsrc | prepend: site.baseurl }}"/>{{ include.title }}</strong>
+</span>

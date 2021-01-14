@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Kernel
   /// Base interface for all Parameter types in RhinoInside.Revit.GH that reference Revit elements.
   /// </summary>
   /// <remarks>
-  /// Do not implement this interface from scratch, derive from <c>RhinoInside.Revit.GH.Types.ElementIdParam</c> instead.
+  /// Do not implement this interface from scratch, derive from <see cref="RhinoInside.Revit.GH.Types.ElementIdParam"/> instead.
   /// </remarks>
   /// <seealso cref="RhinoInside.Revit.GH.Types.ElementIdParam"/>
   public interface IGH_ElementIdParam : IGH_Param
@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Kernel
   /// Base interface for all Component types in RhinoInside.Revit.GH that reference Revit elements.
   /// </summary>
   /// <remarks>
-  /// Do not implement this interface from scratch, derive from <c>RhinoInside.Revit.GH.Components.Component</c> instead.
+  /// Do not implement this interface from scratch, derive from <see cref="RhinoInside.Revit.GH.Components.Component"/> instead.
   /// </remarks>
   /// <seealso cref="RhinoInside.Revit.GH.Components.Component"/>
   public interface IGH_ElementIdComponent : IGH_Component

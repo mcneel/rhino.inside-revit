@@ -6,13 +6,14 @@ using RhinoInside.Revit.Convert.Units;
 using RhinoInside.Revit.Convert.Geometry;
 using DB = Autodesk.Revit.DB;
 using RhinoInside.Revit.Convert.System.Collections.Generic;
+using RhinoInside.Revit.External.DB.Extensions;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Site
 {
   public class BuildingPadByOutline : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("ADE71474-5F00-4BD5-9D1E-D518B42137F2");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
     public BuildingPadByOutline() : base
     (
@@ -73,7 +74,7 @@ namespace RhinoInside.Revit.GH.Components
         ReplaceElement(ref element, newPad, ParametersMask);
       }
 
-      element?.get_Parameter(DB.BuiltInParameter.BUILDINGPAD_HEIGHTABOVELEVEL_PARAM).Set(boundaryBBox.Min.Z / Revit.ModelUnits - level.Value.Elevation);
+      element?.get_Parameter(DB.BuiltInParameter.BUILDINGPAD_HEIGHTABOVELEVEL_PARAM).Set(boundaryBBox.Min.Z / Revit.ModelUnits - level.Value.GetHeight());
     }
   }
 }

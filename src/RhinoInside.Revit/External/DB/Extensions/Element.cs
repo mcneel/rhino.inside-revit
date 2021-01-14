@@ -3,24 +3,77 @@ using System.Collections.Generic;
 using System.Linq;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Architecture;
+using Autodesk.Revit.DB.Mechanical;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
-  public static class ElementExtension
+  internal static class ElementEqualityComparer
   {
-    public static bool IsSameElement(this Element self, Element other)
+    public static readonly IEqualityComparer<Element> InterDocument = new InterDocumentComparer();
+    public static readonly IEqualityComparer<Element> SameDocument = new SameDocumentComparer();
+
+    struct SameDocumentComparer : IEqualityComparer<Element>
+    {
+      bool IEqualityComparer<Element>.Equals(Element x, Element y) => ReferenceEquals(x, y) || x?.Id == y?.Id;
+      int IEqualityComparer<Element>.GetHashCode(Element obj) => obj?.Id.IntegerValue ?? int.MinValue;
+    }
+
+    struct InterDocumentComparer : IEqualityComparer<Element>
+    {
+      bool IEqualityComparer<Element>.Equals(Element x, Element y) =>  IsEquivalent(x, y);
+      int IEqualityComparer<Element>.GetHashCode(Element obj) => (obj?.Id.IntegerValue ?? int.MinValue) ^ (obj?.Document.GetHashCode() ?? 0);
+    }
+
+    /// <summary>
+    /// Determines whether the specified <see cref="Autodesk.Revit.DB.Element"/> equals to this <see cref="Autodesk.Revit.DB.Element"/>.
+    /// </summary>
+    /// <remarks>
+    /// Two <see cref="Autodesk.Revit.DB.Element"/> instances are considered equivalent if they represent the same element
+    /// in this Revit session.
+    /// </remarks>
+    /// <param name="self"></param>
+    /// <param name="other"></param>
+    /// <returns></returns>
+    public static bool IsEquivalent(this Element self, Element other)
     {
       if (ReferenceEquals(self, other))
         return true;
 
-      return self.Id == other?.Id && self.Document.Equals(other?.Document);
+      if (self?.Id != other?.Id)
+        return false;
+
+      return self.Document.Equals(other);
+    }
+  }
+
+  public static class ElementExtension
+  {
+    public static bool CanBeRenamed(this Element element)
+    {
+      if (element is null) return false;
+
+      using (element.Document.RollBackScope())
+      {
+        try { element.Name = Guid.NewGuid().ToString("N"); }
+        catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
+      }
+
+      return true;
     }
 
-    [Obsolete]
-    public static GeometryElement GetGeometry(this Element element, ViewDetailLevel viewDetailLevel, out Options options)
+    public static bool IsNameInUse(this Element element, string name)
     {
-      options = new Options { ComputeReferences = true, DetailLevel = viewDetailLevel };
-      return GetGeometry(element, options);
+      if (element is null) return false;
+
+      using (element.Document.RollBackScope())
+      {
+        try { element.Name = name; }
+        // The caller needs to see this exception to know this element can not be renamed.
+        //catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
+        catch (Autodesk.Revit.Exceptions.ArgumentException) { return true; }
+      }
+
+      return element.Name == name;
     }
 
     public static GeometryElement GetGeometry(this Element element, Options options)
@@ -40,29 +93,23 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return geometry;
     }
+
 #if !REVIT_2019
     public static IList<ElementId> GetDependentElements(this Element element, ElementFilter filter)
     {
-      try
+      var doc = element.Document;
+      using (doc.RollBackScope())
       {
-        using (var transaction = new Transaction(element.Document, nameof(GetDependentElements)))
-        {
-          transaction.Start();
+        var collection = doc.Delete(element.Id);
 
-          var collection = element.Document.Delete(element.Id);
-          if (filter is null)
-            return collection?.ToList();
-
-          return collection?.Where(x => filter.PassesFilter(element.Document, x)).ToList();
-        }
+        return filter is null ? 
+          collection?.ToList():
+          collection?.Where(x => filter.PassesFilter(doc, x)).ToList();
       }
-      catch { }
-
-      return default;
     }
 #endif
 
-    static ElementFilter CreateElementClassFilter(Type type)
+    internal static ElementFilter CreateElementClassFilter(Type type)
     {
       if (type == typeof(Area))
         return new AreaFilter();
@@ -76,6 +123,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (type == typeof(RoomTag))
         return new RoomTagFilter();
 
+      if (type == typeof(Space))
+        return new SpaceFilter();
+
+      if (type == typeof(SpaceTag))
+        return new SpaceTagFilter();
+
       if (type.IsSubclassOf(typeof(CurveElement)))
         type = typeof(CurveElement);
 
@@ -84,34 +137,36 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static T[] GetDependents<T>(this Element element) where T : Element
     {
+      var doc = element.Document;
       if (typeof(T) == typeof(Element))
       {
         var ids = element.GetDependentElements(default);
-        return ids.Select(x => element.Document.GetElement(x)).Where(x => element.Id != element.Id).OfType<T>().ToArray();
+        return ids.Where(x => x != element.Id).Select(x => doc.GetElement(x)).ToArray() as T[];
       }
       else
       {
         using (var filter = CreateElementClassFilter(typeof(T)))
         {
           var ids = element.GetDependentElements(filter);
-          return ids.Select(x => element.Document.GetElement(x)).Where(x => element.Id != element.Id).OfType<T>().ToArray();
+          return ids.Where(x => x != element.Id).Select(x => doc.GetElement(x)).OfType<T>().ToArray();
         }
       }
     }
 
     public static T GetFirstDependent<T>(this Element element) where T : Element
     {
+      var doc = element.Document;
       if (typeof(T) == typeof(Element))
       {
         var ids = element.GetDependentElements(default);
-        return ids.Select(x => element.Document.GetElement(x)).Where(x => element.Id != element.Id).OfType<T>().FirstOrDefault() as T;
+        return ids.Where(x => x != element.Id).Select(x => doc.GetElement(x)).FirstOrDefault() as T;
       }
       else
       {
         using (var filter = CreateElementClassFilter(typeof(T)))
         {
           var ids = element.GetDependentElements(filter);
-          return ids.Select(x => element.Document.GetElement(x)).Where(x => element.Id != element.Id).OfType<T>().FirstOrDefault() as T;
+          return ids.Where(x => x != element.Id).Select(x => doc.GetElement(x)).OfType<T>().FirstOrDefault();
         }
       }
     }
@@ -133,7 +188,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
               }
             ).
             Where(x => x?.Definition is object).
-            Union(element.Parameters.Cast<Parameter>().OrderBy(x => x.Id.IntegerValue)).
+            Union(element.Parameters.Cast<Parameter>().Where(x => x.StorageType != StorageType.None).OrderBy(x => x.Id.IntegerValue)).
             GroupBy(x => x.Id).
             Select(x => x.First());
         case ParameterClass.BuiltIn:
@@ -320,6 +375,47 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
 
       return default;
+    }
+
+    public static void SetParameterValue(this Element element, BuiltInParameter paramId, bool value)
+    {
+      using (var param = element.get_Parameter(paramId))
+      {
+        if (param is null)
+          throw new System.InvalidOperationException();
+
+        if(param.StorageType != StorageType.Integer || param.Definition.ParameterType != ParameterType.YesNo)
+          throw new System.InvalidCastException();
+
+        param.Set(value ? 1 : 0);
+      }
+    }
+
+    public static void SetParameterValue(this Element element, BuiltInParameter paramId, object value)
+    {
+      var param = element.get_Parameter(paramId);
+      if (param != null)
+      {
+        switch (value)
+        {
+          case int intVal:
+            if (StorageType.Integer == param.StorageType)
+              param.Set(intVal);
+            break;
+          case string strVal:
+            if (StorageType.String == param.StorageType)
+              param.Set(strVal);
+            break;
+          case double dblVal:
+            if (StorageType.Double == param.StorageType)
+              param.Set(dblVal);
+            break;
+          case ElementId idVal:
+            if (StorageType.ElementId == param.StorageType)
+              param.Set(idVal);
+            break;
+        }
+      }
     }
     #endregion
   }

@@ -1,6 +1,8 @@
 ---
 title: Python Component in Revit
 order: 100
+thumbnail: /static/images/guides/rir-ghpython.png
+subtitle: Writing Scripted Components in Python for Revit API
 group: Scripting
 ---
 
@@ -49,7 +51,7 @@ Now we can import the namespaces into the script scope:
 
 {% highlight python %}
 # from System.Core DLL
-from System import Enum
+from System import Enum, Action
 
 # {{ site.terms.rir }} API
 import RhinoInside
@@ -85,7 +87,7 @@ clr.AddReference('RhinoInside.Revit')
 clr.AddReference('RevitAPI') 
 clr.AddReference('RevitAPIUI')
 
-from System import Enum
+from System import Enum, Action
 
 import rhinoscriptsyntax as rs
 import Rhino
@@ -143,7 +145,7 @@ clr.AddReference('RhinoInside.Revit')
 clr.AddReference('RevitAPI') 
 clr.AddReference('RevitAPIUI')
 
-from System import Enum
+from System import Enum, Action
 
 import rhinoscriptsyntax as rs
 import Rhino
@@ -222,6 +224,9 @@ import Grasshopper
 from RhinoInside.Revit import Revit, Convert
 from Autodesk.Revit import DB
 
+clr.ImportExtensions(Convert.Geometry)
+from Autodesk.Revit import DB
+
 doc = Revit.ActiveDBDocument
 
 def create_geometry(doc):
@@ -240,22 +245,15 @@ if Trigger:
 
 ## Handling Transactions
 
-To effectively create new transactions and handle the changes to your model in Grasshopper python components, use the try-except block example below:
+To effectively create new transactions and handle the changes to your model in Grasshopper python components, use the with pattern example below:
 
 {% highlight python %}
 # create and start the transaction
-t = DB.Transaction(doc, '<give a descriptive name to your transaction>')
-t.Start()
-try:
+with DB.Transaction(doc, '<give a descriptive name to your transaction>') as t:
+    t.Start()
     # change Revit document here
     # commit the changes after all changes has been made
     t.Commit()
-except Exception as txn_err:
-    # if any errors happen while changing the document, an exception is thrown
-    # make sure to print the exception message for debugging
-    show_error(txn_err)
-    # and rollback the changes made before error
-    t.RollBack()
 {% endhighlight %}
 
 ## Inspecting Revit

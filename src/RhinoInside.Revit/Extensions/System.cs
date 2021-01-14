@@ -1,40 +1,51 @@
-namespace RhinoInside.Revit.Extended
+namespace System
 {
-  using static System.Math;
-  using static System.Double;
-
-  static class Math
+  static class TypeExtension
   {
-    //public static int Clamp(this int v, int lo, int hi)
-    //{
-    //  return hi < v ? hi : v < lo ? lo : v;
-    //}
-
-    //public static double Clamp(this double v, double lo, double hi)
-    //{
-    //  return hi < v ? hi : v < lo ? lo : v;
-    //}
-
-    public static bool IsPositive(double value)
+    public static bool IsGenericSubclassOf(this Type type, Type baseGenericType)
     {
-      switch (Sign(value))
+      for (; type != typeof(object); type = type.BaseType)
       {
-        case -1: return false;
-        case +1: return true;
+        var cur = type.IsGenericType ? type.GetGenericTypeDefinition() : type;
+        if (baseGenericType == cur)
+          return true;
       }
 
-      return IsPositiveInfinity(1.0 / value);
+      return false;
     }
 
-    public static bool IsNegative(double value)
+    public static bool IsGenericSubclassOf(this Type type, Type baseGenericType, out Type genericType)
     {
-      switch (Sign(value))
+      for (; type != typeof(object); type = type.BaseType)
       {
-        case -1: return true;
-        case +1: return false;
+        var cur = type.IsGenericType ? type.GetGenericTypeDefinition() : type;
+        if (baseGenericType == cur)
+        {
+          genericType = type;
+          return true;
+        }
       }
 
-      return IsNegativeInfinity(1.0 / value);
+      genericType = default;
+      return false;
+    }
+  }
+
+  static class StringExtension
+  {
+    /// <summary>
+    /// Ensures string is no longer than the given length. Cuts the string and adds ellipsis at the end if longer.
+    /// </summary>
+    /// <param name="sourceString"></param>
+    /// <param name="maxLength">Maxmium length of the string</param>
+    /// <returns></returns>
+    public static string TripleDot(this string sourceString, int maxLength)
+    {
+      maxLength = Math.Max(1, maxLength);
+
+      return sourceString.Length > maxLength ?
+        sourceString.Substring(0, maxLength - 1) + '…' :
+        sourceString;
     }
   }
 }

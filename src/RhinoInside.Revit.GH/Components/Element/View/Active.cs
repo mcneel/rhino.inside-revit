@@ -5,7 +5,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class ViewActive : DocumentComponent
+  public class ViewActive : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("7CCF350C-80CC-42D0-85BA-78544FD59F4A");
     public override GH_Exposure Exposure => GH_Exposure.primary;
@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.FromParam(CreateDocumentParam(), ParamVisibility.Voluntary),
+      ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -33,8 +33,11 @@ namespace RhinoInside.Revit.GH.Components
       ParamDefinition.Create<Parameters.View>("Active View", "V", "Active graphical view", GH_ParamAccess.item)
     };
 
-    protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
+        return;
+
       DA.SetData("Active View", doc?.GetActiveGraphicalView());
     }
   }

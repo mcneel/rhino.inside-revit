@@ -3,11 +3,12 @@ using System.IO;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class FamilyLoad : DocumentComponent
+  public class FamilyLoad : TransactionalComponent
   {
     public override Guid ComponentGuid => new Guid("0E244846-95AE-4B0E-8218-CB24FD4D34D1");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
@@ -28,7 +29,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       ParamDefinition.FromParam
       (
-        CreateDocumentParam(),
+        new Parameters.Document(),
         ParamVisibility.Voluntary
       ),
       ParamDefinition.FromParam
@@ -82,8 +83,11 @@ namespace RhinoInside.Revit.GH.Components
       )
     };
 
-    protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
+        return;
+
       var filePath = string.Empty;
       if (!DA.GetData("Path", ref filePath))
         return;
@@ -107,8 +111,7 @@ namespace RhinoInside.Revit.GH.Components
         else
         {
           var name = Path.GetFileNameWithoutExtension(filePath);
-          using (var collector = new DB.FilteredElementCollector(doc).OfClass(typeof(DB.Family)))
-            family = collector.Cast<DB.Family>().Where(x => x.Name == name).FirstOrDefault();
+          doc.TryGetFamily(name, out family);
 
           if (family is object && overrideFamily == false)
             AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Family '{name}' already loaded!");

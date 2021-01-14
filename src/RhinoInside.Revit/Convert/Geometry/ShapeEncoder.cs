@@ -1,7 +1,5 @@
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Rhino;
 using Rhino.Geometry;
 using DB = Autodesk.Revit.DB;
 
@@ -20,22 +18,22 @@ namespace RhinoInside.Revit.Convert.Geometry
       switch (geometry)
       {
         case Point point:
-          return new DB.GeometryObject[] { point.ToPoint(factor) };
+          return new DB.Point[] { point.ToPoint(factor) };
 
         case PointCloud pointCloud:
           return pointCloud.ToPoints(factor);
 
         case Curve curve:
-          return curve.ToCurveMany(factor).SelectMany(x => x.ToBoundedCurves()).OfType<DB.GeometryObject>().ToArray();
+          return curve.ToCurveMany(factor).SelectMany(x => x.ToBoundedCurves()).ToArray();
 
         case Brep brep:
-          return ToGeometryObjectMany(BrepEncoder.ToRawBrep(brep, factor)).OfType<DB.GeometryObject>().ToArray();
+          return new DB.GeometryObject[] { ToShape(brep, factor) };
 
         case Extrusion extrusion:
-          return ToGeometryObjectMany(ExtrusionEncoder.ToRawBrep(extrusion, factor)).OfType<DB.GeometryObject>().ToArray();
+          return new DB.GeometryObject[] { ToShape(extrusion, factor) };
 
         case SubD subD:
-          return ToGeometryObjectMany(SubDEncoder.ToRawBrep(subD, factor)).OfType<DB.GeometryObject>().ToArray(); ;
+          return new DB.GeometryObject[] { ToShape(subD, factor) };
 
         case Mesh mesh:
           return new DB.GeometryObject[] { MeshEncoder.ToMesh(MeshEncoder.ToRawMesh(mesh, factor)) };
@@ -44,47 +42,41 @@ namespace RhinoInside.Revit.Convert.Geometry
           if (geometry.HasBrepForm)
           {
             var brepForm = Brep.TryConvertBrep(geometry);
-            if (BrepEncoder.EncodeRaw(ref brepForm, factor))
-              return ToGeometryObjectMany(brepForm).OfType<DB.GeometryObject>().ToArray();
+            return new DB.GeometryObject[] { ToShape(brepForm, factor) };
           }
 
           return new DB.GeometryObject[0];
       }
     }
 
-    internal static IEnumerable<DB.GeometryObject> ToGeometryObjectMany(Brep brep)
+    static DB.GeometryObject ToShape(Brep brep, double factor)
     {
-      var solid = BrepEncoder.ToSolid(brep);
-      if (solid is object)
-      {
-        yield return solid;
-        yield break;
-      }
+      // Try using DB.BRepBuilder
+      if (BrepEncoder.ToSolid(brep, factor) is DB.Solid solid)
+        return solid;
 
-      if (brep.Faces.Count > 1)
-      {
-        Debug.WriteLine("Try exploding the brep and converting face by face.");
+      Debug.WriteLine("Try meshing the brep.");
+      return BrepEncoder.ToMesh(brep, factor);
+    }
 
-        var breps = brep.UnjoinEdges(brep.Edges.Select(x => x.EdgeIndex));
-        foreach (var face in breps.SelectMany(x => ToGeometryObjectMany(x)))
-          yield return face;
-      }
-      else
-      {
-        Debug.WriteLine("Try meshing the brep.");
+    static DB.GeometryObject ToShape(Extrusion extrusion, double factor)
+    {
+      // Try using DB.BRepBuilder
+      if (ExtrusionEncoder.ToSolid(extrusion, factor) is DB.Solid solid)
+        return solid;
 
-        // Emergency result as a mesh
-        var mp = MeshingParameters.Default;
-        mp.MinimumEdgeLength = Revit.ShortCurveTolerance;
-        mp.ClosedObjectPostProcess = true;
-        mp.JaggedSeams = false;
+      Debug.WriteLine("Try meshing the extrusion.");
+      return ExtrusionEncoder.ToMesh(extrusion, factor);
+    }
 
-        var brepMesh = new Mesh();
-        if (Mesh.CreateFromBrep(brep, mp) is Mesh[] meshes)
-          brepMesh.Append(meshes);
+    static DB.GeometryObject ToShape(SubD subD, double factor)
+    {
+      // Try using DB.BRepBuilder
+      if (SubDEncoder.ToSolid(subD, factor) is DB.Solid solid)
+        return solid;
 
-        yield return brepMesh.ToMesh(UnitConverter.NoScale);
-      }
+      Debug.WriteLine("Try meshing the subD.");
+      return SubDEncoder.ToMesh(subD, factor);
     }
   };
 }

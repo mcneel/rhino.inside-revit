@@ -37,7 +37,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
       manager.AddParameter(
-        param: new Parameters.DataObject<DB.CurtainGrid>(),
+        param: new Parameters.CurtainGrid(),
         name: "Curtain Grids",
         nickname: "CG",
         description: "Curtain Grid definition associated with each face of the input Curtain System",
@@ -54,11 +54,8 @@ namespace RhinoInside.Revit.GH.Components
 
       if (curtainSystemInstance.CurtainGrids != null)
       {
-        var cGrids = new List<DB.CurtainGrid>();
-        foreach (DB.CurtainGrid cgrid in curtainSystemInstance.CurtainGrids)
-          cGrids.Add(cgrid);
-
-        DA.SetDataList("Curtain Grids", cGrids.Select(x => new Types.DataObject<DB.CurtainGrid>(x, srcDocument: curtainSystemInstance.Document))) ;
+        var cGrids = curtainSystemInstance.CurtainGrids.Cast<DB.CurtainGrid>();
+        DA.SetDataList("Curtain Grids", cGrids.Select(x => new Types.CurtainGrid(curtainSystemInstance, x))) ;
       }
     }
   }

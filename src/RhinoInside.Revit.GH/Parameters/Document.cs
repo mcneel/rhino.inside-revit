@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.hidden;
     protected override Types.Document PreferredCast(object data) => Types.Document.FromDocument(data as DB.Document);
 
-    public Document() : base("Document", "Document", string.Empty, "Params", "Revit Primitives")
+    public Document() : base("Document", "DOC", "Revit Document", "Params", "Revit Primitives")
     { }
 
     [Flags]
@@ -106,6 +106,46 @@ namespace RhinoInside.Revit.GH.Parameters
       }
 
       base.ProcessVolatileData();
+    }
+
+    public static bool GetDataOrDefault(IGH_Component component, IGH_DataAccess DA, string name, out DB.Document document)
+    {
+      document = default;
+      var _Document_ = component.Params.IndexOfInputParam(name);
+      if (_Document_ < 0)
+      {
+        document = Revit.ActiveDBDocument;
+        if (document?.IsValidObject != true)
+        {
+          component.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "There is no active Revit document");
+          return false;
+        }
+
+        // In case the user has more than one document open we show which one this component is working on
+        if (Revit.ActiveDBApplication.Documents.Size > 1)
+          component.Message = document.Title.TripleDot(16);
+      }
+      else
+      {
+        if (!DA.GetData(_Document_, ref document) || document is null)
+          return false;
+
+        if (document.IsValidObject != true)
+        {
+          component.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Input parameter Document failed to collect data");
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    public override void ClearData()
+    {
+      base.ClearData();
+
+      if(Attributes?.Parent?.DocObject is GH_Component component)
+        component.Message = string.Empty;
     }
   }
 }

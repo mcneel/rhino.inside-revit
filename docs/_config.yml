@@ -68,9 +68,11 @@ simple_search: https://google.com/search
 # site dictionary: list of often used terms that need to be consistent
 terms:
   mcneel: Robert McNeel & Associates
-  rhino: Rhino WIP
+  rhino: Rhino 7
+  rhinoext: (Evaluation - free for 90 days)
   rir: Rhino.Inside.Revit
   revit: Autodesk Revit®
+  revit_versions: 2018-2021
   pyrevit: pyRevit
 
 # site collections (various languages)
@@ -96,7 +98,7 @@ versions:
     version: beta
     name: Beta
     rir_download: https://www.rhino3d.com/download/rhino.inside-revit/7/wip
-    rhino_download: https://www.rhino3d.com/download/rhino/wip
+    rhino_download: https://www.rhino3d.com/download/rhino-for-windows/7/evaluation
 
 # default metadata for pages based on their path
 defaults:
@@ -141,9 +143,10 @@ defaults:
       categories: ['reference']
 
   - scope:
-      path: "pages/*/*/samples"
+      path: "pages/*/*/discover"
     values:
-      categories: ['samples']
+      layout: ltr/page-fullwidth
+      categories: ['discover']
 
   - scope:
       path: "pages/*/*/community"

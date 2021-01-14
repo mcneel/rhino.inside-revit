@@ -5,9 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows.Input;
-using System.Windows.Forms.InteropExtension;
+using System.Windows.Forms;
+using System.Windows.Forms.Interop;
 using Autodesk.Revit.Attributes;
-using Autodesk.Revit.DB;
+using DB = Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
 using GH_IO.Serialization;
@@ -40,16 +41,16 @@ namespace RhinoInside.Revit.UI
 
     public static Result BrowseForFile(out string filePath)
     {
-      using (var openFileDialog = new System.Windows.Forms.OpenFileDialog())
+      using
+      (
+        var openFileDialog = new OpenFileDialog()
+        {
+          Title = "Open Grasshopper file",
+          Filter = "All Grasshopper files (*.gh, *.ghx)|*.gh;*.ghx|Grasshopper Binary (*.gh)|*.gh|Grasshopper Xml (*.ghx)|*.ghx",
+          RestoreDirectory = true
+        }
+      )
       {
-        openFileDialog.Filter = "Grasshopper Binary (*.gh)|*.gh|Grasshopper Xml (*.ghx)|*.ghx";
-#if DEBUG
-        openFileDialog.FilterIndex = 2;
-#else
-        openFileDialog.FilterIndex = 1;
-#endif
-        openFileDialog.RestoreDirectory = true;
-
         switch (openFileDialog.ShowDialog(Revit.MainWindowHandle))
         {
           case System.Windows.Forms.DialogResult.OK: filePath = openFileDialog.FileName; return Result.Succeeded;
@@ -176,11 +177,11 @@ namespace RhinoInside.Revit.UI
       ObjectSnapTypes.Quadrants |
       ObjectSnapTypes.Points;
 
-    internal static bool PickPointOnFace(UIDocument doc, string prompt, out XYZ point, ObjectSnapTypes snapSettings = DefaultSnapTypes)
+    internal static bool PickPointOnFace(UIDocument doc, string prompt, out DB.XYZ point, ObjectSnapTypes snapSettings = DefaultSnapTypes)
     {
       point = null;
 
-      if (doc.ActiveView.ViewType != ViewType.ThreeD)
+      if (doc.ActiveView.ViewType != DB.ViewType.ThreeD)
       {
         try { point = doc.Selection.PickPoint(snapSettings, prompt + "Please pick a point on the current work plane"); }
         catch (OperationCanceledException) { }
@@ -188,9 +189,9 @@ namespace RhinoInside.Revit.UI
       else
       {
         var reference = doc.Selection.PickObject(Autodesk.Revit.UI.Selection.ObjectType.Face, prompt + "Please select a face to define a work plane");
-        if (doc.Document.GetElement(reference.ElementId) is Element element)
+        if (doc.Document.GetElement(reference.ElementId) is DB.Element element)
         {
-          if (element.GetGeometryObjectFromReference(reference) is Face face)
+          if (element.GetGeometryObjectFromReference(reference) is DB.Face face)
           {
             if (Keyboard.IsKeyDown(Key.LeftCtrl))
             {
@@ -198,13 +199,13 @@ namespace RhinoInside.Revit.UI
             }
             else
             {
-              var plane = Autodesk.Revit.DB.Plane.CreateByNormalAndOrigin(face.ComputeNormal(reference.UVPoint), face.Evaluate(reference.UVPoint));
+              var plane = DB.Plane.CreateByNormalAndOrigin(face.ComputeNormal(reference.UVPoint), face.Evaluate(reference.UVPoint));
 
-              using (var transaction = new Transaction(doc.Document))
+              using (var transaction = new DB.Transaction(doc.Document))
               {
                 transaction.Start("PickPointOnFace");
 
-                doc.ActiveView.SketchPlane = SketchPlane.Create(doc.Document, plane);
+                doc.ActiveView.SketchPlane = DB.SketchPlane.Create(doc.Document, plane);
                 doc.ActiveView.ShowActiveWorkPlane();
 
                 try { point = doc.Selection.PickPoint(snapSettings, prompt + "Please pick a point on the defined work plane"); }
@@ -220,11 +221,11 @@ namespace RhinoInside.Revit.UI
       return null != point;
     }
 
-    internal static bool PickPoint(UIDocument doc, string prompt, out XYZ point, ObjectSnapTypes snapSettings = DefaultSnapTypes)
+    internal static bool PickPoint(UIDocument doc, string prompt, out DB.XYZ point, ObjectSnapTypes snapSettings = DefaultSnapTypes)
     {
       point = null;
 
-      View view = null;
+      DB.View view = null;
       do
       {
         view = doc.ActiveView;
@@ -272,8 +273,8 @@ namespace RhinoInside.Revit.UI
         PickPointOnFace(doc, prompt + " : Second box corner - ", out var to)
       )
       {
-        var min = new XYZ(Math.Min(from.X, to.X), Math.Min(from.Y, to.Y), Math.Min(from.Z, to.Z));
-        var max = new XYZ(Math.Max(from.X, to.X), Math.Max(from.Y, to.Y), Math.Max(from.Z, to.Z));
+        var min = new DB.XYZ(Math.Min(from.X, to.X), Math.Min(from.Y, to.Y), Math.Min(from.Z, to.Z));
+        var max = new DB.XYZ(Math.Max(from.X, to.X), Math.Max(from.Y, to.Y), Math.Max(from.Z, to.Z));
 
         goo = new GH_Box(new BoundingBox(min.ToPoint3d(), max.ToPoint3d()));
       }
@@ -291,7 +292,7 @@ namespace RhinoInside.Revit.UI
         if (reference != null)
         {
           var element = doc.Document.GetElement(reference);
-          var edge = element.GetGeometryObjectFromReference(reference) as Edge;
+          var edge = element.GetGeometryObjectFromReference(reference) as DB.Edge;
           var curve = edge.AsCurve().ToCurve();
           goo = new GH_Curve(curve);
         }
@@ -309,7 +310,7 @@ namespace RhinoInside.Revit.UI
         if (reference != null)
         {
           var element = doc.Document.GetElement(reference);
-          var face = element.GetGeometryObjectFromReference(reference) as Face;
+          var face = element.GetGeometryObjectFromReference(reference) as DB.Face;
           var surface = face.ToBrep();
           return new GH_Surface[] { new GH_Surface(surface) };
         }
@@ -328,7 +329,7 @@ namespace RhinoInside.Revit.UI
         {
           var element = doc.Document.GetElement(reference);
 
-          using (var options = new Options() { DetailLevel = ViewDetailLevel.Fine })
+          using (var options = new DB.Options() { DetailLevel = DB.ViewDetailLevel.Fine })
           using (var geometry = element.GetGeometry(options))
             return geometry.ToGeometryBaseMany().OfType<Brep>().Select((x) => new GH_Brep(x));
         }
@@ -338,7 +339,7 @@ namespace RhinoInside.Revit.UI
       return null;
     }
 
-    public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
+    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
     {
       var result = Result.Failed;
       if ((result = BrowseForFile(out var filePath)) == Result.Succeeded)
@@ -352,7 +353,7 @@ namespace RhinoInside.Revit.UI
     public static Result Execute
     (
       UIApplication app,
-      View view,
+      DB.View view,
       IDictionary<string, string> JournalData,
       string filePath,
       ref string message
@@ -367,7 +368,7 @@ namespace RhinoInside.Revit.UI
           var currentCulture = Thread.CurrentThread.CurrentCulture;
           try
           {
-            using (var transGroup = new TransactionGroup(app.ActiveUIDocument.Document))
+            using (var transGroup = new DB.TransactionGroup(app.ActiveUIDocument.Document))
             {
               transGroup.Start(Path.GetFileNameWithoutExtension(definition.Properties.ProjectFileName));
 

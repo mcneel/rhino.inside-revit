@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.FromParam(DocumentComponent.CreateDocumentParam(), ParamVisibility.Voluntary),
+      ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
       ParamDefinition.Create<Parameters.Param_Enum<Types.WallSystemFamily>>
       (
         name: "Wall System Family",
@@ -48,8 +48,11 @@ namespace RhinoInside.Revit.GH.Components
       )
     };
 
-    protected override void TrySolveInstance(IGH_DataAccess DA, DB.Document doc)
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
+        return;
+
       // grab wall system family from input
       var wallKind = DB.WallKind.Unknown;
       if (!DA.GetData("Wall System Family", ref wallKind))

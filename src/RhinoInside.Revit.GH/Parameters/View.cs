@@ -9,7 +9,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class View : ElementIdWithoutPreviewParam<Types.IGH_View, DB.View>
+  public class View : Element<Types.IGH_View, DB.View>
   {
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
     public override Guid ComponentGuid => new Guid("2DC4B866-54DB-4CE6-94C0-C51B33D35B49");
@@ -54,12 +54,12 @@ namespace RhinoInside.Revit.GH.Parameters
             viewTypeBox.Items.Add(new Types.ViewFamily(view.Key));
         }
 
-        if (Current?.APIView is DB.View current)
+        if (Current is Types.View current)
         {
           var familyIndex = 0;
           foreach (var viewFamily in viewTypeBox.Items.Cast<Types.ViewFamily>())
           {
-            var type = current.Document.GetElement<DB.ViewFamilyType>(current.GetTypeId());
+            var type = (DB.ViewFamilyType) current.Type;
             if (type.ViewFamily == viewFamily.Value)
             {
               viewTypeBox.SelectedIndex = familyIndex;

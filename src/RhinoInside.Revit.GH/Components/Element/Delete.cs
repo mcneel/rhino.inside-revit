@@ -129,7 +129,7 @@ namespace RhinoInside.Revit.GH.Components
     (
       DB.Document document,
       ICollection<DB.ElementId> elementIds,
-      List<Types.ElementId> deleted,
+      List<Types.Element> deleted,
       List<Types.Element> modified
     )
     {
@@ -196,7 +196,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var elementList = new List<Types.IGH_ElementId>();
+      var elementList = new List<Types.IGH_Element>();
       if (!DA.GetDataList("Elements", elementList))
         return;
 
@@ -216,7 +216,7 @@ namespace RhinoInside.Revit.GH.Components
             var _Modified_ = Params.IndexOfOutputParam("Modified");
 
             var Succeeded = true;
-            var Deleted  = _Deleted_  < 0 ? default : new List<Types.ElementId>();
+            var Deleted  = _Deleted_  < 0 ? default : new List<Types.Element>();
             var Modified = _Modified_ < 0 ? default : new List<Types.Element>();
 
             foreach (var elementGroup in elementGroups)

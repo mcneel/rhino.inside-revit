@@ -8,7 +8,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class Material : ElementIdWithoutPreviewParam<Types.Material, DB.Material>
+  public class Material : Element<Types.Material, DB.Material>
   {
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
     public override Guid ComponentGuid => new Guid("B18EF2CC-2E67-4A5E-9241-9010FB7D27CE");
@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH.Parameters
         foreach(var cat in materials)
           materialCategoryBox.Items.Add(cat.Key);
 
-        if (Current?.APIElement is DB.Material current)
+        if (Current?.Value is DB.Material current)
         {
           var familyIndex = 0;
           foreach (var materialClass in materialCategoryBox.Items.Cast<string>())
@@ -82,6 +82,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
       listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
       listBox.Items.Clear();
+      listBox.Items.Add(new Types.Material());
 
       using (var collector = new DB.FilteredElementCollector(doc).OfClass(typeof(DB.Material)))
       {

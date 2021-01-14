@@ -34,14 +34,14 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetData("ParameterKey", ref parameterKey))
         return;
 
-      if (parameterKey.Value.TryGetBuiltInParameter(out var builtInParameter))
+      if (parameterKey.Id.TryGetBuiltInParameter(out var builtInParameter))
       {
         DA.SetData("Name", DB.LabelUtils.GetLabelFor(builtInParameter));
         DA.SetData("StorageType", parameterKey.Document?.get_TypeOfStorage(builtInParameter));
         DA.SetData("Class", DBX.ParameterClass.BuiltIn);
         DA.SetData("Guid", null);
       }
-      else if (parameterKey.Document?.GetElement(parameterKey.Value) is DB.ParameterElement parameterElement)
+      else if (parameterKey.Document?.GetElement(parameterKey.Id) is DB.ParameterElement parameterElement)
       {
         var definition = parameterElement.GetDefinition();
         DA.SetData("Name", definition?.Name);

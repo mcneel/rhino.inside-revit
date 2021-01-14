@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Windows.Input;
 using Microsoft.Win32.SafeHandles;
 using Rhino;
@@ -99,6 +100,22 @@ namespace RhinoInside.Revit
           activate: Addin.StartupMode == AddinStartupMode.AtStartup
         );
 
+        // Add DefaultRenderAppearancePath to Rhino settings if missing
+        {
+          var DefaultRenderAppearancePath = System.IO.Path.Combine
+          (
+            Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFilesX86),
+            "Autodesk Shared",
+            "Materials",
+            "Textures"
+          );
+
+          if (!Rhino.ApplicationSettings.FileSettings.GetSearchPaths().Any(x => x.Equals(DefaultRenderAppearancePath, StringComparison.InvariantCultureIgnoreCase)))
+            Rhino.ApplicationSettings.FileSettings.AddSearchPath(DefaultRenderAppearancePath, -1);
+
+          // TODO: Add also AdditionalRenderAppearancePaths content from Revit.ini if missing ??
+        }
+
         // Reset document units
         UpdateDocumentUnits(RhinoDoc.ActiveDoc);
         UpdateDocumentUnits(RhinoDoc.ActiveDoc, Revit.ActiveDBDocument);
@@ -110,14 +127,11 @@ namespace RhinoInside.Revit
         // Look for Guests
         guests = types.
           Where(x => typeof(IGuest).IsAssignableFrom(x)).
-          Where(x => !x.IsInterface).
+          Where(x => !x.IsInterface && !x.IsAbstract && !x.ContainsGenericParameters).
           Select(x => new GuestInfo(x)).
           ToList();
 
         CheckInGuests();
-
-        //Enable Revit window back
-        WindowHandle.ActiveWindow = Revit.MainWindow;
       }
 
       return Result.Succeeded;
@@ -190,6 +204,25 @@ namespace RhinoInside.Revit
     }
     static List<GuestInfo> guests;
 
+    static void AppendExceptionExpandedContent(StringBuilder builder, Exception e)
+    {
+      switch (e)
+      {
+        case System.BadImageFormatException badImageFormatException:
+          if (badImageFormatException.FileName != null) builder.AppendLine($"FileName: {badImageFormatException.FileName}");
+          if (badImageFormatException.FusionLog != null) builder.AppendLine($"FusionLog: {badImageFormatException.FusionLog}");
+          break;
+        case System.IO.FileNotFoundException fileNotFoundException:
+          if (fileNotFoundException.FileName != null) builder.AppendLine($"FileName: {fileNotFoundException.FileName}");
+          if (fileNotFoundException.FusionLog != null) builder.AppendLine($"FusionLog: {fileNotFoundException.FusionLog}");
+          break;
+        case System.IO.FileLoadException fileLoadException:
+          if (fileLoadException.FileName != null) builder.AppendLine($"FileName: {fileLoadException.FileName}");
+          if (fileLoadException.FusionLog != null) builder.AppendLine($"FusionLog: {fileLoadException.FusionLog}");
+          break;
+      }
+    }
+
     static void CheckInGuests()
     {
       if (guests is null)
@@ -207,31 +240,74 @@ namespace RhinoInside.Revit
         if (!load)
           continue;
 
-        guestInfo.Guest = Activator.CreateInstance(guestInfo.ClassType) as IGuest;
-
-        string complainMessage = string.Empty;
-        try { guestInfo.LoadReturnCode = guestInfo.Guest.OnCheckIn(ref complainMessage); }
+        string mainContent = string.Empty;
+        string expandedContent = string.Empty;
+        try
+        {
+          guestInfo.Guest = Activator.CreateInstance(guestInfo.ClassType) as IGuest;
+          guestInfo.LoadReturnCode = guestInfo.Guest.OnCheckIn(ref mainContent);
+        }
         catch (Exception e)
         {
           guestInfo.LoadReturnCode = LoadReturnCode.ErrorShowDialog;
-          complainMessage = e.Message;
+
+          var mainContentBuilder = new StringBuilder();
+          var expandedContentBuilder = new StringBuilder();
+          while (e.InnerException != default)
+          {
+            mainContentBuilder.AppendLine($"· {e.Message}");
+            AppendExceptionExpandedContent(expandedContentBuilder, e);
+            e = e.InnerException;
+          }
+          mainContentBuilder.AppendLine($"· {e.Message}");
+          AppendExceptionExpandedContent(expandedContentBuilder, e);
+
+          mainContent = mainContentBuilder.ToString();
+          expandedContent = expandedContentBuilder.ToString();
         }
 
         if (guestInfo.LoadReturnCode == LoadReturnCode.ErrorShowDialog)
         {
+          var guestName = guestInfo.Guest?.Name ?? guestInfo.ClassType.Namespace;
+
+          {
+            var journalContent = new StringBuilder();
+            journalContent.AppendLine($"{guestName} failed to load");
+            journalContent.AppendLine(mainContent);
+            journalContent.AppendLine(expandedContent);
+            Revit.ActiveDBApplication.WriteJournalComment(journalContent.ToString(), false);
+          }
+
           using
           (
-            var taskDialog = new TaskDialog(MethodBase.GetCurrentMethod().DeclaringType.FullName)
+            var taskDialog = new TaskDialog(Addin.DisplayVersion)
             {
-              Title = guestInfo.Guest.Name,
+              Id = $"{MethodBase.GetCurrentMethod().DeclaringType.FullName}.{MethodBase.GetCurrentMethod().Name}",
               MainIcon = External.UI.TaskDialogIcons.IconError,
               AllowCancellation = false,
-              MainInstruction = $"{guestInfo.Guest.Name} failed to load",
-              MainContent = complainMessage
+              MainInstruction = $"{guestName} failed to load",
+              MainContent = mainContent +
+                            Environment.NewLine + "Do you want to report this problem by email to tech@mcneel.com?",
+              ExpandedContent = expandedContent,
+              FooterText = "Press CTRL+C to copy this information to Clipboard",
+              CommonButtons = Autodesk.Revit.UI.TaskDialogCommonButtons.Yes | Autodesk.Revit.UI.TaskDialogCommonButtons.Cancel,
+              DefaultButton = Autodesk.Revit.UI.TaskDialogResult.Yes
             }
           )
           {
-            taskDialog.Show();
+            if (taskDialog.Show() == Autodesk.Revit.UI.TaskDialogResult.Yes)
+            {
+              ErrorReport.SendEmail
+              (
+                Revit.ActiveUIApplication,
+                taskDialog.MainInstruction,
+                false,
+                new string[]
+                {
+                  Revit.ActiveUIApplication.Application.RecordingJournalFilename
+                }
+              );
+            }
           }
         }
       }
@@ -286,12 +362,12 @@ namespace RhinoInside.Revit
       }
     }
 
-    static void AuditUnits(RhinoDoc doc)
+    internal static void AuditUnits(RhinoDoc doc)
     {
       if (Command.InScriptRunnerCommand())
         return;
 
-      if (Revit.ActiveUIDocument.Document is DB.Document revitDoc)
+      if (Revit.ActiveUIDocument?.Document is DB.Document revitDoc)
       {
         var units = revitDoc.GetUnits();
         var lengthFormatoptions = units.GetFormatOptions(DB.UnitType.UT_Length);
@@ -299,23 +375,53 @@ namespace RhinoInside.Revit
         var GrasshopperModelUnitSystem = GH.Guest.ModelUnitSystem != UnitSystem.Unset ? GH.Guest.ModelUnitSystem : doc.ModelUnitSystem;
         if (doc.ModelUnitSystem != RevitModelUnitSystem || doc.ModelUnitSystem != GrasshopperModelUnitSystem)
         {
+          var hasUnits = doc.ModelUnitSystem != UnitSystem.Unset && doc.ModelUnitSystem != UnitSystem.None;
+          var expandedContent = doc.IsOpening ?
+            $"The Rhino model you are opening is in {doc.ModelUnitSystem}{Environment.NewLine}Revit document '{revitDoc.Title}' length units are {RevitModelUnitSystem}" :
+            string.Empty;
+
           using
           (
             var taskDialog = new TaskDialog("Units")
             {
               MainIcon = External.UI.TaskDialogIcons.IconInformation,
               TitleAutoPrefix = true,
-              AllowCancellation = true,
-              MainInstruction = "Model units mismatch.",
-              MainContent = "What units do you want to use?",
-              ExpandedContent = $"The model you are opening is in {doc.ModelUnitSystem}{Environment.NewLine}Active Revit model '{revitDoc.Title}' units are {RevitModelUnitSystem}",
+              AllowCancellation = hasUnits,
+              MainInstruction = hasUnits ? (doc.IsOpening ? "Model units mismatch." : "Model units mismatch warning.") : "Rhino model has no units.",
+              MainContent = doc.IsOpening ? "What units do you want to use?" : $"Revit document '{revitDoc.Title}' length units are {RevitModelUnitSystem}." + (hasUnits ? $"{Environment.NewLine}Rhino is working in {doc.ModelUnitSystem}." : string.Empty),
+              ExpandedContent = expandedContent,
               FooterText = "Current version: " + Addin.DisplayVersion
             }
           )
           {
-            taskDialog.AddCommandLink(Autodesk.Revit.UI.TaskDialogCommandLinkId.CommandLink1, $"Continue opening in {doc.ModelUnitSystem}", $"Rhino and Grasshopper will work in {doc.ModelUnitSystem}");
-            taskDialog.AddCommandLink(Autodesk.Revit.UI.TaskDialogCommandLinkId.CommandLink2, $"Adjust Rhino model to {RevitModelUnitSystem} like Revit", $"Scale Rhino model by {UnitScale(doc.ModelUnitSystem, RevitModelUnitSystem)}");
-            taskDialog.DefaultButton = Autodesk.Revit.UI.TaskDialogResult.CommandLink2;
+            if (!doc.IsOpening && hasUnits)
+            {
+#if REVIT_2020
+              taskDialog.EnableDoNotShowAgain("RhinoInside.Revit.DocumentUnitsMismatch", true, "Do not show again");
+#else
+              // Without the ability of checking DoNotShowAgain this may be too anoying.
+              return;
+#endif
+            }
+            else
+            {
+              taskDialog.AddCommandLink(Autodesk.Revit.UI.TaskDialogCommandLinkId.CommandLink2, $"Use {RevitModelUnitSystem} like Revit", $"Scale Rhino model by {UnitScale(doc.ModelUnitSystem, RevitModelUnitSystem)}");
+              taskDialog.DefaultButton = Autodesk.Revit.UI.TaskDialogResult.CommandLink2;
+            }
+
+            if (hasUnits)
+            {
+              if (doc.IsOpening)
+              {
+                taskDialog.AddCommandLink(Autodesk.Revit.UI.TaskDialogCommandLinkId.CommandLink1, $"Continue in {doc.ModelUnitSystem}", $"Rhino and Grasshopper will work in {doc.ModelUnitSystem}");
+                taskDialog.DefaultButton = Autodesk.Revit.UI.TaskDialogResult.CommandLink1;
+              }
+              else
+              {
+                taskDialog.CommonButtons = Autodesk.Revit.UI.TaskDialogCommonButtons.Ok;
+                taskDialog.DefaultButton = Autodesk.Revit.UI.TaskDialogResult.Ok;
+              }
+            }
 
             if (GH.Guest.ModelUnitSystem != UnitSystem.Unset)
             {
@@ -334,14 +440,14 @@ namespace RhinoInside.Revit
                 doc.ModelDistanceDisplayPrecision = Clamp((int) -Log10(lengthFormatoptions.Accuracy), 0, 7);
                 doc.ModelAbsoluteTolerance = Revit.VertexTolerance * UnitScale(UnitSystem.Feet, RevitModelUnitSystem);
                 doc.AdjustModelUnitSystem(RevitModelUnitSystem, true);
-                UpdateViewConstructionPlanesFrom(doc, revitDoc);
+                AdjustViewConstructionPlanes(doc);
               break;
               case Autodesk.Revit.UI.TaskDialogResult.CommandLink3:
                 doc.ModelAngleToleranceRadians = Revit.AngleTolerance;
                 doc.ModelDistanceDisplayPrecision = Clamp(Grasshopper.CentralSettings.FormatDecimalDigits, 0, 7);
                 doc.ModelAbsoluteTolerance = Revit.VertexTolerance * UnitScale(UnitSystem.Feet, GH.Guest.ModelUnitSystem);
                 doc.AdjustModelUnitSystem(GH.Guest.ModelUnitSystem, true);
-                UpdateViewConstructionPlanesFrom(doc, revitDoc);
+                AdjustViewConstructionPlanes(doc);
                 break;
               default:
                 AuditTolerances(doc);
@@ -383,7 +489,7 @@ namespace RhinoInside.Revit
           //    break;
           //}
 
-          UpdateViewConstructionPlanesFrom(rhinoDoc, revitDoc);
+          AdjustViewConstructionPlanes(rhinoDoc);
         }
       }
       finally
@@ -392,14 +498,14 @@ namespace RhinoInside.Revit
       }
     }
 
-    static void UpdateViewConstructionPlanesFrom(RhinoDoc rhinoDoc, DB.Document revitDoc)
+    static void AdjustViewConstructionPlanes(RhinoDoc rhinoDoc)
     {
       if (!string.IsNullOrEmpty(rhinoDoc.TemplateFileUsed))
         return;
 
       if (rhinoDoc.IsCreating)
       {
-        Revit.EnqueueAction(doc => UpdateViewConstructionPlanesFrom(rhinoDoc, doc));
+        Revit.EnqueueIdlingAction(() => AdjustViewConstructionPlanes(rhinoDoc));
         return;
       }
 
@@ -439,11 +545,6 @@ namespace RhinoInside.Revit
         }
       }
     }
-    #endregion
-
-    #region Status
-    private static bool CoreIsLicenseExpired() => !RhinoApp.IsLicenseValidated;
-    public static bool IsLicenseExpired = false;
     #endregion
 
     #region Rhino UI
@@ -565,9 +666,11 @@ namespace RhinoInside.Revit
     }
 
     /// <summary>
-    /// Represents a Pseudo-modal loop
-    /// This class implements IDisposable, it's been designed to be used in a using statement.
+    /// Represents a Pseudo-modal loop.
     /// </summary>
+    /// <remarks>
+    /// This class implements <see cref="IDisposable"/> interface, it's been designed to be used in a using statement.
+    /// </remarks>
     internal sealed class ModalScope : IDisposable
     {
       static bool wasExposed = false;

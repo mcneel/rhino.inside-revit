@@ -1,21 +1,26 @@
 using System;
 using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
 using GH_IO.Serialization;
-using Grasshopper.Kernel.Graphs;
+using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
+using Rhino.Geometry;
+using RhinoInside.Revit.External.DB;
 using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.External.UI.Extensions;
 using DB = Autodesk.Revit.DB;
 using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public interface IGH_ElementId : IGH_Goo
+  // public interface IGH_PersistentReference
+  /// <summary>
+  /// Interface to implement into classes that has a stable <see cref="DB.Reference"/>.
+  /// For example: <see cref="DB.Element"/>, <see cref="DB.GeometryObject"/>
+  /// </summary>
+  public interface IGH_ElementId : IGH_ReferenceObject
   {
     DB.Reference Reference { get; }
-    DB.Document Document { get; }
-    DB.ElementId Id { get; }
 
     Guid DocumentGUID { get; }
     string UniqueID { get; }
@@ -26,179 +31,121 @@ namespace RhinoInside.Revit.GH.Types
     void UnloadElement();
   }
 
-  public abstract class ElementId : GH_Goo<DB.ElementId>, IGH_ElementId, IEquatable<ElementId>
+  public abstract class ElementId : ReferenceObject, IGH_ElementId, IEquatable<ElementId>, IGH_QuickCast
   {
-    public override string TypeName => "Revit Model Object";
-    public override string TypeDescription => "Represents a Revit model object";
-    public override bool IsValid => (!(Value is null || Value == DB.ElementId.InvalidElementId)) && (Document?.IsValidObject ?? false);
-    public override sealed IGH_Goo Duplicate() => (IGH_Goo) MemberwiseClone();
-    protected virtual Type ScriptVariableType => typeof(DB.ElementId);
-    public static implicit operator DB.ElementId(ElementId self) { return self.Value; }
+    #region System.Object
+    public bool Equals(ElementId other) => other is object &&
+      other.DocumentGUID == DocumentGUID && other.UniqueID == UniqueID;
+    public override bool Equals(object obj) => (obj is ElementId id) ? Equals(id) : base.Equals(obj);
+    public override int GetHashCode() => DocumentGUID.GetHashCode() ^ UniqueID.GetHashCode();
 
-    public static ElementId FromElementId(DB.Document doc, DB.ElementId id)
+    public override string ToString()
     {
-      if (id == DB.ElementId.InvalidElementId)
-        return null;
+      var TypeName = $"Revit {((IGH_Goo) this).TypeName}";
 
-      if (Category.FromElementId(doc, id) is Category c)
-        return c;
+      if (!IsReferencedElement)
+        return $"{TypeName} : {DisplayName}";
 
-      if (ParameterKey.FromElementId(doc, id) is ParameterKey p)
-        return p;
+      var tip = IsValid ?
+      (
+        IsElementLoaded ?
+        $"{TypeName} : {DisplayName}" :
+        $"Unresolved {TypeName} : {UniqueID}"
+      ) :
+      $"Invalid {TypeName}" + (Id is object ? $" : {Id.IntegerValue}" : string.Empty);
 
-      if (Element.FromElementId(doc, id) is Element e)
-        return e;
-
-      return null;
-    }
-
-    public void SetValue(DB.Document doc, DB.ElementId id)
-    {
-      Document = doc;
-      DocumentGUID = doc.GetFingerprintGUID();
-
-      Value = id;
-      UniqueID = doc?.GetElement(id)?.UniqueId ??
-                 (
-                   id.IntegerValue < DB.ElementId.InvalidElementId.IntegerValue ?
-                     DBX.UniqueId.Format(Guid.Empty, id.IntegerValue) :
-                     string.Empty
-                 );
-    }
-
-    #region IGH_ElementId
-    public DB.Reference Reference
-    {
-      get
+      using (var Documents = Revit.ActiveDBApplication.Documents)
       {
-        try { return DB.Reference.ParseFromStableRepresentation(Document, UniqueID); }
-        catch (Autodesk.Revit.Exceptions.ArgumentNullException) { return null; }
-        catch (Autodesk.Revit.Exceptions.ArgumentException) { return null; }
+        return
+        (
+          Documents.Size > 1 ?
+          $"{tip} @ {Document?.Title ?? DocumentGUID.ToString()}" :
+          tip
+        );
       }
     }
-
-    DB.Document document;
-    public DB.Document Document
-    {
-      get => document?.IsValidObject != true ? null : document;
-      protected set { document = value; }
-    }
-    public DB.ElementId Id => Value;
-    public Guid DocumentGUID { get; protected set; } = Guid.Empty;
-    public string UniqueID { get; protected set; } = string.Empty;
-    public bool IsReferencedElement => !string.IsNullOrEmpty(UniqueID);
-    public bool IsElementLoaded => m_value is object;
-    public virtual bool LoadElement()
-    {
-      if (Document is null)
-      {
-        Value = null;
-        if (!Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var doc))
-        {
-          Document = null;
-          return false;
-        }
-
-        Document = doc;
-      }
-      else if (IsElementLoaded)
-        return true;
-
-      if (Document is object)
-        return Document.TryGetElementId(UniqueID, out m_value);
-
-      return false;
-    }
-    public void UnloadElement() { m_value = null; Document = null; }
     #endregion
 
-    public bool Equals(ElementId id) => id?.DocumentGUID == DocumentGUID && id?.UniqueID == UniqueID;
-    public override bool Equals(object obj) => (obj is ElementId id) ? Equals(id) : base.Equals(obj);
-    public override int GetHashCode() => new { DocumentGUID, UniqueID }.GetHashCode();
-
-    public ElementId() : base(DB.ElementId.InvalidElementId) { }
-    protected ElementId(DB.Document doc, DB.ElementId id) => SetValue(doc, id);
-
-    public override bool CastFrom(object source)
+    #region GH_ISerializable
+    protected override bool Read(GH_IReader reader)
     {
-      if (source is GH_Integer integer)
-      {
-        Value = new DB.ElementId(integer.Value);
-        UniqueID = string.Empty;
-        return true;
-      }
-      if (source is DB.ElementId id)
-      {
-        Value = id;
-        UniqueID = string.Empty;
-        return true;
-      }
+      UnloadElement();
 
-      return false;
+      var documentGUID = Guid.Empty;
+      reader.TryGetGuid("DocumentGUID", ref documentGUID);
+      DocumentGUID = documentGUID;
+
+      string uniqueID = string.Empty;
+      reader.TryGetString("UniqueID", ref uniqueID);
+      UniqueID = uniqueID;
+
+      return true;
     }
 
-    public override bool CastTo<Q>(ref Q target)
+    protected override bool Write(GH_IWriter writer)
     {
-      if (target is IGH_ElementId)
-      {
-        target = (Q) (object) null;
-        return true;
-      }
+      if (DocumentGUID != Guid.Empty)
+        writer.SetGuid("DocumentGUID", DocumentGUID);
 
+      if (!string.IsNullOrEmpty(UniqueID))
+        writer.SetString("UniqueID", UniqueID);
+
+      return true;
+    }
+    #endregion
+
+    #region IGH_Goo
+    public override string IsValidWhyNot => IsValid ? string.Empty : "Not Valid";
+    public virtual object ScriptVariable() => Value;
+
+    public override bool CastTo<Q>(out Q target)
+    {
       if (typeof(Q).IsAssignableFrom(typeof(DB.ElementId)))
       {
-        target = (Q) (object) Value;
+        target = (Q) (object) Id;
         return true;
       }
       if (typeof(Q).IsAssignableFrom(typeof(GH_Integer)))
       {
-        target = (Q) (object) new GH_Integer(Value.IntegerValue);
-        return true;
-      }
-      if (typeof(Q).IsAssignableFrom(typeof(GH_String)))
-      {
-        target = (Q) (object) new GH_String(UniqueID);
+        target = (Q) (object) new GH_Integer(Id.IntegerValue);
         return true;
       }
 
-      return base.CastTo<Q>(ref target);
+      target = default;
+      return false;
     }
 
     [TypeConverter(typeof(Proxy.ObjectConverter))]
     protected class Proxy : IGH_GooProxy
     {
       protected readonly ElementId owner;
-      public Proxy(ElementId o) { owner = o; if(this is IGH_GooProxy proxy) proxy.UserString = proxy.FormatInstance(); }
+      public Proxy(ElementId o) { owner = o; ((IGH_GooProxy) this).UserString = FormatInstance(); }
       public override string ToString() => owner.DisplayName;
 
       IGH_Goo IGH_GooProxy.ProxyOwner => owner;
       string IGH_GooProxy.UserString { get; set; }
       bool IGH_GooProxy.IsParsable => IsParsable();
+      string IGH_GooProxy.MutateString(string str) => str.Trim();
 
-      public virtual bool IsParsable() => false;
       public virtual void Construct() { }
+      public virtual bool IsParsable() => false;
       public virtual string FormatInstance() => owner.DisplayName;
       public virtual bool FromString(string str) => throw new NotImplementedException();
-      public virtual string MutateString(string str) => str.Trim();
 
       public bool Valid => owner.IsValid;
-      public string TypeName => owner.TypeName;
-      public string TypeDescription => owner.TypeDescription;
 
       [System.ComponentModel.Description("The document this element belongs to.")]
       public string Document => owner.Document.GetFilePath();
       [System.ComponentModel.Description("The Guid of document this element belongs to.")]
-      public Guid DocumentGUID => owner.Document.GetFingerprintGUID();
-      [System.ComponentModel.Description("The element identifier in this session.")]
-      public int Id => owner.Id?.IntegerValue ?? -1;
+      public Guid DocumentGUID => owner.DocumentGUID;
+      protected virtual bool IsValidId(DB.Document doc, DB.ElementId id) => true;
+
       [System.ComponentModel.Description("A stable unique identifier for an element within the document.")]
       public string UniqueID => owner.UniqueID;
       [System.ComponentModel.Description("API Object Type.")]
-      public virtual Type ObjectType => owner.ScriptVariable()?.GetType() ?? owner.ScriptVariableType;
+      public virtual Type ObjectType => owner.Value?.GetType();
       [System.ComponentModel.Description("Element is built in Revit.")]
       public bool IsBuiltIn => owner.Id.IsBuiltInId();
-      [System.ComponentModel.Description("A human readable name for the Element.")]
-      public string Name => owner.DisplayName;
 
       class ObjectConverter : ExpandableObjectConverter
       {
@@ -273,54 +220,100 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override IGH_GooProxy EmitProxy() => new Proxy(this);
+    public virtual IGH_GooProxy EmitProxy() => new Proxy(this);
+    #endregion
 
-    public override sealed string ToString()
+    #region DocumentObject
+    public override object Value
     {
-      var tip = IsValid ?
-        $"{TypeName} : {DisplayName}" :
-        (IsReferencedElement && !IsElementLoaded) ?
-        $"Unresolved {TypeName} : {UniqueID}" :
-        $"Invalid {TypeName}";
-
-      using (var Documents = Revit.ActiveDBApplication.Documents)
+      get
       {
-        return
-        (
-          Documents.Size > 1 ?
-          $"{tip} @ {Document?.Title ?? DocumentGUID.ToString()}" :
-          tip
-        );
+        if (base.Value is null && IsElementLoaded)
+          base.Value = FetchValue();
+
+        return base.Value;
       }
+      protected set => base.Value = value;
     }
+    #endregion
 
-    public virtual string DisplayName => Id is null ? UniqueID : $"id {Id.IntegerValue}";
+    #region IGH_ElementId
+    public abstract DB.Reference Reference { get; }
 
-    public override sealed bool Read(GH_IReader reader)
+    public Guid DocumentGUID { get; protected set; } = Guid.Empty;
+    public string UniqueID { get; protected set; } = string.Empty;
+    public bool IsReferencedElement => DocumentGUID != Guid.Empty;
+
+    public abstract bool IsElementLoaded { get; }
+    public abstract bool LoadElement();
+    protected abstract object FetchValue();
+    public virtual void UnloadElement()
     {
-      Value = null;
-      Document = null;
+      ResetValue();
 
-      var documentGUID = Guid.Empty;
-      reader.TryGetGuid("DocumentGUID", ref documentGUID);
-      DocumentGUID = documentGUID;
-
-      string uniqueID = string.Empty;
-      reader.TryGetString("UniqueID", ref uniqueID);
-      UniqueID = uniqueID;
-
-      return true;
+      if (IsReferencedElement)
+        Document = default;
     }
+    #endregion
 
-    public override sealed bool Write(GH_IWriter writer)
+    #region IGH_QuickCast
+    GH_QuickCastType IGH_QuickCast.QC_Type => GH_QuickCastType.text;
+    int IGH_QuickCast.QC_Hash() => FullUniqueId.Format(DocumentGUID, UniqueID).GetHashCode();
+
+    double IGH_QuickCast.QC_Distance(IGH_QuickCast other)
     {
-      if(DocumentGUID != Guid.Empty)
-        writer.SetGuid("DocumentGUID", DocumentGUID);
+      try
+      {
+        switch (other.QC_Type)
+        {
+          case GH_QuickCastType.@bool:    return other.QC_Bool() == ((IGH_QuickCast) this).QC_Bool() ? 0.0 : 1.0;
+          case GH_QuickCastType.@int:     return Math.Abs(other.QC_Int() - ((IGH_QuickCast) this).QC_Int());
+          case GH_QuickCastType.num:      return Math.Abs(other.QC_Num() - ((IGH_QuickCast) this).QC_Num());
+          case GH_QuickCastType.pt:       return other.QC_Pt().DistanceTo(((IGH_QuickCast) this).QC_Pt());
+          case GH_QuickCastType.vec:      return new Point3d(other.QC_Vec()).DistanceTo(new Point3d(((IGH_QuickCast) this).QC_Vec()));
+          case GH_QuickCastType.interval:
+            var otherInterval = other.QC_Interval();
+            var thisInterval = ((IGH_QuickCast) this).QC_Interval();
+            var d0 = Math.Abs(otherInterval.T0 - thisInterval.T0);
+            var d1 = Math.Abs(otherInterval.T1 - thisInterval.T1);
+            return d0 + d1;
+        }
+      }
+      catch { }
 
-      if(!string.IsNullOrEmpty(UniqueID))
-        writer.SetString("UniqueID", UniqueID);
-
-      return true;
+      var dist0 = GH_StringMatcher.LevenshteinDistance(FullUniqueId.Format(DocumentGUID, UniqueID), other.QC_Text());
+      var dist1 = GH_StringMatcher.LevenshteinDistance(FullUniqueId.Format(DocumentGUID, UniqueID).ToUpperInvariant(), other.QC_Text().ToUpperInvariant());
+      return 0.5 * (dist0 + dist1);
     }
+
+    int IGH_QuickCast.QC_CompareTo(IGH_QuickCast other)
+    {
+      if (other.QC_Type != GH_QuickCastType.text)
+        return GH_QuickCastType.text.CompareTo(other.QC_Type);
+
+      return FullUniqueId.Format(DocumentGUID, UniqueID).CompareTo(other.QC_Text());
+    }
+
+    bool IGH_QuickCast.QC_Bool() => IsValid;
+    int IGH_QuickCast.QC_Int() => Id?.IntegerValue ?? throw new InvalidCastException();
+    double IGH_QuickCast.QC_Num() => Id?.IntegerValue ?? throw new InvalidCastException();
+    string IGH_QuickCast.QC_Text() => FullUniqueId.Format(DocumentGUID, UniqueID);
+    Color IGH_QuickCast.QC_Col() => throw new InvalidCastException();
+    Point3d IGH_QuickCast.QC_Pt() => throw new InvalidCastException();
+    Vector3d IGH_QuickCast.QC_Vec() => throw new InvalidCastException();
+    Complex IGH_QuickCast.QC_Complex() => throw new InvalidCastException();
+    Matrix IGH_QuickCast.QC_Matrix() => throw new InvalidCastException();
+    Interval IGH_QuickCast.QC_Interval() => throw new InvalidCastException();
+    #endregion
+
+    public ElementId() { }
+
+    protected ElementId(DB.Document doc, object value) : base(doc, value) { }
+
+    #region Properties
+    public override string DisplayName => IsReferencedElement ?
+      Id is null ? "INVALID" : Id.IntegerValue.ToString() :
+      "<None>";
+    #endregion
   }
 }

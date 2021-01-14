@@ -1,6 +1,7 @@
 ---
 title: Levels & Grids
-order: 44
+order: 45
+thumbnail: /static/images/guides/revit-wip.png
 group: Modeling
 ---
 

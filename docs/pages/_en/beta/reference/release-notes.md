@@ -10,6 +10,220 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html version="0.0.7683.19842" time="01/13/2021 11:01:24" %}
+
+### Fixes
+* Fixed 'Set Element Parameter' casting from integer.
+
+
+{% include ltr/release-header.html version="0.0.7679.63" time="01/09/2021 00:02:06" %}
+
+### Fixes
+* Now Rhino.Inside Revit resolves at load time any dependency on assemblies installed with Rhino.
+* Isolated 'opennurbs.dll' installed with Revit from 'opennurbs.dll' installed with Rhino.
+
+### Changes
+* Now installer needs admin privileges. Please remember to manually uninstall any previous version of Rhino.Inside Revit you already have installed before applying this new one.
+
+### Important Note
+
+This release is a major update to {{ site.terms.rir }}. This build attempts to resolve the loading and runtime errors some have experienced in Revit. It would be great if you could download and install this new version to see if it solves all the load problems.
+
+Because this is a major change, it does require additional steps to install properly:
+
+1. Make sure Revit is closed
+2. This step is quite important 👉: Uninstall any previous versions of {{ site.terms.rir }} through **Windows Control Panel > Programs & Features**
+3. [Download the latest {{ site.terms.rir }}](https://www.rhino3d.com/inside/revit/beta/)
+4. Install the new {{ site.terms.rir }}. This new installer requires administrator privileges to install properly
+
+Any feedback to this new build is welcome on the [{{ site.terms.rir }} Forum]({{ site.forum_url }})
+
+### Why are admin privileges required to install now?
+
+In order to isolate OpenNURBS Library (`opennurbs.dll`) that is deployed by Revit from the library deployed by Rhino we do need to install a manifest file (`opennurbs_private.manifest`) inside the Revit main folder, and this requires administrator privileges. This change does not affect the Revit installation or behavior in any other way. It only directs Revit to use its own version of the OpenNURBS library when importing 3DM files. Please remember to manually uninstall any previous version of {{ site.terms.rir }} you already have installed before applying this new one.
+
+### What’s new about .NET conflicts in this release?
+
+Normally users have a myriad of Revit add-ons installed to support their specific workflows. Since we can not test every possible setup the user may have, we have tried in this release to make the Rhino.Inside load process more robust to handle “any” unexpected circumstance like conflicts with other installed add-ons.
+
+
+{% include ltr/release-header.html version="0.0.7661.35155" time="12/22/2020 19:31:50" %}
+
+### Fixes
+* Fixed 'Deconstruct Compound Structure' units conversion.
+* Fixed 'Deconstruct Compound Structure Layer' units conversion.
+* Fixed "Highlight Elements" context menu when there is no active Revit document or not selected elements in the active document.
+* Fixed "Set one linked element" and "Set Multiple linked elements" context menu.
+
+### Minor Changes
+* Moved 'Set CPlane' context menu item to the Bake area.
+
+### API
+* Fix: `Types.HostObjectType` constructor should be public for serialization purposes.
+
+{% include ltr/release-header.html version="0.0.7653.37544" time="12/14/2020 20:55:12" %}
+
+### New featues
+* Improved 'Element Location' when managing `DB.DirectShape` elements.
+
+### Fixes
+* Fix for `DB.Document.Release` extension method when document is already closed.
+* Fix for `DB.Solid` to `Brep` conversion when there are singular edges.
+* Fixed a problem on faces that have surface orientation reversed.
+
+### Minor changes
+* Improved `BrepEncoder.ToACIS` to reuse the same Internal document.
+* Trim curves are now computed with more precision (1e-5)
+
+{% include ltr/release-header.html version="0.0.7643.31783" time="12/04/2020 17:39:26" %}
+
+### New featues
+* Implemented 'Bake…' context menu into Categories, Line patterns, Materials and Graphical Elements into Rhino blocks. Levels and Shared Site are baked as named CPlanes in Rhino.
+* Added 'Activate Element CPlane' to the 'GraphicalElement' parameters.
+
+### Fixes
+* Fixed some geometry conversion problems using SAT file export-import on those cases.
+* Fixed a units conversion problem on 'Bitmap Asset' components.
+* Fixed a bug in `ValueSetPicker` when comparing `GH_StructurePath` objects.
+* Fixed `Types.BasePoint.Location` for shared locations like the 'Survey Point'.
+
+### Minor Changes
+* Now we keep Revit window disabled while Rhino.Inside is loading. This prevents Rhino `MessageBox` windows that appear during startup go behind Revit window.
+
+### API
+* Added `IsEquivalent` extension method for `DB.Document` and `DB.Element` to compare if two references point to the same internal Revit object.
+
+{% include ltr/release-header.html version="0.0.7626.34420" time="11/19/2020 14:00:20" %}
+### New featues
+* Added 'Query Element' component.
+* Added 'Project Location' component.
+* Added 'Query Shared Sites' component.
+* Added 'Query Site Locations' component.
+* Added 'Site Location Identity' component.
+
+### Fixes
+* Fixed Level elevation by 'Survey Point'.
+* Fixed 'Export Type Image' for types that do not generate any bitmap.
+
+### API
+* Implemented `IGH_QuickCast` interface at `Types.ElementId` for interoperability with List-Set components.
+
+{% include ltr/release-header.html version="0.0.7626.21365" time="11/13/2020 11:52:10" %}
+### New features
+* Added 'Level Identity' component.
+* Added 'Project Information' component.
+* Added special 'Elevation' and 'Elevation Interval' parameter to manage levels elevations from different base points.
+
+### Fixes
+* Fixed 'Element Location' when working with groups.
+
+{% include ltr/release-header.html version="0.0.7622.22831" time="11/13/2020 12:41:02" %}
+### New features
+* Added 'Active Design Option' component.
+* Added 'Design Option Identity' component.
+* Added 'Design Option Set Identity' component.
+* Added 'Query Design Options' component.
+* Added 'Query Design Option Sets' component.
+
+### Fixes
+* Fixed `Types.CurveElement` serialization.
+* Fixed `Types.Dimension.Location` and `Types.Dimension.Curve` properties.
+* Fixed `Types.ParameterValue.CastTo<IGH_Goo>`.
+* Fixed error message at 'Add Wall (Profile)'.
+
+### Minor Changes
+* Enabled Materials support in Revit 2018.
+
+### API
+* Added special cases for conversion from `DB.Parameter` integer value to `GH_Enumerate`.
+
+{% include ltr/release-header.html version="0.0.7618.21861" time="11/09/2020 12:08:42" %}
+### New features
+* Added 'Material Identity' component.
+* Added 'Material Graphics' component.
+* Added 'Extract Material Assets' component.
+* Added 'Replace Material Assets' component.
+* Added 'Create-Analyze-Modify Appearance Asset' components.
+* Added 'Create-Analyze-Modify Physical Asset' components.
+* Added 'Create-Analyze-Modify Thermal Asset' components.
+* Added 'Construct-Deconstruct Bitmap Asset' components.
+* Added 'Construct-Deconstruct Checker Asset' components.
+* Added 'Add Wall (Profile)' component.
+* Added 'Fill Pattern' parameter.
+* Added 'Line Pattern' parameter.
+* Added modify capabilities to the 'Categories Object Styles' component.
+* Added context menu pickers to 'Level' and 'Grid' parameters.
+* Implemented `Name` property in to `Types.Category` this enables subCategory renaming.
+* Improved 'Query Categories', now is faster and able to report internal categories.
+* Added 'Element Location' component.
+* Added 'Element Curve' component.
+* Added 'Host Curtain Grids' component.
+* Added 'Query Grids' component.
+* Added more params to 'Query Levels' component.
+
+### Fixes
+* Fixed 'Similar Types' to work with multiple documents.
+* Now every *Parameter* that references Revit elements will be expired when the user modify the Revit document. If the modify operation is not UNDO or REDO the Grasshopper solution will be computed again.
+* Now 'Bounding Box Filter' accepts any 'Geometry' to extract the bounding box.
+* Fixed 'Document Save' component.
+* Fixed #331: Set Linked Levels/Grids not working
+
+### Minor Changes
+* Added at 'Query Elements' an input parameter 'Limit' and an output parameter 'Count' to help on big models.
+* Renamed 'Graphical Element Geometry' by 'Element View Geometry'
+* Renamed 'Query Graphical Elements' by 'Query View Elements'
+* Component 'Inspect' now ignores Parameters that are not basic types.
+* Rewritten 'Logical And Filter' and 'Logical Or Filter' to take multiple filters.
+* Added support for `DB.ReferencePlane`.
+* Improved non-axis-aligned bounding box support.
+* Improved `Types.Grid` preview on Rhino.
+* Improved `Types.CurtainGrid` preview on Rhino.
+
+### API
+* Now Rhino.Inside Revit requires Rhino 7.0.20301.12003-beta
+* Added *DEBUG* Rhino System folder to `Addin.SystemDir`
+* Added `TransactionChain` class.
+* Added `AdaptiveTransaction` class.
+* Added `CommitScope` extension method to `DB.Document` class.
+* Added `RollBackScope` extension method to `DB.Document` class.
+* Now `DB.Element.GetParameters` ignores parameters that are not basic types.
+* Added `WhereCategoryIdEqualsTo` extension method to `DB.FilteredElementCollector`. `DB.FilteredElementCollector.OfCategoryId` ignores `DB.ElementId.InvalidElementId`.
+* Added `RhinoInside.Revit.External.DB.BuiltInLinePattern` enum.
+* Added `DB.Document.GetCategories` extension method to enumerate all `DB.Category` instances.
+* Added concept of <None> elements.
+* Now `Types.ElementId` caches the `DB.Element` value. This improve performance specially for `Types.Category`.
+* Now `ErrorReport.CLRVersion` returns the running CLR Product version. `ErrorReport.CLRMaxVersion` returns the maximum installed CLR version.
+* Added `Types.Element.Value` to access the internal `DB.Element`.
+* Added `Types.GraphicalElement.DisableJoinsScope` to temporary disallow joins on and from this element.
+
+{% include ltr/release-header.html version="0.0.7571.33757" time="09/23/2020 18:45:14" %}
+### New features
+* Added icon for 'Add Railing' component.
+* Added 'Pin Element' component.
+* Added 'Flip Element' component.
+
+### Fixes
+* Fixed 'Add 3d View' component.
+
+### Minor Changes
+* Added a warning message that warns the user that Rhino and Active Revit model are in different units.
+
+### API
+* Implemented GetDependentElements in more robust way. Now can be called while a DB.Transaction or DB.SubTransaction is open on the element document.
+* Added extension method `WhereParameterEqualsTo` to `FilteredElementCollector`.
+* Added extension method `GetAssociatedLevelId` to `ViewPlan`.
+* Added extension method `GetActiveView` to `DB.Document`.
+
+{% include ltr/release-header.html version="0.0.7557.24227" time="09/19/2020 13:27:34" %}
+
+### New Features
+* Added 'Add SubCategory' component.
+* Added 'Add Railing' component.
+
+### Fixes
+* Fixed 'Document Links' component to make it work with BIM 360 linked files.
+* Improved `DB.HemiteSurface` conversion to `NurbsSurface`.
+
 {% include ltr/release-header.html version="0.0.7536.22136" time="08/19/2020 12:17:52" %}
 
 ### New Features
@@ -67,7 +281,7 @@ Some of the changes mentioned in sections below, might break your existing Grass
 * Fixed a bug in Types.GraphicalElement.ClippingBox when DB.Element is not available.
 * Fixed a bug in 'Add Beam', now default Cross-Section Rotation is 0.0
 
-## Minor Changes
+### Minor Changes
 * Disabled Grasshopper previews when Solver is locked.
 * Now Grasshopper ignores disabled params or components when occurs a change in Revit document in order to expire the solution.
 

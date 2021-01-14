@@ -1,6 +1,7 @@
 ---
 title: Stairs
-order: 43
+order: 44
+thumbnail: /static/images/guides/revit-wip.png
 group: Modeling
 ---
 

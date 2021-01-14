@@ -51,27 +51,30 @@
 
         <!-- highlight the active category link on navigation bar -->
         <script>
-            var url = window.location.href;
-            // set nav bar links by selected version
-            $('#cat_homelogo').attr('href', getPageLink(''));
-            $('#cat_homelink').attr('href', getPageLink(''));
-            $('#cat_starting').attr('href', getPageLink('getting-started'));
-            $('#cat_guides').attr('href', getPageLink('guides/'));
-            $('#cat_samples').attr('href', getPageLink('samples/'));
-            $('#cat_reference').attr('href', getPageLink('reference/'));
-            $('#cat_community').attr('href', getPageLink('community/'));
-            // mark current navbar category as active
-            if (url.endsWith('/getting-started') || url.includes('/getting-started/')) {
-                $('#cat_starting').addClass('active');
-            } else if (url.endsWith('/guides') || url.includes('/guides/')) {
-                $('#cat_guides').addClass('active');
-            } else if (url.endsWith('/samples') || url.includes('/samples/')) {
-                $('#cat_samples').addClass('active');
-            } else if (url.endsWith('/reference') || url.includes('/reference/')) {
-                $('#cat_reference').addClass('active');
-            } else if (url.endsWith('/community') || url.includes('/community/')) {
-                $('#cat_community').addClass('active');
-            }
+            $(document).ready(function(){
+                var url = window.location.href;
+                // set nav bar links by selected version
+                $('#cat_homelogo').attr('href', getPageLink(''));
+                $('#cat_homelink').attr('href', getPageLink(''));
+                $('#cat_starting').attr('href', getPageLink('getting-started'));
+                $('#cat_guides').attr('href', getPageLink('guides/'));
+                $('#cat_discover').attr('href', getPageLink('discover/'));
+                $('#cat_reference').attr('href', getPageLink('reference/'));
+                // mark current navbar category as active
+                if (url.endsWith('/'+'getting-started') || url.includes('/'+'getting-started'+'/')) {
+                    console.log("activating getting-started");
+                    $('#cat_starting').addClass('active');
+                } else if (url.endsWith('/'+'guides') || url.includes('/'+'guides'+'/')) {
+                    console.log("activating guides");
+                    $('#cat_guides').addClass('active');
+                } else if (url.endsWith('/'+'discover') || url.includes('/'+'discover'+'/')) {
+                    console.log("activating discover");
+                    $('#cat_discover').addClass('active');
+                } else if (url.endsWith('/'+'reference') || url.includes('/'+'reference'+'/')) {
+                    console.log("activating reference");
+                    $('#cat_reference').addClass('active');
+                }
+            });
         </script>
 
         <script>
@@ -81,7 +84,7 @@
                 // grab all images in side content, filter out svg
                 // then apply magnificPopup
                 $('.side-content img').filter(function(){
-                        return ! $(this).attr('src').endsWith(".svg")
+                        return ! ($(this).attr('src').endsWith(".svg") || $(this).hasClass("no-popup"))
                     }).magnificPopup({
                     type:'image',
                     zoom: { enabled: true },
@@ -103,6 +106,23 @@
                 anchors.add('.post-content > h2, .post-content > h3, .post-content > h4, .post-content > h5, .post-content > h6');
                 }
             )();
+        </script>
+
+        <!-- gallery interaction -->
+        <script>
+            function attachGalleryItemHover() {
+              $(".gallery-item").hover(function(){
+                    $(this).addClass("gallery-item-focused");
+                    $(this).find(".gallery-thumbnail").removeClass("gallery-thumbnail-dim");
+                    $(this).find(".gallery-info-extra").css("display", "block");
+                }, function(){
+                    $(this).removeClass("gallery-item-focused");
+                    $(this).find(".gallery-thumbnail").addClass("gallery-thumbnail-dim");
+                    $(this).find(".gallery-info-extra").css("display", "none");
+              });
+            };
+            
+            $(document).ready(attachGalleryItemHover);
         </script>
     </body>
 </html>

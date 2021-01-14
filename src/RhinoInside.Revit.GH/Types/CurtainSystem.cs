@@ -1,17 +1,16 @@
 using System;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.Geometry.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  [Kernel.Attributes.Name("Curtain System")]
   public class CurtainSystem : HostObject
   {
-    public override string TypeDescription => "Represents a Revit curtain system element";
     protected override Type ScriptVariableType => typeof(DB.CurtainSystem);
-    public static explicit operator DB.CurtainSystem(CurtainSystem value) =>
-      value?.IsValid == true ? value.Document.GetElement(value) as DB.CurtainSystem : default;
+    public new DB.CurtainSystem Value => base.Value as DB.CurtainSystem;
+    public static explicit operator DB.CurtainSystem(CurtainSystem value) => value?.Value;
 
     public CurtainSystem() { }
     public CurtainSystem(DB.CurtainSystem host) : base(host) { }
@@ -20,9 +19,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var wall = (DB.CurtainSystem) this;
-
-        if (wall?.Location is DB.LocationCurve curveLocation)
+        if (Value is DB.CurtainSystem system && system.Location is DB.LocationCurve curveLocation)
         {
           var start = curveLocation.Curve.Evaluate(0.0, normalized: true).ToPoint3d();
           var end = curveLocation.Curve.Evaluate(1.0, normalized: true).ToPoint3d();
@@ -36,16 +33,9 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override Curve Curve
-    {
-      get
-      {
-        var wall = (DB.CurtainSystem) this;
-
-        return wall?.Location is DB.LocationCurve curveLocation ?
-          curveLocation.Curve.ToCurve() :
-          null;
-      }
-    }
+    public override Curve Curve =>
+      Value is DB.CurtainSystem system && system.Location is DB.LocationCurve curveLocation ?
+      curveLocation.Curve.ToCurve() :
+      default;
   }
 }

@@ -16,6 +16,7 @@ namespace RhinoInside.Revit.GH.Components
   using Exceptions;
   using Kernel.Attributes;
 
+  [Obsolete]
   public abstract class TransactionBaseComponent :
     Component,
     DB.IFailuresPreprocessor,
@@ -345,13 +346,13 @@ namespace RhinoInside.Revit.GH.Components
       return wasMissing;
     }
 
-    protected static bool SolveOptionalLevel(DB.Document doc, double elevation, ref Optional<DB.Level> level)
+    protected static bool SolveOptionalLevel(DB.Document doc, double height, ref Optional<DB.Level> level)
     {
       bool wasMissing = level.IsMissing;
 
       if (wasMissing)
-        level = doc.FindLevelByElevation(elevation / Revit.ModelUnits) ??
-                throw new ArgumentException("No suitable level has been found.", nameof(elevation));
+        level = doc.FindLevelByHeight(height / Revit.ModelUnits) ??
+                throw new ArgumentException("No suitable level has been found.", nameof(height));
 
       else if (level.Value == null)
         throw new ArgumentNullException(nameof(level));
@@ -389,12 +390,12 @@ namespace RhinoInside.Revit.GH.Components
       return SolveOptionalLevel(doc, bbox.IsValid ? bbox.Min.Z : double.NaN, ref level);
     }
 
-    protected static void SolveOptionalLevelsFromBase(DB.Document doc, double elevation, ref Optional<DB.Level> baseLevel, ref Optional<DB.Level> topLevel)
+    protected static void SolveOptionalLevelsFromBase(DB.Document doc, double height, ref Optional<DB.Level> baseLevel, ref Optional<DB.Level> topLevel)
     {
       if (baseLevel.IsMissing && topLevel.IsMissing)
       {
-        var b = doc.FindBaseLevelByElevation(elevation / Revit.ModelUnits, out var t) ??
-                t ?? throw new ArgumentException("No suitable base level has been found.", nameof(elevation));
+        var b = doc.FindBaseLevelByHeight(height / Revit.ModelUnits, out var t) ??
+                t ?? throw new ArgumentException("No suitable base level has been found.", nameof(height));
 
         if (!baseLevel.HasValue)
           baseLevel = b;
@@ -416,12 +417,12 @@ namespace RhinoInside.Revit.GH.Components
         throw new ArgumentException("Failed to assign a level from a diferent document.", nameof(topLevel));
     }
 
-    protected static void SolveOptionalLevelsFromTop(DB.Document doc, double elevation, ref Optional<DB.Level> baseLevel, ref Optional<DB.Level> topLevel)
+    protected static void SolveOptionalLevelsFromTop(DB.Document doc, double height, ref Optional<DB.Level> baseLevel, ref Optional<DB.Level> topLevel)
     {
       if (baseLevel.IsMissing && topLevel.IsMissing)
       {
-        var t = doc.FindTopLevelByElevation(elevation / Revit.ModelUnits, out var b) ??
-                b ?? throw new ArgumentException("No suitable top level has been found.", nameof(elevation));
+        var t = doc.FindTopLevelByHeight(height / Revit.ModelUnits, out var b) ??
+                b ?? throw new ArgumentException("No suitable top level has been found.", nameof(height));
 
         if (!topLevel.HasValue)
           topLevel = t;
@@ -455,24 +456,16 @@ namespace RhinoInside.Revit.GH.Components
     #endregion
   }
 
+  [Obsolete("Please use TransactionalComponent")]
   public abstract class TransactionComponent : TransactionBaseComponent
   {
     protected TransactionComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
 
     #region Autodesk.Revit.DB.Transacion support
-    protected enum TransactionStrategy
-    {
-      PerSolution,
-      PerComponent
-    }
-    protected virtual TransactionStrategy TransactionalStrategy => TransactionStrategy.PerComponent;
-
     protected DB.Transaction CurrentTransaction;
     protected DB.TransactionStatus TransactionStatus => CurrentTransaction?.GetStatus() ?? DB.TransactionStatus.Uninitialized;
 
-    [Obsolete("Superseded by 'StartTransaction' since 2020-05-21")]
-    protected void BeginTransaction(DB.Document document) => StartTransaction(document);
     protected void StartTransaction(DB.Document document)
     {
       if (document is null)
@@ -497,9 +490,6 @@ namespace RhinoInside.Revit.GH.Components
     // Step 1.
     protected override void BeforeSolveInstance()
     {
-      if (TransactionalStrategy != TransactionStrategy.PerComponent)
-        return;
-
       if (Revit.ActiveDBDocument is DB.Document Document)
       {
         StartTransaction(Document);
@@ -520,9 +510,6 @@ namespace RhinoInside.Revit.GH.Components
     // Step 5.
     protected override void AfterSolveInstance()
     {
-      if (TransactionalStrategy != TransactionStrategy.PerComponent)
-        return;
-
       try
       {
         if (RunCount <= 0)
@@ -556,23 +543,15 @@ namespace RhinoInside.Revit.GH.Components
     }
   }
 
+  [Obsolete("Please use TransactionalChainComponent")]
   public abstract class TransactionsComponent : TransactionBaseComponent
   {
     protected TransactionsComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
 
     #region Autodesk.Revit.DB.Transacion support
-    protected enum TransactionStrategy
-    {
-      PerSolution,
-      PerComponent
-    }
-    protected virtual TransactionStrategy TransactionalStrategy => TransactionStrategy.PerComponent;
-
     Dictionary<DB.Document, DB.Transaction> CurrentTransactions;
 
-    [Obsolete("Superseded by 'StartTransaction' since 2020-05-21")]
-    protected void BeginTransaction(DB.Document document) => StartTransaction(document);
     protected void StartTransaction(DB.Document document)
     {
       if (CurrentTransactions?.ContainsKey(document) != true)
@@ -594,9 +573,6 @@ namespace RhinoInside.Revit.GH.Components
     // Step 5.
     protected override void AfterSolveInstance()
     {
-      if (TransactionalStrategy != TransactionStrategy.PerComponent)
-        return;
-
       if (CurrentTransactions is null)
         return;
 
@@ -676,6 +652,7 @@ namespace RhinoInside.Revit.GH.Components
       { typeof(Autodesk.Revit.DB.Category),     Tuple.Create(typeof(Parameters.Category),     typeof(Types.Category))     },
       { typeof(Autodesk.Revit.DB.Element),      Tuple.Create(typeof(Parameters.Element),      typeof(Types.Element))      },
       { typeof(Autodesk.Revit.DB.ElementType),  Tuple.Create(typeof(Parameters.ElementType),  typeof(Types.ElementType))  },
+      { typeof(Autodesk.Revit.DB.FamilySymbol), Tuple.Create(typeof(Parameters.FamilySymbol), typeof(Types.FamilySymbol)) },
       { typeof(Autodesk.Revit.DB.Material),     Tuple.Create(typeof(Parameters.Material),     typeof(Types.Material))     },
       { typeof(Autodesk.Revit.DB.SketchPlane),  Tuple.Create(typeof(Parameters.SketchPlane),  typeof(Types.SketchPlane))  },
       { typeof(Autodesk.Revit.DB.Level),        Tuple.Create(typeof(Parameters.Level),        typeof(Types.Level))        },
@@ -729,7 +706,7 @@ namespace RhinoInside.Revit.GH.Components
       return (IGH_Goo) Activator.CreateInstance(paramTypes.Item2, value);
     }
 
-    protected Type GetParameterType(ParameterInfo parameter, out GH_ParamAccess access, out bool optional)
+    protected Type GetArgumentType(ParameterInfo parameter, out GH_ParamAccess access, out bool optional)
     {
       var parameterType = parameter.ParameterType;
       optional = parameter.IsDefined(typeof(OptionalAttribute), false);
@@ -769,49 +746,46 @@ namespace RhinoInside.Revit.GH.Components
         if (parameter.IsOut || parameter.ParameterType.IsByRef)
           throw new NotImplementedException();
 
-        var parameterType = GetParameterType(parameter, out var access, out var optional);
+        var argumentType = GetArgumentType(parameter, out var access, out var optional);
         var nickname = parameter.Name.First().ToString().ToUpperInvariant();
         var name = nickname + parameter.Name.Substring(1);
 
-        foreach (var nameAttribte in parameter.GetCustomAttributes(typeof(NameAttribute), false).Cast<NameAttribute>())
-          name = nameAttribte.Name;
+        if (parameter.GetCustomAttributes(typeof(NameAttribute), false).FirstOrDefault() is NameAttribute nameAttribute)
+          name = nameAttribute?.Name;
 
-        foreach (var nickNameAttribte in parameter.GetCustomAttributes(typeof(NickNameAttribute), false).Cast<NickNameAttribute>())
-          nickname = nickNameAttribte.NickName;
+        if (parameter.GetCustomAttributes(typeof(NickNameAttribute), false).FirstOrDefault() is NickNameAttribute nickNameAttribute)
+          nickname = nickNameAttribute.NickName;
 
         var description = string.Empty;
         foreach (var descriptionAttribute in parameter.GetCustomAttributes(typeof(DescriptionAttribute), false).Cast<DescriptionAttribute>())
           description = (description.Length > 0) ? $"{description}\r\n{descriptionAttribute.Description}" : descriptionAttribute.Description;
 
-        var param = manager[manager.AddParameter(CreateParam(parameterType), name, nickname, description, access)];
+        var paramType = (parameter.GetCustomAttributes(typeof(ParamTypeAttribute), false).FirstOrDefault() as ParamTypeAttribute)?.Type;
 
-        var defaultValue = default(object);
-        foreach (var defaultValueAttribute in parameter.GetCustomAttributes(typeof(DefaultValueAttribute), false).Cast<DefaultValueAttribute>())
-          defaultValue = defaultValueAttribute.Value;
+        var param = paramType is null ? CreateParam(argumentType) : Activator.CreateInstance(paramType) as IGH_Param;
+        manager.AddParameter(param, name, nickname, description, access);
 
-        if (defaultValue is object)
+        if (parameter.GetCustomAttributes(typeof(DefaultValueAttribute), false).FirstOrDefault() is DefaultValueAttribute defaultValueAttribute)
         {
-          TryGetParamTypes(parameter.ParameterType, out var paramTypes);
-
-          if (paramTypes.Item1.IsGenericSubclassOf(typeof(GH_PersistentParam<>)))
+          if (defaultValueAttribute.Value is object && param.GetType().IsGenericSubclassOf(typeof(GH_PersistentParam<>)))
           {
             dynamic persistentParam = param;
-            persistentParam.SetPersistentData(defaultValue);
+            persistentParam.SetPersistentData(defaultValueAttribute.Value);
           }
         }
 
         param.Optional = optional;
 
-        if (parameterType.IsEnum && param is Param_Integer integerParam)
+        if (argumentType.IsEnum && param is Param_Integer integerParam)
         {
-          foreach (var e in Enum.GetValues(parameterType))
-            integerParam.AddNamedValue(Enum.GetName(parameterType, e), (int) e);
+          foreach (var e in Enum.GetValues(argumentType))
+            integerParam.AddNamedValue(Enum.GetName(argumentType, e), (int) e);
         }
-        else if (parameterType == typeof(Autodesk.Revit.DB.Element) || parameterType.IsSubclassOf(typeof(Autodesk.Revit.DB.Element)))
+        else if (argumentType == typeof(Autodesk.Revit.DB.Element) || argumentType.IsSubclassOf(typeof(Autodesk.Revit.DB.Element)))
         {
-          elementFilterClasses.Add(parameterType);
+          elementFilterClasses.Add(argumentType);
         }
-        else if (parameterType == typeof(Autodesk.Revit.DB.Category))
+        else if (argumentType == typeof(Autodesk.Revit.DB.Category))
         {
           elementFilterClasses.Add(typeof(Autodesk.Revit.DB.Element));
         }
@@ -1037,7 +1011,7 @@ namespace RhinoInside.Revit.GH.Components
         }
         finally
         {
-          if (previous?.IsValidObject == true && !previous.IsSameElement(element))
+          if (previous?.IsValidObject == true && !previous.IsEquivalent(element))
             previous.Document.Delete(previous.Id);
 
           if (element?.IsValidObject == true)
@@ -1135,7 +1109,7 @@ namespace RhinoInside.Revit.GH.Components
       (
         x =>
         x.VolatileData.AllData(true).
-        OfType<Types.IGH_ElementId>().
+        OfType<Types.IGH_Element>().
         Where(goo => options.Document.Equals(goo.Document)).
         Any()
       ).
@@ -1151,7 +1125,7 @@ namespace RhinoInside.Revit.GH.Components
           var newStructure = (IGH_Goo[]) PreviousStructure.Clone();
           for (int g = 0; g < newStructure.Length; g++)
           {
-            if (newStructure[g] is Types.IGH_ElementId id)
+            if (newStructure[g] is Types.IGH_Element id)
             {
               if
               (

@@ -19,8 +19,8 @@ namespace RhinoInside.Revit.GH.Components
 
     public WallByCurve() : base
     (
-      name: "Add Wall",
-      nickname: "Wall",
+      name: "Add Wall (Curve)",
+      nickname: "WallCrv",
       description: "Given a curve, it adds a Wall element to the active Revit document",
       category: "Revit",
       subCategory: "Wall"
@@ -40,7 +40,7 @@ namespace RhinoInside.Revit.GH.Components
       if (PreviousStructure is object)
       {
         var unjoinedWalls = PreviousStructure.OfType<Types.Element>().
-                            Select(x => document.GetElement(x)).
+                            Select(x => document.GetElement(x.Id)).
                             OfType<DB.Wall>().
                             Where(x => x.Pinned).
                             Select
@@ -137,7 +137,7 @@ namespace RhinoInside.Revit.GH.Components
         height = type.GetValueOrDefault()?.GetCompoundStructure()?.SampleHeight * Revit.ModelUnits ?? LiteralLengthValue(6.0);
 
       // Axis
-      var levelPlane = new Rhino.Geometry.Plane(new Rhino.Geometry.Point3d(0.0, 0.0, level.Value.Elevation * Revit.ModelUnits), Rhino.Geometry.Vector3d.ZAxis);
+      var levelPlane = new Rhino.Geometry.Plane(new Rhino.Geometry.Point3d(0.0, 0.0, level.Value.GetHeight() * Revit.ModelUnits), Rhino.Geometry.Vector3d.ZAxis);
       curve = Rhino.Geometry.Curve.ProjectToPlane(curve, levelPlane);
 
       var centerLine = curve.ToCurve();
@@ -195,7 +195,7 @@ namespace RhinoInside.Revit.GH.Components
           type.Value.Id,
           level.Value.Id,
           height / Revit.ModelUnits,
-          levelIsEmpty ? bbox.Min.Z / Revit.ModelUnits - level.Value.Elevation : 0.0,
+          levelIsEmpty ? bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight() : 0.0,
           flipped,
           structuralUsage != DB.Structure.StructuralWallUsage.NonBearing
         );
@@ -222,7 +222,7 @@ namespace RhinoInside.Revit.GH.Components
       if (newWall != null)
       {
         newWall.get_Parameter(DB.BuiltInParameter.WALL_BASE_CONSTRAINT).Set(level.Value.Id);
-        newWall.get_Parameter(DB.BuiltInParameter.WALL_BASE_OFFSET).Set(bbox.Min.Z / Revit.ModelUnits - level.Value.Elevation);
+        newWall.get_Parameter(DB.BuiltInParameter.WALL_BASE_OFFSET).Set(bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight());
         newWall.get_Parameter(DB.BuiltInParameter.WALL_USER_HEIGHT_PARAM).Set(height / Revit.ModelUnits);
         newWall.get_Parameter(DB.BuiltInParameter.WALL_KEY_REF_PARAM).Set((int) locationLine);
         if(structuralUsage == DB.Structure.StructuralWallUsage.NonBearing)

@@ -5,6 +5,7 @@ using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.Convert.Geometry;
 
 using DB = Autodesk.Revit.DB;
+using RhinoInside.Revit.GH.Parameters;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -37,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
       manager.AddParameter(
-        param: new Parameters.WallSystemFamily_ValueList(),
+        param: new Param_Enum<Types.WallSystemFamily>(),
         name: "Wall System Family",
         nickname: "WSF",
         description: "System family (DB.WallKind) of the given wall instance",
@@ -151,7 +152,7 @@ namespace RhinoInside.Revit.GH.Components
         access: GH_ParamAccess.item
         );
       manager.AddParameter(
-        param: new Parameters.WallStructuralUsage_ValueList(),
+        param: new Param_Enum<Types.StructuralWallUsage>(),
         name: "Structural Usage",
         nickname: "STU",
         description: "Structural usage of given wall instance",
@@ -201,7 +202,7 @@ namespace RhinoInside.Revit.GH.Components
       PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.WALL_ATTR_ROOM_BOUNDING, "Is Room Bounding");
 
       PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT, "Structural");
-      PipeHostParameter<Types.StructuralWallUsage>(DA, wallInstance, DB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM, "Structural Usage");
+      PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM, "Structural Usage");
 
       DA.SetData("Orientation", UnitConverter.InRhinoUnits(wallInstance.GetOrientationVector()));
     }

@@ -4,14 +4,6 @@ namespace System.Collections.Generic
 {
   internal static class ListExtensions
   {
-    public static void AddCollection<T>(this List<T> list, ICollection<T> collection)
-    {
-      if (list.Capacity < list.Count + collection.Count)
-        list.Capacity = list.Count + collection.Count;
-
-      list.AddRange(collection);
-    }
-
     public static void AddRange<T>(this List<T> list, IEnumerable<T> collection, int collectionCount)
     {
       if (list.Capacity < list.Count + collectionCount)
@@ -23,6 +15,12 @@ namespace System.Collections.Generic
 
   internal static class EnumerableExtensions
   {
+    public static IEnumerable<T> As<T>(this IEnumerable values)
+    {
+      foreach (var value in values)
+        yield return value is T t ? t : default;
+    }
+
     public static T FirstOr<T>(this IEnumerable<T> values, T value)
     {
       if (values is IList<T> list)

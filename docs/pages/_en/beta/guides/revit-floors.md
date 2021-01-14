@@ -1,6 +1,7 @@
 ---
 title: Floors
-order: 45
+order: 46
+thumbnail: /static/images/guides/revit-wip.png
 group: Modeling
 ---
 

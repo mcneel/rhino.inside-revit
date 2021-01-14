@@ -6,6 +6,8 @@ using Autodesk.Revit.UI.Selection;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
+using Grasshopper.Kernel.Types;
+using Rhino.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.External.UI.Selection;
 using DB = Autodesk.Revit.DB;
@@ -13,7 +15,8 @@ using DB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Parameters
 {
   public abstract class GraphicalElementT<T, R> :
-    ElementIdWithPreviewParam<T, R>,
+    Element<T, R>,
+    IGH_PreviewObject,
     ISelectionFilter
     where T : class, Types.IGH_GraphicalElement
   {
@@ -22,6 +25,14 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       ObjectChanged += OnObjectChanged;
     }
+
+    #region IGH_PreviewObject
+    bool IGH_PreviewObject.Hidden { get; set; }
+    bool IGH_PreviewObject.IsPreviewCapable => !VolatileData.IsEmpty;
+    BoundingBox IGH_PreviewObject.ClippingBox => Preview_ComputeClippingBox();
+    void IGH_PreviewObject.DrawViewportMeshes(IGH_PreviewArgs args) => Preview_DrawMeshes(args);
+    void IGH_PreviewObject.DrawViewportWires(IGH_PreviewArgs args) => Preview_DrawWires(args);
+    #endregion
 
     #region ISelectionFilter
     public virtual bool AllowElement(DB.Element elem) => elem is R;
@@ -151,6 +162,24 @@ namespace RhinoInside.Revit.GH.Parameters
       return GH_GetterResult.success;
     }
 
+    class LinkedElementSelectionFilter : ISelectionFilter
+    {
+      readonly ISelectionFilter SelectionFilter;
+      public LinkedElementSelectionFilter(ISelectionFilter filter) => SelectionFilter = filter;
+
+      public bool AllowElement(DB.Element elem) => elem is DB.RevitLinkInstance;
+      public bool AllowReference(DB.Reference reference, DB.XYZ position)
+      {
+        if (reference.ElementReferenceType == DB.ElementReferenceType.REFERENCE_TYPE_NONE)
+        {
+          if (Revit.ActiveUIDocument.Document.GetElement(reference) is DB.RevitLinkInstance link)
+            return SelectionFilter.AllowElement(link.GetLinkDocument().GetElement(reference.LinkedElementId));
+        }
+
+        return false;
+      }
+    }
+
     protected GH_GetterResult Prompt_Elements(ref GH_Structure<T> value, ObjectType objectType, bool multiple, bool preSelect)
     {
       var uiDocument = Revit.ActiveUIDocument;
@@ -172,16 +201,20 @@ namespace RhinoInside.Revit.GH.Parameters
       var result = Autodesk.Revit.UI.Result.Failed;
       var references = default(IList<DB.Reference>);
       {
+        var selectionFilter = objectType == ObjectType.LinkedElement ?
+          new LinkedElementSelectionFilter(this) :
+          (ISelectionFilter) this;
+
         if (multiple)
         {
           if(preSelect)
-            result = uiDocument.PickObjects(out references, objectType, this, string.Empty, activeElements);
+            result = uiDocument.PickObjects(out references, objectType, selectionFilter, string.Empty, activeElements);
           else
-            result = uiDocument.PickObjects(out references, objectType, this);
+            result = uiDocument.PickObjects(out references, objectType, selectionFilter);
         }
         else
         {
-          result = uiDocument.PickObject(out var reference, objectType, this);
+          result = uiDocument.PickObject(out var reference, objectType, selectionFilter);
           if (result == Autodesk.Revit.UI.Result.Succeeded)
             references = new DB.Reference[] { reference };
         }
@@ -255,9 +288,28 @@ namespace RhinoInside.Revit.GH.Parameters
       //Menu_AppendItem(menu, $"Externalize data", Menu_ExternalizeData, SourceCount == 0, !MutableNickName);
     }
 
+    protected override void Menu_AppendBakeItem(ToolStripDropDown menu)
+    {
+      base.Menu_AppendBakeItem(menu);
+
+      if (VolatileData.DataCount == 1)
+      {
+        var cplane = VolatileData.AllData(true).FirstOrDefault() is Types.GraphicalElement element &&
+          element.Location.IsValid;
+
+        Menu_AppendItem(menu, $"Set CPlane", Menu_SetCPlane, cplane, false);
+      }
+    }
+
     public override void Menu_AppendActions(ToolStripDropDown menu)
     {
-      Menu_AppendItem(menu, $"Highlight {GH_Convert.ToPlural(TypeName)}", Menu_HighlightElements, !VolatileData.IsEmpty, false);
+      if (Revit.ActiveUIDocument?.Document is DB.Document doc)
+      {
+        var highlight = ToElementIds(VolatileData).Any(x => doc.Equals(x.Document));
+
+        Menu_AppendItem(menu, $"Highlight {GH_Convert.ToPlural(TypeName)}", Menu_HighlightElements, highlight, false);
+      }
+
       base.Menu_AppendActions(menu);
     }
 
@@ -292,7 +344,7 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         PrepareForPrompt();
         var data = PersistentData;
-        if (Prompt_Elements(ref data, ObjectType.LinkedElement, false, false) == GH_GetterResult.success)
+        if (Prompt_SingularLinked(ref data) == GH_GetterResult.success)
         {
           RecordPersistentDataEvent("Change data");
 
@@ -342,7 +394,7 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         PrepareForPrompt();
         var data = PersistentData;
-        if (Prompt_Elements(ref data, ObjectType.LinkedElement, true, false) == GH_GetterResult.success)
+        if (Prompt_PluralLinked(ref data) == GH_GetterResult.success)
         {
           RecordPersistentDataEvent("Change data");
 
@@ -389,18 +441,39 @@ namespace RhinoInside.Revit.GH.Parameters
     private void Menu_HighlightElements(object sender, EventArgs e)
     {
       var uiDocument = Revit.ActiveUIDocument;
+      var doc = uiDocument.Document;
       var elementIds = ToElementIds(VolatileData).
-                       Where(x => x.Document.Equals(uiDocument.Document)).
+                       Where(x => doc.Equals(x.Document)).
                        Select(x => x.Id);
 
       if (elementIds.Any())
       {
-        Rhinoceros.InvokeInHostContext(() =>
+        var ids = elementIds.ToArray();
+        uiDocument.Selection.SetElementIds(ids);
+        uiDocument.ShowElements(ids);
+      }
+    }
+
+    private void Menu_SetCPlane(object sender, EventArgs e)
+    {
+      if (VolatileData.AllData(true).FirstOrDefault() is Types.GraphicalElement element)
+      {
+        if
+        (
+          Rhino.RhinoDoc.ActiveDoc is Rhino.RhinoDoc doc &&
+          doc.Views.ActiveView is Rhino.Display.RhinoView view &&
+          view.ActiveViewport is Rhino.Display.RhinoViewport vport
+        )
         {
-          var ids = elementIds.ToArray();
-          uiDocument.Selection.SetElementIds(ids);
-          uiDocument.ShowElements(ids);
-        });
+          Rhinoceros.Show();
+          Rhino.RhinoApp.SetFocusToMainWindow();
+
+          var cplane = vport.GetConstructionPlane();
+          cplane.Plane = element.Location;
+          vport.PushConstructionPlane(cplane);
+
+          view.Redraw();
+        }
       }
     }
 

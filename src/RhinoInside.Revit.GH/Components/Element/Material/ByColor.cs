@@ -4,13 +4,13 @@ using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.System.Drawing;
 using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Material.Obsolete
 {
+  [Obsolete("Since 2020-09-25")]
   public class MaterialByColor : TransactionComponent
   {
     public override Guid ComponentGuid => new Guid("273FF43D-B771-4EB7-A66D-5DA5F7F2731E");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
-    protected override string IconTag => "C";
+    public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.hidden;
 
     public MaterialByColor()
     : base("Add Color Material", "Material", "Quickly create a new Revit material from color", "Revit", "Material")

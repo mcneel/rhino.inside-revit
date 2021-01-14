@@ -10,12 +10,156 @@ using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH
 {
-  using Convert.Units;
   using Convert.Geometry;
   using External.DB.Extensions;
 
-  internal static class ParameterUtils
+  static class ParameterUtils
   {
+    internal static IGH_Goo AsGoo(this DB.Parameter parameter)
+    {
+      if (parameter?.HasValue != true)
+        return default;
+
+      switch (parameter.StorageType)
+      {
+        case DB.StorageType.Integer:
+          var integer = parameter.AsInteger();
+
+          if (parameter.Definition is DB.Definition definition)
+          {
+            switch (definition.ParameterType)
+            {
+              case DB.ParameterType.Invalid:
+                if (definition.UnitType == DB.UnitType.UT_Number && parameter.Id.TryGetBuiltInParameter(out var builtInInteger))
+                {
+                  switch (builtInInteger)
+                  {
+                    case DB.BuiltInParameter.AUTO_JOIN_CONDITION:         return new Types.CurtainGridJoinCondition((DBX.CurtainGridJoinCondition) integer);
+                    case DB.BuiltInParameter.AUTO_JOIN_CONDITION_WALL:    return new Types.CurtainGridJoinCondition((DBX.CurtainGridJoinCondition) integer);
+                    case DB.BuiltInParameter.SPACING_LAYOUT_U:            return new Types.CurtainGridLayout((DBX.CurtainGridLayout) integer);
+                    case DB.BuiltInParameter.SPACING_LAYOUT_1:            return new Types.CurtainGridLayout((DBX.CurtainGridLayout) integer);
+                    case DB.BuiltInParameter.SPACING_LAYOUT_VERT:         return new Types.CurtainGridLayout((DBX.CurtainGridLayout) integer);
+                    case DB.BuiltInParameter.SPACING_LAYOUT_V:            return new Types.CurtainGridLayout((DBX.CurtainGridLayout) integer);
+                    case DB.BuiltInParameter.SPACING_LAYOUT_2:            return new Types.CurtainGridLayout((DBX.CurtainGridLayout) integer);
+                    case DB.BuiltInParameter.SPACING_LAYOUT_HORIZ:        return new Types.CurtainGridLayout((DBX.CurtainGridLayout) integer);
+                    case DB.BuiltInParameter.WRAPPING_AT_INSERTS_PARAM:   return new Types.WallWrapping((DBX.WallWrapping) integer);
+                    case DB.BuiltInParameter.WRAPPING_AT_ENDS_PARAM:      return new Types.WallWrapping((DBX.WallWrapping) integer);
+                    case DB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM: return new Types.StructuralWallUsage((DB.Structure.StructuralWallUsage) integer);
+                    case DB.BuiltInParameter.WALL_KEY_REF_PARAM:          return new Types.WallLocationLine((DB.WallLocationLine) integer);
+                    case DB.BuiltInParameter.FUNCTION_PARAM:              return new Types.WallFunction((DB.WallFunction) integer);
+                  }
+
+                  var builtInIntegerName = builtInInteger.ToString();
+                  if (builtInIntegerName.Contains("COLOR_") || builtInIntegerName.Contains("_COLOR_") || builtInIntegerName.Contains("_COLOR"))
+                  {
+                    int r = integer % 256;
+                    integer /= 256;
+                    int g = integer % 256;
+                    integer /= 256;
+                    int b = integer % 256;
+
+                    return new GH_Colour(System.Drawing.Color.FromArgb(r, g, b));
+                  }
+                } 
+                break;
+              case DB.ParameterType.YesNo:
+                return new GH_Boolean(integer != 0);
+            }
+          }
+
+          return new GH_Integer(integer);
+
+        case DB.StorageType.Double:
+          return new GH_Number(parameter.AsDoubleInRhinoUnits());
+
+        case DB.StorageType.String:
+          return new GH_String(parameter.AsString());
+
+        case DB.StorageType.ElementId:
+
+          var elementId = parameter.AsElementId();
+          if (parameter.Id.TryGetBuiltInParameter(out var builtInElementId))
+          {
+            if (builtInElementId == DB.BuiltInParameter.ID_PARAM || builtInElementId == DB.BuiltInParameter.SYMBOL_ID_PARAM)
+              return new GH_Integer(elementId.IntegerValue);
+          }
+
+          return Types.Element.FromElementId(parameter.Element?.Document, parameter.AsElementId());
+
+        default:
+          throw new NotImplementedException();
+      }
+    }
+
+    internal static bool Set(this DB.Parameter parameter, IGH_Goo value)
+    {
+      if (parameter is null)
+        return default;
+
+      switch (parameter.StorageType)
+      {
+        case DB.StorageType.Integer:
+
+          if (parameter.Definition is DB.Definition definition)
+          {
+            switch (definition.ParameterType)
+            {
+              case DB.ParameterType.Invalid:
+                if (definition.UnitType == DB.UnitType.UT_Number && parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
+                {
+                  var builtInParameterName = builtInParameter.ToString();
+                  if (builtInParameterName.Contains("COLOR_") || builtInParameterName.Contains("_COLOR_") || builtInParameterName.Contains("_COLOR"))
+                  {
+                    if (GH_Convert.ToColor(value, out var color, GH_Conversion.Both))
+                      return parameter.Set(((int) color.R) | ((int) color.G << 8) | ((int) color.B << 16));
+
+                    throw new InvalidCastException();
+                  }
+                }
+                break;
+
+              case DB.ParameterType.YesNo:
+                if (GH_Convert.ToBoolean(value, out var boolean, GH_Conversion.Both))
+                  return parameter.Set(boolean ? 1 : 0);
+
+                throw new InvalidCastException();
+            }
+          }
+
+          if (GH_Convert.ToInt32(value, out var integer, GH_Conversion.Both))
+            return parameter.Set(integer);
+
+          throw new InvalidCastException();
+
+        case DB.StorageType.Double:
+          if (GH_Convert.ToDouble(value, out var real, GH_Conversion.Both))
+            return parameter.SetDoubleInRhinoUnits(real);
+
+          return false;
+
+        case DB.StorageType.String:
+          if (GH_Convert.ToString(value, out var text, GH_Conversion.Both))
+            return parameter.Set(text);
+
+          throw new InvalidCastException();
+
+        case DB.StorageType.ElementId:
+          var element = new Types.Element();
+          if (element.CastFrom(value))
+          {
+            if(parameter.Element.Document.Equals(element.Document))
+              throw new ArgumentException("Failed to assign an element from a diferent document.", parameter.Definition.Name);
+
+            return parameter.Set(element.Id);
+          }
+
+          throw new InvalidCastException();
+
+        default:
+          throw new NotImplementedException();
+      }
+    }
+
     internal static double AsDoubleInRhinoUnits(this DB.Parameter parameter)
     {
       return UnitConverter.InRhinoUnits(parameter.AsDouble(), parameter.Definition.ParameterType);
@@ -115,106 +259,6 @@ namespace RhinoInside.Revit.GH
 
       return parameter;
     }
-
-    internal static bool SetParameter(IGH_ActiveObject obj, DB.Parameter parameter, IGH_Goo goo)
-    {
-      if (goo is null)
-        return false;
-
-      try
-      {
-        var element = parameter.Element;
-        var value = goo.ScriptVariable();
-        var document = default(DB.Document);
-        if (value is DB.Parameter paramValue)
-        {
-          switch (paramValue.StorageType)
-          {
-            case DB.StorageType.Integer: value = paramValue.AsInteger(); break;
-            case DB.StorageType.Double: value = paramValue.AsDoubleInRhinoUnits(); break;
-            case DB.StorageType.String: value = paramValue.AsString(); break;
-            case DB.StorageType.ElementId: value = paramValue.AsElementId(); document = paramValue.Element.Document; break;
-          }
-        }
-
-        switch (parameter.StorageType)
-        {
-          case DB.StorageType.Integer:
-          {
-            switch (value)
-            {
-              case bool boolean: parameter.Set(boolean ? 1 : 0); break;
-              case int integer: parameter.Set(integer); break;
-              case double real: parameter.SetDoubleInRhinoUnits((int) Clamp(Round(real), int.MinValue, int.MaxValue)); break;
-              case System.Drawing.Color color: parameter.Set(((int) color.R) | ((int) color.G << 8) | ((int) color.B << 16)); break;
-              default: element = null; break;
-            }
-            break;
-          }
-          case DB.StorageType.Double:
-          {
-            switch (value)
-            {
-              case int integer: parameter.Set((double) integer); break;
-              case double real: parameter.SetDoubleInRhinoUnits(real); break;
-              default: element = null; break;
-            }
-            break;
-          }
-          case DB.StorageType.String:
-          {
-            switch (value)
-            {
-              case string str: parameter.Set(str); break;
-              default: element = null; break;
-            }
-            break;
-          }
-          case DB.StorageType.ElementId:
-          {
-            switch (value)
-            {
-              case DB.Element ele:
-                if (element.Document.Equals(ele.Document)) parameter.Set(ele.Id);
-                else obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Referencing elements from other documents is not valid");
-                break;
-              case DB.Category cat:
-                if (element.Document.Equals(cat.Document())) parameter.Set(cat.Id);
-                else obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Referencing categories from other documents is not valid");
-                break;
-              case DB.ElementId id:
-                if (document is object)
-                {
-                  if (element.Document.Equals(document)) parameter.Set(id);
-                  else obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Referencing elements from other documents is not valid");
-                }
-                else element = null;
-                break;
-              default: element = null; break;
-            }
-            break;
-          }
-          default:
-          {
-            element = null;
-            break;
-          }
-        }
-
-        if (element is null && parameter is object)
-        {
-          obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to cast from {value.GetType().Name} to {parameter.StorageType.ToString()}.");
-          return false;
-        }
-      }
-      catch (Autodesk.Revit.Exceptions.InvalidOperationException e)
-      {
-        obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to set '{parameter.Definition.Name}' value : {e.Message}");
-        return false;
-      }
-
-      return true;
-    }
   }
 }
 
@@ -227,8 +271,14 @@ namespace RhinoInside.Revit.GH.Components
     public override Guid ComponentGuid => new Guid("D86050F2-C774-49B1-9973-FB3AB188DC94");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
-    public ElementParameterGet()
-    : base("Get Element Parameter", "GetPara", "Gets the parameter value of a specified Revit Element", "Revit", "Element")
+    public ElementParameterGet() : base
+    (
+      name: "Get Element Parameter",
+      nickname: "GetParam",
+      description: "Gets the parameter value of a specified Revit Element",
+      category: "Revit",
+      subCategory:"Element"
+    )
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -262,8 +312,14 @@ namespace RhinoInside.Revit.GH.Components
     public override Guid ComponentGuid => new Guid("8F1EE110-7FDA-49E0-BED4-E8E0227BC021");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
-    public ElementParameterSet()
-    : base("Set Element Parameter", "SetPara", "Sets the parameter value of a specified Revit Element", "Revit", "Element")
+    public ElementParameterSet() : base
+    (
+      name: "Set Element Parameter",
+      nickname: "SetParam",
+      description: "Sets the parameter value of a specified Revit Element",
+      category: "Revit",
+      subCategory: "Element"
+    )
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -298,8 +354,21 @@ namespace RhinoInside.Revit.GH.Components
 
       StartTransaction(element.Document);
 
-      if (ParameterUtils.SetParameter(this, parameter, value))
-        DA.SetData("Element", element);
+      try
+      {
+        if (parameter.Set(value))
+          DA.SetData("Element", element);
+        else
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to set parameter '{parameter.Definition.Name}' : '{value}' is not a valid value.");
+      }
+      catch (InvalidCastException)
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to cast from {value.TypeName} to {parameter.StorageType}.");
+      }
+      catch (Autodesk.Revit.Exceptions.InvalidOperationException e)
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to set parameter '{parameter.Definition.Name}' : {e.Message}");
+      }
     }
   }
 
@@ -309,8 +378,14 @@ namespace RhinoInside.Revit.GH.Components
     public override GH_Exposure Exposure => GH_Exposure.quarternary | GH_Exposure.obscure;
     protected override string IconTag => "R";
 
-    public ElementParameterReset()
-    : base("Reset Element Parameter", "ResetPara", "Resets the parameter value of a specified Revit Element", "Revit", "Element")
+    public ElementParameterReset() : base
+    (
+      name: "Reset Element Parameter",
+      nickname: "ResetParam",
+      description: "Resets the parameter value of a specified Revit Element",
+      category: "Revit",
+      subCategory: "Element"
+    )
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

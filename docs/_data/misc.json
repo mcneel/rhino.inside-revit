@@ -1,0 +1,39 @@
+[
+    {
+        "desc": "Represents a Revit document",
+        "iconsrc": "/static/images/GH/Document.png",
+        "icontag": null,
+        "panel": "Params",
+        "tab": "Revit Primitives",
+        "title": "Document",
+        "typename": "Document",
+        "uuid": "f3427d5c-3793-4e32-b219-8172d56ef04c"
+    },
+    {
+        "desc": "Represents an asset property that can be connected to a texture map as well",
+        "iconsrc": "/static/images/GH/AssetPropertyDouble1DMap.png",
+        "icontag": null,
+        "panel": "Params",
+        "tab": "Revit Primitives",
+        "title": "AssetPropertyDouble1DMap",
+        "typename": "AssetPropertyDouble1DMap",
+        "uuid": "49a94c44-26ec-4ee8-b9e7-37581968c3bf"
+    },
+    {
+        "desc": "Represents an asset property that can be connected to a texture map as well",
+        "iconsrc": "/static/images/GH/AssetPropertyDouble4DMap.png",
+        "icontag": null,
+        "panel": "Params",
+        "tab": "Revit Primitives",
+        "title": "AssetPropertyDouble4DMap",
+        "typename": "AssetPropertyDouble4DMap",
+        "uuid": "c2fc2e60-0336-465a-9ff0-1afc4b65d10d"
+    },
+    {
+        "desc": "Represents any building element",
+        "iconsrc": "/static/images/guides/revit-revit-block.png",
+        "icontag": null,
+        "title": "Building Component",
+        "uuid": "11f05ff5-6268-4985-b9a7-c9f4729b594d"
+    }
+]

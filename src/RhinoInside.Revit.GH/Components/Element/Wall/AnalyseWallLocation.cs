@@ -3,7 +3,7 @@ using System.Linq;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
-
+using RhinoInside.Revit.GH.Parameters;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -38,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
       manager.AddParameter(
-        param: new Parameters.WallLocationLine_ValueList(),
+        param: new Param_Enum<Types.WallLocationLine>(),
         name: "Location Line",
         nickname: "LL",
         description: "Location line setting of the wall element",
@@ -112,7 +112,7 @@ namespace RhinoInside.Revit.GH.Components
         return;
 
       DA.SetData("Center Curve", wallInstance.GetCenterCurve());
-      PipeHostParameter<Types.WallLocationLine>(DA, wallInstance, DB.BuiltInParameter.WALL_KEY_REF_PARAM, "Location Line");
+      PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.WALL_KEY_REF_PARAM, "Location Line");
 
       var offsetPlaneNormal = GetOffsetPlaneNormal(wallInstance);
       var offsetValue = GetOffsetForLocationCurve(wallInstance);

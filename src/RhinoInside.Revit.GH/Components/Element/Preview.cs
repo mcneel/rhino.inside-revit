@@ -1,7 +1,9 @@
 using System;
 using System.Linq;
+using Rhino.Geometry;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
+using RhinoInside.Revit.Convert.Geometry;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -25,7 +27,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
       manager.AddMeshParameter("Meshes", "M", "Element meshes", GH_ParamAccess.list);
-      manager.AddParameter(new Grasshopper.Kernel.Parameters.Param_OGLShader(), "Materials", "M", "Element materials", GH_ParamAccess.list);
+      manager.AddParameter(new Parameters.Material(), "Materials", "M", "Element materials", GH_ParamAccess.list);
       manager.AddCurveParameter("Wires", "W", "Element wires", GH_ParamAccess.list);
     }
 
@@ -53,9 +55,33 @@ namespace RhinoInside.Revit.GH.Components
       var meshingParameters = !double.IsNaN(relativeTolerance) ? new Rhino.Geometry.MeshingParameters(relativeTolerance, Revit.VertexTolerance) : null;
       Types.GeometricElement.BuildPreview(element, meshingParameters, detailLevel, out var materials, out var meshes, out var wires);
 
-      DA.SetDataList(0, meshes?.Select((x) => new GH_Mesh(x)));
-      DA.SetDataList(1, materials?.Select((x) => new GH_Material(x)));
-      DA.SetDataList(2, wires?.Select((x) => new GH_Curve(x)));
+      for (int m = 0; m < meshes?.Length; ++m)
+        meshes[m] = MeshDecoder.FromRawMesh(meshes[m], UnitConverter.NoScale);
+
+      var outMesh = new Mesh();
+      var dictionary = Convert.Display.PreviewConverter.ZipByMaterial(materials, meshes, outMesh);
+      if (dictionary is null)
+      {
+        // In case ZipByMaterial fails we just return the unclasified preview meshes
+        DA.SetDataList(0, meshes?.Select(x => new GH_Mesh(x)));
+        DA.SetDataList(1, materials?.Select(x => new Types.Material(x)));
+      }
+      else
+      {
+        // On success we return the classified set of meshes.
+        if (outMesh.Faces.Count > 0)
+        {
+          DA.SetDataList(0, dictionary.Values.Select(x => new GH_Mesh(x)).Concat(Enumerable.Repeat(new GH_Mesh(outMesh), 1)));
+          DA.SetDataList(1, dictionary.Keys.Select(x => new Types.Material(x)).Concat(Enumerable.Repeat(new Types.Material(), 1)));
+        }
+        else
+        {
+          DA.SetDataList(0, dictionary.Values.Select(x => new GH_Mesh(x)));
+          DA.SetDataList(1, dictionary.Keys.Select(x => new Types.Material(x)));
+        }
+      }
+
+      DA.SetDataList(2, wires?.Select(x => new GH_Curve(x)));
     }
   }
 }

@@ -5,16 +5,17 @@ using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.Convert.Geometry.Raw;
 using RhinoInside.Revit.Convert.System.Collections.Generic;
 using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Site
 {
 #if REVIT_2019
   public class TopographyByMesh : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("E6EA0A85-E118-4BFD-B01E-86BA22155938");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
     public TopographyByMesh() : base
     (
@@ -38,13 +39,12 @@ namespace RhinoInside.Revit.GH.Components
       [Optional] IList<Curve> regions
     )
     {
-      mesh = mesh.DuplicateMesh();
-      mesh.Scale(UnitConverter.ToHostUnits);
+      mesh = mesh.InHostUnits();
       while (mesh.CollapseFacesByEdgeLength(false, Revit.VertexTolerance) > 0) ;
       mesh.Vertices.CombineIdentical(true, true);
       mesh.Vertices.CullUnused();
 
-      var xyz = mesh.Vertices.ConvertAll(x => new DB.XYZ(x.X, x.Y, x.Z));
+      var xyz = mesh.Vertices.ConvertAll(RawEncoder.AsXYZ);
       var facets = new List<DB.PolymeshFacet>(mesh.Faces.Count);
 
       var faceCount = mesh.Faces.Count;

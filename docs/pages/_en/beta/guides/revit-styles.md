@@ -1,47 +1,34 @@
 ---
 title: Styles and Patterns
 order: 91
-group: Configurations
+group: Settings
+thumbnail: /static/images/guides/revit-styles.png
+subtitle: Workflows for Revit Styles, Line & Fill Patterns
+ghdef: revit-styles.ghx
 ---
-
-{% include ltr/en/wip_note.html %}
-
 
 ## Line Patterns
 
 {% capture api_note %}
-In Revit API, line patterns are represented by the {% include api_type.html type='Autodesk.Revit.DB.LinePatternElement' title='DB.LinePatternElement' %}
+In Revit API, line patterns are represented by the {% include api_type.html type='Autodesk.Revit.DB.LinePatternElement' title='DB.LinePatternElement' %}. `Solid` is a special line pattern and Revit does not return a normal API type for this specific line pattern.
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
 ### Find Specific Line Pattern
 
-![]({{ "/static/images/guides/revit-styles01.png" | prepend: site.baseurl }})
+Use the context menu on the {% include ltr/comp.html uuid='eb5ab657' %} component to select a specific line pattern:
 
-Notice that the `Solid` line pattern is being provided as a python object. `Solid` is a special line pattern and Revit does not return a normal API type for this specific line pattern. Hence a temporary python wrapper has been defined for this type in the component:
-
-{% highlight python %}
-class SolidLinePatternElement(object):
-    @property
-    def Id(self):
-        return DB.LinePatternElement.GetSolidPatternId()
-{% endhighlight %}
-
-&nbsp;
-
-{% include ltr/download_comp.html archive='/static/ghnodes/Find Line Pattern.ghuser' name='Find Line Pattern' %}
+![]({{ "/static/images/guides/revit-styles-linepattern-select.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-styles-linepatterns.png" | prepend: site.baseurl }})
 
 ## Fill Patterns
 
 {% capture api_note %}
-In Revit API, fill patterns are represented by the {% include api_type.html type='Autodesk.Revit.DB.FillPatternElement' title='DB.FillPatternElement' %}
+In Revit API, fill patterns are represented by the {% include api_type.html type='Autodesk.Revit.DB.FillPatternElement' title='DB.FillPatternElement' %}. `Solid` is also special fill pattern but in this case, Revit provides access to this pattern as a normal Revit API type.
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
 ### Find Specific Fill Pattern
 
-![]({{ "/static/images/guides/revit-styles02.png" | prepend: site.baseurl }})
-
-Similar to `Solid` line pattern described above, `Solid` is a special fill pattern but in this case, Revit provides access to this pattern as a normal Revit API type.
-
-{% include ltr/download_comp.html archive='/static/ghnodes/Find Fill Pattern.ghuser' name='Find Fill Pattern' %}
+![]({{ "/static/images/guides/revit-styles-fillpattern-select.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-styles-fillpatterns.png" | prepend: site.baseurl }})

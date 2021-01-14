@@ -1,22 +1,21 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Types;
+using Rhino;
+using Rhino.DocObjects;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.Convert.System.Collections.Generic;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  class CurveElement : GraphicalElement
+  [Kernel.Attributes.Name("Curve Element")]
+  public class CurveElement : GraphicalElement, Bake.IGH_BakeAwareElement
   {
-    public override string TypeName => "Revit Curve element";
-
-    public override string TypeDescription => "Represents a Revit Curve Element";
     protected override Type ScriptVariableType => typeof(DB.CurveElement);
-    public static explicit operator DB.CurveElement(CurveElement value) =>
-      value?.IsValid == true ? value.Document.GetElement(value) as DB.CurveElement : default;
+    public static explicit operator DB.CurveElement(CurveElement value) => value?.Value;
+    public new DB.CurveElement Value => base.Value as DB.CurveElement;
 
     public CurveElement() { }
     public CurveElement(DB.CurveElement value) : base(value) { }
@@ -32,24 +31,51 @@ namespace RhinoInside.Revit.GH.Types
     #region IGH_PreviewData
     public override void DrawViewportWires(GH_PreviewWireArgs args)
     {
-      var curveElement = (DB.CurveElement) this;
-      if (curveElement is object)
-      {
-        var curve = curveElement.GeometryCurve.ToCurve();
+      if (Curve is Curve curve)
         args.Pipeline.DrawCurve(curve, args.Color, args.Thickness);
-      }
     }
-
-    public override void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
     #endregion
 
-    public override Curve Curve
+    #region IGH_BakeAwareElement
+    bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
+      BakeElement(new Dictionary<DB.ElementId, Guid>(), true, doc, att, out guid);
+
+    public bool BakeElement
+    (
+      IDictionary<DB.ElementId, Guid> idMap,
+      bool overwrite,
+      RhinoDoc doc,
+      ObjectAttributes att,
+      out Guid guid
+    )
     {
-      get
+      // 1. Check if is already cloned
+      if (idMap.TryGetValue(Id, out guid))
+        return true;
+
+      // 3. Update if necessary
+      if (Value is DB.CurveElement curve)
       {
-        var curveElement = (DB.CurveElement) this;
-        return curveElement?.GeometryCurve?.ToCurve();
+        att = att.Duplicate();
+        att.Name = DisplayName;
+        if (Category.BakeElement(idMap, false, doc, att, out var layerGuid))
+          att.LayerIndex = doc.Layers.FindId(layerGuid).Index;
+
+        guid = doc.Objects.Add(curve.GeometryCurve.ToCurve(), att);
+
+        if (guid != Guid.Empty)
+        {
+          idMap.Add(Id, guid);
+          return true;
+        }
       }
+
+      return false;
     }
+    #endregion
+
+    #region Properties
+    public override Curve Curve => Value?.GeometryCurve.ToCurve();
+    #endregion
   }
 }
