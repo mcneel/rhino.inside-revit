@@ -25,7 +25,7 @@
         <Directory Id="McNeelFolder" Name="McNeel">
           <Directory Id="RhinoInsideFolder" Name="Rhino.Inside">
             <Directory Id="RiRFolder" Name="Revit">
-              <Directory Id="CurrentRiRFolder" Name="$(var.SimpleVersion)">
+              <Directory Id="CurrentRiRFolder" Name="$(var.MajorMinorVersion)">
                 <Directory Id="SamplesFolder" Name="Samples">
                 </Directory>
               </Directory>

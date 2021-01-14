@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?define SimpleVersion="0.0"?> <!--TODO: change to 1.0-->
-<?define ProductVersion="$(var.SimpleVersion).0.0"?>
-
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <Product Id="*"
            UpgradeCode="634a05f2-4511-445a-89c1-7305d83d34c7"
