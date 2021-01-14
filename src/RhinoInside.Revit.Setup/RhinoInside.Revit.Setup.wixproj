@@ -82,9 +82,9 @@
     </CreateProperty>
 
     <!-- Update the MSBuild properties $(TargetName), etc. -->
-    <CreateProperty Value="RhinoInside-Revit-$(ProductVersion)">
+    <!--<CreateProperty Value="RhinoInside-Revit-$(ProductVersion)">
       <Output TaskParameter="Value" PropertyName="TargetName" />
-    </CreateProperty>
+    </CreateProperty>-->
     <CreateProperty Value="$(TargetName)$(TargetExt)">
       <Output TaskParameter="Value" PropertyName="TargetFileName" />
     </CreateProperty>
