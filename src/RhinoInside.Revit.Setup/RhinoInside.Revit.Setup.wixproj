@@ -61,7 +61,6 @@
     <GetAssemblyIdentity AssemblyFiles="..\RhinoInside.Revit\bin\$(Platform)\$(Configuration) 2021\RhinoInside.Revit.dll">
       <Output TaskParameter="Assemblies" ItemName="AsmInfo" />
     </GetAssemblyIdentity>
-
     <!-- Create the MSBuild properties -->
     <CreateProperty Value="%(AsmInfo.Version)">
       <Output TaskParameter="Value" PropertyName="ProductVersion" />
@@ -69,10 +68,8 @@
     <CreateProperty Value="$([System.Version]::Parse(%(AsmInfo.Version)).ToString(2))">
       <Output TaskParameter="Value" PropertyName="MajorMinorVersion" />
     </CreateProperty>
-
-    <Message Text="ProductVersion = $(ProductVersion)" Importance="high"/>
-    <Message Text="MajorMinorVersion = $(ProductMajorMinorVersion)" Importance="high"/>
-
+    <Message Text="ProductVersion = $(ProductVersion)" Importance="high" />
+    <Message Text="MajorMinorVersion = $(MajorMinorVersion)" Importance="high" />
     <!-- Create the WiX preprocessor variables -->
     <CreateProperty Value="$(DefineConstants);ProductVersion=$(ProductVersion)">
       <Output TaskParameter="Value" PropertyName="DefineConstants" />
@@ -80,9 +77,8 @@
     <CreateProperty Value="$(DefineConstants);MajorMinorVersion=$(MajorMinorVersion)">
       <Output TaskParameter="Value" PropertyName="DefineConstants" />
     </CreateProperty>
-
     <!-- Update the MSBuild properties $(TargetName), etc. -->
-    <!--<CreateProperty Value="RhinoInside-Revit-$(ProductVersion)">
+    <!--<CreateProperty Value="$(TargetName)-$(ProductVersion)">
       <Output TaskParameter="Value" PropertyName="TargetName" />
     </CreateProperty>-->
     <CreateProperty Value="$(TargetName)$(TargetExt)">
@@ -97,23 +93,8 @@
     <CreateProperty Value="$(TargetPdbDir)$(TargetPdbName)">
       <Output TaskParameter="Value" PropertyName="TargetPdbPath" />
     </CreateProperty>
-
     <!-- Update the MSBuild property from which candle.exe args are derived -->
-    <CreateProperty Value="
-    Configuration=$(ConfigurationName);
-    OutDir=$(OutDir);
-    Platform=$(PlatformName);
-    ProjectDir=$(ProjectDir);
-    ProjectExt=$(ProjectExt);
-    ProjectFileName=$(ProjectFileName);
-    ProjectName=$(ProjectName);
-    ProjectPath=$(ProjectPath);
-    TargetDir=$(TargetDir);
-    TargetExt=$(TargetExt);
-    TargetFileName=$(TargetFileName);
-    TargetName=$(TargetName);
-    TargetPath=$(TargetPath);
-  ">
+    <CreateProperty Value="Configuration=$(ConfigurationName);OutDir=$(OutDir);Platform=$(PlatformName);ProjectDir=$(ProjectDir);ProjectExt=$(ProjectExt);ProjectFileName=$(ProjectFileName);ProjectName=$(ProjectName);ProjectPath=$(ProjectPath);TargetDir=$(TargetDir);TargetExt=$(TargetExt);TargetFileName=$(TargetFileName);TargetName=$(TargetName);TargetPath=$(TargetPath);">
       <Output TaskParameter="Value" PropertyName="ProjectDefineConstants" />
     </CreateProperty>
   </Target>
