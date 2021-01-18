@@ -486,8 +486,6 @@ namespace RhinoInside.Revit.Convert.Geometry
         {
           var doc = GeometryEncoder.Context.Peek.Document ?? ACISDocument;
 
-          // Looks like DB.ShapeImporter do not support short edges geometry
-          //
           if (DB.ShapeImporter.IsServiceAvailable())
           {
             using (var importer = new DB.ShapeImporter())
@@ -496,7 +494,8 @@ namespace RhinoInside.Revit.Convert.Geometry
               if (list.OfType<DB.Solid>().FirstOrDefault() is DB.Solid shape)
                 return shape;
 
-              return null;
+              // Looks like DB.ShapeImporter do not support short edges geometry
+              //return null;
             }
           }
 
