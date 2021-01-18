@@ -43,8 +43,11 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     )
     {
       bool hasSolids = false;
-      using (var ga = GeometryEncoder.Context.Push(element))
+      using (var ctx = GeometryEncoder.Context.Push(element))
       {
+        ctx.RuntimeMessage = (severity, message, invalidGeometry) =>
+          AddGeometryConversionError((GH_RuntimeMessageLevel) severity, message, invalidGeometry);
+
         var materialIndex = 0;
         var materialCount = materials?.Count ?? 0;
 
@@ -56,7 +59,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
                     {
                       if (materialCount > 0)
                       {
-                        ga.MaterialId =
+                        ctx.MaterialId =
                         (
                           materialIndex < materialCount ?
                           materials[materialIndex++]?.Id :
@@ -66,7 +69,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
                       }
 
                       var subShape = x.ToShape();
-                      materialIds?.AddRange(Enumerable.Repeat(ga.MaterialId, subShape.Length));
+                      materialIds?.AddRange(Enumerable.Repeat(ctx.MaterialId, subShape.Length));
                       if (!hasSolids) hasSolids = subShape.Any(s => s is DB.Solid);
 
                       return subShape;
