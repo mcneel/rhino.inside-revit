@@ -57,6 +57,25 @@
     },
     {
         "highlight": true,
+        "title": "Online Rhino.Inside Revit Essentials",
+        "url": "https://simplyrhino.co.uk/training/courses/rhino-inside-revit-essentials-course",
+        "thumbnail": "/static/images/discover/simplyrhino-rir-training.jpeg",
+        "author": "SimplyRhino",
+        "authorUrl": "https://simplyrhino.co.uk/",
+        "description": "This live and online course is suitable for those within Architecture & Construction who find themselves using Rhino as well as Autodesk Revit® and are looking into ways to enhance the interoperability between the two.",
+        "kinds": [
+            "course",
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "basics",
+            "workflow",
+            "purchase"
+        ]
+    },
+    {
+        "highlight": true,
         "title": "Building Systems Specialist Course",
         "url": "PAZ-academy-course",
         "thumbnail": "/static/images/discover/PAZ-Academy-BSS.jpg",
@@ -173,6 +192,24 @@
         ]
     },
     {
+        "title": "Exploring Rhino.Inside Revit Together",
+        "url": "https://youtu.be/1aUmpgzvhXw",
+        "thumbnail": "https://i3.ytimg.com/vi/1aUmpgzvhXw/maxresdefault.jpg",
+        "author": "7fold Design Technology",
+        "authorUrl": "https://www.youtube.com/channel/UC7eTGSIVovsDYuYw3YFLn8w",
+        "description": "We walk through setting up Rhino.Inside for the first time and exploring the feature set. Full disclosure this is like an unboxing for me and I want to encourage you to join me in the conversation as we figure out what's new!",
+        "kinds": [
+            "tutorial",
+            "podcast",
+            "video"
+        ],
+        "tags": [
+            "podcast",
+            "overview",
+            "example"
+        ]
+    },
+    {
         "title": "Rhino.Inside.Revit Happy Hour Webinar",
         "url": "https://www.youtube.com/watch?v=ko18HhYpjok",
         "thumbnail": "https://i3.ytimg.com/vi/ko18HhYpjok/maxresdefault.jpg",
@@ -186,6 +223,22 @@
         "tags": [
             "podcast",
             "overview"
+        ]
+    },
+    {
+        "title": "Software you need to know in 2021",
+        "url": "https://youtu.be/4kcR_FgN114",
+        "thumbnail": "https://i3.ytimg.com/vi/4kcR_FgN114/maxresdefault.jpg",
+        "author": "Stephen Drew, Architecture Social",
+        "authorUrl": "https://www.youtube.com/channel/UCpW825yNUbeWtp-jmpu-8WA",
+        "description": "Here are Stephen Drew's thoughts on what Architecture Software you need to learn NOW which will give you an advantage and accelerate your career in 2021.",
+        "kinds": [
+            "podcast",
+            "video"
+        ],
+        "tags": [
+            "overview",
+            "podcast"
         ]
     },
     {
@@ -469,6 +522,23 @@
             "tutorial",
             "site",
             "landscape"
+        ]
+    },
+    {
+        "title": "Auto-update Revit Sheets Using Grasshopper",
+        "url": "https://youtu.be/kI6YWoONI9s",
+        "thumbnail": "https://i3.ytimg.com/vi/kI6YWoONI9s/maxresdefault.jpg",
+        "author": "7fold Design Technology",
+        "authorUrl": "https://www.youtube.com/channel/UC7eTGSIVovsDYuYw3YFLn8w",
+        "description": "Join me in this Rhino.Inside tutorial as we walk through setting up automated sheet management for Revit driven by the floor plan type placed on each sheet.",
+        "kinds": [
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "podcast",
+            "tutorial",
+            "workflow"
         ]
     },
     {
