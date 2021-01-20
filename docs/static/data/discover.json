@@ -176,6 +176,22 @@
         ]
     },
     {
+        "title": "Changing AEC w/ Nate Miller",
+        "url": "https://soundcloud.com/user-788137457/changing-aec-w-nate-miller",
+        "thumbnail": "/static/images/discover/podcast-marcello-nathan.jpg",
+        "author": "Marcello Sgambelluri, PE, SE",
+        "authorUrl": "http://therevitcomplex.blogspot.com/",
+        "description": "In this episode John Pierson and Marcello talk to Nate Miller about Grasshopper, Dynamo, Conveyor and more.",
+        "kinds": [
+            "podcast"
+        ],
+        "tags": [
+            "workflow",
+            "automation",
+            "podcast"
+        ]
+    },
+    {
         "title": "Parametric Monkey Primer",
         "url": "https://parametricmonkey.com/2019/11/20/rhino-inside-revit/",
         "thumbnail": "https://i2.wp.com/parametricmonkey.com/wp-content/uploads/2019/11/198_Rhino-Inside-Revit_1600x800.jpg?resize=1600%2C800&ssl=1",
