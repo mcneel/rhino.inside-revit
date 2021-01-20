@@ -559,6 +559,24 @@
         ]
     },
     {
+        "title": "VisualARQ running Rhino.Inside",
+        "url": "https://youtu.be/B_ZMPhcrgsE",
+        "thumbnail": "https://i3.ytimg.com/vi/B_ZMPhcrgsE/maxresdefault.jpg",
+        "author": "VisualARQ",
+        "authorUrl": "https://www.visualarq.com/",
+        "description": "This video shows a sneak preview of VisualARQ 3 version (WIP- Work in progress), running inside Revit using Rhino.Inside technology, available in Rhino 7 (WIP)",
+        "kinds": [
+            "example",
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "tutorial",
+            "BIM",
+            "plug-in"
+        ]
+    },
+    {
         "title": "Auto-update Revit Sheets Using Grasshopper",
         "url": "https://youtu.be/kI6YWoONI9s",
         "thumbnail": "https://i3.ytimg.com/vi/kI6YWoONI9s/maxresdefault.jpg",
