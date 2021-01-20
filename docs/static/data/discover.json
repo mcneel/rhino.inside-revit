@@ -509,6 +509,24 @@
         ]
     },
     {
+        "highlight": true,
+        "title": "Proving Ground Rhino Revit Add-ons",
+        "url": "https://youtu.be/Y7bxHniTfN4",
+        "thumbnail": "https://i3.ytimg.com/vi/Y7bxHniTfN4/maxresdefault.jpg",
+        "author": "Nathan Miller @ Proving Ground",
+        "authorUrl": "https://apps.provingground.io/",
+        "description": "This webinar will be a PREVIEW of new capabilities that expand the data-driven pipeline between Rhino, Revit, and Power BI.",
+        "kinds": [
+            "example",
+            "video"
+        ],
+        "tags": [
+            "plugin",
+            "workflow",
+            "data management"
+        ]
+    },
+    {
         "title": "Solar Analysis with Rhino.Inside.Revit",
         "url": "https://vimeo.com/363977394",
         "thumbnail": "https://i.vimeocdn.com/video/819279340_1280x720.jpg",
