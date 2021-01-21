@@ -1,6 +1,5 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Target Name="Build">
-    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release 2017"/>
     <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release 2018"/>
     <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release 2019"/>
     <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release 2020"/>

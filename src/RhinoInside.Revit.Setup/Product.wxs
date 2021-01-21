@@ -28,11 +28,6 @@
     <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of Rhino.Inside® for Revit is already installed." />
     <MediaTemplate EmbedCab="yes" />
 
-    <!--<Feature Id="Revit.2017.Addin" Title="Revit 2017 Addin" Level="1">
-      <Condition Level="0">REVIT2017_INSTALLLOCATION=""</Condition>
-      <ComponentGroupRef Id="Addins.2017.RhinoInsideRevit" />
-    </Feature>-->
-
     <Feature Id="Revit.2018.Addin" Title="Revit 2018 Addin" Level="1" >
       <Condition Level="0">REVIT2018_INSTALLLOCATION=""</Condition>
       <ComponentGroupRef Id="Addins.2018.RhinoInsideRevit" />

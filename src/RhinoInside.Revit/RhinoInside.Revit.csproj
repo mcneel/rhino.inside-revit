@@ -8,10 +8,6 @@
     <Rhino7DebugPluginsDir>$([MSBuild]::GetRegistryValueFromView('HKEY_CURRENT_USER\Software\McNeel\Rhinoceros\7.0-WIP-Developer-Debug-trunk\Install', 'Default Plug-ins Folder', null, RegistryView.Registry64))</Rhino7DebugPluginsDir>
     <Rhino7PluginsDir>$([MSBuild]::ValueOrDefault('$(Rhino7DebugPluginsDir)', '$(Rhino7DefaultPluginsDir)'))</Rhino7PluginsDir>
   </PropertyGroup>
-  <PropertyGroup Condition="$(Configuration.Contains('2017'))">
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
-    <RevitVersion>2017</RevitVersion>
-  </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.Contains('2018'))">
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <RevitVersion>2018</RevitVersion>
@@ -40,24 +36,6 @@
     <RootNamespace>RhinoInside.Revit</RootNamespace>
     <AssemblyName>RhinoInside.Revit</AssemblyName>
     <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2017|x64'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x64\Debug 2017\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;REVIT_2017</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2017|x64'">
-    <OutputPath>bin\x64\Release 2017\</OutputPath>
-    <DefineConstants>REVIT_2017</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2018|x64'">
     <DebugSymbols>true</DebugSymbols>
