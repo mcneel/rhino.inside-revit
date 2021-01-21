@@ -1,8 +1,5 @@
 ---
 title: Creating Roof From Wall Edges
-description: This sample shows how to Select Revit Element edges as input to a Grasshopper lofted surface. Using Revit objects as input to Grasshopper definitions allows for a dynamic editing directly in Revit and making Grasshopper interactive within the the Revit model
-thumbnail: /static/images/discover/select-revit-elements-as-input04.jpg
-tags: ["roof"]
 ---
 
 <!-- intro video -->

@@ -1,11 +1,32 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
+  internal static class ElementIdComparer
+  {
+    public static readonly IComparer<ElementId> Ascending = new AscendingComparer();
+    public static readonly IComparer<ElementId> Descending = new DescendingComparer();
+
+    struct AscendingComparer : IComparer<ElementId>
+    {
+      int IComparer<ElementId>.Compare(ElementId x, ElementId y) =>
+        (x?.IntegerValue ?? int.MinValue) - (y?.IntegerValue ?? int.MinValue);
+    }
+
+    struct DescendingComparer : IComparer<ElementId>
+    {
+      int IComparer<ElementId>.Compare(ElementId x, ElementId y) =>
+        (y?.IntegerValue ?? int.MinValue) - (x?.IntegerValue ?? int.MinValue);
+    }
+  }
+
+  internal struct ElementIdEqualityComparer : IEqualityComparer<ElementId>
+  {
+    bool IEqualityComparer<ElementId>.Equals(ElementId x, ElementId y) => ReferenceEquals(x, y) || x?.IntegerValue == y?.IntegerValue;
+    int IEqualityComparer<ElementId>.GetHashCode(ElementId obj) => obj?.IntegerValue ?? int.MinValue;
+  }
+
   public static class ElementIdExtension
   {
     public static bool IsValid(this ElementId id) => id is object && id != ElementId.InvalidElementId;

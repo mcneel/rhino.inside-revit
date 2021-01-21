@@ -1000,7 +1000,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
     /// <summary>
-    /// Return the <paramref name="category"/> full name. If is a subCategory this will be "{ParentName}:{SubcategoryName}"
+    /// Return the <paramref name="category"/> full name. If it is a subCategory this will be "{ParentName}\{SubcategoryName}"
     /// </summary>
     /// <param name="category"></param>
     /// <returns></returns>

@@ -72,6 +72,7 @@ terms:
   rhinoext: (Evaluation - free for 90 days)
   rir: Rhino.Inside.Revit
   revit: Autodesk Revit®
+  revit_versions: 2018-2021
   pyrevit: pyRevit
 
 # site collections (various languages)
@@ -144,6 +145,7 @@ defaults:
   - scope:
       path: "pages/*/*/discover"
     values:
+      layout: ltr/page-fullwidth
       categories: ['discover']
 
   - scope:

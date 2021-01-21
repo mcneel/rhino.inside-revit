@@ -4,7 +4,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class StructuralAsset : ElementIdWithoutPreviewParam<Types.StructuralAssetElement, DB.PropertySetElement>
+  public class StructuralAsset : Element<Types.StructuralAssetElement, DB.PropertySetElement>
   {
     public override GH_Exposure Exposure => GH_Exposure.hidden;
     public override Guid ComponentGuid =>

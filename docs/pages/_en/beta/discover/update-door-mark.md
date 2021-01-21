@@ -1,8 +1,5 @@
 ---
 title: Update Door Marks
-description: This sample shows how to updated properties on Revit elements
-thumbnail: /static/images/discover/update-door-mark01.jpg
-tags: ["metadata"]
 ---
 
 <!-- intro video -->

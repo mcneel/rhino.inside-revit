@@ -33,15 +33,20 @@ namespace RhinoInside.Revit.Convert.Geometry
         return default;
 
       brep.Faces.SplitKinkyFaces(Revit.AngleTolerance, true);
-      brep.Faces.SplitClosedFaces(1);
+      brep.Faces.SplitClosedFaces(2);
       brep.Faces.ShrinkFaces();
 
-      var Identity = new Interval(0.0, 1.0);
-
-      foreach (var face in brep.Faces)
+      // Normalize faces
       {
-        face.SetDomain(0, Identity);
-        face.SetDomain(1, Identity);
+        var Identity = new Interval(0.0, 1.0);
+
+        foreach (var face in brep.Faces)
+        {
+          face.SetDomain(0, Identity);
+          face.SetDomain(1, Identity);
+        }
+
+        brep.SetTrimIsoFlags();
       }
 
       return brep.IsValid;
@@ -140,11 +145,33 @@ namespace RhinoInside.Revit.Convert.Geometry
     #region Transfer
     internal static DB.Solid ToSolid(/*const*/Brep brep, double factor)
     {
+      // Try using DB.BRepBuilder
       if (ToSolid(ToRawBrep(brep, factor)) is DB.Solid solid)
         return solid;
 
-      return ToACIS(brep, factor);
+      Debug.WriteLine("Try exporting-importing as ACIS.");
+      GeometryEncoder.Context.Peek.RuntimeMessage(255, "Using SAT…", default);
+      if (ToACIS(brep, factor) is DB.Solid sat) return sat;
+      else GeometryEncoder.Context.Peek.RuntimeMessage(20, "SAT import failed.", default);
+
+      return default;
     }
+
+    internal static DB.Mesh ToMesh(/*const*/ Brep brep, double factor)
+    {
+      using (var mp = MeshingParameters.Default)
+      {
+        mp.MinimumEdgeLength = Revit.ShortCurveTolerance * factor;
+        mp.ClosedObjectPostProcess = brep.IsManifold;
+        mp.JaggedSeams = false;
+
+        if (Mesh.CreateFromBrep(brep, mp) is Mesh[] shells)
+          return MeshEncoder.ToMesh(shells, factor);
+
+        return default;
+      }
+    }
+
 
     /// <summary>
     /// Replaces <see cref="Raw.RawEncoder.ToHost(Brep)"/> to catch Revit Exceptions
@@ -153,7 +180,10 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <returns></returns>
     internal static DB.Solid ToSolid(/*const*/ Brep brep)
     {
-      if(brep is object)
+      if (brep is null)
+        return null;
+
+      bool error = false;
       try
       {
         var brepType = DB.BRepType.OpenShell;
@@ -165,6 +195,11 @@ namespace RhinoInside.Revit.Convert.Geometry
 
         using (var builder = new DB.BRepBuilder(brepType))
         {
+#if REVIT_2018
+          builder.SetAllowShortEdges();
+          builder.AllowRemovalOfProblematicFaces();
+#endif
+
           var brepEdges = new List<DB.BRepBuilderGeometryId>[brep.Edges.Count];
           foreach (var face in brep.Faces)
           {
@@ -188,45 +223,87 @@ namespace RhinoInside.Revit.Convert.Geometry
                 if (edge is null)
                   continue;
 
-                var edgeIds = brepEdges[edge.EdgeIndex];
-                if (edgeIds is null)
+                if (edge.Tolerance > Revit.VertexTolerance)
                 {
-                  edgeIds = brepEdges[edge.EdgeIndex] = new List<DB.BRepBuilderGeometryId>();
-                  edgeIds.AddRange(ToBRepBuilderEdgeGeometry(edge).Select(e => builder.AddEdge(e)));
+                  error = true;
+                  GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Geometry contains ouf of tolerance edges.{Environment.NewLine}Resulting geometry may not be accurate.", edge);
                 }
 
-                bool trimReversed = face.OrientationIsReversed ?
-                                    !trim.IsReversed() :
-                                     trim.IsReversed();
+                try
+                {
+                  var edgeIds = brepEdges[edge.EdgeIndex];
+                  if (edgeIds is null)
+                  {
+                    edgeIds = brepEdges[edge.EdgeIndex] = new List<DB.BRepBuilderGeometryId>();
+                    edgeIds.AddRange(ToBRepBuilderEdgeGeometry(edge).Select(e => builder.AddEdge(e)));
+                  }
 
-                if (trimReversed)
-                {
-                  for (int e = edgeIds.Count - 1; e >= 0; --e)
-                    builder.AddCoEdge(loopId, edgeIds[e], true);
+                  bool trimReversed = face.OrientationIsReversed ?
+                                      !trim.IsReversed() :
+                                       trim.IsReversed();
+
+                  if (trimReversed)
+                  {
+                    for (int e = edgeIds.Count - 1; e >= 0; --e)
+                      builder.AddCoEdge(loopId, edgeIds[e], true);
+                  }
+                  else
+                  {
+                    for (int e = 0; e < edgeIds.Count; ++e)
+                      builder.AddCoEdge(loopId, edgeIds[e], false);
+                  }
                 }
-                else
+                catch (Autodesk.Revit.Exceptions.ApplicationException e)
                 {
-                  for (int e = 0; e < edgeIds.Count; ++e)
-                    builder.AddCoEdge(loopId, edgeIds[e], false);
+                  if (!error)
+                  {
+                    error = true;
+                    var message = e.Message.Replace("BRepBuilder::addCoEdgeInternal_()", "BRepBuilder");
+                    message = message.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)[0];
+                    GeometryEncoder.Context.Peek.RuntimeMessage(20, $"{message}{Environment.NewLine} Edge Index = {edge.EdgeIndex}, Tolerance = {edge.Tolerance * Revit.ModelUnits}", edge);
+                  }
                 }
               }
 
-              builder.FinishLoop(loopId);
+              try { builder.FinishLoop(loopId); }
+              catch (Autodesk.Revit.Exceptions.ApplicationException e)
+              {
+                if (!error)
+                {
+                  error = true;
+                  var message = e.Message.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)[0];
+                  GeometryEncoder.Context.Peek.RuntimeMessage(20, $"{message}{Environment.NewLine} Loop Index = {loop.LoopIndex}", loop);
+                }
+              }
             }
 
-            builder.FinishFace(faceId);
+            try { builder.FinishFace(faceId); }
+            catch (Autodesk.Revit.Exceptions.ApplicationException e)
+            {
+              if (!error)
+              {
+                error = true;
+                var message = e.Message.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)[0];
+                GeometryEncoder.Context.Peek.RuntimeMessage(20, $"{message}{Environment.NewLine} Face Index = {face.FaceIndex}", face);
+              }
+            }
           }
 
           var brepBuilderOutcome = builder.Finish();
           if (builder.IsResultAvailable())
+          {
+#if REVIT_2018
+            if (builder.RemovedSomeFaces())
+              GeometryEncoder.Context.Peek.RuntimeMessage(20, "Some problematic faces were removed from the output", default);
+#endif
             return builder.GetResult();
+          }
         }
       }
       catch (Autodesk.Revit.Exceptions.ApplicationException e)
       {
-        // TODO: Fix cases with singularities and uncomment this line
-        //Debug.Fail(e.Source, e.Message);
-        Debug.WriteLine(e.Message, e.Source);
+        if(!error)
+          GeometryEncoder.Context.Peek.RuntimeMessage(20, e.Message, default);
       }
 
       return null;
@@ -241,6 +318,9 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     static IEnumerable<DB.Line> ToEdgeCurveMany(PolylineCurve curve)
     {
+      if(curve.RemoveShortSegments(Revit.ShortCurveTolerance))
+        GeometryEncoder.Context.Peek.RuntimeMessage(10, "Short edge segment removed.", curve);
+
       int pointCount = curve.PointCount;
       if (pointCount > 1)
       {
@@ -335,26 +415,44 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     static IEnumerable<DB.BRepBuilderEdgeGeometry> ToBRepBuilderEdgeGeometry(BrepEdge edge)
     {
-      var edgeCurve = edge.EdgeCurve.Trim(edge.Domain) ?? edge.EdgeCurve;
+      var edgeCurve = edge.EdgeCurve.Trim(edge.Domain) ?? edge.EdgeCurve.DuplicateCurve();
 
-      if (edgeCurve is null || edge.IsShort(Revit.ShortCurveTolerance, edge.Domain))
+      if (edgeCurve is null || edge.IsShort(Revit.VertexTolerance, edge.Domain))
       {
-        Debug.WriteLine($"Short edge skipped, Length = {edge.GetLength(edge.Domain)}");
+        GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Micro edge skipped, Length = {edge.GetLength(edge.Domain)}", edge);
         return Enumerable.Empty<DB.BRepBuilderEdgeGeometry>();
       }
 
       if (edge.ProxyCurveIsReversed)
         edgeCurve.Reverse();
 
+      if (edgeCurve.IsShort(Revit.ShortCurveTolerance))
+      {
+        var length = edgeCurve.GetLength();
+        GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Geometry contains short edges.{Environment.NewLine}Geometry with short edges may not be as reliable as fully valid geometry.", edge);
+
+        edgeCurve.Scale(1.0 / length);
+        var form = DB.Transform.Identity.ScaleBasis(1.0 * length);
+        
+        return ToEdgeCurveMany(edgeCurve).Select(x => DB.BRepBuilderEdgeGeometry.Create(x.CreateTransformed(form)));
+      }
+
       if (edgeCurve.RemoveShortSegments(Revit.ShortCurveTolerance))
-        Debug.WriteLine("Short segment removed");
+        GeometryEncoder.Context.Peek.RuntimeMessage(10, "Short edge segment removed.", edge);
 
       return ToEdgeCurveMany(edgeCurve).Select(x => DB.BRepBuilderEdgeGeometry.Create(x));
     }
 
+    static DB.Document acisDocument;
+    static DB.Document ACISDocument => acisDocument.IsValid() ? acisDocument :
+      acisDocument = Revit.ActiveDBApplication.NewProjectDocument(DB.UnitSystem.Imperial);
+
     internal static DB.Solid ToACIS(/*const*/ Brep brep, double factor)
     {
-      var SATFile = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():B}.sat");
+      var TempFolder = Path.Combine(Path.GetTempPath(), "McNeel", "Rhino.Inside", $"V{RhinoApp.ExeVersion}", "SATCaches");
+      Directory.CreateDirectory(TempFolder);
+
+      var SATFile = Path.Combine(TempFolder, $"{Guid.NewGuid():N}.sat");
 
       // Export
       {
@@ -386,48 +484,71 @@ namespace RhinoInside.Revit.Convert.Geometry
       {
         try
         {
-          var doc = GeometryEncoder.Context.Peek.Document;
+          var doc = GeometryEncoder.Context.Peek.Document ?? ACISDocument;
 
-          // In case we don't know the destination document we create a new one here.
-          using (doc is null ? doc = Revit.ActiveDBApplication.NewProjectDocument(DB.UnitSystem.Imperial) : default)
+          if (DB.ShapeImporter.IsServiceAvailable())
           {
-            // Everything in this scope should be rolledback.
-            using (doc.RollBackScope())
+            using (var importer = new DB.ShapeImporter())
             {
-              using
-              (
-                var SATOptions = new DB.SATImportOptions()
-                {
-                  ReferencePoint = DB.XYZ.Zero,
-                  Placement = DB.ImportPlacement.Origin,
-                  CustomScale = DB.UnitUtils.Convert(factor, DB.DisplayUnitType.DUT_DECIMAL_FEET, doc.GetUnits().GetFormatOptions(DB.UnitType.UT_Length).DisplayUnits),
-                }
-              )
-              {
-                // Create a 3D view to 
-                var typeId = doc.GetDefaultElementTypeId(DB.ElementTypeGroup.ViewType3D);
-                var view = DB.View3D.CreatePerspective(doc, typeId);
+              var list = importer.Convert(doc, SATFile);
+              if (list.OfType<DB.Solid>().FirstOrDefault() is DB.Solid shape)
+                return shape;
 
-                var instanceId = doc.Import(SATFile, SATOptions, view);
-                if (doc.GetElement(instanceId) is DB.Element element)
-                {
-                  using (var options = new DB.Options() { DetailLevel = DB.ViewDetailLevel.Fine })
+              // Looks like DB.ShapeImporter do not support short edges geometry
+              //return null;
+            }
+          }
+
+          // In case we don't have a  destination document we create a new one here.
+          using (doc.IsValid() ? default : doc = Revit.ActiveDBApplication.NewProjectDocument(DB.UnitSystem.Imperial))
+          {
+            try
+            {
+              // Everything in this scope should be rolledback.
+              using (doc.RollBackScope())
+              {
+                using
+                (
+                  var SATOptions = new DB.SATImportOptions()
                   {
-                    /// <see cref="DB.GeometryInstance.GetInstanceGeometry"/> is like calling
-                    /// <see cref="DB.SolidUtils.CreateTransformed"/> on <see cref="DB.GeometryInstance.SymbolGeometry"/>.
-                    /// It creates a transformed copy of the solid that will survive the Rollback.
-                    /// Unfortunately Paint information lives in the element so even if we paint the
-                    /// instance before doing the duplicate this information is lost after Rollback.
-                    if
-                    (
-                      element.get_Geometry(options) is DB.GeometryElement geometryElement &&
-                      geometryElement.First() is DB.GeometryInstance instance &&
-                      instance.GetInstanceGeometry().First() is DB.Solid solid
-                    )
-                      return solid;
+                    ReferencePoint = DB.XYZ.Zero,
+                    Placement = DB.ImportPlacement.Origin,
+                    CustomScale = DB.UnitUtils.Convert(factor, DB.DisplayUnitType.DUT_DECIMAL_FEET, doc.GetUnits().GetFormatOptions(DB.UnitType.UT_Length).DisplayUnits),
+                  }
+                )
+                {
+                  // Create a 3D view to 
+                  var typeId = doc.GetDefaultElementTypeId(DB.ElementTypeGroup.ViewType3D);
+                  var view = DB.View3D.CreatePerspective(doc, typeId);
+
+                  var instanceId = doc.Import(SATFile, SATOptions, view);
+                  if (doc.GetElement(instanceId) is DB.Element element)
+                  {
+                    using (var options = new DB.Options() { DetailLevel = DB.ViewDetailLevel.Fine })
+                    {
+                      /// <see cref="DB.GeometryInstance.GetInstanceGeometry"/> is like calling
+                      /// <see cref="DB.SolidUtils.CreateTransformed"/> on <see cref="DB.GeometryInstance.SymbolGeometry"/>.
+                      /// It creates a transformed copy of the solid that will survive the Rollback.
+                      /// Unfortunately Paint information lives in the element so even if we paint the
+                      /// instance before doing the duplicate this information is lost after Rollback.
+                      if
+                      (
+                        element.get_Geometry(options) is DB.GeometryElement geometryElement &&
+                        geometryElement.First() is DB.GeometryInstance instance &&
+                        instance.GetInstanceGeometry().First() is DB.Solid solid
+                      )
+                      {
+                        return DB.SolidUtils.Clone(solid);
+                      }
+                    }
                   }
                 }
               }
+            }
+            finally
+            {
+              if (doc != ACISDocument && doc != GeometryEncoder.Context.Peek.Document)
+                doc.Close(false);
             }
           }
         }
@@ -439,6 +560,56 @@ namespace RhinoInside.Revit.Convert.Geometry
 
       return default;
     }
+
+    internal static bool IsEquivalent(this DB.Solid solid, Brep brep)
+    {
+      var hit = new bool[brep.Faces.Count];
+
+      foreach (var face in solid.Faces.Cast<DB.Face>())
+      {
+        double[] samples = { 0.0, 1.0 / 5.0, 2.0 / 5.0, 3.0 / 5.0, 4.0 / 5.0, 1.0};
+
+        foreach (var edges in face.EdgeLoops.Cast<DB.EdgeArray>())
+        {
+          foreach (var edge in edges.Cast<DB.Edge>())
+          {
+            foreach (var sample in samples)
+            {
+              var point = edge.Evaluate(sample).ToPoint3d();
+
+              if (!brep.ClosestPoint(point, out var closest, out var ci, out var s, out var t, Revit.VertexTolerance * Revit.ModelUnits, out var normal))
+                return false;
+            }
+          }
+        }
+
+        // Get some samples
+        using (var mesh = face.Triangulate(0.0))
+        {
+          foreach (var vertex in mesh.Vertices)
+          {
+            // Recover real position on face
+            if (face.Project(vertex) is DB.IntersectionResult result)
+            {
+              using (result)
+              {
+                var point = result.XYZPoint.ToPoint3d();
+
+                // Check if is on Brep
+                if (!brep.ClosestPoint(point, out var closest, out var ci, out var s, out var t, Revit.VertexTolerance * Revit.ModelUnits, out var normal))
+                  return false;
+
+                if (ci.ComponentIndexType == ComponentIndexType.BrepFace)
+                  hit[ci.Index] = true;
+              }
+            }
+          }
+        }
+      }
+
+      return !hit.Any(x => !x);
+    }
+
     #endregion
   }
 }

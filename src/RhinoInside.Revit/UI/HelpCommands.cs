@@ -47,7 +47,15 @@ namespace RhinoInside.Revit.UI
 #if DEBUG
       var location = Path.Combine(Addin.SourceCodePath, "Samples");
 #else
-      var location = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+      var location = Path.Combine
+      (
+        Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+        "McNeel",
+        "Rhino.Inside",
+        "Revit",
+        $"{Addin.Version.Major}.{Addin.Version.Minor}",
+        "Samples"
+      );
 #endif
       using (System.Diagnostics.Process.Start(location)) { }
 

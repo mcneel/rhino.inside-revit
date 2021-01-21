@@ -64,7 +64,8 @@ using UI = Autodesk.Revit.UI;
 
 {{ site.terms.rir }} provides a few utility methods as well. Later on this guide, we are going to use one of these utility functions to bake a sphere into a Revit model. To access these methods, we need to add another binding to `RhinoInside.Revit.dll` assembly which is shipped with {{ site.terms.rir }}.
 
-Please follow the steps described above, and add a reference to this assembly as well. You can find the DLL under `%APPDATA%/Autodesk/Revit/Addins/XXXX/RhinoInside.Revit/` where `XXXX` is the Revit version e.g. `2019`
+Please follow the steps described above, and add a reference to this assembly as well. Typically, you can find the DLL under `%PROGRAMDATA%/Autodesk/Revit/XXXX/RhinoInside.Revit` where `XXXX` is the Revit version e.g. `2019`
+In some cases (such as with some older installations of {{ site.terms.rir }}) the dll may be under `%APPDATA%/Autodesk/Revit/Addins/XXXX/RhinoInside.Revit/`
 
 ![]({{ "/static/images/guides/rir-csharp04b.png" | prepend: site.baseurl }})
 

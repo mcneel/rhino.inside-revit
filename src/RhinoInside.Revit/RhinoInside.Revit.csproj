@@ -186,8 +186,8 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="RhinoCommon" Version="7.0.20301.12003-beta" IncludeAssets="compile; build" />
-        <PackageReference Include="Grasshopper" Version="7.0.20301.12003-beta" IncludeAssets="compile; build" />
+        <PackageReference Include="RhinoCommon" Version="7.0.20314.3001" IncludeAssets="compile; build" />
+        <PackageReference Include="Grasshopper" Version="7.0.20314.3001" IncludeAssets="compile; build" />
         <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitVersion).0.0" IncludeAssets="build; compile" />
       </ItemGroup>
     </Otherwise>
@@ -224,6 +224,7 @@
     <Compile Include="External\DB\ElevationBase.cs" />
     <Compile Include="External\DB\Extensions\Application.cs" />
     <Compile Include="External\DB\Extensions\BasePoint.cs" />
+    <Compile Include="External\DB\Extensions\BoundingBoxUV.cs" />
     <Compile Include="External\DB\Extensions\Category.cs" />
     <Compile Include="External\DB\Extensions\Curve.cs" />
     <Compile Include="External\DB\Extensions\CurveLoop.cs" />

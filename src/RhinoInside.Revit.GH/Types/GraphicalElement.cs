@@ -39,12 +39,12 @@ namespace RhinoInside.Revit.GH.Types
       if (element is DB.View)
         return false;
 
-      using (var location = element.Location)
+      using (var location = element?.Location)
       {
         if (location is object) return true;
       }
 
-      using (var bbox = element.get_BoundingBox(null))
+      using (var bbox = element?.get_BoundingBox(null))
       {
         return bbox is object;
       }

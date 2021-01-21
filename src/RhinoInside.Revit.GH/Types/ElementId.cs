@@ -95,7 +95,6 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_Goo
-    public override bool IsValid => Document.IsValid() && (Id.IsBuiltInId() || Value is object);
     public override string IsValidWhyNot => IsValid ? string.Empty : "Not Valid";
     public virtual object ScriptVariable() => Value;
 

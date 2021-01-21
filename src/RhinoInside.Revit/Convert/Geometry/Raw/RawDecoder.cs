@@ -447,7 +447,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
       var axis = new LineCurve
       (
-        new Line(curves[0].GetEndPoint(0).ToPoint3d(), curves[1].GetEndPoint(0).ToPoint3d()),
+        new Line(AsPoint3d(curves[0].GetEndPoint(0)), AsPoint3d(curves[1].GetEndPoint(0))),
         0.0,
         1.0
       );
@@ -486,9 +486,9 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       if (lofts.Length == 1 && lofts[0].Faces.Count == 1)
       {
         // Surface.Transpose is necessary since Brep.CreateFromLoft places the input curves along V,
-        // instead of that Revit Ruled Surface has those Curves along U axis.
-        // This subtle thing also result in the correct normal of the resulting surface.
-        // Transpose also duplicates the underlaying surface, what is a desired side effect of calling Transpose here.
+        // while Revit Ruled Surface has those Curves along U axis.
+        // This subtle thing also results in the correct normal of the resulting surface.
+        // Transpose duplicates the underlaying surface, what is a desired side effect of calling Transpose here.
         return lofts[0].Faces[0].Transpose();
       }
 
@@ -497,20 +497,20 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
     public static Surface ToRhinoSurface(DB.RuledFace face, double relativeTolerance)
     {
-      NurbsSurface nurbsSurface = default;
-      try
-      {
-#if REVIT_2021
-        using (var surface = DB.ExportUtils.GetNurbsSurfaceDataForSurface(face.GetSurface()))
-          nurbsSurface = ToRhino(surface, face.GetBoundingBox());
-#else
-        using (var surface = DB.ExportUtils.GetNurbsSurfaceDataForFace(face))
-          nurbsSurface = ToRhino(surface, face.GetBoundingBox());
-#endif
-      }
-      catch (Autodesk.Revit.Exceptions.ApplicationException) { }
+//      NurbsSurface nurbsSurface = default;
+//      try
+//      {
+//#if REVIT_2021
+//        using (var surface = DB.ExportUtils.GetNurbsSurfaceDataForSurface(face.GetSurface()))
+//          nurbsSurface = ToRhino(surface, face.GetBoundingBox());
+//#else
+//        using (var surface = DB.ExportUtils.GetNurbsSurfaceDataForFace(face))
+//          nurbsSurface = ToRhino(surface, face.GetBoundingBox());
+//#endif
+//      }
+//      catch (Autodesk.Revit.Exceptions.ApplicationException) { }
 
-      if (nurbsSurface is null)
+//      if (nurbsSurface is null)
       {
         return face.IsExtruded ?
           FromExtrudedSurface
@@ -528,20 +528,20 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
             relativeTolerance
           );
       }
-      else
-      {
-        double ctol = relativeTolerance * Revit.ShortCurveTolerance * 5.0;
-        if (ctol != 0.0)
-        {
-          // Extend using smooth way avoids creating C2 discontinuities
-          nurbsSurface = nurbsSurface.Extend(IsoStatus.West, ctol, true) as NurbsSurface ?? nurbsSurface;
-          nurbsSurface = nurbsSurface.Extend(IsoStatus.East, ctol, true) as NurbsSurface ?? nurbsSurface;
-          nurbsSurface = nurbsSurface.Extend(IsoStatus.South, ctol, true) as NurbsSurface ?? nurbsSurface;
-          nurbsSurface = nurbsSurface.Extend(IsoStatus.North, ctol, true) as NurbsSurface ?? nurbsSurface;
-        }
-      }
+      //else
+      //{
+      //  double ctol = relativeTolerance * Revit.ShortCurveTolerance * 5.0;
+      //  if (ctol != 0.0)
+      //  {
+      //    // Extend using smooth way avoids creating C2 discontinuities
+      //    nurbsSurface = nurbsSurface.Extend(IsoStatus.West, ctol, true) as NurbsSurface ?? nurbsSurface;
+      //    nurbsSurface = nurbsSurface.Extend(IsoStatus.East, ctol, true) as NurbsSurface ?? nurbsSurface;
+      //    nurbsSurface = nurbsSurface.Extend(IsoStatus.South, ctol, true) as NurbsSurface ?? nurbsSurface;
+      //    nurbsSurface = nurbsSurface.Extend(IsoStatus.North, ctol, true) as NurbsSurface ?? nurbsSurface;
+      //  }
+      //}
 
-      return nurbsSurface;
+      //return nurbsSurface;
     }
 
     public static Surface ToRhino(DB.RuledSurface surface, DB.BoundingBoxUV bboxUV) => FromRuledSurface
@@ -718,9 +718,9 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
     struct BrepBoundary
     {
       public BrepLoopType type;
+      public List<int> orientation;
       public List<BrepEdge> edges;
       public PolyCurve trims;
-      public List<int> orientation;
     }
 
     static int AddSurface(Brep brep, DB.Face face, out List<BrepBoundary>[] shells, Dictionary<DB.Edge, BrepEdge> brepEdges = null)
@@ -759,11 +759,12 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
           var loop = new BrepBoundary()
           {
             type = BrepLoopType.Unknown,
+            orientation = new List<int>(edgeLoop.Size),
             edges = new List<BrepEdge>(edgeLoop.Size),
-            trims = new PolyCurve(),
-            orientation = new List<int>(edgeLoop.Size)
+            trims = new PolyCurve()
           };
 
+          var trims = new List<Curve>(edgeLoop.Size);
           foreach (var edge in edges)
           {
             var brepEdge = default(BrepEdge);
@@ -777,16 +778,52 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
               brepEdges?.Add(edge, brepEdge);
             }
 
-            loop.edges.Add(brepEdge);
             var segment = ToRhino(edge.AsCurveFollowingFace(face));
-
             if (!face.MatchesSurfaceOrientation())
               segment.Reverse();
 
-            loop.orientation.Add(segment.TangentAt(segment.Domain.Mid).IsParallelTo(brepEdge.TangentAt(brepEdge.Domain.Mid)));
+            if (surface.Pullback(segment, 1e-5) is Curve trim)
+            {
+              trims.Add(trim);
+              loop.edges.Add(brepEdge);
 
-            var trim = surface.Pullback(segment, Revit.VertexTolerance);
-            loop.trims.Append(trim);
+              loop.orientation.Add(segment.TangentAt(segment.Domain.Mid).IsParallelTo(brepEdge.TangentAt(brepEdge.Domain.Mid)));
+            }
+          }
+
+          // Add singular edges
+          for (int ti = 0, ei = 0; ti < trims.Count; ++ti, ++ei)
+          {
+            int tA = ti;
+            int tB = (ti + 1) % trims.Count;
+
+            loop.trims.AppendSegment(trims[tA]);
+
+            int eA = ei;
+            int eB = (ei + 1) % loop.edges.Count;
+
+            var start = loop.orientation[eA] > 0 ? (loop.edges[eA]).PointAtEnd   : (loop.edges[eA]).PointAtStart;
+            var end   = loop.orientation[eB] > 0 ? (loop.edges[eB]).PointAtStart : (loop.edges[eB]).PointAtEnd;
+
+            if (start.EpsilonEquals(end, Revit.VertexTolerance))
+            {
+              var startTrim = new Point2d(trims[tA].PointAtEnd);
+              var endTrim = new Point2d(trims[tB].PointAtStart);
+              var midTrim = (endTrim + startTrim) * 0.5;
+
+              if (surface.IsAtSingularity(midTrim.X, midTrim.Y, false))
+              {
+                loop.orientation.Insert(eA + 1, 0);
+                loop.edges.Insert(eA + 1, default);
+                loop.trims.AppendSegment(new LineCurve(startTrim, endTrim));
+
+                ei++;
+              }
+            }
+            else // Missing edge
+            {
+              Debug.WriteLine("Missing edge detected");
+            }
           }
 
           loop.trims.MakeClosed(Revit.VertexTolerance);
@@ -852,14 +889,15 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
           {
             var brepEdge = loop.edges[e];
 
-            int orientation = loop.orientation[e];
-            if (orientation == 0)
-              continue;
-
             if (loop.trims.SegmentCurve(e) is Curve trim)
             {
               var ti = brep.AddTrimCurve(trim);
-              brep.Trims.Add(brepEdge, orientation < 0, brepLoop, ti);
+
+              int orientation = loop.orientation[e];
+              if (orientation == 0)
+                brep.Trims.Add(false, brepLoop, ti).TrimType = BrepTrimType.Singular;
+              else
+                brep.Trims.Add(brepEdge, orientation < 0, brepLoop, ti);
             }
           }
 
@@ -903,6 +941,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       {
 #if DEBUG
         brep.IsValidWithLog(out var log);
+        Debug.WriteLine($"{MethodInfo.GetCurrentMethod().DeclaringType.FullName}.{MethodInfo.GetCurrentMethod().Name}()\n{log}");
 #endif
         brep.Repair(Revit.VertexTolerance);
       }
