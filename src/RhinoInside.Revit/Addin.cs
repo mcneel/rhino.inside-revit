@@ -288,8 +288,13 @@ namespace RhinoInside.Revit
       UI.CommandRhinoInsideOptions.CreateUI(addinRibbon);
 
       // check for updates
-      if (AddinOptions.CheckForAddinUpdates)
-        AddinUpdater.CheckUpdates(SetUpdateState);
+      if (AddinOptions.CheckForUpdatesOnStartup)
+        AddinUpdater.CheckUpdates(
+          (AddinReleaseInfo releaseInfo) =>
+          {
+            if (releaseInfo.Version > Version)
+              UI.CommandRhinoInsideOptions.Highlight();
+          });
 
       return Result.Succeeded;
     }
@@ -382,12 +387,6 @@ namespace RhinoInside.Revit
           }
         );
       }
-    }
-
-    void SetUpdateState(AddinReleaseInfo releaseInfo)
-    {
-      if (releaseInfo.Version > Version)
-        UI.CommandRhinoInsideOptions.Highlight();
     }
     #endregion
 

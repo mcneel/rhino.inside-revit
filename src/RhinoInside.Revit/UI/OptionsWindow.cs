@@ -32,7 +32,7 @@ namespace RhinoInside.Revit.UI
     void InitLayout()
     {
       // setup update options
-      _checkUpdatesOnStartup.Checked = AddinOptions.CheckForAddinUpdates;
+      _checkUpdatesOnStartup.Checked = AddinOptions.CheckForUpdatesOnStartup;
 
       // setup update channel selector
       _updateChannelSelector.SelectedIndexChanged += _updateChannelSelector_SelectedIndexChanged;
@@ -122,7 +122,7 @@ namespace RhinoInside.Revit.UI
     {
       // update settings
       if (_checkUpdatesOnStartup.Checked.HasValue)
-        AddinOptions.CheckForAddinUpdates = _checkUpdatesOnStartup.Checked.Value;
+        AddinOptions.CheckForUpdatesOnStartup = _checkUpdatesOnStartup.Checked.Value;
 
       AddinOptions.UpdateChannel =
         AddinUpdater.Channels[_updateChannelSelector.SelectedIndex].Id.ToString();

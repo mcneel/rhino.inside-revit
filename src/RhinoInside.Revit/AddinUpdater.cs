@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
 
 using Autodesk.Revit.UI;
 
@@ -14,22 +15,30 @@ namespace RhinoInside.Revit
   class AddinReleaseInfo
   {
     public string Title { get; set; }
-    public string Description { get; set; }
+    //public string Description { get; set; }
     public DateTime ReleaseDate { get; set; }
     public Version Version { get; set; }
     public string DownloadUrl { get; set; }
+    public string ReleaseNotesUrl { get; set; }
+    public SHA256 Signature { get; set; }
   }
 
-  abstract class AddinUpdateChannel
+  internal class AddinUpdateChannel
   {
-    abstract public Guid Id { get; }
-    abstract public string Name { get; }
-    abstract public string Description { get; }
-    abstract public int MajorVersion { get; }
-    abstract public string Url { get; }
+    public Guid Id { get; set; }
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public Version TargetVersion { get; set; }
+    public string Url { get; set; }
+
+    public AddinUpdateChannel(Guid id, string name, string description, Version target, string url)
+    {
+      Id = id; Name = name; Description = description; TargetVersion = target; Url = url;
+    }
 
     public AddinReleaseInfo GetLatestRelease()
     {
+      // TODO
       return new AddinReleaseInfo
       {
         Version = new Version("2.0")
@@ -37,41 +46,36 @@ namespace RhinoInside.Revit
     }
   }
 
-  class UpdatePublicChannel : AddinUpdateChannel
-  {
-    public override Guid Id => new Guid("0b10351c-25e3-4680-9135-6b86cd27bcda");
-    public override string Name => "Public Releases";
-    public override string Description => "Official and tested public releases downloadable from website";
-    public override int MajorVersion => 1;
-    public override string Url => @"";
-  }
-
-  class UpdateReleaseCandidateChannel : AddinUpdateChannel
-  {
-    public override Guid Id => new Guid("c63def46-e63d-41e3-8f82-9b5ee1d88251");
-    public override string Name => "Release Candidates";
-    public override string Description => "Release candidates are product releases being cleaned up for release and may still contain bugs";
-    public override int MajorVersion => 1;
-    public override string Url => @"";
-  }
-
-  class UpdateDailyChannel : AddinUpdateChannel
-  {
-    public override Guid Id => new Guid("7fc1e535-c7cd-47d8-a969-e01435bacd65");
-    public override string Name => "Daily Builds (Work in Progress)";
-    public override string Description => "Daily Builds are most recent builds of the development branch and might contain bugs and unfinished features";
-    public override int MajorVersion => 1;
-    public override string Url => @"";
-  }
-
   static class AddinUpdater
   {
-    static public readonly AddinUpdateChannel DefaultChannel = new UpdatePublicChannel();
+    static public readonly AddinUpdateChannel DefaultChannel = new AddinUpdateChannel
+    (
+      id:           new Guid("0b10351c-25e3-4680-9135-6b86cd27bcda"),
+      name:         "Public Releases",
+      description:  "Official and tested public releases downloadable from website",
+      target:       new Version(1, 0),
+      url:          @""
+    );
+
     static public readonly List<AddinUpdateChannel> Channels = new List<AddinUpdateChannel>
     {
       DefaultChannel,
-      new UpdateReleaseCandidateChannel(),
-      new UpdateDailyChannel()
+      new AddinUpdateChannel
+      (
+        id:           new Guid("c63def46-e63d-41e3-8f82-9b5ee1d88251"),
+        name:         "Release Candidates",
+        description:  "Release candidates are product releases being cleaned up for release and may still contain bugs",
+        target:       new Version(1, 0),
+        url:          @""
+      ),
+        new AddinUpdateChannel
+      (
+        id:           new Guid("7fc1e535-c7cd-47d8-a969-e01435bacd65"),
+        name:         "Daily Builds (Work in Progress)",
+        description:  "Daily Builds are most recent builds of the development branch and might contain bugs and unfinished features",
+        target:       new Version(1, 0),
+        url:          @""
+      )
     };
 
     static AddinUpdateChannel ActiveChannel

@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.Settings
   static class AddinOptions
   {
     [XmlAttribute]
-    public static bool CheckForAddinUpdates { get; set; } = true;
+    public static bool CheckForUpdatesOnStartup { get; set; } = true;
 
     [XmlAttribute]
     public static string UpdateChannel { get; set; } = AddinUpdater.DefaultChannel.Id.ToString();
