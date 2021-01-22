@@ -959,13 +959,20 @@ namespace RhinoInside.Revit.UI
           Button.Enabled = false;
           Button.ToolTip = "Addin Disabled";
         }
+
+        // disable the button if options are readonly
+        Button.Enabled = !AddinOptions.IsReadOnly;
       }
     }
 
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
       // try opening options window
-      new OptionsWindow(data.Application).Show();
+      if (!AddinOptions.IsReadOnly)
+        new OptionsWindow(data.Application).Show();
+      else
+        TaskDialog.Show("Options", "Contact your system admin to change the options");
+
       return Result.Succeeded;
     }
 
@@ -974,12 +981,16 @@ namespace RhinoInside.Revit.UI
     /// </summary>
     static public void Highlight()
     {
-      // grab the underlying Autodesk.Windows object from Button
-      var getRibbonItemMethodInfo = Button.GetType().GetMethod("getRibbonItem", BindingFlags.NonPublic | BindingFlags.Instance);
-      var adWndObj = (Autodesk.Windows.RibbonButton) getRibbonItemMethodInfo.Invoke(Button, null);
-      // set highlight state and update tooltip
-      adWndObj.Highlight = Autodesk.Internal.Windows.HighlightMode.New;
-      Button.ToolTip = "New Release Available for Download!\n" + Button.ToolTip;
+      // button gets deactivated if options are readonly
+      if (!AddinOptions.IsReadOnly)
+      {
+        // grab the underlying Autodesk.Windows object from Button
+        var getRibbonItemMethodInfo = Button.GetType().GetMethod("getRibbonItem", BindingFlags.NonPublic | BindingFlags.Instance);
+        var adWndObj = (Autodesk.Windows.RibbonButton) getRibbonItemMethodInfo.Invoke(Button, null);
+        // set highlight state and update tooltip
+        adWndObj.Highlight = Autodesk.Internal.Windows.HighlightMode.New;
+        Button.ToolTip = "New Release Available for Download!\n" + Button.ToolTip;
+      }
     }
   }
 }

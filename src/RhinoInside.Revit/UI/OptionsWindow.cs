@@ -17,7 +17,7 @@ using RhinoInside.Revit.Settings;
 
 namespace RhinoInside.Revit.UI
 {
-  class OptionsWindow : BaseWindow
+  internal class OptionsWindow : BaseWindow
   {
     CheckBox _checkUpdatesOnStartup = new CheckBox { Text = "Check Updates on Startup" };
     Label _channelDescription = new Label { Visible = false, Wrap = WrapMode.Word };
@@ -126,6 +126,8 @@ namespace RhinoInside.Revit.UI
 
       AddinOptions.UpdateChannel =
         AddinUpdater.Channels[_updateChannelSelector.SelectedIndex].Id.ToString();
+
+      AddinOptions.Save();
 
       Close();
     }
