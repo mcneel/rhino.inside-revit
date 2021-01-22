@@ -25,11 +25,13 @@ namespace RhinoInside.Revit.UI
   {
     public BaseWindow(UIApplication uiApp, int width, int height)
     {
+      // set Revit window as parent
 #if REVIT_2019
       Owner = Eto.Forms.WpfHelpers.ToEtoWindow(uiApp.MainWindowHandle);
 #else
       Owner = Eto.Forms.WpfHelpers.ToEtoWindow(Autodesk.Windows.ComponentManager.ApplicationWindow);
 #endif
+      // set the default Rhino icon
       Icon = Icon.FromResource("RhinoInside.Revit.Resources.Rhino-logo.ico", assembly: Assembly.GetExecutingAssembly());
 
       // set window size and center on the parent window
