@@ -119,6 +119,6 @@
 <div class="home-discover">
     <div class="container">
         <h2 style="font-size: 32px;"><a href="discover/">{{ include.discover_header }}</a></h2>
-        {% include ltr/gallery_discover.html keyword='kind: featured' max_items="6" notags=true nohighlight=true show_filters=false nonlocal=true %}
+        {% include ltr/gallery_discover.html keyword='kind: featured' max_items=include.discover_count notags=true nohighlight=true show_filters=false %}
     </div>
 </div>

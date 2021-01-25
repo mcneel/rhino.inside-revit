@@ -50,12 +50,6 @@
 </div>
 
 
-{% if include.nonlocal %}
-<script>
-    window.nonLocal = true;
-</script>
-{% endif %}
-
 {% if include.max_items %}
 <script>
     window.maxItems = Number("{{ include.max_items }}");
@@ -63,6 +57,8 @@
 {% endif %}
 
 <script>
+    var nonLocal = !window.location.href.endsWith('discover' + '/')
+
     const urlParams = new URLSearchParams(window.location.search);
 
     function selectItems(items) {
@@ -105,7 +101,7 @@
         cards.forEach((c) => {
             c.thumbnail = proxifyUrls(c.thumbnail);
             c.description = markdown.toHTML(c.description);
-            if (window.nonLocal && !c.url.startsWith('http')) {
+            if (nonLocal && !c.url.startsWith('http')) {
                 c.url = 'discover' + '/' + c.url;
             }
         });
