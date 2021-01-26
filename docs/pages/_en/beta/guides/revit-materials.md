@@ -2,6 +2,7 @@
 title: Materials
 order: 50
 group: Modeling
+home: true
 thumbnail: /static/images/guides/revit-materials.png
 subtitle: Workflows for Revit Materials, Material Graphics and Assets
 ghdef: revit-materials.ghx

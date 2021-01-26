@@ -3,6 +3,7 @@ title: "Revit: Parameters"
 subtitle: All the different types of Parameters
 order: 22
 group: Essentials
+home: true
 thumbnail: /static/images/guides/revit-params.png
 ghdef: revit-params.ghx
 ---

@@ -2,6 +2,7 @@
 title: Curtain Walls & Systems
 order: 41
 group: Modeling
+home: true
 thumbnail: /static/images/guides/revit-curtainwalls.png
 subtitle: Workflows for Revit Curtain Walls and Systems
 ghdef: revit-curtainwalls.ghx

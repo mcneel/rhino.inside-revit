@@ -2,8 +2,9 @@
 title: "Revit: Elements & Instances"
 subtitle: What is an Element in Revit
 order: 21
-thumbnail: /static/images/guides/revit-elements.png
 group: Essentials
+home: true
+thumbnail: /static/images/guides/revit-elements.png
 ---
 
 ## Referencing Elements

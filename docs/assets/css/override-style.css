@@ -84,7 +84,7 @@ pre {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    /* filter: invert(1) hue-rotate(92deg) brightness(0.7); */
+    filter: opacity(0.8);
 }
 
 .home-contents-box {
@@ -152,14 +152,12 @@ pre {
 .home-feature-ghcomps {
     background-size: cover;
     background-position: center;
-    /* background-image: url(https://via.placeholder.com/1024x200.png/666/?text=%20); */
     color: #111;
 }
 
 .home-feature-api {
     background-size: cover;
     background-position: center;
-    /* background-image: url(https://via.placeholder.com/1024x200.png/444/?text=%20); */
     color: #111;
 }
 
@@ -180,6 +178,11 @@ pre {
     overflow: hidden;
 }
 
+.home-feature-grid-img-item img {
+    width: 100%;
+    height: 100%;
+}
+
 .home-feature-rhino-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -198,7 +201,7 @@ pre {
 
 .home-feature-ghcomps-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 20px;
     margin-top: 20px;
 }
@@ -224,6 +227,11 @@ pre {
 .home-feature small {
     font-size: 28px;
     padding-left: 20px;
+}
+
+.home-feature-ghcomps-grid a,
+.home-feature-ghcomps-grid a:visited {
+    color: #111;
 }
 
 .home-feature-content {

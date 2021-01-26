@@ -7,8 +7,7 @@
 
 <div class="home-cover">
     <div class="home-gallery">
-        <!-- <img src="{{ "/static/images/home/background.gif" | prepend: site.baseurl }}" /> -->
-        <img src="https://via.placeholder.com/1024x600.png?text=%20" />
+        <img src="{{ include.banner_img | prepend: site.baseurl }}" />
     </div>
 
     <div class="home-contents-box">
@@ -49,14 +48,14 @@
                         <h2>{{ include.rhino_header }}<small>{{ include.inside_text }}</small></h2>
                         <p>{{ include.rhino_text }}</p>
                         <div class="home-feature-rhino-grid">
-                            <div class="home-feature-grid-item">
-                                <img src="{{ "/assets/img/cube.svg" | prepend: site.baseurl }}" />
+                            <div class="home-feature-grid-item home-feature-grid-img-item">
+                                <img src="{{ include.rh_img1 | prepend: site.baseurl }}" />
                             </div>
-                            <div class="home-feature-grid-item">
-                                <img src="{{ "/assets/img/cube.svg" | prepend: site.baseurl }}" />
+                            <div class="home-feature-grid-item home-feature-grid-img-item">
+                                <img src="{{ include.rh_img2 | prepend: site.baseurl }}" />
                             </div>
-                            <div class="home-feature-grid-item">
-                                <img src="{{ "/assets/img/cube.svg" | prepend: site.baseurl }}" />
+                            <div class="home-feature-grid-item home-feature-grid-img-item">
+                                <img src="{{ include.rh_img3 | prepend: site.baseurl }}" />
                             </div>
                         </div>
                     </div>
@@ -85,18 +84,16 @@
                 <h3>{{ include.ghcomp_header }}</h3>
                 <p>{{ include.ghcomp_text }}</p>
                 <div class="home-feature-ghcomps-grid" style="grid-column: 1 / -1;">
-                    <div class="home-feature-grid-item home-feature-grid-img-item">
-                        <img src="{{ include.ghcomp_img1 | prepend: site.baseurl }}" />
-                    </div>
-                    <div class="home-feature-grid-item home-feature-grid-img-item">
-                        <img src="{{ include.ghcomp_img2 | prepend: site.baseurl }}" />
-                    </div>
-                    <div class="home-feature-grid-item home-feature-grid-img-item">
-                        <img src="{{ include.ghcomp_img3 | prepend: site.baseurl }}" />
-                    </div>
-                    <div class="home-feature-grid-item home-feature-grid-img-item">
-                        <img src="{{ include.ghcomp_img4 | prepend: site.baseurl }}" />
-                    </div>
+                {% for collection in site.collections %}
+                    {% if collection.label == page.collection %}
+                        {% assign items = collection.docs | sort:"order" %}
+                        {% for item in items %}
+                            {% if item.toc and item.title and item.version == page.version and item.home %}
+                                {% include ltr/gallery_item.html item=item large=true %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
                 </div>
             </div>
         </div>

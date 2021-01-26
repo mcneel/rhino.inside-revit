@@ -1,8 +1,9 @@
 ---
 title: Custom Families
 order: 59
-thumbnail: /static/images/guides/revit-wip.png
 group: Modeling
+home: true
+thumbnail: /static/images/guides/revit-wip.png
 ---
 
 {% include ltr/en/wip_note.html %}
