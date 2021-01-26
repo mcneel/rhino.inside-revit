@@ -701,7 +701,8 @@ pre {
 
 /* different naming format otherwise vue.js breaks */
 .discoverItemHighlight {
-    border: 1px solid #b0b0b0;
+    box-shadow: 0 4px 0 #a0a0a0, 0 10px 8px rgba(0, 0, 0, .1);
+
 }
 
 .discover-item-focused {

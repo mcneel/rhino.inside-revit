@@ -36,7 +36,7 @@
                 {% if include.nonew != true %}
                 <div class="discover-info-new">
                     New
-                    <a class="discover-info-new-ok" v-on:click="forgetItem" v-bind:itemid="card.url">
+                    <a class="discover-info-new-ok" v-on:click="forgetItem" v-bind:itemid="card.url" title="Unmark">
                         <img src="{{ "/assets/img/check.svg" | prepend: site.baseurl }}" />
                     </a>
                 </div>
@@ -56,9 +56,9 @@
                 <div class="discover-info-extra" v-html="card.description" />
             </div>
             {% if include.nohighlight != true %}
-            <svg v-if="card.highlight" class="discover-highlight" height="16" width="16">
+            <!-- <svg v-if="card.highlight" class="discover-highlight" height="16" width="16">
                 <polygon points="16,0 16,16 0,16" style="fill:#b0b0b0" />
-            </svg>
+            </svg> -->
             {% endif %}
         </div>
     </div>
