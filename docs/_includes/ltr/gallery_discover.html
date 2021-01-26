@@ -1,11 +1,17 @@
-<div id="discoverSpinner" style="text-align: center;">Fetching awesome content...</div>
+<div id="discoverSpinner" style="text-align: center;">
+    Fetching awesome content...
+</div>
 <div id="discoverGallery" class="block-center" style="visibility: collapse;">
     {% if include.show_filters %}
     <div class="discover-filters-box">
         <ul class="discover-filters">
             <li class="discover-filter" v-for="kind in discoverKinds" v-on:click="filterCardsByKind"
-                v-bind:kind="(( kind.keyword ))">(( kind.title ))</li>
-            <input id="searchbox" class="discover-search" type="text" placeholder="search..." v-model.trim="keyword">
+                v-bind:kind="(( kind.keyword ))">(( kind.title ))
+            </li>
+            <input id="searchbox" class="discover-search" type="text" placeholder="search..." v-model.trim="keyword" />
+            <div id="unmarkall" class="discover-unmarkall" v-on:click="forgetAllItems" title="Unmark All">
+                <img src="{{ "/assets/img/check.svg" | prepend: site.baseurl }}" style="width: 16px;" />
+            </div>
         </ul>
     </div>
     {% endif %}
@@ -15,13 +21,11 @@
     <div class="discover-grid">
     {% endif %}
         {% if include.notags %}
-        <div class="discover-item discover-item-compact"
-             v-for="card in discoverCards"
+        <div class="discover-item discover-item-compact" v-for="card in discoverCards"
              v-bind:class="{ discoverItemHighlight: card.highlight }">
         {% else %}
-        <div class="discover-item"
-             v-for="card in discoverCards"
-             v-bind:class="{ discoverItemHighlight: card.highlight }">
+        <div class="discover-item" v-for="card in discoverCards"
+             v-bind:class="{ discoverItemHighlight: card.highlight }" v-bind:itemid="card.url">
         {% endif %}
             <a v-bind:href="card.url" target="blank">
                 <div class="discover-thumbnail discover-thumbnail-dim">
@@ -29,21 +33,32 @@
                 </div>
             </a>
             <div class="discover-info">
+                {% if include.nonew != true %}
+                <div class="discover-info-new">
+                    New
+                    <a class="discover-info-new-ok" v-on:click="forgetItem" v-bind:itemid="card.url">
+                        <img src="{{ "/assets/img/check.svg" | prepend: site.baseurl }}" />
+                    </a>
+                </div>
+                {% endif %}
                 <a class="discover-info-title" v-bind:href="card.url" target="blank">(( card.title ))</a>
-                <a class="discover-info-author" v-bind:href="card.authorUrl" target="blank">(( card.author ))</a>
+                <a class="discover-info-author" v-bind:href="card.authorUrl" target="blank">(( card.author
+                    ))</a>
                 <div class="discover-info-subtitle">
                     (( card.subtitle ))
                 </div>
                 {% if include.notags != true %}
                 <ul class="discover-info-tags">
-                    <li v-for="tag in card.tags" v-on:click="filterCardsByTag" v-bind:tag="(( tag ))">(( tag ))</li>
+                    <li v-for="tag in card.tags" v-on:click="filterCardsByTag" v-bind:tag="(( tag ))">(( tag ))
+                    </li>
                 </ul>
                 {% endif %}
-                <div class="discover-info-extra" v-html="card.description"></div>
+                <div class="discover-info-extra" v-html="card.description" />
             </div>
             {% if include.nohighlight != true %}
             <svg v-if="card.highlight" class="discover-highlight" height="16" width="16">
-                <polygon points="16,0 16,16 0,16" style="fill:#b0b0b0" /></svg>
+                <polygon points="16,0 16,16 0,16" style="fill:#b0b0b0" />
+            </svg>
             {% endif %}
         </div>
     </div>
@@ -57,7 +72,8 @@
 {% endif %}
 
 <script>
-    var nonLocal = !window.location.href.endsWith('discover' + '/')
+    var urlFormat = /.+discover(\/\?keyword.+)?/;
+    var nonLocal = !window.location.href.match(urlFormat);
 
     const urlParams = new URLSearchParams(window.location.search);
 
@@ -71,15 +87,39 @@
 
     function attachDiscoverItemHover() {
         $(".discover-item").hover(function () {
+            $(this).find(".discover-info-new").css("padding-right", "0")
+            $(this).find(".discover-info-new-ok").css("display", "inline-block")
             $(this).addClass("discover-item-focused");
             $(this).find(".discover-thumbnail").removeClass("discover-thumbnail-dim");
             $(this).find(".discover-info-extra").addClass("discover-info-extra-open");
         }, function () {
+            $(this).find(".discover-info-new").css("padding-right", "5px")
+            $(this).find(".discover-info-new-ok").css("display", "none")
             $(this).removeClass("discover-item-focused");
             $(this).find(".discover-thumbnail").addClass("discover-thumbnail-dim");
             $(this).find(".discover-info-extra").removeClass("discover-info-extra-open");
         });
     };
+
+    function markNewItems() {
+        var forgottenItems = JSON.parse(window.localStorage.getItem("forgottenItems")) || [];
+        var atLeastOneNew = false;
+        $(".discover-item").each((i, c) => {
+            var item = $(c);
+            var newMarker = item.find(".discover-info-new");
+            if (!forgottenItems.includes(item.attr("itemid"))) {
+                newMarker.css("display", "block");
+                atLeastOneNew = true;
+            } else {
+                newMarker.css("display", "none");
+            }
+        });
+        if (atLeastOneNew) {
+            $("#unmarkall").css("visibility", "visible");
+        } else {
+            $("#unmarkall").css("visibility", "hidden");
+        }
+    }
 
     async function getDiscoverCards(filter) {
         var dataUrl = '/static/data/discover.json';
@@ -141,14 +181,33 @@
             },
             methods: {
                 filterCardsByKind: function (event) {
-                    let kind = event.target.getAttribute('kind');
+                    let kind = event.currentTarget.getAttribute('kind');
                     this.keyword = 'kind: ' + kind;
                 },
                 filterCardsByTag: function (event) {
-                    let tag = event.target.getAttribute('tag');
+                    let tag = event.currentTarget.getAttribute('tag');
                     this.keyword = 'tag: ' + tag;
-                    window.scrollTo(0,0);
+                    window.scrollTo(0, 0);
                     $("#searchbox").focus();
+                },
+                forgetItem: function (event) {
+                    let itemId = event.currentTarget.getAttribute('itemid');
+                    var forgottenItems = JSON.parse(window.localStorage.getItem(
+                        "forgottenItems"));
+                    var uniqueItems = new Set(forgottenItems);
+                    uniqueItems.add(itemId);
+                    window.localStorage.setItem("forgottenItems", JSON.stringify(Array.from(
+                        uniqueItems)));
+                    markNewItems();
+                },
+                forgetAllItems: function (event) {
+                    var forgottenItems = [];
+                    $(".discover-item").each((i, c) => {
+                        forgottenItems.push($(c).attr("itemid"));
+                    });
+                    window.localStorage.setItem("forgottenItems", JSON.stringify(
+                        forgottenItems));
+                    markNewItems();
                 }
             },
             watch: {
@@ -178,9 +237,10 @@
                                 df.addClass('discover-filter-active');
                                 if (pushState) {
                                     history.pushState({
-                                        filterType: 'kind',
-                                        keyword: origKwd
-                                    }, `Kind: ${df.text()}`, `?keyword=${origKwd}`);
+                                            filterType: 'kind',
+                                            keyword: origKwd
+                                        }, `Kind: ${df.text()}`,
+                                        `?keyword=${origKwd}`);
                                 }
                             }
                         });
@@ -233,10 +293,12 @@
                 const urlKeyword = urlParams.get('keyword');
                 this.keyword = urlKeyword ? urlKeyword : '{{ include.keyword }}';
                 attachDiscoverItemHover();
+                markNewItems();
             },
             updated: function () {
                 this.$nextTick(function () {
                     attachDiscoverItemHover();
+                    markNewItems();
                 })
             }
 

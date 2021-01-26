@@ -175,6 +175,11 @@ pre {
     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1);
 }
 
+.home-feature-grid-img-item {
+    padding: 0;
+    overflow: hidden;
+}
+
 .home-feature-rhino-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -193,7 +198,7 @@ pre {
 
 .home-feature-ghcomps-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));
     gap: 20px;
     margin-top: 20px;
 }
@@ -728,6 +733,36 @@ pre {
     padding: 5px 10px 5px 10px;
 }
 
+.discover-info-new {
+    display: none;
+    float: left;
+    color: white;
+    background: #dc3545;
+    border-radius: 3px;
+    margin-top: 3px;
+    margin-right: 5px;
+    text-align: center;
+    font-size: 12px;
+    padding: 0 5px 0px 5px;
+}
+
+.discover-info-new-ok {
+    display: none;
+    padding: 0 5px 0 5px;
+    border-radius: 3px;
+}
+
+.discover-info-new-ok:hover {
+    background: #c82333;
+    cursor: pointer;
+}
+
+.discover-info-new-ok img {
+    width: 13px;
+    padding-bottom: 2px;
+    margin: 0px;
+}
+
 .discover-info-title,
 .discover-info-title:visited,
 .discover-info-title:hover {
@@ -811,6 +846,7 @@ pre {
 
 .discover-filter {
     display: inline-block;
+    height: 26px;
     border: 1px solid #d0d0d0;
     border-radius: 3px;
     color: #828282;
@@ -825,11 +861,28 @@ pre {
     border: 1px solid #111;
     color: white;
     background-color: #111;
+    cursor: pointer;
+}
+
+.discover-unmarkall {
+    float: right;
+    height: 26px;
+    color: white;
+    background: #dc3545;
+    font-size: 13px;
+    border-radius: 3px;
+    margin: 10px 0;
+    padding: 2px 5px;
+}
+
+.discover-unmarkall:hover {
+    background: #c82333;
+    cursor: pointer;
 }
 
 .discover-search {
     float: right;
-    vertical-align: middle;
+    height: 26px;
     margin: 10px 10px;
     padding: 2px 5px;
     border: 1px solid #d0d0d0;

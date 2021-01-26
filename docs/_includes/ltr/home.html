@@ -72,8 +72,8 @@
                         <h2>{{ include.gh_header }}<small>{{ include.inside_text }}</small></h2>
                         <p style="text-shadow: 1px 2px 4px rgb(32, 68, 0);">{{ include.gh_text }}</p>
                     </div>
-                    <div class="home-feature-grid-item">
-                        <img src="{{ "/assets/img/cube.svg" | prepend: site.baseurl }}" />
+                    <div class="home-feature-grid-item home-feature-grid-img-item">
+                        <img src="{{ include.gh_img | prepend: site.baseurl }}" />
                     </div>
                 </div>
             </div>
@@ -85,17 +85,17 @@
                 <h3>{{ include.ghcomp_header }}</h3>
                 <p>{{ include.ghcomp_text }}</p>
                 <div class="home-feature-ghcomps-grid" style="grid-column: 1 / -1;">
-                    <div class="home-feature-grid-item">
-                        <img src="{{ "/assets/img/cube.svg" | prepend: site.baseurl }}" />
+                    <div class="home-feature-grid-item home-feature-grid-img-item">
+                        <img src="{{ include.ghcomp_img1 | prepend: site.baseurl }}" />
                     </div>
-                    <div class="home-feature-grid-item">
-                        <img src="{{ "/assets/img/cube.svg" | prepend: site.baseurl }}" />
+                    <div class="home-feature-grid-item home-feature-grid-img-item">
+                        <img src="{{ include.ghcomp_img2 | prepend: site.baseurl }}" />
                     </div>
-                    <div class="home-feature-grid-item">
-                        <img src="{{ "/assets/img/cube.svg" | prepend: site.baseurl }}" />
+                    <div class="home-feature-grid-item home-feature-grid-img-item">
+                        <img src="{{ include.ghcomp_img3 | prepend: site.baseurl }}" />
                     </div>
-                    <div class="home-feature-grid-item">
-                        <img src="{{ "/assets/img/cube.svg" | prepend: site.baseurl }}" />
+                    <div class="home-feature-grid-item home-feature-grid-img-item">
+                        <img src="{{ include.ghcomp_img4 | prepend: site.baseurl }}" />
                     </div>
                 </div>
             </div>
@@ -104,8 +104,8 @@
     <div class="home-feature home-feature-api">
         <div class="container">
             <div class="home-feature-content">
-                <div class="home-feature-grid-item">
-                    <img src="{{ "/assets/img/cube.svg" | prepend: site.baseurl }}" />
+                <div class="home-feature-grid-item home-feature-grid-img-item">
+                    <img src="{{ include.api_img | prepend: site.baseurl }}" />
                 </div>
                 <div>
                     <h3>{{ include.api_header }}</h3>
@@ -119,6 +119,6 @@
 <div class="home-discover">
     <div class="container">
         <h2 style="font-size: 32px;"><a href="discover/">{{ include.discover_header }}</a></h2>
-        {% include ltr/gallery_discover.html keyword='kind: featured' max_items=include.discover_count notags=true nohighlight=true show_filters=false %}
+        {% include ltr/gallery_discover.html keyword='kind: featured' max_items=include.discover_count notags=true nonew=true nohighlight=true show_filters=false %}
     </div>
 </div>
