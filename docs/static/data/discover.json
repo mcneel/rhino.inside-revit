@@ -161,6 +161,22 @@
         ]
     },
     {
+        "title": "BIMxt Rhino.Inside.Revit",
+        "url": "https://vimeo.com/504828686/09cf58c437",
+        "thumbnail": "/static/images/discover/bimxt-rir.png",
+        "author": "BIMxt Network",
+        "authorUrl": "https://www.linkedin.com/groups/8980453/",
+        "description": "Scott Davidson and Ehsan present Rhino.Inside.Revit at the BIMxt Network event",
+        "kinds": [
+            "presentation",
+            "video"
+        ],
+        "tags": [
+            "presentation",
+            "overview"
+        ]
+    },
+    {
         "title": "AECbytes Rhino.Inside.Revit",
         "url": "http://www.aecbytes.com/feature/2020/Rhino-Inside-Revit.html",
         "thumbnail": "/static/images/discover/aecbytes.png",
