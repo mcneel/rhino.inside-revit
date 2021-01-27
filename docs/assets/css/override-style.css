@@ -101,13 +101,17 @@ pre {
     -webkit-box-align: center;
 }
 
+.home-contents-textmask {
+    width: 100%;
+    background: rgb(255,255,255);
+    background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(232,232,232,1) 90%);
+}
+
 .home-contents {
     display: block;
     max-width: 1170px;
     padding: 0 30px 0 30px;
-    margin-bottom: 30px;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 90px auto 30px auto;
     color: white;
 }
 
@@ -188,7 +192,7 @@ pre {
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
     grid-auto-rows: minmax(100px, auto);
-    margin-top: 20px;
+    margin: 20px 0px;
 }
 
 .home-feature-gh-grid {
@@ -238,6 +242,24 @@ pre {
     display: grid;
     grid-template-columns: repeat(2, minmax(250px, 1fr));
     column-gap: 40px;
+}
+
+.home-feature-content a:hover {
+    text-decoration: underline;
+}
+
+.home-feature-content-center-label {
+    text-align: center;
+    margin-top: 30px
+}
+
+.home-feature-content-center-label a,
+.home-feature-content-center-label a:visited {
+    color: #111;
+}
+
+.home-feature-content-center-label a:hover {
+    text-decoration: underline;
 }
 
 .home-discover {

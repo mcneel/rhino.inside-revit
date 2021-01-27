@@ -36,20 +36,27 @@ Grasshopper is a visual programming environment tightly integrated with Rhino’
    
    rhino_header="Rhinoceros 7"
    rhino_text=rhino_note
-   rh_img1="/static/images/home/home_feature_rh1.webp"
-   rh_img2="/static/images/home/home_feature_rh2.webp"
-   rh_img3="/static/images/home/home_feature_rh3.webp"
+   rhino_learn_title="Learn more about Rhino"
+   rhino_learn_link="https://www.rhino3d.com"
+   rhino_img1="/static/images/home/home_feature_rh1.webp"
+   rhino_img2="/static/images/home/home_feature_rh2.webp"
+   rhino_img3="/static/images/home/home_feature_rh3.webp"
    
    gh_header="Grasshopper"
    gh_text=gh_note
+   gh_learn_title="Learn more about Grasshopper"
+   gh_learn_link="https://www.grasshopper3d.com"
    gh_img="/static/images/home/home_feature_gh1.png"
    
    ghcomp_header="Revit-Aware Grasshopper Components"
    ghcomp_text=ghcomp_note
+   ghcomp_learn_link="guides/"
+   ghcomp_learn_title="See more guides ..."
    
-   api_header="Scripting API"
+   api_header="Python and C# Scripting"
    api_text=api_note
    api_img="/static/images/home/home_feature_api.gif"
    
    discover_header="Discover More ..."
+   discover_link="discover/"
    discover_count="9" %}
