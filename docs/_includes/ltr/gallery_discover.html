@@ -6,13 +6,13 @@
     <div class="discover-filters-box">
         <ul class="discover-filters">
             <li class="discover-filter" v-bind:class="{ discoverFilterGray: !kind.isRed, discoverFilterRed: kind.isRed }"
-                v-for="kind in discoverKinds" v-on:click="filterCardsByKind"
-                v-bind:kind="(( kind.keyword ))">(( kind.title ))
+                v-for="kind in discoverKinds" v-on:click="filterCardsByKind" v-bind:kind="(( kind.keyword ))">
+                <span style="display: inline-block; padding: 2px 10px 2px 10px;">(( kind.title ))</span>
+                <div v-if="kind.isRed" id="unmarkall" class="discover-unmarkall" v-on:click="forgetAllItems" title="Unmark All">
+                    <img src="{{ "/assets/img/check.svg" | prepend: site.baseurl }}" style="width: 16px;" />
+                </div>
             </li>
             <input id="searchbox" class="discover-search" type="text" placeholder="search..." v-model.trim="keyword" />
-            <div id="unmarkall" class="discover-unmarkall" v-on:click="forgetAllItems" title="Unmark All">
-                <img src="{{ "/assets/img/check.svg" | prepend: site.baseurl }}" style="width: 16px;" />
-            </div>
         </ul>
     </div>
     {% endif %}
@@ -126,9 +126,9 @@
             }
         });
         if (atLeastOneNew) {
-            $("#unmarkall").css("visibility", "visible");
+            $("#unmarkall").css("display", "inline-block");
         } else {
-            $("#unmarkall").css("visibility", "hidden");
+            $("#unmarkall").css("display", "none");
         }
     }
 
@@ -216,8 +216,11 @@
                     markItems();
                 },
                 forgetAllItems: function (event) {
-                    unmarkItems();
-                    markItems();
+                    if (window.confirm("Are you sure you want to unmark all new items?")) {
+                        unmarkItems();
+                        markItems();
+                    }
+                    event.cancelBubble = true;
                 }
             },
             watch: {
