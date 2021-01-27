@@ -101,7 +101,22 @@
         });
     };
 
-    function markNewItems() {
+    function setupForgottenItems() {
+        var forgottenItems = JSON.parse(window.localStorage.getItem("forgottenItems"))
+        if (forgottenItems == undefined) {
+            unmarkItems();
+        }
+    }
+
+    function unmarkItems() {
+        var forgottenItems = [];
+        $(".discover-item").each((i, c) => {
+            forgottenItems.push($(c).attr("itemid"));
+        });
+        window.localStorage.setItem("forgottenItems", JSON.stringify(forgottenItems));
+    }
+
+    function markItems() {
         var forgottenItems = JSON.parse(window.localStorage.getItem("forgottenItems")) || [];
         var atLeastOneNew = false;
         $(".discover-item").each((i, c) => {
@@ -198,16 +213,11 @@
                     uniqueItems.add(itemId);
                     window.localStorage.setItem("forgottenItems", JSON.stringify(Array.from(
                         uniqueItems)));
-                    markNewItems();
+                    markItems();
                 },
                 forgetAllItems: function (event) {
-                    var forgottenItems = [];
-                    $(".discover-item").each((i, c) => {
-                        forgottenItems.push($(c).attr("itemid"));
-                    });
-                    window.localStorage.setItem("forgottenItems", JSON.stringify(
-                        forgottenItems));
-                    markNewItems();
+                    unmarkItems();
+                    markItems();
                 }
             },
             watch: {
@@ -293,12 +303,13 @@
                 const urlKeyword = urlParams.get('keyword');
                 this.keyword = urlKeyword ? urlKeyword : '{{ include.keyword }}';
                 attachDiscoverItemHover();
-                markNewItems();
+                setupForgottenItems();
+                markItems();
             },
             updated: function () {
                 this.$nextTick(function () {
                     attachDiscoverItemHover();
-                    markNewItems();
+                    markItems();
                 })
             }
 
