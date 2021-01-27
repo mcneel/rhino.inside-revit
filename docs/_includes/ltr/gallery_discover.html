@@ -5,7 +5,8 @@
     {% if include.show_filters %}
     <div class="discover-filters-box">
         <ul class="discover-filters">
-            <li class="discover-filter" v-for="kind in discoverKinds" v-on:click="filterCardsByKind"
+            <li class="discover-filter" v-bind:class="{ discoverFilterGray: !kind.isRed, discoverFilterRed: kind.isRed }"
+                v-for="kind in discoverKinds" v-on:click="filterCardsByKind"
                 v-bind:kind="(( kind.keyword ))">(( kind.title ))
             </li>
             <input id="searchbox" class="discover-search" type="text" placeholder="search..." v-model.trim="keyword" />
@@ -55,11 +56,6 @@
                 {% endif %}
                 <div class="discover-info-extra" v-html="card.description" />
             </div>
-            {% if include.nohighlight != true %}
-            <!-- <svg v-if="card.highlight" class="discover-highlight" height="16" width="16">
-                <polygon points="16,0 16,16 0,16" style="fill:#b0b0b0" />
-            </svg> -->
-            {% endif %}
         </div>
     </div>
 </div>
@@ -170,6 +166,10 @@
                     title: "All",
                     keyword: "all"
                 }, {
+                    title: "New",
+                    keyword: "new",
+                    isRed: true
+                }, {
                     title: "Featured",
                     keyword: "featured"
                 }, {
@@ -228,7 +228,12 @@
 
                     if (origKwd.startsWith('kind:')) {
                         kwd = origKwd.replace('kind:', '').trim();
-                        if (kwd == 'featured') {
+                        if (kwd == 'new') {
+                            var forgottenItems = JSON.parse(window.localStorage.getItem("forgottenItems")) || [];
+                            this.discoverCards = selectItems(allCs.filter(
+                                (c) => !forgottenItems.includes(c.url)
+                            ));
+                        } else if (kwd == 'featured') {
                             this.discoverCards = selectItems(allCs.filter(
                                 (c) => c.highlight
                             ));
@@ -240,11 +245,11 @@
                             this.discoverCards = selectItems(allCs);
                         }
 
-                        $('.discover-filter').removeClass('discover-filter-active');
+                        $('.discover-filter').removeClass('active-filter');
                         $('.discover-filter').each(function () {
                             var df = $(this);
                             if (df.attr('kind') == kwd) {
-                                df.addClass('discover-filter-active');
+                                df.addClass('active-filter');
                                 if (pushState) {
                                     history.pushState({
                                             filterType: 'kind',
@@ -264,7 +269,7 @@
                             this.discoverCards = selectItems(allCs);
                         }
 
-                        $('.discover-filter').removeClass('discover-filter-active');
+                        $('.discover-filter').removeClass('active-filter');
                         if (pushState) {
                             history.pushState({
                                 filterType: 'tag',
@@ -278,7 +283,7 @@
                             c.description.toLowerCase().includes(origKwd)
                         ));
 
-                        $('.discover-filter').removeClass('discover-filter-active');
+                        $('.discover-filter').removeClass('active-filter');
                         if (pushState) {
                             if (history.state && history.state.filterType != 'text') {
                                 history.pushState({
