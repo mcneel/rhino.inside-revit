@@ -73,6 +73,19 @@
 
     const urlParams = new URLSearchParams(window.location.search);
 
+    function getForgottenItems() {
+        if (typeof(Storage) !== "undefined") {
+            return JSON.parse(window.localStorage.getItem("forgottenItems"))
+        }
+        return null;
+    }
+
+    function setForgottenItems(itemValue) {
+        if (typeof(Storage) !== "undefined") {
+            window.localStorage.setItem("forgottenItems", JSON.stringify(itemValue));
+        }
+    }
+
     function selectItems(items) {
         if (window.maxItems != undefined && items.length >= window.maxItems) {
             return items.slice(0, window.maxItems);
@@ -98,7 +111,7 @@
     };
 
     function setupForgottenItems() {
-        var forgottenItems = JSON.parse(window.localStorage.getItem("forgottenItems"))
+        var forgottenItems = getForgottenItems();
         if (forgottenItems == undefined) {
             unmarkItems();
         }
@@ -109,11 +122,11 @@
         $(".discover-item").each((i, c) => {
             forgottenItems.push($(c).attr("itemid"));
         });
-        window.localStorage.setItem("forgottenItems", JSON.stringify(forgottenItems));
+        setForgottenItems(forgottenItems);
     }
 
     function markItems() {
-        var forgottenItems = JSON.parse(window.localStorage.getItem("forgottenItems")) || [];
+        var forgottenItems = getForgottenItems() || [];
         var atLeastOneNew = false;
         $(".discover-item").each((i, c) => {
             var item = $(c);
@@ -207,12 +220,10 @@
                 },
                 forgetItem: function (event) {
                     let itemId = event.currentTarget.getAttribute('itemid');
-                    var forgottenItems = JSON.parse(window.localStorage.getItem(
-                        "forgottenItems"));
+                    var forgottenItems = getForgottenItems();
                     var uniqueItems = new Set(forgottenItems);
                     uniqueItems.add(itemId);
-                    window.localStorage.setItem("forgottenItems", JSON.stringify(Array.from(
-                        uniqueItems)));
+                    setForgottenItems(Array.from(uniqueItems));
                     markItems();
                 },
                 forgetAllItems: function (event) {
@@ -232,7 +243,7 @@
                     if (origKwd.startsWith('kind:')) {
                         kwd = origKwd.replace('kind:', '').trim();
                         if (kwd == 'new') {
-                            var forgottenItems = JSON.parse(window.localStorage.getItem("forgottenItems")) || [];
+                            var forgottenItems = getForgottenItems() || [];
                             this.discoverCards = selectItems(allCs.filter(
                                 (c) => !forgottenItems.includes(c.url)
                             ));
