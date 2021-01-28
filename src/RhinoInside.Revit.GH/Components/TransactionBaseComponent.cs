@@ -891,7 +891,16 @@ namespace RhinoInside.Revit.GH.Components
 
     protected void ThrowArgumentNullException(string paramName, string description = null) => throw new ArgumentNullException(FirstCharUpper(paramName), description ?? string.Empty);
 
-    protected void ThrowArgumentException(string paramName, string description = null) => throw new ArgumentException(description ?? "Invalid value.", FirstCharUpper(paramName));
+    protected void ThrowArgumentException(string paramName, string description = null)
+    {
+      var message = "Input geometry is not valid.";
+      if (description is object)
+        message += Environment.NewLine + description;
+
+      message = message.TrimEnd(Environment.NewLine.ToCharArray());
+
+      throw new ArgumentException(message, FirstCharUpper(paramName));
+    }
 
     protected bool ThrowIfNotValid(string paramName, Rhino.Geometry.Point3d value)
     {
@@ -902,7 +911,12 @@ namespace RhinoInside.Revit.GH.Components
     protected bool ThrowIfNotValid(string paramName, Rhino.Geometry.GeometryBase value)
     {
       if (value is null) ThrowArgumentException(paramName);
-      if (!value.IsValidWithLog(out var log)) ThrowArgumentException(paramName, log);
+      if (!value.IsValidWithLog(out var log))
+      {
+        AddGeometryRuntimeError(GH_RuntimeMessageLevel.Error, default, value);
+        ThrowArgumentException(paramName, log);
+      }
+
       return true;
     }
     #endregion

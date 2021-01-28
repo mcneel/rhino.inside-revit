@@ -555,6 +555,16 @@ namespace RhinoInside.Revit.Convert.Geometry
           yield return NurbsSplineEncoder.ToNurbsSpline(segment, UnitConverter.NoScale);
         }
       }
+      else if(value.GetNextDiscontinuity(Continuity.C1_continuous, value.Domain.Min, value.Domain.Max, out var t))
+      {
+        var splitters = new List<double>() { t };
+        while (value.GetNextDiscontinuity(Continuity.C1_continuous, t, value.Domain.Max, out t))
+          splitters.Add(t);
+
+        var segments = value.Split(splitters);
+        foreach (var segment in segments.Cast<NurbsCurve>())
+          yield return NurbsSplineEncoder.ToNurbsSpline(segment, UnitConverter.NoScale);
+      }
       else if (value.IsClosed(Revit.ShortCurveTolerance * 1.01))
       {
         var segments = value.DuplicateSegments();
@@ -576,16 +586,6 @@ namespace RhinoInside.Revit.Convert.Geometry
           foreach (var segment in segments)
             yield return NurbsSplineEncoder.ToNurbsSpline(segment as NurbsCurve, UnitConverter.NoScale);
         }
-      }
-      else if(value.GetNextDiscontinuity(Continuity.C1_continuous, value.Domain.Min, value.Domain.Max, out var t))
-      {
-        var splitters = new List<double>() { t };
-        while (value.GetNextDiscontinuity(Continuity.C1_continuous, t, value.Domain.Max, out t))
-          splitters.Add(t);
-
-        var segments = value.Split(splitters);
-        foreach (var segment in segments.Cast<NurbsCurve>())
-          yield return NurbsSplineEncoder.ToNurbsSpline(segment, UnitConverter.NoScale);
       }
       else
       {
