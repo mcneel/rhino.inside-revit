@@ -284,7 +284,7 @@ namespace RhinoInside.Revit.Convert.Geometry
                   var message = e.Message.Replace("BRepBuilder::addCoEdgeInternal_()", "BRepBuilder");
                   message = message.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)[0];
                   GeometryEncoder.Context.Peek.RuntimeMessage(20, message, edge);
-                  break;
+                  return default;
                 }
               }
 
@@ -649,7 +649,7 @@ namespace RhinoInside.Revit.Convert.Geometry
                         instance.GetInstanceGeometry().First() is DB.Solid solid
                       )
                       {
-                        return solid;
+                        return DB.SolidUtils.Clone(solid);
                       }
                     }
                   }
