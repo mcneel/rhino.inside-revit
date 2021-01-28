@@ -172,7 +172,7 @@ namespace RhinoInside.Revit.GH.Components
           break;
       }
 #endif
-      AddGeometryRuntimeError(level, text, geometry.InRhinoUnits());
+      AddGeometryRuntimeError(level, text, geometry?.InRhinoUnits());
     }
 
     public void AddGeometryRuntimeError(GH_RuntimeMessageLevel level, string text, Rhino.Geometry.GeometryBase geometry)
