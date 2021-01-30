@@ -23,11 +23,15 @@ namespace RhinoInside.Revit.UI
   /// </summary>
   class BaseWindow : Form
   {
-    public BaseWindow(UIApplication uiApp, int width, int height)
+    private static UIApplication _uiApp = null;
+
+    public BaseWindow(UIApplication uiApp, Size initialSize)
     {
+      _uiApp = uiApp;
+
       // set Revit window as parent
 #if REVIT_2019
-      Owner = Eto.Forms.WpfHelpers.ToEtoWindow(uiApp.MainWindowHandle);
+      Owner = Eto.Forms.WpfHelpers.ToEtoWindow(_uiApp.MainWindowHandle);
 #else
       Owner = Eto.Forms.WpfHelpers.ToEtoWindow(Autodesk.Windows.ComponentManager.ApplicationWindow);
 #endif
@@ -35,15 +39,21 @@ namespace RhinoInside.Revit.UI
       Icon = Icon.FromResource("RhinoInside.Revit.Resources.Rhino-logo.ico", assembly: Assembly.GetExecutingAssembly());
 
       // set window size and center on the parent window
-      var size = new Size(width, height);
-      Size = size;
+      ClientSize = initialSize;
+
+      // assign size handler to always center window
       Resizable = false;
-      var windowLocation = uiApp.GetChildWindowCenterLocation(size.Width, size.Height);
-      Location = new Point(windowLocation.X, windowLocation.Y);
+      this.SizeChanged += BaseWindow_SizeChanged;
 
       // styling
       Padding = new Padding(10, 0, 10, 10);
       BackgroundColor = Colors.White;
+    }
+
+    private void BaseWindow_SizeChanged(object sender, EventArgs e)
+    {
+      var loc = _uiApp.GetChildWindowCenterLocation(Width, Height);
+      Location = new Point(loc.X, loc.Y);
     }
   }
 }

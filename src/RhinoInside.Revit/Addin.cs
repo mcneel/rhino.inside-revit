@@ -289,12 +289,18 @@ namespace RhinoInside.Revit
 
       // check for updates
       if (AddinOptions.CheckForUpdatesOnStartup)
-        AddinUpdater.CheckUpdates(
-          (AddinReleaseInfo releaseInfo) =>
+        AddinUpdater.GetReleaseInfo(
+          (ReleaseInfo releaseInfo) =>
           {
-            if (releaseInfo.Version > Version)
-              UI.CommandRhinoInsideOptions.Highlight();
-          });
+            // if release info is received,
+            if (releaseInfo != null) {
+              // if current version on the active update channel is newer
+              if (releaseInfo.Version > Version)
+                // ask UI to notify user of updates
+                UI.CommandRhinoInsideOptions.NotifyUpdateAvailable(releaseInfo);
+            }
+          }
+        );
 
       return Result.Succeeded;
     }
@@ -940,6 +946,7 @@ namespace RhinoInside.Revit.UI
   class CommandRhinoInsideOptions : Command
   {
     static PushButton Button;
+    static ReleaseInfo LatestReleaseInfo = null;
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
@@ -969,7 +976,12 @@ namespace RhinoInside.Revit.UI
     {
       // try opening options window
       if (!AddinOptions.IsReadOnly)
-        new OptionsWindow(data.Application).Show();
+      {
+        var optWindow = new OptionsWindow(data.Application);
+        if (LatestReleaseInfo != null)
+          optWindow.SetReleaseInfo(LatestReleaseInfo);
+        optWindow.Show();
+      }
       else
         TaskDialog.Show("Options", "Contact your system admin to change the options");
 
@@ -979,18 +991,26 @@ namespace RhinoInside.Revit.UI
     /// <summary>
     /// Mark button with highlighter dot using Autodesk.Windows api
     /// </summary>
-    static public void Highlight()
+    static public void NotifyUpdateAvailable(ReleaseInfo releaseInfo)
     {
       // button gets deactivated if options are readonly
       if (!AddinOptions.IsReadOnly)
       {
-        // grab the underlying Autodesk.Windows object from Button
-        var getRibbonItemMethodInfo = Button.GetType().GetMethod("getRibbonItem", BindingFlags.NonPublic | BindingFlags.Instance);
-        var adWndObj = (Autodesk.Windows.RibbonButton) getRibbonItemMethodInfo.Invoke(Button, null);
-        // set highlight state and update tooltip
-        adWndObj.Highlight = Autodesk.Internal.Windows.HighlightMode.New;
-        Button.ToolTip = "New Release Available for Download!\n" + Button.ToolTip;
+        Highlight();
+        Button.ToolTip = "New Release Available for Download!\n"
+                       + $"Version: {releaseInfo.Version}\n"
+                       + Button.ToolTip;
+        LatestReleaseInfo = releaseInfo;
       }
+    }
+
+    static public void Highlight()
+    {
+      // grab the underlying Autodesk.Windows object from Button
+      var getRibbonItemMethodInfo = Button.GetType().GetMethod("getRibbonItem", BindingFlags.NonPublic | BindingFlags.Instance);
+      var adWndObj = (Autodesk.Windows.RibbonButton) getRibbonItemMethodInfo.Invoke(Button, null);
+      // set highlight state and update tooltip
+      adWndObj.Highlight = Autodesk.Internal.Windows.HighlightMode.New;
     }
   }
 }

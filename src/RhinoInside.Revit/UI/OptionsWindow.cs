@@ -14,6 +14,7 @@ using Forms = Eto.Forms;
 using Autodesk.Revit.UI;
 
 using RhinoInside.Revit.Settings;
+using System.Diagnostics;
 
 namespace RhinoInside.Revit.UI
 {
@@ -23,7 +24,13 @@ namespace RhinoInside.Revit.UI
     Label _channelDescription = new Label { Visible = false, Wrap = WrapMode.Word };
     Forms.ComboBox _updateChannelSelector = new Forms.ComboBox();
 
-    public OptionsWindow(UIApplication uiApp) : base(uiApp, width: 400, height: 250)
+    ReleaseInfo ReleaseInfo = null;
+    Button _releaseNotesBtn = new Button { Text = "Release Notes", Height = 25 };
+    Button _downloadBtn = new Button { Text = "Download Installer", Height = 25 };
+    GroupBox _updateOpts = null;
+
+
+    public OptionsWindow(UIApplication uiApp) : base(uiApp, initialSize: new Size(450, -1))
     {
       Title = "Options";
       InitLayout();
@@ -37,7 +44,9 @@ namespace RhinoInside.Revit.UI
       // setup update channel selector
       _updateChannelSelector.SelectedIndexChanged += _updateChannelSelector_SelectedIndexChanged;
       foreach (AddinUpdateChannel chnl in AddinUpdater.Channels)
+      {
         _updateChannelSelector.Items.Add(chnl.Name);
+      }
 
       if (AddinOptions.UpdateChannel is string activeChannelId)
       {
@@ -49,14 +58,13 @@ namespace RhinoInside.Revit.UI
         _updateChannelSelector.SelectedIndex = AddinUpdater.Channels.IndexOf(AddinUpdater.DefaultChannel);
 
       // apply settings button
-      var applyButton = new Button { Text = "Apply" };
+      var applyButton = new Button { Text = "Apply", Height = 25 };
       applyButton.Click += ApplyButton_Click;
-      applyButton.Height = 25;
 
       // setup update options groupbox
       var spacing = new Size(5, 10);
 
-      var updateOpts = new GroupBox
+      _updateOpts = new GroupBox
       {
         Text = "Updates",
         Content = new TableLayout
@@ -88,10 +96,14 @@ namespace RhinoInside.Revit.UI
                 }
               }
             },
-            _channelDescription
+            _channelDescription,
           }
         }
       };
+
+      // setup release info controls
+      _releaseNotesBtn.Click += _releaseNotesBtn_Click;
+      _downloadBtn.Click += _downloadBtn_Click;
 
       // setup contents
       Content = new TableLayout
@@ -100,12 +112,23 @@ namespace RhinoInside.Revit.UI
         Padding = new Padding(5),
         Rows = {
           new TableRow {
-            Cells = { new TableCell { ScaleWidth = true, Control = updateOpts } }
+            Cells = { new TableCell { ScaleWidth = true, Control = _updateOpts } }
           },
-          null,
           new TableRow { Cells = { applyButton } },
         }
       };
+    }
+
+    private void _downloadBtn_Click(object sender, EventArgs e)
+    {
+      if (ReleaseInfo != null)
+        Process.Start(ReleaseInfo.DownloadUrl);
+    }
+
+    private void _releaseNotesBtn_Click(object sender, EventArgs e)
+    {
+      if (ReleaseInfo != null)
+        Process.Start(ReleaseInfo.ReleaseNotesUrl);
     }
 
     private void _updateChannelSelector_SelectedIndexChanged(object sender, EventArgs e)
@@ -115,7 +138,7 @@ namespace RhinoInside.Revit.UI
         var updaterChannel = AddinUpdater.Channels[channelSelector.SelectedIndex];
         _channelDescription.Text = updaterChannel.Description;
         _channelDescription.Visible = true;
-      }  
+      }
     }
 
     private void ApplyButton_Click(object sender, EventArgs e)
@@ -130,6 +153,58 @@ namespace RhinoInside.Revit.UI
       AddinOptions.Save();
 
       Close();
+    }
+
+    public void SetReleaseInfo(ReleaseInfo releaseInfo)
+    {
+      if (releaseInfo != null)
+      {
+        ReleaseInfo = releaseInfo;
+
+        var updateGroup = ((TableLayout) _updateOpts.Content);
+        updateGroup.Rows.Insert(0,
+          new TableRow
+          {
+            Cells = { new Panel
+              {
+                Content = new TableLayout
+                {
+                  Spacing = new Size(5, 10),
+                  Padding = new Padding(5),
+                  Rows =
+                  {
+                    new TableRow {
+                      Cells =
+                      {
+                        new TableCell {
+                          Control = new ImageView {
+                            Image = Icon.FromResource("RhinoInside.Revit.Resources.NewRelease.png", assembly: Assembly.GetExecutingAssembly()),
+                          }
+                        },
+                        new TableLayout
+                        {
+                          Spacing = new Size(5, 10),
+                          Rows = {
+                            new Label {
+                              Text = "New Release Available!\n"
+                                  + $"Version: {releaseInfo.Version}\n"
+                                  + $"Release Date: {releaseInfo.ReleaseDate}",
+                              Width = 150
+                            },
+                            _downloadBtn,
+                            _releaseNotesBtn,
+                            null
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        );
+      }
     }
   }
 }
