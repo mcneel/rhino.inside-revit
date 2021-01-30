@@ -2,13 +2,6 @@
 <Include xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <Fragment>
 
-    <Property Id="REVIT2017_INSTALLLOCATION" Secure="yes">
-      <RegistrySearch Id="Revit2017InstallLocation" Type="raw"
-                      Root="HKLM"
-                      Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-1700-0510-0000-705C0D862004}"
-                      Name="InstallLocation"/>
-    </Property>
-
     <Property Id="REVIT2018_INSTALLLOCATION" Secure="yes">
       <RegistrySearch Id="Revit2018InstallLocation" Type="raw"
                       Root="HKLM"
@@ -65,7 +58,6 @@
       End Sub
 
       If Session.EvaluateCondition("Installed") = 0 Then
-        ValidateInstallLocation("REVIT2017_INSTALLLOCATION")
         ValidateInstallLocation("REVIT2018_INSTALLLOCATION")
         ValidateInstallLocation("REVIT2019_INSTALLLOCATION")
         ValidateInstallLocation("REVIT2020_INSTALLLOCATION")
@@ -77,7 +69,6 @@
     <DirectoryRef Id="TARGETDIR">
       <Directory Id="ProgramFiles64Folder">
         <Directory Id="AutodeskProgramFilesFolder" Name="Autodesk">
-          <Directory Id="REVIT2017_INSTALLLOCATION" Name="Revit 2017"/>
           <Directory Id="REVIT2018_INSTALLLOCATION" Name="Revit 2018"/>
           <Directory Id="REVIT2019_INSTALLLOCATION" Name="Revit 2019"/>
           <Directory Id="REVIT2020_INSTALLLOCATION" Name="Revit 2020"/>

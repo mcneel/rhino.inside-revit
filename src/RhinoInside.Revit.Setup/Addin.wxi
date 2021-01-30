@@ -4,9 +4,6 @@
   <Fragment>
     <DirectoryRef Id="TARGETDIR">
       <Directory Id="APPLICATIONFOLDER">
-        <Directory Id="APPLICATIONFOLDER2017" Name="2017">
-          <Directory Id="INSTALLFOLDER2017" Name="RhinoInside.Revit"/>
-        </Directory>
         <Directory Id="APPLICATIONFOLDER2018" Name="2018">
           <Directory Id="INSTALLFOLDER2018" Name="RhinoInside.Revit"/>
         </Directory>
@@ -35,33 +32,11 @@
       </Directory>
     </DirectoryRef>
 
-    <SetProperty Id="INSTALLFOLDER2017" Value="[APPLICATIONFOLDER]2017\[ApplicationFolderName]\" After="CostFinalize"/>
     <SetProperty Id="INSTALLFOLDER2018" Value="[APPLICATIONFOLDER]2018\[ApplicationFolderName]\" After="CostFinalize"/>
     <SetProperty Id="INSTALLFOLDER2019" Value="[APPLICATIONFOLDER]2019\[ApplicationFolderName]\" After="CostFinalize"/>
     <SetProperty Id="INSTALLFOLDER2020" Value="[APPLICATIONFOLDER]2020\[ApplicationFolderName]\" After="CostFinalize"/>
     <SetProperty Id="INSTALLFOLDER2021" Value="[APPLICATIONFOLDER]2021\[ApplicationFolderName]\" After="CostFinalize"/>
 
-  </Fragment>
-
-  <Fragment>
-    <ComponentGroup Id="Addins.2017.RhinoInsideRevit">
-      
-      <Component Id="Revit.2017.opennurbs_private.manifest" Guid="{644A5E45-7C05-4DFB-B8B8-77233E3C7D5A}" Directory="REVIT2017_INSTALLLOCATION">
-        <Condition>Privileged</Condition>
-        <File Id="Revit.2017.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
-      </Component>
-
-      <Component Id="Addins.2017.RhinoInsideRevit.addin" Guid="{F2CDF7A8-F7E2-423B-91F8-6223332A9428}" Directory="APPLICATIONFOLDER2017">
-        <File Id="Addins.2017.RhinoInside.Revit.addin" Source="..\RhinoInside.Revit\Properties\RhinoInside.Revit.addin"/>
-      </Component>
-
-      <Component Id="Addins.2017.RhinoInsideRevit" Guid="{ABEFC97A-FC97-4DBA-BCC0-6502A762BB36}" Directory="INSTALLFOLDER2017">
-        <File Id="Addins.2017.RhinoInside.Revit.dll" Source="..\RhinoInside.Revit\bin\x64\$(var.Configuration) 2017\RhinoInside.Revit.dll"/>
-        <File Id="Addins.2017.RhinoInside.Revit.GH.gha" Source="..\RhinoInside.Revit.GH\bin\x64\$(var.Configuration) 2017\RhinoInside.Revit.GH.gha"/>
-        <File Id="Addins.2017.RhinoInside.Revit.Native.dll" Source="..\RhinoInside.Revit.Native\bin\x64\$(var.Configuration)\RhinoInside.Revit.Native.dll"/>
-      </Component>
-      
-    </ComponentGroup>
   </Fragment>
 
   <Fragment>
