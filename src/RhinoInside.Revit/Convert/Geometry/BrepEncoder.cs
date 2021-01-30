@@ -205,6 +205,12 @@ namespace RhinoInside.Revit.Convert.Geometry
           {
             var surfaceGeom = default(DB.BRepBuilderSurfaceGeometry);
             try { surfaceGeom = Raw.RawEncoder.ToHost(face); }
+            catch (Autodesk.Revit.Exceptions.ArgumentException e)
+            {
+              var message = e.Message.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)[0];
+              GeometryEncoder.Context.Peek.RuntimeMessage(20, $"{message}{Environment.NewLine}Face will be removed from the output.", face);
+              continue;
+            }
             catch (Autodesk.Revit.Exceptions.InvalidOperationException e)
             {
               var message = e.Message.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)[0];
@@ -535,8 +541,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       if (edge.ProxyCurveIsReversed)
         edgeCurve.Reverse();
 
-      if (edgeCurve is PolyCurve poly)
-        poly.RemoveNesting();
+      edgeCurve = edgeCurve.Simplify(CurveSimplifyOptions.All, Revit.VertexTolerance, Revit.AngleTolerance) ?? edgeCurve;
 
       if (edgeCurve.RemoveShortSegments(Revit.VertexTolerance))
       {
