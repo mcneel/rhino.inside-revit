@@ -114,6 +114,7 @@ namespace RhinoInside.Revit.UI
           new TableRow {
             Cells = { new TableCell { ScaleWidth = true, Control = _updateOpts } }
           },
+          null,
           new TableRow { Cells = { applyButton } },
         }
       };
