@@ -101,8 +101,8 @@ namespace RhinoInside.Revit
       id:           new Guid("0b10351c-25e3-4680-9135-6b86cd27bcda"),
       name:         "Public Releases",
       description:  "Official and tested public releases downloadable from website",
-      target:       new Version(1, 0),
-      url:          @"https://files.mcneel.com/rhino.inside.revit/updates/1.0/stable.xml"
+      target:       new Version(0, 0),
+      url:          @"https://files.mcneel.com/rhino.inside/revit/update/0.x/stable.xml"
     );
 
     /* Note:
@@ -119,16 +119,16 @@ namespace RhinoInside.Revit
       //  id:           new Guid("c63def46-e63d-41e3-8f82-9b5ee1d88251"),
       //  name:         "Release Candidates",
       //  description:  "Release candidates are product releases being cleaned up for release and may still contain bugs",
-      //  target:       new Version(1, 0),
-      //  url:          @"https://files.mcneel.com/rhino.inside.revit/updates/1.0/rc.xml"
+      //  target:       new Version(0, 0),
+      //  url:          @"https://files.mcneel.com/rhino.inside/revit/update/0.x/rc.xml"
       //),
         new AddinUpdateChannel
       (
         id:           new Guid("7fc1e535-c7cd-47d8-a969-e01435bacd65"),
         name:         "Daily Builds (Work in Progress)",
         description:  "Daily Builds are most recent builds of the development branch and might contain bugs and unfinished features",
-        target:       new Version(1, 0),
-        url:          @"https://files.mcneel.com/rhino.inside.revit/updates/1.0/daily.xml"
+        target:       new Version(0, 0),
+        url:          @"https://files.mcneel.com/rhino.inside/revit/update/0.x/daily.xml"
       )
     };
 
