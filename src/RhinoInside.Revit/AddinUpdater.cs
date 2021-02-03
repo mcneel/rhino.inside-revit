@@ -109,14 +109,14 @@ namespace RhinoInside.Revit
     {
       DefaultChannel,
       // TODO: this channel is not setup yet. activate when ready
-      new AddinUpdateChannel
-      {
-        Id =             new Guid("c63def46-e63d-41e3-8f82-9b5ee1d88251"),
-        Name =           "Release Candidates",
-        Description =    "Release candidates are product releases being cleaned up for release and may still contain bugs",
-        TargetVersion =  new Version(0, 0),
-        Url =            @"https://files.mcneel.com/rhino.inside/revit/update/0.x/rc.xml"
-      },
+      //new AddinUpdateChannel
+      //{
+      //  Id =             new Guid("c63def46-e63d-41e3-8f82-9b5ee1d88251"),
+      //  Name =           "Release Candidates",
+      //  Description =    "Release candidates are product releases being cleaned up for release and may still contain bugs",
+      //  TargetVersion =  new Version(0, 0),
+      //  Url =            @"https://files.mcneel.com/rhino.inside/revit/update/0.x/rc.xml"
+      //},
       new AddinUpdateChannel
       {
         Id =             new Guid("7fc1e535-c7cd-47d8-a969-e01435bacd65"),
