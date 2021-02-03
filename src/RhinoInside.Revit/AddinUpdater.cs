@@ -69,11 +69,6 @@ namespace RhinoInside.Revit
     public Version TargetVersion { get; set; }
     public string Url { get; set; }
 
-    public AddinUpdateChannel(Guid id, string name, string description, Version target, string url)
-    {
-      Id = id; Name = name; Description = description; TargetVersion = target; Url = url;
-    }
-
     public ReleaseInfo GetLatestRelease()
     {
       // capture all errors and return null if any
@@ -97,13 +92,13 @@ namespace RhinoInside.Revit
   internal static class AddinUpdater
   {
     static public readonly AddinUpdateChannel DefaultChannel = new AddinUpdateChannel
-    (
-      id:           new Guid("0b10351c-25e3-4680-9135-6b86cd27bcda"),
-      name:         "Public Releases",
-      description:  "Official and tested public releases downloadable from website",
-      target:       new Version(0, 0),
-      url:          @"https://files.mcneel.com/rhino.inside/revit/update/0.x/stable.xml"
-    );
+    {
+      Id = new Guid("0b10351c-25e3-4680-9135-6b86cd27bcda"),
+      Name = "Public Releases",
+      Description = "Official and tested public releases downloadable from website",
+      TargetVersion = new Version(0, 0),
+      Url = @"https://files.mcneel.com/rhino.inside/revit/update/0.x/stable.xml"
+    };
 
     /* Note:
      * It is expected that this list does not include any channels that do not belong to the major
@@ -114,22 +109,22 @@ namespace RhinoInside.Revit
     {
       DefaultChannel,
       // TODO: this channel is not setup yet. activate when ready
-      //new AddinUpdateChannel
-      //(
-      //  id:           new Guid("c63def46-e63d-41e3-8f82-9b5ee1d88251"),
-      //  name:         "Release Candidates",
-      //  description:  "Release candidates are product releases being cleaned up for release and may still contain bugs",
-      //  target:       new Version(0, 0),
-      //  url:          @"https://files.mcneel.com/rhino.inside/revit/update/0.x/rc.xml"
-      //),
-        new AddinUpdateChannel
-      (
-        id:           new Guid("7fc1e535-c7cd-47d8-a969-e01435bacd65"),
-        name:         "Daily Builds (Work in Progress)",
-        description:  "Daily Builds are most recent builds of the development branch and might contain bugs and unfinished features",
-        target:       new Version(0, 0),
-        url:          @"https://files.mcneel.com/rhino.inside/revit/update/0.x/daily.xml"
-      )
+      new AddinUpdateChannel
+      {
+        Id =             new Guid("c63def46-e63d-41e3-8f82-9b5ee1d88251"),
+        Name =           "Release Candidates",
+        Description =    "Release candidates are product releases being cleaned up for release and may still contain bugs",
+        TargetVersion =  new Version(0, 0),
+        Url =            @"https://files.mcneel.com/rhino.inside/revit/update/0.x/rc.xml"
+      },
+      new AddinUpdateChannel
+      {
+        Id =             new Guid("7fc1e535-c7cd-47d8-a969-e01435bacd65"),
+        Name =           "Daily Builds (Work in Progress)",
+        Description =    "Daily Builds are most recent builds of the development branch and might contain bugs and unfinished features",
+        TargetVersion =  new Version(0, 0),
+        Url =            @"https://files.mcneel.com/rhino.inside/revit/update/0.x/daily.xml"
+      }
     };
 
     static AddinUpdateChannel ActiveChannel
