@@ -243,7 +243,7 @@ The structure of the source is as explained below:
 - `GemFile*` Ruby gemfile listing the ruby dependencies
 - `index.md` Root of the Wiki. It redirects the visitor to default language and Wiki version (defaults are set in the site configs file)
 - `readme.md`: This Markdown document
-- `update_components_data.gh`: This is a grasshopper definition file, used to generate component data file under `_data/`
+- `update_components_data.gh`: This is a Grasshopper definition file, used to generate component data file under `_data/`
 
 ## Page Metadata
 
@@ -835,7 +835,7 @@ This is how the data file is formatted:
   }, 
 ```
 
-Currently, the grasshopper definition `update_components_data.ghx` is used to generate this data file and perform other necessary tasks to update the components list for the wiki.
+Currently, the Grasshopper definition `update_components_data.ghx` is used to generate this data file and perform other necessary tasks to update the components list for the wiki.
 
 ## Misc List
 
