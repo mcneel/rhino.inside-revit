@@ -123,11 +123,11 @@ namespace RhinoInside.Revit.Convert.Geometry
       if (value.IsRational)
       {
         var weights = value.Points.ConvertAll(x => x.Weight);
-        return DB.NurbSpline.CreateCurve(value.Degree, knots, controlPoints, weights);
+        return DB.NurbSpline.CreateCurve(degree, knots, controlPoints, weights);
       }
       else
       {
-        return DB.NurbSpline.CreateCurve(value.Degree, knots, controlPoints);
+        return DB.NurbSpline.CreateCurve(degree, knots, controlPoints);
       }
     }
   }
