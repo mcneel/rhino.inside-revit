@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.UI
   internal class OptionsWindow : BaseWindow
   {
     CheckBox _checkUpdatesOnStartup = new CheckBox { Text = "Check Updates on Startup" };
-    Label _channelDescription = new Label { Visible = false, Wrap = WrapMode.Word };
+    Label _channelDescription = new Label { Visible = false, Wrap = WrapMode.Word, Height = 36 };
     Forms.ComboBox _updateChannelSelector = new Forms.ComboBox();
 
     ReleaseInfo ReleaseInfo = null;
