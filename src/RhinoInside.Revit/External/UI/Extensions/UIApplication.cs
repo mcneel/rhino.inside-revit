@@ -60,5 +60,21 @@ namespace RhinoInside.Revit.External.UI.Extensions
 
     public static bool TryGetDocument(this UIApplication app, Guid guid, out Document document) =>
       app.Application.Documents.Cast<Document>().TryGetDocument(guid, out document, app.ActiveUIDocument?.Document);
+
+    /// <summary>
+    /// Calculate the location of a child window, centered to Revit window
+    /// </summary>
+    /// <param name="width">Width of child window to be centered</param>
+    /// <param name="height">Height of child window to be centered</param>
+    /// <returns></returns>
+    public static System.Drawing.Point GetChildWindowCenterLocation(this UIApplication uiApp, int width, int height)
+    {
+      var revitHeight = Math.Abs(uiApp.MainWindowExtents.Bottom - uiApp.MainWindowExtents.Top);
+      var revitWidth = Math.Abs(uiApp.MainWindowExtents.Right - uiApp.MainWindowExtents.Left);
+      return new System.Drawing.Point(
+          x: Math.Abs(revitWidth - width) / 2 + uiApp.MainWindowExtents.Left,
+          y: Math.Abs(revitHeight - height) / 2 + uiApp.MainWindowExtents.Top
+        );
+    }
   }
 }

@@ -8,10 +8,6 @@
     <Rhino7DebugPluginsDir>$([MSBuild]::GetRegistryValueFromView('HKEY_CURRENT_USER\Software\McNeel\Rhinoceros\7.0-WIP-Developer-Debug-trunk\Install', 'Default Plug-ins Folder', null, RegistryView.Registry64))</Rhino7DebugPluginsDir>
     <Rhino7PluginsDir>$([MSBuild]::ValueOrDefault('$(Rhino7DebugPluginsDir)', '$(Rhino7DefaultPluginsDir)'))</Rhino7PluginsDir>
   </PropertyGroup>
-  <PropertyGroup Condition="$(Configuration.Contains('2017'))">
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
-    <RevitVersion>2017</RevitVersion>
-  </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.Contains('2018'))">
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <RevitVersion>2018</RevitVersion>
@@ -40,24 +36,6 @@
     <RootNamespace>RhinoInside.Revit</RootNamespace>
     <AssemblyName>RhinoInside.Revit</AssemblyName>
     <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2017|x64'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x64\Debug 2017\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;REVIT_2017</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2017|x64'">
-    <OutputPath>bin\x64\Release 2017\</OutputPath>
-    <DefineConstants>REVIT_2017</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2018|x64'">
     <DebugSymbols>true</DebugSymbols>
@@ -150,6 +128,10 @@
           <HintPath>$(Rhino7InstallDir)Eto.dll</HintPath>
           <Private>False</Private>
         </Reference>
+        <Reference Include="Eto.Wpf">
+          <HintPath>$(Rhino7InstallDir)Eto.Wpf.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
         <Reference Include="RhinoCommon">
           <HintPath>$(Rhino7InstallDir)RhinoCommon.dll</HintPath>
           <Private>False</Private>
@@ -185,6 +167,8 @@
         <PackageReference Include="RhinoCommon" Version="7.0.20314.3001" IncludeAssets="compile; build" />
         <PackageReference Include="Grasshopper" Version="7.0.20314.3001" IncludeAssets="compile; build" />
         <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitVersion).0.0" IncludeAssets="build; compile" />
+        <PackageReference Include="Eto.Forms" Version="2.5.9" IncludeAssets="compile; build" />
+        <PackageReference Include="Eto.Platform.Wpf" Version="2.5.9" IncludeAssets="compile; build" />
       </ItemGroup>
     </Otherwise>
   </Choose>
@@ -276,10 +260,13 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Settings\Options.cs" />
+    <Compile Include="UI\BaseWindow.cs" />
     <Compile Include="UI\DocumentCommand.cs" />
     <Compile Include="UI\GrasshopperCommand.cs" />
     <Compile Include="UI\GrasshopperPlayerCommand.cs" />
     <Compile Include="UI\HelpCommands.cs" />
+    <Compile Include="UI\OptionsWindow.cs" />
     <Compile Include="UI\Rhinoceros\Import.cs" />
     <Compile Include="UI\RhinoCommand.cs" />
     <Compile Include="GH\Guest.cs" />
@@ -296,6 +283,7 @@
     <Compile Include="UI\Rhinoceros\Preview.cs" />
     <Compile Include="Convert\Eto.Drawing.cs" />
     <Compile Include="Convert\Geometry\GeometryDecoder.cs" />
+    <Compile Include="AddinUpdater.cs" />
     <None Include="Extensions\README.md" />
     <None Include="Properties\RhinoInside.Revit.addin" />
     <Compile Include="Samples\Sample1.cs" />
@@ -331,6 +319,15 @@
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\SolverOn.png" />
     <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Preview_Shaded.png" />
     <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Import-3DM.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Options.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Rhino-logo.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\NewRelease.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">

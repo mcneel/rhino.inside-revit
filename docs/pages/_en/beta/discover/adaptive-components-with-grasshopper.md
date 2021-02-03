@@ -41,6 +41,6 @@ A good strategy for complex trimmed forms normally is to grid out the untrimmed 
 
 ![]({{ "/static/images/discover/adaptive-component-trim-grid.jpg" | prepend: site.baseurl }})
 
-Note that the internal parameters in the adaptive component can be driven by grasshopper also by setting the parameters on the component instance:
+Note that the internal parameters in the adaptive component can be driven by Grasshopper also by setting the parameters on the component instance:
 
 ![]({{ "/static/images/discover/adaptive-component-parameter.jpg" | prepend: site.baseurl }}){: class="small-image"}
