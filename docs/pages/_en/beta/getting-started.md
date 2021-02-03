@@ -62,7 +62,7 @@ If you encountered any errors, please consult the [Known Issues]({{ site.baseurl
 
 ## Grasshopper inside Revit
 
-Arguably one of the most features of {{ site.terms.rir }} is Grasshopper. Open it by clicking on the Grasshopper button in the new *Rhinoceros* tab. Note the extra *Revit* tab in Grasshopper window, with many Revit-aware components:
+Arguably one of the most important features of {{ site.terms.rir }} is Grasshopper. Open it by clicking on the Grasshopper button in the new *Rhinoceros* tab. Note the extra *Revit* tab in Grasshopper window, with many Revit-aware components:
 
 ![]({{ "/static/images/started/rir-gh01.png" | prepend: site.baseurl }})
 
@@ -80,7 +80,7 @@ See [Basic Interactions Guide]({{ site.baseurl }}{% link _en/beta/guides/rir-gra
 
 To get started, let's create a simple definition in Grasshopper to extract geometry of a Revit element. Grasshopper is by far one of the most exciting add-ons for Rhino and as part of the {{ site.terms.rir }} project has the potential to improve the design and documentation in {{ site.terms.revit }} dramatically.
 
-Open a simple Revit model and draw an single wall
+Open a simple Revit model and draw a single wall
 
 ![]({{ "/static/images/started/revit-doc.png" | prepend: site.baseurl }})
 
@@ -141,7 +141,7 @@ To create a wall, we are going to use a custom Grasshopper node that can create 
 
 ![]({{ "/static/images/started/rir-rhino7.png" | prepend: site.baseurl }})
 
-Now that we have all these components inside the grasshopper definition, let's organize them before connecting the parameters
+Now that we have all these components inside the Grasshopper definition, let's organize them before connecting the parameters
 
 ![]({{ "/static/images/started/rir-rhino8.png" | prepend: site.baseurl }})
 
