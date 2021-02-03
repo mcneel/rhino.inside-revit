@@ -90,14 +90,16 @@ namespace RhinoInside.Revit.Settings
     }
 
     // Data store information
-    private static string DataDirectoryName => "RhinoInside.Revit";
+    private static string McNeelDataDirectoryName => "McNeel";
+    private static string RIRDataDirectoryName => "RhinoInside.Revit";
+    private static string DataDirectoryPath => Path.Combine(McNeelDataDirectoryName, RIRDataDirectoryName, $"{Addin.Version.Major}.0");
     private static string AdminDataDirectory => Path.Combine(
       Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-      DataDirectoryName
+      DataDirectoryPath
       );
     private static string UserDataDirectory => Path.Combine(
       Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-      DataDirectoryName
+      DataDirectoryPath
       );
     private static string OptionsFileName = "Options.xml";
     private static string AdminOptionsFilePath => Path.Combine(AdminDataDirectory, OptionsFileName);
