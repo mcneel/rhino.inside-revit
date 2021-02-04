@@ -94,8 +94,8 @@ namespace RhinoInside.Revit
     static public readonly AddinUpdateChannel DefaultChannel = new AddinUpdateChannel
     {
       Id = new Guid("0b10351c-25e3-4680-9135-6b86cd27bcda"),
-      Name = "Public Releases",
-      Description = "Official and tested public releases downloadable from website",
+      Name = "Public Releases (Official)",
+      Description = "Official and stable public releases downloadable from website",
       TargetVersion = new Version(0, 0),
       Url = @"https://files.mcneel.com/rhino.inside/revit/update/0.x/stable.xml"
     };
