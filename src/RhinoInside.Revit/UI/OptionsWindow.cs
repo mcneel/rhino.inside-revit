@@ -18,7 +18,7 @@ using System.Diagnostics;
 
 namespace RhinoInside.Revit.UI
 {
-  internal class OptionsWindow : BaseWindow
+  internal class OptionsWindow : BaseDialog
   {
     CheckBox _checkUpdatesOnStartup = new CheckBox { Text = "Check Updates on Startup" };
     Label _channelDescription = new Label { Visible = false, Wrap = WrapMode.Word, Height = 36 };

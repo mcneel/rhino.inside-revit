@@ -980,7 +980,7 @@ namespace RhinoInside.Revit.UI
         var optWindow = new OptionsWindow(data.Application);
         if (LatestReleaseInfo != null)
           optWindow.SetReleaseInfo(LatestReleaseInfo);
-        optWindow.Show();
+        optWindow.ShowModal();
       }
       else
         TaskDialog.Show("Options", "Contact your system admin to change the options");
