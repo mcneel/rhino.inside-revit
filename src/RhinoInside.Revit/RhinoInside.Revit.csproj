@@ -238,6 +238,7 @@
     <Compile Include="External\DB\Extensions\Parameter.cs" />
     <Compile Include="External\DB\Extensions\ParameterFilterElement.cs" />
     <Compile Include="External\DB\Extensions\ProjectLocation.cs" />
+    <Compile Include="External\DB\Extensions\Solid.cs" />
     <Compile Include="External\DB\Extensions\Surface.cs" />
     <Compile Include="External\DB\Extensions\View.cs" />
     <Compile Include="External\DB\Extensions\XYZ.cs" />
