@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Rhino.Geometry
@@ -377,6 +378,27 @@ namespace Rhino.Geometry
 
   static class CurveExtension
   {
+    /// <summary>
+    /// Gets array of span "knots".
+    /// </summary>
+    /// <param name="curve"></param>
+    /// <returns> An array with span vectors; or null on error.</returns>
+    public static double[] GetSpanVector(this Curve curve)
+    {
+      var spanCount = curve.SpanCount;
+      if (spanCount > 0)
+      {
+        var spanVector = new double[spanCount + 1];
+        for (int s = 0; s < spanCount; ++s)
+          spanVector[s] = curve.SpanDomain(s).T0;
+
+        spanVector[spanCount] = curve.SpanDomain(spanCount - 1).T1;
+        return spanVector;
+      }
+
+      return default;
+    }
+
     public static bool IsClosed(this Curve curve, double tolerance)
     {
       return curve.IsClosed || curve.PointAtStart.DistanceTo(curve.PointAtEnd) < tolerance;
