@@ -1,13 +1,12 @@
 using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using Rhino;
 using Rhino.Geometry;
-using DB = Autodesk.Revit.DB;
 using RhinoInside.Revit.External.DB;
 using RhinoInside.Revit.External.DB.Extensions;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.Convert.Geometry
 {
@@ -16,6 +15,11 @@ namespace RhinoInside.Revit.Convert.Geometry
   /// </summary>
   static class BrepEncoder
   {
+    #region Tolerances
+    static double JoinTolerance => Math.Sqrt(Revit.VertexTolerance * Revit.VertexTolerance + Revit.VertexTolerance * Revit.VertexTolerance);
+    static double EdgeTolerance => JoinTolerance * 0.5;
+    #endregion
+
     #region Encode
     internal static Brep ToRawBrep(/*const*/ Brep brep, double scaleFactor)
     {
@@ -32,137 +36,100 @@ namespace RhinoInside.Revit.Convert.Geometry
       if (!bbox.IsValid || bbox.Diagonal.Length < Revit.ShortCurveTolerance)
         return default;
 
-      brep.Faces.SplitKinkyFaces(Revit.AngleTolerance, true);
-      brep.Faces.SplitClosedFaces(2);
-      brep.Faces.ShrinkFaces();
-
-      // Normalize faces
+      // Split and Shrink faces
       {
-        var Identity = new Interval(0.0, 1.0);
+        brep.Faces.SplitKinkyFaces(Revit.AngleTolerance, true);
+        brep.Faces.SplitClosedFaces(0);
+        brep.Faces.ShrinkFaces();
+      }
 
-        foreach (var face in brep.Faces)
+      {
+        foreach (var edge in brep.Edges)
         {
-          face.SetDomain(0, Identity);
-          face.SetDomain(1, Identity);
+          if (edge.Tolerance > Revit.VertexTolerance)
+            GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Geometry contains out of tolerance edges, it wil be reparameterized.", edge);
+        }
+      }
+
+      return ReparameterizeBrep(ref brep);
+    }
+
+    static bool ReparameterizeBrep(ref Brep brep)
+    {
+      var edgesToUnjoin = brep.Edges.Select(x => x.EdgeIndex);
+      var shells = brep.UnjoinEdges(edgesToUnjoin);
+      if (shells.Length == 0)
+        shells = new Brep[] { brep };
+
+      foreach (var shell in shells)
+      {
+        foreach (var face in shell.Faces)
+        {
+          face.GetSurfaceSize(out var width, out var height);
+          {
+            face.SetDomain(0, new Interval(0.0, width));
+            var deltaU = KnotListEncoder.MinDelta(face.GetSpanVector(0));
+            if (deltaU < 1e-6)
+              face.SetDomain(0, new Interval(0.0, width * (1e-6 / deltaU)));
+
+            face.SetDomain(1, new Interval(0.0, height));
+            var deltaV = KnotListEncoder.MinDelta(face.GetSpanVector(1));
+            if (deltaV < 1e-6)
+              face.SetDomain(1, new Interval(0.0, height * (1e-6 / deltaV)));
+          }
+
+          face.RebuildEdges(1e-6, false, true);
         }
 
-        brep.SetTrimIsoFlags();
+        int edgeCount = shell.Edges.Count;
+        for (int ei = 0; ei < shell.Edges.Count; ++ei)
+        {
+          var kinky = shell.Edges.SplitKinkyEdge(ei, Revit.AngleTolerance);
+          if (kinky && shell.Edges.Count - edgeCount > 0)
+          {
+            GeometryEncoder.Context.Peek.RuntimeMessage(10, $"{shell.Edges.Count - edgeCount} kinky-edges splitted", default);
+            edgeCount = shell.Edges.Count;
+          }
+        }
+
+        var microEdges = shell.Edges.RemoveNakedMicroEdges(Revit.VertexTolerance);
+#if DEBUG
+        if (microEdges > 0)
+          GeometryEncoder.Context.Peek.RuntimeMessage(255, "DEBUG - Micro-edges removed", default);
+#endif
+
+        var mergedEdges = shell.Edges.MergeAllEdges(Revit.AngleTolerance);
+#if DEBUG
+        if (mergedEdges > 0)
+          GeometryEncoder.Context.Peek.RuntimeMessage(255, "DEBUG - Edges merged", default);
+#endif
+
+        shell.SetTrimIsoFlags();
+      }
+
+      //var join = shells;
+      var join = Brep.JoinBreps(shells, Revit.VertexTolerance);
+      if (join.Length == 1) brep = join[0];
+      else
+      {
+        var merge = new Brep();
+        foreach (var shell in join)
+          merge.Append(shell);
+
+        //var joined = merge.JoinNakedEdges(Revit.VertexTolerance);
+        brep = merge;
       }
 
       return brep.IsValid;
     }
+#endregion
 
-    static bool SplitFaces(ref Brep brep)
-    {
-      Brep brepToSplit = null;
-      while (!ReferenceEquals(brepToSplit, brep))
-      {
-        brepToSplit = brep;
-
-        foreach (var face in brepToSplit.Faces)
-        {
-          var splitters = new List<Curve>();
-
-          var trimsBBox = BoundingBox.Empty;
-          foreach (var trim in face.OuterLoop.Trims)
-            trimsBBox.Union(trim.GetBoundingBox(true));
-
-          var domainUV = new Interval[]
-          {
-            new Interval(trimsBBox.Min.X, trimsBBox.Max.X),
-            new Interval(trimsBBox.Min.Y, trimsBBox.Max.Y),
-          };
-
-          // Compute splitters
-          var splittedUV = new bool[2] { false, false };
-          for (int d = 0; d < 2; d++)
-          {
-            var domain = domainUV[d];
-            var t = domain.Min;
-
-            while (face.GetNextDiscontinuity(d, Continuity.Gsmooth_continuous, t, domain.Max, out t))
-            {
-              splitters.AddRange(face.TrimAwareIsoCurve(1 - d, t));
-              splittedUV[d] = true;
-            }
-          }
-
-          var closedUV = new bool[2] { face.IsClosed(0), face.IsClosed(1) };
-          if (!splittedUV[0] && closedUV[0])
-          {
-            splitters.AddRange(face.TrimAwareIsoCurve(1, face.Domain(0).Mid));
-            splittedUV[0] = true;
-          }
-          if (!splittedUV[1] && closedUV[1])
-          {
-            splitters.AddRange(face.TrimAwareIsoCurve(0, face.Domain(1).Mid));
-            splittedUV[1] = true;
-          }
-
-          if (splitters.Count > 0)
-          {
-            var surfaceIndex = face.SurfaceIndex;
-            var splitted = face.Split(splitters, Revit.ShortCurveTolerance);
-            if (splitted is null)
-            {
-              Debug.Fail("BrepFace.Split", "Failed to split a closed face.");
-              return false;
-            }
-
-            if (brepToSplit.Faces.Count == splitted.Faces.Count)
-            {
-              // Split was ok but for tolerance reasons no new faces were created.
-              // Too near from the limits.
-            }
-            else
-            {
-
-              foreach (var f in splitted.Faces)
-              {
-                if (f.SurfaceIndex != surfaceIndex)
-                  continue;
-
-                if (splittedUV[0] && splittedUV[1])
-                  f.ShrinkFace(BrepFace.ShrinkDisableSide.ShrinkAllSides);
-                else if (splittedUV[0])
-                  f.ShrinkFace(BrepFace.ShrinkDisableSide.DoNotShrinkSouthSide | BrepFace.ShrinkDisableSide.DoNotShrinkNorthSide);
-                else if (splittedUV[1])
-                  f.ShrinkFace(BrepFace.ShrinkDisableSide.DoNotShrinkEastSide | BrepFace.ShrinkDisableSide.DoNotShrinkWestSide);
-              }
-
-              // Start again until no face is splitted
-              brep = splitted;
-              break;
-            }
-          }
-        }
-      }
-
-      return brep is object;
-    }
-    #endregion
-
-    #region Transfer
-    internal static DB.Solid ToSolid(/*const*/Brep brep, double factor)
-    {
-      // Try using DB.BRepBuilder
-      if (ToSolid(ToRawBrep(brep, factor)) is DB.Solid solid)
-        return solid;
-
-      // Try using DB.ShapeImporter or DB.Document.Import
-      Debug.WriteLine("Try exporting-importing as ACIS.");
-      GeometryEncoder.Context.Peek.RuntimeMessage(255, "Using SAT…", default);
-      if (ToACIS(brep, factor) is DB.Solid sat) return sat;
-      else GeometryEncoder.Context.Peek.RuntimeMessage(20, "SAT operation failed.", default);
-
-      return default;
-    }
-
+#region Transfer
     internal static DB.Mesh ToMesh(/*const*/ Brep brep, double factor)
     {
       using (var mp = MeshingParameters.Default)
       {
-        mp.MinimumEdgeLength = Revit.ShortCurveTolerance * factor;
+        mp.MinimumEdgeLength = Revit.ShortCurveTolerance / factor;
         mp.ClosedObjectPostProcess = brep.IsManifold;
         mp.JaggedSeams = false;
 
@@ -173,6 +140,48 @@ namespace RhinoInside.Revit.Convert.Geometry
       }
     }
 
+    internal static DB.Solid ToSolid(/*const*/Brep brep, double factor)
+    {
+      // Try using DB.BRepBuilder
+      {
+        var raw = ToRawBrep(brep, factor);
+
+        if (ToSolid(raw) is DB.Solid solid)
+          return AuditSolid(brep, solid);
+      }
+
+      // Try using SAT
+//#if !DEBUG
+      if (ToACIS(brep, factor) is DB.Solid sat)
+      {
+        GeometryEncoder.Context.Peek.RuntimeMessage(255, "Using SAT…", default);
+        return AuditSolid(brep, sat);
+      }
+//#endif
+
+      GeometryEncoder.Context.Peek.RuntimeMessage(20, "Failed to convert geometry.", brep.InHostUnits());
+      return default;
+    }
+
+    static DB.Solid AuditSolid(Brep brep, DB.Solid solid)
+    {
+      if (brep.IsSolid)
+      {
+//#if DEBUG
+//        if (solid.TryGetNakedEdges(out var nakedEdges))
+//        {
+//          GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Output geometry has {nakedEdges.Count} naked edges.", default);
+//          foreach (var edge in nakedEdges)
+//            GeometryEncoder.Context.Peek.RuntimeMessage(20, default, edge.AsCurve().ToCurve().InHostUnits());
+//        }
+//#else
+        if (!solid.IsWatertight())
+          GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Output geometry has naked edges.", default);
+//#endif
+      }
+
+      return solid;
+    }
 
     /// <summary>
     /// Replaces <see cref="Raw.RawEncoder.ToHost(Brep)"/> to catch Revit Exceptions
@@ -245,12 +254,6 @@ namespace RhinoInside.Revit.Convert.Geometry
                 var edge = trim.Edge;
                 if (edge is null)
                   continue;
-
-                if (edge.Tolerance > Revit.VertexTolerance)
-                {
-                  error = true;
-                  GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Geometry contains out of tolerance edges.{Environment.NewLine}Resulting geometry may not be accurate.", edge);
-                }
 
                 try
                 {
@@ -346,7 +349,12 @@ namespace RhinoInside.Revit.Convert.Geometry
       var length = line.Length;
       bool isShort = length < Revit.ShortCurveTolerance;
       var factor = isShort ? 1.0 / length : UnitConverter.NoScale;
-      var curve = line.ToLine(factor);
+
+      var curve = DB.Line.CreateBound
+      (
+        line.From.ToXYZ(factor),
+        line.To.ToXYZ(factor)
+      );
 
       return isShort ? (DB.Line) curve.CreateTransformed(DB.Transform.Identity.ScaleBasis(length)) : curve;
     }
@@ -356,7 +364,13 @@ namespace RhinoInside.Revit.Convert.Geometry
       var length = arc.Length;
       bool isShort = length < Revit.ShortCurveTolerance;
       var factor = isShort ? 1.0 / length : UnitConverter.NoScale;
-      var curve = arc.ToArc(factor);
+
+      var curve = DB.Arc.Create
+      (
+        arc.StartPoint.ToXYZ(factor),
+        arc.EndPoint.ToXYZ(factor),
+        arc.MidPoint.ToXYZ(factor)
+      );
 
       return isShort ? (DB.Arc) curve.CreateTransformed(DB.Transform.Identity.ScaleBasis(length)) : curve;
     }
@@ -366,13 +380,63 @@ namespace RhinoInside.Revit.Convert.Geometry
       var length = nurbs.GetLength();
       bool isShort = length < Revit.ShortCurveTolerance;
       var factor = isShort ? 1.0 / length : UnitConverter.NoScale;
-      var curve = NurbsSplineEncoder.ToNurbsSpline(nurbs, factor);
 
-      return isShort ? curve.CreateTransformed(DB.Transform.Identity.ScaleBasis(length)) : curve;
+      var degree = nurbs.Degree;
+      var knots = Raw.RawEncoder.ToHost(nurbs.Knots);
+
+      var rational = nurbs.IsRational;
+      var points = nurbs.Points;
+      var count = points.Count;
+      var controlPoints = new DB.XYZ[count];
+      var weights = rational ? new double[count] : default;
+
+      for (int p = 0; p < count; ++p)
+      {
+        var location = points[p].Location;
+        controlPoints[p] = new DB.XYZ(location.X * factor, location.Y * factor, location.Z * factor);
+        if (rational) weights[p] = points[p].Weight;
+      }
+
+      var curve = rational ?
+        DB.NurbSpline.CreateCurve(degree, knots, controlPoints, weights) :
+        DB.NurbSpline.CreateCurve(degree, knots, controlPoints);
+
+      curve = isShort ? curve.CreateTransformed(DB.Transform.Identity.ScaleBasis(1.0 / factor)) : curve;
+      return curve;
+    }
+
+    static IEnumerable<DB.Curve> ToEdgeCurve(PolyCurve curve)
+    {
+      if (curve.RemoveShortSegments(Revit.VertexTolerance))
+      {
+#if DEBUG
+        GeometryEncoder.Context.Peek.RuntimeMessage(10, "Edge micro-segment removed.", curve);
+#endif
+      }
+
+      int segmentCount = curve.SegmentCount;
+      for (int s = 0; s < segmentCount; ++s)
+      {
+        var segment = curve.SegmentCurve(s);
+        switch (segment)
+        {
+          case LineCurve line:   yield return ToEdgeCurve(line.Line); break;
+          case ArcCurve arc:     yield return ToEdgeCurve(arc.Arc); break;
+          case NurbsCurve nurbs: yield return ToEdgeCurve(nurbs); break;
+          default: throw new NotImplementedException();
+        }
+      }
     }
 
     static IEnumerable<DB.Line> ToEdgeCurveMany(PolylineCurve curve)
     {
+      if (curve.RemoveShortSegments(Revit.VertexTolerance))
+      {
+#if DEBUG
+        GeometryEncoder.Context.Peek.RuntimeMessage(10, "Edge micro-segment removed.", curve);
+#endif
+      }
+
       int pointCount = curve.PointCount;
       if (pointCount > 1)
       {
@@ -410,6 +474,13 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     static IEnumerable<DB.Curve> ToEdgeCurveMany(PolyCurve curve)
     {
+      if (curve.RemoveShortSegments(Revit.VertexTolerance))
+      {
+#if DEBUG
+        GeometryEncoder.Context.Peek.RuntimeMessage(10, "Edge micro-segment removed.", curve);
+#endif
+      }
+
       int segmentCount = curve.SegmentCount;
       for (int s = 0; s < segmentCount; ++s)
       {
@@ -420,6 +491,18 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     static IEnumerable<DB.Curve> ToEdgeCurveMany(NurbsCurve curve)
     {
+      // Reparametrize edgeCurve here to avoid two knots overlap due tolerance.
+      // In case overlap happens curve will be splitted in more segments.
+      if (curve.Degree > 2)
+      {
+        var length = curve.GetLength();
+        curve.Domain = new Interval(0.0, length);
+
+        var delta = KnotListEncoder.MinDelta(curve.GetSpanVector());
+        if (delta < 1e-6)
+          curve.Domain = new Interval(0.0, length * (1e-6 / delta));
+      }
+
       if (curve.Degree == 1)
       {
         var curvePoints = curve.Points;
@@ -434,6 +517,7 @@ namespace RhinoInside.Revit.Convert.Geometry
             segment.From = segment.To;
           }
         }
+        yield break;
       }
       else if (curve.Degree == 2)
       {
@@ -443,15 +527,12 @@ namespace RhinoInside.Revit.Convert.Geometry
           yield return ToEdgeCurve(segment);
         }
       }
-      else if (curve.GetNextDiscontinuity(Continuity.C1_continuous, curve.Domain.Min, curve.Domain.Max, out var t))
+      else if (curve.TryGetPolyCurveC2(out var polyCurve))
       {
-        var splitters = new List<double>() { t };
-        while (curve.GetNextDiscontinuity(Continuity.C1_continuous, t, curve.Domain.Max, out t))
-          splitters.Add(t);
+        foreach (var segment in ToEdgeCurve(polyCurve))
+          yield return segment;
 
-        var segments = curve.Split(splitters);
-        foreach (var segment in segments.Select(x => x.ToNurbsCurve()))
-          yield return ToEdgeCurve(segment);
+        yield break;
       }
       else if (curve.IsClosed(Revit.ShortCurveTolerance * 1.01))
       {
@@ -529,36 +610,44 @@ namespace RhinoInside.Revit.Convert.Geometry
     static IEnumerable<DB.BRepBuilderEdgeGeometry> ToBRepBuilderEdgeGeometry(BrepEdge edge)
     {
       var edgeCurve = edge.EdgeCurve.Trim(edge.Domain) ?? edge.EdgeCurve.DuplicateCurve();
-
-      var RuntimeMessage = GeometryEncoder.Context.Peek.RuntimeMessage;
-
       if (edgeCurve is null || edge.IsShort(Revit.VertexTolerance, edge.Domain))
       {
-        RuntimeMessage(10, $"Micro edge skipped.", edge);
+        GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Micro edge skipped.", edge);
         yield break;
       }
 
       if (edge.ProxyCurveIsReversed)
         edgeCurve.Reverse();
 
-      edgeCurve = edgeCurve.Simplify(CurveSimplifyOptions.All, Revit.VertexTolerance, Revit.AngleTolerance) ?? edgeCurve;
-
-      if (edgeCurve.RemoveShortSegments(Revit.VertexTolerance))
-      {
-#if DEBUG
-        RuntimeMessage(10, "Edge micro-segment removed.", edge);
-#endif
-      }
+      edgeCurve = edgeCurve.Simplify
+      (
+        CurveSimplifyOptions.AdjustG1 |
+        CurveSimplifyOptions.Merge,
+        Revit.VertexTolerance,
+        Revit.AngleTolerance
+      ) ?? edgeCurve;
 
       foreach (var segment in ToEdgeCurveMany(edgeCurve))
       {
-        if(segment.Length < Revit.ShortCurveTolerance)
-          RuntimeMessage(10, $"Geometry contains short edges.{Environment.NewLine}Geometry with short edges may not be as reliable as fully valid geometry.", Raw.RawDecoder.ToRhino(segment));
+        var segmentLength = segment.Length;
+
+        if (segmentLength <= Revit.ShortCurveTolerance)
+          GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Geometry contains short edges.{Environment.NewLine}Geometry with short edges may not be as reliable as fully valid geometry.", Raw.RawDecoder.ToRhino(segment));
+
+        if (segmentLength <= Revit.VertexTolerance)
+        {
+#if DEBUG
+          GeometryEncoder.Context.Peek.RuntimeMessage(20, $"The curve is degenerate (its length is too close to zero).", Raw.RawDecoder.ToRhino(segment));
+#endif
+          continue;
+        }
 
         yield return DB.BRepBuilderEdgeGeometry.Create(segment);
       }
     }
+#endregion
 
+#region ACIS
     static DB.Document acisDocument;
     static DB.Document ACISDocument => acisDocument.IsValid() ? acisDocument :
       acisDocument = Revit.ActiveDBApplication.NewProjectDocument(DB.UnitSystem.Imperial);
@@ -610,12 +699,15 @@ namespace RhinoInside.Revit.Convert.Geometry
               if (list.OfType<DB.Solid>().FirstOrDefault() is DB.Solid shape)
                 return shape;
 
+              GeometryEncoder.Context.Peek.RuntimeMessage(10, "Revit Data conversion service failed to import geometry", default);
+
               // Looks like DB.ShapeImporter do not support short edges geometry
               //return null;
             }
           }
+          else GeometryEncoder.Context.Peek.RuntimeMessage(255, "Revit Data conversion service is not available", default);
 
-          // In case we don't have a  destination document we create a new one here.
+          // In case we don't have a destination document we create a new one here.
           using (doc.IsValid() ? default : doc = Revit.ActiveDBApplication.NewProjectDocument(DB.UnitSystem.Imperial))
           {
             try
@@ -633,7 +725,7 @@ namespace RhinoInside.Revit.Convert.Geometry
                   }
                 )
                 {
-                  // Create a 3D view to 
+                  // Create a 3D view to import the SAT file
                   var typeId = doc.GetDefaultElementTypeId(DB.ElementTypeGroup.ViewType3D);
                   var view = DB.View3D.CreatePerspective(doc, typeId);
 
@@ -661,6 +753,10 @@ namespace RhinoInside.Revit.Convert.Geometry
                 }
               }
             }
+            catch (Autodesk.Revit.Exceptions.OptionalFunctionalityNotAvailableException e)
+            {
+              GeometryEncoder.Context.Peek.RuntimeMessage(255, e.Message, default);
+            }
             finally
             {
               if (doc != ACISDocument && doc != GeometryEncoder.Context.Peek.Document)
@@ -672,7 +768,10 @@ namespace RhinoInside.Revit.Convert.Geometry
         {
           try { File.Delete(SATFile); } catch { }
         }
+
+        GeometryEncoder.Context.Peek.RuntimeMessage(10, "Revit SAT module failed to import geometry", default);
       }
+      else GeometryEncoder.Context.Peek.RuntimeMessage(20, "Failed to export geometry to SAT file", default);
 
       return default;
     }
@@ -725,7 +824,6 @@ namespace RhinoInside.Revit.Convert.Geometry
 
       return !hit.Any(x => !x);
     }
-
-    #endregion
+#endregion
   }
 }
