@@ -1,4 +1,7 @@
 using System;
+using System.Reflection;
+using System.Collections.Generic;
+
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 
@@ -9,11 +12,14 @@ namespace RhinoInside.Revit.UI
   /// </summary>
   abstract public class Command : External.UI.Command
   {
-    internal static PushButton AddPushButton<CommandType, AvailabilityType>(PulldownButton pullDownButton, string text, string tooltip)
+    // optional static storage for buttons created by commands
+    private static Dictionary<string, RibbonButton> _buttons = new Dictionary<string, RibbonButton>();
+
+    internal static PushButton AddPushButton<CommandType, AvailabilityType>(PulldownButton pullDownButton, string text, string iconName, string tooltip = null)
       where CommandType : IExternalCommand
       where AvailabilityType : IExternalCommandAvailability
     {
-      var buttonData = NewPushButtonData<CommandType, AvailabilityType>(text);
+      var buttonData = NewPushButtonData<CommandType, AvailabilityType>(text, iconName, tooltip);
 
       if (pullDownButton.AddPushButton(buttonData) is PushButton pushButton)
       {
@@ -24,19 +30,26 @@ namespace RhinoInside.Revit.UI
       return null;
     }
 
-    internal static PushButtonData NewPushButtonData<CommandType, AvailabilityType>(string text = null)
+    internal static PushButtonData NewPushButtonData<CommandType, AvailabilityType>(
+        string name,
+        string iconName,
+        string tooltip
+      )
       where CommandType : IExternalCommand
       where AvailabilityType : IExternalCommandAvailability
     {
       return new PushButtonData
       (
         typeof(CommandType).Name,
-        text ?? typeof(CommandType).Name,
+        name ?? typeof(CommandType).Name,
         typeof(CommandType).Assembly.Location,
         typeof(CommandType).FullName
       )
       {
-        AvailabilityClassName = typeof(AvailabilityType).FullName
+        AvailabilityClassName = typeof(AvailabilityType).FullName,
+        Image = ImageBuilder.LoadBitmapImage(iconName, true),
+        LargeImage = ImageBuilder.LoadBitmapImage(iconName),
+        ToolTip = tooltip,
       };
     }
 
@@ -56,9 +69,49 @@ namespace RhinoInside.Revit.UI
       };
     }
 
-    public class AllwaysAvailable : IExternalCommandAvailability
+    public class AlwaysAvailable : IExternalCommandAvailability
     {
       bool IExternalCommandAvailability.IsCommandAvailable(UIApplication app, CategorySet selectedCategories) => true;
+    }
+
+    public static void StoreButton(string name, RibbonButton button) => _buttons[name] = button;
+    public static RibbonButton RestoreButton(string name)
+    {
+      if (_buttons.TryGetValue(name, out var button))
+        return button;
+      return null;
+    }
+
+    /// <summary>
+    /// Get RibbonButton as underlying Autodesk.Windows API instance
+    /// </summary>
+    /// <param name="button">Revit API RibbonButton</param>
+    /// <returns></returns>
+    public static Autodesk.Windows.RibbonButton GetAdwndRibbonButton(RibbonButton button)
+    {
+      // grab the underlying Autodesk.Windows object from Button
+      if (button != null)
+      {
+        var getRibbonItemMethodInfo = button.GetType().GetMethod("getRibbonItem", BindingFlags.NonPublic | BindingFlags.Instance);
+        if (getRibbonItemMethodInfo != null)
+          return getRibbonItemMethodInfo.Invoke(button, null) as Autodesk.Windows.RibbonButton;
+      }
+      return null;
+    }
+
+    /// <summary>
+    /// Highlight command button as new or updated
+    /// </summary>
+    /// <param name="updated">Highlight as Updated, otherwise as New</param>
+    public static void HighlightButton(RibbonButton button, bool updated = false)
+    {
+      // grab the underlying Autodesk.Windows object from Button
+      if (GetAdwndRibbonButton(button) is Autodesk.Windows.RibbonButton ribbonButton)
+      {
+        // set highlight state and update tooltip
+        ribbonButton.Highlight =
+          updated ? Autodesk.Internal.Windows.HighlightMode.Updated : Autodesk.Internal.Windows.HighlightMode.New;
+      }
     }
 
     /// <summary>

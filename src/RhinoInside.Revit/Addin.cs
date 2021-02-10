@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Windows;
 using System.Windows.Input;
 using Autodesk.Revit.Attributes;
@@ -12,7 +13,6 @@ using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
 using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
-using RhinoInside.Revit.External.UI.Extensions;
 using RhinoInside.Revit.Native;
 using RhinoInside.Revit.Settings;
 using UIX = RhinoInside.Revit.External.UI;
@@ -287,9 +287,19 @@ namespace RhinoInside.Revit
         };
       }
 
-      // Add launch RhinoInside push button
-      var addinRibbon = applicationUI.CreateRibbonPanel("Rhinoceros");
+      // initialize the Ribbon tab and first panel
+      applicationUI.CreateRibbonTab(Addin.AddinName);
+      var addinRibbon = applicationUI.CreateRibbonPanel(Addin.AddinName, "More");
+      // Add launch RhinoInside push button,
       UI.CommandRhinoInside.CreateUI(addinRibbon);
+      // add slideout and the rest of the buttons
+      addinRibbon.AddSlideOut();
+      // about and help links
+      UI.CommandAbout.CreateUI(addinRibbon);
+      UI.CommandDiscourse.CreateUI(addinRibbon);
+      UI.HelpCommand.CreateUI(addinRibbon);
+      addinRibbon.AddSeparator();
+      // addin options
       UI.CommandRhinoInsideOptions.CreateUI(addinRibbon);
 
       // check for updates
@@ -301,8 +311,11 @@ namespace RhinoInside.Revit
             if (releaseInfo != null) {
               // if current version on the active update channel is newer
               if (releaseInfo.Version > Version)
+              {
                 // ask UI to notify user of updates
+                UI.CommandRhinoInside.NotifyUpdateAvailable(releaseInfo);
                 UI.CommandRhinoInsideOptions.NotifyUpdateAvailable(releaseInfo);
+              }
             }
           }
         );
@@ -613,8 +626,6 @@ namespace RhinoInside.Revit.UI
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
   class CommandRhinoInside : Command
   {
-    static PushButton Button;
-
     new class Availability : External.UI.CommandAvailability
     {
       public override bool IsCommandAvailable(UIApplication app, CategorySet selectedCategories) =>
@@ -623,41 +634,32 @@ namespace RhinoInside.Revit.UI
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      const string CommandName = "Rhino";
+      const string CommandName = "Launch";
 
-      var buttonData = NewPushButtonData<CommandRhinoInside, Availability>(CommandName);
+      var buttonData = NewPushButtonData<CommandRhinoInside, Availability>(CommandName, "Resources.RIR-logo.png", "");
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        Button = pushButton;
+        StoreButton("Launch", pushButton);
+        pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://www.rhino3d.com/inside/revit/beta/"));
 
-        if (Addin.RhinoVersionInfo is null)
+        if (Addin.RhinoVersionInfo is FileVersionInfo rhInfo)
         {
-          pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://www.rhino3d.com/download/rhino/wip"));
-          pushButton.Image = ImageBuilder.LoadBitmapImage("Resources.Rhino-logo.png", true);
-          pushButton.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Rhino-logo.png");
-        }
-        else
-        {
-          pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://www.rhino3d.com/inside/revit/beta/"));
-          using (var icon = System.Drawing.Icon.ExtractAssociatedIcon(Addin.RhinoExePath))
-          {
-            pushButton.Image = icon.ToBitmapSource(true);
-            pushButton.LargeImage = icon.ToBitmapSource();
-          }
-
+          // try-catch to capture any property getters failing
           try
           {
-            var versionInfo = Addin.RhinoVersionInfo;
-            pushButton.ToolTip = $"Loads {versionInfo.ProductName} inside this Revit session";
-            pushButton.LongDescription = $"Rhino: {versionInfo.ProductVersion} ({versionInfo.FileDescription}){Environment.NewLine}Rhino.Inside: {Addin.DisplayVersion}{Environment.NewLine}{versionInfo.LegalCopyright}";
+            pushButton.ToolTip =
+              $"Loads {rhInfo.ProductName} inside this Revit session";
+            pushButton.LongDescription =
+              $"Rhino: {rhInfo.ProductVersion} ({rhInfo.FileDescription}){Environment.NewLine}" +
+              $"Rhino.Inside: {Addin.DisplayVersion}{Environment.NewLine}{rhInfo.LegalCopyright}";
           }
           catch (Exception) { }
         }
 
         if (Addin.StartupMode == AddinStartupMode.Disabled)
         {
-          Button.Enabled = false;
-          Button.ToolTip = "Addin Disabled";
+          pushButton.Enabled = false;
+          pushButton.ToolTip = "Addin Disabled";
         }
         else
         {
@@ -676,7 +678,7 @@ namespace RhinoInside.Revit.UI
       )
         return ShowLoadError(data);
 
-      string rhinoTab = Addin.RhinoVersionInfo?.ProductName ?? "Rhinoceros";
+      string rhinoPanelName = Addin.RhinoVersionInfo?.ProductName ?? "Rhinoceros";
 
       if (Addin.CurrentStatus == Addin.Status.Ready)
       {
@@ -693,64 +695,62 @@ namespace RhinoInside.Revit.UI
           return Result.Succeeded;
         }
 
-        // If no windows are visible we show the Ribbon tab
-        return data.Application.ActivateRibbonTab(rhinoTab) ? Result.Succeeded : Result.Failed;
+        return Result.Succeeded;
       }
 
       var result = Result.Failed;
+      var button = RestoreButton("Launch");
       switch (result = Revit.OnStartup(Revit.ApplicationUI))
       {
         case Result.Succeeded:
           // Update Rhino button Tooltip
-          Button.ToolTip = $"Restores previously visible Rhino windows on top of Revit window";
-          Button.LongDescription = $"Use CTRL key to open a Rhino model";
+          button.ToolTip = $"Restores previously visible Rhino windows on top of Revit window";
+          button.LongDescription = $"Use CTRL key to open a Rhino model";
 
           // Register UI on Revit
-          data.Application.CreateRibbonTab(rhinoTab);
-
-          var RhinocerosPanel = data.Application.CreateRibbonPanel(rhinoTab, "Rhinoceros");
-          HelpCommand.CreateUI(RhinocerosPanel);
+          var rhinoPanel = data.Application.CreateRibbonPanel(Addin.AddinName, rhinoPanelName);
 
           var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
           if (assemblies.Any(x => x.GetName().Name == "RhinoCommon"))
           {
-            RhinocerosPanel.AddSeparator();
-            CommandRhino.CreateUI(RhinocerosPanel);
-            CommandImport.CreateUI(RhinocerosPanel);
-            CommandRhinoPreview.CreateUI(RhinocerosPanel);
-            CommandPython.CreateUI(RhinocerosPanel);
+            CommandRhino.CreateUI(rhinoPanel);
+            CommandImport.CreateUI(rhinoPanel);
+            CommandRhinoPreview.CreateUI(rhinoPanel);
+            CommandPython.CreateUI(rhinoPanel);
           }
 
           if (assemblies.Any(x => x.GetName().Name == "Grasshopper"))
           {
-            var GrasshopperPanel = data.Application.CreateRibbonPanel(rhinoTab, "Grasshopper");
-            CommandGrasshopper.CreateUI(GrasshopperPanel);
-            CommandGrasshopperPreview.CreateUI(GrasshopperPanel);
-            CommandGrasshopperSolver.CreateUI(GrasshopperPanel);
-            CommandGrasshopperRecompute.CreateUI(GrasshopperPanel);
-            CommandGrasshopperBake.CreateUI(GrasshopperPanel);
-            GrasshopperPanel.AddSeparator();
-            CommandGrasshopperPlayer.CreateUI(GrasshopperPanel);
+            var grasshopperPanel = data.Application.CreateRibbonPanel(Addin.AddinName, "Grasshopper");
+            CommandGrasshopper.CreateUI(grasshopperPanel);
+            CommandGrasshopperPreview.CreateUI(grasshopperPanel);
+            CommandGrasshopperSolver.CreateUI(grasshopperPanel);
+            CommandGrasshopperRecompute.CreateUI(grasshopperPanel);
+            CommandGrasshopperBake.CreateUI(grasshopperPanel);
+            grasshopperPanel.AddSeparator();
+            CommandGrasshopperPlayer.CreateUI(grasshopperPanel);
           }
 
-          result = data.Application.ActivateRibbonTab(rhinoTab) ? Result.Succeeded : Result.Failed;
+          result = Result.Succeeded;
           break;
+
         case Result.Cancelled:
-          Button.Enabled = false;
+          button.Enabled = false;
 
           if (Addin.CurrentStatus == Addin.Status.Unavailable)
-            Button.ToolTip = "Rhino.Inside failed to found a valid copy of Rhino 7 WIP installed.";
+            button.ToolTip = "Rhino.Inside failed to found a valid copy of Rhino 7 WIP installed.";
           else if (Addin.CurrentStatus == Addin.Status.Obsolete)
-            Button.ToolTip = "Rhino.Inside has expired.";
+            button.ToolTip = "Rhino.Inside has expired.";
           else
-            Button.ToolTip = "Rhino.Inside load was cancelled.";
+            button.ToolTip = "Rhino.Inside load was cancelled.";
 
-          Button.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://www.rhino3d.com/inside/revit"));
+          button.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://www.rhino3d.com/inside/revit"));
           break;
+
         case Result.Failed:
-          Button.Enabled = false;
-          Button.ToolTip = "Rhino.Inside failed to load.";
+          button.Enabled = false;
+          button.ToolTip = "Rhino.Inside failed to load.";
           ShowLoadError(data);
           break;
       }
@@ -947,35 +947,139 @@ namespace RhinoInside.Revit.UI
           catch (Exception) { }
       }
     }
+
+    static public void NotifyUpdateAvailable(ReleaseInfo releaseInfo)
+    {
+      // button gets deactivated if options are readonly
+      if (!AddinOptions.IsReadOnly)
+      {
+        if (RestoreButton("Launch") is RibbonButton button)
+        {
+          HighlightButton(button);
+          button.ToolTip = "New Release Available for Download!\n"
+                         + $"Version: {releaseInfo.Version}\n"
+                         + button.ToolTip;
+        }
+      }
+    }
+  }
+
+  [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
+  class CommandAbout : Command
+  {
+    public static void CreateUI(RibbonPanel ribbonPanel)
+    {
+      const string CommandName = "About";
+
+      var buttonData = NewPushButtonData<CommandAbout, AlwaysAvailable>(CommandName, "Resources.About-icon.png", "");
+      if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
+      {
+        pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://www.rhino3d.com/inside/revit/beta/"));
+      }
+    }
+
+    public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
+    {
+      var details = new StringBuilder();
+
+      var rhino = Addin.RhinoVersionInfo;
+      details.AppendLine($"Rhino: {rhino.ProductVersion} ({rhino.FileDescription})");
+
+      var revit = data.Application.Application;
+#if REVIT_2019
+      details.AppendLine($"Revit: {revit.SubVersionNumber} ({revit.VersionBuild})");
+#else
+      details.AppendLine($"Revit: {revit.VersionNumber} ({revit.VersionBuild})");
+#endif
+
+      details.AppendLine($"CLR: {ErrorReport.CLRVersion}");
+      details.AppendLine($"OS: {Environment.OSVersion}");
+
+      using
+      (
+        var taskDialog = new TaskDialog("About")
+        {
+          Id = MethodBase.GetCurrentMethod().DeclaringType.FullName,
+          MainIcon = External.UI.TaskDialogIcons.IconInformation,
+          TitleAutoPrefix = true,
+          AllowCancellation = true,
+          MainInstruction = $"Rhino.Inside© for Revit",
+          MainContent = $"Rhino.Inside Revit: {Addin.DisplayVersion}",
+          ExpandedContent = details.ToString(),
+          CommonButtons = TaskDialogCommonButtons.Ok,
+          DefaultButton = TaskDialogResult.Ok,
+          FooterText = "Press CTRL+C to copy this information to Clipboard"
+        }
+      )
+      {
+        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Web site");
+        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink2, "Read license");
+        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink3, "See source code");
+
+        switch (taskDialog.Show())
+        {
+          case TaskDialogResult.CommandLink1:
+            using (System.Diagnostics.Process.Start(@"https://www.rhino3d.com/inside/revit/beta/")) { }
+            break;
+          case TaskDialogResult.CommandLink2:
+            using (System.Diagnostics.Process.Start(@"https://github.com/mcneel/rhino.inside-revit/blob/master/LICENSE")) { }
+            break;
+          case TaskDialogResult.CommandLink3:
+            using (System.Diagnostics.Process.Start(@"https://github.com/mcneel/rhino.inside-revit/tree/master/src")) { }
+            break;
+        }
+      }
+
+      return Result.Succeeded;
+    }
+  }
+
+  [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
+  class CommandDiscourse : Command
+  {
+    public static void CreateUI(RibbonPanel ribbonPanel)
+    {
+      const string CommandName = "Forums";
+
+      var buttonData = NewPushButtonData<CommandDiscourse, AlwaysAvailable>(CommandName, "Resources.Forum-icon.png", "");
+      if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
+      {
+        pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://www.rhino3d.com/inside/revit/beta/"));
+      }
+    }
+
+    public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
+    {
+      using (System.Diagnostics.Process.Start(@"https://discourse.mcneel.com/c/rhino-inside/Revit")) { }
+
+      return Result.Succeeded;
+    }
   }
 
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
   class CommandRhinoInsideOptions : Command
   {
-    static PushButton Button;
     static ReleaseInfo LatestReleaseInfo = null;
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
       const string CommandName = "Options";
 
-      var buttonData = NewPushButtonData<CommandRhinoInsideOptions, AllwaysAvailable>(CommandName);
+      var buttonData = NewPushButtonData<CommandRhinoInsideOptions, AlwaysAvailable>(CommandName, "Resources.Options.png", "");
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         // setup button
-        Button = pushButton;
-        pushButton.Image = ImageBuilder.LoadBitmapImage("Resources.Options.png", true);
-        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Options.png");
+        StoreButton("Options", pushButton);
 
         // disable if startup mode is disabled
         if (Addin.StartupMode == AddinStartupMode.Disabled)
         {
-          Button.Enabled = false;
-          Button.ToolTip = "Addin Disabled";
+          pushButton.Enabled = false;
+          pushButton.ToolTip = "Addin Disabled";
         }
 
         // disable the button if options are readonly
-        Button.Enabled = !AddinOptions.IsReadOnly;
+        pushButton.Enabled = !AddinOptions.IsReadOnly;
       }
     }
 
@@ -1003,21 +1107,15 @@ namespace RhinoInside.Revit.UI
       // button gets deactivated if options are readonly
       if (!AddinOptions.IsReadOnly)
       {
-        Highlight();
-        Button.ToolTip = "New Release Available for Download!\n"
-                       + $"Version: {releaseInfo.Version}\n"
-                       + Button.ToolTip;
+        if (RestoreButton("Options") is RibbonButton button)
+        {
+          HighlightButton(button);
+          button.ToolTip = "New Release Available for Download!\n"
+                         + $"Version: {releaseInfo.Version}\n"
+                         + button.ToolTip;
+        }
         LatestReleaseInfo = releaseInfo;
       }
-    }
-
-    static public void Highlight()
-    {
-      // grab the underlying Autodesk.Windows object from Button
-      var getRibbonItemMethodInfo = Button.GetType().GetMethod("getRibbonItem", BindingFlags.NonPublic | BindingFlags.Instance);
-      var adWndObj = (Autodesk.Windows.RibbonButton) getRibbonItemMethodInfo.Invoke(Button, null);
-      // set highlight state and update tooltip
-      adWndObj.Highlight = Autodesk.Internal.Windows.HighlightMode.New;
     }
   }
 }

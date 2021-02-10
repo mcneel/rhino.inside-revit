@@ -29,13 +29,14 @@ namespace RhinoInside.Revit.UI
   {
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      var buttonData = NewPushButtonData<CommandImport, NeedsActiveDocument<Availability>>("Import");
+      var buttonData = NewPushButtonData<CommandImport, NeedsActiveDocument<Availability>>(
+        "Import",
+        "Resources.Ribbon.Rhinoceros.Import-3DM.png",
+        "Imports geometry from 3dm file to a Revit model or family"
+      );
 
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        pushButton.ToolTip = "Imports geometry from 3dm file to a Revit model or family";
-        pushButton.Image = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Rhinoceros.Import-3DM.png", true);
-        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Rhinoceros.Import-3DM.png");
         pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://github.com/mcneel/rhino.inside-revit/tree/master#sample-8"));
       }
     }
@@ -620,15 +621,16 @@ namespace RhinoInside.Revit.UI
                 openFileDialog.FileName
               );
             }
-            else
-            {
-              return Import3DMFileToProject
-              (
-                doc,
-                openFileDialog.FileName,
-                CommandGrasshopperBake.ActiveBuiltInCategory
-              );
-            }
+            //else
+            //{
+            //  return Import3DMFileToProject
+            //  (
+            //    doc,
+            //    openFileDialog.FileName,
+            //    CommandGrasshopperBake.ActiveBuiltInCategory
+            //  );
+            //}
+            break;
           case DialogResult.Cancel: return Result.Cancelled;
         }
       }

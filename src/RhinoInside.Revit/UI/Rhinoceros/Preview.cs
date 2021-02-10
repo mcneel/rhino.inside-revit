@@ -11,34 +11,37 @@ namespace RhinoInside.Revit.UI
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
 #if REVIT_2018
-      var buttonData = NewPushButtonData<CommandRhinoPreview, NeedsActiveDocument<Availability>>("Preview");
+      var buttonData = NewPushButtonData<CommandRhinoPreview, NeedsActiveDocument<Availability>>(
+        "Preview",
+        "Resources.Ribbon.Grasshopper.Preview_Off.png",
+        "Toggle Rhino model preview visibility"
+        );
 
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        Button = pushButton;
+        StoreButton("Preview", pushButton);
         DocumentPreviewServer.ActiveDocumentChanged += DocumentPreviewServer_ActiveDocumentChanged;
-
-        Button.ToolTip = "Toggle Rhino model preview visibility";
         ButtonSetImages(false);
-        Button.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://github.com/mcneel/rhino.inside-revit/tree/master#sample-6"));
+        pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://github.com/mcneel/rhino.inside-revit/tree/master#sample-6"));
       }
 #endif
     }
 
 #if REVIT_2018
-    static PushButton Button = default;
-
     static void ButtonSetImages(bool status)
     {
-      if (status)
+      if (RestoreButton("Preview") is PushButton button)
       {
-        Button.Image = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Rhinoceros.Preview_Shaded.png", true);
-        Button.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Rhinoceros.Preview_Shaded.png");
-      }
-      else
-      {
-        Button.Image = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Preview_Off.png", true);
-        Button.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Preview_Off.png");
+        if (status)
+        {
+          button.Image = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Rhinoceros.Preview_Shaded.png", true);
+          button.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Rhinoceros.Preview_Shaded.png");
+        }
+        else
+        {
+          button.Image = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Preview_Off.png", true);
+          button.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Preview_Off.png");
+        }
       }
     }
 

@@ -43,13 +43,14 @@ namespace RhinoInside.Revit.UI
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
       // Create a push button to trigger a command add it to the ribbon panel.
-      var buttonData = NewPushButtonData<CommandGrasshopper, Availability>("Grasshopper");
+      var buttonData = NewPushButtonData<CommandGrasshopper, Availability>(
+        "Grasshopper",
+        "Resources.Grasshopper.png",
+        "Shows Grasshopper window"
+      );
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        pushButton.ToolTip = "Shows Grasshopper window";
         pushButton.LongDescription = $"Use CTRL key to open only Grasshopper window without restoring other tool windows";
-        pushButton.Image = ImageBuilder.LoadBitmapImage("Resources.Grasshopper.png", true);
-        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Grasshopper.png");
         pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://www.grasshopper3d.com/"));
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
       }
@@ -75,7 +76,6 @@ namespace RhinoInside.Revit.UI
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
   class CommandGrasshopperSolver : GrasshopperCommand
   {
-    static PushButton Button;
     static readonly System.Windows.Media.ImageSource SolverOnSmall = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.SolverOn.png", true);
     static readonly System.Windows.Media.ImageSource SolverOnLarge = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.SolverOn.png", false);
     static readonly System.Windows.Media.ImageSource SolverOffSmall = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.SolverOff.png", true);
@@ -91,27 +91,34 @@ namespace RhinoInside.Revit.UI
 
     static void EnableSolutionsChanged(bool EnableSolutions)
     {
-      if (EnableSolutions)
+      if (RestoreButton("Solver") is PushButton button)
       {
-        Button.ToolTip = "Disable the Grasshopper solver";
-        Button.Image = SolverOnSmall;
-        Button.LargeImage = SolverOnLarge;
-      }
-      else
-      {
-        Button.ToolTip = "Enable the Grasshopper solver";
-        Button.Image = SolverOffSmall;
-        Button.LargeImage = SolverOffLarge;
+        if (EnableSolutions)
+        {
+          button.ToolTip = "Disable the Grasshopper solver";
+          button.Image = SolverOnSmall;
+          button.LargeImage = SolverOnLarge;
+        }
+        else
+        {
+          button.ToolTip = "Enable the Grasshopper solver";
+          button.Image = SolverOffSmall;
+          button.LargeImage = SolverOffLarge;
+        }
       }
     }
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      var buttonData = NewPushButtonData<CommandGrasshopperSolver, Availability>("Solver");
-      Button = ribbonPanel.AddItem(buttonData) as PushButton;
-      if (Button is object)
+      var buttonData = NewPushButtonData<CommandGrasshopperSolver, Availability>(
+        "Solver",
+        "Resources.Ribbon.Grasshopper.SolverOff.png",
+        "Toggle the Grasshopper solver"
+      );
+      if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        Button.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
+        StoreButton("Solver", pushButton);
+        pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
         EnableSolutionsChanged(GH_Document.EnableSolutions);
         GH_Document.EnableSolutionsChanged += EnableSolutionsChanged;
       }
@@ -148,12 +155,13 @@ namespace RhinoInside.Revit.UI
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
       // Create a push button to trigger a command add it to the ribbon panel.
-      var buttonData = NewPushButtonData<CommandGrasshopperRecompute, Availability>("Recompute");
+      var buttonData = NewPushButtonData<CommandGrasshopperRecompute, Availability>(
+        "Recompute",
+        "Resources.Ribbon.Grasshopper.Recompute.png",
+        "Force a complete recompute of all objects"
+        );
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        pushButton.ToolTip = "Force a complete recompute of all objects";
-        pushButton.Image = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Recompute.png", true);
-        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Recompute.png");
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
       }
     }
@@ -198,15 +206,16 @@ namespace RhinoInside.Revit.UI
         {
           if (Revit.ActiveUIDocument?.ActiveGraphicalView is DB.View view)
           {
-            var options = new BakeOptions()
-            {
-              Document = view.Document,
-              View = view,
-              Category = DB.Category.GetCategory(view.Document, ActiveBuiltInCategory),
-              Material = default
-            };
+            //var options = new BakeOptions()
+            //{
+            //  Document = view.Document,
+            //  View = view,
+            //  Category = DB.Category.GetCategory(view.Document, ActiveBuiltInCategory),
+            //  Material = default
+            //};
 
-            return ObjectsToBake(definition, options).Any();
+            //return ObjectsToBake(definition, options).Any();
+            return true;
           }
         }
 
@@ -225,64 +234,59 @@ namespace RhinoInside.Revit.UI
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      var items = ribbonPanel.AddStackedItems
-      (
-        new ComboBoxData("Category"),
-        NewPushButtonData<CommandGrasshopperBake, NeedsActiveDocument<Availability>>("Bake Selected")
-      );
-
-      if(items[0] is ComboBox comboBox)
-      {
-        categoriesComboBox = comboBox;
+      //if(items[0] is ComboBox comboBox)
+      //{
+      //  categoriesComboBox = comboBox;
       
-        EventHandler<IdlingEventArgs> BuildDirectShapeCategoryList = null;
-        Revit.ApplicationUI.Idling += BuildDirectShapeCategoryList = (sender, args) =>
-        {
-          var doc = (sender as UIApplication).ActiveUIDocument?.Document;
-          if (doc == null)
-            return;
+      //  EventHandler<IdlingEventArgs> BuildDirectShapeCategoryList = null;
+      //  Revit.ApplicationUI.Idling += BuildDirectShapeCategoryList = (sender, args) =>
+      //  {
+      //    var doc = (sender as UIApplication).ActiveUIDocument?.Document;
+      //    if (doc == null)
+      //      return;
 
-          var directShapeCategories = Enum.GetValues(typeof(DB.BuiltInCategory)).Cast<DB.BuiltInCategory>().
-          Where(categoryId => DB.DirectShape.IsValidCategoryId(new DB.ElementId(categoryId), doc)).
-          Select(categoryId => DB.Category.GetCategory(doc, categoryId)).
-          Where(x => x is object);
+      //    var directShapeCategories = Enum.GetValues(typeof(DB.BuiltInCategory)).Cast<DB.BuiltInCategory>().
+      //    Where(categoryId => DB.DirectShape.IsValidCategoryId(new DB.ElementId(categoryId), doc)).
+      //    Select(categoryId => DB.Category.GetCategory(doc, categoryId)).
+      //    Where(x => x is object);
 
-          foreach (var group in directShapeCategories.GroupBy(x => x.CategoryType).OrderBy(x => x.Key.ToString()))
-          {
-            foreach (var category in group.OrderBy(x => x.Name))
-            {
-              var comboBoxMemberData = new ComboBoxMemberData(((DB.BuiltInCategory) category.Id.IntegerValue).ToString(), category.Name)
-              {
-                GroupName = group.Key.ToString()
-              };
-              var item = categoriesComboBox.AddItem(comboBoxMemberData);
+      //    foreach (var group in directShapeCategories.GroupBy(x => x.CategoryType).OrderBy(x => x.Key.ToString()))
+      //    {
+      //      foreach (var category in group.OrderBy(x => x.Name))
+      //      {
+      //        var comboBoxMemberData = new ComboBoxMemberData(((DB.BuiltInCategory) category.Id.IntegerValue).ToString(), category.Name)
+      //        {
+      //          GroupName = group.Key.ToString()
+      //        };
+      //        var item = categoriesComboBox.AddItem(comboBoxMemberData);
 
-              if ((DB.BuiltInCategory) category.Id.IntegerValue == DB.BuiltInCategory.OST_GenericModel)
-                categoriesComboBox.Current = item;
-            }
-          }
+      //        if ((DB.BuiltInCategory) category.Id.IntegerValue == DB.BuiltInCategory.OST_GenericModel)
+      //          categoriesComboBox.Current = item;
+      //      }
+      //    }
 
-          Revit.ApplicationUI.Idling -= BuildDirectShapeCategoryList;
-        };
-      }
+      //    Revit.ApplicationUI.Idling -= BuildDirectShapeCategoryList;
+      //  };
+      //}
 
-      if (items[1] is PushButton bakeButton)
+      if (ribbonPanel.AddItem(NewPushButtonData<CommandGrasshopperBake, NeedsActiveDocument<Availability>>(
+        "Bake\nSelected",
+        "Resources.Ribbon.Grasshopper.Bake.png",
+        "Bakes selected objects content in the active Revit document"
+        )) is PushButton bakeButton)
       {
-        bakeButton.ToolTip = "Bakes selected objects content in the active Revit document";
         bakeButton.LongDescription = "Use CTRL key to group resulting elements";
-        bakeButton.Image = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Bake.png", true);
-        bakeButton.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Bake.png");
         bakeButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
       }
     }
 
-    static ComboBox categoriesComboBox = null;
-    public static DB.BuiltInCategory ActiveBuiltInCategory
-    {
-      get => Enum.TryParse(categoriesComboBox.Current?.Name ?? string.Empty, out DB.BuiltInCategory builtInCategory) ?
-             builtInCategory :
-             DB.BuiltInCategory.OST_GenericModel;
-    }
+    //static ComboBox categoriesComboBox = null;
+    //public static DB.BuiltInCategory ActiveBuiltInCategory
+    //{
+    //  get => Enum.TryParse(categoriesComboBox.Current?.Name ?? string.Empty, out DB.BuiltInCategory builtInCategory) ?
+    //         builtInCategory :
+    //         DB.BuiltInCategory.OST_GenericModel;
+    //}
 
     class ElementIdBakeAwareObject : IGH_ElementIdBakeAwareObject
     {
@@ -378,85 +382,85 @@ namespace RhinoInside.Revit.UI
 
     public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
     {
-      if (Instances.ActiveCanvas?.Document is GH_Document definition)
-      {
-        bool groupResult = (System.Windows.Forms.Control.ModifierKeys & System.Windows.Forms.Keys.Control) != System.Windows.Forms.Keys.None;
+      //if (Instances.ActiveCanvas?.Document is GH_Document definition)
+      //{
+      //  bool groupResult = (System.Windows.Forms.Control.ModifierKeys & System.Windows.Forms.Keys.Control) != System.Windows.Forms.Keys.None;
 
-        var options = new BakeOptions()
-        {
-          Document = data.Application.ActiveUIDocument.Document,
-          View = data.View,
-          Category = DB.Category.GetCategory(data.Application.ActiveUIDocument.Document, ActiveBuiltInCategory),
-          Material = default
-        };
+      //  var options = new BakeOptions()
+      //  {
+      //    Document = data.Application.ActiveUIDocument.Document,
+      //    View = data.View,
+      //    Category = DB.Category.GetCategory(data.Application.ActiveUIDocument.Document, ActiveBuiltInCategory),
+      //    Material = default
+      //  };
 
-        var resultingElementIds = new List<DB.ElementId>();
-        using (var transGroup = new DB.TransactionGroup(options.Document))
-        {
-          transGroup.Start("Bake Selected");
+      //  var resultingElementIds = new List<DB.ElementId>();
+      //  using (var transGroup = new DB.TransactionGroup(options.Document))
+      //  {
+      //    transGroup.Start("Bake Selected");
 
-          var bakedElementIds = new List<DB.ElementId>();
-          foreach (var obj in Availability.ObjectsToBake(definition, options))
-          {
-            if (obj.Bake(options, out var partial))
-              bakedElementIds.AddRange(partial);
-          }
+      //    var bakedElementIds = new List<DB.ElementId>();
+      //    foreach (var obj in Availability.ObjectsToBake(definition, options))
+      //    {
+      //      if (obj.Bake(options, out var partial))
+      //        bakedElementIds.AddRange(partial);
+      //    }
 
-          {
-            var activeDesignOptionId = DB.DesignOption.GetActiveDesignOptionId(options.Document);
-            var elementIdsToAssignDO = new List<DB.ElementId>();
-            foreach (var elementId in bakedElementIds)
-            {
-              if
-              (
-                options.Document.GetElement(elementId) is DB.Element element &&
-                element.DesignOption?.Id is DB.ElementId elementDesignOptionId &&
-                elementDesignOptionId != activeDesignOptionId
-              )
-              {
-                elementIdsToAssignDO.Add(elementId);
-              }
-              else resultingElementIds?.Add(elementId);
-            }
+      //    {
+      //      var activeDesignOptionId = DB.DesignOption.GetActiveDesignOptionId(options.Document);
+      //      var elementIdsToAssignDO = new List<DB.ElementId>();
+      //      foreach (var elementId in bakedElementIds)
+      //      {
+      //        if
+      //        (
+      //          options.Document.GetElement(elementId) is DB.Element element &&
+      //          element.DesignOption?.Id is DB.ElementId elementDesignOptionId &&
+      //          elementDesignOptionId != activeDesignOptionId
+      //        )
+      //        {
+      //          elementIdsToAssignDO.Add(elementId);
+      //        }
+      //        else resultingElementIds?.Add(elementId);
+      //      }
 
-            if (elementIdsToAssignDO.Count > 0)
-            {
-              using (var trans = new DB.Transaction(options.Document, "Assign to Active Design Option"))
-              {
-                if (trans.Start() == DB.TransactionStatus.Started)
-                {
-                  // Move elements to Active Design Option
-                  var elementIdsCopied = DB.ElementTransformUtils.CopyElements(options.Document, elementIdsToAssignDO, DB.XYZ.Zero);
-                  options.Document.Delete(elementIdsToAssignDO);
-                  resultingElementIds?.AddRange(elementIdsCopied);
+      //      if (elementIdsToAssignDO.Count > 0)
+      //      {
+      //        using (var trans = new DB.Transaction(options.Document, "Assign to Active Design Option"))
+      //        {
+      //          if (trans.Start() == DB.TransactionStatus.Started)
+      //          {
+      //            // Move elements to Active Design Option
+      //            var elementIdsCopied = DB.ElementTransformUtils.CopyElements(options.Document, elementIdsToAssignDO, DB.XYZ.Zero);
+      //            options.Document.Delete(elementIdsToAssignDO);
+      //            resultingElementIds?.AddRange(elementIdsCopied);
 
-                  trans.Commit();
-                }
-              }
-            }
-          }
+      //            trans.Commit();
+      //          }
+      //        }
+      //      }
+      //    }
 
-          if (groupResult)
-          {
-            using (var trans = new DB.Transaction(options.Document, "Group Bake"))
-            {
-              if (trans.Start() == DB.TransactionStatus.Started)
-              {
-                var group = options.Document.Create.NewGroup(resultingElementIds);
-                trans.Commit();
+      //    if (groupResult)
+      //    {
+      //      using (var trans = new DB.Transaction(options.Document, "Group Bake"))
+      //      {
+      //        if (trans.Start() == DB.TransactionStatus.Started)
+      //        {
+      //          var group = options.Document.Create.NewGroup(resultingElementIds);
+      //          trans.Commit();
 
-                resultingElementIds = new List<DB.ElementId>();
-                resultingElementIds.Add(group.Id);
-              }
-            }
-          }
+      //          resultingElementIds = new List<DB.ElementId>();
+      //          resultingElementIds.Add(group.Id);
+      //        }
+      //      }
+      //    }
 
-          transGroup.Assimilate();
-        }
+      //    transGroup.Assimilate();
+      //  }
 
-        data.Application.ActiveUIDocument.Selection.SetElementIds(resultingElementIds);
-        Instances.RedrawCanvas();
-      }
+      //  data.Application.ActiveUIDocument.Selection.SetElementIds(resultingElementIds);
+      //  Instances.RedrawCanvas();
+      //}
 
       return Result.Succeeded;
     }
@@ -473,9 +477,10 @@ namespace RhinoInside.Revit.UI
 
       if (ribbonPanel.AddItem(radioData) is RadioButtonGroup radioButton)
       {
-        CommandGrasshopperPreviewOff.CreateUI(radioButton);
-        CommandGrasshopperPreviewWireframe.CreateUI(radioButton);
-        CommandGrasshopperPreviewShaded.CreateUI(radioButton);
+        int buttonWidth = 45;
+        CommandGrasshopperPreviewOff.CreateUI(radioButton, minWidth: buttonWidth);
+        CommandGrasshopperPreviewWireframe.CreateUI(radioButton, minWidth: buttonWidth);
+        CommandGrasshopperPreviewShaded.CreateUI(radioButton, minWidth: buttonWidth);
       }
 #endif
     }
@@ -492,9 +497,9 @@ namespace RhinoInside.Revit.UI
   [Transaction(TransactionMode.ReadOnly), Regeneration(RegenerationOption.Manual)]
   class CommandGrasshopperPreviewOff : CommandGrasshopperPreview
   {
-    public static void CreateUI(RadioButtonGroup radioButtonGroup)
+    public static void CreateUI(RadioButtonGroup radioButtonGroup, int minWidth)
     {
-      var buttonData = NewToggleButtonData<CommandGrasshopperPreviewOff, Availability>("Off");
+      var buttonData = NewToggleButtonData<CommandGrasshopperPreviewOff, Availability>(" Off ");
 
       if (radioButtonGroup.AddItem(buttonData) is ToggleButton pushButton)
       {
@@ -502,6 +507,8 @@ namespace RhinoInside.Revit.UI
         pushButton.Image = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Preview_Off.png", true);
         pushButton.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Preview_Off.png");
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
+        if (GetAdwndRibbonButton(pushButton) is Autodesk.Windows.RibbonButton ribbonButton)
+          ribbonButton.MinWidth = minWidth;
 
         if (GH.PreviewServer.PreviewMode == GH_PreviewMode.Disabled)
           radioButtonGroup.Current = pushButton;
@@ -519,9 +526,9 @@ namespace RhinoInside.Revit.UI
   [Transaction(TransactionMode.ReadOnly), Regeneration(RegenerationOption.Manual)]
   class CommandGrasshopperPreviewWireframe : CommandGrasshopperPreview
   {
-    public static void CreateUI(RadioButtonGroup radioButtonGroup)
+    public static void CreateUI(RadioButtonGroup radioButtonGroup, int minWidth)
     {
-      var buttonData = NewToggleButtonData<CommandGrasshopperPreviewWireframe, Availability>("Wireframe");
+      var buttonData = NewToggleButtonData<CommandGrasshopperPreviewWireframe, Availability>(" Wire ");
 
       if (radioButtonGroup.AddItem(buttonData) is ToggleButton pushButton)
       {
@@ -529,6 +536,8 @@ namespace RhinoInside.Revit.UI
         pushButton.Image = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Preview_Wireframe.png", true);
         pushButton.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Preview_Wireframe.png");
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
+        if (GetAdwndRibbonButton(pushButton) is Autodesk.Windows.RibbonButton ribbonButton)
+          ribbonButton.MinWidth = minWidth;
 
         if (GH.PreviewServer.PreviewMode == GH_PreviewMode.Wireframe)
           radioButtonGroup.Current = pushButton;
@@ -546,7 +555,7 @@ namespace RhinoInside.Revit.UI
   [Transaction(TransactionMode.ReadOnly), Regeneration(RegenerationOption.Manual)]
   class CommandGrasshopperPreviewShaded : CommandGrasshopperPreview
   {
-    public static void CreateUI(RadioButtonGroup radioButtonGroup)
+    public static void CreateUI(RadioButtonGroup radioButtonGroup, int minWidth)
     {
       var buttonData = NewToggleButtonData<CommandGrasshopperPreviewShaded, Availability>("Shaded");
 
@@ -556,8 +565,10 @@ namespace RhinoInside.Revit.UI
         pushButton.Image = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Preview_Shaded.png", true);
         pushButton.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Preview_Shaded.png");
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
+        if (GetAdwndRibbonButton(pushButton) is Autodesk.Windows.RibbonButton ribbonButton)
+          ribbonButton.MinWidth = minWidth;
 
-        if(GH.PreviewServer.PreviewMode == GH_PreviewMode.Shaded)
+        if (GH.PreviewServer.PreviewMode == GH_PreviewMode.Shaded)
           radioButtonGroup.Current = pushButton;
       }
     }

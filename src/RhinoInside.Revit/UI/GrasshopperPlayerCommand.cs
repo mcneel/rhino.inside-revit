@@ -28,12 +28,13 @@ namespace RhinoInside.Revit.UI
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
       // Create a push button to trigger a command add it to the ribbon panel.
-      var buttonData = NewPushButtonData<CommandGrasshopperPlayer, NeedsActiveDocument<Availability>>("Player");
+      var buttonData = NewPushButtonData<CommandGrasshopperPlayer, NeedsActiveDocument<Availability>>(
+        "Player",
+        "Resources.GrasshopperPlayer.png",
+        "Loads and evals a Grasshopper definition"
+        );
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        pushButton.ToolTip = "Loads and evals a Grasshopper definition";
-        pushButton.Image = ImageBuilder.LoadBitmapImage("Resources.GrasshopperPlayer.png", true);
-        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("Resources.GrasshopperPlayer.png");
         pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://www.grasshopper3d.com/"));
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool loaded, out bool loadProtected);
       }

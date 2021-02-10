@@ -43,13 +43,14 @@ namespace RhinoInside.Revit.UI
   {
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      var buttonData =  NewPushButtonData<CommandRhino, Availability>("Rhino");
+      var buttonData =  NewPushButtonData<CommandRhino, Availability>(
+        "Rhino",
+        "Resources.Rhino.png",
+        "Shows Rhino window"
+        );
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        pushButton.ToolTip = "Shows Rhino window";
         pushButton.LongDescription = $"Use CTRL key to open only Rhino window without restoring other tool windows";
-        pushButton.Image = ImageBuilder.LoadBitmapImage("Resources.Rhino.png", true);
-        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Rhino.png");
         pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://discourse.mcneel.com/"));
       }
     }
@@ -91,13 +92,14 @@ namespace RhinoInside.Revit.UI
   {
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      var buttonData = NewPushButtonData<CommandPython, Availability>("Python");
+      var buttonData = NewPushButtonData<CommandPython, Availability>(
+        "Python",
+        "Resources.Python.png",
+        "Shows Python editor window"
+        );
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        pushButton.ToolTip = "Shows Python editor window";
         pushButton.LongDescription = $"Use CTRL key to open only Python editor window without restoring other tool windows";
-        pushButton.Image = ImageBuilder.LoadBitmapImage("Resources.Python.png", true);
-        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Python.png");
         pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://developer.rhino3d.com/guides/rhinopython/"));
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool loaded, out bool loadProtected);
       }
