@@ -589,6 +589,8 @@ namespace RhinoInside.Revit
 
       /// <summary>
       /// Initialize the ui framework
+      /// This method needs to be independent since at calling of this method,
+      /// the CLR runtime expects the Rhino UI framework to be already loaded
       /// </summary>
       static void Init()
       {
