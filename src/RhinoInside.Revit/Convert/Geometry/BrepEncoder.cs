@@ -47,22 +47,40 @@ namespace RhinoInside.Revit.Convert.Geometry
         foreach (var edge in brep.Edges)
         {
           if (edge.Tolerance > Revit.VertexTolerance)
-            GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Geometry contains out of tolerance edges, it wil be reparameterized.", edge);
+            GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Geometry contains out of tolerance edges, it will be rebuilt.", edge);
         }
       }
 
-      return ReparameterizeBrep(ref brep);
+      return RebuildBrep(ref brep);
     }
 
-    static bool ReparameterizeBrep(ref Brep brep)
+    static bool RebuildBrep(ref Brep brep)
     {
       var edgesToUnjoin = brep.Edges.Select(x => x.EdgeIndex);
       var shells = brep.UnjoinEdges(edgesToUnjoin);
       if (shells.Length == 0)
         shells = new Brep[] { brep };
 
+      var kinkyEdges = 0;
+      var microEdges = 0;
+      var mergedEdges = 0;
+
       foreach (var shell in shells)
       {
+        // Edges
+        {
+          var edges = shell.Edges;
+
+          int edgeCount = edges.Count;
+          for (int ei = 0; ei < edgeCount; ++ei)
+            edges.SplitKinkyEdge(ei, Revit.AngleTolerance);
+
+          kinkyEdges += edges.Count - edgeCount;
+          microEdges += edges.RemoveNakedMicroEdges(Revit.VertexTolerance);
+          mergedEdges += edges.MergeAllEdges(Revit.AngleTolerance);
+        }
+
+        // Faces
         foreach (var face in shell.Faces)
         {
           face.GetSurfaceSize(out var width, out var height);
@@ -81,31 +99,20 @@ namespace RhinoInside.Revit.Convert.Geometry
           face.RebuildEdges(1e-6, false, true);
         }
 
-        int edgeCount = shell.Edges.Count;
-        for (int ei = 0; ei < shell.Edges.Count; ++ei)
-        {
-          var kinky = shell.Edges.SplitKinkyEdge(ei, Revit.AngleTolerance);
-          if (kinky && shell.Edges.Count - edgeCount > 0)
-          {
-            GeometryEncoder.Context.Peek.RuntimeMessage(10, $"{shell.Edges.Count - edgeCount} kinky-edges splitted", default);
-            edgeCount = shell.Edges.Count;
-          }
-        }
-
-        var microEdges = shell.Edges.RemoveNakedMicroEdges(Revit.VertexTolerance);
-#if DEBUG
-        if (microEdges > 0)
-          GeometryEncoder.Context.Peek.RuntimeMessage(255, "DEBUG - Micro-edges removed", default);
-#endif
-
-        var mergedEdges = shell.Edges.MergeAllEdges(Revit.AngleTolerance);
-#if DEBUG
-        if (mergedEdges > 0)
-          GeometryEncoder.Context.Peek.RuntimeMessage(255, "DEBUG - Edges merged", default);
-#endif
-
+        // Flags
         shell.SetTrimIsoFlags();
       }
+
+      if(kinkyEdges > 0)
+        GeometryEncoder.Context.Peek.RuntimeMessage(10, $"{kinkyEdges} kinky-edges splitted", default);
+
+#if DEBUG
+      if (microEdges > 0)
+        GeometryEncoder.Context.Peek.RuntimeMessage(255, $"DEBUG - {microEdges} Micro-edges removed", default);
+
+      if (mergedEdges > 0)
+        GeometryEncoder.Context.Peek.RuntimeMessage(255, $"DEBUG - {mergedEdges} Edges merged", default);
+#endif
 
       //var join = shells;
       var join = Brep.JoinBreps(shells, Revit.VertexTolerance);
@@ -119,6 +126,14 @@ namespace RhinoInside.Revit.Convert.Geometry
         //var joined = merge.JoinNakedEdges(Revit.VertexTolerance);
         brep = merge;
       }
+
+#if DEBUG
+      foreach (var edge in brep.Edges)
+      {
+        if (edge.Tolerance > Revit.VertexTolerance)
+          GeometryEncoder.Context.Peek.RuntimeMessage(255, $"DEBUG - Geometry contains out of tolerance edges", edge);
+      }
+#endif
 
       return brep.IsValid;
     }
