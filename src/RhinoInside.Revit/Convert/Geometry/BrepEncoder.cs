@@ -560,7 +560,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     internal static DB.Solid ToACIS(/*const*/ Brep brep, double factor)
     {
-      var TempFolder = Path.Combine(Path.GetTempPath(), "McNeel", "Rhino.Inside", $"V{RhinoApp.ExeVersion}", "SATCaches");
+      var TempFolder = Path.Combine(Path.GetTempPath(), Addin.AddinCompany, Addin.AddinName, $"V{RhinoApp.ExeVersion}", "SATCaches");
       Directory.CreateDirectory(TempFolder);
 
       var SATFile = Path.Combine(TempFolder, $"{Guid.NewGuid():N}.sat");

@@ -149,6 +149,11 @@ namespace RhinoInside.Revit
 
   public class Addin : UIX.Application
   {
+    #region AddinInfo
+    public static string AddinCompany => "McNeel";
+    public static string AddinName => "Rhino.Inside";
+    #endregion
+
     #region Status
     internal enum Status
     {

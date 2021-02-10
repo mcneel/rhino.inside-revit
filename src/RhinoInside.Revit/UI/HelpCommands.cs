@@ -50,8 +50,8 @@ namespace RhinoInside.Revit.UI
       var location = Path.Combine
       (
         Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-        "McNeel",
-        "Rhino.Inside",
+        Addin.AddinCompany,
+        Addin.AddinName,
         "Revit",
         $"{Addin.Version.Major}.{Addin.Version.Minor}",
         "Samples"

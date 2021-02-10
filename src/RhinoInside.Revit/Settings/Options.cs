@@ -90,7 +90,7 @@ namespace RhinoInside.Revit.Settings
     }
 
     // Data store information
-    private static string DataDirectoryPath => Path.Combine("McNeel", "Rhino.Inside", "Revit", $"{Addin.Version.Major}.0");
+    private static string DataDirectoryPath => Path.Combine(Addin.AddinCompany, Addin.AddinName, "Revit", $"{Addin.Version.Major}.0");
     private static string AdminDataDirectory => Path.Combine(
       Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
       DataDirectoryPath
