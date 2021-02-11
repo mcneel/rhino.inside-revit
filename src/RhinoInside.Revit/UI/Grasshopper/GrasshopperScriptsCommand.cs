@@ -143,7 +143,7 @@ namespace RhinoInside.Revit.UI
         new AssemblyName
         {
           Name = assemblyName,
-          Version = new Version(0,1)
+          Version = new Version(0, 1)
         },
         AssemblyBuilderAccess.RunAndSave,
         assemblyPath
@@ -177,8 +177,14 @@ namespace RhinoInside.Revit.UI
 
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
-      TaskDialog.Show("Grasshopper", $"Yaay {ExecCfgs?.ScriptPath}");
-      return Result.Succeeded;
+      // run definition with grasshopper player
+      return CommandGrasshopperPlayer.Execute(
+        data.Application,
+        data.Application.ActiveUIDocument?.ActiveView,
+        new Dictionary<string, string>(),
+        ExecCfgs.ScriptPath,
+        ref message
+        );
     }
   }
 }
