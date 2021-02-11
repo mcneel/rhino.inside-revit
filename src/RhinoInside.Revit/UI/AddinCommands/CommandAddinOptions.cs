@@ -42,7 +42,7 @@ namespace RhinoInside.Revit.UI
         }
 
         // disable the button if options are readonly
-        pushButton.Enabled = !AddinOptions.IsReadOnly;
+        pushButton.Enabled = !AddinOptions.IsReadOnly && Addin.IsRhinoUIFrameworkReady;
       }
     }
 

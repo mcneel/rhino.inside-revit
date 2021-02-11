@@ -300,7 +300,7 @@ namespace RhinoInside.Revit
       UI.CommandForums.CreateUI(addinRibbon);
       UI.HelpCommand.CreateUI(addinRibbon);
       addinRibbon.AddSeparator();
-      // addin options
+      // addin options, has Eto window and requires Eto to be loaded
       UI.CommandAddinOptions.CreateUI(addinRibbon);
 
       // check for updates
@@ -590,6 +590,7 @@ namespace RhinoInside.Revit
     #endregion
 
     #region Rhino-friendly UI Framework
+    public static bool IsRhinoUIFrameworkReady { get; private set; }  = false;
     static class RhinoUIFramework
     {
       /// <summary>
@@ -598,11 +599,14 @@ namespace RhinoInside.Revit
       /// <param name="sysDir"></param>
       static public void LoadFramework(string sysDir)
       {
-        Assembly.LoadFrom(Path.Combine(sysDir, "Eto.dll"));
-        Assembly.LoadFrom(Path.Combine(sysDir, "Eto.Wpf.dll"));
-        Assembly.LoadFrom(Path.Combine(sysDir, "Eto.Serialization.Xaml.dll"));
-        Assembly.LoadFrom(Path.Combine(sysDir, "Xceed.Wpf.Toolkit.dll"));
-
+        foreach(string assm in new string[] { "Eto.dll" , "Eto.Wpf.dll", "Eto.Serialization.Xaml.dll", "Xceed.Wpf.Toolkit.dll" })
+        {
+          var assmPath = Path.Combine(sysDir, assm);
+          if (File.Exists(assmPath))
+            Assembly.LoadFrom(assmPath);
+          else
+            return;
+        }
         Init();
       }
 
@@ -615,6 +619,7 @@ namespace RhinoInside.Revit
       {
         if (Eto.Forms.Application.Instance is null)
           new Eto.Forms.Application(Eto.Platforms.Wpf).Attach();
+        IsRhinoUIFrameworkReady = true;
       }
     }
 
