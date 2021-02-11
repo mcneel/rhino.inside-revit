@@ -17,6 +17,9 @@ namespace RhinoInside.Revit.Settings
 
     [XmlElement]
     public string UpdateChannel { get; set; } = AddinUpdater.DefaultChannel.Id.ToString();
+
+    [XmlElement]
+    public List<string> ScriptLocations { get; set; } = new List<string> { @"Z:\LEO-WX\Downloads\GH Scripts" };
   }
 
   // Easy static access to addin options
@@ -37,6 +40,12 @@ namespace RhinoInside.Revit.Settings
     {
       get => Instance.UpdateChannel;
       set => Instance.UpdateChannel = value;
+    }
+
+    public static List<string> ScriptLocations
+    {
+      get => Instance.ScriptLocations;
+      set => Instance.ScriptLocations = value;
     }
 
     // Singleton

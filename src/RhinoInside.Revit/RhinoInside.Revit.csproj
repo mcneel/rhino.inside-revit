@@ -260,14 +260,19 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Settings\Options.cs" />
+    <Compile Include="UI\AddinCommands\CommandAbout.cs" />
+    <Compile Include="UI\AddinCommands\CommandAddinOptions.cs" />
+    <Compile Include="UI\AddinCommands\CommandForums.cs" />
+    <Compile Include="UI\AddinCommands\CommandLaunch.cs" />
     <Compile Include="UI\BaseUI.cs" />
-    <Compile Include="UI\DocumentCommand.cs" />
-    <Compile Include="UI\GrasshopperCommand.cs" />
-    <Compile Include="UI\GrasshopperPlayerCommand.cs" />
-    <Compile Include="UI\HelpCommands.cs" />
-    <Compile Include="UI\OptionsWindow.cs" />
+    <Compile Include="UI\BaseCommand.cs" />
+    <Compile Include="UI\Grasshopper\GrasshopperCommand.cs" />
+    <Compile Include="UI\Grasshopper\GrasshopperPlayerCommand.cs" />
+    <Compile Include="UI\Grasshopper\GrasshopperScriptsCommand.cs" />
+    <Compile Include="UI\AddinCommands\HelpCommands.cs" />
+    <Compile Include="UI\Forms\OptionsWindow.cs" />
     <Compile Include="UI\Rhinoceros\Import.cs" />
-    <Compile Include="UI\RhinoCommand.cs" />
+    <Compile Include="UI\Rhinoceros\RhinoCommand.cs" />
     <Compile Include="GH\Guest.cs" />
     <Compile Include="GH\PreviewServer.cs" />
     <Compile Include="DirectContext3DServer.cs" />
@@ -330,6 +335,9 @@
     <EmbeddedResource Include="Resources\About-icon.png" />
     <EmbeddedResource Include="Resources\Forum-icon.png" />
     <EmbeddedResource Include="Resources\Link-icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GhFile.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
