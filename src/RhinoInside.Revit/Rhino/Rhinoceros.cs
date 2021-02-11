@@ -665,6 +665,11 @@ namespace RhinoInside.Revit
       return Result.Cancelled;
     }
 
+    public static Result RunCommandOptions()
+    {
+      return RhinoApp.RunScript("!_Options", false) ? Result.Succeeded : Result.Failed;
+    }
+
     /// <summary>
     /// Represents a Pseudo-modal loop.
     /// </summary>

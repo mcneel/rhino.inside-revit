@@ -114,6 +114,7 @@ namespace RhinoInside.Revit.UI
             CommandImport.CreateUI(rhinoPanel);
             CommandRhinoPreview.CreateUI(rhinoPanel);
             CommandPython.CreateUI(rhinoPanel);
+            CommandRhinoOptions.CreateUI(rhinoPanel);
           }
 
           if (assemblies.Any(x => x.GetName().Name == "Grasshopper"))

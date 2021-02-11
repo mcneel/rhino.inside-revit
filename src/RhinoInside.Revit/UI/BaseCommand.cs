@@ -115,6 +115,29 @@ namespace RhinoInside.Revit.UI
     }
 
     /// <summary>
+    /// Set an already created button to panel dialog launcher
+    /// </summary>
+    /// <param name="tabName">Ribbon Tab name</param>
+    /// <param name="panel">Ribbon panel</param>
+    /// <param name="button">Ribbon button</param>
+    public static void SetButtonToPanelDialogLauncher(string tabName, RibbonPanel panel, RibbonButton button)
+    {
+      foreach (var adwndRibbonTab in Autodesk.Windows.ComponentManager.Ribbon.Tabs)
+        if (adwndRibbonTab.Title == tabName)
+        {
+          foreach (var adwndRibbonPanel in adwndRibbonTab.Panels)
+            if (panel.Name == adwndRibbonPanel.Source.Title)
+            {
+              if (GetAdwndRibbonButton(button) is Autodesk.Windows.RibbonButton adwndRibbonButton)
+              {
+                adwndRibbonPanel.Source.Items.Remove(adwndRibbonButton);
+                adwndRibbonPanel.Source.DialogLauncher = adwndRibbonButton;
+              }
+            }
+        }
+    }
+
+    /// <summary>
     /// Available when an active Revit document is available
     /// </summary>
     public class NeedsActiveDocument<T> : External.UI.CommandAvailability

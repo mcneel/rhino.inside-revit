@@ -111,4 +111,29 @@ namespace RhinoInside.Revit.UI
       return Result.Succeeded;
     }
   }
+
+
+  [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
+  class CommandRhinoOptions : RhinoCommand
+  {
+    public static void CreateUI(RibbonPanel ribbonPanel)
+    {
+      var buttonData = NewPushButtonData<CommandRhinoOptions, Availability>(
+        "RhinoOptions",
+        "Resources.Rhino.png",
+        "Shows Rhino Options window"
+        );
+      if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
+      {
+        SetButtonToPanelDialogLauncher(Addin.AddinName, ribbonPanel, pushButton);
+      }
+    }
+
+    public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
+    {
+      Rhinoceros.RunCommandOptions();
+      return Result.Succeeded;
+    }
+  }
+
 }
