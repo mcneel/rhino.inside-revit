@@ -296,6 +296,7 @@ namespace RhinoInside.Revit
       addinRibbon.AddSlideOut();
       // about and help links
       UI.CommandAbout.CreateUI(addinRibbon);
+      UI.CommandGuides.CreateUI(addinRibbon);
       UI.CommandForums.CreateUI(addinRibbon);
       UI.HelpCommand.CreateUI(addinRibbon);
       addinRibbon.AddSeparator();

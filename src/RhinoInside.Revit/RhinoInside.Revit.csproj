@@ -263,6 +263,7 @@
     <Compile Include="UI\AddinCommands\CommandAbout.cs" />
     <Compile Include="UI\AddinCommands\CommandAddinOptions.cs" />
     <Compile Include="UI\AddinCommands\CommandForums.cs" />
+    <Compile Include="UI\AddinCommands\CommandGuides.cs" />
     <Compile Include="UI\AddinCommands\CommandLaunch.cs" />
     <Compile Include="UI\BaseUI.cs" />
     <Compile Include="UI\BaseCommand.cs" />
@@ -338,6 +339,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GhFile.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Guides-icon.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
