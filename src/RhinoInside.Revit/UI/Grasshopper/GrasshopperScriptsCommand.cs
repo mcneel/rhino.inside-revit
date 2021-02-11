@@ -38,7 +38,7 @@ namespace RhinoInside.Revit.UI
         // generate assembly containing script command types
         var assmName = $"GrasshopperScriptCommands{Guid.NewGuid()}";
         var assmFileName = $"{assmName}.dll";
-        var assmPath = @"C:\Users\ehsan\Desktop";
+        var assmPath = Path.GetTempPath();
         var assmInfo = GenerateGrasshopperScriptCommandAssembly(assmName, assmFileName, assmPath);
         var assmLoc = Path.Combine(assmPath, assmFileName);
         ProcessScriptsRecursive(location, (name, path) =>
