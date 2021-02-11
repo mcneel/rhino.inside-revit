@@ -584,8 +584,7 @@ namespace RhinoInside.Revit
     public static DateTime BuildDate => new DateTime(2000, 1, 1).AddDays(Version.Build).AddSeconds(Version.Revision * 2);
     public static int DaysUntilExpiration => Math.Max(0, 45 - (DateTime.Now - BuildDate).Days);
 
-    //public static Version Version => Assembly.GetExecutingAssembly().GetName().Version;
-    public static Version Version => new Version(0, 0, 7688);
+    public static Version Version => Assembly.GetExecutingAssembly().GetName().Version;
     public static string DisplayVersion => $"{Version} ({BuildDate})";
     #endregion
 
