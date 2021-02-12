@@ -131,6 +131,11 @@ namespace RhinoInside.Revit.UI
             CommandGrasshopperBake.CreateUI(grasshopperPanel);
             grasshopperPanel.AddSeparator();
             CommandGrasshopperPlayer.CreateUI(grasshopperPanel);
+            grasshopperPanel.AddSlideOut();
+            CommandGrasshopperPackageManager.CreateUI(grasshopperPanel);
+            CommandGrasshopperFolders.CreateUI(grasshopperPanel);
+
+            // create grasshopper scripts panels
             GrasshopperScriptsCommand.CreateUI(data.Application);
           }
 

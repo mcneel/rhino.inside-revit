@@ -334,7 +334,6 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\About-icon.png" />
     <EmbeddedResource Include="Resources\Forum-icon.png" />
-    <EmbeddedResource Include="Resources\Link-icon.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GhFile.png" />
@@ -345,6 +344,19 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GhFile_32.png" />
     <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Import-3DM_32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Link-icon_16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Link-icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Folder-icon.png" />
+    <EmbeddedResource Include="Resources\Folder-icon_16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\PackageManager-icon.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">

@@ -588,4 +588,86 @@ namespace RhinoInside.Revit.UI
   }
 #endif
   #endregion
+
+  #region Misc
+  [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
+  class CommandGrasshopperPackageManager : GrasshopperCommand
+  {
+    public static void CreateUI(RibbonPanel ribbonPanel)
+    {
+      // Create a push button to trigger a command add it to the ribbon panel.
+      var buttonData = NewPushButtonData<CommandGrasshopperPackageManager, Availability>(
+        "Package\nManager",
+        "Resources.PackageManager-icon.png",
+        "Shows Rhino/Grasshopper Package Manager"
+      );
+      if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
+      {
+        pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://www.food4rhino.com/"));
+      }
+    }
+
+    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
+    {
+      Rhinoceros.RunCommandPackageManager();
+      return Result.Succeeded;
+    }
+  }
+
+  [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
+  abstract class CommandGrasshopperFolders : Command
+  {
+    public static void CreateUI(RibbonPanel ribbonPanel)
+    {
+      ribbonPanel.AddStackedItems(
+        NewPushButtonData<CommandGrasshopperUserObjectsFolder, AlwaysAvailable>(
+          name: "UserObjects Folder",
+          iconName: "Resources.Folder-icon.png",
+          tooltip: "Shows Grasshopper UserObjects Folder"
+        ),
+        NewPushButtonData<CommandGrasshopperClustersFolder, AlwaysAvailable>(
+          name: "Clusters Folder",
+          iconName: "Resources.Folder-icon.png",
+          tooltip: "Shows Grasshopper Clusters Folder"
+        ),
+        NewPushButtonData<CommandGrasshopperComponentsFolder, AlwaysAvailable>(
+          name: "Components Folder",
+          iconName: "Resources.Folder-icon.png",
+          tooltip: "Shows Grasshopper Components Folder"
+        )
+      );
+    }
+  }
+
+  [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
+  class CommandGrasshopperUserObjectsFolder : HelpCommand
+  {
+    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
+    {
+      Rhinoceros.RunCommandGHFolder(option: "U");
+      return Result.Succeeded;
+    }
+  }
+
+  [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
+  class CommandGrasshopperClustersFolder : HelpCommand
+  {
+    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
+    {
+      Rhinoceros.RunCommandGHFolder(option: "C");
+      return Result.Succeeded;
+    }
+  }
+
+  [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
+  class CommandGrasshopperComponentsFolder : HelpCommand
+  {
+    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
+    {
+      Rhinoceros.RunCommandGHFolder(option: "o");
+      return Result.Succeeded;
+    }
+  }
+
+  #endregion
 }

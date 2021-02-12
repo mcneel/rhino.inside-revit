@@ -670,6 +670,16 @@ namespace RhinoInside.Revit
       return RhinoApp.RunScript("!_Options", false) ? Result.Succeeded : Result.Failed;
     }
 
+    public static Result RunCommandPackageManager()
+    {
+      return RhinoApp.RunScript("!_PackageManager", false) ? Result.Succeeded : Result.Failed;
+    }
+
+    public static Result RunCommandGHFolder(string option = "S")
+    {
+      return RhinoApp.RunScript($"!_GrasshopperFolders {option}", false) ? Result.Succeeded : Result.Failed;
+    }
+
     /// <summary>
     /// Represents a Pseudo-modal loop.
     /// </summary>
