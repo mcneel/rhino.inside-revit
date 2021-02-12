@@ -26,82 +26,172 @@ using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.UI
 {
+  /// <summary>
+  /// Types of scripts that can be executed
+  /// </summary>
+  public enum ScriptType
+  {
+    GrasshopperGH = 0,
+    GrasshopperGHX,
+  }
+
+  class LinkedItem
+  {
+    public string Name;
+    public string Tooltip = string.Empty;
+  }
+
+  class LinkedScript: LinkedItem
+  {
+    public ScriptType ScriptType;
+    public string ScriptPath;
+  }
+
+  class LinkedItemGroup : LinkedItem
+  {
+    public string GroupPath;
+    public List<LinkedItem> Items = new List<LinkedItem>();
+  }
+
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
-  class GrasshopperScriptsCommand : Command
+  abstract class GrasshopperScriptsCommand : Command
   {
     public static void CreateUI(UIApplication uiApp)
     {
       foreach (var location in AddinOptions.ScriptLocations)
       {
-        var scriptTypes = new Dictionary<string, Type>();
+        // --------------------------------------------------------------------
+        // FIND SCRIPTS
+        // --------------------------------------------------------------------
+        var items = FindScriptsRecursive(location);
 
+        // --------------------------------------------------------------------
+        // CREATE ASSEMBLY
+        // --------------------------------------------------------------------
         // generate assembly containing script command types
         var assmName = $"GrasshopperScriptCommands{Guid.NewGuid()}";
         var assmFileName = $"{assmName}.dll";
         var assmPath = Path.GetTempPath();
         var assmInfo = GenerateGrasshopperScriptCommandAssembly(assmName, assmFileName, assmPath);
         var assmLoc = Path.Combine(assmPath, assmFileName);
-        ProcessScriptsRecursive(location, (name, path) =>
+        var scriptTypes = new Dictionary<string, Type>();
+        // not need to recurse over data since we are only going one level deep
+        // groups are turned into PullDowns, scripts are turned into PushButons
+        // But first lets create command types for all scripts
+        // groups don't need a type since they don't execute anything
+        items.OfType<LinkedItemGroup>().ToList().ForEach((group) =>
         {
-          scriptTypes[name] = GenerateGrasshopperScriptCommandType(assmInfo.Item2, name, path);
+          group.Items.OfType<LinkedScript>().ToList().ForEach((script) =>
+          {
+            scriptTypes[script.Name] = GenerateGrasshopperScriptCommandType(assmInfo.Item2, script.ScriptType, script.Name, script.ScriptPath);
+          });
         });
+        items.OfType<LinkedScript>().ToList().ForEach((script) =>
+        {
+          scriptTypes[script.Name] = GenerateGrasshopperScriptCommandType(assmInfo.Item2, script.ScriptType, script.Name, script.ScriptPath);
+        });
+
+        // save and load the created assembly
         assmInfo.Item1.Save(assmFileName);
         Assembly.LoadFrom(assmLoc);
 
+        // --------------------------------------------------------------------
+        // CREATE UI
+        // --------------------------------------------------------------------
         var ribbonPanel = uiApp.CreateRibbonPanel(Addin.AddinName, Path.GetFileName(location));
-        ProcessScriptsRecursive(location, (name, path) =>
-        {
-          try
-          {
-            var buttonData = NewScriptButton(
-              scriptTypes[name],
-              name,
-              "",
-              assmLoc
-            );
 
-            if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
-            {
-            }
-          }
-          catch (Exception ex)
+        // create pulldown buttons and their sub pushbuttons
+        items.OfType<LinkedItemGroup>().ToList().ForEach((group) =>
+        {
+          var pullDownData = new PulldownButtonData(group.Name, group.Name)
           {
-            TaskDialog.Show("GH", $"{scriptTypes[name].Assembly.Location}, {scriptTypes[name].FullName} | {ex.Message}");
+            Image = ImageBuilder.LoadRibbonButtonImage("Ribbon.Grasshopper.GhFolder.png", true),
+            LargeImage = ImageBuilder.LoadRibbonButtonImage("Ribbon.Grasshopper.GhFolder.png"),
+            ToolTip = group.Tooltip,
+          };
+          if (ribbonPanel.AddItem(pullDownData) is PulldownButton pulldown)
+          {
+            group.Items.OfType<LinkedScript>().ToList().ForEach((script) =>
+            {
+              var buttonData = NewScriptButton(
+                scriptCmdType: scriptTypes[script.Name],
+                script: script,
+                assmLoc: assmLoc
+              );
+              if (pulldown.AddPushButton(buttonData) is PushButton pushButton)
+              {
+                // do stuff with button?
+              }
+            });
+          }
+        });
+
+        // create push buttons on the panel
+        items.OfType<LinkedScript>().ToList().ForEach((script) =>
+        {
+          var buttonData = NewScriptButton(
+                scriptCmdType: scriptTypes[script.Name],
+                script: script,
+                assmLoc: assmLoc
+              );
+          if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
+          {
+            // do stuff with button?
           }
         });
       }
     }
 
-    internal static void ProcessScriptsRecursive(string location, Action<string, string> processAction)
+    internal static List<LinkedItem> FindScriptsRecursive(string location)
     {
+      var items = new List<LinkedItem>();
+
       foreach (var subDir in Directory.GetDirectories(location))
-        ProcessScriptsRecursive(subDir, processAction);
+      {
+        // only go one level deep
+        items.Add(
+          new LinkedItemGroup
+          {
+            Name = Path.GetFileName(subDir),
+            Items = FindScriptsRecursive(subDir),
+          }
+        );
+      }
 
       foreach (var entry in Directory.GetFiles(location))
       {
-        if (new string[] { ".gh", ".ghx" }.Contains(Path.GetExtension(entry).ToLower()))
+        var ext = Path.GetExtension(entry).ToLower();
+        if (new string[] { ".gh", ".ghx" }.Contains(ext))
         {
-          string scriptName = Path.GetFileNameWithoutExtension(entry);
-          processAction(scriptName, entry);
+          items.Add(
+            new LinkedScript
+            {
+              ScriptType = ext == ".gh" ? ScriptType.GrasshopperGH : ScriptType.GrasshopperGHX,
+              ScriptPath = entry,
+              Name = Path.GetFileNameWithoutExtension(entry),
+            }
+          );
         }
       }
+
+      return items;
     }
 
-    internal static PushButtonData NewScriptButton(Type scriptCmdType, string name, string tooltip, string assmLoc)
+    internal static PushButtonData NewScriptButton(Type scriptCmdType, LinkedScript script, string assmLoc)
     {
-      var commandName = scriptCmdType.Name + (name ?? "");
-      var commandButtonName = name ?? commandName;
+      var commandName = scriptCmdType.Name + (script.Name ?? "");
+      var commandButtonName = script.Name ?? commandName;
       var typeAssmLocation = assmLoc;
       var typeName = scriptCmdType.FullName;
       return new PushButtonData(commandName, commandButtonName, typeAssmLocation, typeName)
       {
         Image = ImageBuilder.LoadRibbonButtonImage("Ribbon.Grasshopper.GhFile.png", true),
         LargeImage = ImageBuilder.LoadRibbonButtonImage("Ribbon.Grasshopper.GhFile.png"),
-        ToolTip = tooltip,
+        ToolTip = script.Tooltip,
       };
     }
 
-    internal static Type GenerateGrasshopperScriptCommandType(ModuleBuilder moduleBuilder, string scriptName, string scriptPath)
+    internal static Type GenerateGrasshopperScriptCommandType(ModuleBuilder moduleBuilder, ScriptType scriptType, string scriptName, string scriptPath)
     {
       var typeBuilder = moduleBuilder.DefineType(
         scriptName,
@@ -124,12 +214,19 @@ namespace RhinoInside.Revit.UI
       ));
 
       // get GrasshopperScriptCommand(string scriptPath) const
-      var ghScriptCmdConst = typeof(GrasshopperScriptCommand).GetConstructor(new Type[] { typeof(string) });
+      var ghScriptCmdConst = typeof(GrasshopperScriptCommand).GetConstructor(new Type[] {
+        typeof(int),        // "scriptType"
+        typeof(string)      // "scriptPath"
+      });
       // define a base contructor
       var baseConst = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new Type[] { });
       var gen = baseConst.GetILGenerator();
       gen.Emit(OpCodes.Ldarg_0);                // load "this" onto stack
-      gen.Emit(OpCodes.Ldstr, scriptPath);      // load "scriptPath"
+                                                // load "scriptType"
+      gen.Emit(OpCodes.Ldc_I4, (int)scriptType);
+                                                // load "scriptPath"
+      gen.Emit(OpCodes.Ldstr, scriptPath);
+
       gen.Emit(OpCodes.Call, ghScriptCmdConst); // call script command constructor with values loaded to stack
       gen.Emit(OpCodes.Nop);                    // add a few NOPs
       gen.Emit(OpCodes.Ret);                    // return
@@ -153,29 +250,59 @@ namespace RhinoInside.Revit.UI
         asmBuilder.DefineDynamicModule(assemblyName, assemblyFileName)
         );
     }
-
-    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements) => throw new NotImplementedException();
   }
 
+  /// <summary>
+  /// Base class for all the linked-script buttons in the UI. This class is dyanmically copied,
+  /// extended, and configured to point to the script file and then is tied to the button on the UI
+  /// </summary>
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
   public abstract class GrasshopperScriptCommand : Command
   {
+    /* Note:
+     * There is no base constructor. It is generated dyanmically when copying this base type
+     */
+
+    /// <summary>
+    /// Configurations for the target script
+    /// </summary>
     public class ScriptExecConfigs
     {
+      public ScriptType ScriptType = ScriptType.GrasshopperGH;
       public string ScriptPath;
     }
 
+    /// <summary>
+    /// Script configurations for this instance
+    /// </summary>
     public ScriptExecConfigs ExecCfgs;
 
-    public GrasshopperScriptCommand(string scriptPath)
+    /// <summary>
+    /// Create new instance pointing to given script
+    /// </summary>
+    /// <param name="scriptPath">Full path of script file</param>
+    public GrasshopperScriptCommand(int scriptType, string scriptPath)
     {
       ExecCfgs = new ScriptExecConfigs
       {
+        ScriptType = (ScriptType) scriptType,
         ScriptPath = scriptPath
       };
     }
 
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
+    {
+      switch(ExecCfgs.ScriptType)
+      {
+        case ScriptType.GrasshopperGH:
+        case ScriptType.GrasshopperGHX:
+          return ExecuteGH(data, ref message);
+
+        default: return Result.Succeeded;
+      }
+    }
+
+    private Result ExecuteGH(ExternalCommandData data, ref string message)
     {
       // run definition with grasshopper player
       return CommandGrasshopperPlayer.Execute(
