@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Windows.Forms;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
@@ -352,6 +353,13 @@ namespace RhinoInside.Revit
     #region Public Properties
     internal static WindowHandle MainWindow { get; private set; } = WindowHandle.Zero;
     public static IntPtr MainWindowHandle => MainWindow.Handle;
+
+    public static Screen MainScreen => Screen.FromHandle(MainWindowHandle);
+    public static int MainScreenScaleFactor
+      => MainScreen != null ?
+            System.Convert.ToInt32(Math.Abs(
+              MainScreen.WorkingArea.Width / System.Windows.SystemParameters.PrimaryScreenWidth
+              )) : 1;
 
 #if REVIT_2019
     public static string CurrentUsersDataFolderPath => ApplicationUI.ControlledApplication.CurrentUsersDataFolderPath;

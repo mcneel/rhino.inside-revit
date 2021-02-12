@@ -95,8 +95,8 @@ namespace RhinoInside.Revit.UI
       var typeName = scriptCmdType.FullName;
       return new PushButtonData(commandName, commandButtonName, typeAssmLocation, typeName)
       {
-        Image = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.GhFile.png", true),
-        LargeImage = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.GhFile.png"),
+        Image = ImageBuilder.LoadRibbonButtonImage("Resources.Ribbon.Grasshopper.GhFile.png", true),
+        LargeImage = ImageBuilder.LoadRibbonButtonImage("Resources.Ribbon.Grasshopper.GhFile.png"),
         ToolTip = tooltip,
       };
     }

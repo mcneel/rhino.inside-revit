@@ -93,7 +93,7 @@ namespace RhinoInside.Revit.UI
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
       var buttonData = NewPushButtonData<CommandPython, Availability>(
-        "Python",
+        "Python\nEditor",
         "Resources.Python.png",
         "Shows Python editor window"
         );

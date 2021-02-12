@@ -157,32 +157,43 @@ namespace RhinoInside.Revit
       return Media.Color.FromArgb(color.A, color.R, color.G, color.B);
     }
 
-    static internal Media.Imaging.BitmapImage LoadBitmapImage(string name, bool small = false) =>
-      Assembly.GetExecutingAssembly().LoadBitmapImage($"RhinoInside.Revit.{name}", small);
-
-    static internal Media.Imaging.BitmapImage LoadBitmapImage(this Assembly assembly, string name, bool small = false)
+    static internal Media.Imaging.BitmapSource LoadRibbonButtonImage(string name, bool small = false)
     {
-      using (var resource = assembly.GetManifestResourceStream(name))
+      using (var resource = Assembly.GetExecutingAssembly().GetManifestResourceStream($"RhinoInside.Revit.{name}"))
       {
-        var bitmapImage = new Media.Imaging.BitmapImage();
-        bitmapImage.BeginInit();
-        bitmapImage.StreamSource = resource;
-        bitmapImage.EndInit();
-
+        const uint defaultDPI = 96;
         int desiredSize = small ? 16 : 32;
-        if ((int) bitmapImage.Height != desiredSize || (int) bitmapImage.Width != desiredSize)
-        {
-          var scaledBitmapImage = new Media.Imaging.BitmapImage();
-          scaledBitmapImage.BeginInit();
-          scaledBitmapImage.StreamSource = resource;
-          scaledBitmapImage.DecodePixelWidth  = (int) Math.Round(bitmapImage.PixelWidth  * (desiredSize / bitmapImage.Width));
-          scaledBitmapImage.DecodePixelHeight = (int) Math.Round(bitmapImage.PixelHeight * (desiredSize / bitmapImage.Height));
-          scaledBitmapImage.EndInit();
+        var adjustedIconSize = desiredSize * 2;
+        var adjustedDPI = defaultDPI * 2;
+        var screenScale = Revit.MainScreenScaleFactor;
 
-          return scaledBitmapImage;
-        }
+        var baseImage = new Media.Imaging.BitmapImage();
+        baseImage.BeginInit();
+        baseImage.StreamSource = resource;
+        baseImage.DecodePixelHeight = adjustedIconSize * screenScale;
+        baseImage.EndInit();
+        resource.Seek(0, SeekOrigin.Begin);
 
-        return bitmapImage;
+        var imageWidth = baseImage.PixelWidth;
+        var imageFormat = baseImage.Format;
+        var imageBytePerPixel = baseImage.Format.BitsPerPixel / 8;
+        var palette = baseImage.Palette;
+
+        var stride = imageWidth * imageBytePerPixel;
+        var arraySize = stride * imageWidth;
+        var imageData = Array.CreateInstance(typeof(byte), arraySize);
+        baseImage.CopyPixels(imageData, stride, 0);
+
+        return Media.Imaging.BitmapSource.Create(
+          adjustedIconSize * screenScale,
+          adjustedIconSize * screenScale,
+          adjustedDPI * screenScale,
+          adjustedDPI * screenScale,
+          imageFormat,
+          palette,
+          imageData,
+          stride
+        );
       }
     }
 

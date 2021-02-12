@@ -47,8 +47,8 @@ namespace RhinoInside.Revit.UI
       )
       {
         AvailabilityClassName = typeof(AvailabilityType).FullName,
-        Image = ImageBuilder.LoadBitmapImage(iconName, true),
-        LargeImage = ImageBuilder.LoadBitmapImage(iconName),
+        Image = ImageBuilder.LoadRibbonButtonImage(iconName, true),
+        LargeImage = ImageBuilder.LoadRibbonButtonImage(iconName),
         ToolTip = tooltip,
       };
     }

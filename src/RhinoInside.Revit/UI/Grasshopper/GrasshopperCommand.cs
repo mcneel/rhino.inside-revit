@@ -76,10 +76,10 @@ namespace RhinoInside.Revit.UI
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
   class CommandGrasshopperSolver : GrasshopperCommand
   {
-    static readonly System.Windows.Media.ImageSource SolverOnSmall = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.SolverOn.png", true);
-    static readonly System.Windows.Media.ImageSource SolverOnLarge = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.SolverOn.png", false);
-    static readonly System.Windows.Media.ImageSource SolverOffSmall = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.SolverOff.png", true);
-    static readonly System.Windows.Media.ImageSource SolverOffLarge = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.SolverOff.png", false);
+    static readonly System.Windows.Media.ImageSource SolverOnSmall = ImageBuilder.LoadRibbonButtonImage("Resources.Ribbon.Grasshopper.SolverOn.png", true);
+    static readonly System.Windows.Media.ImageSource SolverOnLarge = ImageBuilder.LoadRibbonButtonImage("Resources.Ribbon.Grasshopper.SolverOn.png", false);
+    static readonly System.Windows.Media.ImageSource SolverOffSmall = ImageBuilder.LoadRibbonButtonImage("Resources.Ribbon.Grasshopper.SolverOff.png", true);
+    static readonly System.Windows.Media.ImageSource SolverOffLarge = ImageBuilder.LoadRibbonButtonImage("Resources.Ribbon.Grasshopper.SolverOff.png", false);
 
     protected new class Availability : GrasshopperCommand.Availability
     {
@@ -91,17 +91,19 @@ namespace RhinoInside.Revit.UI
 
     static void EnableSolutionsChanged(bool EnableSolutions)
     {
-      if (RestoreButton("Solver") is PushButton button)
+      if (RestoreButton("Toggle\nSolver") is PushButton button)
       {
         if (EnableSolutions)
         {
           button.ToolTip = "Disable the Grasshopper solver";
+          button.ItemText = "Disable\nSolver";
           button.Image = SolverOnSmall;
           button.LargeImage = SolverOnLarge;
         }
         else
         {
           button.ToolTip = "Enable the Grasshopper solver";
+          button.ItemText = "Enable\nSolver";
           button.Image = SolverOffSmall;
           button.LargeImage = SolverOffLarge;
         }
@@ -111,14 +113,19 @@ namespace RhinoInside.Revit.UI
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
       var buttonData = NewPushButtonData<CommandGrasshopperSolver, Availability>(
-        "Solver",
+        "Toggle\nSolver",
         "Resources.Ribbon.Grasshopper.SolverOff.png",
         "Toggle the Grasshopper solver"
       );
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        StoreButton("Solver", pushButton);
+        StoreButton("Toggle\nSolver", pushButton);
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
+        // apply a min width to the button so it does not change width
+        // when toggling between Enable and Disable on its title
+        if (GetAdwndRibbonButton(pushButton) is Autodesk.Windows.RibbonButton ribbonButton)
+          ribbonButton.MinWidth = 50;
+
         EnableSolutionsChanged(GH_Document.EnableSolutions);
         GH_Document.EnableSolutionsChanged += EnableSolutionsChanged;
       }
@@ -477,10 +484,9 @@ namespace RhinoInside.Revit.UI
 
       if (ribbonPanel.AddItem(radioData) is RadioButtonGroup radioButton)
       {
-        int buttonWidth = 45;
-        CommandGrasshopperPreviewOff.CreateUI(radioButton, minWidth: buttonWidth);
-        CommandGrasshopperPreviewWireframe.CreateUI(radioButton, minWidth: buttonWidth);
-        CommandGrasshopperPreviewShaded.CreateUI(radioButton, minWidth: buttonWidth);
+        CommandGrasshopperPreviewOff.CreateUI(radioButton);
+        CommandGrasshopperPreviewWireframe.CreateUI(radioButton);
+        CommandGrasshopperPreviewShaded.CreateUI(radioButton);
       }
 #endif
     }
@@ -497,18 +503,19 @@ namespace RhinoInside.Revit.UI
   [Transaction(TransactionMode.ReadOnly), Regeneration(RegenerationOption.Manual)]
   class CommandGrasshopperPreviewOff : CommandGrasshopperPreview
   {
-    public static void CreateUI(RadioButtonGroup radioButtonGroup, int minWidth)
+    public static void CreateUI(RadioButtonGroup radioButtonGroup)
     {
       var buttonData = NewToggleButtonData<CommandGrasshopperPreviewOff, Availability>(" Off ");
 
       if (radioButtonGroup.AddItem(buttonData) is ToggleButton pushButton)
       {
         pushButton.ToolTip = "Don't draw any preview geometry";
-        pushButton.Image = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Preview_Off.png", true);
-        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Preview_Off.png");
+        pushButton.Image = ImageBuilder.LoadRibbonButtonImage("Resources.Ribbon.Grasshopper.Preview_Off.png", true);
+        pushButton.LargeImage = ImageBuilder.LoadRibbonButtonImage("Resources.Ribbon.Grasshopper.Preview_Off.png");
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
+        // add spacing to title to get it to be a consistent width
         if (GetAdwndRibbonButton(pushButton) is Autodesk.Windows.RibbonButton ribbonButton)
-          ribbonButton.MinWidth = minWidth;
+          ribbonButton.Text = "   Off    ";
 
         if (GH.PreviewServer.PreviewMode == GH_PreviewMode.Disabled)
           radioButtonGroup.Current = pushButton;
@@ -526,18 +533,19 @@ namespace RhinoInside.Revit.UI
   [Transaction(TransactionMode.ReadOnly), Regeneration(RegenerationOption.Manual)]
   class CommandGrasshopperPreviewWireframe : CommandGrasshopperPreview
   {
-    public static void CreateUI(RadioButtonGroup radioButtonGroup, int minWidth)
+    public static void CreateUI(RadioButtonGroup radioButtonGroup)
     {
       var buttonData = NewToggleButtonData<CommandGrasshopperPreviewWireframe, Availability>(" Wire ");
 
       if (radioButtonGroup.AddItem(buttonData) is ToggleButton pushButton)
       {
         pushButton.ToolTip = "Draw wireframe preview geometry";
-        pushButton.Image = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Preview_Wireframe.png", true);
-        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Preview_Wireframe.png");
+        pushButton.Image = ImageBuilder.LoadRibbonButtonImage("Resources.Ribbon.Grasshopper.Preview_Wireframe.png", true);
+        pushButton.LargeImage = ImageBuilder.LoadRibbonButtonImage("Resources.Ribbon.Grasshopper.Preview_Wireframe.png");
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
+        // add spacing to title to get it to be a consistent width
         if (GetAdwndRibbonButton(pushButton) is Autodesk.Windows.RibbonButton ribbonButton)
-          ribbonButton.MinWidth = minWidth;
+          ribbonButton.Text = "  Wire   ";
 
         if (GH.PreviewServer.PreviewMode == GH_PreviewMode.Wireframe)
           radioButtonGroup.Current = pushButton;
@@ -555,18 +563,16 @@ namespace RhinoInside.Revit.UI
   [Transaction(TransactionMode.ReadOnly), Regeneration(RegenerationOption.Manual)]
   class CommandGrasshopperPreviewShaded : CommandGrasshopperPreview
   {
-    public static void CreateUI(RadioButtonGroup radioButtonGroup, int minWidth)
+    public static void CreateUI(RadioButtonGroup radioButtonGroup)
     {
       var buttonData = NewToggleButtonData<CommandGrasshopperPreviewShaded, Availability>("Shaded");
 
       if (radioButtonGroup.AddItem(buttonData) is ToggleButton pushButton)
       {
         pushButton.ToolTip = "Draw shaded preview geometry";
-        pushButton.Image = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Preview_Shaded.png", true);
-        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Ribbon.Grasshopper.Preview_Shaded.png");
+        pushButton.Image = ImageBuilder.LoadRibbonButtonImage("Resources.Ribbon.Grasshopper.Preview_Shaded.png", true);
+        pushButton.LargeImage = ImageBuilder.LoadRibbonButtonImage("Resources.Ribbon.Grasshopper.Preview_Shaded.png");
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
-        if (GetAdwndRibbonButton(pushButton) is Autodesk.Windows.RibbonButton ribbonButton)
-          ribbonButton.MinWidth = minWidth;
 
         if (GH.PreviewServer.PreviewMode == GH_PreviewMode.Shaded)
           radioButtonGroup.Current = pushButton;
