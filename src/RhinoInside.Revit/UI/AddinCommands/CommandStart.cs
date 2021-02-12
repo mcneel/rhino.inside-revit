@@ -20,8 +20,10 @@ using UIX = RhinoInside.Revit.External.UI;
 namespace RhinoInside.Revit.UI
 {
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
-  class CommandLaunch : Command
+  class CommandStart : Command
   {
+    public static string CommandName => "Start";
+
     new class Availability : External.UI.CommandAvailability
     {
       public override bool IsCommandAvailable(UIApplication app, CategorySet selectedCategories) =>
@@ -30,12 +32,10 @@ namespace RhinoInside.Revit.UI
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      const string CommandName = "Launch";
-
-      var buttonData = NewPushButtonData<CommandLaunch, Availability>(CommandName, "Resources.RIR-logo.png", "");
+      var buttonData = NewPushButtonData<CommandStart, Availability>(CommandName, "Resources.RIR-logo.png", "");
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        StoreButton("Launch", pushButton);
+        StoreButton(CommandName, pushButton);
         pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://www.rhino3d.com/inside/revit/beta/"));
 
         if (Addin.RhinoVersionInfo is FileVersionInfo rhInfo)
@@ -59,7 +59,7 @@ namespace RhinoInside.Revit.UI
         }
         else
         {
-          if (Settings.KeyboardShortcuts.RegisterDefaultShortcut("Add-Ins", ribbonPanel.Name, typeof(CommandLaunch).Name, CommandName, "R#Ctrl+R"))
+          if (Settings.KeyboardShortcuts.RegisterDefaultShortcut("Add-Ins", ribbonPanel.Name, typeof(CommandStart).Name, CommandName, "R#Ctrl+R"))
             External.ActivationGate.Exit += ShowShortcutHelp;
         }
       }
@@ -95,13 +95,17 @@ namespace RhinoInside.Revit.UI
       }
 
       var result = Result.Failed;
-      var button = RestoreButton("Launch");
+      var button = RestoreButton(CommandName);
+
       switch (result = Revit.OnStartup(Revit.ApplicationUI))
       {
         case Result.Succeeded:
           // Update Rhino button Tooltip
           button.ToolTip = $"Restores previously visible Rhino windows on top of Revit window";
           button.LongDescription = $"Use CTRL key to open a Rhino model";
+          // hide the button title
+          if (GetAdwndRibbonButton(button) is Autodesk.Windows.RibbonButton adwndRadioButton)
+            adwndRadioButton.ShowText = false;
 
           // Register UI on Revit
           var rhinoPanel = data.Application.CreateRibbonPanel(Addin.AddinName, rhinoPanelName);
@@ -351,7 +355,7 @@ namespace RhinoInside.Revit.UI
       // button gets deactivated if options are readonly
       if (!AddinOptions.IsReadOnly)
       {
-        if (RestoreButton("Launch") is RibbonButton button)
+        if (RestoreButton(CommandName) is RibbonButton button)
         {
           HighlightButton(button);
           button.ToolTip = "New Release Available for Download!\n"

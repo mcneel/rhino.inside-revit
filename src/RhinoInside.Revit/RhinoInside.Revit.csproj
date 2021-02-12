@@ -264,7 +264,7 @@
     <Compile Include="UI\AddinCommands\CommandAddinOptions.cs" />
     <Compile Include="UI\AddinCommands\CommandForums.cs" />
     <Compile Include="UI\AddinCommands\CommandGuides.cs" />
-    <Compile Include="UI\AddinCommands\CommandLaunch.cs" />
+    <Compile Include="UI\AddinCommands\CommandStart.cs" />
     <Compile Include="UI\BaseUI.cs" />
     <Compile Include="UI\BaseCommand.cs" />
     <Compile Include="UI\Grasshopper\GrasshopperCommand.cs" />

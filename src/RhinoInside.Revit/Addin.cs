@@ -291,7 +291,7 @@ namespace RhinoInside.Revit
       applicationUI.CreateRibbonTab(Addin.AddinName);
       var addinRibbon = applicationUI.CreateRibbonPanel(Addin.AddinName, "More");
       // Add launch RhinoInside push button,
-      UI.CommandLaunch.CreateUI(addinRibbon);
+      UI.CommandStart.CreateUI(addinRibbon);
       // add slideout and the rest of the buttons
       addinRibbon.AddSlideOut();
       // about and help links
@@ -314,7 +314,7 @@ namespace RhinoInside.Revit
               if (releaseInfo.Version > Version)
               {
                 // ask UI to notify user of updates
-                UI.CommandLaunch.NotifyUpdateAvailable(releaseInfo);
+                UI.CommandStart.NotifyUpdateAvailable(releaseInfo);
                 UI.CommandAddinOptions.NotifyUpdateAvailable(releaseInfo);
               }
             }
