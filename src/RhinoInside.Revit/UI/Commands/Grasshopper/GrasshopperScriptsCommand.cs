@@ -31,31 +31,44 @@ namespace RhinoInside.Revit.UI
   /// </summary>
   public enum ScriptType
   {
-    GrasshopperGH = 0,
-    GrasshopperGHX,
+    GhFile = 0,
+    GhxFile,
   }
 
-  class LinkedItem
+  /// <summary>
+  /// Generic linked item
+  /// </summary>
+  abstract class LinkedItem
   {
     public string Name;
     public string Tooltip = string.Empty;
   }
 
-  class LinkedScript: LinkedItem
-  {
-    public ScriptType ScriptType;
-    public string ScriptPath;
-  }
-
+  /// <summary>
+  /// Group of linked items
+  /// </summary>
   class LinkedItemGroup : LinkedItem
   {
     public string GroupPath;
     public List<LinkedItem> Items = new List<LinkedItem>();
   }
 
-  [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
+  /// <summary>
+  /// Linked script
+  /// </summary>
+  class LinkedScript : LinkedItem
+  {
+    public ScriptType ScriptType;
+    public string ScriptPath;
+  }
+
   abstract class GrasshopperScriptsCommand : Command
   {
+    // TODO:
+    // - calculate hash?
+    // - cleanup temp
+    // - implement cleaning up panel buttons to create new ones
+    // - implement watcher
     public static void CreateUI(UIApplication uiApp)
     {
       foreach (var location in AddinOptions.ScriptLocations)
@@ -166,7 +179,7 @@ namespace RhinoInside.Revit.UI
           items.Add(
             new LinkedScript
             {
-              ScriptType = ext == ".gh" ? ScriptType.GrasshopperGH : ScriptType.GrasshopperGHX,
+              ScriptType = ext == ".gh" ? ScriptType.GhFile : ScriptType.GhxFile,
               ScriptPath = entry,
               Name = Path.GetFileNameWithoutExtension(entry),
             }
@@ -185,9 +198,10 @@ namespace RhinoInside.Revit.UI
       var typeName = scriptCmdType.FullName;
       return new PushButtonData(commandName, commandButtonName, typeAssmLocation, typeName)
       {
-        Image = ImageBuilder.LoadRibbonButtonImage("Ribbon.Grasshopper.GhFile.png", true),
-        LargeImage = ImageBuilder.LoadRibbonButtonImage("Ribbon.Grasshopper.GhFile.png"),
-        ToolTip = script.Tooltip,
+        Image = ImageBuilder.LoadRibbonButtonImage($"Ribbon.Grasshopper.{script.ScriptType}.png", true),
+        LargeImage = ImageBuilder.LoadRibbonButtonImage($"Ribbon.Grasshopper.{script.ScriptType}.png"),
+        ToolTip = "Launch script in Grasshopper player",
+        LongDescription = $"Script Path: {script.ScriptPath}",
       };
     }
 
@@ -268,7 +282,7 @@ namespace RhinoInside.Revit.UI
     /// </summary>
     public class ScriptExecConfigs
     {
-      public ScriptType ScriptType = ScriptType.GrasshopperGH;
+      public ScriptType ScriptType = ScriptType.GhFile;
       public string ScriptPath;
     }
 
@@ -294,8 +308,8 @@ namespace RhinoInside.Revit.UI
     {
       switch(ExecCfgs.ScriptType)
       {
-        case ScriptType.GrasshopperGH:
-        case ScriptType.GrasshopperGHX:
+        case ScriptType.GhFile:
+        case ScriptType.GhxFile:
           return ExecuteGH(data, ref message);
 
         default: return Result.Succeeded;

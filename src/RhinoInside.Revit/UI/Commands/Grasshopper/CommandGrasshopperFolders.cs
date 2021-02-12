@@ -14,7 +14,6 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.UI
 {
-  [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
   abstract class CommandGrasshopperFolders : Command
   {
     public static void CreateUI(RibbonPanel ribbonPanel)
@@ -22,17 +21,17 @@ namespace RhinoInside.Revit.UI
       ribbonPanel.AddStackedItems(
         NewPushButtonData<CommandGrasshopperUserObjectsFolder, AlwaysAvailable>(
           name: CommandGrasshopperUserObjectsFolder.CommandName,
-          iconName: "Folder-icon.png",
+          iconName: "Ribbon.Grasshopper.GHSpecialFolder.png",
           tooltip: "Shows Grasshopper UserObjects Folder"
         ),
         NewPushButtonData<CommandGrasshopperClustersFolder, AlwaysAvailable>(
           name: CommandGrasshopperClustersFolder.CommandName,
-          iconName: "Folder-icon.png",
+          iconName: "Ribbon.Grasshopper.GHSpecialFolder.png",
           tooltip: "Shows Grasshopper Clusters Folder"
         ),
         NewPushButtonData<CommandGrasshopperComponentsFolder, AlwaysAvailable>(
           name: CommandGrasshopperComponentsFolder.CommandName,
-          iconName: "Folder-icon.png",
+          iconName: "Ribbon.Grasshopper.GHSpecialFolder.png",
           tooltip: "Shows Grasshopper Components Folder"
         )
       );
