@@ -24,15 +24,9 @@ namespace RhinoInside.Revit.UI
   {
     public static string CommandName => "Start";
 
-    new class Availability : External.UI.CommandAvailability
-    {
-      public override bool IsCommandAvailable(UIApplication app, CategorySet selectedCategories) =>
-        Addin.CurrentStatus >= Addin.Status.Obsolete;
-    }
-
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      var buttonData = NewPushButtonData<CommandStart, Availability>(CommandName, "Resources.RIR-logo.png", "");
+      var buttonData = NewPushButtonData<CommandStart, AvailableWhenNotObsolete>(CommandName, "RIR-logo.png", "");
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         StoreButton(CommandName, pushButton);
@@ -116,7 +110,7 @@ namespace RhinoInside.Revit.UI
           {
             CommandRhino.CreateUI(rhinoPanel);
             CommandImport.CreateUI(rhinoPanel);
-            CommandRhinoPreview.CreateUI(rhinoPanel);
+            CommandToggleRhinoPreview.CreateUI(rhinoPanel);
             CommandPython.CreateUI(rhinoPanel);
             CommandRhinoOptions.CreateUI(rhinoPanel);
           }

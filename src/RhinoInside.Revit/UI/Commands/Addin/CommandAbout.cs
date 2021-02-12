@@ -22,11 +22,11 @@ namespace RhinoInside.Revit.UI
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
   class CommandAbout : Command
   {
+    public static string CommandName = "About";
+
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      const string CommandName = "About";
-
-      var buttonData = NewPushButtonData<CommandAbout, AlwaysAvailable>(CommandName, "Resources.About-icon.png", "");
+      var buttonData = NewPushButtonData<CommandAbout, AlwaysAvailable>(CommandName, "About-icon.png", "");
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://www.rhino3d.com/inside/revit/beta/"));
@@ -88,5 +88,4 @@ namespace RhinoInside.Revit.UI
       return Result.Succeeded;
     }
   }
-
 }

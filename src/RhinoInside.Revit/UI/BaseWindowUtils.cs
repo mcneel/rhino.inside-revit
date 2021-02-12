@@ -17,48 +17,9 @@ using RhinoInside.Revit.External.UI.Extensions;
 namespace RhinoInside.Revit.UI
 {
   /// <summary>
-  /// Rhino UI framework base form (non-modal) type for this addon
-  /// Current implementation is centered on Revit window and uses the generic Rhino icon
-  /// </summary>
-  class BaseForm : Form
-  {
-    private UIApplication _uiApp = null;
-
-    public BaseForm(UIApplication uiApp, Size initialSize)
-    {
-      BaseUIUtils.SetupWindow(this, uiApp, initialSize);
-      _uiApp = uiApp;
-      SizeChanged += BaseForm_SizeChanged;
-    }
-
-    private void BaseForm_SizeChanged(object sender, EventArgs e)
-      => BaseUIUtils.CenterWindow(this, _uiApp);
-  }
-
-  /// <summary>
-  /// Rhino UI framework base dialog (modal) type for this addon
-  /// Current implementation is centered on Revit window and uses the generic Rhino icon
-  /// </summary>
-  class BaseDialog : Dialog
-  {
-    private UIApplication _uiApp = null;
-
-    public BaseDialog(UIApplication uiApp, Size initialSize)
-    {
-      BaseUIUtils.SetupWindow(this, uiApp, initialSize);
-      _uiApp = uiApp;
-      SizeChanged += BaseDialog_SizeChanged;
-    }
-
-    private void BaseDialog_SizeChanged(object sender, EventArgs e)
-      => BaseUIUtils.CenterWindow(this, _uiApp);
-  }
-
-
-  /// <summary>
   /// Set of utility methods for the base form and dialog
   /// </summary>
-  internal static class BaseUIUtils
+  internal static class BaseWindowUtils
   {
     internal static void SetupWindow(Window wnd, UIApplication uiApp, Size initialSize)
     {

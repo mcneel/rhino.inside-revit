@@ -6,20 +6,22 @@ using Autodesk.Revit.UI;
 namespace RhinoInside.Revit.UI
 {
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
-  public class CommandRhinoPreview : RhinoCommand
+  public class CommandToggleRhinoPreview : RhinoCommand
   {
+    public static string CommandName => "Toggle\nPreview";
+
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
 #if REVIT_2018
-      var buttonData = NewPushButtonData<CommandRhinoPreview, NeedsActiveDocument<Availability>>(
-        "Toggle\nPreview",
-        "Resources.Ribbon.Grasshopper.Preview_Off.png",
+      var buttonData = NewPushButtonData<CommandToggleRhinoPreview, NeedsActiveDocument<Availability>>(
+        CommandName,
+        "Ribbon.Grasshopper.Preview_Off.png",
         "Toggle Rhino model preview visibility"
         );
 
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        StoreButton("Toggle\nPreview", pushButton);
+        StoreButton(CommandName, pushButton);
         DocumentPreviewServer.ActiveDocumentChanged += DocumentPreviewServer_ActiveDocumentChanged;
         ButtonSetImages(false);
         pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://github.com/mcneel/rhino.inside-revit/tree/master#sample-6"));
@@ -30,17 +32,17 @@ namespace RhinoInside.Revit.UI
 #if REVIT_2018
     static void ButtonSetImages(bool status)
     {
-      if (RestoreButton("Toggle\nPreview") is PushButton button)
+      if (RestoreButton(CommandName) is PushButton button)
       {
         if (status)
         {
-          button.Image = ImageBuilder.LoadRibbonButtonImage("Resources.Ribbon.Rhinoceros.Preview_Shaded.png", true);
-          button.LargeImage = ImageBuilder.LoadRibbonButtonImage("Resources.Ribbon.Rhinoceros.Preview_Shaded.png");
+          button.Image = ImageBuilder.LoadRibbonButtonImage("Ribbon.Rhinoceros.Preview_Shaded.png", true);
+          button.LargeImage = ImageBuilder.LoadRibbonButtonImage("Ribbon.Rhinoceros.Preview_Shaded.png");
         }
         else
         {
-          button.Image = ImageBuilder.LoadRibbonButtonImage("Resources.Ribbon.Grasshopper.Preview_Off.png", true);
-          button.LargeImage = ImageBuilder.LoadRibbonButtonImage("Resources.Ribbon.Grasshopper.Preview_Off.png");
+          button.Image = ImageBuilder.LoadRibbonButtonImage("Ribbon.Grasshopper.Preview_Off.png", true);
+          button.LargeImage = ImageBuilder.LoadRibbonButtonImage("Ribbon.Grasshopper.Preview_Off.png");
         }
       }
     }

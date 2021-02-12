@@ -20,13 +20,13 @@ using UIX = RhinoInside.Revit.External.UI;
 namespace RhinoInside.Revit.UI
 {
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
-  class CommandGuides : Command
+  class CommandForums : Command
   {
+    public static string CommandName = "Forums";
+
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      const string CommandName = "Guides";
-
-      var buttonData = NewPushButtonData<CommandGuides, AlwaysAvailable>(CommandName, "Resources.Guides-icon.png", "");
+      var buttonData = NewPushButtonData<CommandForums, AlwaysAvailable>(CommandName, "Forum-icon.png", "");
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://www.rhino3d.com/inside/revit/beta/"));
@@ -35,8 +35,7 @@ namespace RhinoInside.Revit.UI
 
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
-      using (System.Diagnostics.Process.Start(@"https://www.rhino3d.com/inside/revit/beta/guides/")) { }
-
+      using (System.Diagnostics.Process.Start(@"https://discourse.mcneel.com/c/rhino-inside/Revit")) { }
       return Result.Succeeded;
     }
   }

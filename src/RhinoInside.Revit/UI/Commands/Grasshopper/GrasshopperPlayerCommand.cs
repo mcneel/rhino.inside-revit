@@ -25,12 +25,14 @@ namespace RhinoInside.Revit.UI
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
   class CommandGrasshopperPlayer : GrasshopperCommand
   {
+    public static string CommandName => "Player";
+
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
       // Create a push button to trigger a command add it to the ribbon panel.
       var buttonData = NewPushButtonData<CommandGrasshopperPlayer, NeedsActiveDocument<Availability>>(
-        "Player",
-        "Resources.GrasshopperPlayer.png",
+        CommandName,
+        "GrasshopperPlayer.png",
         "Loads and evals a Grasshopper definition"
         );
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)

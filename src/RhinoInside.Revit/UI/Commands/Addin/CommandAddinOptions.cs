@@ -22,17 +22,17 @@ namespace RhinoInside.Revit.UI
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
   class CommandAddinOptions : Command
   {
+    public static string CommandName = "Options";
+
     static ReleaseInfo LatestReleaseInfo = null;
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      const string CommandName = "Options";
-
-      var buttonData = NewPushButtonData<CommandAddinOptions, AlwaysAvailable>(CommandName, "Resources.Options.png", "");
+      var buttonData = NewPushButtonData<CommandAddinOptions, AlwaysAvailable>(CommandName, "Options.png", "Open Rhino.Inside.Revit Options Window");
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         // setup button
-        StoreButton("Options", pushButton);
+        StoreButton(CommandName, pushButton);
 
         // disable if startup mode is disabled
         if (Addin.StartupMode == AddinStartupMode.Disabled)
@@ -57,7 +57,7 @@ namespace RhinoInside.Revit.UI
         optWindow.ShowModal();
       }
       else
-        TaskDialog.Show("Options", "Contact your system admin to change the options");
+        TaskDialog.Show(CommandName, "Contact your system admin to change the options");
 
       return Result.Succeeded;
     }
@@ -70,7 +70,7 @@ namespace RhinoInside.Revit.UI
       // button gets deactivated if options are readonly
       if (!AddinOptions.IsReadOnly)
       {
-        if (RestoreButton("Options") is RibbonButton button)
+        if (RestoreButton(CommandName) is RibbonButton button)
         {
           HighlightButton(button);
           button.ToolTip = "New Release Available for Download!\n"
@@ -81,5 +81,4 @@ namespace RhinoInside.Revit.UI
       }
     }
   }
-
 }

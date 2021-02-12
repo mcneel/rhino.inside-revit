@@ -168,8 +168,8 @@ namespace RhinoInside.Revit
       string specificSizeName = name.Replace(".png", $"_{desiredSize}.png");
       // if screen has no scaling and a specific size is provided, use that
       // otherwise rebuild icon for size and screen scale
-      using (var resource = (screenScale == 1 ? Assembly.GetExecutingAssembly().GetManifestResourceStream($"RhinoInside.Revit.{specificSizeName}") : null)
-                            ?? Assembly.GetExecutingAssembly().GetManifestResourceStream($"RhinoInside.Revit.{name}"))
+      using (var resource = (screenScale == 1 ? Assembly.GetExecutingAssembly().GetManifestResourceStream($"RhinoInside.Revit.Resources.{specificSizeName}") : null)
+                            ?? Assembly.GetExecutingAssembly().GetManifestResourceStream($"RhinoInside.Revit.Resources.{name}"))
       {
         var baseImage = new Media.Imaging.BitmapImage();
         baseImage.BeginInit();

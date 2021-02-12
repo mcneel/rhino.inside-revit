@@ -13,59 +13,62 @@ using System.IO;
 
 namespace RhinoInside.Revit.UI
 {
-  abstract class HelpCommand : Command
+  abstract class CommandHelpLinks : Command
   {
     internal static void CreateUI(RibbonPanel ribbonPanel)
     {
       ribbonPanel.AddStackedItems(
         NewPushButtonData<CommandAPIDocs, AlwaysAvailable>(
-          name: "APIDocs",
-          iconName: "Resources.Link-icon.png",
-          tooltip: "Opens apidocs.co website"
+          name: CommandAPIDocs.CommandName,
+          iconName: "Link-icon.png",
+          tooltip: "Opens apidocs.co (Revit API documentation) website"
         ),
         NewPushButtonData<CommandTheBuildingCoder, AlwaysAvailable>(
-          name: "TheBuildingCoder",
-          iconName: "Resources.Link-icon.png",
-          tooltip: "Opens thebuildingcoder.typepad.com website"
+          name: CommandTheBuildingCoder.CommandName,
+          iconName: "Link-icon.png",
+          tooltip: "Opens TheBuildingCode website"
         ),
         NewPushButtonData<CommandRhinoDevDocs, AlwaysAvailable>(
-          name: "Rhino Dev Docs",
-          iconName: "Resources.Link-icon.png",
-          tooltip: "Opens developer.rhino3d.com website"
+          name: CommandRhinoDevDocs.CommandName,
+          iconName: "Link-icon.png",
+          tooltip: "Opens Rhino Developer documentation website"
         )
       );
     }
   }
 
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
-  class CommandAPIDocs : HelpCommand
+  class CommandAPIDocs : Command
   {
+    public static string CommandName = "Revit API Docs";
+
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
       using (System.Diagnostics.Process.Start(@"https://apidocs.co/apps/revit/" + $"{Revit.ActiveDBApplication?.VersionNumber}#")) { }
-
       return Result.Succeeded;
     }
   }
 
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
-  class CommandTheBuildingCoder : HelpCommand
+  class CommandTheBuildingCoder : Command
   {
+    public static string CommandName = "TheBuildingCoder";
+
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
       using (System.Diagnostics.Process.Start(@"https://thebuildingcoder.typepad.com/")) { }
-
       return Result.Succeeded;
     }
   }
 
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
-  class CommandRhinoDevDocs : HelpCommand
+  class CommandRhinoDevDocs : Command
   {
+    public static string CommandName = "Rhino Dev Docs";
+
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
       using (System.Diagnostics.Process.Start(@"https://developer.rhino3d.com/")) { }
-
       return Result.Succeeded;
     }
   }

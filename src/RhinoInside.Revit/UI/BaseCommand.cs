@@ -12,9 +12,7 @@ namespace RhinoInside.Revit.UI
   /// </summary>
   abstract public class Command : External.UI.Command
   {
-    // optional static storage for buttons created by commands
-    private static Dictionary<string, RibbonButton> _buttons = new Dictionary<string, RibbonButton>();
-
+    #region Ribbon item creation
     internal static PushButton AddPushButton<CommandType, AvailabilityType>(PulldownButton pullDownButton, string text, string iconName, string tooltip = null)
       where CommandType : IExternalCommand
       where AvailabilityType : IExternalCommandAvailability
@@ -30,11 +28,7 @@ namespace RhinoInside.Revit.UI
       return null;
     }
 
-    internal static PushButtonData NewPushButtonData<CommandType, AvailabilityType>(
-        string name,
-        string iconName,
-        string tooltip
-      )
+    internal static PushButtonData NewPushButtonData<CommandType, AvailabilityType>(string name, string iconName, string tooltip)
       where CommandType : IExternalCommand
       where AvailabilityType : IExternalCommandAvailability
     {
@@ -53,40 +47,53 @@ namespace RhinoInside.Revit.UI
       };
     }
 
-    public static ToggleButtonData NewToggleButtonData<CommandType, AvailabilityType>(string text = null)
+    public static ToggleButtonData NewToggleButtonData<CommandType, AvailabilityType>(string name, string iconName, string tooltip)
       where CommandType : IExternalCommand
       where AvailabilityType : IExternalCommandAvailability
     {
       return new ToggleButtonData
       (
         typeof(CommandType).Name,
-        text ?? typeof(CommandType).Name,
+        name ?? typeof(CommandType).Name,
         typeof(CommandType).Assembly.Location,
         typeof(CommandType).FullName
       )
       {
-        AvailabilityClassName = typeof(AvailabilityType).FullName
+        AvailabilityClassName = typeof(AvailabilityType).FullName,
+        Image = ImageBuilder.LoadRibbonButtonImage(iconName, true),
+        LargeImage = ImageBuilder.LoadRibbonButtonImage(iconName),
+        ToolTip = tooltip,
       };
     }
+    #endregion
 
-    public class AlwaysAvailable : IExternalCommandAvailability
-    {
-      bool IExternalCommandAvailability.IsCommandAvailable(UIApplication app, CategorySet selectedCategories) => true;
-    }
+    #region Ribbon item storage
+    /// <summary>
+    /// Static storage for buttons created by commands.
+    /// Usage is optional for derived classes thru Store and Restore methods
+    /// </summary>
+    private static Dictionary<string, RibbonButton> _buttons = new Dictionary<string, RibbonButton>();
 
+    /// <summary>
+    /// Store given button under given name
+    /// </summary>
     public static void StoreButton(string name, RibbonButton button) => _buttons[name] = button;
+
+    /// <summary>
+    /// Restore previously stored button under given name
+    /// </summary>
     public static RibbonButton RestoreButton(string name)
     {
       if (_buttons.TryGetValue(name, out var button))
         return button;
       return null;
     }
+    #endregion
 
+    #region Autodesk.Windows API utility methods
     /// <summary>
     /// Get RibbonButton as underlying Autodesk.Windows API instance
     /// </summary>
-    /// <param name="button">Revit API RibbonButton</param>
-    /// <returns></returns>
     public static Autodesk.Windows.RibbonButton GetAdwndRibbonButton(RibbonButton button)
     {
       // grab the underlying Autodesk.Windows object from Button
@@ -117,9 +124,6 @@ namespace RhinoInside.Revit.UI
     /// <summary>
     /// Set an already created button to panel dialog launcher
     /// </summary>
-    /// <param name="tabName">Ribbon Tab name</param>
-    /// <param name="panel">Ribbon panel</param>
-    /// <param name="button">Ribbon button</param>
     public static void SetButtonToPanelDialogLauncher(string tabName, RibbonPanel panel, RibbonButton button)
     {
       foreach (var adwndRibbonTab in Autodesk.Windows.ComponentManager.Ribbon.Tabs)
@@ -135,6 +139,16 @@ namespace RhinoInside.Revit.UI
               }
             }
         }
+    }
+    #endregion
+
+    #region Availability Types
+    /// <summary>
+    /// Availability class for commands that are always active even when there is no document open
+    /// </summary>
+    public class AlwaysAvailable : IExternalCommandAvailability
+    {
+      bool IExternalCommandAvailability.IsCommandAvailable(UIApplication app, CategorySet selectedCategories) => true;
     }
 
     /// <summary>
@@ -172,14 +186,15 @@ namespace RhinoInside.Revit.UI
       public override bool IsCommandAvailable(UIApplication app, CategorySet selectedCategories) =>
         Addin.CurrentStatus >= Addin.Status.Available;
     }
-  }
 
-  /// <summary>
-  /// Base class for all Rhino.Inside Revit commands that depends on having
-  /// an active Revit document, but do not call RhinoCommon
-  /// </summary>
-  abstract public class DocumentCommand : Command
-  {
-    protected new class Availability : NeedsActiveDocument<Command.Availability> { }
+    /// <summary>
+    /// Available when Rhino.Inside is not obsolete
+    /// </summary>
+    protected class AvailableWhenNotObsolete : External.UI.CommandAvailability
+    {
+      public override bool IsCommandAvailable(UIApplication app, CategorySet selectedCategories) =>
+        Addin.CurrentStatus >= Addin.Status.Obsolete;
+    }
+    #endregion
   }
 }

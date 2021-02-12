@@ -298,7 +298,7 @@ namespace RhinoInside.Revit
       UI.CommandAbout.CreateUI(addinRibbon);
       UI.CommandGuides.CreateUI(addinRibbon);
       UI.CommandForums.CreateUI(addinRibbon);
-      UI.HelpCommand.CreateUI(addinRibbon);
+      UI.CommandHelpLinks.CreateUI(addinRibbon);
       addinRibbon.AddSeparator();
       // addin options, has Eto window and requires Eto to be loaded
       UI.CommandAddinOptions.CreateUI(addinRibbon);

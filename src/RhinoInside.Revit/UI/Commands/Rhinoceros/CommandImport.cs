@@ -27,11 +27,13 @@ namespace RhinoInside.Revit.UI
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
   public class CommandImport : RhinoCommand
   {
+    public static string CommandName => "Import\n3dm";
+
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
       var buttonData = NewPushButtonData<CommandImport, NeedsActiveDocument<Availability>>(
-        "Import\n3dm",
-        "Resources.Ribbon.Rhinoceros.Import-3DM.png",
+        CommandName,
+        "Ribbon.Rhinoceros.Import-3DM.png",
         "Imports geometry from 3dm file to a Revit model or family"
       );
 
