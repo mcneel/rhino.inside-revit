@@ -159,14 +159,18 @@ namespace RhinoInside.Revit
 
     static internal Media.Imaging.BitmapSource LoadRibbonButtonImage(string name, bool small = false)
     {
-      using (var resource = Assembly.GetExecutingAssembly().GetManifestResourceStream($"RhinoInside.Revit.{name}"))
-      {
-        const uint defaultDPI = 96;
-        int desiredSize = small ? 16 : 32;
-        var adjustedIconSize = desiredSize * 2;
-        var adjustedDPI = defaultDPI * 2;
-        var screenScale = Revit.MainScreenScaleFactor;
+      const uint defaultDPI = 96;
+      int desiredSize = small ? 16 : 32;
+      var adjustedIconSize = desiredSize * 2;
+      var adjustedDPI = defaultDPI * 2;
+      var screenScale = Revit.MainScreenScaleFactor;
 
+      string specificSizeName = name.Replace(".png", $"_{desiredSize}.png");
+      // if screen has no scaling and a specific size is provided, use that
+      // otherwise rebuild icon for size and screen scale
+      using (var resource = (screenScale == 1 ? Assembly.GetExecutingAssembly().GetManifestResourceStream($"RhinoInside.Revit.{specificSizeName}") : null)
+                            ?? Assembly.GetExecutingAssembly().GetManifestResourceStream($"RhinoInside.Revit.{name}"))
+      {
         var baseImage = new Media.Imaging.BitmapImage();
         baseImage.BeginInit();
         baseImage.StreamSource = resource;
