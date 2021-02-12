@@ -122,17 +122,4 @@
       
     </ComponentGroup>
   </Fragment>
-
-  <Fragment>
-    <ComponentGroup Id="SamplesComponentGroup">
-      <Component Id="SamplesComponent" Guid="{B25A7369-22A0-45C0-8F0F-F85184E7282B}" Directory="SamplesFolder">
-        <File Id="Samples.Sample2" Source="..\RhinoInside.Revit\Samples\Sample2.ghx"/>
-        <File Id="Samples.Sample3" Source="..\RhinoInside.Revit\Samples\Sample3.ghx"/>
-        <File Id="Samples.Sample4" Source="..\RhinoInside.Revit\Samples\Sample4.ghx"/>
-        <File Id="Samples.Sample5" Source="..\RhinoInside.Revit\Samples\Sample5.ghx"/>
-        <File Id="Samples.Sample7" Source="..\RhinoInside.Revit\Samples\Sample7.py"/>
-      </Component>
-    </ComponentGroup>
-  </Fragment>
-
 </Include>
