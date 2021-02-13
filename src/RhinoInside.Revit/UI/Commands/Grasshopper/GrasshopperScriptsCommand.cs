@@ -60,15 +60,11 @@ namespace RhinoInside.Revit.UI
   {
     public ScriptType ScriptType;
     public string ScriptPath;
+    public Type ScriptCommandType;
   }
 
   abstract class GrasshopperScriptsCommand : Command
   {
-    // TODO:
-    // - calculate hash?
-    // - cleanup temp
-    // - implement cleaning up panel buttons to create new ones
-    // - implement watcher
     public static void CreateUI(UIApplication uiApp)
     {
       foreach (var location in AddinOptions.ScriptLocations)
@@ -76,44 +72,32 @@ namespace RhinoInside.Revit.UI
         // --------------------------------------------------------------------
         // FIND SCRIPTS
         // --------------------------------------------------------------------
-        var items = FindScriptsRecursive(location);
+        var items = FindLinkedItemsRecursive(location);
 
         // --------------------------------------------------------------------
         // CREATE ASSEMBLY
         // --------------------------------------------------------------------
         // generate assembly containing script command types
-        var assmName = $"GrasshopperScriptCommands{Guid.NewGuid()}";
-        var assmFileName = $"{assmName}.dll";
-        var assmPath = Path.GetTempPath();
-        var assmInfo = GenerateGrasshopperScriptCommandAssembly(assmName, assmFileName, assmPath);
-        var assmLoc = Path.Combine(assmPath, assmFileName);
-        var scriptTypes = new Dictionary<string, Type>();
-        // not need to recurse over data since we are only going one level deep
-        // groups are turned into PullDowns, scripts are turned into PushButons
-        // But first lets create command types for all scripts
-        // groups don't need a type since they don't execute anything
-        items.OfType<LinkedItemGroup>().ToList().ForEach((group) =>
+        var assmInfo = new LinkedScriptAssemblyInfo();
+
+        // create types for all the scripts in the structure
+        ProcessLinkedScripts(items, (script) =>
         {
-          group.Items.OfType<LinkedScript>().ToList().ForEach((script) =>
-          {
-            scriptTypes[script.Name] = GenerateGrasshopperScriptCommandType(assmInfo.Item2, script.ScriptType, script.Name, script.ScriptPath);
-          });
-        });
-        items.OfType<LinkedScript>().ToList().ForEach((script) =>
-        {
-          scriptTypes[script.Name] = GenerateGrasshopperScriptCommandType(assmInfo.Item2, script.ScriptType, script.Name, script.ScriptPath);
+          script.ScriptCommandType = assmInfo.MakeScriptCommandType(script);
         });
 
         // save and load the created assembly
-        assmInfo.Item1.Save(assmFileName);
-        Assembly.LoadFrom(assmLoc);
+        assmInfo.SaveAndLoad();
 
         // --------------------------------------------------------------------
         // CREATE UI
         // --------------------------------------------------------------------
-        var ribbonPanel = uiApp.CreateRibbonPanel(Addin.AddinName, Path.GetFileName(location));
+        var panel = uiApp.CreateRibbonPanel(Addin.AddinName, Path.GetFileName(location));
 
-        // create pulldown buttons and their sub pushbuttons
+        // Currently only supporting two levels in the UI:
+        // 1) Pushbuttons on panel for every LinkedScript at the root level
+        // 2) Pulldowns containing pushbuttons for all the LinkedScripts recursively found under their directory
+        // Lets make the pulldowns first so they are first on the panel
         items.OfType<LinkedItemGroup>().ToList().ForEach((group) =>
         {
           var pullDownData = new PulldownButtonData(group.Name, group.Name)
@@ -122,40 +106,23 @@ namespace RhinoInside.Revit.UI
             LargeImage = ImageBuilder.LoadRibbonButtonImage("Ribbon.Grasshopper.GhFolder.png"),
             ToolTip = group.Tooltip,
           };
-          if (ribbonPanel.AddItem(pullDownData) is PulldownButton pulldown)
+          if (panel.AddItem(pullDownData) is PulldownButton pulldown)
           {
-            group.Items.OfType<LinkedScript>().ToList().ForEach((script) =>
+            ProcessLinkedScripts(group.Items, (script) =>
             {
-              var buttonData = NewScriptButton(
-                scriptCmdType: scriptTypes[script.Name],
-                script: script,
-                assmLoc: assmLoc
-              );
-              if (pulldown.AddPushButton(buttonData) is PushButton pushButton)
-              {
-                // do stuff with button?
-              }
+              AddPullDownButton(pulldown, script, assmInfo);
             });
           }
         });
-
-        // create push buttons on the panel
+        // now make pushbuttons
         items.OfType<LinkedScript>().ToList().ForEach((script) =>
         {
-          var buttonData = NewScriptButton(
-                scriptCmdType: scriptTypes[script.Name],
-                script: script,
-                assmLoc: assmLoc
-              );
-          if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
-          {
-            // do stuff with button?
-          }
+          AddPanelButton(panel, script, assmInfo);
         });
       }
     }
 
-    internal static List<LinkedItem> FindScriptsRecursive(string location)
+    internal static List<LinkedItem> FindLinkedItemsRecursive(string location)
     {
       var items = new List<LinkedItem>();
 
@@ -166,7 +133,7 @@ namespace RhinoInside.Revit.UI
           new LinkedItemGroup
           {
             Name = Path.GetFileName(subDir),
-            Items = FindScriptsRecursive(subDir),
+            Items = FindLinkedItemsRecursive(subDir),
           }
         );
       }
@@ -187,15 +154,43 @@ namespace RhinoInside.Revit.UI
         }
       }
 
-      return items;
+      return items.OrderBy(x => x.Name).ToList();
     }
 
-    internal static PushButtonData NewScriptButton(Type scriptCmdType, LinkedScript script, string assmLoc)
+    internal static void ProcessLinkedScripts(List<LinkedItem> items, Action<LinkedScript> action)
     {
-      var commandName = scriptCmdType.Name + (script.Name ?? "");
+      items.ForEach((item) =>
+      {
+        switch (item)
+        {
+          case LinkedItemGroup group: ProcessLinkedScripts(group.Items, action); break;
+          case LinkedScript script: action(script); break;
+        }
+      });
+    }
+
+    internal static void AddPullDownButton(PulldownButton pulldown, LinkedScript script, LinkedScriptAssemblyInfo assmInfo)
+    {
+      if (pulldown.AddPushButton(NewScriptButton(script, assmInfo.FilePath)) is PushButton pushButton)
+      {
+        // do stuff with button?
+      }
+    }
+
+    internal static void AddPanelButton(RibbonPanel panel, LinkedScript script, LinkedScriptAssemblyInfo assmInfo)
+    {
+      if (panel.AddItem(NewScriptButton(script, assmInfo.FilePath)) is PushButton pushButton)
+      {
+        // do stuff with button?
+      }
+    }
+
+    internal static PushButtonData NewScriptButton(LinkedScript script, string assmLoc)
+    {
+      var commandName = script.ScriptCommandType.Name + (script.Name ?? "");
       var commandButtonName = script.Name ?? commandName;
       var typeAssmLocation = assmLoc;
-      var typeName = scriptCmdType.FullName;
+      var typeName = script.ScriptCommandType.FullName;
       return new PushButtonData(commandName, commandButtonName, typeAssmLocation, typeName)
       {
         Image = ImageBuilder.LoadRibbonButtonImage($"Ribbon.Grasshopper.{script.ScriptType}.png", true),
@@ -205,65 +200,85 @@ namespace RhinoInside.Revit.UI
       };
     }
 
-    internal static Type GenerateGrasshopperScriptCommandType(ModuleBuilder moduleBuilder, ScriptType scriptType, string scriptName, string scriptPath)
+    public class LinkedScriptAssemblyInfo
     {
-      var typeBuilder = moduleBuilder.DefineType(
-        scriptName,
-        TypeAttributes.Public | TypeAttributes.Class,
-        typeof(GrasshopperScriptCommand)
-        );
+      public LinkedScriptAssemblyInfo()
+      {
+        Name = $"LinkedScriptAssm-{Guid.NewGuid()}";
+        FileName = $"{Name}.dll";
+        FileLocation = Path.GetTempPath();
 
-      // Transaction(TransactionMode.Manual)
-      typeBuilder.SetCustomAttribute(
-        new CustomAttributeBuilder(
-                  typeof(TransactionAttribute).GetConstructor(new Type[] { typeof(TransactionMode) }),
-                  new object[] { TransactionMode.Manual }
-      ));
+        AssmBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(
+          new AssemblyName
+          {
+            Name = Name,
+            Version = new Version(0, 1)
+          },
+          AssemblyBuilderAccess.RunAndSave,
+          FileLocation
+          );
 
-      //  Regeneration(RegenerationOption.Manual)
-      typeBuilder.SetCustomAttribute(
-        new CustomAttributeBuilder(
-          typeof(RegenerationAttribute).GetConstructor(new Type[] { typeof(RegenerationOption) }),
-          new object[] { RegenerationOption.Manual }
-      ));
+        ModuleBuilder = AssmBuilder.DefineDynamicModule(Name, FileName);
+      }
 
-      // get GrasshopperScriptCommand(string scriptPath) const
-      var ghScriptCmdConst = typeof(GrasshopperScriptCommand).GetConstructor(new Type[] {
+      public string Name { get; private set; }
+      public string FileLocation { get; private set; }
+      public string FileName { get; private set; }
+      public string FilePath => Path.Combine(FileLocation, FileName);
+
+      public AssemblyBuilder AssmBuilder { get; private set; }
+      public ModuleBuilder ModuleBuilder { get; private set; }
+
+      public void SaveAndLoad()
+      {
+        AssmBuilder?.Save(FileName);
+        Assembly.LoadFrom(FilePath);
+      }
+
+      public Type MakeScriptCommandType(LinkedScript script)
+      {
+        var typeBuilder = ModuleBuilder.DefineType(
+          $"LinkedScriptCmd-{Guid.NewGuid()}",
+          TypeAttributes.Public | TypeAttributes.Class,
+          typeof(GrasshopperScriptCommand)
+          );
+
+        // Transaction(TransactionMode.Manual)
+        typeBuilder.SetCustomAttribute(
+          new CustomAttributeBuilder(
+                    typeof(TransactionAttribute).GetConstructor(new Type[] { typeof(TransactionMode) }),
+                    new object[] { TransactionMode.Manual }
+        ));
+
+        //  Regeneration(RegenerationOption.Manual)
+        typeBuilder.SetCustomAttribute(
+          new CustomAttributeBuilder(
+            typeof(RegenerationAttribute).GetConstructor(new Type[] { typeof(RegenerationOption) }),
+            new object[] { RegenerationOption.Manual }
+        ));
+
+        // get GrasshopperScriptCommand(string scriptPath) const
+        var ghScriptCmdConst = typeof(GrasshopperScriptCommand).GetConstructor(new Type[] {
         typeof(int),        // "scriptType"
         typeof(string)      // "scriptPath"
       });
-      // define a base contructor
-      var baseConst = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new Type[] { });
-      var gen = baseConst.GetILGenerator();
-      gen.Emit(OpCodes.Ldarg_0);                // load "this" onto stack
-                                                // load "scriptType"
-      gen.Emit(OpCodes.Ldc_I4, (int)scriptType);
-                                                // load "scriptPath"
-      gen.Emit(OpCodes.Ldstr, scriptPath);
+        // define a base contructor
+        var baseConst = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new Type[] { });
+        var gen = baseConst.GetILGenerator();
+        gen.Emit(OpCodes.Ldarg_0);                // load "this" onto stack
+                                                  // load "scriptType"
+        gen.Emit(OpCodes.Ldc_I4, (int) script.ScriptType);
+        // load "scriptPath"
+        gen.Emit(OpCodes.Ldstr, script.ScriptPath);
 
-      gen.Emit(OpCodes.Call, ghScriptCmdConst); // call script command constructor with values loaded to stack
-      gen.Emit(OpCodes.Nop);                    // add a few NOPs
-      gen.Emit(OpCodes.Ret);                    // return
+        gen.Emit(OpCodes.Call, ghScriptCmdConst); // call script command constructor with values loaded to stack
+        gen.Emit(OpCodes.Nop);                    // add a few NOPs
+        gen.Emit(OpCodes.Ret);                    // return
 
-      return typeBuilder.CreateType();
+        return typeBuilder.CreateType();
+      }
     }
 
-    internal static Tuple<AssemblyBuilder, ModuleBuilder> GenerateGrasshopperScriptCommandAssembly(string assemblyName, string assemblyFileName, string assemblyPath)
-    {
-      var asmBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(
-        new AssemblyName
-        {
-          Name = assemblyName,
-          Version = new Version(0, 1)
-        },
-        AssemblyBuilderAccess.RunAndSave,
-        assemblyPath
-        );
-      return new Tuple<AssemblyBuilder, ModuleBuilder>(
-        asmBuilder,
-        asmBuilder.DefineDynamicModule(assemblyName, assemblyFileName)
-        );
-    }
   }
 
   /// <summary>
