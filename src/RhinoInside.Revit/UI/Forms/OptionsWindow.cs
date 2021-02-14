@@ -119,6 +119,7 @@ namespace RhinoInside.Revit.UI
     Button _releaseNotesBtn = new Button { Text = "Release Notes", Height = 25 };
     Button _downloadBtn = new Button { Text = "Download Installer", Height = 25 };
 
+    TableRow _releaseInfoPanel = null;
     internal ReleaseInfo ReleaseInfo = null;
 
     void InitLayout()
@@ -170,7 +171,10 @@ namespace RhinoInside.Revit.UI
               }
             }
           },
-          _channelDescription,
+          new TableRow {
+            ScaleHeight = false,
+            Cells = { _channelDescription }
+          },
         }
       };
 
@@ -203,15 +207,15 @@ namespace RhinoInside.Revit.UI
 
     internal void SetReleaseInfo(ReleaseInfo releaseInfo)
     {
+      var updateGroup = ((TableLayout) Content);
       if (releaseInfo != null)
       {
         ReleaseInfo = releaseInfo;
 
-        var updateGroup = ((TableLayout)Content);
-        updateGroup.Rows.Insert(0,
-          new TableRow {
-            ScaleHeight = true,
-            Cells = { new Panel {
+        _releaseInfoPanel = new TableRow
+        {
+          ScaleHeight = true,
+          Cells = { new Panel {
                 Content = new TableLayout {
                   Spacing = new Size(5, 10),
                   Padding = new Padding(5),
@@ -244,8 +248,14 @@ namespace RhinoInside.Revit.UI
                 }
               }
             }
-          }
-        );
+        };
+
+        updateGroup.Rows.Insert(0, _releaseInfoPanel);
+      }
+      else if (_releaseInfoPanel is TableRow)
+      {
+        updateGroup.Rows.Remove(_releaseInfoPanel);
+        _releaseInfoPanel = null;
       }
     }
 

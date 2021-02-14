@@ -303,23 +303,13 @@ namespace RhinoInside.Revit
       // addin options, has Eto window and requires Eto to be loaded
       UI.CommandAddinOptions.CreateUI(addinRibbon);
 
-      // check for updates
+
+
+      // add option change listeners
+      AddinOptions.UpdateChannelChanged += AddinOptions_UpdateChannelChanged;
+      // check for updates if requested
       if (AddinOptions.Current.CheckForUpdatesOnStartup)
-        AddinUpdater.GetReleaseInfo(
-          (ReleaseInfo releaseInfo) =>
-          {
-            // if release info is received,
-            if (releaseInfo != null) {
-              // if current version on the active update channel is newer
-              if (releaseInfo.Version > Version)
-              {
-                // ask UI to notify user of updates
-                UI.CommandStart.NotifyUpdateAvailable(releaseInfo);
-                UI.CommandAddinOptions.NotifyUpdateAvailable(releaseInfo);
-              }
-            }
-          }
-        );
+        CheckUpdates();
 
       //load RIR?
       //if (AddinOptions.Current.LoadOnStartup)
@@ -330,6 +320,31 @@ namespace RhinoInside.Revit
       //}
 
       return Result.Succeeded;
+    }
+
+    private void AddinOptions_UpdateChannelChanged(object sender, EventArgs e) => CheckUpdates();
+
+    static void CheckUpdates()
+    {
+      AddinUpdater.GetReleaseInfo(
+        (ReleaseInfo releaseInfo) => {
+          // if release info is received,
+          if (releaseInfo != null)
+          {
+            // if current version on the active update channel is newer
+            if (releaseInfo.Version > Version)
+            {
+              // ask UI to notify user of updates
+              UI.CommandStart.NotifyUpdateAvailable(releaseInfo);
+              UI.CommandAddinOptions.NotifyUpdateAvailable(releaseInfo);
+              return;
+            }
+          }
+          // otherwise clear updates
+          UI.CommandStart.ClearUpdateNotifiy();
+          UI.CommandAddinOptions.ClearUpdateNotifiy();
+        }
+      );
     }
 
     void DoStartUp(Autodesk.Revit.ApplicationServices.Application app)

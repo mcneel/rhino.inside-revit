@@ -73,7 +73,7 @@ namespace RhinoInside.Revit.UI
       // button gets deactivated if options are readonly
       if (!AddinOptions.IsReadOnly)
       {
-        if (RestoreButton(CommandName) is RibbonButton button)
+        if (RestoreButton(CommandName) is PushButton button)
         {
           HighlightButton(button);
           button.ToolTip = "New Release Available for Download!\n"
@@ -82,6 +82,16 @@ namespace RhinoInside.Revit.UI
         }
         LatestReleaseInfo = releaseInfo;
       }
+    }
+
+    static public void ClearUpdateNotifiy()
+    {
+      if (RestoreButton(CommandName) is PushButton button)
+      {
+        ClearHighlights(button);
+        button.ToolTip = "Open Rhino.Inside.Revit Options Window";
+      }
+      LatestReleaseInfo = null;
     }
   }
 }

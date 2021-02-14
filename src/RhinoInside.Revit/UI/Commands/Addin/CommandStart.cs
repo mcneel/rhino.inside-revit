@@ -32,19 +32,7 @@ namespace RhinoInside.Revit.UI
         StoreButton(CommandName, pushButton);
         pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://www.rhino3d.com/inside/revit/beta/"));
 
-        if (Addin.RhinoVersionInfo is FileVersionInfo rhInfo)
-        {
-          // try-catch to capture any property getters failing
-          try
-          {
-            pushButton.ToolTip =
-              $"Loads {rhInfo.ProductName} inside this Revit session";
-            pushButton.LongDescription =
-              $"Rhino: {rhInfo.ProductVersion} ({rhInfo.FileDescription}){Environment.NewLine}" +
-              $"Rhino.Inside: {Addin.DisplayVersion}{Environment.NewLine}{rhInfo.LegalCopyright}";
-          }
-          catch (Exception) { }
-        }
+        SetTooltip(pushButton);
 
         if (Addin.StartupMode == AddinStartupMode.Disabled)
         {
@@ -56,6 +44,23 @@ namespace RhinoInside.Revit.UI
           if (Settings.KeyboardShortcuts.RegisterDefaultShortcut("Add-Ins", ribbonPanel.Name, typeof(CommandStart).Name, CommandName, "R#Ctrl+R"))
             External.ActivationGate.Exit += ShowShortcutHelp;
         }
+      }
+    }
+
+    static void SetTooltip(PushButton pushButton)
+    {
+      if (Addin.RhinoVersionInfo is FileVersionInfo rhInfo)
+      {
+        // try-catch to capture any property getters failing
+        try
+        {
+          pushButton.ToolTip =
+            $"Loads {rhInfo.ProductName} inside this Revit session";
+          pushButton.LongDescription =
+            $"Rhino: {rhInfo.ProductVersion} ({rhInfo.FileDescription}){Environment.NewLine}" +
+            $"Rhino.Inside: {Addin.DisplayVersion}{Environment.NewLine}{rhInfo.LegalCopyright}";
+        }
+        catch (Exception) { }
       }
     }
 
@@ -360,13 +365,22 @@ namespace RhinoInside.Revit.UI
       // button gets deactivated if options are readonly
       if (!AddinOptions.IsReadOnly)
       {
-        if (RestoreButton(CommandName) is RibbonButton button)
+        if (RestoreButton(CommandName) is PushButton button)
         {
           HighlightButton(button);
           button.ToolTip = "New Release Available for Download!\n"
                          + $"Version: {releaseInfo.Version}\n"
                          + button.ToolTip;
         }
+      }
+    }
+
+    static public void ClearUpdateNotifiy()
+    {
+      if (RestoreButton(CommandName) is PushButton button)
+      {
+        ClearHighlights(button);
+        SetTooltip(button);
       }
     }
   }

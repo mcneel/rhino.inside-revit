@@ -138,7 +138,9 @@ namespace RhinoInside.Revit.Settings
                 using (var optsFile = File.OpenRead(UserOptionsFilePath))
                   instance = (AddinOptions) _xml.Deserialize(optsFile);
               }
-              catch {}
+              catch (Exception ex) {
+                // TODO: log errors
+              }
             }
 
             // otherwise use default
@@ -219,7 +221,10 @@ namespace RhinoInside.Revit.Settings
       while (reader.Read())
       {
         if (reader.NodeType == XmlNodeType.EndElement)
+        {
+          reader.Read();
           break;
+        }
 
         var opts = new Dictionary<string, string>();
         optStore[reader.Name] = opts;

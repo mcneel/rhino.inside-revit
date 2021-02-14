@@ -109,7 +109,6 @@ namespace RhinoInside.Revit.UI
     /// <summary>
     /// Highlight command button as new or updated
     /// </summary>
-    /// <param name="updated">Highlight as Updated, otherwise as New</param>
     public static void HighlightButton(RibbonButton button, bool updated = false)
     {
       // grab the underlying Autodesk.Windows object from Button
@@ -118,6 +117,19 @@ namespace RhinoInside.Revit.UI
         // set highlight state and update tooltip
         ribbonButton.Highlight =
           updated ? Autodesk.Internal.Windows.HighlightMode.Updated : Autodesk.Internal.Windows.HighlightMode.New;
+      }
+    }
+
+    /// <summary>
+    /// Clear any previously set highlights on command button
+    /// </summary>
+    public static void ClearHighlights(RibbonButton button)
+    {
+      // grab the underlying Autodesk.Windows object from Button
+      if (GetAdwndRibbonButton(button) is Autodesk.Windows.RibbonButton ribbonButton)
+      {
+        // set highlight state and update tooltip
+        ribbonButton.Highlight = Autodesk.Internal.Windows.HighlightMode.None;
       }
     }
 
