@@ -280,6 +280,7 @@
     <Compile Include="UI\Commands\Grasshopper\GrasshopperPlayerCommand.cs" />
     <Compile Include="UI\Commands\Grasshopper\GrasshopperLinkedScriptsCommand.cs" />
     <Compile Include="UI\Commands\Addin\CommandHelpLinks.cs" />
+    <Compile Include="UI\Forms\BakeOptionsWindow.cs" />
     <Compile Include="UI\Forms\OptionsWindow.cs" />
     <Compile Include="UI\Commands\Rhinoceros\BaseRhinoCommand.cs" />
     <Compile Include="UI\Commands\Rhinoceros\CommandImport.cs" />
