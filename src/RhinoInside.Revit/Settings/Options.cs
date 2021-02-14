@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Serialization;
+using System.Xml.Schema;
 using System.Windows;
 
 namespace RhinoInside.Revit.Settings
@@ -98,10 +100,16 @@ namespace RhinoInside.Revit.Settings
     public static event EventHandler<EventArgs> ScriptLocationsChanged;
     #endregion
 
+    [XmlElement]
+    public AddinCustomOptions CustomOptions = new AddinCustomOptions();
+
     // settings set by admin are readonly
     public static bool IsReadOnly =>
       // Push instance to initialize
       Current != null && usingAdminOptions;
+
+    // de/serializer
+    private static XmlSerializer _xml = new XmlSerializer(typeof(AddinOptions), new Type[] { typeof(AddinCustomOptions) });
 
     // Singleton
     private static bool usingAdminOptions = false;
@@ -115,8 +123,6 @@ namespace RhinoInside.Revit.Settings
         {
           if (instance is null)
           {
-            var xml = new XmlSerializer(typeof(AddinOptions));
-
             // look for admin options file, then user, otherwise null
             // settings set by admin are readonly
             usingAdminOptions = File.Exists(AdminOptionsFilePath);
@@ -130,18 +136,9 @@ namespace RhinoInside.Revit.Settings
               {
                 // read settings
                 using (var optsFile = File.OpenRead(UserOptionsFilePath))
-                  instance = (AddinOptions) xml.Deserialize(optsFile);
+                  instance = (AddinOptions) _xml.Deserialize(optsFile);
               }
-              catch
-              {
-                MessageBox.Show
-                (
-                  caption: $"Rhino.Inside - Oops! Something went wrong :(",
-                  icon: MessageBoxImage.Error,
-                  messageBoxText: "Error reading options. Using defaults instead.",
-                  button: MessageBoxButton.OK
-                );
-              }
+              catch {}
             }
 
             // otherwise use default
@@ -169,8 +166,6 @@ namespace RhinoInside.Revit.Settings
 
     public static void Save()
     {
-      var xmlSerializer = new XmlSerializer(typeof(AddinOptions));
-
       // ensure directory exists
       // clear previous contents, or create empty file
       Directory.CreateDirectory(UserDataDirectory);
@@ -179,8 +174,68 @@ namespace RhinoInside.Revit.Settings
       // serialize options to the empty file
       using (var optsFile = File.OpenWrite(UserOptionsFilePath))
       {
-        xmlSerializer.Serialize(optsFile, Current);
+        _xml.Serialize(optsFile, Current);
       }
     }
+  }
+
+  [Serializable]
+  public class AddinCustomOptions : IXmlSerializable
+  {
+    private Dictionary<string, Dictionary<string, string>> optStore =
+      new Dictionary<string, Dictionary<string, string>>();
+
+    public void AddOption(string root, string key, string value)
+    {
+      if (optStore.TryGetValue(root, out var customOpts))
+        customOpts[key] = value;
+      else
+        optStore[root] = new Dictionary<string, string> {
+            { key, value }
+        };
+    }
+
+    public string GetOption(string root, string key)
+    {
+      if (optStore.TryGetValue(root, out var customOpts))
+        if (customOpts.TryGetValue(key, out var value))
+          return value;
+      return null;
+    }
+
+    public void WriteXml(XmlWriter writer)
+    {
+      foreach (var root in optStore)
+      {
+        writer.WriteStartElement(root.Key);
+        foreach (var option in optStore[root.Key])
+          writer.WriteElementString(option.Key, option.Value);
+        writer.WriteEndElement();
+      }
+    }
+
+    public void ReadXml(XmlReader reader)
+    {
+      while (reader.Read())
+      {
+        if (reader.NodeType == XmlNodeType.EndElement)
+          break;
+
+        var opts = new Dictionary<string, string>();
+        optStore[reader.Name] = opts;
+
+        if (reader.IsStartElement())
+        {
+          while (reader.Read())
+          {
+            if (reader.NodeType == XmlNodeType.EndElement)
+              break;
+            opts[reader.Name] = reader.ReadString();
+          }
+        }
+      }
+    }
+
+    public XmlSchema GetSchema() => null;
   }
 }
