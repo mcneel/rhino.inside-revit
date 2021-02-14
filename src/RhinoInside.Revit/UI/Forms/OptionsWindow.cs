@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
 using System.Windows.Interop;
+using System.Diagnostics;
 
 using Eto.Forms;
 using Eto.Drawing;
@@ -14,13 +15,14 @@ using Forms = Eto.Forms;
 using Autodesk.Revit.UI;
 
 using RhinoInside.Revit.Settings;
-using System.Diagnostics;
 
 namespace RhinoInside.Revit.UI
 {
   internal class OptionsWindow : BaseDialog
   {
+    public GeneralPanel GeneralPanel { get; } = new GeneralPanel();
     public UpdatesPanel UpdatesPanel { get; } = new UpdatesPanel();
+    public ScriptsPanel ScriptsPanel { get; } = new ScriptsPanel();
 
     private TabPage _general;
     private TabPage _updates;
@@ -43,13 +45,13 @@ namespace RhinoInside.Revit.UI
       var applyButton = new Button { Text = "Apply", Height = 25 };
       applyButton.Click += ApplyButton_Click;
 
-    _general = new TabPage { Text = "General", Padding = new Padding(5), Content = new GeneralPanel() };
+    _general = new TabPage { Text = "General", Padding = new Padding(5), Content = GeneralPanel };
     _updates = new TabPage { Text = "Updates", Padding = new Padding(5), Content = UpdatesPanel };
-    _scripts = new TabPage { Text = "Scripts", Padding = new Padding(5), Content = new Panel() };
+    _scripts = new TabPage { Text = "Scripts", Padding = new Padding(5), Content = ScriptsPanel };
     _tabs = new TabControl
     {
       TabPosition = Forms.DockPosition.Top,
-      Pages = { _general, _updates, _scripts }
+      Pages = { _general, _updates, _scripts },
     };
 
     // setup contents
@@ -59,17 +61,19 @@ namespace RhinoInside.Revit.UI
         Padding = new Padding(5),
         Rows = {
           new TableRow {
+            ScaleHeight = true,
             Cells = { new TableCell { ScaleWidth = true, Control = _tabs }}
           },
-          null,
-          new TableRow { Cells = { applyButton } },
+          applyButton
         }
       };
     }
 
     private void ApplyButton_Click(object sender, EventArgs e)
     {
+      GeneralPanel.ApplyChanges();
       UpdatesPanel.ApplyChanges();
+      ScriptsPanel.ApplyChanges();
       AddinOptions.Save();
       Close();
     }
@@ -91,9 +95,9 @@ namespace RhinoInside.Revit.UI
         Padding = new Padding(5),
         Rows = {
           new TableRow {
-            ScaleHeight = true,
-            Cells = { new TableCell(_loadOnStartup, true) }
+            Cells = { _loadOnStartup }
           },
+          null
         }
       };
     }
@@ -148,19 +152,14 @@ namespace RhinoInside.Revit.UI
         Padding = new Padding(5),
         Rows = {
           new TableRow {
-            ScaleHeight = true,
             Cells = { new TableCell(_checkUpdatesOnStartup, true) }
           },
-          new TableLayout
-          {
+          new TableLayout {
             Height = 25,
             Spacing = spacing,
-            Rows =
-            {
+            Rows = {
               new TableRow {
-                ScaleHeight = true,
-                Cells =
-                {
+                Cells = {
                   new Label {
                     Text = $"Update Channel v{Addin.Version.Major}.*",
                     Height = 25,
@@ -210,19 +209,15 @@ namespace RhinoInside.Revit.UI
 
         var updateGroup = ((TableLayout)Content);
         updateGroup.Rows.Insert(0,
-          new TableRow
-          {
-            Cells = { new Panel
-              {
-                Content = new TableLayout
-                {
+          new TableRow {
+            ScaleHeight = true,
+            Cells = { new Panel {
+                Content = new TableLayout {
                   Spacing = new Size(5, 10),
                   Padding = new Padding(5),
-                  Rows =
-                  {
+                  Rows = {
                     new TableRow {
-                      Cells =
-                      {
+                      Cells = {
                         new TableCell {
                           Control = new ImageView {
                             Image = Icon.FromResource("RhinoInside.Revit.Resources.NewRelease.png", assembly: Assembly.GetExecutingAssembly()),
@@ -262,6 +257,99 @@ namespace RhinoInside.Revit.UI
 
       AddinOptions.Current.UpdateChannel =
         AddinUpdater.Channels[_updateChannelSelector.SelectedIndex].Id.ToString();
+    }
+  }
+
+  internal class ScriptsPanel : Panel
+  {
+    public ScriptsPanel() => InitLayout();
+
+    CheckBox _loadScriptsOnStartup = new CheckBox { Text = "Load Scripts on Startup" };
+    ListBox _scriptLocations = new ListBox();
+    Button _addButton = new Button { Text = "Add Location", Height = 25 };
+    Button _delButton = new Button { Text = "Remove Location", Height = 25, Enabled = false };
+
+    void InitLayout()
+    {
+      _loadScriptsOnStartup.Checked = AddinOptions.Current.LoadScriptsOnStartup;
+
+      foreach (var location in AddinOptions.Current.ScriptLocations)
+        _scriptLocations.Items.Add(location);
+      _scriptLocations.SelectedIndexChanged += _scriptLocations_SelectedIndexChanged;
+
+      _addButton.Click += AddButton_Click;
+      _delButton.Click += DelButton_Click;
+
+      Content = new TableLayout
+      {
+        Spacing = new Size(5, 10),
+        Padding = new Padding(5),
+        Rows = {
+          new TableRow {
+            Cells = { _loadScriptsOnStartup }
+          },
+          new TableRow {
+            Cells = { new Label { Text = "Script Locations" } }
+          },
+          new TableRow {
+            ScaleHeight = true,
+            Cells = { _scriptLocations }
+          },
+          new TableLayout
+          {
+            Spacing = new Size(5, 10),
+            Padding = new Padding(5),
+            Rows = {
+              new TableRow {
+                Cells = {
+                  new TableCell(_addButton, true),
+                  new TableCell(_delButton, true),
+                }
+              },
+            }
+          }
+        }
+      };
+    }
+
+    private void _scriptLocations_SelectedIndexChanged(object sender, EventArgs e)
+    {
+      _delButton.Enabled = _scriptLocations.SelectedIndex > -1;
+    }
+
+    private void AddButton_Click(object sender, EventArgs e)
+    {
+      var sfdlg = new SelectFolderDialog();
+      sfdlg.ShowDialog(this);
+
+      if (sfdlg.Directory is string location)
+      {
+        foreach(var item in _scriptLocations.Items)
+          if (item.Text == location) {
+            _scriptLocations.SelectedIndex = _scriptLocations.Items.IndexOf(item);
+            return;
+          }
+
+        _scriptLocations.Items.Add(location);
+      }
+    }
+
+    private void DelButton_Click(object sender, EventArgs e)
+    {
+      if (_scriptLocations.SelectedIndex > -1)
+      {
+        _scriptLocations.Items.RemoveAt(_scriptLocations.SelectedIndex);
+      }
+    }
+
+    internal void ApplyChanges()
+    {
+      if (_loadScriptsOnStartup.Checked.HasValue)
+        AddinOptions.Current.LoadScriptsOnStartup = _loadScriptsOnStartup.Checked.Value;
+      var scriptLocs = new HashSet<string>();
+      foreach (var item in _scriptLocations.Items)
+        scriptLocs.Add(item.Text);
+      AddinOptions.Current.ScriptLocations = scriptLocs;
     }
   }
 }
