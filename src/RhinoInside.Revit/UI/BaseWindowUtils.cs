@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.UI
       wnd.Owner = Eto.Forms.WpfHelpers.ToEtoWindow(Autodesk.Windows.ComponentManager.ApplicationWindow);
 #endif
       // set the default Rhino icon
-      wnd.Icon = Icon.FromResource("RhinoInside.Revit.Resources.Rhino-logo.ico", assembly: Assembly.GetExecutingAssembly());
+      wnd.Icon = Icon.FromResource("RhinoInside.Revit.Resources.RIR-logo.ico", assembly: Assembly.GetExecutingAssembly());
 
       // set window size and center on the parent window
       wnd.ClientSize = initialSize;
