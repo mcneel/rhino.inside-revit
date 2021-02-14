@@ -65,61 +65,58 @@ namespace RhinoInside.Revit.UI
 
   abstract class GrasshopperLinkedScriptsCommand : Command
   {
-    public static void CreateUI(Func<string, RibbonPanel> panelMaker)
+    public static void CreateUI(string location, Func<string, string, RibbonPanel> panelMaker)
     {
-      foreach (var location in AddinOptions.Current.ScriptLocations)
+      // --------------------------------------------------------------------
+      // FIND SCRIPTS
+      // --------------------------------------------------------------------
+      var items = FindLinkedItemsRecursive(location);
+
+      // --------------------------------------------------------------------
+      // CREATE ASSEMBLY
+      // --------------------------------------------------------------------
+      // generate assembly containing script command types
+      var assmInfo = new LinkedScriptAssemblyInfo();
+
+      // create types for all the scripts in the structure
+      ProcessLinkedScripts(items, (script) =>
       {
-        // --------------------------------------------------------------------
-        // FIND SCRIPTS
-        // --------------------------------------------------------------------
-        var items = FindLinkedItemsRecursive(location);
+        script.ScriptCommandType = assmInfo.MakeScriptCommandType(script);
+      });
 
-        // --------------------------------------------------------------------
-        // CREATE ASSEMBLY
-        // --------------------------------------------------------------------
-        // generate assembly containing script command types
-        var assmInfo = new LinkedScriptAssemblyInfo();
+      // save and load the created assembly
+      assmInfo.SaveAndLoad();
 
-        // create types for all the scripts in the structure
-        ProcessLinkedScripts(items, (script) =>
+      // --------------------------------------------------------------------
+      // CREATE UI
+      // --------------------------------------------------------------------
+      var panel = panelMaker(Addin.AddinName, Path.GetFileName(location));
+
+      // Currently only supporting two levels in the UI:
+      // 1) Pushbuttons on panel for every LinkedScript at the root level
+      // 2) Pulldowns containing pushbuttons for all the LinkedScripts recursively found under their directory
+      // Lets make the pulldowns first so they are first on the panel
+      items.OfType<LinkedItemGroup>().ToList().ForEach((group) =>
+      {
+        var pullDownData = new PulldownButtonData(group.Name, group.Name)
         {
-          script.ScriptCommandType = assmInfo.MakeScriptCommandType(script);
-        });
-
-        // save and load the created assembly
-        assmInfo.SaveAndLoad();
-
-        // --------------------------------------------------------------------
-        // CREATE UI
-        // --------------------------------------------------------------------
-        var panel = panelMaker(Path.GetFileName(location));
-
-        // Currently only supporting two levels in the UI:
-        // 1) Pushbuttons on panel for every LinkedScript at the root level
-        // 2) Pulldowns containing pushbuttons for all the LinkedScripts recursively found under their directory
-        // Lets make the pulldowns first so they are first on the panel
-        items.OfType<LinkedItemGroup>().ToList().ForEach((group) =>
+          Image = ImageBuilder.LoadRibbonButtonImage("Ribbon.Grasshopper.GhFolder.png", true),
+          LargeImage = ImageBuilder.LoadRibbonButtonImage("Ribbon.Grasshopper.GhFolder.png"),
+          ToolTip = group.Tooltip,
+        };
+        if (panel.AddItem(pullDownData) is PulldownButton pulldown)
         {
-          var pullDownData = new PulldownButtonData(group.Name, group.Name)
+          ProcessLinkedScripts(group.Items, (script) =>
           {
-            Image = ImageBuilder.LoadRibbonButtonImage("Ribbon.Grasshopper.GhFolder.png", true),
-            LargeImage = ImageBuilder.LoadRibbonButtonImage("Ribbon.Grasshopper.GhFolder.png"),
-            ToolTip = group.Tooltip,
-          };
-          if (panel.AddItem(pullDownData) is PulldownButton pulldown)
-          {
-            ProcessLinkedScripts(group.Items, (script) =>
-            {
-              AddPullDownButton(pulldown, script, assmInfo);
-            });
-          }
-        });
-        // now make pushbuttons
-        items.OfType<LinkedScript>().ToList().ForEach((script) =>
-        {
-          AddPanelButton(panel, script, assmInfo);
-        });
-      }
+            AddPullDownButton(pulldown, script, assmInfo);
+          });
+        }
+      });
+      // now make pushbuttons
+      items.OfType<LinkedScript>().ToList().ForEach((script) =>
+      {
+        AddPanelButton(panel, script, assmInfo);
+      });
     }
 
     internal static List<LinkedItem> FindLinkedItemsRecursive(string location)

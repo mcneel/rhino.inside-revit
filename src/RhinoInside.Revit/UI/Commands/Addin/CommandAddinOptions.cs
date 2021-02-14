@@ -15,6 +15,8 @@ using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
 using RhinoInside.Revit.Native;
 using RhinoInside.Revit.Settings;
+using RhinoInside.Revit.External.UI.Extensions;
+
 using UIX = RhinoInside.Revit.External.UI;
 
 namespace RhinoInside.Revit.UI
@@ -75,7 +77,7 @@ namespace RhinoInside.Revit.UI
       {
         if (RestoreButton(CommandName) is PushButton button)
         {
-          HighlightButton(button);
+          button.Highlight();
           button.ToolTip = "New Release Available for Download!\n"
                          + $"Version: {releaseInfo.Version}\n"
                          + button.ToolTip;
@@ -88,7 +90,7 @@ namespace RhinoInside.Revit.UI
     {
       if (RestoreButton(CommandName) is PushButton button)
       {
-        ClearHighlights(button);
+        button.ClearHighlight();
         button.ToolTip = "Open Rhino.Inside.Revit Options Window";
       }
       LatestReleaseInfo = null;

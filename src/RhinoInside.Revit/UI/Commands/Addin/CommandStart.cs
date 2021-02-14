@@ -15,6 +15,8 @@ using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
 using RhinoInside.Revit.Native;
 using RhinoInside.Revit.Settings;
+using RhinoInside.Revit.External.UI.Extensions;
+
 using UIX = RhinoInside.Revit.External.UI;
 
 namespace RhinoInside.Revit.UI
@@ -22,6 +24,9 @@ namespace RhinoInside.Revit.UI
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
   class CommandStart : Command
   {
+    static RibbonPanel _rhinoPanel;
+    static RibbonPanel _grasshopperPanel;
+
     public static string CommandName => "Start";
 
     public static void CreateUI(RibbonPanel ribbonPanel)
@@ -91,7 +96,7 @@ namespace RhinoInside.Revit.UI
       }
 
       var result = Start(
-        panelMaker: (name) => data.Application.CreateRibbonPanel(Addin.AddinName, name)
+        panelMaker: (tabName, panelName) => data.Application.CreateRibbonPanel(tabName, panelName)
         );
       if (result == Result.Failed)
         ShowLoadError(data);
@@ -99,7 +104,7 @@ namespace RhinoInside.Revit.UI
       return result;
     }
 
-    internal static Result Start(Func<string, RibbonPanel> panelMaker)
+    internal static Result Start(Func<string, string, RibbonPanel> panelMaker)
     {
       var result = Result.Failed;
       var button = RestoreButton(CommandName);
@@ -111,40 +116,50 @@ namespace RhinoInside.Revit.UI
           button.ToolTip = $"Restores previously visible Rhino windows on top of Revit window";
           button.LongDescription = $"Use CTRL key to open a Rhino model";
           // hide the button title
-          if (GetAdwndRibbonButton(button) is Autodesk.Windows.RibbonButton adwndRadioButton)
+          if (button.GetAdwndRibbonButton() is Autodesk.Windows.RibbonButton adwndRadioButton)
             adwndRadioButton.ShowText = false;
 
           var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
+          // add listener for ui compact changes
+          AddinOptions.CompactRibbonChanged += AddinOptions_CompactRibbonChanged;
+
           // Register UI on Revit
           if (assemblies.Any(x => x.GetName().Name == "RhinoCommon"))
           {
-            var rhinoPanel = panelMaker(Addin.RhinoVersionInfo?.ProductName ?? "Rhinoceros");
-            CommandRhino.CreateUI(rhinoPanel);
-            CommandImport.CreateUI(rhinoPanel);
-            CommandToggleRhinoPreview.CreateUI(rhinoPanel);
-            CommandPython.CreateUI(rhinoPanel);
-            CommandRhinoOptions.CreateUI(rhinoPanel);
+            _rhinoPanel = panelMaker(Addin.AddinName, Addin.RhinoVersionInfo?.ProductName ?? "Rhinoceros");
+            CommandRhino.CreateUI(_rhinoPanel);
+            CommandImport.CreateUI(_rhinoPanel);
+            CommandToggleRhinoPreview.CreateUI(_rhinoPanel);
+            CommandPython.CreateUI(_rhinoPanel);
+            CommandRhinoOptions.CreateUI(_rhinoPanel);
           }
 
           if (assemblies.Any(x => x.GetName().Name == "Grasshopper"))
           {
-            var grasshopperPanel = panelMaker("Grasshopper");
-            CommandGrasshopper.CreateUI(grasshopperPanel);
-            CommandGrasshopperPreview.CreateUI(grasshopperPanel);
-            CommandGrasshopperSolver.CreateUI(grasshopperPanel);
-            CommandGrasshopperRecompute.CreateUI(grasshopperPanel);
-            CommandGrasshopperBake.CreateUI(grasshopperPanel);
-            grasshopperPanel.AddSeparator();
-            CommandGrasshopperPlayer.CreateUI(grasshopperPanel);
-            grasshopperPanel.AddSlideOut();
-            CommandGrasshopperPackageManager.CreateUI(grasshopperPanel);
-            CommandGrasshopperFolders.CreateUI(grasshopperPanel);
+            _grasshopperPanel = panelMaker(Addin.AddinName, "Grasshopper");
+            CommandGrasshopper.CreateUI(_grasshopperPanel);
+            CommandGrasshopperPreview.CreateUI(_grasshopperPanel);
+            CommandGrasshopperSolver.CreateUI(_grasshopperPanel);
+            CommandGrasshopperRecompute.CreateUI(_grasshopperPanel);
+            CommandGrasshopperBake.CreateUI(_grasshopperPanel);
+            _grasshopperPanel.AddSeparator();
+            CommandGrasshopperPlayer.CreateUI(_grasshopperPanel);
+            _grasshopperPanel.AddSlideOut();
+            CommandGrasshopperPackageManager.CreateUI(_grasshopperPanel);
+            CommandGrasshopperFolders.CreateUI(_grasshopperPanel);
 
             // create grasshopper scripts panels
             if (AddinOptions.Current.LoadScriptsOnStartup)
-              GrasshopperLinkedScriptsCommand.CreateUI(panelMaker);
+              foreach (var location in AddinOptions.Current.ScriptLocations)
+                GrasshopperLinkedScriptsCommand.CreateUI(location, panelMaker);
+
+            //if (AddinOptions.Current.LoadScriptPackagesOnStartup)
+            //  foreach (var location in /* Yak pacake locations here */)
+            //    GrasshopperLinkedScriptsCommand.CreateUI(location, panelMaker);
           }
+
+          UpdateRibbonCompact();
 
           result = Result.Succeeded;
           break;
@@ -168,6 +183,23 @@ namespace RhinoInside.Revit.UI
           return Result.Failed;
       }
       return result;
+    }
+
+    private static void AddinOptions_CompactRibbonChanged(object sender, EventArgs e) => UpdateRibbonCompact();
+
+    static void UpdateRibbonCompact()
+    {
+      // collapse panel if in compact mode
+      if (AddinOptions.Current.CompactRibbon)
+      {
+        _rhinoPanel?.Collapse(Addin.AddinName);
+        _grasshopperPanel?.Collapse(Addin.AddinName);
+      }
+      else
+      {
+        _rhinoPanel?.Expand(Addin.AddinName);
+        _grasshopperPanel?.Expand(Addin.AddinName);
+      }
     }
 
     static void ShowShortcutHelp(object sender, EventArgs e)
@@ -367,7 +399,7 @@ namespace RhinoInside.Revit.UI
       {
         if (RestoreButton(CommandName) is PushButton button)
         {
-          HighlightButton(button);
+          button.Highlight();
           button.ToolTip = "New Release Available for Download!\n"
                          + $"Version: {releaseInfo.Version}\n"
                          + button.ToolTip;
@@ -379,7 +411,7 @@ namespace RhinoInside.Revit.UI
     {
       if (RestoreButton(CommandName) is PushButton button)
       {
-        ClearHighlights(button);
+        button.ClearHighlight();
         SetTooltip(button);
       }
     }

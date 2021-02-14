@@ -31,7 +31,21 @@ namespace RhinoInside.Revit.Settings
     public static event EventHandler<EventArgs> LoadOnStartupChanged;
 
     [XmlElement]
-    public bool CompactRibbon {
+    public bool CompactTab
+    {
+      get => _compactTab;
+      set
+      {
+        _compactTab = value;
+        CompactTabChanged?.Invoke(this, null);
+      }
+    }
+    private bool _compactTab = false;
+    public static event EventHandler<EventArgs> CompactTabChanged;
+
+    [XmlElement]
+    public bool CompactRibbon
+    {
       get => _compactRibbon;
       set
       {
@@ -41,7 +55,6 @@ namespace RhinoInside.Revit.Settings
     }
     private bool _compactRibbon = false;
     public static event EventHandler<EventArgs> CompactRibbonChanged;
-
     #endregion
 
     #region Updates
@@ -85,6 +98,19 @@ namespace RhinoInside.Revit.Settings
     }
     private bool _loadScriptsOnStartup = true;
     public static event EventHandler<EventArgs> LoadScriptsOnStartupChanged;
+
+    [XmlElement]
+    public bool LoadScriptPackagesOnStartup
+    {
+      get => _loadScriptPackagesOnStartup;
+      set
+      {
+        _loadScriptPackagesOnStartup = value;
+        LoadScriptPackagesOnStartupChanged?.Invoke(this, null);
+      }
+    }
+    private bool _loadScriptPackagesOnStartup = true;
+    public static event EventHandler<EventArgs> LoadScriptPackagesOnStartupChanged;
 
     [XmlElement]
     public HashSet<string> ScriptLocations

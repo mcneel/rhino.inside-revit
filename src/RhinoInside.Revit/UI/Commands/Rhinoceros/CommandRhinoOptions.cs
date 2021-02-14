@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using RhinoInside.Revit.External.UI.Extensions;
 
 using Eto.Forms;
 using Rhino.PlugIns;
@@ -30,7 +31,7 @@ namespace RhinoInside.Revit.UI
         );
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
         // set this button as the panel dialog-launcher (arrow-button at the corner of panel)
-        SetButtonToPanelDialogLauncher(Addin.AddinName, ribbonPanel, pushButton);
+        ribbonPanel.SetButtonToDialogLauncher(Addin.AddinName, pushButton);
     }
 
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)

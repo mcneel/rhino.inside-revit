@@ -10,6 +10,8 @@ using Microsoft.Win32.SafeHandles;
 using Rhino.PlugIns;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.GH.Bake;
+using RhinoInside.Revit.External.UI.Extensions;
+
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.UI
@@ -52,7 +54,7 @@ namespace RhinoInside.Revit.UI
       {
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
         // add spacing to title to get it to be a consistent width
-        if (GetAdwndRibbonButton(pushButton) is Autodesk.Windows.RibbonButton ribbonButton)
+        if (pushButton.GetAdwndRibbonButton() is Autodesk.Windows.RibbonButton ribbonButton)
           ribbonButton.Text = "   Off    ";
 
         if (GH.PreviewServer.PreviewMode == GH_PreviewMode.Disabled)
@@ -81,7 +83,7 @@ namespace RhinoInside.Revit.UI
       {
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
         // add spacing to title to get it to be a consistent width
-        if (GetAdwndRibbonButton(pushButton) is Autodesk.Windows.RibbonButton ribbonButton)
+        if (pushButton.GetAdwndRibbonButton() is Autodesk.Windows.RibbonButton ribbonButton)
           ribbonButton.Text = "  Wire   ";
 
         if (GH.PreviewServer.PreviewMode == GH_PreviewMode.Wireframe)

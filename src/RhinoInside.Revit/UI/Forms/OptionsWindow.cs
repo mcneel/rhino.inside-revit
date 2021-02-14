@@ -84,19 +84,23 @@ namespace RhinoInside.Revit.UI
     public GeneralPanel() => InitLayout();
 
     CheckBox _loadOnStartup = new CheckBox { Text = "Load Rhino on Startup" };
+    CheckBox _compactTab = new CheckBox { Text = "Compact Revit Tabs by Loading into Addin Tab first" };
+    CheckBox _compactRibbon = new CheckBox { Text = "Compact Ribbon by Collapsing Rhino and Grasshopper Panels" };
 
     void InitLayout()
     {
       _loadOnStartup.Checked = AddinOptions.Current.LoadOnStartup;
+      _compactTab.Checked = AddinOptions.Current.CompactTab;
+      _compactRibbon.Checked = AddinOptions.Current.CompactRibbon;
 
       Content = new TableLayout
       {
         Spacing = new Size(5, 10),
         Padding = new Padding(5),
         Rows = {
-          new TableRow {
-            Cells = { _loadOnStartup }
-          },
+          _loadOnStartup,
+          _compactTab,
+          _compactRibbon,
           null
         }
       };
@@ -106,6 +110,12 @@ namespace RhinoInside.Revit.UI
     {
       if (_loadOnStartup.Checked.HasValue)
         AddinOptions.Current.LoadOnStartup = _loadOnStartup.Checked.Value;
+
+      if (_compactTab.Checked.HasValue)
+        AddinOptions.Current.CompactTab = _compactTab.Checked.Value;
+
+      if (_compactRibbon.Checked.HasValue)
+        AddinOptions.Current.CompactRibbon = _compactRibbon.Checked.Value;
     }
   }
 
@@ -114,7 +124,7 @@ namespace RhinoInside.Revit.UI
     public UpdatesPanel() => InitLayout();
 
     CheckBox _checkUpdatesOnStartup = new CheckBox { Text = "Check Updates on Startup" };
-    Label _channelDescription = new Label { Visible = false, Wrap = WrapMode.Word, Height = 36 };
+    Label _channelDescription = new Label { Visible = false, Wrap = WrapMode.Word, Height = 36, VerticalAlignment = VerticalAlignment.Top };
     Forms.ComboBox _updateChannelSelector = new Forms.ComboBox();
     Button _releaseNotesBtn = new Button { Text = "Release Notes", Height = 25 };
     Button _downloadBtn = new Button { Text = "Download Installer", Height = 25 };
@@ -275,6 +285,7 @@ namespace RhinoInside.Revit.UI
     public ScriptsPanel() => InitLayout();
 
     CheckBox _loadScriptsOnStartup = new CheckBox { Text = "Load Scripts on Startup" };
+    CheckBox _loadScriptPackagesOnStartup = new CheckBox { Text = "Load Script Packages on Startup" };
     ListBox _scriptLocations = new ListBox();
     Button _addButton = new Button { Text = "Add Location", Height = 25 };
     Button _delButton = new Button { Text = "Remove Location", Height = 25, Enabled = false };
@@ -282,6 +293,7 @@ namespace RhinoInside.Revit.UI
     void InitLayout()
     {
       _loadScriptsOnStartup.Checked = AddinOptions.Current.LoadScriptsOnStartup;
+      _loadScriptPackagesOnStartup.Checked = AddinOptions.Current.LoadScriptPackagesOnStartup;
 
       foreach (var location in AddinOptions.Current.ScriptLocations)
         _scriptLocations.Items.Add(location);
@@ -295,8 +307,18 @@ namespace RhinoInside.Revit.UI
         Spacing = new Size(5, 10),
         Padding = new Padding(5),
         Rows = {
-          new TableRow {
-            Cells = { _loadScriptsOnStartup }
+          new TableLayout
+          {
+            Spacing = new Size(5, 10),
+            Padding = new Padding(5),
+            Rows = {
+              new TableRow {
+                Cells = {
+                  new TableCell(_loadScriptsOnStartup, true),
+                  new TableCell(_loadScriptPackagesOnStartup, true)
+                }
+              },
+            }
           },
           new TableRow {
             Cells = { new Label { Text = "Script Locations" } }
@@ -356,6 +378,10 @@ namespace RhinoInside.Revit.UI
     {
       if (_loadScriptsOnStartup.Checked.HasValue)
         AddinOptions.Current.LoadScriptsOnStartup = _loadScriptsOnStartup.Checked.Value;
+
+      if (_loadScriptPackagesOnStartup.Checked.HasValue)
+        AddinOptions.Current.LoadScriptPackagesOnStartup = _loadScriptPackagesOnStartup.Checked.Value;
+
       var scriptLocs = new HashSet<string>();
       foreach (var item in _scriptLocations.Items)
         scriptLocs.Add(item.Text);

@@ -10,6 +10,8 @@ using Microsoft.Win32.SafeHandles;
 using Rhino.PlugIns;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.GH.Bake;
+using RhinoInside.Revit.External.UI.Extensions;
+
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.UI
@@ -66,7 +68,7 @@ namespace RhinoInside.Revit.UI
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
         // apply a min width to the button so it does not change width
         // when toggling between Enable and Disable on its title
-        if (GetAdwndRibbonButton(pushButton) is Autodesk.Windows.RibbonButton ribbonButton)
+        if (pushButton.GetAdwndRibbonButton() is Autodesk.Windows.RibbonButton ribbonButton)
           ribbonButton.MinWidth = 50;
 
         EnableSolutionsChanged(GH_Document.EnableSolutions);

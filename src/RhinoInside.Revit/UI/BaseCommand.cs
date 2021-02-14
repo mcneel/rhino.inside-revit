@@ -1,5 +1,4 @@
 using System;
-using System.Reflection;
 using System.Collections.Generic;
 
 using Autodesk.Revit.DB;
@@ -87,70 +86,6 @@ namespace RhinoInside.Revit.UI
       if (_buttons.TryGetValue(name, out var button))
         return button;
       return null;
-    }
-    #endregion
-
-    #region Autodesk.Windows API utility methods
-    /// <summary>
-    /// Get RibbonButton as underlying Autodesk.Windows API instance
-    /// </summary>
-    public static Autodesk.Windows.RibbonButton GetAdwndRibbonButton(RibbonButton button)
-    {
-      // grab the underlying Autodesk.Windows object from Button
-      if (button != null)
-      {
-        var getRibbonItemMethodInfo = button.GetType().GetMethod("getRibbonItem", BindingFlags.NonPublic | BindingFlags.Instance);
-        if (getRibbonItemMethodInfo != null)
-          return getRibbonItemMethodInfo.Invoke(button, null) as Autodesk.Windows.RibbonButton;
-      }
-      return null;
-    }
-
-    /// <summary>
-    /// Highlight command button as new or updated
-    /// </summary>
-    public static void HighlightButton(RibbonButton button, bool updated = false)
-    {
-      // grab the underlying Autodesk.Windows object from Button
-      if (GetAdwndRibbonButton(button) is Autodesk.Windows.RibbonButton ribbonButton)
-      {
-        // set highlight state and update tooltip
-        ribbonButton.Highlight =
-          updated ? Autodesk.Internal.Windows.HighlightMode.Updated : Autodesk.Internal.Windows.HighlightMode.New;
-      }
-    }
-
-    /// <summary>
-    /// Clear any previously set highlights on command button
-    /// </summary>
-    public static void ClearHighlights(RibbonButton button)
-    {
-      // grab the underlying Autodesk.Windows object from Button
-      if (GetAdwndRibbonButton(button) is Autodesk.Windows.RibbonButton ribbonButton)
-      {
-        // set highlight state and update tooltip
-        ribbonButton.Highlight = Autodesk.Internal.Windows.HighlightMode.None;
-      }
-    }
-
-    /// <summary>
-    /// Set an already created button to panel dialog launcher
-    /// </summary>
-    public static void SetButtonToPanelDialogLauncher(string tabName, RibbonPanel panel, RibbonButton button)
-    {
-      foreach (var adwndRibbonTab in Autodesk.Windows.ComponentManager.Ribbon.Tabs)
-        if (adwndRibbonTab.Title == tabName)
-        {
-          foreach (var adwndRibbonPanel in adwndRibbonTab.Panels)
-            if (panel.Name == adwndRibbonPanel.Source.Title)
-            {
-              if (GetAdwndRibbonButton(button) is Autodesk.Windows.RibbonButton adwndRibbonButton)
-              {
-                adwndRibbonPanel.Source.Items.Remove(adwndRibbonButton);
-                adwndRibbonPanel.Source.DialogLauncher = adwndRibbonButton;
-              }
-            }
-        }
     }
     #endregion
 
