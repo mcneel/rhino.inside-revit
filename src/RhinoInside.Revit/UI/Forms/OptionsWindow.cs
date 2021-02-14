@@ -83,8 +83,8 @@ namespace RhinoInside.Revit.UI
   {
     public GeneralPanel() => InitLayout();
 
-    CheckBox _loadOnStartup = new CheckBox { Text = "Load Rhino on Startup" };
-    CheckBox _compactTab = new CheckBox { Text = "Compact Revit Tabs by Loading into Addin Tab first" };
+    CheckBox _loadOnStartup = new CheckBox { Text = "Load Rhino on Startup (Requires Reload)" };
+    CheckBox _compactTab = new CheckBox { Text = "Compact Revit Tabs by Loading into Addin Tab first (Requires Reload)" };
     CheckBox _compactRibbon = new CheckBox { Text = "Compact Ribbon by Collapsing Rhino and Grasshopper Panels" };
 
     void InitLayout()

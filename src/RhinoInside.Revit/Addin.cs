@@ -288,22 +288,37 @@ namespace RhinoInside.Revit
       }
 
       // initialize the Ribbon tab and first panel
-      uiCtrlApp.CreateRibbonTab(Addin.AddinName);
-      var addinRibbon = uiCtrlApp.CreateRibbonPanel(Addin.AddinName, "More");
-      // Add launch RhinoInside push button,
-      UI.CommandStart.CreateUI(addinRibbon);
-      // add slideout and the rest of the buttons
-      addinRibbon.AddSlideOut();
+      RibbonPanel addinRibbon;
+      if (AddinOptions.Current.CompactTab)
+      {
+        addinRibbon = uiCtrlApp.CreateRibbonPanel(Addin.AddinName);
+
+        // Add launch RhinoInside push button,
+        UI.CommandStart.CreateUI(addinRibbon);
+        // addin options, has Eto window and requires Eto to be loaded
+        UI.CommandAddinOptions.CreateUI(addinRibbon);
+      }
+      else
+      {
+        uiCtrlApp.CreateRibbonTab(Addin.AddinName);
+        addinRibbon = uiCtrlApp.CreateRibbonPanel(Addin.AddinName, "More");
+
+        // Add launch RhinoInside push button,
+        UI.CommandStart.CreateUI(addinRibbon);
+        // add slideout and the rest of the buttons
+      }
+
       // about and help links
+      addinRibbon.AddSlideOut();
       UI.CommandAbout.CreateUI(addinRibbon);
       UI.CommandGuides.CreateUI(addinRibbon);
       UI.CommandForums.CreateUI(addinRibbon);
       UI.CommandHelpLinks.CreateUI(addinRibbon);
-      addinRibbon.AddSeparator();
-      // addin options, has Eto window and requires Eto to be loaded
-      UI.CommandAddinOptions.CreateUI(addinRibbon);
-
-
+      if (!AddinOptions.Current.CompactTab)
+      {
+        addinRibbon.AddSeparator();
+        UI.CommandAddinOptions.CreateUI(addinRibbon);
+      }
 
       // add option change listeners
       AddinOptions.UpdateChannelChanged += AddinOptions_UpdateChannelChanged;
@@ -335,7 +350,8 @@ namespace RhinoInside.Revit
             if (releaseInfo.Version > Version)
             {
               // ask UI to notify user of updates
-              UI.CommandStart.NotifyUpdateAvailable(releaseInfo);
+              if (!AddinOptions.Current.CompactTab)
+                UI.CommandStart.NotifyUpdateAvailable(releaseInfo);
               UI.CommandAddinOptions.NotifyUpdateAvailable(releaseInfo);
               return;
             }

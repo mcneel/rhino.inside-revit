@@ -50,6 +50,9 @@ namespace RhinoInside.Revit.UI
             External.ActivationGate.Exit += ShowShortcutHelp;
         }
       }
+
+      // add listener for ui compact changes
+      AddinOptions.CompactRibbonChanged += AddinOptions_CompactRibbonChanged;
     }
 
     static void SetTooltip(PushButton pushButton)
@@ -95,9 +98,13 @@ namespace RhinoInside.Revit.UI
         return Result.Succeeded;
       }
 
+      if (AddinOptions.Current.CompactTab)
+        data.Application.CreateRibbonTab(Addin.AddinName);
+
       var result = Start(
         panelMaker: (tabName, panelName) => data.Application.CreateRibbonPanel(tabName, panelName)
         );
+
       if (result == Result.Failed)
         ShowLoadError(data);
 
@@ -120,9 +127,6 @@ namespace RhinoInside.Revit.UI
             adwndRadioButton.ShowText = false;
 
           var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
-          // add listener for ui compact changes
-          AddinOptions.CompactRibbonChanged += AddinOptions_CompactRibbonChanged;
 
           // Register UI on Revit
           if (assemblies.Any(x => x.GetName().Name == "RhinoCommon"))
