@@ -289,7 +289,7 @@ namespace RhinoInside.Revit
 
       // initialize the Ribbon tab and first panel
       RibbonPanel addinRibbon;
-      if (AddinOptions.Current.CompactTab)
+      if (AddinOptions.Session.CompactTab)
       {
         addinRibbon = uiCtrlApp.CreateRibbonPanel(Addin.AddinName);
 
@@ -314,7 +314,7 @@ namespace RhinoInside.Revit
       UI.CommandGuides.CreateUI(addinRibbon);
       UI.CommandForums.CreateUI(addinRibbon);
       UI.CommandHelpLinks.CreateUI(addinRibbon);
-      if (!AddinOptions.Current.CompactTab)
+      if (!AddinOptions.Session.CompactTab)
       {
         addinRibbon.AddSeparator();
         UI.CommandAddinOptions.CreateUI(addinRibbon);
@@ -327,7 +327,7 @@ namespace RhinoInside.Revit
         CheckUpdates();
 
       //load RIR?
-      //if (AddinOptions.Current.LoadOnStartup)
+      //if (AddinOptions.Session.LoadOnStartup)
       //{
       //  UI.CommandStart.Start(
       //    panelMaker: (name) => uiCtrlApp.CreateRibbonPanel(AddinName, name)
@@ -350,7 +350,7 @@ namespace RhinoInside.Revit
             if (releaseInfo.Version > Version)
             {
               // ask UI to notify user of updates
-              if (!AddinOptions.Current.CompactTab)
+              if (!AddinOptions.Session.CompactTab)
                 UI.CommandStart.NotifyUpdateAvailable(releaseInfo);
               UI.CommandAddinOptions.NotifyUpdateAvailable(releaseInfo);
               return;

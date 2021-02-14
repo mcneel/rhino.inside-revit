@@ -139,15 +139,26 @@ namespace RhinoInside.Revit.Settings
 
     // Singleton
     private static bool usingAdminOptions = false;
-    private static AddinOptions instance = null;
+    private static AddinOptions _sessionInstance = null;  // reflects changes at load time
+    private static AddinOptions _currentInstance = null;  // reflects latest changes
     private static readonly object padlock = new object();
+
+    public static AddinOptions Session
+    {
+      get
+      {
+        if(_sessionInstance is null)
+          _sessionInstance = (AddinOptions)Current.MemberwiseClone();
+        return _sessionInstance;
+      }
+    }
     public static AddinOptions Current
     {
       get
       {
         lock (padlock)
         {
-          if (instance is null)
+          if (_currentInstance is null)
           {
             // look for admin options file, then user, otherwise null
             // settings set by admin are readonly
@@ -162,7 +173,7 @@ namespace RhinoInside.Revit.Settings
               {
                 // read settings
                 using (var optsFile = File.OpenRead(UserOptionsFilePath))
-                  instance = (AddinOptions) _xml.Deserialize(optsFile);
+                  _currentInstance = (AddinOptions) _xml.Deserialize(optsFile);
               }
               catch (Exception ex) {
                 // TODO: log errors
@@ -170,10 +181,11 @@ namespace RhinoInside.Revit.Settings
             }
 
             // otherwise use default
-            if (instance is null)
-              instance = new AddinOptions();
+            if (_currentInstance is null)
+              _currentInstance = new AddinOptions();
           }
-          return instance;
+
+          return _currentInstance;
         }
       }
     }
