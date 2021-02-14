@@ -59,16 +59,13 @@ namespace RhinoInside.Revit.UI
       }
     }
 
-    public override Result Execute(ExternalCommandData data, ref string message, Autodesk.Revit.DB.ElementSet elements)
-    {
+    public override Result Execute(ExternalCommandData data, ref string message, Autodesk.Revit.DB.ElementSet elements) {
       if
       (
         (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)) &&
         (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
       )
         return ShowLoadError(data);
-
-      string rhinoPanelName = Addin.RhinoVersionInfo?.ProductName ?? "Rhinoceros";
 
       if (Addin.CurrentStatus == Addin.Status.Ready)
       {
@@ -88,6 +85,17 @@ namespace RhinoInside.Revit.UI
         return Result.Succeeded;
       }
 
+      var result = Start(
+        panelMaker: (name) => data.Application.CreateRibbonPanel(Addin.AddinName, name)
+        );
+      if (result == Result.Failed)
+        ShowLoadError(data);
+
+      return result;
+    }
+
+    internal static Result Start(Func<string, RibbonPanel> panelMaker)
+    {
       var result = Result.Failed;
       var button = RestoreButton(CommandName);
 
@@ -101,13 +109,12 @@ namespace RhinoInside.Revit.UI
           if (GetAdwndRibbonButton(button) is Autodesk.Windows.RibbonButton adwndRadioButton)
             adwndRadioButton.ShowText = false;
 
-          // Register UI on Revit
-          var rhinoPanel = data.Application.CreateRibbonPanel(Addin.AddinName, rhinoPanelName);
-
           var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
+          // Register UI on Revit
           if (assemblies.Any(x => x.GetName().Name == "RhinoCommon"))
           {
+            var rhinoPanel = panelMaker(Addin.RhinoVersionInfo?.ProductName ?? "Rhinoceros");
             CommandRhino.CreateUI(rhinoPanel);
             CommandImport.CreateUI(rhinoPanel);
             CommandToggleRhinoPreview.CreateUI(rhinoPanel);
@@ -117,7 +124,7 @@ namespace RhinoInside.Revit.UI
 
           if (assemblies.Any(x => x.GetName().Name == "Grasshopper"))
           {
-            var grasshopperPanel = data.Application.CreateRibbonPanel(Addin.AddinName, "Grasshopper");
+            var grasshopperPanel = panelMaker("Grasshopper");
             CommandGrasshopper.CreateUI(grasshopperPanel);
             CommandGrasshopperPreview.CreateUI(grasshopperPanel);
             CommandGrasshopperSolver.CreateUI(grasshopperPanel);
@@ -130,7 +137,7 @@ namespace RhinoInside.Revit.UI
             CommandGrasshopperFolders.CreateUI(grasshopperPanel);
 
             // create grasshopper scripts panels
-            GrasshopperScriptsCommand.CreateUI(data.Application);
+            GrasshopperScriptsCommand.CreateUI(panelMaker);
           }
 
           result = Result.Succeeded;
@@ -152,10 +159,8 @@ namespace RhinoInside.Revit.UI
         case Result.Failed:
           button.Enabled = false;
           button.ToolTip = "Rhino.Inside failed to load.";
-          ShowLoadError(data);
-          break;
+          return Result.Failed;
       }
-
       return result;
     }
 

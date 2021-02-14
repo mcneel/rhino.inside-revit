@@ -65,9 +65,9 @@ namespace RhinoInside.Revit.UI
 
   abstract class GrasshopperScriptsCommand : Command
   {
-    public static void CreateUI(UIApplication uiApp)
+    public static void CreateUI(Func<string, RibbonPanel> panelMaker)
     {
-      foreach (var location in AddinOptions.ScriptLocations)
+      foreach (var location in AddinOptions.Current.ScriptLocations)
       {
         // --------------------------------------------------------------------
         // FIND SCRIPTS
@@ -92,7 +92,7 @@ namespace RhinoInside.Revit.UI
         // --------------------------------------------------------------------
         // CREATE UI
         // --------------------------------------------------------------------
-        var panel = uiApp.CreateRibbonPanel(Addin.AddinName, Path.GetFileName(location));
+        var panel = panelMaker(Path.GetFileName(location));
 
         // Currently only supporting two levels in the UI:
         // 1) Pushbuttons on panel for every LinkedScript at the root level

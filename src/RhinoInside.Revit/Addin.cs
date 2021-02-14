@@ -243,9 +243,9 @@ namespace RhinoInside.Revit
     #region IExternalApplication Members
     internal static UIControlledApplication ApplicationUI { get; private set; }
 
-    protected override Result OnStartup(UIControlledApplication applicationUI)
+    protected override Result OnStartup(UIControlledApplication uiCtrlApp)
     {
-      if (!CanLoad(applicationUI))
+      if (!CanLoad(uiCtrlApp))
         return Result.Failed;
 
       if (StartupMode == AddinStartupMode.Cancelled)
@@ -254,18 +254,18 @@ namespace RhinoInside.Revit
       // Report if opennurbs.dll is loaded
       NativeLoader.SetStackTraceFilePath
       (
-        Path.ChangeExtension(applicationUI.ControlledApplication.RecordingJournalFilename, "log.md")
+        Path.ChangeExtension(uiCtrlApp.ControlledApplication.RecordingJournalFilename, "log.md")
       );
 
       NativeLoader.ReportOnLoad("opennurbs.dll", enable: true);
 
       AssemblyResolver.Enabled = true;
-      ApplicationUI = applicationUI;
+      ApplicationUI = uiCtrlApp;
 
       // Register Revit Failures
       External.DB.ExternalFailures.CreateFailureDefinitions();
 
-      if (applicationUI.IsLateAddinLoading)
+      if (uiCtrlApp.IsLateAddinLoading)
       {
         EventHandler<Autodesk.Revit.UI.Events.IdlingEventArgs> applicationIdling = null;
         ApplicationUI.Idling += applicationIdling = (sender, args) =>
@@ -280,16 +280,16 @@ namespace RhinoInside.Revit
       else
       {
         EventHandler<ApplicationInitializedEventArgs> applicationInitialized = null;
-        ApplicationUI.ControlledApplication.ApplicationInitialized += applicationInitialized = (sender, args) =>
+        uiCtrlApp.ControlledApplication.ApplicationInitialized += applicationInitialized = (sender, args) =>
         {
-          ApplicationUI.ControlledApplication.ApplicationInitialized -= applicationInitialized;
+          uiCtrlApp.ControlledApplication.ApplicationInitialized -= applicationInitialized;
           DoStartUp(sender as Autodesk.Revit.ApplicationServices.Application);
         };
       }
 
       // initialize the Ribbon tab and first panel
-      applicationUI.CreateRibbonTab(Addin.AddinName);
-      var addinRibbon = applicationUI.CreateRibbonPanel(Addin.AddinName, "More");
+      uiCtrlApp.CreateRibbonTab(Addin.AddinName);
+      var addinRibbon = uiCtrlApp.CreateRibbonPanel(Addin.AddinName, "More");
       // Add launch RhinoInside push button,
       UI.CommandStart.CreateUI(addinRibbon);
       // add slideout and the rest of the buttons
@@ -320,6 +320,14 @@ namespace RhinoInside.Revit
             }
           }
         );
+
+      //load RIR?
+      //if (AddinOptions.Current.LoadOnStartup)
+      //{
+      //  UI.CommandStart.Start(
+      //    panelMaker: (name) => uiCtrlApp.CreateRibbonPanel(AddinName, name)
+      //    );
+      //}
 
       return Result.Succeeded;
     }
