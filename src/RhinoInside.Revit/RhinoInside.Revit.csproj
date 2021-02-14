@@ -278,7 +278,7 @@
     <Compile Include="UI\Commands\Grasshopper\CommandPreviewToggleGroup.cs" />
     <Compile Include="UI\Commands\Grasshopper\CommandSolverToggle.cs" />
     <Compile Include="UI\Commands\Grasshopper\GrasshopperPlayerCommand.cs" />
-    <Compile Include="UI\Commands\Grasshopper\GrasshopperScriptsCommand.cs" />
+    <Compile Include="UI\Commands\Grasshopper\GrasshopperLinkedScriptsCommand.cs" />
     <Compile Include="UI\Commands\Addin\CommandHelpLinks.cs" />
     <Compile Include="UI\Forms\OptionsWindow.cs" />
     <Compile Include="UI\Commands\Rhinoceros\BaseRhinoCommand.cs" />

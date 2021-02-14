@@ -137,7 +137,8 @@ namespace RhinoInside.Revit.UI
             CommandGrasshopperFolders.CreateUI(grasshopperPanel);
 
             // create grasshopper scripts panels
-            GrasshopperScriptsCommand.CreateUI(panelMaker);
+            if (AddinOptions.Current.LoadScriptsOnStartup)
+              GrasshopperLinkedScriptsCommand.CreateUI(panelMaker);
           }
 
           result = Result.Succeeded;

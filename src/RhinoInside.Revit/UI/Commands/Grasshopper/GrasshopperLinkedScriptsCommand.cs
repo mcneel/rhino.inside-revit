@@ -63,7 +63,7 @@ namespace RhinoInside.Revit.UI
     public Type ScriptCommandType;
   }
 
-  abstract class GrasshopperScriptsCommand : Command
+  abstract class GrasshopperLinkedScriptsCommand : Command
   {
     public static void CreateUI(Func<string, RibbonPanel> panelMaker)
     {
