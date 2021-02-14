@@ -9,50 +9,105 @@ using System.Windows;
 
 namespace RhinoInside.Revit.Settings
 {
-  [Serializable]
-  public class Options
-  {
-    [XmlElement]
-    public bool CheckForUpdatesOnStartup { get; set; } = true;
-
-    [XmlElement]
-    public string UpdateChannel { get; set; } = AddinUpdater.DefaultChannel.Id.ToString();
-
-    [XmlElement]
-    public List<string> ScriptLocations { get; set; } = new List<string> { @"Z:\LEO-WX\Downloads\GH Scripts" };
-  }
-
   // Easy static access to addin options
-  public static class AddinOptions
+  [Serializable]
+  [XmlRoot("Options")]
+  public class AddinOptions
   {
+    #region Runtime and UI
+    [XmlElement]
+    public bool LoadOnStartup
+    {
+      get => _loadOnStartup;
+      set
+      {
+        _loadOnStartup = value;
+        LoadOnStartupChanged?.Invoke(this, null);
+      }
+    }
+    private bool _loadOnStartup = false;
+    public static event EventHandler<EventArgs> LoadOnStartupChanged;
+
+    [XmlElement]
+    public bool CompactRibbon {
+      get => _compactRibbon;
+      set
+      {
+        _compactRibbon = value;
+        CompactRibbonChanged?.Invoke(this, null);
+      }
+    }
+    private bool _compactRibbon = false;
+    public static event EventHandler<EventArgs> CompactRibbonChanged;
+
+    #endregion
+
+    #region Updates
+    [XmlElement]
+    public bool CheckForUpdatesOnStartup
+    {
+      get => _checkForUpdatesOnStartup;
+      set
+      {
+        _checkForUpdatesOnStartup = value;
+        CheckForUpdatesOnStartupChanged?.Invoke(this, null);
+      }
+    }
+    private bool _checkForUpdatesOnStartup = true;
+    public static event EventHandler<EventArgs> CheckForUpdatesOnStartupChanged;
+
+    [XmlElement]
+    public string UpdateChannel
+    {
+      get => _updateChannel;
+      set
+      {
+        _updateChannel = value;
+        UpdateChannelChanged?.Invoke(this, null);
+      }
+    }
+    private string _updateChannel = AddinUpdater.DefaultChannel.Id.ToString();
+    public static event EventHandler<EventArgs> UpdateChannelChanged;
+    #endregion
+
+    #region Scripts
+    [XmlElement]
+    public bool LoadScriptsOnStartup
+    {
+      get => _loadScriptsOnStartup;
+      set
+      {
+        _loadScriptsOnStartup = value;
+        LoadScriptsOnStartupChanged?.Invoke(this, null);
+      }
+    }
+    private bool _loadScriptsOnStartup = true;
+    public static event EventHandler<EventArgs> LoadScriptsOnStartupChanged;
+
+    [XmlElement]
+    public HashSet<string> ScriptLocations
+    {
+      get => _scriptLocations;
+      set
+      {
+        _scriptLocations = value;
+        ScriptLocationsChanged?.Invoke(this, null);
+      }
+    }
+    private HashSet<string> _scriptLocations = new HashSet<string>();
+    public static event EventHandler<EventArgs> ScriptLocationsChanged;
+    #endregion
+
     // settings set by admin are readonly
     public static bool IsReadOnly =>
       // Push instance to initialize
-      Instance != null && usingAdminOptions;
-  
-    public static bool CheckForUpdatesOnStartup
-    {
-      get => Instance.CheckForUpdatesOnStartup;
-      set => Instance.CheckForUpdatesOnStartup = value;
-    }
-
-    public static string UpdateChannel
-    {
-      get => Instance.UpdateChannel;
-      set => Instance.UpdateChannel = value;
-    }
-
-    public static List<string> ScriptLocations
-    {
-      get => Instance.ScriptLocations;
-      set => Instance.ScriptLocations = value;
-    }
+      Current != null && usingAdminOptions;
 
     // Singleton
     private static bool usingAdminOptions = false;
-    private static Options instance = null;
+    private static AddinOptions instance = null;
     private static readonly object padlock = new object();
-    public static Options Instance
+    public static AddinOptions Current
     {
       get
       {
@@ -60,7 +115,7 @@ namespace RhinoInside.Revit.Settings
         {
           if (instance is null)
           {
-            var xml = new XmlSerializer(typeof(Options));
+            var xml = new XmlSerializer(typeof(AddinOptions));
 
             // look for admin options file, then user, otherwise null
             // settings set by admin are readonly
@@ -75,7 +130,7 @@ namespace RhinoInside.Revit.Settings
               {
                 // read settings
                 using (var optsFile = File.OpenRead(UserOptionsFilePath))
-                  instance = (Options) xml.Deserialize(optsFile);
+                  instance = (AddinOptions) xml.Deserialize(optsFile);
               }
               catch
               {
@@ -91,7 +146,7 @@ namespace RhinoInside.Revit.Settings
 
             // otherwise use default
             if (instance is null)
-              instance = new Options();
+              instance = new AddinOptions();
           }
           return instance;
         }
@@ -114,7 +169,7 @@ namespace RhinoInside.Revit.Settings
 
     public static void Save()
     {
-      var xmlSerializer = new XmlSerializer(typeof(Options));
+      var xmlSerializer = new XmlSerializer(typeof(AddinOptions));
 
       // ensure directory exists
       // clear previous contents, or create empty file
@@ -124,7 +179,7 @@ namespace RhinoInside.Revit.Settings
       // serialize options to the empty file
       using (var optsFile = File.OpenWrite(UserOptionsFilePath))
       {
-        xmlSerializer.Serialize(optsFile, Instance);
+        xmlSerializer.Serialize(optsFile, Current);
       }
     }
   }

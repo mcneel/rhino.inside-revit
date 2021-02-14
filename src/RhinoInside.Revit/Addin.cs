@@ -304,7 +304,7 @@ namespace RhinoInside.Revit
       UI.CommandAddinOptions.CreateUI(addinRibbon);
 
       // check for updates
-      if (AddinOptions.CheckForUpdatesOnStartup)
+      if (AddinOptions.Current.CheckForUpdatesOnStartup)
         AddinUpdater.GetReleaseInfo(
           (ReleaseInfo releaseInfo) =>
           {

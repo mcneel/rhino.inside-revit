@@ -53,7 +53,10 @@ namespace RhinoInside.Revit.UI
       {
         var optWindow = new OptionsWindow(data.Application);
         if (LatestReleaseInfo != null)
-          optWindow.SetReleaseInfo(LatestReleaseInfo);
+        {
+          optWindow.UpdatesPanel.SetReleaseInfo(LatestReleaseInfo);
+          optWindow.ActivateUpdatesTab();
+        }
         optWindow.ShowModal();
       }
       else

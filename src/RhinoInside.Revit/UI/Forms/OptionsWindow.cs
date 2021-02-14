@@ -20,15 +20,12 @@ namespace RhinoInside.Revit.UI
 {
   internal class OptionsWindow : BaseDialog
   {
-    CheckBox _checkUpdatesOnStartup = new CheckBox { Text = "Check Updates on Startup" };
-    Label _channelDescription = new Label { Visible = false, Wrap = WrapMode.Word, Height = 36 };
-    Forms.ComboBox _updateChannelSelector = new Forms.ComboBox();
+    public UpdatesPanel UpdatesPanel { get; } = new UpdatesPanel();
 
-    ReleaseInfo ReleaseInfo = null;
-    Button _releaseNotesBtn = new Button { Text = "Release Notes", Height = 25 };
-    Button _downloadBtn = new Button { Text = "Download Installer", Height = 25 };
-    GroupBox _updateOpts = null;
-
+    private TabPage _general;
+    private TabPage _updates;
+    private TabPage _scripts;
+    private TabControl _tabs;
 
     public OptionsWindow(UIApplication uiApp) : base(uiApp, initialSize: new Size(450, -1))
     {
@@ -36,10 +33,94 @@ namespace RhinoInside.Revit.UI
       InitLayout();
     }
 
+    public void ActivateGeneralTab() => _tabs.SelectedPage = _general;
+    public void ActivateUpdatesTab() => _tabs.SelectedPage = _updates;
+    public void ActivateScriptsTab() => _tabs.SelectedPage = _scripts;
+
+    void InitLayout()
+    {
+      // apply settings button
+      var applyButton = new Button { Text = "Apply", Height = 25 };
+      applyButton.Click += ApplyButton_Click;
+
+    _general = new TabPage { Text = "General", Padding = new Padding(5), Content = new GeneralPanel() };
+    _updates = new TabPage { Text = "Updates", Padding = new Padding(5), Content = UpdatesPanel };
+    _scripts = new TabPage { Text = "Scripts", Padding = new Padding(5), Content = new Panel() };
+    _tabs = new TabControl
+    {
+      TabPosition = Forms.DockPosition.Top,
+      Pages = { _general, _updates, _scripts }
+    };
+
+    // setup contents
+    Content = new TableLayout
+      {
+        Spacing = new Size(5, 10),
+        Padding = new Padding(5),
+        Rows = {
+          new TableRow {
+            Cells = { new TableCell { ScaleWidth = true, Control = _tabs }}
+          },
+          null,
+          new TableRow { Cells = { applyButton } },
+        }
+      };
+    }
+
+    private void ApplyButton_Click(object sender, EventArgs e)
+    {
+      UpdatesPanel.ApplyChanges();
+      AddinOptions.Save();
+      Close();
+    }
+  }
+
+  internal class GeneralPanel: Panel
+  {
+    public GeneralPanel() => InitLayout();
+
+    CheckBox _loadOnStartup = new CheckBox { Text = "Load Rhino on Startup" };
+
+    void InitLayout()
+    {
+      _loadOnStartup.Checked = AddinOptions.Current.LoadOnStartup;
+
+      Content = new TableLayout
+      {
+        Spacing = new Size(5, 10),
+        Padding = new Padding(5),
+        Rows = {
+          new TableRow {
+            ScaleHeight = true,
+            Cells = { new TableCell(_loadOnStartup, true) }
+          },
+        }
+      };
+    }
+
+    internal void ApplyChanges()
+    {
+      if (_loadOnStartup.Checked.HasValue)
+        AddinOptions.Current.LoadOnStartup = _loadOnStartup.Checked.Value;
+    }
+  }
+
+  internal class UpdatesPanel : Panel
+  {
+    public UpdatesPanel() => InitLayout();
+
+    CheckBox _checkUpdatesOnStartup = new CheckBox { Text = "Check Updates on Startup" };
+    Label _channelDescription = new Label { Visible = false, Wrap = WrapMode.Word, Height = 36 };
+    Forms.ComboBox _updateChannelSelector = new Forms.ComboBox();
+    Button _releaseNotesBtn = new Button { Text = "Release Notes", Height = 25 };
+    Button _downloadBtn = new Button { Text = "Download Installer", Height = 25 };
+
+    internal ReleaseInfo ReleaseInfo = null;
+
     void InitLayout()
     {
       // setup update options
-      _checkUpdatesOnStartup.Checked = AddinOptions.CheckForUpdatesOnStartup;
+      _checkUpdatesOnStartup.Checked = AddinOptions.Current.CheckForUpdatesOnStartup;
 
       // setup update channel selector
       _updateChannelSelector.SelectedIndexChanged += _updateChannelSelector_SelectedIndexChanged;
@@ -48,7 +129,7 @@ namespace RhinoInside.Revit.UI
         _updateChannelSelector.Items.Add(chnl.Name);
       }
 
-      if (AddinOptions.UpdateChannel is string activeChannelId)
+      if (AddinOptions.Current.UpdateChannel is string activeChannelId)
       {
         var channelGuid = new Guid(activeChannelId);
         var updaterChannel = AddinUpdater.Channels.Where(x => x.Id == channelGuid).First();
@@ -57,67 +138,46 @@ namespace RhinoInside.Revit.UI
       else
         _updateChannelSelector.SelectedIndex = AddinUpdater.Channels.IndexOf(AddinUpdater.DefaultChannel);
 
-      // apply settings button
-      var applyButton = new Button { Text = "Apply", Height = 25 };
-      applyButton.Click += ApplyButton_Click;
 
       // setup update options groupbox
       var spacing = new Size(5, 10);
 
-      _updateOpts = new GroupBox
-      {
-        Text = "Updates",
-        Content = new TableLayout
-        {
-          Spacing = spacing,
-          Padding = new Padding(5),
-          Rows = {
-            new TableRow {
-              ScaleHeight = true,
-              Cells = { new TableCell(_checkUpdatesOnStartup, true) }
-            },
-            new TableLayout
-            {
-              Height = 25,
-              Spacing = spacing,
-              Rows =
-              {
-                new TableRow {
-                  ScaleHeight = true,
-                  Cells =
-                  {
-                    new Label {
-                      Text = $"Update Channel v{Addin.Version.Major}.*",
-                      Height = 25,
-                      VerticalAlignment = VerticalAlignment.Center
-                    },
-                    _updateChannelSelector
-                  }
-                }
-              }
-            },
-            _channelDescription,
-          }
-        }
-      };
-
-      // setup release info controls
-      _releaseNotesBtn.Click += _releaseNotesBtn_Click;
-      _downloadBtn.Click += _downloadBtn_Click;
-
-      // setup contents
       Content = new TableLayout
       {
         Spacing = spacing,
         Padding = new Padding(5),
         Rows = {
           new TableRow {
-            Cells = { new TableCell { ScaleWidth = true, Control = _updateOpts } }
+            ScaleHeight = true,
+            Cells = { new TableCell(_checkUpdatesOnStartup, true) }
           },
-          null,
-          new TableRow { Cells = { applyButton } },
+          new TableLayout
+          {
+            Height = 25,
+            Spacing = spacing,
+            Rows =
+            {
+              new TableRow {
+                ScaleHeight = true,
+                Cells =
+                {
+                  new Label {
+                    Text = $"Update Channel v{Addin.Version.Major}.*",
+                    Height = 25,
+                    VerticalAlignment = VerticalAlignment.Center
+                  },
+                  _updateChannelSelector
+                }
+              }
+            }
+          },
+          _channelDescription,
         }
       };
+
+      // setup release info controls
+      _releaseNotesBtn.Click += _releaseNotesBtn_Click;
+      _downloadBtn.Click += _downloadBtn_Click;
     }
 
     private void _downloadBtn_Click(object sender, EventArgs e)
@@ -142,27 +202,13 @@ namespace RhinoInside.Revit.UI
       }
     }
 
-    private void ApplyButton_Click(object sender, EventArgs e)
-    {
-      // update settings
-      if (_checkUpdatesOnStartup.Checked.HasValue)
-        AddinOptions.CheckForUpdatesOnStartup = _checkUpdatesOnStartup.Checked.Value;
-
-      AddinOptions.UpdateChannel =
-        AddinUpdater.Channels[_updateChannelSelector.SelectedIndex].Id.ToString();
-
-      AddinOptions.Save();
-
-      Close();
-    }
-
-    public void SetReleaseInfo(ReleaseInfo releaseInfo)
+    internal void SetReleaseInfo(ReleaseInfo releaseInfo)
     {
       if (releaseInfo != null)
       {
         ReleaseInfo = releaseInfo;
 
-        var updateGroup = ((TableLayout) _updateOpts.Content);
+        var updateGroup = ((TableLayout)Content);
         updateGroup.Rows.Insert(0,
           new TableRow
           {
@@ -206,6 +252,16 @@ namespace RhinoInside.Revit.UI
           }
         );
       }
+    }
+
+    internal void ApplyChanges()
+    {
+      // update settings
+      if (_checkUpdatesOnStartup.Checked.HasValue)
+        AddinOptions.Current.CheckForUpdatesOnStartup = _checkUpdatesOnStartup.Checked.Value;
+
+      AddinOptions.Current.UpdateChannel =
+        AddinUpdater.Channels[_updateChannelSelector.SelectedIndex].Id.ToString();
     }
   }
 }

@@ -131,7 +131,7 @@ namespace RhinoInside.Revit
     {
       get
       {
-        if (AddinOptions.UpdateChannel is string activeChannelId)
+        if (AddinOptions.Current.UpdateChannel is string activeChannelId)
         {
           var channelGuid = new Guid(activeChannelId);
           return Channels.Where(x => x.Id == channelGuid).FirstOrDefault();
