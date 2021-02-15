@@ -101,7 +101,10 @@ namespace RhinoInside.Revit.UI
       }
 
       if (AddinOptions.Current.CompactTab)
+      {
         data.Application.CreateRibbonTab(Addin.AddinName);
+        data.Application.ActivateRibbonTab(Addin.AddinName);
+      }
 
       var result = Start(
         panelMaker: (tabName, panelName) => data.Application.CreateRibbonPanel(tabName, panelName)
