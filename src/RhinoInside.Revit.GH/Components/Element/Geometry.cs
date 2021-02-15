@@ -61,8 +61,6 @@ namespace RhinoInside.Revit.GH.Components
       return false;
     }
 
-    protected delegate DB.Options OptionsDelegate();
-
     protected void SolveGeometry
     (
       GH_Path basePath,

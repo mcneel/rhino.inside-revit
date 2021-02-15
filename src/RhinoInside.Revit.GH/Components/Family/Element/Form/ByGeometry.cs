@@ -97,8 +97,11 @@ namespace RhinoInside.Revit.GH.Components
         }
       }
 
-      using (GeometryEncoder.Context.Push(doc))
+      using (var ctx = GeometryEncoder.Context.Push(doc))
       {
+        ctx.RuntimeMessage = (severity, message, invalidGeometry) =>
+          AddGeometryConversionError((GH_RuntimeMessageLevel) severity, message, invalidGeometry);
+
         var solid = brep.ToSolid();
         if (solid != null)
         {

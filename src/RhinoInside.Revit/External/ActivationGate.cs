@@ -368,6 +368,7 @@ namespace RhinoInside.Revit.External
         if (windowToActivate?.IsInvalid == false)
         {
           try { WindowHandle.ActiveWindow = windowToActivate; }
+          catch { /* Windows failed to be activated */ }
           finally { windowToActivate = default; }
         }
       }
