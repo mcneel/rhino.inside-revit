@@ -63,14 +63,20 @@ namespace RhinoInside.Revit.UI
     public Type ScriptCommandType;
   }
 
+  public class ScriptPkg
+  {
+    public string Name;
+    public string Location;
+  }
+
   abstract class GrasshopperLinkedScriptsCommand : Command
   {
-    public static void CreateUI(string location, Func<string, string, RibbonPanel> panelMaker)
+    public static void CreateUI(ScriptPkg pkg, Func<string, string, RibbonPanel> panelMaker)
     {
       // --------------------------------------------------------------------
       // FIND SCRIPTS
       // --------------------------------------------------------------------
-      var items = FindLinkedItemsRecursive(location);
+      var items = FindLinkedItemsRecursive(pkg.Location);
 
       // --------------------------------------------------------------------
       // CREATE ASSEMBLY
@@ -90,7 +96,7 @@ namespace RhinoInside.Revit.UI
       // --------------------------------------------------------------------
       // CREATE UI
       // --------------------------------------------------------------------
-      var panel = panelMaker(Addin.AddinName, Path.GetFileName(location));
+      var panel = panelMaker(Addin.AddinName, pkg.Name);
 
       // Currently only supporting two levels in the UI:
       // 1) Pushbuttons on panel for every LinkedScript at the root level

@@ -285,7 +285,7 @@ namespace RhinoInside.Revit.UI
     public ScriptsPanel() => InitLayout();
 
     CheckBox _loadScriptsOnStartup = new CheckBox { Text = "Load Scripts on Startup" };
-    CheckBox _loadScriptPackagesOnStartup = new CheckBox { Text = "Load Script Packages on Startup" };
+    CheckBox _loadScriptPackagesOnStartup = new CheckBox { Text = "Load Installed Packages on Startup" };
     ListBox _scriptLocations = new ListBox();
     Button _addButton = new Button { Text = "Add Location", Height = 25 };
     Button _delButton = new Button { Text = "Remove Location", Height = 25, Enabled = false };

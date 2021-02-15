@@ -154,13 +154,13 @@ namespace RhinoInside.Revit.UI
             CommandGrasshopperFolders.CreateUI(_grasshopperPanel);
 
             // create grasshopper scripts panels
-            if (AddinOptions.Current.LoadScriptsOnStartup)
-              foreach (var location in AddinOptions.Current.ScriptLocations)
-                GrasshopperLinkedScriptsCommand.CreateUI(location, panelMaker);
+            if (AddinOptions.Current.LoadScriptPackagesOnStartup)
+              foreach (var pkg in GetInstalledScriptPackages())
+                GrasshopperLinkedScriptsCommand.CreateUI(pkg, panelMaker);
 
-            //if (AddinOptions.Current.LoadScriptPackagesOnStartup)
-            //  foreach (var location in /* Yak pacake locations here */)
-            //    GrasshopperLinkedScriptsCommand.CreateUI(location, panelMaker);
+            if (AddinOptions.Current.LoadScriptsOnStartup)
+              foreach (var pkg in GetUserScriptPackages())
+                  GrasshopperLinkedScriptsCommand.CreateUI(pkg, panelMaker);
           }
 
           UpdateRibbonCompact();
@@ -418,6 +418,40 @@ namespace RhinoInside.Revit.UI
         button.ClearHighlight();
         SetTooltip(button);
       }
+    }
+
+    static public List<ScriptPkg> GetUserScriptPackages()
+    {
+      var pkgs = new List<ScriptPkg>();
+      foreach (var location in AddinOptions.Current.ScriptLocations)
+        if (Directory.Exists(location))
+          pkgs.Add(
+            new ScriptPkg { Name = Path.GetFileName(location), Location = location }
+            );
+        return pkgs;
+    }
+
+    static public List<ScriptPkg> GetInstalledScriptPackages()
+    {
+      var pkgs = new List<ScriptPkg>();
+      if (Directory.Exists(Addin.AutoInstallPluginPath))
+      {
+        foreach (var dir in Directory.GetDirectories(Addin.AutoInstallPluginPath))
+        {
+          var manifestFile = Path.Combine(dir, "manifest.txt");
+          if (File.Exists(manifestFile))
+          {
+            var mf = File.ReadAllLines(manifestFile);
+            var version = mf[0].Trim();
+            var scriptsPath = Path.Combine(dir, version, "gh_revit");
+            if (Directory.Exists(scriptsPath))
+              pkgs.Add(
+                new ScriptPkg { Name = $"{Path.GetFileName(dir)} ({version})", Location = scriptsPath }
+                );
+          }
+        }
+      }
+      return pkgs;
     }
   }
 }

@@ -152,6 +152,7 @@ namespace RhinoInside.Revit.Settings
         return _sessionInstance;
       }
     }
+
     public static AddinOptions Current
     {
       get
