@@ -14,6 +14,7 @@ using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
 using RhinoInside.Revit.External.UI.Extensions;
 using RhinoInside.Revit.Native;
+using RhinoInside.Revit.Settings;
 using UIX = RhinoInside.Revit.External.UI;
 
 namespace RhinoInside.Revit
@@ -219,6 +220,11 @@ namespace RhinoInside.Revit
 
       if (DaysUntilExpiration < 1)
         status = Status.Obsolete;
+
+      NativeLoader.IsolateOpenNurbs();
+
+      // initialize ui framework provided by Rhino
+      RhinoUIFramework.LoadFramework(SystemDir);
     }
 
     public Addin() : base(new Guid("02EFF7F0-4921-4FD3-91F6-A87B6BA9BF74")) => Instance = this;
@@ -277,7 +283,24 @@ namespace RhinoInside.Revit
       }
 
       // Add launch RhinoInside push button
-      UI.CommandRhinoInside.CreateUI(applicationUI.CreateRibbonPanel("Rhinoceros"));
+      var addinRibbon = applicationUI.CreateRibbonPanel("Rhinoceros");
+      UI.CommandRhinoInside.CreateUI(addinRibbon);
+      UI.CommandRhinoInsideOptions.CreateUI(addinRibbon);
+
+      // check for updates
+      if (AddinOptions.CheckForUpdatesOnStartup)
+        AddinUpdater.GetReleaseInfo(
+          (ReleaseInfo releaseInfo) =>
+          {
+            // if release info is received,
+            if (releaseInfo != null) {
+              // if current version on the active update channel is newer
+              if (releaseInfo.Version > Version)
+                // ask UI to notify user of updates
+                UI.CommandRhinoInsideOptions.NotifyUpdateAvailable(releaseInfo);
+            }
+          }
+        );
 
       return Result.Succeeded;
     }
@@ -388,13 +411,14 @@ namespace RhinoInside.Revit
           TitleAutoPrefix = true,
           AllowCancellation = true,
           MainInstruction = DaysUntilExpiration < 1 ?
-          "This WIP build has expired" :
-          $"This WIP build expires in {DaysUntilExpiration} days",
+          "Rhino.Inside WIP has expired" :
+          $"Rhino.Inside WIP expires in {DaysUntilExpiration} days",
+          MainContent = "While in WIP phase, you do need to update Rhino.Inside addin at least every 45 days.",
           FooterText = "Current version: " + DisplayVersion
         }
       )
       {
-        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Check for updates…");
+        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Check for updates…", "Open Rhino.Inside download page");
         if (taskDialog.Show() == TaskDialogResult.CommandLink1)
         {
           using (Process.Start(@"https://www.rhino3d.com/download/rhino.inside-revit/7/wip")) { }
@@ -544,6 +568,35 @@ namespace RhinoInside.Revit
 
     public static Version Version => Assembly.GetExecutingAssembly().GetName().Version;
     public static string DisplayVersion => $"{Version} ({BuildDate})";
+    #endregion
+
+    #region Rhino-friendly UI Framework
+    static class RhinoUIFramework
+    {
+      /// <summary>
+      /// Loads assemblies related to the Rhino ui framework from given Rhino system directory
+      /// </summary>
+      /// <param name="sysDir"></param>
+      static public void LoadFramework(string sysDir)
+      {
+        Assembly.LoadFrom(Path.Combine(sysDir, "Eto.dll"));
+        Assembly.LoadFrom(Path.Combine(sysDir, "Eto.Wpf.dll"));
+        Assembly.LoadFrom(Path.Combine(sysDir, "Eto.Serialization.Xaml.dll"));
+        Assembly.LoadFrom(Path.Combine(sysDir, "Xceed.Wpf.Toolkit.dll"));
+
+        Init();
+      }
+
+      /// <summary>
+      /// Initialize the ui framework
+      /// </summary>
+      static void Init()
+      {
+        if (Eto.Forms.Application.Instance is null)
+          new Eto.Forms.Application(Eto.Platforms.Wpf).Attach();
+      }
+    }
+
     #endregion
   }
 }
@@ -886,6 +939,78 @@ namespace RhinoInside.Revit.UI
           try { Registry.CurrentUser.DeleteSubKey(SDKRegistryKeyName); }
           catch (Exception) { }
       }
+    }
+  }
+
+  [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
+  class CommandRhinoInsideOptions : Command
+  {
+    static PushButton Button;
+    static ReleaseInfo LatestReleaseInfo = null;
+
+    public static void CreateUI(RibbonPanel ribbonPanel)
+    {
+      const string CommandName = "Options";
+
+      var buttonData = NewPushButtonData<CommandRhinoInsideOptions, AllwaysAvailable>(CommandName);
+      if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
+      {
+        // setup button
+        Button = pushButton;
+        pushButton.Image = ImageBuilder.LoadBitmapImage("Resources.Options.png", true);
+        pushButton.LargeImage = ImageBuilder.LoadBitmapImage("Resources.Options.png");
+
+        // disable if startup mode is disabled
+        if (Addin.StartupMode == AddinStartupMode.Disabled)
+        {
+          Button.Enabled = false;
+          Button.ToolTip = "Addin Disabled";
+        }
+
+        // disable the button if options are readonly
+        Button.Enabled = !AddinOptions.IsReadOnly;
+      }
+    }
+
+    public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
+    {
+      // try opening options window
+      if (!AddinOptions.IsReadOnly)
+      {
+        var optWindow = new OptionsWindow(data.Application);
+        if (LatestReleaseInfo != null)
+          optWindow.SetReleaseInfo(LatestReleaseInfo);
+        optWindow.ShowModal();
+      }
+      else
+        TaskDialog.Show("Options", "Contact your system admin to change the options");
+
+      return Result.Succeeded;
+    }
+
+    /// <summary>
+    /// Mark button with highlighter dot using Autodesk.Windows api
+    /// </summary>
+    static public void NotifyUpdateAvailable(ReleaseInfo releaseInfo)
+    {
+      // button gets deactivated if options are readonly
+      if (!AddinOptions.IsReadOnly)
+      {
+        Highlight();
+        Button.ToolTip = "New Release Available for Download!\n"
+                       + $"Version: {releaseInfo.Version}\n"
+                       + Button.ToolTip;
+        LatestReleaseInfo = releaseInfo;
+      }
+    }
+
+    static public void Highlight()
+    {
+      // grab the underlying Autodesk.Windows object from Button
+      var getRibbonItemMethodInfo = Button.GetType().GetMethod("getRibbonItem", BindingFlags.NonPublic | BindingFlags.Instance);
+      var adWndObj = (Autodesk.Windows.RibbonButton) getRibbonItemMethodInfo.Invoke(Button, null);
+      // set highlight state and update tooltip
+      adWndObj.Highlight = Autodesk.Internal.Windows.HighlightMode.New;
     }
   }
 }

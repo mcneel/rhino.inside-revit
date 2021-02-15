@@ -593,7 +593,11 @@ namespace RhinoInside.Revit.GH.Components
                   using (var forms = new DeleteElementEnumerator<DB.GenericForm>(new DB.FilteredElementCollector(familyDoc).OfClass(typeof(DB.GenericForm)).Cast<DB.GenericForm>().ToArray()))
                   using (var curves = new DeleteElementEnumerator<DB.CurveElement>(new DB.FilteredElementCollector(familyDoc).OfClass(typeof(DB.CurveElement)).Cast<DB.CurveElement>().Where(x => x.Category.Id.IntegerValue != (int) DB.BuiltInCategory.OST_SketchLines).ToArray()))
                   using (var openings = new DeleteElementEnumerator<DB.Opening>(new DB.FilteredElementCollector(familyDoc).OfClass(typeof(DB.Opening)).Cast<DB.Opening>().ToArray()))
+                  using (var ctx = GeometryEncoder.Context.Push(familyDoc))
                   {
+                    ctx.RuntimeMessage = (severity, message, invalidGeometry) =>
+                      AddGeometryConversionError((GH_RuntimeMessageLevel) severity, message, invalidGeometry);
+
                     bool hasVoids = false;
                     var planesSet = new List<KeyValuePair<double[], DB.SketchPlane>>();
                     var planesSetComparer = new PlaneComparer();

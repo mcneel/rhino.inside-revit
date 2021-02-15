@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Include xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  
+  <Fragment>
+    <DirectoryRef Id="TARGETDIR">
+      <Directory Id="APPLICATIONFOLDER">
+        <Directory Id="APPLICATIONFOLDER2018" Name="2018">
+          <Directory Id="INSTALLFOLDER2018" Name="RhinoInside.Revit"/>
+        </Directory>
+        <Directory Id="APPLICATIONFOLDER2019" Name="2019">
+          <Directory Id="INSTALLFOLDER2019" Name="RhinoInside.Revit"/>
+        </Directory>
+        <Directory Id="APPLICATIONFOLDER2020" Name="2020">
+          <Directory Id="INSTALLFOLDER2020" Name="RhinoInside.Revit" />
+        </Directory>
+        <Directory Id="APPLICATIONFOLDER2021" Name="2021">
+          <Directory Id="INSTALLFOLDER2021" Name="RhinoInside.Revit" />
+        </Directory>
+      </Directory>
+      
+      <Directory Id="CommonAppDataFolder">
+        <Directory Id="McNeelFolder" Name="McNeel">
+          <Directory Id="RhinoInsideFolder" Name="Rhino.Inside">
+            <Directory Id="RiRFolder" Name="Revit">
+              <Directory Id="CurrentRiRFolder" Name="$(var.MajorMinorVersion)">
+                <Directory Id="SamplesFolder" Name="Samples">
+                </Directory>
+              </Directory>
+            </Directory>
+          </Directory>
+        </Directory>
+      </Directory>
+    </DirectoryRef>
+
+    <SetProperty Id="INSTALLFOLDER2018" Value="[APPLICATIONFOLDER]2018\[ApplicationFolderName]\" After="CostFinalize"/>
+    <SetProperty Id="INSTALLFOLDER2019" Value="[APPLICATIONFOLDER]2019\[ApplicationFolderName]\" After="CostFinalize"/>
+    <SetProperty Id="INSTALLFOLDER2020" Value="[APPLICATIONFOLDER]2020\[ApplicationFolderName]\" After="CostFinalize"/>
+    <SetProperty Id="INSTALLFOLDER2021" Value="[APPLICATIONFOLDER]2021\[ApplicationFolderName]\" After="CostFinalize"/>
+
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="Addins.2018.RhinoInsideRevit">
+
+      <Component Id="Revit.2018.opennurbs_private.manifest" Guid="{172FFC5B-958B-4CAC-9D67-BDE312C82278}" Directory="REVIT2018_INSTALLLOCATION">
+        <Condition>Privileged</Condition>
+        <File Id="Revit.2018.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
+      </Component>
+
+      <Component Id="Addins.2018.RhinoInsideRevit.addin" Guid="{D49A455F-C51E-451B-B1B8-2AA62E6A9D1C}" Directory="APPLICATIONFOLDER2018">
+        <File Id="Addins.2018.RhinoInside.Revit.addin" Source="..\RhinoInside.Revit\Properties\RhinoInside.Revit.addin"/>
+      </Component>
+      
+      <Component Id="Addins.2018.RhinoInsideRevit" Guid="{425DE5DB-2E76-4EAC-8CA9-F348965000F2}" Directory="INSTALLFOLDER2018">
+        <File Id="Addins.2018.RhinoInside.Revit.dll" Source="..\RhinoInside.Revit\bin\x64\$(var.Configuration) 2018\RhinoInside.Revit.dll"/>
+        <File Id="Addins.2018.RhinoInside.Revit.GH.gha" Source="..\RhinoInside.Revit.GH\bin\x64\$(var.Configuration) 2018\RhinoInside.Revit.GH.gha"/>
+        <File Id="Addins.2018.RhinoInside.Revit.Native.dll" Source="..\RhinoInside.Revit.Native\bin\x64\$(var.Configuration)\RhinoInside.Revit.Native.dll"/>
+      </Component>
+      
+    </ComponentGroup>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="Addins.2019.RhinoInsideRevit">
+      
+      <Component Id="Revit.2019.opennurbs_private.manifest" Guid="{904FA473-D10E-4B6D-B5CF-F8593240EEA7}" Directory="REVIT2019_INSTALLLOCATION">
+        <Condition>Privileged</Condition>
+        <File Id="Revit.2019.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
+      </Component>
+
+      <Component Id="Addins.2019.RhinoInsideRevit.addin" Guid="{4C2C8AC5-3DD6-4B2C-B568-35BA015F8A66}" Directory="APPLICATIONFOLDER2019">
+        <File Id="Addins.2019.RhinoInside.Revit.addin" Source="..\RhinoInside.Revit\Properties\RhinoInside.Revit.addin"/>
+      </Component>
+      
+      <Component Id="Addins.2019.RhinoInsideRevit" Guid="{C1D9E7B6-0DE7-4640-82C1-B475065E5024}" Directory="INSTALLFOLDER2019">
+        <File Id="Addins.2019.RhinoInside.Revit.dll" Source="..\RhinoInside.Revit\bin\x64\$(var.Configuration) 2019\RhinoInside.Revit.dll"/>
+        <File Id="Addins.2019.RhinoInside.Revit.GH.gha" Source="..\RhinoInside.Revit.GH\bin\x64\$(var.Configuration) 2019\RhinoInside.Revit.GH.gha"/>
+        <File Id="Addins.2019.RhinoInside.Revit.Native.dll" Source="..\RhinoInside.Revit.Native\bin\x64\$(var.Configuration)\RhinoInside.Revit.Native.dll"/>
+      </Component>
+
+    </ComponentGroup>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="Addins.2020.RhinoInsideRevit">
+      
+      <Component Id="Revit.2020.opennurbs_private.manifest" Guid="{AFA79A11-2862-4BFC-BF9E-EF9F16520EC5}" Directory="REVIT2020_INSTALLLOCATION">
+        <Condition>Privileged</Condition>
+        <File Id="Revit.2020.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
+      </Component>
+
+      <Component Id="Addins.2020.RhinoInsideRevit.addin" Guid="{F35F4F5C-B259-4E02-A615-807630BB23C4}" Directory="APPLICATIONFOLDER2020">
+        <File Id="Addins.2020.RhinoInsideRevit.addin" Source="..\RhinoInside.Revit\Properties\RhinoInside.Revit.addin"/>
+      </Component>
+      
+      <Component Id="Addins.2020.RhinoInsideRevit" Guid="{6C890637-2DFD-4E0A-98BC-D3CAAA4EDE0E}" Directory="INSTALLFOLDER2020">
+        <File Id="Addins.2020.RhinoInside.Revit.dll" Source="..\RhinoInside.Revit\bin\x64\$(var.Configuration) 2020\RhinoInside.Revit.dll"/>
+        <File Id="Addins.2020.RhinoInside.Revit.GH.gha" Source="..\RhinoInside.Revit.GH\bin\x64\$(var.Configuration) 2020\RhinoInside.Revit.GH.gha"/>
+        <File Id="Addins.2020.RhinoInside.Revit.Native.dll" Source="..\RhinoInside.Revit.Native\bin\x64\$(var.Configuration)\RhinoInside.Revit.Native.dll"/>
+      </Component>
+
+    </ComponentGroup>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="Addins.2021.RhinoInsideRevit">
+
+      <Component Id="Revit.2021.opennurbs_private.manifest" Guid="{83BE2293-231A-4C7A-B6DD-B6D8D7494E11}" Directory="REVIT2021_INSTALLLOCATION">
+        <Condition>Privileged</Condition>
+        <File Id="Revit.2021.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
+      </Component>
+
+      <Component Id="Addins.2021.RhinoInsideRevit.addin" Guid="{973A5BCA-285D-4A43-BA31-EC261E4A4246}" Directory="APPLICATIONFOLDER2021">
+        <File Id="Addins.2021.RhinoInsideRevit.addin" Source="..\RhinoInside.Revit\Properties\RhinoInside.Revit.addin"/>
+      </Component>
+      
+      <Component Id="Addins.2021.RhinoInsideRevit" Guid="{31B9D2CF-D920-463F-9C5B-F3FFB4EC97E1}" Directory="INSTALLFOLDER2021">
+        <File Id="Addins.2021.RhinoInside.Revit.dll" Source="..\RhinoInside.Revit\bin\x64\$(var.Configuration) 2021\RhinoInside.Revit.dll"/>
+        <File Id="Addins.2021.RhinoInside.Revit.GH.gha" Source="..\RhinoInside.Revit.GH\bin\x64\$(var.Configuration) 2021\RhinoInside.Revit.GH.gha"/>
+        <File Id="Addins.2021.RhinoInside.Revit.Native.dll" Source="..\RhinoInside.Revit.Native\bin\x64\$(var.Configuration)\RhinoInside.Revit.Native.dll"/>
+      </Component>
+      
+    </ComponentGroup>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="SamplesComponentGroup">
+      <Component Id="SamplesComponent" Guid="{B25A7369-22A0-45C0-8F0F-F85184E7282B}" Directory="SamplesFolder">
+        <File Id="Samples.Sample2" Source="..\RhinoInside.Revit\Samples\Sample2.ghx"/>
+        <File Id="Samples.Sample3" Source="..\RhinoInside.Revit\Samples\Sample3.ghx"/>
+        <File Id="Samples.Sample4" Source="..\RhinoInside.Revit\Samples\Sample4.ghx"/>
+        <File Id="Samples.Sample5" Source="..\RhinoInside.Revit\Samples\Sample5.ghx"/>
+        <File Id="Samples.Sample7" Source="..\RhinoInside.Revit\Samples\Sample7.py"/>
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+
+</Include>

@@ -1,10 +1,48 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Target Name="Build">
-    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release 2017"/>
+  <Target Name="Build" DependsOnTargets="Compile;BuildInstaller">
+  </Target>
+
+  <Target Name="Compile">
     <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release 2018"/>
     <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release 2019"/>
     <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release 2020"/>
     <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release 2021"/>
+  </Target>
+
+  <Target Name="BuildInstaller">
     <MSBuild Projects="..\src\RhinoInside.Revit.Setup.sln" Targets="Build" Properties="Configuration=Release"/>
+  </Target>
+
+  <Target Name="WriteUpdateXml">
+    <Error Text="Version cannot be empty" Condition="'$(Version)'==''" />
+    <Error Text="DownloadUrl cannot be empty" Condition="'$(DownloadUrl)'==''" />
+
+    <PropertyGroup>
+      <Title Condition="'$(Title)'==''">Rhino.Inside.Revit $(Version)</Title>
+      <Date>$([System.DateTime]::Now.ToString("o"))</Date>
+
+      <UpdateXmlFile>$(MSBuildThisFileDirectory)update.xml</UpdateXmlFile>
+      <InstallerFile Condition="'$(InstallerFile)'==''">$(MSBuildThisFileDirectory)..\src\RhinoInside.Revit.Setup\bin\x64\Release\RhinoInside.Revit_$(Version).msi</InstallerFile>
+    </PropertyGroup>
+
+    <GetFileHash Files="$(InstallerFile)"
+      Algorithm="sha256" >
+      <Output
+          TaskParameter="Hash"
+          ItemName="Hash" />
+    </GetFileHash>
+
+    <Message Text="title=$(Title)" />
+    <Message Text="releaseDate=$(Date)" />
+    <Message Text="version=$(Version)" />
+    <Message Text="downloadUrl=$(DownloadUrl)" />
+    <Message Text="sha256=@(Hash)" />
+
+    <XmlPoke XmlInputPath="$(UpdateXmlFile)" Query="release/title" Value="$(Title)" />
+    <XmlPoke XmlInputPath="$(UpdateXmlFile)" Query="release/releaseDate" Value="$(Date)" />
+    <XmlPoke XmlInputPath="$(UpdateXmlFile)" Query="release/version" Value="$(Version)" />
+    <XmlPoke XmlInputPath="$(UpdateXmlFile)" Query="release/downloadUrl" Value="$(DownloadUrl)" />
+    <!-- <XmlPoke XmlInputPath="$(UpdateXmlFile)" Query="release/releaseNotesUrl" Value="" /> -->
+    <XmlPoke XmlInputPath="$(UpdateXmlFile)" Query="release/sha256" Value="@(Hash)" />
   </Target>
 </Project>

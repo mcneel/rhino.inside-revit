@@ -235,6 +235,8 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
     {
       // TODO: Implement conversion from other Rhino surface types like PlaneSurface, RevSurface and SumSurface.
 
+      var isNurbs = face.UnderlyingSurface() is NurbsSurface;
+
       using (var nurbsSurface = face.ToNurbsSurface())
       {
         var degreeU = nurbsSurface.Degree(0);
@@ -258,14 +260,14 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
           return DB.BRepBuilderSurfaceGeometry.CreateNURBSSurface
           (
-            degreeU, degreeV, knotsU, knotsV, controlPoints, weights, false, bboxUV
+            degreeU, degreeV, knotsU, knotsV, controlPoints, weights, false, isNurbs ? bboxUV : default
           );
         }
         else
         {
           return DB.BRepBuilderSurfaceGeometry.CreateNURBSSurface
           (
-            degreeU, degreeV, knotsU, knotsV, controlPoints, false, bboxUV
+            degreeU, degreeV, knotsU, knotsV, controlPoints, false, isNurbs ? bboxUV : default
           );
         }
       }

@@ -11,9 +11,11 @@
 
 #define _CRT_SECURE_NO_WARNINGS
 #define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
+#define NOMINMAX
 
 // add headers that you want to pre-compile here
 #include "framework.h"
+#include <shellapi.h>
 
 #include <memory>
 #include <algorithm>

@@ -16,6 +16,8 @@ namespace RhinoInside.Revit.Convert.Geometry
   public static class GeometryEncoder
   {
     #region Context
+    public delegate void RuntimeMessage(int severity, string message, GeometryBase geometry);
+
     [DebuggerTypeProxy(typeof(DebugView))]
     public sealed class Context : State<Context>
     {
@@ -46,6 +48,9 @@ namespace RhinoInside.Revit.Convert.Geometry
       public DB.ElementId GraphicsStyleId = DB.ElementId.InvalidElementId;
       public DB.ElementId MaterialId = DB.ElementId.InvalidElementId;
       public IReadOnlyList<DB.ElementId> FaceMaterialId;
+      public RuntimeMessage RuntimeMessage = NullRuntimeMessage;
+
+      static void NullRuntimeMessage(int severity, string message, GeometryBase geometry) { }
 
       class DebugView
       {
@@ -222,7 +227,8 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static DB.Line[] ToLines(this Polyline value) => value.ToLines(UnitConverter.ToHostUnits);
     public static DB.Line[] ToLines(this Polyline value, double factor)
     {
-      value.ReduceSegments(Revit.ShortCurveTolerance);
+      value = value.Duplicate();
+      value.DeleteShortSegments(Revit.ShortCurveTolerance / factor);
 
       int count = value.Count;
       var list = new DB.Line[Math.Max(0, count - 1)];
@@ -517,17 +523,27 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static IEnumerable<DB.Curve> ToCurveMany(this NurbsCurve value) => value.ToCurveMany(UnitConverter.ToHostUnits);
     public static IEnumerable<DB.Curve> ToCurveMany(this NurbsCurve value, double factor)
     {
+      // Convert to Raw form
+      value = value.DuplicateCurve() as NurbsCurve;
+      if (factor != 1.0) value.Scale(factor);
+      value.RemoveShortSegments(Revit.ShortCurveTolerance);
+
+      // Transfer
       if (value.Degree == 1)
       {
         var curvePoints = value.Points;
         int pointCount = curvePoints.Count;
         if (pointCount > 1)
         {
-          DB.XYZ end, start = curvePoints[0].Location.ToXYZ(factor);
-          for (int p = 1; p < pointCount; start = end, ++p)
+          DB.XYZ end, start = curvePoints[0].Location.ToXYZ(UnitConverter.NoScale);
+          for (int p = 1; p < pointCount; ++p)
           {
-            end = curvePoints[p].Location.ToXYZ(factor);
+            end = curvePoints[p].Location.ToXYZ(UnitConverter.NoScale);
+            if (end.DistanceTo(start) < Revit.ShortCurveTolerance)
+              continue;
+
             yield return DB.Line.CreateBound(start, end);
+            start = end;
           }
         }
       }
@@ -536,8 +552,18 @@ namespace RhinoInside.Revit.Convert.Geometry
         for (int s = 0; s < value.SpanCount; ++s)
         {
           var segment = value.Trim(value.SpanDomain(s)) as NurbsCurve;
-          yield return NurbsSplineEncoder.ToNurbsSpline(segment, factor);
+          yield return NurbsSplineEncoder.ToNurbsSpline(segment, UnitConverter.NoScale);
         }
+      }
+      else if(value.GetNextDiscontinuity(Continuity.C1_continuous, value.Domain.Min, value.Domain.Max, out var t))
+      {
+        var splitters = new List<double>() { t };
+        while (value.GetNextDiscontinuity(Continuity.C1_continuous, t, value.Domain.Max, out t))
+          splitters.Add(t);
+
+        var segments = value.Split(splitters);
+        foreach (var segment in segments.Cast<NurbsCurve>())
+          yield return NurbsSplineEncoder.ToNurbsSpline(segment, UnitConverter.NoScale);
       }
       else if (value.IsClosed(Revit.ShortCurveTolerance * 1.01))
       {
@@ -550,44 +576,44 @@ namespace RhinoInside.Revit.Convert.Geometry
             value.Split(mid) is Curve[] half
           )
           {
-            yield return NurbsSplineEncoder.ToNurbsSpline(half[0] as NurbsCurve, factor);
-            yield return NurbsSplineEncoder.ToNurbsSpline(half[1] as NurbsCurve, factor);
+            yield return NurbsSplineEncoder.ToNurbsSpline(half[0] as NurbsCurve, UnitConverter.NoScale);
+            yield return NurbsSplineEncoder.ToNurbsSpline(half[1] as NurbsCurve, UnitConverter.NoScale);
           }
           else throw new ConversionException("Failed to Split closed Edge");
         }
         else
         {
           foreach (var segment in segments)
-            yield return NurbsSplineEncoder.ToNurbsSpline(segment as NurbsCurve, factor);
+            yield return NurbsSplineEncoder.ToNurbsSpline(segment as NurbsCurve, UnitConverter.NoScale);
         }
-      }
-      else if(value.GetNextDiscontinuity(Continuity.C1_continuous, value.Domain.Min, value.Domain.Max, out var t))
-      {
-        var splitters = new List<double>() { t };
-        while (value.GetNextDiscontinuity(Continuity.C1_continuous, t, value.Domain.Max, out t))
-          splitters.Add(t);
-
-        var segments = value.Split(splitters);
-        foreach (var segment in segments.Cast<NurbsCurve>())
-          yield return NurbsSplineEncoder.ToNurbsSpline(segment, factor);
       }
       else
       {
-        yield return NurbsSplineEncoder.ToNurbsSpline(value, factor);
+        yield return NurbsSplineEncoder.ToNurbsSpline(value, UnitConverter.NoScale);
       }
     }
 
     public static IEnumerable<DB.Curve> ToCurveMany(this PolylineCurve value) => value.ToCurveMany(UnitConverter.ToHostUnits);
     public static IEnumerable<DB.Curve> ToCurveMany(this PolylineCurve value, double factor)
     {
+      // Convert to Raw form
+      value = value.DuplicateCurve() as PolylineCurve;
+      if(factor != 1.0) value.Scale(factor);
+      value.RemoveShortSegments(Revit.ShortCurveTolerance);
+
+      // Transfer
       int pointCount = value.PointCount;
       if (pointCount > 1)
       {
-        DB.XYZ end, start = value.Point(0).ToXYZ(factor);
-        for (int p = 1; p < pointCount; start = end, ++p)
+        DB.XYZ end, start = value.Point(0).ToXYZ(UnitConverter.NoScale);
+        for (int p = 1; p < pointCount; ++p)
         {
-          end = value.Point(p).ToXYZ(factor);
-          yield return DB.Line.CreateBound(start, end);
+          end = value.Point(p).ToXYZ(UnitConverter.NoScale);
+          if (start.DistanceTo(end) > Revit.ShortCurveTolerance)
+          {
+            yield return DB.Line.CreateBound(start, end);
+            start = end;
+          }
         }
       }
     }
@@ -595,6 +621,13 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static IEnumerable<DB.Curve> ToCurveMany(this PolyCurve value) => value.ToCurveMany(UnitConverter.ToHostUnits);
     public static IEnumerable<DB.Curve> ToCurveMany(this PolyCurve value, double factor)
     {
+      // Convert to Raw form
+      value = value.DuplicateCurve() as PolyCurve;
+      if (factor != 1.0) value.Scale(factor);
+      value.RemoveNesting();
+      value.RemoveShortSegments(Revit.ShortCurveTolerance);
+
+      // Transfer
       int segmentCount = value.SegmentCount;
       for (int s = 0; s < segmentCount; ++s)
       {

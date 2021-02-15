@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.Convert.Geometry;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -142,6 +143,71 @@ namespace RhinoInside.Revit.GH.Components
         }
 
         return clippingBox;
+      }
+    }
+    #endregion
+
+    #region AddGeometryRuntimeError
+    readonly List<Rhino.Geometry.GeometryBase> GeometryRuntimeErrors = new List<Rhino.Geometry.GeometryBase>();
+    public override void ClearData()
+    {
+      base.ClearData();
+      GeometryRuntimeErrors.Clear();
+    }
+
+    public void AddGeometryConversionError(GH_RuntimeMessageLevel level, string text, Rhino.Geometry.GeometryBase geometry)
+    {
+#if DEBUG
+      switch (geometry)
+      {
+        case Rhino.Geometry.BrepVertex vertex:
+          text = $"* {text}{Environment.NewLine}Vertex Index = {vertex.VertexIndex} Location = {vertex.Location * Revit.ModelUnits}.";
+          break;
+        case Rhino.Geometry.BrepEdge edge:
+          text = $"◉ {text}{Environment.NewLine}Edge Index = {edge.EdgeIndex} Tolerance {edge.Tolerance * Revit.ModelUnits} Length = {edge.GetLength(edge.Domain) * Revit.ModelUnits}.";
+          break;
+        case Rhino.Geometry.BrepFace face:
+          var mass = Rhino.Geometry.AreaMassProperties.Compute(face);
+          text = $"◼ {text}{Environment.NewLine}Face Index = {face.FaceIndex} Surface Area = {mass?.Area * Revit.ModelUnits * Revit.ModelUnits}.";
+          break;
+      }
+#endif
+      AddGeometryRuntimeError(level, text, geometry?.InRhinoUnits());
+    }
+
+    public void AddGeometryRuntimeError(GH_RuntimeMessageLevel level, string text, Rhino.Geometry.GeometryBase geometry)
+    {
+      if(text is object) AddRuntimeMessage(level, text);
+      if (geometry is object) GeometryRuntimeErrors.Add(geometry);
+    }
+
+    public override void DrawViewportWires(IGH_PreviewArgs args)
+    {
+      base.DrawViewportWires(args);
+
+      foreach (var geometry in GeometryRuntimeErrors)
+      {
+        switch (geometry)
+        {
+          case Rhino.Geometry.Point point:
+            args.Display.DrawPoint(point.Location, Rhino.Display.PointStyle.Asterisk, args.Display.DisplayPipelineAttributes.PointRadius * 2.0f, Color.Orange);
+            break;
+          case Rhino.Geometry.Curve curve:
+            args.Display.DrawCurve(curve, Color.Orange, args.DefaultCurveThickness * 5);
+            if (curve.IsShort(Revit.ShortCurveTolerance * Revit.ModelUnits))
+            {
+              args.Display.DrawPoint(curve.PointAtStart, Rhino.Display.PointStyle.RoundControlPoint, args.Display.DisplayPipelineAttributes.PointRadius * 2.0f, Color.Orange);
+              args.Display.DrawPoint(curve.PointAtEnd, Rhino.Display.PointStyle.RoundControlPoint, args.Display.DisplayPipelineAttributes.PointRadius * 2.0f, Color.Orange);
+            }
+            break;
+          case Rhino.Geometry.Surface surface:
+            args.Display.DrawSurface(surface, Color.Orange, args.DefaultCurveThickness * 5);
+            args.Display.DrawPoint(surface.PointAt(surface.Domain(0).Mid, surface.Domain(1).Mid), Rhino.Display.PointStyle.Square, args.Display.DisplayPipelineAttributes.PointRadius * 3.5f, Color.Orange);
+            break;
+          case Rhino.Geometry.Brep brep:
+            args.Display.DrawBrepWires(brep, Color.Orange, args.DefaultCurveThickness * 5);
+            break;
+        }
       }
     }
     #endregion

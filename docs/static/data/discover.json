@@ -57,6 +57,25 @@
     },
     {
         "highlight": true,
+        "title": "Online Rhino.Inside Revit Essentials",
+        "url": "https://simplyrhino.co.uk/training/courses/rhino-inside-revit-essentials-course",
+        "thumbnail": "/static/images/discover/simplyrhino-rir-training.jpeg",
+        "author": "SimplyRhino",
+        "authorUrl": "https://simplyrhino.co.uk/",
+        "description": "This live and online course is suitable for those within Architecture & Construction who find themselves using Rhino as well as Autodesk Revit® and are looking into ways to enhance the interoperability between the two.",
+        "kinds": [
+            "course",
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "basics",
+            "workflow",
+            "purchase"
+        ]
+    },
+    {
+        "highlight": true,
         "title": "Building Systems Specialist Course",
         "url": "PAZ-academy-course",
         "thumbnail": "/static/images/discover/PAZ-Academy-BSS.jpg",
@@ -142,6 +161,22 @@
         ]
     },
     {
+        "title": "BIMxt Rhino.Inside.Revit",
+        "url": "https://vimeo.com/504828686/09cf58c437",
+        "thumbnail": "/static/images/discover/bimxt-rir.png",
+        "author": "BIMxt Network",
+        "authorUrl": "https://www.linkedin.com/groups/8980453/",
+        "description": "Scott Davidson and Ehsan present Rhino.Inside.Revit at the BIMxt Network event",
+        "kinds": [
+            "presentation",
+            "video"
+        ],
+        "tags": [
+            "presentation",
+            "overview"
+        ]
+    },
+    {
         "title": "AECbytes Rhino.Inside.Revit",
         "url": "http://www.aecbytes.com/feature/2020/Rhino-Inside-Revit.html",
         "thumbnail": "/static/images/discover/aecbytes.png",
@@ -154,6 +189,22 @@
         "tags": [
             "overview",
             "article"
+        ]
+    },
+    {
+        "title": "Changing AEC w/ Nate Miller",
+        "url": "https://soundcloud.com/user-788137457/changing-aec-w-nate-miller",
+        "thumbnail": "/static/images/discover/podcast-marcello-nathan.jpg",
+        "author": "Marcello Sgambelluri, PE, SE",
+        "authorUrl": "http://therevitcomplex.blogspot.com/",
+        "description": "In this episode John Pierson and Marcello talk to Nate Miller about Grasshopper, Dynamo, Conveyor and more.",
+        "kinds": [
+            "podcast"
+        ],
+        "tags": [
+            "workflow",
+            "automation",
+            "podcast"
         ]
     },
     {
@@ -173,6 +224,24 @@
         ]
     },
     {
+        "title": "Exploring Rhino.Inside Revit Together",
+        "url": "https://youtu.be/1aUmpgzvhXw",
+        "thumbnail": "https://i3.ytimg.com/vi/1aUmpgzvhXw/maxresdefault.jpg",
+        "author": "7fold Design Technology",
+        "authorUrl": "https://www.youtube.com/channel/UC7eTGSIVovsDYuYw3YFLn8w",
+        "description": "We walk through setting up Rhino.Inside for the first time and exploring the feature set. Full disclosure this is like an unboxing for me and I want to encourage you to join me in the conversation as we figure out what's new!",
+        "kinds": [
+            "tutorial",
+            "podcast",
+            "video"
+        ],
+        "tags": [
+            "podcast",
+            "overview",
+            "example"
+        ]
+    },
+    {
         "title": "Rhino.Inside.Revit Happy Hour Webinar",
         "url": "https://www.youtube.com/watch?v=ko18HhYpjok",
         "thumbnail": "https://i3.ytimg.com/vi/ko18HhYpjok/maxresdefault.jpg",
@@ -186,6 +255,22 @@
         "tags": [
             "podcast",
             "overview"
+        ]
+    },
+    {
+        "title": "Software you need to know in 2021",
+        "url": "https://youtu.be/4kcR_FgN114",
+        "thumbnail": "https://i3.ytimg.com/vi/4kcR_FgN114/maxresdefault.jpg",
+        "author": "Stephen Drew, Architecture Social",
+        "authorUrl": "https://www.youtube.com/channel/UCpW825yNUbeWtp-jmpu-8WA",
+        "description": "Here are Stephen Drew's thoughts on what Architecture Software you need to learn NOW which will give you an advantage and accelerate your career in 2021.",
+        "kinds": [
+            "podcast",
+            "video"
+        ],
+        "tags": [
+            "overview",
+            "podcast"
         ]
     },
     {
@@ -440,6 +525,24 @@
         ]
     },
     {
+        "highlight": true,
+        "title": "Proving Ground Rhino Revit Add-ons",
+        "url": "https://youtu.be/Y7bxHniTfN4",
+        "thumbnail": "https://i3.ytimg.com/vi/Y7bxHniTfN4/maxresdefault.jpg",
+        "author": "Nathan Miller @ Proving Ground",
+        "authorUrl": "https://apps.provingground.io/",
+        "description": "This webinar will be a PREVIEW of new capabilities that expand the data-driven pipeline between Rhino, Revit, and Power BI.",
+        "kinds": [
+            "example",
+            "video"
+        ],
+        "tags": [
+            "plugin",
+            "workflow",
+            "data management"
+        ]
+    },
+    {
         "title": "Solar Analysis with Rhino.Inside.Revit",
         "url": "https://vimeo.com/363977394",
         "thumbnail": "https://i.vimeocdn.com/video/819279340_1280x720.jpg",
@@ -469,6 +572,41 @@
             "tutorial",
             "site",
             "landscape"
+        ]
+    },
+    {
+        "title": "VisualARQ running Rhino.Inside",
+        "url": "https://youtu.be/B_ZMPhcrgsE",
+        "thumbnail": "https://i3.ytimg.com/vi/B_ZMPhcrgsE/maxresdefault.jpg",
+        "author": "VisualARQ",
+        "authorUrl": "https://www.visualarq.com/",
+        "description": "This video shows a sneak preview of VisualARQ 3 version (WIP- Work in progress), running inside Revit using Rhino.Inside technology, available in Rhino 7 (WIP)",
+        "kinds": [
+            "example",
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "tutorial",
+            "BIM",
+            "plug-in"
+        ]
+    },
+    {
+        "title": "Auto-update Revit Sheets Using Grasshopper",
+        "url": "https://youtu.be/kI6YWoONI9s",
+        "thumbnail": "https://i3.ytimg.com/vi/kI6YWoONI9s/maxresdefault.jpg",
+        "author": "7fold Design Technology",
+        "authorUrl": "https://www.youtube.com/channel/UC7eTGSIVovsDYuYw3YFLn8w",
+        "description": "Join me in this Rhino.Inside tutorial as we walk through setting up automated sheet management for Revit driven by the floor plan type placed on each sheet.",
+        "kinds": [
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "podcast",
+            "tutorial",
+            "workflow"
         ]
     },
     {
@@ -521,6 +659,22 @@
         ]
     },
     {
+        "title": "Structural drawings, Calculations & Model from Architectural design",
+        "url": "https://youtu.be/kFn2FCtHHFo",
+        "thumbnail": "https://i3.ytimg.com/vi/kFn2FCtHHFo/maxresdefault.jpg",
+        "author": "Structured Parametrics",
+        "authorUrl": "https://www.youtube.com/channel/UCqgD1Dm9u5dCoi0f5dPcXlA",
+        "description": "An example of modern parametric workflow for structural engineering. Takes Architectural concept through to structural model, calculations and drawings. Modern workflows can cut engineering time to a fraction of traditional methods allowing responsive collaboration with others.",
+        "kinds": [
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "structural",
+            "tutorial"
+        ]
+    },
+    {
         "title": "Analytical Model Manipulation",
         "url": "analytical-model-manipulation",
         "thumbnail": "https://i3.ytimg.com/vi/dpMFnJcvO5E/maxresdefault.jpg",
@@ -544,7 +698,7 @@
         "thumbnail": "https://i3.ytimg.com/vi/9wW9_ltUKnY/maxresdefault.jpg",
         "author": "Structured Parametrics",
         "authorUrl": "https://www.youtube.com/channel/UCqgD1Dm9u5dCoi0f5dPcXlA",
-        "description": "Tutorial on how to get grasshopper structural framing into Revit with Rhino.Inside. This shows how quick it can be to get framing into Revit but also shows some of the issues with the current workflow for this Work In Progress project.",
+        "description": "Tutorial on how to get Grasshopper structural framing into Revit with Rhino.Inside. This shows how quick it can be to get framing into Revit but also shows some of the issues with the current workflow for this Work In Progress project.",
         "kinds": [
             "tutorial",
             "video"

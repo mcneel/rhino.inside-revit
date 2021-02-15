@@ -1,5 +1,7 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "MixedStackTrace.h"
+
+extern HMODULE hInstance;
 
 static PLDRREGISTERDLLNOTIFICATION LdrRegisterDllNotification = (PLDRREGISTERDLLNOTIFICATION) GetProcAddress(GetModuleHandle(_T("NTDLL")), "LdrRegisterDllNotification");
 static PLDRUNREGISTERDLLNOTIFICATION LdrUnregisterDllNotification = (PLDRUNREGISTERDLLNOTIFICATION) GetProcAddress(GetModuleHandle(_T("NTDLL")), "LdrUnregisterDllNotification");
@@ -80,7 +82,7 @@ class LdrDllTracker
         //if (hFile != INVALID_HANDLE_VALUE)
         //{
         //  // Fake an exception to call MiniDumpWriteDump.
-        //  CONTEXT ContextRecord { };
+        //  CONTEXT ContextRecord {};
         //  RtlCaptureContext(&ContextRecord);
 
         //  EXCEPTION_RECORD ExceptionRecord
@@ -224,4 +226,85 @@ BOOL STDAPICALLTYPE LdrReportOnLoad(LPCWSTR pModuleName, BOOL bEnable)
 
   LdrDllTracker::Instance.ReportOnLoad(pModuleName, bEnable);
   return true;
+}
+
+//BOOL EnsureOpenNurbsPrivateManifest(HWND hWnd, LPCTSTR ManifestFileName)
+//{
+//  if (GetFileAttributes(ManifestFileName) != INVALID_FILE_ATTRIBUTES)
+//    return TRUE;
+//
+//  if
+//  (
+//    IDYES == MessageBox
+//    (
+//      hWnd,
+//      _T("Failed to found 'opennurbs_private.manifest' file.\r\n\r\n")
+//      _T("Do you want to install it now?"),
+//      _T("Rhino.Inside - opennurbs_private.manifest"),
+//      MB_ICONWARNING | MB_YESNO
+//    )
+//  )
+//  {
+//    TCHAR ModuleFileName[MAX_PATH]{};
+//    const DWORD ModuleFileNameLength = GetModuleFileName(hInstance, ModuleFileName, (DWORD)std::size(ModuleFileName));
+//    if (ModuleFileNameLength && ModuleFileNameLength < std::size(ModuleFileName))
+//    {
+//      if (LPTSTR FileName = std::max(_tcsrchr(ModuleFileName, '/'), _tcsrchr(ModuleFileName, '\\')))
+//      {
+//        auto size = ModuleFileName + std::size(ModuleFileName) - FileName - 1;
+//        _tcscpy_s(++FileName, size, _T("opennurbs_private.manifest"));
+//
+//        std::wstring From = ModuleFileName, To = ManifestFileName;
+//        From.push_back(_T('\0'));
+//        To.push_back(_T('\0'));
+//
+//        SHFILEOPSTRUCT Operation{ hWnd, FO_COPY, From.c_str(), To.c_str() };
+//
+//        auto hwnd_enabled = IsWindowEnabled(Operation.hwnd);
+//        EnableWindow(Operation.hwnd, FALSE);
+//        auto result = SHFileOperation(&Operation);
+//        EnableWindow(Operation.hwnd, hwnd_enabled);
+//        return result;
+//      }
+//    }
+//  }
+//
+//  return FALSE;
+//}
+
+RIR_EXPORT
+BOOL STDAPICALLTYPE LdrIsolateOpenNurbs()
+{
+  TCHAR ManifestFileName[MAX_PATH] {};
+  const DWORD ModuleFileNameLength = GetModuleFileName(NULL, ManifestFileName, (DWORD)std::size(ManifestFileName));
+  if (ModuleFileNameLength && ModuleFileNameLength < std::size(ManifestFileName))
+  {
+    if (LPTSTR FileName = std::max(_tcsrchr(ManifestFileName, '/'), _tcsrchr(ManifestFileName, '\\')))
+    {
+      auto size = ManifestFileName + std::size(ManifestFileName) - FileName - 1;
+      _tcscpy_s(++FileName, size, _T("opennurbs_private.manifest"));
+
+      //EnsureOpenNurbsPrivateManifest(GetActiveWindow(), ManifestFileName);
+
+      ACTCTX ActCtx {sizeof(ActCtx)};
+      ActCtx.lpSource = ManifestFileName;
+
+      auto hActCtx = CreateActCtx(&ActCtx);
+      if (hActCtx != INVALID_HANDLE_VALUE)
+      {
+        ULONG_PTR Cookie {};
+        if (ActivateActCtx(hActCtx, &Cookie))
+        {
+          LoadLibrary(_T("opennurbs"));
+          LoadLibrary(_T("atf_rhino_producer"));
+          DeactivateActCtx(0, Cookie);
+        }
+
+        ReleaseActCtx(hActCtx);
+        return TRUE;
+      }
+    }
+  }
+
+  return FALSE;
 }

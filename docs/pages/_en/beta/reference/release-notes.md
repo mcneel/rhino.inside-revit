@@ -10,6 +10,48 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html version="0.0.7688.36802" time="01/18/2021 20:26:44" %}
+
+### Fixes
+* Now is possible to transfer geometry with short-edges.
+* Added geometry conversion errors feedback to some components.
+
+{% include ltr/release-header.html version="0.0.7683.19842" time="01/13/2021 11:01:24" %}
+
+### Fixes
+* Fixed 'Set Element Parameter' casting from integer.
+
+{% include ltr/release-header.html version="0.0.7679.63" time="01/09/2021 00:02:06" %}
+
+### Fixes
+* Now Rhino.Inside Revit resolves at load time any dependency on assemblies installed with Rhino.
+* Isolated 'opennurbs.dll' installed with Revit from 'opennurbs.dll' installed with Rhino.
+
+### Changes
+* Now installer needs admin privileges. Please remember to manually uninstall any previous version of Rhino.Inside Revit you already have installed before applying this new one.
+
+### Important Note
+
+This release is a major update to {{ site.terms.rir }}. This build attempts to resolve the loading and runtime errors some have experienced in Revit. It would be great if you could download and install this new version to see if it solves all the load problems.
+
+Because this is a major change, it does require additional steps to install properly:
+
+1. Make sure Revit is closed
+2. This step is quite important 👉: Uninstall any previous versions of {{ site.terms.rir }} through **Windows Control Panel > Programs & Features**
+3. [Download the latest {{ site.terms.rir }}](https://www.rhino3d.com/inside/revit/beta/)
+4. Install the new {{ site.terms.rir }}. This new installer requires administrator privileges to install properly
+
+Any feedback to this new build is welcome on the [{{ site.terms.rir }} Forum]({{ site.forum_url }})
+
+### Why are admin privileges required to install now?
+
+In order to isolate OpenNURBS Library (`opennurbs.dll`) that is deployed by Revit from the library deployed by Rhino we do need to install a manifest file (`opennurbs_private.manifest`) inside the Revit main folder, and this requires administrator privileges. This change does not affect the Revit installation or behavior in any other way. It only directs Revit to use its own version of the OpenNURBS library when importing 3DM files. Please remember to manually uninstall any previous version of {{ site.terms.rir }} you already have installed before applying this new one.
+
+### What’s new about .NET conflicts in this release?
+
+Normally users have a myriad of Revit add-ons installed to support their specific workflows. Since we can not test every possible setup the user may have, we have tried in this release to make the Rhino.Inside load process more robust to handle “any” unexpected circumstance like conflicts with other installed add-ons.
+
+
 {% include ltr/release-header.html version="0.0.7661.35155" time="12/22/2020 19:31:50" %}
 
 ### Fixes

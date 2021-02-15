@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Include xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Fragment>
+
+    <Property Id="REVIT2018_INSTALLLOCATION" Secure="yes">
+      <RegistrySearch Id="Revit2018InstallLocation" Type="raw"
+                      Root="HKLM"
+                      Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-1800-0510-0000-705C0D862004}"
+                      Name="InstallLocation"/>
+    </Property>
+
+    <Property Id="REVIT2019_INSTALLLOCATION" Secure="yes">
+      <RegistrySearch Id="Revit2019InstallLocation" Type="raw"
+                      Root="HKLM"
+                      Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-1900-0510-0000-705C0D862004}"
+                      Name="InstallLocation"/>
+    </Property>
+
+    <Property Id="REVIT2020_INSTALLLOCATION" Secure="yes">
+      <RegistrySearch Id="Revit2020InstallLocation" Type="raw"
+                      Root="HKLM"
+                      Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-2000-0510-0000-705C0D862004}"
+                      Name="InstallLocation"/>
+    </Property>
+
+    <Property Id="REVIT2021_INSTALLLOCATION" Secure="yes">
+      <RegistrySearch Id="Revit2021InstallLocation" Type="raw"
+                      Root="HKLM"
+                      Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-2100-0510-0000-705C0D862004}"
+                      Name="InstallLocation"/>
+    </Property>
+
+    <InstallUISequence>
+      <Custom Action="ValidateRevitInstallLocation" After="AppSearch"/>
+    </InstallUISequence>
+
+    <InstallExecuteSequence>
+      <Custom Action="ValidateRevitInstallLocation" After="AppSearch"/>
+    </InstallExecuteSequence>
+
+    <CustomAction Id="ValidateRevitInstallLocation" Script="vbscript" Execute="immediate" Return="check" >
+      <![CDATA[
+      Sub ValidateInstallLocation(LocationProperty)
+        InstallLocation = Session.Property(LocationProperty)
+
+        ' If InstallLocation is relative we assume is under "%PROGRAMFILES%\Autodesk"
+        If Mid(InstallLocation, 2, 2) <> ":\" Then
+          ProgramFilesFolder = Session.Property("ProgramFiles64Folder")
+          InstallLocation = ProgramFilesFolder & "Autodesk\" & InstallLocation
+        End If
+
+        ' If Revit.exe is at InstallLocation we assume Revit is not installed
+        If Session.Installer.FileAttributes(InstallLocation & "Revit.exe") = -1 Then
+          Session.Property(LocationProperty) = ""
+        Else
+          Session.Property(LocationProperty) = InstallLocation
+        End If
+      End Sub
+
+      If Session.EvaluateCondition("Installed") = 0 Then
+        ValidateInstallLocation("REVIT2018_INSTALLLOCATION")
+        ValidateInstallLocation("REVIT2019_INSTALLLOCATION")
+        ValidateInstallLocation("REVIT2020_INSTALLLOCATION")
+        ValidateInstallLocation("REVIT2021_INSTALLLOCATION")
+      End If
+      ]]>
+    </CustomAction>
+
+    <DirectoryRef Id="TARGETDIR">
+      <Directory Id="ProgramFiles64Folder">
+        <Directory Id="AutodeskProgramFilesFolder" Name="Autodesk">
+          <Directory Id="REVIT2018_INSTALLLOCATION" Name="Revit 2018"/>
+          <Directory Id="REVIT2019_INSTALLLOCATION" Name="Revit 2019"/>
+          <Directory Id="REVIT2020_INSTALLLOCATION" Name="Revit 2020"/>
+          <Directory Id="REVIT2021_INSTALLLOCATION" Name="Revit 2021"/>
+        </Directory>
+      </Directory>
+    </DirectoryRef>
+
+  </Fragment>
+</Include>
