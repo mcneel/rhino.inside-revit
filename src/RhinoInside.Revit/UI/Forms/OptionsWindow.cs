@@ -284,11 +284,11 @@ namespace RhinoInside.Revit.UI
   {
     public ScriptsPanel() => InitLayout();
 
-    CheckBox _loadScriptsOnStartup = new CheckBox { Text = "Load Scripts on Startup" };
-    CheckBox _loadScriptPackagesOnStartup = new CheckBox { Text = "Load Installed Packages on Startup" };
+    CheckBox _loadScriptPackagesOnStartup = new CheckBox { Text = "Add Installed Packages to Ribbon" };
+    CheckBox _loadScriptsOnStartup = new CheckBox { Text = "Add User Scripts to Ribbon" };
     ListBox _scriptLocations = new ListBox();
-    Button _addButton = new Button { Text = "Add Location", Height = 25 };
-    Button _delButton = new Button { Text = "Remove Location", Height = 25, Enabled = false };
+    Button _addButton = new Button { Text = "Add Script Location", Height = 25 };
+    Button _delButton = new Button { Text = "Remove Selected", Height = 25, Enabled = false };
 
     void InitLayout()
     {
@@ -307,21 +307,16 @@ namespace RhinoInside.Revit.UI
         Spacing = new Size(5, 10),
         Padding = new Padding(5),
         Rows = {
-          new TableLayout
+          new StackLayout
           {
-            Spacing = new Size(5, 10),
-            Padding = new Padding(5),
-            Rows = {
-              new TableRow {
-                Cells = {
-                  new TableCell(_loadScriptsOnStartup, true),
-                  new TableCell(_loadScriptPackagesOnStartup, true)
-                }
-              },
+            Spacing = 10,
+            Items = {
+              _loadScriptPackagesOnStartup,
+              _loadScriptsOnStartup,
             }
           },
           new TableRow {
-            Cells = { new Label { Text = "Script Locations" } }
+            Cells = { new Label { Text = "User Script Locations" } }
           },
           new TableRow {
             ScaleHeight = true,
