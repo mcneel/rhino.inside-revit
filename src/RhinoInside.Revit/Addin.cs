@@ -215,6 +215,8 @@ namespace RhinoInside.Revit
       RhinoVersionInfo?.FilePrivatePart ?? 0
     );
 
+    internal static string AutoInstallPluginPath => Rhino.Runtime.HostUtils.AutoInstallPlugInFolder(true);
+
     static Addin()
     {
       if (StartupMode == AddinStartupMode.Cancelled)
