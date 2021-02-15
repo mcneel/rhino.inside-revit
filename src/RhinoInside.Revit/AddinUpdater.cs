@@ -68,6 +68,7 @@ namespace RhinoInside.Revit
     public string Description { get; set; }
     public Version TargetVersion { get; set; }
     public string Url { get; set; }
+    public bool IsStable { get; set; } = false;
 
     public ReleaseInfo GetLatestRelease()
     {
@@ -97,7 +98,8 @@ namespace RhinoInside.Revit
       Name = "Public Releases (Official)",
       Description = "Official and stable public releases downloadable from website",
       TargetVersion = new Version(0, 0),
-      Url = @"https://files.mcneel.com/rhino.inside/revit/update/0.x/stable.xml"
+      Url = @"https://files.mcneel.com/rhino.inside/revit/update/0.x/stable.xml",
+      IsStable = true
     };
 
     /* Note:
@@ -127,7 +129,7 @@ namespace RhinoInside.Revit
       }
     };
 
-    static AddinUpdateChannel ActiveChannel
+    static public AddinUpdateChannel ActiveChannel
     {
       get
       {

@@ -28,10 +28,11 @@ namespace RhinoInside.Revit.UI
     static RibbonPanel _grasshopperPanel;
 
     public static string CommandName => "Start";
+    public static string CommandIcon => AddinUpdater.ActiveChannel.IsStable? "RIR-logo.png" : "RIR-WIP-logo.png";
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      var buttonData = NewPushButtonData<CommandStart, AvailableWhenNotObsolete>(CommandName, "RIR-logo.png", "");
+      var buttonData = NewPushButtonData<CommandStart, AvailableWhenNotObsolete>(CommandName, CommandIcon, "");
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         StoreButton(CommandName, pushButton);
@@ -53,6 +54,7 @@ namespace RhinoInside.Revit.UI
 
       // add listener for ui compact changes
       AddinOptions.CompactRibbonChanged += AddinOptions_CompactRibbonChanged;
+      AddinOptions.UpdateChannelChanged += AddinOptions_UpdateChannelChanged;
     }
 
     static void SetTooltip(PushButton pushButton)
@@ -203,6 +205,15 @@ namespace RhinoInside.Revit.UI
       {
         _rhinoPanel?.Expand(Addin.AddinName);
         _grasshopperPanel?.Expand(Addin.AddinName);
+      }
+    }
+
+    private static void AddinOptions_UpdateChannelChanged(object sender, EventArgs e)
+    {
+      if (RestoreButton(CommandName) is PushButton button)
+      {
+        button.Image = ImageBuilder.LoadRibbonButtonImage(CommandIcon, true);
+        button.LargeImage = ImageBuilder.LoadRibbonButtonImage(CommandIcon);
       }
     }
 
