@@ -434,6 +434,10 @@ namespace RhinoInside.Revit.UI
       }
     }
 
+    /// <summary>
+    /// Find package
+    /// </summary>
+    /// <returns></returns>
     static public List<ScriptPkg> GetUserScriptPackages()
     {
       var pkgs = new List<ScriptPkg>();
@@ -445,24 +449,31 @@ namespace RhinoInside.Revit.UI
         return pkgs;
     }
 
+    /// <summary>
+    /// Find packages that contain Grasshopper scripts for Rhino.Inside.Revit
+    /// </summary>
     static public List<ScriptPkg> GetInstalledScriptPackages()
     {
       var pkgs = new List<ScriptPkg>();
-      if (Directory.Exists(Addin.AutoInstallPluginPath))
+      var pkgLocations = new List<DirectoryInfo>();
+      pkgLocations.AddRange(Rhino.Runtime.HostUtils.GetActivePlugInVersionFolders(false));
+      pkgLocations.AddRange(Rhino.Runtime.HostUtils.GetActivePlugInVersionFolders(true));
+      foreach (var dirInfo in pkgLocations)
       {
-        foreach (var dir in Directory.GetDirectories(Addin.AutoInstallPluginPath))
+        // grab the name from the package directory
+        // TODO: Could use the Yak core api to grab the package objects
+        var pkgName = Path.GetFileName(Path.GetDirectoryName(dirInfo.FullName));
+        // Looks for Rhino.Inside/Revit/ or Rhino.Inside/Revit/x.x insdie the package
+        var pkgAddinContents = Path.Combine(dirInfo.FullName, Addin.AddinName, "Revit");
+        var pkgAddinSpecificContents = Path.Combine(pkgAddinContents, $"{Addin.Version.Major}.0");
+        // load specific scripts if available, otherwise load for any Rhino.Inside.Revit
+        if (new List<string> {
+            pkgAddinSpecificContents,
+            pkgAddinContents }.Where(d => Directory.Exists(d)).FirstOrDefault() is string pkgContentsDir)
         {
-          var manifestFile = Path.Combine(dir, "manifest.txt");
-          if (File.Exists(manifestFile))
-          {
-            var mf = File.ReadAllLines(manifestFile);
-            var version = mf[0].Trim();
-            var scriptsPath = Path.Combine(dir, version, "gh_revit");
-            if (Directory.Exists(scriptsPath))
-              pkgs.Add(
-                new ScriptPkg { Name = $"{Path.GetFileName(dir)} ({version})", Location = scriptsPath }
-                );
-          }
+          pkgs.Add(
+            new ScriptPkg { Name = $"{pkgName} ({dirInfo.Name})", Location = pkgContentsDir }
+            );
         }
       }
       return pkgs;
