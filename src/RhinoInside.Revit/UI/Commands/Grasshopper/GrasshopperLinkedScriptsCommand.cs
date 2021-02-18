@@ -191,7 +191,7 @@ namespace RhinoInside.Revit.UI
     internal static PushButtonData NewScriptButton(LinkedScript script, string assmLoc)
     {
       var commandName = script.ScriptCommandType.Name + (script.Name ?? "");
-      var commandButtonName = script.Name ?? commandName;
+      var commandButtonName = script.Name.Replace("-", "\n");
       var typeAssmLocation = assmLoc;
       var typeName = script.ScriptCommandType.FullName;
       return new PushButtonData(commandName, commandButtonName, typeAssmLocation, typeName)
