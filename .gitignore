@@ -365,3 +365,6 @@ $RECYCLE.BIN/
 # discard debug files
 script/.debug
 script/.packages
+
+# skip yak build packages
+*.yak
