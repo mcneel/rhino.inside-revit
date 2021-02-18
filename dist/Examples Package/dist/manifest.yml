@@ -1,0 +1,11 @@
+---
+name: Rhino.Inside.Revit Examples
+version: 1.0.0
+authors:
+  - Rhino.Inside.Revit Team
+description: Series of Grasshopper definitions to showcase the power of Rhino.Inside.Revit
+url: https://www.rhino3d.com/inside/revit/
+keywords:
+  - Rhino.Inside.Revit
+  - Rhino.Inside
+  - Revit
