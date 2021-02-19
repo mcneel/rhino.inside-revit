@@ -189,6 +189,14 @@ namespace RhinoInside.Revit
         idlingActions.Enqueue(action);
     }
 
+    // Idling actions that will interact with the ui e.g. if a subsystem needs to update the ribbons
+    static Queue<Action<UIApplication>> idlingUIActions = new Queue<Action<UIApplication>>();
+    internal static void EnqueueIdlingUIAction(Action<UIApplication> action)
+    {
+      lock (idlingUIActions)
+        idlingUIActions.Enqueue(action);
+    }
+
     internal static bool ProcessIdleActions()
     {
       bool pendingIdleActions = false;
@@ -227,6 +235,16 @@ namespace RhinoInside.Revit
         while (idlingActions.Count > 0)
         {
           try { idlingActions.Dequeue().Invoke(); }
+          catch (Exception e) { Debug.Fail(e.Source, e.Message); }
+        }
+      }
+
+      // ui dependent tasks
+      lock (idlingUIActions)
+      {
+        while (idlingUIActions.Count > 0)
+        {
+          try { idlingUIActions.Dequeue().Invoke(ActiveUIApplication); }
           catch (Exception e) { Debug.Fail(e.Source, e.Message); }
         }
       }

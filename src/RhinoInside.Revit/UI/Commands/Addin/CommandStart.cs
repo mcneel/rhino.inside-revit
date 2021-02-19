@@ -13,6 +13,7 @@ using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
 using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
+
 using RhinoInside.Revit.Native;
 using RhinoInside.Revit.Settings;
 using RhinoInside.Revit.External.UI.Extensions;
@@ -158,14 +159,7 @@ namespace RhinoInside.Revit.UI
             CommandGrasshopperPackageManager.CreateUI(_grasshopperPanel);
             CommandGrasshopperFolders.CreateUI(_grasshopperPanel);
 
-            // create grasshopper scripts panels
-            if (AddinOptions.Current.LoadScriptPackagesOnStartup)
-              foreach (var pkg in GetInstalledScriptPackages())
-                GrasshopperLinkedScriptsCommand.CreateUI(pkg, panelMaker);
-
-            if (AddinOptions.Current.LoadScriptsOnStartup)
-              foreach (var pkg in GetUserScriptPackages())
-                  GrasshopperLinkedScriptsCommand.CreateUI(pkg, panelMaker);
+            LoadLinkedScriptsUI(panelMaker);
           }
 
           UpdateRibbonCompact();
@@ -434,49 +428,45 @@ namespace RhinoInside.Revit.UI
       }
     }
 
-    /// <summary>
-    /// Find package
-    /// </summary>
-    /// <returns></returns>
-    static public List<ScriptPkg> GetUserScriptPackages()
+    static public void LoadLinkedScriptsUI(Func<string, string, RibbonPanel> panelMaker)
     {
-      var pkgs = new List<ScriptPkg>();
-      foreach (var location in AddinOptions.Current.ScriptLocations)
-        if (Directory.Exists(location))
-          pkgs.Add(
-            new ScriptPkg { Name = Path.GetFileName(location), Location = location }
-            );
-        return pkgs;
-    }
-
-    /// <summary>
-    /// Find packages that contain Grasshopper scripts for Rhino.Inside.Revit
-    /// </summary>
-    static public List<ScriptPkg> GetInstalledScriptPackages()
-    {
-      var pkgs = new List<ScriptPkg>();
-      var pkgLocations = new List<DirectoryInfo>();
-      pkgLocations.AddRange(Rhino.Runtime.HostUtils.GetActivePlugInVersionFolders(false));
-      pkgLocations.AddRange(Rhino.Runtime.HostUtils.GetActivePlugInVersionFolders(true));
-      foreach (var dirInfo in pkgLocations)
+      // create grasshopper scripts panels from package installed by Yak
+      if (AddinOptions.Current.LoadScriptPackagesOnStartup)
       {
-        // grab the name from the package directory
-        // TODO: Could use the Yak core api to grab the package objects
-        var pkgName = Path.GetFileName(Path.GetDirectoryName(dirInfo.FullName));
-        // Looks for Rhino.Inside/Revit/ or Rhino.Inside/Revit/x.x insdie the package
-        var pkgAddinContents = Path.Combine(dirInfo.FullName, Addin.AddinName, "Revit");
-        var pkgAddinSpecificContents = Path.Combine(pkgAddinContents, $"{Addin.Version.Major}.0");
-        // load specific scripts if available, otherwise load for any Rhino.Inside.Revit
-        if (new List<string> {
-            pkgAddinSpecificContents,
-            pkgAddinContents }.Where(d => Directory.Exists(d)).FirstOrDefault() is string pkgContentsDir)
+        foreach (var pkg in YakWrapper.GetInstalledScriptPackages())
+          LinkedScripts.CreateUI(pkg, panelMaker);
+
+        if(YakWrapper.Init())
         {
-          pkgs.Add(
-            new ScriptPkg { Name = $"{pkgName} ({dirInfo.Name})", Location = pkgContentsDir }
-            );
+          YakWrapper.PackageInstalled += YakWrapper_PackageInstalled;
+          YakWrapper.PackageRemoved += YakWrapper_PackageRemoved;
         }
       }
-      return pkgs;
+
+      // create grasshopper scripts panels from paths set by users
+      if (AddinOptions.Current.LoadScriptsOnStartup)
+      {
+        foreach (var pkg in ScriptPkg.GetUserScriptPackages())
+          LinkedScripts.CreateUI(pkg, panelMaker);
+
+        // TODO: wire up the file watchers
+      }
+    }
+
+    private static void YakWrapper_PackageInstalled(object sender, ScriptPkg pkg)
+    {
+      Revit.EnqueueIdlingUIAction((uiapp) =>
+      {
+        LinkedScripts.CreateUI(pkg, (tabName, panelName) => uiapp.CreateRibbonPanel(tabName, panelName));
+      });
+    }
+
+    private static void YakWrapper_PackageRemoved(object sender, ScriptPkg pkg)
+    {
+      Revit.EnqueueIdlingUIAction((uiapp) =>
+      {
+        LinkedScripts.RemoveUI(pkg);
+      });
     }
   }
 }
