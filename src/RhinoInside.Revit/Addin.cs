@@ -221,7 +221,8 @@ namespace RhinoInside.Revit
       if (DaysUntilExpiration < 1)
         status = Status.Obsolete;
 
-      NativeLoader.IsolateOpenNurbs();
+      if (!NativeLoader.IsolateOpenNurbs())
+        status = Status.Unavailable;
 
       // initialize ui framework provided by Rhino
       RhinoUIFramework.LoadFramework(SystemDir);
@@ -647,7 +648,7 @@ namespace RhinoInside.Revit.UI
           catch (Exception) { }
         }
 
-        if (Addin.StartupMode == AddinStartupMode.Disabled)
+        if (Addin.StartupMode == AddinStartupMode.Disabled || Addin.CurrentStatus < Addin.Status.Available)
         {
           Button.Enabled = false;
           Button.ToolTip = "Addin Disabled";

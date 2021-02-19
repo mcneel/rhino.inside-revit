@@ -228,49 +228,50 @@ BOOL STDAPICALLTYPE LdrReportOnLoad(LPCWSTR pModuleName, BOOL bEnable)
   return true;
 }
 
-//BOOL EnsureOpenNurbsPrivateManifest(HWND hWnd, LPCTSTR ManifestFileName)
-//{
-//  if (GetFileAttributes(ManifestFileName) != INVALID_FILE_ATTRIBUTES)
-//    return TRUE;
-//
-//  if
-//  (
-//    IDYES == MessageBox
-//    (
-//      hWnd,
-//      _T("Failed to found 'opennurbs_private.manifest' file.\r\n\r\n")
-//      _T("Do you want to install it now?"),
-//      _T("Rhino.Inside - opennurbs_private.manifest"),
-//      MB_ICONWARNING | MB_YESNO
-//    )
-//  )
-//  {
-//    TCHAR ModuleFileName[MAX_PATH]{};
-//    const DWORD ModuleFileNameLength = GetModuleFileName(hInstance, ModuleFileName, (DWORD)std::size(ModuleFileName));
-//    if (ModuleFileNameLength && ModuleFileNameLength < std::size(ModuleFileName))
-//    {
-//      if (LPTSTR FileName = std::max(_tcsrchr(ModuleFileName, '/'), _tcsrchr(ModuleFileName, '\\')))
-//      {
-//        auto size = ModuleFileName + std::size(ModuleFileName) - FileName - 1;
-//        _tcscpy_s(++FileName, size, _T("opennurbs_private.manifest"));
-//
-//        std::wstring From = ModuleFileName, To = ManifestFileName;
-//        From.push_back(_T('\0'));
-//        To.push_back(_T('\0'));
-//
-//        SHFILEOPSTRUCT Operation{ hWnd, FO_COPY, From.c_str(), To.c_str() };
-//
-//        auto hwnd_enabled = IsWindowEnabled(Operation.hwnd);
-//        EnableWindow(Operation.hwnd, FALSE);
-//        auto result = SHFileOperation(&Operation);
-//        EnableWindow(Operation.hwnd, hwnd_enabled);
-//        return result;
-//      }
-//    }
-//  }
-//
-//  return FALSE;
-//}
+BOOL EnsureOpenNurbsPrivateManifest(HWND hWnd, LPCTSTR ManifestFileName)
+{
+  if (GetFileAttributes(ManifestFileName) != INVALID_FILE_ATTRIBUTES)
+    return TRUE;
+
+  if
+  (
+    IDOK == MessageBox
+    (
+      hWnd,
+      _T("Failed to find 'opennurbs_private.manifest' file in Revit folder.\r\n\r\n")
+      _T("This file is necessary to avoid OpenNURBS conflicts with Revit builtin 3dm importer.\r\n\r\n")
+      _T("Do you want to install it now? The copy operation will ask for admin access to copy this file to Revit folder"),
+      _T("Rhino.Inside - opennurbs_private.manifest"),
+      MB_ICONWARNING | MB_OK
+    )
+  )
+  {
+    TCHAR ModuleFileName[MAX_PATH]{};
+    const DWORD ModuleFileNameLength = GetModuleFileName(hInstance, ModuleFileName, (DWORD)std::size(ModuleFileName));
+    if (ModuleFileNameLength && ModuleFileNameLength < std::size(ModuleFileName))
+    {
+      if (LPTSTR FileName = std::max(_tcsrchr(ModuleFileName, '/'), _tcsrchr(ModuleFileName, '\\')))
+      {
+        auto size = ModuleFileName + std::size(ModuleFileName) - FileName - 1;
+        _tcscpy_s(++FileName, size, _T("opennurbs_private.manifest"));
+
+        std::wstring From = ModuleFileName, To = ManifestFileName;
+        From.push_back(_T('\0'));
+        To.push_back(_T('\0'));
+
+        SHFILEOPSTRUCT Operation{ hWnd, FO_COPY, From.c_str(), To.c_str() };
+
+        auto hwnd_enabled = IsWindowEnabled(Operation.hwnd);
+        EnableWindow(Operation.hwnd, FALSE);
+        int result = SHFileOperation(&Operation);
+        EnableWindow(Operation.hwnd, hwnd_enabled);
+        return result == 0;
+      }
+    }
+  }
+
+  return FALSE;
+}
 
 RIR_EXPORT
 BOOL STDAPICALLTYPE LdrIsolateOpenNurbs()
@@ -284,7 +285,8 @@ BOOL STDAPICALLTYPE LdrIsolateOpenNurbs()
       auto size = ManifestFileName + std::size(ManifestFileName) - FileName - 1;
       _tcscpy_s(++FileName, size, _T("opennurbs_private.manifest"));
 
-      //EnsureOpenNurbsPrivateManifest(GetActiveWindow(), ManifestFileName);
+      if (!EnsureOpenNurbsPrivateManifest(GetActiveWindow(), ManifestFileName))
+          return FALSE;
 
       ACTCTX ActCtx {sizeof(ActCtx)};
       ActCtx.lpSource = ManifestFileName;
