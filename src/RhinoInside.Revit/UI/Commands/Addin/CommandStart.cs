@@ -436,11 +436,8 @@ namespace RhinoInside.Revit.UI
         foreach (var pkg in YakWrapper.GetInstalledScriptPackages())
           LinkedScripts.CreateUI(pkg, panelMaker);
 
-        if(YakWrapper.Init())
-        {
-          YakWrapper.PackageInstalled += YakWrapper_PackageInstalled;
-          YakWrapper.PackageRemoved += YakWrapper_PackageRemoved;
-        }
+        YakWrapper.PackageInstalled += YakWrapper_PackageInstalled;
+        YakWrapper.PackageRemoved += YakWrapper_PackageRemoved;
       }
 
       // create grasshopper scripts panels from paths set by users

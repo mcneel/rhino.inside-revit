@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.UI
     /// so all the event handlers are bound and called. If Yak.Core assembly
     /// is not found, the handlers aren't bound and they will not be called
     /// </summary>
-    public static bool Init()
+    static YakWrapper()
     {
       if (_yakClient is null)
       {
@@ -40,11 +40,9 @@ namespace RhinoInside.Revit.UI
           {
             addHndlr("PackageInstalled", "OnPackageInstalled");
             addHndlr("PackageRemoved", "OnPackageRemoved");
-            return true;
           }
         }
       }
-      return false;
     }
 
     /// <summary>
