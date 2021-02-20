@@ -328,12 +328,8 @@ namespace RhinoInside.Revit
         CheckUpdates();
 
       //load RIR?
-      //if (AddinOptions.Session.LoadOnStartup)
-      //{
-      //  UI.CommandStart.Start(
-      //    panelMaker: (name) => uiCtrlApp.CreateRibbonPanel(AddinName, name)
-      //    );
-      //}
+      if (AddinOptions.Session.LoadOnStartup)
+        LoadRhinoOnStartup(uiCtrlApp);
 
       return Result.Succeeded;
     }
@@ -376,6 +372,17 @@ namespace RhinoInside.Revit
         if (StartupMode == AddinStartupMode.Scripting)
           Revit.ActiveUIApplication.PostCommand(RevitCommandId.LookupPostableCommandId(PostableCommand.ExitRevit));
       }
+    }
+
+    public static async void LoadRhinoOnStartup(UIControlledApplication uiCtrlApp)
+    {
+      // wait for Revit to be ready
+      await External.ActivationGate.Yield();
+
+      // ask to load rhino
+      UI.CommandStart.Start(
+        panelMaker: (tabName, panelName) => uiCtrlApp.CreateRibbonPanel(tabName, panelName)
+        );
     }
 
     protected override Result OnShutdown(UIControlledApplication applicationUI)
