@@ -455,18 +455,18 @@ namespace RhinoInside.Revit.UI
 
     private static void YakWrapper_PackageInstalled(object sender, ScriptPkg pkg)
     {
-      Revit.EnqueueIdlingUIAction((uiapp) =>
-      {
-        LinkedScripts.CreateUI(pkg, (tabName, panelName) => uiapp.CreateRibbonPanel(tabName, panelName));
-      });
+      //Revit.EnqueueIdlingUIAction((uiapp) =>
+      //{
+      //  LinkedScripts.CreateUI(pkg, (tabName, panelName) => uiapp.CreateRibbonPanel(tabName, panelName));
+      //});
     }
 
     private static void YakWrapper_PackageRemoved(object sender, ScriptPkg pkg)
     {
-      Revit.EnqueueIdlingUIAction((uiapp) =>
-      {
-        LinkedScripts.RemoveUI(pkg);
-      });
+      //Revit.EnqueueIdlingUIAction((uiapp) =>
+      //{
+      //  LinkedScripts.RemoveUI(pkg);
+      //});
     }
   }
 }
