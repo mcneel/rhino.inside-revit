@@ -55,6 +55,7 @@
         <File Id="Addins.2018.RhinoInside.Revit.dll" Source="..\RhinoInside.Revit\bin\x64\$(var.Configuration) 2018\RhinoInside.Revit.dll"/>
         <File Id="Addins.2018.RhinoInside.Revit.GH.gha" Source="..\RhinoInside.Revit.GH\bin\x64\$(var.Configuration) 2018\RhinoInside.Revit.GH.gha"/>
         <File Id="Addins.2018.RhinoInside.Revit.Native.dll" Source="..\RhinoInside.Revit.Native\bin\x64\$(var.Configuration)\RhinoInside.Revit.Native.dll"/>
+        <File Id="Addins.2018.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
       </Component>
       
     </ComponentGroup>
@@ -76,6 +77,7 @@
         <File Id="Addins.2019.RhinoInside.Revit.dll" Source="..\RhinoInside.Revit\bin\x64\$(var.Configuration) 2019\RhinoInside.Revit.dll"/>
         <File Id="Addins.2019.RhinoInside.Revit.GH.gha" Source="..\RhinoInside.Revit.GH\bin\x64\$(var.Configuration) 2019\RhinoInside.Revit.GH.gha"/>
         <File Id="Addins.2019.RhinoInside.Revit.Native.dll" Source="..\RhinoInside.Revit.Native\bin\x64\$(var.Configuration)\RhinoInside.Revit.Native.dll"/>
+        <File Id="Addins.2019.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
       </Component>
 
     </ComponentGroup>
@@ -97,6 +99,7 @@
         <File Id="Addins.2020.RhinoInside.Revit.dll" Source="..\RhinoInside.Revit\bin\x64\$(var.Configuration) 2020\RhinoInside.Revit.dll"/>
         <File Id="Addins.2020.RhinoInside.Revit.GH.gha" Source="..\RhinoInside.Revit.GH\bin\x64\$(var.Configuration) 2020\RhinoInside.Revit.GH.gha"/>
         <File Id="Addins.2020.RhinoInside.Revit.Native.dll" Source="..\RhinoInside.Revit.Native\bin\x64\$(var.Configuration)\RhinoInside.Revit.Native.dll"/>
+        <File Id="Addins.2020.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
       </Component>
 
     </ComponentGroup>
@@ -118,6 +121,7 @@
         <File Id="Addins.2021.RhinoInside.Revit.dll" Source="..\RhinoInside.Revit\bin\x64\$(var.Configuration) 2021\RhinoInside.Revit.dll"/>
         <File Id="Addins.2021.RhinoInside.Revit.GH.gha" Source="..\RhinoInside.Revit.GH\bin\x64\$(var.Configuration) 2021\RhinoInside.Revit.GH.gha"/>
         <File Id="Addins.2021.RhinoInside.Revit.Native.dll" Source="..\RhinoInside.Revit.Native\bin\x64\$(var.Configuration)\RhinoInside.Revit.Native.dll"/>
+        <File Id="Addins.2021.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
       </Component>
       
     </ComponentGroup>

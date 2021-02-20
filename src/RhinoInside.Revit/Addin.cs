@@ -226,7 +226,8 @@ namespace RhinoInside.Revit
       if (DaysUntilExpiration < 1)
         status = Status.Obsolete;
 
-      NativeLoader.IsolateOpenNurbs();
+      if (!NativeLoader.IsolateOpenNurbs())
+        status = Status.Unavailable;
 
       // initialize ui framework provided by Rhino
       RhinoUIFramework.LoadFramework(SystemDir);
