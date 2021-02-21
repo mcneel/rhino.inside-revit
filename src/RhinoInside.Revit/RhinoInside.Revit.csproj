@@ -284,7 +284,6 @@
     <Compile Include="UI\Commands\Grasshopper\LinkedScripts\LinkedScripts.cs" />
     <Compile Include="UI\Commands\Addin\CommandHelpLinks.cs" />
     <Compile Include="UI\Commands\Grasshopper\LinkedScripts\Models.cs" />
-    <Compile Include="UI\Commands\Grasshopper\LinkedScripts\YakWrapper.cs" />
     <Compile Include="UI\Forms\BakeOptionsWindow.cs" />
     <Compile Include="UI\Forms\OptionsWindow.cs" />
     <Compile Include="UI\Commands\Rhinoceros\BaseRhinoCommand.cs" />

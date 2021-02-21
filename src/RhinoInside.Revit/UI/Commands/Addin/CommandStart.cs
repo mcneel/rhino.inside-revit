@@ -163,17 +163,12 @@ namespace RhinoInside.Revit.UI
 
             // setup listeners
             if (AddinOptions.Current.LoadScriptPackagesOnStartup)
-            {
-              YakWrapper.PackageInstalled += YakWrapper_PackageInstalled;
-              YakWrapper.PackageRemoved += YakWrapper_PackageRemoved;
-            }
+              CommandGrasshopperPackageManager.CommandCompleted += CommandGrasshopperPackageManager_CommandCompleted;
 
             // create grasshopper scripts panels from paths set by users
             if (AddinOptions.Current.LoadScriptsOnStartup)
-            {
               // start listening for changes in script location settings
               AddinOptions.ScriptLocationsChanged += AddinOptions_ScriptLocationsChanged;
-            }
           }
 
           UpdateRibbonCompact();
@@ -451,7 +446,7 @@ namespace RhinoInside.Revit.UI
       // determine which packages need to be loaded
       var curState = new HashSet<ScriptPkg>();
       if (AddinOptions.Current.LoadScriptPackagesOnStartup)
-        curState.UnionWith(YakWrapper.GetInstalledScriptPackages());
+        curState.UnionWith(CommandGrasshopperPackageManager.GetInstalledScriptPackages());
       if (AddinOptions.Current.LoadScriptsOnStartup)
         curState.UnionWith(ScriptPkg.GetUserScriptPackages());
 
@@ -497,14 +492,7 @@ namespace RhinoInside.Revit.UI
       UpdateScriptPkgUI(new RibbonHandler(uiApp));
     }
 
-    private static async void YakWrapper_PackageInstalled(object sender, ScriptPkg pkg)
-    {
-      // wait for Revit to be ready and get uiApp
-      var uiApp = await External.ActivationGate.Yield();
-      UpdateScriptPkgUI(new RibbonHandler(uiApp));
-    }
-
-    private static async void YakWrapper_PackageRemoved(object sender, ScriptPkg pkg)
+    private static async void CommandGrasshopperPackageManager_CommandCompleted(object sender, Result e)
     {
       // wait for Revit to be ready and get uiApp
       var uiApp = await External.ActivationGate.Yield();
