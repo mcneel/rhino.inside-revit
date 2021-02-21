@@ -62,10 +62,7 @@ namespace RhinoInside.Revit.UI
     public static ScriptPkg GetInstalledScriptPackage(string location)
     {
       // grab the name from the package directory
-      // TODO: Could use the Yak core api to grab the package objects
-      var version = Path.GetFileName(location);
-      var target = Path.GetDirectoryName(location);
-      var pkgName = Path.GetFileName(target);
+      var pkgName = Path.GetFileName(Path.GetDirectoryName(location));
       // Looks for Rhino.Inside/Revit/ or Rhino.Inside/Revit/x.x insdie the package
       var pkgAddinContents = Path.Combine(location, Addin.AddinName, "Revit");
       var pkgAddinSpecificContents = Path.Combine(pkgAddinContents, $"{Addin.Version.Major}.0");
@@ -74,7 +71,7 @@ namespace RhinoInside.Revit.UI
             pkgAddinSpecificContents,
             pkgAddinContents }.Where(d => Directory.Exists(d)).FirstOrDefault() is string pkgContentsDir)
       {
-        return new ScriptPkg { Name = $"{pkgName} ({version})", Location = pkgContentsDir };
+        return new ScriptPkg { Name = pkgName, Location = pkgContentsDir };
       }
       return null;
     }
