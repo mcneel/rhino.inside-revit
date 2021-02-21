@@ -307,6 +307,7 @@
     <Compile Include="Convert\Eto.Drawing.cs" />
     <Compile Include="Convert\Geometry\GeometryDecoder.cs" />
     <Compile Include="AddinUpdater.cs" />
+    <Compile Include="UI\RibbonHandler.cs" />
     <None Include="Extensions\README.md" />
     <None Include="Properties\RhinoInside.Revit.addin" />
   </ItemGroup>

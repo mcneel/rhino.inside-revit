@@ -380,9 +380,7 @@ namespace RhinoInside.Revit
       await External.ActivationGate.Yield();
 
       // ask to load rhino
-      UI.CommandStart.Start(
-        panelMaker: (tabName, panelName) => uiCtrlApp.CreateRibbonPanel(tabName, panelName)
-        );
+      UI.CommandStart.Start(new UI.RibbonHandler(uiCtrlApp));
     }
 
     protected override Result OnShutdown(UIControlledApplication applicationUI)

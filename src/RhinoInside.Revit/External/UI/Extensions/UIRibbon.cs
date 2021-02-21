@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.External.UI.Extensions
   {
     #region Autodesk.Windows API utility methods
     /// <summary>
-    /// Get RibbonPanel as underlying Autodesk.Windows API instance
+    /// Get RibbonPanel as underlying Autodesk.Windows.RibbonPanel instance
     /// </summary>
     public static ADW.RibbonPanel GetAdwndRibbonPanel(this RibbonPanel panel, string tabName)
     {
@@ -34,7 +34,7 @@ namespace RhinoInside.Revit.External.UI.Extensions
     }
 
     /// <summary>
-    /// Get RibbonButton as underlying Autodesk.Windows API instance
+    /// Get RibbonButton as underlying Autodesk.Windows.RibbonButton instance
     /// </summary>
     public static ADW.RibbonButton GetAdwndRibbonButton(this RibbonButton button)
     {

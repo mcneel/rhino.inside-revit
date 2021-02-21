@@ -53,8 +53,17 @@ namespace RhinoInside.Revit.UI
     public string Location;
     public List<LinkedItem> FindLinkedItems() => FindLinkedItemsRecursive(Location);
 
+    public static bool operator ==(ScriptPkg lp, ScriptPkg rp) => lp.Location.Equals(rp.Location, StringComparison.InvariantCultureIgnoreCase);
+    public static bool operator !=(ScriptPkg lp, ScriptPkg rp) => !lp.Location.Equals(rp.Location, StringComparison.InvariantCultureIgnoreCase);
+    public override bool Equals(object obj) {
+      if (obj is ScriptPkg pkg)
+        return this == pkg;
+      return false;
+    }
+    public override int GetHashCode() => Location.GetHashCode();
+
     /// <summary>
-    /// Find package
+    /// Find all user script packages
     /// </summary>
     /// <returns></returns>
     public static List<ScriptPkg> GetUserScriptPackages()
@@ -66,6 +75,30 @@ namespace RhinoInside.Revit.UI
             new ScriptPkg { Name = Path.GetFileName(location), Location = location }
             );
       return pkgs;
+    }
+
+    /// <summary>
+    /// Find user script package by name
+    /// </summary>
+    /// <returns></returns>
+    public static ScriptPkg GetUserScriptPackageByName(string name)
+    {
+      foreach (var pkg in GetUserScriptPackages())
+        if (pkg.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))
+          return pkg;
+      return null;
+    }
+
+    /// <summary>
+    /// Find user script package by location
+    /// </summary>
+    /// <returns></returns>
+    public static ScriptPkg GetUserScriptPackageByLocation(string location)
+    {
+      foreach (var pkg in GetUserScriptPackages())
+        if (pkg.Location.Equals(location, StringComparison.InvariantCultureIgnoreCase))
+          return pkg;
+      return null;
     }
 
     private static List<LinkedItem> FindLinkedItemsRecursive(string location)

@@ -107,9 +107,7 @@ namespace RhinoInside.Revit.UI
         data.Application.ActivateRibbonTab(Addin.AddinName);
       }
 
-      var result = Start(
-        panelMaker: (tabName, panelName) => data.Application.CreateRibbonPanel(tabName, panelName)
-        );
+      var result = Start(new RibbonHandler(data.Application));
 
       if (result == Result.Failed)
         ShowLoadError(data);
@@ -117,7 +115,7 @@ namespace RhinoInside.Revit.UI
       return result;
     }
 
-    internal static Result Start(Func<string, string, RibbonPanel> panelMaker)
+    internal static Result Start(RibbonHandler ribbon)
     {
       var result = Result.Failed;
       var button = RestoreButton(CommandName);
@@ -137,7 +135,7 @@ namespace RhinoInside.Revit.UI
           // Register UI on Revit
           if (assemblies.Any(x => x.GetName().Name == "RhinoCommon"))
           {
-            _rhinoPanel = panelMaker(Addin.AddinName, Addin.RhinoVersionInfo?.ProductName ?? "Rhinoceros");
+            _rhinoPanel = ribbon.CreateAddinPanel(Addin.RhinoVersionInfo?.ProductName ?? "Rhinoceros");
             CommandRhino.CreateUI(_rhinoPanel);
             CommandImport.CreateUI(_rhinoPanel);
             CommandToggleRhinoPreview.CreateUI(_rhinoPanel);
@@ -147,7 +145,7 @@ namespace RhinoInside.Revit.UI
 
           if (assemblies.Any(x => x.GetName().Name == "Grasshopper"))
           {
-            _grasshopperPanel = panelMaker(Addin.AddinName, "Grasshopper");
+            _grasshopperPanel = ribbon.CreateAddinPanel("Grasshopper");
             CommandGrasshopper.CreateUI(_grasshopperPanel);
             CommandGrasshopperPreview.CreateUI(_grasshopperPanel);
             CommandGrasshopperSolver.CreateUI(_grasshopperPanel);
@@ -159,7 +157,21 @@ namespace RhinoInside.Revit.UI
             CommandGrasshopperPackageManager.CreateUI(_grasshopperPanel);
             CommandGrasshopperFolders.CreateUI(_grasshopperPanel);
 
-            LoadLinkedScriptsUI(panelMaker);
+            UpdateScriptPkgUI(ribbon);
+
+            // setup listeners
+            if (AddinOptions.Current.LoadScriptPackagesOnStartup)
+            {
+              YakWrapper.PackageInstalled += YakWrapper_PackageInstalled;
+              YakWrapper.PackageRemoved += YakWrapper_PackageRemoved;
+            }
+
+            // create grasshopper scripts panels from paths set by users
+            if (AddinOptions.Current.LoadScriptsOnStartup)
+            {
+              // start listening for changes in script location settings
+              AddinOptions.ScriptLocationsChanged += AddinOptions_ScriptLocationsChanged;
+            }
           }
 
           UpdateRibbonCompact();
@@ -428,42 +440,71 @@ namespace RhinoInside.Revit.UI
       }
     }
 
-    static public void LoadLinkedScriptsUI(Func<string, string, RibbonPanel> panelMaker)
+    private static HashSet<ScriptPkg> _lastState = new HashSet<ScriptPkg>();
+
+    private static void UpdateScriptPkgUI(RibbonHandler ribbon)
     {
-      // create grasshopper scripts panels from package installed by Yak
+      // determine which packages need to be loaded
+      var curState = new HashSet<ScriptPkg>();
       if (AddinOptions.Current.LoadScriptPackagesOnStartup)
-      {
-        foreach (var pkg in YakWrapper.GetInstalledScriptPackages())
-          LinkedScripts.CreateUI(pkg, panelMaker);
-
-        YakWrapper.PackageInstalled += YakWrapper_PackageInstalled;
-        YakWrapper.PackageRemoved += YakWrapper_PackageRemoved;
-      }
-
-      // create grasshopper scripts panels from paths set by users
+        curState.UnionWith(YakWrapper.GetInstalledScriptPackages());
       if (AddinOptions.Current.LoadScriptsOnStartup)
+        curState.UnionWith(ScriptPkg.GetUserScriptPackages());
+
+      // create a combined set of both last and current states to iterate over
+      var pkgs = new HashSet<ScriptPkg>(curState);
+      pkgs.UnionWith(_lastState);
+
+      // update the package ui
+      foreach (var pkg in pkgs)
       {
-        foreach (var pkg in ScriptPkg.GetUserScriptPackages())
-          LinkedScripts.CreateUI(pkg, panelMaker);
+        // skip existing packages
+        if (curState.Contains(pkg) && _lastState.Contains(pkg))
+          continue;
 
-        // TODO: wire up the file watchers
+        // create new packages
+        else if (curState.Contains(pkg) && !_lastState.Contains(pkg))
+        {
+          if (LinkedScripts.HasUI(pkg, ribbon))
+            TaskDialog.Show(
+              Addin.AddinName,
+              $"Package \"{pkg.Name}\" has been previously loaded in to the Revit UI." +
+              "Restart Revit for changes to take effect."
+              );
+          else
+            LinkedScripts.CreateUI(pkg, ribbon);
+        }
+
+        // or remove, removed packages
+        else if (!curState.Contains(pkg) && _lastState.Contains(pkg))
+        {
+          if (LinkedScripts.HasUI(pkg, ribbon))
+            LinkedScripts.RemoveUI(pkg, ribbon);
+        }
       }
+
+      _lastState = curState;
     }
 
-    private static void YakWrapper_PackageInstalled(object sender, ScriptPkg pkg)
+    private static async void AddinOptions_ScriptLocationsChanged(object sender, EventArgs e)
     {
-      //Revit.EnqueueIdlingUIAction((uiapp) =>
-      //{
-      //  LinkedScripts.CreateUI(pkg, (tabName, panelName) => uiapp.CreateRibbonPanel(tabName, panelName));
-      //});
+      // wait for Revit to be ready and get uiApp
+      var uiApp = await External.ActivationGate.Yield();
+      UpdateScriptPkgUI(new RibbonHandler(uiApp));
     }
 
-    private static void YakWrapper_PackageRemoved(object sender, ScriptPkg pkg)
+    private static async void YakWrapper_PackageInstalled(object sender, ScriptPkg pkg)
     {
-      //Revit.EnqueueIdlingUIAction((uiapp) =>
-      //{
-      //  LinkedScripts.RemoveUI(pkg);
-      //});
+      // wait for Revit to be ready and get uiApp
+      var uiApp = await External.ActivationGate.Yield();
+      UpdateScriptPkgUI(new RibbonHandler(uiApp));
+    }
+
+    private static async void YakWrapper_PackageRemoved(object sender, ScriptPkg pkg)
+    {
+      // wait for Revit to be ready and get uiApp
+      var uiApp = await External.ActivationGate.Yield();
+      UpdateScriptPkgUI(new RibbonHandler(uiApp));
     }
   }
 }

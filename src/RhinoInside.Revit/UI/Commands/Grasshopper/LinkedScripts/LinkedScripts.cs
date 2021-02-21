@@ -1,34 +1,16 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Threading;
-using System.Windows.Input;
-using System.Windows.Forms;
-using System.Windows.Forms.Interop;
-using System.Reflection;
-using System.Reflection.Emit;
-using Autodesk.Revit.Attributes;
-using DB = Autodesk.Revit.DB;
+
 using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Selection;
-using GH_IO.Serialization;
-using Grasshopper.Kernel;
-using Grasshopper.Kernel.Parameters;
-using Grasshopper.Kernel.Types;
-using Rhino.Geometry;
-using Rhino.PlugIns;
-using RhinoInside.Revit.Settings;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using Autodesk.Revit.DB;
+using ADW = Autodesk.Windows;
+using ADIW = Autodesk.Internal.Windows;
 
 namespace RhinoInside.Revit.UI
 {
   abstract class LinkedScripts
   {
-    public static void CreateUI(ScriptPkg pkg, Func<string, string, RibbonPanel> panelMaker)
+    public static bool CreateUI(ScriptPkg pkg, RibbonHandler ribbon)
     {
       // --------------------------------------------------------------------
       // FIND SCRIPTS
@@ -53,7 +35,9 @@ namespace RhinoInside.Revit.UI
       // --------------------------------------------------------------------
       // CREATE UI
       // --------------------------------------------------------------------
-      var panel = panelMaker(Addin.AddinName, pkg.Name);
+      RibbonPanel panel;
+      try { panel = ribbon.CreateAddinPanel(pkg.Name); }
+      catch { return false; }
 
       // Currently only supporting two levels in the UI:
       // 1) Pushbuttons on panel for every LinkedScript at the root level
@@ -80,11 +64,18 @@ namespace RhinoInside.Revit.UI
       {
         AddPanelButton(panel, script, lsa);
       });
+
+      return true;
     }
 
-    public static void RemoveUI(ScriptPkg pkg)
+    public static bool HasUI(ScriptPkg pkg, RibbonHandler ribbon)
     {
-      // TODO: 
+      return ribbon.HasAddinPanel(pkg.Name);
+    }
+
+    public static bool RemoveUI(ScriptPkg pkg, RibbonHandler ribbon)
+    {
+      return ribbon.RemoveAddinPanel(pkg.Name);
     }
 
     internal static void ProcessLinkedScripts(List<LinkedItem> items, Action<LinkedScript> action)
