@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Windows.Input;
+
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.DB;
@@ -46,11 +48,12 @@ namespace RhinoInside.Revit.UI
 
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
+      bool debugMode = (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl));
       switch (ExecCfgs.ScriptType)
       {
         case ScriptType.GhFile:
         case ScriptType.GhxFile:
-          return ExecuteGH(data, ref message);
+          return debugMode ? OpenGH() : ExecuteGH(data, ref message);
 
         default: return Result.Succeeded;
       }
@@ -67,5 +70,7 @@ namespace RhinoInside.Revit.UI
         ref message
         );
     }
+
+    private Result OpenGH() => GH.Guest.OpenDocument(ExecCfgs.ScriptPath) ? Result.Succeeded : Result.Cancelled;
   }
 }
