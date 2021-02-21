@@ -159,16 +159,14 @@ namespace RhinoInside.Revit.UI
             CommandGrasshopperPackageManager.CreateUI(_grasshopperPanel);
             CommandGrasshopperFolders.CreateUI(_grasshopperPanel);
 
+            // Script Packages UI
             UpdateScriptPkgUI(ribbon);
 
-            // setup listeners
-            if (AddinOptions.Current.LoadScriptPackagesOnStartup)
-              CommandGrasshopperPackageManager.CommandCompleted += CommandGrasshopperPackageManager_CommandCompleted;
-
-            // create grasshopper scripts panels from paths set by users
-            if (AddinOptions.Current.LoadScriptsOnStartup)
-              // start listening for changes in script location settings
-              AddinOptions.ScriptLocationsChanged += AddinOptions_ScriptLocationsChanged;
+            // setup listeners, and in either case, update the packages ui
+            // listed for changes in installed packages
+            CommandGrasshopperPackageManager.CommandCompleted += CommandGrasshopperPackageManager_CommandCompleted;
+            // listen for changes to user-script paths in options
+            AddinOptions.ScriptLocationsChanged += AddinOptions_ScriptLocationsChanged;
           }
 
           UpdateRibbonCompact();
@@ -445,9 +443,9 @@ namespace RhinoInside.Revit.UI
     {
       // determine which packages need to be loaded
       var curState = new HashSet<ScriptPkg>();
-      if (AddinOptions.Current.LoadScriptPackagesOnStartup)
+      if (AddinOptions.Current.LoadInstalledScriptPackages)
         curState.UnionWith(CommandGrasshopperPackageManager.GetInstalledScriptPackages());
-      if (AddinOptions.Current.LoadScriptsOnStartup)
+      if (AddinOptions.Current.LoadUserScriptPackages)
         curState.UnionWith(ScriptPkg.GetUserScriptPackages());
 
       // create a combined set of both last and current states to iterate over

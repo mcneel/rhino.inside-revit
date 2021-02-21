@@ -292,8 +292,8 @@ namespace RhinoInside.Revit.UI
 
     void InitLayout()
     {
-      _loadScriptsOnStartup.Checked = AddinOptions.Current.LoadScriptsOnStartup;
-      _loadScriptPackagesOnStartup.Checked = AddinOptions.Current.LoadScriptPackagesOnStartup;
+      _loadScriptsOnStartup.Checked = AddinOptions.Current.LoadUserScriptPackages;
+      _loadScriptPackagesOnStartup.Checked = AddinOptions.Current.LoadInstalledScriptPackages;
 
       foreach (var location in AddinOptions.Current.ScriptLocations)
         _scriptLocations.Items.Add(location);
@@ -372,10 +372,10 @@ namespace RhinoInside.Revit.UI
     internal void ApplyChanges()
     {
       if (_loadScriptsOnStartup.Checked.HasValue)
-        AddinOptions.Current.LoadScriptsOnStartup = _loadScriptsOnStartup.Checked.Value;
+        AddinOptions.Current.LoadUserScriptPackages = _loadScriptsOnStartup.Checked.Value;
 
       if (_loadScriptPackagesOnStartup.Checked.HasValue)
-        AddinOptions.Current.LoadScriptPackagesOnStartup = _loadScriptPackagesOnStartup.Checked.Value;
+        AddinOptions.Current.LoadInstalledScriptPackages = _loadScriptPackagesOnStartup.Checked.Value;
 
       var scriptLocs = new HashSet<string>();
       foreach (var item in _scriptLocations.Items)

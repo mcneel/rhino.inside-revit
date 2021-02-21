@@ -87,29 +87,29 @@ namespace RhinoInside.Revit.Settings
 
     #region Scripts
     [XmlElement]
-    public bool LoadScriptsOnStartup
+    public bool LoadUserScriptPackages
     {
-      get => _loadScriptsOnStartup;
+      get => _loadUserScripts;
       set
       {
-        _loadScriptsOnStartup = value;
+        _loadUserScripts = value;
         LoadScriptsOnStartupChanged?.Invoke(this, null);
       }
     }
-    private bool _loadScriptsOnStartup = true;
+    private bool _loadUserScripts = true;
     public static event EventHandler<EventArgs> LoadScriptsOnStartupChanged;
 
     [XmlElement]
-    public bool LoadScriptPackagesOnStartup
+    public bool LoadInstalledScriptPackages
     {
-      get => _loadScriptPackagesOnStartup;
+      get => _loadInstalledScripts;
       set
       {
-        _loadScriptPackagesOnStartup = value;
+        _loadInstalledScripts = value;
         LoadScriptPackagesOnStartupChanged?.Invoke(this, null);
       }
     }
-    private bool _loadScriptPackagesOnStartup = true;
+    private bool _loadInstalledScripts = true;
     public static event EventHandler<EventArgs> LoadScriptPackagesOnStartupChanged;
 
     [XmlElement]
