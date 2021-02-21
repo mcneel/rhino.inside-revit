@@ -36,8 +36,9 @@ namespace RhinoInside.Revit.UI
 
     public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
     {
-      Rhinoceros.RunCommandPackageManager();
-      return OnCommandCompleted(Result.Succeeded);
+      return OnCommandCompleted(
+        Rhinoceros.RunCommandPackageManager()
+        );
     }
 
     /// <summary>
