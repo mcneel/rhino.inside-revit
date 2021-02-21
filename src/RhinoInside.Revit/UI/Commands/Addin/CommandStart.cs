@@ -39,14 +39,9 @@ namespace RhinoInside.Revit.UI
         StoreButton(CommandName, pushButton);
         pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://www.rhino3d.com/inside/revit/beta/"));
 
-        SetTooltip(pushButton);
+        SetupButton(pushButton);
 
-        if (Addin.StartupMode == AddinStartupMode.Disabled)
-        {
-          pushButton.Enabled = false;
-          pushButton.ToolTip = "Addin Disabled";
-        }
-        else
+        if (Addin.StartupMode != AddinStartupMode.Disabled)
         {
           if (Settings.KeyboardShortcuts.RegisterDefaultShortcut("Add-Ins", ribbonPanel.Name, typeof(CommandStart).Name, CommandName, "R#Ctrl+R"))
             External.ActivationGate.Exit += ShowShortcutHelp;
@@ -58,7 +53,7 @@ namespace RhinoInside.Revit.UI
       AddinOptions.UpdateChannelChanged += AddinOptions_UpdateChannelChanged;
     }
 
-    static void SetTooltip(PushButton pushButton)
+    static void SetupButton(PushButton pushButton)
     {
       if (Addin.RhinoVersionInfo is FileVersionInfo rhInfo)
       {
@@ -67,9 +62,16 @@ namespace RhinoInside.Revit.UI
         {
           pushButton.ToolTip =
             $"Loads {rhInfo.ProductName} inside this Revit session";
+
           pushButton.LongDescription =
             $"Rhino: {rhInfo.ProductVersion} ({rhInfo.FileDescription}){Environment.NewLine}" +
             $"Rhino.Inside: {Addin.DisplayVersion}{Environment.NewLine}{rhInfo.LegalCopyright}";
+
+          if (Addin.StartupMode == AddinStartupMode.Disabled)
+          {
+            pushButton.Enabled = false;
+            pushButton.ToolTip = "Addin Disabled";
+          }
         }
         catch (Exception) { }
       }
@@ -423,6 +425,7 @@ namespace RhinoInside.Revit.UI
       {
         if (RestoreButton(CommandName) is PushButton button)
         {
+          ClearUpdateNotifiy();
           button.Highlight();
           button.ToolTip = "New Release Available for Download!\n"
                          + $"Version: {releaseInfo.Version}\n"
@@ -436,7 +439,8 @@ namespace RhinoInside.Revit.UI
       if (RestoreButton(CommandName) is PushButton button)
       {
         button.ClearHighlight();
-        SetTooltip(button);
+        // init resets the tooltip to default
+        SetupButton(button);
       }
     }
 

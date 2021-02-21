@@ -25,12 +25,13 @@ namespace RhinoInside.Revit.UI
   class CommandAddinOptions : Command
   {
     public static string CommandName = "Options";
+    public static string CommandTooltip = "Open Rhino.Inside.Revit Options Window";
 
     static ReleaseInfo LatestReleaseInfo = null;
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      var buttonData = NewPushButtonData<CommandAddinOptions, AlwaysAvailable>(CommandName, "Options.png", "Open Rhino.Inside.Revit Options Window");
+      var buttonData = NewPushButtonData<CommandAddinOptions, AlwaysAvailable>(CommandName, "Options.png", CommandTooltip);
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         // setup button
@@ -77,10 +78,11 @@ namespace RhinoInside.Revit.UI
       {
         if (RestoreButton(CommandName) is PushButton button)
         {
+          ClearUpdateNotifiy();
           button.Highlight();
           button.ToolTip = "New Release Available for Download!\n"
                          + $"Version: {releaseInfo.Version}\n"
-                         + button.ToolTip;
+                         + CommandTooltip;
         }
         LatestReleaseInfo = releaseInfo;
       }
@@ -91,7 +93,7 @@ namespace RhinoInside.Revit.UI
       if (RestoreButton(CommandName) is PushButton button)
       {
         button.ClearHighlight();
-        button.ToolTip = "Open Rhino.Inside.Revit Options Window";
+        button.ToolTip = CommandTooltip;
       }
       LatestReleaseInfo = null;
     }
