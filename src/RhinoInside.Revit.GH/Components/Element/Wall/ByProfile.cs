@@ -116,7 +116,7 @@ namespace RhinoInside.Revit.GH.Components
         (
           !boundary.IsClosed ||
           !boundary.TryGetPlane(out var boundaryPlane, Revit.VertexTolerance) ||
-          !boundaryPlane.ZAxis.IsPerpendicularTo(Rhino.Geometry.Vector3d.ZAxis)
+          !boundaryPlane.ZAxis.IsPerpendicularTo(Rhino.Geometry.Vector3d.ZAxis, Revit.AngleTolerance)
         )
           ThrowArgumentException(nameof(profile), "Boundary profile must be a vertical planar closed curve.");
       }
