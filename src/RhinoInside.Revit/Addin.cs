@@ -323,11 +323,11 @@ namespace RhinoInside.Revit
 
       // add option change listeners
       AddinOptions.UpdateChannelChanged += AddinOptions_UpdateChannelChanged;
-      // check for updates if requested
+      // check for updates if requested (buttons must be created by now)
       if (AddinOptions.Current.CheckForUpdatesOnStartup)
         CheckUpdates();
 
-      //load RIR?
+      // automatically load Rhino?
       if (AddinOptions.Session.LoadOnStartup)
         LoadRhinoOnStartup(uiCtrlApp);
 

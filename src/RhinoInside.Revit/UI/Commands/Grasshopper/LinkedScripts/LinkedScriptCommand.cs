@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.UI
   public abstract class LinkedScriptCommand : Command
   {
     /* Note:
-     * There is no base constructor. It is generated dyanmically when copying this base type
+     * There is no default constructor. It is generated dyanmically when copying this base type
      */
 
     /// <summary>
