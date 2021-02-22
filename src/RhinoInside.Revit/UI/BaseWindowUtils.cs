@@ -10,6 +10,8 @@ using System.Windows.Interop;
 using Eto.Forms;
 using Eto.Drawing;
 
+using Rhino.UI;
+
 using Autodesk.Revit.UI;
 
 using RhinoInside.Revit.External.UI.Extensions;

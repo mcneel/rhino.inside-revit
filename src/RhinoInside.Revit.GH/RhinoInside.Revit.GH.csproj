@@ -149,8 +149,8 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="RhinoCommon" Version="7.0.20314.3001" IncludeAssets="compile; build" />
-        <PackageReference Include="Grasshopper" Version="7.0.20314.3001" IncludeAssets="compile; build" />
+        <PackageReference Include="RhinoCommon" Version="7.3.21039.11201" IncludeAssets="compile; build" />
+        <PackageReference Include="Grasshopper" Version="7.3.21039.11201" IncludeAssets="compile; build" />
       </ItemGroup>
     </Otherwise>
   </Choose>
@@ -438,7 +438,7 @@
     <None Include="Extensions\README.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="AfterBuild">
+  <Target Name="AfterBuild" >
     <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.dll" DestinationFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.gha" />
     <Copy Condition="$(Configuration.Contains('Debug'))" UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.gha;$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.pdb" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />
   </Target>
