@@ -330,7 +330,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild" Condition="$(Configuration.Contains('Debug'))">
-    <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)..\RhinoInside.Revit.Native\bin\x64\Release\RhinoInside.Revit.Native.dll;$(ProjectDir)..\RhinoInside.Revit.Native\bin\x64\Debug\RhinoInside.Revit.Native.pdb" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />
+    <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)..\RhinoInside.Revit.Native\bin\x64\Debug\RhinoInside.Revit.Native.dll;$(ProjectDir)..\RhinoInside.Revit.Native\bin\x64\Debug\RhinoInside.Revit.Native.pdb" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />
     <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.dll;$(ProjectDir)$(OutDir)RhinoInside.Revit.pdb" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />
     <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)Properties\RhinoInside.Revit.addin" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)" />
     <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)..\RhinoInside.Revit.Setup\opennurbs_private.manifest;" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />
