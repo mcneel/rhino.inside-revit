@@ -66,7 +66,7 @@ namespace RhinoInside.Revit.UI
     {
       // set Revit window as parent
 #if REVIT_2019
-      wnd.Owner = RhinoEtoApp.MainWindow;
+      wnd.Owner = Eto.Forms.WpfHelpers.ToEtoWindow(uiApp.MainWindowHandle);
 #else
       wnd.Owner = Eto.Forms.WpfHelpers.ToEtoWindow(Autodesk.Windows.ComponentManager.ApplicationWindow);
 #endif

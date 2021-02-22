@@ -125,10 +125,6 @@
   <Choose>
     <When Condition="$(Configuration.Contains('Debug'))">
       <ItemGroup>
-        <Reference Include="Eto">
-          <HintPath>$(Rhino7InstallDir)Eto.dll</HintPath>
-          <Private>False</Private>
-        </Reference>
         <Reference Include="RhinoCommon">
           <HintPath>$(Rhino7InstallDir)RhinoCommon.dll</HintPath>
           <Private>False</Private>
