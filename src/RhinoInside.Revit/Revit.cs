@@ -10,9 +10,11 @@ using Autodesk.Revit.UI.Events;
 using Grasshopper;
 using Grasshopper.Kernel;
 using Microsoft.Win32.SafeHandles;
+
 using Rhino;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.Convert.System.Collections.Generic;
+using RhinoInside.Revit.External.UI.Extensions;
 
 namespace RhinoInside.Revit
 {
@@ -354,12 +356,7 @@ namespace RhinoInside.Revit
     internal static WindowHandle MainWindow { get; private set; } = WindowHandle.Zero;
     public static IntPtr MainWindowHandle => MainWindow.Handle;
 
-    public static Screen MainScreen => Screen.FromHandle(MainWindowHandle);
-    public static int MainScreenScaleFactor
-      => MainScreen != null ?
-            System.Convert.ToInt32(Math.Abs(
-              MainScreen.WorkingArea.Width / System.Windows.SystemParameters.PrimaryScreenWidth
-              )) : 1;
+    public static Screen RevitScreen => ActiveUIApplication?.GetRevitScreen() ?? Screen.FromHandle(ApplicationUI.MainWindowHandle);
 
 #if REVIT_2019
     public static string CurrentUsersDataFolderPath => ApplicationUI.ControlledApplication.CurrentUsersDataFolderPath;

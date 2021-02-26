@@ -10,10 +10,7 @@ using System.Windows.Interop;
 using Eto.Forms;
 using Eto.Drawing;
 
-using Rhino.UI;
-
 using Autodesk.Revit.UI;
-
 using RhinoInside.Revit.External.UI.Extensions;
 
 namespace RhinoInside.Revit.UI
@@ -47,9 +44,14 @@ namespace RhinoInside.Revit.UI
 
     internal static void CenterWindow(Window wnd, UIApplication uiApp)
     {
-      var loc = uiApp.GetChildWindowCenterLocation(wnd.Width, wnd.Height);
-      wnd.Location = new Point(loc.X, loc.Y);
+      var centerRect = uiApp.CenterRectangleOnExtents(wnd.Width, wnd.Height);
+      // setting location on the Eto window causes window to be placed at the wrong location
+      // or high-dpi screens, because Eto is using a newer dpi detection mechanism
+      // and the fact that Revit does not support per-monitor dpi
+      // setting location on the Wpf window instead
+      wnd.ToNative().WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner;
+      wnd.ToNative().Left = centerRect.Left;
+      wnd.ToNative().Top = centerRect.Top;
     }
-
   }
 }

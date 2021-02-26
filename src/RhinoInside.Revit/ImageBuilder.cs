@@ -157,13 +157,16 @@ namespace RhinoInside.Revit
       return Media.Color.FromArgb(color.A, color.R, color.G, color.B);
     }
 
+    // FIXME: find a way to detect the scaling on Revit.RevitScreen
+    public static double GetRevitScreenScaleFactor() => 1;
+
     static internal Media.Imaging.BitmapSource LoadRibbonButtonImage(string name, bool small = false)
     {
       const uint defaultDPI = 96;
       int desiredSize = small ? 16 : 32;
       var adjustedIconSize = desiredSize * 2;
       var adjustedDPI = defaultDPI * 2;
-      var screenScale = Revit.MainScreenScaleFactor;
+      var screenScale = GetRevitScreenScaleFactor();
 
       string specificSizeName = name.Replace(".png", $"_{desiredSize}.png");
       // if screen has no scaling and a specific size is provided, use that
@@ -174,7 +177,7 @@ namespace RhinoInside.Revit
         var baseImage = new Media.Imaging.BitmapImage();
         baseImage.BeginInit();
         baseImage.StreamSource = resource;
-        baseImage.DecodePixelHeight = adjustedIconSize * screenScale;
+        baseImage.DecodePixelHeight = System.Convert.ToInt32(adjustedIconSize * screenScale);
         baseImage.EndInit();
         resource.Seek(0, SeekOrigin.Begin);
 
@@ -188,9 +191,10 @@ namespace RhinoInside.Revit
         var imageData = Array.CreateInstance(typeof(byte), arraySize);
         baseImage.CopyPixels(imageData, stride, 0);
 
+        var imageDim = System.Convert.ToInt32(adjustedIconSize * screenScale);
         return Media.Imaging.BitmapSource.Create(
-          adjustedIconSize * screenScale,
-          adjustedIconSize * screenScale,
+          imageDim,
+          imageDim,
           adjustedDPI * screenScale,
           adjustedDPI * screenScale,
           imageFormat,
