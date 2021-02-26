@@ -356,7 +356,7 @@ namespace RhinoInside.Revit
     internal static WindowHandle MainWindow { get; private set; } = WindowHandle.Zero;
     public static IntPtr MainWindowHandle => MainWindow.Handle;
 
-    public static Screen RevitScreen => ActiveUIApplication?.GetRevitScreen() ?? Screen.FromHandle(ApplicationUI.MainWindowHandle);
+    public static Screen RevitScreen => ActiveUIApplication?.GetRevitScreen() ?? Screen.FromHandle(MainWindowHandle);
 
 #if REVIT_2019
     public static string CurrentUsersDataFolderPath => ApplicationUI.ControlledApplication.CurrentUsersDataFolderPath;
