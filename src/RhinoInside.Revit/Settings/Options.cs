@@ -143,12 +143,19 @@ namespace RhinoInside.Revit.Settings
     private static AddinOptions _currentInstance = null;  // reflects latest changes
     private static readonly object padlock = new object();
 
+    public AddinOptions Clone()
+    {
+      var clone = (AddinOptions) this.MemberwiseClone();
+      clone.CustomOptions = this.CustomOptions.Clone();
+      return clone;
+    }
+
     public static AddinOptions Session
     {
       get
       {
-        if(_sessionInstance is null)
-          _sessionInstance = (AddinOptions)Current.MemberwiseClone();
+        if (_sessionInstance is null)
+          _sessionInstance = Current.Clone();
         return _sessionInstance;
       }
     }
@@ -226,6 +233,14 @@ namespace RhinoInside.Revit.Settings
     private Dictionary<string, Dictionary<string, string>> optStore =
       new Dictionary<string, Dictionary<string, string>>();
 
+    public AddinCustomOptions() { }
+
+    // copy constructor
+    private AddinCustomOptions(AddinCustomOptions source)
+      => optStore = new Dictionary<string, Dictionary<string, string>>(source.optStore);
+
+    public AddinCustomOptions Clone() => new AddinCustomOptions(this);
+
     public void AddOption(string root, string key, string value)
     {
       if (optStore.TryGetValue(root, out var customOpts))
@@ -257,6 +272,12 @@ namespace RhinoInside.Revit.Settings
 
     public void ReadXml(XmlReader reader)
     {
+      if (reader.IsEmptyElement)
+      {
+        reader.Read();
+        return;
+      }
+
       while (reader.Read())
       {
         if (reader.NodeType == XmlNodeType.EndElement)
@@ -266,7 +287,7 @@ namespace RhinoInside.Revit.Settings
         }
 
         var opts = new Dictionary<string, string>();
-        optStore[reader.Name] = opts;
+        optStore[reader.Name.Trim()] = opts;
 
         if (reader.IsStartElement())
         {
@@ -274,7 +295,7 @@ namespace RhinoInside.Revit.Settings
           {
             if (reader.NodeType == XmlNodeType.EndElement)
               break;
-            opts[reader.Name] = reader.ReadString();
+            opts[reader.Name.Trim()] = reader.ReadString().Trim();
           }
         }
       }
