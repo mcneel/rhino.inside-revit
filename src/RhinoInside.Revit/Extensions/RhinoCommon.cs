@@ -529,17 +529,17 @@ namespace Rhino.Geometry
     /// Try to convert this curve into a <see cref="Rhino.Geometry.PolyCurve"/> using a custom <paramref name="angleToleranceRadians"/>.
     /// </summary>
     /// <remarks>
-    /// It splits <paramref name="curve"/> at kinks, and creates a PolyCurve with the resulting G1 continuous segments.
+    /// It splits <paramref name="curve"/> at kinks, and creates a PolyCurve with the resulting G2 continuous segments.
     /// </remarks>
     /// <param name="curve"></param>
-    /// <param name="polyCurve">Resulting polycurve.</param>
+    /// <param name="polyCurve">Resulting polycurve of smooth spans.</param>
     /// <param name="angleToleranceRadians">Tolerance to use when checking for kinks, in radians.</param>
     /// <returns>true if the curve has kinks within tolerance and results into a PolyCurve.</returns>
     public static bool TryGetPolyCurve(this Curve curve, out PolyCurve polyCurve, double angleToleranceRadians)
     {
       var kinks = default(List<double>);
 
-      var continuity = curve.IsClosed ? Continuity.G1_locus_continuous : Continuity.G1_continuous;
+      var continuity = curve.IsClosed ? Continuity.G2_locus_continuous : Continuity.G2_continuous;
       var domain = curve.Domain;
       var t = domain.T0;
       var cosAngleTolerance = Math.Cos(angleToleranceRadians);
