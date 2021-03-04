@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using DB = Autodesk.Revit.DB;
@@ -32,7 +32,8 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       Rhino.Geometry.Brep brep
     )
     {
-      ThrowIfNotValid(nameof(brep), brep);
+      if (!ThrowIfNotValid(nameof(brep), brep))
+        return;
 
       if (element is DB.DirectShape ds) { }
       else ds = DB.DirectShape.CreateElement(doc, new DB.ElementId(DB.BuiltInCategory.OST_GenericModel));
@@ -42,7 +43,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
         ctx.RuntimeMessage = (severity, message, invalidGeometry) =>
           AddGeometryConversionError((GH_RuntimeMessageLevel) severity, message, invalidGeometry); 
 
-        ds.SetShape(brep.ToShape());
+        ds.SetShape(brep.ToShape().OfType<DB.GeometryObject>().ToList());
       }
 
       ReplaceElement(ref element, ds);

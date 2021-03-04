@@ -118,16 +118,16 @@ namespace RhinoInside.Revit.Convert.Geometry
       Debug.Assert(degree > 2 || value.SpanCount == 1);
       Debug.Assert(degree >= 1);
       Debug.Assert(controlPoints.Length > degree);
-      Debug.Assert(knots.Length == degree + controlPoints.Length + 1);
+      Debug.Assert(knots.Length == (degree + 1) + controlPoints.Length);
 
       if (value.IsRational)
       {
         var weights = value.Points.ConvertAll(x => x.Weight);
-        return DB.NurbSpline.CreateCurve(value.Degree, knots, controlPoints, weights);
+        return DB.NurbSpline.CreateCurve(degree, knots, controlPoints, weights);
       }
       else
       {
-        return DB.NurbSpline.CreateCurve(value.Degree, knots, controlPoints);
+        return DB.NurbSpline.CreateCurve(degree, knots, controlPoints);
       }
     }
   }
