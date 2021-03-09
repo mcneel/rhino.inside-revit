@@ -10,6 +10,25 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html version="0.0.7733.38548" time="03/04/2021 17:48:12" %}
+
+### Fixes
+* Fixed some problems transfering Meshes when non working in feet in Rhino.
+* Now `Brep` to `Solid` reparameterize each Brep face and edge with some tolerance values more Revit friendly.
+* Breps with out of tolerance edges are now rebuilt using more Revit friendly tolerances.
+* Added some null checking at reconstruct DirectShape components.
+* Fixed `Curve.TryGetEllipse` orientation issue.
+* Fixed `PolyCurve.ToCurveMany`, it was wrongly scaling the curve twice.
+* Now `NurbsCurve.ToCurve` splits input on G2 segments before transfer.
+* Now `Curve.Simplify` is used to simplify Brep edges before transfer.
+
+* ### API
+* Added `DB.Solid.IsWatertight` extension method.
+* Added `TransactionBaseComponent.TryGetCurveAtPlane`
+* Added `Curve.IsParallelToPlane` extension method.
+* Added `Curve.TryGetPolyCurve` extension method, to split curve into smooth G2 segments.
+* Added `Rhino.Geometry.Curve.GetSpanVector` extension method.
+
 {% include ltr/release-header.html version="0.0.7688.36802" time="01/18/2021 20:26:44" %}
 
 ### Fixes

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Rhino.Geometry
@@ -377,30 +378,63 @@ namespace Rhino.Geometry
 
   static class CurveExtension
   {
+    /// <summary>
+    /// Gets array of span "knots".
+    /// </summary>
+    /// <param name="curve"></param>
+    /// <returns>An array with span vectors; or null on error.</returns>
+    public static double[] GetSpanVector(this Curve curve)
+    {
+      var spanCount = curve.SpanCount;
+      if (spanCount > 0)
+      {
+        var spanVector = new double[spanCount + 1];
+        for (int s = 0; s < spanCount; ++s)
+          spanVector[s] = curve.SpanDomain(s).T0;
+
+        spanVector[spanCount] = curve.SpanDomain(spanCount - 1).T1;
+        return spanVector;
+      }
+
+      return default;
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether or not this curve is a closed curve.
+    /// </summary>
+    /// <param name="curve"></param>
+    /// <param name="tolerance">Tolerance value used to compare start and end curve points.</param>
+    /// <returns></returns>
     public static bool IsClosed(this Curve curve, double tolerance)
     {
       return curve.IsClosed || curve.PointAtStart.DistanceTo(curve.PointAtEnd) < tolerance;
     }
 
-    public static IEnumerable<Curve> SplitClosed(this Curve curve, double tolerance)
+    /// <summary>
+    /// Test a curve to see if it runs parallel to a specific plane.
+    /// </summary>
+    /// <param name="curve"></param>
+    /// <param name="plane">plane used to check for parallelism.</param>
+    /// <param name="tolerance">Tolerance value used to check for planarity.</param>
+    /// <param name="angleTolerance">Tolerance value used to check for coplanarity.</param>
+    /// <returns></returns>
+    /// <seealso cref="Rhino.Geometry.Curve.IsInPlane(Plane, double)"/>
+    public static bool IsParallelToPlane(this Curve curve, Plane plane, double tolerance, double angleTolerance)
     {
-      if (curve is PolyCurve polyCurve)
-      {
-        int segmentCount = polyCurve.SegmentCount;
-        for (int s = 0; s < segmentCount; ++s)
-        {
-          foreach (var c in polyCurve.SegmentCurve(s).SplitClosed(tolerance))
-            yield return c;
-        }
-      }
-      if ((curve is ArcCurve || curve is NurbsCurve) && curve.IsClosed(tolerance))
-      {
-        foreach (var c in curve.Split(curve.Domain.Mid))
-          yield return c;
-      }
-      else yield return curve;
+      if (curve.TryGetLine(out var line, tolerance))
+        return line.Direction.IsPerpendicularTo(plane.Normal, angleTolerance);
+
+      return curve.TryGetPlane(out var curvePlane, tolerance) &&
+        curvePlane.ZAxis.IsParallelTo(plane.Normal, angleTolerance) == 0;
     }
 
+    /// <summary>
+    /// Try to convert this curve into a <see cref="Rhino.Geometry.Line"/> using a custom <paramref name="tolerance"/>.
+    /// </summary>
+    /// <param name="curve"></param>
+    /// <param name="line">On success, the Line will be filled in.</param>
+    /// <param name="tolerance">Tolerance to use when checking.</param>
+    /// <returns>true if the curve could be converted into a Line within tolerance.</returns>
     public static bool TryGetLine(this Curve curve, out Line line, double tolerance)
     {
       if (curve is LineCurve lineCurve)
@@ -418,50 +452,195 @@ namespace Rhino.Geometry
       return false;
     }
 
-    public static bool TryGetEllipse(this Curve curve, out Ellipse ellipse, out Interval interval, double tolerance)
+    /// <summary>
+    /// Try to convert this curve into a <see cref="Rhino.Geometry.Ellipse"/> using a custom <paramref name="tolerance"/>.
+    /// </summary>
+    /// <param name="curve"></param>
+    /// <param name="ellipse">On success, the Ellipse will be filled in.</param>
+    /// <param name="domain">On success, the Ellipse domain will be filled in.</param>
+    /// <param name="tolerance">Tolerance to use when checking.</param>
+    /// <returns>true if the curve could be converted into a Ellipse within tolerance.</returns>
+    public static bool TryGetEllipse(this Curve curve, out Ellipse ellipse, out Interval domain, double tolerance)
     {
       if (curve.TryGetPlane(out var plane, tolerance))
       {
         if (curve.TryGetArc(plane, out var arc, tolerance))
         {
           ellipse = new Ellipse(arc.Plane, arc.Radius, arc.Radius);
-          interval = arc.AngleDomain;
+          domain = arc.AngleDomain;
           return true;
         }
 
-        if (curve.TryGetEllipse(plane, out ellipse, tolerance))
+        return curve.TryGetEllipse(plane, out ellipse, out domain, tolerance);
+      }
+
+      ellipse = default;
+      domain = Interval.Unset;
+      return false;
+    }
+
+    /// <summary>
+    /// Try to convert this curve into a <see cref="Rhino.Geometry.Ellipse"/> using a custom <paramref name="tolerance"/>.
+    /// </summary>
+    /// <param name="curve"></param>
+    /// <param name="plane">Plane in which the comparison is performed.</param>
+    /// <param name="ellipse">On success, the Ellipse will be filled in.</param>
+    /// <param name="domain">On success, the Ellipse domain will be filled in.</param>
+    /// <param name="tolerance">Tolerance to use when checking.</param>
+    /// <returns>true if the curve could be converted into a Ellipse within tolerance.</returns>
+    public static bool TryGetEllipse(this Curve curve, Plane plane, out Ellipse ellipse, out Interval domain, double tolerance)
+    {
+      if (curve.TryGetEllipse(plane, out ellipse, tolerance))
+      {
+        // Curve.TryGetEllipse does not honor curve direction
+        if(curve.ClosedCurveOrientation(ellipse.Plane) == CurveOrientation.Clockwise)
+          ellipse = ellipse.Reverse();
+
+        if (curve.IsClosed)
         {
-          // Curve.TryGetEllipse does not respect curve direction
-          if (plane.Normal.IsParallelTo(ellipse.Plane.Normal) == -1)
-            ellipse = ellipse.Reverse();
-
-          if (curve.IsClosed)
+          domain = new Interval(0.0, 2.0 * Math.PI);
+          return true;
+        }
+        else
+        {
+          var nurbsEllipse = ellipse.ToNurbsCurve();
+          if
+          (
+            nurbsEllipse.ClosestPoint(curve.PointAtStart, out var t0, 0.0) &&
+            nurbsEllipse.ClosestPoint(curve.PointAtEnd, out var t1, 0.0)
+          )
           {
-            interval = new Interval(0.0, 2.0 * Math.PI);
+            domain = new Interval(t0, t1);
+
+            if (domain.IsDecreasing)
+              domain.T0 -= Math.PI * 2.0;
+
             return true;
-          }
-          else
-          {
-            var nurbsEllipse = ellipse.ToNurbsCurve();
-            if
-            (
-              nurbsEllipse.ClosestPoint(curve.PointAtStart, out var t0, 0.0) &&
-              nurbsEllipse.ClosestPoint(curve.PointAtEnd, out var t1, 0.0)
-            )
-            {
-              interval = new Interval(t0, t1);
-
-              if (interval.IsDecreasing)
-                interval.T0 -= Math.PI * 2.0;
-
-              return true;
-            }
           }
         }
       }
 
       ellipse = default;
-      interval = Interval.Unset;
+      domain = Interval.Unset;
+      return false;
+    }
+
+    /// <summary>
+    /// Try to convert this curve into a <see cref="Rhino.Geometry.PolyCurve"/> using a custom <paramref name="angleToleranceRadians"/>.
+    /// </summary>
+    /// <remarks>
+    /// It splits <paramref name="curve"/> at kinks, and creates a PolyCurve with the resulting G2 continuous segments.
+    /// </remarks>
+    /// <param name="curve"></param>
+    /// <param name="polyCurve">Resulting polycurve of smooth spans.</param>
+    /// <param name="angleToleranceRadians">Tolerance to use when checking for kinks, in radians.</param>
+    /// <returns>true if the curve has kinks within tolerance and results into a PolyCurve.</returns>
+    public static bool TryGetPolyCurve(this Curve curve, out PolyCurve polyCurve, double angleToleranceRadians)
+    {
+      var kinks = default(List<double>);
+
+      var continuity = curve.IsClosed ? Continuity.G2_locus_continuous : Continuity.G2_continuous;
+      var domain = curve.Domain;
+      var t = domain.T0;
+      var cosAngleTolerance = Math.Cos(angleToleranceRadians);
+
+      while (curve.GetNextDiscontinuity(continuity, t, domain.T1, cosAngleTolerance, out t))
+      {
+        if (kinks is null) kinks = new List<double>();
+        kinks.Add(t);
+      }
+
+      if (kinks is null)
+      {
+        polyCurve = default;
+        return false;
+      }
+
+      polyCurve = new PolyCurve();
+      foreach (var segment in curve.Split(kinks))
+        polyCurve.AppendSegment(segment);
+
+      return true;
+    }
+
+    static bool TryEvaluateCurvature
+    (
+      Vector3d D1,
+      Vector3d D2,
+      out Vector3d T,
+      out Vector3d K
+    )
+    {
+      double d1 = D1.Length;
+      if (d1 == 0.0)
+      {
+        d1 = D2.Length;
+        if (d1 > 0.0) T = D2 / d1;
+        else T = Vector3d.Zero;
+
+        K = Vector3d.Zero;
+        return false;
+      }
+
+      T = D1 / d1;
+
+      double negD2oT = -D2 * T;
+      d1 = 1.0 / (d1 * d1);
+      K = d1 * (D2 + negD2oT * T);
+      return true;
+    }
+
+    public static bool GetNextDiscontinuity(this Curve curve, Continuity continuityType, double t0, double t1, double cosAngleTolerance, out double t)
+    {
+      return curve.GetNextDiscontinuity(continuityType, t0, t1, cosAngleTolerance, RhinoMath.SqrtEpsilon, out t);
+    }
+
+    public static bool GetNextDiscontinuity(this Curve curve, Continuity continuityType, double t0, double t1, double cosAngleTolerance, double curvatureTolerance, out double t)
+    {
+      var derivatives = 0;
+      switch (continuityType)
+      {
+        case Continuity.G1_continuous:        derivatives = 1; continuityType = Continuity.C1_continuous; break;
+        case Continuity.G1_locus_continuous:  derivatives = 1; continuityType = Continuity.C1_locus_continuous; break;
+        case Continuity.G2_continuous:        derivatives = 2; continuityType = Continuity.C2_continuous; break;
+        case Continuity.G2_locus_continuous:  derivatives = 2;  continuityType = Continuity.C2_locus_continuous; break;
+        default: return curve.GetNextDiscontinuity(continuityType, t0, t1, out t);
+      }
+
+      while (curve.GetNextDiscontinuity(continuityType, t0, t1, out t))
+      {
+        t0 = t;
+        var domain = curve.Domain;
+
+        var below = t == domain.T1 ?
+          curve.DerivativeAt(domain.T1, 2) :
+          curve.DerivativeAt(t, 2, CurveEvaluationSide.Below);
+
+        TryEvaluateCurvature(below[1], below[2], out var belowT, out var belowK);
+
+        var above = t == domain.T1 ?
+          curve.DerivativeAt(domain.T0, 2) :
+          curve.DerivativeAt(t, 2, CurveEvaluationSide.Above);
+
+        TryEvaluateCurvature(above[1], above[2], out var aboveT, out var aboveK);
+
+        // Check if is G1 continuous
+        if (belowT * aboveT < cosAngleTolerance)
+          return true;
+
+        // Check if is G2 continuous
+        if(derivatives >= 2)
+        {
+          if ((belowK - aboveK).Length > curvatureTolerance)
+            return true;
+
+          var belowKLength = belowK.Length;
+          var aboveKLength = aboveK.Length;
+          if (Math.Abs(belowKLength - aboveKLength) > Math.Max(belowKLength, aboveKLength) * 0.05)
+            return true;
+        }
+      }
+
       return false;
     }
   }

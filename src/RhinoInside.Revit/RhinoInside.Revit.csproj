@@ -177,6 +177,7 @@
     <Compile Include="Convert\Display\PreviewConverter.cs" />
     <Compile Include="Convert\Geometry\ExtrusionEncoder.cs" />
     <Compile Include="Convert\Geometry\GeometryEncoder.cs" />
+    <Compile Include="Convert\Geometry\KnotListEncoder.cs" />
     <Compile Include="Convert\Geometry\MeshDecoder.cs" />
     <Compile Include="Convert\Geometry\Raw\RawDecoder.cs" />
     <Compile Include="Convert\Geometry\MeshEncoder.cs" />
@@ -220,6 +221,7 @@
     <Compile Include="External\DB\Extensions\Parameter.cs" />
     <Compile Include="External\DB\Extensions\ParameterFilterElement.cs" />
     <Compile Include="External\DB\Extensions\ProjectLocation.cs" />
+    <Compile Include="External\DB\Extensions\Solid.cs" />
     <Compile Include="External\DB\Extensions\Surface.cs" />
     <Compile Include="External\DB\Extensions\View.cs" />
     <Compile Include="External\DB\Extensions\XYZ.cs" />
