@@ -125,7 +125,7 @@ namespace RhinoInside.Revit.UI
 
     CheckBox _checkUpdatesOnStartup = new CheckBox { Text = "Check Updates on Startup" };
     Label _channelDescription = new Label { Visible = false, Wrap = WrapMode.Word, Height = 36, VerticalAlignment = VerticalAlignment.Top };
-    Forms.ComboBox _updateChannelSelector = new Forms.ComboBox();
+    Forms.DropDown _updateChannelSelector = new Forms.DropDown() { Height = 25 };
     Button _releaseNotesBtn = new Button { Text = "Release Notes", Height = 25 };
     Button _downloadBtn = new Button { Text = "Download Installer", Height = 25 };
 
@@ -139,9 +139,15 @@ namespace RhinoInside.Revit.UI
 
       // setup update channel selector
       _updateChannelSelector.SelectedIndexChanged += _updateChannelSelector_SelectedIndexChanged;
+      var execAssm = Assembly.GetExecutingAssembly();
       foreach (AddinUpdateChannel chnl in AddinUpdater.Channels)
       {
-        _updateChannelSelector.Items.Add(chnl.Name);
+        _updateChannelSelector.Items.Add(
+          new ImageListItem {
+            Image = Icon.FromResource(chnl.IconResource, execAssm).WithSize(16, 16),
+            Text = chnl.Name
+          }
+        );
       }
 
       if (AddinOptions.Current.UpdateChannel is string activeChannelId)
@@ -207,7 +213,7 @@ namespace RhinoInside.Revit.UI
 
     private void _updateChannelSelector_SelectedIndexChanged(object sender, EventArgs e)
     {
-      if (sender is Forms.ComboBox channelSelector)
+      if (sender is Forms.DropDown channelSelector)
       {
         var updaterChannel = AddinUpdater.Channels[channelSelector.SelectedIndex];
         _channelDescription.Text = updaterChannel.Description;

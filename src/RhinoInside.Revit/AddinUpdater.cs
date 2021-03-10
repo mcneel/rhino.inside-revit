@@ -1,17 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Security.Cryptography;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 using System.IO;
 using System.Net;
-
-using Autodesk.Revit.UI;
 
 using RhinoInside.Revit.Settings;
 
@@ -66,6 +61,7 @@ namespace RhinoInside.Revit
     public Guid Id { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
+    public string IconResource { get; set; }
     public Version TargetVersion { get; set; }
     public string Url { get; set; }
     public bool IsStable { get; set; } = false;
@@ -97,6 +93,7 @@ namespace RhinoInside.Revit
       Id = new Guid("0b10351c-25e3-4680-9135-6b86cd27bcda"),
       Name = "Public Releases (Official)",
       Description = "Official and stable public releases downloadable from website",
+      IconResource = "RhinoInside.Revit.Resources.ChannelStable-icon.png",
       TargetVersion = new Version(0, 0),
       Url = @"https://files.mcneel.com/rhino.inside/revit/update/0.x/stable.xml",
       IsStable = true
@@ -124,6 +121,7 @@ namespace RhinoInside.Revit
         Id =             new Guid("7fc1e535-c7cd-47d8-a969-e01435bacd65"),
         Name =           "Daily Builds (Work in Progress)",
         Description =    "Daily Builds are most recent builds of the development branch and might contain bugs and unfinished features",
+        IconResource =   "RhinoInside.Revit.Resources.ChannelDaily-icon.png",
         TargetVersion =  new Version(0, 0),
         Url =            @"https://files.mcneel.com/rhino.inside/revit/update/0.x/daily.xml"
       }
