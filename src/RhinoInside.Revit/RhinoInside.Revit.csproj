@@ -395,6 +395,10 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\RIR-WIP-logo.png" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\ChannelDaily-icon.png" />
+    <EmbeddedResource Include="Resources\ChannelStable-icon.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild" Condition="$(Configuration.Contains('Debug'))">
     <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)..\RhinoInside.Revit.Native\bin\x64\Debug\RhinoInside.Revit.Native.dll;$(ProjectDir)..\RhinoInside.Revit.Native\bin\x64\Debug\RhinoInside.Revit.Native.pdb" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />
