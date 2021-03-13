@@ -253,6 +253,10 @@ namespace RhinoInside.Revit.UI
                                   + $"Release Date: {releaseInfo.ReleaseDate}",
                               Width = 150
                             },
+                            new Label {
+                              Text = "Close Revit and run the installer to update",
+                              TextAlignment = TextAlignment.Center
+                            },
                             _downloadBtn,
                             _releaseNotesBtn,
                             null
