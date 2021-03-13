@@ -65,13 +65,17 @@ If there are any updates available, both the Start and Options buttons will show
 
 ![]({{ "/static/images/reference/updates-new-notif.png" | prepend: site.baseurl }})
 
-You can get the information and download the installer from *Options / Updates*:
+You can get the information and download the installer from *Options / Updates*. Please make sure to close Revit before installing the new version.
 
 ![]({{ "/static/images/reference/updates-newavailable.png" | prepend: site.baseurl }})
 
 ## Grasshopper Scripts
 
 Grasshopper scripts can be loaded into the Revit UI. Create a directory on your machine that contains Grasshopper (`*.gh` or `*.ghx`) scripts. All the scripts at the root of this directory will be added as button to a new panel with the name of this directory. All other sub-directories will be converted into pull-down buttons on the ribbon.
+
+The `My RIR Tools` panel shown in the image below is created from a directory of Grasshopper scripts:
+
+![]({{ "/static/images/reference/settings-addscripts-loadedtools.png" | prepend: site.baseurl }})
 
 ### Loading Grasshopper Scripts into Ribbon
 
