@@ -1,21 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Windows;
-using System.Windows.Input;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
-using Microsoft.Win32;
-using Microsoft.Win32.SafeHandles;
-using RhinoInside.Revit.Native;
-using RhinoInside.Revit.Settings;
-using UIX = RhinoInside.Revit.External.UI;
 
 namespace RhinoInside.Revit.UI
 {

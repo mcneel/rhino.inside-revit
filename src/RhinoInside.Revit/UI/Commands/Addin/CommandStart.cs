@@ -4,20 +4,13 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Windows;
 using System.Windows.Input;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
 using Microsoft.Win32;
-using Microsoft.Win32.SafeHandles;
-
-using RhinoInside.Revit.Native;
-using RhinoInside.Revit.Settings;
 using RhinoInside.Revit.External.UI.Extensions;
-
+using RhinoInside.Revit.Settings;
 using UIX = RhinoInside.Revit.External.UI;
 
 namespace RhinoInside.Revit.UI
@@ -25,8 +18,8 @@ namespace RhinoInside.Revit.UI
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
   class CommandStart : Command
   {
-    static RibbonPanel _rhinoPanel;
-    static RibbonPanel _grasshopperPanel;
+    static RibbonPanel rhinoPanel;
+    static RibbonPanel grasshopperPanel;
 
     public static string CommandName => "Start";
     public static string CommandIcon => AddinUpdater.ActiveChannel.IsStable? "RIR-logo.png" : "RIR-WIP-logo.png";
@@ -77,7 +70,8 @@ namespace RhinoInside.Revit.UI
       }
     }
 
-    public override Result Execute(ExternalCommandData data, ref string message, Autodesk.Revit.DB.ElementSet elements) {
+    public override Result Execute(ExternalCommandData data, ref string message, Autodesk.Revit.DB.ElementSet elements)
+    {
       if
       (
         (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)) &&
@@ -137,27 +131,27 @@ namespace RhinoInside.Revit.UI
           // Register UI on Revit
           if (assemblies.Any(x => x.GetName().Name == "RhinoCommon"))
           {
-            _rhinoPanel = ribbon.CreateAddinPanel(Addin.RhinoVersionInfo?.ProductName ?? "Rhinoceros");
-            CommandRhino.CreateUI(_rhinoPanel);
-            CommandImport.CreateUI(_rhinoPanel);
-            CommandToggleRhinoPreview.CreateUI(_rhinoPanel);
-            CommandPython.CreateUI(_rhinoPanel);
-            CommandRhinoOptions.CreateUI(_rhinoPanel);
+            rhinoPanel = ribbon.CreateAddinPanel(Addin.RhinoVersionInfo?.ProductName ?? "Rhinoceros");
+            CommandRhino.CreateUI(rhinoPanel);
+            CommandImport.CreateUI(rhinoPanel);
+            CommandToggleRhinoPreview.CreateUI(rhinoPanel);
+            CommandPython.CreateUI(rhinoPanel);
+            CommandRhinoOptions.CreateUI(rhinoPanel);
           }
 
           if (assemblies.Any(x => x.GetName().Name == "Grasshopper"))
           {
-            _grasshopperPanel = ribbon.CreateAddinPanel("Grasshopper");
-            CommandGrasshopper.CreateUI(_grasshopperPanel);
-            CommandGrasshopperPreview.CreateUI(_grasshopperPanel);
-            CommandGrasshopperSolver.CreateUI(_grasshopperPanel);
-            CommandGrasshopperRecompute.CreateUI(_grasshopperPanel);
-            CommandGrasshopperBake.CreateUI(_grasshopperPanel);
-            _grasshopperPanel.AddSeparator();
-            CommandGrasshopperPlayer.CreateUI(_grasshopperPanel);
-            _grasshopperPanel.AddSlideOut();
-            CommandGrasshopperPackageManager.CreateUI(_grasshopperPanel);
-            CommandGrasshopperFolders.CreateUI(_grasshopperPanel);
+            grasshopperPanel = ribbon.CreateAddinPanel("Grasshopper");
+            CommandGrasshopper.CreateUI(grasshopperPanel);
+            CommandGrasshopperPreview.CreateUI(grasshopperPanel);
+            CommandGrasshopperSolver.CreateUI(grasshopperPanel);
+            CommandGrasshopperRecompute.CreateUI(grasshopperPanel);
+            CommandGrasshopperBake.CreateUI(grasshopperPanel);
+            grasshopperPanel.AddSeparator();
+            CommandGrasshopperPlayer.CreateUI(grasshopperPanel);
+            grasshopperPanel.AddSlideOut();
+            CommandGrasshopperPackageManager.CreateUI(grasshopperPanel);
+            CommandGrasshopperFolders.CreateUI(grasshopperPanel);
 
             // Script Packages UI
             UpdateScriptPkgUI(ribbon);
@@ -202,13 +196,13 @@ namespace RhinoInside.Revit.UI
       // collapse panel if in compact mode
       if (AddinOptions.Current.CompactRibbon)
       {
-        _rhinoPanel?.Collapse(Addin.AddinName);
-        _grasshopperPanel?.Collapse(Addin.AddinName);
+        rhinoPanel?.Collapse(Addin.AddinName);
+        grasshopperPanel?.Collapse(Addin.AddinName);
       }
       else
       {
-        _rhinoPanel?.Expand(Addin.AddinName);
-        _grasshopperPanel?.Expand(Addin.AddinName);
+        rhinoPanel?.Expand(Addin.AddinName);
+        grasshopperPanel?.Expand(Addin.AddinName);
       }
     }
 

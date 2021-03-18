@@ -1,21 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Windows;
-using System.Windows.Input;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
-using Microsoft.Win32;
-using Microsoft.Win32.SafeHandles;
-using RhinoInside.Revit.Native;
-using RhinoInside.Revit.Settings;
-using UIX = RhinoInside.Revit.External.UI;
 
 namespace RhinoInside.Revit.UI
 {
@@ -26,10 +14,10 @@ namespace RhinoInside.Revit.UI
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      var buttonData = NewPushButtonData<CommandAbout, AlwaysAvailable>(CommandName, "About-icon.png", "");
+      var buttonData = NewPushButtonData<CommandAbout, AlwaysAvailable>(CommandName, "About-icon.png", string.Empty);
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://www.rhino3d.com/inside/revit/beta/"));
+        pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://www.rhino3d.com/inside/revit/"));
       }
     }
 
@@ -74,13 +62,13 @@ namespace RhinoInside.Revit.UI
         switch (taskDialog.Show())
         {
           case TaskDialogResult.CommandLink1:
-            using (System.Diagnostics.Process.Start(@"https://www.rhino3d.com/inside/revit/beta/")) { }
+            using (System.Diagnostics.Process.Start(@"https://www.rhino3d.com/inside/revit/")) { }
             break;
           case TaskDialogResult.CommandLink2:
-            using (System.Diagnostics.Process.Start(@"https://github.com/mcneel/rhino.inside-revit/blob/master/LICENSE")) { }
+            using (System.Diagnostics.Process.Start(@"https://github.com/mcneel/rhino.inside-revit/blob/1.x/LICENSE")) { }
             break;
           case TaskDialogResult.CommandLink3:
-            using (System.Diagnostics.Process.Start(@"https://github.com/mcneel/rhino.inside-revit/tree/master/src")) { }
+            using (System.Diagnostics.Process.Start(@"https://github.com/mcneel/rhino.inside-revit")) { }
             break;
         }
       }

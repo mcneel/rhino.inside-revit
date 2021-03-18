@@ -2,12 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Windows;
-using System.Windows.Input;
-using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
@@ -197,17 +193,17 @@ namespace RhinoInside.Revit
     #endregion
 
     #region Constructor
-    public static readonly string SystemDir =
+    static readonly string SystemDir =
 #if DEBUG
       Registry.GetValue(@"HKEY_CURRENT_USER\SOFTWARE\McNeel\Rhinoceros\7.0-WIP-Developer-Debug-trunk\Install", "Path", null) as string ??
 #endif
       Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install", "Path", null) as string ??
       Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Rhino WIP", "System");
 
-    public static readonly string RhinoExePath = Path.Combine(SystemDir, "Rhino.exe");
-    public static readonly FileVersionInfo RhinoVersionInfo = File.Exists(RhinoExePath) ? FileVersionInfo.GetVersionInfo(RhinoExePath) : null;
-    public static readonly Version MinimumRhinoVersion = new Version(7, 0, 20314);
-    public static readonly Version RhinoVersion = new Version
+    internal static readonly string RhinoExePath = Path.Combine(SystemDir, "Rhino.exe");
+    internal static readonly FileVersionInfo RhinoVersionInfo = File.Exists(RhinoExePath) ? FileVersionInfo.GetVersionInfo(RhinoExePath) : null;
+    static readonly Version MinimumRhinoVersion = new Version(7, 3, 0);
+    static readonly Version RhinoVersion = new Version
     (
       RhinoVersionInfo?.FileMajorPart ?? 0,
       RhinoVersionInfo?.FileMinorPart ?? 0,
@@ -532,7 +528,7 @@ namespace RhinoInside.Revit
             Id = $"{MethodBase.GetCurrentMethod().DeclaringType}.{MethodBase.GetCurrentMethod().Name}.UpdateRhino",
             MainIcon = UIX.TaskDialogIcons.IconInformation,
             AllowCancellation = true,
-            MainInstruction = "Unsupported Rhino WIP version",
+            MainInstruction = "Unsupported Rhino version",
             MainContent = $"Expected Rhino version is ({MinimumRhinoVersion}) or above.",
             ExpandedContent =
             RhinoVersionInfo is null ? "Rhino\n" :
@@ -547,14 +543,14 @@ namespace RhinoInside.Revit
 #endif
             $"• Path: {Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName)}\n" +
             $"• Language: {revit.Language}",
-            FooterText = $"Current Rhino WIP version: {RhinoVersion}"
+            FooterText = $"Current Rhino version: {RhinoVersion}"
           }
         )
         {
-          taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Download latest Rhino WIP…");
+          taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Download latest Rhino…");
           if (taskDialog.Show() == TaskDialogResult.CommandLink1)
           {
-            using (Process.Start(@"https://www.rhino3d.com/download/rhino/wip")) { }
+            using (Process.Start(@"https://www.rhino3d.com/download/rhino/7.0/latest")) { }
           }
         }
 
