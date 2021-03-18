@@ -6,27 +6,26 @@ namespace RhinoInside.Revit.External.DB.Extensions
   {
     public static void GetLocation(this Instance instance, out XYZ origin, out XYZ basisX, out XYZ basisY)
     {
-      var transform = instance.GetTransform();
-      origin = transform.Origin;
-      basisX = transform.BasisX;
-      basisY = transform.BasisY;
-
-      switch (instance.Location)
+      using (var transform = instance.GetTransform())
       {
-        case LocationPoint pointLocation:
-          origin = pointLocation.Point;
-          break;
+        // Value Overrides
+        switch (instance.Location)
+        {
+          case LocationPoint pointLocation:
+            origin = pointLocation.Point;
+            basisX = transform.BasisX;
+            basisY = transform.BasisY;
+            return;
 
-        case LocationCurve curveLocation:
-          var start = curveLocation.Curve.Evaluate(0.0, normalized: true);
-          var end = curveLocation.Curve.Evaluate(1.0, normalized: true);
-          var axis = end - start;
-          var perp = transform.BasisZ.CrossProduct(transform.BasisX);
+          case LocationCurve curveLocation:
+            if (curveLocation.Curve.TryGetLocation(out origin, out basisX, out basisY)) return;
+            break;
+        }
 
-          origin = start + (axis * 0.5);
-          basisX = axis.Normalize();
-          basisY = perp.Normalize();
-          break;
+        // Default values
+        origin = transform.Origin;
+        basisX = transform.BasisX;
+        basisY = transform.BasisY;
       }
     }
 
