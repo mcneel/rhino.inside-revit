@@ -269,9 +269,12 @@ namespace RhinoInside.Revit.GH.Types
       if (Value is null)
         return BoundingBox.Empty;
 
-      return xform == Transform.Identity ?
-        Point.GetBoundingBox(true) :
-        Point.GetBoundingBox(xform);
+      return
+      (
+        xform == Transform.Identity ?
+        Point?.GetBoundingBox(true) :
+        Point?.GetBoundingBox(xform)
+      ) ?? BoundingBox.Empty;
     }
 
     #region IGH_PreviewData
@@ -347,9 +350,12 @@ namespace RhinoInside.Revit.GH.Types
       if (Value is null)
         return BoundingBox.Empty;
 
-      return xform == Transform.Identity ?
-        Curve.GetBoundingBox(true) :
-        Curve.GetBoundingBox(xform);
+      return
+      (
+        xform == Transform.Identity ?
+        Curve?.GetBoundingBox(true) :
+        Curve?.GetBoundingBox(xform)
+      ) ?? BoundingBox.Empty;
     }
 
     #region IGH_PreviewData
@@ -481,15 +487,18 @@ namespace RhinoInside.Revit.GH.Types
         return BoundingBox.Empty;
 
       var bbox = BoundingBox.Empty;
-      if (xform == Transform.Identity)
+      if (Curves is Curve[] curves)
       {
-        foreach (var curve in Curves)
-          bbox.Union(curve.GetBoundingBox(true));
-      }
-      else
-      {
-        foreach (var curve in Curves)
-          bbox.Union(curve.GetBoundingBox(xform));
+        if (xform == Transform.Identity)
+        {
+          foreach (var curve in curves)
+            bbox.Union(curve.GetBoundingBox(true));
+        }
+        else
+        {
+          foreach (var curve in curves)
+            bbox.Union(curve.GetBoundingBox(xform));
+        }
       }
 
       return bbox;
