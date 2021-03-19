@@ -5,6 +5,7 @@ layout: ltr/page-full
 ---
 
 {% capture community_note %}
+
 ## Contributing to Community
 
 The {{ site.terms.rir }} community appreciates and benefits from your contributions. In case you have created videos, articles, blog posts, etc or have developed custom scripted components for {{ site.terms.rir }} you can share your creations with the community in a number of ways. Prepare a package containing links and other resources, and
