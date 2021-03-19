@@ -31,13 +31,20 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       Rhino.Geometry.Point3d point
     )
     {
-      ThrowIfNotValid(nameof(point), point);
+      if (!ThrowIfNotValid(nameof(point), point))
+        return;
 
       if (element is DB.DirectShape ds) { }
       else ds = DB.DirectShape.CreateElement(doc, new DB.ElementId(DB.BuiltInCategory.OST_GenericModel));
 
-      var shape = new DB.Point[] { DB.Point.Create(point.ToXYZ()) };
-      ds.SetShape(shape);
+      using (var ctx = GeometryEncoder.Context.Push(ds))
+      {
+        ctx.RuntimeMessage = (severity, message, invalidGeometry) =>
+          AddGeometryConversionError((GH_RuntimeMessageLevel) severity, message, invalidGeometry);
+
+        var shape = new DB.Point[] { DB.Point.Create(point.ToXYZ()) };
+        ds.SetShape(shape);
+      }
 
       ReplaceElement(ref element, ds);
     }

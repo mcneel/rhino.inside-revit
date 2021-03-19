@@ -178,7 +178,7 @@ namespace RhinoInside.Revit.GH.Types
 
     protected override bool SetValue(DB.Element element)
     {
-      if (DocumentExtension.AsCategory(element) is DB.Category cat)
+      if (DocumentExtension.AsCategory(element) is DB.Category)
       {
         SetValue(element.Document, element.Id);
         return true;
@@ -464,7 +464,7 @@ namespace RhinoInside.Revit.GH.Types
         if (value is object && Value is DB.Category category)
         {
           AssertValidDocument(value.Document, nameof(ProjectionLinePattern));
-          if (category.GetGraphicsStyle(DB.GraphicsStyleType.Projection) is DB.GraphicsStyle style)
+          if (category.GetGraphicsStyle(DB.GraphicsStyleType.Projection) is DB.GraphicsStyle)
           {
             if (category.GetLinePatternId(DB.GraphicsStyleType.Projection) != value.Id)
               category.SetLinePatternId(value.Id, DB.GraphicsStyleType.Projection);
@@ -490,7 +490,7 @@ namespace RhinoInside.Revit.GH.Types
         if (value is object && Value is DB.Category category)
         {
           AssertValidDocument(value.Document, nameof(CutLinePattern));
-          if (category.GetGraphicsStyle(DB.GraphicsStyleType.Cut) is DB.GraphicsStyle style)
+          if (category.GetGraphicsStyle(DB.GraphicsStyleType.Cut) is DB.GraphicsStyle)
           {
             if (category.GetLinePatternId(DB.GraphicsStyleType.Cut) != value.Id)
               category.SetLinePatternId(value.Id, DB.GraphicsStyleType.Cut);

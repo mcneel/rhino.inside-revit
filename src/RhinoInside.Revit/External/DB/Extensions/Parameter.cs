@@ -127,5 +127,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return false;
     }
+
+    public static void SetWorksetId(this Parameter parameter, WorksetId worksetId)
+      => parameter.Set(worksetId.IntegerValue);
   }
 }

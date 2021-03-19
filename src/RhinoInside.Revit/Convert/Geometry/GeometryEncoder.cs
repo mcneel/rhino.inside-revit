@@ -336,6 +336,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static DB.Curve ToCurve(this LineCurve value) => value.Line.ToLine(UnitConverter.ToHostUnits);
     public static DB.Curve ToCurve(this LineCurve value, double factor) => value.Line.ToLine(factor);
 
+    public static DB.Curve ToCurve(this PolylineCurve value) => ToCurve(value, UnitConverter.ToHostUnits);
+    public static DB.Curve ToCurve(this PolylineCurve value, double factor)
+    {
+      if (value.TryGetLine(out var line, Revit.VertexTolerance * factor))
+        return line.ToLine(factor);
+
+      throw new ConversionException("Failed to convert non G1 continuous curve.");
+    }
+
     public static DB.Curve ToCurve(this ArcCurve value) => value.Arc.ToArc(UnitConverter.ToHostUnits);
     public static DB.Curve ToCurve(this ArcCurve value, double factor) => value.Arc.ToArc(factor);
 
@@ -371,6 +380,24 @@ namespace RhinoInside.Revit.Convert.Geometry
       return NurbsSplineEncoder.ToNurbsSpline(value, factor);
     }
 
+    public static DB.Curve ToCurve(this PolyCurve value) => ToCurve(value, UnitConverter.ToHostUnits);
+    public static DB.Curve ToCurve(this PolyCurve value, double factor)
+    {
+      var curve = value.Simplify
+      (
+        CurveSimplifyOptions.AdjustG1 |
+        CurveSimplifyOptions.Merge,
+        Revit.VertexTolerance * factor,
+        Revit.AngleTolerance
+      )
+      ?? value;
+
+      if (curve is PolyCurve)
+        return curve.ToNurbsCurve().ToCurve(factor);
+      else
+        return curve.ToCurve(factor);
+    }
+
     public static DB.Curve ToCurve(this Curve value) => value.ToCurve(UnitConverter.ToHostUnits);
     public static DB.Curve ToCurve(this Curve value, double factor)
     {
@@ -383,34 +410,10 @@ namespace RhinoInside.Revit.Convert.Geometry
           return arc.Arc.ToArc(factor);
 
         case PolylineCurve polyline:
-          value = polyline.Simplify
-          (
-            CurveSimplifyOptions.RebuildLines |
-            CurveSimplifyOptions.Merge,
-            Revit.VertexTolerance * factor,
-            Revit.AngleTolerance
-          )
-          ?? value;
-
-          if (value is PolylineCurve)
-            return value.ToNurbsCurve().ToCurve(factor);
-          else
-            return value.ToCurve(factor);
+          return polyline.ToCurve(factor);
 
         case PolyCurve polyCurve:
-          value = polyCurve.Simplify
-          (
-            CurveSimplifyOptions.AdjustG1 |
-            CurveSimplifyOptions.Merge,
-            Revit.VertexTolerance * factor,
-            Revit.AngleTolerance
-          )
-          ?? value;
-
-          if (value is PolyCurve)
-            return value.ToNurbsCurve().ToCurve(factor);
-          else
-            return value.ToCurve(factor);
+          return polyCurve.ToCurve(factor);
 
         case NurbsCurve nurbsCurve:
           return nurbsCurve.ToCurve(factor);
@@ -547,23 +550,33 @@ namespace RhinoInside.Revit.Convert.Geometry
           }
         }
       }
+      else if (value.TryGetPolyCurve(out var polyCurve, Revit.AngleTolerance))
+      {
+        foreach (var segment in ToCurveMany(polyCurve, UnitConverter.NoScale))
+          yield return segment;
+
+        yield break;
+      }
       else if (value.Degree == 2)
       {
-        for (int s = 0; s < value.SpanCount; ++s)
+        if (value.IsRational && value.TryGetEllipse(out var ellipse, out var interval, Revit.VertexTolerance))
         {
-          var segment = value.Trim(value.SpanDomain(s)) as NurbsCurve;
-          yield return NurbsSplineEncoder.ToNurbsSpline(segment, UnitConverter.NoScale);
+          // Only degree 2 rational NurbCurves should be transferred as an Arc-Ellipse
+          // to avoid unexpected Arcs-Ellipses near linear with gigantic radius.
+          yield return ellipse.ToCurve(interval, UnitConverter.NoScale);
         }
-      }
-      else if(value.GetNextDiscontinuity(Continuity.C1_continuous, value.Domain.Min, value.Domain.Max, out var t))
-      {
-        var splitters = new List<double>() { t };
-        while (value.GetNextDiscontinuity(Continuity.C1_continuous, t, value.Domain.Max, out t))
-          splitters.Add(t);
-
-        var segments = value.Split(splitters);
-        foreach (var segment in segments.Cast<NurbsCurve>())
-          yield return NurbsSplineEncoder.ToNurbsSpline(segment, UnitConverter.NoScale);
+        else if (value.SpanCount == 1)
+        {
+          yield return NurbsSplineEncoder.ToNurbsSpline(value, UnitConverter.NoScale);
+        }
+        else
+        {
+          for (int s = 0; s < value.SpanCount; ++s)
+          {
+            var segment = value.Trim(value.SpanDomain(s)) as NurbsCurve;
+            yield return NurbsSplineEncoder.ToNurbsSpline(segment, UnitConverter.NoScale);
+          }
+        }
       }
       else if (value.IsClosed(Revit.ShortCurveTolerance * 1.01))
       {
@@ -631,7 +644,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       int segmentCount = value.SegmentCount;
       for (int s = 0; s < segmentCount; ++s)
       {
-        foreach (var segment in value.SegmentCurve(s).ToCurveMany(factor))
+        foreach (var segment in value.SegmentCurve(s).ToCurveMany(UnitConverter.NoScale))
           yield return segment;
       }
     }

@@ -96,7 +96,7 @@ namespace RhinoInside.Revit.GH.Components
       public DB.UpdaterId GetUpdaterId() => UpdaterId;
       public static readonly DB.UpdaterId UpdaterId = new DB.UpdaterId
       (
-        Addin.Id,
+        AddIn.Id,
         new Guid("A50F0406-4E9A-4BE5-85CB-77C608AD8086")
       );
 
@@ -399,7 +399,7 @@ namespace RhinoInside.Revit.GH.Components
 
     private void Menu_SimulatedClicked(object sender, EventArgs e)
     {
-      if (sender is ToolStripMenuItem item)
+      if (sender is ToolStripMenuItem)
       {
         RecordUndoEvent($"Set: Simulated");
         Simulated = !Simulated;

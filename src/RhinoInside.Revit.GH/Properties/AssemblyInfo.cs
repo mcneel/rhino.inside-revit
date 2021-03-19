@@ -11,7 +11,7 @@ using Grasshopper.Kernel;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Robert McNeel & Associates")]
 [assembly: AssemblyProduct("Rhino.Inside")]
-[assembly: AssemblyCopyright("© 2019-2020 Robert McNeel & Associates.")]
+[assembly: AssemblyCopyright("© 2019-2021 Robert McNeel & Associates.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -33,7 +33,7 @@ using Grasshopper.Kernel;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("0.0.*")]
+[assembly: AssemblyVersion("0.1.*")]
 //[assembly: AssemblyFileVersion("1.0.0.0")]
 [assembly: AssemblyInformationalVersion("WIP")]
 
@@ -54,7 +54,7 @@ namespace RhinoInside.Revit.GH
     public override string AuthorName => "Robert McNeel & Associates";
     public override string AuthorContact => WebPageURI;
 
-    public override GH_LibraryLicense License => Addin.DaysUntilExpiration < 0 ? GH_LibraryLicense.expired : GH_LibraryLicense.opensource;
+    public override GH_LibraryLicense License => AddIn.DaysUntilExpiration < 0 ? GH_LibraryLicense.expired : GH_LibraryLicense.opensource;
 
     public static readonly string ContactURI = @"https://discourse.mcneel.com/c/rhino-inside/Revit/";
     public static readonly string WebPageURI = @"https://www.rhino3d.com/inside/revit/";

@@ -48,10 +48,6 @@
       <ComponentGroupRef Id="Addins.2021.RhinoInsideRevit" />
     </Feature>
 
-    <Feature Id="RhinoInside.Revit.Samples" Title="Sample files" Level="1">
-      <ComponentGroupRef Id="SamplesComponentGroup" />
-    </Feature>
-
     <UIRef Id="WixUI_Advanced"/>
     <Property Id="ApplicationFolderName" Value="RhinoInside.Revit" />
     <Property Id="WixAppFolder" Value="WixPerMachine" />

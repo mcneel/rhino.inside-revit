@@ -125,7 +125,7 @@ namespace RhinoInside.Revit.GH
     {
       Script.LoadEditor();
       if (!Script.IsEditorLoaded())
-        throw new Exception("Failed to startup Grasshopper");
+        throw new InvalidOperationException("Failed to startup Grasshopper");
     }
 
     /// <summary>
@@ -532,7 +532,7 @@ namespace RhinoInside.Revit.GH
     class DocumentChangedEvent
     {
       static readonly ExternalEvent FlushQueue = ExternalEvent.Create(new FlushQueueHandler());
-      class FlushQueueHandler : External.UI.EventHandler
+      class FlushQueueHandler : External.UI.ExternalEventHandler
       {
         public override string GetName() => nameof(FlushQueue);
         protected override void Execute(UIApplication app)

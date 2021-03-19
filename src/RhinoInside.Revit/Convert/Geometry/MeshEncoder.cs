@@ -60,7 +60,8 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <returns></returns>
     internal static DB.Mesh ToMesh(/*const*/ Mesh mesh, double factor = UnitConverter.NoScale)
     {
-      return ToMesh(mesh.ExplodeAtUnweldedEdges(), factor);
+      var shells = mesh.ExplodeAtUnweldedEdges();
+      return ToMesh(shells.Length == 0 ? new Mesh[] { mesh } : shells, factor);
     }
 
     internal static DB.Mesh ToMesh(Mesh[] shells, double factor = UnitConverter.NoScale)
@@ -80,7 +81,7 @@ namespace RhinoInside.Revit.Convert.Geometry
           foreach (var shell in shells)
           {
             shell.Ngons.Count = 0;
-            shell.Ngons.AddPlanarNgons(Revit.VertexTolerance * factor, 4, 2, true);
+            shell.Ngons.AddPlanarNgons(Revit.VertexTolerance / factor, 4, 2, true);
             AddConnectedFaceSet(builder, shell, factor, true);
           }
 
@@ -108,15 +109,18 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     static void AddConnectedFaceSet(DB.TessellatedShapeBuilder builder, Mesh mesh, double factor, bool assumePlanarNgons = false)
     {
-      var isSolid = mesh.SolidOrientation() != 0;
-      builder.OpenConnectedFaceSet(isSolid);
-
       var vertices = mesh.Vertices.ToPoint3dArray();
       if (factor != 1.0)
       {
         for (int v = 0; v < vertices.Length; ++v)
           vertices[v] *= factor;
       }
+
+      if (vertices.Length < 3)
+        return;
+
+      var isSolid = mesh.SolidOrientation() != 0;
+      builder.OpenConnectedFaceSet(isSolid);
 
       var faceToNgon = new int[mesh.Faces.Count];
 
@@ -264,6 +268,9 @@ namespace RhinoInside.Revit.Convert.Geometry
           continue;
 
         var face = mesh.Faces[fi];
+        if (!face.IsValid(vertices))
+          continue;
+
         if (face.IsQuad)
         {
           fitPoints[0] = vertices[face.A];
@@ -271,34 +278,49 @@ namespace RhinoInside.Revit.Convert.Geometry
           fitPoints[2] = vertices[face.C];
           fitPoints[3] = vertices[face.D];
 
-          quad[0] = Raw.RawEncoder.AsXYZ(fitPoints[0]);
-          quad[1] = Raw.RawEncoder.AsXYZ(fitPoints[1]);
-          quad[2] = Raw.RawEncoder.AsXYZ(fitPoints[2]);
-          quad[3] = Raw.RawEncoder.AsXYZ(fitPoints[3]);
-
-          // If is not planar transfer as two triangles
-          var fit = Plane.FitPlaneToPoints(fitPoints, out var _, out var deviation);
-          if (fit == PlaneFitResult.Failure || deviation > Revit.VertexTolerance)
+          if (Plane.FitPlaneToPoints(fitPoints, out var plane, out var deviation) == PlaneFitResult.Success)
           {
-            // Split along the short diagonal
-            if (quad[0].DistanceTo(quad[2]) <= quad[1].DistanceTo(quad[3]))
-            {
-              triangle[0] = quad[0]; triangle[1] = quad[1]; triangle[2] = quad[2];
-              builder.AddFace(new DB.TessellatedFace(triangle, GeometryEncoder.Context.Peek.MaterialId));
+            var planar = deviation < Revit.VertexTolerance * 0.5;
 
-              triangle[0] = quad[2]; triangle[1] = quad[3]; triangle[2] = quad[0]; 
-              builder.AddFace(new DB.TessellatedFace(triangle, GeometryEncoder.Context.Peek.MaterialId));
+            var A = planar ? plane.ClosestPoint(fitPoints[0]) : fitPoints[0];
+            var B = planar ? plane.ClosestPoint(fitPoints[1]) : fitPoints[1];
+            var C = planar ? plane.ClosestPoint(fitPoints[2]) : fitPoints[2];
+            var D = planar ? plane.ClosestPoint(fitPoints[3]) : fitPoints[3];
+
+            var diagonal = new Line(A, C);
+            var P = new Plane(A, C - A, plane.Normal);
+
+            var distanceB = planar ? P.DistanceTo(B) : diagonal.DistanceTo(B, false);
+            var distanceD = planar ? P.DistanceTo(D) : diagonal.DistanceTo(D, false);
+
+            bool validB = Math.Abs(distanceB) > +Revit.VertexTolerance;
+            bool validD = Math.Abs(distanceD) > +Revit.VertexTolerance;
+
+            quad[0] = Raw.RawEncoder.AsXYZ(A);
+            quad[1] = Raw.RawEncoder.AsXYZ(B);
+            quad[2] = Raw.RawEncoder.AsXYZ(C);
+            quad[3] = Raw.RawEncoder.AsXYZ(D);
+
+            // If is not planar transfer as two triangles
+            if (planar && validB && validD && (distanceB < 0.0 != distanceD < 0.0))
+            {
+              builder.AddFace(new DB.TessellatedFace(quad, GeometryEncoder.Context.Peek.MaterialId));
             }
             else
             {
-              triangle[0] = quad[0]; triangle[1] = quad[1]; triangle[2] = quad[3];
-              builder.AddFace(new DB.TessellatedFace(triangle, GeometryEncoder.Context.Peek.MaterialId));
+              if (validB)
+              {
+                triangle[0] = quad[0]; triangle[1] = quad[1]; triangle[2] = quad[2];
+                builder.AddFace(new DB.TessellatedFace(triangle, GeometryEncoder.Context.Peek.MaterialId));
+              }
 
-              triangle[0] = quad[1]; triangle[1] = quad[2]; triangle[2] = quad[3];
-              builder.AddFace(new DB.TessellatedFace(triangle, GeometryEncoder.Context.Peek.MaterialId));
+              if (validD)
+              {
+                triangle[0] = quad[2]; triangle[1] = quad[3]; triangle[2] = quad[0];
+                builder.AddFace(new DB.TessellatedFace(triangle, GeometryEncoder.Context.Peek.MaterialId));
+              }
             }
           }
-          else builder.AddFace(new DB.TessellatedFace(quad, GeometryEncoder.Context.Peek.MaterialId));
         }
         else
         {

@@ -6,7 +6,7 @@ namespace RhinoInside.Revit.External.UI
 {
   using Extensions;
 
-  public abstract class Command : IExternalCommand
+  public abstract class ExternalCommand : IExternalCommand
   {
     public abstract Result Execute(ExternalCommandData data, ref string message, ElementSet elements);
     Result IExternalCommand.Execute(ExternalCommandData data, ref string message, ElementSet elements)

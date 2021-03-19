@@ -42,11 +42,11 @@ Launch {{ site.terms.revit }}. You will be prompted to confirm loading {{ site.t
 
 ![]({{ "/static/images/started/revit-prompt.png" | prepend: site.baseurl }})
 
-After load is complete, note the new *Rhinoceros* panel under the *Add-ins* tab
+After load is complete, note the new *Rhino.Inside* tab in the Revit UI
 
 ![]({{ "/static/images/started/rir-addon.png" | prepend: site.baseurl }})
 
-Click on the *Rhino* button to start loading {{ site.terms.rir }}. The addon, attempts to load {{ site.terms.rhino }} inside Revit's memory and make sure it is licensed. Once the load process is completed, a new *Rhinoceros* toolbar will appear in Revit.
+Click on the *Start* button to start loading {{ site.terms.rir }}. The addon, attempts to load {{ site.terms.rhino }} inside Revit's memory and make sure it is licensed. Once the load process is completed, new *Rhinoceros* and *Grasshopper* panels will be added to the toolbar.
 
 ![]({{ "/static/images/ribbon/ribbon.png" | prepend: site.baseurl }})
 

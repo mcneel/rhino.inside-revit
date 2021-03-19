@@ -153,7 +153,7 @@ namespace RhinoInside.Revit.External
 
         if (isOpen == false)
         {
-          if (TopState as UI.Application is null)
+          if (TopState as UI.ExternalApplication is null)
           {
             var args = new CanOpenEventArgs();
             canOpen?.Invoke(TopState, args);
@@ -186,7 +186,7 @@ namespace RhinoInside.Revit.External
         IsOpen = true;
         var result = func.Invoke();
 
-        if (IsActive && state as UI.Application is null)
+        if (IsActive && state as UI.ExternalApplication is null)
         {
           while (Rhinoceros.Run()) { }
         }
@@ -215,7 +215,7 @@ namespace RhinoInside.Revit.External
       public YieldAwaiter GetAwaiter() => new YieldAwaiter(Name);
 
       [HostProtection(Synchronization = true)]
-      public class YieldAwaiter : UI.EventHandler, ICriticalNotifyCompletion
+      public class YieldAwaiter : UI.ExternalEventHandler, ICriticalNotifyCompletion
       {
         public readonly string Name;
         Action action;
@@ -291,7 +291,7 @@ namespace RhinoInside.Revit.External
       public OpenAwaiter GetAwaiter() => new OpenAwaiter(Name);
 
       [HostProtection(Synchronization = true)]
-      public class OpenAwaiter : UI.EventHandler, ICriticalNotifyCompletion
+      public class OpenAwaiter : UI.ExternalEventHandler, ICriticalNotifyCompletion
       {
         public readonly string Name;
         Action action;
@@ -360,7 +360,7 @@ namespace RhinoInside.Revit.External
     #endregion
 
     #region Implementation
-    class TryActivateEventHandler : UI.EventHandler
+    class TryActivateEventHandler : UI.ExternalEventHandler
     {
       public override string GetName() => "RhinoInside.Revit.External.ActivationGate";
       protected override void Execute(UIApplication app)

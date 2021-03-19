@@ -1,23 +1,18 @@
 - title: Rhinocerous
   comps:
-    - title: Help
-      desc: Contains links to all the help resources for Rhino.inside Revit
-      iconsrc: 
-      icontag: '?'
-
     - title: Rhino
       desc: The Rhino icon will start Rhino to run inside Revit. Grasshopper can also be run from within that Rhino instance
       iconsrc: /static/images/ribbon/Rhino.png
       icontag: 
 
-    - title: Import
+    - title: Import 3dm
       desc: Import Rhino 3dm files into Revit
       iconsrc: /static/images/ribbon/Import-3DM.png
       icontag: 
 
-    - title: Preview
+    - title: Toggle Preview
       desc: Previews geometry that is open in Rhino, inside Revit
-      iconsrc: /static/images/ribbon/Preview.png
+      iconsrc: /static/images/GH/Toolbar/Preview_Off.png
       icontag: 
 
     - title: Python
@@ -32,17 +27,12 @@
       iconsrc: /static/images/ribbon/Grasshopper.png
       icontag: 
 
-    - title: Player
-      desc: The Grasshopper Player will run any existing Grasshopper definition and immediately return to Revit
-      iconsrc: /static/images/ribbon/GrasshopperPlayer.png
-      icontag: 
-
     - title: 'Off'
       desc: Turns off the real-time preview by Grasshopepr in Revit
       iconsrc: /static/images/GH/Toolbar/Preview_Off.png
       icontag: 
 
-    - title: Wireframe
+    - title: Wire
       desc: Grasshopper will use a wireframe display for real-time preview of geometry in Revit
       iconsrc: /static/images/GH/Toolbar/Preview_Wireframe.png
       icontag: 
@@ -52,17 +42,23 @@
       iconsrc: /static/images/GH/Toolbar/Preview_Shaded.png
       icontag: 
 
+    - title: Disable/Enable Solver
+      desc: Disables/Enables the Grasshopper solver
+      iconsrc: /static/images/GH/Toolbar/SolverOff.png
+      icontag: 
+
     - title: Recompute
       desc: Forces a recompute to the loaded Grasshopper definitions
       iconsrc: /static/images/GH/Toolbar/Recompute.png
-      icontag: 
-
-    - title: Category Selector
-      desc: Bake tool uses this selected category to bake the geometry into Revit
-      iconsrc: 
       icontag: 
 
     - title: Bake Selected
       desc: Bakes the currently selected Rhino Geometry into the currently selected Category in Revit
       iconsrc: /static/images/GH/Toolbar/Bake.png
       icontag: 
+
+    - title: Player
+      desc: The Grasshopper Player will run any existing Grasshopper definition and immediately return to Revit
+      iconsrc: /static/images/ribbon/GrasshopperPlayer.png
+      icontag: 
+

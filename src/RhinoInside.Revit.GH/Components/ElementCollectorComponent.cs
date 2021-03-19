@@ -142,7 +142,6 @@ namespace RhinoInside.Revit.GH.Components
       );
 
       filter = new DB.ElementParameterFilter(rule, false);
-      pattern = default;
       return true;
     }
   }

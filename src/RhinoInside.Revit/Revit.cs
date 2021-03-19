@@ -2,16 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Windows.Forms;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
-using Grasshopper;
-using Grasshopper.Kernel;
 using Microsoft.Win32.SafeHandles;
+
 using Rhino;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.Convert.System.Collections.Generic;
+using RhinoInside.Revit.External.ApplicationServices.Extensions;
+using RhinoInside.Revit.External.UI.Extensions;
 
 namespace RhinoInside.Revit
 {
@@ -21,7 +23,7 @@ namespace RhinoInside.Revit
     {
       if (MainWindow.IsZero)
       {
-        var result = Addin.CheckSetup(applicationUI);
+        var result = AddIn.CheckSetup(applicationUI);
         if (result != Result.Succeeded)
           return result;
 
@@ -59,7 +61,7 @@ namespace RhinoInside.Revit
         applicationUI.Idling += OnIdle;
         applicationUI.ControlledApplication.DocumentChanged += OnDocumentChanged;
 
-        Addin.CurrentStatus = Addin.Status.Ready;
+        AddIn.CurrentStatus = AddIn.Status.Ready;
       }
 
       return Result.Succeeded;
@@ -89,7 +91,7 @@ namespace RhinoInside.Revit
       if(ActiveUIApplication?.IsValidObject != true)
         ActiveUIApplication = (sender as UIApplication);
 
-      if (Addin.CurrentStatus > Addin.Status.Available)
+      if (AddIn.CurrentStatus > AddIn.Status.Available)
       {
         if (ProcessIdleActions())
           args.SetRaiseWithoutDelay();
@@ -99,9 +101,6 @@ namespace RhinoInside.Revit
     public static event EventHandler<DocumentChangedEventArgs> DocumentChanged;
     private static void OnDocumentChanged(object sender, DocumentChangedEventArgs args)
     {
-      if (isCommitting)
-        return;
-
       var document = args.GetDocument();
       if (!document.Equals(ActiveDBDocument))
         return;
@@ -112,6 +111,7 @@ namespace RhinoInside.Revit
     }
 
     #region Bake Recipe
+    [Obsolete("Since 2021-03-19")]
     public static void BakeGeometry(IEnumerable<Rhino.Geometry.GeometryBase> geometries, BuiltInCategory categoryToBakeInto = BuiltInCategory.OST_GenericModel)
     {
       var doc = ActiveDBDocument;
@@ -199,11 +199,7 @@ namespace RhinoInside.Revit
         if (ProcessReadActions())
           pendingIdleActions = true;
 
-        // 2. Do all document write actions
-        if (!ActiveDBDocument.IsReadOnly)
-          ProcessWriteActions();
-
-        // 3. Refresh Active View if necesary
+        // 2. Refresh Active View if necesary
         bool regenComplete = DirectContext3DServer.RegenComplete();
         if (isRefreshActiveViewPending || !regenComplete)
         {
@@ -231,87 +227,6 @@ namespace RhinoInside.Revit
       }
 
       return pendingIdleActions;
-    }
-
-    static Queue<Action<Document>> docWriteActions = new Queue<Action<Document>>();
-    [Obsolete("Since 2020-09-14")]
-    public static void EnqueueAction(Action<Document> action)
-    {
-      lock (docWriteActions)
-        docWriteActions.Enqueue(action);
-    }
-
-    static bool isCommitting = false;
-    static void ProcessWriteActions()
-    {
-      lock (docWriteActions)
-      {
-        if (docWriteActions.Count > 0)
-        {
-          using (var trans = new Transaction(ActiveDBDocument))
-          {
-            try
-            {
-              isCommitting = true;
-
-              if (trans.Start("RhinoInside") == TransactionStatus.Started)
-              {
-                while (docWriteActions.Count > 0)
-                  docWriteActions.Dequeue().Invoke(ActiveDBDocument);
-
-                var options = trans.GetFailureHandlingOptions();
-#if !DEBUG
-                options = options.SetClearAfterRollback(true);
-#endif
-                options = options.SetDelayedMiniWarnings(true);
-                options = options.SetForcedModalHandling(true);
-                options = options.SetFailuresPreprocessor(new FailuresPreprocessor());
-
-                // Hide Rhino UI in case any warning-error dialog popups
-                {
-                  External.EditScope editScope = null;
-                  EventHandler<DialogBoxShowingEventArgs> _ = null;
-                  try
-                  {
-                    ApplicationUI.DialogBoxShowing += _ = (sender, args) =>
-                    {
-                      if (editScope == null)
-                        editScope = new External.EditScope();
-                    };
-
-                    trans.Commit(options);
-                  }
-                  finally
-                  {
-                    ApplicationUI.DialogBoxShowing -= _;
-
-                    if(editScope is IDisposable disposable)
-                      disposable.Dispose();
-                  }
-                }
-
-                if (trans.GetStatus() == TransactionStatus.Committed)
-                {
-                  foreach (GH_Document definition in Instances.DocumentServer)
-                  {
-                    if (definition.Enabled)
-                      definition.NewSolution(false);
-                  }
-                }
-              }
-            }
-            catch (Exception e)
-            {
-              Debug.Fail(e.Source, e.Message);
-              docWriteActions.Clear();
-            }
-            finally
-            {
-              isCommitting = false;
-            }
-          }
-        }
-      }
     }
 
     static Queue<Action<Document, bool>> docReadActions = new Queue<Action<Document, bool>>();
@@ -353,27 +268,20 @@ namespace RhinoInside.Revit
     internal static WindowHandle MainWindow { get; private set; } = WindowHandle.Zero;
     public static IntPtr MainWindowHandle => MainWindow.Handle;
 
-#if REVIT_2019
-    public static string CurrentUsersDataFolderPath => ApplicationUI.ControlledApplication.CurrentUsersDataFolderPath;
-#else
-    public static string CurrentUsersDataFolderPath => System.IO.Path.Combine
-    (
-      Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-      "Autodesk",
-      "Revit",
-      ApplicationUI.ControlledApplication.VersionName
-    );
-#endif
+    internal static Screen MainScreen => ActiveUIApplication?.GetRevitScreen() ?? Screen.FromHandle(MainWindowHandle);
 
-    public static Autodesk.Revit.UI.UIControlledApplication       ApplicationUI => Addin.ApplicationUI;
+    [Obsolete("Since 2021-03-19")]
+    public static string CurrentUsersDataFolderPath => ApplicationUI.ControlledApplication.GetCurrentUsersDataFolderPath();
+
+    public static Autodesk.Revit.UI.UIControlledApplication       ApplicationUI => AddIn.ApplicationUI;
     public static Autodesk.Revit.UI.UIApplication                 ActiveUIApplication { get; internal set; }
     public static Autodesk.Revit.ApplicationServices.Application  ActiveDBApplication => ActiveUIApplication?.Application;
 
     public static Autodesk.Revit.UI.UIDocument                    ActiveUIDocument => ActiveUIApplication?.ActiveUIDocument;
     public static Autodesk.Revit.DB.Document                      ActiveDBDocument => ActiveUIDocument?.Document;
 
-    private const double AbsoluteTolerance                        = (1.0 / 12.0) / 16.0; // 1/16 inch in feet
-    public static double AngleTolerance                           => ActiveDBApplication?.AngleTolerance       ?? Math.PI / 180.0; // in rad
+    private const double AbsoluteTolerance                        = (1.0 / 12.0) / 16.0; // 1/16″ in feet
+    public static double AngleTolerance                           => ActiveDBApplication?.AngleTolerance       ?? Math.PI / 1800.0; // 0.1° in rad
     public static double ShortCurveTolerance                      => ActiveDBApplication?.ShortCurveTolerance  ?? AbsoluteTolerance / 2.0;
     public static double VertexTolerance                          => ActiveDBApplication?.VertexTolerance      ?? AbsoluteTolerance / 10.0;
     public const Rhino.UnitSystem ModelUnitSystem                 = Rhino.UnitSystem.Feet; // Always feet

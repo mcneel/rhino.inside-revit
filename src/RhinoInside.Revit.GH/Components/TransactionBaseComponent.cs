@@ -7,12 +7,14 @@ using Autodesk.Revit.UI.Events;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
+using Rhino.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
+  using Convert.Geometry;
   using Exceptions;
   using Kernel.Attributes;
 
@@ -60,6 +62,11 @@ namespace RhinoInside.Revit.GH.Components
           if (transaction.GetStatus() == DB.TransactionStatus.Started)
           {
             OnBeforeCommit(doc, transaction.GetName());
+
+            transaction.SetFailureHandlingOptions
+            (
+              transaction.GetFailureHandlingOptions().SetClearAfterRollback(false)
+            );
 
             return transaction.Commit();
           }
@@ -168,44 +175,42 @@ namespace RhinoInside.Revit.GH.Components
 
     DB.FailureProcessingResult DB.IFailuresPreprocessor.PreprocessFailures(DB.FailuresAccessor failuresAccessor)
     {
-      if (failuresAccessor.IsTransactionBeingCommitted())
+      if (failuresAccessor.GetSeverity() == DB.FailureSeverity.Error)
       {
-        if (failuresAccessor.GetSeverity() >= DB.FailureSeverity.DocumentCorruption)
-          return DB.FailureProcessingResult.ProceedWithRollBack;
-
-        if (failuresAccessor.GetSeverity() >= DB.FailureSeverity.Error)
+        // Handled failures in order
         {
-          // Handled failures in order
+          var failureDefinitionIdsToFix = FailureDefinitionIdsToFix;
+          if (failureDefinitionIdsToFix != null)
           {
-            var failureDefinitionIdsToFix = FailureDefinitionIdsToFix;
-            if (failureDefinitionIdsToFix != null)
-            {
-              var result = FixFailures(failuresAccessor, failureDefinitionIdsToFix);
-              if (result != DB.FailureProcessingResult.Continue)
-                return result;
-            }
-          }
-
-          // Unhandled failures in incomming order
-          {
-            var failureDefinitionIdsToFix = failuresAccessor.GetFailureMessages().GroupBy(x => x.GetFailureDefinitionId()).Select(x => x.Key);
             var result = FixFailures(failuresAccessor, failureDefinitionIdsToFix);
             if (result != DB.FailureProcessingResult.Continue)
               return result;
           }
         }
+
+        // Unhandled failures in incomming order
+        {
+          var failureDefinitionIdsToFix = failuresAccessor.GetFailureMessages().GroupBy(x => x.GetFailureDefinitionId()).Select(x => x.Key);
+          var result = FixFailures(failuresAccessor, failureDefinitionIdsToFix);
+          if (result != DB.FailureProcessingResult.Continue)
+            return result;
+        }
       }
 
-      if (failuresAccessor.GetSeverity() >= DB.FailureSeverity.Warning)
+      var severity = failuresAccessor.GetSeverity();
+      if (severity >= DB.FailureSeverity.Warning)
       {
-        // Unsolved failures or warnings
+        // Unsolved errors or warnings
         foreach (var error in failuresAccessor.GetFailureMessages().OrderBy(error => error.GetSeverity()))
           AddRuntimeMessage(error, false);
 
-        failuresAccessor.DeleteAllWarnings();
+        failuresAccessor.SetFailureHandlingOptions
+        (
+          failuresAccessor.GetFailureHandlingOptions().SetClearAfterRollback(true)
+        );
       }
 
-      if (failuresAccessor.GetSeverity() >= DB.FailureSeverity.Error)
+      if (severity >= DB.FailureSeverity.Error)
         return DB.FailureProcessingResult.ProceedWithRollBack;
 
       return DB.FailureProcessingResult.Continue;
@@ -215,7 +220,9 @@ namespace RhinoInside.Revit.GH.Components
     // Step 5.2
     #region ITransactionFinalizer
     // Step 5.2.A
-    public virtual void OnCommitted(DB.Document document, string strTransactionName) { }
+    public virtual void OnCommitted(DB.Document document, string strTransactionName)
+    {
+    }
 
     // Step 5.2.B
     public virtual void OnRolledBack(DB.Document document, string strTransactionName)
@@ -363,25 +370,25 @@ namespace RhinoInside.Revit.GH.Components
       return wasMissing;
     }
 
-    protected static bool SolveOptionalLevel(DB.Document doc, Rhino.Geometry.Point3d point, ref Optional<DB.Level> level, out Rhino.Geometry.BoundingBox bbox)
+    protected static bool SolveOptionalLevel(DB.Document doc, Point3d point, ref Optional<DB.Level> level, out BoundingBox bbox)
     {
       bbox = new Rhino.Geometry.BoundingBox(point, point);
       return SolveOptionalLevel(doc, point.IsValid ? point.Z : double.NaN, ref level);
     }
 
-    protected static bool SolveOptionalLevel(DB.Document doc, Rhino.Geometry.Line line, ref Optional<DB.Level> level, out Rhino.Geometry.BoundingBox bbox)
+    protected static bool SolveOptionalLevel(DB.Document doc, Line line, ref Optional<DB.Level> level, out BoundingBox bbox)
     {
       bbox = line.BoundingBox;
       return SolveOptionalLevel(doc, bbox.IsValid ? bbox.Min.Z : double.NaN, ref level);
     }
 
-    protected static bool SolveOptionalLevel(DB.Document doc, Rhino.Geometry.GeometryBase geometry, ref Optional<DB.Level> level, out Rhino.Geometry.BoundingBox bbox)
+    protected static bool SolveOptionalLevel(DB.Document doc, GeometryBase geometry, ref Optional<DB.Level> level, out BoundingBox bbox)
     {
       bbox = geometry.GetBoundingBox(true);
       return SolveOptionalLevel(doc, bbox.IsValid ? bbox.Min.Z : double.NaN, ref level);
     }
 
-    protected static bool SolveOptionalLevel(DB.Document doc, IEnumerable<Rhino.Geometry.GeometryBase> geometries, ref Optional<DB.Level> level, out Rhino.Geometry.BoundingBox bbox)
+    protected static bool SolveOptionalLevel(DB.Document doc, IEnumerable<GeometryBase> geometries, ref Optional<DB.Level> level, out BoundingBox bbox)
     {
       bbox = Rhino.Geometry.BoundingBox.Empty;
       foreach (var geometry in geometries)
@@ -452,6 +459,28 @@ namespace RhinoInside.Revit.GH.Components
       result &= SolveOptionalLevel(doc, Math.Max(curve.PointAtStart.Z, curve.PointAtEnd.Z), ref baseLevel);
 
       return result;
+    }
+    #endregion
+
+    #region Geometry Conversion
+    public static bool TryGetCurveAtPlane(Curve curve, Plane plane, out DB.Curve projected)
+    {
+      if (Curve.ProjectToPlane(curve, plane) is Curve p)
+      {
+        if (p.TryGetLine(out var line, Revit.VertexTolerance * Revit.ModelUnits))
+          projected = line.ToLine();
+        else if (p.TryGetArc(plane, out var arc, Revit.VertexTolerance * Revit.ModelUnits))
+          projected = arc.ToArc();
+        else if (p.TryGetEllipse(plane, out var ellipse, out var interval, Revit.VertexTolerance * Revit.ModelUnits))
+          projected = ellipse.ToCurve(interval);
+        else
+          projected = p.ToCurve();
+
+        return true;
+      }
+
+      projected = default;
+      return false;
     }
     #endregion
   }
@@ -893,28 +922,27 @@ namespace RhinoInside.Revit.GH.Components
 
     protected void ThrowArgumentException(string paramName, string description = null)
     {
-      var message = "Input geometry is not valid.";
-      if (description is object)
-        message += Environment.NewLine + description;
+      if (description is null)
+        description = "Input value is not valid.";
 
-      message = message.TrimEnd(Environment.NewLine.ToCharArray());
+      description = description.TrimEnd(Environment.NewLine.ToCharArray());
 
-      throw new ArgumentException(message, FirstCharUpper(paramName));
+      throw new ArgumentException(description, FirstCharUpper(paramName));
     }
 
-    protected bool ThrowIfNotValid(string paramName, Rhino.Geometry.Point3d value)
+    protected bool ThrowIfNotValid(string paramName, Point3d value)
     {
       if (!value.IsValid) ThrowArgumentException(paramName);
       return true;
     }
 
-    protected bool ThrowIfNotValid(string paramName, Rhino.Geometry.GeometryBase value)
+    protected bool ThrowIfNotValid(string paramName, GeometryBase value)
     {
-      if (value is null) ThrowArgumentException(paramName);
+      if (value is null) ThrowArgumentNullException(paramName);
       if (!value.IsValidWithLog(out var log))
       {
         AddGeometryRuntimeError(GH_RuntimeMessageLevel.Error, default, value);
-        ThrowArgumentException(paramName, log);
+        ThrowArgumentException(paramName, "Input geometry is not valid." + Environment.NewLine + log);
       }
 
       return true;
