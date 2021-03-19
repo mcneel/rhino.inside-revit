@@ -110,6 +110,24 @@
         ]
     },
     {
+        "highlight": true,
+        "title": "Consulting, Training, Development for Rhino.Inside.Revit",
+        "url": "https://www.asti.com/product/revit/rhino-inside-revit/",
+        "thumbnail": "/static/images/discover/Applied_software.jpg",
+        "author": "Applied Software",
+        "authorUrl": "https://www.asti.com/product/revit/rhino-inside-revit/",
+        "description": "Knowing where to start with this technology and how to implement it in your workflow can be intimidating. Our experts will provide a full organizational evaluation of your Rhino, Grasshopper, and Revit workflows and recommend the best practices moving forward.",
+        "kinds": [
+            "course",
+            "tutorial"
+        ],
+        "tags": [
+            "course",
+            "workflow",
+            "consulting"
+        ]
+    },
+    {
         "title": "Rhino.Inside.Revit Review",
         "url": "https://www.youtube.com/watch?v=J11LIrDIchw",
         "thumbnail": "https://i3.ytimg.com/vi/J11LIrDIchw/maxresdefault.jpg",
@@ -258,6 +276,23 @@
         ]
     },
     {
+        "title": "Cutting Edge Hack: Grasshopper & Dynamo working together within Revit",
+        "url": "https://www.youtube.com/watch?v=Oumd-Ye75fE",
+        "thumbnail": "/static/images/discover/marcello-hack-video.jpg",
+        "author": "Marcello Sgambelluri, PE, SE",
+        "authorUrl": "http://therevitcomplex.blogspot.com/",
+        "description": "Marcello shows Rhino.Inside.Revit. Learn how to make Grasshopper Designs and Dynamo Productions work together with Revit using new tech and new attitudes",
+        "kinds": [
+            "podcast",
+            "video"
+        ],
+        "tags": [
+            "presentation",
+            "workflow",
+            "overview"
+        ]
+    },
+    {
         "title": "Software you need to know in 2021",
         "url": "https://youtu.be/4kcR_FgN114",
         "thumbnail": "https://i3.ytimg.com/vi/4kcR_FgN114/maxresdefault.jpg",
@@ -285,8 +320,8 @@
             "video"
         ],
         "tags": [
-            "podcast",
-            "discussion"
+            "example",
+            "workflow"
         ]
     },
     {
