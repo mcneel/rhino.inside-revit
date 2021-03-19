@@ -106,9 +106,6 @@ namespace RhinoInside.Revit
 
       if (!NativeLoader.IsolateOpenNurbs())
         status = Status.Unavailable;
-
-      // initialize ui framework provided by Rhino
-      RhinoUIFramework.LoadFramework(SystemDir);
     }
 
     public AddIn() : base(new Guid("02EFF7F0-4921-4FD3-91F6-A87B6BA9BF74")) => Instance = this;
@@ -140,6 +137,9 @@ namespace RhinoInside.Revit
 
       AssemblyResolver.Enabled = true;
       ApplicationUI = uiCtrlApp;
+
+      // Initialize UI framework provided by Rhino
+      EtoFramework.Init();
 
       // Register Revit Failures
       External.DB.ExternalFailures.CreateFailureDefinitions();
@@ -252,7 +252,7 @@ namespace RhinoInside.Revit
       }
     }
 
-    public static async void LoadRhinoOnStartup(UIControlledApplication uiCtrlApp)
+    static async void LoadRhinoOnStartup(UIControlledApplication uiCtrlApp)
     {
       // wait for Revit to be ready
       await External.ActivationGate.Yield();
@@ -513,36 +513,20 @@ namespace RhinoInside.Revit
     #endregion
 
     #region Rhino-friendly UI Framework
-    public static bool IsRhinoUIFrameworkReady { get; private set; }  = false;
-    static class RhinoUIFramework
+    internal static bool IsEtoFrameworkReady { get; set; }  = false;
+    static class EtoFramework
     {
-      /// <summary>
-      /// Loads assemblies related to the Rhino ui framework from given Rhino system directory
-      /// </summary>
-      /// <param name="sysDir"></param>
-      public static void LoadFramework(string sysDir)
-      {
-        foreach(string assm in new string[] { "Eto.dll" , "Eto.Wpf.dll", "Eto.Serialization.Xaml.dll", "Xceed.Wpf.Toolkit.dll" })
-        {
-          var assmPath = Path.Combine(sysDir, assm);
-          if (File.Exists(assmPath))
-            Assembly.LoadFrom(assmPath);
-          else
-            return;
-        }
-        Init();
-      }
-
       /// <summary>
       /// Initialize the ui framework
       /// This method needs to be independent since at calling of this method,
       /// the CLR runtime expects the Rhino UI framework to be already loaded
       /// </summary>
-      static void Init()
+      public static void Init()
       {
         if (Eto.Forms.Application.Instance is null)
           new Eto.Forms.Application(Eto.Platforms.Wpf).Attach();
-        IsRhinoUIFrameworkReady = true;
+
+        IsEtoFrameworkReady = true;
       }
     }
     #endregion

@@ -66,6 +66,9 @@ namespace RhinoInside.Revit
             if (_AssemblyResolve is null) AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve;
             else
             {
+              if (External.ActivationGate.IsOpen)
+                ActivationGate_Enter(default, EventArgs.Empty);
+
               External.ActivationGate.Enter += ActivationGate_Enter;
               External.ActivationGate.Exit += ActivationGate_Exit;
             }
@@ -77,6 +80,9 @@ namespace RhinoInside.Revit
             {
               External.ActivationGate.Exit -= ActivationGate_Exit;
               External.ActivationGate.Enter -= ActivationGate_Enter;
+
+              if(External.ActivationGate.IsOpen)
+                ActivationGate_Exit(default, EventArgs.Empty);
             }
           }
           enabled = value;
