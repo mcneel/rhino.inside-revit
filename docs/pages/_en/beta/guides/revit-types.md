@@ -3,6 +3,7 @@ title: "Revit: Types & Families"
 subtitle: Revit's categorization system, Categories, Types, ...
 order: 23
 group: Essentials
+home: true
 thumbnail: /static/images/guides/revit-types.png
 ---
 

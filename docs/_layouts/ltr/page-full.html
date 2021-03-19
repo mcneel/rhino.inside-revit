@@ -1,0 +1,35 @@
+---
+---
+<!DOCTYPE html>
+<html>
+{% include ltr/head.html %}
+
+<body>
+    {% include googletagmanager.html %}
+
+    <div class="container">
+        <!-- Pick the correct header for the language -->
+        {% if page.language %}
+        {% include ltr/{{ page.language }}/header.html %}
+        {% else %}
+        {% include ltr/header.html %}
+        {% endif %}
+    </div>
+
+    <div class="container-full">
+        {{ content }}
+    </div>
+
+    <div class="container">
+        <!-- Pick the correct footer for the language -->
+        {% if page.language %}
+        {% include ltr/{{page.language}}/footer.html %}
+        {% else %}
+        {% include ltr/footer.html %}
+        {% endif %}
+    </div>
+
+    {% include scripts.html %}
+</body>
+
+</html>

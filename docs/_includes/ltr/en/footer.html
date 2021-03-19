@@ -3,7 +3,8 @@
         <div class="footer-languages">
             <ul class="footer-language-list">
                 <li><a title="English" href="javascript:navigateTo('');">English</a></li>
-                <li><a href="{{ '#adding-a-new-language' | prepend: site.metawiki_url | prepend: site.repo_url }}">Want to help translate?</a></li>
+                <li><a href="{{ '#adding-a-new-language' | prepend: site.metawiki_url | prepend: site.repo_url }}">Want
+                        to help translate?</a></li>
                 <!-- <li><a title="German" href="javascript:navigateTo('');">Deutsch</a></li>
                 <li><a title="Spanish" href="javascript:navigateTo('');">Español</a></li>
                 <li><a title="French" href="javascript:navigateTo('');">Français</a></li>
@@ -25,9 +26,21 @@
             </ul>
         </div>
         <!-- Automatic Copyright notice -->
+        <div class="social">
+            <a href="{{ site.twitter_url }}" target="_blank" title="{{ site.twitter_title }}">
+                <span class="icon">
+                    <img width="24" height="24" src="{{ site.baseurl }}/assets/img/twitter.svg" />
+                </span>
+            </a>
+            <a href="{{ site.linkedin_url }}" target="_blank" title="{{ site.linkedin_title }}">
+                <span class="icon">
+                    <img width="24" height="24" src="{{ site.baseurl }}/assets/img/linkedin.svg" />
+                </span>
+            </a>
+        </div>
         <div>
             Copyright &#169; 1997-20{{ site.time | date: '%y' }}
-            <br/>
+            <br />
             <a href="https://www.mcneel.com/" target="_blank">{{ site.copyright }}</a>
         </div>
         <!-- Edit page on Github: relative url is from jekyll site configs -->
@@ -36,7 +49,8 @@
             {% assign page_url = '/' | append: page.path %}
             <a href="{{ docs_url | append: site.collections_dir | append: page_url }}" target="_blank">
                 <span class="icon">
-                    <img width="16" height="16" style="margin-top: -5px;" src="{{ site.baseurl }}/assets/img/github-gray.svg" />
+                    <img width="16" height="16" style="margin-top: -5px;"
+                        src="{{ site.baseurl }}/assets/img/github-gray.svg" />
                 </span>
                 Edit page on GitHub
             </a>

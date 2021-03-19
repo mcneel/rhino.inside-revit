@@ -3,6 +3,46 @@
         max-width: 800px;
     }
 
+    .home-cover {
+        height: 60vh;
+        min-height: 100px;
+    }
+
+    .home-dependencies {
+        font-size: 70%;
+    }
+
+    .home-feature {
+        height: unset;
+    }
+
+    .home-feature h2 {
+        font-size: 40px;
+    }
+
+    .home-feature small {
+        display: block;
+        font-size: 24px;
+        padding-left: unset;
+    }
+
+    .home-feature-content {
+        grid-template-columns: 1fr;
+        grid-row-gap: 20px;
+    }
+
+    .home-feature-rhino {
+        background-position: -300px;
+    }
+
+    .home-feature-gh {
+        background-position: -200px;
+    }
+
+    .home-discover h2 {
+        font-size: 36px;
+    }
+
     .row-fluid {
         display: block;
         justify-content: none;
@@ -118,5 +158,14 @@
         width: -webkit-fill-available;
         height: 30px;
         font-size: 14px;
+    }
+
+    .discover-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        grid-auto-rows: unset;
+    }
+
+    .discover-info-extra {
+        display: block;
     }
 }
