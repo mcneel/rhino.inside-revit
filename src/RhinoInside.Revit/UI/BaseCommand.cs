@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.UI
   /// <summary>
   /// Base class for all Rhino.Inside Revit commands
   /// </summary>
-  public abstract class Command : External.UI.Command
+  public abstract class Command : External.UI.ExternalCommand
   {
     #region Ribbon item creation
     internal static PushButton AddPushButton<CommandType, AvailabilityType>(PulldownButton pullDownButton, string text, string iconName, string tooltip = null)

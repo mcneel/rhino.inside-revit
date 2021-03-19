@@ -532,7 +532,7 @@ namespace RhinoInside.Revit.GH
     class DocumentChangedEvent
     {
       static readonly ExternalEvent FlushQueue = ExternalEvent.Create(new FlushQueueHandler());
-      class FlushQueueHandler : External.UI.EventHandler
+      class FlushQueueHandler : External.UI.ExternalEventHandler
       {
         public override string GetName() => nameof(FlushQueue);
         protected override void Execute(UIApplication app)

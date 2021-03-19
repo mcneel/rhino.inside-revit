@@ -15,124 +15,6 @@ using UIX = RhinoInside.Revit.External.UI;
 
 namespace RhinoInside.Revit
 {
-  static class AssemblyResolver
-  {
-    static readonly string InstallPath =
-#if DEBUG
-      Registry.GetValue(@"HKEY_CURRENT_USER\SOFTWARE\McNeel\Rhinoceros\7.0-WIP-Developer-Debug-trunk\Install", "InstallPath", null) as string ??
-#endif
-      Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install", "InstallPath", null) as string ??
-      Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Rhino WIP");
-
-    static readonly FieldInfo _AssemblyResolve = typeof(AppDomain).GetField("_AssemblyResolve", BindingFlags.Instance | BindingFlags.NonPublic);
-
-    struct AssemblyLocation
-    {
-      public AssemblyLocation(AssemblyName name, string location) { Name = name; Location = location; Assembly = default; }
-      public readonly AssemblyName Name;
-      public readonly string Location;
-      public Assembly Assembly;
-    }
-
-    static readonly Dictionary<string, AssemblyLocation> AssemblyLocations = new Dictionary<string, AssemblyLocation>();
-    static AssemblyResolver()
-    {
-      try
-      {
-        var installFolder = new DirectoryInfo(InstallPath);
-        foreach (var dll in installFolder.EnumerateFiles("*.dll", SearchOption.AllDirectories))
-        {
-          try
-          {
-            if (dll.Extension.ToLower() != ".dll") continue;
-
-            var assemblyName = AssemblyName.GetAssemblyName(dll.FullName);
-
-            if (AssemblyLocations.TryGetValue(assemblyName.Name, out var location))
-            {
-              if (location.Name.Version > assemblyName.Version) continue;
-              AssemblyLocations.Remove(assemblyName.Name);
-            }
-
-            AssemblyLocations.Add(assemblyName.Name, new AssemblyLocation(assemblyName, dll.FullName));
-          }
-          catch { }
-        }
-      }
-      catch { }
-    }
-
-    static bool enabled;
-    public static bool Enabled
-    {
-      get => enabled;
-      set
-      {
-        if (enabled != value)
-        {
-          if (value)
-          {
-            if (_AssemblyResolve is null) AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve;
-            else
-            {
-              External.ActivationGate.Enter += ActivationGate_Enter;
-              External.ActivationGate.Exit += ActivationGate_Exit;
-            }
-          }
-          else
-          {
-            if (_AssemblyResolve is null) AppDomain.CurrentDomain.AssemblyResolve -= AssemblyResolve;
-            else
-            {
-              External.ActivationGate.Exit -= ActivationGate_Exit;
-              External.ActivationGate.Enter -= ActivationGate_Enter;
-            }
-          }
-          enabled = value;
-        }
-      }
-    }
-
-    static void ActivationGate_Enter(object sender, EventArgs e)
-    {
-      var domain = AppDomain.CurrentDomain;
-      var assemblyResolve = _AssemblyResolve.GetValue(domain) as ResolveEventHandler;
-      var invocationList = assemblyResolve.GetInvocationList();
-
-      foreach (var invocation in invocationList)
-        domain.AssemblyResolve -= invocation as ResolveEventHandler;
-
-      domain.AssemblyResolve += AssemblyResolve;
-
-      foreach (var invocation in invocationList)
-        AppDomain.CurrentDomain.AssemblyResolve += invocation as ResolveEventHandler;
-    }
-
-    static void ActivationGate_Exit(object sender, EventArgs e)
-    {
-      AppDomain.CurrentDomain.AssemblyResolve -= AssemblyResolve;
-    }
-
-    static Assembly AssemblyResolve(object sender, ResolveEventArgs args)
-    {
-      var assemblyName = new AssemblyName(args.Name).Name;
-      if (!AssemblyLocations.TryGetValue(assemblyName, out var location))
-        return null;
-
-      if (location.Assembly is null)
-      {
-        // Remove it to not try again if it fails
-        AssemblyLocations.Remove(assemblyName);
-
-        // Add again loaded assembly
-        location.Assembly = Assembly.LoadFrom(location.Location);
-        AssemblyLocations.Add(assemblyName, location);
-      }
-
-      return location.Assembly;
-    }
-  }
-
   enum AddinStartupMode
   {
     Cancelled = -2,
@@ -143,7 +25,7 @@ namespace RhinoInside.Revit
     Scripting = 3
   }
 
-  public class Addin : UIX.Application
+  public class Addin : UIX.ExternalApplication
   {
     #region AddinInfo
     public static string AddinCompany => "McNeel";
@@ -193,14 +75,7 @@ namespace RhinoInside.Revit
     #endregion
 
     #region Constructor
-    static readonly string SystemDir =
-#if DEBUG
-      Registry.GetValue(@"HKEY_CURRENT_USER\SOFTWARE\McNeel\Rhinoceros\7.0-WIP-Developer-Debug-trunk\Install", "Path", null) as string ??
-#endif
-      Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install", "Path", null) as string ??
-      Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Rhino WIP", "System");
-
-    internal static readonly string RhinoExePath = Path.Combine(SystemDir, "Rhino.exe");
+    internal static readonly string RhinoExePath = Path.Combine(AssemblyResolver.SystemDir, "Rhino.exe");
     internal static readonly FileVersionInfo RhinoVersionInfo = File.Exists(RhinoExePath) ? FileVersionInfo.GetVersionInfo(RhinoExePath) : null;
     static readonly Version MinimumRhinoVersion = new Version(7, 3, 0);
     static readonly Version RhinoVersion = new Version
@@ -226,7 +101,7 @@ namespace RhinoInside.Revit
         status = Status.Unavailable;
 
       // initialize ui framework provided by Rhino
-      RhinoUIFramework.LoadFramework(SystemDir);
+      RhinoUIFramework.LoadFramework(AssemblyResolver.SystemDir);
     }
 
     public Addin() : base(new Guid("02EFF7F0-4921-4FD3-91F6-A87B6BA9BF74")) => Instance = this;
@@ -534,7 +409,7 @@ namespace RhinoInside.Revit
             RhinoVersionInfo is null ? "Rhino\n" :
             $"{RhinoVersionInfo.ProductName} {RhinoVersionInfo.ProductMajorPart}\n" +
             $"• Version: {RhinoVersion}\n" +
-            $"• Path: '{SystemDir}'" + (!File.Exists(RhinoExePath) ? " (not found)" : string.Empty) + "\n" +
+            $"• Path: '{AssemblyResolver.SystemDir}'" + (!File.Exists(RhinoExePath) ? " (not found)" : string.Empty) + "\n" +
             $"\n{revit.VersionName}\n" +
 #if REVIT_2019
             $"• Version: {revit.SubVersionNumber} ({revit.VersionBuild})\n" +

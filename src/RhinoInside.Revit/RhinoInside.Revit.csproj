@@ -172,6 +172,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="AssemblyResolver.cs" />
     <Compile Include="Convert\ConversionException.cs" />
     <Compile Include="Convert\Display\DisplayMaterialConverter.cs" />
     <Compile Include="Convert\Display\PreviewConverter.cs" />

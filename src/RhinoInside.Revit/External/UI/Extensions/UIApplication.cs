@@ -29,7 +29,7 @@ namespace RhinoInside.Revit.External.UI.Extensions
       var addinId = app.ActiveAddInId?.GetGUID() ?? Guid.Empty;
       if (addinId != Guid.Empty)
       {
-        if (app.LoadedApplications.OfType<UI.Application>().Where(x => x.GetGUID() == addinId).FirstOrDefault() is UI.Application addin)
+        if (app.LoadedApplications.OfType<UI.ExternalApplication>().Where(x => x.GetGUID() == addinId).FirstOrDefault() is UI.ExternalApplication addin)
           return addin.CatchException(e, app, sender);
       }
 
@@ -54,7 +54,7 @@ namespace RhinoInside.Revit.External.UI.Extensions
       var addinId = app.ActiveAddInId?.GetGUID() ?? Guid.Empty;
       if (addinId != Guid.Empty)
       {
-        if (app.LoadedApplications.OfType<UI.Application>().Where(x => x.GetGUID() == addinId).FirstOrDefault() is UI.Application addin)
+        if (app.LoadedApplications.OfType<UI.ExternalApplication>().Where(x => x.GetGUID() == addinId).FirstOrDefault() is UI.ExternalApplication addin)
           addin.ReportException(e, app, sender);
       }
     }
