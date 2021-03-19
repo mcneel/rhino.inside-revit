@@ -627,6 +627,23 @@
         ]
     },
     {
+        "title": "Closest grid intersection to Revit elements",
+        "url": "https://youtu.be/VWOk1d0RfgI",
+        "thumbnail": "https://i3.ytimg.com/vi/VWOk1d0RfgI/maxresdefault.jpg",
+        "author": "Gavin Crump",
+        "authorUrl": "https://www.youtube.com/channel/UCry22yTdpgEDdzIZig7NSMQ",
+        "description": "Use Grasshopper to find the closest grid intersections to elements in a Revit model. Time to blow it out of the water by using Rhino Inside Revit!",
+        "kinds": [
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "analysis",
+            "tutorial",
+            "workflow"
+        ]
+    },
+    {
         "title": "Geometry Gym with Rhino.Inside.Revit ",
         "url": "https://www.youtube.com/watch?v=0m1rn6EAI54",
         "thumbnail": "https://i3.ytimg.com/vi/0m1rn6EAI54/maxresdefault.jpg",
