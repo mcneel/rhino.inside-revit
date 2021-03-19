@@ -103,9 +103,6 @@ namespace RhinoInside.Revit
     public static event EventHandler<DocumentChangedEventArgs> DocumentChanged;
     private static void OnDocumentChanged(object sender, DocumentChangedEventArgs args)
     {
-      if (isCommitting)
-        return;
-
       var document = args.GetDocument();
       if (!document.Equals(ActiveDBDocument))
         return;
@@ -116,6 +113,7 @@ namespace RhinoInside.Revit
     }
 
     #region Bake Recipe
+    [Obsolete("Since 2021-03-19")]
     public static void BakeGeometry(IEnumerable<Rhino.Geometry.GeometryBase> geometries, BuiltInCategory categoryToBakeInto = BuiltInCategory.OST_GenericModel)
     {
       var doc = ActiveDBDocument;
@@ -203,11 +201,7 @@ namespace RhinoInside.Revit
         if (ProcessReadActions())
           pendingIdleActions = true;
 
-        // 2. Do all document write actions
-        if (!ActiveDBDocument.IsReadOnly)
-          ProcessWriteActions();
-
-        // 3. Refresh Active View if necesary
+        // 2. Refresh Active View if necesary
         bool regenComplete = DirectContext3DServer.RegenComplete();
         if (isRefreshActiveViewPending || !regenComplete)
         {
@@ -235,87 +229,6 @@ namespace RhinoInside.Revit
       }
 
       return pendingIdleActions;
-    }
-
-    static Queue<Action<Document>> docWriteActions = new Queue<Action<Document>>();
-    [Obsolete("Since 2020-09-14")]
-    public static void EnqueueAction(Action<Document> action)
-    {
-      lock (docWriteActions)
-        docWriteActions.Enqueue(action);
-    }
-
-    static bool isCommitting = false;
-    static void ProcessWriteActions()
-    {
-      lock (docWriteActions)
-      {
-        if (docWriteActions.Count > 0)
-        {
-          using (var trans = new Transaction(ActiveDBDocument))
-          {
-            try
-            {
-              isCommitting = true;
-
-              if (trans.Start("RhinoInside") == TransactionStatus.Started)
-              {
-                while (docWriteActions.Count > 0)
-                  docWriteActions.Dequeue().Invoke(ActiveDBDocument);
-
-                var options = trans.GetFailureHandlingOptions();
-#if !DEBUG
-                options = options.SetClearAfterRollback(true);
-#endif
-                options = options.SetDelayedMiniWarnings(true);
-                options = options.SetForcedModalHandling(true);
-                options = options.SetFailuresPreprocessor(new FailuresPreprocessor());
-
-                // Hide Rhino UI in case any warning-error dialog popups
-                {
-                  External.EditScope editScope = null;
-                  EventHandler<DialogBoxShowingEventArgs> _ = null;
-                  try
-                  {
-                    ApplicationUI.DialogBoxShowing += _ = (sender, args) =>
-                    {
-                      if (editScope == null)
-                        editScope = new External.EditScope();
-                    };
-
-                    trans.Commit(options);
-                  }
-                  finally
-                  {
-                    ApplicationUI.DialogBoxShowing -= _;
-
-                    if(editScope is IDisposable disposable)
-                      disposable.Dispose();
-                  }
-                }
-
-                if (trans.GetStatus() == TransactionStatus.Committed)
-                {
-                  foreach (GH_Document definition in Instances.DocumentServer)
-                  {
-                    if (definition.Enabled)
-                      definition.NewSolution(false);
-                  }
-                }
-              }
-            }
-            catch (Exception e)
-            {
-              Debug.Fail(e.Source, e.Message);
-              docWriteActions.Clear();
-            }
-            finally
-            {
-              isCommitting = false;
-            }
-          }
-        }
-      }
     }
 
     static Queue<Action<Document, bool>> docReadActions = new Queue<Action<Document, bool>>();
