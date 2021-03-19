@@ -8,7 +8,7 @@ namespace RhinoInside.Revit
 {
   static class AssemblyResolver
   {
-    internal static readonly string SystemDir =
+    static readonly string InstallPath =
 #if DEBUG
       Registry.GetValue(@"HKEY_CURRENT_USER\SOFTWARE\McNeel\Rhinoceros\7.0-WIP-Developer-Debug-trunk\Install", "InstallPath", null) as string ??
 #endif
@@ -30,7 +30,7 @@ namespace RhinoInside.Revit
     {
       try
       {
-        var installFolder = new DirectoryInfo(SystemDir);
+        var installFolder = new DirectoryInfo(InstallPath);
         foreach (var dll in installFolder.EnumerateFiles("*.dll", SearchOption.AllDirectories))
         {
           try

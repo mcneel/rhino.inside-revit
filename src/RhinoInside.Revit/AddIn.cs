@@ -75,7 +75,14 @@ namespace RhinoInside.Revit
     #endregion
 
     #region Constructor
-    internal static readonly string RhinoExePath = Path.Combine(AssemblyResolver.SystemDir, "Rhino.exe");
+    static readonly string SystemDir =
+#if DEBUG
+      Registry.GetValue(@"HKEY_CURRENT_USER\SOFTWARE\McNeel\Rhinoceros\7.0-WIP-Developer-Debug-trunk\Install", "Path", null) as string ??
+#endif
+      Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install", "Path", null) as string ??
+      Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Rhino WIP", "System");
+
+    internal static readonly string RhinoExePath = Path.Combine(SystemDir, "Rhino.exe");
     internal static readonly FileVersionInfo RhinoVersionInfo = File.Exists(RhinoExePath) ? FileVersionInfo.GetVersionInfo(RhinoExePath) : null;
     static readonly Version MinimumRhinoVersion = new Version(7, 3, 0);
     static readonly Version RhinoVersion = new Version
@@ -101,7 +108,7 @@ namespace RhinoInside.Revit
         status = Status.Unavailable;
 
       // initialize ui framework provided by Rhino
-      RhinoUIFramework.LoadFramework(AssemblyResolver.SystemDir);
+      RhinoUIFramework.LoadFramework(SystemDir);
     }
 
     public AddIn() : base(new Guid("02EFF7F0-4921-4FD3-91F6-A87B6BA9BF74")) => Instance = this;
@@ -409,7 +416,7 @@ namespace RhinoInside.Revit
             RhinoVersionInfo is null ? "Rhino\n" :
             $"{RhinoVersionInfo.ProductName} {RhinoVersionInfo.ProductMajorPart}\n" +
             $"• Version: {RhinoVersion}\n" +
-            $"• Path: '{AssemblyResolver.SystemDir}'" + (!File.Exists(RhinoExePath) ? " (not found)" : string.Empty) + "\n" +
+            $"• Path: '{SystemDir}'" + (!File.Exists(RhinoExePath) ? " (not found)" : string.Empty) + "\n" +
             $"\n{revit.VersionName}\n" +
 #if REVIT_2019
             $"• Version: {revit.SubVersionNumber} ({revit.VersionBuild})\n" +
