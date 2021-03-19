@@ -810,6 +810,7 @@ pre {
     overflow: hidden;
     text-overflow: ellipsis;
     text-decoration: none;
+    max-width: 300px;
 }
 
 .discover-info-author,
@@ -889,6 +890,16 @@ pre {
     margin: 10px 5px;
 }
 
+.discover-filter-featured-icon {
+    width: 16px;
+    margin-left: 6px;
+    margin-top: -2px;
+}
+
+.discover-filter-new-icon {
+    width: 16px;
+}
+
 .discoverFilterGray {
     color: #828282;
     border: 1px solid #d0d0d0;
@@ -951,6 +962,18 @@ pre {
     font-size: 13px;
 }
 
+.discover-feature-badge {
+    display: block;
+    border-top: 2px solid #b0b0b0;
+    position: absolute;
+    top: 165px;
+    right: 8px;
+}
+
+.discover-feature-badge img {
+    width: 22px;
+    margin: 0;
+}
 /*
     linkcard ==================================================================
 */

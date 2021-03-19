@@ -5,11 +5,12 @@
     {% if include.show_filters %}
     <div class="discover-filters-box">
         <ul class="discover-filters">
-            <li class="discover-filter" v-bind:class="{ discoverFilterGray: !kind.isRed, discoverFilterRed: kind.isRed }"
+            <li class="discover-filter" v-bind:class="{ discoverFilterGray: !kind.isNew, discoverFilterRed: kind.isNew }"
                 v-for="kind in discoverKinds" v-on:click="filterCardsByKind" v-bind:kind="(( kind.keyword ))">
+                <img class="discover-filter-featured-icon" src="{{ "/assets/img/featured-icon.svg" | prepend: site.baseurl }}" v-if="kind.isFeat" />
                 <span style="display: inline-block; padding: 2px 10px 2px 10px;">(( kind.title ))</span>
-                <div v-if="kind.isRed" id="unmarkall" class="discover-unmarkall" v-on:click="forgetAllItems" title="Unmark All">
-                    <img src="{{ "/assets/img/check.svg" | prepend: site.baseurl }}" style="width: 16px;" />
+                <div v-if="kind.isNew" id="unmarkall" class="discover-unmarkall" v-on:click="forgetAllItems" title="Unmark All">
+                    <img class="discover-filter-new-icon" src="{{ "/assets/img/check.svg" | prepend: site.baseurl }}" />
                 </div>
             </li>
             <input id="searchbox" class="discover-search" type="text" placeholder="search..." v-model.trim="keyword" />
@@ -43,8 +44,10 @@
                 </div>
                 {% endif %}
                 <a class="discover-info-title" v-bind:href="card.url" target="blank">(( card.title ))</a>
-                <a class="discover-info-author" v-bind:href="card.authorUrl" target="blank">(( card.author
-                    ))</a>
+                <a class="discover-info-author" v-bind:href="card.authorUrl" target="blank">(( card.author))</a>
+                <div class="discover-feature-badge" v-if="card.highlight">
+                    <img src="{{ "/assets/img/featured-badge.svg" | prepend: site.baseurl }}" />
+                </div>
                 <div class="discover-info-subtitle">
                     (( card.subtitle ))
                 </div>
@@ -181,10 +184,11 @@
                 }, {
                     title: "New",
                     keyword: "new",
-                    isRed: true
+                    isNew: true
                 }, {
                     title: "Featured",
-                    keyword: "featured"
+                    keyword: "featured",
+                    isFeat: true
                 }, {
                     title: "Courses",
                     keyword: "course"
