@@ -57,7 +57,7 @@ namespace RhinoInside.Revit.External.UI
 #if REVIT_2019
       get => _app.MainWindowHandle;
 #else
-      get => Process.GetCurrentProcess().MainWindowHandle;
+      get => System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
 #endif
     }
     #endregion
@@ -105,7 +105,7 @@ namespace RhinoInside.Revit.External.UI
 #if REVIT_2019
       get => _app.MainWindowHandle;
 #else
-      get => Process.GetCurrentProcess().MainWindowHandle;
+      get => System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
 #endif
     }
     #endregion
