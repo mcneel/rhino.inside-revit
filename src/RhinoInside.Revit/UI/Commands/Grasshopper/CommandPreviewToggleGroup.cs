@@ -46,8 +46,7 @@ namespace RhinoInside.Revit.UI
       {
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
         // add spacing to title to get it to be a consistent width
-        if (pushButton.GetAdwndRibbonButton() is Autodesk.Windows.RibbonButton ribbonButton)
-          ribbonButton.Text = "   Off    ";
+        pushButton.SetText("   Off    ");
 
         if (GH.PreviewServer.PreviewMode == GH_PreviewMode.Disabled)
           radioButtonGroup.Current = pushButton;
@@ -75,8 +74,7 @@ namespace RhinoInside.Revit.UI
       {
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
         // add spacing to title to get it to be a consistent width
-        if (pushButton.GetAdwndRibbonButton() is Autodesk.Windows.RibbonButton ribbonButton)
-          ribbonButton.Text = "  Wire   ";
+        pushButton.SetText("  Wire   ");
 
         if (GH.PreviewServer.PreviewMode == GH_PreviewMode.Wireframe)
           radioButtonGroup.Current = pushButton;

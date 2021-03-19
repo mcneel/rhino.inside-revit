@@ -194,6 +194,7 @@
     <Compile Include="Convert\System.Windows.Media.cs" />
     <Compile Include="ErrorReport.cs" />
     <Compile Include="Exceptions.cs" />
+    <Compile Include="Extensions\AdWindows.cs" />
     <Compile Include="Extensions\Native.cs" />
     <Compile Include="Extensions\WinForms.cs" />
     <Compile Include="External\ApplicationServices\Extensions\Application.cs" />
@@ -242,7 +243,6 @@
     <Compile Include="External\UI\EventHandler.cs" />
     <Compile Include="External\UI\Extensions\UIApplication.cs" />
     <Compile Include="External\UI\Extensions\UIDocument.cs" />
-    <Compile Include="External\UI\Extensions\UIRibbon.cs" />
     <Compile Include="External\UI\Extensions\UIView.cs" />
     <Compile Include="External\UI\Selection.cs" />
     <Compile Include="External\UI\TaskDialogIcons.cs" />

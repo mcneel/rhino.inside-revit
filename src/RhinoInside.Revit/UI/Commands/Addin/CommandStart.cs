@@ -122,10 +122,7 @@ namespace RhinoInside.Revit.UI
           // Update Rhino button Tooltip
           button.ToolTip = $"Restores previously visible Rhino windows on top of Revit window";
           button.LongDescription = $"Use CTRL key to open a Rhino model";
-
-          // Hide the button title
-          if (button.GetAdwndRibbonButton() is Autodesk.Windows.RibbonButton adwndRadioButton)
-            adwndRadioButton.ShowText = false;
+          button.ShowText(false);
 
           var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 

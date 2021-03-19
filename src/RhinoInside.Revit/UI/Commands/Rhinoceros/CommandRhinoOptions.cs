@@ -1,8 +1,6 @@
-
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using RhinoInside.Revit.External.UI.Extensions;
 
 namespace RhinoInside.Revit.UI
 {
@@ -15,14 +13,14 @@ namespace RhinoInside.Revit.UI
     {
       var buttonData = NewPushButtonData<CommandRhinoOptions, Availability>
       (
-        CommandName,
-        "Rhino.png",
-        "Shows Rhino Options window"
+        name: CommandName,
+        iconName: "Rhino.png",
+        tooltip: "Shows Rhino Options window"
       );
 
       // set this button as the panel dialog-launcher (arrow-button at the corner of panel)
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
-        ribbonPanel.SetButtonToDialogLauncher(Addin.AddinName, pushButton);
+        ribbonPanel.SetDialogLauncherButton(Addin.AddinName, pushButton);
     }
 
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)

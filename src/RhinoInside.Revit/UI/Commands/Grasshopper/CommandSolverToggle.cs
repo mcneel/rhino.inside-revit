@@ -61,8 +61,7 @@ namespace RhinoInside.Revit.UI
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
         // apply a min width to the button so it does not change width
         // when toggling between Enable and Disable on its title
-        if (pushButton.GetAdwndRibbonButton() is Autodesk.Windows.RibbonButton ribbonButton)
-          ribbonButton.MinWidth = 50;
+        pushButton.SetMinWidth(50);
 
         EnableSolutionsChanged(GH_Document.EnableSolutions);
         GH_Document.EnableSolutionsChanged += EnableSolutionsChanged;
