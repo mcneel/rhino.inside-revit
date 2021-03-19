@@ -623,15 +623,15 @@ namespace RhinoInside.Revit.UI
                 openFileDialog.FileName
               );
             }
-            //else
-            //{
-            //  return Import3DMFileToProject
-            //  (
-            //    doc,
-            //    openFileDialog.FileName,
-            //    CommandGrasshopperBake.ActiveBuiltInCategory
-            //  );
-            //}
+            else
+            {
+              return Import3DMFileToProject
+              (
+                doc,
+                openFileDialog.FileName,
+                DB.BuiltInCategory.OST_GenericModel
+              );
+            }
             break;
           case DialogResult.Cancel: return Result.Cancelled;
         }
