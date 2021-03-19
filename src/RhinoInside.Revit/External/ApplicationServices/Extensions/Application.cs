@@ -73,10 +73,10 @@ namespace RhinoInside.Revit.External.ApplicationServices.Extensions
 #else
       return System.IO.Path.Combine
       (
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData),
         "Autodesk",
         "Revit",
-        ApplicationUI.ControlledApplication.VersionName
+        app.VersionName
       );
 #endif
     }
