@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.UI
 
       // set this button as the panel dialog-launcher (arrow-button at the corner of panel)
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
-        ribbonPanel.SetDialogLauncherButton(Addin.AddinName, pushButton);
+        ribbonPanel.SetDialogLauncherButton(AddIn.AddinName, pushButton);
     }
 
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)

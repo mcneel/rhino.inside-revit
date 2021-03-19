@@ -169,7 +169,7 @@ namespace RhinoInside.Revit.UI
               new TableRow {
                 Cells = {
                   new Label {
-                    Text = $"Update Channel v{Addin.Version.Major}.*",
+                    Text = $"Update Channel v{AddIn.Version.Major}.*",
                     Height = 25,
                     VerticalAlignment = VerticalAlignment.Center
                   },

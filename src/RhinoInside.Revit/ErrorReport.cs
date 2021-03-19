@@ -104,9 +104,9 @@ namespace RhinoInside.Revit
               writer.WriteLine($"  - ProductType: {revitProduct}");
               writer.WriteLine($"  - Language: {revitLanguage}");
 
-              var rhino = Addin.RhinoVersionInfo;
+              var rhino = AddIn.RhinoVersionInfo;
               writer.WriteLine($"- Rhino: {rhino.ProductVersion} ({rhino.FileDescription})");
-              writer.WriteLine($"- Rhino.Inside Revit: {Addin.DisplayVersion}");
+              writer.WriteLine($"- Rhino.Inside Revit: {AddIn.DisplayVersion}");
 
               if (loadedApplications is object)
               {
@@ -318,9 +318,9 @@ namespace RhinoInside.Revit
       mailBody += $"CLR: {ErrorReport.CLRVersion}" + Environment.NewLine;
       mailBody += $"Revit: {revitVersion}" + Environment.NewLine;
 
-      var rhino = Addin.RhinoVersionInfo;
+      var rhino = AddIn.RhinoVersionInfo;
       mailBody += $"Rhino: {rhino.ProductVersion} ({rhino.FileDescription})" + Environment.NewLine;
-      mailBody += $"Rhino.Inside Revit: {Addin.DisplayVersion}" + Environment.NewLine;
+      mailBody += $"Rhino.Inside Revit: {AddIn.DisplayVersion}" + Environment.NewLine;
 
       mailBody = Uri.EscapeDataString(mailBody);
 

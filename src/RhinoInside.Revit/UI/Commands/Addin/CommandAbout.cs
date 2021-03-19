@@ -25,7 +25,7 @@ namespace RhinoInside.Revit.UI
     {
       var details = new StringBuilder();
 
-      var rhino = Addin.RhinoVersionInfo;
+      var rhino = AddIn.RhinoVersionInfo;
       details.AppendLine($"Rhino: {rhino.ProductVersion} ({rhino.FileDescription})");
 
       var revit = data.Application.Application;
@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.UI
           TitleAutoPrefix = true,
           AllowCancellation = true,
           MainInstruction = $"Rhino.Inside© for Revit",
-          MainContent = $"Rhino.Inside Revit: {Addin.DisplayVersion}",
+          MainContent = $"Rhino.Inside Revit: {AddIn.DisplayVersion}",
           ExpandedContent = details.ToString(),
           CommonButtons = TaskDialogCommonButtons.Ok,
           DefaultButton = TaskDialogResult.Ok,

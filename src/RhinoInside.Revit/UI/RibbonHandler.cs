@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.UI
       return null;
     }
 
-    public readonly string AddinTabName = Addin.AddinName;
+    public readonly string AddinTabName = AddIn.AddinName;
 
     public bool HasPanel(string tabName, string panelName)
     {

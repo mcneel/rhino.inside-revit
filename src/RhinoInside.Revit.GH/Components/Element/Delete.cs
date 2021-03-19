@@ -94,7 +94,7 @@ namespace RhinoInside.Revit.GH.Components
       public DB.UpdaterId GetUpdaterId() => UpdaterId;
       public static readonly DB.UpdaterId UpdaterId = new DB.UpdaterId
       (
-        Addin.Id,
+        AddIn.Id,
         new Guid("9536C7C9-C58B-4D48-9103-5C8EBAA6F6C8")
       );
 

@@ -24,7 +24,7 @@ namespace RhinoInside.Revit
     {
       if (MainWindow.IsZero)
       {
-        var result = Addin.CheckSetup(applicationUI);
+        var result = AddIn.CheckSetup(applicationUI);
         if (result != Result.Succeeded)
           return result;
 
@@ -62,7 +62,7 @@ namespace RhinoInside.Revit
         applicationUI.Idling += OnIdle;
         applicationUI.ControlledApplication.DocumentChanged += OnDocumentChanged;
 
-        Addin.CurrentStatus = Addin.Status.Ready;
+        AddIn.CurrentStatus = AddIn.Status.Ready;
       }
 
       return Result.Succeeded;
@@ -92,7 +92,7 @@ namespace RhinoInside.Revit
       if(ActiveUIApplication?.IsValidObject != true)
         ActiveUIApplication = (sender as UIApplication);
 
-      if (Addin.CurrentStatus > Addin.Status.Available)
+      if (AddIn.CurrentStatus > AddIn.Status.Available)
       {
         if (ProcessIdleActions())
           args.SetRaiseWithoutDelay();
@@ -370,7 +370,7 @@ namespace RhinoInside.Revit
     );
 #endif
 
-    public static Autodesk.Revit.UI.UIControlledApplication       ApplicationUI => Addin.ApplicationUI;
+    public static Autodesk.Revit.UI.UIControlledApplication       ApplicationUI => AddIn.ApplicationUI;
     public static Autodesk.Revit.UI.UIApplication                 ActiveUIApplication { get; internal set; }
     public static Autodesk.Revit.ApplicationServices.Application  ActiveDBApplication => ActiveUIApplication?.Application;
 

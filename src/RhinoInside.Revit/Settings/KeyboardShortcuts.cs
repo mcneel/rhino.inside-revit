@@ -80,7 +80,7 @@ namespace RhinoInside.Revit.Settings
 
 #if DEBUG
       // Those lines generate the KeyboardShortcuts.xml template file when new Revit version is supported
-      string keyboardShortcutsTemplatePath = Path.Combine(Addin.SourceCodePath, "Resources", $"RVT{Revit.ApplicationUI.ControlledApplication.VersionNumber}", "KeyboardShortcuts.xml");
+      string keyboardShortcutsTemplatePath = Path.Combine(AddIn.SourceCodePath, "Resources", $"RVT{Revit.ApplicationUI.ControlledApplication.VersionNumber}", "KeyboardShortcuts.xml");
       var info = new FileInfo(keyboardShortcutsTemplatePath);
       if (info.Length == 0)
       {

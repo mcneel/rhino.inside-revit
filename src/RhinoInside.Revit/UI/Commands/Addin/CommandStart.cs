@@ -34,7 +34,7 @@ namespace RhinoInside.Revit.UI
 
         SetupButton(pushButton);
 
-        if (Addin.StartupMode != AddinStartupMode.Disabled)
+        if (AddIn.StartupMode != AddinStartupMode.Disabled)
         {
           if (Settings.KeyboardShortcuts.RegisterDefaultShortcut("Add-Ins", ribbonPanel.Name, typeof(CommandStart).Name, CommandName, "R#Ctrl+R"))
             External.ActivationGate.Exit += ShowShortcutHelp;
@@ -48,7 +48,7 @@ namespace RhinoInside.Revit.UI
 
     static void SetupButton(PushButton pushButton)
     {
-      if (Addin.RhinoVersionInfo is FileVersionInfo rhInfo)
+      if (AddIn.RhinoVersionInfo is FileVersionInfo rhInfo)
       {
         // try-catch to capture any property getters failing
         try
@@ -58,9 +58,9 @@ namespace RhinoInside.Revit.UI
 
           pushButton.LongDescription =
             $"Rhino: {rhInfo.ProductVersion} ({rhInfo.FileDescription}){Environment.NewLine}" +
-            $"Rhino.Inside: {Addin.DisplayVersion}{Environment.NewLine}{rhInfo.LegalCopyright}";
+            $"Rhino.Inside: {AddIn.DisplayVersion}{Environment.NewLine}{rhInfo.LegalCopyright}";
 
-          if (Addin.StartupMode == AddinStartupMode.Disabled)
+          if (AddIn.StartupMode == AddinStartupMode.Disabled)
           {
             pushButton.Enabled = false;
             pushButton.ToolTip = "Addin Disabled";
@@ -79,7 +79,7 @@ namespace RhinoInside.Revit.UI
       )
         return ShowLoadError(data);
 
-      if (Addin.CurrentStatus == Addin.Status.Ready)
+      if (AddIn.CurrentStatus == AddIn.Status.Ready)
       {
         if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
           return Rhinoceros.RunCommandAbout();
@@ -99,8 +99,8 @@ namespace RhinoInside.Revit.UI
 
       if (AddinOptions.Current.CompactTab)
       {
-        data.Application.CreateRibbonTab(Addin.AddinName);
-        data.Application.ActivateRibbonTab(Addin.AddinName);
+        data.Application.CreateRibbonTab(AddIn.AddinName);
+        data.Application.ActivateRibbonTab(AddIn.AddinName);
       }
 
       var result = Start(new RibbonHandler(data.Application));
@@ -129,7 +129,7 @@ namespace RhinoInside.Revit.UI
           // Register UI on Revit
           if (assemblies.Any(x => x.GetName().Name == "RhinoCommon"))
           {
-            rhinoPanel = ribbon.CreateAddinPanel(Addin.RhinoVersionInfo?.ProductName ?? "Rhinoceros");
+            rhinoPanel = ribbon.CreateAddinPanel(AddIn.RhinoVersionInfo?.ProductName ?? "Rhinoceros");
             CommandRhino.CreateUI(rhinoPanel);
             CommandImport.CreateUI(rhinoPanel);
             CommandToggleRhinoPreview.CreateUI(rhinoPanel);
@@ -169,9 +169,9 @@ namespace RhinoInside.Revit.UI
         case Result.Cancelled:
           button.Enabled = false;
 
-          if (Addin.CurrentStatus == Addin.Status.Unavailable)
+          if (AddIn.CurrentStatus == AddIn.Status.Unavailable)
             button.ToolTip = "Rhino.Inside failed to found a valid copy of Rhino installed.";
-          else if (Addin.CurrentStatus == Addin.Status.Obsolete)
+          else if (AddIn.CurrentStatus == AddIn.Status.Obsolete)
             button.ToolTip = "Rhino.Inside has expired.";
           else
             button.ToolTip = "Rhino.Inside load was cancelled.";
@@ -194,13 +194,13 @@ namespace RhinoInside.Revit.UI
       // collapse panel if in compact mode
       if (AddinOptions.Current.CompactRibbon)
       {
-        rhinoPanel?.Collapse(Addin.AddinName);
-        grasshopperPanel?.Collapse(Addin.AddinName);
+        rhinoPanel?.Collapse(AddIn.AddinName);
+        grasshopperPanel?.Collapse(AddIn.AddinName);
       }
       else
       {
-        rhinoPanel?.Expand(Addin.AddinName);
-        grasshopperPanel?.Expand(Addin.AddinName);
+        rhinoPanel?.Expand(AddIn.AddinName);
+        grasshopperPanel?.Expand(AddIn.AddinName);
       }
     }
 
@@ -257,7 +257,7 @@ namespace RhinoInside.Revit.UI
           ExpandedContent = "This problem use to be due an incompatibility with other installed add-ins.\n\n" +
                             "While running on these modes you may see other add-ins errors and it may take longer to load, don't worry about that no persistent change will be made on your computer.",
           VerificationText = "Exclude installed add-ins list from the report.",
-          FooterText = "Current version: " + Addin.DisplayVersion
+          FooterText = "Current version: " + AddIn.DisplayVersion
         }
       )
       {
@@ -457,7 +457,7 @@ namespace RhinoInside.Revit.UI
         {
           if (LinkedScripts.HasUI(pkg, ribbon))
             TaskDialog.Show(
-              Addin.AddinName,
+              AddIn.AddinName,
               $"Package \"{pkg.Name}\" has been previously loaded in to the Revit UI." +
               "Restart Revit for changes to take effect."
               );

@@ -131,7 +131,7 @@ namespace RhinoInside.Revit.UI
     protected class Availability : External.UI.CommandAvailability
     {
       public override bool IsCommandAvailable(UIApplication app, CategorySet selectedCategories) =>
-        Addin.CurrentStatus >= Addin.Status.Available;
+        AddIn.CurrentStatus >= AddIn.Status.Available;
     }
 
     /// <summary>
@@ -140,7 +140,7 @@ namespace RhinoInside.Revit.UI
     protected class AvailableWhenNotObsolete : External.UI.CommandAvailability
     {
       public override bool IsCommandAvailable(UIApplication app, CategorySet selectedCategories) =>
-        Addin.CurrentStatus >= Addin.Status.Obsolete;
+        AddIn.CurrentStatus >= AddIn.Status.Obsolete;
     }
     #endregion
   }

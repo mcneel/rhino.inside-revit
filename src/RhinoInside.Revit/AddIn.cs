@@ -25,7 +25,7 @@ namespace RhinoInside.Revit
     Scripting = 3
   }
 
-  public class Addin : UIX.ExternalApplication
+  public class AddIn : UIX.ExternalApplication
   {
     #region AddinInfo
     public static string AddinCompany => "McNeel";
@@ -86,7 +86,7 @@ namespace RhinoInside.Revit
       RhinoVersionInfo?.FilePrivatePart ?? 0
     );
 
-    static Addin()
+    static AddIn()
     {
       if (StartupMode == AddinStartupMode.Cancelled)
         return;
@@ -104,11 +104,11 @@ namespace RhinoInside.Revit
       RhinoUIFramework.LoadFramework(AssemblyResolver.SystemDir);
     }
 
-    public Addin() : base(new Guid("02EFF7F0-4921-4FD3-91F6-A87B6BA9BF74")) => Instance = this;
+    public AddIn() : base(new Guid("02EFF7F0-4921-4FD3-91F6-A87B6BA9BF74")) => Instance = this;
 
-    ~Addin() => Instance = default;
+    ~AddIn() => Instance = default;
 
-    internal static Addin Instance { get; set; }
+    internal static AddIn Instance { get; set; }
     public static AddInId Id => Instance;
     #endregion
 
@@ -163,7 +163,7 @@ namespace RhinoInside.Revit
       RibbonPanel addinRibbon;
       if (AddinOptions.Session.CompactTab)
       {
-        addinRibbon = uiCtrlApp.CreateRibbonPanel(Addin.AddinName);
+        addinRibbon = uiCtrlApp.CreateRibbonPanel(AddIn.AddinName);
 
         // Add launch RhinoInside push button,
         UI.CommandStart.CreateUI(addinRibbon);
@@ -172,8 +172,8 @@ namespace RhinoInside.Revit
       }
       else
       {
-        uiCtrlApp.CreateRibbonTab(Addin.AddinName);
-        addinRibbon = uiCtrlApp.CreateRibbonPanel(Addin.AddinName, "More");
+        uiCtrlApp.CreateRibbonTab(AddIn.AddinName);
+        addinRibbon = uiCtrlApp.CreateRibbonPanel(AddIn.AddinName, "More");
 
         // Add launch RhinoInside push button,
         UI.CommandStart.CreateUI(addinRibbon);

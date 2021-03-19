@@ -23,14 +23,14 @@ namespace RhinoInside.Revit.UI
         StoreButton(CommandName, pushButton);
 
         // disable if startup mode is disabled
-        if (Addin.StartupMode == AddinStartupMode.Disabled)
+        if (AddIn.StartupMode == AddinStartupMode.Disabled)
         {
           pushButton.Enabled = false;
           pushButton.ToolTip = "Addin Disabled";
         }
 
         // disable the button if options are readonly
-        pushButton.Enabled = !AddinOptions.IsReadOnly && Addin.IsRhinoUIFrameworkReady;
+        pushButton.Enabled = !AddinOptions.IsReadOnly && AddIn.IsRhinoUIFrameworkReady;
       }
     }
 

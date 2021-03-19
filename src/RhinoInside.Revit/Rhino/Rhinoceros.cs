@@ -73,7 +73,7 @@ namespace RhinoInside.Revit
         }
         catch
         {
-          Addin.CurrentStatus = Addin.Status.Failed;
+          AddIn.CurrentStatus = AddIn.Status.Failed;
           return Result.Failed;
         }
         finally
@@ -97,7 +97,7 @@ namespace RhinoInside.Revit
         RunScriptAsync
         (
           script:   Environment.GetEnvironmentVariable("RhinoInside_RunScript"),
-          activate: Addin.StartupMode == AddinStartupMode.AtStartup
+          activate: AddIn.StartupMode == AddinStartupMode.AtStartup
         );
 
         // Add DefaultRenderAppearancePath to Rhino settings if missing
@@ -280,7 +280,7 @@ namespace RhinoInside.Revit
 
           using
           (
-            var taskDialog = new TaskDialog(Addin.DisplayVersion)
+            var taskDialog = new TaskDialog(AddIn.DisplayVersion)
             {
               Id = $"{MethodBase.GetCurrentMethod().DeclaringType.FullName}.{MethodBase.GetCurrentMethod().Name}",
               MainIcon = External.UI.TaskDialogIcons.IconError,
@@ -390,7 +390,7 @@ namespace RhinoInside.Revit
               MainInstruction = hasUnits ? (doc.IsOpening ? "Model units mismatch." : "Model units mismatch warning.") : "Rhino model has no units.",
               MainContent = doc.IsOpening ? "What units do you want to use?" : $"Revit document '{revitDoc.Title}' length units are {RevitModelUnitSystem}." + (hasUnits ? $"{Environment.NewLine}Rhino is working in {doc.ModelUnitSystem}." : string.Empty),
               ExpandedContent = expandedContent,
-              FooterText = "Current version: " + Addin.DisplayVersion
+              FooterText = "Current version: " + AddIn.DisplayVersion
             }
           )
           {
