@@ -2,6 +2,7 @@
 title: Rhino.Inside.Revit Community
 toc: false
 layout: ltr/page-full
+excerpt_separator: <!--more-->
 ---
 
 {% capture community_note %}
