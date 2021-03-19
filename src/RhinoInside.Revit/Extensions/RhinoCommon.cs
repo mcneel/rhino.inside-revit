@@ -215,8 +215,6 @@ namespace Rhino.Geometry
         if (row < 0)
           return false;
 
-        var column = row == 0 ? 1 : 0;
-
         // Test if projection of all rows of control points projected to 'plane' are coincident.
         // This means 'surface' degenerate to a curve if projected to 'plane', so an "extrusion".
         var rowCount = row == 0 ? nurbsSurface.Points.CountU : nurbsSurface.Points.CountV;

@@ -119,7 +119,7 @@ namespace RhinoInside.Revit.Settings
       set
       {
         _scriptLocations = value;
-        ScriptLocationsChanged?.Invoke(this, null);
+        ScriptLocationsChanged?.Invoke(this, EventArgs.Empty);
       }
     }
     private HashSet<string> _scriptLocations = new HashSet<string>();

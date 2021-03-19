@@ -48,7 +48,7 @@ namespace RhinoInside.Revit.GH.Types
           }
 
           if(renderMaterial is null)
-            target = default(Q);
+            target = default;
           else
             target = (Q) (object) new Grasshopper.Kernel.Types.GH_Material(renderMaterial);
 

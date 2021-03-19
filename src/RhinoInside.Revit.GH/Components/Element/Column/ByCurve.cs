@@ -41,7 +41,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!type.Value.IsActive)
         type.Value.Activate();
 
-      SolveOptionalLevel(doc, curve, ref level, out var bbox);
+      SolveOptionalLevel(doc, curve, ref level, out var _);
 
       // Type
       ChangeElementTypeId(ref element, type.Value.Id);
@@ -68,7 +68,7 @@ namespace RhinoInside.Revit.GH.Components
           BuiltInParameter.LEVEL_PARAM
         };
 
-        ReplaceElement(ref element, newColumn);
+        ReplaceElement(ref element, newColumn, parametersMask);
       }
     }
   }

@@ -1,19 +1,11 @@
 using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Reflection;
-using System.Windows.Interop;
 using System.Diagnostics;
-
-using Eto.Forms;
-using Eto.Drawing;
-using Forms = Eto.Forms;
-
+using System.Linq;
+using System.Reflection;
 using Autodesk.Revit.UI;
-
+using Eto.Drawing;
+using Eto.Forms;
 using RhinoInside.Revit.Settings;
 
 namespace RhinoInside.Revit.UI
@@ -45,17 +37,17 @@ namespace RhinoInside.Revit.UI
       var applyButton = new Button { Text = "Apply", Height = 25 };
       applyButton.Click += ApplyButton_Click;
 
-    _general = new TabPage { Text = "General", Padding = new Padding(5), Content = GeneralPanel };
-    _updates = new TabPage { Text = "Updates", Padding = new Padding(5), Content = UpdatesPanel };
-    _scripts = new TabPage { Text = "Scripts", Padding = new Padding(5), Content = ScriptsPanel };
-    _tabs = new TabControl
-    {
-      TabPosition = Forms.DockPosition.Top,
-      Pages = { _general, _updates, _scripts },
-    };
+      _general = new TabPage { Text = "General", Padding = new Padding(5), Content = GeneralPanel };
+      _updates = new TabPage { Text = "Updates", Padding = new Padding(5), Content = UpdatesPanel };
+      _scripts = new TabPage { Text = "Scripts", Padding = new Padding(5), Content = ScriptsPanel };
+      _tabs = new TabControl
+      {
+        TabPosition = Eto.Forms.DockPosition.Top,
+        Pages = { _general, _updates, _scripts },
+      };
 
-    // setup contents
-    Content = new TableLayout
+      // setup contents
+      Content = new TableLayout
       {
         Spacing = new Size(5, 10),
         Padding = new Padding(5),
@@ -125,7 +117,7 @@ namespace RhinoInside.Revit.UI
 
     CheckBox _checkUpdatesOnStartup = new CheckBox { Text = "Check Updates on Startup" };
     Label _channelDescription = new Label { Visible = false, Wrap = WrapMode.Word, Height = 36, VerticalAlignment = VerticalAlignment.Top };
-    Forms.DropDown _updateChannelSelector = new Forms.DropDown() { Height = 25 };
+    DropDown _updateChannelSelector = new DropDown() { Height = 25 };
     Button _releaseNotesBtn = new Button { Text = "Release Notes", Height = 25 };
     Button _downloadBtn = new Button { Text = "Download Installer", Height = 25 };
 
@@ -138,7 +130,7 @@ namespace RhinoInside.Revit.UI
       _checkUpdatesOnStartup.Checked = AddinOptions.Current.CheckForUpdatesOnStartup;
 
       // setup update channel selector
-      _updateChannelSelector.SelectedIndexChanged += _updateChannelSelector_SelectedIndexChanged;
+      _updateChannelSelector.SelectedIndexChanged += UpdateChannelSelector_SelectedIndexChanged;
       var execAssm = Assembly.GetExecutingAssembly();
       foreach (AddinUpdateChannel chnl in AddinUpdater.Channels)
       {
@@ -154,11 +146,10 @@ namespace RhinoInside.Revit.UI
       {
         var channelGuid = new Guid(activeChannelId);
         var updaterChannel = AddinUpdater.Channels.Where(x => x.Id == channelGuid).First();
-        _updateChannelSelector.SelectedIndex = AddinUpdater.Channels.IndexOf(updaterChannel);
+        _updateChannelSelector.SelectedIndex = Array.IndexOf(AddinUpdater.Channels, updaterChannel);
       }
       else
-        _updateChannelSelector.SelectedIndex = AddinUpdater.Channels.IndexOf(AddinUpdater.DefaultChannel);
-
+        _updateChannelSelector.SelectedIndex = Array.IndexOf(AddinUpdater.Channels, AddinUpdater.DefaultChannel);
 
       // setup update options groupbox
       var spacing = new Size(5, 10);
@@ -195,25 +186,25 @@ namespace RhinoInside.Revit.UI
       };
 
       // setup release info controls
-      _releaseNotesBtn.Click += _releaseNotesBtn_Click;
-      _downloadBtn.Click += _downloadBtn_Click;
+      _releaseNotesBtn.Click += ReleaseNotesBtn_Click;
+      _downloadBtn.Click += DownloadBtn_Click;
     }
 
-    private void _downloadBtn_Click(object sender, EventArgs e)
+    private void DownloadBtn_Click(object sender, EventArgs e)
     {
       if (ReleaseInfo != null)
         Process.Start(ReleaseInfo.DownloadUrl);
     }
 
-    private void _releaseNotesBtn_Click(object sender, EventArgs e)
+    private void ReleaseNotesBtn_Click(object sender, EventArgs e)
     {
       if (ReleaseInfo != null)
         Process.Start(ReleaseInfo.ReleaseNotesUrl);
     }
 
-    private void _updateChannelSelector_SelectedIndexChanged(object sender, EventArgs e)
+    private void UpdateChannelSelector_SelectedIndexChanged(object sender, EventArgs e)
     {
-      if (sender is Forms.DropDown channelSelector)
+      if (sender is DropDown channelSelector)
       {
         var updaterChannel = AddinUpdater.Channels[channelSelector.SelectedIndex];
         _channelDescription.Text = updaterChannel.Description;
@@ -231,36 +222,36 @@ namespace RhinoInside.Revit.UI
         _releaseInfoPanel = new TableRow
         {
           ScaleHeight = true,
-          Cells = { new Panel {
-                Content = new TableLayout {
-                  Spacing = new Size(5, 10),
-                  Padding = new Padding(5),
-                  Rows = {
-                    new TableRow {
-                      Cells = {
-                        new TableCell {
-                          Control = new ImageView {
-                            Image = Icon.FromResource("RhinoInside.Revit.Resources.NewRelease.png", assembly: Assembly.GetExecutingAssembly()),
-                          }
-                        },
-                        new TableLayout
-                        {
-                          Spacing = new Size(5, 10),
-                          Rows = {
-                            new Label {
-                              Text = "New Release Available!\n"
-                                  + $"Version: {releaseInfo.Version}\n"
-                                  + $"Release Date: {releaseInfo.ReleaseDate}",
-                              Width = 150
-                            },
-                            new Label {
-                              Text = "Close Revit and run the installer to update",
-                              TextAlignment = TextAlignment.Center
-                            },
-                            _downloadBtn,
-                            _releaseNotesBtn,
-                            null
-                          }
+          Cells = {
+            new Panel {
+              Content = new TableLayout {
+                Spacing = new Size(5, 10),
+                Padding = new Padding(5),
+                Rows = {
+                  new TableRow {
+                    Cells = {
+                      new TableCell {
+                        Control = new ImageView {
+                          Image = Icon.FromResource("RhinoInside.Revit.Resources.NewRelease.png", assembly: Assembly.GetExecutingAssembly()),
+                        }
+                      },
+                      new TableLayout
+                      {
+                        Spacing = new Size(5, 10),
+                        Rows = {
+                          new Label {
+                            Text = "New Release Available!\n"
+                                + $"Version: {releaseInfo.Version}\n"
+                                + $"Release Date: {releaseInfo.ReleaseDate}",
+                            Width = 150
+                          },
+                          new Label {
+                            Text = "Close Revit and run the installer to update",
+                            TextAlignment = TextAlignment.Center
+                          },
+                          _downloadBtn,
+                          _releaseNotesBtn,
+                          null
                         }
                       }
                     }
@@ -268,6 +259,7 @@ namespace RhinoInside.Revit.UI
                 }
               }
             }
+          }
         };
 
         updateGroup.Rows.Insert(0, _releaseInfoPanel);
@@ -307,7 +299,7 @@ namespace RhinoInside.Revit.UI
 
       foreach (var location in AddinOptions.Current.ScriptLocations)
         _scriptLocations.Items.Add(location);
-      _scriptLocations.SelectedIndexChanged += _scriptLocations_SelectedIndexChanged;
+      _scriptLocations.SelectedIndexChanged += ScriptLocations_SelectedIndexChanged;
 
       _addButton.Click += AddButton_Click;
       _delButton.Click += DelButton_Click;
@@ -349,7 +341,7 @@ namespace RhinoInside.Revit.UI
       };
     }
 
-    private void _scriptLocations_SelectedIndexChanged(object sender, EventArgs e)
+    private void ScriptLocations_SelectedIndexChanged(object sender, EventArgs e)
     {
       _delButton.Enabled = _scriptLocations.SelectedIndex > -1;
     }

@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Bake
     public DB.Document Document;
     public DB.View     View;
     public DB.Category Category;
-    public DB.Workset Workset;
+    public DB.Workset  Workset;
     public DB.Material Material;
   }
 

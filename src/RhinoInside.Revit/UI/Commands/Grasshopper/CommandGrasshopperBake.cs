@@ -1,18 +1,15 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Events;
 using Grasshopper;
 using Grasshopper.Kernel;
-using Microsoft.Win32.SafeHandles;
 using Rhino.PlugIns;
 using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.GH.Bake;
 using RhinoInside.Revit.External.DB.Extensions;
-
+using RhinoInside.Revit.GH.Bake;
 using DB = Autodesk.Revit.DB;
+using WF = System.Windows.Forms;
 
 namespace RhinoInside.Revit.UI
 {
@@ -32,16 +29,13 @@ namespace RhinoInside.Revit.UI
         {
           if (Revit.ActiveUIDocument?.ActiveGraphicalView is DB.View view)
           {
-            //var options = new BakeOptions()
-            //{
-            //  Document = view.Document,
-            //  View = view,
-            //  Category = DB.Category.GetCategory(view.Document, ActiveBuiltInCategory),
-            //  Material = default
-            //};
+            var options = new BakeOptions()
+            {
+              Document = view.Document,
+              View = view
+            };
 
-            //return ObjectsToBake(definition, options).Any();
-            return true;
+            return ObjectsToBake(definition, options).Any();
           }
         }
 
@@ -60,11 +54,14 @@ namespace RhinoInside.Revit.UI
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      if (ribbonPanel.AddItem(NewPushButtonData<CommandGrasshopperBake, NeedsActiveDocument<Availability>>(
-        CommandName,
-        "Ribbon.Grasshopper.Bake.png",
-        "Bakes selected objects content in the active Revit document"
-        )) is PushButton bakeButton)
+      var buttonData = NewPushButtonData<CommandGrasshopperBake, NeedsActiveDocument<Availability>>
+      (
+        name: CommandName,
+        iconName: "Ribbon.Grasshopper.Bake.png",
+        tooltip: "Bakes selected objects content in the active Revit document"
+      );
+
+      if (ribbonPanel.AddItem(buttonData) is PushButton bakeButton)
       {
         bakeButton.LongDescription = "Use CTRL key to group resulting elements";
         bakeButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
@@ -185,7 +182,7 @@ namespace RhinoInside.Revit.UI
         if (bakeOptsDlg.IsCancelled)
           return Result.Cancelled;
 
-        bool groupResult = (System.Windows.Forms.Control.ModifierKeys & System.Windows.Forms.Keys.Control) != System.Windows.Forms.Keys.None;
+        bool groupResult = (WF.Control.ModifierKeys & WF.Keys.Control) != WF.Keys.None;
 
         var options = new BakeOptions()
         {

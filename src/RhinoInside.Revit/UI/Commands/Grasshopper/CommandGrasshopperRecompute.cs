@@ -1,15 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Events;
 using Grasshopper;
 using Grasshopper.Kernel;
 using Microsoft.Win32.SafeHandles;
 using Rhino.PlugIns;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.GH.Bake;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.UI
@@ -29,11 +23,13 @@ namespace RhinoInside.Revit.UI
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
       // Create a push button to trigger a command add it to the ribbon panel.
-      var buttonData = NewPushButtonData<CommandGrasshopperRecompute, Availability>(
-        CommandName,
-        "Ribbon.Grasshopper.Recompute.png",
-        "Force a complete recompute of all objects"
-        );
+      var buttonData = NewPushButtonData<CommandGrasshopperRecompute, Availability>
+      (
+        name: CommandName,
+        iconName: "Ribbon.Grasshopper.Recompute.png",
+        tooltip: "Force a complete recompute of all objects"
+      );
+
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);

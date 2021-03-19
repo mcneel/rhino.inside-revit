@@ -30,11 +30,13 @@ namespace RhinoInside.Revit.UI
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
       // Create a push button to trigger a command add it to the ribbon panel.
-      var buttonData = NewPushButtonData<CommandGrasshopperPlayer, NeedsActiveDocument<Availability>>(
-        CommandName,
-        "GrasshopperPlayer.png",
-        "Loads and evals a Grasshopper definition"
-        );
+      var buttonData = NewPushButtonData<CommandGrasshopperPlayer, NeedsActiveDocument<Availability>>
+      (
+        name: CommandName,
+        iconName: "GrasshopperPlayer.png",
+        tooltip: "Loads and evals a Grasshopper definition"
+      );
+
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://www.grasshopper3d.com/"));
@@ -56,8 +58,8 @@ namespace RhinoInside.Revit.UI
       {
         switch (openFileDialog.ShowDialog(Revit.MainWindowHandle))
         {
-          case System.Windows.Forms.DialogResult.OK: filePath = openFileDialog.FileName; return Result.Succeeded;
-          case System.Windows.Forms.DialogResult.Cancel: filePath = null; return Result.Cancelled;
+          case DialogResult.OK: filePath = openFileDialog.FileName; return Result.Succeeded;
+          case DialogResult.Cancel: filePath = null; return Result.Cancelled;
           default: filePath = null; return Result.Failed;
         }
       }
@@ -191,7 +193,7 @@ namespace RhinoInside.Revit.UI
       }
       else
       {
-        var reference = doc.Selection.PickObject(Autodesk.Revit.UI.Selection.ObjectType.Face, prompt + "Please select a face to define a work plane");
+        var reference = doc.Selection.PickObject(ObjectType.Face, prompt + "Please select a face to define a work plane");
         if (doc.Document.GetElement(reference.ElementId) is DB.Element element)
         {
           if (element.GetGeometryObjectFromReference(reference) is DB.Face face)
@@ -260,7 +262,7 @@ namespace RhinoInside.Revit.UI
         PickPoint(doc, prompt + " : End pont - ", out var to)
       )
       {
-        goo = new GH_Line(new Rhino.Geometry.Line(from.ToPoint3d(), to.ToPoint3d()));
+        goo = new GH_Line(new Line(from.ToPoint3d(), to.ToPoint3d()));
       }
 
       yield return goo;
@@ -357,7 +359,7 @@ namespace RhinoInside.Revit.UI
     (
       UIApplication app,
       DB.View view,
-      IDictionary<string, string> JournalData,
+      IDictionary<string, string> journalData,
       string filePath,
       ref string message
     )

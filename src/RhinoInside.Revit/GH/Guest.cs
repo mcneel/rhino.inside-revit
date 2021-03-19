@@ -125,7 +125,7 @@ namespace RhinoInside.Revit.GH
     {
       Script.LoadEditor();
       if (!Script.IsEditorLoaded())
-        throw new Exception("Failed to startup Grasshopper");
+        throw new InvalidOperationException("Failed to startup Grasshopper");
     }
 
     /// <summary>

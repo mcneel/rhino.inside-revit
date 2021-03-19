@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.UI
   /// <summary>
   /// Base class for all Rhino.Inside Revit commands
   /// </summary>
-  abstract public class Command : External.UI.Command
+  public abstract class Command : External.UI.Command
   {
     #region Ribbon item creation
     internal static PushButton AddPushButton<CommandType, AvailabilityType>(PulldownButton pullDownButton, string text, string iconName, string tooltip = null)
@@ -107,7 +107,7 @@ namespace RhinoInside.Revit.UI
       T dependency = new T();
 
       // We can not relay on the UIApplication first argument.
-      // Seams other Add-ins are calling this method with wrong values.
+      // Seems other Add-ins are calling this method with wrong values.
       // I add the try-catch just because this is called many times.
       public override bool IsCommandAvailable(UIApplication _, CategorySet selectedCategories)
       {

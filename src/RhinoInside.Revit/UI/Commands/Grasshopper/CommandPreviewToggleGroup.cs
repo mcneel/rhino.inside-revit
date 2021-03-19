@@ -1,15 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Events;
-using Grasshopper;
 using Grasshopper.Kernel;
-using Microsoft.Win32.SafeHandles;
 using Rhino.PlugIns;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.GH.Bake;
 using RhinoInside.Revit.External.UI.Extensions;
 
 using DB = Autodesk.Revit.DB;

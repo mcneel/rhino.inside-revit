@@ -1,16 +1,9 @@
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Events;
-using Grasshopper;
-using Grasshopper.Kernel;
-using Microsoft.Win32.SafeHandles;
-using Rhino.PlugIns;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.GH.Bake;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.UI
@@ -23,11 +16,13 @@ namespace RhinoInside.Revit.UI
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
       // Create a push button to trigger a command add it to the ribbon panel.
-      var buttonData = NewPushButtonData<CommandGrasshopperPackageManager, Availability>(
-        CommandName,
-        "PackageManager-icon.png",
-        "Shows Rhino/Grasshopper Package Manager"
+      var buttonData = NewPushButtonData<CommandGrasshopperPackageManager, Availability>
+      (
+        name: CommandName,
+        iconName: "PackageManager-icon.png",
+        tooltip: "Shows Rhino/Grasshopper Package Manager"
       );
+
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://www.food4rhino.com/"));
@@ -36,9 +31,7 @@ namespace RhinoInside.Revit.UI
 
     public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
     {
-      return OnCommandCompleted(
-        Rhinoceros.RunCommandPackageManager()
-        );
+      return Rhinoceros.RunCommandPackageManager();
     }
 
     /// <summary>
@@ -48,11 +41,17 @@ namespace RhinoInside.Revit.UI
     {
       var pkgs = new List<ScriptPkg>();
       var pkgLocations = new List<DirectoryInfo>();
-      pkgLocations.AddRange(Rhino.Runtime.HostUtils.GetActivePlugInVersionFolders(false));
-      pkgLocations.AddRange(Rhino.Runtime.HostUtils.GetActivePlugInVersionFolders(true));
+      {
+        pkgLocations.AddRange(Rhino.Runtime.HostUtils.GetActivePlugInVersionFolders(false));
+        pkgLocations.AddRange(Rhino.Runtime.HostUtils.GetActivePlugInVersionFolders(true));
+      }
+
       foreach (var dirInfo in pkgLocations)
+      {
         if (GetInstalledScriptPackage(dirInfo.FullName) is ScriptPkg pkg)
           pkgs.Add(pkg);
+      }
+
       return pkgs;
     }
 
@@ -63,27 +62,23 @@ namespace RhinoInside.Revit.UI
     {
       // grab the name from the package directory
       var pkgName = Path.GetFileName(Path.GetDirectoryName(location));
+
       // Looks for Rhino.Inside/Revit/ or Rhino.Inside/Revit/x.x insdie the package
       var pkgAddinContents = Path.Combine(location, Addin.AddinName, "Revit");
       var pkgAddinSpecificContents = Path.Combine(pkgAddinContents, $"{Addin.Version.Major}.0");
+
       // load specific scripts if available, otherwise load for any Rhino.Inside.Revit
-      if (new List<string> {
-            pkgAddinSpecificContents,
-            pkgAddinContents }.Where(d => Directory.Exists(d)).FirstOrDefault() is string pkgContentsDir)
+      if
+      (
+        new string[] { pkgAddinSpecificContents, pkgAddinContents }.
+        Where(d => Directory.Exists(d)).
+        FirstOrDefault() is string pkgContentsDir
+      )
       {
         return new ScriptPkg { Name = pkgName, Location = pkgContentsDir };
       }
+
       return null;
     }
-
-    #region Events
-    public static event EventHandler<Result> CommandCompleted;
-
-    public Result OnCommandCompleted(Result res)
-    {
-      CommandCompleted?.Invoke(this, res);
-      return res;
-    }
-    #endregion
   }
 }

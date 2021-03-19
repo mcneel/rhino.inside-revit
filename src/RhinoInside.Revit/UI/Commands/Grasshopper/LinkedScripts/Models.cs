@@ -21,7 +21,29 @@ namespace RhinoInside.Revit.UI
   /// </summary>
   abstract public class LinkedItem
   {
-    public string Name;
+    public string Text
+    {
+      get
+      {
+        string displayName = string.Empty;
+        var nameLines = Name.Split('-');
+        for (int l = 0; l < nameLines.Length; ++l)
+        {
+          var line = nameLines[l].
+            Trim(' ').                    // Remove trailing spaces 
+            Replace(' ', (char) 0x00A0);  // Replace spaces by non-breaking-spaces
+          if (line == string.Empty) continue;
+
+          displayName += line.TripleDot(12);
+          if (l < nameLines.Length - 1)
+            displayName += Environment.NewLine;
+        }
+
+        return displayName;
+      }
+    }
+
+    public string Name = string.Empty;
     public string Tooltip = string.Empty;
   }
 

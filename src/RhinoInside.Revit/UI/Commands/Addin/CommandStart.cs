@@ -122,7 +122,8 @@ namespace RhinoInside.Revit.UI
           // Update Rhino button Tooltip
           button.ToolTip = $"Restores previously visible Rhino windows on top of Revit window";
           button.LongDescription = $"Use CTRL key to open a Rhino model";
-          // hide the button title
+
+          // Hide the button title
           if (button.GetAdwndRibbonButton() is Autodesk.Windows.RibbonButton adwndRadioButton)
             adwndRadioButton.ShowText = false;
 
@@ -156,9 +157,9 @@ namespace RhinoInside.Revit.UI
             // Script Packages UI
             UpdateScriptPkgUI(ribbon);
 
-            // setup listeners, and in either case, update the packages ui
+            // Setup listeners, and in either case, update the packages ui
             // listed for changes in installed packages
-            CommandGrasshopperPackageManager.CommandCompleted += CommandGrasshopperPackageManager_CommandCompleted;
+            Rhino.Commands.Command.EndCommand += PackageManagerCommand_EndCommand;
             // listen for changes to user-script paths in options
             AddinOptions.ScriptLocationsChanged += AddinOptions_ScriptLocationsChanged;
           }
@@ -172,7 +173,7 @@ namespace RhinoInside.Revit.UI
           button.Enabled = false;
 
           if (Addin.CurrentStatus == Addin.Status.Unavailable)
-            button.ToolTip = "Rhino.Inside failed to found a valid copy of Rhino 7 WIP installed.";
+            button.ToolTip = "Rhino.Inside failed to found a valid copy of Rhino installed.";
           else if (Addin.CurrentStatus == Addin.Status.Obsolete)
             button.ToolTip = "Rhino.Inside has expired.";
           else
@@ -405,7 +406,7 @@ namespace RhinoInside.Revit.UI
       }
     }
 
-    static public void NotifyUpdateAvailable(ReleaseInfo releaseInfo)
+    public static void NotifyUpdateAvailable(ReleaseInfo releaseInfo)
     {
       // button gets deactivated if options are readonly
       if (!AddinOptions.IsReadOnly)
@@ -421,7 +422,7 @@ namespace RhinoInside.Revit.UI
       }
     }
 
-    static public void ClearUpdateNotifiy()
+    public static void ClearUpdateNotifiy()
     {
       if (RestoreButton(CommandName) is PushButton button)
       {
@@ -439,6 +440,7 @@ namespace RhinoInside.Revit.UI
       var curState = new HashSet<ScriptPkg>();
       if (AddinOptions.Current.LoadInstalledScriptPackages)
         curState.UnionWith(CommandGrasshopperPackageManager.GetInstalledScriptPackages());
+
       if (AddinOptions.Current.LoadUserScriptPackages)
         curState.UnionWith(ScriptPkg.GetUserScriptPackages());
 
@@ -484,11 +486,14 @@ namespace RhinoInside.Revit.UI
       UpdateScriptPkgUI(new RibbonHandler(uiApp));
     }
 
-    private static async void CommandGrasshopperPackageManager_CommandCompleted(object sender, Result e)
+    private static async void PackageManagerCommand_EndCommand(object sender, Rhino.Commands.CommandEventArgs e)
     {
-      // wait for Revit to be ready and get uiApp
-      var uiApp = await External.ActivationGate.Yield();
-      UpdateScriptPkgUI(new RibbonHandler(uiApp));
+      if (e.CommandEnglishName == "PackageManager")
+      {
+        // wait for Revit to be ready and get uiApp
+        var uiApp = await External.ActivationGate.Yield();
+        UpdateScriptPkgUI(new RibbonHandler(uiApp));
+      }
     }
   }
 }

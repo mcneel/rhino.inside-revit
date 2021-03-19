@@ -73,7 +73,7 @@ namespace RhinoInside.Revit
       {
         var xml = new XmlSerializer(typeof(ReleaseInfo));
         string releaseInfo = new WebClient().DownloadString(this.Url);
-        using (TextReader reader = new StringReader(releaseInfo))
+        using (var reader = new StringReader(releaseInfo))
         {
           return (ReleaseInfo) xml.Deserialize(reader);
         }
@@ -88,7 +88,7 @@ namespace RhinoInside.Revit
 
   internal static class AddinUpdater
   {
-    static public readonly AddinUpdateChannel DefaultChannel = new AddinUpdateChannel
+    public static readonly AddinUpdateChannel DefaultChannel = new AddinUpdateChannel
     {
       Id = new Guid("0b10351c-25e3-4680-9135-6b86cd27bcda"),
       Name = "Public Releases (Official)",
@@ -99,12 +99,11 @@ namespace RhinoInside.Revit
       IsStable = true
     };
 
-    /* Note:
-     * It is expected that this list does not include any channels that do not belong to the major
-     * version of this addon. Any addon should only know about its own channels
-     * e.g. No 2.0/ channel on an addon with major version 1.0
-     */
-    static public readonly List<AddinUpdateChannel> Channels = new List<AddinUpdateChannel>
+    // Note:
+    // It is expected that this list does not include any channels that do not belong to the major
+    // version of this addon. Any addon should only know about its own channels
+    // e.g. No 2.0/ channel on an addon with major version 1.0
+    public static readonly AddinUpdateChannel[] Channels = new AddinUpdateChannel[]
     {
       DefaultChannel,
       // TODO: this channel is not setup yet. activate when ready
@@ -127,7 +126,7 @@ namespace RhinoInside.Revit
       }
     };
 
-    static public AddinUpdateChannel ActiveChannel
+    public static AddinUpdateChannel ActiveChannel
     {
       get
       {
@@ -136,19 +135,20 @@ namespace RhinoInside.Revit
           var channelGuid = new Guid(activeChannelId);
           return Channels.Where(x => x.Id == channelGuid).FirstOrDefault();
         }
+
         return null;
       }
     }
 
-    static public void GetReleaseInfo(Action<ReleaseInfo> callBack)
+    public static void GetReleaseInfo(Action<ReleaseInfo> callBack)
       => GetReleaseInfo(ActiveChannel, callBack);
 
-    static public async void GetReleaseInfo(AddinUpdateChannel channel, Action<ReleaseInfo> callBack)
+    public static async void GetReleaseInfo(AddinUpdateChannel channel, Action<ReleaseInfo> callBack)
     {
-      if (callBack != null)
-        callBack(
-          await Task.Run(() => channel.GetLatestRelease())
-          );
+      callBack?.Invoke
+      (
+        await Task.Run(() => channel.GetLatestRelease())
+      );
     }
   }
 }

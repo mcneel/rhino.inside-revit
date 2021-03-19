@@ -638,7 +638,7 @@ namespace RhinoInside.Revit
       /// Loads assemblies related to the Rhino ui framework from given Rhino system directory
       /// </summary>
       /// <param name="sysDir"></param>
-      static public void LoadFramework(string sysDir)
+      public static void LoadFramework(string sysDir)
       {
         foreach(string assm in new string[] { "Eto.dll" , "Eto.Wpf.dll", "Eto.Serialization.Xaml.dll", "Xceed.Wpf.Toolkit.dll" })
         {
@@ -663,7 +663,6 @@ namespace RhinoInside.Revit
         IsRhinoUIFrameworkReady = true;
       }
     }
-
     #endregion
   }
 }

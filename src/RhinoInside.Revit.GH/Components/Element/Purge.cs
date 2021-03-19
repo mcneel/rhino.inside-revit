@@ -399,7 +399,7 @@ namespace RhinoInside.Revit.GH.Components
 
     private void Menu_SimulatedClicked(object sender, EventArgs e)
     {
-      if (sender is ToolStripMenuItem item)
+      if (sender is ToolStripMenuItem)
       {
         RecordUndoEvent($"Set: Simulated");
         Simulated = !Simulated;

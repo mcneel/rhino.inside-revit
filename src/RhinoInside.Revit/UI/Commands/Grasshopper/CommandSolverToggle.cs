@@ -1,17 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Windows.Media;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Events;
 using Grasshopper;
 using Grasshopper.Kernel;
-using Microsoft.Win32.SafeHandles;
 using Rhino.PlugIns;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.GH.Bake;
 using RhinoInside.Revit.External.UI.Extensions;
-
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.UI
@@ -21,10 +14,10 @@ namespace RhinoInside.Revit.UI
   {
     public static string CommandName => "Toggle\nSolver";
 
-    static readonly System.Windows.Media.ImageSource SolverOnSmall = ImageBuilder.LoadRibbonButtonImage("Ribbon.Grasshopper.SolverOn.png", true);
-    static readonly System.Windows.Media.ImageSource SolverOnLarge = ImageBuilder.LoadRibbonButtonImage("Ribbon.Grasshopper.SolverOn.png", false);
-    static readonly System.Windows.Media.ImageSource SolverOffSmall = ImageBuilder.LoadRibbonButtonImage("Ribbon.Grasshopper.SolverOff.png", true);
-    static readonly System.Windows.Media.ImageSource SolverOffLarge = ImageBuilder.LoadRibbonButtonImage("Ribbon.Grasshopper.SolverOff.png", false);
+    static readonly ImageSource SolverOnSmall = ImageBuilder.LoadRibbonButtonImage("Ribbon.Grasshopper.SolverOn.png", true);
+    static readonly ImageSource SolverOnLarge = ImageBuilder.LoadRibbonButtonImage("Ribbon.Grasshopper.SolverOn.png", false);
+    static readonly ImageSource SolverOffSmall = ImageBuilder.LoadRibbonButtonImage("Ribbon.Grasshopper.SolverOff.png", true);
+    static readonly ImageSource SolverOffLarge = ImageBuilder.LoadRibbonButtonImage("Ribbon.Grasshopper.SolverOff.png", false);
 
     protected new class Availability : GrasshopperCommand.Availability
     {

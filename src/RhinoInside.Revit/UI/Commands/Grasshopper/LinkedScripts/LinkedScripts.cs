@@ -45,7 +45,7 @@ namespace RhinoInside.Revit.UI
       // Lets make the pulldowns first so they are first on the panel
       items.OfType<LinkedItemGroup>().ToList().ForEach((group) =>
       {
-        var pullDownData = new PulldownButtonData(group.Name, group.Name)
+        var pullDownData = new PulldownButtonData(group.Name, group.Text)
         {
           Image = ImageBuilder.LoadRibbonButtonImage("Ribbon.Grasshopper.GhFolder.png", true),
           LargeImage = ImageBuilder.LoadRibbonButtonImage("Ribbon.Grasshopper.GhFolder.png"),
@@ -108,8 +108,8 @@ namespace RhinoInside.Revit.UI
 
     internal static PushButtonData NewScriptButton(LinkedScript script, string assmLoc)
     {
-      var commandName = script.ScriptCommandType.Name + (script.Name ?? "");
-      var commandButtonName = script.Name.Replace("-", "\n");
+      var commandName = $"{script.ScriptCommandType.Name}-{script.Name}";
+      var commandButtonName = script.Text;
       var typeAssmLocation = assmLoc;
       var typeName = script.ScriptCommandType.FullName;
       return new PushButtonData(commandName, commandButtonName, typeAssmLocation, typeName)

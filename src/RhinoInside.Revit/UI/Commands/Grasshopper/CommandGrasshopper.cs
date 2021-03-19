@@ -1,15 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Events;
-using Grasshopper;
-using Grasshopper.Kernel;
-using Microsoft.Win32.SafeHandles;
 using Rhino.PlugIns;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.GH.Bake;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.UI
@@ -22,11 +13,13 @@ namespace RhinoInside.Revit.UI
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
       // Create a push button to trigger a command add it to the ribbon panel.
-      var buttonData = NewPushButtonData<CommandGrasshopper, Availability>(
-        CommandName,
-        "Grasshopper.png",
-        "Shows Grasshopper window"
+      var buttonData = NewPushButtonData<CommandGrasshopper, Availability>
+      (
+        name: CommandName,
+        iconName: "Grasshopper.png",
+        tooltip: "Shows Grasshopper window"
       );
+
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         pushButton.LongDescription = $"Use CTRL key to open only Grasshopper window without restoring other tool windows";

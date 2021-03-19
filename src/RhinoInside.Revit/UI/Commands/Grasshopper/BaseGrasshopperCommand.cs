@@ -17,14 +17,14 @@ namespace RhinoInside.Revit.UI
   /// <summary>
   /// Base class for all Rhino.Inside Revit commands that call Grasshopper API
   /// </summary>
-  abstract public class GrasshopperCommand : RhinoCommand
+  public abstract class GrasshopperCommand : RhinoCommand
   {
     protected static readonly Guid PluginId = new Guid(0xB45A29B1, 0x4343, 0x4035, 0x98, 0x9E, 0x04, 0x4E, 0x85, 0x80, 0xD9, 0xCF);
 
     public GrasshopperCommand()
     {
       if (!PlugIn.LoadPlugIn(PluginId, true, true))
-        throw new Exception("Failed to load Grasshopper");
+        throw new InvalidOperationException("Failed to load Grasshopper");
     }
 
     /// <summary>

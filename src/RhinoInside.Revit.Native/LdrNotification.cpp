@@ -49,7 +49,7 @@ class LdrDllTracker
         Instance.ReportOnLoad(NotificationData->Loaded.BaseDllName->Buffer, false);
 
         // Dump stack trace to file
-        auto stack_trace_file_path = Instance.StackTraceFilePath();
+        auto& stack_trace_file_path = Instance.StackTraceFilePath();
         if (stack_trace_file_path.empty())
         {
 #ifdef _DEBUG
