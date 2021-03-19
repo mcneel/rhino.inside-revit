@@ -1,0 +1,103 @@
+<!-- Activate bootstrap scrollspy on the sidebar -->
+<script type="text/javascript">
+    // offset 100 is the size of header nav bar + a little margin (20px)
+    // this value is also set in stylesheet under :target:before
+    $('body').scrollspy({
+        target: '#sidebar-toc',
+        offset: 100
+    });
+</script>
+
+<!-- Update version selector dropdown with active version -->
+<script>
+    // determine active page
+    detemineActiveVersion();
+    // set active version on version selector
+    var verSelector = document.querySelector("#versionSelector");
+    if (activeVersion == "beta") {
+        verSelector.innerHTML = "Beta";
+    } else {
+        verSelector.innerHTML = 'v' + activeVersion;
+    }
+</script>
+
+<!-- highlight the active category link on navigation bar -->
+<script>
+    $(document).ready(function () {
+        var url = window.location.href;
+        // set nav bar links by selected version
+        $('#cat_homelogo').attr('href', getPageLink(''));
+        $('#cat_homelink').attr('href', getPageLink(''));
+        $('#cat_starting').attr('href', getPageLink('getting-started'));
+        $('#cat_guides').attr('href', getPageLink('guides/'));
+        $('#cat_discover').attr('href', getPageLink('discover/'));
+        $('#cat_reference').attr('href', getPageLink('reference/'));
+        // mark current navbar category as active
+        if (url.endsWith('/' + 'getting-started') || url.includes('/' + 'getting-started' + '/')) {
+            console.log("activating getting-started");
+            $('#cat_starting').addClass('active');
+        } else if (url.endsWith('/' + 'guides') || url.includes('/' + 'guides' + '/')) {
+            console.log("activating guides");
+            $('#cat_guides').addClass('active');
+        } else if (url.endsWith('/' + 'discover') || url.includes('/' + 'discover' + '/')) {
+            console.log("activating discover");
+            $('#cat_discover').addClass('active');
+        } else if (url.endsWith('/' + 'reference') || url.includes('/' + 'reference' + '/')) {
+            console.log("activating reference");
+            $('#cat_reference').addClass('active');
+        }
+    });
+</script>
+
+<script>
+    // apply magnificPopup to all images except svg
+    // svg images are graphics and charts and not screenshots
+    $(document).ready(function () {
+        // grab all images in side content, filter out svg
+        // then apply magnificPopup
+        $('.side-content img').filter(function () {
+            return !($(this).attr('src').endsWith(".svg") || $(this).hasClass("no-popup"))
+        }).magnificPopup({
+            type: 'image',
+            zoom: {
+                enabled: true
+            },
+            gallery: {
+                enabled: true
+            },
+            callbacks: {
+                elementParse: function (item) {
+                    item.src = item.el.attr('src');
+                }
+            }
+        });
+    });
+</script>
+
+<script>
+    // add anchor links that show up when hovering over header
+    (function () {
+        'use strict';
+        anchors.options.placement = 'right';
+        anchors.add(
+            '.post-content > h2, .post-content > h3, .post-content > h4, .post-content > h5, .post-content > h6'
+            );
+    })();
+</script>
+
+<!-- gallery interaction -->
+<script>
+    function attachGalleryItemHover() {
+        $(".gallery-item").hover(function () {
+            $(this).addClass("gallery-item-focused");
+            $(this).find(".gallery-thumbnail").removeClass("gallery-thumbnail-dim");
+            $(this).find(".gallery-info-extra").css("display", "block");
+        }, function () {
+            $(this).removeClass("gallery-item-focused");
+            $(this).find(".gallery-thumbnail").addClass("gallery-thumbnail-dim");
+            $(this).find(".gallery-info-extra").css("display", "none");
+        });
+    };
+
+    $(document).ready(attachGalleryItemHover);
+</script>

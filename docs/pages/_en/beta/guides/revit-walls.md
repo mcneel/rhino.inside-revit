@@ -2,6 +2,7 @@
 title: Walls (Basic & Stacked)
 order: 40
 group: Modeling
+home: true
 thumbnail: /static/images/guides/revit-walls.png
 subtitle: Workflows for Revit Basic and Stacked Walls
 ghdef: revit-walls.ghx

@@ -3,6 +3,7 @@ title: "Revit: Documents & Links"
 subtitle: Where all the elements are stored and shared
 order: 25
 group: Essentials
+home: true
 thumbnail: /static/images/guides/revit-docs.png
 ghdef: revit-docs.ghx
 ---

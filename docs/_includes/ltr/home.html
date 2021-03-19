@@ -1,0 +1,128 @@
+<style>
+    .footer-languages {
+        visibility: hidden;
+        margin: 0px;
+    }
+</style>
+
+<div class="home-cover">
+    <div class="home-gallery">
+        <!-- <img src="{{ include.banner_img | prepend: site.baseurl }}" /> -->
+        <iframe class="embed-responsive-item"
+                src="https://www.youtube.com/embed/KUHdJqVyhZI?showinfo=0&rel=0&modestbranding=1" frameborder="0"
+                allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+        </iframe>
+    </div>
+
+    <!-- <div class="home-contents-box">
+        <div class="home-contents-textmask">
+            <div class="home-contents">
+                <h1>{{ include.banner_header }}</h1>
+                <h3>{{ include.banner_text  }}</h3>
+            </div>
+        </div>
+    </div> -->
+</div>
+
+<div class="home-dependencies">
+    <div class="container">
+        <a type="button" class="btn btn-danger block-center" style="width: 40%; min-width: 300px;"
+            href="{{ include.version.rir_download }}" target="_blank">
+            <img class="button-icon" src="{{ "/assets/img/install.svg" | prepend: site.baseurl }}">
+            Download {{ site.terms.rir }} <small>{{ include.version.name }}</small>
+        </a>
+        <small class="block-center" style="font-size: 85%; margin-top: 20px; margin-bottom: 10px;">
+            {{ site.terms.rir }} requires new technology introduced in Rhinoceros 7
+            <br />
+            Download the latest version of {{ site.terms.rhino }} and evaluate freely for 90 days
+        </small>
+        <a type="button" class="btn btn-danger block-center" style="width: 30%; min-width: 300px;"
+            href="{{ include.version.rhino_download }}" target="_blank">
+            <img class="button-icon" src="{{ "/assets/img/install.svg" | prepend: site.baseurl }}">
+            Download {{ site.terms.rhino }} {{ site.terms.rhinoext }}
+        </a>
+    </div>
+</div>
+
+
+<div class="home-features">
+    <div class="home-feature home-feature-rhino">
+        <div class="container">
+            <div class="home-feature-content">
+                <div>
+                    <h2>{{ include.rhino_header }}<small>{{ include.inside_text }}</small></h2>
+                    <p>{{ include.rhino_text }}</p>
+                    <div class="home-feature-rhino-grid">
+                        <div class="home-feature-grid-item home-feature-grid-img-item">
+                            <img src="{{ include.rhino_img1 | prepend: site.baseurl }}" />
+                        </div>
+                        <div class="home-feature-grid-item home-feature-grid-img-item">
+                            <img src="{{ include.rhino_img2 | prepend: site.baseurl }}" />
+                        </div>
+                        <div class="home-feature-grid-item home-feature-grid-img-item">
+                            <img src="{{ include.rhino_img3 | prepend: site.baseurl }}" />
+                        </div>
+                    </div>
+                    <a href="{{ include.rhino_learn_link }}"><h4>{{ include.rhino_learn_title }}</h4></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="home-feature home-feature-gh">
+        <div class="container">
+            <div class="home-feature-content">
+                <div>
+                    <h2>{{ include.gh_header }}<small>{{ include.inside_text }}</small></h2>
+                    <p style="text-shadow: 1px 2px 4px rgb(32, 68, 0);">{{ include.gh_text }}</p>
+                    <a href="{{ include.gh_learn_link }}"><h4>{{ include.gh_learn_title }}</h4></a>
+                </div>
+                <div class="home-feature-grid-item home-feature-grid-img-item">
+                    <img src="{{ include.gh_img | prepend: site.baseurl }}" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="home-feature home-feature-ghcomps">
+        <div class="container">
+            <div class="home-feature-content">
+                <h3>{{ include.ghcomp_header }}</h3>
+                <p>{{ include.ghcomp_text }}</p>
+                <div class="home-feature-ghcomps-grid" style="grid-column: 1 / -1;">
+                {% for collection in site.collections %}
+                    {% if collection.label == page.collection %}
+                        {% assign items = collection.docs | sort:"order" %}
+                        {% for item in items %}
+                            {% if item.toc and item.title and item.version == page.version and item.home %}
+                                {% include ltr/gallery_item.html item=item large=true %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+                </div>
+            </div>
+            <div class="home-feature-content-center-label">
+                <h4><a href="{{ include.ghcomp_learn_link }}">{{ include.ghcomp_learn_title }}</a></h4>
+            </div>
+        </div>
+    </div>
+    <div class="home-feature home-feature-api">
+        <div class="container">
+            <div class="home-feature-content">
+                <div class="home-feature-grid-item home-feature-grid-img-item">
+                    <img src="{{ include.api_img | prepend: site.baseurl }}" />
+                </div>
+                <div>
+                    <h3>{{ include.api_header }}</h3>
+                    <p>{{ include.api_text }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="home-discover">
+    <div class="container">
+        <h2 style="font-size: 32px;"><a href="{{ include.discover_link }}">{{ include.discover_header }}</a></h2>
+        {% include ltr/gallery_discover.html keyword='kind: featured' max_items=include.discover_count notags=true nonew=true nohighlight=true show_filters=false %}
+    </div>
+</div>

@@ -45,11 +45,248 @@ pre {
 }
 
 /*
-    site content ==============================================================
+    containers ================================================================
 */
+
 .container {
     max-width: 1170px;
 }
+
+.container-full {
+    width: 100%;
+}
+
+.block-center {
+    display: block !important;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/*
+    site home =================================================================
+*/
+
+.home-cover {
+    position: relative;
+    height: 70vh;
+    min-height: 300px;
+}
+
+.home-gallery {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+.home-gallery img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: opacity(0.8);
+}
+
+.home-gallery iframe {
+    width: 100%;
+    height: 100%;
+}
+
+.home-contents-box {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    font-size: 36px;
+    display: flex;
+    align-items: flex-end;
+    box-sizing: border-box;
+    -webkit-box-align: center;
+}
+
+.home-contents-textmask {
+    width: 100%;
+    background: rgb(255,255,255);
+    background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(232,232,232,1) 90%);
+}
+
+.home-contents {
+    display: block;
+    max-width: 1170px;
+    padding: 0 30px 0 30px;
+    margin: 90px auto 30px auto;
+    color: white;
+}
+
+.home-contents h1 {
+    margin-top: 20px;
+    color: #111;
+}
+
+.home-contents h3 {
+    color: #111;
+    font-size: 20px;
+    font-weight: normal;
+}
+
+.home-dependencies {
+    margin: 30px auto 30px auto;
+    text-align: center;
+}
+
+.home-features {
+    background-color: #e8e8e8;
+}
+
+.home-feature {
+    padding: 30px;
+    color: white;
+}
+
+.home-feature-rhino {
+    background-size: cover;
+    background-position: center;
+    background-image: url(../../static/images/home/home_feature_rhino.png);
+}
+
+.home-feature-gh {
+    background-size: cover;
+    background-position: center;
+    background-image: url(../../static/images/home/home_feature_gh.png);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.home-feature-ghcomps {
+    background-size: cover;
+    background-position: center;
+    color: #111;
+}
+
+.home-feature-api {
+    background-size: cover;
+    background-position: center;
+    color: #111;
+}
+
+.home-feature-grid-item {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    color: #111;
+    background-color: white;
+    padding: 15px;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1);
+}
+
+.home-feature-grid-img-item {
+    padding: 0;
+    overflow: hidden;
+}
+
+.home-feature-grid-img-item img {
+    width: 100%;
+    height: 100%;
+}
+
+.home-feature-rhino-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    grid-auto-rows: minmax(100px, auto);
+    margin: 20px 0px;
+}
+
+.home-feature-gh-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    grid-auto-rows: minmax(100px, auto);
+    margin-top: 20px;
+}
+
+.home-feature-ghcomps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.home-feature h2 {
+    font-size: 45px;
+}
+
+.home-feature h3 {
+    font-size: 36px;
+}
+
+.home-feature p {
+    font-size: 18px;
+}
+
+.home-feature a,
+.home-feature a:visited {
+    color: white;
+    text-decoration: none;
+}
+
+.home-feature small {
+    font-size: 28px;
+    padding-left: 20px;
+}
+
+.home-feature-ghcomps-grid a,
+.home-feature-ghcomps-grid a:visited {
+    color: #111;
+}
+
+.home-feature-content {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(250px, 1fr));
+    column-gap: 40px;
+}
+
+.home-feature-content a:hover {
+    text-decoration: underline;
+}
+
+.home-feature-content-center-label {
+    text-align: center;
+    margin-top: 30px
+}
+
+.home-feature-content-center-label a,
+.home-feature-content-center-label a:visited {
+    color: #111;
+}
+
+.home-feature-content-center-label a:hover {
+    text-decoration: underline;
+}
+
+.home-discover {
+    margin-bottom: 30px;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.home-discover h2 {
+    text-align: center;
+    padding: 20px 0 20px 0;
+    font-size: 40px;
+}
+
+.home-discover a,
+.home-discover a:visited {
+    color: #111;
+}
+
+
+/*
+    site content ==============================================================
+*/
 
 .row-fluid {
     display: flex;
@@ -470,25 +707,37 @@ pre {
 
 .discover-grid {
     display: grid;
-    grid-gap: 20px 20px;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-gap: 30px 30px;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     /* grid-template-columns: auto auto auto auto; */
     align-items: start;
-    grid-auto-rows: 220px;
+    grid-auto-rows: 250px;
+}
+
+.discover-grid-compact {
+    grid-auto-rows: 230px;
 }
 
 .discover-item {
     display: block;
-    min-height: 220px;
+    min-height: 250px;
     background-color: #fff;
-    border: 1px solid #d0d0d0;
+    border: 1px solid #b0b0b0;
     border-radius: 5px;
     color: white;
-    /* -webkit-box-shadow: 0 3px 2px rgba(0, 0, 0, .15);
-    -moz-box-shadow: 0 3px 2px rgba(0, 0, 0, .15);
-    box-shadow: 0 3px 2px rgba(0, 0, 0, .15); */
+    box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 4px 0px, rgba(0, 0, 0, 0.025) 0px 15px 20px -1px;
     overflow: hidden;
     position: relative;
+}
+
+.discover-item-compact {
+    min-height: 230px;
+}
+
+/* different naming format otherwise vue.js breaks */
+.discoverItemHighlight {
+    box-shadow: 0 4px 0 #a0a0a0, 0 10px 8px rgba(0, 0, 0, .1);
+
 }
 
 .discover-item-focused {
@@ -500,11 +749,6 @@ pre {
     z-index: 1000;
 }
 
-/* different naming format otherwise vue.js breaks */
-.discoverItemHighlight {
-    border: 1px solid #111;
-}
-
 .discover-highlight {
     position: absolute;
     right: 0px;
@@ -512,7 +756,7 @@ pre {
 }
 
 .discover-thumbnail {
-    height: 135px;
+    height: 165px;
     overflow: hidden;
 }
 
@@ -523,6 +767,36 @@ pre {
 
 .discover-info {
     padding: 5px 10px 5px 10px;
+}
+
+.discover-info-new {
+    display: none;
+    float: left;
+    color: white;
+    background: #dc3545;
+    border-radius: 3px;
+    margin-top: 3px;
+    margin-right: 5px;
+    text-align: center;
+    font-size: 12px;
+    padding: 0 5px 0px 5px;
+}
+
+.discover-info-new-ok {
+    display: none;
+    padding: 0 5px 0 5px;
+    border-radius: 0 3px 3px 0;
+}
+
+.discover-info-new-ok:hover {
+    background: #a70010;
+    cursor: pointer;
+}
+
+.discover-info-new-ok img {
+    width: 13px;
+    padding-bottom: 2px;
+    margin: 0px;
 }
 
 .discover-info-title,
@@ -561,6 +835,10 @@ pre {
     margin-top: 5px;
 }
 
+.discover-info-extra-open {
+    display: block;
+}
+
 .discover-info-extra p {
     color: #828282;
     font-size: 13px;
@@ -591,10 +869,10 @@ pre {
 
 .discover-filters-box {
     width: 100%;
-    background-color: #f6f6f6;
+    background-color: white;
     border: none;
     border-radius: 5px;
-    margin: 30px 0 30px 0;
+    margin: 0 0 30px 0;
     padding: 0;
 }
 
@@ -604,26 +882,67 @@ pre {
 
 .discover-filter {
     display: inline-block;
-    border: 1px solid #d0d0d0;
+    height: 26px;
     border-radius: 3px;
-    /* background-color: white; */
-    color: #828282;
     text-align: center;
     font-size: 13px;
     margin: 10px 5px;
-    padding: 2px 10px 2px 10px;
 }
 
-.discover-filter:hover,
-.discover-filter-active {
-    border: 1px solid #111;
+.discoverFilterGray {
+    color: #828282;
+    border: 1px solid #d0d0d0;
+}
+
+.discoverFilterRed {
+    color: #dc3545;
+    border: 1px solid #dc3545;
+}
+
+.discoverFilterGray:hover {
     color: white;
+    border: 1px solid #111;
     background-color: #111;
+    cursor: pointer;
+}
+
+.discoverFilterRed:hover {
+    color: white;
+    border: 1px solid #dc3545;
+    background-color: #dc3545;
+    cursor: pointer;
+}
+
+.discoverFilterGray.active-filter {
+    color: white;
+    border: 1px solid #111;
+    background-color: #111;
+}
+
+.discoverFilterRed.active-filter {
+    color: white;
+    border: 1px solid #dc3545;
+    background-color: #dc3545;
+}
+
+.discover-unmarkall {
+    display: inline-block;
+    height: 24px;
+    color: white;
+    background: #dc3545;
+    font-size: 13px;
+    border-radius: 0 2px 2px 0;
+    padding: 2px 5px;
+}
+
+.discover-unmarkall:hover {
+    background: #a70010;
+    cursor: pointer;
 }
 
 .discover-search {
     float: right;
-    vertical-align: middle;
+    height: 26px;
     margin: 10px 10px;
     padding: 2px 5px;
     border: 1px solid #d0d0d0;
@@ -795,10 +1114,6 @@ pre {
     padding: 10px 15px 10px 15px;
 }
 
-.rhino-dl {
-    margin-left: 8px;
-}
-
 a.btn-danger {
     color: white;
     -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset, 0 -1px 0 rgba(255, 255, 255, .1) inset, 0 4px 0 #880000, 0 4px 2px rgba(0, 0, 0, .5);
@@ -846,6 +1161,14 @@ a.btn-danger:hover {
 .comp-table td.comp-title {
     padding-right: 10px;
     font-style: italic;
+}
+
+.social {
+    margin-bottom: 5px;
+}
+
+.social a {
+    text-decoration: none;
 }
 
 .icontag {
