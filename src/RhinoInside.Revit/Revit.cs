@@ -14,6 +14,7 @@ using Microsoft.Win32.SafeHandles;
 using Rhino;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.Convert.System.Collections.Generic;
+using RhinoInside.Revit.External.ApplicationServices.Extensions;
 using RhinoInside.Revit.External.UI.Extensions;
 
 namespace RhinoInside.Revit
@@ -356,19 +357,10 @@ namespace RhinoInside.Revit
     internal static WindowHandle MainWindow { get; private set; } = WindowHandle.Zero;
     public static IntPtr MainWindowHandle => MainWindow.Handle;
 
-    public static Screen RevitScreen => ActiveUIApplication?.GetRevitScreen() ?? Screen.FromHandle(MainWindowHandle);
+    internal static Screen MainScreen => ActiveUIApplication?.GetRevitScreen() ?? Screen.FromHandle(MainWindowHandle);
 
-#if REVIT_2019
-    public static string CurrentUsersDataFolderPath => ApplicationUI.ControlledApplication.CurrentUsersDataFolderPath;
-#else
-    public static string CurrentUsersDataFolderPath => System.IO.Path.Combine
-    (
-      Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-      "Autodesk",
-      "Revit",
-      ApplicationUI.ControlledApplication.VersionName
-    );
-#endif
+    [Obsolete("Since 2021-03-19")]
+    public static string CurrentUsersDataFolderPath => ApplicationUI.ControlledApplication.GetCurrentUsersDataFolderPath();
 
     public static Autodesk.Revit.UI.UIControlledApplication       ApplicationUI => AddIn.ApplicationUI;
     public static Autodesk.Revit.UI.UIApplication                 ActiveUIApplication { get; internal set; }

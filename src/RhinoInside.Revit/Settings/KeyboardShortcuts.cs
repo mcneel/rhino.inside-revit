@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
+using RhinoInside.Revit.External.ApplicationServices.Extensions;
 
 namespace RhinoInside.Revit.Settings
 {
@@ -71,7 +72,7 @@ namespace RhinoInside.Revit.Settings
     {
       commandId = $"CustomCtrl_%CustomCtrl_%{tabName}%{panelName}%{commandId}";
 
-      string keyboardShortcutsPath = Path.Combine(Revit.CurrentUsersDataFolderPath, "KeyboardShortcuts.xml");
+      string keyboardShortcutsPath = Path.Combine(Revit.ApplicationUI.ControlledApplication.GetCurrentUsersDataFolderPath(), "KeyboardShortcuts.xml");
       if (!File.Exists(keyboardShortcutsPath))
         keyboardShortcutsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Autodesk", $"RVT {Revit.ApplicationUI.ControlledApplication.VersionNumber}", "UserDataCache", "KeyboardShortcuts.xml");
 
@@ -126,7 +127,7 @@ namespace RhinoInside.Revit.Settings
       }
 
       if (shortcutUpdated)
-        SaveAs(shortcuts, Path.Combine(Revit.CurrentUsersDataFolderPath, "KeyboardShortcuts.xml"));
+        SaveAs(shortcuts, Path.Combine(Revit.ApplicationUI.ControlledApplication.GetCurrentUsersDataFolderPath(), "KeyboardShortcuts.xml"));
 
       return shortcutUpdated;
     }

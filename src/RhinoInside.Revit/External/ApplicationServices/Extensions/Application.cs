@@ -63,4 +63,22 @@ namespace RhinoInside.Revit.External.ApplicationServices.Extensions
       return 1033;
     }
   }
+
+  static class ControlledApplicationExtension
+  {
+    public static string GetCurrentUsersDataFolderPath(this ControlledApplication app)
+    {
+#if REVIT_2019
+      return app.CurrentUsersDataFolderPath;
+#else
+      return System.IO.Path.Combine
+      (
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        "Autodesk",
+        "Revit",
+        ApplicationUI.ControlledApplication.VersionName
+      );
+#endif
+    }
+  }
 }
