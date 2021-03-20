@@ -148,11 +148,12 @@ namespace RhinoInside.Revit.GH.Components
     #endregion
 
     #region AddGeometryRuntimeError
-    readonly List<Rhino.Geometry.GeometryBase> GeometryRuntimeErrors = new List<Rhino.Geometry.GeometryBase>();
+    readonly List<(Rhino.Geometry.GeometryBase geometry, Rhino.Geometry.BoundingBox bbox)> RuntimeErrorGeometry = new List<(Rhino.Geometry.GeometryBase, Rhino.Geometry.BoundingBox)>();
+
     public override void ClearData()
     {
       base.ClearData();
-      GeometryRuntimeErrors.Clear();
+      RuntimeErrorGeometry.Clear();
     }
 
     public void AddGeometryConversionError(GH_RuntimeMessageLevel level, string text, Rhino.Geometry.GeometryBase geometry)
@@ -178,35 +179,57 @@ namespace RhinoInside.Revit.GH.Components
     public void AddGeometryRuntimeError(GH_RuntimeMessageLevel level, string text, Rhino.Geometry.GeometryBase geometry)
     {
       if(text is object) AddRuntimeMessage(level, text);
-      if (geometry is object) GeometryRuntimeErrors.Add(geometry);
+      if (geometry is object) RuntimeErrorGeometry.Add((geometry, geometry.GetBoundingBox(false)));
     }
 
     public override void DrawViewportWires(IGH_PreviewArgs args)
     {
       base.DrawViewportWires(args);
 
-      foreach (var geometry in GeometryRuntimeErrors)
+      var viewport = args.Display.Viewport;
+
+      /// To speed up display in case there are a lot of errors,
+      /// something that may happen with dense meshes,
+      /// we avoid drawing while in dynamic display.
+      if (!Attributes.Selected && args.Display.IsDynamicDisplay)
+        return;
+
+      var dpi = args.Display.DpiScale;
+      var pointRadius    = 2.0f * args.Display.DisplayPipelineAttributes.PointRadius * dpi;
+      var curveThickness = (int) Math.Round(1.5f * args.DefaultCurveThickness * dpi, MidpointRounding.AwayFromZero);
+
+      foreach (var error in RuntimeErrorGeometry)
       {
-        switch (geometry)
+        // Skip geometry outside the viewport
+        if (!viewport.IsVisible(error.bbox))
+          continue;
+
+        var center = error.bbox.Center;
+        if (viewport.GetWorldToScreenScale(center, out var pixelsPerUnits))
         {
-          case Rhino.Geometry.Point point:
-            args.Display.DrawPoint(point.Location, Rhino.Display.PointStyle.Asterisk, args.Display.DisplayPipelineAttributes.PointRadius * 2.0f, Color.Orange);
-            break;
-          case Rhino.Geometry.Curve curve:
-            args.Display.DrawCurve(curve, Color.Orange, args.DefaultCurveThickness * 5);
-            if (curve.IsShort(Revit.ShortCurveTolerance * Revit.ModelUnits))
+          // If geometry is smaller than a point diameter we show it as a point
+          if (error.bbox.Diagonal.Length * pixelsPerUnits < pointRadius * 2.0)
+          {
+            args.Display.DrawPoint(center, Rhino.Display.PointStyle.RoundControlPoint, Color.Orange, Color.White, pointRadius, dpi, pointRadius * 0.5f, 0.0f, true, false);
+          }
+          else
+          {
+            switch (error.geometry)
             {
-              args.Display.DrawPoint(curve.PointAtStart, Rhino.Display.PointStyle.RoundControlPoint, args.Display.DisplayPipelineAttributes.PointRadius * 2.0f, Color.Orange);
-              args.Display.DrawPoint(curve.PointAtEnd, Rhino.Display.PointStyle.RoundControlPoint, args.Display.DisplayPipelineAttributes.PointRadius * 2.0f, Color.Orange);
+              case Rhino.Geometry.Point point:
+                args.Display.DrawPoint(point.Location, Rhino.Display.PointStyle.X, Color.Orange, Color.White, pointRadius, dpi, pointRadius * 0.5f, 0.0f, true, false);
+                break;
+              case Rhino.Geometry.Curve curve:
+                args.Display.DrawCurve(curve, Color.Orange, curveThickness);
+                break;
+              case Rhino.Geometry.Surface surface:
+                args.Display.DrawSurface(surface, Color.Orange, curveThickness);
+                break;
+              case Rhino.Geometry.Brep brep:
+                args.Display.DrawBrepWires(brep, Color.Orange, curveThickness);
+                break;
             }
-            break;
-          case Rhino.Geometry.Surface surface:
-            args.Display.DrawSurface(surface, Color.Orange, args.DefaultCurveThickness * 5);
-            args.Display.DrawPoint(surface.PointAt(surface.Domain(0).Mid, surface.Domain(1).Mid), Rhino.Display.PointStyle.Square, args.Display.DisplayPipelineAttributes.PointRadius * 3.5f, Color.Orange);
-            break;
-          case Rhino.Geometry.Brep brep:
-            args.Display.DrawBrepWires(brep, Color.Orange, args.DefaultCurveThickness * 5);
-            break;
+          }
         }
       }
     }

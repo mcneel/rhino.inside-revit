@@ -686,7 +686,8 @@ namespace RhinoInside.Revit
               linesCount = -ToPointsBuffer(pointCloud, part, out vertexFormatBits, out vertexBuffer, out vertexCount, out linesBuffer);
             }
 
-            vertexFormat = new DB3D.VertexFormat(vertexFormatBits);
+            if (vertexFormatBits != default)
+              vertexFormat = new DB3D.VertexFormat(vertexFormatBits);
           }
 
           geometry = null;

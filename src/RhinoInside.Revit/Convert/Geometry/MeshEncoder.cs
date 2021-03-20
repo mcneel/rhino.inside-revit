@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Linq;
 using Rhino.Geometry;
 using DB = Autodesk.Revit.DB;
 
@@ -12,6 +13,10 @@ namespace RhinoInside.Revit.Convert.Geometry
   /// </summary>
   static class MeshEncoder
   {
+    #region Tolerances
+    static readonly double ShortEdgeTolerance = 2.0 * Revit.VertexTolerance;
+    #endregion
+
     #region Encode
     internal static Mesh ToRawMesh(/*const*/ Mesh mesh, double scaleFactor)
     {
@@ -25,7 +30,9 @@ namespace RhinoInside.Revit.Convert.Geometry
       if (EncodeRaw(ref mesh, scaleFactor))
       {
         // Revit needs Solid edges to be greater than Revit.ShortCurveTolerance
-        while (mesh.CollapseFacesByEdgeLength(false, Revit.ShortCurveTolerance) > 0) ;
+        mesh.Vertices.Align(Revit.ShortCurveTolerance, default);
+        mesh.Vertices.Align(Revit.ShortCurveTolerance, mesh.GetNakedEdgePointStatus().Select(x => !x));
+        mesh.Weld(Revit.AngleTolerance);
 
         return Brep.CreateFromMesh(mesh, true);
       }
@@ -42,13 +49,87 @@ namespace RhinoInside.Revit.Convert.Geometry
     static bool EncodeRaw(ref Mesh mesh, double scaleFactor)
     {
       if (scaleFactor != 1.0 && !mesh.Scale(scaleFactor))
-        return default;
+        return false;
 
       var bbox = mesh.GetBoundingBox(false);
-      if (!bbox.IsValid)
-        return default;
+      if (!bbox.IsValid || bbox.Diagonal.Length < ShortEdgeTolerance)
+        return false;
 
       return true;
+    }
+
+    [Flags]
+    enum MeshIssues
+    {
+      Nothing = 0,
+      ShortEdges = 1,
+    }
+
+    static MeshIssues AuditEdge(Point3d from, Point3d to)
+    {
+      var issues = default(MeshIssues);
+
+      if (from.DistanceTo(to) < ShortEdgeTolerance)
+      {
+        issues |= MeshIssues.ShortEdges;
+        GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Geometry contains short edges. Edges will be collapsed at the output.", new LineCurve(from, to));
+      }
+
+      return issues;
+    }
+
+    static MeshIssues AuditMesh(Mesh mesh)
+    {
+      var issues = default(MeshIssues);
+
+      var vertices = mesh.Vertices.ToPoint3dArray();
+
+      var faceCount = mesh.Faces.Count;
+      for (int f = 0; f < faceCount; ++f)
+      {
+        var face = mesh.Faces[f];
+
+        var A = vertices[face.A];
+        var B = vertices[face.B];
+        var C = vertices[face.C];
+
+        issues |= AuditEdge(A, B);
+        issues |= AuditEdge(B, C);
+
+        if (face.IsQuad)
+        {
+          var D = vertices[face.D];
+
+          issues |= AuditEdge(C, D);
+          issues |= AuditEdge(D, A);
+        }
+        else issues |= AuditEdge(C, A);
+      }
+
+      var edges = mesh.TopologyEdges;
+      for (int ei = 0; ei < edges.Count; ++ei)
+      {
+        if (edges.GetConnectedFaces(ei).Length > 2)
+          GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Geometry is nonmanifold.", new LineCurve(edges.EdgeLine(ei)));
+      }
+
+      var degenerated = mesh.Faces.CullDegenerateFaces();
+      if(degenerated > 0)
+        GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Geometry contains degenerated faces. Those faces will be removed.", default);
+
+      return issues;
+    }
+
+    static bool TryRebuildMesh(Mesh mesh, MeshIssues issues)
+    {
+      if (issues.HasFlag(MeshIssues.ShortEdges) && mesh.Ngons.Count == 0)
+      {
+        mesh.Vertices.Align(ShortEdgeTolerance, mesh.GetNakedEdgePointStatus().Select(x => !x));
+        mesh.Vertices.Align(ShortEdgeTolerance, default);
+        mesh.Weld(Revit.AngleTolerance);
+      }
+
+      return mesh.IsValid;
     }
     #endregion
 
@@ -58,8 +139,11 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="mesh"></param>
     /// <returns></returns>
-    internal static DB.Mesh ToMesh(/*const*/ Mesh mesh, double factor = UnitConverter.NoScale)
+    internal static DB.Mesh ToMesh(Mesh mesh, double factor = UnitConverter.NoScale)
     {
+      if (mesh is null)
+        return default;
+
       var shells = mesh.ExplodeAtUnweldedEdges();
       return ToMesh(shells.Length == 0 ? new Mesh[] { mesh } : shells, factor);
     }
@@ -77,17 +161,42 @@ namespace RhinoInside.Revit.Convert.Geometry
             Fallback = DB.TessellatedShapeBuilderFallback.Salvage
           }
         )
-        {
+        { 
           foreach (var shell in shells)
           {
-            shell.Ngons.Count = 0;
-            shell.Ngons.AddPlanarNgons(Revit.VertexTolerance / factor, 4, 2, true);
-            AddConnectedFaceSet(builder, shell, factor, true);
+            var issues = AuditMesh(shell);
+
+            var nGonCount = shell.Ngons.Count;
+            if (nGonCount != 0)
+            {
+              shell.Ngons.Count = 0;
+              if
+              (
+                nGonCount == 1 &&
+                Plane.FitPlaneToPoints(shell.Vertices.ToPoint3dArray(), out var _, out var deviation) == PlaneFitResult.Success &&
+                deviation <= Revit.VertexTolerance
+              )
+                shell.Ngons.AddPlanarNgons(Revit.VertexTolerance, 4, 2, true);
+            }
+
+            if (TryRebuildMesh(shell, issues))
+              AddConnectedFaceSet(builder, shell, factor, true);
           }
 
           builder.Build();
           using (var result = builder.GetBuildResult())
           {
+#if DEBUG
+            if (result.HasInvalidData)
+            {
+              var faceSets = result.GetNumberOfFaceSets();
+              for (int fs = 0; fs < faceSets; ++fs)
+              {
+                foreach (var issue in result.GetIssuesForFaceSet(fs))
+                  GeometryEncoder.Context.Peek.RuntimeMessage(255, $"DEBUG - {issue.GetIssueDescription()}", default);
+              }
+            }
+#endif
             if (result.Outcome != DB.TessellatedShapeBuilderOutcome.Nothing)
             {
               var geometries = result.GetGeometricalObjects();
@@ -110,17 +219,18 @@ namespace RhinoInside.Revit.Convert.Geometry
     static void AddConnectedFaceSet(DB.TessellatedShapeBuilder builder, Mesh mesh, double factor, bool assumePlanarNgons = false)
     {
       var vertices = mesh.Vertices.ToPoint3dArray();
+      if (vertices.Length < 3)
+        return;
+
       if (factor != 1.0)
       {
         for (int v = 0; v < vertices.Length; ++v)
           vertices[v] *= factor;
       }
 
-      if (vertices.Length < 3)
-        return;
-
       var isSolid = mesh.SolidOrientation() != 0;
       builder.OpenConnectedFaceSet(isSolid);
+      var faces = 0;
 
       var faceToNgon = new int[mesh.Faces.Count];
 
@@ -224,23 +334,33 @@ namespace RhinoInside.Revit.Convert.Geometry
             }
 
             var loops = Curve.JoinCurves(lines, Revit.VertexTolerance, true);
+
+            for (int i = 0; i < loops.Length; ++i)
+            {
+              loops[i] = loops[i].Simplify(CurveSimplifyOptions.All, ShortEdgeTolerance, Revit.AngleTolerance);
+              loops[i].RemoveShortSegments(ShortEdgeTolerance);
+            }
+
             var allLoopVertices = new List<IList<DB.XYZ>>(loops.Length);
 
             foreach (var loop in loops)
             {
-              var polyline = loop as PolylineCurve;
-              var loopVertices = new DB.XYZ[polyline.PointCount - 1];
-              for (int p = 0; p < loopVertices.Length; ++p)
-                loopVertices[p] = Raw.RawEncoder.AsXYZ(polyline.Point(p));
+              if (loop is PolylineCurve polyline && polyline.SpanCount > 2)
+              {
+                var loopVertices = new DB.XYZ[polyline.PointCount - 1];
+                for (int p = 0; p < loopVertices.Length; ++p)
+                  loopVertices[p] = Raw.RawEncoder.AsXYZ(polyline.Point(p));
 
-              var orientation = normal.IsZero ? loop.ClosedCurveOrientation() : loop.ClosedCurveOrientation(normal);
-              if (orientation == CurveOrientation.CounterClockwise)
-                allLoopVertices.Insert(0, loopVertices);
-              else
-                allLoopVertices.Add(loopVertices);
+                var orientation = normal.IsZero ? loop.ClosedCurveOrientation() : loop.ClosedCurveOrientation(normal);
+                if (orientation == CurveOrientation.CounterClockwise)
+                  allLoopVertices.Insert(0, loopVertices);
+                else
+                  allLoopVertices.Add(loopVertices);
+              }
             }
 
             builder.AddFace(new DB.TessellatedFace(allLoopVertices, GeometryEncoder.Context.Peek.MaterialId));
+            faces++;
           }
           else
           {
@@ -251,8 +371,17 @@ namespace RhinoInside.Revit.Convert.Geometry
         }
         else
         {
-          var outerLoopVertices = Array.ConvertAll(ngon.BoundaryVertexIndexList(), vi => Raw.RawEncoder.AsXYZ(vertices[vi]));
-          builder.AddFace(new DB.TessellatedFace(outerLoopVertices, GeometryEncoder.Context.Peek.MaterialId));
+          var pline = new PolylineCurve(Array.ConvertAll(ngon.BoundaryVertexIndexList(), vi => vertices[vi]));
+          if (pline.Simplify(CurveSimplifyOptions.All, ShortEdgeTolerance, Revit.AngleTolerance) is PolylineCurve polyline)
+          {
+            polyline.RemoveShortSegments(ShortEdgeTolerance);
+            if (polyline.SpanCount > 2)
+            {
+              var outerLoopVertices = polyline.ToPolyline().ConvertAll(vi => Raw.RawEncoder.AsXYZ(vi));
+              builder.AddFace(new DB.TessellatedFace(outerLoopVertices, GeometryEncoder.Context.Peek.MaterialId));
+              faces++;
+            }
+          }
         }
       }
 
@@ -305,6 +434,7 @@ namespace RhinoInside.Revit.Convert.Geometry
             if (planar && validB && validD && (distanceB < 0.0 != distanceD < 0.0))
             {
               builder.AddFace(new DB.TessellatedFace(quad, GeometryEncoder.Context.Peek.MaterialId));
+              faces++;
             }
             else
             {
@@ -312,12 +442,14 @@ namespace RhinoInside.Revit.Convert.Geometry
               {
                 triangle[0] = quad[0]; triangle[1] = quad[1]; triangle[2] = quad[2];
                 builder.AddFace(new DB.TessellatedFace(triangle, GeometryEncoder.Context.Peek.MaterialId));
+                faces++;
               }
 
               if (validD)
               {
                 triangle[0] = quad[2]; triangle[1] = quad[3]; triangle[2] = quad[0];
                 builder.AddFace(new DB.TessellatedFace(triangle, GeometryEncoder.Context.Peek.MaterialId));
+                faces++;
               }
             }
           }
@@ -329,10 +461,19 @@ namespace RhinoInside.Revit.Convert.Geometry
           triangle[2] = Raw.RawEncoder.AsXYZ(vertices[face.C]);
 
           builder.AddFace(new DB.TessellatedFace(triangle, GeometryEncoder.Context.Peek.MaterialId));
+          faces++;
         }
       }
 
-      builder.CloseConnectedFaceSet();
+      if (faces == 0) builder.CancelConnectedFaceSet();
+      else
+      {
+        try { builder.CloseConnectedFaceSet(); }
+        catch (Autodesk.Revit.Exceptions.InvalidOperationException e)
+        {
+          builder.CancelConnectedFaceSet();
+        }
+      }
     }
     #endregion
   }
