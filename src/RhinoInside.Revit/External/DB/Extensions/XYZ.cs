@@ -160,9 +160,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var y = aZ * bX - aX * bZ;
       var z = aX * bY - aY * bX;
 
-      // Scale result to be lengthA * lengthB in magnitude
-      var length = lengthA * lengthB / GetLength(x, y, z, tolerance);
-      return new XYZ(x * length, y * length, z * length);
+      // Scale result back to be lengthA * lengthB * sin(𝛼) in magnitude
+      var lengthAB = lengthA * lengthB;
+      return new XYZ(x * lengthAB, y * lengthAB, z * lengthAB);
     }
 
     /// <summary>
@@ -308,7 +308,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static bool TryGetInverse(this Transform transform, out Transform inverse)
     {
-      if (transform.Determinant < DefaultTolerance)
+      if (DefaultTolerance < transform.Determinant)
       {
         try { inverse = transform.Inverse; return true; }
         catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }

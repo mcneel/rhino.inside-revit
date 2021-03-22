@@ -95,7 +95,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
                  inverse.GetPrincipalComponent(0D) :
                  mesh.ComputeMeanNormal();
 
-      basisY = basisZ.CrossProduct(basisX, 0D).Normalize(0D);
+      basisY = basisZ.CrossProduct(basisX).Normalize(0D);
 
       return true;
     }
@@ -112,7 +112,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns>The XYZ point of the Centroid of this mesh.</returns>
     public static XYZ ComputeCentroid(this Mesh mesh)
     {
-      Sum area2 = default;
+      Sum weights = default;
       Sum centroidX = default, centroidY = default, centroidZ = default;
       var numTriangles = mesh.NumTriangles;
 
@@ -128,18 +128,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
         vY.Add(v0.Y, v1.Y, v2.Y);
         vZ.Add(v0.Z, v1.Z, v2.Z);
 
-        //var c = (v0 + v1 + v2) / 3.0;
-        var a = (v1 - v0).CrossProduct(v2 - v0, 0D).GetLength(0D);
-        area2.Add(a);
-        a /= 3.0;
+        var w = (v1 - v0).CrossProduct(v2 - v0, 0D).GetLength(0D);
+        weights.Add(w);
+        w /= 3.0;
 
-        centroidX.Add(vX.Value * a);
-        centroidY.Add(vY.Value * a);
-        centroidZ.Add(vZ.Value * a);
+        centroidX.Add(vX.Value * w);
+        centroidY.Add(vY.Value * w);
+        centroidZ.Add(vZ.Value * w);
       }
 
-      var area = area2.Value;
-      return new XYZ(centroidX.Value / area, centroidY.Value / area, centroidZ.Value / area);
+      var weightsSum = weights.Value;
+      return new XYZ(centroidX.Value / weightsSum, centroidY.Value / weightsSum, centroidZ.Value / weightsSum);
     }
 
     /// <summary>
@@ -167,13 +166,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
         var v2 = triangle.get_Vertex(2);
 
         var normal = (v1 - v0).CrossProduct(v2 - v0, 0D);
-        var area = normal.GetLength(0D);
-        normalX.Add(normal.X * area);
-        normalY.Add(normal.Y * area);
-        normalZ.Add(normal.Z * area);
+        normalX.Add(normal.X);
+        normalY.Add(normal.Y);
+        normalZ.Add(normal.Z);
       }
 
-      return new XYZ(normalX.Value, normalY.Value, normalZ.Value);
+      return new XYZ(normalX.Value / numTriangles, normalY.Value / numTriangles, normalZ.Value / numTriangles);
     }
 
     #endregion
