@@ -87,15 +87,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
         {
           origin = start + (curveDirection * 0.5);
           basisX = curveDirection.Normalize(0D);
-          basisY = curve.Normal.CrossProduct(basisX, 0D).Normalize(0D);
+          basisY = curve.Normal.CrossProduct(basisX).Normalize(0D);
           return true;
         }
       }
       else
       {
         origin = curve.Center;
-        basisX = curve.XDirection.Normalize(0D);
-        basisY = curve.YDirection.Normalize(0D);
+        basisX = curve.XDirection;
+        basisY = curve.YDirection;
         return true;
       }
 
@@ -115,15 +115,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
         {
           origin = start + (curveDirection * 0.5);
           basisX = curveDirection.Normalize(0D);
-          basisY = curve.Normal.CrossProduct(basisX, 0D);
+          basisY = curve.Normal.CrossProduct(basisX).Normalize(0D);
           return true;
         }
       }
       else
       {
         origin = curve.Center;
-        basisX = curve.XDirection.Normalize(0D);
-        basisY = curve.YDirection.Normalize(0D);
+        basisX = curve.XDirection;
+        basisY = curve.YDirection;
         return true;
       }
 
@@ -164,10 +164,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
             normal = inverse.GetPrincipalComponent(0D);
 
             if(planar)
-              normal = basisX.CrossProduct(normal, 0D).Normalize(0D);
+              normal = basisX.CrossProduct(normal).Normalize(0D);
           }
 
-          basisY = normal.CrossProduct(basisX, 0D).Normalize(0D);
+          basisY = normal.CrossProduct(basisX).Normalize(0D);
           return true;
         }
       }
