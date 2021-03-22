@@ -4,6 +4,8 @@ order: 10
 group: User Interface
 ---
 
+{% include youtube_player.html id="ogocxN8WXlA" %}
+
 ## Loading {{ site.terms.rir }}
 
 One Revit is loaded, click on the *Start* button under *Revit > Rhino.Inside* tab to load the {{ site.terms.rir }}
