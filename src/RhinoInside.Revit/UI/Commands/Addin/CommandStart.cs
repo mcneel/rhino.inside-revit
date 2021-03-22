@@ -348,8 +348,6 @@ namespace RhinoInside.Revit.UI
       using (File.Create(RhinoAssemblyResolveLog_txt)) { }
 
       bool deleteKey = false;
-      int DebugLoggingEnabled = 0;
-      int DebugLoggingSaveToFile = 0;
 
       try
       {
@@ -363,17 +361,14 @@ namespace RhinoInside.Revit.UI
             deleteKey = true;
           }
 
+        var DebugLogging = Settings.DebugLogging.Current;
         try
         {
-          using (var DebugLogging = Registry.CurrentUser.OpenSubKey(@"Software\McNeel\Rhinoceros\7.0\Global Options\Debug Logging", true))
+          Settings.DebugLogging.Current = new DebugLogging
           {
-            DebugLoggingEnabled = (DebugLogging.GetValue("Enabled", 0) as int?).GetValueOrDefault();
-            DebugLoggingSaveToFile = (DebugLogging.GetValue("SaveToFile", 0) as int?).GetValueOrDefault();
-
-            DebugLogging.SetValue("Enabled", 1);
-            DebugLogging.SetValue("SaveToFile", 1);
-            DebugLogging.Flush();
-          }
+            Enabled = true,
+            SaveToFile = true
+          };
 
           var si = new ProcessStartInfo()
           {
@@ -387,19 +382,14 @@ namespace RhinoInside.Revit.UI
         }
         finally
         {
-          using (var DebugLogging = Registry.CurrentUser.OpenSubKey(@"Software\McNeel\Rhinoceros\7.0\Global Options\Debug Logging", true))
-          {
-            DebugLogging.SetValue("Enabled", DebugLoggingEnabled);
-            DebugLogging.SetValue("SaveToFile", DebugLoggingSaveToFile);
-            DebugLogging.Flush();
-          }
+          Settings.DebugLogging.Current = DebugLogging;
         }
       }
       finally
       {
         if (deleteKey)
           try { Registry.CurrentUser.DeleteSubKey(SDKRegistryKeyName); }
-          catch (Exception) { }
+          catch { }
       }
     }
 

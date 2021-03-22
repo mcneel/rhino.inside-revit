@@ -57,8 +57,7 @@ namespace RhinoInside.Revit
         // Load RhinoCore
         try
         {
-          core = new RhinoCore
-          (
+          var args = Settings.DebugLogging.Current.Enabled ?
             new string[]
             {
               "/nosplash",
@@ -67,9 +66,16 @@ namespace RhinoInside.Revit
               "/stopwatch",
               $"/scheme={SchemeName}",
               $"/language={Revit.ApplicationUI.ControlledApplication.Language.ToLCID()}"
-            },
-            WindowStyle.Hidden
-          );
+            } :
+            new string[]
+            {
+              "/nosplash",
+              "/notemplate",
+              $"/scheme={SchemeName}",
+              $"/language={Revit.ApplicationUI.ControlledApplication.Language.ToLCID()}"
+            };
+
+          core = new RhinoCore(args, WindowStyle.Hidden);
         }
         catch
         {
