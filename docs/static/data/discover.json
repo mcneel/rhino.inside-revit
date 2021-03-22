@@ -734,6 +734,23 @@
         ]
     },
     {
+        "title": "Revit rooms to Rhino using Rhino Inside",
+        "url": "https://youtu.be/vm7I4hgPDNc",
+        "thumbnail": "https://i3.ytimg.com/vi/vm7I4hgPDNc/maxresdefault.jpg",
+        "author": "Gavin Crump",
+        "authorUrl": "https://www.youtube.com/channel/UCry22yTdpgEDdzIZig7NSMQ",
+        "description": "Rooms are very important when dealing with analysis workflows in Revit/Rhino projects. In this video I'll run through my workflow I typically use to cleanly migrate room shapes and their data to Rhino from Revit.",
+        "kinds": [
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "analysis",
+            "tutorial",
+            "workflow"
+        ]
+    },
+    {
         "title": "Geometry Gym with Rhino.Inside.Revit ",
         "url": "https://www.youtube.com/watch?v=0m1rn6EAI54",
         "thumbnail": "https://i3.ytimg.com/vi/0m1rn6EAI54/maxresdefault.jpg",
