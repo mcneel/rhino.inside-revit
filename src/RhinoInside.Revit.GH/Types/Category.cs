@@ -195,7 +195,7 @@ namespace RhinoInside.Revit.GH.Types
       return new Category(category);
     }
 
-    new public static Category FromElementId(DB.Document doc, DB.ElementId id)
+    public static new Category FromElementId(DB.Document doc, DB.ElementId id)
     {
       if (id.IsCategoryId(doc))
         return new Category(doc, id);

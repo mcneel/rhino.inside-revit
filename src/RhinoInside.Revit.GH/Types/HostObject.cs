@@ -106,5 +106,15 @@ namespace RhinoInside.Revit.GH.Types
 
     public HostObjectType() { }
     protected internal HostObjectType(DB.HostObjAttributes type) : base(type) { }
+
+    public CompoundStructure CompoundStructure
+    {
+      get => Value is DB.HostObjAttributes type ? new CompoundStructure(Document, type.GetCompoundStructure()) : default;
+      set
+      {
+        if (value is object && Value is DB.HostObjAttributes type)
+          type.SetCompoundStructure(value.Value);
+      }
+    }
   }
 }

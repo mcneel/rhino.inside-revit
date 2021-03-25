@@ -177,6 +177,8 @@
     <Compile Include="Components\ElementType\GroupType\Create.cs" />
     <Compile Include="Components\ElementType\GroupType\QueryGroupTypes.cs" />
     <Compile Include="Components\ElementType\HostObjectType\CompoundStructure.cs" />
+    <Compile Include="Components\ElementType\HostObjectType\ConstructCompoundStructure.cs" />
+    <Compile Include="Components\ElementType\HostObjectType\ConstructCompoundStructureLayer.cs" />
     <Compile Include="Components\ElementType\HostObjectType\DeconstructCompoundStructure.cs" />
     <Compile Include="Components\ElementType\HostObjectType\DeconstructCompoundStructureLayer.cs" />
     <Compile Include="Components\ElementType\Identity.cs" />
@@ -308,6 +310,7 @@
     <Compile Include="Parameters\AssetPropertyDouble1DMap.cs" />
     <Compile Include="Parameters\AssetPropertyDouble4DMap.cs" />
     <Compile Include="Extensions\Grasshopper\Kernel\Parameters\Param_ColorRGBA.cs" />
+    <Compile Include="Parameters\CompoundStructure.cs" />
     <Compile Include="Parameters\CurtainGrid.cs" />
     <Compile Include="Parameters\Elevation.cs" />
     <Compile Include="Parameters\Input\BuiltInParameter.cs" />
@@ -381,6 +384,7 @@
     <Compile Include="Types\BuildingPad.cs" />
     <Compile Include="Types\Category.cs" />
     <Compile Include="Types\Ceiling.cs" />
+    <Compile Include="Types\CompoundStructure.cs" />
     <Compile Include="Types\CurtainGrid.cs" />
     <Compile Include="Types\CurtainSystem.cs" />
     <Compile Include="Types\CurveElement.cs" />
