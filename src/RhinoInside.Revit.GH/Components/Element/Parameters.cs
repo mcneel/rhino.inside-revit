@@ -147,7 +147,7 @@ namespace RhinoInside.Revit.GH
           var element = new Types.Element();
           if (element.CastFrom(value))
           {
-            if(parameter.Element.Document.Equals(element.Document))
+            if(!parameter.Element.Document.IsEquivalent(element.Document))
               throw new ArgumentException("Failed to assign an element from a diferent document.", parameter.Definition.Name);
 
             return parameter.Set(element.Id);
