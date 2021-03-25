@@ -543,6 +543,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap CompoundStructure_Construct {
+            get {
+                object obj = ResourceManager.GetObject("CompoundStructure_Construct", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap CompoundStructureGeometry {
             get {
                 object obj = ResourceManager.GetObject("CompoundStructureGeometry", resourceCulture);
@@ -556,6 +566,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap CompoundStructureLayer {
             get {
                 object obj = ResourceManager.GetObject("CompoundStructureLayer", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap CompoundStructureLayer_Construct {
+            get {
+                object obj = ResourceManager.GetObject("CompoundStructureLayer_Construct", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -2416,6 +2436,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap RoofByOutline {
             get {
                 object obj = ResourceManager.GetObject("RoofByOutline", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SelectDeselectElement {
+            get {
+                object obj = ResourceManager.GetObject("SelectDeselectElement", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

@@ -1270,76 +1270,6 @@
     "uuid": "47b560ac-1e1d-4576-9f17-bccf612974d8"
   }, 
   {
-    "desc": "Given a Brep, it adds a Brep shape to the active Revit document", 
-    "iconsrc": "/static/images/GH/DirectShapeByBrep.png", 
-    "icontag": null, 
-    "panel": "DirectShape", 
-    "tab": "Revit", 
-    "title": "Add Brep DirectShape", 
-    "typename": "DirectShapeByBrep", 
-    "uuid": "5ade9ae3-588c-4285-abc5-09deb92c6660"
-  }, 
-  {
-    "desc": "Given a Curve, it adds a Curve shape to the active Revit document", 
-    "iconsrc": "/static/images/GH/DirectShapeByCurve.png", 
-    "icontag": null, 
-    "panel": "DirectShape", 
-    "tab": "Revit", 
-    "title": "Add Curve DirectShape", 
-    "typename": "DirectShapeByCurve", 
-    "uuid": "77f4fbdd-8a05-44a3-ac54-e52a79cf3e5a"
-  }, 
-  {
-    "desc": "Given its Geometry, it adds a DirectShape element to the active Revit document", 
-    "iconsrc": "/static/images/GH/DirectShapeByGeometry.png", 
-    "icontag": null, 
-    "panel": "DirectShape", 
-    "tab": "Revit", 
-    "title": "Add Geometry DirectShape", 
-    "typename": "DirectShapeByGeometry", 
-    "uuid": "0bfbda45-49cc-4ac6-8d6d-ecd2cfed062a"
-  }, 
-  {
-    "desc": "Given its Geometry, it reconstructs a DirectShapeType to the active Revit document", 
-    "iconsrc": "/static/images/GH/DirectShapeTypeByGeometry.png", 
-    "icontag": null, 
-    "panel": "DirectShape", 
-    "tab": "Revit", 
-    "title": "Add DirectShapeType", 
-    "typename": "DirectShapeTypeByGeometry", 
-    "uuid": "25dcfe8e-5be9-460c-80e8-51b7041d8fed"
-  }, 
-  {
-    "desc": "Given its location, it reconstructs a DirectShape into the active Revit document", 
-    "iconsrc": "/static/images/GH/DirectShapeByLocation.png", 
-    "icontag": null, 
-    "panel": "DirectShape", 
-    "tab": "Revit", 
-    "title": "Add DirectShape", 
-    "typename": "DirectShapeByLocation", 
-    "uuid": "a811efa4-8de2-46f3-9f88-3d4f13fe40be"
-  }, 
-  {
-    "desc": "Given a Mesh, it adds a Mesh shape to the active Revit document", 
-    "iconsrc": "/static/images/GH/DirectShapeByMesh.png", 
-    "icontag": null, 
-    "panel": "DirectShape", 
-    "tab": "Revit", 
-    "title": "Add Mesh DirectShape", 
-    "typename": "DirectShapeByMesh", 
-    "uuid": "5542506a-a09e-4ec9-92b4-f2b52417511c"
-  }, 
-  {
-    "desc": "Given a Point, it adds a Point shape to the active Revit document", 
-    "iconsrc": "/static/images/GH/DirectShapeByPoint.png", 
-    "icontag": null, 
-    "panel": "DirectShape", 
-    "tab": "Revit", 
-    "title": "Add Point DirectShape", 
-    "typename": "DirectShapeByPoint", 
-    "uuid": "7a889b89-c423-4ed8-91d9-5cece1ee803d"
-  }, 
-  {
     "desc": "Queries appearance, structural, and other assets from given material", 
     "iconsrc": "/static/images/GH/QueryAssetsOfMaterial.png", 
     "icontag": null, 
@@ -1528,6 +1458,16 @@
     "title": "Add Roof", 
     "typename": "RoofByOutline", 
     "uuid": "198e152b-6636-4d90-9443-ae77b8b1475e"
+  }, 
+  {
+    "desc": "Adds or remove elements from active selection", 
+    "iconsrc": "/static/images/GH/SelectDeselectElement.png", 
+    "icontag": null, 
+    "panel": "Element", 
+    "tab": "Revit", 
+    "title": "Select Elements", 
+    "typename": "SelectDeselectElement", 
+    "uuid": "d59d8b4b-a8ab-49c7-9036-209872aedd8b"
   }, 
   {
     "desc": "Given a Plane, it adds a SketchPlane element to the active Revit document", 
@@ -2100,6 +2040,76 @@
     "uuid": "3aedba3c-1b77-4c52-a7fc-7ca7095f730e"
   }, 
   {
+    "desc": "Given a Brep, it adds a Brep shape to the active Revit document", 
+    "iconsrc": "/static/images/GH/DirectShapeByBrep.png", 
+    "icontag": null, 
+    "panel": "DirectShape", 
+    "tab": "Revit", 
+    "title": "Add Brep DirectShape", 
+    "typename": "DirectShapeByBrep", 
+    "uuid": "5ade9ae3-588c-4285-abc5-09deb92c6660"
+  }, 
+  {
+    "desc": "Given a Curve, it adds a Curve shape to the active Revit document", 
+    "iconsrc": "/static/images/GH/DirectShapeByCurve.png", 
+    "icontag": null, 
+    "panel": "DirectShape", 
+    "tab": "Revit", 
+    "title": "Add Curve DirectShape", 
+    "typename": "DirectShapeByCurve", 
+    "uuid": "77f4fbdd-8a05-44a3-ac54-e52a79cf3e5a"
+  }, 
+  {
+    "desc": "Given its Geometry, it adds a DirectShape element to the active Revit document", 
+    "iconsrc": "/static/images/GH/DirectShapeByGeometry.png", 
+    "icontag": null, 
+    "panel": "DirectShape", 
+    "tab": "Revit", 
+    "title": "Add Geometry DirectShape", 
+    "typename": "DirectShapeByGeometry", 
+    "uuid": "0bfbda45-49cc-4ac6-8d6d-ecd2cfed062a"
+  }, 
+  {
+    "desc": "Given its Geometry, it reconstructs a DirectShapeType to the active Revit document", 
+    "iconsrc": "/static/images/GH/DirectShapeTypeByGeometry.png", 
+    "icontag": null, 
+    "panel": "DirectShape", 
+    "tab": "Revit", 
+    "title": "Add DirectShapeType", 
+    "typename": "DirectShapeTypeByGeometry", 
+    "uuid": "25dcfe8e-5be9-460c-80e8-51b7041d8fed"
+  }, 
+  {
+    "desc": "Given its location, it reconstructs a DirectShape into the active Revit document", 
+    "iconsrc": "/static/images/GH/DirectShapeByLocation.png", 
+    "icontag": null, 
+    "panel": "DirectShape", 
+    "tab": "Revit", 
+    "title": "Add DirectShape", 
+    "typename": "DirectShapeByLocation", 
+    "uuid": "a811efa4-8de2-46f3-9f88-3d4f13fe40be"
+  }, 
+  {
+    "desc": "Given a Mesh, it adds a Mesh shape to the active Revit document", 
+    "iconsrc": "/static/images/GH/DirectShapeByMesh.png", 
+    "icontag": null, 
+    "panel": "DirectShape", 
+    "tab": "Revit", 
+    "title": "Add Mesh DirectShape", 
+    "typename": "DirectShapeByMesh", 
+    "uuid": "5542506a-a09e-4ec9-92b4-f2b52417511c"
+  }, 
+  {
+    "desc": "Given a Point, it adds a Point shape to the active Revit document", 
+    "iconsrc": "/static/images/GH/DirectShapeByPoint.png", 
+    "icontag": null, 
+    "panel": "DirectShape", 
+    "tab": "Revit", 
+    "title": "Add Point DirectShape", 
+    "typename": "DirectShapeByPoint", 
+    "uuid": "7a889b89-c423-4ed8-91d9-5cece1ee803d"
+  }, 
+  {
     "desc": "Query level identity information", 
     "iconsrc": "/static/images/GH/LevelIdentity.png", 
     "icontag": null, 
@@ -2240,34 +2250,54 @@
     "uuid": "e8d8d05a-8703-4f75-b106-12b40ec9df7b"
   }, 
   {
-    "desc": "Get host object type compound structure", 
+    "desc": "Get-Set host type compound structure", 
     "iconsrc": "/static/images/GH/HostObjectTypeCompoundStructure.png", 
     "icontag": null, 
     "panel": "Host", 
     "tab": "Revit", 
     "title": "Host Type Compound Structure", 
     "typename": "HostObjectTypeCompoundStructure", 
-    "uuid": "024619ef-58ff-47c1-8833-96ba2f2b677b"
+    "uuid": "08cb62f1-68cb-4fd3-971c-25b0c82ac25a"
   }, 
   {
-    "desc": "Deconstructs given compound structure into its properties", 
+    "desc": "Construct compound structure", 
+    "iconsrc": null, 
+    "icontag": "C", 
+    "panel": "Host", 
+    "tab": "Revit", 
+    "title": "Construct Compound Structure", 
+    "typename": "ConstructCompoundStructure", 
+    "uuid": "92ba430e-196f-42b6-baf1-2fe864ef4f89"
+  }, 
+  {
+    "desc": "Construct compound structure layer", 
+    "iconsrc": null, 
+    "icontag": "C", 
+    "panel": "Host", 
+    "tab": "Revit", 
+    "title": "Construct Compound Structure Layer", 
+    "typename": "ConstructCompoundStructureLayer", 
+    "uuid": "69ee799c-266f-401e-9f77-a4533ebb5a60"
+  }, 
+  {
+    "desc": "Deconstruct compound structure", 
     "iconsrc": "/static/images/GH/DeconstructCompoundStructure.png", 
     "icontag": null, 
     "panel": "Host", 
     "tab": "Revit", 
     "title": "Deconstruct Compound Structure", 
     "typename": "DeconstructCompoundStructure", 
-    "uuid": "d0853b76-49fa-4ba8-869c-293a9c30ffe1"
+    "uuid": "120090a3-1cd6-4c97-8ca2-ab65587936ed"
   }, 
   {
-    "desc": "Deconstructs given compound structure layer into its properties", 
+    "desc": "Deconstruct compound structure layer", 
     "iconsrc": "/static/images/GH/DeconstructCompoundStructureLayer.png", 
     "icontag": null, 
     "panel": "Host", 
     "tab": "Revit", 
     "title": "Deconstruct Compound Structure Layer", 
     "typename": "DeconstructCompoundStructureLayer", 
-    "uuid": "bc64525a-10b6-46db-a134-cf803738b1a0"
+    "uuid": "6b32703e-a8b4-49c9-b855-133d3df925fe"
   }, 
   {
     "desc": "Get the boundary profile of the given host element", 
