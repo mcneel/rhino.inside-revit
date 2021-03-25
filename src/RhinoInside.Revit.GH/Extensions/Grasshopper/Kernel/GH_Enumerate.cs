@@ -102,7 +102,7 @@ namespace RhinoInside.Revit.GH.Types
     public static bool TryGetParamTypes(Type type, out Tuple<Type, Type> paramTypes) =>
       EnumTypes.TryGetValue(type, out paramTypes);
 
-    public override sealed string ToString() => $"{TypeName}: {Text}";
+    public sealed override string ToString() => $"{TypeName}: {Text}";
     public string Text
     {
       get
@@ -323,7 +323,7 @@ namespace RhinoInside.Revit.GH.Types
         return description?.Description ?? $"{typeof(T).Module.Name} {TypeName}";
       }
     }
-    public override sealed Type UnderlyingEnumType => typeof(T);
+    public sealed override Type UnderlyingEnumType => typeof(T);
 
     public override bool CastFrom(object source)
     {

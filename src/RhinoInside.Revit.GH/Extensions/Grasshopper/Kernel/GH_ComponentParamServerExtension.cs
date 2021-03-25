@@ -131,7 +131,7 @@ namespace Grasshopper.Kernel
         if (!DA.GetData(index, ref value)) return false;
         if (!validate(value))
         {
-          parameters.Owner.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{name} value is not valid.");
+          parameters.Owner.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Input parameter {name} collected some invalid data.");
           return false;
         }
 

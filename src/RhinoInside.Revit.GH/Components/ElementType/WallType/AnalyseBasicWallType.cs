@@ -35,7 +35,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
       manager.AddParameter(
-        param: new Parameters.DataObject<DB.CompoundStructure>(),
+        param: new Parameters.CompoundStructure(),
         name: "Structure",
         nickname: "S",
         description: "Compound Structure definition of given Basic Wall type",
@@ -82,7 +82,7 @@ namespace RhinoInside.Revit.GH.Components
         return;
 
       // grab compound structure
-      DA.SetData("Structure", new Types.DataObject<DB.CompoundStructure>(wallType.GetCompoundStructure(),wallType.Document));
+      DA.SetData("Structure", new Types.CompoundStructure(wallType.Document, wallType.GetCompoundStructure()));
 
       // pipe the wall type parameters directly to component outputs
       PipeHostParameter(DA, wallType, DB.BuiltInParameter.WRAPPING_AT_INSERTS_PARAM, "Wrapping at Inserts");

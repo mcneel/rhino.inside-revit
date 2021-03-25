@@ -347,23 +347,37 @@ namespace RhinoInside.Revit.GH.Types
   [
     ComponentGuid("A8122936-6A69-4D78-B1F5-13FD8F2144A5"),
     Name("End Cap Condition"),
-    Description("Represents end cap condition of a wall compound structure"),
+    Description("Represents end cap condition of a compound structure"),
   ]
   public class EndCapCondition : GH_Enum<DB.EndCapCondition>
   {
     public EndCapCondition() : base() { }
     public EndCapCondition(DB.EndCapCondition value) : base(value) { }
+
+    public override bool IsEmpty => Value == DB.EndCapCondition.None;
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
+      {
+        { (int) DB.EndCapCondition.None,      "<empty>"  },
+        { (int) DB.EndCapCondition.Exterior,  "Exterior" },
+        { (int) DB.EndCapCondition.Interior,  "Interior" },
+        { (int) DB.EndCapCondition.NoEndCap,  "None"     },
+      }
+    );
   }
 
   [
     ComponentGuid("68D22DE2-CDD5-4441-9745-462E28030A03"),
     Name("Deck Embedding Type"),
-    Description("Represents deck embedding type of a wall compound structure layer"),
+    Description("Represents deck embedding type of a compound structure layer"),
   ]
   public class DeckEmbeddingType : GH_Enum<DB.StructDeckEmbeddingType>
   {
-    public DeckEmbeddingType() : base() { }
+    public DeckEmbeddingType() : base(DB.StructDeckEmbeddingType.Invalid) { }
     public DeckEmbeddingType(DB.StructDeckEmbeddingType value) : base(value) { }
+
+    public override bool IsEmpty => Value == DB.StructDeckEmbeddingType.Invalid;
   }
 
   [
@@ -377,6 +391,21 @@ namespace RhinoInside.Revit.GH.Types
     public LayerFunction(DB.MaterialFunctionAssignment value) : base(value) { }
 
     public override bool IsEmpty => Value == DB.MaterialFunctionAssignment.None;
+
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
+      {
+        { (int) DB.MaterialFunctionAssignment.None,                 "<empty>"               },
+        { (int) DB.MaterialFunctionAssignment.Structure,            "Structure [1]"         },
+        { (int) DB.MaterialFunctionAssignment.Substrate,            "Substrate [2]"         },
+        { (int) DB.MaterialFunctionAssignment.Insulation,           "Thermal/Air Layer [3]" },
+        { (int) DB.MaterialFunctionAssignment.Finish1,              "Finish 1 [4]"          },
+        { (int) DB.MaterialFunctionAssignment.Finish2,              "Finish 2 [5]"          },
+        { (int) DB.MaterialFunctionAssignment.Membrane,             "Membrane Layer"        },
+        { (int) DB.MaterialFunctionAssignment.StructuralDeck,       "Structural Deck [1]"   },
+      }
+    );
   }
 
   [
@@ -388,6 +417,17 @@ namespace RhinoInside.Revit.GH.Types
   {
     public OpeningWrappingCondition() : base() { }
     public OpeningWrappingCondition(DB.OpeningWrappingCondition value) : base(value) { }
+
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
+      {
+        { (int) DB.OpeningWrappingCondition.None,                 "None"                },
+        { (int) DB.OpeningWrappingCondition.Exterior,             "Exterior"            },
+        { (int) DB.OpeningWrappingCondition.Interior,             "Interior"            },
+        { (int) DB.OpeningWrappingCondition.ExteriorAndInterior,  "Exterior & Interior" },
+      }
+    );
   }
 
   [

@@ -95,12 +95,6 @@ namespace RhinoInside.Revit.GH.Types
 
     protected virtual void SubInvalidateGraphics() { }
 
-    internal void AssertValidDocument(DB.Document doc, string paramName)
-    {
-      if (!(doc?.Equals(Document) ?? false))
-        throw new System.ArgumentException("Invalid Document", paramName);
-    }
-
     public static Element FromValue(object data)
     {
       switch (data)

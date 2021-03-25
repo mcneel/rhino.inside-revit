@@ -20,6 +20,12 @@ namespace RhinoInside.Revit.GH.Components
                                       ImageBuilder.BuildIcon(IconTag, Properties.Resources.UnknownIcon);
 
     protected virtual string IconTag => GetType().Name.Substring(0, 1);
+
+#if DEBUG
+    // Placeholders for breakpoints in DEBUG
+    public override void AddRuntimeMessage(GH_RuntimeMessageLevel level, string text) =>
+      base.AddRuntimeMessage(level, text);
+#endif
   }
 
   public abstract class Component : GH_Component, Kernel.IGH_ElementIdComponent
@@ -44,7 +50,7 @@ namespace RhinoInside.Revit.GH.Components
     Exception unhandledException;
     protected bool IsAborted => unhandledException is object;
     protected virtual bool AbortOnUnhandledException => false;
-    public override sealed void ComputeData()
+    public sealed override void ComputeData()
     {
       Rhinoceros.InvokeInHostContext(() => base.ComputeData());
 

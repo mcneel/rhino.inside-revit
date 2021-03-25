@@ -17,13 +17,16 @@ namespace RhinoInside.Revit.GH.Types
     object Value { get; }
   }
 
-  public abstract class DocumentObject : IGH_DocumentObject, IEquatable<DocumentObject>
+  public abstract class DocumentObject : IGH_DocumentObject, IEquatable<DocumentObject>, ICloneable
   {
     #region System.Object
     public bool Equals(DocumentObject other) => other is object &&
       Equals(Document, other.Document) && Equals(Value, other.Value);
     public override bool Equals(object obj) => (obj is DocumentObject id) ? Equals(id) : base.Equals(obj);
     public override int GetHashCode() => Document.GetHashCode() ^ Value.GetHashCode();
+    public override string ToString() => $"Revit {((IGH_Goo) this).TypeName} : {DisplayName}";
+
+    object ICloneable.Clone() => MemberwiseClone();
     #endregion
 
     #region IGH_Goo
@@ -39,7 +42,7 @@ namespace RhinoInside.Revit.GH.Types
     string IGH_Goo.TypeDescription => $"Represents a Revit {((IGH_Goo) this).TypeName.ToLowerInvariant()}";
     public virtual bool IsValid => Document.IsValid();
     public virtual string IsValidWhyNot => IsValid ? string.Empty : "Not Valid";
-    IGH_Goo IGH_Goo.Duplicate() => (IGH_Goo) MemberwiseClone();
+    IGH_Goo IGH_Goo.Duplicate() => (IGH_Goo) (this as ICloneable)?.Clone();
     object IGH_Goo.ScriptVariable() => Value;
 
     IGH_GooProxy IGH_Goo.EmitProxy() => default;
@@ -94,6 +97,12 @@ namespace RhinoInside.Revit.GH.Types
       protected set { document = value; ResetValue(); }
     }
 
+    protected internal void AssertValidDocument(DB.Document doc, string paramName)
+    {
+      if (!(doc?.Equals(Document) ?? false))
+        throw new System.ArgumentException("Invalid Document", paramName);
+    }
+
     object value;
     public virtual object Value
     {
@@ -113,6 +122,24 @@ namespace RhinoInside.Revit.GH.Types
   public interface IGH_ValueObject : IGH_DocumentObject
   {
 
+  }
+
+  public abstract class ValueObject : DocumentObject, IGH_ValueObject, IEquatable<ValueObject>
+  {
+    #region System.Object
+    public bool Equals(ValueObject other) => other is object &&
+      Equals(Document, other.Document) && Equals(Value, other.Value);
+    public override bool Equals(object obj) => (obj is ValueObject id) ? Equals(id) : base.Equals(obj);
+    public override int GetHashCode() => Document.GetHashCode() ^ Value.GetHashCode();
+    #endregion
+
+    #region IGH_Goo
+    public override bool IsValid => base.IsValid && !(Value is null);
+    #endregion
+
+    protected ValueObject() { }
+
+    protected ValueObject(DB.Document doc, object val) : base(doc, val) { }
   }
 
   /// <summary>
