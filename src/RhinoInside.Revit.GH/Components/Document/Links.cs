@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
@@ -13,6 +14,22 @@ namespace RhinoInside.Revit.GH.Components
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "L";
     protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.RevitLinkType));
+
+    #region UI
+    protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
+    {
+      base.AppendAdditionalComponentMenuItems(menu);
+
+      var activeApp = Revit.ActiveUIApplication;
+      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.ManageLinks);
+      Menu_AppendItem
+      (
+        menu, $"Manage Links…",
+        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
+        activeApp.CanPostCommand(commandId), false
+      );
+    }
+    #endregion
 
     public DocumentLinks() : base
     (

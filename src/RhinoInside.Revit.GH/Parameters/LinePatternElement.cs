@@ -16,6 +16,21 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public LinePatternElement() : base("Line Pattern", "Line Pattern", "Represents a Revit document line pattern.", "Params", "Revit Primitives") { }
 
+    #region UI
+    public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
+    {
+      base.AppendAdditionalMenuItems(menu);
+
+      var activeApp = Revit.ActiveUIApplication;
+      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.LinePatterns);
+      Menu_AppendItem
+      (
+        menu, $"Open Line Patterns…",
+        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
+        activeApp.CanPostCommand(commandId), false
+      );
+    }
+
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
       if (SourceCount != 0)
@@ -72,5 +87,6 @@ namespace RhinoInside.Revit.GH.Parameters
         ExpireSolution(true);
       }
     }
+    #endregion
   }
 }

@@ -148,7 +148,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
       if (elementIds.Any())
       {
-        using (new External.EditScope())
+        using (new External.UI.EditScope(Revit.ActiveUIApplication))
         {
           using
           (

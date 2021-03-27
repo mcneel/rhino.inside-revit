@@ -15,6 +15,22 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public Material() : base("Material", "Material", "Represents a Revit document material.", "Params", "Revit Primitives") { }
 
+    #region UI
+    public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
+    {
+      base.AppendAdditionalMenuItems(menu);
+
+      var activeApp = Revit.ActiveUIApplication;
+      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.Materials);
+      Menu_AppendItem
+      (
+        menu, $"Open Materials…",
+        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
+        activeApp.CanPostCommand(commandId), false
+      );
+    }
+    #endregion
+
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
       if (SourceCount != 0)

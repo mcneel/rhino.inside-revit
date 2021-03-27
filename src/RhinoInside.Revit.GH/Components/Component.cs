@@ -37,7 +37,7 @@ namespace RhinoInside.Revit.GH.Components
       {
         foreach (var obsolete in GetType().GetCustomAttributes(typeof(ObsoleteAttribute), false).Cast<ObsoleteAttribute>())
         {
-          if(!string.IsNullOrEmpty(obsolete.Message))
+          if (!string.IsNullOrEmpty(obsolete.Message))
             Description = obsolete.Message + Environment.NewLine + Description;
         }
       }
@@ -184,7 +184,7 @@ namespace RhinoInside.Revit.GH.Components
 
     public void AddGeometryRuntimeError(GH_RuntimeMessageLevel level, string text, Rhino.Geometry.GeometryBase geometry)
     {
-      if(text is object) AddRuntimeMessage(level, text);
+      if (text is object) AddRuntimeMessage(level, text);
       if (geometry is object) RuntimeErrorGeometry.Add((geometry, geometry.GetBoundingBox(false)));
     }
 
@@ -201,7 +201,7 @@ namespace RhinoInside.Revit.GH.Components
         return;
 
       var dpi = args.Display.DpiScale;
-      var pointRadius    = 2.0f * args.Display.DisplayPipelineAttributes.PointRadius * dpi;
+      var pointRadius = 2.0f * args.Display.DisplayPipelineAttributes.PointRadius * dpi;
       var curveThickness = (int) Math.Round(1.5f * args.DefaultCurveThickness * dpi, MidpointRounding.AwayFromZero);
 
       foreach (var error in RuntimeErrorGeometry)

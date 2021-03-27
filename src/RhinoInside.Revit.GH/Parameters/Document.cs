@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public DataGrouping Grouping { get; set; } = DataGrouping.None;
 
-    public override sealed bool Read(GH_IReader reader)
+    public sealed override bool Read(GH_IReader reader)
     {
       if (!base.Read(reader))
         return false;
@@ -38,7 +38,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
       return true;
     }
-    public override sealed bool Write(GH_IWriter writer)
+    public sealed override bool Write(GH_IWriter writer)
     {
       if (!base.Write(writer))
         return false;
@@ -49,6 +49,7 @@ namespace RhinoInside.Revit.GH.Parameters
       return true;
     }
 
+    #region UI
     protected override void Menu_AppendPreProcessParameter(ToolStripDropDown menu)
     {
       base.Menu_AppendPreProcessParameter(menu);
@@ -76,6 +77,7 @@ namespace RhinoInside.Revit.GH.Parameters
     protected override void Menu_AppendPromptMore(ToolStripDropDown menu) { }
     protected override GH_GetterResult Prompt_Singular(ref Types.Document value) => GH_GetterResult.cancel;
     protected override GH_GetterResult Prompt_Plural(ref List<Types.Document> values) => GH_GetterResult.cancel;
+    #endregion
 
     protected override void ProcessVolatileData()
     {

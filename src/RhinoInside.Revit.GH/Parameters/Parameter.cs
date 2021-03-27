@@ -19,6 +19,21 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public ParameterKey() : base("Parameter Key", "ParaKey", "Represents a Revit parameter definition.", "Params", "Revit Primitives") { }
 
+    #region UI
+    public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
+    {
+      base.AppendAdditionalMenuItems(menu);
+
+      var activeApp = Revit.ActiveUIApplication;
+      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.ProjectParameters);
+      Menu_AppendItem
+      (
+        menu, $"Open Project Parameters…",
+        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
+        activeApp.CanPostCommand(commandId), false
+      );
+    }
+
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
       var listBox = new ListBox();
@@ -157,6 +172,7 @@ namespace RhinoInside.Revit.GH.Parameters
         ExpireSolution(true);
       }
     }
+    #endregion
   }
 
   public class ParameterValue : GH_Param<Types.ParameterValue>

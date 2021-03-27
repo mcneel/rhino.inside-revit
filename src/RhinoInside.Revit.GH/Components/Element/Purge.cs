@@ -387,9 +387,19 @@ namespace RhinoInside.Revit.GH.Components
     }
 
     #region UI
+
     protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
     {
       base.AppendAdditionalComponentMenuItems(menu);
+
+      var activeApp = Revit.ActiveUIApplication;
+      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.PurgeUnused);
+      Menu_AppendItem
+      (
+        menu, $"Open Purge Unused…",
+        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
+        activeApp.CanPostCommand(commandId), false
+      );
 
 #if DEBUG
       // TODO : Keep thinking on Simulated Transactions feature
@@ -397,6 +407,7 @@ namespace RhinoInside.Revit.GH.Components
 #endif
     }
 
+#if DEBUG
     private void Menu_SimulatedClicked(object sender, EventArgs e)
     {
       if (sender is ToolStripMenuItem)
@@ -411,6 +422,7 @@ namespace RhinoInside.Revit.GH.Components
         ExpireSolution(true);
       }
     }
+#endif
     #endregion
 
     #region IO

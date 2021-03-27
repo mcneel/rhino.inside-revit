@@ -16,6 +16,19 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public Level() : base("Level", "Level", "Represents a Revit document level.", "Params", "Revit Primitives") { }
 
+    #region UI
+    protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
+    {
+      var Level = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.Level);
+      Menu_AppendItem
+      (
+        menu, $"Set new {TypeName}",
+        Menu_PromptNew(Level),
+        Revit.ActiveUIApplication.CanPostCommand(Level),
+        false
+      );
+    }
+
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
       if (SourceCount != 0)
@@ -75,6 +88,7 @@ namespace RhinoInside.Revit.GH.Parameters
         ExpireSolution(true);
       }
     }
+    #endregion
   }
 
   public class Grid : GraphicalElementT<Types.Grid, DB.Grid>
@@ -83,6 +97,19 @@ namespace RhinoInside.Revit.GH.Parameters
     public override Guid ComponentGuid => new Guid("7D2FB886-A184-41B8-A7D6-A6FDB85CF4E4");
 
     public Grid() : base("Grid", "Grid", "Represents a Revit document grid.", "Params", "Revit Primitives") { }
+
+    #region UI
+    protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
+    {
+      var Grid = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.Grid);
+      Menu_AppendItem
+      (
+        menu, $"Set new {TypeName}",
+        Menu_PromptNew(Grid),
+        Revit.ActiveUIApplication.CanPostCommand(Grid),
+        false
+      );
+    }
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
@@ -143,5 +170,6 @@ namespace RhinoInside.Revit.GH.Parameters
         ExpireSolution(true);
       }
     }
+    #endregion
   }
 }
