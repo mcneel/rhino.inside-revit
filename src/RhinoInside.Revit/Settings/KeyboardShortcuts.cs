@@ -72,16 +72,16 @@ namespace RhinoInside.Revit.Settings
     {
       commandId = $"CustomCtrl_%CustomCtrl_%{tabName}%{panelName}%{commandId}";
 
-      string keyboardShortcutsPath = Path.Combine(Revit.ApplicationUI.ControlledApplication.GetCurrentUsersDataFolderPath(), "KeyboardShortcuts.xml");
+      string keyboardShortcutsPath = Path.Combine(AddIn.ApplicationUI.ControlledApplication.GetCurrentUsersDataFolderPath(), "KeyboardShortcuts.xml");
       if (!File.Exists(keyboardShortcutsPath))
-        keyboardShortcutsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Autodesk", $"RVT {Revit.ApplicationUI.ControlledApplication.VersionNumber}", "UserDataCache", "KeyboardShortcuts.xml");
+        keyboardShortcutsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Autodesk", $"RVT {AddIn.ApplicationUI.ControlledApplication.VersionNumber}", "UserDataCache", "KeyboardShortcuts.xml");
 
       if (!LoadFrom(keyboardShortcutsPath, out var shortcuts))
-        LoadFromResources($"Resources.RVT{Revit.ApplicationUI.ControlledApplication.VersionNumber}.KeyboardShortcuts.xml", out shortcuts);
+        LoadFromResources($"Resources.RVT{AddIn.ApplicationUI.ControlledApplication.VersionNumber}.KeyboardShortcuts.xml", out shortcuts);
 
 #if DEBUG
       // Those lines generate the KeyboardShortcuts.xml template file when new Revit version is supported
-      string keyboardShortcutsTemplatePath = Path.Combine(AddIn.SourceCodePath, "Resources", $"RVT{Revit.ApplicationUI.ControlledApplication.VersionNumber}", "KeyboardShortcuts.xml");
+      string keyboardShortcutsTemplatePath = Path.Combine(AddIn.SourceCodePath, "Resources", $"RVT{AddIn.ApplicationUI.ControlledApplication.VersionNumber}", "KeyboardShortcuts.xml");
       var info = new FileInfo(keyboardShortcutsTemplatePath);
       if (info.Length == 0)
       {
@@ -127,7 +127,7 @@ namespace RhinoInside.Revit.Settings
       }
 
       if (shortcutUpdated)
-        SaveAs(shortcuts, Path.Combine(Revit.ApplicationUI.ControlledApplication.GetCurrentUsersDataFolderPath(), "KeyboardShortcuts.xml"));
+        SaveAs(shortcuts, Path.Combine(AddIn.ApplicationUI.ControlledApplication.GetCurrentUsersDataFolderPath(), "KeyboardShortcuts.xml"));
 
       return shortcutUpdated;
     }

@@ -273,6 +273,7 @@ namespace RhinoInside.Revit
     [Obsolete("Since 2021-03-19")]
     public static string CurrentUsersDataFolderPath => ApplicationUI.ControlledApplication.GetCurrentUsersDataFolderPath();
 
+    [Obsolete("Since 2021-03-27")]
     public static Autodesk.Revit.UI.UIControlledApplication       ApplicationUI => AddIn.ApplicationUI;
     public static Autodesk.Revit.UI.UIApplication                 ActiveUIApplication { get; internal set; }
     public static Autodesk.Revit.ApplicationServices.Application  ActiveDBApplication => ActiveUIApplication?.Application;

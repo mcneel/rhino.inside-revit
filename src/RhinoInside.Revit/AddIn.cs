@@ -12,6 +12,7 @@ using Microsoft.Win32.SafeHandles;
 using RhinoInside.Revit.Native;
 using RhinoInside.Revit.Settings;
 using UIX = RhinoInside.Revit.External.UI;
+using ASX = RhinoInside.Revit.External.ApplicationServices;
 
 namespace RhinoInside.Revit
 {
@@ -147,11 +148,11 @@ namespace RhinoInside.Revit
       if (uiCtrlApp.IsLateAddinLoading)
       {
         EventHandler<Autodesk.Revit.UI.Events.IdlingEventArgs> applicationIdling = null;
-        ApplicationUI.Idling += applicationIdling = (sender, args) =>
+        uiCtrlApp.Idling += applicationIdling = (sender, args) =>
         {
           if (sender is UIApplication app)
           {
-            ApplicationUI.Idling -= applicationIdling;
+            uiCtrlApp.Idling -= applicationIdling;
             DoStartUp(app.Application);
           }
         };
@@ -245,7 +246,7 @@ namespace RhinoInside.Revit
       if (StartupMode < AddinStartupMode.AtStartup)
         return;
 
-      if (Revit.OnStartup(Revit.ApplicationUI) == Result.Succeeded)
+      if (Revit.OnStartup(ApplicationUI) == Result.Succeeded)
       {
         if (StartupMode == AddinStartupMode.Scripting)
           Revit.ActiveUIApplication.PostCommand(RevitCommandId.LookupPostableCommandId(PostableCommand.ExitRevit));
@@ -339,7 +340,7 @@ namespace RhinoInside.Revit
     #endregion
 
     #region Version
-    internal static bool CheckIsExpired(bool quiet = true)
+    static bool CheckIsExpired(bool quiet = true)
     {
       if (DaysUntilExpiration > 0 && quiet)
         return false;
@@ -370,31 +371,31 @@ namespace RhinoInside.Revit
       return DaysUntilExpiration < 1;
     }
 
-    static bool IsValid(UIControlledApplication app)
+    static bool IsValid(ASX.HostServices app)
     {
 #if REVIT_2021
-      return app.ControlledApplication.VersionNumber == "2021";
+      return app.VersionNumber == "2021";
 #elif REVIT_2020
-      return app.ControlledApplication.VersionNumber == "2020";
+      return app.VersionNumber == "2020";
 #elif REVIT_2019
-      return app.ControlledApplication.VersionNumber == "2019";
+      return app.VersionNumber == "2019";
 #elif REVIT_2018
-      return app.ControlledApplication.VersionNumber == "2018";
+      return app.VersionNumber == "2018";
 #elif REVIT_2017
-      return app.ControlledApplication.VersionNumber == "2017";
+      return app.VersionNumber == "2017";
 #else
       return false;
 #endif
     }
 
-    static bool CanLoad(UIControlledApplication app)
+    static bool CanLoad(UIX.UIHostApplication app)
     {
-      return IsValid(app);
+      return IsValid(app.Services);
     }
 
-    internal static Result CheckSetup(UIControlledApplication app)
+    internal static Result CheckSetup(UIX.UIHostApplication app)
     {
-      var revit = app.ControlledApplication;
+      var services = app.Services;
 
       // Check if Rhino.Inside is expired
       if (CheckIsExpired(DaysUntilExpiration > 10))
@@ -417,14 +418,14 @@ namespace RhinoInside.Revit
             $"{RhinoVersionInfo.ProductName} {RhinoVersionInfo.ProductMajorPart}\n" +
             $"• Version: {RhinoVersion}\n" +
             $"• Path: '{SystemDir}'" + (!File.Exists(RhinoExePath) ? " (not found)" : string.Empty) + "\n" +
-            $"\n{revit.VersionName}\n" +
+            $"\n{services.VersionName}\n" +
 #if REVIT_2019
-            $"• Version: {revit.SubVersionNumber} ({revit.VersionBuild})\n" +
+            $"• Version: {services.SubVersionNumber} ({services.VersionBuild})\n" +
 #else
             $"• Version: {revit.VersionNumber} ({revit.VersionBuild})\n" +
 #endif
             $"• Path: {Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName)}\n" +
-            $"• Language: {revit.Language}",
+            $"• Language: {services.Language}",
             FooterText = $"Current Rhino version: {RhinoVersion}"
           }
         )
@@ -471,8 +472,8 @@ namespace RhinoInside.Revit
 
               var RhinoInside_dmp = Path.Combine
               (
-                Path.GetDirectoryName(revit.RecordingJournalFilename),
-                Path.GetFileNameWithoutExtension(revit.RecordingJournalFilename) + ".RhinoInside.Revit.dmp"
+                Path.GetDirectoryName(services.RecordingJournalFilename),
+                Path.GetFileNameWithoutExtension(services.RecordingJournalFilename) + ".RhinoInside.Revit.dmp"
               );
 
               MiniDumper.Write(RhinoInside_dmp);
@@ -484,7 +485,7 @@ namespace RhinoInside.Revit
                 true,
                 new string[]
                 {
-                  revit.RecordingJournalFilename,
+                  services.RecordingJournalFilename,
                   RhinoInside_dmp
                 }
               );
@@ -512,7 +513,7 @@ namespace RhinoInside.Revit
     public static string DisplayVersion => $"{Version} ({BuildDate})";
     #endregion
 
-    #region Rhino-friendly UI Framework
+    #region Eto UI Framework
     internal static bool IsEtoFrameworkReady { get; set; }  = false;
     static class EtoFramework
     {

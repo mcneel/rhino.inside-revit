@@ -116,7 +116,7 @@ namespace RhinoInside.Revit.UI
       var result = Result.Failed;
       var button = RestoreButton(CommandName);
 
-      switch (result = Revit.OnStartup(Revit.ApplicationUI))
+      switch (result = Revit.OnStartup(AddIn.ApplicationUI))
       {
         case Result.Succeeded:
           // Update Rhino button Tooltip

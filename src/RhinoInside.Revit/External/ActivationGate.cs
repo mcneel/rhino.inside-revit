@@ -449,29 +449,5 @@ namespace RhinoInside.Revit.External
     static Hook hook = default;
     #endregion
   }
-
-  public sealed class EditScope : IDisposable
-  {
-    readonly WindowHandle activeWindow = WindowHandle.ActiveWindow;
-    readonly bool WasExposed = Rhinoceros.MainWindow.Visible;
-    readonly bool WasEnabled = Revit.MainWindow.Enabled;
-
-    public EditScope()
-    {
-                      Rhinoceros.MainWindow.HideOwnedPopups();
-      if (WasExposed) Rhinoceros.MainWindow.Visible = false;
-
-      Revit.MainWindow.Enabled = true;
-      WindowHandle.ActiveWindow = Revit.MainWindow;
-    }
-
-    void IDisposable.Dispose()
-    {
-      if (WasExposed) Rhinoceros.MainWindow.Visible = WasExposed;
-                      Rhinoceros.MainWindow.ShowOwnedPopups();
-
-      Revit.MainWindow.Enabled = WasEnabled;
-      WindowHandle.ActiveWindow = activeWindow;
-    }
-  }
 }
+

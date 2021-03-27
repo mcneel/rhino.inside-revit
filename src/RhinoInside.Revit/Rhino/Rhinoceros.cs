@@ -47,128 +47,118 @@ namespace RhinoInside.Revit
   {
     #region Revit Interface
     static RhinoCore core;
-    public static readonly string SchemeName = $"Inside-Revit-{Revit.ApplicationUI.ControlledApplication.VersionNumber}";
+    public static readonly string SchemeName = $"Inside-Revit-{AddIn.ApplicationUI.ControlledApplication.VersionNumber}";
     internal static string[] StartupLog;
 
     internal static Result Startup()
     {
-      if (core is null)
+      if (core is object)
+        return Result.Failed;
+
+      // Load RhinoCore
+      try
       {
-        // Load RhinoCore
-        try
-        {
-          var args = Settings.DebugLogging.Current.Enabled ?
-            new string[]
-            {
-              "/nosplash",
-              "/notemplate",
-              "/captureprintcalls",
-              "/stopwatch",
-              $"/scheme={SchemeName}",
-              $"/language={Revit.ApplicationUI.ControlledApplication.Language.ToLCID()}"
-            } :
-            new string[]
-            {
-              "/nosplash",
-              "/notemplate",
-              $"/scheme={SchemeName}",
-              $"/language={Revit.ApplicationUI.ControlledApplication.Language.ToLCID()}"
-            };
+        var args = Settings.DebugLogging.Current.Enabled ?
+          new string[]
+          {
+            "/nosplash",
+            "/notemplate",
+            "/captureprintcalls",
+            "/stopwatch",
+            $"/scheme={SchemeName}",
+            $"/language={AddIn.ApplicationUI.ControlledApplication.Language.ToLCID()}"
+          } :
+          new string[]
+          {
+            "/nosplash",
+            "/notemplate",
+            $"/scheme={SchemeName}",
+            $"/language={AddIn.ApplicationUI.ControlledApplication.Language.ToLCID()}"
+          };
 
-          core = new RhinoCore(args, WindowStyle.Hidden);
-        }
-        catch
-        {
-          AddIn.CurrentStatus = AddIn.Status.Failed;
-          return Result.Failed;
-        }
-        finally
-        {
-          StartupLog = RhinoApp.CapturedCommandWindowStrings(true);
-          RhinoApp.CommandWindowCaptureEnabled = false;
-        }
+        core = new RhinoCore(args, WindowStyle.Hidden);
+      }
+      catch
+      {
+        AddIn.CurrentStatus = AddIn.Status.Failed;
+        return Result.Failed;
+      }
+      finally
+      {
+        StartupLog = RhinoApp.CapturedCommandWindowStrings(true);
+        RhinoApp.CommandWindowCaptureEnabled = false;
+      }
 
-        MainWindow = new WindowHandle(RhinoApp.MainWindowHandle());
-        External.ActivationGate.AddGateWindow(MainWindow.Handle);
+      MainWindow = new WindowHandle(RhinoApp.MainWindowHandle());
+      External.ActivationGate.AddGateWindow(MainWindow.Handle);
 
-        RhinoApp.MainLoop                         += MainLoop;
+      RhinoApp.MainLoop                         += MainLoop;
 
-        RhinoDoc.NewDocument                      += OnNewDocument;
-        RhinoDoc.EndOpenDocumentInitialViewUpdate += EndOpenDocumentInitialViewUpdate;
+      RhinoDoc.NewDocument                      += OnNewDocument;
+      RhinoDoc.EndOpenDocumentInitialViewUpdate += EndOpenDocumentInitialViewUpdate;
 
-        Command.BeginCommand                      += BeginCommand;
-        Command.EndCommand                        += EndCommand;
+      Command.BeginCommand                      += BeginCommand;
+      Command.EndCommand                        += EndCommand;
 
-        // Alternative to /runscript= Rhino command line option
-        RunScriptAsync
+      // Alternative to /runscript= Rhino command line option
+      RunScriptAsync
+      (
+        script:   Environment.GetEnvironmentVariable("RhinoInside_RunScript"),
+        activate: AddIn.StartupMode == AddinStartupMode.AtStartup
+      );
+
+      // Add DefaultRenderAppearancePath to Rhino settings if missing
+      {
+        var DefaultRenderAppearancePath = System.IO.Path.Combine
         (
-          script:   Environment.GetEnvironmentVariable("RhinoInside_RunScript"),
-          activate: AddIn.StartupMode == AddinStartupMode.AtStartup
+          Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFilesX86),
+          "Autodesk Shared",
+          "Materials",
+          "Textures"
         );
 
-        // Add DefaultRenderAppearancePath to Rhino settings if missing
-        {
-          var DefaultRenderAppearancePath = System.IO.Path.Combine
-          (
-            Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFilesX86),
-            "Autodesk Shared",
-            "Materials",
-            "Textures"
-          );
+        if (!Rhino.ApplicationSettings.FileSettings.GetSearchPaths().Any(x => x.Equals(DefaultRenderAppearancePath, StringComparison.InvariantCultureIgnoreCase)))
+          Rhino.ApplicationSettings.FileSettings.AddSearchPath(DefaultRenderAppearancePath, -1);
 
-          if (!Rhino.ApplicationSettings.FileSettings.GetSearchPaths().Any(x => x.Equals(DefaultRenderAppearancePath, StringComparison.InvariantCultureIgnoreCase)))
-            Rhino.ApplicationSettings.FileSettings.AddSearchPath(DefaultRenderAppearancePath, -1);
-
-          // TODO: Add also AdditionalRenderAppearancePaths content from Revit.ini if missing ??
-        }
-
-        // Reset document units
-        UpdateDocumentUnits(RhinoDoc.ActiveDoc);
-        UpdateDocumentUnits(RhinoDoc.ActiveDoc, Revit.ActiveDBDocument);
-
-        Type[] types = default;
-        try { types = Assembly.GetCallingAssembly().GetTypes(); }
-        catch (ReflectionTypeLoadException ex) { types = ex.Types?.Where(x => x is object).ToArray(); }
-
-        // Look for Guests
-        guests = types.
-          Where(x => typeof(IGuest).IsAssignableFrom(x)).
-          Where(x => !x.IsInterface && !x.IsAbstract && !x.ContainsGenericParameters).
-          Select(x => new GuestInfo(x)).
-          ToList();
-
-        CheckInGuests();
+        // TODO: Add also AdditionalRenderAppearancePaths content from Revit.ini if missing ??
       }
+
+      // Reset document units
+      UpdateDocumentUnits(RhinoDoc.ActiveDoc);
+      UpdateDocumentUnits(RhinoDoc.ActiveDoc, Revit.ActiveDBDocument);
+
+      // Load Guests
+      CheckInGuests();
 
       return Result.Succeeded;
     }
 
     internal static Result Shutdown()
     {
-      if (core is object)
+      if (core is null)
+        return Result.Failed;
+
+      // Unload Guests
+      CheckOutGuests();
+
+      Command.EndCommand                        -= EndCommand;
+      Command.BeginCommand                      -= BeginCommand;
+
+      RhinoDoc.EndOpenDocumentInitialViewUpdate -= EndOpenDocumentInitialViewUpdate;
+      RhinoDoc.NewDocument                      -= OnNewDocument;
+
+      RhinoApp.MainLoop                         -= MainLoop;
+
+      // Unload RhinoCore
+      try
       {
-        // Unload Guests
-        CheckOutGuests();
-
-        Command.EndCommand                        -= EndCommand;
-        Command.BeginCommand                      -= BeginCommand;
-
-        RhinoDoc.EndOpenDocumentInitialViewUpdate -= EndOpenDocumentInitialViewUpdate;
-        RhinoDoc.NewDocument                      -= OnNewDocument;
-
-        RhinoApp.MainLoop                         -= MainLoop;
-
-        // Unload RhinoCore
-        try
-        {
-          core.Dispose();
-          core = null;
-        }
-        catch (Exception /*e*/)
-        {
-          //Debug.Fail(e.Source, e.Message);
-          return Result.Failed;
-        }
+        core.Dispose();
+        core = null;
+      }
+      catch (Exception /*e*/)
+      {
+        //Debug.Fail(e.Source, e.Message);
+        return Result.Failed;
       }
 
       return Result.Succeeded;
@@ -231,8 +221,19 @@ namespace RhinoInside.Revit
 
     static void CheckInGuests()
     {
-      if (guests is null)
+      if (guests is object)
         return;
+
+      Type[] types = default;
+      try { types = Assembly.GetCallingAssembly().GetTypes(); }
+      catch (ReflectionTypeLoadException ex) { types = ex.Types?.Where(x => x is object).ToArray(); }
+
+      // Look for Guests
+      guests = types.
+        Where(x => typeof(IGuest).IsAssignableFrom(x)).
+        Where(x => !x.IsInterface && !x.IsAbstract && !x.ContainsGenericParameters).
+        Select(x => new GuestInfo(x)).
+        ToList();
 
       foreach (var guestInfo in guests)
       {
@@ -335,6 +336,8 @@ namespace RhinoInside.Revit
         try { guestInfo.Guest.OnCheckOut(); guestInfo.LoadReturnCode = LoadReturnCode.ErrorNoDialog; }
         catch (Exception) { }
       }
+
+      guests = null;
     }
     #endregion
 
