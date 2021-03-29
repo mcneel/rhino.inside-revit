@@ -422,7 +422,7 @@ namespace RhinoInside.Revit
 #if REVIT_2019
             $"• Version: {services.SubVersionNumber} ({services.VersionBuild})\n" +
 #else
-            $"• Version: {revit.VersionNumber} ({revit.VersionBuild})\n" +
+            $"• Version: {services.VersionNumber} ({services.VersionBuild})\n" +
 #endif
             $"• Path: {Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName)}\n" +
             $"• Language: {services.Language}",

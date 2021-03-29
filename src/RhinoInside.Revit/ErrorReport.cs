@@ -246,7 +246,7 @@ namespace RhinoInside.Revit
 #if REVIT_2019
         services.SubVersionNumber,
 #else
-        revit.VersionNumber,
+        services.VersionNumber,
 #endif
         services.VersionNumber,
         services.Product,
@@ -260,7 +260,7 @@ namespace RhinoInside.Revit
 #if REVIT_2019
       var revitVersion = $"{services.SubVersionNumber} ({services.VersionBuild})";
 #else
-      var revitVersion = $"{revit.VersionNumber} ({revit.VersionBuild})";
+      var revitVersion = $"{services.VersionNumber} ({services.VersionBuild})";
 #endif
 
       SendEmail(subject, reportFilePath, revitVersion, includeAddinsList, attachments);
