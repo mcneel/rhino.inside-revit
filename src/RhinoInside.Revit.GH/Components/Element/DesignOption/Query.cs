@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using DB = Autodesk.Revit.DB;
@@ -24,6 +25,22 @@ namespace RhinoInside.Revit.GH.Components.DesignOption
       true
     );
     protected override DB.ElementFilter ElementFilter => elementFilter;
+
+    #region UI
+    protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
+    {
+      base.AppendAdditionalComponentMenuItems(menu);
+
+      var activeApp = Revit.ActiveUIApplication;
+      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.DesignOptions);
+      Menu_AppendItem
+      (
+        menu, $"Open Design Options…",
+        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
+        activeApp.CanPostCommand(commandId), false
+      );
+    }
+    #endregion
 
     public QueryDesignOptionSets() : base
     (
@@ -85,6 +102,22 @@ namespace RhinoInside.Revit.GH.Components.DesignOption
 
     static readonly DB.ElementFilter elementFilter = new DB.ElementClassFilter(typeof(DB.DesignOption));
     protected override DB.ElementFilter ElementFilter => elementFilter;
+
+    #region UI
+    protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
+    {
+      base.AppendAdditionalComponentMenuItems(menu);
+
+      var activeApp = Revit.ActiveUIApplication;
+      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.DesignOptions);
+      Menu_AppendItem
+      (
+        menu, $"Open Design Options…",
+        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
+        activeApp.CanPostCommand(commandId), false
+      );
+    }
+    #endregion
 
     public QueryDesignOptions() : base
     (

@@ -19,11 +19,11 @@ namespace RhinoInside.Revit.UI
   /// <summary>
   /// Base class for all Rhino.Inside Revit commands that call RhinoCommon
   /// </summary>
-  abstract public class RhinoCommand : Command
+  public abstract class RhinoCommand : Command
   {
     public RhinoCommand()
     {
-      if (Revit.OnStartup(Revit.ApplicationUI) != Result.Succeeded)
+      if (Revit.OnStartup(AddIn.ApplicationUI) != Result.Succeeded)
         throw new Exception("Failed to startup Rhino");
     }
 

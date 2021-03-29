@@ -49,14 +49,15 @@ namespace RhinoInside.Revit.GH.Components
     {
       // Disable Rhino UI if any warning-error dialog popup
       {
-        External.EditScope editScope = null;
+        var uiApplication = Revit.ActiveUIApplication;
+        External.UI.EditScope scope = null;
         EventHandler<DialogBoxShowingEventArgs> _ = null;
         try
         {
-          Revit.ApplicationUI.DialogBoxShowing += _ = (sender, args) =>
+          uiApplication.DialogBoxShowing += _ = (sender, args) =>
           {
-            if (editScope is null)
-              editScope = new External.EditScope();
+            if (scope is null)
+              scope = new External.UI.EditScope(uiApplication);
           };
 
           if (transaction.GetStatus() == DB.TransactionStatus.Started)
@@ -74,9 +75,9 @@ namespace RhinoInside.Revit.GH.Components
         }
         finally
         {
-          Revit.ApplicationUI.DialogBoxShowing -= _;
+          uiApplication.DialogBoxShowing -= _;
 
-          if (editScope is IDisposable disposable)
+          if (scope is IDisposable disposable)
             disposable.Dispose();
         }
       }

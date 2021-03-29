@@ -9,6 +9,7 @@ using Autodesk.Revit.UI;
 using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
 using static Microsoft.Win32.SafeHandles.InteropServices.Kernel32;
+using UIX = RhinoInside.Revit.External.UI;
 
 namespace RhinoInside.Revit
 {
@@ -232,68 +233,34 @@ namespace RhinoInside.Revit
       }
     }
 
-
-    public static void SendEmail(UIControlledApplication app, string subject, bool includeAddinsList, IEnumerable<string> attachments)
+    public static void SendEmail(UIX.UIHostApplication app, string subject, bool includeAddinsList, IEnumerable<string> attachments)
     {
-      var revit = app.ControlledApplication;
+      var services = app.Services;
       var now = DateTime.Now.ToString("yyyyMMddTHHmmssZ");
       var reportFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), $"RhinoInside-Revit-Report-{now}.zip");
 
       CreateReportFile
       (
-        revit.VersionName,
-        revit.VersionBuild,
+        services.VersionName,
+        services.VersionBuild,
 #if REVIT_2019
-        revit.SubVersionNumber,
+        services.SubVersionNumber,
 #else
-        revit.VersionNumber,
+        services.VersionNumber,
 #endif
-        revit.VersionNumber,
-        revit.Product,
-        revit.Language,
+        services.VersionNumber,
+        services.Product,
+        services.Language,
         includeAddinsList ? app.LoadedApplications : default,
         reportFilePath,
-        Path.ChangeExtension(revit.RecordingJournalFilename, "log.md"),
+        Path.ChangeExtension(services.RecordingJournalFilename, "log.md"),
         attachments
       );
 
 #if REVIT_2019
-      var revitVersion = $"{revit.SubVersionNumber} ({revit.VersionBuild})";
+      var revitVersion = $"{services.SubVersionNumber} ({services.VersionBuild})";
 #else
-      var revitVersion = $"{revit.VersionNumber} ({revit.VersionBuild})";
-#endif
-
-      SendEmail(subject, reportFilePath, revitVersion, includeAddinsList, attachments);
-    }
-
-    public static void SendEmail(UIApplication app, string subject, bool includeAddinsList, IEnumerable<string> attachments)
-    {
-      var revit = app.Application;
-      var now = DateTime.Now.ToString("yyyyMMddTHHmmssZ");
-      var reportFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), $"RhinoInside-Revit-Report-{now}.zip");
-
-      CreateReportFile
-      (
-        revit.VersionName,
-        revit.VersionBuild,
-#if REVIT_2019
-        revit.SubVersionNumber,
-#else
-        revit.VersionNumber,
-#endif
-        revit.VersionNumber,
-        revit.Product,
-        revit.Language,
-        includeAddinsList ? app.LoadedApplications : default,
-        reportFilePath,
-        Path.ChangeExtension(revit.RecordingJournalFilename, "log.md"),
-        attachments
-      );
-
-#if REVIT_2019
-      var revitVersion = $"{revit.SubVersionNumber} ({revit.VersionBuild})";
-#else
-      var revitVersion = $"{revit.VersionNumber} ({revit.VersionBuild})";
+      var revitVersion = $"{services.VersionNumber} ({services.VersionBuild})";
 #endif
 
       SendEmail(subject, reportFilePath, revitVersion, includeAddinsList, attachments);

@@ -107,14 +107,15 @@ namespace RhinoInside.Revit.GH.Components
     protected DB.TransactionStatus CommitTransaction(DB.Document doc, DB.Transaction transaction)
     {
       // Disable Rhino UI if any warning-error dialog popup
-      External.EditScope editScope = null;
+      var uiApplication = Revit.ActiveUIApplication;
+      External.UI.EditScope scope = null;
       EventHandler<DialogBoxShowingEventArgs> _ = null;
       try
       {
-        Revit.ApplicationUI.DialogBoxShowing += _ = (sender, args) =>
+        uiApplication.DialogBoxShowing += _ = (sender, args) =>
         {
-          if (editScope is null)
-            editScope = new External.EditScope();
+          if (scope is null)
+            scope = new External.UI.EditScope(uiApplication);
         };
 
         if (transaction.GetStatus() == DB.TransactionStatus.Started)
@@ -125,9 +126,9 @@ namespace RhinoInside.Revit.GH.Components
       }
       finally
       {
-        Revit.ApplicationUI.DialogBoxShowing -= _;
+        uiApplication.DialogBoxShowing -= _;
 
-        if (editScope is IDisposable disposable)
+        if (scope is IDisposable disposable)
           disposable.Dispose();
       }
     }
@@ -396,7 +397,7 @@ namespace RhinoInside.Revit.GH.Components
     }
 
     #region DBX.ITransactionNotification
-    External.EditScope editScope = null;
+    External.UI.EditScope editScope = null;
     EventHandler<DialogBoxShowingEventArgs> dialogBoxShowing = null;
 
     // Step 2.1
@@ -406,10 +407,11 @@ namespace RhinoInside.Revit.GH.Components
     public virtual void OnPrepare(IReadOnlyCollection<DB.Document> documents)
     {
       // Disable Rhino UI in case any warning-error dialog popups
-      Revit.ApplicationUI.DialogBoxShowing += dialogBoxShowing = (sender, args) =>
+      var activeApplication = Revit.ActiveUIApplication;
+      activeApplication.DialogBoxShowing += dialogBoxShowing = (sender, args) =>
       {
         if (editScope is null)
-          editScope = new External.EditScope();
+          editScope = new External.UI.EditScope(activeApplication);
       };
     }
 
@@ -420,7 +422,7 @@ namespace RhinoInside.Revit.GH.Components
 
       // Restore Rhino UI in case any warning-error dialog popups
       {
-        Revit.ApplicationUI.DialogBoxShowing -= dialogBoxShowing;
+        Revit.ActiveUIApplication.DialogBoxShowing -= dialogBoxShowing;
 
         if (editScope is IDisposable disposable)
           disposable.Dispose();

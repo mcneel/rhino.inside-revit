@@ -1,4 +1,5 @@
 using System;
+using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using DB = Autodesk.Revit.DB;
@@ -10,6 +11,22 @@ namespace RhinoInside.Revit.GH.Components
     public override Guid ComponentGuid => new Guid("2F3AFCC9-C8A4-4423-B1BF-2A04E8FD2734");
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "i";
+
+    #region UI
+    protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
+    {
+      base.AppendAdditionalComponentMenuItems(menu);
+
+      var activeApp = Revit.ActiveUIApplication;
+      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.ProjectInformation);
+      Menu_AppendItem
+      (
+        menu, $"Edit Project Information…",
+        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
+        activeApp.CanPostCommand(commandId), false
+      );
+    }
+    #endregion
 
     public ProjectInformation()
     : base

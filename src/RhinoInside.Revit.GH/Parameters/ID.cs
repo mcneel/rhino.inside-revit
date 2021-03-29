@@ -59,7 +59,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public DataGrouping Grouping { get; set; } = DataGrouping.None;
 
-    public override sealed bool Read(GH_IReader reader)
+    public sealed override bool Read(GH_IReader reader)
     {
       if (!base.Read(reader))
         return false;
@@ -70,7 +70,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
       return true;
     }
-    public override sealed bool Write(GH_IWriter writer)
+    public sealed override bool Write(GH_IWriter writer)
     {
       if (!base.Write(writer))
         return false;

@@ -10,7 +10,30 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
-{% include ltr/release-header.html version="0.1" time="03/04/2021 17:48:12" %}
+{% include ltr/release-header.html version="0.2" time="03/09/2021" %}
+
+### New featues
+* Added 'Construct Compount Structure' component.
+* Added 'Construct Compount Structure Layer' component.
+* Added 'Select Element' component.
+* Added 'Set new Element' at the parameters context menu.
+* Added auditing capabilities to the `Mesh` conversion routines.
+
+### Fixes
+* Fixed `Element Location` component when handling `Curves` or `Meshes`.
+* Removed `/captureprintcalls /stopwatch` from the default startup mode.
+
+### API
+* Added class `Sum` to do more accurate a summations
+* Added accurate `XYZ.GetLength`
+* Added accurate `XYZ.Normalize`
+* Added accurate `XYZ.CrossProduct`
+* Added `XYZExtension.ComputeMeanPoint`
+* Added `XYZExtension.ComputeCovariance`
+* Added `Transform.GetPrincipalComponent`
+* Added `Transform.TryGetInverse`
+
+{% include ltr/release-header.html version="0.1" time="03/15/2021" %}
 
 As part of the preparation for the {{ site.terms.rir }} v1, we have mostly focused on user interface updates in this release. These changes focus on making the {{ site.terms.rir }} easier to use, notify the user about the available updates, and provide a method to deploy and access the Grasshopper scripts easier through the Revit UI.
 

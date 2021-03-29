@@ -15,6 +15,21 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public Category() : base("Category", "Category", "Represents a Revit document category.", "Params", "Revit Primitives") { }
 
+    #region UI
+    public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
+    {
+      base.AppendAdditionalMenuItems(menu);
+
+      var activeApp = Revit.ActiveUIApplication;
+      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.ObjectStyles);
+      Menu_AppendItem
+      (
+        menu, $"Open Object Styles…",
+        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
+        activeApp.CanPostCommand(commandId), false
+      );
+    }
+
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
       if (SourceCount != 0)
@@ -105,6 +120,7 @@ namespace RhinoInside.Revit.GH.Parameters
         ExpireSolution(true);
       }
     }
+    #endregion
   }
 
   public class GraphicsStyle : Element<Types.GraphicsStyle, DB.GraphicsStyle>

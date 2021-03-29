@@ -240,6 +240,8 @@ namespace RhinoInside.Revit.GH.Parameters
       return GH_GetterResult.success;
     }
 
+    protected virtual void Menu_AppendPromptNew(ToolStripDropDown menu) { }
+
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
       if (SourceCount == 0)
@@ -253,6 +255,8 @@ namespace RhinoInside.Revit.GH.Parameters
         Menu_AppendCustomItem(menu, comboBox);
       }
 
+      Menu_AppendPromptNew(menu);
+
       Menu_AppendItem(menu, $"Set one {TypeName}", Menu_PromptOne, SourceCount == 0, false);
     }
 
@@ -261,7 +265,7 @@ namespace RhinoInside.Revit.GH.Parameters
       var name_plural = GH_Convert.ToPlural(TypeName);
 
       Menu_AppendItem(menu, $"Set Multiple {name_plural}", Menu_PromptPlural, SourceCount == 0);
-      Menu_AppendItem(menu, $"Change {name_plural} collection", Menu_PromptPreselect, SourceCount == 0, false);
+      Menu_AppendItem(menu, $"Change {TypeName} collection", Menu_PromptPreselect, SourceCount == 0, false);
     }
 
     protected override void Menu_AppendManageCollection(ToolStripDropDown menu)
@@ -437,6 +441,27 @@ namespace RhinoInside.Revit.GH.Parameters
         ExpireSolution(true);
       }
     }
+
+    protected EventHandler Menu_PromptNew(Autodesk.Revit.UI.RevitCommandId commandId) => async (sender, args) =>
+    {
+      var activeApp = Revit.ActiveUIApplication;
+      using (var scope = new External.UI.EditScope(activeApp))
+      {
+        var activeDoc = activeApp.ActiveUIDocument.Document;
+        var changes = await scope.ExecuteCommandAsync(commandId);
+        if (changes.GetSummary(activeDoc, out var added, out var deleted, out var modified) > 0)
+        {
+          RecordPersistentDataEvent("Change data");
+
+          MutableNickName = true;
+          PersistentData.Clear();
+          PersistentData.AppendRange(added.Select(x => Types.Element.FromElementId(activeDoc, x)).OfType<T>());
+
+          OnObjectChanged(GH_ObjectEventType.PersistentData);
+          ExpireSolution(true);
+        }
+      }
+    };
 
     private void Menu_HighlightElements(object sender, EventArgs e)
     {

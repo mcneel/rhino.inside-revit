@@ -230,6 +230,7 @@
     <Compile Include="External\DB\Extensions\Wall.cs" />
     <Compile Include="External\DB\ExternalFailures.cs" />
     <Compile Include="External\DB\FloorFunction.cs" />
+    <Compile Include="External\ApplicationServices\HostServices.cs" />
     <Compile Include="External\DB\ParameterBinding.cs" />
     <Compile Include="External\DB\ParameterClass.cs" />
     <Compile Include="External\DB\Transaction.cs" />
@@ -241,6 +242,7 @@
     <Compile Include="External\DB\CurtainPanelSystemFamily.cs" />
     <Compile Include="External\UI\Application.cs" />
     <Compile Include="External\UI\Command.cs" />
+    <Compile Include="External\UI\EditScope.cs" />
     <Compile Include="External\UI\EventHandler.cs" />
     <Compile Include="External\UI\Extensions\UIApplication.cs" />
     <Compile Include="External\UI\Extensions\UIDocument.cs" />
@@ -251,6 +253,7 @@
     <Compile Include="Extensions\System.cs" />
     <Compile Include="Extensions\Win32.cs" />
     <Compile Include="External\ActivationGate.cs" />
+    <Compile Include="External\UI\UIHostApplication.cs" />
     <Compile Include="GH\Bake.cs" />
     <Compile Include="GH\Kernel.cs" />
     <Compile Include="Rhino\Rhinoceros.cs" />

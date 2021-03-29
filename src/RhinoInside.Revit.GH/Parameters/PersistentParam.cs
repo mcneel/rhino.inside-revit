@@ -124,7 +124,7 @@ namespace RhinoInside.Revit.GH.Parameters
     protected virtual void ProcessVolatileData() { }
     protected virtual void PostProcessVolatileData() => base.PostProcessData();
 
-    public override sealed void PostProcessData()
+    public sealed override void PostProcessData()
     {
       LoadVolatileData();
 
