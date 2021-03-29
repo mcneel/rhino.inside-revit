@@ -2,7 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Data;
+using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.Convert.System.Collections.Generic;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -44,13 +47,89 @@ namespace RhinoInside.Revit.GH.Components
         name: "Geometry",
         nickname: "G",
         description: "Compound structure layer geometry sorted by layer index",
-        access: GH_ParamAccess.list
+        access: GH_ParamAccess.tree
         );
     }
 
-    private List<Rhino.Geometry.Brep> GetCompoundStructureLayerGeom(DB.Element element)
+    private void GetCompoundStructureGeometry
+    (
+      DB.HostObject element,
+      GH_Path basePath,
+      out GH_Structure<IGH_GeometricGoo> geometries
+    )
     {
-      var layerGeoms = new List<Rhino.Geometry.Brep>();
+      geometries = new GH_Structure<IGH_GeometricGoo>();
+      var elementIds = new List<DB.ElementId>() { element.Id };
+
+      bool createParts = DB.PartUtils.AreElementsValidForCreateParts(element.Document, elementIds);
+      try
+      {
+        using (var transaction = new DB.Transaction(element.Document, nameof(GetCompoundStructureGeometry)))
+        {
+          transaction.Start();
+
+          var type = element.Document.GetElement(element.GetTypeId()) as DB.HostObjAttributes;
+          using (var structure = type.GetCompoundStructure())
+          {
+            var count = structure.LayerCount;
+            var materials = new Dictionary<DB.ElementId, int>();
+            for (int l = 0; l < count; ++l)
+            {
+              var material = DB.Material.Create(element.Document, Guid.NewGuid().ToString("N"));
+              materials.Add(material, l);
+              structure.SetMaterialId(l, material);
+            }
+
+            type.SetCompoundStructure(structure);
+
+            if (createParts)
+              DB.PartUtils.CreateParts(element.Document, elementIds);
+
+            element.Document.Regenerate();
+
+            // get the exploded parts
+            foreach (var partId in DB.PartUtils.GetAssociatedParts(element.Document, element.Id, includePartsWithAssociatedParts: true, includeAllChildren: true))
+            {
+              if (element.Document.GetElement(partId) is DB.Part part)
+              {
+                var materialId = part.get_Parameter(DB.BuiltInParameter.DPART_MATERIAL_ID_PARAM).AsElementId();
+                if (!materials.TryGetValue(materialId, out var layerIndex))
+                  layerIndex = -1;
+
+                var path = basePath.AppendElement(layerIndex);
+
+                using (var options = new DB.Options())
+                {
+                  // extract geometry for each part
+                  if (part.get_Geometry(options) is DB.GeometryElement geometryElement)
+                  {
+                    var list = geometryElement?.
+                      ToGeometryBaseMany().
+                      OfType<Rhino.Geometry.Brep>().
+                      Where(x => !ElementGeometryComponent.IsEmpty(x)).
+                      Convert(ElementGeometryComponent.ToGeometricGoo).
+                      ToList();
+
+                    geometries.AppendRange(list, path);
+                  }
+                }
+              }
+            }
+          }
+       }
+      }
+      catch { }
+    }
+
+
+    private void GetCompoundStructureGeometry
+    (
+      DB.Element element,
+      GH_Path basePath,
+      out GH_Structure<IGH_GeometricGoo> geometries
+    )
+    {
+      geometries = new GH_Structure<IGH_GeometricGoo>();
       var elementIds = new List<DB.ElementId>() { element.Id };
 
       bool createParts = DB.PartUtils.AreElementsValidForCreateParts(element.Document, elementIds);
@@ -58,7 +137,7 @@ namespace RhinoInside.Revit.GH.Components
       {
         // start a dry transaction that will be rolled back automatically
         // when execution goes out of next using statment
-        using (var transaction = createParts ? new DB.Transaction(element.Document, nameof(GetCompoundStructureLayerGeom)) : default)
+        using (var transaction = createParts ? new DB.Transaction(element.Document, nameof(GetCompoundStructureGeometry)) : default)
         {
           transaction?.Start();
 
@@ -69,18 +148,23 @@ namespace RhinoInside.Revit.GH.Components
             element.Document.Regenerate();
           }
 
-          // get the exploded parts
-          foreach (DB.ElementId partId in DB.PartUtils.GetAssociatedParts(element.Document, element.Id, includePartsWithAssociatedParts: true, includeAllChildren: true))
+          foreach (var partId in DB.PartUtils.GetAssociatedParts(element.Document, element.Id, includePartsWithAssociatedParts: true, includeAllChildren: true))
           {
             if (element.Document.GetElement(partId) is DB.Element part)
             {
               using (var options = new DB.Options())
               {
                 // extract geometry for each part
-                if (part.get_Geometry(options) is DB.GeometryElement partGeom)
+                if (part.get_Geometry(options) is DB.GeometryElement geometryElement)
                 {
-                  foreach (DB.GeometryObject geom in partGeom)
-                    layerGeoms.AddRange(geom.ToGeometryBaseMany().OfType<Rhino.Geometry.Brep>());
+                  var list = geometryElement?.
+                    ToGeometryBaseMany().
+                    OfType<Rhino.Geometry.Brep>().
+                    Where(x => !ElementGeometryComponent.IsEmpty(x)).
+                    Convert(ElementGeometryComponent.ToGeometricGoo).
+                    ToList();
+
+                  geometries.AppendRange(list, basePath);
                 }
               }
             }
@@ -88,8 +172,6 @@ namespace RhinoInside.Revit.GH.Components
         }
       }
       catch {}
-
-      return layerGeoms;
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -98,7 +180,15 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetData("Element", ref element))
         return;
 
-      DA.SetDataList("Geometry", GetCompoundStructureLayerGeom(element));
+      var geometry = default(GH_Structure<IGH_GeometricGoo>);
+      var _Geometry_ = Params.IndexOfOutputParam("Geometry");
+      switch (element)
+      {
+        case DB.HostObject h: GetCompoundStructureGeometry(h, DA.ParameterTargetPath(_Geometry_), out geometry); break;
+        case DB.Element e: GetCompoundStructureGeometry(e, DA.ParameterTargetPath(_Geometry_), out geometry); break;
+      }
+
+      DA.SetDataTree(_Geometry_, geometry);
     }
   }
 }
