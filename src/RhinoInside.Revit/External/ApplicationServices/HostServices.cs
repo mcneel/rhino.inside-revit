@@ -64,7 +64,7 @@ namespace RhinoInside.Revit.External.ApplicationServices
         System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData),
         "Autodesk",
         "Revit",
-        app.VersionName
+        _app.VersionName
       );
 #endif
     #endregion
