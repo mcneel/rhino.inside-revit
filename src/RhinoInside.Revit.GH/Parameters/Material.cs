@@ -29,7 +29,6 @@ namespace RhinoInside.Revit.GH.Parameters
         activeApp.CanPostCommand(commandId), false
       );
     }
-    #endregion
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
@@ -132,5 +131,6 @@ namespace RhinoInside.Revit.GH.Parameters
         ExpireSolution(true);
       }
     }
+    #endregion
   }
 }

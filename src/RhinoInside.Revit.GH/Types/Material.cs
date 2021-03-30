@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public Material() { }
     public Material(DB.Document doc, DB.ElementId id) : base(doc, id) { }
-    public Material(DB.Material material) : base(material) { }
+    public Material(DB.Material value) : base(value) { }
 
     public override bool CastTo<Q>(out Q target)
     {
