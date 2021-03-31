@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.Settings
   [XmlRoot("Options")]
   public class AddinOptions
   {
-    #region Runtime and UI
+    #region Rhino
     [XmlElement]
     public bool LoadOnStartup
     {
@@ -30,6 +30,21 @@ namespace RhinoInside.Revit.Settings
     private bool _loadOnStartup = false;
     public static event EventHandler<EventArgs> LoadOnStartupChanged;
 
+    [XmlElement]
+    public bool UseHostLanguage
+    {
+      get => _useHostLanguage;
+      set
+      {
+        _useHostLanguage = value;
+        UseHostLanguageChanged?.Invoke(this, null);
+      }
+    }
+    private bool _useHostLanguage = true;
+    public static event EventHandler<EventArgs> UseHostLanguageChanged;
+    #endregion
+
+    #region UI
     [XmlElement]
     public bool CompactTab
     {

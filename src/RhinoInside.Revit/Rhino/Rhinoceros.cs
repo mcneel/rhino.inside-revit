@@ -58,25 +58,20 @@ namespace RhinoInside.Revit
       // Load RhinoCore
       try
       {
-        var args = Settings.DebugLogging.Current.Enabled ?
-          new string[]
-          {
-            "/nosplash",
-            "/notemplate",
-            "/captureprintcalls",
-            "/stopwatch",
-            $"/scheme={SchemeName}",
-            $"/language={AddIn.ApplicationUI.ControlledApplication.Language.ToLCID()}"
-          } :
-          new string[]
-          {
-            "/nosplash",
-            "/notemplate",
-            $"/scheme={SchemeName}",
-            $"/language={AddIn.ApplicationUI.ControlledApplication.Language.ToLCID()}"
-          };
+        var args = new List<string>() { $"/scheme={SchemeName}", "/nosplash", "/notemplate" };
 
-        core = new RhinoCore(args, WindowStyle.Hidden);
+        if (Settings.AddinOptions.Session.UseHostLanguage)
+        {
+          args.Add($"/language={AddIn.ApplicationUI.ControlledApplication.Language.ToLCID()}");
+        }
+
+        if (Settings.DebugLogging.Current.Enabled)
+        {
+          args.Add("/captureprintcalls");
+          args.Add("/stopwatch");
+        }
+
+        core = new RhinoCore(args.ToArray(), WindowStyle.Hidden);
       }
       catch
       {

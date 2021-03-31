@@ -71,17 +71,19 @@ namespace RhinoInside.Revit.UI
     }
   }
 
-  internal class GeneralPanel: Panel
+  internal class GeneralPanel : Panel
   {
     public GeneralPanel() => InitLayout();
 
-    CheckBox _loadOnStartup = new CheckBox { Text = "Start Rhino on Startup (Restart Revit)" };
-    CheckBox _compactTab = new CheckBox { Text = "Compact Revit tabs (Load into Add-ins tab - Restart Revit)" };
-    CheckBox _compactRibbon = new CheckBox { Text = "Compact Ribbon (Collapse Rhino and Grasshopper panels)" };
+    CheckBox _loadOnStartup = new CheckBox { Text = "Start Rhino on startup", ToolTip = "Restart Revit" };
+    CheckBox _useHostLanguage = new CheckBox { Text = "Use Revit UI language", ToolTip = "Rhino UI will be same language as Revit" };
+    CheckBox _compactTab = new CheckBox { Text = "Compact Revit tabs", ToolTip = "Load into Add-ins tab - Restart Revit" };
+    CheckBox _compactRibbon = new CheckBox { Text = "Compact Ribbon", ToolTip = "Collapse Rhino and Grasshopper panels" };
 
     void InitLayout()
     {
       _loadOnStartup.Checked = AddinOptions.Current.LoadOnStartup;
+      _useHostLanguage.Checked = AddinOptions.Current.UseHostLanguage;
       _compactTab.Checked = AddinOptions.Current.CompactTab;
       _compactRibbon.Checked = AddinOptions.Current.CompactRibbon;
 
@@ -89,10 +91,36 @@ namespace RhinoInside.Revit.UI
       {
         Spacing = new Size(5, 10),
         Padding = new Padding(5),
-        Rows = {
-          _loadOnStartup,
-          _compactTab,
-          _compactRibbon,
+        Rows =
+        {
+          new GroupBox
+          {
+            Text = "Rhino",
+            Content = new TableLayout
+            {
+              Spacing = new Size(5, 10),
+              Padding = new Padding(5),
+              Rows =
+              {
+                _loadOnStartup,
+                _useHostLanguage,
+              }
+            }
+          },
+          new GroupBox
+          {
+            Text = "User Interface",
+            Content = new TableLayout
+            {
+              Spacing = new Size(5, 10),
+              Padding = new Padding(5),
+              Rows =
+              {
+                _compactTab,
+                _compactRibbon,
+              }
+            }
+          },
           null
         }
       };
@@ -108,6 +136,9 @@ namespace RhinoInside.Revit.UI
 
       if (_compactRibbon.Checked.HasValue)
         AddinOptions.Current.CompactRibbon = _compactRibbon.Checked.Value;
+
+      if (_useHostLanguage.Checked.HasValue)
+        AddinOptions.Current.UseHostLanguage = _useHostLanguage.Checked.Value;
     }
   }
 
