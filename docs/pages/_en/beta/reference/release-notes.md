@@ -10,6 +10,24 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html version="0.3" time="04/01/2021" %}
+
+### New featues
+* Added 'Select Element' component.
+* Added 'Set new Element' to parameters context menu.
+* Added 'Externalise selection' to the parameters context menu.
+
+### Minor changes
+* Added option to use Revit UI language on Rhino interface.
+
+### Fixes
+* Fixed a problem that makes the AddIn can not load when Rhino is not installed.
+* Fixed F1 context help for commands.
+* Fixed 'Element Parts Geometry' component, it now output geometry branched by layer index.
+* Fixed 'Internalise selection' context menu option.
+* Fixed 'Change Element collection' context menu option.
+* Fixed a problem that makes parameters context menu opens slowly.
+
 {% include ltr/release-header.html version="0.2" time="03/09/2021" %}
 
 ### New featues
