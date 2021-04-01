@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public SpatialElement() : base(
       name: "SpatialElement",
       nickname: "SpatialElement",
-      description: "Represents a Revit Spatial element.",
+      description: "Contains a collection of Revit spatial elements",
       category: "Params",
       subcategory: "Revit"
       )

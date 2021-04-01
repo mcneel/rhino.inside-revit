@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override Guid ComponentGuid => new Guid("2B0684C4-A444-406D-8BEC-69683D146388");
     public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.hidden;
 
-    public Sketch() : base("Sketch", "Sketch", "Represents a Revit document sketch.", "Params", "Revit Primitives") { }
+    public Sketch() : base("Sketch", "Sketch", "Contains a collection of Revit sketch elements", "Params", "Revit Primitives") { }
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu) { }
     protected override void Menu_AppendPromptMore(ToolStripDropDown menu) { }
