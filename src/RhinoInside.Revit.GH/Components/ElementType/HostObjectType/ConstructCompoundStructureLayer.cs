@@ -55,8 +55,7 @@ namespace RhinoInside.Revit.GH.Components.Host
           Name = "Thickness",
           NickName = "T",
           Description = "Thickness of the given compound structure layer",
-          Access = GH_ParamAccess.item,
-          Optional = true
+          Access = GH_ParamAccess.item
         }
       ),
       new ParamDefinition
@@ -141,36 +140,42 @@ namespace RhinoInside.Revit.GH.Components.Host
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
         return;
 
-      Params.GetData(DA, "Function", out Types.LayerFunction function);
-      Params.GetData(DA, "Material", out Types.Material material);
-      Params.GetData(DA, "Thickness", out double? width);
-      Params.GetData(DA, "Wraps", out bool? wraps);
-      Params.GetData(DA, "Structural Material", out bool? structuralMaterial);
-      Params.GetData(DA, "Variable", out bool? variableThickness);
-      Params.GetData(DA, "Deck Profile", out Types.FamilySymbol deckProfile);
-      Params.GetData(DA, "Deck Usage", out Types.DeckEmbeddingType deckType);
+      bool update = false;
+      update |= Params.GetData(DA, "Function", out Types.LayerFunction function);
+      update |= Params.GetData(DA, "Material", out Types.Material material);
+      update |= Params.GetData(DA, "Thickness", out double? width);
+      update |= Params.GetData(DA, "Wraps", out bool? wraps);
+      update |= Params.GetData(DA, "Structural Material", out bool? structuralMaterial);
+      update |= Params.GetData(DA, "Variable", out bool? variableThickness);
+      update |= Params.GetData(DA, "Deck Profile", out Types.FamilySymbol deckProfile);
+      update |= Params.GetData(DA, "Deck Usage", out Types.DeckEmbeddingType deckType);
 
-      var layer = new Types.CompoundStructureLayer(doc)
+      var layer = update ? new Types.CompoundStructureLayer(doc)
       {
-        Function = function?.IsValid == true ? function : new Types.LayerFunction(DB.MaterialFunctionAssignment.Structure),
+        Function = function?.IsValid == true ? function :
+        new Types.LayerFunction(width == 0.0 ? DB.MaterialFunctionAssignment.Membrane : DB.MaterialFunctionAssignment.Structure),
         Material = material,
-        Width = width.HasValue && width >= 0.0 ? width : 0.0,
+        Width = width,
         LayerCapFlag = wraps,
         StructuralMaterial = structuralMaterial,
         VariableWidth = variableThickness,
         DeckProfile = deckProfile,
         DeckEmbeddingType = deckType
-      };
+      } :
+      default;
 
-      if (layer.Function.Value == DB.MaterialFunctionAssignment.Membrane)
+      if (layer is object)
       {
-        if (layer.Width.Value != 0.0)
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, Types.CompoundStructure.ToString(DB.CompoundStructureError.MembraneTooThick));
-      }
-      else if (layer.Function.Value != DB.MaterialFunctionAssignment.Membrane)
-      {
-        if (layer.Width.Value == 0.0)
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, Types.CompoundStructure.ToString(DB.CompoundStructureError.NonmembraneTooThin));
+        if (layer.Function.Value == DB.MaterialFunctionAssignment.Membrane)
+        {
+          if (layer.Width.Value != 0.0)
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, Types.CompoundStructure.ToString(DB.CompoundStructureError.MembraneTooThick));
+        }
+        else if (layer.Function.Value != DB.MaterialFunctionAssignment.Membrane)
+        {
+          if (layer.Width.Value == 0.0)
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, Types.CompoundStructure.ToString(DB.CompoundStructureError.NonmembraneTooThin));
+        }
       }
 
       DA.SetData("Layer", layer);
