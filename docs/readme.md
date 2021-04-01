@@ -803,7 +803,7 @@ This is how the data file is formatted:
 
 ```yaml
   # revit panel name
-- title: Rhinocerous
+- title: Rhinoceros
   # list of ui components under this panel
   comps:
       # ui component title
