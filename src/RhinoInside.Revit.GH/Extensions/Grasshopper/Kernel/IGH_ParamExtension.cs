@@ -112,6 +112,9 @@ namespace Grasshopper.Kernel
 
         foreach (var proxy in Instances.ComponentServer.ObjectProxies.Where(x => !x.Obsolete && x.Kind == GH_ObjectType.CompiledObject && x.Exposure != GH_Exposure.hidden && x.Exposure < GH_Exposure.tertiary))
         {
+          var RiR = new Guid("1FA46AFC-7B70-D4EB-C77A-D6DF5E36BA5C");
+          if (proxy.LibraryGuid != RiR) continue;
+
           if (typeof(IGH_Component).IsAssignableFrom(proxy.Type))
           {
             try
