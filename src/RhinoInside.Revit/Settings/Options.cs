@@ -23,6 +23,7 @@ namespace RhinoInside.Revit.Settings
       get => _loadOnStartup;
       set
       {
+        if (_loadOnStartup == value) return;
         _loadOnStartup = value;
         LoadOnStartupChanged?.Invoke(this, null);
       }
@@ -36,6 +37,7 @@ namespace RhinoInside.Revit.Settings
       get => _useHostLanguage;
       set
       {
+        if (_useHostLanguage == value) return;
         _useHostLanguage = value;
         UseHostLanguageChanged?.Invoke(this, null);
       }
@@ -51,6 +53,7 @@ namespace RhinoInside.Revit.Settings
       get => _compactTab;
       set
       {
+        if (_compactTab == value) return;
         _compactTab = value;
         CompactTabChanged?.Invoke(this, null);
       }
@@ -64,6 +67,7 @@ namespace RhinoInside.Revit.Settings
       get => _compactRibbon;
       set
       {
+        if (_compactRibbon == value) return;
         _compactRibbon = value;
         CompactRibbonChanged?.Invoke(this, null);
       }
@@ -79,6 +83,7 @@ namespace RhinoInside.Revit.Settings
       get => _checkForUpdatesOnStartup;
       set
       {
+        if (_checkForUpdatesOnStartup == value) return;
         _checkForUpdatesOnStartup = value;
         CheckForUpdatesOnStartupChanged?.Invoke(this, null);
       }
@@ -92,6 +97,7 @@ namespace RhinoInside.Revit.Settings
       get => _updateChannel;
       set
       {
+        if (_updateChannel == value) return;
         _updateChannel = value;
         UpdateChannelChanged?.Invoke(this, null);
       }
@@ -107,6 +113,7 @@ namespace RhinoInside.Revit.Settings
       get => _loadUserScripts;
       set
       {
+        if (_loadUserScripts == value) return;
         _loadUserScripts = value;
         LoadScriptsOnStartupChanged?.Invoke(this, null);
       }
@@ -120,6 +127,7 @@ namespace RhinoInside.Revit.Settings
       get => _loadInstalledScripts;
       set
       {
+        if (_loadInstalledScripts == value) return;
         _loadInstalledScripts = value;
         LoadScriptPackagesOnStartupChanged?.Invoke(this, null);
       }
@@ -133,6 +141,7 @@ namespace RhinoInside.Revit.Settings
       get => _scriptLocations;
       set
       {
+        if (_scriptLocations == value) return;
         _scriptLocations = value;
         ScriptLocationsChanged?.Invoke(this, EventArgs.Empty);
       }
@@ -160,8 +169,8 @@ namespace RhinoInside.Revit.Settings
 
     public AddinOptions Clone()
     {
-      var clone = (AddinOptions) this.MemberwiseClone();
-      clone.CustomOptions = this.CustomOptions.Clone();
+      var clone = (AddinOptions) MemberwiseClone();
+      clone.CustomOptions = CustomOptions.Clone();
       return clone;
     }
 
