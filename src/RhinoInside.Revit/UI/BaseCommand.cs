@@ -27,11 +27,11 @@ namespace RhinoInside.Revit.UI
       return null;
     }
 
-    internal static PushButtonData NewPushButtonData<CommandType, AvailabilityType>(string name, string iconName, string tooltip)
+    internal static PushButtonData NewPushButtonData<CommandType, AvailabilityType>(string name, string iconName, string tooltip, string url = default)
       where CommandType : IExternalCommand
       where AvailabilityType : IExternalCommandAvailability
     {
-      return new PushButtonData
+      var data = new PushButtonData
       (
         typeof(CommandType).Name,
         name ?? typeof(CommandType).Name,
@@ -42,15 +42,26 @@ namespace RhinoInside.Revit.UI
         AvailabilityClassName = typeof(AvailabilityType).FullName,
         Image = ImageBuilder.LoadRibbonButtonImage(iconName, true),
         LargeImage = ImageBuilder.LoadRibbonButtonImage(iconName),
-        ToolTip = tooltip,
+        ToolTip = tooltip
       };
+
+      if (url != string.Empty)
+      {
+        if (url is null) url = AddIn.AddinWebSite;
+        else if (!url.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+          url = AddIn.AddinWebSite + url;
+
+        data.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, url));
+      }
+
+      return data;
     }
 
-    public static ToggleButtonData NewToggleButtonData<CommandType, AvailabilityType>(string name, string iconName, string tooltip)
+    public static ToggleButtonData NewToggleButtonData<CommandType, AvailabilityType>(string name, string iconName, string tooltip, string url = default)
       where CommandType : IExternalCommand
       where AvailabilityType : IExternalCommandAvailability
     {
-      return new ToggleButtonData
+      var data = new ToggleButtonData
       (
         typeof(CommandType).Name,
         name ?? typeof(CommandType).Name,
@@ -63,6 +74,17 @@ namespace RhinoInside.Revit.UI
         LargeImage = ImageBuilder.LoadRibbonButtonImage(iconName),
         ToolTip = tooltip,
       };
+
+      if (url != string.Empty)
+      {
+        if (url is null) url = AddIn.AddinWebSite;
+        else if (!url.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+          url = AddIn.AddinWebSite + url;
+
+        data.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, url));
+      }
+
+      return data;
     }
     #endregion
 
@@ -76,12 +98,12 @@ namespace RhinoInside.Revit.UI
     /// <summary>
     /// Store given button under given name
     /// </summary>
-    public static void StoreButton(string name, RibbonButton button) => _buttons[name] = button;
+    protected static void StoreButton(string name, RibbonButton button) => _buttons[name] = button;
 
     /// <summary>
     /// Restore previously stored button under given name
     /// </summary>
-    public static RibbonButton RestoreButton(string name)
+    protected static RibbonButton RestoreButton(string name)
     {
       if (_buttons.TryGetValue(name, out var button))
         return button;
@@ -104,7 +126,7 @@ namespace RhinoInside.Revit.UI
     public class NeedsActiveDocument<T> : External.UI.CommandAvailability
       where T : IExternalCommandAvailability, new()
     {
-      T dependency = new T();
+      readonly T dependency = new T();
 
       // We can not relay on the UIApplication first argument.
       // Seems other Add-ins are calling this method with wrong values.

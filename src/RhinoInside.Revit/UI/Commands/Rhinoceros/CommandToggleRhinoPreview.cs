@@ -13,18 +13,19 @@ namespace RhinoInside.Revit.UI
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
 #if REVIT_2018
-      var buttonData = NewPushButtonData<CommandToggleRhinoPreview, NeedsActiveDocument<Availability>>(
-        CommandName,
-        "Ribbon.Grasshopper.Preview_Off.png",
-        "Toggle Rhino model preview visibility"
-        );
+      var buttonData = NewPushButtonData<CommandToggleRhinoPreview, NeedsActiveDocument<Availability>>
+      (
+        name: CommandName,
+        iconName: "Ribbon.Grasshopper.Preview_Off.png",
+        tooltip: "Toggle Rhino model preview visibility",
+        url : "reference/rir-interface#rhinoceros-panel"
+      );
 
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         StoreButton(CommandName, pushButton);
         DocumentPreviewServer.ActiveDocumentChanged += DocumentPreviewServer_ActiveDocumentChanged;
         ButtonSetImages(false);
-        pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://github.com/mcneel/rhino.inside-revit/tree/master#sample-6"));
       }
 #endif
     }
@@ -54,7 +55,6 @@ namespace RhinoInside.Revit.UI
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
 #if REVIT_2018
-
       DocumentPreviewServer.Toggle();
       return Result.Succeeded;
 #else

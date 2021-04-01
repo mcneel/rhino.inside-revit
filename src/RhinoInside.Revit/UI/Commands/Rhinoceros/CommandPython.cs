@@ -1,25 +1,16 @@
 using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-
-using Eto.Forms;
 using Rhino.PlugIns;
-using System.Diagnostics;
 
 namespace RhinoInside.Revit.UI
 {
   /// <summary>
   /// Base class for all Rhino.Inside Revit commands that call IronPython API
   /// </summary>
-  abstract public class IronPyhtonCommand : RhinoCommand
+  public abstract class IronPyhtonCommand : RhinoCommand
   {
     protected static readonly Guid PluginId = new Guid("814d908a-e25c-493d-97e9-ee3861957f49");
     public IronPyhtonCommand()
@@ -48,16 +39,18 @@ namespace RhinoInside.Revit.UI
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      var buttonData = NewPushButtonData<CommandPython, Availability>(
-        CommandName,
-        "Python.png",
-        "Shows Python editor window"
-        );
+      var buttonData = NewPushButtonData<CommandPython, Availability>
+      (
+        name: CommandName,
+        iconName: "Python.png",
+        tooltip: "Shows Python editor window",
+        url: "https://developer.rhino3d.com/guides/rhinopython/"
+      );
+
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         pushButton.LongDescription = $"Use CTRL key to open only Python editor window without restoring other tool windows";
-        pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://developer.rhino3d.com/guides/rhinopython/"));
-        pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool loaded, out bool loadProtected);
+        pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
       }
     }
 

@@ -10,20 +10,6 @@ namespace RhinoInside.Revit.External.UI.Extensions
 {
   public static class UIApplicationExtension
   {
-    internal static bool ActivateRibbonTab(this UIApplication app, string tabName)
-    {
-      foreach (var tab in Autodesk.Windows.ComponentManager.Ribbon.Tabs)
-      {
-        if (tab.Name == tabName)
-        {
-          tab.IsActive = true;
-          return true;
-        }
-      }
-
-      return false;
-    }
-
     internal static bool CatchException(this UIApplication app, Exception e, object sender)
     {
       var addinId = app.ActiveAddInId?.GetGUID() ?? Guid.Empty;

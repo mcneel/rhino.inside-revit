@@ -17,13 +17,13 @@ namespace RhinoInside.Revit.UI
       (
         name: CommandName,
         iconName: "Grasshopper.png",
-        tooltip: "Shows Grasshopper window"
+        tooltip: "Shows Grasshopper window",
+        url: "https://www.grasshopper3d.com/"
       );
 
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         pushButton.LongDescription = $"Use CTRL key to open only Grasshopper window without restoring other tool windows";
-        pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://www.grasshopper3d.com/"));
         pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
       }
     }

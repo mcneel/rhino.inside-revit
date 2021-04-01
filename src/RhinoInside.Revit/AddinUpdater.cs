@@ -140,15 +140,6 @@ namespace RhinoInside.Revit
       }
     }
 
-    public static void GetReleaseInfo(Action<ReleaseInfo> callBack)
-      => GetReleaseInfo(ActiveChannel, callBack);
-
-    public static async void GetReleaseInfo(AddinUpdateChannel channel, Action<ReleaseInfo> callBack)
-    {
-      callBack?.Invoke
-      (
-        await Task.Run(() => channel.GetLatestRelease())
-      );
-    }
+    public static Task<ReleaseInfo> GetReleaseInfoAsync() => Task.Run(() => ActiveChannel.GetLatestRelease());
   }
 }

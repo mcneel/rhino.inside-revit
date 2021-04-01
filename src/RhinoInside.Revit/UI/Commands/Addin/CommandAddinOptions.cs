@@ -1,7 +1,6 @@
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using RhinoInside.Revit.External.UI.Extensions;
 using RhinoInside.Revit.Settings;
 
 namespace RhinoInside.Revit.UI
@@ -16,21 +15,27 @@ namespace RhinoInside.Revit.UI
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      var buttonData = NewPushButtonData<CommandAddinOptions, AlwaysAvailable>(CommandName, "Options.png", CommandTooltip);
+      var buttonData = NewPushButtonData<CommandAddinOptions, AlwaysAvailable>
+      (
+        name: CommandName,
+        iconName: "Options.png",
+        tooltip: CommandTooltip,
+        url: "reference/rir-interface#rhinoinsiderevit-options"
+      );
+
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         // setup button
         StoreButton(CommandName, pushButton);
 
-        // disable if startup mode is disabled
+        // disable the button if options are readonly
+        pushButton.Enabled = !AddinOptions.IsReadOnly && AddIn.IsEtoFrameworkReady;
+
         if (AddIn.StartupMode == AddinStartupMode.Disabled)
         {
           pushButton.Enabled = false;
-          pushButton.ToolTip = "Addin Disabled";
+          pushButton.ToolTip = "Add-In is disabled";
         }
-
-        // disable the button if options are readonly
-        pushButton.Enabled = !AddinOptions.IsReadOnly && AddIn.IsEtoFrameworkReady;
       }
     }
 
@@ -56,7 +61,7 @@ namespace RhinoInside.Revit.UI
     /// <summary>
     /// Mark button with highlighter dot using Autodesk.Windows api
     /// </summary>
-    static public void NotifyUpdateAvailable(ReleaseInfo releaseInfo)
+    public static void NotifyUpdateAvailable(ReleaseInfo releaseInfo)
     {
       // button gets deactivated if options are readonly
       if (!AddinOptions.IsReadOnly)
@@ -73,7 +78,7 @@ namespace RhinoInside.Revit.UI
       }
     }
 
-    static public void ClearUpdateNotifiy()
+    public static void ClearUpdateNotifiy()
     {
       if (RestoreButton(CommandName) is PushButton button)
       {

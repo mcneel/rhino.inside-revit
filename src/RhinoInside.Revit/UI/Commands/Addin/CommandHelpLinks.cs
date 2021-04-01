@@ -9,20 +9,26 @@ namespace RhinoInside.Revit.UI
     internal static void CreateUI(RibbonPanel ribbonPanel)
     {
       ribbonPanel.AddStackedItems(
-        NewPushButtonData<CommandAPIDocs, AlwaysAvailable>(
+        NewPushButtonData<CommandAPIDocs, AlwaysAvailable>
+        (
           name: CommandAPIDocs.CommandName,
           iconName: "Link-icon.png",
-          tooltip: "Opens apidocs.co (Revit API documentation) website"
+          tooltip: "Opens apidocs.co (Revit API documentation) website",
+          url: "reference/rir-interface#more-slideout"
         ),
-        NewPushButtonData<CommandTheBuildingCoder, AlwaysAvailable>(
+        NewPushButtonData<CommandTheBuildingCoder, AlwaysAvailable>
+        (
           name: CommandTheBuildingCoder.CommandName,
           iconName: "Link-icon.png",
-          tooltip: "Opens TheBuildingCode website"
+          tooltip: "Opens TheBuildingCode website",
+          url: "reference/rir-interface#more-slideout"
         ),
-        NewPushButtonData<CommandRhinoDevDocs, AlwaysAvailable>(
+        NewPushButtonData<CommandRhinoDevDocs, AlwaysAvailable>
+        (
           name: CommandRhinoDevDocs.CommandName,
           iconName: "Link-icon.png",
-          tooltip: "Opens Rhino Developer documentation website"
+          tooltip: "Opens Rhino Developer documentation website",
+          url: "reference/rir-interface#more-slideout"
         )
       );
     }

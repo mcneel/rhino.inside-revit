@@ -1,18 +1,6 @@
 using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-
-using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-
-using Eto.Forms;
-using Rhino.PlugIns;
-using System.Diagnostics;
 
 namespace RhinoInside.Revit.UI
 {
@@ -23,7 +11,7 @@ namespace RhinoInside.Revit.UI
   {
     public RhinoCommand()
     {
-      if (Revit.OnStartup(AddIn.ApplicationUI) != Result.Succeeded)
+      if (Revit.OnStartup(AddIn.Host) != Result.Succeeded)
         throw new Exception("Failed to startup Rhino");
     }
 

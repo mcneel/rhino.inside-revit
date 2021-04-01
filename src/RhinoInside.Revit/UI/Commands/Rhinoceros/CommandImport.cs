@@ -31,15 +31,16 @@ namespace RhinoInside.Revit.UI
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      var buttonData = NewPushButtonData<CommandImport, NeedsActiveDocument<Availability>>(
-        CommandName,
-        "Ribbon.Rhinoceros.Import-3DM.png",
-        "Imports geometry from 3dm file to a Revit model or family"
+      var buttonData = NewPushButtonData<CommandImport, NeedsActiveDocument<Availability>>
+      (
+        name: CommandName,
+        iconName: "Ribbon.Rhinoceros.Import-3DM.png",
+        tooltip: "Imports geometry from 3dm file to a Revit model or family",
+        url : "reference/rir-interface#rhinoceros-panel"
       );
 
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://github.com/mcneel/rhino.inside-revit/tree/master#sample-8"));
       }
     }
 

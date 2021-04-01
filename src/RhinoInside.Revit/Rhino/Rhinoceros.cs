@@ -47,7 +47,7 @@ namespace RhinoInside.Revit
   {
     #region Revit Interface
     static RhinoCore core;
-    public static readonly string SchemeName = $"Inside-Revit-{AddIn.ApplicationUI.ControlledApplication.VersionNumber}";
+    public static readonly string SchemeName = $"Inside-Revit-{AddIn.Host.Services.VersionNumber}";
     internal static string[] StartupLog;
 
     internal static Result Startup()
@@ -62,7 +62,7 @@ namespace RhinoInside.Revit
 
         if (Settings.AddinOptions.Session.UseHostLanguage)
         {
-          args.Add($"/language={AddIn.ApplicationUI.ControlledApplication.Language.ToLCID()}");
+          args.Add($"/language={AddIn.Host.Services.Language.ToLCID()}");
         }
 
         if (Settings.DebugLogging.Current.Enabled)

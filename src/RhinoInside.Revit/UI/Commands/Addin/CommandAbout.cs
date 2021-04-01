@@ -14,10 +14,16 @@ namespace RhinoInside.Revit.UI
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      var buttonData = NewPushButtonData<CommandAbout, AlwaysAvailable>(CommandName, "About-icon.png", string.Empty);
+      var buttonData = NewPushButtonData<CommandAbout, AlwaysAvailable>
+      (
+        name: CommandName,
+        iconName: "About-icon.png",
+        tooltip: "",
+        url: "reference/release-notes"
+      );
+
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://www.rhino3d.com/inside/revit/"));
       }
     }
 
@@ -26,7 +32,7 @@ namespace RhinoInside.Revit.UI
       var details = new StringBuilder();
 
       var rhino = AddIn.RhinoVersionInfo;
-      details.AppendLine($"Rhino: {rhino.ProductVersion} ({rhino.FileDescription})");
+      details.AppendLine($"Rhino: {rhino?.ProductVersion} ({rhino?.FileDescription ?? "not found"})");
 
       var revit = data.Application.Application;
 #if REVIT_2019

@@ -11,10 +11,16 @@ namespace RhinoInside.Revit.UI
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      var buttonData = NewPushButtonData<CommandGuides, AlwaysAvailable>(CommandName, "Guides-icon.png", "");
+      var buttonData = NewPushButtonData<CommandGuides, AlwaysAvailable>
+      (
+        name: CommandName,
+        iconName: "Guides-icon.png",
+        tooltip: "Opens Rhino.Inside Revit guides page",
+        url: "reference/rir-interface#more-slideout"
+      );
+
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://www.rhino3d.com/inside/revit/beta/"));
       }
     }
 

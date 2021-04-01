@@ -11,10 +11,16 @@ namespace RhinoInside.Revit.UI
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      var buttonData = NewPushButtonData<CommandForums, AlwaysAvailable>(CommandName, "Forum-icon.png", "");
+      var buttonData = NewPushButtonData<CommandForums, AlwaysAvailable>
+      (
+        name: CommandName,
+        iconName: "Forum-icon.png",
+        tooltip: "Opens discourse.mcneel.com website",
+        url: "reference/rir-interface#more-slideout"
+      );
+
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://www.rhino3d.com/inside/revit/beta/"));
       }
     }
 

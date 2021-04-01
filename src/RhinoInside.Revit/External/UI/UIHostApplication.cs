@@ -26,6 +26,20 @@ namespace RhinoInside.Revit.External.UI
 
     #region Ribbon
     public abstract void CreateRibbonTab(string tabName);
+    internal bool ActivateRibbonTab(string tabName)
+    {
+      foreach (var tab in Autodesk.Windows.ComponentManager.Ribbon.Tabs)
+      {
+        if (tab.Name == tabName)
+        {
+          tab.IsActive = true;
+          return true;
+        }
+      }
+
+      return false;
+    }
+
     public abstract RibbonPanel CreateRibbonPanel(Tab tab, string panelName);
     public abstract RibbonPanel CreateRibbonPanel(string tabName, string panelName);
     public abstract IReadOnlyList<RibbonPanel> GetRibbonPanels(Tab tab);

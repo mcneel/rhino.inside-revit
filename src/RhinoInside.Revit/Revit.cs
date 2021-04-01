@@ -13,17 +13,18 @@ using Rhino;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.Convert.System.Collections.Generic;
 using RhinoInside.Revit.External.ApplicationServices.Extensions;
+using RhinoInside.Revit.External.UI;
 using RhinoInside.Revit.External.UI.Extensions;
 
 namespace RhinoInside.Revit
 {
   public static partial class Revit
   {
-    internal static Result OnStartup(UIControlledApplication applicationUI)
+    internal static Result OnStartup(UIHostApplication applicationUI)
     {
       if (MainWindow.IsZero)
       {
-        var result = AddIn.CheckSetup(applicationUI);
+        var result = AddIn.CheckSetup();
         if (result != Result.Succeeded)
           return result;
 
@@ -59,7 +60,7 @@ namespace RhinoInside.Revit
 
         // Register some events
         applicationUI.Idling += OnIdle;
-        applicationUI.ControlledApplication.DocumentChanged += OnDocumentChanged;
+        applicationUI.Services.DocumentChanged += OnDocumentChanged;
 
         AddIn.CurrentStatus = AddIn.Status.Ready;
       }
@@ -67,12 +68,12 @@ namespace RhinoInside.Revit
       return Result.Succeeded;
     }
 
-    internal static Result OnShutdown(UIControlledApplication applicationUI)
+    internal static Result OnShutdown(UIHostApplication applicationUI)
     {
       if (!MainWindow.IsZero)
       {
         // Unregister some events
-        applicationUI.ControlledApplication.DocumentChanged -= OnDocumentChanged;
+        applicationUI.Services.DocumentChanged -= OnDocumentChanged;
         applicationUI.Idling -= OnIdle;
 
         Rhinoceros.Shutdown();
@@ -88,9 +89,6 @@ namespace RhinoInside.Revit
 
     static void OnIdle(object sender, IdlingEventArgs args)
     {
-      if(ActiveUIApplication?.IsValidObject != true)
-        ActiveUIApplication = (sender as UIApplication);
-
       if (AddIn.CurrentStatus > AddIn.Status.Available)
       {
         if (ProcessIdleActions())
@@ -274,8 +272,9 @@ namespace RhinoInside.Revit
     public static string CurrentUsersDataFolderPath => ApplicationUI.ControlledApplication.GetCurrentUsersDataFolderPath();
 
     [Obsolete("Since 2021-03-27")]
-    public static Autodesk.Revit.UI.UIControlledApplication       ApplicationUI => AddIn.ApplicationUI;
-    public static Autodesk.Revit.UI.UIApplication                 ActiveUIApplication { get; internal set; }
+    public static Autodesk.Revit.UI.UIControlledApplication       ApplicationUI { get; internal set; }
+
+    public static Autodesk.Revit.UI.UIApplication                 ActiveUIApplication => AddIn.Host.Value as Autodesk.Revit.UI.UIApplication;
     public static Autodesk.Revit.ApplicationServices.Application  ActiveDBApplication => ActiveUIApplication?.Application;
 
     public static Autodesk.Revit.UI.UIDocument                    ActiveUIDocument => ActiveUIApplication?.ActiveUIDocument;

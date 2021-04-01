@@ -5,11 +5,40 @@ using System.Linq;
 using Autodesk.Revit.UI;
 using ADW = Autodesk.Windows;
 using ADIW = Autodesk.Internal.Windows;
+using RhinoInside.Revit.Settings;
 
 namespace RhinoInside.Revit.UI
 {
-  abstract class LinkedScripts
+  static class LinkedScripts
   {
+    public static void CreateUI(RibbonHandler ribbon)
+    {
+      // Setup listeners, and in either case, update the packages ui
+      // listed for changes in installed packages
+      Rhino.Commands.Command.EndCommand += PackageManagerCommand_EndCommand;
+      // listen for changes to user-script paths in options
+      AddinOptions.ScriptLocationsChanged += AddinOptions_ScriptLocationsChanged;
+
+      UpdateScriptPkgUI(ribbon);
+    }
+
+    private static async void AddinOptions_ScriptLocationsChanged(object sender, EventArgs e)
+    {
+      // wait for Revit to be ready and get uiApp
+      var uiApp = await External.ActivationGate.Yield();
+      UpdateScriptPkgUI(new RibbonHandler(uiApp));
+    }
+
+    private static async void PackageManagerCommand_EndCommand(object sender, Rhino.Commands.CommandEventArgs e)
+    {
+      if (e.CommandEnglishName == "PackageManager")
+      {
+        // wait for Revit to be ready and get uiApp
+        var uiApp = await External.ActivationGate.Yield();
+        UpdateScriptPkgUI(new RibbonHandler(uiApp));
+      }
+    }
+
     public static bool CreateUI(ScriptPkg pkg, RibbonHandler ribbon)
     {
       // --------------------------------------------------------------------
@@ -77,6 +106,54 @@ namespace RhinoInside.Revit.UI
     {
       return ribbon.RemoveAddinPanel(pkg.Name);
     }
+
+    private static HashSet<ScriptPkg> _lastState = new HashSet<ScriptPkg>();
+
+    internal static void UpdateScriptPkgUI(RibbonHandler ribbon)
+    {
+      // determine which packages need to be loaded
+      var curState = new HashSet<ScriptPkg>();
+      if (AddinOptions.Current.LoadInstalledScriptPackages)
+        curState.UnionWith(CommandGrasshopperPackageManager.GetInstalledScriptPackages());
+
+      if (AddinOptions.Current.LoadUserScriptPackages)
+        curState.UnionWith(ScriptPkg.GetUserScriptPackages());
+
+      // create a combined set of both last and current states to iterate over
+      var pkgs = new HashSet<ScriptPkg>(curState);
+      pkgs.UnionWith(_lastState);
+
+      // update the package ui
+      foreach (var pkg in pkgs)
+      {
+        // skip existing packages
+        if (curState.Contains(pkg) && _lastState.Contains(pkg))
+          continue;
+
+        // create new packages
+        else if (curState.Contains(pkg) && !_lastState.Contains(pkg))
+        {
+          if (LinkedScripts.HasUI(pkg, ribbon))
+            TaskDialog.Show(
+              AddIn.AddinName,
+              $"Package \"{pkg.Name}\" has been previously loaded in to the Revit UI." +
+              "Restart Revit for changes to take effect."
+              );
+          else
+            LinkedScripts.CreateUI(pkg, ribbon);
+        }
+
+        // or remove, removed packages
+        else if (!curState.Contains(pkg) && _lastState.Contains(pkg))
+        {
+          if (LinkedScripts.HasUI(pkg, ribbon))
+            LinkedScripts.RemoveUI(pkg, ribbon);
+        }
+      }
+
+      _lastState = curState;
+    }
+
 
     internal static void ProcessLinkedScripts(List<LinkedItem> items, Action<LinkedScript> action)
     {

@@ -34,13 +34,13 @@ namespace RhinoInside.Revit.UI
       (
         name: CommandName,
         iconName: "GrasshopperPlayer.png",
-        tooltip: "Loads and evals a Grasshopper definition"
+        tooltip: "Loads and evals a Grasshopper definition",
+        url: "reference/rir-interface#grasshopper-panel"
       );
 
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://www.grasshopper3d.com/"));
-        pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool loaded, out bool loadProtected);
+        pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
       }
     }
 

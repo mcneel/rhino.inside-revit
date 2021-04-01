@@ -1,18 +1,6 @@
-using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-
-using Eto.Forms;
-using Rhino.PlugIns;
-using System.Diagnostics;
 
 namespace RhinoInside.Revit.UI
 {
@@ -23,15 +11,17 @@ namespace RhinoInside.Revit.UI
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      var buttonData = NewPushButtonData<CommandRhino, Availability>(
-        CommandName,
-        "Rhino.png",
-        "Shows Rhino window"
-        );
+      var buttonData = NewPushButtonData<CommandRhino, Availability>
+      (
+        name: CommandName,
+        iconName: "Rhino.png",
+        tooltip: "Shows Rhino window",
+        url: "reference/rir-interface#rhinoceros-panel"
+      );
+
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         pushButton.LongDescription = $"Use CTRL key to open only Rhino window without restoring other tool windows";
-        pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://discourse.mcneel.com/"));
       }
     }
 
