@@ -312,17 +312,14 @@ namespace RhinoInside.Revit
     {
       if(await AddinUpdater.GetReleaseInfoAsync() is ReleaseInfo releaseInfo)
       {
-        // if release info is received,
-        if (releaseInfo != null)
+        // if release info is received, and
+        // if current version on the active update channel is newer
+        if (releaseInfo != null && releaseInfo.Version > Version)
         {
-          // if current version on the active update channel is newer
-          if (releaseInfo.Version > Version)
-          {
-            // ask UI to notify user of updates
-            if (!AddinOptions.Session.CompactTab)
-              UI.CommandStart.NotifyUpdateAvailable(releaseInfo);
-            UI.CommandAddinOptions.NotifyUpdateAvailable(releaseInfo);
-          }
+          // ask UI to notify user of updates
+          if (!AddinOptions.Session.CompactTab)
+            UI.CommandStart.NotifyUpdateAvailable(releaseInfo);
+          UI.CommandAddinOptions.NotifyUpdateAvailable(releaseInfo);
         }
         else
         {
