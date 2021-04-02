@@ -543,9 +543,9 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap CompoundStructure_Construct {
+        internal static System.Drawing.Bitmap ConstructCompoundStructure {
             get {
-                object obj = ResourceManager.GetObject("CompoundStructure_Construct", resourceCulture);
+                object obj = ResourceManager.GetObject("ConstructCompoundStructure", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -573,9 +573,9 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap CompoundStructureLayer_Construct {
+        internal static System.Drawing.Bitmap ConstructCompoundStructureLayer {
             get {
-                object obj = ResourceManager.GetObject("CompoundStructureLayer_Construct", resourceCulture);
+                object obj = ResourceManager.GetObject("ConstructCompoundStructureLayer", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
