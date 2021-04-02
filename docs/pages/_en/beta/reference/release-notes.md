@@ -12,7 +12,7 @@ Some of the changes mentioned in sections below, might break your existing Grass
 <!-- most recent release should be on top -->
 {% include ltr/release-header.html version="0.3" time="04/01/2021" %}
 
-### New featues
+### New Features
 * Added 'Select Element' component.
 * Added 'Set new Element' to parameters context menu.
 * Added 'Externalise selection' to the parameters context menu.
@@ -30,7 +30,7 @@ Some of the changes mentioned in sections below, might break your existing Grass
 
 {% include ltr/release-header.html version="0.2" time="03/09/2021" %}
 
-### New featues
+### New Features
 * Added 'Construct Compount Structure' component.
 * Added 'Construct Compount Structure Layer' component.
 * Added 'Select Element' component.
@@ -66,8 +66,8 @@ As part of the preparation for the {{ site.terms.rir }} v1, we have mostly focus
 {% include ltr/release-header.html version="0.0.7733.38548" time="03/04/2021 17:48:12" %}
 
 ### Fixes
-* Fixed some problems transfering Meshes when non working in feet in Rhino.
-* Now `Brep` to `Solid` reparameterize each Brep face and edge with some tolerance values more Revit friendly.
+* Fixed some problems transferring Meshes when non working in feet in Rhino.
+* Now `Brep` to `Solid` re-parameterize each Brep face and edge with some tolerance values more Revit friendly.
 * Breps with out of tolerance edges are now rebuilt using more Revit friendly tolerances.
 * Added some null checking at reconstruct DirectShape components.
 * Fixed `Curve.TryGetEllipse` orientation issue.
