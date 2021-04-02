@@ -20,12 +20,12 @@ namespace RhinoInside.Revit.UI
       (
         name: CommandName,
         iconName: "PackageManager-icon.png",
-        tooltip: "Shows Rhino/Grasshopper Package Manager"
+        tooltip: "Shows Rhino/Grasshopper Package Manager",
+        url: "https://www.food4rhino.com/"
       );
 
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        pushButton.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, "https://www.food4rhino.com/"));
       }
     }
 

@@ -143,16 +143,19 @@ namespace RhinoInside.Revit.GH.Components.Host
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
         return;
 
-      Params.GetDataList(DA, "Exterior Layers", out IList<Types.CompoundStructureLayer> exterior);
-      Params.GetDataList(DA, "Core Layers", out IList<Types.CompoundStructureLayer> core);
-      Params.GetDataList(DA, "Interior Layers", out IList<Types.CompoundStructureLayer> interior);
-      Params.GetData(DA, "Total Thickness", out double? minThickness);
-      Params.GetData(DA, "Wrapping At Inserts", out Types.OpeningWrappingCondition openingWrapping);
-      Params.GetData(DA, "Wrapping At Ends", out Types.EndCapCondition endCaps);
-      Params.GetData(DA, "Sample Height", out double? sampleHeight);
-      Params.GetData(DA, "Cutoff Height", out double? cutoffHeight);
+      bool update = false;
+      update |= Params.GetDataList(DA, "Exterior Layers", out IList<Types.CompoundStructureLayer> exterior);
+      update |= Params.GetDataList(DA, "Core Layers", out IList<Types.CompoundStructureLayer> core);
+      update |= Params.GetDataList(DA, "Interior Layers", out IList<Types.CompoundStructureLayer> interior);
+      update |= Params.GetData(DA, "Total Thickness", out double? minThickness);
+      update |= Params.GetData(DA, "Wrapping At Inserts", out Types.OpeningWrappingCondition openingWrapping);
+      update |= Params.GetData(DA, "Wrapping At Ends", out Types.EndCapCondition endCaps);
+      update |= Params.GetData(DA, "Sample Height", out double? sampleHeight);
+      update |= Params.GetData(DA, "Cutoff Height", out double? cutoffHeight);
 
-      var structure = new Types.CompoundStructure(doc);
+      var structure = update ? new Types.CompoundStructure(doc) : default;
+
+      if(structure is object)
       {
         structure.SetLayers(exterior, core, interior);
         if(minThickness.HasValue) structure.SetWidth(minThickness.Value);

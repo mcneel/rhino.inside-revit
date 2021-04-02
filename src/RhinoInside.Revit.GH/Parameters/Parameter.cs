@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override Guid ComponentGuid => new Guid("A550F532-8C68-460B-91F3-DA0A5A0D42B5");
     public override GH_Exposure Exposure => GH_Exposure.septenary;
 
-    public ParameterKey() : base("Parameter Key", "ParaKey", "Represents a Revit parameter definition.", "Params", "Revit Primitives") { }
+    public ParameterKey() : base("Parameter Key", "ParaKey", "Contains a collection of Revit parameter keys", "Params", "Revit Primitives") { }
 
     #region UI
     public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
@@ -186,7 +186,7 @@ namespace RhinoInside.Revit.GH.Parameters
       return data is DB.Parameter parameter ? new Types.ParameterValue(parameter) : default;
     }
 
-    public ParameterValue() : base("ParameterValue", "ParameterValue", "Represents a Revit parameter value on an element.", "Params", "Revit Primitives", GH_ParamAccess.item) { }
+    public ParameterValue() : base("ParameterValue", "ParameterValue", "Contains a collection of Revit parameter values on an element.", "Params", "Revit Primitives", GH_ParamAccess.item) { }
     protected ParameterValue(string name, string nickname, string description, string category, string subcategory, GH_ParamAccess access) :
     base(name, nickname, description, category, subcategory, access)
     { }

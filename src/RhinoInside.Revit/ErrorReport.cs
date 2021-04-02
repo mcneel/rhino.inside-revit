@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using Autodesk.Revit.UI;
 using Microsoft.Win32;
@@ -293,6 +294,157 @@ namespace RhinoInside.Revit
 
       using (Process.Start(mailtoURI + mailBody)) { }
     }
+
+    public static Result ShowLoadError()
+    {
+      using
+      (
+        var taskDialog = new TaskDialog("Oops! Something went wrong :(")
+        {
+          Id = $"{MethodBase.GetCurrentMethod().DeclaringType}.{MethodBase.GetCurrentMethod().Name}",
+          MainIcon = UIX.TaskDialogIcons.IconError,
+          TitleAutoPrefix = true,
+          AllowCancellation = true,
+          MainInstruction = "Rhino.Inside failed to load",
+          MainContent = $"Please run some tests before reporting.{Environment.NewLine}Those tests would help us figure out what happened.",
+          ExpandedContent = "This problem use to be due an incompatibility with other installed add-ins.\n\n" +
+                            "While running on these modes you may see other add-ins errors and it may take longer to load, don't worry about that no persistent change will be made on your computer.",
+          VerificationText = "Exclude installed add-ins list from the report.",
+          FooterText = "Current version: " + AddIn.DisplayVersion
+        }
+      )
+      {
+        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "1. Run Revit without other Addins…", "Good for testing if Rhino.Inside would load if no other add-in were installed.");
+        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink2, "2. Run Rhino.Inside in verbose mode…", "Enables all logging mechanisms built in Rhino for support purposes.");
+        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink3, "3. Send report…", "Reports this problem by email to tech@mcneel.com");
+        taskDialog.DefaultButton = TaskDialogResult.CommandLink3;
+
+        while (true)
+          switch (taskDialog.Show())
+          {
+            case TaskDialogResult.CommandLink1: RunWithoutAddIns(); break;
+            case TaskDialogResult.CommandLink2: RunVerboseMode(); break;
+            case TaskDialogResult.CommandLink3: SendEmail
+              (
+                AddIn.Host,
+                "Rhino.Inside Revit failed to load",
+                !taskDialog.WasVerificationChecked(),
+                new string[]
+                {
+                  AddIn.Host.Services.RecordingJournalFilename,
+                  RhinoDebugMessages_txt,
+                  RhinoAssemblyResolveLog_txt
+                }
+              );
+              return Result.Succeeded;
+            default: return Result.Cancelled;
+          }
+      }
+    }
+
+    static void RunWithoutAddIns()
+    {
+      var SafeModeFolder = Path.Combine(AddIn.Host.Services.CurrentUserAddinsLocation, "RhinoInside.Revit", "SafeMode");
+      Directory.CreateDirectory(SafeModeFolder);
+
+      Settings.AddIns.GetInstalledAddins(AddIn.Host.Services.VersionNumber, out var AddinFiles);
+      if (AddinFiles.Where(x => Path.GetFileName(x) == "RhinoInside.Revit.addin").FirstOrDefault() is string RhinoInsideRevitAddinFile)
+      {
+        var SafeModeAddinFile = Path.Combine(SafeModeFolder, Path.GetFileName(RhinoInsideRevitAddinFile));
+        File.Copy(RhinoInsideRevitAddinFile, SafeModeAddinFile, true);
+
+        if (Settings.AddIns.LoadFrom(SafeModeAddinFile, out var SafeModeAddin))
+        {
+          SafeModeAddin.First().Assembly = Assembly.GetCallingAssembly().Location;
+          Settings.AddIns.SaveAs(SafeModeAddin, SafeModeAddinFile);
+        }
+
+        var journalFile = Path.Combine(SafeModeFolder, "RhinoInside.Revit-SafeMode.txt");
+        using (var journal = File.CreateText(journalFile))
+        {
+          journal.WriteLine("' ");
+          journal.WriteLine("Dim Jrn");
+          journal.WriteLine("Set Jrn = CrsJournalScript");
+          journal.WriteLine(" Jrn.RibbonEvent \"TabActivated:Add-Ins\"");
+          journal.WriteLine(" Jrn.RibbonEvent \"Execute external command:CustomCtrl_%CustomCtrl_%Add-Ins%Rhinoceros%CommandRhinoInside:RhinoInside.Revit.UI.CommandRhinoInside\"");
+        }
+
+        var batchFile = Path.Combine(SafeModeFolder, "RhinoInside.Revit-SafeMode.bat");
+        using (var batch = File.CreateText(batchFile))
+        {
+          batch.WriteLine($"\"{Process.GetCurrentProcess().MainModule.FileName}\" \"{Path.GetFileName(journalFile)}\"");
+        }
+
+        var si = new ProcessStartInfo()
+        {
+          FileName = Process.GetCurrentProcess().MainModule.FileName,
+          Arguments = $"\"{journalFile}\""
+        };
+        using (var RevitApp = Process.Start(si)) { RevitApp.WaitForExit(); }
+      }
+    }
+
+    static readonly string RhinoDebugMessages_txt = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "RhinoDebugMessages.txt");
+    static readonly string RhinoAssemblyResolveLog_txt = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RhinoAssemblyResolveLog.txt");
+
+    static void RunVerboseMode()
+    {
+      const string SDKRegistryKeyName = @"Software\McNeel\Rhinoceros\SDK";
+
+      if (File.Exists(RhinoDebugMessages_txt))
+        File.Delete(RhinoDebugMessages_txt);
+
+      if (File.Exists(RhinoAssemblyResolveLog_txt))
+        File.Delete(RhinoAssemblyResolveLog_txt);
+
+      using (File.Create(RhinoAssemblyResolveLog_txt)) { }
+
+      bool deleteKey = false;
+
+      try
+      {
+        using (var existingSDK = Registry.CurrentUser.OpenSubKey(SDKRegistryKeyName))
+          if (existingSDK is null)
+          {
+            using (var newSDK = Registry.CurrentUser.CreateSubKey(SDKRegistryKeyName))
+              if (newSDK is null)
+                return;
+
+            deleteKey = true;
+          }
+
+        var DebugLogging = Settings.DebugLogging.Current;
+        try
+        {
+          Settings.DebugLogging.Current = new Settings.DebugLogging
+          {
+            Enabled = true,
+            SaveToFile = true
+          };
+
+          var si = new ProcessStartInfo()
+          {
+            FileName = Process.GetCurrentProcess().MainModule.FileName,
+            Arguments = "/nosplash",
+            UseShellExecute = false
+          };
+          si.EnvironmentVariables["RhinoInside_RunScript"] = "_Grasshopper";
+
+          using (var RevitApp = Process.Start(si)) { RevitApp.WaitForExit(); }
+        }
+        finally
+        {
+          Settings.DebugLogging.Current = DebugLogging;
+        }
+      }
+      finally
+      {
+        if (deleteKey)
+          try { Registry.CurrentUser.DeleteSubKey(SDKRegistryKeyName); }
+          catch { }
+      }
+    }
+
   }
 
   sealed class MiniDumper

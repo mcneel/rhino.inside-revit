@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Parameters
     protected override System.Drawing.Bitmap Icon => ((System.Drawing.Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
                                                      ImageBuilder.BuildIcon("Y");
 
-    public ElementFilter() : base("ElementFilter", "ElementFilter", "Represents a Revit element filter.", "Params", "Revit Primitives", GH_ParamAccess.item) { }
+    public ElementFilter() : base("ElementFilter", "ElementFilter", "Contains a collection of Revit element filters", "Params", "Revit Primitives", GH_ParamAccess.item) { }
   }
 
   public class FilterRule : GH_Param<Types.FilterRule>
@@ -20,6 +20,6 @@ namespace RhinoInside.Revit.GH.Parameters
     protected override System.Drawing.Bitmap Icon => ((System.Drawing.Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
                                                      ImageBuilder.BuildIcon("R");
 
-    public FilterRule() : base("FilterRule", "FilterRule", "Represents a Revit filter rule.", "Params", "Revit Primitives", GH_ParamAccess.item) { }
+    public FilterRule() : base("FilterRule", "FilterRule", "Contains a collection of Revit filter rules", "Params", "Revit Primitives", GH_ParamAccess.item) { }
   }
 }

@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
     public override Guid ComponentGuid => new Guid("B18EF2CC-2E67-4A5E-9241-9010FB7D27CE");
 
-    public Material() : base("Material", "Material", "Represents a Revit document material.", "Params", "Revit Primitives") { }
+    public Material() : base("Material", "Material", "Contains a collection of Revit material elements", "Params", "Revit Primitives") { }
 
     #region UI
     public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
@@ -29,7 +29,6 @@ namespace RhinoInside.Revit.GH.Parameters
         activeApp.CanPostCommand(commandId), false
       );
     }
-    #endregion
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
@@ -132,5 +131,6 @@ namespace RhinoInside.Revit.GH.Parameters
         ExpireSolution(true);
       }
     }
+    #endregion
   }
 }

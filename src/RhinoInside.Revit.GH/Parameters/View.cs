@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
     public override Guid ComponentGuid => new Guid("2DC4B866-54DB-4CE6-94C0-C51B33D35B49");
 
-    public View() : base("View", "View", "Represents a Revit view.", "Params", "Revit Primitives") { }
+    public View() : base("View", "View", "Contains a collection of Revit view elements", "Params", "Revit Primitives") { }
 
     protected override Types.IGH_View InstantiateT() => new Types.View();
 

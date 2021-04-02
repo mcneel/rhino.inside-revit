@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     public override Guid ComponentGuid => new Guid("E3462915-3C4D-4864-9DD4-5A73F91C6543");
 
-    public HostObject() : base("Host", "Host", "Represents a Revit document host element.", "Params", "Revit Primitives") { }
+    public HostObject() : base("Host", "Host", "Contains a collection of host elements", "Params", "Revit Primitives") { }
 
     protected override Types.IGH_HostObject InstantiateT() => new Types.HostObject();
   }
@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.hidden;
     public override Guid ComponentGuid => new Guid("708AB072-878E-41ED-9B8C-AAB0E1D85A53");
 
-    public HostObjectType() : base("Host Type", "HostType", "Represents a Revit document host element type.", "Params", "Revit Primitives") { }
+    public HostObjectType() : base("Host Type", "HostType", "Contains a collection of Revit host types", "Params", "Revit Primitives") { }
 
     protected override Types.IGH_HostObjectType InstantiateT() => new Types.HostObjectType();
   }
@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     public override Guid ComponentGuid => new Guid("0D0AFE5F-4578-493E-8374-C6BD1C5395BE");
 
-    public BuildingPad() : base("Building Pad", "Building Pad", "Represents a Revit document building pad element.", "Params", "Revit Primitives") { }
+    public BuildingPad() : base("Building Pad", "Building Pad", "Contains a collection of Revit building pad elements", "Params", "Revit Primitives") { }
 
     #region UI
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
@@ -52,7 +52,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     public override Guid ComponentGuid => new Guid("A2DD571E-729C-4F69-BD34-2769583D329B");
 
-    public CurtainGridLine() : base("Curtain Grid Line", "Curtain Grid Line", "Represents a Revit document curtain grid line element.", "Params", "Revit Primitives") { }
+    public CurtainGridLine() : base("Curtain Grid Line", "Curtain Grid Line", "Contains a collection of Revit curtain grid line elements", "Params", "Revit Primitives") { }
 
     #region UI
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
@@ -74,7 +74,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     public override Guid ComponentGuid => new Guid("E94B20E9-C2AA-4FC7-939D-ECD071EA45DA");
 
-    public CurtainSystem() : base("Curtain System", "Curtain System", "Represents a Revit document curtain system element.", "Params", "Revit Primitives") { }
+    public CurtainSystem() : base("Curtain System", "Curtain System", "Contains a collection of Revit curtain system elements", "Params", "Revit Primitives") { }
 
     #region UI
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
@@ -96,7 +96,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     public override Guid ComponentGuid => new Guid("7FCEA93D-8CDE-446C-9167-E8B590342C66");
 
-    public Ceiling() : base("Ceiling", "Ceiling", "Represents a Revit document ceiling element.", "Params", "Revit Primitives") { }
+    public Ceiling() : base("Ceiling", "Ceiling", "Contains a collection of Revit ceiling elements", "Params", "Revit Primitives") { }
   }
 
   public class Floor : GraphicalElementT<Types.Floor, DB.Floor>
@@ -104,7 +104,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     public override Guid ComponentGuid => new Guid("45616DF6-59BF-4480-A133-8F9B3BA27AF1");
 
-    public Floor() : base("Floor", "Floor", "Represents a Revit document floor element.", "Params", "Revit Primitives") { }
+    public Floor() : base("Floor", "Floor", "Contains a collection of Revit floor elements", "Params", "Revit Primitives") { }
 
     #region UI
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
@@ -146,7 +146,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     public override Guid ComponentGuid => new Guid("D75E33E2-2508-42E6-AEF1-B05759A495AB");
 
-    public Roof() : base("Roof", "Roof", "Represents a Revit document roof element.", "Params", "Revit Primitives") { }
+    public Roof() : base("Roof", "Roof", "Contains a collection of Revit roof elements", "Params", "Revit Primitives") { }
 
     #region UI
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
@@ -188,7 +188,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     public override Guid ComponentGuid => new Guid("15AD6BF9-63AD-462B-985D-F6B8C2299465");
 
-    public Wall() : base("Wall", "Wall", "Represents a Revit document wall element.", "Params", "Revit Primitives") { }
+    public Wall() : base("Wall", "Wall", "Contains a collection of Revit wall elements", "Params", "Revit Primitives") { }
 
     #region UI
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)

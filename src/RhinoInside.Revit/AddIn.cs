@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -12,7 +11,6 @@ using Microsoft.Win32.SafeHandles;
 using RhinoInside.Revit.Native;
 using RhinoInside.Revit.Settings;
 using UIX = RhinoInside.Revit.External.UI;
-using ASX = RhinoInside.Revit.External.ApplicationServices;
 
 namespace RhinoInside.Revit
 {
@@ -31,6 +29,7 @@ namespace RhinoInside.Revit
     #region AddinInfo
     public static string AddinCompany => "McNeel";
     public static string AddinName => "Rhino.Inside";
+    public static string AddinWebSite => @"https://www.rhino3d.com/inside/revit/beta/";
     #endregion
 
     #region Status
@@ -49,7 +48,7 @@ namespace RhinoInside.Revit
 
     internal static Status CurrentStatus
     {
-      get =>  status;
+      get => status;
 
       set
       {
@@ -118,15 +117,20 @@ namespace RhinoInside.Revit
     #endregion
 
     #region IExternalApplication Members
-    internal static UIControlledApplication ApplicationUI { get; private set; }
+    static UIX.UIHostApplication host;
+    internal static UIX.UIHostApplication Host
+    {
+      get => host;
+      private set { host?.Dispose(); host = value; }
+    }
 
     protected override Result OnStartup(UIControlledApplication uiCtrlApp)
     {
-      if (!CanLoad(uiCtrlApp))
-        return Result.Failed;
-
-      if (StartupMode == AddinStartupMode.Cancelled)
-        return Result.Cancelled;
+      // Check if the AddIn can startup
+      {
+        var result = CanStartup(uiCtrlApp);
+        if (result != Result.Succeeded) return result;
+      }
 
       // Report if opennurbs.dll is loaded
       NativeLoader.SetStackTraceFilePath
@@ -137,136 +141,73 @@ namespace RhinoInside.Revit
       NativeLoader.ReportOnLoad("opennurbs.dll", enable: true);
 
       AssemblyResolver.Enabled = true;
-      ApplicationUI = uiCtrlApp;
+      Host = uiCtrlApp;
+      Revit.ApplicationUI = uiCtrlApp;
 
-      // Initialize UI framework provided by Rhino
-      EtoFramework.Init();
-
-      // Register Revit Failures
-      External.DB.ExternalFailures.CreateFailureDefinitions();
-
-      if (uiCtrlApp.IsLateAddinLoading)
+      // Initialize DB
       {
-        EventHandler<Autodesk.Revit.UI.Events.IdlingEventArgs> applicationIdling = null;
-        uiCtrlApp.Idling += applicationIdling = (sender, args) =>
+        // Register Revit Failures
+        External.DB.ExternalFailures.CreateFailureDefinitions();
+
+        if (uiCtrlApp.IsLateAddinLoading)
         {
-          if (sender is UIApplication app)
+          EventHandler<Autodesk.Revit.UI.Events.IdlingEventArgs> applicationIdling = null;
+          uiCtrlApp.Idling += applicationIdling = (sender, args) =>
           {
-            uiCtrlApp.Idling -= applicationIdling;
-            DoStartUp(app.Application);
-          }
-        };
-      }
-      else
-      {
-        EventHandler<ApplicationInitializedEventArgs> applicationInitialized = null;
-        uiCtrlApp.ControlledApplication.ApplicationInitialized += applicationInitialized = (sender, args) =>
+            if (sender is UIApplication app)
+            {
+              uiCtrlApp.Idling -= applicationIdling;
+              DoStartUp(app.Application);
+            }
+          };
+        }
+        else
         {
-          uiCtrlApp.ControlledApplication.ApplicationInitialized -= applicationInitialized;
-          DoStartUp(sender as Autodesk.Revit.ApplicationServices.Application);
-        };
+          EventHandler<ApplicationInitializedEventArgs> applicationInitialized = null;
+          Host.Services.ApplicationInitialized += applicationInitialized = (sender, args) =>
+          {
+            Host.Services.ApplicationInitialized -= applicationInitialized;
+            DoStartUp(sender as Autodesk.Revit.ApplicationServices.Application);
+          };
+        }
       }
 
-      // initialize the Ribbon tab and first panel
-      RibbonPanel addinRibbon;
-      if (AddinOptions.Session.CompactTab)
+      // Initialize UI
       {
-        addinRibbon = uiCtrlApp.CreateRibbonPanel(AddIn.AddinName);
+        if(CurrentStatus >= Status.Available)
+          EtoFramework.Init();
 
-        // Add launch RhinoInside push button,
-        UI.CommandStart.CreateUI(addinRibbon);
-        // addin options, has Eto window and requires Eto to be loaded
-        UI.CommandAddinOptions.CreateUI(addinRibbon);
+        UI.CommandStart.CreateUI(uiCtrlApp);
       }
-      else
+
+      // Check For Updates
       {
-        uiCtrlApp.CreateRibbonTab(AddIn.AddinName);
-        addinRibbon = uiCtrlApp.CreateRibbonPanel(AddIn.AddinName, "More");
-
-        // Add launch RhinoInside push button,
-        UI.CommandStart.CreateUI(addinRibbon);
-        // add slideout and the rest of the buttons
+        AddinOptions.UpdateChannelChanged += (sender, args) => CheckForUpdates();
+        if (AddinOptions.Current.CheckForUpdatesOnStartup) CheckForUpdates();
       }
-
-      // about and help links
-      addinRibbon.AddSlideOut();
-      UI.CommandAbout.CreateUI(addinRibbon);
-      UI.CommandGuides.CreateUI(addinRibbon);
-      UI.CommandForums.CreateUI(addinRibbon);
-      UI.CommandHelpLinks.CreateUI(addinRibbon);
-      if (!AddinOptions.Session.CompactTab)
-      {
-        addinRibbon.AddSeparator();
-        UI.CommandAddinOptions.CreateUI(addinRibbon);
-      }
-
-      // add option change listeners
-      AddinOptions.UpdateChannelChanged += AddinOptions_UpdateChannelChanged;
-      // check for updates if requested (buttons must be created by now)
-      if (AddinOptions.Current.CheckForUpdatesOnStartup)
-        CheckUpdates();
-
-      // automatically load Rhino?
-      if (AddinOptions.Session.LoadOnStartup)
-        LoadRhinoOnStartup(uiCtrlApp);
 
       return Result.Succeeded;
     }
 
-    private void AddinOptions_UpdateChannelChanged(object sender, EventArgs e) => CheckUpdates();
-
-    static void CheckUpdates()
-    {
-      AddinUpdater.GetReleaseInfo(
-        (ReleaseInfo releaseInfo) => {
-          // if release info is received,
-          if (releaseInfo != null)
-          {
-            // if current version on the active update channel is newer
-            if (releaseInfo.Version > Version)
-            {
-              // ask UI to notify user of updates
-              if (!AddinOptions.Session.CompactTab)
-                UI.CommandStart.NotifyUpdateAvailable(releaseInfo);
-              UI.CommandAddinOptions.NotifyUpdateAvailable(releaseInfo);
-              return;
-            }
-          }
-          // otherwise clear updates
-          UI.CommandStart.ClearUpdateNotifiy();
-          UI.CommandAddinOptions.ClearUpdateNotifiy();
-        }
-      );
-    }
-
     void DoStartUp(Autodesk.Revit.ApplicationServices.Application app)
     {
-      Revit.ActiveUIApplication = new UIApplication(app);
+      Host = new UIApplication(app);
 
-      if (StartupMode < AddinStartupMode.AtStartup)
+      if (StartupMode < AddinStartupMode.AtStartup && !AddinOptions.Session.LoadOnStartup)
         return;
 
-      if (Revit.OnStartup(ApplicationUI) == Result.Succeeded)
+      if (UI.CommandStart.Start() == Result.Succeeded)
       {
         if (StartupMode == AddinStartupMode.Scripting)
-          Revit.ActiveUIApplication.PostCommand(RevitCommandId.LookupPostableCommandId(PostableCommand.ExitRevit));
+          Host.PostCommand(RevitCommandId.LookupPostableCommandId(PostableCommand.ExitRevit));
       }
     }
 
-    static async void LoadRhinoOnStartup(UIControlledApplication uiCtrlApp)
-    {
-      // wait for Revit to be ready
-      await External.ActivationGate.Yield();
-
-      // ask to load rhino
-      UI.CommandStart.Start(new UI.RibbonHandler(uiCtrlApp));
-    }
-
-    protected override Result OnShutdown(UIControlledApplication applicationUI)
+    protected override Result OnShutdown(UIControlledApplication uiCtrlApp)
     {
       try
       {
-        return Revit.OnShutdown(applicationUI);
+        return Revit.OnShutdown(Host);
       }
       catch
       {
@@ -274,7 +215,9 @@ namespace RhinoInside.Revit
       }
       finally
       {
-        ApplicationUI = null;
+        Revit.ApplicationUI = null;
+
+        Host = null;
         AssemblyResolver.Enabled = false;
       }
     }
@@ -340,6 +283,53 @@ namespace RhinoInside.Revit
     #endregion
 
     #region Version
+    static bool IsValid(Autodesk.Revit.ApplicationServices.ControlledApplication app)
+    {
+#if REVIT_2021
+      return app.VersionNumber == "2021";
+#elif REVIT_2020
+      return app.VersionNumber == "2020";
+#elif REVIT_2019
+      return app.VersionNumber == "2019";
+#elif REVIT_2018
+      return app.VersionNumber == "2018";
+#elif REVIT_2017
+      return app.VersionNumber == "2017";
+#else
+      return false;
+#endif
+    }
+
+    static Result CanStartup(UIControlledApplication app)
+    {
+      if (StartupMode == AddinStartupMode.Cancelled)
+        return Result.Cancelled;
+
+      return IsValid(app.ControlledApplication) ? Result.Succeeded : Result.Failed;
+    }
+
+    static async void CheckForUpdates()
+    {
+      if(await AddinUpdater.GetReleaseInfoAsync() is ReleaseInfo releaseInfo)
+      {
+        // if release info is received, and
+        // if current version on the active update channel is newer
+        if (releaseInfo != null && releaseInfo.Version > Version)
+        {
+          // ask UI to notify user of updates
+          if (!AddinOptions.Session.CompactTab)
+            UI.CommandStart.NotifyUpdateAvailable(releaseInfo);
+          UI.CommandAddinOptions.NotifyUpdateAvailable(releaseInfo);
+        }
+        else
+        {
+          // otherwise clear updates
+          UI.CommandStart.ClearUpdateNotifiy();
+          UI.CommandAddinOptions.ClearUpdateNotifiy();
+        }
+      }
+    }
+
     static bool CheckIsExpired(bool quiet = true)
     {
       if (DaysUntilExpiration > 0 && quiet)
@@ -371,31 +361,9 @@ namespace RhinoInside.Revit
       return DaysUntilExpiration < 1;
     }
 
-    static bool IsValid(ASX.HostServices app)
+    internal static Result CheckSetup()
     {
-#if REVIT_2021
-      return app.VersionNumber == "2021";
-#elif REVIT_2020
-      return app.VersionNumber == "2020";
-#elif REVIT_2019
-      return app.VersionNumber == "2019";
-#elif REVIT_2018
-      return app.VersionNumber == "2018";
-#elif REVIT_2017
-      return app.VersionNumber == "2017";
-#else
-      return false;
-#endif
-    }
-
-    static bool CanLoad(UIX.UIHostApplication app)
-    {
-      return IsValid(app.Services);
-    }
-
-    internal static Result CheckSetup(UIX.UIHostApplication app)
-    {
-      var services = app.Services;
+      var services = Host.Services;
 
       // Check if Rhino.Inside is expired
       if (CheckIsExpired(DaysUntilExpiration > 10))
@@ -414,8 +382,8 @@ namespace RhinoInside.Revit
             MainInstruction = "Unsupported Rhino version",
             MainContent = $"Expected Rhino version is ({MinimumRhinoVersion}) or above.",
             ExpandedContent =
-            RhinoVersionInfo is null ? "Rhino\n" :
-            $"{RhinoVersionInfo.ProductName} {RhinoVersionInfo.ProductMajorPart}\n" +
+            (RhinoVersionInfo is null ? "Rhino\n" :
+            $"{RhinoVersionInfo.ProductName} {RhinoVersionInfo.ProductMajorPart}\n") +
             $"• Version: {RhinoVersion}\n" +
             $"• Path: '{SystemDir}'" + (!File.Exists(RhinoExePath) ? " (not found)" : string.Empty) + "\n" +
             $"\n{services.VersionName}\n" +
@@ -480,7 +448,7 @@ namespace RhinoInside.Revit
 
               ErrorReport.SendEmail
               (
-                app,
+                Host,
                 $"Rhino.Inside Revit failed - openNURBS Conflict",
                 true,
                 new string[]

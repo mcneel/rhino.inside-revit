@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         if (Value is DB.CompoundStructure structure)
-          return $"Compound structure [{structure.LayerCount} layers]";
+          return $"{structure.LayerCount} layers : {structure.GetWidth() * Revit.ModelUnits} {Grasshopper.Kernel.GH_Format.RhinoUnitSymbol()}";
 
         return "<None>";
       }

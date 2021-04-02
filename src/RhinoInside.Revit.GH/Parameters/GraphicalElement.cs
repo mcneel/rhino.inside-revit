@@ -288,8 +288,18 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override void Menu_AppendInternaliseData(ToolStripDropDown menu)
     {
-      base.Menu_AppendInternaliseData(menu);
-      //Menu_AppendItem(menu, $"Externalize data", Menu_ExternalizeData, SourceCount == 0, !MutableNickName);
+      //base.Menu_AppendInternaliseData(menu);
+      Menu_AppendItem(menu, $"Internalise selection", Menu_InternaliseData, SourceCount > 0 || !MutableNickName, false);
+
+      if (Revit.ActiveUIDocument.Document is DB.Document activeDoc)
+      {
+        var any = ToElementIds(VolatileData).
+          Where(x => activeDoc.Equals(x.Document)).
+          Select(x => x.Id).
+          Any();
+
+        Menu_AppendItem(menu, $"Externalise selection", Menu_ExternaliseData, any, false);
+      }
     }
 
     protected override void Menu_AppendBakeItem(ToolStripDropDown menu)
@@ -422,7 +432,7 @@ namespace RhinoInside.Revit.GH.Parameters
       try
       {
         PrepareForPrompt();
-        var data = PersistentData;
+        var data = m_data.Duplicate();
         if (Prompt_Elements(ref data, ObjectType.Element, true, true) == GH_GetterResult.success)
         {
           RecordPersistentDataEvent("Change data");
@@ -502,49 +512,64 @@ namespace RhinoInside.Revit.GH.Parameters
       }
     }
 
-    //private void Menu_ExternalizeData(object sender, EventArgs e)
-    //{
-    //  if (sender is ToolStripMenuItem item)
-    //  {
-    //    var active = Revit.ActiveUIDocument?.Document;
-    //    if (active is null)
-    //      return;
+    private void Menu_InternaliseData(object sender, EventArgs e)
+    {
+      RecordUndoEvent("Internalise data");
 
-    //    bool any = false;
-    //    var documents = PersistentData.AllData(true).Cast<Types.GraphicalElement>().Where(x => active.Equals(x.Document)).GroupBy(x => x.Document);
-    //    foreach (var doc in documents.Select(x => x.Key))
-    //    {
-    //      using (var collector = new DB.FilteredElementCollector(doc))
-    //      {
-    //        var filterCollector = collector.OfClass(typeof(DB.FilterElement));
-    //        var filters = collector.Cast<DB.FilterElement>();
-    //        any |= filters.Where(x => x.Name == NickName).Any();
-    //      }
-    //    }
+      PersistentData.Clear();
+      PersistentData.MergeStructure(m_data.Duplicate());
+      m_data.Clear();
+      OnObjectChanged(GH_ObjectEventType.PersistentData);
 
-    //    var result = any ?
-    //      MessageBox.Show
-    //      (
-    //        owner: Instances.ActiveCanvas,
-    //        caption: "Internalize data",
-    //        icon: MessageBoxIcon.Question,
-    //        text: $"{NickName} filter already exist, do you want to overwrite it?",
-    //        buttons: MessageBoxButtons.YesNoCancel
-    //      ):
-    //      DialogResult.Yes;
+      if (!MutableNickName)
+      {
+        MutableNickName = true;
+        OnObjectChanged(GH_ObjectEventType.NickName);
+      }
 
-    //    if (result == DialogResult.Cancel)
-    //      return;
+      RemoveAllSources();
+      ExpireSolution(true);
+    }
 
-    //    if (result == DialogResult.Yes)
-    //    {
+    private async void Menu_ExternaliseData(object sender, EventArgs e)
+    {
+      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.SaveSelection);
+      var activeApp = Revit.ActiveUIApplication;
+      using (var scope = new External.UI.EditScope(activeApp))
+      {
+        var activeDoc = activeApp.ActiveUIDocument.Document;
 
-    //    }
+        var elementIds = ToElementIds(VolatileData).
+          Where(x => activeDoc.Equals(x.Document)).
+          Select(x => x.Id).
+          ToList();
 
-    //    MutableNickName = item.Checked;
-    //    ExpireSolution(true);
-    //  }
-    //}
+        var previous = activeApp.ActiveUIDocument.Selection.GetElementIds();
+        Rhinoceros.InvokeInHostContext(() => activeApp.ActiveUIDocument.Selection.SetElementIds(elementIds));
+
+        var changes = await scope.ExecuteCommandAsync(commandId);
+        if (changes.GetSummary(activeDoc, out var added, out var deleted, out var modified) > 0)
+        {
+          var selectionFilter = added.Select(x => activeDoc.GetElement(x)).OfType<DB.SelectionFilterElement>().FirstOrDefault();
+          if (selectionFilter is object)
+          {
+            RecordUndoEvent("Externalise data");
+
+            PersistentData.Clear();
+            OnObjectChanged(GH_ObjectEventType.PersistentData);
+
+            MutableNickName = false;
+            NickName = selectionFilter.Name;
+            OnObjectChanged(GH_ObjectEventType.NickName);
+
+            RemoveAllSources();
+            ExpireSolution(true);
+          }
+        }
+
+        Rhinoceros.InvokeInHostContext(() => activeApp.ActiveUIDocument.Selection.SetElementIds(previous));
+      }
+    }
     #endregion
 
     #region ElementFilter
@@ -707,7 +732,7 @@ namespace RhinoInside.Revit.GH.Parameters
     (
       "Graphical Element",
       "Graphical Element",
-      "Represents a Revit graphical element.",
+      "Contains a collection of Revit graphical elements",
       "Params", "Revit Primitives"
     )
     { }

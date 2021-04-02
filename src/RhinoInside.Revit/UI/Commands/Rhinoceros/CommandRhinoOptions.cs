@@ -15,7 +15,8 @@ namespace RhinoInside.Revit.UI
       (
         name: CommandName,
         iconName: "Rhino.png",
-        tooltip: "Shows Rhino Options window"
+        tooltip: "Shows Rhino Options window",
+        url: "reference/rir-interface#rhino-options"
       );
 
       // set this button as the panel dialog-launcher (arrow-button at the corner of panel)

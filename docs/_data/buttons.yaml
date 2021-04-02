@@ -1,4 +1,4 @@
-- title: Rhinocerous
+- title: Rhinoceros
   comps:
     - title: Rhino
       desc: The Rhino icon will start Rhino to run inside Revit. Grasshopper can also be run from within that Rhino instance

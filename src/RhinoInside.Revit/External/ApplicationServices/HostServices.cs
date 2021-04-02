@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Autodesk.Revit.ApplicationServices;
 
 namespace RhinoInside.Revit.External.ApplicationServices
@@ -30,6 +31,39 @@ namespace RhinoInside.Revit.External.ApplicationServices
 
     #region Folders
     public abstract string CurrentUsersDataFolderPath { get; }
+    public abstract string CurrentUserAddinsLocation { get; }
+    #endregion
+
+    #region Events
+    protected static readonly Dictionary<Delegate, (Delegate Target, int Count)> EventMap = new Dictionary<Delegate, (Delegate, int)>();
+
+    protected static EventHandler<T> AddEventHandler<T>(EventHandler<T> handler)
+    {
+      if (EventMap.TryGetValue(handler, out var trampoline)) trampoline.Count++;
+      else trampoline.Target = new EventHandler<T>((s, a) => ActivationGate.Open(() => handler.Invoke(s, a), s));
+
+      EventMap[handler] = trampoline;
+
+      return (EventHandler<T>) trampoline.Target;
+    }
+
+    protected static EventHandler<T> RemoveEventHandler<T>(EventHandler<T> handler)
+    {
+      if (EventMap.TryGetValue(handler, out var trampoline))
+      {
+        if (trampoline.Count == 0) EventMap.Remove(handler);
+        else
+        {
+          trampoline.Count--;
+          EventMap[handler] = trampoline;
+        }
+      }
+
+      return (EventHandler<T>) trampoline.Target;
+    }
+
+    public abstract event EventHandler<Autodesk.Revit.DB.Events.DocumentChangedEventArgs> DocumentChanged;
+    public abstract event EventHandler<Autodesk.Revit.DB.Events.ApplicationInitializedEventArgs> ApplicationInitialized;
     #endregion
   }
 
@@ -38,6 +72,7 @@ namespace RhinoInside.Revit.External.ApplicationServices
     readonly ControlledApplication _app;
     public HostServicesC(ControlledApplication app) => _app = app;
     public override void Dispose() { }
+
     public override object Value => _app;
 
     #region Version
@@ -67,6 +102,20 @@ namespace RhinoInside.Revit.External.ApplicationServices
         _app.VersionName
       );
 #endif
+    public override string CurrentUserAddinsLocation => _app.CurrentUserAddinsLocation;
+    #endregion
+
+    #region Events
+    public override event EventHandler<Autodesk.Revit.DB.Events.DocumentChangedEventArgs> DocumentChanged
+    {
+      add => _app.DocumentChanged += AddEventHandler(value);
+      remove => _app.DocumentChanged -= RemoveEventHandler(value);
+    }
+    public override event EventHandler<Autodesk.Revit.DB.Events.ApplicationInitializedEventArgs> ApplicationInitialized
+    {
+      add    => _app.ApplicationInitialized += AddEventHandler(value);
+      remove => _app.ApplicationInitialized -= RemoveEventHandler(value);
+    }
     #endregion
   }
 
@@ -104,6 +153,20 @@ namespace RhinoInside.Revit.External.ApplicationServices
         _app.VersionName
       );
 #endif
+    public override string CurrentUserAddinsLocation => _app.CurrentUserAddinsLocation;
+    #endregion
+
+    #region Events
+    public override event EventHandler<Autodesk.Revit.DB.Events.DocumentChangedEventArgs> DocumentChanged
+    {
+      add => _app.DocumentChanged += AddEventHandler(value);
+      remove => _app.DocumentChanged -= RemoveEventHandler(value);
+    }
+    public override event EventHandler<Autodesk.Revit.DB.Events.ApplicationInitializedEventArgs> ApplicationInitialized
+    {
+      add => _app.ApplicationInitialized += AddEventHandler(value);
+      remove => _app.ApplicationInitialized -= RemoveEventHandler(value);
+    }
     #endregion
   }
   #endregion

@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Parameters
     (
       name: "Component",
       nickname: "Component",
-      description: "Represents a Revit Component element.",
+      description: "Contains a collection of Revit component elements",
       category: "Params",
       subcategory: "Revit Primitives"
     )
@@ -32,7 +32,7 @@ namespace RhinoInside.Revit.GH.Parameters
     (
       name: "Mullion",
       nickname: "Mullion",
-      description: "Represents a Revit curtain grid mullion element.",
+      description: "Contains a collection of Revit curtain grid mullion elements",
       category: "Params",
       subcategory: "Revit Primitives"
     )
@@ -48,7 +48,7 @@ namespace RhinoInside.Revit.GH.Parameters
     (
       name: "Panel",
       nickname: "Panel",
-      description: "Represents a Revit curtain grid panel element.",
+      description: "Contains a collection of Revit curtain grid panel elements",
       category: "Params",
       subcategory: "Revit Primitives"
     )
@@ -60,7 +60,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.hidden;
     public override Guid ComponentGuid => new Guid("786D9097-DF9C-4513-9B5F-278667FBE999");
 
-    public FamilySymbol() : base("Family Type", "FamType", "Represents a Revit document family type.", "Params", "Revit Primitives") { }
+    public FamilySymbol() : base("Family Type", "FamType", "Contains a collection of Revit family types", "Params", "Revit Primitives") { }
 
     protected override Types.IGH_FamilySymbol InstantiateT() => new Types.FamilySymbol();
   }

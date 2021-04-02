@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Parameters
     (
       "Appearance Asset",
       "Appearance",
-      "Represents a Revit Appearance Asset",
+      "Contains a collection of Revit appearance asset elements",
       "Params",
       "Revit Primitives"
     )

@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Types
   [
     ComponentGuid("83088978-8B44-4154-ABC9-A7CA53CA65E5"),
     Name("Parameter Class"),
-    Description("Represents a Revit Parameter class."),
+    Description("Contains a collection of Revit Parameter class values"),
   ]
   public class ParameterClass : GH_Enum<DBX.ParameterClass>
   {
@@ -23,7 +23,7 @@ namespace RhinoInside.Revit.GH.Types
   [
     ComponentGuid("2A5D36DD-CD94-4306-963B-D9312DAEB0F9"),
     Name("Parameter Binding"),
-    Description("Represents a Revit parameter binding type."),
+    Description("Contains a collection of Revit parameter binding type values"),
   ]
   public class ParameterBinding : GH_Enum<DBX.ParameterBinding>
   {
@@ -33,7 +33,7 @@ namespace RhinoInside.Revit.GH.Types
   [
     ComponentGuid("A3621A84-190A-48C2-9B0C-F5784B78089C"),
     Name("Storage Type"),
-    Description("Represents a Revit storage type."),
+    Description("Contains a collection of Revit storage type values"),
   ]
   public class StorageType : GH_Enum<DB.StorageType>
   {
@@ -43,7 +43,7 @@ namespace RhinoInside.Revit.GH.Types
   [
     ComponentGuid("A5EA05A9-C17E-48F4-AC4C-34F169AE4F9A"),
     Name("Parameter Type"),
-    Description("Represents a Revit parameter type."),
+    Description("Contains a collection of Revit parameter type values"),
   ]
   public class ParameterType : GH_Enum<DB.ParameterType>
   {
@@ -53,7 +53,7 @@ namespace RhinoInside.Revit.GH.Types
   [
     ComponentGuid("38E9E729-9D9F-461F-A1D7-798CDFA2CD4C"),
     Name("Unit Type"),
-    Description("Represents a Revit unit type."),
+    Description("Contains a collection of Revit unit type values"),
   ]
   public class UnitType : GH_Enum<DB.UnitType>
   {
@@ -73,14 +73,14 @@ namespace RhinoInside.Revit.GH.Types
   [
     ComponentGuid("ABE3F6CB-CE2D-4DBE-AB81-A6CB884D7DE1"),
     Name("Unit System"),
-    Description("Represents a Revit unit system."),
+    Description("Contains a collection of Revit unit system values"),
   ]
   public class UnitSystem : GH_Enum<DB.UnitSystem> { }
 
   [
     ComponentGuid("3D9979B4-65C8-447F-BCEA-3705249DF3B6"),
     Name("Parameter Group"),
-    Description("Represents a Revit parameter group."),
+    Description("Contains a collection of Revit parameter group values"),
   ]
   public class BuiltInParameterGroup : GH_Enum<DB.BuiltInParameterGroup>
   {
@@ -99,7 +99,7 @@ namespace RhinoInside.Revit.GH.Types
   [
     ComponentGuid("195B9D7E-D4B0-4335-A442-3C2FA40794A2"),
     Name("Category Type"),
-    Description("Represents a Revit parameter category type."),
+    Description("Contains a collection of Revit parameter category type values"),
   ]
   public class CategoryType : GH_Enum<DB.CategoryType>
   {
@@ -122,7 +122,7 @@ namespace RhinoInside.Revit.GH.Types
   [
     ComponentGuid("1AF2E8BF-5FAF-41AD-9A2F-EB96A706587C"),
     Name("Graphics Style Type"),
-    Description("Represents a graphics style type."),
+    Description("Contains a collection of graphics style type values"),
   ]
   public class GraphicsStyleType : GH_Enum<DB.GraphicsStyleType>
   {
@@ -133,7 +133,7 @@ namespace RhinoInside.Revit.GH.Types
   [
     ComponentGuid("F992A251-4085-4525-A514-298F3155DF8A"),
     Name("Detail Level"),
-    Description("Represents a view detail level."),
+    Description("Contains a collection of view detail level values"),
   ]
   public class ViewDetailLevel : GH_Enum<DB.ViewDetailLevel>
   {
@@ -143,7 +143,7 @@ namespace RhinoInside.Revit.GH.Types
   [
     ComponentGuid("83380EFC-D2E2-3A9E-A1D7-939EC71852DD"),
     Name("View Discipline"),
-    Description("Represents a Revit view discipline."),
+    Description("Contains a collection of Revit view discipline values"),
   ]
   public class ViewDiscipline : GH_Enum<DB.ViewDiscipline>
   {
@@ -153,7 +153,7 @@ namespace RhinoInside.Revit.GH.Types
   [
     ComponentGuid("485C3278-0D1A-445D-B3DA-75FB8CD38CF9"),
     Name("View Family"),
-    Description("Represents a Revit view family."),
+    Description("Contains a collection of Revit view family values"),
   ]
   public class ViewFamily : GH_Enum<DB.ViewFamily>
   {
@@ -191,7 +191,7 @@ namespace RhinoInside.Revit.GH.Types
   [
     ComponentGuid("BF051011-660D-39E7-86ED-20EEE3A68DB0"),
     Name("View Type"),
-    Description("Represents a Revit view type."),
+    Description("Contains a collection of Revit view type values"),
   ]
   public class ViewType : GH_Enum<DB.ViewType>
   {
@@ -201,7 +201,7 @@ namespace RhinoInside.Revit.GH.Types
   [
     ComponentGuid("2FDE857C-EDAB-4999-B6AE-DC531DD2AD18"),
     Name("Image Fit direction type"),
-    Description("Represents a Revit fit direction type."),
+    Description("Contains a collection of Revit fit direction type values"),
   ]
   public class FitDirectionType : GH_Enum<DB.FitDirectionType>
   {
@@ -212,7 +212,7 @@ namespace RhinoInside.Revit.GH.Types
   [
     ComponentGuid("C6132D3E-1BA4-4BF5-B40C-D08F81A79AB1"),
     Name("Image Resolution"),
-    Description("Represents a Revit image resolution."),
+    Description("Contains a collection of Revit image resolution values"),
   ]
   public class ImageResolution : GH_Enum<DB.ImageResolution>
   {
@@ -234,7 +234,7 @@ namespace RhinoInside.Revit.GH.Types
   [
     ComponentGuid("F6BABEFF-C4AD-49D0-81D6-9C3CD021DD45"),
     Name("Image FileType"),
-    Description("Represents a Revit image file type."),
+    Description("Contains a collection of Revit image file type values"),
   ]
   public class ImageFileType : GH_Enum<DB.ImageFileType>
   {
@@ -259,7 +259,7 @@ namespace RhinoInside.Revit.GH.Types
   [
     ComponentGuid("2A3E4872-EF41-442A-B886-8B7DBA73DFE2"),
     Name("Wall Location Line"),
-    Description("Represents a Revit wall location line."),
+    Description("Contains a collection of Revit wall location line values"),
   ]
   public class WallLocationLine : GH_Enum<DB.WallLocationLine>
   {
@@ -283,7 +283,7 @@ namespace RhinoInside.Revit.GH.Types
   [
     ComponentGuid("2FEFFADD-BD29-4B19-9682-4CC5947DF11C"),
     Name("Wall System Family"),
-    Description("Represents a Revit wall system family"),
+    Description("Contains a collection of Revit wall system family"),
   ]
   public class WallSystemFamily : GH_Enum<DB.WallKind>
   {
@@ -305,7 +305,7 @@ namespace RhinoInside.Revit.GH.Types
   [
     ComponentGuid("F069304B-4066-4D23-9542-7AC54CED3C92"),
     Name("Wall Function"),
-    Description("Represents a Revit wall function"),
+    Description("Contains a collection of Revit wall function"),
   ]
   public class WallFunction : GH_Enum<DB.WallFunction> {
     public WallFunction() : base() { }
@@ -315,7 +315,7 @@ namespace RhinoInside.Revit.GH.Types
   [
     ComponentGuid("7A71E012-6E92-493D-960C-83BE3C50ECAE"),
     Name("Wall Wrapping"),
-    Description("Represents a Revit wall wrapping option"),
+    Description("Contains a collection of Revit wall wrapping option"),
   ]
   public class WallWrapping : GH_Enum<DBX.WallWrapping>
   {
@@ -326,7 +326,7 @@ namespace RhinoInside.Revit.GH.Types
   [
     ComponentGuid("2F1CE55B-FD85-4EC5-8638-8DA06932DE0E"),
     Name("Structural Wall Usage"),
-    Description("Represents a Revit structural wall usage."),
+    Description("Contains a collection of Revit structural wall usage values"),
   ]
   public class StructuralWallUsage : GH_Enum<DB.Structure.StructuralWallUsage> {
     public StructuralWallUsage() : base() { }

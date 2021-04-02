@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.GH.Components
       return true;
     }
 
-    static IGH_GeometricGoo ToGeometricGoo(GeometryBase geometry)
+    internal static IGH_GeometricGoo ToGeometricGoo(GeometryBase geometry)
     {
       switch (geometry)
       {
