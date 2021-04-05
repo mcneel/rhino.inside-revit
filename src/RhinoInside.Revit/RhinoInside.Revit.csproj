@@ -369,13 +369,17 @@
     <EmbeddedResource Include="Resources\ChannelStable-icon.png" />
   </ItemGroup>
   <ItemGroup>
-    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
     <Content Include="Properties\ProductInfo.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ProductInfo.cs</LastGenOutput>
     </Content>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v16.0\TextTemplating\Microsoft.TextTemplating.targets" />
+  <PropertyGroup>
+    <TransformOnBuild>true</TransformOnBuild>
+  </PropertyGroup>
   <Target Name="AfterBuild" Condition="$(Configuration.Contains('Debug'))">
     <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)..\RhinoInside.Revit.Native\bin\x64\Debug\RhinoInside.Revit.Native.dll;$(ProjectDir)..\RhinoInside.Revit.Native\bin\x64\Debug\RhinoInside.Revit.Native.pdb" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />
     <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.dll;$(ProjectDir)$(OutDir)RhinoInside.Revit.pdb" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />

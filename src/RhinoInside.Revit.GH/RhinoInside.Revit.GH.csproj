@@ -452,6 +452,10 @@
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v16.0\TextTemplating\Microsoft.TextTemplating.targets" />
+  <PropertyGroup>
+    <TransformOnBuild>true</TransformOnBuild>
+  </PropertyGroup>
   <Target Name="AfterBuild">
     <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.dll" DestinationFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.gha" />
     <Copy Condition="$(Configuration.Contains('Debug'))" UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.gha;$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.pdb" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />
