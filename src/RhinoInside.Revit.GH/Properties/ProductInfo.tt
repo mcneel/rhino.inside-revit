@@ -6,7 +6,7 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.Xml.Serialization" #>
-<#@ output extension=".h" #>
+<#@ output extension=".cs" #>
 <#
 ProductInfo product;
 ushort Major = 0;
@@ -14,7 +14,7 @@ ushort Minor = 0;
 ushort Build = 0;
 ushort Revision = 0;
 
-using (var reader = new StreamReader($"../{nameof(ProductInfo)}.xml"))
+using (var reader = new StreamReader($"{nameof(ProductInfo)}.xml"))
 {
   var serializer = new XmlSerializer(typeof(ProductInfo));
   product = serializer.Deserialize(reader) as ProductInfo;
@@ -29,15 +29,15 @@ using (var reader = new StreamReader($"../{nameof(ProductInfo)}.xml"))
   Revision = (ushort)(now.TimeOfDay.TotalSeconds / 2);
 }
 #>
-#define _FILEVERSION_ <#= Major #>, <#= Minor #>, <#= Build #>, <#= Revision #>
-#define _PRODUCTVERSION_ <#= Major #>, <#= Minor #>, <#= Build #>, <#= Revision #>
+using System.Reflection;
 
-#define _CompanyName_ "<#= product.Company #>"
-#define _LegalCopyright_ "<#= product.Copyright #>"
-#define _LegalTrademarks_ "<#= product.Trademark #>"
-#define _ProductName_ "<#= product.Name #>"
-#define _ProductVersion_ "<#= product.MajorVersion #>.<#= product.MinorVersion #>-<#= product.InformationalVersion #>"
-#define _FileVersion_ "<#= Major #>.<#= Minor #>.<#= Build #>.<#= Revision #>"
+[assembly: AssemblyCompany("<#= product.Company #>")]
+[assembly: AssemblyProduct("<#= product.Name #>")]
+[assembly: AssemblyCopyright("© <#= product.Copyright #>")]
+[assembly: AssemblyTrademark("<#= product.Trademark #>")]
+[assembly: AssemblyVersion("<#= product.MajorVersion #>.<#= product.MinorVersion #>.*")]
+[assembly: AssemblyFileVersion("<#= Major #>.<#= Minor #>.<#= Build #>.<#= Revision #>")]
+[assembly: AssemblyInformationalVersion("<#= product.MajorVersion #>.<#= product.MinorVersion #>-<#= product.InformationalVersion #>")]
 
 <#+
 public class ProductInfo
@@ -46,7 +46,7 @@ public class ProductInfo
   public string Company= "";
   public string Copyright= "";
   public string Trademark = "";
-  public string InformationalVersion= "";
+  public string InformationalVersion = "";
   public ushort MajorVersion = 0;
   public ushort MinorVersion = 0;
 }

@@ -14,6 +14,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RhinoInside.Revit.Native", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BF89E7F2-A559-4C13-8798-15A27AFA90A0}"
 	ProjectSection(SolutionItems) = preProject
+		ProductInfo.xml = ProductInfo.xml
 		..\docs\pages\_en\beta\reference\release-notes.md = ..\docs\pages\_en\beta\reference\release-notes.md
 	EndProjectSection
 EndProject
