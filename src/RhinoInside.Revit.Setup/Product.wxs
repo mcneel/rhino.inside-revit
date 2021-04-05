@@ -8,6 +8,8 @@
            Language="1033">
     <Package Manufacturer="Robert McNeel &amp; Associates"
              Description="Rhino.Inside® for Revit"
+             Keywords="Installer;Rhino;Revit"
+             Comments="$(var.ProductVersion)"
              InstallerVersion="301"
              Platform="$(var.Platform)"
              InstallScope="perMachine"
