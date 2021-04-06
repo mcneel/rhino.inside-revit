@@ -19,6 +19,10 @@ indent_size = 2
 [*.{csproj,vbproj,vcxproj,vcxproj.filters,proj,projitems,shproj}]
 indent_size = 2
 
+# T4 files
+[*.tt]
+insert_final_newline = false
+
 # Xml config files
 [*.{props,targets,ruleset,config,nuspec,resx,vsixmanifest,vsct}]
 indent_size = 2
