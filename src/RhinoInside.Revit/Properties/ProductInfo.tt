@@ -23,7 +23,9 @@ using (var reader = new StreamReader(this.Host.ResolvePath($"../../ProductInfo.x
   Major = product.MajorVersion;
   Minor = product.MinorVersion;
 
-  var now = DateTime.Now;
+  var buildDate = Environment.GetEnvironmentVariable("BuildDate");
+  var now = !string.IsNullOrWhiteSpace(buildDate) ? DateTime.Parse(buildDate) :
+            DateTime.Now;
   var days = now.Date - new DateTime(2000, 1, 1);
 
   Build = product.BuildVersion.HasValue ? product.BuildVersion.Value :
