@@ -14,7 +14,7 @@ ushort Minor = 0;
 ushort Build = 0;
 ushort Revision = 0;
 
-using (var reader = new StreamReader(this.Host.ResolvePath($"../{nameof(ProductInfo)}.xml")))
+using (var reader = new StreamReader(this.Host.ResolvePath($"../ProductInfo.xml")))
 {
   var serializer = new XmlSerializer(typeof(ProductInfo));
   product = serializer.Deserialize(reader) as ProductInfo;
