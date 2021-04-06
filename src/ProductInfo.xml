@@ -6,4 +6,8 @@
   <InformationalVersion>wip</InformationalVersion>
   <MajorVersion>0</MajorVersion>
   <MinorVersion>3</MinorVersion>
+  <!--
+  <BuildVersion></BuildVersion>
+  <RevisionVersion></RevisionVersion>
+  -->
 </ProductInfo>

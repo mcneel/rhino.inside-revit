@@ -25,8 +25,12 @@ using (var reader = new StreamReader(this.Host.ResolvePath($"../../ProductInfo.x
 
   var now = DateTime.Now;
   var days = now.Date - new DateTime(2000, 1, 1);
-  Build = Math.Min(ushort.MaxValue, (ushort)days.TotalDays);
-  Revision = (ushort)(now.TimeOfDay.TotalSeconds / 2);
+
+  Build = product.BuildVersion.HasValue ? product.BuildVersion.Value :
+          Math.Min(ushort.MaxValue, (ushort)days.TotalDays);
+
+  Revision = product.RevisionVersion.HasValue ? product.RevisionVersion.Value :
+             (ushort)(now.TimeOfDay.TotalSeconds / 2);
 }
 #>
 using System.Reflection;
@@ -35,7 +39,7 @@ using System.Reflection;
 [assembly: AssemblyProduct("<#= product.Name #>")]
 [assembly: AssemblyCopyright("© <#= product.Copyright #>")]
 [assembly: AssemblyTrademark("<#= product.Trademark #>")]
-[assembly: AssemblyVersion("<#= product.MajorVersion #>.<#= product.MinorVersion #>.*")]
+[assembly: AssemblyVersion("<#= Major #>.<#= Minor #>.<#= Build #>.<#= Revision #>")]
 [assembly: AssemblyFileVersion("<#= Major #>.<#= Minor #>.<#= Build #>.<#= Revision #>")]
 [assembly: AssemblyInformationalVersion("<#= product.MajorVersion #>.<#= product.MinorVersion #>-<#= product.InformationalVersion #>")]
 
@@ -49,5 +53,7 @@ public class ProductInfo
   public string InformationalVersion = "";
   public ushort MajorVersion = 0;
   public ushort MinorVersion = 0;
+  public ushort? BuildVersion;
+  public ushort? RevisionVersion;
 }
 #>

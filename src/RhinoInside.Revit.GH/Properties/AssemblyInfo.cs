@@ -1,13 +1,12 @@
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("RhinoInside.Revit.GH")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Rhino.Inside for Autodesk Revit")]
+[assembly: AssemblyDescription("Provides components to interact with Autodesk© Revit©")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCulture("")]
 
@@ -30,11 +29,11 @@ namespace RhinoInside.Revit.GH
     public AssemblyInfo() { }
 
     public override System.Drawing.Bitmap Icon => (System.Drawing.Bitmap) Properties.Resources.ResourceManager.GetObject("logo_24x24");
-    public override string Name => "Rhino.Inside for Autodesk Revit";
-    public override string Version => $"{Assembly.GetName().Version} (WIP)";
-    public override string Description => "Provides components to interact with Autodesk© Revit©";
+    public override string Name => Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyTitleAttribute>().Title;
+    public override string Version => Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+    public override string Description => Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyDescriptionAttribute>().Description;
 
-    public override string AuthorName => "Robert McNeel & Associates";
+    public override string AuthorName => Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyCompanyAttribute>().Company;
     public override string AuthorContact => WebPageURI;
 
     public override GH_LibraryLicense License => AddIn.DaysUntilExpiration < 0 ? GH_LibraryLicense.expired : GH_LibraryLicense.opensource;
