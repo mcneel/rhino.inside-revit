@@ -76,6 +76,7 @@ namespace RhinoInside.Revit.UI
     {
       EnableSolutionsChanged(GH_Document.EnableSolutions);
       GH_Document.EnableSolutionsChanged += EnableSolutionsChanged;
+      CommandStart.AddinStarted -= CommandStart_AddinStarted;
     }
 
     public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)

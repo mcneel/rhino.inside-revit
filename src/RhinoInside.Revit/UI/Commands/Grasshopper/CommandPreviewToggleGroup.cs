@@ -38,6 +38,7 @@ namespace RhinoInside.Revit.UI
         CommandGrasshopperPreviewWireframe.SetState(radioButton);
         CommandGrasshopperPreviewShaded.SetState(radioButton);
       }
+      CommandStart.AddinStarted -= CommandStart_AddinStarted;
     }
 #endif
 
