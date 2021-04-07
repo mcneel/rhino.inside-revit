@@ -321,7 +321,7 @@ namespace RhinoInside.Revit.GH.Components.Material
           return boolProp.Value;
 
         case DB.Visual.AssetPropertyDistance distProp:
-          return distProp.Value * Rhino.RhinoMath.UnitScale(distProp.DisplayUnitType.ToUnitSystem(), Rhino.RhinoDoc.ActiveDoc?.ModelUnitSystem ?? Rhino.UnitSystem.Meters);
+          return distProp.ScaleToRhino(Rhino.RhinoDoc.ActiveDoc?.ModelUnitSystem ?? Rhino.UnitSystem.Meters);
 
         case DB.Visual.AssetPropertyDouble doubleProp:
           return doubleProp.Value;
@@ -469,7 +469,8 @@ namespace RhinoInside.Revit.GH.Components.Material
         case DB.Visual.AssetPropertyDistance distProp:
           if (removeAsset)
             distProp.RemoveConnectedAsset();
-          distProp.Value = value * Rhino.RhinoMath.UnitScale(Rhino.RhinoDoc.ActiveDoc?.ModelUnitSystem ?? Rhino.UnitSystem.Meters, distProp.DisplayUnitType.ToUnitSystem());
+          distProp.Value = value;
+          distProp.Value = distProp.ScaleToRevit(Rhino.RhinoDoc.ActiveDoc?.ModelUnitSystem ?? Rhino.UnitSystem.Meters);
           break;
       }
     }

@@ -6,6 +6,7 @@ using Rhino;
 using Rhino.Geometry;
 using RhinoInside.Revit.External.DB;
 using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.Convert.Units;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.Convert.Geometry
@@ -784,7 +785,7 @@ namespace RhinoInside.Revit.Convert.Geometry
                   {
                     ReferencePoint = DB.XYZ.Zero,
                     Placement = DB.ImportPlacement.Origin,
-                    CustomScale = DB.UnitUtils.Convert(factor, DB.DisplayUnitType.DUT_DECIMAL_FEET, doc.GetUnits().GetFormatOptions(DB.UnitType.UT_Length).DisplayUnits),
+                    CustomScale = factor.ConvertAsLength(doc, Rhino.UnitSystem.Feet),
                   }
                 )
                 {

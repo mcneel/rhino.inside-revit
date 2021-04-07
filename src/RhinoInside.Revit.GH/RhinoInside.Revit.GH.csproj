@@ -24,6 +24,10 @@
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <RevitVersion>2021</RevitVersion>
   </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration.Contains('2022'))">
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <RevitVersion>2022</RevitVersion>
+  </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -104,6 +108,15 @@
     <PlatformTarget>x64</PlatformTarget>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2022|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug 2022\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021;REVIT_2022</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
@@ -119,7 +132,6 @@
       <Name>RhinoInside.Revit</Name>
       <Private>False</Private>
     </ProjectReference>
-    <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitVersion).*" IncludeAssets="build; compile" />
   </ItemGroup>
   <Choose>
     <When Condition="$(Configuration.Contains('Debug'))">
@@ -144,12 +156,26 @@
           <HintPath>$(Rhino7PluginsDir)Grasshopper\Grasshopper.dll</HintPath>
           <Private>False</Private>
         </Reference>
-      </ItemGroup>
+        <Reference Include="RevitAPI">
+            <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\RevitAPI.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="RevitAPIUI">
+            <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\RevitAPIUI.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="AdWindows">
+            <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\AdWindows.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        </ItemGroup>
     </When>
     <Otherwise>
       <ItemGroup>
         <PackageReference Include="RhinoCommon" Version="7.3.21039.11201" IncludeAssets="compile; build" />
+        <PackageReference Include="RhinoWindows" Version="7.3.21039.11201" IncludeAssets="build; compile" />
         <PackageReference Include="Grasshopper" Version="7.3.21039.11201" IncludeAssets="compile; build" />
+        <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitVersion).0.0" IncludeAssets="build; compile" />
       </ItemGroup>
     </Otherwise>
   </Choose>

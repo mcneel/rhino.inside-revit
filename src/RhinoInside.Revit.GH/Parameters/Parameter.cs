@@ -7,6 +7,7 @@ using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.Convert.Units;
 using DB = Autodesk.Revit.DB;
 using DBX = RhinoInside.Revit.External.DB;
 
@@ -254,7 +255,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
       try { Description = p.StorageType == DB.StorageType.ElementId ? "ElementId" : DB.LabelUtils.GetLabelFor(p.Definition.ParameterType); }
       catch (Autodesk.Revit.Exceptions.InvalidOperationException)
-      { Description = p.Definition.UnitType == DB.UnitType.UT_Number ? "Enumerate" : DB.LabelUtils.GetLabelFor(p.Definition.UnitType); }
+      { Description = p.Definition.IsNumberParameter() ? "Enumerate" : p.Definition.GetDataTypeLabel(); }
 
       if(string.IsNullOrEmpty(Description))
         Description = ParameterType.ToString();

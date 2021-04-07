@@ -8,6 +8,7 @@ using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using RhinoInside.Revit.External.DB;
 using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.Convert.Units;
 using DB = Autodesk.Revit.DB;
 using DBX = RhinoInside.Revit.External.DB;
 
@@ -190,7 +191,7 @@ namespace RhinoInside.Revit.GH.Types
             {
               try { description = parameter.StorageType == DB.StorageType.ElementId ? "ElementId" : DB.LabelUtils.GetLabelFor(parameter.Definition.ParameterType); }
               catch (Autodesk.Revit.Exceptions.InvalidOperationException)
-              { description = parameter.Definition.UnitType == DB.UnitType.UT_Number ? "Enumerate" : DB.LabelUtils.GetLabelFor(parameter.Definition.UnitType); }
+              { description = parameter.Definition.IsNumberParameter() ? "Enumerate" : parameter.Definition.GetDataTypeLabel(); }
             }
 
             if (parameter.IsReadOnly)

@@ -50,6 +50,27 @@ namespace RhinoInside.Revit.GH.Types
     public override bool IsEmpty => Value == DB.ParameterType.Invalid;
   }
 
+#if REVIT_2022
+  [
+    ComponentGuid("38E9E729-9D9F-461F-A1D7-798CDFA2CD4C"),
+    Name("Unit Type"),
+    Description("Contains a collection of Revit unit type values"),
+  ]
+  public class UnitType : GH_Enumerate
+  {
+    public UnitType() : base(-1) { }
+    public UnitType(DB.ForgeTypeId value) : base(-1) { }
+
+    public override bool IsEmpty => Value == -1;
+
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>()
+    );
+
+    public override Type UnderlyingEnumType => typeof(DB.ForgeTypeId);
+  }
+#else
   [
     ComponentGuid("38E9E729-9D9F-461F-A1D7-798CDFA2CD4C"),
     Name("Unit Type"),
@@ -69,6 +90,7 @@ namespace RhinoInside.Revit.GH.Types
       ToDictionary(x => x, x => DB.LabelUtils.GetLabelFor((DB.UnitType) x))
     );
   }
+#endif
 
   [
     ComponentGuid("ABE3F6CB-CE2D-4DBE-AB81-A6CB884D7DE1"),

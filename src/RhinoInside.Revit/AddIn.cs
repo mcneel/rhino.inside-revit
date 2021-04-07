@@ -285,7 +285,9 @@ namespace RhinoInside.Revit
     #region Version
     static bool IsValid(Autodesk.Revit.ApplicationServices.ControlledApplication app)
     {
-#if REVIT_2021
+#if REVIT_2022
+      return app.VersionNumber == "2022";
+#elif REVIT_2021
       return app.VersionNumber == "2021";
 #elif REVIT_2020
       return app.VersionNumber == "2020";

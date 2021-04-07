@@ -1,5 +1,6 @@
 using System;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.Convert.Units;
 using DB = Autodesk.Revit.DB;
 using DBX = RhinoInside.Revit.External.DB;
 
@@ -40,7 +41,7 @@ namespace RhinoInside.Revit.GH.Components
       if (parameter?.Element is DB.ElementType) DA.SetData("Binding", DBX.ParameterBinding.Type);
       else if (parameter?.Element is DB.Element) DA.SetData("Binding", DBX.ParameterBinding.Instance);
       else DA.SetData("Binding", null);
-      DA.SetData("Unit", parameter?.Definition.UnitType);
+      DA.SetData("Unit", parameter?.Definition.GetUnitType());
       DA.SetData("Is Read Only", parameter?.IsReadOnly);
       DA.SetData("User Modifiable", parameter?.UserModifiable);
     }

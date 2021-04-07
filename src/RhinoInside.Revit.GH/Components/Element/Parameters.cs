@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
-using static System.Math;
-using static Rhino.RhinoMath;
+using RhinoInside.Revit.Convert.Units;
 using DB = Autodesk.Revit.DB;
 using DBX = RhinoInside.Revit.External.DB;
 
@@ -30,7 +29,7 @@ namespace RhinoInside.Revit.GH
             switch (definition.ParameterType)
             {
               case DB.ParameterType.Invalid:
-                if (definition.UnitType == DB.UnitType.UT_Number && parameter.Id.TryGetBuiltInParameter(out var builtInInteger))
+                if (definition.IsNumberParameter() && parameter.Id.TryGetBuiltInParameter(out var builtInInteger))
                 {
                   switch (builtInInteger)
                   {
@@ -105,7 +104,7 @@ namespace RhinoInside.Revit.GH
             switch (definition.ParameterType)
             {
               case DB.ParameterType.Invalid:
-                if (definition.UnitType == DB.UnitType.UT_Number && parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
+                if (definition.IsNumberParameter() && parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
                 {
                   var builtInParameterName = builtInParameter.ToString();
                   if (builtInParameterName.Contains("COLOR_") || builtInParameterName.Contains("_COLOR_") || builtInParameterName.Contains("_COLOR"))

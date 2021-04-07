@@ -452,8 +452,7 @@ namespace RhinoInside.Revit.GH
       if (Revit.ActiveUIDocument?.Document is DB.Document revitDoc)
       {
         var units = revitDoc.GetUnits();
-        var lengthFormatoptions = units.GetFormatOptions(DB.UnitType.UT_Length);
-        revitUS = lengthFormatoptions.DisplayUnits.ToUnitSystem();
+        revitUS = units.ToUnitSystem();
       }
 
       if (RhinoDoc.ActiveDoc is RhinoDoc doc)
