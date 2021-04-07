@@ -31,7 +31,7 @@ namespace RhinoInside.Revit.UI
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      var buttonData = NewPushButtonData<CommandImport, NeedsActiveDocument<Availability>>
+      var buttonData = NewPushButtonData<CommandImport, NeedsActiveDocument<AvailableWhenRhinoReady>>
       (
         name: CommandName,
         iconName: "Ribbon.Rhinoceros.Import-3DM.png",
@@ -39,7 +39,7 @@ namespace RhinoInside.Revit.UI
         url : "reference/rir-interface#rhinoceros-panel"
       );
 
-      if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
+      if (ribbonPanel.AddItem(buttonData) is PushButton)
       {
       }
     }
@@ -633,7 +633,7 @@ namespace RhinoInside.Revit.UI
                 DB.BuiltInCategory.OST_GenericModel
               );
             }
-            break;
+            
           case DialogResult.Cancel: return Result.Cancelled;
         }
       }

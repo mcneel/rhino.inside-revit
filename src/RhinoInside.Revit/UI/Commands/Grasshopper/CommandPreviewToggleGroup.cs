@@ -10,21 +10,38 @@ namespace RhinoInside.Revit.UI
 {
   abstract class CommandGrasshopperPreview : GrasshopperCommand
   {
+    public static string CommandName => "GrasshopperPreview";
+
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
 #if REVIT_2018
-      var radioData = new RadioButtonGroupData("GrasshopperPreview");
+      var radioData = new RadioButtonGroupData(CommandName);
 
       if (ribbonPanel.AddItem(radioData) is RadioButtonGroup radioButton)
       {
         CommandGrasshopperPreviewOff.CreateUI(radioButton);
         CommandGrasshopperPreviewWireframe.CreateUI(radioButton);
         CommandGrasshopperPreviewShaded.CreateUI(radioButton);
+        StoreButton(CommandName, radioButton);
       }
+
+      CommandStart.AddinStarted += CommandStart_AddinStarted;
 #endif
     }
 
-    protected new class Availability : NeedsActiveDocument<GrasshopperCommand.Availability>
+#if REVIT_2018
+    private static void CommandStart_AddinStarted(object sender, CommandStart.AddinStartedArgs e)
+    {
+      if (RestoreButton(CommandName) is RadioButtonGroup radioButton)
+      {
+        CommandGrasshopperPreviewOff.SetState(radioButton);
+        CommandGrasshopperPreviewWireframe.SetState(radioButton);
+        CommandGrasshopperPreviewShaded.SetState(radioButton);
+      }
+    }
+#endif
+
+    protected class AvailableWhenProjDocGHReady : NeedsActiveDocument<GrasshopperCommand.AvailableWhenGHReady>
     {
       public override bool IsCommandAvailable(UIApplication _, DB.CategorySet selectedCategories) =>
         base.IsCommandAvailable(_, selectedCategories) &&
@@ -36,21 +53,27 @@ namespace RhinoInside.Revit.UI
   [Transaction(TransactionMode.ReadOnly), Regeneration(RegenerationOption.Manual)]
   class CommandGrasshopperPreviewOff : CommandGrasshopperPreview
   {
-    public static string CommandName => "Off";
+    public static new string CommandName => "Off";
 
     public static void CreateUI(RadioButtonGroup radioButtonGroup)
     {
-      var buttonData = NewToggleButtonData<CommandGrasshopperPreviewOff, Availability>(CommandName, "Ribbon.Grasshopper.Preview_Off.png", "Don't draw any preview geometry");
+      var buttonData = NewToggleButtonData<CommandGrasshopperPreviewOff, AvailableWhenProjDocGHReady>(CommandName, "Ribbon.Grasshopper.Preview_Off.png", "Don't draw any preview geometry");
 
       if (radioButtonGroup.AddItem(buttonData) is ToggleButton pushButton)
       {
-        pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
         // add spacing to title to get it to be a consistent width
         pushButton.SetText("   Off    ");
-
-        if (GH.PreviewServer.PreviewMode == GH_PreviewMode.Disabled)
-          radioButtonGroup.Current = pushButton;
+        StoreButton(CommandName, pushButton);
       }
+    }
+
+    public static void SetState(RadioButtonGroup radioButtonGroup)
+    {
+      if (RestoreButton(CommandName) is ToggleButton pushButton)
+        if (GH.PreviewServer.PreviewMode == GH_PreviewMode.Disabled)
+        {
+          radioButtonGroup.Current = pushButton;
+        }
     }
 
     public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
@@ -64,21 +87,27 @@ namespace RhinoInside.Revit.UI
   [Transaction(TransactionMode.ReadOnly), Regeneration(RegenerationOption.Manual)]
   class CommandGrasshopperPreviewWireframe : CommandGrasshopperPreview
   {
-    public static string CommandName => "Wire";
+    public static new string CommandName => "Wire";
 
     public static void CreateUI(RadioButtonGroup radioButtonGroup)
     {
-      var buttonData = NewToggleButtonData<CommandGrasshopperPreviewWireframe, Availability>(CommandName, "Ribbon.Grasshopper.Preview_Wireframe.png", "Draw wireframe preview geometry");
+      var buttonData = NewToggleButtonData<CommandGrasshopperPreviewWireframe, AvailableWhenProjDocGHReady>(CommandName, "Ribbon.Grasshopper.Preview_Wireframe.png", "Draw wireframe preview geometry");
 
       if (radioButtonGroup.AddItem(buttonData) is ToggleButton pushButton)
       {
-        pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
         // add spacing to title to get it to be a consistent width
         pushButton.SetText("  Wire   ");
-
-        if (GH.PreviewServer.PreviewMode == GH_PreviewMode.Wireframe)
-          radioButtonGroup.Current = pushButton;
+        StoreButton(CommandName, pushButton);
       }
+    }
+
+    public static void SetState(RadioButtonGroup radioButtonGroup)
+    {
+      if (RestoreButton(CommandName) is ToggleButton pushButton)
+        if (GH.PreviewServer.PreviewMode == GH_PreviewMode.Wireframe)
+        {
+          radioButtonGroup.Current = pushButton;
+        }
     }
 
     public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
@@ -92,19 +121,25 @@ namespace RhinoInside.Revit.UI
   [Transaction(TransactionMode.ReadOnly), Regeneration(RegenerationOption.Manual)]
   class CommandGrasshopperPreviewShaded : CommandGrasshopperPreview
   {
-    public static string CommandName => "Shaded";
+    public static new string CommandName => "Shaded";
 
     public static void CreateUI(RadioButtonGroup radioButtonGroup)
     {
-      var buttonData = NewToggleButtonData<CommandGrasshopperPreviewShaded, Availability>(CommandName, "Ribbon.Grasshopper.Preview_Shaded.png", "Draw shaded preview geometry");
+      var buttonData = NewToggleButtonData<CommandGrasshopperPreviewShaded, AvailableWhenProjDocGHReady>(CommandName, "Ribbon.Grasshopper.Preview_Shaded.png", "Draw shaded preview geometry");
 
       if (radioButtonGroup.AddItem(buttonData) is ToggleButton pushButton)
       {
-        pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
-        // set this toggle to active by default
-        if (GH.PreviewServer.PreviewMode == GH_PreviewMode.Shaded)
-          radioButtonGroup.Current = pushButton;
+        StoreButton(CommandName, pushButton);
       }
+    }
+
+    public static void SetState(RadioButtonGroup radioButtonGroup)
+    {
+      if (RestoreButton(CommandName) is ToggleButton pushButton)
+        if (GH.PreviewServer.PreviewMode == GH_PreviewMode.Shaded)
+        {
+          radioButtonGroup.Current = pushButton;
+        }
     }
 
     public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
