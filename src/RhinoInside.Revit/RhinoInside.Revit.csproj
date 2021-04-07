@@ -187,7 +187,8 @@
         <PackageReference Include="RhinoCommon" Version="7.3.21039.11201" IncludeAssets="compile; build" />
         <PackageReference Include="RhinoWindows" Version="7.3.21039.11201" IncludeAssets="build; compile" />
         <PackageReference Include="Grasshopper" Version="7.3.21039.11201" IncludeAssets="compile; build" />
-        <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitVersion).0.0" IncludeAssets="build; compile" />
+        <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="2019.0.1" IncludeAssets="build; compile" Condition="'$(Configuration)' == 'Release 2019'" />
+        <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitVersion).0.0" IncludeAssets="build; compile" Condition="'$(Configuration)' != 'Release 2019'" />
       </ItemGroup>
     </Otherwise>
   </Choose>
