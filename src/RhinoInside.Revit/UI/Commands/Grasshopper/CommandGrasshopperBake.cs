@@ -146,7 +146,7 @@ namespace RhinoInside.Revit.UI
             worksetId = options.Workset?.Id ?? options.Document.GetWorksetTable().GetActiveWorksetId();
 
           ids = new List<DB.ElementId>();
-          foreach (var geometry in geometryToBake)
+          foreach (var geometry in geometryToBake.Where(g => g != null))
           {
             var ds = DB.DirectShape.CreateElement(options.Document, categoryId);
             ds.Name = param.NickName;
