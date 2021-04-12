@@ -274,6 +274,7 @@
     <Compile Include="UI\Commands\Addin\CommandGuides.cs" />
     <Compile Include="UI\Commands\Addin\CommandStart.cs" />
     <Compile Include="UI\Commands\Addin\CommandHelpLinks.cs" />
+    <Compile Include="UI\Commands\Rhinoceros\CommandRhinoOpenViewport.cs" />
     <Compile Include="UI\RibbonHandler.cs" />
     <Compile Include="UI\BaseDialog.cs" />
     <Compile Include="UI\BaseForm.cs" />
@@ -373,6 +374,7 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ProductInfo.cs</LastGenOutput>
     </Content>
+    <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\OpenViewport.png" />
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
