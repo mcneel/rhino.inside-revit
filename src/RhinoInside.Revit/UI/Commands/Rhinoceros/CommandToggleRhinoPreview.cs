@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.UI
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
 #if REVIT_2018
-      var buttonData = NewPushButtonData<CommandToggleRhinoPreview, NeedsActiveDocument<Availability>>
+      var buttonData = NewPushButtonData<CommandToggleRhinoPreview, NeedsActiveDocument<AvailableWhenRhinoReady>>
       (
         name: CommandName,
         iconName: "Ribbon.Grasshopper.Preview_Off.png",
@@ -24,11 +24,20 @@ namespace RhinoInside.Revit.UI
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         StoreButton(CommandName, pushButton);
-        DocumentPreviewServer.ActiveDocumentChanged += DocumentPreviewServer_ActiveDocumentChanged;
         ButtonSetImages(false);
       }
+
+      CommandStart.AddinStarted += CommandStart_AddinStarted;
 #endif
     }
+
+#if REVIT_2018
+    private static void CommandStart_AddinStarted(object sender, CommandStart.AddinStartedArgs e)
+    {
+      DocumentPreviewServer.ActiveDocumentChanged += DocumentPreviewServer_ActiveDocumentChanged;
+      CommandStart.AddinStarted -= CommandStart_AddinStarted;
+    }
+#endif
 
 #if REVIT_2018
     static void ButtonSetImages(bool status)

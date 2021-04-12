@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.UI
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
       // Create a push button to trigger a command add it to the ribbon panel.
-      var buttonData = NewPushButtonData<CommandGrasshopperPackageManager, Availability>
+      var buttonData = NewPushButtonData<CommandGrasshopperPackageManager, AvailableWhenGHReady>
       (
         name: CommandName,
         iconName: "PackageManager-icon.png",
@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.UI
         url: "https://www.food4rhino.com/"
       );
 
-      if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
+      if (ribbonPanel.AddItem(buttonData) is PushButton)
       {
       }
     }

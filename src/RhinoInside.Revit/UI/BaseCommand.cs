@@ -93,17 +93,17 @@ namespace RhinoInside.Revit.UI
     /// Static storage for buttons created by commands.
     /// Usage is optional for derived classes thru Store and Restore methods
     /// </summary>
-    private static Dictionary<string, RibbonButton> _buttons = new Dictionary<string, RibbonButton>();
+    private static readonly Dictionary<string, RibbonItem> _buttons = new Dictionary<string, RibbonItem>();
 
     /// <summary>
     /// Store given button under given name
     /// </summary>
-    protected static void StoreButton(string name, RibbonButton button) => _buttons[name] = button;
+    protected static void StoreButton(string name, RibbonItem button) => _buttons[name] = button;
 
     /// <summary>
     /// Restore previously stored button under given name
     /// </summary>
-    protected static RibbonButton RestoreButton(string name)
+    protected static RibbonItem RestoreButton(string name)
     {
       if (_buttons.TryGetValue(name, out var button))
         return button;
@@ -163,6 +163,15 @@ namespace RhinoInside.Revit.UI
     {
       public override bool IsCommandAvailable(UIApplication app, CategorySet selectedCategories) =>
         AddIn.CurrentStatus >= AddIn.Status.Obsolete;
+    }
+
+    /// <summary>
+    /// Available when Rhino.Inside is not obsolete
+    /// </summary>
+    protected class AvailableWhenReady : External.UI.CommandAvailability
+    {
+      public override bool IsCommandAvailable(UIApplication app, CategorySet selectedCategories) =>
+        AddIn.CurrentStatus >= AddIn.Status.Ready;
     }
     #endregion
   }

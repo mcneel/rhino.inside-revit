@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.UI
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
       // Create a push button to trigger a command add it to the ribbon panel.
-      var buttonData = NewPushButtonData<CommandGrasshopper, Availability>
+      var buttonData = NewPushButtonData<CommandGrasshopper, AvailableWhenGHReady>
       (
         name: CommandName,
         iconName: "Grasshopper.png",
@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.UI
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         pushButton.LongDescription = $"Use CTRL key to open only Grasshopper window without restoring other tool windows";
-        pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
+        StoreButton(CommandName, pushButton);
       }
     }
 

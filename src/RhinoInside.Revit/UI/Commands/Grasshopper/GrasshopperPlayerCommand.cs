@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.UI
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
       // Create a push button to trigger a command add it to the ribbon panel.
-      var buttonData = NewPushButtonData<CommandGrasshopperPlayer, NeedsActiveDocument<Availability>>
+      var buttonData = NewPushButtonData<CommandGrasshopperPlayer, NeedsActiveDocument<AvailableWhenGHReady>>
       (
         name: CommandName,
         iconName: "GrasshopperPlayer.png",
@@ -40,7 +40,7 @@ namespace RhinoInside.Revit.UI
 
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
+        StoreButton(CommandName, pushButton);
       }
     }
 
@@ -230,7 +230,7 @@ namespace RhinoInside.Revit.UI
     {
       point = null;
 
-      DB.View view = null;
+      DB.View view;
       do
       {
         view = doc.ActiveView;
@@ -346,7 +346,7 @@ namespace RhinoInside.Revit.UI
 
     public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
     {
-      var result = Result.Failed;
+      Result result;
       if ((result = BrowseForFile(out var filePath)) == Result.Succeeded)
       {
         result = Execute(data.Application, data.View, data.JournalData, filePath, ref message);
@@ -358,13 +358,15 @@ namespace RhinoInside.Revit.UI
     public static Result Execute
     (
       UIApplication app,
+#pragma warning disable IDE0060 // Remove unused parameter
       DB.View view,
       IDictionary<string, string> journalData,
+#pragma warning restore IDE0060 // Remove unused parameter
       string filePath,
       ref string message
     )
     {
-      var result = Result.Failed;
+      Result result;
       if ((result = ReadFromFile(filePath, out var definition)) == Result.Succeeded)
       {
         using (definition)
