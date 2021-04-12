@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.UI
     /// <param name="uiCtrlApp"></param>
     public static void CreateUI(UIControlledApplication uiCtrlApp)
     {
-      CreateMainControlPanel(uiCtrlApp);
+      CreateMainPanel(uiCtrlApp);
 
       // add the rest of the ui
       // they will all be 'unavailable' (set by the availability type) since
@@ -170,15 +170,36 @@ namespace RhinoInside.Revit.UI
     #endregion
 
     #region UI Panels and Buttons
-    static void CreateMainControlPanel(UIControlledApplication uiCtrlApp)
+    static void CreateMainPanel(UIControlledApplication uiCtrlApp)
     {
       RibbonPanel ribbonPanel;
+
+      void CreateStartButton(string tabName)
+      {
+        var buttonData = NewPushButtonData<CommandStart, AvailableWhenNotObsolete>(CommandName, CommandIcon, "");
+        if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
+        {
+          StoreButton(CommandName, pushButton);
+          SetupButton(pushButton);
+
+          if (AddIn.CurrentStatus >= AddIn.Status.Available && AddIn.StartupMode != AddinStartupMode.Disabled)
+          {
+            if (Settings.KeyboardShortcuts.RegisterDefaultShortcut(tabName, ribbonPanel.Name, typeof(CommandStart).Name, CommandName, "R#Ctrl+R"))
+              External.ActivationGate.Exit += ShowShortcutHelp;
+          }
+        }
+
+        // add listener for ui compact changes
+        Settings.AddinOptions.CompactRibbonChanged += AddinOptions_CompactRibbonChanged;
+        Settings.AddinOptions.UpdateChannelChanged += AddinOptions_UpdateChannelChanged;
+      }
+
       if (Settings.AddinOptions.Session.CompactTab)
       {
         ribbonPanel = uiCtrlApp.CreateRibbonPanel(AddIn.AddinName);
 
         // Add launch RhinoInside push button,
-        CommandStart.CreateStartButton("Add-Ins", ribbonPanel);
+        CreateStartButton("Add-Ins");
         // addin options, has Eto window and requires Eto to be loaded
         CommandAddinOptions.CreateUI(ribbonPanel);
       }
@@ -188,7 +209,7 @@ namespace RhinoInside.Revit.UI
         ribbonPanel = uiCtrlApp.CreateRibbonPanel(AddIn.AddinName, "More");
 
         // Add launch RhinoInside push button,
-        CommandStart.CreateStartButton(AddIn.AddinName, ribbonPanel);
+        CreateStartButton(AddIn.AddinName);
         // add slideout and the rest of the buttons
       }
 
@@ -203,26 +224,6 @@ namespace RhinoInside.Revit.UI
         ribbonPanel.AddSeparator();
         CommandAddinOptions.CreateUI(ribbonPanel);
       }
-    }
-
-    static void CreateStartButton(string tabName, RibbonPanel ribbonPanel)
-    {
-      var buttonData = NewPushButtonData<CommandStart, AvailableWhenNotObsolete>(CommandName, CommandIcon, "");
-      if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
-      {
-        StoreButton(CommandName, pushButton);
-        SetupButton(pushButton);
-
-        if (AddIn.CurrentStatus >= AddIn.Status.Available && AddIn.StartupMode != AddinStartupMode.Disabled)
-        {
-          if (Settings.KeyboardShortcuts.RegisterDefaultShortcut(tabName, ribbonPanel.Name, typeof(CommandStart).Name, CommandName, "R#Ctrl+R"))
-            External.ActivationGate.Exit += ShowShortcutHelp;
-        }
-      }
-
-      // add listener for ui compact changes
-      Settings.AddinOptions.CompactRibbonChanged += AddinOptions_CompactRibbonChanged;
-      Settings.AddinOptions.UpdateChannelChanged += AddinOptions_UpdateChannelChanged;
     }
 
     static void CreateRhinoButtons()
