@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Media.Imaging;
 
 using Autodesk.Revit.UI;
 using ADW = Autodesk.Windows;
@@ -154,7 +155,6 @@ namespace RhinoInside.Revit.UI
       _lastState = curState;
     }
 
-
     internal static void ProcessLinkedScripts(List<LinkedItem> items, Action<LinkedScript> action)
     {
       items.ForEach((item) =>
@@ -185,17 +185,32 @@ namespace RhinoInside.Revit.UI
 
     internal static PushButtonData NewScriptButton(LinkedScript script, string assmLoc)
     {
-      var commandName = $"{script.ScriptCommandType.Name}-{script.Name}";
-      var commandButtonName = script.Text;
+      // execution
       var typeAssmLocation = assmLoc;
       var typeName = script.ScriptCommandType.FullName;
+
+      // ui
+      var commandName = $"{script.ScriptCommandType.Name}-{script.Name}";
+      var commandButtonName = script.Text;
+      BitmapSource commandIcon = GetScriptIcon(script, true);
+      BitmapSource commandIconLarge = GetScriptIcon(script);
+      
       return new PushButtonData(commandName, commandButtonName, typeAssmLocation, typeName)
       {
-        Image = ImageBuilder.LoadRibbonButtonImage($"Ribbon.Grasshopper.{script.ScriptType}.png", true),
-        LargeImage = ImageBuilder.LoadRibbonButtonImage($"Ribbon.Grasshopper.{script.ScriptType}.png"),
-        ToolTip = "Launch script in Grasshopper player",
+        Image = commandIcon,
+        LargeImage = commandIconLarge,
+        ToolTip = script.Description != null && !string.IsNullOrEmpty(script.Description) ? script.Description : "Launch script in Grasshopper player",
         LongDescription = $"Script Path: {script.ScriptPath}",
       };
+    }
+
+    internal static BitmapSource GetScriptIcon(LinkedScript script, bool small = false)
+    {
+      int desiredSize = small ? 16 : 32;
+      if (script.Icon is System.Drawing.Bitmap)
+        return script.Icon.ToBitmapImage(desiredSize, desiredSize);
+      else
+        return ImageBuilder.LoadRibbonButtonImage($"Ribbon.Grasshopper.{script.ScriptType}.png", small);
     }
   }
 }

@@ -64,6 +64,61 @@ namespace RhinoInside.Revit.UI
     public ScriptType ScriptType { get; set; }
     public string ScriptPath { get; set; }
     public Type ScriptCommandType { get; set; }
+
+    public string Description { get; set; } = null;
+    public System.Drawing.Bitmap Icon { get; set; } = null;
+
+    static readonly string[] SupportedExtensions = new string[] { ".gh", ".ghx" };
+    public static LinkedScript FromPath(string scriptPath)
+    {
+      var ext = Path.GetExtension(scriptPath).ToLower();
+      if (File.Exists(scriptPath) && SupportedExtensions.Contains(ext))
+      {
+        var script = new LinkedScript
+        {
+          ScriptType = ext == ".gh" ? ScriptType.GhFile : ScriptType.GhxFile,
+          ScriptPath = scriptPath,
+          Name = Path.GetFileNameWithoutExtension(scriptPath),
+        };
+
+        // now that base props are setup, read the rest from the file
+        ReadGHArchiveProps(script);
+
+        return script;
+      }
+      else
+        return null;
+    }
+
+    static void ReadGHArchiveProps(LinkedScript script)
+    {
+      var archive = new GH_IO.Serialization.GH_Archive();
+      if (archive.ReadFromFile(script.ScriptPath))
+      {
+        // find gh document properties
+        var defProps = archive.GetRootNode.FindChunk("Definition")?.FindChunk("DefinitionProperties");
+        if (defProps != null)
+        {
+          // find description
+          if (defProps.ItemExists("Description"))
+            script.Description = defProps.GetString("Description");
+
+          // find icon
+          if (defProps.ItemExists("IconImageData"))
+          {
+            var iconImgData = defProps.GetString("IconImageData");
+            if (iconImgData is string && !string.IsNullOrEmpty(iconImgData))
+            {
+              script.Icon = new System.Drawing.Bitmap(
+                new System.IO.MemoryStream(
+                  System.Convert.FromBase64String(iconImgData)
+                  )
+                );
+            }
+          }
+        }
+      }
+    }
   }
 
   /// <summary>
@@ -141,20 +196,8 @@ namespace RhinoInside.Revit.UI
       }
 
       foreach (var entry in Directory.GetFiles(location))
-      {
-        var ext = Path.GetExtension(entry).ToLower();
-        if (new string[] { ".gh", ".ghx" }.Contains(ext))
-        {
-          items.Add(
-            new LinkedScript
-            {
-              ScriptType = ext == ".gh" ? ScriptType.GhFile : ScriptType.GhxFile,
-              ScriptPath = entry,
-              Name = Path.GetFileNameWithoutExtension(entry),
-            }
-          );
-        }
-      }
+        if (LinkedScript.FromPath(entry) is LinkedScript script)
+          items.Add(script);
 
       return items.OrderBy(x => x.Name).ToList();
     }
