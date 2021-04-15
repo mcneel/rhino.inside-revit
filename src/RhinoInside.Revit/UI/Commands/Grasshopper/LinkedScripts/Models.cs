@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.UI
   /// <summary>
   /// Generic linked item
   /// </summary>
-  abstract public class LinkedItem
+  public abstract class LinkedItem
   {
     public string Text
     {
@@ -43,8 +43,8 @@ namespace RhinoInside.Revit.UI
       }
     }
 
-    public string Name = string.Empty;
-    public string Tooltip = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Tooltip { get; set; } = string.Empty;
   }
 
   /// <summary>
@@ -52,8 +52,8 @@ namespace RhinoInside.Revit.UI
   /// </summary>
   public class LinkedItemGroup : LinkedItem
   {
-    public string GroupPath;
-    public List<LinkedItem> Items = new List<LinkedItem>();
+    public string GroupPath { get; set; }
+    public List<LinkedItem> Items { get; set; } = new List<LinkedItem>();
   }
 
   /// <summary>
@@ -61,9 +61,9 @@ namespace RhinoInside.Revit.UI
   /// </summary>
   public class LinkedScript : LinkedItem
   {
-    public ScriptType ScriptType;
-    public string ScriptPath;
-    public Type ScriptCommandType;
+    public ScriptType ScriptType { get; set; }
+    public string ScriptPath { get; set; }
+    public Type ScriptCommandType { get; set; }
   }
 
   /// <summary>
@@ -133,6 +133,7 @@ namespace RhinoInside.Revit.UI
         items.Add(
           new LinkedItemGroup
           {
+            GroupPath = subDir,
             Name = Path.GetFileName(subDir),
             Items = FindLinkedItemsRecursive(subDir),
           }
