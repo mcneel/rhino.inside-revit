@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Windows.Media.Imaging;
 
 using RhinoInside.Revit.Settings;
 
@@ -66,7 +67,6 @@ namespace RhinoInside.Revit.UI
     public Type ScriptCommandType { get; set; }
 
     public string Description { get; set; } = null;
-    public System.Drawing.Bitmap Icon { get; set; } = null;
 
     static readonly string[] SupportedExtensions = new string[] { ".gh", ".ghx" };
     public static LinkedScript FromPath(string scriptPath)
@@ -82,7 +82,26 @@ namespace RhinoInside.Revit.UI
         };
 
         // now that base props are setup, read the rest from the file
-        ReadGHArchiveProps(script);
+        var archive = new GH_IO.Serialization.GH_Archive();
+        if (archive.ReadFromFile(script.ScriptPath))
+        {
+          // find gh document properties
+          var defProps = archive.GetRootNode.FindChunk("Definition")?.FindChunk("DefinitionProperties");
+          if (defProps != null)
+          {
+            // find description
+            if (defProps.ItemExists("Description"))
+              script.Description = defProps.GetString("Description");
+
+            // find icon
+            if (defProps.ItemExists("IconImageData"))
+            {
+              var iconImgData = defProps.GetString("IconImageData");
+              if (iconImgData is string && !string.IsNullOrEmpty(iconImgData))
+                script.IconImageData = iconImgData;
+            }
+          }
+        }
 
         return script;
       }
@@ -90,34 +109,30 @@ namespace RhinoInside.Revit.UI
         return null;
     }
 
-    static void ReadGHArchiveProps(LinkedScript script)
+    string IconImageData = null;
+    public BitmapSource GetScriptIcon(int width, int height)
     {
-      var archive = new GH_IO.Serialization.GH_Archive();
-      if (archive.ReadFromFile(script.ScriptPath))
+      if (IconImageData is string)
       {
-        // find gh document properties
-        var defProps = archive.GetRootNode.FindChunk("Definition")?.FindChunk("DefinitionProperties");
-        if (defProps != null)
+        // if SVG
+        if (IconImageData.IndexOf("<svg", StringComparison.OrdinalIgnoreCase) > 0)
         {
-          // find description
-          if (defProps.ItemExists("Description"))
-            script.Description = defProps.GetString("Description");
-
-          // find icon
-          if (defProps.ItemExists("IconImageData"))
-          {
-            var iconImgData = defProps.GetString("IconImageData");
-            if (iconImgData is string && !string.IsNullOrEmpty(iconImgData))
-            {
-              script.Icon = new System.Drawing.Bitmap(
-                new System.IO.MemoryStream(
-                  System.Convert.FromBase64String(iconImgData)
-                  )
-                );
-            }
-          }
+          return Rhino.UI.DrawingUtilities.BitmapFromSvg(
+            IconImageData, width, height
+            ).ToBitmapImage();
+        }
+        // else assume bitmap
+        else
+        {
+          return new System.Drawing.Bitmap(
+            new System.IO.MemoryStream(
+              System.Convert.FromBase64String(IconImageData)
+              )
+            ).ToBitmapImage(width, height);
         }
       }
+      else
+        return null;
     }
   }
 

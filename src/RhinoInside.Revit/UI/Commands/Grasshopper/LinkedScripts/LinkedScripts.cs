@@ -207,8 +207,8 @@ namespace RhinoInside.Revit.UI
     internal static BitmapSource GetScriptIcon(LinkedScript script, bool small = false)
     {
       int desiredSize = small ? 16 : 32;
-      if (script.Icon is System.Drawing.Bitmap)
-        return script.Icon.ToBitmapImage(desiredSize, desiredSize);
+      if (script.GetScriptIcon(desiredSize, desiredSize) is BitmapSource icon)
+        return icon;
       else
         return ImageBuilder.LoadRibbonButtonImage($"Ribbon.Grasshopper.{script.ScriptType}.png", small);
     }
