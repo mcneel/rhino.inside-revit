@@ -9,6 +9,7 @@ using DB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Components
 {
   using Kernel.Attributes;
+  using RhinoInside.Revit.External.DB.Extensions;
 
   public class DefineSharedParameter : ReconstructElementComponent
   {
@@ -39,8 +40,8 @@ namespace RhinoInside.Revit.GH.Components
     )
     {
       var parameterGUID = default(Guid?);
-      var parameterType = DB.ParameterType.Text;
-      var parameterGroup = DB.BuiltInParameterGroup.PG_DATA;
+      var parameterType = External.DB.Schemas.SpecType.String.Text;
+      var parameterGroup = External.DB.Schemas.ParameterGroup.Data;
       bool instance = true;
       bool visible = true;
 
@@ -54,8 +55,8 @@ namespace RhinoInside.Revit.GH.Components
             (
               def.Name == name &&
               def.Visible == visible &&
-              def.ParameterType == parameterType &&
-              def.ParameterGroup == parameterGroup &&
+              def.GetDataType() == parameterType &&
+              def.GetGroupType() == parameterGroup &&
               (instance ? bindings.Current is DB.InstanceBinding : bindings.Current is DB.TypeBinding)
             )
             {
@@ -80,7 +81,7 @@ namespace RhinoInside.Revit.GH.Components
 
         using (var definitionFile = Revit.ActiveUIApplication.Application.CreateSharedParameterFile())
         {
-          if (definitionFile?.Groups.Create(DB.LabelUtils.GetLabelFor(parameterGroup)).Definitions.Create(defOptions) is DB.ExternalDefinition definition)
+          if (definitionFile?.Groups.Create(parameterGroup.Label).Definitions.Create(defOptions) is DB.ExternalDefinition definition)
           {
             // TODO : Ask for categories
             using (var categorySet = new DB.CategorySet())

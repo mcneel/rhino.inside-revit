@@ -10,6 +10,8 @@ using DB = Autodesk.Revit.DB;
 using System.Diagnostics;
 using System.IO;
 
+using RhinoInside.Revit.External.DB.Extensions;
+
 #if REVIT_2018
 using Autodesk.Revit.DB.Visual;
 #else
@@ -244,16 +246,16 @@ namespace RhinoInside.Revit.GH.Types
 
       var offset = Rhino.Geometry.Vector2d.Zero;
       if (asset.FindByName(UnifiedBitmap.TextureRealWorldOffsetX) is AssetPropertyDistance offsetX)
-        offset.X = DB.UnitUtils.Convert(offsetX.Value, offsetX.DisplayUnitType, DB.DisplayUnitType.DUT_METERS);
+        offset.X = DB.UnitUtils.Convert(offsetX.Value, offsetX.GetUnitTypeId(), External.DB.Schemas.UnitType.Meters);
       if (asset.FindByName(UnifiedBitmap.TextureRealWorldOffsetY) is AssetPropertyDistance offsetY)
-        offset.Y = DB.UnitUtils.Convert(offsetY.Value, offsetY.DisplayUnitType, DB.DisplayUnitType.DUT_METERS);
+        offset.Y = DB.UnitUtils.Convert(offsetY.Value, offsetY.GetUnitTypeId(), External.DB.Schemas.UnitType.Meters);
       texture.Offset = offset;
 
       var repeat = new Rhino.Geometry.Vector2d(1.0, 1.0);
       if (asset.FindByName(UnifiedBitmap.TextureRealWorldScaleX) is AssetPropertyDistance scaleX)
-        repeat.X = 1.0 / DB.UnitUtils.Convert(scaleX.Value, scaleX.DisplayUnitType, DB.DisplayUnitType.DUT_METERS);
+        repeat.X = 1.0 / DB.UnitUtils.Convert(scaleX.Value, scaleX.GetUnitTypeId(), External.DB.Schemas.UnitType.Meters);
       if (asset.FindByName(UnifiedBitmap.TextureRealWorldScaleY) is AssetPropertyDistance scaleY)
-        repeat.Y = 1.0 / DB.UnitUtils.Convert(scaleY.Value, scaleY.DisplayUnitType, DB.DisplayUnitType.DUT_METERS);
+        repeat.Y = 1.0 / DB.UnitUtils.Convert(scaleY.Value, scaleY.GetUnitTypeId(), External.DB.Schemas.UnitType.Meters);
       texture.Repeat = repeat;
 
       return texture;

@@ -233,20 +233,24 @@ namespace RhinoInside.Revit.External.DB.Extensions
             Union(element.GetParameters(name).OrderBy(x => x.Id.IntegerValue)).
             GroupBy(x => x.Id).
             Select(x => x.First());
+
         case ParameterClass.BuiltIn:
           return BuiltInParameterExtension.BuiltInParameterMap.TryGetValue(name, out var parameters) ?
             parameters.Select(x => element.get_Parameter(x)).Where(x => x?.Definition is object) :
             Enumerable.Empty<Parameter>();
+
         case ParameterClass.Project:
           return element.GetParameters(name).
             Where(p => !p.IsShared && p.Id.IntegerValue > 0).
             Where(p => (p.Element.Document.GetElement(p.Id) as ParameterElement)?.get_Parameter(BuiltInParameter.ELEM_DELETABLE_IN_FAMILY)?.AsInteger() == 1).
             OrderBy(x => x.Id.IntegerValue);
+
         case ParameterClass.Family:
           return element.GetParameters(name).
             Where(p => !p.IsShared && p.Id.IntegerValue > 0).
             Where(p => (p.Element.Document.GetElement(p.Id) as ParameterElement)?.get_Parameter(BuiltInParameter.ELEM_DELETABLE_IN_FAMILY)?.AsInteger() == 0).
             OrderBy(x => x.Id.IntegerValue);
+
         case ParameterClass.Shared:
           return element.GetParameters(name).
             Where(p => p.IsShared).
@@ -255,6 +259,24 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return Enumerable.Empty<Parameter>();
     }
+
+    public static Parameter GetParameter(this Element element, ElementId parameterId)
+    {
+      if (parameterId.TryGetBuiltInParameter(out var builtInParameter))
+        return element.get_Parameter(builtInParameter);
+
+      if (element.Document.GetElement(parameterId) is ParameterElement parameterElement)
+        return element.get_Parameter(parameterElement.GetDefinition());
+
+      return default;
+    }
+
+#if !REVIT_2022
+    public static Parameter GetParameter(this Element element, Schemas.ParameterId parameterId)
+    {
+      return element.get_Parameter(parameterId);
+    }
+#endif
 
     public static Parameter GetParameter(this Element element, string name, ParameterClass set)
     {

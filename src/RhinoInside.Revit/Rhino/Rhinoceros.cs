@@ -375,8 +375,7 @@ namespace RhinoInside.Revit
       if (Revit.ActiveUIDocument?.Document is DB.Document revitDoc)
       {
         var units = revitDoc.GetUnits();
-        var lengthFormatoptions = units.GetFormatOptions(DB.UnitType.UT_Length);
-        var RevitModelUnitSystem = lengthFormatoptions.DisplayUnits.ToUnitSystem();
+        var RevitModelUnitSystem = units.ToUnitSystem(out var distanceDisplayPrecision);
         var GrasshopperModelUnitSystem = GH.Guest.ModelUnitSystem != UnitSystem.Unset ? GH.Guest.ModelUnitSystem : doc.ModelUnitSystem;
         if (doc.ModelUnitSystem != RevitModelUnitSystem || doc.ModelUnitSystem != GrasshopperModelUnitSystem)
         {
@@ -442,7 +441,7 @@ namespace RhinoInside.Revit
             {
             case Autodesk.Revit.UI.TaskDialogResult.CommandLink2:
                 doc.ModelAngleToleranceRadians = Revit.AngleTolerance;
-                doc.ModelDistanceDisplayPrecision = Clamp((int) -Log10(lengthFormatoptions.Accuracy), 0, 7);
+                doc.ModelDistanceDisplayPrecision = distanceDisplayPrecision;
                 doc.ModelAbsoluteTolerance = Revit.VertexTolerance * UnitScale(UnitSystem.Feet, RevitModelUnitSystem);
                 doc.AdjustModelUnitSystem(RevitModelUnitSystem, true);
                 AdjustViewConstructionPlanes(doc);
@@ -477,10 +476,9 @@ namespace RhinoInside.Revit
         else if (rhinoDoc.ModelUnitSystem == UnitSystem.None)
         {
           var units = revitDoc.GetUnits();
-          var lengthFormatoptions = units.GetFormatOptions(DB.UnitType.UT_Length);
-          rhinoDoc.ModelUnitSystem = lengthFormatoptions.DisplayUnits.ToUnitSystem();
+          rhinoDoc.ModelUnitSystem = units.ToUnitSystem(out var distanceDisplayPrecision);
           rhinoDoc.ModelAngleToleranceRadians = Revit.AngleTolerance;
-          rhinoDoc.ModelDistanceDisplayPrecision = Clamp((int) -Log10(lengthFormatoptions.Accuracy), 0, 7);
+          rhinoDoc.ModelDistanceDisplayPrecision = distanceDisplayPrecision;
           rhinoDoc.ModelAbsoluteTolerance = Revit.VertexTolerance * UnitScale(UnitSystem.Feet, rhinoDoc.ModelUnitSystem);
           //switch (rhinoDoc.ModelUnitSystem)
           //{

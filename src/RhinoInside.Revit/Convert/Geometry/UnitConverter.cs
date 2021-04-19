@@ -11,19 +11,34 @@ namespace RhinoInside.Revit.Convert.Geometry
   {
     #region Scaling factors
     /// <summary>
+    /// Revit Internal Unit System is Feet
+    /// </summary>
+    const UnitSystem InternalUnitSystem = UnitSystem.Feet;
+
+    /// <summary>
+    /// Revit internal model units
+    /// </summary>
+    internal static UnitSystem HostUnitSystem => InternalUnitSystem;
+
+    /// <summary>
+    /// 1 revit internal model unit in Rhino units
+    /// </summary>
+    internal static double HostModelUnits => RhinoMath.UnitScale(InternalUnitSystem, RhinoDoc.ActiveDoc?.ModelUnitSystem ?? UnitSystem.Meters);
+
+    /// <summary>
     /// Factor to do a direct conversion without any unit scaling.
     /// </summary>
     public const double NoScale = 1.0;
 
     /// <summary>
-    /// Factor for converting a value from Revit internal units to Rhino model units.
+    /// Factor for converting a value from Revit internal units to active Rhino document units.
     /// </summary>
-    public static double ToRhinoUnits => RhinoMath.UnitScale(UnitSystem.Feet, RhinoDoc.ActiveDoc?.ModelUnitSystem ?? UnitSystem.Meters);
+    public static double ToRhinoUnits => RhinoMath.UnitScale(InternalUnitSystem, RhinoDoc.ActiveDoc?.ModelUnitSystem ?? UnitSystem.Meters);
 
     /// <summary>
-    /// Factor for converting a value from Rhino model units to Revit internal units.
+    /// Factor for converting a value from active Rhino document units to Revit internal units.
     /// </summary>
-    public static double ToHostUnits => RhinoMath.UnitScale(RhinoDoc.ActiveDoc?.ModelUnitSystem ?? UnitSystem.Meters, UnitSystem.Feet);
+    public static double ToHostUnits => RhinoMath.UnitScale(RhinoDoc.ActiveDoc?.ModelUnitSystem ?? UnitSystem.Meters, InternalUnitSystem);
     #endregion
 
     #region Scale
@@ -312,7 +327,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       if (rhinoDoc is null)
         return double.NaN;
 
-      return InOtherUnits(value, type, UnitSystem.Feet, rhinoDoc.ModelUnitSystem);
+      return InOtherUnits(value, type, InternalUnitSystem, rhinoDoc.ModelUnitSystem);
     }
     #endregion
 
@@ -369,7 +384,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       if (rhinoDoc is null)
         return double.NaN;
 
-      return InOtherUnits(value, type, rhinoDoc.ModelUnitSystem, UnitSystem.Feet);
+      return InOtherUnits(value, type, rhinoDoc.ModelUnitSystem, InternalUnitSystem);
     }
     #endregion
   }
