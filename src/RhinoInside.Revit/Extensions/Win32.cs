@@ -309,6 +309,19 @@ namespace Microsoft.Win32.SafeHandles.InteropServices
       public DWORD dwExStyle;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
+    public struct SIZE
+    {
+      public int cx;
+      public int cy;
+
+      public SIZE(int x, int y)
+      {
+        cx = x;
+        cy = y;
+      }
+    }
+
     [DllImport(USER32, SetLastError = true)]
     public static extern bool IsWindow(HWND hWnd);
 
@@ -427,4 +440,56 @@ namespace Microsoft.Win32.SafeHandles.InteropServices
     public static extern int CallNextHookEx(HHOOK hhook, int nCode, IntPtr wParam, IntPtr lParam);
     #endregion
   }
+
+  [SuppressUnmanagedCodeSecurity]
+  internal static class Gdi32
+  {
+    internal const string GDI32 = "GDI32";
+
+    [DllImport(GDI32, EntryPoint = "DeleteObject")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool DeleteObject([In] IntPtr hObject);
+
+  }
+
+  [SuppressUnmanagedCodeSecurity]
+  internal static class Shell32
+  {
+    const string SHELL32 = "SHELL32";
+
+    [Flags]
+    public enum SIIGBF
+    {
+      SIIGBF_RESIZETOFIT = 00,
+      SIIGBF_BIGGERSIZEOK = 01,
+      SIIGBF_MEMORYONLY = 02,
+      SIIGBF_ICONONLY = 04,
+      SIIGBF_THUMBNAILONLY = 08,
+      SIIGBF_INCACHEONLY = 10
+    }
+
+    [ComImport()]
+    [Guid("bcc18b79-ba16-442f-80c4-8a59c30c463b")]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    public interface IShellItemImageFactory
+    {
+      void GetImage
+      (
+        [In, MarshalAs(UnmanagedType.Struct)] User32.SIZE size,
+        [In] SIIGBF flags,
+        [Out] out IntPtr phbm
+      );
+    }
+
+    [DllImport(SHELL32, CharSet = CharSet.Unicode, PreserveSig = false)]
+    [return: MarshalAs(UnmanagedType.Interface)]
+    public static extern IShellItemImageFactory SHCreateItemFromParsingName
+    (
+     [In][MarshalAs(UnmanagedType.LPWStr)] string pszPath,
+     [In] IntPtr pbc,
+     [In][MarshalAs(UnmanagedType.LPStruct)] Guid riid
+    );
+
+  }
+
 }

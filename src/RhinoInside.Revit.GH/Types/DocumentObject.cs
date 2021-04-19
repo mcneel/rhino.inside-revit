@@ -144,7 +144,7 @@ namespace RhinoInside.Revit.GH.Types
 
   /// <summary>
   /// Interface to implement into classes that can not be created-duplicated-updated-deleted without starting a Revit Transaction.
-  /// For example: <see cref="DB.CurtainGrid"/>
+  /// For example: <see cref="DB.CurtainGrid"/>, <see cref="DB.Parameter"/>
   /// </summary>
   public interface IGH_ReferenceObject : IGH_DocumentObject
   {

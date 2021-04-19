@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -165,18 +165,18 @@
           <Private>False</Private>
         </Reference>
         <Reference Include="RevitAPI">
-            <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\RevitAPI.dll</HintPath>
-            <Private>False</Private>
+          <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\RevitAPI.dll</HintPath>
+          <Private>False</Private>
         </Reference>
         <Reference Include="RevitAPIUI">
-            <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\RevitAPIUI.dll</HintPath>
-            <Private>False</Private>
+          <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\RevitAPIUI.dll</HintPath>
+          <Private>False</Private>
         </Reference>
         <Reference Include="AdWindows">
-            <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\AdWindows.dll</HintPath>
-            <Private>False</Private>
+          <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\AdWindows.dll</HintPath>
+          <Private>False</Private>
         </Reference>
-        </ItemGroup>
+      </ItemGroup>
     </When>
     <Otherwise>
       <ItemGroup>
@@ -338,7 +338,7 @@
     <Compile Include="Components\Parameter\ParameterKeyIdentity.cs" />
     <None Include="Extensions\README.md" />
     <Compile Include="Extensions\Grasshopper\Kernel\GH_ComponentParamServerExtension.cs" />
-    <Compile Include="Extensions\Grasshopper\Kernel\GH_Enumerate.cs" />
+    <Compile Include="Extensions\Grasshopper\Kernel\GH_Enum.cs" />
     <Compile Include="Extensions\Grasshopper\Kernel\IGH_ParamExtension.cs" />
     <Compile Include="Extensions\Grasshopper\Kernel\Data\IGH_StructureExtension.cs" />
     <Compile Include="Extensions\Grasshopper\Kernel\Types\GH_ColorRGBA.cs" />
@@ -444,6 +444,7 @@
     <Compile Include="Types\DatumPlane.cs" />
     <Compile Include="Types\ProjectLocation.cs" />
     <Compile Include="Types\Roof.cs" />
+    <Compile Include="Types\DataType.cs" />
     <Compile Include="Types\Sketch.cs" />
     <Compile Include="Types\SketchPlane.cs" />
     <Compile Include="Types\Material.cs" />

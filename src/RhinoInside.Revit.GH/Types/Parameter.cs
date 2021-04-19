@@ -3,6 +3,8 @@ using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.External.UI.Extensions;
 using DB = Autodesk.Revit.DB;
+using DBX = RhinoInside.Revit.External.DB;
+using DBXS = RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -10,12 +12,12 @@ namespace RhinoInside.Revit.GH.Types
   public class ParameterKey : Element
   {
     #region IGH_Goo
-    public override bool IsValid => Id.TryGetBuiltInParameter(out var _) || base.IsValid;
+    public override bool IsValid => (Id?.TryGetBuiltInParameter(out var _) == true) || base.IsValid;
 
     protected override Type ScriptVariableType => typeof(DB.ParameterElement);
-    override public object ScriptVariable() => null;
+    public override object ScriptVariable() => null;
 
-    public override sealed bool CastFrom(object source)
+    public sealed override bool CastFrom(object source)
     {
       if (base.CastFrom(source))
         return true;
@@ -96,6 +98,9 @@ namespace RhinoInside.Revit.GH.Types
 
       [System.ComponentModel.Description("BuiltIn parameter Id.")]
       public DB.BuiltInParameter? BuiltInId => owner.Id.TryGetBuiltInParameter(out var bip) ? bip : default;
+
+      [System.ComponentModel.Description("Forge Id.")]
+      public DBXS.ParameterId SchemaId => owner.Id.TryGetBuiltInParameter(out var bip) ? (DBXS.ParameterId) bip : default;
       #endregion
 
       #region Definition
@@ -114,28 +119,31 @@ namespace RhinoInside.Revit.GH.Types
       [System.ComponentModel.Category(Definition), System.ComponentModel.Description("Whether or not the parameter values can vary across group members.")]
       public bool? VariesAcrossGroups => parameter?.GetDefinition()?.VariesAcrossGroups;
 
-      [System.ComponentModel.Category(Definition)]
-      public DB.ParameterType? Type => parameter?.GetDefinition()?.ParameterType;
+      [System.ComponentModel.Category(Definition), System.ComponentModel.Description("Parameter data Type")]
+      public string Type => ((DBXS.DataType) parameter?.GetDefinition()?.GetDataType())?.Label;
 
       [System.ComponentModel.Category(Definition)]
-      public DB.BuiltInParameterGroup? Group => parameter?.GetDefinition()?.ParameterGroup;
+      public string Group => parameter?.GetDefinition()?.GetGroupType()?.Label;
       #endregion
     }
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
     #endregion
 
+    public new DB.ParameterElement Value => base.Value as DB.ParameterElement;
+
     public ParameterKey() { }
     public ParameterKey(DB.Document doc, DB.ElementId id) : base(doc, id) { }
     public ParameterKey(DB.ParameterElement element) : base(element) { }
 
-    new public static ParameterKey FromElementId(DB.Document doc, DB.ElementId id)
+    public static new ParameterKey FromElementId(DB.Document doc, DB.ElementId id)
     {
       if (id.IsParameterId(doc))
         return new ParameterKey(doc, id);
 
       return null;
     }
+
     public override string DisplayName
     {
       get
@@ -166,11 +174,47 @@ namespace RhinoInside.Revit.GH.Types
         return base.Name;
       }
     }
+
+    public DBX.ParameterClass Class
+    {
+      get
+      {
+        if (Id is object && Id.TryGetBuiltInParameter(out var _))
+          return DBX.ParameterClass.BuiltIn;
+
+        switch (Value)
+        {
+          case DB.GlobalParameter _: return DBX.ParameterClass.Global;
+          case DB.SharedParameterElement _: return DBX.ParameterClass.Shared;
+          case DB.ParameterElement project:
+            switch (project.get_Parameter(DB.BuiltInParameter.ELEM_DELETABLE_IN_FAMILY).AsInteger())
+            {
+              case 0: return DBX.ParameterClass.Family;
+              case 1: return DBX.ParameterClass.Project;
+            }
+            break;
+        }
+
+        return default;
+      }
+    }
+    public DB.Definition Definition
+    {
+      get
+      {
+        if (Value is DB.ParameterElement element)
+          return element.GetDefinition();
+
+        return default;
+      }
+    }
+
+    public Guid? GuidValue => Value is DB.SharedParameterElement shared ? shared.GuidValue : default;
     #endregion
   }
 
   [Kernel.Attributes.Name("Parameter Value")]
-  public class ParameterValue : ReferenceObject, IEquatable<ParameterValue>
+  public class ParameterValue : ReferenceObject, IEquatable<ParameterValue>, IGH_Goo
   {
     #region System.Object
     public bool Equals(ParameterValue other)
@@ -252,6 +296,12 @@ namespace RhinoInside.Revit.GH.Types
       }
 
       var goo = Value.AsGoo();
+      if (goo is null)
+      {
+        target = default;
+        return true;
+      }
+
       if (goo is Q q)
       {
         target = q;
@@ -260,6 +310,8 @@ namespace RhinoInside.Revit.GH.Types
 
       return goo.CastTo(out target);
     }
+
+    object IGH_Goo.ScriptVariable() => Value.AsGoo() is IGH_Goo goo ? goo.ScriptVariable() : default;
     #endregion
 
     #region DocumentObject

@@ -7,6 +7,7 @@ using Grasshopper.Kernel;
 using Rhino.PlugIns;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.External.DB.Schemas;
 using RhinoInside.Revit.GH.Bake;
 using DB = Autodesk.Revit.DB;
 using WF = System.Windows.Forms;
@@ -139,7 +140,7 @@ namespace RhinoInside.Revit.UI
 
         if (geometryToBake.Any())
         {
-          var categoryId = options.Category?.Id ?? new DB.ElementId(DB.BuiltInCategory.OST_GenericModel);
+          var categoryId = options.Category?.Id ?? CategoryId.GenericModel;
 
           var worksetId = DB.WorksetId.InvalidWorksetId;
           if (options.Document.IsWorkshared)
@@ -152,9 +153,8 @@ namespace RhinoInside.Revit.UI
             ds.Name = param.NickName;
             if (options.Document.IsWorkshared)
             {
-              var worksetParam = ds.get_Parameter(DB.BuiltInParameter.ELEM_PARTITION_PARAM);
-              if (worksetParam != null)
-                worksetParam.SetWorksetId(worksetId);
+              if (ds.GetParameter(ParameterId.ElemPartitionParam) is DB.Parameter worksetParam)
+                worksetParam.Set(worksetId.IntegerValue);
             }
 
             var shape = geometry.ToShape().ToList();
@@ -176,10 +176,8 @@ namespace RhinoInside.Revit.UI
       {
         var doc = data.Application.ActiveUIDocument.Document;
 
-        var bakeOptsDlg = new BakeOptionsWindow(data.Application);
-        bakeOptsDlg.ShowModal();
-
-        if (bakeOptsDlg.IsCancelled)
+        var bakeOptsDlg = new BakeOptionsDialog(data.Application);
+        if(bakeOptsDlg.ShowModal() != Eto.Forms.DialogResult.Ok)
           return Result.Cancelled;
 
         bool groupResult = (WF.Control.ModifierKeys & WF.Keys.Control) != WF.Keys.None;
@@ -248,8 +246,7 @@ namespace RhinoInside.Revit.UI
                 var group = options.Document.Create.NewGroup(resultingElementIds);
                 trans.Commit();
 
-                resultingElementIds = new List<DB.ElementId>();
-                resultingElementIds.Add(group.Id);
+                resultingElementIds = new List<DB.ElementId>() { group.Id };
               }
             }
           }

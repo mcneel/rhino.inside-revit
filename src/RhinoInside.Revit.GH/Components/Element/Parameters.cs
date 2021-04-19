@@ -3,15 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
-using RhinoInside.Revit.Convert.Units;
+using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.External.DB.Schemas;
 using DB = Autodesk.Revit.DB;
 using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH
 {
-  using Convert.Geometry;
-  using External.DB.Extensions;
-
   static class ParameterUtils
   {
     internal static IGH_Goo AsGoo(this DB.Parameter parameter)
@@ -29,7 +28,7 @@ namespace RhinoInside.Revit.GH
             switch (definition.ParameterType)
             {
               case DB.ParameterType.Invalid:
-                if (definition.IsNumberParameter() && parameter.Id.TryGetBuiltInParameter(out var builtInInteger))
+                if (parameter.Id.TryGetBuiltInParameter(out var builtInInteger))
                 {
                   switch (builtInInteger)
                   {
@@ -101,58 +100,52 @@ namespace RhinoInside.Revit.GH
 
           if (parameter.Definition is DB.Definition definition)
           {
-            switch (definition.ParameterType)
+            if (definition.GetDataType() == SpecType.Boolean.YesNo)
             {
-              case DB.ParameterType.Invalid:
-                if (definition.IsNumberParameter() && parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
-                {
-                  var builtInParameterName = builtInParameter.ToString();
-                  if (builtInParameterName.Contains("COLOR_") || builtInParameterName.Contains("_COLOR_") || builtInParameterName.Contains("_COLOR"))
-                  {
-                    if (GH_Convert.ToColor(value, out var color, GH_Conversion.Both))
-                      return parameter.Set(((int) color.R) | ((int) color.G << 8) | ((int) color.B << 16));
-
-                    throw new InvalidCastException();
-                  }
-                }
-                break;
-
-              case DB.ParameterType.YesNo:
-                if (GH_Convert.ToBoolean(value, out var boolean, GH_Conversion.Both))
-                  return parameter.Set(boolean ? 1 : 0);
-
+              if (!GH_Convert.ToBoolean(value, out var boolean, GH_Conversion.Both))
                 throw new InvalidCastException();
+
+              return parameter.Set(boolean ? 1 : 0);
+            }
+            else if (parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
+            {
+              var builtInParameterName = builtInParameter.ToString();
+              if (builtInParameterName.Contains("COLOR_") || builtInParameterName.Contains("_COLOR_") || builtInParameterName.Contains("_COLOR"))
+              {
+                if (!GH_Convert.ToColor(value, out var color, GH_Conversion.Both))
+                  throw new InvalidCastException();
+
+                return parameter.Set(((int) color.R) | ((int) color.G << 8) | ((int) color.B << 16));
+              }
             }
           }
 
-          if (GH_Convert.ToInt32(value, out var integer, GH_Conversion.Both))
-            return parameter.Set(integer);
+          if (!GH_Convert.ToInt32(value, out var integer, GH_Conversion.Both))
+            throw new InvalidCastException();
 
-          throw new InvalidCastException();
+          return parameter.Set(integer);
 
         case DB.StorageType.Double:
-          if (GH_Convert.ToDouble(value, out var real, GH_Conversion.Both))
-            return parameter.SetDoubleInRhinoUnits(real);
+          if (!GH_Convert.ToDouble(value, out var real, GH_Conversion.Both))
+            throw new InvalidCastException();
 
-          return false;
+          return parameter.SetDoubleInRhinoUnits(real);
 
         case DB.StorageType.String:
-          if (GH_Convert.ToString(value, out var text, GH_Conversion.Both))
-            return parameter.Set(text);
+          if (!GH_Convert.ToString(value, out var text, GH_Conversion.Both))
+            throw new InvalidCastException();
 
-          throw new InvalidCastException();
+          return parameter.Set(text);
 
         case DB.StorageType.ElementId:
           var element = new Types.Element();
-          if (element.CastFrom(value))
-          {
-            if(!parameter.Element.Document.IsEquivalent(element.Document))
-              throw new ArgumentException("Failed to assign an element from a diferent document.", parameter.Definition.Name);
+          if (!element.CastFrom(value))
+            throw new InvalidCastException();
 
-            return parameter.Set(element.Id);
-          }
+          if (!parameter.Element.Document.IsEquivalent(element.Document))
+            throw new ArgumentException("Failed to assign an element from a diferent document.", parameter.Definition.Name);
 
-          throw new InvalidCastException();
+          return parameter.Set(element.Id);
 
         default:
           throw new NotImplementedException();
@@ -169,91 +162,92 @@ namespace RhinoInside.Revit.GH
       return parameter.Set(UnitConverter.InHostUnits(value, parameter.Definition.ParameterType));
     }
 
-    internal static DB.Parameter GetParameter(IGH_ActiveObject obj, DB.Element element, IGH_Goo key)
+    internal static DB.Parameter GetParameter(IGH_ActiveObject obj, DB.Element element, IGH_Goo goo)
     {
       DB.Parameter parameter = null;
-      switch (key as Types.ParameterKey ?? key.ScriptVariable())
+      object key = default;
+
+      if (goo is Types.ParameterValue value)
+        goo = new Types.ParameterKey(value.Document, value.Value.Id);
+
+      if (goo is Types.ParameterKey parameterKey)
       {
-        case Types.ParameterKey parameterKey:
-          if (parameterKey.Document.Equals(element.Document))
+        if (parameterKey.Document.Equals(element.Document)) key = parameterKey.Id;
+        else
+        {
+          switch (parameterKey.Class)
           {
-            if (Enum.IsDefined(typeof(DB.BuiltInParameter), parameterKey.Id.IntegerValue))
+            case DBX.ParameterClass.BuiltIn:
+              parameter = parameterKey.Id.TryGetBuiltInParameter(out var builtInParameter) ? element.get_Parameter(builtInParameter) : default; break;
+            case DBX.ParameterClass.Project:
+              parameter = element.GetParameter(parameterKey.Name, parameterKey.Definition?.ParameterType ?? DB.ParameterType.Invalid, DBX.ParameterClass.Project); break;
+            case DBX.ParameterClass.Family:
+              parameter = element.GetParameter(parameterKey.Name, parameterKey.Definition?.ParameterType ?? DB.ParameterType.Invalid, DBX.ParameterClass.Family); break;
+            case DBX.ParameterClass.Shared:
+              parameter = element.get_Parameter(parameterKey.GuidValue.Value); break;
+          }
+        }
+      }
+
+      if (parameter is null)
+      {
+        switch (key ?? goo.ScriptVariable())
+        {
+          case string parameterName:
+          {
+            parameter = element.GetParameter(parameterName, DBX.ParameterClass.Any);
+            if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterName}' is not defined in 'Element'");
+            break;
+          }
+          case int parameterId:
+          {
+            var elementId = new DB.ElementId(parameterId);
+            if (elementId.TryGetBuiltInParameter(out var builtInParameter))
             {
-              parameter = element.get_Parameter((DB.BuiltInParameter) parameterKey.Id.IntegerValue);
-              if (parameter is null)
-                obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{DB.LabelUtils.GetLabelFor((DB.BuiltInParameter) parameterKey.Id.IntegerValue)}' not defined in 'Element'");
+              parameter = element.get_Parameter(builtInParameter);
+              if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{DB.LabelUtils.GetLabelFor(builtInParameter)}' is not defined in 'Element'");
             }
-            else if (element.Document.GetElement(parameterKey.Id) is DB.ParameterElement parameterElement)
+            else if (element.Document.GetElement(new DB.ElementId(parameterId)) is DB.ParameterElement parameterElement)
             {
               parameter = element.get_Parameter(parameterElement.GetDefinition());
-              if (parameter is null)
-                obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterElement.Name}' not defined in 'Element'");
+              if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterElement.Name}' is not defined in 'Element'");
             }
-            else
-              obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Data conversion failed from {key.TypeName} to Revit Parameter element");
+            else obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Data conversion failed from {goo.TypeName} to Revit Parameter element");
+            break;
           }
-          else
-            obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"'ParameterKey' doesn't belong same document as 'Element'");
-
-          break;
-
-        case DB.Parameter param:
-          if (param.Element.Document.Equals(element.Document) && param.Element.Id == element.Id)
-            parameter = param;
-          else
-            obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Parameter '{param.Definition.Name}' doesn't belong to 'Element'");
-
-          break;
-
-        case string parameterName:
-          parameter = element.GetParameter(parameterName, DBX.ParameterClass.Any);
-          if (parameter is null)
-            obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterName}' not defined in 'Element'");
-          break;
-
-        case int parameterId:
-          if (Enum.IsDefined(typeof(DB.BuiltInParameter), parameterId))
+          case DB.Parameter param:
           {
-            parameter = element.get_Parameter((DB.BuiltInParameter) parameterId);
-            if (parameter is null)
-              obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{DB.LabelUtils.GetLabelFor((DB.BuiltInParameter) parameterId)}' not defined in 'Element'");
+            parameter = element.get_Parameter(param.Definition);
+            if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{param.Definition.Name}' is not defined in 'Element'");
+            break;
           }
-          else if (element.Document.GetElement(new DB.ElementId(parameterId)) is DB.ParameterElement parameterElement)
+          case DB.ElementId elementId:
           {
-            parameter = element.get_Parameter(parameterElement.GetDefinition());
-            if (parameter is null)
-              obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterElement.Name}' not defined in 'Element'");
+            if (elementId.TryGetBuiltInParameter(out var builtInParameter))
+            {
+              parameter = element.get_Parameter(builtInParameter);
+              if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{DB.LabelUtils.GetLabelFor(builtInParameter)}' is not  defined in 'Element'");
+            }
+            else if (element.Document.GetElement(elementId) is DB.ParameterElement parameterElement)
+            {
+              parameter = element.get_Parameter(parameterElement.GetDefinition());
+              if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterElement.Name}' is not defined in 'Element'");
+            }
+            else obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Data conversion failed from {goo.TypeName} to Revit Parameter element");
+            break;
           }
-          else
-            obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Data conversion failed from {key.TypeName} to Revit Parameter element");
-          break;
-
-        case DB.ElementId parameterElementId:
-          if (Enum.IsDefined(typeof(DB.BuiltInParameter), parameterElementId.IntegerValue))
+          case Guid guid:
           {
-            parameter = element.get_Parameter((DB.BuiltInParameter) parameterElementId.IntegerValue);
-            if (parameter is null)
-              obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{DB.LabelUtils.GetLabelFor((DB.BuiltInParameter) parameterElementId.IntegerValue)}' not defined in 'Element'");
+            parameter = element.get_Parameter(guid);
+            if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{guid}' is not defined in 'Element'");
+            break;
           }
-          else if (element.Document.GetElement(parameterElementId) is DB.ParameterElement parameterElement)
+          default:
           {
-            parameter = element.get_Parameter(parameterElement.GetDefinition());
-            if (parameter is null)
-              obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterElement.Name}' not defined in 'Element'");
+            obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Data conversion failed from {goo.TypeName} to Revit Parameter element");
+            break;
           }
-          else
-            obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Data conversion failed from {key.TypeName} to Revit Parameter element");
-          break;
-
-        case Guid guid:
-          parameter = element.get_Parameter(guid);
-          if (parameter is null)
-            obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{guid}' not defined in 'Element'");
-          break;
-
-        default:
-          obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Data conversion failed from {key.TypeName} to Revit Parameter element");
-          break;
+        }
       }
 
       return parameter;
@@ -444,7 +438,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       manager.AddParameter(new Parameters.Element(), "Element", "E", "Element to query", GH_ParamAccess.item);
       manager[manager.AddTextParameter("Name", "N", "Filter params by Name", GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddParameter(new Parameters.Param_Enum<Types.BuiltInParameterGroup>(), "Group", "G", "Filter params by the group they belong", GH_ParamAccess.item)].Optional = true;
+      manager[manager.AddParameter(new Parameters.Param_Enum<Types.ParameterGroup>(), "Group", "G", "Filter params by the group they belong", GH_ParamAccess.item)].Optional = true;
       manager[manager.AddBooleanParameter("ReadOnly", "R", "Filter params by its ReadOnly property", GH_ParamAccess.item)].Optional = true;
     }
 
@@ -462,8 +456,8 @@ namespace RhinoInside.Revit.GH.Components
       string parameterName = null;
       bool noFilterName = (!DA.GetData("Name", ref parameterName) && Params.Input[1].Sources.Count == 0);
 
-      var builtInParameterGroup = DB.BuiltInParameterGroup.INVALID;
-      bool noFilterGroup = (!DA.GetData("Group", ref builtInParameterGroup) && Params.Input[2].Sources.Count == 0);
+      var parameterGroup = ParameterGroup.Empty;
+      bool noFilterGroup = (!DA.GetData("Group", ref parameterGroup) && Params.Input[2].Sources.Count == 0);
 
       bool readOnly = false;
       bool noFilterReadOnly = (!DA.GetData("ReadOnly", ref readOnly) && Params.Input[3].Sources.Count == 0);
@@ -472,14 +466,14 @@ namespace RhinoInside.Revit.GH.Components
       if (element is object)
       {
         parameters = new List<DB.Parameter>(element.Parameters.Size);
-        foreach (var group in element.GetParameters(DBX.ParameterClass.Any).GroupBy((x) => x.Definition?.ParameterGroup ?? DB.BuiltInParameterGroup.INVALID).OrderBy((x) => x.Key))
+        foreach (var group in element.GetParameters(DBX.ParameterClass.Any).GroupBy(x => x.Definition?.GetGroupType() ?? ParameterGroup.Empty).OrderBy(x => x.Key))
         {
           foreach (var param in group.OrderBy(x => x.Id.IntegerValue))
           {
             if (!noFilterName && parameterName != param.Definition?.Name)
               continue;
 
-            if (!noFilterGroup && builtInParameterGroup != (param.Definition?.ParameterGroup ?? DB.BuiltInParameterGroup.INVALID))
+            if (!noFilterGroup && parameterGroup != (param.Definition?.GetGroupType() ?? ParameterGroup.Empty))
               continue;
 
             if (!noFilterReadOnly && readOnly != param.IsReadOnly)

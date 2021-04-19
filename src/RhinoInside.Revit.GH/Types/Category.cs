@@ -7,6 +7,7 @@ using Rhino.DocObjects;
 using RhinoInside.Revit.Convert.System.Drawing;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
+using DBXS = RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -14,11 +15,11 @@ namespace RhinoInside.Revit.GH.Types
   public class Category : Element, Bake.IGH_BakeAwareElement
   {
     #region IGH_Goo
-    public override bool IsValid => (Id.TryGetBuiltInCategory(out var _) && true) || base.IsValid;
+    public override bool IsValid => (Id?.TryGetBuiltInCategory(out var _) == true) || base.IsValid;
     protected override Type ScriptVariableType => typeof(DB.Category);
-    override public object ScriptVariable() => Value;
+    public override object ScriptVariable() => Value;
 
-    public override sealed bool CastFrom(object source)
+    public sealed override bool CastFrom(object source)
     {
       if (base.CastFrom(source))
         return true;
@@ -121,6 +122,9 @@ namespace RhinoInside.Revit.GH.Types
 
       [System.ComponentModel.Description("BuiltIn category Id.")]
       public DB.BuiltInCategory? BuiltInId => owner.Id.TryGetBuiltInCategory(out var bic) ? bic : default;
+
+      [System.ComponentModel.Description("Forge schema Id.")]
+      public DBXS.CategoryId ForgeTypeId => owner.Id.TryGetBuiltInCategory(out var bic) ? (DBXS.CategoryId) bic : default;
       #endregion
 
       #region Category

@@ -1,6 +1,6 @@
 using System;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.Convert.Units;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 using DBX = RhinoInside.Revit.External.DB;
 
@@ -22,7 +22,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(new Parameters.Param_Enum<Types.BuiltInParameterGroup>(), "Group", "G", "Parameter group", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.Param_Enum<Types.ParameterGroup>(), "Group", "G", "Parameter group", GH_ParamAccess.item);
       manager.AddParameter(new Parameters.Param_Enum<Types.ParameterType>(), "Type", "T", "Parameter type", GH_ParamAccess.item);
       manager.AddParameter(new Parameters.Param_Enum<Types.ParameterBinding>(), "Binding", "B", "Parameter binding", GH_ParamAccess.item);
       manager.AddParameter(new Parameters.Param_Enum<Types.UnitType>(), "Unit", "U", "Unit type", GH_ParamAccess.item);
@@ -36,12 +36,22 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetData("ParameterValue", ref parameter))
         return;
 
-      DA.SetData("Group", parameter?.Definition.ParameterGroup);
-      DA.SetData("Type", parameter?.Definition.ParameterType);
+      if (parameter?.Definition is DB.Definition definition)
+      {
+        DA.SetData("Group", definition.GetGroupType());
+        DA.SetData("Type", definition.GetDataType());
+      }
+
       if (parameter?.Element is DB.ElementType) DA.SetData("Binding", DBX.ParameterBinding.Type);
       else if (parameter?.Element is DB.Element) DA.SetData("Binding", DBX.ParameterBinding.Instance);
       else DA.SetData("Binding", null);
-      DA.SetData("Unit", parameter?.Definition.GetUnitType());
+
+      if (parameter.StorageType == DB.StorageType.Double)
+      {
+        try { DA.SetData("Unit", parameter?.GetUnitTypeId()); }
+        catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
+      }
+      
       DA.SetData("Is Read Only", parameter?.IsReadOnly);
       DA.SetData("User Modifiable", parameter?.UserModifiable);
     }

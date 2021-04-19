@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -262,6 +262,33 @@
     <Compile Include="External\ApplicationServices\HostServices.cs" />
     <Compile Include="External\DB\ParameterBinding.cs" />
     <Compile Include="External\DB\ParameterClass.cs" />
+    <Compile Include="External\DB\Schemas\CategoryId.cs" />
+    <Compile Include="External\DB\Schemas\CategoryId.Enum.cs" />
+    <Compile Include="External\DB\Schemas\CategoryId.Values.cs" />
+    <Compile Include="External\DB\Schemas\DisciplineType.cs" />
+    <Compile Include="External\DB\Schemas\DisciplineType.Values.cs" />
+    <Compile Include="External\DB\Schemas\ParameterGroup.cs" />
+    <Compile Include="External\DB\Schemas\ParameterGroup.Enum.cs" />
+    <Compile Include="External\DB\Schemas\ParameterGroup.Values.cs" />
+    <Compile Include="External\DB\Schemas\ParameterId.cs" />
+    <Compile Include="External\DB\Schemas\ParameterId.Enum.cs" />
+    <Compile Include="External\DB\Schemas\ParameterId.Values.cs" />
+    <Compile Include="External\DB\Schemas\DataType.Label.cs" />
+    <Compile Include="External\DB\Schemas\SchemaBuilder.cs" />
+    <Compile Include="External\DB\Schemas\SpecType.Boolean.cs" />
+    <Compile Include="External\DB\Schemas\SpecType.cs" />
+    <Compile Include="External\DB\Schemas\DataType.cs" />
+    <Compile Include="External\DB\Schemas\SpecType.Enum.cs" />
+    <Compile Include="External\DB\Schemas\SpecType.Measurable.cs" />
+    <Compile Include="External\DB\Schemas\SpecType.Reference.cs" />
+    <Compile Include="External\DB\Schemas\SpecType.Int.cs" />
+    <Compile Include="External\DB\Schemas\SpecType.String.cs" />
+    <Compile Include="External\DB\Schemas\UnitSymbol.cs" />
+    <Compile Include="External\DB\Schemas\UnitSymbol.Enum.cs" />
+    <Compile Include="External\DB\Schemas\UnitSymbol.Values.cs" />
+    <Compile Include="External\DB\Schemas\UnitType.cs" />
+    <Compile Include="External\DB\Schemas\UnitType.Enum.cs" />
+    <Compile Include="External\DB\Schemas\UnitType.Values.cs" />
     <Compile Include="External\DB\Transaction.cs" />
     <Compile Include="External\DB\UniqueId.cs" />
     <Compile Include="External\DB\WallWrapping.cs" />
@@ -296,8 +323,10 @@
     <Compile Include="UI\Commands\Addin\CommandGuides.cs" />
     <Compile Include="UI\Commands\Addin\CommandStart.cs" />
     <Compile Include="UI\Commands\Addin\CommandHelpLinks.cs" />
+    <Compile Include="UI\Forms\ImportOptionsDialog.cs" />
+    <Compile Include="Extensions\ShellItem.cs" />
+    <Compile Include="UI\ModalDialog.cs" />
     <Compile Include="UI\RibbonHandler.cs" />
-    <Compile Include="UI\BaseDialog.cs" />
     <Compile Include="UI\BaseForm.cs" />
     <Compile Include="UI\BaseCommand.cs" />
     <Compile Include="UI\BaseWindowUtils.cs" />
@@ -314,8 +343,8 @@
     <Compile Include="UI\Commands\Grasshopper\LinkedScripts\LinkedScriptCommand.cs" />
     <Compile Include="UI\Commands\Grasshopper\LinkedScripts\LinkedScripts.cs" />
     <Compile Include="UI\Commands\Grasshopper\LinkedScripts\Models.cs" />
-    <Compile Include="UI\Forms\BakeOptionsWindow.cs" />
-    <Compile Include="UI\Forms\OptionsWindow.cs" />
+    <Compile Include="UI\Forms\BakeOptionsDialog.cs" />
+    <Compile Include="UI\Forms\AddInOptionsDialog.cs" />
     <Compile Include="UI\Commands\Rhinoceros\BaseRhinoCommand.cs" />
     <Compile Include="UI\Commands\Rhinoceros\CommandRhino.cs" />
     <Compile Include="UI\Commands\Rhinoceros\CommandRhinoOptions.cs" />

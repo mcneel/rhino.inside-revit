@@ -3,8 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Windows.Forms;
-using System.Windows.Forms.Interop;
+using Eto.Forms;
 
 using Autodesk.Revit.Attributes;
 using DB = Autodesk.Revit.DB;
@@ -21,13 +20,15 @@ using Rhino.FileIO;
 using Rhino.DocObjects;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.Convert.System.Drawing;
+using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.UI
 {
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
   public class CommandImport : RhinoCommand
   {
-    public static string CommandName => "Import\n3dm";
+    public static string CommandName => "Import\n3DM";
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
@@ -158,7 +159,7 @@ namespace RhinoInside.Revit.UI
       Rhino.Render.RenderMaterial mat
     )
     {
-      string name = mat.Name;
+      string name = mat.Name ?? mat.Id.ToString();
       var appearanceAssetId = DB.ElementId.InvalidElementId;
 
 #if REVIT_2018
@@ -386,7 +387,10 @@ namespace RhinoInside.Revit.UI
     (
       DB.Document doc,
       string filePath,
-      DB.BuiltInCategory builtInCategory
+      DB.ElementId categoryId,
+      DB.WorksetId worksetId,
+      string familyName,
+      string typeName
     )
     {
       try
@@ -395,17 +399,44 @@ namespace RhinoInside.Revit.UI
 
         using (var model = File3dm.Read(filePath))
         {
-          var scaleFactor = RhinoMath.UnitScale(model.Settings.ModelUnitSystem, Revit.ModelUnitSystem);
+          var scaleFactor = RhinoMath.UnitScale(model.Settings.ModelUnitSystem, UnitConverter.HostUnitSystem);
 
           using (var trans = new DB.Transaction(doc, "Import 3D Model"))
           {
             if (trans.Start() == DB.TransactionStatus.Started)
             {
-              var categoryId = new DB.ElementId(builtInCategory);
               var materials = GetMaterialsByName(doc);
 
-              var type = DB.DirectShapeType.Create(doc, Path.GetFileName(filePath), categoryId);
+              if (string.IsNullOrEmpty(typeName))
+                typeName = Path.GetFileName(filePath);
 
+              var type = default(DB.DirectShapeType);
+              {
+                using (var collector = new DB.FilteredElementCollector(doc))
+                {
+                  var typeCollector = collector.WhereElementIsElementType().
+                    WhereElementIsKindOf(typeof(DB.DirectShapeType)).
+                    OfCategoryId(categoryId).
+                    WhereParameterEqualsTo(DB.BuiltInParameter.ALL_MODEL_FAMILY_NAME, familyName).
+                    WhereParameterEqualsTo(DB.BuiltInParameter.ALL_MODEL_TYPE_NAME, typeName);
+
+                  type = typeCollector.FirstElement() as DB.DirectShapeType;
+                  if (type is null)
+                  {
+                    type = DB.DirectShapeType.Create(doc, typeName, categoryId);
+#if REVIT_2022
+                    if (!string.IsNullOrEmpty(familyName))
+                      type.SetFamilyName(familyName);
+#endif
+                  }
+                  else
+                  {
+                    type.SetShape(new DB.GeometryObject[] { });
+                  }
+                }
+              }
+
+              // Fill type geometry
               foreach (var obj in model.Objects.Where(x => !x.Attributes.IsInstanceDefinitionObject && x.Attributes.Space == ActiveSpace.ModelSpace))
               {
                 if (!obj.Attributes.Visible)
@@ -427,6 +458,12 @@ namespace RhinoInside.Revit.UI
                 library.AddDefinitionType(type.UniqueId, type.Id);
 
               ds.SetShape(DB.DirectShape.CreateGeometryInstance(doc, type.UniqueId, DB.Transform.Identity));
+
+              if (doc.IsWorkshared)
+              {
+                if (ds.GetParameter(ParameterId.ElemPartitionParam) is DB.Parameter worksetParam)
+                  worksetParam.Set(worksetId.IntegerValue);
+              }
 
               if (trans.Commit() == DB.TransactionStatus.Committed)
               {
@@ -458,7 +495,7 @@ namespace RhinoInside.Revit.UI
     {
       using (var model = File3dm.Read(filePath))
       {
-        var scaleFactor = RhinoMath.UnitScale(model.Settings.ModelUnitSystem, Revit.ModelUnitSystem);
+        var scaleFactor = RhinoMath.UnitScale(model.Settings.ModelUnitSystem, UnitConverter.HostUnitSystem);
 
         using (var trans = new DB.Transaction(doc, "Import 3D Model"))
         {
@@ -558,7 +595,7 @@ namespace RhinoInside.Revit.UI
                         {
                           var categoryId = ImportLayer(doc, model, layer, categories, materials);
                           if (categoryId != DB.ElementId.InvalidElementId)
-                            freeForm.get_Parameter(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY).Set(categoryId);
+                            freeForm.GetParameter(ParameterId.FamilyElemSubcategory).Set(categoryId);
                         }
 
                         if (obj.Attributes.MaterialSource == ObjectMaterialSource.MaterialFromObject)
@@ -567,7 +604,7 @@ namespace RhinoInside.Revit.UI
                           {
                             var categoryId = ImportMaterial(doc, material, materials);
                             if (categoryId != DB.ElementId.InvalidElementId)
-                              freeForm.get_Parameter(DB.BuiltInParameter.MATERIAL_ID_PARAM).Set(categoryId);
+                              freeForm.GetParameter(ParameterId.MaterialIdParam).Set(categoryId);
                           }
                         }
                       }
@@ -598,42 +635,42 @@ namespace RhinoInside.Revit.UI
       var doc = data.Application.ActiveUIDocument.Document;
       if(!doc.IsFamilyDocument && !DB.DirectShape.IsSupportedDocument(doc))
       {
-        message = "Active document dont't support DirectShape functionality.";
+        message = "Active document doesnt't support DirectShape functionality.";
         return Result.Failed;
       }
 
-      using
-      (
-        var openFileDialog = new OpenFileDialog()
-        {
-          Filter = "Rhino 3D models (*.3dm)|*.3dm",
-          FilterIndex = 1,
-          RestoreDirectory = true
-        }
-      )
+      using (var options = new ImportOptionsDialog(data.Application))
       {
-
-        switch (openFileDialog.ShowDialog(Revit.MainWindowHandle))
+        switch (options.ShowModal())
         {
-          case DialogResult.OK:
+          case DialogResult.Ok:
             if (doc.IsFamilyDocument)
             {
               return Import3DMFileToFamily
               (
                 doc,
-                openFileDialog.FileName
+                options.FileName
               );
             }
             else
             {
+              if (!DB.DirectShape.IsValidCategoryId(options.CategoryId, doc))
+              {
+                message = "DirectShape functionality doesnt't support selected category on the active document.";
+                return Result.Failed;
+              }
+
               return Import3DMFileToProject
               (
                 doc,
-                openFileDialog.FileName,
-                DB.BuiltInCategory.OST_GenericModel
+                options.FileName,
+                options.CategoryId,
+                options.WorksetId,
+                options.FamilyName,
+                options.TypeName
               );
             }
-            break;
+
           case DialogResult.Cancel: return Result.Cancelled;
         }
       }

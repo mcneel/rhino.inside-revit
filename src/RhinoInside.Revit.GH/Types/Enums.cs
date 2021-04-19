@@ -3,12 +3,15 @@ using System.Linq;
 using Grasshopper.Kernel.Types;
 using DB = Autodesk.Revit.DB;
 using DBX = RhinoInside.Revit.External.DB;
+using DBXS = RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.GH.Types
 {
   using System.Collections.Generic;
   using System.Collections.ObjectModel;
+  using System.Reflection;
   using Kernel.Attributes;
+  using RhinoInside.Revit.External.DB.Extensions;
 
   [
     ComponentGuid("83088978-8B44-4154-ABC9-A7CA53CA65E5"),
@@ -41,82 +44,11 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [
-    ComponentGuid("A5EA05A9-C17E-48F4-AC4C-34F169AE4F9A"),
-    Name("Parameter Type"),
-    Description("Contains a collection of Revit parameter type values"),
-  ]
-  public class ParameterType : GH_Enum<DB.ParameterType>
-  {
-    public override bool IsEmpty => Value == DB.ParameterType.Invalid;
-  }
-
-#if REVIT_2022
-  [
-    ComponentGuid("38E9E729-9D9F-461F-A1D7-798CDFA2CD4C"),
-    Name("Unit Type"),
-    Description("Contains a collection of Revit unit type values"),
-  ]
-  public class UnitType : GH_Enumerate
-  {
-    public UnitType() : base(-1) { }
-    public UnitType(DB.ForgeTypeId value) : base(-1) { }
-
-    public override bool IsEmpty => Value == -1;
-
-    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
-    (
-      new Dictionary<int, string>()
-    );
-
-    public override Type UnderlyingEnumType => typeof(DB.ForgeTypeId);
-  }
-#else
-  [
-    ComponentGuid("38E9E729-9D9F-461F-A1D7-798CDFA2CD4C"),
-    Name("Unit Type"),
-    Description("Contains a collection of Revit unit type values"),
-  ]
-  public class UnitType : GH_Enum<DB.UnitType>
-  {
-    public UnitType() : base(DB.UnitType.UT_Undefined) { }
-    public UnitType(DB.UnitType value) : base(value) { }
-
-    public override bool IsEmpty => Value == DB.UnitType.UT_Undefined;
-
-    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
-    (
-      Enum.GetValues(typeof(DB.UnitType)).Cast<int>().
-      Where(x => x != (int) DB.UnitType.UT_Custom && x != (int) DB.UnitType.UT_Undefined).
-      ToDictionary(x => x, x => DB.LabelUtils.GetLabelFor((DB.UnitType) x))
-    );
-  }
-#endif
-
-  [
     ComponentGuid("ABE3F6CB-CE2D-4DBE-AB81-A6CB884D7DE1"),
     Name("Unit System"),
     Description("Contains a collection of Revit unit system values"),
   ]
   public class UnitSystem : GH_Enum<DB.UnitSystem> { }
-
-  [
-    ComponentGuid("3D9979B4-65C8-447F-BCEA-3705249DF3B6"),
-    Name("Parameter Group"),
-    Description("Contains a collection of Revit parameter group values"),
-  ]
-  public class BuiltInParameterGroup : GH_Enum<DB.BuiltInParameterGroup>
-  {
-    public BuiltInParameterGroup() : base(DB.BuiltInParameterGroup.INVALID) { }
-
-    public override bool IsEmpty => Value == DB.BuiltInParameterGroup.INVALID;
-
-    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
-    (
-      Enum.GetValues(typeof(DB.BuiltInParameterGroup)).Cast<int>().
-      OrderBy(x => DB.LabelUtils.GetLabelFor((DB.BuiltInParameterGroup) x)).
-      ToDictionary(x => x, x => DB.LabelUtils.GetLabelFor((DB.BuiltInParameterGroup) x))
-    );
-  }
 
   [
     ComponentGuid("195B9D7E-D4B0-4335-A442-3C2FA40794A2"),

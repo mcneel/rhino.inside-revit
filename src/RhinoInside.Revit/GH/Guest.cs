@@ -452,7 +452,7 @@ namespace RhinoInside.Revit.GH
       if (Revit.ActiveUIDocument?.Document is DB.Document revitDoc)
       {
         var units = revitDoc.GetUnits();
-        revitUS = units.ToUnitSystem();
+        revitUS = units.ToUnitSystem(out var _);
       }
 
       if (RhinoDoc.ActiveDoc is RhinoDoc doc)
