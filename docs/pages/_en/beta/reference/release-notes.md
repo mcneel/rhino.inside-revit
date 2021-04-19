@@ -13,9 +13,12 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/release-header.html version="0.4" time="04/19/2021" %}
 
 ### New Features
-* Added support for Revit 2022
-* Added command to open an independent Rhino viewport
-* Added UI to command 'Import 3DM'
+* Added support for Revit 2022.
+* Added command to open an independent Rhino viewport.
+* Added UI to 'Import 3DM' command.
+
+### Minor changes
+* Renamed 'Element Parameters' to 'Query Element Parameters'.
 
 {% include ltr/release-header.html version="0.3" time="04/06/2021" %}
 

@@ -1311,12 +1311,12 @@
   }, 
   {
     "desc": "Get the parameters of the specified Element", 
-    "iconsrc": "/static/images/GH/ElementParameters.png", 
+    "iconsrc": "/static/images/GH/QueryElementParameters.png", 
     "icontag": null, 
     "panel": "Element", 
     "tab": "Revit", 
-    "title": "Element Parameters", 
-    "typename": "ElementParameters", 
+    "title": "Query Element Parameters", 
+    "typename": "QueryElementParameters", 
     "uuid": "44515a6b-84ee-4dbd-8241-17edbe07c5b6"
   }, 
   {
