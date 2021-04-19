@@ -615,12 +615,13 @@ namespace RhinoInside.Revit
         if (RhinoDoc.ActiveDoc is RhinoDoc rhinoDoc)
         {
           // Keep Rhino window exposed to user while in a get operation
-          if (RhinoGet.InGet(rhinoDoc))
+          if (RhinoGet.InGet(rhinoDoc) && !Exposed)
           {
             // if there is no floating viewport visible...
             if (!rhinoDoc.Views.Where(x => x.Floating).Any())
             {
-              if (!Exposed)
+              var cursorPosition = System.Windows.Forms.Cursor.Position;
+              if(!OpenRevitViewport(cursorPosition.X - 400, cursorPosition.Y - 300))
                 Exposed = true;
             }
           }
@@ -641,30 +642,17 @@ namespace RhinoInside.Revit
       Show();
     }
 
-    public static bool RunScript(string script, bool activate)
+    public static async void RunScriptAsync(string script, bool activate)
     {
       if (string.IsNullOrEmpty(script))
-        return false;
-
-      External.ActivationGate.Yield();
-
-      if (activate)
-        RhinoApp.SetFocusToMainWindow();
-
-      return RhinoApp.RunScript(script, false);
-    }
-
-    public static async Task<bool> RunScriptAsync(string script, bool activate)
-    {
-      if (string.IsNullOrEmpty(script))
-        return false;
+        return;
 
       await External.ActivationGate.Yield();
 
       if (activate)
         RhinoApp.SetFocusToMainWindow();
 
-      return RhinoApp.RunScript(script, false);
+      RhinoApp.RunScript(script, false);
     }
 
     public static Result RunCommandAbout()
@@ -690,6 +678,59 @@ namespace RhinoInside.Revit
     {
       return RhinoApp.RunScript("!_PackageManager", false) ? Result.Succeeded : Result.Failed;
     }
+
+    #region Open Viewport
+    const string RevitViewName = "Revit";
+    static bool OpenRevitViewport(int x, int y)
+    {
+      if (RhinoDoc.ActiveDoc is RhinoDoc rhinoDoc)
+      {
+        var view3D = rhinoDoc.Views.Where(v => v.MainViewport.Name == RevitViewName).FirstOrDefault();
+        if (view3D is null)
+        {
+          if
+          (
+            rhinoDoc.Views.Add
+            (
+              RevitViewName, Rhino.Display.DefinedViewportProjection.Perspective,
+              new System.Drawing.Rectangle(x, y, 800, 600),
+              true
+            ) is Rhino.Display.RhinoView rhinoView
+          )
+          {
+            rhinoView.MainViewport.ZoomExtents();
+            return true;
+          }
+          else return false;
+        }
+        else
+        {
+          rhinoDoc.Views.ActiveView = view3D;
+
+          var viewWindow = new WindowHandle(view3D.Handle);
+
+          //if (!view3D.Floating)
+          if (viewWindow.Parent.Owner.IsZero)
+          {
+            view3D.Maximized = true;
+            Exposed = true;
+          }
+
+          return MainWindow.BringToFront();
+        }
+      }
+
+      return false;
+    }
+
+    public static async void RunCommandOpenViewportAsync()
+    {
+      var cursorPosition = System.Windows.Forms.Cursor.Position;
+
+      await External.ActivationGate.Yield();
+      OpenRevitViewport(cursorPosition.X + 50, cursorPosition.Y + 50);
+    }
+    #endregion
 
     /// <summary>
     /// Represents a Pseudo-modal loop.
