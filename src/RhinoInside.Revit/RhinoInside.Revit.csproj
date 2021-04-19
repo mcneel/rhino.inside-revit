@@ -275,7 +275,6 @@
     <Compile Include="External\DB\Schemas\ParameterId.Enum.cs" />
     <Compile Include="External\DB\Schemas\ParameterId.Values.cs" />
     <Compile Include="External\DB\Schemas\DataType.Label.cs" />
-    <Compile Include="External\DB\Schemas\SchemaBuilder.cs" />
     <Compile Include="External\DB\Schemas\SpecType.Boolean.cs" />
     <Compile Include="External\DB\Schemas\SpecType.cs" />
     <Compile Include="External\DB\Schemas\DataType.cs" />
