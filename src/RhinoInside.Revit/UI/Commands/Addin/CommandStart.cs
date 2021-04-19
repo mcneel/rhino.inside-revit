@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.UI
     static RibbonPanel grasshopperPanel;
 
     public static string CommandName => "Start";
-    public static string CommandIcon => AddinUpdater.ActiveChannel.IsStable? "RIR-logo.png" : "RIR-WIP-logo.png";
+    public static string CommandIcon => AddinUpdater.ActiveChannel.IsStable ? "RIR-logo.png" : "RIR-WIP-logo.png";
 
     /// <summary>
     /// Initialize the Ribbon tab and first panel
@@ -28,57 +28,17 @@ namespace RhinoInside.Revit.UI
     /// <param name="uiCtrlApp"></param>
     public static void CreateUI(UIControlledApplication uiCtrlApp)
     {
-      RibbonPanel ribbonPanel;
-      if (Settings.AddinOptions.Session.CompactTab)
-      {
-        ribbonPanel = uiCtrlApp.CreateRibbonPanel(AddIn.AddinName);
+      CreateMainPanel(uiCtrlApp);
 
-        // Add launch RhinoInside push button,
-        CommandStart.CreateUI("Add-Ins", ribbonPanel);
-        // addin options, has Eto window and requires Eto to be loaded
-        CommandAddinOptions.CreateUI(ribbonPanel);
-      }
-      else
-      {
-        uiCtrlApp.CreateRibbonTab(AddIn.AddinName);
-        ribbonPanel = uiCtrlApp.CreateRibbonPanel(AddIn.AddinName, "More");
-
-        // Add launch RhinoInside push button,
-        CommandStart.CreateUI(AddIn.AddinName, ribbonPanel);
-        // add slideout and the rest of the buttons
-      }
-
-      // about and help links
-      ribbonPanel.AddSlideOut();
-      CommandAbout.CreateUI(ribbonPanel);
-      CommandGuides.CreateUI(ribbonPanel);
-      CommandForums.CreateUI(ribbonPanel);
-      CommandHelpLinks.CreateUI(ribbonPanel);
+      // add the rest of the ui
+      // they will all be 'unavailable' (set by the availability type) since
+      // RIR is not loaded yet. This allows keyboard shortcuts to be assigned
       if (!Settings.AddinOptions.Session.CompactTab)
       {
-        ribbonPanel.AddSeparator();
-        CommandAddinOptions.CreateUI(ribbonPanel);
+        AddIn.Host.ActivateRibbonTab(AddIn.AddinName);
+        CreateRhinoButtons();
+        CreateGHButtons();
       }
-    }
-
-    static void CreateUI(string tabName, RibbonPanel ribbonPanel)
-    {
-      var buttonData = NewPushButtonData<CommandStart, AvailableWhenNotObsolete>(CommandName, CommandIcon, "");
-      if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
-      {
-        StoreButton(CommandName, pushButton);
-        SetupButton(pushButton);
-
-        if (AddIn.CurrentStatus >= AddIn.Status.Available && AddIn.StartupMode != AddinStartupMode.Disabled)
-        {
-          if (Settings.KeyboardShortcuts.RegisterDefaultShortcut(tabName, ribbonPanel.Name, typeof(CommandStart).Name, CommandName, "R#Ctrl+R"))
-            External.ActivationGate.Exit += ShowShortcutHelp;
-        }
-      }
-
-      // add listener for ui compact changes
-      Settings.AddinOptions.CompactRibbonChanged += AddinOptions_CompactRibbonChanged;
-      Settings.AddinOptions.UpdateChannelChanged += AddinOptions_UpdateChannelChanged;
     }
 
     static void SetupButton(PushButton pushButton)
@@ -131,6 +91,8 @@ namespace RhinoInside.Revit.UI
 
     internal static Result Start()
     {
+      AddinStarting?.Invoke(null, new AddinStartingArgs());
+
       var result = Result.Failed;
       var button = RestoreButton(CommandName);
 
@@ -147,38 +109,20 @@ namespace RhinoInside.Revit.UI
           if (Settings.AddinOptions.Session.CompactTab)
           {
             AddIn.Host.CreateRibbonTab(AddIn.AddinName);
-            AddIn.Host.ActivateRibbonTab(AddIn.AddinName);
+
+            // Register UI on Revit
+            if (assemblies.Any(x => x.GetName().Name == "RhinoCommon"))
+            {
+              CreateRhinoButtons();
+            }
+
+            if (assemblies.Any(x => x.GetName().Name == "Grasshopper"))
+            {
+              CreateGHButtons();
+            }
           }
 
-          // Register UI on Revit
-          if (assemblies.Any(x => x.GetName().Name == "RhinoCommon"))
-          {
-            rhinoPanel = AddIn.Host.CreateRibbonPanel(AddIn.AddinName, AddIn.RhinoVersionInfo?.ProductName ?? "Rhinoceros");
-            CommandRhino.CreateUI(rhinoPanel);
-            CommandImport.CreateUI(rhinoPanel);
-            CommandToggleRhinoPreview.CreateUI(rhinoPanel);
-            CommandPython.CreateUI(rhinoPanel);
-            CommandRhinoOptions.CreateUI(rhinoPanel);
-          }
-
-          if (assemblies.Any(x => x.GetName().Name == "Grasshopper"))
-          {
-            grasshopperPanel = AddIn.Host.CreateRibbonPanel(AddIn.AddinName, "Grasshopper");
-            CommandGrasshopper.CreateUI(grasshopperPanel);
-            CommandGrasshopperPreview.CreateUI(grasshopperPanel);
-            CommandGrasshopperSolver.CreateUI(grasshopperPanel);
-            CommandGrasshopperRecompute.CreateUI(grasshopperPanel);
-            CommandGrasshopperBake.CreateUI(grasshopperPanel);
-            grasshopperPanel.AddSeparator();
-            CommandGrasshopperPlayer.CreateUI(grasshopperPanel);
-            grasshopperPanel.AddSlideOut();
-            CommandGrasshopperPackageManager.CreateUI(grasshopperPanel);
-            CommandGrasshopperFolders.CreateUI(grasshopperPanel);
-
-            // Script Packages UI
-            LinkedScripts.CreateUI(new RibbonHandler(AddIn.Host));
-          }
-
+          CreateGHScriptButtons();
           UpdateRibbonCompact();
 
           result = Result.Succeeded;
@@ -202,8 +146,119 @@ namespace RhinoInside.Revit.UI
           return Result.Failed;
       }
 
-      return (result == Result.Failed) ? ErrorReport.ShowLoadError() : result;
+      var res = (result == Result.Failed) ? ErrorReport.ShowLoadError() : result;
+
+      AddinStarted?.Invoke(null, new AddinStartedArgs()
+      {
+        ResultCode = res
+      });
+
+      return res;
     }
+
+    #region Events
+    public class AddinStartingArgs : EventArgs
+    {
+    }
+    public static event EventHandler<AddinStartingArgs> AddinStarting;
+
+    public class AddinStartedArgs : EventArgs
+    {
+      public Result ResultCode { get; set; }
+    }
+    public static event EventHandler<AddinStartedArgs> AddinStarted;
+    #endregion
+
+    #region UI Panels and Buttons
+    static void CreateMainPanel(UIControlledApplication uiCtrlApp)
+    {
+      RibbonPanel ribbonPanel;
+
+      void CreateStartButton(string tabName)
+      {
+        var buttonData = NewPushButtonData<CommandStart, AvailableWhenNotObsolete>(CommandName, CommandIcon, "");
+        if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
+        {
+          StoreButton(CommandName, pushButton);
+          SetupButton(pushButton);
+
+          if (AddIn.CurrentStatus >= AddIn.Status.Available && AddIn.StartupMode != AddinStartupMode.Disabled)
+          {
+            if (Settings.KeyboardShortcuts.RegisterDefaultShortcut(tabName, ribbonPanel.Name, typeof(CommandStart).Name, CommandName, "R#Ctrl+R"))
+              External.ActivationGate.Exit += ShowShortcutHelp;
+          }
+        }
+
+        // add listener for ui compact changes
+        Settings.AddinOptions.CompactRibbonChanged += AddinOptions_CompactRibbonChanged;
+        Settings.AddinOptions.UpdateChannelChanged += AddinOptions_UpdateChannelChanged;
+      }
+
+      if (Settings.AddinOptions.Session.CompactTab)
+      {
+        ribbonPanel = uiCtrlApp.CreateRibbonPanel(AddIn.AddinName);
+
+        // Add launch RhinoInside push button,
+        CreateStartButton("Add-Ins");
+        // addin options, has Eto window and requires Eto to be loaded
+        CommandAddinOptions.CreateUI(ribbonPanel);
+      }
+      else
+      {
+        uiCtrlApp.CreateRibbonTab(AddIn.AddinName);
+        ribbonPanel = uiCtrlApp.CreateRibbonPanel(AddIn.AddinName, "More");
+
+        // Add launch RhinoInside push button,
+        CreateStartButton(AddIn.AddinName);
+        // add slideout and the rest of the buttons
+      }
+
+      // about and help links
+      ribbonPanel.AddSlideOut();
+      CommandAbout.CreateUI(ribbonPanel);
+      CommandGuides.CreateUI(ribbonPanel);
+      CommandForums.CreateUI(ribbonPanel);
+      CommandHelpLinks.CreateUI(ribbonPanel);
+      if (!Settings.AddinOptions.Session.CompactTab)
+      {
+        ribbonPanel.AddSeparator();
+        CommandAddinOptions.CreateUI(ribbonPanel);
+      }
+    }
+
+    static void CreateRhinoButtons()
+    {
+      rhinoPanel = AddIn.Host.CreateRibbonPanel(AddIn.AddinName, AddIn.RhinoVersionInfo?.ProductName ?? "Rhinoceros");
+      CommandRhino.CreateUI(rhinoPanel);
+      CommandImport.CreateUI(rhinoPanel);
+      CommandToggleRhinoPreview.CreateUI(rhinoPanel);
+      CommandPython.CreateUI(rhinoPanel);
+      rhinoPanel.AddSlideOut();
+      CommandRhinoOpenViewport.CreateUI(rhinoPanel);
+      CommandRhinoOptions.CreateUI(rhinoPanel);
+    }
+
+    static void CreateGHButtons()
+    {
+      grasshopperPanel = AddIn.Host.CreateRibbonPanel(AddIn.AddinName, "Grasshopper");
+      CommandGrasshopper.CreateUI(grasshopperPanel);
+      CommandGrasshopperPreview.CreateUI(grasshopperPanel);
+      CommandGrasshopperSolver.CreateUI(grasshopperPanel);
+      CommandGrasshopperRecompute.CreateUI(grasshopperPanel);
+      CommandGrasshopperBake.CreateUI(grasshopperPanel);
+      grasshopperPanel.AddSeparator();
+      CommandGrasshopperPlayer.CreateUI(grasshopperPanel);
+      grasshopperPanel.AddSlideOut();
+      CommandGrasshopperPackageManager.CreateUI(grasshopperPanel);
+      CommandGrasshopperFolders.CreateUI(grasshopperPanel);
+    }
+
+    static void CreateGHScriptButtons()
+    {
+      // Script Packages UI
+      LinkedScripts.CreateUI(new RibbonHandler(AddIn.Host));
+    }
+    #endregion
 
     #region Shortcuts
     static void ShowShortcutHelp(object sender, EventArgs e)

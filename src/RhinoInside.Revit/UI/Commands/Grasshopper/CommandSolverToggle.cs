@@ -19,11 +19,16 @@ namespace RhinoInside.Revit.UI
     static readonly ImageSource SolverOffSmall = ImageBuilder.LoadRibbonButtonImage("Ribbon.Grasshopper.SolverOff.png", true);
     static readonly ImageSource SolverOffLarge = ImageBuilder.LoadRibbonButtonImage("Ribbon.Grasshopper.SolverOff.png", false);
 
-    protected new class Availability : GrasshopperCommand.Availability
+    protected class AvailableWhenGHSolverReady : GrasshopperCommand.AvailableWhenGHReady
     {
-      public override bool IsCommandAvailable(UIApplication _, DB.CategorySet selectedCategories)
+      public override bool IsCommandAvailable(UIApplication _, DB.CategorySet selectedCategories) =>
+        base.IsCommandAvailable(_, selectedCategories) &&
+        // at this point addin is loaded and rhinocommon is available
+        GHEditorLoaded();
+
+      bool GHEditorLoaded()
       {
-        return GH.Guest.IsEditorLoaded() && base.IsCommandAvailable(_, selectedCategories);
+        return GH.Guest.IsEditorLoaded();
       }
     }
 
@@ -50,7 +55,7 @@ namespace RhinoInside.Revit.UI
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      var buttonData = NewPushButtonData<CommandGrasshopperSolver, Availability>(
+      var buttonData = NewPushButtonData<CommandGrasshopperSolver, AvailableWhenGHSolverReady>(
         CommandName,
         "Ribbon.Grasshopper.SolverOff.png",
         "Toggle the Grasshopper solver"
@@ -58,14 +63,20 @@ namespace RhinoInside.Revit.UI
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         StoreButton(CommandName, pushButton);
-        pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
         // apply a min width to the button so it does not change width
         // when toggling between Enable and Disable on its title
         pushButton.SetMinWidth(50);
-
-        EnableSolutionsChanged(GH_Document.EnableSolutions);
-        GH_Document.EnableSolutionsChanged += EnableSolutionsChanged;
+        StoreButton(CommandName, pushButton);
       }
+
+      CommandStart.AddinStarted += CommandStart_AddinStarted;
+    }
+
+    private static void CommandStart_AddinStarted(object sender, CommandStart.AddinStartedArgs e)
+    {
+      EnableSolutionsChanged(GH_Document.EnableSolutions);
+      GH_Document.EnableSolutionsChanged += EnableSolutionsChanged;
+      CommandStart.AddinStarted -= CommandStart_AddinStarted;
     }
 
     public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)

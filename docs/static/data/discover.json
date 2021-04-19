@@ -276,6 +276,24 @@
         ]
     },
     {
+        "title": "Rhino + Revit with Gavin Crump",
+        "url": "https://youtu.be/8YFSqPss8AU",
+        "thumbnail": "https://i3.ytimg.com/vi/8YFSqPss8AU/maxresdefault.jpg",
+        "author": "Revit Pure Live and The Aussie BIM Guru",
+        "authorUrl": "https://revitpure.com/",
+        "description": "Learn the best practices and optimal workflows to make Rhino and Revit work together. For today's show, none other than the legendary Gavin Crump of the great Aussie BIM Guru YouTube channel will be joining Revit Pure Live.",
+        "kinds": [
+            "podcast",
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "podcast",
+            "tutorial",
+            "overview"
+        ]
+    },
+    {
         "title": "Cutting Edge Hack: Grasshopper & Dynamo working together within Revit",
         "url": "https://www.youtube.com/watch?v=Oumd-Ye75fE",
         "thumbnail": "/static/images/discover/marcello-hack-video.jpg",
@@ -508,6 +526,22 @@
             "tutorial",
             "example",
             "article",
+            "video"
+        ],
+        "tags": [
+            "family",
+            "tutorial"
+        ]
+    },
+    {
+        "title": "Custom Casework Inspired by Renzo Piano using Rhino.Inside for Revit",
+        "url": "https://youtu.be/1Om8bMSLC0w",
+        "thumbnail": "https://i3.ytimg.com/vi/1Om8bMSLC0w/maxresdefault.jpg",
+        "author": "7fold Design Technology",
+        "authorUrl": "https://www.youtube.com/channel/UC7eTGSIVovsDYuYw3YFLn8w",
+        "description": "This workflow uses Grasshopper to model custom casework inspired by Renzo Piano's design at the Jerome Seydoux Pathe Foundation in Paris.",
+        "kinds": [
+            "tutorial",
             "video"
         ],
         "tags": [
@@ -751,6 +785,23 @@
         ]
     },
     {
+        "title": "How to Automate Setting Revit Materials Per Panel",
+        "url": "https://youtu.be/nujhKF2hoHM",
+        "thumbnail": "https://i3.ytimg.com/vi/nujhKF2hoHM/maxresdefault.jpg",
+        "author": "7fold Design Technology",
+        "authorUrl": "https://www.youtube.com/channel/UC7eTGSIVovsDYuYw3YFLn8w",
+        "description": "This complete workflow shows you how to take existing panels in your architecture design model and swap out the materials for each family instance.",
+        "kinds": [
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "materials",
+            "tutorial",
+            "workflow"
+        ]
+    },
+    {
         "title": "Geometry Gym with Rhino.Inside.Revit ",
         "url": "https://www.youtube.com/watch?v=0m1rn6EAI54",
         "thumbnail": "https://i3.ytimg.com/vi/0m1rn6EAI54/maxresdefault.jpg",
@@ -880,6 +931,40 @@
         "tags": [
             "tutorial",
             "adaptive-components"
+        ]
+    },
+    {
+        "title": "Create a Simple Revit Adaptive Component for use in Rhino Inside",
+        "url": "https://youtu.be/fa3zaCkX3H4",
+        "thumbnail": "https://i3.ytimg.com/vi/fa3zaCkX3H4/maxresdefault.jpg",
+        "author": "7fold Design Technology",
+        "authorUrl": "https://www.youtube.com/channel/UC7eTGSIVovsDYuYw3YFLn8w",
+        "description": "Learn how to create parametric offset relationships for this family that can be used for paneling, rationalizing architecture facade designs, and in connection with Rhino Inside Grasshopper scripts for modeling in Revit.",
+        "kinds": [
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "family",
+            "adaptive",
+            "tutorial"
+        ]
+    },
+    {
+        "title": "Use Grasshopper to Model 3 Revit Adaptive Component Types by an Image",
+        "url": "https://youtu.be/wmsQDEipM6w",
+        "thumbnail": "https://i3.ytimg.com/vi/wmsQDEipM6w/maxresdefault.jpg",
+        "author": "7fold Design Technology",
+        "authorUrl": "https://www.youtube.com/channel/UC7eTGSIVovsDYuYw3YFLn8w",
+        "description": "Using Rhino Inside for Revit learn how to model adaptive components dynamically with Grasshopper. This is a great method for understanding how to organize data in Grasshopper into multiple groups.",
+        "kinds": [
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "family",
+            "adaptive",
+            "tutorial"
         ]
     },
     {

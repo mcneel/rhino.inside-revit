@@ -30,11 +30,20 @@ namespace RhinoInside.Revit.UI
     /// <summary>
     /// Available when Grasshopper Plugin is available in Rhino
     /// </summary>
-    protected new class Availability : RhinoCommand.Availability
+    protected class AvailableWhenGHReady : RhinoCommand.AvailableWhenRhinoReady
     {
       public override bool IsCommandAvailable(UIApplication _, DB.CategorySet selectedCategories) =>
         base.IsCommandAvailable(_, selectedCategories) &&
-        (PlugIn.PlugInExists(PluginId, out bool loaded, out bool loadProtected) & (loaded | !loadProtected));
+        AddIn.CurrentStatus == AddIn.Status.Ready &&
+        // at this point addin is loaded and rhinocommon is available
+        GHIsReady();
+
+      bool GHIsReady()
+      {
+        // wrapping rhino test method to remove the rhinocommon
+        // dependency from IsCommandAvailable method.
+        return (PlugIn.PlugInExists(PluginId, out bool loaded, out bool loadProtected) & (loaded | !loadProtected));
+      }
     }
   }
 }

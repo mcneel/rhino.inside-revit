@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Microsoft.Win32.SafeHandles;
 using Rhino;
@@ -640,17 +641,30 @@ namespace RhinoInside.Revit
       Show();
     }
 
-    public static async void RunScriptAsync(string script, bool activate)
+    public static bool RunScript(string script, bool activate)
     {
       if (string.IsNullOrEmpty(script))
-        return;
+        return false;
+
+      External.ActivationGate.Yield();
+
+      if (activate)
+        RhinoApp.SetFocusToMainWindow();
+
+      return RhinoApp.RunScript(script, false);
+    }
+
+    public static async Task<bool> RunScriptAsync(string script, bool activate)
+    {
+      if (string.IsNullOrEmpty(script))
+        return false;
 
       await External.ActivationGate.Yield();
 
       if (activate)
         RhinoApp.SetFocusToMainWindow();
 
-      RhinoApp.RunScript(script, false);
+      return RhinoApp.RunScript(script, false);
     }
 
     public static Result RunCommandAbout()

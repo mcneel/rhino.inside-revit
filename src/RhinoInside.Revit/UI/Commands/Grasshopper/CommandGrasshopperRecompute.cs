@@ -13,17 +13,23 @@ namespace RhinoInside.Revit.UI
   {
     public static string CommandName => "Recompute";
 
-    protected new class Availability : GrasshopperCommand.Availability
+    protected class AvailableWhenGHCanvasReady : GrasshopperCommand.AvailableWhenGHReady
     {
       public override bool IsCommandAvailable(UIApplication _, DB.CategorySet selectedCategories) =>
         base.IsCommandAvailable(_, selectedCategories) &&
-        Instances.ActiveCanvas?.Document is object;
+        // at this point addin is loaded and rhinocommon is available
+        GHHasActiveCanvas();
+
+      bool GHHasActiveCanvas()
+      {
+        return Instances.ActiveCanvas?.Document is object;
+      }
     }
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
       // Create a push button to trigger a command add it to the ribbon panel.
-      var buttonData = NewPushButtonData<CommandGrasshopperRecompute, Availability>
+      var buttonData = NewPushButtonData<CommandGrasshopperRecompute, AvailableWhenGHCanvasReady>
       (
         name: CommandName,
         iconName: "Ribbon.Grasshopper.Recompute.png",
@@ -32,7 +38,7 @@ namespace RhinoInside.Revit.UI
 
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
+        StoreButton(CommandName, pushButton);
       }
     }
 
