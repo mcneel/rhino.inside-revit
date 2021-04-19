@@ -10,6 +10,13 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html version="0.4" time="04/19/2021" %}
+
+### New Features
+* Added support for Revit 2022
+* Added command to open an independent Rhino viewport
+* Added UI to command 'Import 3DM'
+
 {% include ltr/release-header.html version="0.3" time="04/06/2021" %}
 
 ### New Features
