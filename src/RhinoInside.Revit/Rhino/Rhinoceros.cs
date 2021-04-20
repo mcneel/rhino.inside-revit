@@ -627,7 +627,7 @@ namespace RhinoInside.Revit
                   Exposed = true;
               }
             }
-            // If we are in a GetString or GetInt we need the command prompt
+            // If we are in a GetString or GetInt we need the command prompt.
             else Exposed = true;
           }
         }
