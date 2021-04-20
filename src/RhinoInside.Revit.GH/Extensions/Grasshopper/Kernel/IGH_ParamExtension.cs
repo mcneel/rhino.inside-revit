@@ -107,28 +107,32 @@ namespace Grasshopper.Kernel
     {
       if ((param.Kind == GH_ParamKind.floating || param.Kind == GH_ParamKind.output) && param.Recipients.Count == 0)
       {
+        var RiR = new Guid("1FA46AFC-7B70-D4EB-C77A-D6DF5E36BA5C");
         var components = new List<IGH_Component>();
         var paramType = param.Type;
 
-        foreach (var proxy in Instances.ComponentServer.ObjectProxies.Where(x => !x.Obsolete && x.Kind == GH_ObjectType.CompiledObject && x.Exposure != GH_Exposure.hidden && x.Exposure < GH_Exposure.tertiary))
+        foreach (var proxy in Instances.ComponentServer.ObjectProxies)
         {
-          var RiR = new Guid("1FA46AFC-7B70-D4EB-C77A-D6DF5E36BA5C");
+          if (proxy.Obsolete) continue;
+          if (!proxy.SDKCompliant) continue;
+          if (proxy.Kind != GH_ObjectType.CompiledObject) continue;
+          if (proxy.Exposure != GH_Exposure.primary && proxy.Exposure != GH_Exposure.secondary) continue;
           if (proxy.LibraryGuid != RiR) continue;
 
           if (typeof(IGH_Component).IsAssignableFrom(proxy.Type))
           {
             try
             {
-              if (proxy.CreateInstance() is IGH_Component compoennt)
+              if (proxy.CreateInstance() is IGH_Component component)
               {
-                foreach (var input in compoennt.Params.Input)
+                foreach (var input in component.Params.Input)
                 {
                   if (input.Type == typeof(IGH_Goo) || input.Type == typeof(IGH_GeometricGoo))
                     continue;
 
                   if (input.GetType() == param.GetType() || input.Type.IsAssignableFrom(paramType))
                   {
-                    components.Add(compoennt);
+                    components.Add(component);
                     break;
                   }
                 }
