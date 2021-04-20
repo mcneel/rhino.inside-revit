@@ -68,6 +68,7 @@ namespace RhinoInside.Revit.GH
 
       RhinoDoc.BeginOpenDocument                += BeginOpenDocument;
       RhinoDoc.EndOpenDocumentInitialViewUpdate += EndOpenDocumentInitialViewUpdate;
+      Rhino.Commands.Command.EndCommand         += RhinoCommand_EndCommand;
 
       Instances.CanvasCreatedEventHandler Canvas_Created = default;
       Instances.CanvasCreated += Canvas_Created = (canvas) =>
@@ -94,6 +95,7 @@ namespace RhinoInside.Revit.GH
     {
       Instances.DocumentServer.DocumentAdded -= DocumentServer_DocumentAdded;
 
+      Rhino.Commands.Command.EndCommand         -= RhinoCommand_EndCommand;
       RhinoDoc.EndOpenDocumentInitialViewUpdate -= EndOpenDocumentInitialViewUpdate;
       RhinoDoc.BeginOpenDocument                -= BeginOpenDocument;
 
@@ -231,6 +233,19 @@ namespace RhinoInside.Revit.GH
       {
         definition.Enabled = activeDefinitionWasEnabled;
         definition.NewSolution(false);
+      }
+    }
+
+    private void RhinoCommand_EndCommand(object sender, Rhino.Commands.CommandEventArgs args)
+    {
+      if (args.CommandEnglishName == "GrasshopperBake")
+      {
+        if (!Rhinoceros.Exposed && !RhinoDoc.ActiveDoc.Views.Where(x => x.Floating).Any())
+        {
+          var cursorPosition = System.Windows.Forms.Cursor.Position;
+          if (!Rhinoceros.OpenRevitViewport(cursorPosition.X - 400, cursorPosition.Y - 300))
+            Rhinoceros.Exposed = true;
+        }
       }
     }
     #endregion

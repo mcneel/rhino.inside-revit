@@ -681,7 +681,7 @@ namespace RhinoInside.Revit
 
     #region Open Viewport
     const string RevitViewName = "Revit";
-    static bool OpenRevitViewport(int x, int y)
+    internal static bool OpenRevitViewport(int x, int y)
     {
       if (RhinoDoc.ActiveDoc is RhinoDoc rhinoDoc)
       {

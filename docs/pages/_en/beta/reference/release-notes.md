@@ -14,11 +14,12 @@ Some of the changes mentioned in sections below, might break your existing Grass
 
 ### New Features
 * Added support for Revit 2022.
-* Added command to open an independent Rhino viewport.
+* Added command to open a Rhino viewport.
 * Added UI to 'Import 3DM' command.
 
 ### Minor changes
 * Renamed 'Element Parameters' to 'Query Element Parameters'.
+* Grasshopper 'Bake' command opens the floating viewport if no viewport is already visible.
 
 ### API
 * Now `RhinoInside.Revit.GH.Guest.ShowEditor` activates Grasshopper window.
