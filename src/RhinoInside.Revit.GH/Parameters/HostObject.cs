@@ -10,12 +10,12 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     public override Guid ComponentGuid => new Guid("E3462915-3C4D-4864-9DD4-5A73F91C6543");
 
-    public HostObject() : base("Host", "Host", "Contains a collection of host elements", "Params", "Revit Primitives") { }
+    public HostObject() : base("Host", "Host", "Contains a collection of Revit host elements", "Params", "Revit Primitives") { }
 
     protected override Types.IGH_HostObject InstantiateT() => new Types.HostObject();
   }
 
-  public class HostObjectType : Element<Types.IGH_HostObjectType, DB.HostObjAttributes>
+  public class HostObjectType : ElementType<Types.IGH_HostObjectType, DB.HostObjAttributes>
   {
     public override GH_Exposure Exposure => GH_Exposure.hidden;
     public override Guid ComponentGuid => new Guid("708AB072-878E-41ED-9B8C-AAB0E1D85A53");

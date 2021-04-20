@@ -207,7 +207,8 @@ namespace RhinoInside.Revit.Settings
                 using (var optsFile = File.OpenRead(UserOptionsFilePath))
                   _currentInstance = (AddinOptions) _xml.Deserialize(optsFile);
               }
-              catch (Exception ex) {
+              catch (Exception)
+              {
                 // TODO: log errors
               }
             }
@@ -265,22 +266,33 @@ namespace RhinoInside.Revit.Settings
 
     public AddinCustomOptions Clone() => new AddinCustomOptions(this);
 
-    public void AddOption(string root, string key, string value)
-    {
-      if (optStore.TryGetValue(root, out var customOpts))
-        customOpts[key] = value;
-      else
-        optStore[root] = new Dictionary<string, string> {
-            { key, value }
-        };
-    }
-
-    public string GetOption(string root, string key)
+    public string Get(string root, string key)
     {
       if (optStore.TryGetValue(root, out var customOpts))
         if (customOpts.TryGetValue(key, out var value))
           return value;
+
       return null;
+    }
+
+    public void Set(string root, string key, string value)
+    {
+      if (value is null) Remove(root, key);
+      else
+      {
+        if (optStore.TryGetValue(root, out var customOpts))
+          customOpts[key] = value;
+        else
+          optStore[root] = new Dictionary<string, string> { { key, value } };
+      }
+    }
+
+    public bool Remove(string root, string key)
+    {
+      if (optStore.TryGetValue(root, out var customOpts))
+        return customOpts.Remove(key);
+
+      return false;
     }
 
     public void WriteXml(XmlWriter writer)

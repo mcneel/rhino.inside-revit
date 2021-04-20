@@ -8,6 +8,8 @@
            Language="1033">
     <Package Manufacturer="Robert McNeel &amp; Associates"
              Description="Rhino.Inside® for Revit"
+             Keywords="Installer;Rhino;Revit"
+             Comments="$(var.ProductVersion)"
              InstallerVersion="301"
              Platform="$(var.Platform)"
              InstallScope="perMachine"
@@ -46,6 +48,11 @@
     <Feature Id="Revit.2021.Addin" Title="Revit 2021 Addin" Level="1">
       <Condition Level="0">REVIT2021_INSTALLLOCATION=""</Condition>
       <ComponentGroupRef Id="Addins.2021.RhinoInsideRevit" />
+    </Feature>
+
+    <Feature Id="Revit.2022.Addin" Title="Revit 2022 Addin" Level="1">
+      <Condition Level="0">REVIT2022_INSTALLLOCATION=""</Condition>
+      <ComponentGroupRef Id="Addins.2022.RhinoInsideRevit" />
     </Feature>
 
     <UIRef Id="WixUI_Advanced"/>

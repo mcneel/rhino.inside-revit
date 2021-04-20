@@ -18,11 +18,20 @@ namespace RhinoInside.Revit.UI
     /// <summary>
     /// Available when no Rhino command is currently running
     /// </summary>
-    protected new class Availability : Command.Availability
+    protected class AvailableWhenRhinoReady : Command.Availability
     {
       public override bool IsCommandAvailable(UIApplication app, CategorySet selectedCategories) =>
         base.IsCommandAvailable(app, selectedCategories) &&
-        !Rhino.Commands.Command.InCommand();
+        AddIn.CurrentStatus == AddIn.Status.Ready &&
+        // at this point addin is loaded and rhinocommon is available
+        RhinoIsReady();
+
+      bool RhinoIsReady()
+      {
+        // wrapping rhino test method to remove the rhinocommon
+        // dependency from IsCommandAvailable method.
+        return !Rhino.Commands.Command.InCommand();
+      }
     }
   }
 }

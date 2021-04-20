@@ -68,6 +68,7 @@ namespace RhinoInside.Revit.GH
 
       RhinoDoc.BeginOpenDocument                += BeginOpenDocument;
       RhinoDoc.EndOpenDocumentInitialViewUpdate += EndOpenDocumentInitialViewUpdate;
+      Rhino.Commands.Command.EndCommand         += RhinoCommand_EndCommand;
 
       Instances.CanvasCreatedEventHandler Canvas_Created = default;
       Instances.CanvasCreated += Canvas_Created = (canvas) =>
@@ -94,6 +95,7 @@ namespace RhinoInside.Revit.GH
     {
       Instances.DocumentServer.DocumentAdded -= DocumentServer_DocumentAdded;
 
+      Rhino.Commands.Command.EndCommand         -= RhinoCommand_EndCommand;
       RhinoDoc.EndOpenDocumentInitialViewUpdate -= EndOpenDocumentInitialViewUpdate;
       RhinoDoc.BeginOpenDocument                -= BeginOpenDocument;
 
@@ -136,12 +138,12 @@ namespace RhinoInside.Revit.GH
 
     /// <summary>
     /// Show the main Grasshopper Editor. The editor will be loaded first if needed.
-    /// If the Editor is already on screen, nothing will happen.
+    /// If the Editor is already on screen, it will be activated.
     /// </summary>
     public static void ShowEditor()
     {
       Script.ShowEditor();
-      Rhinoceros.MainWindow.BringToFront();
+      Instances.DocumentEditor?.Activate();
     }
 
     /// <summary>
@@ -231,6 +233,19 @@ namespace RhinoInside.Revit.GH
       {
         definition.Enabled = activeDefinitionWasEnabled;
         definition.NewSolution(false);
+      }
+    }
+
+    private void RhinoCommand_EndCommand(object sender, Rhino.Commands.CommandEventArgs args)
+    {
+      if (args.CommandEnglishName == "GrasshopperBake")
+      {
+        if (!Rhinoceros.Exposed && !RhinoDoc.ActiveDoc.Views.Where(x => x.Floating).Any())
+        {
+          var cursorPosition = System.Windows.Forms.Cursor.Position;
+          if (!Rhinoceros.OpenRevitViewport(cursorPosition.X - 400, cursorPosition.Y - 300))
+            Rhinoceros.Exposed = true;
+        }
       }
     }
     #endregion
@@ -452,8 +467,7 @@ namespace RhinoInside.Revit.GH
       if (Revit.ActiveUIDocument?.Document is DB.Document revitDoc)
       {
         var units = revitDoc.GetUnits();
-        var lengthFormatoptions = units.GetFormatOptions(DB.UnitType.UT_Length);
-        revitUS = lengthFormatoptions.DisplayUnits.ToUnitSystem();
+        revitUS = units.ToUnitSystem(out var _);
       }
 
       if (RhinoDoc.ActiveDoc is RhinoDoc doc)

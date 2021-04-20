@@ -7,6 +7,7 @@ using Grasshopper.Kernel;
 using Rhino.PlugIns;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.External.DB.Schemas;
 using RhinoInside.Revit.GH.Bake;
 using DB = Autodesk.Revit.DB;
 using WF = System.Windows.Forms;
@@ -18,13 +19,15 @@ namespace RhinoInside.Revit.UI
   {
     public static string CommandName => "Bake\nSelected";
 
-    protected new class Availability : GrasshopperCommand.Availability
+    protected class AvailableWhenGHBakeReady : NeedsActiveDocument<GrasshopperCommand.AvailableWhenGHReady>
     {
-      public override bool IsCommandAvailable(UIApplication _, DB.CategorySet selectedCategories)
-      {
-        if (!base.IsCommandAvailable(_, selectedCategories))
-          return false;
+      public override bool IsCommandAvailable(UIApplication _, DB.CategorySet selectedCategories) =>
+        base.IsCommandAvailable(_, selectedCategories) &&
+        // at this point addin is loaded and rhinocommon is available
+        GHHasObjectsToBake();
 
+      bool GHHasObjectsToBake()
+      {
         if (Instances.ActiveCanvas?.Document is GH_Document definition)
         {
           if (Revit.ActiveUIDocument?.ActiveGraphicalView is DB.View view)
@@ -54,7 +57,7 @@ namespace RhinoInside.Revit.UI
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      var buttonData = NewPushButtonData<CommandGrasshopperBake, NeedsActiveDocument<Availability>>
+      var buttonData = NewPushButtonData<CommandGrasshopperBake, AvailableWhenGHBakeReady>
       (
         name: CommandName,
         iconName: "Ribbon.Grasshopper.Bake.png",
@@ -64,7 +67,7 @@ namespace RhinoInside.Revit.UI
       if (ribbonPanel.AddItem(buttonData) is PushButton bakeButton)
       {
         bakeButton.LongDescription = "Use CTRL key to group resulting elements";
-        bakeButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
+        StoreButton(CommandName, bakeButton);
       }
     }
 
@@ -139,22 +142,21 @@ namespace RhinoInside.Revit.UI
 
         if (geometryToBake.Any())
         {
-          var categoryId = options.Category?.Id ?? new DB.ElementId(DB.BuiltInCategory.OST_GenericModel);
+          var categoryId = options.Category?.Id ?? CategoryId.GenericModel;
 
           var worksetId = DB.WorksetId.InvalidWorksetId;
           if (options.Document.IsWorkshared)
             worksetId = options.Workset?.Id ?? options.Document.GetWorksetTable().GetActiveWorksetId();
 
           ids = new List<DB.ElementId>();
-          foreach (var geometry in geometryToBake)
+          foreach (var geometry in geometryToBake.Where(g => g != null))
           {
             var ds = DB.DirectShape.CreateElement(options.Document, categoryId);
             ds.Name = param.NickName;
             if (options.Document.IsWorkshared)
             {
-              var worksetParam = ds.get_Parameter(DB.BuiltInParameter.ELEM_PARTITION_PARAM);
-              if (worksetParam != null)
-                worksetParam.SetWorksetId(worksetId);
+              if (ds.GetParameter(ParameterId.ElemPartitionParam) is DB.Parameter worksetParam)
+                worksetParam.Set(worksetId.IntegerValue);
             }
 
             var shape = geometry.ToShape().ToList();
@@ -176,10 +178,8 @@ namespace RhinoInside.Revit.UI
       {
         var doc = data.Application.ActiveUIDocument.Document;
 
-        var bakeOptsDlg = new BakeOptionsWindow(data.Application);
-        bakeOptsDlg.ShowModal();
-
-        if (bakeOptsDlg.IsCancelled)
+        var bakeOptsDlg = new BakeOptionsDialog(data.Application);
+        if(bakeOptsDlg.ShowModal() != Eto.Forms.DialogResult.Ok)
           return Result.Cancelled;
 
         bool groupResult = (WF.Control.ModifierKeys & WF.Keys.Control) != WF.Keys.None;
@@ -199,7 +199,7 @@ namespace RhinoInside.Revit.UI
           transGroup.Start("Bake Selected");
 
           var bakedElementIds = new List<DB.ElementId>();
-          foreach (var obj in Availability.ObjectsToBake(definition, options))
+          foreach (var obj in AvailableWhenGHBakeReady.ObjectsToBake(definition, options))
           {
             if (obj.Bake(options, out var partial))
               bakedElementIds.AddRange(partial);
@@ -248,8 +248,7 @@ namespace RhinoInside.Revit.UI
                 var group = options.Document.Create.NewGroup(resultingElementIds);
                 trans.Commit();
 
-                resultingElementIds = new List<DB.ElementId>();
-                resultingElementIds.Add(group.Id);
+                resultingElementIds = new List<DB.ElementId>() { group.Id };
               }
             }
           }

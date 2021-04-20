@@ -9,4 +9,7 @@
     "python.jediEnabled": true,
     "python.formatting.provider": "black",
     "python.languageServer": "Jedi",
+    "python.formatting.blackArgs": [
+        "--line-length=80"
+    ],
 }

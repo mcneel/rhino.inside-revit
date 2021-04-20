@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ProductInfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Name>Rhino.Inside</Name>
+  <Company>Robert McNeel &amp; Associates</Company>
+  <Copyright>2019-2021 Robert McNeel &amp; Associates.</Copyright>
+  <InformationalVersion>wip</InformationalVersion>
+  <MajorVersion>0</MajorVersion>
+  <MinorVersion>4</MinorVersion>
+  <!--
+  <BuildVersion></BuildVersion>
+  <RevisionVersion></RevisionVersion>
+  -->
+</ProductInfo>

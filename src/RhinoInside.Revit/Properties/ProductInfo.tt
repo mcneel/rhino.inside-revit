@@ -1,0 +1,61 @@
+<#@ template debug="false" hostspecific="true" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Xml" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Xml.Serialization" #>
+<#@ output extension=".cs" #>
+<#
+ProductInfo product;
+ushort Major = 0;
+ushort Minor = 0;
+ushort Build = 0;
+ushort Revision = 0;
+
+using (var reader = new StreamReader(this.Host.ResolvePath($"../../ProductInfo.xml")))
+{
+  var serializer = new XmlSerializer(typeof(ProductInfo));
+  product = serializer.Deserialize(reader) as ProductInfo;
+  reader.Close();
+
+  Major = product.MajorVersion;
+  Minor = product.MinorVersion;
+
+  var buildDate = Environment.GetEnvironmentVariable("BuildDate");
+  var now = !string.IsNullOrWhiteSpace(buildDate) ? DateTime.Parse(buildDate) :
+            DateTime.Now;
+  var days = now.Date - new DateTime(2000, 1, 1);
+
+  Build = product.BuildVersion.HasValue ? product.BuildVersion.Value :
+          Math.Min(ushort.MaxValue, (ushort)days.TotalDays);
+
+  Revision = product.RevisionVersion.HasValue ? product.RevisionVersion.Value :
+             (ushort)(now.TimeOfDay.TotalSeconds / 2);
+}
+#>
+using System.Reflection;
+
+[assembly: AssemblyCompany("<#= product.Company #>")]
+[assembly: AssemblyProduct("<#= product.Name #>")]
+[assembly: AssemblyCopyright("© <#= product.Copyright #>")]
+[assembly: AssemblyTrademark("<#= product.Trademark #>")]
+[assembly: AssemblyVersion("<#= Major #>.<#= Minor #>.<#= Build #>.<#= Revision #>")]
+[assembly: AssemblyFileVersion("<#= Major #>.<#= Minor #>.<#= Build #>.<#= Revision #>")]
+[assembly: AssemblyInformationalVersion("<#= product.MajorVersion #>.<#= product.MinorVersion #>-<#= product.InformationalVersion #>")]
+
+<#+
+public class ProductInfo
+{
+  public string Name = "";
+  public string Company= "";
+  public string Copyright= "";
+  public string Trademark = "";
+  public string InformationalVersion = "";
+  public ushort MajorVersion = 0;
+  public ushort MinorVersion = 0;
+  public ushort? BuildVersion;
+  public ushort? RevisionVersion;
+}
+#>

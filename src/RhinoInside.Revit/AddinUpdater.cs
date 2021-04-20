@@ -78,7 +78,7 @@ namespace RhinoInside.Revit
           return (ReleaseInfo) xml.Deserialize(reader);
         }
       }
-      catch (Exception updateCheckEx)
+      catch (Exception)
       {
         // TODO: log error message for debug
         return null;

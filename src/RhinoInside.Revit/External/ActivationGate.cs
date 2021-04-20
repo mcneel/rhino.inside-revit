@@ -186,7 +186,7 @@ namespace RhinoInside.Revit.External
         IsOpen = true;
         var result = func.Invoke();
 
-        if (IsActive && state as UI.ExternalApplication is null)
+        if (!wasOpen && IsActive && state as UI.ExternalApplication is null)
         {
           while (Rhinoceros.Run()) { }
         }

@@ -30,6 +30,13 @@
                       Name="InstallLocation"/>
     </Property>
 
+    <Property Id="REVIT2022_INSTALLLOCATION" Secure="yes">
+        <RegistrySearch Id="Revit2022InstallLocation" Type="raw"
+                        Root="HKLM"
+                        Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-2200-0510-0000-705C0D862004}"
+                        Name="InstallLocation"/>
+      </Property>
+
     <InstallUISequence>
       <Custom Action="ValidateRevitInstallLocation" After="AppSearch"/>
     </InstallUISequence>
@@ -62,6 +69,7 @@
         ValidateInstallLocation("REVIT2019_INSTALLLOCATION")
         ValidateInstallLocation("REVIT2020_INSTALLLOCATION")
         ValidateInstallLocation("REVIT2021_INSTALLLOCATION")
+        ValidateInstallLocation("REVIT2022_INSTALLLOCATION")
       End If
       ]]>
     </CustomAction>
@@ -73,6 +81,7 @@
           <Directory Id="REVIT2019_INSTALLLOCATION" Name="Revit 2019"/>
           <Directory Id="REVIT2020_INSTALLLOCATION" Name="Revit 2020"/>
           <Directory Id="REVIT2021_INSTALLLOCATION" Name="Revit 2021"/>
+          <Directory Id="REVIT2022_INSTALLLOCATION" Name="Revit 2022"/>
         </Directory>
       </Directory>
     </DirectoryRef>

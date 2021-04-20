@@ -1,18 +1,6 @@
 using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Reflection;
-using System.Windows.Interop;
-
-using Eto.Forms;
 using Eto.Drawing;
-
-using Autodesk.Revit.UI;
-
-using RhinoInside.Revit.External.UI.Extensions;
+using Eto.Forms;
 
 namespace RhinoInside.Revit.UI
 {
@@ -20,11 +8,11 @@ namespace RhinoInside.Revit.UI
   /// Rhino UI framework base form (non-modal) type for this addon
   /// Current implementation is centered on Revit window and uses the generic Rhino icon
   /// </summary>
-  abstract public class BaseForm : Form
+  public abstract class BaseForm : Form
   {
-    private UIApplication _uiApp = null;
+    private Autodesk.Revit.UI.UIApplication _uiApp = null;
 
-    public BaseForm(UIApplication uiApp, Size initialSize)
+    public BaseForm(Autodesk.Revit.UI.UIApplication uiApp, Size initialSize)
     {
       BaseWindowUtils.SetupWindow(this, uiApp, initialSize);
       _uiApp = uiApp;

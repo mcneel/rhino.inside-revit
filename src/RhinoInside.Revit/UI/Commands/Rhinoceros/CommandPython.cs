@@ -22,7 +22,7 @@ namespace RhinoInside.Revit.UI
     /// <summary>
     /// Available when IronPython Plugin is available in Rhino
     /// </summary>
-    protected new class Availability : RhinoCommand.Availability
+    protected new class Availability : RhinoCommand.AvailableWhenRhinoReady
     {
       public override bool IsCommandAvailable(UIApplication applicationData, CategorySet selectedCategories)
       {
@@ -39,7 +39,7 @@ namespace RhinoInside.Revit.UI
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      var buttonData = NewPushButtonData<CommandPython, Availability>
+      var buttonData = NewPushButtonData<CommandPython, AvailableWhenRhinoReady>
       (
         name: CommandName,
         iconName: "Python.png",
@@ -50,13 +50,13 @@ namespace RhinoInside.Revit.UI
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
         pushButton.LongDescription = $"Use CTRL key to open only Python editor window without restoring other tool windows";
-        pushButton.Visible = PlugIn.PlugInExists(PluginId, out bool _, out bool _);
+        StoreButton(CommandName, pushButton);
       }
     }
 
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
-      Rhinoceros.RunScriptAsync("_EditPythonScript", activate: true);
+      Rhinoceros.RunScriptAsync("!_EditPythonScript", activate: true);
       return Result.Succeeded;
     }
   }

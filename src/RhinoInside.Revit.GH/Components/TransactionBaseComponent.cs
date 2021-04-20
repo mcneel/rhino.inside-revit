@@ -694,7 +694,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       if (type.IsEnum)
       {
-        if (!Types.GH_Enumerate.TryGetParamTypes(type, out paramTypes))
+        if (!Types.GH_Enum.TryGetParamTypes(type, out paramTypes))
           paramTypes = Tuple.Create(typeof(Param_Integer), typeof(GH_Integer));
 
         return true;
@@ -961,7 +961,7 @@ namespace RhinoInside.Revit.GH.Components
     protected ReconstructElementComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
 
-    protected override sealed void RegisterInputParams(GH_InputParamManager manager)
+    protected sealed override void RegisterInputParams(GH_InputParamManager manager)
     {
       var type = GetType();
       var ReconstructInfo = type.GetMethod($"Reconstruct{type.Name}", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -981,7 +981,7 @@ namespace RhinoInside.Revit.GH.Components
     }
 
     // Step 3.
-    protected override sealed void TrySolveInstance(IGH_DataAccess DA)
+    protected sealed override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (Revit.ActiveDBDocument is DB.Document Document)
         Iterate(DA, Document, (DB.Document doc, ref DB.Element current) => TrySolveInstance(DA, doc, ref current));

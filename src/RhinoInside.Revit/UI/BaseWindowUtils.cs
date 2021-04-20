@@ -38,7 +38,7 @@ namespace RhinoInside.Revit.UI
       wnd.Resizable = false;
 
       // styling
-      wnd.Padding = new Padding(10, 0, 10, 10);
+      wnd.Padding = new Padding(10, 10, 10, 10);
       wnd.BackgroundColor = Colors.White;
     }
 
@@ -49,9 +49,10 @@ namespace RhinoInside.Revit.UI
       // or high-dpi screens, because Eto is using a newer dpi detection mechanism
       // and the fact that Revit does not support per-monitor dpi
       // setting location on the Wpf window instead
-      wnd.ToNative().WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner;
-      wnd.ToNative().Left = centerRect.Left;
-      wnd.ToNative().Top = centerRect.Top;
+      var native = wnd.ToNative();
+      native.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner;
+      native.Left = centerRect.Left;
+      native.Top = centerRect.Top;
     }
   }
 }

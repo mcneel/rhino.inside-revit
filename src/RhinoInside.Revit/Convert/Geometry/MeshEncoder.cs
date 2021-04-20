@@ -469,7 +469,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       else
       {
         try { builder.CloseConnectedFaceSet(); }
-        catch (Autodesk.Revit.Exceptions.InvalidOperationException e)
+        catch (Autodesk.Revit.Exceptions.InvalidOperationException)
         {
           builder.CancelConnectedFaceSet();
         }

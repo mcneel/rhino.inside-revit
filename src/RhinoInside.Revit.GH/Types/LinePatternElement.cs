@@ -14,11 +14,11 @@ namespace RhinoInside.Revit.GH.Types
   public class LinePatternElement : Element, Bake.IGH_BakeAwareElement
   {
     #region IGH_Goo
-    public override bool IsValid => Id.TryGetBuiltInLinePattern(out var _) || base.IsValid;
+    public override bool IsValid => (Id?.TryGetBuiltInLinePattern(out var _) == true) || base.IsValid;
 
     protected override Type ScriptVariableType => typeof(DB.LinePatternElement);
 
-    public override sealed bool CastFrom(object source)
+    public sealed override bool CastFrom(object source)
     {
       if (base.CastFrom(source))
         return true;
@@ -60,7 +60,7 @@ namespace RhinoInside.Revit.GH.Types
     public LinePatternElement(DB.Document doc, DB.ElementId id) : base(doc, id) { }
     public LinePatternElement(DB.LinePatternElement value) : base(value) { }
 
-    new public static LinePatternElement FromElementId(DB.Document doc, DB.ElementId id)
+    public static new LinePatternElement FromElementId(DB.Document doc, DB.ElementId id)
     {
       if (id.IsLinePatternId(doc))
         return new LinePatternElement(doc, id);

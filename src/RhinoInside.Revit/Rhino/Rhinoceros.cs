@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Microsoft.Win32.SafeHandles;
 using Rhino;
@@ -374,8 +375,7 @@ namespace RhinoInside.Revit
       if (Revit.ActiveUIDocument?.Document is DB.Document revitDoc)
       {
         var units = revitDoc.GetUnits();
-        var lengthFormatoptions = units.GetFormatOptions(DB.UnitType.UT_Length);
-        var RevitModelUnitSystem = lengthFormatoptions.DisplayUnits.ToUnitSystem();
+        var RevitModelUnitSystem = units.ToUnitSystem(out var distanceDisplayPrecision);
         var GrasshopperModelUnitSystem = GH.Guest.ModelUnitSystem != UnitSystem.Unset ? GH.Guest.ModelUnitSystem : doc.ModelUnitSystem;
         if (doc.ModelUnitSystem != RevitModelUnitSystem || doc.ModelUnitSystem != GrasshopperModelUnitSystem)
         {
@@ -441,7 +441,7 @@ namespace RhinoInside.Revit
             {
             case Autodesk.Revit.UI.TaskDialogResult.CommandLink2:
                 doc.ModelAngleToleranceRadians = Revit.AngleTolerance;
-                doc.ModelDistanceDisplayPrecision = Clamp((int) -Log10(lengthFormatoptions.Accuracy), 0, 7);
+                doc.ModelDistanceDisplayPrecision = distanceDisplayPrecision;
                 doc.ModelAbsoluteTolerance = Revit.VertexTolerance * UnitScale(UnitSystem.Feet, RevitModelUnitSystem);
                 doc.AdjustModelUnitSystem(RevitModelUnitSystem, true);
                 AdjustViewConstructionPlanes(doc);
@@ -476,10 +476,9 @@ namespace RhinoInside.Revit
         else if (rhinoDoc.ModelUnitSystem == UnitSystem.None)
         {
           var units = revitDoc.GetUnits();
-          var lengthFormatoptions = units.GetFormatOptions(DB.UnitType.UT_Length);
-          rhinoDoc.ModelUnitSystem = lengthFormatoptions.DisplayUnits.ToUnitSystem();
+          rhinoDoc.ModelUnitSystem = units.ToUnitSystem(out var distanceDisplayPrecision);
           rhinoDoc.ModelAngleToleranceRadians = Revit.AngleTolerance;
-          rhinoDoc.ModelDistanceDisplayPrecision = Clamp((int) -Log10(lengthFormatoptions.Accuracy), 0, 7);
+          rhinoDoc.ModelDistanceDisplayPrecision = distanceDisplayPrecision;
           rhinoDoc.ModelAbsoluteTolerance = Revit.VertexTolerance * UnitScale(UnitSystem.Feet, rhinoDoc.ModelUnitSystem);
           //switch (rhinoDoc.ModelUnitSystem)
           //{
@@ -616,14 +615,20 @@ namespace RhinoInside.Revit
         if (RhinoDoc.ActiveDoc is RhinoDoc rhinoDoc)
         {
           // Keep Rhino window exposed to user while in a get operation
-          if (RhinoGet.InGet(rhinoDoc))
+          if (RhinoGet.InGet(rhinoDoc) && !Exposed)
           {
-            // if there is no floating viewport visible...
-            if (!rhinoDoc.Views.Where(x => x.Floating).Any())
+            if (RhinoGet.InGetObject(rhinoDoc) || RhinoGet.InGetPoint(rhinoDoc))
             {
-              if (!Exposed)
-                Exposed = true;
+              // If there is no floating viewport visible...
+              if (!rhinoDoc.Views.Where(x => x.Floating).Any())
+              {
+                var cursorPosition = System.Windows.Forms.Cursor.Position;
+                if (!OpenRevitViewport(cursorPosition.X - 400, cursorPosition.Y - 300))
+                  Exposed = true;
+              }
             }
+            // If we are in a GetString or GetInt we need the command prompt.
+            else Exposed = true;
           }
         }
       }
@@ -678,6 +683,59 @@ namespace RhinoInside.Revit
     {
       return RhinoApp.RunScript("!_PackageManager", false) ? Result.Succeeded : Result.Failed;
     }
+
+    #region Open Viewport
+    const string RevitViewName = "Revit";
+    internal static bool OpenRevitViewport(int x, int y)
+    {
+      if (RhinoDoc.ActiveDoc is RhinoDoc rhinoDoc)
+      {
+        var view3D = rhinoDoc.Views.Where(v => v.MainViewport.Name == RevitViewName).FirstOrDefault();
+        if (view3D is null)
+        {
+          if
+          (
+            rhinoDoc.Views.Add
+            (
+              RevitViewName, Rhino.Display.DefinedViewportProjection.Perspective,
+              new System.Drawing.Rectangle(x, y, 800, 600),
+              true
+            ) is Rhino.Display.RhinoView rhinoView
+          )
+          {
+            rhinoView.MainViewport.ZoomExtents();
+            return true;
+          }
+          else return false;
+        }
+        else
+        {
+          rhinoDoc.Views.ActiveView = view3D;
+
+          var viewWindow = new WindowHandle(view3D.Handle);
+
+          //if (!view3D.Floating)
+          if (viewWindow.Parent.Owner.IsZero)
+          {
+            view3D.Maximized = true;
+            Exposed = true;
+          }
+
+          return MainWindow.BringToFront();
+        }
+      }
+
+      return false;
+    }
+
+    public static async void RunCommandOpenViewportAsync()
+    {
+      var cursorPosition = System.Windows.Forms.Cursor.Position;
+
+      await External.ActivationGate.Yield();
+      OpenRevitViewport(cursorPosition.X + 50, cursorPosition.Y + 50);
+    }
+    #endregion
 
     /// <summary>
     /// Represents a Pseudo-modal loop.

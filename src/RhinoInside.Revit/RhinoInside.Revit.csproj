@@ -24,10 +24,13 @@
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <RevitVersion>2021</RevitVersion>
   </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration.Contains('2022'))">
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <RevitVersion>2022</RevitVersion>
+  </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{D6C256D4-B518-464F-9E68-CB282202E846}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -105,6 +108,23 @@
     <PlatformTarget>x64</PlatformTarget>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2022|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug 2022\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021;REVIT_2022</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2022|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Release 2022\</OutputPath>
+    <DefineConstants>REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021;REVIT_2022</DefineConstants>
+    <Optimize>true</Optimize>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -167,11 +187,14 @@
         <PackageReference Include="RhinoCommon" Version="7.3.21039.11201" IncludeAssets="compile; build" />
         <PackageReference Include="RhinoWindows" Version="7.3.21039.11201" IncludeAssets="build; compile" />
         <PackageReference Include="Grasshopper" Version="7.3.21039.11201" IncludeAssets="compile; build" />
-        <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitVersion).0.0" IncludeAssets="build; compile" />
+        <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="2019.0.1" IncludeAssets="build; compile" Condition="'$(Configuration)' == 'Release 2019'" />
+        <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitVersion).0.0" IncludeAssets="build; compile" Condition="'$(Configuration)' != 'Release 2019'" />
       </ItemGroup>
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="AddIn.cs" />
+    <Compile Include="AddinUpdater.cs" />
     <Compile Include="AssemblyResolver.cs" />
     <Compile Include="Convert\ConversionException.cs" />
     <Compile Include="Convert\Display\DisplayMaterialConverter.cs" />
@@ -188,15 +211,22 @@
     <Compile Include="Convert\Geometry\SolidDecoder.cs" />
     <Compile Include="Convert\Geometry\BrepEncoder.cs" />
     <Compile Include="Convert\Geometry\SubDEncoder.cs" />
-    <Compile Include="Convert\System.Collections.Generic.cs" />
-    <Compile Include="Convert\Units\DisplayUnitTypeConverter.cs" />
+    <Compile Include="Convert\Geometry\GeometryDecoder.cs" />
     <Compile Include="Convert\Geometry\UnitConverter.cs" />
+    <Compile Include="Convert\Units\DisplayUnitTypeConverter.cs" />
+    <Compile Include="Convert\Eto.Drawing.cs" />
+    <Compile Include="Convert\System.Collections.Generic.cs" />
     <Compile Include="Convert\System.Drawing.cs" />
     <Compile Include="Convert\System.Windows.Media.cs" />
     <Compile Include="ErrorReport.cs" />
     <Compile Include="Exceptions.cs" />
+    <None Include="Extensions\README.md" />
     <Compile Include="Extensions\AdWindows.cs" />
     <Compile Include="Extensions\Native.cs" />
+    <Compile Include="Extensions\RhinoCommon.cs" />
+    <Compile Include="Extensions\ShellItem.cs" />
+    <Compile Include="Extensions\System.cs" />
+    <Compile Include="Extensions\Win32.cs" />
     <Compile Include="Extensions\WinForms.cs" />
     <Compile Include="External\ApplicationServices\Extensions\Application.cs" />
     <Compile Include="External\DB\Application.cs" />
@@ -233,6 +263,32 @@
     <Compile Include="External\ApplicationServices\HostServices.cs" />
     <Compile Include="External\DB\ParameterBinding.cs" />
     <Compile Include="External\DB\ParameterClass.cs" />
+    <Compile Include="External\DB\Schemas\CategoryId.cs" />
+    <Compile Include="External\DB\Schemas\CategoryId.Enum.cs" />
+    <Compile Include="External\DB\Schemas\CategoryId.Values.cs" />
+    <Compile Include="External\DB\Schemas\DisciplineType.cs" />
+    <Compile Include="External\DB\Schemas\DisciplineType.Values.cs" />
+    <Compile Include="External\DB\Schemas\ParameterGroup.cs" />
+    <Compile Include="External\DB\Schemas\ParameterGroup.Enum.cs" />
+    <Compile Include="External\DB\Schemas\ParameterGroup.Values.cs" />
+    <Compile Include="External\DB\Schemas\ParameterId.cs" />
+    <Compile Include="External\DB\Schemas\ParameterId.Enum.cs" />
+    <Compile Include="External\DB\Schemas\ParameterId.Values.cs" />
+    <Compile Include="External\DB\Schemas\DataType.Label.cs" />
+    <Compile Include="External\DB\Schemas\SpecType.Boolean.cs" />
+    <Compile Include="External\DB\Schemas\SpecType.cs" />
+    <Compile Include="External\DB\Schemas\DataType.cs" />
+    <Compile Include="External\DB\Schemas\SpecType.Enum.cs" />
+    <Compile Include="External\DB\Schemas\SpecType.Measurable.cs" />
+    <Compile Include="External\DB\Schemas\SpecType.Reference.cs" />
+    <Compile Include="External\DB\Schemas\SpecType.Int.cs" />
+    <Compile Include="External\DB\Schemas\SpecType.String.cs" />
+    <Compile Include="External\DB\Schemas\UnitSymbol.cs" />
+    <Compile Include="External\DB\Schemas\UnitSymbol.Enum.cs" />
+    <Compile Include="External\DB\Schemas\UnitSymbol.Values.cs" />
+    <Compile Include="External\DB\Schemas\UnitType.cs" />
+    <Compile Include="External\DB\Schemas\UnitType.Enum.cs" />
+    <Compile Include="External\DB\Schemas\UnitType.Values.cs" />
     <Compile Include="External\DB\Transaction.cs" />
     <Compile Include="External\DB\UniqueId.cs" />
     <Compile Include="External\DB\WallWrapping.cs" />
@@ -249,23 +305,17 @@
     <Compile Include="External\UI\Extensions\UIView.cs" />
     <Compile Include="External\UI\Selection.cs" />
     <Compile Include="External\UI\TaskDialogIcons.cs" />
-    <Compile Include="Extensions\RhinoCommon.cs" />
-    <Compile Include="Extensions\System.cs" />
-    <Compile Include="Extensions\Win32.cs" />
     <Compile Include="External\ActivationGate.cs" />
     <Compile Include="External\UI\UIHostApplication.cs" />
     <Compile Include="GH\Bake.cs" />
+    <Compile Include="GH\Guest.cs" />
     <Compile Include="GH\Kernel.cs" />
+    <Compile Include="GH\PreviewServer.cs" />
     <Compile Include="Rhino\Rhinoceros.cs" />
     <Compile Include="Rhino\DocumentPreviewServer.cs" />
     <Compile Include="Settings\Addins.cs" />
     <Compile Include="Settings\DebugLogging.cs" />
     <Compile Include="Settings\KeyboardShortcuts.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Settings\Options.cs" />
     <Compile Include="UI\Commands\Addin\CommandAbout.cs" />
     <Compile Include="UI\Commands\Addin\CommandAddinOptions.cs" />
@@ -273,7 +323,10 @@
     <Compile Include="UI\Commands\Addin\CommandGuides.cs" />
     <Compile Include="UI\Commands\Addin\CommandStart.cs" />
     <Compile Include="UI\Commands\Addin\CommandHelpLinks.cs" />
-    <Compile Include="UI\BaseDialog.cs" />
+    <Compile Include="UI\Forms\ImportOptionsDialog.cs" />
+    <Compile Include="UI\ModalDialog.cs" />
+    <Compile Include="UI\Commands\Rhinoceros\CommandRhinoOpenViewport.cs" />
+    <Compile Include="UI\RibbonHandler.cs" />
     <Compile Include="UI\BaseForm.cs" />
     <Compile Include="UI\BaseCommand.cs" />
     <Compile Include="UI\BaseWindowUtils.cs" />
@@ -290,15 +343,14 @@
     <Compile Include="UI\Commands\Grasshopper\LinkedScripts\LinkedScriptCommand.cs" />
     <Compile Include="UI\Commands\Grasshopper\LinkedScripts\LinkedScripts.cs" />
     <Compile Include="UI\Commands\Grasshopper\LinkedScripts\Models.cs" />
-    <Compile Include="UI\Forms\BakeOptionsWindow.cs" />
-    <Compile Include="UI\Forms\OptionsWindow.cs" />
+    <Compile Include="UI\Forms\BakeOptionsDialog.cs" />
+    <Compile Include="UI\Forms\AddInOptionsDialog.cs" />
     <Compile Include="UI\Commands\Rhinoceros\BaseRhinoCommand.cs" />
-    <Compile Include="UI\Commands\Rhinoceros\CommandImport.cs" />
-    <Compile Include="UI\Commands\Rhinoceros\CommandPython.cs" />
     <Compile Include="UI\Commands\Rhinoceros\CommandRhino.cs" />
     <Compile Include="UI\Commands\Rhinoceros\CommandRhinoOptions.cs" />
-    <Compile Include="GH\Guest.cs" />
-    <Compile Include="GH\PreviewServer.cs" />
+    <Compile Include="UI\Commands\Rhinoceros\CommandImport.cs" />
+    <Compile Include="UI\Commands\Rhinoceros\CommandToggleRhinoPreview.cs" />
+    <Compile Include="UI\Commands\Rhinoceros\CommandPython.cs" />
     <Compile Include="DirectContext3DServer.cs" />
     <Compile Include="ImageBuilder.cs" />
     <Compile Include="Operator.cs" />
@@ -306,17 +358,20 @@
     <Compile Include="Optional.cs" />
     <Compile Include="Revit.cs" />
     <Compile Include="Revit.FailuresPreprocessor.cs" />
-    <Compile Include="AddIn.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI\Commands\Rhinoceros\CommandToggleRhinoPreview.cs" />
-    <Compile Include="Convert\Eto.Drawing.cs" />
-    <Compile Include="Convert\Geometry\GeometryDecoder.cs" />
-    <Compile Include="AddinUpdater.cs" />
-    <Compile Include="UI\RibbonHandler.cs" />
-    <None Include="Extensions\README.md" />
-    <None Include="Properties\RhinoInside.Revit.addin" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\ProductInfo.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ProductInfo.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <None Include="Properties\RhinoInside.Revit.addin" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <SubType>Designer</SubType>
       <Generator>ResXFileCodeGenerator</Generator>
@@ -328,11 +383,7 @@
     <EmbeddedResource Include="Resources\Grasshopper.png" />
     <EmbeddedResource Include="Resources\GrasshopperPlayer.png" />
     <EmbeddedResource Include="Resources\Python.png" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\RVT$(RevitVersion)\KeyboardShortcuts.xml" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\Bake.png" />
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\Preview_Off.png" />
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\Preview_Shaded.png" />
@@ -342,69 +393,45 @@
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\SolverOn.png" />
     <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Preview_Shaded.png" />
     <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Import-3DM.png" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\Options.png" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\Rhino-logo.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\NewRelease.png" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\RIR-logo.png" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\About-icon.png" />
     <EmbeddedResource Include="Resources\Forum-icon.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GhFile.png" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\Guides-icon.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GhFile_32.png" />
     <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Import-3DM_32.png" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\Link-icon_16.png" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\Link-icon.png" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\Folder-icon.png" />
     <EmbeddedResource Include="Resources\Folder-icon_16.png" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\PackageManager-icon.png" />
-  </ItemGroup>
-  <ItemGroup>
+    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GhFile.png" />
+    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GhFile_32.png" />
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GhFolder.png" />
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GhFolder_32.png" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GHSpecialFolder.png" />
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GHSpecialFolder_16.png" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GhxFile.png" />
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GhxFile_32.png" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\RIR-logo.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\RIR-WIP-logo.png" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\ChannelDaily-icon.png" />
     <EmbeddedResource Include="Resources\ChannelStable-icon.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Properties\ProductInfo.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ProductInfo.cs</LastGenOutput>
+    </Content>
+    <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\OpenViewport.png" />
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v16.0\TextTemplating\Microsoft.TextTemplating.targets" />
+  <PropertyGroup>
+    <TransformOnBuild>true</TransformOnBuild>
+  </PropertyGroup>
   <Target Name="AfterBuild" Condition="$(Configuration.Contains('Debug'))">
     <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)..\RhinoInside.Revit.Native\bin\x64\Debug\RhinoInside.Revit.Native.dll;$(ProjectDir)..\RhinoInside.Revit.Native\bin\x64\Debug\RhinoInside.Revit.Native.pdb" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />
     <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.dll;$(ProjectDir)$(OutDir)RhinoInside.Revit.pdb" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />

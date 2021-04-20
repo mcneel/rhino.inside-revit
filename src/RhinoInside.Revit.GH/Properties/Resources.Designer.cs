@@ -543,16 +543,6 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap ConstructCompoundStructure {
-            get {
-                object obj = ResourceManager.GetObject("ConstructCompoundStructure", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap CompoundStructureGeometry {
             get {
                 object obj = ResourceManager.GetObject("CompoundStructureGeometry", resourceCulture);
@@ -573,16 +563,6 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap ConstructCompoundStructureLayer {
-            get {
-                object obj = ResourceManager.GetObject("ConstructCompoundStructureLayer", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap ConstructBitmapTexture {
             get {
                 object obj = ResourceManager.GetObject("ConstructBitmapTexture", resourceCulture);
@@ -596,6 +576,26 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap ConstructCheckerTexture {
             get {
                 object obj = ResourceManager.GetObject("ConstructCheckerTexture", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ConstructCompoundStructure {
+            get {
+                object obj = ResourceManager.GetObject("ConstructCompoundStructure", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ConstructCompoundStructureLayer {
+            get {
+                object obj = ResourceManager.GetObject("ConstructCompoundStructureLayer", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -1366,16 +1366,6 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap ElementParameterReset {
             get {
                 object obj = ResourceManager.GetObject("ElementParameterReset", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ElementParameters {
-            get {
-                object obj = ResourceManager.GetObject("ElementParameters", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -2286,6 +2276,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap QueryElement {
             get {
                 object obj = ResourceManager.GetObject("QueryElement", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap QueryElementParameters {
+            get {
+                object obj = ResourceManager.GetObject("QueryElementParameters", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
