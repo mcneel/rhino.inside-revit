@@ -617,13 +617,18 @@ namespace RhinoInside.Revit
           // Keep Rhino window exposed to user while in a get operation
           if (RhinoGet.InGet(rhinoDoc) && !Exposed)
           {
-            // if there is no floating viewport visible...
-            if (!rhinoDoc.Views.Where(x => x.Floating).Any())
+            if (RhinoGet.InGetObject(rhinoDoc) || RhinoGet.InGetPoint(rhinoDoc))
             {
-              var cursorPosition = System.Windows.Forms.Cursor.Position;
-              if(!OpenRevitViewport(cursorPosition.X - 400, cursorPosition.Y - 300))
-                Exposed = true;
+              // If there is no floating viewport visible...
+              if (!rhinoDoc.Views.Where(x => x.Floating).Any())
+              {
+                var cursorPosition = System.Windows.Forms.Cursor.Position;
+                if (!OpenRevitViewport(cursorPosition.X - 400, cursorPosition.Y - 300))
+                  Exposed = true;
+              }
             }
+            // If we are in a GetString or GetInt we need the command prompt
+            else Exposed = true;
           }
         }
       }
@@ -716,7 +721,7 @@ namespace RhinoInside.Revit
             Exposed = true;
           }
 
-          return viewWindow.BringToFront();
+          return MainWindow.BringToFront();
         }
       }
 
