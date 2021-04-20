@@ -716,7 +716,7 @@ namespace RhinoInside.Revit
             Exposed = true;
           }
 
-          return MainWindow.BringToFront();
+          return viewWindow.BringToFront();
         }
       }
 

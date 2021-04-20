@@ -136,12 +136,12 @@ namespace RhinoInside.Revit.GH
 
     /// <summary>
     /// Show the main Grasshopper Editor. The editor will be loaded first if needed.
-    /// If the Editor is already on screen, nothing will happen.
+    /// If the Editor is already on screen, it will be activated.
     /// </summary>
     public static void ShowEditor()
     {
       Script.ShowEditor();
-      Rhinoceros.MainWindow.BringToFront();
+      Instances.DocumentEditor?.Activate();
     }
 
     /// <summary>

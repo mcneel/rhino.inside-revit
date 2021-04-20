@@ -10,7 +10,7 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
-{% include ltr/release-header.html version="0.4" time="04/19/2021" %}
+{% include ltr/release-header.html version="0.4" time="04/20/2021" %}
 
 ### New Features
 * Added support for Revit 2022.
@@ -19,6 +19,9 @@ Some of the changes mentioned in sections below, might break your existing Grass
 
 ### Minor changes
 * Renamed 'Element Parameters' to 'Query Element Parameters'.
+
+### API
+* Now `RhinoInside.Revit.GH.Guest.ShowEditor` activates Grasshopper window.
 
 {% include ltr/release-header.html version="0.3" time="04/06/2021" %}
 
