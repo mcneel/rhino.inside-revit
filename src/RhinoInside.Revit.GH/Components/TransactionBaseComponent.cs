@@ -64,11 +64,6 @@ namespace RhinoInside.Revit.GH.Components
           {
             OnBeforeCommit(doc, transaction.GetName());
 
-            transaction.SetFailureHandlingOptions
-            (
-              transaction.GetFailureHandlingOptions().SetClearAfterRollback(false)
-            );
-
             return transaction.Commit();
           }
           else return transaction.RollBack();
@@ -205,10 +200,7 @@ namespace RhinoInside.Revit.GH.Components
         foreach (var error in failuresAccessor.GetFailureMessages().OrderBy(error => error.GetSeverity()))
           AddRuntimeMessage(error, false);
 
-        failuresAccessor.SetFailureHandlingOptions
-        (
-          failuresAccessor.GetFailureHandlingOptions().SetClearAfterRollback(true)
-        );
+        failuresAccessor.DeleteAllWarnings();
       }
 
       if (severity >= DB.FailureSeverity.Error)

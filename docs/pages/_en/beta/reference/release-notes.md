@@ -10,6 +10,11 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html version="0.5" time="04/21/2021" %}
+
+### Fixes
+* Now Transaction warnings and errors are displayed in the component balloon only.
+
 {% include ltr/release-header.html version="0.4" time="04/20/2021" %}
 
 ### New Features
