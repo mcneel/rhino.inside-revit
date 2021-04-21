@@ -44,11 +44,47 @@ namespace RhinoInside.Revit.GH.Components
     )
     {
       if (!location.IsValid)
-        ThrowArgumentException(nameof(location), "Location is not valid.");
+        ThrowArgumentException(nameof(location));
+
+      if (type?.Document.IsEquivalent(doc) == false)
+        ThrowArgumentException(nameof(type));
+
+      if (level.HasValue && level.Value.Document.IsEquivalent(doc) == false)
+        ThrowArgumentException(nameof(level));
+
+      if (host?.Document.IsEquivalent(doc) == false)
+        ThrowArgumentException(nameof(host));
 
       if (!type.IsActive)
         type.Activate();
 
+      SolveOptionalLevel(doc, location, type, ref level, host);
+
+      var newElement = element;
+
+      // Check if current Instance can be modified
+      if (newElement is DB.FamilyInstance)
+      {
+        if (!newElement.Host.IsEquivalent(host)) newElement = default;
+        else if (newElement.LevelId != level.Value.Id) newElement = default;
+        else if (newElement.GetTypeId() != type.Id)
+        {
+          if (DB.Element.IsValidType(type.Document, new DB.ElementId[] { newElement.Id }, type.Id))
+          {
+            element = default;
+            newElement = type.Document.GetElement(newElement.ChangeTypeId(type.Id)) as DB.FamilyInstance;
+          }
+          else newElement = default;
+        }
+
+        if (newElement?.Pinned == true)
+        {
+          try { newElement.Pinned = false; }
+          catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
+        }
+      }
+
+      if (newElement is null)
       {
         FamilyInstanceCreationData creationData;
         switch (type.Family.FamilyPlacementType)
@@ -74,54 +110,84 @@ namespace RhinoInside.Revit.GH.Components
             break;
         }
 
-        var dataList = new List<FamilyInstanceCreationData>() { creationData };
-        var newElementIds = doc.IsFamilyDocument ?
-                            doc.FamilyCreate.NewFamilyInstances2(dataList) :
-                            doc.Create.NewFamilyInstances2(dataList);
-
-        if (newElementIds.Count != 1)
+        // Create a new Instance
         {
-          doc.Delete(newElementIds);
-          throw new InvalidOperationException();
-        }
+          var dataList = new List<FamilyInstanceCreationData>() { creationData };
+          var newElementIds = doc.IsFamilyDocument ?
+                              doc.FamilyCreate.NewFamilyInstances2(dataList) :
+                              doc.Create.NewFamilyInstances2(dataList);
 
-        var parametersMask = new DB.BuiltInParameter[]
-        {
-          DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-          DB.BuiltInParameter.ELEM_FAMILY_PARAM,
-          DB.BuiltInParameter.ELEM_TYPE_PARAM,
-          DB.BuiltInParameter.FAMILY_LEVEL_PARAM,
-          DB.BuiltInParameter.FAMILY_BASE_LEVEL_PARAM,
-          DB.BuiltInParameter.FAMILY_BASE_LEVEL_OFFSET_PARAM,
-          DB.BuiltInParameter.FAMILY_TOP_LEVEL_PARAM,
-          DB.BuiltInParameter.FAMILY_TOP_LEVEL_OFFSET_PARAM,
-          DB.BuiltInParameter.SCHEDULE_LEVEL_PARAM,
-          DB.BuiltInParameter.SCHEDULE_BASE_LEVEL_PARAM,
-          DB.BuiltInParameter.SCHEDULE_BASE_LEVEL_OFFSET_PARAM,
-          DB.BuiltInParameter.SCHEDULE_TOP_LEVEL_PARAM,
-          DB.BuiltInParameter.SCHEDULE_TOP_LEVEL_OFFSET_PARAM,
-          DB.BuiltInParameter.INSTANCE_SCHEDULE_ONLY_LEVEL_PARAM,
-          DB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM
-        };
+          if (newElementIds.Count != 1)
+            throw new InvalidOperationException();
 
-        ReplaceElement(ref element, doc.GetElement(newElementIds.First()) as DB.FamilyInstance, parametersMask);
-        doc.Regenerate();
-
-        if (element.Pinned)
-        {
-          try { element.Pinned = false; }
-          catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
+          newElement = doc.GetElement(newElementIds.First()) as DB.FamilyInstance;
         }
       }
+
+      var parametersMask = new DB.BuiltInParameter[]
+      {
+        DB.BuiltInParameter.ELEMENT_LOCKED_PARAM,
+        DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+        DB.BuiltInParameter.ELEM_FAMILY_PARAM,
+        DB.BuiltInParameter.ELEM_TYPE_PARAM,
+        DB.BuiltInParameter.FAMILY_LEVEL_PARAM,
+        DB.BuiltInParameter.FAMILY_BASE_LEVEL_PARAM,
+        DB.BuiltInParameter.FAMILY_BASE_LEVEL_OFFSET_PARAM,
+        DB.BuiltInParameter.FAMILY_TOP_LEVEL_PARAM,
+        DB.BuiltInParameter.FAMILY_TOP_LEVEL_OFFSET_PARAM,
+        DB.BuiltInParameter.SCHEDULE_LEVEL_PARAM,
+        DB.BuiltInParameter.SCHEDULE_BASE_LEVEL_PARAM,
+        DB.BuiltInParameter.SCHEDULE_BASE_LEVEL_OFFSET_PARAM,
+        DB.BuiltInParameter.SCHEDULE_TOP_LEVEL_PARAM,
+        DB.BuiltInParameter.SCHEDULE_TOP_LEVEL_OFFSET_PARAM,
+        DB.BuiltInParameter.INSTANCE_SCHEDULE_ONLY_LEVEL_PARAM,
+        DB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM
+      };
+
+      ReplaceElement(ref element, newElement, parametersMask);
+
+      // Regenerate here to allow SetLocation get the current element location correctly.
+      doc.Regenerate();
 
       element?.SetLocation(location.Origin.ToXYZ(), location.XAxis.ToXYZ(), location.YAxis.ToXYZ());
     }
 
+    void SolveOptionalLevel(DB.Document doc, Plane location, DB.FamilySymbol type, ref Optional<DB.Level> level, DB.Element host)
+    {
+      switch (type.Family.FamilyPlacementType)
+      {
+        case DB.FamilyPlacementType.OneLevelBased:
+          SolveOptionalLevel(doc, host, ref level);
+          SolveOptionalLevel(doc, location.Origin, ref level, out var _);
+          break;
+
+        case DB.FamilyPlacementType.OneLevelBasedHosted:
+          if (host is null)
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "This family requires a host.");
+          else
+            SolveOptionalLevel(doc, host, ref level);
+
+          SolveOptionalLevel(doc, location.Origin, ref level, out var _);
+          break;
+
+        case DB.FamilyPlacementType.TwoLevelsBased:
+          SolveOptionalLevel(doc, host, ref level);
+          SolveOptionalLevel(doc, location.Origin, ref level, out var _);
+          break;
+
+        case DB.FamilyPlacementType.WorkPlaneBased:
+          break;
+
+        default:
+          if (host is null)
+            SolveOptionalLevel(doc, location.Origin, ref level, out var _);
+
+          break;
+        }
+      }
+
     FamilyInstanceCreationData CreateOneLevelBased(DB.Document doc, Plane location, DB.FamilySymbol type, Optional<DB.Level> level, DB.Element host)
     {
-      SolveOptionalLevel(doc, host, ref level);
-      SolveOptionalLevel(doc, location.Origin, ref level, out var _);
-
       if (host is null)
       {
         return new FamilyInstanceCreationData
@@ -147,13 +213,6 @@ namespace RhinoInside.Revit.GH.Components
 
     FamilyInstanceCreationData CreateOneLevelBasedHosted(DB.Document doc, Plane location, DB.FamilySymbol type, Optional<DB.Level> level, DB.Element host)
     {
-      if (host is null)
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "This family requires a host.");
-      else
-        SolveOptionalLevel(doc, host, ref level);
-
-      SolveOptionalLevel(doc, location.Origin, ref level, out var _);
-
       return new FamilyInstanceCreationData
       (
         location.Origin.ToXYZ(),
@@ -166,9 +225,6 @@ namespace RhinoInside.Revit.GH.Components
 
     FamilyInstanceCreationData CreateTwoLevelsBased(DB.Document doc, Plane location, DB.FamilySymbol type, Optional<DB.Level> level, DB.Element host)
     {
-      SolveOptionalLevel(doc, host, ref level);
-      SolveOptionalLevel(doc, location.Origin, ref level, out var _);
-
       return new FamilyInstanceCreationData
       (
         location.Origin.ToXYZ(),
@@ -211,8 +267,6 @@ namespace RhinoInside.Revit.GH.Components
     {
       if (host is null)
       {
-        SolveOptionalLevel(doc, location.Origin, ref level, out var _);
-
         return new FamilyInstanceCreationData
         (
           location.Origin.ToXYZ(),
