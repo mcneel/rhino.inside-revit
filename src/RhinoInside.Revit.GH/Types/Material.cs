@@ -24,6 +24,12 @@ namespace RhinoInside.Revit.GH.Types
       if (base.CastTo<Q>(out target))
         return true;
 
+      if (typeof(Q).IsAssignableFrom(typeof(Grasshopper.Kernel.Types.GH_Colour)))
+      {
+        target = (Q) (object) new Grasshopper.Kernel.Types.GH_Colour(ObjectColor);
+        return true;
+      }
+
       if (typeof(Q).IsAssignableFrom(typeof(Grasshopper.Kernel.Types.GH_Material)))
       {
         if (RhinoDoc.ActiveDoc is RhinoDoc doc)
@@ -140,7 +146,7 @@ namespace RhinoInside.Revit.GH.Types
           return color;
         }
 
-        return System.Drawing.Color.Black;
+        return System.Drawing.Color.Empty;
       }
     }
     #endregion

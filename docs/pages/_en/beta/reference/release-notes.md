@@ -14,6 +14,7 @@ Some of the changes mentioned in sections below, might break your existing Grass
 
 ### New Features
 * Now 'Add Component (Location)' tries to reuse previous iteration element.
+* Implemented direct casting from 'Material' to 'Colour'.
 
 ### Fixes
 * Now Transaction warnings and errors are displayed in the component balloon only.
