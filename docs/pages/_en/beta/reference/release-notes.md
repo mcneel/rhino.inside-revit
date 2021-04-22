@@ -19,6 +19,9 @@ Some of the changes mentioned in sections below, might break your existing Grass
 ### Fixes
 * Now Transaction warnings and errors are displayed in the component balloon only.
 
+### Minor Changes
+* Added 'Default 3D View' and 'Close Inactive Views' to te 'View' parameter context menu.
+
 ### API
 * Removed Obsolete `Revit.ApplicationUI` and `Revit.CurrentUsersDataFolderPath` properties.
 * Removed Obsolete `Revit.BakeGeometry` method.
