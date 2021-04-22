@@ -268,12 +268,6 @@ namespace RhinoInside.Revit
 
     internal static Screen MainScreen => ActiveUIApplication?.GetRevitScreen() ?? Screen.FromHandle(MainWindowHandle);
 
-    [Obsolete("Since 2021-03-19")]
-    public static string CurrentUsersDataFolderPath => ApplicationUI.ControlledApplication.GetCurrentUsersDataFolderPath();
-
-    [Obsolete("Since 2021-03-27")]
-    public static Autodesk.Revit.UI.UIControlledApplication       ApplicationUI { get; internal set; }
-
     public static Autodesk.Revit.UI.UIApplication                 ActiveUIApplication => AddIn.Host.Value as Autodesk.Revit.UI.UIApplication;
     public static Autodesk.Revit.ApplicationServices.Application  ActiveDBApplication => ActiveUIApplication?.Application;
 
