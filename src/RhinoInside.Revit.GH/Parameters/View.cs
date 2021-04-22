@@ -33,6 +33,7 @@ namespace RhinoInside.Revit.GH.Parameters
           activeApp.CanPostCommand(commandId), false
         );
       }
+#if REVIT_2019
       {
         var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.CloseInactiveViews);
         Menu_AppendItem
@@ -42,6 +43,7 @@ namespace RhinoInside.Revit.GH.Parameters
           activeApp.CanPostCommand(commandId), false
         );
       }
+#endif
     }
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
