@@ -20,6 +20,7 @@ Some of the changes mentioned in sections below, might break your existing Grass
 
 ### API
 * Removed Obsolete `Revit.ApplicationUI` and `Revit.CurrentUsersDataFolderPath` properties.
+* Removed Obsolete `Revit.BakeGeometry` method.
 
 {% include ltr/release-header.html version="0.4" time="04/20/2021" %}
 
