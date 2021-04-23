@@ -288,12 +288,12 @@ namespace RhinoInside.Revit.GH.Components
       return wasMissing;
     }
 
-    protected static bool SolveOptionalType<T>(ref Optional<T> type, DB.Document doc, DB.ElementTypeGroup group, string paramName) where T : DB.ElementType
+    protected static bool SolveOptionalType<T>(DB.Document doc, ref Optional<T> type, DB.ElementTypeGroup group, string paramName) where T : DB.ElementType
     {
-      return SolveOptionalType(ref type, doc, group, (document, name) => throw new ArgumentNullException(paramName), paramName);
+      return SolveOptionalType(doc, ref type, group, (document, name) => throw new ArgumentNullException(paramName), paramName);
     }
 
-    protected static bool SolveOptionalType<T>(ref Optional<T> type, DB.Document doc, DB.ElementTypeGroup group, Func<DB.Document, string, T> recoveryAction, string paramName) where T : DB.ElementType
+    protected static bool SolveOptionalType<T>(DB.Document doc, ref Optional<T> type, DB.ElementTypeGroup group, Func<DB.Document, string, T> recoveryAction, string paramName) where T : DB.ElementType
     {
       bool wasMissing = type.IsMissing;
 
@@ -307,7 +307,7 @@ namespace RhinoInside.Revit.GH.Components
       return wasMissing;
     }
 
-    protected static bool SolveOptionalType(ref Optional<DB.FamilySymbol> type, DB.Document doc, DB.BuiltInCategory category, string paramName)
+    protected static bool SolveOptionalType(DB.Document doc, ref Optional<DB.FamilySymbol> type, DB.BuiltInCategory category, string paramName)
     {
       bool wasMissing = type.IsMissing;
 

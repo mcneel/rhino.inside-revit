@@ -44,7 +44,7 @@ namespace RhinoInside.Revit.GH.Components
       )
         ThrowArgumentException(nameof(boundary), "Boundary should be an horizontal planar closed curve.");
 
-      SolveOptionalType(ref type, doc, DB.ElementTypeGroup.RoofType, nameof(type));
+      SolveOptionalType(doc, ref type, DB.ElementTypeGroup.RoofType, nameof(type));
 
       SolveOptionalLevel(doc, boundary, ref level, out var bbox);
 

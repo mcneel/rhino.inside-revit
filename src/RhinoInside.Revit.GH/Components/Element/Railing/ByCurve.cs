@@ -39,7 +39,7 @@ namespace RhinoInside.Revit.GH.Components
       [Optional] bool flipped
     )
     {
-      SolveOptionalType(ref type, doc, DB.ElementTypeGroup.StairsRailingType, nameof(type));
+      SolveOptionalType(doc, ref type, DB.ElementTypeGroup.StairsRailingType, nameof(type));
       SolveOptionalLevel(doc, curve, ref level, out var bbox);
 
       // Axis

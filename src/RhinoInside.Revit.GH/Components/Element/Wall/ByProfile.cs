@@ -121,7 +121,7 @@ namespace RhinoInside.Revit.GH.Components
           ThrowArgumentException(nameof(profile), "Boundary profile must be a vertical planar closed curve.");
       }
 
-      SolveOptionalType(ref type, doc, DB.ElementTypeGroup.WallType, nameof(type));
+      SolveOptionalType(doc, ref type, DB.ElementTypeGroup.WallType, nameof(type));
       SolveOptionalLevel(doc, profile, ref level, out var bbox);
 
       foreach (var curve in profile)

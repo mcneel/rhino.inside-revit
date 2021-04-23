@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.GH.Components
       if (curve.FromZ > curve.ToZ)
         curve.Flip();
 
-      SolveOptionalType(ref type, doc, BuiltInCategory.OST_StructuralColumns, nameof(type));
+      SolveOptionalType(doc, ref type, BuiltInCategory.OST_StructuralColumns, nameof(type));
 
       if (!type.Value.IsActive)
         type.Value.Activate();

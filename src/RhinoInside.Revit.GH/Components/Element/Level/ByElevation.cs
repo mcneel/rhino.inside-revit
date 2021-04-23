@@ -41,7 +41,7 @@ namespace RhinoInside.Revit.GH.Components.Level
       elevation *= scaleFactor;
       elevation += doc.GetBasePointLocation(Params.Input<Parameters.Elevation>("Elevation").ElevationBase).Z;
 
-      SolveOptionalType(ref type, doc, DB.ElementTypeGroup.LevelType, nameof(type));
+      SolveOptionalType(doc, ref type, DB.ElementTypeGroup.LevelType, nameof(type));
 
       if (element is DB.Level level)
       {
