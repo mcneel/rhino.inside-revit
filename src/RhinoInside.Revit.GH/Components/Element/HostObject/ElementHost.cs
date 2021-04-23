@@ -61,6 +61,12 @@ namespace RhinoInside.Revit.GH.Components.Host
         {
           var elementCollector = collector.OfClass(typeof(DB.HostObject));
 
+          // Element should be at the same Design Option
+          if (element.DesignOption is DB.DesignOption designOption)
+            elementCollector = elementCollector.WherePasses(new DB.ElementDesignOptionFilter(designOption.Id));
+          else
+            elementCollector = elementCollector.WherePasses(new DB.ElementDesignOptionFilter(DB.ElementId.InvalidElementId));
+
           if (element.Category.Parent is DB.Category hostCategory)
             elementCollector = elementCollector.OfCategoryId(hostCategory.Id);
 
