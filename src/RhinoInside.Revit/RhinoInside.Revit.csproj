@@ -251,6 +251,7 @@
     <Compile Include="External\DB\Extensions\Instance.cs" />
     <Compile Include="External\DB\Extensions\Level.cs" />
     <Compile Include="External\DB\Extensions\LinePattern.cs" />
+    <Compile Include="External\DB\Extensions\Mesh.cs" />
     <Compile Include="External\DB\Extensions\Parameter.cs" />
     <Compile Include="External\DB\Extensions\ParameterFilterElement.cs" />
     <Compile Include="External\DB\Extensions\ProjectLocation.cs" />

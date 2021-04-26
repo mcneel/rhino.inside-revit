@@ -1027,6 +1027,31 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
         );
       }
 
+#if REVIT_2021
+      switch (mesh.DistributionOfNormals)
+      {
+        case DB.DistributionOfNormals.AtEachPoint:
+          if (mesh.NumberOfNormals == result.Vertices.Count)
+          {
+            foreach (var xyz in mesh.GetNormals())
+              result.Normals.Add(xyz.X, xyz.Y, xyz.Z);
+          }
+          break;
+        case DB.DistributionOfNormals.OnePerFace:
+          result.FaceNormals.ComputeFaceNormals();
+          break;
+        case DB.DistributionOfNormals.OnEachFacet:
+          if (mesh.NumberOfNormals == result.Faces.Count)
+          {
+            foreach (var xyz in mesh.GetNormals())
+              result.FaceNormals.AddFaceNormal(xyz.X, xyz.Y, xyz.Z);
+          }
+          break;
+      }
+#else
+      result.FaceNormals.ComputeFaceNormals();
+#endif
+
       return result;
     }
     #endregion
