@@ -190,7 +190,7 @@ namespace RhinoInside.Revit.GH.Types
             if (parameter.Definition is DB.Definition definition)
             {
               DataType dataType = definition.GetDataType();
-              description = dataType.Label;
+              description = dataType.Label.ToLower();
 
               if (string.IsNullOrEmpty(description))
                 description = parameter.StorageType.ToString();
@@ -204,11 +204,11 @@ namespace RhinoInside.Revit.GH.Types
             if (parameter.IsReadOnly)
               description = "read only " + description;
 
-            description += $"{parameterClass} {description} parameter.{Environment.NewLine}";
+            description = $"{parameterClass} {description} parameter.{Environment.NewLine}{Environment.NewLine}";
             description += $"ParameterId : {((ParameterId)parameter.GetTypeId()).FullName}";
 
             if(parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
-              description += "\nBuiltInParameter : " + builtInParameter.ToStringGeneric();
+              description += $"{Environment.NewLine}BuiltInParameter : {builtInParameter.ToStringGeneric()}";
 
             return description;
           }
