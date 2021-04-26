@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
     public ParameterId() { }
     public ParameterId(string id) : base(id)
     {
-      if (!id.StartsWith("autodesk.revit.parameter"))
+      if (!id.StartsWith("autodesk.revit.parameter") && !id.StartsWith("autodesk.parameter.aec"))
         throw new ArgumentException("Invalid argument value", nameof(id));
     }
 

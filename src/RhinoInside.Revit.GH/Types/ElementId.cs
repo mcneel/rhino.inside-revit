@@ -187,19 +187,29 @@ namespace RhinoInside.Revit.GH.Types
           get
           {
             var description = string.Empty;
-            if (parameter.Element is object && parameter.Definition is object)
+            if (parameter.Definition is DB.Definition definition)
             {
-              DataType dataType = parameter.Definition?.GetDataType();
+              DataType dataType = definition.GetDataType();
               description = dataType.Label;
 
               if (string.IsNullOrEmpty(description))
                 description = parameter.StorageType.ToString();
             }
 
-            if (parameter.IsReadOnly)
-              description = "Read only " + description;
+            string parameterClass = "Unknown";
+            if (parameter.Id.IsBuiltInId()) parameterClass = "Built-in";
+            else if (parameter.IsShared) parameterClass = "Shared";
+            else parameterClass = "Project";
 
-            description += "\nParameterId : " + ((DB.BuiltInParameter)parameter.Id.IntegerValue).ToStringGeneric();
+            if (parameter.IsReadOnly)
+              description = "read only " + description;
+
+            description += $"{parameterClass} {description} parameter.{Environment.NewLine}";
+            description += $"ParameterId : {((ParameterId)parameter.GetTypeId()).FullName}";
+
+            if(parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
+              description += "\nBuiltInParameter : " + builtInParameter.ToStringGeneric();
+
             return description;
           }
         }

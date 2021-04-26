@@ -127,5 +127,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return false;
     }
+
+#if !REVIT_2022
+    public static Schemas.ParameterId GetTypeId(this Parameter parameter)
+    {
+      if (parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
+        return builtInParameter;
+
+      if(parameter.IsShared)
+        return new Schemas.ParameterId($"autodesk.parameter.aec.revit.external.-1:{parameter.GUID:N}");
+      else
+        return new Schemas.ParameterId($"autodesk.parameter.aec.revit.project:{parameter.Id.IntegerValue}");
+    }
+#endif
   }
 }
