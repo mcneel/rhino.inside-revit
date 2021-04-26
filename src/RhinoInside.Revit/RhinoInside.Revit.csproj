@@ -247,7 +247,7 @@
     <Compile Include="External\DB\Extensions\Face.cs" />
     <Compile Include="External\DB\Extensions\FilteredElementCollector.cs" />
     <Compile Include="External\DB\Extensions\GeometryObject.cs" />
-    <Compile Include="External\DB\Extensions\HostObjectExtension.cs" />
+    <Compile Include="External\DB\Extensions\HostObject.cs" />
     <Compile Include="External\DB\Extensions\Instance.cs" />
     <Compile Include="External\DB\Extensions\Level.cs" />
     <Compile Include="External\DB\Extensions\LinePattern.cs" />
