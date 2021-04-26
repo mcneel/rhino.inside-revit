@@ -523,6 +523,25 @@ namespace Rhino.Geometry
       return false;
     }
 
+    internal static bool TryGetHermiteSpline(this Curve curve, out IList<Point3d> points, out Vector3d startTangent, out Vector3d endTangent, double tolerance)
+    {
+      if (!(curve.Fit(3, tolerance * 0.2, 0.0) is NurbsCurve fit))
+      {
+        points = default;
+        startTangent = default;
+        endTangent = default;
+        return default;
+
+      }
+
+      var interval = curve.Domain;
+      startTangent = curve.TangentAt(interval.T0);
+      endTangent = curve.TangentAt(interval.T1);
+      points = fit.GrevillePoints(true);
+
+      return true;
+    }
+
     /// <summary>
     /// Try to convert this curve into a <see cref="Rhino.Geometry.PolyCurve"/> using a custom <paramref name="angleToleranceRadians"/>.
     /// </summary>
