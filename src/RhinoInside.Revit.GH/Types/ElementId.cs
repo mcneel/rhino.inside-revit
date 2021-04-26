@@ -192,7 +192,7 @@ namespace RhinoInside.Revit.GH.Types
               DataType dataType = parameter.Definition?.GetDataType();
               description = dataType.Label;
 
-              if (string.IsNullOrEmpty(Description))
+              if (string.IsNullOrEmpty(description))
                 description = parameter.StorageType.ToString();
             }
 
