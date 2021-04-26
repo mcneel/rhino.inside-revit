@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
+using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
@@ -25,7 +26,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.Floor(), "Floor", "F", "New Floor", GH_ParamAccess.item);
     }
 
-    bool Reuse(ref DB.Floor element, Rhino.Geometry.Curve boundary, DB.FloorType type, DB.Level level, bool structural)
+    bool Reuse(ref DB.Floor element, Curve boundary, DB.FloorType type, DB.Level level, bool structural)
     {
       if (element is null) return false;
 
@@ -36,14 +37,50 @@ namespace RhinoInside.Revit.GH.Components
           return false;
 
         var plane = sketch.SketchPlane.GetPlane().ToPlane();
-        var profile = Rhino.Geometry.Curve.ProjectToPlane(boundary, plane);
+        var profile = Curve.ProjectToPlane(boundary, plane);
 
         if
         (
-          !Rhino.Geometry.Curve.GetDistancesBetweenCurves(profiles[0], profile, Revit.VertexTolerance * Revit.ModelUnits * 0.1, out var max, out var _, out var _, out var _, out var _, out var _) ||
+          !Curve.GetDistancesBetweenCurves(profiles[0], profile, Revit.VertexTolerance * Revit.ModelUnits, out var max, out var _, out var _, out var _, out var _, out var _) ||
           max > Revit.VertexTolerance * Revit.ModelUnits
         )
-          return false;
+        {
+          var segments = boundary.TryGetPolyCurve(out var polyCurve, Revit.AngleTolerance) ?
+            polyCurve.DuplicateSegments() :
+            new Curve[] { boundary };
+
+          var index = 0;
+          var loops = sketch.GetAllModelCurves();
+          foreach (var loop in loops)
+          {
+            if (segments.Length != loop.Count)
+              return false;
+
+            foreach (var edge in loop)
+            {
+              var segment = segments[(++index) % segments.Length];
+              segment.Scale(1.0 / Revit.ModelUnits);
+
+              var curve = default(DB.Curve);
+              if
+              (
+                edge.GeometryCurve is DB.HermiteSpline &&
+                segment.TryGetHermiteSpline(out var points, out var start, out var end, Revit.VertexTolerance)
+              )
+              {
+                var xyz = new DB.XYZ[points.Count];
+                for (int p = 0; p < xyz.Length; p++)
+                  xyz[p] = points[p].ToXYZ(UnitConverter.NoScale);
+
+                using (var tangents = new DB.HermiteSplineTangents() { StartTangent = start.ToXYZ(), EndTangent = end.ToXYZ() })
+                  curve = DB.HermiteSpline.Create(xyz, segment.IsClosed, tangents);
+              }
+              else curve = segment.ToCurve(UnitConverter.NoScale);
+
+              edge.SetGeometryCurve(curve, false);
+            }
+          }
+        }
       }
       else return false;
 
@@ -93,8 +130,6 @@ namespace RhinoInside.Revit.GH.Components
 
       if (!Reuse(ref element, boundary, type.Value, level.Value, structural))
       {
-        var curveArray = boundary.ToCurveArray();
-
         var parametersMask = new DB.BuiltInParameter[]
         {
           DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
@@ -104,10 +139,18 @@ namespace RhinoInside.Revit.GH.Components
           DB.BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL
         };
 
+#if REVIT_2022
+        var curveLoops = new DB.CurveLoop[] { boundary.ToCurveLoop() };
+
+        ReplaceElement(ref element, DB.Floor.Create(doc, curveLoops, type.Value.Id, level.Value.Id, structural, default, 0.0), parametersMask);
+#else
+        var curveArray = boundary.ToCurveArray();
+
         if (type.Value.IsFoundationSlab)
           ReplaceElement(ref element, doc.Create.NewFoundationSlab(curveArray, type.Value, level.Value, structural, DB.XYZ.BasisZ), parametersMask);
         else
           ReplaceElement(ref element, doc.Create.NewFloor(curveArray, type.Value, level.Value, structural, DB.XYZ.BasisZ), parametersMask);
+#endif
       }
 
       if (element != null)
