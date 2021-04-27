@@ -22,6 +22,7 @@ Some of the changes mentioned in sections below, might break your existing Grass
 * Fixed 'Element Host' when working with several Design Options.
 * Fixed a `System.StackOverflowException` when selection Description property on the 'Manage Collection' dialog.
 * Fixed a problem with 'opennurbs_private.manifest' on Windows server editions.
+* Fixed 'Add Wall (Profile)' orientation, now wall faces to external boundary plane normal.
 
 ### Minor Changes
 * Added 'Default 3D View' and 'Close Inactive Views' to te 'View' parameter context menu.
