@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.UI
         name: CommandName,
         iconName: "Ribbon.Grasshopper.CaptureElements.png",
         tooltip: "Capture elements from Revit model and bind to Grasshopper component",
-        url: "https://www.rhino3d.com/inside/revit/beta/guides/rir-grasshopper#element-tracking"
+        url: "guides/rir-grasshopper#element-tracking"
       );
 
       if (ribbonPanel.AddItem(buttonData) is PushButton)

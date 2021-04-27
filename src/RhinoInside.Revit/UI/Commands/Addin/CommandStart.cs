@@ -251,8 +251,8 @@ namespace RhinoInside.Revit.UI
       grasshopperPanel.AddSlideOut();
       CommandGrasshopperPackageManager.CreateUI(grasshopperPanel);
       CommandGrasshopperFolders.CreateUI(grasshopperPanel);
-      CommandGrasshopperCaptureElements.CreateUI(grasshopperPanel);
-      CommandGrasshopperReleaseElements.CreateUI(grasshopperPanel);
+      //CommandGrasshopperCaptureElements.CreateUI(grasshopperPanel);
+      //CommandGrasshopperReleaseElements.CreateUI(grasshopperPanel);
     }
 
     static void CreateGHScriptButtons()

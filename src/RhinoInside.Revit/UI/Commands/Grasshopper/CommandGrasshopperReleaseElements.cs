@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.UI
         name: CommandName,
         iconName: "Ribbon.Grasshopper.ReleaseElements.png",
         tooltip: "Release elements created and tracked by Grasshopper",
-        url: "https://www.rhino3d.com/inside/revit/beta/guides/rir-grasshopper#element-tracking"
+        url: "guides/rir-grasshopper#element-tracking"
       );
 
       if (ribbonPanel.AddItem(buttonData) is PushButton)
