@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.GH.Components
       Optional<string> name
     )
     {
-      SolveOptionalType(ref type, doc, DB.ElementTypeGroup.GridType, nameof(type));
+      SolveOptionalType(doc, ref type, DB.ElementTypeGroup.GridType, nameof(type));
 
       var parametersMask = name.IsMissing ?
         new DB.BuiltInParameter[]

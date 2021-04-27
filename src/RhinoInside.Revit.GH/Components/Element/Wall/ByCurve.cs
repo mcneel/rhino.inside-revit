@@ -131,7 +131,7 @@ namespace RhinoInside.Revit.GH.Components
         ThrowArgumentException(nameof(curve), "Curve must be a horizontal line or arc curve.");
 #endif
 
-      SolveOptionalType(ref type, doc, DB.ElementTypeGroup.WallType, nameof(type));
+      SolveOptionalType(doc, ref type, DB.ElementTypeGroup.WallType, nameof(type));
 
       bool levelIsEmpty = SolveOptionalLevel(doc, curve, ref level, out var bbox);
 

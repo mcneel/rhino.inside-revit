@@ -48,6 +48,11 @@ namespace RhinoInside.Revit.GH.Components.Host
         DA.SetData("Host", Types.HostObject.FromElement(opening.Host));
         return;
       }
+      else if (element is DB.Sketch sketch)
+      {
+        DA.SetData("Host", Types.HostObject.FromElement(sketch.GetHostObject()));
+        return;
+      }
       else if (element.get_Parameter(DB.BuiltInParameter.HOST_ID_PARAM) is DB.Parameter hostId)
       {
         DA.SetData("Host", Types.HostObject.FromElementId(element.Document, hostId.AsElementId()));
@@ -61,7 +66,13 @@ namespace RhinoInside.Revit.GH.Components.Host
         {
           var elementCollector = collector.OfClass(typeof(DB.HostObject));
 
-          if (element.Category.Parent is DB.Category hostCategory)
+          // Element should be at the same Design Option
+          if (element.DesignOption is DB.DesignOption designOption)
+            elementCollector = elementCollector.WherePasses(new DB.ElementDesignOptionFilter(designOption.Id));
+          else
+            elementCollector = elementCollector.WherePasses(new DB.ElementDesignOptionFilter(DB.ElementId.InvalidElementId));
+
+          if (element.Category?.Parent is DB.Category hostCategory)
             elementCollector = elementCollector.OfCategoryId(hostCategory.Id);
 
           var bboxFilter = new DB.BoundingBoxIntersectsFilter(new DB.Outline(bbox.Min, bbox.Max));

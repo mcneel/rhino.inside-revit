@@ -108,76 +108,6 @@ namespace RhinoInside.Revit
       DocumentChanged?.Invoke(sender, args);
     }
 
-    #region Bake Recipe
-    [Obsolete("Since 2021-03-19")]
-    public static void BakeGeometry(IEnumerable<Rhino.Geometry.GeometryBase> geometries, BuiltInCategory categoryToBakeInto = BuiltInCategory.OST_GenericModel)
-    {
-      var doc = ActiveDBDocument;
-      if (doc is null)
-        throw new ArgumentNullException(nameof(ActiveDBDocument));
-
-      if (categoryToBakeInto == BuiltInCategory.INVALID)
-        return;
-
-      foreach (var shapes in geometries.Convert(ShapeEncoder.ToShape))
-        BakeGeometry(doc, shapes, categoryToBakeInto);
-    }
-
-    [Conditional("DEBUG")]
-    static void TraceGeometry(IEnumerable<Rhino.Geometry.GeometryBase> geometries)
-    {
-      var doc = ActiveDBDocument;
-      if (doc is null)
-        return;
-
-      using (var ctx = GeometryEncoder.Context.Push(doc))
-      {
-        using (var collector = new FilteredElementCollector(doc))
-        {
-          var materials = collector.OfClass(typeof(Material)).Cast<Material>();
-          ctx.MaterialId = (materials.Where((x) => x.Name == "Debug").FirstOrDefault()?.Id) ?? ElementId.InvalidElementId;
-        }
-
-        foreach (var shape in geometries.Convert(ShapeEncoder.ToShape))
-          BakeGeometry(doc, shape, BuiltInCategory.OST_GenericModel);
-      }
-    }
-
-    static void BakeGeometry(Document doc, IEnumerable<GeometryObject> geometryToBake, BuiltInCategory categoryToBakeInto)
-    {
-      try
-      {
-        var geometryList = new List<GeometryObject>();
-
-        // DirectShape only accepts those types and no nulls
-        foreach (var g in geometryToBake)
-        {
-          switch (g)
-          {
-            case Point p: geometryList.Add(p); break;
-            case Curve c: geometryList.Add(c); break;
-            case Solid s: geometryList.Add(s); break;
-            case Mesh m: geometryList.Add(m); break;
-          }
-        }
-
-        if (geometryList.Count > 0)
-        {
-          var category = new ElementId(categoryToBakeInto);
-          if (!DirectShape.IsValidCategoryId(category, doc))
-            category = new ElementId(BuiltInCategory.OST_GenericModel);
-
-          var ds = DirectShape.CreateElement(doc, category);
-          ds.SetShape(geometryList);
-        }
-      }
-      catch (Exception e)
-      {
-        Debug.Fail(e.Source, e.Message);
-      }
-    }
-    #endregion
-
     #region Idling Actions
     private static Queue<Action> idlingActions = new Queue<Action>();
     internal static void EnqueueIdlingAction(Action action)
@@ -267,12 +197,6 @@ namespace RhinoInside.Revit
     public static IntPtr MainWindowHandle => MainWindow.Handle;
 
     internal static Screen MainScreen => ActiveUIApplication?.GetRevitScreen() ?? Screen.FromHandle(MainWindowHandle);
-
-    [Obsolete("Since 2021-03-19")]
-    public static string CurrentUsersDataFolderPath => ApplicationUI.ControlledApplication.GetCurrentUsersDataFolderPath();
-
-    [Obsolete("Since 2021-03-27")]
-    public static Autodesk.Revit.UI.UIControlledApplication       ApplicationUI { get; internal set; }
 
     public static Autodesk.Revit.UI.UIApplication                 ActiveUIApplication => AddIn.Host.Value as Autodesk.Revit.UI.UIApplication;
     public static Autodesk.Revit.ApplicationServices.Application  ActiveDBApplication => ActiveUIApplication?.Application;

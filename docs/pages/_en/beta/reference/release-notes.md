@@ -10,6 +10,33 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html version="0.5" time="04/27/2021" %}
+
+### New Features
+* Now 'Add Component (Location)' tries to reuse previous iteration element.
+* Now 'Add Floor' tries to reuse previous iteration element.
+* Now 'Add Roof' tries to reuse previous iteration element.
+* Added ability to specify imported 3DM to project origin and to import non visible layers.
+
+### Fixes
+* Now Transaction warnings and errors are displayed in the component balloon only.
+* Fixed 'Element Host' when working with several Design Options.
+* Fixed a `System.StackOverflowException` when selection Description property on the 'Manage Collection' dialog.
+* Fixed a problem with 'opennurbs_private.manifest' on Windows server editions.
+* Fixed 'Add Wall (Profile)' orientation, now wall faces to external boundary plane normal.
+
+### Minor Changes
+* Added 'Default 3D View' and 'Close Inactive Views' to te 'View' parameter context menu.
+* Implemented direct casting from 'Material' to 'Colour'.
+* Now 'Element Host' works with `DB.Sketch` elements.
+
+### API
+* Removed Obsolete `Revit.ApplicationUI` and `Revit.CurrentUsersDataFolderPath` properties.
+* Removed Obsolete `Revit.BakeGeometry` method.
+* Added `DB.Parameter.GetTypeId` extension method.
+* Added `DB.Curve.TryGetPlane` extension method.
+* Now `DB.Mesh.ToRhino` returns a mesh with normals.
+
 {% include ltr/release-header.html version="0.4" time="04/20/2021" %}
 
 ### New Features

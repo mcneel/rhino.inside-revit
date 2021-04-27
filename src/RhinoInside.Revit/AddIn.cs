@@ -121,7 +121,7 @@ namespace RhinoInside.Revit
     internal static UIX.UIHostApplication Host
     {
       get => host;
-      private set { host?.Dispose(); host = value; }
+      private set { if (!ReferenceEquals(host, value)) { host?.Dispose(); host = value; } }
     }
 
     protected override Result OnStartup(UIControlledApplication uiCtrlApp)
@@ -142,7 +142,6 @@ namespace RhinoInside.Revit
 
       AssemblyResolver.Enabled = true;
       Host = uiCtrlApp;
-      Revit.ApplicationUI = uiCtrlApp;
 
       // Initialize DB
       {
@@ -215,8 +214,6 @@ namespace RhinoInside.Revit
       }
       finally
       {
-        Revit.ApplicationUI = null;
-
         Host = null;
         AssemblyResolver.Enabled = false;
       }
