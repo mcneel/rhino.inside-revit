@@ -27,13 +27,17 @@ namespace RhinoInside.Revit.UI
     readonly DB.Document Document;
     readonly ImageView imageView = new ImageView();
     readonly DropDown fileSelector = new DropDown();
-    readonly Button fileBrowser = new Button() { Text = "…" };
+    readonly Button fileBrowser = new Button() { Text = "â€¦" };
+    readonly DropDown placementSelector = new DropDown();
+    readonly DropDown layersSelector = new DropDown();
     readonly DropDown categorySelector = new DropDown();
     readonly DropDown worksetSelector = new DropDown() { Enabled = false };
     readonly ComboBox familyName = new ComboBox() { AutoComplete = true };
     readonly ComboBox typeName = new ComboBox() { AutoComplete = true };
 
     public string FileName => fileSelector.SelectedKey;
+    public DB.ImportPlacement Placement => (DB.ImportPlacement) Enum.Parse(typeof(DB.ImportPlacement), placementSelector.SelectedKey);
+    public bool VisibleLayersOnly => bool.Parse(layersSelector.SelectedKey);
     public DB.ElementId CategoryId => new DB.ElementId(int.Parse(categorySelector.SelectedKey));
     public DB.WorksetId WorksetId => worksetSelector.SelectedKey is null ? DB.WorksetId.InvalidWorksetId: new DB.WorksetId(int.Parse(worksetSelector.SelectedKey));
 #if REVIT_2022
@@ -58,7 +62,7 @@ namespace RhinoInside.Revit.UI
       fileSelector.SelectedKeyChanged += FileSelector_SelectedKeyChanged;
       fileSelector.SelectedIndex = 0;
 
-      fileBrowser.Text = "Browse…";
+      fileBrowser.Text = "Browseâ€¦";
       fileBrowser.Click += FileBrowser_Click;
 
       for (int i = 0; i < 10; ++i)
@@ -66,6 +70,13 @@ namespace RhinoInside.Revit.UI
         var fileName = AddinOptions.Current.CustomOptions.Get(ImportOptions, $"FileNameMRU{i}");
         if (File.Exists(fileName))
           fileSelector.Items.Add(Path.GetFileName(fileName), fileName);
+      }
+
+      // Layers
+      {
+        layersSelector.Items.Add("All", false.ToString());
+        layersSelector.Items.Add("Visible", true.ToString());
+        layersSelector.SelectedIndex = 1;
       }
 
       if (Document.IsFamilyDocument)
@@ -76,10 +87,22 @@ namespace RhinoInside.Revit.UI
 
     void InitLayoutFamily()
     {
-      var category = Document.OwnerFamily.FamilyCategory;
-      categorySelector.Enabled = false;
-      categorySelector.Items.Add(new ListItem { Key = category.Id.ToString(), Text = category.Name, Tag = category });
-      categorySelector.SelectedIndex = 0;
+      // Placement
+      {
+        //placementSelector.Items.Add("Center to Origin", DB.ImportPlacement.Centered.ToString());
+        placementSelector.Items.Add("Origin to Origin", DB.ImportPlacement.Origin.ToString());
+        //placementSelector.Items.Add("Shared Coordinates to Origin", DB.ImportPlacement.Shared.ToString());
+        placementSelector.Items.Add("Base Point to Origin", DB.ImportPlacement.Site.ToString());
+        placementSelector.SelectedIndex = 0;
+      }
+
+      // Category
+      {
+        var category = Document.OwnerFamily.FamilyCategory;
+        categorySelector.Enabled = false;
+        categorySelector.Items.Add(new ListItem { Key = category.Id.ToString(), Text = category.Name, Tag = category });
+        categorySelector.SelectedIndex = 0;
+      }
 
       Content = new TableLayout
       {
@@ -105,10 +128,9 @@ namespace RhinoInside.Revit.UI
                       { new TableCell(fileSelector, true), new TableCell(fileBrowser, false) })
                     },
                   },
-                  new TableRow
-                  {
-                    Cells = { new Label { Text = "Category" }, categorySelector }
-                  },
+                  new TableRow { Cells = { new Label { Text = "Positioning" }, placementSelector } },
+                  new TableRow { Cells = { new Label { Text = "Layers" }, layersSelector } },
+                  new TableRow { Cells = { new Label { Text = "Category" }, categorySelector } },
                 }
               }
             }
@@ -119,6 +141,15 @@ namespace RhinoInside.Revit.UI
 
     void InitLayoutProject()
     {
+      // Placement
+      {
+        //placementSelector.Items.Add("Center to Center", DB.ImportPlacement.Centered.ToString());
+        placementSelector.Items.Add("Origin to Origin", DB.ImportPlacement.Origin.ToString());
+        //placementSelector.Items.Add("By Shared Coordinates", DB.ImportPlacement.Shared.ToString());
+        placementSelector.Items.Add("Base Point to Base Point", DB.ImportPlacement.Site.ToString());
+        placementSelector.SelectedIndex = 0;
+      }
+
       // Category
       {
         var directShapeCategories = BuiltInCategoryExtension.BuiltInCategories.
@@ -194,24 +225,14 @@ namespace RhinoInside.Revit.UI
                       { new TableCell(fileSelector, true), new TableCell(fileBrowser, false) })
                     },
                   },
-                  new TableRow
-                  {
-                    Cells = { new Label { Text = "Category" }, categorySelector }
-                  },
-                  new TableRow
-                  {
-                    Cells = { new Label { Text = "Workset" }, worksetSelector }
-                  },
+                  new TableRow { Cells = { new Label { Text = "Positioning" }, placementSelector } },
+                  new TableRow { Cells = { new Label { Text = "Layers" }, layersSelector } },
+                  new TableRow { Cells = { new Label { Text = "Category" }, categorySelector } },
+                  new TableRow { Cells = { new Label { Text = "Workset" }, worksetSelector } },
 #if REVIT_2022
-                  new TableRow
-                  {
-                    Cells = { new Label { Text = "Family name" }, familyName }
-                  },
+                  new TableRow { Cells = { new Label { Text = "Family name" }, familyName } },
 #endif
-                  new TableRow
-                  {
-                    Cells = { new Label { Text = "Type name" }, typeName }
-                  },
+                  new TableRow { Cells = { new Label { Text = "Type name" }, typeName } },
                 }
               }
             }

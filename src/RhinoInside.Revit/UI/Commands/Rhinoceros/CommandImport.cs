@@ -323,6 +323,46 @@ namespace RhinoInside.Revit.UI
     }
     #endregion
 
+    static Point3d ImportPlacement(File3dm model, DB.ImportPlacement placement)
+    {
+      switch (placement)
+      {
+        case DB.ImportPlacement.Site:
+          return model.Settings.ModelBasepoint;
+
+        case DB.ImportPlacement.Origin:
+          return Point3d.Origin;
+
+        case DB.ImportPlacement.Centered:
+          throw new NotImplementedException();
+
+        case DB.ImportPlacement.Shared:
+          throw new NotImplementedException();
+      }
+
+      throw new NotImplementedException();
+    }
+
+    static DB.XYZ ImportPlacement(DB.Document doc, DB.ImportPlacement placement)
+    {
+      switch (placement)
+      {
+        case DB.ImportPlacement.Site:
+          return BasePointExtension.GetProjectBasePoint(doc).GetPosition();
+
+        case DB.ImportPlacement.Origin:
+          return DB.XYZ.Zero;
+
+        case DB.ImportPlacement.Centered:
+          throw new NotImplementedException();
+
+        case DB.ImportPlacement.Shared:
+          return BasePointExtension.GetSurveyPoint(doc).GetPosition();
+      }
+
+      throw new NotImplementedException();
+    }
+
     #region Project
     static IList<DB.GeometryObject> ImportObject
     (
@@ -331,11 +371,13 @@ namespace RhinoInside.Revit.UI
       GeometryBase geometry,
       ObjectAttributes attributes,
       Dictionary<string, DB.Material> materials,
-      double scaleFactor
+      double scaleFactor,
+      Vector3d translationVector,
+      bool visibleLayersOnly
     )
     {
       var layer = model.AllLayers.FindIndex(attributes.LayerIndex);
-      if (layer?.IsVisible ?? false)
+      if (visibleLayersOnly || layer?.IsVisible == true)
       {
         using (var ctx = GeometryEncoder.Context.Push(doc))
         {
@@ -356,6 +398,9 @@ namespace RhinoInside.Revit.UI
               }
           }
 
+          if (translationVector != Vector3d.Zero)
+            geometry.Translate(translationVector);
+
           if (geometry is InstanceReferenceGeometry instance)
           {
             if (model.AllInstanceDefinitions.FindId(instance.ParentIdefId) is InstanceDefinitionGeometry definition)
@@ -368,7 +413,7 @@ namespace RhinoInside.Revit.UI
                 var GNodes = objectIds.
                   Select(x => model.Objects.FindId(x)).
                   Cast<File3dmObject>().
-                  SelectMany(x => ImportObject(doc, model, x.Geometry, x.Attributes, materials, scaleFactor));
+                  SelectMany(x => ImportObject(doc, model, x.Geometry, x.Attributes, materials, scaleFactor, Vector3d.Zero, visibleLayersOnly));
 
                 library.AddDefinition(definitionId, GNodes.ToArray());
               }
@@ -387,6 +432,8 @@ namespace RhinoInside.Revit.UI
     (
       DB.Document doc,
       string filePath,
+      DB.ImportPlacement placement,
+      bool visibleLayersOnly,
       DB.ElementId categoryId,
       DB.WorksetId worksetId,
       string familyName,
@@ -442,7 +489,20 @@ namespace RhinoInside.Revit.UI
                 if (!obj.Attributes.Visible)
                   continue;
 
-                var geometryList = ImportObject(doc, model, obj.Geometry, obj.Attributes, materials, scaleFactor).ToArray();
+                if (visibleLayersOnly && model.AllLayers.FindIndex(obj.Attributes.LayerIndex)?.IsVisible != true)
+                  continue;
+
+                var geometryList = ImportObject
+                (
+                  doc,
+                  model,
+                  obj.Geometry,
+                  obj.Attributes,
+                  materials,
+                  scaleFactor,
+                  Point3d.Origin - model.Settings.ModelBasepoint,
+                  visibleLayersOnly
+                ).ToArray();
                 if (geometryList?.Length > 0)
                 {
                   try { type.AppendShape(geometryList); }
@@ -457,12 +517,22 @@ namespace RhinoInside.Revit.UI
               if (!library.ContainsType(type.UniqueId))
                 library.AddDefinitionType(type.UniqueId, type.Id);
 
-              ds.SetShape(DB.DirectShape.CreateGeometryInstance(doc, type.UniqueId, DB.Transform.Identity));
+              var transform = DB.Transform.CreateTranslation(model.Settings.ModelBasepoint.ToXYZ(scaleFactor));
+              ds.SetShape(DB.DirectShape.CreateGeometryInstance(doc, type.UniqueId, transform));
 
               if (doc.IsWorkshared)
               {
                 if (ds.GetParameter(ParameterId.ElemPartitionParam) is DB.Parameter worksetParam)
                   worksetParam.Set(worksetId.IntegerValue);
+              }
+
+              {
+                var from = ImportPlacement(model, placement).ToXYZ(scaleFactor);
+                var to = ImportPlacement(doc, placement);
+                var placementTranslation = to - from;
+
+                if (!placementTranslation.IsZeroLength())
+                  DB.ElementTransformUtils.MoveElement(doc, ds.Id, placementTranslation);
               }
 
               if (trans.Commit() == DB.TransactionStatus.Committed)
@@ -490,12 +560,15 @@ namespace RhinoInside.Revit.UI
     static Result Import3DMFileToFamily
     (
       DB.Document doc,
-      string filePath
+      string filePath,
+      DB.ImportPlacement placement,
+      bool visibleLayersOnly
     )
     {
       using (var model = File3dm.Read(filePath))
       {
         var scaleFactor = RhinoMath.UnitScale(model.Settings.ModelUnitSystem, UnitConverter.HostUnitSystem);
+        var translationVector = Point3d.Origin - ImportPlacement(model, placement);
 
         using (var trans = new DB.Transaction(doc, "Import 3D Model"))
         {
@@ -533,12 +606,15 @@ namespace RhinoInside.Revit.UI
                 continue;
 
               var layer = model.AllLayers.FindIndex(obj.Attributes.LayerIndex);
-              if (layer?.IsVisible != true)
+              if (visibleLayersOnly && layer?.IsVisible != true)
                 continue;
 
               var geometry = obj.Geometry;
               if (geometry is Extrusion extrusion) geometry = extrusion.ToBrep();
               else if (geometry is SubD subD) geometry = subD.ToBrep(SubDToBrepOptions.Default);
+
+              if (translationVector != Vector3d.Zero)
+                geometry.Translate(translationVector);
 
               try
               {
@@ -649,7 +725,9 @@ namespace RhinoInside.Revit.UI
               return Import3DMFileToFamily
               (
                 doc,
-                options.FileName
+                options.FileName,
+                options.Placement,
+                options.VisibleLayersOnly
               );
             }
             else
@@ -664,6 +742,8 @@ namespace RhinoInside.Revit.UI
               (
                 doc,
                 options.FileName,
+                options.Placement,
+                options.VisibleLayersOnly,
                 options.CategoryId,
                 options.WorksetId,
                 options.FamilyName,
