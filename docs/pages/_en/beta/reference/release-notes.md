@@ -15,6 +15,7 @@ Some of the changes mentioned in sections below, might break your existing Grass
 ### New Features
 * Now 'Add Component (Location)' tries to reuse previous iteration element.
 * Now 'Add Floor' tries to reuse previous iteration element.
+* Now 'Add Roof' tries to reuse previous iteration element.
 * Added ability to specify imported 3DM to project origin and to import non visible layers.
 
 ### Fixes

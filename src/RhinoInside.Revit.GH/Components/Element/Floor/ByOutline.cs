@@ -45,9 +45,9 @@ namespace RhinoInside.Revit.GH.Components
           max > Revit.VertexTolerance * Revit.ModelUnits
         )
         {
-          var segments = boundary.TryGetPolyCurve(out var polyCurve, Revit.AngleTolerance) ?
+          var segments = profile.TryGetPolyCurve(out var polyCurve, Revit.AngleTolerance) ?
             polyCurve.DuplicateSegments() :
-            new Curve[] { boundary };
+            new Curve[] { profile };
 
           var index = 0;
           var loops = sketch.GetAllModelCurves();
@@ -104,7 +104,7 @@ namespace RhinoInside.Revit.GH.Components
       DB.Document doc,
       ref DB.Floor element,
 
-      Rhino.Geometry.Curve boundary,
+      Curve boundary,
       Optional<DB.FloorType> type,
       Optional<DB.Level> level,
       [Optional] bool structural
@@ -112,9 +112,10 @@ namespace RhinoInside.Revit.GH.Components
     {
       if
       (
+        boundary.IsShort(Revit.ShortCurveTolerance * Revit.ModelUnits) ||
         !boundary.IsClosed ||
-        !boundary.TryGetPlane(out var boundaryPlane, Revit.VertexTolerance) ||
-        boundaryPlane.ZAxis.IsParallelTo(Rhino.Geometry.Vector3d.ZAxis) == 0
+        !boundary.TryGetPlane(out var boundaryPlane, Revit.VertexTolerance * Revit.ModelUnits) ||
+        boundaryPlane.ZAxis.IsParallelTo(Vector3d.ZAxis) == 0
       )
         ThrowArgumentException(nameof(boundary), "Boundary must be an horizontal planar closed curve.");
 
@@ -126,7 +127,11 @@ namespace RhinoInside.Revit.GH.Components
 
       SolveOptionalType(doc, ref type, DB.ElementTypeGroup.FloorType, nameof(type));
 
-      SolveOptionalLevel(doc, boundary, ref level, out var _);
+      SolveOptionalLevel(doc, boundary, ref level, out var bbox);
+
+      var orientation = boundary.ClosedCurveOrientation(Plane.WorldXY);
+      if (orientation == CurveOrientation.CounterClockwise)
+        boundary.Reverse();
 
       if (!Reuse(ref element, boundary, type.Value, level.Value, structural))
       {
@@ -155,8 +160,7 @@ namespace RhinoInside.Revit.GH.Components
 
       if (element != null)
       {
-        var boundaryBBox = boundary.GetBoundingBox(true);
-        var floorHeightabovelevel = boundaryBBox.Min.Z / Revit.ModelUnits - level.Value.GetHeight();
+        var floorHeightabovelevel = bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight();
         if
         (
           element.GetParameter(External.DB.Schemas.ParameterId.FloorHeightabovelevelParam) is DB.Parameter floorHeightabovelevelParam &&
