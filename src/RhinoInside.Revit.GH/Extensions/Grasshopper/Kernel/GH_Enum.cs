@@ -628,9 +628,10 @@ namespace RhinoInside.Revit.GH.Parameters
         {
           if (listBox.Items[listBox.SelectedIndex] is T value)
           {
-            RecordUndoEvent($"Set: {value}");
+            RecordPersistentDataEvent($"Set: {value}");
             PersistentData.Clear();
             PersistentData.Append(value.Duplicate() as T);
+            OnObjectChanged(GH_ObjectEventType.PersistentData);
           }
         }
 
@@ -644,9 +645,10 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         if (item.Tag is T value)
         {
-          RecordUndoEvent($"Set: {value}");
+          RecordPersistentDataEvent($"Set: {value}");
           PersistentData.Clear();
           PersistentData.Append(value.Duplicate() as T);
+          OnObjectChanged(GH_ObjectEventType.PersistentData);
 
           ExpireSolution(true);
         }

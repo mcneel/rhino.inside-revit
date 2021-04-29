@@ -164,9 +164,10 @@ namespace RhinoInside.Revit.GH.Parameters
         {
           if (listBox.Items[listBox.SelectedIndex] is IGH_GooProxy value)
           {
-            RecordUndoEvent($"Set: {value}");
+            RecordPersistentDataEvent($"Set: {value}");
             PersistentData.Clear();
             PersistentData.Append(value.ProxyOwner as Types.ParameterKey);
+            OnObjectChanged(GH_ObjectEventType.PersistentData);
           }
         }
 

@@ -81,9 +81,10 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       if (sender is ListBox listBox)
       {
-        RecordUndoEvent($"Set: {NickName}");
+        RecordPersistentDataEvent($"Set: {NickName}");
         PersistentData.Clear();
         PersistentData.AppendRange(listBox.SelectedItems.OfType<Types.Level>());
+        OnObjectChanged(GH_ObjectEventType.PersistentData);
 
         ExpireSolution(true);
       }
@@ -163,9 +164,10 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       if (sender is ListBox listBox)
       {
-        RecordUndoEvent($"Set: {NickName}");
+        RecordPersistentDataEvent($"Set: {NickName}");
         PersistentData.Clear();
         PersistentData.AppendRange(listBox.SelectedItems.OfType<Types.Grid>());
+        OnObjectChanged(GH_ObjectEventType.PersistentData);
 
         ExpireSolution(true);
       }

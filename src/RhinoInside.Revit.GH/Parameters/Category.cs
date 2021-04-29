@@ -111,9 +111,10 @@ namespace RhinoInside.Revit.GH.Parameters
         {
           if (listBox.Items[listBox.SelectedIndex] is Types.Category value)
           {
-            RecordUndoEvent($"Set: {value}");
+            RecordPersistentDataEvent($"Set: {value}");
             PersistentData.Clear();
             PersistentData.Append(value);
+            OnObjectChanged(GH_ObjectEventType.PersistentData);
           }
         }
 

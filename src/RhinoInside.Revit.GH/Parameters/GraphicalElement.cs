@@ -514,7 +514,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     private void Menu_InternaliseData(object sender, EventArgs e)
     {
-      RecordUndoEvent("Internalise data");
+      RecordPersistentDataEvent("Internalise data");
 
       PersistentData.Clear();
       PersistentData.MergeStructure(m_data.Duplicate());
