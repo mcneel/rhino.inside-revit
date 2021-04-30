@@ -27,7 +27,10 @@ namespace RhinoInside.Revit.GH.Parameters
       get
       {
         var current = (SourceCount == 0 && PersistentDataCount == 1) ? PersistentData.get_FirstItem(true) : default;
-        return (current?.LoadElement() == true ? current : default) as T;
+
+        return current is Types.IGH_ReferenceData reference && !reference.LoadReferencedData() ?
+          default :
+          current;
       }
     }
 

@@ -81,12 +81,12 @@ namespace RhinoInside.Revit.GH.Types
     DB.Reference reference;
     public override DB.Reference Reference => reference;
 
-    public override bool IsElementLoaded => Document is object && Reference is object;
-    public override bool LoadElement()
+    public override bool IsReferencedDataLoaded => Document is object && Reference is object;
+    public override bool LoadReferencedData()
     {
-      if (IsReferencedElement && !IsElementLoaded)
+      if (IsReferencedData && !IsReferencedDataLoaded)
       {
-        UnloadElement();
+        UnloadReferencedData();
 
         if (Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var document))
         {
@@ -99,15 +99,15 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
 
-      return IsElementLoaded;
+      return IsReferencedDataLoaded;
     }
 
-    public override void UnloadElement()
+    public override void UnloadReferencedData()
     {
-      if (IsReferencedElement)
+      if (IsReferencedData)
         reference = default;
 
-      base.UnloadElement();
+      base.UnloadReferencedData();
     }
 
     protected override object FetchValue()
@@ -127,14 +127,14 @@ namespace RhinoInside.Revit.GH.Types
       get => Guid.Empty;
       set { if (value != Guid.Empty) throw new InvalidOperationException(); }
     }
-    bool IGH_GeometricGoo.IsReferencedGeometry => IsReferencedElement;
-    bool IGH_GeometricGoo.IsGeometryLoaded => IsElementLoaded;
+    bool IGH_GeometricGoo.IsReferencedGeometry => IsReferencedData;
+    bool IGH_GeometricGoo.IsGeometryLoaded => IsReferencedDataLoaded;
 
-    void IGH_GeometricGoo.ClearCaches() => UnloadElement();
+    void IGH_GeometricGoo.ClearCaches() => UnloadReferencedData();
     IGH_GeometricGoo IGH_GeometricGoo.DuplicateGeometry() => (IGH_GeometricGoo) MemberwiseClone();
     public abstract BoundingBox GetBoundingBox(Transform xform);
-    bool IGH_GeometricGoo.LoadGeometry(                  ) => IsElementLoaded || LoadElement();
-    bool IGH_GeometricGoo.LoadGeometry(Rhino.RhinoDoc doc) => IsElementLoaded || LoadElement();
+    bool IGH_GeometricGoo.LoadGeometry(                  ) => IsReferencedDataLoaded || LoadReferencedData();
+    bool IGH_GeometricGoo.LoadGeometry(Rhino.RhinoDoc doc) => IsReferencedDataLoaded || LoadReferencedData();
     IGH_GeometricGoo IGH_GeometricGoo.Transform(Transform xform) => null;
     IGH_GeometricGoo IGH_GeometricGoo.Morph(SpaceMorph xmorph) => null;
     #endregion

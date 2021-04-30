@@ -69,10 +69,10 @@ namespace RhinoInside.Revit.GH.Types
       get => Guid.Empty;
       set { if (value != Guid.Empty) throw new InvalidOperationException(); }
     }
-    bool IGH_GeometricGoo.IsReferencedGeometry => IsReferencedElement;
-    bool IGH_GeometricGoo.IsGeometryLoaded => IsElementLoaded;
+    bool IGH_GeometricGoo.IsReferencedGeometry => IsReferencedData;
+    bool IGH_GeometricGoo.IsGeometryLoaded => IsReferencedDataLoaded;
 
-    void IGH_GeometricGoo.ClearCaches() => UnloadElement();
+    void IGH_GeometricGoo.ClearCaches() => UnloadReferencedData();
     IGH_GeometricGoo IGH_GeometricGoo.DuplicateGeometry() => (IGH_GeometricGoo) MemberwiseClone();
     public virtual BoundingBox GetBoundingBox(Transform xform)
     {
@@ -86,8 +86,8 @@ namespace RhinoInside.Revit.GH.Types
       return BoundingBox.Unset;
     }
 
-    bool IGH_GeometricGoo.LoadGeometry() => IsElementLoaded || LoadElement();
-    bool IGH_GeometricGoo.LoadGeometry(Rhino.RhinoDoc doc) => IsElementLoaded || LoadElement();
+    bool IGH_GeometricGoo.LoadGeometry() => IsReferencedDataLoaded || LoadReferencedData();
+    bool IGH_GeometricGoo.LoadGeometry(Rhino.RhinoDoc doc) => IsReferencedDataLoaded || LoadReferencedData();
     IGH_GeometricGoo IGH_GeometricGoo.Transform(Transform xform) => null;
     IGH_GeometricGoo IGH_GeometricGoo.Morph(SpaceMorph xmorph) => null;
     #endregion

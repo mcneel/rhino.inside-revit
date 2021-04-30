@@ -25,14 +25,9 @@ namespace RhinoInside.Revit.GH.Types
 
     Guid DocumentGUID { get; }
     string UniqueID { get; }
-
-    bool IsReferencedElement { get; }
-    bool IsElementLoaded { get; }
-    bool LoadElement();
-    void UnloadElement();
   }
 
-  public abstract class ElementId : ReferenceObject, IGH_ElementId, IEquatable<ElementId>, IGH_QuickCast
+  public abstract class ElementId : ReferenceObject, IGH_ReferenceData, IGH_ElementId, IEquatable<ElementId>, IGH_QuickCast
   {
     #region System.Object
     public bool Equals(ElementId other) => other is object &&
@@ -44,12 +39,12 @@ namespace RhinoInside.Revit.GH.Types
     {
       var TypeName = $"Revit {((IGH_Goo) this).TypeName}";
 
-      if (!IsReferencedElement)
+      if (!IsReferencedData)
         return $"{TypeName} : {DisplayName}";
 
       var tip = IsValid ?
       (
-        IsElementLoaded ?
+        IsReferencedDataLoaded ?
         $"{TypeName} : {DisplayName}" :
         $"Unresolved {TypeName} : {UniqueID}"
       ) :
@@ -70,7 +65,7 @@ namespace RhinoInside.Revit.GH.Types
     #region GH_ISerializable
     protected override bool Read(GH_IReader reader)
     {
-      UnloadElement();
+      UnloadReferencedData();
 
       var documentGUID = Guid.Empty;
       reader.TryGetGuid("DocumentGUID", ref documentGUID);
@@ -241,7 +236,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (base.Value is null && IsElementLoaded)
+        if (base.Value is null && IsReferencedDataLoaded)
           base.Value = FetchValue();
 
         return base.Value;
@@ -250,23 +245,26 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
+    #region IGH_ReferencedData
+    public bool IsReferencedData => DocumentGUID != Guid.Empty;
+    public abstract bool IsReferencedDataLoaded { get; }
+
+    public abstract bool LoadReferencedData();
+    protected abstract object FetchValue();
+    public virtual void UnloadReferencedData()
+    {
+      ResetValue();
+
+      if (IsReferencedData)
+        Document = default;
+    }
+    #endregion
+
     #region IGH_ElementId
     public abstract DB.Reference Reference { get; }
 
     public Guid DocumentGUID { get; protected set; } = Guid.Empty;
     public string UniqueID { get; protected set; } = string.Empty;
-    public bool IsReferencedElement => DocumentGUID != Guid.Empty;
-
-    public abstract bool IsElementLoaded { get; }
-    public abstract bool LoadElement();
-    protected abstract object FetchValue();
-    public virtual void UnloadElement()
-    {
-      ResetValue();
-
-      if (IsReferencedElement)
-        Document = default;
-    }
     #endregion
 
     #region IGH_QuickCast
@@ -324,7 +322,7 @@ namespace RhinoInside.Revit.GH.Types
     protected ElementId(DB.Document doc, object value) : base(doc, value) { }
 
     #region Properties
-    public override string DisplayName => IsReferencedElement ?
+    public override string DisplayName => IsReferencedData ?
       Id is null ? "INVALID" : Id.IntegerValue.ToString() :
       "<None>";
     #endregion

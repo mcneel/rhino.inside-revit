@@ -82,10 +82,10 @@ namespace RhinoInside.Revit.GH.Types
 
       public Proxy(Category c) : base(c) { (this as IGH_GooProxy).UserString = FormatInstance(); }
 
-      public override bool IsParsable() => !owner.IsReferencedElement || owner.Document is object;
+      public override bool IsParsable() => !owner.IsReferencedData || owner.Document is object;
       public override string FormatInstance()
       {
-        if (owner.IsReferencedElement && owner.IsElementLoaded)
+        if (owner.IsReferencedData && owner.IsReferencedDataLoaded)
           return owner.DisplayName;
 
         return base.FormatInstance();
@@ -112,8 +112,8 @@ namespace RhinoInside.Revit.GH.Types
         else
           return false;
 
-        owner.UnloadElement();
-        return owner.LoadElement();
+        owner.UnloadReferencedData();
+        return owner.LoadReferencedData();
       }
 
       #region Misc
@@ -162,7 +162,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region DocumentObject
-    public new DB.Category Value => IsElementLoaded ? Document.GetCategory(Id) : default;
+    public new DB.Category Value => IsReferencedDataLoaded ? Document.GetCategory(Id) : default;
 
     public override string DisplayName
     {
