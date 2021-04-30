@@ -42,7 +42,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (self?.Id != other?.Id)
         return false;
 
-      return self.Document.Equals(other);
+      return self.Document.Equals(other.Document);
     }
   }
 
