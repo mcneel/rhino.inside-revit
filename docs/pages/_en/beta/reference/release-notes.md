@@ -10,6 +10,11 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html version="0.6" time="04/30/2021" %}
+
+### Minor Changes
+* Added pattern matching capabilities to 'Query Element Parameters'.
+
 {% include ltr/release-header.html version="0.5" time="04/27/2021" %}
 
 ### New Features

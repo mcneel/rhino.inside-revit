@@ -470,7 +470,10 @@ namespace RhinoInside.Revit.GH.Components
         {
           foreach (var param in group.OrderBy(x => x.Id.IntegerValue))
           {
-            if (!noFilterName && parameterName != param.Definition?.Name)
+            if (string.IsNullOrEmpty(param.Definition.Name))
+              continue;
+
+            if (!noFilterName && !param.Definition.Name.IsSymbolNameLike(parameterName))
               continue;
 
             if (!noFilterGroup && parameterGroup != (param.Definition?.GetGroupType() ?? ParameterGroup.Empty))
