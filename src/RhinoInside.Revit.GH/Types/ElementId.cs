@@ -134,7 +134,8 @@ namespace RhinoInside.Revit.GH.Types
       public string Document => owner.Document.GetFilePath();
       [System.ComponentModel.Description("The Guid of document this element belongs to.")]
       public Guid DocumentGUID => owner.DocumentGUID;
-      protected virtual bool IsValidId(DB.Document doc, DB.ElementId id) => true;
+      protected virtual bool IsValidId(DB.Document doc, DB.ElementId id) =>
+        owner.GetType() == Element.FromElementId(doc, id).GetType();
 
       [System.ComponentModel.Description("A stable unique identifier for an element within the document.")]
       public string UniqueID => owner.UniqueID;

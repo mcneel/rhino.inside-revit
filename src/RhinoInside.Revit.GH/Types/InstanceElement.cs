@@ -25,7 +25,7 @@ namespace RhinoInside.Revit.GH.Types
     protected override bool SetValue(DB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(DB.Element element)
     {
-      if (element.Category is null)
+      if (element?.Category is null)
         return false;
 
       return GeometricElement.IsValidElement(element);
