@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.Win32.SafeHandles;
 
 namespace Rhino.Geometry
 {
@@ -768,4 +769,31 @@ namespace Rhino.DocObjects.Tables
       return false;
     }
   }
+}
+
+namespace Rhino.Display
+{
+  static class RhionViewExtension
+  {
+    public static bool BringToFront(this RhinoView view)
+    {
+      var viewWindow = new WindowHandle(view.Handle);
+      if (!viewWindow.IsZero)
+      {
+        var topMost = viewWindow;
+        while (!topMost.Parent.IsZero)
+        {
+          topMost = topMost.Parent;
+          //if (view.Floating) break;
+          if (!viewWindow.Parent.Owner.IsZero) break;
+        }
+
+        if (topMost.Visible == false) topMost.Visible = true;
+        return topMost.BringToFront();
+      }
+
+      return false;
+    }
+  }
+
 }

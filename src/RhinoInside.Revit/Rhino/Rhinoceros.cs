@@ -9,6 +9,7 @@ using System.Windows.Input;
 using Microsoft.Win32.SafeHandles;
 using Rhino;
 using Rhino.Commands;
+using Rhino.Display;
 using Rhino.Geometry;
 using Rhino.Input;
 using Rhino.PlugIns;
@@ -512,46 +513,50 @@ namespace RhinoInside.Revit
         return;
       }
 
-      bool imperial = rhinoDoc.ModelUnitSystem == UnitSystem.Feet || rhinoDoc.ModelUnitSystem == UnitSystem.Inches;
+      foreach (var view in rhinoDoc.Views)
+        AdjustViewCPlane(view.MainViewport);
+    }
 
-      var modelGridSpacing = imperial ?
-      1.0 * UnitScale(UnitSystem.Yards, rhinoDoc.ModelUnitSystem) :
-      1.0 * UnitScale(UnitSystem.Meters, rhinoDoc.ModelUnitSystem);
-
-      var modelSnapSpacing = imperial ?
-      1 / 16.0 * UnitScale(UnitSystem.Inches, rhinoDoc.ModelUnitSystem) :
-      1.0 * UnitScale(UnitSystem.Millimeters, rhinoDoc.ModelUnitSystem);
-
-      var modelThickLineFrequency = imperial ? 6 : 5;
-
-      // Views
+    static void AdjustViewCPlane(RhinoViewport viewport)
+    {
+      if (viewport.ParentView?.Document is RhinoDoc rhinoDoc)
       {
-        foreach (var view in rhinoDoc.Views)
-        {
-          var cplane = view.MainViewport.GetConstructionPlane();
+        bool imperial = rhinoDoc.ModelUnitSystem == UnitSystem.Feet || rhinoDoc.ModelUnitSystem == UnitSystem.Inches;
 
-          cplane.GridSpacing = modelGridSpacing;
-          cplane.SnapSpacing = modelSnapSpacing;
-          cplane.ThickLineFrequency = modelThickLineFrequency;
+        var modelGridSpacing = imperial ?
+        1.0 * UnitScale(UnitSystem.Yards, rhinoDoc.ModelUnitSystem) :
+        1.0 * UnitScale(UnitSystem.Meters, rhinoDoc.ModelUnitSystem);
 
-          view.MainViewport.SetConstructionPlane(cplane);
+        var modelSnapSpacing = imperial ?
+        1 / 16.0 * UnitScale(UnitSystem.Inches, rhinoDoc.ModelUnitSystem) :
+        1.0 * UnitScale(UnitSystem.Millimeters, rhinoDoc.ModelUnitSystem);
 
-          var min = cplane.Plane.PointAt(-cplane.GridSpacing * cplane.GridLineCount, -cplane.GridSpacing * cplane.GridLineCount, 0.0);
-          var max = cplane.Plane.PointAt(+cplane.GridSpacing * cplane.GridLineCount, +cplane.GridSpacing * cplane.GridLineCount, 0.0);
-          var bbox = new BoundingBox(min, max);
+        var modelThickLineFrequency = imperial ? 6 : 5;
 
-          // Zoom to grid
-          view.MainViewport.ZoomBoundingBox(bbox);
+        var cplane = viewport.GetConstructionPlane();
 
-          // Adjust to extens in case There is anything in the viewports like Grasshopper previews.
-          view.MainViewport.ZoomExtents();
-        }
+        cplane.GridSpacing = modelGridSpacing;
+        cplane.SnapSpacing = modelSnapSpacing;
+        cplane.ThickLineFrequency = modelThickLineFrequency;
+
+        viewport.SetConstructionPlane(cplane);
+
+        var min = cplane.Plane.PointAt(-cplane.GridSpacing * cplane.GridLineCount, -cplane.GridSpacing * cplane.GridLineCount, 0.0);
+        var max = cplane.Plane.PointAt(+cplane.GridSpacing * cplane.GridLineCount, +cplane.GridSpacing * cplane.GridLineCount, 0.0);
+        var bbox = new BoundingBox(min, max);
+
+        // Zoom to grid
+        viewport.ZoomBoundingBox(bbox);
+
+        // Adjust to extens in case There is anything in the viewports like Grasshopper previews.
+        viewport.ZoomExtents();
       }
     }
     #endregion
 
     #region Rhino UI
-    /*internal*/ public static void InvokeInHostContext(Action action) => core.InvokeInHostContext(action);
+    /*internal*/
+    public static void InvokeInHostContext(Action action) => core.InvokeInHostContext(action);
     /*internal*/ public static T InvokeInHostContext<T>(Func<T> func) => core.InvokeInHostContext(func);
 
     public static bool Exposed
@@ -697,13 +702,15 @@ namespace RhinoInside.Revit
           (
             rhinoDoc.Views.Add
             (
-              RevitViewName, Rhino.Display.DefinedViewportProjection.Perspective,
+              RevitViewName, DefinedViewportProjection.Perspective,
               new System.Drawing.Rectangle(x, y, 800, 600),
               true
-            ) is Rhino.Display.RhinoView rhinoView
+            ) is RhinoView rhinoView
           )
           {
-            rhinoView.MainViewport.ZoomExtents();
+            rhinoDoc.Views.ActiveView = rhinoView;
+
+            AdjustViewCPlane(rhinoView.MainViewport);
             return true;
           }
           else return false;
@@ -711,17 +718,7 @@ namespace RhinoInside.Revit
         else
         {
           rhinoDoc.Views.ActiveView = view3D;
-
-          var viewWindow = new WindowHandle(view3D.Handle);
-
-          //if (!view3D.Floating)
-          if (viewWindow.Parent.Owner.IsZero)
-          {
-            view3D.Maximized = true;
-            Exposed = true;
-          }
-
-          return MainWindow.BringToFront();
+          return view3D.BringToFront();
         }
       }
 
