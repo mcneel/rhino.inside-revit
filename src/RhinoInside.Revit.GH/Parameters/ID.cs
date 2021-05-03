@@ -293,7 +293,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
       foreach (var data in VolatileData.AllData(true).OfType<Types.IGH_ElementId>())
       {
-        if (!data.IsValid)
+        if (!data.Id.IsValid() || !data.Document.IsValid())
           continue;
 
         if (!doc.Equals(data.Document))

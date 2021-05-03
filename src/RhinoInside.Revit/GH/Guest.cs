@@ -495,7 +495,9 @@ namespace RhinoInside.Revit.GH
         e.NewDocument.SolutionEnd += ActiveDefinition_SolutionEnd;
       }
     }
+    #endregion
 
+    #region DocumentChanged
     void OnDocumentChanged(object sender, DocumentChangedEventArgs e)
     {
       var document = e.GetDocument();
@@ -519,9 +521,6 @@ namespace RhinoInside.Revit.GH
             if (obj is Kernel.IGH_ElementIdParam persistentParam)
             {
               if (persistentParam.Locked)
-                continue;
-
-              if (persistentParam.DataType == GH_ParamData.remote)
                 continue;
 
               if (persistentParam.NeedsToBeExpired(document, added, deleted, modified))
@@ -551,8 +550,20 @@ namespace RhinoInside.Revit.GH
         public override string GetName() => nameof(FlushQueue);
         protected override void Execute(UIApplication app)
         {
+          var solutions = new List<GH_Document>();
           while (changeQueue.Count > 0)
-            changeQueue.Dequeue().NewSolution();
+          {
+            if (changeQueue.Dequeue().NewSolution() is GH_Document solution)
+            {
+              if (!solutions.Contains(solution))
+                solutions.Add(solution);
+            }
+          }
+
+          if (solutions.Count == 0)
+            Instances.ActiveCanvas?.Refresh();
+          else foreach(var solution in solutions)
+            solution.NewSolution(false);
         }
       }
 
@@ -573,15 +584,14 @@ namespace RhinoInside.Revit.GH
       public GH_Document Definition;
       public readonly List<IGH_ActiveObject> ExpiredObjects = new List<IGH_ActiveObject>();
 
-      void NewSolution()
+      GH_Document NewSolution()
       {
         Debug.Assert(ExpiredObjects.Count > 0, "An empty change is been enqueued.");
 
         foreach (var obj in ExpiredObjects)
           obj.ExpireSolution(false);
 
-        if (Operation == UndoOperation.TransactionCommitted)
-          Definition.NewSolution(false);
+        return Operation == UndoOperation.TransactionCommitted ? Definition : default;
       }
     }
     #endregion
