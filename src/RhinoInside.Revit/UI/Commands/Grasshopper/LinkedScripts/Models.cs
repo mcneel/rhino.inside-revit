@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Windows.Media.Imaging;
 
 using RhinoInside.Revit.Settings;
 
@@ -19,7 +20,7 @@ namespace RhinoInside.Revit.UI
   /// <summary>
   /// Generic linked item
   /// </summary>
-  abstract public class LinkedItem
+  public abstract class LinkedItem
   {
     public string Text
     {
@@ -43,8 +44,8 @@ namespace RhinoInside.Revit.UI
       }
     }
 
-    public string Name = string.Empty;
-    public string Tooltip = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Tooltip { get; set; } = string.Empty;
   }
 
   /// <summary>
@@ -52,8 +53,8 @@ namespace RhinoInside.Revit.UI
   /// </summary>
   public class LinkedItemGroup : LinkedItem
   {
-    public string GroupPath;
-    public List<LinkedItem> Items = new List<LinkedItem>();
+    public string GroupPath { get; set; }
+    public List<LinkedItem> Items { get; set; } = new List<LinkedItem>();
   }
 
   /// <summary>
@@ -61,9 +62,78 @@ namespace RhinoInside.Revit.UI
   /// </summary>
   public class LinkedScript : LinkedItem
   {
-    public ScriptType ScriptType;
-    public string ScriptPath;
-    public Type ScriptCommandType;
+    public ScriptType ScriptType { get; set; }
+    public string ScriptPath { get; set; }
+    public Type ScriptCommandType { get; set; }
+
+    public string Description { get; set; } = null;
+
+    static readonly string[] SupportedExtensions = new string[] { ".gh", ".ghx" };
+    public static LinkedScript FromPath(string scriptPath)
+    {
+      var ext = Path.GetExtension(scriptPath).ToLower();
+      if (File.Exists(scriptPath) && SupportedExtensions.Contains(ext))
+      {
+        var script = new LinkedScript
+        {
+          ScriptType = ext == ".gh" ? ScriptType.GhFile : ScriptType.GhxFile,
+          ScriptPath = scriptPath,
+          Name = Path.GetFileNameWithoutExtension(scriptPath),
+        };
+
+        // now that base props are setup, read the rest from the file
+        var archive = new GH_IO.Serialization.GH_Archive();
+        if (archive.ReadFromFile(script.ScriptPath))
+        {
+          // find gh document properties
+          var defProps = archive.GetRootNode.FindChunk("Definition")?.FindChunk("DefinitionProperties");
+          if (defProps != null)
+          {
+            // find description
+            if (defProps.ItemExists("Description"))
+              script.Description = defProps.GetString("Description");
+
+            // find icon
+            if (defProps.ItemExists("IconImageData"))
+            {
+              var iconImgData = defProps.GetString("IconImageData");
+              if (iconImgData is string && !string.IsNullOrEmpty(iconImgData))
+                script.IconImageData = iconImgData;
+            }
+          }
+        }
+
+        return script;
+      }
+      else
+        return null;
+    }
+
+    string IconImageData = null;
+    public BitmapSource GetScriptIcon(int width, int height)
+    {
+      if (IconImageData is string)
+      {
+        // if SVG
+        if (IconImageData.IndexOf("<svg", StringComparison.OrdinalIgnoreCase) > 0)
+        {
+          return Rhino.UI.DrawingUtilities.BitmapFromSvg(
+            IconImageData, width, height
+            ).ToBitmapImage();
+        }
+        // else assume bitmap
+        else
+        {
+          return new System.Drawing.Bitmap(
+            new System.IO.MemoryStream(
+              System.Convert.FromBase64String(IconImageData)
+              )
+            ).ToBitmapImage(width, height);
+        }
+      }
+      else
+        return null;
+    }
   }
 
   /// <summary>
@@ -133,6 +203,7 @@ namespace RhinoInside.Revit.UI
         items.Add(
           new LinkedItemGroup
           {
+            GroupPath = subDir,
             Name = Path.GetFileName(subDir),
             Items = FindLinkedItemsRecursive(subDir),
           }
@@ -140,20 +211,8 @@ namespace RhinoInside.Revit.UI
       }
 
       foreach (var entry in Directory.GetFiles(location))
-      {
-        var ext = Path.GetExtension(entry).ToLower();
-        if (new string[] { ".gh", ".ghx" }.Contains(ext))
-        {
-          items.Add(
-            new LinkedScript
-            {
-              ScriptType = ext == ".gh" ? ScriptType.GhFile : ScriptType.GhxFile,
-              ScriptPath = entry,
-              Name = Path.GetFileNameWithoutExtension(entry),
-            }
-          );
-        }
-      }
+        if (LinkedScript.FromPath(entry) is LinkedScript script)
+          items.Add(script);
 
       return items.OrderBy(x => x.Name).ToList();
     }

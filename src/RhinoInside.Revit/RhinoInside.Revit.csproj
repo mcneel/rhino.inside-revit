@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -184,11 +184,10 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="RhinoCommon" Version="7.3.21039.11201" IncludeAssets="compile; build" />
-        <PackageReference Include="RhinoWindows" Version="7.3.21039.11201" IncludeAssets="build; compile" />
-        <PackageReference Include="Grasshopper" Version="7.3.21039.11201" IncludeAssets="compile; build" />
-        <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="2019.0.1" IncludeAssets="build; compile" Condition="'$(Configuration)' == 'Release 2019'" />
-        <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitVersion).0.0" IncludeAssets="build; compile" Condition="'$(Configuration)' != 'Release 2019'" />
+        <PackageReference Include="RhinoCommon" Version="7.6.21127.19001" IncludeAssets="compile; build" />
+        <PackageReference Include="RhinoWindows" Version="7.6.21127.19001" IncludeAssets="build; compile" />
+        <PackageReference Include="Grasshopper" Version="7.6.21127.19001" IncludeAssets="compile; build" />
+        <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitVersion).0.0" IncludeAssets="build; compile" />
       </ItemGroup>
     </Otherwise>
   </Choose>
