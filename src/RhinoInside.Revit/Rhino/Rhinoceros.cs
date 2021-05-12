@@ -9,6 +9,7 @@ using System.Windows.Input;
 using Microsoft.Win32.SafeHandles;
 using Rhino;
 using Rhino.Commands;
+using Rhino.Display;
 using Rhino.Geometry;
 using Rhino.Input;
 using Rhino.PlugIns;
@@ -375,8 +376,7 @@ namespace RhinoInside.Revit
       if (Revit.ActiveUIDocument?.Document is DB.Document revitDoc)
       {
         var units = revitDoc.GetUnits();
-        var lengthFormatoptions = units.GetFormatOptions(DB.UnitType.UT_Length);
-        var RevitModelUnitSystem = lengthFormatoptions.DisplayUnits.ToUnitSystem();
+        var RevitModelUnitSystem = units.ToUnitSystem(out var distanceDisplayPrecision);
         var GrasshopperModelUnitSystem = GH.Guest.ModelUnitSystem != UnitSystem.Unset ? GH.Guest.ModelUnitSystem : doc.ModelUnitSystem;
         if (doc.ModelUnitSystem != RevitModelUnitSystem || doc.ModelUnitSystem != GrasshopperModelUnitSystem)
         {
@@ -442,7 +442,7 @@ namespace RhinoInside.Revit
             {
             case Autodesk.Revit.UI.TaskDialogResult.CommandLink2:
                 doc.ModelAngleToleranceRadians = Revit.AngleTolerance;
-                doc.ModelDistanceDisplayPrecision = Clamp((int) -Log10(lengthFormatoptions.Accuracy), 0, 7);
+                doc.ModelDistanceDisplayPrecision = distanceDisplayPrecision;
                 doc.ModelAbsoluteTolerance = Revit.VertexTolerance * UnitScale(UnitSystem.Feet, RevitModelUnitSystem);
                 doc.AdjustModelUnitSystem(RevitModelUnitSystem, true);
                 AdjustViewConstructionPlanes(doc);
@@ -477,10 +477,9 @@ namespace RhinoInside.Revit
         else if (rhinoDoc.ModelUnitSystem == UnitSystem.None)
         {
           var units = revitDoc.GetUnits();
-          var lengthFormatoptions = units.GetFormatOptions(DB.UnitType.UT_Length);
-          rhinoDoc.ModelUnitSystem = lengthFormatoptions.DisplayUnits.ToUnitSystem();
+          rhinoDoc.ModelUnitSystem = units.ToUnitSystem(out var distanceDisplayPrecision);
           rhinoDoc.ModelAngleToleranceRadians = Revit.AngleTolerance;
-          rhinoDoc.ModelDistanceDisplayPrecision = Clamp((int) -Log10(lengthFormatoptions.Accuracy), 0, 7);
+          rhinoDoc.ModelDistanceDisplayPrecision = distanceDisplayPrecision;
           rhinoDoc.ModelAbsoluteTolerance = Revit.VertexTolerance * UnitScale(UnitSystem.Feet, rhinoDoc.ModelUnitSystem);
           //switch (rhinoDoc.ModelUnitSystem)
           //{
@@ -514,46 +513,50 @@ namespace RhinoInside.Revit
         return;
       }
 
-      bool imperial = rhinoDoc.ModelUnitSystem == UnitSystem.Feet || rhinoDoc.ModelUnitSystem == UnitSystem.Inches;
+      foreach (var view in rhinoDoc.Views)
+        AdjustViewCPlane(view.MainViewport);
+    }
 
-      var modelGridSpacing = imperial ?
-      1.0 * UnitScale(UnitSystem.Yards, rhinoDoc.ModelUnitSystem) :
-      1.0 * UnitScale(UnitSystem.Meters, rhinoDoc.ModelUnitSystem);
-
-      var modelSnapSpacing = imperial ?
-      1 / 16.0 * UnitScale(UnitSystem.Inches, rhinoDoc.ModelUnitSystem) :
-      1.0 * UnitScale(UnitSystem.Millimeters, rhinoDoc.ModelUnitSystem);
-
-      var modelThickLineFrequency = imperial ? 6 : 5;
-
-      // Views
+    static void AdjustViewCPlane(RhinoViewport viewport)
+    {
+      if (viewport.ParentView?.Document is RhinoDoc rhinoDoc)
       {
-        foreach (var view in rhinoDoc.Views)
-        {
-          var cplane = view.MainViewport.GetConstructionPlane();
+        bool imperial = rhinoDoc.ModelUnitSystem == UnitSystem.Feet || rhinoDoc.ModelUnitSystem == UnitSystem.Inches;
 
-          cplane.GridSpacing = modelGridSpacing;
-          cplane.SnapSpacing = modelSnapSpacing;
-          cplane.ThickLineFrequency = modelThickLineFrequency;
+        var modelGridSpacing = imperial ?
+        1.0 * UnitScale(UnitSystem.Yards, rhinoDoc.ModelUnitSystem) :
+        1.0 * UnitScale(UnitSystem.Meters, rhinoDoc.ModelUnitSystem);
 
-          view.MainViewport.SetConstructionPlane(cplane);
+        var modelSnapSpacing = imperial ?
+        1 / 16.0 * UnitScale(UnitSystem.Inches, rhinoDoc.ModelUnitSystem) :
+        1.0 * UnitScale(UnitSystem.Millimeters, rhinoDoc.ModelUnitSystem);
 
-          var min = cplane.Plane.PointAt(-cplane.GridSpacing * cplane.GridLineCount, -cplane.GridSpacing * cplane.GridLineCount, 0.0);
-          var max = cplane.Plane.PointAt(+cplane.GridSpacing * cplane.GridLineCount, +cplane.GridSpacing * cplane.GridLineCount, 0.0);
-          var bbox = new BoundingBox(min, max);
+        var modelThickLineFrequency = imperial ? 6 : 5;
 
-          // Zoom to grid
-          view.MainViewport.ZoomBoundingBox(bbox);
+        var cplane = viewport.GetConstructionPlane();
 
-          // Adjust to extens in case There is anything in the viewports like Grasshopper previews.
-          view.MainViewport.ZoomExtents();
-        }
+        cplane.GridSpacing = modelGridSpacing;
+        cplane.SnapSpacing = modelSnapSpacing;
+        cplane.ThickLineFrequency = modelThickLineFrequency;
+
+        viewport.SetConstructionPlane(cplane);
+
+        var min = cplane.Plane.PointAt(-cplane.GridSpacing * cplane.GridLineCount, -cplane.GridSpacing * cplane.GridLineCount, 0.0);
+        var max = cplane.Plane.PointAt(+cplane.GridSpacing * cplane.GridLineCount, +cplane.GridSpacing * cplane.GridLineCount, 0.0);
+        var bbox = new BoundingBox(min, max);
+
+        // Zoom to grid
+        viewport.ZoomBoundingBox(bbox);
+
+        // Adjust to extens in case There is anything in the viewports like Grasshopper previews.
+        viewport.ZoomExtents();
       }
     }
     #endregion
 
     #region Rhino UI
-    /*internal*/ public static void InvokeInHostContext(Action action) => core.InvokeInHostContext(action);
+    /*internal*/
+    public static void InvokeInHostContext(Action action) => core.InvokeInHostContext(action);
     /*internal*/ public static T InvokeInHostContext<T>(Func<T> func) => core.InvokeInHostContext(func);
 
     public static bool Exposed
@@ -617,14 +620,20 @@ namespace RhinoInside.Revit
         if (RhinoDoc.ActiveDoc is RhinoDoc rhinoDoc)
         {
           // Keep Rhino window exposed to user while in a get operation
-          if (RhinoGet.InGet(rhinoDoc))
+          if (RhinoGet.InGet(rhinoDoc) && !Exposed)
           {
-            // if there is no floating viewport visible...
-            if (!rhinoDoc.Views.Where(x => x.Floating).Any())
+            if (RhinoGet.InGetObject(rhinoDoc) || RhinoGet.InGetPoint(rhinoDoc))
             {
-              if (!Exposed)
-                Exposed = true;
+              // If there is no floating viewport visible...
+              if (!rhinoDoc.Views.Where(x => x.Floating).Any())
+              {
+                var cursorPosition = System.Windows.Forms.Cursor.Position;
+                if (!OpenRevitViewport(cursorPosition.X - 400, cursorPosition.Y - 300))
+                  Exposed = true;
+              }
             }
+            // If we are in a GetString or GetInt we need the command prompt.
+            else Exposed = true;
           }
         }
       }
@@ -643,30 +652,17 @@ namespace RhinoInside.Revit
       Show();
     }
 
-    public static bool RunScript(string script, bool activate)
+    public static async void RunScriptAsync(string script, bool activate)
     {
       if (string.IsNullOrEmpty(script))
-        return false;
-
-      External.ActivationGate.Yield();
-
-      if (activate)
-        RhinoApp.SetFocusToMainWindow();
-
-      return RhinoApp.RunScript(script, false);
-    }
-
-    public static async Task<bool> RunScriptAsync(string script, bool activate)
-    {
-      if (string.IsNullOrEmpty(script))
-        return false;
+        return;
 
       await External.ActivationGate.Yield();
 
       if (activate)
         RhinoApp.SetFocusToMainWindow();
 
-      return RhinoApp.RunScript(script, false);
+      RhinoApp.RunScript(script, false);
     }
 
     public static Result RunCommandAbout()
@@ -692,6 +688,51 @@ namespace RhinoInside.Revit
     {
       return RhinoApp.RunScript("!_PackageManager", false) ? Result.Succeeded : Result.Failed;
     }
+
+    #region Open Viewport
+    const string RevitViewName = "Revit";
+    internal static bool OpenRevitViewport(int x, int y)
+    {
+      if (RhinoDoc.ActiveDoc is RhinoDoc rhinoDoc)
+      {
+        var view3D = rhinoDoc.Views.Where(v => v.MainViewport.Name == RevitViewName).FirstOrDefault();
+        if (view3D is null)
+        {
+          if
+          (
+            rhinoDoc.Views.Add
+            (
+              RevitViewName, DefinedViewportProjection.Perspective,
+              new System.Drawing.Rectangle(x, y, 800, 600),
+              true
+            ) is RhinoView rhinoView
+          )
+          {
+            rhinoDoc.Views.ActiveView = rhinoView;
+
+            AdjustViewCPlane(rhinoView.MainViewport);
+            return true;
+          }
+          else return false;
+        }
+        else
+        {
+          rhinoDoc.Views.ActiveView = view3D;
+          return view3D.BringToFront();
+        }
+      }
+
+      return false;
+    }
+
+    public static async void RunCommandOpenViewportAsync()
+    {
+      var cursorPosition = System.Windows.Forms.Cursor.Position;
+
+      await External.ActivationGate.Yield();
+      OpenRevitViewport(cursorPosition.X + 50, cursorPosition.Y + 50);
+    }
+    #endregion
 
     /// <summary>
     /// Represents a Pseudo-modal loop.

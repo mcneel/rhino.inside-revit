@@ -33,7 +33,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
       // If selected items are modified we need to expire dependant components
       foreach (var data in VolatileData.AllData(true).OfType<Types.IGH_ElementId>())
       {
-        if (!data.IsElementLoaded)
+        if (!data.IsValid)
           continue;
 
         if (modified.Contains(data.Id))

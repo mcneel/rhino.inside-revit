@@ -1,4 +1,5 @@
 #include "pch.h"
+#include <versionhelpers.h>
 #include "MixedStackTrace.h"
 
 extern HMODULE hInstance;
@@ -276,6 +277,9 @@ BOOL EnsureOpenNurbsPrivateManifest(HWND hWnd, LPCTSTR ManifestFileName)
 RIR_EXPORT
 BOOL STDAPICALLTYPE LdrIsolateOpenNurbs()
 {
+  if (IsWindowsServer())
+    return TRUE;
+
   TCHAR ManifestFileName[MAX_PATH] {};
   const DWORD ModuleFileNameLength = GetModuleFileName(NULL, ManifestFileName, (DWORD)std::size(ManifestFileName));
   if (ModuleFileNameLength && ModuleFileNameLength < std::size(ManifestFileName))
@@ -286,7 +290,7 @@ BOOL STDAPICALLTYPE LdrIsolateOpenNurbs()
       _tcscpy_s(++FileName, size, _T("opennurbs_private.manifest"));
 
       if (!EnsureOpenNurbsPrivateManifest(GetActiveWindow(), ManifestFileName))
-          return FALSE;
+        return FALSE;
 
       ACTCTX ActCtx {sizeof(ActCtx)};
       ActCtx.lpSource = ManifestFileName;

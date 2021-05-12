@@ -44,7 +44,7 @@ namespace RhinoInside.Revit.UI
       // try opening options window
       if (!AddinOptions.IsReadOnly)
       {
-        var optWindow = new OptionsWindow(data.Application);
+        var optWindow = new AddInOptionsDialog(data.Application);
         if (LatestReleaseInfo != null)
         {
           optWindow.UpdatesPanel.SetReleaseInfo(LatestReleaseInfo);

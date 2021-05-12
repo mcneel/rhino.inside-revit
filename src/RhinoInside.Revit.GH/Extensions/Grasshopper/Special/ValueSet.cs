@@ -530,7 +530,7 @@ namespace Grasshopper.Special
 
       foreach (var goo in PersistentData)
       {
-        if (goo is RhinoInside.Revit.GH.Types.IGH_ElementId id) id.UnloadElement();
+        if (goo is RhinoInside.Revit.GH.Types.IGH_ReferenceData id) id.UnloadReferencedData();
         else if (goo is IGH_GeometricGoo geo) geo.ClearCaches();
       }
     }
@@ -562,7 +562,7 @@ namespace Grasshopper.Special
     }
 
     public abstract void ProcessData();
-    public override sealed void PostProcessData()
+    public sealed override void PostProcessData()
     {
       foreach (var branch in m_data.Branches)
       {
@@ -570,7 +570,7 @@ namespace Grasshopper.Special
         {
           var goo = branch[i];
 
-          if (goo is RhinoInside.Revit.GH.Types.IGH_ElementId id && id.IsReferencedElement && !id.IsElementLoaded && !id.LoadElement())
+          if (goo is RhinoInside.Revit.GH.Types.IGH_ReferenceData id && id.IsReferencedData && !id.IsReferencedDataLoaded && !id.LoadReferencedData())
           {
             AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"A referenced element could not be found in the Revit document.");
             branch[i] = null;

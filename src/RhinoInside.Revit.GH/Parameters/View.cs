@@ -18,9 +18,37 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override Types.IGH_View InstantiateT() => new Types.View();
 
+    #region UI
+    public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
+    {
+      base.AppendAdditionalMenuItems(menu);
+
+      var activeApp = Revit.ActiveUIApplication;
+      {
+        var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.Default3DView);
+        Menu_AppendItem
+        (
+          menu, "Default 3D View…",
+          (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
+          activeApp.CanPostCommand(commandId), false
+        );
+      }
+#if REVIT_2019
+      {
+        var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.CloseInactiveViews);
+        Menu_AppendItem
+        (
+          menu, "Close Inactive Views…",
+          (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
+          activeApp.CanPostCommand(commandId), false
+        );
+      }
+#endif
+    }
+
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
-      if (SourceCount != 0)
+      if (SourceCount != 0 || Revit.ActiveUIDocument is null)
         return;
 
       var listBox = new ListBox();
@@ -116,14 +144,16 @@ namespace RhinoInside.Revit.GH.Parameters
         {
           if (listBox.Items[listBox.SelectedIndex] is Types.View value)
           {
-            RecordUndoEvent($"Set: {value}");
+            RecordPersistentDataEvent($"Set: {value}");
             PersistentData.Clear();
             PersistentData.Append(value);
+            OnObjectChanged(GH_ObjectEventType.PersistentData);
           }
         }
 
         ExpireSolution(true);
       }
     }
+    #endregion
   }
 }

@@ -7,6 +7,7 @@ using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.External.DB.Schemas;
 using DB = Autodesk.Revit.DB;
 using DBX = RhinoInside.Revit.External.DB;
 
@@ -163,9 +164,10 @@ namespace RhinoInside.Revit.GH.Parameters
         {
           if (listBox.Items[listBox.SelectedIndex] is IGH_GooProxy value)
           {
-            RecordUndoEvent($"Set: {value}");
+            RecordPersistentDataEvent($"Set: {value}");
             PersistentData.Clear();
             PersistentData.Append(value.ProxyOwner as Types.ParameterKey);
+            OnObjectChanged(GH_ObjectEventType.PersistentData);
           }
         }
 
@@ -252,17 +254,16 @@ namespace RhinoInside.Revit.GH.Parameters
       NickName = Name;
       MutableNickName = false;
 
-      try { Description = p.StorageType == DB.StorageType.ElementId ? "ElementId" : DB.LabelUtils.GetLabelFor(p.Definition.ParameterType); }
-      catch (Autodesk.Revit.Exceptions.InvalidOperationException)
-      { Description = p.Definition.UnitType == DB.UnitType.UT_Number ? "Enumerate" : DB.LabelUtils.GetLabelFor(p.Definition.UnitType); }
+      DataType dataType = p.Definition?.GetDataType();
+      Description = CategoryId.IsCategoryId(dataType, out var _) ? $"Family Type" : dataType.Label;
 
-      if(string.IsNullOrEmpty(Description))
-        Description = ParameterType.ToString();
+      if (string.IsNullOrEmpty(Description))
+        Description = p.StorageType.ToString();
 
       if (ParameterSharedGUID.HasValue)
         Description = $"Shared parameter {ParameterSharedGUID.Value:B}\n{Description}";
       else if (ParameterBuiltInId != DB.BuiltInParameter.INVALID)
-        Description = $"BuiltIn parameter {ParameterBuiltInId.ToStringGeneric()}\n{Description}";
+        Description = $"BuiltIn Parameter \"{((External.DB.Schemas.ParameterId) ParameterBuiltInId).FullName}\"\n{Description}";
       else if(ParameterBinding != DBX.ParameterBinding.Unknown)
         Description = $"{ParameterClass} parameter ({ParameterBinding})\n{Description}";
       else
@@ -277,7 +278,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public DB.BuiltInParameter ParameterBuiltInId      { get; private set; } = DB.BuiltInParameter.INVALID;
     public Guid? ParameterSharedGUID                   { get; private set; } = default;
 
-    public override sealed bool Read(GH_IReader reader)
+    public sealed override bool Read(GH_IReader reader)
     {
       if (!base.Read(reader))
         return false;
@@ -331,7 +332,7 @@ namespace RhinoInside.Revit.GH.Parameters
       return true;
     }
 
-    public override sealed bool Write(GH_IWriter writer)
+    public sealed override bool Write(GH_IWriter writer)
     {
       if (!base.Write(writer))
         return false;

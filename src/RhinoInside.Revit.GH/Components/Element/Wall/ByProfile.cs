@@ -110,23 +110,51 @@ namespace RhinoInside.Revit.GH.Components
       [Optional] DB.Structure.StructuralWallUsage structuralUsage
     )
     {
+      var boundaryPlane = default(Rhino.Geometry.Plane);
+      var maxArea = 0.0;
       foreach (var boundary in profile)
       {
+        var plane = default(Rhino.Geometry.Plane);
         if
         (
           !boundary.IsClosed ||
-          !boundary.TryGetPlane(out var boundaryPlane, Revit.VertexTolerance) ||
-          !boundaryPlane.ZAxis.IsPerpendicularTo(Rhino.Geometry.Vector3d.ZAxis, Revit.AngleTolerance)
+          !boundary.TryGetPlane(out plane, Revit.VertexTolerance) ||
+          !plane.ZAxis.IsPerpendicularTo(Rhino.Geometry.Vector3d.ZAxis, Revit.AngleTolerance)
         )
           ThrowArgumentException(nameof(profile), "Boundary profile must be a vertical planar closed curve.");
+
+        using (var properties = Rhino.Geometry.AreaMassProperties.Compute(boundary))
+        {
+          if (properties.Area > maxArea)
+          {
+            maxArea = properties.Area;
+            boundaryPlane = plane;
+          }
+        }
       }
 
-      SolveOptionalType(ref type, doc, DB.ElementTypeGroup.WallType, nameof(type));
+      SolveOptionalType(doc, ref type, DB.ElementTypeGroup.WallType, nameof(type));
       SolveOptionalLevel(doc, profile, ref level, out var bbox);
 
       foreach (var curve in profile)
+      {
         curve.RemoveShortSegments(Revit.ShortCurveTolerance * Revit.ModelUnits);
+        var orientation = curve.ClosedCurveOrientation(boundaryPlane);
+        if (orientation == Rhino.Geometry.CurveOrientation.CounterClockwise)
+          curve.Reverse();
+      }
       var boundaries = profile.SelectMany(x => GeometryEncoder.ToCurveMany(x)).SelectMany(CurveExtension.ToBoundedCurves).ToList();
+
+      // Flipped - Adjust it to orient the wall facing to boundaryPlane.Normal
+      if
+      (
+        Rhino.Geometry.Vector3d.VectorAngle
+        (
+          boundaryPlane.Normal,
+          new Rhino.Geometry.Vector3d(-1.0, 1.0, 0.0)
+        ) > Math.PI * 0.5
+      )
+        flipped = !flipped;
 
       // LocationLine
       if (locationLine != DB.WallLocationLine.WallCenterline)

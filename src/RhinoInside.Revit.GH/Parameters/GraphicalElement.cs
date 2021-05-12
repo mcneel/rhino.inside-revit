@@ -7,6 +7,7 @@ using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
+using Rhino.Display;
 using Rhino.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.External.UI.Selection;
@@ -26,6 +27,13 @@ namespace RhinoInside.Revit.GH.Parameters
       ObjectChanged += OnObjectChanged;
     }
 
+    protected override T PreferredCast(object data)
+    {
+      return data is DB.Element element && AllowElement(element) ?
+             Types.GraphicalElement.FromElement(element) as T :
+             null;
+    }
+
     #region IGH_PreviewObject
     bool IGH_PreviewObject.Hidden { get; set; }
     bool IGH_PreviewObject.IsPreviewCapable => !VolatileData.IsEmpty;
@@ -35,7 +43,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #endregion
 
     #region ISelectionFilter
-    public virtual bool AllowElement(DB.Element elem) => elem is R;
+    public virtual bool AllowElement(DB.Element elem) => Types.GraphicalElement.IsValidElement(elem);
     public bool AllowReference(DB.Reference reference, DB.XYZ position)
     {
       if (reference.ElementReferenceType == DB.ElementReferenceType.REFERENCE_TYPE_NONE)
@@ -496,12 +504,12 @@ namespace RhinoInside.Revit.GH.Parameters
         if
         (
           Rhino.RhinoDoc.ActiveDoc is Rhino.RhinoDoc doc &&
-          doc.Views.ActiveView is Rhino.Display.RhinoView view &&
-          view.ActiveViewport is Rhino.Display.RhinoViewport vport
+          (doc.Views.ActiveView ?? doc.Views.FirstOrDefault()) is RhinoView view &&
+          view.ActiveViewport is RhinoViewport vport
         )
         {
-          Rhinoceros.Show();
-          Rhino.RhinoApp.SetFocusToMainWindow();
+          view.BringToFront();
+          doc.Views.ActiveView = view;
 
           var cplane = vport.GetConstructionPlane();
           cplane.Plane = element.Location;
@@ -514,7 +522,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     private void Menu_InternaliseData(object sender, EventArgs e)
     {
-      RecordUndoEvent("Internalise data");
+      RecordPersistentDataEvent("Internalise data");
 
       PersistentData.Clear();
       PersistentData.MergeStructure(m_data.Duplicate());
@@ -738,14 +746,5 @@ namespace RhinoInside.Revit.GH.Parameters
     { }
 
     protected override Types.IGH_GraphicalElement InstantiateT() => new Types.GraphicalElement();
-
-    protected override Types.IGH_GraphicalElement PreferredCast(object data)
-    {
-      return data is DB.Element element && AllowElement(element) ?
-             Types.GraphicalElement.FromElement(element) as Types.GraphicalElement:
-             null;
-    }
-
-    public override bool AllowElement(DB.Element elem) => Types.GraphicalElement.IsValidElement(elem);
   }
 }

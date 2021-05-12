@@ -64,11 +64,6 @@ namespace RhinoInside.Revit.GH.Components
           {
             OnBeforeCommit(doc, transaction.GetName());
 
-            transaction.SetFailureHandlingOptions
-            (
-              transaction.GetFailureHandlingOptions().SetClearAfterRollback(false)
-            );
-
             return transaction.Commit();
           }
           else return transaction.RollBack();
@@ -205,10 +200,7 @@ namespace RhinoInside.Revit.GH.Components
         foreach (var error in failuresAccessor.GetFailureMessages().OrderBy(error => error.GetSeverity()))
           AddRuntimeMessage(error, false);
 
-        failuresAccessor.SetFailureHandlingOptions
-        (
-          failuresAccessor.GetFailureHandlingOptions().SetClearAfterRollback(true)
-        );
+        failuresAccessor.DeleteAllWarnings();
       }
 
       if (severity >= DB.FailureSeverity.Error)
@@ -296,12 +288,12 @@ namespace RhinoInside.Revit.GH.Components
       return wasMissing;
     }
 
-    protected static bool SolveOptionalType<T>(ref Optional<T> type, DB.Document doc, DB.ElementTypeGroup group, string paramName) where T : DB.ElementType
+    protected static bool SolveOptionalType<T>(DB.Document doc, ref Optional<T> type, DB.ElementTypeGroup group, string paramName) where T : DB.ElementType
     {
-      return SolveOptionalType(ref type, doc, group, (document, name) => throw new ArgumentNullException(paramName), paramName);
+      return SolveOptionalType(doc, ref type, group, (document, name) => throw new ArgumentNullException(paramName), paramName);
     }
 
-    protected static bool SolveOptionalType<T>(ref Optional<T> type, DB.Document doc, DB.ElementTypeGroup group, Func<DB.Document, string, T> recoveryAction, string paramName) where T : DB.ElementType
+    protected static bool SolveOptionalType<T>(DB.Document doc, ref Optional<T> type, DB.ElementTypeGroup group, Func<DB.Document, string, T> recoveryAction, string paramName) where T : DB.ElementType
     {
       bool wasMissing = type.IsMissing;
 
@@ -315,7 +307,7 @@ namespace RhinoInside.Revit.GH.Components
       return wasMissing;
     }
 
-    protected static bool SolveOptionalType(ref Optional<DB.FamilySymbol> type, DB.Document doc, DB.BuiltInCategory category, string paramName)
+    protected static bool SolveOptionalType(DB.Document doc, ref Optional<DB.FamilySymbol> type, DB.BuiltInCategory category, string paramName)
     {
       bool wasMissing = type.IsMissing;
 
@@ -694,7 +686,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       if (type.IsEnum)
       {
-        if (!Types.GH_Enumerate.TryGetParamTypes(type, out paramTypes))
+        if (!Types.GH_Enum.TryGetParamTypes(type, out paramTypes))
           paramTypes = Tuple.Create(typeof(Param_Integer), typeof(GH_Integer));
 
         return true;
@@ -961,7 +953,7 @@ namespace RhinoInside.Revit.GH.Components
     protected ReconstructElementComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
 
-    protected override sealed void RegisterInputParams(GH_InputParamManager manager)
+    protected sealed override void RegisterInputParams(GH_InputParamManager manager)
     {
       var type = GetType();
       var ReconstructInfo = type.GetMethod($"Reconstruct{type.Name}", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -981,7 +973,7 @@ namespace RhinoInside.Revit.GH.Components
     }
 
     // Step 3.
-    protected override sealed void TrySolveInstance(IGH_DataAccess DA)
+    protected sealed override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (Revit.ActiveDBDocument is DB.Document Document)
         Iterate(DA, Document, (DB.Document doc, ref DB.Element current) => TrySolveInstance(DA, doc, ref current));

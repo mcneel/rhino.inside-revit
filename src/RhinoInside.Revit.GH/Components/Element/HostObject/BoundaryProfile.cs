@@ -39,14 +39,10 @@ namespace RhinoInside.Revit.GH.Components.Host
       if (!DA.GetData("Host", ref host) || host is null)
         return;
 
-      using (var filter = new DB.ElementClassFilter(typeof(DB.Sketch)))
+      if(host.GetSketch() is DB.Sketch sketch)
       {
-        var sketckIds = host.GetDependentElements(filter);
-        if (sketckIds.Select(x => host.Document.GetElement(x)).FirstOrDefault() is DB.Sketch sketch)
-        {
-          DA.SetData("Plane", sketch.SketchPlane.GetPlane().ToPlane());
-          DA.SetDataList("Profile", sketch.Profile.ToPolyCurves());
-        }
+        DA.SetData("Plane", sketch.SketchPlane.GetPlane().ToPlane());
+        DA.SetDataList("Profile", sketch.Profile.ToPolyCurves());
       }
     }
   }

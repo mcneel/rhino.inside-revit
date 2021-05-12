@@ -97,7 +97,7 @@ namespace RhinoInside.Revit.GH.Components
 
       // Reconstruct Beam
       {
-        SolveOptionalType(ref type, doc, DB.BuiltInCategory.OST_StructuralFraming, nameof(type));
+        SolveOptionalType(doc, ref type, DB.BuiltInCategory.OST_StructuralFraming, nameof(type));
 
         var newBeam = doc.Create.NewFamilyInstance
         (

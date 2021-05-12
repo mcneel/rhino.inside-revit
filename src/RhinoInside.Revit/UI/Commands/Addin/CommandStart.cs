@@ -230,11 +230,11 @@ namespace RhinoInside.Revit.UI
     {
       rhinoPanel = AddIn.Host.CreateRibbonPanel(AddIn.AddinName, AddIn.RhinoVersionInfo?.ProductName ?? "Rhinoceros");
       CommandRhino.CreateUI(rhinoPanel);
-      CommandImport.CreateUI(rhinoPanel);
+      CommandRhinoOpenViewport.CreateUI(rhinoPanel);
       CommandToggleRhinoPreview.CreateUI(rhinoPanel);
       CommandPython.CreateUI(rhinoPanel);
       rhinoPanel.AddSlideOut();
-      CommandRhinoOpenViewport.CreateUI(rhinoPanel);
+      CommandImport.CreateUI(rhinoPanel);
       CommandRhinoOptions.CreateUI(rhinoPanel);
     }
 
@@ -251,6 +251,8 @@ namespace RhinoInside.Revit.UI
       grasshopperPanel.AddSlideOut();
       CommandGrasshopperPackageManager.CreateUI(grasshopperPanel);
       CommandGrasshopperFolders.CreateUI(grasshopperPanel);
+      //CommandGrasshopperCaptureElements.CreateUI(grasshopperPanel);
+      //CommandGrasshopperReleaseElements.CreateUI(grasshopperPanel);
     }
 
     static void CreateGHScriptButtons()

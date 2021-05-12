@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.Win32.SafeHandles;
 
 namespace Rhino.Geometry
 {
@@ -523,6 +524,25 @@ namespace Rhino.Geometry
       return false;
     }
 
+    internal static bool TryGetHermiteSpline(this Curve curve, out IList<Point3d> points, out Vector3d startTangent, out Vector3d endTangent, double tolerance)
+    {
+      if (!(curve.Fit(3, tolerance * 0.2, 0.0) is NurbsCurve fit))
+      {
+        points = default;
+        startTangent = default;
+        endTangent = default;
+        return default;
+
+      }
+
+      var interval = curve.Domain;
+      startTangent = curve.TangentAt(interval.T0);
+      endTangent = curve.TangentAt(interval.T1);
+      points = fit.GrevillePoints(true);
+
+      return true;
+    }
+
     /// <summary>
     /// Try to convert this curve into a <see cref="Rhino.Geometry.PolyCurve"/> using a custom <paramref name="angleToleranceRadians"/>.
     /// </summary>
@@ -749,4 +769,31 @@ namespace Rhino.DocObjects.Tables
       return false;
     }
   }
+}
+
+namespace Rhino.Display
+{
+  static class RhionViewExtension
+  {
+    public static bool BringToFront(this RhinoView view)
+    {
+      var viewWindow = new WindowHandle(view.Handle);
+      if (!viewWindow.IsZero)
+      {
+        var topMost = viewWindow;
+        while (!topMost.Parent.IsZero)
+        {
+          topMost = topMost.Parent;
+          //if (view.Floating) break;
+          if (!viewWindow.Parent.Owner.IsZero) break;
+        }
+
+        if (topMost.Visible == false) topMost.Visible = true;
+        return topMost.BringToFront();
+      }
+
+      return false;
+    }
+  }
+
 }

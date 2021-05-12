@@ -5,7 +5,7 @@ using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
-  public static class BuiltInParameterExtension
+  static class BuiltInParameterExtension
   {
     private static readonly SortedSet<BuiltInParameter> builtInParameters =
       new SortedSet<BuiltInParameter>
@@ -78,7 +78,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
   }
 
-  public static class ParameterTypeExtension
+  static class ParameterTypeExtension
   {
     public static StorageType ToStorageType(this ParameterType parameterType)
     {
@@ -105,7 +105,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
   }
 
-  public static class ParameterExtension
+  static class ParameterExtension
   {
     public static bool ResetValue(this Parameter parameter)
     {
@@ -128,7 +128,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return false;
     }
 
-    public static void SetWorksetId(this Parameter parameter, WorksetId worksetId)
-      => parameter.Set(worksetId.IntegerValue);
+#if !REVIT_2022
+    public static Schemas.ParameterId GetTypeId(this Parameter parameter)
+    {
+      if (parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
+        return builtInParameter;
+
+      if(parameter.IsShared)
+        return new Schemas.ParameterId($"autodesk.parameter.aec.revit.external.-1:{parameter.GUID:N}");
+      else
+        return new Schemas.ParameterId($"autodesk.parameter.aec.revit.project:{parameter.Id.IntegerValue}");
+    }
+#endif
   }
 }

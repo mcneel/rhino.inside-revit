@@ -81,39 +81,6 @@ namespace RhinoInside.Revit.GH.Parameters
       return true;
     }
 
-    public override void ClearData()
-    {
-      base.ClearData();
-
-      if (PersistentData.IsEmpty)
-        return;
-
-      foreach (var goo in PersistentData.OfType<T>())
-        goo?.UnloadElement();
-    }
-
-    protected override void LoadVolatileData()
-    {
-      if (SourceCount == 0)
-      {
-        foreach (var branch in m_data.Branches)
-        {
-          for (int i = 0; i < branch.Count; i++)
-          {
-            var item = branch[i];
-            if (item?.IsReferencedElement ?? false)
-            {
-              if (!item.LoadElement())
-              {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"A referenced {item.TypeName} could not be found in the Revit document.");
-                branch[i] = null;
-              }
-            }
-          }
-        }
-      }
-    }
-
     protected override void ProcessVolatileData()
     {
       if (Grouping != DataGrouping.None)
@@ -307,23 +274,6 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override void PrepareForPrompt() { }
     protected override void RecoverFromPrompt() { }
-
-    protected override bool Prompt_ManageCollection(GH_Structure<T> values)
-    {
-      foreach (var item in values.AllData(true))
-      {
-        if (item.IsValid)
-          continue;
-
-        if (item is Types.IGH_ElementId elementId)
-        {
-          if (elementId.IsReferencedElement)
-            elementId.LoadElement();
-        }
-      }
-
-      return base.Prompt_ManageCollection(values);
-    }
     #endregion
 
     #region IGH_ElementIdParam
@@ -343,7 +293,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
       foreach (var data in VolatileData.AllData(true).OfType<Types.IGH_ElementId>())
       {
-        if (!data.IsElementLoaded)
+        if (!data.Id.IsValid() || !data.Document.IsValid())
           continue;
 
         if (!doc.Equals(data.Document))

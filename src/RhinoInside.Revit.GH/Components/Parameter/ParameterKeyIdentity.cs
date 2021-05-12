@@ -44,6 +44,7 @@ namespace RhinoInside.Revit.GH.Components
       else if (parameterKey.Document?.GetElement(parameterKey.Id) is DB.ParameterElement parameterElement)
       {
         var definition = parameterElement.GetDefinition();
+
         DA.SetData("Name", definition?.Name);
         DA.SetData("StorageType", definition?.ParameterType.ToStorageType());
 

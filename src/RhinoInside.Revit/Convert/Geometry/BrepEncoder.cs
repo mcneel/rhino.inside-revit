@@ -784,7 +784,12 @@ namespace RhinoInside.Revit.Convert.Geometry
                   {
                     ReferencePoint = DB.XYZ.Zero,
                     Placement = DB.ImportPlacement.Origin,
-                    CustomScale = DB.UnitUtils.Convert(factor, DB.DisplayUnitType.DUT_DECIMAL_FEET, doc.GetUnits().GetFormatOptions(DB.UnitType.UT_Length).DisplayUnits),
+                    CustomScale = DB.UnitUtils.Convert
+                    (
+                      factor,
+                      External.DB.Schemas.UnitType.Feet,
+                      doc.GetUnits().GetFormatOptions(External.DB.Schemas.SpecType.Measurable.Length).GetUnitTypeId()
+                    )
                   }
                 )
                 {

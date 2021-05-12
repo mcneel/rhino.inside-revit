@@ -58,12 +58,12 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override bool IsElementLoaded => Document is object && Id is object;
-    public override sealed bool LoadElement()
+    public override bool IsReferencedDataLoaded => Document is object && Id is object;
+    public sealed override bool LoadReferencedData()
     {
-      if (IsReferencedElement && !IsElementLoaded)
+      if (IsReferencedData && !IsReferencedDataLoaded)
       {
-        UnloadElement();
+        UnloadReferencedData();
 
         if (Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var document))
         {
@@ -72,15 +72,15 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
 
-      return IsElementLoaded;
+      return IsReferencedDataLoaded;
     }
 
-    public override void UnloadElement()
+    public override void UnloadReferencedData()
     {
-      if (IsReferencedElement)
+      if (IsReferencedData)
         id = default;
 
-      base.UnloadElement();
+      base.UnloadReferencedData();
     }
 
     protected override object FetchValue() => Document.GetElement(Id);

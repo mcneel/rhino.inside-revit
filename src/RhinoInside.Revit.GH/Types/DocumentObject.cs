@@ -8,7 +8,7 @@ using DB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   /// <summary>
-  /// Interface to implement into classes that are defined into <see cref="Autodesk.Revit.DB"/> namespace.
+  /// Interface to wrap classes that are defined into <see cref="Autodesk.Revit.DB"/> namespace.
   /// For example: <see cref="DB.Document"/>
   /// </summary>
   public interface IGH_DocumentObject : IGH_Goo
@@ -94,7 +94,14 @@ namespace RhinoInside.Revit.GH.Types
     public DB.Document Document
     {
       get => document?.IsValidObject != true ? null : document;
-      protected set { document = value; ResetValue(); }
+      protected set
+      {
+        // Please don't Dispose 'document' here, same reference may be in use in other places.
+        //if (value is null) document?.Dispose();
+
+        document = value;
+        ResetValue();
+      }
     }
 
     protected internal void AssertValidDocument(DB.Document doc, string paramName)
@@ -110,13 +117,20 @@ namespace RhinoInside.Revit.GH.Types
       protected set => this.value = value;
     }
 
-    protected virtual void ResetValue() => value = default;
+    protected virtual void ResetValue()
+    {
+      // Please don't Dispose 'value' here, same reference may be in use in other places.
+      //if (value is IDisposable disposable)
+      //  disposable.Dispose();
+
+      value = default;
+    }
 
     public abstract string DisplayName { get; }
   }
 
   /// <summary>
-  /// Interface to implement into classes that can be created-duplicated-updated-deleted without starting a Revit Transaction.
+  /// Interface to wrap classes that can be created-duplicated-updated-deleted without starting a Revit Transaction.
   /// For example: <see cref="DB.CompoundStructureLayer"/>
   /// </summary>
   public interface IGH_ValueObject : IGH_DocumentObject
@@ -143,8 +157,8 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   /// <summary>
-  /// Interface to implement into classes that can not be created-duplicated-updated-deleted without starting a Revit Transaction.
-  /// For example: <see cref="DB.CurtainGrid"/>
+  /// Interface to wrap classes that can not be created-duplicated-updated-deleted without starting a Revit Transaction.
+  /// For example: <see cref="DB.CurtainGrid"/>, <see cref="DB.Parameter"/>
   /// </summary>
   public interface IGH_ReferenceObject : IGH_DocumentObject
   {

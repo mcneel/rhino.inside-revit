@@ -24,6 +24,10 @@
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <RevitVersion>2021</RevitVersion>
   </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration.Contains('2022'))">
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <RevitVersion>2022</RevitVersion>
+  </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -100,6 +104,23 @@
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x64\Release 2021\</OutputPath>
     <DefineConstants>REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021</DefineConstants>
+    <Optimize>true</Optimize>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2022|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug 2022\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021;REVIT_2022</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2022|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Release 2022\</OutputPath>
+    <DefineConstants>REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021;REVIT_2022</DefineConstants>
     <Optimize>true</Optimize>
     <PlatformTarget>x64</PlatformTarget>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
@@ -202,6 +223,7 @@
     <Compile Include="Extensions\AdWindows.cs" />
     <Compile Include="Extensions\Native.cs" />
     <Compile Include="Extensions\RhinoCommon.cs" />
+    <Compile Include="Extensions\ShellItem.cs" />
     <Compile Include="Extensions\System.cs" />
     <Compile Include="Extensions\Win32.cs" />
     <Compile Include="Extensions\WinForms.cs" />
@@ -224,9 +246,11 @@
     <Compile Include="External\DB\Extensions\Face.cs" />
     <Compile Include="External\DB\Extensions\FilteredElementCollector.cs" />
     <Compile Include="External\DB\Extensions\GeometryObject.cs" />
+    <Compile Include="External\DB\Extensions\HostObject.cs" />
     <Compile Include="External\DB\Extensions\Instance.cs" />
     <Compile Include="External\DB\Extensions\Level.cs" />
     <Compile Include="External\DB\Extensions\LinePattern.cs" />
+    <Compile Include="External\DB\Extensions\Mesh.cs" />
     <Compile Include="External\DB\Extensions\Parameter.cs" />
     <Compile Include="External\DB\Extensions\ParameterFilterElement.cs" />
     <Compile Include="External\DB\Extensions\ProjectLocation.cs" />
@@ -240,6 +264,32 @@
     <Compile Include="External\ApplicationServices\HostServices.cs" />
     <Compile Include="External\DB\ParameterBinding.cs" />
     <Compile Include="External\DB\ParameterClass.cs" />
+    <Compile Include="External\DB\Schemas\CategoryId.cs" />
+    <Compile Include="External\DB\Schemas\CategoryId.Enum.cs" />
+    <Compile Include="External\DB\Schemas\CategoryId.Values.cs" />
+    <Compile Include="External\DB\Schemas\DisciplineType.cs" />
+    <Compile Include="External\DB\Schemas\DisciplineType.Values.cs" />
+    <Compile Include="External\DB\Schemas\ParameterGroup.cs" />
+    <Compile Include="External\DB\Schemas\ParameterGroup.Enum.cs" />
+    <Compile Include="External\DB\Schemas\ParameterGroup.Values.cs" />
+    <Compile Include="External\DB\Schemas\ParameterId.cs" />
+    <Compile Include="External\DB\Schemas\ParameterId.Enum.cs" />
+    <Compile Include="External\DB\Schemas\ParameterId.Values.cs" />
+    <Compile Include="External\DB\Schemas\DataType.Label.cs" />
+    <Compile Include="External\DB\Schemas\SpecType.Boolean.cs" />
+    <Compile Include="External\DB\Schemas\SpecType.cs" />
+    <Compile Include="External\DB\Schemas\DataType.cs" />
+    <Compile Include="External\DB\Schemas\SpecType.Enum.cs" />
+    <Compile Include="External\DB\Schemas\SpecType.Measurable.cs" />
+    <Compile Include="External\DB\Schemas\SpecType.Reference.cs" />
+    <Compile Include="External\DB\Schemas\SpecType.Int.cs" />
+    <Compile Include="External\DB\Schemas\SpecType.String.cs" />
+    <Compile Include="External\DB\Schemas\UnitSymbol.cs" />
+    <Compile Include="External\DB\Schemas\UnitSymbol.Enum.cs" />
+    <Compile Include="External\DB\Schemas\UnitSymbol.Values.cs" />
+    <Compile Include="External\DB\Schemas\UnitType.cs" />
+    <Compile Include="External\DB\Schemas\UnitType.Enum.cs" />
+    <Compile Include="External\DB\Schemas\UnitType.Values.cs" />
     <Compile Include="External\DB\Transaction.cs" />
     <Compile Include="External\DB\UniqueId.cs" />
     <Compile Include="External\DB\WallWrapping.cs" />
@@ -274,6 +324,10 @@
     <Compile Include="UI\Commands\Addin\CommandGuides.cs" />
     <Compile Include="UI\Commands\Addin\CommandStart.cs" />
     <Compile Include="UI\Commands\Addin\CommandHelpLinks.cs" />
+    <Compile Include="UI\Commands\Grasshopper\CommandGrasshopperCaptureElements.cs" />
+    <Compile Include="UI\Commands\Grasshopper\CommandGrasshopperReleaseElements.cs" />
+    <Compile Include="UI\Forms\ImportOptionsDialog.cs" />
+    <Compile Include="UI\ModalDialog.cs" />
     <Compile Include="UI\Commands\Rhinoceros\CommandRhinoOpenViewport.cs" />
     <Compile Include="UI\RibbonHandler.cs" />
     <Compile Include="UI\BaseDialog.cs" />
@@ -293,8 +347,8 @@
     <Compile Include="UI\Commands\Grasshopper\LinkedScripts\LinkedScriptCommand.cs" />
     <Compile Include="UI\Commands\Grasshopper\LinkedScripts\LinkedScripts.cs" />
     <Compile Include="UI\Commands\Grasshopper\LinkedScripts\Models.cs" />
-    <Compile Include="UI\Forms\BakeOptionsWindow.cs" />
-    <Compile Include="UI\Forms\OptionsWindow.cs" />
+    <Compile Include="UI\Forms\BakeOptionsDialog.cs" />
+    <Compile Include="UI\Forms\AddInOptionsDialog.cs" />
     <Compile Include="UI\Commands\Rhinoceros\BaseRhinoCommand.cs" />
     <Compile Include="UI\Commands\Rhinoceros\CommandRhino.cs" />
     <Compile Include="UI\Commands\Rhinoceros\CommandRhinoOptions.cs" />
@@ -374,6 +428,8 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ProductInfo.cs</LastGenOutput>
     </Content>
+    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\CaptureElements.png" />
+    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\ReleaseElements.png" />
     <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\OpenViewport.png" />
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>

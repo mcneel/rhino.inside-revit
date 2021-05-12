@@ -227,20 +227,21 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #endregion
 
     #region TryGetPlane
-    //public static bool TryGetPlane(this Curve curve, out Plane plane, double maxDeviation = 1e-9)
-    //{
-    //  if (TryGetLocation(curve, out var origin, out var basisX, out var basisY))
-    //  {
-    //    if (curve.IsInPlane(origin, basisX, basisY, maxDeviation))
-    //    {
-    //      plane = Plane.CreateByOriginAndBasis(origin, basisX, basisY);
-    //      return true;
-    //    }
-    //  }
+    public static bool TryGetPlane(this Curve curve, out Plane plane)
+    {
+      using(var loop = new CurveLoop())
+      {
+        loop.Append(curve);
+        if (loop.HasPlane())
+        {
+          plane = loop.GetPlane();
+          return true;
+        }
+      }
 
-    //  plane = default;
-    //  return false;
-    //}
+      plane = default;
+      return default;
+    }
     #endregion
   }
 }

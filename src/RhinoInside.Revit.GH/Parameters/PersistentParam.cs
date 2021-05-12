@@ -7,6 +7,23 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 
+namespace RhinoInside.Revit.GH.Types
+{
+  /// <summary>
+  /// Implement this interface into your Goo type if you are referencing external resources.
+  /// </summary>
+  /// <remarks>
+  /// <see cref="Parameters.PersistentParam{T}"/> uses it to load-unload external resources.
+  /// </remarks>
+  interface IGH_ReferenceData
+  {
+    bool IsReferencedData { get; }
+    bool IsReferencedDataLoaded { get; }
+    bool LoadReferencedData();
+    void UnloadReferencedData();
+  }
+}
+
 namespace RhinoInside.Revit.GH.Parameters
 {
   public abstract class PersistentParam<T> : GH_PersistentParam<T>
@@ -80,7 +97,41 @@ namespace RhinoInside.Revit.GH.Parameters
       return true;
     }
 
-    protected virtual void LoadVolatileData() { }
+    public override void ClearData()
+    {
+      base.ClearData();
+
+      if (PersistentData.IsEmpty)
+        return;
+
+      foreach (var reference in PersistentData.OfType<Types.IGH_ReferenceData>())
+      {
+        if (reference.IsReferencedData)
+          reference.UnloadReferencedData();
+      }
+    }
+
+    protected virtual void LoadVolatileData()
+    {
+      if (SourceCount == 0)
+      {
+        foreach (var branch in m_data.Branches)
+        {
+          for (int i = 0; i < branch.Count; i++)
+          {
+            if (branch[i] is Types.IGH_ReferenceData reference)
+            {
+              if (reference.IsReferencedData && !reference.LoadReferencedData())
+              {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"A referenced {branch[i].TypeName} could not be found.");
+                branch[i] = null;
+              }
+            }
+          }
+        }
+      }
+    }
+
     protected virtual void PreProcessVolatileData()
     {
       if (Culling != DataCulling.None)
@@ -210,6 +261,23 @@ namespace RhinoInside.Revit.GH.Parameters
     }
 
     protected virtual void Menu_AppendPostProcessParameter(ToolStripDropDown menu) { }
+
+    protected override bool Prompt_ManageCollection(GH_Structure<T> values)
+    {
+      foreach (var item in values.AllData(true))
+      {
+        if (item.IsValid)
+          continue;
+
+        if (item is Types.IGH_ReferenceData reference)
+        {
+          if (reference.IsReferencedData)
+            reference.LoadReferencedData();
+        }
+      }
+
+      return base.Prompt_ManageCollection(values);
+    }
     #endregion
   }
 }

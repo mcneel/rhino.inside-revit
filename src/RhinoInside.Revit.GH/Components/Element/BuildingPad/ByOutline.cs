@@ -61,7 +61,7 @@ namespace RhinoInside.Revit.GH.Components.Site
       }
       else
       {
-        SolveOptionalType(ref type, doc, DB.ElementTypeGroup.BuildingPadType, (document, param) => DB.BuildingPadType.CreateDefault(document), nameof(type));
+        SolveOptionalType(doc, ref type, DB.ElementTypeGroup.BuildingPadType, (document, param) => DB.BuildingPadType.CreateDefault(document), nameof(type));
 
         var newPad = DB.Architecture.BuildingPad.Create
         (

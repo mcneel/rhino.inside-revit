@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
       Optional<bool> perspective
     )
     {
-      SolveOptionalType(ref type, doc, DB.ElementTypeGroup.ViewType3D, nameof(type));
+      SolveOptionalType(doc, ref type, DB.ElementTypeGroup.ViewType3D, nameof(type));
 
       var orientation = new DB.ViewOrientation3D
       (

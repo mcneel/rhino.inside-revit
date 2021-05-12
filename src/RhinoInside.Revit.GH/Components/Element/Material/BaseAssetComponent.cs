@@ -6,6 +6,7 @@ using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.Convert.Units;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Material
@@ -321,7 +322,12 @@ namespace RhinoInside.Revit.GH.Components.Material
           return boolProp.Value;
 
         case DB.Visual.AssetPropertyDistance distProp:
-          return distProp.Value * Rhino.RhinoMath.UnitScale(distProp.DisplayUnitType.ToUnitSystem(), Rhino.RhinoDoc.ActiveDoc?.ModelUnitSystem ?? Rhino.UnitSystem.Meters);
+          return DB.UnitUtils.Convert
+          (
+            distProp.Value,
+            distProp.GetUnitTypeId(),
+            (Rhino.RhinoDoc.ActiveDoc?.ModelUnitSystem ?? Rhino.UnitSystem.Meters).ToUnitType()
+          );
 
         case DB.Visual.AssetPropertyDouble doubleProp:
           return doubleProp.Value;
@@ -409,47 +415,43 @@ namespace RhinoInside.Revit.GH.Components.Material
     public DB.AppearanceAssetElement EnsureThisAsset(DB.Document doc, string name)
      => EnsureAsset(_assetData.Schema, doc, name);
 
-    public static bool
-    AssetParamHasNestedAsset(DB.Visual.Asset asset, string name)
+    public static bool AssetParamHasNestedAsset(DB.Visual.Asset asset, string name)
     {
       // find param
       var prop = asset.FindByName(name);
       return prop != null && prop.GetSingleConnectedAsset() != null;
     }
 
-    public static object
-    GetAssetParamValue(DB.Visual.Asset asset, string name)
+    public static object GetAssetParamValue(DB.Visual.Asset asset, string name)
     {
       // find param
-      var prop = asset.FindByName(name);
-      if (prop != null)
+      if(asset.FindByName(name) is DB.Visual.AssetProperty prop)
         return ConvertFromAssetPropertyValue(prop);
+
       return null;
     }
 
-    public static void
-    SetAssetParamValue(DB.Visual.Asset asset, string name, bool value, bool removeAsset = true)
+    public static void SetAssetParamValue(DB.Visual.Asset asset, string name, bool value, bool removeAsset = true)
     {
       var prop = asset.FindByName(name);
       switch (prop)
       {
         case DB.Visual.AssetPropertyBoolean boolProp:
-          if (removeAsset)
-            boolProp.RemoveConnectedAsset();
+          if (removeAsset) boolProp.RemoveConnectedAsset();
+
           boolProp.Value = value;
           break;
       }
     }
 
-    public static void
-    SetAssetParamValue(DB.Visual.Asset asset, string name, string value, bool removeAsset = true)
+    public static void SetAssetParamValue(DB.Visual.Asset asset, string name, string value, bool removeAsset = true)
     {
       var prop = asset.FindByName(name);
       switch (prop)
       {
         case DB.Visual.AssetPropertyString stringProp:
-          if (removeAsset)
-            stringProp.RemoveConnectedAsset();
+          if (removeAsset) stringProp.RemoveConnectedAsset();
+
           stringProp.Value = value;
           break;
       }
@@ -462,14 +464,20 @@ namespace RhinoInside.Revit.GH.Components.Material
       switch (prop)
       {
         case DB.Visual.AssetPropertyDouble doubleProp:
-          if (removeAsset)
-            doubleProp.RemoveConnectedAsset();
+          if (removeAsset) doubleProp.RemoveConnectedAsset();
+
           doubleProp.Value = value;
           break;
+
         case DB.Visual.AssetPropertyDistance distProp:
-          if (removeAsset)
-            distProp.RemoveConnectedAsset();
-          distProp.Value = value * Rhino.RhinoMath.UnitScale(Rhino.RhinoDoc.ActiveDoc?.ModelUnitSystem ?? Rhino.UnitSystem.Meters, distProp.DisplayUnitType.ToUnitSystem());
+          if (removeAsset) distProp.RemoveConnectedAsset();
+
+          distProp.Value = DB.UnitUtils.Convert
+          (
+            value,
+            (Rhino.RhinoDoc.ActiveDoc?.ModelUnitSystem ?? Rhino.UnitSystem.Meters).ToUnitType(),
+            distProp.GetUnitTypeId()
+          );
           break;
       }
     }
@@ -481,8 +489,8 @@ namespace RhinoInside.Revit.GH.Components.Material
       switch (prop)
       {
         case DB.Visual.AssetPropertyDoubleArray3d tdProp:
-          if (removeAsset)
-            tdProp.RemoveConnectedAsset();
+          if (removeAsset) tdProp.RemoveConnectedAsset();
+
           tdProp.SetValueAsXYZ(new DB.XYZ(
             value.R,
             value.G,
@@ -490,8 +498,8 @@ namespace RhinoInside.Revit.GH.Components.Material
           ));
           break;
         case DB.Visual.AssetPropertyDoubleArray4d fdProp:
-          if (removeAsset)
-            fdProp.RemoveConnectedAsset();
+          if (removeAsset) fdProp.RemoveConnectedAsset();
+
           fdProp.SetValueAsDoubles(new double[] {
             value.R,
             value.G,

@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.GH.Parameters
       var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.Materials);
       Menu_AppendItem
       (
-        menu, $"Open Materials…",
+        menu, "Open Materials…",
         (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
         activeApp.CanPostCommand(commandId), false
       );
@@ -122,9 +122,10 @@ namespace RhinoInside.Revit.GH.Parameters
         {
           if (listBox.Items[listBox.SelectedIndex] is Types.Material value)
           {
-            RecordUndoEvent($"Set: {value}");
+            RecordPersistentDataEvent($"Set: {value}");
             PersistentData.Clear();
             PersistentData.Append(value);
+            OnObjectChanged(GH_ObjectEventType.PersistentData);
           }
         }
 

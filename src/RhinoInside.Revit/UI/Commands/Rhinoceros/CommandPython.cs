@@ -56,7 +56,7 @@ namespace RhinoInside.Revit.UI
 
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
-      Rhinoceros.RunScriptAsync("_EditPythonScript", activate: true);
+      Rhinoceros.RunScriptAsync("!_EditPythonScript", activate: true);
       return Result.Succeeded;
     }
   }

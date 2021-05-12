@@ -1,6 +1,9 @@
 using System.Diagnostics;
-using Rhino;
+using RhinoInside.Revit.External.DB.Extensions;
+using static System.Math;
+using static Rhino.RhinoMath;
 using DB = Autodesk.Revit.DB;
+using DBXS = RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.Convert.Units
 {
@@ -10,11 +13,15 @@ namespace RhinoInside.Revit.Convert.Units
     {
       static ToUnitSystemStatic()
       {
-        foreach (var unit in DB.UnitUtils.GetValidDisplayUnits(DB.UnitType.UT_Length))
+#if REVIT_2021
+        foreach (var unit in DB.UnitUtils.GetValidUnits(DBXS.SpecType.Measurable.Length))
+#else
+        foreach (var unit in DB.UnitUtils.GetValidDisplayUnits(DBXS.SpecType.Measurable.Length))
+#endif
         {
-          var revit = DB.UnitUtils.Convert(1.0, DB.DisplayUnitType.DUT_METERS, unit);
-          var rhino = RhinoMath.UnitScale(UnitSystem.Meters, unit.ToUnitSystem());
-          //Debug.Assert(Rhino.RhinoMath.EpsilonEquals(revit, rhino, Rhino.RhinoMath.ZeroTolerance), $"ToRhinoLengthUnits({unit}) fails!!");
+          var revit = DB.UnitUtils.Convert(1.0, DBXS.UnitType.Meters, unit);
+          var rhino = UnitScale(Rhino.UnitSystem.Meters, ToUnitSystem(unit));
+          //Debug.Assert(EpsilonEquals(revit, rhino, ZeroTolerance), $"ToRhinoLengthUnits({unit}) fails!!");
         }
       }
 
@@ -22,49 +29,51 @@ namespace RhinoInside.Revit.Convert.Units
       internal static void Assert() { }
     }
 
-    public static UnitSystem ToUnitSystem(this DB.DisplayUnitType value)
+    public static Rhino.UnitSystem ToUnitSystem(this DBXS.UnitType value)
     {
       ToUnitSystemStatic.Assert();
 
-      if (!DB.UnitUtils.IsValidDisplayUnit(DB.UnitType.UT_Length, value))
+      if (!DBXS.SpecType.Measurable.Length.IsValidUnitType(value))
         throw new ConversionException($"{value} is not a length unit");
 
-      switch (value)
-      {
-        case DB.DisplayUnitType.DUT_METERS: return Rhino.UnitSystem.Meters;
-        case DB.DisplayUnitType.DUT_METERS_CENTIMETERS: return Rhino.UnitSystem.Meters;
-        case DB.DisplayUnitType.DUT_DECIMETERS: return Rhino.UnitSystem.Decimeters;
-        case DB.DisplayUnitType.DUT_CENTIMETERS: return Rhino.UnitSystem.Centimeters;
-        case DB.DisplayUnitType.DUT_MILLIMETERS: return Rhino.UnitSystem.Millimeters;
+      if (value == DBXS.UnitType.Meters) return Rhino.UnitSystem.Meters;
+      if (value == DBXS.UnitType.MetersCentimeters) return Rhino.UnitSystem.Meters;
+      if (value == DBXS.UnitType.Decimeters) return Rhino.UnitSystem.Decimeters;
+      if (value == DBXS.UnitType.Centimeters) return Rhino.UnitSystem.Centimeters;
+      if (value == DBXS.UnitType.Millimeters) return Rhino.UnitSystem.Millimeters;
 
-        case DB.DisplayUnitType.DUT_FRACTIONAL_INCHES: return Rhino.UnitSystem.Inches;
-        case DB.DisplayUnitType.DUT_DECIMAL_INCHES: return Rhino.UnitSystem.Inches;
-        case DB.DisplayUnitType.DUT_FEET_FRACTIONAL_INCHES: return Rhino.UnitSystem.Feet;
-        case DB.DisplayUnitType.DUT_DECIMAL_FEET: return Rhino.UnitSystem.Feet;
-#if REVIT_2021
-        case DB.DisplayUnitType.DUT_DECIMAL_US_SURVEY_FEET: return Rhino.UnitSystem.Feet;
-#endif
-      }
+      if (value == DBXS.UnitType.Inches) return Rhino.UnitSystem.Inches;
+      if (value == DBXS.UnitType.FractionalInches) return Rhino.UnitSystem.Inches;
+      if (value == DBXS.UnitType.Feet) return Rhino.UnitSystem.Feet;
+      if (value == DBXS.UnitType.FeetFractionalInches) return Rhino.UnitSystem.Feet;
+      if (value == DBXS.UnitType.UsSurveyFeet) return Rhino.UnitSystem.Feet;
 
       Debug.Fail($"{value} conversion is not implemented");
       return Rhino.UnitSystem.Unset;
     }
 
-    public static DB.DisplayUnitType ToDisplayUnitType(this UnitSystem value)
+    public static DBXS.UnitType ToUnitType(this Rhino.UnitSystem value)
     {
       switch (value)
       {
-        case Rhino.UnitSystem.Meters: return DB.DisplayUnitType.DUT_METERS;
-        case Rhino.UnitSystem.Decimeters: return DB.DisplayUnitType.DUT_DECIMETERS;
-        case Rhino.UnitSystem.Centimeters: return DB.DisplayUnitType.DUT_CENTIMETERS;
-        case Rhino.UnitSystem.Millimeters: return DB.DisplayUnitType.DUT_MILLIMETERS;
+        case Rhino.UnitSystem.Meters:       return DBXS.UnitType.Meters;
+        case Rhino.UnitSystem.Decimeters:   return DBXS.UnitType.Decimeters;
+        case Rhino.UnitSystem.Centimeters:  return DBXS.UnitType.Centimeters;
+        case Rhino.UnitSystem.Millimeters:  return DBXS.UnitType.Millimeters;
 
-        case Rhino.UnitSystem.Inches: return DB.DisplayUnitType.DUT_DECIMAL_INCHES;
-        case Rhino.UnitSystem.Feet: return DB.DisplayUnitType.DUT_DECIMAL_FEET;
+        case Rhino.UnitSystem.Inches:       return DBXS.UnitType.Inches;
+        case Rhino.UnitSystem.Feet:         return DBXS.UnitType.Feet;
       }
 
       Debug.Fail($"{value} conversion is not implemented");
-      return DB.DisplayUnitType.DUT_UNDEFINED;
+      return DBXS.UnitType.Empty;
+    }
+
+    public static Rhino.UnitSystem ToUnitSystem(this DB.Units value, out int distanceDisplayPrecision)
+    {
+      var lengthFormatoptions = value.GetFormatOptions(DBXS.SpecType.Measurable.Length);
+      distanceDisplayPrecision = Clamp((int) -Log10(lengthFormatoptions.Accuracy), 0, 7);
+      return ToUnitSystem(lengthFormatoptions.GetUnitTypeId());
     }
   }
 }

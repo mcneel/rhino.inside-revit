@@ -246,7 +246,8 @@ namespace RhinoInside.Revit.GH.Components
         }
       }
 
-      if (failuresAccessor.GetSeverity() >= DB.FailureSeverity.Warning)
+      var severity = failuresAccessor.GetSeverity();
+      if (severity >= DB.FailureSeverity.Warning)
       {
         // Unsolved failures or warnings
         foreach (var error in failuresAccessor.GetFailureMessages().OrderBy(error => error.GetSeverity()))
@@ -255,7 +256,7 @@ namespace RhinoInside.Revit.GH.Components
         failuresAccessor.DeleteAllWarnings();
       }
 
-      if (failuresAccessor.GetSeverity() >= DB.FailureSeverity.Error)
+      if (severity >= DB.FailureSeverity.Error)
         return DB.FailureProcessingResult.ProceedWithRollBack;
 
       return DB.FailureProcessingResult.Continue;

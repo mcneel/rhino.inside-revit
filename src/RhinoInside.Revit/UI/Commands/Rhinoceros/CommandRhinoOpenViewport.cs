@@ -1,3 +1,4 @@
+using System.Linq;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
@@ -21,19 +22,15 @@ namespace RhinoInside.Revit.UI
 
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        pushButton.LongDescription = $"Opens a new perspective viewport (torn off from Rhino window)";
+        pushButton.LongDescription = "Torn off from Rhino window";
         StoreButton(CommandName, pushButton);
       }
     }
 
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
-      return Rhinoceros.RunScript(
-        "-_NewFloatingViewport Enter\n" +
-        "-_ViewportProperties Size 600 400\n" +
-        "-_Zoom _Extents\n" +
-        "_Enter",
-        false) ? Result.Succeeded : Result.Failed;
+      Rhinoceros.RunCommandOpenViewportAsync();
+      return Result.Succeeded;
     }
   }
 }
