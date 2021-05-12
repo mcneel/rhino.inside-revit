@@ -47,7 +47,6 @@ namespace RhinoInside.Revit.UI
       // setup contents
       Content = new TableLayout
       {
-        Padding = new Padding(0, 10),
         Rows =
         {
           new TableRow
