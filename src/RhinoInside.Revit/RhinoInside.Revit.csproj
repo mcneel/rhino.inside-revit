@@ -163,9 +163,9 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="RhinoCommon" Version="7.6.21103.13001-rc" IncludeAssets="compile; build" />
-        <PackageReference Include="RhinoWindows" Version="7.6.21103.13001-rc" IncludeAssets="build; compile" />
-        <PackageReference Include="Grasshopper" Version="7.6.21103.13001-rc" IncludeAssets="compile; build" />
+        <PackageReference Include="RhinoCommon" Version="7.6.21127.19001" IncludeAssets="compile; build" />
+        <PackageReference Include="RhinoWindows" Version="7.6.21127.19001" IncludeAssets="build; compile" />
+        <PackageReference Include="Grasshopper" Version="7.6.21127.19001" IncludeAssets="compile; build" />
         <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitVersion).0.0" IncludeAssets="build; compile" />
       </ItemGroup>
     </Otherwise>
