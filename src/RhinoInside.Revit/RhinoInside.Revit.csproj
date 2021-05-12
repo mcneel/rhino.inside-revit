@@ -330,7 +330,6 @@
     <Compile Include="UI\ModalDialog.cs" />
     <Compile Include="UI\Commands\Rhinoceros\CommandRhinoOpenViewport.cs" />
     <Compile Include="UI\RibbonHandler.cs" />
-    <Compile Include="UI\BaseDialog.cs" />
     <Compile Include="UI\BaseForm.cs" />
     <Compile Include="UI\BaseCommand.cs" />
     <Compile Include="UI\BaseWindowUtils.cs" />
