@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Types
   /// Interface to implement into classes that has a stable <see cref="DB.Reference"/>.
   /// For example: <see cref="DB.Element"/>, <see cref="DB.GeometryObject"/>
   /// </summary>
-  public interface IGH_ElementId : IGH_ReferenceObject
+  public interface IGH_ElementId : IGH_ReferenceObject, IEquatable<IGH_ElementId>
   {
     DB.Reference Reference { get; }
 
@@ -27,10 +27,10 @@ namespace RhinoInside.Revit.GH.Types
     string UniqueID { get; }
   }
 
-  public abstract class ElementId : ReferenceObject, IGH_ReferenceData, IGH_ElementId, IEquatable<ElementId>, IGH_QuickCast
+  public abstract class ElementId : ReferenceObject, IGH_ReferenceData, IGH_ElementId, IGH_QuickCast
   {
     #region System.Object
-    public bool Equals(ElementId other) => other is object &&
+    public bool Equals(IGH_ElementId other) => other is object &&
       other.DocumentGUID == DocumentGUID && other.UniqueID == UniqueID;
     public override bool Equals(object obj) => (obj is ElementId id) ? Equals(id) : base.Equals(obj);
     public override int GetHashCode() => DocumentGUID.GetHashCode() ^ UniqueID.GetHashCode();
@@ -55,7 +55,7 @@ namespace RhinoInside.Revit.GH.Types
         return
         (
           Documents.Size > 1 ?
-          $"{tip} @ {Document?.Title ?? DocumentGUID.ToString()}" :
+          $"{tip} @ {Document?.GetFileName() ?? DocumentGUID.ToString()}" :
           tip
         );
       }
