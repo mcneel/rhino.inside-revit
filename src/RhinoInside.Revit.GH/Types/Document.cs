@@ -50,21 +50,21 @@ namespace RhinoInside.Revit.GH.Types
         {
           var docs = Documents.Cast<DB.Document>();
 
-          var match_path = docs.Where(x => x.PathName.Equals(str.Value, StringComparison.InvariantCultureIgnoreCase)).ToArray();
+          var match_path = docs.Where(x => x.PathName.Equals(str.Value, StringComparison.OrdinalIgnoreCase)).ToArray();
           if (match_path.Length == 1)
           {
             Value = match_path[0];
             return true;
           }
 
-          var match_file = docs.Where(x => Path.GetFileName(x.GetFilePath()).Equals(str.Value, StringComparison.InvariantCultureIgnoreCase)).ToArray();
+          var match_file = docs.Where(x => x.GetFileName().Equals(str.Value, StringComparison.OrdinalIgnoreCase)).ToArray();
           if (match_file.Length == 1)
           {
             Value = match_file[0];
             return true;
           }
 
-          var match_title = docs.Where(x => x.Title.Equals(str.Value, StringComparison.InvariantCultureIgnoreCase)).ToArray();
+          var match_title = docs.Where(x => x.GetTitle().Equals(str.Value, StringComparison.OrdinalIgnoreCase)).ToArray();
           if (match_title.Length == 1)
           {
             Value = match_title[0];

@@ -6,7 +6,6 @@ using Autodesk.Revit.UI.Selection;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
-using Grasshopper.Kernel.Types;
 using Rhino.Display;
 using Rhino.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
@@ -43,7 +42,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #endregion
 
     #region ISelectionFilter
-    public virtual bool AllowElement(DB.Element elem) => Types.GraphicalElement.IsValidElement(elem);
+    public virtual bool AllowElement(DB.Element elem) => elem is R && Types.GraphicalElement.IsValidElement(elem);
     public bool AllowReference(DB.Reference reference, DB.XYZ position)
     {
       if (reference.ElementReferenceType == DB.ElementReferenceType.REFERENCE_TYPE_NONE)
@@ -51,7 +50,6 @@ namespace RhinoInside.Revit.GH.Parameters
 
       return false;
     }
-
     #endregion
 
     #region UI methods
@@ -261,9 +259,8 @@ namespace RhinoInside.Revit.GH.Parameters
         comboBox.Tag = menu;
 
         Menu_AppendCustomItem(menu, comboBox);
+        Menu_AppendPromptNew(menu);
       }
-
-      Menu_AppendPromptNew(menu);
 
       Menu_AppendItem(menu, $"Set one {TypeName}", Menu_PromptOne, SourceCount == 0, false);
     }
@@ -299,7 +296,7 @@ namespace RhinoInside.Revit.GH.Parameters
       //base.Menu_AppendInternaliseData(menu);
       Menu_AppendItem(menu, $"Internalise selection", Menu_InternaliseData, SourceCount > 0 || !MutableNickName, false);
 
-      if (Revit.ActiveUIDocument.Document is DB.Document activeDoc)
+      if (Revit.ActiveUIDocument?.Document is DB.Document activeDoc)
       {
         var any = ToElementIds(VolatileData).
           Where(x => activeDoc.Equals(x.Document)).
@@ -346,6 +343,12 @@ namespace RhinoInside.Revit.GH.Parameters
           RecordPersistentDataEvent("Change data");
 
           MutableNickName = true;
+          if (Kind == GH_ParamKind.floating)
+          {
+            IconDisplayMode = GH_IconDisplayMode.application;
+            Attributes?.ExpireLayout();
+          }
+
           PersistentData.Clear();
           if (data is object)
             PersistentData.Append(data);
@@ -371,6 +374,12 @@ namespace RhinoInside.Revit.GH.Parameters
           RecordPersistentDataEvent("Change data");
 
           MutableNickName = true;
+          if (Kind == GH_ParamKind.floating)
+          {
+            IconDisplayMode = GH_IconDisplayMode.application;
+            Attributes?.ExpireLayout();
+          }
+
           PersistentData.Clear();
           if (data is object)
             PersistentData.MergeStructure(data);
@@ -396,6 +405,12 @@ namespace RhinoInside.Revit.GH.Parameters
           RecordPersistentDataEvent("Change data");
 
           MutableNickName = true;
+          if (Kind == GH_ParamKind.floating)
+          {
+            IconDisplayMode = GH_IconDisplayMode.application;
+            Attributes?.ExpireLayout();
+          }
+
           PersistentData.Clear();
           if (data is object)
             PersistentData.AppendRange(data);
@@ -421,6 +436,12 @@ namespace RhinoInside.Revit.GH.Parameters
           RecordPersistentDataEvent("Change data");
 
           MutableNickName = true;
+          if (Kind == GH_ParamKind.floating)
+          {
+            IconDisplayMode = GH_IconDisplayMode.application;
+            Attributes?.ExpireLayout();
+          }
+
           PersistentData.Clear();
           if (data is object)
             PersistentData.MergeStructure(data);
@@ -446,6 +467,12 @@ namespace RhinoInside.Revit.GH.Parameters
           RecordPersistentDataEvent("Change data");
 
           MutableNickName = true;
+          if (Kind == GH_ParamKind.floating)
+          {
+            IconDisplayMode = GH_IconDisplayMode.application;
+            Attributes?.ExpireLayout();
+          }
+
           PersistentData.Clear();
           if (data is object)
             PersistentData.MergeStructure(data);
@@ -472,6 +499,12 @@ namespace RhinoInside.Revit.GH.Parameters
           RecordPersistentDataEvent("Change data");
 
           MutableNickName = true;
+          if (Kind == GH_ParamKind.floating)
+          {
+            IconDisplayMode = GH_IconDisplayMode.application;
+            Attributes?.ExpireLayout();
+          }
+
           PersistentData.Clear();
           PersistentData.AppendRange(added.Select(x => Types.Element.FromElementId(activeDoc, x)).OfType<T>());
 
@@ -532,6 +565,12 @@ namespace RhinoInside.Revit.GH.Parameters
       if (!MutableNickName)
       {
         MutableNickName = true;
+        if (Kind == GH_ParamKind.floating)
+        {
+          IconDisplayMode = GH_IconDisplayMode.application;
+          Attributes?.ExpireLayout();
+        }
+
         OnObjectChanged(GH_ObjectEventType.NickName);
       }
 
@@ -567,6 +606,12 @@ namespace RhinoInside.Revit.GH.Parameters
             OnObjectChanged(GH_ObjectEventType.PersistentData);
 
             MutableNickName = false;
+            if (Kind == GH_ParamKind.floating)
+            {
+              IconDisplayMode = GH_IconDisplayMode.name;
+              Attributes?.ExpireLayout();
+            }
+
             NickName = selectionFilter.Name;
             OnObjectChanged(GH_ObjectEventType.NickName);
 
@@ -584,6 +629,9 @@ namespace RhinoInside.Revit.GH.Parameters
     private ComboBox BuildFilterList()
     {
       var comboBox = new ComboBox();
+      comboBox.Items.Add("<Not Externalized>");
+      if (MutableNickName)
+        comboBox.SelectedIndex = 0;
 
       var doc = Revit.ActiveUIDocument?.Document;
       if (doc is object)
@@ -596,12 +644,9 @@ namespace RhinoInside.Revit.GH.Parameters
           filters = collector.Cast<DB.FilterElement>().OrderBy(x => x.Name).ToArray();
         }
 
-        comboBox.Items.Add("<Not Externalized>");
         comboBox.Items.Add("<Active Selection>");
 
-        if (MutableNickName)
-          comboBox.SelectedIndex = 0;
-        else if(NickName == "<Active Selection>")
+        if (!MutableNickName && NickName == "<Active Selection>")
           comboBox.SelectedIndex = 1;
 
         foreach (var filter in filters)
@@ -632,6 +677,12 @@ namespace RhinoInside.Revit.GH.Parameters
             RecordUndoEvent("Set: NickName");
             MutableNickName = comboBox.SelectedIndex == 0;
 
+            if (Kind == GH_ParamKind.floating)
+            {
+              IconDisplayMode = MutableNickName ? GH_IconDisplayMode.application : GH_IconDisplayMode.name;
+              Attributes?.ExpireLayout();
+            }
+
             PersistentData.Clear();
             if (comboBox.SelectedIndex == 0)
               PersistentData.MergeStructure(m_data);
@@ -644,6 +695,11 @@ namespace RhinoInside.Revit.GH.Parameters
               OnObjectChanged(GH_ObjectEventType.NickName);
               ExpireSolution(true);
             }
+            else
+            {
+              ClearRuntimeMessages();
+              OnDisplayExpired(false);
+            }
           }
         }
       }
@@ -655,6 +711,12 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         case GH_ObjectEventType.Sources:
           MutableNickName = true;
+          if (Kind == GH_ParamKind.floating)
+          {
+            IconDisplayMode = GH_IconDisplayMode.application;
+            Attributes?.ExpireLayout();
+          }
+
           break;
       }
     }
@@ -710,14 +772,14 @@ namespace RhinoInside.Revit.GH.Parameters
                     }
                   }
                 }
+
+                var dataCount = m_data.DataCount;
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"{dataCount}/{dataCount + filteredElementsCount} {(dataCount != 1 ? GH_Convert.ToPlural(TypeName) : TypeName)} collected from document '{doc.GetFileName()}'");
               }
               else
               {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to collect '{NickName}' elements from document '{doc.Title}'");
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to collect '{NickName}' elements from document '{doc.GetFileName()}'");
               }
-
-              var dataCount = m_data.DataCount;
-              AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"{dataCount}/{dataCount + filteredElementsCount} {(dataCount != 1 ? GH_Convert.ToPlural(TypeName) : TypeName)} collected from document '{doc.Title}'");
             }
           }
         }

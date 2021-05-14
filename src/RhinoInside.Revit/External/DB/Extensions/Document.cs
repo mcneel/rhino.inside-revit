@@ -72,30 +72,58 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
     #region File
-    public static string GetFilePath(this Document doc)
+    /// <summary>
+    /// The file name of the document's disk file without extension.
+    /// </summary>
+    /// <param name="doc"></param>
+    /// <returns>The mode title</returns>
+    public static string GetTitle(this Document doc)
+    {
+#if REVIT_2022
+      return doc.Title;
+#else
+      return System.IO.Path.GetFileNameWithoutExtension(doc.Title);
+#endif
+    }
+
+    /// <summary>
+    /// The file name of the document's disk file with extension.
+    /// </summary>
+    /// <param name="doc"></param>
+    /// <returns>The model file name</returns>
+    /// <remarks>
+    /// This method returns an empty string if the project has not been saved.
+    /// Note that the file name returned will be empty if a document is detached.
+    /// <see cref="Autodesk.Revit.DB.Document.IsDetached"/>
+    /// </remarks>
+    public static string GetFileName(this Document doc)
     {
       if (doc is null)
         return string.Empty;
 
-      if (string.IsNullOrEmpty(doc.PathName))
-        return (doc.Title + (doc.IsFamilyDocument ? ".rfa" : ".rvt"));
+      if (!string.IsNullOrEmpty(doc.PathName))
+        return System.IO.Path.GetFileName(doc.PathName);
 
-      return doc.PathName;
+      return doc.GetTitle() + (doc.IsFamilyDocument ? ".rfa" : ".rvt");
     }
 
-    public static bool HasModelPath(this Document doc, ModelPath modelPath)
+    /// <summary>
+    /// Gets the model path of the model.
+    /// </summary>
+    /// <param name="doc"></param>
+    /// <returns>The model path</returns>
+    public static ModelPath GetModelPath(this Document doc)
     {
 #if REVIT_2020
-      if (modelPath.CloudPath)
-        return doc.IsModelInCloud && modelPath.Compare(doc.GetCloudModelPath()) == 0;
+      if (doc.IsModelInCloud)
+        return doc.GetCloudModelPath();
 #endif
 
-      if (modelPath.ServerPath)
-        return doc.IsWorkshared && modelPath.Compare(doc.GetWorksharingCentralModelPath()) == 0;
+      if (!string.IsNullOrEmpty(doc.PathName))
+        return ModelPathUtils.ConvertUserVisiblePathToModelPath(doc.PathName);
 
-      return modelPath.Compare(new FilePath(doc.PathName)) == 0;
+      return default;
     }
-
     #endregion
 
     #region ElementId
@@ -536,5 +564,30 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return false;
     }
     #endregion
+  }
+
+  public static class ModelPathExtension
+  {
+    /// <summary>
+    /// Determines whether the specified <see cref="Autodesk.Revit.DB.ModelPath"/>
+    /// equals to this <see cref="Autodesk.Revit.DB.ModelPath"/>.
+    /// </summary>
+    /// <remarks>
+    /// Two <see cref="Autodesk.Revit.DB.ModelPath"/> instances are considered equivalent
+    /// if they represent the same target model file.
+    /// </remarks>
+    /// <param name="self"></param>
+    /// <param name="other"></param>
+    /// <returns></returns>
+    public static bool IsEquivalent(this ModelPath self, ModelPath other)
+    {
+      if (ReferenceEquals(self, other))
+        return true;
+
+      if (self is null || other is null)
+        return false;
+
+      return self.Compare(other) == 0;
+    }
   }
 }

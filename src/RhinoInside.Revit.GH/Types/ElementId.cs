@@ -131,7 +131,7 @@ namespace RhinoInside.Revit.GH.Types
       public bool Valid => owner.IsValid;
 
       [System.ComponentModel.Description("The document this element belongs to.")]
-      public string Document => owner.Document.GetFilePath();
+      public string Document => DB.ModelPathUtils.ConvertModelPathToUserVisiblePath(owner.Document.GetModelPath());
       [System.ComponentModel.Description("The Guid of document this element belongs to.")]
       public Guid DocumentGUID => owner.DocumentGUID;
       protected virtual bool IsValidId(DB.Document doc, DB.ElementId id) =>

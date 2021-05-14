@@ -83,7 +83,7 @@ namespace RhinoInside.Revit.GH.Components
             // grab the model path
             var modelPath = reference.PathType == DB.PathType.Relative ? reference.GetAbsolutePath() : reference.GetPath();
             // look into the loaded documents and find the one with the same path
-            if (documents.Cast<DB.Document>().Where(x => x.IsLinked && x.HasModelPath(modelPath)).FirstOrDefault() is DB.Document linkedDoc)
+            if (documents.Cast<DB.Document>().Where(x => x.IsLinked && modelPath.IsEquivalent(x.GetModelPath())).FirstOrDefault() is DB.Document linkedDoc)
               // if found, add that to the output list
               docs.Add(linkedDoc);
           }
