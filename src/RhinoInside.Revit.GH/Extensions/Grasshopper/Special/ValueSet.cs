@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Windows.Forms;
+using GH_IO.Serialization;
 using Grasshopper.GUI;
 using Grasshopper.GUI.Canvas;
 using Grasshopper.GUI.HTML;
@@ -21,12 +21,147 @@ using Grasshopper.Kernel.Types;
 
 namespace Grasshopper.Special
 {
+  /// <summary>
+  /// <see cref="IEqualityComparer{T}"/> implementation for <see cref="IGH_Goo"/> references.
+  /// </summary>
+  /// <remarks>
+  /// Support most of the Grasshopper built-in types, but some types are not comparable, see code below.
+  /// </remarks>
+  struct GooEqualityComparer : IEqualityComparer<IGH_Goo>
+  {
+    static bool IsEquatable(Type value) => value?.GetInterfaces().Any
+    (
+      i =>
+      i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEquatable<>)
+    ) == true;
+
+    public static bool IsEquatable(IGH_Goo goo)
+    {
+      return IsEquatable(goo?.GetType()) ||
+      goo is IGH_GeometricGoo ||
+      goo is IGH_QuickCast ||
+      goo is GH_StructurePath ||
+      goo is GH_Culture ||
+      goo is IComparable ||
+      (
+        goo?.ScriptVariable() is object obj &&
+        (
+          IsEquatable(obj.GetType()) ||
+          obj is ValueType ||
+          obj is IComparable
+        )
+      );
+    }
+
+    public bool Equals(IGH_Goo x, IGH_Goo y)
+    {
+      if (ReferenceEquals(x, y)) return true;
+      if (x is null) return false;
+      if (y is null) return false;
+
+      // Compare at Goo level
+      if (x.GetType() is Type typeX && y.GetType() is Type typeY && typeX == typeY)
+      {
+        if (IsEquatable(typeX))
+        {
+          dynamic dynX = x, dynY = y;
+          return dynX.Equals(dynY);
+        }
+
+        if (x is IGH_QuickCast qcX && y is IGH_QuickCast qcY)
+          return qcX.QC_CompareTo(qcY) == 0;
+
+        if (x is IGH_GeometricGoo geoX && y is IGH_GeometricGoo geoY)
+        {
+          if (geoX.IsReferencedGeometry || geoY.IsReferencedGeometry)
+            return geoX.ReferenceID == geoY.ReferenceID;
+
+          if (geoX.ScriptVariable() is Rhino.Geometry.GeometryBase geometryX && geoY.ScriptVariable() is Rhino.Geometry.GeometryBase geometryY)
+            return Rhino.Geometry.GeometryBase.GeometryEquals(geometryX, geometryY);
+        }
+
+        if (x is GH_StructurePath pathX && y is GH_StructurePath pathY)
+          return pathX.Value == pathY.Value;
+
+        if (x is GH_Culture cultureX && y is GH_Culture cultureY)
+          return cultureX.Value == cultureY.Value;
+
+        if (x is IComparable cX && y is IComparable cY)
+          return cX.CompareTo(cY) == 0;
+
+        // Compare at ScriptVariable level
+        if (x.ScriptVariable() is object objX && y.ScriptVariable() is object objY)
+          return ScriptVariableEquals(objX, objY);
+      }
+
+      return false;
+    }
+
+    static bool ScriptVariableEquals(object x, object y)
+    {
+      if (x.GetType() is Type typeX && y.GetType() is Type typeY && typeX == typeY)
+      {
+        if (IsEquatable(typeX))
+        {
+          dynamic dynX = x, dynY = y;
+          return dynX.Equals(dynY);
+        }
+
+        if (x is IComparable comparableX && y is IComparable comparableY)
+          return comparableX.CompareTo(comparableY) == 0;
+
+        if (x is ValueType valueX && y is ValueType valueY)
+          return valueX.Equals(valueY);
+      }
+
+      return false;
+    }
+
+    public int GetHashCode(IGH_Goo obj)
+    {
+      if (obj is null)
+        return 0;
+
+      if (IsEquatable(obj.GetType()))
+        return obj.GetHashCode();
+
+      if (obj is IGH_GeometricGoo geo && geo.IsReferencedGeometry)
+        return geo.ReferenceID.GetHashCode();
+
+      if (obj is IGH_QuickCast qc)
+        return qc.QC_Hash();
+
+      if (obj is GH_StructurePath path)
+        return path.Value.GetHashCode();
+
+      if (obj is GH_Culture culture)
+        return culture.Value.LCID;
+
+      if (obj is IComparable comparableGoo)
+        return comparableGoo.GetHashCode();
+
+      if (obj.ScriptVariable() is object o)
+      {
+        if (o is IComparable comparable)
+          return comparable.GetHashCode();
+
+        if (IsEquatable(o.GetType()))
+          return o.GetHashCode();
+
+        if (o is ValueType value)
+          return value.GetHashCode();
+      }
+
+      return 0;
+    }
+  }
+
   [EditorBrowsable(EditorBrowsableState.Never)]
-  public abstract class ValueSet : GH_PersistentParam<IGH_Goo>, IGH_InitCodeAware
+  public abstract class ValueSet : GH_PersistentParam<IGH_Goo>, IGH_InitCodeAware, IGH_StateAwareObject
   {
     public override string TypeName => "Data";
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
     public override GH_ParamKind Kind => GH_ParamKind.floating;
+
     protected override Bitmap Icon => ClassIcon;
     static readonly Bitmap ClassIcon = BuildIcon();
     static Bitmap BuildIcon()
@@ -48,13 +183,39 @@ namespace Grasshopper.Special
     }
 
     void IGH_InitCodeAware.SetInitCode(string code) => NickName = code;
+    protected override IGH_Goo InstantiateT() => new GH_ObjectWrapper();
 
-    public ValueSet() : base("Value Set Picker", string.Empty, "A value picker for comparable values", "Params", "Input")
+    protected ValueSet(string name, string nickname, string description, string category, string subcategory) :
+      base(name, nickname, description, category, subcategory)
     {
       ObjectChanged += OnObjectChanged;
+
+      // This makes the parameter not turn orange when there is nothing selected.
+      Optional = true;
     }
 
-    protected override IGH_Goo InstantiateT() => new GH_ObjectWrapper();
+    [Flags]
+    public enum DataCulling
+    {
+      None = 0,
+      Nulls = 1 << 0,
+      Invalids = 1 << 1,
+      Duplicates = 1 << 2,
+      Empty = 1 << 31
+    };
+
+    /// <summary>
+    /// Culling nulls by default to make it work as a <see cref="CheckBox"/>
+    /// </summary>
+    const DataCulling DefaultCulling = DataCulling.Nulls;
+    DataCulling culling = DefaultCulling;
+    public DataCulling Culling
+    {
+      get => culling & CullingMask;
+      set => culling = value;
+    }
+
+    public virtual DataCulling CullingMask => DataCulling.Nulls | DataCulling.Invalids | DataCulling.Duplicates | DataCulling.Empty;
 
     public class ListItem
     {
@@ -82,9 +243,79 @@ namespace Grasshopper.Special
 
     public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
     {
-      base.AppendAdditionalMenuItems(menu);
-      Menu_AppendItem(menu, "Invert selection", Menu_InvertSelectionClicked, SourceCount > 0);
-      Menu_AppendItem(menu, "Select all", Menu_SelectAllClicked, SourceCount > 0);
+      Menu_AppendWireDisplay(menu);
+      Menu_AppendDisconnectWires(menu);
+
+      Menu_AppendPreProcessParameter(menu);
+      Menu_AppendPrincipalParameter(menu);
+      Menu_AppendReverseParameter(menu);
+      Menu_AppendFlattenParameter(menu);
+      Menu_AppendGraftParameter(menu);
+      Menu_AppendSimplifyParameter(menu);
+      Menu_AppendPostProcessParameter(menu);
+
+      if (Kind == GH_ParamKind.floating || Kind == GH_ParamKind.input)
+      {
+        Menu_AppendSeparator(menu);
+        if (Menu_CustomSingleValueItem() is ToolStripMenuItem single)
+        {
+          single.Enabled &= SourceCount == 0;
+          menu.Items.Add(single);
+        }
+        else Menu_AppendPromptOne(menu);
+
+        if (Menu_CustomMultiValueItem() is ToolStripMenuItem more)
+        {
+          more.Enabled &= SourceCount == 0;
+          menu.Items.Add(more);
+        }
+        else Menu_AppendPromptMore(menu);
+        Menu_AppendManageCollection(menu);
+
+        Menu_AppendSeparator(menu);
+        Menu_AppendDestroyPersistent(menu);
+        Menu_AppendInternaliseData(menu);
+
+        if (Exposure != GH_Exposure.hidden)
+          Menu_AppendExtractParameter(menu);
+      }
+    }
+
+    protected virtual void Menu_AppendPreProcessParameter(ToolStripDropDown menu) { }
+
+    private void Menu_Culling(DataCulling value)
+    {
+      RecordUndoEvent("Set: Culling");
+
+      if (Culling.HasFlag(value))
+        Culling &= ~value;
+      else
+        Culling |= value;
+
+      OnObjectChanged(GH_ObjectEventType.Options);
+
+      if (Kind == GH_ParamKind.output)
+        ExpireOwner();
+
+      ExpireSolution(true);
+    }
+
+    protected virtual void Menu_AppendPostProcessParameter(ToolStripDropDown menu)
+    {
+      var Cull = Menu_AppendItem(menu, "Cull");
+
+      Cull.Checked = Culling != DataCulling.None;
+      if (CullingMask.HasFlag(DataCulling.Nulls))
+        Menu_AppendItem(Cull.DropDown, "Nulls", (s, a) => Menu_Culling(DataCulling.Nulls), true, Culling.HasFlag(DataCulling.Nulls));
+
+      if (CullingMask.HasFlag(DataCulling.Invalids))
+        Menu_AppendItem(Cull.DropDown, "Invalids", (s, a) => Menu_Culling(DataCulling.Invalids), true, Culling.HasFlag(DataCulling.Invalids));
+
+      if (CullingMask.HasFlag(DataCulling.Duplicates))
+        Menu_AppendItem(Cull.DropDown, "Duplicates", (s, a) => Menu_Culling(DataCulling.Duplicates), true, Culling.HasFlag(DataCulling.Duplicates));
+
+      if (CullingMask.HasFlag(DataCulling.Empty))
+        Menu_AppendItem(Cull.DropDown, "Empty", (s, a) => Menu_Culling(DataCulling.Empty), true, Culling.HasFlag(DataCulling.Empty));
     }
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu) { }
@@ -106,8 +337,12 @@ namespace Grasshopper.Special
       ResetPersistentData(null, "Clear selection");
     }
 
-    protected override void Menu_AppendInternaliseData(ToolStripDropDown menu) =>
+    protected override void Menu_AppendInternaliseData(ToolStripDropDown menu)
+    {
       Menu_AppendItem(menu, "Internalise selection", Menu_InternaliseDataClicked, SourceCount > 0);
+      Menu_AppendItem(menu, "Invert selection", Menu_InvertSelectionClicked, SourceCount > 0);
+      Menu_AppendItem(menu, "Select all", Menu_SelectAllClicked, SourceCount > 0);
+    }
 
     private void Menu_InternaliseDataClicked(object sender, EventArgs e)
     {
@@ -294,7 +529,7 @@ namespace Grasshopper.Special
                 }
 
                 var footnoteBounds = new RectangleF(bounds.Left, bounds.Bottom - 17, bounds.Width - 3, 17);
-                graphics.DrawString($"{Owner.ListItems.Count} items, {Owner.VolatileDataCount} selected", GH_FontServer.StandardAdjusted, Brushes.Gray, footnoteBounds, GH_TextRenderingConstants.FarCenter);
+                graphics.DrawString($"{Owner.ListItems.Count} items", GH_FontServer.StandardAdjusted, Brushes.Gray, footnoteBounds, GH_TextRenderingConstants.FarCenter);
               }
             }
 
@@ -524,6 +759,28 @@ namespace Grasshopper.Special
       base.AddedToDocument(document);
     }
 
+    public override bool Read(GH_IReader reader)
+    {
+      if (!base.Read(reader))
+        return false;
+
+      int culling = (int) DefaultCulling;
+      reader.TryGetInt32("Culling", ref culling);
+      Culling = (DataCulling) culling;
+
+      return true;
+    }
+    public override bool Write(GH_IWriter writer)
+    {
+      if (!base.Write(writer))
+        return false;
+
+      if (Culling != DefaultCulling)
+        writer.SetInt32("Culling", (int) Culling);
+
+      return true;
+    }
+
     public override void ClearData()
     {
       base.ClearData();
@@ -545,24 +802,10 @@ namespace Grasshopper.Special
 
       OnObjectChanged(GH_ObjectEventType.PersistentData);
 
-      base.ClearData();
-      ExpireDownStreamObjects();
-      OnSolutionExpired(false);
-
-      Phase = GH_SolutionPhase.Collecting;
-      AddVolatileDataTree(PersistentData.Duplicate());
-      PostProcessVolatileData();
-      Phase = GH_SolutionPhase.Collected;
-
-      if (OnPingDocument() is GH_Document doc)
-      {
-        doc.ClearReferenceTable();
-        doc.NewSolution(false);
-      }
+      ExpireSolution(true);
     }
 
-    public abstract void ProcessData();
-    public sealed override void PostProcessData()
+    protected virtual void LoadVolatileData()
     {
       foreach (var branch in m_data.Branches)
       {
@@ -572,29 +815,75 @@ namespace Grasshopper.Special
 
           if (goo is RhinoInside.Revit.GH.Types.IGH_ReferenceData id && id.IsReferencedData && !id.IsReferencedDataLoaded && !id.LoadReferencedData())
           {
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"A referenced element could not be found in the Revit document.");
-            branch[i] = null;
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"A referenced {goo.TypeName} could not be found.");
           }
           else if (goo is IGH_GeometricGoo geo && geo.IsReferencedGeometry && !geo.IsGeometryLoaded && !geo.LoadGeometry())
           {
             AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"A referenced {geo.TypeName} could not be found in the Rhino document.");
-            branch[i] = null;
           }
         }
       }
+    }
 
-      ProcessData();
+    protected virtual void PreProcessVolatileData() { }
+
+    protected abstract void ProcessVolatileData();
+
+    protected virtual void PostProcessVolatileData() => base.PostProcessData();
+
+    protected override void OnVolatileDataCollected()
+    {
+      base.OnVolatileDataCollected();
+
+      if (Culling != DataCulling.None)
+      {
+        var data = new GH_Structure<IGH_Goo>();
+        var pathCount = m_data.PathCount;
+        for (int p = 0; p < pathCount; ++p)
+        {
+          var path = m_data.Paths[p];
+          var branch = m_data.get_Branch(path);
+
+          var items = branch.Cast<IGH_Goo>();
+          if (Culling.HasFlag(DataCulling.Nulls))
+            items = items.Where(x => x is object);
+
+          if (Culling.HasFlag(DataCulling.Invalids))
+            items = items.Where(x => x?.IsValid != false);
+
+          if (Culling.HasFlag(DataCulling.Duplicates))
+            items = items.Distinct(new GooEqualityComparer());
+
+          if (!Culling.HasFlag(DataCulling.Empty) || items.Any())
+            data.AppendRange(items, path);
+        }
+
+        m_data = data;
+      }
+    }
+
+    public sealed override void PostProcessData()
+    {
+      LoadVolatileData();
+
+      PreProcessVolatileData();
+
+      ProcessVolatileData();
 
       // Show elements sorted Alphabetically
       ListItems.Sort((x, y) => string.CompareOrdinal(x.Name, y.Name));
 
-      m_data.Clear();
-      m_data.AppendRange(SelectedItems.Select(x => x.Value), new GH_Path(0));
-
       PostProcessVolatileData();
     }
 
-    protected void PostProcessVolatileData() => base.PostProcessData();
+    public override void RegisterRemoteIDs(GH_GuidTable id_list)
+    {
+      foreach (var item in SelectedItems)
+      {
+        if (item.Value is IGH_GeometricGoo geo)
+          id_list.Add(geo.ReferenceID, this);
+      }
+    }
 
     protected override string HtmlHelp_Source()
     {
@@ -617,165 +906,81 @@ namespace Grasshopper.Special
 
       return nTopic.HtmlFormat();
     }
+
+    #region IGH_StateAwareObject
+    string IGH_StateAwareObject.SaveState()
+    {
+      if (string.IsNullOrEmpty(NickName) && PersistentData.IsEmpty)
+        return string.Empty;
+
+      var chunk = new GH_LooseChunk("ValueSet");
+
+      chunk.SetString(nameof(NickName), NickName);
+      PersistentData.Write(chunk.CreateChunk(nameof(PersistentData)));
+
+      return chunk.Serialize_Xml();
+    }
+
+    void IGH_StateAwareObject.LoadState(string state)
+    {
+      if (!string.IsNullOrEmpty(state))
+      {
+        try
+        {
+          var chunk = new GH_LooseChunk("ValueSet");
+          chunk.Deserialize_Xml(state);
+
+          NickName = chunk.GetString(nameof(NickName));
+          PersistentData.Read(chunk.FindChunk(nameof(PersistentData)));
+
+          ExpireSolution(false);
+          return;
+        }
+        catch { }
+      }
+
+      NickName = string.Empty;
+      PersistentData.Clear();
+    }
+    #endregion
   }
 
   [EditorBrowsable(EditorBrowsableState.Never)]
-  public class ValueSetPicker : ValueSet
+  public class ValuePicker : ValueSet
   {
     static readonly Guid ComponentClassGuid = new Guid("AFB12752-3ACB-4ACF-8102-16982A69CDAE");
     public override Guid ComponentGuid => ComponentClassGuid;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
-    public ValueSetPicker() { }
+    public ValuePicker() : base
+    (
+      name: "Value Picker",
+      nickname: string.Empty,
+      description: "A value picker for comparable values",
+      category: "Params",
+      subcategory: "Input"
+    )
+    { }
 
-    class GooEqualityComparer : IEqualityComparer<IGH_Goo>
+    protected override void ProcessVolatileData()
     {
-      static bool IsEquatable(Type value)
-      {
-        for (var type = value; type is object; type = type.BaseType)
-        {
-          var IEquatableT = typeof(IEquatable<>).MakeGenericType(type);
-          if (IEquatableT.IsAssignableFrom(value))
-            return true;
-        }
-
-        return false;
-      }
-
-      public static bool IsEquatable(IGH_Goo goo)
-      {
-        return IsEquatable(goo?.GetType()) ||
-        goo is IGH_GeometricGoo ||
-        goo is IGH_QuickCast ||
-        goo is GH_StructurePath ||
-        goo is GH_Culture ||
-        goo is IComparable ||
-        (
-          goo?.ScriptVariable() is object obj &&
-          (
-            IsEquatable(obj.GetType()) ||
-            obj is ValueType ||
-            obj is IComparable
-          )
-        );
-      }
-
-      public bool Equals(IGH_Goo x, IGH_Goo y)
-      {
-        // Compare at Goo level
-        if (x.GetType() is Type typeX && y.GetType() is Type typeY && typeX == typeY)
-        {
-          if (IsEquatable(typeX))
-          {
-            dynamic dynX = x, dynY = y;
-            return dynX.Equals(dynY);
-          }
-
-          if (x is IGH_QuickCast qcX && y is IGH_QuickCast qcY)
-            return qcX.QC_CompareTo(qcY) == 0;
-
-          if (x is IGH_GeometricGoo geoX && y is IGH_GeometricGoo geoY)
-          {
-            if (geoX.IsReferencedGeometry || geoY.IsReferencedGeometry)
-              return geoX.ReferenceID == geoY.ReferenceID;
-
-            if (geoX.ScriptVariable() is Rhino.Geometry.GeometryBase geometryX && geoY.ScriptVariable() is Rhino.Geometry.GeometryBase geometryY)
-              return Rhino.Geometry.GeometryBase.GeometryEquals(geometryX, geometryY);
-          }
-
-          if (x is GH_StructurePath pathX && y is GH_StructurePath pathY)
-            return pathX.Value == pathY.Value;
-
-          if (x is GH_Culture cultureX && y is GH_Culture cultureY)
-            return cultureX.Value == cultureY.Value;
-
-          if (x is IComparable cX && y is IComparable cY)
-            return cX.CompareTo(cY) == 0;
-
-          // Compare at ScriptVariable level
-          if (x.ScriptVariable() is object objX && y.ScriptVariable() is object objY)
-            return ScriptVariableEquals(objX, objY);
-        }
-
-        return false;
-      }
-
-      static bool ScriptVariableEquals(object x, object y)
-      {
-        if (x.GetType() is Type typeX && y.GetType() is Type typeY && typeX == typeY)
-        {
-          if (IsEquatable(typeX))
-          {
-            dynamic dynX = x, dynY = y;
-            return dynX.Equals(dynY);
-          }
-
-          if (x is IComparable comparableX && y is IComparable comparableY)
-            return comparableX.CompareTo(comparableY) == 0;
-
-          if (x is ValueType valueX && y is ValueType valueY)
-            return valueX.Equals(valueY);
-        }
-
-        return false;
-      }
-
-      public int GetHashCode(IGH_Goo obj)
-      {
-        if (IsEquatable(obj.GetType()))
-          return obj.GetHashCode();
-
-        if (obj is IGH_GeometricGoo geo && geo.IsReferencedGeometry)
-          return geo.ReferenceID.GetHashCode();
-
-        if (obj is IGH_QuickCast qc)
-          return qc.QC_Hash();
-
-        if (obj is GH_StructurePath path)
-          return path.Value.GetHashCode();
-
-        if (obj is GH_Culture culture)
-          return culture.Value.LCID;
-
-        if (obj is IComparable comparableGoo)
-          return comparableGoo.GetHashCode();
-
-        if (obj.ScriptVariable() is object o)
-        {
-          if (o is IComparable comparable)
-            return comparable.GetHashCode();
-
-          if (IsEquatable(o.GetType()))
-            return o.GetHashCode();
-
-          if (o is ValueType value)
-            return value.GetHashCode();
-        }
-
-        return 0;
-      }
-    }
-
-    public override void ProcessData()
-    {
-      int dataCount = VolatileDataCount;
       int nonComparableCount = 0;
-      var goosSet = new HashSet<IGH_Goo>(VolatileData.AllData(true).
-          Where(x =>
-          {
-            if (GooEqualityComparer.IsEquatable(x))
-              return true;
+      var goosSet = new HashSet<IGH_Goo>
+      (
+        VolatileData.AllData(true).
+        Where(x =>
+        {
+          if (GooEqualityComparer.IsEquatable(x))
+            return true;
 
-            nonComparableCount++;
-            return false;
-          })
-          , new GooEqualityComparer());
+          nonComparableCount++;
+          return false;
+        }),
+        new GooEqualityComparer()
+      );
 
       if (nonComparableCount > 0)
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"{nonComparableCount} null or non comparable elements filtered.");
-
-      var duplicatedCount = dataCount - nonComparableCount - goosSet.Count;
-      if (duplicatedCount > 0)
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"{duplicatedCount} duplicated elements filtered.");
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"{nonComparableCount} non comparable elements filtered.");
 
       if (DataType == GH_ParamData.local)
       {
@@ -793,6 +998,23 @@ namespace Grasshopper.Special
       else
       {
         ListItems.Clear();
+      }
+
+      // Cull items that are not selected
+      var selectedItems = new HashSet<IGH_Goo>(SelectedItems.Select(x=> x.Value), new GooEqualityComparer());
+
+      var pathCount = m_data.PathCount;
+      for (int p = 0; p < pathCount; ++p)
+      {
+        var path = m_data.get_Path(p);
+        var srcBranch = m_data.get_Branch(path);
+
+        var itemCount = srcBranch.Count;
+        for (int i = 0; i < itemCount; ++i)
+        {
+          if (!selectedItems.Contains((IGH_Goo) srcBranch[i]))
+            srcBranch[i] = default;
+        }
       }
     }
   }
