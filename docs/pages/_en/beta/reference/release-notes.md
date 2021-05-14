@@ -15,7 +15,7 @@ Some of the changes mentioned in sections below, might break your existing Grass
 ### Minor Changes
 * Added pattern matching capabilities to 'Query Element Parameters'.
 * Now 'Value Picker' respects input data branching structure on output.
-* Now 'Value Picker' respects input data branching structure on output.
+* Now 'Graphical Element' parameters show the name of the externalized saved selection.
 
 {% include ltr/release-header.html version="0.5" time="04/27/2021" %}
 
