@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -26,68 +28,43 @@ namespace RhinoInside.Revit.GH.Types
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public abstract class PersistentParam<T> : GH_PersistentParam<T>
+  interface IGH_PersistentStateAwareObject
+  {
+    bool LoadState(GH_IReader reader);
+    bool SaveState(GH_IWriter writer);
+    bool ResetState();
+  }
+
+  public abstract class PersistentParam<T> : GH_PersistentParam<T>, IGH_InitCodeAware, IGH_PersistentStateAwareObject
     where T : class, IGH_Goo
   {
     protected override /*sealed*/ Bitmap Icon => ((Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
                                               ImageBuilder.BuildIcon(IconTag, Properties.Resources.UnknownIcon);
 
     protected virtual string IconTag => typeof(T).Name.Substring(0, 1);
-    public virtual void SetInitCode(string code) => NickName = code;
+    public virtual void SetInitCode(string code) => SetPersistentData(code);
 
     protected PersistentParam(string name, string nickname, string description, string category, string subcategory) :
       base(name, nickname, description, category, subcategory)
     { }
 
-    [Flags]
-    public enum DataCulling
-    {
-      None = 0,
-      Nulls = 1 << 0,
-      Invalids = 1 << 1,
-      Duplicates = 1 << 2,
-    };
-
-    DataCulling culling = DataCulling.None;
-    public DataCulling Culling
-    {
-      get => culling;
-      set => culling = value & CullingMask;
-    }
-
-    public virtual DataCulling CullingMask =>
-      DataCulling.Nulls | DataCulling.Invalids |
-      (
-        IsEquatable(typeof(T)) ?
-        DataCulling.Duplicates :
-        DataCulling.None
-      );
-
-    static bool IsEquatable(Type value)
-    {
-      for (var type = value; type is object; type = type.BaseType)
-      {
-        var IEquatableT = typeof(IEquatable<>).MakeGenericType(type);
-        if (IEquatableT.IsAssignableFrom(value))
-          return true;
-      }
-
-      return false;
-    }
-
+    #region IO
     public override bool Read(GH_IReader reader)
     {
       if (!base.Read(reader))
         return false;
 
-      int grouping = (int) DataCulling.None;
-      reader.TryGetInt32("Culling", ref grouping);
-      Culling = (DataCulling) grouping;
+      int culling = (int) DataCulling.None;
+      reader.TryGetInt32("Culling", ref culling);
+      Culling = (DataCulling) culling;
 
       return true;
     }
+
     public override bool Write(GH_IWriter writer)
     {
+      RequiresPersistenDataConstructor();
+
       if (!base.Write(writer))
         return false;
 
@@ -97,6 +74,59 @@ namespace RhinoInside.Revit.GH.Parameters
       return true;
     }
 
+    [Conditional("DEBUG")]
+    void RequiresPersistenDataConstructor()
+    {
+      var set = new HashSet<string>();
+      var errors = new List<string>();
+      foreach (var goo in PersistentData.NonNulls)
+      {
+        if (goo.GetType().GetConstructor(Type.EmptyTypes) is null)
+        {
+          var error = $"'{goo.GetType().FullName}' has no public empty constructor.{Environment.NewLine}Parameterless constructor is mandatory for serialization.";
+          if (set.Add(error)) errors.Add(error);
+        }
+      }
+
+      var builder = new System.Text.StringBuilder();
+      foreach (var error in errors) builder.AppendLine(error);
+      Debug.Assert(errors.Count == 0, builder.ToString());
+    }
+    #endregion
+
+    #region VolatileData
+    [Flags]
+    public enum DataCulling
+    {
+      None = 0,
+      Nulls = 1 << 0,
+      Invalids = 1 << 1,
+      Duplicates = 1 << 2,
+      Empty = 1 << 31
+    };
+
+    DataCulling culling = DataCulling.None;
+    public DataCulling Culling
+    {
+      get => culling;
+      set => culling = value & CullingMask;
+    }
+
+    /// <summary>
+    /// Culling options depend on capabilities of <see cref="T"/>
+    /// </summary>
+    static DataCulling CullingMask =>
+      (!typeof(T).IsValueType ? DataCulling.Nulls : DataCulling.None) |
+      (typeof(IGH_Goo).IsAssignableFrom(typeof(T)) ? DataCulling.Invalids : DataCulling.None) |
+      (IsEquatable(typeof(T)) ? DataCulling.Duplicates : DataCulling.None) |
+      DataCulling.Empty;
+
+    static bool IsEquatable(Type value) => value?.GetInterfaces().Any
+    (
+      i =>
+      i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEquatable<>)
+    ) == true;
+
     public override void ClearData()
     {
       base.ClearData();
@@ -105,10 +135,7 @@ namespace RhinoInside.Revit.GH.Parameters
         return;
 
       foreach (var reference in PersistentData.OfType<Types.IGH_ReferenceData>())
-      {
-        if (reference.IsReferencedData)
-          reference.UnloadReferencedData();
-      }
+        reference.UnloadReferencedData();
     }
 
     protected virtual void LoadVolatileData()
@@ -136,18 +163,6 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       if (Culling != DataCulling.None)
       {
-        if (Kind == GH_ParamKind.floating)
-        {
-          if ((Culling & DataCulling.Nulls) != 0)
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "Nulls culled");
-
-          if ((Culling & DataCulling.Invalids) != 0)
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "Invalids culled");
-
-          if ((Culling & DataCulling.Duplicates) != 0)
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "Duplicates culled");
-        }
-
         var data = new GH_Structure<T>();
         var pathCount = m_data.PathCount;
         for (int p = 0; p < pathCount; ++p)
@@ -155,18 +170,18 @@ namespace RhinoInside.Revit.GH.Parameters
           var path = m_data.Paths[p];
           var branch = m_data.get_Branch(path);
 
-          var items = branch.Cast<object>();
-          if ((Culling & DataCulling.Nulls) != 0)
-            items = items.Where(x => x != null);
+          var items = branch.Cast<T>();
+          if (Culling.HasFlag(DataCulling.Nulls))
+            items = items.Where(x => x is object);
 
-          if ((Culling & DataCulling.Invalids) != 0)
-            items = items.Where(x => (x as IGH_Goo)?.IsValid != false);
+          if (Culling.HasFlag(DataCulling.Invalids))
+            items = items.Where(x => x?.IsValid != false);
 
-          if ((Culling & DataCulling.Duplicates) != 0)
-            items = items.GroupBy(x => x).Select(x => x.Key);
+          if (Culling.HasFlag(DataCulling.Duplicates))
+            items = items.Distinct();
 
-          foreach (var item in items)
-            data.Append((T) item, path);
+          if (!Culling.HasFlag(DataCulling.Empty) || items.Any())
+            data.AppendRange(items, path);
         }
 
         m_data = data;
@@ -185,6 +200,20 @@ namespace RhinoInside.Revit.GH.Parameters
 
       PostProcessVolatileData();
     }
+    #endregion
+
+    #region PersistentData
+    protected T PersistentValue
+    {
+      get
+      {
+        return PersistentData.PathCount == 1 &&
+          PersistentData.DataCount == 1 ?
+          PersistentData.get_FirstItem(false) :
+          default;
+      }
+    }
+    #endregion
 
     #region UI
     public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
@@ -230,17 +259,20 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected virtual void Menu_AppendPreProcessParameter(ToolStripDropDown menu)
     {
-      var Cull = Menu_AppendItem(menu, "Cull") as ToolStripMenuItem;
+      var Cull = Menu_AppendItem(menu, "Cull");
 
       Cull.Checked = Culling != DataCulling.None;
-      if ((CullingMask & DataCulling.Nulls) != 0)
-        Menu_AppendItem(Cull.DropDown, "Nulls", (s, a) => Menu_Culling(DataCulling.Nulls), true, (Culling & DataCulling.Nulls) != 0);
+      if (CullingMask.HasFlag(DataCulling.Nulls))
+        Menu_AppendItem(Cull.DropDown, "Nulls", (s, a) => Menu_Culling(DataCulling.Nulls), true, Culling.HasFlag(DataCulling.Nulls));
 
-      if ((CullingMask & DataCulling.Nulls) != 0)
-        Menu_AppendItem(Cull.DropDown, "Invalids", (s, a) => Menu_Culling(DataCulling.Invalids), true, (Culling & DataCulling.Invalids) != 0);
+      if (CullingMask.HasFlag(DataCulling.Invalids))
+        Menu_AppendItem(Cull.DropDown, "Invalids", (s, a) => Menu_Culling(DataCulling.Invalids), true, Culling.HasFlag(DataCulling.Invalids));
 
-      if ((CullingMask & DataCulling.Nulls) != 0)
-        Menu_AppendItem(Cull.DropDown, "Duplicates", (s, a) => Menu_Culling(DataCulling.Duplicates), true, (Culling & DataCulling.Duplicates) != 0);
+      if (CullingMask.HasFlag(DataCulling.Duplicates))
+        Menu_AppendItem(Cull.DropDown, "Duplicates", (s, a) => Menu_Culling(DataCulling.Duplicates), true, Culling.HasFlag(DataCulling.Duplicates));
+
+      if (CullingMask.HasFlag(DataCulling.Empty))
+        Menu_AppendItem(Cull.DropDown, "Empty", (s, a) => Menu_Culling(DataCulling.Empty), true, Culling.HasFlag(DataCulling.Empty));
     }
 
     private void Menu_Culling(DataCulling value)
@@ -277,6 +309,55 @@ namespace RhinoInside.Revit.GH.Parameters
       }
 
       return base.Prompt_ManageCollection(values);
+    }
+    #endregion
+
+    #region IGH_PersistentStateAwareObject
+    bool IGH_PersistentStateAwareObject.SaveState(GH_IWriter writer)
+    {
+      if (NickName != Name)
+        writer.SetString(nameof(NickName), NickName);
+
+      if (MutableNickName != true)
+        writer.SetBoolean(nameof(MutableNickName), MutableNickName);
+
+      if (IconDisplayMode != GH_IconDisplayMode.application)
+        writer.SetInt32(nameof(IconDisplayMode), (int) IconDisplayMode);
+
+      if (PersistentData.IsEmpty != true)
+        PersistentData.Write(writer.CreateChunk(nameof(PersistentData)));
+
+      return true;
+    }
+
+    bool IGH_PersistentStateAwareObject.LoadState(GH_IReader reader)
+    {
+      var nickName = Name;
+      reader.TryGetString(nameof(NickName), ref nickName);
+      NickName = nickName;
+
+      var mutableNickName = true;
+      reader.TryGetBoolean(nameof(MutableNickName), ref mutableNickName);
+      MutableNickName = mutableNickName;
+
+      var iconDisplayMode = (int) GH_IconDisplayMode.application;
+      reader.TryGetInt32(nameof(IconDisplayMode), ref iconDisplayMode);
+      IconDisplayMode = (GH_IconDisplayMode) iconDisplayMode;
+
+      PersistentData.Clear();
+      if (reader.FindChunk(nameof(PersistentData)) is GH_Chunk persistentData)
+        PersistentData.Read(persistentData);
+
+      ExpireSolution(false);
+      return true;
+    }
+
+    bool IGH_PersistentStateAwareObject.ResetState()
+    {
+      PersistentData.Clear();
+
+      ExpireSolution(false);
+      return true;
     }
     #endregion
   }

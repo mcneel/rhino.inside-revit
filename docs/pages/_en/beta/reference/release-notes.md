@@ -12,6 +12,9 @@ Some of the changes mentioned in sections below, might break your existing Grass
 <!-- most recent release should be on top -->
 {% include ltr/release-header.html version="0.6" time="04/30/2021" %}
 
+### New Features
+* Added 'Culling > Empty' options to cull empty lists.
+
 ### Minor Changes
 * Added pattern matching capabilities to 'Query Element Parameters'.
 * Now 'Value Picker' respects input data branching structure on output.
