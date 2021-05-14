@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices;
+
 namespace System
 {
   static class TypeExtension
@@ -46,6 +48,16 @@ namespace System
       return sourceString.Length > maxLength ?
         sourceString.Substring(0, maxLength - 1) + '…' :
         sourceString;
+    }
+
+    [DllImport("SHLWAPI", CharSet = CharSet.Unicode)]
+    static extern bool PathCompactPathExW([Out] Text.StringBuilder pszOut, string szPath, int cchMax, int dwFlags);
+    internal static string TripleDotPath(this string path, int maxLength)
+    {
+      if (path is null) return null;
+      var builder = new Text.StringBuilder(maxLength + 1);
+      PathCompactPathExW(builder, path, maxLength, 0);
+      return builder.ToString();
     }
   }
 }

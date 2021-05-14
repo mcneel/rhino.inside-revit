@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
@@ -40,5 +42,32 @@ namespace RhinoInside.Revit.GH
 
     public static readonly string ContactURI = @"https://discourse.mcneel.com/c/rhino-inside/Revit/";
     public static readonly string WebPageURI = @"https://www.rhino3d.com/inside/revit/";
+  }
+
+  public class AssemblyPriority : GH_AssemblyPriority
+  {
+    public override GH_LoadingInstruction PriorityLoad()
+    {
+      try
+      {
+        var types = Assembly.GetExecutingAssembly().GetTypes().Where(x => x.IsDefined(typeof(AssemblyPriorityAttribute), false));
+        foreach (var type in types)
+          System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(type.TypeHandle);
+      }
+      catch { return GH_LoadingInstruction.Abort; }
+
+      return GH_LoadingInstruction.Proceed;
+    }
+  }
+
+  /// <summary>
+  /// Specifies the class static constructor needs to be called before any
+  /// <see cref="Grasshopper.Kernel.IGH_DocumentObject"/> defined in this assembly is created.
+  /// </summary>
+  [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+  [System.ComponentModel.DisplayName]
+  sealed class AssemblyPriorityAttribute : Attribute
+  {
+    public AssemblyPriorityAttribute() { }
   }
 }

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
+using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.External.UI.Extensions;
 
 namespace RhinoInside.Revit.External.UI
 {
@@ -16,9 +18,10 @@ namespace RhinoInside.Revit.External.UI
     public static implicit operator UIHostApplication(UIControlledApplication value) => new UIHostApplicationC(value);
 
     public abstract object Value { get; }
+    public abstract bool IsValid { get; }
 
     public abstract ApplicationServices.HostServices Services { get; }
-    public abstract UIDocument ActiveUIDocument { get; }
+    public abstract UIDocument ActiveUIDocument { get; set; }
 
     #region UI
     public abstract IntPtr MainWindowHandle { get; }
@@ -70,9 +73,10 @@ namespace RhinoInside.Revit.External.UI
     public UIHostApplicationC(UIControlledApplication app) => _app = app;
     public override void Dispose() { }
     public override object Value => _app;
+    public override bool IsValid => true;
 
     public override ApplicationServices.HostServices Services => new ApplicationServices.HostServicesC(_app.ControlledApplication);
-    public override UIDocument ActiveUIDocument => default;
+    public override UIDocument ActiveUIDocument { get => default; set => throw new InvalidOperationException(); }
 
     #region UI
     public override IntPtr MainWindowHandle
@@ -125,10 +129,37 @@ namespace RhinoInside.Revit.External.UI
     readonly UIApplication _app;
     public UIHostApplicationU(UIApplication app) => _app = app;
     public override void Dispose() => _app.Dispose();
-    public override object Value => _app;
+    public override object Value => _app.IsValidObject ? _app : default;
+    public override bool IsValid => _app.IsValidObject;
 
     public override ApplicationServices.HostServices Services => new ApplicationServices.HostServicesU(_app.Application);
-    public override UIDocument ActiveUIDocument => _app.ActiveUIDocument;
+    public override UIDocument ActiveUIDocument
+    {
+      get => _app.ActiveUIDocument;
+      set
+      {
+        if (value is null) throw new ArgumentNullException();
+        if (value.Document.IsEquivalent(_app.ActiveUIDocument.Document)) return;
+
+        Rhinoceros.InvokeInHostContext
+        (
+          () =>
+          {
+            var activeWindow = Microsoft.Win32.SafeHandles.WindowHandle.ActiveWindow;
+
+            try
+            {
+              if (value.TryGetActiveGraphicalView(out var uiView))
+              {
+                using (var collector = new FilteredElementCollector(value.Document, uiView.ViewId))
+                  value.ShowElements(collector.FirstElementId());
+              }
+            }
+            finally { Microsoft.Win32.SafeHandles.WindowHandle.ActiveWindow = activeWindow; }
+          }
+        );
+      }
+    }
 
     #region UI
     public override IntPtr MainWindowHandle

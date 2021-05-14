@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Autodesk.Revit.DB;
 
@@ -8,6 +9,16 @@ namespace RhinoInside.Revit.External.DB.Extensions
   public static class DocumentExtension
   {
     public static bool IsValid(this Document doc) => doc?.IsValidObject == true;
+
+    public static bool IsValidWithLog(this Document doc, out string log)
+    {
+      if (doc is null) { log = "Document is a null reference."; return false; }
+      if (!doc.IsValidObject) { log = "Document was closed."; return false; }
+
+      log = string.Empty;
+      return true;
+    }
+
 
     /// <summary>
     /// Determines whether the specified <see cref="Autodesk.Revit.DB.Document"/> equals to this <see cref="Autodesk.Revit.DB.Document"/>.
@@ -588,6 +599,144 @@ namespace RhinoInside.Revit.External.DB.Extensions
         return false;
 
       return self.Compare(other) == 0;
+    }
+  }
+
+  public static class ModelUri
+  {
+    public const string UriSchemeServer = "RSN";
+    public const string UriSchemeCloud = "cloud";
+    internal static readonly Uri Empty = new Uri("empty:");
+
+    public static Uri ToUri(this ModelPath modelPath)
+    {
+      if (modelPath is null)
+        return default;
+
+      if (modelPath.Empty)
+        return ModelUri.Empty;
+
+#if REVIT_2020
+      if (modelPath.CloudPath)
+      {
+#if REVIT_2021
+        return new UriBuilder(UriSchemeCloud, modelPath.Region, 0, $"{modelPath.GetProjectGUID():D}/{modelPath.GetModelGUID():D}").Uri;
+#elif REVIT_2020
+        return new UriBuilder(UriSchemeCloud, "GLOBAL", 0, $"{modelPath.GetProjectGUID():D}/{modelPath.GetModelGUID():D}").Uri;
+#endif
+      }
+      else
+#endif
+      {
+        var path = ModelPathUtils.ConvertModelPathToUserVisiblePath(modelPath);
+        if (modelPath.ServerPath)
+          return new Uri(path);
+        else if (path.Length > 3 && char.IsLetter(path[0]) && path[1] == Path.VolumeSeparatorChar && (path[2] == Path.DirectorySeparatorChar || path[2] == Path.AltDirectorySeparatorChar))
+          return new UriBuilder(Uri.UriSchemeFile, string.Empty, 0, path).Uri;
+      }
+
+      throw new ArgumentException($"Failed to convert {nameof(ModelPath)} in to {nameof(Uri)}", nameof(modelPath));
+    }
+
+    public static ModelPath ToModelPath(this Uri uri)
+    {
+      if (uri is null)
+        return default;
+
+      if (uri.IsFile)
+        return new FilePath(uri.LocalPath);
+
+      if (uri.IsServerUri(out var centralServerLocation, out var path))
+        return new ServerPath(centralServerLocation, path);
+
+#if REVIT_2020
+      if (IsCloudUri(uri, out var region, out var projectId, out var modelId))
+      {
+        return Rhinoceros.InvokeInHostContext(() =>
+        {
+          try
+          {
+#if REVIT_2022
+            if (region == string.Empty)
+              return ModelPathUtils.ConvertCloudGUIDsToCloudPath(ModelPathUtils.CloudRegionUS, projectId, modelId);
+            else
+              return ModelPathUtils.ConvertCloudGUIDsToCloudPath(region, projectId, modelId);
+#elif REVIT_2021
+            if (region == string.Empty)
+              return ModelPathUtils.ConvertCloudGUIDsToCloudPath(projectId, modelId);
+            else
+              return ModelPathUtils.ConvertCloudGUIDsToCloudPath(region, projectId, modelId);
+#else
+            return ModelPathUtils.ConvertCloudGUIDsToCloudPath(projectId, modelId);
+#endif
+          }
+          catch (Autodesk.Revit.Exceptions.ApplicationException) { return default; }
+        });
+      }
+#endif
+
+      throw new ArgumentException($"Failed to convert {nameof(Uri)} in to {nameof(ModelPath)}", nameof(uri));
+    }
+
+    public static bool IsEmptyUri(this Uri uri)
+    {
+      return uri.Scheme.Equals("empty", StringComparison.InvariantCultureIgnoreCase);
+    }
+
+    public static bool IsFileUri(this Uri uri, out string path)
+    {
+      if (uri.IsFile)
+      {
+        path = uri.LocalPath;
+        return true;
+      }
+
+      path = default;
+      return false;
+    }
+
+    public static bool IsServerUri(this Uri uri, out string centralServerLocation, out string path)
+    {
+      if (uri.Scheme.Equals(UriSchemeServer, StringComparison.InvariantCultureIgnoreCase))
+      {
+        centralServerLocation = uri.Host;
+        path = uri.AbsolutePath;
+        return true;
+      }
+
+      centralServerLocation = default;
+      path = default;
+      return false;
+    }
+
+    public static bool IsCloudUri(this Uri uri, out string region, out Guid projectId, out Guid modelId)
+    {
+      if (uri.Scheme.Equals(UriSchemeCloud, StringComparison.InvariantCultureIgnoreCase))
+      {
+        var fragments = uri.AbsolutePath.Split('/');
+        if (fragments.Length == 3)
+        {
+          if
+          (
+            fragments[0] == string.Empty &&
+            Guid.TryParseExact(fragments[1], "D", out projectId) &&
+            Guid.TryParseExact(fragments[2], "D", out modelId)
+          )
+          {
+            if (uri.Host == string.Empty)
+              region = "GLOBAL";
+            else
+              region = uri.Host.ToUpperInvariant();
+
+            return true;
+          }
+        }
+      }
+
+      region = default;
+      projectId = default;
+      modelId = default;
+      return false;
     }
   }
 }

@@ -12,6 +12,12 @@ namespace RhinoInside.Revit.External.UI.Extensions
     /// <returns>true on succes.</returns>
     public static bool TryGetOpenUIView(this Autodesk.Revit.DB.View view, out Autodesk.Revit.UI.UIView uiView)
     {
+      if (view?.IsValidObject != true)
+      {
+        uiView = default;
+        return false;
+      }
+
       using (var uiDocument = new Autodesk.Revit.UI.UIDocument(view.Document))
       {
         uiView = uiDocument.GetOpenUIViews().Where(x => x.ViewId == view.Id).FirstOrDefault();

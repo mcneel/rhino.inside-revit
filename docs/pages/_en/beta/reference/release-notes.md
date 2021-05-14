@@ -14,6 +14,7 @@ Some of the changes mentioned in sections below, might break your existing Grass
 
 ### New Features
 * Added 'Culling > Empty' options to cull empty lists.
+* Added 'Document' parameter to reference Revit documents.
 
 ### Minor Changes
 * Added pattern matching capabilities to 'Query Element Parameters'.
