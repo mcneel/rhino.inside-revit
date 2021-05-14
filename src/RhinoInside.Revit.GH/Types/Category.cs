@@ -164,12 +164,22 @@ namespace RhinoInside.Revit.GH.Types
     #region DocumentObject
     public new DB.Category Value => IsReferencedDataLoaded ? Document.GetCategory(Id) : default;
 
+    protected override void ResetValue()
+    {
+      // Some categories are slow to found,
+      // Category referenmce seem to be generated on demand and the reference become invalid "sudently".
+      // so we can not catch the reference but the name is used many times in UI and needs to be fast.
+      fullName = default;
+
+      base.ResetValue();
+    }
+
     public override string DisplayName
     {
       get
       {
-        if (Value is DB.Category category)
-          return category.FullName();
+        if (FullName is string full)
+          return full;
 
         return base.DisplayName;
       }
@@ -368,7 +378,28 @@ namespace RhinoInside.Revit.GH.Types
     #region Properties
     public override string Name
     {
-      get => base.Value?.Name ?? Value?.Name;
+      get
+      {
+        if (FullName is string full)
+        {
+          var segments = full.Split('\\');
+          return segments[segments.Length - 1];
+        }
+
+        return default;
+      }
+    }
+
+    string fullName;
+    public string FullName
+    {
+      get
+      {
+        if (fullName is null && Value is DB.Category category)
+          fullName = category.FullName();
+
+        return fullName;
+      }
     }
 
     public System.Drawing.Color? LineColor
