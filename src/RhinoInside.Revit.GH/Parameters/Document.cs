@@ -113,19 +113,24 @@ namespace RhinoInside.Revit.GH.Parameters
     public static bool GetDataOrDefault(IGH_Component component, IGH_DataAccess DA, string name, out DB.Document document)
     {
       document = default;
-      var _Document_ = component.Params.IndexOfInputParam(name);
+      var _Document_ = name is null ? -1 : component.Params.IndexOfInputParam(name);
       if (_Document_ < 0)
       {
         document = Revit.ActiveDBDocument;
         if (document?.IsValidObject != true)
         {
-          component.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "There is no active Revit document");
+          if (component.GetTopLevelObject() is IGH_ActiveObject active)
+            active.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "There is no current Revit document");
+
           return false;
         }
 
         // In case the user has more than one document open we show which one this component is working on
         if (Revit.ActiveDBApplication.Documents.Size > 1)
-          component.Message = document.Title.TripleDot(16);
+        {
+          if (component.GetTopLevelObject() is IGH_ActiveObject active)
+            active.AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Using document '{document.GetTitle()}'");
+        }
       }
       else
       {
@@ -140,14 +145,6 @@ namespace RhinoInside.Revit.GH.Parameters
       }
 
       return true;
-    }
-
-    public override void ClearData()
-    {
-      base.ClearData();
-
-      if(Attributes?.Parent?.DocObject is GH_Component component)
-        component.Message = string.Empty;
     }
   }
 }

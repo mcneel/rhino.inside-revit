@@ -1,5 +1,6 @@
 using System;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -27,10 +28,8 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var Document = Revit.ActiveDBDocument;
-      Message = Document?.Title;
-
-      DA.SetData("Active Document", Document);
+      if (Parameters.Document.GetDataOrDefault(this, default, default, out var Document))
+        DA.SetData("Active Document", Document);
     }
   }
 }

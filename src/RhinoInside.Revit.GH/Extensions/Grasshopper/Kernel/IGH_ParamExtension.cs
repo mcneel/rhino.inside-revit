@@ -8,6 +8,22 @@ using RhinoInside.Revit.GH.Types;
 
 namespace Grasshopper.Kernel
 {
+  static class IGH_DocumentObjectExtension
+  {
+    public static IGH_DocumentObject GetTopLevelObject(this IGH_DocumentObject docObject)
+    {
+      var top = docObject.Attributes.GetTopLevel.DocObject;
+      var document = top.OnPingDocument();
+      while (document.Owner is object)
+      {
+        top = document.Owner as IGH_ActiveObject;
+        document = document.Owner.OwnerDocument();
+      }
+
+      return top;
+    }
+  }
+
   static class IGH_ParamExtension
   {
     public static void AddVolatileDataTree<T1, T2>(this IGH_Param param, IGH_Structure structure, Converter<T1, T2> converter)

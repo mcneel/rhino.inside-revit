@@ -512,7 +512,7 @@ namespace RhinoInside.Revit.GH.Components
     // Step 1.
     protected override void BeforeSolveInstance()
     {
-      if (Revit.ActiveDBDocument is DB.Document Document)
+      if (Parameters.Document.GetDataOrDefault(this, default, default, out var Document))
       {
         StartTransaction(Document);
 
@@ -542,7 +542,7 @@ namespace RhinoInside.Revit.GH.Components
 
         if (Phase != GH_SolutionPhase.Failed)
         {
-          if (Revit.ActiveDBDocument is DB.Document Document)
+          if (Parameters.Document.GetDataOrDefault(this, default, default, out var Document))
             CommitTransaction(Document);
         }
       }
@@ -975,10 +975,8 @@ namespace RhinoInside.Revit.GH.Components
     // Step 3.
     protected sealed override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (Revit.ActiveDBDocument is DB.Document Document)
+      if (Parameters.Document.GetDataOrDefault(this, default, default, out var Document))
         Iterate(DA, Document, (DB.Document doc, ref DB.Element current) => TrySolveInstance(DA, doc, ref current));
-      else
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "There is no active Revit document");
     }
 
     delegate void CommitAction(DB.Document doc, ref DB.Element element);
