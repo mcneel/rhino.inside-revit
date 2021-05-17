@@ -58,7 +58,7 @@
   </Target>
   <Target Name="BeforeBuild">
     <!-- Read the version from the RhinoInside.Revit.dll -->
-    <GetAssemblyIdentity AssemblyFiles="..\RhinoInside.Revit\bin\$(Platform)\$(Configuration) 2021\RhinoInside.Revit.dll">
+    <GetAssemblyIdentity AssemblyFiles="..\RhinoInside.Revit\bin\$(Platform)\$(Configuration) 2022\RhinoInside.Revit.dll">
       <Output TaskParameter="Assemblies" ItemName="AsmInfo" />
     </GetAssemblyIdentity>
     <!-- Create the MSBuild properties -->
@@ -68,8 +68,12 @@
     <CreateProperty Value="$([System.Version]::Parse(%(AsmInfo.Version)).ToString(2))">
       <Output TaskParameter="Value" PropertyName="MajorMinorVersion" />
     </CreateProperty>
+    <CreateProperty Value="$([System.Version]::Parse(%(AsmInfo.Version)).Build)">
+      <Output TaskParameter="Value" PropertyName="BuildVersion" />
+    </CreateProperty>
     <Message Text="ProductVersion = $(ProductVersion)" Importance="high" />
     <Message Text="MajorMinorVersion = $(MajorMinorVersion)" Importance="high" />
+    <Message Text="BuildVersion = $(BuildVersion)" Importance="high" />
     <!-- Set teamcity build number -->
     <Message Text="##teamcity[buildNumber '$(ProductVersion)']" Importance="high" Condition="$(CI)==true"/>
     <!-- Create the WiX preprocessor variables -->
@@ -77,6 +81,9 @@
       <Output TaskParameter="Value" PropertyName="DefineConstants" />
     </CreateProperty>
     <CreateProperty Value="$(DefineConstants);MajorMinorVersion=$(MajorMinorVersion)">
+      <Output TaskParameter="Value" PropertyName="DefineConstants" />
+    </CreateProperty>
+    <CreateProperty Value="$(DefineConstants);BuildVersion=$(BuildVersion)">
       <Output TaskParameter="Value" PropertyName="DefineConstants" />
     </CreateProperty>
     <!-- Update the MSBuild properties $(TargetName), etc. -->
