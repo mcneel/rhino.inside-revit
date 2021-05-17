@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <?define ProductName='Rhino.Inside® for Autodesk Revit' ?>
+
   <Product Id="*"
            UpgradeCode="634a05f2-4511-445a-89c1-7305d83d34c7"
            Manufacturer="Robert McNeel &amp; Associates"
-           Name="Rhino.Inside® for Revit"
+           Name="$(var.ProductName)"
            Version="$(var.ProductVersion)"
            Language="1033">
     <Package Manufacturer="Robert McNeel &amp; Associates"
-             Description="Rhino.Inside® for Revit"
-             Keywords="Installer;Rhino;Revit"
+             Description="$(var.ProductName)"
+             Keywords="Installer;Rhino;Inside;Revit"
              Comments="$(var.ProductVersion)"
              InstallerVersion="301"
              Platform="$(var.Platform)"
@@ -75,7 +77,40 @@
     />
     <CustomAction Id="SetARPINSTALLLOCATION" Property="ARPINSTALLLOCATION" Value="[APPLICATIONFOLDER]"/>
 
+    <CustomAction Id="WIPExpirationDateWarning" Script="vbscript">
+      <![CDATA[
+      ExpirationDate = DateAdd("d", $(var.BuildVersion) + 45, DateSerial(2000,1,1))
+      DaysLeft = Cint(DateDiff("d", Now(), ExpirationDate))      
+      Set Record = Session.Installer.CreateRecord(1)
+      
+      If DaysLeft < 0 Then
+        Record.StringData(0) = _
+        "This Work-In-Progress installer expired on" & vbCrlf & _
+        FormatDateTime(ExpirationDate, 1) & "." & vbCrlf & vbCrlf & _
+        "Please check for updates at 'https://www.rhino3d.com/inside/revit/'"
+        Session.Message &H01000000, Record
+      End If
+      
+      If DaysLeft = 0 Then
+        Record.StringData(0) = _
+        "This Work-In-Progress installer expires today." & vbCrlf & vbCrlf & _
+        "Please check for updates at 'https://www.rhino3d.com/inside/revit/'"
+        Session.Message &H02000000, Record
+      End If
+      
+      If DaysLeft > 0 Then
+        Record.StringData(0) = _
+        "This installer contains a Work-In-Progress version of $(var.ProductName)." & vbCrlf & vbCrlf & _
+        "It will expire on " & FormatDateTime(ExpirationDate, 1) & "," & vbCrlf & _
+        DaysLeft & " days from now."
+        Session.Message &H03000000, Record
+      End If
+      
+      ]]>
+    </CustomAction>
+
     <InstallUISequence>
+      <Custom Action="WIPExpirationDateWarning" After="AppSearch" />
       <Custom Action="OverwriteWixSetDefaultPerUserFolder" After="WixSetDefaultPerUserFolder" />
       <Custom Action="OverwriteWixSetDefaultPerMachineFolder" After="WixSetDefaultPerMachineFolder" />
     </InstallUISequence>

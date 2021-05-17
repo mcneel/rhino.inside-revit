@@ -56,7 +56,7 @@
           InstallLocation = ProgramFilesFolder & "Autodesk\" & InstallLocation
         End If
 
-        ' If Revit.exe is at InstallLocation we assume Revit is not installed
+        ' If Revit.exe is not at InstallLocation we assume Revit is not installed
         If Session.Installer.FileAttributes(InstallLocation & "Revit.exe") = -1 Then
           Session.Property(LocationProperty) = ""
         Else
