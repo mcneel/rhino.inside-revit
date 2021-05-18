@@ -27,7 +27,7 @@ namespace RhinoInside
       get
       {
         if (IsMissing)
-          throw new InvalidOperationException("Optional object must have a value.");
+          throw new InvalidOperationException("Optional object has no value.");
 
         return value;
       }
