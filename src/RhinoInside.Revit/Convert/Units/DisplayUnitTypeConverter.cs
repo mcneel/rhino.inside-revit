@@ -9,30 +9,22 @@ namespace RhinoInside.Revit.Convert.Units
 {
   static class DisplayUnitTypeConverter
   {
-    static class ToUnitSystemStatic
+#if DEBUG
+    static DisplayUnitTypeConverter()
     {
-      static ToUnitSystemStatic()
-      {
 #if REVIT_2021
-        foreach (var unit in DB.UnitUtils.GetValidUnits(DBXS.SpecType.Measurable.Length))
+      var lengthUnits = DB.UnitUtils.GetValidUnits(DBXS.SpecType.Measurable.Length);
 #else
-        foreach (var unit in DB.UnitUtils.GetValidDisplayUnits(DBXS.SpecType.Measurable.Length))
+      var lengthUnits = DB.UnitUtils.GetValidDisplayUnits(DB.UnitType.UT_Length);
 #endif
-        {
-          var revit = DB.UnitUtils.Convert(1.0, DBXS.UnitType.Meters, unit);
-          var rhino = UnitScale(Rhino.UnitSystem.Meters, ToUnitSystem(unit));
-          //Debug.Assert(EpsilonEquals(revit, rhino, ZeroTolerance), $"ToRhinoLengthUnits({unit}) fails!!");
-        }
-      }
-
-      [Conditional("DEBUG")]
-      internal static void Assert() { }
+      // Verify all conversions are implementd.
+      foreach (var unit in lengthUnits)
+        ToUnitSystem(unit);
     }
+#endif
 
     public static Rhino.UnitSystem ToUnitSystem(this DBXS.UnitType value)
     {
-      ToUnitSystemStatic.Assert();
-
       if (!DBXS.SpecType.Measurable.Length.IsValidUnitType(value))
         throw new ConversionException($"{value} is not a length unit");
 
@@ -56,13 +48,17 @@ namespace RhinoInside.Revit.Convert.Units
     {
       switch (value)
       {
+        case Rhino.UnitSystem.Kilometers:   return DBXS.UnitType.Kilometers;
+        case Rhino.UnitSystem.Hectometers:  return DBXS.UnitType.Hectometers;
         case Rhino.UnitSystem.Meters:       return DBXS.UnitType.Meters;
         case Rhino.UnitSystem.Decimeters:   return DBXS.UnitType.Decimeters;
         case Rhino.UnitSystem.Centimeters:  return DBXS.UnitType.Centimeters;
         case Rhino.UnitSystem.Millimeters:  return DBXS.UnitType.Millimeters;
 
-        case Rhino.UnitSystem.Inches:       return DBXS.UnitType.Inches;
+        case Rhino.UnitSystem.Miles:        return DBXS.UnitType.Miles;
+        case Rhino.UnitSystem.Yards:        return DBXS.UnitType.Yards;
         case Rhino.UnitSystem.Feet:         return DBXS.UnitType.Feet;
+        case Rhino.UnitSystem.Inches:       return DBXS.UnitType.Inches;
       }
 
       Debug.Fail($"{value} conversion is not implemented");

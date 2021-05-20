@@ -95,13 +95,13 @@ namespace RhinoInside.Revit.GH.Types
         // 2. Check if already exist
         var index = doc.Linetypes.Find(linePattern.Name);
         var linetype = index < 0 ?
-          new Rhino.DocObjects.Linetype() { Name = linePattern.Name } :
+          new Linetype() { Name = linePattern.Name } :
           doc.Linetypes[index];
 
         // 3. Update if necessary
         if (index < 0 || overwrite)
         {
-          var feet = RhinoMath.UnitScale(Rhino.UnitSystem.Feet, Rhino.UnitSystem.Millimeters);
+          var feet = Convert.Geometry.UnitConverter.ConvertFromHostUnits(1.0, Rhino.UnitSystem.Millimeters);
 
           using (var pattern = linePattern.GetLinePattern())
           {

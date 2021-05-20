@@ -1,29 +1,112 @@
 using System;
+using System.Diagnostics;
 using Rhino;
 using Rhino.Geometry;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.Convert.Geometry
 {
-  using global::System.Diagnostics;
-
   public static class UnitConverter
   {
+    static UnitConverter()
+    {
+      InternalUnits = new double[]
+      {
+        1.0,              // None
+        304800.0,         // Microns
+        304.8,            // Millimeters
+        30.48,            // Centimeters
+        0.3048,           // Meters
+        0.0003048,        // Kilometers
+        12000000.0,       // Microinches
+        12000.0,          // Mils
+        12.0,             // Inches
+        1.0,              // Feet
+        1.0 / 5280.0,     // Miles
+        double.NaN,       // CustomUnits
+        3048000000.0,     // Angstroms
+        304800000.0,      // Nanometers
+        3.048,            // Decimeters
+        0.03048,          // Dekameters
+        0.003048,         // Hectometers
+        3.048e-7,         // Megameters
+        3.048e-10,        // Gigameters
+        1.0 / 3.0,        // Yards
+        864.0,            // PrinterPoints
+        72.0,             // PrinterPicas
+        0.3048 / 1852.0,  // NauticalMiles
+        0.3048 / 149597870700.0,  // AstronomicalUnits
+        0.3048 / 9460730472580800.0,  // LightYears
+        0.3048 / 149597870700.0 * 648000.0 / Math.PI, // Parsecs
+        double.NaN
+      };
+
+      Debug.Assert(InternalUnits.Length == Enum.GetValues(typeof(UnitSystem)).Length);
+    }
+
     #region Scaling factors
+    static readonly double[] InternalUnits;
+
     /// <summary>
     /// Revit Internal Unit System is Feet
     /// </summary>
     const UnitSystem InternalUnitSystem = UnitSystem.Feet;
 
     /// <summary>
-    /// Revit internal model units
+    /// Rhino Unit System
     /// </summary>
-    internal static UnitSystem HostUnitSystem => InternalUnitSystem;
+    /// <remarks>
+    /// It returns <see cref="RhinoDoc.ActiveDoc.ModelUnitSystem"/> or meters if there is no ActiveDoc.
+    /// </remarks>
+    static UnitSystem ExternalUnitSystem => RhinoDoc.ActiveDoc?.ModelUnitSystem ?? UnitSystem.Meters;
 
     /// <summary>
-    /// 1 revit internal model unit in Rhino units
+    /// Converts a value from Host's internal units to a given unit.
     /// </summary>
-    internal static double HostModelUnits => RhinoMath.UnitScale(InternalUnitSystem, RhinoDoc.ActiveDoc?.ModelUnitSystem ?? UnitSystem.Meters);
+    /// <param name="value"></param>
+    /// <param name="rhinoModelUnits"></param>
+    /// <returns></returns>
+    public static double ConvertFromHostUnits(double value, UnitSystem rhinoModelUnits)
+    {
+      if (!Enum.IsDefined(typeof(UnitSystem), rhinoModelUnits))
+        throw new ArgumentOutOfRangeException(nameof(rhinoModelUnits));
+
+      return value * InternalUnits[(int) rhinoModelUnits];
+    }
+
+    /// <summary>
+    /// Converts a value from a given unit to Host's internal units.
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="rhinoModelUnits"></param>
+    /// <returns></returns>
+    public static double ConvertToHostUnits(double value, UnitSystem rhinoModelUnits)
+    {
+      if (!Enum.IsDefined(typeof(UnitSystem), rhinoModelUnits))
+        throw new ArgumentOutOfRangeException(nameof(rhinoModelUnits));
+
+      return value / InternalUnits[(int) rhinoModelUnits];
+    }
+
+    /// <summary>
+    /// Converts a value from Host's internal units to a given unit.
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="rhinoModelUnits"></param>
+    /// <returns></returns>
+    internal static double Convert(double value, UnitSystem from, UnitSystem to)
+    {
+      if (!Enum.IsDefined(typeof(UnitSystem), from))
+        throw new ArgumentOutOfRangeException(nameof(from));
+
+      if (!Enum.IsDefined(typeof(UnitSystem), to))
+        throw new ArgumentOutOfRangeException(nameof(to));
+
+      if (from == to)
+        return value;
+
+      return value * InternalUnits[(int) from] / InternalUnits[(int) to];
+    }
 
     /// <summary>
     /// Factor to do a direct conversion without any unit scaling.
@@ -33,19 +116,19 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <summary>
     /// Factor for converting a value from Revit internal units to active Rhino document units.
     /// </summary>
-    public static double ToRhinoUnits => RhinoMath.UnitScale(InternalUnitSystem, RhinoDoc.ActiveDoc?.ModelUnitSystem ?? UnitSystem.Meters);
+    internal static double ToRhinoUnits => InternalUnits[(int) ExternalUnitSystem];
 
     /// <summary>
     /// Factor for converting a value from active Rhino document units to Revit internal units.
     /// </summary>
-    public static double ToHostUnits => RhinoMath.UnitScale(RhinoDoc.ActiveDoc?.ModelUnitSystem ?? UnitSystem.Meters, InternalUnitSystem);
+    internal static double ToHostUnits => 1.0 / InternalUnits[(int) ExternalUnitSystem];
     #endregion
 
     #region Scale
     public static void Scale(ref Interval value, double factor)
     {
-      value.T0 *= (float) factor;
-      value.T1 *= (float) factor;
+      value.T0 *= factor;
+      value.T1 *= factor;
     }
 
     public static void Scale(ref Point2f value, double factor)
@@ -217,7 +300,7 @@ namespace RhinoInside.Revit.Convert.Geometry
         case DB.ParameterType.AreaForcePerLength:
         case DB.ParameterType.ReinforcementAreaPerUnitLength:
 
-          return value * RhinoMath.UnitScale(from, to);
+          return Convert(value, from, to);
 
         case DB.ParameterType.ForcePerLength:
         case DB.ParameterType.LinearForcePerLength:
@@ -225,7 +308,7 @@ namespace RhinoInside.Revit.Convert.Geometry
         case DB.ParameterType.WeightPerUnitLength:
         case DB.ParameterType.PipeMassPerUnitLength:
 
-          return value / RhinoMath.UnitScale(from, to);
+          return Convert(value, to, from);
 
         #endregion
 
@@ -239,13 +322,13 @@ namespace RhinoInside.Revit.Convert.Geometry
         case DB.ParameterType.ReinforcementArea:
         case DB.ParameterType.SectionArea:
 
-          return value * Math.Pow(RhinoMath.UnitScale(from, to), 2.0);
+          return value * Math.Pow(Convert(1.0, from, to), 2.0);
 
         case DB.ParameterType.HVACCoolingLoadDividedByArea:
         case DB.ParameterType.HVACHeatingLoadDividedByArea:
         case DB.ParameterType.MassPerUnitArea:
 
-          return value / Math.Pow(RhinoMath.UnitScale(from, to), 2.0);
+          return value / Math.Pow(Convert(1.0, from, to), 2.0);
 
         #endregion
 
@@ -255,13 +338,13 @@ namespace RhinoInside.Revit.Convert.Geometry
         case DB.ParameterType.PipingVolume:
         case DB.ParameterType.ReinforcementVolume:
 
-          return value * Math.Pow(RhinoMath.UnitScale(from, to), 3.0);
+          return value * Math.Pow(Convert(1.0, from, to), 3.0);
 
         case DB.ParameterType.HVACCoolingLoadDividedByVolume:
         case DB.ParameterType.HVACHeatingLoadDividedByVolume:
         case DB.ParameterType.HVACAirflowDividedByVolume:
 
-          return value * Math.Pow(RhinoMath.UnitScale(from, to), 3.0);
+          return value * Math.Pow(Convert(1.0, from, to), 3.0);
 
         #endregion
 

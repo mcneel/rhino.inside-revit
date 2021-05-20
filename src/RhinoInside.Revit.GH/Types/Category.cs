@@ -247,7 +247,7 @@ namespace RhinoInside.Revit.GH.Types
       };
 
       if (0 < value.Value && value.Value < 17)
-        return size[value.Value] * RhinoMath.UnitScale(Rhino.UnitSystem.Inches, Rhino.UnitSystem.Millimeters);
+        return Convert.Geometry.UnitConverter.Convert(size[value.Value], Rhino.UnitSystem.Inches, Rhino.UnitSystem.Millimeters);
 
       return 0.0;
     }

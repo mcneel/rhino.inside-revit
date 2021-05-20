@@ -446,7 +446,7 @@ namespace RhinoInside.Revit.UI
 
         using (var model = File3dm.Read(filePath))
         {
-          var scaleFactor = RhinoMath.UnitScale(model.Settings.ModelUnitSystem, UnitConverter.HostUnitSystem);
+          var scaleFactor = UnitConverter.ConvertToHostUnits(1.0, model.Settings.ModelUnitSystem);
 
           using (var trans = new DB.Transaction(doc, "Import 3D Model"))
           {
@@ -567,7 +567,7 @@ namespace RhinoInside.Revit.UI
     {
       using (var model = File3dm.Read(filePath))
       {
-        var scaleFactor = RhinoMath.UnitScale(model.Settings.ModelUnitSystem, UnitConverter.HostUnitSystem);
+        var scaleFactor = UnitConverter.ConvertToHostUnits(1.0, model.Settings.ModelUnitSystem);
         var translationVector = Point3d.Origin - ImportPlacement(model, placement);
 
         using (var trans = new DB.Transaction(doc, "Import 3D Model"))

@@ -209,9 +209,7 @@ namespace RhinoInside.Revit
     public static double ShortCurveTolerance                      => ActiveDBApplication?.ShortCurveTolerance  ?? AbsoluteTolerance / 2.0;
     public static double VertexTolerance                          => ActiveDBApplication?.VertexTolerance      ?? AbsoluteTolerance / 10.0;
 
-    [Obsolete("Since 2021-04-16")]
-    public const Rhino.UnitSystem ModelUnitSystem                 = Rhino.UnitSystem.Feet; // Always feet
-    public static double ModelUnits                               => UnitConverter.HostModelUnits; // 1 feet in Rhino units
+    public static double ModelUnits                               => UnitConverter.ToRhinoUnits; // 1 feet in Rhino units
     #endregion
   }
 }
