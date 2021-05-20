@@ -10,10 +10,10 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
-{% include ltr/release-header.html version="0.6" time="04/30/2021" %}
+{% include ltr/release-header.html version="0.6" time="05/20/2021" %}
 
 ### New Features
-* Added 'Culling > Empty' options to cull empty lists.
+* Added 'Culling > Empty' option to parameters to cull empty lists.
 * Added 'Document' parameter to reference Revit documents.
 
 ### Minor Changes
@@ -22,6 +22,7 @@ Some of the changes mentioned in sections below, might break your existing Grass
 * Now 'Graphical Element' parameters show the name of the externalized saved selection.
 * Now components on clusters that access Active Document notify on the top level object in the canvas.
 * Speed up categories listing on UI.
+* Added 45 days warning into the installer.
 
 ### Fixes
 * Fixed 'Types.IGH_Element' comparison method.
