@@ -284,13 +284,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return parameters.FirstOrDefault(x => !x.IsReadOnly) ?? parameters.FirstOrDefault();
     }
 
-    public static Parameter GetParameter(this Element element, string name, ParameterType type, ParameterClass set)
+    public static Parameter GetParameter(this Element element, string name, Schemas.DataType type, ParameterClass set)
     {
-      var parameters = element.GetParameters(name, set).Where(x => x.Definition.ParameterType == type);
+      var parameters = element.GetParameters(name, set).Where(x => (Schemas.DataType) x.Definition.GetDataType() == type);
       return parameters.FirstOrDefault(x => !x.IsReadOnly) ?? parameters.FirstOrDefault();
     }
 
-    public static Parameter GetParameter(this Element element, string name, ParameterType type, ParameterBinding parameterBinding, ParameterClass set)
+    public static Parameter GetParameter(this Element element, string name, Schemas.DataType type, ParameterBinding parameterBinding, ParameterClass set)
     {
       if (element is ElementType ? parameterBinding != ParameterBinding.Type : parameterBinding != ParameterBinding.Instance)
         return null;
@@ -343,21 +343,21 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
         if (typeof(T) == typeof(bool))
         {
-          if (param.StorageType != StorageType.Integer || param.Definition.ParameterType != ParameterType.YesNo)
+          if (param.StorageType != StorageType.Integer || (Schemas.DataType) param.Definition.GetDataType() != Schemas.SpecType.Boolean.YesNo)
             throw new System.InvalidCastException();
 
           return (T) (object) (param.AsInteger() != 0);
         }
         else if (typeof(T) == typeof(int))
         {
-          if (param.StorageType != StorageType.Integer || param.Definition.ParameterType != ParameterType.Integer)
+          if (param.StorageType != StorageType.Integer || (Schemas.DataType) param.Definition.GetDataType() != Schemas.SpecType.Int.Integer)
             throw new System.InvalidCastException();
 
           return (T) (object) (param.AsInteger() != 0);
         }
         else if (typeof(T).IsSubclassOf(typeof(Enum)))
         {
-          if (param.StorageType != StorageType.Integer || param.Definition.ParameterType != ParameterType.Invalid)
+          if (param.StorageType != StorageType.Integer || (Schemas.DataType) param.Definition.GetDataType() != Schemas.SpecType.Int.Integer)
             throw new System.InvalidCastException();
 
           return (T) (object) (param.AsInteger() != 0);
@@ -406,7 +406,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         if (param is null)
           throw new System.InvalidOperationException();
 
-        if(param.StorageType != StorageType.Integer || param.Definition.ParameterType != ParameterType.YesNo)
+        if(param.StorageType != StorageType.Integer || (Schemas.DataType) param.Definition.GetDataType() != Schemas.SpecType.Boolean.YesNo)
           throw new System.InvalidCastException();
 
         param.Set(value ? 1 : 0);

@@ -180,9 +180,9 @@ namespace RhinoInside.Revit.GH
             case DBX.ParameterClass.BuiltIn:
               parameter = parameterKey.Id.TryGetBuiltInParameter(out var builtInParameter) ? element.get_Parameter(builtInParameter) : default; break;
             case DBX.ParameterClass.Project:
-              parameter = element.GetParameter(parameterKey.Name, parameterKey.Definition?.ParameterType ?? DB.ParameterType.Invalid, DBX.ParameterClass.Project); break;
+              parameter = element.GetParameter(parameterKey.Name, parameterKey.Definition?.GetDataType() ?? SpecType.Empty, DBX.ParameterClass.Project); break;
             case DBX.ParameterClass.Family:
-              parameter = element.GetParameter(parameterKey.Name, parameterKey.Definition?.ParameterType ?? DB.ParameterType.Invalid, DBX.ParameterClass.Family); break;
+              parameter = element.GetParameter(parameterKey.Name, parameterKey.Definition?.GetDataType() ?? SpecType.Empty, DBX.ParameterClass.Family); break;
             case DBX.ParameterClass.Shared:
               parameter = element.get_Parameter(parameterKey.GuidValue.Value); break;
           }

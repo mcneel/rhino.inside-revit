@@ -399,7 +399,7 @@ namespace RhinoInside.Revit.GH.Parameters
       if(ParameterBuiltInId != DB.BuiltInParameter.INVALID)
         return element.get_Parameter(ParameterBuiltInId);
 
-      return element.GetParameter(ParameterName, ParameterType, ParameterBinding, ParameterClass);
+      return element.GetParameter(ParameterName, ParameterType.ToDataType(), ParameterBinding, ParameterClass);
     }
   }
 }

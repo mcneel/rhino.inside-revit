@@ -113,171 +113,11 @@ namespace RhinoInside.Revit.External.DB.Schemas
 
 #if !REVIT_2022
 #pragma warning disable CS0618 // Type or member is obsolete
-    public static implicit operator DataType(Autodesk.Revit.DB.ParameterType value)
-    {
-      if (value is Autodesk.Revit.DB.ParameterType.FamilyType)
-        return new CategoryId("autodesk.revit.category.family");
+    public static implicit operator DataType(Autodesk.Revit.DB.ParameterType value) =>
+      Extensions.DataTypeExtension.ToDataType(value);
 
-      foreach (var item in parameterTypeMap)
-      {
-        if (item.Value == (int) value)
-          return item.Key;
-      }
-
-      return Empty;
-    }
-
-    public static implicit operator Autodesk.Revit.DB.ParameterType(DataType value)
-    {
-      if (CategoryId.IsCategoryId(value, out var _))
-        return Autodesk.Revit.DB.ParameterType.FamilyType;
-
-      if (parameterTypeMap.TryGetValue(value, out var pt))
-        return (Autodesk.Revit.DB.ParameterType) pt;
-
-      return Autodesk.Revit.DB.ParameterType.Invalid;
-    }
-
-    static readonly Dictionary<DataType, int> parameterTypeMap = new Dictionary<DataType, int>()
-    {
-      { SpecType.String.Text, 1 }, // ParameterType.Text
-      { SpecType.Int.Integer, 2 }, // ParameterType.Integer
-      { SpecType.Measurable.Number, 3 }, // ParameterType.Number
-      { SpecType.Measurable.Length, 4 }, // ParameterType.Length
-      { SpecType.Measurable.Area, 5 }, // ParameterType.Area
-      { SpecType.Measurable.Volume, 6 }, // ParameterType.Volme
-      { SpecType.Measurable.Angle, 7 }, // ParameterType.Angle
-      { SpecType.String.Url, 8}, // ParameterType.URL
-      { SpecType.Reference.Material, 9}, // ParameterType.Material
-      { SpecType.Boolean.YesNo, 10}, // ParameterType.YesNo
-      { SpecType.Measurable.Force, 11}, // ParameterType.Force
-      { SpecType.Measurable.LinearForce, 12}, // ParameterType.LinearForce
-      { SpecType.Measurable.AreaForce, 13}, // ParameterType.AreaForce
-      { SpecType.Measurable.Moment, 14}, // ParameterType.Moment
-      { SpecType.Int.NumberOfPoles, 15}, // ParameterType.NumberOfPoles
-      //{ SpecType.Measurable.FixtureUnit, 16}, // ParameterType.FixtureUnit
-      //{ Reference.FamilyType, 17}, // ParameterType.FamilyType
-      { SpecType.Reference.LoadClassification, 18}, // ParameterType.LoadClassification
-      { SpecType.Reference.Image, 19}, // ParameterType.Image
-      { SpecType.String.MultilineText, 20}, // ParameterType.MultilineText
-      { SpecType.Custom, 99}, // ParameterType.Custom
-      { SpecType.Measurable.HvacDensity, 107}, // ParameterType.HVACDensity
-      { SpecType.Measurable.HvacEnergy, 108}, // ParameterType.HVACEnergy
-      { SpecType.Measurable.HvacFriction, 109}, // ParameterType.HVACFriction
-      { SpecType.Measurable.HvacPower, 110}, // ParameterType.HVACPower
-      { SpecType.Measurable.HvacPowerDensity, 111}, // ParameterType.HVACPowerDensity
-      { SpecType.Measurable.HvacPressure, 112}, // ParameterType.HVACPressure
-      { SpecType.Measurable.HvacTemperature, 113}, // ParameterType.HVACTemperature
-      { SpecType.Measurable.HvacVelocity, 114}, // ParameterType.HVACVelocity
-      { SpecType.Measurable.AirFlow, 115}, // ParameterType.HVACAirflow
-      { SpecType.Measurable.DuctSize, 116}, // ParameterType.HVACDuctSize
-      { SpecType.Measurable.CrossSection, 117}, // ParameterType.HVACCrossSection
-      { SpecType.Measurable.HeatGain, 118}, // ParameterType.HVACHeatGain
-      { SpecType.Measurable.Current, 119}, // ParameterType.ElectricalCurrent
-      { SpecType.Measurable.ElectricalPotential, 120}, // ParameterType.ElectricalPotential
-      { SpecType.Measurable.ElectricalFrequency, 121}, // ParameterType.ElectricalFrequency
-      { SpecType.Measurable.Illuminance, 122}, // ParameterType.ElectricalFrequency
-      { SpecType.Measurable.LuminousFlux, 123}, // ParameterType.ElectricalLuminousFlux
-      { SpecType.Measurable.ElectricalPower, 124}, // ParameterType.ElectricalPower
-      { SpecType.Measurable.HvacRoughness, 125}, // ParameterType.HVACRoughness
-      { SpecType.Measurable.ApparentPower, 134}, // ParameterType.ElectricalApparentPower
-      { SpecType.Measurable.ElectricalPowerDensity, 135}, // ParameterType.ElectricalPowerDensity
-      { SpecType.Measurable.PipingDensity, 136}, // ParameterType.PipingDensity
-      { SpecType.Measurable.Flow, 137}, // ParameterType.PipingFlow
-      { SpecType.Measurable.PipingFriction, 138}, // ParameterType.PipingFriction
-      { SpecType.Measurable.PipingPressure, 139}, // ParameterType.PipingPressure
-      { SpecType.Measurable.PipingTemperature, 140}, // ParameterType.PipingTemperature
-      { SpecType.Measurable.PipingVelocity, 141}, // ParameterType.PipingVelocity
-      { SpecType.Measurable.PipingViscosity, 142}, // ParameterType.PipingViscosity
-      { SpecType.Measurable.PipeSize, 143}, // ParameterType.PipeSize
-      { SpecType.Measurable.PipingRoughness, 144}, // ParameterType.PipingRoughness
-      { SpecType.Measurable.Stress, 145}, // ParameterType.Stress
-      { SpecType.Measurable.UnitWeight, 146}, // ParameterType.UnitWeight
-      { SpecType.Measurable.ThermalExpansionCoefficient, 147}, // ParameterType.ThermalExpansion
-      { SpecType.Measurable.LinearMoment, 148}, // ParameterType.LinearMoment
-      { SpecType.Measurable.PointSpringCoefficient, 150}, // ParameterType.ForcePerLength
-      { SpecType.Measurable.RotationalPointSpringCoefficient, 151}, // ParameterType.ForceLengthPerAngle
-      { SpecType.Measurable.LineSpringCoefficient, 152}, // ParameterType.LinearForcePerLength
-      { SpecType.Measurable.RotationalLineSpringCoefficient, 153}, // ParameterType.LinearForceLengthPerAngle
-      { SpecType.Measurable.AreaSpringCoefficient, 154}, // ParameterType.AreaForcePerLength
-      { SpecType.Measurable.PipingVolume, 155}, // ParameterType.PipingVolume
-      { SpecType.Measurable.HvacViscosity, 156}, // ParameterType.HVACViscosity
-      { SpecType.Measurable.HeatTransferCoefficient, 157}, // ParameterType.HVACCoefficientOfHeatTransfer
-      { SpecType.Measurable.AirFlowDensity, 158}, // ParameterType.HVACAirflowDensity
-      { SpecType.Measurable.Slope, 159}, // ParameterType.Slope
-      { SpecType.Measurable.CoolingLoad, 160}, // ParameterType.HVACCoolingLoad
-      { SpecType.Measurable.CoolingLoadDividedByArea, 161}, // ParameterType.HVACCoolingLoadDividedByArea
-      { SpecType.Measurable.CoolingLoadDividedByVolume, 162}, // ParameterType.HVACCoolingLoadDividedByVolume
-      { SpecType.Measurable.HeatingLoad, 163}, // ParameterType.HVACHeatingLoad
-      { SpecType.Measurable.HeatingLoadDividedByArea, 164}, // ParameterType.HVACHeatingLoadDividedByArea
-      { SpecType.Measurable.HeatingLoadDividedByVolume, 165}, // ParameterType.HVACHeatingLoadDividedByVolume
-      { SpecType.Measurable.AirFlowDividedByVolume, 166}, // ParameterType.HVACAirflowDividedByVolume
-      { SpecType.Measurable.AirFlowDividedByCoolingLoad, 167}, // ParameterType.HVACAirflowDividedByCoolingLoad
-      { SpecType.Measurable.AreaDividedByCoolingLoad, 168}, // ParameterType.HVACAreaDividedByCoolingLoad
-      { SpecType.Measurable.WireDiameter, 169}, // ParameterType.WireSize
-      { SpecType.Measurable.HvacSlope, 170}, // ParameterType.HVACSlope
-      { SpecType.Measurable.PipingSlope, 171}, // ParameterType.PipingSlope
-      { SpecType.Measurable.Currency, 172}, // ParameterType.Currency
-      { SpecType.Measurable.Efficacy, 173}, // ParameterType.ElectricalEfficacy
-      { SpecType.Measurable.Wattage, 174}, // ParameterType.ElectricalWattage
-      { SpecType.Measurable.ColorTemperature, 175}, // ParameterType.ColorTemperature
-      { SpecType.Measurable.LuminousIntensity, 177}, // ParameterType.ElectricalLuminousIntensity
-      { SpecType.Measurable.Luminance, 178}, // ParameterType.ElectricalLuminance
-      { SpecType.Measurable.AreaDividedByHeatingLoad, 179}, // ParameterType.HVACAreaDividedByHeatingLoad
-      { SpecType.Measurable.Factor, 180}, // ParameterType.HVACFactor
-      { SpecType.Measurable.ElectricalTemperature, 181}, // ParameterType.ElectricalTemperature
-      { SpecType.Measurable.CableTraySize, 182}, // ParameterType.ElectricalCableTraySize
-      { SpecType.Measurable.ConduitSize, 183}, // ParameterType.ElectricalConduitSize
-      { SpecType.Measurable.ReinforcementVolume, 184}, // ParameterType.ReinforcementVolume
-      { SpecType.Measurable.ReinforcementLength, 185}, // ParameterType.ReinforcementLength
-      { SpecType.Measurable.DemandFactor, 186}, // ParameterType.ElectricalDemandFactor
-      { SpecType.Measurable.DuctInsulationThickness, 187}, // ParameterType.HVACDuctInsulationThickness
-      { SpecType.Measurable.DuctLiningThickness, 188}, // ParameterType.HVACDuctLiningThickness
-      { SpecType.Measurable.PipeInsulationThickness, 189}, // ParameterType.PipeInsulationThickness
-      { SpecType.Measurable.ThermalResistance, 190}, // ParameterType.HVACThermalResistance
-      { SpecType.Measurable.ThermalMass, 191}, // ParameterType.HVACThermalMass
-      { SpecType.Measurable.Acceleration, 192}, // ParameterType.Acceleration
-      { SpecType.Measurable.BarDiameter, 193}, // ParameterType.BarDiameter
-      { SpecType.Measurable.CrackWidth, 194}, // ParameterType.CrackWidth
-      { SpecType.Measurable.Displacement, 195}, // ParameterType.DisplacementDeflection
-      { SpecType.Measurable.Energy, 196}, // ParameterType.Energy
-      { SpecType.Measurable.StructuralFrequency, 197}, // ParameterType.StructuralFrequency
-      { SpecType.Measurable.Mass, 198}, // ParameterType.Mass
-      { SpecType.Measurable.MassPerUnitLength, 199}, // ParameterType.MassPerUnitLength
-      { SpecType.Measurable.MomentOfInertia, 200}, // ParameterType.MomentOfInertia
-      { SpecType.Measurable.SurfaceAreaPerUnitLength, 201}, // ParameterType.SurfaceArea
-      { SpecType.Measurable.Period, 202}, // ParameterType.Period
-      { SpecType.Measurable.Pulsation, 203}, // ParameterType.Pulsation
-      { SpecType.Measurable.ReinforcementArea, 204}, // ParameterType.ReinforcementArea
-      { SpecType.Measurable.ReinforcementAreaPerUnitLength, 205}, // ParameterType.ReinforcementAreaPerUnitLength
-      { SpecType.Measurable.ReinforcementCover, 206}, // ParameterType.ReinforcementCover
-      { SpecType.Measurable.ReinforcementSpacing, 207}, // ParameterType.ReinforcementSpacing
-      { SpecType.Measurable.Rotation, 208}, // ParameterType.Rotation
-      { SpecType.Measurable.SectionArea, 209}, // ParameterType.SectionArea
-      { SpecType.Measurable.SectionDimension, 210}, // ParameterType.SectionDimension
-      { SpecType.Measurable.SectionModulus, 211}, // ParameterType.SectionModulus
-      { SpecType.Measurable.SectionProperty, 212}, // ParameterType.SectionProperty
-      { SpecType.Measurable.StructuralVelocity, 213}, // ParameterType.StructuralVelocity
-      { SpecType.Measurable.WarpingConstant, 214}, // ParameterType.WarpingConstant
-      { SpecType.Measurable.Weight, 215}, // ParameterType.Weight
-      { SpecType.Measurable.WeightPerUnitLength, 216}, // ParameterType.WeightPerUnitLength
-      { SpecType.Measurable.ThermalConductivity, 217}, // ParameterType.HVACThermalConductivity
-      { SpecType.Measurable.SpecificHeat, 218}, // ParameterType.HVACSpecificHeat
-      { SpecType.Measurable.SpecificHeatOfVaporization, 219}, // ParameterType.HVACSpecificHeatOfVaporization
-      { SpecType.Measurable.Permeability, 220}, // ParameterType.HVACPermeability
-      { SpecType.Measurable.ElectricalResistivity, 221}, // ParameterType.ElectricalResistivity
-      { SpecType.Measurable.MassDensity, 222}, // ParameterType.MassDensity
-      { SpecType.Measurable.MassPerUnitArea, 223}, // ParameterType.MassPerUnitArea
-      { SpecType.Measurable.PipeDimension, 224}, // ParameterType.PipeDimension
-      { SpecType.Measurable.PipingMass, 225}, // ParameterType.PipeMass
-      { SpecType.Measurable.PipeMassPerUnitLength, 226}, // ParameterType.PipeMassPerUnitLength
-      { SpecType.Measurable.HvacTemperatureDifference, 227}, // ParameterType.HVACTemperatureDifference
-      { SpecType.Measurable.PipingTemperatureDifference, 228}, // ParameterType.PipingTemperatureDifference
-      { SpecType.Measurable.ElectricalTemperatureDifference, 229}, // ParameterType.ElectricalTemperatureDifference
-      { SpecType.Measurable.Time, 230}, // ParameterType.TimeInterval
-      { SpecType.Measurable.Speed, 231}, // ParameterType.Speed
-      { SpecType.Measurable.Stationing, 232}, // ParameterType.Stationing
-    };
+    public static implicit operator Autodesk.Revit.DB.ParameterType(DataType value) =>
+      Extensions.DataTypeExtension.ToParameterType(value);
 #pragma warning restore CS0618 // Type or member is obsolete
 #endif
   }
@@ -308,6 +148,176 @@ namespace RhinoInside.Revit.External.DB.Extensions
     internal static Schemas.DataType GetDataType(this Autodesk.Revit.DB.ExternalDefinitionCreationOptions value) => value.Type;
     internal static void SetDataType(this Autodesk.Revit.DB.ExternalDefinitionCreationOptions value, Schemas.DataType dataType) => value.Type = dataType;
 #endif
+
+    #region ParameterType
+#pragma warning disable CS0618 // Type or member is obsolete
+    static readonly Dictionary<Schemas.DataType, int> parameterTypeMap = new Dictionary<Schemas.DataType, int>()
+    {
+      { Schemas.SpecType.String.Text, 1 }, // ParameterType.Text
+      { Schemas.SpecType.Int.Integer, 2 }, // ParameterType.Integer
+      { Schemas.SpecType.Measurable.Number, 3 }, // ParameterType.Number
+      { Schemas.SpecType.Measurable.Length, 4 }, // ParameterType.Length
+      { Schemas.SpecType.Measurable.Area, 5 }, // ParameterType.Area
+      { Schemas.SpecType.Measurable.Volume, 6 }, // ParameterType.Volme
+      { Schemas.SpecType.Measurable.Angle, 7 }, // ParameterType.Angle
+      { Schemas.SpecType.String.Url, 8}, // ParameterType.URL
+      { Schemas.SpecType.Reference.Material, 9}, // ParameterType.Material
+      { Schemas.SpecType.Boolean.YesNo, 10}, // ParameterType.YesNo
+      { Schemas.SpecType.Measurable.Force, 11}, // ParameterType.Force
+      { Schemas.SpecType.Measurable.LinearForce, 12}, // ParameterType.LinearForce
+      { Schemas.SpecType.Measurable.AreaForce, 13}, // ParameterType.AreaForce
+      { Schemas.SpecType.Measurable.Moment, 14}, // ParameterType.Moment
+      { Schemas.SpecType.Int.NumberOfPoles, 15}, // ParameterType.NumberOfPoles
+      //{ Schemas.SpecType.Measurable.FixtureUnit, 16}, // ParameterType.FixtureUnit
+      //{ Reference.FamilyType, 17}, // ParameterType.FamilyType
+      { Schemas.SpecType.Reference.LoadClassification, 18}, // ParameterType.LoadClassification
+      { Schemas.SpecType.Reference.Image, 19}, // ParameterType.Image
+      { Schemas.SpecType.String.MultilineText, 20}, // ParameterType.MultilineText
+      { Schemas.SpecType.Custom, 99}, // ParameterType.Custom
+      { Schemas.SpecType.Measurable.HvacDensity, 107}, // ParameterType.HVACDensity
+      { Schemas.SpecType.Measurable.HvacEnergy, 108}, // ParameterType.HVACEnergy
+      { Schemas.SpecType.Measurable.HvacFriction, 109}, // ParameterType.HVACFriction
+      { Schemas.SpecType.Measurable.HvacPower, 110}, // ParameterType.HVACPower
+      { Schemas.SpecType.Measurable.HvacPowerDensity, 111}, // ParameterType.HVACPowerDensity
+      { Schemas.SpecType.Measurable.HvacPressure, 112}, // ParameterType.HVACPressure
+      { Schemas.SpecType.Measurable.HvacTemperature, 113}, // ParameterType.HVACTemperature
+      { Schemas.SpecType.Measurable.HvacVelocity, 114}, // ParameterType.HVACVelocity
+      { Schemas.SpecType.Measurable.AirFlow, 115}, // ParameterType.HVACAirflow
+      { Schemas.SpecType.Measurable.DuctSize, 116}, // ParameterType.HVACDuctSize
+      { Schemas.SpecType.Measurable.CrossSection, 117}, // ParameterType.HVACCrossSection
+      { Schemas.SpecType.Measurable.HeatGain, 118}, // ParameterType.HVACHeatGain
+      { Schemas.SpecType.Measurable.Current, 119}, // ParameterType.ElectricalCurrent
+      { Schemas.SpecType.Measurable.ElectricalPotential, 120}, // ParameterType.ElectricalPotential
+      { Schemas.SpecType.Measurable.ElectricalFrequency, 121}, // ParameterType.ElectricalFrequency
+      { Schemas.SpecType.Measurable.Illuminance, 122}, // ParameterType.ElectricalFrequency
+      { Schemas.SpecType.Measurable.LuminousFlux, 123}, // ParameterType.ElectricalLuminousFlux
+      { Schemas.SpecType.Measurable.ElectricalPower, 124}, // ParameterType.ElectricalPower
+      { Schemas.SpecType.Measurable.HvacRoughness, 125}, // ParameterType.HVACRoughness
+      { Schemas.SpecType.Measurable.ApparentPower, 134}, // ParameterType.ElectricalApparentPower
+      { Schemas.SpecType.Measurable.ElectricalPowerDensity, 135}, // ParameterType.ElectricalPowerDensity
+      { Schemas.SpecType.Measurable.PipingDensity, 136}, // ParameterType.PipingDensity
+      { Schemas.SpecType.Measurable.Flow, 137}, // ParameterType.PipingFlow
+      { Schemas.SpecType.Measurable.PipingFriction, 138}, // ParameterType.PipingFriction
+      { Schemas.SpecType.Measurable.PipingPressure, 139}, // ParameterType.PipingPressure
+      { Schemas.SpecType.Measurable.PipingTemperature, 140}, // ParameterType.PipingTemperature
+      { Schemas.SpecType.Measurable.PipingVelocity, 141}, // ParameterType.PipingVelocity
+      { Schemas.SpecType.Measurable.PipingViscosity, 142}, // ParameterType.PipingViscosity
+      { Schemas.SpecType.Measurable.PipeSize, 143}, // ParameterType.PipeSize
+      { Schemas.SpecType.Measurable.PipingRoughness, 144}, // ParameterType.PipingRoughness
+      { Schemas.SpecType.Measurable.Stress, 145}, // ParameterType.Stress
+      { Schemas.SpecType.Measurable.UnitWeight, 146}, // ParameterType.UnitWeight
+      { Schemas.SpecType.Measurable.ThermalExpansionCoefficient, 147}, // ParameterType.ThermalExpansion
+      { Schemas.SpecType.Measurable.LinearMoment, 148}, // ParameterType.LinearMoment
+      { Schemas.SpecType.Measurable.PointSpringCoefficient, 150}, // ParameterType.ForcePerLength
+      { Schemas.SpecType.Measurable.RotationalPointSpringCoefficient, 151}, // ParameterType.ForceLengthPerAngle
+      { Schemas.SpecType.Measurable.LineSpringCoefficient, 152}, // ParameterType.LinearForcePerLength
+      { Schemas.SpecType.Measurable.RotationalLineSpringCoefficient, 153}, // ParameterType.LinearForceLengthPerAngle
+      { Schemas.SpecType.Measurable.AreaSpringCoefficient, 154}, // ParameterType.AreaForcePerLength
+      { Schemas.SpecType.Measurable.PipingVolume, 155}, // ParameterType.PipingVolume
+      { Schemas.SpecType.Measurable.HvacViscosity, 156}, // ParameterType.HVACViscosity
+      { Schemas.SpecType.Measurable.HeatTransferCoefficient, 157}, // ParameterType.HVACCoefficientOfHeatTransfer
+      { Schemas.SpecType.Measurable.AirFlowDensity, 158}, // ParameterType.HVACAirflowDensity
+      { Schemas.SpecType.Measurable.Slope, 159}, // ParameterType.Slope
+      { Schemas.SpecType.Measurable.CoolingLoad, 160}, // ParameterType.HVACCoolingLoad
+      { Schemas.SpecType.Measurable.CoolingLoadDividedByArea, 161}, // ParameterType.HVACCoolingLoadDividedByArea
+      { Schemas.SpecType.Measurable.CoolingLoadDividedByVolume, 162}, // ParameterType.HVACCoolingLoadDividedByVolume
+      { Schemas.SpecType.Measurable.HeatingLoad, 163}, // ParameterType.HVACHeatingLoad
+      { Schemas.SpecType.Measurable.HeatingLoadDividedByArea, 164}, // ParameterType.HVACHeatingLoadDividedByArea
+      { Schemas.SpecType.Measurable.HeatingLoadDividedByVolume, 165}, // ParameterType.HVACHeatingLoadDividedByVolume
+      { Schemas.SpecType.Measurable.AirFlowDividedByVolume, 166}, // ParameterType.HVACAirflowDividedByVolume
+      { Schemas.SpecType.Measurable.AirFlowDividedByCoolingLoad, 167}, // ParameterType.HVACAirflowDividedByCoolingLoad
+      { Schemas.SpecType.Measurable.AreaDividedByCoolingLoad, 168}, // ParameterType.HVACAreaDividedByCoolingLoad
+      { Schemas.SpecType.Measurable.WireDiameter, 169}, // ParameterType.WireSize
+      { Schemas.SpecType.Measurable.HvacSlope, 170}, // ParameterType.HVACSlope
+      { Schemas.SpecType.Measurable.PipingSlope, 171}, // ParameterType.PipingSlope
+      { Schemas.SpecType.Measurable.Currency, 172}, // ParameterType.Currency
+      { Schemas.SpecType.Measurable.Efficacy, 173}, // ParameterType.ElectricalEfficacy
+      { Schemas.SpecType.Measurable.Wattage, 174}, // ParameterType.ElectricalWattage
+      { Schemas.SpecType.Measurable.ColorTemperature, 175}, // ParameterType.ColorTemperature
+      { Schemas.SpecType.Measurable.LuminousIntensity, 177}, // ParameterType.ElectricalLuminousIntensity
+      { Schemas.SpecType.Measurable.Luminance, 178}, // ParameterType.ElectricalLuminance
+      { Schemas.SpecType.Measurable.AreaDividedByHeatingLoad, 179}, // ParameterType.HVACAreaDividedByHeatingLoad
+      { Schemas.SpecType.Measurable.Factor, 180}, // ParameterType.HVACFactor
+      { Schemas.SpecType.Measurable.ElectricalTemperature, 181}, // ParameterType.ElectricalTemperature
+      { Schemas.SpecType.Measurable.CableTraySize, 182}, // ParameterType.ElectricalCableTraySize
+      { Schemas.SpecType.Measurable.ConduitSize, 183}, // ParameterType.ElectricalConduitSize
+      { Schemas.SpecType.Measurable.ReinforcementVolume, 184}, // ParameterType.ReinforcementVolume
+      { Schemas.SpecType.Measurable.ReinforcementLength, 185}, // ParameterType.ReinforcementLength
+      { Schemas.SpecType.Measurable.DemandFactor, 186}, // ParameterType.ElectricalDemandFactor
+      { Schemas.SpecType.Measurable.DuctInsulationThickness, 187}, // ParameterType.HVACDuctInsulationThickness
+      { Schemas.SpecType.Measurable.DuctLiningThickness, 188}, // ParameterType.HVACDuctLiningThickness
+      { Schemas.SpecType.Measurable.PipeInsulationThickness, 189}, // ParameterType.PipeInsulationThickness
+      { Schemas.SpecType.Measurable.ThermalResistance, 190}, // ParameterType.HVACThermalResistance
+      { Schemas.SpecType.Measurable.ThermalMass, 191}, // ParameterType.HVACThermalMass
+      { Schemas.SpecType.Measurable.Acceleration, 192}, // ParameterType.Acceleration
+      { Schemas.SpecType.Measurable.BarDiameter, 193}, // ParameterType.BarDiameter
+      { Schemas.SpecType.Measurable.CrackWidth, 194}, // ParameterType.CrackWidth
+      { Schemas.SpecType.Measurable.Displacement, 195}, // ParameterType.DisplacementDeflection
+      { Schemas.SpecType.Measurable.Energy, 196}, // ParameterType.Energy
+      { Schemas.SpecType.Measurable.StructuralFrequency, 197}, // ParameterType.StructuralFrequency
+      { Schemas.SpecType.Measurable.Mass, 198}, // ParameterType.Mass
+      { Schemas.SpecType.Measurable.MassPerUnitLength, 199}, // ParameterType.MassPerUnitLength
+      { Schemas.SpecType.Measurable.MomentOfInertia, 200}, // ParameterType.MomentOfInertia
+      { Schemas.SpecType.Measurable.SurfaceAreaPerUnitLength, 201}, // ParameterType.SurfaceArea
+      { Schemas.SpecType.Measurable.Period, 202}, // ParameterType.Period
+      { Schemas.SpecType.Measurable.Pulsation, 203}, // ParameterType.Pulsation
+      { Schemas.SpecType.Measurable.ReinforcementArea, 204}, // ParameterType.ReinforcementArea
+      { Schemas.SpecType.Measurable.ReinforcementAreaPerUnitLength, 205}, // ParameterType.ReinforcementAreaPerUnitLength
+      { Schemas.SpecType.Measurable.ReinforcementCover, 206}, // ParameterType.ReinforcementCover
+      { Schemas.SpecType.Measurable.ReinforcementSpacing, 207}, // ParameterType.ReinforcementSpacing
+      { Schemas.SpecType.Measurable.Rotation, 208}, // ParameterType.Rotation
+      { Schemas.SpecType.Measurable.SectionArea, 209}, // ParameterType.SectionArea
+      { Schemas.SpecType.Measurable.SectionDimension, 210}, // ParameterType.SectionDimension
+      { Schemas.SpecType.Measurable.SectionModulus, 211}, // ParameterType.SectionModulus
+      { Schemas.SpecType.Measurable.SectionProperty, 212}, // ParameterType.SectionProperty
+      { Schemas.SpecType.Measurable.StructuralVelocity, 213}, // ParameterType.StructuralVelocity
+      { Schemas.SpecType.Measurable.WarpingConstant, 214}, // ParameterType.WarpingConstant
+      { Schemas.SpecType.Measurable.Weight, 215}, // ParameterType.Weight
+      { Schemas.SpecType.Measurable.WeightPerUnitLength, 216}, // ParameterType.WeightPerUnitLength
+      { Schemas.SpecType.Measurable.ThermalConductivity, 217}, // ParameterType.HVACThermalConductivity
+      { Schemas.SpecType.Measurable.SpecificHeat, 218}, // ParameterType.HVACSpecificHeat
+      { Schemas.SpecType.Measurable.SpecificHeatOfVaporization, 219}, // ParameterType.HVACSpecificHeatOfVaporization
+      { Schemas.SpecType.Measurable.Permeability, 220}, // ParameterType.HVACPermeability
+      { Schemas.SpecType.Measurable.ElectricalResistivity, 221}, // ParameterType.ElectricalResistivity
+      { Schemas.SpecType.Measurable.MassDensity, 222}, // ParameterType.MassDensity
+      { Schemas.SpecType.Measurable.MassPerUnitArea, 223}, // ParameterType.MassPerUnitArea
+      { Schemas.SpecType.Measurable.PipeDimension, 224}, // ParameterType.PipeDimension
+      { Schemas.SpecType.Measurable.PipingMass, 225}, // ParameterType.PipeMass
+      { Schemas.SpecType.Measurable.PipeMassPerUnitLength, 226}, // ParameterType.PipeMassPerUnitLength
+      { Schemas.SpecType.Measurable.HvacTemperatureDifference, 227}, // ParameterType.HVACTemperatureDifference
+      { Schemas.SpecType.Measurable.PipingTemperatureDifference, 228}, // ParameterType.PipingTemperatureDifference
+      { Schemas.SpecType.Measurable.ElectricalTemperatureDifference, 229}, // ParameterType.ElectricalTemperatureDifference
+      { Schemas.SpecType.Measurable.Time, 230}, // ParameterType.TimeInterval
+      { Schemas.SpecType.Measurable.Speed, 231}, // ParameterType.Speed
+      { Schemas.SpecType.Measurable.Stationing, 232}, // ParameterType.Stationing
+    };
+
+    internal static Schemas.DataType ToDataType(this Autodesk.Revit.DB.ParameterType value)
+    {
+      if (value is Autodesk.Revit.DB.ParameterType.FamilyType)
+        return new Schemas.CategoryId("autodesk.revit.category.family");
+
+      foreach (var item in parameterTypeMap)
+      {
+        if (item.Value == (int) value)
+          return item.Key;
+      }
+
+      return Schemas.DataType.Empty;
+    }
+
+    internal static Autodesk.Revit.DB.ParameterType ToParameterType(this Schemas.DataType value)
+    {
+      if (Schemas.CategoryId.IsCategoryId(value, out var _))
+        return Autodesk.Revit.DB.ParameterType.FamilyType;
+
+      if (parameterTypeMap.TryGetValue(value, out var pt))
+        return (Autodesk.Revit.DB.ParameterType) pt;
+
+      return Autodesk.Revit.DB.ParameterType.Invalid;
+    }
+#pragma warning restore CS0618 // Type or member is obsolete
+    #endregion
 
     #region StorageType
     static readonly IReadOnlyDictionary<Schemas.DataType, Autodesk.Revit.DB.StorageType> SpecToStorageType = new Dictionary<Schemas.DataType, Autodesk.Revit.DB.StorageType>
