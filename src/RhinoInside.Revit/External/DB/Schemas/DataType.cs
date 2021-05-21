@@ -329,10 +329,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
       { Schemas.SpecType.String.MultilineText, Autodesk.Revit.DB.StorageType.String },
       { Schemas.SpecType.String.Url, Autodesk.Revit.DB.StorageType.String },
 
-      { Schemas.SpecType.String.Text, Autodesk.Revit.DB.StorageType.String },
-      { Schemas.SpecType.String.MultilineText, Autodesk.Revit.DB.StorageType.String },
-      { Schemas.SpecType.String.Url, Autodesk.Revit.DB.StorageType.String },
-
       { Schemas.SpecType.Reference.Material, Autodesk.Revit.DB.StorageType.ElementId },
       { Schemas.SpecType.Reference.Image, Autodesk.Revit.DB.StorageType.ElementId },
       { Schemas.SpecType.Reference.LoadClassification, Autodesk.Revit.DB.StorageType.ElementId },

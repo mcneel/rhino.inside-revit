@@ -24,24 +24,11 @@ namespace RhinoInside.Revit.External.DB.Schemas
 #endif
 
 #if !REVIT_2022
-    public static implicit operator ParameterGroup(Autodesk.Revit.DB.BuiltInParameterGroup value)
-    {
-      foreach (var item in map)
-      {
-        if (item.Value == (int) value)
-          return item.Key;
-      }
+    public static implicit operator ParameterGroup(Autodesk.Revit.DB.BuiltInParameterGroup value) =>
+      Extensions.ParameterGroupExtension.ToParameterGroup(value);
 
-      return Empty;
-    }
-
-    public static implicit operator Autodesk.Revit.DB.BuiltInParameterGroup(ParameterGroup value)
-    {
-      if (map.TryGetValue(value, out var ut))
-        return (Autodesk.Revit.DB.BuiltInParameterGroup) ut;
-
-      return Autodesk.Revit.DB.BuiltInParameterGroup.INVALID;
-    }
+    public static implicit operator Autodesk.Revit.DB.BuiltInParameterGroup(ParameterGroup value) =>
+      Extensions.ParameterGroupExtension.ToBuiltInParameterGroup(value);
 #endif
   }
 }
@@ -62,6 +49,25 @@ namespace RhinoInside.Revit.External.DB.Extensions
 #else
       return value.ParameterGroup;
 #endif
+    }
+
+    internal static Schemas.ParameterGroup ToParameterGroup(this Autodesk.Revit.DB.BuiltInParameterGroup value)
+    {
+      foreach (var item in Schemas.ParameterGroup.map)
+      {
+        if (item.Value == (int) value)
+          return item.Key;
+      }
+
+      return Schemas.ParameterGroup.Empty;
+    }
+
+    internal static Autodesk.Revit.DB.BuiltInParameterGroup ToBuiltInParameterGroup(this Schemas.ParameterGroup value)
+    {
+      if (Schemas.ParameterGroup.map.TryGetValue(value, out var ut))
+        return (Autodesk.Revit.DB.BuiltInParameterGroup) ut;
+
+      return Autodesk.Revit.DB.BuiltInParameterGroup.INVALID;
     }
   }
 }

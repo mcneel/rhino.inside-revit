@@ -7,9 +7,9 @@ using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.External.DB.Schemas;
 using DB = Autodesk.Revit.DB;
 using DBX = RhinoInside.Revit.External.DB;
+using EDBS = RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
@@ -221,8 +221,8 @@ namespace RhinoInside.Revit.GH.Parameters
     public ParameterParam(DB.Parameter p) : this()
     {
       ParameterName = p.Definition.Name;
-      ParameterType = p.Definition.ParameterType;
-      ParameterGroup = p.Definition.ParameterGroup;
+      ParameterType = p.Definition.GetDataType();
+      ParameterGroup = p.Definition.GetGroupType();
       ParameterBinding = p.Element is DB.ElementType ? DBX.ParameterBinding.Type : DBX.ParameterBinding.Instance;
 
       if (p.IsShared)
@@ -248,22 +248,22 @@ namespace RhinoInside.Revit.GH.Parameters
         }
       }
 
-      try { Name = $"{DB.LabelUtils.GetLabelFor(ParameterGroup)} : {ParameterName}"; }
+      try { Name = $"{ParameterGroup.Label} : {ParameterName}"; }
       catch (Autodesk.Revit.Exceptions.InvalidOperationException) { Name = ParameterName; }
 
       NickName = Name;
       MutableNickName = false;
 
-      DataType dataType = p.Definition?.GetDataType();
-      Description = CategoryId.IsCategoryId(dataType, out var _) ? $"Family Type" : dataType.Label;
+      EDBS.DataType dataType = p.Definition?.GetDataType();
+      Description = EDBS.CategoryId.IsCategoryId(dataType, out var _) ? $"Family Type" : dataType.Label;
 
       if (string.IsNullOrEmpty(Description))
         Description = p.StorageType.ToString();
 
       if (ParameterSharedGUID.HasValue)
         Description = $"Shared parameter {ParameterSharedGUID.Value:B}\n{Description}";
-      else if (ParameterBuiltInId != DB.BuiltInParameter.INVALID)
-        Description = $"BuiltIn Parameter \"{((External.DB.Schemas.ParameterId) ParameterBuiltInId).FullName}\"\n{Description}";
+      else if (ParameterBuiltInId != EDBS.ParameterId.Empty)
+        Description = $"BuiltIn Parameter \"{ParameterBuiltInId.FullName}\"\n{Description}";
       else if(ParameterBinding != DBX.ParameterBinding.Unknown)
         Description = $"{ParameterClass} parameter ({ParameterBinding})\n{Description}";
       else
@@ -271,11 +271,11 @@ namespace RhinoInside.Revit.GH.Parameters
     }
 
     public string ParameterName                        { get; private set; } = string.Empty;
-    public DB.ParameterType ParameterType              { get; private set; } = DB.ParameterType.Invalid;
-    public DB.BuiltInParameterGroup ParameterGroup     { get; private set; } = DB.BuiltInParameterGroup.INVALID;
+    public EDBS.DataType ParameterType                 { get; private set; } = EDBS.DataType.Empty;
+    public EDBS.ParameterGroup ParameterGroup          { get; private set; } = EDBS.ParameterGroup.Empty;
     public DBX.ParameterBinding ParameterBinding       { get; private set; } = DBX.ParameterBinding.Unknown;
     public DBX.ParameterClass ParameterClass           { get; private set; } = DBX.ParameterClass.Any;
-    public DB.BuiltInParameter ParameterBuiltInId      { get; private set; } = DB.BuiltInParameter.INVALID;
+    public EDBS.ParameterId ParameterBuiltInId         { get; private set; } = EDBS.ParameterId.Empty;
     public Guid? ParameterSharedGUID                   { get; private set; } = default;
 
     public sealed override bool Read(GH_IReader reader)
@@ -283,35 +283,45 @@ namespace RhinoInside.Revit.GH.Parameters
       if (!base.Read(reader))
         return false;
 
-      ///////////////////////////////////////////////////////////////
-      // Keep this code while in WIP to read WIP components
-      if
-      (
-        Enum.TryParse(Name, out DB.BuiltInParameter builtInId) &&
-        Enum.IsDefined(typeof(DB.BuiltInParameter), builtInId)
-      )
-        ParameterBuiltInId = builtInId;
-      ///////////////////////////////////////////////////////////////
+      object GetValue(string name)
+      {
+        if (reader.FindItem(name) is GH_IO.Types.GH_Item item)
+        {
+          if (item.Type == GH_IO.Types.GH_Types.gh_int32)  return item._int32;
+          if (item.Type == GH_IO.Types.GH_Types.gh_string) return item._string;
+        }
+
+        return default;
+      }
 
       var parameterName = default(string);
       reader.TryGetString("ParameterName", ref parameterName);
       ParameterName = parameterName;
 
-      var parameterType = (int) DB.ParameterType.Invalid;
-      reader.TryGetInt32("ParameterType", ref parameterType);
-      ParameterType = (DB.ParameterType) parameterType;
+      ParameterType = EDBS.DataType.Empty;
+      switch (GetValue("ParameterType"))
+      {
+        case int enumerate: ParameterType = ((DB.ParameterType) enumerate).ToDataType(); break;
+        case string schema: ParameterType = new EDBS.DataType(schema); break;
+      }
 
-      var parameterGroup = (int) DB.BuiltInParameterGroup.INVALID;
-      reader.TryGetInt32("ParameterGroup", ref parameterGroup);
-      ParameterGroup = (DB.BuiltInParameterGroup) parameterGroup;
+      ParameterGroup = EDBS.ParameterGroup.Empty;
+      switch (GetValue("ParameterGroup"))
+      {
+        case int enumerate: ParameterGroup = ((DB.BuiltInParameterGroup) enumerate).ToParameterGroup(); break;
+        case string schema: ParameterGroup = new EDBS.ParameterGroup(schema); break;
+      }
 
       var parameterBinding = (int) DBX.ParameterBinding.Unknown;
       reader.TryGetInt32("ParameterBinding", ref parameterBinding);
       ParameterBinding = (DBX.ParameterBinding) parameterBinding;
 
-      var parameterBuiltInId = (int) DB.BuiltInParameter.INVALID;
-      reader.TryGetInt32("ParameterBuiltInId", ref parameterBuiltInId);
-      ParameterBuiltInId = (DB.BuiltInParameter) parameterBuiltInId;
+      ParameterBuiltInId = EDBS.ParameterId.Empty;
+      switch (GetValue("ParameterBuiltInId"))
+      {
+        case int enumerate: ParameterBuiltInId = (DB.BuiltInParameter) enumerate; break;
+        case string schema: ParameterBuiltInId = new EDBS.ParameterId(schema); break;
+      }
 
       var parameterSharedGUID = default(Guid);
       if (reader.TryGetGuid("ParameterSharedGUID", ref parameterSharedGUID))
@@ -324,7 +334,7 @@ namespace RhinoInside.Revit.GH.Parameters
         ParameterClass = (DBX.ParameterClass) parameterClass;
       else if(ParameterSharedGUID.HasValue)
         ParameterClass = DBX.ParameterClass.Shared;
-      else if(ParameterBuiltInId != DB.BuiltInParameter.INVALID)
+      else if(ParameterBuiltInId != EDBS.ParameterId.Empty)
         ParameterClass = DBX.ParameterClass.BuiltIn;
       else if(ParameterBinding != DBX.ParameterBinding.Unknown)
         ParameterClass = DBX.ParameterClass.Project;
@@ -340,17 +350,17 @@ namespace RhinoInside.Revit.GH.Parameters
       if(!string.IsNullOrEmpty(ParameterName))
         writer.SetString("ParameterName", ParameterName);
 
-      if (ParameterGroup != DB.BuiltInParameterGroup.INVALID)
-        writer.SetInt32("ParameterGroup", (int) ParameterGroup);
+      if (ParameterGroup != EDBS.ParameterGroup.Empty)
+        writer.SetString("ParameterGroup", ParameterGroup.FullName);
 
-      if (ParameterType != DB.ParameterType.Invalid)
-        writer.SetInt32("ParameterType", (int) ParameterType);
+      if (ParameterType != EDBS.DataType.Empty)
+        writer.SetString("ParameterType", ParameterType.FullName);
 
       if (ParameterBinding != DBX.ParameterBinding.Unknown)
         writer.SetInt32("ParameterBinding", (int) ParameterBinding);
 
-      if (ParameterBuiltInId != DB.BuiltInParameter.INVALID)
-        writer.SetInt32("ParameterBuiltInId", (int) ParameterBuiltInId);
+      if (ParameterBuiltInId != EDBS.ParameterId.Empty)
+        writer.SetString("ParameterBuiltInId", ParameterBuiltInId.FullName);
 
       if (ParameterSharedGUID.HasValue)
         writer.SetGuid("ParameterSharedGUID", ParameterSharedGUID.Value);
@@ -366,8 +376,8 @@ namespace RhinoInside.Revit.GH.Parameters
       if (ParameterSharedGUID.HasValue)
         return ParameterSharedGUID.Value.GetHashCode();
 
-      if (ParameterBuiltInId != DB.BuiltInParameter.INVALID)
-        return (int) ParameterBuiltInId;
+      if (ParameterBuiltInId != EDBS.ParameterId.Empty)
+        return ParameterBuiltInId.GetHashCode();
 
       return new { ParameterName, ParameterType, ParameterBinding, ParameterClass }.GetHashCode();
     }
@@ -379,7 +389,7 @@ namespace RhinoInside.Revit.GH.Parameters
         if (ParameterSharedGUID.HasValue)
           return value.ParameterSharedGUID.HasValue && ParameterSharedGUID == value.ParameterSharedGUID.Value;
 
-        if (ParameterBuiltInId != DB.BuiltInParameter.INVALID)
+        if (ParameterBuiltInId != EDBS.ParameterId.Empty)
           return ParameterBuiltInId == value.ParameterBuiltInId;
 
         return ParameterName == value.ParameterName &&
@@ -396,10 +406,10 @@ namespace RhinoInside.Revit.GH.Parameters
       if(ParameterSharedGUID.HasValue)
         return element.get_Parameter(ParameterSharedGUID.Value);
 
-      if(ParameterBuiltInId != DB.BuiltInParameter.INVALID)
-        return element.get_Parameter(ParameterBuiltInId);
+      if(ParameterBuiltInId != EDBS.ParameterId.Empty)
+        return element.GetParameter(ParameterBuiltInId);
 
-      return element.GetParameter(ParameterName, ParameterType.ToDataType(), ParameterBinding, ParameterClass);
+      return element.GetParameter(ParameterName, ParameterType, ParameterBinding, ParameterClass);
     }
   }
 }

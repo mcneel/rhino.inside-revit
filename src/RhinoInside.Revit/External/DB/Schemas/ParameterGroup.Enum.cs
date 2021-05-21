@@ -4,7 +4,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
 {
   public partial class ParameterGroup
   {
-    static readonly Dictionary<ParameterGroup, int> map = new Dictionary<ParameterGroup, int>()
+    internal static readonly Dictionary<ParameterGroup, int> map = new Dictionary<ParameterGroup, int>()
     {
       { ElectricalAnalysis, -5000231 }, // PG_ELECTRICAL_ANALYSIS
       { AlternateUnits, -5000230 }, // PG_ALTERNATE_UNITS
