@@ -105,7 +105,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       if (from == to)
         return value;
 
-      return value * InternalUnits[(int) from] / InternalUnits[(int) to];
+      return value * InternalUnits[(int) to] / InternalUnits[(int) from];
     }
 
     /// <summary>
