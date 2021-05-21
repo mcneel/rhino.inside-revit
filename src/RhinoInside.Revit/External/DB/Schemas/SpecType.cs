@@ -31,6 +31,24 @@ namespace RhinoInside.Revit.External.DB.Schemas
       return false;
     }
 
+    public static bool IsMeasurableSpec(DataType value, out SpecType specType)
+    {
+      var typeId = value.TypeId;
+#if REVIT_2022
+      if (Autodesk.Revit.DB.UnitUtils.IsMeasurableSpec(value))
+#else
+      if (typeId.StartsWith("autodesk.spec.aec"))
+#endif
+      {
+        specType = new SpecType(typeId);
+        return true;
+      }
+
+      specType = default;
+      return false;
+    }
+
+
     /// <summary>
     /// Checks whether a unit type is valid for this spec.
     /// </summary>

@@ -46,7 +46,7 @@ namespace RhinoInside.Revit.GH.Components
         var definition = parameterElement.GetDefinition();
 
         DA.SetData("Name", definition?.Name);
-        DA.SetData("StorageType", definition?.ParameterType.ToStorageType());
+        DA.SetData("StorageType", definition?.GetDataType().ToStorageType());
 
         if (parameterElement is DB.SharedParameterElement shared)
         {

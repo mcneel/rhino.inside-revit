@@ -6,6 +6,7 @@ using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
+using EDBS = RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -817,9 +818,9 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.FilterRule(), "Rule", "R", string.Empty, GH_ParamAccess.item);
     }
 
-    static readonly Dictionary<DB.BuiltInParameter, DB.ParameterType> BuiltInParametersTypes = new Dictionary<DB.BuiltInParameter, DB.ParameterType>();
+    static readonly Dictionary<DB.BuiltInParameter, EDBS.DataType> BuiltInParametersTypes = new Dictionary<DB.BuiltInParameter, EDBS.DataType>();
 
-    static bool TryGetParameterDefinition(DB.Document doc, DB.ElementId id, out DB.StorageType storageType, out DB.ParameterType parameterType)
+    static bool TryGetParameterDefinition(DB.Document doc, DB.ElementId id, out DB.StorageType storageType, out EDBS.DataType dataType)
     {
       if (id.TryGetBuiltInParameter(out var builtInParameter))
       {
@@ -827,28 +828,13 @@ namespace RhinoInside.Revit.GH.Components
 
         if (storageType == DB.StorageType.ElementId)
         {
-          if (builtInParameter == DB.BuiltInParameter.ID_PARAM || builtInParameter == DB.BuiltInParameter.SYMBOL_ID_PARAM)
-          {
-            parameterType = DB.ParameterType.Integer;
-            return true;
-          }
-
-          if (builtInParameter == DB.BuiltInParameter.ELEM_TYPE_PARAM)
-          {
-            parameterType = DB.ParameterType.FamilyType;
-            return true;
-          }
-
-          if (builtInParameter == DB.BuiltInParameter.ELEM_CATEGORY_PARAM || builtInParameter == DB.BuiltInParameter.ELEM_CATEGORY_PARAM_MT)
-          {
-            parameterType = (DB.ParameterType) int.MaxValue;
-            return true;
-          }
+          dataType = EDBS.SpecType.Int.Integer;
+          return true;
         }
 
         if (storageType == DB.StorageType.Double)
         {
-          if (BuiltInParametersTypes.TryGetValue(builtInParameter, out parameterType))
+          if (BuiltInParametersTypes.TryGetValue(builtInParameter, out dataType))
             return true;
 
           var categoriesWhereDefined = doc.GetBuiltInCategoriesWithParameters().
@@ -873,18 +859,18 @@ namespace RhinoInside.Revit.GH.Components
                 if (parameter is null)
                   continue;
 
-                parameterType = parameter.Definition.ParameterType;
-                BuiltInParametersTypes.Add(builtInParameter, parameterType);
+                dataType = parameter.Definition.GetDataType();
+                BuiltInParametersTypes.Add(builtInParameter, dataType);
                 return true;
               }
             }
           }
 
-          parameterType = DB.ParameterType.Invalid;
+          dataType = EDBS.DataType.Empty;
           return false;
         }
 
-        parameterType = DB.ParameterType.Invalid;
+        dataType = EDBS.DataType.Empty;
         return true;
       }
       else
@@ -893,8 +879,8 @@ namespace RhinoInside.Revit.GH.Components
         {
           if (doc.GetElement(id) is DB.ParameterElement parameter)
           {
-            storageType = parameter.GetDefinition().ParameterType.ToStorageType();
-            parameterType = parameter.GetDefinition().ParameterType;
+            dataType = parameter.GetDefinition().GetDataType();
+            storageType = dataType.ToStorageType();
             return true;
           }
         }
@@ -902,7 +888,7 @@ namespace RhinoInside.Revit.GH.Components
       }
 
       storageType = DB.StorageType.None;
-      parameterType = DB.ParameterType.Invalid;
+      dataType = EDBS.SpecType.Empty;
       return false;
     }
 
@@ -924,7 +910,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetData("ParameterKey", ref parameterKey))
         return;
 
-      if (!TryGetParameterDefinition(parameterKey.Document, parameterKey.Id, out var storageType, out var parameterType))
+      if (!TryGetParameterDefinition(parameterKey.Document, parameterKey.Id, out var storageType, out var dataType))
       {
         if (parameterKey.Id.TryGetBuiltInParameter(out var builtInParameter))
           AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to found parameter '{DB.LabelUtils.GetLabelFor(builtInParameter)}' in Revit document.");
@@ -981,58 +967,30 @@ namespace RhinoInside.Revit.GH.Components
               var goo = default(GH_Number);
               if (DA.GetData("Value", ref goo))
               {
+                var tol = 0.0;
                 if (Condition == ConditionType.Equals || Condition == ConditionType.NotEquals)
                 {
-                  if (parameterType == DB.ParameterType.Length || parameterType == DB.ParameterType.Area || parameterType == DB.ParameterType.Volume)
-                    rule = new DB.FilterDoubleRule(provider, ruleEvaluator, UnitConverter.InHostUnits(goo.Value, parameterType), UnitConverter.InHostUnits(Revit.VertexTolerance, parameterType));
-                  else
-                    rule = new DB.FilterDoubleRule(provider, ruleEvaluator, UnitConverter.InHostUnits(goo.Value, parameterType), 1e-6);
+                  // Adjust tolerance acording to data-type dimensionality
+                  if (dataType.TryGetLengthDimensionality(out var dimensionality) && dimensionality != 0)
+                    tol = UnitConverter.Convert
+                    (
+                      Revit.VertexTolerance,
+                      UnitConverter.ExternalUnitSystem,
+                      UnitConverter.InternalUnitSystem,
+                      Math.Abs(dimensionality)
+                    );
+                  else tol = 1e-6;
                 }
-                else
-                  rule = new DB.FilterDoubleRule(provider, ruleEvaluator, UnitConverter.InHostUnits(goo.Value, parameterType), 0.0);
+
+                rule = new DB.FilterDoubleRule(provider, ruleEvaluator, UnitConverter.InHostUnits(goo.Value, dataType), tol);
               }
             }
             break;
           case DB.StorageType.ElementId:
             {
-              switch(parameterType)
-              {
-                case DB.ParameterType.Integer: // Id
-                  {
-                    var value = new GH_Integer(DB.ElementId.InvalidElementId.IntegerValue);
-                    if (DA.GetData("Value", ref value))
-                      rule = new DB.FilterElementIdRule(provider, ruleEvaluator, new DB.ElementId(value.Value));
-                  }
-                  break;
-                case (DB.ParameterType) int.MaxValue: // Category
-                  {
-                    var value = default(Types.Category);
-                    if (DA.GetData("Value", ref value))
-                      rule = new DB.FilterElementIdRule(provider, ruleEvaluator, value.Id);
-                  }
-                  break;
-                case DB.ParameterType.Material:
-                  {
-                    var value = default(Types.Material);
-                    if (DA.GetData("Value", ref value))
-                      rule = new DB.FilterElementIdRule(provider, ruleEvaluator, value.Id);
-                  }
-                  break;
-                case DB.ParameterType.FamilyType:
-                  {
-                    var value = default(Types.ElementType);
-                    if (DA.GetData("Value", ref value))
-                      rule = new DB.FilterElementIdRule(provider, ruleEvaluator, value.Id);
-                  }
-                  break;
-                default:
-                  {
-                    var value = default(Types.Element);
-                    if (DA.GetData("Value", ref value))
-                      rule = new DB.FilterElementIdRule(provider, ruleEvaluator, value.Id);
-                  }
-                  break;
-              }
+              var value = default(Types.IGH_ElementId);
+              if (DA.GetData("Value", ref value))
+                rule = new DB.FilterElementIdRule(provider, ruleEvaluator, value.Id);
             }
             break;
         }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Autodesk.Revit.DB;
+using EDBS = RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
@@ -75,33 +76,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
 
       return value.ToString();
-    }
-  }
-
-  static class ParameterTypeExtension
-  {
-    public static StorageType ToStorageType(this ParameterType parameterType)
-    {
-      switch (parameterType)
-      {
-        case ParameterType.Invalid:
-          return StorageType.None;
-        case ParameterType.Text:
-        case ParameterType.MultilineText:
-        case ParameterType.URL:
-          return StorageType.String;
-        case ParameterType.YesNo:
-        case ParameterType.Integer:
-        case ParameterType.LoadClassification:
-          return StorageType.Integer;
-        case ParameterType.Material:
-        case ParameterType.FamilyType:
-        case ParameterType.Image:
-          return StorageType.ElementId;
-        case ParameterType.Number:
-        default:
-          return StorageType.Double;
-      }
     }
   }
 

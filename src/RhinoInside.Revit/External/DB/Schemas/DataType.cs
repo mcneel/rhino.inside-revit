@@ -195,11 +195,11 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { SpecType.Measurable.UnitWeight, 146}, // ParameterType.UnitWeight
       { SpecType.Measurable.ThermalExpansionCoefficient, 147}, // ParameterType.ThermalExpansion
       { SpecType.Measurable.LinearMoment, 148}, // ParameterType.LinearMoment
-      //{ SpecType.Measurable.ForcePerLength, 150}, // ParameterType.ForcePerLength
-      //{ SpecType.Measurable.ForceLengthPerAngle, 151}, // ParameterType.ForceLengthPerAngle
-      //{ SpecType.Measurable.LinearForcePerLength, 152}, // ParameterType.LinearForcePerLength
-      //{ SpecType.Measurable.LinearForceLengthPerAngle, 153}, // ParameterType.LinearForceLengthPerAngle
-      //{ SpecType.Measurable.AreaForcePerLength, 154}, // ParameterType.AreaForcePerLength
+      { SpecType.Measurable.PointSpringCoefficient, 150}, // ParameterType.ForcePerLength
+      { SpecType.Measurable.RotationalPointSpringCoefficient, 151}, // ParameterType.ForceLengthPerAngle
+      { SpecType.Measurable.LineSpringCoefficient, 152}, // ParameterType.LinearForcePerLength
+      { SpecType.Measurable.RotationalLineSpringCoefficient, 153}, // ParameterType.LinearForceLengthPerAngle
+      { SpecType.Measurable.AreaSpringCoefficient, 154}, // ParameterType.AreaForcePerLength
       { SpecType.Measurable.PipingVolume, 155}, // ParameterType.PipingVolume
       { SpecType.Measurable.HvacViscosity, 156}, // ParameterType.HVACViscosity
       { SpecType.Measurable.HeatTransferCoefficient, 157}, // ParameterType.HVACCoefficientOfHeatTransfer
@@ -308,5 +308,91 @@ namespace RhinoInside.Revit.External.DB.Extensions
     internal static Schemas.DataType GetDataType(this Autodesk.Revit.DB.ExternalDefinitionCreationOptions value) => value.Type;
     internal static void SetDataType(this Autodesk.Revit.DB.ExternalDefinitionCreationOptions value, Schemas.DataType dataType) => value.Type = dataType;
 #endif
+
+    #region StorageType
+    static readonly IReadOnlyDictionary<Schemas.DataType, Autodesk.Revit.DB.StorageType> SpecToStorageType = new Dictionary<Schemas.DataType, Autodesk.Revit.DB.StorageType>
+    {
+      { Schemas.SpecType.Boolean.YesNo, Autodesk.Revit.DB.StorageType.Integer },
+      { Schemas.SpecType.Int.Integer, Autodesk.Revit.DB.StorageType.Integer },
+
+      { Schemas.SpecType.String.Text, Autodesk.Revit.DB.StorageType.String },
+      { Schemas.SpecType.String.MultilineText, Autodesk.Revit.DB.StorageType.String },
+      { Schemas.SpecType.String.Url, Autodesk.Revit.DB.StorageType.String },
+
+      { Schemas.SpecType.String.Text, Autodesk.Revit.DB.StorageType.String },
+      { Schemas.SpecType.String.MultilineText, Autodesk.Revit.DB.StorageType.String },
+      { Schemas.SpecType.String.Url, Autodesk.Revit.DB.StorageType.String },
+
+      { Schemas.SpecType.Reference.Material, Autodesk.Revit.DB.StorageType.ElementId },
+      { Schemas.SpecType.Reference.Image, Autodesk.Revit.DB.StorageType.ElementId },
+      { Schemas.SpecType.Reference.LoadClassification, Autodesk.Revit.DB.StorageType.ElementId },
+    };
+
+    internal static Autodesk.Revit.DB.StorageType ToStorageType(this Schemas.DataType dataType)
+    {
+      if (SpecToStorageType.TryGetValue(dataType, out var storage))
+        return storage;
+
+      if (Schemas.CategoryId.IsCategoryId(dataType, out var _))
+        return Autodesk.Revit.DB.StorageType.ElementId;
+
+      if (Schemas.SpecType.IsMeasurableSpec(dataType, out var _))
+        return Autodesk.Revit.DB.StorageType.Double;
+
+      return Autodesk.Revit.DB.StorageType.None;
+    }
+
+#if REVIT_2021
+    internal static Autodesk.Revit.DB.StorageType ToStorageType(this Autodesk.Revit.DB.ForgeTypeId dataType) =>
+      ToStorageType((Schemas.DataType) dataType);
+#endif
+    #endregion
+
+    #region Dimensionality
+    internal static readonly IReadOnlyDictionary<Schemas.DataType, int> DataTypeLengthDimensionality = new Dictionary<Schemas.DataType, int>
+    {
+      #region Length
+      { Schemas.SpecType.Measurable.Length, +1 },
+      { Schemas.SpecType.Measurable.RotationalLineSpringCoefficient, +1 },
+      { Schemas.SpecType.Measurable.ReinforcementLength, +1 },
+
+      { Schemas.SpecType.Measurable.PointSpringCoefficient, -1 },
+      { Schemas.SpecType.Measurable.MassPerUnitLength, -1 },
+      { Schemas.SpecType.Measurable.WeightPerUnitLength, -1 },
+      { Schemas.SpecType.Measurable.PipeMassPerUnitLength, -1 },
+      #endregion
+
+      #region Area
+      { Schemas.SpecType.Measurable.Area, +2 },
+      { Schemas.SpecType.Measurable.AreaForce, +2 },
+      { Schemas.SpecType.Measurable.AreaDividedByCoolingLoad, +2 },
+      { Schemas.SpecType.Measurable.AreaDividedByHeatingLoad, +2 },
+      { Schemas.SpecType.Measurable.SurfaceAreaPerUnitLength, +2 -1 },
+      { Schemas.SpecType.Measurable.ReinforcementAreaPerUnitLength, +2 -1 },
+      { Schemas.SpecType.Measurable.ReinforcementArea, +2 },
+      { Schemas.SpecType.Measurable.SectionArea, +2 },
+      { Schemas.SpecType.Measurable.RotationalPointSpringCoefficient, +2 },
+
+      { Schemas.SpecType.Measurable.LineSpringCoefficient, -2 },
+      { Schemas.SpecType.Measurable.CoolingLoadDividedByArea, -2 },
+      { Schemas.SpecType.Measurable.HeatingLoadDividedByArea, -2 },
+      { Schemas.SpecType.Measurable.MassPerUnitArea, -2 },
+      #endregion
+
+      #region Volume
+      { Schemas.SpecType.Measurable.Volume, +3 },
+      { Schemas.SpecType.Measurable.PipingVolume, +3 },
+      { Schemas.SpecType.Measurable.ReinforcementVolume, +3 },
+
+      { Schemas.SpecType.Measurable.AreaSpringCoefficient, -3 },
+      { Schemas.SpecType.Measurable.CoolingLoadDividedByVolume, -3 },
+      { Schemas.SpecType.Measurable.HeatingLoadDividedByVolume, -3 },
+      { Schemas.SpecType.Measurable.AirFlowDividedByVolume, -3 },
+      #endregion
+    };
+
+    internal static bool TryGetLengthDimensionality(this Schemas.DataType dataType, out int dimensionality) =>
+      DataTypeLengthDimensionality.TryGetValue(dataType, out dimensionality);
+    #endregion
   }
 }

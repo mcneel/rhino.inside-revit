@@ -111,7 +111,7 @@ namespace RhinoInside.Revit.GH.Types
       public Guid? Guid => (parameter as DB.SharedParameterElement)?.GuidValue;
 
       [System.ComponentModel.Category(Definition), System.ComponentModel.Description("Internal parameter data storage type.")]
-      public DB.StorageType? StorageType => BuiltInId.HasValue ? Revit.ActiveDBDocument?.get_TypeOfStorage(BuiltInId.Value) : parameter?.GetDefinition()?.ParameterType.ToStorageType();
+      public DB.StorageType? StorageType => BuiltInId.HasValue ? Revit.ActiveDBDocument?.get_TypeOfStorage(BuiltInId.Value) : parameter?.GetDefinition()?.GetDataType().ToStorageType();
 
       [System.ComponentModel.Category(Definition), System.ComponentModel.Description("Visible in UI.")]
       public bool? Visible => parameter?.GetDefinition()?.Visible;
