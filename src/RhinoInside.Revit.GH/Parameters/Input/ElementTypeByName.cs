@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
     public ElementTypeByName()
     {
-      Name = "ElementType Picker";
+      Name = "Element Type Picker";
       Description = "Provides an Element type picker";
     }
 
@@ -44,28 +44,18 @@ namespace RhinoInside.Revit.GH.Parameters.Input
         {
           var elementCollector = collector.WhereElementIsElementType();
 
-          if (Components.ElementCollectorComponent.TryGetFilterStringParam(DB.BuiltInParameter.SYMBOL_FAMILY_NAME_PARAM, ref familyName, out var familyNameFilter))
+          if (Components.ElementCollectorComponent.TryGetFilterStringParam(DB.BuiltInParameter.ALL_MODEL_FAMILY_NAME, ref familyName, out var familyNameFilter))
             elementCollector = elementCollector.WherePasses(familyNameFilter);
 
           var elementTypes = elementCollector.Cast<DB.ElementType>();
 
+          if (familyName is object)
+            elementTypes = elementTypes.Where(x => x.GetFamilyName().IsSymbolNameLike(familyName));
+
           foreach (var elementType in elementTypes)
           {
-            if (familyName is object)
-            {
-              if (!elementType.GetFamilyName().IsSymbolNameLike(familyName))
-                continue;
-            }
-
-            if (SourceCount == 0)
-            {
-              // If is a no pattern match update NickName case
-              if (string.Equals(elementType.GetFamilyName(), familyName, StringComparison.OrdinalIgnoreCase))
-                familyName = elementType.GetFamilyName();
-            }
-
             var referenceId = FullUniqueId.Format(doc.GetFingerprintGUID(), elementType.UniqueId);
-            var item = new GH_ValueListItem($"{elementType.GetFamilyName()}  : {elementType.Name}", $"\"{referenceId}\"");
+            var item = new GH_ValueListItem($"{elementType.FamilyName} : {elementType.Name}", $"\"{referenceId}\"");
             item.Selected = selectedItems.Contains(item.Expression);
             ListItems.Add(item);
 
