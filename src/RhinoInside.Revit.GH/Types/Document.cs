@@ -167,13 +167,14 @@ namespace RhinoInside.Revit.GH.Types
               {
                 if (!info.IsWorkshared)
                 {
-                  CentralModelURI = ModelUri.Empty;
                   CentralPathName = string.Empty;
+                  CentralModelURI = ModelUri.Empty;
                 }
                 else if (info.IsLocal)
                 {
-                  CentralModelURI = new UriBuilder(Uri.UriSchemeFile, string.Empty, 0, info.CentralPath).Uri;
                   CentralPathName = info.CentralPath;
+                  if (Uri.TryCreate(info.CentralPath, UriKind.Absolute, out var centralModelURI))
+                    CentralModelURI = centralModelURI;
                 }
               }
             }
@@ -364,59 +365,12 @@ namespace RhinoInside.Revit.GH.Types
           {
             var docs = documents.Cast<DB.Document>();
 
-            if (str.Contains(':'))
+            if (str.Contains(Path.DirectorySeparatorChar) || str.Contains(Path.AltDirectorySeparatorChar))
             {
               // Find a matching PathName
-              {
-                var match_path = docs.Where(x => x.PathName.Equals(str, StringComparison.OrdinalIgnoreCase)).ToArray();
-                if (match_path.Length == 1)
-                  return FromValue(match_path[0]);
-              }
-
-              // Find a matching ModelPath
-              {
-                var modelPath = default(DB.ModelPath);
-
-                // If 'str' starts like "X:\" is an absolute MS-DOS path
-                if (str.Length > 3 && char.IsLetter(str[0]) && str[1] == Path.VolumeSeparatorChar && (str[2] == Path.DirectorySeparatorChar || str[2] == Path.AltDirectorySeparatorChar))
-                {
-                  // TODO: Open the file on the background
-                  // modelPath = new DB.FilePath(str);
-                }
-                else
-                {
-                  try
-                  {
-                    var uri = new Uri(str);
-                    if (uri.Scheme == Uri.UriSchemeFile || uri.Scheme == ModelUri.UriSchemeServer || uri.Scheme == ModelUri.UriSchemeCloud)
-                    {
-                      var match_path = docs.Where(x => x.GetModelPath().ToUri().Equals(uri)).ToArray();
-                      if (match_path.Length == 1)
-                        return FromValue(match_path[0]);
-
-                      // TODO: Open the file on the background
-                      //modelPath = uri.ToModelPath();
-                    }
-                  }
-                  catch (UriFormatException) { }
-                }
-
-#if DEBUG
-                if (modelPath is object)
-                {
-                  using (var openOptions = new DB.OpenOptions())
-                  {
-                    if (Revit.ActiveDBApplication.OpenDocumentFile(modelPath, openOptions) is DB.Document model)
-                    {
-                      // How long this Document should stay open??
-                      // model.Close();
-
-                      return FromValue(model);
-                    }
-                  }
-                }
-#endif
-              }
+              var match_path = docs.Where(x => x.PathName.Equals(str, StringComparison.OrdinalIgnoreCase)).ToArray();
+              if (match_path.Length == 1)
+                return FromValue(match_path[0]);
             }
             else
             {

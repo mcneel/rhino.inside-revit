@@ -629,10 +629,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 #endif
       {
         var path = ModelPathUtils.ConvertModelPathToUserVisiblePath(modelPath);
-        if (modelPath.ServerPath)
-          return new Uri(path);
-        else if (path.Length > 3 && char.IsLetter(path[0]) && path[1] == Path.VolumeSeparatorChar && (path[2] == Path.DirectorySeparatorChar || path[2] == Path.AltDirectorySeparatorChar))
-          return new UriBuilder(Uri.UriSchemeFile, string.Empty, 0, path).Uri;
+        if (Uri.TryCreate(path, UriKind.Absolute, out var uri))
+          return uri;
       }
 
       throw new ArgumentException($"Failed to convert {nameof(ModelPath)} in to {nameof(Uri)}", nameof(modelPath));
