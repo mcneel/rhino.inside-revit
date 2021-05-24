@@ -10,6 +10,15 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html version="0.7" time="05/24/2021" %}
+
+### Minor Changes
+* Renamed 'Value Set Picker' to 'Value Picker'.
+
+### Fixes
+* Fixed conversion from UNC `DB.ModelPath` to `Uri`.
+* Fixed a units coversion issue related to some 'Structural' parameter types.
+
 {% include ltr/release-header.html version="0.6" time="05/20/2021" %}
 
 ### New Features

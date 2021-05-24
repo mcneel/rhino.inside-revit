@@ -165,7 +165,7 @@ namespace Grasshopper.Kernel
         panel.Tag = panedComponentId;
 
         var valueSetComponentId = new Guid("{AFB12752-3ACB-4ACF-8102-16982A69CDAE}");
-        var picker = GH_DocumentObject.Menu_AppendItem(connect.DropDown, "Value Set Picker", eventHandler, Instances.ComponentServer.EmitObjectIcon(valueSetComponentId));
+        var picker = GH_DocumentObject.Menu_AppendItem(connect.DropDown, "Value Picker", eventHandler, Instances.ComponentServer.EmitObjectIcon(valueSetComponentId));
         picker.Tag = valueSetComponentId;
 
         if (components.Count > 0)
