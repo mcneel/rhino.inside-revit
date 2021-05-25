@@ -691,13 +691,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (modelPath.Empty)
         return ModelUri.Empty;
 
-#if REVIT_2020
-      if (modelPath.CloudPath)
+      if (modelPath.IsCloudPath())
       {
         return new UriBuilder(UriSchemeCloud, modelPath.GetRegion(), 0, $"{modelPath.GetProjectGUID():D}/{modelPath.GetModelGUID():D}").Uri;
       }
       else
-#endif
       {
         var path = ModelPathUtils.ConvertModelPathToUserVisiblePath(modelPath);
         if (Uri.TryCreate(path, UriKind.Absolute, out var uri))
@@ -715,34 +713,26 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (uri.IsFile)
         return new FilePath(uri.LocalPath);
 
-      if (uri.IsServerUri(out var centralServerLocation, out var path))
+      if (IsServerUri(uri, out var centralServerLocation, out var path))
         return new ServerPath(centralServerLocation, path);
 
-#if REVIT_2020
       if (IsCloudUri(uri, out var region, out var projectId, out var modelId))
       {
         return Rhinoceros.InvokeInHostContext(() =>
         {
           try
           {
-#if REVIT_2022
-            if (region == string.Empty)
-              return ModelPathUtils.ConvertCloudGUIDsToCloudPath(ModelPathUtils.CloudRegionUS, projectId, modelId);
-            else
-              return ModelPathUtils.ConvertCloudGUIDsToCloudPath(region, projectId, modelId);
-#elif REVIT_2021
-            if (region == string.Empty)
-              return ModelPathUtils.ConvertCloudGUIDsToCloudPath(projectId, modelId);
-            else
-              return ModelPathUtils.ConvertCloudGUIDsToCloudPath(region, projectId, modelId);
-#else
+#if REVIT_2021
+            return ModelPathUtils.ConvertCloudGUIDsToCloudPath(region, projectId, modelId);
+#elif REVIT_2019
             return ModelPathUtils.ConvertCloudGUIDsToCloudPath(projectId, modelId);
+#else
+            return default;
 #endif
           }
           catch (Autodesk.Revit.Exceptions.ApplicationException) { return default; }
         });
       }
-#endif
 
       throw new ArgumentException($"Failed to convert {nameof(Uri)} in to {nameof(ModelPath)}", nameof(uri));
     }
