@@ -143,9 +143,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
       /// Note that <see cref="Document.Title"/> and <see cref="Document.PathName"/> 
       /// will be **empty** strings if a document is detached.
       /// 
-      /// Both entries are not precise.
+      /// Both descriptions are not accurate.
       /// Detached models return only the file name on its Document.PathName property,
-      /// not an empty string. So we need to check IsDetached here.
+      /// instead of an empty string. So we need to check IsDetached here.
       /// </summary>
       if (string.IsNullOrEmpty(doc.PathName) || doc.IsDetached)
         return default;

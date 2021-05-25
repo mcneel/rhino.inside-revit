@@ -11,7 +11,7 @@
   <PropertyGroup Condition="$(Configuration.Contains('2018'))">
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <RevitVersion>2018</RevitVersion>
-    <RevitApiVersion>2018.0.0</RevitApiVersion>
+    <RevitApiVersion>2018.0.2</RevitApiVersion>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.Contains('2019'))">
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>

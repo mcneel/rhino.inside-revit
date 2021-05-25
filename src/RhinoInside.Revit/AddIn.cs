@@ -280,31 +280,60 @@ namespace RhinoInside.Revit
     #endregion
 
     #region Version
-    static bool IsValid(Autodesk.Revit.ApplicationServices.ControlledApplication app)
-    {
 #if REVIT_2022
-      return app.VersionNumber == "2022";
+    static readonly Version MinimumRevitVersion = new Version(2022, 0, 0);
 #elif REVIT_2021
-      return app.VersionNumber == "2021";
+    static readonly Version MinimumRevitVersion = new Version(2021, 0, 0);
 #elif REVIT_2020
-      return app.VersionNumber == "2020";
+    static readonly Version MinimumRevitVersion = new Version(2020, 0, 0);
 #elif REVIT_2019
-      return app.VersionNumber == "2019";
+    static readonly Version MinimumRevitVersion = new Version(2019, 1, 0);
 #elif REVIT_2018
-      return app.VersionNumber == "2018";
-#elif REVIT_2017
-      return app.VersionNumber == "2017";
-#else
-      return false;
+    static readonly Version MinimumRevitVersion = new Version(2018, 2, 0);
 #endif
-    }
 
     static Result CanStartup(UIControlledApplication app)
     {
       if (StartupMode == AddinStartupMode.Cancelled)
         return Result.Cancelled;
 
-      return IsValid(app.ControlledApplication) ? Result.Succeeded : Result.Failed;
+      // Check if Revit.exe is a supported version
+      var RevitVersion = new Version(app.ControlledApplication.SubVersionNumber);
+      if (RevitVersion < MinimumRevitVersion)
+      {
+        using
+        (
+          var taskDialog = new TaskDialog("Update Revit")
+          {
+            Id = $"{MethodBase.GetCurrentMethod().DeclaringType}.{MethodBase.GetCurrentMethod().Name}.UpdateRevit",
+            MainIcon = UIX.TaskDialogIcons.IconInformation,
+            AllowCancellation = true,
+            MainInstruction = "Unsupported Revit version",
+            MainContent = $"Expected Revit version is ({MinimumRevitVersion}) or above.",
+            ExpandedContent =
+            (RhinoVersionInfo is null ? "Rhino\n" :
+            $"{RhinoVersionInfo.ProductName} {RhinoVersionInfo.ProductMajorPart}\n") +
+            $"• Version: {RhinoVersion}\n" +
+            $"• Path: '{SystemDir}'" + (!File.Exists(RhinoExePath) ? " (not found)" : string.Empty) + "\n" +
+            $"\n{app.ControlledApplication.VersionName}\n" +
+            $"• Version: {RevitVersion} ({app.ControlledApplication.VersionBuild})\n" +
+            $"• Path: {Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName)}\n" +
+            $"• Language: {app.ControlledApplication.Language}",
+            FooterText = $"Current Revit version: {RevitVersion}"
+          }
+        )
+        {
+          taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Revit Products Downloads…");
+          if (taskDialog.Show() == TaskDialogResult.CommandLink1)
+          {
+            using (Process.Start(@"https://knowledge.autodesk.com/support/revit-products/downloads")) { }
+          }
+        }
+
+        return Result.Cancelled;
+      }
+
+      return Result.Succeeded;
     }
 
     static async void CheckForUpdates()
@@ -478,9 +507,9 @@ namespace RhinoInside.Revit
 
     public static Version Version => Assembly.GetExecutingAssembly().GetName().Version;
     public static string DisplayVersion => $"{Version} ({BuildDate})";
-    #endregion
+#endregion
 
-    #region Eto UI Framework
+#region Eto UI Framework
     internal static bool IsEtoFrameworkReady { get; set; }  = false;
     static class EtoFramework
     {
@@ -497,6 +526,6 @@ namespace RhinoInside.Revit
         IsEtoFrameworkReady = true;
       }
     }
-    #endregion
+#endregion
   }
 }
