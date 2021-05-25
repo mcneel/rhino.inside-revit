@@ -275,7 +275,7 @@ namespace RhinoInside.Revit.GH.Types
     Preview GeometryPreview
     {
       get { return geometryPreview ?? (geometryPreview = Preview.OrderNew(this)); }
-      set { if (geometryPreview != value) { ((IDisposable) geometryPreview)?.Dispose(); geometryPreview = value; } }
+      set { if (geometryPreview != value) geometryPreview = value; }
     }
 
     public Rhino.Display.DisplayMaterial[] TryGetPreviewMaterials()
