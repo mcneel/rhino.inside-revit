@@ -105,7 +105,7 @@ namespace RhinoInside.Revit.GH.Components
           views = views.Where((x) => x.CanBePrinted == IsPrintable);
 
         if (viewFamily != DB.ViewFamily.Invalid)
-          views = views.Where((x) => (x.Document.GetElement(x.GetTypeId()) as DB.ViewFamilyType).ViewFamily == viewFamily);
+          views = views.Where(x => (x.Document.GetElement(x.GetTypeId()) as DB.ViewFamilyType)?.ViewFamily == viewFamily);
 
         if (name is object)
           views = views.Where(x => x.Name.IsSymbolNameLike(name));
