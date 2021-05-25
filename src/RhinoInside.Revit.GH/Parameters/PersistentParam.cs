@@ -140,19 +140,19 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected virtual void LoadVolatileData()
     {
-      if (SourceCount == 0)
+      if (DataType != GH_ParamData.local)
+        return;
+
+      foreach (var branch in m_data.Branches)
       {
-        foreach (var branch in m_data.Branches)
+        for (int i = 0; i < branch.Count; i++)
         {
-          for (int i = 0; i < branch.Count; i++)
+          if (branch[i] is Types.IGH_ReferenceData reference)
           {
-            if (branch[i] is Types.IGH_ReferenceData reference)
+            if (reference.IsReferencedData && !reference.LoadReferencedData())
             {
-              if (reference.IsReferencedData && !reference.LoadReferencedData())
-              {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"A referenced {branch[i].TypeName} could not be found.");
-                branch[i] = null;
-              }
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"A referenced {branch[i].TypeName} could not be found.");
+              branch[i] = null;
             }
           }
         }
