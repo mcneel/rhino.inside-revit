@@ -84,17 +84,14 @@ namespace RhinoInside.Revit.GH.Parameters
       switch (uiDocument.PickObject(out var reference, ObjectType.LinkedElement, this))
       {
         case Autodesk.Revit.UI.Result.Succeeded:
-          value = new GH_Structure<T>();
-
-          if (doc.GetElement(reference.ElementId) is DB.RevitLinkInstance instance)
+          if (Types.Element.FromReference(doc, reference) is T element)
           {
-            var linkedDoc = instance.GetLinkDocument();
-            var element = Types.Element.FromElementId(linkedDoc, reference.LinkedElementId) as T;
-            value.Append(element, new GH_Path(0));
-
+            value = new GH_Structure<T>();
+            value.Append(element);
             return GH_GetterResult.success;
           }
           break;
+
         case Autodesk.Revit.UI.Result.Cancelled:
           return GH_GetterResult.cancel;
       }
@@ -143,20 +140,13 @@ namespace RhinoInside.Revit.GH.Parameters
         case Autodesk.Revit.UI.Result.Succeeded:
           value = new GH_Structure<T>();
 
-          var groups = references.Select
-          (
-            r =>
-            {
-              var instance = doc.GetElement(r.ElementId) as DB.RevitLinkInstance;
-              var linkedDoc = instance.GetLinkDocument();
-
-              return Types.Element.FromElementId(linkedDoc, r.LinkedElementId) as T;
-            }
-          ).GroupBy(x => x.Document);
+          var groups = references.
+            Select(r => Types.Element.FromReference(doc, r) as T).
+            GroupBy(x => x.Document);
 
           int index = 0;
           foreach (var group in groups)
-            value.AppendRange(group, new GH_Path(index));
+            value.AppendRange(group, new GH_Path(index++));
 
           return GH_GetterResult.success;
         case Autodesk.Revit.UI.Result.Cancelled:
