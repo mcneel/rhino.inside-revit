@@ -281,15 +281,15 @@ namespace RhinoInside.Revit
 
     #region Version
 #if REVIT_2022
-    static readonly Version MinimumRevitVersion = new Version(2022, 0, 0);
+    static readonly Version MinimumRevitVersion = new Version(2022, 0);
 #elif REVIT_2021
-    static readonly Version MinimumRevitVersion = new Version(2021, 0, 0);
+    static readonly Version MinimumRevitVersion = new Version(2021, 0);
 #elif REVIT_2020
-    static readonly Version MinimumRevitVersion = new Version(2020, 0, 0);
+    static readonly Version MinimumRevitVersion = new Version(2020, 0);
 #elif REVIT_2019
-    static readonly Version MinimumRevitVersion = new Version(2019, 1, 0);
+    static readonly Version MinimumRevitVersion = new Version(2019, 1);
 #elif REVIT_2018
-    static readonly Version MinimumRevitVersion = new Version(2018, 2, 0);
+    static readonly Version MinimumRevitVersion = new Version(2018, 2);
 #endif
 
     static Result CanStartup(UIControlledApplication app)
