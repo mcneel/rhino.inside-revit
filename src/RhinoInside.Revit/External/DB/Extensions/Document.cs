@@ -650,7 +650,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns></returns>
     public static bool IsCloudPath(this ModelPath self)
     {
-#if REVIT_2020
+#if REVIT_2019
       return self.CloudPath;
 #else
       return self.GetProjectGUID() != Guid.Empty && self.GetModelGUID() != Guid.Empty;
