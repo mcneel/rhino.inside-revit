@@ -93,7 +93,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 #if REVIT_2022
       return doc.Title;
 #else
-      return System.IO.Path.GetFileNameWithoutExtension(doc.Title);
+      return Path.GetFileNameWithoutExtension(doc.Title);
 #endif
     }
 
@@ -105,15 +105,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <remarks>
     /// This method returns an empty string if the project has not been saved.
     /// Note that the file name returned will be empty if a document is detached.
-    /// <see cref="Autodesk.Revit.DB.Document.IsDetached"/>
+    /// <see cref="Document.IsDetached"/>
     /// </remarks>
     public static string GetFileName(this Document doc)
     {
-      if (doc is null)
+      /// <summary>
+      /// To enforce the method remarks, we need to check IsDetached here.
+      /// </summary>
+      if (doc is null || doc.IsDetached)
         return string.Empty;
 
       if (!string.IsNullOrEmpty(doc.PathName))
-        return System.IO.Path.GetFileName(doc.PathName);
+        return Path.GetFileName(doc.PathName);
 
       return doc.GetTitle() + (doc.IsFamilyDocument ? ".rfa" : ".rvt");
     }
@@ -121,19 +124,38 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <summary>
     /// Gets the model path of the model.
     /// </summary>
+    /// <remarks>
+    /// If <paramref name="doc"/> is still not saved this method returns null.
+    /// </remarks>
     /// <param name="doc"></param>
-    /// <returns>The model path</returns>
+    /// <returns>The model path or null if still not saved.</returns>
     public static ModelPath GetModelPath(this Document doc)
     {
+      /// <summary>
+      /// Revit documentation reads like:
+      ///
+      /// <see cref="Document.PathName"/> summary:
+      /// This string is empty if the project has not been saved or does not have a disk
+      /// file associated with it yet. Note that the pathname will be **empty** if a document
+      /// is detached. See Autodesk.Revit.DB.Document.IsDetached.
+      ///  
+      /// <see cref="Document.IsDetached"/> summary:
+      /// Note that <see cref="Document.Title"/> and <see cref="Document.PathName"/> 
+      /// will be **empty** strings if a document is detached.
+      /// 
+      /// Both entries are not precise.
+      /// Detached models return only the file name on its Document.PathName property,
+      /// not an empty string. So we need to check IsDetached here.
+      /// </summary>
+      if (string.IsNullOrEmpty(doc.PathName) || doc.IsDetached)
+        return default;
+
 #if REVIT_2020
       if (doc.IsModelInCloud)
         return doc.GetCloudModelPath();
 #endif
 
-      if (!string.IsNullOrEmpty(doc.PathName))
-        return ModelPathUtils.ConvertUserVisiblePathToModelPath(doc.PathName);
-
-      return default;
+      return ModelPathUtils.ConvertUserVisiblePathToModelPath(doc.PathName);
     }
     #endregion
 
@@ -600,6 +622,25 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return self.Compare(other) == 0;
     }
+
+    /// <summary>
+    /// Returns the region of the cloud account and project which contains this model.
+    /// </summary>
+    /// <param name="self"></param>
+    /// <returns></returns>
+    public static string GetRegion(this ModelPath self)
+    {
+      if (self.CloudPath)
+      {
+#if REVIT_2021
+        return self.Region;
+#else
+        return "GLOBAL";
+#endif
+      }
+
+      return default;
+    }
   }
 
   public static class ModelUri
@@ -619,11 +660,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 #if REVIT_2020
       if (modelPath.CloudPath)
       {
-#if REVIT_2021
-        return new UriBuilder(UriSchemeCloud, modelPath.Region, 0, $"{modelPath.GetProjectGUID():D}/{modelPath.GetModelGUID():D}").Uri;
-#elif REVIT_2020
-        return new UriBuilder(UriSchemeCloud, "GLOBAL", 0, $"{modelPath.GetProjectGUID():D}/{modelPath.GetModelGUID():D}").Uri;
-#endif
+        return new UriBuilder(UriSchemeCloud, modelPath.GetRegion(), 0, $"{modelPath.GetProjectGUID():D}/{modelPath.GetModelGUID():D}").Uri;
       }
       else
 #endif

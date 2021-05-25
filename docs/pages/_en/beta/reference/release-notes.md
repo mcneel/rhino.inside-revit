@@ -17,7 +17,8 @@ Some of the changes mentioned in sections below, might break your existing Grass
 
 ### Fixes
 * Fixed conversion from UNC `DB.ModelPath` to `Uri`.
-* Fixed a units coversion issue related to some 'Structural' parameter types.
+* Fixed a problem with detached workshared models.
+* Fixed a units conversion issue related to some 'Structural' parameter types.
 
 {% include ltr/release-header.html version="0.6" time="05/20/2021" %}
 
