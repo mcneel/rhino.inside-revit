@@ -624,13 +624,47 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
     /// <summary>
+    /// Returns whether this path is a file path (as opposed to a server path or cloud path)
+    /// </summary>
+    /// <param name="self"></param>
+    /// <returns></returns>
+    public static bool IsFilePath(this ModelPath self)
+    {
+      return !self.ServerPath && !self.IsCloudPath();
+    }
+
+    /// <summary>
+    /// Returns whether this path is a server path (as opposed to a file path or cloud path)
+    /// </summary>
+    /// <param name="self"></param>
+    /// <returns></returns>
+    public static bool IsServerPath(this ModelPath self)
+    {
+      return self.ServerPath && !self.IsCloudPath();
+    }
+
+    /// <summary>
+    /// Returns whether this path is a cloud path (as opposed to a file path or server path)
+    /// </summary>
+    /// <param name="self"></param>
+    /// <returns></returns>
+    public static bool IsCloudPath(this ModelPath self)
+    {
+#if REVIT_2020
+      return self.CloudPath;
+#else
+      return self.GetProjectGUID() != Guid.Empty && self.GetModelGUID() != Guid.Empty;
+#endif
+    }
+
+    /// <summary>
     /// Returns the region of the cloud account and project which contains this model.
     /// </summary>
     /// <param name="self"></param>
     /// <returns></returns>
     public static string GetRegion(this ModelPath self)
     {
-      if (self.CloudPath)
+      if (self.IsCloudPath())
       {
 #if REVIT_2021
         return self.Region;
