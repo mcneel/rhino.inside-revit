@@ -150,7 +150,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (string.IsNullOrEmpty(doc.PathName) || doc.IsDetached)
         return default;
 
-#if REVIT_2020
+#if REVIT_2019
       if (doc.IsModelInCloud)
         return doc.GetCloudModelPath();
 #endif
@@ -727,7 +727,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 #elif REVIT_2019
             return ModelPathUtils.ConvertCloudGUIDsToCloudPath(projectId, modelId);
 #else
-            return default;
+            return default(ModelPath);
 #endif
           }
           catch (Autodesk.Revit.Exceptions.ApplicationException) { return default; }
