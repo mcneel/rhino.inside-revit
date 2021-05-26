@@ -43,7 +43,7 @@ namespace RhinoInside.Revit.GH.Components
       }
     }
 
-    static string[] keywords = new string[] { "Revit" };
+    static readonly string[] keywords = new string[] { "Revit" };
     public override IEnumerable<string> Keywords => base.Keywords is null ? keywords : Enumerable.Concat(base.Keywords, keywords);
 
     #region IGH_ActiveObject

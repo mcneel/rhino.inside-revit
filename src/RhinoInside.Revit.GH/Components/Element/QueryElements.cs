@@ -73,6 +73,9 @@ namespace RhinoInside.Revit.GH.Components
     public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
     protected override DB.ElementFilter ElementFilter => new DB.ElementIsElementTypeFilter(true);
 
+    static readonly string[] keywords = new string[] { "Count" };
+    public override IEnumerable<string> Keywords => Enumerable.Concat(base.Keywords, keywords);
+
     public QueryElements() : base
     (
       name: "Query Elements",
