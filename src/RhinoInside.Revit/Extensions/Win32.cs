@@ -17,7 +17,7 @@ namespace Microsoft.Win32.SafeHandles
     public LibraryHandle(IntPtr hInstance) : base(false) => SetHandle(hInstance);
 
     [System.Security.SecurityCritical]
-    override protected bool ReleaseHandle() => true;
+    protected override bool ReleaseHandle() => true;
 
     public static bool operator ==(LibraryHandle x, LibraryHandle y) => x.handle == y.handle;
     public static bool operator !=(LibraryHandle x, LibraryHandle y) => x.handle != y.handle;
@@ -53,7 +53,7 @@ namespace Microsoft.Win32.SafeHandles
   {
     internal SafeLibraryHandle() : base(true) { }
     [System.Security.SecurityCritical]
-    override protected bool ReleaseHandle() => Kernel32.FreeLibrary(this);
+    protected override bool ReleaseHandle() => Kernel32.FreeLibrary(this);
   }
 
   internal class ThreadHandle
@@ -70,13 +70,6 @@ namespace Microsoft.Win32.SafeHandles
     public override bool Equals(object obj) => obj is WindowHandle value && value.handle == handle;
     public override int GetHashCode() => (int) handle;
     public override string ToString() => IsInvalid ? "Zero" : $"0x{(ulong)handle:x16}, \"{Name}\"";
-
-    private static void CheckWin32Error()
-    {
-      int error = Marshal.GetLastWin32Error();
-      if (error != 0)
-        throw new Win32Exception(error);
-    }
 
     private WindowHandle() : this(false) { }
     protected WindowHandle(bool ownsHandle) : base(IntPtr.Zero, ownsHandle) { }
@@ -186,11 +179,7 @@ namespace Microsoft.Win32.SafeHandles
     public static WindowHandle ActiveWindow
     {
       get => User32.GetActiveWindow();
-      set
-      {
-        User32.SetActiveWindow(value);
-        CheckWin32Error();
-      }
+      set => User32.SetActiveWindow(value);
     }
 
     public bool BringToFront() => User32.BringWindowToTop(this);
@@ -210,7 +199,7 @@ namespace Microsoft.Win32.SafeHandles
 
     private SafeHookHandle() : base(IntPtr.Zero, true) { }
 
-    protected override sealed bool ReleaseHandle() => User32.UnhookWindowsHookEx(this);
+    protected sealed override bool ReleaseHandle() => User32.UnhookWindowsHookEx(this);
   }
 
   internal class Hook : IDisposable
