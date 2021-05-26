@@ -32,7 +32,7 @@ namespace RhinoInside.Revit.GH.Components.Material
 
       ParamDefinition.Create<Param_String>("Manufacturer", "MAN", optional: true, relevance: ParamVisibility.Default),
       ParamDefinition.Create<Param_String>("Model", "MOD", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("Cost", "COS", optional: true, relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Param_Number>("Cost", "COS", optional: true, relevance: ParamVisibility.Default),
       ParamDefinition.Create<Param_String>("URL", "URL", optional: true, relevance: ParamVisibility.Default),
 
       ParamDefinition.Create<Param_String>("Keynote", "KN", optional: true, relevance: ParamVisibility.Default),
@@ -51,7 +51,7 @@ namespace RhinoInside.Revit.GH.Components.Material
 
       ParamDefinition.Create<Param_String>("Manufacturer", "MAN", relevance: ParamVisibility.Default),
       ParamDefinition.Create<Param_String>("Model", "MOD", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("Cost", "COS", relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Param_Number>("Cost", "COS", relevance: ParamVisibility.Default),
       ParamDefinition.Create<Param_String>("URL", "URL", relevance: ParamVisibility.Default),
 
       ParamDefinition.Create<Param_String>("Keynote", "KN", relevance: ParamVisibility.Default),
@@ -71,7 +71,7 @@ namespace RhinoInside.Revit.GH.Components.Material
 
       update |= Params.GetData(DA, "Manufacturer", out string manufacturer);
       update |= Params.GetData(DA, "Model", out string model);
-      update |= Params.GetData(DA, "Cost", out string cost);
+      update |= Params.GetData(DA, "Cost", out double? cost);
       update |= Params.GetData(DA, "URL", out string url);
 
       update |= Params.GetData(DA, "Keynote", out string keynote);

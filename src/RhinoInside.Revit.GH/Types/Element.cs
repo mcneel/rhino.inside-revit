@@ -579,13 +579,13 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public string Cost
+    public double? Cost
     {
-      get => Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_COST)?.AsString();
+      get => Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_COST)?.AsDouble();
       set
       {
         if (value is object)
-          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_COST)?.Set(value);
+          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_COST)?.Set(value.Value);
       }
     }
 
