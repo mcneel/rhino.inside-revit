@@ -51,7 +51,7 @@ namespace RhinoInside.Revit.UI
           $"Rhino.Inside: {AddIn.DisplayVersion}{Environment.NewLine}{rhInfo.LegalCopyright}";
       }
 
-      if (AddIn.StartupMode == AddinStartupMode.Disabled)
+      if (AddIn.StartupMode == AddInStartupMode.Disabled)
       {
         pushButton.Enabled = false;
         pushButton.ToolTip = "Add-In is disabled";
@@ -182,7 +182,7 @@ namespace RhinoInside.Revit.UI
           StoreButton(CommandName, pushButton);
           SetupButton(pushButton);
 
-          if (AddIn.CurrentStatus >= AddIn.Status.Available && AddIn.StartupMode != AddinStartupMode.Disabled)
+          if (AddIn.CurrentStatus >= AddIn.Status.Available && AddIn.StartupMode != AddInStartupMode.Disabled)
           {
             if (Settings.KeyboardShortcuts.RegisterDefaultShortcut(tabName, ribbonPanel.Name, typeof(CommandStart).Name, CommandName, "R#Ctrl+R"))
               External.ActivationGate.Exit += ShowShortcutHelp;

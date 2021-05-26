@@ -64,8 +64,8 @@ namespace RhinoInside.Revit
     (
       string revitVersionName,
       string revitVersionBuild,
-      string revitSubVersionNumber,
       string revitVersionNumber,
+      string revitSubVersionNumber,
       Autodesk.Revit.ApplicationServices.ProductType revitProduct,
       Autodesk.Revit.ApplicationServices.LanguageType revitLanguage,
       ExternalApplicationArray loadedApplications,
@@ -98,11 +98,7 @@ namespace RhinoInside.Revit
 
               writer.WriteLine($"- {revitVersionName}");
               writer.WriteLine($"  - VersionBuild: {revitVersionBuild}");
-#if REVIT_2019
               writer.WriteLine($"  - SubVersionNumber: {revitSubVersionNumber}");
-#else
-              writer.WriteLine($"  - VersionNumber: {revitVersionNumber}");
-#endif
               writer.WriteLine($"  - ProductType: {revitProduct}");
               writer.WriteLine($"  - Language: {revitLanguage}");
 
@@ -244,12 +240,8 @@ namespace RhinoInside.Revit
       (
         services.VersionName,
         services.VersionBuild,
-#if REVIT_2019
+        services.VersionNumber,
         services.SubVersionNumber,
-#else
-        services.VersionNumber,
-#endif
-        services.VersionNumber,
         services.Product,
         services.Language,
         includeAddinsList ? app.LoadedApplications : default,
@@ -258,11 +250,7 @@ namespace RhinoInside.Revit
         attachments
       );
 
-#if REVIT_2019
       var revitVersion = $"{services.SubVersionNumber} ({services.VersionBuild})";
-#else
-      var revitVersion = $"{services.VersionNumber} ({services.VersionBuild})";
-#endif
 
       SendEmail(subject, reportFilePath, revitVersion, includeAddinsList, attachments);
     }

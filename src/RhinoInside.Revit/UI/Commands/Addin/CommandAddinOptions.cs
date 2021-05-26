@@ -31,7 +31,7 @@ namespace RhinoInside.Revit.UI
         // disable the button if options are readonly
         pushButton.Enabled = !AddinOptions.IsReadOnly && AddIn.IsEtoFrameworkReady;
 
-        if (AddIn.StartupMode == AddinStartupMode.Disabled)
+        if (AddIn.StartupMode == AddInStartupMode.Disabled)
         {
           pushButton.Enabled = false;
           pushButton.ToolTip = "Add-In is disabled";

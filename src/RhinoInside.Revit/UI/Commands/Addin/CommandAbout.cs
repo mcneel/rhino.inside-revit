@@ -35,11 +35,7 @@ namespace RhinoInside.Revit.UI
       details.AppendLine($"Rhino: {rhino?.ProductVersion} ({rhino?.FileDescription ?? "not found"})");
 
       var revit = data.Application.Application;
-#if REVIT_2019
       details.AppendLine($"Revit: {revit.SubVersionNumber} ({revit.VersionBuild})");
-#else
-      details.AppendLine($"Revit: {revit.VersionNumber} ({revit.VersionBuild})");
-#endif
 
       details.AppendLine($"CLR: {ErrorReport.CLRVersion}");
       details.AppendLine($"OS: {Environment.OSVersion}");

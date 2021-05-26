@@ -101,7 +101,7 @@ namespace RhinoInside.Revit
       RunScriptAsync
       (
         script:   Environment.GetEnvironmentVariable("RhinoInside_RunScript"),
-        activate: AddIn.StartupMode == AddinStartupMode.AtStartup
+        activate: AddIn.StartupMode == AddInStartupMode.AtStartup
       );
 
       // Add DefaultRenderAppearancePath to Rhino settings if missing

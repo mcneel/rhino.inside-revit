@@ -14,7 +14,7 @@ using UIX = RhinoInside.Revit.External.UI;
 
 namespace RhinoInside.Revit
 {
-  enum AddinStartupMode
+  enum AddInStartupMode
   {
     Cancelled = -2,
     Disabled = -1,
@@ -61,17 +61,17 @@ namespace RhinoInside.Revit
     #endregion
 
     #region StartupMode
-    static AddinStartupMode GetStartupMode()
+    static AddInStartupMode GetStartupMode()
     {
-      if (!Enum.TryParse(Environment.GetEnvironmentVariable("RhinoInside_StartupMode"), out AddinStartupMode mode))
-        mode = AddinStartupMode.Default;
+      if (!Enum.TryParse(Environment.GetEnvironmentVariable("RhinoInside_StartupMode"), out AddInStartupMode mode))
+        mode = AddInStartupMode.Default;
 
-      if (mode == AddinStartupMode.Default)
-        mode = AddinStartupMode.WhenNeeded;
+      if (mode == AddInStartupMode.Default)
+        mode = AddInStartupMode.WhenNeeded;
 
       return mode;
     }
-    internal static readonly AddinStartupMode StartupMode = GetStartupMode();
+    internal static readonly AddInStartupMode StartupMode = GetStartupMode();
     #endregion
 
     #region Constructor
@@ -95,7 +95,7 @@ namespace RhinoInside.Revit
 
     static AddIn()
     {
-      if (StartupMode == AddinStartupMode.Cancelled)
+      if (StartupMode == AddInStartupMode.Cancelled)
         return;
 
       if (RhinoVersion >= MinimumRhinoVersion)
@@ -192,12 +192,12 @@ namespace RhinoInside.Revit
     {
       Host = new UIApplication(app);
 
-      if (StartupMode < AddinStartupMode.AtStartup && !AddinOptions.Session.LoadOnStartup)
+      if (StartupMode < AddInStartupMode.AtStartup && !AddinOptions.Session.LoadOnStartup)
         return;
 
       if (UI.CommandStart.Start() == Result.Succeeded)
       {
-        if (StartupMode == AddinStartupMode.Scripting)
+        if (StartupMode == AddInStartupMode.Scripting)
           Host.PostCommand(RevitCommandId.LookupPostableCommandId(PostableCommand.ExitRevit));
       }
     }
@@ -294,11 +294,16 @@ namespace RhinoInside.Revit
 
     static Result CanStartup(UIControlledApplication app)
     {
-      if (StartupMode == AddinStartupMode.Cancelled)
+      if (StartupMode == AddInStartupMode.Cancelled)
         return Result.Cancelled;
 
       // Check if Revit.exe is a supported version
-      var RevitVersion = new Version(app.ControlledApplication.SubVersionNumber);
+      Version RevitVersion;
+      {
+        try { RevitVersion = new Version(app.ControlledApplication.SubVersionNumber); }
+        catch (System.MissingMemberException) { RevitVersion = new Version(app.ControlledApplication.VersionNumber); }
+      }
+
       if (RevitVersion < MinimumRevitVersion)
       {
         using
@@ -415,11 +420,7 @@ namespace RhinoInside.Revit
             $"• Version: {RhinoVersion}\n" +
             $"• Path: '{SystemDir}'" + (!File.Exists(RhinoExePath) ? " (not found)" : string.Empty) + "\n" +
             $"\n{services.VersionName}\n" +
-#if REVIT_2019
             $"• Version: {services.SubVersionNumber} ({services.VersionBuild})\n" +
-#else
-            $"• Version: {services.VersionNumber} ({services.VersionBuild})\n" +
-#endif
             $"• Path: {Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName)}\n" +
             $"• Language: {services.Language}",
             FooterText = $"Current Rhino version: {RhinoVersion}"
