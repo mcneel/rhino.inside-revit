@@ -157,7 +157,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override bool AppendMenuItems(ToolStripDropDown menu)
     {
       // Name
-      if (Attributes.IsTopLevel ? false : IconCapableUI)
+      if (IconCapableUI && Attributes.IsTopLevel)
         Menu_AppendObjectNameEx(menu);
       else
         Menu_AppendObjectName(menu);
@@ -170,7 +170,7 @@ namespace RhinoInside.Revit.GH.Parameters
       }
 
       // Enabled
-      if (this is IGH_Component || (this is IGH_Param param && param.Kind == GH_ParamKind.floating))
+      if (Kind == GH_ParamKind.floating)
         Menu_AppendEnableItem(menu);
 
       // Bake
