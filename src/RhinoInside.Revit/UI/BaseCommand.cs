@@ -113,20 +113,22 @@ namespace RhinoInside.Revit.UI
 
     #region Availability Types
     /// <summary>
-    /// Availability class for commands that are always active even when there is no document open
+    /// Availability for commands that are always available even when there is no document open.
     /// </summary>
-    public class AlwaysAvailable : IExternalCommandAvailability
+    public struct AlwaysAvailable : IExternalCommandAvailability
     {
       bool IExternalCommandAvailability.IsCommandAvailable(UIApplication app, CategorySet selectedCategories) => true;
     }
 
     /// <summary>
-    /// Available when an active Revit document is available
+    /// Available when an active Revit document is loaded on Revit UI.
     /// </summary>
     public class NeedsActiveDocument<T> : External.UI.CommandAvailability
-      where T : IExternalCommandAvailability, new()
+      where T : External.UI.CommandAvailability, new()
     {
       readonly T dependency = new T();
+
+      public override bool IsRuntimeReady() => dependency.IsRuntimeReady();
 
       // We can not relay on the UIApplication first argument.
       // Seems other Add-ins are calling this method with wrong values.
@@ -138,7 +140,7 @@ namespace RhinoInside.Revit.UI
           try
           {
             return (app.ActiveUIDocument?.Document?.IsValidObject ?? false) &&
-                   dependency.IsCommandAvailable(app, selectedCategories);
+                   (dependency as IExternalCommandAvailability).IsCommandAvailable(app, selectedCategories);
           }
           catch (Autodesk.Revit.Exceptions.ApplicationException) { }
         }
@@ -148,30 +150,27 @@ namespace RhinoInside.Revit.UI
     }
 
     /// <summary>
-    /// Available when Rhino.Inside is not expired, crashed or already active
+    /// Available when Rhino.Inside is not expired, crashed or already active.
     /// </summary>
-    protected class Availability : External.UI.CommandAvailability
+    protected internal class Availability : External.UI.CommandAvailability
     {
-      public override bool IsCommandAvailable(UIApplication app, CategorySet selectedCategories) =>
-        AddIn.CurrentStatus >= AddIn.Status.Available;
+      public override bool IsRuntimeReady() => AddIn.CurrentStatus >= AddIn.Status.Available;
     }
 
     /// <summary>
-    /// Available when Rhino.Inside is not obsolete
+    /// Available when Rhino.Inside is not obsolete.
     /// </summary>
-    protected class AvailableWhenNotObsolete : External.UI.CommandAvailability
+    protected internal class AvailableWhenNotObsolete : External.UI.CommandAvailability
     {
-      public override bool IsCommandAvailable(UIApplication app, CategorySet selectedCategories) =>
-        AddIn.CurrentStatus >= AddIn.Status.Obsolete;
+      public override bool IsRuntimeReady() => AddIn.CurrentStatus >= AddIn.Status.Obsolete;
     }
 
     /// <summary>
-    /// Available when Rhino.Inside is not obsolete
+    /// Available when Rhino.Inside is ready.
     /// </summary>
-    protected class AvailableWhenReady : External.UI.CommandAvailability
+    protected internal class AvailableWhenReady : External.UI.CommandAvailability
     {
-      public override bool IsCommandAvailable(UIApplication app, CategorySet selectedCategories) =>
-        AddIn.CurrentStatus >= AddIn.Status.Ready;
+      public override bool IsRuntimeReady() => AddIn.CurrentStatus >= AddIn.Status.Ready;
     }
     #endregion
   }

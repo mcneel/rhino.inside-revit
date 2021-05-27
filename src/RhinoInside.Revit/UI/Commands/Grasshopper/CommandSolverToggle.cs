@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.UI
     static readonly ImageSource SolverOffSmall = ImageBuilder.LoadRibbonButtonImage("Ribbon.Grasshopper.SolverOff.png", true);
     static readonly ImageSource SolverOffLarge = ImageBuilder.LoadRibbonButtonImage("Ribbon.Grasshopper.SolverOff.png", false);
 
-    protected class AvailableWhenGHSolverReady : GrasshopperCommand.AvailableWhenGHReady
+    protected class AvailableWhenGHSolverReady : GrasshopperCommand.Availability
     {
       public override bool IsCommandAvailable(UIApplication _, DB.CategorySet selectedCategories) =>
         base.IsCommandAvailable(_, selectedCategories) &&

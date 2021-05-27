@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.UI
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
       // Create a push button to trigger a command add it to the ribbon panel.
-      var buttonData = NewPushButtonData<CommandGrasshopperReleaseElements, AvailableWhenGHReady>
+      var buttonData = NewPushButtonData<CommandGrasshopperReleaseElements, NeedsActiveDocument<Availability>>
       (
         name: CommandName,
         iconName: "Ribbon.Grasshopper.ReleaseElements.png",

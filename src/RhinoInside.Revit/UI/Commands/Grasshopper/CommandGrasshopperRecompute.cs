@@ -13,23 +13,20 @@ namespace RhinoInside.Revit.UI
   {
     public static string CommandName => "Recompute";
 
-    protected class AvailableWhenGHCanvasReady : GrasshopperCommand.AvailableWhenGHReady
+    /// <summary>
+    /// Available when Grasshopper canvas has a document loaded.
+    /// </summary>
+    protected class AvailableWhenCanvasHasDocument : Availability
     {
-      public override bool IsCommandAvailable(UIApplication _, DB.CategorySet selectedCategories) =>
-        base.IsCommandAvailable(_, selectedCategories) &&
-        // at this point addin is loaded and rhinocommon is available
-        GHHasActiveCanvas();
-
-      bool GHHasActiveCanvas()
-      {
-        return Instances.ActiveCanvas?.Document is object;
-      }
+      public override bool IsCommandAvailable(UIApplication app, DB.CategorySet selectedCategories) =>
+        base.IsCommandAvailable(app, selectedCategories) &&
+        Instances.ActiveCanvas?.Document is object;
     }
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
       // Create a push button to trigger a command add it to the ribbon panel.
-      var buttonData = NewPushButtonData<CommandGrasshopperRecompute, AvailableWhenGHCanvasReady>
+      var buttonData = NewPushButtonData<CommandGrasshopperRecompute, AvailableWhenCanvasHasDocument>
       (
         name: CommandName,
         iconName: "Ribbon.Grasshopper.Recompute.png",

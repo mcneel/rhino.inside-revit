@@ -15,7 +15,7 @@ using DB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.UI
 {
   /// <summary>
-  /// Base class for all Rhino.Inside Revit commands that call Grasshopper API
+  /// Base class for all Rhino.Inside Revit commands that call Grasshopper API.
   /// </summary>
   public abstract class GrasshopperCommand : RhinoCommand
   {
@@ -28,22 +28,21 @@ namespace RhinoInside.Revit.UI
     }
 
     /// <summary>
-    /// Available when Grasshopper Plugin is available in Rhino
+    /// Available when Grasshopper Plugin is available in Rhino.
     /// </summary>
-    protected class AvailableWhenGHReady : RhinoCommand.AvailableWhenRhinoReady
+    protected internal new class Availability : RhinoCommand.Availability
     {
-      public override bool IsCommandAvailable(UIApplication _, DB.CategorySet selectedCategories) =>
-        base.IsCommandAvailable(_, selectedCategories) &&
-        AddIn.CurrentStatus == AddIn.Status.Ready &&
-        // at this point addin is loaded and rhinocommon is available
-        GHIsReady();
-
-      bool GHIsReady()
+      static bool ready = false;
+      public override bool IsRuntimeReady()
       {
-        // wrapping rhino test method to remove the rhinocommon
-        // dependency from IsCommandAvailable method.
-        return (PlugIn.PlugInExists(PluginId, out bool loaded, out bool loadProtected) & (loaded | !loadProtected));
+        if (!base.IsRuntimeReady()) return false;
+        if (!ready) ready = AppDomain.CurrentDomain.GetAssemblies().Any(x => x.GetName().Name == "Grasshopper");
+        return ready;
       }
+
+      public override bool IsCommandAvailable(UIApplication app, DB.CategorySet selectedCategories) =>
+        base.IsCommandAvailable(app, selectedCategories) &&
+        (PlugIn.PlugInExists(PluginId, out bool loaded, out bool loadProtected) & (loaded | !loadProtected));
     }
   }
 }

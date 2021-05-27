@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.UI
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      var buttonData = NewPushButtonData<CommandRhinoOpenViewport, AvailableWhenRhinoReady>
+      var buttonData = NewPushButtonData<CommandRhinoOpenViewport, Availability>
       (
         name: CommandName,
         iconName: "Ribbon.Rhinoceros.OpenViewport.png",

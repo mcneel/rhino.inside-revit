@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.UI
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
       // Create a push button to trigger a command add it to the ribbon panel.
-      var buttonData = NewPushButtonData<CommandGrasshopperPlayer, NeedsActiveDocument<AvailableWhenGHReady>>
+      var buttonData = NewPushButtonData<CommandGrasshopperPlayer, NeedsActiveDocument<Availability>>
       (
         name: CommandName,
         iconName: "GrasshopperPlayer.png",
@@ -358,77 +358,79 @@ namespace RhinoInside.Revit.UI
     public static Result Execute
     (
       UIApplication app,
-#pragma warning disable IDE0060 // Remove unused parameter
       DB.View view,
       IDictionary<string, string> journalData,
-#pragma warning restore IDE0060 // Remove unused parameter
       string filePath,
       ref string message
     )
     {
-      Result result;
-      if ((result = ReadFromFile(filePath, out var definition)) == Result.Succeeded)
+      var (res, msg) = External.ActivationGate.Open(() =>
       {
-        using (definition)
+        var result = ReadFromFile(filePath, out var definition);
+        if (result == Result.Succeeded)
         {
-          bool enableSolutions = GH_Document.EnableSolutions;
-          var currentCulture = Thread.CurrentThread.CurrentCulture;
-          try
+          using (definition)
           {
-            using (var transGroup = new DB.TransactionGroup(app.ActiveUIDocument.Document))
+            bool enableSolutions = GH_Document.EnableSolutions;
+            var currentCulture = Thread.CurrentThread.CurrentCulture;
+            try
             {
-              transGroup.Start(Path.GetFileNameWithoutExtension(definition.Properties.ProjectFileName));
-
-              GH_Document.EnableSolutions = true;
-              definition.Enabled = true;
-              definition.ExpireSolution();
-
-              var inputs = GetInputParams(definition);
-              result = PromptForInputs(app.ActiveUIDocument, inputs, out var values);
-              if (result != Result.Succeeded)
-                return result;
-
-              // Update input volatile data values
-              foreach (var value in values)
-                value.Key.AddVolatileDataList(new Grasshopper.Kernel.Data.GH_Path(0), value.Value);
-
-              Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-              using (var modal = new Rhinoceros.ModalScope())
+              using (var transGroup = new DB.TransactionGroup(app.ActiveUIDocument.Document))
               {
-                definition.NewSolution(false, GH_SolutionMode.Silent);
+                transGroup.Start(Path.GetFileNameWithoutExtension(definition.Properties.ProjectFileName));
 
-                do
+                GH_Document.EnableSolutions = true;
+                definition.Enabled = true;
+                definition.ExpireSolution();
+
+                var inputs = GetInputParams(definition);
+                result = PromptForInputs(app.ActiveUIDocument, inputs, out var values);
+                if (result != Result.Succeeded)
+                  return (result, default);
+
+                // Update input volatile data values
+                foreach (var value in values)
+                  value.Key.AddVolatileDataList(new Grasshopper.Kernel.Data.GH_Path(0), value.Value);
+
+                Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+                using (var modal = new Rhinoceros.ModalScope())
                 {
-                  if (modal.Run(false, false) == Result.Failed)
-                    return Result.Failed;
+                  definition.NewSolution(false, GH_SolutionMode.Silent);
 
-                } while (definition.ScheduleDelay >= GH_Document.ScheduleRecursive);
+                  do
+                  {
+                    if (modal.Run(false, false) == Result.Failed)
+                      return (Result.Failed, default);
+
+                  } while (definition.ScheduleDelay >= GH_Document.ScheduleRecursive);
+                }
+                Thread.CurrentThread.CurrentCulture = currentCulture;
+
+                if (definition.SolutionState == GH_ProcessStep.Aborted)
+                {
+                  return (Result.Cancelled, $"Solution aborted by user after ~{ definition.SolutionSpan.TotalSeconds} seconds");
+                }
+
+                transGroup.Assimilate();
               }
+            }
+            catch (Exception e)
+            {
+              return (Result.Failed, e.Message);
+            }
+            finally
+            {
               Thread.CurrentThread.CurrentCulture = currentCulture;
-
-              if (definition.SolutionState == GH_ProcessStep.Aborted)
-              {
-                message = $"Solution aborted by user after ~{ definition.SolutionSpan.TotalSeconds} seconds";
-                return Result.Cancelled;
-              }
-
-              transGroup.Assimilate();
+              GH_Document.EnableSolutions = enableSolutions;
             }
           }
-          catch (Exception e)
-          {
-            message = e.Message;
-            return Result.Failed;
-          }
-          finally
-          {
-            Thread.CurrentThread.CurrentCulture = currentCulture;
-            GH_Document.EnableSolutions = enableSolutions;
-          }
         }
-      }
 
-      return result;
+        return (result, default);
+      }, default);
+
+      message = msg;
+      return res;
     }
   }
 }

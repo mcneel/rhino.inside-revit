@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.UI
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      var buttonData = NewPushButtonData<CommandRhinoOptions, AvailableWhenRhinoReady>
+      var buttonData = NewPushButtonData<CommandRhinoOptions, Availability>
       (
         name: CommandName,
         iconName: "Rhino.png",

@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.UI
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
 #if REVIT_2018
-      var buttonData = NewPushButtonData<CommandToggleRhinoPreview, NeedsActiveDocument<AvailableWhenRhinoReady>>
+      var buttonData = NewPushButtonData<CommandToggleRhinoPreview, NeedsActiveDocument<Availability>>
       (
         name: CommandName,
         iconName: "Ribbon.Grasshopper.Preview_Off.png",

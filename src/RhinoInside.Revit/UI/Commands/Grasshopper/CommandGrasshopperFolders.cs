@@ -10,19 +10,19 @@ namespace RhinoInside.Revit.UI
     {
       ribbonPanel.AddStackedItems
       (
-        NewPushButtonData<CommandGrasshopperUserObjectsFolder, AvailableWhenGHReady>
+        NewPushButtonData<CommandGrasshopperUserObjectsFolder, Availability>
         (
           name: CommandGrasshopperUserObjectsFolder.CommandName,
           iconName: "Ribbon.Grasshopper.GHSpecialFolder.png",
           tooltip: "Shows Grasshopper UserObjects Folder"
         ),
-        NewPushButtonData<CommandGrasshopperClustersFolder, AvailableWhenGHReady>
+        NewPushButtonData<CommandGrasshopperClustersFolder, Availability>
         (
           name: CommandGrasshopperClustersFolder.CommandName,
           iconName: "Ribbon.Grasshopper.GHSpecialFolder.png",
           tooltip: "Shows Grasshopper Clusters Folder"
         ),
-        NewPushButtonData<CommandGrasshopperComponentsFolder, AvailableWhenGHReady>
+        NewPushButtonData<CommandGrasshopperComponentsFolder, Availability>
         (
           name: CommandGrasshopperComponentsFolder.CommandName,
           iconName: "Ribbon.Grasshopper.GHSpecialFolder.png",

@@ -42,11 +42,14 @@ namespace RhinoInside.Revit.UI
     }
 #endif
 
-    protected class AvailableWhenProjDocGHReady : NeedsActiveDocument<GrasshopperCommand.AvailableWhenGHReady>
+    /// <summary>
+    /// Available when current Revit document is a project, not a family.
+    /// </summary>
+    protected new class Availability : GrasshopperCommand.Availability
     {
-      public override bool IsCommandAvailable(UIApplication _, DB.CategorySet selectedCategories) =>
-        base.IsCommandAvailable(_, selectedCategories) &&
-        Revit.ActiveUIDocument?.Document.IsFamilyDocument == false;
+      public override bool IsCommandAvailable(UIApplication app, DB.CategorySet selectedCategories) =>
+        base.IsCommandAvailable(app, selectedCategories) &&
+        Revit.ActiveUIDocument?.Document?.IsFamilyDocument == false;
     }
   }
 
@@ -58,7 +61,12 @@ namespace RhinoInside.Revit.UI
 
     public static void CreateUI(RadioButtonGroup radioButtonGroup)
     {
-      var buttonData = NewToggleButtonData<CommandGrasshopperPreviewOff, AvailableWhenProjDocGHReady>(CommandName, "Ribbon.Grasshopper.Preview_Off.png", "Don't draw any preview geometry");
+      var buttonData = NewToggleButtonData<CommandGrasshopperPreviewOff, Availability>
+      (
+        name: CommandName,
+        iconName: "Ribbon.Grasshopper.Preview_Off.png",
+        tooltip: "Don't draw any preview geometry"
+      );
 
       if (radioButtonGroup.AddItem(buttonData) is ToggleButton pushButton)
       {
@@ -92,7 +100,12 @@ namespace RhinoInside.Revit.UI
 
     public static void CreateUI(RadioButtonGroup radioButtonGroup)
     {
-      var buttonData = NewToggleButtonData<CommandGrasshopperPreviewWireframe, AvailableWhenProjDocGHReady>(CommandName, "Ribbon.Grasshopper.Preview_Wireframe.png", "Draw wireframe preview geometry");
+      var buttonData = NewToggleButtonData<CommandGrasshopperPreviewWireframe, Availability>
+      (
+        name: CommandName,
+        iconName: "Ribbon.Grasshopper.Preview_Wireframe.png",
+        tooltip: "Draw wireframe preview geometry"
+      );
 
       if (radioButtonGroup.AddItem(buttonData) is ToggleButton pushButton)
       {
@@ -126,7 +139,12 @@ namespace RhinoInside.Revit.UI
 
     public static void CreateUI(RadioButtonGroup radioButtonGroup)
     {
-      var buttonData = NewToggleButtonData<CommandGrasshopperPreviewShaded, AvailableWhenProjDocGHReady>(CommandName, "Ribbon.Grasshopper.Preview_Shaded.png", "Draw shaded preview geometry");
+      var buttonData = NewToggleButtonData<CommandGrasshopperPreviewShaded, Availability>
+      (
+        name: CommandName,
+        iconName: "Ribbon.Grasshopper.Preview_Shaded.png",
+        tooltip: "Draw shaded preview geometry"
+      );
 
       if (radioButtonGroup.AddItem(buttonData) is ToggleButton pushButton)
       {

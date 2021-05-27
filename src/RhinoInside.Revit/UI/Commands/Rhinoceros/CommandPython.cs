@@ -20,9 +20,9 @@ namespace RhinoInside.Revit.UI
     }
 
     /// <summary>
-    /// Available when IronPython Plugin is available in Rhino
+    /// Available when IronPython Plugin is available in Rhino.
     /// </summary>
-    protected new class Availability : RhinoCommand.AvailableWhenRhinoReady
+    protected new class Availability : RhinoCommand.Availability
     {
       public override bool IsCommandAvailable(UIApplication applicationData, CategorySet selectedCategories)
       {
@@ -39,7 +39,7 @@ namespace RhinoInside.Revit.UI
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      var buttonData = NewPushButtonData<CommandPython, AvailableWhenRhinoReady>
+      var buttonData = NewPushButtonData<CommandPython, Availability>
       (
         name: CommandName,
         iconName: "Python.png",

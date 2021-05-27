@@ -32,7 +32,7 @@ namespace RhinoInside.Revit.UI
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
-      var buttonData = NewPushButtonData<CommandImport, NeedsActiveDocument<AvailableWhenRhinoReady>>
+      var buttonData = NewPushButtonData<CommandImport, NeedsActiveDocument<Availability>>
       (
         name: CommandName,
         iconName: "Ribbon.Rhinoceros.Import-3DM.png",
