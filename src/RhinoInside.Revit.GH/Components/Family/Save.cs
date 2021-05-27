@@ -63,10 +63,7 @@ namespace RhinoInside.Revit.GH.Components
           if (DA.GetData("PreviewView", ref view))
           {
             if (!view.Document.Equals(familyDoc))
-            {
-              AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"View '{view.Title}' is not a valid view in document {familyDoc.Title}");
-              return;
-            }
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"View '{view.Title}' is not a valid view in document {familyDoc.GetFileName()}"); return;
           }
 
           try
@@ -88,8 +85,7 @@ namespace RhinoInside.Revit.GH.Components
             }
             else
             {
-              bool isFolder = filePath.Last() == Path.DirectorySeparatorChar;
-              if (isFolder)
+              if (filePath.Last() == Path.DirectorySeparatorChar)
                 filePath = Path.Combine(filePath, familyDoc.Title);
 
               if (Path.IsPathRooted(filePath) && filePath.Contains(Path.DirectorySeparatorChar))
