@@ -253,14 +253,16 @@ namespace RhinoInside.Revit.UI
 
       using (var collector = new DB.FilteredElementCollector(Document))
       {
-        var familyCollector = collector.WhereElementIsElementType().
+        var familyNames = collector.WhereElementIsElementType().
           WhereElementIsKindOf(typeof(DB.DirectShapeType)).
           OfCategoryId(CategoryId).
           OfType<DB.DirectShapeType>().
-          GroupBy(x => x.FamilyName);
+          Select(x => x.FamilyName).
+          Distinct().
+          OrderBy(x => x);
 
-        foreach (var family in familyCollector.OrderBy(x => x.Key))
-          familyName.Items.Add(family.Key);
+        foreach (var familyName in familyNames)
+          this.familyName.Items.Add(familyName);
       }
     }
 
@@ -277,8 +279,8 @@ namespace RhinoInside.Revit.UI
         if (!string.IsNullOrEmpty(familyName))
           typeCollector = typeCollector.WhereParameterEqualsTo(DB.BuiltInParameter.ALL_MODEL_FAMILY_NAME, familyName);
 
-        foreach (var type in typeCollector.OfType<DB.DirectShapeType>().GroupBy(x => x.Name).OrderBy(x => x.Key))
-          typeName.Items.Add(type.Key);
+        foreach (var name in typeCollector.OfType<DB.DirectShapeType>().Select(x => x.Name).Distinct().OrderBy(x => x))
+          typeName.Items.Add(name);
       }
     }
 
