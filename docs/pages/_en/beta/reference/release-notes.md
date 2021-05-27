@@ -10,15 +10,21 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
-{% include ltr/release-header.html version="0.7" time="05/24/2021" %}
+{% include ltr/release-header.html version="0.7" time="05/27/2021" %}
 
 ### Minor Changes
 * Renamed 'Value Set Picker' to 'Value Picker'.
+* Now Linked Elements picker groups selection by document.
+* Improved geometry units conversion, now is faster and more accurate.
+* Changed default snap spacing from 1/16" to 3' and from 1mm to 1m.
 
 ### Fixes
+* Fixed `Interval.Scale` extension method.
 * Fixed conversion from UNC `DB.ModelPath` to `Uri`.
 * Fixed a problem with detached workshared models.
 * Fixed a units conversion issue related to some 'Structural' parameter types.
+* Fixed `Element.Cost` property type.
+* Fixed 'Query Views' when filtered by 'Family'.
 
 {% include ltr/release-header.html version="0.6" time="05/20/2021" %}
 
