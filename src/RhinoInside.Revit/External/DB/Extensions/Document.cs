@@ -19,7 +19,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return true;
     }
 
-
     /// <summary>
     /// Determines whether the specified <see cref="Autodesk.Revit.DB.Document"/> equals to this <see cref="Autodesk.Revit.DB.Document"/>.
     /// </summary>
@@ -190,7 +189,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       {
         if (EpisodeId == Guid.Empty)
         {
-          if(((BuiltInCategory) id).IsValid())
+          if (((BuiltInCategory) id).IsValid())
             categoryId = new ElementId((BuiltInCategory) id);
         }
         else
@@ -392,7 +391,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         return null;
 
       return id.TryGetBuiltInCategory(out var categoryId) ?
-        GetCategory(doc, categoryId):
+        GetCategory(doc, categoryId) :
         AsCategory(doc.GetElement(id));
     }
 
@@ -528,24 +527,34 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// </summary>
     /// <param name="doc"></param>
     /// <returns>The active graphical <see cref="Autodesk.Revit.DB.View"/></returns>
-    public static View GetActiveGraphicalView(this Document doc) => Rhinoceros.InvokeInHostContext(() =>
+    /// <remarks>
+    /// The active view is the view that last had focus in the UI. null if no view is considered active.
+    /// </remarks>
+    public static View GetActiveGraphicalView(this Document doc)
     {
-      using (var uiDocument = new Autodesk.Revit.UI.UIDocument(doc))
+      var active = doc.ActiveView;
+      if (active?.ViewType.IsGraphicalViewType() == true)
+        return active;
+
+      return Rhinoceros.InvokeInHostContext(() =>
       {
-        var activeView = uiDocument.ActiveGraphicalView;
-
-        if (activeView is null)
+        using (var uiDocument = new Autodesk.Revit.UI.UIDocument(doc))
         {
-          var openViews = uiDocument.GetOpenUIViews().
-              Select(x => doc.GetElement(x.ViewId) as View).
-              Where(x => x.ViewType.IsGraphicalViewType());
+          var activeView = uiDocument.ActiveGraphicalView;
 
-          activeView = openViews.FirstOrDefault();
+          if (activeView is null)
+          {
+            var openViews = uiDocument.GetOpenUIViews().
+                Select(x => doc.GetElement(x.ViewId) as View).
+                Where(x => x.ViewType.IsGraphicalViewType());
+
+            activeView = openViews.FirstOrDefault();
+          }
+
+          return activeView;
         }
-
-        return activeView;
-      }
-    });
+      });
+    }
 
     /// <summary>
     /// Gets the active <see cref="Autodesk.Revit.DB.View"/> of the provided <see cref="Autodesk.Revit.DB.Document"/>.
