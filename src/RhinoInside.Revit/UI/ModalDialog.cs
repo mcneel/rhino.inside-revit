@@ -15,6 +15,7 @@ namespace RhinoInside.Revit.UI
     public ModalDialog(Autodesk.Revit.UI.UIApplication uiApp, Size initialSize)
     {
       BaseWindowUtils.SetupWindow(this, uiApp, initialSize);
+
       _uiApp = uiApp;
       SizeChanged += ModalDialog_SizeChanged;
 
@@ -28,7 +29,10 @@ namespace RhinoInside.Revit.UI
     private void ModalDialog_SizeChanged(object sender, EventArgs e)
     {
       SizeChanged -= ModalDialog_SizeChanged;
-      BaseWindowUtils.CenterWindow(this, _uiApp);
+
+      // Centers ModalDialog on Owner center.
+      var native = this.ToNative();
+      native.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner;
     }
 
     DialogResult dialogResult = DialogResult.None;

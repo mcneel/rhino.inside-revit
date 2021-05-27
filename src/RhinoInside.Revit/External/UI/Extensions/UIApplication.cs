@@ -61,40 +61,5 @@ namespace RhinoInside.Revit.External.UI.Extensions
 
     public static bool TryGetDocument(this UIApplication app, Guid guid, out Document document) =>
       app.Application.Documents.Cast<Document>().TryGetDocument(guid, out document, app.ActiveUIDocument?.Document);
-
-    /// <summary>
-    /// Get Revit screen that includes center of Revit window.
-    /// </summary>
-    public static Screen GetMainScreen(this UIApplication uiapp)
-    {
-      // find the screen that contains the center of Revit window
-      var rect = uiapp.MainWindowExtents;
-      return Screen.FromPoint
-      (
-        new System.Drawing.Point
-        (
-          Math.Abs(rect.Right - rect.Left) / 2 + rect.Left,
-          Math.Abs(rect.Bottom - rect.Top) / 2 + rect.Top
-        )
-      );
-    }
-
-    /// <summary>
-    /// Center given rectangle on main window and return new rectangle
-    /// </summary>
-    /// <param name="width">Width of rectangle to be centered</param>
-    /// <param name="height">Height of rectangle to be centered</param>
-    /// <returns></returns>
-    public static System.Drawing.Rectangle CenterRectangleOnExtents(this UIApplication uiApp, int width, int height)
-    {
-      var revitHeight = Math.Abs(uiApp.MainWindowExtents.Bottom - uiApp.MainWindowExtents.Top);
-      var revitWidth = Math.Abs(uiApp.MainWindowExtents.Right - uiApp.MainWindowExtents.Left);
-      return new System.Drawing.Rectangle(
-          x: Math.Abs(revitWidth - width) / 2 + uiApp.MainWindowExtents.Left,
-          y: Math.Abs(revitHeight - height) / 2 + uiApp.MainWindowExtents.Top,
-          width: width,
-          height: height
-        );
-    }
   }
 }

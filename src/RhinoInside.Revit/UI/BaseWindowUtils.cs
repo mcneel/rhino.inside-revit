@@ -1,17 +1,7 @@
-using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Reflection;
-using System.Windows.Interop;
-
-using Eto.Forms;
-using Eto.Drawing;
-
 using Autodesk.Revit.UI;
-using RhinoInside.Revit.External.UI.Extensions;
+using Eto.Drawing;
+using Eto.Forms;
 
 namespace RhinoInside.Revit.UI
 {
@@ -40,19 +30,6 @@ namespace RhinoInside.Revit.UI
       // styling
       wnd.Padding = new Padding(10, 10, 10, 10);
       wnd.BackgroundColor = Colors.White;
-    }
-
-    internal static void CenterWindow(Window wnd, UIApplication uiApp)
-    {
-      var centerRect = uiApp.CenterRectangleOnExtents(wnd.Width, wnd.Height);
-      // setting location on the Eto window causes window to be placed at the wrong location
-      // or high-dpi screens, because Eto is using a newer dpi detection mechanism
-      // and the fact that Revit does not support per-monitor dpi
-      // setting location on the Wpf window instead
-      var native = wnd.ToNative();
-      native.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner;
-      native.Left = centerRect.Left;
-      native.Top = centerRect.Top;
     }
   }
 }

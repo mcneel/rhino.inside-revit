@@ -16,10 +16,6 @@ namespace RhinoInside.Revit.UI
     {
       BaseWindowUtils.SetupWindow(this, uiApp, initialSize);
       _uiApp = uiApp;
-      SizeChanged += BaseForm_SizeChanged;
     }
-
-    private void BaseForm_SizeChanged(object sender, EventArgs e)
-      => BaseWindowUtils.CenterWindow(this, _uiApp);
   }
 }

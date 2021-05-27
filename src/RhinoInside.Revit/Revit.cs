@@ -196,8 +196,6 @@ namespace RhinoInside.Revit
     internal static WindowHandle MainWindow { get; private set; } = WindowHandle.Zero;
     public static IntPtr MainWindowHandle => MainWindow.Handle;
 
-    internal static Screen MainScreen => ActiveUIApplication?.GetRevitScreen() ?? Screen.FromHandle(MainWindowHandle);
-
     public static Autodesk.Revit.UI.UIApplication                 ActiveUIApplication => AddIn.Host.Value as Autodesk.Revit.UI.UIApplication;
     public static Autodesk.Revit.ApplicationServices.Application  ActiveDBApplication => ActiveUIApplication?.Application;
 
