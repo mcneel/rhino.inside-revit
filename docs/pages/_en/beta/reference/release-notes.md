@@ -18,6 +18,7 @@ Some of the changes mentioned in sections below, might break your existing Grass
 * Improved geometry units conversion, now is faster and more accurate.
 * Changed default snap spacing from 1/16" to 3' and from 1mm to 1m.
 * Now 'Category Identity' returns "ParentName\Name" as 'Name' for subCategories.
+* Now 'Query Categories' returns elements sorted by Id as any other Query component.
 
 ### Fixes
 * Fixed `Interval.Scale` extension method.
