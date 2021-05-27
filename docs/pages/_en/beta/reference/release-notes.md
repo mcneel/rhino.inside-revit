@@ -17,6 +17,7 @@ Some of the changes mentioned in sections below, might break your existing Grass
 * Now Linked Elements picker groups selection by document.
 * Improved geometry units conversion, now is faster and more accurate.
 * Changed default snap spacing from 1/16" to 3' and from 1mm to 1m.
+* Now 'Category Identity' returns "ParentName\Name" as 'Name' for subCategories.
 
 ### Fixes
 * Fixed `Interval.Scale` extension method.
