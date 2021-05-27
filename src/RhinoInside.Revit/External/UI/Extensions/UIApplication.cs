@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using Autodesk.Revit.DB;
@@ -45,22 +46,37 @@ namespace RhinoInside.Revit.External.UI.Extensions
       }
     }
 
+    internal static IList<UIDocument> GetOpenUIDocuments(this UIApplication app)
+    {
+      return Rhinoceros.InvokeInHostContext
+      (
+        () =>
+        app.Application.Documents.Cast<Document>().
+        Where(x => !x.IsLinked).
+        Select(x => new UIDocument(x)).
+        Where(x => x.GetOpenUIViews().Count > 0).
+        ToArray()
+      );
+    }
+
     public static bool TryGetDocument(this UIApplication app, Guid guid, out Document document) =>
       app.Application.Documents.Cast<Document>().TryGetDocument(guid, out document, app.ActiveUIDocument?.Document);
 
     /// <summary>
     /// Get Revit screen that includes center of Revit window.
     /// </summary>
-    public static Screen GetRevitScreen(this UIApplication uiapp)
+    public static Screen GetMainScreen(this UIApplication uiapp)
     {
       // find the screen that contains the center of Revit window
-      var r = uiapp.MainWindowExtents;
-      return Screen.FromPoint(
-        new System.Drawing.Point(
-          Math.Abs(r.Right - r.Left) / 2 + r.Left,
-          Math.Abs(r.Bottom - r.Top) / 2 + r.Top
-          )
-        );
+      var rect = uiapp.MainWindowExtents;
+      return Screen.FromPoint
+      (
+        new System.Drawing.Point
+        (
+          Math.Abs(rect.Right - rect.Left) / 2 + rect.Left,
+          Math.Abs(rect.Bottom - rect.Top) / 2 + rect.Top
+        )
+      );
     }
 
     /// <summary>
