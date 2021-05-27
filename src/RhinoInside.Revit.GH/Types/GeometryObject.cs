@@ -88,7 +88,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         UnloadReferencedData();
 
-        if (Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var document))
+        if (Types.Document.TryGetDocument(DocumentGUID, out var document))
         {
           try
           {

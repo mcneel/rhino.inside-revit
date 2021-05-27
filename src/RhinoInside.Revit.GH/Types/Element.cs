@@ -65,7 +65,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         UnloadReferencedData();
 
-        if (Revit.ActiveUIApplication.TryGetDocument(DocumentGUID, out var document))
+        if (Types.Document.TryGetDocument(DocumentGUID, out var document))
         {
           if (document.TryGetElementId(UniqueID, out id))
             Document = document;
@@ -322,7 +322,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (FullUniqueId.TryParse(uniqueid, out var documentId, out var uniqueId))
         {
-          if (Revit.ActiveUIApplication.TryGetDocument(documentId, out var doc))
+          if (Types.Document.TryGetDocument(documentId, out var doc))
           {
             try { source = doc.GetElement(uniqueId); }
             catch { }

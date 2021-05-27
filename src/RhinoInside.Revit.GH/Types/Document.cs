@@ -8,6 +8,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.External.UI.Extensions;
 using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
@@ -346,6 +347,10 @@ namespace RhinoInside.Revit.GH.Types
         document = twins[0];
         return true;
       }
+
+      // Look for Linked documents here.
+      if (Revit.ActiveUIApplication.TryGetDocument(guid, out document))
+        return true;
 
       document = default;
       return false;
