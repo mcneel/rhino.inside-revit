@@ -27,6 +27,8 @@ Some of the changes mentioned in sections below, might break your existing Grass
 * Fixed a units conversion issue related to some 'Structural' parameter types.
 * Fixed `Element.Cost` property type.
 * Fixed 'Query Views' when filtered by 'Family'.
+* Fixed a bug on Import dialog, it was showing same family multiple times.
+* Changed the way we obtain Revit document Title, now is always without extension.
 
 {% include ltr/release-header.html version="0.6" time="05/20/2021" %}
 
