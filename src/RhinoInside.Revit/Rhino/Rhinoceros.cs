@@ -528,8 +528,8 @@ namespace RhinoInside.Revit
         1.0 * UnitScale(UnitSystem.Meters, rhinoDoc.ModelUnitSystem);
 
         var modelSnapSpacing = imperial ?
-        1 / 16.0 * UnitScale(UnitSystem.Inches, rhinoDoc.ModelUnitSystem) :
-        1.0 * UnitScale(UnitSystem.Millimeters, rhinoDoc.ModelUnitSystem);
+        3.0 * UnitScale(UnitSystem.Feet, rhinoDoc.ModelUnitSystem) :
+        1.0 * UnitScale(UnitSystem.Meters, rhinoDoc.ModelUnitSystem);
 
         var modelThickLineFrequency = imperial ? 6 : 5;
 
