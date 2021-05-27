@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -59,7 +60,7 @@ namespace RhinoInside.Revit.GH.Components
       DA.GetData("Folder", ref folder);
 
       if (string.IsNullOrEmpty(folder))
-        folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), view.Document.Title);
+        folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), view.Document.GetTitle());
 
       Directory.CreateDirectory(folder);
 
