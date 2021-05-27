@@ -68,15 +68,18 @@ namespace RhinoInside.Revit.Convert.Geometry
     }
 
     /// <summary>
-    /// Revit Internal Unit System is Feet
+    /// Revit Internal Unit System.
     /// </summary>
+    /// <remarks>
+    /// It returns <see cref="UnitSystem.Feet"/>.
+    /// </remarks>
     internal const UnitSystem InternalUnitSystem = UnitSystem.Feet;
 
     /// <summary>
-    /// Rhino Unit System
+    /// Rhino Unit System.
     /// </summary>
     /// <remarks>
-    /// It returns <see cref="RhinoDoc.ActiveDoc.ModelUnitSystem"/> or meters if there is no ActiveDoc.
+    /// It returns <see cref="RhinoDoc.ActiveDoc.ModelUnitSystem"/> or <see cref="UnitSystem.Meters"/> if there is no ActiveDoc.
     /// </remarks>
     internal static UnitSystem ExternalUnitSystem => RhinoDoc.ActiveDoc?.ModelUnitSystem ?? UnitSystem.Meters;
 
@@ -322,12 +325,11 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static G InOtherUnits<G>(this G value, double factor) where G : GeometryBase
     { value = (G) value.DuplicateShallow(); if(factor != 1.0) Scale(value, factor); return value; }
 
-    static double InOtherUnits(double value, EDBS.DataType type, UnitSystem from, UnitSystem to)
+    static double InOtherUnits(double value, EDBS.SpecType type, UnitSystem from, UnitSystem to)
     {
-      if (!type.TryGetLengthDimensionality(out var dimensionality))
-        dimensionality = 0;
-
-      return Convert(value, from, to, dimensionality);
+      return type.TryGetLengthDimensionality(out var dimensionality) ?
+        Convert(value, from, to, dimensionality) :
+        value;
     }
     #endregion
 
@@ -377,9 +379,10 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static G InRhinoUnits<G>(this G value) where G : GeometryBase
     { Scale(value = (G) value.DuplicateShallow(), ToRhinoUnits); return value; }
 
-    public static double InRhinoUnits(double value, EDBS.DataType type) =>
-      InRhinoUnits(value, type, RhinoDoc.ActiveDoc);
-    static double InRhinoUnits(double value, EDBS.DataType type, RhinoDoc rhinoDoc)
+    public static double InRhinoUnits(double value, EDBS.SpecType type) =>
+      InOtherUnits(value, type, InternalUnitSystem, ExternalUnitSystem);
+
+    static double InRhinoUnits(double value, EDBS.SpecType type, RhinoDoc rhinoDoc)
     {
       if (rhinoDoc is null)
         return double.NaN;
@@ -434,9 +437,10 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static G InHostUnits<G>(this G value) where G : GeometryBase
     { Scale(value = (G) value.DuplicateShallow(), ToHostUnits); return value; }
 
-    public static double InHostUnits(double value, EDBS.DataType type) =>
-      InHostUnits(value, type, RhinoDoc.ActiveDoc);
-    static double InHostUnits(double value, EDBS.DataType type, RhinoDoc rhinoDoc)
+    public static double InHostUnits(double value, EDBS.SpecType type) =>
+      InOtherUnits(value, type, ExternalUnitSystem, InternalUnitSystem);
+
+    static double InHostUnits(double value, EDBS.SpecType type, RhinoDoc rhinoDoc)
     {
       if (rhinoDoc is null)
         return double.NaN;

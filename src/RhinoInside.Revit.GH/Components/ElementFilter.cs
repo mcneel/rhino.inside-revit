@@ -956,43 +956,63 @@ namespace RhinoInside.Revit.GH.Components
         switch (storageType)
         {
           case DB.StorageType.Integer:
-            {
-              var goo = default(GH_Integer);
-              if (DA.GetData("Value", ref goo))
-                rule = new DB.FilterIntegerRule(provider, ruleEvaluator, goo.Value);
-            }
-            break;
+          {
+            var goo = default(GH_Integer);
+            if (DA.GetData("Value", ref goo))
+              rule = new DB.FilterIntegerRule(provider, ruleEvaluator, goo.Value);
+          }
+          break;
+
           case DB.StorageType.Double:
+          {
+            var goo = default(GH_Number);
+            if (DA.GetData("Value", ref goo))
             {
-              var goo = default(GH_Number);
-              if (DA.GetData("Value", ref goo))
+              var value = goo.Value;
+              var tol = 0.0;
+
+              // If is a Measurable it may need to be scaled.
+              if (EDBS.SpecType.IsMeasurableSpec(dataType, out var spec))
               {
-                var tol = 0.0;
+                // Adjust value acording to data-type dimensionality
+                if (spec.TryGetLengthDimensionality(out var dimensionality))
+                  value = UnitConverter.Convert
+                  (
+                    value,
+                    UnitConverter.ExternalUnitSystem,
+                    UnitConverter.InternalUnitSystem,
+                    dimensionality
+                  );
+                else
+                  dimensionality = 0;
+
+                // Adjust tolerance acording to data-type dimensionality
                 if (Condition == ConditionType.Equals || Condition == ConditionType.NotEquals)
                 {
-                  // Adjust tolerance acording to data-type dimensionality
-                  if (dataType.TryGetLengthDimensionality(out var dimensionality) && dimensionality != 0)
-                    tol = UnitConverter.Convert
+                  tol = dimensionality == 0 ?
+                    1e-6 :
+                    UnitConverter.Convert
                     (
                       Revit.VertexTolerance,
                       UnitConverter.ExternalUnitSystem,
                       UnitConverter.InternalUnitSystem,
                       Math.Abs(dimensionality)
                     );
-                  else tol = 1e-6;
                 }
-
-                rule = new DB.FilterDoubleRule(provider, ruleEvaluator, UnitConverter.InHostUnits(goo.Value, dataType), tol);
               }
+
+              rule = new DB.FilterDoubleRule(provider, ruleEvaluator, value, tol);
             }
-            break;
+          }
+          break;
+
           case DB.StorageType.ElementId:
-            {
-              var value = default(Types.IGH_ElementId);
-              if (DA.GetData("Value", ref value))
-                rule = new DB.FilterElementIdRule(provider, ruleEvaluator, value.Id);
-            }
-            break;
+          {
+            var value = default(Types.IGH_ElementId);
+            if (DA.GetData("Value", ref value))
+              rule = new DB.FilterElementIdRule(provider, ruleEvaluator, value.Id);
+          }
+          break;
         }
       }
 

@@ -152,12 +152,21 @@ namespace RhinoInside.Revit.GH
 
     internal static double AsDoubleInRhinoUnits(this DB.Parameter parameter)
     {
-      return UnitConverter.InRhinoUnits(parameter.AsDouble(), parameter.Definition.GetDataType());
+      var value = parameter.AsDouble();
+
+      return SpecType.IsMeasurableSpec(parameter.Definition.GetDataType(), out var spec) ?
+        UnitConverter.InRhinoUnits(value, spec) :
+        value;
     }
 
     internal static bool SetDoubleInRhinoUnits(this DB.Parameter parameter, double value)
     {
-      return parameter.Set(UnitConverter.InHostUnits(value, parameter.Definition.GetDataType()));
+      return parameter.Set
+      (
+        SpecType.IsMeasurableSpec(parameter.Definition.GetDataType(), out var spec) ?
+        UnitConverter.InHostUnits(value, spec) :
+        value
+      );
     }
 
     internal static DB.Parameter GetParameter(IGH_ActiveObject obj, DB.Element element, IGH_Goo goo)

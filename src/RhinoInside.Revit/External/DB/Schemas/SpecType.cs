@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace RhinoInside.Revit.External.DB.Schemas
 {
@@ -62,6 +63,53 @@ namespace RhinoInside.Revit.External.DB.Schemas
       return Autodesk.Revit.DB.UnitUtils.IsValidDisplayUnit(this, unitType);
 #endif
     }
+
+    #region Dimensionality
+    internal static readonly IReadOnlyDictionary<SpecType, int> LengthDimensionality = new Dictionary<SpecType, int>
+    {
+      #region Length
+      { Measurable.Length, +1 },
+      { Measurable.RotationalLineSpringCoefficient, +1 },
+      { Measurable.ReinforcementLength, +1 },
+
+      { Measurable.PointSpringCoefficient, -1 },
+      { Measurable.MassPerUnitLength, -1 },
+      { Measurable.WeightPerUnitLength, -1 },
+      { Measurable.PipeMassPerUnitLength, -1 },
+      #endregion
+
+      #region Area
+      { Measurable.Area, +2 },
+      { Measurable.AreaForce, +2 },
+      { Measurable.AreaDividedByCoolingLoad, +2 },
+      { Measurable.AreaDividedByHeatingLoad, +2 },
+      { Measurable.SurfaceAreaPerUnitLength, +2 -1 },
+      { Measurable.ReinforcementAreaPerUnitLength, +2 -1 },
+      { Measurable.ReinforcementArea, +2 },
+      { Measurable.SectionArea, +2 },
+      { Measurable.RotationalPointSpringCoefficient, +2 },
+
+      { Measurable.LineSpringCoefficient, -2 },
+      { Measurable.CoolingLoadDividedByArea, -2 },
+      { Measurable.HeatingLoadDividedByArea, -2 },
+      { Measurable.MassPerUnitArea, -2 },
+      #endregion
+
+      #region Volume
+      { Measurable.Volume, +3 },
+      { Measurable.PipingVolume, +3 },
+      { Measurable.ReinforcementVolume, +3 },
+
+      { Measurable.AreaSpringCoefficient, -3 },
+      { Measurable.CoolingLoadDividedByVolume, -3 },
+      { Measurable.HeatingLoadDividedByVolume, -3 },
+      { Measurable.AirFlowDividedByVolume, -3 },
+      #endregion
+    };
+
+    internal bool TryGetLengthDimensionality(out int dimensionality) =>
+      LengthDimensionality.TryGetValue(this, out dimensionality);
+    #endregion
 
 #if REVIT_2021
     public static implicit operator SpecType(Autodesk.Revit.DB.ForgeTypeId value) => value is null ? null : new SpecType(value.TypeId);

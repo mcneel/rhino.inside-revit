@@ -13,11 +13,15 @@ using DBXS = RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public abstract class DataType<T> : GH_Goo<T>, IEquatable<DataType<T>>, IComparable<DataType<T>>, IComparable, IGH_QuickCast
+  public abstract class DataType<T> : IGH_Goo,
+    IEquatable<DataType<T>>,
+    IComparable<DataType<T>>,
+    IComparable,
+    IGH_QuickCast
     where T : DBXS.DataType, new()
   {
     protected DataType() { }
-    protected DataType(T value) : base(value) { }
+    protected DataType(T value) => Value = value;
 
     public virtual string Text
     {
@@ -29,12 +33,15 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+    public T Value { get; set; }
+
     public bool IsEmpty => Value == DBXS.DataType.Empty;
 
     #region IGH_Goo
-    public override bool IsValid => Value != default;
+    public virtual bool IsValid => Value != default;
+    public virtual string IsValidWhyNot => IsValid ? string.Empty : "Not Valid";
 
-    public override string TypeName
+    public virtual string TypeName
     {
       get
       {
@@ -43,7 +50,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override string TypeDescription
+    public virtual string TypeDescription
     {
       get
       {
@@ -52,15 +59,18 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override IGH_Goo Duplicate() => (IGH_Goo) MemberwiseClone();
+    public IGH_Goo Duplicate() => (IGH_Goo) MemberwiseClone();
 
-    public override object ScriptVariable() => Value.FullName;
+    public virtual IGH_GooProxy EmitProxy() => default;
 
-    public override bool CastTo<Q>(ref Q target)
+    public virtual object ScriptVariable() => Value.FullName;
+
+    public virtual bool CastFrom(object source) => false;
+    public virtual bool CastTo<Q>(out Q target)
     {
       if (typeof(Q).IsAssignableFrom(typeof(GH_String)))
       {
-        target = (Q) (object) new GH_String(base.Value.TypeId);
+        target = (Q) (object) new GH_String(Value.TypeId);
         return true;
       }
 
@@ -70,10 +80,11 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
-      return base.CastTo<Q>(ref target);
+      target = default;
+      return false;
     }
 
-    public override bool Write(GH_IWriter writer)
+    public virtual bool Write(GH_IWriter writer)
     {
       if(Value?.TypeId is string typeId)
         writer.SetString("string", typeId);
@@ -81,7 +92,7 @@ namespace RhinoInside.Revit.GH.Types
       return true;
     }
 
-    public override bool Read(GH_IReader reader)
+    public virtual bool Read(GH_IReader reader)
     {
       string typeId = default;
       if (reader.TryGetString("string", ref typeId))
@@ -89,7 +100,7 @@ namespace RhinoInside.Revit.GH.Types
       else
         Value = default;
 
-      return base.Read(reader);
+      return true;
     }
     #endregion
 
@@ -132,7 +143,7 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     int IGH_QuickCast.QC_Hash() => Value.GetHashCode();
-    bool IGH_QuickCast.QC_Bool() => IsEmpty;
+    bool IGH_QuickCast.QC_Bool() => IsValid && !IsEmpty;
     int IGH_QuickCast.QC_Int() => throw new InvalidCastException($"{GetType().Name} cannot be cast to {nameof(Int32)}");
     double IGH_QuickCast.QC_Num() => throw new InvalidCastException($"{GetType().Name} cannot be cast to {nameof(Double)}");
     string IGH_QuickCast.QC_Text() => Value.FullName;

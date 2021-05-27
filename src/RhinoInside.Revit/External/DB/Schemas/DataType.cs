@@ -353,52 +353,5 @@ namespace RhinoInside.Revit.External.DB.Extensions
       ToStorageType((Schemas.DataType) dataType);
 #endif
     #endregion
-
-    #region Dimensionality
-    internal static readonly IReadOnlyDictionary<Schemas.DataType, int> DataTypeLengthDimensionality = new Dictionary<Schemas.DataType, int>
-    {
-      #region Length
-      { Schemas.SpecType.Measurable.Length, +1 },
-      { Schemas.SpecType.Measurable.RotationalLineSpringCoefficient, +1 },
-      { Schemas.SpecType.Measurable.ReinforcementLength, +1 },
-
-      { Schemas.SpecType.Measurable.PointSpringCoefficient, -1 },
-      { Schemas.SpecType.Measurable.MassPerUnitLength, -1 },
-      { Schemas.SpecType.Measurable.WeightPerUnitLength, -1 },
-      { Schemas.SpecType.Measurable.PipeMassPerUnitLength, -1 },
-      #endregion
-
-      #region Area
-      { Schemas.SpecType.Measurable.Area, +2 },
-      { Schemas.SpecType.Measurable.AreaForce, +2 },
-      { Schemas.SpecType.Measurable.AreaDividedByCoolingLoad, +2 },
-      { Schemas.SpecType.Measurable.AreaDividedByHeatingLoad, +2 },
-      { Schemas.SpecType.Measurable.SurfaceAreaPerUnitLength, +2 -1 },
-      { Schemas.SpecType.Measurable.ReinforcementAreaPerUnitLength, +2 -1 },
-      { Schemas.SpecType.Measurable.ReinforcementArea, +2 },
-      { Schemas.SpecType.Measurable.SectionArea, +2 },
-      { Schemas.SpecType.Measurable.RotationalPointSpringCoefficient, +2 },
-
-      { Schemas.SpecType.Measurable.LineSpringCoefficient, -2 },
-      { Schemas.SpecType.Measurable.CoolingLoadDividedByArea, -2 },
-      { Schemas.SpecType.Measurable.HeatingLoadDividedByArea, -2 },
-      { Schemas.SpecType.Measurable.MassPerUnitArea, -2 },
-      #endregion
-
-      #region Volume
-      { Schemas.SpecType.Measurable.Volume, +3 },
-      { Schemas.SpecType.Measurable.PipingVolume, +3 },
-      { Schemas.SpecType.Measurable.ReinforcementVolume, +3 },
-
-      { Schemas.SpecType.Measurable.AreaSpringCoefficient, -3 },
-      { Schemas.SpecType.Measurable.CoolingLoadDividedByVolume, -3 },
-      { Schemas.SpecType.Measurable.HeatingLoadDividedByVolume, -3 },
-      { Schemas.SpecType.Measurable.AirFlowDividedByVolume, -3 },
-      #endregion
-    };
-
-    internal static bool TryGetLengthDimensionality(this Schemas.DataType dataType, out int dimensionality) =>
-      DataTypeLengthDimensionality.TryGetValue(dataType, out dimensionality);
-    #endregion
   }
 }
