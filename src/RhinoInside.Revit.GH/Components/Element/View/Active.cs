@@ -35,10 +35,10 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
+      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc))
         return;
 
-      DA.SetData("Active View", doc?.GetActiveGraphicalView());
+      DA.SetData("Active View", doc.Value?.GetActiveGraphicalView());
     }
   }
 }
