@@ -35,34 +35,39 @@ namespace RhinoInside.Revit.GH.Parameters
       if (SourceCount != 0)
         return;
 
-      var listBox = new ListBox();
-      listBox.BorderStyle = BorderStyle.FixedSingle;
-      listBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
-      listBox.Height = (int) (100 * GH_GraphicsUtil.UiScale);
+      var listBox = new ListBox
+      {
+        Sorted = true,
+        BorderStyle = BorderStyle.FixedSingle,
+        Width = (int) (200 * GH_GraphicsUtil.UiScale),
+        Height = (int) (100 * GH_GraphicsUtil.UiScale)
+      };
       listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
-      listBox.Sorted = true;
 
-      var patternTargetBox = new ComboBox();
-      patternTargetBox.DropDownStyle = ComboBoxStyle.DropDownList;
-      patternTargetBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
-      patternTargetBox.Tag = listBox;
+      var patternTargetBox = new ComboBox
+      {
+        Sorted = true,
+        DropDownStyle = ComboBoxStyle.DropDownList,
+        Width = (int) (200 * GH_GraphicsUtil.UiScale),
+        Tag = listBox
+      };
       patternTargetBox.SelectedIndexChanged += PatternTargetBox_SelectedIndexChanged;
       patternTargetBox.SetCueBanner("Fill Pattern target filter…");
-      patternTargetBox.Sorted = true;
 
       using (var collector = new DB.FilteredElementCollector(Revit.ActiveUIDocument.Document))
       {
         listBox.Items.Clear();
 
-        var patterns = collector.
+        var targets = collector.
                         OfClass(typeof(DB.FillPatternElement)).
                         Cast<DB.FillPatternElement>().
-                        GroupBy(x => x.GetFillPattern().Target);
+                        Select(x => x.GetFillPattern().Target).
+                        Distinct();
 
-        foreach (var pattern in patterns)
-          patternTargetBox.Items.Add(pattern.Key);
+        foreach (var target in targets)
+          patternTargetBox.Items.Add(target);
 
-        if (Current?.Value is DB.FillPatternElement current)
+        if (PersistentValue?.Value is DB.FillPatternElement current)
         {
           var targetIndex = 0;
           foreach (var patternTarget in patternTargetBox.Items.Cast<DB.FillPatternTarget>())
@@ -109,7 +114,7 @@ namespace RhinoInside.Revit.GH.Parameters
           listBox.Items.Add(new Types.FillPatternElement(pattern));
       }
 
-      listBox.SelectedIndex = listBox.Items.OfType<Types.FillPatternElement>().IndexOf(Current, 0).FirstOr(-1);
+      listBox.SelectedIndex = listBox.Items.Cast<Types.FillPatternElement>().IndexOf(PersistentValue, 0).FirstOr(-1);
       listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
     }
 

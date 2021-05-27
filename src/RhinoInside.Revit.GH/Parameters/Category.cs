@@ -57,7 +57,7 @@ namespace RhinoInside.Revit.GH.Parameters
       categoriesTypeBox.Items.Add("Internal");
       categoriesTypeBox.Items.Add("Analytical");
 
-      if(Current?.Value is DB.Category current)
+      if(PersistentValue?.Value is DB.Category current)
       {
         if (current.IsTagCategory)
           categoriesTypeBox.SelectedIndex = 2;
@@ -91,15 +91,15 @@ namespace RhinoInside.Revit.GH.Parameters
       using (var collector = doc.Settings.Categories)
       {
         var categories = collector.
-                          Cast<DB.Category>().
-                          Where(x => 3 == (int) categoryType ? x.IsTagCategory : x.CategoryType == categoryType && !x.IsTagCategory);
+          Cast<DB.Category>().
+          Where(x => 3 == (int) categoryType ? x.IsTagCategory : x.CategoryType == categoryType && !x.IsTagCategory);
 
         listBox.DisplayMember = "DisplayName";
         foreach (var category in categories)
           listBox.Items.Add(Types.Category.FromCategory(category));
       }
 
-      listBox.SelectedIndex = listBox.Items.OfType<Types.Category>().IndexOf(Current, 0).FirstOr(-1);
+      listBox.SelectedIndex = listBox.Items.Cast<Types.Category>().IndexOf(PersistentValue, 0).FirstOr(-1);
       listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
     }
 

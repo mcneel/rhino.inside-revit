@@ -24,34 +24,42 @@ namespace RhinoInside.Revit.GH.Parameters
       if (SourceCount != 0)
         return;
 
-      var elementTypesBox = new ListBox();
-      elementTypesBox.BorderStyle = BorderStyle.FixedSingle;
-      elementTypesBox.Width = (int) (300 * GH_GraphicsUtil.UiScale);
-      elementTypesBox.Height = (int) (100 * GH_GraphicsUtil.UiScale);
+      var elementTypesBox = new ListBox
+      {
+        Sorted = true,
+        BorderStyle = BorderStyle.FixedSingle,
+        Width = (int) (300 * GH_GraphicsUtil.UiScale),
+        Height = (int) (100 * GH_GraphicsUtil.UiScale)
+      };
       elementTypesBox.SelectedIndexChanged += ElementTypesBox_SelectedIndexChanged;
-      elementTypesBox.Sorted = true;
 
-      var familiesBox = new ComboBox();
-      familiesBox.DropDownStyle = ComboBoxStyle.DropDownList;
+      var familiesBox = new ComboBox
+      {
+        DropDownStyle = ComboBoxStyle.DropDownList,
+        Width = (int) (300 * GH_GraphicsUtil.UiScale)
+      };
       familiesBox.DropDownHeight = familiesBox.ItemHeight * 15;
       familiesBox.SetCueBanner("Family filter…");
-      familiesBox.Width = (int) (300 * GH_GraphicsUtil.UiScale);
 
-      var categoriesBox = new ComboBox();
-      categoriesBox.DropDownStyle = ComboBoxStyle.DropDownList;
+      var categoriesBox = new ComboBox
+      {
+        DropDownStyle = ComboBoxStyle.DropDownList,
+        Width = (int) (300 * GH_GraphicsUtil.UiScale)
+      };
       categoriesBox.DropDownHeight = categoriesBox.ItemHeight * 15;
       categoriesBox.SetCueBanner("Category filter…");
-      categoriesBox.Width = (int) (300 * GH_GraphicsUtil.UiScale);
 
       familiesBox.Tag = Tuple.Create(elementTypesBox, categoriesBox);
       familiesBox.SelectedIndexChanged += FamiliesBox_SelectedIndexChanged;
       categoriesBox.Tag = Tuple.Create(elementTypesBox, familiesBox);
       categoriesBox.SelectedIndexChanged += CategoriesBox_SelectedIndexChanged;
 
-      var categoriesTypeBox = new ComboBox();
-      categoriesTypeBox.DropDownStyle = ComboBoxStyle.DropDownList;
-      categoriesTypeBox.Width = (int) (300 * GH_GraphicsUtil.UiScale);
-      categoriesTypeBox.Tag = categoriesBox;
+      var categoriesTypeBox = new ComboBox
+      {
+        DropDownStyle = ComboBoxStyle.DropDownList,
+        Width = (int) (300 * GH_GraphicsUtil.UiScale),
+        Tag = categoriesBox
+      };
       categoriesTypeBox.SelectedIndexChanged += CategoryType_SelectedIndexChanged;
       categoriesTypeBox.Items.Add("All Categories");
       categoriesTypeBox.Items.Add("Model");
@@ -60,7 +68,7 @@ namespace RhinoInside.Revit.GH.Parameters
       categoriesTypeBox.Items.Add("Internal");
       categoriesTypeBox.Items.Add("Analytical");
 
-      if (Current is Types.ElementType current)
+      if (PersistentValue is Types.ElementType current)
       {
         if (current.Category.Value.IsTagCategory)
           categoriesTypeBox.SelectedIndex = 3;
@@ -154,7 +162,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
         foreach (var familyName in collector.WhereElementIsElementType().OfClass(typeof(R)).
           WherePasses(new DB.ElementMulticategoryFilter(categories)).Cast<R>().
-          GroupBy(x => x.GetFamilyName()).Select(x => x.Key))
+          Select(x => x.GetFamilyName()).Distinct())
         {
           familiesBox.Items.Add(familyName);
         }
@@ -196,7 +204,7 @@ namespace RhinoInside.Revit.GH.Parameters
         }
       }
 
-      listBox.SelectedIndex = listBox.Items.OfType<T>().IndexOf(Current, 0).FirstOr(-1);
+      listBox.SelectedIndex = listBox.Items.Cast<T>().IndexOf(PersistentValue, 0).FirstOr(-1);
       listBox.SelectedIndexChanged += ElementTypesBox_SelectedIndexChanged;
     }
 

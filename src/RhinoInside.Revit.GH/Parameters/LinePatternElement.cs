@@ -36,12 +36,14 @@ namespace RhinoInside.Revit.GH.Parameters
       if (SourceCount != 0)
         return;
 
-      var listBox = new ListBox();
-      listBox.BorderStyle = BorderStyle.FixedSingle;
-      listBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
-      listBox.Height = (int) (100 * GH_GraphicsUtil.UiScale);
+      var listBox = new ListBox
+      {
+        Sorted = true,
+        BorderStyle = BorderStyle.FixedSingle,
+        Width = (int) (200 * GH_GraphicsUtil.UiScale),
+        Height = (int) (100 * GH_GraphicsUtil.UiScale)
+      };
       listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
-      listBox.Sorted = true;
 
       Menu_AppendCustomItem(menu, listBox);
       RefreshPatternList(listBox);
@@ -66,7 +68,7 @@ namespace RhinoInside.Revit.GH.Parameters
           listBox.Items.Add(new Types.LinePatternElement(pattern));
       }
 
-      listBox.SelectedIndex = listBox.Items.OfType<Types.LinePatternElement>().IndexOf(Current, 0).FirstOr(-1);
+      listBox.SelectedIndex = listBox.Items.Cast<Types.LinePatternElement>().IndexOf(PersistentValue, 0).FirstOr(-1);
       listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
     }
 

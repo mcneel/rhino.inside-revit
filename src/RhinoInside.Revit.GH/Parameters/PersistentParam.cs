@@ -207,10 +207,17 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       get
       {
-        return PersistentData.PathCount == 1 &&
+        var value = PersistentData.PathCount == 1 &&
           PersistentData.DataCount == 1 ?
           PersistentData.get_FirstItem(false) :
           default;
+
+        value = (T) value?.Duplicate();
+
+        if (value is Types.IGH_ReferenceData data)
+          data.LoadReferencedData();
+
+        return value;
       }
     }
     #endregion

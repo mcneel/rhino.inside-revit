@@ -51,17 +51,21 @@ namespace RhinoInside.Revit.GH.Parameters
       if (SourceCount != 0 || Revit.ActiveUIDocument is null)
         return;
 
-      var listBox = new ListBox();
-      listBox.BorderStyle = BorderStyle.FixedSingle;
-      listBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
-      listBox.Height = (int) (100 * GH_GraphicsUtil.UiScale);
+      var listBox = new ListBox
+      {
+        Sorted = true,
+        BorderStyle = BorderStyle.FixedSingle,
+        Width = (int) (200 * GH_GraphicsUtil.UiScale),
+        Height = (int) (100 * GH_GraphicsUtil.UiScale)
+      };
       listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
-      listBox.Sorted = true;
 
-      var viewTypeBox = new ComboBox();
-      viewTypeBox.DropDownStyle = ComboBoxStyle.DropDownList;
-      viewTypeBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
-      viewTypeBox.Tag = listBox;
+      var viewTypeBox = new ComboBox
+      {
+        DropDownStyle = ComboBoxStyle.DropDownList,
+        Width = (int) (200 * GH_GraphicsUtil.UiScale),
+        Tag = listBox
+      };
       viewTypeBox.SelectedIndexChanged += ViewTypeBox_SelectedIndexChanged;
       viewTypeBox.SetCueBanner("View type filter…");
 
@@ -82,13 +86,15 @@ namespace RhinoInside.Revit.GH.Parameters
             viewTypeBox.Items.Add(new Types.ViewFamily(view.Key));
         }
 
-        if (Current is Types.View current)
+        var viewFamily = (PersistentValue?.Type?.Value as DB.ViewFamilyType)?.ViewFamily ??
+          DB.ViewFamily.Invalid;
+
+        if (viewFamily != DB.ViewFamily.Invalid)
         {
           var familyIndex = 0;
-          foreach (var viewFamily in viewTypeBox.Items.Cast<Types.ViewFamily>())
+          foreach (var family in viewTypeBox.Items.Cast<Types.ViewFamily>())
           {
-            var type = (DB.ViewFamilyType) current.Type;
-            if (type.ViewFamily == viewFamily.Value)
+            if (family.Value == viewFamily)
             {
               viewTypeBox.SelectedIndex = familyIndex;
               break;
@@ -132,7 +138,7 @@ namespace RhinoInside.Revit.GH.Parameters
           listBox.Items.Add(new Types.View(view));
       }
 
-      listBox.SelectedIndex = listBox.Items.OfType<Types.View>().IndexOf(Current, 0).FirstOr(-1);
+      listBox.SelectedIndex = listBox.Items.OfType<Types.View>().IndexOf(PersistentValue, 0).FirstOr(-1);
       listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
     }
 

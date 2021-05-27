@@ -22,18 +22,6 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override T PreferredCast(object data) => data is R ? Types.Element.FromValue(data) as T : null;
 
-    protected T Current
-    {
-      get
-      {
-        var current = (SourceCount == 0 && PersistentDataCount == 1) ? PersistentData.get_FirstItem(true) : default;
-
-        return current is Types.IGH_ReferenceData reference && !reference.LoadReferencedData() ?
-          default :
-          current;
-      }
-    }
-
     internal static IEnumerable<Types.IGH_Element> ToElementIds(IGH_Structure data) =>
       data.AllData(true).
       OfType<Types.IGH_Element>().
