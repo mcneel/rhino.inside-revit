@@ -19,6 +19,7 @@ Some of the changes mentioned in sections below, might break your existing Grass
 * Changed default snap spacing from 1/16" to 3' and from 1mm to 1m.
 * Now 'Category Identity' returns "ParentName\Name" as 'Name' for subCategories.
 * Now 'Query Categories' returns elements sorted by Id as any other Query component.
+* Enabled the IconMode UI on parameters.
 
 ### Fixes
 * Fixed `Interval.Scale` extension method.
@@ -29,6 +30,7 @@ Some of the changes mentioned in sections below, might break your existing Grass
 * Fixed 'Query Views' when filtered by 'Family'.
 * Fixed a bug on Import dialog, it was showing same family multiple times.
 * Changed the way we obtain Revit document Title, now is always without extension.
+* Fixed a data-mismatch problem on 'Element Geometry' component.
 
 {% include ltr/release-header.html version="0.6" time="05/20/2021" %}
 
