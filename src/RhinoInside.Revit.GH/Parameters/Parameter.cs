@@ -72,6 +72,8 @@ namespace RhinoInside.Revit.GH.Parameters
 
     private void RefreshCategoryList(ComboBox categoriesBox, DB.CategoryType categoryType)
     {
+      if (Revit.ActiveUIDocument is null) return;
+
       var categories = Revit.ActiveUIDocument.Document.Settings.Categories.Cast<DB.Category>().Where(x => x.AllowsBoundParameters);
 
       if (categoryType != DB.CategoryType.Invalid)
@@ -93,6 +95,8 @@ namespace RhinoInside.Revit.GH.Parameters
 
     private void RefreshParametersList(ListBox listBox, ComboBox categoriesBox)
     {
+      if (Revit.ActiveUIDocument is null) return;
+
       var doc = Revit.ActiveUIDocument.Document;
       var selectedIndex = -1;
 
@@ -203,7 +207,7 @@ namespace RhinoInside.Revit.GH.Parameters
         if (data.Value is DB.Parameter parameter && parameter.Definition is DB.Definition definition)
         {
           return parameter.HasValue ?
-            $"{definition.Name} : {parameter.AsValueString()}" :
+            $"{definition.Name} : {(parameter.StorageType == DB.StorageType.String ? parameter.AsString() : parameter.AsValueString())}" :
             $"{definition.Name} : <null>";
         }
       }
