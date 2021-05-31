@@ -609,9 +609,13 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public string Mark
+    public virtual string Mark
     {
-      get => Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MARK)?.AsString();
+      get => Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MARK) is DB.Parameter parameter &&
+        parameter.HasValue ?
+        parameter.AsString() :
+        default;
+
       set
       {
         if (value is object)

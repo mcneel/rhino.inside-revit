@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         var type = GetType();
         var name = type.GetTypeInfo().GetCustomAttribute(typeof(Kernel.Attributes.NameAttribute)) as Kernel.Attributes.NameAttribute;
-        return name?.Name ?? type.Name;
+        return $"Revit {name?.Name ?? type.Name}";
       }
     }
     string IGH_Goo.TypeDescription => $"Represents a Revit {((IGH_Goo) this).TypeName.ToLowerInvariant()}";

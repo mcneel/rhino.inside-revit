@@ -8,7 +8,7 @@ using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using RhinoInside.Revit.External.DB;
 using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.External.DB.Schemas;
+using EDBS = RhinoInside.Revit.External.DB.Schemas;
 using DB = Autodesk.Revit.DB;
 using DBX = RhinoInside.Revit.External.DB;
 
@@ -37,15 +37,15 @@ namespace RhinoInside.Revit.GH.Types
 
     public override string ToString()
     {
-      var TypeName = $"Revit {((IGH_Goo) this).TypeName}";
+      var TypeName = ((IGH_Goo) this).TypeName;
 
       if (!IsReferencedData)
-        return $"{TypeName} : {DisplayName}";
+        return DisplayName;
 
       var tip = IsValid ?
       (
         IsReferencedDataLoaded ?
-        $"{TypeName} : {DisplayName}" :
+        DisplayName :
         $"Unresolved {TypeName} : {UniqueID}"
       ) :
       $"Invalid {TypeName}" + (Id is object ? $" : {Id.IntegerValue}" : string.Empty);
@@ -185,7 +185,7 @@ namespace RhinoInside.Revit.GH.Types
             var description = string.Empty;
             if (parameter.Definition is DB.Definition definition)
             {
-              DataType dataType = definition.GetDataType();
+              EDBS.DataType dataType = definition.GetDataType();
               description = dataType.Label.ToLower();
 
               if (string.IsNullOrEmpty(description))
@@ -201,7 +201,7 @@ namespace RhinoInside.Revit.GH.Types
               description = "read only " + description;
 
             description = $"{parameterClass} {description} parameter.{Environment.NewLine}{Environment.NewLine}";
-            description += $"ParameterId : {((ParameterId)parameter.GetTypeId()).FullName}";
+            description += $"ParameterId : {((EDBS.ParameterId)parameter.GetTypeId()).FullName}";
 
             if(parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
               description += $"{Environment.NewLine}BuiltInParameter : {builtInParameter.ToStringGeneric()}";

@@ -26,13 +26,55 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if(Value is DB.ElementType elementType)
-           return $"{elementType.GetFamilyName()} : {elementType.Name}";
+        if (Value is DB.ElementType type)
+        {
+          var displayName = string.Empty;
+
+          if (type.Category is DB.Category category)
+            displayName += category.FullName();
+          displayName += " : ";
+
+          var familyName = type.GetFamilyName();
+          if (!string.IsNullOrEmpty(familyName))
+            displayName += familyName;
+          displayName += " : ";
+
+          displayName += type.Name;
+
+          if
+          (
+            type.get_Parameter(DB.BuiltInParameter.ALL_MODEL_TYPE_MARK) is DB.Parameter parameter &&
+            parameter.HasValue
+          )
+          {
+            var mark = parameter.AsString();
+            if (!string.IsNullOrEmpty(mark))
+              displayName += $" [{mark}]";
+          }
+
+          return displayName;
+        }
 
         return base.DisplayName;
       }
     }
 
+
     public string FamilyName => Value?.GetFamilyName();
+
+    #region Identity Data
+    public override string Mark
+    {
+      get => Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_TYPE_MARK) is DB.Parameter parameter &&
+        parameter.HasValue ?
+        parameter.AsString() :
+        default;
+      set
+      {
+        if (value is object)
+          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_TYPE_MARK)?.Set(value);
+      }
+    }
+    #endregion
   }
 }
