@@ -29,7 +29,7 @@ namespace RhinoInside.Revit.GH.Components
       ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
       ParamDefinition.Create<Parameters.Category>("Category", "C", string.Empty, GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_String>("Family Name", "FN", string.Empty, GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Param_String>("Name", "N",string.Empty, GH_ParamAccess.item,optional: true),
+      ParamDefinition.Create<Param_String>("Name", "N",string.Empty, GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true),
     };
 
@@ -41,27 +41,21 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
-        return;
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
+      if (!Params.TryGetData(DA, "Category", out Types.Category category)) return;
+      if (!Params.TryGetData(DA, "Family Name", out string familyName)) return;
+      if (!Params.TryGetData(DA, "Name", out string name)) return;
+      if (!Params.TryGetData(DA, "Filter", out DB.ElementFilter filter)) return;
 
-      var categoryId = default(DB.ElementId);
-      DA.GetData("Category", ref categoryId);
-
-      string familyName = null;
-      DA.GetData("Family Name", ref familyName);
-
-      string name = null;
-      DA.GetData("Name", ref name);
-
-      DB.ElementFilter filter = null;
-      DA.GetData("Filter", ref filter);
+      if (!(category?.Document is null || doc.Equals(category.Document)))
+        throw new System.ArgumentException("Wrong Document.", "Category");
 
       using (var collector = new DB.FilteredElementCollector(doc))
       {
         var elementCollector = collector.WherePasses(ElementFilter);
 
-        if (categoryId is object)
-          elementCollector.WhereCategoryIdEqualsTo(categoryId);
+        if (category is object)
+          elementCollector.WhereCategoryIdEqualsTo(category.Id);
 
         if (filter is object)
           elementCollector = elementCollector.WherePasses(filter);
