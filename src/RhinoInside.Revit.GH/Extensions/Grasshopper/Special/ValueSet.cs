@@ -427,12 +427,14 @@ namespace Grasshopper.Special
       const int ItemHeight = 18;
       const int FootnoteHeight = 18;
       const int ScrollerWidth = 8;
-      int PaddingLeft => Owner.IconDisplayMode == GH_IconDisplayMode.application ? 0 : 26;
+      int PaddingLeft => Owner.IconDisplayMode == GH_IconDisplayMode.application ? 0 : 30;
+
+      Rectangle AdjustedBounds => GH_Convert.ToRectangle(Bounds);
 
       Rectangle CaptionBounds => new Rectangle
       (
-        (int) Bounds.X + 2 + PaddingLeft, (int) Bounds.Y + 1,
-        (int) Bounds.Width - 4 - PaddingLeft, CaptionHeight - 2
+        AdjustedBounds.X + 2 + PaddingLeft, AdjustedBounds.Y + 1,
+        AdjustedBounds.Width - 4 - PaddingLeft, CaptionHeight - 2
       );
 
       Rectangle FootnoteBounds => new Rectangle
@@ -443,8 +445,8 @@ namespace Grasshopper.Special
 
       Rectangle ListBounds => new Rectangle
       (
-        (int) Bounds.X + 2 + PaddingLeft, (int) Bounds.Y + CaptionHeight,
-        (int) Bounds.Width - 4 - PaddingLeft, (int) Bounds.Height - CaptionHeight - FootnoteHeight
+        AdjustedBounds.X + PaddingLeft, AdjustedBounds.Y + CaptionHeight,
+        AdjustedBounds.Width - PaddingLeft, AdjustedBounds.Height - CaptionHeight - FootnoteHeight
       );
 
       Rectangle ScrollerBounds
@@ -458,15 +460,15 @@ namespace Grasshopper.Special
             var factor = (float) scrollerBounds.Height / total;
             if (factor < 1.0)
             {
-              var scrollSize = Math.Max((scrollerBounds.Height) * factor, ItemHeight);
+              var scrollSize = Math.Max(scrollerBounds.Height * factor, ItemHeight);
               var position = ((scrollerBounds.Height - scrollSize) * ScrollRatio);
-              return new Rectangle
+              return GH_Convert.ToRectangle(new RectangleF
               (
                 scrollerBounds.Right - ScrollerWidth - 2,
-                scrollerBounds.Top + (int) Math.Round(position),
+                scrollerBounds.Top + position,
                 ScrollerWidth,
-                (int) Math.Round(scrollSize)
-              );
+                scrollSize
+              ));
             }
           }
 
@@ -507,7 +509,7 @@ namespace Grasshopper.Special
               capsule.AddOutputGrip(OutputGrip.Y);
               capsule.Render(graphics, Selected, Owner.Locked, (Owner as IGH_PreviewObject)?.Hidden != false);
 
-              var iconBox = (RectangleF) capsule.Box_Content;
+              var iconBox = capsule.Box_Content;
               iconBox.X += 3;
               iconBox.Y += 2;
 
@@ -517,7 +519,7 @@ namespace Grasshopper.Special
               if (Owner.IconDisplayMode == GH_IconDisplayMode.icon && Owner.IconCapableUI)
               {
                 var icon = Owner.Locked ? Owner.Icon_24x24_Locked : Owner.Icon_24x24;
-                capsule.RenderEngine.RenderIcon(graphics, icon, iconBox);
+                capsule.RenderEngine.RenderIcon(graphics, icon, iconBox, 1);
 
                 if (Owner.Obsolete)
                   GH_GraphicsUtil.RenderObjectOverlay(graphics, Owner, iconBox);
@@ -559,7 +561,6 @@ namespace Grasshopper.Special
 
               {
                 var clip = ListBounds;
-                clip.Inflate(-2, 0);
 
                 Brush alternateBrush = null;
                 if (GH_Canvas.ZoomFadeMedium > 0 /*&& Owner.DataType == GH_ParamData.remote*/)
@@ -581,12 +582,20 @@ namespace Grasshopper.Special
                 using (var nameFormat = new StringFormat(StringFormatFlags.NoWrap) { LineAlignment = StringAlignment.Center })
                 using (var typeFormat = new StringFormat(StringFormatFlags.NoWrap) { LineAlignment = StringAlignment.Center, Alignment = StringAlignment.Far })
                 {
-                  var itemBounds = new Rectangle((int) clip.X, (int) clip.Y, (int) clip.Width, (int) 18);
+                  var itemBounds = new RectangleF(clip.X, clip.Y, clip.Width, ItemHeight);
                   int index = 0;
                   foreach (var item in Owner.ListItems)
                   {
                     if (index++ % 2 != 0)
                       graphics.FillRectangle(alternateBrush, itemBounds);
+
+                    var nameBounds = new RectangleF(itemBounds.X + 22, itemBounds.Y, itemBounds.Width - 22, itemBounds.Height);
+
+                    if (GH_Canvas.ZoomFadeMedium > 0 && clip.Width > 250f)
+                    {
+                      var typeBounds = nameBounds; typeBounds.Width -= 2;
+                      graphics.DrawString(item.Value.TypeName, GH_FontServer.StandardAdjusted, Brushes.LightGray, typeBounds, typeFormat);
+                    }
 
                     if (item.Selected)
                     {
@@ -594,19 +603,11 @@ namespace Grasshopper.Special
                       {
                         var highlightBounds = itemBounds;
                         highlightBounds.Inflate(-1, -1);
-                        GH_GraphicsUtil.RenderHighlightBox(graphics, highlightBounds, 2, true, true);
+                        GH_GraphicsUtil.RenderHighlightBox(graphics, GH_Convert.ToRectangle(highlightBounds), 2, true, true);
                       }
 
                       var markBounds = new RectangleF(itemBounds.X, itemBounds.Y, 22, itemBounds.Height);
                       RenderCheckMark(graphics, markBounds, textColor);
-                    }
-
-                    var nameBounds = new RectangleF(itemBounds.X + 22, itemBounds.Y, itemBounds.Width - 22, itemBounds.Height);
-
-                    if (GH_Canvas.ZoomFadeMedium > 0 && ListBounds.Width > 300)
-                    {
-                      var typeBounds = nameBounds; typeBounds.Width -= 2;
-                      graphics.DrawString(item.Value.TypeName, GH_FontServer.StandardAdjusted, Brushes.LightGray, typeBounds, typeFormat);
                     }
 
                     {
@@ -630,13 +631,20 @@ namespace Grasshopper.Special
 
                 if (GH_Canvas.ZoomFadeMedium > 0 /*&& Owner.DataType == GH_ParamData.remote*/)
                 {
-                  graphics.DrawRectangle(Pens.Black, clip.X, clip.Y, clip.Width, clip.Height);
+                  using (var edge = new Pen(style.Edge))
+                    graphics.DrawRectangle
+                    (
+                      edge,
+                      clip.X, clip.Y,
+                      clip.Width, clip.Height
+                    );
+
                   GH_GraphicsUtil.ShadowHorizontal(graphics, clip.Left, clip.Right, clip.Top);
                 }
                 else
                 {
-                  GH_GraphicsUtil.EtchFadingHorizontal(graphics, (int) bounds.Left, (int) bounds.Right, (int) (bounds.Top + 20), (int) (0.8 * alpha), (int) (0.3 * alpha));
-                  GH_GraphicsUtil.EtchFadingHorizontal(graphics, (int) bounds.Left, (int) bounds.Right, (int) (bounds.Bottom - 16), (int) (0.8 * alpha), (int) (0.3 * alpha));
+                  GH_GraphicsUtil.EtchFadingHorizontal(graphics, clip.Left, clip.Right, clip.Top, (int) (0.8 * alpha), (int) (0.3 * alpha));
+                  GH_GraphicsUtil.EtchFadingHorizontal(graphics, clip.Left, clip.Right, clip.Bottom + 1, (int) (0.8 * alpha), (int) (0.3 * alpha));
                 }
 
                 graphics.DrawString($"{Owner.ListItems.Count} items", GH_FontServer.StandardAdjusted, Brushes.Gray, FootnoteBounds, GH_TextRenderingConstants.FarCenter);
@@ -887,6 +895,8 @@ namespace Grasshopper.Special
         if (goo is RhinoInside.Revit.GH.Types.IGH_ReferenceData id) id.UnloadReferencedData();
         else if (goo is IGH_GeometricGoo geo) geo.ClearCaches();
       }
+
+      ListItems.Clear();
     }
 
     protected void ResetPersistentData(IEnumerable<T> list, string name)
@@ -1065,6 +1075,12 @@ namespace Grasshopper.Special
       return (score.Match * 0.5, score.TokenRatio * 0.5, score.Match / (double) value.Length);
     }
 
+    protected virtual void SortItems()
+    {
+      // Show elements sorted Alphabetically.
+      ListItems.Sort((x, y) => string.CompareOrdinal(x.Name, y.Name));
+    }
+
     public sealed override void PostProcessData()
     {
       LoadVolatileData();
@@ -1073,8 +1089,7 @@ namespace Grasshopper.Special
 
       ProcessVolatileData();
 
-      // Show elements sorted Alphabetically.
-      ListItems.Sort((x, y) => string.CompareOrdinal(x.Name, y.Name));
+      SortItems();
 
       // Order by fuzzy token if suits.
       if (!string.IsNullOrEmpty(NickName) && RhinoInside.Revit.Operator.CompareMethodFromPattern(NickName) == RhinoInside.Revit.Operator.CompareMethod.Equals)
