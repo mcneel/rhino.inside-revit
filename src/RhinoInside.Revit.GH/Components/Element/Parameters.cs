@@ -177,7 +177,8 @@ namespace RhinoInside.Revit.GH
       if (goo is Types.ParameterValue value)
         goo = new Types.ParameterKey(value.Document, value.Value.Id);
 
-      if (goo is Types.ParameterKey parameterKey)
+      if (goo is Types.ParameterId id) parameter = element.GetParameter(id.Value);
+      else if (goo is Types.ParameterKey parameterKey)
       {
         if (parameterKey.Document.Equals(element.Document)) key = parameterKey.Id;
         else

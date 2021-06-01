@@ -36,12 +36,17 @@ namespace RhinoInside.Revit.GH.Types
           document = element.Document;
           parameterId = element.Id;
         }
+        else if (source is ParameterId id)
+        {
+          source = (DB.BuiltInParameter) id.Value;
+        }
         else source = goo.ScriptVariable();
       }
 
       switch (source)
       {
         case int integer:            parameterId = new DB.ElementId(integer); break;
+        case DB.BuiltInParameter bip:parameterId = new DB.ElementId(bip); break;
         case DB.ElementId id:        parameterId = id; break;
         case DB.Parameter parameter: SetValue(parameter.Element.Document, parameter.Id); return true;
       }
@@ -214,7 +219,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Parameter Value")]
-  public class ParameterValue : ReferenceObject, IEquatable<ParameterValue>, IGH_Goo
+  public class ParameterValue : ReferenceObject, IEquatable<ParameterValue>, IGH_Goo, IGH_QuickCast, IConvertible
   {
     #region System.Object
     public bool Equals(ParameterValue other)
@@ -312,6 +317,110 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     object IGH_Goo.ScriptVariable() => Value.AsGoo() is IGH_Goo goo ? goo.ScriptVariable() : default;
+    #endregion
+
+    #region IGH_QuickCast
+    GH_QuickCastType IGH_QuickCast.QC_Type
+    {
+      get
+      {
+        //return GH_QuickCastType.text;
+        switch (Value.ToConvertible())
+        {
+          default:
+          case bool     _: return GH_QuickCastType.@bool;
+          case char     _: return GH_QuickCastType.@int;
+          case sbyte    _: return GH_QuickCastType.@int;
+          case byte     _: return GH_QuickCastType.@int;
+          case short    _: return GH_QuickCastType.@int;
+          case ushort   _: return GH_QuickCastType.@int;
+          case int      _: return GH_QuickCastType.@int;
+          case uint     _: return GH_QuickCastType.@int;
+          case long     _: return GH_QuickCastType.@int;
+          case ulong    _: return GH_QuickCastType.@int;
+          case float    _: return GH_QuickCastType.num;
+          case double   _: return GH_QuickCastType.num;
+          case decimal  _: return GH_QuickCastType.num;
+          case DateTime _: return GH_QuickCastType.num;
+          case string   _: return GH_QuickCastType.text;
+        }
+      }
+    }
+
+    double IGH_QuickCast.QC_Distance(IGH_QuickCast other)
+    {
+      var quickCast = Value.AsGoo() as IGH_QuickCast;
+      var quickType = quickCast?.QC_Type ?? (GH_QuickCastType) (-1);
+
+      switch (quickType)
+      {
+        case GH_QuickCastType.@bool:    return Math.Abs((quickCast.QC_Bool() ? 0.0 : 1.0) - (other.QC_Bool() ? 0.0 : 1.0));
+        case GH_QuickCastType.@int:     return Math.Abs(((double) quickCast.QC_Int()) - ((double) other.QC_Int()));
+        case GH_QuickCastType.num:      return Math.Abs(((double) quickCast.QC_Num()) - ((double) other.QC_Num()));
+        case GH_QuickCastType.text:
+          var thisText = quickCast.QC_Text(); var otherText = other.QC_Text();
+          var dist0 = Grasshopper.Kernel.GH_StringMatcher.LevenshteinDistance(thisText, otherText);
+          var dist1 = Grasshopper.Kernel.GH_StringMatcher.LevenshteinDistance(thisText.ToUpperInvariant(), otherText.ToUpperInvariant());
+          return 0.5 * (dist0 + dist1);
+        case GH_QuickCastType.col:
+          var thisCol = quickCast.QC_Col(); var otherCol = other.QC_Col();
+          var colorRGBA = new Rhino.Geometry.Point4d(thisCol.R - otherCol.R, thisCol.G - otherCol.G, thisCol.B - otherCol.B, thisCol.A - otherCol.A);
+          colorRGBA *= 1.0 / 255.0;
+          return Math.Sqrt(colorRGBA.X * colorRGBA.X + colorRGBA.Y * colorRGBA.Y + colorRGBA.Z * colorRGBA.Z + colorRGBA.W * colorRGBA.W);
+        case GH_QuickCastType.pt:       return quickCast.QC_Pt().DistanceTo(other.QC_Pt());
+        case GH_QuickCastType.vec:      return ((Rhino.Geometry.Point3d) quickCast.QC_Vec()).DistanceTo((Rhino.Geometry.Point3d) other.QC_Vec());
+        case GH_QuickCastType.complex:  throw new InvalidOperationException();
+        case GH_QuickCastType.interval: throw new InvalidOperationException();
+        case GH_QuickCastType.matrix:   throw new InvalidOperationException();
+        default:                        throw new InvalidOperationException();
+      }
+    }
+
+    int IGH_QuickCast.QC_Hash() => Value.ToConvertible()?.GetHashCode() ?? 0;
+    bool IGH_QuickCast.QC_Bool() => System.Convert.ToBoolean(Value.ToConvertible());
+    int IGH_QuickCast.QC_Int() => System.Convert.ToInt32(Value.ToConvertible());
+    double IGH_QuickCast.QC_Num() => System.Convert.ToDouble(Value.ToConvertible());
+    string IGH_QuickCast.QC_Text() => System.Convert.ToString(Value.ToConvertible());
+    System.Drawing.Color IGH_QuickCast.QC_Col() => System.Drawing.Color.FromArgb(System.Convert.ToInt32(Value.ToConvertible()));
+    Rhino.Geometry.Point3d IGH_QuickCast.QC_Pt() => (Value.AsGoo() as IGH_QuickCast)?.QC_Pt() ??
+      throw new InvalidCastException($"{GetType().Name} cannot be cast to {nameof(Rhino.Geometry.Point3d)}");
+    Rhino.Geometry.Vector3d IGH_QuickCast.QC_Vec() => (Value.AsGoo() as IGH_QuickCast)?.QC_Vec() ??
+      throw new InvalidCastException($"{GetType().Name} cannot be cast to {nameof(Rhino.Geometry.Vector3d)}");
+    Complex IGH_QuickCast.QC_Complex() => (Value.AsGoo() as IGH_QuickCast)?.QC_Complex() ??
+      throw new InvalidCastException($"{GetType().Name} cannot be cast to {nameof(Complex)}");
+    Rhino.Geometry.Matrix IGH_QuickCast.QC_Matrix() => (Value.AsGoo() as IGH_QuickCast)?.QC_Matrix() ??
+      throw new InvalidCastException($"{GetType().Name} cannot be cast to {nameof(Rhino.Geometry.Matrix)}");
+    Rhino.Geometry.Interval IGH_QuickCast.QC_Interval() => (Value.AsGoo() as IGH_QuickCast)?.QC_Interval() ??
+      throw new InvalidCastException($"{GetType().Name} cannot be cast to {nameof(Rhino.Geometry.Interval)}");
+    int IGH_QuickCast.QC_CompareTo(IGH_QuickCast other)
+    {
+      var quickCast = Value.AsGoo() as IGH_QuickCast;
+      var quickType = quickCast?.QC_Type ?? (GH_QuickCastType) (-1);
+
+      if (quickType != other.QC_Type) quickType.CompareTo(other.QC_Type);
+      return quickCast.QC_CompareTo(other);
+    }
+    #endregion
+
+    #region IConvertible
+    TypeCode IConvertible.GetTypeCode() => TypeCode.Object;
+
+    object IConvertible.ToType(Type conversionType, IFormatProvider provider) => Value.ToConvertible().ToType(conversionType, provider);
+    bool IConvertible.ToBoolean(IFormatProvider provider) => Value.ToConvertible().ToBoolean(provider);
+    sbyte IConvertible.ToSByte(IFormatProvider provider) => Value.ToConvertible().ToSByte(provider);
+    byte IConvertible.ToByte(IFormatProvider provider) => Value.ToConvertible().ToByte(provider);
+    char IConvertible.ToChar(IFormatProvider provider) => Value.ToConvertible().ToChar(provider);
+    short IConvertible.ToInt16(IFormatProvider provider) => Value.ToConvertible().ToInt16(provider);
+    ushort IConvertible.ToUInt16(IFormatProvider provider) => Value.ToConvertible().ToUInt16(provider);
+    uint IConvertible.ToUInt32(IFormatProvider provider) => Value.ToConvertible().ToUInt32(provider);
+    int IConvertible.ToInt32(IFormatProvider provider) => Value.ToConvertible().ToInt32(provider);
+    long IConvertible.ToInt64(IFormatProvider provider) => Value.ToConvertible().ToInt64(provider);
+    ulong IConvertible.ToUInt64(IFormatProvider provider) => Value.ToConvertible().ToUInt64(provider);
+    float IConvertible.ToSingle(IFormatProvider provider) => Value.ToConvertible().ToSingle(provider);
+    double IConvertible.ToDouble(IFormatProvider provider) => Value.ToConvertible().ToDouble(provider);
+    decimal IConvertible.ToDecimal(IFormatProvider provider) => Value.ToConvertible().ToDecimal(provider);
+    DateTime IConvertible.ToDateTime(IFormatProvider provider) => Value.ToConvertible().ToDateTime(provider);
+    string IConvertible.ToString(IFormatProvider provider) => Value.ToConvertible().ToString(provider);
     #endregion
 
     #region DocumentObject
