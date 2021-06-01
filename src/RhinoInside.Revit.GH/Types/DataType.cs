@@ -402,4 +402,61 @@ namespace RhinoInside.Revit.GH.Types
       catch (ArgumentException) { return false; }
     }
   }
+
+  [
+    ComponentGuid("6FBA8F56-FDFA-4EA4-90C1-52CCB29DF32D"),
+    Name("Built-In Category"),
+    Description("Contains a collection of Revit built-in category values"),
+  ]
+  public class CategoryId : DataType<EDBS.CategoryId>, IGH_Enumerate
+  {
+    public CategoryId() { }
+    public CategoryId(EDBS.CategoryId value) : base(value) { }
+
+    static CategoryId[] enumValues;
+    public static IReadOnlyCollection<CategoryId> EnumValues
+    {
+      get
+      {
+        if (enumValues is null)
+        {
+          enumValues = typeof(EDBS.CategoryId).
+            GetProperties(BindingFlags.Public | BindingFlags.Static).
+            Where(x => x.PropertyType == typeof(EDBS.CategoryId)).
+            Select(x => new CategoryId((EDBS.CategoryId) x.GetValue(null))).
+            OrderBy(x => x.Value.Label).
+            ToArray();
+        }
+
+        return enumValues;
+      }
+    }
+
+    public override bool CastFrom(object source)
+    {
+      if (source is IGH_Goo goo)
+        source = goo.ScriptVariable();
+
+      try
+      {
+        switch (source)
+        {
+#if REVIT_2021
+          case DB.ForgeTypeId f: Value = f; break;
+#endif
+#if !REVIT_2022
+          case int i: Value = (DB.BuiltInCategory) i; break;
+          case DB.BuiltInCategory u: Value = u; break;
+#endif
+          case EDBS.CategoryId v: Value = v; break;
+          case EDBS.DataType s: Value = new EDBS.CategoryId(s.TypeId); break;
+          case string t: Value = new EDBS.CategoryId(t); break;
+          default: return base.CastFrom(source);
+        }
+
+        return true;
+      }
+      catch (ArgumentException) { return false; }
+    }
+  }
 }

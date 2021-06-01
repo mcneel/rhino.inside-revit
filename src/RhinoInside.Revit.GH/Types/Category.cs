@@ -38,12 +38,17 @@ namespace RhinoInside.Revit.GH.Types
           document = element.Document;
           categoryId = element.Id;
         }
+        else if (source is CategoryId id)
+        {
+          source = (DB.BuiltInCategory) id.Value;
+        }
         else source = goo.ScriptVariable();
       }
 
       switch (source)
       {
         case int i:               categoryId = new DB.ElementId(i); break;
+        case DB.BuiltInCategory bic: categoryId = new DB.ElementId(bic); break;
         case DB.ElementId id:     categoryId = id; break;
         case DB.Category c:       SetValue(c.Document(), c.Id); return true;
         case DB.GraphicsStyle s:  SetValue(s.Document, s.GraphicsStyleCategory.Id); return true;

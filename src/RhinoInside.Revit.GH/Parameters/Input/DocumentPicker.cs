@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
-using RhinoInside.Revit.External.DB;
+using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters.Input
 {
-  public abstract class DocumentPicker : GH_ValueList, Kernel.IGH_ElementIdParam
+  #region DocumentValuePicker
+
+  public abstract class DocumentValuePicker : GH_ValueList, Kernel.IGH_ElementIdParam
   {
     #region IGH_ElementIdParam
     protected virtual DB.ElementFilter ElementFilter => null;
@@ -54,7 +56,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
     #endregion
   }
 
-  public abstract class DocumentCategoriesPicker : DocumentPicker
+  public abstract class DocumentCategoriesPicker : DocumentValuePicker
   {
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     public override bool PassesFilter(DB.Document document, DB.ElementId id) => id.IsCategoryId(document);
@@ -142,92 +144,163 @@ namespace RhinoInside.Revit.GH.Parameters.Input
     public AnalyticalCategoriesPicker() { }
   }
 
+  #endregion
 
-  public class DocumentLevelsPicker : DocumentPicker
+  #region DocumentElementPicker
+
+  public abstract class DocumentElementPicker<T> : Grasshopper.Special.ValueSet<T>,
+  Kernel.IGH_ElementIdParam
+  where T : class, IGH_Goo
+  {
+    protected DocumentElementPicker(string name, string nickname, string description, string category, string subcategory) :
+      base(name, nickname, description, category, subcategory)
+    {
+      IconDisplayMode = GH_IconDisplayMode.icon;
+    }
+
+    protected override System.Drawing.Bitmap Icon =>
+      ((System.Drawing.Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
+      base.Icon;
+
+    #region IGH_ElementIdParam
+    protected virtual DB.ElementFilter ElementFilter => null;
+    public virtual bool PassesFilter(DB.Document document, DB.ElementId id)
+    {
+      return ElementFilter?.PassesFilter(document, id) ?? true;
+    }
+
+    bool Kernel.IGH_ElementIdParam.NeedsToBeExpired
+    (
+      DB.Document doc,
+      ICollection<DB.ElementId> added,
+      ICollection<DB.ElementId> deleted,
+      ICollection<DB.ElementId> modified
+    )
+    {
+      // If selected items are modified we need to expire dependant components
+      foreach (var data in VolatileData.AllData(true).OfType<Types.IGH_ElementId>())
+      {
+        if (!doc.IsEquivalent(data.Document))
+          continue;
+
+        if (modified.Contains(data.Id) || deleted.Contains(data.Id))
+          return true;
+      }
+
+      if (SourceCount == 0)
+      {
+        // If an element that pass the filter is added we need to update ListItems
+        var updateListItems = added.Where(id => PassesFilter(doc, id)).Any();
+
+        if (!updateListItems)
+        {
+          // If an item in ListItems is deleted we need to update ListItems
+          foreach (var item in ListItems.Select(x => x.Value).OfType<Types.IGH_ElementId>())
+          {
+            if (!doc.IsEquivalent(item.Document))
+              continue;
+
+            if (modified.Contains(item.Id) || deleted.Contains(item.Id))
+            {
+              updateListItems = true;
+              break;
+            }
+          }
+        }
+
+        if (updateListItems)
+        {
+          ClearData();
+          CollectData();
+          ComputeData();
+          OnDisplayExpired(false);
+        }
+      }
+
+      return false;
+    }
+    #endregion
+  }
+
+  public class DocumentLevelsPicker : DocumentElementPicker<Types.Level>
   {
     public override Guid ComponentGuid => new Guid("BD6A74F3-8C46-4506-87D9-B34BD96747DA");
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.Level));
 
-    public DocumentLevelsPicker()
-    {
-      Category = "Revit";
-      SubCategory = "Input";
-      Name = "Levels Picker";
-      MutableNickName = false;
-      Description = "Provides a Level picker";
-    }
+    public DocumentLevelsPicker() : base
+    (
+      name: "Levels Picker",
+      nickname: "Levels",
+      description: "Provides a Level picker",
+      category: "Revit",
+      subcategory: "Input"
+    )
+    {}
 
-    void RefreshList()
+    protected override void LoadVolatileData()
     {
-      var selectedItems = ListItems.Where(x => x.Selected).Select(x => x.Expression).ToList();
-      ListItems.Clear();
-
-      if (Revit.ActiveDBDocument is DB.Document doc)
+      if (SourceCount == 0)
       {
-        using (var collector = new DB.FilteredElementCollector(doc))
+        m_data.Clear();
+
+        if (Document.TryGetCurrentDocument(this, out var doc))
         {
-          foreach (var level in collector.OfClass(typeof(DB.Level)).Cast<DB.Level>().OrderByDescending(x => x.GetHeight()))
+          using (var collector = new DB.FilteredElementCollector(doc.Value))
           {
-            var referenceId = FullUniqueId.Format(doc.GetFingerprintGUID(), level.UniqueId);
-            var item = new GH_ValueListItem(level.Name, $"\"{ referenceId }\"");
-            item.Selected = selectedItems.Contains(item.Expression);
-            ListItems.Add(item);
+            m_data.AppendRange(collector.OfClass(typeof(DB.Level)).Cast<DB.Level>().Select(x => new Types.Level(x)));
           }
         }
       }
+
+      base.LoadVolatileData();
     }
 
-    protected override void CollectVolatileData_Custom()
+    protected override void SortItems()
     {
-      NickName = "Level";
-      RefreshList();
-      base.CollectVolatileData_Custom();
+      // Show elements sorted Alphabetically.
+      ListItems.Sort((x, y) =>
+      {
+        var result = (int) (x.Value.Value.GetHeight() - y.Value.Value.GetHeight());
+        return result == 0 ? string.CompareOrdinal(x.Name, y.Name) : result;
+      });
     }
   }
 
-  public class DocumentFamiliesPicker : DocumentPicker
+  public class DocumentFamiliesPicker : DocumentElementPicker<Types.Family>
   {
     public override Guid ComponentGuid => new Guid("45CEE087-4194-4E55-AA20-9CC5D2193CE0");
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.Family));
 
-    public DocumentFamiliesPicker()
+    public DocumentFamiliesPicker() : base
+    (
+      name: "Component Families Picker",
+      nickname: "Component Families",
+      description: "Provides a Family picker",
+      category: "Revit",
+      subcategory : "Input"
+    )
+    {}
+
+    protected override void LoadVolatileData()
     {
-      Category = "Revit";
-      SubCategory = "Input";
-      Name = "Component Families Picker";
-      MutableNickName = false;
-      Description = "Provides a Family picker";
-
-      ListMode = GH_ValueListMode.DropDown;
-    }
-
-    void RefreshList()
-    {
-      var selectedItems = ListItems.Where(x => x.Selected).Select(x => x.Expression).ToList();
-      ListItems.Clear();
-
-      if (Revit.ActiveDBDocument is DB.Document doc)
+      if (SourceCount == 0)
       {
-        using (var collector = new DB.FilteredElementCollector(doc))
+        m_data.Clear();
+
+        if (Document.TryGetCurrentDocument(this, out var doc))
         {
-          foreach (var family in collector.OfClass(typeof(DB.Family)).Cast<DB.Family>().OrderBy((x) => $"{x.FamilyCategory.Name} : {x.Name}"))
+          using (var collector = new DB.FilteredElementCollector(doc.Value))
           {
-            var referenceId = FullUniqueId.Format(doc.GetFingerprintGUID(), family.UniqueId);
-            var item = new GH_ValueListItem($"{family.FamilyCategory.Name} : {family.Name}", $"\"{ referenceId }\"");
-            item.Selected = selectedItems.Contains(item.Expression);
-            ListItems.Add(item);
+            m_data.AppendRange(collector.OfClass(typeof(DB.Family)).Cast<DB.Family>().Select(x => new Types.Family(x)));
           }
         }
       }
-    }
 
-    protected override void CollectVolatileData_Custom()
-    {
-      NickName = "Component Family";
-      RefreshList();
-      base.CollectVolatileData_Custom();
+      base.LoadVolatileData();
     }
   }
+
+  #endregion
 }

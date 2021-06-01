@@ -22,36 +22,39 @@ namespace RhinoInside.Revit.GH.Parameters
     protected override Types.IGH_Document PreferredCast(object data) => Types.Document.FromValue(data);
     protected override Types.IGH_Document InstantiateT() => new Types.Document();
 
+    public static bool TryGetCurrentDocument(IGH_ActiveObject activeObject, out Types.Document document)
+    {
+      document = Types.Document.FromValue(Revit.ActiveDBDocument);
+      if (document?.Value is null)
+      {
+        if (activeObject.GetTopLevelObject() is IGH_ActiveObject active)
+        {
+          if (document is null)
+            active.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "There is no current Revit document or is not available");
+          else
+            active.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Document '{document.DisplayName}' is not available");
+        }
+
+        return false;
+      }
+
+      // In case the user has more than one document open we show which one this component is working on
+      if (Revit.ActiveDBApplication.Documents.Size > 1)
+      {
+        if (activeObject.GetTopLevelObject() is IGH_Component active)
+          active.AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Using current document '{document.Title}'");
+      }
+      return true;
+    }
+
     public static bool TryGetDocumentOrCurrent(IGH_Component component, IGH_DataAccess DA, string name, out Types.Document document)
     {
-      document = default;
       var _Document_ = name is null ? -1 : component.Params.IndexOfInputParam(name);
       if (_Document_ < 0)
-      {
-        document = Types.Document.FromValue(Revit.ActiveDBDocument);
-        if (document?.Value is null)
-        {
-          if (component.GetTopLevelObject() is IGH_ActiveObject active)
-          {
-            if (document is null)
-              active.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "There is no current Revit document or is not available");
-            else
-              active.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Document '{document.DisplayName}' is not available");
-          }
+        return TryGetCurrentDocument(component, out document);
 
-          return false;
-        }
-
-        // In case the user has more than one document open we show which one this component is working on
-        if (Revit.ActiveDBApplication.Documents.Size > 1)
-        {
-          if (component.GetTopLevelObject() is IGH_Component active)
-            active.AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Using current document '{document.Title}'");
-        }
-      }
-      else return DA.GetData(_Document_, ref document);
-
-      return true;
+      document = default;
+      return DA.GetData(_Document_, ref document);
     }
 
     public static bool GetDataOrDefault(IGH_Component component, IGH_DataAccess DA, string name, out DB.Document document)

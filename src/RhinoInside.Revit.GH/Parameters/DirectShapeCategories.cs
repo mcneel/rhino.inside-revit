@@ -1,41 +1,46 @@
 using System;
 using System.Linq;
-using Autodesk.Revit.DB;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Special;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class DirectShapeCategories : GH_ValueList
+  public class DirectShapeCategories : Grasshopper.Special.ValueSet<Types.CategoryId>
   {
     public override Guid ComponentGuid => new Guid("7BAFE137-332B-481A-BE22-09E8BD4C86FC");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.obscure;
 
-    public DirectShapeCategories()
+    protected override System.Drawing.Bitmap Icon =>
+      ((System.Drawing.Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
+      base.Icon;
+
+    public DirectShapeCategories() : base
+    (
+      name: "DirectShape Categories",
+      nickname: "Categories",
+      description: "Provides a picker for direct shape categories",
+      category: "Revit",
+      subcategory: "DirectShape"
+    )
     {
-      Name = "DirectShape Categories";
-      NickName = "Categories";
-      MutableNickName = false;
-      Description = "Provides a picker of a valid DirectShape category";
-      Category = "Revit";
-      SubCategory = "DirectShape";
+      IconDisplayMode = GH_IconDisplayMode.name;
+    }
 
-      ListItems.Clear();
-
-      var ActiveDBDocument = Revit.ActiveDBDocument;
-      if (ActiveDBDocument is null)
-        return;
-
-      var directShapeCategories = ActiveDBDocument.Settings.Categories.Cast<Autodesk.Revit.DB.Category>().Where((x) => DirectShape.IsValidCategoryId(x.Id, ActiveDBDocument));
-      foreach (var group in directShapeCategories.GroupBy((x) => x.CategoryType).OrderBy((x) => x.Key))
+    protected override void LoadVolatileData()
+    {
+      if (SourceCount == 0)
       {
-        foreach (var category in group.OrderBy(x => x.Name))
+        m_data.Clear();
+
+        if (Document.TryGetCurrentDocument(this, out var doc))
         {
-          ListItems.Add(new GH_ValueListItem(category.Name, category.Id.IntegerValue.ToString()));
-          if (category.Id.IntegerValue == (int) BuiltInCategory.OST_GenericModel)
-            SelectItem(ListItems.Count - 1);
+          var categories = Types.CategoryId.EnumValues.
+            Where(x => DB.DirectShape.IsValidCategoryId(new DB.ElementId(x.Value), doc.Value));
+          m_data.AppendRange(categories);
         }
       }
+
+      base.LoadVolatileData();
     }
   }
 }
