@@ -99,7 +99,6 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { Measurable.RotationalPointSpringCoefficient, +1 +1 },
       { Measurable.RotationalLineSpringCoefficient, +1 +1 -1 },
       { Measurable.Displacement, +1 },
-      { Measurable.StructuralVelocity, +1 },
       { Measurable.Acceleration, +1 },
       { Measurable.Energy, +2 },
       { Measurable.ReinforcementLength, +1 },
