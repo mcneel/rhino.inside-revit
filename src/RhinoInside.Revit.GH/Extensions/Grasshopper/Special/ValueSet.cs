@@ -183,13 +183,11 @@ namespace Grasshopper.Special
       return bitmap;
     }
 
-    void IGH_InitCodeAware.SetInitCode(string code) => NickName = code;
+    void IGH_InitCodeAware.SetInitCode(string code) => SearchPattern = code;
 
     protected ValueSet(string name, string nickname, string description, string category, string subcategory) :
       base(name, nickname, description, category, subcategory)
     {
-      ObjectChanged += OnObjectChanged;
-
       // This makes the parameter not turn orange when there is nothing selected.
       Optional = true;
     }
@@ -219,6 +217,8 @@ namespace Grasshopper.Special
 
     protected virtual string GetItemDisplayText(T item) => ((IGH_Goo) item).ToString();
 
+    public string SearchPattern { get; set; } = string.Empty;
+
     public class ListItem
     {
       public ListItem(T goo, string name, bool selected = false)
@@ -244,12 +244,6 @@ namespace Grasshopper.Special
 
     public List<ListItem> ListItems = new List<ListItem>();
     public IEnumerable<ListItem> SelectedItems => ListItems.Where(x => x.Selected);
-
-    private void OnObjectChanged(IGH_DocumentObject sender, GH_ObjectChangedEventArgs e)
-    {
-      if (e.Type == GH_ObjectEventType.NickName)
-        ExpireSolution(true);
-    }
 
     public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
     {
@@ -529,7 +523,7 @@ namespace Grasshopper.Special
                 using
                 (
                   var capsuleName = GH_Capsule.CreateTextCapsule(iconBox, iconBox,
-                                    GH_Palette.Black, Owner.Name,
+                                    GH_Palette.Black, Owner.NickName,
                                     GH_FontServer.LargeAdjusted, GH_Orientation.vertical_center, 3, 6))
                 {
                   capsuleName.Render(graphics, Selected, Owner.Locked, false);
@@ -544,14 +538,14 @@ namespace Grasshopper.Special
               var style = GH_CapsuleRenderEngine.GetImpliedStyle(palette, this);
               var textColor = Color.FromArgb(alpha, style.Text);
 
-              var captionColor = string.IsNullOrEmpty(Owner.NickName) || !Owner.MutableNickName ?
+              var captionColor = string.IsNullOrEmpty(Owner.SearchPattern) ?
                                  Color.FromArgb(alpha / 2, style.Text) : textColor;
 
               using (var nameFill = new SolidBrush(captionColor))
               {
                 graphics.DrawString
                 (
-                  string.IsNullOrEmpty(Owner.NickName) ? "Search…" : Owner.NickName,
+                  string.IsNullOrEmpty(Owner.SearchPattern) ? "Search…" : Owner.SearchPattern,
                   GH_FontServer.LargeAdjusted,
                   nameFill,
                   CaptionBounds,
@@ -800,10 +794,10 @@ namespace Grasshopper.Special
             if (clientBounds.Contains(e.CanvasLocation))
             {
               var canvasLocation = new Point((int) e.CanvasLocation.X, (int) e.CanvasLocation.Y);
-              if (Owner.MutableNickName && CaptionBounds.Contains(canvasLocation))
+              if (CaptionBounds.Contains(canvasLocation))
               {
                 var pattern = new SearchInputBox(this);
-                pattern.ShowTextInputBox(canvas, Owner.NickName, true, true, canvas.Viewport.XFormMatrix(GH_Viewport.GH_DisplayMatrix.CanvasToControl));
+                pattern.ShowTextInputBox(canvas, Owner.SearchPattern, true, true, canvas.Viewport.XFormMatrix(GH_Viewport.GH_DisplayMatrix.CanvasToControl));
                 return GH_ObjectResponse.Handled;
               }
 
@@ -832,23 +826,23 @@ namespace Grasshopper.Special
         public SearchInputBox(ResizableAttributes attributes)
         {
           this.attributes = attributes;
-          var bounds = GH_Convert.ToRectangle(attributes.CaptionBounds);
+          var bounds = attributes.CaptionBounds;
           bounds.X += 2;
           bounds.Width -= 4;
           bounds.Y += 1;
           bounds.Height -= 2;
 
           Bounds = bounds;
-          Font = GH_FontServer.LargeAdjusted;
+          Font = GH_FontServer.StandardAdjusted;
         }
 
         protected override void HandleTextInputAccepted(string text)
         {
-          if (attributes.Owner.NickName == text) return;
+          if (attributes.Owner.SearchPattern == text) return;
 
-          attributes.Owner.RecordUndoEvent("Set NickName");
-          attributes.Owner.NickName = text;
-          attributes.Owner.OnObjectChanged(GH_ObjectEventType.NickName);
+          attributes.Owner.RecordUndoEvent("Set Search Pattern");
+          attributes.Owner.SearchPattern = text;
+          attributes.Owner.OnObjectChanged(GH_ObjectEventType.Custom);
 
           attributes.Owner.ExpireSolution(true);
         }
@@ -856,18 +850,15 @@ namespace Grasshopper.Special
     }
 
     public override void CreateAttributes() => m_attributes = new ResizableAttributes(this);
-    public override void AddedToDocument(GH_Document document)
-    {
-      if (NickName == Name)
-        NickName = string.Empty;
-
-      base.AddedToDocument(document);
-    }
 
     public override bool Read(GH_IReader reader)
     {
       if (!base.Read(reader))
         return false;
+
+      string searchPattern = string.Empty;
+      reader.TryGetString("SearchPattern", ref searchPattern);
+      SearchPattern = searchPattern;
 
       int culling = (int) DefaultCulling;
       reader.TryGetInt32("Culling", ref culling);
@@ -875,10 +866,14 @@ namespace Grasshopper.Special
 
       return true;
     }
+
     public override bool Write(GH_IWriter writer)
     {
       if (!base.Write(writer))
         return false;
+
+      if (!string.IsNullOrEmpty(SearchPattern))
+        writer.SetString("SearchPattern", SearchPattern);
 
       if (Culling != DefaultCulling)
         writer.SetInt32("Culling", (int) Culling);
@@ -967,8 +962,8 @@ namespace Grasshopper.Special
 
       var items = volatileData.Select(goo => new ListItem(goo, GetItemDisplayText(goo), persistentData.Contains(goo)));
 
-      if (RhinoInside.Revit.Operator.CompareMethodFromPattern(NickName) != RhinoInside.Revit.Operator.CompareMethod.Equals)
-        items = items.Where(x => string.IsNullOrEmpty(NickName) || RhinoInside.Revit.Operator.IsSymbolNameLike(x.Name, NickName));
+      if (RhinoInside.Revit.Operator.CompareMethodFromPattern(SearchPattern) != RhinoInside.Revit.Operator.CompareMethod.Equals)
+        items = items.Where(x => string.IsNullOrEmpty(SearchPattern) || RhinoInside.Revit.Operator.IsSymbolNameLike(x.Name, SearchPattern));
 
       ListItems = items.ToList();
 
@@ -1092,8 +1087,8 @@ namespace Grasshopper.Special
       SortItems();
 
       // Order by fuzzy token if suits.
-      if (!string.IsNullOrEmpty(NickName) && RhinoInside.Revit.Operator.CompareMethodFromPattern(NickName) == RhinoInside.Revit.Operator.CompareMethod.Equals)
-        ListItems = ListItems.OrderByDescending(x => FuzzyTokenMatchRatio(NickName, x.Name, false)).ToList();
+      if (!string.IsNullOrEmpty(SearchPattern) && RhinoInside.Revit.Operator.CompareMethodFromPattern(SearchPattern) == RhinoInside.Revit.Operator.CompareMethod.Equals)
+        ListItems = ListItems.OrderByDescending(x => FuzzyTokenMatchRatio(SearchPattern, x.Name, false)).ToList();
 
       PostProcessVolatileData();
     }
@@ -1132,12 +1127,12 @@ namespace Grasshopper.Special
     #region IGH_StateAwareObject
     string IGH_StateAwareObject.SaveState()
     {
-      if (string.IsNullOrEmpty(NickName) && PersistentData.IsEmpty)
+      if (string.IsNullOrEmpty(SearchPattern) && PersistentData.IsEmpty)
         return string.Empty;
 
       var chunk = new GH_LooseChunk("ValueSet");
 
-      chunk.SetString(nameof(NickName), NickName);
+      chunk.SetString(nameof(SearchPattern), SearchPattern);
       PersistentData.Write(chunk.CreateChunk(nameof(PersistentData)));
 
       return chunk.Serialize_Xml();
@@ -1152,7 +1147,7 @@ namespace Grasshopper.Special
           var chunk = new GH_LooseChunk("ValueSet");
           chunk.Deserialize_Xml(state);
 
-          NickName = chunk.GetString(nameof(NickName));
+          SearchPattern = chunk.GetString(nameof(SearchPattern));
           PersistentData.Read(chunk.FindChunk(nameof(PersistentData)));
 
           ExpireSolution(false);
@@ -1161,7 +1156,7 @@ namespace Grasshopper.Special
         catch { }
       }
 
-      NickName = string.Empty;
+      SearchPattern = string.Empty;
       PersistentData.Clear();
     }
     #endregion
