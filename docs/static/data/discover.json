@@ -294,6 +294,23 @@
         ]
     },
     {
+        "title": "Efficient modelmaking with Rhino.Inside.Revit.",
+        "url": "https://youtu.be/KD_Zh_ddNjE",
+        "thumbnail": "https://i3.ytimg.com/vi/KD_Zh_ddNjE/maxresdefault.jpg",
+        "author": "Olivia Morgan",
+        "authorUrl": "https://yourmodel.space/",
+        "description": "BIMThoughts crew chats with Olivia Morgan, the founder of Model Space about all things model making. We cover 3D printing, get a Revit model ready for 3D printing, how awesome Rhino.Inside.Revit is so much more! Be sure to listen to the end to get all of Olivia’s Hot Tips for model making!",
+        "kinds": [
+            "podcast",
+            "video"
+        ],
+        "tags": [
+            "modelmaking",
+            "workflow",
+            "overview"
+        ]
+    },
+    {
         "title": "Cutting Edge Hack: Grasshopper & Dynamo working together within Revit",
         "url": "https://www.youtube.com/watch?v=Oumd-Ye75fE",
         "thumbnail": "/static/images/discover/marcello-hack-video.jpg",
@@ -327,7 +344,7 @@
         ]
     },
     {
-        "title": "BIMThoughts on  Rhino.Inside.Revit and PyRevit",
+        "title": "BIMThoughts on Rhino.Inside.Revit and PyRevit",
         "url": "https://youtu.be/qTysGOdhHzI",
         "thumbnail": "https://i3.ytimg.com/vi/qTysGOdhHzI/maxresdefault.jpg",
         "author": "BIMThoughts Podcast",
