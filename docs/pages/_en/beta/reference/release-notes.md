@@ -10,9 +10,16 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
-{% include ltr/release-header.html version="0.7" time="05/27/2021" %}
+{% include ltr/release-header.html version="0.7" time="06/02/2021" %}
+
+### New Features
+* Added Preview and Fuzzy search to 'Value Picker'.
+* Now 'Built-In Parameter Groups' and 'Built-In Parameters' are a bit more usable.
+* Now 'Levels Picker' and 'Component Families Picker' are a bit more usable.
+* Now 'DirectShape Categories' is a bit more usable.
 
 ### Minor Changes
+* Now Revit 2018.2 and 2019.1 or above is required.
 * Renamed 'Value Set Picker' to 'Value Picker'.
 * Now Linked Elements picker groups selection by document.
 * Improved geometry units conversion, now is faster and more accurate.
@@ -20,6 +27,7 @@ Some of the changes mentioned in sections below, might break your existing Grass
 * Now 'Category Identity' returns "ParentName\Name" as 'Name' for subCategories.
 * Now 'Query Categories' returns elements sorted by Id as any other Query component.
 * Enabled the IconMode UI on parameters.
+* Removed `TypeName` from `ToString` result.
 
 ### Fixes
 * Fixed `Interval.Scale` extension method.
@@ -31,6 +39,13 @@ Some of the changes mentioned in sections below, might break your existing Grass
 * Fixed a bug on Import dialog, it was showing same family multiple times.
 * Changed the way we obtain Revit document Title, now is always without extension.
 * Fixed a data-mismatch problem on 'Element Geometry' component.
+* Fixed Types.ParameterValue tooltip for parameters that contain string values.
+* Fixed 'Query Types' when managing nulls.
+* Fixed pixel jitter on 'Value Picker'.
+
+### API
+* Added conversion from `ParameterId` to `Types.ParameterKey`.
+* Added conversion from `CategoryId` to `Types.Category`.
 
 {% include ltr/release-header.html version="0.6" time="05/20/2021" %}
 
