@@ -1,7 +1,7 @@
 ---
 title: Openings
 order: 48
-thumbnail: /static/images/guides/revit-wip.png
+thumbnail: /static/images/guides/rir-ghpython.png
 group: Modeling
 ---
 
@@ -84,7 +84,3 @@ Use the *Create Shaft* component shared here to create a shaft element from boun
 &nbsp;
 
 {% include ltr/download_comp.html archive='/static/ghnodes/Create Shaft.ghuser' name='Create Shaft' %}
-
-## Creating Openings By Face
-
-{% include ltr/en/wip_note.html %}

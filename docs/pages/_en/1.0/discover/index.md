@@ -22,4 +22,4 @@ Each feature page listed here, is a self-contained article on a specific topic. 
 
 Visitors can download the archive for each article by clicking on the download button included on the page. You can create your own articles, following a similar format, and send us the markdown file of the article, plus all the images and attachments in a package and we can add them to this page. You can also follow the [wiki guidelines]({{ site.metawiki_url | prepend: site.repo_url }}) and submit a PR with your content.
 {% endcapture %}
-{% include ltr/discover_beta.html contents=community_note%}
+{% include ltr/discover_v1.html contents=community_note%}

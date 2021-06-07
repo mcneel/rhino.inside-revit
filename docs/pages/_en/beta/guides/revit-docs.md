@@ -51,9 +51,6 @@ Use the {% include ltr/comp.html uuid='f7d56db0' %} to inspect the work-sharing 
 
 ![]({{ "/static/images/guides/revit-docs-wsidentity.png" | prepend: site.baseurl }})
 
-## Opening Documents
-
-{% include ltr/en/wip_note.html %}
 
 ## Saving Documents
 
@@ -81,15 +78,3 @@ Use the {% include ltr/comp.html uuid='0f7da57e' %} component shown here to acce
 You can chain the {% include ltr/comp.html uuid='5b935ca4' %} component into the {% include ltr/comp.html uuid='ebccfdd8' %} component to grab all the linked documents from all the open documents:
 
 ![]({{ "/static/images/guides/revit-links-querywalls-alldocs.png" | prepend: site.baseurl }})
-
-## Unloading/Reloading Links
-
-{% include ltr/en/wip_note.html %}
-
-## Replacing Links
-
-{% include ltr/en/wip_note.html %}
-
-## Finding Link Instances
-
-{% include ltr/en/wip_note.html %}

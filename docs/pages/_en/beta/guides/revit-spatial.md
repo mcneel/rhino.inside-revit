@@ -1,7 +1,7 @@
 ---
 title: Spatial Elements
 order: 43
-thumbnail: /static/images/guides/revit-wip.png
+thumbnail: /static/images/guides/rir-ghpython.png
 group: Modeling
 ---
 
@@ -124,22 +124,6 @@ Use the **Analyse Area** component shared above to filter the *Area* elements by
 
 ![]({{ "/static/images/guides/revit-spatial16.png" | prepend: site.baseurl }})
 
-## Analyzing HVAC Zones
-
-{% include ltr/en/wip_note.html %}
-
-## Modifying Spatial Elements
-
-{% include ltr/en/wip_note.html %}
-
-## Modifying Separation Lines
-
-{% include ltr/en/wip_note.html %}
-
-## Modifying HVAC Zones
-
-{% include ltr/en/wip_note.html %}
-
 ## Creating Separation Lines
 
 ### Area Boundary Lines
@@ -149,27 +133,3 @@ To create area boundary lines, use the *Create Area Boundaries* component shared
 ![]({{ "/static/images/guides/revit-spatial14.png" | prepend: site.baseurl }})
 
 {% include ltr/download_comp.html archive='/static/ghnodes/Create Area Boundaries.ghuser' name='Create Area Boundaries' %}
-
-## Creating Spatial Elements
-
-{% include ltr/en/wip_note.html %}
-
-### Creating Rooms
-
-{% include ltr/en/wip_note.html %}
-
-### Creating Areas
-
-{% include ltr/en/wip_note.html %}
-
-### Creating Spaces
-
-{% include ltr/en/wip_note.html %}
-
-## Creating Area Schemes
-
-{% include ltr/en/wip_note.html %}
-
-## Creating HVAC Zones
-
-{% include ltr/en/wip_note.html %}

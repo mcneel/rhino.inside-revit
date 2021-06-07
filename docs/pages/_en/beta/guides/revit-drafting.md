@@ -1,11 +1,10 @@
 ---
 title: Drafting
 order: 62
-thumbnail: /static/images/guides/revit-wip.png
+thumbnail: /static/images/guides/rir-ghpython.png
+
 group: Documentation
 ---
-
-{% include ltr/en/wip_note.html %}
 
 ## Filled Regions
 

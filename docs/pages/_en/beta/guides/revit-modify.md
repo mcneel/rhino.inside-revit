@@ -2,10 +2,8 @@
 title: Modify Geometry
 order: 58
 group: Modeling
-thumbnail: /static/images/guides/revit-wip.png
+thumbnail: /static/images/guides/rir-ghpython.png
 ---
-
-{% include ltr/en/wip_note.html %}
 
 ## Flip
 

@@ -6,8 +6,6 @@ thumbnail: /static/images/guides/revit-to-rhino.png
 group: Essentials
 ---
 
-{% include ltr/en/wip_note.html %}
-
 {% include youtube_player.html id="lnKTkVhjztY" %}
 
 

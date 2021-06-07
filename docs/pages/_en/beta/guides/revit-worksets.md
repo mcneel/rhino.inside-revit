@@ -1,7 +1,8 @@
 ---
 title: Worksets
 order: 71
-thumbnail: /static/images/guides/revit-wip.png
+thumbnail: /static/images/guides/rir-ghpython.png
+
 group: Containers
 ---
 

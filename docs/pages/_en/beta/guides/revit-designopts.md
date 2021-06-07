@@ -49,13 +49,6 @@ You can pass a design option to the {% include ltr/comp.html uuid='1b197e82' %} 
 
 ![]({{ "/static/images/guides/revit-designopts-queryelements.png" | prepend: site.baseurl }})
 
-## Setting Element Design Option
-
-{% include ltr/warning_note.html note='Currently there is no support in Revit API to set element Design Options' %}
-
-<!-- https://forums.autodesk.com/t5/revit-api-forum/expose-design-options-settings/m-p/6451629/highlight/true#M17496 -->
-<!-- https://thebuildingcoder.typepad.com/blog/2015/03/list-and-switch-design-options-using-ui-automation.html -->
-
 ## Deleting Design Options
 
 {% capture doptsrem_note %}

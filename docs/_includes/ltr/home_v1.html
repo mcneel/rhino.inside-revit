@@ -6,22 +6,22 @@
 </style>
 
 <div class="home-cover">
-    <div class="home-gallery">
-        <!-- <img src="{{ include.banner_img | prepend: site.baseurl }}" /> -->
+    <!-- <div class="home-gallery">
+        <img src="{{ include.banner_img | prepend: site.baseurl }}" />
         <iframe class="embed-responsive-item"
                 src="https://www.youtube.com/embed/KUHdJqVyhZI?showinfo=0&rel=0&modestbranding=1" frameborder="0"
                 allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
         </iframe>
-    </div>
+    </div> -->
 
-    <!-- <div class="home-contents-box">
+    <div class="home-contents-box">
         <div class="home-contents-textmask">
             <div class="home-contents">
                 <h1>{{ include.banner_header }}</h1>
                 <h3>{{ include.banner_text  }}</h3>
             </div>
         </div>
-    </div> -->
+    </div>
 </div>
 
 <div class="home-dependencies">
@@ -123,6 +123,6 @@
 <div class="home-discover">
     <div class="container">
         <h2 style="font-size: 32px;"><a href="{{ include.discover_link }}">{{ include.discover_header }}</a></h2>
-        {% include ltr/gallery_discover.html keyword='kind: featured' max_items=include.discover_count notags=true nonew=true nohighlight=true show_filters=false %}
+        {% include ltr/gallery_discover_v1.html keyword='kind: featured' max_items=include.discover_count notags=true nonew=true nohighlight=true show_filters=false %}
     </div>
 </div>
