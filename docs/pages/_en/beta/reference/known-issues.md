@@ -41,6 +41,8 @@ When {{ site.terms.rir }} loads, the error below appears.
 
 ![]({{ "/static/images/reference/known-issues-error-200.png" | prepend: site.baseurl }})
 
+### Microsoft.WindowsAPICodePack DLL Conflict
+
 The underlying issue is that one of the `Microsoft.WindowsAPICodePack` or `Microsoft.WindowsAPICodePack.Shell` dlls that are shipped with the conflicting Revit add-in, does not have a public key, and the conflicting add-in is not compiled to use the exact version of these dlls that are shipped with the product. The latest version of both these dlls are installed by Rhino into the Global Assembly Cache (GAC) when Rhino is installed. When {{ site.terms.rir }} and the conflicting add-in are both loaded into Revit, one of them ends up using the incompatible dll version and this causes the error.
 
 ### Workaround
@@ -68,6 +70,27 @@ This normally appears when there is a conflict between Rhino.inside and one or m
 
 If this does not solve the problem, then using the [Search for Conflicting Plugins]({{ site.baseurl }}{% link _en/beta/reference/toubleshooting.md %}#search-for-conflicting-plugins) section.
 
+### Xceed.Wpf.Toolkit.dll DLL Conflict
+
+Revit plugins listed below carry a different (sometimes older) version of the `Xceed.Wpf.Toolkit.dll` library. This causes conflict with the version shipped with Rhino, when it is launching inside Revit, since a different version of this library is already loaded.
+
+Known conflicting plugins are:
+
+- **VRay for Revit** (latest)
+ 
+  By default installed under `C:\Program Files\Chaos Group\V-Ray\V-Ray for Revit`
+
+- **BIMTrack for Revit** (latest)
+  
+  By default installed under `%PROGRAMDATA%\Autodesk\ApplicationPlugins\BimOne.BIMTrack.bundle\Contents\Revit\20XX` or `%APPDATA%\Autodesk\ApplicationPlugins\BimOne.BIMTrack.bundle\Contents\Revit\20XX` if installed per user (replace `20XX` with your Revit version)
+
+#### Workaround
+
+- Close Revit
+- Go to the installed directory for any of the conflicting plugins and rename the `Xceed.Wpf.Toolkit.dll` file to `Xceed.Wpf.Toolkit.dll.bak`
+- Load Revit and {{ site.terms.rir }} again and it should load
+
+
 ## JSON Error
 
 ### Problem
@@ -79,4 +102,3 @@ A Long JSON error shows up as shown below
 ### Workaround
 
 Like the previous -200 error, this is a conflict with another plugin. See the Error - 200 solution for this problem, and the [Search for Conflicting Plugins]({{ site.baseurl }}{% link _en/beta/reference/toubleshooting.md %}#search-for-conflicting-plugins) section below.
-
