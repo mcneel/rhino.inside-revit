@@ -10,6 +10,8 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html version="0.8" time="06/09/2021" %}
+
 {% include ltr/release-header.html version="0.7" time="06/02/2021" %}
 
 ### New Features
