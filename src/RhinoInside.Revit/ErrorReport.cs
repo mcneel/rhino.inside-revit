@@ -352,7 +352,7 @@ namespace RhinoInside.Revit
 
         if (Settings.AddIns.LoadFrom(SafeModeAddinFile, out var SafeModeAddin))
         {
-          SafeModeAddin.First().Assembly = Assembly.GetCallingAssembly().Location;
+          SafeModeAddin.First().Assembly = Assembly.GetExecutingAssembly().Location;
           Settings.AddIns.SaveAs(SafeModeAddin, SafeModeAddinFile);
         }
 

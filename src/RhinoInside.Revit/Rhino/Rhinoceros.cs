@@ -222,7 +222,7 @@ namespace RhinoInside.Revit
         return;
 
       Type[] types = default;
-      try { types = Assembly.GetCallingAssembly().GetTypes(); }
+      try { types = Assembly.GetExecutingAssembly().GetTypes(); }
       catch (ReflectionTypeLoadException ex) { types = ex.Types?.Where(x => x is object).ToArray(); }
 
       // Look for Guests
