@@ -379,7 +379,7 @@ namespace RhinoInside.Revit
           MainInstruction = DaysUntilExpiration < 1 ?
           "Rhino.Inside WIP has expired" :
           $"Rhino.Inside WIP expires in {DaysUntilExpiration} days",
-          MainContent = "While in WIP phase, you do need to update Rhino.Inside addin at least every 45 days.",
+          MainContent = "While in WIP phase, you do need to update Rhino.Inside addin at least every 90 days.",
           FooterText = "Current version: " + DisplayVersion
         }
       )
@@ -504,7 +504,7 @@ namespace RhinoInside.Revit
     static string CallerFilePath([System.Runtime.CompilerServices.CallerFilePath] string CallerFilePath = "") => CallerFilePath;
     public static string SourceCodePath => Path.GetDirectoryName(CallerFilePath());
     public static DateTime BuildDate => new DateTime(2000, 1, 1).AddDays(Version.Build).AddSeconds(Version.Revision * 2);
-    public static int DaysUntilExpiration => Math.Max(0, 45 - (DateTime.Now - BuildDate).Days);
+    public static int DaysUntilExpiration => Math.Max(0, 90 - (DateTime.Now - BuildDate).Days);
 
     public static Version Version => Assembly.GetExecutingAssembly().GetName().Version;
     public static string DisplayVersion => $"{Version} ({BuildDate})";
