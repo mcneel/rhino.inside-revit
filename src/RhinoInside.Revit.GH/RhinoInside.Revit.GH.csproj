@@ -348,6 +348,7 @@
     <Compile Include="Parameters\CompoundStructure.cs" />
     <Compile Include="Parameters\CurtainGrid.cs" />
     <Compile Include="Parameters\Elevation.cs" />
+    <Compile Include="Parameters\Input\BuiltInCategory.cs" />
     <Compile Include="Parameters\Input\BuiltInParameter.cs" />
     <Compile Include="Parameters\Input\CurtainGridAlignType_ValueList.cs" />
     <Compile Include="Parameters\Input\CurtainGridJoinCondition_ValueList.cs" />
