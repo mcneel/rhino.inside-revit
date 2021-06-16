@@ -413,6 +413,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap BuiltInCategory {
+            get {
+                object obj = ResourceManager.GetObject("BuiltInCategory", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap BuiltInParameterByName {
             get {
                 object obj = ResourceManager.GetObject("BuiltInParameterByName", resourceCulture);
