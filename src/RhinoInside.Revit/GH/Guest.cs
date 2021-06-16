@@ -42,6 +42,9 @@ namespace RhinoInside.Revit.GH
 
     LoadReturnCode IGuest.OnCheckIn(ref string errorMessage)
     {
+      if(GooTable is object)
+        Instances.ComponentServer.GHAFileLoaded += GHAFileLoaded;
+
       string message = null;
       try
       {
@@ -251,6 +254,27 @@ namespace RhinoInside.Revit.GH
     #endregion
 
     #region Grasshopper Assemblies
+    static readonly FieldInfo GooTable = typeof(Grasshopper.Kernel.Data.GH_Structure<>).GetField("GooTable", BindingFlags.Static | BindingFlags.NonPublic);
+    static void GHAFileLoaded(object sender, GH_GHALoadingEventArgs arg)
+    {
+      try
+      {
+        var gooInterfaces = new Type[]
+        {
+          typeof(Grasshopper.Kernel.Types.IGH_Goo),
+          typeof(Grasshopper.Kernel.Types.IGH_GeometricGoo)
+        };
+
+        foreach (var gooType in gooInterfaces)
+        {
+          var structureType = typeof(Grasshopper.Kernel.Data.GH_Structure<>).MakeGenericType(gooType);
+          var GooTable = structureType.GetField("GooTable", BindingFlags.Static | BindingFlags.NonPublic);
+          GooTable?.SetValue(null, null);
+        }
+      }
+      catch { }
+    }
+
     static bool LoadGHA(string filePath)
     {
       var LoadGHAProc = typeof(GH_ComponentServer).GetMethod("LoadGHA", BindingFlags.NonPublic | BindingFlags.Instance);
