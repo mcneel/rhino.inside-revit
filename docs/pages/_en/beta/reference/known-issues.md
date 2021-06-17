@@ -102,3 +102,12 @@ A Long JSON error shows up as shown below
 ### Workaround
 
 Like the previous -200 error, this is a conflict with another plugin. See the Error - 200 solution for this problem, and the [Search for Conflicting Plugins]({{ site.baseurl }}{% link _en/beta/reference/toubleshooting.md %}#search-for-conflicting-plugins) section below.
+
+
+## Rhino.Inside tab is missing
+
+{{ site.terms.rir }} looks into Windows Registry to determine which Revit versions are installed. There is a known issue with Revit 2021 installer that writes an incomplete install path to the `InstallLocation` key ([See here for the conversation over this issue](https://discourse.mcneel.com/t/rhino-inside-wont-load-in-revit-2021/100769/13)).
+
+This issue might make the installed Revit 2021, invisible to the {{ site.terms.rir }} installer and therefore {{ site.terms.rir }} will not load in Revit 2021. Updates has been applied to the installer to correct for this issue but it makes the assumption that Revit 2021 is installed under its default path (`C:\Program Files\Autodesk\Revit 2021`). If you have installed Revit 2021 at another location the issue will remain. 
+
+You can either change the value of `LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-2100-0510-0000-705C0D862004}\InstallLocation` to the full path of where Revit is installed, or update Revit 2021 to latest (latest installers have corrected this issue).
