@@ -14,11 +14,11 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
     public BuiltInParameterGroups() : base
     (
-      name : "Built-In Parameter Groups",
-      nickname : "Parameter Groups",
-      description : "Provides a picker for built-in parameter Groups",
-      category : "Revit",
-      subcategory :  "Parameter"
+      name: "Built-In Parameter Groups",
+      nickname: "Parameter Groups",
+      description: "Provides a picker for built-in parameter Groups",
+      category: "Revit",
+      subcategory: "Parameter"
     )
     {
       IconDisplayMode = GH_IconDisplayMode.name;
