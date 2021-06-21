@@ -208,3 +208,49 @@ namespace RhinoInside.Revit.External.UI
   }
   #endregion
 }
+
+namespace System.Windows.Interop
+{
+  static class UIHostApplicationInterop
+  {
+    public static Window GetMainWindow(this RhinoInside.Revit.External.UI.UIHostApplication app)
+    {
+      if (app.MainWindowHandle != IntPtr.Zero)
+      {
+        if (Interop.HwndSource.FromHwnd(app.MainWindowHandle).RootVisual is Window window)
+          return window;
+
+        try { return new Interop.HwndTarget(app.MainWindowHandle).RootVisual as Window; }
+        catch { }
+      }
+
+      return default;
+    }
+  }
+}
+
+namespace System.Windows.Forms.Interop
+{
+  static class UIHostApplicationInterop
+  {
+    public static IWin32Window GetMainWindow(this RhinoInside.Revit.External.UI.UIHostApplication app)
+    {
+      return app.MainWindowHandle != IntPtr.Zero ?
+        NativeWindow.FromHandle(app.MainWindowHandle) :
+        default;
+    }
+  }
+}
+
+namespace Eto.Forms.Interop
+{
+  static class UIHostApplicationInterop
+  {
+    public static Window GetMainWindow(this RhinoInside.Revit.External.UI.UIHostApplication app)
+    {
+      return app.MainWindowHandle != IntPtr.Zero ?
+        new Form(new Wpf.Forms.HwndFormHandler(app.MainWindowHandle)) :
+        default;
+    }
+  }
+}
