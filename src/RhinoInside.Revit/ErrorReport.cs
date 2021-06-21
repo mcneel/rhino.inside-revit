@@ -50,6 +50,8 @@ namespace RhinoInside.Revit
       }
     }
 
+    static string OnLoadStackTraceFilePath;
+
     static void CreateReportEntry(ZipArchive archive, string entryName, string filePath)
     {
       try
