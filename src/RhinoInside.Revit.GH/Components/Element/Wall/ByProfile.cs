@@ -133,7 +133,7 @@ namespace RhinoInside.Revit.GH.Components
             normal = plane.Normal;
 
             var orientation = boundary.ClosedCurveOrientation(plane);
-            if (orientation == Rhino.Geometry.CurveOrientation.Clockwise)
+            if (orientation == Rhino.Geometry.CurveOrientation.CounterClockwise)
               normal.Reverse();
           }
         }
@@ -228,6 +228,9 @@ namespace RhinoInside.Revit.GH.Components
           newWall.get_Parameter(DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).Set(1);
           newWall.get_Parameter(DB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM).Set((int) structuralUsage);
         }
+
+        if (newWall.Flipped != flipped)
+          newWall.Flip();
 
         // Setup joins in a last step
         if (allowJoins) joinedWalls.Add(newWall);
