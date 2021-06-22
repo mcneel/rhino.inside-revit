@@ -212,12 +212,12 @@ namespace RhinoInside.Revit.GH.Parameters
           PersistentData.get_FirstItem(false) :
           default;
 
-        value = (T) value?.Duplicate();
+        value = (T) value.Duplicate();
 
         if (value is Types.IGH_ReferenceData data)
           data.LoadReferencedData();
 
-        return value;
+        return value?.IsValid == true ? value : default;
       }
     }
     #endregion

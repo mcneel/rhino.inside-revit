@@ -299,7 +299,6 @@ namespace RhinoInside.Revit.GH.Components
       typeof(DB.Architecture.RoomTagType),
       typeof(DB.Architecture.Fascia),
       typeof(DB.Architecture.Gutter),
-      typeof(DB.Architecture.Gutter),
 
       typeof(DB.Mechanical.SpaceTagType),
 

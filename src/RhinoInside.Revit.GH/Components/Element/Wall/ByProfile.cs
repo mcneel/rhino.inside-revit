@@ -110,7 +110,9 @@ namespace RhinoInside.Revit.GH.Components
       [Optional] DB.Structure.StructuralWallUsage structuralUsage
     )
     {
-      var boundaryPlane = default(Rhino.Geometry.Plane);
+      if (profile.Count < 1) return;
+
+      var normal = default(Rhino.Geometry.Vector3d);
       var maxArea = 0.0;
       foreach (var boundary in profile)
       {
@@ -128,7 +130,11 @@ namespace RhinoInside.Revit.GH.Components
           if (properties.Area > maxArea)
           {
             maxArea = properties.Area;
-            boundaryPlane = plane;
+            normal = plane.Normal;
+
+            var orientation = boundary.ClosedCurveOrientation(plane);
+            if (orientation == Rhino.Geometry.CurveOrientation.Clockwise)
+              normal.Reverse();
           }
         }
       }
@@ -137,24 +143,9 @@ namespace RhinoInside.Revit.GH.Components
       SolveOptionalLevel(doc, profile, ref level, out var bbox);
 
       foreach (var curve in profile)
-      {
         curve.RemoveShortSegments(Revit.ShortCurveTolerance * Revit.ModelUnits);
-        var orientation = curve.ClosedCurveOrientation(boundaryPlane);
-        if (orientation == Rhino.Geometry.CurveOrientation.CounterClockwise)
-          curve.Reverse();
-      }
-      var boundaries = profile.SelectMany(x => GeometryEncoder.ToCurveMany(x)).SelectMany(CurveExtension.ToBoundedCurves).ToList();
 
-      // Flipped - Adjust it to orient the wall facing to boundaryPlane.Normal
-      if
-      (
-        Rhino.Geometry.Vector3d.VectorAngle
-        (
-          boundaryPlane.Normal,
-          new Rhino.Geometry.Vector3d(-1.0, 1.0, 0.0)
-        ) > Math.PI * 0.5
-      )
-        flipped = !flipped;
+      var boundaries = profile.SelectMany(x => GeometryEncoder.ToCurveMany(x)).SelectMany(CurveExtension.ToBoundedCurves).ToList();
 
       // LocationLine
       if (locationLine != DB.WallLocationLine.WallCenterline)
@@ -201,7 +192,8 @@ namespace RhinoInside.Revit.GH.Components
         boundaries,
         type.Value.Id,
         level.Value.Id,
-        structuralUsage != DB.Structure.StructuralWallUsage.NonBearing
+        structuralUsage != DB.Structure.StructuralWallUsage.NonBearing,
+        normal.ToXYZ()
       );
 
       // Walls are created with the last LocationLine used in the Revit editor!!
@@ -236,9 +228,6 @@ namespace RhinoInside.Revit.GH.Components
           newWall.get_Parameter(DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).Set(1);
           newWall.get_Parameter(DB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM).Set((int) structuralUsage);
         }
-
-        if (newWall.Flipped != flipped)
-          newWall.Flip();
 
         // Setup joins in a last step
         if (allowJoins) joinedWalls.Add(newWall);
