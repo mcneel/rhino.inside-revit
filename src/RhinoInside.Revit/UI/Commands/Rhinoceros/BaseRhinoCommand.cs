@@ -9,12 +9,6 @@ namespace RhinoInside.Revit.UI
   /// </summary>
   public abstract class RhinoCommand : Command
   {
-    public RhinoCommand()
-    {
-      if (Revit.OnStartup(AddIn.Host) != Result.Succeeded)
-        throw new Exception("Failed to startup Rhino");
-    }
-
     /// <summary>
     /// Available when no Rhino command is currently running.
     /// </summary>

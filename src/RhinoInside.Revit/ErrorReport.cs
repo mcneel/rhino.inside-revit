@@ -50,7 +50,11 @@ namespace RhinoInside.Revit
       }
     }
 
-    static string OnLoadStackTraceFilePath;
+    public static string OnLoadStackTraceFilePath
+    {
+      get => NativeLoader.GetStackTraceFilePath();
+      set => NativeLoader.SetStackTraceFilePath(value);
+    }
 
     static void CreateReportEntry(ZipArchive archive, string entryName, string filePath)
     {
@@ -567,8 +571,8 @@ namespace RhinoInside.Revit
       Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Rhino-Inside-Revit.log");
 
     public static bool Active = Directory.Exists(LogPath);
-    public static string AppDomainAssembliesPath => Path.Combine(LogPath, $"AppDomain.Assemblies.md");
-    public static string ThreadLogPath => Path.Combine(LogPath, $"Thread{Thread.CurrentThread.ManagedThreadId}-Log.md");
+    static string AppDomainAssembliesPath => Path.Combine(LogPath, $"AppDomain.Assemblies.md");
+    static string ThreadLogPath => Path.Combine(LogPath, $"Thread{Thread.CurrentThread.ManagedThreadId}-Log.md");
 
     [ThreadStatic]
     static FileStream threadLogStream;
@@ -627,25 +631,27 @@ namespace RhinoInside.Revit
 
     private static void CurrentDomain_FirstChanceException(object sender, System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs e)
     {
+      // TODO : Add more info to each exception entry like callstack info.
+
       Log(Severity.Exception, e.Exception.GetType().FullName, $"Source = {e.Exception.Source}", e.Exception.Message);
     }
 
     private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
       if (e.ExceptionObject is Exception exception)
-        Critical(exception.GetType().FullName, $"Source = {exception.Source}", exception.Message);
+        LogCritical(exception.GetType().FullName, $"Source = {exception.Source}", exception.Message);
 
       if (e.IsTerminating)
-        Critical("CLR is terminating.");
+        LogCritical("CLR is terminating.");
     }
 
     static string Now => DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ff");
 
     [ThreadStatic]
     static int IndentLevel = 1;
-    public static int Count = 0;
+    public static int EntryCount = 0;
 
-    public struct Entry : IDisposable
+    internal struct Entry : IDisposable
     {
       readonly int Indent;
       public readonly int Id;
@@ -670,11 +676,11 @@ namespace RhinoInside.Revit
           IndentLevel = Indent - 1;
       }
 
-      internal static Entry Next() => new Entry(Interlocked.Increment(ref Count), IndentLevel);
-      internal static Entry Scope() => new Entry(Interlocked.Increment(ref Count), ++IndentLevel);
+      internal static Entry Next() => Active ? new Entry(Interlocked.Increment(ref EntryCount), IndentLevel) : default;
+      internal static Entry Scope() => Active ? new Entry(Interlocked.Increment(ref EntryCount), ++IndentLevel) : default;
 
-      public void Trace(string name, params string[] details) => Logger.Log(this, EntryRole.Subordinate, Severity.Trace, name, details);
-      public void Warning(string name, params string[] details) => Logger.Log(this, EntryRole.Subordinate, Severity.Warning, name, details);
+      public void LogTrace(string name, params string[] details) => Logger.Log(this, EntryRole.Subordinate, Severity.Trace, name, details);
+      public void LogWarning(string name, params string[] details) => Logger.Log(this, EntryRole.Subordinate, Severity.Warning, name, details);
       public void Log(Severity severity, string name, params string[] details) => Logger.Log(this, EntryRole.Subordinate, severity, name, details);
 
       internal void LogEntry(Stream stream, EntryRole role, Severity severity, string name, params string[] details)
@@ -750,29 +756,29 @@ namespace RhinoInside.Revit
       return string.Empty;
     }
 
-    public static Entry Scope([CallerMemberName] string name = "", params string[] details)
+    public static Entry LogScope([CallerMemberName] string name = "", params string[] details)
     {
       var entry = Entry.Scope();
       Log(entry, EntryRole.Main, Severity.Trace, name, details);
       return entry;
     }
 
-    public static void Trace([CallerMemberName] string name = "", params string[] details) =>
+    public static void LogTrace([CallerMemberName] string name = "", params string[] details) =>
       Log(Entry.Next(), EntryRole.Main, Severity.Trace, name, details);
 
-    public static void Information([CallerMemberName] string name = "", params string[] details) =>
+    public static void LogInformation([CallerMemberName] string name = "", params string[] details) =>
       Log(Entry.Next(), EntryRole.Main, Severity.Information, name, details);
 
-    public static void Succeded([CallerMemberName] string name = "", params string[] details) =>
+    public static void LogSucceded([CallerMemberName] string name = "", params string[] details) =>
       Log(Entry.Next(), EntryRole.Main, Severity.Succeded, name, details);
 
-    public static void Warning([CallerMemberName] string name = "", params string[] details) =>
+    public static void LogWarning([CallerMemberName] string name = "", params string[] details) =>
       Log(Entry.Next(), EntryRole.Main, Severity.Warning, name, details);
 
-    public static void Error([CallerMemberName] string name = "", params string[] details) =>
+    public static void LogError([CallerMemberName] string name = "", params string[] details) =>
       Log(Entry.Next(), EntryRole.Main, Severity.Error, name, details);
 
-    public static void Critical([CallerMemberName] string name = "", params string[] details) =>
+    public static void LogCritical([CallerMemberName] string name = "", params string[] details) =>
       Log(Entry.Next(), EntryRole.Main, Severity.Critical, name, details);
 
     static void Log(Severity severity, string name, params string[] details) =>
@@ -780,7 +786,7 @@ namespace RhinoInside.Revit
 
     static void Log(Entry entry, EntryRole role, Severity severity, string name, params string[] details)
     {
-      if(ThreadLogStream is Stream threadLogStream)
+      if(Active && ThreadLogStream is Stream threadLogStream)
         DispatchAsynch(() => entry.LogEntry(threadLogStream, role, severity, name, details));
     }
 

@@ -150,19 +150,19 @@ namespace RhinoInside.Revit.UI
     }
 
     /// <summary>
+    /// Available even when Rhino.Inside is obsolete.
+    /// </summary>
+    protected internal class AvailableWhenObsolete : External.UI.CommandAvailability
+    {
+      public override bool IsRuntimeReady() => AddIn.CurrentStatus >= AddIn.Status.Obsolete;
+    }
+
+    /// <summary>
     /// Available when Rhino.Inside is not expired, crashed or already active.
     /// </summary>
     protected internal class Availability : External.UI.CommandAvailability
     {
       public override bool IsRuntimeReady() => AddIn.CurrentStatus >= AddIn.Status.Available;
-    }
-
-    /// <summary>
-    /// Available when Rhino.Inside is not obsolete.
-    /// </summary>
-    protected internal class AvailableWhenNotObsolete : External.UI.CommandAvailability
-    {
-      public override bool IsRuntimeReady() => AddIn.CurrentStatus >= AddIn.Status.Obsolete;
     }
 
     /// <summary>

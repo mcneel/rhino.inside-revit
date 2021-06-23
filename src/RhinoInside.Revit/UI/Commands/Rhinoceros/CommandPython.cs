@@ -12,10 +12,10 @@ namespace RhinoInside.Revit.UI
   /// </summary>
   public abstract class IronPyhtonCommand : RhinoCommand
   {
-    protected static readonly Guid PluginId = new Guid("814d908a-e25c-493d-97e9-ee3861957f49");
+    protected static readonly Guid PlugInId = new Guid("814d908a-e25c-493d-97e9-ee3861957f49");
     public IronPyhtonCommand()
     {
-      if (!PlugIn.LoadPlugIn(PluginId, true, true))
+      if (!PlugIn.LoadPlugIn(PlugInId, true, true))
         throw new Exception("Failed to startup IronPyhton");
     }
 
@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.UI
       public override bool IsCommandAvailable(UIApplication applicationData, CategorySet selectedCategories)
       {
         return base.IsCommandAvailable(applicationData, selectedCategories) &&
-              (PlugIn.PlugInExists(PluginId, out bool loaded, out bool loadProtected) & (loaded | !loadProtected));
+              (PlugIn.PlugInExists(PlugInId, out bool loaded, out bool loadProtected) & (loaded | !loadProtected));
       }
     }
   }

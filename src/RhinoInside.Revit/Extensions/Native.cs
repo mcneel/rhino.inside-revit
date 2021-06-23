@@ -8,6 +8,13 @@ namespace RhinoInside.Revit.Native
   {
     [
       DllImport("RhinoInside.Revit.Native.dll",
+      EntryPoint = "LdrGetStackTraceFilePath",
+      CharSet = CharSet.Unicode)
+    ]
+    internal static extern string GetStackTraceFilePath();
+
+    [
+      DllImport("RhinoInside.Revit.Native.dll",
       EntryPoint = "LdrSetStackTraceFilePath",
       CharSet = CharSet.Unicode)
     ]
@@ -15,10 +22,18 @@ namespace RhinoInside.Revit.Native
 
     [
       DllImport("RhinoInside.Revit.Native.dll",
-      EntryPoint = "LdrReportOnLoad",
+      EntryPoint = "LdrGetReportOnLoad",
       CharSet = CharSet.Unicode)
     ]
-    internal static extern void ReportOnLoad(string moduleName, [MarshalAs(UnmanagedType.Bool)] bool enable);
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool GetReportOnLoad(string moduleName);
+
+    [
+      DllImport("RhinoInside.Revit.Native.dll",
+      EntryPoint = "LdrSetReportOnLoad",
+      CharSet = CharSet.Unicode)
+    ]
+    internal static extern void SetReportOnLoad(string moduleName, [MarshalAs(UnmanagedType.Bool)] bool enable);
 
     [
       DllImport("RhinoInside.Revit.Native.dll",

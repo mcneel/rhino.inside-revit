@@ -15,7 +15,12 @@ Some of the changes mentioned in sections below, might break your existing Grass
 ### New Features
 
 * Added 'Built-In Category' searchable selector.
-* Added 'Element Classes" searchable selector.
+* Added 'Element Classes' searchable selector.
+
+### Fixes 
+
+* More fixes to `AssemblyResolver`.
+* Fixed 'Add Wall (Profile)' orientation.
 
 {% include ltr/release-header.html version="0.7" time="06/02/2021" %}
 

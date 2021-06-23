@@ -40,25 +40,29 @@ namespace RhinoInside.Revit.GH
       Instance = this;
     }
 
-    LoadReturnCode IGuest.OnCheckIn(ref string errorMessage)
+    GuestResult IGuest.EntryPoint(object sender, EventArgs args)
     {
       if(GooTable is object)
         Instances.ComponentServer.GHAFileLoaded += GHAFileLoaded;
 
-      string message = null;
+      switch (args)
+      {
+        case CheckInArgs checkIn: return OnCheckIn(checkIn);
+        case CheckOutArgs checkOut: return OnCheckOut(checkOut);
+      }
+
+      return default;
+    }
+
+    GuestResult OnCheckIn(CheckInArgs options)
+    {
       try
       {
         if (!LoadStartupAssemblies())
-          message = "Failed to load Revit Grasshopper components.";
+          options.Message = "Failed to load Revit Grasshopper components.";
       }
-      catch (FileNotFoundException e) { message = $"{e.Message}{Environment.NewLine}{e.FileName}"; }
-      catch (Exception e)             { message = e.Message; }
-
-      if (!(message is null))
-      {
-        errorMessage = message;
-        return LoadReturnCode.ErrorShowDialog;
-      }
+      catch (FileNotFoundException e) { options.Message = $"{e.Message}{Environment.NewLine}{e.FileName}"; }
+      catch (Exception e)             { options.Message = e.Message; }
 
       // Register PreviewServer
       previewServer = new PreviewServer();
@@ -91,10 +95,10 @@ namespace RhinoInside.Revit.GH
 
       Instances.DocumentServer.DocumentAdded += DocumentServer_DocumentAdded;
 
-      return LoadReturnCode.Success;
+      return GuestResult.Succeeded;
     }
 
-    void IGuest.OnCheckOut()
+    GuestResult OnCheckOut(CheckOutArgs options)
     {
       Instances.DocumentServer.DocumentAdded -= DocumentServer_DocumentAdded;
 
@@ -110,6 +114,8 @@ namespace RhinoInside.Revit.GH
       // Unregister PreviewServer
       previewServer?.Unregister();
       previewServer = null;
+
+      return GuestResult.Succeeded;
     }
     #endregion
 
@@ -359,9 +365,11 @@ namespace RhinoInside.Revit.GH
 
       foreach (var folder in DefaultAssemblyFolders)
       {
+        if (!folder.Exists) continue;
+
         IEnumerable<FileInfo> assemblyFiles;
         try { assemblyFiles = folder.EnumerateFiles("*.gha", SearchOption.AllDirectories); }
-        catch (System.IO.DirectoryNotFoundException) { continue; }
+        catch (System.Security.SecurityException) { continue; }
 
         foreach (var assemblyFile in assemblyFiles)
         {
@@ -380,7 +388,7 @@ namespace RhinoInside.Revit.GH
 
         IEnumerable<FileInfo> linkFiles;
         try { linkFiles = folder.EnumerateFiles("*.ghlink", SearchOption.TopDirectoryOnly); }
-        catch (System.IO.DirectoryNotFoundException) { continue; }
+        catch (System.Security.SecurityException) { continue; }
 
         foreach (var linkFile in linkFiles)
         {

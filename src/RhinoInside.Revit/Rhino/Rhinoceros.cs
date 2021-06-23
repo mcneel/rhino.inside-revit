@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using Microsoft.Win32.SafeHandles;
 using Rhino;
@@ -16,7 +15,6 @@ using Rhino.PlugIns;
 using Rhino.Runtime.InProcess;
 using RhinoInside.Revit.Convert.Units;
 using RhinoInside.Revit.External.ApplicationServices.Extensions;
-using static System.Math;
 using static Rhino.RhinoMath;
 using DB = Autodesk.Revit.DB;
 
@@ -30,12 +28,31 @@ namespace RhinoInside
     public GuestPlugInIdAttribute(string plugInId) => PlugInId = Guid.Parse(plugInId);
   }
 
+  public class CheckInArgs : EventArgs
+  {
+    public string Message { get; set; } = string.Empty;
+    public bool ShowMessage { get; set; } = true;
+  }
+
+  public class CheckOutArgs : EventArgs
+  {
+    public string Message { get; set; } = string.Empty;
+    public bool ShowMessage { get; set; } = true;
+  }
+
+  public enum GuestResult
+  {
+    Failed = int.MinValue,
+    Cancelled = int.MinValue + 1,
+    Nothing = 0,
+    Succeeded = 1
+  }
+
   public interface IGuest
   {
     string Name { get; }
 
-    LoadReturnCode OnCheckIn(ref string complainMessage);
-    void OnCheckOut();
+    GuestResult EntryPoint(object sender, EventArgs args);
   }
   #endregion
 }
@@ -52,10 +69,24 @@ namespace RhinoInside.Revit
     public static readonly string SchemeName = $"Inside-Revit-{AddIn.Host.Services.VersionNumber}";
     internal static string[] StartupLog;
 
-    internal static Result Startup()
+    internal static bool InitEto()
     {
-      if (core is object)
-        return Result.Failed;
+      if (Eto.Forms.Application.Instance is null)
+        new Eto.Forms.Application(Eto.Platforms.Wpf).Attach();
+
+      return true;
+    }
+
+    internal static bool InitRhinoCommon()
+    {
+      var hostMainWindow = new WindowHandle(AddIn.Host.MainWindowHandle);
+
+      // Save Revit window status
+      bool wasEnabled = hostMainWindow.Enabled;
+      var activeWindow = WindowHandle.ActiveWindow ?? hostMainWindow;
+
+      // Disable Revit window
+      hostMainWindow.Enabled = false;
 
       // Load RhinoCore
       try
@@ -75,20 +106,34 @@ namespace RhinoInside.Revit
 
         core = new RhinoCore(args.ToArray(), WindowStyle.Hidden);
       }
-      catch
+      catch (Exception e)
       {
+        AddIn.ReportException(e, AddIn.Host, new string[0]);
         AddIn.CurrentStatus = AddIn.Status.Failed;
-        return Result.Failed;
+        return false;
       }
       finally
       {
+        // Enable Revit window back
+        hostMainWindow.Enabled = wasEnabled;
+        WindowHandle.ActiveWindow = activeWindow;
+
         StartupLog = RhinoApp.CapturedCommandWindowStrings(true);
         RhinoApp.CommandWindowCaptureEnabled = false;
       }
 
       MainWindow = new WindowHandle(RhinoApp.MainWindowHandle());
-      External.ActivationGate.AddGateWindow(MainWindow.Handle);
+      return External.ActivationGate.AddGateWindow(MainWindow.Handle);
+    }
 
+    internal static bool InitGrasshopper()
+    {
+      var PluginId = new Guid(0xB45A29B1, 0x4343, 0x4035, 0x98, 0x9E, 0x04, 0x4E, 0x85, 0x80, 0xD9, 0xCF);
+      return PlugIn.PlugInExists(PluginId, out bool loaded, out bool loadProtected) & (loaded | !loadProtected);
+    }
+
+    internal static Result Startup()
+    {
       RhinoApp.MainLoop                         += MainLoop;
 
       RhinoDoc.NewDocument                      += OnNewDocument;
@@ -191,7 +236,7 @@ namespace RhinoInside.Revit
     {
       public readonly Type ClassType;
       public IGuest Guest;
-      public LoadReturnCode LoadReturnCode;
+      public GuestResult CheckInResult;
 
       public GuestInfo(Type type) => ClassType = type;
     }
@@ -216,7 +261,7 @@ namespace RhinoInside.Revit
       }
     }
 
-    static void CheckInGuests()
+    internal static void CheckInGuests()
     {
       if (guests is object)
         return;
@@ -246,14 +291,15 @@ namespace RhinoInside.Revit
 
         string mainContent = string.Empty;
         string expandedContent = string.Empty;
+        var checkInArgs = new CheckInArgs();
         try
         {
           guestInfo.Guest = Activator.CreateInstance(guestInfo.ClassType) as IGuest;
-          guestInfo.LoadReturnCode = guestInfo.Guest.OnCheckIn(ref mainContent);
+          guestInfo.CheckInResult = guestInfo.Guest.EntryPoint(default, checkInArgs);
         }
         catch (Exception e)
         {
-          guestInfo.LoadReturnCode = LoadReturnCode.ErrorShowDialog;
+          guestInfo.CheckInResult = GuestResult.Failed;
 
           var mainContentBuilder = new StringBuilder();
           var expandedContentBuilder = new StringBuilder();
@@ -270,7 +316,7 @@ namespace RhinoInside.Revit
           expandedContent = expandedContentBuilder.ToString();
         }
 
-        if (guestInfo.LoadReturnCode == LoadReturnCode.ErrorShowDialog)
+        if (guestInfo.CheckInResult == GuestResult.Failed)
         {
           var guestName = guestInfo.Guest?.Name ?? guestInfo.ClassType.Namespace;
 
@@ -327,10 +373,10 @@ namespace RhinoInside.Revit
         if (guestInfo.Guest is null)
           continue;
 
-        if (guestInfo.LoadReturnCode == LoadReturnCode.Success)
+        if (guestInfo.CheckInResult == GuestResult.Succeeded)
           continue;
 
-        try { guestInfo.Guest.OnCheckOut(); guestInfo.LoadReturnCode = LoadReturnCode.ErrorNoDialog; }
+        try { guestInfo.Guest.EntryPoint(default, new CheckOutArgs()); guestInfo.CheckInResult = GuestResult.Cancelled; }
         catch (Exception) { }
       }
 
