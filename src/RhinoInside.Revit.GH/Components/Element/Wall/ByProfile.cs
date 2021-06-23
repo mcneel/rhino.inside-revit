@@ -151,8 +151,14 @@ namespace RhinoInside.Revit.GH.Components
       if (locationLine != DB.WallLocationLine.WallCenterline)
       {
         double offsetDist = 0.0;
-        var compoundStructure = type.Value.GetCompoundStructure();
-        if (compoundStructure == null)
+        if (type.Value.GetCompoundStructure() is DB.CompoundStructure compoundStructure)
+        {
+          if (!compoundStructure.IsVerticallyHomogeneous())
+            compoundStructure = DB.CompoundStructure.CreateSimpleCompoundStructure(compoundStructure.GetLayers());
+
+          offsetDist = compoundStructure.GetOffsetForLocationLine(locationLine);
+        }
+        else
         {
           switch (locationLine)
           {
@@ -169,18 +175,10 @@ namespace RhinoInside.Revit.GH.Components
               break;
           }
         }
-        else
-        {
-          if (!compoundStructure.IsVerticallyHomogeneous())
-            compoundStructure = DB.CompoundStructure.CreateSimpleCompoundStructure(compoundStructure.GetLayers());
-
-          offsetDist = compoundStructure.GetOffsetForLocationLine(locationLine);
-        }
 
         if (offsetDist != 0.0)
         {
-          profile[0].TryGetPlane(out var plane);
-          var translation = DB.Transform.CreateTranslation((plane.Normal * (flipped ? -offsetDist : offsetDist)).ToXYZ());
+          var translation = DB.Transform.CreateTranslation((normal * (flipped ? -offsetDist : offsetDist)).ToXYZ());
           for (int b = 0; b < boundaries.Count; ++b)
             boundaries[b] = boundaries[b].CreateTransformed(translation);
         }
