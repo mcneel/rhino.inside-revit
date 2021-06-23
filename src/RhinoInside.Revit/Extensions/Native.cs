@@ -11,7 +11,8 @@ namespace RhinoInside.Revit.Native
       EntryPoint = "LdrGetStackTraceFilePath",
       CharSet = CharSet.Unicode)
     ]
-    internal static extern string GetStackTraceFilePath();
+    static extern System.IntPtr LdrGetStackTraceFilePath();
+    internal static string GetStackTraceFilePath() => Marshal.PtrToStringUni(LdrGetStackTraceFilePath());
 
     [
       DllImport("RhinoInside.Revit.Native.dll",
