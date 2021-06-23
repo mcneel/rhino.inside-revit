@@ -42,9 +42,6 @@ namespace RhinoInside.Revit.GH
 
     GuestResult IGuest.EntryPoint(object sender, EventArgs args)
     {
-      if(GooTable is object)
-        Instances.ComponentServer.GHAFileLoaded += GHAFileLoaded;
-
       switch (args)
       {
         case CheckInArgs checkIn: return OnCheckIn(checkIn);
@@ -476,6 +473,12 @@ namespace RhinoInside.Revit.GH
             taskDialog.Show();
           }
         }
+      }
+
+      if (GooTable is object)
+      {
+        try { Instances.ComponentServer.GHAFileLoaded += GHAFileLoaded; }
+        catch { }
       }
 
       GH_ComponentServer.UpdateRibbonUI();
