@@ -64,8 +64,18 @@ namespace RhinoInside.Revit
         if (failed)
           throw new InvalidOperationException($"Failed to activate {assembly.FullName}");
 
-        activated?.Invoke(AppDomain.CurrentDomain, new AssemblyLoadEventArgs(assembly));
-        activated = default;
+        NotifyActivatedAsync();
+      }
+
+      async void NotifyActivatedAsync()
+      {
+        if (activated is object)
+        {
+          await System.Threading.Tasks.Task.Yield();
+
+          try { activated(AppDomain.CurrentDomain, new AssemblyLoadEventArgs(Assembly)); }
+          finally { activated = default; }
+        }
       }
     }
 
@@ -281,7 +291,7 @@ namespace RhinoInside.Revit
           return requested.Version > executingAssemblyName.Version ? default : executingAssembly;
       }
 
-      // AppDomain.CurrentDomain.AssemblyResolve may be called from any thread.
+      // AppDomain.AssemblyResolve may be called from any thread.
       lock (references)
       {
         // Look up if Rhino deplois something for us…
@@ -403,7 +413,7 @@ namespace RhinoInside.Revit
     static void AssemblyLoaded(object sender, AssemblyLoadEventArgs args)
     {
       var assemblyName = args.LoadedAssembly.GetName();
-      if (references.TryGetValue(assemblyName.Name, out var location) && location.Assembly is null)
+      if (references.TryGetValue(assemblyName.Name, out var location))
         location.Activate(args.LoadedAssembly);
     }
 
