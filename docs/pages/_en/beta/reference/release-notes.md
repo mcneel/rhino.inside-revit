@@ -10,16 +10,17 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
-{% include ltr/release-header.html version="0.8" time="06/23/2021" %}
+{% include ltr/release-header.html version="0.8" time="06/24/2021" %}
 
 ### New Features
 
 * Added 'Built-In Category' searchable selector.
 * Added 'Element Classes' searchable selector.
+* Added Layout context menu to 'Value Picker' components.
 
-### Fixes 
+### Fixes
 
-* More fixes to `AssemblyResolver`.
+* Fixed more assembly conflicts.
 * Fix to prevent RiR doesn't load when 'KeyboardShortcuts.xml' contains invalid characters.
 * Fixed 'Add Wall (Profile)' orientation.
 
