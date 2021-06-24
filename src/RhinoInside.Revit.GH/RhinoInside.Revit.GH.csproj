@@ -165,17 +165,17 @@
           <Private>False</Private>
         </Reference>
         <Reference Include="RevitAPI">
-            <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\RevitAPI.dll</HintPath>
-            <Private>False</Private>
-          </Reference>
-          <Reference Include="RevitAPIUI">
-            <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\RevitAPIUI.dll</HintPath>
-            <Private>False</Private>
-          </Reference>
-          <Reference Include="AdWindows">
-            <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\AdWindows.dll</HintPath>
-            <Private>False</Private>
-          </Reference>
+          <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\RevitAPI.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="RevitAPIUI">
+          <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\RevitAPIUI.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="AdWindows">
+          <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\AdWindows.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
       </ItemGroup>
     </When>
     <Otherwise>
@@ -350,6 +350,7 @@
     <Compile Include="Parameters\Elevation.cs" />
     <Compile Include="Parameters\Input\BuiltInCategory.cs" />
     <Compile Include="Parameters\Input\BuiltInParameter.cs" />
+    <Compile Include="Parameters\Input\BuiltInParameterGroups.cs" />
     <Compile Include="Parameters\Input\CurtainGridAlignType_ValueList.cs" />
     <Compile Include="Parameters\Input\CurtainGridJoinCondition_ValueList.cs" />
     <Compile Include="Parameters\Input\CurtainGridLayout_ValueList.cs" />
