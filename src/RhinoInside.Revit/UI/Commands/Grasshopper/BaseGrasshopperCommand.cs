@@ -28,11 +28,10 @@ namespace RhinoInside.Revit.UI
       public override bool IsRuntimeReady()
       {
         if (!base.IsRuntimeReady()) return false;
-        if (!ready) ready = AppDomain.CurrentDomain.GetAssemblies().Any(x => x.GetName().Name == "Grasshopper");
-        return ready;
+        return ready || (ready = AssemblyResolver.References["Grasshopper"].Assembly is object);
       }
 
-      public override bool IsCommandAvailable(UIApplication app, DB.CategorySet selectedCategories) =>
+      protected override bool IsCommandAvailable(UIApplication app, DB.CategorySet selectedCategories) =>
         base.IsCommandAvailable(app, selectedCategories) &&
         (PlugIn.PlugInExists(PlugInId, out bool loaded, out bool loadProtected) & (loaded | !loadProtected));
     }

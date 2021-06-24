@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.UI
     /// </summary>
     protected new class Availability : NeedsActiveDocument<GrasshopperCommand.Availability>
     {
-      public override bool IsCommandAvailable(UIApplication app, DB.CategorySet selectedCategories)
+      protected override bool IsCommandAvailable(UIApplication app, DB.CategorySet selectedCategories)
       {
         if (!base.IsCommandAvailable(app, selectedCategories))
           return false;

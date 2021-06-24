@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.UI
     /// </summary>
     protected internal new class Availability : AvailableWhenReady
     {
-      public override bool IsCommandAvailable(UIApplication app, CategorySet selectedCategories) =>
+      protected override bool IsCommandAvailable(UIApplication app, CategorySet selectedCategories) =>
         base.IsCommandAvailable(app, selectedCategories) &&
         !Rhino.Commands.Command.InCommand();
     }

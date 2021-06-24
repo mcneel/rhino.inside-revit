@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.UI
 
     protected new class Availability : GrasshopperCommand.Availability
     {
-      public override bool IsCommandAvailable(UIApplication _, DB.CategorySet selectedCategories) =>
+      protected override bool IsCommandAvailable(UIApplication _, DB.CategorySet selectedCategories) =>
         base.IsCommandAvailable(_, selectedCategories) &&
         GH.Guest.IsEditorLoaded();
     }

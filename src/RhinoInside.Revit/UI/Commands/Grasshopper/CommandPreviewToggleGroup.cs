@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.UI
     /// </summary>
     protected new class Availability : GrasshopperCommand.Availability
     {
-      public override bool IsCommandAvailable(UIApplication app, DB.CategorySet selectedCategories) =>
+      protected override bool IsCommandAvailable(UIApplication app, DB.CategorySet selectedCategories) =>
         base.IsCommandAvailable(app, selectedCategories) &&
         Revit.ActiveUIDocument?.Document?.IsFamilyDocument == false;
     }

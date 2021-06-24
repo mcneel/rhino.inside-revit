@@ -24,11 +24,9 @@ namespace RhinoInside.Revit.UI
     /// </summary>
     protected new class Availability : RhinoCommand.Availability
     {
-      public override bool IsCommandAvailable(UIApplication applicationData, CategorySet selectedCategories)
-      {
-        return base.IsCommandAvailable(applicationData, selectedCategories) &&
-              (PlugIn.PlugInExists(PlugInId, out bool loaded, out bool loadProtected) & (loaded | !loadProtected));
-      }
+      protected override bool IsCommandAvailable(UIApplication applicationData, CategorySet selectedCategories) =>
+        base.IsCommandAvailable(applicationData, selectedCategories) &&
+        (PlugIn.PlugInExists(PlugInId, out bool loaded, out bool loadProtected) & (loaded | !loadProtected));
     }
   }
 

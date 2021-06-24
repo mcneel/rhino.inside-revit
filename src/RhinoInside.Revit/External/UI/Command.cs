@@ -42,7 +42,7 @@ namespace RhinoInside.Revit.External.UI
   public abstract class CommandAvailability : IExternalCommandAvailability
   {
     public virtual bool IsRuntimeReady() => true;
-    public virtual bool IsCommandAvailable(UIApplication app, CategorySet selectedCategories) => true;
+    protected virtual bool IsCommandAvailable(UIApplication app, CategorySet selectedCategories) => true;
 
     bool IExternalCommandAvailability.IsCommandAvailable(UIApplication app, CategorySet selectedCategories)
     {

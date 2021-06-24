@@ -150,7 +150,7 @@ namespace RhinoInside.Revit.UI
 
       void CreateStartButton(string tabName)
       {
-        var buttonData = NewPushButtonData<CommandStart, AvailableWhenObsolete>(CommandName, CommandIcon, "");
+        var buttonData = NewPushButtonData<CommandStart, AvailableEvenObsolete>(CommandName, CommandIcon, "");
         if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
         {
           StoreButton(CommandName, pushButton);
