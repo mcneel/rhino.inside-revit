@@ -413,19 +413,9 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap BuiltInCategory {
+        internal static System.Drawing.Bitmap BuiltInCategories {
             get {
-                object obj = ResourceManager.GetObject("BuiltInCategory", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap BuiltInParameterByName {
-            get {
-                object obj = ResourceManager.GetObject("BuiltInParameterByName", resourceCulture);
+                object obj = ResourceManager.GetObject("BuiltInCategories", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -436,6 +426,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap BuiltInParameterGroups {
             get {
                 object obj = ResourceManager.GetObject("BuiltInParameterGroups", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap BuiltInParameters {
+            get {
+                object obj = ResourceManager.GetObject("BuiltInParameters", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

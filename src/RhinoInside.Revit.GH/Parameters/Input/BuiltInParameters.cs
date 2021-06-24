@@ -3,7 +3,7 @@ using Grasshopper.Kernel;
 
 namespace RhinoInside.Revit.GH.Parameters.Input
 {
-  public class BuiltInParameterByName : Grasshopper.Special.ValueSet<Types.ParameterId>
+  public class BuiltInParameters : Grasshopper.Special.ValueSet<Types.ParameterId>
   {
     public override Guid ComponentGuid => new Guid("C1D96F56-F53C-4DFC-8090-EC2050BDBB66");
     public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
       ((System.Drawing.Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
       base.Icon;
 
-    public BuiltInParameterByName() : base
+    public BuiltInParameters() : base
     (
       name: "Built-In Parameters",
       nickname: "Parameters",
