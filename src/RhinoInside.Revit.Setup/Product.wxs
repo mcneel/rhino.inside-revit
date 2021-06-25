@@ -79,7 +79,7 @@
 
     <CustomAction Id="WIPExpirationDateWarning" Script="vbscript">
       <![CDATA[
-      ExpirationDate = DateAdd("d", $(var.BuildVersion) + 45, DateSerial(2000,1,1))
+      ExpirationDate = DateAdd("d", $(var.BuildVersion) + 90, DateSerial(2000,1,1))
       DaysLeft = Cint(DateDiff("d", Now(), ExpirationDate))      
       Set Record = Session.Installer.CreateRecord(1)
       

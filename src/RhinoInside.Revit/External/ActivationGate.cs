@@ -77,10 +77,32 @@ namespace RhinoInside.Revit.External
     /// </summary>
     public static IEnumerable<IntPtr> GateWindows => gates.Select(x => x.Key);
 
+    static WindowHandle HostMainWindow = WindowHandle.Zero;
+
+    /// <summary>
+    /// Attach Activation Gate to the Host main window.
+    /// </summary>
+    /// <param name="hWnd">HWND of the host main window.</param>
+    public static void SetHostWindow(IntPtr hWnd)
+    {
+      var window = new WindowHandle(hWnd);
+
+      if (!window.IsZero)
+      {
+        if (window.IsInvalid)
+          throw new ArgumentException("Invalid handle vale", nameof(hWnd));
+
+        if (!HostMainWindow.IsZero)
+          throw new InvalidOperationException("Failed to change host main window");
+      }
+
+      HostMainWindow = window;
+    }
+
     /// <summary>
     /// Registers a window as a Gate window.
     /// </summary>
-    /// <param name="hWnd">HWND of the window to register.</param>
+    /// <param name="hWnd">HWND of the gate window to register.</param>
     /// <returns>true on success, false on failure.</returns>
     public static bool AddGateWindow(IntPtr hWnd)
     {
@@ -201,8 +223,8 @@ namespace RhinoInside.Revit.External
         if (IsActive && !IsOpen)
         {
           // Return control to Revit
-          Revit.MainWindow.Enabled = true;
-          WindowHandle.ActiveWindow = Revit.MainWindow;
+          HostMainWindow.Enabled = true;
+          WindowHandle.ActiveWindow = HostMainWindow;
         }
       }
     }
@@ -386,7 +408,7 @@ namespace RhinoInside.Revit.External
 
             if (IsOpen)
             {
-              if (windowToActivate == Revit.MainWindow && !windowToActivate.Enabled)
+              if (windowToActivate == HostMainWindow && !windowToActivate.Enabled)
               {
                 foreach (var gate in gates)
                 {

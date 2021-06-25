@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.UI
     /// </summary>
     protected class AvailableWhenCanvasHasDocument : Availability
     {
-      public override bool IsCommandAvailable(UIApplication app, DB.CategorySet selectedCategories) =>
+      protected override bool IsCommandAvailable(UIApplication app, DB.CategorySet selectedCategories) =>
         base.IsCommandAvailable(app, selectedCategories) &&
         Instances.ActiveCanvas?.Document is object;
     }

@@ -20,7 +20,7 @@ namespace RhinoInside.Revit
 {
   public static partial class Revit
   {
-    internal static Result OnStartup(UIHostApplication applicationUI)
+    internal static Result OnStartup()
     {
       if (MainWindow.IsZero)
       {
@@ -28,29 +28,10 @@ namespace RhinoInside.Revit
         if (result != Result.Succeeded)
           return result;
 
-#if REVIT_2019
-        MainWindow = new WindowHandle(applicationUI.MainWindowHandle);
-#else
-        MainWindow = new WindowHandle(Process.GetCurrentProcess().MainWindowHandle);
-#endif
+        MainWindow = new WindowHandle(AddIn.Host.MainWindowHandle);
 
-        // Save Revit window status
-        bool wasEnabled = MainWindow.Enabled;
-        var activeWindow = WindowHandle.ActiveWindow ?? MainWindow;
-
-        try
-        {
-          // Disable Revit window
-          MainWindow.Enabled = false;
-
-          result = Rhinoceros.Startup();
-        }
-        finally
-        {
-          //Enable Revit window back
-          MainWindow.Enabled = wasEnabled;
-          WindowHandle.ActiveWindow = activeWindow;
-        }
+        try   { result = Rhinoceros.Startup(); }
+        catch { result = Result.Failed; }
 
         if (result != Result.Succeeded)
         {
@@ -59,8 +40,8 @@ namespace RhinoInside.Revit
         }
 
         // Register some events
-        applicationUI.Idling += OnIdle;
-        applicationUI.Services.DocumentChanged += OnDocumentChanged;
+        AddIn.Host.Idling += OnIdle;
+        AddIn.Host.Services.DocumentChanged += OnDocumentChanged;
 
         AddIn.CurrentStatus = AddIn.Status.Ready;
       }
@@ -68,15 +49,15 @@ namespace RhinoInside.Revit
       return Result.Succeeded;
     }
 
-    internal static Result OnShutdown(UIHostApplication applicationUI)
+    internal static Result Shutdown()
     {
+      Rhinoceros.Shutdown();
+
       if (!MainWindow.IsZero)
       {
         // Unregister some events
-        applicationUI.Services.DocumentChanged -= OnDocumentChanged;
-        applicationUI.Idling -= OnIdle;
-
-        Rhinoceros.Shutdown();
+        AddIn.Host.Services.DocumentChanged -= OnDocumentChanged;
+        AddIn.Host.Idling -= OnIdle;
 
         MainWindow.SetHandleAsInvalid();
       }
@@ -100,10 +81,8 @@ namespace RhinoInside.Revit
     private static void OnDocumentChanged(object sender, DocumentChangedEventArgs args)
     {
       var document = args.GetDocument();
-      if (!document.Equals(ActiveDBDocument))
-        return;
-
-      CancelReadActions();
+      if (document.Equals(ActiveDBDocument))
+        CancelReadActions();
 
       DocumentChanged?.Invoke(sender, args);
     }
@@ -194,7 +173,7 @@ namespace RhinoInside.Revit
 
     #region Public Properties
     internal static WindowHandle MainWindow { get; private set; } = WindowHandle.Zero;
-    public static IntPtr MainWindowHandle => MainWindow.Handle;
+    public static IntPtr MainWindowHandle                         => MainWindow.Handle;
 
     public static Autodesk.Revit.UI.UIApplication                 ActiveUIApplication => AddIn.Host.Value as Autodesk.Revit.UI.UIApplication;
     public static Autodesk.Revit.ApplicationServices.Application  ActiveDBApplication => ActiveUIApplication?.Application;

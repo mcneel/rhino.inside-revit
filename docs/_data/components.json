@@ -295,18 +295,18 @@
     "icontag": null, 
     "panel": "Parameter", 
     "tab": "Revit", 
-    "title": "BuiltInParameterGroups", 
+    "title": "Built-In ParameterGroups", 
     "typename": "BuiltInParameterGroups", 
     "uuid": "5d331b12-da6c-46a7-aa13-f463e42650d1"
   }, 
   {
     "desc": "Provides a BuiltInParameter picker", 
-    "iconsrc": "/static/images/GH/BuiltInParameterByName.png", 
+    "iconsrc": "/static/images/GH/BuiltInParameters.png", 
     "icontag": null, 
     "panel": "Input", 
     "tab": "Revit", 
-    "title": "BuiltInParameter Picker", 
-    "typename": "BuiltInParameterByName", 
+    "title": "Built-In Parameter Picker", 
+    "typename": "BuiltInParameters", 
     "uuid": "c1d96f56-f53c-4dfc-8090-ec2050bdbb66"
   }, 
   {

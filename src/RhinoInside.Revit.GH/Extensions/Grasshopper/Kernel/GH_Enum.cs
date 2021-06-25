@@ -127,7 +127,7 @@ namespace RhinoInside.Revit.GH.Types
       return result;
     }
 
-    static readonly Dictionary<Type, Tuple<Type, Type>> EnumTypes = LookForEnums(Assembly.GetCallingAssembly());
+    static readonly Dictionary<Type, Tuple<Type, Type>> EnumTypes = LookForEnums(Assembly.GetExecutingAssembly());
     public static bool TryGetParamTypes(Type type, out Tuple<Type, Type> paramTypes) =>
       EnumTypes.TryGetValue(type, out paramTypes);
 

@@ -5,10 +5,14 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using Autodesk.Revit.UI;
 using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
+using RhinoInside.Revit.Native;
 using static Microsoft.Win32.SafeHandles.InteropServices.Kernel32;
 using UIX = RhinoInside.Revit.External.UI;
 
@@ -44,6 +48,12 @@ namespace RhinoInside.Revit
 
         return string.Empty;
       }
+    }
+
+    public static string OnLoadStackTraceFilePath
+    {
+      get => NativeLoader.GetStackTraceFilePath();
+      set => NativeLoader.SetStackTraceFilePath(value);
     }
 
     static void CreateReportEntry(ZipArchive archive, string entryName, string filePath)
@@ -255,7 +265,7 @@ namespace RhinoInside.Revit
         services.Language,
         includeAddinsList ? app.LoadedApplications : default,
         reportFilePath,
-        Path.ChangeExtension(services.RecordingJournalFilename, "log.md"),
+        OnLoadStackTraceFilePath,
         attachments
       );
 
@@ -352,7 +362,7 @@ namespace RhinoInside.Revit
 
         if (Settings.AddIns.LoadFrom(SafeModeAddinFile, out var SafeModeAddin))
         {
-          SafeModeAddin.First().Assembly = Assembly.GetCallingAssembly().Location;
+          SafeModeAddin.First().Assembly = Assembly.GetExecutingAssembly().Location;
           Settings.AddIns.SaveAs(SafeModeAddin, SafeModeAddinFile);
         }
 
@@ -441,7 +451,6 @@ namespace RhinoInside.Revit
           catch { }
       }
     }
-
   }
 
   sealed class MiniDumper
@@ -554,5 +563,247 @@ namespace RhinoInside.Revit
         );
       }
     }
+  }
+
+  internal static class Logger
+  {
+    public static string LogPath { get; private set; } =
+      Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Rhino-Inside-Revit.log");
+
+    public static bool Active = Directory.Exists(LogPath);
+    static string AppDomainAssembliesPath => Path.Combine(LogPath, $"AppDomain.Assemblies.md");
+    static string ThreadLogPath => Path.Combine(LogPath, $"Thread{Thread.CurrentThread.ManagedThreadId}-Log.md");
+
+    [ThreadStatic]
+    static FileStream threadLogStream;
+    static Stream ThreadLogStream
+    {
+      get
+      {
+        try { return threadLogStream ?? (threadLogStream = new FileStream(ThreadLogPath, FileMode.Append, FileAccess.Write, FileShare.Read)); }
+        catch { }
+        return default;
+      }
+    }
+
+    static Logger()
+    {
+      if (Active)
+      {
+#if !DEBUG
+        // This should disable logging on each run, we don't want the user forget to disable it.
+        try
+        {
+          var logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), $"Rhino-Inside-Revit-{Now}.log");
+          Directory.Move(LogPath, logPath);
+          LogPath = logPath;
+        }
+        catch { }
+#endif
+        // Capture assemblies here and log in an other thread.
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+        Task.Run(() =>
+        {
+          using (var writer = new StreamWriter(AppDomainAssembliesPath, true, System.Text.Encoding.UTF8))
+          {
+            writer.WriteLine("# Assemblies");
+            writer.WriteLine();
+            writer.WriteLine("| #|Name|Version|Culture|Token|Location|");
+            writer.WriteLine("|-:|:---|:------|:-----:|:---:|:-------|");
+
+            var index = 0;
+            foreach (var assembly in assemblies)
+            {
+              var assemblyName = assembly.GetName();
+              var publicKeyToken = assemblyName.GetPublicKeyToken() ?? new byte[0];
+              var token = string.Concat(Array.ConvertAll(publicKeyToken, x => x.ToString("X2")));
+              var location = assembly.IsDynamic ? string.Empty : assembly.Location;
+
+              writer.WriteLine($"|{index++}|{assemblyName.Name}|{assemblyName.Version}|{assemblyName.CultureName}|{token}|{location}|");
+            }
+          }
+        });
+
+        AppDomain.CurrentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
+        AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException; ;
+      }
+    }
+
+    private static void CurrentDomain_FirstChanceException(object sender, System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs e)
+    {
+      // TODO : Add more info to each exception entry like callstack info.
+
+      Log(Severity.Exception, e.Exception.GetType().FullName, $"Source = {e.Exception.Source}", e.Exception.Message);
+    }
+
+    private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+    {
+      if (e.ExceptionObject is Exception exception)
+        LogCritical(exception.GetType().FullName, $"Source = {exception.Source}", exception.Message);
+
+      if (e.IsTerminating)
+        LogCritical("CLR is terminating.");
+    }
+
+    static string Now => DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ff");
+
+    [ThreadStatic]
+    static int IndentLevel = 1;
+    public static int EntryCount = 0;
+
+    internal struct Entry : IDisposable
+    {
+      readonly int Indent;
+      public readonly int Id;
+      public readonly DateTime Timestamp;
+
+      internal string IndentPrefix => Indent > 0 ? new string('>', Indent) : string.Empty;
+      internal string Header => $"ID {Id} {Timestamp:yyyy-MM-dd HH:mm:ss.ff}";
+      internal string HeaderId => $"#id-{Id}-{Timestamp:yyyy-MM-dd-HHmmssff}";
+
+      internal Entry(int id, int indent)
+      {
+        Id = id;
+        Timestamp = DateTime.Now;
+        Indent = indent;
+      }
+
+      void IDisposable.Dispose()
+      {
+        Logger.Log(this, EntryRole.Subordinate, Severity.Return, string.Empty);
+
+        if (Indent > 0)
+          IndentLevel = Indent - 1;
+      }
+
+      internal static Entry Next() => Active ? new Entry(Interlocked.Increment(ref EntryCount), IndentLevel) : default;
+      internal static Entry Scope() => Active ? new Entry(Interlocked.Increment(ref EntryCount), ++IndentLevel) : default;
+
+      public void LogTrace(string name, params string[] details) => Logger.Log(this, EntryRole.Subordinate, Severity.Trace, name, details);
+      public void LogWarning(string name, params string[] details) => Logger.Log(this, EntryRole.Subordinate, Severity.Warning, name, details);
+      public void Log(Severity severity, string name, params string[] details) => Logger.Log(this, EntryRole.Subordinate, severity, name, details);
+
+      internal void LogEntry(Stream stream, EntryRole role, Severity severity, string name, params string[] details)
+      {
+        string Add(string token) => string.IsNullOrEmpty(token) ? string.Empty : $"{token} ";
+
+        string Italic(string token) => string.IsNullOrEmpty(token) ? string.Empty : $"*{token}*";
+        string Bold(string token) => string.IsNullOrEmpty(token) ? string.Empty : $"**{token}**";
+        string Link(string token, string url) => string.IsNullOrEmpty(token) ? string.Empty : $"[{token}]({url})";
+
+        using (var writer = new StreamWriter(stream, System.Text.Encoding.UTF8, 0x1000, true))
+        {
+          writer.AutoFlush = false;
+
+          // Header
+          if (role == EntryRole.Main)
+          {
+            writer.WriteLine($"{Add(IndentPrefix)}###### {Header}");
+            writer.WriteLine(IndentPrefix);
+            writer.WriteLine($"{Add(IndentPrefix)}{Add(SeverityIcon(severity))}{Add(Bold(name))} ");
+          }
+          else
+          {
+            writer.WriteLine($"{Add(IndentPrefix)}{Add(Link(SeverityIcon(severity), HeaderId))}{Add(Italic(Now))}{Add(name)} ");
+          }
+
+          // Details
+          foreach (var detail in details)
+            writer.WriteLine($"{Add(IndentPrefix)}{Add(detail)} ");
+
+          // Footer
+          if (severity == Severity.Return && Indent > 0)
+            writer.WriteLine(new string('>', Indent - 1));
+          else
+            writer.WriteLine(IndentPrefix);
+
+          writer.Flush();
+        }
+      }
+    }
+
+    internal enum EntryRole
+    {
+      Main,
+      Subordinate
+    }
+
+    public enum Severity
+    {
+      Exception   = -4, // '⚡'
+      Critical    = -3, // '⛔'
+      Error       = -2, // '❌'
+      Warning     = -1, // '⚠'
+      Trace       =  0,
+      Information = +1, // 'ℹ'
+      Succeded    = +2, // '✔️'
+      Return      = +3, // '⤶'
+    }
+
+    static string SeverityIcon(Severity severity)
+    {
+      switch (severity)
+      {
+        case Severity.Exception:   return "⚡";
+        case Severity.Critical:    return "⛔";
+        case Severity.Warning:     return "⚠️";
+        case Severity.Error:       return "❌";
+        case Severity.Succeded:    return "✔️";
+        case Severity.Information: return "ℹ️";
+        case Severity.Return:      return "⤶";
+      }
+
+      return string.Empty;
+    }
+
+    public static Entry LogScope([CallerMemberName] string name = "", params string[] details)
+    {
+      var entry = Entry.Scope();
+      Log(entry, EntryRole.Main, Severity.Trace, name, details);
+      return entry;
+    }
+
+    public static void LogTrace([CallerMemberName] string name = "", params string[] details) =>
+      Log(Entry.Next(), EntryRole.Main, Severity.Trace, name, details);
+
+    public static void LogInformation([CallerMemberName] string name = "", params string[] details) =>
+      Log(Entry.Next(), EntryRole.Main, Severity.Information, name, details);
+
+    public static void LogSucceded([CallerMemberName] string name = "", params string[] details) =>
+      Log(Entry.Next(), EntryRole.Main, Severity.Succeded, name, details);
+
+    public static void LogWarning([CallerMemberName] string name = "", params string[] details) =>
+      Log(Entry.Next(), EntryRole.Main, Severity.Warning, name, details);
+
+    public static void LogError([CallerMemberName] string name = "", params string[] details) =>
+      Log(Entry.Next(), EntryRole.Main, Severity.Error, name, details);
+
+    public static void LogCritical([CallerMemberName] string name = "", params string[] details) =>
+      Log(Entry.Next(), EntryRole.Main, Severity.Critical, name, details);
+
+    static void Log(Severity severity, string name, params string[] details) =>
+      Log(Entry.Next(), EntryRole.Main, severity, name, details);
+
+    static void Log(Entry entry, EntryRole role, Severity severity, string name, params string[] details)
+    {
+      if(Active && ThreadLogStream is Stream threadLogStream)
+        DispatchAsynch(() => entry.LogEntry(threadLogStream, role, severity, name, details));
+    }
+
+    #region Dispatcher
+    static readonly WeakReference<Task> dispatcher = new WeakReference<Task>(default);
+    static void DispatchAsynch(Action action)
+    {
+      lock (dispatcher)
+      {
+        dispatcher.SetTarget
+        (
+          dispatcher.TryGetTarget(out var currentDispatcher) ?
+          currentDispatcher.ContinueWith(_ => action()) :
+          Task.Run(action)
+        );
+      }
+    }
+    #endregion
   }
 }
