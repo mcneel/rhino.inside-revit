@@ -7,6 +7,7 @@ using RhinoInside.Revit.Convert.Geometry;
 using DB = Autodesk.Revit.DB;
 using RhinoInside.Revit.Convert.System.Collections.Generic;
 using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 
 namespace RhinoInside.Revit.GH.Components.Site
 {
@@ -17,16 +18,13 @@ namespace RhinoInside.Revit.GH.Components.Site
 
     public BuildingPadByOutline() : base
     (
-      "Add BuildingPad", "BuildingPad",
-      "Given a set of contour Curves, it adds a BuildingPad element to the active Revit document",
-      "Revit", "Site"
+      name: "Add BuildingPad",
+      nickname: "BuildingPad",
+      description: "Given a set of contour Curves, it adds a BuildingPad element to the active Revit document",
+      category: "Revit",
+      subCategory: "Site"
     )
     { }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.HostObject(), "BuildingPad", "BP", "New BuildingPad", GH_ParamAccess.item);
-    }
 
     static readonly DB.BuiltInParameter[] ParametersMask = new DB.BuiltInParameter[]
     {
@@ -40,22 +38,24 @@ namespace RhinoInside.Revit.GH.Components.Site
     void ReconstructBuildingPadByOutline
     (
       DB.Document doc,
-      ref DB.Architecture.BuildingPad element,
+
+      [Description("New BuildingPad"), NickName("BP")]
+      ref DB.Architecture.BuildingPad buildingPad,
 
       IList<Rhino.Geometry.Curve> boundaries,
       Optional<DB.BuildingPadType> type,
       Optional<DB.Level> level
     )
     {
-      ChangeElementType(ref element, type);
+      ChangeElementType(ref buildingPad, type);
 
       SolveOptionalLevel(doc, boundaries, ref level, out var boundaryBBox);
 
       var curveLoops = boundaries.ConvertAll(GeometryEncoder.ToCurveLoop);
 
-      if (element is DB.Architecture.BuildingPad buildingPad)
+      if (buildingPad is object)
       {
-        element.get_Parameter(DB.BuiltInParameter.LEVEL_PARAM).Set(level.Value.Id);
+        buildingPad.get_Parameter(DB.BuiltInParameter.LEVEL_PARAM).Set(level.Value.Id);
 
         buildingPad.SetBoundary(curveLoops);
       }
@@ -71,10 +71,10 @@ namespace RhinoInside.Revit.GH.Components.Site
           curveLoops
         );
 
-        ReplaceElement(ref element, newPad, ParametersMask);
+        ReplaceElement(ref buildingPad, newPad, ParametersMask);
       }
 
-      element?.get_Parameter(DB.BuiltInParameter.BUILDINGPAD_HEIGHTABOVELEVEL_PARAM).Set(boundaryBBox.Min.Z / Revit.ModelUnits - level.Value.GetHeight());
+      buildingPad?.get_Parameter(DB.BuiltInParameter.BUILDINGPAD_HEIGHTABOVELEVEL_PARAM).Set(boundaryBBox.Min.Z / Revit.ModelUnits - level.Value.GetHeight());
     }
   }
 }

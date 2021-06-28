@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.DirectShapes
@@ -13,20 +14,19 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
     public DirectShapeByMesh() : base
     (
-      "Add Mesh DirectShape", "MshDShape",
-      "Given a Mesh, it adds a Mesh shape to the active Revit document",
-      "Revit", "DirectShape"
+      name: "Add Mesh DirectShape",
+      nickname: "MshDShape",
+      description: "Given a Mesh, it adds a Mesh shape to the active Revit document",
+      category: "Revit",
+      subCategory: "DirectShape"
     )
     { }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.GraphicalElement(), "Mesh", "M", "New MeshShape", GH_ParamAccess.item);
-    }
 
     void ReconstructDirectShapeByMesh
     (
       DB.Document doc,
+
+      [ParamType(typeof(Parameters.GraphicalElement)), Name("Mesh"), NickName("M"), Description("New Mesh Shape")]
       ref DB.DirectShape element,
 
       Rhino.Geometry.Mesh mesh
@@ -35,18 +35,17 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       if (!ThrowIfNotValid(nameof(mesh), mesh))
         return;
 
-      if (element is DB.DirectShape ds) { }
-      else ds = DB.DirectShape.CreateElement(doc, new DB.ElementId(DB.BuiltInCategory.OST_GenericModel));
+      var genericModel = new DB.ElementId(DB.BuiltInCategory.OST_GenericModel);
+      if (element is object && element.Category.Id == genericModel) { }
+      else ReplaceElement(ref element, DB.DirectShape.CreateElement(doc, genericModel));
 
-      using (var ctx = GeometryEncoder.Context.Push(ds))
+      using (var ctx = GeometryEncoder.Context.Push(element))
       {
         ctx.RuntimeMessage = (severity, message, invalidGeometry) =>
           AddGeometryConversionError((GH_RuntimeMessageLevel) severity, message, invalidGeometry);
 
-        ds.SetShape(mesh.ToShape().OfType<DB.GeometryObject>().ToList());
+        element.SetShape(mesh.ToShape().OfType<DB.GeometryObject>().ToList());
       }
-
-      ReplaceElement(ref element, ds);
     }
   }
 }

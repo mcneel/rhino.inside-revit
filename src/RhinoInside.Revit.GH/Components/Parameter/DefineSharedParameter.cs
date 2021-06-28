@@ -18,22 +18,20 @@ namespace RhinoInside.Revit.GH.Components
 
     public DefineSharedParameter() : base
     (
-      "Define Shared Parameter", "SharedPara" +
-      "",
-      "Given its Name, it creates a Shared Parameter definition to the active Revit document",
-      "Revit", "Parameter"
+      name: "Define Shared Parameter",
+      nickname: "SharedPara",
+      description: "Given its Name, it creates a Shared Parameter definition to the active Revit document",
+      category: "Revit",
+      subCategory: "Parameter"
     )
     { }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.ParameterKey(), "ParameterKey", "K", "New Parameter definition", GH_ParamAccess.item);
-    }
 
     void ReconstructDefineSharedParameter
     (
       DB.Document doc,
-      ref DB.SharedParameterElement element,
+
+      [Description("New Parameter definition"), NickName("K")]
+      ref DB.SharedParameterElement parameterKey,
 
       [Description("Parameter Name")] string name,
       [Description("Overwrite Parameter definition if found"), Optional, DefaultValue(false)] bool overwrite
@@ -64,7 +62,7 @@ namespace RhinoInside.Revit.GH.Components
               {
                 if (!overwrite)
                 {
-                  ReplaceElement(ref element, parameterElement);
+                  ReplaceElement(ref parameterKey, parameterElement);
                   throw new CancelException($"A parameter called \"{name}\" is already in the document");
                 }
                 parameterGUID = parameterElement.GuidValue;
@@ -103,7 +101,7 @@ namespace RhinoInside.Revit.GH.Components
         }
       }
 
-      ReplaceElement(ref element, DB.SharedParameterElement.Lookup(doc, parameterGUID.Value));
+      ReplaceElement(ref parameterKey, DB.SharedParameterElement.Lookup(doc, parameterGUID.Value));
     }
   }
 }

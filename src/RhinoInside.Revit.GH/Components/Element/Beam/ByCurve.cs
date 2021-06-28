@@ -3,6 +3,7 @@ using System.Linq;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -19,11 +20,6 @@ namespace RhinoInside.Revit.GH.Components
       "Revit", "Build"
     )
     { }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.FamilyInstance(), "Beam", "B", "New Beam", GH_ParamAccess.item);
-    }
 
     protected override void OnAfterStart(DB.Document document, string strTransactionName)
     {
@@ -57,9 +53,11 @@ namespace RhinoInside.Revit.GH.Components
     void ReconstructBeamByCurve
     (
       DB.Document doc,
-      ref DB.FamilyInstance element,
 
-               Rhino.Geometry.Curve curve,
+      [Description("New Beam")]
+      ref DB.FamilyInstance beam,
+
+      Rhino.Geometry.Curve curve,
       Optional<DB.FamilySymbol> type,
       Optional<DB.Level> level
     )
@@ -77,12 +75,12 @@ namespace RhinoInside.Revit.GH.Components
       var centerLine = curve.ToCurve();
 
       if (type.HasValue)
-        ChangeElementTypeId(ref element, type.Value.Id);
+        ChangeElementTypeId(ref beam, type.Value.Id);
 
       // Try to update Beam
-      if (element is object && element.Location is DB.LocationCurve locationCurve && centerLine.IsSameKindAs(locationCurve.Curve))
+      if (beam is object && beam.Location is DB.LocationCurve locationCurve && centerLine.IsSameKindAs(locationCurve.Curve))
       {
-        var referenceLevel = element.get_Parameter(DB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM);
+        var referenceLevel = beam.get_Parameter(DB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM);
         var updateLevel = referenceLevel.AsElementId() != level.Value.Id;
 
         if (!updateLevel || !referenceLevel.IsReadOnly)
@@ -107,12 +105,12 @@ namespace RhinoInside.Revit.GH.Components
           DB.Structure.StructuralType.Beam
         );
 
-        if (element is object && DB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(element, 0))
+        if (beam is object && DB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(beam, 0))
           DB.Structure.StructuralFramingUtils.AllowJoinAtEnd(newBeam, 0);
         else
           DB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(newBeam, 0);
 
-        if (element is object && DB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(element, 1))
+        if (beam is object && DB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(beam, 1))
           DB.Structure.StructuralFramingUtils.AllowJoinAtEnd(newBeam, 1);
         else
           DB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(newBeam, 1);
@@ -131,7 +129,7 @@ namespace RhinoInside.Revit.GH.Components
           DB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM,
         };
 
-        ReplaceElement(ref element, newBeam, parametersMask);
+        ReplaceElement(ref beam, newBeam, parametersMask);
       }
     }
   }

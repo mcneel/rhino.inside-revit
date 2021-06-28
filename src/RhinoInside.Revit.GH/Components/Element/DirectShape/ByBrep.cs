@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.DirectShapes
@@ -19,14 +20,11 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     )
     { }
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.GraphicalElement(), "Brep", "B", "New BrepShape", GH_ParamAccess.item);
-    }
-
     void ReconstructDirectShapeByBrep
     (
       DB.Document doc,
+
+      [ParamType(typeof(Parameters.GraphicalElement)), Name("Brep"), NickName("B"), Description("New Brep Shape")]
       ref DB.DirectShape element,
 
       Rhino.Geometry.Brep brep
@@ -35,18 +33,17 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       if (!ThrowIfNotValid(nameof(brep), brep))
         return;
 
-      if (element is DB.DirectShape ds) { }
-      else ds = DB.DirectShape.CreateElement(doc, new DB.ElementId(DB.BuiltInCategory.OST_GenericModel));
+      var genericModel = new DB.ElementId(DB.BuiltInCategory.OST_GenericModel);
+      if (element is object && element.Category.Id == genericModel) { }
+      else ReplaceElement(ref element, DB.DirectShape.CreateElement(doc, genericModel));
 
-      using (var ctx = GeometryEncoder.Context.Push(ds))
+      using (var ctx = GeometryEncoder.Context.Push(element))
       {
         ctx.RuntimeMessage = (severity, message, invalidGeometry) =>
           AddGeometryConversionError((GH_RuntimeMessageLevel) severity, message, invalidGeometry); 
 
-        ds.SetShape(brep.ToShape().OfType<DB.GeometryObject>().ToList());
+        element.SetShape(brep.ToShape().OfType<DB.GeometryObject>().ToList());
       }
-
-      ReplaceElement(ref element, ds);
     }
   }
 }

@@ -21,15 +21,12 @@ namespace RhinoInside.Revit.GH.Components.Level
     )
     { }
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.Level(), "Level", "L", "New Level", GH_ParamAccess.item);
-    }
-
     void ReconstructLevelByElevation
     (
       DB.Document doc,
-      ref DB.Level element,
+
+      [Description("New Level")]
+      ref DB.Level level,
 
       [ParamType(typeof(Parameters.Elevation))]
       double elevation,
@@ -43,17 +40,13 @@ namespace RhinoInside.Revit.GH.Components.Level
 
       SolveOptionalType(doc, ref type, DB.ElementTypeGroup.LevelType, nameof(type));
 
-      if (element is DB.Level level)
+      if (level is object)
       {
         level.SetHeight(elevation);
       }
       else
       {
-        var newLevel = DB.Level.Create
-        (
-          doc,
-          elevation
-        );
+        var newLevel = DB.Level.Create(doc, elevation);
 
         var parametersMask = name.IsMissing ?
           new DB.BuiltInParameter[]
@@ -70,14 +63,14 @@ namespace RhinoInside.Revit.GH.Components.Level
             DB.BuiltInParameter.DATUM_TEXT
           };
 
-        ReplaceElement(ref element, newLevel, parametersMask);
+        ReplaceElement(ref level, newLevel, parametersMask);
       }
 
-      ChangeElementTypeId(ref element, type.Value.Id);
+      ChangeElementTypeId(ref level, type.Value.Id);
 
-      if (name != Optional.Missing && element != null)
+      if (name != Optional.Missing && level is object)
       {
-        try { element.Name = name.Value; }
+        try { level.Name = name.Value; }
         catch (Autodesk.Revit.Exceptions.ArgumentException e)
         {
           AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"{e.Message.Replace($".{Environment.NewLine}", ". ")}");

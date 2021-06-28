@@ -20,16 +20,13 @@ namespace RhinoInside.Revit.GH.Components
 
     public FamilyInstanceByLocation () : base
     (
-      "Add Component (Location)", "CompLoca",
-      "Given its location, it reconstructs a Component element into the active Revit document",
-      "Revit", "Build"
+      name: "Add Component (Location)",
+      nickname: "CompLoca",
+      description: "Given its location, it reconstructs a Component element into the active Revit document",
+      category: "Revit",
+      subCategory: "Build"
     )
     { }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.FamilyInstance(), "Component", "C", "New Component element", GH_ParamAccess.item);
-    }
 
     bool Reuse(ref DB.FamilyInstance element, Plane location, DB.FamilySymbol type, DB.Level level, DB.Element host)
     {
@@ -58,7 +55,9 @@ namespace RhinoInside.Revit.GH.Components
     void ReconstructFamilyInstanceByLocation
     (
       DB.Document doc,
-      ref DB.FamilyInstance element,
+
+      [Description("New Component element")]
+      ref DB.FamilyInstance component,
 
       [Description("Location where to place the element. Point or plane is accepted.")]
       Plane location,
@@ -84,7 +83,7 @@ namespace RhinoInside.Revit.GH.Components
 
       SolveOptionalLevel(doc, location, type, ref level, host);
 
-      if (!Reuse(ref element, location, type, level.Value, host))
+      if (!Reuse(ref component, location, type, level.Value, host))
       {
         FamilyInstanceCreationData creationData;
         switch (type.Family.FamilyPlacementType)
@@ -140,13 +139,13 @@ namespace RhinoInside.Revit.GH.Components
           DB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM
         };
 
-        ReplaceElement(ref element, newElement, parametersMask);
+        ReplaceElement(ref component, newElement, parametersMask);
 
         // Regenerate here to allow SetLocation get the current element location correctly.
         doc.Regenerate();
       }
 
-      element?.SetLocation(location.Origin.ToXYZ(), location.XAxis.ToXYZ(), location.YAxis.ToXYZ());
+      component?.SetLocation(location.Origin.ToXYZ(), location.XAxis.ToXYZ(), location.YAxis.ToXYZ());
     }
 
     void SolveOptionalLevel(DB.Document doc, Plane location, DB.FamilySymbol type, ref Optional<DB.Level> level, DB.Element host)

@@ -4,6 +4,7 @@ using Grasshopper.Kernel;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -20,11 +21,6 @@ namespace RhinoInside.Revit.GH.Components
       "Revit", "Build"
     )
     { }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.Floor(), "Floor", "F", "New Floor", GH_ParamAccess.item);
-    }
 
     bool Reuse(ref DB.Floor element, Curve boundary, DB.FloorType type, DB.Level level, bool structural)
     {
@@ -102,7 +98,9 @@ namespace RhinoInside.Revit.GH.Components
     void ReconstructFloorByOutline
     (
       DB.Document doc,
-      ref DB.Floor element,
+
+      [Description("New Floor")]
+      ref DB.Floor floor,
 
       Curve boundary,
       Optional<DB.FloorType> type,
@@ -133,7 +131,7 @@ namespace RhinoInside.Revit.GH.Components
       if (orientation == CurveOrientation.CounterClockwise)
         boundary.Reverse();
 
-      if (!Reuse(ref element, boundary, type.Value, level.Value, structural))
+      if (!Reuse(ref floor, boundary, type.Value, level.Value, structural))
       {
         var parametersMask = new DB.BuiltInParameter[]
         {
@@ -152,18 +150,18 @@ namespace RhinoInside.Revit.GH.Components
         var curveArray = boundary.ToCurveArray();
 
         if (type.Value.IsFoundationSlab)
-          ReplaceElement(ref element, doc.Create.NewFoundationSlab(curveArray, type.Value, level.Value, structural, DB.XYZ.BasisZ), parametersMask);
+          ReplaceElement(ref floor, doc.Create.NewFoundationSlab(curveArray, type.Value, level.Value, structural, DB.XYZ.BasisZ), parametersMask);
         else
-          ReplaceElement(ref element, doc.Create.NewFloor(curveArray, type.Value, level.Value, structural, DB.XYZ.BasisZ), parametersMask);
+          ReplaceElement(ref floor, doc.Create.NewFloor(curveArray, type.Value, level.Value, structural, DB.XYZ.BasisZ), parametersMask);
 #endif
       }
 
-      if (element != null)
+      if (floor != null)
       {
         var floorHeightabovelevel = bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight();
         if
         (
-          element.GetParameter(External.DB.Schemas.ParameterId.FloorHeightabovelevelParam) is DB.Parameter floorHeightabovelevelParam &&
+          floor.GetParameter(External.DB.Schemas.ParameterId.FloorHeightabovelevelParam) is DB.Parameter floorHeightabovelevelParam &&
           floorHeightabovelevelParam.AsDouble() != floorHeightabovelevel
         )
         {

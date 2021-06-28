@@ -3,6 +3,7 @@ using Rhino.Geometry;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using DB = Autodesk.Revit.DB;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -21,15 +22,12 @@ namespace RhinoInside.Revit.GH.Components
     )
     { }
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.Grid(), "Grid", "G", "New Grid", GH_ParamAccess.item);
-    }
-
     void ReconstructGridByCurve
     (
       DB.Document doc,
-      ref DB.Element element,
+
+      [ParamType(typeof(Parameters.GraphicalElement)), Description("New Grid")]
+      ref DB.Element grid,
 
       Curve curve,
       Optional<DB.GridType> type,
@@ -55,13 +53,13 @@ namespace RhinoInside.Revit.GH.Components
 
       if (curve.TryGetLine(out var line, Revit.VertexTolerance * Revit.ModelUnits))
       {
-        ReplaceElement(ref element, DB.Grid.Create(doc, line.ToLine()), parametersMask);
-        ChangeElementTypeId(ref element, type.Value.Id);
+        ReplaceElement(ref grid, DB.Grid.Create(doc, line.ToLine()), parametersMask);
+        ChangeElementTypeId(ref grid, type.Value.Id);
       }
       else if (curve.TryGetArc(out var arc, Revit.VertexTolerance * Revit.ModelUnits))
       {
-        ReplaceElement(ref element, DB.Grid.Create(doc, arc.ToArc()), parametersMask);
-        ChangeElementTypeId(ref element, type.Value.Id);
+        ReplaceElement(ref grid, DB.Grid.Create(doc, arc.ToArc()), parametersMask);
+        ChangeElementTypeId(ref grid, type.Value.Id);
       }
       else
       {
@@ -83,14 +81,15 @@ namespace RhinoInside.Revit.GH.Components
 
           curve.TryGetPlane(out var plane);
           var sketchPlane = DB.SketchPlane.Create(doc, plane.ToPlane());
+          var newGrid = doc.GetElement(DB.MultiSegmentGrid.Create(doc, type.Value.Id, curveLoop, sketchPlane.Id)) as DB.MultiSegmentGrid;
 
-          ReplaceElement(ref element, doc.GetElement(DB.MultiSegmentGrid.Create(doc, type.Value.Id, curveLoop, sketchPlane.Id)), parametersMask);
+          ReplaceElement(ref grid, newGrid, parametersMask);
         }
       }
 
-      if (name != Optional.Missing && element != null)
+      if (name != Optional.Missing && grid is object)
       {
-        try { element.Name = name.Value; }
+        try { grid.Name = name.Value; }
         catch (Autodesk.Revit.Exceptions.ArgumentException e)
         {
           AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"{e.Message.Replace($".{Environment.NewLine}", ". ")}");

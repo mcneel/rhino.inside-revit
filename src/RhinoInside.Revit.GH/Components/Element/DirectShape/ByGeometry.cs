@@ -4,13 +4,13 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.DirectShapes
 {
   using Kernel.Attributes;
+  using Convert.Geometry;
+  using External.DB.Extensions;
 
   public abstract class ReconstructDirectShapeComponent : ReconstructElementComponent
   {
@@ -122,21 +122,20 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
     public DirectShapeByGeometry() : base
     (
-      "Add Geometry DirectShape", "GeoDShape",
-      "Given its Geometry, it adds a DirectShape element to the active Revit document",
-      "Revit", "DirectShape"
+      name: "Add Geometry DirectShape",
+      nickname: "GeoDShape",
+      description: "Given its Geometry, it adds a DirectShape element to the active Revit document",
+      category: "Revit",
+      subCategory: "DirectShape"
     )
     { }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.GraphicalElement(), "DirectShape", "DS", "New DirectShape", GH_ParamAccess.item);
-    }
 
     void ReconstructDirectShapeByGeometry
     (
       DB.Document doc,
-      ref DB.Element element,
+
+      [ParamType(typeof(Parameters.GraphicalElement)), NickName("DS"), Description("New DirectShape")]
+      ref DB.DirectShape directShape,
 
       [Optional] string name,
       Optional<DB.Category> category,
@@ -146,13 +145,11 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     {
       SolveOptionalCategory(ref category, doc, DB.BuiltInCategory.OST_GenericModel, nameof(geometry));
 
-      if (element is DB.DirectShape directShape && directShape.Category.Id == category.Value.Id) { }
-      else directShape = DB.DirectShape.CreateElement(doc, category.Value.Id);
+      if (directShape is object && directShape.Category.Id == category.Value.Id) { }
+      else ReplaceElement(ref directShape, DB.DirectShape.CreateElement(doc, category.Value.Id));
 
       directShape.Name = name ?? string.Empty;
       directShape.SetShape(BuildShape(directShape, geometry, material, out var paintIds));
-
-      ReplaceElement(ref element, directShape);
 
       PaintElementSolids(directShape, paintIds);
     }
@@ -165,21 +162,20 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
     public DirectShapeTypeByGeometry() : base
     (
-      "Add DirectShapeType", "DShapeTyp",
-      "Given its Geometry, it reconstructs a DirectShapeType to the active Revit document",
-      "Revit", "DirectShape"
+      name: "Add DirectShapeType",
+      nickname: "DShapeTyp",
+      description: "Given its Geometry, it reconstructs a DirectShapeType to the active Revit document",
+      category: "Revit",
+      subCategory: "DirectShape"
     )
     { }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.ElementType(), "Type", "T", "New DirectShapeType", GH_ParamAccess.item);
-    }
 
     void ReconstructDirectShapeTypeByGeometry
     (
       DB.Document doc,
-      ref DB.ElementType elementType,
+
+      [Description("New DirectShape Type")]
+      ref DB.ElementType type,
 
       string name,
       Optional<DB.Category> category,
@@ -189,13 +185,13 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     {
       SolveOptionalCategory(ref category, doc, DB.BuiltInCategory.OST_GenericModel, nameof(geometry));
 
-      if (elementType is DB.DirectShapeType directShapeType && directShapeType.Category.Id == category.Value.Id) { }
+      if (type is DB.DirectShapeType directShapeType && directShapeType.Category.Id == category.Value.Id) { }
       else directShapeType = DB.DirectShapeType.Create(doc, name, category.Value.Id);
 
       directShapeType.Name = name;
       directShapeType.SetShape(BuildShape(directShapeType, geometry, material, out var paintIds));
 
-      ReplaceElement(ref elementType, directShapeType);
+      ReplaceElement(ref type, directShapeType);
 
       PaintElementSolids(directShapeType, paintIds);
     }
@@ -208,29 +204,35 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
     public DirectShapeByLocation() : base
     (
-      "Add DirectShape", "DShape",
-      "Given its location, it reconstructs a DirectShape into the active Revit document",
-      "Revit", "DirectShape"
+      name: "Add DirectShape",
+      nickname: "DShape",
+      description: "Given its location, it reconstructs a DirectShape into the active Revit document",
+      category: "Revit",
+      subCategory: "DirectShape"
     )
     { }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.GraphicalElement(), "DirectShape", "DS", "New DirectShape", GH_ParamAccess.item);
-    }
 
     void ReconstructDirectShapeByLocation
     (
       DB.Document doc,
-      ref DB.Element element,
+
+      [ParamType(typeof(Parameters.GraphicalElement)), NickName("DS"), Description("New DirectShape")]
+      ref DB.DirectShape directShape,
 
       [Description("Location where to place the element. Point or plane is accepted.")]
       Rhino.Geometry.Plane location,
       DB.DirectShapeType type
     )
     {
-      if (element is DB.DirectShape directShape && directShape.Category.Id == type.Category.Id) { }
-      else directShape = DB.DirectShape.CreateElement(doc, type.Category.Id);
+      var parametersMask = new DB.BuiltInParameter[]
+      {
+        DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+        DB.BuiltInParameter.ELEM_FAMILY_PARAM,
+        DB.BuiltInParameter.ELEM_TYPE_PARAM
+      };
+
+      if (directShape is object && directShape.Category.Id == type.Category.Id) { }
+      else ReplaceElement(ref directShape, DB.DirectShape.CreateElement(doc, type.Category.Id), parametersMask);
 
       if (directShape.TypeId != type.Id)
         directShape.SetTypeId(type.Id);
@@ -245,15 +247,6 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       {
         directShape.SetShape(DB.DirectShape.CreateGeometryInstance(doc, type.UniqueId, transform));
       }
-
-      var parametersMask = new DB.BuiltInParameter[]
-      {
-        DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-        DB.BuiltInParameter.ELEM_FAMILY_PARAM,
-        DB.BuiltInParameter.ELEM_TYPE_PARAM
-      };
-
-      ReplaceElement(ref element, directShape, parametersMask);
     }
   }
 }

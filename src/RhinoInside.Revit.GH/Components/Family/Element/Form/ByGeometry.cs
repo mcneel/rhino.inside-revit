@@ -1,8 +1,9 @@
 using System;
 using System.Linq;
+using Grasshopper.Kernel;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
-using Grasshopper.Kernel;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -22,15 +23,12 @@ namespace RhinoInside.Revit.GH.Components
     )
     { }
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.GraphicalElement(), "Form", "F", "New Form", GH_ParamAccess.item);
-    }
-
     void ReconstructFormByGeometry
     (
       DB.Document doc,
-      ref DB.Element element,
+
+      [ParamType(typeof(Parameters.GraphicalElement)), Description("New Form")]
+      ref DB.GenericForm form,
 
       Brep brep
     )
@@ -52,7 +50,7 @@ namespace RhinoInside.Revit.GH.Components
 
             ReplaceElement
             (
-              ref element,
+              ref form,
               doc.FamilyCreate.NewFormByCap
               (
                 !cutting,
@@ -80,7 +78,7 @@ namespace RhinoInside.Revit.GH.Components
 
             ReplaceElement
             (
-              ref element,
+              ref form,
               doc.FamilyCreate.NewExtrusionForm
               (
                 !cutting,
@@ -105,19 +103,19 @@ namespace RhinoInside.Revit.GH.Components
         var solid = brep.ToSolid();
         if (solid != null)
         {
-          if (element is DB.FreeFormElement freeFormElement)
+          if (form is DB.FreeFormElement freeFormElement)
           {
             freeFormElement.UpdateSolidGeometry(solid);
           }
           else
           {
-            ReplaceElement(ref element, DB.FreeFormElement.Create(doc, solid));
+            ReplaceElement(ref form, DB.FreeFormElement.Create(doc, solid));
 
             if (doc.OwnerFamily.IsConceptualMassFamily)
-              element.get_Parameter(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY).Set(new DB.ElementId(DB.BuiltInCategory.OST_MassForm));
+              form.get_Parameter(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY).Set(new DB.ElementId(DB.BuiltInCategory.OST_MassForm));
           }
 
-          element.get_Parameter(DB.BuiltInParameter.ELEMENT_IS_CUTTING)?.Set(cutting ? 1 : 0);
+          form.get_Parameter(DB.BuiltInParameter.ELEMENT_IS_CUTTING)?.Set(cutting ? 1 : 0);
         }
         else AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Failed to convert Brep to Form");
       }

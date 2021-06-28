@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -21,14 +22,11 @@ namespace RhinoInside.Revit.GH.Components
     )
     { }
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.ElementType(), "GroupType", "G", "New GroupType", GH_ParamAccess.item);
-    }
-
     void ReconstructGroupTypeCreate
     (
       DB.Document doc,
+
+      [Description("New Group Type"), NickName("GT")]
       ref DB.GroupType groupType,
 
       IList<DB.Element> elements,

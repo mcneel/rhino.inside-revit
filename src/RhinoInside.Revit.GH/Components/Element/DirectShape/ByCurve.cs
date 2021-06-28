@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.DirectShapes
@@ -13,20 +14,19 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
     public DirectShapeByCurve() : base
     (
-      "Add Curve DirectShape", "CrvDShape",
-      "Given a Curve, it adds a Curve shape to the active Revit document",
-      "Revit", "DirectShape"
+      name: "Add Curve DirectShape",
+      nickname: "CrvDShape",
+      description: "Given a Curve, it adds a Curve shape to the active Revit document",
+      category: "Revit",
+      subCategory: "DirectShape"
     )
     { }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.GraphicalElement(), "Curve", "C", "New CurveShape", GH_ParamAccess.item);
-    }
 
     void ReconstructDirectShapeByCurve
     (
       DB.Document doc,
+
+      [ParamType(typeof(Parameters.GraphicalElement)), Name("Curve"), NickName("C"), Description("New Curve Shape")]
       ref DB.DirectShape element,
 
       Rhino.Geometry.Curve curve
@@ -35,18 +35,17 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       if (!ThrowIfNotValid(nameof(curve), curve))
         return;
 
-      if (element is DB.DirectShape ds) { }
-      else ds = DB.DirectShape.CreateElement(doc, new DB.ElementId(DB.BuiltInCategory.OST_GenericModel));
+      var genericModel = new DB.ElementId(DB.BuiltInCategory.OST_GenericModel);
+      if (element is object && element.Category.Id == genericModel) { }
+      else ReplaceElement(ref element, DB.DirectShape.CreateElement(doc, genericModel));
 
-      using (var ctx = GeometryEncoder.Context.Push(ds))
+      using (var ctx = GeometryEncoder.Context.Push(element))
       {
         ctx.RuntimeMessage = (severity, message, invalidGeometry) =>
           AddGeometryConversionError((GH_RuntimeMessageLevel) severity, message, invalidGeometry);
 
-        ds.SetShape(curve.ToShape().OfType<DB.GeometryObject>().ToList());
+        element.SetShape(curve.ToShape().OfType<DB.GeometryObject>().ToList());
       }
-
-      ReplaceElement(ref element, ds);
     }
   }
 }

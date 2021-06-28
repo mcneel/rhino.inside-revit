@@ -3,6 +3,7 @@ using Grasshopper.Kernel;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -19,11 +20,6 @@ namespace RhinoInside.Revit.GH.Components
       "Revit", "Build"
     )
     { }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.Roof(), "Roof", "R", "New Roof", GH_ParamAccess.item);
-    }
 
     bool Reuse(ref DB.FootPrintRoof element, Curve boundary, DB.RoofType type, DB.Level level)
     {
@@ -103,7 +99,9 @@ namespace RhinoInside.Revit.GH.Components
     void ReconstructRoofByOutline
     (
       DB.Document doc,
-      ref DB.FootPrintRoof element,
+
+      [Description("New Roof")]
+      ref DB.FootPrintRoof roof,
 
       Curve boundary,
       Optional<DB.RoofType> type,
@@ -133,7 +131,7 @@ namespace RhinoInside.Revit.GH.Components
       if (orientation == CurveOrientation.CounterClockwise)
         boundary.Reverse();
 
-      if (!Reuse(ref element, boundary, type.Value, level.Value))
+      if (!Reuse(ref roof, boundary, type.Value, level.Value))
       {
         var parametersMask = new DB.BuiltInParameter[]
         {
@@ -147,16 +145,16 @@ namespace RhinoInside.Revit.GH.Components
         using (var curveArray = boundary.ToCurveArray())
         {
           var footPrintToModelCurvesMapping = new DB.ModelCurveArray();
-          ReplaceElement(ref element, doc.Create.NewFootPrintRoof(curveArray, level.Value, type.Value, out footPrintToModelCurvesMapping), parametersMask);
+          ReplaceElement(ref roof, doc.Create.NewFootPrintRoof(curveArray, level.Value, type.Value, out footPrintToModelCurvesMapping), parametersMask);
         }
       }
 
-      if (element != null)
+      if (roof != null)
       {
         var roofLevelOffset = bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight();
         if
         (
-          element.GetParameter(External.DB.Schemas.ParameterId.RoofLevelOffsetParam) is DB.Parameter RoofLevelOffsetParam &&
+          roof.GetParameter(External.DB.Schemas.ParameterId.RoofLevelOffsetParam) is DB.Parameter RoofLevelOffsetParam &&
           RoofLevelOffsetParam.AsDouble() != roofLevelOffset
         )
         {

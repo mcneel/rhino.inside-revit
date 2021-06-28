@@ -16,6 +16,7 @@ namespace RhinoInside.Revit.GH.Components
 {
   using Convert.Geometry;
   using Exceptions;
+  using Grasshopper.Kernel.Attributes;
   using Kernel.Attributes;
 
   [Obsolete]
@@ -571,71 +572,88 @@ namespace RhinoInside.Revit.GH.Components
     : base(name, nickname, description, category, subCategory) { }
 
     #region Reflection
-    static Dictionary<Type, Tuple<Type, Type>> ParamTypes = new Dictionary<Type, Tuple<Type, Type>>()
+    static readonly Dictionary<Type, (Type ParamType, Type GooType)> ParamTypes = new Dictionary<Type, (Type, Type)>()
     {
-      { typeof(bool),                           Tuple.Create(typeof(Param_Boolean),           typeof(GH_Boolean))         },
-      { typeof(int),                            Tuple.Create(typeof(Param_Integer),           typeof(GH_Integer))         },
-      { typeof(double),                         Tuple.Create(typeof(Param_Number),            typeof(GH_Number))          },
-      { typeof(string),                         Tuple.Create(typeof(Param_String),            typeof(GH_String))          },
-      { typeof(Guid),                           Tuple.Create(typeof(Param_Guid),              typeof(GH_Guid))            },
-      { typeof(DateTime),                       Tuple.Create(typeof(Param_Time),              typeof(GH_Time))            },
+      { typeof(bool),                         (typeof(Param_Boolean),               typeof(GH_Boolean))             },
+      { typeof(int),                          (typeof(Param_Integer),               typeof(GH_Integer))             },
+      { typeof(double),                       (typeof(Param_Number),                typeof(GH_Number))              },
+      { typeof(string),                       (typeof(Param_String),                typeof(GH_String))              },
+      { typeof(Guid),                         (typeof(Param_Guid),                  typeof(GH_Guid))                },
+      { typeof(DateTime),                     (typeof(Param_Time),                  typeof(GH_Time))                },
 
-      { typeof(Rhino.Geometry.Transform),       Tuple.Create(typeof(Param_Transform),         typeof(GH_Transform))       },
-      { typeof(Rhino.Geometry.Point3d),         Tuple.Create(typeof(Param_Point),             typeof(GH_Point))           },
-      { typeof(Rhino.Geometry.Vector3d),        Tuple.Create(typeof(Param_Vector),            typeof(GH_Vector))          },
-      { typeof(Rhino.Geometry.Plane),           Tuple.Create(typeof(Param_Plane),             typeof(GH_Plane))          },
-      { typeof(Rhino.Geometry.Line),            Tuple.Create(typeof(Param_Line),              typeof(GH_Line))            },
-      { typeof(Rhino.Geometry.Arc),             Tuple.Create(typeof(Param_Arc),               typeof(GH_Arc))             },
-      { typeof(Rhino.Geometry.Circle),          Tuple.Create(typeof(Param_Circle),            typeof(GH_Circle))          },
-      { typeof(Rhino.Geometry.Curve),           Tuple.Create(typeof(Param_Curve),             typeof(GH_Curve))           },
-      { typeof(Rhino.Geometry.Surface),         Tuple.Create(typeof(Param_Surface),           typeof(GH_Surface))         },
-      { typeof(Rhino.Geometry.Brep),            Tuple.Create(typeof(Param_Brep),              typeof(GH_Brep))            },
-//    { typeof(Rhino.Geometry.Extrusion),       Tuple.Create(typeof(Param_Extrusion),         typeof(GH_Extrusion))       },
-      { typeof(Rhino.Geometry.Mesh),            Tuple.Create(typeof(Param_Mesh),              typeof(GH_Mesh))            },
-      { typeof(Rhino.Geometry.SubD),            Tuple.Create(typeof(Param_SubD),              typeof(GH_SubD))            },
+      { typeof(Transform),                    (typeof(Param_Transform),             typeof(GH_Transform))           },
+      { typeof(Point3d),                      (typeof(Param_Point),                 typeof(GH_Point))               },
+      { typeof(Vector3d),                     (typeof(Param_Vector),                typeof(GH_Vector))              },
+      { typeof(Plane),                        (typeof(Param_Plane),                 typeof(GH_Plane))               },
+      { typeof(Line),                         (typeof(Param_Line),                  typeof(GH_Line))                },
+      { typeof(Arc),                          (typeof(Param_Arc),                   typeof(GH_Arc))                 },
+      { typeof(Circle),                       (typeof(Param_Circle),                typeof(GH_Circle))              },
+      { typeof(Curve),                        (typeof(Param_Curve),                 typeof(GH_Curve))               },
+      { typeof(Surface),                      (typeof(Param_Surface),               typeof(GH_Surface))             },
+      { typeof(Brep),                         (typeof(Param_Brep),                  typeof(GH_Brep))                },
+//    { typeof(Extrusion),                    (typeof(Param_Extrusion),             typeof(GH_Extrusion))           },
+      { typeof(Mesh),                         (typeof(Param_Mesh),                  typeof(GH_Mesh))                },
+      { typeof(SubD),                         (typeof(Param_SubD),                  typeof(GH_SubD))                },
 
-      { typeof(IGH_Goo),                        Tuple.Create(typeof(Param_GenericObject),     typeof(IGH_Goo))            },
-      { typeof(IGH_GeometricGoo),               Tuple.Create(typeof(Param_Geometry),          typeof(IGH_GeometricGoo))   },
+      { typeof(IGH_Goo),                      (typeof(Param_GenericObject),         typeof(IGH_Goo))                },
+      { typeof(IGH_GeometricGoo),             (typeof(Param_Geometry),              typeof(IGH_GeometricGoo))       },
 
-      { typeof(Autodesk.Revit.DB.Category),     Tuple.Create(typeof(Parameters.Category),     typeof(Types.Category))     },
-      { typeof(Autodesk.Revit.DB.Element),      Tuple.Create(typeof(Parameters.Element),      typeof(Types.Element))      },
-      { typeof(Autodesk.Revit.DB.ElementType),  Tuple.Create(typeof(Parameters.ElementType),  typeof(Types.ElementType))  },
-      { typeof(Autodesk.Revit.DB.FamilySymbol), Tuple.Create(typeof(Parameters.FamilySymbol), typeof(Types.FamilySymbol)) },
-      { typeof(Autodesk.Revit.DB.Material),     Tuple.Create(typeof(Parameters.Material),     typeof(Types.Material))     },
-      { typeof(Autodesk.Revit.DB.SketchPlane),  Tuple.Create(typeof(Parameters.SketchPlane),  typeof(Types.SketchPlane))  },
-      { typeof(Autodesk.Revit.DB.Level),        Tuple.Create(typeof(Parameters.Level),        typeof(Types.Level))        },
-      { typeof(Autodesk.Revit.DB.Grid),         Tuple.Create(typeof(Parameters.Grid),         typeof(Types.Grid))         },
-      { typeof(Autodesk.Revit.DB.HostObject),   Tuple.Create(typeof(Parameters.HostObject),   typeof(Types.HostObject))   },
+      { typeof(DB.Document),                  (typeof(Parameters.Document),         typeof(Types.Document))         },
+      { typeof(DB.ElementFilter),             (typeof(Parameters.ElementFilter),    typeof(Types.ElementFilter))    },
+      { typeof(DB.FilterRule),                (typeof(Parameters.FilterRule),       typeof(Types.FilterRule))       },
+      { typeof(DB.ParameterElement),          (typeof(Parameters.ParameterKey),     typeof(Types.ParameterKey))     },
+
+      { typeof(DB.ElementType),               (typeof(Parameters.ElementType),      typeof(Types.ElementType))      },
+      { typeof(DB.Element),                   (typeof(Parameters.Element),          typeof(Types.Element))          },
+
+      { typeof(DB.Category),                  (typeof(Parameters.Category),         typeof(Types.Category))         },
+      { typeof(DB.Family),                    (typeof(Parameters.Family),           typeof(Types.Family))           },
+      { typeof(DB.View),                      (typeof(Parameters.View),             typeof(Types.View))             },
+      { typeof(DB.Group),                     (typeof(Parameters.Group),            typeof(Types.Group))            },
+
+      { typeof(DB.SketchPlane),               (typeof(Parameters.SketchPlane),      typeof(Types.SketchPlane))      },
+      { typeof(DB.Level),                     (typeof(Parameters.Level),            typeof(Types.Level))            },
+      { typeof(DB.Grid),                      (typeof(Parameters.Grid),             typeof(Types.Grid))             },
+      { typeof(DB.Material),                  (typeof(Parameters.Material),         typeof(Types.Material))         },
+
+      { typeof(DB.HostObjAttributes),         (typeof(Parameters.HostObjectType),   typeof(Types.HostObjectType))   },
+      { typeof(DB.HostObject),                (typeof(Parameters.HostObject),       typeof(Types.HostObject))       },
+      { typeof(DB.Wall),                      (typeof(Parameters.Wall),             typeof(Types.Wall))             },
+      { typeof(DB.Floor),                     (typeof(Parameters.Floor),            typeof(Types.Floor))            },
+      { typeof(DB.Ceiling),                   (typeof(Parameters.Ceiling),          typeof(Types.Ceiling))          },
+      { typeof(DB.RoofBase),                  (typeof(Parameters.Roof),             typeof(Types.Roof))             },
+      { typeof(DB.CurtainSystem),             (typeof(Parameters.CurtainSystem),    typeof(Types.CurtainSystem))    },
+      { typeof(DB.CurtainGridLine),           (typeof(Parameters.CurtainGridLine),  typeof(Types.CurtainGridLine))  },
+      { typeof(DB.Architecture.BuildingPad),  (typeof(Parameters.BuildingPad),      typeof(Types.BuildingPad))      },
+
+      { typeof(DB.FamilySymbol),              (typeof(Parameters.FamilySymbol),     typeof(Types.FamilySymbol))     },
+      { typeof(DB.FamilyInstance),            (typeof(Parameters.FamilyInstance),   typeof(Types.FamilyInstance))   },
+
+      { typeof(DB.SpatialElement),            (typeof(Parameters.SpatialElement),   typeof(Types.SpatialElement))   },
     };
 
-    protected bool TryGetParamTypes(Type type, out Tuple<Type, Type> paramTypes)
+    protected bool TryGetParamTypes(Type type, out (Type ParamType, Type GooType) paramTypes)
     {
       if (type.IsEnum)
       {
-        if (!Types.GH_Enum.TryGetParamTypes(type, out paramTypes))
-          paramTypes = Tuple.Create(typeof(Param_Integer), typeof(GH_Integer));
+        if (Types.GH_Enum.TryGetParamTypes(type, out var enumTypes))
+          paramTypes = (enumTypes.Item1, enumTypes.Item2);
+        else
+          paramTypes = (typeof(Param_Integer), typeof(GH_Integer));
 
         return true;
       }
 
-      if (!ParamTypes.TryGetValue(type, out paramTypes))
+      while (type != typeof(object))
       {
-        if (typeof(DB.ElementType).IsAssignableFrom(type))
-        {
-          paramTypes = Tuple.Create(typeof(Parameters.ElementType), typeof(Types.ElementType));
+        if (ParamTypes.TryGetValue(type, out paramTypes))
           return true;
-        }
 
-        if (typeof(DB.Element).IsAssignableFrom(type))
-        {
-          paramTypes = Tuple.Create(typeof(Parameters.Element), typeof(Types.Element));
-          return true;
-        }
-
-        return false;
+        type = type.BaseType;
       }
 
-      return true;
+      paramTypes = default;
+      return false;
     }
 
     IGH_Param CreateParam(Type argumentType)
@@ -643,20 +661,21 @@ namespace RhinoInside.Revit.GH.Components
       if (!TryGetParamTypes(argumentType, out var paramTypes))
         return new Param_GenericObject();
 
-      return (IGH_Param) Activator.CreateInstance(paramTypes.Item1);
+      return (IGH_Param) Activator.CreateInstance(paramTypes.ParamType);
     }
 
     IGH_Goo CreateGoo(Type argumentType, object value)
     {
       if (!TryGetParamTypes(argumentType, out var paramTypes))
-        return null;
+        return default;
 
-      return (IGH_Goo) Activator.CreateInstance(paramTypes.Item2, value);
+      return (IGH_Goo) Activator.CreateInstance(paramTypes.GooType, value);
     }
 
     protected Type GetArgumentType(ParameterInfo parameter, out GH_ParamAccess access, out bool optional)
     {
-      var parameterType = parameter.ParameterType;
+      var parameterType = parameter.ParameterType.GetElementType() ?? parameter.ParameterType;
+
       optional = parameter.IsDefined(typeof(OptionalAttribute), false);
       access = GH_ParamAccess.item;
 
@@ -679,14 +698,17 @@ namespace RhinoInside.Revit.GH.Components
       return parameterType;
     }
 
-    protected void RegisterInputParams(GH_InputParamManager manager, MethodInfo methodInfo)
+    protected void GetParams(MethodInfo methodInfo, out List<IGH_Param> inputs, out List<IGH_Param> outputs)
     {
+      inputs = new List<IGH_Param>();
+      outputs = new List<IGH_Param>();
+
       foreach (var parameter in methodInfo.GetParameters())
       {
-        if (parameter.Position < 2)
+        if (parameter.Position < 1)
           continue;
 
-        if (parameter.IsOut || parameter.ParameterType.IsByRef)
+        if ((parameter.Position == 1) != (parameter.IsOut || parameter.ParameterType.IsByRef))
           throw new NotImplementedException();
 
         var argumentType = GetArgumentType(parameter, out var access, out var optional);
@@ -706,7 +728,18 @@ namespace RhinoInside.Revit.GH.Components
         var paramType = (parameter.GetCustomAttributes(typeof(ParamTypeAttribute), false).FirstOrDefault() as ParamTypeAttribute)?.Type;
 
         var param = paramType is null ? CreateParam(argumentType) : Activator.CreateInstance(paramType) as IGH_Param;
-        manager.AddParameter(param, name, nickname, description, access);
+        {
+          param.Name = name;
+          param.NickName = nickname;
+          param.Description = description;
+          param.Access = access;
+          param.Optional = optional;
+
+          if(parameter.Position == 1)
+            outputs.Add(param);
+          else
+            inputs.Add(param);
+        }
 
         if (parameter.GetCustomAttributes(typeof(DefaultValueAttribute), false).FirstOrDefault() is DefaultValueAttribute defaultValueAttribute)
         {
@@ -716,8 +749,6 @@ namespace RhinoInside.Revit.GH.Components
             persistentParam.SetPersistentData(defaultValueAttribute.Value);
           }
         }
-
-        param.Optional = optional;
 
         if (argumentType.IsEnum && param is Param_Integer integerParam)
         {
@@ -859,11 +890,45 @@ namespace RhinoInside.Revit.GH.Components
     protected ReconstructElementComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
 
-    protected sealed override void RegisterInputParams(GH_InputParamManager manager)
+    List<IGH_Param> inputs;
+    List<IGH_Param> outputs;
+
+    protected override void PostConstructor()
     {
       var type = GetType();
       var ReconstructInfo = type.GetMethod($"Reconstruct{type.Name}", BindingFlags.Instance | BindingFlags.NonPublic);
-      RegisterInputParams(manager, ReconstructInfo);
+      GetParams(ReconstructInfo, out inputs, out outputs);
+
+      foreach (var param in inputs.Concat(outputs))
+      {
+        if (string.IsNullOrEmpty(param.NickName)) param.NickName = param.Name;
+        if (param.Description is null) param.Description = string.Empty;
+        if (param.Description == string.Empty) param.Description = param.Name;
+      }
+
+      base.PostConstructor();
+    }
+
+    protected sealed override void RegisterInputParams(GH_InputParamManager manager)
+    {
+      foreach (var input in inputs)
+      {
+        if (input.Attributes is null)
+          input.Attributes = new GH_LinkedParamAttributes(input, Attributes);
+
+        manager.AddParameter(input);
+      }
+    }
+
+    protected sealed override void RegisterOutputParams(GH_OutputParamManager manager)
+    {
+      foreach (var output in outputs)
+      {
+        if (output.Attributes is null)
+          output.Attributes = new GH_LinkedParamAttributes(output, Attributes);
+
+        manager.AddParameter(output);
+      }
     }
 
     protected static void ReplaceElement<T>(ref T previous, T next, ICollection<DB.BuiltInParameter> parametersMask = null) where T : DB.Element

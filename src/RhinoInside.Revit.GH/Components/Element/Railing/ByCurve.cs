@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -22,15 +23,12 @@ namespace RhinoInside.Revit.GH.Components
     )
     { }
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.GraphicalElement(), "Railing", "R", "New Railing", GH_ParamAccess.item);
-    }
-
     void ReconstructRailingByCurve
     (
       DB.Document doc,
-      ref DB.Architecture.Railing element,
+
+      [Description("New Railing"), ParamType(typeof(Parameters.GraphicalElement))]
+      ref DB.Architecture.Railing railing,
 
       Rhino.Geometry.Curve curve,
       Optional<DB.Architecture.RailingType> type,
@@ -48,10 +46,10 @@ namespace RhinoInside.Revit.GH.Components
       curve = curve.Simplify(Rhino.Geometry.CurveSimplifyOptions.All, Revit.VertexTolerance * Revit.ModelUnits, Revit.AngleTolerance) ?? curve;
 
       // Type
-      ChangeElementTypeId(ref element, type.Value.Id);
+      ChangeElementTypeId(ref railing, type.Value.Id);
 
       DB.Architecture.Railing newRail = null;
-      if (element is DB.Architecture.Railing previousRail)
+      if (railing is DB.Architecture.Railing previousRail)
       {
         newRail = previousRail;
 
@@ -76,7 +74,7 @@ namespace RhinoInside.Revit.GH.Components
           DB.BuiltInParameter.STAIRS_RAILING_HEIGHT_OFFSET,
         };
 
-        ReplaceElement(ref element, newRail, parametersMask);
+        ReplaceElement(ref railing, newRail, parametersMask);
       }
 
       if (newRail is object)

@@ -27,11 +27,6 @@ namespace RhinoInside.Revit.GH.Components
     )
     { }
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.Wall(), "Wall", "W", "New Wall", GH_ParamAccess.item);
-    }
-
     protected override void OnAfterStart(DB.Document document, string strTransactionName)
     {
       base.OnAfterStart(document, strTransactionName);
@@ -101,7 +96,9 @@ namespace RhinoInside.Revit.GH.Components
     void ReconstructWallByCurve
     (
       DB.Document doc,
-      ref DB.Wall element,
+
+      [Description("New Wall")]
+      ref DB.Wall wall,
 
       Rhino.Geometry.Curve curve,
       Optional<DB.WallType> type,
@@ -184,10 +181,10 @@ namespace RhinoInside.Revit.GH.Components
       }
 
       // Type
-      ChangeElementTypeId(ref element, type.Value.Id);
+      ChangeElementTypeId(ref wall, type.Value.Id);
 
       DB.Wall newWall = null;
-      if (element is DB.Wall previousWall && previousWall.Location is DB.LocationCurve locationCurve && centerLine.IsSameKindAs(locationCurve.Curve))
+      if (wall is DB.Wall previousWall && previousWall.Location is DB.LocationCurve locationCurve && centerLine.IsSameKindAs(locationCurve.Curve))
       {
         newWall = previousWall;
 
@@ -223,7 +220,7 @@ namespace RhinoInside.Revit.GH.Components
           DB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM
         };
 
-        ReplaceElement(ref element, newWall, parametersMask);
+        ReplaceElement(ref wall, newWall, parametersMask);
       }
 
       if (newWall != null)
