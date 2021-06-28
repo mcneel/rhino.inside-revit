@@ -108,14 +108,14 @@ namespace RhinoInside.Revit.GH.Components
     }
 
     protected abstract ParamDefinition[] Inputs { get; }
-    protected override sealed void RegisterInputParams(GH_InputParamManager manager)
+    protected sealed override void RegisterInputParams(GH_InputParamManager manager)
     {
       foreach (var definition in Inputs.Where(x => x.Relevance.HasFlag(ParamVisibility.Default)))
         manager.AddParameter(CreateDuplicateParam(definition.Param));
     }
 
     protected abstract ParamDefinition[] Outputs { get; }
-    protected override sealed void RegisterOutputParams(GH_OutputParamManager manager)
+    protected sealed override void RegisterOutputParams(GH_OutputParamManager manager)
     {
       foreach (var definition in Outputs.Where(x => x.Relevance.HasFlag(ParamVisibility.Default)))
         manager.AddParameter(CreateDuplicateParam(definition.Param));
@@ -235,7 +235,7 @@ namespace RhinoInside.Revit.GH.Components
 
       if (componentParams.Count == 0)
       {
-        if(templateParams.Length > 0)
+        if (templateParams.Length > 0)
           return templateParams[templateParams.Length + offset].Param;
       }
       else
@@ -309,7 +309,6 @@ namespace RhinoInside.Revit.GH.Components
       UpdateName(Params.Input, Inputs);
       UpdateName(Params.Output, Outputs);
     }
-
     #endregion
 
     #region Display
@@ -333,6 +332,71 @@ namespace RhinoInside.Revit.GH.Components
     }
 
     public override void CreateAttributes() => m_attributes = new Attributes(this);
+    #endregion
+
+    #region IO
+    public override bool Read(GH_IReader reader)
+    {
+      if (!base.Read(reader)) return false;
+
+      // Upgrade from non IGH_VariableParameterComponent data
+      if (!reader.ChunkExists("ParameterData"))
+      {
+        // Inputs
+        {
+          // RegisterInputParams(...)
+          foreach (var definition in Inputs.Where(x => x.Relevance.HasFlag(ParamVisibility.Default)))
+            Params.RegisterInputParam(CreateDuplicateParam(definition.Param));
+
+          int index = 0;
+          var chunk = default(GH_IReader);
+          while ((chunk = reader.FindChunk("param_input", index++)) is object)
+          {
+            var name = string.Empty;
+            if (chunk.TryGetString("Name", ref name))
+            {
+              if (Params.Input<IGH_Param>(name) is IGH_Param param)
+              {
+                var access = param.Access;
+                var optional = param.Optional;
+                param.Read(chunk);
+                param.Optional = optional;
+                param.Access = access;
+              }
+            }
+          }
+        }
+
+        // Outputs
+        {
+          // RegisterOutputParams(...)
+          foreach (var definition in Outputs.Where(x => x.Relevance.HasFlag(ParamVisibility.Default)))
+            Params.RegisterOutputParam(CreateDuplicateParam(definition.Param));
+
+          int index = 0;
+          var chunk = default(GH_IReader);
+          while ((chunk = reader.FindChunk("param_output", index++)) is object)
+          {
+            var name = string.Empty;
+            if (chunk.TryGetString("Name", ref name))
+            {
+              if (Params.Output<IGH_Param>(name) is IGH_Param param)
+              {
+                var access = param.Access;
+                var optional = param.Optional;
+                param.Read(chunk);
+                param.Optional = optional;
+                param.Access = access;
+              }
+            }
+          }
+        }
+
+        VariableParameterMaintenance();
+      }
+
+      return true;
+    }
     #endregion
   }
 }

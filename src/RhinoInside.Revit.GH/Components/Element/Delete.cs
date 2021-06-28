@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Windows.Forms;
 using GH_IO.Serialization;
@@ -368,7 +367,7 @@ namespace RhinoInside.Revit.GH.Components
 namespace RhinoInside.Revit.GH.Components.Obsolete
 {
   [Obsolete("Obsolete since 2020-05-21")]
-  public class ElementDelete : TransactionsComponent
+  public class ElementDelete : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("213C1F14-A827-40E2-957E-BA079ECCE700");
     public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.hidden;
@@ -378,16 +377,27 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
     : base("Delete Element", "Delete", "Deletes elements from Revit document", "Revit", "Element")
     { }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      manager.AddParameter(new Parameters.Element(), "Elements", "E", "Elements to delete", GH_ParamAccess.tree);
-    }
+      new ParamDefinition
+      (
+        new Parameters.Element()
+        {
+          Name = "Elements",
+          NickName = "E",
+          Description = "Elements to Delete",
+          Access = GH_ParamAccess.tree
+        }
+      ),
+    };
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager) { }
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs = { };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!DA.GetDataTree<Types.Element>("Elements", out var elementsTree))
+      if (!DA.GetDataTree<Types.IGH_Element>("Elements", out var elementsTree))
         return;
 
       var elementsToDelete = Parameters.Element.

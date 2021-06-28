@@ -266,6 +266,7 @@ namespace RhinoInside.Revit.GH
 namespace RhinoInside.Revit.GH.Components
 {
   using External.DB.Extensions;
+  using Grasshopper.Kernel.Parameters;
 
   public class ElementParameterGet : Component
   {
@@ -308,7 +309,7 @@ namespace RhinoInside.Revit.GH.Components
     }
   }
 
-  public class ElementParameterSet : TransactionsComponent
+  public class ElementParameterSet : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("8F1EE110-7FDA-49E0-BED4-E8E0227BC021");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
@@ -323,17 +324,51 @@ namespace RhinoInside.Revit.GH.Components
     )
     { }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      manager.AddParameter(new Parameters.Element(), "Element", "E", "Element to update", GH_ParamAccess.item);
-      manager.AddGenericParameter("ParameterKey", "K", "Element parameter to modify", GH_ParamAccess.item);
-      manager.AddGenericParameter("ParameterValue", "V", "Element parameter value", GH_ParamAccess.item);
-    }
+      new ParamDefinition
+      (
+        new Parameters.Element()
+        {
+          Name = "Element",
+          NickName = "E",
+          Description = "Element to update",
+        }
+      ),
+      new ParamDefinition
+      (
+        new Param_GenericObject()
+        {
+          Name = "ParameterKey",
+          NickName = "K",
+          Description = "Element parameter to modify",
+        }
+      ),
+      new ParamDefinition
+      (
+        new Param_GenericObject()
+        {
+          Name = "ParameterValue",
+          NickName = "V",
+          Description = "Element parameter value",
+        }
+      ),
+    };
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      manager.AddParameter(new Parameters.Element(), "Element", "E", "Updated Element", GH_ParamAccess.item);
-    }
+      new ParamDefinition
+      (
+        new Parameters.Element()
+        {
+          Name = "Element",
+          NickName = "E",
+          Description = "Updated Element",
+        }
+      ),
+    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
@@ -360,7 +395,7 @@ namespace RhinoInside.Revit.GH.Components
         if (parameter.Set(value))
           DA.SetData("Element", element);
         else
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to set parameter '{parameter.Definition.Name}' : '{value}' is not a valid value.");
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Unable to set parameter '{parameter.Definition.Name}' : '{value}' is not a valid value.");
       }
       catch (InvalidCastException)
       {
@@ -373,7 +408,7 @@ namespace RhinoInside.Revit.GH.Components
     }
   }
 
-  public class ElementParameterReset : TransactionBaseComponent
+  public class ElementParameterReset : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("2C374E6D-A547-45AC-B77D-04DD61317622");
     public override GH_Exposure Exposure => GH_Exposure.quarternary | GH_Exposure.obscure;
@@ -389,16 +424,42 @@ namespace RhinoInside.Revit.GH.Components
     )
     { }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      manager.AddParameter(new Parameters.Element(), "Element", "E", "Element to update", GH_ParamAccess.item);
-      manager.AddGenericParameter("ParameterKey", "K", "Element parameter to reset", GH_ParamAccess.item);
-    }
+      new ParamDefinition
+      (
+        new Parameters.Element()
+        {
+          Name = "Element",
+          NickName = "E",
+          Description = "Element to update",
+        }
+      ),
+      new ParamDefinition
+      (
+        new Param_GenericObject()
+        {
+          Name = "ParameterKey",
+          NickName = "K",
+          Description = "Element parameter to modify",
+        }
+      ),
+    };
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      manager.AddParameter(new Parameters.Element(), "Element", "E", "Updated Element", GH_ParamAccess.item);
-    }
+      new ParamDefinition
+      (
+        new Parameters.Element()
+        {
+          Name = "Element",
+          NickName = "E",
+          Description = "Updated Element",
+        }
+      ),
+    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
@@ -414,21 +475,18 @@ namespace RhinoInside.Revit.GH.Components
       if (parameter is null)
         return;
 
-      using (var transaction = NewTransaction(element.Document))
-      {
-        transaction.Start();
+      StartTransaction(element.Document);
 
-        if (parameter.ResetValue())
-        {
-          if (CommitTransaction(element.Document, transaction) == DB.TransactionStatus.Committed)
-            DA.SetData("Element", element);
-          else
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to reset '{parameter.Definition.Name}'");
-        }
-        else
-        {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Unable to reset '{parameter.Definition.Name}'");
-        }
+      try
+      {
+        if (!parameter.ResetValue())
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Unable to reset parameter '{parameter.Definition.Name}'.");
+
+        DA.SetData("Element", element);
+      }
+      catch (Autodesk.Revit.Exceptions.InvalidOperationException e)
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to reset parameter '{parameter.Definition.Name}' : {e.Message}");
       }
     }
   }
