@@ -533,12 +533,39 @@ namespace RhinoInside.Revit.GH
     #endregion
 
     #region DocumentChanged
+
+    struct ReadOnlySortedCollection : ICollection<DB.ElementId>
+    {
+      readonly ICollection<DB.ElementId> collection;
+      public ReadOnlySortedCollection(ICollection<DB.ElementId> source) => collection = source;
+
+      public int Count => collection.Count;
+      public bool IsReadOnly => true;
+
+      public bool Contains(DB.ElementId item)
+      {
+        if (collection is List<DB.ElementId> list)
+          return list.BinarySearch(item, ElementIdComparer.NoNullsAscending) >= 0;
+        else
+          return collection.Contains(item);
+      }
+
+      public void CopyTo(DB.ElementId[] array, int arrayIndex) => collection.CopyTo(array, arrayIndex);
+
+      public void Add(DB.ElementId item) => throw new InvalidOperationException("Collection is read-only");
+      public bool Remove(DB.ElementId item) => throw new InvalidOperationException("Collection is read-only");
+      public void Clear() => throw new InvalidOperationException("Collection is read-only");
+
+      public IEnumerator<DB.ElementId> GetEnumerator() => collection.GetEnumerator();
+      System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => collection.GetEnumerator();
+    }
+
     void OnDocumentChanged(object sender, DocumentChangedEventArgs e)
     {
       var document = e.GetDocument();
-      var added    = e.GetAddedElementIds();
-      var deleted  = e.GetDeletedElementIds();
-      var modified = e.GetModifiedElementIds();
+      var added    = new ReadOnlySortedCollection(e.GetAddedElementIds());
+      var deleted  = new ReadOnlySortedCollection(e.GetDeletedElementIds());
+      var modified = new ReadOnlySortedCollection(e.GetModifiedElementIds());
 
       if (added.Count > 0 || deleted.Count > 0 || modified.Count > 0)
       {
