@@ -1,55 +1,80 @@
 using System;
-using System.Linq;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Parameters;
 using RhinoInside.Revit.Convert.System.Drawing;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Material.Obsolete
 {
   [Obsolete("Since 2020-09-25")]
-  public class MaterialByColor : TransactionComponent
+  public class MaterialByColor : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("273FF43D-B771-4EB7-A66D-5DA5F7F2731E");
     public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.hidden;
 
-    public MaterialByColor()
-    : base("Add Color Material", "Material", "Quickly create a new Revit material from color", "Revit", "Material")
+    public MaterialByColor() : base
+    (
+      name: "Create Material (Color)",
+      nickname: "Material",
+      description: "Quickly create a new Revit material from color",
+      category: "Revit",
+      subCategory: "Material"
+    )
     { }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      manager.AddColourParameter("Color", "C", "Material color", GH_ParamAccess.item, System.Drawing.Color.White);
-    }
+      ParamDefinition.Create<Parameters.Document>
+      (
+        name: "Document",
+        nickname: "DOC",
+        relevance: ParamVisibility.Voluntary
+      ),
+      ParamDefinition.Create<Param_Colour>
+      (
+        name: "Color",
+        nickname: "C",
+        description: "Material color",
+        defaultValue: System.Drawing.Color.White
+      ),
+    };
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      manager.AddParameter(new Parameters.Material(), "Material", "M", string.Empty, GH_ParamAccess.item);
-    }
+      ParamDefinition.Create<Parameters.Material>
+      (
+        name: "Material",
+        nickname: "M"
+      ),
+    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var doc = Revit.ActiveDBDocument;
-      if (doc is null)
-      {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Failed to access the active Revit doument");
-        return;
-      }
+      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
 
-      var color = default(System.Drawing.Color);
-      if (!DA.GetData("Color", ref color))
-        return;
+      var color = System.Drawing.Color.Empty;
+      if (!DA.GetData("Color", ref color)) return;
+
+      StartTransaction(doc.Value);
 
       string name = color.A == 255 ?
                     $"RGB {color.R} {color.G} {color.B}" :
                     $"RGB {color.R} {color.G} {color.B} {color.A}";
 
+      // Query for an existing material with the requested name
       var material = default(DB.Material);
-      using (var collector = new DB.FilteredElementCollector(doc).OfClass(typeof(DB.Material)))
-        material = collector.Where(x => x.Name == name).Cast<DB.Material>().FirstOrDefault();
+      using (var collector = new DB.FilteredElementCollector(doc.Value))
+      {
+        material = collector.OfClass(typeof(DB.Material)).
+        WhereParameterEqualsTo(DB.BuiltInParameter.MATERIAL_NAME, name).
+        FirstElement() as DB.Material;
+      }
 
-      bool materialIsNew = material is null;
-      if (materialIsNew)
-        material = doc.GetElement(DB.Material.Create(doc, name)) as DB.Material;
+      if (material is null)
+        material = doc.Value.GetElement(DB.Material.Create(doc.Value, name)) as DB.Material;
 
       if (material.MaterialClass != "RGB")
         material.MaterialClass = "RGB";

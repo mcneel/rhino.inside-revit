@@ -699,14 +699,14 @@ namespace RhinoInside.Revit.GH.Components
         var name = nickname + parameter.Name.Substring(1);
 
         if (parameter.GetCustomAttributes(typeof(NameAttribute), false).FirstOrDefault() is NameAttribute nameAttribute)
-          name = nameAttribute?.Name;
+          name = nameAttribute.Name;
 
         if (parameter.GetCustomAttributes(typeof(NickNameAttribute), false).FirstOrDefault() is NickNameAttribute nickNameAttribute)
           nickname = nickNameAttribute.NickName;
 
         var description = string.Empty;
         foreach (var descriptionAttribute in parameter.GetCustomAttributes(typeof(DescriptionAttribute), false).Cast<DescriptionAttribute>())
-          description = (description.Length > 0) ? $"{description}\r\n{descriptionAttribute.Description}" : descriptionAttribute.Description;
+          description = (description.Length > 0) ? $"{description}{Environment.NewLine}{descriptionAttribute.Description}" : descriptionAttribute.Description;
 
         var paramType = (parameter.GetCustomAttributes(typeof(ParamTypeAttribute), false).FirstOrDefault() as ParamTypeAttribute)?.Type;
 
@@ -739,11 +739,11 @@ namespace RhinoInside.Revit.GH.Components
         }
       }
 
-      if (elementFilterClasses.Count > 0 && !elementFilterClasses.Contains(typeof(Autodesk.Revit.DB.Element)))
+      if (elementFilterClasses.Count > 0 && !elementFilterClasses.Contains(typeof(DB.Element)))
       {
         elementFilter = (elementFilterClasses.Count == 1) ?
-         (DB.ElementFilter) new Autodesk.Revit.DB.ElementClassFilter(elementFilterClasses[0]) :
-         (DB.ElementFilter) new Autodesk.Revit.DB.LogicalOrFilter(elementFilterClasses.Select(x => new Autodesk.Revit.DB.ElementClassFilter(x)).ToArray());
+         (DB.ElementFilter) new DB.ElementClassFilter(elementFilterClasses[0]) :
+         (DB.ElementFilter) new DB.LogicalOrFilter(elementFilterClasses.Select(x => new DB.ElementClassFilter(x)).ToArray());
       }
     }
 
@@ -792,7 +792,7 @@ namespace RhinoInside.Revit.GH.Components
 
         try { return (bool) GetInputOptionalDataInfo.MakeGenericMethod(typeof(T).GetGenericArguments()[0]).Invoke(this, args); }
         catch (TargetInvocationException e) { throw e.InnerException; }
-        finally { value = args[2] != null ? (T) args[2] : default; }
+        finally { value = args[2] is object ? (T) args[2] : default; }
       }
       else
       {
@@ -861,7 +861,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!value.IsValidWithLog(out var log))
       {
         AddGeometryRuntimeError(GH_RuntimeMessageLevel.Error, default, value);
-        ThrowArgumentException(paramName, "Input geometry is not valid." + Environment.NewLine + log);
+        ThrowArgumentException(paramName, $"Input geometry is not valid.{Environment.NewLine}{log}");
       }
 
       return true;

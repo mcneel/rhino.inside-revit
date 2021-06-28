@@ -33,7 +33,6 @@ namespace RhinoInside.Revit.GH.Components.Material
           Name = "Document",
           NickName = "DOC",
           Description = "Document",
-          Access = GH_ParamAccess.item,
           Optional = true
         },
         ParamVisibility.Voluntary
@@ -45,7 +44,6 @@ namespace RhinoInside.Revit.GH.Components.Material
           Name = "Name",
           NickName = "N",
           Description = "Material Name",
-          Access = GH_ParamAccess.item,
         }
       ),
       new ParamDefinition
@@ -55,7 +53,6 @@ namespace RhinoInside.Revit.GH.Components.Material
           Name = "Template",
           NickName = "T",
           Description = "Template Material",
-          Access = GH_ParamAccess.item,
           Optional = true
         },
         ParamVisibility.Default
@@ -72,23 +69,20 @@ namespace RhinoInside.Revit.GH.Components.Material
           Name = "Material",
           NickName = "M",
           Description = "Material",
-          Access = GH_ParamAccess.item
         }
       ),
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if(!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
-        return;
+      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
 
       var name = default(string);
-      if (!DA.GetData("Name", ref name) || name == string.Empty)
-        return;
+      if (!DA.GetData("Name", ref name) || name == string.Empty) return;
 
       // Query for an existing material with the requested name
       var material = default(DB.Material);
-      using (var collector = new DB.FilteredElementCollector(doc))
+      using (var collector = new DB.FilteredElementCollector(doc.Value))
       {
         material = collector.OfClass(typeof(DB.Material)).
           WhereParameterEqualsTo(DB.BuiltInParameter.MATERIAL_NAME, name).
@@ -98,13 +92,13 @@ namespace RhinoInside.Revit.GH.Components.Material
       if (material is null)
       {
         // Create new material
-        StartTransaction(doc);
+        StartTransaction(doc.Value);
 
         // Try to duplicate template
         var template = default(DB.Material);
         if (DA.GetData("Template", ref template) && template is object)
         {
-          if (doc.Equals(template.Document))
+          if (doc.Value.Equals(template.Document))
           {
             material = template.Duplicate(name);
           }
@@ -114,19 +108,19 @@ namespace RhinoInside.Revit.GH.Components.Material
             (
               template.Document,
               new DB.ElementId[] { template.Id },
-              doc,
-              DB.Transform.Identity,
-              new DB.CopyPasteOptions()
+              doc.Value,
+              default,
+              default
             );
 
-            material = ids.Select(x => doc.GetElement(x)).
+            material = ids.Select(x => doc.Value.GetElement(x)).
               OfType<DB.Material>().
               FirstOrDefault();
           }
         }
 
         if(material is null)
-          material = doc.GetElement(DB.Material.Create(doc, name)) as DB.Material;
+          material = doc.Value.GetElement(DB.Material.Create(doc.Value, name)) as DB.Material;
       }
 
       DA.SetData("Material", material);
@@ -136,7 +130,7 @@ namespace RhinoInside.Revit.GH.Components.Material
   namespace Obsolete
   {
     [Obsolete("Since 2020-09-24")]
-    public class MaterialByName : TransactionComponent
+    public class MaterialByName : TransactionalChainComponent
     {
       public override Guid ComponentGuid => new Guid("0D9F07E2-3A21-4E85-96CC-BC0E6A607AF1");
       public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.hidden;
@@ -151,49 +145,72 @@ namespace RhinoInside.Revit.GH.Components.Material
       )
       { }
 
-      protected override void RegisterInputParams(GH_InputParamManager manager)
+      protected override ParamDefinition[] Inputs => inputs;
+      static readonly ParamDefinition[] inputs =
       {
-        manager.AddTextParameter("Name", "N", string.Empty, GH_ParamAccess.item);
-        manager.AddBooleanParameter("Override", "O", "Override Material", GH_ParamAccess.item, false);
-        manager[manager.AddColourParameter("Color", "C", "Material color", GH_ParamAccess.item, System.Drawing.Color.White)].Optional = true;
-      }
+        ParamDefinition.Create<Parameters.Document>
+        (
+          name: "Document",
+          nickname: "DOC",
+          relevance: ParamVisibility.Voluntary
+        ),
+        ParamDefinition.Create<Param_String>
+        (
+          name: "Name",
+          nickname: "N"
+        ),
+        ParamDefinition.Create<Param_Boolean>
+        (
+          name: "Override",
+          nickname: "O",
+          description: "Override Material",
+          defaultValue: false
+        ),
+        ParamDefinition.Create<Param_Colour>
+        (
+          name: "Color",
+          nickname: "C",
+          description: "Material color",
+          optional: true,
+          defaultValue: System.Drawing.Color.White
+        ),
+      };
 
-      protected override void RegisterOutputParams(GH_OutputParamManager manager)
+      protected override ParamDefinition[] Outputs => outputs;
+      static readonly ParamDefinition[] outputs =
       {
-        manager.AddParameter(new Parameters.Material(), "Material", "M", string.Empty, GH_ParamAccess.item);
-      }
+        ParamDefinition.Create<Parameters.Material>
+        (
+          name: "Material",
+          nickname: "M"
+        ),
+      };
 
       protected override void TrySolveInstance(IGH_DataAccess DA)
       {
-        var doc = Revit.ActiveDBDocument;
-        if (doc is null)
-        {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Failed to access the active Revit doument");
-          return;
-        }
+        if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
 
         var overrideMaterial = false;
-        if (!DA.GetData("Override", ref overrideMaterial))
-          return;
+        if (!DA.GetData("Override", ref overrideMaterial)) return;
 
         var name = string.Empty;
-        if (!DA.GetData("Name", ref name))
-          return;
+        if (!DA.GetData("Name", ref name)) return;
 
         var color = System.Drawing.Color.Empty;
         DA.GetData("Color", ref color);
 
+        // Query for an existing material with the requested name
         var material = default(DB.Material);
-        using (var collector = new DB.FilteredElementCollector(doc))
+        using (var collector = new DB.FilteredElementCollector(doc.Value))
         {
           material = collector.OfClass(typeof(DB.Material)).
-                 WhereParameterEqualsTo(DB.BuiltInParameter.MATERIAL_NAME, name).
-                 FirstElement() as DB.Material;
+          WhereParameterEqualsTo(DB.BuiltInParameter.MATERIAL_NAME, name).
+          FirstElement() as DB.Material;
         }
 
         bool materialIsNew = material is null;
         if (materialIsNew)
-          material = doc.GetElement(DB.Material.Create(doc, name)) as DB.Material;
+          material = doc.Value.GetElement(DB.Material.Create(doc.Value, name)) as DB.Material;
 
         if (materialIsNew || overrideMaterial)
         {
