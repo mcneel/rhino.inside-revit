@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Microsoft.Win32.SafeHandles;
 
@@ -773,7 +772,7 @@ namespace Rhino.DocObjects.Tables
 
 namespace Rhino.Display
 {
-  static class RhionViewExtension
+  static class RhinoViewExtension
   {
     public static bool BringToFront(this RhinoView view)
     {
@@ -795,5 +794,4 @@ namespace Rhino.Display
       return false;
     }
   }
-
 }
