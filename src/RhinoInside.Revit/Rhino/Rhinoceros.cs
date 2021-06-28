@@ -159,7 +159,7 @@ namespace RhinoInside.Revit
           "Textures"
         );
 
-        if (!Rhino.ApplicationSettings.FileSettings.GetSearchPaths().Any(x => x.Equals(DefaultRenderAppearancePath, StringComparison.InvariantCultureIgnoreCase)))
+        if (!Rhino.ApplicationSettings.FileSettings.GetSearchPaths().Any(x => x.Equals(DefaultRenderAppearancePath, StringComparison.OrdinalIgnoreCase)))
           Rhino.ApplicationSettings.FileSettings.AddSearchPath(DefaultRenderAppearancePath, -1);
 
         // TODO: Add also AdditionalRenderAppearancePaths content from Revit.ini if missing ??
@@ -266,9 +266,10 @@ namespace RhinoInside.Revit
       if (guests is object)
         return;
 
-      Type[] types = default;
+      var types = Type.EmptyTypes;
       try { types = Assembly.GetExecutingAssembly().GetTypes(); }
-      catch (ReflectionTypeLoadException ex) { types = ex.Types?.Where(x => x is object).ToArray(); }
+      catch (ReflectionTypeLoadException ex)
+      { types = ex.Types.Where(x => x?.TypeInitializer is object).ToArray(); }
 
       // Look for Guests
       guests = types.
