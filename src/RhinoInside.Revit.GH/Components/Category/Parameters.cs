@@ -9,7 +9,6 @@ namespace RhinoInside.Revit.GH.Components
   public class CategoryParameters : Component
   {
     public override Guid ComponentGuid => new Guid("189F0A94-D077-4B96-8A92-6D5334EF7157");
-    protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.ParameterElement));
 
     public CategoryParameters() : base
     (

@@ -285,11 +285,14 @@ namespace RhinoInside.Revit.GH.Parameters
       ICollection<DB.ElementId> modified
     )
     {
-      if (DataType != GH_ParamData.local)
-        return false;
+      if (Kind != GH_ParamKind.output)
+      {
+        if (DataType != GH_ParamData.local)
+          return false;
 
-      if (Phase == GH_SolutionPhase.Blank)
-        CollectData();
+        if (Phase == GH_SolutionPhase.Blank)
+          CollectData();
+      }
 
       foreach (var data in VolatileData.AllData(true).OfType<Types.IGH_ElementId>())
       {

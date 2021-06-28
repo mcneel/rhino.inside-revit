@@ -54,7 +54,6 @@ namespace RhinoInside.Revit.GH.Components
     public override Guid ComponentGuid => new Guid("C1C15806-311A-4A07-9DAE-6DBD1D98EC05");
     public override GH_Exposure Exposure => GH_Exposure.obscure;
     protected override string IconTag => "F";
-    protected override DB.ElementFilter ElementFilter => null;
 
     public DocumentFile() : base
     (

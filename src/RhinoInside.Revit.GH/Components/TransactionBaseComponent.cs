@@ -679,13 +679,8 @@ namespace RhinoInside.Revit.GH.Components
       return parameterType;
     }
 
-    DB.ElementFilter elementFilter = null;
-    protected override DB.ElementFilter ElementFilter => elementFilter;
-
     protected void RegisterInputParams(GH_InputParamManager manager, MethodInfo methodInfo)
     {
-      var elementFilterClasses = new List<Type>();
-
       foreach (var parameter in methodInfo.GetParameters())
       {
         if (parameter.Position < 2)
@@ -729,21 +724,6 @@ namespace RhinoInside.Revit.GH.Components
           foreach (var e in Enum.GetValues(argumentType))
             integerParam.AddNamedValue(Enum.GetName(argumentType, e), (int) e);
         }
-        else if (argumentType == typeof(Autodesk.Revit.DB.Element) || argumentType.IsSubclassOf(typeof(Autodesk.Revit.DB.Element)))
-        {
-          elementFilterClasses.Add(argumentType);
-        }
-        else if (argumentType == typeof(Autodesk.Revit.DB.Category))
-        {
-          elementFilterClasses.Add(typeof(Autodesk.Revit.DB.Element));
-        }
-      }
-
-      if (elementFilterClasses.Count > 0 && !elementFilterClasses.Contains(typeof(DB.Element)))
-      {
-        elementFilter = (elementFilterClasses.Count == 1) ?
-         (DB.ElementFilter) new DB.ElementClassFilter(elementFilterClasses[0]) :
-         (DB.ElementFilter) new DB.LogicalOrFilter(elementFilterClasses.Select(x => new DB.ElementClassFilter(x)).ToArray());
       }
     }
 

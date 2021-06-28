@@ -12,21 +12,21 @@ namespace RhinoInside.Revit.GH.Components
   {
     public override Guid ComponentGuid => new Guid("D150E40E-0970-4683-B517-038F8BA8B0D8");
     public override GH_Exposure Exposure => GH_Exposure.primary;
-    protected override DB.ElementFilter ElementFilter => null;
 
-    public override bool NeedsToBeExpired(DB.Events.DocumentChangedEventArgs e)
+    public override bool NeedsToBeExpired
+    (
+      DB.Document document,
+      ICollection<DB.ElementId> added,
+      ICollection<DB.ElementId> deleted,
+      ICollection<DB.ElementId> modified
+    )
     {
-      var document = e.GetDocument();
-
-      var added = e.GetAddedElementIds().Where(x => x.IsCategoryId(document));
-      if (added.Any())
+      if (added.Where(x => x.IsCategoryId(document)).Any())
         return true;
 
-      var modified = e.GetModifiedElementIds().Where(x => x.IsCategoryId(document));
-      if (modified.Any())
+      if (modified.Where(x => x.IsCategoryId(document)).Any())
         return true;
 
-      var deleted = e.GetDeletedElementIds();
       if (deleted.Any())
       {
         var empty = new DB.ElementId[0];

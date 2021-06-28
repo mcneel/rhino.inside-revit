@@ -593,7 +593,7 @@ namespace RhinoInside.Revit.GH
               if (persistentComponent.Locked)
                 continue;
 
-              if (persistentComponent.NeedsToBeExpired(e))
+              if (persistentComponent.NeedsToBeExpired(document, added, deleted, modified))
                 change.ExpiredObjects.Add(persistentComponent);
             }
           }

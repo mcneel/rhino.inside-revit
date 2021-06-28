@@ -242,30 +242,35 @@ namespace RhinoInside.Revit.GH.Components
     #endregion
 
     #region IGH_ElementIdComponent
-    protected virtual DB.ElementFilter ElementFilter { get; }
-    public virtual bool NeedsToBeExpired(DB.Events.DocumentChangedEventArgs e)
+    static readonly DB.ElementId[] EmptyElementIds = new DB.ElementId[0];
+    public virtual bool NeedsToBeExpired
+    (
+      DB.Document document,
+      ICollection<DB.ElementId> added,
+      ICollection<DB.ElementId> deleted,
+      ICollection<DB.ElementId> modified
+    )
     {
-      var persistentInputs = Params.Input.
-        Where(x => x.DataType == GH_ParamData.local).
-        OfType<Kernel.IGH_ElementIdParam>();
-
-      if (persistentInputs.Any())
+      // Only Query-Collector components need to be expired when something is added.
+      if (modified.Count > 0 || deleted.Count > 0)
       {
-        var filter = ElementFilter;
+        // Only inputs with persitent data or outputs are considered source of data.
+        var persistentInputs = Params.Input.
+          Where(x => x.DataType == GH_ParamData.local).
+          OfType<Kernel.IGH_ElementIdParam>();
 
-        var modified = filter is null ? e.GetModifiedElementIds() : e.GetModifiedElementIds(filter);
-        var deleted = e.GetDeletedElementIds();
-
-        if (modified.Count > 0 || deleted.Count > 0)
+        // Check inputs
+        foreach (var param in persistentInputs)
         {
-          var document = e.GetDocument();
-          var empty = new DB.ElementId[0];
+          if (param.NeedsToBeExpired(document, EmptyElementIds, deleted, modified))
+            return true;
+        }
 
-          foreach (var param in persistentInputs)
-          {
-            if (param.NeedsToBeExpired(document, empty, deleted, modified))
-              return true;
-          }
+        // Check outputs
+        foreach (var output in Params.Output.OfType<Kernel.IGH_ElementIdParam>())
+        {
+          if (output.NeedsToBeExpired(document, EmptyElementIds, deleted, modified))
+            return true;
         }
       }
 
