@@ -4,6 +4,8 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using RhinoInside.Revit.Convert.System.Collections.Generic;
+using RhinoInside.Revit.External.DB;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -50,18 +52,45 @@ namespace RhinoInside.Revit.GH.Components
             catch { }
           }
           break;
+
         case Grasshopper.Kernel.Types.GH_Integer i:
           DA.SetData("Element", Types.Element.FromElementId(doc, new DB.ElementId(i.Value)));
           break;
+
         case Grasshopper.Kernel.Types.GH_String s:
-          try
+
+          if (FullUniqueId.TryParse(s.Value, out var documentId, out var uniqueId))
           {
-            DA.SetData("Element", Types.Element.FromElementId(doc, new DB.ElementId(System.Convert.ToInt32(s.Value))));
+            if (doc.GetFingerprintGUID() == documentId && doc.GetElement(uniqueId) is DB.Element element)
+              DA.SetData("Element", Types.Element.FromElement(element));
+
             return;
           }
-          catch { }
 
-          DA.SetData("Element", Types.Element.FromElement(doc.GetElement(s.Value)));
+          if (UniqueId.TryParse(s.Value, out var _, out var _))
+          {
+            if (doc.GetElement(s.Value) is DB.Element element)
+              DA.SetData("Element", Types.Element.FromElement(element));
+
+            return;
+          }
+
+          if (int.TryParse(s.Value, out var index))
+          {
+            if(doc.GetElement(new DB.ElementId(index)) is DB.Element element)
+              DA.SetData("Element", Types.Element.FromElement(element));
+
+            return;
+          }
+
+          break;
+
+        case Types.CategoryId c:
+          DA.SetData("Element", Types.Category.FromElementId(doc, new DB.ElementId(c.Value)));
+          break;
+
+        case Types.ParameterId p:
+          DA.SetData("Element", Types.ParameterKey.FromElementId(doc, new DB.ElementId(p.Value)));
           break;
       }
     }
