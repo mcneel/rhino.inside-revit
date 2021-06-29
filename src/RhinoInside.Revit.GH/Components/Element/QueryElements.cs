@@ -61,16 +61,16 @@ namespace RhinoInside.Revit.GH.Components
 
           if (FullUniqueId.TryParse(s.Value, out var documentId, out var uniqueId))
           {
-            if (doc.GetFingerprintGUID() == documentId && doc.GetElement(uniqueId) is DB.Element element)
-              DA.SetData("Element", Types.Element.FromElement(element));
+            if (doc.GetFingerprintGUID() == documentId && doc.TryGetElementId(uniqueId, out var elementId))
+              DA.SetData("Element", Types.Element.FromElementId(doc, elementId));
 
             return;
           }
 
           if (UniqueId.TryParse(s.Value, out var _, out var _))
           {
-            if (doc.GetElement(s.Value) is DB.Element element)
-              DA.SetData("Element", Types.Element.FromElement(element));
+            if (doc.TryGetElementId(s.Value, out var elementId))
+              DA.SetData("Element", Types.Element.FromElementId(doc, elementId));
 
             return;
           }
