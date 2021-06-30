@@ -50,15 +50,23 @@ namespace RhinoInside.Revit.GH.Components
     Exception unhandledException;
     protected bool IsAborted => unhandledException is object;
     protected virtual bool AbortOnUnhandledException => false;
+
+    static Component ComputingComponent;
     public sealed override void ComputeData()
     {
-      Rhinoceros.InvokeInHostContext(() => base.ComputeData());
-
-      if (unhandledException is object)
+      var current = ComputingComponent;
+      ComputingComponent = this;
+      try
       {
-        unhandledException = default;
-        ResetData();
+        Rhinoceros.InvokeInHostContext(() => base.ComputeData());
+
+        if (unhandledException is object)
+        {
+          unhandledException = default;
+          ResetData();
+        }
       }
+      finally { ComputingComponent = current; }
     }
 
     protected virtual void ResetData()
@@ -251,6 +259,9 @@ namespace RhinoInside.Revit.GH.Components
       ICollection<DB.ElementId> modified
     )
     {
+      // Changes made by this should not expire this.
+      if (ReferenceEquals(ComputingComponent, this)) return false;
+
       // Only Query-Collector components need to be expired when something is added.
       if (modified.Count > 0 || deleted.Count > 0)
       {

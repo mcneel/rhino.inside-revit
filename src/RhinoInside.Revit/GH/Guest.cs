@@ -713,6 +713,15 @@ namespace RhinoInside.Revit.GH
 
     void ActiveDefinition_SolutionStart(object sender, GH_SolutionEventArgs e)
     {
+      // Expire objects that contain elements modified by Grasshopper.
+      while (DocumentChangedEvent.changeQueue.Count > 0)
+      {
+        var change = DocumentChangedEvent.changeQueue.Dequeue();
+
+        foreach (var obj in change.ExpiredObjects)
+          obj.ExpireSolution(false);
+      }
+
       ActiveDocuments.Push(e.Document);
       StartTransactionGroups();
     }
@@ -722,19 +731,16 @@ namespace RhinoInside.Revit.GH
       CommitTransactionGroups();
       ActiveDocuments.Pop();
 
-      // Expire objects that contain elements modified by Grasshopper.
+      // Warn the user about objects that contain elements modified by Grasshopper.
       {
         var expiredObjectsCount = 0;
-        while (DocumentChangedEvent.changeQueue.Count > 0)
+        foreach (var change in DocumentChangedEvent.changeQueue)
         {
-          var change = DocumentChangedEvent.changeQueue.Dequeue();
-          expiredObjectsCount += change.ExpiredObjects.Count;
+          if(e.Document == change.Definition)
+            expiredObjectsCount += change.ExpiredObjects.Count;
 
           foreach (var obj in change.ExpiredObjects)
-          {
-            obj.ClearData();
-            obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"This object expired because it contained obsolete Revit elements.");
-          }
+            obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "This object will be expired because it contains obsolete Revit elements.");
         }
 
         if (expiredObjectsCount > 0)
@@ -744,10 +750,10 @@ namespace RhinoInside.Revit.GH
             new GH_RuntimeMessage
             (
               expiredObjectsCount == 1 ?
-              $"An object expired because it contained obsolete Revit elements." :
-              $"{expiredObjectsCount} objects expired because them contained obsolete Revit elements.",
+              $"An object will be expired because contains obsolete Revit elements." :
+              $"{expiredObjectsCount} objects will be expired because contain obsolete Revit elements.",
               GH_RuntimeMessageLevel.Remark,
-              "Document"
+              "Rhino.Inside"
             )
           );
         }
