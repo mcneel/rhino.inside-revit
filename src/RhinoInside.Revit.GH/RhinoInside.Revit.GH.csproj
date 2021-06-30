@@ -347,6 +347,7 @@
     <Compile Include="Parameters\AssetPropertyDouble4DMap.cs" />
     <Compile Include="Parameters\CompoundStructure.cs" />
     <Compile Include="Parameters\CurtainGrid.cs" />
+    <Compile Include="Parameters\CurveElement.cs" />
     <Compile Include="Parameters\Elevation.cs" />
     <Compile Include="Parameters\Input\BuiltInCategories.cs" />
     <Compile Include="Parameters\Input\BuiltInParameters.cs" />

@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.GH.Components
     (
       DB.Document doc,
 
-      [Description("New CurveElement"), ParamType(typeof(Parameters.GraphicalElement))]
+      [Description("New CurveElement")]
       ref DB.ModelCurve curveElement,
 
       Rhino.Geometry.Curve curve,

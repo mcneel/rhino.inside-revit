@@ -320,6 +320,7 @@ namespace RhinoInside.Revit.GH.Components
       { typeof(DB.View),                      (typeof(Parameters.View),             typeof(Types.View))             },
       { typeof(DB.Group),                     (typeof(Parameters.Group),            typeof(Types.Group))            },
 
+      { typeof(DB.CurveElement),              (typeof(Parameters.CurveElement),     typeof(Types.CurveElement))     },
       { typeof(DB.SketchPlane),               (typeof(Parameters.SketchPlane),      typeof(Types.SketchPlane))      },
       { typeof(DB.Level),                     (typeof(Parameters.Level),            typeof(Types.Level))            },
       { typeof(DB.Grid),                      (typeof(Parameters.Grid),             typeof(Types.Grid))             },
