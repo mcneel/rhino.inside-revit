@@ -9,6 +9,7 @@ using Grasshopper.GUI;
 using Grasshopper.GUI.Canvas;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Attributes;
+using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 
 namespace RhinoInside.Revit.GH.Components
@@ -276,7 +277,32 @@ namespace RhinoInside.Revit.GH.Components
 
     public virtual bool DestroyParameter(GH_ParameterSide side, int index) => CanRemoveParameter(side, index);
 
-    public virtual void VariableParameterMaintenance() { }
+    public virtual void VariableParameterMaintenance()
+    {
+      foreach (var input in Inputs)
+      {
+        if (Params.Input<IGH_Param>(input.Param.Name) is IGH_Param param)
+        {
+          param.Access = input.Param.Access;
+          param.Optional = input.Param.Optional;
+
+          if (input.Param is Param_Number input_number && param is Param_Number param_number)
+            param_number.AngleParameter = input_number.AngleParameter;
+        }
+      }
+
+      foreach (var output in Outputs)
+      {
+        if (Params.Output<IGH_Param>(output.Param.Name) is IGH_Param param)
+        {
+          param.Access = output.Param.Access;
+          param.Optional = output.Param.Optional;
+
+          if (output.Param is Param_Number input_number && param is Param_Number param_number)
+            param_number.AngleParameter = input_number.AngleParameter;
+        }
+      }
+    }
 
     void CanvasFullNamesChanged()
     {
