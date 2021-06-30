@@ -27,14 +27,14 @@ namespace RhinoInside.Revit.GH.Components
     )
     { }
 
-    protected override void OnAfterStart(DB.Document document, string strTransactionName)
+    public override void OnStarted(DB.Document document)
     {
-      base.OnAfterStart(document, strTransactionName);
+      base.OnStarted(document);
 
       // Disable all previous walls joins
-      if (PreviousStructure is object)
+      if (PreviousStructure(document) is Types.IGH_ElementId[] previous)
       {
-        var unjoinedWalls = PreviousStructure.OfType<Types.Element>().
+        var unjoinedWalls = previous.OfType<Types.Element>().
                             Select(x => document.GetElement(x.Id)).
                             OfType<DB.Wall>().
                             Where(x => x.Pinned).
@@ -70,9 +70,9 @@ namespace RhinoInside.Revit.GH.Components
     }
 
     List<DB.Wall> joinedWalls = new List<DB.Wall>();
-    protected override void OnBeforeCommit(DB.Document document, string strTransactionName)
+    public override void OnPrepare(IReadOnlyCollection<DB.Document> documents)
     {
-      base.OnBeforeCommit(document, strTransactionName);
+      base.OnPrepare(documents);
 
       // Reenable new joined walls
       foreach (var wallToJoin in joinedWalls)

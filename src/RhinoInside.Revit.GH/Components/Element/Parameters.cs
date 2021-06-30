@@ -296,15 +296,10 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DB.Element element = null;
-      if (!DA.GetData("Element", ref element))
-        return;
+      if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
+      if (!Params.GetData(DA, "ParameterKey", out IGH_Goo key)) return;
 
-      IGH_Goo parameterKey = null;
-      if (!DA.GetData("ParameterKey", ref parameterKey))
-        return;
-
-      var parameter = ParameterUtils.GetParameter(this, element, parameterKey);
+      var parameter = ParameterUtils.GetParameter(this, element.Value, key);
       DA.SetData("ParameterValue", parameter);
     }
   }
@@ -372,39 +367,20 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DB.Element element = null;
-      if (!DA.GetData("Element", ref element))
-        return;
+      if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
+      if (!Params.GetData(DA, "ParameterKey", out IGH_Goo key)) return;
+      if (!Params.GetData(DA, "ParameterValue", out IGH_Goo value)) return;
 
-      IGH_Goo key = null;
-      if (!DA.GetData("ParameterKey", ref key))
-        return;
-
-      IGH_Goo value = null;
-      if (!DA.GetData("ParameterValue", ref value))
-        return;
-
-      var parameter = ParameterUtils.GetParameter(this, element, key);
+      var parameter = ParameterUtils.GetParameter(this, element.Value, key);
       if (parameter is null)
         return;
 
       StartTransaction(element.Document);
 
-      try
-      {
-        if (parameter.Set(value))
-          DA.SetData("Element", element);
-        else
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Unable to set parameter '{parameter.Definition.Name}' : '{value}' is not a valid value.");
-      }
-      catch (InvalidCastException)
-      {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to cast from {value.TypeName} to {parameter.StorageType}.");
-      }
-      catch (Autodesk.Revit.Exceptions.InvalidOperationException e)
-      {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to set parameter '{parameter.Definition.Name}' : {e.Message}");
-      }
+      if (parameter.Set(value))
+        DA.SetData("Element", element);
+      else
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Unable to set parameter '{parameter.Definition.Name}' : '{value}' is not a valid value.");
     }
   }
 
@@ -463,31 +439,19 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DB.Element element = null;
-      if (!DA.GetData("Element", ref element))
-        return;
+      if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
+      if (!Params.GetData(DA, "ParameterKey", out IGH_Goo key)) return;
 
-      IGH_Goo key = null;
-      if (!DA.GetData("ParameterKey", ref key))
-        return;
-
-      var parameter = ParameterUtils.GetParameter(this, element, key);
+      var parameter = ParameterUtils.GetParameter(this, element.Value, key);
       if (parameter is null)
         return;
 
       StartTransaction(element.Document);
 
-      try
-      {
-        if (!parameter.ResetValue())
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Unable to reset parameter '{parameter.Definition.Name}'.");
+      if (!parameter.ResetValue())
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Unable to reset parameter '{parameter.Definition.Name}'.");
 
-        DA.SetData("Element", element);
-      }
-      catch (Autodesk.Revit.Exceptions.InvalidOperationException e)
-      {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to reset parameter '{parameter.Definition.Name}' : {e.Message}");
-      }
+      DA.SetData("Element", element);
     }
   }
 
@@ -515,41 +479,30 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DB.Element element = null;
-      if (!DA.GetData("Element", ref element))
-        return;
+      if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
 
-      string parameterName = null;
-      bool noFilterName = (!DA.GetData("Name", ref parameterName) && Params.Input[1].Sources.Count == 0);
+      var filterName = Params.GetData(DA, "Name", out string parameterName);
+      var filterGroup = Params.GetData(DA, "Group", out ParameterGroup parameterGroup);
+      var filterReadOnly = Params.GetData(DA, "ReadOnly", out bool? readOnly);
 
-      var parameterGroup = ParameterGroup.Empty;
-      bool noFilterGroup = (!DA.GetData("Group", ref parameterGroup) && Params.Input[2].Sources.Count == 0);
-
-      bool readOnly = false;
-      bool noFilterReadOnly = (!DA.GetData("ReadOnly", ref readOnly) && Params.Input[3].Sources.Count == 0);
-
-      List<DB.Parameter> parameters = null;
-      if (element is object)
+      var parameters = new List<DB.Parameter>(element.Value.Parameters.Size);
+      foreach (var group in element.Value.GetParameters(DBX.ParameterClass.Any).GroupBy(x => x.Definition?.GetGroupType() ?? ParameterGroup.Empty).OrderBy(x => x.Key))
       {
-        parameters = new List<DB.Parameter>(element.Parameters.Size);
-        foreach (var group in element.GetParameters(DBX.ParameterClass.Any).GroupBy(x => x.Definition?.GetGroupType() ?? ParameterGroup.Empty).OrderBy(x => x.Key))
+        foreach (var param in group.OrderBy(x => x.Id.IntegerValue))
         {
-          foreach (var param in group.OrderBy(x => x.Id.IntegerValue))
-          {
-            if (string.IsNullOrEmpty(param.Definition.Name))
-              continue;
+          if (string.IsNullOrEmpty(param.Definition.Name))
+            continue;
 
-            if (!noFilterName && !param.Definition.Name.IsSymbolNameLike(parameterName))
-              continue;
+          if (filterName && !param.Definition.Name.IsSymbolNameLike(parameterName))
+            continue;
 
-            if (!noFilterGroup && parameterGroup != (param.Definition?.GetGroupType() ?? ParameterGroup.Empty))
-              continue;
+          if (filterGroup && parameterGroup != (param.Definition?.GetGroupType() ?? ParameterGroup.Empty))
+            continue;
 
-            if (!noFilterReadOnly && readOnly != param.IsReadOnly)
-              continue;
+          if (filterReadOnly && readOnly != param.IsReadOnly)
+            continue;
 
-            parameters.Add(param);
-          }
+          parameters.Add(param);
         }
       }
 

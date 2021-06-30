@@ -3,228 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using Autodesk.Revit.UI.Events;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
-using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
   using Convert.Geometry;
   using Exceptions;
-  using Grasshopper.Kernel.Attributes;
+  using External.DB.Extensions;
   using Kernel.Attributes;
 
   [Obsolete]
-  public abstract class TransactionBaseComponent :
-    Component,
-    DB.IFailuresPreprocessor,
-    DB.ITransactionFinalizer
+  public abstract class TransactionBaseComponent : TransactionalChainComponent
   {
     protected TransactionBaseComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
-
-    protected DB.Transaction NewTransaction(DB.Document doc) => NewTransaction(doc, Name);
-    protected DB.Transaction NewTransaction(DB.Document doc, string name)
-    {
-      var transaction = new DB.Transaction(doc, name);
-
-      var options = transaction.GetFailureHandlingOptions();
-      options = options.SetClearAfterRollback(true);
-      options = options.SetDelayedMiniWarnings(false);
-      options = options.SetForcedModalHandling(true);
-
-      options = options.SetFailuresPreprocessor(this);
-      options = options.SetTransactionFinalizer(this);
-
-      transaction.SetFailureHandlingOptions(options);
-
-      return transaction;
-    }
-
-    protected DB.TransactionStatus CommitTransaction(DB.Document doc, DB.Transaction transaction)
-    {
-      // Disable Rhino UI if any warning-error dialog popup
-      {
-        var uiApplication = Revit.ActiveUIApplication;
-        External.UI.EditScope scope = null;
-        EventHandler<DialogBoxShowingEventArgs> _ = null;
-        try
-        {
-          uiApplication.DialogBoxShowing += _ = (sender, args) =>
-          {
-            if (scope is null)
-              scope = new External.UI.EditScope(uiApplication);
-          };
-
-          if (transaction.GetStatus() == DB.TransactionStatus.Started)
-          {
-            OnBeforeCommit(doc, transaction.GetName());
-
-            return transaction.Commit();
-          }
-          else return transaction.RollBack();
-        }
-        finally
-        {
-          uiApplication.DialogBoxShowing -= _;
-
-          if (scope is IDisposable disposable)
-            disposable.Dispose();
-        }
-      }
-    }
-
-    // Setp 1.
-    // protected override void BeforeSolveInstance() { }
-
-    // Step 2.
-    protected virtual void OnAfterStart(DB.Document document, string strTransactionName) { }
-
-    // Step 3.
-    //protected override void TrySolveInstance(IGH_DataAccess DA) { }
-
-    // Step 4.
-    protected virtual void OnBeforeCommit(DB.Document document, string strTransactionName) { }
-
-    // Step 5.
-    //protected override void AfterSolveInstance() {}
-
-    // Step 5.1
-    #region IFailuresPreprocessor
-    void AddRuntimeMessage(DB.FailureMessageAccessor error, bool? solved = null)
-    {
-      if (error.GetFailureDefinitionId() == DBX.ExternalFailures.TransactionFailures.SimulatedTransaction)
-      {
-        // Simulation signal is already reflected in the canvas changing the component color,
-        // So it's up to the component show relevant information about what 'simulation' means.
-        // As an example Purge component shows a remarks that reads like 'No elements were deleted'.
-        //AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, error.GetDescriptionText());
-
-        return;
-      }
-
-      var level = GH_RuntimeMessageLevel.Remark;
-      switch (error.GetSeverity())
-      {
-        case DB.FailureSeverity.Warning:            level = GH_RuntimeMessageLevel.Warning; break;
-        case DB.FailureSeverity.Error:              level = GH_RuntimeMessageLevel.Error;   break;
-        case DB.FailureSeverity.DocumentCorruption: level = GH_RuntimeMessageLevel.Error;   break;
-      }
-
-      string solvedMark = string.Empty;
-      if (error.GetSeverity() > DB.FailureSeverity.Warning)
-      {
-        switch (solved)
-        {
-          case false: solvedMark = "❌ "; break;
-          case true: solvedMark = "✔ "; break;
-        }
-      }
-
-      var description = error.GetDescriptionText();
-      var text = string.IsNullOrEmpty(description) ?
-        $"{solvedMark}{level} {{{error.GetFailureDefinitionId().Guid}}}" :
-        $"{solvedMark}{description}";
-
-      int idsCount = 0;
-      foreach (var id in error.GetFailingElementIds())
-        text += idsCount++ == 0 ? $" {{{id.IntegerValue}" : $", {id.IntegerValue}";
-      if (idsCount > 0) text += "} ";
-
-      AddRuntimeMessage(level, text);
-    }
-
-    // Override to add handled failures to your component (Order is important).
-    protected virtual IEnumerable<DB.FailureDefinitionId> FailureDefinitionIdsToFix => null;
-
-    DB.FailureProcessingResult FixFailures(DB.FailuresAccessor failuresAccessor, IEnumerable<DB.FailureDefinitionId> failureIds)
-    {
-      foreach (var failureId in failureIds)
-      {
-        int solvedErrors = 0;
-
-        foreach (var error in failuresAccessor.GetFailureMessages().Where(x => x.GetFailureDefinitionId() == failureId))
-        {
-          if (!failuresAccessor.IsFailureResolutionPermitted(error))
-            continue;
-
-          // Don't try to fix two times same issue
-          if (failuresAccessor.GetAttemptedResolutionTypes(error).Any())
-            continue;
-
-          AddRuntimeMessage(error, true);
-
-          failuresAccessor.ResolveFailure(error);
-          solvedErrors++;
-        }
-
-        if (solvedErrors > 0)
-          return DB.FailureProcessingResult.ProceedWithCommit;
-      }
-
-      return DB.FailureProcessingResult.Continue;
-    }
-
-    DB.FailureProcessingResult DB.IFailuresPreprocessor.PreprocessFailures(DB.FailuresAccessor failuresAccessor)
-    {
-      if (failuresAccessor.GetSeverity() == DB.FailureSeverity.Error)
-      {
-        // Handled failures in order
-        {
-          var failureDefinitionIdsToFix = FailureDefinitionIdsToFix;
-          if (failureDefinitionIdsToFix != null)
-          {
-            var result = FixFailures(failuresAccessor, failureDefinitionIdsToFix);
-            if (result != DB.FailureProcessingResult.Continue)
-              return result;
-          }
-        }
-
-        // Unhandled failures in incomming order
-        {
-          var failureDefinitionIdsToFix = failuresAccessor.GetFailureMessages().GroupBy(x => x.GetFailureDefinitionId()).Select(x => x.Key);
-          var result = FixFailures(failuresAccessor, failureDefinitionIdsToFix);
-          if (result != DB.FailureProcessingResult.Continue)
-            return result;
-        }
-      }
-
-      var severity = failuresAccessor.GetSeverity();
-      if (severity >= DB.FailureSeverity.Warning)
-      {
-        // Unsolved errors or warnings
-        foreach (var error in failuresAccessor.GetFailureMessages().OrderBy(error => error.GetSeverity()))
-          AddRuntimeMessage(error, false);
-
-        failuresAccessor.DeleteAllWarnings();
-      }
-
-      if (severity >= DB.FailureSeverity.Error)
-        return DB.FailureProcessingResult.ProceedWithRollBack;
-
-      return DB.FailureProcessingResult.Continue;
-    }
-    #endregion
-
-    // Step 5.2
-    #region ITransactionFinalizer
-    // Step 5.2.A
-    public virtual void OnCommitted(DB.Document document, string strTransactionName)
-    {
-    }
-
-    // Step 5.2.B
-    public virtual void OnRolledBack(DB.Document document, string strTransactionName)
-    {
-      foreach (var param in Params.Output)
-        param.Phase = GH_SolutionPhase.Failed;
-    }
-    #endregion
 
     #region Solve Optional values
     protected static double LiteralLengthValue(double meters)
@@ -479,94 +275,7 @@ namespace RhinoInside.Revit.GH.Components
     #endregion
   }
 
-  [Obsolete("Please use TransactionalComponent")]
-  public abstract class TransactionComponent : TransactionBaseComponent
-  {
-    protected TransactionComponent(string name, string nickname, string description, string category, string subCategory)
-    : base(name, nickname, description, category, subCategory) { }
-
-    #region Autodesk.Revit.DB.Transacion support
-    protected DB.Transaction CurrentTransaction;
-    protected DB.TransactionStatus TransactionStatus => CurrentTransaction?.GetStatus() ?? DB.TransactionStatus.Uninitialized;
-
-    protected void StartTransaction(DB.Document document)
-    {
-      if (document is null)
-        return;
-
-      CurrentTransaction = NewTransaction(document, Name);
-      if (CurrentTransaction.Start() != DB.TransactionStatus.Started)
-      {
-        CurrentTransaction.Dispose();
-        CurrentTransaction = null;
-        throw new InvalidOperationException($"Unable to start Transaction '{Name}'");
-      }
-    }
-
-    protected DB.TransactionStatus CommitTransaction(DB.Document document)
-    {
-      try     { return base.CommitTransaction(document, CurrentTransaction); }
-      finally { CurrentTransaction.Dispose(); CurrentTransaction = default; }
-    }
-    #endregion
-
-    // Step 1.
-    protected override void BeforeSolveInstance()
-    {
-      if (Parameters.Document.GetDataOrDefault(this, default, default, out var Document))
-      {
-        StartTransaction(Document);
-
-        OnAfterStart(Document, CurrentTransaction.GetName());
-      }
-    }
-
-    // Step 2.
-    //protected override void OnAfterStart(Document document, string strTransactionName) { }
-
-    // Step 3.
-    //protected override void TrySolveInstance(IGH_DataAccess DA) { }
-
-    // Step 4.
-    //protected override void OnBeforeCommit(Document document, string strTransactionName) { }
-
-    // Step 5.
-    protected override void AfterSolveInstance()
-    {
-      try
-      {
-        if (RunCount <= 0)
-          return;
-
-        if (TransactionStatus == DB.TransactionStatus.Uninitialized)
-          return;
-
-        if (Phase != GH_SolutionPhase.Failed)
-        {
-          if (Parameters.Document.GetDataOrDefault(this, default, default, out var Document))
-            CommitTransaction(Document);
-        }
-      }
-      finally
-      {
-        switch (TransactionStatus)
-        {
-          case DB.TransactionStatus.Uninitialized:
-          case DB.TransactionStatus.Started:
-          case DB.TransactionStatus.Committed:
-            break;
-          default:
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Transaction {TransactionStatus} and aborted.");
-            break;
-        }
-
-        CurrentTransaction?.Dispose();
-        CurrentTransaction = null;
-      }
-    }
-  }
-
-  public abstract class ReflectedComponent : TransactionComponent
+  public abstract class ReflectedComponent : TransactionBaseComponent
   {
     protected ReflectedComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
@@ -808,7 +517,7 @@ namespace RhinoInside.Revit.GH.Components
       else
       {
         value = default;
-        if (!DA.GetData(index, ref value))
+        if (!DA.GetData(index, ref value) || ReferenceEquals(value, null))
         {
           var param = Params.Input[index];
           if (param.Optional && param.SourceCount == 0)
@@ -884,8 +593,14 @@ namespace RhinoInside.Revit.GH.Components
     ReflectedComponent,
     Bake.IGH_ElementIdBakeAwareObject
   {
-    protected IGH_Goo[] PreviousStructure;
-    System.Collections.IEnumerator PreviousStructureEnumerator;
+    Dictionary<DB.Document, (Types.IGH_ElementId[] Structure, IEnumerator<Types.IGH_ElementId> Enumerator)> Previous =
+      new Dictionary<DB.Document, (Types.IGH_ElementId[], IEnumerator<Types.IGH_ElementId>)>();
+
+    protected Types.IGH_ElementId[] PreviousStructure(DB.Document doc) =>
+      Previous.TryGetValue(doc, out var data) ? data.Structure : default;
+
+    IEnumerator<Types.IGH_ElementId> PreviousStructureEnumerator(DB.Document doc) =>
+      Previous.TryGetValue(doc, out var data) ? data.Enumerator : default;
 
     protected ReconstructElementComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
@@ -909,27 +624,24 @@ namespace RhinoInside.Revit.GH.Components
       base.PostConstructor();
     }
 
-    protected sealed override void RegisterInputParams(GH_InputParamManager manager)
-    {
-      foreach (var input in inputs)
-      {
-        if (input.Attributes is null)
-          input.Attributes = new GH_LinkedParamAttributes(input, Attributes);
+    protected override ParamDefinition[] Inputs =>
+    (
+      Enumerable.Repeat
+      (
+        ParamDefinition.Create<Parameters.Document>
+        (
+          name: "Document",
+          nickname: "DOC",
+          relevance: ParamVisibility.Voluntary
+        ), 1
+      ).
+      Concat(inputs.Select(ParamDefinition.FromParam)).ToArray()
+    );
 
-        manager.AddParameter(input);
-      }
-    }
-
-    protected sealed override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      foreach (var output in outputs)
-      {
-        if (output.Attributes is null)
-          output.Attributes = new GH_LinkedParamAttributes(output, Attributes);
-
-        manager.AddParameter(output);
-      }
-    }
+    protected override ParamDefinition[] Outputs =>
+    (
+      outputs.Select(ParamDefinition.FromParam).ToArray()
+    );
 
     protected static void ReplaceElement<T>(ref T previous, T next, ICollection<DB.BuiltInParameter> parametersMask = null) where T : DB.Element
     {
@@ -937,26 +649,24 @@ namespace RhinoInside.Revit.GH.Components
       previous = next;
     }
 
-    // Step 2.
-    protected override void OnAfterStart(DB.Document document, string strTransactionName)
-    {
-      PreviousStructureEnumerator = PreviousStructure?.GetEnumerator();
-    }
-
     // Step 3.
     protected sealed override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (Parameters.Document.GetDataOrDefault(this, default, default, out var Document))
+      if (Parameters.Document.GetDataOrDefault(this, DA, "Document", out var Document))
+      {
+        StartTransaction(Document);
         Iterate(DA, Document, (DB.Document doc, ref DB.Element current) => TrySolveInstance(DA, doc, ref current));
+      }
     }
 
     delegate void CommitAction(DB.Document doc, ref DB.Element element);
 
     void Iterate(IGH_DataAccess DA, DB.Document doc, CommitAction action)
     {
-      var element = PreviousStructureEnumerator?.MoveNext() ?? false ?
+      var enumerator = PreviousStructureEnumerator(doc);
+      var element = enumerator?.MoveNext() ?? false ?
                     (
-                      PreviousStructureEnumerator.Current is Types.Element x && doc.Equals(x.Document) ?
+                      enumerator.Current is Types.Element x && doc.Equals(x.Document) ?
                       doc.GetElement(x.Id) :
                       null
                     ) :
@@ -1041,6 +751,7 @@ namespace RhinoInside.Revit.GH.Components
       var parameters = ReconstructInfo.GetParameters();
 
       var arguments = new object[parameters.Length];
+      int docParamIndex = Params.IndexOfInputParam("Document");
       try
       {
         arguments[0] = doc;
@@ -1053,6 +764,9 @@ namespace RhinoInside.Revit.GH.Components
 
           if (paramIndex < 0)
             continue;
+
+          // Skip Document if present
+          paramIndex += docParamIndex + 1;
 
           args[1] = paramIndex;
 
@@ -1075,35 +789,67 @@ namespace RhinoInside.Revit.GH.Components
       finally { element = (DB.Element) arguments[1]; }
     }
 
-    // Step 4.
-    protected override void OnBeforeCommit(DB.Document document, string strTransactionName)
+    // Step 2.1
+    public override void OnStarted(DB.Document document)
     {
+      base.OnStarted(document);
+
+      if (Previous.TryGetValue(document, out var data))
+        Previous.Remove(document);
+
+      data.Enumerator = (data.Structure as IEnumerable<Types.IGH_ElementId>)?.GetEnumerator();
+      Previous.Add(document, data);
+    }
+
+    // Step 3.1
+    public override void OnPrepare(IReadOnlyCollection<DB.Document> documents)
+    {
+      base.OnPrepare(documents);
+
       // Remove extra unused elements
-      while (PreviousStructureEnumerator?.MoveNext() ?? false)
+      foreach (var previous in Previous)
       {
-        if (PreviousStructureEnumerator.Current is Types.Element elementId && document.Equals(elementId.Document))
+        var document = previous.Key;
+        var data = previous.Value;
+
+        while (data.Enumerator?.MoveNext() ?? false)
         {
-          if (document.GetElement(elementId.Id) is DB.Element element)
+          if (data.Enumerator.Current is Types.IGH_Element elementId && document.Equals(elementId.Document))
           {
-            try { document.Delete(element.Id); }
-            catch (Autodesk.Revit.Exceptions.ApplicationException) { }
+            if (document.GetElement(elementId.Id) is DB.Element element)
+            {
+              try { document.Delete(element.Id); }
+              catch (Autodesk.Revit.Exceptions.ApplicationException) { }
+            }
           }
         }
       }
     }
 
-    // Step 5.
-    protected override void AfterSolveInstance()
+    // Step 3.2
+    public override void OnDone(DB.TransactionStatus status)
     {
-      try { base.AfterSolveInstance(); }
-      finally { PreviousStructureEnumerator = null; }
-    }
+      base.OnDone(status);
 
-    // Step 5.2.A
-    public override void OnCommitted(DB.Document document, string strTransactionName)
-    {
-      // Update previous elements
-      PreviousStructure = Params.Output[0].VolatileData.AllData(false).ToArray();
+      var previous = new Dictionary<DB.Document, (Types.IGH_ElementId[], IEnumerator<Types.IGH_ElementId>)>();
+
+      if (status == DB.TransactionStatus.Committed)
+      {
+        // Update previous elements
+        var elementSets = Params.Output[0].VolatileData.AllData(false).
+          Cast<Types.IGH_ElementId>().GroupBy(x => x.Document);
+
+        foreach (var set in elementSets)
+          previous.Add(set.Key, (set.ToArray(), default));
+      }
+      else
+      {
+        // Reset Enumerator
+        foreach (var data in Previous)
+          previous.Add(data.Key, (data.Value.Structure, default));
+      }
+
+      Previous = previous;
     }
 
     #region IGH_ElementIdBakeAwareObject
@@ -1121,37 +867,33 @@ namespace RhinoInside.Revit.GH.Components
 
     bool Bake.IGH_ElementIdBakeAwareObject.Bake(Bake.BakeOptions options, out ICollection<DB.ElementId> ids)
     {
-      using (var trans = new DB.Transaction(options.Document, "Bake"))
+      if (Previous.TryGetValue(options.Document, out var data))
       {
-        if (trans.Start() == DB.TransactionStatus.Started)
+        using (var trans = new DB.Transaction(options.Document, "Bake"))
         {
-          var list = new List<DB.ElementId>();
-          var newStructure = (IGH_Goo[]) PreviousStructure.Clone();
-          for (int g = 0; g < newStructure.Length; g++)
+          if (trans.Start() == DB.TransactionStatus.Started)
           {
-            if (newStructure[g] is Types.IGH_Element id)
+            var list = new List<DB.ElementId>();
+            foreach (var elementId in data.Structure)
             {
-              if
-              (
-                id.Document.Equals(options.Document) &&
-                id.Document.GetElement(id.Id) is DB.Element element
-              )
+              if (!elementId.IsValid) continue;
+
+              if (elementId.Value is DB.Element element)
               {
                 try { element.Pinned = false; }
                 catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
-
-                list.Add(element.Id);
-                newStructure[g] = default;
               }
-            }
-          }
 
-          if (trans.Commit() == DB.TransactionStatus.Committed)
-          {
-            ids = list;
-            PreviousStructure = newStructure;
-            ExpireSolution(false);
-            return true;
+              list.Add(elementId.Id);
+            }
+
+            if (trans.Commit() == DB.TransactionStatus.Committed)
+            {
+              ids = list;
+              Previous.Remove(options.Document);
+              ExpireSolution(false);
+              return true;
+            }
           }
         }
       }

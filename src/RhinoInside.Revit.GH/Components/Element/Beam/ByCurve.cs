@@ -21,14 +21,14 @@ namespace RhinoInside.Revit.GH.Components
     )
     { }
 
-    protected override void OnAfterStart(DB.Document document, string strTransactionName)
+    public override void OnStarted(DB.Document document)
     {
-      base.OnAfterStart(document, strTransactionName);
+      base.OnStarted(document);
 
       // Reset all previous beams joins
-      if (PreviousStructure is object)
+      if (PreviousStructure(document) is Types.IGH_ElementId[] previous)
       {
-        var beamsToUnjoin = PreviousStructure.OfType<Types.Element>().
+        var beamsToUnjoin = previous.OfType<Types.Element>().
                             Select(x => document.GetElement(x.Id)).
                             OfType<DB.FamilyInstance>().
                             Where(x => x.Pinned);

@@ -325,7 +325,7 @@ namespace RhinoInside.Revit.GH.Components
     }
 
     // Step 2.
-    protected override sealed void SolveInstance(IGH_DataAccess DA)
+    protected sealed override void SolveInstance(IGH_DataAccess DA)
     {
       if (TransactionExtent == TransactionExtent.Component)
       {
@@ -359,7 +359,7 @@ namespace RhinoInside.Revit.GH.Components
     }
 
     // Step 3.
-    protected override sealed void AfterSolveInstance()
+    protected sealed override void AfterSolveInstance()
     {
       using (chain)
       {
