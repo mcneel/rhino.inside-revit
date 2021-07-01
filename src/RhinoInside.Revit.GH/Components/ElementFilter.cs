@@ -39,19 +39,19 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var elements = new List<Types.Element>();
+      var elements = new List<Types.IGH_Element>();
       if (!DA.GetDataList("Elements", elements))
         return;
 
-      var filter = default(DB.ElementFilter);
+      var filter = default(Types.ElementFilter);
       if (!DA.GetData("Filter", ref filter))
         return;
 
-      var pass = new List<bool>(elements.Count);
-      foreach (var element in elements)
-        pass.Add(element.IsValid && filter.PassesFilter(element.Document, element.Id));
-
-      DA.SetDataList("Pass", pass);
+      DA.SetDataList
+      (
+        "Pass",
+        elements.Select(x => x.IsValid ? new GH_Boolean(filter.Value.PassesFilter(x.Document, x.Id)) : default)
+      );
     }
   }
 
