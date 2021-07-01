@@ -342,11 +342,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <remarks>This method will return all categories and sub categories if <paramref name="parentId"/> is null.</remarks>
     public static ICollection<Category> GetCategories(this Document doc, ElementId parentId = default)
     {
-      using (var collector = new FilteredElementCollector(doc))
+      using (var collector = new FilteredElementCollector(doc).OfClass(typeof(GraphicsStyle)))
       {
         var categories =
         (
-          collector.OfClass(typeof(GraphicsStyle)).Cast<GraphicsStyle>().
+          collector.Cast<GraphicsStyle>().
           Select(x => x.GraphicsStyleCategory).
           Where(x => x.Name != string.Empty)
         );
@@ -361,7 +361,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static Category GetCategory(this Document doc, BuiltInCategory categoryId)
     {
       if (doc is null || categoryId == BuiltInCategory.INVALID)
-        return null;
+        return default;
 
       // 1. We try with the regular way calling Category.GetCategory
       try
@@ -388,7 +388,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static Category GetCategory(this Document doc, ElementId id)
     {
       if (doc is null || !id.IsValid())
-        return null;
+        return default;
 
       return id.TryGetBuiltInCategory(out var categoryId) ?
         GetCategory(doc, categoryId) :
@@ -402,16 +402,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (BuiltInCategoriesWithParameters is null || !doc.Equals(BuiltInCategoriesWithParametersDocument))
       {
         BuiltInCategoriesWithParametersDocument = doc;
-        BuiltInCategoriesWithParameters = BuiltInCategoryExtension.BuiltInCategories.
-          Where
-          (
-            bic =>
-            {
-              try { return Category.GetCategory(doc, bic)?.AllowsBoundParameters == true; }
-              catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
-            }
-          ).
-          ToArray();
+        BuiltInCategoriesWithParameters = BuiltInCategoryExtension.BuiltInCategories.Where
+        (
+          bic =>
+          {
+            try { return Category.GetCategory(doc, bic)?.AllowsBoundParameters == true; }
+            catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
+          }
+        ).
+        ToArray();
       }
 
       return BuiltInCategoriesWithParameters;
@@ -748,7 +747,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static bool IsEmptyUri(this Uri uri)
     {
-      return uri.Scheme.Equals("empty", StringComparison.InvariantCultureIgnoreCase);
+      return uri.Scheme.Equals(Empty.Scheme, StringComparison.InvariantCultureIgnoreCase);
     }
 
     public static bool IsFileUri(this Uri uri, out string path)

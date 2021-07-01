@@ -30,10 +30,9 @@ namespace RhinoInside.Revit.GH.Components
       if (deleted.Any())
       {
         var empty = new DB.ElementId[0];
-        var deletedSet = new HashSet<DB.ElementId>(deleted);
         foreach (var param in Params.Output.OfType<Kernel.IGH_ElementIdParam>())
         {
-          if (param.NeedsToBeExpired(document, empty, deletedSet, empty))
+          if (param.NeedsToBeExpired(document, empty, deleted, empty))
             return true;
         }
       }
@@ -75,40 +74,40 @@ namespace RhinoInside.Revit.GH.Components
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
         return;
 
-      if (!Params.TryGetData(DA, "Type", out DB.CategoryType? categoryType)) return;
-      if (!Params.TryGetData(DA, "Parent", out Types.Category Parent)) return;
-      if (!Params.TryGetData(DA, "Name", out string Name)) return;
-      if (!Params.TryGetData(DA, "Allows Subcategories", out bool? AllowsSubcategories)) return;
-      if (!Params.TryGetData(DA, "Allows Parameters", out bool? AllowsParameters)) return;
-      if (!Params.TryGetData(DA, "Has Material Quantities", out bool? HasMaterialQuantities)) return;
-      if (!Params.TryGetData(DA, "Cuttable", out bool? Cuttable)) return;
+      if (!Params.TryGetData(DA, "Type", out DB.CategoryType? type)) return;
+      if (!Params.TryGetData(DA, "Parent", out Types.Category parent)) return;
+      if (!Params.TryGetData(DA, "Name", out string name)) return;
+      if (!Params.TryGetData(DA, "Allows Subcategories", out bool? allowsSubcategories)) return;
+      if (!Params.TryGetData(DA, "Allows Parameters", out bool? allowsParameters)) return;
+      if (!Params.TryGetData(DA, "Has Material Quantities", out bool? hasMaterialQuantities)) return;
+      if (!Params.TryGetData(DA, "Cuttable", out bool? cuttable)) return;
 
-      if(!(Parent?.Document is null || doc.Equals(Parent.Document)))
-        throw new System.ArgumentException("Wrong Document.", nameof(Parent));
+      if(!(parent?.Document is null || doc.Equals(parent.Document)))
+        throw new System.ArgumentException("Wrong Document.", nameof(parent));
 
-      IEnumerable<DB.Category> categories = doc.GetCategories(Parent?.Id);
+      IEnumerable<DB.Category> categories = doc.GetCategories(parent?.Id);
 
-      if (categoryType.HasValue)
-        categories = categories.Where(x => x.CategoryType == categoryType);
+      if (type.HasValue)
+        categories = categories.Where(x => x.CategoryType == type);
 
-      if (AllowsSubcategories.HasValue)
-        categories = categories.Where(x => x.CanAddSubcategory == AllowsSubcategories);
+      if (allowsSubcategories.HasValue)
+        categories = categories.Where(x => x.CanAddSubcategory == allowsSubcategories);
 
-      if (AllowsParameters.HasValue)
-        categories = categories.Where(x => x.AllowsBoundParameters == AllowsParameters);
+      if (allowsParameters.HasValue)
+        categories = categories.Where(x => x.AllowsBoundParameters == allowsParameters);
 
-      if (HasMaterialQuantities.HasValue)
-        categories = categories.Where(x => x.HasMaterialQuantities == HasMaterialQuantities);
+      if (hasMaterialQuantities.HasValue)
+        categories = categories.Where(x => x.HasMaterialQuantities == hasMaterialQuantities);
 
-      if (Cuttable.HasValue)
-        categories = categories.Where(x => x.IsCuttable == Cuttable);
+      if (cuttable.HasValue)
+        categories = categories.Where(x => x.IsCuttable == cuttable);
 
-      if (Name is object)
+      if (name is object)
       {
-        if (Parent?.Id is null)
-          categories = categories.Where(x => x.FullName().IsSymbolNameLike(Name));
+        if (parent?.Id is null)
+          categories = categories.Where(x => x.FullName().IsSymbolNameLike(name));
         else
-          categories = categories.Where(x => x.Name.IsSymbolNameLike(Name));
+          categories = categories.Where(x => x.Name.IsSymbolNameLike(name));
       }
 
       DA.SetDataList("Categories", categories);
