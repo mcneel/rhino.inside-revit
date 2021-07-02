@@ -226,12 +226,15 @@ namespace Grasshopper.Special
       {
         Value = goo;
 
-        var lines = name.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
-        switch (lines.Length)
+        if (name is object)
         {
-          case 0: Name = string.Empty; break;
-          case 1: Name = name; break;
-          default: Name = $"{lines[0]} ⤶"; break; // Alternatives ⏎⮐
+          var lines = name.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+          switch (lines.Length)
+          {
+            case 0: Name = string.Empty; break;
+            case 1: Name = name; break;
+            default: Name = $"{lines[0]} ⤶"; break; // Alternatives ⏎⮐
+          }
         }
 
         Selected = selected;
