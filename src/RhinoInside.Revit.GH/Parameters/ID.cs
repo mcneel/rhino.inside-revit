@@ -246,6 +246,7 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       base.Menu_AppendPreProcessParameter(menu);
 
+#if DEBUG
       var Group = Menu_AppendItem(menu, "Group by");
 
       Group.Checked = Grouping != DataGrouping.None;
@@ -253,6 +254,7 @@ namespace RhinoInside.Revit.GH.Parameters
       Menu_AppendItem(Group.DropDown, "Workset",       (s, a) => Menu_GroupBy(DataGrouping.Workset),       true, (Grouping & DataGrouping.Workset) != 0);
       Menu_AppendItem(Group.DropDown, "Design Option", (s, a) => Menu_GroupBy(DataGrouping.DesignOption),  true, (Grouping & DataGrouping.DesignOption) != 0);
       Menu_AppendItem(Group.DropDown, "Category",      (s, a) => Menu_GroupBy(DataGrouping.Category),      true, (Grouping & DataGrouping.Category) != 0);
+#endif
     }
 
     private void Menu_GroupBy(DataGrouping value)

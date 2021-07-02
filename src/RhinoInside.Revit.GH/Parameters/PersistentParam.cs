@@ -266,20 +266,23 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected virtual void Menu_AppendPreProcessParameter(ToolStripDropDown menu)
     {
-      var Cull = Menu_AppendItem(menu, "Cull");
+      if (Kind != GH_ParamKind.output)
+      {
+        var Cull = Menu_AppendItem(menu, "Cull");
 
-      Cull.Checked = Culling != DataCulling.None;
-      if (CullingMask.HasFlag(DataCulling.Nulls))
-        Menu_AppendItem(Cull.DropDown, "Nulls", (s, a) => Menu_Culling(DataCulling.Nulls), true, Culling.HasFlag(DataCulling.Nulls));
+        Cull.Checked = Culling != DataCulling.None;
+        if (CullingMask.HasFlag(DataCulling.Nulls))
+          Menu_AppendItem(Cull.DropDown, "Nulls", (s, a) => Menu_Culling(DataCulling.Nulls), true, Culling.HasFlag(DataCulling.Nulls));
 
-      if (CullingMask.HasFlag(DataCulling.Invalids))
-        Menu_AppendItem(Cull.DropDown, "Invalids", (s, a) => Menu_Culling(DataCulling.Invalids), true, Culling.HasFlag(DataCulling.Invalids));
+        if (CullingMask.HasFlag(DataCulling.Invalids))
+          Menu_AppendItem(Cull.DropDown, "Invalids", (s, a) => Menu_Culling(DataCulling.Invalids), true, Culling.HasFlag(DataCulling.Invalids));
 
-      if (CullingMask.HasFlag(DataCulling.Duplicates))
-        Menu_AppendItem(Cull.DropDown, "Duplicates", (s, a) => Menu_Culling(DataCulling.Duplicates), true, Culling.HasFlag(DataCulling.Duplicates));
+        if (CullingMask.HasFlag(DataCulling.Duplicates))
+          Menu_AppendItem(Cull.DropDown, "Duplicates", (s, a) => Menu_Culling(DataCulling.Duplicates), true, Culling.HasFlag(DataCulling.Duplicates));
 
-      if (CullingMask.HasFlag(DataCulling.Empty))
-        Menu_AppendItem(Cull.DropDown, "Empty", (s, a) => Menu_Culling(DataCulling.Empty), true, Culling.HasFlag(DataCulling.Empty));
+        if (CullingMask.HasFlag(DataCulling.Empty))
+          Menu_AppendItem(Cull.DropDown, "Empty", (s, a) => Menu_Culling(DataCulling.Empty), true, Culling.HasFlag(DataCulling.Empty));
+      }
     }
 
     private void Menu_Culling(DataCulling value)
