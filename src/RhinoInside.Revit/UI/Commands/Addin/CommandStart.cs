@@ -91,6 +91,9 @@ namespace RhinoInside.Revit.UI
 
         case AddIn.Status.Available:
           return Start();
+
+        case AddIn.Status.Unavailable:
+          return AddIn.CheckSetup();
       }
 
       return Result.Failed;
