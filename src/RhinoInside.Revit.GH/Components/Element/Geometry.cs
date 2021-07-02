@@ -96,7 +96,7 @@ namespace RhinoInside.Revit.GH.Components
             var path = basePath.AppendElement(index++);
             geometries.EnsurePath(path);
 
-            if (element?.IsValidObject == true && element.get_BoundingBox(null) != null)
+            if (element.IsValid() && element.get_BoundingBox(null) is object)
             {
               // Extract the geometry
               using (var geometry = element.GetGeometry(options))

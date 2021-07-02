@@ -173,7 +173,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public static Element FromElement(DB.Element element)
     {
-      if (element is null)
+      if (!element.IsValid())
         return null;
 
       for (var type = element.GetType(); type != typeof(DB.Element); type = type.BaseType)

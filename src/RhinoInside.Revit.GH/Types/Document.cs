@@ -131,7 +131,7 @@ namespace RhinoInside.Revit.GH.Types
     #region IGH_ReferenceData
     public bool IsReferencedData => DocumentGUID != default || ModelURI != default;
 
-    public bool IsReferencedDataLoaded => Value?.IsValidObject == true;
+    public bool IsReferencedDataLoaded => Value.IsValid();
 
     public bool LoadReferencedData()
     {

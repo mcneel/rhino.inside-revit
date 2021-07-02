@@ -726,10 +726,10 @@ namespace RhinoInside.Revit.GH.Components
         }
         finally
         {
-          if (previous?.IsValidObject == true && !previous.IsEquivalent(element))
+          if (previous.IsValid() && !previous.IsEquivalent(element))
             previous.Document.Delete(previous.Id);
 
-          if (element?.IsValidObject == true)
+          if (element.IsValid())
           {
             try { element.Pinned = true; }
             catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }

@@ -48,6 +48,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   public static class ElementExtension
   {
+    public static bool IsValid(this Element element) => element?.IsValidObject == true;
+
+    public static bool IsValidWithLog(this Element element, out string log)
+    {
+      if (element is null)        { log = "Element is a null reference.";                    return false; }
+      if (!element.IsValidObject) { log = "Referenced Revit element was deleted or undone."; return false; }
+
+      log = string.Empty;
+      return true;
+    }
+
     public static bool CanBeRenamed(this Element element)
     {
       if (element is null) return false;
@@ -78,7 +89,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static GeometryElement GetGeometry(this Element element, Options options)
     {
-      if (element?.IsValidObject != true)
+      if (!element.IsValid())
         return default;
 
       var geometry = element.get_Geometry(options);
