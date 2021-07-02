@@ -355,7 +355,7 @@ namespace RhinoInside.Revit
 
       // if release info is received, and
       // if current version on the active update channel is newer
-      if (releaseInfo?.Version > Version)
+      if (releaseInfo is ReleaseInfo && releaseInfo.Version > Version)
       {
         // ask UI to notify user of updates
         if (!AddinOptions.Session.CompactTab)
