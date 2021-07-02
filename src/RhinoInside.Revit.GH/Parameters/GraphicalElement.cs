@@ -240,6 +240,8 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
+      if (Revit.ActiveUIDocument?.Document is null) return;
+
       if (SourceCount == 0)
       {
         var comboBox = BuildFilterList();
@@ -257,6 +259,8 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override void Menu_AppendPromptMore(ToolStripDropDown menu)
     {
+      if (Revit.ActiveUIDocument?.Document is null) return;
+
       var name_plural = GH_Convert.ToPlural(TypeName);
 
       Menu_AppendItem(menu, $"Set Multiple {name_plural}", Menu_PromptPlural, SourceCount == 0);

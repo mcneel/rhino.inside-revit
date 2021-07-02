@@ -21,8 +21,8 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
-      if (SourceCount != 0)
-        return;
+      if (SourceCount != 0) return;
+      if (Revit.ActiveUIDocument?.Document is null) return;
 
       var elementTypesBox = new ListBox
       {

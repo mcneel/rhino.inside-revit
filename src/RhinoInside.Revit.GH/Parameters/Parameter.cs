@@ -37,6 +37,9 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
+      if (SourceCount != 0) return;
+      if (Revit.ActiveUIDocument?.Document is null) return;
+
       var listBox = new ListBox();
       listBox.BorderStyle = BorderStyle.FixedSingle;
       listBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
