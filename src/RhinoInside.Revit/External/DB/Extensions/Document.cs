@@ -12,8 +12,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static bool IsValidWithLog(this Document doc, out string log)
     {
-      if (doc is null) { log = "Document is a null reference."; return false; }
-      if (!doc.IsValidObject) { log = "Document was closed."; return false; }
+      if (doc is null)        { log = "Document is a null reference.";         return false; }
+      if (!doc.IsValidObject) { log = "Referenced Revit document was closed."; return false; }
 
       log = string.Empty;
       return true;

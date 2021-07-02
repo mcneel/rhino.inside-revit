@@ -41,7 +41,7 @@ namespace RhinoInside.Revit.GH.Types
     }
     string IGH_Goo.TypeDescription => $"Represents a Revit {((IGH_Goo) this).TypeName.ToLowerInvariant()}";
     public virtual bool IsValid => Document.IsValid();
-    public virtual string IsValidWhyNot => IsValid ? string.Empty : "Not Valid";
+    public virtual string IsValidWhyNot => document.IsValidWithLog(out var log) ? default : log;
     IGH_Goo IGH_Goo.Duplicate() => (IGH_Goo) (this as ICloneable)?.Clone();
     object IGH_Goo.ScriptVariable() => Value;
 
@@ -148,7 +148,18 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_Goo
-    public override bool IsValid => base.IsValid && !(Value is null);
+    public override bool IsValid => base.IsValid && Value is object;
+    public override string IsValidWhyNot
+    {
+      get
+      {
+        if (base.IsValidWhyNot is string log) return log;
+
+        if (Value is null) return $"Referenced {((IGH_Goo) this).TypeName} was deleted or undone.";
+
+        return default;
+      }
+    }
     #endregion
 
     protected ValueObject() { }

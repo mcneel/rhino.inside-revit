@@ -91,7 +91,30 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_Goo
-    public override string IsValidWhyNot => IsValid ? string.Empty : "Not Valid";
+
+    public override bool IsValid => base.IsValid && Id.IsValid();
+    public override string IsValidWhyNot
+    {
+      get
+      {
+        if (DocumentGUID == Guid.Empty) return $"DocumentGUID '{Guid.Empty}' is invalid";
+        if (!UniqueId.TryParse(UniqueID, out var _, out var _)) return $"UniqueID '{UniqueID}' is invalid";
+
+        var id = Id;
+        if (Document is null)
+        {
+          return $"Referenced Revit document '{DocumentGUID}' was closed.";
+        }
+        else
+        {
+          if (id is null) return $"Referenced Revit element '{UniqueID}' is not available.";
+          if (id == DB.ElementId.InvalidElementId) return "Id is equal to InvalidElementId.";
+        }
+
+        return default;
+      }
+    }
+
     public virtual object ScriptVariable() => Value;
 
     public override bool CastTo<Q>(out Q target)

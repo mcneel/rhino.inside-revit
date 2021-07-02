@@ -25,6 +25,22 @@ namespace RhinoInside.Revit.GH.Types
   {
     #region IGH_Goo
     public override bool IsValid => base.IsValid && Value is object;
+    public override string IsValidWhyNot
+    {
+      get
+      {
+        if (base.IsValidWhyNot is string log) return log;
+
+        if (Id.IsBuiltInId())
+        {
+          if (!IsValid) return $"Referenced built-in {((IGH_Goo) this).TypeName} is not valid. {{{Id.IntegerValue}}}";
+        }
+        else if (Value is null) return $"Referenced {((IGH_Goo) this).TypeName} was deleted or undone. {{{Id.IntegerValue}}}";
+
+        return default;
+      }
+    }
+
     protected virtual Type ScriptVariableType => typeof(DB.Element);
     #endregion
 

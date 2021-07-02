@@ -81,7 +81,7 @@ namespace RhinoInside.Revit.GH.Types
     }
     string IGH_Goo.TypeDescription => $"Represents a Revit {((IGH_Goo) this).TypeName.ToLowerInvariant()}";
     public virtual bool IsValid => document.IsValid();
-    public virtual string IsValidWhyNot => document.IsValidWithLog(out var log) ? string.Empty : log;
+    public virtual string IsValidWhyNot => document.IsValidWithLog(out var log) ? default : log;
     IGH_Goo IGH_Goo.Duplicate() => (IGH_Goo) MemberwiseClone();
     object IGH_Goo.ScriptVariable() => Value;
     public IGH_GooProxy EmitProxy() => new Proxy(this);
@@ -573,7 +573,7 @@ namespace RhinoInside.Revit.GH.Types
 
     #region IGH_Goo
     public bool IsValid => true;
-    public string IsValidWhyNot => string.Empty;
+    public string IsValidWhyNot => default;
 
     public string TypeName => "Document State";
     public string TypeDescription => "Stores a document state";
