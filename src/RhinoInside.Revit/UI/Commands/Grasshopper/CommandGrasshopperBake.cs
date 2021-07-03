@@ -130,7 +130,7 @@ namespace RhinoInside.Revit.UI
       bool Bake(IGH_Param param, BakeOptions options, out ICollection<DB.ElementId> ids)
       {
         var geometryToBake = param.VolatileData.AllData(true).
-          Select(x => GH_Convert.ToGeometryBase(x)).
+          Select(GH_Convert.ToGeometryBase).
           OfType<Rhino.Geometry.GeometryBase>();
 
         if (geometryToBake.Any())
@@ -152,8 +152,7 @@ namespace RhinoInside.Revit.UI
                 worksetParam.Set(worksetId.IntegerValue);
             }
 
-            var shape = geometry.ToShape().ToList();
-            ds.SetShape(shape);
+            ds.SetShape(geometry.ToShape());
             ids.Add(ds.Id);
           }
 

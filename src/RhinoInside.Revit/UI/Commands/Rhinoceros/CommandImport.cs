@@ -409,10 +409,9 @@ namespace RhinoInside.Revit.UI
               var library = DB.DirectShapeLibrary.GetDirectShapeLibrary(doc);
               if (!library.Contains(definitionId))
               {
-                var objectIds = definition.GetObjectIds();
-                var GNodes = objectIds.
-                  Select(x => model.Objects.FindId(x)).
-                  Cast<File3dmObject>().
+                var GNodes = definition.GetObjectIds(). // Get idef object ids
+                  Select(x => model.Objects.FindId(x)). // Find object instance
+                  OfType<File3dmObject>().              // Skip missing objects
                   SelectMany(x => ImportObject(doc, model, x.Geometry, x.Attributes, materials, scaleFactor, Vector3d.Zero, visibleLayersOnly));
 
                 library.AddDefinition(definitionId, GNodes.ToArray());
@@ -478,7 +477,7 @@ namespace RhinoInside.Revit.UI
                   }
                   else
                   {
-                    type.SetShape(new DB.GeometryObject[] { });
+                    type.SetShape(new DB.GeometryObject[0]);
                   }
                 }
               }
