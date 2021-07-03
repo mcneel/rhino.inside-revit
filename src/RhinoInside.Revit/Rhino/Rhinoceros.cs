@@ -391,8 +391,11 @@ namespace RhinoInside.Revit
       // If a new document is created without template it is updated from Revit.ActiveDBDocument
       Debug.Assert(string.IsNullOrEmpty(e.Document.TemplateFileUsed));
 
-      UpdateDocumentUnits(e.Document);
-      UpdateDocumentUnits(e.Document, Revit.ActiveDBDocument);
+      if (e.Document is RhinoDoc)
+      {
+        UpdateDocumentUnits(e.Document);
+        UpdateDocumentUnits(e.Document, Revit.ActiveDBDocument);
+      }
     }
 
     static void EndOpenDocumentInitialViewUpdate(object sender, DocumentEventArgs e)
