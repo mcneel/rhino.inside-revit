@@ -31,7 +31,6 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Element",
           NickName = "E",
           Description = "Element to access Flipping state",
-          Access = GH_ParamAccess.item
         }
       ),
       new ParamDefinition
@@ -41,10 +40,9 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Facing",
           NickName = "F",
           Description = "New state for Element Facing flipping",
-          Access = GH_ParamAccess.item,
           Optional = true
         },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -53,10 +51,9 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Hand",
           NickName = "H",
           Description = "New state for Element Hand flipping",
-          Access = GH_ParamAccess.item,
           Optional = true
         },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -65,10 +62,9 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Work Plane",
           NickName = "W",
           Description = "New state for Element Work Plane flipping",
-          Access = GH_ParamAccess.item,
           Optional = true
         },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
     };
 
@@ -82,7 +78,6 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Element",
           NickName = "E",
           Description = "Element to access Flipping state",
-          Access = GH_ParamAccess.item
         }
       ),
       new ParamDefinition
@@ -92,7 +87,6 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Facing",
           NickName = "F",
           Description = "State for Element Face flipping",
-          Access = GH_ParamAccess.item
         }
       ),
       new ParamDefinition
@@ -102,7 +96,6 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Hand",
           NickName = "H",
           Description = "State for Element Hand flipping",
-          Access = GH_ParamAccess.item
         }
       ),
       new ParamDefinition
@@ -112,7 +105,6 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Work Plane",
           NickName = "W",
           Description = "State for Element Work Plane flipping",
-          Access = GH_ParamAccess.item
         }
       ),
     };

@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.GH.Components.Material.Obsolete
       (
         name: "Document",
         nickname: "DOC",
-        relevance: ParamVisibility.Voluntary
+        relevance: ParamRelevance.Occasional
       ),
       ParamDefinition.Create<Param_Colour>
       (

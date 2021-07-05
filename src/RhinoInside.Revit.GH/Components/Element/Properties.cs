@@ -34,7 +34,6 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Element",
           NickName = "E",
           Description = "Element to access Name",
-          Access = GH_ParamAccess.item
         }
       ),
       new ParamDefinition
@@ -44,10 +43,9 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Name",
           NickName = "N",
           Description = "Element Name",
-          Access = GH_ParamAccess.item,
           Optional = true
         },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
     };
 
@@ -61,7 +59,6 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Element",
           NickName = "E",
           Description = "Element to access Name",
-          Access = GH_ParamAccess.item
         }
       ),
       new ParamDefinition
@@ -71,9 +68,8 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Name",
           NickName = "N",
           Description = "Element Name",
-          Access = GH_ParamAccess.item
         },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
     };
 
@@ -194,7 +190,6 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Element",
           NickName = "E",
           Description = "Element to access Type",
-          Access = GH_ParamAccess.item
         }
       )
     };
@@ -209,7 +204,6 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Element",
           NickName = "E",
           Description = "Element to access Type",
-          Access = GH_ParamAccess.item
         }
       ),
       new ParamDefinition
@@ -219,7 +213,6 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Category",
           NickName = "C",
           Description = "Element Category",
-          Access = GH_ParamAccess.item
         }
       ),
     };
@@ -262,7 +255,6 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Element",
           NickName = "E",
           Description = "Element to access Type",
-          Access = GH_ParamAccess.item
         }
       ),
       new ParamDefinition
@@ -272,10 +264,9 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Type",
           NickName = "T",
           Description = "Element Type",
-          Access = GH_ParamAccess.item,
           Optional = true
         },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
     };
 
@@ -289,7 +280,6 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Element",
           NickName = "E",
           Description = "Element to access Type",
-          Access = GH_ParamAccess.item
         }
       ),
       new ParamDefinition
@@ -299,7 +289,6 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Type",
           NickName = "T",
           Description = "Element Type",
-          Access = GH_ParamAccess.item
         }
       ),
     };

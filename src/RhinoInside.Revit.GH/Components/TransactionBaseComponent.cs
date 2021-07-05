@@ -408,10 +408,10 @@ namespace RhinoInside.Revit.GH.Components
       return parameterType;
     }
 
-    protected void GetParams(MethodInfo methodInfo, out List<(IGH_Param Param, ParamVisibility Relevance)> inputs, out List<(IGH_Param Param, ParamVisibility Relevance)> outputs)
+    protected void GetParams(MethodInfo methodInfo, out List<(IGH_Param Param, ParamRelevance Relevance)> inputs, out List<(IGH_Param Param, ParamRelevance Relevance)> outputs)
     {
-      inputs = new List<(IGH_Param Param, ParamVisibility Relevance)>();
-      outputs = new List<(IGH_Param Param, ParamVisibility Relevance)>();
+      inputs = new List<(IGH_Param Param, ParamRelevance Relevance)>();
+      outputs = new List<(IGH_Param Param, ParamRelevance Relevance)>();
 
       foreach (var parameter in methodInfo.GetParameters())
       {
@@ -424,7 +424,7 @@ namespace RhinoInside.Revit.GH.Components
         var name = nickname + parameter.Name.Substring(1);
 
         // HACK: for Document parameter
-        var relevance = parameter.Position == 0 ? ParamVisibility.Voluntary : ParamVisibility.Binding;
+        var relevance = parameter.Position == 0 ? ParamRelevance.Occasional : ParamRelevance.Binding;
 
         if (parameter.GetCustomAttributes(typeof(NameAttribute), false).FirstOrDefault() is NameAttribute nameAttribute)
           name = nameAttribute.Name;
@@ -620,44 +620,42 @@ namespace RhinoInside.Revit.GH.Components
     protected ReconstructElementComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
 
-    List<(IGH_Param Param, ParamVisibility Relevance)> inputs;
-    List<(IGH_Param Param, ParamVisibility Relevance)> outputs;
-
     protected override void PostConstructor()
     {
       var type = GetType();
       var ReconstructInfo = type.GetMethod($"Reconstruct{type.Name}", BindingFlags.Instance | BindingFlags.NonPublic);
-      GetParams(ReconstructInfo, out inputs, out outputs);
+      GetParams(ReconstructInfo, out var ins, out var outs);
 
-      foreach (var definition in inputs.Concat(outputs))
-      {
-        if (string.IsNullOrEmpty(definition.Param.NickName)) definition.Param.NickName = definition.Param.Name;
-        if (definition.Param.Description is null) definition.Param.Description = string.Empty;
-        if (definition.Param.Description == string.Empty) definition.Param.Description = definition.Param.Name;
-      }
+      inputs = ins.Select
+      (
+        x =>
+        {
+          if (string.IsNullOrEmpty(x.Param.NickName)) x.Param.NickName = x.Param.Name;
+          if (x.Param.Description is null) x.Param.Description = string.Empty;
+          if (x.Param.Description == string.Empty) x.Param.Description = x.Param.Name;
+          return new ParamDefinition(x.Param, x.Relevance);
+        }
+      ).ToArray();
+
+      outputs = outs.Select
+      (
+        x =>
+        {
+          if (string.IsNullOrEmpty(x.Param.NickName)) x.Param.NickName = x.Param.Name;
+          if (x.Param.Description is null) x.Param.Description = string.Empty;
+          if (x.Param.Description == string.Empty) x.Param.Description = x.Param.Name;
+          return new ParamDefinition(x.Param, x.Relevance);
+        }
+      ).ToArray();
 
       base.PostConstructor();
     }
 
-    protected override ParamDefinition[] Inputs =>
-    (
-      inputs.Select
-      (
-        x => !x.Relevance.HasFlag(ParamVisibility.Mandatory) ?
-        ParamDefinition.FromParam(x.Param, ParamVisibility.Voluntary) :
-        ParamDefinition.FromParam(x.Param)
-      ).ToArray()
-    );
+    private ParamDefinition[] inputs;
+    protected override ParamDefinition[] Inputs => inputs;
 
-    protected override ParamDefinition[] Outputs =>
-    (
-      outputs.Select
-      (
-        x => !x.Relevance.HasFlag(ParamVisibility.Mandatory) ?
-        ParamDefinition.FromParam(x.Param, ParamVisibility.Voluntary) :
-        ParamDefinition.FromParam(x.Param)
-      ).ToArray()
-    );
+    private ParamDefinition[] outputs;
+    protected override ParamDefinition[] Outputs => outputs;
 
     protected static void ReplaceElement<T>(ref T previous, T next, ICollection<DB.BuiltInParameter> parametersMask = null) where T : DB.Element
     {

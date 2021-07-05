@@ -1,16 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
-using System.Windows.Forms;
 using GH_IO.Serialization;
 using Grasshopper;
-using Grasshopper.GUI;
-using Grasshopper.GUI.Canvas;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Attributes;
 using Grasshopper.Kernel.Parameters;
-using Grasshopper.Kernel.Types;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -23,55 +18,37 @@ namespace RhinoInside.Revit.GH.Components
     protected ZuiComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
 
-    [Flags]
-    protected enum ParamVisibility
+    protected enum ParamRelevance
     {
-      Voluntary = 0,
-      Mandatory = 1,
-      Default = 2,
-      Binding = 3
+      Binding = default,
+      Primary = 1,
+      Secondary = 2,
+      Tertiary = 3,
+      Quarternary = 4,
+      Quinary = 5,
+      Senary = 6,
+      Septenary = 7,
+      Occasional = int.MaxValue,
     }
 
     protected struct ParamDefinition
     {
       public readonly IGH_Param Param;
-      public readonly ParamVisibility Relevance;
+      public readonly ParamRelevance Relevance;
 
-      internal ParamDefinition(IGH_Param param)
+      public ParamDefinition(IGH_Param param)
       {
         Param = param;
-        Relevance = ParamVisibility.Binding;
+        Relevance = ParamRelevance.Binding;
       }
 
-      internal ParamDefinition(IGH_Param param, ParamVisibility relevance)
+      public ParamDefinition(IGH_Param param, ParamRelevance relevance)
       {
         Param = param;
         Relevance = relevance;
       }
 
-      public static ParamDefinition FromParam(IGH_Param param) =>
-        new ParamDefinition(param, ParamVisibility.Binding);
-
-      public static ParamDefinition FromParam(IGH_Param param, ParamVisibility relevance) =>
-        new ParamDefinition(param, relevance);
-
-      public static ParamDefinition FromParam<T>(GH_PersistentParam<T> param, ParamVisibility relevance, object defaultValue)
-        where T : class, IGH_Goo, new()
-      {
-        var def = new ParamDefinition(param, relevance);
-        if (def.Param is GH_PersistentParam<T> persistentParam)
-        {
-          var data = new T();
-          if (!data.CastFrom(defaultValue))
-            throw new InvalidCastException();
-
-          persistentParam.PersistentData.Append(data);
-        }
-
-        return def;
-      }
-
-      public static ParamDefinition Create<T>(string name, string nickname, string description = "", GH_ParamAccess access = GH_ParamAccess.item, bool optional = false, ParamVisibility relevance = ParamVisibility.Binding)
+      public static ParamDefinition Create<T>(string name, string nickname, string description = "", GH_ParamAccess access = GH_ParamAccess.item, bool optional = false, ParamRelevance relevance = ParamRelevance.Binding)
         where T : class, IGH_Param, new()
       {
         var param = new T()
@@ -86,7 +63,7 @@ namespace RhinoInside.Revit.GH.Components
         return new ParamDefinition(param, relevance);
       }
 
-      public static ParamDefinition Create<T>(string name, string nickname, string description, object defaultValue, GH_ParamAccess access = GH_ParamAccess.item, bool optional = false, ParamVisibility relevance = ParamVisibility.Binding)
+      public static ParamDefinition Create<T>(string name, string nickname, string description, object defaultValue, GH_ParamAccess access = GH_ParamAccess.item, bool optional = false, ParamRelevance relevance = ParamRelevance.Binding)
         where T : class, IGH_Param, new()
       {
         var param = new T()
@@ -111,89 +88,15 @@ namespace RhinoInside.Revit.GH.Components
     protected abstract ParamDefinition[] Inputs { get; }
     protected sealed override void RegisterInputParams(GH_InputParamManager manager)
     {
-      foreach (var definition in Inputs.Where(x => x.Relevance.HasFlag(ParamVisibility.Default)))
-        manager.AddParameter(CreateDuplicateParam(definition.Param));
+      foreach (var definition in Inputs.Where(x => x.Relevance <= ParamRelevance.Primary))
+        manager.AddParameter(definition.Param.CreateTwin());
     }
 
     protected abstract ParamDefinition[] Outputs { get; }
     protected sealed override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      foreach (var definition in Outputs.Where(x => x.Relevance.HasFlag(ParamVisibility.Default)))
-        manager.AddParameter(CreateDuplicateParam(definition.Param));
-    }
-
-    class NullAttributes : IGH_Attributes
-    {
-      public static NullAttributes Instance = new NullAttributes();
-
-      NullAttributes() { }
-      public PointF Pivot { get => PointF.Empty; set => throw new NotImplementedException(); }
-      public RectangleF Bounds { get => RectangleF.Empty; set => throw new NotImplementedException(); }
-
-      public bool AllowMessageBalloon => false;
-      public bool HasInputGrip => false;
-      public bool HasOutputGrip => false;
-      public PointF InputGrip => PointF.Empty;
-      public PointF OutputGrip => PointF.Empty;
-      public IGH_DocumentObject DocObject => null;
-      public IGH_Attributes Parent { get => null; set => throw new NotImplementedException(); }
-
-      public bool IsTopLevel => false;
-      public IGH_Attributes GetTopLevel => null;
-
-      public string PathName => string.Empty;
-
-      public Guid InstanceGuid => Guid.Empty;
-
-      public bool Selected { get => false; set => throw new NotImplementedException(); }
-
-      public bool TooltipEnabled => false;
-
-      public void AppendToAttributeTree(List<IGH_Attributes> attributes) { }
-      public void ExpireLayout() { }
-      public bool InvalidateCanvas(GH_Canvas canvas, GH_CanvasMouseEvent e) => false;
-      public bool IsMenuRegion(PointF point) => false;
-
-      public bool IsPickRegion(PointF point) => false;
-      public bool IsPickRegion(RectangleF box, GH_PickBox method) => false;
-
-      public bool IsTooltipRegion(PointF canvasPoint) => false;
-
-      public void NewInstanceGuid() => throw new NotImplementedException();
-      public void NewInstanceGuid(Guid newID) => throw new NotImplementedException();
-
-      public void PerformLayout() => throw new NotImplementedException();
-
-      public void RenderToCanvas(GH_Canvas canvas, GH_CanvasChannel channel) { }
-      public GH_ObjectResponse RespondToKeyDown(GH_Canvas sender, KeyEventArgs e) => GH_ObjectResponse.Ignore;
-      public GH_ObjectResponse RespondToKeyUp(GH_Canvas sender, KeyEventArgs e) => GH_ObjectResponse.Ignore;
-      public GH_ObjectResponse RespondToMouseDoubleClick(GH_Canvas sender, GH_CanvasMouseEvent e) => GH_ObjectResponse.Ignore;
-      public GH_ObjectResponse RespondToMouseDown(GH_Canvas sender, GH_CanvasMouseEvent e) => GH_ObjectResponse.Ignore;
-      public GH_ObjectResponse RespondToMouseMove(GH_Canvas sender, GH_CanvasMouseEvent e) => GH_ObjectResponse.Ignore;
-      public GH_ObjectResponse RespondToMouseUp(GH_Canvas sender, GH_CanvasMouseEvent e) => GH_ObjectResponse.Ignore;
-      public void SetupTooltip(PointF canvasPoint, GH_TooltipDisplayEventArgs e) { }
-
-      public bool Read(GH_IReader reader) => true;
-
-      public bool Write(GH_IWriter writer) => true;
-    }
-
-    public static IGH_Param CreateDuplicateParam(IGH_Param original)
-    {
-      var attributes = original.Attributes;
-      try
-      {
-        original.Attributes = NullAttributes.Instance;
-        var newParam = GH_ComponentParamServer.CreateDuplicate(original);
-
-        newParam.NewInstanceGuid();
-
-        if (newParam.MutableNickName && CentralSettings.CanvasFullNames)
-          newParam.NickName = newParam.Name;
-
-        return newParam;
-      }
-      finally { original.Attributes = attributes; }
+      foreach (var definition in Outputs.Where(x => x.Relevance <= ParamRelevance.Primary))
+        manager.AddParameter(definition.Param.CreateTwin());
     }
 
     #region UI
@@ -255,21 +158,21 @@ namespace RhinoInside.Revit.GH.Components
     public virtual IGH_Param CreateParameter(GH_ParameterSide side, int index)
     {
       if (GetTemplateParam(side, index) is IGH_Param param)
-        return CreateDuplicateParam(param);
+        return param.CreateTwin();
 
       return default;
     }
 
     public virtual bool CanRemoveParameter(GH_ParameterSide side, int index)
     {
-      var templateParams = side == GH_ParameterSide.Input ? Inputs : Outputs;
+      var templateParams  = side == GH_ParameterSide.Input ? Inputs : Outputs;
       var componentParams = side == GH_ParameterSide.Input ? Params.Input : Params.Output;
 
       string current = componentParams[index].Name;
       for (int i = 0; i < templateParams.Length; ++i)
       {
         if (templateParams[i].Param.Name == current)
-          return !templateParams[i].Relevance.HasFlag(ParamVisibility.Mandatory);
+          return templateParams[i].Relevance != ParamRelevance.Binding;
       }
 
       return true;
@@ -370,10 +273,11 @@ namespace RhinoInside.Revit.GH.Components
       {
         // Inputs
         {
-          // RegisterInputParams(...)
-          foreach (var definition in Inputs.Where(x => x.Relevance.HasFlag(ParamVisibility.Default)))
-            Params.RegisterInputParam(CreateDuplicateParam(definition.Param));
+          // Tentatively register all parameters
+          foreach (var definition in Inputs)
+            Params.RegisterInputParam(definition.Param.CreateTwin());
 
+          var found = new bool[Params.Input.Count];
           int index = 0;
           var chunk = default(GH_IReader);
           while ((chunk = reader.FindChunk("param_input", index++)) is object)
@@ -381,24 +285,38 @@ namespace RhinoInside.Revit.GH.Components
             var name = string.Empty;
             if (chunk.TryGetString("Name", ref name))
             {
-              if (Params.Input<IGH_Param>(name) is IGH_Param param)
-              {
-                var access = param.Access;
-                var optional = param.Optional;
-                param.Read(chunk);
-                param.Optional = optional;
-                param.Access = access;
-              }
+              var i = Params.IndexOfInputParam(name);
+              if (i > 0) continue;
+              var param = Params.Input[i];
+
+              var access = param.Access;
+              var optional = param.Optional;
+              param.Read(chunk);
+              param.Optional = optional;
+              param.Access = access;
+
+              found[i] = true;
+            }
+          }
+
+          // Remove not-found parameters
+          for (int i = Params.Input.Count - 1; i >= 0; --i)
+          {
+            if (!found[i] && CanRemoveParameter(GH_ParameterSide.Input, i))
+            {
+              var param = Params.Input[i];
+              Params.UnregisterInputParameter(param);
             }
           }
         }
 
         // Outputs
         {
-          // RegisterOutputParams(...)
-          foreach (var definition in Outputs.Where(x => x.Relevance.HasFlag(ParamVisibility.Default)))
-            Params.RegisterOutputParam(CreateDuplicateParam(definition.Param));
+          // Tentatively register all parameters
+          foreach (var definition in Outputs)
+            Params.RegisterOutputParam(definition.Param.CreateTwin());
 
+          var found = new bool[Params.Output.Count];
           int index = 0;
           var chunk = default(GH_IReader);
           while ((chunk = reader.FindChunk("param_output", index++)) is object)
@@ -406,14 +324,27 @@ namespace RhinoInside.Revit.GH.Components
             var name = string.Empty;
             if (chunk.TryGetString("Name", ref name))
             {
-              if (Params.Output<IGH_Param>(name) is IGH_Param param)
-              {
-                var access = param.Access;
-                var optional = param.Optional;
-                param.Read(chunk);
-                param.Optional = optional;
-                param.Access = access;
-              }
+              var o = Params.IndexOfOutputParam(name);
+              if (o > 0) continue;
+              var param = Params.Output[o];
+
+              var access = param.Access;
+              var optional = param.Optional;
+              param.Read(chunk);
+              param.Optional = optional;
+              param.Access = access;
+
+              found[o] = true;
+            }
+          }
+
+          // Remove not-found parameters
+          for (int o = Params.Output.Count - 1; o >= 0; --o)
+          {
+            if (!found[o] && CanRemoveParameter(GH_ParameterSide.Output, o))
+            {
+              var param = Params.Output[o];
+              Params.UnregisterOutputParameter(param);
             }
           }
         }

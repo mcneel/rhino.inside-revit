@@ -27,14 +27,13 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
-      ParamDefinition.FromParam
+      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition
       (
         new Param_FilePath()
         {
           Name = "Path",
           NickName = "P",
-          Access = GH_ParamAccess.item,
           Optional = true,
           FileFilter = "Project File (*.rvt)|*.rvt"
         }
@@ -48,7 +47,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.Document>("Document", "DOC", string.Empty, GH_ParamAccess.list)
+      new ParamDefinition(new Parameters.Document())
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -72,13 +71,10 @@ namespace RhinoInside.Revit.GH.Components
         return;
 
       var view = default(DB.View);
-      if (DA.GetData("View", ref view))
+      if (DA.GetData("View", ref view) && !view.Document.Equals(doc))
       {
-        if (!view.Document.Equals(doc))
-        {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"View '{view.Title}' is not a valid view in document {doc.Title}");
-          return;
-        }
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"View '{view.Title}' is not a valid view in document {doc.Title}");
+        return;
       }
 
       try

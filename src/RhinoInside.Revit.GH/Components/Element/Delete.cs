@@ -36,8 +36,7 @@ namespace RhinoInside.Revit.GH.Components
           NickName = "E",
           Description = "Elements to Delete",
           Access = GH_ParamAccess.list
-        },
-        ParamVisibility.Binding
+        }
       ),
     };
 
@@ -51,9 +50,7 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Succeeded",
           NickName = "S",
           Description = "Element delete succeeded",
-          Access = GH_ParamAccess.item
-        },
-        ParamVisibility.Binding
+        }
       ),
       new ParamDefinition
       (
@@ -64,7 +61,7 @@ namespace RhinoInside.Revit.GH.Components
           Description = "Deleted elements. From a logical point of view, are the children of this Element",
           Access = GH_ParamAccess.list
         },
-        ParamVisibility.Voluntary
+        ParamRelevance.Occasional
       ),
       new ParamDefinition
       (
@@ -75,7 +72,7 @@ namespace RhinoInside.Revit.GH.Components
           Description = "Modified elements. Those elements reference Element but do not strictly depend on it",
           Access = GH_ParamAccess.list
         },
-        ParamVisibility.Voluntary
+        ParamRelevance.Occasional
       )
     };
 

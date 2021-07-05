@@ -25,58 +25,47 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.FromParam
-      (
-        new Parameters.Document(),
-        ParamVisibility.Voluntary
-      ),
-      ParamDefinition.FromParam
+      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition
       (
         new Param_FilePath()
         {
           Name = "Path",
           NickName = "P",
-          Access = GH_ParamAccess.item,
           FileFilter = "Family File (*.rfa)|*.rfa"
         }
       ),
-      ParamDefinition.FromParam
+      new ParamDefinition
       (
         new Param_Boolean()
         {
           Name = "Override Family",
           NickName = "OF",
           Description = "Override Family",
-          Access = GH_ParamAccess.item
-        },
-        ParamVisibility.Binding,
-        defaultValue: false
+        }.
+        SetDefaultVale(false)
       ),
-      ParamDefinition.FromParam
+      new ParamDefinition
       (
         new Param_Boolean()
         {
           Name = "Override Parameters",
           NickName = "OP",
           Description = "Override Parameters",
-          Access = GH_ParamAccess.item
-        },
-        ParamVisibility.Binding,
-        defaultValue: false
+        }.
+        SetDefaultVale(false)
       ),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.FromParam
+      new ParamDefinition
       (
         new Parameters.Family()
         {
           Name = "Family",
           NickName = "F",
-          Description = string.Empty,
-          Access = GH_ParamAccess.item
         }
       )
     };

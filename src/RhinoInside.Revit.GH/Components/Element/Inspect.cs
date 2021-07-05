@@ -65,15 +65,6 @@ namespace RhinoInside.Revit.GH.Components
 
     public override void CreateAttributes() => m_attributes = new ComponentAttributes(this);
 
-    void AddOutputParameter(IGH_Param param)
-    {
-      if (param.Attributes is null)
-        param.Attributes = new GH_LinkedParamAttributes(param, Attributes);
-
-      param.Access = GH_ParamAccess.item;
-      Params.RegisterOutputParam(param);
-    }
-
     void Menu_PopulateOutputsWithCommonParameters(object sender, EventArgs e)
     {
       var common = default(HashSet<Parameters.ParameterParam>);
@@ -135,7 +126,7 @@ namespace RhinoInside.Revit.GH.Components
         {
           foreach (var parameter in group.OrderBy(x => x.ParameterBuiltInId))
           {
-            AddOutputParameter(parameter);
+            Params.RegisterOutputParam(parameter);
 
             if (connected.TryGetValue(parameter, out var recipients))
             {

@@ -31,7 +31,6 @@ namespace RhinoInside.Revit.GH.Components.Host
           Name = "Layer",
           NickName = "L",
           Description = "Compound struture layer to deconstruct",
-          Access = GH_ParamAccess.item
         }
       )
     };
@@ -46,7 +45,6 @@ namespace RhinoInside.Revit.GH.Components.Host
           Name = "Function",
           NickName = "F",
           Description = "Function of the given compound structure layer",
-          Access = GH_ParamAccess.item
         }
       ),
       new ParamDefinition
@@ -56,9 +54,8 @@ namespace RhinoInside.Revit.GH.Components.Host
           Name = "Material",
           NickName = "M",
           Description = "Material assigned to the given compound structure layer",
-          Access = GH_ParamAccess.item
         },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -67,7 +64,6 @@ namespace RhinoInside.Revit.GH.Components.Host
           Name = "Thickness",
           NickName = "T",
           Description = "Thickness of the given compound structure layer",
-          Access = GH_ParamAccess.item
         }
       ),
       new ParamDefinition
@@ -77,9 +73,8 @@ namespace RhinoInside.Revit.GH.Components.Host
           Name = "Wraps",
           NickName = "W",
           Description = "Whether compound structure layer participates in wrapping at end caps and/or inserts",
-          Access = GH_ParamAccess.item,
         },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -88,9 +83,8 @@ namespace RhinoInside.Revit.GH.Components.Host
           Name = "Structural Material",
           NickName = "SM",
           Description = "Indicates the layer material defines the structural properties of the type",
-          Access = GH_ParamAccess.item,
         },
-        ParamVisibility.Voluntary
+        ParamRelevance.Occasional
       ),
       new ParamDefinition
       (
@@ -99,9 +93,8 @@ namespace RhinoInside.Revit.GH.Components.Host
           Name = "Variable",
           NickName = "V",
           Description = "Indicates the layer thickness is variable",
-          Access = GH_ParamAccess.item,
         },
-        ParamVisibility.Voluntary
+        ParamRelevance.Occasional
       ),
       new ParamDefinition
       (
@@ -110,9 +103,8 @@ namespace RhinoInside.Revit.GH.Components.Host
           Name = "Deck Profile",
           NickName = "DP",
           Description = "Deck profile of structural deck layer",
-          Access = GH_ParamAccess.item
         },
-        ParamVisibility.Voluntary
+        ParamRelevance.Occasional
       ),
       new ParamDefinition
       (
@@ -121,9 +113,8 @@ namespace RhinoInside.Revit.GH.Components.Host
           Name = "Deck Usage",
           NickName = "DU",
           Description = "Embedding type for structural deck layer",
-          Access = GH_ParamAccess.item
         },
-        ParamVisibility.Voluntary
+        ParamRelevance.Occasional
       ),
     };
 

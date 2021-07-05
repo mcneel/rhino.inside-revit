@@ -33,68 +33,61 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.FromParam
+      new ParamDefinition
       (
         new Parameters.Document(),
-        ParamVisibility.Voluntary
+        ParamRelevance.Occasional
       ),
-      ParamDefinition.FromParam
+      new ParamDefinition
       (
         new Param_FilePath()
         {
           Name = "Template",
           NickName = "T",
-          Access = GH_ParamAccess.item,
           Optional = true,
           FileFilter = "Family Template Files (*.rft)|*.rft"
         }
       ),
-      ParamDefinition.FromParam
+      new ParamDefinition
       (
         new Param_Boolean()
         {
           Name = "Override Family",
           NickName = "OF",
           Description = "Override Family",
-          Access = GH_ParamAccess.item
-        },
-        ParamVisibility.Binding,
-        defaultValue: false
+        }.
+        SetDefaultVale(false)
       ),
-      ParamDefinition.FromParam
+      new ParamDefinition
       (
         new Param_Boolean()
         {
           Name = "Override Parameters",
           NickName = "OP",
           Description = "Override Parameters",
-          Access = GH_ParamAccess.item
-        },
-        ParamVisibility.Binding,
-        defaultValue: false
+        }.
+        SetDefaultVale(false)
       ),
-      ParamDefinition.FromParam
+      new ParamDefinition
       (
         new Param_String()
         {
           Name = "Name",
           NickName = "N",
           Description = "Family Name",
-          Access = GH_ParamAccess.item
         }
       ),
-      ParamDefinition.FromParam
+      new ParamDefinition
       (
         new Parameters.Category()
         {
           Name = "Category",
           NickName = "C",
           Description = "Family Category",
-          Access = GH_ParamAccess.item,
           Optional = true
         }
       ),
-      ParamDefinition.FromParam
+      new ParamDefinition
       (
         new Param_Geometry()
         {
@@ -110,14 +103,12 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.FromParam
+      new ParamDefinition
       (
         new Parameters.Family()
         {
           Name = "Family",
           NickName = "F",
-          Description = string.Empty,
-          Access = GH_ParamAccess.item
         }
       )
     };

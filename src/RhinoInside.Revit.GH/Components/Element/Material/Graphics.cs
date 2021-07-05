@@ -27,21 +27,21 @@ namespace RhinoInside.Revit.GH.Components.Material
     {
       ParamDefinition.Create<Parameters.Material>("Material", "M"),
 
-      ParamDefinition.Create<Param_Boolean>("Use Render Appearance", "R", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_Colour>("Color", "C", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_Number>("Transparency", "T", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_Number>("Shininess", "SH", optional: true, relevance: ParamVisibility.Voluntary),
-      ParamDefinition.Create<Param_Number>("Smoothness", "SM", optional: true, relevance: ParamVisibility.Voluntary),
+      ParamDefinition.Create<Param_Boolean>("Use Render Appearance", "R", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Colour>("Color", "C", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Number>("Transparency", "T", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Number>("Shininess", "SH", optional: true, relevance: ParamRelevance.Occasional),
+      ParamDefinition.Create<Param_Number>("Smoothness", "SM", optional: true, relevance: ParamRelevance.Occasional),
 
-      ParamDefinition.Create<Parameters.FillPatternElement>("Surface Foreground Pattern", "SFP", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_Colour>("Surface Foreground Color", "SFC", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Parameters.FillPatternElement>("Surface Background Pattern", "SBP", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_Colour>("Surface Background Color", "SBC", optional: true, relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Parameters.FillPatternElement>("Surface Foreground Pattern", "SFP", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Colour>("Surface Foreground Color", "SFC", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.FillPatternElement>("Surface Background Pattern", "SBP", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Colour>("Surface Background Color", "SBC", optional: true, relevance: ParamRelevance.Primary),
 
-      ParamDefinition.Create<Parameters.FillPatternElement>("Cut Foreground Pattern", "SFP", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_Colour>("Cut Foreground Color", "SFC", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Parameters.FillPatternElement>("Cut Background Pattern", "SBP", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_Colour>("Cut Background Color", "SBC", optional: true, relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Parameters.FillPatternElement>("Cut Foreground Pattern", "SFP", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Colour>("Cut Foreground Color", "SFC", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.FillPatternElement>("Cut Background Pattern", "SBP", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Colour>("Cut Background Color", "SBC", optional: true, relevance: ParamRelevance.Primary),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -49,21 +49,21 @@ namespace RhinoInside.Revit.GH.Components.Material
     {
       ParamDefinition.Create<Parameters.Material>("Material", "M"),
 
-      ParamDefinition.Create<Param_Boolean>("Use Render Appearance", "R", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_Colour>("Color", "C", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_Number>("Transparency", "T", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_Number>("Shininess", "SH", relevance: ParamVisibility.Voluntary),
-      ParamDefinition.Create<Param_Number>("Smoothness", "SM", relevance: ParamVisibility.Voluntary),
+      ParamDefinition.Create<Param_Boolean>("Use Render Appearance", "R", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Colour>("Color", "C", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Number>("Transparency", "T", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Number>("Shininess", "SH", relevance: ParamRelevance.Occasional),
+      ParamDefinition.Create<Param_Number>("Smoothness", "SM", relevance: ParamRelevance.Occasional),
 
-      ParamDefinition.Create<Parameters.FillPatternElement>("Surface Foreground Pattern", "SFP", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_Colour>("Surface Foreground Color", "SFC", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Parameters.FillPatternElement>("Surface Background Pattern", "SBP", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_Colour>("Surface Background Color", "SBC", relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Parameters.FillPatternElement>("Surface Foreground Pattern", "SFP", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Colour>("Surface Foreground Color", "SFC", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.FillPatternElement>("Surface Background Pattern", "SBP", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Colour>("Surface Background Color", "SBC", relevance: ParamRelevance.Primary),
 
-      ParamDefinition.Create<Parameters.FillPatternElement>("Cut Foreground Pattern", "SFP", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_Colour>("Cut Foreground Color", "SFC", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Parameters.FillPatternElement>("Cut Background Pattern", "SBP", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_Colour>("Cut Background Color", "SBC", relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Parameters.FillPatternElement>("Cut Foreground Pattern", "SFP", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Colour>("Cut Foreground Color", "SFC", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.FillPatternElement>("Cut Background Pattern", "SBP", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Colour>("Cut Background Color", "SBC", relevance: ParamRelevance.Primary),
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)

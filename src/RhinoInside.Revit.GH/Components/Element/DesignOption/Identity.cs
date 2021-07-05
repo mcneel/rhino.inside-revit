@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.GH.Components.DesignOption
     static readonly ParamDefinition[] outputs =
     {
       ParamDefinition.Create<Param_String>("Name", "N", string.Empty, GH_ParamAccess.item),
-      ParamDefinition.Create<Parameters.Element>("Design Options", "DO", string.Empty, GH_ParamAccess.list, relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Parameters.Element>("Design Options", "DO", string.Empty, GH_ParamAccess.list, relevance: ParamRelevance.Primary),
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -55,9 +55,9 @@ namespace RhinoInside.Revit.GH.Components.DesignOption
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.Element>("Design Option Set", "DOS", string.Empty, GH_ParamAccess.item, relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Parameters.Element>("Design Option Set", "DOS", string.Empty, GH_ParamAccess.item, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_String>("Name", "N", string.Empty, GH_ParamAccess.item),
-      ParamDefinition.Create<Param_Boolean>("Primary", "P", string.Empty, GH_ParamAccess.item, relevance: ParamVisibility.Default)
+      ParamDefinition.Create<Param_Boolean>("Primary", "P", string.Empty, GH_ParamAccess.item, relevance: ParamRelevance.Primary)
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)

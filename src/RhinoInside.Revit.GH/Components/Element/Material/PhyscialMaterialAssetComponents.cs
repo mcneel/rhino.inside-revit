@@ -52,7 +52,7 @@ namespace RhinoInside.Revit.GH.Components.Material
         param.Access = paramInfo.ParamAccess;
         param.Optional = paramInfo.Optional;
 
-        inputs.Add(ParamDefinition.FromParam(param));
+        inputs.Add(new ParamDefinition(param));
       }
 
       return inputs.ToArray();
@@ -74,7 +74,7 @@ namespace RhinoInside.Revit.GH.Components.Material
         param.Description = paramInfo.Description;
         param.Access = paramInfo.ParamAccess;
 
-        outputs.Add(ParamDefinition.FromParam(param));
+        outputs.Add(new ParamDefinition(param));
       }
 
       return outputs.ToArray();
@@ -250,17 +250,7 @@ namespace RhinoInside.Revit.GH.Components.Material
       // add optional document parameter as first
       var inputs = new List<ParamDefinition>()
       {
-        new ParamDefinition(
-            new Parameters.Document()
-            {
-              Name = "Document",
-              NickName = "DOC",
-              Description = "Document",
-              Access = GH_ParamAccess.item,
-              Optional = true
-            },
-            ParamVisibility.Voluntary
-          )
+        new ParamDefinition(new Parameters.Document() { Optional = true }, ParamRelevance.Occasional)
       };
       inputs.AddRange(GetAssetDataAsInputs());
       return inputs.ToArray();
@@ -450,17 +440,7 @@ namespace RhinoInside.Revit.GH.Components.Material
       // add optional document parameter as first
       var inputs = new List<ParamDefinition>()
       {
-        new ParamDefinition(
-            new Parameters.Document()
-            {
-              Name = "Document",
-              NickName = "DOC",
-              Description = "Document",
-              Access = GH_ParamAccess.item,
-              Optional = true
-            },
-            ParamVisibility.Voluntary
-          )
+        new ParamDefinition(new Parameters.Document() { Optional = true }, ParamRelevance.Occasional)
       };
       inputs.AddRange(GetAssetDataAsInputs());
       return inputs.ToArray();

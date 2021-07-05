@@ -33,7 +33,6 @@ namespace RhinoInside.Revit.GH.Components.Host
           Name = "Structure",
           NickName = "S",
           Description = "Compound structure to deconstruct",
-          Access = GH_ParamAccess.item
         }
       )
     };
@@ -50,7 +49,7 @@ namespace RhinoInside.Revit.GH.Components.Host
           Description = "Layers which define the exterior side of the compound structure",
           Access = GH_ParamAccess.list,
         },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -71,7 +70,7 @@ namespace RhinoInside.Revit.GH.Components.Host
           Description = "Layers which define the interior side of the compound structure",
           Access = GH_ParamAccess.list,
         },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -80,9 +79,8 @@ namespace RhinoInside.Revit.GH.Components.Host
           Name = "Total Thickness",
           NickName = "TT",
           Description = "Total thickness of the given compound structure",
-          Access = GH_ParamAccess.item,
         },
-        ParamVisibility.Voluntary
+        ParamRelevance.Occasional
       ),
       new ParamDefinition
       (
@@ -91,9 +89,8 @@ namespace RhinoInside.Revit.GH.Components.Host
           Name = "Wrapping At Inserts",
           NickName = "WI",
           Description = "Inserts wrapping condition on compound structure",
-          Access = GH_ParamAccess.item,
         },
-        ParamVisibility.Voluntary
+        ParamRelevance.Occasional
       ),
       new ParamDefinition
       (
@@ -102,9 +99,8 @@ namespace RhinoInside.Revit.GH.Components.Host
           Name = "Wrapping At Ends",
           NickName = "WE",
           Description = "End cap condition of compound structure",
-          Access = GH_ParamAccess.item,
         },
-        ParamVisibility.Voluntary
+        ParamRelevance.Occasional
       ),
       new ParamDefinition
       (
@@ -113,9 +109,8 @@ namespace RhinoInside.Revit.GH.Components.Host
           Name = "Sample Height",
           NickName = "SH",
           Description = "Sample height of compound structure",
-          Access = GH_ParamAccess.item,
         },
-        ParamVisibility.Voluntary
+        ParamRelevance.Occasional
       ),
       new ParamDefinition
       (
@@ -124,9 +119,8 @@ namespace RhinoInside.Revit.GH.Components.Host
           Name = "Cutoff Height",
           NickName = "CH",
           Description = "Cutoff height of compound structure",
-          Access = GH_ParamAccess.item,
         },
-        ParamVisibility.Voluntary
+        ParamRelevance.Occasional
       ),
     };
 

@@ -35,7 +35,7 @@ namespace RhinoInside.Revit.GH.Components.Material
           Description = "Document",
           Optional = true
         },
-        ParamVisibility.Voluntary
+        ParamRelevance.Occasional
       ),
       new ParamDefinition
       (
@@ -55,7 +55,7 @@ namespace RhinoInside.Revit.GH.Components.Material
           Description = "Template Material",
           Optional = true
         },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
     };
 
@@ -152,7 +152,7 @@ namespace RhinoInside.Revit.GH.Components.Material
         (
           name: "Document",
           nickname: "DOC",
-          relevance: ParamVisibility.Voluntary
+          relevance: ParamRelevance.Occasional
         ),
         ParamDefinition.Create<Param_String>
         (
