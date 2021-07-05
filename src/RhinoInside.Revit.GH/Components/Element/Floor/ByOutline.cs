@@ -148,7 +148,7 @@ namespace RhinoInside.Revit.GH.Components
 #if REVIT_2022
         var curveLoops = new DB.CurveLoop[] { boundary.ToCurveLoop() };
 
-        ReplaceElement(ref floor, DB.Floor.Create(doc, curveLoops, type.Value.Id, level.Value.Id, structural, default, 0.0), parametersMask);
+        ReplaceElement(ref floor, DB.Floor.Create(document, curveLoops, type.Value.Id, level.Value.Id, structural, default, 0.0), parametersMask);
 #else
         var curveArray = boundary.ToCurveArray();
 
