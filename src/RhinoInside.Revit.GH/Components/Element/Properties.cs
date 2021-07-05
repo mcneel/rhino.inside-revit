@@ -128,38 +128,48 @@ namespace RhinoInside.Revit.GH.Components
       }
     }
 
+    Dictionary<string, string> namesMap;
     public override void OnPrepare(IReadOnlyCollection<DB.Document> documents)
     {
       if (renames is object)
       {
-        // Update elements to the final names
+        // Create a names map to remap the final output at 'Name'
+        namesMap = Params.IndexOfOutputParam("Name") < 0 ? default : new Dictionary<string, string>();
+
         foreach (var rename in renames)
+        {
+          if (namesMap is object)
+          {
+            var elementName = rename.Key.Name;
+            if (!namesMap.ContainsKey(elementName))
+              namesMap.Add(rename.Key.Name, rename.Value);
+          }
+
+          // Update elements to the final names
           rename.Key.Name = rename.Value;
+        }
       }
     }
 
     public override void OnDone(DB.TransactionStatus status)
     {
-      renames = default;
-
-      if (status == DB.TransactionStatus.Committed)
+      if (status == DB.TransactionStatus.Committed && namesMap is object)
       {
-        // Update output 'Name' with final values from 'Element'
-        var _Element_ = Params.IndexOfOutputParam("Element");
+        // Reconstruct output 'Name' with final values from `namesMap`.
         var _Name_ = Params.IndexOfOutputParam("Name");
-        if (_Element_ >= 0 && _Name_ >= 0)
+        if (_Name_ >= 0)
         {
-          var materialParam = Params.Output[_Element_];
           var nameParam = Params.Output[_Name_];
-
-          nameParam.VolatileData.ClearData();
-          nameParam.AddVolatileDataTree
-          (
-            materialParam.VolatileData,
-            (Types.Element x) => x is null ? null : new GH_String(x.Name)
-          );
+          foreach (var item in nameParam.VolatileData.AllData(true))
+          {
+            if (item is GH_String text && namesMap.TryGetValue(text.Value, out var name))
+              text.Value = name;
+          }
         }
       }
+
+      namesMap = default;
+      renames = default;
     }
   }
 
