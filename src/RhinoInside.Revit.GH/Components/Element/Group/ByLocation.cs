@@ -8,6 +8,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
+  using System.Runtime.InteropServices;
   using Kernel.Attributes;
 
   public class GroupByLocation : ReconstructElementComponent
@@ -27,7 +28,8 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructGroupByLocation
     (
-      DB.Document doc,
+      [Optional, NickName("DOC")]
+      DB.Document document,
 
       [Description("New Group Element")]
       ref DB.Group group,
@@ -41,7 +43,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!location.IsValid)
         ThrowArgumentException(nameof(location), "Should be a valid point.");
 
-      SolveOptionalLevel(doc, location, ref level, out var bbox);
+      SolveOptionalLevel(document, location, ref level, out var bbox);
 
       ChangeElementTypeId(ref group, type.Id);
 
@@ -62,9 +64,9 @@ namespace RhinoInside.Revit.GH.Components
       }
       else
       {
-        var newGroup = doc.IsFamilyDocument ?
-                       doc.FamilyCreate.PlaceGroup(newLocation, type) :
-                       doc.Create.PlaceGroup(newLocation, type);
+        var newGroup = document.IsFamilyDocument ?
+                       document.FamilyCreate.PlaceGroup(newLocation, type) :
+                       document.Create.PlaceGroup(newLocation, type);
 
         var parametersMask = new DB.BuiltInParameter[]
         {
@@ -92,13 +94,13 @@ namespace RhinoInside.Revit.GH.Components
 
             levelParam.Set(level.Value.Id);
             offsetFromLevel.Set(newOffset);
-            doc.Regenerate();
+            document.Regenerate();
 
             var newGroups = new HashSet<DB.ElementId>(groupType.Groups.Cast<DB.Group>().Select(x => x.Id));
             newGroups.ExceptWith(oldGroups);
 
             if(newGroups.FirstOrDefault() is DB.ElementId newGroupId)
-              group = newGroupId.IsValid() ? doc.GetElement(newGroupId) as DB.Group : default;
+              group = newGroupId.IsValid() ? document.GetElement(newGroupId) as DB.Group : default;
           }
         }
       }

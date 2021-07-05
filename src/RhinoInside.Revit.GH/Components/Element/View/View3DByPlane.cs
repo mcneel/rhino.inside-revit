@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.GH.Kernel.Attributes;
@@ -23,7 +24,8 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
 
     void ReconstructView3DByPlane
     (
-      DB.Document doc,
+      [Optional, NickName("DOC")]
+      DB.Document document,
 
       [Description("New 3D View")]
       ref DB.View3D view3D,
@@ -34,7 +36,7 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
       Optional<bool> perspective
     )
     {
-      SolveOptionalType(doc, ref type, DB.ElementTypeGroup.ViewType3D, nameof(type));
+      SolveOptionalType(document, ref type, DB.ElementTypeGroup.ViewType3D, nameof(type));
 
       var orientation = new DB.ViewOrientation3D
       (
@@ -48,12 +50,12 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
         var newView = perspective.IsNullOrMissing ?
         DB.View3D.CreatePerspective
         (
-          doc,
+          document,
           type.Value.Id
         ) :
         DB.View3D.CreateIsometric
         (
-          doc,
+          document,
           type.Value.Id
         );
 

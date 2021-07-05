@@ -95,7 +95,8 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructWallByCurve
     (
-      DB.Document doc,
+      [Optional, NickName("DOC")]
+      DB.Document document,
 
       [Description("New Wall")]
       ref DB.Wall wall,
@@ -128,9 +129,9 @@ namespace RhinoInside.Revit.GH.Components
         ThrowArgumentException(nameof(curve), "Curve must be a horizontal line or arc curve.");
 #endif
 
-      SolveOptionalType(doc, ref type, DB.ElementTypeGroup.WallType, nameof(type));
+      SolveOptionalType(document, ref type, DB.ElementTypeGroup.WallType, nameof(type));
 
-      bool levelIsEmpty = SolveOptionalLevel(doc, curve, ref level, out var bbox);
+      bool levelIsEmpty = SolveOptionalLevel(document, curve, ref level, out var bbox);
 
       // Curve
       var levelPlane = new Rhino.Geometry.Plane(new Rhino.Geometry.Point3d(0.0, 0.0, level.Value.GetHeight() * Revit.ModelUnits), Rhino.Geometry.Vector3d.ZAxis);
@@ -194,7 +195,7 @@ namespace RhinoInside.Revit.GH.Components
       {
         newWall = DB.Wall.Create
         (
-          doc,
+          document,
           centerLine,
           type.Value.Id,
           level.Value.Id,

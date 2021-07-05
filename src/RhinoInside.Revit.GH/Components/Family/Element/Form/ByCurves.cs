@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.GH.Kernel.Attributes;
@@ -24,7 +25,8 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructFormByCurves
     (
-      DB.Document doc,
+      [Optional, NickName("DOC")]
+      DB.Document document,
 
       [ParamType(typeof(Parameters.GraphicalElement)), Description("New Form")]
       ref DB.GenericForm form,
@@ -32,7 +34,7 @@ namespace RhinoInside.Revit.GH.Components
       IList<Rhino.Geometry.Curve> profiles
     )
     {
-      if (!doc.IsFamilyDocument)
+      if (!document.IsFamilyDocument)
         throw new InvalidOperationException("This component can only run in Family editor");
 
       var planes = new List<Rhino.Geometry.Plane>();
@@ -50,13 +52,13 @@ namespace RhinoInside.Revit.GH.Components
         var profile = profiles[0];
         var plane = planes[0];
 
-        using (var sketchPlane = DB.SketchPlane.Create(doc, plane.ToPlane()))
+        using (var sketchPlane = DB.SketchPlane.Create(document, plane.ToPlane()))
         using (var referenceArray = new DB.ReferenceArray())
         {
           foreach (var curve in profile.ToCurveMany())
-            referenceArray.Append(new DB.Reference(doc.FamilyCreate.NewModelCurve(curve, sketchPlane)));
+            referenceArray.Append(new DB.Reference(document.FamilyCreate.NewModelCurve(curve, sketchPlane)));
 
-          ReplaceElement(ref form, doc.FamilyCreate.NewFormByCap(true, referenceArray));
+          ReplaceElement(ref form, document.FamilyCreate.NewFormByCap(true, referenceArray));
         }
       }
       else
@@ -66,18 +68,18 @@ namespace RhinoInside.Revit.GH.Components
           int index = 0;
           foreach (var profile in profiles)
           {
-            using (var sketchPlane = DB.SketchPlane.Create(doc, planes[index++].ToPlane()))
+            using (var sketchPlane = DB.SketchPlane.Create(document, planes[index++].ToPlane()))
             {
               var referenceArray = new DB.ReferenceArray();
 
               foreach (var curve in profile.ToCurveMany())
-                referenceArray.Append(new DB.Reference(doc.FamilyCreate.NewModelCurve(curve, sketchPlane)));
+                referenceArray.Append(new DB.Reference(document.FamilyCreate.NewModelCurve(curve, sketchPlane)));
 
               referenceArrayArray.Append(referenceArray);
             }
           }
 
-          ReplaceElement(ref form, doc.FamilyCreate.NewLoftForm(true, referenceArrayArray));
+          ReplaceElement(ref form, document.FamilyCreate.NewLoftForm(true, referenceArrayArray));
         }
       }
     }

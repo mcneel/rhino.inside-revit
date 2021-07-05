@@ -93,7 +93,8 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructWallByProfile
     (
-      DB.Document doc,
+      [Optional, NickName("DOC")]
+      DB.Document document,
 
       [Description("New Wall")]
       ref DB.Wall wall,
@@ -136,8 +137,8 @@ namespace RhinoInside.Revit.GH.Components
         }
       }
 
-      SolveOptionalType(doc, ref type, DB.ElementTypeGroup.WallType, nameof(type));
-      SolveOptionalLevel(doc, profile, ref level, out var bbox);
+      SolveOptionalType(document, ref type, DB.ElementTypeGroup.WallType, nameof(type));
+      SolveOptionalLevel(document, profile, ref level, out var bbox);
 
       foreach (var curve in profile)
         curve.RemoveShortSegments(Revit.ShortCurveTolerance * Revit.ModelUnits);
@@ -183,7 +184,7 @@ namespace RhinoInside.Revit.GH.Components
 
       var newWall = DB.Wall.Create
       (
-        doc,
+        document,
         boundaries,
         type.Value.Id,
         level.Value.Id,

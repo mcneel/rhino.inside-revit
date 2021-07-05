@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
@@ -15,9 +16,11 @@ namespace RhinoInside.Revit.GH.Components
 
     public RoofByOutline() : base
     (
-      "Add Roof", "Roof",
-      "Given its outline curve, it adds a Roof element to the active Revit document",
-      "Revit", "Build"
+      name: "Add Roof",
+      nickname: "Roof",
+      description: "Given its outline curve, it adds a Roof element to the active Revit document",
+      category: "Revit",
+      subCategory: "Build"
     )
     { }
 
@@ -98,7 +101,8 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructRoofByOutline
     (
-      DB.Document doc,
+      [Optional, NickName("DOC")]
+      DB.Document document,
 
       [Description("New Roof")]
       ref DB.FootPrintRoof roof,
@@ -117,15 +121,15 @@ namespace RhinoInside.Revit.GH.Components
       )
         ThrowArgumentException(nameof(boundary), "Boundary should be an horizontal planar closed curve.");
 
-      if (type.HasValue && type.Value.Document.IsEquivalent(doc) == false)
+      if (type.HasValue && type.Value.Document.IsEquivalent(document) == false)
         ThrowArgumentException(nameof(type));
 
-      if (level.HasValue && level.Value.Document.IsEquivalent(doc) == false)
+      if (level.HasValue && level.Value.Document.IsEquivalent(document) == false)
         ThrowArgumentException(nameof(level));
 
-      SolveOptionalType(doc, ref type, DB.ElementTypeGroup.RoofType, nameof(type));
+      SolveOptionalType(document, ref type, DB.ElementTypeGroup.RoofType, nameof(type));
 
-      SolveOptionalLevel(doc, boundary, ref level, out var bbox);
+      SolveOptionalLevel(document, boundary, ref level, out var bbox);
 
       var orientation = boundary.ClosedCurveOrientation(Plane.WorldXY);
       if (orientation == CurveOrientation.CounterClockwise)
@@ -145,7 +149,7 @@ namespace RhinoInside.Revit.GH.Components
         using (var curveArray = boundary.ToCurveArray())
         {
           var footPrintToModelCurvesMapping = new DB.ModelCurveArray();
-          ReplaceElement(ref roof, doc.Create.NewFootPrintRoof(curveArray, level.Value, type.Value, out footPrintToModelCurvesMapping), parametersMask);
+          ReplaceElement(ref roof, document.Create.NewFootPrintRoof(curveArray, level.Value, type.Value, out footPrintToModelCurvesMapping), parametersMask);
         }
       }
 

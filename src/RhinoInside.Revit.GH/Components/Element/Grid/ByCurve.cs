@@ -4,6 +4,7 @@ using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using DB = Autodesk.Revit.DB;
 using RhinoInside.Revit.GH.Kernel.Attributes;
+using System.Runtime.InteropServices;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -24,7 +25,8 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructGridByCurve
     (
-      DB.Document doc,
+      [Optional, NickName("DOC")]
+      DB.Document document,
 
       [ParamType(typeof(Parameters.GraphicalElement)), Description("New Grid")]
       ref DB.Element grid,
@@ -34,7 +36,7 @@ namespace RhinoInside.Revit.GH.Components
       Optional<string> name
     )
     {
-      SolveOptionalType(doc, ref type, DB.ElementTypeGroup.GridType, nameof(type));
+      SolveOptionalType(document, ref type, DB.ElementTypeGroup.GridType, nameof(type));
 
       var parametersMask = name.IsMissing ?
         new DB.BuiltInParameter[]
@@ -53,12 +55,12 @@ namespace RhinoInside.Revit.GH.Components
 
       if (curve.TryGetLine(out var line, Revit.VertexTolerance * Revit.ModelUnits))
       {
-        ReplaceElement(ref grid, DB.Grid.Create(doc, line.ToLine()), parametersMask);
+        ReplaceElement(ref grid, DB.Grid.Create(document, line.ToLine()), parametersMask);
         ChangeElementTypeId(ref grid, type.Value.Id);
       }
       else if (curve.TryGetArc(out var arc, Revit.VertexTolerance * Revit.ModelUnits))
       {
-        ReplaceElement(ref grid, DB.Grid.Create(doc, arc.ToArc()), parametersMask);
+        ReplaceElement(ref grid, DB.Grid.Create(document, arc.ToArc()), parametersMask);
         ChangeElementTypeId(ref grid, type.Value.Id);
       }
       else
@@ -80,8 +82,8 @@ namespace RhinoInside.Revit.GH.Components
           }
 
           curve.TryGetPlane(out var plane);
-          var sketchPlane = DB.SketchPlane.Create(doc, plane.ToPlane());
-          var newGrid = doc.GetElement(DB.MultiSegmentGrid.Create(doc, type.Value.Id, curveLoop, sketchPlane.Id)) as DB.MultiSegmentGrid;
+          var sketchPlane = DB.SketchPlane.Create(document, plane.ToPlane());
+          var newGrid = document.GetElement(DB.MultiSegmentGrid.Create(document, type.Value.Id, curveLoop, sketchPlane.Id)) as DB.MultiSegmentGrid;
 
           ReplaceElement(ref grid, newGrid, parametersMask);
         }

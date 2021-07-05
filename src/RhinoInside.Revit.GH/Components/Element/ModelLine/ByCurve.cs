@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
@@ -14,15 +15,18 @@ namespace RhinoInside.Revit.GH.Components
 
     public ModelLineByCurve() : base
     (
-      "Add ModelLine", "ModelLine",
-      "Given a Curve, it adds a Curve element to the active Revit document",
-      "Revit", "Model"
+      name: "Add ModelLine",
+      nickname: "ModelLine",
+      description: "Given a Curve, it adds a Curve element to the active Revit document",
+      category: "Revit",
+      subCategory: "Model"
     )
     { }
 
     void ReconstructModelLineByCurve
     (
-      DB.Document doc,
+      [Optional, NickName("DOC")]
+      DB.Document document,
 
       [Description("New CurveElement")]
       ref DB.ModelCurve curveElement,
@@ -42,10 +46,10 @@ namespace RhinoInside.Revit.GH.Components
 
       if (curveElement is DB.ModelCurve modelCurve && centerLine.IsSameKindAs(modelCurve.GeometryCurve))
         modelCurve.SetSketchPlaneAndCurve(sketchPlane, centerLine);
-      else if (doc.IsFamilyDocument)
-        ReplaceElement(ref curveElement, doc.FamilyCreate.NewModelCurve(centerLine, sketchPlane));
+      else if (document.IsFamilyDocument)
+        ReplaceElement(ref curveElement, document.FamilyCreate.NewModelCurve(centerLine, sketchPlane));
       else
-        ReplaceElement(ref curveElement, doc.Create.NewModelCurve(centerLine, sketchPlane));
+        ReplaceElement(ref curveElement, document.Create.NewModelCurve(centerLine, sketchPlane));
     }
   }
 }

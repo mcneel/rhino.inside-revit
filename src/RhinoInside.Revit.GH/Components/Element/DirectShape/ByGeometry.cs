@@ -132,7 +132,8 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
     void ReconstructDirectShapeByGeometry
     (
-      DB.Document doc,
+      [Optional, NickName("DOC")]
+      DB.Document document,
 
       [ParamType(typeof(Parameters.GraphicalElement)), NickName("DS"), Description("New DirectShape")]
       ref DB.DirectShape directShape,
@@ -143,10 +144,10 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       [Optional] IList<DB.Material> material
     )
     {
-      SolveOptionalCategory(ref category, doc, DB.BuiltInCategory.OST_GenericModel, nameof(geometry));
+      SolveOptionalCategory(ref category, document, DB.BuiltInCategory.OST_GenericModel, nameof(geometry));
 
       if (directShape is object && directShape.Category.Id == category.Value.Id) { }
-      else ReplaceElement(ref directShape, DB.DirectShape.CreateElement(doc, category.Value.Id));
+      else ReplaceElement(ref directShape, DB.DirectShape.CreateElement(document, category.Value.Id));
 
       directShape.Name = name ?? string.Empty;
       directShape.SetShape(BuildShape(directShape, geometry, material, out var paintIds));
@@ -172,7 +173,8 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
     void ReconstructDirectShapeTypeByGeometry
     (
-      DB.Document doc,
+      [Optional, NickName("DOC")]
+      DB.Document document,
 
       [Description("New DirectShape Type")]
       ref DB.ElementType type,
@@ -183,10 +185,10 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       [Optional] IList<DB.Material> material
     )
     {
-      SolveOptionalCategory(ref category, doc, DB.BuiltInCategory.OST_GenericModel, nameof(geometry));
+      SolveOptionalCategory(ref category, document, DB.BuiltInCategory.OST_GenericModel, nameof(geometry));
 
       if (type is DB.DirectShapeType directShapeType && directShapeType.Category.Id == category.Value.Id) { }
-      else directShapeType = DB.DirectShapeType.Create(doc, name, category.Value.Id);
+      else directShapeType = DB.DirectShapeType.Create(document, name, category.Value.Id);
 
       directShapeType.Name = name;
       directShapeType.SetShape(BuildShape(directShapeType, geometry, material, out var paintIds));
@@ -214,7 +216,8 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
     void ReconstructDirectShapeByLocation
     (
-      DB.Document doc,
+      [Optional, NickName("DOC")]
+      DB.Document document,
 
       [ParamType(typeof(Parameters.GraphicalElement)), NickName("DS"), Description("New DirectShape")]
       ref DB.DirectShape directShape,
@@ -232,12 +235,12 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       };
 
       if (directShape is object && directShape.Category.Id == type.Category.Id) { }
-      else ReplaceElement(ref directShape, DB.DirectShape.CreateElement(doc, type.Category.Id), parametersMask);
+      else ReplaceElement(ref directShape, DB.DirectShape.CreateElement(document, type.Category.Id), parametersMask);
 
       if (directShape.TypeId != type.Id)
         directShape.SetTypeId(type.Id);
 
-      using (var library = DB.DirectShapeLibrary.GetDirectShapeLibrary(doc))
+      using (var library = DB.DirectShapeLibrary.GetDirectShapeLibrary(document))
       {
         if (!library.ContainsType(type.UniqueId))
           library.AddDefinitionType(type.UniqueId, type.Id);
@@ -245,7 +248,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
       using (var transform = Rhino.Geometry.Transform.PlaneToPlane(Rhino.Geometry.Plane.WorldXY, location).ToTransform())
       {
-        directShape.SetShape(DB.DirectShape.CreateGeometryInstance(doc, type.UniqueId, transform));
+        directShape.SetShape(DB.DirectShape.CreateGeometryInstance(document, type.UniqueId, transform));
       }
     }
   }

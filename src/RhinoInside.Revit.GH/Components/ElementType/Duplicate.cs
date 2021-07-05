@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.GH.Kernel.Attributes;
@@ -24,7 +25,8 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructElementTypeDuplicate
     (
-      DB.Document doc,
+      [Optional, NickName("DOC")]
+      DB.Document document,
 
       [Name("Type"), NickName("T"), Description("New Type")]
       ref DB.ElementType elementType,

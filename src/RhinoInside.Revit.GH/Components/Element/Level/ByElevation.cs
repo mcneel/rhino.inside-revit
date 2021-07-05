@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.GH.Kernel.Attributes;
@@ -23,7 +24,8 @@ namespace RhinoInside.Revit.GH.Components.Level
 
     void ReconstructLevelByElevation
     (
-      DB.Document doc,
+      [Optional, NickName("DOC")]
+      DB.Document document,
 
       [Description("New Level")]
       ref DB.Level level,
@@ -36,9 +38,9 @@ namespace RhinoInside.Revit.GH.Components.Level
     {
       var scaleFactor = 1.0 / Revit.ModelUnits;
       elevation *= scaleFactor;
-      elevation += doc.GetBasePointLocation(Params.Input<Parameters.Elevation>("Elevation").ElevationBase).Z;
+      elevation += document.GetBasePointLocation(Params.Input<Parameters.Elevation>("Elevation").ElevationBase).Z;
 
-      SolveOptionalType(doc, ref type, DB.ElementTypeGroup.LevelType, nameof(type));
+      SolveOptionalType(document, ref type, DB.ElementTypeGroup.LevelType, nameof(type));
 
       if (level is object)
       {
@@ -46,7 +48,7 @@ namespace RhinoInside.Revit.GH.Components.Level
       }
       else
       {
-        var newLevel = DB.Level.Create(doc, elevation);
+        var newLevel = DB.Level.Create(document, elevation);
 
         var parametersMask = name.IsMissing ?
           new DB.BuiltInParameter[]

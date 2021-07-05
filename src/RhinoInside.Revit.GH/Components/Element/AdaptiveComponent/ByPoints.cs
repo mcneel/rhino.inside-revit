@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.Convert.System.Collections.Generic;
@@ -17,20 +18,24 @@ namespace RhinoInside.Revit.GH.Components
 
     public AdaptiveComponentByPoints() : base
     (
-      "Add Component (Adaptive)", "CompAdap",
-      "Given a collection of Points, it adds an AdaptiveComponent element to the active Revit document",
-      "Revit", "Build"
+      name: "Add Component (Adaptive)",
+      nickname: "CompAdap",
+      description: "Given a collection of Points, it adds an AdaptiveComponent element to the active Revit document",
+      category: "Revit",
+      subCategory: "Build"
     )
     { }
 
     void ReconstructAdaptiveComponentByPoints
     (
-      DB.Document doc,
+      [Optional, NickName("DOC")]
+      DB.Document document,
 
       [Description("New Adaptive Component element")]
       ref DB.FamilyInstance component,
 
       IList<Rhino.Geometry.Point3d> points,
+
       DB.FamilySymbol type
     )
     {
@@ -45,10 +50,10 @@ namespace RhinoInside.Revit.GH.Components
       if (component is object && DB.AdaptiveComponentInstanceUtils.IsAdaptiveComponentInstance(component))
       {
         var adaptivePointIds = DB.AdaptiveComponentInstanceUtils.GetInstancePlacementPointElementRefIds(component);
-        if (adaptivePointIds.Count == adaptivePoints.Count)
+        if (adaptivePointIds.Count == adaptivePoints.Length)
         {
           int index = 0;
-          foreach (var vertex in adaptivePointIds.Select(id => doc.GetElement(id)).Cast<DB.ReferencePoint>())
+          foreach (var vertex in adaptivePointIds.Select(id => document.GetElement(id)).Cast<DB.ReferencePoint>())
             vertex.Position = adaptivePoints[index++];
 
           return;
@@ -61,13 +66,13 @@ namespace RhinoInside.Revit.GH.Components
           Revit.ActiveUIApplication.Application.Create.NewFamilyInstanceCreationData(type, adaptivePoints)
         };
 
-        var newElementIds = doc.IsFamilyDocument ?
-                            doc.FamilyCreate.NewFamilyInstances2( creationData ) :
-                            doc.Create.NewFamilyInstances2( creationData );
+        var newElementIds = document.IsFamilyDocument ?
+                            document.FamilyCreate.NewFamilyInstances2( creationData ) :
+                            document.Create.NewFamilyInstances2( creationData );
 
         if (newElementIds.Count != 1)
         {
-          doc.Delete(newElementIds);
+          document.Delete(newElementIds);
           throw new InvalidOperationException();
         }
 
@@ -78,7 +83,7 @@ namespace RhinoInside.Revit.GH.Components
           DB.BuiltInParameter.ELEM_TYPE_PARAM
         };
 
-        ReplaceElement(ref component, doc.GetElement(newElementIds.First()) as DB.FamilyInstance, parametersMask);
+        ReplaceElement(ref component, document.GetElement(newElementIds.First()) as DB.FamilyInstance, parametersMask);
       }
     }
   }

@@ -54,7 +54,8 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructFamilyInstanceByLocation
     (
-      DB.Document doc,
+      [Optional, NickName("DOC")]
+      DB.Document document,
 
       [Description("New Component element")]
       ref DB.FamilyInstance component,
@@ -69,19 +70,19 @@ namespace RhinoInside.Revit.GH.Components
       if (!location.IsValid)
         ThrowArgumentException(nameof(location));
 
-      if (type?.Document.IsEquivalent(doc) == false)
+      if (type?.Document.IsEquivalent(document) == false)
         ThrowArgumentException(nameof(type));
 
-      if (level.HasValue && level.Value.Document.IsEquivalent(doc) == false)
+      if (level.HasValue && level.Value.Document.IsEquivalent(document) == false)
         ThrowArgumentException(nameof(level));
 
-      if (host?.Document.IsEquivalent(doc) == false)
+      if (host?.Document.IsEquivalent(document) == false)
         ThrowArgumentException(nameof(host));
 
       if (!type.IsActive)
         type.Activate();
 
-      SolveOptionalLevel(doc, location, type, ref level, host);
+      SolveOptionalLevel(document, location, type, ref level, host);
 
       if (!Reuse(ref component, location, type, level.Value, host))
       {
@@ -89,35 +90,35 @@ namespace RhinoInside.Revit.GH.Components
         switch (type.Family.FamilyPlacementType)
         {
           case DB.FamilyPlacementType.OneLevelBased:
-            creationData = CreateOneLevelBased(doc, location, type, level, host);
+            creationData = CreateOneLevelBased(document, location, type, level, host);
             break;
 
           case DB.FamilyPlacementType.OneLevelBasedHosted:
-            creationData = CreateOneLevelBasedHosted(doc, location, type, level, host);
+            creationData = CreateOneLevelBasedHosted(document, location, type, level, host);
             break;
 
           case DB.FamilyPlacementType.TwoLevelsBased:
-            creationData = CreateTwoLevelsBased(doc, location, type, level, host);
+            creationData = CreateTwoLevelsBased(document, location, type, level, host);
             break;
 
           case DB.FamilyPlacementType.WorkPlaneBased:
-            creationData = CreateWorkPlaneBased(doc, location, type, level, host);
+            creationData = CreateWorkPlaneBased(document, location, type, level, host);
             break;
 
           default:
-            creationData = CreateDefault(doc, location, type, level, host);
+            creationData = CreateDefault(document, location, type, level, host);
             break;
         }
 
         var dataList = new List<FamilyInstanceCreationData>() { creationData };
-        var newElementIds = doc.IsFamilyDocument ?
-                            doc.FamilyCreate.NewFamilyInstances2(dataList) :
-                            doc.Create.NewFamilyInstances2(dataList);
+        var newElementIds = document.IsFamilyDocument ?
+                            document.FamilyCreate.NewFamilyInstances2(dataList) :
+                            document.Create.NewFamilyInstances2(dataList);
 
         if (newElementIds.Count != 1)
           throw new InvalidOperationException();
 
-        var newElement = doc.GetElement(newElementIds.First()) as DB.FamilyInstance;
+        var newElement = document.GetElement(newElementIds.First()) as DB.FamilyInstance;
 
         var parametersMask = new DB.BuiltInParameter[]
         {
@@ -142,7 +143,7 @@ namespace RhinoInside.Revit.GH.Components
         ReplaceElement(ref component, newElement, parametersMask);
 
         // Regenerate here to allow SetLocation get the current element location correctly.
-        doc.Regenerate();
+        document.Regenerate();
       }
 
       component?.SetLocation(location.Origin.ToXYZ(), location.XAxis.ToXYZ(), location.YAxis.ToXYZ());

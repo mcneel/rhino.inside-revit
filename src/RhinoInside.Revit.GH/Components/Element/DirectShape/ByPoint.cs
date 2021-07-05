@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.GH.Kernel.Attributes;
@@ -23,7 +24,8 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
     void ReconstructDirectShapeByPoint
     (
-      DB.Document doc,
+      [Optional, NickName("DOC")]
+      DB.Document document,
 
       [ParamType(typeof(Parameters.GraphicalElement)), Name("Point"), NickName("P"), Description("New Point Shape")]
       ref DB.DirectShape element,
@@ -36,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
       var genericModel = new DB.ElementId(DB.BuiltInCategory.OST_GenericModel);
       if (element is object && element.Category.Id == genericModel) { }
-      else ReplaceElement(ref element, DB.DirectShape.CreateElement(doc, genericModel));
+      else ReplaceElement(ref element, DB.DirectShape.CreateElement(document, genericModel));
 
       using (var ctx = GeometryEncoder.Context.Push(element))
       {

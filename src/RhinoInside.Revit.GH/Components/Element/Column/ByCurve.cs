@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.GH.Kernel.Attributes;
@@ -23,7 +24,8 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructColumnByCurve
     (
-      DB.Document doc,
+      [Optional, NickName("DOC")]
+      DB.Document document,
 
       [Description("New Column")]
       ref DB.FamilyInstance column,
@@ -36,12 +38,12 @@ namespace RhinoInside.Revit.GH.Components
       if (curve.FromZ > curve.ToZ)
         curve.Flip();
 
-      SolveOptionalType(doc, ref type, DB.BuiltInCategory.OST_StructuralColumns, nameof(type));
+      SolveOptionalType(document, ref type, DB.BuiltInCategory.OST_StructuralColumns, nameof(type));
 
       if (!type.Value.IsActive)
         type.Value.Activate();
 
-      SolveOptionalLevel(doc, curve, ref level, out var _);
+      SolveOptionalLevel(document, curve, ref level, out var _);
 
       // Type
       ChangeElementTypeId(ref column, type.Value.Id);
@@ -52,7 +54,7 @@ namespace RhinoInside.Revit.GH.Components
       }
       else
       {
-        var newColumn = doc.Create.NewFamilyInstance
+        var newColumn = document.Create.NewFamilyInstance
         (
           curve.ToLine(),
           type.Value,

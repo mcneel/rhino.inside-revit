@@ -25,7 +25,8 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructRailingByCurve
     (
-      DB.Document doc,
+      [Optional, NickName("DOC")]
+      DB.Document document,
 
       [Description("New Railing"), ParamType(typeof(Parameters.GraphicalElement))]
       ref DB.Architecture.Railing railing,
@@ -37,8 +38,8 @@ namespace RhinoInside.Revit.GH.Components
       [Optional] bool flipped
     )
     {
-      SolveOptionalType(doc, ref type, DB.ElementTypeGroup.StairsRailingType, nameof(type));
-      SolveOptionalLevel(doc, curve, ref level, out var bbox);
+      SolveOptionalType(document, ref type, DB.ElementTypeGroup.StairsRailingType, nameof(type));
+      SolveOptionalLevel(document, curve, ref level, out var bbox);
 
       // Axis
       var levelPlane = new Rhino.Geometry.Plane(new Rhino.Geometry.Point3d(0.0, 0.0, level.Value.GetHeight() * Revit.ModelUnits), Rhino.Geometry.Vector3d.ZAxis);
@@ -59,7 +60,7 @@ namespace RhinoInside.Revit.GH.Components
       {
         newRail = DB.Architecture.Railing.Create
         (
-          doc,
+          document,
           curve.ToCurveLoop(),
           type.Value.Id,
           level.Value.Id

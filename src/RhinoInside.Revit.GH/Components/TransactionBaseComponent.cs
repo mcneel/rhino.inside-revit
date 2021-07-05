@@ -386,7 +386,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       var parameterType = parameter.ParameterType.GetElementType() ?? parameter.ParameterType;
 
-      optional = parameter.IsDefined(typeof(OptionalAttribute), false);
+      optional = parameter.IsOptional;
       access = GH_ParamAccess.item;
 
       var genericType = parameterType.IsGenericType ? parameterType.GetGenericTypeDefinition() : null;
@@ -408,22 +408,23 @@ namespace RhinoInside.Revit.GH.Components
       return parameterType;
     }
 
-    protected void GetParams(MethodInfo methodInfo, out List<IGH_Param> inputs, out List<IGH_Param> outputs)
+    protected void GetParams(MethodInfo methodInfo, out List<(IGH_Param Param, ParamVisibility Relevance)> inputs, out List<(IGH_Param Param, ParamVisibility Relevance)> outputs)
     {
-      inputs = new List<IGH_Param>();
-      outputs = new List<IGH_Param>();
+      inputs = new List<(IGH_Param Param, ParamVisibility Relevance)>();
+      outputs = new List<(IGH_Param Param, ParamVisibility Relevance)>();
 
       foreach (var parameter in methodInfo.GetParameters())
       {
-        if (parameter.Position < 1)
-          continue;
-
-        if ((parameter.Position == 1) != (parameter.IsOut || parameter.ParameterType.IsByRef))
+        // HACK: Only Tracked Element may be ByRef
+        if (((parameter.Position == 1) != parameter.ParameterType.IsByRef) && !parameter.IsIn && !parameter.IsOut)
           throw new NotImplementedException();
 
         var argumentType = GetArgumentType(parameter, out var access, out var optional);
         var nickname = parameter.Name.First().ToString().ToUpperInvariant();
         var name = nickname + parameter.Name.Substring(1);
+
+        // HACK: for Document parameter
+        var relevance = parameter.Position == 0 ? ParamVisibility.Voluntary : ParamVisibility.Binding;
 
         if (parameter.GetCustomAttributes(typeof(NameAttribute), false).FirstOrDefault() is NameAttribute nameAttribute)
           name = nameAttribute.Name;
@@ -445,10 +446,23 @@ namespace RhinoInside.Revit.GH.Components
           param.Access = access;
           param.Optional = optional;
 
-          if(parameter.Position == 1)
-            outputs.Add(param);
+          if (parameter.ParameterType.IsByRef)
+          {
+            if (!parameter.IsIn && !parameter.IsOut)
+            {
+              outputs.Add((param, relevance));
+            }
+            else
+            {
+              if (parameter.IsIn)
+                inputs.Add((param, relevance));
+
+              if (parameter.IsOut)
+                outputs.Add((param, relevance));
+            }
+          }
           else
-            inputs.Add(param);
+            inputs.Add((param, relevance));
         }
 
         if (parameter.GetCustomAttributes(typeof(DefaultValueAttribute), false).FirstOrDefault() is DefaultValueAttribute defaultValueAttribute)
@@ -606,8 +620,8 @@ namespace RhinoInside.Revit.GH.Components
     protected ReconstructElementComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
 
-    List<IGH_Param> inputs;
-    List<IGH_Param> outputs;
+    List<(IGH_Param Param, ParamVisibility Relevance)> inputs;
+    List<(IGH_Param Param, ParamVisibility Relevance)> outputs;
 
     protected override void PostConstructor()
     {
@@ -615,11 +629,11 @@ namespace RhinoInside.Revit.GH.Components
       var ReconstructInfo = type.GetMethod($"Reconstruct{type.Name}", BindingFlags.Instance | BindingFlags.NonPublic);
       GetParams(ReconstructInfo, out inputs, out outputs);
 
-      foreach (var param in inputs.Concat(outputs))
+      foreach (var definition in inputs.Concat(outputs))
       {
-        if (string.IsNullOrEmpty(param.NickName)) param.NickName = param.Name;
-        if (param.Description is null) param.Description = string.Empty;
-        if (param.Description == string.Empty) param.Description = param.Name;
+        if (string.IsNullOrEmpty(definition.Param.NickName)) definition.Param.NickName = definition.Param.Name;
+        if (definition.Param.Description is null) definition.Param.Description = string.Empty;
+        if (definition.Param.Description == string.Empty) definition.Param.Description = definition.Param.Name;
       }
 
       base.PostConstructor();
@@ -627,21 +641,22 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override ParamDefinition[] Inputs =>
     (
-      Enumerable.Repeat
+      inputs.Select
       (
-        ParamDefinition.Create<Parameters.Document>
-        (
-          name: "Document",
-          nickname: "DOC",
-          relevance: ParamVisibility.Voluntary
-        ), 1
-      ).
-      Concat(inputs.Select(ParamDefinition.FromParam)).ToArray()
+        x => !x.Relevance.HasFlag(ParamVisibility.Mandatory) ?
+        ParamDefinition.FromParam(x.Param, ParamVisibility.Voluntary) :
+        ParamDefinition.FromParam(x.Param)
+      ).ToArray()
     );
 
     protected override ParamDefinition[] Outputs =>
     (
-      outputs.Select(ParamDefinition.FromParam).ToArray()
+      outputs.Select
+      (
+        x => !x.Relevance.HasFlag(ParamVisibility.Mandatory) ?
+        ParamDefinition.FromParam(x.Param, ParamVisibility.Voluntary) :
+        ParamDefinition.FromParam(x.Param)
+      ).ToArray()
     );
 
     protected static void ReplaceElement<T>(ref T previous, T next, ICollection<DB.BuiltInParameter> parametersMask = null) where T : DB.Element
@@ -766,7 +781,7 @@ namespace RhinoInside.Revit.GH.Components
           if (paramIndex < 0)
             continue;
 
-          // Skip Document if present
+          // HACK: Skip Document if present
           paramIndex += docParamIndex + 1;
 
           args[1] = paramIndex;

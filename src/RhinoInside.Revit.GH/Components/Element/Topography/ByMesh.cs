@@ -20,15 +20,18 @@ namespace RhinoInside.Revit.GH.Components.Site
 
     public TopographyByMesh() : base
     (
-      "Add Topography (Mesh)", "Topography",
-      "Given a Mesh, it adds a Topography surface to the active Revit document",
-      "Revit", "Site"
+      name: "Add Topography (Mesh)",
+      nickname: "Topography",
+      description: "Given a Mesh, it adds a Topography surface to the active Revit document",
+      category: "Revit",
+      subCategory: "Site"
     )
     { }
 
     void ReconstructTopographyByMesh
     (
-      DB.Document doc,
+      [Optional, NickName("DOC")]
+      DB.Document document,
 
       [ParamType(typeof(Parameters.GraphicalElement)), Description("New Topography")]
       ref DB.Architecture.TopographySurface topography,
@@ -76,13 +79,13 @@ namespace RhinoInside.Revit.GH.Components.Site
         else if (!DB.Architecture.TopographySurface.IsValidFaceSet(facets, xyz))
           AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"At least one face is not valid for {typeof(DB.Architecture.TopographySurface).Name}");
         else
-          ReplaceElement(ref topography, DB.Architecture.TopographySurface.Create(doc, xyz, facets));
+          ReplaceElement(ref topography, DB.Architecture.TopographySurface.Create(document, xyz, facets));
       }
 
       if (topography is object && regions?.Count > 0)
       {
         var curveLoops = regions.Select(region => region.ToCurveLoop());
-        DB.Architecture.SiteSubRegion.Create(doc, curveLoops.ToList(), topography.Id);
+        DB.Architecture.SiteSubRegion.Create(document, curveLoops.ToList(), topography.Id);
       }
     }
   }

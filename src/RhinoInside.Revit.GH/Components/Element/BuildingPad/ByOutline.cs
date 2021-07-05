@@ -8,6 +8,7 @@ using DB = Autodesk.Revit.DB;
 using RhinoInside.Revit.Convert.System.Collections.Generic;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.GH.Kernel.Attributes;
+using System.Runtime.InteropServices;
 
 namespace RhinoInside.Revit.GH.Components.Site
 {
@@ -37,7 +38,8 @@ namespace RhinoInside.Revit.GH.Components.Site
 
     void ReconstructBuildingPadByOutline
     (
-      DB.Document doc,
+      [Optional, NickName("DOC")]
+      DB.Document document,
 
       [Description("New BuildingPad"), NickName("BP")]
       ref DB.Architecture.BuildingPad buildingPad,
@@ -49,7 +51,7 @@ namespace RhinoInside.Revit.GH.Components.Site
     {
       ChangeElementType(ref buildingPad, type);
 
-      SolveOptionalLevel(doc, boundaries, ref level, out var boundaryBBox);
+      SolveOptionalLevel(document, boundaries, ref level, out var boundaryBBox);
 
       var curveLoops = boundaries.ConvertAll(GeometryEncoder.ToCurveLoop);
 
@@ -61,11 +63,11 @@ namespace RhinoInside.Revit.GH.Components.Site
       }
       else
       {
-        SolveOptionalType(doc, ref type, DB.ElementTypeGroup.BuildingPadType, (document, param) => DB.BuildingPadType.CreateDefault(document), nameof(type));
+        SolveOptionalType(document, ref type, DB.ElementTypeGroup.BuildingPadType, (doc, param) => DB.BuildingPadType.CreateDefault(doc), nameof(type));
 
         var newPad = DB.Architecture.BuildingPad.Create
         (
-          doc,
+          document,
           type.Value.Id,
           level.Value.Id,
           curveLoops

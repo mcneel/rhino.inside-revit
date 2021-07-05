@@ -16,9 +16,11 @@ namespace RhinoInside.Revit.GH.Components
 
     public FloorByOutline() : base
     (
-      "Add Floor", "Floor",
-      "Given its outline curve, it adds a Floor element to the active Revit document",
-      "Revit", "Build"
+      name: "Add Floor",
+      nickname: "Floor",
+      description: "Given its outline curve, it adds a Floor element to the active Revit document",
+      category: "Revit",
+      subCategory: "Build"
     )
     { }
 
@@ -97,7 +99,8 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructFloorByOutline
     (
-      DB.Document doc,
+      [Optional, NickName("DOC")]
+      DB.Document document,
 
       [Description("New Floor")]
       ref DB.Floor floor,
@@ -117,15 +120,15 @@ namespace RhinoInside.Revit.GH.Components
       )
         ThrowArgumentException(nameof(boundary), "Boundary must be an horizontal planar closed curve.");
 
-      if (type.HasValue && type.Value.Document.IsEquivalent(doc) == false)
+      if (type.HasValue && type.Value.Document.IsEquivalent(document) == false)
         ThrowArgumentException(nameof(type));
 
-      if (level.HasValue && level.Value.Document.IsEquivalent(doc) == false)
+      if (level.HasValue && level.Value.Document.IsEquivalent(document) == false)
         ThrowArgumentException(nameof(level));
 
-      SolveOptionalType(doc, ref type, DB.ElementTypeGroup.FloorType, nameof(type));
+      SolveOptionalType(document, ref type, DB.ElementTypeGroup.FloorType, nameof(type));
 
-      SolveOptionalLevel(doc, boundary, ref level, out var bbox);
+      SolveOptionalLevel(document, boundary, ref level, out var bbox);
 
       var orientation = boundary.ClosedCurveOrientation(Plane.WorldXY);
       if (orientation == CurveOrientation.CounterClockwise)
@@ -150,9 +153,9 @@ namespace RhinoInside.Revit.GH.Components
         var curveArray = boundary.ToCurveArray();
 
         if (type.Value.IsFoundationSlab)
-          ReplaceElement(ref floor, doc.Create.NewFoundationSlab(curveArray, type.Value, level.Value, structural, DB.XYZ.BasisZ), parametersMask);
+          ReplaceElement(ref floor, document.Create.NewFoundationSlab(curveArray, type.Value, level.Value, structural, DB.XYZ.BasisZ), parametersMask);
         else
-          ReplaceElement(ref floor, doc.Create.NewFloor(curveArray, type.Value, level.Value, structural, DB.XYZ.BasisZ), parametersMask);
+          ReplaceElement(ref floor, document.Create.NewFloor(curveArray, type.Value, level.Value, structural, DB.XYZ.BasisZ), parametersMask);
 #endif
       }
 

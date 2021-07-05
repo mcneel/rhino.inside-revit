@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
@@ -14,15 +15,18 @@ namespace RhinoInside.Revit.GH.Components
 
     public SketchPlaneByPlane() : base
     (
-      "Add SketchPlane", "SketchPlane",
-      "Given a Plane, it adds a SketchPlane element to the active Revit document",
-      "Revit", "Model"
+      name: "Add SketchPlane",
+      nickname: "SketchPlane",
+      description: "Given a Plane, it adds a SketchPlane element to the active Revit document",
+      category: "Revit",
+      subCategory: "Model"
     )
     { }
 
     void ReconstructSketchPlaneByPlane
     (
-      DB.Document doc,
+      [Optional, NickName("DOC")]
+      DB.Document document,
 
       [Description("New SketchPlane")]
       ref DB.SketchPlane sketchPlane,
@@ -47,7 +51,7 @@ namespace RhinoInside.Revit.GH.Components
             double angle = plane0.Normal.AngleTo(plane1.Normal);
 
             using (var axis = DB.Line.CreateUnbound(plane0.Origin, axisDirection))
-              DB.ElementTransformUtils.RotateElement(doc, sketchPlane.Id, axis, angle);
+              DB.ElementTransformUtils.RotateElement(document, sketchPlane.Id, axis, angle);
 
             plane0 = sketchPlane.GetPlane();
           }
@@ -57,19 +61,19 @@ namespace RhinoInside.Revit.GH.Components
             if (angle != 0.0)
             {
               using (var axis = DB.Line.CreateUnbound(plane0.Origin, plane1.Normal))
-                DB.ElementTransformUtils.RotateElement(doc, sketchPlane.Id, axis, angle);
+                DB.ElementTransformUtils.RotateElement(document, sketchPlane.Id, axis, angle);
             }
           }
 
           var trans = plane1.Origin - plane0.Origin;
           if (!trans.IsZeroLength())
-            DB.ElementTransformUtils.MoveElement(doc, sketchPlane.Id, trans);
+            DB.ElementTransformUtils.MoveElement(document, sketchPlane.Id, trans);
         }
 
         sketchPlane.Pinned = pinned;
       }
       else
-        ReplaceElement(ref sketchPlane, DB.SketchPlane.Create(doc, plane.ToPlane()));
+        ReplaceElement(ref sketchPlane, DB.SketchPlane.Create(document, plane.ToPlane()));
     }
   }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.GH.Kernel.Attributes;
@@ -14,15 +15,18 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
     public DirectShapeByBrep() : base
     (
-      "Add Brep DirectShape", "BrpDShape",
-      "Given a Brep, it adds a Brep shape to the active Revit document",
-      "Revit", "DirectShape"
+      name: "Add Brep DirectShape",
+      nickname: "BrpDShape",
+      description: "Given a Brep, it adds a Brep shape to the active Revit document",
+      category: "Revit",
+      subCategory: "DirectShape"
     )
     { }
 
     void ReconstructDirectShapeByBrep
     (
-      DB.Document doc,
+      [Optional, NickName("DOC")]
+      DB.Document document,
 
       [ParamType(typeof(Parameters.GraphicalElement)), Name("Brep"), NickName("B"), Description("New Brep Shape")]
       ref DB.DirectShape element,
@@ -35,7 +39,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
       var genericModel = new DB.ElementId(DB.BuiltInCategory.OST_GenericModel);
       if (element is object && element.Category.Id == genericModel) { }
-      else ReplaceElement(ref element, DB.DirectShape.CreateElement(doc, genericModel));
+      else ReplaceElement(ref element, DB.DirectShape.CreateElement(document, genericModel));
 
       using (var ctx = GeometryEncoder.Context.Push(element))
       {

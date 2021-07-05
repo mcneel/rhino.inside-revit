@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
@@ -15,9 +16,11 @@ namespace RhinoInside.Revit.GH.Components
 
     public BeamByCurve() : base
     (
-      "Add Beam", "Beam",
-      "Given its Axis, it adds a Beam element to the active Revit document",
-      "Revit", "Build"
+      name: "Add Beam",
+      nickname: "Beam",
+      description: "Given its Axis, it adds a Beam element to the active Revit document",
+      category: "Revit",
+      subCategory: "Build"
     )
     { }
 
@@ -52,7 +55,8 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructBeamByCurve
     (
-      DB.Document doc,
+      [Optional, NickName("DOC")]
+      DB.Document document,
 
       [Description("New Beam")]
       ref DB.FamilyInstance beam,
@@ -70,7 +74,7 @@ namespace RhinoInside.Revit.GH.Components
       )
         ThrowArgumentException(nameof(curve), "Curve must be a C1 continuous planar non closed curve.");
 
-      SolveOptionalLevel(doc, curve, ref level, out var _);
+      SolveOptionalLevel(document, curve, ref level, out var _);
 
       var centerLine = curve.ToCurve();
 
@@ -95,9 +99,9 @@ namespace RhinoInside.Revit.GH.Components
 
       // Reconstruct Beam
       {
-        SolveOptionalType(doc, ref type, DB.BuiltInCategory.OST_StructuralFraming, nameof(type));
+        SolveOptionalType(document, ref type, DB.BuiltInCategory.OST_StructuralFraming, nameof(type));
 
-        var newBeam = doc.Create.NewFamilyInstance
+        var newBeam = document.Create.NewFamilyInstance
         (
           centerLine,
           type.Value,
