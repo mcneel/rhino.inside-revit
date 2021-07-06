@@ -179,6 +179,22 @@
         ]
     },
     {
+        "title": "BIMThoughts Rhino.Inside.Revit",
+        "url": "https://youtu.be/4P5jO4clI5k",
+        "thumbnail": "https://i3.ytimg.com/vi/4P5jO4clI5k/maxresdefault.jpg",
+        "author": "BIMThoughts",
+        "authorUrl": "https://bimthoughts.com/e2125/",
+        "description": "Scott Davidson and Ehsan discuss Rhino.Inside.Revit with the BIMThoughts crew",
+        "kinds": [
+            "podcast",
+            "video"
+        ],
+        "tags": [
+            "discussion",
+            "overview"
+        ]
+    },
+    {
         "title": "BIMxt Rhino.Inside.Revit",
         "url": "https://vimeo.com/504828686/09cf58c437",
         "thumbnail": "/static/images/discover/bimxt-rir.png",
