@@ -37,9 +37,11 @@ namespace RhinoInside.Revit.GH.Components
       if (element.GetTypeId() != type.Id)
       {
         if (DB.Element.IsValidType(element.Document, new DB.ElementId[] { element.Id }, type.Id))
-          element = element.Document.GetElement(element.ChangeTypeId(type.Id)) as DB.FamilyInstance;
-        else
-          return false;
+        {
+          if (element.ChangeTypeId(type.Id) is DB.ElementId id && id != DB.ElementId.InvalidElementId)
+            element = element.Document.GetElement(id) as DB.FamilyInstance;
+        }
+        else return false;
       }
 
       // Unpin here to allow SetLocation update location correctly.

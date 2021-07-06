@@ -850,7 +850,7 @@ namespace RhinoInside.Revit.GH.Components
       if (status == DB.TransactionStatus.Committed)
       {
         // Update previous elements
-        var elementSets = Params.Output[0].VolatileData.AllData(false).
+        var elementSets = Params.Output[0].VolatileData.AllData(true).
           Cast<Types.IGH_ElementId>().GroupBy(x => x.Document);
 
         foreach (var set in elementSets)

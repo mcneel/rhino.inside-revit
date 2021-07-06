@@ -44,16 +44,16 @@ namespace RhinoInside.Revit.GH.Components.Site
       [Description("New BuildingPad"), NickName("BP")]
       ref DB.Architecture.BuildingPad buildingPad,
 
-      IList<Rhino.Geometry.Curve> boundaries,
+      IList<Rhino.Geometry.Curve> boundary,
       Optional<DB.BuildingPadType> type,
       Optional<DB.Level> level
     )
     {
       ChangeElementType(ref buildingPad, type);
 
-      SolveOptionalLevel(document, boundaries, ref level, out var boundaryBBox);
+      SolveOptionalLevel(document, boundary, ref level, out var boundaryBBox);
 
-      var curveLoops = boundaries.ConvertAll(GeometryEncoder.ToCurveLoop);
+      var curveLoops = boundary.ConvertAll(GeometryEncoder.ToCurveLoop);
 
       if (buildingPad is object)
       {
