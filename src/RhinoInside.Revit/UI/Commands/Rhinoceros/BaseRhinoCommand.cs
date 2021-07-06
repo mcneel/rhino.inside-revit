@@ -9,18 +9,12 @@ namespace RhinoInside.Revit.UI
   /// </summary>
   public abstract class RhinoCommand : Command
   {
-    public RhinoCommand()
-    {
-      if (Revit.OnStartup(AddIn.Host) != Result.Succeeded)
-        throw new Exception("Failed to startup Rhino");
-    }
-
     /// <summary>
     /// Available when no Rhino command is currently running.
     /// </summary>
     protected internal new class Availability : AvailableWhenReady
     {
-      public override bool IsCommandAvailable(UIApplication app, CategorySet selectedCategories) =>
+      protected override bool IsCommandAvailable(UIApplication app, CategorySet selectedCategories) =>
         base.IsCommandAvailable(app, selectedCategories) &&
         !Rhino.Commands.Command.InCommand();
     }

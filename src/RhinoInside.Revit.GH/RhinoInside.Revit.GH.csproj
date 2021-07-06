@@ -165,17 +165,17 @@
           <Private>False</Private>
         </Reference>
         <Reference Include="RevitAPI">
-            <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\RevitAPI.dll</HintPath>
-            <Private>False</Private>
-          </Reference>
-          <Reference Include="RevitAPIUI">
-            <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\RevitAPIUI.dll</HintPath>
-            <Private>False</Private>
-          </Reference>
-          <Reference Include="AdWindows">
-            <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\AdWindows.dll</HintPath>
-            <Private>False</Private>
-          </Reference>
+          <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\RevitAPI.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="RevitAPIUI">
+          <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\RevitAPIUI.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="AdWindows">
+          <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\AdWindows.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
       </ItemGroup>
     </When>
     <Otherwise>
@@ -348,7 +348,9 @@
     <Compile Include="Parameters\CompoundStructure.cs" />
     <Compile Include="Parameters\CurtainGrid.cs" />
     <Compile Include="Parameters\Elevation.cs" />
-    <Compile Include="Parameters\Input\BuiltInParameter.cs" />
+    <Compile Include="Parameters\Input\BuiltInCategories.cs" />
+    <Compile Include="Parameters\Input\BuiltInParameters.cs" />
+    <Compile Include="Parameters\Input\BuiltInParameterGroups.cs" />
     <Compile Include="Parameters\Input\CurtainGridAlignType_ValueList.cs" />
     <Compile Include="Parameters\Input\CurtainGridJoinCondition_ValueList.cs" />
     <Compile Include="Parameters\Input\CurtainGridLayout_ValueList.cs" />
@@ -405,6 +407,11 @@
     <Compile Include="Parameters\ValueList.cs" />
     <Compile Include="Parameters\View.cs" />
     <Compile Include="Parameters\SpatialElement.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Solid.cs" />
     <Compile Include="Types\AppearanceAsset.cs" />
     <Compile Include="Types\AssetPropertyDouble1DMap.cs" />
@@ -464,11 +471,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>ProductInfo.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <EmbeddedResource Include="Properties\Resources.resx">
       <SubType>Designer</SubType>

@@ -1,10 +1,9 @@
+using System;
 using System.Windows.Media;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
 using Grasshopper;
 using Grasshopper.Kernel;
-using Rhino.PlugIns;
-using RhinoInside.Revit.External.UI.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.UI
@@ -19,17 +18,37 @@ namespace RhinoInside.Revit.UI
     static readonly ImageSource SolverOffSmall = ImageBuilder.LoadRibbonButtonImage("Ribbon.Grasshopper.SolverOff.png", true);
     static readonly ImageSource SolverOffLarge = ImageBuilder.LoadRibbonButtonImage("Ribbon.Grasshopper.SolverOff.png", false);
 
-    protected class AvailableWhenGHSolverReady : GrasshopperCommand.Availability
+    protected new class Availability : GrasshopperCommand.Availability
     {
-      public override bool IsCommandAvailable(UIApplication _, DB.CategorySet selectedCategories) =>
+      protected override bool IsCommandAvailable(UIApplication _, DB.CategorySet selectedCategories) =>
         base.IsCommandAvailable(_, selectedCategories) &&
-        // at this point addin is loaded and rhinocommon is available
-        GHEditorLoaded();
+        GH.Guest.IsEditorLoaded();
+    }
 
-      bool GHEditorLoaded()
+    public static void CreateUI(RibbonPanel ribbonPanel)
+    {
+      var buttonData = NewPushButtonData<CommandGrasshopperSolver, Availability>
+      (
+        CommandName,
+        "Ribbon.Grasshopper.SolverOff.png",
+        "Toggle the Grasshopper solver"
+      );
+
+      if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        return GH.Guest.IsEditorLoaded();
+        // apply a min width to the button so it does not change width
+        // when toggling between Enable and Disable on its title
+        pushButton.SetMinWidth(50);
+        StoreButton(CommandName, pushButton);
       }
+
+      AssemblyResolver.References["Grasshopper"].Activated += Grasshopper_AssemblyActivated;
+    }
+
+    private static void Grasshopper_AssemblyActivated(object sender, AssemblyLoadEventArgs args)
+    {
+      EnableSolutionsChanged(GH_Document.EnableSolutions);
+      GH_Document.EnableSolutionsChanged += EnableSolutionsChanged;
     }
 
     static void EnableSolutionsChanged(bool EnableSolutions)
@@ -51,32 +70,6 @@ namespace RhinoInside.Revit.UI
           button.LargeImage = SolverOffLarge;
         }
       }
-    }
-
-    public static void CreateUI(RibbonPanel ribbonPanel)
-    {
-      var buttonData = NewPushButtonData<CommandGrasshopperSolver, AvailableWhenGHSolverReady>(
-        CommandName,
-        "Ribbon.Grasshopper.SolverOff.png",
-        "Toggle the Grasshopper solver"
-      );
-      if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
-      {
-        StoreButton(CommandName, pushButton);
-        // apply a min width to the button so it does not change width
-        // when toggling between Enable and Disable on its title
-        pushButton.SetMinWidth(50);
-        StoreButton(CommandName, pushButton);
-      }
-
-      CommandStart.AddinStarted += CommandStart_AddinStarted;
-    }
-
-    private static void CommandStart_AddinStarted(object sender, CommandStart.AddinStartedArgs e)
-    {
-      EnableSolutionsChanged(GH_Document.EnableSolutions);
-      GH_Document.EnableSolutionsChanged += EnableSolutionsChanged;
-      CommandStart.AddinStarted -= CommandStart_AddinStarted;
     }
 
     public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)

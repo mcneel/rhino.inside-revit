@@ -10,7 +10,6 @@ using DB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Parameters.Input
 {
   #region DocumentValuePicker
-
   public abstract class DocumentValuePicker : GH_ValueList, Kernel.IGH_ElementIdParam
   {
     #region IGH_ElementIdParam
@@ -58,7 +57,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
   public abstract class DocumentCategoriesPicker : DocumentValuePicker
   {
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.hidden;
     public override bool PassesFilter(DB.Document document, DB.ElementId id) => id.IsCategoryId(document);
     protected abstract bool CategoryIsInSet(DB.Category category);
     protected abstract DB.BuiltInCategory DefaultBuiltInCategory { get; }
@@ -109,6 +108,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
     }
   }
 
+  [Obsolete("Since 2021-06-10. Please use 'Built-In Categories'")]
   public class ModelCategoriesPicker : DocumentCategoriesPicker
   {
     public override Guid ComponentGuid => new Guid("EB266925-F1AA-4729-B5C0-B978937F51A3");
@@ -118,6 +118,8 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
     public ModelCategoriesPicker() { }
   }
+
+  [Obsolete("Since 2021-06-10. Please use 'Built-In Categories'")]
   public class AnnotationCategoriesPicker : DocumentCategoriesPicker
   {
     public override Guid ComponentGuid => new Guid("B1D1CA45-3771-49CA-8540-9A916A743C1B");
@@ -126,6 +128,8 @@ namespace RhinoInside.Revit.GH.Parameters.Input
     protected override bool CategoryIsInSet(DB.Category category) => !category.IsTagCategory && category.CategoryType == DB.CategoryType.Annotation;
     public AnnotationCategoriesPicker() { }
   }
+
+  [Obsolete("Since 2021-06-10. Please use 'Built-In Categories'")]
   public class TagCategoriesPicker : DocumentCategoriesPicker
   {
     public override Guid ComponentGuid => new Guid("30F6DA06-35F9-4E83-AE9E-080AF26C8326");
@@ -134,6 +138,8 @@ namespace RhinoInside.Revit.GH.Parameters.Input
     protected override bool CategoryIsInSet(DB.Category category) => category.IsTagCategory;
     public TagCategoriesPicker() { }
   }
+
+  [Obsolete("Since 2021-06-10. Please use 'Built-In Categories'")]
   public class AnalyticalCategoriesPicker : DocumentCategoriesPicker
   {
     public override Guid ComponentGuid => new Guid("4120C5ED-4329-4F42-B8D3-FA518E6E6807");

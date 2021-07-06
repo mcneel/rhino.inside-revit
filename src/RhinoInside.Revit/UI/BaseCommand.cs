@@ -131,11 +131,11 @@ namespace RhinoInside.Revit.UI
       public override bool IsRuntimeReady() => dependency.IsRuntimeReady();
 
       // We can not relay on the UIApplication first argument.
-      // Seems other Add-ins are calling this method with wrong values.
+      // Seems other Add-Ins are calling this method with strange values.
       // I add the try-catch just because this is called many times.
-      public override bool IsCommandAvailable(UIApplication _, CategorySet selectedCategories)
+      protected override bool IsCommandAvailable(UIApplication _, CategorySet selectedCategories)
       {
-        if(Revit.ActiveUIApplication is UIApplication app)
+        if(AddIn.Host.Value is UIApplication app)
         {
           try
           {
@@ -150,19 +150,19 @@ namespace RhinoInside.Revit.UI
     }
 
     /// <summary>
+    /// Available even when Rhino.Inside is obsolete.
+    /// </summary>
+    protected internal class AvailableEvenObsolete : External.UI.CommandAvailability
+    {
+      public override bool IsRuntimeReady() => AddIn.CurrentStatus >= AddIn.Status.Obsolete;
+    }
+
+    /// <summary>
     /// Available when Rhino.Inside is not expired, crashed or already active.
     /// </summary>
     protected internal class Availability : External.UI.CommandAvailability
     {
       public override bool IsRuntimeReady() => AddIn.CurrentStatus >= AddIn.Status.Available;
-    }
-
-    /// <summary>
-    /// Available when Rhino.Inside is not obsolete.
-    /// </summary>
-    protected internal class AvailableWhenNotObsolete : External.UI.CommandAvailability
-    {
-      public override bool IsRuntimeReady() => AddIn.CurrentStatus >= AddIn.Status.Obsolete;
     }
 
     /// <summary>

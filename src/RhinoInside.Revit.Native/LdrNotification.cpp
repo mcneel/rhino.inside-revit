@@ -205,7 +205,10 @@ public:
 
   bool ReportOnLoad(const std::wstring& moduleName) const
   {
-    return mModuleSet.find(moduleName) != mModuleSet.cend();
+    std::wstring module_name(moduleName.size(), wchar_t());
+    std::transform(moduleName.begin(), moduleName.end(), module_name.begin(), tolower);
+
+    return mModuleSet.find(module_name) != mModuleSet.cend();
   }
 
   static LdrDllTracker Instance;
@@ -214,13 +217,29 @@ public:
 LdrDllTracker LdrDllTracker::Instance;
 
 RIR_EXPORT
-void STDAPICALLTYPE LdrSetStackTraceFilePath(LPCWSTR pReportFilePath)
+LPCWSTR STDAPICALLTYPE LdrGetStackTraceFilePath()
 {
-  LdrDllTracker::Instance.StackTraceFilePath(pReportFilePath);
+  return LdrDllTracker::Instance.StackTraceFilePath().c_str();
 }
 
 RIR_EXPORT
-BOOL STDAPICALLTYPE LdrReportOnLoad(LPCWSTR pModuleName, BOOL bEnable)
+void STDAPICALLTYPE LdrSetStackTraceFilePath(LPCWSTR pReportFilePath)
+{
+  LdrDllTracker::Instance.StackTraceFilePath(pReportFilePath ? pReportFilePath : L"");
+}
+
+RIR_EXPORT
+BOOL STDAPICALLTYPE LdrGetReportOnLoad(LPCWSTR pModuleName)
+{
+  if (pModuleName == nullptr)
+    return false;
+
+  LdrDllTracker::Instance.ReportOnLoad(pModuleName);
+  return true;
+}
+
+RIR_EXPORT
+BOOL STDAPICALLTYPE LdrSetReportOnLoad(LPCWSTR pModuleName, BOOL bEnable)
 {
   if (pModuleName == nullptr)
     return false;

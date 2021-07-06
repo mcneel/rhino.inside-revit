@@ -218,6 +218,7 @@ namespace Grasshopper.Special
     protected virtual string GetItemDisplayText(T item) => ((IGH_Goo) item).ToString();
 
     public string SearchPattern { get; set; } = string.Empty;
+    protected internal int LayoutLevel { get; set; } = 1;
 
     public class ListItem
     {
@@ -285,7 +286,23 @@ namespace Grasshopper.Special
       }
     }
 
-    protected virtual void Menu_AppendPreProcessParameter(ToolStripDropDown menu) { }
+    protected virtual void Menu_AppendPreProcessParameter(ToolStripDropDown menu)
+    {
+      var detail = Menu_AppendItem(menu, "Layout");
+      Menu_AppendItem(detail.DropDown, "List", (s, a) => Menu_LayoutLevel(1), true, LayoutLevel == 1);
+      Menu_AppendItem(detail.DropDown, "Tiles", (s, a) => Menu_LayoutLevel(2), true, LayoutLevel == 2);
+    }
+
+    private void Menu_LayoutLevel(int value)
+    {
+      RecordUndoEvent("Set: Layout");
+
+      LayoutLevel = value;
+
+      OnObjectChanged(GH_ObjectEventType.Options);
+
+      OnDisplayExpired(true);
+    }
 
     private void Menu_Culling(DataCulling value)
     {
@@ -389,7 +406,7 @@ namespace Grasshopper.Special
       public override bool HasOutputGrip => true;
       public override bool AllowMessageBalloon => true;
       protected override Padding SizingBorders => new Padding(4, 6, 4, 6);
-      protected override Size MinimumSize => new Size(50 + PaddingLeft, 25 + 18 * 5);
+      protected override Size MinimumSize => new Size(50 + PaddingLeft, 25 + ItemHeight * 5);
 
       public ResizableAttributes(ValueSet<T> owner) : base(owner)
       {
@@ -399,6 +416,7 @@ namespace Grasshopper.Special
           new SizeF(Math.Max(200 + PaddingLeft, MinimumSize.Width), Math.Max(Bounds.Height, MinimumSize.Height))
         );
       }
+
       protected override void Layout()
       {
         if (MaximumSize.Width < Bounds.Width || Bounds.Width < MinimumSize.Width)
@@ -406,7 +424,7 @@ namespace Grasshopper.Special
         if (MaximumSize.Height < Bounds.Height || Bounds.Height < MinimumSize.Height)
           Bounds = new RectangleF(Bounds.Location, new SizeF(Bounds.Width, Bounds.Height < MinimumSize.Height ? MinimumSize.Height : MaximumSize.Height));
 
-        var itemBounds = new RectangleF(Bounds.X + 2, Bounds.Y + 20, Bounds.Width - 4, 18);
+        var itemBounds = new RectangleF(Bounds.X + 2, Bounds.Y + 20, Bounds.Width - 4, ItemHeight);
 
         for (int i = 0; i < Owner.ListItems.Count; i++)
         {
@@ -418,9 +436,9 @@ namespace Grasshopper.Special
       }
 
       const int CaptionHeight = 20;
-      const int ItemHeight = 18;
       const int FootnoteHeight = 18;
       const int ScrollerWidth = 8;
+      int ItemHeight => 2 + (16 * Owner.LayoutLevel);
       int PaddingLeft => Owner.IconDisplayMode == GH_IconDisplayMode.application ? 0 : 30;
 
       Rectangle AdjustedBounds => GH_Convert.ToRectangle(Bounds);
@@ -571,46 +589,81 @@ namespace Grasshopper.Special
 
                 var transform = graphics.Transform;
                 if (!ScrollerBounds.IsEmpty)
-                  graphics.TranslateTransform(0.0f, -((Owner.ListItems.Count * ItemHeight) - clip.Height) * ScrollRatio);
+                {
+                  var scroll = -((Owner.ListItems.Count * ItemHeight) - clip.Height) * ScrollRatio;
+                  graphics.TranslateTransform(0.0f, scroll);
+                }
 
+                using (var textBrush = new SolidBrush(Color.FromArgb(20, 20, 20)))
                 using (var nameFormat = new StringFormat(StringFormatFlags.NoWrap) { LineAlignment = StringAlignment.Center })
+                using (var textFormat = new StringFormat(StringFormatFlags.NoWrap) { LineAlignment = StringAlignment.Far })
                 using (var typeFormat = new StringFormat(StringFormatFlags.NoWrap) { LineAlignment = StringAlignment.Center, Alignment = StringAlignment.Far })
                 {
                   var itemBounds = new RectangleF(clip.X, clip.Y, clip.Width, ItemHeight);
-                  int index = 0;
-                  foreach (var item in Owner.ListItems)
+                  for(int index = 0; index < Owner.ListItems.Count; ++index)
                   {
-                    if (index++ % 2 != 0)
-                      graphics.FillRectangle(alternateBrush, itemBounds);
-
-                    var nameBounds = new RectangleF(itemBounds.X + 22, itemBounds.Y, itemBounds.Width - 22, itemBounds.Height);
-
-                    if (GH_Canvas.ZoomFadeMedium > 0 && clip.Width > 250f)
+                    if (graphics.IsVisible(itemBounds))
                     {
-                      var typeBounds = nameBounds; typeBounds.Width -= 2;
-                      graphics.DrawString(item.Value.TypeName, GH_FontServer.StandardAdjusted, Brushes.LightGray, typeBounds, typeFormat);
-                    }
+                      var item = Owner.ListItems[index];
 
-                    if (item.Selected)
-                    {
-                      if (GH_Canvas.ZoomFadeMedium > 0 /*&& Owner.DataType == GH_ParamData.remote*/)
+                      if (index % 2 != 0)
+                        graphics.FillRectangle(alternateBrush, itemBounds);
+
+                      var nameBounds = new RectangleF(itemBounds.X + 22, itemBounds.Y + 1, itemBounds.Width - 22, (itemBounds.Height - 2) / Owner.LayoutLevel);
+
+                      if (GH_Canvas.ZoomFadeMedium > 0 && clip.Width > 250f && Owner.LayoutLevel == 1)
                       {
-                        var highlightBounds = itemBounds;
-                        highlightBounds.Inflate(-1, -1);
-                        GH_GraphicsUtil.RenderHighlightBox(graphics, GH_Convert.ToRectangle(highlightBounds), 2, true, true);
+                        var typeBounds = nameBounds; typeBounds.Width -= 2;
+                        graphics.DrawString(item.Value.TypeName, GH_FontServer.StandardAdjusted, Brushes.LightGray, typeBounds, typeFormat);
                       }
 
-                      var markBounds = new RectangleF(itemBounds.X, itemBounds.Y, 22, itemBounds.Height);
-                      RenderCheckMark(graphics, markBounds, textColor);
-                    }
+                      if (item.Selected)
+                      {
+                        if (GH_Canvas.ZoomFadeMedium > 0 /*&& Owner.DataType == GH_ParamData.remote*/)
+                        {
+                          var highlightBounds = itemBounds;
+                          highlightBounds.Inflate(-1, -1);
+                          GH_GraphicsUtil.RenderHighlightBox(graphics, GH_Convert.ToRectangle(highlightBounds), 2, true, true);
+                        }
 
-                    {
-                      if (item.Name is null)
-                        graphics.DrawString("<null>", GH_FontServer.StandardAdjusted, Brushes.LightGray, nameBounds, nameFormat);
-                      else if (item.Name.Length == 0)
-                        graphics.DrawString("<empty>", GH_FontServer.StandardAdjusted, Brushes.LightGray, nameBounds, nameFormat);
-                      else
-                        graphics.DrawString(item.Name, GH_FontServer.StandardAdjusted, Brushes.Black, nameBounds, nameFormat);
+                        var markBounds = new RectangleF(itemBounds.X + 1, itemBounds.Y, 22, itemBounds.Height);
+                        RenderCheckMark(graphics, markBounds, textColor);
+                      }
+
+                      {
+                        string name = item.Name;
+                        var brush = Brushes.Black;
+
+                        if (item.Name is null)
+                        {
+                          name = "<null>";
+                          brush = Brushes.LightGray;
+                        }
+                        else if (item.Name.Length == 0)
+                        {
+                          name = "<empty>";
+                          brush = Brushes.LightGray;
+                        }
+
+                        graphics.DrawString(name, GH_FontServer.StandardAdjusted, brush, nameBounds, nameFormat);
+
+                        if (Owner.LayoutLevel > 1)
+                        {
+                          var text = ((object) item.Value).ToString();
+                          if (text == item.Name)
+                            text = item.Value.TypeName;
+
+                          var textBounds = new RectangleF
+                          {
+                            X = nameBounds.X,
+                            Y = nameBounds.Y + 16,
+                            Width = nameBounds.Width,
+                            Height = nameBounds.Height
+                          };
+
+                          graphics.DrawString(text, GH_FontServer.ConsoleSmallAdjusted, textBrush, textBounds, textFormat);
+                        }
+                      }
                     }
 
                     itemBounds.Y += itemBounds.Height;
@@ -798,6 +851,7 @@ namespace Grasshopper.Special
               {
                 var pattern = new SearchInputBox(this);
                 pattern.ShowTextInputBox(canvas, Owner.SearchPattern, true, true, canvas.Viewport.XFormMatrix(GH_Viewport.GH_DisplayMatrix.CanvasToControl));
+
                 return GH_ObjectResponse.Handled;
               }
 
@@ -838,7 +892,13 @@ namespace Grasshopper.Special
 
         protected override void HandleTextInputAccepted(string text)
         {
-          if (attributes.Owner.SearchPattern == text) return;
+          attributes.ScrollRatio = 0.0f;
+
+          if (attributes.Owner.SearchPattern == text)
+          {
+            attributes.Owner.OnDisplayExpired(true);
+            return;
+          }
 
           attributes.Owner.RecordUndoEvent("Set Search Pattern");
           attributes.Owner.SearchPattern = text;
@@ -864,6 +924,10 @@ namespace Grasshopper.Special
       reader.TryGetInt32("Culling", ref culling);
       Culling = (DataCulling) culling;
 
+      int layoutLevel = 1;
+      reader.TryGetInt32("LayoutLevel", ref layoutLevel);
+      LayoutLevel = Rhino.RhinoMath.Clamp(layoutLevel, 1, 2);
+
       return true;
     }
 
@@ -877,6 +941,9 @@ namespace Grasshopper.Special
 
       if (Culling != DefaultCulling)
         writer.SetInt32("Culling", (int) Culling);
+
+      if (LayoutLevel != 1)
+        writer.SetInt32("LayoutLevel", LayoutLevel);
 
       return true;
     }

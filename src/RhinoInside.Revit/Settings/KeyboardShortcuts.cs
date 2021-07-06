@@ -76,60 +76,69 @@ namespace RhinoInside.Revit.Settings
       if (!File.Exists(keyboardShortcutsPath))
         keyboardShortcutsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Autodesk", $"RVT {AddIn.Host.Services.VersionNumber}", "UserDataCache", "KeyboardShortcuts.xml");
 
-      if (!LoadFrom(keyboardShortcutsPath, out var shortcuts))
-        LoadFromResources($"Resources.RVT{AddIn.Host.Services.VersionNumber}.KeyboardShortcuts.xml", out shortcuts);
-
-#if DEBUG
-      // Those lines generate the KeyboardShortcuts.xml template file when new Revit version is supported
-      string keyboardShortcutsTemplatePath = Path.Combine(AddIn.SourceCodePath, "Resources", $"RVT{AddIn.Host.Services.VersionNumber}", "KeyboardShortcuts.xml");
-      var info = new FileInfo(keyboardShortcutsTemplatePath);
-      if (info.Length == 0)
-      {
-        var shortcutsSummary = new Shortcuts();
-        foreach (var shortcutItem in shortcuts.OrderBy(x => x.CommandId))
-        {
-          if (!string.IsNullOrEmpty(shortcutItem.Shortcuts))
-          {
-            var shortcutDefinition = new ShortcutItem
-            {
-              CommandId = shortcutItem.CommandId,
-              Shortcuts = shortcutItem.Shortcuts
-            };
-            shortcutsSummary.Add(shortcutDefinition);
-          }
-        }
-
-        SaveAs(shortcutsSummary, keyboardShortcutsTemplatePath);
-      }
-#endif
-
-      bool shortcutUpdated = false;
       try
       {
-        var shortcutItem = shortcuts.Where(x => x.CommandId == commandId).First();
-        if (shortcutItem.Shortcuts is null)
+        if (!LoadFrom(keyboardShortcutsPath, out var shortcuts))
+          LoadFromResources($"Resources.RVT{AddIn.Host.Services.VersionNumber}.KeyboardShortcuts.xml", out shortcuts);
+
+#if DEBUG
+        // Those lines generate the KeyboardShortcuts.xml template file when new Revit version is supported
+        string keyboardShortcutsTemplatePath = Path.Combine(AddIn.SourceCodePath, "Resources", $"RVT{AddIn.Host.Services.VersionNumber}", "KeyboardShortcuts.xml");
+        var info = new FileInfo(keyboardShortcutsTemplatePath);
+        if (info.Length == 0)
         {
-          shortcutItem.Shortcuts = commandShortcuts;
+          var shortcutsSummary = new Shortcuts();
+          foreach (var shortcutItem in shortcuts.OrderBy(x => x.CommandId))
+          {
+            if (!string.IsNullOrEmpty(shortcutItem.Shortcuts))
+            {
+              var shortcutDefinition = new ShortcutItem
+              {
+                CommandId = shortcutItem.CommandId,
+                Shortcuts = shortcutItem.Shortcuts
+              };
+              shortcutsSummary.Add(shortcutDefinition);
+            }
+          }
+
+          SaveAs(shortcutsSummary, keyboardShortcutsTemplatePath);
+        }
+#endif
+
+        bool shortcutUpdated = false;
+        try
+        {
+          var shortcutItem = shortcuts.Where(x => x.CommandId == commandId).First();
+          if (shortcutItem.Shortcuts is null)
+          {
+            shortcutItem.Shortcuts = commandShortcuts;
+            shortcutUpdated = true;
+          }
+        }
+        catch (InvalidOperationException)
+        {
+          var shortcutItem = new ShortcutItem()
+          {
+            CommandName = commandName,
+            CommandId = commandId,
+            Shortcuts = commandShortcuts,
+            Paths = $"{tabName}>{panelName}"
+          };
+          shortcuts.Add(shortcutItem);
           shortcutUpdated = true;
         }
+
+        if (shortcutUpdated)
+          SaveAs(shortcuts, Path.Combine(AddIn.Host.Services.CurrentUsersDataFolderPath, "KeyboardShortcuts.xml"));
+
+        return shortcutUpdated;
       }
-      catch (InvalidOperationException)
+      catch (Exception e)
       {
-        var shortcutItem = new ShortcutItem()
-        {
-          CommandName = commandName,
-          CommandId = commandId,
-          Shortcuts = commandShortcuts,
-          Paths = $"{tabName}>{panelName}"
-        };
-        shortcuts.Add(shortcutItem);
-        shortcutUpdated = true;
+        AddIn.ReportException(e, AddIn.Host, new string[] { keyboardShortcutsPath });
       }
 
-      if (shortcutUpdated)
-        SaveAs(shortcuts, Path.Combine(AddIn.Host.Services.CurrentUsersDataFolderPath, "KeyboardShortcuts.xml"));
-
-      return shortcutUpdated;
+      return false;
     }
  }
 }
