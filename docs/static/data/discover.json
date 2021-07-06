@@ -750,6 +750,24 @@
         ]
     },
     {
+        "title": "Grasshopper BIM objects with VisualARQ",
+        "url": "https://youtu.be/y6B2W_gggME",
+        "thumbnail": "https://i3.ytimg.com/vi/y6B2W_gggME/maxresdefault.jpg",
+        "author": "VisualARQ",
+        "authorUrl": "https://www.visualarq.com/",
+        "description": "This video tutorial shows how to work with the VisualARQ Grasshopper styles (VisualARQ objects driven by Grasshopper definitions), running VisualARQ inside Revit. This way, you can work with the VisualARQ parametric objects, and generate them in Revit automatically as Revit Furniture object types. This connection is possible with the VisualARQ Grasshopper components.",
+        "kinds": [
+            "example",
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "tutorial",
+            "BIM",
+            "plug-in"
+        ]
+    },
+    {
         "title": "Auto-update Revit Sheets Using Grasshopper",
         "url": "https://youtu.be/kI6YWoONI9s",
         "thumbnail": "https://i3.ytimg.com/vi/kI6YWoONI9s/maxresdefault.jpg",
