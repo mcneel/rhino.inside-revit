@@ -3,14 +3,6 @@ title: {{ site.terms.rir }}
 layout: ltr/page-full
 ---
 
-{% capture banner_title %}
-Introducing {{ site.terms.rir }} {{ site.versions.beta.name }}
-{% endcapture %}
-
-{% capture banner_note %}
-The {{ site.terms.rir }} project is an exciting new development sponsored by {{ site.terms.mcneel }} that brings the power of {{ site.terms.rhino }} and Grasshopper to the {{ site.terms.revit }} environment
-{% endcapture %}
-
 {% capture rhino_note %}
 {{ site.terms.rhino }} is a surface modeling application with an incredibly fast and accurate freeform geometry engine that also supports meshes and point clouds. Rhino supports more that 40+ file formats, making it a great interoperability tool. It is easy to learn, very customizable, extensible, and has a very strong third-party ecosystem with over a thousand add-ons providing lots of additional capabilities
 {% endcapture %}
@@ -27,13 +19,11 @@ Grasshopper is a visual programming environment tightly integrated with Rhino’
 {{ site.terms.rir }} provides translation API to allow creating custom conversion workflows between your Revit data and Rhino geometry and metadata. This includes an advanced geometry conversion API to safely translate advanced Rhino shapes into Revit. The API is easily accessible from Grasshopper's Python or C# scripting components
 {% endcapture %}
 
-{% include ltr/home_beta.html
+{% include ltr/home.html
    inside_text=".Inside.Revit"
    version=site.versions.beta
 
-   banner_header=banner_title
-   banner_text=banner_note
-   banner_img="/static/images/home/background.gif"
+   banner_video="https://www.youtube.com/embed/KUHdJqVyhZI?showinfo=0&rel=0&modestbranding=1"
 
    rhino_header="Rhinoceros 7"
    rhino_text=rhino_note

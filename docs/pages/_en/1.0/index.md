@@ -27,7 +27,7 @@ Grasshopper is a visual programming environment tightly integrated with Rhino’
 {{ site.terms.rir }} provides translation API to allow creating custom conversion workflows between your Revit data and Rhino geometry and metadata. This includes an advanced geometry conversion API to safely translate advanced Rhino shapes into Revit. The API is easily accessible from Grasshopper's Python or C# scripting components
 {% endcapture %}
 
-{% include ltr/home_v1.html
+{% include ltr/home.html
    inside_text=".Inside.Revit"
    version=site.versions.one
 

@@ -3,7 +3,7 @@ title: 101 Class LiveAcademy
 ---
 
 <!-- intro video -->
-![]({{ "/static/images/community/liveacademy-oliver-101.jpg" | prepend: site.baseurl }})
+![]({{ "/static/images/discover/liveacademy-oliver-101.jpg" | prepend: site.baseurl }})
 
 In this 1-hour course Oliver Thomas from BIG will cover the basics of the Rhino.Inside interface, components and workflows whilst working on a real-world project workflow.
 

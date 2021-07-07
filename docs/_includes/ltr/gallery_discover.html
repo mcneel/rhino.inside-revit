@@ -149,7 +149,7 @@
     }
 
     async function getDiscoverCards(filter) {
-        var dataUrl = '/static/data/discover_beta.json';
+        var dataUrl = '/static/data/discover.json';
         dataUrl = proxifyUrls(dataUrl);
 
         console.log(`fetching from ${dataUrl}`)
@@ -164,6 +164,8 @@
     var app;
 
     getDiscoverCards().then((cards) => {
+        // filter for version
+        cards = cards.filter(c => c.versions.includes(activeVersion));
         // cleanup the links
         cards.forEach((c) => {
             c.thumbnail = proxifyUrls(c.thumbnail);
