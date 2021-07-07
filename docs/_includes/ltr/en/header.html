@@ -1,41 +1,53 @@
 <header class="site-header">
-    <!-- Logo -->
-    <a id="cat_homelogo" class="site-logo" href="#">
-        <img src="{{ site.baseurl }}/{{ site.logo }}">
-    </a>
-
-    <!-- Title -->
-    <a id="cat_homelink" class="site-title" href="#">{{ site.title }}</a>
-
-    <!-- Version selector dropdown -->
-    <a id="versionSelector" class="dropdown-toggle version-selector" data-toggle="dropdown" aria-haspopup="true"
-        aria-expanded="false"></a>
-    <div class="dropdown-menu" aria-labelledby="versionSelector">
-        {% for version in site.versions %}
-        <!-- grab name and link for each version -->
-        <a class="version-link" href="#" onclick="navigateTo('', '{{ version[1].version }}')">{{ version[1].name }}</a>
-        {% endfor %}
+    {% if site.version != page.version %}
+    <div class="site-header-messagebar">
+        <strong>WARNING:</strong> You're viewing an older version of this page! <a href="#" onclick="navigateTo('', '{{ site.version }}')">View the latest instead</a>
     </div>
+    {% else %}
+    <div class="site-header-topbar"></div>
+    {% endif %}
 
-    <!-- Navigation Bar -->
-    <nav class="site-nav">
-        <img class="menu-icon" src="{{ site.baseurl }}/assets/img/burger.svg" />
-        {% assign pages = site.pages | sort:"order"  %}
-        <div class="trigger">
-            <a id="cat_starting" class="page-link" href="#">Getting Started</a>
-            <a id="cat_guides" class="page-link" href="#">Guides</a>
-            <a id="cat_discover" class="page-link" href="#">Discover</a>
-            <a class="extern-link" href="{{ site.forum_url }}" target="_blank" title="Discussion Forum">Forums</a>
-            <a id="cat_reference" class="page-link" href="#">Reference</a>
+    <div class="site-header-block">
+        <!-- Logo -->
+        <a id="cat_homelogo" class="site-logo" href="#">
+            <img src="{{ site.baseurl }}/{{ site.logo }}">
+        </a>
 
-            <a class="extern-link" href="{{ site.youtube_url }}" target="_blank" title="YouTube Channel">
-                <span class="img-button-title">YouTube</span>
-                <img class="youtube-link" width="28" height="28" src="{{ site.baseurl }}/assets/img/youtube.svg" />
-            </a>
-            <a class="extern-link" href="{{ site.repo_url }}" target="_blank" title="Source Code Repository on Github">
-                <span class="img-button-title">Github</span>
-                <img class="github-link" width="28" height="28" src="{{ site.baseurl }}/assets/img/github.svg" />
-            </a>
+        <!-- Title -->
+        <a id="cat_homelink" class="site-title" href="#">{{ site.title }}</a>
+
+        <!-- Version selector dropdown -->
+        <a id="versionSelector" class="dropdown-toggle version-selector" data-toggle="dropdown" aria-haspopup="true"
+            aria-expanded="false"></a>
+        <div class="dropdown-menu" aria-labelledby="versionSelector">
+            <!-- grab name and link for each version -->
+            {% for version in site.versions %}
+            <a class="version-link" href="#"
+                onclick="navigateTo('', '{{ version[1].version }}')">{{ version[1].name }}</a>
+            {% endfor %}
         </div>
-    </nav>
+
+        <!-- Navigation Bar -->
+        <nav class="site-nav">
+            <img class="menu-icon" src="{{ site.baseurl }}/assets/img/burger.svg" />
+            {% assign pages = site.pages | sort:"order"  %}
+            <div class="trigger">
+                <a id="cat_starting" class="page-link" href="#">Getting Started</a>
+                <a id="cat_guides" class="page-link" href="#">Guides</a>
+                <a id="cat_discover" class="page-link" href="#">Discover</a>
+                <a class="extern-link" href="{{ site.forum_url }}" target="_blank" title="Discussion Forum">Forums</a>
+                <a id="cat_reference" class="page-link" href="#">Reference</a>
+
+                <a class="extern-link" href="{{ site.youtube_url }}" target="_blank" title="YouTube Channel">
+                    <span class="img-button-title">YouTube</span>
+                    <img class="youtube-link" width="28" height="28" src="{{ site.baseurl }}/assets/img/youtube.svg" />
+                </a>
+                <a class="extern-link" href="{{ site.repo_url }}" target="_blank"
+                    title="Source Code Repository on Github">
+                    <span class="img-button-title">Github</span>
+                    <img class="github-link" width="28" height="28" src="{{ site.baseurl }}/assets/img/github.svg" />
+                </a>
+            </div>
+        </nav>
+    </div>
 </header>

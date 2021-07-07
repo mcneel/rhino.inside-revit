@@ -19,11 +19,17 @@ function getPageLink(pageName, pageVersion) {
 
 // navigate to page with active version
 function navigateTo(pageName, pageVersion) {
-    window.location.href = getPageLink(pageName, pageVersion);
+    console.log(`Active page: ${determineActivePage()}`);
+    window.location.href = getPageLink(determineActivePage(), pageVersion);
+}
+
+//extract page from url
+function determineActivePage() {
+    return window.location.href.split(`${activeVersion}/`)[1];
 }
 
 // extract active version from url
-function detemineActiveVersion() {
+function determineActiveVersion() {
     var url = window.location.href;
     var version = activeVersion;
     console.log(url);
