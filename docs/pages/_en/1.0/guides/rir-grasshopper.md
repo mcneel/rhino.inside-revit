@@ -68,6 +68,18 @@ Grasshopper solver can also be toggled from the *Rhinoceros* tab in Revit. This 
 
 ![]({{ "/static/images/guides/rir-grasshopper-solver.png" | prepend: site.baseurl }})
 
+## Element Tracking
+
+// TODO: 
+
+## Unit Systems
+
+// TODO: 
+
+## Tolerances
+
+// TODO: 
+
 ## Grasshopper Performance
 
 As mentioned in the sections above, paying close attention to the items below will help increasing the performance of Grasshopper definition:
