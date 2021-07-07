@@ -4,26 +4,26 @@ namespace RhinoInside.Revit.GH.Components
 {
   class FamilyLoadOptions : DB.IFamilyLoadOptions
   {
-    readonly bool OverrideFamily;
-    readonly bool OverrideParameters;
+    readonly bool OverwriteFamily;
+    readonly bool OverwriteParameters;
 
-    public FamilyLoadOptions(bool overrideFamily, bool overrideParameters)
+    public FamilyLoadOptions(bool overwriteFamily, bool overwriteParameters)
     {
-      OverrideFamily = overrideFamily;
-      OverrideParameters = overrideParameters;
+      OverwriteFamily = overwriteFamily;
+      OverwriteParameters = overwriteParameters;
     }
 
     bool DB.IFamilyLoadOptions.OnFamilyFound(bool familyInUse, out bool overwriteParameterValues)
     {
-      overwriteParameterValues = !familyInUse | OverrideParameters;
-      return !familyInUse | OverrideFamily;
+      overwriteParameterValues = !familyInUse | OverwriteParameters;
+      return !familyInUse | OverwriteFamily;
     }
 
     bool DB.IFamilyLoadOptions.OnSharedFamilyFound(DB.Family sharedFamily, bool familyInUse, out DB.FamilySource source, out bool overwriteParameterValues)
     {
       source = DB.FamilySource.Family;
-      overwriteParameterValues = !familyInUse | OverrideParameters;
-      return !familyInUse | OverrideFamily;
+      overwriteParameterValues = !familyInUse | OverwriteParameters;
+      return !familyInUse | OverwriteFamily;
     }
   }
 }

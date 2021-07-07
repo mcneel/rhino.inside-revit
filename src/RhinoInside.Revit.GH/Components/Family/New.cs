@@ -52,21 +52,23 @@ namespace RhinoInside.Revit.GH.Components
       (
         new Param_Boolean()
         {
-          Name = "Override Family",
-          NickName = "OF",
-          Description = "Override Family",
+          Name = "Overwrite",
+          NickName = "O",
+          Description = "Overwrite Family",
         }.
-        SetDefaultVale(false)
+        SetDefaultVale(false),
+        ParamRelevance.Primary
       ),
       new ParamDefinition
       (
         new Param_Boolean()
         {
-          Name = "Override Parameters",
+          Name = "Overwrite Parameters",
           NickName = "OP",
-          Description = "Override Parameters",
+          Description = "Overwrite Parameters",
         }.
-        SetDefaultVale(false)
+        SetDefaultVale(false),
+        ParamRelevance.Occasional
       ),
       new ParamDefinition
       (
@@ -112,6 +114,17 @@ namespace RhinoInside.Revit.GH.Components
         }
       )
     };
+
+    public override void VariableParameterMaintenance()
+    {
+      if (Params.Input<IGH_Param>("Override Family") is IGH_Param overrideFamily)
+        overrideFamily.Name = "Overwrite";
+
+      if (Params.Input<IGH_Param>("Override Parameters") is IGH_Param overrideParameters)
+        overrideParameters.Name = "Overwrite Parameters";
+
+      base.VariableParameterMaintenance();
+    }
 
     public static Dictionary<string, DB.ElementId> GetMaterialIdsByName(DB.Document doc)
     {
@@ -506,25 +519,13 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
-        return;
-
-      var scaleFactor = 1.0 / Revit.ModelUnits;
-
-      var overrideFamily = false;
-      if (!DA.GetData("Override Family", ref overrideFamily))
-        return;
-
-      var overrideParameters = false;
-      if (!DA.GetData("Override Parameters", ref overrideParameters))
-        return;
-
-      var name = string.Empty;
-      if (!DA.GetData("Name", ref name))
-        return;
-
-      var categoryId = DB.ElementId.InvalidElementId;
-      DA.GetData("Category", ref categoryId);
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
+      if (!Params.TryGetData(DA, "Overwrite", out bool? overwrite)) return;
+      if (!overwrite.HasValue) overwrite = false;
+      if (!Params.TryGetData(DA, "Overwrite Parameters", out bool? overwriteParameters)) return;
+      if (!overwriteParameters.HasValue) overwriteParameters = overwrite;
+      if (!Params.GetData(DA, "Name", out string name)) return;
+      if (!Params.GetData(DA, "Category", out DB.ElementId categoryId)) categoryId = DB.ElementId.InvalidElementId;
       var updateCategory = categoryId != DB.ElementId.InvalidElementId;
 
       var geometry = new List<IGH_GeometricGoo>();
@@ -549,7 +550,7 @@ namespace RhinoInside.Revit.GH.Components
         updateCategory &= family.FamilyCategory.Id != categoryId;
       }
 
-      if (familyIsNew || (overrideFamily && (updateCategory || updateGeometry)))
+      if (familyIsNew || (overwrite == true && (updateCategory || updateGeometry)))
       {
         try
         {
@@ -639,7 +640,7 @@ namespace RhinoInside.Revit.GH.Components
                 CommitTransaction(familyDoc, transaction);
               }
 
-              family = familyDoc.LoadFamily(doc, new FamilyLoadOptions(overrideFamily, overrideParameters));
+              family = familyDoc.LoadFamily(doc, new FamilyLoadOptions(overwrite == true, overwriteParameters == true));
             }
             finally
             {
@@ -667,7 +668,7 @@ namespace RhinoInside.Revit.GH.Components
           AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
         }
       }
-      else if (!overrideFamily)
+      else if (overwrite != true)
       {
         AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Family '{name}' already loaded!");
       }

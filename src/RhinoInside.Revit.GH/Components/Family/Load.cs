@@ -39,21 +39,23 @@ namespace RhinoInside.Revit.GH.Components
       (
         new Param_Boolean()
         {
-          Name = "Override Family",
-          NickName = "OF",
-          Description = "Override Family",
+          Name = "Overwrite",
+          NickName = "O",
+          Description = "Overwrite Family",
         }.
-        SetDefaultVale(false)
+        SetDefaultVale(false),
+        ParamRelevance.Primary
       ),
       new ParamDefinition
       (
         new Param_Boolean()
         {
-          Name = "Override Parameters",
+          Name = "Overwrite Parameters",
           NickName = "OP",
-          Description = "Override Parameters",
+          Description = "Overwrite Parameters",
         }.
-        SetDefaultVale(false)
+        SetDefaultVale(false),
+        ParamRelevance.Occasional
       ),
     };
 
@@ -70,28 +72,31 @@ namespace RhinoInside.Revit.GH.Components
       )
     };
 
+    public override void VariableParameterMaintenance()
+    {
+      if (Params.Input<IGH_Param>("Override Family") is IGH_Param overrideFamily)
+        overrideFamily.Name = "Overwrite";
+
+      if (Params.Input<IGH_Param>("Override Parameters") is IGH_Param overrideParameters)
+        overrideParameters.Name = "Overwrite Parameters";
+
+      base.VariableParameterMaintenance();
+    }
+
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
-        return;
-
-      var filePath = string.Empty;
-      if (!DA.GetData("Path", ref filePath))
-        return;
-
-      var overrideFamily = false;
-      if (!DA.GetData("Override Family", ref overrideFamily))
-        return;
-
-      var overrideParameters = false;
-      if (!DA.GetData("Override Parameters", ref overrideParameters))
-        return;
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
+      if (!Params.GetData(DA, "Path", out string filePath)) return;
+      if (!Params.TryGetData(DA, "Overwrite", out bool? overwrite)) return;
+      if (!overwrite.HasValue) overwrite = false;
+      if (!Params.TryGetData(DA, "Overwrite Parameters", out bool? overwriteParameters)) return;
+      if (!overwriteParameters.HasValue) overwriteParameters = overwrite;
 
       using (var transaction = NewTransaction(doc))
       {
         transaction.Start(Name);
 
-        if (doc.LoadFamily(filePath, new FamilyLoadOptions(overrideFamily, overrideParameters), out var family))
+        if (doc.LoadFamily(filePath, new FamilyLoadOptions(overwrite == true, overwriteParameters == true), out var family))
         {
           CommitTransaction(doc, transaction);
         }
@@ -100,7 +105,7 @@ namespace RhinoInside.Revit.GH.Components
           var name = Path.GetFileNameWithoutExtension(filePath);
           doc.TryGetFamily(name, out family);
 
-          if (family is object && overrideFamily == false)
+          if (family is object && overwrite != true)
             AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Family '{name}' already loaded!");
         }
 
