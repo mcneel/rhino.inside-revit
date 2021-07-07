@@ -38,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components
           FileFilter = "Project File (*.rvt)|*.rvt"
         }
       ),
-      ParamDefinition.Create<Param_Boolean>("Override File", "OF", "Override file on disk", defaultValue: false, GH_ParamAccess.item),
+      ParamDefinition.Create<Param_Boolean>("Overwrite", "OF", "Overwrite file on disk", defaultValue: false, GH_ParamAccess.item),
       ParamDefinition.Create<Param_Boolean>("Compact", "C", "Compact the file", defaultValue: false, GH_ParamAccess.item),
       ParamDefinition.Create<Param_Integer>("Backups", "B", "The maximum number of backups to keep on disk", -1, GH_ParamAccess.item),
       ParamDefinition.Create<Parameters.View>("View", "View", "The view that will be used to generate the file preview", GH_ParamAccess.item, optional: true)
@@ -58,8 +58,8 @@ namespace RhinoInside.Revit.GH.Components
       var filePath = string.Empty;
       DA.GetData("Path", ref filePath);
 
-      var overrideFile = false;
-      if (!DA.GetData("Override File", ref overrideFile))
+      var overwrite = false;
+      if (!DA.GetData("Overwrite", ref overwrite))
         return;
 
       var compact = false;
@@ -83,7 +83,7 @@ namespace RhinoInside.Revit.GH.Components
 
         if (string.IsNullOrEmpty(filePath))
         {
-          if (overrideFile)
+          if (overwrite)
           {
             using (var saveOptions = new DB.SaveOptions() { Compact = compact })
             {
@@ -112,7 +112,7 @@ namespace RhinoInside.Revit.GH.Components
                 filePath += ".rvt";
             }
 
-            using (var saveAsOptions = new DB.SaveAsOptions() { OverwriteExistingFile = overrideFile, Compact = compact })
+            using (var saveAsOptions = new DB.SaveAsOptions() { OverwriteExistingFile = overwrite, Compact = compact })
             {
               if (backups > -1)
                 saveAsOptions.MaximumBackups = backups;
