@@ -46,13 +46,34 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected PersistentParam(string name, string nickname, string description, string category, string subcategory) :
       base(name, nickname, description, category, subcategory)
-    { }
+    {
+      Debug.Assert(GetType().IsPublic, $"{GetType()} is not public, Grasshopper will fail deserializing this type.");
+
+      ComponentVersion = CurrentVersion;
+
+      if (Obsolete)
+      {
+        foreach (var obsolete in GetType().GetCustomAttributes(typeof(ObsoleteAttribute), false).Cast<ObsoleteAttribute>())
+        {
+          if (!string.IsNullOrEmpty(obsolete.Message))
+            Description = obsolete.Message + Environment.NewLine + Description;
+        }
+      }
+    }
 
     #region IO
+    protected virtual Version CurrentVersion => GetType().Assembly.GetName().Version;
+    protected Version ComponentVersion { get; private set; }
+
     public override bool Read(GH_IReader reader)
     {
       if (!base.Read(reader))
         return false;
+
+      string version = "0.0.0.0";
+      reader.TryGetString("ComponentVersion", ref version);
+      ComponentVersion = Version.TryParse(version, out var componentVersion) ?
+        componentVersion : new Version(0, 0, 0, 0);
 
       int culling = (int) DataCulling.None;
       reader.TryGetInt32("Culling", ref culling);
@@ -67,6 +88,11 @@ namespace RhinoInside.Revit.GH.Parameters
 
       if (!base.Write(writer))
         return false;
+
+      if (ComponentVersion > CurrentVersion)
+        writer.SetString("ComponentVersion", ComponentVersion.ToString());
+      else
+        writer.SetString("ComponentVersion", CurrentVersion.ToString());
 
       if (Culling != DataCulling.None)
         writer.SetInt32("Culling", (int) Culling);

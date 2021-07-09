@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Components
       protected set => status = value;
     }
 
-    internal new class Attributes : ZuiComponent.Attributes
+    internal new class Attributes : ZuiAttributes
     {
       public Attributes(TransactionalComponent owner) : base(owner) { }
 

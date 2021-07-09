@@ -184,20 +184,29 @@ namespace RhinoInside.Revit.GH.Parameters
     #endregion
   }
 
-  public class ParameterValue : GH_Param<Types.ParameterValue>
+  public class ParameterValue : Param<Types.ParameterValue>
   {
     public override Guid ComponentGuid => new Guid("3E13D360-4B29-42C7-8F3E-2AB8F74B4EA8");
     public override GH_Exposure Exposure => GH_Exposure.hidden;
-    protected override System.Drawing.Bitmap Icon => ((System.Drawing.Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
-                                                     ImageBuilder.BuildIcon("#");
+    protected override string IconTag => "#";
+
     protected override Types.ParameterValue PreferredCast(object data)
     {
       return data is DB.Parameter parameter ? new Types.ParameterValue(parameter) : default;
     }
 
-    public ParameterValue() : base("ParameterValue", "ParameterValue", "Contains a collection of Revit parameter values on an element.", "Params", "Revit Primitives", GH_ParamAccess.item) { }
-    protected ParameterValue(string name, string nickname, string description, string category, string subcategory, GH_ParamAccess access) :
-    base(name, nickname, description, category, subcategory, access)
+    public ParameterValue() : base
+    (
+      name: "Parameter Value",
+      nickname: "Parameter Value",
+      description: "Contains a collection of Revit parameter values on an element.",
+      category: "Params",
+      subcategory: "Revit Primitives"
+    )
+    { }
+
+    protected ParameterValue(string name, string nickname, string description, string category, string subcategory) :
+    base(name, nickname, description, category, subcategory)
     { }
 
     protected override string Format(Types.ParameterValue data)
@@ -224,7 +233,16 @@ namespace RhinoInside.Revit.GH.Parameters
   {
     public override Guid ComponentGuid => new Guid("43F0E4E9-3DC4-4965-AB80-07E28E203A91");
 
-    public ParameterParam() : base(string.Empty, string.Empty, string.Empty, "Params", "Revit Primitives", GH_ParamAccess.item) { }
+    public ParameterParam() : base
+    (
+      name: string.Empty,
+      nickname: string.Empty,
+      description: string.Empty,
+      category: "Params",
+      subcategory: "Revit Primitives"
+    )
+    { }
+
     public ParameterParam(DB.Parameter p) : this()
     {
       ParameterName = p.Definition.Name;

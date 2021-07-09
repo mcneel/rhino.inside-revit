@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using DB = Autodesk.Revit.DB;
@@ -33,6 +34,8 @@ namespace RhinoInside.Revit.GH.Components
     protected Component(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory)
     {
+      ComponentVersion = CurrentVersion;
+
       if (Obsolete)
       {
         foreach (var obsolete in GetType().GetCustomAttributes(typeof(ObsoleteAttribute), false).Cast<ObsoleteAttribute>())
@@ -45,6 +48,37 @@ namespace RhinoInside.Revit.GH.Components
 
     static readonly string[] keywords = new string[] { "Revit" };
     public override IEnumerable<string> Keywords => base.Keywords is null ? keywords : Enumerable.Concat(base.Keywords, keywords);
+
+    #region IO
+    protected virtual Version CurrentVersion => GetType().Assembly.GetName().Version;
+    protected Version ComponentVersion { get; private set; }
+
+    public override bool Read(GH_IReader reader)
+    {
+      if (!base.Read(reader))
+        return false;
+
+      string version = "0.0.0.0";
+      reader.TryGetString("ComponentVersion", ref version);
+      ComponentVersion = Version.TryParse(version, out var componentVersion) ?
+        componentVersion : new Version(0, 0, 0, 0);
+
+      return true;
+    }
+
+    public override bool Write(GH_IWriter writer)
+    {
+      if (!base.Write(writer))
+        return false;
+
+      if (ComponentVersion > CurrentVersion)
+        writer.SetString("ComponentVersion", ComponentVersion.ToString());
+      else
+        writer.SetString("ComponentVersion", CurrentVersion.ToString());
+
+      return true;
+    }
+    #endregion
 
     #region IGH_ActiveObject
     Exception unhandledException;
