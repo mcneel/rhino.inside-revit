@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
@@ -12,7 +11,6 @@ using DB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Components
 {
   using Convert.Geometry;
-  using Exceptions;
   using External.DB.Extensions;
   using Kernel.Attributes;
 
@@ -702,7 +700,7 @@ namespace RhinoInside.Revit.GH.Components
         {
           action(doc, ref element);
         }
-        catch (CancelException e)
+        catch (RhinoInside.Revit.Exceptions.CancelException e)
         {
           AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
           element = null;
@@ -716,11 +714,6 @@ namespace RhinoInside.Revit.GH.Components
         catch (Autodesk.Revit.Exceptions.ApplicationException e)
         {
           AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
-          element = null;
-        }
-        catch (System.ComponentModel.WarningException e)
-        {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, e.Message);
           element = null;
         }
         catch (System.ArgumentNullException)

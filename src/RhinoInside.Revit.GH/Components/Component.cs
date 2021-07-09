@@ -7,6 +7,41 @@ using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using DB = Autodesk.Revit.DB;
 
+namespace RhinoInside.Revit.GH.Exceptions
+{
+  /// <summary>
+  /// The exception that is thrown when a non-fatal warning occurs.
+  /// The current operation is canceled but what is already committed remains valid.
+  /// </summary>
+  /// <remarks>
+  /// If it is catched inside a loop is safe to continue looping over the rest of elements.
+  /// </remarks>
+  public class RuntimeWarningException : Exception
+  {
+    public RuntimeWarningException() : base(string.Empty) { }
+    public RuntimeWarningException(string message) : base(message) { }
+    public RuntimeWarningException(string message, Exception inner) : base(message, inner)
+    {
+    }
+  }
+
+  /// <summary>
+  /// The exception that is thrown when a non-fatal error occurs.
+  /// The current operation is canceled but what is already committed remains valid.
+  /// </summary>
+  /// <remarks>
+  /// If it is catched inside a loop is safe to continue looping over the rest of elements.
+  /// </remarks>
+  public class RuntimeErrorException : Exception
+  {
+    public RuntimeErrorException() : base(string.Empty) { }
+    public RuntimeErrorException(string message) : base(message) { }
+    public RuntimeErrorException(string message, Exception inner) : base(message, inner)
+    {
+    }
+  }
+}
+
 namespace RhinoInside.Revit.GH.Components
 {
   public abstract class GH_Component : Grasshopper.Kernel.GH_Component
@@ -23,7 +58,7 @@ namespace RhinoInside.Revit.GH.Components
     protected virtual string IconTag => GetType().Name.Substring(0, 1);
 
 #if DEBUG
-    // Placeholders for breakpoints in DEBUG
+    // Placeholder for breakpoints in DEBUG
     public override void AddRuntimeMessage(GH_RuntimeMessageLevel level, string text) =>
       base.AddRuntimeMessage(level, text);
 #endif
@@ -133,23 +168,42 @@ namespace RhinoInside.Revit.GH.Components
       {
         TrySolveInstance(DA);
       }
-      catch (Exceptions.CancelException e)
+      catch (Exceptions.RuntimeWarningException e)
       {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, e.Message);
       }
-      catch (Exceptions.FailException e)
+      catch (Exceptions.RuntimeErrorException e)
       {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
+      }
+      catch (RhinoInside.Revit.Exceptions.CancelException e)
+      {
+        // This will abort component solution
+        unhandledException = e;
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
+      }
+      catch (RhinoInside.Revit.Exceptions.FailException e)
+      {
+        // This will abort entire solution
         OnPingDocument()?.RequestAbortSolution();
 
         unhandledException = e;
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
       }
       catch (Autodesk.Revit.Exceptions.ArgumentOutOfRangeException e)
       {
         if (AbortOnUnhandledException)
           unhandledException = e;
 
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.ParamName} value is out of range");
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: Value is out of range");
+      }
+      catch (Autodesk.Revit.Exceptions.ArgumentException e)
+      {
+        if (AbortOnUnhandledException)
+          unhandledException = e;
+
+        var message = e.Message.Split(new string[] { Environment.NewLine }, StringSplitOptions.None)[0];
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {message}");
       }
       catch (Autodesk.Revit.Exceptions.ApplicationException e)
       {
