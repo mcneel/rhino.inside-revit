@@ -75,6 +75,12 @@ namespace RhinoInside.Revit.GH.Parameters
       ComponentVersion = Version.TryParse(version, out var componentVersion) ?
         componentVersion : new Version(0, 0, 0, 0);
 
+      if (ComponentVersion > CurrentVersion)
+      {
+        var assemblyName = Grasshopper.Instances.ComponentServer.FindAssemblyByObject(this)?.Name ?? GetType().Assembly.GetName().Name;
+        reader.AddMessage($"Component '{Name}' was saved with a newer version.{Environment.NewLine}Please update '{assemblyName}' to version {ComponentVersion} or above.", GH_Message_Type.error);
+      }
+
       int culling = (int) DataCulling.None;
       reader.TryGetInt32("Culling", ref culling);
       Culling = (DataCulling) culling;
@@ -218,6 +224,14 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public sealed override void PostProcessData()
     {
+      if (ComponentVersion > CurrentVersion)
+      {
+        var assemblyName = Grasshopper.Instances.ComponentServer.FindAssemblyByObject(this)?.Name ?? GetType().Assembly.GetName().Name;
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"This component was saved with a newer version.{Environment.NewLine}Please update '{assemblyName}' to version {ComponentVersion} or above.");
+        VolatileData.Clear();
+        return;
+      }
+
       LoadVolatileData();
 
       PreProcessVolatileData();
