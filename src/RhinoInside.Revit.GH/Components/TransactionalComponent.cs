@@ -10,9 +10,151 @@ using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
+  class TransactionalComponentFailuresPreprocessor : DB.IFailuresPreprocessor
+  {
+    readonly IGH_ActiveObject ActiveObject;
+    readonly IEnumerable<DB.FailureDefinitionId> FailureDefinitionIdsToFix;
+    readonly bool FixUnhandledFailures;
+
+    public TransactionalComponentFailuresPreprocessor
+    (
+      IGH_ActiveObject activeObject
+    )
+    {
+      ActiveObject = activeObject;
+      FailureDefinitionIdsToFix = default;
+      FixUnhandledFailures = true;
+    }
+
+    public TransactionalComponentFailuresPreprocessor
+    (
+      IGH_ActiveObject activeObject,
+      IEnumerable<DB.FailureDefinitionId> failureDefinitionIdsToFix,
+      bool fixUnhandledFailures
+    )
+    {
+      ActiveObject = activeObject;
+      FailureDefinitionIdsToFix = failureDefinitionIdsToFix;
+      FixUnhandledFailures = fixUnhandledFailures;
+    }
+
+    void AddRuntimeMessage(DB.FailureMessageAccessor error, bool? solved = null)
+    {
+      if (error.GetFailureDefinitionId() == DBX.ExternalFailures.TransactionFailures.SimulatedTransaction)
+      {
+        // Simulation signal is already reflected in the canvas changing the component color,
+        // So it's up to the component show relevant information about what 'simulation' means.
+        // As an example Purge component shows a remarks that reads like 'No elements were deleted'.
+        //AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, error.GetDescriptionText());
+
+        return;
+      }
+
+      var level = GH_RuntimeMessageLevel.Remark;
+      switch (error.GetSeverity())
+      {
+        case DB.FailureSeverity.Warning: level = GH_RuntimeMessageLevel.Warning; break;
+        case DB.FailureSeverity.Error: level = GH_RuntimeMessageLevel.Error; break;
+      }
+
+      string solvedMark = string.Empty;
+      if (error.GetSeverity() > DB.FailureSeverity.Warning)
+      {
+        switch (solved)
+        {
+          case false: solvedMark = "❌ "; break;
+          case true: solvedMark = "✔ "; break;
+        }
+      }
+
+      var description = error.GetDescriptionText();
+      var text = string.IsNullOrEmpty(description) ?
+        $"{solvedMark}{level} {{{error.GetFailureDefinitionId().Guid}}}" :
+        $"{solvedMark}{description}";
+
+      int idsCount = 0;
+      foreach (var id in error.GetFailingElementIds())
+        text += idsCount++ == 0 ? $" {{{id.IntegerValue}" : $", {id.IntegerValue}";
+      if (idsCount > 0) text += "} ";
+
+      ActiveObject.AddRuntimeMessage(level, text);
+    }
+
+    DB.FailureProcessingResult FixFailures(DB.FailuresAccessor failuresAccessor, IEnumerable<DB.FailureDefinitionId> failureIds)
+    {
+      foreach (var failureId in failureIds)
+      {
+        int solvedErrors = 0;
+
+        foreach (var error in failuresAccessor.GetFailureMessages().Where(x => x.GetFailureDefinitionId() == failureId))
+        {
+          if (!failuresAccessor.IsFailureResolutionPermitted(error))
+            continue;
+
+          // Don't try to fix two times same issue
+          if (failuresAccessor.GetAttemptedResolutionTypes(error).Any())
+            continue;
+
+          AddRuntimeMessage(error, true);
+
+          failuresAccessor.ResolveFailure(error);
+          solvedErrors++;
+        }
+
+        if (solvedErrors > 0)
+          return DB.FailureProcessingResult.ProceedWithCommit;
+      }
+
+      return DB.FailureProcessingResult.Continue;
+    }
+
+    public virtual DB.FailureProcessingResult PreprocessFailures(DB.FailuresAccessor failuresAccessor)
+    {
+      if (!failuresAccessor.IsTransactionBeingCommitted())
+        return DB.FailureProcessingResult.Continue;
+
+      if (failuresAccessor.GetSeverity() >= DB.FailureSeverity.DocumentCorruption)
+        return DB.FailureProcessingResult.ProceedWithRollBack;
+
+      if (failuresAccessor.GetSeverity() >= DB.FailureSeverity.Error)
+      {
+        // Handled failures in order
+        if (FailureDefinitionIdsToFix is IEnumerable<DB.FailureDefinitionId> failureDefinitionIdsToFix)
+        {
+          var result = FixFailures(failuresAccessor, failureDefinitionIdsToFix);
+          if (result != DB.FailureProcessingResult.Continue)
+            return result;
+        }
+
+        // Unhandled failures in incomming order
+        if (FixUnhandledFailures)
+        {
+          var unhandledFailureDefinitionIds = failuresAccessor.GetFailureMessages().GroupBy(x => x.GetFailureDefinitionId()).Select(x => x.Key);
+          var result = FixFailures(failuresAccessor, unhandledFailureDefinitionIds);
+          if (result != DB.FailureProcessingResult.Continue)
+            return result;
+        }
+      }
+
+      var severity = failuresAccessor.GetSeverity();
+      if (severity >= DB.FailureSeverity.Warning)
+      {
+        // Unsolved failures or warnings
+        foreach (var error in failuresAccessor.GetFailureMessages().OrderBy(error => error.GetSeverity()))
+          AddRuntimeMessage(error, false);
+
+        failuresAccessor.DeleteAllWarnings();
+      }
+
+      if (severity >= DB.FailureSeverity.Error)
+        return DB.FailureProcessingResult.ProceedWithRollBack;
+
+      return DB.FailureProcessingResult.Continue;
+    }
+  }
+
   public abstract class TransactionalComponent :
     ZuiComponent,
-    DB.IFailuresPreprocessor,
     DB.ITransactionFinalizer
   {
     protected TransactionalComponent(string name, string nickname, string description, string category, string subCategory)
@@ -26,6 +168,57 @@ namespace RhinoInside.Revit.GH.Components
       protected set => status = value;
     }
 
+    protected DB.Transaction NewTransaction(DB.Document doc) => NewTransaction(doc, Name);
+    protected DB.Transaction NewTransaction(DB.Document doc, string name)
+    {
+      var transaction = new DB.Transaction(doc, name);
+
+      var options = transaction.GetFailureHandlingOptions();
+      options = options.SetClearAfterRollback(true);
+      options = options.SetDelayedMiniWarnings(false);
+      options = options.SetForcedModalHandling(true);
+
+      if(CreateFailuresPreprocessor() is DB.IFailuresPreprocessor preprocessor)
+        options = options.SetFailuresPreprocessor(preprocessor);
+
+      options = options.SetTransactionFinalizer(this);
+
+      transaction.SetFailureHandlingOptions(options);
+
+      return transaction;
+    }
+
+    protected DB.TransactionStatus CommitTransaction(DB.Document doc, DB.Transaction transaction)
+    {
+      // Disable Rhino UI if any warning-error dialog popup
+      var uiApplication = Revit.ActiveUIApplication;
+      External.UI.EditScope scope = null;
+      EventHandler<DialogBoxShowingEventArgs> _ = null;
+      try
+      {
+        uiApplication.DialogBoxShowing += _ = (sender, args) =>
+        {
+          if (scope is null)
+            scope = new External.UI.EditScope(uiApplication);
+        };
+
+        if (transaction.GetStatus() == DB.TransactionStatus.Started)
+        {
+          return transaction.Commit();
+        }
+        else return transaction.RollBack();
+      }
+      finally
+      {
+        uiApplication.DialogBoxShowing -= _;
+
+        if (scope is IDisposable disposable)
+          disposable.Dispose();
+      }
+    }
+    #endregion
+
+    #region Attributes
     internal new class Attributes : ZuiAttributes
     {
       public Attributes(TransactionalComponent owner) : base(owner) { }
@@ -85,53 +278,6 @@ namespace RhinoInside.Revit.GH.Components
     }
 
     public override void CreateAttributes() => m_attributes = new Attributes(this);
-
-    protected DB.Transaction NewTransaction(DB.Document doc) => NewTransaction(doc, Name);
-    protected DB.Transaction NewTransaction(DB.Document doc, string name)
-    {
-      var transaction = new DB.Transaction(doc, name);
-
-      var options = transaction.GetFailureHandlingOptions();
-      options = options.SetClearAfterRollback(true);
-      options = options.SetDelayedMiniWarnings(false);
-      options = options.SetForcedModalHandling(true);
-
-      options = options.SetFailuresPreprocessor(this);
-      options = options.SetTransactionFinalizer(this);
-
-      transaction.SetFailureHandlingOptions(options);
-
-      return transaction;
-    }
-
-    protected DB.TransactionStatus CommitTransaction(DB.Document doc, DB.Transaction transaction)
-    {
-      // Disable Rhino UI if any warning-error dialog popup
-      var uiApplication = Revit.ActiveUIApplication;
-      External.UI.EditScope scope = null;
-      EventHandler<DialogBoxShowingEventArgs> _ = null;
-      try
-      {
-        uiApplication.DialogBoxShowing += _ = (sender, args) =>
-        {
-          if (scope is null)
-            scope = new External.UI.EditScope(uiApplication);
-        };
-
-        if (transaction.GetStatus() == DB.TransactionStatus.Started)
-        {
-          return transaction.Commit();
-        }
-        else return transaction.RollBack();
-      }
-      finally
-      {
-        uiApplication.DialogBoxShowing -= _;
-
-        if (scope is IDisposable disposable)
-          disposable.Dispose();
-      }
-    }
     #endregion
 
     // Setp 1.
@@ -144,122 +290,14 @@ namespace RhinoInside.Revit.GH.Components
     //protected override void AfterSolveInstance() {}
 
     #region IFailuresPreprocessor
-    void AddRuntimeMessage(DB.FailureMessageAccessor error, bool? solved = null)
-    {
-      if (error.GetFailureDefinitionId() == DBX.ExternalFailures.TransactionFailures.SimulatedTransaction)
-      {
-        // Simulation signal is already reflected in the canvas changing the component color,
-        // So it's up to the component show relevant information about what 'simulation' means.
-        // As an example Purge component shows a remarks that reads like 'No elements were deleted'.
-        //AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, error.GetDescriptionText());
-
-        return;
-      }
-
-      var level = GH_RuntimeMessageLevel.Remark;
-      switch (error.GetSeverity())
-      {
-        case DB.FailureSeverity.Warning: level = GH_RuntimeMessageLevel.Warning; break;
-        case DB.FailureSeverity.Error: level = GH_RuntimeMessageLevel.Error; break;
-      }
-
-      string solvedMark = string.Empty;
-      if (error.GetSeverity() > DB.FailureSeverity.Warning)
-      {
-        switch (solved)
-        {
-          case false: solvedMark = "❌ "; break;
-          case true: solvedMark = "✔ "; break;
-        }
-      }
-
-      var description = error.GetDescriptionText();
-      var text = string.IsNullOrEmpty(description) ?
-        $"{solvedMark}{level} {{{error.GetFailureDefinitionId().Guid}}}" :
-        $"{solvedMark}{description}";
-
-      int idsCount = 0;
-      foreach (var id in error.GetFailingElementIds())
-        text += idsCount++ == 0 ? $" {{{id.IntegerValue}" : $", {id.IntegerValue}";
-      if (idsCount > 0) text += "} ";
-
-      AddRuntimeMessage(level, text);
-    }
 
     // Override to add handled failures to your component (Order is important).
     protected virtual IEnumerable<DB.FailureDefinitionId> FailureDefinitionIdsToFix => null;
     protected virtual bool FixUnhandledFailures => true;
 
-    DB.FailureProcessingResult FixFailures(DB.FailuresAccessor failuresAccessor, IEnumerable<DB.FailureDefinitionId> failureIds)
+    protected virtual DB.IFailuresPreprocessor CreateFailuresPreprocessor()
     {
-      foreach (var failureId in failureIds)
-      {
-        int solvedErrors = 0;
-
-        foreach (var error in failuresAccessor.GetFailureMessages().Where(x => x.GetFailureDefinitionId() == failureId))
-        {
-          if (!failuresAccessor.IsFailureResolutionPermitted(error))
-            continue;
-
-          // Don't try to fix two times same issue
-          if (failuresAccessor.GetAttemptedResolutionTypes(error).Any())
-            continue;
-
-          AddRuntimeMessage(error, true);
-
-          failuresAccessor.ResolveFailure(error);
-          solvedErrors++;
-        }
-
-        if (solvedErrors > 0)
-          return DB.FailureProcessingResult.ProceedWithCommit;
-      }
-
-      return DB.FailureProcessingResult.Continue;
-    }
-
-    public virtual DB.FailureProcessingResult PreprocessFailures(DB.FailuresAccessor failuresAccessor)
-    {
-      if (!failuresAccessor.IsTransactionBeingCommitted())
-        return DB.FailureProcessingResult.Continue;
-
-      if (failuresAccessor.GetSeverity() >= DB.FailureSeverity.DocumentCorruption)
-        return DB.FailureProcessingResult.ProceedWithRollBack;
-
-      if (failuresAccessor.GetSeverity() >= DB.FailureSeverity.Error)
-      {
-        // Handled failures in order
-        if (FailureDefinitionIdsToFix is IEnumerable<DB.FailureDefinitionId> failureDefinitionIdsToFix)
-        {
-          var result = FixFailures(failuresAccessor, failureDefinitionIdsToFix);
-          if (result != DB.FailureProcessingResult.Continue)
-            return result;
-        }
-
-        // Unhandled failures in incomming order
-        if(FixUnhandledFailures)
-        {
-          var unhandledFailureDefinitionIds = failuresAccessor.GetFailureMessages().GroupBy(x => x.GetFailureDefinitionId()).Select(x => x.Key);
-          var result = FixFailures(failuresAccessor, unhandledFailureDefinitionIds);
-          if (result != DB.FailureProcessingResult.Continue)
-            return result;
-        }
-      }
-
-      var severity = failuresAccessor.GetSeverity();
-      if (severity >= DB.FailureSeverity.Warning)
-      {
-        // Unsolved failures or warnings
-        foreach (var error in failuresAccessor.GetFailureMessages().OrderBy(error => error.GetSeverity()))
-          AddRuntimeMessage(error, false);
-
-        failuresAccessor.DeleteAllWarnings();
-      }
-
-      if (severity >= DB.FailureSeverity.Error)
-        return DB.FailureProcessingResult.ProceedWithRollBack;
-
-      return DB.FailureProcessingResult.Continue;
+      return new TransactionalComponentFailuresPreprocessor(this, FailureDefinitionIdsToFix, FixUnhandledFailures);
     }
     #endregion
 
@@ -281,14 +319,16 @@ namespace RhinoInside.Revit.GH.Components
   public enum TransactionExtent
   {
     Default,
-    Instance,
     Component,
+    Instance,
+    Scope,
   }
 
   public abstract class TransactionalChainComponent : TransactionalComponent, DBX.ITransactionNotification
   {
     protected TransactionalChainComponent(string name, string nickname, string description, string category, string subCategory)
-    : base(name, nickname, description, category, subCategory) { }
+    : base(name, nickname, description, category, subCategory)
+    { }
 
     protected override bool AbortOnUnhandledException => TransactionExtent == TransactionExtent.Component;
 
@@ -306,7 +346,42 @@ namespace RhinoInside.Revit.GH.Components
     }
 
     DBX.TransactionChain chain;
-    protected void StartTransaction(DB.Document document) => chain.Start(document);
+
+    public DB.TransactionStatus StartTransaction(DB.Document document) => chain.Start(document);
+
+    protected DB.TransactionStatus CommitTransaction()
+    {
+      if (TransactionExtent != TransactionExtent.Scope)
+        throw new InvalidOperationException();
+
+      try
+      {
+        if (chain.HasStarted())
+         Status = chain.Commit();
+      }
+      catch (Exception e)
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
+      }
+
+      return Status;
+    }
+
+    protected void RollBackTransaction()
+    {
+      if (TransactionExtent != TransactionExtent.Scope)
+        throw new InvalidOperationException();
+
+      try
+      {
+        if (chain.HasStarted())
+          Status = chain.RollBack();
+      }
+      catch (Exception e)
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
+      }
+    }
 
     // Setp 1.
     protected override void BeforeSolveInstance()
@@ -317,11 +392,12 @@ namespace RhinoInside.Revit.GH.Components
       (
         new DBX.TransactionHandlingOptions
         {
-          FailuresPreprocessor = this,
+          FailuresPreprocessor = CreateFailuresPreprocessor(),
           TransactionNotification = this
         },
         Name
       );
+
     }
 
     // Step 2.
@@ -333,13 +409,46 @@ namespace RhinoInside.Revit.GH.Components
       }
       else
       {
-        Status = DB.TransactionStatus.Uninitialized;
-
         try
         {
           base.SolveInstance(DA);
 
-          Status = chain.Commit();
+          if (chain.HasStarted())
+            Status = chain.Commit();
+        }
+        catch
+        {
+          Status = chain.RollBack();
+        }
+        finally
+        {
+          switch (Status)
+          {
+            case DB.TransactionStatus.Uninitialized:
+            case DB.TransactionStatus.Started:
+            case DB.TransactionStatus.Committed:
+              break;
+            default:
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Transaction {Status} and aborted.");
+              break;
+          }
+        }
+      }
+    }
+
+    // Step 3.
+    protected /*sealed*/ override void AfterSolveInstance()
+    {
+      using (chain)
+      {
+        try
+        {
+          if (chain.HasStarted())
+            Status = IsAborted ? chain.RollBack() : chain.Commit();
+        }
+        catch (Exception e)
+        {
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
         }
         finally
         {
@@ -353,41 +462,6 @@ namespace RhinoInside.Revit.GH.Components
               AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Transaction {Status} and aborted.");
               ResetData();
               break;
-          }
-        }
-      }
-    }
-
-    // Step 3.
-    protected sealed override void AfterSolveInstance()
-    {
-      using (chain)
-      {
-        Status = DB.TransactionStatus.Error;
-
-        if (!IsAborted)
-        {
-          try
-          {
-            Status = chain.Commit();
-          }
-          catch (Exception e)
-          {
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
-          }
-          finally
-          {
-            switch (Status)
-            {
-              case DB.TransactionStatus.Uninitialized:
-              case DB.TransactionStatus.Started:
-              case DB.TransactionStatus.Committed:
-                break;
-              default:
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Transaction {Status} and aborted.");
-                ResetData();
-                break;
-            }
           }
         }
 
@@ -422,6 +496,7 @@ namespace RhinoInside.Revit.GH.Components
       Status = status;
 
       // Restore Rhino UI in case any warning-error dialog popups
+      if(dialogBoxShowing != default)
       {
         Revit.ActiveUIApplication.DialogBoxShowing -= dialogBoxShowing;
 
