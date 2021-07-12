@@ -5,6 +5,16 @@ using Microsoft.Win32.SafeHandles;
 
 namespace Rhino.Geometry
 {
+  static class NaN
+  {
+    public static readonly double Value = double.NaN;
+    public static readonly Interval Interval = new Interval(Value, Value);
+    public static readonly Point3d Point3d = new Point3d(Value, Value, Value);
+    public static readonly Vector3d Vector3d = new Vector3d(Value, Value, Value);
+    public static readonly Plane Plane = new Plane(Point3d, Vector3d, Vector3d);
+    public static readonly BoundingBox BoundingBox = new BoundingBox(Point3d, Point3d);
+  }
+
   static class Vector3dExtension
   {
     /// <summary>
@@ -41,7 +51,7 @@ namespace Rhino.Geometry
     public static BoundingBox GetBoundingBox(this BoundingBox value, Transform xform)
     {
       if (!value.IsValid)
-        return BoundingBox.Unset;
+        return NaN.BoundingBox;
 
       // BoundingBox constructor already checks for Identity xform
       //if (xform.IsIdentity)
@@ -62,7 +72,7 @@ namespace Rhino.Geometry
     public static BoundingBox GetBoundingBox(this Box value, Transform xform)
     {
       if (!value.IsValid)
-        return BoundingBox.Unset;
+        return NaN.BoundingBox;
 
       // BoundingBox constructor already checks for Identity xform
       //if (xform.IsIdentity)
@@ -167,7 +177,7 @@ namespace Rhino.Geometry
 
         loop = null;
         area = double.NaN;
-        centroid = new Point3d(double.NaN, double.NaN, double.NaN);
+        centroid = NaN.Point3d;
       }
 
       public readonly BrepFace Face;
@@ -178,15 +188,15 @@ namespace Rhino.Geometry
 
       public NurbsCurve Loop
       {
-        get { if (loop is null) loop = Curve.ProjectToPlane(Face.OuterLoop.To3dCurve(), Plane).ToNurbsCurve(); return loop; }
+        get { if (Plane.IsValid && loop is null) loop = Curve.ProjectToPlane(Face.OuterLoop.To3dCurve(), Plane).ToNurbsCurve(); return loop; }
       }
       public Point3d Centroid
       {
-        get { if (!centroid.IsValid) using (var mp = AreaMassProperties.Compute(Loop, RhinoMath.ZeroTolerance)) if(mp is object) { area = mp.Area; centroid = mp.Centroid; } return centroid; }
+        get { if (!centroid.IsValid && Loop is object) using (var mp = AreaMassProperties.Compute(Loop, RhinoMath.ZeroTolerance)) if(mp is object) { area = mp.Area; centroid = mp.Centroid; } return centroid; }
       }
       public double LoopArea
       {
-        get { if (double.IsNaN(area)) using (var mp = AreaMassProperties.Compute(Loop, RhinoMath.ZeroTolerance)) if(mp is object) { area = mp.Area; centroid = mp.Centroid; } return area; }
+        get { if (double.IsNaN(area) && Loop is object) using (var mp = AreaMassProperties.Compute(Loop, RhinoMath.ZeroTolerance)) if(mp is object) { area = mp.Area; centroid = mp.Centroid; } return area; }
       }
 
       public bool ProjectionDegenartesToCurve(Surface surface)

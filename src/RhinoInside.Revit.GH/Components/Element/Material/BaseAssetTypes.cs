@@ -141,10 +141,10 @@ namespace RhinoInside.Revit.GH.Components.Material
   [AttributeUsage(AttributeTargets.Property)]
   public class APIAssetPropValueRangeAttribute : Attribute
   {
-    public double Min = double.NaN;
-    public double Max = double.NaN;
+    public double Min;
+    public double Max;
 
-    public APIAssetPropValueRangeAttribute(double min = double.NaN, double max = double.NaN)
+    public APIAssetPropValueRangeAttribute(double min = double.NegativeInfinity, double max = double.PositiveInfinity)
     {
       Min = min;
       Max = max;

@@ -45,7 +45,7 @@ namespace RhinoInside.Revit.GH.Types
           );
         }
 
-        return BoundingBox.Unset;
+        return NaN.BoundingBox;
       }
     }
 
