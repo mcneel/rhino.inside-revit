@@ -87,7 +87,6 @@ namespace RhinoInside.Revit
 
     internal static readonly string RhinoExePath = Path.Combine(SystemDir, "Rhino.exe");
     internal static readonly FileVersionInfo RhinoVersionInfo = File.Exists(RhinoExePath) ? FileVersionInfo.GetVersionInfo(RhinoExePath) : null;
-    static readonly Version MinimumRhinoVersion = new Version(7, 6, 0);
     static readonly Version RhinoVersion = new Version
     (
       RhinoVersionInfo?.FileMajorPart ?? 0,
@@ -95,6 +94,14 @@ namespace RhinoInside.Revit
       RhinoVersionInfo?.FileBuildPart ?? 0,
       RhinoVersionInfo?.FilePrivatePart ?? 0
     );
+    static Version MinimumRhinoVersion
+    {
+      get
+      {
+        var assemblyVersion = Assembly.GetExecutingAssembly().GetReferencedAssemblies().Where(x => x.Name == "RhinoCommon").FirstOrDefault().Version;
+        return new Version(assemblyVersion.Major, assemblyVersion.Minor, 0);
+      }
+    }
 
     static AddIn()
     {
