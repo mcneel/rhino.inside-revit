@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Components
     }
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(new Parameters.GraphicalElement(), "Elements", "E", "Group Elements", GH_ParamAccess.list);
+      manager.AddParameter(new Parameters.Element(), "Elements", "E", "Group Elements", GH_ParamAccess.list);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)

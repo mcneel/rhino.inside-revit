@@ -35,19 +35,19 @@ namespace RhinoInside.Revit.GH.Components
       ref DB.Group group,
 
       [Description("Location where to place the group.")]
-      Rhino.Geometry.Point3d location,
+      Rhino.Geometry.Plane location,
       DB.GroupType type,
       Optional<DB.Level> level
     )
     {
       if (!location.IsValid)
-        ThrowArgumentException(nameof(location), "Should be a valid point.");
+        ThrowArgumentException(nameof(location), "Should be a valid plane.");
 
-      SolveOptionalLevel(document, location, ref level, out var bbox);
+      SolveOptionalLevel(document, location.Origin, ref level, out var bbox);
 
       ChangeElementTypeId(ref group, type.Id);
 
-      var newLocation = location.ToXYZ();
+      var newLocation = location.Origin.ToXYZ();
       if
       (
         group is DB.Group &&
@@ -102,6 +102,14 @@ namespace RhinoInside.Revit.GH.Components
             if(newGroups.FirstOrDefault() is DB.ElementId newGroupId)
               group = newGroupId.IsValid() ? document.GetElement(newGroupId) as DB.Group : default;
           }
+        }
+
+        if (Types.Element.FromElement(group) is Types.Group goo)
+        {
+          var pinned = goo.Pinned;
+          goo.Pinned = false;
+          goo.Location = location;
+          goo.Pinned = pinned;
         }
       }
     }
