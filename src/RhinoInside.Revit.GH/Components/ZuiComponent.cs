@@ -21,16 +21,16 @@ namespace RhinoInside.Revit.GH.Components
 
     protected enum ParamRelevance
     {
-      Binding = int.MaxValue,
-      Primary = Binding - 1,
-      Secondary = Binding - 2,
-      Tertiary = Binding - 3,
+      Binding     = int.MaxValue,
+      Primary     = Binding - 1,
+      Secondary   = Binding - 2,
+      Tertiary    = Binding - 3,
       Quarternary = Binding - 4,
-      Quinary = Binding - 5,
-      Senary = Binding - 6,
-      Septenary = Binding - 7,
-      Occasional = Binding - 8,
-      None = default,
+      Quinary     = Binding - 5,
+      Senary      = Binding - 6,
+      Septenary   = Binding - 7,
+      Occasional  = Binding - 8,
+      None        = default,
     }
 
     protected struct ParamDefinition
@@ -321,6 +321,8 @@ namespace RhinoInside.Revit.GH.Components
           // Input parameters may contain PersistentData.
           if (obsoleteParameters.Count > 0)
           {
+            document.DestroyObjectTable();
+
             var index = document.Objects.IndexOf(this);
             var group = new Grasshopper.Kernel.Special.GH_Group
             {
