@@ -604,8 +604,10 @@ namespace RhinoInside.Revit.GH
       }
     }
 
-    class DocumentChangedEvent
+    internal class DocumentChangedEvent
     {
+      public static bool EnableSolutions { get; set; } = true;
+
       static readonly ExternalEvent FlushQueue = ExternalEvent.Create(new FlushQueueHandler());
       class FlushQueueHandler : External.UI.ExternalEventHandler
       {
@@ -624,14 +626,17 @@ namespace RhinoInside.Revit.GH
 
           if (solutions.Count == 0)
             Instances.ActiveCanvas?.Refresh();
-          else foreach(var solution in solutions)
-            solution.NewSolution(false);
+          else foreach (var solution in solutions)
+              solution.NewSolution(false);
         }
       }
 
       public static readonly Queue<DocumentChangedEvent> changeQueue = new Queue<DocumentChangedEvent>();
       public static void Enqueue(DocumentChangedEvent value)
       {
+        if (!EnableSolutions)
+          return;
+
         changeQueue.Enqueue(value);
 
         if (value.Definition.SolutionState != GH_ProcessStep.Process)

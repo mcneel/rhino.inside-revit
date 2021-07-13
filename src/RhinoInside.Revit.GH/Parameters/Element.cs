@@ -9,6 +9,8 @@ using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
+using RhinoInside.Revit.External.DB;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
@@ -130,92 +132,82 @@ namespace RhinoInside.Revit.GH.Parameters
       }
     }
 
-    void Menu_DeleteElements(object sender, EventArgs args)
+    (bool Committed, IList<string> Messages) DeleteElements()
     {
-      var doc = Revit.ActiveUIDocument.Document;
-      var elementIds = ToElementIds(VolatileData).
-                       Where(x => doc.Equals(x.Document)).
-                       Select(x => x.Id);
+      var committed = false;
+      var messages = new List<string>();
 
-      if (elementIds.Any())
+      foreach (var document in ToElementIds(VolatileData).GroupBy(x => x.Document))
       {
-        using (new External.UI.EditScope(Revit.ActiveUIApplication))
+        using (var group = new DB.TransactionGroup(document.Key, "Delete Elements") { IsFailureHandlingForcedModal = true })
         {
-          using
+          var elementIds = new HashSet<DB.ElementId>
           (
-            var taskDialog = new TaskDialog("Delete Elements")
-            {
-              Id = MethodBase.GetCurrentMethod().DeclaringType.FullName,
-              MainIcon = External.UI.TaskDialogIcons.IconWarning,
-              TitleAutoPrefix = false,
-              MainInstruction = "Are you sure you want to delete those elements?",
-              CommonButtons = TaskDialogCommonButtons.Yes | TaskDialogCommonButtons.No,
-              DefaultButton = TaskDialogResult.Yes,
-              AllowCancellation = true,
-#if REVIT_2020
-              EnableMarqueeProgressBar = true
-#endif
-            }
-          )
+            document.Where(x => x.IsValid && !x.Id.IsBuiltInId()).Select(x => x.Id),
+            default(ElementIdEqualityComparer)
+          );
+
+          if (elementIds.Count > 0)
           {
-            taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Show elements");
-            taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink2, "Manage element collection");
-
-            var result = TaskDialogResult.None;
-            bool highlight = false;
-            do
+            using (var tx = new DB.Transaction(document.Key, "Delete Elements"))
             {
-              var elements = elementIds.ToArray();
-              taskDialog.ExpandedContent = $"{elements.Length} elements and its depending elements will be deleted.";
+              tx.SetFailureHandlingOptions(tx.GetFailureHandlingOptions().SetDelayedMiniWarnings(false));
 
-              if (highlight)
-                Revit.ActiveUIDocument?.Selection.SetElementIds(elements);
-
-              switch (result = taskDialog.Show())
+              if (tx.Start() == DB.TransactionStatus.Started)
               {
-                case TaskDialogResult.CommandLink1:
-                  Revit.ActiveUIDocument?.ShowElements(elements);
-                  highlight = true;
-                  break;
-
-                case TaskDialogResult.CommandLink2:
-                  using (var dataManager = new GH_PersistentDataEditor())
+                // Show feedback on Revit
+                foreach (var elementId in elementIds)
+                {
+                  using (var message = new DB.FailureMessage(ExternalFailures.ElementFailures.ConfirmDeleteElement))
                   {
-                    var elementCollection = new GH_Structure<IGH_Goo>();
-                    elementCollection.AppendRange(elementIds.Select(x => Types.Element.FromElementId(doc, x)));
-                    dataManager.SetData(elementCollection, new Types.Element());
-
-                    GH_WindowsFormUtil.CenterFormOnCursor(dataManager, true);
-                    if (dataManager.ShowDialog(Revit.MainWindowHandle) == System.Windows.Forms.DialogResult.OK)
-                      elementIds = dataManager.GetData<IGH_Goo>().AllData(true).OfType<Types.Element>().Select(x => x.Id);
+                    message.SetFailingElement(elementId);
+                    document.Key.PostFailure(message);
                   }
-                  break;
+                }
 
-                case TaskDialogResult.Yes:
-                  try
+                if (tx.Commit() == DB.TransactionStatus.Committed)
+                {
+                  messages.Add($"Some elements were deleted from '{document.Key.Title.TripleDot(16)}'.");
+
+                  if (elementIds.All(x => document.Key.GetElement(x) is object))
                   {
-                    using (var transaction = new DB.Transaction(doc, "Delete elements"))
-                    {
-                      transaction.Start();
-                      doc.Delete(elements);
-                      transaction.Commit();
-                    }
-
-                    ClearData();
-                    ExpireDownStreamObjects();
-                    OnPingDocument().NewSolution(false);
+                    tx.Start();
+                    document.Key.Delete(elementIds);
+                    committed |= tx.Commit() == DB.TransactionStatus.Committed;
                   }
-                  catch (Autodesk.Revit.Exceptions.ArgumentException)
-                  {
-                    TaskDialog.Show("Delete elements", $"One or more of the {TypeName} cannot be deleted.");
-                  }
-                  break;
+                  else committed = true;
+                }
               }
             }
-            while (result == TaskDialogResult.CommandLink1 || result == TaskDialogResult.CommandLink2);
           }
         }
       }
+
+      return (committed, messages);
+    }
+
+    void Menu_DeleteElements(object sender, EventArgs e)
+    {
+      bool enableSolutions = Guest.DocumentChangedEvent.EnableSolutions;
+      Guest.DocumentChangedEvent.EnableSolutions = false;
+
+      var (commited, messages) = DeleteElements();
+
+      Guest.ShowEditor();
+
+      if (commited)
+      {
+        // Show feedback on Grasshopper
+        ClearRuntimeMessages();
+        foreach (var message in messages)
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, message);
+
+        ReloadVolatileData();
+        ExpireDownStreamObjects();
+        OnPingDocument().NewSolution(false);
+      }
+
+      Guest.DocumentChangedEvent.EnableSolutions = enableSolutions;
     }
     #endregion
   }

@@ -41,12 +41,24 @@ namespace RhinoInside.Revit.External.DB
     public static class ElementFailures
     {
       /// <summary>
+      /// Are you sure you want to delete those elements?
+      /// </summary>
+      public static readonly FailureDefinitionId ConfirmDeleteElement = new FailureDefinitionId(new Guid("BD477F3C-8560-4A51-8BBD-870A5C97EE22"));
+
+      /// <summary>
       /// Failed to purge element. This element is in use.
       /// </summary>
       public static readonly FailureDefinitionId FailedToPurgeElement = new FailureDefinitionId(new Guid("D2732B32-E917-4D3A-B639-A72E3A20F2E5"));
 
       internal static void CreateFailureDefinitions()
       {
+        FailureDefinition.CreateFailureDefinition
+        (
+          id: ConfirmDeleteElement,
+          severity: FailureSeverity.Warning,
+          messageString: "Are you sure you want to delete these elements?"
+        );
+
         FailureDefinition.CreateFailureDefinition
         (
           id: FailedToPurgeElement,

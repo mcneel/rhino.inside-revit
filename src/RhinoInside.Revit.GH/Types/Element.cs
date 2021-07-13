@@ -77,7 +77,7 @@ namespace RhinoInside.Revit.GH.Types
     public override bool IsReferencedDataLoaded => Document is object && Id is object;
     public sealed override bool LoadReferencedData()
     {
-      if (IsReferencedData && !IsReferencedDataLoaded)
+      if (IsReferencedData)
       {
         UnloadReferencedData();
 

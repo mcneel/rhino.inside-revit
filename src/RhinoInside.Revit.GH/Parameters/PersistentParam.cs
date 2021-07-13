@@ -175,6 +175,11 @@ namespace RhinoInside.Revit.GH.Parameters
       if (DataType != GH_ParamData.local)
         return;
 
+      ReloadVolatileData();
+    }
+
+    protected virtual void ReloadVolatileData()
+    {
       foreach (var branch in m_data.Branches)
       {
         for (int i = 0; i < branch.Count; i++)
@@ -190,7 +195,6 @@ namespace RhinoInside.Revit.GH.Parameters
         }
       }
     }
-
     protected virtual void PreProcessVolatileData()
     {
       if (Culling != DataCulling.None)
