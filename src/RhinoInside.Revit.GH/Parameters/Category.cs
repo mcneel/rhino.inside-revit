@@ -57,7 +57,7 @@ namespace RhinoInside.Revit.GH.Parameters
       categoriesTypeBox.Items.Add("Internal");
       categoriesTypeBox.Items.Add("Analytical");
 
-      if(PersistentValue?.Value is DB.Category current)
+      if(PersistentValue?.APIObject is DB.Category current)
       {
         if (current.IsTagCategory)
           categoriesTypeBox.SelectedIndex = 2;
