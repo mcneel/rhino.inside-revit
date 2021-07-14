@@ -29,22 +29,24 @@ namespace RhinoInside.Revit.GH.Parameters
         Sorted = true,
         BorderStyle = BorderStyle.FixedSingle,
         Width = (int) (300 * GH_GraphicsUtil.UiScale),
-        Height = (int) (100 * GH_GraphicsUtil.UiScale)
+        Height = (int) (100 * GH_GraphicsUtil.UiScale),
       };
       elementTypesBox.SelectedIndexChanged += ElementTypesBox_SelectedIndexChanged;
 
       var familiesBox = new ComboBox
       {
+        Sorted = true,
         DropDownStyle = ComboBoxStyle.DropDownList,
-        Width = (int) (300 * GH_GraphicsUtil.UiScale)
+        Width = (int) (300 * GH_GraphicsUtil.UiScale),
       };
       familiesBox.DropDownHeight = familiesBox.ItemHeight * 15;
       familiesBox.SetCueBanner("Family filter…");
 
       var categoriesBox = new ComboBox
       {
+        Sorted = true,
         DropDownStyle = ComboBoxStyle.DropDownList,
-        Width = (int) (300 * GH_GraphicsUtil.UiScale)
+        Width = (int) (300 * GH_GraphicsUtil.UiScale),
       };
       categoriesBox.DropDownHeight = categoriesBox.ItemHeight * 15;
       categoriesBox.SetCueBanner("Category filter…");
@@ -70,10 +72,10 @@ namespace RhinoInside.Revit.GH.Parameters
 
       if (PersistentValue is Types.ElementType current)
       {
-        if (current.Category.Value.IsTagCategory)
+        if (current.Category.IsTagCategory == true)
           categoriesTypeBox.SelectedIndex = 3;
         else
-          categoriesTypeBox.SelectedIndex = (int) current.Category.Value.CategoryType;
+          categoriesTypeBox.SelectedIndex = (int) current.Category.CategoryType;
 
         var categoryIndex = 0;
         var currentCategory = current.Category;
@@ -98,7 +100,7 @@ namespace RhinoInside.Revit.GH.Parameters
           familyIndex++;
         }
       }
-      else categoriesTypeBox.SelectedIndex = 0;
+      else categoriesTypeBox.SelectedIndex = 1;
 
       Menu_AppendCustomItem(menu, categoriesTypeBox);
       Menu_AppendCustomItem(menu, categoriesBox);
@@ -106,36 +108,47 @@ namespace RhinoInside.Revit.GH.Parameters
       Menu_AppendCustomItem(menu, elementTypesBox);
     }
 
-    static bool HasElementTypes(DB.ElementId categoryId)
+    ICollection<DB.Category> CategoriesWithTypes(DB.Document document)
     {
-      using (var collector = new DB.FilteredElementCollector(Revit.ActiveUIDocument.Document))
+      using (var collector = new DB.FilteredElementCollector(document))
       {
-        var elementCollector = collector.OfClass(typeof(R)).OfCategoryId(categoryId);
-        return elementCollector.GetElementCount() > 0;
+        var elementCollector = collector.WhereElementIsElementType().OfClass(typeof(R));
+        return new HashSet<DB.Category>
+        (
+          collector.Select(x => x.Category),
+          CategoryEqualityComparer.SameDocument
+        );
       }
     }
 
     private void RefreshCategoryList(ComboBox categoriesBox, DB.CategoryType categoryType)
     {
-      var categories = Revit.ActiveUIDocument.Document.Settings.Categories.Cast<DB.Category>().Where(x => x.AllowsBoundParameters);
+      if (Revit.ActiveUIDocument is null) return;
+
+      var doc = Revit.ActiveUIDocument.Document;
+      var categories = (IEnumerable<DB.Category>) CategoriesWithTypes(doc);
 
       if (categoryType != DB.CategoryType.Invalid)
       {
         if (categoryType == (DB.CategoryType) 3)
-          categories = categories.Where(x => x.IsTagCategory);
+          categories = categories.Where(x => x?.IsTagCategory == true);
         else
-          categories = categories.Where(x => x.CategoryType == categoryType && !x.IsTagCategory);
+          categories = categories.Where
+          (
+            x => (x?.CategoryType ?? DB.CategoryType.Internal) == categoryType &&
+            x?.IsTagCategory == false
+          );
       }
 
       categoriesBox.SelectedIndex = -1;
       categoriesBox.Items.Clear();
       categoriesBox.DisplayMember = "DisplayName";
-      foreach (var category in categories.OrderBy(x => x.Name))
+      foreach (var category in categories)
       {
-        if (!HasElementTypes(category.Id))
-          continue;
-
-        categoriesBox.Items.Add(Types.Category.FromCategory(category));
+        if(category is null)
+          categoriesBox.Items.Add(new Types.Category());
+        else
+          categoriesBox.Items.Add(Types.Category.FromCategory(category));
       }
     }
 
@@ -176,6 +189,7 @@ namespace RhinoInside.Revit.GH.Parameters
       listBox.SelectedIndexChanged -= ElementTypesBox_SelectedIndexChanged;
       listBox.Items.Clear();
 
+      if (categoriesBox.SelectedIndex != -1 || familiesBox.SelectedIndex != -1)
       {
         var categories = GetCategoryIds(categoriesBox);
         if (categories.Length > 0)
@@ -188,7 +202,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
             var familyName = familiesBox.SelectedItem as string;
 
-            listBox.DisplayMember = "DisplayName";
+            listBox.DisplayMember = "Name";
             foreach (var elementType in elementTypes)
             {
               if

@@ -31,11 +31,11 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var category = default(DB.Category);
+      var category = default(Types.Category);
       if (!DA.GetData("Category", ref category))
         return;
 
-      if(category.Document() is DB.Document doc)
+      if(category.Document is DB.Document doc)
       {
         var parameterKeys = DB.TableView.GetAvailableParameters(doc, category.Id);
         DA.SetDataList("ParameterKeys", parameterKeys.Select(paramId => Types.ParameterKey.FromElementId(doc, paramId)));

@@ -88,7 +88,8 @@ namespace RhinoInside.Revit.GH.Components
             // TODO : Ask for categories
             using (var categorySet = new DB.CategorySet())
             {
-              foreach (var category in document.Settings.Categories.Cast<DB.Category>().Where(category => category.AllowsBoundParameters))
+              var categories = document.GetBuiltInCategoriesWithParameters().Select(x => document.GetCategory(x));
+              foreach (var category in categories)
                 categorySet.Insert(category);
 
               var binding = instance ? (DB.ElementBinding) new DB.InstanceBinding(categorySet) : (DB.ElementBinding) new DB.TypeBinding(categorySet);

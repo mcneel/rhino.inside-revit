@@ -326,7 +326,7 @@ namespace RhinoInside.Revit.GH.Types
             // Create Category Type Layer
             if (category.Parent is null)
             {
-              if (CategoryType.NamedValues.TryGetValue((int) category.CategoryType, out var typeName))
+              if (Types.CategoryType.NamedValues.TryGetValue((int) category.CategoryType, out var typeName))
               {
                 var type = doc.Layers.FindByFullPath($"{RootLayerName}::{category.CategoryType}", -1);
                 if (type < 0)
@@ -422,6 +422,10 @@ namespace RhinoInside.Revit.GH.Types
         return fullName;
       }
     }
+
+    public DB.CategoryType CategoryType => Value?.CategoryType ?? DB.CategoryType.Invalid;
+
+    public bool? IsTagCategory => Value?.IsTagCategory;
 
     public System.Drawing.Color? LineColor
     {

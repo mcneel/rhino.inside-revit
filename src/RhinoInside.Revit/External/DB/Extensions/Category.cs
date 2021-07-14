@@ -971,6 +971,45 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
   }
 
+  internal static class CategoryEqualityComparer
+  {
+    public static readonly IEqualityComparer<Category> InterDocument = new InterDocumentComparer();
+    public static readonly IEqualityComparer<Category> SameDocument = new SameDocumentComparer();
+
+    struct SameDocumentComparer : IEqualityComparer<Category>
+    {
+      bool IEqualityComparer<Category>.Equals(Category x, Category y) => ReferenceEquals(x, y) || x?.Id == y?.Id;
+      int IEqualityComparer<Category>.GetHashCode(Category obj) => obj?.Id.IntegerValue ?? int.MinValue;
+    }
+
+    struct InterDocumentComparer : IEqualityComparer<Category>
+    {
+      bool IEqualityComparer<Category>.Equals(Category x, Category y) => IsEquivalent(x, y);
+      int IEqualityComparer<Category>.GetHashCode(Category obj) => (obj?.Id.IntegerValue ?? int.MinValue) ^ (obj?.Document().GetHashCode() ?? 0);
+    }
+
+    /// <summary>
+    /// Determines whether the specified <see cref="Autodesk.Revit.DB.Category"/> equals to this <see cref="Autodesk.Revit.DB.Category"/>.
+    /// </summary>
+    /// <remarks>
+    /// Two <see cref="Autodesk.Revit.DB.Category"/> instances are considered equivalent if they represent the same element
+    /// in this Revit session.
+    /// </remarks>
+    /// <param name="self"></param>
+    /// <param name="other"></param>
+    /// <returns></returns>
+    public static bool IsEquivalent(this Category self, Category other)
+    {
+      if (ReferenceEquals(self, other))
+        return true;
+
+      if (self?.Id != other?.Id)
+        return false;
+
+      return self.Document().Equals(other.Document());
+    }
+  }
+
   public static class CategoryExtension
   {
     /// <summary>
@@ -987,7 +1026,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (map is null)
         return true;
 
-      return !map.Cast<Category>().Where(x => x.Id.IntegerValue == category.Id.IntegerValue).Any();
+      return !map.Cast<Category>().Any(x => x.Id.IntegerValue == category.Id.IntegerValue);
     }
 
     /// <summary>
@@ -996,7 +1035,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <param name="category"></param>
     public static Document Document(this Category category)
     {
-      return category?.GetGraphicsStyle(GraphicsStyleType.Projection).Document;
+      return category?.GetGraphicsStyle(GraphicsStyleType.Projection)?.Document;
     }
 
     /// <summary>

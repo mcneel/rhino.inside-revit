@@ -77,7 +77,8 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       if (Revit.ActiveUIDocument is null) return;
 
-      var categories = Revit.ActiveUIDocument.Document.Settings.Categories.Cast<DB.Category>().Where(x => x.AllowsBoundParameters);
+      var doc = Revit.ActiveUIDocument.Document;
+      var categories = doc.GetBuiltInCategoriesWithParameters().Select(x => doc.GetCategory(x));
 
       if (categoryType != DB.CategoryType.Invalid)
       {

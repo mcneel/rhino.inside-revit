@@ -29,9 +29,12 @@ namespace RhinoInside.Revit.UI
         if (!base.IsCommandAvailable(app, selectedCategories))
           return false;
 
+        if (!DB.DirectShape.IsSupportedDocument(Revit.ActiveUIDocument.Document))
+          return false;
+
         if (Instances.ActiveCanvas?.Document is GH_Document definition)
         {
-          if (Revit.ActiveUIDocument?.ActiveGraphicalView is DB.View view)
+          if (Revit.ActiveUIDocument.ActiveGraphicalView is DB.View view)
           {
             var options = new BakeOptions()
             {

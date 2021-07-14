@@ -1,22 +1,13 @@
 using System;
-using System.IO;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Reflection;
-using System.Windows.Interop;
-using System.Diagnostics;
-using System.Xml.Serialization;
-
-using Eto.Forms;
-using Eto.Drawing;
-using Forms = Eto.Forms;
-
-using DB = Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-
+using Eto.Drawing;
+using Eto.Forms;
+using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.Settings;
+using DB = Autodesk.Revit.DB;
+using Forms = Eto.Forms;
 
 namespace RhinoInside.Revit.UI
 {
@@ -45,12 +36,7 @@ namespace RhinoInside.Revit.UI
     void InitLayout()
     {
       // collect categories (only applicable to directshapes since baking creates directshapes)
-      var directShapeCategories = Enum.GetValues(typeof(DB.BuiltInCategory)).Cast<DB.BuiltInCategory>().
-                                  Where(categoryId => DB.DirectShape.IsValidCategoryId(new DB.ElementId(categoryId), Document)).
-                                  Select(categoryId => DB.Category.GetCategory(Document, categoryId)).
-                                  Where(x => x is object);
-
-      foreach (var group in directShapeCategories.GroupBy(x => x.CategoryType).OrderBy(x => x.Key.ToString()))
+      foreach (var group in DirectShapeCategories.GroupBy(x => x.CategoryType).OrderBy(x => x.Key.ToString()))
         foreach (var category in group.OrderBy(x => x.Name))
         {
           _categorySelector.Items.Add(new ListItem { Key = category.Name, Text = category.Name });
@@ -103,24 +89,34 @@ namespace RhinoInside.Revit.UI
       };
     }
 
+    IEnumerable<DB.Category> DirectShapeCategories =>
+      BuiltInCategoryExtension.BuiltInCategories.
+      Where(categoryId => DB.DirectShape.IsValidCategoryId(new DB.ElementId(categoryId), Document)).
+      Select(categoryId => Document.GetCategory(categoryId)).
+      Where(x => x is object);
+
     private void BakeButton_Click(object sender, EventArgs e)
     {
       // set selected category
-      foreach (DB.Category category in Document.Settings.Categories)
-        if (category.Name == _categorySelector.SelectedKey)
-        {
-          AddinOptions.Current.CustomOptions.Set(OPTROOT, "LastSelectedCategory", category.Name);
-          SelectedCategory = category.Id;
-        }
+      foreach (var category in DirectShapeCategories)
+      {
+        if (category.Name != _categorySelector.SelectedKey) continue;
+
+        AddinOptions.Current.CustomOptions.Set(OPTROOT, "LastSelectedCategory", category.Name);
+        SelectedCategory = category.Id;
+      }
 
       // set selected workset
       if (Document.IsWorkshared)
-        foreach (DB.Workset workset in new DB.FilteredWorksetCollector(Document).OfKind(DB.WorksetKind.UserWorkset).ToWorksets())
-          if (workset.Name == _worksetSelector.SelectedKey)
-          {
-            AddinOptions.Current.CustomOptions.Set(OPTROOT, "LastSelectedWorkset", workset.Name);
-            SelectedWorkset = workset.Id;
-          }
+      {
+        foreach (var workset in new DB.FilteredWorksetCollector(Document).OfKind(DB.WorksetKind.UserWorkset))
+        {
+          if (workset.Name != _worksetSelector.SelectedKey) continue;
+
+          AddinOptions.Current.CustomOptions.Set(OPTROOT, "LastSelectedWorkset", workset.Name);
+          SelectedWorkset = workset.Id;
+        }
+      }
 
       AddinOptions.Save();
       Close(DialogResult.Ok);

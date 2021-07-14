@@ -515,17 +515,16 @@ namespace RhinoInside.Revit.GH.Types
 
     public virtual string Name
     {
-      get => Value?.Name;
+      get => Rhinoceros.InvokeInHostContext(() => Value?.Name);
       set
       {
-        if (value is object)
+        if (value is object && value != Name)
         {
           if (Id.IsBuiltInId())
           {
-            if (value == Name) return;
             throw new InvalidOperationException($"BuiltIn {((IGH_Goo) this).TypeName.ToLowerInvariant()} '{DisplayName}' does not support assignment of a user-specified name.");
           }
-          else if (Value is DB.Element element && element.Name != value)
+          else if (Value is DB.Element element)
           {
             element.Name = value;
           }
@@ -535,7 +534,11 @@ namespace RhinoInside.Revit.GH.Types
 
     public Category Category
     {
-      get => Category.FromCategory(Value?.Category);
+      get => Value is object ?
+        Value.Category is DB.Category category ?
+        Category.FromCategory(category) :
+        new Category() :
+        default;
     }
 
     public virtual ElementType Type
