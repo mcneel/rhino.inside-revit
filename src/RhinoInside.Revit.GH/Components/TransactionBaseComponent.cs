@@ -705,17 +705,6 @@ namespace RhinoInside.Revit.GH.Components
           AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
           element = null;
         }
-        catch (Autodesk.Revit.Exceptions.ArgumentException e)
-        {
-          var message = e.Message.Split("\r\n".ToCharArray()).First().Replace("Application.ShortCurveTolerance", "Revit.ShortCurveTolerance");
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {message}");
-          element = null;
-        }
-        catch (Autodesk.Revit.Exceptions.ApplicationException e)
-        {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
-          element = null;
-        }
         catch (System.ArgumentNullException)
         {
           // Grasshopper components use to send a Null when they receive a Null without throwing any error
