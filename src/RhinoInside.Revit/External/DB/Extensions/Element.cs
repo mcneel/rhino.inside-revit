@@ -46,6 +46,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
   }
 
+  internal struct ElementNameComparer : IComparer<string>
+  {
+    public int Compare(string x, string y) => NamingUtils.CompareNames(x, y);
+  }
+
   public static class ElementExtension
   {
     public static bool IsValid(this Element element) => element?.IsValidObject == true;
