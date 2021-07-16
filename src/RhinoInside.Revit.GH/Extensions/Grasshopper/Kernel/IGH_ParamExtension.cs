@@ -235,6 +235,17 @@ namespace Grasshopper.Kernel
       finally { param.Attributes = attributes; }
     }
 
+    internal static void CopyFrom(this IGH_Param target, IGH_Param source)
+    {
+      target.Name = source.Name;
+      target.NickName = CentralSettings.CanvasFullNames ? source.Name : source.NickName;
+      target.Description = source.Description;
+      target.Category = source.Category;
+      target.SubCategory = source.SubCategory;
+      target.Access = source.Access;
+      target.Optional = source.Optional;
+    }
+
     struct NullAttributes : IGH_Attributes
     {
       public PointF Pivot { get => PointF.Empty; set => throw new NotImplementedException(); }

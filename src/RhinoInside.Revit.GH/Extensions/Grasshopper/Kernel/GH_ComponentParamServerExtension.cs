@@ -8,7 +8,7 @@ namespace Grasshopper.Kernel
 {
   static class GH_ComponentParamServerExtension
   {
-    static int IndexOf(this IList<IGH_Param> list, string name, out IGH_Param value)
+    internal static int IndexOf(this IList<IGH_Param> list, string name, out IGH_Param value)
     {
       value = default;
       int index = 0;
@@ -59,7 +59,7 @@ namespace Grasshopper.Kernel
       where T : struct
     {
       var index = parameters.Input.IndexOf(name, out var param);
-      if (param?.DataType > GH_ParamData.@void)
+      if (param?.DataType > GH_ParamData.@void && !param.VolatileData.IsEmpty)
       {
         T val = default;
         if (!DA.GetData(index, ref val)) { value = default; return false; }
@@ -84,7 +84,7 @@ namespace Grasshopper.Kernel
       value = default;
 
       var index = parameters.Input.IndexOf(name, out var param);
-      if (param?.DataType > GH_ParamData.@void)
+      if (param?.DataType > GH_ParamData.@void && !param.VolatileData.IsEmpty)
       {
         if (!DA.GetData(index, ref value)) return false;
         if (!validate(value))
@@ -145,7 +145,7 @@ namespace Grasshopper.Kernel
       where T : struct
     {
       var index = parameters.Input.IndexOf(name, out var param);
-      if (param?.DataType > GH_ParamData.@void)
+      if (param?.DataType > GH_ParamData.@void && !param.VolatileData.IsEmpty)
       {
         var goos = new List<IGH_Goo>();
         if (DA.GetDataList(index, goos))
@@ -153,12 +153,12 @@ namespace Grasshopper.Kernel
           values = new T?[goos.Count];
 
           int i = 0;
-          foreach (var goo in goos.Cast<IGH_Goo>())
+          foreach (var goo in goos)
           {
             if (goo != null)
             {
               if (goo is T data) values[i] = data;
-              if (goo.CastTo<T>(out data)) values[i] = data;
+              else if (goo.CastTo<T>(out data)) values[i] = data;
             }
 
             i++;
@@ -174,7 +174,7 @@ namespace Grasshopper.Kernel
     public static bool TryGetDataList<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out IList<T> values)
     {
       var index = parameters.Input.IndexOf(name, out var param);
-      if (param?.DataType > GH_ParamData.@void)
+      if (param?.DataType > GH_ParamData.@void && !param.VolatileData.IsEmpty)
       {
         var goos = new List<IGH_Goo>();
         if (DA.GetDataList(index, goos))
@@ -184,12 +184,12 @@ namespace Grasshopper.Kernel
           var TIsGoo = typeof(IGH_Goo).IsAssignableFrom(typeof(T));
 
           int i = 0;
-          foreach (var goo in goos.Cast<IGH_Goo>())
+          foreach (var goo in goos)
           {
             if (goo != null)
             {
               if (goo is T data) values[i] = data;
-              if (goo.CastTo(out data)) values[i] = data;
+              else if (goo.CastTo(out data)) values[i] = data;
               else if (TIsGoo)
               {
                 var TGoo = (IGH_Goo) Activator.CreateInstance(typeof(T));
@@ -223,7 +223,7 @@ namespace Grasshopper.Kernel
           var TIsGoo = typeof(IGH_Goo).IsAssignableFrom(typeof(T));
 
           int i = 0;
-          foreach (var goo in goos.Cast<IGH_Goo>())
+          foreach (var goo in goos)
           {
             if (goo != null)
             {
@@ -261,7 +261,7 @@ namespace Grasshopper.Kernel
           var TIsGoo = typeof(IGH_Goo).IsAssignableFrom(typeof(T));
 
           int i = 0;
-          foreach (var goo in goos.Cast<IGH_Goo>())
+          foreach (var goo in goos)
           {
             if (goo != null)
             {
