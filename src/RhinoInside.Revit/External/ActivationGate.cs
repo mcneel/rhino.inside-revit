@@ -194,10 +194,10 @@ namespace RhinoInside.Revit.External
       }
     }
 
-    internal static void Open(Action action, object state) =>
+    internal static void Open(Action action, object state = default) =>
       Open(() => { action.Invoke(); return System.Reflection.Missing.Value; }, state);
 
-    internal static T Open<T>(Func<T> func, object state)
+    internal static T Open<T>(Func<T> func, object state = default)
     {
       var prevState = TopState;
       var wasOpen = IsOpen;
@@ -240,35 +240,35 @@ namespace RhinoInside.Revit.External
       public class YieldAwaiter : UI.ExternalEventHandler, ICriticalNotifyCompletion
       {
         public readonly string Name;
-        Action action;
         ExternalEvent external;
+        Action continuation;
         UIApplication result;
 
         internal YieldAwaiter(string name)
         {
           Name = name;
-          action = default;
+          continuation = default;
           external = default;
           result = default;
         }
 
         #region Awaiter
-        public bool IsCompleted => false;
+        public bool IsCompleted => !external?.IsPending ?? false;
         public UIApplication GetResult() => result;
         #endregion
 
         #region ICriticalNotifyCompletion
         [SecuritySafeCritical]
-        void INotifyCompletion.OnCompleted(Action continuation) =>
-          Post(continuation);
+        void INotifyCompletion.OnCompleted(Action action) =>
+          Post(action);
 
         [SecuritySafeCritical]
-        void ICriticalNotifyCompletion.UnsafeOnCompleted(Action continuation) =>
-          Post(continuation);
+        void ICriticalNotifyCompletion.UnsafeOnCompleted(Action action) =>
+          Post(action);
 
-        void Post(Action continuation)
+        void Post(Action action)
         {
-          action = continuation;
+          continuation = action;
           external = ExternalEvent.Create(this);
           switch (external.Raise())
           {
@@ -286,7 +286,7 @@ namespace RhinoInside.Revit.External
         {
           result = app;
           using (external)
-            action.Invoke();
+            continuation.Invoke();
         }
 
         public override string GetName() => Name;
@@ -316,34 +316,34 @@ namespace RhinoInside.Revit.External
       public class OpenAwaiter : UI.ExternalEventHandler, ICriticalNotifyCompletion
       {
         public readonly string Name;
-        Action action;
         ExternalEvent external;
+        Action continuation;
         readonly bool result = !IsOpen;
 
         internal OpenAwaiter(string name)
         {
           Name = name;
-          action = default;
+          continuation = default;
           external = default;
         }
 
         #region Awaiter
-        public bool IsCompleted => IsOpen;
+        public bool IsCompleted => !external?.IsPending ?? IsOpen;
         public bool GetResult() => result;
         #endregion
 
         #region ICriticalNotifyCompletion
         [SecuritySafeCritical]
-        void INotifyCompletion.OnCompleted(Action continuation) =>
-          Post(continuation);
+        void INotifyCompletion.OnCompleted(Action action) =>
+          Post(action);
 
         [SecuritySafeCritical]
-        void ICriticalNotifyCompletion.UnsafeOnCompleted(Action continuation) =>
-          Post(continuation);
+        void ICriticalNotifyCompletion.UnsafeOnCompleted(Action action) =>
+          Post(action);
 
-        void Post(Action continuation)
+        void Post(Action action)
         {
-          action = continuation;
+          continuation = action;
           external = ExternalEvent.Create(this);
           switch (external.Raise())
           {
@@ -360,7 +360,7 @@ namespace RhinoInside.Revit.External
         protected override void Execute(UIApplication app)
         {
           using (external)
-            action.Invoke();
+            continuation.Invoke();
         }
 
         public override string GetName() => Name;
