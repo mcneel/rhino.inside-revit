@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.GH.ElementTracking;
 using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
@@ -31,17 +32,11 @@ namespace RhinoInside.Revit.GH.Components
       if (Params.Input<IGH_Param>("Name").DataType != GH_ParamData.@void)
       {
         // Rename all previous grids to avoid name conflicts
-        if (PreviousStructure(document) is Types.IGH_ElementId[] previous)
-        {
-          var pinnedGrids = previous.OfType<Types.Grid>().
-                            Where(x => x.IsValid).
-                            Select(x => document.GetElement(x.Id)).
-                            OfType<DB.Grid>().
-                            Where(x => x.Pinned);
+        var grids = Params.TrackedElements<DB.Grid>("Grid", document);
+        var pinnedGrids = grids.Where(x => x.Pinned);
 
-          foreach (var grid in pinnedGrids)
-            grid.Name = Guid.NewGuid().ToString();
-        }
+        foreach (var grid in pinnedGrids)
+          grid.Name = Guid.NewGuid().ToString();
       }
     }
 

@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.Convert.Units;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.Kernel.Attributes;
-
-using DB = Autodesk.Revit.DB;
 using Rhino.Geometry;
+using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.Convert.System.Collections.Generic;
+using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.GH.ElementTracking;
+using RhinoInside.Revit.GH.Kernel.Attributes;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -34,39 +33,33 @@ namespace RhinoInside.Revit.GH.Components
       base.OnStarted(document);
 
       // Disable all previous walls joins
-      if (PreviousStructure(document) is Types.IGH_ElementId[] previous)
+      var walls = Params.TrackedElements<DB.Wall>("Wall", document);
+      var pinnedWalls = walls.Where(x => x.Pinned).
+                        Select
+                        (
+                          x =>
+                          (
+                            x,
+                            (x.Location as DB.LocationCurve).get_JoinType(0),
+                            (x.Location as DB.LocationCurve).get_JoinType(1)
+                          )
+                        );
+
+      foreach (var (wall, joinType0, joinType1) in pinnedWalls)
       {
-        var unjoinedWalls = previous.OfType<Types.Element>().
-                            Select(x => document.GetElement(x.Id)).
-                            OfType<DB.Wall>().
-                            Where(x => x.Pinned).
-                            Select
-                            (
-                              x => Tuple.Create
-                              (
-                                x,
-                                (x.Location as DB.LocationCurve).get_JoinType(0),
-                                (x.Location as DB.LocationCurve).get_JoinType(1)
-                              )
-                            ).
-                            ToArray();
-
-        foreach (var unjoinedWall in unjoinedWalls)
+        var location = wall.Location as DB.LocationCurve;
+        if (DB.WallUtils.IsWallJoinAllowedAtEnd(wall, 0))
         {
-          var location = unjoinedWall.Item1.Location as DB.LocationCurve;
-          if (DB.WallUtils.IsWallJoinAllowedAtEnd(unjoinedWall.Item1, 0))
-          {
-            DB.WallUtils.DisallowWallJoinAtEnd(unjoinedWall.Item1, 0);
-            DB.WallUtils.AllowWallJoinAtEnd(unjoinedWall.Item1, 0);
-            location.set_JoinType(0, unjoinedWall.Item2);
-          }
+          DB.WallUtils.DisallowWallJoinAtEnd(wall, 0);
+          DB.WallUtils.AllowWallJoinAtEnd(wall, 0);
+          location.set_JoinType(0, joinType0);
+        }
 
-          if (DB.WallUtils.IsWallJoinAllowedAtEnd(unjoinedWall.Item1, 1))
-          {
-            DB.WallUtils.DisallowWallJoinAtEnd(unjoinedWall.Item1, 1);
-            DB.WallUtils.AllowWallJoinAtEnd(unjoinedWall.Item1, 1);
-            location.set_JoinType(1, unjoinedWall.Item3);
-          }
+        if (DB.WallUtils.IsWallJoinAllowedAtEnd(wall, 1))
+        {
+          DB.WallUtils.DisallowWallJoinAtEnd(wall, 1);
+          DB.WallUtils.AllowWallJoinAtEnd(wall, 1);
+          location.set_JoinType(1, joinType1);
         }
       }
     }

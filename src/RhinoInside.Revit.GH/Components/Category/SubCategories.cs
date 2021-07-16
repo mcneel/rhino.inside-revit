@@ -1,9 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.GH.ElementTracking;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -49,7 +49,7 @@ namespace RhinoInside.Revit.GH.Components
     }
   }
 
-  public class AddSubCategory : TransactionalChainComponent
+  public class AddSubCategory : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("8DE336FB-E764-4A8E-BB12-9AECDA19769F");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
@@ -67,43 +67,125 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.Create<Parameters.Category>("Parent", "P", "Parent category", GH_ParamAccess.item),
-      ParamDefinition.Create<Param_String>("Name", "N", "SubCategory name", GH_ParamAccess.item),
+      ParamDefinition.Create<Parameters.Category>("Parent", "P", "Parent category"),
+      ParamDefinition.Create<Param_String>("Name", "N", "SubCategory name", optional: true),
+      ParamDefinition.Create<Parameters.Category>("Template", "T", "Template category", optional: true, relevance: ParamRelevance.Occasional),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.Category>("SubCategory", "S", "New SubCategory", GH_ParamAccess.item)
+      ParamDefinition.Create<Parameters.Category>("SubCategory", "S", "New SubCategory")
     };
+
+    protected override bool CurrentDocumentOnly => false;
+    const string _SubCategory_ = "SubCategory";
+    static readonly DB.BuiltInParameter[] ExcludeUniqueProperties = { };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DB.Category parent = null;
-      if (!DA.GetData("Parent", ref parent))
-        return;
+      if (!Params.GetData(DA, "Parent", out Types.Category parent)) return;
+      if (!Params.TryGetData(DA, "Name", out string name, x => x is object)) return;
+      Params.TryGetData(DA, "Template", out Types.Category template);
 
-      string newSubcatName = default;
-      if (!DA.GetData("Name", ref newSubcatName))
-        return;
+      // Previous Output
+      var category = Params.ReadTrackedElement(_SubCategory_, parent.Document, out DB.Element element) ?
+        Types.Category.FromCategory(DocumentExtension.AsCategory(element)) :
+        new Types.Category();
 
-      // find existing subcat if exists
-      var newSubcat = parent.SubCategories.Cast<DB.Category>().
-        Where(x => x.Name == newSubcatName).
-        FirstOrDefault();
-
-      // if not found, create one
-      if (newSubcat is null && newSubcatName != string.Empty)
+      StartTransaction(parent.Document);
       {
-        var doc = parent.Document();
-        StartTransaction(doc);
+        category = Reconstruct(category, parent, name, template);
 
-        using (var categories = doc.Settings.Categories)
-          newSubcat = categories.NewSubcategory(parent, newSubcatName);
+        Params.WriteTrackedElement(_SubCategory_, parent.Document, category.Value);
+        DA.SetData(_SubCategory_, category);
+      }
+    }
+
+    bool Reuse(Types.Category category, Types.Category parent, string name, Types.Category template)
+    {
+      if (!category.IsValid) return false;
+      if (!category.APIObject.Parent.IsEquivalent(parent.APIObject)) return false;
+      if (name is object) category.Name = name;
+      if (template?.IsValid == true)
+      {
+        category.LineColor = template.LineColor;
+        category.Material = template.Material;
+        category.ProjectionLinePattern = template.ProjectionLinePattern;
+        category.CutLinePattern = template.CutLinePattern;
+        category.ProjectionLineWeight = template.ProjectionLineWeight;
+        category.CutLineWeight = template.CutLineWeight;
       }
 
-      // return data to DA
-      DA.SetData("SubCategory", newSubcat);
+      return true;
+    }
+
+    Types.Category Create(Types.Category parent, string name, Types.Category template)
+    {
+      var category = default(Types.Category);
+      var doc = parent.Document;
+
+      // Make sure the name is unique
+      {
+        if (name is null)
+          name = template?.Name ?? parent.Name;
+
+        name = parent.APIObject.SubCategories.
+          Cast<DB.Category>().
+          Select(x => x.Name).
+          WhereNamePrefixedWith(name).
+          NextNameOrDefault() ?? name;
+      }
+
+      // Try to duplicate template
+      if (template?.Id.IsBuiltInId() == false)
+      {
+        var ids = DB.ElementTransformUtils.CopyElements
+        (
+          template.Document,
+          new DB.ElementId[] { template.Id },
+          doc,
+          default,
+          default
+        );
+
+        category = ids.Select(x => Types.Category.FromElementId(doc, x)).OfType<Types.Category>().FirstOrDefault();
+        category.Name = name;
+      }
+
+      if (category is null)
+      {
+        using (var categories = doc.Settings.Categories)
+          category = Types.Category.FromCategory(categories.NewSubcategory(parent.APIObject, name));
+
+        if (template?.Id.IsBuiltInId() == true)
+        {
+          category.LineColor = template.LineColor;
+          category.Material = template.Material;
+          category.ProjectionLinePattern = template.ProjectionLinePattern;
+          category.CutLinePattern = template.CutLinePattern;
+          category.ProjectionLineWeight = template.ProjectionLineWeight;
+          category.CutLineWeight = template.CutLineWeight;
+        }
+      }
+
+      return category;
+    }
+
+    Types.Category Reconstruct(Types.Category category, Types.Category parent, string name, Types.Category template)
+    {
+      if (!Reuse(category, parent, name, template))
+      {
+        var element = category.Value;
+        element = element.ReplaceElement
+        (
+          Create(parent, name, template).Value,
+          ExcludeUniqueProperties
+        );
+        category.SetValue(element.Document, element.Id);
+      }
+
+      return category;
     }
   }
 }

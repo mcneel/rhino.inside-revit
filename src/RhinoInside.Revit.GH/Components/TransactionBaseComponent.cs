@@ -11,11 +11,13 @@ using DB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Components
 {
   using Convert.Geometry;
+  using ElementTracking;
+  using Exceptions;
   using External.DB.Extensions;
   using Kernel.Attributes;
 
   [Obsolete]
-  public abstract class TransactionBaseComponent : TransactionalChainComponent
+  public abstract class TransactionBaseComponent : ElementTrackerComponent
   {
     protected TransactionBaseComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
@@ -55,7 +57,7 @@ namespace RhinoInside.Revit.GH.Components
       if (elementType.HasValue && element is object)
       {
         if (!element.Document.Equals(elementType.Value.Document))
-          throw new ArgumentException($"{nameof(ChangeElementType)} failed to assign a type from a diferent document.", nameof(elementType));
+          throw new RuntimeArgumentException(nameof(elementType), $"{nameof(ChangeElementType)} failed to assign a type from a diferent document.");
 
         ChangeElementTypeId(ref element, elementType.Value.Id);
       }
@@ -72,20 +74,20 @@ namespace RhinoInside.Revit.GH.Components
 
         if(category.IsMissing)
         {
-          category = Autodesk.Revit.DB.Category.GetCategory(doc, builtInCategory) ??
-          throw new ArgumentException("No suitable Category has been found.", paramName);
+          category = DB.Category.GetCategory(doc, builtInCategory) ??
+          throw new RuntimeArgumentException(paramName, "No suitable Category has been found.");
         }
       }
 
       else if (category.Value == null)
-        throw new ArgumentNullException(paramName);
+        throw new RuntimeArgumentNullException(paramName);
 
       return wasMissing;
     }
 
     protected static bool SolveOptionalType<T>(DB.Document doc, ref Optional<T> type, DB.ElementTypeGroup group, string paramName) where T : DB.ElementType
     {
-      return SolveOptionalType(doc, ref type, group, (document, name) => throw new ArgumentNullException(paramName), paramName);
+      return SolveOptionalType(doc, ref type, group, (document, name) => throw new RuntimeArgumentNullException(paramName), paramName);
     }
 
     protected static bool SolveOptionalType<T>(DB.Document doc, ref Optional<T> type, DB.ElementTypeGroup group, Func<DB.Document, string, T> recoveryAction, string paramName) where T : DB.ElementType
@@ -94,7 +96,7 @@ namespace RhinoInside.Revit.GH.Components
 
       if (wasMissing)
         type = (T) doc.GetElement(doc.GetDefaultElementTypeId(group)) ??
-        throw new ArgumentException($"No suitable {group} has been found.", paramName);
+        throw new RuntimeArgumentException(paramName, $"No suitable {group} has been found.");
 
       else if (type.Value == null)
         type = (T) recoveryAction.Invoke(doc, paramName);
@@ -108,13 +110,13 @@ namespace RhinoInside.Revit.GH.Components
 
       if (wasMissing)
         type = doc.GetElement(doc.GetDefaultFamilyTypeId(new DB.ElementId(category))) as DB.FamilySymbol ??
-               throw new ArgumentException("No suitable type has been found.", paramName);
+               throw new RuntimeArgumentException(paramName, "No suitable type has been found.");
 
       else if (type.Value == null)
-        throw new ArgumentNullException(paramName);
+        throw new RuntimeArgumentNullException(paramName);
 
       else if (!type.Value.Document.Equals(doc))
-        throw new ArgumentException($"{nameof(SolveOptionalType)} failed to assign a type from a diferent document.", nameof(type));
+        throw new RuntimeArgumentException(nameof(type), $"{nameof(SolveOptionalType)} failed to assign a type from a diferent document.");
 
       if (!type.Value.IsActive)
         type.Value.Activate();
@@ -133,10 +135,10 @@ namespace RhinoInside.Revit.GH.Components
       }
 
       else if (level.Value == null)
-        throw new ArgumentNullException(nameof(level));
+        throw new RuntimeArgumentNullException(nameof(level));
 
       else if (!level.Value.Document.Equals(doc))
-        throw new ArgumentException("Failed to assign a level from a diferent document.", nameof(level));
+        throw new RuntimeArgumentException(nameof(level), "Failed to assign a level from a diferent document.");
 
       return wasMissing;
     }
@@ -147,13 +149,13 @@ namespace RhinoInside.Revit.GH.Components
 
       if (wasMissing)
         level = doc.FindLevelByHeight(height / Revit.ModelUnits) ??
-                throw new ArgumentException("No suitable level has been found.", nameof(height));
+                throw new RuntimeArgumentException(nameof(height), "No suitable level has been found.");
 
       else if (level.Value == null)
-        throw new ArgumentNullException(nameof(level));
+        throw new RuntimeArgumentNullException(nameof(level));
 
       else if (!level.Value.Document.Equals(doc))
-        throw new ArgumentException("Failed to assign a level from a diferent document.", nameof(level));
+        throw new RuntimeArgumentException(nameof(level), "Failed to assign a level from a diferent document.");
 
       return wasMissing;
     }
@@ -190,7 +192,7 @@ namespace RhinoInside.Revit.GH.Components
       if (baseLevel.IsMissing && topLevel.IsMissing)
       {
         var b = doc.FindBaseLevelByHeight(height / Revit.ModelUnits, out var t) ??
-                t ?? throw new ArgumentException("No suitable base level has been found.", nameof(height));
+                t ?? throw new RuntimeArgumentException(nameof(height), "No suitable base level has been found.");
 
         if (!baseLevel.HasValue)
           baseLevel = b;
@@ -200,16 +202,16 @@ namespace RhinoInside.Revit.GH.Components
       }
 
       else if (baseLevel.Value == null)
-        throw new ArgumentNullException(nameof(baseLevel));
+        throw new RuntimeArgumentNullException(nameof(baseLevel));
 
       else if (topLevel.Value == null)
-        throw new ArgumentNullException(nameof(topLevel));
+        throw new RuntimeArgumentNullException(nameof(topLevel));
 
       else if (!baseLevel.Value.Document.Equals(doc))
-        throw new ArgumentException("Failed to assign a level from a diferent document.", nameof(baseLevel));
+        throw new RuntimeArgumentException(nameof(baseLevel), "Failed to assign a level from a diferent document.");
 
       else if (!topLevel.Value.Document.Equals(doc))
-        throw new ArgumentException("Failed to assign a level from a diferent document.", nameof(topLevel));
+        throw new RuntimeArgumentException(nameof(topLevel), "Failed to assign a level from a diferent document.");
     }
 
     protected static void SolveOptionalLevelsFromTop(DB.Document doc, double height, ref Optional<DB.Level> baseLevel, ref Optional<DB.Level> topLevel)
@@ -217,7 +219,7 @@ namespace RhinoInside.Revit.GH.Components
       if (baseLevel.IsMissing && topLevel.IsMissing)
       {
         var t = doc.FindTopLevelByHeight(height / Revit.ModelUnits, out var b) ??
-                b ?? throw new ArgumentException("No suitable top level has been found.", nameof(height));
+                b ?? throw new RuntimeArgumentException(nameof(height), "No suitable top level has been found.");
 
         if (!topLevel.HasValue)
           topLevel = t;
@@ -227,16 +229,16 @@ namespace RhinoInside.Revit.GH.Components
       }
 
       else if (baseLevel.Value == null)
-        throw new ArgumentNullException(nameof(baseLevel));
+        throw new RuntimeArgumentNullException(nameof(baseLevel));
 
       else if (topLevel.Value == null)
-        throw new ArgumentNullException(nameof(topLevel));
+        throw new RuntimeArgumentNullException(nameof(topLevel));
 
       else if (!baseLevel.Value.Document.Equals(doc))
-        throw new ArgumentException("Failed to assign a level from a diferent document.", nameof(baseLevel));
+        throw new RuntimeArgumentException(nameof(baseLevel), "Failed to assign a level from a diferent document.");
 
       else if (!topLevel.Value.Document.Equals(doc))
-        throw new ArgumentException("Failed to assign a level from a diferent document.", nameof(topLevel));
+        throw new RuntimeArgumentException(nameof(topLevel), "Failed to assign a level from a diferent document.");
     }
 
     protected static bool SolveOptionalLevels(DB.Document doc, Rhino.Geometry.Curve curve, ref Optional<DB.Level> baseLevel, ref Optional<DB.Level> topLevel)
@@ -508,13 +510,13 @@ namespace RhinoInside.Revit.GH.Components
             return false;
           }
 
-          throw new ArgumentNullException(param.Name);
+          throw new RuntimeArgumentNullException(param.Name);
         }
 
         if (!typeof(T).IsEnumDefined(enumValue))
         {
           var param = Params.Input[index];
-          throw new System.ComponentModel.InvalidEnumArgumentException(param.Name, enumValue, typeof(T));
+          throw new RuntimeArgumentException(param.Name);
         }
 
         value = (T) Enum.ToObject(typeof(T), enumValue);
@@ -536,7 +538,7 @@ namespace RhinoInside.Revit.GH.Components
           if (param.Optional && param.SourceCount == 0)
             return false;
 
-          throw new ArgumentNullException(param.Name);
+          throw new RuntimeArgumentNullException(param.Name);
         }
       }
 
@@ -570,7 +572,7 @@ namespace RhinoInside.Revit.GH.Components
       return new string(chars);
     }
 
-    protected void ThrowArgumentNullException(string paramName, string description = null) => throw new ArgumentNullException(FirstCharUpper(paramName), description ?? string.Empty);
+    protected void ThrowArgumentNullException(string paramName, string description = null) => throw new RuntimeArgumentNullException(FirstCharUpper(paramName), description ?? string.Empty);
 
     protected void ThrowArgumentException(string paramName, string description = null)
     {
@@ -579,7 +581,7 @@ namespace RhinoInside.Revit.GH.Components
 
       description = description.TrimEnd(Environment.NewLine.ToCharArray());
 
-      throw new ArgumentException(description, FirstCharUpper(paramName));
+      throw new RuntimeArgumentException(FirstCharUpper(paramName), description);
     }
 
     protected bool ThrowIfNotValid(string paramName, Point3d value)
@@ -606,15 +608,6 @@ namespace RhinoInside.Revit.GH.Components
     ReflectedComponent,
     Bake.IGH_ElementIdBakeAwareObject
   {
-    Dictionary<DB.Document, (Types.IGH_ElementId[] Structure, IEnumerator<Types.IGH_ElementId> Enumerator)> Previous =
-      new Dictionary<DB.Document, (Types.IGH_ElementId[], IEnumerator<Types.IGH_ElementId>)>();
-
-    protected Types.IGH_ElementId[] PreviousStructure(DB.Document doc) =>
-      Previous.TryGetValue(doc, out var data) ? data.Structure : default;
-
-    IEnumerator<Types.IGH_ElementId> PreviousStructureEnumerator(DB.Document doc) =>
-      Previous.TryGetValue(doc, out var data) ? data.Enumerator : default;
-
     protected ReconstructElementComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
 
@@ -664,75 +657,72 @@ namespace RhinoInside.Revit.GH.Components
     // Step 3.
     protected sealed override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (Parameters.Document.GetDataOrDefault(this, DA, "Document", out var Document))
+      if (Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var document))
       {
-        StartTransaction(Document);
-        Iterate(DA, Document, (DB.Document doc, ref DB.Element current) => TrySolveInstance(DA, doc, ref current));
+        StartTransaction(document.Value);
+        Iterate
+        (
+          DA,
+          document.Value,
+          (DB.Document doc, ref DB.Element current) => TrySolveInstance(DA, doc, ref current)
+        );
       }
+      else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "There is no active Revit document");
     }
 
     delegate void CommitAction(DB.Document doc, ref DB.Element element);
 
     void Iterate(IGH_DataAccess DA, DB.Document doc, CommitAction action)
     {
-      var enumerator = PreviousStructureEnumerator(doc);
-      var element = enumerator?.MoveNext() ?? false ?
-                    (
-                      enumerator.Current is Types.Element x && doc.Equals(x.Document) ?
-                      doc.GetElement(x.Id) :
-                      null
-                    ) :
-                    null;
+      // Previous Output
+      var trackedParam = Params.Output[0];
+      Params.ReadTrackedElement(trackedParam.Name, doc, out DB.Element previous);
+      var element = previous; 
 
-      if (element?.Pinned != false)
+      if (element?.DesignOption?.Id is DB.ElementId elementDesignOptionId)
       {
-        var previous = element;
+        var activeDesignOptionId = DB.DesignOption.GetActiveDesignOptionId(element.Document);
 
-        if (element?.DesignOption?.Id is DB.ElementId elementDesignOptionId)
-        {
-          var activeDesignOptionId = DB.DesignOption.GetActiveDesignOptionId(element.Document);
+        if (elementDesignOptionId != activeDesignOptionId)
+          element = null;
+      }
 
-          if (elementDesignOptionId != activeDesignOptionId)
-            element = null;
-        }
-
-        try
-        {
+      try
+      {
+        if(element?.Pinned != false)
           action(doc, ref element);
-        }
-        catch (RhinoInside.Revit.Exceptions.CancelException e)
-        {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
-          element = null;
-        }
-        catch (System.ArgumentNullException)
-        {
-          // Grasshopper components use to send a Null when they receive a Null without throwing any error
-          element = null;
-        }
-        catch (System.ArgumentException e)
-        {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
-          element = null;
-        }
-        catch (System.Exception e)
-        {
-          throw e;
-        }
-        finally
-        {
-          if (previous.IsValid() && !previous.IsEquivalent(element))
-            previous.Document.Delete(previous.Id);
+      }
+      catch (RhinoInside.Revit.Exceptions.CancelException e)
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
+        element = null;
+      }
+      catch (RuntimeArgumentNullException)
+      {
+        // Grasshopper components use to send a Null when
+        // they receive a Null without throwing any error
+        element = null;
+      }
+      catch (RuntimeArgumentException e)
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
+        element = null;
+      }
+      finally
+      {
+        Params.WriteTrackedElement(trackedParam.Name, doc, element);
+        DA.SetData(trackedParam.Name, element);
 
-          if (element.IsValid())
+        if (element.IsValid())
+        {
+          // In case element is crated on this iteratrion we pin it here by default
+          if (element.Pinned == false && previous is null)
           {
             try { element.Pinned = true; }
             catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
           }
         }
       }
-
-      DA.SetData(0, element);
     }
 
     void TrySolveInstance
@@ -789,107 +779,70 @@ namespace RhinoInside.Revit.GH.Components
     public override void OnStarted(DB.Document document)
     {
       base.OnStarted(document);
-
-      if (Previous.TryGetValue(document, out var data))
-        Previous.Remove(document);
-
-      data.Enumerator = (data.Structure as IEnumerable<Types.IGH_ElementId>)?.GetEnumerator();
-      Previous.Add(document, data);
     }
 
     // Step 3.1
     public override void OnPrepare(IReadOnlyCollection<DB.Document> documents)
     {
       base.OnPrepare(documents);
-
-      // Remove extra unused elements
-      foreach (var previous in Previous)
-      {
-        var document = previous.Key;
-        var data = previous.Value;
-
-        while (data.Enumerator?.MoveNext() ?? false)
-        {
-          if (data.Enumerator.Current is Types.IGH_Element elementId && document.Equals(elementId.Document))
-          {
-            if (document.GetElement(elementId.Id) is DB.Element element)
-            {
-              try { document.Delete(element.Id); }
-              catch (Autodesk.Revit.Exceptions.ApplicationException) { }
-            }
-          }
-        }
-      }
     }
 
     // Step 3.2
     public override void OnDone(DB.TransactionStatus status)
     {
       base.OnDone(status);
-
-      var previous = new Dictionary<DB.Document, (Types.IGH_ElementId[], IEnumerator<Types.IGH_ElementId>)>();
-
-      if (status == DB.TransactionStatus.Committed)
-      {
-        // Update previous elements
-        var elementSets = Params.Output[0].VolatileData.AllData(true).
-          Cast<Types.IGH_ElementId>().GroupBy(x => x.Document);
-
-        foreach (var set in elementSets)
-          previous.Add(set.Key, (set.ToArray(), default));
-      }
-      else
-      {
-        // Reset Enumerator
-        foreach (var data in Previous)
-          previous.Add(data.Key, (data.Value.Structure, default));
-      }
-
-      Previous = previous;
     }
-
     #region IGH_ElementIdBakeAwareObject
+
+    IEnumerable<Types.IGH_GraphicalElement> GetElementsToBake(DB.Document document) =>
+      Params.Output.Where(x => x is Kernel.IGH_ElementIdParam).
+      SelectMany(x => x.VolatileData.AllData(true).OfType<Types.IGH_GraphicalElement>()).
+      Where(x => x.Document.IsEquivalent(document));
+
     bool Bake.IGH_ElementIdBakeAwareObject.CanBake(Bake.BakeOptions options) =>
-      Params?.Output.OfType<Kernel.IGH_ElementIdParam>().
-      Where
-      (
-        x =>
-        x.VolatileData.AllData(true).
-        OfType<Types.IGH_Element>().
-        Where(goo => options.Document.Equals(goo.Document)).
-        Any()
-      ).
-      Any() ?? false;
+      DB.DirectShape.IsSupportedDocument(options.Document) &&
+      GetElementsToBake(options.Document).Any();
 
     bool Bake.IGH_ElementIdBakeAwareObject.Bake(Bake.BakeOptions options, out ICollection<DB.ElementId> ids)
     {
-      if (Previous.TryGetValue(options.Document, out var data))
+      using (var trans = new DB.Transaction(options.Document, "Bake"))
       {
-        using (var trans = new DB.Transaction(options.Document, "Bake"))
+        if (trans.Start() == DB.TransactionStatus.Started)
         {
-          if (trans.Start() == DB.TransactionStatus.Started)
+          var newIds = new List<DB.ElementId>();
+          var graphicalElements = GetElementsToBake(options.Document);
+
+          foreach (var graphicalElement in graphicalElements)
           {
-            var list = new List<DB.ElementId>();
-            foreach (var elementId in data.Structure)
+            if (graphicalElement.Value is DB.Element element && element.get_BoundingBox(null) != null)
             {
-              if (!elementId.IsValid) continue;
-
-              if (elementId.Value is DB.Element element)
+              using (var geometryOptions = new DB.Options() { DetailLevel = DB.ViewDetailLevel.Fine })
               {
-                try { element.Pinned = false; }
-                catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
+                using (var geometry = element.get_Geometry(geometryOptions))
+                {
+                  var list = geometry.ToDirectShapeGeometry().ToList();
+                  if (list.Count > 0)
+                  {
+                    var categoryId = DB.DirectShape.IsValidCategoryId(element.Category.Id, options.Document) ?
+                      element.Category.Id : new DB.ElementId(DB.BuiltInCategory.OST_GenericModel);
+
+                    try
+                    {
+                      var shape = DB.DirectShape.CreateElement(options.Document, categoryId);
+                      shape.SetShape(list);
+                      newIds.Add(shape.Id);
+                    }
+                    catch { }
+                  }
+                }
               }
-
-              list.Add(elementId.Id);
             }
+          }
 
-            if (trans.Commit() == DB.TransactionStatus.Committed)
-            {
-              ids = list;
-              Previous.Remove(options.Document);
-              ExpireSolution(false);
-              return true;
-            }
+          if (trans.Commit() == DB.TransactionStatus.Committed)
+          {
+            ids = newIds;
+            return true;
           }
         }
       }

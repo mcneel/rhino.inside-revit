@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.GH.ElementTracking;
 using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
@@ -29,26 +31,21 @@ namespace RhinoInside.Revit.GH.Components
       base.OnStarted(document);
 
       // Reset all previous beams joins
-      if (PreviousStructure(document) is Types.IGH_ElementId[] previous)
+      var beams = Params.TrackedElements<DB.FamilyInstance>("Beam", document);
+      var pinnedBeams = beams.Where(x => x.Pinned);
+
+      foreach (var beam in pinnedBeams)
       {
-        var beamsToUnjoin = previous.OfType<Types.Element>().
-                            Select(x => document.GetElement(x.Id)).
-                            OfType<DB.FamilyInstance>().
-                            Where(x => x.Pinned);
-
-        foreach (var unjoinedBeam in beamsToUnjoin)
+        if (DB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(beam, 0))
         {
-          if (DB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(unjoinedBeam, 0))
-          {
-            DB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(unjoinedBeam, 0);
-            DB.Structure.StructuralFramingUtils.AllowJoinAtEnd(unjoinedBeam, 0);
-          }
+          DB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(beam, 0);
+          DB.Structure.StructuralFramingUtils.AllowJoinAtEnd(beam, 0);
+        }
 
-          if (DB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(unjoinedBeam, 1))
-          {
-            DB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(unjoinedBeam, 1);
-            DB.Structure.StructuralFramingUtils.AllowJoinAtEnd(unjoinedBeam, 1);
-          }
+        if (DB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(beam, 1))
+        {
+          DB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(beam, 1);
+          DB.Structure.StructuralFramingUtils.AllowJoinAtEnd(beam, 1);
         }
       }
     }

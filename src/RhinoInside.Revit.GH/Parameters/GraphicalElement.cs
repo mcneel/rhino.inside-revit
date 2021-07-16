@@ -19,6 +19,7 @@ namespace RhinoInside.Revit.GH.Parameters
     IGH_PreviewObject,
     ISelectionFilter
     where T : class, Types.IGH_GraphicalElement
+    where R : DB.Element
   {
     protected GraphicalElementT(string name, string nickname, string description, string category, string subcategory) :
     base(name, nickname, description, category, subcategory)
@@ -55,11 +56,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #region UI methods
     protected override GH_GetterResult Prompt_Singular(ref T value)
     {
-#if REVIT_2018
-      const ObjectType objectType = ObjectType.Subelement;
-#else
       const ObjectType objectType = ObjectType.Element;
-#endif
 
       var uiDocument = Revit.ActiveUIDocument;
       switch (uiDocument.PickObject(out var reference, objectType, this))

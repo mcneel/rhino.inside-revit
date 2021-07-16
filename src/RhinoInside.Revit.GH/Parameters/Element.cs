@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.Interop;
 using Autodesk.Revit.UI;
@@ -10,13 +11,163 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.External.DB;
-using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
+
+namespace RhinoInside.Revit.GH.ElementTracking
+{
+  public enum TrackingMode
+  {
+    /// <summary>
+    /// Tracking is not applicable on this object.
+    /// </summary>
+    NotApplicable = -1,
+    /// <summary>
+    /// A brand new element should be created on each solution.
+    /// Elements created on previous iterations are ignored.
+    /// </summary>
+    /// <remarks>
+    /// No element tracking takes part in this mode, each run appends a new element.
+    /// The operation may fail if an element with same name already exists.
+    /// </remarks>
+    Disabled = 0,
+    /// <summary>
+    /// A brand new element should be created for each solution.
+    /// Elements created on previous iterations are deleted.
+    /// </summary>
+    /// <remarks>
+    /// If an element with the same name already exists it will be replaced by the new one.
+    /// </remarks>
+    Supersede = 1,
+    /// <summary>
+    /// An existing element should be reconstructed from the input values if it exists;
+    /// otherwise, a new one should be created.
+    /// </summary>
+    /// <remarks>
+    /// The operation may fail if an element with this name already exists.
+    /// </remarks>
+    Reconstruct = 2,
+  };
+
+  internal interface IGH_TrackingComponent
+  {
+    /// <summary>
+    /// Current tracking mode.
+    /// </summary>
+    /// <remarks>
+    /// Default value is <see cref="TrackingMode.NotApplicable"/>.
+    /// </remarks>
+    TrackingMode TrackingMode { get; set; }
+  }
+
+  internal interface IGH_TrackingParam
+  {
+    ElementStreamMode StreamMode { get; set; }
+
+    void OpenTrackingParam(bool currentDocumentOnly);
+    void CloseTrackingParam();
+
+    IEnumerable<T> GetTrackedElements<T>(DB.Document doc) where T : DB.Element;
+
+    bool ReadTrackedElement<T>(DB.Document doc, out T element) where T : DB.Element;
+    void WriteTrackedElement<T>(DB.Document doc, T element) where T : DB.Element;
+  }
+
+  public static class TrackingParamElementExtensions
+  {
+    /// <summary>
+    /// Reads en element from <paramref name="name"/> parameter.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="parameters"></param>
+    /// <param name="name"></param>
+    /// <param name="doc"></param>
+    /// <param name="value"></param>
+    /// <param name="elementName"></param>
+    /// <returns>True if the parameter is present</returns>
+    public static bool ReadTrackedElement<T>(this GH_ComponentParamServer parameters, string name, DB.Document doc, out T value)
+      where T : DB.Element
+    {
+      var index = parameters.Output.IndexOf(name, out var parameter);
+      if (parameter is IGH_TrackingParam tracking)
+      {
+        tracking.ReadTrackedElement(doc, out value);
+        return true;
+      }
+      else if (parameter is object)
+        throw new InvalidOperationException($"Parameter '{name}' does not implement {nameof(IGH_TrackingParam)} interface");
+
+      value = default;
+      return false;
+    }
+
+    public static void WriteTrackedElement<T>(this GH_ComponentParamServer parameters, string name, DB.Document document, T value)
+      where T : DB.Element
+    {
+      var index = parameters.Output.IndexOf(name, out var parameter);
+      if (parameter is IGH_TrackingParam tracking)
+        tracking.WriteTrackedElement(document, value);
+      else if (parameter is object)
+        throw new InvalidOperationException($"Parameter '{name}' does not implement {nameof(IGH_TrackingParam)} interface");
+      else
+        throw new InvalidOperationException($"Parameter '{name}' is missing");
+    }
+
+    public static IEnumerable<T> TrackedElements<T>(this GH_ComponentParamServer parameters, string name, DB.Document document)
+      where T : DB.Element
+    {
+      var index = parameters.Output.IndexOf(name, out var parameter);
+      if (parameter is IGH_TrackingParam tracking)
+        return tracking.GetTrackedElements<T>(document);
+      else if (parameter is object)
+        throw new InvalidOperationException($"Parameter '{name}' does not implement {nameof(IGH_TrackingParam)} interface");
+
+      return Enumerable.Empty<T>();
+    }
+  }
+
+  public static class TrackingParamGooExtensions
+  {
+    public static bool ReadTrackedElement<T>(this GH_ComponentParamServer parameters, string name, DB.Document doc, out T value)
+      where T : Types.IGH_ElementId
+    {
+      if
+      (
+        TrackingParamElementExtensions.ReadTrackedElement(parameters, name, doc, out DB.Element element) &&
+        Types.Element.FromElement(element) is T t
+      )
+      {
+        value = t;
+        return true;
+      }
+
+      value = default;
+      return false;
+    }
+
+    public static void WriteTrackedElement<T>(this GH_ComponentParamServer parameters, string name, DB.Document document, T value)
+      where T : Types.IGH_ElementId
+    {
+      TrackingParamElementExtensions.WriteTrackedElement(parameters, name, document, value.Value as DB.Element);
+    }
+
+    public static IEnumerable<T> TrackedElements<T>(this GH_ComponentParamServer parameters, string name, DB.Document document)
+      where T : Types.IGH_ElementId
+    {
+      return TrackingParamElementExtensions.TrackedElements<DB.Element>(parameters, name, document).
+        Select(x => Types.Element.FromElement(x) is T t ? t : default);
+    }
+  }
+}
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public abstract class Element<T, R> : ElementIdParam<T, R>
-  where T : class, Types.IGH_Element
+  using ElementTracking;
+  using RhinoInside.Revit.External.DB.Extensions;
+
+  public abstract class Element<T, R> : ElementIdParam<T, R>,
+    IGH_TrackingParam
+    where T : class, Types.IGH_Element
+    where R : DB.Element
   {
     protected Element(string name, string nickname, string description, string category, string subcategory) :
       base(name, nickname, description, category, subcategory)
@@ -71,7 +222,82 @@ namespace RhinoInside.Revit.GH.Parameters
 
           Menu_AppendItem(menu, $"Delete {GH_Convert.ToPlural(TypeName)}", Menu_DeleteElements, delete, false);
         }
+
+        if (TrackingMode != TrackingMode.NotApplicable)
+          Menu_AppendItem(menu, $"Release {GH_Convert.ToPlural(TypeName)}…", Menu_ReleaseElements, HasTrackedElements, false);
       }
+    }
+
+    bool HasTrackedElements => ToElementIds(VolatileData).Any(x => ElementStream.IsElementTracked(x.Value as DB.Element));
+
+    async Task<(bool Committed, IList<string> Messages)> ReleaseElementsAsync()
+    {
+      var committed = false;
+      var messages = new List<string>();
+
+      foreach (var document in ToElementIds(VolatileData).GroupBy(x => x.Document))
+      {
+        using (var tx = new DB.Transaction(document.Key, "Release Elements"))
+        {
+          if (tx.Start() == DB.TransactionStatus.Started)
+          {
+            var list = new List<DB.ElementId>();
+
+            foreach (var element in document.Select(x => x.Value).OfType<DB.Element>())
+            {
+              if (ElementStream.ReleaseElement(element))
+              {
+                element.Pinned = false;
+                list.Add(element.Id);
+              }
+            }
+
+            // Show feedback on Revit
+            if (list.Count > 0)
+            {
+              if (list.Count == 1)
+                messages.Add($"An element was released at '{document.Key.Title.TripleDot(16)}' document and is no longer synchronized.");
+              else
+                messages.Add($"{list.Count} elements were released at '{document.Key.Title.TripleDot(16)}' document and are no longer synchronized.");
+
+              using (var message = new DB.FailureMessage(ExternalFailures.ElementFailures.TrackedElementReleased))
+              {
+                message.SetFailingElements(list);
+                document.Key.PostFailure(message);
+              }
+
+              committed |= await tx.CommitAsync() == DB.TransactionStatus.Committed;
+            }
+          }
+        }
+      }
+
+      return (committed, messages);
+    }
+
+    async void Menu_ReleaseElements(object sender, EventArgs e)
+    {
+      // TODO: Ask for pinned or not, Save a selection, destination workset, destination view??
+
+      bool enableSolutions = Guest.DocumentChangedEvent.EnableSolutions;
+      Guest.DocumentChangedEvent.EnableSolutions = false;
+
+      var (commited, messages) = await ReleaseElementsAsync();
+
+      Guest.ShowEditor();
+
+      if (commited)
+      {
+        // Show feedback on Grasshopper
+        ExpireSolutionTopLevel(false);
+
+        foreach (var message in messages)
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, message);
+
+        OnDisplayExpired(false);
+      }
+
+      Guest.DocumentChangedEvent.EnableSolutions = enableSolutions;
     }
 
     void Menu_PinElements(object sender, EventArgs args)
@@ -210,9 +436,82 @@ namespace RhinoInside.Revit.GH.Parameters
       Guest.DocumentChangedEvent.EnableSolutions = enableSolutions;
     }
     #endregion
+
+    TrackingMode TrackingMode => (Attributes.GetTopLevel.DocObject as IGH_TrackingComponent)?.TrackingMode ?? TrackingMode.NotApplicable;
+
+    #region IGH_TrackingParam
+    ElementStreamMode IGH_TrackingParam.StreamMode { get; set; }
+
+    internal ElementStreamDictionary<R> ElementStreams;
+
+    void IGH_TrackingParam.OpenTrackingParam(bool currentDocumentOnly)
+    {
+      if (TrackingMode == TrackingMode.NotApplicable) return;
+
+      var component = Attributes.GetTopLevel.DocObject;
+
+      // Open an ElementStreamDictionary to store ouput param on multiple documents
+      var streamId = new ElementStreamId(component, Name);
+      var streamMode = ((IGH_TrackingParam) this).StreamMode | (currentDocumentOnly ? ElementStreamMode.CurrentDocument : default);
+      ElementStreams = new ElementStreamDictionary<R>(streamId, streamMode);
+
+      // This deletes all elements tracked from previous iterations.
+      // It helps to avoid name collisions on named elements.
+      if (TrackingMode < TrackingMode.Reconstruct)
+      {
+        var chain = Attributes.GetTopLevel.DocObject as Components.TransactionalChainComponent;
+        foreach (var stream in ElementStreams)
+        {
+          if (stream.Value.Length == 0) continue;
+
+          // Insert the Clear operation on the TransactionChain if available.
+          chain?.StartTransaction(stream.Key);
+          stream.Value.Clear();
+        }
+      }
+    }
+
+    void IGH_TrackingParam.CloseTrackingParam()
+    {
+      if (TrackingMode == TrackingMode.NotApplicable) return;
+
+      // Close all element streams and delete excess elements.
+      using (ElementStreams) ElementStreams = default;
+    }
+
+    IEnumerable<TOutput> IGH_TrackingParam.GetTrackedElements<TOutput>(DB.Document doc)
+    {
+      if (TrackingMode == TrackingMode.Reconstruct)
+        return ElementStreams[doc].Cast<TOutput>();
+
+      return Enumerable.Empty<TOutput>();
+    }
+
+    bool IGH_TrackingParam.ReadTrackedElement<TOutput>(DB.Document doc, out TOutput element)
+    {
+      if (TrackingMode == TrackingMode.Reconstruct)
+      {
+        var elementStream = ElementStreams[doc];
+        if (elementStream.Read(out var previous) && previous is TOutput output)
+        {
+          element = output;
+          return true;
+        }
+      }
+
+      element = default;
+      return false;
+    }
+
+    void IGH_TrackingParam.WriteTrackedElement<TInput>(DB.Document doc, TInput element)
+    {
+      if (TrackingMode > TrackingMode.Disabled)
+        ElementStreams[doc].Write(element as R);
+    }
+    #endregion
   }
 
-  public class Element : Element<Types.IGH_Element, object>
+  public class Element : Element<Types.IGH_Element, DB.Element>
   {
     public override GH_Exposure Exposure => GH_Exposure.septenary;
     public override Guid ComponentGuid => new Guid("F3EA4A9C-B24F-4587-A358-6A7E6D8C028B");

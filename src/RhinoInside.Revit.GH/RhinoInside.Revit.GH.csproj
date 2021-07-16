@@ -239,6 +239,7 @@
     <Compile Include="Components\Element\DesignOption\Active.cs" />
     <Compile Include="Components\Element\DesignOption\Identity.cs" />
     <Compile Include="Components\Element\DesignOption\Query.cs" />
+    <Compile Include="Components\Element\Duplicate.cs" />
     <Compile Include="Components\Element\FlipUnflipElement.cs" />
     <Compile Include="Components\Element\Geometry.cs" />
     <Compile Include="Components\Element\Grid\QueryGrids.cs" />
@@ -332,6 +333,7 @@
     <Compile Include="Components\Family\Geometry\OpeningByCurve.cs" />
     <Compile Include="Components\Family\Save.cs" />
     <Compile Include="Components\Family\Geometry\VoidByBrep.cs" />
+    <Compile Include="Components\Filters\SelectionFilterElement\ByName.cs" />
     <Compile Include="Components\Parameter\DefineSharedParameter.cs" />
     <Compile Include="Components\Parameter\DeconstructParameterValue.cs" />
     <Compile Include="Components\Parameter\ParameterKeyIdentity.cs" />

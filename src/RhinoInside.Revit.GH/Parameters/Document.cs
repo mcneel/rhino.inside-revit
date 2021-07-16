@@ -51,7 +51,14 @@ namespace RhinoInside.Revit.GH.Parameters
     public static bool TryGetDocumentOrCurrent(IGH_Component component, IGH_DataAccess DA, string name, out Types.Document document)
     {
       var _Document_ = name is null ? -1 : component.Params.IndexOfInputParam(name);
-      if (_Document_ < 0 || component.Params.Input[_Document_].SourceCount == 0)
+      if
+      (
+        _Document_ < 0 ||
+        (
+          component.Params.Input[_Document_].SourceCount == 0 &&
+          component.Params.Input[_Document_].DataType == GH_ParamData.@void
+        )
+      )
         return TryGetCurrentDocument(component, out document);
 
       document = default;

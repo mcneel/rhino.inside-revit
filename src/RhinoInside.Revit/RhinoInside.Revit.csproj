@@ -316,6 +316,7 @@
     <Compile Include="External\ActivationGate.cs" />
     <Compile Include="External\UI\UIHostApplication.cs" />
     <Compile Include="GH\Bake.cs" />
+    <Compile Include="GH\ElementStream.cs" />
     <Compile Include="GH\Guest.cs" />
     <Compile Include="GH\Kernel.cs" />
     <Compile Include="GH\PreviewServer.cs" />

@@ -394,31 +394,42 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!DA.GetDataTree<Types.IGH_Element>("Elements", out var elementsTree))
+      if (!DA.GetDataTree<Types.Element>("Elements", out var elements))
         return;
 
-      var elementsToDelete = Parameters.Element.
-                             ToElementIds(elementsTree).
+      var elementsToDelete = elements.AllData(true).
+                             Cast<Types.IGH_Element>().
+                             Where(x => x.IsValid).
                              GroupBy(x => x.Document).
-                             ToArray();
+                             ToList();
 
-      foreach (var group in elementsToDelete)
+      var options = new External.DB.TransactionHandlingOptions
       {
-        StartTransaction(group.Key);
+        FailuresPreprocessor = new TransactionalComponentFailuresPreprocessor(this)
+      };
 
-        try
+      using (var chain = new External.DB.TransactionChain(options, Name))
+      {
+        foreach (var group in elementsToDelete)
         {
-          var deletedElements = group.Key.Delete(group.Select(x => x.Id).ToArray());
+          chain.Start(group.Key);
 
-          if (deletedElements.Count == 0)
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "No elements were deleted");
-          else
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"{elementsToDelete.Length} elements and {deletedElements.Count - elementsToDelete.Length} dependant elements were deleted.");
+          try
+          {
+            var deletedElements = group.Key.Delete(group.Select(x => x.Id).ToArray());
+
+            if (deletedElements.Count == 0)
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "No elements were deleted");
+            else
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"{elementsToDelete.Count} elements and {deletedElements.Count - elementsToDelete.Count} dependant elements were deleted.");
+          }
+          catch (Autodesk.Revit.Exceptions.ArgumentException)
+          {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "One or more of the elements cannot be deleted.");
+          }
         }
-        catch (Autodesk.Revit.Exceptions.ArgumentException)
-        {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "One or more of the elements cannot be deleted.");
-        }
+
+        chain.Commit();
       }
     }
   }

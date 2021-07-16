@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Windows.Forms;
 using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
@@ -9,6 +10,32 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Exceptions
 {
+  /// <summary>
+  /// The exception that is thrown when a non-fatal remark occurs.
+  /// The current operation is canceled but what is already committed remains valid.
+  /// </summary>
+  /// <remarks>
+  /// If it is catched inside a loop is safe to continue looping over the rest of elements.
+  /// </remarks>
+  class RuntimeArgumentException : Exception
+  {
+    readonly string paramName = "";
+    public virtual string ParamName => paramName;
+
+    public RuntimeArgumentException() : this(string.Empty, string.Empty) { }
+    public RuntimeArgumentException(string paramName) : this(string.Empty, paramName) { }
+    public RuntimeArgumentException(string paramName, string message) : base(message)
+    {
+      this.paramName = paramName;
+    }
+  }
+  class RuntimeArgumentNullException : RuntimeArgumentException
+  {
+    public RuntimeArgumentNullException() : base(string.Empty, string.Empty) { }
+    public RuntimeArgumentNullException(string paramName) : base(paramName, string.Empty) { }
+    public RuntimeArgumentNullException(string paramName, string message) : base(paramName, message) { }
+  }
+
   /// <summary>
   /// The exception that is thrown when a non-fatal warning occurs.
   /// The current operation is canceled but what is already committed remains valid.
@@ -167,6 +194,15 @@ namespace RhinoInside.Revit.GH.Components
       try
       {
         TrySolveInstance(DA);
+      }
+      catch (Exceptions.RuntimeArgumentNullException e)
+      {
+        // Grasshopper components use to send a Null when
+        // they receive a Null without throwing any error
+      }
+      catch (Exceptions.RuntimeArgumentException e)
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, e.Message);
       }
       catch (Exceptions.RuntimeWarningException e)
       {

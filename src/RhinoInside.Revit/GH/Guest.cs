@@ -16,9 +16,10 @@ using Grasshopper;
 using Grasshopper.Plugin;
 using Grasshopper.Kernel;
 using Grasshopper.GUI.Canvas;
-using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.Convert.Units;
 using System.Diagnostics;
+using RhinoInside.Revit.External.DB;
+using RhinoInside.Revit.External.DB.Extensions;
 
 namespace RhinoInside.Revit.GH
 {
@@ -77,20 +78,23 @@ namespace RhinoInside.Revit.GH
       Instances.CanvasCreatedEventHandler Canvas_Created = default;
       Instances.CanvasCreated += Canvas_Created = (canvas) =>
       {
-        Instances.CanvasCreated -= Canvas_Created;
+        Instances.CanvasCreated            -= Canvas_Created;
         Instances.DocumentEditor.Activated += DocumentEditor_Activated;
         canvas.DocumentChanged             += ActiveCanvas_DocumentChanged;
+        canvas.KeyDown                     += ActiveCanvas_KeyDown;
       };
 
       Instances.CanvasDestroyedEventHandler Canvas_Destroyed = default;
       Instances.CanvasDestroyed += Canvas_Destroyed = (canvas) =>
       {
-        Instances.CanvasDestroyed -= Canvas_Destroyed;
+        canvas.KeyDown                     -= ActiveCanvas_KeyDown;
         canvas.DocumentChanged             -= ActiveCanvas_DocumentChanged;
         Instances.DocumentEditor.Activated -= DocumentEditor_Activated;
+        Instances.CanvasDestroyed          -= Canvas_Destroyed;
       };
 
       Instances.DocumentServer.DocumentAdded += DocumentServer_DocumentAdded;
+      Instances.DocumentServer.DocumentRemoved += DocumentServer_DocumentRemoved;
 
       return GuestResult.Succeeded;
     }
@@ -213,6 +217,7 @@ namespace RhinoInside.Revit.GH
     static bool? EnableSolutions;
     private void DocumentServer_DocumentAdded(GH_DocumentServer sender, GH_Document doc)
     {
+      doc.ObjectsDeleted += Doc_ObjectsDeleted;
       if (!External.ActivationGate.IsOpen)
       {
         if (GH_Document.EnableSolutions)
@@ -221,6 +226,11 @@ namespace RhinoInside.Revit.GH
           EnableSolutions = true;
         }
       }
+    }
+
+    private void DocumentServer_DocumentRemoved(GH_DocumentServer sender, GH_Document doc)
+    {
+      doc.ObjectsDeleted -= Doc_ObjectsDeleted;
     }
 
     bool activeDefinitionWasEnabled = false;
@@ -664,14 +674,19 @@ namespace RhinoInside.Revit.GH
     #endregion
 
     #region Transaction Groups
-    readonly Stack<DB.TransactionGroup> ActiveTransactionGroups = new Stack<DB.TransactionGroup>();
-    readonly Stack<GH_Document> ActiveDocuments = new Stack<GH_Document>();
+    readonly Queue<DB.TransactionGroup> ActiveTransactionGroups = new Queue<DB.TransactionGroup>();
+    readonly Stack<GH_Document> ActiveDocumentStack = new Stack<GH_Document>();
 
     internal void StartTransactionGroups()
     {
       var now = DateTime.Now.ToString(System.Globalization.CultureInfo.CurrentUICulture);
-      var name = ActiveDocuments.Peek().DisplayName;
+      var name = ActiveDocumentStack.Peek().DisplayName;
 
+      StartTransactionGroups($"Grasshopper {now}: {name.TripleDot(16)}", true);
+    }
+
+    internal void StartTransactionGroups(string name, bool forcedModal)
+    {
       using (var documents = Revit.ActiveDBApplication.Documents)
       {
         foreach (var doc in documents.Cast<DB.Document>())
@@ -688,13 +703,13 @@ namespace RhinoInside.Revit.GH
           if (doc.IsModifiable)
             continue;
 
-          var group = new DB.TransactionGroup(doc, $"Grasshopper {now}: {name.TripleDot(16)}")
+          var group = new DB.TransactionGroup(doc, name)
           {
-            IsFailureHandlingForcedModal = true
+            IsFailureHandlingForcedModal = forcedModal
           };
           group.Start();
 
-          ActiveTransactionGroups.Push(group);
+          ActiveTransactionGroups.Enqueue(group);
         }
       }
     }
@@ -705,7 +720,7 @@ namespace RhinoInside.Revit.GH
       {
         try
         {
-          using (var group = ActiveTransactionGroups.Pop())
+          using (var group = ActiveTransactionGroups.Dequeue())
           {
             if (group.IsValidObject)
               group.Assimilate();
@@ -715,6 +730,163 @@ namespace RhinoInside.Revit.GH
       }
     }
     #endregion
+
+    #region Element Tracking
+
+    /// <summary>
+    /// Adds Shift+Del sortcut to Delete command
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void ActiveCanvas_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
+    {
+      if (sender is GH_Canvas canvas && canvas.Document is GH_Document document)
+      {
+        if (e.KeyData == (System.Windows.Forms.Keys.Delete | System.Windows.Forms.Keys.Shift))
+        {
+          e.SuppressKeyPress = true;
+
+          var selectedObjects = document.SelectedObjects();
+          if (selectedObjects.Count > 0)
+          {
+            document.UndoUtil.RecordRemoveObjectEvent("Delete", selectedObjects);
+            document.RemoveObjects(selectedObjects, true);
+          }
+        }
+      }
+    }
+
+    private async void Doc_ObjectsDeleted(object sender, GH_DocObjectEventArgs e)
+    {
+      if (e.Document.Context != GH_DocumentContext.Loaded)
+        return;
+
+      var canvas = Instances.ActiveCanvas;
+      var canvasModifiersEnabled = canvas?.ModifiersEnabled;
+
+      var grasshopperDocument = e.Document;
+      var grasshopperDocumentEnabled = grasshopperDocument?.Enabled;
+
+      var activeUIDocument = Revit.ActiveUIDocument;
+      if (activeUIDocument is null) return;
+
+      var activeDocument = activeUIDocument.Document;
+      var activeView = activeUIDocument.ActiveGraphicalView;
+
+      var authorities = ElementTracking.TrackedElementsDictionary.NewAuthorityCollection();
+      {
+        foreach (var documentObject in e.Objects)
+        {
+          if (ElementTracking.ElementStreamId.TryGetAuthority(grasshopperDocument, documentObject, out var authority))
+            authorities.Add(authority);
+        }
+      }
+
+      bool rolledback = false;
+      var allowModelessHandling = System.Windows.Forms.Control.ModifierKeys != System.Windows.Forms.Keys.Shift;
+      var transactionGroups = new Queue<(DB.Document Document, DB.TransactionGroup Group)>();
+      try
+      {
+        if (canvasModifiersEnabled.HasValue) canvas.ModifiersEnabled = false;
+        if (grasshopperDocumentEnabled.HasValue) grasshopperDocument.Enabled = false;
+
+        var revitDocuments = Revit.ActiveDBApplication.Documents.Cast<DB.Document>();
+        foreach (var revitDocument in revitDocuments)
+        {
+          if (rolledback) break;
+          if (revitDocument.IsLinked) continue;
+
+          var elements = ElementTracking.TrackedElementsDictionary.Keys(revitDocument, authorities);
+          if (elements.Count == 0) continue;
+
+          if (revitDocument.IsReadOnly || revitDocument.IsModifiable)
+          {
+            rolledback = true;
+            break;
+          }
+
+          {
+            var transactionGroup = new DB.TransactionGroup(revitDocument, "Release Elements")
+            {
+              IsFailureHandlingForcedModal = false
+            };
+
+            if (transactionGroup.Start() == DB.TransactionStatus.Started)
+              transactionGroups.Enqueue((revitDocument, transactionGroup));
+          }
+
+          var elementIds = new HashSet<DB.ElementId>(elements.Select(x => x.Id));
+          var deletedIds = default(ICollection<DB.ElementId>);
+          var modifiedIds = default(ICollection<DB.ElementId>);
+
+          if (allowModelessHandling)
+            deletedIds = revitDocument.GetDependentElements(elementIds, out modifiedIds, default);
+
+          using (var tx = new DB.Transaction(revitDocument, "Release Elements"))
+          {
+            if (tx.Start() == DB.TransactionStatus.Started)
+            {
+              // Untrack elements on revitDocument owned by deleted callSites
+              foreach (var element in elements)
+              {
+                if (ElementTracking.TrackedElementsDictionary.Remove(element))
+                  element.Pinned = false;
+              }
+
+              if (allowModelessHandling)
+              {
+                using (var message = new DB.FailureMessage(ExternalFailures.ElementFailures.TrackedElementReleased))
+                {
+                  var resolution = DB.DeleteElements.Create(revitDocument, elementIds);
+                  message.AddResolution(DB.FailureResolutionType.DeleteElements, resolution);
+
+                  message.SetFailingElements(elementIds);
+
+                  elementIds.SymmetricExceptWith(deletedIds.Concat(modifiedIds));
+                  message.SetAdditionalElements(elementIds);
+
+                  revitDocument.PostFailure(message);
+                }
+              }
+              else
+              {
+                // If Shift is pressed we delete elements here, hopefully without UI
+                revitDocument.Delete(elementIds);
+              }
+
+              rolledback |= await tx.CommitAsync() != DB.TransactionStatus.Committed;
+            }
+            else rolledback = true;
+          }
+        }
+      }
+      catch { rolledback = true; }
+      finally
+      {
+        while (transactionGroups.Count > 0)
+        {
+          var (document, group) = transactionGroups.Dequeue();
+          using (group)
+          {
+            if (!group.IsValidObject) continue;
+            if (!document.IsValidObject) continue;
+            if (rolledback) group.RollBack();
+            else group.Assimilate();
+          }
+        }
+
+        if (canvasModifiersEnabled.HasValue) canvas.ModifiersEnabled = canvasModifiersEnabled.Value;
+        if (grasshopperDocumentEnabled.HasValue) grasshopperDocument.Enabled = grasshopperDocumentEnabled.Value;
+
+        ShowEditor();
+
+        if (!activeDocument.IsEquivalent(Revit.ActiveUIDocument.Document))
+          e.Document.ExpireSolution();
+
+        if (rolledback)
+          e.Document.Undo();
+      }
+    }
 
     void ActiveDefinition_SolutionStart(object sender, GH_SolutionEventArgs e)
     {
@@ -727,27 +899,29 @@ namespace RhinoInside.Revit.GH
           obj.ExpireSolution(false);
       }
 
-      ActiveDocuments.Push(e.Document);
+      ActiveDocumentStack.Push(e.Document);
       StartTransactionGroups();
     }
 
     void ActiveDefinition_SolutionEnd(object sender, GH_SolutionEventArgs e)
     {
+      if (ActiveDocumentStack.Peek() != e.Document)
+        throw new InvalidOperationException();
+
       CommitTransactionGroups();
-      ActiveDocuments.Pop();
+      ActiveDocumentStack.Pop();
 
       // Warn the user about objects that contain elements modified by Grasshopper.
       {
         var expiredObjectsCount = 0;
         foreach (var change in DocumentChangedEvent.changeQueue)
         {
-          if(e.Document == change.Definition)
+          if (e.Document == change.Definition)
             expiredObjectsCount += change.ExpiredObjects.Count;
 
           foreach (var obj in change.ExpiredObjects)
             obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "This object will be expired because it contains obsolete Revit elements.");
         }
-
         if (expiredObjectsCount > 0)
         {
           Instances.DocumentEditor.SetStatusBarEvent
@@ -766,5 +940,6 @@ namespace RhinoInside.Revit.GH
 
       ModelUnitSystem = RhinoDoc.ActiveDoc.ModelUnitSystem;
     }
+    #endregion
   }
 }

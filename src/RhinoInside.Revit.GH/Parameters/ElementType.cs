@@ -145,7 +145,7 @@ namespace RhinoInside.Revit.GH.Parameters
       categoriesBox.DisplayMember = "DisplayName";
       foreach (var category in categories)
       {
-        if(category is null)
+        if (category is null)
           categoriesBox.Items.Add(new Types.Category());
         else
           categoriesBox.Items.Add(Types.Category.FromCategory(category));
@@ -267,6 +267,45 @@ namespace RhinoInside.Revit.GH.Parameters
 
         ExpireSolution(true);
       }
+    }
+
+    public static bool GetDataOrDefault<TOutput>
+    (
+      IGH_Component component,
+      IGH_DataAccess DA,
+      string name,
+      out TOutput type,
+      Types.Document document,
+      DB.ElementTypeGroup typeGroup
+    )
+      where TOutput : class
+    {
+      if (!component.Params.TryGetData(DA, name, out type)) return false;
+      if (type is null)
+      {
+        var data = Types.ElementType.FromElementId(document.Value, document.Value.GetDefaultElementTypeId(typeGroup));
+        if (data is null)
+          throw new Exceptions.RuntimeWarningException($"No suitable {typeGroup} has been found.");
+
+        type = data as TOutput;
+        if (type is null)
+          return data.CastTo(out type);
+      }
+
+      // Validate document
+      switch (type)
+      {
+        case DB.Element element:
+          if (!document.Value.IsEquivalent(element.Document))
+            throw new Exceptions.RuntimeErrorException("Failed to assign a type from a diferent document.");
+          break;
+        case Types.IGH_ElementId id:
+          if (!document.Value.IsEquivalent(id.Document))
+            throw new Exceptions.RuntimeErrorException("Failed to assign a type from a diferent document.");
+          break;
+      }
+
+      return true;
     }
   }
 

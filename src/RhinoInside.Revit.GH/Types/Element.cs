@@ -346,13 +346,15 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
 
-      if (source is ValueTuple<DB.Document, DB.ElementId> tuple)
+      if (source is DB.Element value)
       {
-        try { source = tuple.Item1.GetElement(tuple.Item2); }
-        catch { }
+        if (!SetValue(value))
+          SetValue(default, DB.ElementId.InvalidElementId);
+
+        return true;
       }
 
-      return SetValue(source as DB.Element);
+      return false;
     }
 
     public override bool CastTo<Q>(out Q target)
@@ -471,20 +473,39 @@ namespace RhinoInside.Revit.GH.Types
 
     public virtual bool CanBeRenamed() => Value.CanBeRenamed();
 
-    static string GetUniqueNameRoot(string name)
+    public bool SetIncrementalName(string name)
     {
-      if (name?.EndsWith(")") == true)
+      if (!DB.NamingUtils.IsValidName(name))
+        throw new ArgumentException("Element name contains prohibited characters and is invalid.", nameof(name));
+
+      if (Value is DB.Element element)
       {
-        var start = name.LastIndexOf('(');
-        if (start >= 0)
         {
-          var number = name.Substring(start + 1, name.Length - start - 2);
-          if (int.TryParse(number, out var _))
-            return name.Substring(0, start - 1);
+          var index = name.LastIndexOf(' ');
+          if (index >= 0)
+          {
+            if (int.TryParse(name.Substring(index + 1), out var _))
+              name = name.Substring(0, index);
+          }
+        }
+
+        {
+          int index = 0;
+          while (true)
+          {
+            try
+            {
+              if (index == 0) { index++; element.Name = name; }
+              else element.Name = $"{name} {index++}";
+              return true;
+            }
+            catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
+            catch (Autodesk.Revit.Exceptions.ArgumentException) { }
+          }
         }
       }
 
-      return name;
+      return false;
     }
 
     public bool SetUniqueName(string name)
@@ -494,20 +515,19 @@ namespace RhinoInside.Revit.GH.Types
 
       if (Value is DB.Element element)
       {
-        name = GetUniqueNameRoot(name);
-
-        int index = 0;
-        while (true)
+        if (name?.EndsWith(")") == true)
         {
-          try
+          var start = name.LastIndexOf('(');
+          if (start >= 0)
           {
-            if (index == 0) { index++; element.Name = name; }
-            else element.Name = $"{name} ({index++})";
-            return true;
+            var uniqueId = name.Substring(start + 1, name.Length - start - 2);
+            if (UniqueId.TryParse(uniqueId, out var _, out var _))
+              name = name.Substring(0, Math.Max(0, start - 1));
           }
-          catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
-          catch (Autodesk.Revit.Exceptions.ArgumentException) { }
         }
+
+        element.Name = string.IsNullOrEmpty(name) ? $"({element.UniqueId})" : $"{name} ({element.UniqueId})";
+        return true;
       }
 
       return false;

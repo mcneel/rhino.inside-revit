@@ -2,9 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Windows.Forms;
 using Autodesk.Revit.UI.Events;
+using GH_IO.Serialization;
 using Grasshopper.GUI.Canvas;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.GH.ElementTracking;
 using DB = Autodesk.Revit.DB;
 using DBX = RhinoInside.Revit.External.DB;
 
@@ -502,6 +505,106 @@ namespace RhinoInside.Revit.GH.Components
 
         if (editScope is IDisposable disposable)
           disposable.Dispose();
+      }
+    }
+    #endregion
+  }
+
+  public abstract class ElementTrackerComponent : TransactionalChainComponent, IGH_TrackingComponent
+  {
+    protected ElementTrackerComponent(string name, string nickname, string description, string category, string subCategory)
+    : base(name, nickname, description, category, subCategory)
+    { }
+
+    protected virtual bool CurrentDocumentOnly
+    {
+      get
+      {
+        if(Params.Input<Parameters.Document>("Document") is IGH_Param document)
+          return document.SourceCount == 0 && document.DataType == GH_ParamData.@void;
+
+        return false;
+      }
+    }
+
+    protected override void BeforeSolveInstance()
+    {
+      base.BeforeSolveInstance();
+
+      var currentDocumentOnly = CurrentDocumentOnly;
+      foreach (var output in Params.Output.OfType<IGH_TrackingParam>())
+        output.OpenTrackingParam(currentDocumentOnly);
+    }
+
+    protected override void AfterSolveInstance()
+    {
+      foreach (var output in Params.Output.OfType<IGH_TrackingParam>())
+        output.CloseTrackingParam();
+
+      base.AfterSolveInstance();
+    }
+
+    #region IGH_TrackingComponent
+    public TrackingMode TrackingMode { get; set; } = TrackingMode.Reconstruct;
+    #endregion
+
+    #region IO
+    public override void AddedToDocument(GH_Document document)
+    {
+      if (ComponentVersion < new Version(0, 9, 0, 0))
+        TrackingMode = TrackingMode.Reconstruct;
+
+      base.AddedToDocument(document);
+    }
+
+    public override bool Read(GH_IReader reader)
+    {
+      if (!base.Read(reader))
+        return false;
+
+      int mode = (int) TrackingMode.Disabled;
+      reader.TryGetInt32("TrackingMode", ref mode);
+      TrackingMode = (TrackingMode) mode;
+
+      return true;
+    }
+
+    public override bool Write(GH_IWriter writer)
+    {
+      if (!base.Write(writer))
+        return false;
+
+      if (TrackingMode != TrackingMode.Disabled)
+        writer.SetInt32("TrackingMode", (int) TrackingMode);
+
+      return true;
+    }
+    #endregion
+
+    #region UI
+    protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
+    {
+      base.AppendAdditionalComponentMenuItems(menu);
+
+      if (TrackingMode != TrackingMode.NotApplicable)
+      {
+        if (Params.Output.OfType<ElementTracking.IGH_TrackingParam>().FirstOrDefault() is IGH_Param output)
+        {
+          Menu_AppendSeparator(menu);
+          var tracking = Menu_AppendItem(menu, "Tracking Mode");
+
+          var append = Menu_AppendItem(tracking.DropDown, "Disabled", (s, a) => { TrackingMode = TrackingMode.Disabled; ExpireSolution(true); }, true, TrackingMode == TrackingMode.Disabled);
+          append.ToolTipText = $"No element tracking takes part in this mode, each solution will append a new {output.TypeName}." + Environment.NewLine +
+                               $"The operation may fail if a {output.TypeName} with same name already exists.";
+
+          var supersede = Menu_AppendItem(tracking.DropDown, "Supersede", (s, a) => { TrackingMode = TrackingMode.Supersede; ExpireSolution(true); }, true, TrackingMode == TrackingMode.Supersede);
+          supersede.ToolTipText = $"A brand new {output.TypeName} will be created for each solution." + Environment.NewLine +
+                                  $"{GH_Convert.ToPlural(output.TypeName)} created on previous iterations are deleted.";
+
+          var reconstruct = Menu_AppendItem(tracking.DropDown, "Reconstruct", (s, a) => { TrackingMode = TrackingMode.Reconstruct; ExpireSolution(true); }, true, TrackingMode == TrackingMode.Reconstruct);
+          reconstruct.ToolTipText = $"If suitable, the previous solution {output.TypeName} will be reconstructed from the input values;" + Environment.NewLine +
+                                    "otherwise, a new one will be created.";
+        }
       }
     }
     #endregion
