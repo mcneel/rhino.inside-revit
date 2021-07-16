@@ -4,7 +4,7 @@ namespace RhinoInside.Revit.Exceptions
 {
   /// <summary>
   /// The exception that is thrown when a non-fatal error occurs.
-  /// The current operation failed, if you catch this exception changes must be undone
+  /// The current operation failed, if you catch this exception changes must be undone.
   /// </summary>
   public class FailException : Exception
   {
@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.Exceptions
 
   /// <summary>
   /// The exception that is thrown when a non-fatal warning occurs.
-  /// The current operation was cancelled but what is already done is valid.
+  /// The current operation is canceled but what is already committed remains valid.
   /// </summary>
   public class CancelException : Exception
   {
