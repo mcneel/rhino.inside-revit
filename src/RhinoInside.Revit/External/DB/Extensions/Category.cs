@@ -973,7 +973,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   internal static class CategoryEqualityComparer
   {
+    /// <summary>
+    /// IEqualityComparer for <see cref="DB.Category"/> that compares categories from different <see cref="DB.Document"/>.
+    /// </summary>
     public static readonly IEqualityComparer<Category> InterDocument = new InterDocumentComparer();
+
+    /// <summary>
+    /// IEqualityComparer for <see cref="DB.Category"/> that assumes all categories are from the same <see cref="DB.Document"/>.
+    /// </summary>
     public static readonly IEqualityComparer<Category> SameDocument = new SameDocumentComparer();
 
     struct SameDocumentComparer : IEqualityComparer<Category>
