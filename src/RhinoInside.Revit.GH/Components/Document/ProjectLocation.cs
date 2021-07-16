@@ -49,7 +49,11 @@ namespace RhinoInside.Revit.GH.Components
 
       if (Params.GetData(DA, "Shared Site", out Types.ProjectLocation location, x => x.IsValid))
       {
-        location.AssertValidDocument(doc, "Shared Site");
+        if (!doc.Equals(location.Document))
+        {
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "'Shared Site' is not valid on 'Project' document");
+          return;
+        }
 
         StartTransaction(doc);
         doc.ActiveProjectLocation = location.Value;

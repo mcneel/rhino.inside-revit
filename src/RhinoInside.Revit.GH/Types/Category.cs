@@ -450,7 +450,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (value is object && APIObject is DB.Category category)
         {
-          AssertValidDocument(value.Document, nameof(Material));
+          AssertValidDocument(value, nameof(Material));
           if ((category.Material?.Id ?? DB.ElementId.InvalidElementId) != value.Id)
             category.Material = value.Value;
         }
@@ -523,7 +523,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (value is object && APIObject is DB.Category category)
         {
-          AssertValidDocument(value.Document, nameof(ProjectionLinePattern));
+          AssertValidDocument(value, nameof(ProjectionLinePattern));
           if (category.GetGraphicsStyle(DB.GraphicsStyleType.Projection) is DB.GraphicsStyle)
           {
             if (category.GetLinePatternId(DB.GraphicsStyleType.Projection) != value.Id)
@@ -549,7 +549,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (value is object && APIObject is DB.Category category)
         {
-          AssertValidDocument(value.Document, nameof(CutLinePattern));
+          AssertValidDocument(value, nameof(CutLinePattern));
           if (category.GetGraphicsStyle(DB.GraphicsStyleType.Cut) is DB.GraphicsStyle)
           {
             if (category.GetLinePatternId(DB.GraphicsStyleType.Cut) != value.Id)

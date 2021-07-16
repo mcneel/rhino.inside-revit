@@ -548,7 +548,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (value is object && Value is DB.Element element)
         {
-          AssertValidDocument(value.Document, nameof(Type));
+          AssertValidDocument(value, nameof(Type));
           InvalidateGraphics();
 
           element.ChangeTypeId(value.Id);

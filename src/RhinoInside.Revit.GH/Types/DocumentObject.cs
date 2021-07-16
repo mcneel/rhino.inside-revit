@@ -104,10 +104,12 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    protected internal void AssertValidDocument(DB.Document doc, string paramName)
+    protected internal bool AssertValidDocument(DocumentObject other, string paramName)
     {
-      if (!(doc?.Equals(Document) ?? false))
-        throw new System.ArgumentException("Invalid Document", paramName);
+      if (other.Document is null) return false;
+      if (other.Document.Equals(Document)) return true;
+
+      throw new System.ArgumentException("Invalid Document", paramName);
     }
 
     object value;
