@@ -510,8 +510,8 @@ namespace RhinoInside.Revit.GH.Types
 
   [
     ComponentGuid("6a2b7564-9dd1-4cfc-a539-a352cb39cb7c"),
-    Name("Thermal Material Type"),
-    Description("Represents thermal material type"),
+    Name("Thermal Material Class"),
+    Description("Represents thermal material class"),
   ]
   public class ThermalMaterialType : GH_Enum<DB.ThermalMaterialType>
   {
