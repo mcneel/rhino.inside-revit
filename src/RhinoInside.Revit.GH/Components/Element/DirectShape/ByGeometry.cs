@@ -163,9 +163,9 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
     public DirectShapeTypeByGeometry() : base
     (
-      name: "Add DirectShapeType",
+      name: "Add DirectShape Type",
       nickname: "DShapeTyp",
-      description: "Given its Geometry, it reconstructs a DirectShapeType to the active Revit document",
+      description: "Given its Geometry, it reconstructs a DirectShape Type to the active Revit document",
       category: "Revit",
       subCategory: "DirectShape"
     )
@@ -179,6 +179,8 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       [Description("New DirectShape Type")]
       ref DB.ElementType type,
 
+      [Optional, Name("Family Name"), NickName("FN")]
+      string familyName,
       string name,
       Optional<DB.Category> category,
       IList<IGH_GeometricGoo> geometry,
@@ -190,6 +192,15 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       if (type is DB.DirectShapeType directShapeType && directShapeType.Category.Id == category.Value.Id) { }
       else directShapeType = DB.DirectShapeType.Create(document, name, category.Value.Id);
 
+#if REVIT_2022
+      if (familyName is object)
+        directShapeType.SetFamilyName(familyName);
+      else
+        directShapeType.SetFamilyName(name);
+#else
+      if (familyName is object)
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Family Name on DirectShape Types is only supported on Revit 2022 or above.");
+#endif
       directShapeType.Name = name;
       directShapeType.SetShape(BuildShape(directShapeType, geometry, material, out var paintIds));
 
