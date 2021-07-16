@@ -111,3 +111,44 @@ Like the previous -200 error, this is a conflict with another plugin. See the Er
 This issue might make the installed Revit 2021, invisible to the {{ site.terms.rir }} installer and therefore {{ site.terms.rir }} will not load in Revit 2021. Updates has been applied to the installer to correct for this issue but it makes the assumption that Revit 2021 is installed under its default path (`C:\Program Files\Autodesk\Revit 2021`). If you have installed Revit 2021 at another location the issue will remain. 
 
 You can either change the value of `LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-2100-0510-0000-705C0D862004}\InstallLocation` to the full path of where Revit is installed, or update Revit 2021 to latest (latest installers have corrected this issue).
+
+
+## Grasshopper add-ons are missing in revit
+
+### Problem
+
+Depending on how the Grasshopper add-ons are installed, or how the user profile is setup on your network, some of the add-ons might be located on a network location. Revit, by default, prohibits loading external DLL files from a network location. This is primarily a security measure set by the .net runtime.
+
+If you notice one or more of the Grasshopper add-ons are missing when loaded inside Revit, please open Rhino window (inside Revit) and press F2 to open the command history in Rhino. You should be able to see a report of all the Grasshopper add-ons that have been loaded. Below is an example of such report:
+
+```
+...
+* Loading Grasshopper core assembly...
+* Loading CurveComponents assembly...
+* Loading FieldComponents assembly...
+* Loading GalapagosComponents assembly...
+* Loading IOComponents assembly...
+...
+```
+
+If there are any load errors like the example below, marked as `Exception System.NotSupportedException` then most probably Revit is blocking loading the Grasshopper add-ons from a network location:
+
+```
+Message: Could not load file or assembly 'file:///C:\Users\n.bucco\AppData\Roaming\Grasshopper\Libraries\anemone1.gha' or one of its dependencies. Operation is not supported. (Exception from HRESULT: 0x80131515)
+
+Exception System.NotSupportedException:
+
+Message: An attempt was made to load an assembly from a network location which would have caused the assembly to be sandboxed in previous versions of the .NET Framework. This release of the .NET Framework does not enable CAS policy by default, so this load may be dangerous. If this load is not intended to sandbox the assembly, please enable the loadFromRemoteSources switch. See http://go.microsoft.com/fwlink/?LinkId=155569 for more information.
+```
+
+### Workaround
+
+Modify the `Revit.exe.config` file (by default located alongside `Revit.exe` at `C:\Program Files\Autodesk\Revit 20XX\Revit.exe.config` where `20XX` is your Revit version) and add the following directive to the `<runtime>` xml element:
+
+```xml
+<loadFromRemoteSources  enabled="true"/>
+```
+
+Example:
+
+![]({{ "/static/images/reference/loadremoteresources.png" | prepend: site.baseurl }})
