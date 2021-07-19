@@ -349,7 +349,7 @@ namespace RhinoInside.Revit.GH.Components
             var index = Params.Input.IndexOf(input.Param.Name, out var param);
             if (index >= 0)
             {
-              var inputType = input.GetType();
+              var inputType = input.Param.GetType();
               if (inputType != param.GetType() && param.CreateSurrogate(inputType) is IGH_Param surrogate)
               {
                 GH_UpgradeUtil.MigrateRecipients(param, surrogate);
@@ -371,12 +371,12 @@ namespace RhinoInside.Revit.GH.Components
             var index = Params.Output.IndexOf(output.Param.Name, out var param);
             if (index >= 0)
             {
-              var outputType = output.GetType();
+              var outputType = output.Param.GetType();
               if (outputType != param.GetType() && param.CreateSurrogate(outputType) is IGH_Param surrogate)
               {
                 GH_UpgradeUtil.MigrateSources(param, surrogate);
-                Params.UnregisterInputParameter(param);
-                Params.RegisterInputParam(surrogate, index);
+                Params.UnregisterOutputParameter(param);
+                Params.RegisterOutputParam(surrogate, index);
                 param = surrogate;
               }
 
