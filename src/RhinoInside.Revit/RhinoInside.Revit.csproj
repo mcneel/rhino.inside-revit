@@ -190,9 +190,9 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="RhinoCommon" Version="7.6.21127.19001" IncludeAssets="compile; build" />
-        <PackageReference Include="RhinoWindows" Version="7.6.21127.19001" IncludeAssets="build; compile" />
-        <PackageReference Include="Grasshopper" Version="7.6.21127.19001" IncludeAssets="compile; build" />
+        <PackageReference Include="RhinoCommon" Version="7.8.21196.5001" IncludeAssets="compile; build" />
+        <PackageReference Include="RhinoWindows" Version="7.8.21196.5001" IncludeAssets="build; compile" />
+        <PackageReference Include="Grasshopper" Version="7.8.21196.5001" IncludeAssets="compile; build" />
         <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitApiVersion)" IncludeAssets="build; compile" />
       </ItemGroup>
     </Otherwise>
