@@ -277,6 +277,8 @@ namespace RhinoInside.Revit.GH.Components
       // If we read from a previous version some parameters may need to be adjusted.
       if (ComponentVersion < CurrentVersion)
       {
+        document.DestroyObjectTable();
+
         // PerformLayout here to obtain parameters pivots.
         Attributes.PerformLayout();
 
@@ -321,8 +323,6 @@ namespace RhinoInside.Revit.GH.Components
           // Input parameters may contain PersistentData.
           if (obsoleteParameters.Count > 0)
           {
-            document.DestroyObjectTable();
-
             var index = document.Objects.IndexOf(this);
             var group = new Grasshopper.Kernel.Special.GH_Group
             {
