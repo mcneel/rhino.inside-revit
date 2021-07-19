@@ -342,12 +342,22 @@ namespace RhinoInside.Revit.GH.Components
           }
         }
 
-        // Refresh paremeters with current values.
+        // Refresh paremeters with current types & values.
         {
           foreach (var input in Inputs)
           {
-            if (Params.Input<IGH_Param>(input.Param.Name) is IGH_Param param)
+            var index = Params.Input.IndexOf(input.Param.Name, out var param);
+            if (index >= 0)
             {
+              var inputType = input.GetType();
+              if (inputType != param.GetType() && param.CreateSurrogate(inputType) is IGH_Param surrogate)
+              {
+                GH_UpgradeUtil.MigrateRecipients(param, surrogate);
+                Params.UnregisterOutputParameter(param);
+                Params.RegisterOutputParam(surrogate, index);
+                param = surrogate;
+              }
+
               param.Access = input.Param.Access;
               param.Optional = input.Param.Optional;
 
@@ -358,8 +368,18 @@ namespace RhinoInside.Revit.GH.Components
 
           foreach (var output in Outputs)
           {
-            if (Params.Output<IGH_Param>(output.Param.Name) is IGH_Param param)
+            var index = Params.Output.IndexOf(output.Param.Name, out var param);
+            if (index >= 0)
             {
+              var outputType = output.GetType();
+              if (outputType != param.GetType() && param.CreateSurrogate(outputType) is IGH_Param surrogate)
+              {
+                GH_UpgradeUtil.MigrateSources(param, surrogate);
+                Params.UnregisterInputParameter(param);
+                Params.RegisterInputParam(surrogate, index);
+                param = surrogate;
+              }
+
               param.Access = output.Param.Access;
               param.Optional = output.Param.Optional;
 

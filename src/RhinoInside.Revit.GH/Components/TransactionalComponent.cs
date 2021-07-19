@@ -87,8 +87,6 @@ namespace RhinoInside.Revit.GH.Components
     {
       foreach (var failureId in failureIds)
       {
-        int solvedErrors = 0;
-
         foreach (var error in failuresAccessor.GetFailureMessages().Where(x => x.GetFailureDefinitionId() == failureId))
         {
           if (!failuresAccessor.IsFailureResolutionPermitted(error))
@@ -101,10 +99,9 @@ namespace RhinoInside.Revit.GH.Components
           AddRuntimeMessage(error, true);
 
           failuresAccessor.ResolveFailure(error);
-          solvedErrors++;
         }
 
-        if (solvedErrors > 0)
+        if (failuresAccessor.CanCommitPendingTransaction())
           return DB.FailureProcessingResult.ProceedWithCommit;
       }
 

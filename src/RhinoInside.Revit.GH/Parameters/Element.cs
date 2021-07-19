@@ -1,81 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Windows.Forms.Interop;
 using Autodesk.Revit.UI;
-using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
-using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.External.DB;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.ElementTracking
 {
-  public enum TrackingMode
+  internal static class TrackingParamElementExtensions
   {
     /// <summary>
-    /// Tracking is not applicable on this object.
-    /// </summary>
-    NotApplicable = -1,
-    /// <summary>
-    /// A brand new element should be created on each solution.
-    /// Elements created on previous iterations are ignored.
-    /// </summary>
-    /// <remarks>
-    /// No element tracking takes part in this mode, each run appends a new element.
-    /// The operation may fail if an element with same name already exists.
-    /// </remarks>
-    Disabled = 0,
-    /// <summary>
-    /// A brand new element should be created for each solution.
-    /// Elements created on previous iterations are deleted.
-    /// </summary>
-    /// <remarks>
-    /// If an element with the same name already exists it will be replaced by the new one.
-    /// </remarks>
-    Supersede = 1,
-    /// <summary>
-    /// An existing element should be reconstructed from the input values if it exists;
-    /// otherwise, a new one should be created.
-    /// </summary>
-    /// <remarks>
-    /// The operation may fail if an element with this name already exists.
-    /// </remarks>
-    Reconstruct = 2,
-  };
-
-  internal interface IGH_TrackingComponent
-  {
-    /// <summary>
-    /// Current tracking mode.
-    /// </summary>
-    /// <remarks>
-    /// Default value is <see cref="TrackingMode.NotApplicable"/>.
-    /// </remarks>
-    TrackingMode TrackingMode { get; set; }
-  }
-
-  internal interface IGH_TrackingParam
-  {
-    ElementStreamMode StreamMode { get; set; }
-
-    void OpenTrackingParam(bool currentDocumentOnly);
-    void CloseTrackingParam();
-
-    IEnumerable<T> GetTrackedElements<T>(DB.Document doc) where T : DB.Element;
-
-    bool ReadTrackedElement<T>(DB.Document doc, out T element) where T : DB.Element;
-    void WriteTrackedElement<T>(DB.Document doc, T element) where T : DB.Element;
-  }
-
-  public static class TrackingParamElementExtensions
-  {
-    /// <summary>
-    /// Reads en element from <paramref name="name"/> parameter.
+    /// Reads an element from <paramref name="name"/> parameter.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="parameters"></param>
@@ -125,7 +64,7 @@ namespace RhinoInside.Revit.GH.ElementTracking
     }
   }
 
-  public static class TrackingParamGooExtensions
+  internal static class TrackingParamGooExtensions
   {
     public static bool ReadTrackedElement<T>(this GH_ComponentParamServer parameters, string name, DB.Document doc, out T value)
       where T : Types.IGH_ElementId
@@ -448,10 +387,8 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       if (TrackingMode == TrackingMode.NotApplicable) return;
 
-      var component = Attributes.GetTopLevel.DocObject;
-
       // Open an ElementStreamDictionary to store ouput param on multiple documents
-      var streamId = new ElementStreamId(component, Name);
+      var streamId = new ElementStreamId(this, string.Empty);
       var streamMode = ((IGH_TrackingParam) this).StreamMode | (currentDocumentOnly ? ElementStreamMode.CurrentDocument : default);
       ElementStreams = new ElementStreamDictionary<R>(streamId, streamMode);
 

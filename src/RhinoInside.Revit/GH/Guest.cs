@@ -1,25 +1,21 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-
-using DB = Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
-
-using Rhino;
-using Rhino.PlugIns;
-
 using Grasshopper;
-using Grasshopper.Plugin;
-using Grasshopper.Kernel;
 using Grasshopper.GUI.Canvas;
+using Grasshopper.Kernel;
+using Grasshopper.Plugin;
+using Rhino;
 using RhinoInside.Revit.Convert.Units;
-using System.Diagnostics;
 using RhinoInside.Revit.External.DB;
 using RhinoInside.Revit.External.DB.Extensions;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH
 {
@@ -732,7 +728,6 @@ namespace RhinoInside.Revit.GH
     #endregion
 
     #region Element Tracking
-
     /// <summary>
     /// Adds Shift+Del sortcut to Delete command
     /// </summary>
@@ -777,8 +772,35 @@ namespace RhinoInside.Revit.GH
       {
         foreach (var documentObject in e.Objects)
         {
-          if (ElementTracking.ElementStreamId.TryGetAuthority(grasshopperDocument, documentObject, out var authority))
-            authorities.Add(authority);
+          if (documentObject is ElementTracking.IGH_TrackingComponent trackingComponent)
+          {
+            if (trackingComponent.TrackingMode <= ElementTracking.TrackingMode.Disabled)
+              continue;
+
+            if (documentObject is IGH_Component component)
+            {
+              foreach (var param in component.Params.Input)
+              {
+                if (param is ElementTracking.IGH_TrackingParam)
+                {
+                  if (ElementTracking.ElementStreamId.TryGetAuthority(grasshopperDocument, param, out var inputAuthority))
+                    authorities.Add(inputAuthority);
+                }
+              }
+
+              foreach (var param in component.Params.Output)
+              {
+                if (param is ElementTracking.IGH_TrackingParam)
+                {
+                  if (ElementTracking.ElementStreamId.TryGetAuthority(grasshopperDocument, param, out var outputAuthority))
+                    authorities.Add(outputAuthority);
+                }
+              }
+            }
+
+            if (ElementTracking.ElementStreamId.TryGetAuthority(grasshopperDocument, documentObject, out var authority))
+              authorities.Add(authority);
+          }
         }
       }
 

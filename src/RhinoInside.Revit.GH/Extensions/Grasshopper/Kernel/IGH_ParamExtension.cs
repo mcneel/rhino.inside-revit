@@ -224,8 +224,29 @@ namespace Grasshopper.Kernel
           param.Attributes = default(NullAttributes);
 
         var newParam = GH_ComponentParamServer.CreateDuplicate(param);
-
         newParam.NewInstanceGuid();
+
+        if (newParam.MutableNickName && CentralSettings.CanvasFullNames)
+          newParam.NickName = newParam.Name;
+
+        return newParam;
+      }
+      finally { param.Attributes = attributes; }
+    }
+
+    internal static IGH_Param CreateSurrogate(this IGH_Param param, Type type)
+    {
+      var attributes = param.Attributes;
+      try
+      {
+        if (param.Attributes is null)
+          param.Attributes = default(NullAttributes);
+
+        var chunk = new GH_LooseChunk("param");
+        if (!param.Write(chunk)) return default;
+
+        var newParam = Activator.CreateInstance(type) as IGH_Param;
+        if (!newParam.Read(chunk)) return default;
 
         if (newParam.MutableNickName && CentralSettings.CanvasFullNames)
           newParam.NickName = newParam.Name;

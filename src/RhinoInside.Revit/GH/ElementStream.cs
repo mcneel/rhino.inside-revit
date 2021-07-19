@@ -1,10 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Data;
 using RhinoInside.Revit.External.DB;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
@@ -13,6 +11,64 @@ namespace RhinoInside.Revit.GH.ElementTracking
 {
   using DBXS = DB.ExtensibleStorage;
 
+  public enum TrackingMode
+  {
+    /// <summary>
+    /// Tracking is not applicable on this object.
+    /// </summary>
+    NotApplicable = -1,
+    /// <summary>
+    /// A brand new element should be created on each solution.
+    /// Elements created on previous iterations are ignored.
+    /// </summary>
+    /// <remarks>
+    /// No element tracking takes part in this mode, each run appends a new element.
+    /// The operation may fail if an element with same name already exists.
+    /// </remarks>
+    Disabled = 0,
+    /// <summary>
+    /// A brand new element should be created for each solution.
+    /// Elements created on previous iterations are deleted.
+    /// </summary>
+    /// <remarks>
+    /// If an element with the same name already exists it will be replaced by the new one.
+    /// </remarks>
+    Supersede = 1,
+    /// <summary>
+    /// An existing element should be reconstructed from the input values if it exists;
+    /// otherwise, a new one should be created.
+    /// </summary>
+    /// <remarks>
+    /// The operation may fail if an element with this name already exists.
+    /// </remarks>
+    Reconstruct = 2,
+  };
+
+  internal interface IGH_TrackingComponent
+  {
+    /// <summary>
+    /// Current tracking mode.
+    /// </summary>
+    /// <remarks>
+    /// Default value is <see cref="TrackingMode.NotApplicable"/>.
+    /// </remarks>
+    TrackingMode TrackingMode { get; set; }
+  }
+
+  internal interface IGH_TrackingParam
+  {
+    ElementStreamMode StreamMode { get; set; }
+
+    void OpenTrackingParam(bool currentDocumentOnly);
+    void CloseTrackingParam();
+
+    IEnumerable<T> GetTrackedElements<T>(DB.Document doc) where T : DB.Element;
+
+    bool ReadTrackedElement<T>(DB.Document doc, out T element) where T : DB.Element;
+    void WriteTrackedElement<T>(DB.Document doc, T element) where T : DB.Element;
+  }
+
+  #region ElementStream
   [Flags]
   internal enum ElementStreamMode
   {
@@ -207,7 +263,20 @@ namespace RhinoInside.Revit.GH.ElementTracking
       Document = document;
       Id = streamId;
       Filter = streamFilter;
-      Enumerator = new ElementEnumerator<T>(TrackedElementsDictionary.SortedKeys<T>(Document, Id, streamFilter));
+      try
+      {
+        Enumerator = new ElementEnumerator<T>(TrackedElementsDictionary.SortedKeys<T>(Document, Id, streamFilter));
+      }
+      catch (System.ArgumentException)
+      {
+        Enumerator = new ElementEnumerator<T>(new SortedList<int, T>());
+        using (var scope = document.CommitScope())
+        {
+          var conflicts = TrackedElementsDictionary.Keys(document, streamId, streamFilter);
+          document.Delete(conflicts.Select(x => x.Id).ToList());
+          scope.Commit();
+        }
+      }
     }
 
     public override void Dispose()
@@ -531,6 +600,7 @@ namespace RhinoInside.Revit.GH.ElementTracking
         if (filter != default)
           elementCollector = elementCollector.WherePasses(filter);
 
+        var authorityComparer = default(AuthorityComparer);
         var keys = new List<DB.Element>();
         foreach (var element in elementCollector)
         {
@@ -539,7 +609,7 @@ namespace RhinoInside.Revit.GH.ElementTracking
             if (id.Name != default && id.Name != name)
               continue;
 
-            if (!authority.SequenceEqual(id.Authority))
+            if (!authorityComparer.Equals(authority, id.Authority))
               continue;
 
             keys.Add(element);
@@ -579,7 +649,7 @@ namespace RhinoInside.Revit.GH.ElementTracking
       where T : DB.Element
     {
       if (id.Authority == default) throw new ArgumentNullException(nameof(id.Authority));
-      if (id.Name == default) throw new ArgumentNullException(nameof(id.Authority));
+      if (id.Name == default) throw new ArgumentNullException(nameof(id.Name));
 
       using (var collector = new DB.FilteredElementCollector(doc))
       {
@@ -591,14 +661,15 @@ namespace RhinoInside.Revit.GH.ElementTracking
         if (filter != default)
           elementCollector = elementCollector.WherePasses(filter);
 
+        var authorityComparer = default(AuthorityComparer);
         var keys = new SortedList<int, T>();
         foreach (var element in elementCollector.OfType<T>())
         {
           if (TryGetValue(element, out var _, out var authority, out var name, out var index))
           {
-            if (name == id.Name && authority.SequenceEqual(id.Authority))
+            if (name == id.Name && authorityComparer.Equals(authority, id.Authority))
             {
-              keys.Add(index, element as T);
+              keys.Add(index, element);
             }
           }
         }
@@ -660,4 +731,5 @@ namespace RhinoInside.Revit.GH.ElementTracking
         return entity.Schema != null && entity.Get<string>(Fields.UniqueId) == element.UniqueId;
     }
   }
+  #endregion
 }
