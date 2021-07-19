@@ -730,6 +730,11 @@ namespace RhinoInside.Revit.GH.ElementTracking
       using (var entity = element.GetEntity(Schema))
         return entity.Schema != null && entity.Get<string>(Fields.UniqueId) == element.UniqueId;
     }
+
+    public static bool ContainsKey(DB.Document document, DB.ElementId elementId)
+    {
+      return SchemaFilter.PassesFilter(document, elementId);
+    }
   }
   #endregion
 }
