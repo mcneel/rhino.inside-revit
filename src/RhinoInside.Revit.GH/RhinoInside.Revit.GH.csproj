@@ -333,7 +333,8 @@
     <Compile Include="Components\Family\Geometry\OpeningByCurve.cs" />
     <Compile Include="Components\Family\Save.cs" />
     <Compile Include="Components\Family\Geometry\VoidByBrep.cs" />
-    <Compile Include="Components\Filters\SelectionFilterElement\ByName.cs" />
+    <Compile Include="Components\Filters\Parameter\ByName.cs" />
+    <Compile Include="Components\Filters\Selection\ByName.cs" />
     <Compile Include="Components\Parameter\DefineSharedParameter.cs" />
     <Compile Include="Components\Parameter\DeconstructParameterValue.cs" />
     <Compile Include="Components\Parameter\ParameterKeyIdentity.cs" />

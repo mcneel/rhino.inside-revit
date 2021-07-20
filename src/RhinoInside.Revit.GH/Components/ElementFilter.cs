@@ -541,7 +541,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var rules = new List<DB.FilterRule>();
-      if (!DA.GetDataList("Rules", rules))
+      if (!DA.GetDataList("Rules", rules) || rules.Count == 0)
         return;
 
       var inverted = false;
@@ -1148,9 +1148,9 @@ namespace RhinoInside.Revit.GH.Components
 
           case DB.StorageType.ElementId:
           {
-            var value = default(Types.IGH_ElementId);
+            var value = default(DB.ElementId);
             if (DA.GetData("Value", ref value))
-              rule = new DB.FilterElementIdRule(provider, ruleEvaluator, value.Id);
+              rule = new DB.FilterElementIdRule(provider, ruleEvaluator, value);
           }
           break;
         }
@@ -1230,6 +1230,43 @@ namespace RhinoInside.Revit.GH.Components
     public ElementFilterRuleLessOrEqual()
     : base("Less Or Equal Rule", "LessOrEqu", "Filter used to match elements if value of a parameter less or equal than Value", "Revit", "Filter")
     { }
+  }
+
+  public class CategoryFilterRule : Component
+  {
+    public override Guid ComponentGuid => new Guid("0CE4F51D-49D0-4B0C-82C8-84CCCF0968F6");
+
+    public override GH_Exposure Exposure => GH_Exposure.quinary | GH_Exposure.obscure;
+    public override bool IsPreviewCapable => false;
+
+    public CategoryFilterRule()
+    : base("Category Rule", "Category", "Filter used to match elements on a category", "Revit", "Filter")
+    { }
+
+    protected CategoryFilterRule(string name, string nickname, string description, string category, string subCategory)
+    : base(name, nickname, description, category, subCategory) { }
+
+    protected override void RegisterInputParams(GH_InputParamManager manager)
+    {
+      manager.AddParameter(new Parameters.Category(), "Categories", "C", "Categories to check", GH_ParamAccess.list);
+    }
+
+    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    {
+      manager.AddParameter(new Parameters.FilterRule(), "Rule", "R", string.Empty, GH_ParamAccess.item);
+    }
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      var categories = new List<Types.Category>();
+      if (!DA.GetDataList("Categories", categories) || categories.Count == 0)
+        return;
+
+      var categoryIds = categories.Select(x => x.Id).ToList();
+      var rule = new DB.FilterCategoryRule(categoryIds);
+
+      DA.SetData("Rule", rule);
+    }
   }
   #endregion
 }

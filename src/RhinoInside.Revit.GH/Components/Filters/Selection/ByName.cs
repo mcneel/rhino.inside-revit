@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     public SelectionFilterElementByName() : base
     (
-      name: "Create Selection Filter",
+      name: "Add Selection Filter",
       nickname: "Selection Filter",
       description: "Create a selection filter",
       category: "Revit",
@@ -44,7 +44,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
         {
           Name = "Elements",
           NickName = "E",
-          Description = "Elements ",
+          Description = "Elements",
           Access = GH_ParamAccess.list,
           Optional = true
         },
@@ -59,14 +59,14 @@ namespace RhinoInside.Revit.GH.Components.Filters
       (
         new Parameters.Element()
         {
-          Name = _Selection_,
-          NickName = _Selection_.Substring(0, 1),
-          Description = $"Output {_Selection_}",
+          Name = _SelectionFilter_,
+          NickName = _SelectionFilter_.Substring(0, 1),
+          Description = $"Output {_SelectionFilter_}",
         }
       ),
     };
 
-    const string _Selection_ = "Selection";
+    const string _SelectionFilter_ = "Selection Filter";
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       // Input
@@ -75,15 +75,15 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!Params.TryGetDataList(DA, "Elements", out IList<Types.IGH_GraphicalElement> elements)) return;
 
       // Previous Output
-      Params.ReadTrackedElement(_Selection_, doc.Value, out DB.SelectionFilterElement selection);
+      Params.ReadTrackedElement(_SelectionFilter_, doc.Value, out DB.SelectionFilterElement selection);
 
       StartTransaction(doc.Value);
       {
         var elementIds = elements?.Where(x => doc.Value.IsEquivalent(x.Document)).Select(x => x.Id).ToList();
         selection = Reconstruct(selection, doc.Value, name, elementIds, default);
 
-        Params.WriteTrackedElement(_Selection_, doc.Value, selection);
-        DA.SetData(_Selection_, selection);
+        Params.WriteTrackedElement(_SelectionFilter_, doc.Value, selection);
+        DA.SetData(_SelectionFilter_, selection);
       }
     }
 
@@ -115,7 +115,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       // Make sure the name is unique
       {
         if (name is null)
-          name = template?.Name ?? _Selection_;
+          name = template?.Name ?? _SelectionFilter_;
 
         name = doc.GetNamesakeElements
         (
