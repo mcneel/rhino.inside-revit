@@ -25,15 +25,19 @@ namespace RhinoInside.Revit.GH.Components
     #region Solve Optional values
     protected static double LiteralLengthValue(double meters)
     {
-      switch (Rhino.RhinoDoc.ActiveDoc.ModelUnitSystem)
+      var modelUnitSystem = Rhino.RhinoDoc.ActiveDoc.ModelUnitSystem;
+      switch (modelUnitSystem)
       {
         case Rhino.UnitSystem.None:
         case Rhino.UnitSystem.Inches:
         case Rhino.UnitSystem.Feet:
-          return Math.Round(meters * Rhino.RhinoMath.UnitScale(Rhino.UnitSystem.Meters, Rhino.UnitSystem.Feet))
-                 * Rhino.RhinoMath.UnitScale(Rhino.UnitSystem.Feet, Rhino.RhinoDoc.ActiveDoc.ModelUnitSystem);
+          return UnitConverter.ConvertFromHostUnits
+          (
+            Math.Round(UnitConverter.ConvertToHostUnits(meters, Rhino.UnitSystem.Meters)),
+            modelUnitSystem
+          );
         default:
-          return meters * Rhino.RhinoMath.UnitScale(Rhino.UnitSystem.Meters, Rhino.RhinoDoc.ActiveDoc.ModelUnitSystem);
+          return UnitConverter.Convert(meters, Rhino.UnitSystem.Meters, modelUnitSystem);
       }
     }
 
