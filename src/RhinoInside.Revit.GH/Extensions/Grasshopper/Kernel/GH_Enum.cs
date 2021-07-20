@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Types
       if (!typeof(IGH_Enumerate).IsAssignableFrom(typeof(T)))
         throw new ArgumentException($"{enumType.Name} does not implement interface {typeof(IGH_Enumerate).FullName}", nameof(T));
 
-      var _EnumValues_ = enumType.GetProperty("EnumValues", BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Static, null, typeof(IReadOnlyCollection<T>), new Type[0], null);
+      var _EnumValues_ = enumType.GetProperty("EnumValues", BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Static, null, typeof(IReadOnlyCollection<T>), Type.EmptyTypes, null);
       if (_EnumValues_ != null)
         return (IReadOnlyCollection<T>) _EnumValues_?.GetValue(null);
 
@@ -147,7 +147,7 @@ namespace RhinoInside.Revit.GH.Types
       if (!enumType.IsSubclassOf(typeof(GH_Enum)))
         throw new ArgumentException($"{nameof(enumType)} must be a subclass of {typeof(GH_Enum).FullName}", nameof(enumType));
 
-      var _NamedValues_ = enumType.GetProperty("NamedValues", BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Static, null, typeof(ReadOnlyDictionary<int, string>), new Type[0], null);
+      var _NamedValues_ = enumType.GetProperty("NamedValues", BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Static, null, typeof(ReadOnlyDictionary<int, string>), Type.EmptyTypes, null);
       return _NamedValues_.GetValue(null) as ReadOnlyDictionary<int, string>;
     }
 

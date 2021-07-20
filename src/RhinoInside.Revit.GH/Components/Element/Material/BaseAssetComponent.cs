@@ -54,7 +54,7 @@ namespace RhinoInside.Revit.GH.Components.Material
         param.Access = paramInfo.ParamAccess;
         param.Optional = paramInfo.Optional;
 
-        inputs.Add(ParamDefinition.FromParam(param));
+        inputs.Add(new ParamDefinition(param));
       }
 
       return inputs.ToArray();
@@ -76,7 +76,7 @@ namespace RhinoInside.Revit.GH.Components.Material
         param.Description = paramInfo.Description;
         param.Access = paramInfo.ParamAccess;
 
-        outputs.Add(ParamDefinition.FromParam(param));
+        outputs.Add(new ParamDefinition(param));
       }
 
       return outputs.ToArray();

@@ -1,11 +1,115 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Security;
+using System.Security.Permissions;
 using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB
 {
+  static class TransactionExtension
+  {
+    public struct TransactionAwaitable
+    {
+      readonly TransactionAwaiter awaiter;
+      internal TransactionAwaitable(Transaction transaction) => awaiter = new TransactionAwaiter(transaction);
+      public TransactionAwaiter GetAwaiter() => awaiter;
+
+      [HostProtection(Synchronization = true)]
+      public class TransactionAwaiter : UI.ExternalEventHandler, ICriticalNotifyCompletion, ITransactionFinalizer
+      {
+        public readonly string Name;
+        readonly ITransactionFinalizer TransactionFinalizer;
+        Autodesk.Revit.UI.ExternalEvent external;
+        Action continuation;
+        TransactionStatus result = TransactionStatus.Pending;
+        Exception exception;
+
+        internal TransactionAwaiter(Transaction transaction)
+        {
+          using (var options = transaction.GetFailureHandlingOptions())
+          {
+            TransactionFinalizer = options.GetTransactionFinalizer();
+
+            Name = transaction.GetName();
+            result = transaction.Commit
+            (
+              options.
+              SetTransactionFinalizer(this).
+              SetForcedModalHandling(false)
+            );
+          }
+        }
+
+        #region Awaiter
+        public bool IsCompleted => result != TransactionStatus.Pending;
+        public TransactionStatus GetResult() => exception is null ? result : throw exception;
+        #endregion
+
+        #region ICriticalNotifyCompletion
+        [SecuritySafeCritical]
+        void INotifyCompletion.OnCompleted(Action action) => continuation = action;
+
+        [SecuritySafeCritical]
+        void ICriticalNotifyCompletion.UnsafeOnCompleted(Action action) => continuation = action;
+
+        void Rise()
+        {
+          // If TransactionAwaitable is not awaited or Transaction runs synchronously we are done.
+          if (continuation is null)
+            return;
+
+          external = Autodesk.Revit.UI.ExternalEvent.Create(this);
+          switch (external.Raise())
+          {
+            case Autodesk.Revit.UI.ExternalEventRequest.Accepted: break;
+            case Autodesk.Revit.UI.ExternalEventRequest.Pending: throw new InvalidOperationException();
+            case Autodesk.Revit.UI.ExternalEventRequest.Denied: throw new NotSupportedException();
+            case Autodesk.Revit.UI.ExternalEventRequest.TimedOut: throw new TimeoutException();
+            default: throw new NotImplementedException();
+          }
+        }
+        #endregion
+
+        #region ITransactionFinalizer
+        void ITransactionFinalizer.OnCommitted(Document document, string strTransactionName)
+        {
+          result = TransactionStatus.Committed;
+
+          try { TransactionFinalizer?.OnCommitted(document, strTransactionName); }
+          catch (TargetInvocationException e) { exception = e.InnerException; }
+
+          Rise();
+        }
+
+        void ITransactionFinalizer.OnRolledBack(Document document, string strTransactionName)
+        {
+          result = TransactionStatus.RolledBack;
+
+          try { TransactionFinalizer?.OnRolledBack(document, strTransactionName); }
+          catch (TargetInvocationException e) { exception = e.InnerException; }
+
+          Rise();
+        }
+        #endregion
+
+        #region IExternalEventHandler
+        protected override void Execute(Autodesk.Revit.UI.UIApplication app)
+        {
+          using (external)
+            continuation.Invoke();
+        }
+
+        public override string GetName() => Name;
+        #endregion
+      }
+    }
+
+    public static TransactionAwaitable CommitAsync(this Transaction self) => new TransactionAwaitable(self);
+  }
+
   public interface ITransactionNotification
   {
     void OnStarted(Document document);
@@ -28,7 +132,7 @@ namespace RhinoInside.Revit.External.DB
   /// TransactionChain provide control over a subset of changes on several documents as an atomic unique change.
   /// </summary>
   /// <remarks>
-  /// A TransactionChain behaves lia a <see cref="Autodesk.Revit.DB.Transaction"/> but on several documents at
+  /// A TransactionChain behaves like a <see cref="Autodesk.Revit.DB.Transaction"/> but on several documents
   /// at the same time.
   /// </remarks>
   public class TransactionChain : IFailuresPreprocessor, ITransactionFinalizer, IDisposable
@@ -161,7 +265,8 @@ namespace RhinoInside.Revit.External.DB
       }
       finally
       {
-        HandlingOptions.TransactionNotification?.OnDone(status);
+        if(status != TransactionStatus.Pending)
+          HandlingOptions.TransactionNotification?.OnDone(status);
       }
 
       return status;
@@ -199,7 +304,19 @@ namespace RhinoInside.Revit.External.DB
         var transaction = transactionLinks.Current;
 
         if (transaction.GetStatus() == TransactionStatus.Started)
+        {
+          transaction.SetFailureHandlingOptions
+          (
+            transaction.GetFailureHandlingOptions().
+            SetClearAfterRollback(!HandlingOptions.KeepFailuresAfterRollback).
+            SetDelayedMiniWarnings(HandlingOptions.DelayedMiniWarnings).
+            SetForcedModalHandling(!HandlingOptions.AllowModelessHandling).
+            SetFailuresPreprocessor(this).
+            SetTransactionFinalizer(this)
+          );
+
           return transaction.Commit();
+        }
         else
           return transaction.RollBack();
       }

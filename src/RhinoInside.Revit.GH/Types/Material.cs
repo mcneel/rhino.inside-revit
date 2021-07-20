@@ -250,7 +250,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (value is object && Value is DB.Material material && value.Id != material.SurfaceForegroundPatternId)
         {
-          AssertValidDocument(value.Document, nameof(SurfaceForegroundPattern));
+          AssertValidDocument(value, nameof(SurfaceForegroundPattern));
           material.SurfaceForegroundPatternId = value.Id;
         }
       }
@@ -289,7 +289,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (value is object && Value is DB.Material material && value.Id != material.SurfaceBackgroundPatternId)
         {
-          AssertValidDocument(value.Document, nameof(SurfaceBackgroundPattern));
+          AssertValidDocument(value, nameof(SurfaceBackgroundPattern));
           material.SurfaceBackgroundPatternId = value.Id;
         }
       }
@@ -328,7 +328,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (value is object && Value is DB.Material material && value.Id != material.CutForegroundPatternId)
         {
-          AssertValidDocument(value.Document, nameof(CutForegroundPattern));
+          AssertValidDocument(value, nameof(CutForegroundPattern));
           material.CutForegroundPatternId = value.Id;
         }
       }
@@ -367,7 +367,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (value is object && Value is DB.Material material && value.Id != material.CutBackgroundPatternId)
         {
-          AssertValidDocument(value.Document, nameof(CutBackgroundPattern));
+          AssertValidDocument(value, nameof(CutBackgroundPattern));
           material.CutBackgroundPatternId = value.Id;
         }
       }
@@ -406,7 +406,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (value is object && Value is DB.Material material && value.Id != material.SurfacePatternId)
         {
-          AssertValidDocument(value.Document, nameof(SurfaceForegroundPattern));
+          AssertValidDocument(value, nameof(SurfaceForegroundPattern));
           material.SurfacePatternId = value.Id;
         }
       }
@@ -463,7 +463,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (value is object && Value is DB.Material material && value.Id != material.CutPatternId)
         {
-          AssertValidDocument(value.Document, nameof(CutForegroundPattern));
+          AssertValidDocument(value, nameof(CutForegroundPattern));
           material.CutPatternId = value.Id;
         }
       }
@@ -533,7 +533,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (value is object && Value is DB.Material material && value.Id != material.AppearanceAssetId)
         {
-          AssertValidDocument(value.Document, nameof(AppearanceAssetId));
+          AssertValidDocument(value, nameof(AppearanceAssetId));
           material.AppearanceAssetId = value.Id;
         }
       }
@@ -556,7 +556,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (value is object && Value is DB.Material material && value.Id != material.StructuralAssetId)
         {
-          AssertValidDocument(value.Document, nameof(StructuralAssetId));
+          AssertValidDocument(value, nameof(StructuralAssetId));
           material.StructuralAssetId = value.Id;
         }
       }
@@ -579,7 +579,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (value is object && Value is DB.Material material && value.Id != material.ThermalAssetId)
         {
-          AssertValidDocument(value.Document, nameof(ThermalAssetId));
+          AssertValidDocument(value, nameof(ThermalAssetId));
           material.ThermalAssetId = value.Id;
         }
       }

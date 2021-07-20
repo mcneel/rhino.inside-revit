@@ -1,20 +1,112 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Windows.Forms.Interop;
 using Autodesk.Revit.UI;
-using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
-using Grasshopper.Kernel.Types;
+using RhinoInside.Revit.External.DB;
 using DB = Autodesk.Revit.DB;
+
+namespace RhinoInside.Revit.GH.ElementTracking
+{
+  internal static class TrackingParamElementExtensions
+  {
+    /// <summary>
+    /// Reads an element from <paramref name="name"/> parameter.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="parameters"></param>
+    /// <param name="name"></param>
+    /// <param name="doc"></param>
+    /// <param name="value"></param>
+    /// <param name="elementName"></param>
+    /// <returns>True if the parameter is present</returns>
+    public static bool ReadTrackedElement<T>(this GH_ComponentParamServer parameters, string name, DB.Document doc, out T value)
+      where T : DB.Element
+    {
+      var index = parameters.Output.IndexOf(name, out var parameter);
+      if (parameter is IGH_TrackingParam tracking)
+      {
+        tracking.ReadTrackedElement(doc, out value);
+        return true;
+      }
+      else if (parameter is object)
+        throw new InvalidOperationException($"Parameter '{name}' does not implement {nameof(IGH_TrackingParam)} interface");
+
+      value = default;
+      return false;
+    }
+
+    public static void WriteTrackedElement<T>(this GH_ComponentParamServer parameters, string name, DB.Document document, T value)
+      where T : DB.Element
+    {
+      var index = parameters.Output.IndexOf(name, out var parameter);
+      if (parameter is IGH_TrackingParam tracking)
+        tracking.WriteTrackedElement(document, value);
+      else if (parameter is object)
+        throw new InvalidOperationException($"Parameter '{name}' does not implement {nameof(IGH_TrackingParam)} interface");
+      else
+        throw new InvalidOperationException($"Parameter '{name}' is missing");
+    }
+
+    public static IEnumerable<T> TrackedElements<T>(this GH_ComponentParamServer parameters, string name, DB.Document document)
+      where T : DB.Element
+    {
+      var index = parameters.Output.IndexOf(name, out var parameter);
+      if (parameter is IGH_TrackingParam tracking)
+        return tracking.GetTrackedElements<T>(document);
+      else if (parameter is object)
+        throw new InvalidOperationException($"Parameter '{name}' does not implement {nameof(IGH_TrackingParam)} interface");
+
+      return Enumerable.Empty<T>();
+    }
+  }
+
+  internal static class TrackingParamGooExtensions
+  {
+    public static bool ReadTrackedElement<T>(this GH_ComponentParamServer parameters, string name, DB.Document doc, out T value)
+      where T : Types.IGH_ElementId
+    {
+      if
+      (
+        TrackingParamElementExtensions.ReadTrackedElement(parameters, name, doc, out DB.Element element) &&
+        Types.Element.FromElement(element) is T t
+      )
+      {
+        value = t;
+        return true;
+      }
+
+      value = default;
+      return false;
+    }
+
+    public static void WriteTrackedElement<T>(this GH_ComponentParamServer parameters, string name, DB.Document document, T value)
+      where T : Types.IGH_ElementId
+    {
+      TrackingParamElementExtensions.WriteTrackedElement(parameters, name, document, value.Value as DB.Element);
+    }
+
+    public static IEnumerable<T> TrackedElements<T>(this GH_ComponentParamServer parameters, string name, DB.Document document)
+      where T : Types.IGH_ElementId
+    {
+      return TrackingParamElementExtensions.TrackedElements<DB.Element>(parameters, name, document).
+        Select(x => Types.Element.FromElement(x) is T t ? t : default);
+    }
+  }
+}
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public abstract class Element<T, R> : ElementIdParam<T, R>
-  where T : class, Types.IGH_Element
+  using ElementTracking;
+  using RhinoInside.Revit.External.DB.Extensions;
+
+  public abstract class Element<T, R> : ElementIdParam<T, R>,
+    IGH_TrackingParam
+    where T : class, Types.IGH_Element
+    where R : DB.Element
   {
     protected Element(string name, string nickname, string description, string category, string subcategory) :
       base(name, nickname, description, category, subcategory)
@@ -69,7 +161,82 @@ namespace RhinoInside.Revit.GH.Parameters
 
           Menu_AppendItem(menu, $"Delete {GH_Convert.ToPlural(TypeName)}", Menu_DeleteElements, delete, false);
         }
+
+        if (TrackingMode != TrackingMode.NotApplicable)
+          Menu_AppendItem(menu, $"Release {GH_Convert.ToPlural(TypeName)}…", Menu_ReleaseElements, HasTrackedElements, false);
       }
+    }
+
+    bool HasTrackedElements => ToElementIds(VolatileData).Any(x => ElementStream.IsElementTracked(x.Value as DB.Element));
+
+    async Task<(bool Committed, IList<string> Messages)> ReleaseElementsAsync()
+    {
+      var committed = false;
+      var messages = new List<string>();
+
+      foreach (var document in ToElementIds(VolatileData).GroupBy(x => x.Document))
+      {
+        using (var tx = new DB.Transaction(document.Key, "Release Elements"))
+        {
+          if (tx.Start() == DB.TransactionStatus.Started)
+          {
+            var list = new List<DB.ElementId>();
+
+            foreach (var element in document.Select(x => x.Value).OfType<DB.Element>())
+            {
+              if (ElementStream.ReleaseElement(element))
+              {
+                element.Pinned = false;
+                list.Add(element.Id);
+              }
+            }
+
+            // Show feedback on Revit
+            if (list.Count > 0)
+            {
+              if (list.Count == 1)
+                messages.Add($"An element was released at '{document.Key.Title.TripleDot(16)}' document and is no longer synchronized.");
+              else
+                messages.Add($"{list.Count} elements were released at '{document.Key.Title.TripleDot(16)}' document and are no longer synchronized.");
+
+              using (var message = new DB.FailureMessage(ExternalFailures.ElementFailures.TrackedElementReleased))
+              {
+                message.SetFailingElements(list);
+                document.Key.PostFailure(message);
+              }
+
+              committed |= await tx.CommitAsync() == DB.TransactionStatus.Committed;
+            }
+          }
+        }
+      }
+
+      return (committed, messages);
+    }
+
+    async void Menu_ReleaseElements(object sender, EventArgs e)
+    {
+      // TODO: Ask for pinned or not, Save a selection, destination workset, destination view??
+
+      bool enableSolutions = Guest.DocumentChangedEvent.EnableSolutions;
+      Guest.DocumentChangedEvent.EnableSolutions = false;
+
+      var (commited, messages) = await ReleaseElementsAsync();
+
+      Guest.ShowEditor();
+
+      if (commited)
+      {
+        // Show feedback on Grasshopper
+        ExpireSolutionTopLevel(false);
+
+        foreach (var message in messages)
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, message);
+
+        OnDisplayExpired(false);
+      }
+
+      Guest.DocumentChangedEvent.EnableSolutions = enableSolutions;
     }
 
     void Menu_PinElements(object sender, EventArgs args)
@@ -130,97 +297,158 @@ namespace RhinoInside.Revit.GH.Parameters
       }
     }
 
-    void Menu_DeleteElements(object sender, EventArgs args)
+    (bool Committed, IList<string> Messages) DeleteElements()
     {
-      var doc = Revit.ActiveUIDocument.Document;
-      var elementIds = ToElementIds(VolatileData).
-                       Where(x => doc.Equals(x.Document)).
-                       Select(x => x.Id);
+      var committed = false;
+      var messages = new List<string>();
 
-      if (elementIds.Any())
+      foreach (var document in ToElementIds(VolatileData).GroupBy(x => x.Document))
       {
-        using (new External.UI.EditScope(Revit.ActiveUIApplication))
+        using (var group = new DB.TransactionGroup(document.Key, "Delete Elements") { IsFailureHandlingForcedModal = true })
         {
-          using
+          var elementIds = new HashSet<DB.ElementId>
           (
-            var taskDialog = new TaskDialog("Delete Elements")
-            {
-              Id = MethodBase.GetCurrentMethod().DeclaringType.FullName,
-              MainIcon = External.UI.TaskDialogIcons.IconWarning,
-              TitleAutoPrefix = false,
-              MainInstruction = "Are you sure you want to delete those elements?",
-              CommonButtons = TaskDialogCommonButtons.Yes | TaskDialogCommonButtons.No,
-              DefaultButton = TaskDialogResult.Yes,
-              AllowCancellation = true,
-#if REVIT_2020
-              EnableMarqueeProgressBar = true
-#endif
-            }
-          )
+            document.Where(x => x.IsValid && !x.Id.IsBuiltInId()).Select(x => x.Id),
+            default(ElementIdEqualityComparer)
+          );
+
+          if (elementIds.Count > 0)
           {
-            taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Show elements");
-            taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink2, "Manage element collection");
-
-            var result = TaskDialogResult.None;
-            bool highlight = false;
-            do
+            using (var tx = new DB.Transaction(document.Key, "Delete Elements"))
             {
-              var elements = elementIds.ToArray();
-              taskDialog.ExpandedContent = $"{elements.Length} elements and its depending elements will be deleted.";
+              tx.SetFailureHandlingOptions(tx.GetFailureHandlingOptions().SetDelayedMiniWarnings(false));
 
-              if (highlight)
-                Revit.ActiveUIDocument?.Selection.SetElementIds(elements);
-
-              switch (result = taskDialog.Show())
+              if (tx.Start() == DB.TransactionStatus.Started)
               {
-                case TaskDialogResult.CommandLink1:
-                  Revit.ActiveUIDocument?.ShowElements(elements);
-                  highlight = true;
-                  break;
-
-                case TaskDialogResult.CommandLink2:
-                  using (var dataManager = new GH_PersistentDataEditor())
+                // Show feedback on Revit
+                foreach (var elementId in elementIds)
+                {
+                  using (var message = new DB.FailureMessage(ExternalFailures.ElementFailures.ConfirmDeleteElement))
                   {
-                    var elementCollection = new GH_Structure<IGH_Goo>();
-                    elementCollection.AppendRange(elementIds.Select(x => Types.Element.FromElementId(doc, x)));
-                    dataManager.SetData(elementCollection, new Types.Element());
-
-                    GH_WindowsFormUtil.CenterFormOnCursor(dataManager, true);
-                    if (dataManager.ShowDialog(Revit.MainWindowHandle) == System.Windows.Forms.DialogResult.OK)
-                      elementIds = dataManager.GetData<IGH_Goo>().AllData(true).OfType<Types.Element>().Select(x => x.Id);
+                    message.SetFailingElement(elementId);
+                    document.Key.PostFailure(message);
                   }
-                  break;
+                }
 
-                case TaskDialogResult.Yes:
-                  try
+                if (tx.Commit() == DB.TransactionStatus.Committed)
+                {
+                  messages.Add($"Some elements were deleted from '{document.Key.Title.TripleDot(16)}'.");
+
+                  if (elementIds.All(x => document.Key.GetElement(x) is object))
                   {
-                    using (var transaction = new DB.Transaction(doc, "Delete elements"))
-                    {
-                      transaction.Start();
-                      doc.Delete(elements);
-                      transaction.Commit();
-                    }
-
-                    ClearData();
-                    ExpireDownStreamObjects();
-                    OnPingDocument().NewSolution(false);
+                    tx.Start();
+                    document.Key.Delete(elementIds);
+                    committed |= tx.Commit() == DB.TransactionStatus.Committed;
                   }
-                  catch (Autodesk.Revit.Exceptions.ArgumentException)
-                  {
-                    TaskDialog.Show("Delete elements", $"One or more of the {TypeName} cannot be deleted.");
-                  }
-                  break;
+                  else committed = true;
+                }
               }
             }
-            while (result == TaskDialogResult.CommandLink1 || result == TaskDialogResult.CommandLink2);
           }
         }
       }
+
+      return (committed, messages);
+    }
+
+    void Menu_DeleteElements(object sender, EventArgs e)
+    {
+      bool enableSolutions = Guest.DocumentChangedEvent.EnableSolutions;
+      Guest.DocumentChangedEvent.EnableSolutions = false;
+
+      var (commited, messages) = DeleteElements();
+
+      Guest.ShowEditor();
+
+      if (commited)
+      {
+        // Show feedback on Grasshopper
+        ClearRuntimeMessages();
+        foreach (var message in messages)
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, message);
+
+        ReloadVolatileData();
+        ExpireDownStreamObjects();
+        OnPingDocument().NewSolution(false);
+      }
+
+      Guest.DocumentChangedEvent.EnableSolutions = enableSolutions;
+    }
+    #endregion
+
+    TrackingMode TrackingMode => (Attributes.GetTopLevel.DocObject as IGH_TrackingComponent)?.TrackingMode ?? TrackingMode.NotApplicable;
+
+    #region IGH_TrackingParam
+    ElementStreamMode IGH_TrackingParam.StreamMode { get; set; }
+
+    internal ElementStreamDictionary<R> ElementStreams;
+
+    void IGH_TrackingParam.OpenTrackingParam(bool currentDocumentOnly)
+    {
+      if (TrackingMode == TrackingMode.NotApplicable) return;
+
+      // Open an ElementStreamDictionary to store ouput param on multiple documents
+      var streamId = new ElementStreamId(this, string.Empty);
+      var streamMode = ((IGH_TrackingParam) this).StreamMode | (currentDocumentOnly ? ElementStreamMode.CurrentDocument : default);
+      ElementStreams = new ElementStreamDictionary<R>(streamId, streamMode);
+
+      // This deletes all elements tracked from previous iterations.
+      // It helps to avoid name collisions on named elements.
+      if (TrackingMode < TrackingMode.Reconstruct)
+      {
+        var chain = Attributes.GetTopLevel.DocObject as Components.TransactionalChainComponent;
+        foreach (var stream in ElementStreams)
+        {
+          if (stream.Value.Length == 0) continue;
+
+          // Insert the Clear operation on the TransactionChain if available.
+          chain?.StartTransaction(stream.Key);
+          stream.Value.Clear();
+        }
+      }
+    }
+
+    void IGH_TrackingParam.CloseTrackingParam()
+    {
+      if (TrackingMode == TrackingMode.NotApplicable) return;
+
+      // Close all element streams and delete excess elements.
+      using (ElementStreams) ElementStreams = default;
+    }
+
+    IEnumerable<TOutput> IGH_TrackingParam.GetTrackedElements<TOutput>(DB.Document doc)
+    {
+      if (TrackingMode == TrackingMode.Reconstruct)
+        return ElementStreams[doc].Cast<TOutput>();
+
+      return Enumerable.Empty<TOutput>();
+    }
+
+    bool IGH_TrackingParam.ReadTrackedElement<TOutput>(DB.Document doc, out TOutput element)
+    {
+      if (TrackingMode == TrackingMode.Reconstruct)
+      {
+        var elementStream = ElementStreams[doc];
+        if (elementStream.Read(out var previous) && previous is TOutput output)
+        {
+          element = output;
+          return true;
+        }
+      }
+
+      element = default;
+      return false;
+    }
+
+    void IGH_TrackingParam.WriteTrackedElement<TInput>(DB.Document doc, TInput element)
+    {
+      if (TrackingMode > TrackingMode.Disabled)
+        ElementStreams[doc].Write(element as R);
     }
     #endregion
   }
 
-  public class Element : Element<Types.IGH_Element, object>
+  public class Element : Element<Types.IGH_Element, DB.Element>
   {
     public override GH_Exposure Exposure => GH_Exposure.septenary;
     public override Guid ComponentGuid => new Guid("F3EA4A9C-B24F-4587-A358-6A7E6D8C028B");

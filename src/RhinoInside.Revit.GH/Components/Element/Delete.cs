@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Windows.Forms;
 using GH_IO.Serialization;
@@ -37,8 +36,7 @@ namespace RhinoInside.Revit.GH.Components
           NickName = "E",
           Description = "Elements to Delete",
           Access = GH_ParamAccess.list
-        },
-        ParamVisibility.Binding
+        }
       ),
     };
 
@@ -52,9 +50,7 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Succeeded",
           NickName = "S",
           Description = "Element delete succeeded",
-          Access = GH_ParamAccess.item
-        },
-        ParamVisibility.Binding
+        }
       ),
       new ParamDefinition
       (
@@ -65,7 +61,7 @@ namespace RhinoInside.Revit.GH.Components
           Description = "Deleted elements. From a logical point of view, are the children of this Element",
           Access = GH_ParamAccess.list
         },
-        ParamVisibility.Voluntary
+        ParamRelevance.Occasional
       ),
       new ParamDefinition
       (
@@ -76,7 +72,7 @@ namespace RhinoInside.Revit.GH.Components
           Description = "Modified elements. Those elements reference Element but do not strictly depend on it",
           Access = GH_ParamAccess.list
         },
-        ParamVisibility.Voluntary
+        ParamRelevance.Occasional
       )
     };
 
@@ -368,7 +364,7 @@ namespace RhinoInside.Revit.GH.Components
 namespace RhinoInside.Revit.GH.Components.Obsolete
 {
   [Obsolete("Obsolete since 2020-05-21")]
-  public class ElementDelete : TransactionsComponent
+  public class ElementDelete : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("213C1F14-A827-40E2-957E-BA079ECCE700");
     public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.hidden;
@@ -378,40 +374,62 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
     : base("Delete Element", "Delete", "Deletes elements from Revit document", "Revit", "Element")
     { }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      manager.AddParameter(new Parameters.Element(), "Elements", "E", "Elements to delete", GH_ParamAccess.tree);
-    }
+      new ParamDefinition
+      (
+        new Parameters.Element()
+        {
+          Name = "Elements",
+          NickName = "E",
+          Description = "Elements to Delete",
+          Access = GH_ParamAccess.tree
+        }
+      ),
+    };
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager) { }
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs = { };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!DA.GetDataTree<Types.Element>("Elements", out var elementsTree))
+      if (!DA.GetDataTree<Types.Element>("Elements", out var elements))
         return;
 
-      var elementsToDelete = Parameters.Element.
-                             ToElementIds(elementsTree).
+      var elementsToDelete = elements.AllData(true).
+                             Cast<Types.IGH_Element>().
+                             Where(x => x.IsValid).
                              GroupBy(x => x.Document).
-                             ToArray();
+                             ToList();
 
-      foreach (var group in elementsToDelete)
+      var options = new External.DB.TransactionHandlingOptions
       {
-        StartTransaction(group.Key);
+        FailuresPreprocessor = new TransactionalComponentFailuresPreprocessor(this)
+      };
 
-        try
+      using (var chain = new External.DB.TransactionChain(options, Name))
+      {
+        foreach (var group in elementsToDelete)
         {
-          var deletedElements = group.Key.Delete(group.Select(x => x.Id).ToArray());
+          chain.Start(group.Key);
 
-          if (deletedElements.Count == 0)
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "No elements were deleted");
-          else
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"{elementsToDelete.Length} elements and {deletedElements.Count - elementsToDelete.Length} dependant elements were deleted.");
+          try
+          {
+            var deletedElements = group.Key.Delete(group.Select(x => x.Id).ToArray());
+
+            if (deletedElements.Count == 0)
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "No elements were deleted");
+            else
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"{elementsToDelete.Count} elements and {deletedElements.Count - elementsToDelete.Count} dependant elements were deleted.");
+          }
+          catch (Autodesk.Revit.Exceptions.ArgumentException)
+          {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "One or more of the elements cannot be deleted.");
+          }
         }
-        catch (Autodesk.Revit.Exceptions.ArgumentException)
-        {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "One or more of the elements cannot be deleted.");
-        }
+
+        chain.Commit();
       }
     }
   }

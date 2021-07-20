@@ -1,9 +1,13 @@
 using System;
+using System.Linq;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.Convert.System.Collections.Generic;
 using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -15,71 +19,75 @@ namespace RhinoInside.Revit.GH.Components
 
     public FloorByOutline() : base
     (
-      "Add Floor", "Floor",
-      "Given its outline curve, it adds a Floor element to the active Revit document",
-      "Revit", "Build"
+      name: "Add Floor",
+      nickname: "Floor",
+      description: "Given its outline curve, it adds a Floor element to the active Revit document",
+      category: "Revit",
+      subCategory: "Build"
     )
     { }
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.Floor(), "Floor", "F", "New Floor", GH_ParamAccess.item);
-    }
-
-    bool Reuse(ref DB.Floor element, Curve boundary, DB.FloorType type, DB.Level level, bool structural)
+    bool Reuse(ref DB.Floor element, IList<Curve> boundaries, DB.FloorType type, DB.Level level, bool structural)
     {
       if (element is null) return false;
 
       if (element.GetSketch() is DB.Sketch sketch)
       {
         var profiles = sketch.Profile.ToPolyCurves();
-        if (profiles.Length != 1)
+        if (profiles.Length != boundaries.Count)
           return false;
 
+        var loops = sketch.GetAllModelCurves();
         var plane = sketch.SketchPlane.GetPlane().ToPlane();
-        var profile = Curve.ProjectToPlane(boundary, plane);
 
-        if
-        (
-          !Curve.GetDistancesBetweenCurves(profiles[0], profile, Revit.VertexTolerance * Revit.ModelUnits, out var max, out var _, out var _, out var _, out var _, out var _) ||
-          max > Revit.VertexTolerance * Revit.ModelUnits
-        )
+        var pi = 0;
+        foreach (var boundary in boundaries)
         {
-          var segments = profile.TryGetPolyCurve(out var polyCurve, Revit.AngleTolerance) ?
-            polyCurve.DuplicateSegments() :
-            new Curve[] { profile };
+          var profile = Curve.ProjectToPlane(boundary, plane);
 
-          var index = 0;
-          var loops = sketch.GetAllModelCurves();
-          foreach (var loop in loops)
+          if
+          (
+            !Curve.GetDistancesBetweenCurves(profiles[pi], profile, Revit.VertexTolerance * Revit.ModelUnits, out var max, out var _, out var _, out var _, out var _, out var _) ||
+            max > Revit.VertexTolerance * Revit.ModelUnits
+          )
           {
-            if (segments.Length != loop.Count)
-              return false;
+            var segments = profile.TryGetPolyCurve(out var polyCurve, Revit.AngleTolerance) ?
+              polyCurve.DuplicateSegments() :
+              profile.Split(profile.Domain.Mid);
 
-            foreach (var edge in loop)
+            if (pi < loops.Count)
             {
-              var segment = segments[(++index) % segments.Length];
-              segment.Scale(1.0 / Revit.ModelUnits);
+              var loop = loops[pi];
+              if (segments.Length != loop.Count)
+                return false;
 
-              var curve = default(DB.Curve);
-              if
-              (
-                edge.GeometryCurve is DB.HermiteSpline &&
-                segment.TryGetHermiteSpline(out var points, out var start, out var end, Revit.VertexTolerance)
-              )
+              var index = 0;
+              foreach (var edge in loop)
               {
-                var xyz = new DB.XYZ[points.Count];
-                for (int p = 0; p < xyz.Length; p++)
-                  xyz[p] = points[p].ToXYZ(UnitConverter.NoScale);
+                var segment = segments[(++index) % segments.Length];
 
-                using (var tangents = new DB.HermiteSplineTangents() { StartTangent = start.ToXYZ(), EndTangent = end.ToXYZ() })
-                  curve = DB.HermiteSpline.Create(xyz, segment.IsClosed, tangents);
+                var curve = default(DB.Curve);
+                if
+                (
+                  edge.GeometryCurve is DB.HermiteSpline &&
+                  segment.TryGetHermiteSpline(out var points, out var start, out var end, Revit.VertexTolerance * Revit.ModelUnits)
+                )
+                {
+                  using (var tangents = new DB.HermiteSplineTangents() { StartTangent = start.ToXYZ(), EndTangent = end.ToXYZ() })
+                  {
+                    var xyz = points.ConvertAll(GeometryEncoder.ToXYZ);
+                    curve = DB.HermiteSpline.Create(xyz, segment.IsClosed, tangents);
+                  }
+                }
+                else curve = segment.ToCurve();
+
+                if(!edge.GeometryCurve.IsAlmostEqualTo(curve))
+                  edge.SetGeometryCurve(curve, false);
               }
-              else curve = segment.ToCurve(UnitConverter.NoScale);
-
-              edge.SetGeometryCurve(curve, false);
             }
           }
+
+          pi++;
         }
       }
       else return false;
@@ -87,9 +95,11 @@ namespace RhinoInside.Revit.GH.Components
       if (element.GetTypeId() != type.Id)
       {
         if (DB.Element.IsValidType(element.Document, new DB.ElementId[] { element.Id }, type.Id))
-          element = element.Document.GetElement(element.ChangeTypeId(type.Id)) as DB.Floor;
-        else
-          return false;
+        {
+          if (element.ChangeTypeId(type.Id) is DB.ElementId id && id != DB.ElementId.InvalidElementId)
+            element = element.Document.GetElement(id) as DB.Floor;
+        }
+        else return false;
       }
 
       bool succeed = true;
@@ -101,39 +111,71 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructFloorByOutline
     (
-      DB.Document doc,
-      ref DB.Floor element,
+      [Optional, NickName("DOC")]
+      DB.Document document,
 
-      Curve boundary,
+      [Description("New Floor")]
+      ref DB.Floor floor,
+
+      IList<Curve> boundary,
       Optional<DB.FloorType> type,
       Optional<DB.Level> level,
       [Optional] bool structural
     )
     {
-      if
-      (
-        boundary.IsShort(Revit.ShortCurveTolerance * Revit.ModelUnits) ||
-        !boundary.IsClosed ||
-        !boundary.TryGetPlane(out var boundaryPlane, Revit.VertexTolerance * Revit.ModelUnits) ||
-        boundaryPlane.ZAxis.IsParallelTo(Vector3d.ZAxis) == 0
-      )
-        ThrowArgumentException(nameof(boundary), "Boundary must be an horizontal planar closed curve.");
+      if (boundary.Count < 1) return;
 
-      if (type.HasValue && type.Value.Document.IsEquivalent(doc) == false)
+      var normal = default(Vector3d); var maxArea = 0.0;
+      var index = 0; var maxIndex = 0;
+      foreach (var loop in boundary)
+      {
+        var plane = default(Plane);
+        if
+        (
+          loop is null ||
+          loop.IsShort(Revit.ShortCurveTolerance * Revit.ModelUnits) ||
+          !loop.IsClosed ||
+          !loop.TryGetPlane(out plane, Revit.VertexTolerance) ||
+          plane.ZAxis.IsParallelTo(Vector3d.ZAxis, Revit.AngleTolerance) == 0
+        )
+          ThrowArgumentException(nameof(boundary), "Boundary loop curves should be a valid horizontal, planar and closed.");
+
+        using (var properties = AreaMassProperties.Compute(loop))
+        {
+          if (properties.Area > maxArea)
+          {
+            normal = plane.Normal;
+            maxArea = properties.Area;
+            maxIndex = index;
+
+            var orientation = loop.ClosedCurveOrientation(Plane.WorldXY);
+            if (orientation == CurveOrientation.CounterClockwise)
+              normal.Reverse();
+          }
+        }
+
+        index++;
+      }
+
+#if !REVIT_2022
+      if (boundary.Count > 1)
+      {
+        boundary = new Curve[] { boundary[maxIndex] };
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Multiple boundary curves are only supported on Revit 2022 or above.");
+      }
+#endif
+
+      if (type.HasValue && type.Value.Document.IsEquivalent(document) == false)
         ThrowArgumentException(nameof(type));
 
-      if (level.HasValue && level.Value.Document.IsEquivalent(doc) == false)
+      if (level.HasValue && level.Value.Document.IsEquivalent(document) == false)
         ThrowArgumentException(nameof(level));
 
-      SolveOptionalType(doc, ref type, DB.ElementTypeGroup.FloorType, nameof(type));
+      SolveOptionalType(document, ref type, DB.ElementTypeGroup.FloorType, nameof(type));
 
-      SolveOptionalLevel(doc, boundary, ref level, out var bbox);
+      SolveOptionalLevel(document, boundary, ref level, out var bbox);
 
-      var orientation = boundary.ClosedCurveOrientation(Plane.WorldXY);
-      if (orientation == CurveOrientation.CounterClockwise)
-        boundary.Reverse();
-
-      if (!Reuse(ref element, boundary, type.Value, level.Value, structural))
+      if (!Reuse(ref floor, boundary, type.Value, level.Value, structural))
       {
         var parametersMask = new DB.BuiltInParameter[]
         {
@@ -145,25 +187,25 @@ namespace RhinoInside.Revit.GH.Components
         };
 
 #if REVIT_2022
-        var curveLoops = new DB.CurveLoop[] { boundary.ToCurveLoop() };
+        var curveLoops = boundary.ConvertAll(GeometryEncoder.ToCurveLoop);
 
-        ReplaceElement(ref element, DB.Floor.Create(doc, curveLoops, type.Value.Id, level.Value.Id, structural, default, 0.0), parametersMask);
+        ReplaceElement(ref floor, DB.Floor.Create(document, curveLoops, type.Value.Id, level.Value.Id, structural, default, 0.0), parametersMask);
 #else
-        var curveArray = boundary.ToCurveArray();
+        var curveArray = boundary[0].ToCurveArray();
 
         if (type.Value.IsFoundationSlab)
-          ReplaceElement(ref element, doc.Create.NewFoundationSlab(curveArray, type.Value, level.Value, structural, DB.XYZ.BasisZ), parametersMask);
+          ReplaceElement(ref floor, document.Create.NewFoundationSlab(curveArray, type.Value, level.Value, structural, DB.XYZ.BasisZ), parametersMask);
         else
-          ReplaceElement(ref element, doc.Create.NewFloor(curveArray, type.Value, level.Value, structural, DB.XYZ.BasisZ), parametersMask);
+          ReplaceElement(ref floor, document.Create.NewFloor(curveArray, type.Value, level.Value, structural, DB.XYZ.BasisZ), parametersMask);
 #endif
       }
 
-      if (element != null)
+      if (floor is object)
       {
         var floorHeightabovelevel = bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight();
         if
         (
-          element.GetParameter(External.DB.Schemas.ParameterId.FloorHeightabovelevelParam) is DB.Parameter floorHeightabovelevelParam &&
+          floor.GetParameter(External.DB.Schemas.ParameterId.FloorHeightabovelevelParam) is DB.Parameter floorHeightabovelevelParam &&
           floorHeightabovelevelParam.AsDouble() != floorHeightabovelevel
         )
         {

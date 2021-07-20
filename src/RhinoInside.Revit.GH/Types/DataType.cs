@@ -39,7 +39,7 @@ namespace RhinoInside.Revit.GH.Types
 
     #region IGH_Goo
     public virtual bool IsValid => Value != default;
-    public virtual string IsValidWhyNot => IsValid ? string.Empty : "Not Valid";
+    public virtual string IsValidWhyNot => IsValid ? default : "Not Valid";
 
     string IGH_Goo.ToString() => Value.Label;
 

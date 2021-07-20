@@ -29,7 +29,7 @@ namespace RhinoInside.Revit.GH.Types
         if (location.IsValid)
           return new BoundingBox(location.Origin, location.Origin);
 
-        return BoundingBox.Unset;
+        return NaN.BoundingBox;
       }
     }
 

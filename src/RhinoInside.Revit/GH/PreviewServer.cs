@@ -308,7 +308,8 @@ namespace RhinoInside.Revit.GH
     {
       try
       {
-        BuildScene(dBView);
+        if (!BuildScene(dBView).IsValid)
+          return;
 
         DB3D.DrawContext.SetWorldTransform(DB.Transform.Identity.ScaleBasis(UnitConverter.ToHostUnits));
 

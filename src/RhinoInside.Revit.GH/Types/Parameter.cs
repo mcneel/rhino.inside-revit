@@ -68,7 +68,23 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
-      return base.CastTo<Q>(out target);
+      if (typeof(Q).IsAssignableFrom(typeof(ParameterId)))
+      {
+        var parameterId = new ParameterId();
+        if (Value.Id.TryGetBuiltInParameter(out var bip))
+        {
+          parameterId.Value = bip;
+          target = (Q) (object) parameterId;
+          return true;
+        }
+        else
+        {
+          target = (Q) (object) default(Q);
+          return false;
+        }
+      }
+
+      return base.CastTo(out target);
     }
 
     new class Proxy : Element.Proxy

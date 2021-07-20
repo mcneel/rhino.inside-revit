@@ -28,14 +28,11 @@ namespace RhinoInside.Revit.Convert.System.Collections.Generic
     /// <typeparam name="TOutput">The type of the elements of the target array.</typeparam>
     /// <param name="input">The <see cref="IList{T}"/> to convert to a target type.</param>
     /// <param name="converter">A <see cref="Converter{TInput, TOutput}"/> that converts each element from one type to another type.</param>
-    /// <returns>An IList of the target type containing the converted elements from the source IList.</returns>
-    public static IList<TOutput> ConvertAll<TInput, TOutput>(this IList<TInput> input, Converter<TInput, TOutput> converter)
+    /// <returns>An Array of the target type containing the converted elements from the source IList.</returns>
+    public static TOutput[] ConvertAll<TInput, TOutput>(this IList<TInput> input, Converter<TInput, TOutput> converter)
     {
       if (input is TInput[] array)
         return Array.ConvertAll(array, converter);
-
-      if (input is List<TInput> list)
-        return list.ConvertAll(converter);
 
       var count = input.Count;
       var output = new TOutput[count];

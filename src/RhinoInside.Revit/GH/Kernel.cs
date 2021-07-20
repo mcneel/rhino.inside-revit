@@ -31,6 +31,12 @@ namespace RhinoInside.Revit.GH.Kernel
   /// <seealso cref="RhinoInside.Revit.GH.Components.Component"/>
   public interface IGH_ElementIdComponent : IGH_Component
   {
-    bool NeedsToBeExpired(DB.Events.DocumentChangedEventArgs args);
+    bool NeedsToBeExpired
+    (
+      DB.Document doc,
+      ICollection<DB.ElementId> added,
+      ICollection<DB.ElementId> deleted,
+      ICollection<DB.ElementId> modified
+    );
   }
 }

@@ -4,6 +4,8 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using RhinoInside.Revit.Convert.System.Collections.Generic;
+using RhinoInside.Revit.External.DB;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -26,7 +28,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
+      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_GenericObject>("Id", "ID", "Element Id or UniqueId to look for", defaultValue: -1),
     };
 
@@ -50,18 +52,45 @@ namespace RhinoInside.Revit.GH.Components
             catch { }
           }
           break;
+
         case Grasshopper.Kernel.Types.GH_Integer i:
           DA.SetData("Element", Types.Element.FromElementId(doc, new DB.ElementId(i.Value)));
           break;
+
         case Grasshopper.Kernel.Types.GH_String s:
-          try
+
+          if (FullUniqueId.TryParse(s.Value, out var documentId, out var uniqueId))
           {
-            DA.SetData("Element", Types.Element.FromElementId(doc, new DB.ElementId(System.Convert.ToInt32(s.Value))));
+            if (doc.GetFingerprintGUID() == documentId && doc.TryGetElementId(uniqueId, out var elementId))
+              DA.SetData("Element", Types.Element.FromElementId(doc, elementId));
+
             return;
           }
-          catch { }
 
-          DA.SetData("Element", Types.Element.FromElement(doc.GetElement(s.Value)));
+          if (UniqueId.TryParse(s.Value, out var _, out var _))
+          {
+            if (doc.TryGetElementId(s.Value, out var elementId))
+              DA.SetData("Element", Types.Element.FromElementId(doc, elementId));
+
+            return;
+          }
+
+          if (int.TryParse(s.Value, out var index))
+          {
+            if(doc.GetElement(new DB.ElementId(index)) is DB.Element element)
+              DA.SetData("Element", Types.Element.FromElement(element));
+
+            return;
+          }
+
+          break;
+
+        case Types.CategoryId c:
+          DA.SetData("Element", Types.Category.FromElementId(doc, new DB.ElementId(c.Value)));
+          break;
+
+        case Types.ParameterId p:
+          DA.SetData("Element", Types.ParameterKey.FromElementId(doc, new DB.ElementId(p.Value)));
           break;
       }
     }
@@ -89,16 +118,16 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
+      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item),
-      ParamDefinition.Create<Param_Integer>("Limit", "L", $"Max number of Elements to query for.{Environment.NewLine}For an unlimited query remove this parameter.", defaultValue: 100, GH_ParamAccess.item, relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Param_Integer>("Limit", "L", $"Max number of Elements to query for.{Environment.NewLine}For an unlimited query remove this parameter.", defaultValue: 100, GH_ParamAccess.item, relevance: ParamRelevance.Primary),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.Element>("Elements", "E", "Elements list", GH_ParamAccess.list, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_Integer>("Count", "C", $"Elements count.{Environment.NewLine}For a more performant way of knowing how many elements this query returns remove the Elements output.", GH_ParamAccess.item, relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Parameters.Element>("Elements", "E", "Elements list", GH_ParamAccess.list, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Integer>("Count", "C", $"Elements count.{Environment.NewLine}For a more performant way of knowing how many elements this query returns remove the Elements output.", GH_ParamAccess.item, relevance: ParamRelevance.Primary),
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)

@@ -35,7 +35,6 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Element",
           NickName = "E",
           Description = "Element to access selection state",
-          Access = GH_ParamAccess.item
         }
       ),
       new ParamDefinition
@@ -45,10 +44,9 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Selected",
           NickName = "S",
           Description = "New state for Element Pin",
-          Access = GH_ParamAccess.item,
           Optional = true
         },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
     };
 
@@ -62,7 +60,6 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Element",
           NickName = "E",
           Description = "Element to access selection state",
-          Access = GH_ParamAccess.item
         }
       ),
       new ParamDefinition
@@ -72,9 +69,8 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Selected",
           NickName = "S",
           Description = "State for Element Pin",
-          Access = GH_ParamAccess.item
         },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
     };
 

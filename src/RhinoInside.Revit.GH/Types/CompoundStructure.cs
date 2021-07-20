@@ -320,7 +320,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (value is object && Value is DB.CompoundStructureLayer layer)
         {
-          AssertValidDocument(value.Document, nameof(Material));
+          AssertValidDocument(value, nameof(Material));
           layer.MaterialId = value.Id;
         }
       }
@@ -377,7 +377,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (value is object && Value is DB.CompoundStructureLayer layer)
         {
-          AssertValidDocument(value.Document, nameof(DeckProfile));
+          AssertValidDocument(value, nameof(DeckProfile));
           layer.DeckProfileId = value.Id;
         }
       }

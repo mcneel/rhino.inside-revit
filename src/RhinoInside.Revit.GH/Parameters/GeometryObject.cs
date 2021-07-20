@@ -50,6 +50,8 @@ namespace RhinoInside.Revit.GH.Parameters
     protected override GH_GetterResult Prompt_Singular(ref Types.Vertex value)
     {
       var uiDocument = Revit.ActiveUIDocument;
+      if (uiDocument is null) return GH_GetterResult.cancel;
+
       switch (uiDocument.PickObject(out var reference, ObjectType.Edge, "Click on an edge near an end to select a vertex, TAB for alternates, ESC quit."))
       {
         case Autodesk.Revit.UI.Result.Succeeded:
@@ -86,7 +88,9 @@ namespace RhinoInside.Revit.GH.Parameters
     protected override GH_GetterResult Prompt_Plural(ref List<Types.Edge> value)
     {
       var uiDocument = Revit.ActiveUIDocument;
-      switch(uiDocument.PickObjects(out var references, ObjectType.Edge))
+      if (uiDocument is null) return GH_GetterResult.cancel;
+
+      switch (uiDocument.PickObjects(out var references, ObjectType.Edge))
       {
         case Autodesk.Revit.UI.Result.Succeeded:
           value = references.Select((x) => new Types.Edge(uiDocument.Document, x)).ToList();
@@ -102,6 +106,8 @@ namespace RhinoInside.Revit.GH.Parameters
     protected override GH_GetterResult Prompt_Singular(ref Types.Edge value)
     {
       var uiDocument = Revit.ActiveUIDocument;
+      if (uiDocument is null) return GH_GetterResult.cancel;
+
       switch (uiDocument.PickObject(out var reference, ObjectType.Edge))
       {
         case Autodesk.Revit.UI.Result.Succeeded:
@@ -128,6 +134,8 @@ namespace RhinoInside.Revit.GH.Parameters
     protected override GH_GetterResult Prompt_Plural(ref List<Types.Face> value)
     {
       var uiDocument = Revit.ActiveUIDocument;
+      if (uiDocument is null) return GH_GetterResult.cancel;
+
       switch (uiDocument.PickObjects(out var references, ObjectType.Face))
       {
         case Autodesk.Revit.UI.Result.Succeeded:
@@ -144,6 +152,8 @@ namespace RhinoInside.Revit.GH.Parameters
     protected override GH_GetterResult Prompt_Singular(ref Types.Face value)
     {
       var uiDocument = Revit.ActiveUIDocument;
+      if (uiDocument is null) return GH_GetterResult.cancel;
+
       switch (uiDocument.PickObject(out var reference, ObjectType.Face))
       {
         case Autodesk.Revit.UI.Result.Succeeded:

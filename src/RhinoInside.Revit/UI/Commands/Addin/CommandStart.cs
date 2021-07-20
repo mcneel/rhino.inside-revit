@@ -91,6 +91,9 @@ namespace RhinoInside.Revit.UI
 
         case AddIn.Status.Available:
           return Start();
+
+        case AddIn.Status.Unavailable:
+          return AddIn.CheckSetup();
       }
 
       return Result.Failed;
@@ -232,14 +235,14 @@ namespace RhinoInside.Revit.UI
       CommandGrasshopperPreview.CreateUI(grasshopperPanel);
       CommandGrasshopperSolver.CreateUI(grasshopperPanel);
       CommandGrasshopperRecompute.CreateUI(grasshopperPanel);
-      CommandGrasshopperBake.CreateUI(grasshopperPanel);
+      //CommandGrasshopperCaptureElements.CreateUI(grasshopperPanel);
+      CommandGrasshopperReleaseElements.CreateUI(grasshopperPanel);
       grasshopperPanel.AddSeparator();
       CommandGrasshopperPlayer.CreateUI(grasshopperPanel);
       grasshopperPanel.AddSlideOut();
       CommandGrasshopperPackageManager.CreateUI(grasshopperPanel);
       CommandGrasshopperFolders.CreateUI(grasshopperPanel);
-      //CommandGrasshopperCaptureElements.CreateUI(grasshopperPanel);
-      //CommandGrasshopperReleaseElements.CreateUI(grasshopperPanel);
+      CommandGrasshopperBake.CreateUI(grasshopperPanel);
     }
 
     static void CreateScriptsPanel()

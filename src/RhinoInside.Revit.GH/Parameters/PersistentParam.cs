@@ -46,13 +46,40 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected PersistentParam(string name, string nickname, string description, string category, string subcategory) :
       base(name, nickname, description, category, subcategory)
-    { }
+    {
+      Debug.Assert(GetType().IsPublic, $"{GetType()} is not public, Grasshopper will fail deserializing this type.");
+
+      ComponentVersion = CurrentVersion;
+
+      if (Obsolete)
+      {
+        foreach (var obsolete in GetType().GetCustomAttributes(typeof(ObsoleteAttribute), false).Cast<ObsoleteAttribute>())
+        {
+          if (!string.IsNullOrEmpty(obsolete.Message))
+            Description = obsolete.Message + Environment.NewLine + Description;
+        }
+      }
+    }
 
     #region IO
+    protected virtual Version CurrentVersion => GetType().Assembly.GetName().Version;
+    protected Version ComponentVersion { get; private set; }
+
     public override bool Read(GH_IReader reader)
     {
       if (!base.Read(reader))
         return false;
+
+      string version = "0.0.0.0";
+      reader.TryGetString("ComponentVersion", ref version);
+      ComponentVersion = Version.TryParse(version, out var componentVersion) ?
+        componentVersion : new Version(0, 0, 0, 0);
+
+      if (ComponentVersion > CurrentVersion)
+      {
+        var assemblyName = Grasshopper.Instances.ComponentServer.FindAssemblyByObject(this)?.Name ?? GetType().Assembly.GetName().Name;
+        reader.AddMessage($"Component '{Name}' was saved with a newer version.{Environment.NewLine}Please update '{assemblyName}' to version {ComponentVersion} or above.", GH_Message_Type.error);
+      }
 
       int culling = (int) DataCulling.None;
       reader.TryGetInt32("Culling", ref culling);
@@ -68,6 +95,11 @@ namespace RhinoInside.Revit.GH.Parameters
       if (!base.Write(writer))
         return false;
 
+      if (ComponentVersion > CurrentVersion)
+        writer.SetString("ComponentVersion", ComponentVersion.ToString());
+      else
+        writer.SetString("ComponentVersion", CurrentVersion.ToString());
+
       if (Culling != DataCulling.None)
         writer.SetInt32("Culling", (int) Culling);
 
@@ -81,9 +113,10 @@ namespace RhinoInside.Revit.GH.Parameters
       var errors = new List<string>();
       foreach (var goo in PersistentData.NonNulls)
       {
-        if (goo.GetType().GetConstructor(Type.EmptyTypes) is null)
+        var gooType = goo.GetType();
+        if (gooType.GetConstructor(Type.EmptyTypes) is null)
         {
-          var error = $"'{goo.GetType().FullName}' has no public empty constructor.{Environment.NewLine}Parameterless constructor is mandatory for serialization.";
+          var error = $"'{gooType.FullName}' has no public empty constructor.{Environment.NewLine}Parameterless constructor is mandatory for serialization.";
           if (set.Add(error)) errors.Add(error);
         }
       }
@@ -143,6 +176,11 @@ namespace RhinoInside.Revit.GH.Parameters
       if (DataType != GH_ParamData.local)
         return;
 
+      ReloadVolatileData();
+    }
+
+    protected virtual void ReloadVolatileData()
+    {
       foreach (var branch in m_data.Branches)
       {
         for (int i = 0; i < branch.Count; i++)
@@ -158,7 +196,6 @@ namespace RhinoInside.Revit.GH.Parameters
         }
       }
     }
-
     protected virtual void PreProcessVolatileData()
     {
       if (Culling != DataCulling.None)
@@ -192,6 +229,14 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public sealed override void PostProcessData()
     {
+      if (ComponentVersion > CurrentVersion)
+      {
+        var assemblyName = Grasshopper.Instances.ComponentServer.FindAssemblyByObject(this)?.Name ?? GetType().Assembly.GetName().Name;
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"This component was saved with a newer version.{Environment.NewLine}Please update '{assemblyName}' to version {ComponentVersion} or above.");
+        VolatileData.Clear();
+        return;
+      }
+
       LoadVolatileData();
 
       PreProcessVolatileData();
@@ -266,20 +311,23 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected virtual void Menu_AppendPreProcessParameter(ToolStripDropDown menu)
     {
-      var Cull = Menu_AppendItem(menu, "Cull");
+      if (Kind != GH_ParamKind.output)
+      {
+        var Cull = Menu_AppendItem(menu, "Cull");
 
-      Cull.Checked = Culling != DataCulling.None;
-      if (CullingMask.HasFlag(DataCulling.Nulls))
-        Menu_AppendItem(Cull.DropDown, "Nulls", (s, a) => Menu_Culling(DataCulling.Nulls), true, Culling.HasFlag(DataCulling.Nulls));
+        Cull.Checked = Culling != DataCulling.None;
+        if (CullingMask.HasFlag(DataCulling.Nulls))
+          Menu_AppendItem(Cull.DropDown, "Nulls", (s, a) => Menu_Culling(DataCulling.Nulls), true, Culling.HasFlag(DataCulling.Nulls));
 
-      if (CullingMask.HasFlag(DataCulling.Invalids))
-        Menu_AppendItem(Cull.DropDown, "Invalids", (s, a) => Menu_Culling(DataCulling.Invalids), true, Culling.HasFlag(DataCulling.Invalids));
+        if (CullingMask.HasFlag(DataCulling.Invalids))
+          Menu_AppendItem(Cull.DropDown, "Invalids", (s, a) => Menu_Culling(DataCulling.Invalids), true, Culling.HasFlag(DataCulling.Invalids));
 
-      if (CullingMask.HasFlag(DataCulling.Duplicates))
-        Menu_AppendItem(Cull.DropDown, "Duplicates", (s, a) => Menu_Culling(DataCulling.Duplicates), true, Culling.HasFlag(DataCulling.Duplicates));
+        if (CullingMask.HasFlag(DataCulling.Duplicates))
+          Menu_AppendItem(Cull.DropDown, "Duplicates", (s, a) => Menu_Culling(DataCulling.Duplicates), true, Culling.HasFlag(DataCulling.Duplicates));
 
-      if (CullingMask.HasFlag(DataCulling.Empty))
-        Menu_AppendItem(Cull.DropDown, "Empty", (s, a) => Menu_Culling(DataCulling.Empty), true, Culling.HasFlag(DataCulling.Empty));
+        if (CullingMask.HasFlag(DataCulling.Empty))
+          Menu_AppendItem(Cull.DropDown, "Empty", (s, a) => Menu_Culling(DataCulling.Empty), true, Culling.HasFlag(DataCulling.Empty));
+      }
     }
 
     private void Menu_Culling(DataCulling value)

@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.GH.Types
       return base.CastFrom(source);
     }
 
-    public override BoundingBox GetBoundingBox(Transform xform) => BoundingBox.Unset;
+    public override BoundingBox GetBoundingBox(Transform xform) => NaN.BoundingBox;
 
     #region IGH_PreviewData
     public override void DrawViewportWires(GH_PreviewWireArgs args)
@@ -44,7 +44,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Location
-    public override BoundingBox BoundingBox => BoundingBox.Unset;
+    public override BoundingBox BoundingBox => NaN.BoundingBox;
 
     public override Plane Location => Value?.GetPlane().ToPlane() ?? base.Location;
     #endregion

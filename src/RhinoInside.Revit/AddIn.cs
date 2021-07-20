@@ -10,6 +10,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
 using Microsoft.Win32;
+using RhinoInside.Revit.External.ApplicationServices.Extensions;
 using RhinoInside.Revit.Native;
 using RhinoInside.Revit.Settings;
 using UIX = RhinoInside.Revit.External.UI;
@@ -86,7 +87,6 @@ namespace RhinoInside.Revit
 
     internal static readonly string RhinoExePath = Path.Combine(SystemDir, "Rhino.exe");
     internal static readonly FileVersionInfo RhinoVersionInfo = File.Exists(RhinoExePath) ? FileVersionInfo.GetVersionInfo(RhinoExePath) : null;
-    static readonly Version MinimumRhinoVersion = new Version(7, 6, 0);
     static readonly Version RhinoVersion = new Version
     (
       RhinoVersionInfo?.FileMajorPart ?? 0,
@@ -94,6 +94,14 @@ namespace RhinoInside.Revit
       RhinoVersionInfo?.FileBuildPart ?? 0,
       RhinoVersionInfo?.FilePrivatePart ?? 0
     );
+    static Version MinimumRhinoVersion
+    {
+      get
+      {
+        var assemblyVersion = Assembly.GetExecutingAssembly().GetReferencedAssemblies().Where(x => x.Name == "RhinoCommon").FirstOrDefault().Version;
+        return new Version(assemblyVersion.Major, assemblyVersion.Minor, 0);
+      }
+    }
 
     static AddIn()
     {
@@ -306,12 +314,7 @@ namespace RhinoInside.Revit
         return Result.Cancelled;
 
       // Check if Revit.exe is a supported version
-      Version RevitVersion;
-      {
-        try { RevitVersion = new Version(app.ControlledApplication.SubVersionNumber); }
-        catch (System.MissingMemberException) { RevitVersion = new Version(app.ControlledApplication.VersionNumber); }
-      }
-
+      var RevitVersion = new Version(app.ControlledApplication.GetSubVersionNumber());
       if (RevitVersion < MinimumRevitVersion)
       {
         using
@@ -355,7 +358,7 @@ namespace RhinoInside.Revit
 
       // if release info is received, and
       // if current version on the active update channel is newer
-      if (releaseInfo?.Version > Version)
+      if (releaseInfo is ReleaseInfo && releaseInfo.Version > Version)
       {
         // ask UI to notify user of updates
         if (!AddinOptions.Session.CompactTab)

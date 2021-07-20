@@ -3,6 +3,7 @@ using System.Windows.Forms;
 using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
+using RhinoInside.Revit.External.DB.Extensions;
 using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
@@ -110,6 +111,15 @@ namespace RhinoInside.Revit.GH.Parameters
         ExpireOwner();
 
       ExpireSolution(true);
+    }
+
+    public static bool GetData(IGH_Component component, IGH_DataAccess DA, string name, out double height, Types.Document document)
+    {
+      height = default;
+      if (!DA.GetData(name, ref height)) return false;
+      height += document.Value.GetBasePointLocation(component.Params.Input<Elevation>(name).ElevationBase).Z * Revit.ModelUnits;
+
+      return true;
     }
   }
 

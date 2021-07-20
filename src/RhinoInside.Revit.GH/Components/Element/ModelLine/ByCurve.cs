@@ -1,7 +1,9 @@
 using System;
+using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -13,31 +15,28 @@ namespace RhinoInside.Revit.GH.Components
 
     public ModelLineByCurve() : base
     (
-      "Add ModelLine", "ModelLine",
-      "Given a Curve, it adds a Curve element to the active Revit document",
-      "Revit", "Model"
+      name: "Add ModelLine",
+      nickname: "ModelLine",
+      description: "Given a Curve, it adds a Curve element to the active Revit document",
+      category: "Revit",
+      subCategory: "Model"
     )
     { }
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.GraphicalElement(), "CurveElement", "C", "New CurveElement", GH_ParamAccess.list);
-    }
-
     void ReconstructModelLineByCurve
     (
-      DB.Document doc,
-      ref DB.Element element,
+      [Optional, NickName("DOC")]
+      DB.Document document,
+
+      [Description("New CurveElement")]
+      ref DB.ModelCurve curveElement,
 
       Rhino.Geometry.Curve curve,
       DB.SketchPlane sketchPlane
     )
     {
       var plane = sketchPlane.GetPlane().ToPlane();
-      if
-      (
-        ((curve = Rhino.Geometry.Curve.ProjectToPlane(curve, plane)) == null)
-      )
+      if ((curve = Rhino.Geometry.Curve.ProjectToPlane(curve, plane)) is null)
         ThrowArgumentException(nameof(curve), "Failed to project curve in the sketchPlane.");
 
       var centerLine = curve.ToCurve();
@@ -45,12 +44,19 @@ namespace RhinoInside.Revit.GH.Components
       if (curve.IsClosed == centerLine.IsBound)
         AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Unable to keep curve closed.");
 
-      if (element is DB.ModelCurve modelCurve && centerLine.IsSameKindAs(modelCurve.GeometryCurve))
-        modelCurve.SetSketchPlaneAndCurve(sketchPlane, centerLine);
-      else if (doc.IsFamilyDocument)
-        ReplaceElement(ref element, doc.FamilyCreate.NewModelCurve(centerLine, sketchPlane));
+      if (curveElement is DB.ModelCurve modelCurve && centerLine.IsSameKindAs(modelCurve.GeometryCurve))
+      {
+        if (modelCurve.SketchPlane.IsEquivalent(sketchPlane))
+        {
+          if (!centerLine.IsAlmostEqualTo(modelCurve.GeometryCurve))
+            modelCurve.SetGeometryCurve(centerLine, true);
+        }
+        else modelCurve.SetSketchPlaneAndCurve(sketchPlane, centerLine);
+      }
+      else if (document.IsFamilyDocument)
+        ReplaceElement(ref curveElement, document.FamilyCreate.NewModelCurve(centerLine, sketchPlane));
       else
-        ReplaceElement(ref element, doc.Create.NewModelCurve(centerLine, sketchPlane));
+        ReplaceElement(ref curveElement, document.Create.NewModelCurve(centerLine, sketchPlane));
     }
   }
 }

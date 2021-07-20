@@ -18,25 +18,27 @@ namespace RhinoInside.Revit.GH.Components
 
     public DefineSharedParameter() : base
     (
-      "Define Shared Parameter", "SharedPara" +
-      "",
-      "Given its Name, it creates a Shared Parameter definition to the active Revit document",
-      "Revit", "Parameter"
+      name: "Define Shared Parameter",
+      nickname: "SharedPara",
+      description: "Given its Name, it creates a Shared Parameter definition to the active Revit document",
+      category: "Revit",
+      subCategory: "Parameter"
     )
     { }
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.ParameterKey(), "ParameterKey", "K", "New Parameter definition", GH_ParamAccess.item);
-    }
-
     void ReconstructDefineSharedParameter
     (
-      DB.Document doc,
-      ref DB.SharedParameterElement element,
+      [Optional, NickName("DOC")]
+      DB.Document document,
 
-      [Description("Parameter Name")] string name,
-      [Description("Overwrite Parameter definition if found"), Optional, DefaultValue(false)] bool overwrite
+      [Description("New Parameter definition"), NickName("K")]
+      ref DB.SharedParameterElement parameterKey,
+
+      [Description("Parameter Name")]
+      string name,
+
+      [Description("Overwrite Parameter definition if found"), Optional, DefaultValue(false)]
+      bool overwrite
     )
     {
       var parameterGUID = default(Guid?);
@@ -45,7 +47,7 @@ namespace RhinoInside.Revit.GH.Components
       bool instance = true;
       bool visible = true;
 
-      using (var bindings = doc.ParameterBindings.ReverseIterator())
+      using (var bindings = document.ParameterBindings.ReverseIterator())
       {
         while (bindings.MoveNext())
         {
@@ -60,11 +62,11 @@ namespace RhinoInside.Revit.GH.Components
               (instance ? bindings.Current is DB.InstanceBinding : bindings.Current is DB.TypeBinding)
             )
             {
-              if (doc.GetElement(def.Id) is DB.SharedParameterElement parameterElement)
+              if (document.GetElement(def.Id) is DB.SharedParameterElement parameterElement)
               {
                 if (!overwrite)
                 {
-                  ReplaceElement(ref element, parameterElement);
+                  ReplaceElement(ref parameterKey, parameterElement);
                   throw new CancelException($"A parameter called \"{name}\" is already in the document");
                 }
                 parameterGUID = parameterElement.GuidValue;
@@ -86,14 +88,15 @@ namespace RhinoInside.Revit.GH.Components
             // TODO : Ask for categories
             using (var categorySet = new DB.CategorySet())
             {
-              foreach (var category in doc.Settings.Categories.Cast<DB.Category>().Where(category => category.AllowsBoundParameters))
+              var categories = document.GetBuiltInCategoriesWithParameters().Select(x => document.GetCategory(x));
+              foreach (var category in categories)
                 categorySet.Insert(category);
 
               var binding = instance ? (DB.ElementBinding) new DB.InstanceBinding(categorySet) : (DB.ElementBinding) new DB.TypeBinding(categorySet);
 
-              if (!doc.ParameterBindings.Insert(definition, binding, parameterGroup))
+              if (!document.ParameterBindings.Insert(definition, binding, parameterGroup))
               {
-                if (!overwrite || !doc.ParameterBindings.ReInsert(definition, binding, parameterGroup))
+                if (!overwrite || !document.ParameterBindings.ReInsert(definition, binding, parameterGroup))
                   throw new InvalidOperationException("Failed while creating the parameter binding.");
               }
             }
@@ -103,7 +106,7 @@ namespace RhinoInside.Revit.GH.Components
         }
       }
 
-      ReplaceElement(ref element, DB.SharedParameterElement.Lookup(doc, parameterGUID.Value));
+      ReplaceElement(ref parameterKey, DB.SharedParameterElement.Lookup(document, parameterGUID.Value));
     }
   }
 }

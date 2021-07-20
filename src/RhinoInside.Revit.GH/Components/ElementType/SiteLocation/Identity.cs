@@ -27,37 +27,37 @@ namespace RhinoInside.Revit.GH.Components.Site
     static readonly ParamDefinition[] inputs =
     {
       ParamDefinition.Create<Parameters.ElementType>("Site Location", "SL"),
-      ParamDefinition.Create<Param_String>("Place Name", "PN", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_Number>("Time Zone", "TZ", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.FromParam
+      ParamDefinition.Create<Param_String>("Place Name", "PN", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Number>("Time Zone", "TZ", optional: true, relevance: ParamRelevance.Primary),
+      new ParamDefinition
       (
         new Param_Number() { Name = "Latitude", NickName = "LAT", Optional = true, AngleParameter = true, UseDegrees = true },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
-      ParamDefinition.FromParam
+      new ParamDefinition
       (
         new Param_Number() { Name = "Longitude", NickName = "LON", Optional = true, AngleParameter = true, UseDegrees = true },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.ElementType>("Site Location", "SL", relevance: ParamVisibility.Voluntary),
-      ParamDefinition.Create<Param_Number>("Elevation", "E", "The elevation of the site location", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("Weather Station", "WS", "The name of the weather station at the site location", relevance: ParamVisibility.Voluntary),
-      ParamDefinition.Create<Param_String>("Place Name", "PN", "The place name of the site", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_Number>("Time Zone", "TZ", "The time-zone for the site", relevance: ParamVisibility.Default),
-      ParamDefinition.FromParam
+      ParamDefinition.Create<Parameters.ElementType>("Site Location", "SL", relevance: ParamRelevance.Occasional),
+      ParamDefinition.Create<Param_Number>("Elevation", "E", "The elevation of the site location", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Weather Station", "WS", "The name of the weather station at the site location", relevance: ParamRelevance.Occasional),
+      ParamDefinition.Create<Param_String>("Place Name", "PN", "The place name of the site", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Number>("Time Zone", "TZ", "The time-zone for the site", relevance: ParamRelevance.Primary),
+      new ParamDefinition
       (
         new Param_Number() { Name = "Latitude", NickName = "LAT", Description = "The latitude of the site location", AngleParameter = true, UseDegrees = true },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
-      ParamDefinition.FromParam
+      new ParamDefinition
       (
         new Param_Number() { Name = "Longitude", NickName = "LON", Description = "The longitude of the site location", AngleParameter = true, UseDegrees = true },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
     };
 

@@ -1,11 +1,10 @@
 using System;
-using System.Collections;
-using System.Linq;
-using DB = Autodesk.Revit.DB;
-using Grasshopper.Kernel;
 using System.Collections.Generic;
+using System.Linq;
+using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using RhinoInside.Revit.External.DB.Extensions;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -28,7 +27,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
+      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.Category>("Category", "C", string.Empty, GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_String>("Name", "N", string.Empty, GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true),
@@ -40,7 +39,7 @@ namespace RhinoInside.Revit.GH.Components
       ParamDefinition.Create<Param_String>("Families", "F", "Family list", GH_ParamAccess.list)
     };
 
-    class FamilyNameComparer : IEqualityComparer<DB.ElementType>
+    struct FamilyNameComparer : IEqualityComparer<DB.ElementType>
     {
       public  bool Equals(DB.ElementType x, DB.ElementType y)
       {
@@ -66,24 +65,17 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
-        return;
-
-      var categoryId = default(DB.ElementId);
-      DA.GetData("Category", ref categoryId);
-
-      string name = null;
-      DA.GetData("Name", ref name);
-
-      DB.ElementFilter filter = null;
-      DA.GetData("Filter", ref filter);
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
+      Params.GetData(DA, "Category", out Types.Category category);
+      Params.GetData(DA, "Name", out string name);
+      Params.GetData(DA, "Filter", out DB.ElementFilter filter);
 
       using (var collector = new DB.FilteredElementCollector(doc))
       {
         var elementCollector = collector.WherePasses(ElementFilter);
 
-        if (categoryId is object)
-          elementCollector.WhereCategoryIdEqualsTo(categoryId);
+        if (category is object)
+          elementCollector.WhereCategoryIdEqualsTo(category.Id);
 
         if (filter is object)
           elementCollector = elementCollector.WherePasses(filter);
@@ -91,14 +83,11 @@ namespace RhinoInside.Revit.GH.Components
         if (TryGetFilterStringParam(DB.BuiltInParameter.SYMBOL_FAMILY_NAME_PARAM, ref name, out var nameFilter))
           elementCollector = elementCollector.WherePasses(nameFilter);
 
-        var familiesSet = new HashSet<DB.ElementType>(elementCollector.Cast<DB.ElementType>(), new FamilyNameComparer());
+        var familiesSet = new HashSet<DB.ElementType>(elementCollector.Cast<DB.ElementType>(), default(FamilyNameComparer));
 
-        var families =
-        (
-          name is null ?
+        var families = name is null ?
           familiesSet :
-          familiesSet.Where(x => x.FamilyName.IsSymbolNameLike(name))
-        ).ToList();
+          familiesSet.Where(x => x.FamilyName.IsSymbolNameLike(name));
 
         DA.SetDataList("Families", families.Select(x => x.FamilyName));
       }

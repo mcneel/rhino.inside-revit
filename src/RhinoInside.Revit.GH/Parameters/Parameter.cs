@@ -13,7 +13,7 @@ using EDBS = RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class ParameterKey : Element<Types.ParameterKey, DB.ElementId>
+  public class ParameterKey : Element<Types.ParameterKey, DB.ParameterElement>
   {
     public override Guid ComponentGuid => new Guid("A550F532-8C68-460B-91F3-DA0A5A0D42B5");
     public override GH_Exposure Exposure => GH_Exposure.septenary;
@@ -37,6 +37,9 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
+      if (SourceCount != 0) return;
+      if (Revit.ActiveUIDocument?.Document is null) return;
+
       var listBox = new ListBox();
       listBox.BorderStyle = BorderStyle.FixedSingle;
       listBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
@@ -74,7 +77,8 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       if (Revit.ActiveUIDocument is null) return;
 
-      var categories = Revit.ActiveUIDocument.Document.Settings.Categories.Cast<DB.Category>().Where(x => x.AllowsBoundParameters);
+      var doc = Revit.ActiveUIDocument.Document;
+      var categories = doc.GetBuiltInCategoriesWithParameters().Select(x => doc.GetCategory(x));
 
       if (categoryType != DB.CategoryType.Invalid)
       {
@@ -181,20 +185,29 @@ namespace RhinoInside.Revit.GH.Parameters
     #endregion
   }
 
-  public class ParameterValue : GH_Param<Types.ParameterValue>
+  public class ParameterValue : Param<Types.ParameterValue>
   {
     public override Guid ComponentGuid => new Guid("3E13D360-4B29-42C7-8F3E-2AB8F74B4EA8");
     public override GH_Exposure Exposure => GH_Exposure.hidden;
-    protected override System.Drawing.Bitmap Icon => ((System.Drawing.Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
-                                                     ImageBuilder.BuildIcon("#");
+    protected override string IconTag => "#";
+
     protected override Types.ParameterValue PreferredCast(object data)
     {
       return data is DB.Parameter parameter ? new Types.ParameterValue(parameter) : default;
     }
 
-    public ParameterValue() : base("ParameterValue", "ParameterValue", "Contains a collection of Revit parameter values on an element.", "Params", "Revit Primitives", GH_ParamAccess.item) { }
-    protected ParameterValue(string name, string nickname, string description, string category, string subcategory, GH_ParamAccess access) :
-    base(name, nickname, description, category, subcategory, access)
+    public ParameterValue() : base
+    (
+      name: "Parameter Value",
+      nickname: "Parameter Value",
+      description: "Contains a collection of Revit parameter values on an element.",
+      category: "Params",
+      subcategory: "Revit Primitives"
+    )
+    { }
+
+    protected ParameterValue(string name, string nickname, string description, string category, string subcategory) :
+    base(name, nickname, description, category, subcategory)
     { }
 
     protected override string Format(Types.ParameterValue data)
@@ -221,7 +234,16 @@ namespace RhinoInside.Revit.GH.Parameters
   {
     public override Guid ComponentGuid => new Guid("43F0E4E9-3DC4-4965-AB80-07E28E203A91");
 
-    public ParameterParam() : base(string.Empty, string.Empty, string.Empty, "Params", "Revit Primitives", GH_ParamAccess.item) { }
+    public ParameterParam() : base
+    (
+      name: string.Empty,
+      nickname: string.Empty,
+      description: string.Empty,
+      category: "Params",
+      subcategory: "Revit Primitives"
+    )
+    { }
+
     public ParameterParam(DB.Parameter p) : this()
     {
       ParameterName = p.Definition.Name;

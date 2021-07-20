@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
-using Autodesk.Revit.DB;
+using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.GH.Kernel.Attributes;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -21,20 +23,18 @@ namespace RhinoInside.Revit.GH.Components
     )
     { }
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.GraphicalElement(), "Form", "F", "New Form", GH_ParamAccess.item);
-    }
-
     void ReconstructFormByCurves
     (
-      Document doc,
-      ref Autodesk.Revit.DB.Element element,
+      [Optional, NickName("DOC")]
+      DB.Document document,
+
+      [ParamType(typeof(Parameters.GraphicalElement)), Description("New Form")]
+      ref DB.GenericForm form,
 
       IList<Rhino.Geometry.Curve> profiles
     )
     {
-      if (!doc.IsFamilyDocument)
+      if (!document.IsFamilyDocument)
         throw new InvalidOperationException("This component can only run in Family editor");
 
       var planes = new List<Rhino.Geometry.Plane>();
@@ -52,34 +52,34 @@ namespace RhinoInside.Revit.GH.Components
         var profile = profiles[0];
         var plane = planes[0];
 
-        using (var sketchPlane = SketchPlane.Create(doc, plane.ToPlane()))
-        using (var referenceArray = new ReferenceArray())
+        using (var sketchPlane = DB.SketchPlane.Create(document, plane.ToPlane()))
+        using (var referenceArray = new DB.ReferenceArray())
         {
           foreach (var curve in profile.ToCurveMany())
-            referenceArray.Append(new Reference(doc.FamilyCreate.NewModelCurve(curve, sketchPlane)));
+            referenceArray.Append(new DB.Reference(document.FamilyCreate.NewModelCurve(curve, sketchPlane)));
 
-          ReplaceElement(ref element, doc.FamilyCreate.NewFormByCap(true, referenceArray));
+          ReplaceElement(ref form, document.FamilyCreate.NewFormByCap(true, referenceArray));
         }
       }
       else
       {
-        using (var referenceArrayArray = new ReferenceArrayArray())
+        using (var referenceArrayArray = new DB.ReferenceArrayArray())
         {
           int index = 0;
           foreach (var profile in profiles)
           {
-            using (var sketchPlane = SketchPlane.Create(doc, planes[index++].ToPlane()))
+            using (var sketchPlane = DB.SketchPlane.Create(document, planes[index++].ToPlane()))
             {
-              var referenceArray = new ReferenceArray();
+              var referenceArray = new DB.ReferenceArray();
 
               foreach (var curve in profile.ToCurveMany())
-                referenceArray.Append(new Reference(doc.FamilyCreate.NewModelCurve(curve, sketchPlane)));
+                referenceArray.Append(new DB.Reference(document.FamilyCreate.NewModelCurve(curve, sketchPlane)));
 
               referenceArrayArray.Append(referenceArray);
             }
           }
 
-          ReplaceElement(ref element, doc.FamilyCreate.NewLoftForm(true, referenceArrayArray));
+          ReplaceElement(ref form, document.FamilyCreate.NewLoftForm(true, referenceArrayArray));
         }
       }
     }

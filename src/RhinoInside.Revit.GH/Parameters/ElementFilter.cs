@@ -3,23 +3,37 @@ using Grasshopper.Kernel;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class ElementFilter : GH_Param<Types.ElementFilter>
+  public class ElementFilter : Param<Types.ElementFilter>
   {
     public override Guid ComponentGuid => new Guid("BFCFC49C-747E-40D9-AAEE-93CE06EAAF2B");
     public override GH_Exposure Exposure => GH_Exposure.hidden;
-    protected override System.Drawing.Bitmap Icon => ((System.Drawing.Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
-                                                     ImageBuilder.BuildIcon("Y");
+    protected override string IconTag => "Y";
 
-    public ElementFilter() : base("ElementFilter", "ElementFilter", "Contains a collection of Revit element filters", "Params", "Revit Primitives", GH_ParamAccess.item) { }
+    public ElementFilter() : base
+    (
+      name: "Element Filter",
+      nickname: "Element Filter",
+      description: "Contains a collection of Revit element filters",
+      category: "Params",
+      subcategory: "Revit Primitives"
+    )
+    { }
   }
 
-  public class FilterRule : GH_Param<Types.FilterRule>
+  public class FilterRule : Param<Types.FilterRule>
   {
     public override Guid ComponentGuid => new Guid("F08E1292-F855-48C7-9921-BD12EF0F67D2");
     public override GH_Exposure Exposure => GH_Exposure.hidden;
-    protected override System.Drawing.Bitmap Icon => ((System.Drawing.Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
-                                                     ImageBuilder.BuildIcon("R");
+    protected override string IconTag => "R";
 
-    public FilterRule() : base("FilterRule", "FilterRule", "Contains a collection of Revit filter rules", "Params", "Revit Primitives", GH_ParamAccess.item) { }
+    public FilterRule() : base
+    (
+      name: "Filter Rule",
+      nickname: "Filter Rule",
+      description: "Contains a collection of Revit filter rules",
+      category: "Params",
+      subcategory: "Revit Primitives"
+    )
+    { }
   }
 }

@@ -32,7 +32,7 @@ namespace RhinoInside.Revit.GH.Types
     #region System.Object
     public bool Equals(IGH_ElementId other) => other is object &&
       other.DocumentGUID == DocumentGUID && other.UniqueID == UniqueID;
-    public override bool Equals(object obj) => (obj is ElementId id) ? Equals(id) : base.Equals(obj);
+    public override bool Equals(object obj) => (obj is IGH_ElementId id) ? Equals(id) : base.Equals(obj);
     public override int GetHashCode() => DocumentGUID.GetHashCode() ^ UniqueID.GetHashCode();
 
     public override string ToString()
@@ -91,7 +91,30 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_Goo
-    public override string IsValidWhyNot => IsValid ? string.Empty : "Not Valid";
+
+    public override bool IsValid => base.IsValid && Id.IsValid();
+    public override string IsValidWhyNot
+    {
+      get
+      {
+        if (DocumentGUID == Guid.Empty) return $"DocumentGUID '{Guid.Empty}' is invalid";
+        if (!UniqueId.TryParse(UniqueID, out var _, out var _)) return $"UniqueID '{UniqueID}' is invalid";
+
+        var id = Id;
+        if (Document is null)
+        {
+          return $"Referenced Revit document '{DocumentGUID}' was closed.";
+        }
+        else
+        {
+          if (id is null) return $"Referenced Revit element '{UniqueID}' is not available.";
+          if (id == DB.ElementId.InvalidElementId) return "Id is equal to InvalidElementId.";
+        }
+
+        return default;
+      }
+    }
+
     public virtual object ScriptVariable() => Value;
 
     public override bool CastTo<Q>(out Q target)
@@ -131,9 +154,11 @@ namespace RhinoInside.Revit.GH.Types
       public bool Valid => owner.IsValid;
 
       [System.ComponentModel.Description("The document this element belongs to.")]
-      public string Document => DB.ModelPathUtils.ConvertModelPathToUserVisiblePath(owner.Document.GetModelPath());
+      public string Document => owner.Document?.GetFileName();
+
       [System.ComponentModel.Description("The Guid of document this element belongs to.")]
       public Guid DocumentGUID => owner.DocumentGUID;
+
       protected virtual bool IsValidId(DB.Document doc, DB.ElementId id) =>
         owner.GetType() == Element.FromElementId(doc, id).GetType();
 

@@ -131,6 +131,9 @@ namespace RhinoInside.Revit.Convert.Geometry
       foreach (var curve in value)
         polycurve.AppendSegment(curve.ToCurve());
 
+      if(!value.IsOpen())
+        polycurve.MakeClosed(Revit.VertexTolerance * Revit.ModelUnits);
+
       return polycurve;
     }
 
@@ -166,6 +169,8 @@ namespace RhinoInside.Revit.Convert.Geometry
 
         foreach (var curve in curveArray.Cast<DB.Curve>())
           polycurve.AppendSegment(curve.ToCurve());
+
+        polycurve.MakeClosed(Revit.VertexTolerance * Revit.ModelUnits);
 
         list[index++] = polycurve;
       }

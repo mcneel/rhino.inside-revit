@@ -31,15 +31,16 @@ namespace RhinoInside.Revit.GH.Components.Material
 
     private ParamDefinition[] GetFieldsAsInputs()
     {
-      List<ParamDefinition> inputs = new List<ParamDefinition>();
+      var inputs = new List<ParamDefinition>();
 
-      var param = new Parameters.AppearanceAsset();
-      param.Name = ComponentInfo.Name;
-      param.NickName = ComponentInfo.NickName;
-      param.Description = ComponentInfo.Description;
-      param.Access = GH_ParamAccess.item;
+      var param = new Parameters.AppearanceAsset
+      {
+        Name = ComponentInfo.Name,
+        NickName = ComponentInfo.NickName,
+        Description = ComponentInfo.Description,
+      };
 
-      inputs.Add(ParamDefinition.FromParam(param));
+      inputs.Add(new ParamDefinition(param));
       inputs.AddRange(GetAssetDataAsInputs(skipUnchangable: true));
       return inputs.ToArray();
     }

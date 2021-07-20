@@ -33,68 +33,63 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.FromParam
+      new ParamDefinition
       (
         new Parameters.Document(),
-        ParamVisibility.Voluntary
+        ParamRelevance.Occasional
       ),
-      ParamDefinition.FromParam
+      new ParamDefinition
       (
         new Param_FilePath()
         {
           Name = "Template",
           NickName = "T",
-          Access = GH_ParamAccess.item,
           Optional = true,
           FileFilter = "Family Template Files (*.rft)|*.rft"
         }
       ),
-      ParamDefinition.FromParam
+      new ParamDefinition
       (
         new Param_Boolean()
         {
-          Name = "Override Family",
-          NickName = "OF",
-          Description = "Override Family",
-          Access = GH_ParamAccess.item
-        },
-        ParamVisibility.Binding,
-        defaultValue: false
+          Name = "Overwrite",
+          NickName = "O",
+          Description = "Overwrite Family",
+        }.
+        SetDefaultVale(false),
+        ParamRelevance.Primary
       ),
-      ParamDefinition.FromParam
+      new ParamDefinition
       (
         new Param_Boolean()
         {
-          Name = "Override Parameters",
+          Name = "Overwrite Parameters",
           NickName = "OP",
-          Description = "Override Parameters",
-          Access = GH_ParamAccess.item
-        },
-        ParamVisibility.Binding,
-        defaultValue: false
+          Description = "Overwrite Parameters",
+        }.
+        SetDefaultVale(false),
+        ParamRelevance.Occasional
       ),
-      ParamDefinition.FromParam
+      new ParamDefinition
       (
         new Param_String()
         {
           Name = "Name",
           NickName = "N",
           Description = "Family Name",
-          Access = GH_ParamAccess.item
         }
       ),
-      ParamDefinition.FromParam
+      new ParamDefinition
       (
         new Parameters.Category()
         {
           Name = "Category",
           NickName = "C",
           Description = "Family Category",
-          Access = GH_ParamAccess.item,
           Optional = true
         }
       ),
-      ParamDefinition.FromParam
+      new ParamDefinition
       (
         new Param_Geometry()
         {
@@ -110,17 +105,26 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.FromParam
+      new ParamDefinition
       (
         new Parameters.Family()
         {
           Name = "Family",
           NickName = "F",
-          Description = string.Empty,
-          Access = GH_ParamAccess.item
         }
       )
     };
+
+    public override void VariableParameterMaintenance()
+    {
+      if (Params.Input<IGH_Param>("Override Family") is IGH_Param overrideFamily)
+        overrideFamily.Name = "Overwrite";
+
+      if (Params.Input<IGH_Param>("Override Parameters") is IGH_Param overrideParameters)
+        overrideParameters.Name = "Overwrite Parameters";
+
+      base.VariableParameterMaintenance();
+    }
 
     public static Dictionary<string, DB.ElementId> GetMaterialIdsByName(DB.Document doc)
     {
@@ -515,25 +519,13 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
-        return;
-
-      var scaleFactor = 1.0 / Revit.ModelUnits;
-
-      var overrideFamily = false;
-      if (!DA.GetData("Override Family", ref overrideFamily))
-        return;
-
-      var overrideParameters = false;
-      if (!DA.GetData("Override Parameters", ref overrideParameters))
-        return;
-
-      var name = string.Empty;
-      if (!DA.GetData("Name", ref name))
-        return;
-
-      var categoryId = DB.ElementId.InvalidElementId;
-      DA.GetData("Category", ref categoryId);
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
+      if (!Params.TryGetData(DA, "Overwrite", out bool? overwrite)) return;
+      if (!overwrite.HasValue) overwrite = false;
+      if (!Params.TryGetData(DA, "Overwrite Parameters", out bool? overwriteParameters)) return;
+      if (!overwriteParameters.HasValue) overwriteParameters = overwrite;
+      if (!Params.GetData(DA, "Name", out string name)) return;
+      if (!Params.GetData(DA, "Category", out DB.ElementId categoryId)) categoryId = DB.ElementId.InvalidElementId;
       var updateCategory = categoryId != DB.ElementId.InvalidElementId;
 
       var geometry = new List<IGH_GeometricGoo>();
@@ -558,7 +550,7 @@ namespace RhinoInside.Revit.GH.Components
         updateCategory &= family.FamilyCategory.Id != categoryId;
       }
 
-      if (familyIsNew || (overrideFamily && (updateCategory || updateGeometry)))
+      if (familyIsNew || (overwrite == true && (updateCategory || updateGeometry)))
       {
         try
         {
@@ -648,7 +640,7 @@ namespace RhinoInside.Revit.GH.Components
                 CommitTransaction(familyDoc, transaction);
               }
 
-              family = familyDoc.LoadFamily(doc, new FamilyLoadOptions(overrideFamily, overrideParameters));
+              family = familyDoc.LoadFamily(doc, new FamilyLoadOptions(overwrite == true, overwriteParameters == true));
             }
             finally
             {
@@ -676,7 +668,7 @@ namespace RhinoInside.Revit.GH.Components
           AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
         }
       }
-      else if (!overrideFamily)
+      else if (overwrite != true)
       {
         AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Family '{name}' already loaded!");
       }

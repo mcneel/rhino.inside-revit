@@ -1,13 +1,9 @@
 using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 using System.Xml;
-using System.Xml.Serialization;
 using System.Xml.Schema;
-using System.Windows;
+using System.Xml.Serialization;
 
 namespace RhinoInside.Revit.Settings
 {
@@ -30,6 +26,20 @@ namespace RhinoInside.Revit.Settings
     }
     private bool _loadOnStartup = false;
     public static event EventHandler<EventArgs> LoadOnStartupChanged;
+
+    [XmlElement]
+    public bool IsolateSettings
+    {
+      get => _isolateSettings;
+      set
+      {
+        if (_isolateSettings == value) return;
+        _isolateSettings = value;
+        IsolateSettingsChanged?.Invoke(this, null);
+      }
+    }
+    private bool _isolateSettings = false;
+    public static event EventHandler<EventArgs> IsolateSettingsChanged;
 
     [XmlElement]
     public bool UseHostLanguage

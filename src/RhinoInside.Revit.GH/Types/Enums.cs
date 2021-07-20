@@ -74,6 +74,31 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [
+    ComponentGuid("CC3DB1A4-5C24-478D-A784-00725BB1E1F6"),
+    Name("Element On Phase Status"),
+    Description("Represents the statuses that an element can have with respect to a given phase."),
+  ]
+  public class ElementOnPhaseStatus : GH_Enum<DB.ElementOnPhaseStatus>
+  {
+    public ElementOnPhaseStatus() : base() { }
+    public ElementOnPhaseStatus(DB.ElementOnPhaseStatus value) : base(value) { }
+
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
+      {
+        { (int) DB.ElementOnPhaseStatus.None,       "<None>"      },
+        { (int) DB.ElementOnPhaseStatus.Past,       "Past"        },
+        { (int) DB.ElementOnPhaseStatus.Existing,   "Existing"    },
+        { (int) DB.ElementOnPhaseStatus.Demolished, "Demolished"  },
+        { (int) DB.ElementOnPhaseStatus.New,        "New"         },
+        { (int) DB.ElementOnPhaseStatus.Temporary,  "Temporary"   },
+        { (int) DB.ElementOnPhaseStatus.Future,     "Future"      },
+      }
+    );
+  }
+
+  [
     ComponentGuid("1AF2E8BF-5FAF-41AD-9A2F-EB96A706587C"),
     Name("Graphics Style Type"),
     Description("Contains a collection of graphics style type values"),
@@ -510,8 +535,8 @@ namespace RhinoInside.Revit.GH.Types
 
   [
     ComponentGuid("6a2b7564-9dd1-4cfc-a539-a352cb39cb7c"),
-    Name("Thermal Material Type"),
-    Description("Represents thermal material type"),
+    Name("Thermal Material Class"),
+    Description("Represents thermal material class"),
   ]
   public class ThermalMaterialType : GH_Enum<DB.ThermalMaterialType>
   {
