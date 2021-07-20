@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ScriptVariableType => typeof(DB.HostObject);
     public new DB.HostObject Value => base.Value as DB.HostObject;
 
-    protected internal HostObject() { }
+    public HostObject() { }
     protected internal HostObject(DB.HostObject host) : base(host) { }
 
     public override Plane Location
