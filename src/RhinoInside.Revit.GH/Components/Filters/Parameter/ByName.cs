@@ -159,15 +159,13 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
       if (ruleFilter is null)
       {
-        ruleFilter = filter is null?
-        DB.ParameterFilterElement.Create
-        (
-          doc, name, categoryIds
-        ) :
         ruleFilter = DB.ParameterFilterElement.Create
         (
-          doc, name, categoryIds, filter
+          doc, name, categoryIds
         );
+
+        if(filter is object)
+          ruleFilter.SetElementFilter(filter);
       }
 
       return ruleFilter;

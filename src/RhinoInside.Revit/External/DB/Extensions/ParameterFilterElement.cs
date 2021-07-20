@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static bool SetElementFilter(this ParameterFilterElement self, ElementFilter elementFilter)
     {
-      return false;
+      throw new System.NotImplementedException();
     }
 #endif
   }
