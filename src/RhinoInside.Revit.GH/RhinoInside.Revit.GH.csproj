@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -11,22 +11,27 @@
   <PropertyGroup Condition="$(Configuration.Contains('2018'))">
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <RevitVersion>2018</RevitVersion>
+    <RevitApiVersion>2018.0.2</RevitApiVersion>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.Contains('2019'))">
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <RevitVersion>2019</RevitVersion>
+    <RevitApiVersion>2019.0.1</RevitApiVersion>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.Contains('2020'))">
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <RevitVersion>2020</RevitVersion>
+    <RevitApiVersion>2020.0.0</RevitApiVersion>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.Contains('2021'))">
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <RevitVersion>2021</RevitVersion>
+    <RevitApiVersion>2021.0.0</RevitApiVersion>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.Contains('2022'))">
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <RevitVersion>2022</RevitVersion>
+    <RevitApiVersion>2022.0.0</RevitApiVersion>
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -182,8 +187,7 @@
       <ItemGroup>
         <PackageReference Include="RhinoCommon" Version="7.8.21196.5001" IncludeAssets="compile; build" />
         <PackageReference Include="Grasshopper" Version="7.8.21196.5001" IncludeAssets="compile; build" />
-        <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="2019.0.1" IncludeAssets="build; compile" Condition="'$(Configuration)' == 'Release 2019'" />
-        <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitVersion).0.0" IncludeAssets="build; compile" Condition="'$(Configuration)' != 'Release 2019'" />
+        <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitApiVersion)" IncludeAssets="build; compile" />
       </ItemGroup>
     </Otherwise>
   </Choose>
