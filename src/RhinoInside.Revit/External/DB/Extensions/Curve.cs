@@ -58,7 +58,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool IsAlmostEqualTo(this Arc self, Arc other, double tolerance = XYZExtension.DefaultTolerance) =>
       self.IsBound == other.IsBound &&
       self.IsCyclic == other.IsCyclic &&
-      self.IsClosed == other.IsClosed &&
       IsAlmostEqualTo(self.Radius, other.Radius, tolerance) &&
       IsAlmostEqualTo(self.GetEndParameter(0), other.GetEndParameter(0), tolerance) &&
       IsAlmostEqualTo(self.GetEndParameter(1), other.GetEndParameter(1), tolerance) &&
@@ -70,7 +69,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool IsAlmostEqualTo(this Ellipse self, Ellipse other, double tolerance = XYZExtension.DefaultTolerance) =>
       self.IsBound == other.IsBound &&
       self.IsCyclic == other.IsCyclic &&
-      self.IsClosed == other.IsClosed &&
       self.Center.IsAlmostEqualTo(other.Center, tolerance) &&
       self.Normal.IsAlmostEqualTo(other.Normal, tolerance) &&
       self.XDirection.IsAlmostEqualTo(other.XDirection, tolerance) &&
@@ -83,7 +81,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool IsAlmostEqualTo(this HermiteSpline self, HermiteSpline other, double tolerance = XYZExtension.DefaultTolerance) =>
       self.IsBound == other.IsBound &&
       self.IsCyclic == other.IsCyclic &&
-      self.IsClosed == other.IsClosed &&
       IsAlmostEqualTo(self.ControlPoints, other.ControlPoints, tolerance) &&
       IsAlmostEqualTo(self.Tangents, other.Tangents, tolerance) &&
       IsAlmostEqualTo(self.Parameters, other.Parameters, tolerance);
@@ -91,7 +88,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool IsAlmostEqualTo(this NurbSpline self, NurbSpline other, double tolerance = XYZExtension.DefaultTolerance) =>
       self.IsBound == other.IsBound &&
       self.IsCyclic == other.IsCyclic &&
-      self.IsClosed == other.IsClosed &&
       self.Degree == other.Degree &&
       self.isRational == other.isRational &&
       IsAlmostEqualTo(self.CtrlPoints, other.CtrlPoints, tolerance) &&
@@ -101,7 +97,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool IsAlmostEqualTo(this CylindricalHelix self, CylindricalHelix other, double tolerance = XYZExtension.DefaultTolerance) =>
       self.IsBound == other.IsBound &&
       self.IsCyclic == other.IsCyclic &&
-      self.IsClosed == other.IsClosed &&
       self.IsRightHanded == other.IsRightHanded &&
       IsAlmostEqualTo(self.Height, other.Height, tolerance) &&
       IsAlmostEqualTo(self.Pitch, other.Pitch, tolerance) &&
