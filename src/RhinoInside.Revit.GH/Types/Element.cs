@@ -126,6 +126,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       { typeof(DB.BasePoint),               (element)=> new BasePoint             (element as DB.BasePoint)         },
       { typeof(DB.DesignOption),            (element)=> new DesignOption          (element as DB.DesignOption)      },
+      { typeof(DB.Phase),                   (element)=> new Phase                 (element as DB.Phase)             },
       { typeof(DB.View),                    (element)=> new View                  (element as DB.View)              },
       { typeof(DB.Family),                  (element)=> new Family                (element as DB.Family)            },
       { typeof(DB.ElementType),             (element)=> new ElementType           (element as DB.ElementType)       },
@@ -453,12 +454,6 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region Properties
-    public DB.WorksetId WorksetId
-    {
-      get => Document?.GetWorksetId(Id);
-      set => Value?.get_Parameter(DB.BuiltInParameter.ELEM_PARTITION_PARAM)?.Set(value.IntegerValue);
-    }
-
     public bool CanDelete => IsValid && DB.DocumentValidation.CanDeleteElement(Document, Id);
 
     public bool? Pinned
@@ -572,6 +567,40 @@ namespace RhinoInside.Revit.GH.Types
           InvalidateGraphics();
 
           element.ChangeTypeId(value.Id);
+        }
+      }
+    }
+
+    public DB.WorksetId WorksetId
+    {
+      get => Document?.GetWorksetId(Id);
+      set => Value?.get_Parameter(DB.BuiltInParameter.ELEM_PARTITION_PARAM)?.Set(value.IntegerValue);
+    }
+
+    public Phase CreatedPhase
+    {
+      get => Value is DB.Element element && element.HasPhases() ? new Phase(element.Document, element.CreatedPhaseId) : default;
+      set
+      {
+        if (value is object && Value is DB.Element element && element.HasPhases())
+        {
+          AssertValidDocument(value, nameof(CreatedPhase));
+          if (element.CreatedPhaseId != value.Id)
+            element.CreatedPhaseId = value.Id;
+        }
+      }
+    }
+
+    public Phase DemolishedPhase
+    {
+      get => Value is DB.Element element && element.HasPhases() ? new Phase(element.Document, element.DemolishedPhaseId) : default;
+      set
+      {
+        if (value is object && Value is DB.Element element && element.HasPhases())
+        {
+          AssertValidDocument(value, nameof(DemolishedPhase));
+          if (element.DemolishedPhaseId != value.Id)
+            element.DemolishedPhaseId = value.Id;
         }
       }
     }

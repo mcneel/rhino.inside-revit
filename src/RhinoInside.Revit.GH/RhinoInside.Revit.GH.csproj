@@ -286,6 +286,8 @@
     <Compile Include="Components\Element\Material\ByName.cs" />
     <Compile Include="Components\Element\ModelLine\ByCurve.cs" />
     <Compile Include="Components\Element\Passport.cs" />
+    <Compile Include="Components\Element\Phase\ElementPhasing.cs" />
+    <Compile Include="Components\Element\Phase\QueryPhases.cs" />
     <Compile Include="Components\Element\PinUnPinElement.cs" />
     <Compile Include="Components\Element\Preview.cs" />
     <Compile Include="Components\Element\ProjectLocation\Query.cs" />
@@ -374,6 +376,7 @@
     <Compile Include="Parameters\Input\WallStructuralUsage_ValueList.cs" />
     <Compile Include="Parameters\Input\WallSystemFamily_ValueList.cs" />
     <Compile Include="Parameters\Input\WallWrapping_ValueList.cs" />
+    <Compile Include="Parameters\Phase.cs" />
     <Compile Include="Parameters\TextureData.cs" />
     <Compile Include="Components\TransactionalComponent.cs" />
     <Compile Include="Components\TransactionBaseComponent.cs" />
@@ -451,6 +454,7 @@
     <Compile Include="Types\Panel.cs" />
     <Compile Include="Types\Parameter.cs" />
     <Compile Include="Types\DatumPlane.cs" />
+    <Compile Include="Types\Phase.cs" />
     <Compile Include="Types\ProjectLocation.cs" />
     <Compile Include="Types\Roof.cs" />
     <Compile Include="Types\DataType.cs" />

@@ -837,6 +837,41 @@ namespace RhinoInside.Revit.GH.Components
     }
   }
 
+  public class ElementPhaseStatusFilter : ElementFilterComponent
+  {
+    public override Guid ComponentGuid => new Guid("805C21EE-5481-4412-A06C-7965761737E8");
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    protected override string IconTag => "P";
+
+    public ElementPhaseStatusFilter()
+    : base("Phase Status Filter", "PhStFiltr", "Filter used to match elements associated to the given Phase status", "Revit", "Filter")
+    { }
+
+    protected override void RegisterInputParams(GH_InputParamManager manager)
+    {
+      manager.AddParameter(new Parameters.Phase(), "Phase", "P", "Phase to match", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.Param_Enum<Types.ElementOnPhaseStatus>(), "Status", "S", "Phase status to match", GH_ParamAccess.list);
+      base.RegisterInputParams(manager);
+    }
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      var phase = default(DB.Phase);
+      if (!DA.GetData("Phase", ref phase))
+        return;
+
+      var status = new List<DB.ElementOnPhaseStatus>();
+      if (!DA.GetDataList("Status", status))
+        return;
+
+      var inverted = false;
+      if (!DA.GetData("Inverted", ref inverted))
+        return;
+
+      DA.SetData("Filter", new DB.ElementPhaseStatusFilter(phase.Id, status, inverted));
+    }
+  }
+
   public class ElementOwnerViewFilter : ElementFilterComponent
   {
     public override Guid ComponentGuid => new Guid("CFB42D90-F9D4-4601-9EEF-C624E92A424D");
