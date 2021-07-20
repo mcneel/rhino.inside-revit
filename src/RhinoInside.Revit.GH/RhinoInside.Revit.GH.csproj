@@ -460,6 +460,7 @@
     <Compile Include="Types\Instance.cs" />
     <Compile Include="Types\InstanceElement.cs" />
     <Compile Include="Types\LinePatternElement.cs" />
+    <Compile Include="Types\MEPCurve.cs" />
     <Compile Include="Types\Panel.cs" />
     <Compile Include="Types\Parameter.cs" />
     <Compile Include="Types\DatumPlane.cs" />

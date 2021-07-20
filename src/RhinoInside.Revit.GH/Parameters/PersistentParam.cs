@@ -113,9 +113,10 @@ namespace RhinoInside.Revit.GH.Parameters
       var errors = new List<string>();
       foreach (var goo in PersistentData.NonNulls)
       {
-        if (goo.GetType().GetConstructor(Type.EmptyTypes) is null)
+        var gooType = goo.GetType();
+        if (gooType.GetConstructor(Type.EmptyTypes) is null)
         {
-          var error = $"'{goo.GetType().FullName}' has no public empty constructor.{Environment.NewLine}Parameterless constructor is mandatory for serialization.";
+          var error = $"'{gooType.FullName}' has no public empty constructor.{Environment.NewLine}Parameterless constructor is mandatory for serialization.";
           if (set.Add(error)) errors.Add(error);
         }
       }
