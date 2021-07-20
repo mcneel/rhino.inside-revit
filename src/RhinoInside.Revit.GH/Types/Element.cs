@@ -127,6 +127,8 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(DB.BasePoint),               (element)=> new BasePoint             (element as DB.BasePoint)         },
       { typeof(DB.DesignOption),            (element)=> new DesignOption          (element as DB.DesignOption)      },
       { typeof(DB.Phase),                   (element)=> new Phase                 (element as DB.Phase)             },
+      { typeof(DB.SelectionFilterElement),  (element)=> new SelectionFilterElement(element as DB.SelectionFilterElement)},
+      { typeof(DB.ParameterFilterElement),  (element)=> new ParameterFilterElement(element as DB.ParameterFilterElement)},
       { typeof(DB.View),                    (element)=> new View                  (element as DB.View)              },
       { typeof(DB.Family),                  (element)=> new Family                (element as DB.Family)            },
       { typeof(DB.ElementType),             (element)=> new ElementType           (element as DB.ElementType)       },

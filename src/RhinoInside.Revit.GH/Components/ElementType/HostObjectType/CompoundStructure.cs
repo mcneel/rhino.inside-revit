@@ -99,7 +99,7 @@ namespace RhinoInside.Revit.GH.Components.Host
   }
 }
 
-namespace RhinoInside.Revit.GH.Components.Obsolete
+namespace RhinoInside.Revit.GH.Components.Host.Obsolete
 {
   [Obsolete("Since 2021-03-23")]
   public class HostObjectTypeCompoundStructure : Component

@@ -135,7 +135,7 @@ namespace RhinoInside.Revit.GH.Components.Host
   }
 }
 
-namespace RhinoInside.Revit.GH.Components.Obsolete
+namespace RhinoInside.Revit.GH.Components.Host.Obsolete
 {
   [Obsolete("Since 2021-03-24")]
   public class DeconstructCompoundStructureLayer : Component

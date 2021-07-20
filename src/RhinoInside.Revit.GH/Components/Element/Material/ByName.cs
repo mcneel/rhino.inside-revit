@@ -172,7 +172,7 @@ namespace RhinoInside.Revit.GH.Components.Material
   }
 }
 
-namespace RhinoInside.Revit.GH.Components.Obsolete
+namespace RhinoInside.Revit.GH.Components.Material.Obsolete
 {
   [Obsolete("Since 2020-09-24")]
   public class MaterialByName : TransactionalChainComponent

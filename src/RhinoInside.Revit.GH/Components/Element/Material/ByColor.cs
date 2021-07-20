@@ -13,7 +13,7 @@ using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.GH.ElementTracking;
 using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Material.Obsolete
+namespace RhinoInside.Revit.GH.Components.Material
 {
   public class MaterialByColor : ElementTrackerComponent
   {
