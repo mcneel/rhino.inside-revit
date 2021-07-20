@@ -541,14 +541,16 @@ namespace RhinoInside.Revit.GH.Components
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var rules = new List<DB.FilterRule>();
-      if (!DA.GetDataList("Rules", rules) || rules.Count == 0)
+      if (!DA.GetDataList("Rules", rules))
         return;
 
       var inverted = false;
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      DA.SetData("Filter", new DB.ElementParameterFilter(rules, inverted));
+      rules = rules.OfType<DB.FilterRule>().ToList();
+      if(rules.Count > 0)
+        DA.SetData("Filter", new DB.ElementParameterFilter(rules, inverted));
     }
   }
   #endregion
@@ -960,7 +962,7 @@ namespace RhinoInside.Revit.GH.Components
 
     static readonly Dictionary<DB.BuiltInParameter, EDBS.DataType> BuiltInParametersTypes = new Dictionary<DB.BuiltInParameter, EDBS.DataType>();
 
-    static bool TryGetParameterDefinition(DB.Document doc, DB.ElementId id, out DB.StorageType storageType, out EDBS.DataType dataType)
+    internal static bool TryGetParameterDefinition(DB.Document doc, DB.ElementId id, out DB.StorageType storageType, out EDBS.DataType dataType)
     {
       if (id.TryGetBuiltInParameter(out var builtInParameter))
       {
@@ -1232,6 +1234,126 @@ namespace RhinoInside.Revit.GH.Components
     { }
   }
 
+  public abstract class ElementFilterStringRule : Component
+  {
+    public override GH_Exposure Exposure => GH_Exposure.quinary;
+    public override bool IsPreviewCapable => false;
+
+    protected enum ConditionType
+    {
+      Contains,
+      BeginsWith,
+      EndsWith,
+    }
+
+    protected abstract ConditionType Condition { get; }
+
+    protected ElementFilterStringRule(string name, string nickname, string description, string category, string subCategory)
+    : base(name, nickname, description, category, subCategory) { }
+
+    protected override void RegisterInputParams(GH_InputParamManager manager)
+    {
+      manager.AddParameter(new Parameters.ParameterKey(), "ParameterKey", "K", "Parameter to check", GH_ParamAccess.item);
+      manager.AddTextParameter("Value", "V", "Value to check with", GH_ParamAccess.item);
+      manager.AddBooleanParameter("Inverted", "I", "True if the results of the rule should be inverted", GH_ParamAccess.item, false);
+    }
+
+    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    {
+      manager.AddParameter(new Parameters.FilterRule(), "Rule", "R", string.Empty, GH_ParamAccess.item);
+    }
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      var parameterKey = default(Types.ParameterKey);
+      if (!DA.GetData("ParameterKey", ref parameterKey))
+        return;
+
+      var inverted = false;
+      if (!DA.GetData("Inverted", ref inverted))
+        return;
+
+      if (!ElementFilterRule.TryGetParameterDefinition(parameterKey.Document, parameterKey.Id, out var storageType, out var dataType))
+      {
+        if (parameterKey.Id.TryGetBuiltInParameter(out var builtInParameter))
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to found parameter '{DB.LabelUtils.GetLabelFor(builtInParameter)}' in Revit document.");
+        else
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to found parameter '{parameterKey.Id.IntegerValue}' in Revit document.");
+
+        return;
+      }
+
+      if (storageType != DB.StorageType.String)
+      {
+        if (parameterKey.Id.TryGetBuiltInParameter(out var builtInParameter))
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{DB.LabelUtils.GetLabelFor(builtInParameter)}' is not a text parameter.");
+        else
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterKey.Id.IntegerValue}' is not a text parameter.");
+
+        return;
+      }
+
+      var provider = new DB.ParameterValueProvider(parameterKey.Id);
+
+      DB.FilterRule rule = null;
+      if (storageType == DB.StorageType.String)
+      {
+        DB.FilterStringRuleEvaluator ruleEvaluator = null;
+        switch (Condition)
+        {
+          case ConditionType.Contains: ruleEvaluator = new DB.FilterStringContains(); break;
+          case ConditionType.BeginsWith: ruleEvaluator = new DB.FilterStringBeginsWith(); break;
+          case ConditionType.EndsWith: ruleEvaluator = new DB.FilterStringEndsWith(); break;
+        }
+
+        var goo = default(GH_String);
+        if (DA.GetData("Value", ref goo))
+          rule = new DB.FilterStringRule(provider, ruleEvaluator, goo.Value, true);
+      }
+
+      if (rule is object)
+      {
+        if (inverted)
+          DA.SetData("Rule", new DB.FilterInverseRule(rule));
+        else
+          DA.SetData("Rule", rule);
+      }
+    }
+  }
+
+  public class ElementFilterRuleContains : ElementFilterStringRule
+  {
+    public override Guid ComponentGuid => new Guid("B1265CF6-3031-4E05-B958-38D00C5A41EF");
+    protected override string IconTag => "?";
+    protected override ConditionType Condition => ConditionType.Contains;
+
+    public ElementFilterRuleContains()
+    : base("String Contains", "Contains", "Filter used to match elements if value of a parameter contains a string", "Revit", "Filter")
+    { }
+  }
+
+  public class ElementFilterRuleBeginsWith : ElementFilterStringRule
+  {
+    public override Guid ComponentGuid => new Guid("7FA73840-6511-49BD-A4C9-85F0DFD907E5");
+    protected override string IconTag => "<";
+    protected override ConditionType Condition => ConditionType.BeginsWith;
+
+    public ElementFilterRuleBeginsWith()
+    : base("String Begins", "Begins", "Filter used to match elements if value of a parameter begins with a string", "Revit", "Filter")
+    { }
+  }
+
+  public class ElementFilterRuleEndsWith : ElementFilterStringRule
+  {
+    public override Guid ComponentGuid => new Guid("84F29564-1ACD-4148-B00F-EA3FCFB6DF13");
+    protected override string IconTag => ">";
+    protected override ConditionType Condition => ConditionType.EndsWith;
+
+    public ElementFilterRuleEndsWith()
+    : base("String Ends", "Ends", "Filter used to match elements if value of a parameter ends with a string", "Revit", "Filter")
+    { }
+  }
+
   public class CategoryFilterRule : Component
   {
     public override Guid ComponentGuid => new Guid("0CE4F51D-49D0-4B0C-82C8-84CCCF0968F6");
@@ -1242,9 +1364,6 @@ namespace RhinoInside.Revit.GH.Components
     public CategoryFilterRule()
     : base("Category Rule", "Category", "Filter used to match elements on a category", "Revit", "Filter")
     { }
-
-    protected CategoryFilterRule(string name, string nickname, string description, string category, string subCategory)
-    : base(name, nickname, description, category, subCategory) { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
