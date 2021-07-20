@@ -142,7 +142,8 @@ namespace RhinoInside.Revit.GH.Components
                 }
                 else curve = segment.ToCurve();
 
-                edge.SetGeometryCurve(curve, false);
+                if (!edge.GeometryCurve.IsAlmostEqualTo(curve))
+                  edge.SetGeometryCurve(curve, false);
               }
             }
           }

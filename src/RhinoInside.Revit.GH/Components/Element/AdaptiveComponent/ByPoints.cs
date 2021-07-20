@@ -54,7 +54,11 @@ namespace RhinoInside.Revit.GH.Components
         {
           int index = 0;
           foreach (var vertex in adaptivePointIds.Select(id => document.GetElement(id)).Cast<DB.ReferencePoint>())
-            vertex.Position = adaptivePoints[index++];
+          {
+            var position = adaptivePoints[index++];
+            if (!vertex.Position.IsAlmostEqualTo(position))
+              vertex.Position = position;
+          }
 
           return;
         }

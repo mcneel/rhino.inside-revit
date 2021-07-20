@@ -477,8 +477,12 @@ namespace RhinoInside.Revit.GH.Types
         {
           if (element.Location is DB.LocationCurve locationCurve)
           {
-            InvalidateGraphics();
-            locationCurve.Curve = value.ToCurve();
+            var curve = value.ToCurve();
+            if (!locationCurve.Curve.IsAlmostEqualTo(curve))
+            {
+              InvalidateGraphics();
+              locationCurve.Curve = curve;
+            }
           }
           else throw new InvalidOperationException("Curve can not be set for this element.");
         }

@@ -45,7 +45,14 @@ namespace RhinoInside.Revit.GH.Components
         AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Unable to keep curve closed.");
 
       if (curveElement is DB.ModelCurve modelCurve && centerLine.IsSameKindAs(modelCurve.GeometryCurve))
-        modelCurve.SetSketchPlaneAndCurve(sketchPlane, centerLine);
+      {
+        if (modelCurve.SketchPlane.IsEquivalent(sketchPlane))
+        {
+          if (!centerLine.IsAlmostEqualTo(modelCurve.GeometryCurve))
+            modelCurve.SetGeometryCurve(centerLine, true);
+        }
+        else modelCurve.SetSketchPlaneAndCurve(sketchPlane, centerLine);
+      }
       else if (document.IsFamilyDocument)
         ReplaceElement(ref curveElement, document.FamilyCreate.NewModelCurve(centerLine, sketchPlane));
       else

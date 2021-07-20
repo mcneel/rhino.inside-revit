@@ -11,6 +11,126 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return self.IsBound == other.IsBound && self.GetType() == other.GetType();
     }
 
+    #region IsAlmostEqualTo
+    static bool IsAlmostEqualTo(double x, double y, double toleance)
+    {
+      double min, max;
+      if (x < y) { min = x; max = y; }
+      else       { min = y; max = x; }
+
+      var length = max - min;
+      return length <= toleance || length <= max * toleance;
+    }
+
+    static bool IsAlmostEqualTo(IList<XYZ> x, IList<XYZ> y, double toleance)
+    {
+      var count = x.Count;
+      if (count != y.Count) return false;
+      for (int p = 0; p < count; ++p)
+      {
+        if (!x[p].IsAlmostEqualTo(y[p], toleance))
+          return false;
+      }
+
+      return true;
+    }
+
+    static bool IsAlmostEqualTo(DoubleArray x, DoubleArray y, double toleance)
+    {
+      var count = x.Size;
+      if (count != y.Size) return false;
+      for (int p = 0; p < count; ++p)
+      {
+        if (!IsAlmostEqualTo(x.get_Item(p), y.get_Item(p), toleance))
+          return false;
+      }
+
+      return true;
+    }
+
+    public static bool IsAlmostEqualTo(this Line self, Line other, double tolerance = XYZExtension.DefaultTolerance) =>
+      self.IsBound == other.IsBound &&
+      self.Origin.IsAlmostEqualTo(other.Origin, tolerance) &&
+      self.Direction.IsAlmostEqualTo(other.Direction, tolerance) &&
+      IsAlmostEqualTo(self.GetEndParameter(0), other.GetEndParameter(0), tolerance) &&
+      IsAlmostEqualTo(self.GetEndParameter(1), other.GetEndParameter(1), tolerance);
+
+    public static bool IsAlmostEqualTo(this Arc self, Arc other, double tolerance = XYZExtension.DefaultTolerance) =>
+      self.IsBound == other.IsBound &&
+      self.IsCyclic == other.IsCyclic &&
+      self.IsClosed == other.IsClosed &&
+      IsAlmostEqualTo(self.Radius, other.Radius, tolerance) &&
+      IsAlmostEqualTo(self.GetEndParameter(0), other.GetEndParameter(0), tolerance) &&
+      IsAlmostEqualTo(self.GetEndParameter(1), other.GetEndParameter(1), tolerance) &&
+      self.Center.IsAlmostEqualTo(other.Center, tolerance) &&
+      self.Normal.IsAlmostEqualTo(other.Normal, tolerance) &&
+      self.XDirection.IsAlmostEqualTo(other.XDirection, tolerance) &&
+      self.YDirection.IsAlmostEqualTo(other.YDirection, tolerance);
+
+    public static bool IsAlmostEqualTo(this Ellipse self, Ellipse other, double tolerance = XYZExtension.DefaultTolerance) =>
+      self.IsBound == other.IsBound &&
+      self.IsCyclic == other.IsCyclic &&
+      self.IsClosed == other.IsClosed &&
+      self.Center.IsAlmostEqualTo(other.Center, tolerance) &&
+      self.Normal.IsAlmostEqualTo(other.Normal, tolerance) &&
+      self.XDirection.IsAlmostEqualTo(other.XDirection, tolerance) &&
+      self.YDirection.IsAlmostEqualTo(other.YDirection, tolerance) &&
+      IsAlmostEqualTo(self.GetEndParameter(0), other.GetEndParameter(0), tolerance) &&
+      IsAlmostEqualTo(self.GetEndParameter(1), other.GetEndParameter(1), tolerance) &&
+      IsAlmostEqualTo(self.RadiusX, other.RadiusX, tolerance) &&
+      IsAlmostEqualTo(self.RadiusY, other.RadiusY, tolerance);
+
+    public static bool IsAlmostEqualTo(this HermiteSpline self, HermiteSpline other, double tolerance = XYZExtension.DefaultTolerance) =>
+      self.IsBound == other.IsBound &&
+      self.IsCyclic == other.IsCyclic &&
+      self.IsClosed == other.IsClosed &&
+      IsAlmostEqualTo(self.ControlPoints, other.ControlPoints, tolerance) &&
+      IsAlmostEqualTo(self.Tangents, other.Tangents, tolerance) &&
+      IsAlmostEqualTo(self.Parameters, other.Parameters, tolerance);
+
+    public static bool IsAlmostEqualTo(this NurbSpline self, NurbSpline other, double tolerance = XYZExtension.DefaultTolerance) =>
+      self.IsBound == other.IsBound &&
+      self.IsCyclic == other.IsCyclic &&
+      self.IsClosed == other.IsClosed &&
+      self.Degree == other.Degree &&
+      self.isRational == other.isRational &&
+      IsAlmostEqualTo(self.CtrlPoints, other.CtrlPoints, tolerance) &&
+      IsAlmostEqualTo(self.Knots, other.Knots, tolerance) &&
+      IsAlmostEqualTo(self.Weights, other.Weights, tolerance);
+
+    public static bool IsAlmostEqualTo(this CylindricalHelix self, CylindricalHelix other, double tolerance = XYZExtension.DefaultTolerance) =>
+      self.IsBound == other.IsBound &&
+      self.IsCyclic == other.IsCyclic &&
+      self.IsClosed == other.IsClosed &&
+      self.IsRightHanded == other.IsRightHanded &&
+      IsAlmostEqualTo(self.Height, other.Height, tolerance) &&
+      IsAlmostEqualTo(self.Pitch, other.Pitch, tolerance) &&
+      IsAlmostEqualTo(self.Radius, other.Radius, tolerance) &&
+      IsAlmostEqualTo(self.GetEndParameter(0), other.GetEndParameter(0), tolerance) &&
+      IsAlmostEqualTo(self.GetEndParameter(1), other.GetEndParameter(1), tolerance) &&
+      self.BasePoint.IsAlmostEqualTo(other.BasePoint, tolerance) &&
+      self.XVector.IsAlmostEqualTo(other.XVector, tolerance) &&
+      self.YVector.IsAlmostEqualTo(other.YVector, tolerance) &&
+      self.ZVector.IsAlmostEqualTo(other.ZVector, tolerance);
+
+    public static bool IsAlmostEqualTo(this Curve self, Curve other, double tolerance = XYZExtension.DefaultTolerance)
+    {
+      if (!IsSameKindAs(self, other)) return false;
+
+      switch (self)
+      {
+        case Line selfLine: return IsAlmostEqualTo(selfLine, (Line) other, tolerance);
+        case Arc selfArc: return IsAlmostEqualTo(selfArc, (Arc) other, tolerance);
+        case Ellipse selfEllipse: return IsAlmostEqualTo(selfEllipse, (Ellipse) other, tolerance);
+        case HermiteSpline selfHermite: return IsAlmostEqualTo(selfHermite, (HermiteSpline) other, tolerance);
+        case NurbSpline selfNurb: return IsAlmostEqualTo(selfNurb, (NurbSpline) other, tolerance);
+        case CylindricalHelix selfHelix: return IsAlmostEqualTo(selfHelix, (CylindricalHelix) other, tolerance);
+      }
+
+      throw new NotImplementedException();
+    }
+    #endregion
+
     public static IEnumerable<Curve> ToBoundedCurves(this Curve curve)
     {
       switch (curve)

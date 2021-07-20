@@ -89,7 +89,9 @@ namespace RhinoInside.Revit.GH.Components
           if (updateLevel)
             referenceLevel.Set(level.Value.Id);
 
-          locationCurve.Curve = centerLine;
+          if(!locationCurve.Curve.IsAlmostEqualTo(centerLine))
+            locationCurve.Curve = centerLine;
+
           return;
         }
       }

@@ -182,7 +182,8 @@ namespace RhinoInside.Revit.GH.Components
       {
         newWall = previousWall;
 
-        locationCurve.Curve = centerLine;
+        if(!locationCurve.Curve.IsAlmostEqualTo(centerLine))
+          locationCurve.Curve = centerLine;
       }
       else
       {

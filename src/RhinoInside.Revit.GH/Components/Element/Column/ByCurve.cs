@@ -2,6 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
@@ -50,7 +51,11 @@ namespace RhinoInside.Revit.GH.Components
 
       if (column is object && column.Location is DB.LocationCurve locationCurve)
       {
-        locationCurve.Curve = curve.ToLine();
+        var centerLine = curve.ToLine();
+        if (!locationCurve.Curve.IsAlmostEqualTo(centerLine))
+          locationCurve.Curve = centerLine;
+
+        return;
       }
       else
       {
