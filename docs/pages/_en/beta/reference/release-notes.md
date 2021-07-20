@@ -10,6 +10,57 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html version="0.9" time="07/20/2021" %}
+
+### New Features
+* All creation components now keep track of elements created between sessions.
+* Added 'Release Elements' to the Ribbon.
+* Now Add components can create elements in other documents than the active.
+* Now 'Document' parameter in Optional in all Add components.
+* Now 'Add Floor' accepts multiple curves per 'Boundary'.
+* Now 'Add DirectShape Type' take a 'Family Name' input.
+* Added 'Convert Material' component.
+* Added some Phasing components.
+* Added components for string-based rules #376
+* Added 'Category Rule' component.
+* Added 'Create Selection Filter' component.
+* Added 'Create Parameter Filter' component.
+* Added 'Duplicate Element' component.
+
+### Fixes
+* Revit location: inconsistent use of degrees and radians #389
+* Now 'QueryDesignOptions' returns 'Main Model' when 'Design Option Set' is "None".
+* Now 'Filter Element' returns Nulls instead of False for invalid elements.
+* Fixed 'Element Name' component when output 'Element' is post-processed.
+* Fix for Grasshopper preview when geometry produces an invalid bounding box.
+* Fixed some serialization problems on types without a public constructor.
+* Fix for Revit minimum version checking on Revit 2018.
+
+### Minor changes
+* Minor Rhino version is now 7.8.21196.5001
+* Now Rhino.Inside propagate options from and to Rhino 7 standalone.
+* Restored back the warning about Rhino needs to be updated.
+* Revit elements notifications are now handled a bit faster on big definitions.
+* Now Components parameters that contain modified elements don't get expired until the next solution.
+* Now 'Query Element' handles FullUniqueId and Built-In UniqueId.
+* Disabled 'Group by' context menu.
+* Disabled 'Cull' on output parameters.
+* Now 'Add Wall (Profile)' reuses wall when possible.
+* Added error message when user is opening a file authored with a newer version of RiR than the current installed.
+* Now 'Add Model Group' takes a Plane instead of a Point.
+* Now 'Level' and 'Grid' pickers are sorted like in Revit UI.
+* Renamed 'Thermal Material Type' to 'Thermal Material Class".
+
+### API
+* Added DB.Element.IsValid extension method.
+* Now `DB.CurveLoop.ToCurve` returns closed `PolyCurve` objects.
+* Now `DB.CurveArrArray.ToPolyCurves` returns closed `PolyCurve` objects.
+* Now GeometryBase.ToShape extension method never returns nulls.
+* Now ConvertAll always return an Array.
+* Added `DB.Document.TryGetElement` by name extension method.
+* Added `DB.Document.GetNamesakeElements` extension method.
+* Added `DB.Curve.IsAlmostEqualTo` extension method.
+
 {% include ltr/release-header.html version="0.8" time="06/24/2021" %}
 
 ### New Features
