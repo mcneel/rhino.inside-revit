@@ -1328,7 +1328,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override ConditionType Condition => ConditionType.Contains;
 
     public ElementFilterRuleContains()
-    : base("String Contains", "Contains", "Filter used to match elements if value of a parameter contains a string", "Revit", "Filter")
+    : base("Text Contains Rule", "Contains", "Filter used to match elements if value of a parameter contains the specified text", "Revit", "Filter")
     { }
   }
 
@@ -1339,7 +1339,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override ConditionType Condition => ConditionType.BeginsWith;
 
     public ElementFilterRuleBeginsWith()
-    : base("String Begins", "Begins", "Filter used to match elements if value of a parameter begins with a string", "Revit", "Filter")
+    : base("Text Begins Rule", "Begins", "Filter used to match elements if value of a parameter begins with the specified text", "Revit", "Filter")
     { }
   }
 
@@ -1350,7 +1350,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override ConditionType Condition => ConditionType.EndsWith;
 
     public ElementFilterRuleEndsWith()
-    : base("String Ends", "Ends", "Filter used to match elements if value of a parameter ends with a string", "Revit", "Filter")
+    : base("Text Ends Rule", "Ends", "Filter used to match elements if value of a parameter ends with the specified text", "Revit", "Filter")
     { }
   }
 
