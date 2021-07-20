@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -207,7 +207,6 @@
     <Compile Include="Components\Document\ProjectInformation.cs" />
     <Compile Include="Components\Document\ProjectLocation.cs" />
     <Compile Include="Components\Document\Save.cs" />
-    <Compile Include="Components\ElementFilter.cs" />
     <Compile Include="Components\ElementType\Default.cs" />
     <Compile Include="Components\ElementType\Duplicate.cs" />
     <Compile Include="Components\ElementType\ExportImage.cs" />
@@ -337,6 +336,13 @@
     <Compile Include="Components\Family\Geometry\OpeningByCurve.cs" />
     <Compile Include="Components\Family\Save.cs" />
     <Compile Include="Components\Family\Geometry\VoidByBrep.cs" />
+    <Compile Include="Components\Filters\ElementFilterRule.cs" />
+    <Compile Include="Components\Filters\ElementGenericFilter.cs" />
+    <Compile Include="Components\Filters\ElementGeometryFilter.cs" />
+    <Compile Include="Components\Filters\ElementGraphicalFilter.cs" />
+    <Compile Include="Components\Filters\ElementLogicalFilter.cs" />
+    <Compile Include="Components\Filters\FilterElement.cs" />
+    <Compile Include="Components\Filters\Obsolete.cs" />
     <Compile Include="Components\Filters\Parameter\ByName.cs" />
     <Compile Include="Components\Filters\Selection\ByName.cs" />
     <Compile Include="Components\Parameter\DefineSharedParameter.cs" />
