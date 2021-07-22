@@ -41,25 +41,38 @@ namespace RhinoInside.Revit.GH.Components
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
-      if (!Params.GetData(DA, "Id", out Grasshopper.Kernel.Types.IGH_Goo id)) return;
+      if (!Params.GetData(DA, "Id", out Grasshopper.Kernel.Types.IGH_Goo goo)) return;
 
-      switch (id)
+      switch (goo)
       {
-        case Grasshopper.Kernel.Types.GH_Number n:
-          if (!double.IsNaN(n.Value))
+        case Types.CategoryId c:
+          DA.SetData("Element", Types.Category.FromElementId(doc, new DB.ElementId(c.Value)));
+          return;
+
+        case Types.ParameterId p:
+          DA.SetData("Element", Types.ParameterKey.FromElementId(doc, new DB.ElementId(p.Value)));
+          return;
+      }
+
+      var value = goo.ScriptVariable();
+
+      switch (value)
+      {
+        case double n:
+          if (!double.IsNaN(n))
           {
-            try { DA.SetData("Element", Types.Element.FromElementId(doc, new DB.ElementId(System.Convert.ToInt32(n.Value)))); }
+            try { DA.SetData("Element", Types.Element.FromElementId(doc, new DB.ElementId(System.Convert.ToInt32(n)))); }
             catch { }
           }
-          break;
+          return;
 
-        case Grasshopper.Kernel.Types.GH_Integer i:
-          DA.SetData("Element", Types.Element.FromElementId(doc, new DB.ElementId(i.Value)));
-          break;
+        case int i:
+          DA.SetData("Element", Types.Element.FromElementId(doc, new DB.ElementId(i)));
+          return;
 
-        case Grasshopper.Kernel.Types.GH_String s:
+        case string s:
 
-          if (FullUniqueId.TryParse(s.Value, out var documentId, out var uniqueId))
+          if (FullUniqueId.TryParse(s, out var documentId, out var uniqueId))
           {
             if (doc.GetFingerprintGUID() == documentId && doc.TryGetElementId(uniqueId, out var elementId))
               DA.SetData("Element", Types.Element.FromElementId(doc, elementId));
@@ -67,31 +80,23 @@ namespace RhinoInside.Revit.GH.Components
             return;
           }
 
-          if (UniqueId.TryParse(s.Value, out var _, out var _))
+          if (UniqueId.TryParse(s, out var _, out var _))
           {
-            if (doc.TryGetElementId(s.Value, out var elementId))
+            if (doc.TryGetElementId(s, out var elementId))
               DA.SetData("Element", Types.Element.FromElementId(doc, elementId));
 
             return;
           }
 
-          if (int.TryParse(s.Value, out var index))
+          if (int.TryParse(s, out var index))
           {
-            if(doc.GetElement(new DB.ElementId(index)) is DB.Element element)
+            if (doc.GetElement(new DB.ElementId(index)) is DB.Element element)
               DA.SetData("Element", Types.Element.FromElement(element));
 
             return;
           }
 
-          break;
-
-        case Types.CategoryId c:
-          DA.SetData("Element", Types.Category.FromElementId(doc, new DB.ElementId(c.Value)));
-          break;
-
-        case Types.ParameterId p:
-          DA.SetData("Element", Types.ParameterKey.FromElementId(doc, new DB.ElementId(p.Value)));
-          break;
+          return;
       }
     }
   }
