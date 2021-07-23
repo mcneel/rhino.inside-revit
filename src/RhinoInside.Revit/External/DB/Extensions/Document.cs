@@ -37,6 +37,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (self is null || other is null)
         return false;
 
+      if (!self.IsValidObject || !other.IsValidObject)
+        return false;
+
       return self.Equals(other);
     }
 
@@ -542,7 +545,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     static Document BuiltInCategoriesWithParametersDocument;
     internal static IReadOnlyCollection<BuiltInCategory> GetBuiltInCategoriesWithParameters(this Document doc)
     {
-      if (BuiltInCategoriesWithParameters is null || !doc.Equals(BuiltInCategoriesWithParametersDocument))
+      if (BuiltInCategoriesWithParametersDocument?.IsValidObject != true || !doc.IsEquivalent(BuiltInCategoriesWithParametersDocument))
       {
         BuiltInCategoriesWithParametersDocument = doc;
         BuiltInCategoriesWithParameters = BuiltInCategoryExtension.BuiltInCategories.Where

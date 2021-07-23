@@ -42,6 +42,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (self?.Id != other?.Id)
         return false;
 
+      if (!self.IsValidObject || !other.IsValidObject)
+        return false;
+
       return self.Document.Equals(other.Document);
     }
   }
@@ -682,8 +685,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       if (from?.Document is Document document)
       {
-        to.CopyParametersFrom(from, mask);
-        document.Delete(from.Id);
+        if (!from.IsEquivalent(to))
+        {
+          to.CopyParametersFrom(from, mask);
+          document.Delete(from.Id);
+        }
       }
 
       return to;
