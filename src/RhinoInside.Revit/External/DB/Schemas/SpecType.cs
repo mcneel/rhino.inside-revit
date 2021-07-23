@@ -64,7 +64,32 @@ namespace RhinoInside.Revit.External.DB.Schemas
 #endif
     }
 
-    #region Dimensionality
+    public DisciplineType DisciplineType
+    {
+      get
+      {
+        if (this != Empty)
+        {
+#if !REVIT_2022
+          if (Autodesk.Revit.DB.UnitUtils.IsMeasurableSpec(this))
+            return Autodesk.Revit.DB.UnitUtils.GetDiscipline(this);
+
+#else
+          if (Namespace == "autodesk.spec.aec.electrical") return DisciplineType.Electrical;
+          if (Namespace == "autodesk.spec.aec.energy") return DisciplineType.Energy;
+          if (Namespace == "autodesk.spec.aec.hvac") return DisciplineType.Hvac;
+          if (Namespace == "autodesk.spec.aec.infrastructure") return DisciplineType.Infrastructure;
+          if (Namespace == "autodesk.spec.aec.piping") return DisciplineType.Piping;
+          if (Namespace == "autodesk.spec.aec.structural") return DisciplineType.Structural;
+#endif
+          return DisciplineType.Common;
+        }
+
+        return DisciplineType.Empty;
+      }
+    }
+
+#region Dimensionality
     internal static readonly IReadOnlyDictionary<SpecType, int> LengthDimensionality = new Dictionary<SpecType, int>
     {
       #region Common
