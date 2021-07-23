@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
 #if REVIT_2022
       Autodesk.Revit.DB.LabelUtils.GetLabelForGroup(this);
 #else
-      Autodesk.Revit.DB.LabelUtils.GetLabelFor((BuiltInParameterGroup) this);
+      Autodesk.Revit.DB.LabelUtils.GetLabelFor((Autodesk.Revit.DB.BuiltInParameterGroup) this);
 #endif
 
     public ParameterGroup() { }
