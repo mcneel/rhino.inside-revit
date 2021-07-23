@@ -70,7 +70,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
       {
         if (this != Empty)
         {
-#if !REVIT_2022
+#if REVIT_2022
           if (Autodesk.Revit.DB.UnitUtils.IsMeasurableSpec(this))
             return Autodesk.Revit.DB.UnitUtils.GetDiscipline(this);
 
