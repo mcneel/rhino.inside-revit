@@ -393,6 +393,23 @@
         ]
     },
     {
+        "title": "First Look at Element Binding",
+        "url": "https://youtu.be/9nntnMWZmN8",
+        "thumbnail": "https://i3.ytimg.com/vi/9nntnMWZmN8/maxresdefault.jpg",
+        "author": "7fold Design Technology",
+        "authorUrl": "https://www.youtube.com/channel/UC7eTGSIVovsDYuYw3YFLn8w",
+        "description": "Take a first look at the improved workflow in Rhino Inside that maintains a persistent connection to elements created in Revit such as walls, levels, grids, adaptive components, and more. This new feature is referred to as 'element binding' and is an essential stepping stone to collaborating with colleagues with Rhino Inside. No more re-generating model elements by accident the moment you open up a script for the first time.",
+        "kinds": [
+            "tutorial",
+            "podcast",
+            "video"
+        ],
+        "tags": [
+            "podcast",
+            "overview"
+        ]
+    },
+    {
         "title": "How-to-Rhino Tutorial",
         "url": "https://www.youtube.com/watch?v=fEjVrJuR1ik",
         "thumbnail": "https://i3.ytimg.com/vi/fEjVrJuR1ik/maxresdefault.jpg",
