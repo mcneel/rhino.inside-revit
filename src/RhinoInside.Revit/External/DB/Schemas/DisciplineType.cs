@@ -17,5 +17,10 @@ namespace RhinoInside.Revit.External.DB.Schemas
       if (!id.StartsWith("autodesk.spec:discipline") && !id.StartsWith("autodesk.spec.discipline"))
         throw new ArgumentException("Invalid argument value", nameof(id));
     }
+
+#if REVIT_2021
+    public static implicit operator DisciplineType(Autodesk.Revit.DB.ForgeTypeId value) => value is null ? null : new DisciplineType(value.TypeId);
+    public static implicit operator Autodesk.Revit.DB.ForgeTypeId(DisciplineType value) => value is null ? null : new Autodesk.Revit.DB.ForgeTypeId(value.TypeId);
+#endif
   }
 }
