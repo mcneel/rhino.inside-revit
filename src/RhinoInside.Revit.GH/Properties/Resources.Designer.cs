@@ -1423,6 +1423,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ElementPhaseStatusFilter {
+            get {
+                object obj = ResourceManager.GetObject("ElementPhaseStatusFilter", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ElementPreview {
             get {
                 object obj = ResourceManager.GetObject("ElementPreview", resourceCulture);
@@ -2216,6 +2226,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap ParameterKeyIdentity {
             get {
                 object obj = ResourceManager.GetObject("ParameterKeyIdentity", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ParameterTypes {
+            get {
+                object obj = ResourceManager.GetObject("ParameterTypes", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
