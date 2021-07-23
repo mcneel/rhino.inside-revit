@@ -97,7 +97,7 @@ namespace Grasshopper.Kernel
       return true;
     }
 
-    public static bool GetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T? value, Func<T, bool> validate)
+    public static bool GetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T? value, Func<T?, bool> validate)
       where T : struct
     {
       var index = parameters.Input.IndexOf(name, out var param);
