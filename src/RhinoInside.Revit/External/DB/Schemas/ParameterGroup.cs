@@ -11,6 +11,13 @@ namespace RhinoInside.Revit.External.DB.Schemas
     static readonly ParameterGroup empty = new ParameterGroup();
     public static new ParameterGroup Empty => empty;
 
+    public string LocalizedLabel =>
+#if REVIT_2022
+      Autodesk.Revit.DB.LabelUtils.GetLabelForGroup(this);
+#else
+      Autodesk.Revit.DB.LabelUtils.GetLabelFor((BuiltInParameterGroup) this);
+#endif
+
     public ParameterGroup() { }
     public ParameterGroup(string id) : base(id)
     {
@@ -37,17 +44,25 @@ namespace RhinoInside.Revit.External.DB.Extensions
 {
   static class ParameterGroupExtension
   {
-    public static Schemas.ParameterGroup GetGroupType(this Autodesk.Revit.DB.Definition value)
+    public static Schemas.ParameterGroup GetGroupType(this Autodesk.Revit.DB.Definition self)
     {
 #if REVIT_2022
       // Revit 2022 has Definition.GetGroupTypeId defined,
       // but it throws an exception when ParameterGroup is BuiltInParameterGroup.INVALID
       // By now to improve speed we use our implementation even on Revit 2022
-      return value.ParameterGroup == Autodesk.Revit.DB.BuiltInParameterGroup.INVALID ?
-        Schemas.ParameterGroup.Empty :
-        (Schemas.ParameterGroup) value.GetGroupTypeId();
+      return self.ParameterGroup == Autodesk.Revit.DB.BuiltInParameterGroup.INVALID ?
+        default : (Schemas.ParameterGroup) self.GetGroupTypeId();
 #else
-      return value.ParameterGroup;
+      return self.ParameterGroup;
+#endif
+    }
+
+    public static void SetGroupType(this Autodesk.Revit.DB.InternalDefinition self, Schemas.ParameterGroup group)
+    {
+#if REVIT_2022
+      self.SetGroupTypeId(group);
+#else
+      self.set_ParameterGroup(group);
 #endif
     }
 
@@ -59,7 +74,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           return item.Key;
       }
 
-      return Schemas.ParameterGroup.Empty;
+      return default;
     }
 
     internal static Autodesk.Revit.DB.BuiltInParameterGroup ToBuiltInParameterGroup(this Schemas.ParameterGroup value)
