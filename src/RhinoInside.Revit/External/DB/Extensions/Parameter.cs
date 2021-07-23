@@ -172,4 +172,32 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
     }
   }
+
+  static class InternalDefinitionExtension
+  {
+    public static ParameterBinding GetParameterBinding(this InternalDefinition self, Document doc)
+    {
+      if (doc is object)
+      {
+        if (doc.IsFamilyDocument)
+        {
+          if (doc.FamilyManager.get_Parameter(self) is FamilyParameter parameter)
+            return parameter.IsInstance ? ParameterBinding.Instance : ParameterBinding.Type;
+
+          return ParameterBinding.Unknown;
+        }
+        else
+        {
+          switch (doc.ParameterBindings.get_Item(self))
+          {
+            case InstanceBinding _: return ParameterBinding.Instance;
+            case TypeBinding _: return ParameterBinding.Type;
+            default: return ParameterBinding.Unknown;
+          }
+        }
+      }
+
+      return ParameterBinding.Unknown;
+    }
+  }
 }
