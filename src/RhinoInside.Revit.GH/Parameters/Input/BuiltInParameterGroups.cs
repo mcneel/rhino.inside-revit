@@ -6,7 +6,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
   public class BuiltInParameterGroups : Grasshopper.Special.ValueSet<Types.ParameterGroup>
   {
     public override Guid ComponentGuid => new Guid("5D331B12-DA6C-46A7-AA13-F463E42650D1");
-    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
     protected override System.Drawing.Bitmap Icon =>
       ((System.Drawing.Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
