@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
+using Grasshopper.Kernel.Parameters;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.External.DB.Schemas;
 using DB = Autodesk.Revit.DB;
 using DBX = RhinoInside.Revit.External.DB;
+using DBXS = RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.GH
 {
@@ -265,9 +267,6 @@ namespace RhinoInside.Revit.GH
 
 namespace RhinoInside.Revit.GH.Components
 {
-  using External.DB.Extensions;
-  using Grasshopper.Kernel.Parameters;
-
   public class ElementParameterGet : Component
   {
     public override Guid ComponentGuid => new Guid("D86050F2-C774-49B1-9973-FB3AB188DC94");
@@ -276,7 +275,7 @@ namespace RhinoInside.Revit.GH.Components
     public ElementParameterGet() : base
     (
       name: "Get Element Parameter",
-      nickname: "GetParam",
+      nickname: "Get",
       description: "Gets the parameter value of a specified Revit Element",
       category: "Revit",
       subCategory:"Element"
@@ -299,8 +298,11 @@ namespace RhinoInside.Revit.GH.Components
       if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
       if (!Params.GetData(DA, "ParameterKey", out IGH_Goo key)) return;
 
-      var parameter = ParameterUtils.GetParameter(this, element.Value, key);
-      DA.SetData("ParameterValue", parameter);
+      if (element.Value is object)
+      {
+        var parameter = ParameterUtils.GetParameter(this, element.Value, key);
+        DA.SetData("ParameterValue", parameter);
+      }
     }
   }
 
@@ -312,7 +314,7 @@ namespace RhinoInside.Revit.GH.Components
     public ElementParameterSet() : base
     (
       name: "Set Element Parameter",
-      nickname: "SetParam",
+      nickname: "Set",
       description: "Sets the parameter value of a specified Revit Element",
       category: "Revit",
       subCategory: "Element"
@@ -393,7 +395,7 @@ namespace RhinoInside.Revit.GH.Components
     public ElementParameterReset() : base
     (
       name: "Reset Element Parameter",
-      nickname: "ResetParam",
+      nickname: "Reset",
       description: "Resets the parameter value of a specified Revit Element",
       category: "Revit",
       subCategory: "Element"
@@ -482,11 +484,11 @@ namespace RhinoInside.Revit.GH.Components
       if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
 
       var filterName = Params.GetData(DA, "Name", out string parameterName);
-      var filterGroup = Params.GetData(DA, "Group", out ParameterGroup parameterGroup);
+      var filterGroup = Params.GetData(DA, "Group", out DBXS.ParameterGroup parameterGroup);
       var filterReadOnly = Params.GetData(DA, "ReadOnly", out bool? readOnly);
 
       var parameters = new List<DB.Parameter>(element.Value.Parameters.Size);
-      foreach (var group in element.Value.GetParameters(DBX.ParameterClass.Any).GroupBy(x => x.Definition?.GetGroupType() ?? ParameterGroup.Empty).OrderBy(x => x.Key))
+      foreach (var group in element.Value.GetParameters(DBX.ParameterClass.Any).GroupBy(x => x.Definition?.GetGroupType() ?? DBXS.ParameterGroup.Empty).OrderBy(x => x.Key))
       {
         foreach (var param in group.OrderBy(x => x.Id.IntegerValue))
         {
@@ -496,7 +498,7 @@ namespace RhinoInside.Revit.GH.Components
           if (filterName && !param.Definition.Name.IsSymbolNameLike(parameterName))
             continue;
 
-          if (filterGroup && parameterGroup != (param.Definition?.GetGroupType() ?? ParameterGroup.Empty))
+          if (filterGroup && parameterGroup != (param.Definition?.GetGroupType() ?? DBXS.ParameterGroup.Empty))
             continue;
 
           if (filterReadOnly && readOnly != param.IsReadOnly)
