@@ -253,6 +253,17 @@ namespace RhinoInside.Revit.GH.Components
     #endregion
 
     #region IO
+    protected static ParamDefinition FindDefinition(ParamDefinition[] list, string name)
+    {
+      for (int i = 0; i < list.Length; ++i)
+      {
+        if (list[i].Param.Name == name)
+          return list[i];
+      }
+
+      return default;
+    }
+
     static int IndexOf(ParamDefinition[] list, IGH_Param value)
     {
       for (int i = 0; i < list.Length; ++i)
@@ -326,8 +337,8 @@ namespace RhinoInside.Revit.GH.Components
             var index = document.Objects.IndexOf(this);
             var group = new Grasshopper.Kernel.Special.GH_Group
             {
-              NickName = $"Obsolete : {Name}", // We tag it as "Obsolete" to allow user find those groups.
-              Border = Grasshopper.Kernel.Special.GH_GroupBorder.Box,
+              NickName = $"Upgraded : {Name}", // We tag it as "Upgraded" to allow user find those groups.
+              Border = Grasshopper.Kernel.Special.GH_GroupBorder.Blob,
               Colour = System.Drawing.Color.FromArgb(211, GH_Skin.palette_warning_standard.Fill)
             };
             document.AddObject(group, false, index++);
