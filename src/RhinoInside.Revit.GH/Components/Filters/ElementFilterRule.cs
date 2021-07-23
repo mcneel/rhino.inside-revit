@@ -148,8 +148,8 @@ namespace RhinoInside.Revit.GH.Components.Filters
         }
 
         var goo = default(GH_String);
-        if (DA.GetData("Value", ref goo))
-          rule = new DB.FilterStringRule(provider, ruleEvaluator, goo.Value, true);
+        if (DA.GetData("Value", ref goo) && goo.Value is string value)
+          rule = new DB.FilterStringRule(provider, ruleEvaluator, value, true);
       }
       else
       {
