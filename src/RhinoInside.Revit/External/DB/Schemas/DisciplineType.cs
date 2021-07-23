@@ -8,6 +8,9 @@ namespace RhinoInside.Revit.External.DB.Schemas
   /// </summary>
   public partial class DisciplineType : DataType
   {
+    static readonly DisciplineType empty = new DisciplineType();
+    public static new DisciplineType Empty => empty;
+
     public DisciplineType() { }
     public DisciplineType(string id) : base(id)
     {
