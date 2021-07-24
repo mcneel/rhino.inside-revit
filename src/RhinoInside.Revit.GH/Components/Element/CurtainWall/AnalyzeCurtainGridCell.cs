@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
       manager.AddParameter(
-        param: new Parameters.DataObject<DB.CurtainCell>(),
+        param: new Parameters.CurtainCell(),
         name: "Curtain Grid Cell",
         nickname: "CGC",
         description: "Curtain Grid Cell",
