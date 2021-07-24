@@ -295,13 +295,25 @@ namespace RhinoInside.Revit.GH.Components
       if (!Params.GetDataList(DA, "Elements", out IList<Types.Element> elements)) return;
       if (!Params.TryGetDataList(DA, "Exclude", out IList<Types.Element> exclude)) return;
 
-      if (!detailLevel.HasValue)
-        detailLevel = DB.ViewDetailLevel.Coarse;
-
       if (!TryGetCommonDocument(elements.Concat(exclude ?? Enumerable.Empty<Types.Element>()), out var doc))
         return;
 
-      using(var options = new DB.Options() { DetailLevel = detailLevel.Value })
+      var scope = default(IDisposable);
+      if (!detailLevel.HasValue)
+      {
+        detailLevel = DB.ViewDetailLevel.Coarse;
+      }
+      else if (elements.Any(x => x.Value is DB.FamilySymbol symbol && !symbol.IsActive))
+      {
+        scope = doc.RollBackScope();
+        foreach(var symbol in elements.Select(x => x.Value).OfType<DB.FamilySymbol>())
+          symbol.Activate();
+
+        doc.Regenerate();
+      }
+
+      using (scope)
+      using (var options = new DB.Options() { DetailLevel = detailLevel.Value })
       {
         Params.TrySetDataList(DA, "Elements", () => elements);
 
