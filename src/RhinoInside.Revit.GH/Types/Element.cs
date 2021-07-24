@@ -352,12 +352,7 @@ namespace RhinoInside.Revit.GH.Types
       }
 
       if (source is DB.Element value)
-      {
-        if (!SetValue(value))
-          SetValue(default, DB.ElementId.InvalidElementId);
-
-        return true;
-      }
+        return SetValue(value);
 
       return false;
     }
