@@ -450,7 +450,7 @@ namespace RhinoInside.Revit.GH.Components
             if (chunk.TryGetString("Name", ref name))
             {
               var i = Params.IndexOfInputParam(name);
-              if (i > 0) continue;
+              if (i < 0) continue;
               var param = Params.Input[i];
 
               var access = param.Access;
@@ -489,7 +489,7 @@ namespace RhinoInside.Revit.GH.Components
             if (chunk.TryGetString("Name", ref name))
             {
               var o = Params.IndexOfOutputParam(name);
-              if (o > 0) continue;
+              if (o < 0) continue;
               var param = Params.Output[o];
 
               var access = param.Access;
