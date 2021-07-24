@@ -103,8 +103,8 @@ namespace RhinoInside.Revit.External.DB.Schemas
     public bool Equals(DataType other) => FullName == other?.FullName;
     #endregion
 
-    public static bool operator == (DataType lhs, DataType rhs) =>  (ReferenceEquals(lhs, rhs) || lhs.Equals(rhs));
-    public static bool operator != (DataType lhs, DataType rhs) => !(ReferenceEquals(lhs, rhs) || lhs.Equals(rhs));
+    public static bool operator == (DataType lhs, DataType rhs) =>  (ReferenceEquals(lhs, rhs) || lhs?.Equals(rhs) == true);
+    public static bool operator != (DataType lhs, DataType rhs) => !(ReferenceEquals(lhs, rhs) || lhs?.Equals(rhs) == true);
 
 #if REVIT_2021
     public static implicit operator DataType(Autodesk.Revit.DB.ForgeTypeId value) => value is null ? null : new DataType(value.TypeId);
