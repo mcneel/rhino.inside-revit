@@ -70,7 +70,29 @@ Grasshopper solver can also be toggled from the *Rhinoceros* tab in Revit. This 
 
 ## Element Tracking
 
-// TODO: 
+Grasshopper components track Revit elements in the Revit model.  This tracking allows Grasshopper to replace the Revit elements that is previoulsy created, even between saves.  Each component output remembers wich it added and it will replace the Revit element when possible and avoid creating duplicates.  Grasshopper will remember these elements after the file is closed and re-opened in the future. Only *Add* components in Grasshopper use tracking.
+
+This video explains many of the details:
+
+{% include vimeo_player.html id="574667912" %}
+
+The Tracking Mode can be controlled by right-clicking on the component center. 
+
+![]({{ "/static/images/guides/tracking-modes.png" | prepend: site.baseurl }}){: class="small-image"}
+
+There are 3 modes:
+1. **Disabled** - This turns off any tracking of created Revit elements.  This can result in duplicate elements being created in Revit.
+1. **Supersede** - This will create completely new elements in Revit each time Grasshopper runs.
+1. **Reconstruct** - The default setting.  Grasshopper will modify existing elements in Revit if possible.  Otherwise, new objects will be created.
+
+Each output on Add Component has additional controls to help manage tracking:
+
+![]({{ "/static/images/guides/tracking-tools.png" | prepend: site.baseurl }}){: class="small-image"}
+
+1. **Highlight** - Select and highlight the Revit elements created by this output.
+1. **Unpin** - Remove the Pin from any Revit element created by this output. There is also an Unpin component that can be used for this.
+1. **Delete** - Delete any Elements tracked by this output.
+1. **Release** - The output will forget the objects and not continue to track them.  Be aware that this might create duplicate objects if the Grasshopper definition is run again.
 
 ## Unit Systems
 
