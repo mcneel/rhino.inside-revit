@@ -202,7 +202,13 @@ namespace RhinoInside.Revit.External.DB
       transactionLinks = default;
 
       foreach (var transaction in transactionChain.Values.Reverse())
-        transaction.Dispose();
+      {
+        // Some exceptions like assigning an already used name to a DB.Material
+        // corrupts the transaction, so we catch any exception here.
+        if (!transaction.IsValidObject) continue;
+        try { transaction.Dispose(); }
+        catch { }
+      }
 
       transactionChain.Clear();
     }
