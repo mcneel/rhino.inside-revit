@@ -1,14 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.Convert.Units;
 using RhinoInside.Revit.Convert.Geometry;
-using DB = Autodesk.Revit.DB;
 using RhinoInside.Revit.Convert.System.Collections.Generic;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.GH.Kernel.Attributes;
-using System.Runtime.InteropServices;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Site
 {
@@ -49,14 +47,14 @@ namespace RhinoInside.Revit.GH.Components.Site
       Optional<DB.Level> level
     )
     {
-      ChangeElementType(ref buildingPad, type);
-
       SolveOptionalLevel(document, boundary, ref level, out var boundaryBBox);
 
       var curveLoops = boundary.ConvertAll(GeometryEncoder.ToCurveLoop);
 
       if (buildingPad is object)
       {
+        ChangeElementType(ref buildingPad, type);
+
         buildingPad.get_Parameter(DB.BuiltInParameter.LEVEL_PARAM).Set(level.Value.Id);
 
         buildingPad.SetBoundary(curveLoops);
