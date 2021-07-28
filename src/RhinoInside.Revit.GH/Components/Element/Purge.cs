@@ -104,7 +104,7 @@ namespace RhinoInside.Revit.GH.Components
       {
         ElementIds = elementIds;
 
-        DB.UpdaterRegistry.RegisterUpdater(this);
+        DB.UpdaterRegistry.RegisterUpdater(this, isOptional: true);
 
         var filter = new DB.ElementCategoryFilter(DB.BuiltInCategory.INVALID, true);
         DB.UpdaterRegistry.AddTrigger(UpdaterId, filter, DB.Element.GetChangeTypeAny());
