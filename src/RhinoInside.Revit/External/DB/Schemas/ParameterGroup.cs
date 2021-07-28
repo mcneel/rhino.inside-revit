@@ -79,7 +79,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     internal static Autodesk.Revit.DB.BuiltInParameterGroup ToBuiltInParameterGroup(this Schemas.ParameterGroup value)
     {
-      if (Schemas.ParameterGroup.map.TryGetValue(value, out var ut))
+      if (value is object && Schemas.ParameterGroup.map.TryGetValue(value, out var ut))
         return (Autodesk.Revit.DB.BuiltInParameterGroup) ut;
 
       return Autodesk.Revit.DB.BuiltInParameterGroup.INVALID;
