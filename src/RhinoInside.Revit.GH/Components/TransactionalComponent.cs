@@ -449,6 +449,7 @@ namespace RhinoInside.Revit.GH.Components
         catch (Exception e)
         {
           AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
+          ResetData();
         }
         finally
         {
