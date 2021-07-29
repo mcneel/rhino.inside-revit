@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -218,6 +218,7 @@
     <Compile Include="Convert\Geometry\SubDEncoder.cs" />
     <Compile Include="Convert\Geometry\GeometryDecoder.cs" />
     <Compile Include="Convert\Geometry\UnitConverter.cs" />
+    <Compile Include="Convert\Render\RenderMaterialConverter.cs" />
     <Compile Include="Convert\Units\DisplayUnitTypeConverter.cs" />
     <Compile Include="Convert\Eto.Drawing.cs" />
     <Compile Include="Convert\System.Collections.Generic.cs" />
