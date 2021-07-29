@@ -12,6 +12,7 @@ using Rhino;
 using Rhino.Display;
 using Rhino.Render;
 using RhinoInside.Revit.Convert.System.Drawing;
+using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 using SD = System.Drawing;
 
