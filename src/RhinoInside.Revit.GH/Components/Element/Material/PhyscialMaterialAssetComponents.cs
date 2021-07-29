@@ -287,7 +287,7 @@ namespace RhinoInside.Revit.GH.Components.Material
     {
       new ParamDefinition
       (
-        new Parameters.ThermalAsset()
+        new Parameters.StructuralAsset()
         {
           Name = _Asset_,
           NickName = _Asset_.Substring(0, 1),

@@ -81,7 +81,7 @@ namespace RhinoInside.Revit.GH.Components.Material
       if (ComponentVersion < CurrentVersion)
       {
         if (Params.Output<IGH_Param>("Appearance Asset (Generic)") is IGH_Param asset)
-          asset.CopyFrom(Outputs[0].Param);
+          asset.CopyFrom(FindDefinition(Outputs, _Asset_).Param);
       }
 
       base.AddedToDocument(document);
