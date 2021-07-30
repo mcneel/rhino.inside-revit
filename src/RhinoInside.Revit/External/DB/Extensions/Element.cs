@@ -274,6 +274,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
     #region Parameter
+    struct ParameterEqualityComparer : IEqualityComparer<Parameter>
+    {
+      public bool Equals(Parameter x, Parameter y) => x.Id.IntegerValue == y.Id.IntegerValue;
+      public int GetHashCode(Parameter obj) => obj.Id.IntegerValue;
+    }
+
     public static IEnumerable<Parameter> GetParameters(this Element element, ParameterClass set)
     {
       switch (set)
@@ -289,7 +295,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
               }
             ).
             Where(x => x?.Definition is object).
-            Union(element.Parameters.Cast<Parameter>().Where(x => x.StorageType != StorageType.None)).
+            Union(element.Parameters.Cast<Parameter>().Where(x => x.StorageType != StorageType.None), default(ParameterEqualityComparer)).
             OrderBy(x => x.Id.IntegerValue);
         case ParameterClass.BuiltIn:
           return BuiltInParameterExtension.BuiltInParameters.
@@ -327,7 +333,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       {
         case ParameterClass.Any:
           return element.GetParameters(name, ParameterClass.BuiltIn).
-            Union(element.GetParameters(name)).
+            Union(element.GetParameters(name), default(ParameterEqualityComparer)).
             OrderBy(x => x.Id.IntegerValue);
 
         case ParameterClass.BuiltIn:
