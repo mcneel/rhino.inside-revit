@@ -279,8 +279,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       switch (set)
       {
         case ParameterClass.Any:
-          return Enum.GetValues(typeof(BuiltInParameter)).
-            Cast<BuiltInParameter>().
+          return BuiltInParameterExtension.BuiltInParameters.
             Select
             (
               x =>
@@ -290,14 +289,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
               }
             ).
             Where(x => x?.Definition is object).
-            Union(element.Parameters.Cast<Parameter>().Where(x => x.StorageType != StorageType.None).OrderBy(x => x.Id.IntegerValue)).
-            GroupBy(x => x.Id).
-            Select(x => x.First());
+            Union(element.Parameters.Cast<Parameter>().Where(x => x.StorageType != StorageType.None)).
+            OrderBy(x => x.Id.IntegerValue);
         case ParameterClass.BuiltIn:
-          return Enum.GetValues(typeof(BuiltInParameter)).
-            Cast<BuiltInParameter>().
-            GroupBy(x => x).
-            Select(x => x.First()).
+          return BuiltInParameterExtension.BuiltInParameters.
             Select
             (
               x =>
@@ -332,9 +327,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
       {
         case ParameterClass.Any:
           return element.GetParameters(name, ParameterClass.BuiltIn).
-            Union(element.GetParameters(name).OrderBy(x => x.Id.IntegerValue)).
-            GroupBy(x => x.Id).
-            Select(x => x.First());
+            Union(element.GetParameters(name)).
+            OrderBy(x => x.Id.IntegerValue);
 
         case ParameterClass.BuiltIn:
           return BuiltInParameterExtension.BuiltInParameterMap.TryGetValue(name, out var parameters) ?
@@ -683,15 +677,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #region Replace
     public static T ReplaceElement<T>(this T from, T to, ICollection<BuiltInParameter> mask) where T : Element
     {
-      if (from?.Document is Document document)
-      {
-        if (!from.IsEquivalent(to))
-        {
-          to.CopyParametersFrom(from, mask);
-          document.Delete(from.Id);
-        }
-      }
-
+      to.CopyParametersFrom(from, mask);
       return to;
     }
     #endregion

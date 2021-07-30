@@ -11,7 +11,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
       new SortedSet<BuiltInParameter>
       (
         Enum.GetValues(typeof(BuiltInParameter)).
-        Cast<BuiltInParameter>().Where( x => x != BuiltInParameter.INVALID)
+        Cast<BuiltInParameter>().
+        Distinct().                               // Removes Duplicates
+        Where(x => x != BuiltInParameter.INVALID) // Removes INVALID
       );
 
     /// <summary>
@@ -36,9 +38,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// Internal Dictionary that maps <see cref="BuiltInParameter"/> by name.
     /// Results are implicitly orderd by value in the <see cref="BuiltInParameter"/> enum.
     /// </summary>
-    internal static readonly IReadOnlyDictionary<string, BuiltInParameter[]> BuiltInParameterMap =
-      Enum.GetValues(typeof(BuiltInParameter)).
-      Cast<BuiltInParameter>().
+    internal static readonly IReadOnlyDictionary<string, IReadOnlyList<BuiltInParameter>> BuiltInParameterMap =
+      BuiltInParameters.
       Where
       (
         x =>
@@ -48,7 +49,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         }
       ).
       GroupBy(x => LabelUtils.GetLabelFor(x)).
-      ToDictionary(x => x.Key, x=> x.ToArray());
+      ToDictionary(x => x.Key, x => (IReadOnlyList<BuiltInParameter>) x.ToArray());
 
     /// <summary>
     /// <see cref="Autodesk.Revit.DB.BuiltInParameter"/> has duplicate values.
@@ -183,16 +184,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
         {
           if (doc.FamilyManager.get_Parameter(self) is FamilyParameter parameter)
             return parameter.IsInstance ? ParameterBinding.Instance : ParameterBinding.Type;
-
-          return ParameterBinding.Unknown;
         }
-        else
+        else if (!self.Id.IsBuiltInId())
         {
           switch (doc.ParameterBindings.get_Item(self))
           {
             case InstanceBinding _: return ParameterBinding.Instance;
-            case TypeBinding _: return ParameterBinding.Type;
-            default: return ParameterBinding.Unknown;
+            case TypeBinding _:     return ParameterBinding.Type;
           }
         }
       }
