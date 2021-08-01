@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.UI
 
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
-      using (System.Diagnostics.Process.Start($@"{AddIn.AddinWebSite}/guides/")) { }
+      using (System.Diagnostics.Process.Start($@"{AddIn.AddInWebSite}/guides/")) { }
       return Result.Succeeded;
     }
   }

@@ -136,7 +136,7 @@ namespace RhinoInside.Revit.UI
         {
           if (LinkedScripts.HasUI(pkg, ribbon))
             TaskDialog.Show(
-              AddIn.AddinName,
+              AddIn.AddInName,
               $"Package \"{pkg.Name}\" has been previously loaded in to the Revit UI." +
               "Restart Revit for changes to take effect."
               );

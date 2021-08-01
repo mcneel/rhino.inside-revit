@@ -30,9 +30,9 @@ namespace RhinoInside.Revit
   public class AddIn : UIX.ExternalApplication
   {
     #region AddInInfo
-    public static string AddinCompany => "McNeel";
-    public static string AddinName => "Rhino.Inside";
-    public static string AddinWebSite => @"https://www.rhino3d.com/inside/revit/1.0/";
+    public static string AddInCompany => "McNeel";
+    public static string AddInName => "Rhino.Inside";
+    public static string AddInWebSite => @"https://www.rhino3d.com/inside/revit/1.0/";
     #endregion
 
     #region Status
@@ -115,7 +115,7 @@ namespace RhinoInside.Revit
 
       Logger.LogTrace
       (
-        $"{AddinName} Loaded",
+        $"{AddInName} Loaded",
         $"AddIn.StartupMode = {StartupMode}",
         $"AddIn.CurrentStatus = {CurrentStatus}"
       );
@@ -389,14 +389,14 @@ namespace RhinoInside.Revit
           TitleAutoPrefix = true,
           AllowCancellation = true,
           MainInstruction = expired ?
-          $"{AddinName} has expired" :
-          $"{AddinName} expires in {daysUntilExpiration} days",
-          MainContent = $"While in WIP phase, you do need to update {AddinName} every {ExpirationPeriod} days.",
+          $"{AddInName} has expired" :
+          $"{AddInName} expires in {daysUntilExpiration} days",
+          MainContent = $"While in WIP phase, you do need to update {AddInName} every {ExpirationPeriod} days.",
           FooterText = "Current version: " + DisplayVersion
         }
       )
       {
-        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Check for updates…", $"Open {AddinName} download page");
+        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Check for updates…", $"Open {AddInName} download page");
         if (taskDialog.Show() == TaskDialogResult.CommandLink1)
         {
           using (Process.Start(@"https://www.rhino3d.com/download/rhino.inside-revit/7")) { }

@@ -64,7 +64,7 @@ namespace RhinoInside.Revit.UI
       var pkgName = Path.GetFileName(Path.GetDirectoryName(location));
 
       // Looks for Rhino.Inside/Revit/ or Rhino.Inside/Revit/x.x insdie the package
-      var pkgAddinContents = Path.Combine(location, AddIn.AddinName, "Revit");
+      var pkgAddinContents = Path.Combine(location, AddIn.AddInName, "Revit");
       var pkgAddinSpecificContents = Path.Combine(pkgAddinContents, $"{AddIn.Version.Major}.0");
 
       // load specific scripts if available, otherwise load for any Rhino.Inside.Revit
