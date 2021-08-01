@@ -32,7 +32,7 @@ namespace RhinoInside.Revit
     #region AddInInfo
     public static string AddinCompany => "McNeel";
     public static string AddinName => "Rhino.Inside";
-    public static string AddinWebSite => @"https://www.rhino3d.com/inside/revit/beta/";
+    public static string AddinWebSite => @"https://www.rhino3d.com/inside/revit/1.0/";
     #endregion
 
     #region Status
@@ -398,7 +398,7 @@ namespace RhinoInside.Revit
         taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Check for updates…", "Open Rhino.Inside download page");
         if (taskDialog.Show() == TaskDialogResult.CommandLink1)
         {
-          using (Process.Start(@"https://www.rhino3d.com/download/rhino.inside-revit/7/wip")) { }
+          using (Process.Start(@"https://www.rhino3d.com/download/rhino.inside-revit/7")) { }
         }
       }
 
