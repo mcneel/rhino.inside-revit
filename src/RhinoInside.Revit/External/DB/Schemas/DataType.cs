@@ -303,16 +303,19 @@ namespace RhinoInside.Revit.External.DB.Extensions
           return item.Key;
       }
 
-      return Schemas.DataType.Empty;
+      return default;
     }
 
     internal static Autodesk.Revit.DB.ParameterType ToParameterType(this Schemas.DataType value)
     {
-      if (Schemas.CategoryId.IsCategoryId(value, out var _))
-        return Autodesk.Revit.DB.ParameterType.FamilyType;
+      if (value is object)
+      {
+        if (Schemas.CategoryId.IsCategoryId(value, out var _))
+          return Autodesk.Revit.DB.ParameterType.FamilyType;
 
-      if (parameterTypeMap.TryGetValue(value, out var pt))
-        return (Autodesk.Revit.DB.ParameterType) pt;
+        if (parameterTypeMap.TryGetValue(value, out var pt))
+          return (Autodesk.Revit.DB.ParameterType) pt;
+      }
 
       return Autodesk.Revit.DB.ParameterType.Invalid;
     }

@@ -83,6 +83,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AddParameter {
+            get {
+                object obj = ResourceManager.GetObject("AddParameter", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap AddSubCategory {
             get {
                 object obj = ResourceManager.GetObject("AddSubCategory", resourceCulture);
@@ -786,16 +796,6 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap DeconstructParameterValue {
             get {
                 object obj = ResourceManager.GetObject("DeconstructParameterValue", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap DefineSharedParameter {
-            get {
-                object obj = ResourceManager.GetObject("DefineSharedParameter", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -2213,6 +2213,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ParameterIdentity {
+            get {
+                object obj = ResourceManager.GetObject("ParameterIdentity", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ParameterKey {
             get {
                 object obj = ResourceManager.GetObject("ParameterKey", resourceCulture);
@@ -2223,9 +2233,9 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap ParameterKeyIdentity {
+        internal static System.Drawing.Bitmap ParameterParam {
             get {
-                object obj = ResourceManager.GetObject("ParameterKeyIdentity", resourceCulture);
+                object obj = ResourceManager.GetObject("ParameterParam", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

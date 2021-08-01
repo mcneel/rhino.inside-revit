@@ -187,6 +187,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         }
         else if (!self.Id.IsBuiltInId())
         {
+          if (doc.GetElement(self.Id) is GlobalParameter) return ParameterBinding.Global;
           switch (doc.ParameterBindings.get_Item(self))
           {
             case InstanceBinding _: return ParameterBinding.Instance;

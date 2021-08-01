@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Components
   public class FamilyTypes : Component
   {
     public override Guid ComponentGuid => new Guid("742836D7-01C4-485A-BFA8-6CDA3F121F7B");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
     protected override string IconTag => "T";
 
     public FamilyTypes() : base

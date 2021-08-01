@@ -1,21 +1,237 @@
 using System;
+using GH_IO.Serialization;
 using Grasshopper.Kernel.Types;
+using Grasshopper.Special;
+using RhinoInside.Revit.External.ApplicationServices.Extensions;
 using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.External.UI.Extensions;
 using DB = Autodesk.Revit.DB;
 using DBX = RhinoInside.Revit.External.DB;
 using DBXS = RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  [Kernel.Attributes.Name("Parameter Key")]
-  public class ParameterKey : Element
+  [Kernel.Attributes.Name("Parameter")]
+  public class ParameterKey : Element,
+    IEquatable<ParameterKey>,
+    IGH_ItemDescription,
+    IGH_Goo
   {
+    string IGH_Goo.TypeName => IsReferencedData ?
+      $"Revit {Class} Parameter" : "Revit Parameter Definition";
+
+    public ParameterKey() { }
+    public ParameterKey(DB.Document doc, DB.ElementId id) : base(doc, id) { }
+    public ParameterKey(DB.ParameterElement element) : base(element) { }
+
+    public ParameterKey(DB.Definition value)
+    {
+      name = value.Name;
+      dataType = value.GetDataType();
+      group = value.GetGroupType();
+    }
+
+    public ParameterKey(DB.ExternalDefinition value) :
+      this((DB.Definition) value)
+    {
+      guid = value.GUID;
+      visible = value.Visible;
+      Description = value.Description;
+      userModifiable = value.UserModifiable;
+#if REVIT_2020
+      hideWhenNoValue = value.HideWhenNoValue;
+#endif
+    }
+
+    public ParameterKey(DB.Document doc, DB.InternalDefinition value) :
+      this(doc, value.Id)
+    {
+      name = value.Name;
+      dataType = value.GetDataType();
+      group = value.GetGroupType();
+
+      if (doc.GetElement(value.Id) is DB.SharedParameterElement parameter)
+        guid = parameter.GuidValue;
+
+      visible = value.Visible;
+    }
+
+    public ParameterKey Duplicate() => (ParameterKey) MemberwiseClone();
+
+    #region System.Object
+    public override string ToString() => IsReferencedData ?
+      base.ToString() :
+      DataType is object ?
+      Group is object ?
+      $"{Name} : {DataType.Label} : {Group.Label}" :
+      $"{Name} : {DataType.Label}" :
+      Name ?? GUID.GetValueOrDefault().ToString("B");
+
+    public override bool Equals(object obj) =>
+      obj is ParameterKey other && Equals(other);
+
+    public override int GetHashCode() => IsReferencedData ?
+      base.GetHashCode() :
+      (GUID, Name, Description, DataType, Group, Visible, UserModifiable, HideWhenNoValue).
+      GetHashCode();
+    #endregion
+
+    #region IEquatable
+    public bool Equals(ParameterKey other)
+    {
+      return IsReferencedData ?
+      base.Equals(other) :
+      GUID == other.GUID &&
+      Name == other.Name &&
+      Description == other.Description &&
+      DataType == other.DataType &&
+      Group == other.Group &&
+      Visible == other.Visible &&
+      UserModifiable == other.UserModifiable &&
+      HideWhenNoValue == other.HideWhenNoValue;
+    }
+    #endregion
+
+    #region DocumentObject
+    public static new ParameterKey FromElementId(DB.Document doc, DB.ElementId id)
+    {
+      if (id.IsParameterId(doc))
+        return new ParameterKey(doc, id);
+
+      return null;
+    }
+
+    public new DB.ParameterElement Value => base.Value as DB.ParameterElement;
+
+    protected virtual bool SetValue(DB.Parameter parameter)
+    {
+      SetValue(parameter.Element.Document, parameter.Id);
+      if (parameter.Definition is DB.InternalDefinition definition)
+      {
+        name = definition.Name;
+        dataType = definition.GetDataType();
+        group = definition.GetGroupType();
+        visible = definition.Visible;
+      }
+
+      //if (dataType == DBXS.DataType.Empty)
+      //{
+      //  switch (parameter.StorageType)
+      //  {
+      //    case DB.StorageType.Integer: dataType = DBXS.SpecType.Int.Integer; break;
+      //    case DB.StorageType.Double: dataType = DBXS.SpecType.Measurable.Number; break;
+      //    case DB.StorageType.String: dataType = DBXS.SpecType.String.Text; break;
+      //    case DB.StorageType.ElementId:
+      //      if (parameter.HasValue)
+      //      {
+      //        if (Document.GetElement(parameter.AsElementId()) is DB.Element value)
+      //        if (value.Category is DB.Category category)
+      //        if (category.Id.TryGetBuiltInCategory(out var categoryId))
+      //        {
+      //          dataType = (DBXS.CategoryId) categoryId;
+      //        }
+      //      }
+      //      break;
+      //  }
+      //}
+      
+      userModifiable = parameter.UserModifiable;
+      if (parameter.IsShared) guid = parameter.GUID;
+      else guid = null;
+
+      return true;
+    }
+
+    public override string DisplayName
+    {
+      get
+      {
+        try
+        {
+          if (Id is object && Id.TryGetBuiltInParameter(out var builtInParameter))
+            return DB.LabelUtils.GetLabelFor(builtInParameter) ?? base.DisplayName;
+        }
+        catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
+
+        return base.DisplayName;
+      }
+    }
+    #endregion
+
     #region IGH_Goo
-    public override bool IsValid => (Id?.TryGetBuiltInParameter(out var _) == true) || base.IsValid;
+    public override bool IsValid => IsReferencedData ?
+      ((Id?.TryGetBuiltInParameter(out var _) == true) || base.IsValid) :
+      (name is object && DB.NamingUtils.IsValidName(name) || GUID.HasValue);
+
+    public bool GetDocumentParameter(Document document, out ParameterKey key)
+    {
+      if (document.Value.IsFamilyDocument)
+      {
+        var parameter = IsReferencedData ?
+          Value :
+          document.Value.GetElement
+          (document.Value.FamilyManager.get_Parameter(Name)?.Id ?? DB.ElementId.InvalidElementId)
+          as DB.ParameterElement;
+
+        if (parameter is object)
+        {
+          key = IsReferencedData ? this : new ParameterKey(parameter);
+          return true;
+        }
+      }
+      else
+      {
+        var global = IsReferencedData ?
+          Value as DB.GlobalParameter :
+          document.Value.GetElement(DB.GlobalParametersManager.FindByName(document.Value, Name)) as DB.GlobalParameter;
+
+        if (global is object)
+        {
+          key = IsReferencedData ? this : new ParameterKey(global);
+          return true;
+        }
+      }
+
+      key = this;
+      return false;
+    }
+    public bool GetProjectParameter(Document document, out ParameterKey key)
+    {
+      if (!document.Value.IsFamilyDocument && !(Value is DB.GlobalParameter))
+      {
+        var project = IsReferencedData ?
+          Value :
+          FindByName(document.Value, Name);
+
+        if (project is object)
+        {
+          key = IsReferencedData ? this : new ParameterKey(project);
+          return true;
+        }
+      }
+
+      key = this;
+      return false;
+    }
+
+    static DB.ParameterElement FindByName(DB.Document doc, string name)
+    {
+      using (var iterator = doc.ParameterBindings.ForwardIterator())
+      {
+        while (iterator.MoveNext())
+        {
+          if (iterator.Key is DB.InternalDefinition definition)
+          {
+            if (definition.Name == name)
+              return doc.GetElement(definition.Id) as DB.ParameterElement;
+          }
+        }
+      }
+
+      return default;
+    }
 
     protected override Type ScriptVariableType => typeof(DB.ParameterElement);
-    public override object ScriptVariable() => null;
+    public override object ScriptVariable() => Name;
 
     public sealed override bool CastFrom(object source)
     {
@@ -25,11 +241,7 @@ namespace RhinoInside.Revit.GH.Types
       var document = Revit.ActiveDBDocument;
       var parameterId = DB.ElementId.InvalidElementId;
 
-      if (source is ValueTuple<DB.Document, DB.ElementId> tuple)
-      {
-        (document, parameterId) = tuple;
-      }
-      else if (source is IGH_Goo goo)
+      if (source is IGH_Goo goo)
       {
         if (source is IGH_Element element)
         {
@@ -40,15 +252,21 @@ namespace RhinoInside.Revit.GH.Types
         {
           source = (DB.BuiltInParameter) id.Value;
         }
+        else if (source is ParameterValue parameterValue)
+        {
+          source = parameterValue.Value;
+        }
         else source = goo.ScriptVariable();
       }
 
       switch (source)
       {
-        case int integer:            parameterId = new DB.ElementId(integer); break;
-        case DB.BuiltInParameter bip:parameterId = new DB.ElementId(bip); break;
-        case DB.ElementId id:        parameterId = id; break;
-        case DB.Parameter parameter: SetValue(parameter.Element.Document, parameter.Id); return true;
+        case int integer: parameterId = new DB.ElementId(integer); break;
+        case DB.BuiltInParameter bip: parameterId = new DB.ElementId(bip); break;
+        case DB.ElementId id: parameterId = id; break;
+        case DB.Parameter parameter: return SetValue(parameter);
+        case string n: name = n; return true;
+        case Guid g: guid = g; return true;
       }
 
       if (parameterId.TryGetBuiltInParameter(out var _))
@@ -71,7 +289,7 @@ namespace RhinoInside.Revit.GH.Types
       if (typeof(Q).IsAssignableFrom(typeof(ParameterId)))
       {
         var parameterId = new ParameterId();
-        if (Value.Id.TryGetBuiltInParameter(out var bip))
+        if (Id.TryGetBuiltInParameter(out var bip))
         {
           parameterId.Value = bip;
           target = (Q) (object) parameterId;
@@ -84,6 +302,28 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
 
+      if (typeof(Q).IsAssignableFrom(typeof(DB.ExternalDefinitionCreationOptions)))
+      {
+        if (IsValid)
+        {
+          var options = new DB.ExternalDefinitionCreationOptions(Name, DataType)
+          {
+            Description = Description ?? string.Empty,
+            Visible = Visible.GetValueOrDefault(true),
+            UserModifiable = UserModifiable.GetValueOrDefault(true),
+#if REVIT_2020
+            HideWhenNoValue = HideWhenNoValue.GetValueOrDefault(false)
+#endif
+          };
+
+          if (GUID.HasValue) options.GUID = GUID.Value;
+          target = (Q) (object) options;
+        }
+        else target = (Q) (object) null;
+
+        return true;
+      }
+
       return base.CastTo(out target);
     }
 
@@ -93,14 +333,18 @@ namespace RhinoInside.Revit.GH.Types
 
       public Proxy(ParameterKey o) : base(o) { (this as IGH_GooProxy).UserString = FormatInstance(); }
 
-      public override bool IsParsable() => true;
+      public override bool IsParsable() => owner.IsReferencedData;
       public override string FormatInstance()
       {
-        int value = owner.Id?.IntegerValue ?? -1;
-        if (Enum.IsDefined(typeof(DB.BuiltInParameter), value))
-          return ((DB.BuiltInParameter) value).ToStringGeneric();
+        if (owner.IsReferencedData)
+        {
+          int value = owner.Id?.IntegerValue ?? -1;
+          if (Enum.IsDefined(typeof(DB.BuiltInParameter), value))
+            return ((DB.BuiltInParameter) value).ToStringGeneric();
 
-        return value.ToString();
+          return value.ToString();
+        }
+        else return owner.DisplayName;
       }
       public override bool FromString(string str)
       {
@@ -115,10 +359,19 @@ namespace RhinoInside.Revit.GH.Types
 
       #region Misc
       protected override bool IsValidId(DB.Document doc, DB.ElementId id) => id.IsParameterId(doc);
-      public override Type ObjectType => IsBuiltIn ? typeof(DB.BuiltInParameter) : base.ObjectType;
+      public override Type ObjectType => !owner.IsReferencedData ?
+        typeof(DB.Definition) :
+        IsBuiltIn ? typeof(DB.BuiltInParameter) : base.ObjectType;
 
       [System.ComponentModel.Description("BuiltIn parameter Id.")]
-      public DB.BuiltInParameter? BuiltInId => owner.Id.TryGetBuiltInParameter(out var bip) ? bip : default;
+      public DB.BuiltInParameter? BuiltInId
+      {
+        get
+        {
+          if (owner.Id.TryGetBuiltInParameter(out var bip)) return bip;
+          return default;
+        }
+      }
 
       [System.ComponentModel.Description("Forge Id.")]
       public DBXS.ParameterId SchemaId => owner.Id.TryGetBuiltInParameter(out var bip) ? (DBXS.ParameterId) bip : default;
@@ -126,65 +379,142 @@ namespace RhinoInside.Revit.GH.Types
 
       #region Definition
       const string Definition = "Definition";
-      DB.ParameterElement parameter => owner.Value as DB.ParameterElement;
 
       [System.ComponentModel.Category(Definition), System.ComponentModel.Description("The Guid that identifies this parameter as a shared parameter.")]
-      public Guid? Guid => (parameter as DB.SharedParameterElement)?.GuidValue;
+      public Guid? Guid => owner.GUID;
 
       [System.ComponentModel.Category(Definition), System.ComponentModel.Description("Internal parameter data storage type.")]
-      public DB.StorageType? StorageType => BuiltInId.HasValue ? Revit.ActiveDBDocument?.get_TypeOfStorage(BuiltInId.Value) : parameter?.GetDefinition()?.GetDataType().ToStorageType();
-
-      [System.ComponentModel.Category(Definition), System.ComponentModel.Description("Visible in UI.")]
-      public bool? Visible => parameter?.GetDefinition()?.Visible;
-
-      [System.ComponentModel.Category(Definition), System.ComponentModel.Description("Whether or not the parameter values can vary across group members.")]
-      public bool? VariesAcrossGroups => parameter?.GetDefinition()?.VariesAcrossGroups;
+      public DB.StorageType? StorageType => BuiltInId.HasValue ? Revit.ActiveDBDocument?.get_TypeOfStorage(BuiltInId.Value) : owner.DataType.ToStorageType();
 
       [System.ComponentModel.Category(Definition), System.ComponentModel.Description("Parameter data Type")]
-      public string Type => ((DBXS.DataType) parameter?.GetDefinition()?.GetDataType())?.Label;
+      public string Type => owner.DataType?.Label;
 
       [System.ComponentModel.Category(Definition)]
-      public string Group => parameter?.GetDefinition()?.GetGroupType()?.Label;
+      public string Group => owner.Group?.Label;
+
+      [System.ComponentModel.Category(Definition), System.ComponentModel.Description("Visible in UI.")]
+      public bool? Visible => owner.Visible;
       #endregion
     }
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
     #endregion
 
-    public new DB.ParameterElement Value => base.Value as DB.ParameterElement;
-
-    public ParameterKey() { }
-    public ParameterKey(DB.Document doc, DB.ElementId id) : base(doc, id) { }
-    public ParameterKey(DB.ParameterElement element) : base(element) { }
-
-    public static new ParameterKey FromElementId(DB.Document doc, DB.ElementId id)
+    #region GH_ISerializable
+    protected override bool Write(GH_IWriter writer)
     {
-      if (id.IsParameterId(doc))
-        return new ParameterKey(doc, id);
+      if (!base.Write(writer))
+        return false;
 
-      return null;
+      if (guid.HasValue)
+        writer.SetGuid("GUID", guid.Value);
+
+      if (name is object)
+        writer.SetString("Name", name);
+
+      if (description is object)
+        writer.SetString("Description", description);
+
+      if (dataType is object)
+        writer.SetString("DataType", dataType.FullName);
+
+      if (group is object)
+        writer.SetString("Group", group.FullName);
+
+      if (visible.HasValue)
+        writer.SetBoolean("Visible", visible.Value);
+
+      if (userModifiable.HasValue)
+        writer.SetBoolean("UserModifiable", userModifiable.Value);
+
+      if (hideWhenNoValue.HasValue)
+        writer.SetBoolean("HideWhenNoValue", hideWhenNoValue.Value);
+
+      return true;
     }
 
-    public override string DisplayName
+    protected override bool Read(GH_IReader reader)
+    {
+      if (!base.Read(reader))
+        return false;
+
+      var _guid = default(Guid);
+      if (reader.TryGetGuid("GUID", ref _guid))
+        guid = _guid;
+      else
+        guid = null;
+
+      name = default;
+      reader.TryGetString("Name", ref name);
+      
+      description = default;
+      reader.TryGetString("Description", ref description);
+
+      var _dataType = default(string);
+      dataType = reader.TryGetString("DataType", ref _dataType) ?
+        new DBXS.DataType(_dataType) : null;
+
+      var _group = default(string);
+      group = reader.TryGetString("Group", ref _group) ?
+        new DBXS.ParameterGroup(_group) : null;
+
+      var _visible = default(bool);
+      if (reader.TryGetBoolean("Visible", ref _visible)) visible = _visible;
+      else visible = null;
+
+      var _userModifiable = default(bool);
+      if (reader.TryGetBoolean("UserModifiable", ref _userModifiable)) userModifiable = _userModifiable;
+      else userModifiable = null;
+
+      var _hideWhenNoValue = default(bool);
+      if (reader.TryGetBoolean("HideWhenNoValue", ref _hideWhenNoValue)) hideWhenNoValue = _hideWhenNoValue;
+      else hideWhenNoValue = null;
+
+      return true;
+    }
+    #endregion
+
+    #region IGH_ItemDescription
+    System.Drawing.Bitmap IGH_ItemDescription.GetImage(System.Drawing.Size size) => default;
+    string IGH_ItemDescription.NickName
     {
       get
       {
-        try
-        {
-          if (Id is object && Id.TryGetBuiltInParameter(out var builtInParameter))
-            return DB.LabelUtils.GetLabelFor(builtInParameter) ?? base.DisplayName;
-        }
-        catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
+        if (Id is object && Id.TryGetBuiltInParameter(out var bip))
+          return ((DBXS.ParameterId) bip).Name;
 
-        return base.DisplayName;
+        if (IsReferencedData)
+        {
+          return GUID.HasValue ?
+            $"{{{Id?.IntegerValue}}} : {GUID.Value:B}" :
+            $"{{{Id?.IntegerValue}}}";
+        }
+        else
+        {
+          return GUID.HasValue ?
+            $"{GUID.Value:B}" :
+            string.Empty;
+        }
       }
     }
+    string IGH_ItemDescription.Description =>
+      Id is object && Id.TryGetBuiltInParameter(out var bip) ?
+      ((DBXS.ParameterId) bip).Namespace :
+      DataType?.Label;
+
+    #endregion
 
     #region Properties
+    Guid? guid;
+    public Guid? GUID => (Value as DB.SharedParameterElement)?.GuidValue ?? guid;
+
+    string name;
     public override string Name
     {
       get
       {
+        if (!IsReferencedData) return name;
+
         try
         {
           if (Id is object && Id.TryGetBuiltInParameter(out var builtInParameter))
@@ -194,6 +524,254 @@ namespace RhinoInside.Revit.GH.Types
 
         return base.Name;
       }
+      set
+      {
+        if (!IsReferencedData)
+        {
+          if (!DB.NamingUtils.IsValidName(value))
+            throw new ArgumentException("Invalid parameter name");
+
+          name = value;
+        }
+        else base.Name = value;
+      }
+    }
+
+    string description;
+    public override string Description
+    {
+      get => description;
+      set
+      {
+        if (IsReferencedData) throw new InvalidOperationException();
+        description = value;
+      }
+    }
+
+    DBXS.DataType dataType;
+    public DBXS.DataType DataType
+    {
+      get => Value?.GetDefinition()?.GetDataType() ?? dataType;
+      set
+      {
+        if (IsReferencedData) throw new InvalidOperationException();
+        dataType = value;
+      }
+    }
+
+    DBXS.ParameterGroup group;
+    public DBXS.ParameterGroup Group
+    {
+      get => Value?.GetDefinition()?.GetGroupType() ?? group;
+      set
+      {
+        if (IsReferencedData)
+        {
+          if (Id.IsBuiltInId()) throw new InvalidOperationException("This operation is not supported on built-in parameters");
+          Value?.GetDefinition()?.SetGroupType(value);
+        }
+        else group = value;
+      }
+    }
+
+    bool? visible;
+    public bool? Visible
+    {
+      get => Value?.GetDefinition()?.Visible ?? visible;
+      set
+      {
+        if (IsReferencedData) throw new InvalidOperationException();
+        visible = value;
+      }
+    }
+
+    bool? userModifiable;
+    public bool? UserModifiable
+    {
+      get
+      {
+        if (!IsReferencedData) return userModifiable;
+        if (Id is object && Document is DB.Document doc)
+        {
+          if (doc.IsFamilyDocument)
+          {
+            var familyParameter = Id.TryGetBuiltInParameter(out var builtInParameter) ?
+              doc.FamilyManager.get_Parameter(builtInParameter) :
+              Value is DB.ParameterElement element ?
+              doc.FamilyManager.get_Parameter(element.GetDefinition()) :
+              default;
+
+            return familyParameter?.UserModifiable;
+          }
+          else
+          {
+            if (Value is DB.ParameterElement element)
+            {
+              if (element is DB.GlobalParameter)
+                return true;
+
+              return doc.ParameterBindings.Contains(element.GetDefinition());
+            }
+          }
+        }
+
+        return null;
+      }
+      set
+      {
+        if (IsReferencedData) throw new InvalidOperationException();
+        userModifiable = value;
+      }
+    }
+
+    bool? hideWhenNoValue;
+    public bool? HideWhenNoValue
+    {
+      get
+      {
+        if (!IsReferencedData) return hideWhenNoValue;
+        switch (Value)
+        {
+#if REVIT_2020
+          case DB.SharedParameterElement shared: return shared.ShouldHideWhenNoValue();
+#else
+          case DB.SharedParameterElement shared: return false;
+#endif
+          case DB.GlobalParameter _: return false;
+        }
+
+        return default;
+      }
+      set
+      {
+        if (IsReferencedData) throw new InvalidOperationException();
+        hideWhenNoValue = value;
+      }
+    }
+
+    bool? reporting;
+    public bool? IsReporting
+    {
+      get
+      {
+        if (IsValid)
+        {
+          if (IsReferencedData)
+          {
+            if (Document is DB.Document doc)
+            {
+              if (doc.IsFamilyDocument)
+              {
+                var familyParameter = Id.TryGetBuiltInParameter(out var builtInParameter) ?
+                  doc.FamilyManager.get_Parameter(builtInParameter) :
+                  Value is DB.ParameterElement element ?
+                  doc.FamilyManager.get_Parameter(element.GetDefinition()) :
+                  default;
+
+                return familyParameter?.IsReporting;
+              }
+              else if (Value is DB.GlobalParameter global)
+              {
+                return global.IsReporting;
+              }
+            }
+          }
+          else return reporting;
+        }
+
+        return default;
+      }
+      set
+      {
+        if (!value.HasValue || !IsValid) return;
+        if (IsReferencedData)
+        {
+          if(Document is DB.Document doc)
+          {
+            if (doc.IsFamilyDocument)
+            {
+              var familyParameter = Id.TryGetBuiltInParameter(out var builtInParameter) ?
+                doc.FamilyManager.get_Parameter(builtInParameter) :
+                Value is DB.ParameterElement element ?
+                doc.FamilyManager.get_Parameter(element.GetDefinition()) :
+                default;
+
+              if (familyParameter is object && familyParameter.IsReporting != value.Value)
+              {
+                if (value.Value) doc.FamilyManager.MakeReporting(familyParameter);
+                else doc.FamilyManager.MakeNonReporting(familyParameter);
+              }
+            }
+            else if (Value is DB.GlobalParameter global && global.IsReporting != value.Value)
+            {
+              global.IsReporting = value.Value;
+            }
+          }
+        }
+        else reporting = value;
+      }
+    }
+
+    string formula;
+    public string Formula
+    {
+      get
+      {
+        if (IsValid)
+        {
+          if (IsReferencedData)
+          {
+            if (Document is DB.Document doc)
+            {
+              if (doc.IsFamilyDocument)
+              {
+                var familyParameter = Id.TryGetBuiltInParameter(out var builtInParameter) ?
+                  doc.FamilyManager.get_Parameter(builtInParameter) :
+                  Value is DB.ParameterElement element ?
+                  doc.FamilyManager.get_Parameter(element.GetDefinition()) :
+                  default;
+
+                return familyParameter?.Formula;
+              }
+              else if (Value is DB.GlobalParameter global)
+              {
+                return global.GetFormula();
+              }
+            }
+          }
+          else return formula;
+        }
+
+        return default;
+      }
+      set
+      {
+        if (value is null || !IsValid) return;
+        if (IsReferencedData)
+        {
+          if (Document is DB.Document doc)
+          {
+            if (doc.IsFamilyDocument)
+            {
+              var familyParameter = Id.TryGetBuiltInParameter(out var builtInParameter) ?
+                doc.FamilyManager.get_Parameter(builtInParameter) :
+                Value is DB.ParameterElement element ?
+                doc.FamilyManager.get_Parameter(element.GetDefinition()) :
+                default;
+
+              if (familyParameter is object && familyParameter.Formula != value)
+              {
+                doc.FamilyManager.SetFormula(familyParameter, value);
+              }
+            }
+            else if (Value is DB.GlobalParameter global && global.GetFormula() != value)
+            {
+              global.SetFormula(value);
+            }
+          }
+        }
+        else formula = value;
+      }
     }
 
     public DBX.ParameterClass Class
@@ -202,6 +780,13 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (Id is object && Id.TryGetBuiltInParameter(out var _))
           return DBX.ParameterClass.BuiltIn;
+
+        if (!IsReferencedData)
+        {
+          if (GUID.HasValue) return DBX.ParameterClass.Shared;
+          if (Name is object) return DBX.ParameterClass.Project;  
+          return DBX.ParameterClass.Invalid;
+        }
 
         switch (Value)
         {
@@ -216,28 +801,114 @@ namespace RhinoInside.Revit.GH.Types
             break;
         }
 
-        return default;
+        return DBX.ParameterClass.Invalid;
       }
     }
-    public DB.Definition Definition
+
+    public DBX.ParameterBinding Binding
     {
       get
       {
+        if (!IsReferencedData) return DBX.ParameterBinding.Unknown;
+
+        if (Document is DB.Document doc)
+        {
+          if (doc.IsFamilyDocument)
+          {
+            var familyParameter = Id.TryGetBuiltInParameter(out var bip) ?
+              doc.FamilyManager.get_Parameter(bip) :
+              Value?.GetDefinition() is DB.InternalDefinition definition ?
+              doc.FamilyManager.get_Parameter(definition) :
+              default;
+
+            return familyParameter is null ?
+              DBX.ParameterBinding.Unknown :
+              familyParameter.IsInstance ?
+              DBX.ParameterBinding.Instance :
+              DBX.ParameterBinding.Type;
+          }
+          else switch (Value)
+          {
+            case DB.GlobalParameter _: return DBX.ParameterBinding.Global;
+            case DB.ParameterElement parameterElement:
+              var definition = parameterElement.GetDefinition();
+              if (!Id.IsBuiltInId())
+              {
+                switch (doc.ParameterBindings.get_Item(definition))
+                {
+                  case DB.InstanceBinding _: return DBX.ParameterBinding.Instance;
+                  case DB.TypeBinding _: return DBX.ParameterBinding.Type;
+                }
+              }
+
+              return DBX.ParameterBinding.Unknown;
+          }
+        }
+
+        return DBX.ParameterBinding.Unknown;
+      }
+    }
+
+    public DB.InternalDefinition InternalDefinition
+    {
+      get
+      {
+        if (!IsReferencedData) return default;
         if (Value is DB.ParameterElement element)
           return element.GetDefinition();
+
+        if (Document?.IsFamilyDocument == true && Id.TryGetBuiltInParameter(out var bip))
+        {
+          if (Document.FamilyManager.get_Parameter(bip) is DB.FamilyParameter parameter)
+            return parameter.Definition as DB.InternalDefinition;
+        }
 
         return default;
       }
     }
-
-    public Guid? GuidValue => Value is DB.SharedParameterElement shared ? shared.GuidValue : default;
     #endregion
   }
 
   [Kernel.Attributes.Name("Parameter Value")]
-  public class ParameterValue : ReferenceObject, IEquatable<ParameterValue>, IGH_Goo, IGH_QuickCast, IConvertible
+  public class ParameterValue : ReferenceObject,
+    IEquatable<ParameterValue>,
+    IGH_Goo,
+    IGH_QuickCast,
+    IConvertible
   {
+    public ParameterValue() { }
+    public ParameterValue(DB.Parameter value) : base(value.Element.Document, value) { }
+
     #region System.Object
+    public override string ToString() => Value.AsGoo()?.ToString();
+    public override bool Equals(object obj) =>
+      (obj is ElementId id) ? Equals(id) : base.Equals(obj);
+
+    public override int GetHashCode()
+    {
+      int hashCode = 0;
+      if (Value is DB.Parameter value)
+      {
+        hashCode ^= value.Id.GetHashCode();
+        hashCode ^= value.StorageType.GetHashCode();
+
+        if (value.HasValue)
+        {
+          switch (value.StorageType)
+          {
+            case DB.StorageType.Integer: hashCode ^= value.AsInteger().GetHashCode(); break;
+            case DB.StorageType.Double: hashCode ^= value.AsDouble().GetHashCode(); break;
+            case DB.StorageType.String: hashCode ^= value.AsString().GetHashCode(); break;
+            case DB.StorageType.ElementId: hashCode ^= value.AsElementId().GetHashCode(); break;
+          }
+        }
+      }
+
+      return hashCode;
+    }
+    #endregion
+
+    #region IEquatable
     public bool Equals(ParameterValue other)
     {
       if (other is null) return false;
@@ -265,33 +936,6 @@ namespace RhinoInside.Revit.GH.Types
       }
 
       return false;
-    }
-    public override bool Equals(object obj) => (obj is ElementId id) ? Equals(id) : base.Equals(obj);
-    public override int GetHashCode()
-    {
-      int hashCode = 0;
-      if (Value is DB.Parameter value)
-      {
-        hashCode ^= value.Id.GetHashCode();
-        hashCode ^= value.StorageType.GetHashCode();
-
-        if (value.HasValue)
-        {
-          switch (value.StorageType)
-          {
-            case DB.StorageType.Integer: hashCode ^= value.AsInteger().GetHashCode(); break;
-            case DB.StorageType.Double: hashCode ^= value.AsDouble().GetHashCode(); break;
-            case DB.StorageType.String: hashCode ^= value.AsString().GetHashCode(); break;
-            case DB.StorageType.ElementId: hashCode ^= value.AsElementId().GetHashCode(); break;
-          }
-        }
-      }
-
-      return hashCode;
-    }
-    public override string ToString()
-    {
-      return Value.AsGoo()?.ToString();
     }
     #endregion
 
@@ -457,8 +1101,5 @@ namespace RhinoInside.Revit.GH.Types
     #region ReferenceObject
     public override DB.ElementId Id => Value?.Element.Id;
     #endregion
-
-    public ParameterValue() { }
-    public ParameterValue(DB.Parameter value) : base(value.Element.Document, value) { }
   }
 }

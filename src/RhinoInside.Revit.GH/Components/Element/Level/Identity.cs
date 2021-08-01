@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.GH.Components.Level
   public class LevelIdentity : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("E996B34D-2C86-4496-8E02-C879228C329E");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
     protected override string IconTag => "ID";
 
     public LevelIdentity()

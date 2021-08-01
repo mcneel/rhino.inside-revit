@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager.AddParameter(new Parameters.ParameterKey(), "ParameterKey", "K", "Parameter to check", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.ParameterKey(), "Parameter", "P", "Parameter to check", GH_ParamAccess.item);
       manager.AddGenericParameter("Value", "V", "Value to check with", GH_ParamAccess.item);
     }
 
@@ -322,7 +322,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager.AddParameter(new Parameters.ParameterKey(), "ParameterKey", "K", "Parameter to check", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.ParameterKey(), "Parameter", "P", "Parameter to check", GH_ParamAccess.item);
       manager.AddTextParameter("Value", "V", "Value to check with", GH_ParamAccess.item);
       manager.AddBooleanParameter("Inverted", "I", "True if the results of the rule should be inverted", GH_ParamAccess.item, false);
     }

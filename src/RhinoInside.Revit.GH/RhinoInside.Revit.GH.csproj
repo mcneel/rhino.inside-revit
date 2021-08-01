@@ -345,9 +345,14 @@
     <Compile Include="Components\Filters\Obsolete.cs" />
     <Compile Include="Components\Filters\Parameter\ByName.cs" />
     <Compile Include="Components\Filters\Selection\ByName.cs" />
-    <Compile Include="Components\Parameter\DefineSharedParameter.cs" />
-    <Compile Include="Components\Parameter\DeconstructParameterValue.cs" />
-    <Compile Include="Components\Parameter\ParameterKeyIdentity.cs" />
+    <Compile Include="Components\ParameterElement\AddParameter.cs" />
+    <Compile Include="Components\ParameterElement\DefineParameter.cs" />
+    <Compile Include="Components\ParameterElement\GlobalParameter.cs" />
+    <Compile Include="Components\ParameterElement\ParameterFormula.cs" />
+    <Compile Include="Components\ParameterElement\ParameterIdentity.cs" />
+    <Compile Include="Components\ParameterElement\ProjectParameter.cs" />
+    <Compile Include="Components\ParameterElement\QueryParameters.cs" />
+    <Compile Include="Components\ParameterElement\SharedParameters.cs" />
     <None Include="Extensions\README.md" />
     <Compile Include="Extensions\Grasshopper\Kernel\GH_ComponentParamServerExtension.cs" />
     <Compile Include="Extensions\Grasshopper\Kernel\GH_Enum.cs" />
@@ -397,7 +402,6 @@
     <Compile Include="Parameters\FillPatternElement.cs" />
     <Compile Include="Parameters\LinePatternElement.cs" />
     <Compile Include="Parameters\Param.cs" />
-    <Compile Include="Parameters\DataObject.cs" />
     <Compile Include="Parameters\Category.cs" />
     <Compile Include="Parameters\CategoryTypes.cs" />
     <Compile Include="Parameters\DatumPlane.cs" />

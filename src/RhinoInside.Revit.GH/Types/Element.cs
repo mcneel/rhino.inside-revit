@@ -41,6 +41,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+    // TODO : Rename to ValueType
     protected virtual Type ScriptVariableType => typeof(DB.Element);
     #endregion
 
@@ -421,18 +422,6 @@ namespace RhinoInside.Revit.GH.Types
       public virtual int? Id
       {
         get => owner.Id?.IntegerValue;
-        set
-        {
-          if (!value.HasValue || value == DB.ElementId.InvalidElementId.IntegerValue)
-            owner.SetValue(default, DB.ElementId.InvalidElementId);
-          else
-          {
-            var doc = owner.Document ?? Revit.ActiveDBDocument;
-            var id = new DB.ElementId(value.Value);
-
-            if (IsValidId(doc, id)) owner.SetValue(doc, id);
-          }
-        }
       }
 
       [System.ComponentModel.Description("A human readable name for the Element.")]
@@ -606,7 +595,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Identity Data
-    public string Description
+    public virtual string Description
     {
       get => Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.AsString();
       set

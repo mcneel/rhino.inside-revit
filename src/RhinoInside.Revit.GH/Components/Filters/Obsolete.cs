@@ -5,10 +5,10 @@ using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Filters.Obsolete
+namespace RhinoInside.Revit.GH.Components.Obsolete
 {
   [Obsolete("Obsolete since 2020-10-22")]
-  public class ElementLogicalAndFilter : ElementFilterComponent
+  public class ElementLogicalAndFilter : Filters.ElementFilterComponent
   {
     public override Guid ComponentGuid => new Guid("754C40D7-5AE8-4027-921C-0210BBDFAB37");
     public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.hidden;
@@ -34,7 +34,7 @@ namespace RhinoInside.Revit.GH.Components.Filters.Obsolete
   }
 
   [Obsolete("Obsolete since 2020-10-22")]
-  public class ElementLogicalOrFilter : ElementFilterComponent
+  public class ElementLogicalOrFilter : Filters.ElementFilterComponent
   {
     public override Guid ComponentGuid => new Guid("61F75DE1-EE65-4AA8-B9F8-40516BE46C8D");
     public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.hidden;
@@ -60,7 +60,7 @@ namespace RhinoInside.Revit.GH.Components.Filters.Obsolete
   }
 
   [Obsolete("Obsolete since 2020-10-15")]
-  public class ElementBoundingBoxFilter : ElementFilterComponent
+  public class ElementBoundingBoxFilter : Filters.ElementFilterComponent
   {
     public override Guid ComponentGuid => new Guid("F5A32842-B18E-470F-8BD3-BAE1373AD982");
     public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.hidden;

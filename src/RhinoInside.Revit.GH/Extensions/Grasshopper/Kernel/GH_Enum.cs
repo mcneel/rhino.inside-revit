@@ -713,8 +713,12 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         if (CreatePickerObject() is IGH_ActiveObject picker)
         {
+          var nameless = string.IsNullOrEmpty(picker.NickName);
           if (this.ConnectNewObject(picker))
+          {
+            if (nameless) picker.NickName = string.Empty;
             picker.ExpireSolution(true);
+          }
         }
       }
     }
