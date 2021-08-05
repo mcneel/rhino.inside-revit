@@ -309,7 +309,7 @@ namespace RhinoInside.Revit.GH.Types
       catch (ArgumentException) { return false; }
     }
 
-    public static Type PickerObjectType => typeof(Parameters.Input.ParameterTypes);
+    public static Type PickerObjectType => typeof(Parameters.Input.BuiltInParameterTypes);
   }
 
   [
