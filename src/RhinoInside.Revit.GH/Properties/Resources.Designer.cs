@@ -2423,6 +2423,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap QueryParameters {
+            get {
+                object obj = ResourceManager.GetObject("QueryParameters", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap QueryProjectLocations {
             get {
                 object obj = ResourceManager.GetObject("QueryProjectLocations", resourceCulture);
