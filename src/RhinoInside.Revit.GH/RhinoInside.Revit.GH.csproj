@@ -381,7 +381,7 @@
     <Compile Include="Parameters\Input\EndCapCondition_ValueList.cs" />
     <Compile Include="Parameters\Input\LayerFunction_ValueList.cs" />
     <Compile Include="Parameters\Input\OpeningWrappingCondition_ValueList.cs" />
-    <Compile Include="Parameters\Input\ParameterTypes.cs" />
+    <Compile Include="Parameters\Input\BuiltInParameterTypes.cs" />
     <Compile Include="Parameters\Input\StructuralAssetBehaviour_ValueList.cs" />
     <Compile Include="Parameters\Input\StructuralAssetClass_ValueList.cs" />
     <Compile Include="Parameters\Input\ThermalMaterialType_ValueList.cs" />
