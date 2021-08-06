@@ -377,6 +377,7 @@
     <Compile Include="Parameters\Input\CurtainMullionSystemFamily_ValueList.cs" />
     <Compile Include="Parameters\Input\DeckEmbeddingType_ValueList.cs" />
     <Compile Include="Parameters\Input\DocumentPicker.cs" />
+    <Compile Include="Parameters\Input\ElementClasses.cs" />
     <Compile Include="Parameters\Input\ElementTypeByName.cs" />
     <Compile Include="Parameters\Input\EndCapCondition_ValueList.cs" />
     <Compile Include="Parameters\Input\LayerFunction_ValueList.cs" />
