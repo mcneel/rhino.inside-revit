@@ -958,4 +958,13 @@
   <data name="SharedParameters" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\..\..\art\gh-icons\comps\SharedParameters.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="GlobalParameter" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\..\..\art\gh-icons\comps\GlobalParameter.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ParameterFormula" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\..\..\art\gh-icons\comps\ParameterFormula.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ProjectParameter" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\..\..\art\gh-icons\comps\ProjectParameter.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>
