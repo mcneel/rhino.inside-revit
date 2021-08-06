@@ -231,7 +231,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
   public class DocumentLevelsPicker : DocumentElementPicker<Types.Level>
   {
     public override Guid ComponentGuid => new Guid("BD6A74F3-8C46-4506-87D9-B34BD96747DA");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.Level));
 
     public DocumentLevelsPicker() : base
@@ -276,7 +276,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
   public class DocumentFamiliesPicker : DocumentElementPicker<Types.Family>
   {
     public override Guid ComponentGuid => new Guid("45CEE087-4194-4E55-AA20-9CC5D2193CE0");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.Family));
 
     public DocumentFamiliesPicker() : base
