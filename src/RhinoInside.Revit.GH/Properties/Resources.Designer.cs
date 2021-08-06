@@ -473,6 +473,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap CategoryFilterRule {
+            get {
+                object obj = ResourceManager.GetObject("CategoryFilterRule", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap CategoryIdentity {
             get {
                 object obj = ResourceManager.GetObject("CategoryIdentity", resourceCulture);
@@ -1196,6 +1206,36 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap ElementFilter {
             get {
                 object obj = ResourceManager.GetObject("ElementFilter", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ElementFilterRuleBeginsWith {
+            get {
+                object obj = ResourceManager.GetObject("ElementFilterRuleBeginsWith", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ElementFilterRuleContains {
+            get {
+                object obj = ResourceManager.GetObject("ElementFilterRuleContains", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ElementFilterRuleEndsWith {
+            get {
+                object obj = ResourceManager.GetObject("ElementFilterRuleEndsWith", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
