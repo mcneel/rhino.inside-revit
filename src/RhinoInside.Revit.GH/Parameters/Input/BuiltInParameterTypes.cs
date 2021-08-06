@@ -7,7 +7,7 @@ using DBXS = RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.GH.Parameters.Input
 {
-  public class ParameterTypes : Grasshopper.Special.ValueSet<Types.ParameterType>
+  public class BuiltInParameterTypes : Grasshopper.Special.ValueSet<Types.ParameterType>
   {
     public override Guid ComponentGuid => new Guid("8AB856C6-DE20-44C8-9CF0-9460DABCF7EE");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
@@ -18,9 +18,9 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
     public DBXS.DisciplineType DisciplineType = DBXS.DisciplineType.Common;
 
-    public ParameterTypes() : base
+    public BuiltInParameterTypes() : base
     (
-      name: "Parameter Types",
+      name: "Built-In Parameter Types",
       nickname: "Parameter Types",
       description: "Provides a picker for parameters types",
       category: "Revit",
