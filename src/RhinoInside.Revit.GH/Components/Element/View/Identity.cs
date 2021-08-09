@@ -47,9 +47,10 @@ namespace RhinoInside.Revit.GH.Components
       else
         DA.SetData("Discipline", null);
 
-      DA.SetData("Family", (view.Document.GetElement(view.GetTypeId()) as DB.ViewFamilyType).ViewFamily);
+      var type = view.Document.GetElement(view.GetTypeId());
+      DA.SetData("Family", (type as DB.ViewFamilyType)?.ViewFamily);
       DA.SetData("Name", view.Name);
-      DA.SetData("Template", view.Document.GetElement(view.ViewTemplateId) as DB.View);
+      DA.SetData("Template", new Types.View(view.Document, view.ViewTemplateId));
       DA.SetData("Is Template", view.IsTemplate);
       DA.SetData("Is Assembly", view.IsAssemblyView);
       DA.SetData("Is Printable", view.CanBePrinted);
