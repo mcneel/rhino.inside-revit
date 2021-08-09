@@ -275,9 +275,9 @@ namespace RhinoInside.Revit.UI
                         Spacing = new Size(5, 10),
                         Rows = {
                           new Label {
-                            Text = "New Release Available!\n"
-                                + $"Version: {releaseInfo.Version}\n"
-                                + $"Release Date: {releaseInfo.ReleaseDate}",
+                            Text = $"New {releaseInfo.Source.ReleaseName} Available!\n"
+                                 + $"Version: {releaseInfo.Version}\n"
+                                 + $"Release Date: {releaseInfo.ReleaseDate}",
                             Width = 150
                           },
                           new Label {
