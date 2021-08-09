@@ -113,7 +113,7 @@ namespace RhinoInside.Revit
       new AddinUpdateChannel
       {
         Id =             new Guid("c63def46-e63d-41e3-8f82-9b5ee1d88251"),
-        Name =           "Release Candidates",
+        Name =           "Release Candidates (Pre-release Bug Fixes)",
         ReleaseName =    "Release Candidate",
         Description =    "Release candidates are product releases being stabilized for final release and may still contain bugs",
         IconResource =   "RhinoInside.Revit.Resources.ChannelRC-icon.png",
