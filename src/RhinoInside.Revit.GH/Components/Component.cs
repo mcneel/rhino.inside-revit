@@ -206,7 +206,10 @@ namespace RhinoInside.Revit.GH.Components
       }
       catch (Exceptions.RuntimeArgumentException e)
       {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, e.Message);
+        if (AbortOnUnhandledException)
+          unhandledException = e;
+
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
       }
       catch (Exceptions.RuntimeWarningException e)
       {
