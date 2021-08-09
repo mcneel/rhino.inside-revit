@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Grasshopper.Kernel;
 
 namespace RhinoInside.Revit.GH.Parameters.Input
@@ -30,7 +31,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
       if (SourceCount == 0)
       {
         m_data.Clear();
-        m_data.AppendRange(Types.ParameterId.EnumValues);
+        m_data.AppendRange(Types.ParameterId.EnumValues.Where(x => !string.IsNullOrEmpty(x.Value.Label)));
       }
 
       base.LoadVolatileData();
