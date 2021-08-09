@@ -203,7 +203,9 @@ namespace RhinoInside.Revit.GH.Types
         { (int) DB.ViewType.PanelSchedule,        "Panel Schedule" },
         { (int) DB.ViewType.Walkthrough,          "Walkthrough" },
         { (int) DB.ViewType.Rendering,            "Rendering" },
+#if REVIT_2020
         { (int) DB.ViewType.SystemsAnalysisReport,"Systems Analysis Report" },
+#endif
         { (int) DB.ViewType.Internal,             "Internal" },
       }
     );
