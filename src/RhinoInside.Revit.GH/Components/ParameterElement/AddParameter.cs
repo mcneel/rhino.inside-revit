@@ -116,6 +116,12 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
       if (!Params.GetData(DA, "Definition", out Types.ParameterKey key, x => x.IsValid)) return;
       if (!Params.GetData(DA, "Binding", out Types.ParameterBinding binding, x => x.IsValid && x.Value != DBX.ParameterBinding.Unknown)) return;
 
+      if (key.DataType is null)
+        throw new Exceptions.RuntimeErrorException($"Unknown data-type for parameter '{key.Name}'");
+
+      if (key.Id.TryGetBuiltInParameter(out var _))
+        throw new Exceptions.RuntimeWarningException($"Parameter '{key.Name}' is a BuiltIn parameter");
+
       // Previous Output
       Params.ReadTrackedElement(_Parameter_, doc.Value, out DB.ParameterElement parameter);
 
