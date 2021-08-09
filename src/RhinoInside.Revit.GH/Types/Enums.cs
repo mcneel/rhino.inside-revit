@@ -175,6 +175,38 @@ namespace RhinoInside.Revit.GH.Types
   public class ViewType : GH_Enum<DB.ViewType>
   {
     public override bool IsEmpty => Value == DB.ViewType.Undefined;
+    public ViewType() { }
+    public ViewType(DB.ViewType value) : base(value) { }
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
+      {
+        { (int) DB.ViewType.FloorPlan,            "Floor Plan" },
+        { (int) DB.ViewType.CeilingPlan,          "Ceiling Plan" },
+        { (int) DB.ViewType.Elevation,            "Elevation" },
+        { (int) DB.ViewType.ThreeD,               "3D View" },
+        { (int) DB.ViewType.Schedule,             "Schedule" },
+        { (int) DB.ViewType.DrawingSheet,         "Sheet" },
+        { (int) DB.ViewType.ProjectBrowser,       "Project Browser" },
+        { (int) DB.ViewType.Report,               "Report" },
+        { (int) DB.ViewType.DraftingView,         "Drafting" },
+        { (int) DB.ViewType.Legend,               "Legend" },
+        { (int) DB.ViewType.SystemBrowser,        "System Browser" },
+        { (int) DB.ViewType.EngineeringPlan,      "Engineering Plan" },
+        { (int) DB.ViewType.AreaPlan,             "Area Plan" },
+        { (int) DB.ViewType.Section,              "Section" },
+        { (int) DB.ViewType.Detail,               "Detail" },
+        { (int) DB.ViewType.CostReport,           "Cost Report" },
+        { (int) DB.ViewType.LoadsReport,          "Loads Report" },
+        { (int) DB.ViewType.PresureLossReport,    "Presure Loss Report" },
+        { (int) DB.ViewType.ColumnSchedule,       "Column Schedule" },
+        { (int) DB.ViewType.PanelSchedule,        "Panel Schedule" },
+        { (int) DB.ViewType.Walkthrough,          "Walkthrough" },
+        { (int) DB.ViewType.Rendering,            "Rendering" },
+        { (int) DB.ViewType.SystemsAnalysisReport,"Systems Analysis Report" },
+        { (int) DB.ViewType.Internal,             "Internal" },
+      }
+    );
   }
 
   [
