@@ -1,7 +1,5 @@
 using System;
 using System.Linq;
-using System.Reflection;
-using GH_IO.Serialization;
 using Grasshopper;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
@@ -9,7 +7,6 @@ using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Display;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.External.UI.Extensions;
 using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
@@ -29,7 +26,7 @@ namespace RhinoInside.Revit.GH.Types
     public override bool Equals(object obj) => (obj is GeometryObject<X> id) ? Equals(id) : base.Equals(obj);
     public override int GetHashCode() => DocumentGUID.GetHashCode() ^ UniqueID.GetHashCode();
 
-    public override sealed string ToString()
+    public sealed override string ToString()
     {
       string typeName = ((IGH_Goo) this).TypeName;
       if (!IsValid)
@@ -172,12 +169,19 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     protected GeometryObject() { }
-    protected GeometryObject(X data) : base(default, data) { }
     protected GeometryObject(DB.Document doc, DB.Reference reference)
     {
-      DocumentGUID = doc.GetFingerprintGUID();
-      UniqueID = reference.ConvertToStableRepresentation(doc);
+      try
+      {
+        Document = doc;
+        DocumentGUID = doc.GetFingerprintGUID();
+
+        this.reference = reference;
+        UniqueID = reference.ConvertToStableRepresentation(doc);
+      }
+      catch (Autodesk.Revit.Exceptions.InvalidObjectException) { }
     }
+
     public new X Value => base.Value as X;
 
     /// <summary>
@@ -213,7 +217,6 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     public Vertex() { }
-    public Vertex(DB.Point data) : base(data) { }
     public Vertex(DB.Document doc, DB.Reference reference, int index) : base(doc, reference) { VertexIndex = index; }
 
     Point Point
@@ -293,7 +296,6 @@ namespace RhinoInside.Revit.GH.Types
   public class Edge : GeometryObject<DB.Edge>, IGH_PreviewData
   {
     public Edge() { }
-    public Edge(DB.Edge edge) : base(edge) { }
     public Edge(DB.Document doc, DB.Reference reference) : base(doc, reference) { }
 
     Curve Curve
@@ -374,7 +376,6 @@ namespace RhinoInside.Revit.GH.Types
   public class Face : GeometryObject<DB.Face>, IGH_PreviewData
   {
     public Face() { }
-    public Face(DB.Face face) : base(face) { }
     public Face(DB.Document doc, DB.Reference reference) : base(doc, reference) { }
 
     Curve[] Curves
