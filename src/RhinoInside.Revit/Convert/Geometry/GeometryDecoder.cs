@@ -21,6 +21,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       public DB.Element Element = default;
       public DB.Visibility Visibility = DB.Visibility.Invisible;
       public DB.ElementId GraphicsStyleId = DB.ElementId.InvalidElementId;
+      public DB.ElementId[] SkipGraphicsStyles = default;
       public DB.ElementId MaterialId = DB.ElementId.InvalidElementId;
       public DB.ElementId[] FaceMaterialId;
     }
@@ -254,6 +255,19 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     public static IEnumerable<GeometryBase> ToGeometryBaseMany(this DB.GeometryObject geometry)
     {
+      // if context contains geometry styles to be skipped, then skip
+      var context = Context.Peek;
+      if (context.Element is object && context.SkipGraphicsStyles is DB.ElementId[])
+      {
+        var doc = context.Element.Document;
+        if (doc.GetElement(geometry.GraphicsStyleId) is DB.GraphicsStyle style
+              && context.SkipGraphicsStyles.Contains(style.GraphicsStyleCategory.Id))
+        {
+          yield return null;
+          yield break;
+        }
+      }
+
       UpdateGraphicAttributes(geometry);
 
       switch (geometry)

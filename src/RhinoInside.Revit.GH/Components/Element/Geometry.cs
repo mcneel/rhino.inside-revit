@@ -67,6 +67,7 @@ namespace RhinoInside.Revit.GH.Components
       DB.Document doc,
       IList<Types.Element> elements,
       IList<Types.Element> exclude,
+      IList<Types.Category> excludeCategory,
       DB.Options options,
       out GH_Structure<IGH_GeometricGoo> geometries
     )
@@ -83,6 +84,9 @@ namespace RhinoInside.Revit.GH.Components
             if (doc.Delete(exclude.ConvertAll(x => x?.Id ?? DB.ElementId.InvalidElementId)).Count > 0)
               doc.Regenerate();
           }
+
+          var excludeGraphicStyleIds =
+            excludeCategory?.Select(c => c.Id).ToArray();
 
           int index = 0;
           foreach (var element in elements.Select(x => x.Value))
@@ -107,6 +111,8 @@ namespace RhinoInside.Revit.GH.Components
                   {
                     context.Element = element;
                     context.GraphicsStyleId = element.Category?.GetGraphicsStyle(DB.GraphicsStyleType.Projection)?.Id ?? DB.ElementId.InvalidElementId;
+                    if (excludeGraphicStyleIds is object)
+                      context.SkipGraphicsStyles = excludeGraphicStyleIds;
                     context.MaterialId = element.Category?.Material?.Id ?? DB.ElementId.InvalidElementId;
 
                     var list = geometry?.
@@ -238,6 +244,19 @@ namespace RhinoInside.Revit.GH.Components
           Optional = true
         },
         ParamRelevance.Occasional
+      ),
+      new ParamDefinition
+      (
+        new Parameters.Category()
+        {
+          Name = "Exclude Category",
+          NickName = "EXC",
+          Description = "Categories to exclude while extracting the geometry e.g. Light Source mesh from Light Fixtures",
+          Access = GH_ParamAccess.list,
+          DataMapping = GH_DataMapping.Flatten,
+          Optional = true
+        },
+        ParamRelevance.Occasional
       )
     };
 
@@ -294,6 +313,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!Params.TryGetData(DA, "Detail Level", out DB.ViewDetailLevel? detailLevel)) return;
       if (!Params.GetDataList(DA, "Elements", out IList<Types.Element> elements)) return;
       if (!Params.TryGetDataList(DA, "Exclude", out IList<Types.Element> exclude)) return;
+      if (!Params.TryGetDataList(DA, "Exclude Category", out IList<Types.Category> excludeCategory)) return;
 
       if (!TryGetCommonDocument(elements.Concat(exclude ?? Enumerable.Empty<Types.Element>()), out var doc))
         return;
@@ -324,6 +344,7 @@ namespace RhinoInside.Revit.GH.Components
           doc,
           elements,
           exclude,
+          excludeCategory,
           options,
           out var Geometry
         );
@@ -433,6 +454,19 @@ namespace RhinoInside.Revit.GH.Components
         },
         ParamRelevance.Primary
       ),
+      new ParamDefinition
+      (
+        new Parameters.Category()
+        {
+          Name = "Exclude Category",
+          NickName = "EXC",
+          Description = "Categories to exclude while extracting the geometry e.g. Light Source mesh from Light Fixtures",
+          Access = GH_ParamAccess.list,
+          DataMapping = GH_DataMapping.Flatten,
+          Optional = true
+        },
+        ParamRelevance.Occasional
+      ),
       //new ParamDefinition
       //(
       //  new Parameters.Material()
@@ -451,6 +485,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!Params.GetData(DA, "View", out Types.View view, x => x.IsValid)) return;
       if (!Params.GetDataList(DA, "Elements", out IList<Types.Element> elements)) return;
       if (!Params.TryGetDataList(DA, "Exclude", out IList<Types.Element> exclude)) return;
+      if (!Params.TryGetDataList(DA, "Exclude Category", out IList<Types.Category> excludeCategory)) return;
 
       if (!TryGetCommonDocument(elements.Concat(exclude ?? Enumerable.Empty<Types.Element>()).Concat(Enumerable.Repeat(view, 1)), out var doc))
         return;
@@ -466,6 +501,7 @@ namespace RhinoInside.Revit.GH.Components
           doc,
           elements,
           exclude,
+          excludeCategory,
           options,
           out var Geometry
         );
