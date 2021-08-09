@@ -37,35 +37,31 @@ namespace RhinoInside.Revit.GH.Types
 
     public override string ToString()
     {
-      var TypeName = ((IGH_Goo) this).TypeName;
+      var valid = IsValid;
+      string Invalid = Id == DB.ElementId.InvalidElementId ?
+        string.Empty :
+        IsReferencedData ?
+        (valid ? /*"Referenced "*/ "" : "Unresolved ") :
+        (valid ? string.Empty : "Invalid ");
+      string TypeName = ((IGH_Goo) this).TypeName;
+      string InstanceName = DisplayName ?? string.Empty;
 
       if (!IsReferencedData)
-        return DisplayName;
+        return $"{Invalid}{TypeName} : {InstanceName}";
 
-      var tip = IsValid ?
-      (
-        IsReferencedDataLoaded ?
-#if DEBUG
-        $"{DisplayName} : id {Id.IntegerValue}" :
-#else
-        DisplayName :
-#endif
-        $"Unresolved {TypeName} : {UniqueID}"
-      ) :
-      $"Invalid {TypeName}" + (Id is object ? $" : id {Id.IntegerValue}" : string.Empty);
+      string InstanceId = valid ? $" : id {Id.IntegerValue}" : $" : {UniqueID}";
+
       using (var Documents = Revit.ActiveDBApplication.Documents)
       {
-        return
-        (
-          Documents.Size > 1 ?
-          $"{tip} @ {Document?.GetFileName() ?? DocumentGUID.ToString()}" :
-          tip
-        );
+        if (Documents.Size > 1)
+          InstanceId = $"{InstanceId} @ {Document?.GetFileName() ?? DocumentGUID.ToString("B")}";
       }
-    }
-#endregion
 
-#region GH_ISerializable
+      return $"{Invalid}{TypeName} : {InstanceName}{InstanceId}";
+    }
+    #endregion
+
+    #region GH_ISerializable
     protected override bool Read(GH_IReader reader)
     {
       UnloadReferencedData();
@@ -91,10 +87,9 @@ namespace RhinoInside.Revit.GH.Types
 
       return true;
     }
-#endregion
+    #endregion
 
-#region IGH_Goo
-
+    #region IGH_Goo
     public override bool IsValid => base.IsValid && Id.IsValid();
     public override string IsValidWhyNot
     {
@@ -127,6 +122,7 @@ namespace RhinoInside.Revit.GH.Types
         target = (Q) (object) Id;
         return true;
       }
+
       if (typeof(Q).IsAssignableFrom(typeof(GH_Integer)))
       {
         target = (Q) (object) new GH_Integer(Id.IntegerValue);
@@ -258,9 +254,9 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     public virtual IGH_GooProxy EmitProxy() => new Proxy(this);
-#endregion
+    #endregion
 
-#region DocumentObject
+    #region DocumentObject
     public override object Value
     {
       get
@@ -272,9 +268,9 @@ namespace RhinoInside.Revit.GH.Types
       }
       protected set => base.Value = value;
     }
-#endregion
+    #endregion
 
-#region IGH_ReferencedData
+    #region IGH_ReferencedData
     public bool IsReferencedData => DocumentGUID != Guid.Empty;
     public abstract bool IsReferencedDataLoaded { get; }
 
@@ -287,16 +283,16 @@ namespace RhinoInside.Revit.GH.Types
       if (IsReferencedData)
         Document = default;
     }
-#endregion
+    #endregion
 
-#region IGH_ElementId
+    #region IGH_ElementId
     public abstract DB.Reference Reference { get; }
 
     public Guid DocumentGUID { get; protected set; } = Guid.Empty;
     public string UniqueID { get; protected set; } = string.Empty;
-#endregion
+    #endregion
 
-#region IGH_QuickCast
+    #region IGH_QuickCast
     GH_QuickCastType IGH_QuickCast.QC_Type => GH_QuickCastType.text;
     int IGH_QuickCast.QC_Hash() => FullUniqueId.Format(DocumentGUID, UniqueID).GetHashCode();
 
@@ -344,16 +340,16 @@ namespace RhinoInside.Revit.GH.Types
     Complex IGH_QuickCast.QC_Complex() => throw new InvalidCastException();
     Matrix IGH_QuickCast.QC_Matrix() => throw new InvalidCastException();
     Interval IGH_QuickCast.QC_Interval() => throw new InvalidCastException();
-#endregion
+    #endregion
 
     public ElementId() { }
 
     protected ElementId(DB.Document doc, object value) : base(doc, value) { }
 
-#region Properties
+    #region Properties
     public override string DisplayName => IsReferencedData ?
       Id is null ? "INVALID" : Id.IntegerValue.ToString() :
       "<None>";
-#endregion
+    #endregion
   }
 }

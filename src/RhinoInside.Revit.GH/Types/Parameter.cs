@@ -16,8 +16,15 @@ namespace RhinoInside.Revit.GH.Types
     IGH_ItemDescription,
     IGH_Goo
   {
-    string IGH_Goo.TypeName => IsReferencedData ?
-      $"Revit {Class} Parameter" : "Revit Parameter Definition";
+    string IGH_Goo.TypeName
+    {
+      get
+      {
+        var parameterClass = Class;
+        return parameterClass != DBX.ParameterClass.Invalid ?
+        $"Revit {Class} Parameter" : "Revit Parameter";
+      }
+    }
 
     public ParameterKey() { }
     public ParameterKey(DB.Document doc, DB.ElementId id) : base(doc, id) { }
@@ -58,14 +65,6 @@ namespace RhinoInside.Revit.GH.Types
     public ParameterKey Duplicate() => (ParameterKey) MemberwiseClone();
 
     #region System.Object
-    public override string ToString() => IsReferencedData ?
-      base.ToString() :
-      DataType is object ?
-      Group is object ?
-      $"{Name} : {DataType.Label} : {Group.Label}" :
-      $"{Name} : {DataType.Label}" :
-      Name ?? GUID.GetValueOrDefault().ToString("B");
-
     public override bool Equals(object obj) =>
       obj is ParameterKey other && Equals(other);
 
@@ -152,7 +151,7 @@ namespace RhinoInside.Revit.GH.Types
         }
         catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
 
-        return base.DisplayName;
+        return base.DisplayName ?? GUID.GetValueOrDefault().ToString("B");
       }
     }
     #endregion
@@ -282,22 +281,28 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (typeof(Q).IsAssignableFrom(typeof(GH_Guid)))
       {
-        target = (Q) (object) (Document.GetElement(Id) as DB.SharedParameterElement)?.GuidValue;
-        return true;
-      }
-
-      if (typeof(Q).IsAssignableFrom(typeof(ParameterId)))
-      {
-        var parameterId = new ParameterId();
-        if (Id.TryGetBuiltInParameter(out var bip))
+        if (GUID.HasValue)
         {
-          parameterId.Value = bip;
-          target = (Q) (object) parameterId;
+          target = (Q) (object) new GH_Guid(GUID.Value);
           return true;
         }
         else
         {
-          target = (Q) (object) default(Q);
+          target = default;
+          return false;
+        }
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(ParameterId)))
+      {
+        if (Id.TryGetBuiltInParameter(out var bip))
+        {
+          target = (Q) (object) new ParameterId(bip);
+          return true;
+        }
+        else
+        {
+          target = default;
           return false;
         }
       }
@@ -318,10 +323,13 @@ namespace RhinoInside.Revit.GH.Types
 
           if (GUID.HasValue) options.GUID = GUID.Value;
           target = (Q) (object) options;
+          return true;
         }
-        else target = (Q) (object) null;
-
-        return true;
+        else
+        {
+          target = default;
+          return false;
+        }
       }
 
       return base.CastTo(out target);
@@ -846,24 +854,6 @@ namespace RhinoInside.Revit.GH.Types
         }
 
         return DBX.ParameterBinding.Unknown;
-      }
-    }
-
-    public DB.InternalDefinition InternalDefinition
-    {
-      get
-      {
-        if (!IsReferencedData) return default;
-        if (Value is DB.ParameterElement element)
-          return element.GetDefinition();
-
-        if (Document?.IsFamilyDocument == true && Id.TryGetBuiltInParameter(out var bip))
-        {
-          if (Document.FamilyManager.get_Parameter(bip) is DB.FamilyParameter parameter)
-            return parameter.Definition as DB.InternalDefinition;
-        }
-
-        return default;
       }
     }
     #endregion
