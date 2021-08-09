@@ -25,7 +25,14 @@ namespace RhinoInside.Revit.GH.Types
       Equals(Document, other.Document) && Equals(Value, other.Value);
     public override bool Equals(object obj) => (obj is DocumentObject id) ? Equals(id) : base.Equals(obj);
     public override int GetHashCode() => Document.GetHashCode() ^ Value.GetHashCode();
-    public override string ToString() => $"Revit {((IGH_Goo) this).TypeName} : {DisplayName}";
+    public override string ToString()
+    {
+      string Invalid = IsValid ? string.Empty : "Invalid ";
+      string TypeName = ((IGH_Goo) this).TypeName;
+      string InstanceName = DisplayName is string displayName ? $" : {displayName}" : string.Empty;
+
+      return Invalid + TypeName + InstanceName;
+    }
 
     object ICloneable.Clone() => MemberwiseClone();
     #endregion
@@ -130,8 +137,6 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     public abstract string DisplayName { get; }
-
-    string IGH_Goo.ToString() => DisplayName ?? "<INVALID>";
   }
 
   /// <summary>

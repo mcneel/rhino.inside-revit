@@ -358,6 +358,7 @@
     <Compile Include="Extensions\Grasshopper\Kernel\GH_Enum.cs" />
     <Compile Include="Extensions\Grasshopper\Kernel\IGH_ParamExtension.cs" />
     <Compile Include="Extensions\Grasshopper\Kernel\Data\IGH_StructureExtension.cs" />
+    <Compile Include="Extensions\Grasshopper\Kernel\Parameters\Param_Angle.cs" />
     <Compile Include="Extensions\Grasshopper\Kernel\Types\GH_ColorRGBA.cs" />
     <Compile Include="Extensions\Grasshopper\Kernel\Parameters\Param_ColorRGBA.cs" />
     <Compile Include="Extensions\Grasshopper\Special\ValueSet.cs" />

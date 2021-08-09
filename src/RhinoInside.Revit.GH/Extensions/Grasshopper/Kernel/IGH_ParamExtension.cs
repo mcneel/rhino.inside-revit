@@ -229,6 +229,12 @@ namespace Grasshopper.Kernel
         if (newParam.MutableNickName && CentralSettings.CanvasFullNames)
           newParam.NickName = newParam.Name;
 
+        if (newParam is Parameters.Param_Number newNumberParam)
+        {
+          newNumberParam.AngleParameter = ((Parameters.Param_Number) param).AngleParameter;
+          newNumberParam.UseDegrees = ((Parameters.Param_Number) param).UseDegrees;
+        }
+
         return newParam;
       }
       finally { param.Attributes = attributes; }

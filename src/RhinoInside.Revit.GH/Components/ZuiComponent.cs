@@ -373,7 +373,10 @@ namespace RhinoInside.Revit.GH.Components
               param.Optional = input.Param.Optional;
 
               if (input.Param is Param_Number input_number && param is Param_Number param_number)
+              {
                 param_number.AngleParameter = input_number.AngleParameter;
+                param_number.UseDegrees = input_number.UseDegrees;
+              }
             }
           }
 
@@ -394,8 +397,11 @@ namespace RhinoInside.Revit.GH.Components
               param.Access = output.Param.Access;
               param.Optional = output.Param.Optional;
 
-              if (output.Param is Param_Number input_number && param is Param_Number param_number)
-                param_number.AngleParameter = input_number.AngleParameter;
+              if (output.Param is Param_Number output_number && param is Param_Number param_number)
+              {
+                param_number.AngleParameter = output_number.AngleParameter;
+                param_number.UseDegrees = output_number.UseDegrees;
+              }
             }
           }
         }

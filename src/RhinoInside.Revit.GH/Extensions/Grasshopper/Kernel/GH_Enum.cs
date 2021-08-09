@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
@@ -10,6 +11,7 @@ using Grasshopper;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
+using Grasshopper.Special;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -59,7 +61,14 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [EditorBrowsable(EditorBrowsableState.Never)]
-  public abstract class GH_Enum : GH_Integer, IGH_Goo, IEquatable<GH_Enum>, IComparable<GH_Enum>, IComparable, IGH_Enumerate
+  public abstract class GH_Enum : GH_Integer,
+    IGH_Goo,
+    IGH_Enumerate,
+    IGH_ItemDescription,
+    IFormattable,
+    IComparable,
+    IComparable<GH_Enum>,
+    IEquatable<GH_Enum>
   {
     protected GH_Enum() { }
     protected GH_Enum(int value) : base(value) { }
@@ -134,7 +143,7 @@ namespace RhinoInside.Revit.GH.Types
       }
 
       // Register all the ParamsTypes as params in Grasshopper
-      foreach(var entry in result)
+      foreach (var entry in result)
       {
         if (entry.Value.Param.IsGenericType)
         {
@@ -143,7 +152,7 @@ namespace RhinoInside.Revit.GH.Types
             Instances.ComponentServer.AddProxy(proxy);
         }
       }
-      
+
       return result;
     }
 
@@ -151,15 +160,14 @@ namespace RhinoInside.Revit.GH.Types
     public static bool TryGetParamTypes(Type type, out (Type Param, Type Goo) paramTypes) =>
       EnumTypes.TryGetValue(type, out paramTypes);
 
-    string IGH_Goo.ToString() => Text ?? "<INVALID>";
-    public sealed override string ToString() => Value.ToString();
+    string IGH_Goo.ToString() => $"{TypeName} : {Text} : {Value}";
     public virtual string Text
     {
       get
       {
         if (!IsValid) return "<invalid>";
         if (IsEmpty) return "<empty>";
-        return Format(GetType(), this);
+        return ToString(default, CultureInfo.CurrentUICulture);
       }
     }
 
@@ -172,40 +180,7 @@ namespace RhinoInside.Revit.GH.Types
       return _NamedValues_.GetValue(null) as ReadOnlyDictionary<int, string>;
     }
 
-    public static string Format<T>(GH_Enum value)
-      where T : GH_Enum
-    {
-      if (value is null) return default;
-      else if (value.IsEmpty) return string.Empty;
-      else if (value.IsValid)
-      {
-        try { return GetNamedValues(typeof(T))[value.Value]; }
-        catch (KeyNotFoundException) { return $"#{value}"; }
-      }
-
-      return default;
-    }
-
-    public static string Format(Type enumType, GH_Enum value)
-    {
-      if (enumType is null)
-        throw new ArgumentNullException(nameof(enumType));
-
-      if (!enumType.IsSubclassOf(typeof(GH_Enum)))
-        throw new ArgumentException($"{nameof(enumType)} must be a subclass of {typeof(GH_Enum).FullName}", nameof(enumType));
-
-      if (value is null) return default;
-      else if (value.IsEmpty) return string.Empty;
-      else if (value.IsValid)
-      {
-        try { return GetNamedValues(enumType)[value.Value]; }
-        catch (KeyNotFoundException) { return $"#{value}"; }
-      }
-
-      return default;
-    }
-
-    public static GH_Enum Parse(Type enumType, string name)
+    public static GH_Enum FromString(Type enumType, string name)
     {
       if (enumType is null)
         throw new ArgumentNullException(nameof(enumType));
@@ -225,26 +200,15 @@ namespace RhinoInside.Revit.GH.Types
 
         return enumerate;
       }
-      else if (name[0] == '#')
-      {
-        var enumerate = Activator.CreateInstance(enumType) as GH_Enum;
-        enumerate.Value = (int) Enum.Parse(enumerate.UnderlyingEnumType, name.Substring(1));
-        return enumerate;
-      }
       else
       {
-        var NamedValues = GetNamedValues(enumType);
-        var inverse = NamedValues.ToDictionary(x => x.Value, x => x.Key);
-        if (!inverse.TryGetValue(name, out var val))
-          throw new ArgumentException($"{name} is not one of the named constants defined for the enumeration", nameof(name));
-
         var enumerate = Activator.CreateInstance(enumType) as GH_Enum;
-        enumerate.Value = val;
+        enumerate.Value = (int) Enum.Parse(enumerate.UnderlyingEnumType, name);
         return enumerate;
       }
     }
 
-    public static GH_Enum Parse(Type enumType, int value)
+    public static GH_Enum FromInt32(Type enumType, int value)
     {
       if (enumType is null)
         throw new ArgumentNullException(nameof(enumType));
@@ -260,7 +224,7 @@ namespace RhinoInside.Revit.GH.Types
       throw new ArgumentException(nameof(value));
     }
 
-    public static GH_Enum Parse(Type enumType, double value)
+    public static GH_Enum FromDouble(Type enumType, double value)
     {
       if (enumType is null)
         throw new ArgumentNullException(nameof(enumType));
@@ -288,27 +252,6 @@ namespace RhinoInside.Revit.GH.Types
       throw new ArgumentException(nameof(value));
     }
 
-    public static string Format<T>(T value)
-      where T : GH_Enum
-    {
-      return Format(typeof(T), value);
-    }
-
-    public static bool TryParse<T>(string name, out T value)
-      where T : GH_Enum
-    {
-      try
-      {
-        value = (T) Parse(typeof(T), name);
-        return true;
-      }
-      catch (ArgumentException)
-      {
-        value = default;
-        return false;
-      }
-    }
-
     public override bool CastFrom(object source)
     {
       switch (source)
@@ -323,9 +266,9 @@ namespace RhinoInside.Revit.GH.Types
         var enumerate = default(GH_Enum);
         switch (source)
         {
-          case int intValue:        enumerate = Parse(GetType(), intValue);     break;
-          case double doubleValue:  enumerate = Parse(GetType(), doubleValue);  break;
-          case string stringValue:  enumerate = Parse(GetType(), stringValue);  break;
+          case int intValue:        enumerate = FromInt32(GetType(), intValue);     break;
+          case double doubleValue:  enumerate = FromDouble(GetType(), doubleValue);  break;
+          case string stringValue:  enumerate = FromString(GetType(), stringValue);  break;
           default:
             return base.CastFrom(source);
         }
@@ -360,9 +303,98 @@ namespace RhinoInside.Revit.GH.Types
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
 
+    #region IGH_ItemDescription
+    Bitmap IGH_ItemDescription.GetImage(Size size) => default;
+    string IGH_ItemDescription.Name => Text;
+    string IGH_ItemDescription.NickName => Value.ToString("D");
+    string IGH_ItemDescription.Description => TypeDescription;
+    #endregion
 
     #region System.Object
     public override int GetHashCode() => Value.GetHashCode();
+    #endregion
+
+    #region IFormattable
+    public sealed override string ToString() => ToString(default, CultureInfo.CurrentCulture);
+    public string ToString(string format, IFormatProvider formatProvider)
+    {
+      if (string.IsNullOrEmpty(format)) format = "G";
+
+      if (format.ToUpper() == "G" && formatProvider is CultureInfo ci)
+      {
+        if (!ci.Equals(CultureInfo.InvariantCulture))
+        {
+          if (IsEmpty) return string.Empty;
+          else if (IsValid)
+          {
+            try { return GetNamedValues(GetType())[Value]; }
+            catch (KeyNotFoundException) { return $"#{Value:D}"; }
+          }
+
+          return default;
+        }
+      }
+
+      switch (ScriptVariable())
+      {
+        case IFormattable formattable:
+          return formattable.ToString(format, formatProvider);
+
+        case object script:
+          return script.ToString();
+      }
+
+      return default;
+    }
+
+    public static bool TryParse<T>(string value, out T result)
+      where T : GH_Enum => TryParse(value, CultureInfo.CurrentCulture, out result);
+    public static bool TryParse<T>(string value, IFormatProvider formatProvider, out T result)
+      where T : GH_Enum
+    {
+      if (value is null)
+      {
+        result = default;
+        return false;
+      }
+      else if (value == string.Empty)
+      {
+        result = Activator.CreateInstance(typeof(T)) as T;
+        if (!result.IsEmpty)
+          throw new ArgumentException(nameof(value));
+
+        return true;
+      }
+      else
+      {
+        if (formatProvider is CultureInfo ci && !ci.Equals(CultureInfo.InvariantCulture))
+        {
+          if (value[0] == '#')
+          {
+            result = Activator.CreateInstance(typeof(T)) as T;
+            result.Value = (int) Enum.Parse(result.UnderlyingEnumType, value.Substring(1));
+            return true;
+          }
+          else
+          {
+            var NamedValues = GetNamedValues(typeof(T));
+            var inverse = NamedValues.ToDictionary(x => x.Value, x => x.Key);
+            if (!inverse.TryGetValue(value, out var val))
+              throw new ArgumentException($"'{value}' is not one of the named constants defined for the type {typeof(T)}", nameof(value));
+
+            result = Activator.CreateInstance(typeof(T)) as T;
+            result.Value = val;
+            return true;
+          }
+        }
+        else
+        {
+          result = Activator.CreateInstance(typeof(T)) as T;
+          result.Value = (int) Enum.Parse(result.UnderlyingEnumType, value);
+          return true;
+        }
+      }
+    }
     #endregion
 
     #region IComparable
@@ -406,7 +438,7 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         var description = GetType().GetTypeInfo().GetCustomAttribute(typeof(Kernel.Attributes.DescriptionAttribute)) as System.ComponentModel.DescriptionAttribute;
-        return description?.Description ?? $"{typeof(T).Module.Name} {TypeName}";
+        return description?.Description ?? $"A {TypeName} value";
       }
     }
     public sealed override Type UnderlyingEnumType => typeof(T);
@@ -429,6 +461,12 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastTo<Q>(ref Q target)
     {
+      if (typeof(Q) == typeof(T))
+      {
+        target = (Q) (object) Value;
+        return true;
+      }
+
       if (typeof(Q).IsAssignableFrom(typeof(GH_Integer)))
       {
         target = (Q) (object) new GH_Integer(base.Value);
@@ -441,16 +479,10 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
-      if (typeof(Q) == typeof(T))
-      {
-        target = (Q) (object) Value;
-        return true;
-      }
-
-      return base.CastTo<Q>(ref target);
+      return base.CastTo(ref target);
     }
 
-    public override object ScriptVariable() => base.Value;
+    public override object ScriptVariable() => Value;
 
     static GH_Enum<T>[] enumValues;
     public static GH_Enum<T>[] EnumValues 
@@ -502,7 +534,7 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   using Kernel.Attributes;
 
-  public class Param_Enum<T> : Grasshopper.Kernel.GH_PersistentParam<T>, IGH_ObjectProxy
+  public class Param_Enum<T> : GH_PersistentParam<T>, IGH_ObjectProxy
     where T : class, IGH_Goo, Types.IGH_Enumerate, new()
   {
     protected Param_Enum(string name, string abbreviation, string description, string category, string subcategory) :

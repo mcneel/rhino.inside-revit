@@ -21,24 +21,6 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Geometric Element")]
   public class GeometricElement : GraphicalElement, IGH_GeometricElement, IGH_PreviewMeshData, Bake.IGH_BakeAwareElement
   {
-    public override string DisplayName
-    {
-      get
-      {
-        if (Value is DB.Element element)
-        {
-          if (element.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MARK) is DB.Parameter parameter && parameter.HasValue)
-          {
-            var mark = parameter.AsString();
-            if (!string.IsNullOrEmpty(mark))
-              return $"{base.DisplayName} [{mark}]";
-          }
-        }
-
-        return base.DisplayName;
-      }
-    }
-
     public GeometricElement() { }
     public GeometricElement(DB.Element element) : base(element) { }
 

@@ -927,19 +927,6 @@ namespace Grasshopper.Special
 
                 return GH_ObjectResponse.Handled;
               }
-
-              if (canvas.Viewport.Zoom >= GH_Viewport.ZoomDefault * 0.8f /*&& Owner.DataType == GH_ParamData.remote*/)
-              {
-                if (ListBounds.Contains(canvasLocation))
-                {
-                  foreach (var item in Owner.ListItems)
-                    item.Selected = true;
-
-                  Owner.ResetPersistentData(Owner.ListItems.Select(x => x.Value), "Select all");
-
-                  return GH_ObjectResponse.Handled;
-                }
-              }
             }
           }
         }

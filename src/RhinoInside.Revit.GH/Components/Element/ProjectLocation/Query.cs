@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using DB = Autodesk.Revit.DB;
@@ -12,6 +13,22 @@ namespace RhinoInside.Revit.GH.Components.Site
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "⌖";
     protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.ProjectLocation));
+
+    #region UI
+    protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
+    {
+      base.AppendAdditionalComponentMenuItems(menu);
+
+      var activeApp = Revit.ActiveUIApplication;
+      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.Location);
+      Menu_AppendItem
+      (
+        menu, $"Open Location…",
+        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
+        activeApp.CanPostCommand(commandId), false
+      );
+    }
+    #endregion
 
     public QueryProjectLocations()
     : base

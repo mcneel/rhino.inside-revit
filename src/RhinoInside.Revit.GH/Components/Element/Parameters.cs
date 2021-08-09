@@ -396,11 +396,7 @@ namespace RhinoInside.Revit.GH.Components.Element
 
       DA.SetData("Element", element);
 
-      Params.TrySetData(DA, "Parameter", () =>
-        key.IsReferencedData ?
-        key :
-        new Types.ParameterKey(element.Document, parameter.Definition as DB.InternalDefinition));
-
+      Params.TrySetData(DA, "Parameter", () => new Types.ParameterKey(element.Document, parameter.Definition as DB.InternalDefinition));
       Params.TrySetData(DA, "Value", () => parameter.AsGoo());
     }
   }
