@@ -43,7 +43,8 @@ namespace RhinoInside.Revit.GH.Components.Level
           Name = "Type",
           NickName = "T",
           Description = "Level Type",
-          Optional = true
+          Optional = true,
+          SelectedBuiltInCategory = DB.BuiltInCategory.OST_Levels
         },
         ParamRelevance.Primary
       ),
