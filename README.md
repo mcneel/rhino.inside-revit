@@ -23,9 +23,7 @@ See Wiki pages below for more information about the architecture of this project
 
 ## Build Process
 
-McNeel team is using internal [AppVeyor-based](https://www.appveyor.com/docs/)
-build systems to build this project branches. If you need custom builds, you
-are encouraged to fork the project and adapt to your own CI/CD system.
+The project uses a combination of GitHub Actions for pull request builds and a private build server to produce signed daily builds from the main release and development branches.
 
 ### Building from Source
 
