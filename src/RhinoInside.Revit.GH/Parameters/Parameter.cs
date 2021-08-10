@@ -335,8 +335,10 @@ namespace RhinoInside.Revit.GH.Parameters
           }
       }
 
-      try { Name = $"{ParameterGroup.Label} : {ParameterName}"; }
-      catch (Autodesk.Revit.Exceptions.InvalidOperationException) { Name = ParameterName; }
+      if (ParameterGroup is object && ParameterGroup != EDBS.ParameterGroup.Empty)
+        Name = $"{ParameterGroup.Label} : {ParameterName}";
+      else
+        Name = ParameterName;
 
       NickName = Name;
       MutableNickName = false;
