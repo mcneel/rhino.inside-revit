@@ -730,9 +730,10 @@ namespace RhinoInside.Revit.GH.Parameters
         if (value.IsEmpty) continue;
         switch (value.ScriptVariable())
         {
-          case int i: list.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(value.Text, $"{i}")); break;
-          case double d: list.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(value.Text, $"{d}")); break;
-          case string s: list.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(value.Text, $"\"{s}\"")); break;
+          case Enum e:    list.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(value.Text, $"{System.Convert.ToInt32(e)}")); break;
+          case int i:     list.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(value.Text, $"{i}")); break;
+          case double d:  list.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(value.Text, $"{d}")); break;
+          case string s:  list.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(value.Text, $"\"{s}\"")); break;
         }
       }
 
