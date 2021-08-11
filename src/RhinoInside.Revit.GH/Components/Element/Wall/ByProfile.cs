@@ -247,6 +247,7 @@ namespace RhinoInside.Revit.GH.Components
 
         if (offsetDist != 0.0)
         {
+          offsetDist *= Revit.ModelUnits;
           var translation = Transform.Translation(normal * (flipped ? -offsetDist : offsetDist));
 
           var newProfile = new Curve[profile.Count];
