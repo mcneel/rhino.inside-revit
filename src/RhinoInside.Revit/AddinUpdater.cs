@@ -145,6 +145,6 @@ namespace RhinoInside.Revit
     }
 
     public static async Task<ReleaseInfo> GetReleaseInfoAsync()
-        => await Task.Run(() => ActiveChannel.GetLatestRelease());
+        => await Task.Run(() => ActiveChannel?.GetLatestRelease());
   }
 }

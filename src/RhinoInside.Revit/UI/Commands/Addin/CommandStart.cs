@@ -20,7 +20,10 @@ namespace RhinoInside.Revit.UI
     static RibbonPanel grasshopperPanel;
 
     public static string CommandName => "Start";
-    public static string CommandIcon => AddinUpdater.ActiveChannel.IsStable ? "RIR-logo.png" : "RIR-WIP-logo.png";
+
+    // determine which RIR icon to use
+    public static string CommandIcon =>
+      AddinUpdater.ActiveChannel is null ? "RIR-logo.png" :  (AddinUpdater.ActiveChannel.IsStable ? "RIR-logo.png" : "RIR-WIP-logo.png");
 
     /// <summary>
     /// Initialize the Ribbon tab and first panel
