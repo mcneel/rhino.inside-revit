@@ -253,6 +253,17 @@ namespace RhinoInside.Revit.GH.Components
     #endregion
 
     #region IO
+    protected static ParamDefinition FindDefinition(ParamDefinition[] list, string name)
+    {
+      for (int i = 0; i < list.Length; ++i)
+      {
+        if (list[i].Param.Name == name)
+          return list[i];
+      }
+
+      return default;
+    }
+
     static int IndexOf(ParamDefinition[] list, IGH_Param value)
     {
       for (int i = 0; i < list.Length; ++i)
@@ -326,8 +337,8 @@ namespace RhinoInside.Revit.GH.Components
             var index = document.Objects.IndexOf(this);
             var group = new Grasshopper.Kernel.Special.GH_Group
             {
-              NickName = $"Obsolete : {Name}", // We tag it as "Obsolete" to allow user find those groups.
-              Border = Grasshopper.Kernel.Special.GH_GroupBorder.Box,
+              NickName = $"Upgraded : {Name}", // We tag it as "Upgraded" to allow user find those groups.
+              Border = Grasshopper.Kernel.Special.GH_GroupBorder.Blob,
               Colour = System.Drawing.Color.FromArgb(211, GH_Skin.palette_warning_standard.Fill)
             };
             document.AddObject(group, false, index++);
@@ -353,8 +364,8 @@ namespace RhinoInside.Revit.GH.Components
               if (inputType != param.GetType() && param.CreateSurrogate(inputType) is IGH_Param surrogate)
               {
                 GH_UpgradeUtil.MigrateRecipients(param, surrogate);
-                Params.UnregisterOutputParameter(param);
-                Params.RegisterOutputParam(surrogate, index);
+                Params.UnregisterInputParameter(param);
+                Params.RegisterInputParam(surrogate, index);
                 param = surrogate;
               }
 
@@ -362,7 +373,10 @@ namespace RhinoInside.Revit.GH.Components
               param.Optional = input.Param.Optional;
 
               if (input.Param is Param_Number input_number && param is Param_Number param_number)
+              {
                 param_number.AngleParameter = input_number.AngleParameter;
+                param_number.UseDegrees = input_number.UseDegrees;
+              }
             }
           }
 
@@ -383,8 +397,11 @@ namespace RhinoInside.Revit.GH.Components
               param.Access = output.Param.Access;
               param.Optional = output.Param.Optional;
 
-              if (output.Param is Param_Number input_number && param is Param_Number param_number)
-                param_number.AngleParameter = input_number.AngleParameter;
+              if (output.Param is Param_Number output_number && param is Param_Number param_number)
+              {
+                param_number.AngleParameter = output_number.AngleParameter;
+                param_number.UseDegrees = output_number.UseDegrees;
+              }
             }
           }
         }
@@ -439,7 +456,7 @@ namespace RhinoInside.Revit.GH.Components
             if (chunk.TryGetString("Name", ref name))
             {
               var i = Params.IndexOfInputParam(name);
-              if (i > 0) continue;
+              if (i < 0) continue;
               var param = Params.Input[i];
 
               var access = param.Access;
@@ -478,7 +495,7 @@ namespace RhinoInside.Revit.GH.Components
             if (chunk.TryGetString("Name", ref name))
             {
               var o = Params.IndexOfOutputParam(name);
-              if (o > 0) continue;
+              if (o < 0) continue;
               var param = Params.Output[o];
 
               var access = param.Access;

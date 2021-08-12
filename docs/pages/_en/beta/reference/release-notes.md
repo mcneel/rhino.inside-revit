@@ -10,6 +10,36 @@ Some of the changes mentioned in sections below, might break your existing Grass
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html version="1.0" time="08/01/2021" %}
+
+### New Features
+
+* Now 'Element Preview' and 'Element Geometry' work with 'Element Types'.
+* Added 'Define Parameter' component.
+* Added 'Add Parameter' component.
+* Added 'Query Parameters' component.
+* Added 'Shared Parameters' component.
+* Added 'Global Parameter' component.
+* Added 'Project Parameter' component.
+* Added 'Element Parameter' component.
+* Added 'Parameter Formula' component.
+* Added 'Parameter Type' picker.
+
+### Fixes
+
+* Fixed GetParameters when there are duplicates.
+* Disabled View refreshing when the View is not a model one or is not ready to display `DirectContext3D` graphics.
+* Fixed 'Element Name' component 'Name' output when transaction is rolledback.
+* Now 'Add Building Pad' component creates a default type if there is no one in the document.
+* Fixed 'Get Element Parameter' when it takes a null.
+* Fixed a serialization problem with types that inherit from `DataType`.
+* Fix for 'Query Element' when the input is not an accepted type but cast well to one of it.
+
+### API
+
+* Added `DB.InternalDefinition.GetParameterBinding` extension method.
+* Fixed ParameterGroup.ToBuiltInParameterGroup when input is null. It should return `BuiltInParameterGroup.INVALID` in that case.
+
 {% include ltr/release-header.html version="0.9" time="07/20/2021" %}
 
 ### New Features

@@ -33,7 +33,7 @@ namespace RhinoInside.Revit
     public abstract void RenderScene(DB.View dBView, DB.DisplayStyle displayStyle);
     #endregion
 
-    virtual public void Register()
+    public virtual void Register()
     {
       using (var service = DBES.ExternalServiceRegistry.GetService(DBES.ExternalServices.BuiltInExternalServices.DirectContext3DService) as DBES.MultiServerService)
       {
@@ -45,7 +45,7 @@ namespace RhinoInside.Revit
       }
     }
 
-    virtual public void Unregister()
+    public virtual void Unregister()
     {
       using (var service = DBES.ExternalServiceRegistry.GetService(DBES.ExternalServices.BuiltInExternalServices.DirectContext3DService) as DBES.MultiServerService)
       {
@@ -554,6 +554,21 @@ namespace RhinoInside.Revit
              displayStyle == DB.DisplayStyle.ShadingWithEdges ||
              displayStyle == DB.DisplayStyle.Realistic ||
              displayStyle == DB.DisplayStyle.RealisticWithEdges;
+    }
+
+    public static bool IsAvailable(DB.View view)
+    {
+      if (view is null) return false;
+      if (view.Document.IsFamilyDocument) return false;
+      if (!IsModelView(view)) return false;
+
+      var displayStyle = view.DisplayStyle;
+      return
+       displayStyle == DB.DisplayStyle.Wireframe ||
+       displayStyle == DB.DisplayStyle.HLR ||
+       displayStyle == DB.DisplayStyle.Shading ||
+       displayStyle == DB.DisplayStyle.ShadingWithEdges ||
+       displayStyle == DB.DisplayStyle.FlatColors;
     }
 
     public static bool HasVertexNormals(DB3D.VertexFormatBits vertexFormatBits) => (((int) vertexFormatBits) & 2) != 0;

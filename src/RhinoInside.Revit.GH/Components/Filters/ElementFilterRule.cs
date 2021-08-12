@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager.AddParameter(new Parameters.ParameterKey(), "ParameterKey", "K", "Parameter to check", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.ParameterKey(), "Parameter", "P", "Parameter to check", GH_ParamAccess.item);
       manager.AddGenericParameter("Value", "V", "Value to check with", GH_ParamAccess.item);
     }
 
@@ -88,7 +88,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       {
         try
         {
-          if (doc.GetElement(id) is DB.ParameterElement parameter)
+          if (doc?.GetElement(id) is DB.ParameterElement parameter)
           {
             dataType = parameter.GetDefinition().GetDataType();
             storageType = dataType.ToStorageType();
@@ -118,7 +118,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var parameterKey = default(Types.ParameterKey);
-      if (!DA.GetData("ParameterKey", ref parameterKey))
+      if (!DA.GetData("Parameter", ref parameterKey) || !parameterKey.IsReferencedData)
         return;
 
       if (!TryGetParameterDefinition(parameterKey.Document, parameterKey.Id, out var storageType, out var dataType))
@@ -126,7 +126,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
         if (parameterKey.Id.TryGetBuiltInParameter(out var builtInParameter))
           AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to found parameter '{DB.LabelUtils.GetLabelFor(builtInParameter)}' in Revit document.");
         else
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to found parameter '{parameterKey.Id.IntegerValue}' in Revit document.");
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to found parameter '{parameterKey.Name}' in Revit document.");
 
         return;
       }
@@ -140,16 +140,16 @@ namespace RhinoInside.Revit.GH.Components.Filters
         switch (Condition)
         {
           case ConditionType.NotEquals:
-          case ConditionType.Equals: ruleEvaluator = new DB.FilterStringEquals(); break;
-          case ConditionType.Greater: ruleEvaluator = new DB.FilterStringGreater(); break;
-          case ConditionType.GreaterOrEqual: ruleEvaluator = new DB.FilterStringGreaterOrEqual(); break;
-          case ConditionType.Less: ruleEvaluator = new DB.FilterStringLess(); break;
-          case ConditionType.LessOrEqual: ruleEvaluator = new DB.FilterStringLessOrEqual(); break;
+          case ConditionType.Equals:          ruleEvaluator = new DB.FilterStringEquals();          break;
+          case ConditionType.Greater:         ruleEvaluator = new DB.FilterStringGreater();         break;
+          case ConditionType.GreaterOrEqual:  ruleEvaluator = new DB.FilterStringGreaterOrEqual();  break;
+          case ConditionType.Less:            ruleEvaluator = new DB.FilterStringLess();            break;
+          case ConditionType.LessOrEqual:     ruleEvaluator = new DB.FilterStringLessOrEqual();     break;
         }
 
         var goo = default(GH_String);
-        if (DA.GetData("Value", ref goo))
-          rule = new DB.FilterStringRule(provider, ruleEvaluator, goo.Value, true);
+        if (DA.GetData("Value", ref goo) && goo.Value is string value)
+          rule = new DB.FilterStringRule(provider, ruleEvaluator, value, true);
       }
       else
       {
@@ -157,11 +157,11 @@ namespace RhinoInside.Revit.GH.Components.Filters
         switch (Condition)
         {
           case ConditionType.NotEquals:
-          case ConditionType.Equals: ruleEvaluator = new DB.FilterNumericEquals(); break;
-          case ConditionType.Greater: ruleEvaluator = new DB.FilterNumericGreater(); break;
-          case ConditionType.GreaterOrEqual: ruleEvaluator = new DB.FilterNumericGreaterOrEqual(); break;
-          case ConditionType.Less: ruleEvaluator = new DB.FilterNumericLess(); break;
-          case ConditionType.LessOrEqual: ruleEvaluator = new DB.FilterNumericLessOrEqual(); break;
+          case ConditionType.Equals:          ruleEvaluator = new DB.FilterNumericEquals();         break;
+          case ConditionType.Greater:         ruleEvaluator = new DB.FilterNumericGreater();        break;
+          case ConditionType.GreaterOrEqual:  ruleEvaluator = new DB.FilterNumericGreaterOrEqual(); break;
+          case ConditionType.Less:            ruleEvaluator = new DB.FilterNumericLess();           break;
+          case ConditionType.LessOrEqual:     ruleEvaluator = new DB.FilterNumericLessOrEqual();    break;
         }
 
         switch (storageType)
@@ -322,7 +322,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager.AddParameter(new Parameters.ParameterKey(), "ParameterKey", "K", "Parameter to check", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.ParameterKey(), "Parameter", "P", "Parameter to check", GH_ParamAccess.item);
       manager.AddTextParameter("Value", "V", "Value to check with", GH_ParamAccess.item);
       manager.AddBooleanParameter("Inverted", "I", "True if the results of the rule should be inverted", GH_ParamAccess.item, false);
     }
@@ -335,7 +335,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var parameterKey = default(Types.ParameterKey);
-      if (!DA.GetData("ParameterKey", ref parameterKey))
+      if (!DA.GetData("Parameter", ref parameterKey))
         return;
 
       var inverted = false;

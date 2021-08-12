@@ -21,6 +21,21 @@ namespace RhinoInside.Revit.Convert.System.Drawing
     }
   }
 
+  public static class ColorWithTransparencyConverter
+  {
+    public static Color ToColor(this DB.ColorWithTransparency c)
+    {
+      return c.IsValidObject ?
+             Color.FromArgb(0xFF - (int) c.GetTransparency(), (int) c.GetRed(), (int) c.GetGreen(), (int) c.GetBlue()) :
+             Color.FromArgb(0, 0, 0, 0);
+    }
+
+    public static DB.ColorWithTransparency ToColorWithTransparency(this Color c)
+    {
+      return new DB.ColorWithTransparency(c.R, c.G, c.B, 0xFFu - c.A);
+    }
+  }
+
   public static class RectangleConverter
   {
     public static Rectangle ToRectangle(this DB.Rectangle value)

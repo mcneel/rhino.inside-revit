@@ -42,6 +42,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (self?.Id != other?.Id)
         return false;
 
+      if (!self.IsValidObject || !other.IsValidObject)
+        return false;
+
       return self.Document.Equals(other.Document);
     }
   }
@@ -145,17 +148,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       static readonly ElementId[] Empty = new ElementId[0];
 
-      public ICollection<ElementId> AddedElementIds { get; private set; } = Empty;
       public ICollection<ElementId> DeletedElementIds { get; private set; } = Empty;
       public ICollection<ElementId> ModifiedElementIds { get; private set; } = Empty;
 
-      public DeleteUpdater()
+      public DeleteUpdater(Document document, ElementFilter filter)
       {
-        UpdaterRegistry.RegisterUpdater(this);
+        UpdaterRegistry.RegisterUpdater(this, isOptional: true);
 
-        var filter = new ElementCategoryFilter(BuiltInCategory.INVALID, true);
-        UpdaterRegistry.AddTrigger(UpdaterId, filter, Element.GetChangeTypeAny());
-        UpdaterRegistry.AddTrigger(UpdaterId, filter, Element.GetChangeTypeElementDeletion());
+        if (filter is null)
+          filter = new ElementCategoryFilter(BuiltInCategory.INVALID, true);
+
+        UpdaterRegistry.AddTrigger(UpdaterId, document, filter, Element.GetChangeTypeAny());
+        UpdaterRegistry.AddTrigger(UpdaterId, document, filter, Element.GetChangeTypeElementDeletion());
       }
 
       void IDisposable.Dispose()
@@ -166,7 +170,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       public void Execute(UpdaterData data)
       {
-        AddedElementIds = data.GetAddedElementIds();
         DeletedElementIds = data.GetDeletedElementIds();
         ModifiedElementIds = data.GetModifiedElementIds();
       }
@@ -174,6 +177,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
       public FailureProcessingResult PreprocessFailures(FailuresAccessor failuresAccessor) => FailureProcessingResult.ProceedWithRollBack;
     }
 
+    /// <summary>
+    /// Same as <see cref="Document.Delete(ICollection{ElementId})"/> but also return modified elements.
+    /// </summary>
+    /// <param name="document">The document where elementIds belong to.</param>
+    /// <param name="elementIds">The ids of the elements to delete.</param>
+    /// <param name="modifiedElements">The modified element id set.</param>
+    /// <param name="filter">What type of elements we are interested of. Can be null to return all related elements.</param>
+    /// <returns>The deleted element id set.</returns>
     public static ICollection<ElementId> GetDependentElements
     (
       this Document document,
@@ -182,29 +193,21 @@ namespace RhinoInside.Revit.External.DB.Extensions
       ElementFilter filter
     )
     {
-      using (var updater = new DeleteUpdater())
+      using (var updater = new DeleteUpdater(document, filter))
       using (var tx = new Transaction(document, "Delete"))
       {
-        tx.SetFailureHandlingOptions
+        tx.Start();
+        document.Delete(elementIds);
+        tx.Commit
         (
           tx.GetFailureHandlingOptions().
           SetClearAfterRollback(true).
           SetForcedModalHandling(true).
           SetFailuresPreprocessor(updater)
         );
-        tx.Start();
 
-        var deletedIds = document.Delete(elementIds);
-        tx.Commit();
-
-        modifiedElements = new List<ElementId>();
-        modifiedElements = filter is null ?
-          updater.ModifiedElementIds :
-          updater.ModifiedElementIds?.Where(x => filter.PassesFilter(document, x)).ToList();
-
-        return filter is null ?
-          updater.DeletedElementIds :
-          updater.DeletedElementIds?.Where(x => filter.PassesFilter(document, x)).ToList();
+        modifiedElements = updater.ModifiedElementIds ?? new List<ElementId>();
+        return updater.DeletedElementIds              ?? new List<ElementId>();
       }
     }
 
@@ -271,13 +274,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
     #region Parameter
+    struct ParameterEqualityComparer : IEqualityComparer<Parameter>
+    {
+      public bool Equals(Parameter x, Parameter y) => x.Id.IntegerValue == y.Id.IntegerValue;
+      public int GetHashCode(Parameter obj) => obj.Id.IntegerValue;
+    }
+
     public static IEnumerable<Parameter> GetParameters(this Element element, ParameterClass set)
     {
       switch (set)
       {
         case ParameterClass.Any:
-          return Enum.GetValues(typeof(BuiltInParameter)).
-            Cast<BuiltInParameter>().
+          return BuiltInParameterExtension.BuiltInParameters.
             Select
             (
               x =>
@@ -287,14 +295,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
               }
             ).
             Where(x => x?.Definition is object).
-            Union(element.Parameters.Cast<Parameter>().Where(x => x.StorageType != StorageType.None).OrderBy(x => x.Id.IntegerValue)).
-            GroupBy(x => x.Id).
-            Select(x => x.First());
+            Union(element.Parameters.Cast<Parameter>().Where(x => x.StorageType != StorageType.None), default(ParameterEqualityComparer)).
+            OrderBy(x => x.Id.IntegerValue);
         case ParameterClass.BuiltIn:
-          return Enum.GetValues(typeof(BuiltInParameter)).
-            Cast<BuiltInParameter>().
-            GroupBy(x => x).
-            Select(x => x.First()).
+          return BuiltInParameterExtension.BuiltInParameters.
             Select
             (
               x =>
@@ -329,9 +333,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
       {
         case ParameterClass.Any:
           return element.GetParameters(name, ParameterClass.BuiltIn).
-            Union(element.GetParameters(name).OrderBy(x => x.Id.IntegerValue)).
-            GroupBy(x => x.Id).
-            Select(x => x.First());
+            Union(element.GetParameters(name), default(ParameterEqualityComparer)).
+            OrderBy(x => x.Id.IntegerValue);
 
         case ParameterClass.BuiltIn:
           return BuiltInParameterExtension.BuiltInParameterMap.TryGetValue(name, out var parameters) ?
@@ -680,12 +683,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #region Replace
     public static T ReplaceElement<T>(this T from, T to, ICollection<BuiltInParameter> mask) where T : Element
     {
-      if (from?.Document is Document document)
-      {
-        to.CopyParametersFrom(from, mask);
-        document.Delete(from.Id);
-      }
-
+      to.CopyParametersFrom(from, mask);
       return to;
     }
     #endregion

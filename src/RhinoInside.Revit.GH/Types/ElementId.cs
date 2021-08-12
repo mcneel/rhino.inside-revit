@@ -37,28 +37,27 @@ namespace RhinoInside.Revit.GH.Types
 
     public override string ToString()
     {
-      var TypeName = ((IGH_Goo) this).TypeName;
+      var valid = IsValid;
+      string Invalid = Id == DB.ElementId.InvalidElementId ?
+        string.Empty :
+        IsReferencedData ?
+        (valid ? /*"Referenced "*/ "" : "Unresolved ") :
+        (valid ? string.Empty : "Invalid ");
+      string TypeName = ((IGH_Goo) this).TypeName;
+      string InstanceName = DisplayName ?? string.Empty;
 
       if (!IsReferencedData)
-        return DisplayName;
+        return $"{Invalid}{TypeName} : {InstanceName}";
 
-      var tip = IsValid ?
-      (
-        IsReferencedDataLoaded ?
-        DisplayName :
-        $"Unresolved {TypeName} : {UniqueID}"
-      ) :
-      $"Invalid {TypeName}" + (Id is object ? $" : {Id.IntegerValue}" : string.Empty);
+      string InstanceId = valid ? $" : id {Id.IntegerValue}" : $" : {UniqueID}";
 
       using (var Documents = Revit.ActiveDBApplication.Documents)
       {
-        return
-        (
-          Documents.Size > 1 ?
-          $"{tip} @ {Document?.GetFileName() ?? DocumentGUID.ToString()}" :
-          tip
-        );
+        if (Documents.Size > 1)
+          InstanceId = $"{InstanceId} @ {Document?.GetFileName() ?? DocumentGUID.ToString("B")}";
       }
+
+      return $"{Invalid}{TypeName} : {InstanceName}{InstanceId}";
     }
     #endregion
 
@@ -91,7 +90,6 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_Goo
-
     public override bool IsValid => base.IsValid && Id.IsValid();
     public override string IsValidWhyNot
     {
@@ -124,6 +122,7 @@ namespace RhinoInside.Revit.GH.Types
         target = (Q) (object) Id;
         return true;
       }
+
       if (typeof(Q).IsAssignableFrom(typeof(GH_Integer)))
       {
         target = (Q) (object) new GH_Integer(Id.IntegerValue);
@@ -167,7 +166,7 @@ namespace RhinoInside.Revit.GH.Types
       [System.ComponentModel.Description("API Object Type.")]
       public virtual Type ObjectType => owner.Value?.GetType();
       [System.ComponentModel.Description("Element is built in Revit.")]
-      public bool IsBuiltIn => owner.Id.IsBuiltInId();
+      public bool IsBuiltIn => owner.IsReferencedData && owner.Id.IsBuiltInId();
 
       class ObjectConverter : ExpandableObjectConverter
       {

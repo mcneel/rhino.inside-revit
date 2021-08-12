@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Grasshopper.Kernel;
 using Rhino;
 using Rhino.DocObjects;
+using RhinoInside.Revit.Convert.Render;
 using RhinoInside.Revit.Convert.System.Drawing;
 using DB = Autodesk.Revit.DB;
 
@@ -34,29 +34,10 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (RhinoDoc.ActiveDoc is RhinoDoc doc)
         {
-          var renderMaterial = Rhino.Render.RenderMaterial.CreateBasicMaterial(Rhino.DocObjects.Material.DefaultMaterial, doc);
-          renderMaterial.Name = Name;
-
-#if REVIT_2018
-          if (AppearanceAsset?.Value is DB.AppearanceAssetElement appearance)
-          {
-            using (var asset = appearance.GetRenderingAsset())
-              AppearanceAssetElement.SimulateRenderMaterial(renderMaterial, asset, doc);
-          }
-          else 
-#endif
-          if (Value is DB.Material material)
-          {
-            renderMaterial.Fields.Set(Rhino.Render.RenderMaterial.BasicMaterialParameterNames.Diffuse, material.Color.ToColor());
-            renderMaterial.Fields.Set(Rhino.Render.RenderMaterial.BasicMaterialParameterNames.Shine, material.Shininess / 128.0 * Rhino.DocObjects.Material.MaxShine);
-            renderMaterial.Fields.Set(Rhino.Render.RenderMaterial.BasicMaterialParameterNames.Reflectivity, 1.0 / Math.Exp((1.0 - (material.Smoothness / 100.0)) * 10));
-            renderMaterial.Fields.Set(Rhino.Render.RenderMaterial.BasicMaterialParameterNames.Transparency, material.Transparency / 100.0);
-          }
-
-          if(renderMaterial is null)
-            target = default;
-          else
+          if(Value.ToRenderMaterial(doc) is Rhino.Render.RenderMaterial renderMaterial)
             target = (Q) (object) new Grasshopper.Kernel.Types.GH_Material(renderMaterial);
+          else
+            target = default;
 
           return true;
         }

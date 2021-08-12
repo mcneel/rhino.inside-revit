@@ -6,6 +6,7 @@ namespace RhinoInside.Revit.External.DB
   public enum ParameterClass
   {
     Any = -1,
+    Invalid = 0,
     BuiltIn = 1,
     Project = 2,
     Family = 4,

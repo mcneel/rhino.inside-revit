@@ -89,7 +89,8 @@ namespace RhinoInside.Revit.GH.Components
       Params.TryGetData(DA, "Template", out Types.Category template);
 
       // Previous Output
-      var category = Params.ReadTrackedElement(_SubCategory_, parent.Document, out DB.Element element) ?
+      Params.ReadTrackedElement(_SubCategory_, parent.Document, out DB.Element element);
+      var category = element is object ?
         Types.Category.FromCategory(DocumentExtension.AsCategory(element)) :
         new Types.Category();
 

@@ -71,6 +71,10 @@ namespace RhinoInside.Revit.GH.Exceptions
 
 namespace RhinoInside.Revit.GH.Components
 {
+  using EditorBrowsableAttribute = System.ComponentModel.EditorBrowsableAttribute;
+  using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;
+
+  [EditorBrowsable(EditorBrowsableState.Never)]
   public abstract class GH_Component : Grasshopper.Kernel.GH_Component
   {
     protected GH_Component(string name, string nickname, string description, string category, string subCategory)
@@ -202,7 +206,10 @@ namespace RhinoInside.Revit.GH.Components
       }
       catch (Exceptions.RuntimeArgumentException e)
       {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, e.Message);
+        if (AbortOnUnhandledException)
+          unhandledException = e;
+
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
       }
       catch (Exceptions.RuntimeWarningException e)
       {
@@ -425,5 +432,104 @@ namespace RhinoInside.Revit.GH.Components
       return false;
     }
     #endregion
+  }
+
+  [EditorBrowsable(EditorBrowsableState.Never)]
+  public abstract class ComponentUpgrader : IGH_UpgradeObject
+  {
+    public abstract DateTime Version { get; }
+    public abstract Guid UpgradeFrom { get; }
+    public abstract Guid UpgradeTo { get; }
+
+    public virtual IReadOnlyDictionary<string, string> GetInputAliases(IGH_Component source) => default;
+    public virtual IReadOnlyDictionary<string, string> GetOutputAliases(IGH_Component source) => default;
+
+    public virtual IGH_DocumentObject Upgrade(IGH_DocumentObject docObject, GH_Document document)
+    {
+      if (docObject is IGH_Component source && Grasshopper.Instances.ComponentServer.EmitObject(UpgradeTo) is IGH_Component target)
+      {
+        int master = -1;
+
+        var inputAliases = GetInputAliases(source);
+        var input_index = -1;
+        foreach (var input in source.Params.Input)
+        {
+          input_index++;
+
+          var inputName = input.Name;
+          if (inputAliases?.TryGetValue(input.Name, out inputName) == true && string.IsNullOrEmpty(inputName))
+            continue;
+
+          var index = target.Params.IndexOfInputParam(inputName ?? input.Name);
+          if (index >= 0)
+          {
+            if (input_index == source.MasterParameterIndex)
+              master = index;
+
+            var target_parameter = target.Params.Input[index];
+
+            target_parameter.WireDisplay = input.WireDisplay;
+            target_parameter.DataMapping = input.DataMapping;
+            target_parameter.Reverse = input.Reverse;
+            target_parameter.Simplify = input.Simplify;
+
+            // Implementation relay on Optional & Access
+            //target_parameter.Optional = input.Optional;
+            //target_parameter.Access = input.Access;
+
+            GH_UpgradeUtil.MigrateSources(input, target_parameter);
+            target_parameter.NewInstanceGuid(input.InstanceGuid);
+          }
+        }
+
+        var outputAliases = GetOutputAliases(source);
+        foreach (var output in source.Params.Output)
+        {
+          var outputName = output.Name;
+          if (outputAliases?.TryGetValue(output.Name, out outputName) == true && string.IsNullOrEmpty(outputName))
+            continue;
+
+          var index = target.Params.IndexOfOutputParam(outputName ?? output.Name);
+          if (index >= 0)
+          {
+            var target_parameter = target.Params.Output[index];
+
+            target_parameter.WireDisplay = output.WireDisplay;
+            target_parameter.DataMapping = output.DataMapping;
+            target_parameter.Reverse = output.Reverse;
+            target_parameter.Simplify = output.Simplify;
+
+            // Implementation relay on Optional & Access
+            //target_parameter.Optional = input.Optional;
+            //target_parameter.Access = input.Access;
+
+            GH_UpgradeUtil.MigrateRecipients(output, target_parameter);
+            target_parameter.NewInstanceGuid(output.InstanceGuid);
+          }
+        }
+
+        target.IconDisplayMode = source.IconDisplayMode;
+        target.MasterParameterIndex = master;
+        target.Locked = source.Locked;
+        target.Hidden = source.Hidden;
+
+        if (GH_UpgradeUtil.SwapComponents(source, target, false))
+          return target;
+      }
+
+      return default;
+    }
+
+    public static void SolveInstance(IGH_Component component, IGH_DataAccess DA)
+    {
+      component.AddRuntimeMessage
+      (
+        GH_RuntimeMessageLevel.Error,
+        "This component is Obsolete." + Environment.NewLine +
+        "Please use 'Solution > Upgrade Components…' from Grasshopper menu."
+      );
+
+      DA.AbortComponentSolution();
+    }
   }
 }

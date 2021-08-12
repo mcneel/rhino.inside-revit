@@ -6,6 +6,7 @@ using System.Reflection;
 using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
+using Grasshopper.Special;
 using Rhino.Geometry;
 using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
@@ -17,7 +18,8 @@ namespace RhinoInside.Revit.GH.Types
     IEquatable<DataType<T>>,
     IComparable<DataType<T>>,
     IComparable,
-    IGH_QuickCast
+    IGH_QuickCast,
+    IGH_ItemDescription
     where T : EDBS.DataType, new()
   {
     protected DataType() { }
@@ -41,8 +43,6 @@ namespace RhinoInside.Revit.GH.Types
     public virtual bool IsValid => Value != default;
     public virtual string IsValidWhyNot => IsValid ? default : "Not Valid";
 
-    string IGH_Goo.ToString() => Value.Label;
-
     public virtual string TypeName
     {
       get
@@ -62,6 +62,8 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     public IGH_Goo Duplicate() => (IGH_Goo) MemberwiseClone();
+
+    string IGH_Goo.ToString() => Text;
 
     public virtual IGH_GooProxy EmitProxy() => default;
 
@@ -104,6 +106,13 @@ namespace RhinoInside.Revit.GH.Types
 
       return true;
     }
+    #endregion
+
+    #region IGH_ItemDescription
+    Bitmap IGH_ItemDescription.GetImage(Size size) => default;
+    string IGH_ItemDescription.Name => Value?.Label;
+    string IGH_ItemDescription.NickName => Value?.Name;
+    string IGH_ItemDescription.Description => Value?.Namespace;
     #endregion
 
     #region System.Object
@@ -250,12 +259,24 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (enumValues is null)
         {
-          enumValues = typeof(EDBS.SpecType.Measurable).
+          var types = new Type[]
+          {
+            typeof(EDBS.SpecType.Boolean),
+            typeof(EDBS.SpecType.Int),
+            typeof(EDBS.SpecType.String),
+            typeof(EDBS.SpecType.Measurable),
+            typeof(EDBS.SpecType.Reference)
+          };
+
+          enumValues = types.SelectMany
+          (
+            type => type.
             GetProperties(BindingFlags.Public | BindingFlags.Static).
-            Where(x => x.PropertyType == typeof(EDBS.SpecType.Measurable)).
-            Select(x => new ParameterType((EDBS.UnitType) x.GetValue(null))).
-            OrderBy(x => x.Value.FullName).
-            ToArray();
+            Where(x => x.PropertyType == typeof(EDBS.SpecType)).
+            Select(x => new ParameterType((EDBS.DataType) x.GetValue(null))).
+            OrderBy(x => x.Value.FullName)
+          ).
+          ToArray();
         }
 
         return enumValues;
@@ -287,6 +308,8 @@ namespace RhinoInside.Revit.GH.Types
       }
       catch (ArgumentException) { return false; }
     }
+
+    public static Type PickerObjectType => typeof(Parameters.Input.BuiltInParameterTypes);
   }
 
   [
@@ -344,6 +367,8 @@ namespace RhinoInside.Revit.GH.Types
       }
       catch (ArgumentException) { return false; }
     }
+
+    public static Type PickerObjectType => typeof(Parameters.Input.BuiltInParameterGroups);
   }
 
   [
@@ -401,6 +426,8 @@ namespace RhinoInside.Revit.GH.Types
       }
       catch (ArgumentException) { return false; }
     }
+
+    public static Type PickerObjectType => typeof(Parameters.Input.BuiltInParameters);
   }
 
   [
@@ -458,5 +485,7 @@ namespace RhinoInside.Revit.GH.Types
       }
       catch (ArgumentException) { return false; }
     }
+
+    public static Type PickerObjectType => typeof(Parameters.Input.BuiltInCategories);
   }
 }

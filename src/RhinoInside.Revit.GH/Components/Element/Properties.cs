@@ -162,8 +162,13 @@ namespace RhinoInside.Revit.GH.Components
           var nameParam = Params.Output[_Name_];
           foreach (var item in nameParam.VolatileData.AllData(true))
           {
-            if (item is GH_String text && namesMap.TryGetValue(text.Value, out var name))
-              text.Value = name;
+            if (item is GH_String text)
+            {
+              if (namesMap.TryGetValue(text.Value, out var name))
+                text.Value = name;
+              else
+                text.Value = null;
+            }
           }
         }
       }

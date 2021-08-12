@@ -48,6 +48,10 @@
         justify-content: none;
     }
 
+    .site-nav {
+        top: 6px;
+    }
+
     .site-nav .img-button-title {
         display: inline-block;
     }
@@ -82,6 +86,10 @@
     .sidebar {
         display: inline;
         position: inherit;
+    }
+
+    .sidebar ul {
+        margin-top: 20px;
     }
 
     .sidebar li {

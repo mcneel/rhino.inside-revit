@@ -449,6 +449,7 @@ namespace RhinoInside.Revit.GH.Components
         catch (Exception e)
         {
           AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
+          ResetData();
         }
         finally
         {
@@ -520,7 +521,7 @@ namespace RhinoInside.Revit.GH.Components
         if(Params.Input<Parameters.Document>("Document") is IGH_Param document)
           return document.SourceCount == 0 && document.DataType == GH_ParamData.@void;
 
-        return false;
+        return true;
       }
     }
 

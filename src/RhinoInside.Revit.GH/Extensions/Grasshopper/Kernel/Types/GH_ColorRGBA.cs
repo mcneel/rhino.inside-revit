@@ -1,17 +1,32 @@
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using GH_IO.Serialization;
 using GH_IO.Types;
+using Grasshopper.Special;
 
 namespace Grasshopper.Kernel.Types
 {
   [EditorBrowsable(EditorBrowsableState.Never)]
-  public class GH_ColorRGBA : GH_Goo<Rhino.Display.ColorRGBA>
+  public class GH_ColorRGBA : GH_Goo<Rhino.Display.ColorRGBA>, IGH_ItemDescription
   {
     public override bool IsValid => true;
 
-    public override string TypeName => "Color";
+    public override string TypeName => "RGBA Color";
 
-    public override string TypeDescription => "Color defined by 4 floating point values";
+    public override string TypeDescription => "A double-precision, RGBA color";
+
+    #region IGH_ItemDescription
+    public System.Drawing.Bitmap GetImage(System.Drawing.Size size) => default;
+
+    public string Name => ToString();
+
+    public string NickName => Value.A == 1.0 ?
+      $"{Value.R:F2},{Value.G:F2},{Value.B:F2}":
+      $"{Value.R:F2},{Value.G:F2},{Value.B:F2},{Value.A:F2}";
+
+    public string Description => TypeDescription;
+    #endregion
 
     public override IGH_Goo Duplicate() => MemberwiseClone() as IGH_Goo;
 
@@ -20,8 +35,26 @@ namespace Grasshopper.Kernel.Types
 
     public override string ToString()
     {
-      return GH_Format.FormatColour((System.Drawing.Color) Value);
+      var color = (System.Drawing.Color) Value;
+
+      return color.A < 255 ?
+        $"{color.R},{color.G},{color.B},{color.A}" :
+        $"{color.R},{color.G},{color.B}";
     }
+
+    struct ArgbComparer : IEqualityComparer<System.Drawing.Color>
+    {
+      public bool Equals(System.Drawing.Color x, System.Drawing.Color y) => x.ToArgb() == y.ToArgb();
+      public int GetHashCode(System.Drawing.Color obj) => obj.ToArgb();
+    }
+    static readonly IReadOnlyDictionary<int, string> ColorNames = typeof(System.Drawing.Color).
+      GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static).
+      Where(x => x.PropertyType == typeof(System.Drawing.Color)).Select(x => (System.Drawing.Color) x.GetValue(null)).
+      Distinct(default(ArgbComparer)).
+      ToDictionary(k => k.ToArgb(), v => v.Name);
+
+    public static bool TryGetName(System.Drawing.Color color, out string name) =>
+      ColorNames.TryGetValue(color.ToArgb(), out name);
 
     public override bool CastFrom(object source)
     {

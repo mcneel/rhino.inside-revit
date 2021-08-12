@@ -580,7 +580,7 @@ namespace RhinoInside.Revit.GH.Types
         {
           var tip = string.Empty;
           if (graphicsStyle.GraphicsStyleCategory.Parent is DB.Category parent)
-            tip = $"{parent.Name} : ";
+            tip = $"{parent.Name}\\";
 
           switch (graphicsStyle.GraphicsStyleType)
           {

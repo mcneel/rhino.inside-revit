@@ -103,8 +103,8 @@ namespace RhinoInside.Revit.External.DB.Schemas
     public bool Equals(DataType other) => FullName == other?.FullName;
     #endregion
 
-    public static bool operator == (DataType lhs, DataType rhs) =>  (ReferenceEquals(lhs, rhs) || lhs.Equals(rhs));
-    public static bool operator != (DataType lhs, DataType rhs) => !(ReferenceEquals(lhs, rhs) || lhs.Equals(rhs));
+    public static bool operator == (DataType lhs, DataType rhs) =>  (ReferenceEquals(lhs, rhs) || lhs?.Equals(rhs) == true);
+    public static bool operator != (DataType lhs, DataType rhs) => !(ReferenceEquals(lhs, rhs) || lhs?.Equals(rhs) == true);
 
 #if REVIT_2021
     public static implicit operator DataType(Autodesk.Revit.DB.ForgeTypeId value) => value is null ? null : new DataType(value.TypeId);
@@ -303,16 +303,19 @@ namespace RhinoInside.Revit.External.DB.Extensions
           return item.Key;
       }
 
-      return Schemas.DataType.Empty;
+      return default;
     }
 
     internal static Autodesk.Revit.DB.ParameterType ToParameterType(this Schemas.DataType value)
     {
-      if (Schemas.CategoryId.IsCategoryId(value, out var _))
-        return Autodesk.Revit.DB.ParameterType.FamilyType;
+      if (value is object)
+      {
+        if (Schemas.CategoryId.IsCategoryId(value, out var _))
+          return Autodesk.Revit.DB.ParameterType.FamilyType;
 
-      if (parameterTypeMap.TryGetValue(value, out var pt))
-        return (Autodesk.Revit.DB.ParameterType) pt;
+        if (parameterTypeMap.TryGetValue(value, out var pt))
+          return (Autodesk.Revit.DB.ParameterType) pt;
+      }
 
       return Autodesk.Revit.DB.ParameterType.Invalid;
     }

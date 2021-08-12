@@ -123,22 +123,22 @@ namespace RhinoInside.Revit.GH.Components
       [Optional] bool structural
     )
     {
-      if (boundary.Count < 1) return;
+      if (boundary is null) return;
 
       var normal = default(Vector3d); var maxArea = 0.0;
       var index = 0; var maxIndex = 0;
       foreach (var loop in boundary)
       {
+        if (loop is null) return;
         var plane = default(Plane);
         if
         (
-          loop is null ||
           loop.IsShort(Revit.ShortCurveTolerance * Revit.ModelUnits) ||
           !loop.IsClosed ||
           !loop.TryGetPlane(out plane, Revit.VertexTolerance) ||
           plane.ZAxis.IsParallelTo(Vector3d.ZAxis, Revit.AngleTolerance) == 0
         )
-          ThrowArgumentException(nameof(boundary), "Boundary loop curves should be a valid horizontal, planar and closed.");
+          ThrowArgumentException(nameof(boundary), "Boundary loop curves should be a set of valid horizontal, coplanar and closed curves.");
 
         using (var properties = AreaMassProperties.Compute(loop))
         {
@@ -175,7 +175,11 @@ namespace RhinoInside.Revit.GH.Components
 
       SolveOptionalLevel(document, boundary, ref level, out var bbox);
 
-      if (!Reuse(ref floor, boundary, type.Value, level.Value, structural))
+      if (boundary.Count == 0)
+      {
+        floor = default;
+      }
+      else if (!Reuse(ref floor, boundary, type.Value, level.Value, structural))
       {
         var parametersMask = new DB.BuiltInParameter[]
         {

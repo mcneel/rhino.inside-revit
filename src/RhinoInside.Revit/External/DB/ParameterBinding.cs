@@ -1,9 +1,13 @@
+using System;
+
 namespace RhinoInside.Revit.External.DB
 {
+  [Flags]
   public enum ParameterBinding
   {
     Unknown,
-    Instance,
-    Type,
+    Instance = 1,
+    Type     = 2,
+    Global   = 4
   }
 }

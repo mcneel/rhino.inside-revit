@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override Guid ComponentGuid => new Guid("A550F532-8C68-460B-91F3-DA0A5A0D42B5");
     public override GH_Exposure Exposure => GH_Exposure.septenary;
 
-    public ParameterKey() : base("Parameter Key", "ParaKey", "Contains a collection of Revit parameter keys", "Params", "Revit Primitives") { }
+    public ParameterKey() : base("Parameter", "Parameter", "Contains a collection of Revit parameters", "Params", "Revit Primitives") { }
 
     #region UI
     public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
@@ -26,13 +26,37 @@ namespace RhinoInside.Revit.GH.Parameters
       base.AppendAdditionalMenuItems(menu);
 
       var activeApp = Revit.ActiveUIApplication;
-      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.ProjectParameters);
-      Menu_AppendItem
-      (
-        menu, $"Open Project Parameters…",
-        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
-        activeApp.CanPostCommand(commandId), false
-      );
+      var doc = activeApp.ActiveUIDocument?.Document;
+      if (doc is null) return;
+
+      {
+        var commandId = doc.IsFamilyDocument ?
+          Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.FamilyTypes) :
+          Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.ProjectParameters);
+
+        var commandName = doc.IsFamilyDocument ?
+          "Open Family Parameters…" :
+          "Open Project Parameters…";
+
+        Menu_AppendItem
+        (
+          menu, commandName,
+          (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
+          activeApp.CanPostCommand(commandId), false
+        );
+      }
+
+#if REVIT_2022
+      {
+        var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.GlobalParameters);
+        Menu_AppendItem
+        (
+          menu, "Open Global Parameters…",
+          (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
+          !doc.IsFamilyDocument && activeApp.CanPostCommand(commandId), false
+        );
+      }
+#endif
     }
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
@@ -40,25 +64,32 @@ namespace RhinoInside.Revit.GH.Parameters
       if (SourceCount != 0) return;
       if (Revit.ActiveUIDocument?.Document is null) return;
 
-      var listBox = new ListBox();
-      listBox.BorderStyle = BorderStyle.FixedSingle;
-      listBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
-      listBox.Height = (int) (100 * GH_GraphicsUtil.UiScale);
+      var listBox = new ListBox
+      {
+        Sorted = true,
+        BorderStyle = BorderStyle.FixedSingle,
+        Width = (int) (200 * GH_GraphicsUtil.UiScale),
+        Height = (int) (100 * GH_GraphicsUtil.UiScale)
+      };
       listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
-      listBox.Sorted = true;
 
-      var categoriesBox = new ComboBox();
-      categoriesBox.DropDownStyle = ComboBoxStyle.DropDownList;
+      var categoriesBox = new ComboBox
+      {
+        Sorted = true,
+        DropDownStyle = ComboBoxStyle.DropDownList,
+        Width = (int) (200 * GH_GraphicsUtil.UiScale),
+        Tag = listBox
+      };
       categoriesBox.DropDownHeight = categoriesBox.ItemHeight * 15;
       categoriesBox.SetCueBanner("Category filter…");
-      categoriesBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
-      categoriesBox.Tag = listBox;
       categoriesBox.SelectedIndexChanged += CategoriesBox_SelectedIndexChanged;
 
-      var categoriesTypeBox = new ComboBox();
-      categoriesTypeBox.DropDownStyle = ComboBoxStyle.DropDownList;
-      categoriesTypeBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
-      categoriesTypeBox.Tag = categoriesBox;
+      var categoriesTypeBox = new ComboBox
+      {
+        DropDownStyle = ComboBoxStyle.DropDownList,
+        Width = (int) (200 * GH_GraphicsUtil.UiScale),
+        Tag = categoriesBox
+      };
       categoriesTypeBox.SelectedIndexChanged += CategoryType_SelectedIndexChanged;
       categoriesTypeBox.Items.Add("All Categories");
       categoriesTypeBox.Items.Add("Model");
@@ -90,7 +121,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
       categoriesBox.SelectedIndex = -1;
       categoriesBox.Items.Clear();
-      foreach (var category in categories.OrderBy(x => x.Name))
+      foreach (var category in categories)
       {
         var tag = Types.Category.FromCategory(category);
         int index = categoriesBox.Items.Add(tag.EmitProxy());

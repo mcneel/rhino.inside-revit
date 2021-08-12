@@ -63,7 +63,7 @@ namespace RhinoInside.Revit.GH.Components
       Params.TrySetData(DA, "Shared Site", () => new Types.ProjectLocation(doc.ActiveProjectLocation));
       Params.TrySetData(DA, "Survey Point", () => new Types.BasePoint(BasePointExtension.GetSurveyPoint(doc)));
       Params.TrySetData(DA, "Project Base Point", () => new Types.BasePoint(BasePointExtension.GetProjectBasePoint(doc)));
-      Params.TrySetData(DA, "Internal Origin", () => new Types.BasePoint(BasePointExtension.GetInternalOriginPoint(doc)));
+      Params.TrySetData(DA, "Internal Origin", () => new Types.InternalOrigin(InternalOriginExtension.GetInternalOriginPoint(doc)));
     }
   }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Reflection;
 using GH_IO.Serialization;
 using Grasshopper.Kernel.Types;
+using Grasshopper.Special;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
@@ -24,7 +25,14 @@ namespace RhinoInside.Revit.GH.Types
       Equals(Document, other.Document) && Equals(Value, other.Value);
     public override bool Equals(object obj) => (obj is DocumentObject id) ? Equals(id) : base.Equals(obj);
     public override int GetHashCode() => Document.GetHashCode() ^ Value.GetHashCode();
-    public override string ToString() => $"Revit {((IGH_Goo) this).TypeName} : {DisplayName}";
+    public override string ToString()
+    {
+      string Invalid = IsValid ? string.Empty : "Invalid ";
+      string TypeName = ((IGH_Goo) this).TypeName;
+      string InstanceName = DisplayName is string displayName ? $" : {displayName}" : string.Empty;
+
+      return Invalid + TypeName + InstanceName;
+    }
 
     object ICloneable.Clone() => MemberwiseClone();
     #endregion
@@ -178,7 +186,10 @@ namespace RhinoInside.Revit.GH.Types
     DB.ElementId Id { get; }
   }
 
-  public abstract class ReferenceObject : DocumentObject, IGH_ReferenceObject, IEquatable<ReferenceObject>
+  public abstract class ReferenceObject : DocumentObject,
+    IEquatable<ReferenceObject>,
+    IGH_ReferenceObject,
+    IGH_ItemDescription
   {
     #region System.Object
     public bool Equals(ReferenceObject other) => other is object &&
@@ -192,5 +203,12 @@ namespace RhinoInside.Revit.GH.Types
     protected ReferenceObject(DB.Document doc, object val) : base(doc, val) { }
 
     public abstract DB.ElementId Id { get; }
+
+    #region IGH_ItemDescription
+    System.Drawing.Bitmap IGH_ItemDescription.GetImage(System.Drawing.Size size) => default;
+    string IGH_ItemDescription.Name => DisplayName;
+    string IGH_ItemDescription.NickName => $"{{{Id?.IntegerValue}}}";
+    string IGH_ItemDescription.Description => Document?.GetFileName();
+    #endregion
   }
 }

@@ -41,6 +41,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+    // TODO : Rename to ValueType
     protected virtual Type ScriptVariableType => typeof(DB.Element);
     #endregion
 
@@ -56,6 +57,8 @@ namespace RhinoInside.Revit.GH.Types
         return value;
       }
     }
+
+    public override string DisplayName => Name ?? (IsReferencedData ? string.Empty : "<None>");
     #endregion
 
     #region ReferenceObject
@@ -124,7 +127,11 @@ namespace RhinoInside.Revit.GH.Types
 
     public static readonly Dictionary<Type, Func<DB.Element, Element>> ActivatorDictionary = new Dictionary<Type, Func<DB.Element, Element>>()
     {
+// TODO : Upgrade Revit 2021 nuget package to 2021.0.1 and change the if below to REVIT_2021
+#if REVIT_2022
+      { typeof(DB.InternalOrigin),          (element)=> new InternalOrigin        (element as DB.InternalOrigin)    },
       { typeof(DB.BasePoint),               (element)=> new BasePoint             (element as DB.BasePoint)         },
+#endif
       { typeof(DB.DesignOption),            (element)=> new DesignOption          (element as DB.DesignOption)      },
       { typeof(DB.Phase),                   (element)=> new Phase                 (element as DB.Phase)             },
       { typeof(DB.SelectionFilterElement),  (element)=> new SelectionFilterElement(element as DB.SelectionFilterElement)},
@@ -206,8 +213,14 @@ namespace RhinoInside.Revit.GH.Types
 
           return new InstanceElement(element);
         }
-
-        if (GeometricElement.IsValidElement(element))
+// TODO : Upgrade Revit 2021 nuget package to 2021.0.1 and change the if below to REVIT_2021
+#if !REVIT_2022
+        else if (InternalOrigin.IsValidElement(element))
+          return new InternalOrigin(element as DB.BasePoint);
+        else if (BasePoint.IsValidElement(element))
+          return new BasePoint(element as DB.BasePoint);
+#endif
+        else if (GeometricElement.IsValidElement(element))
           return new GeometricElement(element);
 
         return new GraphicalElement(element);
@@ -352,12 +365,7 @@ namespace RhinoInside.Revit.GH.Types
       }
 
       if (source is DB.Element value)
-      {
-        if (!SetValue(value))
-          SetValue(default, DB.ElementId.InvalidElementId);
-
-        return true;
-      }
+        return SetValue(value);
 
       return false;
     }
@@ -426,18 +434,6 @@ namespace RhinoInside.Revit.GH.Types
       public virtual int? Id
       {
         get => owner.Id?.IntegerValue;
-        set
-        {
-          if (!value.HasValue || value == DB.ElementId.InvalidElementId.IntegerValue)
-            owner.SetValue(default, DB.ElementId.InvalidElementId);
-          else
-          {
-            var doc = owner.Document ?? Revit.ActiveDBDocument;
-            var id = new DB.ElementId(value.Value);
-
-            if (IsValidId(doc, id)) owner.SetValue(doc, id);
-          }
-        }
       }
 
       [System.ComponentModel.Description("A human readable name for the Element.")]
@@ -446,18 +442,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
 
-    public override string DisplayName
-    {
-      get
-      {
-        if (Name is string name && name != string.Empty)
-          return name;
-
-        return base.DisplayName;
-      }
-    }
-
-    #region Properties
+#region Properties
     public bool CanDelete => IsValid && DB.DocumentValidation.CanDeleteElement(Document, Id);
 
     public bool? Pinned
@@ -608,10 +593,10 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
     }
-    #endregion
+#endregion
 
-    #region Identity Data
-    public string Description
+#region Identity Data
+    public virtual string Description
     {
       get => Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.AsString();
       set
@@ -694,6 +679,6 @@ namespace RhinoInside.Revit.GH.Types
           Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MARK)?.Set(value);
       }
     }
-    #endregion
+#endregion
   }
 }

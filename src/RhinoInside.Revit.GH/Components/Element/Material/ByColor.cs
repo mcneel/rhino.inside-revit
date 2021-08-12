@@ -80,25 +80,23 @@ namespace RhinoInside.Revit.GH.Components.Material
       // Input
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
       if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return;
-      Params.TryGetData(DA, "Shader", out GH_Material template);
+      if (!Params.GetData(DA, "Shader", out GH_Material template)) return;
 
-      // Previous Output
-      var mat = Params.ReadTrackedElement(_Material_, doc.Value, out DB.Material material);
-      var app = Params.ReadTrackedElement(_Asset_, doc.Value, out DB.AppearanceAssetElement asset);
+      if (name is null)
+        name = GetMaterialName(template);
 
-      if (!mat && !app) return;
-
-      StartTransaction(doc.Value);
-      if (mat)
+      if (Params.ReadTrackedElement(_Material_, doc.Value, out DB.Material material))
       {
+        StartTransaction(doc.Value);
         material = Reconstruct(material, doc.Value, name, template);
 
         Params.WriteTrackedElement(_Material_, doc.Value, material);
         DA.SetData(_Material_, material);
       }
 
-      if (app)
+      if (Params.ReadTrackedElement(_Asset_, doc.Value, out DB.AppearanceAssetElement asset))
       {
+        StartTransaction(doc.Value);
         asset = Reconstruct(asset, doc.Value, name, template);
         if (material is object && asset is object)
         {
@@ -115,6 +113,41 @@ namespace RhinoInside.Revit.GH.Components.Material
         DA.SetData(_Asset_, asset);
       }
     }
+
+    #region Utils
+    static string GetMaterialName(GH_Material material)
+    {
+      var name = default(string);
+
+      switch (material.Type)
+      {
+        case GH_Material.MaterialType.Shader: name = "Display Material"; break;
+        case GH_Material.MaterialType.RhinoMaterial:
+          if (Rhino.RhinoDoc.ActiveDoc is Rhino.RhinoDoc rhinoDoc)
+          {
+            using (var content = Rhino.Render.RenderContent.FromId(rhinoDoc, material.RdkMaterialId))
+              name = content?.Name;
+          }
+          break;
+
+        case GH_Material.MaterialType.XmlMaterial:
+        {
+          using (var content = Rhino.Render.RenderContent.FromXml(material.RdkMaterialXml, null))
+            name = content?.Name;
+        }
+        break;
+
+        case GH_Material.MaterialType.RmtlMaterial:
+          name = System.IO.Path.GetFileName(material.RdkMaterialRmtl);
+          break;
+      }
+
+      if (string.IsNullOrEmpty(name))
+        name = "Rhino Material";
+
+      return name;
+    }
+    #endregion
 
     #region Material
     bool Reuse(DB.Material material, string name, GH_Material template)
@@ -135,9 +168,6 @@ namespace RhinoInside.Revit.GH.Components.Material
 
       // Make sure the name is unique
       {
-        if (name is null)
-          name = "Shader";
-
         name = doc.GetNamesakeElements
         (
           typeof(DB.Material), name, categoryId: DB.BuiltInCategory.OST_Materials
@@ -148,8 +178,7 @@ namespace RhinoInside.Revit.GH.Components.Material
       }
 
       material = doc.GetElement(DB.Material.Create(doc, name)) as DB.Material;
-      material.MaterialClass = "Shader";
-      material.MaterialCategory = "Shader";
+      material.MaterialCategory = material.MaterialClass = "Display";
 
       if (template is object)
       {
@@ -221,9 +250,6 @@ namespace RhinoInside.Revit.GH.Components.Material
 
       // Make sure the name is unique
       {
-        if (name is null)
-          name = "Shader";
-
         name = doc.GetNamesakeElements
         (
           typeof(DB.AppearanceAssetElement), name, categoryId: DB.BuiltInCategory.INVALID

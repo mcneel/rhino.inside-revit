@@ -4616,7 +4616,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { "autodesk.spec.aec:length", "Length" },
       { "autodesk.spec.aec:massDensity", "Mass Density" },
       { "autodesk.spec.aec:material", "Material" },
-      { "autodesk.spec.aec:multilineText", "multiline Text" },
+      { "autodesk.spec.aec:multilineText", "Multiline Text" },
       { "autodesk.spec.aec:number", "Number" },
       { "autodesk.spec.aec:numberOfPoles", "Number Of Poles" },
       { "autodesk.spec.aec:rotationAngle", "Rotation Angle" },

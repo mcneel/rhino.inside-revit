@@ -100,10 +100,14 @@ namespace RhinoInside.Revit.GH.Components
 
       if (wasMissing)
         type = (T) doc.GetElement(doc.GetDefaultElementTypeId(group)) ??
+               (T) recoveryAction.Invoke(doc, paramName) ??
         throw new RuntimeArgumentException(paramName, $"No suitable {group} has been found.");
 
       else if (type.Value == null)
-        type = (T) recoveryAction.Invoke(doc, paramName);
+        throw new RuntimeArgumentNullException(paramName);
+
+      else if (!type.Value.Document.Equals(doc))
+        throw new RuntimeArgumentException(nameof(type), $"{nameof(SolveOptionalType)} failed to assign a type from a diferent document.");
 
       return wasMissing;
     }
