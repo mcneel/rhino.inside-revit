@@ -14,6 +14,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RhinoInside.Revit.GH", "Rhi
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RhinoInside.Revit.Native", "RhinoInside.Revit.Native\RhinoInside.Revit.Native.vcxproj", "{CE1818BB-B141-47BC-A253-F855FC4123CF}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{157ECD29-1D19-448F-BC03-70AD444775CF}"
+	ProjectSection(SolutionItems) = preProject
+		ProductInfo.xml = ProductInfo.xml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
