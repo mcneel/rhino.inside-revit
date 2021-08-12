@@ -118,8 +118,11 @@ namespace RhinoInside.Revit.GH.Components.Filters
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var parameterKey = default(Types.ParameterKey);
-      if (!DA.GetData("Parameter", ref parameterKey) || !parameterKey.IsReferencedData)
+      if (!DA.GetData("Parameter", ref parameterKey))
         return;
+
+      if (!parameterKey.IsReferencedData)
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Conversion from '{parameterKey.Name}' to Parameter may be ambiguous. Please use 'BuiltInParameter Picker' or a 'Parameter' Param");
 
       if (!TryGetParameterDefinition(parameterKey.Document, parameterKey.Id, out var storageType, out var dataType))
       {
@@ -338,6 +341,9 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!DA.GetData("Parameter", ref parameterKey))
         return;
 
+      if (!parameterKey.IsReferencedData)
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Conversion from '{parameterKey.Name}' to Parameter may be ambiguous. Please use 'BuiltInParameter Picker' or a 'Parameter' Param");
+
       var inverted = false;
       if (!DA.GetData("Inverted", ref inverted))
         return;
@@ -347,7 +353,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
         if (parameterKey.Id.TryGetBuiltInParameter(out var builtInParameter))
           AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to found parameter '{DB.LabelUtils.GetLabelFor(builtInParameter)}' in Revit document.");
         else
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to found parameter '{parameterKey.Id.IntegerValue}' in Revit document.");
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to found parameter '{parameterKey.Name}' in Revit document.");
 
         return;
       }

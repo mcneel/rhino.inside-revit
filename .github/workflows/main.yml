@@ -1,0 +1,11 @@
+name: build
+on: [pull_request]
+
+jobs:
+  test:
+    name: test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: microsoft/setup-msbuild@v1
+      - run: msbuild script\cibuild.msbuild -v:m

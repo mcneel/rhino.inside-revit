@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using GH_IO.Serialization;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
+using EDBS = RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
@@ -18,6 +20,9 @@ namespace RhinoInside.Revit.GH.Parameters
     { }
 
     protected override System.Drawing.Bitmap Icon => Properties.Resources.ElementType;
+
+    #region UI
+    public DB.BuiltInCategory SelectedBuiltInCategory { get; set; } = DB.BuiltInCategory.INVALID;
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
@@ -100,7 +105,18 @@ namespace RhinoInside.Revit.GH.Parameters
           familyIndex++;
         }
       }
-      else categoriesTypeBox.SelectedIndex = 1;
+      else if (SelectedBuiltInCategory != DB.BuiltInCategory.INVALID)
+      {
+        var category = new Types.Category(Revit.ActiveDBDocument, new DB.ElementId(SelectedBuiltInCategory));
+        if (category.IsTagCategory == true)
+          categoriesTypeBox.SelectedIndex = 3;
+        else
+          categoriesTypeBox.SelectedIndex = (int) category.CategoryType;
+      }
+      else
+      {
+        categoriesTypeBox.SelectedIndex = 1;
+      }
 
       Menu_AppendCustomItem(menu, categoriesTypeBox);
       Menu_AppendCustomItem(menu, categoriesBox);
@@ -143,12 +159,19 @@ namespace RhinoInside.Revit.GH.Parameters
       categoriesBox.SelectedIndex = -1;
       categoriesBox.Items.Clear();
       categoriesBox.DisplayMember = "DisplayName";
+
       foreach (var category in categories)
       {
         if (category is null)
           categoriesBox.Items.Add(new Types.Category());
         else
           categoriesBox.Items.Add(Types.Category.FromCategory(category));
+      }
+
+      if (SelectedBuiltInCategory != DB.BuiltInCategory.INVALID)
+      {
+        var currentCategory = new Types.Category(doc, new DB.ElementId(SelectedBuiltInCategory));
+        categoriesBox.SelectedIndex = categoriesBox.Items.Cast<Types.Category>().IndexOf(currentCategory, 0).FirstOr(-1);
       }
     }
 
@@ -239,6 +262,10 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       if (sender is ComboBox categoriesBox && categoriesBox.Tag is Tuple<ListBox, ComboBox> tuple)
       {
+        SelectedBuiltInCategory = categoriesBox.SelectedItem is Types.Category category &&
+          category.Id.TryGetBuiltInCategory(out var bic) ?
+          bic : DB.BuiltInCategory.INVALID;
+
         RefreshFamiliesBox(tuple.Item2, categoriesBox);
         RefreshElementTypesList(tuple.Item1, categoriesBox, tuple.Item2);
       }
@@ -268,6 +295,34 @@ namespace RhinoInside.Revit.GH.Parameters
         ExpireSolution(true);
       }
     }
+    #endregion
+
+    #region IO
+    public override bool Read(GH_IReader reader)
+    {
+      if (!base.Read(reader))
+        return false;
+
+      var selectedBuiltInCategory = string.Empty;
+      if (reader.TryGetString("SelectedBuiltInCategory", ref selectedBuiltInCategory))
+        SelectedBuiltInCategory = new EDBS.CategoryId(selectedBuiltInCategory);
+      else
+        SelectedBuiltInCategory = DB.BuiltInCategory.INVALID;
+
+      return true;
+    }
+
+    public override bool Write(GH_IWriter writer)
+    {
+      if (!base.Write(writer))
+        return false;
+
+      if (SelectedBuiltInCategory != DB.BuiltInCategory.INVALID)
+        writer.SetString("SelectedBuiltInCategory", ((EDBS.CategoryId) SelectedBuiltInCategory).FullName);
+
+      return true;
+    }
+    #endregion
 
     public static bool GetDataOrDefault<TOutput>
     (

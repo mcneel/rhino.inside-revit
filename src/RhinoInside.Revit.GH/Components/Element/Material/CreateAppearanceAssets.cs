@@ -136,7 +136,7 @@ namespace RhinoInside.Revit.GH.Components.Material
 
         name = doc.GetNamesakeElements
         (
-          typeof(DB.Material), name, categoryId: DB.BuiltInCategory.OST_AppearanceAsset
+          typeof(DB.AppearanceAssetElement), name, categoryId: DB.BuiltInCategory.INVALID
         ).
         Select(x => x.Name).
         WhereNamePrefixedWith(name).

@@ -364,8 +364,8 @@ namespace RhinoInside.Revit.GH.Components
               if (inputType != param.GetType() && param.CreateSurrogate(inputType) is IGH_Param surrogate)
               {
                 GH_UpgradeUtil.MigrateRecipients(param, surrogate);
-                Params.UnregisterOutputParameter(param);
-                Params.RegisterOutputParam(surrogate, index);
+                Params.UnregisterInputParameter(param);
+                Params.RegisterInputParam(surrogate, index);
                 param = surrogate;
               }
 

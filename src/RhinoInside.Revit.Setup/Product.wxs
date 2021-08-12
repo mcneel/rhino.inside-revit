@@ -2,6 +2,9 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <?define ProductName='Rhino.Inside® for Autodesk Revit' ?>
 
+  <!-- ExpirationPeriod is expressed in days. 0 means never expires. -->
+  <?define ExpirationPeriod = 0 ?>
+  
   <Product Id="*"
            UpgradeCode="634a05f2-4511-445a-89c1-7305d83d34c7"
            Manufacturer="Robert McNeel &amp; Associates"
@@ -77,9 +80,10 @@
     />
     <CustomAction Id="SetARPINSTALLLOCATION" Property="ARPINSTALLLOCATION" Value="[APPLICATIONFOLDER]"/>
 
+    <?if $(var.ExpirationPeriod) > 0 ?>
     <CustomAction Id="WIPExpirationDateWarning" Script="vbscript">
       <![CDATA[
-      ExpirationDate = DateAdd("d", $(var.BuildVersion) + 90, DateSerial(2000,1,1))
+      ExpirationDate = DateAdd("d", $(var.BuildVersion) + $(var.ExpirationPeriod), DateSerial(2000,1,1))
       DaysLeft = Cint(DateDiff("d", Now(), ExpirationDate))      
       Set Record = Session.Installer.CreateRecord(1)
       
@@ -108,9 +112,12 @@
       
       ]]>
     </CustomAction>
-
+    <?endif?>
+    
     <InstallUISequence>
+      <?if $(var.ExpirationPeriod) > 0 ?>
       <Custom Action="WIPExpirationDateWarning" After="AppSearch" />
+      <?endif?>
       <Custom Action="OverwriteWixSetDefaultPerUserFolder" After="WixSetDefaultPerUserFolder" />
       <Custom Action="OverwriteWixSetDefaultPerMachineFolder" After="WixSetDefaultPerMachineFolder" />
     </InstallUISequence>
