@@ -19,7 +19,7 @@ In Revit API, Schedules are a type of view ({% include api_type.html type='Autod
 
 ## Querying Schedules Types
 
-Since schedules are actually views, we can use the same workflow as for [Views]({{ site.baseurl }}{% link _en/beta/guides/revit-views.md %}), to work with schedules:
+Since schedules are actually views, we can use the same workflow as for [Views]({{ site.baseurl }}{% link _en/1.0/guides/revit-views.md %}), to work with schedules:
 
 ![]({{ "/static/images/guides/revit-schedules02.png" | prepend: site.baseurl }})
 

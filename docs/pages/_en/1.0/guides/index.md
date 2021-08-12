@@ -7,7 +7,7 @@ toc: false
 <!-- 20 -->
 <!-- 30 -->
 ## Essentials
-These pages guide you through understanding the underlying concepts in Revit data model: *Elements*, *Parameters*, *Categories*, *Families*, *Types*, *Instances*, etc. They also show you how to use Rhino and Grasshopper inside Revit, and the basics of transferring geometry and data between Revit and Rhino (or other applications) using {{ site.terms.rir }}. Make sure to take a look at the [*Getting Started*]({{ site.baseurl }}{% link _en/beta/getting-started.md %}) page before continuing.
+These pages guide you through understanding the underlying concepts in Revit data model: *Elements*, *Parameters*, *Categories*, *Families*, *Types*, *Instances*, etc. They also show you how to use Rhino and Grasshopper inside Revit, and the basics of transferring geometry and data between Revit and Rhino (or other applications) using {{ site.terms.rir }}. Make sure to take a look at the [*Getting Started*]({{ site.baseurl }}{% link _en/1.0/getting-started.md %}) page before continuing.
 
 {% include ltr/gallery.html group="Essentials" large=false %}
 

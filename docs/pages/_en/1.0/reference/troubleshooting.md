@@ -4,7 +4,7 @@ order: 42
 group: Deployment & Configs
 ---
 
-This guide provides ways to troubleshoot and collect information about {{ site.terms.rir }} errors. Please see [Known Issues & Bugs]({{ site.baseurl }}{% link _en/beta/reference/known-issues.md %}) for a list of known issues.
+This guide provides ways to troubleshoot and collect information about {{ site.terms.rir }} errors. Please see [Known Issues & Bugs]({{ site.baseurl }}{% link _en/1.0/reference/known-issues.md %}) for a list of known issues.
 
 ## Getting {{ site.terms.rir }} Version
 
@@ -26,7 +26,7 @@ In case of any issues when loading {{ site.terms.rir }} you can use the debug in
 
 ### Creating Debug Package
 
-Please refer to [{{ site.terms.rir }} Interface]({{ site.baseurl }}{% link _en/beta/reference/rir-interface.md %}) article to learn how to access the debug package maker.
+Please refer to [{{ site.terms.rir }} Interface]({{ site.baseurl }}{% link _en/1.0/reference/rir-interface.md %}) article to learn how to access the debug package maker.
 
 Once debug package maker window is shown, you are presented with a few options:
 

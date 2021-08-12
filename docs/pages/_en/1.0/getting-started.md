@@ -56,9 +56,9 @@ The new toolbar contains many new buttons that give you access to
 - Python IDE (with access to Revit API)
 - Grasshopper (with custom Revit components)
 
-See [{{ site.terms.rir }} Interface]({{ site.baseurl }}{% link _en/beta/reference/rir-interface.md %}) for a complete list of buttons in the *Rhinoceros* tab
+See [{{ site.terms.rir }} Interface]({{ site.baseurl }}{% link _en/1.0/reference/rir-interface.md %}) for a complete list of buttons in the *Rhinoceros* tab
 
-If you encountered any errors, please consult the [Known Issues]({{ site.baseurl }}{% link _en/beta/reference/known-issues.md %}) page for a list of already known issues and their temporary workarounds.
+If you encountered any errors, please consult the [Known Issues]({{ site.baseurl }}{% link _en/1.0/reference/known-issues.md %}) page for a list of already known issues and their temporary workarounds.
 
 ## Grasshopper inside Revit
 
@@ -74,7 +74,7 @@ The Revit-aware component icons help identifying the action that the component p
 
 ![]({{ "/static/images/started/rir-icons.png" | prepend: site.baseurl }}){: class="small-image"}
 
-See [Basic Interactions Guide]({{ site.baseurl }}{% link _en/beta/guides/rir-grasshopper.md %}) for more info on Revit-aware components.
+See [Basic Interactions Guide]({{ site.baseurl }}{% link _en/1.0/guides/rir-grasshopper.md %}) for more info on Revit-aware components.
 
 ## Extracting Revit Geometry
 
@@ -230,6 +230,6 @@ G = [x.ToBrep() for x in E.Geometry[DB.Options()]]
 
 The *Guides* section listed on the navigation bar, is a great next point to see how {{ site.terms.rir }} can be used in tackling many design and documentation challenges in {{ site.terms.revit }}. The articles under this page provide many examples on creating Grasshopper definitions and writing your own custom scripts.
 
-Take a look at the [Discover]({{ site.baseurl }}{% link _en/beta/discover/index.md %}) page to find out how Grasshopper and Rhino can be used in Revit workflows.
+Take a look at the [Discover]({{ site.baseurl }}{% link _en/1.0/discover/index.md %}) page to find out how Grasshopper and Rhino can be used in Revit workflows.
 
 Reach out to {{ site.terms.rir }} developers and the users community on the [forum]({{ site.forum_url }}) if you came across a special condition that might need a new component or a more detailed explanation.

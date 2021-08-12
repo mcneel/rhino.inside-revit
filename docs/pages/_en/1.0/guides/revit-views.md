@@ -150,7 +150,7 @@ To set the Visibility/Graphics overrides for an element on a specific view, use 
 
 ![]({{ "/static/images/guides/revit-views07.png" | prepend: site.baseurl }})
 
-See [Styles and Patterns]({{ site.baseurl }}{% link _en/beta/guides/revit-styles.md %}) on how to use the *Find Line Pattern* and *Find Fill Pattern* custom components. Here is an example of running the example above on a series of walls in a 3D view:
+See [Styles and Patterns]({{ site.baseurl }}{% link _en/1.0/guides/revit-styles.md %}) on how to use the *Find Line Pattern* and *Find Fill Pattern* custom components. Here is an example of running the example above on a series of walls in a 3D view:
 
 ![]({{ "/static/images/guides/revit-views08.png" | prepend: site.baseurl }})
 
