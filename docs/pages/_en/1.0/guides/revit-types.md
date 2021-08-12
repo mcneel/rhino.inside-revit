@@ -66,7 +66,7 @@ In case of custom types, the component will return the default `DB.FamilySymbol`
 
 ## Modifying Types
 
-Once you have filtered out the desired type, you can query its parameters and apply new values. See [Document Model: Parameters]({{ site.baseurl }}{% link _en/beta/guides/revit-params.md %}) to learn how to edit parameters of an element. The element parameter components work on element types as well.
+Once you have filtered out the desired type, you can query its parameters and apply new values. See [Document Model: Parameters]({{ site.baseurl }}{% link _en/1.0/guides/revit-params.md %}) to learn how to edit parameters of an element. The element parameter components work on element types as well.
 
 ![]({{ "/static/images/guides/revit-families06.png" | prepend: site.baseurl }})
 

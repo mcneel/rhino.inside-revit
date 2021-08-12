@@ -49,7 +49,9 @@
     }
 
     .site-nav {
-        top: 6px;
+        top: 12px;
+        z-index: 1000;
+        background-color: transparent;
     }
 
     .site-nav .img-button-title {

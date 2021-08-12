@@ -5,7 +5,7 @@ group: Deployment & Configs
 ---
 
 {% capture breaking_changes_notes %}
-Some of the changes mentioned in sections below, might break your existing Grasshopper definitions. We hope this should not be causing a lot of trouble and rework for you, since in most cases the older components can easily be replaced by new ones without changes to the actual workflow. As always, if you have any issues with loading **Rhino.Inside.Revit** or any of the components, take a look at the [Troubleshooting Guide]({{ site.baseurl }}{% link _en/beta/reference/troubleshooting.md %}) or head out to the [Discussion Forum]({{ site.forum_url }}) to reach out to us. We do our best to resolve the bugs and software conflicts and need your help to make this product better for everyone.
+Some of the changes mentioned in sections below, might break your existing Grasshopper definitions. We hope this should not be causing a lot of trouble and rework for you, since in most cases the older components can easily be replaced by new ones without changes to the actual workflow. As always, if you have any issues with loading **Rhino.Inside.Revit** or any of the components, take a look at the [Troubleshooting Guide]({{ site.baseurl }}{% link _en/1.0/reference/troubleshooting.md %}) or head out to the [Discussion Forum]({{ site.forum_url }}) to reach out to us. We do our best to resolve the bugs and software conflicts and need your help to make this product better for everyone.
 {% endcapture %}
 {% include ltr/warning_note.html note=breaking_changes_notes %}
 
@@ -186,10 +186,10 @@ As part of the preparation for the {{ site.terms.rir }} v1, we have mostly focus
 
 {% include youtube_player.html id="ogocxN8WXlA" %}
 
-* **New Rhino.Inside Ribbon:** Checkout the updated [Rhino.Inside Tab]({{ site.baseurl }}{% link _en/beta/reference/rir-interface.md %}#rhinoinsiderevit-tab) page for instructions on how to use the new layout, and the new buttons added to the ribbon.
-* **Settings**: This release adds a Settings window to {{ site.terms.rir }} as well. Checkout the [documentation here]({{ site.baseurl }}{% link _en/beta/reference/rir-interface.md %}#rhinoinsiderevit-settings)
-* **Update Checks**: Checkout the new section on [Checking for Updates]({{ site.baseurl }}{% link _en/beta/reference/rir-interface.md %}#checking-for-updates) to learn how to check for updates and install the *Stable* or *Daily* releases.
-* **Deploying Grasshopper Scripts**: Checkout the [documentation]({{ site.baseurl }}{% link _en/beta/reference/rir-interface.md %}#deploying-grasshopper-scripts) on how to add your scripts to the Revit UI, or install {{ site.terms.rir }} scripts using Rhino package manager
+* **New Rhino.Inside Ribbon:** Checkout the updated [Rhino.Inside Tab]({{ site.baseurl }}{% link _en/1.0/reference/rir-interface.md %}#rhinoinsiderevit-tab) page for instructions on how to use the new layout, and the new buttons added to the ribbon.
+* **Settings**: This release adds a Settings window to {{ site.terms.rir }} as well. Checkout the [documentation here]({{ site.baseurl }}{% link _en/1.0/reference/rir-interface.md %}#rhinoinsiderevit-settings)
+* **Update Checks**: Checkout the new section on [Checking for Updates]({{ site.baseurl }}{% link _en/1.0/reference/rir-interface.md %}#checking-for-updates) to learn how to check for updates and install the *Stable* or *Daily* releases.
+* **Deploying Grasshopper Scripts**: Checkout the [documentation]({{ site.baseurl }}{% link _en/1.0/reference/rir-interface.md %}#deploying-grasshopper-scripts) on how to add your scripts to the Revit UI, or install {{ site.terms.rir }} scripts using Rhino package manager
 
 {% include ltr/release-header.html version="0.0.7733.38548" time="03/04/2021 17:48:12" %}
 

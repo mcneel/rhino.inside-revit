@@ -103,4 +103,4 @@ Here is video on creating native Levels, Floors, Columns and Façade panels usin
 
 {% include youtube_player.html id="cc3WLvGkWcc" %}
 
-For more information on working with each category of Revit elements, see the [Modeling section in Guides]({{ site.baseurl }}{% link _en/beta/guides/index.md %}#modeling-in-revit)
+For more information on working with each category of Revit elements, see the [Modeling section in Guides]({{ site.baseurl }}{% link _en/1.0/guides/index.md %}#modeling-in-revit)
