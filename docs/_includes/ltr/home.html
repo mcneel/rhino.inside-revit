@@ -7,21 +7,26 @@
 
 <div class="home-cover">
     <div class="home-gallery">
-        <!-- <img src="{{ include.banner_img | prepend: site.baseurl }}" /> -->
+        {% if include.banner_img %}
+        <img src="{{ include.banner_img | prepend: site.baseurl }}" />
+        {% elsif include.banner_video %}
         <iframe class="embed-responsive-item"
-                src="https://www.youtube.com/embed/KUHdJqVyhZI?showinfo=0&rel=0&modestbranding=1" frameborder="0"
+                src="{{ include.banner_video }}" frameborder="0"
                 allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
         </iframe>
+        {% endif %}
     </div>
 
-    <!-- <div class="home-contents-box">
+    {% if include.banner_header %}
+    <div class="home-contents-box">
         <div class="home-contents-textmask">
             <div class="home-contents">
                 <h1>{{ include.banner_header }}</h1>
                 <h3>{{ include.banner_text  }}</h3>
             </div>
         </div>
-    </div> -->
+    </div>
+    {% endif %}
 </div>
 
 <div class="home-dependencies">
