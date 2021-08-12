@@ -428,7 +428,7 @@
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GhxFile_32.png" />
     <EmbeddedResource Include="Resources\RIR-logo.ico" />
     <EmbeddedResource Include="Resources\RIR-WIP-logo.png" />
-    <EmbeddedResource Include="Resources\ChannelDaily-icon.png" />
+    <EmbeddedResource Include="Resources\ChannelRC-icon.png" />
     <EmbeddedResource Include="Resources\ChannelStable-icon.png" />
   </ItemGroup>
   <ItemGroup>
@@ -436,6 +436,7 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ProductInfo.cs</LastGenOutput>
     </Content>
+    <EmbeddedResource Include="Resources\ChannelDaily-icon.png" />
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\CaptureElements.png" />
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\ReleaseElements.png" />
     <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\OpenViewport.png" />
