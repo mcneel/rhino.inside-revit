@@ -12,8 +12,25 @@ namespace RhinoInside.Revit.GH.Types
     protected override bool SetValue(DB.Element element) =>
       IsValidElement(element) && base.SetValue(element);
 
-    public static bool IsValidElement(DB.Element element) =>
-      element?.get_Parameter(DB.BuiltInParameter.OPTION_SET_NAME) != null;
+    public static bool IsValidElement(DB.Element element) => IsValidElementFilter.PassesFilter(element);
+
+    internal static readonly DB.ElementFilter IsValidElementFilter = new DB.LogicalAndFilter
+    (
+      new DB.ElementCategoryFilter(DB.BuiltInCategory.OST_DesignOptionSets),
+#if REVIT_2022
+      new DB.ElementParameterFilter(new DB.HasValueFilterRule(new DB.ElementId(DB.BuiltInParameter.OPTION_SET_NAME)))
+#else
+      new DB.ElementParameterFilter
+      (
+        new DB.FilterStringRule
+        (
+          new DB.ParameterValueProvider(new DB.ElementId(DB.BuiltInParameter.OPTION_SET_NAME)),
+          new DB.FilterStringEquals(), string.Empty, true
+        ),
+        inverted: true
+      )
+#endif
+    );
 
     public DesignOptionSet() { }
     public DesignOptionSet(DB.Element value) : base(value) { }

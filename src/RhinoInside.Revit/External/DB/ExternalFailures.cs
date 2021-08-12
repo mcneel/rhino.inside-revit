@@ -41,17 +41,51 @@ namespace RhinoInside.Revit.External.DB
     public static class ElementFailures
     {
       /// <summary>
+      /// Are you sure you want to delete those elements?
+      /// </summary>
+      public static readonly FailureDefinitionId ConfirmDeleteElement = new FailureDefinitionId(new Guid("BD477F3C-8560-4A51-8BBD-870A5C97EE22"));
+
+      /// <summary>
       /// Failed to purge element. This element is in use.
       /// </summary>
       public static readonly FailureDefinitionId FailedToPurgeElement = new FailureDefinitionId(new Guid("D2732B32-E917-4D3A-B639-A72E3A20F2E5"));
+
+      /// <summary>
+      /// Elements are no longer tracked.
+      /// </summary>
+      public static readonly FailureDefinitionId TrackedElementReleased = new FailureDefinitionId(new Guid("F6C3F3E6-E216-43B6-A400-90D7F5F1A410"));
 
       internal static void CreateFailureDefinitions()
       {
         FailureDefinition.CreateFailureDefinition
         (
+          id: ConfirmDeleteElement,
+          severity: FailureSeverity.Warning,
+          messageString: "Are you sure you want to delete these elements?"
+        );
+
+        FailureDefinition.CreateFailureDefinition
+        (
           id: FailedToPurgeElement,
           severity: FailureSeverity.Error,
           messageString: "Failed to purge element. This element is in use."
+        );
+
+        FailureDefinition.CreateFailureDefinition
+        (
+          id: TrackedElementReleased,
+          severity: FailureSeverity.Warning,
+          messageString: "Rhino.Inside : Elements are no longer tracked."
+        ).
+        AddResolutionType
+        (
+          FailureResolutionType.DeleteElements,
+          "Delete All…",
+          typeof(DeleteElements)
+        ).
+        SetDefaultResolutionType
+        (
+          FailureResolutionType.DeleteElements
         );
       }
     }

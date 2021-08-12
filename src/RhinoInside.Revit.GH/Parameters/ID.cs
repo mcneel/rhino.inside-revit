@@ -59,7 +59,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public DataGrouping Grouping { get; set; } = DataGrouping.None;
 
-    public sealed override bool Read(GH_IReader reader)
+    public override bool Read(GH_IReader reader)
     {
       if (!base.Read(reader))
         return false;
@@ -70,7 +70,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
       return true;
     }
-    public sealed override bool Write(GH_IWriter writer)
+    public override bool Write(GH_IWriter writer)
     {
       if (!base.Write(writer))
         return false;
@@ -246,6 +246,7 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       base.Menu_AppendPreProcessParameter(menu);
 
+#if DEBUG
       var Group = Menu_AppendItem(menu, "Group by");
 
       Group.Checked = Grouping != DataGrouping.None;
@@ -253,6 +254,7 @@ namespace RhinoInside.Revit.GH.Parameters
       Menu_AppendItem(Group.DropDown, "Workset",       (s, a) => Menu_GroupBy(DataGrouping.Workset),       true, (Grouping & DataGrouping.Workset) != 0);
       Menu_AppendItem(Group.DropDown, "Design Option", (s, a) => Menu_GroupBy(DataGrouping.DesignOption),  true, (Grouping & DataGrouping.DesignOption) != 0);
       Menu_AppendItem(Group.DropDown, "Category",      (s, a) => Menu_GroupBy(DataGrouping.Category),      true, (Grouping & DataGrouping.Category) != 0);
+#endif
     }
 
     private void Menu_GroupBy(DataGrouping value)
@@ -285,11 +287,14 @@ namespace RhinoInside.Revit.GH.Parameters
       ICollection<DB.ElementId> modified
     )
     {
-      if (DataType != GH_ParamData.local)
-        return false;
+      if (Kind != GH_ParamKind.output)
+      {
+        if (DataType != GH_ParamData.local)
+          return false;
 
-      if (Phase == GH_SolutionPhase.Blank)
-        CollectData();
+        if (Phase == GH_SolutionPhase.Blank)
+          CollectData();
+      }
 
       foreach (var data in VolatileData.AllData(true).OfType<Types.IGH_ElementId>())
       {

@@ -74,6 +74,31 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [
+    ComponentGuid("CC3DB1A4-5C24-478D-A784-00725BB1E1F6"),
+    Name("Element On Phase Status"),
+    Description("Represents the statuses that an element can have with respect to a given phase."),
+  ]
+  public class ElementOnPhaseStatus : GH_Enum<DB.ElementOnPhaseStatus>
+  {
+    public ElementOnPhaseStatus() : base() { }
+    public ElementOnPhaseStatus(DB.ElementOnPhaseStatus value) : base(value) { }
+
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
+      {
+        { (int) DB.ElementOnPhaseStatus.None,       "<None>"      },
+        { (int) DB.ElementOnPhaseStatus.Past,       "Past"        },
+        { (int) DB.ElementOnPhaseStatus.Existing,   "Existing"    },
+        { (int) DB.ElementOnPhaseStatus.Demolished, "Demolished"  },
+        { (int) DB.ElementOnPhaseStatus.New,        "New"         },
+        { (int) DB.ElementOnPhaseStatus.Temporary,  "Temporary"   },
+        { (int) DB.ElementOnPhaseStatus.Future,     "Future"      },
+      }
+    );
+  }
+
+  [
     ComponentGuid("1AF2E8BF-5FAF-41AD-9A2F-EB96A706587C"),
     Name("Graphics Style Type"),
     Description("Contains a collection of graphics style type values"),
@@ -150,6 +175,40 @@ namespace RhinoInside.Revit.GH.Types
   public class ViewType : GH_Enum<DB.ViewType>
   {
     public override bool IsEmpty => Value == DB.ViewType.Undefined;
+    public ViewType() { }
+    public ViewType(DB.ViewType value) : base(value) { }
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
+      {
+        { (int) DB.ViewType.FloorPlan,            "Floor Plan" },
+        { (int) DB.ViewType.CeilingPlan,          "Ceiling Plan" },
+        { (int) DB.ViewType.Elevation,            "Elevation" },
+        { (int) DB.ViewType.ThreeD,               "3D View" },
+        { (int) DB.ViewType.Schedule,             "Schedule" },
+        { (int) DB.ViewType.DrawingSheet,         "Sheet" },
+        { (int) DB.ViewType.ProjectBrowser,       "Project Browser" },
+        { (int) DB.ViewType.Report,               "Report" },
+        { (int) DB.ViewType.DraftingView,         "Drafting" },
+        { (int) DB.ViewType.Legend,               "Legend" },
+        { (int) DB.ViewType.SystemBrowser,        "System Browser" },
+        { (int) DB.ViewType.EngineeringPlan,      "Engineering Plan" },
+        { (int) DB.ViewType.AreaPlan,             "Area Plan" },
+        { (int) DB.ViewType.Section,              "Section" },
+        { (int) DB.ViewType.Detail,               "Detail" },
+        { (int) DB.ViewType.CostReport,           "Cost Report" },
+        { (int) DB.ViewType.LoadsReport,          "Loads Report" },
+        { (int) DB.ViewType.PresureLossReport,    "Presure Loss Report" },
+        { (int) DB.ViewType.ColumnSchedule,       "Column Schedule" },
+        { (int) DB.ViewType.PanelSchedule,        "Panel Schedule" },
+        { (int) DB.ViewType.Walkthrough,          "Walkthrough" },
+        { (int) DB.ViewType.Rendering,            "Rendering" },
+#if REVIT_2020
+        { (int) DB.ViewType.SystemsAnalysisReport,"Systems Analysis Report" },
+#endif
+        { (int) DB.ViewType.Internal,             "Internal" },
+      }
+    );
   }
 
   [
@@ -510,8 +569,8 @@ namespace RhinoInside.Revit.GH.Types
 
   [
     ComponentGuid("6a2b7564-9dd1-4cfc-a539-a352cb39cb7c"),
-    Name("Thermal Material Type"),
-    Description("Represents thermal material type"),
+    Name("Thermal Material Class"),
+    Description("Represents thermal material class"),
   ]
   public class ThermalMaterialType : GH_Enum<DB.ThermalMaterialType>
   {

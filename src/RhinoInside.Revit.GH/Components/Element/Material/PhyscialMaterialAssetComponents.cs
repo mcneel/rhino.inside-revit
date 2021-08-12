@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
-
+using System.Linq;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 
 using RhinoInside.Revit.External.DB.Extensions;
-
+using RhinoInside.Revit.GH.ElementTracking;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Material
@@ -52,7 +53,7 @@ namespace RhinoInside.Revit.GH.Components.Material
         param.Access = paramInfo.ParamAccess;
         param.Optional = paramInfo.Optional;
 
-        inputs.Add(ParamDefinition.FromParam(param));
+        inputs.Add(new ParamDefinition(param));
       }
 
       return inputs.ToArray();
@@ -74,7 +75,7 @@ namespace RhinoInside.Revit.GH.Components.Material
         param.Description = paramInfo.Description;
         param.Access = paramInfo.ParamAccess;
 
-        outputs.Add(ParamDefinition.FromParam(param));
+        outputs.Add(new ParamDefinition(param));
       }
 
       return outputs.ToArray();
@@ -219,105 +220,191 @@ namespace RhinoInside.Revit.GH.Components.Material
     #endregion
   }
 
-  // structural asset
-  public class CreateStructuralAsset : BasePhysicalAssetComponent<StructuralAssetData>
+  #region Structural Asset
+  public class CreateStructuralAsset : ElementTrackerComponent
   {
-    public override Guid ComponentGuid =>
-      new Guid("af2678c8-2a53-4056-9399-5a06dd9ac14d");
+    public override Guid ComponentGuid => new Guid("af2678c8-2a53-4056-9399-5a06dd9ac14d");
     public override GH_Exposure Exposure => GH_Exposure.quinary;
 
-    public CreateStructuralAsset() : base()
-    {
-      Name = $"Create {ComponentInfo.Name}";
-      NickName = $"C-{ComponentInfo.NickName}";
-      Description = $"Create a new instance of {ComponentInfo.Description}";
-    }
+    public CreateStructuralAsset() : base
+    (
+      name: "Create Physical Asset",
+      nickname: "Physical Asset",
+      description: "Create a Revit structural asset",
+      category: "Revit",
+      subCategory: "Material"
+    )
+    { }
 
-    protected override ParamDefinition[] Inputs => GetInputs();
-    protected override ParamDefinition[] Outputs => new ParamDefinition[]
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.Create<Parameters.StructuralAsset>(
-        name: ComponentInfo.Name,
-        nickname: ComponentInfo.NickName,
-        description: ComponentInfo.Description,
-        access: GH_ParamAccess.item
-        ),
+      new ParamDefinition
+      (
+        new Parameters.Document()
+        {
+          Name = "Document",
+          NickName = "DOC",
+          Description = "Document",
+          Optional = true
+        },
+        ParamRelevance.Occasional
+      ),
+      new ParamDefinition
+      (
+        new Param_String()
+        {
+          Name = "Name",
+          NickName = "N",
+          Description = "Asset Name",
+          Optional = true
+        }
+      ),
+      new ParamDefinition
+      (
+        new Parameters.Param_Enum<Types.StructuralAssetClass>()
+        {
+          Name = "Class",
+          NickName = "C",
+          Description = "Structural Asset Class",
+        }
+      ),
+      new ParamDefinition
+      (
+        new Parameters.StructuralAsset()
+        {
+          Name = "Template",
+          NickName = "T",
+          Description = "Template Asset",
+          Optional = true
+        },
+        ParamRelevance.Occasional
+      ),
     };
 
-    private ParamDefinition[] GetInputs()
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      // build a list of inputs based on the shader data type
-      // add optional document parameter as first
-      var inputs = new List<ParamDefinition>()
-      {
-        new ParamDefinition(
-            new Parameters.Document()
-            {
-              Name = "Document",
-              NickName = "DOC",
-              Description = "Document",
-              Access = GH_ParamAccess.item,
-              Optional = true
-            },
-            ParamVisibility.Voluntary
-          )
-      };
-      inputs.AddRange(GetAssetDataAsInputs());
-      return inputs.ToArray();
-    }
+      new ParamDefinition
+      (
+        new Parameters.StructuralAsset()
+        {
+          Name = _Asset_,
+          NickName = _Asset_.Substring(0, 1),
+          Description = $"Output {_Asset_}",
+        }
+      ),
+    };
+
+    const string _Asset_ = "Physical Asset";
+    static readonly DB.BuiltInParameter[] ExcludeUniqueProperties =
+    {
+      DB.BuiltInParameter.PROPERTY_SET_NAME,
+      DB.BuiltInParameter.PHY_MATERIAL_PARAM_CLASS
+    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
-        return;
+      // Input
+      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
+      if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return;
+      if (!Params.GetData(DA, "Class", out Types.StructuralAssetClass type, x => x.IsValid)) return;
+      Params.TryGetData(DA, "Template", out DB.PropertySetElement template);
 
-      // get required input (name, class)
-      string name = default;
-      if (!DA.GetData("Name", ref name))
-        return;
+      // Previous Output
+      Params.ReadTrackedElement(_Asset_, doc.Value, out DB.PropertySetElement asset);
 
-      DB.StructuralAssetClass assetClass = default;
-      if (!DA.GetData("Type", ref assetClass))
-        return;
-
-      // check naming conflicts with other asset types
-      var psetElement = FindPropertySetElement(doc, name);
-      if (psetElement != null && !MatchesPhysicalAssetType(psetElement))
+      StartTransaction(doc.Value);
       {
-        AddRuntimeMessage(
-          GH_RuntimeMessageLevel.Error,
-          $"Thermal asset with same name exists already. Use a different name for this asset"
-        );
-        return;
+        asset = Reconstruct(asset, doc.Value, name, type.Value, template);
+
+        Params.WriteTrackedElement(_Asset_, doc.Value, asset);
+        DA.SetData(_Asset_, asset);
+      }
+    }
+
+    bool Reuse(DB.PropertySetElement assetElement, string name, DB.StructuralAssetClass type, DB.PropertySetElement template)
+    {
+      if (assetElement is null) return false;
+      if (name is object) assetElement.Name = name;
+
+      if (assetElement.GetStructuralAsset() is DB.StructuralAsset asset)
+      {
+        if (asset.StructuralAssetClass != type) return false;
+      }
+      else return false;
+
+      if (template?.GetStructuralAsset() is DB.StructuralAsset)
+      {
+        template.CopyParametersFrom(template, ExcludeUniqueProperties);
       }
 
-      StartTransaction(doc);
+      return true;
+    }
 
-      // TODO: reuse psetElement if suitable
-      // delete existing matching psetelement
-      if (psetElement != null)
-        doc.Delete(psetElement.Id);
+    DB.PropertySetElement Create(DB.Document doc, string name, DB.StructuralAssetClass type, DB.PropertySetElement template)
+    {
+      var assetElement = default(DB.PropertySetElement);
 
-      // create asset from input data
-      var structAsset = new DB.StructuralAsset(name, assetClass);
+      // Make sure the name is unique
+      {
+        if (name is null)
+          name = template?.Name ?? _Asset_;
 
-      // we need to apply the behaviour here manually
-      // otherwise the resultant DB.PropertySetElement will be missing parameters
-      DB.StructuralBehavior behaviour = default;
-      if (DA.GetData("Behaviour", ref behaviour))
-        structAsset.Behavior = behaviour;
-      else
-        structAsset.Behavior = DB.StructuralBehavior.Isotropic;
+        name = doc.GetNamesakeElements
+        (
+          typeof(DB.PropertySetElement), name, categoryId: DB.BuiltInCategory.OST_PropertySet
+        ).
+        Where(x => Types.StructuralAssetElement.IsValidElement(x)).
+        Select(x => x.Name).
+        WhereNamePrefixedWith(name).
+        NextNameOrDefault() ?? name;
+      }
 
-      // set the asset on psetelement
-      psetElement = DB.PropertySetElement.Create(doc, structAsset);
+      // Try to duplicate template
+      if (template is object)
+      {
+        if (doc.Equals(template.Document))
+        {
+          assetElement = template.Duplicate(doc, name);
+        }
+        else
+        {
+          var ids = DB.ElementTransformUtils.CopyElements
+          (
+            template.Document,
+            new DB.ElementId[] { template.Id },
+            doc,
+            default,
+            default
+          );
 
-      // grab asset data from inputs
-      var assetData = CreateAssetDataFromInputs(DA);
-      UpdatePropertySetElementFromData(psetElement, assetData);
+          assetElement = ids.Select(x => doc.GetElement(x)).OfType<DB.PropertySetElement>().FirstOrDefault();
+          assetElement.Name = name;
+        }
+      }
 
-      // send the new asset to output
-      DA.SetData(ComponentInfo.Name, new Types.StructuralAssetElement(psetElement));
+      if (assetElement is null)
+      {
+        var asset = new DB.StructuralAsset(name, type);
+        assetElement = DB.PropertySetElement.Create(doc, asset);
+      }
+
+      return assetElement;
+    }
+
+    DB.PropertySetElement Reconstruct(DB.PropertySetElement assetElement, DB.Document doc, string name, DB.StructuralAssetClass type, DB.PropertySetElement template)
+    {
+      if (!Reuse(assetElement, name, type, template))
+      {
+        assetElement = assetElement.ReplaceElement
+        (
+          Create(doc, name, type, template),
+          ExcludeUniqueProperties
+        );
+      }
+
+      return assetElement;
     }
   }
 
@@ -418,103 +505,193 @@ namespace RhinoInside.Revit.GH.Components.Material
       SetOutputsFromPropertySetElement(DA, structuralAsset.Value);
     }
   }
+# endregion
 
-  // thermal asset
-  public class CreateThermalAsset : BasePhysicalAssetComponent<ThermalAssetData>
+  #region Thermal Asset
+  public class CreateThermalAsset : ElementTrackerComponent
   {
-    public override Guid ComponentGuid =>
-      new Guid("bd9164c4-effb-4145-bb96-006daeaeb99a");
+    public override Guid ComponentGuid => new Guid("BD9164C4-EFFB-4145-BB96-006DAEAEB99A");
     public override GH_Exposure Exposure => GH_Exposure.quinary;
 
-    public CreateThermalAsset() : base()
-    {
-      Name = $"Create {ComponentInfo.Name}";
-      NickName = $"C-{ComponentInfo.NickName}";
-      Description = $"Create a new instance of {ComponentInfo.Description}";
-    }
+    public CreateThermalAsset() : base
+    (
+      name: "Create Thermal Asset",
+      nickname: "Thermal Asset",
+      description: "Create a Revit thermal asset",
+      category: "Revit",
+      subCategory: "Material"
+    )
+    { }
 
-    protected override ParamDefinition[] Inputs => GetInputs();
-    protected override ParamDefinition[] Outputs => new ParamDefinition[]
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.Create<Parameters.ThermalAsset>(
-        name: ComponentInfo.Name,
-        nickname: ComponentInfo.NickName,
-        description: ComponentInfo.Description,
-        access: GH_ParamAccess.item
-        ),
+      new ParamDefinition
+      (
+        new Parameters.Document()
+        {
+          Name = "Document",
+          NickName = "DOC",
+          Description = "Document",
+          Optional = true
+        },
+        ParamRelevance.Occasional
+      ),
+      new ParamDefinition
+      (
+        new Param_String()
+        {
+          Name = "Name",
+          NickName = "N",
+          Description = "Asset Name",
+          Optional = true
+        }
+      ),
+      new ParamDefinition
+      (
+        new Parameters.Param_Enum<Types.ThermalMaterialType>()
+        {
+          Name = "Class",
+          NickName = "C",
+          Description = "Asset Class",
+        }
+      ),
+      new ParamDefinition
+      (
+        new Parameters.ThermalAsset()
+        {
+          Name = "Template",
+          NickName = "T",
+          Description = "Template Asset",
+          Optional = true
+        },
+        ParamRelevance.Occasional
+      ),
     };
 
-    private ParamDefinition[] GetInputs()
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      // build a list of inputs based on the shader data type
-      // add optional document parameter as first
-      var inputs = new List<ParamDefinition>()
-      {
-        new ParamDefinition(
-            new Parameters.Document()
-            {
-              Name = "Document",
-              NickName = "DOC",
-              Description = "Document",
-              Access = GH_ParamAccess.item,
-              Optional = true
-            },
-            ParamVisibility.Voluntary
-          )
-      };
-      inputs.AddRange(GetAssetDataAsInputs());
-      return inputs.ToArray();
-    }
+      new ParamDefinition
+      (
+        new Parameters.ThermalAsset()
+        {
+          Name = _Asset_,
+          NickName = _Asset_.Substring(0, 1),
+          Description = $"Output {_Asset_}",
+        }
+      ),
+    };
+
+    const string _Asset_ = "Thermal Asset";
+    static readonly DB.BuiltInParameter[] ExcludeUniqueProperties =
+    {
+      DB.BuiltInParameter.PROPERTY_SET_NAME,
+      DB.BuiltInParameter.PHY_MATERIAL_PARAM_CLASS
+    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
-        return;
+      // Input
+      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
+      if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return;
+      if (!Params.GetData(DA, "Class", out Types.ThermalMaterialType type, x => x.IsValid)) return;
+      Params.TryGetData(DA, "Template", out DB.PropertySetElement template);
 
-      // get required input (name, class)
-      string name = default;
-      if (!DA.GetData("Name", ref name))
-        return;
+      // Previous Output
+      Params.ReadTrackedElement(_Asset_, doc.Value, out DB.PropertySetElement asset);
 
-      DB.ThermalMaterialType materialType = default;
-      if (!DA.GetData("Type", ref materialType))
-        return;
-
-      // check naming conflicts with other asset types
-      DB.PropertySetElement psetElement = FindPropertySetElement(doc, name);
-      if (psetElement != null && !MatchesPhysicalAssetType(psetElement))
+      StartTransaction(doc.Value);
       {
-        AddRuntimeMessage(
-          GH_RuntimeMessageLevel.Error,
-          $"Thermal asset with same name exists already. Use a different name for this asset"
-        );
-        return;
+        asset = Reconstruct(asset, doc.Value, name, type.Value, template);
+
+        Params.WriteTrackedElement(_Asset_, doc.Value, asset);
+        DA.SetData(_Asset_, asset);
+      }
+    }
+
+    bool Reuse(DB.PropertySetElement assetElement, string name, DB.ThermalMaterialType type, DB.PropertySetElement template)
+    {
+      if (assetElement is null) return false;
+      if (name is object) assetElement.Name = name;
+
+      if (assetElement.GetThermalAsset() is DB.ThermalAsset asset)
+      {
+        if (asset.ThermalMaterialType != type) return false;
+      }
+      else return false;
+
+      if (template?.GetThermalAsset() is DB.ThermalAsset)
+      {
+        template.CopyParametersFrom(template, ExcludeUniqueProperties);
       }
 
-      StartTransaction(doc);
+      return true;
+    }
 
-      // TODO: reuse psetElement if suitable
-      // delete existing matching psetelement
-      if (psetElement != null)
-        doc.Delete(psetElement.Id);
+    DB.PropertySetElement Create(DB.Document doc, string name, DB.ThermalMaterialType type, DB.PropertySetElement template)
+    {
+      var assetElement = default(DB.PropertySetElement);
 
-      // create asset from input data
-      var thermalAsset = new DB.ThermalAsset(name, materialType);
+      // Make sure the name is unique
+      {
+        if (name is null)
+          name = template?.Name ?? _Asset_;
 
-      // we need to apply the behaviour here manually
-      // otherwise the resultant DB.PropertySetElement will be missing parameters
-      var behaviour = DB.StructuralBehavior.Isotropic;
-      DA.GetData("Behaviour", ref behaviour);
+        name = doc.GetNamesakeElements
+        (
+          typeof(DB.PropertySetElement), name, categoryId: DB.BuiltInCategory.OST_PropertySet
+        ).
+        Where(x => Types.ThermalAssetElement.IsValidElement(x)).
+        Select(x => x.Name).
+        WhereNamePrefixedWith(name).
+        NextNameOrDefault() ?? name;
+      }
 
-      // set the asset on psetelement
-      psetElement = DB.PropertySetElement.Create(doc, thermalAsset);
+      // Try to duplicate template
+      if (template is object)
+      {
+        if (doc.Equals(template.Document))
+        {
+          assetElement = template.Duplicate(doc, name);
+        }
+        else
+        {
+          var ids = DB.ElementTransformUtils.CopyElements
+          (
+            template.Document,
+            new DB.ElementId[] { template.Id },
+            doc,
+            default,
+            default
+          );
 
-      // grab asset data from inputs
-      var assetData = CreateAssetDataFromInputs(DA);
-      UpdatePropertySetElementFromData(psetElement, assetData);
+          assetElement = ids.Select(x => doc.GetElement(x)).OfType<DB.PropertySetElement>().FirstOrDefault();
+          assetElement.Name = name;
+        }
+      }
 
-      // send the new asset to output
-      DA.SetData(ComponentInfo.Name, new Types.ThermalAssetElement(psetElement));
+      if (assetElement is null)
+      {
+        var asset = new DB.ThermalAsset(name, type);
+        assetElement = DB.PropertySetElement.Create(doc, asset);
+      }
+
+      return assetElement;
+    }
+
+    DB.PropertySetElement Reconstruct(DB.PropertySetElement assetElement, DB.Document doc, string name, DB.ThermalMaterialType type, DB.PropertySetElement template)
+    {
+      if (!Reuse(assetElement, name, type, template))
+      {
+        assetElement = assetElement.ReplaceElement
+        (
+          Create(doc, name, type, template),
+          ExcludeUniqueProperties
+        );
+      }
+
+      return assetElement;
     }
   }
 
@@ -615,4 +792,5 @@ namespace RhinoInside.Revit.GH.Components.Material
       SetOutputsFromPropertySetElement(DA, thermalAsset.Value);
     }
   }
+  #endregion
 }

@@ -30,7 +30,6 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Element",
           NickName = "E",
           Description = "Element to access Pin",
-          Access = GH_ParamAccess.item
         }
       ),
       new ParamDefinition
@@ -40,10 +39,9 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Pinned",
           NickName = "P",
           Description = "New state for Element Pin",
-          Access = GH_ParamAccess.item,
           Optional = true
         },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
     };
 
@@ -57,7 +55,6 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Element",
           NickName = "E",
           Description = "Element to access Pin",
-          Access = GH_ParamAccess.item
         }
       ),
       new ParamDefinition
@@ -67,7 +64,6 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Pinned",
           NickName = "P",
           Description = "State for Element Pin",
-          Access = GH_ParamAccess.item
         }
       ),
     };

@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
   public class ElementTypeByName : ValueList
   {
     public override Guid ComponentGuid => new Guid("D3FB53D3-9118-4F11-A32D-AECB30AA418D");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     public ElementTypeByName()
     {

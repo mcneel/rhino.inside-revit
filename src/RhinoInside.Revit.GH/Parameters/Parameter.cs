@@ -13,12 +13,12 @@ using EDBS = RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class ParameterKey : Element<Types.ParameterKey, DB.ElementId>
+  public class ParameterKey : Element<Types.ParameterKey, DB.ParameterElement>
   {
     public override Guid ComponentGuid => new Guid("A550F532-8C68-460B-91F3-DA0A5A0D42B5");
     public override GH_Exposure Exposure => GH_Exposure.septenary;
 
-    public ParameterKey() : base("Parameter Key", "ParaKey", "Contains a collection of Revit parameter keys", "Params", "Revit Primitives") { }
+    public ParameterKey() : base("Parameter", "Parameter", "Contains a collection of Revit parameters", "Params", "Revit Primitives") { }
 
     #region UI
     public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
@@ -26,36 +26,70 @@ namespace RhinoInside.Revit.GH.Parameters
       base.AppendAdditionalMenuItems(menu);
 
       var activeApp = Revit.ActiveUIApplication;
-      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.ProjectParameters);
-      Menu_AppendItem
-      (
-        menu, $"Open Project Parameters…",
-        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
-        activeApp.CanPostCommand(commandId), false
-      );
+      var doc = activeApp.ActiveUIDocument?.Document;
+      if (doc is null) return;
+
+      {
+        var commandId = doc.IsFamilyDocument ?
+          Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.FamilyTypes) :
+          Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.ProjectParameters);
+
+        var commandName = doc.IsFamilyDocument ?
+          "Open Family Parameters…" :
+          "Open Project Parameters…";
+
+        Menu_AppendItem
+        (
+          menu, commandName,
+          (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
+          activeApp.CanPostCommand(commandId), false
+        );
+      }
+
+#if REVIT_2022
+      {
+        var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.GlobalParameters);
+        Menu_AppendItem
+        (
+          menu, "Open Global Parameters…",
+          (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
+          !doc.IsFamilyDocument && activeApp.CanPostCommand(commandId), false
+        );
+      }
+#endif
     }
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
-      var listBox = new ListBox();
-      listBox.BorderStyle = BorderStyle.FixedSingle;
-      listBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
-      listBox.Height = (int) (100 * GH_GraphicsUtil.UiScale);
-      listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
-      listBox.Sorted = true;
+      if (SourceCount != 0) return;
+      if (Revit.ActiveUIDocument?.Document is null) return;
 
-      var categoriesBox = new ComboBox();
-      categoriesBox.DropDownStyle = ComboBoxStyle.DropDownList;
+      var listBox = new ListBox
+      {
+        Sorted = true,
+        BorderStyle = BorderStyle.FixedSingle,
+        Width = (int) (200 * GH_GraphicsUtil.UiScale),
+        Height = (int) (100 * GH_GraphicsUtil.UiScale)
+      };
+      listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
+
+      var categoriesBox = new ComboBox
+      {
+        Sorted = true,
+        DropDownStyle = ComboBoxStyle.DropDownList,
+        Width = (int) (200 * GH_GraphicsUtil.UiScale),
+        Tag = listBox
+      };
       categoriesBox.DropDownHeight = categoriesBox.ItemHeight * 15;
       categoriesBox.SetCueBanner("Category filter…");
-      categoriesBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
-      categoriesBox.Tag = listBox;
       categoriesBox.SelectedIndexChanged += CategoriesBox_SelectedIndexChanged;
 
-      var categoriesTypeBox = new ComboBox();
-      categoriesTypeBox.DropDownStyle = ComboBoxStyle.DropDownList;
-      categoriesTypeBox.Width = (int) (200 * GH_GraphicsUtil.UiScale);
-      categoriesTypeBox.Tag = categoriesBox;
+      var categoriesTypeBox = new ComboBox
+      {
+        DropDownStyle = ComboBoxStyle.DropDownList,
+        Width = (int) (200 * GH_GraphicsUtil.UiScale),
+        Tag = categoriesBox
+      };
       categoriesTypeBox.SelectedIndexChanged += CategoryType_SelectedIndexChanged;
       categoriesTypeBox.Items.Add("All Categories");
       categoriesTypeBox.Items.Add("Model");
@@ -74,7 +108,8 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       if (Revit.ActiveUIDocument is null) return;
 
-      var categories = Revit.ActiveUIDocument.Document.Settings.Categories.Cast<DB.Category>().Where(x => x.AllowsBoundParameters);
+      var doc = Revit.ActiveUIDocument.Document;
+      var categories = doc.GetBuiltInCategoriesWithParameters().Select(x => doc.GetCategory(x));
 
       if (categoryType != DB.CategoryType.Invalid)
       {
@@ -86,7 +121,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
       categoriesBox.SelectedIndex = -1;
       categoriesBox.Items.Clear();
-      foreach (var category in categories.OrderBy(x => x.Name))
+      foreach (var category in categories)
       {
         var tag = Types.Category.FromCategory(category);
         int index = categoriesBox.Items.Add(tag.EmitProxy());
@@ -181,20 +216,29 @@ namespace RhinoInside.Revit.GH.Parameters
     #endregion
   }
 
-  public class ParameterValue : GH_Param<Types.ParameterValue>
+  public class ParameterValue : Param<Types.ParameterValue>
   {
     public override Guid ComponentGuid => new Guid("3E13D360-4B29-42C7-8F3E-2AB8F74B4EA8");
     public override GH_Exposure Exposure => GH_Exposure.hidden;
-    protected override System.Drawing.Bitmap Icon => ((System.Drawing.Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
-                                                     ImageBuilder.BuildIcon("#");
+    protected override string IconTag => "#";
+
     protected override Types.ParameterValue PreferredCast(object data)
     {
       return data is DB.Parameter parameter ? new Types.ParameterValue(parameter) : default;
     }
 
-    public ParameterValue() : base("ParameterValue", "ParameterValue", "Contains a collection of Revit parameter values on an element.", "Params", "Revit Primitives", GH_ParamAccess.item) { }
-    protected ParameterValue(string name, string nickname, string description, string category, string subcategory, GH_ParamAccess access) :
-    base(name, nickname, description, category, subcategory, access)
+    public ParameterValue() : base
+    (
+      name: "Parameter Value",
+      nickname: "Parameter Value",
+      description: "Contains a collection of Revit parameter values on an element.",
+      category: "Params",
+      subcategory: "Revit Primitives"
+    )
+    { }
+
+    protected ParameterValue(string name, string nickname, string description, string category, string subcategory) :
+    base(name, nickname, description, category, subcategory)
     { }
 
     protected override string Format(Types.ParameterValue data)
@@ -221,7 +265,16 @@ namespace RhinoInside.Revit.GH.Parameters
   {
     public override Guid ComponentGuid => new Guid("43F0E4E9-3DC4-4965-AB80-07E28E203A91");
 
-    public ParameterParam() : base(string.Empty, string.Empty, string.Empty, "Params", "Revit Primitives", GH_ParamAccess.item) { }
+    public ParameterParam() : base
+    (
+      name: string.Empty,
+      nickname: string.Empty,
+      description: string.Empty,
+      category: "Params",
+      subcategory: "Revit Primitives"
+    )
+    { }
+
     public ParameterParam(DB.Parameter p) : this()
     {
       ParameterName = p.Definition.Name;

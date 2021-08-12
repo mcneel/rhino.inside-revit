@@ -13,18 +13,7 @@ namespace RhinoInside.Revit.GH.Components.DesignOption
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "Q";
 
-    static readonly DB.ElementFilter elementFilter = new DB.ElementParameterFilter
-    (
-      new DB.FilterStringRule
-      (
-        new DB.ParameterValueProvider(new DB.ElementId(DB.BuiltInParameter.OPTION_SET_NAME)),
-        new DB.FilterStringEquals(),
-        string.Empty,
-        true
-      ),
-      true
-    );
-    protected override DB.ElementFilter ElementFilter => elementFilter;
+    protected override DB.ElementFilter ElementFilter => Types.DesignOptionSet.IsValidElementFilter;
 
     #region UI
     protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
@@ -55,9 +44,9 @@ namespace RhinoInside.Revit.GH.Components.DesignOption
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
+      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Design Option name", GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamVisibility.Voluntary),
+      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Occasional),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -132,11 +121,11 @@ namespace RhinoInside.Revit.GH.Components.DesignOption
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
+      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.Element>("Design Option Set", "DOS", string.Empty, GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_String>("Name", "N", "Design Option name", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_Boolean>("Primary", "P", "Design Option is primary", GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamVisibility.Voluntary),
+      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Occasional),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -150,7 +139,7 @@ namespace RhinoInside.Revit.GH.Components.DesignOption
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
         return;
 
-      if (!Params.TryGetData(DA, "Design Option Set", out Types.DesignOptionSet set, x => x.IsValid)) return;
+      if (!Params.TryGetData(DA, "Design Option Set", out Types.DesignOptionSet set)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
       if (!Params.TryGetData(DA, "Primary", out bool? primary)) return;
       if (!Params.TryGetData(DA, "Filter", out DB.ElementFilter filter, x => x.IsValidObject)) return;

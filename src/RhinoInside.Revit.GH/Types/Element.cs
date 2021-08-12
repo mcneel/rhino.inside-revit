@@ -25,6 +25,23 @@ namespace RhinoInside.Revit.GH.Types
   {
     #region IGH_Goo
     public override bool IsValid => base.IsValid && Value is object;
+    public override string IsValidWhyNot
+    {
+      get
+      {
+        if (base.IsValidWhyNot is string log) return log;
+
+        if (Id.IsBuiltInId())
+        {
+          if (!IsValid) return $"Referenced built-in {((IGH_Goo) this).TypeName} is not valid. {{{Id.IntegerValue}}}";
+        }
+        else if (Value is null) return $"Referenced {((IGH_Goo) this).TypeName} was deleted or undone. {{{Id.IntegerValue}}}";
+
+        return default;
+      }
+    }
+
+    // TODO : Rename to ValueType
     protected virtual Type ScriptVariableType => typeof(DB.Element);
     #endregion
 
@@ -40,6 +57,8 @@ namespace RhinoInside.Revit.GH.Types
         return value;
       }
     }
+
+    public override string DisplayName => Name ?? (IsReferencedData ? string.Empty : "<None>");
     #endregion
 
     #region ReferenceObject
@@ -61,7 +80,7 @@ namespace RhinoInside.Revit.GH.Types
     public override bool IsReferencedDataLoaded => Document is object && Id is object;
     public sealed override bool LoadReferencedData()
     {
-      if (IsReferencedData && !IsReferencedDataLoaded)
+      if (IsReferencedData)
       {
         UnloadReferencedData();
 
@@ -108,13 +127,21 @@ namespace RhinoInside.Revit.GH.Types
 
     public static readonly Dictionary<Type, Func<DB.Element, Element>> ActivatorDictionary = new Dictionary<Type, Func<DB.Element, Element>>()
     {
+// TODO : Upgrade Revit 2021 nuget package to 2021.0.1 and change the if below to REVIT_2021
+#if REVIT_2022
+      { typeof(DB.InternalOrigin),          (element)=> new InternalOrigin        (element as DB.InternalOrigin)    },
       { typeof(DB.BasePoint),               (element)=> new BasePoint             (element as DB.BasePoint)         },
+#endif
       { typeof(DB.DesignOption),            (element)=> new DesignOption          (element as DB.DesignOption)      },
+      { typeof(DB.Phase),                   (element)=> new Phase                 (element as DB.Phase)             },
+      { typeof(DB.SelectionFilterElement),  (element)=> new SelectionFilterElement(element as DB.SelectionFilterElement)},
+      { typeof(DB.ParameterFilterElement),  (element)=> new ParameterFilterElement(element as DB.ParameterFilterElement)},
       { typeof(DB.View),                    (element)=> new View                  (element as DB.View)              },
       { typeof(DB.Family),                  (element)=> new Family                (element as DB.Family)            },
       { typeof(DB.ElementType),             (element)=> new ElementType           (element as DB.ElementType)       },
       { typeof(DB.FamilySymbol),            (element)=> new FamilySymbol          (element as DB.FamilySymbol)      },
       { typeof(DB.HostObjAttributes),       (element)=> new HostObjectType        (element as DB.HostObjAttributes) },
+      { typeof(DB.MEPCurveType),            (element)=> new MEPCurveType          (element as DB.MEPCurveType)      },
       { typeof(DB.ParameterElement),        (element)=> new ParameterKey          (element as DB.ParameterElement)  },
       { typeof(DB.Material),                (element)=> new Material              (element as DB.Material)          },
       { typeof(DB.GraphicsStyle),           (element)=> new GraphicsStyle         (element as DB.GraphicsStyle)     },
@@ -141,6 +168,7 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(DB.SpatialElement),          (element)=> new SpatialElement        (element as DB.SpatialElement)    },
       { typeof(DB.Group),                   (element)=> new Group                 (element as DB.Group)             },
       { typeof(DB.HostObject),              (element)=> new HostObject            (element as DB.HostObject)        },
+      { typeof(DB.MEPCurve),                (element)=> new MEPCurve              (element as DB.MEPCurve)          },
       { typeof(DB.CurtainSystem),           (element)=> new CurtainSystem         (element as DB.CurtainSystem)     },
       { typeof(DB.CurtainGridLine),         (element)=> new CurtainGridLine       (element as DB.CurtainGridLine)   },
       { typeof(DB.Floor),                   (element)=> new Floor                 (element as DB.Floor)             },
@@ -157,7 +185,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public static Element FromElement(DB.Element element)
     {
-      if (element is null)
+      if (!element.IsValid())
         return null;
 
       for (var type = element.GetType(); type != typeof(DB.Element); type = type.BaseType)
@@ -185,8 +213,14 @@ namespace RhinoInside.Revit.GH.Types
 
           return new InstanceElement(element);
         }
-
-        if (GeometricElement.IsValidElement(element))
+// TODO : Upgrade Revit 2021 nuget package to 2021.0.1 and change the if below to REVIT_2021
+#if !REVIT_2022
+        else if (InternalOrigin.IsValidElement(element))
+          return new InternalOrigin(element as DB.BasePoint);
+        else if (BasePoint.IsValidElement(element))
+          return new BasePoint(element as DB.BasePoint);
+#endif
+        else if (GeometricElement.IsValidElement(element))
           return new GeometricElement(element);
 
         return new GraphicalElement(element);
@@ -330,13 +364,10 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
 
-      if (source is ValueTuple<DB.Document, DB.ElementId> tuple)
-      {
-        try { source = tuple.Item1.GetElement(tuple.Item2); }
-        catch { }
-      }
+      if (source is DB.Element value)
+        return SetValue(value);
 
-      return SetValue(source as DB.Element);
+      return false;
     }
 
     public override bool CastTo<Q>(out Q target)
@@ -403,18 +434,6 @@ namespace RhinoInside.Revit.GH.Types
       public virtual int? Id
       {
         get => owner.Id?.IntegerValue;
-        set
-        {
-          if (!value.HasValue || value == DB.ElementId.InvalidElementId.IntegerValue)
-            owner.SetValue(default, DB.ElementId.InvalidElementId);
-          else
-          {
-            var doc = owner.Document ?? Revit.ActiveDBDocument;
-            var id = new DB.ElementId(value.Value);
-
-            if (IsValidId(doc, id)) owner.SetValue(doc, id);
-          }
-        }
       }
 
       [System.ComponentModel.Description("A human readable name for the Element.")]
@@ -423,24 +442,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
 
-    public override string DisplayName
-    {
-      get
-      {
-        if (Name is string name && name != string.Empty)
-          return name;
-
-        return base.DisplayName;
-      }
-    }
-
-    #region Properties
-    public DB.WorksetId WorksetId
-    {
-      get => Document?.GetWorksetId(Id);
-      set => Value?.get_Parameter(DB.BuiltInParameter.ELEM_PARTITION_PARAM)?.Set(value.IntegerValue);
-    }
-
+#region Properties
     public bool CanDelete => IsValid && DB.DocumentValidation.CanDeleteElement(Document, Id);
 
     public bool? Pinned
@@ -455,20 +457,39 @@ namespace RhinoInside.Revit.GH.Types
 
     public virtual bool CanBeRenamed() => Value.CanBeRenamed();
 
-    static string GetUniqueNameRoot(string name)
+    public bool SetIncrementalName(string name)
     {
-      if (name?.EndsWith(")") == true)
+      if (!DB.NamingUtils.IsValidName(name))
+        throw new ArgumentException("Element name contains prohibited characters and is invalid.", nameof(name));
+
+      if (Value is DB.Element element)
       {
-        var start = name.LastIndexOf('(');
-        if (start >= 0)
         {
-          var number = name.Substring(start + 1, name.Length - start - 2);
-          if (int.TryParse(number, out var _))
-            return name.Substring(0, start - 1);
+          var index = name.LastIndexOf(' ');
+          if (index >= 0)
+          {
+            if (int.TryParse(name.Substring(index + 1), out var _))
+              name = name.Substring(0, index);
+          }
+        }
+
+        {
+          int index = 0;
+          while (true)
+          {
+            try
+            {
+              if (index == 0) { index++; element.Name = name; }
+              else element.Name = $"{name} {index++}";
+              return true;
+            }
+            catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
+            catch (Autodesk.Revit.Exceptions.ArgumentException) { }
+          }
         }
       }
 
-      return name;
+      return false;
     }
 
     public bool SetUniqueName(string name)
@@ -478,20 +499,19 @@ namespace RhinoInside.Revit.GH.Types
 
       if (Value is DB.Element element)
       {
-        name = GetUniqueNameRoot(name);
-
-        int index = 0;
-        while (true)
+        if (name?.EndsWith(")") == true)
         {
-          try
+          var start = name.LastIndexOf('(');
+          if (start >= 0)
           {
-            if (index == 0) { index++; element.Name = name; }
-            else element.Name = $"{name} ({index++})";
-            return true;
+            var uniqueId = name.Substring(start + 1, name.Length - start - 2);
+            if (UniqueId.TryParse(uniqueId, out var _, out var _))
+              name = name.Substring(0, Math.Max(0, start - 1));
           }
-          catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
-          catch (Autodesk.Revit.Exceptions.ArgumentException) { }
         }
+
+        element.Name = string.IsNullOrEmpty(name) ? $"({element.UniqueId})" : $"{name} ({element.UniqueId})";
+        return true;
       }
 
       return false;
@@ -499,17 +519,16 @@ namespace RhinoInside.Revit.GH.Types
 
     public virtual string Name
     {
-      get => Value?.Name;
+      get => Rhinoceros.InvokeInHostContext(() => Value?.Name);
       set
       {
-        if (value is object)
+        if (value is object && value != Name)
         {
           if (Id.IsBuiltInId())
           {
-            if (value == Name) return;
             throw new InvalidOperationException($"BuiltIn {((IGH_Goo) this).TypeName.ToLowerInvariant()} '{DisplayName}' does not support assignment of a user-specified name.");
           }
-          else if (Value is DB.Element element && element.Name != value)
+          else if (Value is DB.Element element)
           {
             element.Name = value;
           }
@@ -519,7 +538,11 @@ namespace RhinoInside.Revit.GH.Types
 
     public Category Category
     {
-      get => Category.FromCategory(Value?.Category);
+      get => Value is object ?
+        Value.Category is DB.Category category ?
+        Category.FromCategory(category) :
+        new Category() :
+        default;
     }
 
     public virtual ElementType Type
@@ -529,17 +552,51 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (value is object && Value is DB.Element element)
         {
-          AssertValidDocument(value.Document, nameof(Type));
+          AssertValidDocument(value, nameof(Type));
           InvalidateGraphics();
 
           element.ChangeTypeId(value.Id);
         }
       }
     }
-    #endregion
 
-    #region Identity Data
-    public string Description
+    public DB.WorksetId WorksetId
+    {
+      get => Document?.GetWorksetId(Id);
+      set => Value?.get_Parameter(DB.BuiltInParameter.ELEM_PARTITION_PARAM)?.Set(value.IntegerValue);
+    }
+
+    public Phase CreatedPhase
+    {
+      get => Value is DB.Element element && element.HasPhases() ? new Phase(element.Document, element.CreatedPhaseId) : default;
+      set
+      {
+        if (value is object && Value is DB.Element element && element.HasPhases())
+        {
+          AssertValidDocument(value, nameof(CreatedPhase));
+          if (element.CreatedPhaseId != value.Id)
+            element.CreatedPhaseId = value.Id;
+        }
+      }
+    }
+
+    public Phase DemolishedPhase
+    {
+      get => Value is DB.Element element && element.HasPhases() ? new Phase(element.Document, element.DemolishedPhaseId) : default;
+      set
+      {
+        if (value is object && Value is DB.Element element && element.HasPhases())
+        {
+          AssertValidDocument(value, nameof(DemolishedPhase));
+          if (element.DemolishedPhaseId != value.Id)
+            element.DemolishedPhaseId = value.Id;
+        }
+      }
+    }
+#endregion
+
+#region Identity Data
+    public virtual string Description
     {
       get => Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.AsString();
       set
@@ -622,6 +679,6 @@ namespace RhinoInside.Revit.GH.Types
           Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MARK)?.Set(value);
       }
     }
-    #endregion
+#endregion
   }
 }

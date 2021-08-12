@@ -50,7 +50,7 @@ namespace RhinoInside.Revit.GH.Types
       return base.CastFrom(source);
     }
 
-    public override BoundingBox GetBoundingBox(Transform xform) => BoundingBox.Unset;
+    public override BoundingBox GetBoundingBox(Transform xform) => NaN.BoundingBox;
 
     #region IGH_PreviewData
     public override void DrawViewportWires(GH_PreviewWireArgs args)
@@ -122,7 +122,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Properties
-    public override BoundingBox BoundingBox => BoundingBox.Unset;
+    public override BoundingBox BoundingBox => NaN.BoundingBox;
 
     public override Plane Location
     {
@@ -141,12 +141,7 @@ namespace RhinoInside.Revit.GH.Types
           );
         }
 
-        return new Plane
-        (
-          new Point3d(double.NaN, double.NaN, double.NaN),
-          Vector3d.Zero,
-          Vector3d.Zero
-        );
+        return NaN.Plane;
       }
     }
 
@@ -220,7 +215,7 @@ namespace RhinoInside.Revit.GH.Types
         return bbox;
       }
 
-      return BoundingBox.Unset;
+      return NaN.BoundingBox;
     }
 
     #region IGH_PreviewData
@@ -234,14 +229,14 @@ namespace RhinoInside.Revit.GH.Types
           if (points is object)
           {
             var bbox = BoundingBox;
-            var polyline = new List<Point3d>(points.Count * 2);
+            var polyline = new List<Point3d>(points.Length * 2);
 
-            for (int p = 0; p < points.Count; ++p)
+            for (int p = 0; p < points.Length; ++p)
               points[p] = new Point3d(points[p].X, points[p].Y, bbox.Min.Z);
 
             polyline.AddRange(points);
 
-            for (int p = 0; p < points.Count; ++p)
+            for (int p = 0; p < points.Length; ++p)
               points[p] = new Point3d(points[p].X, points[p].Y, bbox.Max.Z);
 
             polyline.AddRange(points.Reverse());
@@ -379,7 +374,7 @@ namespace RhinoInside.Revit.GH.Types
           return bbox;
         }
 
-        return BoundingBox.Unset;
+        return NaN.BoundingBox;
       }
     }
 
@@ -387,9 +382,9 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var origin = new Point3d(double.NaN, double.NaN, double.NaN);
-        var axis = new Vector3d(double.NaN, double.NaN, double.NaN);
-        var perp = new Vector3d(double.NaN, double.NaN, double.NaN);
+        var origin = NaN.Point3d;
+        var axis = NaN.Vector3d;
+        var perp = NaN.Vector3d;
 
         if (Value is DB.Grid grid)
         {
@@ -546,7 +541,7 @@ namespace RhinoInside.Revit.GH.Types
           );
         }
 
-        return BoundingBox.Unset;
+        return NaN.BoundingBox;
       }
     }
 
@@ -556,12 +551,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         return Value is DB.ReferencePlane referencePlane ?
           referencePlane.GetPlane().ToPlane() :
-          new Plane
-          (
-            new Point3d(double.NaN, double.NaN, double.NaN),
-            Vector3d.Zero,
-            Vector3d.Zero
-          );
+          NaN.Plane;
       }
     }
 
@@ -569,7 +559,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get => Value is DB.ReferencePlane referencePlane ?
           new LineCurve(referencePlane.BubbleEnd.ToPoint3d(), referencePlane.FreeEnd.ToPoint3d()) :
-        default;
+          default;
     }
     #endregion
   }

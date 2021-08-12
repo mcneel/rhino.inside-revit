@@ -5,8 +5,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
 {
   internal static class ElementIdComparer
   {
-    public static readonly IComparer<ElementId> Ascending = new AscendingComparer();
-    public static readonly IComparer<ElementId> Descending = new DescendingComparer();
+    public static readonly IComparer<ElementId> Ascending = default(AscendingComparer);
+    public static readonly IComparer<ElementId> Descending = default(DescendingComparer);
+    public static readonly IComparer<ElementId> NoNullsAscending = default(NoNullsAscendingComparer);
+    public static readonly IComparer<ElementId> NoNullsDescending = default(NoNullsDescendingComparer);
 
     struct AscendingComparer : IComparer<ElementId>
     {
@@ -18,6 +20,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       int IComparer<ElementId>.Compare(ElementId x, ElementId y) =>
         (y?.IntegerValue ?? int.MinValue) - (x?.IntegerValue ?? int.MinValue);
+    }
+
+    struct NoNullsAscendingComparer : IComparer<ElementId>
+    {
+      int IComparer<ElementId>.Compare(ElementId x, ElementId y) =>
+        x.IntegerValue - y.IntegerValue;
+    }
+
+    struct NoNullsDescendingComparer : IComparer<ElementId>
+    {
+      int IComparer<ElementId>.Compare(ElementId x, ElementId y) =>
+        y.IntegerValue - x.IntegerValue;
     }
   }
 

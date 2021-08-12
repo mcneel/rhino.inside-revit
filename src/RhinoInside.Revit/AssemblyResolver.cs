@@ -373,7 +373,7 @@ namespace RhinoInside.Revit
               switch (taskDialog.Show())
               {
                 case TaskDialogResult.CommandLink1:
-                  using (Process.Start(@"https://www.rhino3d.com/inside/revit/beta/reference/known-issues")) { }
+                  using (Process.Start($@"{AddIn.AddInWebSite}/reference/known-issues")) { }
                   break;
                 case TaskDialogResult.CommandLink2:
 

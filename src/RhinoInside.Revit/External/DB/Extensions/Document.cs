@@ -12,8 +12,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static bool IsValidWithLog(this Document doc, out string log)
     {
-      if (doc is null) { log = "Document is a null reference."; return false; }
-      if (!doc.IsValidObject) { log = "Document was closed."; return false; }
+      if (doc is null)        { log = "Document is a null reference.";         return false; }
+      if (!doc.IsValidObject) { log = "Referenced Revit document was closed."; return false; }
 
       log = string.Empty;
       return true;
@@ -35,6 +35,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
         return true;
 
       if (self is null || other is null)
+        return false;
+
+      if (!self.IsValidObject || !other.IsValidObject)
         return false;
 
       return self.Equals(other);
@@ -298,6 +301,158 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
     #endregion
 
+    #region Name
+    internal static bool TryGetElement<T>(this Document doc, out T element, string name, string parentName = default, BuiltInCategory? categoryId = default) where T : Element
+    {
+      if (typeof(ElementType).IsAssignableFrom(typeof(T)))
+      {
+        using (var collector = new FilteredElementCollector(doc).WhereElementIsKindOf(typeof(T)))
+        {
+          element = collector.
+          WhereElementIsKindOf(typeof(T)).
+          WhereCategoryIdEqualsTo(categoryId).
+          WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, parentName).
+          WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_TYPE_NAME, name).
+          OfType<T>().FirstOrDefault();
+        }
+      }
+      else if (typeof(AppearanceAssetElement).IsAssignableFrom(typeof(T)))
+      {
+        element = name is object ? AppearanceAssetElement.GetAppearanceAssetElementByName(doc, name) as T : default;
+      }
+      else
+      {
+        using (var collector = new FilteredElementCollector(doc))
+        {
+          var elementCollector = collector.
+          WhereElementIsKindOf(typeof(T)).
+          WhereCategoryIdEqualsTo(categoryId);
+
+          var nameParameter = ElementExtension.GetNameParameter(typeof(T));
+          var enumerable = nameParameter != BuiltInParameter.INVALID ?
+            elementCollector.WhereParameterEqualsTo(nameParameter, name) :
+            elementCollector.Where(x => x.Name == name);
+
+          element = enumerable.OfType<T>().FirstOrDefault();
+        }
+      }
+
+      return element is object;
+    }
+
+    internal static IEnumerable<Element> GetNamesakeElements(this Document doc, Type type, string name, string parentName = default, BuiltInCategory? categoryId = default)
+    {
+      var enumerable = Enumerable.Empty<Element>();
+
+      if (!string.IsNullOrEmpty(name))
+      {
+        if (typeof(ElementType).IsAssignableFrom(type))
+        {
+          enumerable = new FilteredElementCollector(doc).
+          WhereElementIsKindOf(type).
+          WhereCategoryIdEqualsTo(categoryId).
+          WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, parentName).
+          WhereParameterBeginsWith(BuiltInParameter.ALL_MODEL_TYPE_NAME, name);
+        }
+        else
+        {
+          var elementCollector = new FilteredElementCollector(doc).
+          WhereElementIsKindOf(type).
+          WhereCategoryIdEqualsTo(categoryId);
+
+          var nameParameter = ElementExtension.GetNameParameter(type);
+          enumerable = nameParameter != BuiltInParameter.INVALID ?
+            elementCollector.WhereParameterBeginsWith(nameParameter, name) :
+            elementCollector.Where(x => x.Name.StartsWith(name));
+        }
+      }
+
+      return enumerable.
+        // WhereElementIsKindOf sometimes is not enough.
+        Where(x => type.IsAssignableFrom(x.GetType())).
+        // Look for elements called "name" or "name 1" but not "name abc".
+        Where
+        (
+          x =>
+          {
+            TryParseNameId(x.Name, out var prefix, out var _);
+            return prefix == name;
+          }
+        );
+    }
+
+    internal static bool TryParseNameId(string name, out string prefix, out int id)
+    {
+      id = default;
+      var index = name.LastIndexOf(' ');
+      if (index >= 0)
+      {
+        if (int.TryParse(name.Substring(index + 1), out id))
+        {
+          prefix = name.Substring(0, index);
+          return true;
+        }
+      }
+
+      prefix = name;
+      return false;
+    }
+
+    internal static int? GetIncrementalName(this Document doc, Type type, ref string name, string parentName = default, BuiltInCategory? categoryId = default)
+    {
+      if (name is null)
+        throw new ArgumentNullException(nameof(name));
+
+      if (name is null)
+        throw new ArgumentNullException(nameof(name));
+
+      if (!NamingUtils.IsValidName(name))
+        throw new ArgumentException("Element name contains prohibited characters and is invalid.", nameof(name));
+
+      // Remove number sufix from name and trailing spaces.
+      TryParseNameId(name.Trim(), out name, out var _);
+
+      var last = doc.GetNamesakeElements(type, name, parentName, categoryId).
+        OrderBy(x => x.Name, default(ElementNameComparer)).LastOrDefault();
+
+      if (last is object)
+      {
+        if (TryParseNameId(last.Name, out name, out var id))
+          return id + 1;
+
+        return 1;
+      }
+
+      return default;
+    }
+
+    internal static IEnumerable<string> WhereNamePrefixedWith(this IEnumerable<string> enumerable, string prefix)
+    {
+      foreach (var value in enumerable)
+      {
+        if (!value.StartsWith(prefix)) continue;
+
+        TryParseNameId(value, out var name, out var _);
+        if (name != prefix) continue;
+
+        yield return value;
+      }
+    }
+
+    internal static string NextNameOrDefault(this IEnumerable<string> enumerable)
+    {
+      var last = enumerable.OrderBy(x => x, default(ElementNameComparer)).LastOrDefault();
+
+      if (last is object)
+      {
+        TryParseNameId(last, out var next, out var id);
+        return $"{next} {id + 1}";
+      }
+
+      return default;
+    }
+    #endregion
+
     #region Category
     internal static Category AsCategory(Element element)
     {
@@ -323,15 +478,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
     /// <summary>
-    /// IEqualityComparer for <see cref="DB.Category"/> that assumes all categories are from the same <see cref="DB.Document"/>.
-    /// </summary>
-    struct CategoryEqualityComparer : IEqualityComparer<Category>
-    {
-      public bool Equals(Category x, Category y) => x.Id == y.Id;
-      public int GetHashCode(Category obj) => obj.Id.IntegerValue;
-    }
-
-    /// <summary>
     /// Query all <see cref="Autodesk.Revit.DB.Category"/> objects in <paramref name="doc"/>
     /// that are sub categories of <paramref name="parentId"/> or
     /// root categories if <paramref name="parentId"/> is <see cref="Autodesk.Revit.DB.ElementId.InvalidElementId"/>.
@@ -342,11 +488,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <remarks>This method will return all categories and sub categories if <paramref name="parentId"/> is null.</remarks>
     public static ICollection<Category> GetCategories(this Document doc, ElementId parentId = default)
     {
-      using (var collector = new FilteredElementCollector(doc))
+      using (var collector = new FilteredElementCollector(doc).OfClass(typeof(GraphicsStyle)))
       {
         var categories =
         (
-          collector.OfClass(typeof(GraphicsStyle)).Cast<GraphicsStyle>().
+          collector.Cast<GraphicsStyle>().
           Select(x => x.GraphicsStyleCategory).
           Where(x => x.Name != string.Empty)
         );
@@ -354,14 +500,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
         if (parentId is object)
           categories = categories.Where(x => parentId == (x.Parent?.Id ?? ElementId.InvalidElementId));
 
-        return new HashSet<Category>(categories, new CategoryEqualityComparer());
+        return new HashSet<Category>(categories, CategoryEqualityComparer.SameDocument);
       }
     }
 
     public static Category GetCategory(this Document doc, BuiltInCategory categoryId)
     {
       if (doc is null || categoryId == BuiltInCategory.INVALID)
-        return null;
+        return default;
 
       // 1. We try with the regular way calling Category.GetCategory
       try
@@ -388,7 +534,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static Category GetCategory(this Document doc, ElementId id)
     {
       if (doc is null || !id.IsValid())
-        return null;
+        return default;
 
       return id.TryGetBuiltInCategory(out var categoryId) ?
         GetCategory(doc, categoryId) :
@@ -399,19 +545,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
     static Document BuiltInCategoriesWithParametersDocument;
     internal static IReadOnlyCollection<BuiltInCategory> GetBuiltInCategoriesWithParameters(this Document doc)
     {
-      if (BuiltInCategoriesWithParameters is null || !doc.Equals(BuiltInCategoriesWithParametersDocument))
+      if (BuiltInCategoriesWithParametersDocument?.IsValidObject != true || !doc.IsEquivalent(BuiltInCategoriesWithParametersDocument))
       {
         BuiltInCategoriesWithParametersDocument = doc;
-        BuiltInCategoriesWithParameters = BuiltInCategoryExtension.BuiltInCategories.
-          Where
-          (
-            bic =>
-            {
-              try { return Category.GetCategory(doc, bic)?.AllowsBoundParameters == true; }
-              catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
-            }
-          ).
-          ToArray();
+        BuiltInCategoriesWithParameters = BuiltInCategoryExtension.BuiltInCategories.Where
+        (
+          bic =>
+          {
+            try { return Category.GetCategory(doc, bic)?.AllowsBoundParameters == true; }
+            catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
+          }
+        ).
+        ToArray();
       }
 
       return BuiltInCategoriesWithParameters;
@@ -748,7 +893,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static bool IsEmptyUri(this Uri uri)
     {
-      return uri.Scheme.Equals("empty", StringComparison.InvariantCultureIgnoreCase);
+      return uri.Scheme.Equals(Empty.Scheme, StringComparison.InvariantCultureIgnoreCase);
     }
 
     public static bool IsFileUri(this Uri uri, out string path)

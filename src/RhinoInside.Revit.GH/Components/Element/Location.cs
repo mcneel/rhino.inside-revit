@@ -102,7 +102,7 @@ namespace RhinoInside.Revit.GH.Components
         description:  "Element location",
         access: GH_ParamAccess.item,
         optional:  true,
-        ParamVisibility.Default
+        ParamRelevance.Primary
       )
     };
 
@@ -116,7 +116,6 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Element",
           NickName = "E",
           Description = "Element to access location",
-          Access = GH_ParamAccess.item
         }
       ),
       new ParamDefinition
@@ -126,7 +125,6 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Location",
           NickName = "L",
           Description = "Element location",
-          Access = GH_ParamAccess.item
         }
       ),
       new ParamDefinition
@@ -136,9 +134,8 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Hand",
           NickName = "H",
           Description = "Element hand orientation",
-          Access = GH_ParamAccess.item
         },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -147,9 +144,8 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Facing",
           NickName = "F",
           Description = "Element facing orientation",
-          Access = GH_ParamAccess.item
         },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -158,9 +154,8 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Work Plane",
           NickName = "W",
           Description = "Element work plane orientation",
-          Access = GH_ParamAccess.item
         },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
     };
 
@@ -225,7 +220,7 @@ namespace RhinoInside.Revit.GH.Components
         description: "Element curve",
         access: GH_ParamAccess.item,
         optional : true,
-        ParamVisibility.Default
+        ParamRelevance.Primary
       )
     };
 
@@ -299,7 +294,6 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
           Name = "Element",
           NickName = "E",
           Description = "Element to extract information",
-          Access = GH_ParamAccess.item
         }
       ),
     };
@@ -314,9 +308,8 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
           Name = "Level",
           NickName = "L",
           Description = "Element reference level",
-          Access = GH_ParamAccess.item
         },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -325,9 +318,8 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
           Name = "Box",
           NickName = "B",
           Description = "Element oriented bounding box",
-          Access = GH_ParamAccess.item
         },
-        ParamVisibility.Voluntary
+        ParamRelevance.Occasional
       ),
       new ParamDefinition
       (
@@ -336,9 +328,8 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
           Name = "Location",
           NickName = "L",
           Description = "Element location",
-          Access = GH_ParamAccess.item
         },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -347,9 +338,8 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
           Name = "Facing Orientation",
           NickName = "F",
           Description = "Element facing orientation",
-          Access = GH_ParamAccess.item
         },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -358,9 +348,8 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
           Name = "Hand Orientation",
           NickName = "H",
           Description = "Element hand orientation",
-          Access = GH_ParamAccess.item
         },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -369,9 +358,8 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
           Name = "Curve",
           NickName = "C",
           Description = "Element curve location",
-          Access = GH_ParamAccess.item
         },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
     };
 

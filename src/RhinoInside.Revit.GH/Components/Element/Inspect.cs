@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components
   public class ElementInspect : Component, IGH_VariableParameterComponent
   {
     public override Guid ComponentGuid => new Guid("FAD33C4B-A7C3-479B-B309-8F5363B25599");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
     protected override string IconTag => "I";
 
     public ElementInspect()
@@ -28,9 +28,9 @@ namespace RhinoInside.Revit.GH.Components
       bool hasOutputParameters = Params.Output.Count > 0;
 
       Menu_AppendSeparator(menu);
-      Menu_AppendItem(menu, "Get common parameters", Menu_PopulateOutputsWithCommonParameters, hasInputData, false);
-      Menu_AppendItem(menu, "Get all parameters", Menu_PopulateOutputsWithAllParameters, hasInputData, false);
-      Menu_AppendItem(menu, "Remove unconnected parameters", Menu_RemoveUnconnectedParameters, hasOutputParameters, false);
+      Menu_AppendItem(menu, "Show common parameters", Menu_PopulateOutputsWithCommonParameters, hasInputData, false);
+      Menu_AppendItem(menu, "Show all parameters", Menu_PopulateOutputsWithAllParameters, hasInputData, false);
+      Menu_AppendItem(menu, "Hide unconnected parameters", Menu_RemoveUnconnectedParameters, hasOutputParameters, false);
     }
 
     class ComponentAttributes : GH_ComponentAttributes
@@ -64,15 +64,6 @@ namespace RhinoInside.Revit.GH.Components
     }
 
     public override void CreateAttributes() => m_attributes = new ComponentAttributes(this);
-
-    void AddOutputParameter(IGH_Param param)
-    {
-      if (param.Attributes is null)
-        param.Attributes = new GH_LinkedParamAttributes(param, Attributes);
-
-      param.Access = GH_ParamAccess.item;
-      Params.RegisterOutputParam(param);
-    }
 
     void Menu_PopulateOutputsWithCommonParameters(object sender, EventArgs e)
     {
@@ -135,7 +126,7 @@ namespace RhinoInside.Revit.GH.Components
         {
           foreach (var parameter in group.OrderBy(x => x.ParameterBuiltInId))
           {
-            AddOutputParameter(parameter);
+            Params.RegisterOutputParam(parameter);
 
             if (connected.TryGetValue(parameter, out var recipients))
             {

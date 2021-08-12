@@ -156,6 +156,14 @@ namespace Grasshopper.Special
     }
   }
 
+  interface IGH_ItemDescription
+  {
+    Bitmap GetImage(Size size);
+    string Name { get; }
+    string NickName { get; }
+    string Description { get; }
+  }
+
   [EditorBrowsable(EditorBrowsableState.Never)]
   public abstract class ValueSet<T> : GH_PersistentParam<T>,
     IGH_InitCodeAware,
@@ -215,9 +223,49 @@ namespace Grasshopper.Special
 
     public virtual DataCulling CullingMask => DataCulling.Nulls | DataCulling.Invalids | DataCulling.Duplicates | DataCulling.Empty;
 
-    protected virtual string GetItemDisplayText(T item) => ((IGH_Goo) item).ToString();
+    protected virtual string GetItemName(T value)
+    {
+      switch (value)
+      {
+        case IGH_ItemDescription item: return item.Name;
+        case IGH_Goo goo: return goo.ToString();
+      }
 
-    public string SearchPattern { get; set; } = string.Empty;
+      return value.ToString();
+    }
+
+    protected virtual string GetItemNickName(T value)
+    {
+      switch (value)
+      {
+        case IGH_ItemDescription item: return item.NickName;
+        case GH_Colour color:
+          if (color.Value.IsNamedColor) return color.Value.Name;
+          return GH_ColorRGBA.TryGetName(color.Value, out var name) ? name: string.Empty;
+        case IGH_GeometricGoo geom: return geom.IsReferencedGeometry ?
+            geom.ReferenceID.ToString("B") :
+            string.Empty;
+        case IGH_Goo goo: return string.Empty;
+      }
+
+      return string.Empty;
+    }
+
+    protected virtual string GetItemDescription(T value)
+    {
+      switch (value)
+      {
+        case IGH_ItemDescription item: return item.Description;
+        case IGH_GeometricGoo geom: return geom.IsReferencedGeometry ?
+            Rhino.RhinoDoc.ActiveDoc?.Name :
+            value.TypeDescription;
+        case IGH_Goo goo: return goo.TypeDescription;
+      }
+
+      return string.Empty;
+    }
+
+   public string SearchPattern { get; set; } = string.Empty;
     protected internal int LayoutLevel { get; set; } = 1;
 
     public class ListItem
@@ -226,12 +274,15 @@ namespace Grasshopper.Special
       {
         Value = goo;
 
-        var lines = name.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
-        switch (lines.Length)
+        if (name is object)
         {
-          case 0: Name = string.Empty; break;
-          case 1: Name = name; break;
-          default: Name = $"{lines[0]} ⤶"; break; // Alternatives ⏎⮐
+          var lines = name.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+          switch (lines.Length)
+          {
+            case 0: Name = string.Empty; break;
+            case 1: Name = name; break;
+            default: Name = $"{lines[0]} ⤶"; break; // Alternatives ⏎⮐
+          }
         }
 
         Selected = selected;
@@ -290,7 +341,8 @@ namespace Grasshopper.Special
     {
       var detail = Menu_AppendItem(menu, "Layout");
       Menu_AppendItem(detail.DropDown, "List", (s, a) => Menu_LayoutLevel(1), true, LayoutLevel == 1);
-      Menu_AppendItem(detail.DropDown, "Tiles", (s, a) => Menu_LayoutLevel(2), true, LayoutLevel == 2);
+      Menu_AppendItem(detail.DropDown, "Details", (s, a) => Menu_LayoutLevel(2), true, LayoutLevel == 2);
+      //Menu_AppendItem(detail.DropDown, "Tiles", (s, a) => Menu_LayoutLevel(3), true, LayoutLevel == 3);
     }
 
     private void Menu_LayoutLevel(int value)
@@ -435,6 +487,7 @@ namespace Grasshopper.Special
         base.Layout();
       }
 
+      static readonly Font NickNameFont = GH_FontServer.NewFont(GH_FontServer.StandardAdjusted, FontStyle.Italic);
       const int CaptionHeight = 20;
       const int FootnoteHeight = 18;
       const int ScrollerWidth = 8;
@@ -594,10 +647,11 @@ namespace Grasshopper.Special
                   graphics.TranslateTransform(0.0f, scroll);
                 }
 
-                using (var textBrush = new SolidBrush(Color.FromArgb(20, 20, 20)))
                 using (var nameFormat = new StringFormat(StringFormatFlags.NoWrap) { LineAlignment = StringAlignment.Center })
-                using (var textFormat = new StringFormat(StringFormatFlags.NoWrap) { LineAlignment = StringAlignment.Far })
+                using (var nickNameBrush = new SolidBrush(Color.FromArgb(80, 80, 80)))
+                using (var nickNameFormat = new StringFormat(StringFormatFlags.NoWrap) { LineAlignment = StringAlignment.Center })
                 using (var typeFormat = new StringFormat(StringFormatFlags.NoWrap) { LineAlignment = StringAlignment.Center, Alignment = StringAlignment.Far })
+                using (var descriptionFormat = new StringFormat(StringFormatFlags.NoWrap) { LineAlignment = StringAlignment.Center, Alignment = StringAlignment.Far })
                 {
                   var itemBounds = new RectangleF(clip.X, clip.Y, clip.Width, ItemHeight);
                   for(int index = 0; index < Owner.ListItems.Count; ++index)
@@ -611,10 +665,30 @@ namespace Grasshopper.Special
 
                       var nameBounds = new RectangleF(itemBounds.X + 22, itemBounds.Y + 1, itemBounds.Width - 22, (itemBounds.Height - 2) / Owner.LayoutLevel);
 
-                      if (GH_Canvas.ZoomFadeMedium > 0 && clip.Width > 250f && Owner.LayoutLevel == 1)
+                      if (GH_Canvas.ZoomFadeMedium > 0 && clip.Width > 250f)
                       {
                         var typeBounds = nameBounds; typeBounds.Width -= 2;
                         graphics.DrawString(item.Value.TypeName, GH_FontServer.StandardAdjusted, Brushes.LightGray, typeBounds, typeFormat);
+                      }
+
+                      if (Owner.LayoutLevel > 1)
+                      {
+                        if (Owner.GetItemDescription(item.Value) is string description && description != string.Empty)
+                        {
+                          if (GH_Canvas.ZoomFadeMedium > 0 && clip.Width > 250f)
+                          {
+                            var nickNameBounds = new RectangleF
+                            {
+                              X = nameBounds.X,
+                              Y = nameBounds.Y + 16,
+                              Width = nameBounds.Width,
+                              Height = nameBounds.Height
+                            };
+
+                            var descriptionBounds = nickNameBounds; descriptionBounds.Width -= 2;
+                            graphics.DrawString(description, GH_FontServer.StandardAdjusted, Brushes.LightGray, descriptionBounds, descriptionFormat);
+                          }
+                        }
                       }
 
                       if (item.Selected)
@@ -649,19 +723,18 @@ namespace Grasshopper.Special
 
                         if (Owner.LayoutLevel > 1)
                         {
-                          var text = ((object) item.Value).ToString();
-                          if (text == item.Name)
-                            text = item.Value.TypeName;
-
-                          var textBounds = new RectangleF
+                          if (Owner.GetItemNickName(item.Value) is string nickName && nickName != string.Empty)
                           {
-                            X = nameBounds.X,
-                            Y = nameBounds.Y + 16,
-                            Width = nameBounds.Width,
-                            Height = nameBounds.Height
-                          };
+                            var nickNameBounds = new RectangleF
+                            {
+                              X = nameBounds.X,
+                              Y = nameBounds.Y + 16,
+                              Width = nameBounds.Width,
+                              Height = nameBounds.Height
+                            };
 
-                          graphics.DrawString(text, GH_FontServer.ConsoleSmallAdjusted, textBrush, textBounds, textFormat);
+                            graphics.DrawString(nickName, NickNameFont, nickNameBrush, nickNameBounds, nickNameFormat);
+                          }
                         }
                       }
                     }
@@ -854,19 +927,6 @@ namespace Grasshopper.Special
 
                 return GH_ObjectResponse.Handled;
               }
-
-              if (canvas.Viewport.Zoom >= GH_Viewport.ZoomDefault * 0.8f /*&& Owner.DataType == GH_ParamData.remote*/)
-              {
-                if (ListBounds.Contains(canvasLocation))
-                {
-                  foreach (var item in Owner.ListItems)
-                    item.Selected = true;
-
-                  Owner.ResetPersistentData(Owner.ListItems.Select(x => x.Value), "Select all");
-
-                  return GH_ObjectResponse.Handled;
-                }
-              }
             }
           }
         }
@@ -1027,7 +1087,7 @@ namespace Grasshopper.Special
         new GooEqualityComparer()
       );
 
-      var items = volatileData.Select(goo => new ListItem(goo, GetItemDisplayText(goo), persistentData.Contains(goo)));
+      var items = volatileData.Select(goo => new ListItem(goo, GetItemName(goo), persistentData.Contains(goo)));
 
       if (RhinoInside.Revit.Operator.CompareMethodFromPattern(SearchPattern) != RhinoInside.Revit.Operator.CompareMethod.Equals)
         items = items.Where(x => string.IsNullOrEmpty(SearchPattern) || RhinoInside.Revit.Operator.IsSymbolNameLike(x.Name, SearchPattern));

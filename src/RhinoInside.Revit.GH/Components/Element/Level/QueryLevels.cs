@@ -28,12 +28,12 @@ namespace RhinoInside.Revit.GH.Components.Level
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
+      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Level name", GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Parameters.ElevationInterval>("Elevation", "E", "Level elevation interval along z-axis", GH_ParamAccess.item, optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_Boolean>("Structural", "S", "Level is structural", GH_ParamAccess.item, optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_Boolean>("Building Story", "BS", "Level is building story", defaultValue: true, GH_ParamAccess.item, optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamVisibility.Default)
+      ParamDefinition.Create<Parameters.ElevationInterval>("Elevation", "E", "Level elevation interval along z-axis", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Boolean>("Structural", "S", "Level is structural", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Boolean>("Building Story", "BS", "Level is building story", defaultValue: true, GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary)
     };
 
     protected override ParamDefinition[] Outputs => outputs;
