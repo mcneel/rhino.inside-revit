@@ -97,7 +97,7 @@ versions:
   one:
     version: 1.0
     name: v1.0
-    rir_download: https://www.rhino3d.com/download/rhino.inside-revit/7/latest
+    rir_download: https://www.rhino3d.com/download/rhino.inside-revit/1/latest
     rhino_download: https://www.rhino3d.com/download/rhino-for-windows/7/evaluation
   beta:
     version: beta
