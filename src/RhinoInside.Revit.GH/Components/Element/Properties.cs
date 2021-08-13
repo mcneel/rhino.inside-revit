@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
@@ -270,6 +271,7 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Element",
           NickName = "E",
           Description = "Element to access Type",
+          Access = GH_ParamAccess.list
         }
       ),
       new ParamDefinition
@@ -279,7 +281,8 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Type",
           NickName = "T",
           Description = "Element Type",
-          Optional = true
+          Optional = true,
+          Access = GH_ParamAccess.list
         },
         ParamRelevance.Primary
       ),
@@ -295,6 +298,7 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Element",
           NickName = "E",
           Description = "Element to access Type",
+          Access = GH_ParamAccess.list
         }
       ),
       new ParamDefinition
@@ -304,30 +308,71 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Type",
           NickName = "T",
           Description = "Element Type",
-        }
+          Access = GH_ParamAccess.list
+        },
+        ParamRelevance.Primary
       ),
     };
 
+
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var element = default(Types.Element);
-      if (!DA.GetData("Element", ref element))
-        return;
+      if (!Params.GetDataList(DA, "Element", out IList<Types.Element> elements)) return;
 
-      var _Type_ = Params.IndexOfInputParam("Type");
-      if (_Type_ >= 0 && Params.Input[_Type_].DataType != GH_ParamData.@void)
+      if (Params.GetDataList(DA, "Type", out IList<Types.ElementType> types))
       {
-        var type = default(Types.ElementType);
-        if (DA.GetData(_Type_, ref type))
+        var newTypes = Params.IndexOfInputParam("Type") < 0 ? default : new List<Types.ElementType>();
+        var typesSets = new Dictionary<Types.ElementType, List<DB.ElementId>>();
+
+        int index = 0;
+        foreach (var element in elements)
         {
-          StartTransaction(element.Document);
+          if (element is object && types.ElementAtOrLast(index) is Types.ElementType type)
+          {
+            newTypes?.Add(element is object ? type : default);
 
-          element.Type = type;
+            if (!typesSets.TryGetValue(type, out var entry))
+              typesSets.Add(type, new List<DB.ElementId> { element.Id });
+            else
+              entry.Add(element.Id);
+          }
+          else newTypes?.Add(default);
+
+          index++;
         }
-      }
 
-      DA.SetData("Element", element);
-      DA.SetData("Type", element.Type);
+        var map = new Dictionary<DB.ElementId, DB.ElementId>();
+        foreach (var type in typesSets)
+        {
+          StartTransaction(type.Key.Document);
+
+          foreach (var entry in DB.Element.ChangeTypeId(type.Key.Document, type.Value, type.Key.Id))
+          {
+            if (map.ContainsKey(entry.Key)) map.Remove(entry.Key);
+            map.Add(entry.Key, entry.Value);
+          }
+        }
+
+        DA.SetDataList
+        (
+          "Element",
+          elements.Select
+          (
+            x =>
+            x is null ? null :
+            map.TryGetValue(x.Id, out var newId) ?
+            Types.Element.FromElementId(x.Document, newId) : x
+          )
+        );
+
+        if (newTypes is object)
+          DA.SetDataList("Type", newTypes);
+      }
+      else
+      {
+        DA.SetDataList("Element", elements);
+        Params.TrySetDataList(DA, "Type", () => elements.Select(x => x.Type));
+      }
     }
   }
 }

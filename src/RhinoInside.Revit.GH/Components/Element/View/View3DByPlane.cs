@@ -72,10 +72,17 @@ namespace RhinoInside.Revit.GH.Components.Views
       }
       else
       {
-        view3D.SetOrientation(orientation);
+        if (view3D.IsLocked)
+        {
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "View is locked and cannot be reoriented.");
+        }
+        else
+        {
+          view3D.SetOrientation(orientation);
 
-        if (perspective.HasValue)
-          view3D.get_Parameter(DB.BuiltInParameter.VIEWER_PERSPECTIVE).Set(perspective.Value ? 1 : 0);
+          if (perspective.HasValue)
+            view3D.get_Parameter(DB.BuiltInParameter.VIEWER_PERSPECTIVE).Set(perspective.Value ? 1 : 0);
+        }
 
         ChangeElementTypeId(ref view3D, type.Value.Id);
       }
