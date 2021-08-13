@@ -695,9 +695,12 @@ namespace RhinoInside.Revit.GH.Components
           element = null;
       }
 
+      var graphical = element is object && Types.GraphicalElement.IsValidElement(element);
+      var pinned = element?.Pinned != false;
+
       try
       {
-        if(element?.Pinned != false)
+        if(!graphical || pinned)
           action(doc, ref element);
       }
       catch (RhinoInside.Revit.Exceptions.CancelException e)
@@ -721,10 +724,10 @@ namespace RhinoInside.Revit.GH.Components
         Params.WriteTrackedElement(trackedParam.Name, doc, element);
         DA.SetData(trackedParam.Name, element);
 
-        if (element.IsValid())
+        if (Types.GraphicalElement.IsValidElement(element))
         {
           // In case element is crated on this iteratrion we pin it here by default
-          if (element.Pinned == false && previous is null)
+          if (pinned && !element.Pinned)
           {
             try { element.Pinned = true; }
             catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
