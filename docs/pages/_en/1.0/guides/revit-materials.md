@@ -43,7 +43,7 @@ The first challenge is to be able to query available materials in a Revit model 
 
 ### Extracting Materials from Geometry
 
-To extract the set of materials assigned to faces of a geometry, use the *Geometry Materials* component shared here. In this example, a custom component is used to extract the geometry objects from Revit API ({% include api_type.html type='Autodesk.Revit.DB.Solid' title='DB.Solid' %} - See [Extracting Type Geometry by Category]({{ site.baseurl }}{% link _en/beta/guides/revit-types.md %}#extracting-type-geometry-by-category)). These objects are then passed to the *Geometry Materials* component to extract materials. Finally the *Element.Decompose* component is used to extract the material name.
+To extract the set of materials assigned to faces of a geometry, use the *Geometry Materials* component shared here. In this example, a custom component is used to extract the geometry objects from Revit API ({% include api_type.html type='Autodesk.Revit.DB.Solid' title='DB.Solid' %} - See [Extracting Type Geometry by Category]({{ site.baseurl }}{% link _en/1.0/guides/revit-types.md %}#extracting-type-geometry-by-category)). These objects are then passed to the *Geometry Materials* component to extract materials. Finally the *Element.Decompose* component is used to extract the material name.
 
 ![]({{ "/static/images/guides/revit-materials-extract.png" | prepend: site.baseurl }})
 
@@ -65,7 +65,7 @@ Use the {% include ltr/comp.html uuid='8c5cd6fb-' %} component to access the mat
 
 ![]({{ "/static/images/guides/revit-materials-graphics.png" | prepend: site.baseurl }})
 
-You can make changes to the graphic properties using the same component. See [Styles and Patterns]({{ site.baseurl }}{% link _en/beta/guides/revit-styles.md %}#find-specific-fill-pattern) page for the **Find Fill Pattern** component:
+You can make changes to the graphic properties using the same component. See [Styles and Patterns]({{ site.baseurl }}{% link _en/1.0/guides/revit-styles.md %}#find-specific-fill-pattern) page for the **Find Fill Pattern** component:
 
 ![]({{ "/static/images/guides/revit-materials-graphics-mod.png" | prepend: site.baseurl }})
 

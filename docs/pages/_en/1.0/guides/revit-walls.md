@@ -43,7 +43,7 @@ A better workflow is to collect walls based on the *Wall System Family*. Use the
 
 ### By Wall Type
 
-You can also collect walls of a specific type very easily using a workflow described in [Data Model: Elements & Instances]({{ site.baseurl }}{% link _en/beta/guides/revit-elements.md %}#instances)
+You can also collect walls of a specific type very easily using a workflow described in [Data Model: Elements & Instances]({{ site.baseurl }}{% link _en/1.0/guides/revit-elements.md %}#instances)
 
 ![]({{ "/static/images/guides/revit-walls-querywalltype.png" | prepend: site.baseurl }})
 
@@ -52,7 +52,7 @@ You can also collect walls of a specific type very easily using a workflow descr
 
 ### Reading Type Parameters
 
-Once you have filtered out the desired wall type using workflows described above, you can query its parameters and apply new values. See [Document Model: Parameters]({{ site.baseurl }}{% link _en/beta/guides/revit-params.md %}) to learn how to edit parameters of an element type.
+Once you have filtered out the desired wall type using workflows described above, you can query its parameters and apply new values. See [Document Model: Parameters]({{ site.baseurl }}{% link _en/1.0/guides/revit-params.md %}) to learn how to edit parameters of an element type.
 
 ### Analyzing Basic Walls
 
@@ -93,7 +93,7 @@ Use the {% include ltr/comp.html uuid="bc64525a-" %} component to extract inform
 
 ### Reading Instance Parameters
 
-Once you have filtered out the desired wall instance using workflows described above, you can query its parameters and apply new values. See [Document Model: Parameters]({{ site.baseurl }}{% link _en/beta/guides/revit-params.md %}) to learn how to edit parameters of an element.
+Once you have filtered out the desired wall instance using workflows described above, you can query its parameters and apply new values. See [Document Model: Parameters]({{ site.baseurl }}{% link _en/1.0/guides/revit-params.md %}) to learn how to edit parameters of an element.
 
 ### Common Wall Properties
 

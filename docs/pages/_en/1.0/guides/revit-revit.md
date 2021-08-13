@@ -28,7 +28,7 @@ This is also a good place to mention **Subcategories**. They sound like an organ
 
 ## Elements & Instances
 
-An often-asked question is **What is an Element?** Elements are the basic building blocks in Revit data model. Elements are organized into Categories. The list of categories is built into each Revit version and can not be changed. Elements have [Parameters]({{ site.baseurl }}{% link _en/beta/guides/revit-params.md %}) that hold data associated with the Element. Depending on their category, Elements will get a series of built-in parameters and can also accept custom parameters defined by user. Elements might have geometry e.g. Walls (3D) or Detail Components (2D), or might not include any geometry at all e.g. *Project Information* (Yes even that is an Element in Revit data model, although it is not selectable since Revit views are designed around geometric elements, therefore Revit provides a custom window to edit the project information). Elements have [Types]({{ site.baseurl }}{% link _en/beta/guides/revit-types.md %}) that define how the element behaves in the Revit model.
+An often-asked question is **What is an Element?** Elements are the basic building blocks in Revit data model. Elements are organized into Categories. The list of categories is built into each Revit version and can not be changed. Elements have [Parameters]({{ site.baseurl }}{% link _en/1.0/guides/revit-params.md %}) that hold data associated with the Element. Depending on their category, Elements will get a series of built-in parameters and can also accept custom parameters defined by user. Elements might have geometry e.g. Walls (3D) or Detail Components (2D), or might not include any geometry at all e.g. *Project Information* (Yes even that is an Element in Revit data model, although it is not selectable since Revit views are designed around geometric elements, therefore Revit provides a custom window to edit the project information). Elements have [Types]({{ site.baseurl }}{% link _en/1.0/guides/revit-types.md %}) that define how the element behaves in the Revit model.
 
 {% capture api_note %}
 In Revit API, Elements are represented by the {% include api_type.html type='Autodesk.Revit.DB.Element' title='DB.Element' %} and each element parameter is represented by {% include api_type.html type='Autodesk.Revit.DB.Parameter' title='DB.Parameter' %}. The {% include api_type.html type='Autodesk.Revit.DB.Element' title='DB.Element' %} has multiple methods to provide access to its collection of properties
@@ -40,7 +40,7 @@ Each element has an Id (`DB.Element.Id`) that is an integer value. However this 
 {% include ltr/api_note.html note=api_note %}
 
 {% capture link_note %}
-See [Revit: Elements & Instances]({{ site.baseurl }}{% link _en/beta/guides/revit-elements.md %}) guide on how to work with Revit Elements and Instances using Grasshopper in Revit.
+See [Revit: Elements & Instances]({{ site.baseurl }}{% link _en/1.0/guides/revit-elements.md %}) guide on how to work with Revit Elements and Instances using Grasshopper in Revit.
 {% endcapture %}
 {% include ltr/link_card.html note=link_note thumbnail='/static/images/guides/revit-elements.png' %}
 
@@ -76,7 +76,7 @@ Global parameters are category-agnostic parameters that could be applied to a ra
 &nbsp;
 
 {% capture link_note %}
-See [Revit: Parameters]({{ site.baseurl }}{% link _en/beta/guides/revit-params.md %}) guide on how to inspect, read, and write Revit element instance and type parameters using Grasshopper in Revit.
+See [Revit: Parameters]({{ site.baseurl }}{% link _en/1.0/guides/revit-params.md %}) guide on how to inspect, read, and write Revit element instance and type parameters using Grasshopper in Revit.
 {% endcapture %}
 {% include ltr/link_card.html note=link_note thumbnail='/static/images/guides/revit-params.png' %}
 
@@ -131,7 +131,7 @@ Defining new custom families is not a trivial task especially if they need to be
 To get you started, Revit installation provides a default set of these custom families based on the measurement system e.g. Imperial vs Metric and also provides many templates to help with creating new custom families from scratch.
 
 {% capture link_note %}
-See [Revit: Types & Families]({{ site.baseurl }}{% link _en/beta/guides/revit-types.md %}) guide on how to work with Revit Types, and Families using Grasshopper in Revit.
+See [Revit: Types & Families]({{ site.baseurl }}{% link _en/1.0/guides/revit-types.md %}) guide on how to work with Revit Types, and Families using Grasshopper in Revit.
 {% endcapture %}
 {% include ltr/link_card.html note=link_note thumbnail='/static/images/guides/revit-types.png' %}
 
@@ -144,6 +144,6 @@ Revit Containers (e.g. *Worksets*, *Design Options*, etc.) are a mechanism to lo
 In simplest terms, Revit *Documents* are collections of Revit *Elements*. A Revit Document can represent a building model (*Revit Projects*) or can represent an *Custom Family* definition (*Revit Families*).
 
 {% capture link_note %}
-See [Revit: Documents]({{ site.baseurl }}{% link _en/beta/guides/revit-docs.md %}) guide on how to work with Revit documents, linked documents, and querying elements inside them using Grasshopper in Revit.
+See [Revit: Documents]({{ site.baseurl }}{% link _en/1.0/guides/revit-docs.md %}) guide on how to work with Revit documents, linked documents, and querying elements inside them using Grasshopper in Revit.
 {% endcapture %}
 {% include ltr/link_card.html note=link_note thumbnail='/static/images/guides/revit-docs.png' %}

@@ -21,7 +21,7 @@ This normally appears when there is a conflict when an older version of the Rhin
 
 ### Workaround
 
-Please follow the instructions on [Submitting Debug Info]({{ site.baseurl }}{% link _en/beta/reference/toubleshooting.md %}#submitting-debug-info) to submit the error and debug information to {{ site.terms.rir }} development team.
+Please follow the instructions on [Submitting Debug Info]({{ site.baseurl }}{% link _en/1.0/reference/toubleshooting.md %}#submitting-debug-info) to submit the error and debug information to {{ site.terms.rir }} development team.
 
 Saving the project, then restarting Revit is usually the fastest workaround. If {{ site.terms.rir }} is loaded first, then everything should work with no issues.
 
@@ -68,7 +68,7 @@ This normally appears when there is a conflict between Rhino.inside and one or m
 
 **pyRevit Add-in**: Another common conflict is with an older version (older than 4.7) of the {{ site.terms.pyrevit }} plugin.  While the newer versions to {{ site.terms.pyrevit }} do not cause a problem, an older version might.  Information on the {{ site.terms.pyrevit }} conflict can be found on [issue #628](https://github.com/eirannejad/pyRevit/issues/628). To update the older version of {{ site.terms.pyrevit }}, follow the steps listed above to download the necessary dlls and place them under the `bin/` directory inside pyRevit installation (default path is `%APPDATA%\pyRevit-Master\`)
 
-If this does not solve the problem, then using the [Search for Conflicting Plugins]({{ site.baseurl }}{% link _en/beta/reference/toubleshooting.md %}#search-for-conflicting-plugins) section.
+If this does not solve the problem, then using the [Search for Conflicting Plugins]({{ site.baseurl }}{% link _en/1.0/reference/toubleshooting.md %}#search-for-conflicting-plugins) section.
 
 ### Xceed.Wpf.Toolkit.dll DLL Conflict
 
@@ -101,7 +101,7 @@ A Long JSON error shows up as shown below
 
 ### Workaround
 
-Like the previous -200 error, this is a conflict with another plugin. See the Error - 200 solution for this problem, and the [Search for Conflicting Plugins]({{ site.baseurl }}{% link _en/beta/reference/toubleshooting.md %}#search-for-conflicting-plugins) section below.
+Like the previous -200 error, this is a conflict with another plugin. See the Error - 200 solution for this problem, and the [Search for Conflicting Plugins]({{ site.baseurl }}{% link _en/1.0/reference/toubleshooting.md %}#search-for-conflicting-plugins) section below.
 
 
 ## Rhino.Inside tab is missing
