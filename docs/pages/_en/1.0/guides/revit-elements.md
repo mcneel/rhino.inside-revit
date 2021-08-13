@@ -79,19 +79,17 @@ Select all the objects in the selected categories.
 
 ### Class Filter
 
-Use the [Revit API Class names](https://www.revitapidocs.com/2015/eb16114f-69ea-f4de-0d0d-f7388b105a16.htm) to select Elements in the project.
+Use the [Revit API Class names](https://www.revitapidocs.com/2015/eb16114f-69ea-f4de-0d0d-f7388b105a16.htm) to select Elements in the project. The input can be the Element Classes selector or a string of the class name.
 
 ![]({{ "/static/images/guides/filter-class.png" | prepend: site.baseurl }})
-
-The input can be the Element Classes selectore or a string of the class name.
 
 ### Types Filter
 
 Include or exclude Revit elements based on Type name.
 
-![]({{ "/static/images/guides/filter-type.png" | prepend: site.baseurl }})
-
 In this case the {% include ltr/comp.html uuid='eb266925' %} is an input for the {% include ltr/comp.html uuid='d3fb53d3' %} selector to create a filter with {% include ltr/comp.html uuid='4434c470' %}
+
+![]({{ "/static/images/guides/filter-type.png" | prepend: site.baseurl }})
 
 ### Exclude Types Filter
 
@@ -99,7 +97,7 @@ In this case the {% include ltr/comp.html uuid='eb266925' %} is an input for the
 
 ### Parameter Filter
 
-{% include ltr/comp.html uuid='e6a1f501' %} is used to filter for values of specific praremeter on elements. For all comparisons, the [Filter Rules](#filter_rules) components should be used.
+{% include ltr/comp.html uuid='e6a1f501' %} is used to filter for values of specific praremeter on elements. For all comparisons, the [Filter Rules](#filter-rules) components should be used.
 
 The list of Parameter names and types are quite long in Revit. Using the {% include ltr/comp.html uuid='c1d96f56' %} is a great way to select the proper parameter with it's additional listed detail in the selector.
 
@@ -135,9 +133,9 @@ Filter used to match Revit elements that belong to a specifc design option.
 
 ### Level Filter
 
-Filter for elements only on a specific level.  This component is best used with the {% include ltr/comp.html uuid='c1d96f56' %}.
+Filter for elements only on a specific level.  This component is best used with the {% include ltr/comp.html uuid='bd6a74f3' %}.
 
-![]({{ "/static/images/guides/filter-level.png" | prepend: site.baseurl }})### 
+![]({{ "/static/images/guides/filter-level.png" | prepend: site.baseurl }})
 
 ### Owner View Filter
 
