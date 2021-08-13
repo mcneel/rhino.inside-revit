@@ -12,6 +12,14 @@ namespace System.Collections.Generic
       list.AddRange(collection);
     }
   }
+  internal static class IListExtensions
+  {
+    public static T ElementAtOrLast<T>(this IList<T> list, int index)
+    {
+      var count = list.Count;
+      return index < count ? list[index] : list[count - 1];
+    }
+  }
 
   internal static class EnumerableExtensions
   {
