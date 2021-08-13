@@ -730,7 +730,7 @@
     "uuid": "396f7e91-7f08-4a3d-9b9b-b6aa91ac0a2b"
   }, 
   {
-    "desc": "Filter used to combine a set of filters that pass when any pass", 
+    "desc": "Filter used to combine a set of filters that pass when all pass", 
     "iconsrc": "/static/images/GH/ElementLogicalAndFilter.png", 
     "icontag": null, 
     "panel": "Filter", 

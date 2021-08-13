@@ -96,11 +96,17 @@ Each output on Add Component has additional controls to help manage tracking:
 
 ## Unit Systems
 
-// TODO: 
+In Revit, when choosing a unit system only the interface numbers change. Revit is always working in feet behind the scenes. When the Rhino and Revit unit systems are not the same, Rhino will propmpt to change the units to match the Revit display units. 
+
+![]({{ "/static/images/guides/unit-convertion.jpg" | prepend: site.baseurl }}){: class="small-image"}
+
+Not matter how this dialog is answered the geometry will be converted to be the correct size in both products. The unit scaling of the Rhino model is a question of user convensianece having both products display the same values.
+
+Be aware that scaling a model in Rhino will also effect the tolerances below.  A model that needs to be scaled up a great amount, for example mm to meters can adversly effect the tolerance.
 
 ## Tolerances
 
-Geometry types.  Revit can handle Curves, BREP (NURBS) and Mesh geometry from Rhino.  The key is to understand which gemetry type is best in which situation. An important aspect of gemotry is the [Geometric Tolerance](https://wiki.mcneel.com/rhino/faqtolerances) that any shape was built to.
+Geometry types.  Revit can handle Curves, BREP (NURBS) and Mesh geometry from Rhino.  The key is to understand which gemetry type is best in which situation. An important aspect of geometry is the [Geometric Tolerance](https://wiki.mcneel.com/rhino/faqtolerances) that any shape was built to.
 
 When converting gemoetry, tolerance issues can effect Revit in multiple ways. Ideally Rhino Breps can be converted into Revit directly, but if tolerances are not correct, Revit may reject the geometry.
 

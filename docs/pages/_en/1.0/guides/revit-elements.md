@@ -42,9 +42,134 @@ You can use the {% include ltr/comp.html uuid='e6a1f501' %} component in combina
 
 ![]({{ "/static/images/guides/revit-elements-querybyparam.png" | prepend: site.baseurl }})
 
-## Querying Instances by Filters
+## Querying Filters
 
-// TODO:
+Filter components will allow Grasshopper to select specific Revit elements thru many different properties.  These properties can also be combined together to make sophisticated selections.
+
+Normally Filters are created then sent into one of the many [query components]({{ "/guides/rir-grasshopper#revit-aware-components" | prepend: site.baseurl }}) in Rhino.
+
+
+### Filter Element
+
+This component takes a previous selection of Revit elements and can returns a True/False list of whether each element matches the filter. In this case a set of preselected Revit elements in the {% include ltr/comp.html uuid='ef607c2a' %} can be filtered by creating a filter using the {% include ltr/comp.html uuid='eb266925' %} input to the {% include ltr/comp.html uuid='36180a9e' %} to create the filter. Then the {% include ltr/comp.html uuid='36180a9e' %} component will return a list of True False that can be used to Cull Pattern the list to the elements that fit the filter. Only that Walls in the selection set make it thru.
+
+![]({{ "/static/images/guides/filter-elements.png" | prepend: site.baseurl }})
+
+### Exclusion Filter
+
+The {% include ltr/comp.html uuid='396f7e91' %} works the same as above, but returns True when an element does not pass the filter test.
+
+### Logical And Filter
+
+Combine multiple filters together using the {% include ltr/comp.html uuid='0e534afb' %}. All elements must pass all filters.
+
+![]({{ "/static/images/guides/filter-and.png" | prepend: site.baseurl }})
+
+Note that more inputs can be added by zooming in on the component.
+
+### Logical Or Filter
+
+Combine multiple filters together using the {% include ltr/comp.html uuid='3804757f' %}. Elements pass by qualifiying for any one of the input filters.
+
+### Category Filter
+
+Select all the objects in the selected categories.
+
+![]({{ "/static/images/guides/filter-category.png" | prepend: site.baseurl }})
+
+### Class Filter
+
+Use the [Revit API Class names](https://www.revitapidocs.com/2015/eb16114f-69ea-f4de-0d0d-f7388b105a16.htm) to select Elements in the project.
+
+![]({{ "/static/images/guides/filter-class.png" | prepend: site.baseurl }})
+
+The input can be the Element Classes selectore or a string of the class name.
+
+### Types Filter
+
+Include or exclude Revit elements based on Type name.
+
+![]({{ "/static/images/guides/filter-type.png" | prepend: site.baseurl }})
+
+In this case the {% include ltr/comp.html uuid='eb266925' %} is an input for the {% include ltr/comp.html uuid='d3fb53d3' %} selector to create a filter with {% include ltr/comp.html uuid='4434c470' %}
+
+### Exclude Types Filter
+
+{% include ltr/comp.html uuid='f69d485f' %} can be used to filter out types from a list. Combine thru an Logical And component to filter. This component is similiar to the API method *[WhereElementIsNotElementType](https://www.revitapidocs.com/2015/061cbbb9-26f1-a8f8-a4b2-3d7ff0105199.htm)*.
+
+### Parameter Filter
+
+{% include ltr/comp.html uuid='e6a1f501' %} is used to filter for values of specific praremeter on elements. For all comparisons, the [Filter Rules](#filter_rules) components should be used.
+
+The list of Parameter names and types are quite long in Revit. Using the {% include ltr/comp.html uuid='c1d96f56' %} is a great way to select the proper parameter with it's additional listed detail in the selector.
+
+![]({{ "/static/images/guides/parameter-rule-filter.png" | prepend: site.baseurl }})
+
+### Bounding Box Filter
+
+Filter used to match Revit elements by their geometric bounding box. The initial gemetric object can be either from Rhino or Revit.
+
+Input parameters:
+
+* Bounding Box (Geometry) - World aligned bounding box to query.
+* Union (Boolean) - Target union of bounding boxes.
+* Strict (Boolean) - True means element should be strictly contained.
+* Tolerance (Number) - Tolerance used to query.
+* Inverted (Boolean) - True if the results of the filter should be inverted.
+
+### Intersects Brep Filter
+
+Filter used to match Revit elements that geometrically intersect a NURBS Brep.
+
+### Intersects Element
+
+Filter used to match Revit elements that geometrically intersect another Revit element.
+
+### Intersects Mesh Filter
+
+Filter used to match Revit elements that geometrically intersect a Rhino mesh.
+
+### Design Options Filter
+
+Filter used to match Revit elements that belong to a specifc design option.
+
+### Level Filter
+
+Filter for elements only on a specific level.  This component is best used with the {% include ltr/comp.html uuid='c1d96f56' %}.
+
+![]({{ "/static/images/guides/filter-level.png" | prepend: site.baseurl }})### 
+
+### Owner View Filter
+
+Filter for elements that belong to a specific view.  This component is best used with a selector that returns a view from the model.
+
+![]({{ "/static/images/guides/filter-view.png" | prepend: site.baseurl }})
+
+### Phase Status Filter
+
+Filter used to match elements associated to the given Phase status. The Phase and the staus can be found by right clicking on the inputs.
+
+![]({{ "/static/images/guides/filter-phase.png" | prepend: site.baseurl }})
+
+### Selectable in view filter
+
+Filter used to match seletable elements into the given View
+
+### Filter Rules
+
+Filter Rules can be used with the {% include ltr/comp.html uuid='e6a1f501' %} to compare values.
+
+This example shows using the value of one element to find all other elements in the model with that same parameter value:
+
+![]({{ "/static/images/guides/parameter-rule-element.png" | prepend: site.baseurl }})
+
+### Add Parameter Filter
+
+Create a parameter based filter in the Revit model.  This will also be used as a parameter filter in Grasshopper.
+
+### Add Selection Filter
+
+Create a selection filter in Revit and then use that filter in the Grasshopper definition.
 
 ## Extracting Instance Geometry
 
@@ -58,7 +183,6 @@ The {% include ltr/comp.html uuid='b3bcbf5b' %} component can be used to extract
 
 For elements that are constructed on a base curve (e.g. Basic Walls) you can use the {% include ltr/comp.html uuid='dcc82eca' %} to get and set the base curve.
 
-
 ![]({{ "/static/images/guides/revit-elements-basecurve.png" | prepend: site.baseurl }})
 
 ### Instance Bounding Box
@@ -68,7 +192,6 @@ You can pass an instance into a Grasshopper *Box* component to extract the bound
 ![]({{ "/static/images/guides/revit-elements-getbbox.png" | prepend: site.baseurl }})
 
 ![]({{ "/static/images/guides/revit-elements-getbboxscap.png" | prepend: site.baseurl }})
-
 
 ### Instance Bounding Geometry
 
