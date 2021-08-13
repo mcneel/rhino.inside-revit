@@ -1,8 +1,11 @@
 using System;
+using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.Convert.System.Collections.Generic;
 using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -14,16 +17,13 @@ namespace RhinoInside.Revit.GH.Components
 
     public RoofByOutline() : base
     (
-      "Add Roof", "Roof",
-      "Given its outline curve, it adds a Roof element to the active Revit document",
-      "Revit", "Build"
+      name: "Add Roof",
+      nickname: "Roof",
+      description: "Given its outline curve, it adds a Roof element to the active Revit document",
+      category: "Revit",
+      subCategory: "Build"
     )
     { }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.Roof(), "Roof", "R", "New Roof", GH_ParamAccess.item);
-    }
 
     bool Reuse(ref DB.FootPrintRoof element, Curve boundary, DB.RoofType type, DB.Level level)
     {
@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH.Components
           var hack = new DB.XYZ(1.0, 1.0, 0.0);
           var segments = profile.TryGetPolyCurve(out var polyCurve, Revit.AngleTolerance) ?
             polyCurve.DuplicateSegments() :
-            new Curve[] { profile };
+            profile.Split(profile.Domain.Mid);
 
           var index = 0;
           var loops = sketch.GetAllModelCurves();
@@ -59,27 +59,28 @@ namespace RhinoInside.Revit.GH.Components
             foreach (var edge in loop)
             {
               var segment = segments[(++index) % segments.Length];
-              segment.Scale(1.0 / Revit.ModelUnits);
 
               var curve = default(DB.Curve);
               if
               (
                 edge.GeometryCurve is DB.HermiteSpline &&
-                segment.TryGetHermiteSpline(out var points, out var start, out var end, Revit.VertexTolerance)
+                segment.TryGetHermiteSpline(out var points, out var start, out var end, Revit.VertexTolerance * Revit.ModelUnits)
               )
               {
-                var xyz = new DB.XYZ[points.Count];
-                for (int p = 0; p < xyz.Length; p++)
-                  xyz[p] = points[p].ToXYZ(UnitConverter.NoScale);
-
                 using (var tangents = new DB.HermiteSplineTangents() { StartTangent = start.ToXYZ(), EndTangent = end.ToXYZ() })
+                {
+                  var xyz = points.ConvertAll(GeometryEncoder.ToXYZ);
                   curve = DB.HermiteSpline.Create(xyz, segment.IsClosed, tangents);
+                }
               }
-              else curve = segment.ToCurve(UnitConverter.NoScale);
+              else curve = segment.ToCurve();
 
-              // The following line allows SetGeometryCurve to work!!
-              edge.Location.Move(hack);
-              edge.SetGeometryCurve(curve, false);
+              if (!edge.GeometryCurve.IsAlmostEqualTo(curve))
+              {
+                // The following line allows SetGeometryCurve to work!!
+                edge.Location.Move(hack);
+                edge.SetGeometryCurve(curve, false);
+              }
             }
           }
         }
@@ -89,9 +90,11 @@ namespace RhinoInside.Revit.GH.Components
       if (element.GetTypeId() != type.Id)
       {
         if (DB.Element.IsValidType(element.Document, new DB.ElementId[] { element.Id }, type.Id))
-          element = element.Document.GetElement(element.ChangeTypeId(type.Id)) as DB.FootPrintRoof;
-        else
-          return false;
+        {
+          if (element.ChangeTypeId(type.Id) is DB.ElementId id && id != DB.ElementId.InvalidElementId)
+            element = element.Document.GetElement(id) as DB.FootPrintRoof;
+        }
+        else return false;
       }
 
       bool succeed = true;
@@ -102,8 +105,11 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructRoofByOutline
     (
-      DB.Document doc,
-      ref DB.FootPrintRoof element,
+      [Optional, NickName("DOC")]
+      DB.Document document,
+
+      [Description("New Roof")]
+      ref DB.FootPrintRoof roof,
 
       Curve boundary,
       Optional<DB.RoofType> type,
@@ -112,28 +118,29 @@ namespace RhinoInside.Revit.GH.Components
     {
       if
       (
+        boundary is null ||
         boundary.IsShort(Revit.ShortCurveTolerance * Revit.ModelUnits) ||
         !boundary.IsClosed ||
         !boundary.TryGetPlane(out var boundaryPlane, Revit.VertexTolerance * Revit.ModelUnits) ||
         boundaryPlane.ZAxis.IsParallelTo(Vector3d.ZAxis) == 0
       )
-        ThrowArgumentException(nameof(boundary), "Boundary should be an horizontal planar closed curve.");
+        ThrowArgumentException(nameof(boundary), "Boundary curve should be a valid horizontal planar closed curve.");
 
-      if (type.HasValue && type.Value.Document.IsEquivalent(doc) == false)
+      if (type.HasValue && type.Value.Document.IsEquivalent(document) == false)
         ThrowArgumentException(nameof(type));
 
-      if (level.HasValue && level.Value.Document.IsEquivalent(doc) == false)
+      if (level.HasValue && level.Value.Document.IsEquivalent(document) == false)
         ThrowArgumentException(nameof(level));
 
-      SolveOptionalType(doc, ref type, DB.ElementTypeGroup.RoofType, nameof(type));
+      SolveOptionalType(document, ref type, DB.ElementTypeGroup.RoofType, nameof(type));
 
-      SolveOptionalLevel(doc, boundary, ref level, out var bbox);
+      SolveOptionalLevel(document, boundary, ref level, out var bbox);
 
       var orientation = boundary.ClosedCurveOrientation(Plane.WorldXY);
       if (orientation == CurveOrientation.CounterClockwise)
         boundary.Reverse();
 
-      if (!Reuse(ref element, boundary, type.Value, level.Value))
+      if (!Reuse(ref roof, boundary, type.Value, level.Value))
       {
         var parametersMask = new DB.BuiltInParameter[]
         {
@@ -147,16 +154,16 @@ namespace RhinoInside.Revit.GH.Components
         using (var curveArray = boundary.ToCurveArray())
         {
           var footPrintToModelCurvesMapping = new DB.ModelCurveArray();
-          ReplaceElement(ref element, doc.Create.NewFootPrintRoof(curveArray, level.Value, type.Value, out footPrintToModelCurvesMapping), parametersMask);
+          ReplaceElement(ref roof, document.Create.NewFootPrintRoof(curveArray, level.Value, type.Value, out footPrintToModelCurvesMapping), parametersMask);
         }
       }
 
-      if (element != null)
+      if (roof != null)
       {
         var roofLevelOffset = bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight();
         if
         (
-          element.GetParameter(External.DB.Schemas.ParameterId.RoofLevelOffsetParam) is DB.Parameter RoofLevelOffsetParam &&
+          roof.GetParameter(External.DB.Schemas.ParameterId.RoofLevelOffsetParam) is DB.Parameter RoofLevelOffsetParam &&
           RoofLevelOffsetParam.AsDouble() != roofLevelOffset
         )
         {

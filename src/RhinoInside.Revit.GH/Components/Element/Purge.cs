@@ -42,8 +42,7 @@ namespace RhinoInside.Revit.GH.Components
           Description = "Elements to Purge",
           Access = GH_ParamAccess.list,
           DataMapping = GH_DataMapping.Graft
-        },
-        ParamVisibility.Binding
+        }
       ),
     };
 
@@ -57,9 +56,7 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Succeeded",
           NickName = "S",
           Description = "Element purge succeeded",
-          Access = GH_ParamAccess.item
-        },
-        ParamVisibility.Binding
+        }
       ),
       new ParamDefinition
       (
@@ -69,8 +66,7 @@ namespace RhinoInside.Revit.GH.Components
           NickName = "D",
           Description = "Deleted elements. From a logical point of view, are the children of this Element",
           Access = GH_ParamAccess.list
-        },
-        ParamVisibility.Binding
+        }
       ),
       new ParamDefinition
       (
@@ -80,8 +76,7 @@ namespace RhinoInside.Revit.GH.Components
           NickName = "M",
           Description = "Modified elements. Those elements reference Element but do not strictly depend on it",
           Access = GH_ParamAccess.list
-        },
-        ParamVisibility.Binding
+        }
       )
     };
 
@@ -109,7 +104,7 @@ namespace RhinoInside.Revit.GH.Components
       {
         ElementIds = elementIds;
 
-        DB.UpdaterRegistry.RegisterUpdater(this);
+        DB.UpdaterRegistry.RegisterUpdater(this, isOptional: true);
 
         var filter = new DB.ElementCategoryFilter(DB.BuiltInCategory.INVALID, true);
         DB.UpdaterRegistry.AddTrigger(UpdaterId, filter, DB.Element.GetChangeTypeAny());

@@ -141,10 +141,10 @@ namespace RhinoInside.Revit.GH.Components.Material
   [AttributeUsage(AttributeTargets.Property)]
   public class APIAssetPropValueRangeAttribute : Attribute
   {
-    public double Min = double.NaN;
-    public double Max = double.NaN;
+    public double Min;
+    public double Max;
 
-    public APIAssetPropValueRangeAttribute(double min = double.NaN, double max = double.NaN)
+    public APIAssetPropValueRangeAttribute(double min = double.NegativeInfinity, double max = double.PositiveInfinity)
     {
       Min = min;
       Max = max;
@@ -596,7 +596,7 @@ namespace RhinoInside.Revit.GH.Components.Material
     public new string Name { get; set; }
 
     [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_CLASS, typeof(DB.StructuralAssetClass))]
-    [AssetGHParameter(typeof(Parameters.Param_Enum<Types.StructuralAssetClass>), "Type", "T", "Physical asset type", optional: false, modifiable: false)]
+    [AssetGHParameter(typeof(Parameters.Param_Enum<Types.StructuralAssetClass>), "Class", "C", "Physical asset type", optional: false, modifiable: false)]
     public DB.StructuralAssetClass Type { get; set; }
 
     [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_SUBCLASS, typeof(string))]
@@ -773,7 +773,7 @@ namespace RhinoInside.Revit.GH.Components.Material
     public new string Name { get; set; }
 
     [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_CLASS, typeof(DB.ThermalMaterialType))]
-    [AssetGHParameter(typeof(Parameters.Param_Enum<Types.ThermalMaterialType>), "Type", "T", "Thermal asset material asset type", optional: false, modifiable: false)]
+    [AssetGHParameter(typeof(Parameters.Param_Enum<Types.ThermalMaterialType>), "Class", "C", "Thermal asset type", optional: false, modifiable: false)]
     public DB.StructuralAssetClass Type { get; set; }
 
     [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_SUBCLASS, typeof(string))]

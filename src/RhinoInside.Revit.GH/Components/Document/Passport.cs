@@ -25,7 +25,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
+      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -54,7 +54,6 @@ namespace RhinoInside.Revit.GH.Components
     public override Guid ComponentGuid => new Guid("C1C15806-311A-4A07-9DAE-6DBD1D98EC05");
     public override GH_Exposure Exposure => GH_Exposure.obscure;
     protected override string IconTag => "F";
-    protected override DB.ElementFilter ElementFilter => null;
 
     public DocumentFile() : base
     (
@@ -69,7 +68,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
+      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -118,7 +117,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
+      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -172,7 +171,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
+      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
     };
 
     protected override ParamDefinition[] Outputs => outputs;

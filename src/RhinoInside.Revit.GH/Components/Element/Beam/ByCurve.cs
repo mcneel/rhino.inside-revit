@@ -1,8 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.GH.ElementTracking;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -14,52 +18,47 @@ namespace RhinoInside.Revit.GH.Components
 
     public BeamByCurve() : base
     (
-      "Add Beam", "Beam",
-      "Given its Axis, it adds a Beam element to the active Revit document",
-      "Revit", "Build"
+      name: "Add Beam",
+      nickname: "Beam",
+      description: "Given its Axis, it adds a Beam element to the active Revit document",
+      category: "Revit",
+      subCategory: "Build"
     )
     { }
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    public override void OnStarted(DB.Document document)
     {
-      manager.AddParameter(new Parameters.FamilyInstance(), "Beam", "B", "New Beam", GH_ParamAccess.item);
-    }
-
-    protected override void OnAfterStart(DB.Document document, string strTransactionName)
-    {
-      base.OnAfterStart(document, strTransactionName);
+      base.OnStarted(document);
 
       // Reset all previous beams joins
-      if (PreviousStructure is object)
+      var beams = Params.TrackedElements<DB.FamilyInstance>("Beam", document);
+      var pinnedBeams = beams.Where(x => x.Pinned);
+
+      foreach (var beam in pinnedBeams)
       {
-        var beamsToUnjoin = PreviousStructure.OfType<Types.Element>().
-                            Select(x => document.GetElement(x.Id)).
-                            OfType<DB.FamilyInstance>().
-                            Where(x => x.Pinned);
-
-        foreach (var unjoinedBeam in beamsToUnjoin)
+        if (DB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(beam, 0))
         {
-          if (DB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(unjoinedBeam, 0))
-          {
-            DB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(unjoinedBeam, 0);
-            DB.Structure.StructuralFramingUtils.AllowJoinAtEnd(unjoinedBeam, 0);
-          }
+          DB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(beam, 0);
+          DB.Structure.StructuralFramingUtils.AllowJoinAtEnd(beam, 0);
+        }
 
-          if (DB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(unjoinedBeam, 1))
-          {
-            DB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(unjoinedBeam, 1);
-            DB.Structure.StructuralFramingUtils.AllowJoinAtEnd(unjoinedBeam, 1);
-          }
+        if (DB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(beam, 1))
+        {
+          DB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(beam, 1);
+          DB.Structure.StructuralFramingUtils.AllowJoinAtEnd(beam, 1);
         }
       }
     }
 
     void ReconstructBeamByCurve
     (
-      DB.Document doc,
-      ref DB.FamilyInstance element,
+      [Optional, NickName("DOC")]
+      DB.Document document,
 
-               Rhino.Geometry.Curve curve,
+      [Description("New Beam")]
+      ref DB.FamilyInstance beam,
+
+      Rhino.Geometry.Curve curve,
       Optional<DB.FamilySymbol> type,
       Optional<DB.Level> level
     )
@@ -72,17 +71,17 @@ namespace RhinoInside.Revit.GH.Components
       )
         ThrowArgumentException(nameof(curve), "Curve must be a C1 continuous planar non closed curve.");
 
-      SolveOptionalLevel(doc, curve, ref level, out var _);
+      SolveOptionalLevel(document, curve, ref level, out var _);
 
       var centerLine = curve.ToCurve();
 
       if (type.HasValue)
-        ChangeElementTypeId(ref element, type.Value.Id);
+        ChangeElementTypeId(ref beam, type.Value.Id);
 
       // Try to update Beam
-      if (element is object && element.Location is DB.LocationCurve locationCurve && centerLine.IsSameKindAs(locationCurve.Curve))
+      if (beam is object && beam.Location is DB.LocationCurve locationCurve && centerLine.IsSameKindAs(locationCurve.Curve))
       {
-        var referenceLevel = element.get_Parameter(DB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM);
+        var referenceLevel = beam.get_Parameter(DB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM);
         var updateLevel = referenceLevel.AsElementId() != level.Value.Id;
 
         if (!updateLevel || !referenceLevel.IsReadOnly)
@@ -90,16 +89,18 @@ namespace RhinoInside.Revit.GH.Components
           if (updateLevel)
             referenceLevel.Set(level.Value.Id);
 
-          locationCurve.Curve = centerLine;
+          if(!locationCurve.Curve.IsAlmostEqualTo(centerLine))
+            locationCurve.Curve = centerLine;
+
           return;
         }
       }
 
       // Reconstruct Beam
       {
-        SolveOptionalType(doc, ref type, DB.BuiltInCategory.OST_StructuralFraming, nameof(type));
+        SolveOptionalType(document, ref type, DB.BuiltInCategory.OST_StructuralFraming, nameof(type));
 
-        var newBeam = doc.Create.NewFamilyInstance
+        var newBeam = document.Create.NewFamilyInstance
         (
           centerLine,
           type.Value,
@@ -107,12 +108,12 @@ namespace RhinoInside.Revit.GH.Components
           DB.Structure.StructuralType.Beam
         );
 
-        if (element is object && DB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(element, 0))
+        if (beam is object && DB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(beam, 0))
           DB.Structure.StructuralFramingUtils.AllowJoinAtEnd(newBeam, 0);
         else
           DB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(newBeam, 0);
 
-        if (element is object && DB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(element, 1))
+        if (beam is object && DB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(beam, 1))
           DB.Structure.StructuralFramingUtils.AllowJoinAtEnd(newBeam, 1);
         else
           DB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(newBeam, 1);
@@ -131,7 +132,7 @@ namespace RhinoInside.Revit.GH.Components
           DB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM,
         };
 
-        ReplaceElement(ref element, newBeam, parametersMask);
+        ReplaceElement(ref beam, newBeam, parametersMask);
       }
     }
   }

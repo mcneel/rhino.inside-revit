@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using DB = Autodesk.Revit.DB;
@@ -9,9 +10,25 @@ namespace RhinoInside.Revit.GH.Components.Site
   public class QuerySiteLocations : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("9C352309-F20B-4C9B-AF46-3783D1106CDF");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
     protected override string IconTag => "⌖";
     protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.SiteLocation));
+
+    #region UI
+    protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
+    {
+      base.AppendAdditionalComponentMenuItems(menu);
+
+      var activeApp = Revit.ActiveUIApplication;
+      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.Location);
+      Menu_AppendItem
+      (
+        menu, $"Open Location…",
+        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
+        activeApp.CanPostCommand(commandId), false
+      );
+    }
+    #endregion
 
     public QuerySiteLocations()
     : base
@@ -27,9 +44,9 @@ namespace RhinoInside.Revit.GH.Components.Site
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.FromParam(new Parameters.Document(), ParamVisibility.Voluntary),
+      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Site location name", optional: true),
-      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary),
     };
 
     protected override ParamDefinition[] Outputs => outputs;

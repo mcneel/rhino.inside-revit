@@ -1,6 +1,8 @@
 using System;
+using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -21,14 +23,12 @@ namespace RhinoInside.Revit.GH.Components
     )
     { }
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.ElementType(), "Type", "T", "New Type", GH_ParamAccess.item);
-    }
-
     void ReconstructElementTypeDuplicate
     (
-      DB.Document doc,
+      [Optional, NickName("DOC")]
+      DB.Document document,
+
+      [Name("Type"), NickName("T"), Description("New Type")]
       ref DB.ElementType elementType,
 
       DB.ElementType type,

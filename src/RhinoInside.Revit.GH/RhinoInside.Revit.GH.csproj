@@ -11,22 +11,27 @@
   <PropertyGroup Condition="$(Configuration.Contains('2018'))">
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <RevitVersion>2018</RevitVersion>
+    <RevitApiVersion>2018.0.2</RevitApiVersion>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.Contains('2019'))">
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <RevitVersion>2019</RevitVersion>
+    <RevitApiVersion>2019.0.1</RevitApiVersion>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.Contains('2020'))">
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <RevitVersion>2020</RevitVersion>
+    <RevitApiVersion>2020.0.0</RevitApiVersion>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.Contains('2021'))">
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <RevitVersion>2021</RevitVersion>
+    <RevitApiVersion>2021.0.0</RevitApiVersion>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.Contains('2022'))">
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <RevitVersion>2022</RevitVersion>
+    <RevitApiVersion>2022.0.0</RevitApiVersion>
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -180,10 +185,9 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="RhinoCommon" Version="7.6.21127.19001" IncludeAssets="compile; build" />
-        <PackageReference Include="Grasshopper" Version="7.6.21127.19001" IncludeAssets="compile; build" />
-        <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="2019.0.1" IncludeAssets="build; compile" Condition="'$(Configuration)' == 'Release 2019'" />
-        <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitVersion).0.0" IncludeAssets="build; compile" Condition="'$(Configuration)' != 'Release 2019'" />
+        <PackageReference Include="RhinoCommon" Version="7.8.21196.5001" IncludeAssets="compile; build" />
+        <PackageReference Include="Grasshopper" Version="7.8.21196.5001" IncludeAssets="compile; build" />
+        <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitApiVersion)" IncludeAssets="build; compile" />
       </ItemGroup>
     </Otherwise>
   </Choose>
@@ -203,7 +207,6 @@
     <Compile Include="Components\Document\ProjectInformation.cs" />
     <Compile Include="Components\Document\ProjectLocation.cs" />
     <Compile Include="Components\Document\Save.cs" />
-    <Compile Include="Components\ElementFilter.cs" />
     <Compile Include="Components\ElementType\Default.cs" />
     <Compile Include="Components\ElementType\Duplicate.cs" />
     <Compile Include="Components\ElementType\ExportImage.cs" />
@@ -239,6 +242,7 @@
     <Compile Include="Components\Element\DesignOption\Active.cs" />
     <Compile Include="Components\Element\DesignOption\Identity.cs" />
     <Compile Include="Components\Element\DesignOption\Query.cs" />
+    <Compile Include="Components\Element\Duplicate.cs" />
     <Compile Include="Components\Element\FlipUnflipElement.cs" />
     <Compile Include="Components\Element\Geometry.cs" />
     <Compile Include="Components\Element\Grid\QueryGrids.cs" />
@@ -332,14 +336,29 @@
     <Compile Include="Components\Family\Geometry\OpeningByCurve.cs" />
     <Compile Include="Components\Family\Save.cs" />
     <Compile Include="Components\Family\Geometry\VoidByBrep.cs" />
-    <Compile Include="Components\Parameter\DefineSharedParameter.cs" />
-    <Compile Include="Components\Parameter\DeconstructParameterValue.cs" />
-    <Compile Include="Components\Parameter\ParameterKeyIdentity.cs" />
+    <Compile Include="Components\Filters\ElementFilterRule.cs" />
+    <Compile Include="Components\Filters\ElementGenericFilter.cs" />
+    <Compile Include="Components\Filters\ElementGeometryFilter.cs" />
+    <Compile Include="Components\Filters\ElementGraphicalFilter.cs" />
+    <Compile Include="Components\Filters\ElementLogicalFilter.cs" />
+    <Compile Include="Components\Filters\FilterElement.cs" />
+    <Compile Include="Components\Filters\Obsolete.cs" />
+    <Compile Include="Components\Filters\Parameter\ByName.cs" />
+    <Compile Include="Components\Filters\Selection\ByName.cs" />
+    <Compile Include="Components\ParameterElement\AddParameter.cs" />
+    <Compile Include="Components\ParameterElement\DefineParameter.cs" />
+    <Compile Include="Components\ParameterElement\GlobalParameter.cs" />
+    <Compile Include="Components\ParameterElement\ParameterFormula.cs" />
+    <Compile Include="Components\ParameterElement\ParameterIdentity.cs" />
+    <Compile Include="Components\ParameterElement\ProjectParameter.cs" />
+    <Compile Include="Components\ParameterElement\QueryParameters.cs" />
+    <Compile Include="Components\ParameterElement\SharedParameters.cs" />
     <None Include="Extensions\README.md" />
     <Compile Include="Extensions\Grasshopper\Kernel\GH_ComponentParamServerExtension.cs" />
     <Compile Include="Extensions\Grasshopper\Kernel\GH_Enum.cs" />
     <Compile Include="Extensions\Grasshopper\Kernel\IGH_ParamExtension.cs" />
     <Compile Include="Extensions\Grasshopper\Kernel\Data\IGH_StructureExtension.cs" />
+    <Compile Include="Extensions\Grasshopper\Kernel\Parameters\Param_Angle.cs" />
     <Compile Include="Extensions\Grasshopper\Kernel\Types\GH_ColorRGBA.cs" />
     <Compile Include="Extensions\Grasshopper\Kernel\Parameters\Param_ColorRGBA.cs" />
     <Compile Include="Extensions\Grasshopper\Special\ValueSet.cs" />
@@ -347,6 +366,7 @@
     <Compile Include="Parameters\AssetPropertyDouble4DMap.cs" />
     <Compile Include="Parameters\CompoundStructure.cs" />
     <Compile Include="Parameters\CurtainGrid.cs" />
+    <Compile Include="Parameters\CurveElement.cs" />
     <Compile Include="Parameters\Elevation.cs" />
     <Compile Include="Parameters\Input\BuiltInCategories.cs" />
     <Compile Include="Parameters\Input\BuiltInParameters.cs" />
@@ -358,10 +378,12 @@
     <Compile Include="Parameters\Input\CurtainMullionSystemFamily_ValueList.cs" />
     <Compile Include="Parameters\Input\DeckEmbeddingType_ValueList.cs" />
     <Compile Include="Parameters\Input\DocumentPicker.cs" />
+    <Compile Include="Parameters\Input\ElementClasses.cs" />
     <Compile Include="Parameters\Input\ElementTypeByName.cs" />
     <Compile Include="Parameters\Input\EndCapCondition_ValueList.cs" />
     <Compile Include="Parameters\Input\LayerFunction_ValueList.cs" />
     <Compile Include="Parameters\Input\OpeningWrappingCondition_ValueList.cs" />
+    <Compile Include="Parameters\Input\BuiltInParameterTypes.cs" />
     <Compile Include="Parameters\Input\StructuralAssetBehaviour_ValueList.cs" />
     <Compile Include="Parameters\Input\StructuralAssetClass_ValueList.cs" />
     <Compile Include="Parameters\Input\ThermalMaterialType_ValueList.cs" />
@@ -371,6 +393,7 @@
     <Compile Include="Parameters\Input\WallStructuralUsage_ValueList.cs" />
     <Compile Include="Parameters\Input\WallSystemFamily_ValueList.cs" />
     <Compile Include="Parameters\Input\WallWrapping_ValueList.cs" />
+    <Compile Include="Parameters\Phase.cs" />
     <Compile Include="Parameters\TextureData.cs" />
     <Compile Include="Components\TransactionalComponent.cs" />
     <Compile Include="Components\TransactionBaseComponent.cs" />
@@ -381,7 +404,6 @@
     <Compile Include="Parameters\FillPatternElement.cs" />
     <Compile Include="Parameters\LinePatternElement.cs" />
     <Compile Include="Parameters\Param.cs" />
-    <Compile Include="Parameters\DataObject.cs" />
     <Compile Include="Parameters\Category.cs" />
     <Compile Include="Parameters\CategoryTypes.cs" />
     <Compile Include="Parameters\DatumPlane.cs" />
@@ -445,9 +467,11 @@
     <Compile Include="Types\Instance.cs" />
     <Compile Include="Types\InstanceElement.cs" />
     <Compile Include="Types\LinePatternElement.cs" />
+    <Compile Include="Types\MEPCurve.cs" />
     <Compile Include="Types\Panel.cs" />
     <Compile Include="Types\Parameter.cs" />
     <Compile Include="Types\DatumPlane.cs" />
+    <Compile Include="Types\Phase.cs" />
     <Compile Include="Types\ProjectLocation.cs" />
     <Compile Include="Types\Roof.cs" />
     <Compile Include="Types\DataType.cs" />

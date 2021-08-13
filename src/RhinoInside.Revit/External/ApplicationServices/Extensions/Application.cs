@@ -80,5 +80,13 @@ namespace RhinoInside.Revit.External.ApplicationServices.Extensions
       );
 #endif
     }
+
+    internal static string GetSubVersionNumber(this ControlledApplication app)
+    {
+      try { return InternalGetSubVersionNumber(app); }
+      catch (System.MissingMemberException) { return $"{app.VersionNumber}.0"; }
+    }
+
+    static string InternalGetSubVersionNumber(ControlledApplication app) => app.SubVersionNumber;
   }
 }

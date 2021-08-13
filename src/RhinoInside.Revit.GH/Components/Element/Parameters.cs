@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
+using Grasshopper.Kernel.Parameters;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.External.DB.Schemas;
 using DB = Autodesk.Revit.DB;
 using DBX = RhinoInside.Revit.External.DB;
+using DBXS = RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.GH
 {
@@ -180,20 +182,37 @@ namespace RhinoInside.Revit.GH
       if (goo is Types.ParameterId id) parameter = element.GetParameter(id.Value);
       else if (goo is Types.ParameterKey parameterKey)
       {
-        if (parameterKey.Document.Equals(element.Document)) key = parameterKey.Id;
+        if (parameterKey.Document.IsEquivalent(element.Document)) key = parameterKey.Id;
         else
         {
-          switch (parameterKey.Class)
+          if (parameterKey.IsReferencedData)
           {
-            case DBX.ParameterClass.BuiltIn:
-              parameter = parameterKey.Id.TryGetBuiltInParameter(out var builtInParameter) ? element.get_Parameter(builtInParameter) : default; break;
-            case DBX.ParameterClass.Project:
-              parameter = element.GetParameter(parameterKey.Name, parameterKey.Definition?.GetDataType() ?? SpecType.Empty, DBX.ParameterClass.Project); break;
-            case DBX.ParameterClass.Family:
-              parameter = element.GetParameter(parameterKey.Name, parameterKey.Definition?.GetDataType() ?? SpecType.Empty, DBX.ParameterClass.Family); break;
-            case DBX.ParameterClass.Shared:
-              parameter = element.get_Parameter(parameterKey.GuidValue.Value); break;
+            switch (parameterKey.Class)
+            {
+              case DBX.ParameterClass.BuiltIn:
+                parameter = parameterKey.Id.TryGetBuiltInParameter(out var builtInParameter) ? element.get_Parameter(builtInParameter) : default; break;
+              case DBX.ParameterClass.Project:
+                parameter = element.GetParameter(parameterKey.Name, parameterKey.DataType, DBX.ParameterClass.Project); break;
+              case DBX.ParameterClass.Family:
+                parameter = element.GetParameter(parameterKey.Name, parameterKey.DataType, DBX.ParameterClass.Family); break;
+              case DBX.ParameterClass.Shared:
+                parameter = element.get_Parameter(parameterKey.GUID.Value); break;
+            }
           }
+          else
+          {
+            if (parameterKey.GUID.HasValue)
+              parameter = element.get_Parameter(parameterKey.GUID.Value);
+            else if (parameterKey.Id.TryGetBuiltInParameter(out var bip))
+              parameter = element.get_Parameter(bip);
+            else if (!string.IsNullOrEmpty(parameterKey.Name))
+              parameter = element.GetParameter(parameterKey.Name, DBX.ParameterClass.Any);
+          }
+
+          if (parameter is null)
+            obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterKey.DisplayName}' is not defined in 'Element'");
+
+          return parameter;
         }
       }
 
@@ -263,173 +282,192 @@ namespace RhinoInside.Revit.GH
   }
 }
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Element
 {
-  using External.DB.Extensions;
-
-  public class ElementParameterGet : Component
+  public class ElementParameter : TransactionalChainComponent
   {
-    public override Guid ComponentGuid => new Guid("D86050F2-C774-49B1-9973-FB3AB188DC94");
+    public override Guid ComponentGuid => new Guid("F568D3E7-BE3F-455B-A8D4-EBFA573D55C2");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    protected override string IconTag => "P";
 
-    public ElementParameterGet() : base
+    static readonly string[] keywords = new string[] { "Get", "Set" };
+    public override IEnumerable<string> Keywords => base.Keywords is null ? keywords : Enumerable.Concat(base.Keywords, keywords);
+
+    public ElementParameter() : base
     (
-      name: "Get Element Parameter",
-      nickname: "GetParam",
-      description: "Gets the parameter value of a specified Revit Element",
-      category: "Revit",
-      subCategory:"Element"
-    )
-    { }
-
-    protected override void RegisterInputParams(GH_InputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.Element(), "Element", "E", "Element to query", GH_ParamAccess.item);
-      manager.AddGenericParameter("ParameterKey", "K", "Element parameter to query", GH_ParamAccess.item);
-    }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.ParameterValue(), "ParameterValue", "V", "Element parameter value", GH_ParamAccess.item);
-    }
-
-    protected override void TrySolveInstance(IGH_DataAccess DA)
-    {
-      DB.Element element = null;
-      if (!DA.GetData("Element", ref element))
-        return;
-
-      IGH_Goo parameterKey = null;
-      if (!DA.GetData("ParameterKey", ref parameterKey))
-        return;
-
-      var parameter = ParameterUtils.GetParameter(this, element, parameterKey);
-      DA.SetData("ParameterValue", parameter);
-    }
-  }
-
-  public class ElementParameterSet : TransactionsComponent
-  {
-    public override Guid ComponentGuid => new Guid("8F1EE110-7FDA-49E0-BED4-E8E0227BC021");
-    public override GH_Exposure Exposure => GH_Exposure.quarternary;
-
-    public ElementParameterSet() : base
-    (
-      name: "Set Element Parameter",
-      nickname: "SetParam",
-      description: "Sets the parameter value of a specified Revit Element",
+      name: "Element Parameter",
+      nickname: "Param",
+      description: "Get-Set accessor to element parameter values",
       category: "Revit",
       subCategory: "Element"
     )
     { }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      manager.AddParameter(new Parameters.Element(), "Element", "E", "Element to update", GH_ParamAccess.item);
-      manager.AddGenericParameter("ParameterKey", "K", "Element parameter to modify", GH_ParamAccess.item);
-      manager.AddGenericParameter("ParameterValue", "V", "Element parameter value", GH_ParamAccess.item);
-    }
+      new ParamDefinition
+      (
+        new Parameters.Element()
+        {
+          Name = "Element",
+          NickName = "E",
+          Description = "An Element to update",
+        }
+      ),
+      new ParamDefinition
+      (
+        new Parameters.ParameterKey()
+        {
+          Name = "Parameter",
+          NickName = "P",
+          Description = "Element parameter to modify",
+        }
+      ),
+      new ParamDefinition
+      (
+        new Param_GenericObject()
+        {
+          Name = "Value",
+          NickName = "V",
+          Description = "Element parameter value",
+          Optional = true
+        },
+        ParamRelevance.Primary
+      ),
+    };
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      manager.AddParameter(new Parameters.Element(), "Element", "E", "Updated Element", GH_ParamAccess.item);
-    }
+      new ParamDefinition
+      (
+        new Parameters.Element()
+        {
+          Name = "Element",
+          NickName = "E",
+          Description = "The Element",
+        }
+      ),
+      new ParamDefinition
+      (
+        new Parameters.ParameterKey()
+        {
+          Name = "Parameter",
+          NickName = "P",
+          Description = "Element parameter",
+        },
+        ParamRelevance.Occasional
+      ),
+      new ParamDefinition
+      (
+        new Param_GenericObject()
+        {
+          Name = "Value",
+          NickName = "V",
+          Description = "Element parameter value",
+        },
+        ParamRelevance.Primary
+      ),
+    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DB.Element element = null;
-      if (!DA.GetData("Element", ref element))
-        return;
+      if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
+      var document = Types.Document.FromValue(element.Document);
 
-      IGH_Goo key = null;
-      if (!DA.GetData("ParameterKey", ref key))
-        return;
+      if (!Params.GetData(DA, "Parameter", out Types.ParameterKey key, x => x.IsValid)) return;
+      if (!Params.TryGetData(DA, "Value", out IGH_Goo value)) return;
 
-      IGH_Goo value = null;
-      if (!DA.GetData("ParameterValue", ref value))
-        return;
-
-      var parameter = ParameterUtils.GetParameter(this, element, key);
+      var parameter = ParameterUtils.GetParameter(this, element.Value, key);
       if (parameter is null)
         return;
 
-      StartTransaction(element.Document);
+      if (value is object)
+      {
+        StartTransaction(element.Document);
 
-      try
-      {
-        if (parameter.Set(value))
-          DA.SetData("Element", element);
-        else
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to set parameter '{parameter.Definition.Name}' : '{value}' is not a valid value.");
+        if (!parameter.Set(value))
+        {
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Unable to set parameter '{parameter.Definition.Name}' : '{value}' is not a valid value.");
+          return;
+        }
       }
-      catch (InvalidCastException)
-      {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to cast from {value.TypeName} to {parameter.StorageType}.");
-      }
-      catch (Autodesk.Revit.Exceptions.InvalidOperationException e)
-      {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to set parameter '{parameter.Definition.Name}' : {e.Message}");
-      }
+
+      DA.SetData("Element", element);
+
+      Params.TrySetData(DA, "Parameter", () => new Types.ParameterKey(element.Document, parameter.Definition as DB.InternalDefinition));
+      Params.TrySetData(DA, "Value", () => parameter.AsGoo());
     }
   }
 
-  public class ElementParameterReset : TransactionBaseComponent
+  public class ElementParameterReset : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("2C374E6D-A547-45AC-B77D-04DD61317622");
     public override GH_Exposure Exposure => GH_Exposure.quarternary | GH_Exposure.obscure;
-    protected override string IconTag => "R";
 
     public ElementParameterReset() : base
     (
       name: "Reset Element Parameter",
-      nickname: "ResetParam",
+      nickname: "Reset",
       description: "Resets the parameter value of a specified Revit Element",
       category: "Revit",
       subCategory: "Element"
     )
     { }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      manager.AddParameter(new Parameters.Element(), "Element", "E", "Element to update", GH_ParamAccess.item);
-      manager.AddGenericParameter("ParameterKey", "K", "Element parameter to reset", GH_ParamAccess.item);
-    }
+      new ParamDefinition
+      (
+        new Parameters.Element()
+        {
+          Name = "Element",
+          NickName = "E",
+          Description = "Element to update",
+        }
+      ),
+      new ParamDefinition
+      (
+        new Parameters.ParameterKey()
+        {
+          Name = "Parameter",
+          NickName = "P",
+          Description = "Element parameter to reset",
+        }
+      ),
+    };
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      manager.AddParameter(new Parameters.Element(), "Element", "E", "Updated Element", GH_ParamAccess.item);
-    }
+      new ParamDefinition
+      (
+        new Parameters.Element()
+        {
+          Name = "Element",
+          NickName = "E",
+          Description = "Updated Element",
+        }
+      ),
+    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DB.Element element = null;
-      if (!DA.GetData("Element", ref element))
-        return;
+      if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
+      if (!Params.GetData(DA, "Parameter", out Types.ParameterKey key)) return;
 
-      IGH_Goo key = null;
-      if (!DA.GetData("ParameterKey", ref key))
-        return;
-
-      var parameter = ParameterUtils.GetParameter(this, element, key);
+      var parameter = ParameterUtils.GetParameter(this, element.Value, key);
       if (parameter is null)
         return;
 
-      using (var transaction = NewTransaction(element.Document))
-      {
-        transaction.Start();
+      StartTransaction(element.Document);
 
-        if (parameter.ResetValue())
-        {
-          if (CommitTransaction(element.Document, transaction) == DB.TransactionStatus.Committed)
-            DA.SetData("Element", element);
-          else
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to reset '{parameter.Definition.Name}'");
-        }
-        else
-        {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Unable to reset '{parameter.Definition.Name}'");
-        }
-      }
+      if (!parameter.ResetValue())
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Unable to reset parameter '{parameter.Definition.Name}'.");
+
+      DA.SetData("Element", element);
     }
   }
 
@@ -457,45 +495,200 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DB.Element element = null;
-      if (!DA.GetData("Element", ref element))
-        return;
+      if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
 
-      string parameterName = null;
-      bool noFilterName = (!DA.GetData("Name", ref parameterName) && Params.Input[1].Sources.Count == 0);
+      var filterName = Params.GetData(DA, "Name", out string parameterName);
+      var filterGroup = Params.GetData(DA, "Group", out DBXS.ParameterGroup parameterGroup);
+      var filterReadOnly = Params.GetData(DA, "ReadOnly", out bool? readOnly);
 
-      var parameterGroup = ParameterGroup.Empty;
-      bool noFilterGroup = (!DA.GetData("Group", ref parameterGroup) && Params.Input[2].Sources.Count == 0);
-
-      bool readOnly = false;
-      bool noFilterReadOnly = (!DA.GetData("ReadOnly", ref readOnly) && Params.Input[3].Sources.Count == 0);
-
-      List<DB.Parameter> parameters = null;
-      if (element is object)
+      var parameters = new List<DB.Parameter>(element.Value.Parameters.Size);
+      foreach (var group in element.Value.GetParameters(DBX.ParameterClass.Any).GroupBy(x => x.Definition?.GetGroupType() ?? DBXS.ParameterGroup.Empty).OrderBy(x => x.Key))
       {
-        parameters = new List<DB.Parameter>(element.Parameters.Size);
-        foreach (var group in element.GetParameters(DBX.ParameterClass.Any).GroupBy(x => x.Definition?.GetGroupType() ?? ParameterGroup.Empty).OrderBy(x => x.Key))
+        foreach (var param in group.OrderBy(x => x.Id.IntegerValue))
         {
-          foreach (var param in group.OrderBy(x => x.Id.IntegerValue))
-          {
-            if (string.IsNullOrEmpty(param.Definition.Name))
-              continue;
+          if (string.IsNullOrEmpty(param.Definition.Name))
+            continue;
 
-            if (!noFilterName && !param.Definition.Name.IsSymbolNameLike(parameterName))
-              continue;
+          if (filterName && !param.Definition.Name.IsSymbolNameLike(parameterName))
+            continue;
 
-            if (!noFilterGroup && parameterGroup != (param.Definition?.GetGroupType() ?? ParameterGroup.Empty))
-              continue;
+          if (filterGroup && parameterGroup != (param.Definition?.GetGroupType() ?? DBXS.ParameterGroup.Empty))
+            continue;
 
-            if (!noFilterReadOnly && readOnly != param.IsReadOnly)
-              continue;
+          if (filterReadOnly && readOnly != param.IsReadOnly)
+            continue;
 
-            parameters.Add(param);
-          }
+          parameters.Add(param);
         }
       }
 
       DA.SetDataList("Parameters", parameters);
+    }
+  }
+}
+
+namespace RhinoInside.Revit.GH.Components.Obsolete
+{
+  using EditorBrowsableAttribute = System.ComponentModel.EditorBrowsableAttribute;
+  using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;
+
+  [EditorBrowsable(EditorBrowsableState.Never)]
+  public class ElementParameterGetUpgrader : ComponentUpgrader
+  {
+    public ElementParameterGetUpgrader() { }
+    public override DateTime Version => new DateTime(2021, 07, 30);
+    public override Guid UpgradeFrom => new Guid("D86050F2-C774-49B1-9973-FB3AB188DC94");
+    public override Guid UpgradeTo => new Guid("F568D3E7-BE3F-455B-A8D4-EBFA573D55C2");
+
+    public override IReadOnlyDictionary<string, string> GetInputAliases(IGH_Component _) =>
+      new Dictionary<string, string>()
+      {
+        {"ParameterKey", "Parameter"}
+      };
+
+    public override IReadOnlyDictionary<string, string> GetOutputAliases(IGH_Component _) =>
+      new Dictionary<string, string>()
+      {
+        {"ParameterValue", "Value"}
+      };
+  }
+
+  [Obsolete("Obsolete since 2021-07-30")]
+  [EditorBrowsable(EditorBrowsableState.Never)]
+  public class ElementParameterGet : Component
+  {
+    public override Guid ComponentGuid => new Guid("D86050F2-C774-49B1-9973-FB3AB188DC94");
+    public override GH_Exposure Exposure => GH_Exposure.quarternary | GH_Exposure.hidden;
+
+    public ElementParameterGet() : base
+    (
+      name: "Get Element Parameter",
+      nickname: "Get",
+      description: "Gets the parameter value of a specified Revit Element",
+      category: "Revit",
+      subCategory: "Element"
+    )
+    { }
+
+    protected override void RegisterInputParams(GH_InputParamManager manager)
+    {
+      manager.AddParameter(new Parameters.Element(), "Element", "E", "Element to query", GH_ParamAccess.item);
+      manager.AddGenericParameter("ParameterKey", "K", "Element parameter to query", GH_ParamAccess.item);
+    }
+
+    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    {
+      manager.AddParameter(new Parameters.ParameterValue(), "ParameterValue", "V", "Element parameter value", GH_ParamAccess.item);
+    }
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
+      if (!Params.GetData(DA, "ParameterKey", out IGH_Goo key)) return;
+
+      if (element.Value is object)
+      {
+        var parameter = ParameterUtils.GetParameter(this, element.Value, key);
+        DA.SetData("ParameterValue", parameter);
+      }
+    }
+  }
+
+  [EditorBrowsable(EditorBrowsableState.Never)]
+  public class ElementParameterSetUpgrader : ComponentUpgrader
+  {
+    public ElementParameterSetUpgrader() { }
+    public override DateTime Version => new DateTime(2021, 07, 30);
+    public override Guid UpgradeFrom => new Guid("8F1EE110-7FDA-49E0-BED4-E8E0227BC021");
+    public override Guid UpgradeTo => new Guid("F568D3E7-BE3F-455B-A8D4-EBFA573D55C2");
+
+    public override IReadOnlyDictionary<string, string> GetInputAliases(IGH_Component _) =>
+      new Dictionary<string, string>()
+      {
+        {"ParameterKey", "Parameter"},
+        {"ParameterValue", "Value"}
+      };
+  }
+
+  [Obsolete("Obsolete since 2021-07-30")]
+  [EditorBrowsable(EditorBrowsableState.Never)]
+  public class ElementParameterSet : TransactionalChainComponent
+  {
+    public override Guid ComponentGuid => new Guid("8F1EE110-7FDA-49E0-BED4-E8E0227BC021");
+    public override GH_Exposure Exposure => GH_Exposure.quarternary | GH_Exposure.hidden;
+
+    public ElementParameterSet() : base
+    (
+      name: "Set Element Parameter",
+      nickname: "Set",
+      description: "Sets the parameter value of a specified Revit Element",
+      category: "Revit",
+      subCategory: "Element"
+    )
+    { }
+
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
+    {
+    new ParamDefinition
+    (
+      new Parameters.Element()
+      {
+        Name = "Element",
+        NickName = "E",
+        Description = "Element to update",
+      }
+    ),
+    new ParamDefinition
+    (
+      new Param_GenericObject()
+      {
+        Name = "ParameterKey",
+        NickName = "K",
+        Description = "Element parameter to modify",
+      }
+    ),
+    new ParamDefinition
+    (
+      new Param_GenericObject()
+      {
+        Name = "ParameterValue",
+        NickName = "V",
+        Description = "Element parameter value",
+      }
+    ),
+  };
+
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
+    {
+    new ParamDefinition
+    (
+      new Parameters.Element()
+      {
+        Name = "Element",
+        NickName = "E",
+        Description = "Updated Element",
+      }
+    ),
+  };
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
+      if (!Params.GetData(DA, "ParameterKey", out IGH_Goo key)) return;
+      if (!Params.GetData(DA, "ParameterValue", out IGH_Goo value)) return;
+
+      var parameter = ParameterUtils.GetParameter(this, element.Value, key);
+      if (parameter is null)
+        return;
+
+      StartTransaction(element.Document);
+
+      if (parameter.Set(value))
+        DA.SetData("Element", element);
+      else
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Unable to set parameter '{parameter.Definition.Name}' : '{value}' is not a valid value.");
     }
   }
 }

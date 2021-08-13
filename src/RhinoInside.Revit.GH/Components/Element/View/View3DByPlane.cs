@@ -1,9 +1,11 @@
 using System;
+using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Obsolete
+namespace RhinoInside.Revit.GH.Components.Views
 {
   public class View3DByPlane : ReconstructElementComponent
   {
@@ -12,23 +14,21 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
 
     public View3DByPlane() : base
     (
-      "Add View3D",
-      "View3D",
-      "Given a plane, it adds a 3D View to the active Revit document",
-      "Revit",
-      "View"
+      name: "Add View3D",
+      nickname: "View3D",
+      description: "Given a plane, it adds a 3D View to the active Revit document",
+      category: "Revit",
+      subCategory: "View"
     )
     { }
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.View(), "View3D", "V", "New 3D View", GH_ParamAccess.item);
-    }
-
     void ReconstructView3DByPlane
     (
-      DB.Document doc,
-      ref DB.View3D view,
+      [Optional, NickName("DOC")]
+      DB.Document document,
+
+      [Description("New 3D View")]
+      ref DB.View3D view3D,
 
       Rhino.Geometry.Plane plane,
       Optional<DB.ElementType> type,
@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
       Optional<bool> perspective
     )
     {
-      SolveOptionalType(doc, ref type, DB.ElementTypeGroup.ViewType3D, nameof(type));
+      SolveOptionalType(document, ref type, DB.ElementTypeGroup.ViewType3D, nameof(type));
 
       var orientation = new DB.ViewOrientation3D
       (
@@ -45,17 +45,17 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
         -plane.ZAxis.ToXYZ()
       );
 
-      if (view is null)
+      if (view3D is null)
       {
         var newView = perspective.IsNullOrMissing ?
         DB.View3D.CreatePerspective
         (
-          doc,
+          document,
           type.Value.Id
         ) :
         DB.View3D.CreateIsometric
         (
-          doc,
+          document,
           type.Value.Id
         );
 
@@ -68,21 +68,21 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
 
         newView.SetOrientation(orientation);
         newView.get_Parameter(DB.BuiltInParameter.VIEWER_CROP_REGION).Set(0);
-        ReplaceElement(ref view, newView, parametersMask);
+        ReplaceElement(ref view3D, newView, parametersMask);
       }
       else
       {
-        view.SetOrientation(orientation);
+        view3D.SetOrientation(orientation);
 
         if (perspective.HasValue)
-          view.get_Parameter(DB.BuiltInParameter.VIEWER_PERSPECTIVE).Set(perspective.Value ? 1 : 0);
+          view3D.get_Parameter(DB.BuiltInParameter.VIEWER_PERSPECTIVE).Set(perspective.Value ? 1 : 0);
 
-        ChangeElementTypeId(ref view, type.Value.Id);
+        ChangeElementTypeId(ref view3D, type.Value.Id);
       }
 
-      if (name.HasValue && view is object)
+      if (name.HasValue && view3D is object)
       {
-        try { view.Name = name.Value; }
+        try { view3D.Name = name.Value; }
         catch (Autodesk.Revit.Exceptions.ArgumentException e)
         {
           AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"{e.Message.Replace($".{Environment.NewLine}", ". ")}");

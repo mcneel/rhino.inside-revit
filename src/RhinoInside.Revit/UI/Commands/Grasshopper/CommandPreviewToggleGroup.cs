@@ -49,7 +49,7 @@ namespace RhinoInside.Revit.UI
     {
       protected override bool IsCommandAvailable(UIApplication app, DB.CategorySet selectedCategories) =>
         base.IsCommandAvailable(app, selectedCategories) &&
-        Revit.ActiveUIDocument?.Document?.IsFamilyDocument == false;
+        DirectContext3DServer.IsAvailable(Revit.ActiveUIDocument?.ActiveGraphicalView);
     }
   }
 

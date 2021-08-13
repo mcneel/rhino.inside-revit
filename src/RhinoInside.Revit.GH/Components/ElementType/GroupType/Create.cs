@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -21,32 +23,30 @@ namespace RhinoInside.Revit.GH.Components
     )
     { }
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.ElementType(), "GroupType", "G", "New GroupType", GH_ParamAccess.item);
-    }
-
     void ReconstructGroupTypeCreate
     (
-      DB.Document doc,
+      [Optional, NickName("DOC")]
+      DB.Document document,
+
+      [Description("New Group Type"), NickName("GT")]
       ref DB.GroupType groupType,
 
       IList<DB.Element> elements,
       Optional<string> name
     )
     {
-      var elementIds = DB.ElementTransformUtils.CopyElements(doc, elements.Where(x => x.Document.Equals(doc)).Select(x => x.Id).ToList(), DB.XYZ.Zero);
+      var elementIds = DB.ElementTransformUtils.CopyElements(document, elements.Where(x => x.Document.Equals(document)).Select(x => x.Id).ToList(), DB.XYZ.Zero);
 
       if (groupType is DB.GroupType oldGroupType)
       {
         // To avoid name conflicts we rename the old GroupType that will be deleted
         oldGroupType.Name = Guid.NewGuid().ToString();
 
-        var newGroup = doc.IsFamilyDocument ?
-                        doc.FamilyCreate.NewGroup(elementIds):
-                        doc.Create.NewGroup(elementIds);
+        var newGroup = document.IsFamilyDocument ?
+                        document.FamilyCreate.NewGroup(elementIds):
+                        document.Create.NewGroup(elementIds);
         groupType = newGroup.GroupType;
-        doc.Delete(newGroup.Id);
+        document.Delete(newGroup.Id);
 
         // Update other occurrences of oldGroupType
         foreach (var twinGroup in oldGroupType.Groups.Cast<DB.Group>())
@@ -54,11 +54,11 @@ namespace RhinoInside.Revit.GH.Components
       }
       else
       {
-        var newGroup = doc.IsFamilyDocument ?
-                        doc.FamilyCreate.NewGroup(elementIds) :
-                        doc.Create.NewGroup(elementIds);
+        var newGroup = document.IsFamilyDocument ?
+                        document.FamilyCreate.NewGroup(elementIds) :
+                        document.Create.NewGroup(elementIds);
         groupType = newGroup.GroupType;
-        doc.Delete(newGroup.Id);
+        document.Delete(newGroup.Id);
       }
 
       if (groupType is object && name.HasValue)

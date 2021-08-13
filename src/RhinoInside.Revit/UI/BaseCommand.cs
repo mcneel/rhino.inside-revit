@@ -47,9 +47,9 @@ namespace RhinoInside.Revit.UI
 
       if (url != string.Empty)
       {
-        if (url is null) url = AddIn.AddinWebSite;
+        if (url is null) url = AddIn.AddInWebSite;
         else if (!url.StartsWith("http", StringComparison.OrdinalIgnoreCase))
-          url = AddIn.AddinWebSite + url;
+          url = AddIn.AddInWebSite + url;
 
         data.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, url));
       }
@@ -77,9 +77,9 @@ namespace RhinoInside.Revit.UI
 
       if (url != string.Empty)
       {
-        if (url is null) url = AddIn.AddinWebSite;
+        if (url is null) url = AddIn.AddInWebSite;
         else if (!url.StartsWith("http", StringComparison.OrdinalIgnoreCase))
-          url = AddIn.AddinWebSite + url;
+          url = AddIn.AddInWebSite + url;
 
         data.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, url));
       }

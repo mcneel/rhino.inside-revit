@@ -27,11 +27,11 @@ namespace RhinoInside.Revit.GH.Components
       var folderPath = new Grasshopper.Kernel.Parameters.Param_FilePath();
       manager[manager.AddParameter(folderPath, "Folder", "F", $"Default is {Environment.GetFolderPath(Environment.SpecialFolder.MyPictures)}\\%ProjectTitle%", GH_ParamAccess.item)].Optional = true;
 
-      manager.AddBooleanParameter("OverrideFile", "O", string.Empty, GH_ParamAccess.item, false);
+      manager.AddBooleanParameter("Overwrite", "O", "Overwrite file", GH_ParamAccess.item, false);
 
       var fileType = new Parameters.Param_Enum<Types.ImageFileType>();
       fileType.PersistentData.Append(new Types.ImageFileType(DB.ImageFileType.PNG));
-      manager.AddParameter(fileType, "FileType", "T", "The file type used for export", GH_ParamAccess.item);
+      manager.AddParameter(fileType, "File Type", "FT", "The file type used for export", GH_ParamAccess.item);
 
       var imageResolution = new Parameters.Param_Enum<Types.ImageResolution>();
       imageResolution.PersistentData.Append(new Types.ImageResolution());
@@ -39,9 +39,9 @@ namespace RhinoInside.Revit.GH.Components
 
       var fitDirectionType = new Parameters.Param_Enum<Types.FitDirectionType>();
       fitDirectionType.PersistentData.Append(new Types.FitDirectionType());
-      manager.AddParameter(fitDirectionType, "FitDirection", "D", "The fit direction", GH_ParamAccess.item);
+      manager.AddParameter(fitDirectionType, "Fit Direction", "D", "The fit direction", GH_ParamAccess.item);
 
-      manager.AddIntegerParameter("PixelSize", "S", "The pixel size of an image in specified direction", GH_ParamAccess.item, 2048);
+      manager.AddIntegerParameter("Pixel Size", "PS", "The pixel size of an image in specified direction", GH_ParamAccess.item, 2048);
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
@@ -64,12 +64,12 @@ namespace RhinoInside.Revit.GH.Components
 
       Directory.CreateDirectory(folder);
 
-      var overrideFile = default(bool);
-      if (!DA.GetData("OverrideFile", ref overrideFile))
+      var overwrite = default(bool);
+      if (!DA.GetData("Overwrite", ref overwrite))
         return;
 
       var fileType = default(DB.ImageFileType);
-      if (!DA.GetData("FileType", ref fileType))
+      if (!DA.GetData("File Type", ref fileType))
         return;
 
       var resolution = default(DB.ImageResolution);
@@ -77,11 +77,11 @@ namespace RhinoInside.Revit.GH.Components
         return;
 
       var fitDirection = default(DB.FitDirectionType);
-      if (!DA.GetData("FitDirection", ref fitDirection))
+      if (!DA.GetData("Fit Direction", ref fitDirection))
         return;
 
       var pixelSize = default(int);
-      if (!DA.GetData("PixelSize", ref pixelSize))
+      if (!DA.GetData("Pixel Size", ref pixelSize))
         return;
 
       var viewName = DB.ImageExportOptions.GetFileName(view.Document, view.Id);
@@ -111,7 +111,7 @@ namespace RhinoInside.Revit.GH.Components
         case DB.ImageFileType.TIFF:         filePath += ".tif"; break;
       }
 
-      if (!overrideFile && File.Exists(filePath))
+      if (!overwrite && File.Exists(filePath))
         AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"File '{filePath}' already exists.");
       else
         view.Document.ExportImage(options);

@@ -6,6 +6,7 @@ using Grasshopper.Kernel;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.Convert.System.Collections.Generic;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Site
@@ -17,16 +18,13 @@ namespace RhinoInside.Revit.GH.Components.Site
 
     public TopographyByPoints() : base
     (
-      "Add Topography (Points)", "Topography",
-      "Given a set of Points, it adds a Topography surface to the active Revit document",
-      "Revit", "Site"
+      name: "Add Topography (Points)",
+      nickname: "Topography",
+      description: "Given a set of Points, it adds a Topography surface to the active Revit document",
+      category: "Revit",
+      subCategory: "Site"
     )
     { }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.GraphicalElement(), "Topography", "T", "New Topography", GH_ParamAccess.item);
-    }
 
     //class FailuresPreprocessor : DB.IFailuresPreprocessor
     //{
@@ -35,8 +33,11 @@ namespace RhinoInside.Revit.GH.Components.Site
 
     void ReconstructTopographyByPoints
     (
-      DB.Document doc,
-      ref DB.Architecture.TopographySurface element,
+      [Optional, NickName("DOC")]
+      DB.Document document,
+
+      [ParamType(typeof(Parameters.GraphicalElement)), Description("New Topography")]
+      ref DB.Architecture.TopographySurface topography,
 
       IList<Point3d> points,
       [Optional] IList<Curve> regions
@@ -80,13 +81,13 @@ namespace RhinoInside.Revit.GH.Components.Site
       //}
       //else
       {
-        ReplaceElement(ref element, DB.Architecture.TopographySurface.Create(doc, xyz));
+        ReplaceElement(ref topography, DB.Architecture.TopographySurface.Create(document, xyz));
       }
 
-      if (element is object && regions?.Count > 0)
+      if (topography is object && regions?.Count > 0)
       {
         var curveLoops = regions.Select(region => region.ToCurveLoop());
-        DB.Architecture.SiteSubRegion.Create(doc, curveLoops.ToList(), element.Id);
+        DB.Architecture.SiteSubRegion.Create(document, curveLoops.ToList(), topography.Id);
       }
     }
   }

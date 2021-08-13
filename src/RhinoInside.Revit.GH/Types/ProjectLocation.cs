@@ -29,7 +29,7 @@ namespace RhinoInside.Revit.GH.Types
         if (location.IsValid)
           return new BoundingBox(location.Origin, location.Origin);
 
-        return BoundingBox.Unset;
+        return NaN.BoundingBox;
       }
     }
 
@@ -116,6 +116,8 @@ namespace RhinoInside.Revit.GH.Types
     public SiteLocation() { }
     public SiteLocation(DB.SiteLocation value) : base(value) { }
 
-    public override string DisplayName => Value?.PlaceName;
+    public override string DisplayName =>
+      Value?.PlaceName is string placeName && placeName.Length > 0?
+      placeName : base.DisplayName;
   }
 }

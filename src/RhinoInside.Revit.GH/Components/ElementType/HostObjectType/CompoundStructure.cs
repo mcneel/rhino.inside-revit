@@ -30,7 +30,6 @@ namespace RhinoInside.Revit.GH.Components.Host
           Name = "Type",
           NickName = "T",
           Description = "Host Type to access compound structure",
-          Access = GH_ParamAccess.item
         }
       ),
       new ParamDefinition
@@ -40,10 +39,9 @@ namespace RhinoInside.Revit.GH.Components.Host
           Name = "Structure",
           NickName = "S",
           Description = "New component structure for Type",
-          Access = GH_ParamAccess.item,
           Optional = true
         },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
     };
 
@@ -57,7 +55,6 @@ namespace RhinoInside.Revit.GH.Components.Host
           Name = "Type",
           NickName = "T",
           Description = "Accessed Host Type",
-          Access = GH_ParamAccess.item
         }
       ),
       new ParamDefinition
@@ -67,9 +64,8 @@ namespace RhinoInside.Revit.GH.Components.Host
           Name = "Structure",
           NickName = "S",
           Description = "Compound structure definition of given type",
-          Access = GH_ParamAccess.item,
         },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
     };
 
@@ -103,7 +99,7 @@ namespace RhinoInside.Revit.GH.Components.Host
   }
 }
 
-namespace RhinoInside.Revit.GH.Components.Obsolete
+namespace RhinoInside.Revit.GH.Components.Host.Obsolete
 {
   [Obsolete("Since 2021-03-23")]
   public class HostObjectTypeCompoundStructure : Component

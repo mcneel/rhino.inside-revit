@@ -26,36 +26,36 @@ namespace RhinoInside.Revit.GH.Components.Material
     {
       ParamDefinition.Create<Parameters.Material>("Material", "M"),
 
-      ParamDefinition.Create<Param_String>("Description", "D", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("Class", "CL", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("Comments", "C", optional: true, relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Param_String>("Description", "D", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Class", "CL", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Comments", "C", optional: true, relevance: ParamRelevance.Primary),
 
-      ParamDefinition.Create<Param_String>("Manufacturer", "MAN", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("Model", "MOD", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_Number>("Cost", "COS", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("URL", "URL", optional: true, relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Param_String>("Manufacturer", "MAN", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Model", "MOD", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Number>("Cost", "COS", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("URL", "URL", optional: true, relevance: ParamRelevance.Primary),
 
-      ParamDefinition.Create<Param_String>("Keynote", "KN", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("Mark", "MK", optional: true, relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Param_String>("Keynote", "KN", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Mark", "MK", optional: true, relevance: ParamRelevance.Primary),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.Material>("Material", "M", relevance: ParamVisibility.Voluntary),
+      ParamDefinition.Create<Parameters.Material>("Material", "M", relevance: ParamRelevance.Occasional),
 
-      ParamDefinition.Create<Param_String>("Name", "N", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("Description", "D", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("Class", "CL", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("Comments", "C", relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Param_String>("Name", "N", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Description", "D", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Class", "CL", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Comments", "C", relevance: ParamRelevance.Primary),
 
-      ParamDefinition.Create<Param_String>("Manufacturer", "MAN", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("Model", "MOD", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_Number>("Cost", "COS", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("URL", "URL", relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Param_String>("Manufacturer", "MAN", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Model", "MOD", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Number>("Cost", "COS", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("URL", "URL", relevance: ParamRelevance.Primary),
 
-      ParamDefinition.Create<Param_String>("Keynote", "KN", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("Mark", "MK", relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Param_String>("Keynote", "KN", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Mark", "MK", relevance: ParamRelevance.Primary),
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)

@@ -27,15 +27,15 @@ namespace RhinoInside.Revit.GH.Components
     {
       ParamDefinition.Create<Parameters.Category>("Category", "C"),
 
-      ParamDefinition.Create<Param_Integer>("Line Weight [projection]", "LWP", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_Integer>("Line Weight [cut]", "LWC", optional: true, relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Param_Integer>("Line Weight [projection]", "LWP", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Integer>("Line Weight [cut]", "LWC", optional: true, relevance: ParamRelevance.Primary),
 
-      ParamDefinition.Create<Param_Colour>("Line Color", "LC", optional: true, relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Param_Colour>("Line Color", "LC", optional: true, relevance: ParamRelevance.Primary),
 
-      ParamDefinition.Create<Parameters.LinePatternElement>("Line Pattern [projection]", "LPP", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Parameters.LinePatternElement>("Line Pattern [cut]", "LPC", optional: true, relevance: ParamVisibility.Voluntary),
+      ParamDefinition.Create<Parameters.LinePatternElement>("Line Pattern [projection]", "LPP", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.LinePatternElement>("Line Pattern [cut]", "LPC", optional: true, relevance: ParamRelevance.Occasional),
 
-      ParamDefinition.Create<Parameters.Material>("Material", "M", optional: true, relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Parameters.Material>("Material", "M", optional: true, relevance: ParamRelevance.Primary),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -43,15 +43,15 @@ namespace RhinoInside.Revit.GH.Components
     {
       ParamDefinition.Create<Parameters.Category>("Category", "C"),
 
-      ParamDefinition.Create<Param_Integer>("Line Weight [projection]", "LWP", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_Integer>("Line Weight [cut]", "LWC", relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Param_Integer>("Line Weight [projection]", "LWP", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Integer>("Line Weight [cut]", "LWC", relevance: ParamRelevance.Primary),
 
-      ParamDefinition.Create<Param_Colour>("Line Color", "LC", relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Param_Colour>("Line Color", "LC", relevance: ParamRelevance.Primary),
 
-      ParamDefinition.Create<Parameters.LinePatternElement>("Line Pattern [projection]", "LPP", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Parameters.LinePatternElement>("Line Pattern [cut]", "LPC", relevance: ParamVisibility.Voluntary),
+      ParamDefinition.Create<Parameters.LinePatternElement>("Line Pattern [projection]", "LPP", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.LinePatternElement>("Line Pattern [cut]", "LPC", relevance: ParamRelevance.Occasional),
 
-      ParamDefinition.Create<Parameters.Material>("Material", "M", relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Parameters.Material>("Material", "M", relevance: ParamRelevance.Primary),
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)

@@ -1,7 +1,10 @@
 using System;
-using Autodesk.Revit.DB;
+using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.GH.Kernel.Attributes;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -12,63 +15,67 @@ namespace RhinoInside.Revit.GH.Components
 
     public ColumnByCurve() : base
     (
-      "Add Column", "Column",
-      "Given its Axis, it adds a structural Column to the active Revit document",
-      "Revit", "Build"
+      name: "Add Column",
+      nickname: "Column",
+      description: "Given its Axis, it adds a structural Column to the active Revit document",
+      category: "Revit",
+      subCategory: "Build"
     )
     { }
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.FamilyInstance(), "Column", "C", "New Column", GH_ParamAccess.item);
-    }
-
     void ReconstructColumnByCurve
     (
-      Document doc,
-      ref Autodesk.Revit.DB.Element element,
+      [Optional, NickName("DOC")]
+      DB.Document document,
+
+      [Description("New Column")]
+      ref DB.FamilyInstance column,
 
       Rhino.Geometry.Line curve,
-      Optional<Autodesk.Revit.DB.FamilySymbol> type,
-      Optional<Autodesk.Revit.DB.Level> level
+      Optional<DB.FamilySymbol> type,
+      Optional<DB.Level> level
     )
     {
       if (curve.FromZ > curve.ToZ)
         curve.Flip();
 
-      SolveOptionalType(doc, ref type, BuiltInCategory.OST_StructuralColumns, nameof(type));
+      SolveOptionalType(document, ref type, DB.BuiltInCategory.OST_StructuralColumns, nameof(type));
 
       if (!type.Value.IsActive)
         type.Value.Activate();
 
-      SolveOptionalLevel(doc, curve, ref level, out var _);
+      SolveOptionalLevel(document, curve, ref level, out var _);
 
       // Type
-      ChangeElementTypeId(ref element, type.Value.Id);
+      ChangeElementTypeId(ref column, type.Value.Id);
 
-      if (element is FamilyInstance familyInstance && element.Location is LocationCurve locationCurve)
+      if (column is object && column.Location is DB.LocationCurve locationCurve)
       {
-        locationCurve.Curve = curve.ToLine();
+        var centerLine = curve.ToLine();
+        if (!locationCurve.Curve.IsAlmostEqualTo(centerLine))
+          locationCurve.Curve = centerLine;
+
+        return;
       }
       else
       {
-        var newColumn = doc.Create.NewFamilyInstance
+        var newColumn = document.Create.NewFamilyInstance
         (
           curve.ToLine(),
           type.Value,
           level.Value,
-          Autodesk.Revit.DB.Structure.StructuralType.Column
+          DB.Structure.StructuralType.Column
         );
 
-        var parametersMask = new BuiltInParameter[]
+        var parametersMask = new DB.BuiltInParameter[]
         {
-          BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-          BuiltInParameter.ELEM_FAMILY_PARAM,
-          BuiltInParameter.ELEM_TYPE_PARAM,
-          BuiltInParameter.LEVEL_PARAM
+          DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+          DB.BuiltInParameter.ELEM_FAMILY_PARAM,
+          DB.BuiltInParameter.ELEM_TYPE_PARAM,
+          DB.BuiltInParameter.LEVEL_PARAM
         };
 
-        ReplaceElement(ref element, newColumn, parametersMask);
+        ReplaceElement(ref column, newColumn, parametersMask);
       }
     }
   }

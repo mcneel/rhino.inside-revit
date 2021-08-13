@@ -7,6 +7,7 @@ using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.Convert.Geometry.Raw;
 using RhinoInside.Revit.Convert.System.Collections.Generic;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Site
@@ -19,21 +20,21 @@ namespace RhinoInside.Revit.GH.Components.Site
 
     public TopographyByMesh() : base
     (
-      "Add Topography (Mesh)", "Topography",
-      "Given a Mesh, it adds a Topography surface to the active Revit document",
-      "Revit", "Site"
+      name: "Add Topography (Mesh)",
+      nickname: "Topography",
+      description: "Given a Mesh, it adds a Topography surface to the active Revit document",
+      category: "Revit",
+      subCategory: "Site"
     )
     { }
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.GraphicalElement(), "Topography", "T", "New Topography", GH_ParamAccess.item);
-    }
-
     void ReconstructTopographyByMesh
     (
-      DB.Document doc,
-      ref DB.Architecture.TopographySurface element,
+      [Optional, NickName("DOC")]
+      DB.Document document,
+
+      [ParamType(typeof(Parameters.GraphicalElement)), Description("New Topography")]
+      ref DB.Architecture.TopographySurface topography,
 
       Mesh mesh,
       [Optional] IList<Curve> regions
@@ -78,13 +79,13 @@ namespace RhinoInside.Revit.GH.Components.Site
         else if (!DB.Architecture.TopographySurface.IsValidFaceSet(facets, xyz))
           AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"At least one face is not valid for {typeof(DB.Architecture.TopographySurface).Name}");
         else
-          ReplaceElement(ref element, DB.Architecture.TopographySurface.Create(doc, xyz, facets));
+          ReplaceElement(ref topography, DB.Architecture.TopographySurface.Create(document, xyz, facets));
       }
 
-      if (element is object && regions?.Count > 0)
+      if (topography is object && regions?.Count > 0)
       {
         var curveLoops = regions.Select(region => region.ToCurveLoop());
-        DB.Architecture.SiteSubRegion.Create(doc, curveLoops.ToList(), element.Id);
+        DB.Architecture.SiteSubRegion.Create(document, curveLoops.ToList(), topography.Id);
       }
     }
   }

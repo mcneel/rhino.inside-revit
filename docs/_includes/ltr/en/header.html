@@ -1,8 +1,8 @@
 <header class="site-header">
     {% if site.version != page.version %}
-    <div class="site-header-messagebar">
-        <strong>WARNING:</strong> You're viewing an older version of this page! <a href="#" onclick="navigateTo('', '{{ site.version }}')">Switch to the latest instead</a>
-    </div>
+    <a href="#" onclick="navigateTo('', '{{ site.version }}')" class="site-header-messagebar">
+        <strong>There is a new {{ site.terms.rir }} available! Want to check it out?</strong>
+    </a>
     {% else %}
     <div class="site-header-topbar"></div>
     {% endif %}

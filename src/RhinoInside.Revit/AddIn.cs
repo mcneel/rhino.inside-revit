@@ -10,6 +10,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
 using Microsoft.Win32;
+using RhinoInside.Revit.External.ApplicationServices.Extensions;
 using RhinoInside.Revit.Native;
 using RhinoInside.Revit.Settings;
 using UIX = RhinoInside.Revit.External.UI;
@@ -29,9 +30,9 @@ namespace RhinoInside.Revit
   public class AddIn : UIX.ExternalApplication
   {
     #region AddInInfo
-    public static string AddinCompany => "McNeel";
-    public static string AddinName => "Rhino.Inside";
-    public static string AddinWebSite => @"https://www.rhino3d.com/inside/revit/beta/";
+    public static string AddInCompany => "McNeel";
+    public static string AddInName => "Rhino.Inside";
+    public static string AddInWebSite => @"https://www.rhino3d.com/inside/revit/1.0/";
     #endregion
 
     #region Status
@@ -86,7 +87,6 @@ namespace RhinoInside.Revit
 
     internal static readonly string RhinoExePath = Path.Combine(SystemDir, "Rhino.exe");
     internal static readonly FileVersionInfo RhinoVersionInfo = File.Exists(RhinoExePath) ? FileVersionInfo.GetVersionInfo(RhinoExePath) : null;
-    static readonly Version MinimumRhinoVersion = new Version(7, 6, 0);
     static readonly Version RhinoVersion = new Version
     (
       RhinoVersionInfo?.FileMajorPart ?? 0,
@@ -94,20 +94,28 @@ namespace RhinoInside.Revit
       RhinoVersionInfo?.FileBuildPart ?? 0,
       RhinoVersionInfo?.FilePrivatePart ?? 0
     );
+    static Version MinimumRhinoVersion
+    {
+      get
+      {
+        var assemblyVersion = Assembly.GetExecutingAssembly().GetReferencedAssemblies().Where(x => x.Name == "RhinoCommon").FirstOrDefault().Version;
+        return new Version(assemblyVersion.Major, assemblyVersion.Minor, 0);
+      }
+    }
 
     static AddIn()
     {
       if (StartupMode == AddInStartupMode.Cancelled)
         return;
 
-      if (DaysUntilExpiration < 1)
+      if (IsExpired())
         status = Status.Obsolete;
       else if (RhinoVersion >= MinimumRhinoVersion)
         status = NativeLoader.IsolateOpenNurbs() ? Status.Available : Status.Unavailable;
 
       Logger.LogTrace
       (
-        $"{AddinName} Loaded",
+        $"{AddInName} Loaded",
         $"AddIn.StartupMode = {StartupMode}",
         $"AddIn.CurrentStatus = {CurrentStatus}"
       );
@@ -306,12 +314,7 @@ namespace RhinoInside.Revit
         return Result.Cancelled;
 
       // Check if Revit.exe is a supported version
-      Version RevitVersion;
-      {
-        try { RevitVersion = new Version(app.ControlledApplication.SubVersionNumber); }
-        catch (System.MissingMemberException) { RevitVersion = new Version(app.ControlledApplication.VersionNumber); }
-      }
-
+      var RevitVersion = new Version(app.ControlledApplication.GetSubVersionNumber());
       if (RevitVersion < MinimumRevitVersion)
       {
         using
@@ -355,7 +358,7 @@ namespace RhinoInside.Revit
 
       // if release info is received, and
       // if current version on the active update channel is newer
-      if (releaseInfo?.Version > Version)
+      if (releaseInfo is ReleaseInfo && releaseInfo.Version > Version)
       {
         // ask UI to notify user of updates
         if (!AddinOptions.Session.CompactTab)
@@ -371,43 +374,12 @@ namespace RhinoInside.Revit
       }
     }
 
-    static bool CheckIsExpired(bool quiet = true)
-    {
-      if (DaysUntilExpiration > 0 && quiet)
-        return false;
-
-      using
-      (
-        var taskDialog = new TaskDialog("Days left")
-        {
-          Id = $"{MethodBase.GetCurrentMethod().DeclaringType}.{MethodBase.GetCurrentMethod().Name}",
-          MainIcon = UIX.TaskDialogIcons.IconInformation,
-          TitleAutoPrefix = true,
-          AllowCancellation = true,
-          MainInstruction = DaysUntilExpiration < 1 ?
-          "Rhino.Inside WIP has expired" :
-          $"Rhino.Inside WIP expires in {DaysUntilExpiration} days",
-          MainContent = "While in WIP phase, you do need to update Rhino.Inside addin at least every 90 days.",
-          FooterText = "Current version: " + DisplayVersion
-        }
-      )
-      {
-        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Check for updates…", "Open Rhino.Inside download page");
-        if (taskDialog.Show() == TaskDialogResult.CommandLink1)
-        {
-          using (Process.Start(@"https://www.rhino3d.com/download/rhino.inside-revit/7/wip")) { }
-        }
-      }
-
-      return DaysUntilExpiration < 1;
-    }
-
     internal static Result CheckSetup()
     {
       var services = Host.Services;
 
       // Check if Rhino.Inside is expired
-      if (CheckIsExpired(DaysUntilExpiration > 10))
+      if (CheckIsExpired(minDaysUntilExpiration: 10))
         return Result.Cancelled;
 
       // Check if Rhino.exe is a supported version
@@ -449,12 +421,71 @@ namespace RhinoInside.Revit
     }
 
     static string CallerFilePath([System.Runtime.CompilerServices.CallerFilePath] string CallerFilePath = "") => CallerFilePath;
-    public static string SourceCodePath => Path.GetDirectoryName(CallerFilePath());
-    public static DateTime BuildDate => new DateTime(2000, 1, 1).AddDays(Version.Build).AddSeconds(Version.Revision * 2);
-    public static int DaysUntilExpiration => Math.Max(0, 90 - (DateTime.Now - BuildDate).Days);
+    internal static string SourceCodePath => Path.GetDirectoryName(CallerFilePath());
+    static DateTime BuildDate => new DateTime(2000, 1, 1).AddDays(Version.Build).AddSeconds(Version.Revision * 2);
 
     public static Version Version => Assembly.GetExecutingAssembly().GetName().Version;
     public static string DisplayVersion => $"{Version} ({BuildDate})";
+    #endregion
+
+    #region Expiration
+    const int NeverExpire = 0;
+
+    /// <summary>
+    /// Expiration period in days. 0 means never expire.
+    /// </summary>
+    static readonly int ExpirationPeriod =
+      Assembly.GetExecutingAssembly().
+      GetCustomAttribute<AssemblyInformationalVersionAttribute>().
+      InformationalVersion.ToLowerInvariant().
+      Contains("-wip") ? 90 : NeverExpire;
+
+    static bool CheckIsExpired(int minDaysUntilExpiration = int.MaxValue)
+    {
+      var expired = IsExpired(out var daysUntilExpiration);
+      if (!expired && daysUntilExpiration >= minDaysUntilExpiration)
+        return false;
+
+      using
+      (
+        var taskDialog = new TaskDialog("Days left")
+        {
+          Id = $"{MethodBase.GetCurrentMethod().DeclaringType}.{MethodBase.GetCurrentMethod().Name}",
+          MainIcon = UIX.TaskDialogIcons.IconInformation,
+          TitleAutoPrefix = true,
+          AllowCancellation = true,
+          MainInstruction = expired ?
+          $"{AddInName} has expired" :
+          $"{AddInName} expires in {daysUntilExpiration} days",
+          MainContent = $"While in WIP phase, you do need to update {AddInName} every {ExpirationPeriod} days.",
+          FooterText = "Current version: " + DisplayVersion
+        }
+      )
+      {
+        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Check for updates…", $"Open {AddInName} download page");
+        if (taskDialog.Show() == TaskDialogResult.CommandLink1)
+        {
+          using (Process.Start(@"https://www.rhino3d.com/download/rhino.inside-revit/7")) { }
+        }
+      }
+
+      return expired;
+    }
+
+    internal static bool IsExpired() => IsExpired(out var _);
+    internal static bool IsExpired(out int daysUntilExpiration)
+    {
+      if (ExpirationPeriod > 0)
+      {
+        daysUntilExpiration = Math.Max(0, ExpirationPeriod - (DateTime.Now - BuildDate).Days);
+        return daysUntilExpiration < 1;
+      }
+      else
+      {
+        daysUntilExpiration = int.MaxValue;
+        return false;
+      }
+    }
     #endregion
   }
 }

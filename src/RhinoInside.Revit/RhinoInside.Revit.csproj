@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -131,20 +131,21 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.IO.Compression" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
-    <Reference Include="WindowsBase" />
-    <Reference Include="Microsoft.VisualBasic" />
-    <Reference Include="PresentationCore" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Management.Automation" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <Choose>
     <When Condition="$(Configuration.Contains('Debug'))">
@@ -189,9 +190,9 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="RhinoCommon" Version="7.6.21127.19001" IncludeAssets="compile; build" />
-        <PackageReference Include="RhinoWindows" Version="7.6.21127.19001" IncludeAssets="build; compile" />
-        <PackageReference Include="Grasshopper" Version="7.6.21127.19001" IncludeAssets="compile; build" />
+        <PackageReference Include="RhinoCommon" Version="7.8.21196.5001" IncludeAssets="compile; build" />
+        <PackageReference Include="RhinoWindows" Version="7.8.21196.5001" IncludeAssets="build; compile" />
+        <PackageReference Include="Grasshopper" Version="7.8.21196.5001" IncludeAssets="compile; build" />
         <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitApiVersion)" IncludeAssets="build; compile" />
       </ItemGroup>
     </Otherwise>
@@ -217,6 +218,7 @@
     <Compile Include="Convert\Geometry\SubDEncoder.cs" />
     <Compile Include="Convert\Geometry\GeometryDecoder.cs" />
     <Compile Include="Convert\Geometry\UnitConverter.cs" />
+    <Compile Include="Convert\Render\RenderMaterialConverter.cs" />
     <Compile Include="Convert\Units\DisplayUnitTypeConverter.cs" />
     <Compile Include="Convert\Eto.Drawing.cs" />
     <Compile Include="Convert\System.Collections.Generic.cs" />
@@ -259,6 +261,7 @@
     <Compile Include="External\DB\Extensions\Parameter.cs" />
     <Compile Include="External\DB\Extensions\ParameterFilterElement.cs" />
     <Compile Include="External\DB\Extensions\ProjectLocation.cs" />
+    <Compile Include="External\DB\Extensions\Sketch.cs" />
     <Compile Include="External\DB\Extensions\Solid.cs" />
     <Compile Include="External\DB\Extensions\Surface.cs" />
     <Compile Include="External\DB\Extensions\View.cs" />
@@ -314,6 +317,7 @@
     <Compile Include="External\ActivationGate.cs" />
     <Compile Include="External\UI\UIHostApplication.cs" />
     <Compile Include="GH\Bake.cs" />
+    <Compile Include="GH\ElementStream.cs" />
     <Compile Include="GH\Guest.cs" />
     <Compile Include="GH\Kernel.cs" />
     <Compile Include="GH\PreviewServer.cs" />
@@ -424,7 +428,7 @@
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GhxFile_32.png" />
     <EmbeddedResource Include="Resources\RIR-logo.ico" />
     <EmbeddedResource Include="Resources\RIR-WIP-logo.png" />
-    <EmbeddedResource Include="Resources\ChannelDaily-icon.png" />
+    <EmbeddedResource Include="Resources\ChannelRC-icon.png" />
     <EmbeddedResource Include="Resources\ChannelStable-icon.png" />
   </ItemGroup>
   <ItemGroup>
@@ -432,6 +436,7 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ProductInfo.cs</LastGenOutput>
     </Content>
+    <EmbeddedResource Include="Resources\ChannelDaily-icon.png" />
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\CaptureElements.png" />
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\ReleaseElements.png" />
     <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\OpenViewport.png" />

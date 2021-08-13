@@ -73,14 +73,16 @@ namespace RhinoInside.Revit.UI
   {
     public GeneralPanel() => InitLayout();
 
-    CheckBox _loadOnStartup = new CheckBox { Text = "Start Rhino on startup", ToolTip = "Restart Revit" };
-    CheckBox _useHostLanguage = new CheckBox { Text = "Use Revit UI language", ToolTip = "Rhino UI will be same language as Revit" };
-    CheckBox _compactTab = new CheckBox { Text = "Compact Revit tabs", ToolTip = "Load into Add-ins tab - Restart Revit" };
-    CheckBox _compactRibbon = new CheckBox { Text = "Compact Ribbon", ToolTip = "Collapse Rhino and Grasshopper panels" };
+    readonly CheckBox _loadOnStartup = new CheckBox { Text = "Start Rhino on startup", ToolTip = "Restart Revit" };
+    readonly CheckBox _isolateSettings = new CheckBox { Text = "Isolate Rhino settings", ToolTip = "Rhino will use a separate set of settings in Revit" };
+    readonly CheckBox _useHostLanguage = new CheckBox { Text = "Use Revit UI language", ToolTip = "Rhino UI will be same language as Revit" };
+    readonly CheckBox _compactTab = new CheckBox { Text = "Compact Revit tabs", ToolTip = "Load into Add-ins tab - Restart Revit" };
+    readonly CheckBox _compactRibbon = new CheckBox { Text = "Compact Ribbon", ToolTip = "Collapse Rhino and Grasshopper panels" };
 
     void InitLayout()
     {
       _loadOnStartup.Checked = AddinOptions.Current.LoadOnStartup;
+      _isolateSettings.Checked = AddinOptions.Current.IsolateSettings;
       _useHostLanguage.Checked = AddinOptions.Current.UseHostLanguage;
       _compactTab.Checked = AddinOptions.Current.CompactTab;
       _compactRibbon.Checked = AddinOptions.Current.CompactRibbon;
@@ -101,6 +103,7 @@ namespace RhinoInside.Revit.UI
               Rows =
               {
                 _loadOnStartup,
+                _isolateSettings,
                 _useHostLanguage,
               }
             }
@@ -135,6 +138,9 @@ namespace RhinoInside.Revit.UI
       if (_compactRibbon.Checked.HasValue)
         AddinOptions.Current.CompactRibbon = _compactRibbon.Checked.Value;
 
+      if (_isolateSettings.Checked.HasValue)
+        AddinOptions.Current.IsolateSettings = _isolateSettings.Checked.Value;
+
       if (_useHostLanguage.Checked.HasValue)
         AddinOptions.Current.UseHostLanguage = _useHostLanguage.Checked.Value;
     }
@@ -144,11 +150,11 @@ namespace RhinoInside.Revit.UI
   {
     public UpdatesPanel() => InitLayout();
 
-    CheckBox _checkUpdatesOnStartup = new CheckBox { Text = "Check Updates on Startup" };
-    Label _channelDescription = new Label { Visible = false, Wrap = WrapMode.Word, Height = 36, VerticalAlignment = VerticalAlignment.Top };
-    DropDown _updateChannelSelector = new DropDown() { Height = 25 };
-    Button _releaseNotesBtn = new Button { Text = "Release Notes", Height = 25 };
-    Button _downloadBtn = new Button { Text = "Download Installer", Height = 25 };
+    readonly CheckBox _checkUpdatesOnStartup = new CheckBox { Text = "Check Updates on Startup" };
+    readonly Label _channelDescription = new Label { Visible = false, Wrap = WrapMode.Word, Height = 36, VerticalAlignment = VerticalAlignment.Top };
+    readonly DropDown _updateChannelSelector = new DropDown() { Height = 25 };
+    readonly Button _releaseNotesBtn = new Button { Text = "Release Notes", Height = 25 };
+    readonly Button _downloadBtn = new Button { Text = "Download Installer", Height = 25 };
 
     TableRow _releaseInfoPanel = null;
     internal ReleaseInfo ReleaseInfo = null;
@@ -269,9 +275,9 @@ namespace RhinoInside.Revit.UI
                         Spacing = new Size(5, 10),
                         Rows = {
                           new Label {
-                            Text = "New Release Available!\n"
-                                + $"Version: {releaseInfo.Version}\n"
-                                + $"Release Date: {releaseInfo.ReleaseDate}",
+                            Text = $"New {releaseInfo.Source.ReleaseName} Available!\n"
+                                 + $"Version: {releaseInfo.Version}\n"
+                                 + $"Release Date: {releaseInfo.ReleaseDate}",
                             Width = 150
                           },
                           new Label {

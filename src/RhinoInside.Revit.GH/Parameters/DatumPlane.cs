@@ -31,16 +31,18 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
-      if (SourceCount != 0)
-        return;
+      if (SourceCount != 0) return;
+      if (Revit.ActiveUIDocument?.Document is null) return;
 
       if (MutableNickName)
       {
-        var listBox = new ListBox();
-        listBox.BorderStyle = BorderStyle.FixedSingle;
-        listBox.Width = (int) (250 * GH_GraphicsUtil.UiScale);
-        listBox.Height = (int) (100 * GH_GraphicsUtil.UiScale);
-        listBox.SelectionMode = SelectionMode.MultiExtended;
+        var listBox = new ListBox
+        {
+          BorderStyle = BorderStyle.FixedSingle,
+          Width = (int) (250 * GH_GraphicsUtil.UiScale),
+          Height = (int) (100 * GH_GraphicsUtil.UiScale),
+          SelectionMode = SelectionMode.MultiExtended
+        };
         listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
 
         Menu_AppendCustomItem(menu, listBox);
@@ -63,6 +65,7 @@ namespace RhinoInside.Revit.GH.Parameters
         var levels = collector.Cast<DB.Level>().
           OrderBy(x => x.GetHeight()).
           Select(x => new Types.Level(x)).
+          OrderBy(x => x.Name, default(ElementNameComparer)).
           ToList();
 
         foreach (var level in levels)
@@ -114,18 +117,19 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
-      if (SourceCount != 0)
-        return;
+      if (SourceCount != 0) return;
+      if (Revit.ActiveUIDocument?.Document is null) return;
 
       if (MutableNickName)
       {
-        var listBox = new ListBox();
-        listBox.BorderStyle = BorderStyle.FixedSingle;
-        listBox.Width = (int) (250 * GH_GraphicsUtil.UiScale);
-        listBox.Height = (int) (100 * GH_GraphicsUtil.UiScale);
-        listBox.SelectionMode = SelectionMode.MultiExtended;
+        var listBox = new ListBox
+        {
+          BorderStyle = BorderStyle.FixedSingle,
+          Width = (int) (250 * GH_GraphicsUtil.UiScale),
+          Height = (int) (100 * GH_GraphicsUtil.UiScale),
+          SelectionMode = SelectionMode.MultiExtended
+        };
         listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
-        listBox.Sorted = true;
 
         Menu_AppendCustomItem(menu, listBox);
         RefreshGridList(listBox);
@@ -146,6 +150,7 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         var items = collector.Cast<DB.Grid>().
           Select(x => new Types.Grid(x)).
+          OrderBy(x => x.Name, default(ElementNameComparer)).
           ToList();
 
         foreach (var item in items)

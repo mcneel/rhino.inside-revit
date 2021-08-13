@@ -13,6 +13,8 @@ ushort Major = 0;
 ushort Minor = 0;
 ushort Build = 0;
 ushort Revision = 0;
+string Release = "";
+string Metadata = "";
 
 using (var reader = new StreamReader(this.Host.ResolvePath($"../ProductInfo.xml")))
 {
@@ -22,6 +24,10 @@ using (var reader = new StreamReader(this.Host.ResolvePath($"../ProductInfo.xml"
 
   Major = product.MajorVersion;
   Minor = product.MinorVersion;
+  if (!string.IsNullOrWhiteSpace(product.ReleaseVersion))
+    Release = $"-{product.ReleaseVersion}";
+  if (!string.IsNullOrWhiteSpace(product.MetaVersion))
+    Metadata = $"+{product.MetaVersion}";
 
   var buildDate = Environment.GetEnvironmentVariable("BuildDate");
   var now = !string.IsNullOrWhiteSpace(buildDate) ? DateTime.Parse(buildDate) :
@@ -42,7 +48,7 @@ using (var reader = new StreamReader(this.Host.ResolvePath($"../ProductInfo.xml"
 #define _LegalCopyright_ "<#= product.Copyright #>"
 #define _LegalTrademarks_ "<#= product.Trademark #>"
 #define _ProductName_ "<#= product.Name #>"
-#define _ProductVersion_ "<#= product.MajorVersion #>.<#= product.MinorVersion #>-<#= product.InformationalVersion #>"
+#define _ProductVersion_ "<#= Major #>.<#= Minor #>.<#= Build #><#= Release #><#= Metadata #>"
 #define _FileVersion_ "<#= Major #>.<#= Minor #>.<#= Build #>.<#= Revision #>"
 
 <#+
@@ -52,7 +58,8 @@ public class ProductInfo
   public string Company= "";
   public string Copyright= "";
   public string Trademark = "";
-  public string InformationalVersion= "";
+  public string ReleaseVersion= "";
+  public string MetaVersion= "";
   public ushort MajorVersion = 0;
   public ushort MinorVersion = 0;
   public ushort? BuildVersion;

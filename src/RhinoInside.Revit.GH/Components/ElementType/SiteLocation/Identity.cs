@@ -27,37 +27,37 @@ namespace RhinoInside.Revit.GH.Components.Site
     static readonly ParamDefinition[] inputs =
     {
       ParamDefinition.Create<Parameters.ElementType>("Site Location", "SL"),
-      ParamDefinition.Create<Param_String>("Place Name", "PN", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_Number>("Time Zone", "TZ", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.FromParam
+      ParamDefinition.Create<Param_String>("Place Name", "PN", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Number>("Time Zone", "TZ", "Hours ranging from -12 to +12. 0 represents GMT.", optional: true, relevance: ParamRelevance.Primary),
+      new ParamDefinition
       (
-        new Param_Number() { Name = "Latitude", NickName = "LAT", Optional = true, AngleParameter = true, UseDegrees = true },
-        ParamVisibility.Default
+        new Param_Angle() { Name = "Latitude", NickName = "LAT", Optional = true, AngleParameter = true, UseDegrees = true },
+        ParamRelevance.Primary
       ),
-      ParamDefinition.FromParam
+      new ParamDefinition
       (
-        new Param_Number() { Name = "Longitude", NickName = "LON", Optional = true, AngleParameter = true, UseDegrees = true },
-        ParamVisibility.Default
+        new Param_Angle() { Name = "Longitude", NickName = "LON", Optional = true, AngleParameter = true, UseDegrees = true },
+        ParamRelevance.Primary
       ),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.ElementType>("Site Location", "SL", relevance: ParamVisibility.Voluntary),
-      ParamDefinition.Create<Param_Number>("Elevation", "E", "The elevation of the site location", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("Weather Station", "WS", "The name of the weather station at the site location", relevance: ParamVisibility.Voluntary),
-      ParamDefinition.Create<Param_String>("Place Name", "PN", "The place name of the site", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_Number>("Time Zone", "TZ", "The time-zone for the site", relevance: ParamVisibility.Default),
-      ParamDefinition.FromParam
+      ParamDefinition.Create<Parameters.ElementType>("Site Location", "SL", relevance: ParamRelevance.Occasional),
+      ParamDefinition.Create<Param_Number>("Elevation", "E", "The elevation of the site location", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Weather Station", "WS", "The name of the weather station at the site location", relevance: ParamRelevance.Occasional),
+      ParamDefinition.Create<Param_String>("Place Name", "PN", "The place name of the site", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Number>("Time Zone", "TZ", "The time-zone for the site", relevance: ParamRelevance.Primary),
+      new ParamDefinition
       (
-        new Param_Number() { Name = "Latitude", NickName = "LAT", Description = "The latitude of the site location", AngleParameter = true, UseDegrees = true },
-        ParamVisibility.Default
+        new Param_Angle() { Name = "Latitude", NickName = "LAT", Description = "The latitude of the site location", AngleParameter = true, UseDegrees = true },
+        ParamRelevance.Primary
       ),
-      ParamDefinition.FromParam
+      new ParamDefinition
       (
-        new Param_Number() { Name = "Longitude", NickName = "LON", Description = "The longitude of the site location", AngleParameter = true, UseDegrees = true },
-        ParamVisibility.Default
+        new Param_Angle() { Name = "Longitude", NickName = "LON", Description = "The longitude of the site location", AngleParameter = true, UseDegrees = true },
+        ParamRelevance.Primary
       ),
     };
 
@@ -67,9 +67,9 @@ namespace RhinoInside.Revit.GH.Components.Site
 
       bool update = false;
       update |= Params.GetData(DA, "Place Name", out string placeName);
-      update |= Params.GetData(DA, "TimeZone", out double? timeZone);
+      update |= Params.GetData(DA, "Time Zone", out double? timeZone);
       update |= Params.GetData(DA, "Latitude", out double? latitude);
-      update |= Params.GetData(DA, "TimeZone", out double? longitude);
+      update |= Params.GetData(DA, "Longitude", out double? longitude);
 
       if (update)
       {
@@ -79,24 +79,37 @@ namespace RhinoInside.Revit.GH.Components.Site
         if (timeZone != null) location.Value.TimeZone = timeZone.Value;
         if (latitude != null)
         {
-          location.Value.Latitude = Params.Input<Param_Number>("Latitude").UseDegrees ?
-            ToRadians(latitude.Value) :
-            latitude.Value;
+          if (Params.Input<Param_Number>("Latitude").UseDegrees)
+          {
+            if (Math.Abs(latitude.Value) < 90.0)
+              location.Value.Latitude = ToRadians(latitude.Value);
+            else
+              throw new Exceptions.RuntimeArgumentException("Latitude", "Value is out of range. It must be between -90 and 90.");
+          }
+          else
+          {
+            if (Math.Abs(latitude.Value) < Math.PI / 2.0)
+              location.Value.Latitude = latitude.Value;
+            else
+              throw new Exceptions.RuntimeArgumentException("Latitude", "Value is out of range. It must be between -PI/2 and PI/2.");
+          }
         }
+
         if (longitude != null)
         {
           location.Value.Longitude = Params.Input<Param_Number>("Longitude").UseDegrees ?
-            ToRadians(longitude.Value) :
+            ToRadians(longitude.Value) % (2.0 * Math.PI) :
             longitude.Value;
         }
       }
 
+      Params.TrySetData(DA, "Site Location", () => location);
       Params.TrySetData(DA, "Place Name", () => location.Value.PlaceName);
       Params.TrySetData(DA, "Weather Station", () => location.Value.WeatherStationName);
       Params.TrySetData(DA, "Time Zone", () => location.Value.TimeZone);
       Params.TrySetData(DA, "Latitude", () => Params.Output<Param_Number>("Latitude").UseDegrees ? ToDegrees(location.Value.Latitude) : location.Value.Latitude);
       Params.TrySetData(DA, "Longitude", () => Params.Output<Param_Number>("Longitude").UseDegrees ? ToDegrees(location.Value.Longitude) : location.Value.Longitude);
-      Params.TrySetData(DA, "Elevation", () => location.Value.Elevation);
+      Params.TrySetData(DA, "Elevation", () => location.Value.Elevation * Revit.ModelUnits);
     }
   }
 }

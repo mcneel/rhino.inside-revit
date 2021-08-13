@@ -27,26 +27,36 @@ namespace RhinoInside.Revit.Convert.Geometry
           return curve.ToCurveMany(factor).SelectMany(x => x.ToBoundedCurves()).ToArray();
 
         case Brep brep:
-          return new DB.GeometryObject[] { ToShape(brep, factor) };
+          if (ToShape(brep, factor) is DB.GeometryObject brepShape)
+            return new DB.GeometryObject[] { brepShape };
+          break;
 
         case Extrusion extrusion:
-          return new DB.GeometryObject[] { ToShape(extrusion, factor) };
+          if (ToShape(extrusion, factor) is DB.GeometryObject extrusionShape)
+            return new DB.GeometryObject[] { extrusionShape };
+          break;
 
         case SubD subD:
-          return new DB.GeometryObject[] { ToShape(subD, factor) };
+          if (ToShape(subD, factor) is DB.GeometryObject subDShape)
+            return new DB.GeometryObject[] { subDShape };
+          break;
 
         case Mesh mesh:
-          return new DB.GeometryObject[] { MeshEncoder.ToMesh(MeshEncoder.ToRawMesh(mesh, factor)) };
+          if (MeshEncoder.ToMesh(MeshEncoder.ToRawMesh(mesh, factor)) is DB.GeometryObject meshShape)
+            return new DB.GeometryObject[] { meshShape };
+          break;
 
         default:
           if (geometry.HasBrepForm)
           {
             var brepForm = Brep.TryConvertBrep(geometry);
-            return new DB.GeometryObject[] { ToShape(brepForm, factor) };
+            if (brepForm is object && ToShape(brepForm, factor) is DB.GeometryObject geometryShape)
+              return new DB.GeometryObject[] { geometryShape };
           }
-
-          return new DB.GeometryObject[0];
+          break;
       }
+
+      return new DB.GeometryObject[0];
     }
 
     static DB.GeometryObject ToShape(Brep brep, double factor)

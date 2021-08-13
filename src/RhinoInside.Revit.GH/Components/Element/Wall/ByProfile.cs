@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.Convert.Units;
+using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.Convert.System.Collections.Generic;
 using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.GH.ElementTracking;
 using RhinoInside.Revit.GH.Kernel.Attributes;
-
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -27,57 +28,46 @@ namespace RhinoInside.Revit.GH.Components
     )
     { }
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    public override void OnStarted(DB.Document document)
     {
-      manager.AddParameter(new Parameters.Wall(), "Wall", "W", "New Wall", GH_ParamAccess.item);
-    }
-
-    protected override void OnAfterStart(DB.Document document, string strTransactionName)
-    {
-      base.OnAfterStart(document, strTransactionName);
+      base.OnStarted(document);
 
       // Disable all previous walls joins
-      if (PreviousStructure is object)
+      var walls = Params.TrackedElements<DB.Wall>("Wall", document);
+      var pinnedWalls = walls.Where(x => x.Pinned).
+                        Select
+                        (
+                          x =>
+                          (
+                            x,
+                            (x.Location as DB.LocationCurve).get_JoinType(0),
+                            (x.Location as DB.LocationCurve).get_JoinType(1)
+                          )
+                        );
+
+      foreach (var (wall, joinType0, joinType1) in pinnedWalls)
       {
-        var unjoinedWalls = PreviousStructure.OfType<Types.Element>().
-                            Select(x => document.GetElement(x.Id)).
-                            OfType<DB.Wall>().
-                            Where(x => x.Pinned).
-                            Select
-                            (
-                              x => Tuple.Create
-                              (
-                                x,
-                                (x.Location as DB.LocationCurve).get_JoinType(0),
-                                (x.Location as DB.LocationCurve).get_JoinType(1)
-                              )
-                            ).
-                            ToArray();
-
-        foreach (var unjoinedWall in unjoinedWalls)
+        var location = wall.Location as DB.LocationCurve;
+        if (DB.WallUtils.IsWallJoinAllowedAtEnd(wall, 0))
         {
-          var location = unjoinedWall.Item1.Location as DB.LocationCurve;
-          if (DB.WallUtils.IsWallJoinAllowedAtEnd(unjoinedWall.Item1, 0))
-          {
-            DB.WallUtils.DisallowWallJoinAtEnd(unjoinedWall.Item1, 0);
-            DB.WallUtils.AllowWallJoinAtEnd(unjoinedWall.Item1, 0);
-            location.set_JoinType(0, unjoinedWall.Item2);
-          }
+          DB.WallUtils.DisallowWallJoinAtEnd(wall, 0);
+          DB.WallUtils.AllowWallJoinAtEnd(wall, 0);
+          location.set_JoinType(0, joinType0);
+        }
 
-          if (DB.WallUtils.IsWallJoinAllowedAtEnd(unjoinedWall.Item1, 1))
-          {
-            DB.WallUtils.DisallowWallJoinAtEnd(unjoinedWall.Item1, 1);
-            DB.WallUtils.AllowWallJoinAtEnd(unjoinedWall.Item1, 1);
-            location.set_JoinType(1, unjoinedWall.Item3);
-          }
+        if (DB.WallUtils.IsWallJoinAllowedAtEnd(wall, 1))
+        {
+          DB.WallUtils.DisallowWallJoinAtEnd(wall, 1);
+          DB.WallUtils.AllowWallJoinAtEnd(wall, 1);
+          location.set_JoinType(1, joinType1);
         }
       }
     }
 
     List<DB.Wall> joinedWalls = new List<DB.Wall>();
-    protected override void OnBeforeCommit(DB.Document document, string strTransactionName)
+    public override void OnPrepare(IReadOnlyCollection<DB.Document> documents)
     {
-      base.OnBeforeCommit(document, strTransactionName);
+      base.OnPrepare(documents);
 
       // Reenable new joined walls
       foreach (var wallToJoin in joinedWalls)
@@ -96,12 +86,95 @@ namespace RhinoInside.Revit.GH.Components
     };
     protected override IEnumerable<DB.FailureDefinitionId> FailureDefinitionIdsToFix => failureDefinitionIdsToFix;
 
+    bool Reuse(ref DB.Wall element, IList<Curve> boundaries, Vector3d normal, DB.WallType type)
+    {
+      if (element is null) return false;
+
+      if (element.GetSketch() is DB.Sketch sketch)
+      {
+        var plane = sketch.SketchPlane.GetPlane().ToPlane();
+        if (normal.IsParallelTo(plane.Normal, Revit.AngleTolerance) == 0)
+          return false;
+
+        var profiles = sketch.Profile.ToPolyCurves();
+        if (profiles.Length != boundaries.Count)
+          return false;
+
+        var loops = sketch.GetAllModelCurves();
+        var pi = 0;
+        foreach (var boundary in boundaries)
+        {
+          var profile = Curve.ProjectToPlane(boundary, plane);
+
+          if
+          (
+            !Curve.GetDistancesBetweenCurves(profiles[pi], profile, Revit.VertexTolerance * Revit.ModelUnits, out var max, out var _, out var _, out var _, out var _, out var _) ||
+            max > Revit.VertexTolerance * Revit.ModelUnits
+          )
+          {
+            var segments = profile.TryGetPolyCurve(out var polyCurve, Revit.AngleTolerance) ?
+              polyCurve.DuplicateSegments():
+              profile.Split(profile.Domain.Mid);
+
+            if (pi < loops.Count)
+            {
+              var loop = loops[pi];
+              if (segments.Length != loop.Count)
+                return false;
+
+              var index = 0;
+              foreach (var edge in loop)
+              {
+                var segment = segments[(++index) % segments.Length];
+
+                var curve = default(DB.Curve);
+                if
+                (
+                  edge.GeometryCurve is DB.HermiteSpline &&
+                  segment.TryGetHermiteSpline(out var points, out var start, out var end, Revit.VertexTolerance * Revit.ModelUnits)
+                )
+                {
+                  using (var tangents = new DB.HermiteSplineTangents() { StartTangent = start.ToXYZ(), EndTangent = end.ToXYZ() })
+                  {
+                    var xyz = points.ConvertAll(GeometryEncoder.ToXYZ);
+                    curve = DB.HermiteSpline.Create(xyz, segment.IsClosed, tangents);
+                  }
+                }
+                else curve = segment.ToCurve();
+
+                if (!edge.GeometryCurve.IsAlmostEqualTo(curve))
+                  edge.SetGeometryCurve(curve, false);
+              }
+            }
+          }
+
+          pi++;
+        }
+      }
+      else return false;
+
+      if (element.GetTypeId() != type.Id)
+      {
+        if (DB.Element.IsValidType(element.Document, new DB.ElementId[] { element.Id }, type.Id))
+        {
+          if (element.ChangeTypeId(type.Id) is DB.ElementId id && id != DB.ElementId.InvalidElementId)
+            element = element.Document.GetElement(id) as DB.Wall;
+        }
+        else return false;
+      }
+
+      return true;
+    }
+
     void ReconstructWallByProfile
     (
-      DB.Document doc,
-      ref DB.Wall element,
+      [Optional, NickName("DOC")]
+      DB.Document document,
 
-      IList<Rhino.Geometry.Curve> profile,
+      [Description("New Wall")]
+      ref DB.Wall wall,
+
+      IList<Curve> profile,
       Optional<DB.WallType> type,
       Optional<DB.Level> level,
       [Optional] DB.WallLocationLine locationLine,
@@ -112,20 +185,21 @@ namespace RhinoInside.Revit.GH.Components
     {
       if (profile.Count < 1) return;
 
-      var normal = default(Rhino.Geometry.Vector3d);
+      var normal = default(Vector3d);
       var maxArea = 0.0;
       foreach (var boundary in profile)
       {
-        var plane = default(Rhino.Geometry.Plane);
+        var plane = default(Plane);
         if
         (
+           boundary is null ||
           !boundary.IsClosed ||
           !boundary.TryGetPlane(out plane, Revit.VertexTolerance) ||
-          !plane.ZAxis.IsPerpendicularTo(Rhino.Geometry.Vector3d.ZAxis, Revit.AngleTolerance)
+          !plane.ZAxis.IsPerpendicularTo(Vector3d.ZAxis, Revit.AngleTolerance)
         )
-          ThrowArgumentException(nameof(profile), "Boundary profile must be a vertical planar closed curve.");
+          ThrowArgumentException(nameof(profile), "Boundary profile should be a valid vertical planar closed curve.");
 
-        using (var properties = Rhino.Geometry.AreaMassProperties.Compute(boundary))
+        using (var properties = AreaMassProperties.Compute(boundary))
         {
           if (properties.Area > maxArea)
           {
@@ -133,19 +207,14 @@ namespace RhinoInside.Revit.GH.Components
             normal = plane.Normal;
 
             var orientation = boundary.ClosedCurveOrientation(plane);
-            if (orientation == Rhino.Geometry.CurveOrientation.CounterClockwise)
+            if (orientation == CurveOrientation.CounterClockwise)
               normal.Reverse();
           }
         }
       }
 
-      SolveOptionalType(doc, ref type, DB.ElementTypeGroup.WallType, nameof(type));
-      SolveOptionalLevel(doc, profile, ref level, out var bbox);
-
-      foreach (var curve in profile)
-        curve.RemoveShortSegments(Revit.ShortCurveTolerance * Revit.ModelUnits);
-
-      var boundaries = profile.SelectMany(x => GeometryEncoder.ToCurveMany(x)).SelectMany(CurveExtension.ToBoundedCurves).ToList();
+      SolveOptionalType(document, ref type, DB.ElementTypeGroup.WallType, nameof(type));
+      SolveOptionalLevel(document, profile, ref level, out var bbox);
 
       // LocationLine
       if (locationLine != DB.WallLocationLine.WallCenterline)
@@ -178,27 +247,37 @@ namespace RhinoInside.Revit.GH.Components
 
         if (offsetDist != 0.0)
         {
-          var translation = DB.Transform.CreateTranslation((normal * (flipped ? -offsetDist : offsetDist)).ToXYZ());
-          for (int b = 0; b < boundaries.Count; ++b)
-            boundaries[b] = boundaries[b].CreateTransformed(translation);
+          var translation = Transform.Translation(normal * (flipped ? -offsetDist : offsetDist));
+
+          var newProfile = new Curve[profile.Count];
+          for (int p = 0; p < profile.Count; ++p)
+          {
+            newProfile[p] = profile[p].DuplicateCurve();
+            newProfile[p].Transform(translation);
+          }
+
+          profile = newProfile;
         }
       }
 
-      var newWall = DB.Wall.Create
-      (
-        doc,
-        boundaries,
-        type.Value.Id,
-        level.Value.Id,
-        structuralUsage != DB.Structure.StructuralWallUsage.NonBearing,
-        normal.ToXYZ()
-      );
-
-      // Walls are created with the last LocationLine used in the Revit editor!!
-      //newWall.get_Parameter(BuiltInParameter.WALL_KEY_REF_PARAM).Set((int) WallLocationLine.WallCenterline);
-
-      var parametersMask = new DB.BuiltInParameter[]
+      if (!Reuse(ref wall, profile, normal, type.Value))
       {
+        var boundaries = profile.SelectMany(x => GeometryEncoder.ToCurveMany(x)).SelectMany(External.DB.Extensions.CurveExtension.ToBoundedCurves).ToList();
+        var newWall = DB.Wall.Create
+        (
+          document,
+          boundaries,
+          type.Value.Id,
+          level.Value.Id,
+          structuralUsage != DB.Structure.StructuralWallUsage.NonBearing,
+          normal.ToXYZ()
+        );
+
+        // Walls are created with the last LocationLine used in the Revit editor!!
+        //newWall.get_Parameter(BuiltInParameter.WALL_KEY_REF_PARAM).Set((int) WallLocationLine.WallCenterline);
+
+        var parametersMask = new DB.BuiltInParameter[]
+        {
           DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
           DB.BuiltInParameter.ELEM_FAMILY_PARAM,
           DB.BuiltInParameter.ELEM_TYPE_PARAM,
@@ -208,34 +287,35 @@ namespace RhinoInside.Revit.GH.Components
           DB.BuiltInParameter.WALL_BASE_OFFSET,
           DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT,
           DB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM
-      };
+        };
 
-      ReplaceElement(ref element, newWall, parametersMask);
+        ReplaceElement(ref wall, newWall, parametersMask);
+      }
 
-      if (newWall != null)
+      if (wall is object)
       {
-        newWall.get_Parameter(DB.BuiltInParameter.WALL_BASE_CONSTRAINT).Set(level.Value.Id);
-        newWall.get_Parameter(DB.BuiltInParameter.WALL_BASE_OFFSET).Set(bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight());
-        newWall.get_Parameter(DB.BuiltInParameter.WALL_KEY_REF_PARAM).Set((int) locationLine);
+        wall.get_Parameter(DB.BuiltInParameter.WALL_BASE_CONSTRAINT).Set(level.Value.Id);
+        wall.get_Parameter(DB.BuiltInParameter.WALL_BASE_OFFSET).Set(bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight());
+        wall.get_Parameter(DB.BuiltInParameter.WALL_KEY_REF_PARAM).Set((int) locationLine);
         if (structuralUsage == DB.Structure.StructuralWallUsage.NonBearing)
         {
-          newWall.get_Parameter(DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).Set(0);
+          wall.get_Parameter(DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).Set(0);
         }
         else
         {
-          newWall.get_Parameter(DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).Set(1);
-          newWall.get_Parameter(DB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM).Set((int) structuralUsage);
+          wall.get_Parameter(DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).Set(1);
+          wall.get_Parameter(DB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM).Set((int) structuralUsage);
         }
 
-        if (newWall.Flipped != flipped)
-          newWall.Flip();
+        if (wall.Flipped != flipped)
+          wall.Flip();
 
         // Setup joins in a last step
-        if (allowJoins) joinedWalls.Add(newWall);
+        if (allowJoins) joinedWalls.Add(wall);
         else
         {
-          DB.WallUtils.DisallowWallJoinAtEnd(newWall, 0);
-          DB.WallUtils.DisallowWallJoinAtEnd(newWall, 1);
+          DB.WallUtils.DisallowWallJoinAtEnd(wall, 0);
+          DB.WallUtils.DisallowWallJoinAtEnd(wall, 1);
         }
       }
     }

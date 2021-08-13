@@ -20,16 +20,13 @@ namespace RhinoInside.Revit.GH.Components
 
     public FamilyInstanceByLocation () : base
     (
-      "Add Component (Location)", "CompLoca",
-      "Given its location, it reconstructs a Component element into the active Revit document",
-      "Revit", "Build"
+      name: "Add Component (Location)",
+      nickname: "CompLoca",
+      description: "Given its location, it reconstructs a Component element into the active Revit document",
+      category: "Revit",
+      subCategory: "Build"
     )
     { }
-
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
-    {
-      manager.AddParameter(new Parameters.FamilyInstance(), "Component", "C", "New Component element", GH_ParamAccess.item);
-    }
 
     bool Reuse(ref DB.FamilyInstance element, Plane location, DB.FamilySymbol type, DB.Level level, DB.Element host)
     {
@@ -40,9 +37,11 @@ namespace RhinoInside.Revit.GH.Components
       if (element.GetTypeId() != type.Id)
       {
         if (DB.Element.IsValidType(element.Document, new DB.ElementId[] { element.Id }, type.Id))
-          element = element.Document.GetElement(element.ChangeTypeId(type.Id)) as DB.FamilyInstance;
-        else
-          return false;
+        {
+          if (element.ChangeTypeId(type.Id) is DB.ElementId id && id != DB.ElementId.InvalidElementId)
+            element = element.Document.GetElement(id) as DB.FamilyInstance;
+        }
+        else return false;
       }
 
       // Unpin here to allow SetLocation update location correctly.
@@ -57,8 +56,11 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructFamilyInstanceByLocation
     (
-      DB.Document doc,
-      ref DB.FamilyInstance element,
+      [Optional, NickName("DOC")]
+      DB.Document document,
+
+      [Description("New Component element")]
+      ref DB.FamilyInstance component,
 
       [Description("Location where to place the element. Point or plane is accepted.")]
       Plane location,
@@ -70,55 +72,55 @@ namespace RhinoInside.Revit.GH.Components
       if (!location.IsValid)
         ThrowArgumentException(nameof(location));
 
-      if (type?.Document.IsEquivalent(doc) == false)
+      if (type?.Document.IsEquivalent(document) == false)
         ThrowArgumentException(nameof(type));
 
-      if (level.HasValue && level.Value.Document.IsEquivalent(doc) == false)
+      if (level.HasValue && level.Value.Document.IsEquivalent(document) == false)
         ThrowArgumentException(nameof(level));
 
-      if (host?.Document.IsEquivalent(doc) == false)
+      if (host?.Document.IsEquivalent(document) == false)
         ThrowArgumentException(nameof(host));
 
       if (!type.IsActive)
         type.Activate();
 
-      SolveOptionalLevel(doc, location, type, ref level, host);
+      SolveOptionalLevel(document, location, type, ref level, host);
 
-      if (!Reuse(ref element, location, type, level.Value, host))
+      if (!Reuse(ref component, location, type, level.Value, host))
       {
         FamilyInstanceCreationData creationData;
         switch (type.Family.FamilyPlacementType)
         {
           case DB.FamilyPlacementType.OneLevelBased:
-            creationData = CreateOneLevelBased(doc, location, type, level, host);
+            creationData = CreateOneLevelBased(document, location, type, level, host);
             break;
 
           case DB.FamilyPlacementType.OneLevelBasedHosted:
-            creationData = CreateOneLevelBasedHosted(doc, location, type, level, host);
+            creationData = CreateOneLevelBasedHosted(document, location, type, level, host);
             break;
 
           case DB.FamilyPlacementType.TwoLevelsBased:
-            creationData = CreateTwoLevelsBased(doc, location, type, level, host);
+            creationData = CreateTwoLevelsBased(document, location, type, level, host);
             break;
 
           case DB.FamilyPlacementType.WorkPlaneBased:
-            creationData = CreateWorkPlaneBased(doc, location, type, level, host);
+            creationData = CreateWorkPlaneBased(document, location, type, level, host);
             break;
 
           default:
-            creationData = CreateDefault(doc, location, type, level, host);
+            creationData = CreateDefault(document, location, type, level, host);
             break;
         }
 
         var dataList = new List<FamilyInstanceCreationData>() { creationData };
-        var newElementIds = doc.IsFamilyDocument ?
-                            doc.FamilyCreate.NewFamilyInstances2(dataList) :
-                            doc.Create.NewFamilyInstances2(dataList);
+        var newElementIds = document.IsFamilyDocument ?
+                            document.FamilyCreate.NewFamilyInstances2(dataList) :
+                            document.Create.NewFamilyInstances2(dataList);
 
         if (newElementIds.Count != 1)
           throw new InvalidOperationException();
 
-        var newElement = doc.GetElement(newElementIds.First()) as DB.FamilyInstance;
+        var newElement = document.GetElement(newElementIds.First()) as DB.FamilyInstance;
 
         var parametersMask = new DB.BuiltInParameter[]
         {
@@ -140,13 +142,13 @@ namespace RhinoInside.Revit.GH.Components
           DB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM
         };
 
-        ReplaceElement(ref element, newElement, parametersMask);
+        ReplaceElement(ref component, newElement, parametersMask);
 
         // Regenerate here to allow SetLocation get the current element location correctly.
-        doc.Regenerate();
+        document.Regenerate();
       }
 
-      element?.SetLocation(location.Origin.ToXYZ(), location.XAxis.ToXYZ(), location.YAxis.ToXYZ());
+      component?.SetLocation(location.Origin.ToXYZ(), location.XAxis.ToXYZ(), location.YAxis.ToXYZ());
     }
 
     void SolveOptionalLevel(DB.Document doc, Plane location, DB.FamilySymbol type, ref Optional<DB.Level> level, DB.Element host)

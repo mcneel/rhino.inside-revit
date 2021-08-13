@@ -42,37 +42,37 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.Create<Parameters.Document>("Project", "P", relevance: ParamVisibility.Voluntary),
+      ParamDefinition.Create<Parameters.Document>("Project", "P", relevance: ParamRelevance.Occasional),
 
-      ParamDefinition.Create<Param_String>("Organization Name", "ON", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("Organization Description", "OD", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("Building Name", "BN", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("Author", "A", optional: true, relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Param_String>("Organization Name", "ON", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Organization Description", "OD", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Building Name", "BN", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Author", "A", optional: true, relevance: ParamRelevance.Primary),
 
-      ParamDefinition.Create<Param_String>("Client Name", "CN", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("Project Issue Date", "PID", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("Project Status", "PS", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("Project Address", "PA", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("Project Name", "PN", optional: true, relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("Project Number", "PNUM", optional: true, relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Param_String>("Client Name", "CN", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Project Issue Date", "PID", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Project Status", "PS", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Project Address", "PA", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Project Name", "PN", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Project Number", "PNUM", optional: true, relevance: ParamRelevance.Primary),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.Element>("Project Information", "PI", relevance: ParamVisibility.Voluntary),
+      ParamDefinition.Create<Parameters.Element>("Project Information", "PI", relevance: ParamRelevance.Occasional),
 
-      ParamDefinition.Create<Param_String>("Organization Name", "ON", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("Organization Description", "OD", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("Building Name", "BN", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("Author", "A", relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Param_String>("Organization Name", "ON", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Organization Description", "OD", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Building Name", "BN", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Author", "A", relevance: ParamRelevance.Primary),
 
-      ParamDefinition.Create<Param_String>("Client Name", "CN", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("Project Issue Date", "PID", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("Project Status", "PS", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("Project Address", "PA", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("Project Name", "PN", relevance: ParamVisibility.Default),
-      ParamDefinition.Create<Param_String>("Project Number", "PNUM", relevance: ParamVisibility.Default),
+      ParamDefinition.Create<Param_String>("Client Name", "CN", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Project Issue Date", "PID", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Project Status", "PS", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Project Address", "PA", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Project Name", "PN", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Project Number", "PNUM", relevance: ParamRelevance.Primary),
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)

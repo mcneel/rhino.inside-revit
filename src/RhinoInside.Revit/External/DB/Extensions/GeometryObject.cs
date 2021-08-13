@@ -12,13 +12,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
       switch (geometry)
       {
         case Point p: yield return p; yield break;
-        case Curve c:
-          foreach (var unbounded in c.ToBoundedCurves())
-            yield return unbounded;
-          yield break;
+        case Curve c: foreach (var unbounded in c.ToBoundedCurves()) yield return unbounded; yield break;
         case Solid s: yield return s; yield break;
         case Mesh m: yield return m; yield break;
         case GeometryInstance i: yield return i; yield break;
+        case GeometryElement e: foreach (var g in e) yield return g; yield break;
         default: throw new ArgumentException("DirectShape only supports Point, Curve, Solid, Mesh and GeometryInstance.");
       }
     }

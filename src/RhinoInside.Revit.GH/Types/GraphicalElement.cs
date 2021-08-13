@@ -33,18 +33,21 @@ namespace RhinoInside.Revit.GH.Types
     protected override bool SetValue(DB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static bool IsValidElement(DB.Element element)
     {
+      if (!element.IsValid())
+        return false;
+
       if (element is DB.ElementType)
         return false;
 
       if (element is DB.View)
         return false;
 
-      using (var location = element?.Location)
+      using (var location = element.Location)
       {
         if (location is object) return true;
       }
 
-      using (var bbox = element?.get_BoundingBox(null))
+      using (var bbox = element.get_BoundingBox(null))
       {
         return bbox is object;
       }
@@ -83,7 +86,7 @@ namespace RhinoInside.Revit.GH.Types
           return bbox;
       }
 
-      return BoundingBox.Unset;
+      return NaN.BoundingBox;
     }
 
     bool IGH_GeometricGoo.LoadGeometry() => IsReferencedDataLoaded || LoadReferencedData();
@@ -271,7 +274,7 @@ namespace RhinoInside.Revit.GH.Types
     /// </summary>
     public virtual BoundingBox BoundingBox => Value is DB.Element element ?
       element.get_BoundingBox(null).ToBoundingBox() :
-      BoundingBox.Unset;
+      NaN.BoundingBox;
 
     /// <summary>
     /// Box aligned to <see cref="Location"/>
@@ -308,7 +311,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         var box = BoundingBox;
         if (!box.IsValid)
-          return Interval.Unset;
+          return NaN.Interval;
 
         return new Interval(box.Min.Z, box.Max.Z);
       }
@@ -320,7 +323,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         var box = BoundingBox;
         if (!box.IsValid)
-          return new UVInterval(Interval.Unset, Interval.Unset);
+          return new UVInterval(NaN.Interval, NaN.Interval);
 
         var u = new Interval(box.Min.X, box.Max.X);
         var v = new Interval(box.Min.Y, box.Max.Y);
@@ -335,9 +338,9 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var origin = new Point3d(double.NaN, double.NaN, double.NaN);
-        var axis = new Vector3d(double.NaN, double.NaN, double.NaN);
-        var perp = new Vector3d(double.NaN, double.NaN, double.NaN);
+        var origin = NaN.Point3d;
+        var axis = NaN.Vector3d;
+        var perp = NaN.Vector3d;
 
         if (Value is DB.Element element)
         {
@@ -474,8 +477,12 @@ namespace RhinoInside.Revit.GH.Types
         {
           if (element.Location is DB.LocationCurve locationCurve)
           {
-            InvalidateGraphics();
-            locationCurve.Curve = value.ToCurve();
+            var curve = value.ToCurve();
+            if (!locationCurve.Curve.IsAlmostEqualTo(curve))
+            {
+              InvalidateGraphics();
+              locationCurve.Curve = curve;
+            }
           }
           else throw new InvalidOperationException("Curve can not be set for this element.");
         }

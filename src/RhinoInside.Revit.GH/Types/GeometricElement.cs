@@ -21,24 +21,6 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Geometric Element")]
   public class GeometricElement : GraphicalElement, IGH_GeometricElement, IGH_PreviewMeshData, Bake.IGH_BakeAwareElement
   {
-    public override string DisplayName
-    {
-      get
-      {
-        if (Value is DB.Element element)
-        {
-          if (element.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MARK) is DB.Parameter parameter && parameter.HasValue)
-          {
-            var mark = parameter.AsString();
-            if (!string.IsNullOrEmpty(mark))
-              return $"{base.DisplayName} [{mark}]";
-          }
-        }
-
-        return base.DisplayName;
-      }
-    }
-
     public GeometricElement() { }
     public GeometricElement(DB.Element element) : base(element) { }
 
@@ -72,6 +54,7 @@ namespace RhinoInside.Revit.GH.Types
           if (meshes?.Length > 0 || wires?.Length > 0)
           {
             var bbox = BoundingBox.Empty;
+
             foreach (var mesh in meshes)
               bbox.Union(mesh.GetBoundingBox(xform));
 
@@ -158,7 +141,7 @@ namespace RhinoInside.Revit.GH.Types
 
       void Build()
       {
-        if ((meshes is null && wires is null && materials is null))
+        if (meshes is null && wires is null && materials is null)
         {
           var element = geometricElement.Document.GetElement(geometricElement.Id);
           if (element is null)
@@ -170,7 +153,7 @@ namespace RhinoInside.Revit.GH.Types
           if (meshes is object && materialElements is object)
           {
             var outMesh = new Mesh();
-            var dictionary = Convert.Display.PreviewConverter.ZipByMaterial(materialElements, meshes, outMesh);
+            var dictionary = PreviewConverter.ZipByMaterial(materialElements, meshes, outMesh);
             if (outMesh.Faces.Count > 0)
             {
               materials = dictionary.Keys.Select(x => x.ToDisplayMaterial(null)).Concat(Enumerable.Repeat(new Rhino.Display.DisplayMaterial(), 1)).ToArray();
@@ -260,13 +243,21 @@ namespace RhinoInside.Revit.GH.Types
 
       void IDisposable.Dispose()
       {
-        foreach (var mesh in meshes ?? Enumerable.Empty<Mesh>())
-          mesh.Dispose();
-        meshes = null;
+        if (meshes is object)
+        {
+          foreach (var mesh in meshes)
+            mesh.Dispose();
 
-        foreach (var wire in wires ?? Enumerable.Empty<Curve>())
-          wire.Dispose();
-        wires = null;
+          meshes = null;
+        }
+
+        if (wires is object)
+        {
+          foreach (var wire in wires)
+            wire.Dispose();
+
+          wires = null;
+        }
       }
     }
 
@@ -314,7 +305,7 @@ namespace RhinoInside.Revit.GH.Types
         return;
 
       var material = args.Material;
-      var element = Document?.GetElement(Id);
+      var element = Value;
       if (element is null)
       {
         const int factor = 3;
@@ -371,7 +362,7 @@ namespace RhinoInside.Revit.GH.Types
       const int factor = 3;
 
       var color = args.Color;
-      var element = Document?.GetElement(Id);
+      var element = Value;
       if (element is null)
       {
         // Erased element
@@ -395,9 +386,11 @@ namespace RhinoInside.Revit.GH.Types
         var meshes = TryGetPreviewMeshes();
         if (meshes is object)
         {
-          // Grasshopper does not show mesh wires.
-          //foreach (var mesh in meshes)
-          //  args.Pipeline.DrawMeshWires(mesh, color, thickness);
+          if (Grasshopper.CentralSettings.PreviewMeshEdges)
+          {
+            foreach (var mesh in meshes)
+              args.Pipeline.DrawMeshWires(mesh, color, thickness);
+          }
         }
         else
         {
@@ -411,10 +404,7 @@ namespace RhinoInside.Revit.GH.Types
     #region IGH_PreviewMeshData
     void IGH_PreviewMeshData.DestroyPreviewMeshes() => SubInvalidateGraphics();
 
-    Mesh[] IGH_PreviewMeshData.GetPreviewMeshes()
-    {
-      return TryGetPreviewMeshes();
-    }
+    Mesh[] IGH_PreviewMeshData.GetPreviewMeshes() => TryGetPreviewMeshes();
     #endregion
 
     #region IGH_BakeAwareElement

@@ -43,7 +43,7 @@ namespace RhinoInside.Revit.GH.Types
           value?.Value is DB.HostObjAttributes hostType
         )
         {
-          AssertValidDocument(value.Document, nameof(Type));
+          AssertValidDocument(value, nameof(Type));
           InvalidateGraphics();
 
           host.ChangeTypeId(hostType.Id);

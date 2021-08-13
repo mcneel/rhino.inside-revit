@@ -96,7 +96,7 @@ namespace RhinoInside.Revit.GH.Components
             var path = basePath.AppendElement(index++);
             geometries.EnsurePath(path);
 
-            if (element?.IsValidObject == true && element.get_BoundingBox(null) != null)
+            if (element.IsValid() && element.get_BoundingBox(null) is object)
             {
               // Extract the geometry
               using (var geometry = element.GetGeometry(options))
@@ -213,7 +213,6 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Detail Level",
           NickName = "DL",
           Description = "View detail level used to extract geometry",
-          Access = GH_ParamAccess.item,
           Optional = true
         }
       ),
@@ -238,7 +237,7 @@ namespace RhinoInside.Revit.GH.Components
           DataMapping = GH_DataMapping.Flatten,
           Optional = true
         },
-        ParamVisibility.Voluntary
+        ParamRelevance.Occasional
       )
     };
 
@@ -254,7 +253,7 @@ namespace RhinoInside.Revit.GH.Components
           Description = "Elements geometry is extracted from",
           Access = GH_ParamAccess.list
         },
-        ParamVisibility.Voluntary
+        ParamRelevance.Occasional
       ),
       new ParamDefinition
       (
@@ -264,8 +263,7 @@ namespace RhinoInside.Revit.GH.Components
           NickName = "G",
           Description = "Element geometry",
           Access = GH_ParamAccess.tree
-        },
-        ParamVisibility.Binding
+        }
       ),
       new ParamDefinition
       (
@@ -276,7 +274,7 @@ namespace RhinoInside.Revit.GH.Components
           Description = "Geometry category",
           Access = GH_ParamAccess.tree
         },
-        ParamVisibility.Voluntary
+        ParamRelevance.Occasional
       ),
       //new ParamDefinition
       //(
@@ -297,13 +295,25 @@ namespace RhinoInside.Revit.GH.Components
       if (!Params.GetDataList(DA, "Elements", out IList<Types.Element> elements)) return;
       if (!Params.TryGetDataList(DA, "Exclude", out IList<Types.Element> exclude)) return;
 
-      if (!detailLevel.HasValue)
-        detailLevel = DB.ViewDetailLevel.Coarse;
-
       if (!TryGetCommonDocument(elements.Concat(exclude ?? Enumerable.Empty<Types.Element>()), out var doc))
         return;
 
-      using(var options = new DB.Options() { DetailLevel = detailLevel.Value })
+      var scope = default(IDisposable);
+      if (!detailLevel.HasValue)
+      {
+        detailLevel = DB.ViewDetailLevel.Coarse;
+      }
+      else if (elements.Any(x => x.Value is DB.FamilySymbol symbol && !symbol.IsActive))
+      {
+        scope = doc.RollBackScope();
+        foreach(var symbol in elements.Select(x => x.Value).OfType<DB.FamilySymbol>())
+          symbol.Activate();
+
+        doc.Regenerate();
+      }
+
+      using (scope)
+      using (var options = new DB.Options() { DetailLevel = detailLevel.Value })
       {
         Params.TrySetDataList(DA, "Elements", () => elements);
 
@@ -361,7 +371,6 @@ namespace RhinoInside.Revit.GH.Components
           Name = "View",
           NickName = "V",
           Description = "View used to extract geometry",
-          Access = GH_ParamAccess.item
         }
       ),
       new ParamDefinition
@@ -385,7 +394,7 @@ namespace RhinoInside.Revit.GH.Components
           DataMapping = GH_DataMapping.Flatten,
           Optional = true
         },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
     };
 
@@ -401,7 +410,7 @@ namespace RhinoInside.Revit.GH.Components
           Description = "Elements geometry is extracted from",
           Access = GH_ParamAccess.list
         },
-        ParamVisibility.Voluntary
+        ParamRelevance.Occasional
       ),
       new ParamDefinition
       (
@@ -411,8 +420,7 @@ namespace RhinoInside.Revit.GH.Components
           NickName = "G",
           Description = "Element geometry",
           Access = GH_ParamAccess.tree
-        },
-        ParamVisibility.Binding
+        }
       ),
       new ParamDefinition
       (
@@ -423,7 +431,7 @@ namespace RhinoInside.Revit.GH.Components
           Description = "Geometry category",
           Access = GH_ParamAccess.tree
         },
-        ParamVisibility.Default
+        ParamRelevance.Primary
       ),
       //new ParamDefinition
       //(

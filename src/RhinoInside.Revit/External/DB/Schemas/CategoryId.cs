@@ -55,21 +55,5 @@ namespace RhinoInside.Revit.External.DB.Schemas
 
       return Autodesk.Revit.DB.BuiltInCategory.INVALID;
     }
-
-    public static implicit operator CategoryId(Autodesk.Revit.DB.ElementId value)
-    {
-      if (value is null) return default;
-      if (value == Autodesk.Revit.DB.ElementId.InvalidElementId) return Empty;
-      if (value.TryGetBuiltInCategory(out var builtInCategory)) return builtInCategory;
-
-      throw new InvalidCastException();
-    }
-
-    public static implicit operator Autodesk.Revit.DB.ElementId(CategoryId value)
-    {
-      if (value is null) return default;
-      if (value == Empty) return Autodesk.Revit.DB.ElementId.InvalidElementId;
-      return value;
-    }
   }
 }

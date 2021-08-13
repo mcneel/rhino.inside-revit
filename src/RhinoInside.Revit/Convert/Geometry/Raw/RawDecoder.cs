@@ -71,7 +71,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
         return AsTransform(bbox.Transform).TransformBoundingBox(box);
       }
 
-      return BoundingBox.Unset;
+      return NaN.BoundingBox;
     }
 
     public static BoundingBox AsBoundingBox(DB.BoundingBoxXYZ bbox, out Transform transform)
@@ -84,7 +84,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       }
 
       transform = Transform.Identity;
-      return BoundingBox.Unset;
+      return NaN.BoundingBox;
     }
 
     public static Box AsBox(DB.BoundingBoxXYZ bbox)

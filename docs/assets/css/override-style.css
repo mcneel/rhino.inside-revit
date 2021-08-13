@@ -315,19 +315,25 @@ pre {
 }
 
 .site-header-messagebar {
+    display: block;
     min-height: 5px;
     width: 100%;
     color: white;
     font-style: italic;
     padding: 5px;
     text-align: center;
-    background: repeating-linear-gradient(-55deg, #222, #222 10px, #333 10px, #333 20px);
+    /* background: repeating-linear-gradient(-55deg, #222, #222 10px, #333 10px, #333 20px); */
+    background-color: orange;
 }
 
-.site-header-messagebar a,
-.site-header-messagebar a:hover,
-.site-header-messagebar a:visited {
+.site-header-messagebar:hover,
+.site-header-messagebar:visited {
     color: white;
+    text-decoration: none;
+}
+
+.site-header-messagebar:hover {
+    background-color: #eb8d01;
 }
 
 /* logo */
