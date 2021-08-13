@@ -815,7 +815,10 @@ namespace RhinoInside.Revit.GH
           var modifiedIds = default(ICollection<DB.ElementId>);
 
           if (allowModelessHandling)
-            deletedIds = revitDocument.GetDependentElements(elementIds, out modifiedIds, default);
+          {
+            try { deletedIds = revitDocument.GetDependentElements(elementIds, out modifiedIds, default); }
+            catch (Autodesk.Revit.Exceptions.ArgumentException) { deletedIds = elementIds; modifiedIds = new DB.ElementId[0]; }
+          }
 
           using (var tx = new DB.Transaction(revitDocument, "Release Elements"))
           {
