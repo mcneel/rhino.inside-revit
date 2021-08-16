@@ -44,13 +44,15 @@ You can use the {% include ltr/comp.html uuid='e6a1f501' %} component in combina
 
 ## Querying Filters
 
-Filter components will allow Grasshopper to select specific Revit elements thru many different properties.  These properties can also be combined together to make sophisticated selections.
+Filter components will allow Grasshopper to select specific Revit elements thru many different properties. These filters can also be combined together to make sophisticated selections.
 
 Normally Filters are created then sent into one of the many [query components]({{ "/guides/rir-grasshopper#revit-aware-components" | prepend: site.baseurl }}) in Rhino.
 
+![]({{ "/static/images/guides/filter-basic.png" | prepend: site.baseurl }})
+
 ### Filter Element
 
-This component takes a previous selection of Revit elements and can returns a True/False list of whether each element matches the filter. In this case a set of preselected Revit elements in the {% include ltr/comp.html uuid='ef607c2a' %} can be filtered by creating a filter using the {% include ltr/comp.html uuid='eb266925' %} input to the {% include ltr/comp.html uuid='36180a9e' %} to create the filter. Then the {% include ltr/comp.html uuid='36180a9e' %} component will return a list of True False that can be used to Cull Pattern the list to the elements that fit the filter. Only that Walls in the selection set make it thru.
+This component takes a previous selection of Revit elements and can returns a True/False list of whether each element matches the filter. For example a set of preselected Revit elements in the {% include ltr/comp.html uuid='ef607c2a' %} can be filtered by using the {% include ltr/comp.html uuid='eb266925' %} input to the {% include ltr/comp.html uuid='36180a9e' %} to create the filter. The {% include ltr/comp.html uuid='36180a9e' %} component will return a list of True False that can be used to Cull Pattern the list.
 
 ![]({{ "/static/images/guides/filter-elements.png" | prepend: site.baseurl }})
 
@@ -68,11 +70,11 @@ Note that more inputs can be added by zooming in on the component.
 
 ### Logical Or Filter
 
-Combine multiple filters together using the {% include ltr/comp.html uuid='3804757f' %}. Elements pass by qualifiying for any one of the input filters.
+Combine multiple filters together using the {% include ltr/comp.html uuid='3804757f' %}. Elements pass by any one of the input filters.
 
 ### Category Filter
 
-Select all the objects in the selected categories.
+Filter all the objects in the selected category.
 
 ![]({{ "/static/images/guides/filter-category.png" | prepend: site.baseurl }})
 
@@ -96,7 +98,7 @@ In this case the {% include ltr/comp.html uuid='eb266925' %} is an input for the
 
 ### Parameter Filter
 
-{% include ltr/comp.html uuid='e6a1f501' %} is used to filter for values of specific praremeter on elements. For all comparisons, the [Filter Rules](#filter-rules) components should be used.
+{% include ltr/comp.html uuid='e6a1f501' %} is used to filter for values of specific parameter on elements. For all Parameter value comparisons, the [Filter Rules](#filter-rules) components should be used.
 
 The list of Parameter names and types are quite long in Revit. Using the {% include ltr/comp.html uuid='c1d96f56' %} is a great way to select the proper parameter with it's additional listed detail in the selector.
 
@@ -104,7 +106,7 @@ The list of Parameter names and types are quite long in Revit. Using the {% incl
 
 ### Bounding Box Filter
 
-Filter used to match Revit elements by their geometric bounding box. The initial gemetric object can be either from Rhino or Revit.
+Filter used to match Revit elements by their geometric bounding box. The initial geometric object can be either from Rhino or Revit.
 
 Input parameters:
 
@@ -144,13 +146,13 @@ Filter for elements that belong to a specific view.  This component is best used
 
 ### Phase Status Filter
 
-Filter used to match elements associated to the given Phase status. The Phase and the staus can be found by right clicking on the inputs.
+Filter used to match elements associated to the given Phase status. The Phase and the status can be found by right clicking on the inputs.
 
 ![]({{ "/static/images/guides/filter-phase.png" | prepend: site.baseurl }})
 
 ### Selectable in view filter
 
-Filter used to match seletable elements into the given View
+Filter used to match selectable elements into the given View
 
 ### Filter Rules
 
@@ -170,7 +172,7 @@ Create a selection filter in Revit and then use that filter in the Grasshopper d
 
 ## Extracting Instance Geometry
 
-The {% include ltr/comp.html uuid='b3bcbf5b' %} component can be used to extract the geometry of an instance. In the example below, the complete geometry of a *Stacked Wall* instance has been extracted. The {% include ltr/comp.html uuid='b078e48a' %} picker can be used to select the level of detail for geometry extraction:
+{% include ltr/comp.html uuid='b3bcbf5b' %} used to extract the geometry of an instance. In the example below, the complete geometry of a *Stacked Wall* instance has been extracted. The {% include ltr/comp.html uuid='b078e48a' %} picker can be used to select the level of detail for geometry extraction:
 
 ![]({{ "/static/images/guides/revit-elements-getgeom.png" | prepend: site.baseurl }})
 
