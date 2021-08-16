@@ -343,8 +343,10 @@
     <Compile Include="Components\Filters\ElementLogicalFilter.cs" />
     <Compile Include="Components\Filters\FilterElement.cs" />
     <Compile Include="Components\Filters\Obsolete.cs" />
-    <Compile Include="Components\Filters\Parameter\ByName.cs" />
-    <Compile Include="Components\Filters\Selection\ByName.cs" />
+    <Compile Include="Components\Filters\Parameter\ParameterFilter.cs" />
+    <Compile Include="Components\Filters\QueryFilters.cs" />
+    <Compile Include="Components\Filters\Selection\SelectionElements.cs" />
+    <Compile Include="Components\Filters\Selection\SelectionFilter.cs" />
     <Compile Include="Components\ParameterElement\AddParameter.cs" />
     <Compile Include="Components\ParameterElement\DefineParameter.cs" />
     <Compile Include="Components\ParameterElement\GlobalParameter.cs" />
