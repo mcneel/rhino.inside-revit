@@ -41,14 +41,6 @@ The first challenge is to be able to query available materials in a Revit model 
 
 ![]({{ "/static/images/guides/revit-materials-filter.png" | prepend: site.baseurl }})
 
-### Extracting Materials from Geometry
-
-To extract the set of materials assigned to faces of a geometry, use the *Geometry Materials* component shared here. In this example, a custom component is used to extract the geometry objects from Revit API ({% include api_type.html type='Autodesk.Revit.DB.Solid' title='DB.Solid' %} - See [Extracting Type Geometry by Category]({{ site.baseurl }}{% link _en/1.0/guides/revit-types.md %}#extracting-type-geometry-by-category)). These objects are then passed to the *Geometry Materials* component to extract materials. Finally the *Element.Decompose* component is used to extract the material name.
-
-![]({{ "/static/images/guides/revit-materials-extract.png" | prepend: site.baseurl }})
-
-{% include ltr/download_comp.html archive='/static/ghnodes/Geometry Materials.ghuser' name='Geometry Materials' %}
-
 ## Material Identity
 
 Use the {% include ltr/comp.html uuid='222b42df-' %} component to access the material identity:
