@@ -22,6 +22,8 @@ Each one of these aspects is represented by a tab in the Revit material editor w
 
 ![]({{ "/static/images/guides/revit-materials-editortabs.png" | prepend: site.baseurl }})
 
+![]({{ "/static/images/guides/gh-material-parts.png" | prepend: site.baseurl }})
+
 In the sections below, we will discuss how to deal with all of these 5 aspects using {{ site.terms.rir }}
 
 {% include youtube_player.html id="8CdhieEi6Os" %}
