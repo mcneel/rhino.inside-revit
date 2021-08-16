@@ -289,6 +289,8 @@
     <Compile Include="Components\Element\Material\ByName.cs" />
     <Compile Include="Components\Element\ModelLine\ByCurve.cs" />
     <Compile Include="Components\Element\Passport.cs" />
+    <Compile Include="Components\Element\Phasing\ElementPhasing.cs" />
+    <Compile Include="Components\Element\Phasing\QueryPhases.cs" />
     <Compile Include="Components\Element\PinUnPinElement.cs" />
     <Compile Include="Components\Element\Preview.cs" />
     <Compile Include="Components\Element\ProjectLocation\Query.cs" />
