@@ -48,7 +48,6 @@ Filter components will allow Grasshopper to select specific Revit elements thru 
 
 Normally Filters are created then sent into one of the many [query components]({{ "/guides/rir-grasshopper#revit-aware-components" | prepend: site.baseurl }}) in Rhino.
 
-
 ### Filter Element
 
 This component takes a previous selection of Revit elements and can returns a True/False list of whether each element matches the filter. In this case a set of preselected Revit elements in the {% include ltr/comp.html uuid='ef607c2a' %} can be filtered by creating a filter using the {% include ltr/comp.html uuid='eb266925' %} input to the {% include ltr/comp.html uuid='36180a9e' %} to create the filter. Then the {% include ltr/comp.html uuid='36180a9e' %} component will return a list of True False that can be used to Cull Pattern the list to the elements that fit the filter. Only that Walls in the selection set make it thru.

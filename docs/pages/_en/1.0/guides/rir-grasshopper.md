@@ -70,13 +70,13 @@ Grasshopper solver can also be toggled from the *Rhinoceros* tab in Revit. This 
 
 ## Element Tracking
 
-Grasshopper components track Revit elements in the Revit model.  This tracking allows Grasshopper to replace the Revit elements that is previoulsy created, even between saves.  Each component output remembers wich it added and it will replace the Revit element when possible and avoid creating duplicates.  Grasshopper will remember these elements after the file is closed and re-opened in the future. Only *Add* components in Grasshopper use tracking.
+Tracking allows Grasshopper to replace the Revit elements that is previously created, even between saves. Each component output remembers which Revit elements it added and avoid creating duplicates. Only *Add* components in Grasshopper use tracking. Grasshopper will remember these elements after the file is closed and re-opened in the future.
 
 This video explains many of the details:
 
 {% include vimeo_player.html id="574667912" %}
 
-The Tracking Mode can be controlled by right-clicking on the component center. 
+The Tracking Mode can be controlled by right-clicking on the component center.
 
 ![]({{ "/static/images/guides/tracking-modes.png" | prepend: site.baseurl }}){: class="small-image"}
 
@@ -96,30 +96,26 @@ Each output on Add Component has additional controls to help manage tracking:
 
 ## Unit Systems
 
-In Revit, when choosing a unit system only the interface numbers change. Revit is always working in feet behind the scenes. When the Rhino and Revit unit systems are not the same, Rhino will propmpt to change the units to match the Revit display units. 
+In Revit, when choosing a unit system only the interface numbers change, Revit is always working in feet behind the scenes. When the Rhino and Revit unit systems are not the same, Rhino will prompt to change the units to match the Revit display units.
 
 ![]({{ "/static/images/guides/unit-convertion.jpg" | prepend: site.baseurl }}){: class="small-image"}
 
-Not matter how this dialog is answered the geometry will be converted to be the correct size in both products. The unit scaling of the Rhino model is a question of user convensianece having both products display the same values.
+Not matter how this dialog is answered the geometry will be converted to be the correct size in both products.
 
-Be aware that scaling a model in Rhino will also effect the tolerances below.  A model that needs to be scaled up a great amount, for example mm to meters can adversly effect the tolerance.
+Be aware that scaling a model in Rhino will also effect the tolerances below.  A model that needs to be scaled up a great amount, for example mm to meters can adversely effect the tolerance.
 
 ## Tolerances
 
-Geometry types.  Revit can handle Curves, BREP (NURBS) and Mesh geometry from Rhino.  The key is to understand which gemetry type is best in which situation. An important aspect of geometry is the [Geometric Tolerance](https://wiki.mcneel.com/rhino/faqtolerances) that any shape was built to.
+Revit can handle Curves, BREP (NURBS) and Mesh geometry from Rhino. An important aspect of geometry is the [Geometric Tolerance](https://wiki.mcneel.com/rhino/faqtolerances) that any shape was built to. When converting geometry, tolerance issues can effect Revit in multiple ways. 
 
-When converting gemoetry, tolerance issues can effect Revit in multiple ways. Ideally Rhino Breps can be converted into Revit directly, but if tolerances are not correct, Revit may reject the geometry.
-
-* Geometry that cannot be converted to Revit directly will be directed to a secondary transfer method using SAT files. This can be quite slow for many objects. A warning will show up on components that need to use this method.
+* Ideally Rhino Breps can be converted into Revit directly, but if tolerances are not correct, Revit may reject the geometry.
+* Geometry that cannot be converted to Revit directly will be directed to a secondary transfer method using SAT files. SAT transfer is much slower. A warning will show up on components that need to use the SAT method.
 ![]({{ "/static/images/guides/directshape-use-sat.jpg" | prepend: site.baseurl }}){: class="small-image"}
 * Directshape elements that pass neither the normal or the SAT transfer may be imported as Mesh models with dense black edges.
-* Family Types can only recieve NURBS gemetry, so tolerance issues must be solved. An error message will show if some gemoetry is not converted to the Family Type.
+* Family Types can only accept NURBS geometry, so tolerance issues must be solved. An error message will show if some geometry is not converted to the Family Type.
 * Models that are a long distance from the origin may not be able to hold tight tolerances and therefore will may get rejected by Revit.
 
-Ideally a Rhino model and a Revit model can be modeled to the same tolerance.  But this is not always possible in practice due to models created in other software or imported. The general process of *fixing* models that do not transfer will is as follows:
-
-1. Search And repair bad objects in Rhino using the [*Selbadobject* repair process](https://wiki.mcneel.com/rhino/badobjects).
-1. Set tolerance in file and reset tolerance on objects as covered below.
+Ideally a Rhino model and a Revit model can be modeled to the same tolerance. 
 
 For curves, Revit will not accept curve segments less then about 1mm in length. This include surface trim edges.
 
@@ -134,7 +130,12 @@ For NURBS tolerances Rhino should be set to the built-in Revit tolerance. To set
 * 0.006 of an inch
 * 0.0005 of a foot
 
-Existing models that have a tolerance problem can be reset to a newer tolerance.  This process can get complicated. To reset tolerance and update all the join information on the model:
+It is not always possible in practice to have Rhino models at the same tolerance as Revit would like. Models created in other software or imported are a good example. The general process of *fixing* models that do not transfer will is as follows:
+
+1. Search And repair bad objects in Rhino using the [*Selbadobject* repair process](https://wiki.mcneel.com/rhino/badobjects).
+1. Set tolerance in file and reset tolerance on objects as covered shown above.
+
+Existing models that have a tolerance problem can be reset to a newer tolerance. This process can get complicated. To reset tolerance and update all the join information on the model:
 
 1. Explode the polysurfaces into surfaces.
 1. Select all the surfaces and run the RebuildEdges command. Use the default settings.
