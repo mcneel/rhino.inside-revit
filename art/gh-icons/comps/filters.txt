@@ -2,6 +2,7 @@ ElementFilter
 ElementBoundingBoxFilter
 ElementCategoryFilter
 ElementClassFilter
+ElementWorksetFilter
 ElementDesignOptionFilter
 ElementIntersectsBrepFilter
 ElementIntersectsElementFilter
