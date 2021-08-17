@@ -22,6 +22,8 @@ Each one of these aspects is represented by a tab in the Revit material editor w
 
 ![]({{ "/static/images/guides/revit-materials-editortabs.png" | prepend: site.baseurl }})
 
+In Grasshopper here is how materials aspects are organized in Grasshopper. Components for {% include ltr/comp.html uuid='ec93f8e0' %} and  {% include ltr/comp.html uuid='c3be363d' %} also exist.
+
 ![]({{ "/static/images/guides/gh-material-parts.png" | prepend: site.baseurl }})
 
 In the sections below, we will discuss how to deal with all of these 5 aspects using {{ site.terms.rir }}
@@ -69,7 +71,7 @@ Use the {% include ltr/comp.html uuid='3aedba3c-' %} document-aware component to
 
 ![]({{ "/static/images/guides/revit-materials-create.png" | prepend: site.baseurl }})
 
-After creating the material, use the {% include ltr/comp.html uuid='8c5cd6fb-' %} component to assign graphic properties to the new material:
+After creating the material, use the {% include ltr/comp.html uuid='8c5cd6fb-' %}, {% include ltr/comp.html uuid='222b42df-' %}, or {% include ltr/comp.html uuid='2f1ec561-' %} to assign graphic properties to the new material:
 
 ![]({{ "/static/images/guides/revit-materials-create-color.png" | prepend: site.baseurl }})
 
