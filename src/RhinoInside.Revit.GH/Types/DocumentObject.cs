@@ -2,7 +2,6 @@ using System;
 using System.Reflection;
 using GH_IO.Serialization;
 using Grasshopper.Kernel.Types;
-using Grasshopper.Special;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
@@ -183,32 +182,86 @@ namespace RhinoInside.Revit.GH.Types
   /// </summary>
   public interface IGH_ReferenceObject : IGH_DocumentObject
   {
-    DB.ElementId Id { get; }
+    Guid DocumentGUID { get; }
+    string UniqueID { get; }
   }
 
   public abstract class ReferenceObject : DocumentObject,
     IEquatable<ReferenceObject>,
     IGH_ReferenceObject,
-    IGH_ItemDescription
+    IGH_ReferenceData
   {
-    #region System.Object
-    public bool Equals(ReferenceObject other) => other is object &&
-      Equals(Document, other.Document) && Equals(Id, other.Id);
-    public override bool Equals(object obj) => (obj is ReferenceObject id) ? Equals(id) : base.Equals(obj);
-    public override int GetHashCode() => Document.GetHashCode() ^ Id.IntegerValue;
-    #endregion
-
     protected ReferenceObject() { }
 
     protected ReferenceObject(DB.Document doc, object val) : base(doc, val) { }
 
-    public abstract DB.ElementId Id { get; }
+    #region System.Object
+    public bool Equals(ReferenceObject other) => other is object &&
+      Equals(Document, other.Document) && Equals(UniqueID, other.UniqueID);
+    public override bool Equals(object obj) => (obj is ReferenceObject id) ? Equals(id) : base.Equals(obj);
+    public override int GetHashCode() => Document.GetHashCode() ^ UniqueID.GetHashCode();
+    #endregion
 
-    #region IGH_ItemDescription
-    System.Drawing.Bitmap IGH_ItemDescription.GetImage(System.Drawing.Size size) => default;
-    string IGH_ItemDescription.Name => DisplayName;
-    string IGH_ItemDescription.NickName => $"{{{Id?.IntegerValue}}}";
-    string IGH_ItemDescription.Description => Document?.GetFileName();
+    #region DocumentObject
+    public override object Value
+    {
+      get
+      {
+        if (base.Value is null && IsReferencedDataLoaded)
+          base.Value = FetchValue();
+
+        return base.Value;
+      }
+      protected set => base.Value = value;
+    }
+    #endregion
+
+    #region GH_ISerializable
+    protected override bool Read(GH_IReader reader)
+    {
+      UnloadReferencedData();
+
+      var documentGUID = Guid.Empty;
+      reader.TryGetGuid("DocumentGUID", ref documentGUID);
+      DocumentGUID = documentGUID;
+
+      string uniqueID = string.Empty;
+      reader.TryGetString("UniqueID", ref uniqueID);
+      UniqueID = uniqueID;
+
+      return true;
+    }
+
+    protected override bool Write(GH_IWriter writer)
+    {
+      if (DocumentGUID != Guid.Empty)
+        writer.SetGuid("DocumentGUID", DocumentGUID);
+
+      if (!string.IsNullOrEmpty(UniqueID))
+        writer.SetString("UniqueID", UniqueID);
+
+      return true;
+    }
+    #endregion
+
+    #region IGH_ReferenceObject
+    public Guid DocumentGUID { get; protected set; } = Guid.Empty;
+    public string UniqueID { get; protected set; } = string.Empty;
+    #endregion
+
+    #region IGH_ReferencedData
+    public abstract bool IsReferencedData { get; }
+    public abstract bool IsReferencedDataLoaded { get; }
+
+    public abstract bool LoadReferencedData();
+    protected abstract object FetchValue();
+    public virtual void UnloadReferencedData()
+    {
+      ResetValue();
+
+      if (IsReferencedData)
+        Document = default;
+    }
     #endregion
   }
 }

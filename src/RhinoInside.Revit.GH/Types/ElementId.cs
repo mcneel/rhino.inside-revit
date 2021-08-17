@@ -11,6 +11,7 @@ using RhinoInside.Revit.External.DB.Extensions;
 using EDBS = RhinoInside.Revit.External.DB.Schemas;
 using DB = Autodesk.Revit.DB;
 using DBX = RhinoInside.Revit.External.DB;
+using Grasshopper.Special;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -22,12 +23,13 @@ namespace RhinoInside.Revit.GH.Types
   public interface IGH_ElementId : IGH_ReferenceObject, IEquatable<IGH_ElementId>
   {
     DB.Reference Reference { get; }
-
-    Guid DocumentGUID { get; }
-    string UniqueID { get; }
+    DB.ElementId Id { get; }
   }
 
-  public abstract class ElementId : ReferenceObject, IGH_ReferenceData, IGH_ElementId, IGH_QuickCast
+  public abstract class ElementId : ReferenceObject,
+    IGH_ElementId,
+    IGH_ItemDescription,
+    IGH_QuickCast
   {
     #region System.Object
     public bool Equals(IGH_ElementId other) => other is object &&
@@ -58,34 +60,6 @@ namespace RhinoInside.Revit.GH.Types
       }
 
       return $"{Invalid}{TypeName} : {InstanceName}{InstanceId}";
-    }
-    #endregion
-
-    #region GH_ISerializable
-    protected override bool Read(GH_IReader reader)
-    {
-      UnloadReferencedData();
-
-      var documentGUID = Guid.Empty;
-      reader.TryGetGuid("DocumentGUID", ref documentGUID);
-      DocumentGUID = documentGUID;
-
-      string uniqueID = string.Empty;
-      reader.TryGetString("UniqueID", ref uniqueID);
-      UniqueID = uniqueID;
-
-      return true;
-    }
-
-    protected override bool Write(GH_IWriter writer)
-    {
-      if (DocumentGUID != Guid.Empty)
-        writer.SetGuid("DocumentGUID", DocumentGUID);
-
-      if (!string.IsNullOrEmpty(UniqueID))
-        writer.SetString("UniqueID", UniqueID);
-
-      return true;
     }
     #endregion
 
@@ -256,40 +230,20 @@ namespace RhinoInside.Revit.GH.Types
     public virtual IGH_GooProxy EmitProxy() => new Proxy(this);
     #endregion
 
-    #region DocumentObject
-    public override object Value
-    {
-      get
-      {
-        if (base.Value is null && IsReferencedDataLoaded)
-          base.Value = FetchValue();
-
-        return base.Value;
-      }
-      protected set => base.Value = value;
-    }
+    #region IGH_ItemDescription
+    Bitmap IGH_ItemDescription.GetImage(Size size) => default;
+    string IGH_ItemDescription.Name => DisplayName;
+    string IGH_ItemDescription.NickName => $"{{{Id?.ToString()}}}";
+    string IGH_ItemDescription.Description => Document?.GetFileName();
     #endregion
 
     #region IGH_ReferencedData
-    public bool IsReferencedData => DocumentGUID != Guid.Empty;
-    public abstract bool IsReferencedDataLoaded { get; }
-
-    public abstract bool LoadReferencedData();
-    protected abstract object FetchValue();
-    public virtual void UnloadReferencedData()
-    {
-      ResetValue();
-
-      if (IsReferencedData)
-        Document = default;
-    }
+    public override bool IsReferencedData => DocumentGUID != Guid.Empty;
     #endregion
 
     #region IGH_ElementId
     public abstract DB.Reference Reference { get; }
-
-    public Guid DocumentGUID { get; protected set; } = Guid.Empty;
-    public string UniqueID { get; protected set; } = string.Empty;
+    public abstract DB.ElementId Id { get; }
     #endregion
 
     #region IGH_QuickCast

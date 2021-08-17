@@ -224,4 +224,34 @@ namespace RhinoInside.Revit.GH.Components.Filters
         DA.SetData("Filter", new DB.ElementParameterFilter(rules, inverted));
     }
   }
+
+  public class ElementWorksetFilter : ElementFilterComponent
+  {
+    public override Guid ComponentGuid => new Guid("3380C493-B1DF-4E93-A2CA-612808291394");
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    protected override string IconTag => "W";
+
+    public ElementWorksetFilter()
+    : base("Workset Filter", "WSetFltr", "Filter used to match elements by their workset", "Revit", "Filter")
+    { }
+
+    protected override void RegisterInputParams(GH_InputParamManager manager)
+    {
+      manager.AddParameter(new Parameters.Workset(), "Workset", "W", "Workset to match", GH_ParamAccess.item);
+      base.RegisterInputParams(manager);
+    }
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      var workset = default(Types.Workset);
+      if (!DA.GetData("Workset", ref workset))
+        return;
+
+      var inverted = false;
+      if (!DA.GetData("Inverted", ref inverted))
+        return;
+
+      DA.SetData("Filter", new DB.ElementWorksetFilter(workset.Id, inverted));
+    }
+  }
 }
