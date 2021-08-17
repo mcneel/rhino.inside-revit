@@ -1111,6 +1111,26 @@
         ]
     },
     {
+        "title": "Clash Detection with Rhino.Inside.Revit",
+        "url": "https://youtu.be/ba7TZZqFD4U",
+        "thumbnail": "https://i3.ytimg.com/vi/ba7TZZqFD4U/maxresdefault.jpg",
+        "author": "PointOneStudio",
+        "authorUrl": "https://www.youtube.com/channel/UCGG5EoGVQGfVfw5uEb_IA3g",
+        "description": "In this video, I will introduce to make clash detection using RhinoInside for Revit.",
+        "kinds": [
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "structural",
+            "tutorial"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
+    },
+    {
         "title": "Structural drawings, Calculations & Model from Architectural design",
         "url": "https://youtu.be/kFn2FCtHHFo",
         "thumbnail": "https://i3.ytimg.com/vi/kFn2FCtHHFo/maxresdefault.jpg",
