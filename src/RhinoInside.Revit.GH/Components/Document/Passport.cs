@@ -52,7 +52,7 @@ namespace RhinoInside.Revit.GH.Components
   public class DocumentFile : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("C1C15806-311A-4A07-9DAE-6DBD1D98EC05");
-    public override GH_Exposure Exposure => GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => "F";
 
     public DocumentFile() : base
@@ -101,7 +101,7 @@ namespace RhinoInside.Revit.GH.Components
   public class DocumentWorksharing : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("F7D56DB0-F1C1-45BB-AA07-196039FFF862");
-    public override GH_Exposure Exposure => GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary | GH_Exposure.obscure;
     protected override string IconTag => "⟳";
 
     public DocumentWorksharing() : base

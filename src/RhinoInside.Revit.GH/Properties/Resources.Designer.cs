@@ -1673,6 +1673,26 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ElementWorkset {
+            get {
+                object obj = ResourceManager.GetObject("ElementWorkset", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ElementWorksetFilter {
+            get {
+                object obj = ResourceManager.GetObject("ElementWorksetFilter", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap EndCapCondition_ValueList {
             get {
                 object obj = ResourceManager.GetObject("EndCapCondition_ValueList", resourceCulture);
@@ -2603,6 +2623,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap QueryWorksets {
+            get {
+                object obj = ResourceManager.GetObject("QueryWorksets", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap RailingByCurve {
             get {
                 object obj = ResourceManager.GetObject("RailingByCurve", resourceCulture);
@@ -2966,6 +2996,36 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap WallWrapping_ValueList {
             get {
                 object obj = ResourceManager.GetObject("WallWrapping_ValueList", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Workset {
+            get {
+                object obj = ResourceManager.GetObject("Workset", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap WorksetActive {
+            get {
+                object obj = ResourceManager.GetObject("WorksetActive", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap WorksetIdentity {
+            get {
+                object obj = ResourceManager.GetObject("WorksetIdentity", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
