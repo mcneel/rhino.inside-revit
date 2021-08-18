@@ -684,7 +684,7 @@ Is useful to extract a wall shape without the Inserts or without extending it to
 
 {% include ltr/release-header.html version="0.0.7341.20715" time="02/06/2020 11:30:30" %}
 
-* Added **Structural Usage** input parameter to *Wall.ByCurve* component
+* Added **Structural Usage** input parameter to {% include ltr/comp.html uuid='37a8c46f' %} component
 
 ![]({{ "/static/images/release_notes/79999999_01.png" | prepend: site.baseurl }}){: class="small-image"}
 

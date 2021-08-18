@@ -19,11 +19,11 @@ Use the custom component shared here to get access to the `DB.ProjectInfo` eleme
 
 {% include ltr/download_comp.html archive='/static/ghnodes/Project Info.ghuser' name='Project Info' %}
 
-Since `DB.ProjectInfo` is a `DB.Element`, you can use the typical element components to operate on the project information. For example you can use the *Element.ParameterGet* to read the built-in or custom parameters:
+Since `DB.ProjectInfo` is a `DB.Element`, you can use the typical element components to operate on the project information. For example you can use the {% include ltr/comp.html uuid='f568d3e7' %} to read the built-in or custom parameters:
 
 ![]({{ "/static/images/guides/revit-psettings02.png" | prepend: site.baseurl }})
 
-Or use the *Element.ParameterSet* to set the built-in or custom parameter values:
+Or use the {% include ltr/comp.html uuid='f568d3e7' %} to set the built-in or custom parameter values:
 
 ![]({{ "/static/images/guides/revit-psettings03.png" | prepend: site.baseurl }})
 
@@ -34,7 +34,7 @@ In Revit API, Project Locations is a `DB.Element` and is represented by the {% i
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-Use the *Project Locations* component shared here to grab a list of all project locations as well as the active one. Since `DB.ProjectLocation` is a `DB.Element`, you can use the *Element.Identity* component to grab the location name:
+Use the *Project Locations* component shared here to grab a list of all project locations as well as the active one. Since `DB.ProjectLocation` is a `DB.Element`, you can use the {% include ltr/comp.html uuid='01934ad1' %} component to grab the location name:
 
 ![]({{ "/static/images/guides/revit-psettings04.png" | prepend: site.baseurl }})
 

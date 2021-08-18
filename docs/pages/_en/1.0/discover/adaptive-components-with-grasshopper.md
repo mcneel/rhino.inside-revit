@@ -23,11 +23,11 @@ This sample shows how to how to drive {{ site.terms.revit }} adaptive components
 
 ###  Setting Up to Use Adaptive Components
 
-The Grasshopper definition is grabbing the existing adaptive component type (Category: *Generic Models* Family: *Frame-Panel* Type: *Frame-Panel*) and passes that to the *AddAdaptiveComponent.ByPoints* component:
+The Grasshopper definition is grabbing the existing adaptive component type (Category: *Generic Models* Family: *Frame-Panel* Type: *Frame-Panel*) and passes that to the {% include ltr/comp.html uuid='e8ddc0e4' %} component:
 
 ![]({{ "/static/images/discover/adaptive-component-type-selection.jpg" | prepend: site.baseurl }})
 
-The input to the *AddAdaptiveComponent.ByPoints* is a data-tree structure where each branch contains a set of 4 points, ordered correctly:
+The input to the {% include ltr/comp.html uuid='e8ddc0e4' %} is a data-tree structure where each branch contains a set of 4 points, ordered correctly:
 
 ![]({{ "/static/images/discover/adaptive-component-tree-set.jpg" | prepend: site.baseurl }}){:height="35%" width="35%"}
 

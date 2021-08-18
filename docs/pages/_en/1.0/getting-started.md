@@ -129,7 +129,7 @@ Now open Grasshopper and add a curve component. Right-Click the component and se
 
 ![]({{ "/static/images/started/rir-rhino2.png" | prepend: site.baseurl }})
 
-Now from the *Revit > Input* panel and {% include ltr/comp.html uuid="eb266925-" %}, {% include ltr/comp.html uuid="d3fb53d3-9" %} and {% include ltr/comp.html uuid="bd6a74f3-" %} components as well:
+Now from the *Revit > Input* panel and {% include ltr/comp.html uuid="af9d949f-" %}, {% include ltr/comp.html uuid="d3fb53d3-9" %} and {% include ltr/comp.html uuid="bd6a74f3-" %} components as well:
 
 ![]({{ "/static/images/started/rir-rhino3.png" | prepend: site.baseurl }})
 
@@ -145,9 +145,9 @@ Now that we have all these components inside the Grasshopper definition, let's o
 
 ![]({{ "/static/images/started/rir-rhino8.png" | prepend: site.baseurl }})
 
-From the list of categories shown on the {% include ltr/comp.html uuid="eb266925-" %} component, select the **Walls** category
+From the list of categories shown on the {% include ltr/comp.html uuid="af9d949f-" %} component, select the **Walls** category
 
-Now connect the output of the {% include ltr/comp.html uuid="eb266925-" %} to the input of {% include ltr/comp.html uuid="d3fb53d3-9" %} (the input parameter is not visible by default. Drag the arrow over to the left of the component where the input parameter is expected to be)
+Now connect the output of the {% include ltr/comp.html uuid="af9d949f-" %} to the input of {% include ltr/comp.html uuid="d3fb53d3-9" %} (the input parameter is not visible by default. Drag the arrow over to the left of the component where the input parameter is expected to be)
 
 ![]({{ "/static/images/started/rir-rhino9.png" | prepend: site.baseurl }})
 
