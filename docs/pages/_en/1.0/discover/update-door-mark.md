@@ -29,5 +29,5 @@ Now take a look at the definition by selecting the Grasshopper Icon in the Revit
 
 ![]({{ "/static/images/discover/update-door-mark02.jpg" | prepend: site.baseurl }})
 
-The definition finds all the Doors setting a Category Filter and finding all the Elements of that Category. Then, using the *ParameterGet* Component each `Mark` is found for each door. Then the `Comments` parameter is set using the *ParameterSet* component.
+The definition finds all the Doors setting a Category Filter and finding all the Elements of that Category. Then, using the {% include ltr/comp.html uuid='f568d3e7' %} Component each `Mark` is found for each door. Then the `Comments` parameter is set using the {% include ltr/comp.html uuid='f568d3e7' %} component.
 

@@ -41,15 +41,15 @@ The first portion of this example, brings in the column Brep geometry from Rhino
 
 ### Creating Revit Family
 
-The modified Brep geometry is then passed to the *Family.New* component alongside other inputs required to create a new Revit family.
+The modified Brep geometry is then passed to the {% include ltr/comp.html uuid='82523911' %} component alongside other inputs required to create a new Revit family.
 
 ![]({{ "/static/images/discover/column-family-curve03.png" | prepend: site.baseurl }})
 
 
 ### Placing Family Instances
 
-In this step, instances of the newly created family are places along the curve points. To insert a family instance, we use the *AddFamilyInstance.ByLocation* component. The *Family.GetTypes* component is used to get the first (and default) family type from the newly created family.
+In this step, instances of the newly created family are places along the curve points. To insert a family instance, we use the {% include ltr/comp.html uuid='0c642d7d' %} component. The {% include ltr/comp.html uuid='742836d7' %} component is used to get the first (and default) family type from the newly created family.
 
 ![]({{ "/static/images/discover/column-family-curve04.png" | prepend: site.baseurl }})
 
-As it is shown in the definition, the points on the curve are passed to the *AddFamilyInstance.ByLocation* component, however, to get the correct orientation for the column, the curve is evaluated at each point to create a rotated plane matching the curvature of the curve at the point.
+As it is shown in the definition, the points on the curve are passed to the {% include ltr/comp.html uuid='0c642d7d' %} component, however, to get the correct orientation for the column, the curve is evaluated at each point to create a rotated plane matching the curvature of the curve at the point.

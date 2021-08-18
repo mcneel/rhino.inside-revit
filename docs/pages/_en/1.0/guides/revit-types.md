@@ -11,7 +11,7 @@ When working with Revit or Revit API, we are mostly dealing with Revit **Types**
 
 ## Querying Types
 
-You can use the combination of a category picker components e.g. {% include ltr/comp.html uuid="eb266925-" %}, the {% include ltr/comp.html uuid="d08f7ab1-" %} component, and {% include ltr/comp.html uuid="7b00f940-" %} component to collect types in a certain Revit category:
+You can use the combination of a category picker components e.g. {% include ltr/comp.html uuid="af9d949f-" %}, the {% include ltr/comp.html uuid="d08f7ab1-" %} component, and {% include ltr/comp.html uuid="7b00f940-" %} component to collect types in a certain Revit category:
 
 ![]({{ "/static/images/guides/revit-families01.png" | prepend: site.baseurl }})
 
@@ -21,7 +21,7 @@ The {% include ltr/comp.html uuid="7b00f940-" %} component can further filter th
 
 ### Querying Type Info
 
-Use the *ElementType.Identity* to access information about that type. Please note that the *Family Name* parameter, returns the *System Family* name for *System Types* and the *Custom Family* name for Custom Types:
+Use the {% include ltr/comp.html uuid='7dea1ba3' %} to access information about that type. Please note that the *Family Name* parameter, returns the *System Family* name for *System Types* and the *Custom Family* name for Custom Types:
 
 ![]({{ "/static/images/guides/revit-families02a.png" | prepend: site.baseurl }})
 
@@ -40,12 +40,7 @@ Notice that **Duct Systems** for example, is a system type and therefore have no
 
 ## Choosing A Specific Type
 
-{{ site.terms.rir }} includes a few components that can help you pick a specific element type from a Revit category:
-
-- {% include ltr/comp.html uuid="eb266925-" %}: Allows selecting a specific model category e.g. Walls
-- *Analytical.CategoriesPicker*: Allows selecting a specific analytical category e.g. Analytical Walls
-- *Annotation.CategoriesPicker*: Allows selecting a specific annotation category e.g. Dimensions
-  - *Tag.CategoriesPicker*: Allows selecting a specific tag category e.g. Room Tags
+{% include ltr/comp.html uuid="af9d949f-" %} component allows selecting a specific model category e.g. Walls
 
 You can pass the any of the categories above to the {% include ltr/comp.html uuid="d3fb53d3-9" %} component to select a specific type from that category:
 
@@ -72,17 +67,13 @@ Once you have filtered out the desired type, you can query its parameters and ap
 
 ## Extracting Type Geometry
 
-Once you have filtered out the desired type, you can extract the geometry for that element type using the {% include ltr/comp.html uuid="b7e6a82f-" %} component. The *Level Of Detail* value list component makes it easy to provide correct values for LOD input parameter.
+Once you have filtered out the desired type, you can extract the geometry for that element type using the {% include ltr/comp.html uuid="b3bcbf5b-" %} component. The {% include ltr/comp.html uuid="b078e48a-" %} value list component makes it easy to provide correct values for LOD input parameter.
 
 ![]({{ "/static/images/guides/revit-families07.png" | prepend: site.baseurl }})
 
-The {% include ltr/comp.html uuid="b7e6a82f-" %} component automatically previews the geometry in Rhino window.
+The {% include ltr/comp.html uuid="b3bcbf5b-" %} component automatically previews the geometry in Rhino window.
 
 ![]({{ "/static/images/guides/revit-families08.png" | prepend: site.baseurl }})
-
-&nbsp;
-
-{% include ltr/download_comp.html archive='/static/ghnodes/Level Of Detail.ghuser' name='Level Of Detail' %}
 
 ## Extracting Type Geometry by Category
 
@@ -98,7 +89,7 @@ The *Element Geometry By SubCategory* component shared here helps you extract ge
 
 ## Creating New Types
 
-To create new types, you would need to find an existing type, use the *ElementType.Duplicate* component to duplicate that type with a new name, and adjust the desired properties.
+To create new types, you would need to find an existing type, use the {% include ltr/comp.html uuid="5ed7e612-" %} component to duplicate that type with a new name, and adjust the desired properties.
 
 ![]({{ "/static/images/guides/revit-families09.png" | prepend: site.baseurl }})
 
@@ -106,13 +97,13 @@ Revit *Project Browser* now displays the new type under *Families*
 
 ## Removing Types
 
-You can use the *Element.Delete* component to delete types. Remember that deleting types will delete all instances of that type as well. If you don't want this, find the instances and change their types before deleting a type from model.
+You can use the {% include ltr/comp.html uuid="3ffc2cb2-" %} component to delete types. Remember that deleting types will delete all instances of that type as well. If you don't want this, find the instances and change their types before deleting a type from model.
 
 ![]({{ "/static/images/guides/revit-families09d.png" | prepend: site.baseurl }})
 
 ## Loading Families
 
-Use the *Family.Load* component to load a new family file into your model.
+Use the {% include ltr/comp.html uuid="0e244846-" %} component to load a new family file into your model.
 
 ![]({{ "/static/images/guides/revit-families10.png" | prepend: site.baseurl }})
 
@@ -120,7 +111,7 @@ Revit *Project Browser* now lists the new family under *Families*
 
 ## Saving Families
 
-Use the *Family.Save* component to save a family into an external file.
+Use the {% include ltr/comp.html uuid="c2b9b045-" %} component to save a family into an external file.
 
 ![]({{ "/static/images/guides/revit-families11.png" | prepend: site.baseurl }})
 
@@ -128,31 +119,31 @@ Use the *Family.Save* component to save a family into an external file.
 
 ## Creating New Families
 
-Under current {{ site.terms.rir }} implementation, you can use the *Family.New* component to generate new Revit families and insert a new geometry into the family. Make sure to assign the correct template file to the component for best results.
+Under current {{ site.terms.rir }} implementation, you can use the {% include ltr/comp.html uuid='82523911' %} component to generate new Revit families and insert a new geometry into the family. Make sure to assign the correct template file to the component for best results.
 
 ![]({{ "/static/images/guides/revit-families12.png" | prepend: site.baseurl }})
 
 Revit *Project Browser* now lists the new family under *Families*
 
-You can also pass the **Generic Model** template to the *Family.New* component and set the category manually using the {% include ltr/comp.html uuid="eb266925-" %} component.
+You can also pass the **Generic Model** template to the {% include ltr/comp.html uuid='82523911' %} component and set the category manually using the {% include ltr/comp.html uuid="af9d949f-" %} component.
 
 ![]({{ "/static/images/guides/revit-families13.png" | prepend: site.baseurl }})
 
 There are a series of components under the *Revit > Family* panel that will help you generate geometry for Revit families:
 
-- *FamilyElement.ByBrep*
-- *FamilyElement.ByCurve*
-- *FamilyOpening.ByCurve*
-- *FamilyVoid.ByBrep*
+- {% include ltr/comp.html uuid='f0887ad5' %}
+- {% include ltr/comp.html uuid='6fbb9200' %}
+- {% include ltr/comp.html uuid='72fdc627' %}
+- {% include ltr/comp.html uuid='f0887ad5' %}
 
 ![]({{ "/static/images/guides/revit-families14.png" | prepend: site.baseurl }})
 
-As shown in the example above, you can use the *Visibility.Construct* component to create visibility options for the generated geometry. This components provides all the options available in the native Revit *Visibility/Graphics* editor for family geometries.
+As shown in the example above, you can use the {% include ltr/comp.html uuid='10ea29d4' %} component to create visibility options for the generated geometry. This components provides all the options available in the native Revit *Visibility/Graphics* editor for family geometries.
 
 ![]({{ "/static/images/guides/revit-families15.png" | prepend: site.baseurl }})
 
 ## Editing Families
 
-You can use the *Family.New* component to edit existing families as well. Just pass the appropriate template and family name, the new geometry, and the *Family.New* component automatically finds the existing family, replaces the content and reloads the family into the Revit model. Make sure the *OverrideFamily* is set to `True` and *OverrideParameters* is set appropriately to override the family parameters if needed.
+You can use the {% include ltr/comp.html uuid='82523911' %} component to edit existing families as well. Just pass the appropriate template and family name, the new geometry, and the {% include ltr/comp.html uuid='82523911' %} component automatically finds the existing family, replaces the content and reloads the family into the Revit model. Make sure the *OverrideFamily* is set to `True` and *OverrideParameters* is set appropriately to override the family parameters if needed.
 
 ![]({{ "/static/images/guides/revit-families16.png" | prepend: site.baseurl }})
