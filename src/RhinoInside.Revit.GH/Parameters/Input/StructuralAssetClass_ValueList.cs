@@ -15,9 +15,9 @@ namespace RhinoInside.Revit.GH.Parameters.Input
     {
       Category = "Revit";
       SubCategory = "Material";
-      Name = "Physical Asset Type";
-      NickName = "PAMT";
-      Description = "Picker for physical material type options";
+      Name = "Physical Asset Class";
+      NickName = "Physical Class";
+      Description = "Picker for physical material class options";
 
       ListItems.Clear();
 

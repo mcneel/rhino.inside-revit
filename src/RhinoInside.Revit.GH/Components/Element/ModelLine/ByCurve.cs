@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Components
 
     public ModelLineByCurve() : base
     (
-      name: "Add ModelLine",
+      name: "Add Model Line",
       nickname: "ModelLine",
       description: "Given a Curve, it adds a Curve element to the active Revit document",
       category: "Revit",
