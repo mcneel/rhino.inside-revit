@@ -1973,6 +1973,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap GraphicalElementPhasing {
+            get {
+                object obj = ResourceManager.GetObject("GraphicalElementPhasing", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Grid {
             get {
                 object obj = ResourceManager.GetObject("Grid", resourceCulture);
@@ -2513,6 +2523,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap QueryFilters {
+            get {
+                object obj = ResourceManager.GetObject("QueryFilters", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap QueryGrids {
             get {
                 object obj = ResourceManager.GetObject("QueryGrids", resourceCulture);
@@ -2546,6 +2566,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap QueryParameters {
             get {
                 object obj = ResourceManager.GetObject("QueryParameters", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap QueryPhases {
+            get {
+                object obj = ResourceManager.GetObject("QueryPhases", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -2666,6 +2696,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap SelectDeselectElement {
             get {
                 object obj = ResourceManager.GetObject("SelectDeselectElement", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SelectionElements {
+            get {
+                object obj = ResourceManager.GetObject("SelectionElements", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
