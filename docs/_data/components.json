@@ -1,6 +1,16 @@
 [
   {
-    "desc": "Represents a Revit document fill pattern", 
+    "desc": "Contains a collection of Revit construction phase elements", 
+    "iconsrc": "/static/images/GH/Phase.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
+    "tab": "Params", 
+    "title": "Phase", 
+    "typename": "Phase", 
+    "uuid": "353ffb47-46d6-4fee-8dbd-40e683416531"
+  }, 
+  {
+    "desc": "Contains a collection of Revit fill pattern elements", 
     "iconsrc": "/static/images/GH/FillPatternElement.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -10,7 +20,7 @@
     "uuid": "efddb3d7-cf2a-4972-b1c4-29374bb89149"
   }, 
   {
-    "desc": "Represents a Revit document line pattern", 
+    "desc": "Contains a collection of Revit line pattern elements", 
     "iconsrc": "/static/images/GH/LinePatternElement.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -20,7 +30,7 @@
     "uuid": "eb5ab657-ae01-42f0-bf98-071da6d7a2d2"
   }, 
   {
-    "desc": "Represents a Revit document category", 
+    "desc": "Contains a collection of Revit categories", 
     "iconsrc": "/static/images/GH/Category.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -40,7 +50,7 @@
     "uuid": "5ffb1339-8521-44a1-9075-2984637725e9"
   }, 
   {
-    "desc": "Represents a Revit document level", 
+    "desc": "Contains a collection of Revit level elements", 
     "iconsrc": "/static/images/GH/Level.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -50,7 +60,7 @@
     "uuid": "3238f8bc-8483-4584-b47c-48b4933e478e"
   }, 
   {
-    "desc": "Represents a Revit document grid", 
+    "desc": "Contains a collection of Revit grid elements", 
     "iconsrc": "/static/images/GH/Grid.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -60,7 +70,7 @@
     "uuid": "7d2fb886-a184-41b8-a7d6-a6fdb85cf4e4"
   }, 
   {
-    "desc": "Provides a picker of a valid DirectShape category", 
+    "desc": "Provides a picker for direct shape categories", 
     "iconsrc": "/static/images/GH/DirectShapeCategories.png", 
     "icontag": null, 
     "panel": "DirectShape", 
@@ -70,7 +80,17 @@
     "uuid": "7bafe137-332b-481a-be22-09e8bd4c86fc"
   }, 
   {
-    "desc": "Represents a Revit document element", 
+    "desc": "Contains a collection of Revit documents", 
+    "iconsrc": "/static/images/GH/Document.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
+    "tab": "Params", 
+    "title": "Document", 
+    "typename": "Document", 
+    "uuid": "f3427d5c-3793-4e32-b219-8172d56ef04c"
+  }, 
+  {
+    "desc": "Contains a collection of Revit elements", 
     "iconsrc": "/static/images/GH/Element.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -80,7 +100,7 @@
     "uuid": "f3ea4a9c-b24f-4587-a358-6a7e6d8c028b"
   }, 
   {
-    "desc": "Represents a Revit document element type", 
+    "desc": "Contains a collection of Revit element types", 
     "iconsrc": "/static/images/GH/ElementType.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -90,7 +110,7 @@
     "uuid": "97dd546d-65c3-4d00-a609-3f5fbda67142"
   }, 
   {
-    "desc": "Represents a Revit document family", 
+    "desc": "Contains a collection of Revit family elements", 
     "iconsrc": "/static/images/GH/Family.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -100,7 +120,7 @@
     "uuid": "3966add8-07c0-43e7-874b-6eff95598eb0"
   }, 
   {
-    "desc": "Represents a Revit curtain grid mullion element", 
+    "desc": "Contains a collection of Revit curtain grid mullion elements", 
     "iconsrc": "/static/images/GH/Mullion.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -110,7 +130,7 @@
     "uuid": "6d845cbd-1962-4912-80c1-f47fe99ad54a"
   }, 
   {
-    "desc": "Represents a Revit curtain grid panel element", 
+    "desc": "Contains a collection of Revit curtain grid panel elements", 
     "iconsrc": "/static/images/GH/Panel.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -120,7 +140,7 @@
     "uuid": "cef5dd61-bc7d-4e66-ae94-e990b193acdc"
   }, 
   {
-    "desc": "Represents a Revit vertex", 
+    "desc": "Contains a collection of Revit vertices", 
     "iconsrc": "/static/images/GH/Vertex.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -130,7 +150,7 @@
     "uuid": "bc1b160a-dc04-4139-ab7d-1aecbde7ff88"
   }, 
   {
-    "desc": "Represents a Revit edge", 
+    "desc": "Contains a collection of Revit edges", 
     "iconsrc": "/static/images/GH/Edge.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -140,7 +160,7 @@
     "uuid": "b79fd0fd-63ae-4776-a0a7-6392a3a58b0d"
   }, 
   {
-    "desc": "Represents a Revit face", 
+    "desc": "Contains a collection of Revit faces", 
     "iconsrc": "/static/images/GH/Face.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -150,7 +170,7 @@
     "uuid": "759700ed-bc79-4986-a6ab-84921a7c9293"
   }, 
   {
-    "desc": "Represents a Revit graphical element", 
+    "desc": "Contains a collection of Revit graphical elements", 
     "iconsrc": "/static/images/GH/GraphicalElement.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -160,7 +180,7 @@
     "uuid": "ef607c2a-2f44-43f4-9c39-369ce114b51f"
   }, 
   {
-    "desc": "Represents a Revit document group element", 
+    "desc": "Contains a collection of Revit group elements", 
     "iconsrc": "/static/images/GH/Group.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -170,7 +190,7 @@
     "uuid": "2674b9ff-e463-426b-8a8c-ccb5a7f4c84e"
   }, 
   {
-    "desc": "Represents a Revit document host element", 
+    "desc": "Contains a collection of Revit host elements", 
     "iconsrc": "/static/images/GH/HostObject.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -180,7 +200,7 @@
     "uuid": "e3462915-3c4d-4864-9dd4-5a73f91c6543"
   }, 
   {
-    "desc": "Represents a Revit document building pad element", 
+    "desc": "Contains a collection of Revit building pad elements", 
     "iconsrc": "/static/images/GH/BuildingPad.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -190,7 +210,7 @@
     "uuid": "0d0afe5f-4578-493e-8374-c6bd1c5395be"
   }, 
   {
-    "desc": "Represents a Revit document curtain grid line element", 
+    "desc": "Contains a collection of Revit curtain grid line elements", 
     "iconsrc": "/static/images/GH/CurtainGridLine.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -200,7 +220,7 @@
     "uuid": "a2dd571e-729c-4f69-bd34-2769583d329b"
   }, 
   {
-    "desc": "Represents a Revit document curtain system element", 
+    "desc": "Contains a collection of Revit curtain system elements", 
     "iconsrc": "/static/images/GH/CurtainSystem.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -210,7 +230,7 @@
     "uuid": "e94b20e9-c2aa-4fc7-939d-ecd071ea45da"
   }, 
   {
-    "desc": "Represents a Revit document ceiling element", 
+    "desc": "Contains a collection of Revit ceiling elements", 
     "iconsrc": "/static/images/GH/Ceiling.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -220,7 +240,7 @@
     "uuid": "7fcea93d-8cde-446c-9167-e8b590342c66"
   }, 
   {
-    "desc": "Represents a Revit document floor element", 
+    "desc": "Contains a collection of Revit floor elements", 
     "iconsrc": "/static/images/GH/Floor.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -230,7 +250,7 @@
     "uuid": "45616df6-59bf-4480-a133-8f9b3ba27af1"
   }, 
   {
-    "desc": "Represents a Revit document roof element", 
+    "desc": "Contains a collection of Revit roof elements", 
     "iconsrc": "/static/images/GH/Roof.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -240,7 +260,7 @@
     "uuid": "d75e33e2-2508-42e6-aef1-b05759a495ab"
   }, 
   {
-    "desc": "Represents a Revit document wall element", 
+    "desc": "Contains a collection of Revit wall elements", 
     "iconsrc": "/static/images/GH/Wall.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -250,7 +270,7 @@
     "uuid": "15ad6bf9-63ad-462b-985d-f6b8c2299465"
   }, 
   {
-    "desc": "Represents a Revit document material", 
+    "desc": "Contains a collection of Revit material elements", 
     "iconsrc": "/static/images/GH/Material.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -260,17 +280,17 @@
     "uuid": "b18ef2cc-2e67-4a5e-9241-9010fb7d27ce"
   }, 
   {
-    "desc": "Represents a Revit parameter definition", 
+    "desc": "Contains a collection of Revit parameters", 
     "iconsrc": "/static/images/GH/ParameterKey.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
     "tab": "Params", 
-    "title": "Parameter Key", 
+    "title": "Parameter", 
     "typename": "ParameterKey", 
     "uuid": "a550f532-8c68-460b-91f3-da0a5a0d42b5"
   }, 
   {
-    "desc": "Represents a Revit document sketch plane", 
+    "desc": "Contains a collection of Revit sketch plane elements", 
     "iconsrc": "/static/images/GH/SketchPlane.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -280,7 +300,7 @@
     "uuid": "93bf1f61-69ad-433f-a202-352c14e4ced8"
   }, 
   {
-    "desc": "Represents a Revit view", 
+    "desc": "Contains a collection of Revit view elements", 
     "iconsrc": "/static/images/GH/View.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -290,24 +310,44 @@
     "uuid": "2dc4b866-54db-4ce6-94c0-c51b33d35b49"
   }, 
   {
-    "desc": "Provides a picker of a BuiltInParameterGroup", 
+    "desc": "Contains a collection of Revit workset elements", 
+    "iconsrc": "/static/images/GH/Workset.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
+    "tab": "Params", 
+    "title": "Workset", 
+    "typename": "Workset", 
+    "uuid": "5c073f7d-6d31-4063-a943-4152e1a799d1"
+  }, 
+  {
+    "desc": "Provides a picker for built-in categories", 
+    "iconsrc": "/static/images/GH/BuiltInCategories.png", 
+    "icontag": null, 
+    "panel": "Input", 
+    "tab": "Revit", 
+    "title": "Built-In Categories", 
+    "typename": "BuiltInCategories", 
+    "uuid": "af9d949f-1692-45aa-9fe4-653cff5eca26"
+  }, 
+  {
+    "desc": "Provides a picker for built-in parameters", 
+    "iconsrc": "/static/images/GH/BuiltInParameters.png", 
+    "icontag": null, 
+    "panel": "Parameter", 
+    "tab": "Revit", 
+    "title": "Built-In Parameters", 
+    "typename": "BuiltInParameters", 
+    "uuid": "c1d96f56-f53c-4dfc-8090-ec2050bdbb66"
+  }, 
+  {
+    "desc": "Provides a picker for built-in parameter Groups", 
     "iconsrc": "/static/images/GH/BuiltInParameterGroups.png", 
     "icontag": null, 
     "panel": "Parameter", 
     "tab": "Revit", 
-    "title": "Built-In ParameterGroups", 
+    "title": "Built-In Parameter Groups", 
     "typename": "BuiltInParameterGroups", 
     "uuid": "5d331b12-da6c-46a7-aa13-f463e42650d1"
-  }, 
-  {
-    "desc": "Provides a BuiltInParameter picker", 
-    "iconsrc": "/static/images/GH/BuiltInParameters.png", 
-    "icontag": null, 
-    "panel": "Input", 
-    "tab": "Revit", 
-    "title": "Built-In Parameter Picker", 
-    "typename": "BuiltInParameters", 
-    "uuid": "c1d96f56-f53c-4dfc-8090-ec2050bdbb66"
   }, 
   {
     "desc": "Picker for curtain grid align type options", 
@@ -360,46 +400,6 @@
     "uuid": "db470316-67c1-45e0-904d-9d0137c847b2"
   }, 
   {
-    "desc": "Provides a Model Category picker", 
-    "iconsrc": "/static/images/GH/ModelCategoriesPicker.png", 
-    "icontag": null, 
-    "panel": "Input", 
-    "tab": "Revit", 
-    "title": "Model Categories Picker", 
-    "typename": "ModelCategoriesPicker", 
-    "uuid": "eb266925-f1aa-4729-b5c0-b978937f51a3"
-  }, 
-  {
-    "desc": "Provides a Annotation Category picker", 
-    "iconsrc": "/static/images/GH/AnnotationCategoriesPicker.png", 
-    "icontag": null, 
-    "panel": "Input", 
-    "tab": "Revit", 
-    "title": "Annotation Categories Picker", 
-    "typename": "AnnotationCategoriesPicker", 
-    "uuid": "b1d1ca45-3771-49ca-8540-9a916a743c1b"
-  }, 
-  {
-    "desc": "Provides a Tag Category picker", 
-    "iconsrc": "/static/images/GH/TagCategoriesPicker.png", 
-    "icontag": null, 
-    "panel": "Input", 
-    "tab": "Revit", 
-    "title": "Tag Categories Picker", 
-    "typename": "TagCategoriesPicker", 
-    "uuid": "30f6da06-35f9-4e83-ae9e-080af26c8326"
-  }, 
-  {
-    "desc": "Provides a Analytical Category picker", 
-    "iconsrc": "/static/images/GH/AnalyticalCategoriesPicker.png", 
-    "icontag": null, 
-    "panel": "Input", 
-    "tab": "Revit", 
-    "title": "Analytical Categories Picker", 
-    "typename": "AnalyticalCategoriesPicker", 
-    "uuid": "4120c5ed-4329-4f42-b8d3-fa518e6e6807"
-  }, 
-  {
     "desc": "Provides a Level picker", 
     "iconsrc": "/static/images/GH/DocumentLevelsPicker.png", 
     "icontag": null, 
@@ -420,12 +420,22 @@
     "uuid": "45cee087-4194-4e55-aa20-9cc5d2193ce0"
   }, 
   {
+    "desc": "Provides a picker for Revit element classes", 
+    "iconsrc": "/static/images/GH/ElementClasses.png", 
+    "icontag": null, 
+    "panel": "Input", 
+    "tab": "Revit", 
+    "title": "Element Classes", 
+    "typename": "ElementClasses", 
+    "uuid": "f432d672-fa9d-48b1-babb-cff8bef38787"
+  }, 
+  {
     "desc": "Provides an Element type picker", 
     "iconsrc": "/static/images/GH/ElementTypeByName.png", 
     "icontag": null, 
     "panel": "Input", 
     "tab": "Revit", 
-    "title": "ElementType Picker", 
+    "title": "Element Type Picker", 
     "typename": "ElementTypeByName", 
     "uuid": "d3fb53d3-9118-4f11-a32d-aecb30aa418d"
   }, 
@@ -458,6 +468,16 @@
     "title": "Opening Wrapping Condition", 
     "typename": "OpeningWrappingCondition_ValueList", 
     "uuid": "55b31952-fae4-41a1-92b4-b59e80f8223c"
+  }, 
+  {
+    "desc": "Provides a picker for parameters types", 
+    "iconsrc": "/static/images/GH/BuiltInParameterTypes.png", 
+    "icontag": null, 
+    "panel": "Parameter", 
+    "tab": "Revit", 
+    "title": "Built-In Parameter Types", 
+    "typename": "BuiltInParameterTypes", 
+    "uuid": "8ab856c6-de20-44c8-9cf0-9460dabcf7ee"
   }, 
   {
     "desc": "Picker material behaviour options of physical or thermal assets", 
@@ -710,236 +730,6 @@
     "uuid": "fbb2e4a2-cc2a-470e-b7e8-cb3320166cc5"
   }, 
   {
-    "desc": "Evaluate if an Element pass a Filter", 
-    "iconsrc": "/static/images/GH/FilterElement.png", 
-    "icontag": null, 
-    "panel": "Filter", 
-    "tab": "Revit", 
-    "title": "Filter Element", 
-    "typename": "FilterElement", 
-    "uuid": "36180a9e-04ca-4b38-82fe-c6707b32c680"
-  }, 
-  {
-    "desc": "Filter used to exclude a set of elements", 
-    "iconsrc": "/static/images/GH/ElementExclusionFilter.png", 
-    "icontag": null, 
-    "panel": "Filter", 
-    "tab": "Revit", 
-    "title": "Exclusion Filter", 
-    "typename": "ElementExclusionFilter", 
-    "uuid": "396f7e91-7f08-4a3d-9b9b-b6aa91ac0a2b"
-  }, 
-  {
-    "desc": "Filter used to combine a set of filters that pass when any pass", 
-    "iconsrc": "/static/images/GH/ElementLogicalAndFilter.png", 
-    "icontag": null, 
-    "panel": "Filter", 
-    "tab": "Revit", 
-    "title": "Logical And Filter", 
-    "typename": "ElementLogicalAndFilter", 
-    "uuid": "0e534afb-7264-4aff-99f3-7f7ea7db9f3d"
-  }, 
-  {
-    "desc": "Filter used to combine a set of filters that pass when any pass", 
-    "iconsrc": "/static/images/GH/ElementLogicalOrFilter.png", 
-    "icontag": null, 
-    "panel": "Filter", 
-    "tab": "Revit", 
-    "title": "Logical Or Filter", 
-    "typename": "ElementLogicalOrFilter", 
-    "uuid": "3804757f-3f4c-469d-8788-fca26f477a9c"
-  }, 
-  {
-    "desc": "Filter used to exclude element types", 
-    "iconsrc": "/static/images/GH/ElementExcludeElementTypeFilter.png", 
-    "icontag": null, 
-    "panel": "Filter", 
-    "tab": "Revit", 
-    "title": "Exclude Types", 
-    "typename": "ElementExcludeElementTypeFilter", 
-    "uuid": "f69d485f-b262-4297-a496-93f5653f5d19"
-  }, 
-  {
-    "desc": "Filter used to match elements by their API class", 
-    "iconsrc": "/static/images/GH/ElementClassFilter.png", 
-    "icontag": null, 
-    "panel": "Filter", 
-    "tab": "Revit", 
-    "title": "Class Filter", 
-    "typename": "ElementClassFilter", 
-    "uuid": "6bd34014-cd73-42d8-94db-658be8f42254"
-  }, 
-  {
-    "desc": "Filter used to match elements by their category", 
-    "iconsrc": "/static/images/GH/ElementCategoryFilter.png", 
-    "icontag": null, 
-    "panel": "Filter", 
-    "tab": "Revit", 
-    "title": "Category Filter", 
-    "typename": "ElementCategoryFilter", 
-    "uuid": "d08f7ab1-be36-45fa-b006-0078022db140"
-  }, 
-  {
-    "desc": "Filter used to match elements by their type", 
-    "iconsrc": "/static/images/GH/ElementTypeFilter.png", 
-    "icontag": null, 
-    "panel": "Filter", 
-    "tab": "Revit", 
-    "title": "Type Filter", 
-    "typename": "ElementTypeFilter", 
-    "uuid": "4434c470-4caf-4178-929d-284c3b5a24b5"
-  }, 
-  {
-    "desc": "Filter used to match elements by the value of a parameter", 
-    "iconsrc": "/static/images/GH/ElementParameterFilter.png", 
-    "icontag": null, 
-    "panel": "Filter", 
-    "tab": "Revit", 
-    "title": "Parameter Filter", 
-    "typename": "ElementParameterFilter", 
-    "uuid": "e6a1f501-bda4-4b78-8828-084b5eda926f"
-  }, 
-  {
-    "desc": "Filter used to match elements by their BoundingBox", 
-    "iconsrc": "/static/images/GH/ElementBoundingBoxFilter.png", 
-    "icontag": null, 
-    "panel": "Filter", 
-    "tab": "Revit", 
-    "title": "Bounding Box Filter", 
-    "typename": "ElementBoundingBoxFilter", 
-    "uuid": "3b8be676-390b-4be1-b6da-c02ffa3234b6"
-  }, 
-  {
-    "desc": "Filter used to match elements that intersect to the given element", 
-    "iconsrc": "/static/images/GH/ElementIntersectsElementFilter.png", 
-    "icontag": null, 
-    "panel": "Filter", 
-    "tab": "Revit", 
-    "title": "Intersects Element Filter", 
-    "typename": "ElementIntersectsElementFilter", 
-    "uuid": "d1e4c98d-e550-4f25-991a-5061ef845c37"
-  }, 
-  {
-    "desc": "Filter used to match elements that intersect to the given brep", 
-    "iconsrc": "/static/images/GH/ElementIntersectsBrepFilter.png", 
-    "icontag": null, 
-    "panel": "Filter", 
-    "tab": "Revit", 
-    "title": "Intersects Brep Filter", 
-    "typename": "ElementIntersectsBrepFilter", 
-    "uuid": "a8889824-f607-4465-b84f-16df79dd08ab"
-  }, 
-  {
-    "desc": "Filter used to match elements that intersect to the given mesh", 
-    "iconsrc": "/static/images/GH/ElementIntersectsMeshFilter.png", 
-    "icontag": null, 
-    "panel": "Filter", 
-    "tab": "Revit", 
-    "title": "Intersects Mesh Filter", 
-    "typename": "ElementIntersectsMeshFilter", 
-    "uuid": "09f9e451-f6c9-42fb-90e3-85e9923998a2"
-  }, 
-  {
-    "desc": "Filter used to match elements associated to the given level", 
-    "iconsrc": "/static/images/GH/ElementLevelFilter.png", 
-    "icontag": null, 
-    "panel": "Filter", 
-    "tab": "Revit", 
-    "title": "Level Filter", 
-    "typename": "ElementLevelFilter", 
-    "uuid": "b534489b-1367-4aca-8fd8-d4b365ceee0d"
-  }, 
-  {
-    "desc": "Filter used to match elements associated to the given Design Option", 
-    "iconsrc": "/static/images/GH/ElementDesignOptionFilter.png", 
-    "icontag": null, 
-    "panel": "Filter", 
-    "tab": "Revit", 
-    "title": "Design Option Filter", 
-    "typename": "ElementDesignOptionFilter", 
-    "uuid": "1b197e82-3a65-43d4-ae47-fd25e4e6f2e5"
-  }, 
-  {
-    "desc": "Filter used to match elements associated to the given View", 
-    "iconsrc": "/static/images/GH/ElementOwnerViewFilter.png", 
-    "icontag": null, 
-    "panel": "Filter", 
-    "tab": "Revit", 
-    "title": "Owner View Filter", 
-    "typename": "ElementOwnerViewFilter", 
-    "uuid": "cfb42d90-f9d4-4601-9eef-c624e92a424d"
-  }, 
-  {
-    "desc": "Filter used to match seletable elements into the given View", 
-    "iconsrc": "/static/images/GH/ElementSelectableInViewFilter.png", 
-    "icontag": null, 
-    "panel": "Filter", 
-    "tab": "Revit", 
-    "title": "Selectable In View Filter", 
-    "typename": "ElementSelectableInViewFilter", 
-    "uuid": "ac546f16-c917-4cd1-9f8a-fbdd6330eb80"
-  }, 
-  {
-    "desc": "Filter used to match elements if value of a parameter are not equals to Value", 
-    "iconsrc": "/static/images/GH/ElementFilterRuleNotEquals.png", 
-    "icontag": null, 
-    "panel": "Filter", 
-    "tab": "Revit", 
-    "title": "Not Equals Rule", 
-    "typename": "ElementFilterRuleNotEquals", 
-    "uuid": "6bbe9731-ef71-42e8-a880-1d2adfeb9f79"
-  }, 
-  {
-    "desc": "Filter used to match elements if value of a parameter equals to Value", 
-    "iconsrc": "/static/images/GH/ElementFilterRuleEquals.png", 
-    "icontag": null, 
-    "panel": "Filter", 
-    "tab": "Revit", 
-    "title": "Equals Rule", 
-    "typename": "ElementFilterRuleEquals", 
-    "uuid": "0f9139ac-2a21-474c-9c5b-6864b2f2313c"
-  }, 
-  {
-    "desc": "Filter used to match elements if value of a parameter greater than Value", 
-    "iconsrc": "/static/images/GH/ElementFilterRuleGreater.png", 
-    "icontag": null, 
-    "panel": "Filter", 
-    "tab": "Revit", 
-    "title": "Greater Rule", 
-    "typename": "ElementFilterRuleGreater", 
-    "uuid": "bb7d39da-97ad-4277-82c7-010af857ff03"
-  }, 
-  {
-    "desc": "Filter used to match elements if value of a parameter greater or equal than Value", 
-    "iconsrc": "/static/images/GH/ElementFilterRuleGreaterOrEqual.png", 
-    "icontag": null, 
-    "panel": "Filter", 
-    "tab": "Revit", 
-    "title": "Greater Or Equal Rule", 
-    "typename": "ElementFilterRuleGreaterOrEqual", 
-    "uuid": "05bbaedd-027b-40da-8390-f826b63fd100"
-  }, 
-  {
-    "desc": "Filter used to match elements if value of a parameter less than Value", 
-    "iconsrc": "/static/images/GH/ElementFilterRuleLess.png", 
-    "icontag": null, 
-    "panel": "Filter", 
-    "tab": "Revit", 
-    "title": "Less Rule", 
-    "typename": "ElementFilterRuleLess", 
-    "uuid": "be2c5afe-7d56-4f63-9a23-20560e3675b9"
-  }, 
-  {
-    "desc": "Filter used to match elements if value of a parameter less or equal than Value", 
-    "iconsrc": "/static/images/GH/ElementFilterRuleLessOrEqual.png", 
-    "icontag": null, 
-    "panel": "Filter", 
-    "tab": "Revit", 
-    "title": "Less Or Equal Rule", 
-    "typename": "ElementFilterRuleLessOrEqual", 
-    "uuid": "bb69852f-6a39-4adc-b9b8-d16a8862b4c7"
-  }, 
-  {
     "desc": "Query default type", 
     "iconsrc": "/static/images/GH/ElementTypeDefault.png", 
     "icontag": null, 
@@ -1150,6 +940,16 @@
     "uuid": "97d71aa8-6987-45b9-8f25-b92671e20ef4"
   }, 
   {
+    "desc": "Duplicates document elements", 
+    "iconsrc": "/static/images/GH/ElementDuplicate.png", 
+    "icontag": null, 
+    "panel": "Element", 
+    "tab": "Revit", 
+    "title": "Duplicate Element", 
+    "typename": "ElementDuplicate", 
+    "uuid": "f4c12aa0-a87b-4209-bd7b-4a189e4f4f0e"
+  }, 
+  {
     "desc": "Flips or Unflips elements from Revit document", 
     "iconsrc": "/static/images/GH/FlipUnflipElement.png", 
     "icontag": null, 
@@ -1280,46 +1080,6 @@
     "uuid": "1f644064-035a-4fa1-971b-64d7da824f09"
   }, 
   {
-    "desc": "Gets the parameter value of a specified Revit Element", 
-    "iconsrc": "/static/images/GH/ElementParameterGet.png", 
-    "icontag": null, 
-    "panel": "Element", 
-    "tab": "Revit", 
-    "title": "Get Element Parameter", 
-    "typename": "ElementParameterGet", 
-    "uuid": "d86050f2-c774-49b1-9973-fb3ab188dc94"
-  }, 
-  {
-    "desc": "Sets the parameter value of a specified Revit Element", 
-    "iconsrc": "/static/images/GH/ElementParameterSet.png", 
-    "icontag": null, 
-    "panel": "Element", 
-    "tab": "Revit", 
-    "title": "Set Element Parameter", 
-    "typename": "ElementParameterSet", 
-    "uuid": "8f1ee110-7fda-49e0-bed4-e8e0227bc021"
-  }, 
-  {
-    "desc": "Resets the parameter value of a specified Revit Element", 
-    "iconsrc": "/static/images/GH/ElementParameterReset.png", 
-    "icontag": null, 
-    "panel": "Element", 
-    "tab": "Revit", 
-    "title": "Reset Element Parameter", 
-    "typename": "ElementParameterReset", 
-    "uuid": "2c374e6d-a547-45ac-b77d-04dd61317622"
-  }, 
-  {
-    "desc": "Get the parameters of the specified Element", 
-    "iconsrc": "/static/images/GH/QueryElementParameters.png", 
-    "icontag": null, 
-    "panel": "Element", 
-    "tab": "Revit", 
-    "title": "Query Element Parameters", 
-    "typename": "QueryElementParameters", 
-    "uuid": "44515a6b-84ee-4dbd-8241-17edbe07c5b6"
-  }, 
-  {
     "desc": "Given its location, it reconstructs a Component element into the active Revit document", 
     "iconsrc": "/static/images/GH/FamilyInstanceByLocation.png", 
     "icontag": null, 
@@ -1330,7 +1090,7 @@
     "uuid": "0c642d7d-897b-479e-8668-91e09222d7b9"
   }, 
   {
-    "desc": "Analyze family instance space eg spatial elements surrounding the given instance", 
+    "desc": "Analyze spatial elements surrounding the given instance", 
     "iconsrc": "/static/images/GH/AnalyzeInstanceSpace.png", 
     "icontag": null, 
     "panel": "Room & Area", 
@@ -1465,9 +1225,9 @@
     "icontag": null, 
     "panel": "Element", 
     "tab": "Revit", 
-    "title": "Select Elements", 
+    "title": "Select Element", 
     "typename": "SelectDeselectElement", 
-    "uuid": "d59d8b4b-a8ab-49c7-9036-209872aedd8b"
+    "uuid": "3e44d6bb-5f49-40e8-a2c4-53e5e3a63ddc"
   }, 
   {
     "desc": "Given a Plane, it adds a SketchPlane element to the active Revit document", 
@@ -1830,34 +1590,514 @@
     "uuid": "f0887ad5-8acb-4806-bb12-7596bcedffed"
   }, 
   {
-    "desc": "Given its Name, it creates a Shared Parameter definition to the active Revit document", 
-    "iconsrc": "/static/images/GH/DefineSharedParameter.png", 
+    "desc": "Get document filters list", 
+    "iconsrc": "/static/images/GH/QueryFilters.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Query Filters", 
+    "typename": "QueryFilters", 
+    "uuid": "b7b1740b-0721-49c8-92f5-057775da9792"
+  }, 
+  {
+    "desc": "Given its Definition, it adds a new Parameter into the Revit document", 
+    "iconsrc": "/static/images/GH/AddParameter.png", 
     "icontag": null, 
     "panel": "Parameter", 
     "tab": "Revit", 
-    "title": "Define Shared Parameter", 
-    "typename": "DefineSharedParameter", 
+    "title": "Add Parameter", 
+    "typename": "AddParameter", 
     "uuid": "84ab6f3c-bb4b-48e4-9175-b7f40791bb7f"
   }, 
   {
-    "desc": "Decompose a parameter value", 
-    "iconsrc": "/static/images/GH/DeconstructParameterValue.png", 
+    "desc": "Given its attributes, it creates a Parameter definition", 
+    "iconsrc": "/static/images/GH/DefineParameter.png", 
     "icontag": null, 
     "panel": "Parameter", 
     "tab": "Revit", 
-    "title": "Deconstruct ParameterValue", 
-    "typename": "DeconstructParameterValue", 
+    "title": "Define Parameter", 
+    "typename": "DefineParameter", 
+    "uuid": "134b7171-84e2-4900-b0c9-1d3e40f9b679"
+  }, 
+  {
+    "desc": "Get-Set accessor to global parameter values", 
+    "iconsrc": "/static/images/GH/GlobalParameter.png", 
+    "icontag": null, 
+    "panel": "Parameter", 
+    "tab": "Revit", 
+    "title": "Global Parameter", 
+    "typename": "GlobalParameter", 
+    "uuid": "32e77d86-0bf5-4766-b5e7-e181044c3820"
+  }, 
+  {
+    "desc": "Parameter formula property Get-Set accessor to Parameter formula properties", 
+    "iconsrc": "/static/images/GH/ParameterFormula.png", 
+    "icontag": null, 
+    "panel": "Parameter", 
+    "tab": "Revit", 
+    "title": "Parameter Formula", 
+    "typename": "ParameterFormula", 
+    "uuid": "21f9f9c6-e5c2-4d38-820a-99ac4517f62f"
+  }, 
+  {
+    "desc": "Query parameter identity data", 
+    "iconsrc": "/static/images/GH/ParameterIdentity.png", 
+    "icontag": null, 
+    "panel": "Parameter", 
+    "tab": "Revit", 
+    "title": "Parameter Identity", 
+    "typename": "ParameterIdentity", 
     "uuid": "3bde5890-fb80-4af2-b9ac-373661756bda"
   }, 
   {
-    "desc": "Decompose a parameter definition", 
-    "iconsrc": "/static/images/GH/ParameterKeyIdentity.png", 
+    "desc": "Gives acces to project parameter settings", 
+    "iconsrc": "/static/images/GH/ProjectParameter.png", 
     "icontag": null, 
     "panel": "Parameter", 
     "tab": "Revit", 
-    "title": "ParameterKey Identity", 
-    "typename": "ParameterKeyIdentity", 
-    "uuid": "a80f4919-2387-4c78-be2b-2f35b2e60298"
+    "title": "Project Parameter", 
+    "typename": "ProjectParameter", 
+    "uuid": "1cc5af70-8c5a-4e4a-9d5f-52925d6d4a61"
+  }, 
+  {
+    "desc": "Get document parameters list", 
+    "iconsrc": "/static/images/GH/QueryParameters.png", 
+    "icontag": null, 
+    "panel": "Parameter", 
+    "tab": "Revit", 
+    "title": "Query Parameters", 
+    "typename": "QueryParameters", 
+    "uuid": "d82d9fc3-fc74-4c54-aae1-cb4d806741db"
+  }, 
+  {
+    "desc": "Explore the content of the shared parameters file", 
+    "iconsrc": "/static/images/GH/SharedParameters.png", 
+    "icontag": null, 
+    "panel": "Parameter", 
+    "tab": "Revit", 
+    "title": "Shared Parameters", 
+    "typename": "SharedParameters", 
+    "uuid": "7844b410-0c2d-46e3-9cde-229e81438e38"
+  }, 
+  {
+    "desc": "Filter used to match elements if value of a parameter are not equals to Value", 
+    "iconsrc": "/static/images/GH/ElementFilterRuleNotEquals.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Not Equals Rule", 
+    "typename": "ElementFilterRuleNotEquals", 
+    "uuid": "6bbe9731-ef71-42e8-a880-1d2adfeb9f79"
+  }, 
+  {
+    "desc": "Filter used to match elements if value of a parameter equals to Value", 
+    "iconsrc": "/static/images/GH/ElementFilterRuleEquals.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Equals Rule", 
+    "typename": "ElementFilterRuleEquals", 
+    "uuid": "0f9139ac-2a21-474c-9c5b-6864b2f2313c"
+  }, 
+  {
+    "desc": "Filter used to match elements if value of a parameter greater than Value", 
+    "iconsrc": "/static/images/GH/ElementFilterRuleGreater.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Greater Rule", 
+    "typename": "ElementFilterRuleGreater", 
+    "uuid": "bb7d39da-97ad-4277-82c7-010af857ff03"
+  }, 
+  {
+    "desc": "Filter used to match elements if value of a parameter greater or equal than Value", 
+    "iconsrc": "/static/images/GH/ElementFilterRuleGreaterOrEqual.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Greater Or Equal Rule", 
+    "typename": "ElementFilterRuleGreaterOrEqual", 
+    "uuid": "05bbaedd-027b-40da-8390-f826b63fd100"
+  }, 
+  {
+    "desc": "Filter used to match elements if value of a parameter less than Value", 
+    "iconsrc": "/static/images/GH/ElementFilterRuleLess.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Less Rule", 
+    "typename": "ElementFilterRuleLess", 
+    "uuid": "be2c5afe-7d56-4f63-9a23-20560e3675b9"
+  }, 
+  {
+    "desc": "Filter used to match elements if value of a parameter less or equal than Value", 
+    "iconsrc": "/static/images/GH/ElementFilterRuleLessOrEqual.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Less Or Equal Rule", 
+    "typename": "ElementFilterRuleLessOrEqual", 
+    "uuid": "bb69852f-6a39-4adc-b9b8-d16a8862b4c7"
+  }, 
+  {
+    "desc": "Filter used to match elements if value of a parameter contains the specified text", 
+    "iconsrc": "/static/images/GH/ElementFilterRuleContains.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Text Contains Rule", 
+    "typename": "ElementFilterRuleContains", 
+    "uuid": "b1265cf6-3031-4e05-b958-38d00c5a41ef"
+  }, 
+  {
+    "desc": "Filter used to match elements if value of a parameter begins with the specified text", 
+    "iconsrc": "/static/images/GH/ElementFilterRuleBeginsWith.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Text Begins Rule", 
+    "typename": "ElementFilterRuleBeginsWith", 
+    "uuid": "7fa73840-6511-49bd-a4c9-85f0dfd907e5"
+  }, 
+  {
+    "desc": "Filter used to match elements if value of a parameter ends with the specified text", 
+    "iconsrc": "/static/images/GH/ElementFilterRuleEndsWith.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Text Ends Rule", 
+    "typename": "ElementFilterRuleEndsWith", 
+    "uuid": "84f29564-1acd-4148-b00f-ea3fcfb6df13"
+  }, 
+  {
+    "desc": "Filter used to match elements on a category", 
+    "iconsrc": "/static/images/GH/CategoryFilterRule.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Category Rule", 
+    "typename": "CategoryFilterRule", 
+    "uuid": "0ce4f51d-49d0-4b0c-82c8-84cccf0968f6"
+  }, 
+  {
+    "desc": "Filter used to exclude element types", 
+    "iconsrc": "/static/images/GH/ElementExcludeElementTypeFilter.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Exclude Types", 
+    "typename": "ElementExcludeElementTypeFilter", 
+    "uuid": "f69d485f-b262-4297-a496-93f5653f5d19"
+  }, 
+  {
+    "desc": "Filter used to match elements by their API class", 
+    "iconsrc": "/static/images/GH/ElementClassFilter.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Class Filter", 
+    "typename": "ElementClassFilter", 
+    "uuid": "6bd34014-cd73-42d8-94db-658be8f42254"
+  }, 
+  {
+    "desc": "Filter used to match elements by their category", 
+    "iconsrc": "/static/images/GH/ElementCategoryFilter.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Category Filter", 
+    "typename": "ElementCategoryFilter", 
+    "uuid": "d08f7ab1-be36-45fa-b006-0078022db140"
+  }, 
+  {
+    "desc": "Filter used to match elements by their type", 
+    "iconsrc": "/static/images/GH/ElementTypeFilter.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Type Filter", 
+    "typename": "ElementTypeFilter", 
+    "uuid": "4434c470-4caf-4178-929d-284c3b5a24b5"
+  }, 
+  {
+    "desc": "Filter used to match elements by the value of a parameter", 
+    "iconsrc": "/static/images/GH/ElementParameterFilter.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Parameter Filter", 
+    "typename": "ElementParameterFilter", 
+    "uuid": "e6a1f501-bda4-4b78-8828-084b5eda926f"
+  }, 
+  {
+    "desc": "Filter used to match elements by their workset", 
+    "iconsrc": "/static/images/GH/ElementWorksetFilter.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Workset Filter", 
+    "typename": "ElementWorksetFilter", 
+    "uuid": "3380c493-b1df-4e93-a2ca-612808291394"
+  }, 
+  {
+    "desc": "Filter used to match elements by their BoundingBox", 
+    "iconsrc": "/static/images/GH/ElementBoundingBoxFilter.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Bounding Box Filter", 
+    "typename": "ElementBoundingBoxFilter", 
+    "uuid": "3b8be676-390b-4be1-b6da-c02ffa3234b6"
+  }, 
+  {
+    "desc": "Filter used to match elements that intersect to the given element", 
+    "iconsrc": "/static/images/GH/ElementIntersectsElementFilter.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Intersects Element Filter", 
+    "typename": "ElementIntersectsElementFilter", 
+    "uuid": "d1e4c98d-e550-4f25-991a-5061ef845c37"
+  }, 
+  {
+    "desc": "Filter used to match elements that intersect to the given brep", 
+    "iconsrc": "/static/images/GH/ElementIntersectsBrepFilter.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Intersects Brep Filter", 
+    "typename": "ElementIntersectsBrepFilter", 
+    "uuid": "a8889824-f607-4465-b84f-16df79dd08ab"
+  }, 
+  {
+    "desc": "Filter used to match elements that intersect to the given mesh", 
+    "iconsrc": "/static/images/GH/ElementIntersectsMeshFilter.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Intersects Mesh Filter", 
+    "typename": "ElementIntersectsMeshFilter", 
+    "uuid": "09f9e451-f6c9-42fb-90e3-85e9923998a2"
+  }, 
+  {
+    "desc": "Filter used to match elements associated to the given level", 
+    "iconsrc": "/static/images/GH/ElementLevelFilter.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Level Filter", 
+    "typename": "ElementLevelFilter", 
+    "uuid": "b534489b-1367-4aca-8fd8-d4b365ceee0d"
+  }, 
+  {
+    "desc": "Filter used to match elements associated to the given Design Option", 
+    "iconsrc": "/static/images/GH/ElementDesignOptionFilter.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Design Option Filter", 
+    "typename": "ElementDesignOptionFilter", 
+    "uuid": "1b197e82-3a65-43d4-ae47-fd25e4e6f2e5"
+  }, 
+  {
+    "desc": "Filter used to match elements associated to the given Phase status", 
+    "iconsrc": "/static/images/GH/ElementPhaseStatusFilter.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Phase Status Filter", 
+    "typename": "ElementPhaseStatusFilter", 
+    "uuid": "805c21ee-5481-4412-a06c-7965761737e8"
+  }, 
+  {
+    "desc": "Filter used to match elements associated to the given View", 
+    "iconsrc": "/static/images/GH/ElementOwnerViewFilter.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Owner View Filter", 
+    "typename": "ElementOwnerViewFilter", 
+    "uuid": "cfb42d90-f9d4-4601-9eef-c624e92a424d"
+  }, 
+  {
+    "desc": "Filter used to match seletable elements into the given View", 
+    "iconsrc": "/static/images/GH/ElementSelectableInViewFilter.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Selectable In View Filter", 
+    "typename": "ElementSelectableInViewFilter", 
+    "uuid": "ac546f16-c917-4cd1-9f8a-fbdd6330eb80"
+  }, 
+  {
+    "desc": "Filter used to combine a set of filters that pass when any pass", 
+    "iconsrc": "/static/images/GH/ElementLogicalAndFilter.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Logical And Filter", 
+    "typename": "ElementLogicalAndFilter", 
+    "uuid": "0e534afb-7264-4aff-99f3-7f7ea7db9f3d"
+  }, 
+  {
+    "desc": "Filter used to combine a set of filters that pass when any pass", 
+    "iconsrc": "/static/images/GH/ElementLogicalOrFilter.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Logical Or Filter", 
+    "typename": "ElementLogicalOrFilter", 
+    "uuid": "3804757f-3f4c-469d-8788-fca26f477a9c"
+  }, 
+  {
+    "desc": "Filter used to exclude a set of elements", 
+    "iconsrc": "/static/images/GH/ElementExclusionFilter.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Exclusion Filter", 
+    "typename": "ElementExclusionFilter", 
+    "uuid": "396f7e91-7f08-4a3d-9b9b-b6aa91ac0a2b"
+  }, 
+  {
+    "desc": "Evaluate if an Element pass a Filter", 
+    "iconsrc": "/static/images/GH/FilterElement.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Filter Element", 
+    "typename": "FilterElement", 
+    "uuid": "36180a9e-04ca-4b38-82fe-c6707b32c680"
+  }, 
+  {
+    "desc": "Create a parameter based filter", 
+    "iconsrc": "/static/images/GH/ParameterFilterElementByName.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Add Parameter Filter", 
+    "typename": "ParameterFilterElementByName", 
+    "uuid": "01e86d7c-b143-47f6-bc26-0a234eb360f3"
+  }, 
+  {
+    "desc": "Selection Elements list", 
+    "iconsrc": "/static/images/GH/SelectionElements.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Selection Elements", 
+    "typename": "SelectionElements", 
+    "uuid": "e90f2139-fa13-4ee2-bfd3-6642fa9053ab"
+  }, 
+  {
+    "desc": "Create a selection filter", 
+    "iconsrc": "/static/images/GH/SelectionFilterElementByName.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Add Selection Filter", 
+    "typename": "SelectionFilterElementByName", 
+    "uuid": "29618f71-3b57-4a20-9cb2-4c3d17774172"
+  }, 
+  {
+    "desc": "Gets the active workset", 
+    "iconsrc": "/static/images/GH/WorksetActive.png", 
+    "icontag": null, 
+    "panel": "Document", 
+    "tab": "Revit", 
+    "title": "Active Workset", 
+    "typename": "WorksetActive", 
+    "uuid": "aa467c94-d400-4f4a-80bf-defb309a4c52"
+  }, 
+  {
+    "desc": "Element Workset properties Get-Set accessor to element workset information", 
+    "iconsrc": "/static/images/GH/ElementWorkset.png", 
+    "icontag": null, 
+    "panel": "Element", 
+    "tab": "Revit", 
+    "title": "Element Workset", 
+    "typename": "ElementWorkset", 
+    "uuid": "b441ba8c-429e-4f92-90dc-97da3f14eb85"
+  }, 
+  {
+    "desc": "Workset properties Get-Set accessor to workset information", 
+    "iconsrc": "/static/images/GH/WorksetIdentity.png", 
+    "icontag": null, 
+    "panel": "Document", 
+    "tab": "Revit", 
+    "title": "Workset Identity", 
+    "typename": "WorksetIdentity", 
+    "uuid": "c33cd128-9bee-4b0c-bb0e-3ffbfcb3c41e"
+  }, 
+  {
+    "desc": "Get document construction worksets list", 
+    "iconsrc": "/static/images/GH/QueryWorksets.png", 
+    "icontag": null, 
+    "panel": "Document", 
+    "tab": "Revit", 
+    "title": "Query Worksets", 
+    "typename": "QueryWorksets", 
+    "uuid": "311316ba-81c7-495c-8a20-b7974091d6b1"
+  }, 
+  {
+    "desc": "Given a plane, it adds a 3D View to the active Revit document", 
+    "iconsrc": "/static/images/GH/View3DByPlane.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "tab": "Revit", 
+    "title": "Add View3D", 
+    "typename": "View3DByPlane", 
+    "uuid": "f7b775c9-05e0-40f7-85e9-5cc2ef79731e"
+  }, 
+  {
+    "desc": "Element Phasing properties Get-Set accessor to element phasing information", 
+    "iconsrc": "/static/images/GH/GraphicalElementPhasing.png", 
+    "icontag": null, 
+    "panel": "Element", 
+    "tab": "Revit", 
+    "title": "Element Phasing", 
+    "typename": "GraphicalElementPhasing", 
+    "uuid": "3ba4524a-d4e5-4392-88b3-17a0cf651b09"
+  }, 
+  {
+    "desc": "Get document construction phases list", 
+    "iconsrc": "/static/images/GH/QueryPhases.png", 
+    "icontag": null, 
+    "panel": "Document", 
+    "tab": "Revit", 
+    "title": "Query Phases", 
+    "typename": "QueryPhases", 
+    "uuid": "91e4d3e1-883a-44d9-a3d2-b836967869e1"
+  }, 
+  {
+    "desc": "Get-Set accessor to element parameter values", 
+    "iconsrc": "/static/images/GH/ElementParameter.png", 
+    "icontag": null, 
+    "panel": "Element", 
+    "tab": "Revit", 
+    "title": "Element Parameter", 
+    "typename": "ElementParameter", 
+    "uuid": "f568d3e7-be3f-455b-a8d4-ebfa573d55c2"
+  }, 
+  {
+    "desc": "Resets the parameter value of a specified Revit Element", 
+    "iconsrc": "/static/images/GH/ElementParameterReset.png", 
+    "icontag": null, 
+    "panel": "Element", 
+    "tab": "Revit", 
+    "title": "Reset Element Parameter", 
+    "typename": "ElementParameterReset", 
+    "uuid": "2c374e6d-a547-45ac-b77d-04dd61317622"
+  }, 
+  {
+    "desc": "Get the parameters of the specified Element", 
+    "iconsrc": "/static/images/GH/QueryElementParameters.png", 
+    "icontag": null, 
+    "panel": "Element", 
+    "tab": "Revit", 
+    "title": "Query Element Parameters", 
+    "typename": "QueryElementParameters", 
+    "uuid": "44515a6b-84ee-4dbd-8241-17edbe07c5b6"
   }, 
   {
     "desc": "Material Graphics Data", 
@@ -1880,7 +2120,7 @@
     "uuid": "5b18389b-5e25-4428-b1a6-1a55109a7a3c"
   }, 
   {
-    "desc": "Create a new instance of Physical Asset", 
+    "desc": "Create a Revit structural asset", 
     "iconsrc": "/static/images/GH/CreateStructuralAsset.png", 
     "icontag": null, 
     "panel": "Material", 
@@ -1910,7 +2150,7 @@
     "uuid": "ec93f8e0-d2af-4a44-a040-89a7c40b9fc7"
   }, 
   {
-    "desc": "Create a new instance of Thermal Asset", 
+    "desc": "Create a Revit thermal asset", 
     "iconsrc": "/static/images/GH/CreateThermalAsset.png", 
     "icontag": null, 
     "panel": "Material", 
@@ -1980,12 +2220,12 @@
     "uuid": "2332c031-de18-43a9-b41f-6405e1460c06"
   }, 
   {
-    "desc": "Create a new instance of Appearance asset of \"Generic\" schema inside document", 
+    "desc": "Create a Revit appearance asset", 
     "iconsrc": "/static/images/GH/CreateGenericShader.png", 
     "icontag": null, 
     "panel": "Material", 
     "tab": "Revit", 
-    "title": "Create Appearance Asset (Generic)", 
+    "title": "Create Appearance Asset", 
     "typename": "CreateGenericShader", 
     "uuid": "0f251f87-317b-4669-bc70-22b29d3eba6a"
   }, 
@@ -2030,12 +2270,22 @@
     "uuid": "94af13c1-ce70-46b5-9103-24b46e2f7375"
   }, 
   {
+    "desc": "Quickly create a new Revit material from a Shader or Color", 
+    "iconsrc": "/static/images/GH/MaterialByColor.png", 
+    "icontag": null, 
+    "panel": "Material", 
+    "tab": "Revit", 
+    "title": "Convert Material", 
+    "typename": "MaterialByColor", 
+    "uuid": "273ff43d-b771-4eb7-a66d-5da5f7f2731e"
+  }, 
+  {
     "desc": "Create a Revit material by name", 
     "iconsrc": "/static/images/GH/MaterialByName.png", 
     "icontag": null, 
     "panel": "Material", 
     "tab": "Revit", 
-    "title": "Create Material", 
+    "title": "Add Material", 
     "typename": "MaterialByName", 
     "uuid": "3aedba3c-1b77-4c52-a7fc-7ca7095f730e"
   }, 
@@ -2070,12 +2320,12 @@
     "uuid": "0bfbda45-49cc-4ac6-8d6d-ecd2cfed062a"
   }, 
   {
-    "desc": "Given its Geometry, it reconstructs a DirectShapeType to the active Revit document", 
+    "desc": "Given its Geometry, it reconstructs a DirectShape Type to the active Revit document", 
     "iconsrc": "/static/images/GH/DirectShapeTypeByGeometry.png", 
     "icontag": null, 
     "panel": "DirectShape", 
     "tab": "Revit", 
-    "title": "Add DirectShapeType", 
+    "title": "Add DirectShape Type", 
     "typename": "DirectShapeTypeByGeometry", 
     "uuid": "25dcfe8e-5be9-460c-80e8-51b7041d8fed"
   }, 
@@ -2130,7 +2380,7 @@
     "uuid": "87715caf-92a9-4b14-99e5-f8ccb2cc19bd"
   }, 
   {
-    "desc": "Given its elevation, it adds a Level to the active Revit document", 
+    "desc": "Given its elevation, it adds a Level to the current Revit document", 
     "iconsrc": "/static/images/GH/LevelByElevation.png", 
     "icontag": null, 
     "panel": "Model", 
@@ -2261,8 +2511,8 @@
   }, 
   {
     "desc": "Construct compound structure", 
-    "iconsrc": null, 
-    "icontag": "C", 
+    "iconsrc": "/static/images/GH/ConstructCompoundStructure.png", 
+    "icontag": null, 
     "panel": "Host", 
     "tab": "Revit", 
     "title": "Construct Compound Structure", 
@@ -2271,8 +2521,8 @@
   }, 
   {
     "desc": "Construct compound structure layer", 
-    "iconsrc": null, 
-    "icontag": "C", 
+    "iconsrc": "/static/images/GH/ConstructCompoundStructureLayer.png", 
+    "icontag": null, 
     "panel": "Host", 
     "tab": "Revit", 
     "title": "Construct Compound Structure Layer", 
@@ -2348,15 +2598,5 @@
     "title": "Host Inserts", 
     "typename": "HostObjectInserts", 
     "uuid": "70ccf7a6-856c-4d24-a82b-bc1d4fc63078"
-  }, 
-  {
-    "desc": "Given a plane, it adds a 3D View to the active Revit document", 
-    "iconsrc": "/static/images/GH/View3DByPlane.png", 
-    "icontag": null, 
-    "panel": "View", 
-    "tab": "Revit", 
-    "title": "Add View3D", 
-    "typename": "View3DByPlane", 
-    "uuid": "f7b775c9-05e0-40f7-85e9-5cc2ef79731e"
   }
 ]
