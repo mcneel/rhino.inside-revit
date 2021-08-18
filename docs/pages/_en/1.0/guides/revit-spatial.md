@@ -28,7 +28,7 @@ To find the separation (or boundary) lines associated with a category of spatial
 
 *Area Schemes* are container for Area element. Each *Area Schemes* can contain many Area element, host on various levels. *Area* plans are directly associated with a Level (just like any other plan view) and also a specific *Area Scheme*. This is why you would see the *Area Scheme* name in parentheses in front of the *Area* plan name e.g. **My Area Plan (Gross Building)**.
 
-Use the **Get Area Schemes** component shared here to query the available *Area Schemes*. Note that *Area Schemes* are Elements and you can use the *Element.Identity* component to grab their Name:
+Use the **Get Area Schemes** component shared here to query the available *Area Schemes*. Note that *Area Schemes* are Elements and you can use the {% include ltr/comp.html uuid='01934ad1' %} component to grab their Name:
 
 ![]({{ "/static/images/guides/revit-spatial03.png" | prepend: site.baseurl }})
 

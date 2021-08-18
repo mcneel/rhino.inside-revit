@@ -13,11 +13,11 @@ In Revit API, Views of all types are represented by the {% include api_type.html
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-You can use the combination of *Element.ClassFilter*, and {% include ltr/comp.html uuid="7b00f940-" %} components to collect views:
+You can use the combination of {% include ltr/comp.html uuid='6bd34014' %}, and {% include ltr/comp.html uuid="7b00f940-" %} components to collect views:
 
 ![]({{ "/static/images/guides/revit-views01.png" | prepend: site.baseurl }})
 
-Notice that the *Element.ClassFilter* requires the full name of the API class as string input e.g. `Autodesk.Revit.DB.View`
+Notice that the {% include ltr/comp.html uuid='6bd34014' %} requires the full name of the API class as string input e.g. `Autodesk.Revit.DB.View`
 
 {% capture issue_note %}
 Add Views to category pickers so an {% include ltr/comp.html uuid="d08f7ab1-" %} can be used to list views
@@ -106,7 +106,7 @@ Outputs parameters are:
 
 ### Reading View Properties
 
-Use the *Element.Decompose* component to inspect the properties of a view object.
+Use the {% include ltr/comp.html uuid='fad33c4b' %} component to inspect the properties of a view object.
 
 ![]({{ "/static/images/guides/revit-views03.png" | prepend: site.baseurl }})
 
@@ -125,11 +125,11 @@ To read the view range property of a view, use the *Get View Range* component sh
 
 ### Collecting Displayed Elements
 
-To collect all the elements owned by a view, use the *Element.OwnerViewFilter* component, passed to the {% include ltr/comp.html uuid="0f7da57e-" %} as shown below. Keep in mind that the 3D geometry that is usually shown in model views are not "Owned" by that view. All 2d elements e.g. Detail items, detail lines, ... are owned by the view they have created on.
+To collect all the elements owned by a view, use the {% include ltr/comp.html uuid='cfb42d90' %} component, passed to the {% include ltr/comp.html uuid="0f7da57e-" %} as shown below. Keep in mind that the 3D geometry that is usually shown in model views are not "Owned" by that view. All 2d elements e.g. Detail items, detail lines, ... are owned by the view they have created on.
 
 ![]({{ "/static/images/guides/revit-views04.png" | prepend: site.baseurl }})
 
-You can use the *Element.SelectableInViewFilter* component to only list the selectable elements on a view.
+You can use the {% include ltr/comp.html uuid='ac546f16' %} component to only list the selectable elements on a view.
 
 ![]({{ "/static/images/guides/revit-views05.png" | prepend: site.baseurl }})
 
