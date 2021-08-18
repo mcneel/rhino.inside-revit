@@ -42,7 +42,13 @@ You can use the {% include ltr/comp.html uuid='e6a1f501' %} component in combina
 
 ![]({{ "/static/images/guides/revit-elements-querybyparam.png" | prepend: site.baseurl }})
 
-## Querying Filters
+## Querying Instances by Level
+
+The {% include ltr/comp.html uuid="b534489b-" %} allows you to filter project elements by Level.
+
+![]({{ "/static/images/guides/revit-level-filters.png" | prepend: site.baseurl }})
+
+## Querying Instances by Filters
 
 Filter components will allow Grasshopper to select specific Revit elements thru many different properties. These filters can also be combined together to make sophisticated selections.
 
