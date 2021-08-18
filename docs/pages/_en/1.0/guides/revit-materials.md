@@ -22,7 +22,7 @@ Each one of these aspects is represented by a tab in the Revit material editor w
 
 ![]({{ "/static/images/guides/revit-materials-editortabs.png" | prepend: site.baseurl }})
 
-In Grasshopper here is how materials aspects are organized in Grasshopper. Similar components for {% include ltr/comp.html uuid='ec93f8e0' %} and {% include ltr/comp.html uuid='c3be363d' %} also exist.
+In Grasshopper there are 3 main components to break down the aspects of a material. Similar components to {% include ltr/comp.html uuid='5b18389b' %} also exist for {% include ltr/comp.html uuid='ec93f8e0' %} and {% include ltr/comp.html uuid='c3be363d' %}.
 
 ![]({{ "/static/images/guides/gh-material-parts.png" | prepend: site.baseurl }})
 
