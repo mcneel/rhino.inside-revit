@@ -18,7 +18,10 @@
             "purchase",
             "book"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "highlight": true,
@@ -37,7 +40,10 @@
             "basics",
             "course"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "highlight": true,
@@ -56,7 +62,10 @@
             "example",
             "purchase"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "highlight": true,
@@ -76,7 +85,10 @@
             "workflow",
             "purchase"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "highlight": true,
@@ -95,7 +107,10 @@
             "course",
             "purchase"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "highlight": true,
@@ -113,7 +128,10 @@
         "tags": [
             "course"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "highlight": true,
@@ -132,7 +150,10 @@
             "workflow",
             "consulting"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Rhino.Inside.Revit Review",
@@ -150,7 +171,10 @@
             "workflow",
             "overview"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "highlight": true,
@@ -169,7 +193,10 @@
             "example",
             "workflow"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Grasshopper in a Revit Workflow",
@@ -186,7 +213,10 @@
             "discussion",
             "overview"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "BIMThoughts Rhino.Inside.Revit",
@@ -203,7 +233,10 @@
             "discussion",
             "overview"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "BIMxt Rhino.Inside.Revit",
@@ -220,7 +253,10 @@
             "presentation",
             "overview"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "AECbytes Rhino.Inside.Revit",
@@ -236,7 +272,10 @@
             "overview",
             "article"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Changing AEC w/ Nate Miller",
@@ -253,7 +292,10 @@
             "automation",
             "podcast"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Parametric Monkey Primer",
@@ -270,7 +312,10 @@
             "basics",
             "article"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Exploring Rhino.Inside Revit Together",
@@ -289,7 +334,10 @@
             "overview",
             "example"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Rhino.Inside.Revit Happy Hour Webinar",
@@ -306,7 +354,10 @@
             "podcast",
             "overview"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Rhino + Revit with Gavin Crump",
@@ -325,7 +376,10 @@
             "tutorial",
             "overview"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Efficient modelmaking with Rhino.Inside.Revit.",
@@ -343,7 +397,10 @@
             "workflow",
             "overview"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Cutting Edge Hack: Grasshopper & Dynamo working together within Revit",
@@ -361,7 +418,10 @@
             "workflow",
             "overview"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Software you need to know in 2021",
@@ -378,7 +438,10 @@
             "overview",
             "podcast"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "BIMThoughts on Rhino.Inside.Revit and PyRevit",
@@ -395,7 +458,10 @@
             "example",
             "workflow"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Aussie BIM Guru Video Series on Rhino.Inside.Revit",
@@ -413,7 +479,10 @@
             "example",
             "workflow"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "First Look at Element Binding",
@@ -449,7 +518,10 @@
             "basics",
             "example"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Selecting Rhino elements by Revit properties by the Aussie BIM Guru",
@@ -465,7 +537,10 @@
         "tags": [
             "tutorial"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Becoming a computational designer with Rhino.Inside.Revit",
@@ -483,7 +558,10 @@
             "overview",
             "discussion"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "SF Computational Design Institute presentation of Rhino.Inside.Revit",
@@ -500,7 +578,10 @@
             "presentation",
             "overview"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "AIA Detroit co.de.D Rhino.Inside.Revit Presentation",
@@ -518,7 +599,10 @@
             "presentation",
             "discussion"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "highlight": true,
@@ -538,7 +622,10 @@
             "convert",
             "tutorial"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Direct Send Rhino Objects to Revit with Conveyor",
@@ -557,7 +644,10 @@
             "convert",
             "tutorial"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Get Revit Walls into Rhino with Conveyor",
@@ -576,7 +666,10 @@
             "convert",
             "tutorial"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "highlight": true,
@@ -596,7 +689,10 @@
             "convert",
             "tutorial"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Create Column Family and insert along a Curve",
@@ -615,7 +711,10 @@
             "family",
             "tutorial"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Custom Casework Inspired by Renzo Piano using Rhino.Inside for Revit",
@@ -632,7 +731,10 @@
             "family",
             "tutorial"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Creating Wall in Revit",
@@ -651,7 +753,10 @@
             "wall",
             "tutorial"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Creating Walls Tutorial",
@@ -667,7 +772,10 @@
         "tags": [
             "tutorial"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Creating Windows",
@@ -684,7 +792,10 @@
             "tutorial",
             "basic"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Intro to Rhino.Inside.Revit",
@@ -701,7 +812,10 @@
             "example",
             "workflow"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "EvolveLAB covers Rhino.Inside.Revit - Way Faster Wednesday",
@@ -718,7 +832,10 @@
             "tutorial",
             "workflow"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Transfer Revit to Rhino",
@@ -737,7 +854,10 @@
             "convert",
             "tutorial"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "highlight": true,
@@ -756,7 +876,10 @@
             "workflow",
             "data management"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Solar Analysis with Rhino.Inside.Revit",
@@ -772,7 +895,10 @@
         "tags": [
             "tutorial"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Lands Design running inside Revit",
@@ -790,7 +916,10 @@
             "site",
             "landscape"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "VisualARQ running Rhino.Inside",
@@ -809,7 +938,10 @@
             "BIM",
             "plug-in"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Grasshopper BIM objects with VisualARQ",
@@ -828,7 +960,10 @@
             "BIM",
             "plug-in"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Auto-update Revit Sheets Using Grasshopper",
@@ -846,7 +981,10 @@
             "tutorial",
             "workflow"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Room Data and View Analysis with Rhino.Inside.Revit",
@@ -864,7 +1002,10 @@
             "tutorial",
             "workflow"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Closest grid intersection to Revit elements",
@@ -882,7 +1023,10 @@
             "tutorial",
             "workflow"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Revit rooms to Rhino using Rhino Inside",
@@ -900,7 +1044,10 @@
             "tutorial",
             "workflow"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "How to Automate Setting Revit Materials Per Panel",
@@ -918,7 +1065,10 @@
             "tutorial",
             "workflow"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Geometry Gym with Rhino.Inside.Revit ",
@@ -935,7 +1085,10 @@
             "structural",
             "basics"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Place Beams in Rhino.Inside.Revit",
@@ -952,7 +1105,30 @@
             "tutorial",
             "structural"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
+    },
+    {
+        "title": "Clash Detection with Rhino.Inside.Revit",
+        "url": "https://youtu.be/ba7TZZqFD4U",
+        "thumbnail": "https://i3.ytimg.com/vi/ba7TZZqFD4U/maxresdefault.jpg",
+        "author": "PointOneStudio",
+        "authorUrl": "https://www.youtube.com/channel/UCGG5EoGVQGfVfw5uEb_IA3g",
+        "description": "In this video, I will introduce to make clash detection using RhinoInside for Revit.",
+        "kinds": [
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "structural",
+            "tutorial"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Structural drawings, Calculations & Model from Architectural design",
@@ -969,7 +1145,10 @@
             "structural",
             "tutorial"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Analytical Model Manipulation",
@@ -988,7 +1167,10 @@
             "analytical",
             "tutorial"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Structural framing from Grasshopper to Revit",
@@ -1005,7 +1187,10 @@
             "structural",
             "tutorial"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Clash Detection, Grasshopper player, SubD, Rhino.Inside.Revit",
@@ -1022,7 +1207,10 @@
             "structural",
             "workflow"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Optimizing your Workflow in Rhino-to-Revit ",
@@ -1039,7 +1227,10 @@
             "presentation",
             "overview"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Building Shell using Adaptive Components",
@@ -1058,7 +1249,10 @@
             "tutorial",
             "adaptive-components"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Create a Simple Revit Adaptive Component for use in Rhino Inside",
@@ -1076,7 +1270,10 @@
             "adaptive",
             "tutorial"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Use Grasshopper to Model 3 Revit Adaptive Component Types by an Image",
@@ -1094,7 +1291,10 @@
             "adaptive",
             "tutorial"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Custom Revit region with Rhino",
@@ -1110,7 +1310,10 @@
         "tags": [
             "tutorial"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Adaptive Components driven by Ladybug/Grasshopper",
@@ -1128,7 +1331,10 @@
             "optimization",
             "tutorial"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Rename Multiple Revit Models Levels with RhinoInside and Excel Data",
@@ -1144,7 +1350,10 @@
         "tags": [
             "tutorial"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Parametric Twisting Tower with Rhino.Inside.Revit",
@@ -1160,7 +1369,10 @@
         "tags": [
             "example"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Getting User Input using Human UI",
@@ -1179,7 +1391,10 @@
             "custom ui",
             "tutorial"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Roof From Wall Edges",
@@ -1198,7 +1413,10 @@
             "roof",
             "tutorial"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Extract Window Geometry and Material by Sub-Categories",
@@ -1217,7 +1435,10 @@
             "material",
             "geometry"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     },
     {
         "title": "Update Door Marks",
@@ -1236,6 +1457,9 @@
             "parameters",
             "tutorial"
         ],
-        "versions" : ["beta"]
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
     }
 ]

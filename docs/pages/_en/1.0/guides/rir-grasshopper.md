@@ -70,13 +70,13 @@ Grasshopper solver can also be toggled from the *Rhinoceros* tab in Revit. This 
 
 ## Element Tracking
 
-Grasshopper components track Revit elements in the Revit model.  This tracking allows Grasshopper to replace the Revit elements that is previoulsy created, even between saves.  Each component output remembers wich it added and it will replace the Revit element when possible and avoid creating duplicates.  Grasshopper will remember these elements after the file is closed and re-opened in the future. Only *Add* components in Grasshopper use tracking.
+Tracking allows Grasshopper to replace the Revit elements that is previously created, even between saves. Each component output remembers which Revit elements it added and avoid creating duplicates. Only *Add* components in Grasshopper use tracking. Grasshopper will remember these elements after the file is closed and re-opened in the future.
 
 This video explains many of the details:
 
 {% include vimeo_player.html id="574667912" %}
 
-The Tracking Mode can be controlled by right-clicking on the component center. 
+The Tracking Mode can be controlled by right-clicking on the component center.
 
 ![]({{ "/static/images/guides/tracking-modes.png" | prepend: site.baseurl }}){: class="small-image"}
 
@@ -96,11 +96,51 @@ Each output on Add Component has additional controls to help manage tracking:
 
 ## Unit Systems
 
-// TODO: 
+In Revit, when choosing a unit system only the interface numbers change, Revit is always working in feet behind the scenes. When the Rhino and Revit unit systems are not the same, Rhino will prompt to change the units to match the Revit display units.
+
+![]({{ "/static/images/guides/unit-convertion.jpg" | prepend: site.baseurl }}){: class="small-image"}
+
+Not matter how this dialog is answered the geometry will be converted to be the correct size in both products.
+
+Be aware that scaling a model in Rhino will also effect the tolerances below.  A model that needs to be scaled up a great amount, for example mm to meters can adversely effect the tolerance.
 
 ## Tolerances
 
-// TODO: 
+Revit can handle Curves, BREP (NURBS) and Mesh geometry from Rhino. An important aspect of geometry is the [Geometric Tolerance](https://wiki.mcneel.com/rhino/faqtolerances) that any shape was built to. When converting geometry, tolerance issues can effect Revit in multiple ways. 
+
+* Ideally Rhino Breps can be converted into Revit directly, but if tolerances are not correct, Revit may reject the geometry.
+* Geometry that cannot be converted to Revit directly will be directed to a secondary transfer method using SAT files. SAT transfer is much slower. A warning will show up on components that need to use the SAT method.
+![]({{ "/static/images/guides/directshape-use-sat.jpg" | prepend: site.baseurl }}){: class="small-image"}
+* Directshape elements that pass neither the normal or the SAT transfer may be imported as Mesh models with dense black edges.
+* Family Types can only accept NURBS geometry, so tolerance issues must be solved. An error message will show if some geometry is not converted to the Family Type.
+* Models that are a long distance from the origin may not be able to hold tight tolerances and therefore will may get rejected by Revit.
+
+Ideally a Rhino model and a Revit model can be modeled to the same tolerance. 
+
+For curves, Revit will not accept curve segments less then about 1mm in length. This include surface trim edges.
+
+* 1/256 (0.0039) of a foot
+* 3/64 (0.047) of and inch
+* About 1mm
+
+For NURBS tolerances Rhino should be set to the built-in Revit tolerance. To set tolerance go to Tools pulldown > Options > Units. Then set that to the Revit tolerance based on the Unit type:
+
+* 0.1 mm
+* 0.0001 of a meter
+* 0.006 of an inch
+* 0.0005 of a foot
+
+It is not always possible in practice to have Rhino models at the same tolerance as Revit would like. Models created in other software or imported are a good example. The general process of *fixing* models that do not transfer will is as follows:
+
+1. Search And repair bad objects in Rhino using the [*Selbadobject* repair process](https://wiki.mcneel.com/rhino/badobjects).
+1. Set tolerance in file and reset tolerance on objects as covered shown above.
+
+Existing models that have a tolerance problem can be reset to a newer tolerance. This process can get complicated. To reset tolerance and update all the join information on the model:
+
+1. Explode the polysurfaces into surfaces.
+1. Select all the surfaces and run the RebuildEdges command. Use the default settings.
+1. Select the surfaces and hit the Join command.
+1. Run the Show Edge command to check for naked edges. These are the edges that are out of tolerance.
 
 ## Grasshopper Performance
 
@@ -110,4 +150,5 @@ As mentioned in the sections above, paying close attention to the items below wi
 - Grasshopper previous in Revit require geometry conversions. Having too many previews also slows down the Revit view. Keep the preview on for Grasshopper components when necessary. You can also toggle the preview globally from the *Rhinoceros* tab in Revit
 - Running many transactions on individual elements is slower that running one transaction on many elements at once. Try to design the graph logic in a way that a single transactional component can operate on as many elements as you need to modify at once
 - Toggling the Grasshopper solver can be helpful in reducing wait times on on large Revit models
+- Poor quality geometry or models out of tolerance can slow dow the transfer process. See *Tolerances* section above
   
