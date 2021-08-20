@@ -29,7 +29,7 @@ namespace RhinoInside.Revit.GH.Types
 
       if (value is DB.HostObject host)
       {
-        var sketch = host.GetFirstDependent<DB.Sketch>();
+        var sketch = host.GetSketch();
         return sketch is object && SetValue(sketch);
       }
 

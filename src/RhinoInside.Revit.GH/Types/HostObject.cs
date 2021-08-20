@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (Value is DB.HostObject host && !(host.Location is DB.LocationPoint) && !(host.Location is DB.LocationCurve))
         {
-          if (host.GetFirstDependent<DB.Sketch>() is DB.Sketch sketch)
+          if (host.GetSketch() is DB.Sketch sketch)
           {
             var center = Point3d.Origin;
             var count = 0;

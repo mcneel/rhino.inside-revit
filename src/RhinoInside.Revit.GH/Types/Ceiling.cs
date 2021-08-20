@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is DB.Ceiling ceiling && ceiling.GetFirstDependent<DB.Sketch>() is DB.Sketch sketch)
+        if (Value is DB.Ceiling ceiling && ceiling.GetSketch() is DB.Sketch sketch)
         {
           var center = Point3d.Origin;
           var count = 0;
