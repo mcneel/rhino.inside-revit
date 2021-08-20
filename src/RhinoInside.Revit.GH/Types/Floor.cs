@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is DB.Floor floor && floor.GetFirstDependent<DB.Sketch>() is DB.Sketch sketch)
+        if (Value is DB.Floor floor && floor.GetSketch() is DB.Sketch sketch)
         {
           var center = Point3d.Origin;
           var count = 0;

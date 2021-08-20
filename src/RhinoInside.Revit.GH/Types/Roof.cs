@@ -37,7 +37,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if(Value is DB.RoofBase roof && !(roof.Location is DB.LocationPoint) && !(roof.Location is DB.LocationCurve))
         {
-          if (roof.GetFirstDependent<DB.Sketch>() is DB.Sketch sketch)
+          if (roof.GetSketch() is DB.Sketch sketch)
           {
             var center = Point3d.Origin;
             var count = 0;

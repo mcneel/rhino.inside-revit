@@ -35,16 +35,16 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
       );
 #endif
     }
-#endregion
+    #endregion
 
-      public GlobalParameter() : base
-    (
-      name: "Global Parameter",
-      nickname: "GlobalParam",
-      description: "Get-Set accessor to global parameter values",
-      category: "Revit",
-      subCategory: "Parameter"
-    )
+    public GlobalParameter() : base
+  (
+    name: "Global Parameter",
+    nickname: "GlobalParam",
+    description: "Get-Set accessor to global parameter values",
+    category: "Revit",
+    subCategory: "Parameter"
+  )
     { }
 
     protected override ParamDefinition[] Inputs => inputs;
@@ -187,88 +187,84 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
       if (parameter is null || value is null)
         return default;
 
-      using(var parameterValue = parameter.GetValue())
-      switch (parameterValue)
-      {
-        case DB.IntegerParameterValue i:
+      using (var parameterValue = parameter.GetValue())
+        switch (parameterValue)
+        {
+          case DB.IntegerParameterValue i:
 
-          if (parameter.GetDefinition() is DB.Definition definition)
-          {
-            if (definition.GetDataType() == SpecType.Boolean.YesNo)
+            if (parameter.GetDefinition() is DB.Definition definition)
             {
-              if (!GH_Convert.ToBoolean(value, out var boolean, GH_Conversion.Both))
-                throw new InvalidCastException();
-
-              i.Value = boolean ? 1 : 0;
-              parameter.SetValue(i);
-              return true;
-            }
-            else if (parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
-            {
-              var builtInParameterName = builtInParameter.ToString();
-              if (builtInParameterName.Contains("COLOR_") || builtInParameterName.Contains("_COLOR_") || builtInParameterName.Contains("_COLOR"))
+              if (definition.GetDataType() == SpecType.Boolean.YesNo)
               {
-                if (!GH_Convert.ToColor(value, out var color, GH_Conversion.Both))
+                if (!GH_Convert.ToBoolean(value, out var boolean, GH_Conversion.Both))
                   throw new InvalidCastException();
 
-                i.Value = ((int) color.R) | ((int) color.G << 8) | ((int) color.B << 16);
+                i.Value = boolean ? 1 : 0;
                 parameter.SetValue(i);
                 return true;
               }
+              else if (parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
+              {
+                var builtInParameterName = builtInParameter.ToString();
+                if (builtInParameterName.Contains("COLOR_") || builtInParameterName.Contains("_COLOR_") || builtInParameterName.Contains("_COLOR"))
+                {
+                  if (!GH_Convert.ToColor(value, out var color, GH_Conversion.Both))
+                    throw new InvalidCastException();
+
+                  i.Value = ((int) color.R) | ((int) color.G << 8) | ((int) color.B << 16);
+                  parameter.SetValue(i);
+                  return true;
+                }
+              }
             }
-          }
 
-          if (!GH_Convert.ToInt32(value, out var integer, GH_Conversion.Both))
-            throw new InvalidCastException();
+            if (!GH_Convert.ToInt32(value, out var integer, GH_Conversion.Both))
+              throw new InvalidCastException();
 
-          i.Value = integer;
-          parameter.SetValue(i);
-          return true;
+            i.Value = integer;
+            parameter.SetValue(i);
+            return true;
 
-        case DB.DoubleParameterValue d:
-          if (!GH_Convert.ToDouble(value, out var real, GH_Conversion.Both))
-            throw new InvalidCastException();
+          case DB.DoubleParameterValue d:
+            if (!GH_Convert.ToDouble(value, out var real, GH_Conversion.Both))
+              throw new InvalidCastException();
 
-          d.Value = SpecType.IsMeasurableSpec(parameter.GetDefinition().GetDataType(), out var spec) ?
-            UnitConverter.InHostUnits(real, spec) :
-            real;
+            d.Value = SpecType.IsMeasurableSpec(parameter.GetDefinition().GetDataType(), out var spec) ?
+              UnitConverter.InHostUnits(real, spec) :
+              real;
 
-          parameter.SetValue(d);
-          return true;
+            parameter.SetValue(d);
+            return true;
 
-        case DB.StringParameterValue s:
-          if (!GH_Convert.ToString(value, out var text, GH_Conversion.Both))
-            throw new InvalidCastException();
+          case DB.StringParameterValue s:
+            if (!GH_Convert.ToString(value, out var text, GH_Conversion.Both))
+              throw new InvalidCastException();
 
-          s.Value = text;
-          parameter.SetValue(s);
-          return true;
+            s.Value = text;
+            parameter.SetValue(s);
+            return true;
 
-        case DB.ElementIdParameterValue id:
-          var element = new Types.Element();
-          if (!element.CastFrom(value))
-            throw new InvalidCastException();
+          case DB.ElementIdParameterValue id:
+            var element = new Types.Element();
+            if (!element.CastFrom(value))
+              throw new InvalidCastException();
 
-          if (!parameter.Document.IsEquivalent(element.Document))
-            throw new ArgumentException("Failed to assign an element from a diferent document.", parameter.Name);
+            if (!parameter.Document.IsEquivalent(element.Document))
+              throw new ArgumentException("Failed to assign an element from a diferent document.", parameter.Name);
 
-          id.Value = element.Id;
-          parameter.SetValue(id);
-          return true;
+            id.Value = element.Id;
+            parameter.SetValue(id);
+            return true;
 
-        default:
-          throw new NotImplementedException();
-      }
+          default:
+            throw new NotImplementedException();
+        }
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       // Input
-      if (!Parameters.Document.TryGetCurrentDocument(this, out var document)) return;
-      if (!Params.GetData(DA, "Parameter", out Types.ParameterKey key, x => x.IsValid)) return;
-      if (!key.GetDocumentParameter(document, out key))
-        throw new Exceptions.RuntimeWarningException($"Parameter '{key.Name}' is not defined on document '{document.Title}'");
-
+      if (!Parameters.ParameterKey.GetDocumentParameter(this, DA, "Parameter", out var key)) return;
       if (!Params.TryGetData(DA, "Value", out IGH_Goo value)) return;
 
       if (key.Value is DB.GlobalParameter global)
@@ -279,9 +275,10 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
           SetGoo(global, value);
         }
 
-        DA.SetData("Parameter", new Types.ParameterKey(global));
+        DA.SetData("Parameter", key);
         Params.TrySetData(DA, "Value", () => GetGoo(global));
       }
+      else throw new Exceptions.RuntimeWarningException($"Parameter '{key.Name}' is not a valid reference to a global parameter");
     }
   }
 }
