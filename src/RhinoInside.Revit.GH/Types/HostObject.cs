@@ -88,6 +88,7 @@ namespace RhinoInside.Revit.GH.Types
           case DB.ExtrusionRoof extrusionRoof: grids = extrusionRoof.CurtainGrids?.Cast<DB.CurtainGrid>(); break;
           case DB.FootPrintRoof footPrintRoof: grids = footPrintRoof.CurtainGrids?.Cast<DB.CurtainGrid>(); break;
           case DB.Wall wall: grids = wall.CurtainGrid is null ? null : Enumerable.Repeat(wall.CurtainGrid, 1); break;
+          default: return new CurtainGrid[0];
         }
 
         return grids.Select(x => new CurtainGrid(Value, x)).ToArray();
