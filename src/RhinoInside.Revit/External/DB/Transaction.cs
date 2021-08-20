@@ -470,7 +470,7 @@ namespace RhinoInside.Revit.External.DB
     /// <summary>
     /// Implementation class for <see cref="CommitScope(Document)"/>
     /// </summary>
-    public readonly struct CommittableScope : IDisposable, ITransactionFinalizer
+    public readonly struct CommittableScope : IDisposable
     {
       internal static CommittableScope Default;
       readonly Transaction transaction;
@@ -484,8 +484,7 @@ namespace RhinoInside.Revit.External.DB
           transaction.GetFailureHandlingOptions().
           SetClearAfterRollback(true).
           SetDelayedMiniWarnings(false).
-          SetForcedModalHandling(true).
-          SetTransactionFinalizer(this)
+          SetForcedModalHandling(true)
         );
 
         if (transaction.Start() != TransactionStatus.Started)
@@ -495,12 +494,6 @@ namespace RhinoInside.Revit.External.DB
       public void Commit() => transaction?.Commit();
 
       void IDisposable.Dispose() => transaction?.Dispose();
-
-      void ITransactionFinalizer.OnCommitted(Document document, string strTransactionName) { }
-      void ITransactionFinalizer.OnRolledBack(Document document, string strTransactionName)
-      {
-        throw new Exceptions.FailException($"Failed to commit transaction '{strTransactionName}' on document '{document.Title.TripleDot(16)}'");
-      }
     }
 
     /// <summary>
