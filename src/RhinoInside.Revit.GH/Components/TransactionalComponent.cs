@@ -586,7 +586,7 @@ namespace RhinoInside.Revit.GH.Components
 
       if (TrackingMode != TrackingMode.NotApplicable)
       {
-        if (Params.Output.OfType<ElementTracking.IGH_TrackingParam>().FirstOrDefault() is IGH_Param output)
+        if (Params.Output.OfType<IGH_TrackingParam>().FirstOrDefault() is IGH_Param output)
         {
           Menu_AppendSeparator(menu);
           var tracking = Menu_AppendItem(menu, "Tracking Mode");
@@ -595,12 +595,12 @@ namespace RhinoInside.Revit.GH.Components
           append.ToolTipText = $"No element tracking takes part in this mode, each solution will append a new {output.TypeName}." + Environment.NewLine +
                                $"The operation may fail if a {output.TypeName} with same name already exists.";
 
-          var supersede = Menu_AppendItem(tracking.DropDown, "Supersede", (s, a) => { TrackingMode = TrackingMode.Supersede; ExpireSolution(true); }, true, TrackingMode == TrackingMode.Supersede);
+          var supersede = Menu_AppendItem(tracking.DropDown, "Enabled : Replace", (s, a) => { TrackingMode = TrackingMode.Supersede; ExpireSolution(true); }, true, TrackingMode == TrackingMode.Supersede);
           supersede.ToolTipText = $"A brand new {output.TypeName} will be created for each solution." + Environment.NewLine +
                                   $"{GH_Convert.ToPlural(output.TypeName)} created on previous iterations are deleted.";
 
-          var reconstruct = Menu_AppendItem(tracking.DropDown, "Reconstruct", (s, a) => { TrackingMode = TrackingMode.Reconstruct; ExpireSolution(true); }, true, TrackingMode == TrackingMode.Reconstruct);
-          reconstruct.ToolTipText = $"If suitable, the previous solution {output.TypeName} will be reconstructed from the input values;" + Environment.NewLine +
+          var reconstruct = Menu_AppendItem(tracking.DropDown, "Enabled : Update", (s, a) => { TrackingMode = TrackingMode.Reconstruct; ExpireSolution(true); }, true, TrackingMode == TrackingMode.Reconstruct);
+          reconstruct.ToolTipText = $"If suitable, the previous solution {output.TypeName} will be updated from the input values;" + Environment.NewLine +
                                     "otherwise, a new one will be created.";
         }
       }
