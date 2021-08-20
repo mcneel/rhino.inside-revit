@@ -19,6 +19,71 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public ParameterKey() : base("Parameter", "Parameter", "Contains a collection of Revit parameters", "Params", "Revit Primitives") { }
 
+    public static bool GetDocumentParameter(IGH_Component component, IGH_DataAccess DA, string name, out Types.ParameterKey key)
+    {
+      if (!component.Params.GetData(DA, name, out key, x => x.IsValid)) return false;
+
+      if (!key.IsReferencedData)
+      {
+        if (!Document.TryGetCurrentDocument(component, out var document))
+          return false;
+
+        var keyName = key.Name;
+        var parameterId = document.Value.IsFamilyDocument ?
+              document.Value.FamilyManager.
+              get_Parameter(keyName)?.Id ??
+              DB.ElementId.InvalidElementId :
+              DB.GlobalParametersManager.FindByName(document.Value, keyName);
+
+        key = Types.ParameterKey.FromElementId(document.Value, parameterId);
+        if (key is object) return true;
+
+        if (document.Value.IsFamilyDocument)
+          throw new Exceptions.RuntimeWarningException($"Family parameter '{keyName}' is not defined on document '{document.Title}'");
+        else
+          throw new Exceptions.RuntimeWarningException($"Global parameter '{keyName}' is not defined on document '{document.Title}'");
+      }
+
+      return key.IsValid;
+    }
+
+    public static bool GetProjectParameter(IGH_Component component, IGH_DataAccess DA, string name, out Types.ParameterKey key)
+    {
+      if (!component.Params.GetData(DA, name, out key, x => x.IsValid)) return false;
+
+      if (!key.IsReferencedData)
+      {
+        if (!Document.TryGetCurrentDocument(component, out var document))
+          return false;
+
+        var keyName = key.Name;
+        if (!document.Value.IsFamilyDocument)
+        {
+          var parameterId = DB.ElementId.InvalidElementId;
+          using (var iterator = document.Value.ParameterBindings.ForwardIterator())
+          {
+            while (iterator.MoveNext())
+            {
+              if (iterator.Key is DB.InternalDefinition definition)
+              {
+                if (definition.Name == keyName)
+                  parameterId = definition.Id;
+              }
+            }
+          }
+
+          key = Types.ParameterKey.FromElementId(document.Value, parameterId);
+          if (key is object) return true;
+        }
+
+        throw new Exceptions.RuntimeWarningException($"Project parameter '{keyName}' is not defined on document '{document.Title}'");
+      }
+      else if (key.Document.IsFamilyDocument || key.Value is DB.GlobalParameter)
+        throw new Exceptions.RuntimeWarningException($"Parameter '{key.Name}' is not a valid reference to a project parameter");
+
+      return key.IsValid;
+    }
+
     #region UI
 
     protected DB.BuiltInCategory SelectedBuiltInCategory = DB.BuiltInCategory.INVALID;

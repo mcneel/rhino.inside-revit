@@ -91,11 +91,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       // Input
-      if (!Parameters.Document.TryGetCurrentDocument(this, out var document)) return;
-      if (!Params.GetData(DA, "Parameter", out Types.ParameterKey key, x => x.IsValid)) return;
-      if (!key.GetDocumentParameter(document, out key))
-        throw new Exceptions.RuntimeWarningException($"Parameter '{key.Name}' is not a global or family parameter");
-
+      if (!Parameters.ParameterKey.GetDocumentParameter(this, DA, "Parameter", out var key)) return;
       if (!Params.TryGetData(DA, "Formula", out string formula)) return;
       if (!Params.TryGetData(DA, "Reporting", out bool? reporting)) return;
 
