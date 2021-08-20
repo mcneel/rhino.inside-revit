@@ -93,7 +93,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static string GetTitle(this Document doc)
     {
 #if REVIT_2022
-      return doc.Title;
+      return doc.IsFamilyDocument ? Path.GetFileNameWithoutExtension(doc.Title) : doc.Title;
 #else
       return Path.GetFileNameWithoutExtension(doc.Title);
 #endif
