@@ -105,7 +105,9 @@ namespace RhinoInside.Revit.GH
               if (!GH_Convert.ToBoolean(value, out var boolean, GH_Conversion.Both))
                 throw new InvalidCastException();
 
-              return parameter.Set(boolean ? 1 : 0);
+              var _boolean = boolean ? 1 : 0;
+              if (parameter.AsInteger() == _boolean) return true;
+              return parameter.Set(_boolean);
             }
             else if (parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
             {
@@ -115,7 +117,9 @@ namespace RhinoInside.Revit.GH
                 if (!GH_Convert.ToColor(value, out var color, GH_Conversion.Both))
                   throw new InvalidCastException();
 
-                return parameter.Set(((int) color.R) | ((int) color.G << 8) | ((int) color.B << 16));
+                var _color = ((int) color.R) | ((int) color.G << 8) | ((int) color.B << 16);
+                if (parameter.AsInteger() == _color) return true;
+                return parameter.Set(_color);
               }
             }
           }
@@ -123,18 +127,21 @@ namespace RhinoInside.Revit.GH
           if (!GH_Convert.ToInt32(value, out var integer, GH_Conversion.Both))
             throw new InvalidCastException();
 
+          if (parameter.AsInteger() == integer) return true;
           return parameter.Set(integer);
 
         case DB.StorageType.Double:
           if (!GH_Convert.ToDouble(value, out var real, GH_Conversion.Both))
             throw new InvalidCastException();
 
+          if (parameter.AsDouble() == real) return true;
           return parameter.SetDoubleInRhinoUnits(real);
 
         case DB.StorageType.String:
           if (!GH_Convert.ToString(value, out var text, GH_Conversion.Both))
             throw new InvalidCastException();
 
+          if (parameter.AsString() == text) return true;
           return parameter.Set(text);
 
         case DB.StorageType.ElementId:
@@ -145,6 +152,7 @@ namespace RhinoInside.Revit.GH
           if (!parameter.Element.Document.IsEquivalent(element.Document))
             throw new ArgumentException("Failed to assign an element from a diferent document.", parameter.Definition.Name);
 
+          if (parameter.AsElementId() == element.Id) return true;
           return parameter.Set(element.Id);
 
         default:
