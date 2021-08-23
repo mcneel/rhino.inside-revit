@@ -4,6 +4,8 @@ using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
+  using static NumericTolerance;
+
   public static class CurveExtension
   {
     public static bool IsSameKindAs(this Curve self, Curve other)
@@ -12,17 +14,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
     #region IsAlmostEqualTo
-    static bool IsAlmostEqualTo(double x, double y, double toleance)
-    {
-      double min, max;
-      if (x < y) { min = x; max = y; }
-      else       { min = y; max = x; }
-
-      var length = max - min;
-      return length <= toleance || length <= max * toleance;
-    }
-
-    static bool IsAlmostEqualTo(IList<XYZ> x, IList<XYZ> y, double toleance)
+    private static bool IsAlmostEqualTo(IList<XYZ> x, IList<XYZ> y, double toleance)
     {
       var count = x.Count;
       if (count != y.Count) return false;
@@ -35,57 +27,57 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return true;
     }
 
-    static bool IsAlmostEqualTo(DoubleArray x, DoubleArray y, double toleance)
+    private static bool IsAlmostEqualTo(DoubleArray x, DoubleArray y, double toleance)
     {
       var count = x.Size;
       if (count != y.Size) return false;
       for (int p = 0; p < count; ++p)
       {
-        if (!IsAlmostEqualTo(x.get_Item(p), y.get_Item(p), toleance))
+        if (!NumericTolerance.IsAlmostEqualTo(x.get_Item(p), y.get_Item(p), toleance))
           return false;
       }
 
       return true;
     }
 
-    public static bool IsAlmostEqualTo(this Line self, Line other, double tolerance = XYZExtension.DefaultTolerance) =>
+    public static bool IsAlmostEqualTo(this Line self, Line other, double tolerance = DefaultTolerance) =>
       self.IsBound == other.IsBound &&
       self.Origin.IsAlmostEqualTo(other.Origin, tolerance) &&
       self.Direction.IsAlmostEqualTo(other.Direction, tolerance) &&
-      IsAlmostEqualTo(self.GetEndParameter(0), other.GetEndParameter(0), tolerance) &&
-      IsAlmostEqualTo(self.GetEndParameter(1), other.GetEndParameter(1), tolerance);
+      NumericTolerance.IsAlmostEqualTo(self.GetEndParameter(0), other.GetEndParameter(0), tolerance) &&
+      NumericTolerance.IsAlmostEqualTo(self.GetEndParameter(1), other.GetEndParameter(1), tolerance);
 
-    public static bool IsAlmostEqualTo(this Arc self, Arc other, double tolerance = XYZExtension.DefaultTolerance) =>
+    public static bool IsAlmostEqualTo(this Arc self, Arc other, double tolerance = DefaultTolerance) =>
       self.IsBound == other.IsBound &&
       self.IsCyclic == other.IsCyclic &&
-      IsAlmostEqualTo(self.Radius, other.Radius, tolerance) &&
-      IsAlmostEqualTo(self.GetEndParameter(0), other.GetEndParameter(0), tolerance) &&
-      IsAlmostEqualTo(self.GetEndParameter(1), other.GetEndParameter(1), tolerance) &&
+      NumericTolerance.IsAlmostEqualTo(self.Radius, other.Radius, tolerance) &&
+      NumericTolerance.IsAlmostEqualTo(self.GetEndParameter(0), other.GetEndParameter(0), tolerance) &&
+      NumericTolerance.IsAlmostEqualTo(self.GetEndParameter(1), other.GetEndParameter(1), tolerance) &&
       self.Center.IsAlmostEqualTo(other.Center, tolerance) &&
       self.Normal.IsAlmostEqualTo(other.Normal, tolerance) &&
       self.XDirection.IsAlmostEqualTo(other.XDirection, tolerance) &&
       self.YDirection.IsAlmostEqualTo(other.YDirection, tolerance);
 
-    public static bool IsAlmostEqualTo(this Ellipse self, Ellipse other, double tolerance = XYZExtension.DefaultTolerance) =>
+    public static bool IsAlmostEqualTo(this Ellipse self, Ellipse other, double tolerance = DefaultTolerance) =>
       self.IsBound == other.IsBound &&
       self.IsCyclic == other.IsCyclic &&
       self.Center.IsAlmostEqualTo(other.Center, tolerance) &&
       self.Normal.IsAlmostEqualTo(other.Normal, tolerance) &&
       self.XDirection.IsAlmostEqualTo(other.XDirection, tolerance) &&
       self.YDirection.IsAlmostEqualTo(other.YDirection, tolerance) &&
-      IsAlmostEqualTo(self.GetEndParameter(0), other.GetEndParameter(0), tolerance) &&
-      IsAlmostEqualTo(self.GetEndParameter(1), other.GetEndParameter(1), tolerance) &&
-      IsAlmostEqualTo(self.RadiusX, other.RadiusX, tolerance) &&
-      IsAlmostEqualTo(self.RadiusY, other.RadiusY, tolerance);
+      NumericTolerance.IsAlmostEqualTo(self.GetEndParameter(0), other.GetEndParameter(0), tolerance) &&
+      NumericTolerance.IsAlmostEqualTo(self.GetEndParameter(1), other.GetEndParameter(1), tolerance) &&
+      NumericTolerance.IsAlmostEqualTo(self.RadiusX, other.RadiusX, tolerance) &&
+      NumericTolerance.IsAlmostEqualTo(self.RadiusY, other.RadiusY, tolerance);
 
-    public static bool IsAlmostEqualTo(this HermiteSpline self, HermiteSpline other, double tolerance = XYZExtension.DefaultTolerance) =>
+    public static bool IsAlmostEqualTo(this HermiteSpline self, HermiteSpline other, double tolerance = DefaultTolerance) =>
       self.IsBound == other.IsBound &&
       self.IsCyclic == other.IsCyclic &&
       IsAlmostEqualTo(self.ControlPoints, other.ControlPoints, tolerance) &&
       IsAlmostEqualTo(self.Tangents, other.Tangents, tolerance) &&
       IsAlmostEqualTo(self.Parameters, other.Parameters, tolerance);
 
-    public static bool IsAlmostEqualTo(this NurbSpline self, NurbSpline other, double tolerance = XYZExtension.DefaultTolerance) =>
+    public static bool IsAlmostEqualTo(this NurbSpline self, NurbSpline other, double tolerance = DefaultTolerance) =>
       self.IsBound == other.IsBound &&
       self.IsCyclic == other.IsCyclic &&
       self.Degree == other.Degree &&
@@ -94,21 +86,21 @@ namespace RhinoInside.Revit.External.DB.Extensions
       IsAlmostEqualTo(self.Knots, other.Knots, tolerance) &&
       IsAlmostEqualTo(self.Weights, other.Weights, tolerance);
 
-    public static bool IsAlmostEqualTo(this CylindricalHelix self, CylindricalHelix other, double tolerance = XYZExtension.DefaultTolerance) =>
+    public static bool IsAlmostEqualTo(this CylindricalHelix self, CylindricalHelix other, double tolerance = DefaultTolerance) =>
       self.IsBound == other.IsBound &&
       self.IsCyclic == other.IsCyclic &&
       self.IsRightHanded == other.IsRightHanded &&
-      IsAlmostEqualTo(self.Height, other.Height, tolerance) &&
-      IsAlmostEqualTo(self.Pitch, other.Pitch, tolerance) &&
-      IsAlmostEqualTo(self.Radius, other.Radius, tolerance) &&
-      IsAlmostEqualTo(self.GetEndParameter(0), other.GetEndParameter(0), tolerance) &&
-      IsAlmostEqualTo(self.GetEndParameter(1), other.GetEndParameter(1), tolerance) &&
+      NumericTolerance.IsAlmostEqualTo(self.Height, other.Height, tolerance) &&
+      NumericTolerance.IsAlmostEqualTo(self.Pitch, other.Pitch, tolerance) &&
+      NumericTolerance.IsAlmostEqualTo(self.Radius, other.Radius, tolerance) &&
+      NumericTolerance.IsAlmostEqualTo(self.GetEndParameter(0), other.GetEndParameter(0), tolerance) &&
+      NumericTolerance.IsAlmostEqualTo(self.GetEndParameter(1), other.GetEndParameter(1), tolerance) &&
       self.BasePoint.IsAlmostEqualTo(other.BasePoint, tolerance) &&
       self.XVector.IsAlmostEqualTo(other.XVector, tolerance) &&
       self.YVector.IsAlmostEqualTo(other.YVector, tolerance) &&
       self.ZVector.IsAlmostEqualTo(other.ZVector, tolerance);
 
-    public static bool IsAlmostEqualTo(this Curve self, Curve other, double tolerance = XYZExtension.DefaultTolerance)
+    public static bool IsAlmostEqualTo(this Curve self, Curve other, double tolerance = DefaultTolerance)
     {
       if (!IsSameKindAs(self, other)) return false;
 
@@ -168,7 +160,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool TryGetLocation(this Line curve, out XYZ origin, out XYZ basisX, out XYZ basisY)
     {
       var curveDirection = curve.Direction;
-      if (!curveDirection.IsAlmostEqualTo(XYZ.Zero, XYZExtension.DefaultTolerance))
+      if (!curveDirection.IsAlmostEqualTo(XYZ.Zero, DefaultTolerance))
       {
         if (curve.IsBound)
         {
@@ -198,7 +190,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         var end = curve.GetEndPoint(1);
         var curveDirection = end - start;
 
-        if (!curveDirection.IsAlmostEqualTo(XYZ.Zero, XYZExtension.DefaultTolerance))
+        if (!curveDirection.IsAlmostEqualTo(XYZ.Zero, DefaultTolerance))
         {
           origin = start + (curveDirection * 0.5);
           basisX = curveDirection.Normalize(0D);
@@ -226,7 +218,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         var end = curve.GetEndPoint(1);
         var curveDirection = end - start;
 
-        if (!curveDirection.IsAlmostEqualTo(XYZ.Zero, XYZExtension.DefaultTolerance))
+        if (!curveDirection.IsAlmostEqualTo(XYZ.Zero, DefaultTolerance))
         {
           origin = start + (curveDirection * 0.5);
           basisX = curveDirection.Normalize(0D);
@@ -263,7 +255,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         var end = curve.GetEndPoint(1);
         var curveDirection = end - start;
 
-        if (!curveDirection.IsAlmostEqualTo(XYZ.Zero, XYZExtension.DenormalUpperBound))
+        if (!curveDirection.IsAlmostEqualTo(XYZ.Zero, DenormalUpperBound))
         {
           origin = start + (curveDirection * 0.5);
           basisX = curveDirection.Normalize(0D);
