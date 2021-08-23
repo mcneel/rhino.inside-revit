@@ -40,7 +40,7 @@ namespace RhinoInside.Revit.GH.Types
           if (ceiling.Document.GetElement(ceiling.LevelId) is DB.Level level)
             center.Z = level.GetHeight() * Revit.ModelUnits;
 
-          center.Z += ceiling.get_Parameter(DB.BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM)?.AsDoubleInRhinoUnits() ?? 0.0;
+          center.Z += Revit.ModelUnits * ceiling.get_Parameter(DB.BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM)?.AsDouble() ?? 0.0;
 
           var plane = sketch.SketchPlane.GetPlane().ToPlane();
           var origin = center;

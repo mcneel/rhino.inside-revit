@@ -173,7 +173,7 @@ namespace RhinoInside.Revit.GH.Types
       set
       {
         if (value is null || IsStructural == value) return;
-        Value?.get_Parameter(DB.BuiltInParameter.LEVEL_IS_STRUCTURAL).Set(value.Value ? 1 : 0);
+        Value?.get_Parameter(DB.BuiltInParameter.LEVEL_IS_STRUCTURAL).Update(value.Value ? 1 : 0);
       }
     }
 
@@ -183,7 +183,7 @@ namespace RhinoInside.Revit.GH.Types
       set
       {
         if (value is null || IsBuildingStory == value) return;
-        Value?.get_Parameter(DB.BuiltInParameter.LEVEL_IS_BUILDING_STORY).Set(value.Value ? 1 : 0);
+        Value?.get_Parameter(DB.BuiltInParameter.LEVEL_IS_BUILDING_STORY).Update(value.Value ? 1 : 0);
       }
     }
     #endregion

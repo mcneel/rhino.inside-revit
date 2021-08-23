@@ -40,7 +40,7 @@ namespace RhinoInside.Revit.GH.Types
           if (floor.Document.GetElement(floor.LevelId) is DB.Level level)
             center.Z = level.GetHeight() * Revit.ModelUnits;
 
-          center.Z += floor.get_Parameter(DB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM)?.AsDoubleInRhinoUnits() ?? 0.0;
+          center.Z += Revit.ModelUnits * floor.get_Parameter(DB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM)?.AsDouble() ?? 0.0;
 
           var plane = sketch.SketchPlane.GetPlane().ToPlane();
           var origin = center;

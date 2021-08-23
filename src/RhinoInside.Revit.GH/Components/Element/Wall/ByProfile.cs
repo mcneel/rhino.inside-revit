@@ -275,7 +275,7 @@ namespace RhinoInside.Revit.GH.Components
         );
 
         // Walls are created with the last LocationLine used in the Revit editor!!
-        //newWall.get_Parameter(BuiltInParameter.WALL_KEY_REF_PARAM).Set((int) WallLocationLine.WallCenterline);
+        //newWall.get_Parameter(BuiltInParameter.WALL_KEY_REF_PARAM).Update((int) WallLocationLine.WallCenterline);
 
         var parametersMask = new DB.BuiltInParameter[]
         {
@@ -295,17 +295,17 @@ namespace RhinoInside.Revit.GH.Components
 
       if (wall is object)
       {
-        wall.get_Parameter(DB.BuiltInParameter.WALL_BASE_CONSTRAINT).Set(level.Value.Id);
-        wall.get_Parameter(DB.BuiltInParameter.WALL_BASE_OFFSET).Set(bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight());
-        wall.get_Parameter(DB.BuiltInParameter.WALL_KEY_REF_PARAM).Set((int) locationLine);
+        wall.get_Parameter(DB.BuiltInParameter.WALL_BASE_CONSTRAINT).Update(level.Value.Id);
+        wall.get_Parameter(DB.BuiltInParameter.WALL_BASE_OFFSET).Update(bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight());
+        wall.get_Parameter(DB.BuiltInParameter.WALL_KEY_REF_PARAM).Update((int) locationLine);
         if (structuralUsage == DB.Structure.StructuralWallUsage.NonBearing)
         {
-          wall.get_Parameter(DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).Set(0);
+          wall.get_Parameter(DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).Update(0);
         }
         else
         {
-          wall.get_Parameter(DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).Set(1);
-          wall.get_Parameter(DB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM).Set((int) structuralUsage);
+          wall.get_Parameter(DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).Update(1);
+          wall.get_Parameter(DB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM).Update((int) structuralUsage);
         }
 
         if (wall.Flipped != flipped)

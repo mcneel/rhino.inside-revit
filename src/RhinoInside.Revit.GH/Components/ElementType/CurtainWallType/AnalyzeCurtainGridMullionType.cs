@@ -217,8 +217,9 @@ namespace RhinoInside.Revit.GH.Components
       var radiusParam = mullionType.get_Parameter(DB.BuiltInParameter.CIRC_MULLION_RADIUS);
       if (radiusParam != null)
       {
-        DA.SetData("Radius", radiusParam.AsGoo());
-        DA.SetData("Thickness", radiusParam.AsDoubleInRhinoUnits() * 2);
+        var radius = radiusParam.AsDouble() * Revit.ModelUnits;
+        DA.SetData("Radius", radius);
+        DA.SetData("Thickness", radius * 2.0);
       }
     }
   }

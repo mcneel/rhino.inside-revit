@@ -288,7 +288,7 @@ namespace RhinoInside.Revit.GH.Components
         else freeForm = DB.FreeFormElement.Create(familyDoc, solid);
 
         brep.TryGetUserString(DB.BuiltInParameter.ELEMENT_IS_CUTTING.ToString(), out bool cutting, false);
-        freeForm.get_Parameter(DB.BuiltInParameter.ELEMENT_IS_CUTTING).Set(cutting ? 1 : 0);
+        freeForm.get_Parameter(DB.BuiltInParameter.ELEMENT_IS_CUTTING).Update(cutting ? 1 : 0);
 
         if (!cutting)
         {
@@ -313,19 +313,19 @@ namespace RhinoInside.Revit.GH.Components
           }
 
           if (familySubCategory is null)
-            freeForm.get_Parameter(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY).Set(DB.ElementId.InvalidElementId);
+            freeForm.get_Parameter(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY).Update(DB.ElementId.InvalidElementId);
           else
             freeForm.Subcategory = familySubCategory;
 
           brep.TryGetUserString(DB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), out var visible, true);
-          freeForm.get_Parameter(DB.BuiltInParameter.IS_VISIBLE_PARAM).Set(visible ? 1 : 0);
+          freeForm.get_Parameter(DB.BuiltInParameter.IS_VISIBLE_PARAM).Update(visible ? 1 : 0);
 
           brep.TryGetUserString(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility, 57406);
-          freeForm.get_Parameter(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Set(visibility);
+          freeForm.get_Parameter(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(visibility);
 
           brep.TryGetUserString(DB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), out DB.ElementId materialId);
           var familyMaterialId = MapMaterial(doc, familyDoc, materialId, true);
-          freeForm.get_Parameter(DB.BuiltInParameter.MATERIAL_ID_PARAM).Set(familyMaterialId);
+          freeForm.get_Parameter(DB.BuiltInParameter.MATERIAL_ID_PARAM).Update(familyMaterialId);
         }
 
         return cutting;
@@ -403,8 +403,8 @@ namespace RhinoInside.Revit.GH.Components
             }
             else symbolicCurve = familyDoc.FamilyCreate.NewSymbolicCurve(c, sketchPlane);
 
-            symbolicCurve.get_Parameter(DB.BuiltInParameter.IS_VISIBLE_PARAM).Set(visible ? 1 : 0);
-            symbolicCurve.get_Parameter(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Set(visibility);
+            symbolicCurve.get_Parameter(DB.BuiltInParameter.IS_VISIBLE_PARAM).Update(visible ? 1 : 0);
+            symbolicCurve.get_Parameter(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(visibility);
 
             if (familyGraphicsStyle is object)
               symbolicCurve.Subcategory = familyGraphicsStyle;
@@ -418,8 +418,8 @@ namespace RhinoInside.Revit.GH.Components
             }
             else modelCurve = familyDoc.FamilyCreate.NewModelCurve(c, sketchPlane);
 
-            modelCurve.get_Parameter(DB.BuiltInParameter.IS_VISIBLE_PARAM).Set(visible ? 1 : 0);
-            modelCurve.get_Parameter(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Set(visibility);
+            modelCurve.get_Parameter(DB.BuiltInParameter.IS_VISIBLE_PARAM).Update(visible ? 1 : 0);
+            modelCurve.get_Parameter(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(visibility);
 
             if (familyGraphicsStyle is object)
               modelCurve.Subcategory = familyGraphicsStyle;
@@ -633,7 +633,7 @@ namespace RhinoInside.Revit.GH.Components
                       }
                     }
 
-                    familyDoc.OwnerFamily.get_Parameter(DB.BuiltInParameter.FAMILY_ALLOW_CUT_WITH_VOIDS).Set(hasVoids ? 1 : 0);
+                    familyDoc.OwnerFamily.get_Parameter(DB.BuiltInParameter.FAMILY_ALLOW_CUT_WITH_VOIDS).Update(hasVoids ? 1 : 0);
                   }
                 }
 

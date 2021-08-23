@@ -83,12 +83,12 @@ namespace RhinoInside.Revit.GH.Components
         using (var baseLevel = newRail.get_Parameter(DB.BuiltInParameter.STAIRS_RAILING_BASE_LEVEL_PARAM))
         {
           if (!baseLevel.IsReadOnly)
-            baseLevel.Set(level.Value.Id);
+            baseLevel.Update(level.Value.Id);
         }
         using (var heightOffset = newRail.get_Parameter(DB.BuiltInParameter.STAIRS_RAILING_HEIGHT_OFFSET))
         {
           if (!heightOffset.IsReadOnly)
-            heightOffset.Set(bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight());
+            heightOffset.Update(bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight());
         }
 
         newRail.HostId = host?.Id ?? DB.ElementId.InvalidElementId;
