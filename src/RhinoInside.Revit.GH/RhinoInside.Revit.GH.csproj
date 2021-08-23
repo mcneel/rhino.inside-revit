@@ -256,6 +256,9 @@
     <Compile Include="Components\Element\Inspect.cs" />
     <Compile Include="Components\Element\Level\Identity.cs" />
     <Compile Include="Components\Element\Level\QueryLevels.cs" />
+    <Compile Include="Components\Element\LinePatternElement\LinePatternByName.cs" />
+    <Compile Include="Components\Element\LinePatternElement\LinePatternDashes.cs" />
+    <Compile Include="Components\Element\LinePatternElement\QueryLinePatterns.cs" />
     <Compile Include="Components\Element\Location.cs" />
     <Compile Include="Components\Element\MaterialQuantities.cs" />
     <Compile Include="Components\Element\Materials.cs" />
@@ -289,6 +292,8 @@
     <Compile Include="Components\Element\Material\ByName.cs" />
     <Compile Include="Components\Element\ModelLine\ByCurve.cs" />
     <Compile Include="Components\Element\Passport.cs" />
+    <Compile Include="Components\Element\Phasing\ElementPhasing.cs" />
+    <Compile Include="Components\Element\Phasing\QueryPhases.cs" />
     <Compile Include="Components\Element\PinUnPinElement.cs" />
     <Compile Include="Components\Element\Preview.cs" />
     <Compile Include="Components\Element\ProjectLocation\Query.cs" />
@@ -321,6 +326,10 @@
     <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainGridPanel.cs" />
     <Compile Include="Components\Element\Wall\ByProfile.cs" />
     <Compile Include="Components\Element\Wall\QueryWalls.cs" />
+    <Compile Include="Components\Workset\Active.cs" />
+    <Compile Include="Components\Workset\ElementWorkset.cs" />
+    <Compile Include="Components\Workset\Identity.cs" />
+    <Compile Include="Components\Workset\QueryWorksets.cs" />
     <Compile Include="Components\Family\Element\Form\ByCurves.cs" />
     <Compile Include="Components\Family\Element\Form\ByGeometry.cs" />
     <Compile Include="Components\Family\Element\Visibility\Construct.cs" />
@@ -343,8 +352,10 @@
     <Compile Include="Components\Filters\ElementLogicalFilter.cs" />
     <Compile Include="Components\Filters\FilterElement.cs" />
     <Compile Include="Components\Filters\Obsolete.cs" />
-    <Compile Include="Components\Filters\Parameter\ByName.cs" />
-    <Compile Include="Components\Filters\Selection\ByName.cs" />
+    <Compile Include="Components\Filters\Parameter\ParameterFilter.cs" />
+    <Compile Include="Components\Filters\QueryFilters.cs" />
+    <Compile Include="Components\Filters\Selection\SelectionElements.cs" />
+    <Compile Include="Components\Filters\Selection\SelectionFilter.cs" />
     <Compile Include="Components\ParameterElement\AddParameter.cs" />
     <Compile Include="Components\ParameterElement\DefineParameter.cs" />
     <Compile Include="Components\ParameterElement\GlobalParameter.cs" />
@@ -353,6 +364,7 @@
     <Compile Include="Components\ParameterElement\ProjectParameter.cs" />
     <Compile Include="Components\ParameterElement\QueryParameters.cs" />
     <Compile Include="Components\ParameterElement\SharedParameters.cs" />
+    <Compile Include="Types\Workset.cs" />
     <None Include="Extensions\README.md" />
     <Compile Include="Extensions\Grasshopper\Kernel\GH_ComponentParamServerExtension.cs" />
     <Compile Include="Extensions\Grasshopper\Kernel\GH_Enum.cs" />
@@ -424,11 +436,12 @@
     <Compile Include="Parameters\PersistentParam.cs" />
     <Compile Include="Parameters\Sketch.cs" />
     <Compile Include="Parameters\SketchPlane.cs" />
+    <Compile Include="Parameters\SpatialElement.cs" />
     <Compile Include="Parameters\StructuralAsset.cs" />
     <Compile Include="Parameters\ThermalAsset.cs" />
     <Compile Include="Parameters\ValueList.cs" />
     <Compile Include="Parameters\View.cs" />
-    <Compile Include="Parameters\SpatialElement.cs" />
+    <Compile Include="Parameters\Workset.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

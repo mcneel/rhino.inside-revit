@@ -11,17 +11,23 @@ using DB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Curtain Grid")]
-  public class CurtainGrid : ReferenceObject, IGH_GeometricGoo, IGH_PreviewData
+  public class CurtainGrid : DocumentObject,
+    IGH_GeometricGoo,
+    IGH_PreviewData
   {
+    public CurtainGrid() : base() { }
+    public CurtainGrid(DB.HostObject host, DB.CurtainGrid value) : base(host.Document, value)
+    { }
+
     #region DocumentObject
     public override string DisplayName
     {
       get
       {
-        if (Document.GetElement(Id) is DB.Element element)
-          return $"{element.Name} [Curtain Grid]";
+        if (Value is DB.CurtainGrid grid)
+          return $"Curtain Grid [{grid.NumULines} x {grid.NumVLines}]";
 
-        return "[Curtain Grid]";
+        return "Curtain Grid";
       }
     }
 
@@ -32,11 +38,6 @@ namespace RhinoInside.Revit.GH.Types
 
       base.ResetValue();
     }
-    #endregion
-
-    #region ReferenceObject
-    readonly DB.ElementId id;
-    public override DB.ElementId Id => id;
     #endregion
 
     #region IGH_Goo
@@ -121,12 +122,6 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
     #endregion
-
-    public CurtainGrid() : base() { }
-    public CurtainGrid(DB.HostObject host, DB.CurtainGrid value) : base(host.Document, value)
-    {
-      id = host.Id;
-    }
 
     #region Implementation
     static IEnumerable<DB.CurtainGrid> HostCurtainGrids(DB.HostObject host)

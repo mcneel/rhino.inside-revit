@@ -790,7 +790,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Parameter Value")]
-  public class ParameterValue : ReferenceObject,
+  public class ParameterValue : DocumentObject,
     IEquatable<ParameterValue>,
     IGH_Goo,
     IGH_QuickCast,
@@ -1016,10 +1016,6 @@ namespace RhinoInside.Revit.GH.Types
         return default;
       }
     }
-    #endregion
-
-    #region ReferenceObject
-    public override DB.ElementId Id => Value?.Element.Id;
     #endregion
   }
 }

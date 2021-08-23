@@ -16,8 +16,8 @@ namespace System.Collections.Generic
   {
     public static T ElementAtOrLast<T>(this IList<T> list, int index)
     {
-      var count = list.Count;
-      return index < count ? list[index] : list[count - 1];
+      var count = list.Count;      
+      return index < count ? list[index] : count == 0 ? default : list[count - 1];
     }
   }
 

@@ -72,6 +72,7 @@ namespace RhinoInside.Revit.GH.Components
       // Reenable new joined walls
       foreach (var wallToJoin in joinedWalls)
       {
+        if (!wallToJoin.IsValid()) continue;
         DB.WallUtils.AllowWallJoinAtEnd(wallToJoin, 0);
         DB.WallUtils.AllowWallJoinAtEnd(wallToJoin, 1);
       }
@@ -201,6 +202,12 @@ namespace RhinoInside.Revit.GH.Components
 
         using (var properties = AreaMassProperties.Compute(boundary))
         {
+          if (properties is null)
+          {
+            AddGeometryRuntimeError(GH_RuntimeMessageLevel.Error, "Failed to compute Boundary Area", boundary);
+            throw new RhinoInside.Revit.Exceptions.CancelException();
+          }
+
           if (properties.Area > maxArea)
           {
             maxArea = properties.Area;
@@ -261,6 +268,8 @@ namespace RhinoInside.Revit.GH.Components
         }
       }
 
+      normal = -normal;
+
       if (!Reuse(ref wall, profile, normal, type.Value))
       {
         var boundaries = profile.SelectMany(x => GeometryEncoder.ToCurveMany(x)).SelectMany(External.DB.Extensions.CurveExtension.ToBoundedCurves).ToList();
@@ -283,6 +292,7 @@ namespace RhinoInside.Revit.GH.Components
           DB.BuiltInParameter.ELEM_FAMILY_PARAM,
           DB.BuiltInParameter.ELEM_TYPE_PARAM,
           DB.BuiltInParameter.WALL_KEY_REF_PARAM,
+          DB.BuiltInParameter.WALL_HEIGHT_TYPE,
           DB.BuiltInParameter.WALL_USER_HEIGHT_PARAM,
           DB.BuiltInParameter.WALL_BASE_CONSTRAINT,
           DB.BuiltInParameter.WALL_BASE_OFFSET,
@@ -295,6 +305,8 @@ namespace RhinoInside.Revit.GH.Components
 
       if (wall is object)
       {
+        wall.get_Parameter(DB.BuiltInParameter.WALL_HEIGHT_TYPE).Update(DB.ElementId.InvalidElementId);
+        wall.get_Parameter(DB.BuiltInParameter.WALL_USER_HEIGHT_PARAM).Update((bbox.Max.Z - bbox.Min.Z) / Revit.ModelUnits);
         wall.get_Parameter(DB.BuiltInParameter.WALL_BASE_CONSTRAINT).Update(level.Value.Id);
         wall.get_Parameter(DB.BuiltInParameter.WALL_BASE_OFFSET).Update(bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight());
         wall.get_Parameter(DB.BuiltInParameter.WALL_KEY_REF_PARAM).Update((int) locationLine);

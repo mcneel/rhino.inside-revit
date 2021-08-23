@@ -17,6 +17,10 @@
             "example",
             "purchase",
             "book"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -35,13 +39,17 @@
         "tags": [
             "basics",
             "course"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
         "highlight": true,
         "title": "101 Class LiveAcademy",
         "url": "oliver-thomas-training",
-        "thumbnail": "/static/images/community/liveacademy-oliver-101.jpg",
+        "thumbnail": "/static/images/discover/liveacademy-oliver-101.jpg",
         "author": "Oliver Thomas, BIG",
         "authorUrl": "",
         "description": "In this 1-hour course Oliver Thomas from BIG will cover the basics of the Rhino.Inside interface, the components and workflow while working on a real-world project.",
@@ -53,6 +61,10 @@
         "tags": [
             "example",
             "purchase"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -72,6 +84,10 @@
             "basics",
             "workflow",
             "purchase"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -90,6 +106,10 @@
         "tags": [
             "course",
             "purchase"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -107,6 +127,10 @@
         ],
         "tags": [
             "course"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -125,6 +149,10 @@
             "course",
             "workflow",
             "consulting"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -142,6 +170,10 @@
             "presentation",
             "workflow",
             "overview"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -160,6 +192,10 @@
             "presentation",
             "example",
             "workflow"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -176,6 +212,10 @@
         "tags": [
             "discussion",
             "overview"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -192,6 +232,10 @@
         "tags": [
             "discussion",
             "overview"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -208,6 +252,10 @@
         "tags": [
             "presentation",
             "overview"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -223,6 +271,10 @@
         "tags": [
             "overview",
             "article"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -239,6 +291,10 @@
             "workflow",
             "automation",
             "podcast"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -255,6 +311,10 @@
         "tags": [
             "basics",
             "article"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -273,6 +333,10 @@
             "podcast",
             "overview",
             "example"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -289,6 +353,10 @@
         "tags": [
             "podcast",
             "overview"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -307,6 +375,10 @@
             "podcast",
             "tutorial",
             "overview"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -324,6 +396,10 @@
             "modelmaking",
             "workflow",
             "overview"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -341,6 +417,10 @@
             "presentation",
             "workflow",
             "overview"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -357,6 +437,10 @@
         "tags": [
             "overview",
             "podcast"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -373,6 +457,10 @@
         "tags": [
             "example",
             "workflow"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -390,6 +478,10 @@
         "tags": [
             "example",
             "workflow"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -407,7 +499,8 @@
         "tags": [
             "podcast",
             "overview"
-        ]
+        ],
+        "versions" : ["1.0"]
     },
     {
         "title": "How-to-Rhino Tutorial",
@@ -424,6 +517,10 @@
             "tutorial",
             "basics",
             "example"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -439,6 +536,10 @@
         ],
         "tags": [
             "tutorial"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -456,6 +557,10 @@
             "podcast",
             "overview",
             "discussion"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -472,6 +577,10 @@
         "tags": [
             "presentation",
             "overview"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -489,6 +598,10 @@
         "tags": [
             "presentation",
             "discussion"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -508,6 +621,10 @@
         "tags": [
             "convert",
             "tutorial"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -526,6 +643,10 @@
         "tags": [
             "convert",
             "tutorial"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -544,6 +665,10 @@
         "tags": [
             "convert",
             "tutorial"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -563,6 +688,10 @@
         "tags": [
             "convert",
             "tutorial"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -581,6 +710,10 @@
         "tags": [
             "family",
             "tutorial"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -597,6 +730,10 @@
         "tags": [
             "family",
             "tutorial"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -615,6 +752,10 @@
         "tags": [
             "wall",
             "tutorial"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -630,6 +771,10 @@
         ],
         "tags": [
             "tutorial"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -646,6 +791,10 @@
         "tags": [
             "tutorial",
             "basic"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -662,6 +811,10 @@
         "tags": [
             "example",
             "workflow"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -678,6 +831,10 @@
         "tags": [
             "tutorial",
             "workflow"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -696,6 +853,10 @@
         "tags": [
             "convert",
             "tutorial"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -714,6 +875,10 @@
             "plugin",
             "workflow",
             "data management"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -729,6 +894,10 @@
         ],
         "tags": [
             "tutorial"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -746,6 +915,10 @@
             "tutorial",
             "site",
             "landscape"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -764,6 +937,10 @@
             "tutorial",
             "BIM",
             "plug-in"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -782,6 +959,10 @@
             "tutorial",
             "BIM",
             "plug-in"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -799,6 +980,10 @@
             "podcast",
             "tutorial",
             "workflow"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -816,6 +1001,10 @@
             "analysis",
             "tutorial",
             "workflow"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -833,6 +1022,10 @@
             "analysis",
             "tutorial",
             "workflow"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -850,6 +1043,10 @@
             "analysis",
             "tutorial",
             "workflow"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -867,6 +1064,10 @@
             "materials",
             "tutorial",
             "workflow"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -883,6 +1084,10 @@
         "tags": [
             "structural",
             "basics"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -899,6 +1104,30 @@
         "tags": [
             "tutorial",
             "structural"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
+    },
+    {
+        "title": "Clash Detection with Rhino.Inside.Revit",
+        "url": "https://youtu.be/ba7TZZqFD4U",
+        "thumbnail": "https://i3.ytimg.com/vi/ba7TZZqFD4U/maxresdefault.jpg",
+        "author": "PointOneStudio",
+        "authorUrl": "https://www.youtube.com/channel/UCGG5EoGVQGfVfw5uEb_IA3g",
+        "description": "In this video, I will introduce to make clash detection using RhinoInside for Revit.",
+        "kinds": [
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "structural",
+            "tutorial"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -915,6 +1144,10 @@
         "tags": [
             "structural",
             "tutorial"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -933,6 +1166,10 @@
         "tags": [
             "analytical",
             "tutorial"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -949,6 +1186,10 @@
         "tags": [
             "structural",
             "tutorial"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -965,6 +1206,10 @@
         "tags": [
             "structural",
             "workflow"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -981,6 +1226,10 @@
         "tags": [
             "presentation",
             "overview"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -999,6 +1248,10 @@
         "tags": [
             "tutorial",
             "adaptive-components"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -1016,6 +1269,10 @@
             "family",
             "adaptive",
             "tutorial"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -1033,6 +1290,10 @@
             "family",
             "adaptive",
             "tutorial"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -1048,6 +1309,10 @@
         ],
         "tags": [
             "tutorial"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -1065,6 +1330,10 @@
             "analysis",
             "optimization",
             "tutorial"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -1080,6 +1349,10 @@
         ],
         "tags": [
             "tutorial"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -1095,6 +1368,10 @@
         ],
         "tags": [
             "example"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -1113,6 +1390,10 @@
         "tags": [
             "custom ui",
             "tutorial"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -1131,6 +1412,10 @@
         "tags": [
             "roof",
             "tutorial"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -1149,6 +1434,10 @@
         "tags": [
             "material",
             "geometry"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     },
     {
@@ -1167,6 +1456,10 @@
         "tags": [
             "parameters",
             "tutorial"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
         ]
     }
 ]

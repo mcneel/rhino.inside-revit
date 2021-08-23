@@ -1,7 +1,8 @@
 ---
 title: Schedules & Reports
 order: 65
-thumbnail: /static/images/guides/revit-wip.png
+thumbnail: /static/images/guides/rir-ghpython.png
+
 group: Documentation
 ---
 
@@ -33,37 +34,3 @@ Since schedules are actually views, we can use the same workflow as for [Views](
 ### Finding Specific Schedule
 
 ![]({{ "/static/images/guides/revit-schedules05.png" | prepend: site.baseurl }})
-
-## Key Schedules
-
-{% include ltr/en/wip_note.html %}
-
-## Embedded Schedules
-
-{% include ltr/en/wip_note.html %}
-
-## Reports and Graphical Schedules
-
-{% include ltr/en/wip_note.html %}
-
-## Schedule Definition
-
-{% include ltr/en/wip_note.html %}
-
-## Collecting Scheduled Elements
-
-{% include ltr/en/wip_note.html %}
-
-<!-- in order! -->
-
-## Creating New Schedules
-
-{% include ltr/en/wip_note.html %}
-
-### Create Base Schedule
-
-{% include ltr/en/wip_note.html %}
-
-### Modify Schedule Definition
-
-{% include ltr/en/wip_note.html %}

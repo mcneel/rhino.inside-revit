@@ -1,12 +1,10 @@
 ---
 title: Project Settings
 order: 90
-thumbnail: /static/images/guides/revit-wip.png
+thumbnail: /static/images/guides/rir-ghpython.png
+
 group: Settings
 ---
-
-{% include ltr/en/wip_note.html %}
-
 
 ## Project Information
 

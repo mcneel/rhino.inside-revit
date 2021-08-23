@@ -297,18 +297,6 @@ The {% include ltr/comp.html uuid="face5e7d-" %} component also provides the *Mu
 
 ![]({{ "/static/images/guides/revit-curtainwalls-assocmullionspanels.gif" | prepend: site.baseurl }})
 
-## Modifying Curtain Wall Types
-
-{% include ltr/en/wip_note.html %}
-
-## Modifying Curtain Walls
-
-{% include ltr/en/wip_note.html %}
-
-## Creating Curtain Wall Types
-
-{% include ltr/en/wip_note.html %}
-
 ## Creating Curtain Walls
 
 ### By Profile
@@ -316,12 +304,6 @@ The {% include ltr/comp.html uuid="face5e7d-" %} component also provides the *Mu
 Similar to creating a basic wall based on a profile, you can simply create a curtain wall by passing a *Curtain Wall Type* to the {% include ltr/comp.html uuid='78b02ae8' %} component:
 
 ![]({{ "/static/images/guides/revit-curtainwalls-byprofilescap.png" | prepend: site.baseurl }})
-
-
-### Creating Non-Linear Curtain Walls
-
-<!-- https://github.com/mcneel/rhino.inside-revit/issues/47 -->
-{% include ltr/en/wip_note.html %}
 
 
 <!-- Curtain Systems -->
@@ -354,11 +336,3 @@ Extracting information from *Curtain System* instances are very similar to Curta
 Once you gain access to the *Curtain Grid* definition, you can use the {% include ltr/comp.html uuid="d7b5c58e-" %} to extract information, very similar to grids on *Curtain Walls*:
 
 ![]({{ "/static/images/guides/revit-curtainsystems-analyzecgrid.png" | prepend: site.baseurl }})
-
-## Modifying Curtain Systems
-
-{% include ltr/en/wip_note.html %}
-
-## Creating Curtain Systems
-
-{% include ltr/en/wip_note.html %}

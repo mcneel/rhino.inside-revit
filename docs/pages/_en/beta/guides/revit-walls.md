@@ -179,40 +179,12 @@ To keeps the geometry list extracted from layers in identical order as other com
 ![]({{ "/static/images/guides/revit-walls-layersinorder.gif" | prepend: site.baseurl }})
 
 
-## Modifying Wall Types
-
-{% include ltr/en/wip_note.html %}
-
-### Modifying Basic Wall Structure
-
-{% include ltr/en/wip_note.html %}
-
-### Modifying Stacked Wall Structure
-
-{% include ltr/en/wip_note.html %}
-
-## Modifying Walls
-
-{% include ltr/en/wip_note.html %}
-
-### Modifying Base Curve
-
-{% include ltr/en/wip_note.html %}
-
 ### Modifying Profile
 
 {% capture api_note %}
 Modifying wall profile curves are not supported by the API at the moment
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
-
-## Creating Wall Types
-
-{% include ltr/en/wip_note.html %}
-
-### Creating Basic Wall Type
-
-{% include ltr/en/wip_note.html %}
 
 ### Creating Stacked Wall Type
 

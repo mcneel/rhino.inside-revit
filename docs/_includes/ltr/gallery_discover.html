@@ -164,6 +164,8 @@
     var app;
 
     getDiscoverCards().then((cards) => {
+        // filter for version
+        cards = cards.filter(c => c.versions.includes(activeVersion));
         // cleanup the links
         cards.forEach((c) => {
             c.thumbnail = proxifyUrls(c.thumbnail);
