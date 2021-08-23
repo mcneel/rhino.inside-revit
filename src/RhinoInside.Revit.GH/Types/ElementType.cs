@@ -45,7 +45,7 @@ namespace RhinoInside.Revit.GH.Types
       set
       {
         if (value is object)
-          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_TYPE_MARK)?.Set(value);
+          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_TYPE_MARK)?.Update(value);
       }
     }
     #endregion

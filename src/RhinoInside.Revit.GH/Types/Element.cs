@@ -563,7 +563,7 @@ namespace RhinoInside.Revit.GH.Types
     public DB.WorksetId WorksetId
     {
       get => Document?.GetWorksetId(Id);
-      set => Value?.get_Parameter(DB.BuiltInParameter.ELEM_PARTITION_PARAM)?.Set(value.IntegerValue);
+      set => Value?.get_Parameter(DB.BuiltInParameter.ELEM_PARTITION_PARAM)?.Update(value.IntegerValue);
     }
 
     public Phase CreatedPhase
@@ -602,7 +602,7 @@ namespace RhinoInside.Revit.GH.Types
       set
       {
         if (value is object)
-          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.Set(value);
+          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.Update(value);
       }
     }
 
@@ -612,7 +612,7 @@ namespace RhinoInside.Revit.GH.Types
       set
       {
         if (value is object)
-          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS)?.Set(value);
+          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS)?.Update(value);
       }
     }
 
@@ -622,7 +622,7 @@ namespace RhinoInside.Revit.GH.Types
       set
       {
         if (value is object)
-          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MANUFACTURER)?.Set(value);
+          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MANUFACTURER)?.Update(value);
       }
     }
 
@@ -632,7 +632,7 @@ namespace RhinoInside.Revit.GH.Types
       set
       {
         if (value is object)
-          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MODEL)?.Set(value);
+          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MODEL)?.Update(value);
       }
     }
 
@@ -642,7 +642,7 @@ namespace RhinoInside.Revit.GH.Types
       set
       {
         if (value is object)
-          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_COST)?.Set(value.Value);
+          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_COST)?.Update(value.Value);
       }
     }
 
@@ -652,7 +652,7 @@ namespace RhinoInside.Revit.GH.Types
       set
       {
         if (value is object)
-          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_URL)?.Set(value);
+          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_URL)?.Update(value);
       }
     }
 
@@ -662,7 +662,7 @@ namespace RhinoInside.Revit.GH.Types
       set
       {
         if (value is object)
-          Value?.get_Parameter(DB.BuiltInParameter.KEYNOTE_PARAM)?.Set(value);
+          Value?.get_Parameter(DB.BuiltInParameter.KEYNOTE_PARAM)?.Update(value);
       }
     }
 
@@ -676,7 +676,7 @@ namespace RhinoInside.Revit.GH.Types
       set
       {
         if (value is object)
-          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MARK)?.Set(value);
+          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MARK)?.Update(value);
       }
     }
 #endregion

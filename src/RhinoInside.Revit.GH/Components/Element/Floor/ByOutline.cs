@@ -103,8 +103,8 @@ namespace RhinoInside.Revit.GH.Components
       }
 
       bool succeed = true;
-      succeed &= element.get_Parameter(DB.BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL).Set(structural ? 1 : 0);
-      succeed &= element.get_Parameter(DB.BuiltInParameter.LEVEL_PARAM).Set(level.Id);
+      succeed &= element.get_Parameter(DB.BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL).Update(structural ? 1 : 0);
+      succeed &= element.get_Parameter(DB.BuiltInParameter.LEVEL_PARAM).Update(level.Id);
 
       return succeed;
     }
@@ -207,14 +207,7 @@ namespace RhinoInside.Revit.GH.Components
       if (floor is object)
       {
         var floorHeightabovelevel = bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight();
-        if
-        (
-          floor.GetParameter(External.DB.Schemas.ParameterId.FloorHeightabovelevelParam) is DB.Parameter floorHeightabovelevelParam &&
-          floorHeightabovelevelParam.AsDouble() != floorHeightabovelevel
-        )
-        {
-          floorHeightabovelevelParam.Set(floorHeightabovelevel);
-        }
+        floor.get_Parameter(DB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM)?.Update(floorHeightabovelevel);
       }
     }
   }

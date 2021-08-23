@@ -98,7 +98,7 @@ namespace RhinoInside.Revit.GH.Components
       }
 
       bool succeed = true;
-      succeed &= element.get_Parameter(DB.BuiltInParameter.ROOF_BASE_LEVEL_PARAM).Set(level.Id);
+      succeed &= element.get_Parameter(DB.BuiltInParameter.ROOF_BASE_LEVEL_PARAM).Update(level.Id);
 
       return succeed;
     }
@@ -144,11 +144,11 @@ namespace RhinoInside.Revit.GH.Components
       {
         var parametersMask = new DB.BuiltInParameter[]
         {
-        DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-        DB.BuiltInParameter.ELEM_FAMILY_PARAM,
-        DB.BuiltInParameter.ELEM_TYPE_PARAM,
-        DB.BuiltInParameter.ROOF_BASE_LEVEL_PARAM,
-        DB.BuiltInParameter.ROOF_LEVEL_OFFSET_PARAM
+          DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+          DB.BuiltInParameter.ELEM_FAMILY_PARAM,
+          DB.BuiltInParameter.ELEM_TYPE_PARAM,
+          DB.BuiltInParameter.ROOF_BASE_LEVEL_PARAM,
+          DB.BuiltInParameter.ROOF_LEVEL_OFFSET_PARAM
         };
 
         using (var curveArray = boundary.ToCurveArray())
@@ -158,17 +158,10 @@ namespace RhinoInside.Revit.GH.Components
         }
       }
 
-      if (roof != null)
+      if (roof is object)
       {
         var roofLevelOffset = bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight();
-        if
-        (
-          roof.GetParameter(External.DB.Schemas.ParameterId.RoofLevelOffsetParam) is DB.Parameter RoofLevelOffsetParam &&
-          RoofLevelOffsetParam.AsDouble() != roofLevelOffset
-        )
-        {
-          RoofLevelOffsetParam.Set(roofLevelOffset);
-        }
+        roof.get_Parameter(DB.BuiltInParameter.ROOF_LEVEL_OFFSET_PARAM)?.Update(roofLevelOffset);
       }
     }
   }

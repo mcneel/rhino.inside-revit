@@ -55,7 +55,7 @@ namespace RhinoInside.Revit.GH.Components.Site
       {
         ChangeElementType(ref buildingPad, type);
 
-        buildingPad.get_Parameter(DB.BuiltInParameter.LEVEL_PARAM).Set(level.Value.Id);
+        buildingPad.get_Parameter(DB.BuiltInParameter.LEVEL_PARAM).Update(level.Value.Id);
 
         buildingPad.SetBoundary(curveLoops);
       }
@@ -74,7 +74,7 @@ namespace RhinoInside.Revit.GH.Components.Site
         ReplaceElement(ref buildingPad, newPad, ParametersMask);
       }
 
-      buildingPad?.get_Parameter(DB.BuiltInParameter.BUILDINGPAD_HEIGHTABOVELEVEL_PARAM).Set(boundaryBBox.Min.Z / Revit.ModelUnits - level.Value.GetHeight());
+      buildingPad?.get_Parameter(DB.BuiltInParameter.BUILDINGPAD_HEIGHTABOVELEVEL_PARAM).Update(boundaryBBox.Min.Z / Revit.ModelUnits - level.Value.GetHeight());
     }
   }
 }
