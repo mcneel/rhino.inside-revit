@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using DB = Autodesk.Revit.DB;
@@ -13,6 +14,22 @@ namespace RhinoInside.Revit.GH.Components.Material
     protected override string IconTag => "M";
 
     protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.Material));
+
+    #region UI
+    protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
+    {
+      base.AppendAdditionalComponentMenuItems(menu);
+
+      var activeApp = Revit.ActiveUIApplication;
+      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.Materials);
+      Menu_AppendItem
+      (
+        menu, $"Open Materials…",
+        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
+        activeApp.CanPostCommand(commandId), false
+      );
+    }
+    #endregion
 
     public QueryMaterials() : base
     (

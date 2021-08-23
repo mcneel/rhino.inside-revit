@@ -105,7 +105,6 @@ namespace RhinoInside.Revit.GH.Types
 
           using (var pattern = linePattern.GetLinePattern())
           {
-            var segments = pattern.GetSegments();
             linetype.SetSegments
             (
               pattern.GetSegments().Select
@@ -142,9 +141,65 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         if (Id is object && Id.TryGetBuiltInLinePattern(out var builtInLinePattern))
-          return $"<{builtInLinePattern}>";
+          return $"{builtInLinePattern}";
 
         return base.Name;
+      }
+    }
+
+    public IList<double> Dashes
+    {
+      get
+      {
+        if (Value is DB.LinePatternElement linePattern)
+        {
+          var factor = Convert.Geometry.UnitConverter.ToRhinoUnits;
+
+          using (var pattern = linePattern.GetLinePattern())
+          {
+            return pattern.GetSegments().Select
+            (
+              x =>
+              {
+                switch (x.Type)
+                {
+                  case DB.LinePatternSegmentType.Dash: return x.Length * +factor;
+                  case DB.LinePatternSegmentType.Space: return x.Length * -factor;
+                  case DB.LinePatternSegmentType.Dot: return 0.0;
+                  default: throw new ArgumentOutOfRangeException();
+                }
+              }
+            ).ToArray();
+          }
+        }
+
+        return default;
+      }
+      set
+      {
+        if (Value is DB.LinePatternElement linePattern)
+        {
+          var factor = Convert.Geometry.UnitConverter.ToHostUnits;
+
+          using (var pattern = linePattern.GetLinePattern())
+          {
+            pattern.SetSegments
+            (
+              value.Select
+              (
+                x =>
+                {
+                  if (x < 0.0) return new DB.LinePatternSegment(DB.LinePatternSegmentType.Space, -x * factor);
+                  if (x > 0.0) return new DB.LinePatternSegment(DB.LinePatternSegmentType.Dash, +x * factor);
+                  if (x == 0.0) return new DB.LinePatternSegment(DB.LinePatternSegmentType.Dot, 0.0);
+                  throw new ArgumentOutOfRangeException();
+                }
+              ).ToArray()
+            );
+
+            linePattern.SetLinePattern(pattern);
+          }
+        }
       }
     }
     #endregion

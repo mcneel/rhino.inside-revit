@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using DB = Autodesk.Revit.DB;
@@ -42,9 +43,25 @@ namespace RhinoInside.Revit.GH.Components
   public class QueryLineStyles : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("54082395-7160-4563-B289-215AFDD33A7F");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.obscure;
 
     protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.GraphicsStyle));
+
+    #region UI
+    protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
+    {
+      base.AppendAdditionalComponentMenuItems(menu);
+
+      var activeApp = Revit.ActiveUIApplication;
+      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.LineStyles);
+      Menu_AppendItem
+      (
+        menu, $"Open Line Styles…",
+        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
+        activeApp.CanPostCommand(commandId), false
+      );
+    }
+    #endregion
 
     public QueryLineStyles() : base
     (
@@ -52,7 +69,7 @@ namespace RhinoInside.Revit.GH.Components
       nickname: "Line Styles",
       description: "Get document line styles list",
       category: "Revit",
-      subCategory: "Model"
+      subCategory: "Category"
     )
     { }
 
