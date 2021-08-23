@@ -134,6 +134,32 @@ namespace RhinoInside.Revit.GH.Components.Filters
         return;
       }
 
+      // Do a guess based on the Value content
+      if (storageType == DB.StorageType.None)
+      {
+        var goo = default(IGH_Goo);
+        if (!DA.GetData("Value", ref goo)) return;
+
+        switch (goo)
+        {
+          case GH_Boolean _:          storageType = DB.StorageType.Integer; break;
+          case GH_Integer _:          storageType = DB.StorageType.Integer; break;
+          case GH_Number _:           storageType = DB.StorageType.Double; break;
+          case GH_String _:           storageType = DB.StorageType.String; break;
+          case Types.IGH_ElementId _: storageType = DB.StorageType.ElementId; break;
+          default:
+            switch (goo.ScriptVariable())
+            {
+              case bool _: storageType = DB.StorageType.Integer; break;
+              case int _: storageType = DB.StorageType.Integer; break;
+              case double _: storageType = DB.StorageType.Double; break;
+              case string _: storageType = DB.StorageType.String; break;
+              case DB.Element _: storageType = DB.StorageType.ElementId; break;
+            }
+            break;
+        }
+      }
+
       var provider = new DB.ParameterValueProvider(parameterKey.Id);
 
       DB.FilterRule rule = null;
