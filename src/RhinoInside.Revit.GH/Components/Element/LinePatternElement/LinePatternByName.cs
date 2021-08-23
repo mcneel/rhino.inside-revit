@@ -102,10 +102,11 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElement
       if (name is object) pattern.Name = name;
       if (template is object)
       {
-        using (var dashes = template.GetLinePattern())
+        using (var oldDashes = pattern.GetLinePattern())
+        using (var newDashes = template.GetLinePattern())
         {
-          dashes.Name = pattern.Name;
-          pattern.SetLinePattern(dashes);
+          if (oldDashes.UpdateSegments(newDashes.GetSegments()))
+            pattern.SetLinePattern(oldDashes);
         }
       }
 

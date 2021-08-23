@@ -264,6 +264,7 @@
     <Compile Include="External\DB\Extensions\Sketch.cs" />
     <Compile Include="External\DB\Extensions\Solid.cs" />
     <Compile Include="External\DB\Extensions\Surface.cs" />
+    <Compile Include="External\DB\NumericTolerance.cs" />
     <Compile Include="External\DB\Extensions\View.cs" />
     <Compile Include="External\DB\Extensions\XYZ.cs" />
     <Compile Include="External\DB\Extensions\Wall.cs" />

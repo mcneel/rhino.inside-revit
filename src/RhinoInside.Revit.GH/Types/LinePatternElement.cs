@@ -183,21 +183,23 @@ namespace RhinoInside.Revit.GH.Types
 
           using (var pattern = linePattern.GetLinePattern())
           {
-            pattern.SetSegments
+            if
             (
-              value.Select
+              pattern.UpdateSegments
               (
-                x =>
-                {
-                  if (x < 0.0) return new DB.LinePatternSegment(DB.LinePatternSegmentType.Space, -x * factor);
-                  if (x > 0.0) return new DB.LinePatternSegment(DB.LinePatternSegmentType.Dash, +x * factor);
-                  if (x == 0.0) return new DB.LinePatternSegment(DB.LinePatternSegmentType.Dot, 0.0);
-                  throw new ArgumentOutOfRangeException();
-                }
-              ).ToArray()
-            );
-
-            linePattern.SetLinePattern(pattern);
+                value.Select
+                (
+                  x =>
+                  {
+                    if (x < 0.0) return new DB.LinePatternSegment(DB.LinePatternSegmentType.Space, -x * factor);
+                    if (x > 0.0) return new DB.LinePatternSegment(DB.LinePatternSegmentType.Dash, +x * factor);
+                    if (x == 0.0) return new DB.LinePatternSegment(DB.LinePatternSegmentType.Dot, 0.0);
+                    throw new ArgumentOutOfRangeException();
+                  }
+                ).ToArray()
+              )
+            )
+              linePattern.SetLinePattern(pattern);
           }
         }
       }
