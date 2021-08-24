@@ -33,7 +33,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var curve = default(Rhino.Geometry.Curve);
+      var curve = default(Curve);
       if (!DA.GetData("Curve", ref curve))
         return;
 
@@ -57,7 +57,7 @@ namespace RhinoInside.Revit.GH.Components
 
       var symbolic = default(bool);
       if (DA.GetData("Symbolic", ref symbolic))
-        curve.TrySetUserString(DB.BuiltInParameter.MODEL_OR_SYMBOLIC.ToString(), symbolic, false);
+        curve.TrySetUserString(DB.BuiltInParameter.MODEL_OR_SYMBOLIC.ToString(), symbolic, true);
 
       DA.SetData("Curve", curve);
     }

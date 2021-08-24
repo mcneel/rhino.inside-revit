@@ -678,7 +678,10 @@ namespace Rhino.Geometry
     {
       if (geometry.GetUserString(key) is string stringValue)
       {
-        value = (T) System.Convert.ChangeType(stringValue, typeof(T), System.Globalization.CultureInfo.InvariantCulture);
+        if (typeof(T).IsEnum)
+          value = (T) Enum.Parse(typeof(T), stringValue);
+        else
+          value = (T) System.Convert.ChangeType(stringValue, typeof(T), System.Globalization.CultureInfo.InvariantCulture);
         return true;
       }
 
