@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Host")]
   public class HostObject : InstanceElement, IGH_HostObject
   {
-    protected override Type ScriptVariableType => typeof(DB.HostObject);
+    protected override Type ValueType => typeof(DB.HostObject);
     public new DB.HostObject Value => base.Value as DB.HostObject;
 
     public HostObject() { }
@@ -102,7 +102,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Host Type")]
   public class HostObjectType : ElementType, IGH_HostObjectType
   {
-    protected override Type ScriptVariableType => typeof(DB.HostObjAttributes);
+    protected override Type ValueType => typeof(DB.HostObjAttributes);
     public new DB.HostObjAttributes Value => base.Value as DB.HostObjAttributes;
 
     public HostObjectType() { }

@@ -6,7 +6,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Spatial Element")]
   public class SpatialElement : InstanceElement
   {
-    protected override Type ScriptVariableType => typeof(DB.SpatialElement);
+    protected override Type ValueType => typeof(DB.SpatialElement);
     public static explicit operator DB.SpatialElement(SpatialElement value) => value?.Value;
     public new DB.SpatialElement Value => base.Value as DB.SpatialElement;
 

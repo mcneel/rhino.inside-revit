@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Floor")]
   public class Floor : HostObject
   {
-    protected override Type ScriptVariableType => typeof(DB.Floor);
+    protected override Type ValueType => typeof(DB.Floor);
     public static explicit operator DB.Floor(Floor value) => value?.Value;
     public new DB.Floor Value => base.Value as DB.Floor;
 

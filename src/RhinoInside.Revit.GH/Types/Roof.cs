@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Roof")]
   public class Roof : HostObject
   {
-    protected override Type ScriptVariableType => typeof(DB.RoofBase);
+    protected override Type ValueType => typeof(DB.RoofBase);
     public static explicit operator DB.RoofBase(Roof value) => value?.Value;
     public new DB.RoofBase Value => base.Value as DB.RoofBase;
 

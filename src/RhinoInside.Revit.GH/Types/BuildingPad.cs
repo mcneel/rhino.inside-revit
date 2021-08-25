@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Building Pad")]
   public class BuildingPad : HostObject
   {
-    protected override Type ScriptVariableType => typeof(DB.Architecture.BuildingPad);
+    protected override Type ValueType => typeof(DB.Architecture.BuildingPad);
     public static explicit operator DB.Architecture.BuildingPad(BuildingPad value) => value?.Value;
     public new DB.Architecture.BuildingPad Value => base.Value as DB.Architecture.BuildingPad;
 

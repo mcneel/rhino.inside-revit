@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Types
     #region IGH_Goo
     public override bool IsValid => (Id?.TryGetBuiltInLinePattern(out var _) == true) || base.IsValid;
 
-    protected override Type ScriptVariableType => typeof(DB.LinePatternElement);
+    protected override Type ValueType => typeof(DB.LinePatternElement);
 
     public sealed override bool CastFrom(object source)
     {

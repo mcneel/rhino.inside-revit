@@ -160,7 +160,7 @@ namespace RhinoInside.Revit.GH.Types
       ((Id?.TryGetBuiltInParameter(out var _) == true) || base.IsValid) :
       (name is object && DB.NamingUtils.IsValidName(name) || GUID.HasValue);
 
-    protected override Type ScriptVariableType => typeof(DB.ParameterElement);
+    protected override Type ValueType => typeof(DB.ParameterElement);
     public override object ScriptVariable() => Name;
 
     public sealed override bool CastFrom(object source)

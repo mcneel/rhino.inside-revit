@@ -51,7 +51,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Design Option")]
   public class DesignOption : Element
   {
-    protected override Type ScriptVariableType => typeof(DB.DesignOption);
+    protected override Type ValueType => typeof(DB.DesignOption);
     public new DB.DesignOption Value => base.Value as DB.DesignOption;
 
     public override string DisplayName

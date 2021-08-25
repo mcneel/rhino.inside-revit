@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Component")]
   public class FamilyInstance : InstanceElement, IGH_FamilyInstance, Bake.IGH_BakeAwareElement
   {
-    protected override Type ScriptVariableType => typeof(DB.FamilyInstance);
+    protected override Type ValueType => typeof(DB.FamilyInstance);
     public static explicit operator DB.FamilyInstance(FamilyInstance value) => value?.Value;
     public new DB.FamilyInstance Value => base.Value as DB.FamilyInstance;
 
@@ -328,7 +328,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Component Type")]
   public class FamilySymbol : ElementType, IGH_FamilySymbol, Bake.IGH_BakeAwareElement
   {
-    protected override Type ScriptVariableType => typeof(DB.FamilySymbol);
+    protected override Type ValueType => typeof(DB.FamilySymbol);
     public static explicit operator DB.FamilySymbol(FamilySymbol value) => value?.Value;
     public new DB.FamilySymbol Value => base.Value as DB.FamilySymbol;
 

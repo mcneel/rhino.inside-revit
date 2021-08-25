@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Types
   {
     #region IGH_Goo
     public override bool IsValid => (Id?.TryGetBuiltInCategory(out var _) == true) || base.IsValid;
-    protected override Type ScriptVariableType => typeof(DB.Category);
+    protected override Type ValueType => typeof(DB.Category);
     public override object ScriptVariable() => APIObject;
 
     public sealed override bool CastFrom(object source)
@@ -555,7 +555,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Graphics Style")]
   public class GraphicsStyle : Element
   {
-    protected override Type ScriptVariableType => typeof(DB.GraphicsStyle);
+    protected override Type ValueType => typeof(DB.GraphicsStyle);
     public new DB.GraphicsStyle Value => base.Value as DB.GraphicsStyle;
 
     public GraphicsStyle() { }

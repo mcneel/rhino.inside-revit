@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Sketch Plane")]
   public class SketchPlane : GraphicalElement
   {
-    protected override Type ScriptVariableType => typeof(DB.SketchPlane);
+    protected override Type ValueType => typeof(DB.SketchPlane);
     public static explicit operator DB.SketchPlane(SketchPlane value) => value?.Value;
     public new DB.SketchPlane Value => base.Value as DB.SketchPlane;
 

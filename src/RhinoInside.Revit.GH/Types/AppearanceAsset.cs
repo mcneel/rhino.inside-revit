@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Appearance Asset")]
   public class AppearanceAssetElement : Element, Bake.IGH_BakeAwareElement
   {
-    protected override Type ScriptVariableType => typeof(DB.AppearanceAssetElement);
+    protected override Type ValueType => typeof(DB.AppearanceAssetElement);
     public new DB.AppearanceAssetElement Value => base.Value as DB.AppearanceAssetElement;
 
     public AppearanceAssetElement() { }

@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Curtain Grid Line")]
   public class CurtainGridLine : HostObject
   {
-    protected override Type ScriptVariableType => typeof(DB.CurtainGridLine);
+    protected override Type ValueType => typeof(DB.CurtainGridLine);
     public new DB.CurtainGridLine Value => base.Value as DB.CurtainGridLine;
     public static explicit operator DB.CurtainGridLine(CurtainGridLine value) => value?.Value;
 

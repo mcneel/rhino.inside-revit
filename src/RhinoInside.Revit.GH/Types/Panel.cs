@@ -6,7 +6,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Panel")]
   public class Panel : FamilyInstance
   {
-    protected override Type ScriptVariableType => typeof(DB.FamilyInstance);
+    protected override Type ValueType => typeof(DB.FamilyInstance);
     public static explicit operator DB.FamilyInstance(Panel value) => value?.Value;
     public new DB.FamilyInstance Value => base.Value as DB.FamilyInstance;
 

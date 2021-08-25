@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Base Point")]
   public class BasePoint : GraphicalElement
   {
-    protected override Type ScriptVariableType => typeof(DB.BasePoint);
+    protected override Type ValueType => typeof(DB.BasePoint);
     public new DB.BasePoint Value => base.Value as DB.BasePoint;
 
     protected override bool SetValue(DB.Element element) => IsValidElement(element) && base.SetValue(element);
@@ -127,7 +127,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Internal Origin")]
   public class InternalOrigin : GraphicalElement
   {
-    protected override Type ScriptVariableType => typeof(DBInternalOrigin);
+    protected override Type ValueType => typeof(DBInternalOrigin);
     public new DBInternalOrigin Value => base.Value as DBInternalOrigin;
 
     protected override bool SetValue(DB.Element element) => IsValidElement(element) && base.SetValue(element);

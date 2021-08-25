@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Linked Element")]
   public class Instance : GraphicalElement
   {
-    protected override Type ScriptVariableType => typeof(DB.Instance);
+    protected override Type ValueType => typeof(DB.Instance);
     public new DB.Instance Value => base.Value as DB.Instance;
 
     public Instance() { }
@@ -39,7 +39,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Linked Model")]
   public class RevitLinkInstance : Instance
   {
-    protected override Type ScriptVariableType => typeof(DB.RevitLinkInstance);
+    protected override Type ValueType => typeof(DB.RevitLinkInstance);
     public new DB.RevitLinkInstance Value => base.Value as DB.RevitLinkInstance;
 
     public RevitLinkInstance() { }
@@ -49,7 +49,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Import Symbol")]
   public class ImportInstance : Instance
   {
-    protected override Type ScriptVariableType => typeof(DB.ImportInstance);
+    protected override Type ValueType => typeof(DB.ImportInstance);
     public new DB.ImportInstance Value => base.Value as DB.ImportInstance;
 
     public ImportInstance() { }
@@ -59,7 +59,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Point Cloud")]
   public class PointCloudInstance : Instance
   {
-    protected override Type ScriptVariableType => typeof(DB.PointCloudInstance);
+    protected override Type ValueType => typeof(DB.PointCloudInstance);
     public new DB.PointCloudInstance Value => base.Value as DB.PointCloudInstance;
 
     public PointCloudInstance() { }

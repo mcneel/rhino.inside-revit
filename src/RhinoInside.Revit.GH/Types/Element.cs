@@ -41,8 +41,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    // TODO : Rename to ValueType
-    protected virtual Type ScriptVariableType => typeof(DB.Element);
+    protected virtual Type ValueType => typeof(DB.Element);
     #endregion
 
     #region DocumentObject
@@ -300,7 +299,7 @@ namespace RhinoInside.Revit.GH.Types
 
     protected virtual bool SetValue(DB.Element element)
     {
-      if (ScriptVariableType.IsInstanceOfType(element))
+      if (ValueType.IsInstanceOfType(element))
       {
         Document     = element.Document;
         DocumentGUID = Document.GetFingerprintGUID();

@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Group")]
   public class Group : GraphicalElement
   {
-    protected override Type ScriptVariableType => typeof(DB.Group);
+    protected override Type ValueType => typeof(DB.Group);
     public new DB.Group Value => base.Value as DB.Group;
     public static explicit operator DB.Group(Group value) => value?.Value;
 

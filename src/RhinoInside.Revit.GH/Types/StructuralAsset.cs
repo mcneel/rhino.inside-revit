@@ -7,7 +7,7 @@ namespace RhinoInside.Revit.GH.Types
   [Name("Structural Asset")]
   public class StructuralAssetElement : Element
   {
-    protected override Type ScriptVariableType => typeof(DB.PropertySetElement);
+    protected override Type ValueType => typeof(DB.PropertySetElement);
     public new DB.PropertySetElement Value => base.Value as DB.PropertySetElement;
 
     protected override bool SetValue(DB.Element element) => IsValidElement(element) && base.SetValue(element);

@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Selection Filter")]
   public class SelectionFilterElement : Element
   {
-    protected override Type ScriptVariableType => typeof(DB.SelectionFilterElement);
+    protected override Type ValueType => typeof(DB.SelectionFilterElement);
     public new DB.SelectionFilterElement Value => base.Value as DB.SelectionFilterElement;
 
     public SelectionFilterElement() { }
@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Parameter Filter")]
   public class ParameterFilterElement : Element
   {
-    protected override Type ScriptVariableType => typeof(DB.ParameterFilterElement);
+    protected override Type ValueType => typeof(DB.ParameterFilterElement);
     public new DB.ParameterFilterElement Value => base.Value as DB.ParameterFilterElement;
 
     public ParameterFilterElement() { }

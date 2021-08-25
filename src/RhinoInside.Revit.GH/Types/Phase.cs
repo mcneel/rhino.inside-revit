@@ -6,7 +6,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Phase")]
   public class Phase : Element
   {
-    protected override Type ScriptVariableType => typeof(DB.Phase);
+    protected override Type ValueType => typeof(DB.Phase);
     public new DB.Phase Value => base.Value as DB.Phase;
 
     public Phase() { }

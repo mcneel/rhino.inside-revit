@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Curve Element")]
   public class CurveElement : GraphicalElement, Bake.IGH_BakeAwareElement
   {
-    protected override Type ScriptVariableType => typeof(DB.CurveElement);
+    protected override Type ValueType => typeof(DB.CurveElement);
     public static explicit operator DB.CurveElement(CurveElement value) => value?.Value;
     public new DB.CurveElement Value => base.Value as DB.CurveElement;
 
