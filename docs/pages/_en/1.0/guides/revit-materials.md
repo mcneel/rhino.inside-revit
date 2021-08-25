@@ -22,7 +22,15 @@ Each one of these aspects is represented by a tab in the Revit material editor w
 
 ![]({{ "/static/images/guides/revit-materials-editortabs.png" | prepend: site.baseurl }})
 
-In Grasshopper there are 3 main components to break down the aspects of a material. Similar components to {% include ltr/comp.html uuid='5b18389b' %} also exist for {% include ltr/comp.html uuid='ec93f8e0' %} and {% include ltr/comp.html uuid='c3be363d' %}.
+In Grasshopper, there are 5 main components to break down these 5 aspects of a material:
+
+- {% include ltr/comp.html uuid='222b42df' %}
+- {% include ltr/comp.html uuid='8c5cd6fb' %}
+- {% include ltr/comp.html uuid='5b18389b' %}
+- {% include ltr/comp.html uuid='ec93f8e0' %}
+- {% include ltr/comp.html uuid='c3be363d' %}
+
+These components are shown below. The {% include ltr/comp.html uuid='1f644064' %} is used to extract Assets (Appearance, Physical, and Thermal) from the material and each can be analyzed with their own respective "Analyze" components listed above. Scroll to [Material Assets](#material-assets) to see more information on the various assets:
 
 ![]({{ "/static/images/guides/gh-material-parts.png" | prepend: site.baseurl }})
 
