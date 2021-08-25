@@ -1,2 +1,7 @@
+{% if include.title %}
+## {{ include.title }}
+<small class="build-time">{{ include.version }} @ {{ include.time }}</small>
+{% else %}
 ## v{{ include.version }}
 <small class="build-time">Build Time: {{ include.time }}</small>
+{% endif %}
