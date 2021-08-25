@@ -12,7 +12,7 @@ The {{ site.terms.rir }} project is an exciting new development sponsored by {{ 
 {% endcapture %}
 
 {% capture rhino_note %}
-{{ site.terms.rhino }} is a surface modeling application with an incredibly fast and accurate freeform geometry engine that also supports meshes and point clouds. Rhino supports more that 40+ file formats, making it a great interoperability tool. It is easy to learn, very customizable, extensible, and has a very strong third-party ecosystem with over a thousand add-ons providing lots of additional capabilities
+{{ site.terms.rhino }} is a surface modeling application with an incredibly fast and accurate freeform geometry engine that also supports meshes and point clouds. Rhino supports 40+ file formats, making it a great interoperability tool. It is easy to learn, very customizable, extensible, and has a very strong third-party ecosystem with over a thousand add-ons providing lots of additional capabilities
 {% endcapture %}
 
 {% capture gh_note %}
