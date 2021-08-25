@@ -22,6 +22,18 @@ Each one of these aspects is represented by a tab in the Revit material editor w
 
 ![]({{ "/static/images/guides/revit-materials-editortabs.png" | prepend: site.baseurl }})
 
+In Grasshopper, there are 5 main components to break down these 5 aspects of a material:
+
+- {% include ltr/comp.html uuid='222b42df' %}
+- {% include ltr/comp.html uuid='8c5cd6fb' %}
+- {% include ltr/comp.html uuid='5b18389b' %}
+- {% include ltr/comp.html uuid='ec93f8e0' %}
+- {% include ltr/comp.html uuid='c3be363d' %}
+
+These components are shown below. The {% include ltr/comp.html uuid='1f644064' %} is used to extract Assets (Appearance, Physical, and Thermal) from the material and each can be analyzed with their own respective "Analyze" components listed above. Scroll to [Material Assets](#material-assets) to see more information on the various assets:
+
+![]({{ "/static/images/guides/gh-material-parts.png" | prepend: site.baseurl }})
+
 In the sections below, we will discuss how to deal with all of these 5 aspects using {{ site.terms.rir }}
 
 {% include youtube_player.html id="8CdhieEi6Os" %}
@@ -67,7 +79,7 @@ Use the {% include ltr/comp.html uuid='3aedba3c-' %} document-aware component to
 
 ![]({{ "/static/images/guides/revit-materials-create.png" | prepend: site.baseurl }})
 
-After creating the material, use the {% include ltr/comp.html uuid='8c5cd6fb-' %} component to assign graphic properties to the new material:
+After creating the material, use the {% include ltr/comp.html uuid='8c5cd6fb-' %}, {% include ltr/comp.html uuid='222b42df-' %}, or {% include ltr/comp.html uuid='2f1ec561-' %} to assign graphic properties to the new material:
 
 ![]({{ "/static/images/guides/revit-materials-create-color.png" | prepend: site.baseurl }})
 
