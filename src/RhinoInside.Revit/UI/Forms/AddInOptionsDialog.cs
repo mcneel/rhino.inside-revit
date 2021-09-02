@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using Autodesk.Revit.UI;
+using System.Threading.Tasks;
+
 using Eto.Drawing;
 using Eto.Forms;
+
+using Autodesk.Revit.UI;
+
 using RhinoInside.Revit.Settings;
 
 namespace RhinoInside.Revit.UI
@@ -21,7 +25,7 @@ namespace RhinoInside.Revit.UI
     private TabPage _scripts;
     private TabControl _tabs;
 
-    public AddInOptionsDialog(UIApplication uiApp) : base(uiApp, initialSize: new Size(450, -1))
+    public AddInOptionsDialog(UIApplication uiApp) : base(uiApp, initialSize: new Size(470, -1))
     {
       Title = "Options";
       DefaultButton.Click += OkButton_Click;
@@ -155,6 +159,17 @@ namespace RhinoInside.Revit.UI
     readonly DropDown _updateChannelSelector = new DropDown() { Height = 25 };
     readonly Button _releaseNotesBtn = new Button { Text = "Release Notes", Height = 25 };
     readonly Button _downloadBtn = new Button { Text = "Download Installer", Height = 25 };
+    readonly StackLayout _prevChannelsInfo = new StackLayout();
+    static readonly Spinner _prevChannelsInfoSpinner = new Spinner { Visible = false, Enabled = true };
+    readonly StackLayout _prevChannelsInfoLabel = new StackLayout
+    {
+      Orientation = Orientation.Horizontal,
+      Items =
+      {
+        new Label { Text = "Latest In Other Channels:  " },
+        _prevChannelsInfoSpinner
+      }
+    };
 
     TableRow _releaseInfoPanel = null;
     internal ReleaseInfo ReleaseInfo = null;
@@ -167,12 +182,12 @@ namespace RhinoInside.Revit.UI
       // setup update channel selector
       _updateChannelSelector.SelectedIndexChanged += UpdateChannelSelector_SelectedIndexChanged;
       var execAssm = Assembly.GetExecutingAssembly();
-      foreach (AddinUpdateChannel chnl in AddinUpdater.Channels)
+      foreach (AddinUpdateChannel channel in AddinUpdater.Channels)
       {
         _updateChannelSelector.Items.Add(
           new ImageListItem {
-            Image = Icon.FromResource(chnl.IconResource, execAssm).WithSize(16, 16),
-            Text = chnl.Name
+            Image = Icon.FromResource(channel.IconResource, execAssm).WithSize(16, 16),
+            Text = channel.Name
           }
         );
       }
@@ -180,8 +195,8 @@ namespace RhinoInside.Revit.UI
       if (AddinOptions.Current.UpdateChannel is string activeChannelId)
       {
         var channelGuid = new Guid(activeChannelId);
-        var updaterChannel = AddinUpdater.Channels.Where(x => x.Id == channelGuid).First();
-        _updateChannelSelector.SelectedIndex = Array.IndexOf(AddinUpdater.Channels, updaterChannel);
+        var updateChannel = AddinUpdater.Channels.Where(x => x.Id == channelGuid).First();
+        _updateChannelSelector.SelectedIndex = Array.IndexOf(AddinUpdater.Channels, updateChannel);
       }
       else
         _updateChannelSelector.SelectedIndex = Array.IndexOf(AddinUpdater.Channels, AddinUpdater.DefaultChannel);
@@ -214,8 +229,14 @@ namespace RhinoInside.Revit.UI
             }
           },
           new TableRow {
-            ScaleHeight = false,
             Cells = { _channelDescription }
+          },
+           new TableRow {
+            Cells = { _prevChannelsInfoLabel }
+          },
+           new TableRow {
+            ScaleHeight = false,
+            Cells = { _prevChannelsInfo }
           },
         }
       };
@@ -241,9 +262,66 @@ namespace RhinoInside.Revit.UI
     {
       if (sender is DropDown channelSelector)
       {
-        var updaterChannel = AddinUpdater.Channels[channelSelector.SelectedIndex];
-        _channelDescription.Text = updaterChannel.Description;
+        var updateChannel = AddinUpdater.Channels[channelSelector.SelectedIndex];
+        _channelDescription.Text = updateChannel.Description;
         _channelDescription.Visible = true;
+
+        // build the table for other channel information
+        UpdatePreviousChannelsInfo(
+          AddinUpdater.Channels.Where(c => c.Id != updateChannel.Id).ToList()
+          );
+      }
+    }
+
+    private async void UpdatePreviousChannelsInfo(List<AddinUpdateChannel> prevChannels)
+    {
+      if (prevChannels.Count > 0)
+      {
+        _prevChannelsInfoLabel.Visible = true;
+        _prevChannelsInfoSpinner.Visible = true;
+        _prevChannelsInfo.Items.Clear();
+        _prevChannelsInfo.Visible = true;
+
+        var infoTable = new TableLayout();
+
+        foreach (AddinUpdateChannel channel in prevChannels)
+        {
+          var releaseInfo = await AddinUpdater.GetReleaseInfoAsync(channel);
+          var downloadBtn = new LinkButton { Text = $"v{releaseInfo.Version}" };
+          downloadBtn.Click += (s, e) => Process.Start(releaseInfo.DownloadUrl);
+          var whatsNewButton = new LinkButton { Text = $"Release Notes" };
+          whatsNewButton.Click += (s, e) => Process.Start(releaseInfo.ReleaseNotesUrl);
+
+          infoTable.Rows.Add(
+            new TableRow
+            {
+              Cells =
+              {
+                new ImageView {
+                  Image = Icon.FromResource(
+                    channel.IconResource, assembly: Assembly.GetExecutingAssembly()
+                    ).WithSize(16, 16),
+                },
+                new TableCell
+                {
+                  ScaleWidth = true,
+                  Control = new Label { Text = channel.ReleaseName },
+                },
+                null,
+                downloadBtn,
+                new Panel { Width = 20 },
+                whatsNewButton
+              }
+            });
+        }
+
+        _prevChannelsInfoSpinner.Visible = false;
+        _prevChannelsInfo.Items.Add(infoTable);
+      }
+      else
+      {
+        _prevChannelsInfoLabel.Visible = false;
+        _prevChannelsInfo.Visible = false;
       }
     }
 
