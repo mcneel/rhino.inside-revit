@@ -304,6 +304,7 @@
     <Compile Include="Components\Element\SelectDeselectElement.cs" />
     <Compile Include="Components\Element\SketchPlane\ByPlane.cs" />
     <Compile Include="Components\Element\Sketch\Deconstruct.cs" />
+    <Compile Include="Components\Element\Sheet\SheetByNumber.cs" />
     <Compile Include="Components\Element\Topography\ByMesh.cs" />
     <Compile Include="Components\Element\Topography\ByPoints.cs" />
     <Compile Include="Components\Element\Properties.cs" />
