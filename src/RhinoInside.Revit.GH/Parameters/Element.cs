@@ -11,7 +11,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.ElementTracking
 {
-  internal static class TrackingParamElementExtensions
+  public static class TrackingParamElementExtensions
   {
     /// <summary>
     /// Reads an element from <paramref name="name"/> parameter.
