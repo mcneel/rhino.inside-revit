@@ -127,8 +127,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public static readonly Dictionary<Type, Func<DB.Element, Element>> ActivatorDictionary = new Dictionary<Type, Func<DB.Element, Element>>()
     {
-// TODO : Upgrade Revit 2021 nuget package to 2021.0.1 and change the if below to REVIT_2021
-#if REVIT_2022
+#if REVIT_2021
       { typeof(DB.InternalOrigin),          (element)=> new InternalOrigin        (element as DB.InternalOrigin)    },
       { typeof(DB.BasePoint),               (element)=> new BasePoint             (element as DB.BasePoint)         },
 #endif
@@ -213,8 +212,7 @@ namespace RhinoInside.Revit.GH.Types
 
           return new InstanceElement(element);
         }
-// TODO : Upgrade Revit 2021 nuget package to 2021.0.1 and change the if below to REVIT_2021
-#if !REVIT_2022
+#if !REVIT_2021
         else if (InternalOrigin.IsValidElement(element))
           return new InternalOrigin(element as DB.BasePoint);
         else if (BasePoint.IsValidElement(element))
