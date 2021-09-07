@@ -1193,6 +1193,25 @@
         ]
     },
     {
+        "title": "Craft clean structural models",
+        "url": "https://youtu.be/TamTGqaoPQw",
+        "thumbnail": "https://i3.ytimg.com/vi/TamTGqaoPQw/maxresdefault.jpg",
+        "author": "Structured Parametrics",
+        "authorUrl": "https://www.youtube.com/channel/UCqgD1Dm9u5dCoi0f5dPcXlA",
+        "description": "We demo new techniques for stripping haphazard or messy Architectural information and converting it to high quality structural models and drawings.",
+        "kinds": [
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "structural",
+            "tutorial"
+        ],
+        "versions" : [
+            "1.0"
+        ]
+    },
+    {
         "title": "Clash Detection, Grasshopper player, SubD, Rhino.Inside.Revit",
         "url": "https://youtu.be/bskTiUdHxW0",
         "thumbnail": "https://i3.ytimg.com/vi/bskTiUdHxW0/maxresdefault.jpg",
