@@ -89,14 +89,14 @@ namespace RhinoInside.Revit.GH.Components.Views
         new Param_Boolean
         {
           Name = "Indexed",
-          NickName = "ID",
+          NickName = "IDX",
           Description = $"Whether sheet appears on sheet lists",
           Optional = true
         }
       ),
       new ParamDefinition
       (
-        new Parameters.View()
+        new Parameters.Sheet()
         {
           Name = "Template",
           NickName = "T",
@@ -112,7 +112,7 @@ namespace RhinoInside.Revit.GH.Components.Views
     {
       new ParamDefinition
       (
-        new Parameters.View()
+        new Parameters.Sheet()
         {
           Name = _Sheet_.name,
           NickName = _Sheet_.nickname,
@@ -135,7 +135,7 @@ namespace RhinoInside.Revit.GH.Components.Views
       DB.BuiltInParameter.SHEET_NUMBER,
     };
 
-    class CreationData
+    class SheetHandler
     {
       // required
       public string Number { get; }
@@ -157,7 +157,7 @@ namespace RhinoInside.Revit.GH.Components.Views
 
       public DB.ViewSheet Template { get; set; }
 
-      public CreationData(string number)
+      public SheetHandler(string number)
       {
         Number = number;
       }
@@ -214,7 +214,7 @@ namespace RhinoInside.Revit.GH.Components.Views
       // update, or create
       StartTransaction(doc.Value);
       {
-        sheet = Reconstruct(sheet, doc.Value, new CreationData(number)
+        sheet = Reconstruct(sheet, doc.Value, new SheetHandler(number)
         {
           Name = name,
           IsPlaceHolder = placeholder,
@@ -234,7 +234,7 @@ namespace RhinoInside.Revit.GH.Components.Views
       }
     }
 
-    bool Reuse(DB.ViewSheet sheet, CreationData data)
+    bool Reuse(DB.ViewSheet sheet, SheetHandler data)
     {
       bool rejected = false;
 
@@ -275,7 +275,7 @@ namespace RhinoInside.Revit.GH.Components.Views
       return true;
     }
 
-    DB.ViewSheet Create(DB.Document doc, CreationData data)
+    DB.ViewSheet Create(DB.Document doc, SheetHandler data)
     {
       var sheet = data.CreateSheet(doc);
 
@@ -291,7 +291,7 @@ namespace RhinoInside.Revit.GH.Components.Views
       return sheet;
     }
 
-    DB.ViewSheet Reconstruct(DB.ViewSheet sheet, DB.Document doc, CreationData data)
+    DB.ViewSheet Reconstruct(DB.ViewSheet sheet, DB.Document doc, SheetHandler data)
     {
       if (sheet is null || !Reuse(sheet, data))
         sheet = sheet.ReplaceElement
