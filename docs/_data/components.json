@@ -1,5 +1,15 @@
 [
   {
+    "desc": "Contains a Revit sheet", 
+    "iconsrc": "/static/images/GH/Sheet.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
+    "tab": "Params", 
+    "title": "Sheet", 
+    "typename": "Sheet", 
+    "uuid": "3c0d65b7-4173-423c-97e9-c6124e8c258a"
+  }, 
+  {
     "desc": "Contains a collection of Revit construction phase elements", 
     "iconsrc": "/static/images/GH/Phase.png", 
     "icontag": null, 
@@ -490,22 +500,22 @@
     "uuid": "c907b51e-eea7-4ecf-a110-79ef1b7069ec"
   }, 
   {
-    "desc": "Picker for physical material type options", 
+    "desc": "Picker for physical material class options", 
     "iconsrc": "/static/images/GH/StructuralAssetClass_ValueList.png", 
     "icontag": null, 
     "panel": "Material", 
     "tab": "Revit", 
-    "title": "Physical Asset Type", 
+    "title": "Physical Asset Class", 
     "typename": "StructuralAssetClass_ValueList", 
     "uuid": "6f5d09c7-797f-4ffe-afae-b9c0ddc5905f"
   }, 
   {
-    "desc": "Picker for thermal material type options", 
+    "desc": "Picker for thermal material class options", 
     "iconsrc": "/static/images/GH/ThermalMaterialType_ValueList.png", 
     "icontag": null, 
     "panel": "Material", 
     "tab": "Revit", 
-    "title": "Thermal Asset Type", 
+    "title": "Thermal Asset Class", 
     "typename": "ThermalMaterialType_ValueList", 
     "uuid": "9d9d0211-4598-4f50-921e-ad1208944e7c"
   }, 
@@ -568,6 +578,16 @@
     "title": "Wall Wrapping", 
     "typename": "WallWrapping_ValueList", 
     "uuid": "141f0da4-659e-47e4-8033-3b61057f860b"
+  }, 
+  {
+    "desc": "Get document line styles list", 
+    "iconsrc": "/static/images/GH/QueryLineStyles.png", 
+    "icontag": null, 
+    "panel": "Category", 
+    "tab": "Revit", 
+    "title": "Query Line Styles", 
+    "typename": "QueryLineStyles", 
+    "uuid": "54082395-7160-4563-b289-215afdd33a7f"
   }, 
   {
     "desc": "Query category identity information", 
@@ -1125,7 +1145,7 @@
     "icontag": null, 
     "panel": "Model", 
     "tab": "Revit", 
-    "title": "Add ModelLine", 
+    "title": "Add Model Line", 
     "typename": "ModelLineByCurve", 
     "uuid": "240127b1-94ee-47c9-98f8-05de32447b01"
   }, 
@@ -1230,12 +1250,42 @@
     "uuid": "3e44d6bb-5f49-40e8-a2c4-53e5e3a63ddc"
   }, 
   {
+    "desc": "Get all document sheets", 
+    "iconsrc": "/static/images/GH/QuerySheets.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "tab": "Revit", 
+    "title": "Query Sheets", 
+    "typename": "QuerySheets", 
+    "uuid": "97c8cb27-955f-44cf-948d-dfbde285cd7a"
+  }, 
+  {
+    "desc": "Get all document title block types", 
+    "iconsrc": "/static/images/GH/QueryTitleBlockTypes.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "tab": "Revit", 
+    "title": "Query Title Block Types", 
+    "typename": "QueryTitleBlockTypes", 
+    "uuid": "c7a57ec8-d4d3-4251-aa91-cc67f833313b"
+  }, 
+  {
+    "desc": "Query sheet identity information", 
+    "iconsrc": "/static/images/GH/SheetIdentity.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "tab": "Revit", 
+    "title": "Sheet Identity", 
+    "typename": "SheetIdentity", 
+    "uuid": "cadf5fbb-9dea-4b9f-8214-9897cec0e54a"
+  }, 
+  {
     "desc": "Given a Plane, it adds a SketchPlane element to the active Revit document", 
     "iconsrc": "/static/images/GH/SketchPlaneByPlane.png", 
     "icontag": null, 
     "panel": "Model", 
     "tab": "Revit", 
-    "title": "Add SketchPlane", 
+    "title": "Add Sketch Plane", 
     "typename": "SketchPlaneByPlane", 
     "uuid": "1fa679e4-1821-483a-99f8-dc166b0595f4"
   }, 
@@ -2040,6 +2090,16 @@
     "uuid": "311316ba-81c7-495c-8a20-b7974091d6b1"
   }, 
   {
+    "desc": "Create a new sheet in Revit with given number and name", 
+    "iconsrc": "/static/images/GH/SheetByNumber.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "tab": "Revit", 
+    "title": "Add Sheet", 
+    "typename": "SheetByNumber", 
+    "uuid": "704d9c1b-fc56-4407-87cf-720047ae5875"
+  }, 
+  {
     "desc": "Given a plane, it adds a 3D View to the active Revit document", 
     "iconsrc": "/static/images/GH/View3DByPlane.png", 
     "icontag": null, 
@@ -2358,6 +2418,36 @@
     "title": "Add Point DirectShape", 
     "typename": "DirectShapeByPoint", 
     "uuid": "7a889b89-c423-4ed8-91d9-5cece1ee803d"
+  }, 
+  {
+    "desc": "Create a Revit line pattern by name", 
+    "iconsrc": "/static/images/GH/LinePatternByName.png", 
+    "icontag": null, 
+    "panel": "Model", 
+    "tab": "Revit", 
+    "title": "Add Line Pattern", 
+    "typename": "LinePatternByName", 
+    "uuid": "5c99445a-e908-4598-b6f4-f3db4fb84cc1"
+  }, 
+  {
+    "desc": "Get-Set accessor to line patern dashes, spaces and dots", 
+    "iconsrc": "/static/images/GH/LinePatternDashes.png", 
+    "icontag": null, 
+    "panel": "Model", 
+    "tab": "Revit", 
+    "title": "Line Pattern Dashes", 
+    "typename": "LinePatternDashes", 
+    "uuid": "851e51fe-8b35-4f32-babd-0fb3a1afeaf4"
+  }, 
+  {
+    "desc": "Get document line patterns list", 
+    "iconsrc": "/static/images/GH/QueryLinePatterns.png", 
+    "icontag": null, 
+    "panel": "Model", 
+    "tab": "Revit", 
+    "title": "Query Line Patterns", 
+    "typename": "QueryLinePatterns", 
+    "uuid": "a94000fd-8bcd-49d5-9f00-09bedb88a123"
   }, 
   {
     "desc": "Query level identity information", 
