@@ -1983,6 +1983,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap GraphicsStyle {
+            get {
+                object obj = ResourceManager.GetObject("GraphicsStyle", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Grid {
             get {
                 object obj = ResourceManager.GetObject("Grid", resourceCulture);
@@ -2146,6 +2156,26 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap LevelIdentity {
             get {
                 object obj = ResourceManager.GetObject("LevelIdentity", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap LinePatternByName {
+            get {
+                object obj = ResourceManager.GetObject("LinePatternByName", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap LinePatternDashes {
+            get {
+                object obj = ResourceManager.GetObject("LinePatternDashes", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -2546,6 +2576,26 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap QueryGroupTypes {
             get {
                 object obj = ResourceManager.GetObject("QueryGroupTypes", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap QueryLinePatterns {
+            get {
+                object obj = ResourceManager.GetObject("QueryLinePatterns", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap QueryLineStyles {
+            get {
+                object obj = ResourceManager.GetObject("QueryLineStyles", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
