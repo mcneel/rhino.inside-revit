@@ -25,7 +25,7 @@ namespace RhinoInside.Revit.UI
     private TabPage _scripts;
     private TabControl _tabs;
 
-    public AddInOptionsDialog(UIApplication uiApp) : base(uiApp, initialSize: new Size(470, -1))
+    public AddInOptionsDialog(UIApplication uiApp) : base(uiApp, initialSize: new Size(470, 450))
     {
       Title = "Options";
       DefaultButton.Click += OkButton_Click;
@@ -159,7 +159,7 @@ namespace RhinoInside.Revit.UI
     readonly DropDown _updateChannelSelector = new DropDown() { Height = 25 };
     readonly Button _releaseNotesBtn = new Button { Text = "Release Notes", Height = 25 };
     readonly Button _downloadBtn = new Button { Text = "Download Installer", Height = 25 };
-    readonly StackLayout _prevChannelsInfo = new StackLayout();
+    readonly Panel _prevChannelsInfo = new Panel();
     static readonly Spinner _prevChannelsInfoSpinner = new Spinner { Visible = false, Enabled = true };
     readonly StackLayout _prevChannelsInfoLabel = new StackLayout
     {
@@ -171,7 +171,7 @@ namespace RhinoInside.Revit.UI
       }
     };
 
-    TableRow _releaseInfoPanel = null;
+    TableRow _releaseInfoPanel = new TableRow();
     internal ReleaseInfo ReleaseInfo = null;
 
     void InitLayout()
@@ -185,7 +185,8 @@ namespace RhinoInside.Revit.UI
       foreach (AddinUpdateChannel channel in AddinUpdater.Channels)
       {
         _updateChannelSelector.Items.Add(
-          new ImageListItem {
+          new ImageListItem
+          {
             Image = Icon.FromResource(channel.IconResource, execAssm).WithSize(16, 16),
             Text = channel.Name
           }
@@ -235,9 +236,9 @@ namespace RhinoInside.Revit.UI
             Cells = { _prevChannelsInfoLabel }
           },
            new TableRow {
-            ScaleHeight = false,
             Cells = { _prevChannelsInfo }
           },
+           null
         }
       };
 
@@ -277,10 +278,7 @@ namespace RhinoInside.Revit.UI
     {
       if (prevChannels.Count > 0)
       {
-        _prevChannelsInfoLabel.Visible = true;
         _prevChannelsInfoSpinner.Visible = true;
-        _prevChannelsInfo.Items.Clear();
-        _prevChannelsInfo.Visible = true;
 
         var infoTable = new TableLayout();
 
@@ -297,7 +295,9 @@ namespace RhinoInside.Revit.UI
             {
               Cells =
               {
-                new ImageView {
+                new ImageView
+                {
+                  Width = 18,
                   Image = Icon.FromResource(
                     channel.IconResource, assembly: Assembly.GetExecutingAssembly()
                     ).WithSize(16, 16),
@@ -307,7 +307,6 @@ namespace RhinoInside.Revit.UI
                   ScaleWidth = true,
                   Control = new Label { Text = channel.ReleaseName },
                 },
-                null,
                 downloadBtn,
                 new Panel { Width = 20 },
                 whatsNewButton
@@ -315,8 +314,8 @@ namespace RhinoInside.Revit.UI
             });
         }
 
+        _prevChannelsInfo.Content = infoTable;
         _prevChannelsInfoSpinner.Visible = false;
-        _prevChannelsInfo.Items.Add(infoTable);
       }
       else
       {
@@ -334,7 +333,6 @@ namespace RhinoInside.Revit.UI
 
         _releaseInfoPanel = new TableRow
         {
-          ScaleHeight = true,
           Cells = {
             new Panel {
               Content = new TableLayout {
@@ -363,8 +361,7 @@ namespace RhinoInside.Revit.UI
                             TextAlignment = TextAlignment.Center
                           },
                           _downloadBtn,
-                          _releaseNotesBtn,
-                          null
+                          _releaseNotesBtn
                         }
                       }
                     }
@@ -466,8 +463,9 @@ namespace RhinoInside.Revit.UI
 
       if (sfdlg.Directory is string location)
       {
-        foreach(var item in _scriptLocations.Items)
-          if (item.Text == location) {
+        foreach (var item in _scriptLocations.Items)
+          if (item.Text == location)
+          {
             _scriptLocations.SelectedIndex = _scriptLocations.Items.IndexOf(item);
             return;
           }
