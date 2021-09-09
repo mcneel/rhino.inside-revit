@@ -77,7 +77,7 @@ namespace RhinoInside.Revit.GH.Components
         if (TryGetFilterStringParam(DB.BuiltInParameter.SHEET_NAME, ref name, out var sheetNameFilter))
           sheetsCollector = sheetsCollector.WherePasses(sheetNameFilter);
 
-        var sheets = collector.Cast<DB.ViewSheet>();
+        var sheets = sheetsCollector.Cast<DB.ViewSheet>();
 
         if (!nofilterIsPlaceholder)
           sheets = sheets.Where((x) => x.IsPlaceholder == IsPlaceholder);
