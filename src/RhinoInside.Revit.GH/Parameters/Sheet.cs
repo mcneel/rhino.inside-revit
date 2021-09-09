@@ -19,6 +19,14 @@ namespace RhinoInside.Revit.GH.Parameters
     protected override Types.IGH_Sheet InstantiateT() => new Types.Sheet();
 
     #region UI
+    static readonly List<(string title, Func<DB.ViewSheet, bool> qualifier)> sheetTypeQualifiers
+       = new List<(string title, Func<DB.ViewSheet, bool> qualifier)>
+    {
+      ( title: "All sheets", qualifier: (s) => true ),
+      ( title: "Placeholder sheets", qualifier: (s) => s.IsPlaceholder ),
+      ( title: "Assembly sheets", qualifier: (s) => s.IsAssemblyView ),
+    };
+
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
       if (SourceCount != 0) return;
@@ -33,43 +41,56 @@ namespace RhinoInside.Revit.GH.Parameters
       };
       listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
 
-      var placeholderCheckBox = new CheckBox
+      var sheetTypeBox = new ComboBox
       {
+        DropDownStyle = ComboBoxStyle.DropDownList,
         Width = (int) (200 * GH_GraphicsUtil.UiScale),
-        Text = "Show Placeholders Only",
-        Checked = PersistentValue is Types.Sheet sheet ? sheet.Value.IsPlaceholder : false,
         Tag = listBox
       };
-      placeholderCheckBox.CheckedChanged += PlaceHolderCheckBox_CheckedChanged;
 
-      RefreshViewsList(listBox, placeholderCheckBox.Checked);
+      sheetTypeBox.SetCueBanner("Sheet type filter…");
+      sheetTypeBox.Items.AddRange(
+        sheetTypeQualifiers.Select(q => q.title).ToArray()
+        );
 
-      Menu_AppendCustomItem(menu, placeholderCheckBox);
+      if (PersistentValue is Types.Sheet sheet)
+      {
+        var mostStringentMatchedQualifier = sheetTypeQualifiers.Where(q => q.qualifier(sheet.Value)).LastOrDefault();
+        sheetTypeBox.SelectedIndex = sheetTypeQualifiers.IndexOf(mostStringentMatchedQualifier);
+      }
+
+      sheetTypeBox.SelectedIndexChanged += PlaceHolderCheckBox_CheckedChanged;
+
+      // refresh with the first selector or any other
+      RefreshViewsList(listBox, sheetTypeBox.SelectedIndex >= 0 ? sheetTypeBox.SelectedIndex : 0);
+
+      Menu_AppendCustomItem(menu, sheetTypeBox);
       Menu_AppendCustomItem(menu, listBox);
     }
 
     private void PlaceHolderCheckBox_CheckedChanged(object sender, EventArgs e)
     {
-      if (sender is CheckBox checkbox)
+      if (sender is ComboBox sheetTypeBox)
       {
-        if (checkbox.Tag is ListBox listBox)
-          RefreshViewsList(listBox, checkbox.Checked);
+        if (sheetTypeBox.Tag is ListBox listBox)
+          RefreshViewsList(listBox, sheetTypeBox.SelectedIndex);
       }
     }
 
-    private void RefreshViewsList(ListBox listBox, bool isPlaceholder = false)
+    private void RefreshViewsList(ListBox listBox, int typeIndex = 0)
     {
       var doc = Revit.ActiveUIDocument.Document;
 
       listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
       listBox.Items.Clear();
 
+      var qualifierInfo = sheetTypeQualifiers[typeIndex];
       using (var collector = new DB.FilteredElementCollector(doc))
       {
         var sheets = collector.OfClass(typeof(DB.ViewSheet))
                               .Cast<DB.ViewSheet>()
                               .Where(x => !x.IsTemplate)
-                              .Where(x => x.IsPlaceholder == isPlaceholder);
+                              .Where(x => qualifierInfo.qualifier(x));
 
         listBox.DisplayMember = "DisplayName";
         foreach (var sheet in sheets)

@@ -35,6 +35,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.Element(), "Title Block", "TB", "Sheet title block", GH_ParamAccess.item);
       manager.AddBooleanParameter("Is Placeholder", "IPH", "Sheet is placeholder", GH_ParamAccess.item);
       manager.AddBooleanParameter("Is Indexed", "IIDX", "Sheet appears on sheet lists", GH_ParamAccess.item);
+      manager.AddBooleanParameter("Is Assembly Sheet", "IAS", "Sheet belongs to a Revit assembly", GH_ParamAccess.item);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -53,6 +54,7 @@ namespace RhinoInside.Revit.GH.Components
 
       DA.SetData("Is Placeholder", sheet.IsPlaceholder);
       DA.SetData("Is Indexed", sheet.GetParameterValue<bool>(DB.BuiltInParameter.SHEET_SCHEDULED));
+      DA.SetData("Is Assembly Sheet", sheet.IsAssemblyView);
     }
   }
 }
