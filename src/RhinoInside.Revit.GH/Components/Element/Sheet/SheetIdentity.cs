@@ -32,7 +32,6 @@ namespace RhinoInside.Revit.GH.Components
     {
       manager.AddTextParameter("Number", "NO", "Sheet number", GH_ParamAccess.item);
       manager.AddTextParameter("Name", "N", "Sheet name", GH_ParamAccess.item);
-      manager.AddParameter(new Parameters.Element(), "Title Block", "TB", "Sheet title block", GH_ParamAccess.item);
       manager.AddBooleanParameter("Is Placeholder", "IPH", "Sheet is placeholder", GH_ParamAccess.item);
       manager.AddBooleanParameter("Is Indexed", "IIDX", "Sheet appears on sheet lists", GH_ParamAccess.item);
       manager.AddBooleanParameter("Is Assembly Sheet", "IAS", "Sheet belongs to a Revit assembly", GH_ParamAccess.item);
@@ -46,11 +45,6 @@ namespace RhinoInside.Revit.GH.Components
 
       DA.SetData("Number", sheet.SheetNumber);
       DA.SetData("Name", sheet.Name);
-
-      var tblocks = new DB.FilteredElementCollector(sheet.Document, sheet.Id)
-                          .OfCategory(DB.BuiltInCategory.OST_TitleBlocks)
-                          .ToElements();
-      DA.SetData("Title Block", tblocks.FirstOrDefault());
 
       DA.SetData("Is Placeholder", sheet.IsPlaceholder);
       DA.SetData("Is Indexed", sheet.GetParameterValue<bool>(DB.BuiltInParameter.SHEET_SCHEDULED));
