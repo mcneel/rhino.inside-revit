@@ -1,12 +1,11 @@
 using System;
-using System.Linq;
 using Grasshopper.Kernel;
 
 using RhinoInside.Revit.External.DB.Extensions;
 
 using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Element.Sheet
 {
   public class SheetIdentity : Component
   {
@@ -25,7 +24,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager.AddParameter(new Parameters.Sheet(), "Sheet", "Sheet", string.Empty, GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.Sheet(), "Sheet", "Sheet", "Sheet to analyze identity", GH_ParamAccess.item);
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)

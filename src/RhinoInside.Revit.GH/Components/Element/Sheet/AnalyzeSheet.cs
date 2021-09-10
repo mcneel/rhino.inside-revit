@@ -2,11 +2,7 @@ using System;
 using System.Linq;
 using Grasshopper.Kernel;
 
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.Convert.Geometry;
-
 using DB = Autodesk.Revit.DB;
-using RhinoInside.Revit.GH.Parameters;
 
 namespace RhinoInside.Revit.GH.Components.Element.Sheet
 {
