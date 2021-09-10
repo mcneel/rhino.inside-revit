@@ -319,6 +319,7 @@
     <Compile Include="Components\Element\Topography\ByPoints.cs" />
     <Compile Include="Components\Element\Properties.cs" />
     <Compile Include="Components\Element\View\Active.cs" />
+    <Compile Include="Components\Element\View\ClusterViewsByType.cs" />
     <Compile Include="Components\Element\View\ExportImage.cs" />
     <Compile Include="Components\Element\View\Identity.cs" />
     <Compile Include="Components\Element\View\QueryViews.cs" />
