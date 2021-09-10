@@ -96,6 +96,17 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       ),
       new ParamDefinition
       (
+        new Parameters.AssemblyInstance()
+        {
+          Name = "Assembly",
+          NickName = "A",
+          Description = "Assembly to create sheet for",
+          Optional = true
+        },
+        ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
         new Parameters.Sheet()
         {
           Name = "Template",
@@ -155,6 +166,8 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
 
       public DB.ElementType TitleblockType { get; set; }
 
+      public DB.AssemblyInstance Assembly { get; set; }
+
       public DB.ViewSheet Template { get; set; }
 
       public SheetHandler(string number)
@@ -164,17 +177,60 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
 
       public DB.ViewSheet CreateSheet(DB.Document doc)
       {
-        if (IsPlaceHolder.HasValue && IsPlaceHolder.Value)
-          return DB.ViewSheet.CreatePlaceholder(doc);
+        var tblockId = TitleblockType?.Id ?? DB.ElementId.InvalidElementId;
+        if (Assembly is DB.AssemblyInstance assm)
+        {
+          return DB.AssemblyViewUtils.CreateSheet(assm.Document, assm.Id, tblockId);
+        }
         else
-          return DB.ViewSheet.Create(
-            doc,
-            TitleblockType?.Id ?? DB.ElementId.InvalidElementId
-            );
+        {
+          if (IsPlaceHolder.HasValue && IsPlaceHolder.Value)
+            return DB.ViewSheet.CreatePlaceholder(doc);
+          else
+            return DB.ViewSheet.Create(doc, tblockId);
+        }
+      }
+
+      public bool CanUpdateSheet(DB.ViewSheet sheet)
+      {
+        bool canUpdate = true;
+
+        // - if titleblock on existing does not match the titleblock provided (or not),
+        //   on the inputs, do not reuse so Revit places tblock by default at proper location
+        //   and whether sheet has titleblock or not matches the input
+        var tblocks = new DB.FilteredElementCollector(sheet.Document, sheet.Id)
+                            .OfCategory(DB.BuiltInCategory.OST_TitleBlocks)
+                            .ToElements();
+        if (TitleblockType is DB.ElementType tblockType)
+        {
+          if (tblocks.Count == 0 || tblocks.Count > 1)
+            canUpdate = false;
+          else
+          {
+            var tblock = tblocks.First();
+            if (!tblock.GetTypeId().Equals(tblockType.Id))
+              canUpdate = false;
+          }
+        }
+        else if (tblocks.Any())
+          canUpdate = false;
+
+        // - if sheet placeholder state is different from input, do not reuse.
+        //   sheets can not be converted to placeholder vice versa
+        if (IsPlaceHolder.HasValue && (IsPlaceHolder.Value != sheet.IsPlaceholder))
+          canUpdate = false;
+
+        return canUpdate;
       }
 
       public void UpdateSheet(DB.ViewSheet sheet)
       {
+        // we are not duplicating sheets. that is a very complex process
+        // involving various view types, some can only exist on a single sheet
+        // let's just copy the parameters from template instead
+        if (Template is DB.ViewSheet template)
+          sheet.CopyParametersFrom(template, ExcludeUniqueProperties);
+
         sheet.SheetNumber = Number;
 
         if (Name is object)
@@ -206,6 +262,8 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       Params.TryGetData(DA, "Placeholder", out bool? placeholder);
       Params.TryGetData(DA, "Indexed", out bool? indexed);
       Params.TryGetData(DA, $"{_TitleBlock_.name} Type", out DB.ElementType tblockType);
+
+      Params.TryGetData(DA, "Assembly", out DB.AssemblyInstance assembly);
       Params.TryGetData(DA, "Template", out DB.ViewSheet template);
 
       // find any tracked sheet
@@ -220,6 +278,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
           IsPlaceHolder = placeholder,
           IsIndexed = indexed,
           TitleblockType = tblockType,
+          Assembly = assembly,
           Template = template
         });
 
@@ -236,58 +295,23 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
 
     bool Reuse(DB.ViewSheet sheet, SheetHandler data)
     {
-      bool rejected = false;
-
-      // - if titleblock on existing does not match the titleblock provided (or not),
-      //   on the inputs, do not reuse so Revit places tblock by default at proper location
-      //   and whether sheet has titleblock or not matches the input
-      var tblocks = new DB.FilteredElementCollector(sheet.Document, sheet.Id)
-                          .OfCategory(DB.BuiltInCategory.OST_TitleBlocks)
-                          .ToElements();
-      if (data.TitleblockType is DB.ElementType tblockType)
-      {
-        if (tblocks.Count == 0 || tblocks.Count > 1)
-          rejected = true;
-        else
-        {
-          var tblock = tblocks.First();
-          if (!tblock.GetTypeId().Equals(tblockType.Id))
-            rejected = true;
-        }
-      }
-      else if (tblocks.Any())
-        rejected = true;
-
-      // - if sheet placeholder state is different from input, do not reuse.
-      //   sheets can not be converted to placeholder vice versa
-      if (data.IsPlaceHolder.HasValue && (data.IsPlaceHolder.Value != sheet.IsPlaceholder))
-        rejected = true;
-
-      if (rejected)
+      if (!data.CanUpdateSheet(sheet))
       {
         // let's change the sheet number so other sheets can be created with same id
         sheet.SheetNumber = sheet.UniqueId;
         return false;
       }
-
-      sheet.CopyParametersFrom(data.Template, ExcludeUniqueProperties);
-      data.UpdateSheet(sheet);
-      return true;
+      else
+      {
+        data.UpdateSheet(sheet);
+        return true;
+      }
     }
 
     DB.ViewSheet Create(DB.Document doc, SheetHandler data)
     {
       var sheet = data.CreateSheet(doc);
-
-      // we are not duplicating sheets. that is a very complex process
-      // involving various view types, some can only exist on a single sheet
-      // let's just copy the parameters from template instead
-      if (data.Template is DB.ViewSheet template)
-        sheet.CopyParametersFrom(template, ExcludeUniqueProperties);
-
-      // let input data override any other
       data.UpdateSheet(sheet);
-
       return sheet;
     }
 
