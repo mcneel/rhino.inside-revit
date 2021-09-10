@@ -373,9 +373,9 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Assembly {
+        internal static System.Drawing.Bitmap AssemblyByCategory {
             get {
-                object obj = ResourceManager.GetObject("Assembly", resourceCulture);
+                object obj = ResourceManager.GetObject("AssemblyByCategory", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -383,9 +383,9 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap AssemblyByCategory {
+        internal static System.Drawing.Bitmap AssemblyInstance {
             get {
-                object obj = ResourceManager.GetObject("AssemblyByCategory", resourceCulture);
+                object obj = ResourceManager.GetObject("AssemblyInstance", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -596,6 +596,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap CheckerData {
             get {
                 object obj = ResourceManager.GetObject("CheckerData", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ClusterViewsByType {
+            get {
+                object obj = ResourceManager.GetObject("ClusterViewsByType", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
