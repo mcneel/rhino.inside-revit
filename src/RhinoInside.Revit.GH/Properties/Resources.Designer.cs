@@ -273,6 +273,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AnalyzeSheet {
+            get {
+                object obj = ResourceManager.GetObject("AnalyzeSheet", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap AnalyzeStackedWall {
             get {
                 object obj = ResourceManager.GetObject("AnalyzeStackedWall", resourceCulture);
@@ -356,6 +366,46 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap AppearanceAsset {
             get {
                 object obj = ResourceManager.GetObject("AppearanceAsset", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Assembly {
+            get {
+                object obj = ResourceManager.GetObject("Assembly", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AssemblyByCategory {
+            get {
+                object obj = ResourceManager.GetObject("AssemblyByCategory", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AssemblyMembers {
+            get {
+                object obj = ResourceManager.GetObject("AssemblyMembers", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AssemblyViews {
+            get {
+                object obj = ResourceManager.GetObject("AssemblyViews", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -966,6 +1016,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap DirectShapeTypeByGeometry {
             get {
                 object obj = ResourceManager.GetObject("DirectShapeTypeByGeometry", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap DisassembleAssembly {
+            get {
+                object obj = ResourceManager.GetObject("DisassembleAssembly", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -2466,6 +2526,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap ProjectParameter {
             get {
                 object obj = ResourceManager.GetObject("ProjectParameter", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap QueryAssemblies {
+            get {
+                object obj = ResourceManager.GetObject("QueryAssemblies", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
