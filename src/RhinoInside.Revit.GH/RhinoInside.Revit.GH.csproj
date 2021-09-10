@@ -231,6 +231,10 @@
     <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainGridPanelType.cs" />
     <Compile Include="Components\ElementType\WallType\QueryWallTypes.cs" />
     <Compile Include="Components\Element\AdaptiveComponent\ByPoints.cs" />
+    <Compile Include="Components\Element\Assembly\AssemblyHandler.cs" />
+    <Compile Include="Components\Element\Assembly\AssemblyMembers.cs" />
+    <Compile Include="Components\Element\Assembly\AssemblyByCategory.cs" />
+    <Compile Include="Components\Element\Assembly\DisassembleAssembly.cs" />
     <Compile Include="Components\Element\Assembly\QueryAssemblies.cs" />
     <Compile Include="Components\Element\Beam\ByCurve.cs" />
     <Compile Include="Components\Element\BuildingPad\ByOutline.cs" />

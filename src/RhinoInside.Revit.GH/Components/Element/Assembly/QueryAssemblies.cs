@@ -3,11 +3,9 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 
-using RhinoInside.Revit.External.DB.Extensions;
-
 using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Assemblies
 {
   public class QueryAssemblies : ElementCollectorComponent
   {
