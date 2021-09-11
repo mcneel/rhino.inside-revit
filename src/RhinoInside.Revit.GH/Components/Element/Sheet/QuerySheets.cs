@@ -7,7 +7,7 @@ using RhinoInside.Revit.External.DB.Extensions;
 
 using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Element.Sheet
 {
   public class QuerySheets : ElementCollectorComponent
   {
@@ -33,6 +33,7 @@ namespace RhinoInside.Revit.GH.Components
       ParamDefinition.Create<Param_String>("Name", "N", "Sheet name", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_Boolean>("Is Placeholder", "IPH", "Sheet is placeholder", false, GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_Boolean>("Is Indexed", "IIDX", "Sheet appears on sheet lists", true, GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_Boolean>("Is Assembly Sheet", "IAS", "Sheet belongs to a Revit assembly", false, GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true),
     };
 
@@ -61,6 +62,10 @@ namespace RhinoInside.Revit.GH.Components
       var _IsIndexed_ = Params.IndexOfInputParam("Is Indexed");
       bool nofilterIsIndexed = (!DA.GetData(_IsIndexed_, ref IsIndexed) && Params.Input[_IsIndexed_].DataType == GH_ParamData.@void);
 
+      bool IsAssemblySheet = false;
+      var _IsAssemblySheet_ = Params.IndexOfInputParam("Is Assembly Sheet");
+      bool nofilterIsAssemblySheet = (!DA.GetData(_IsAssemblySheet_, ref IsAssemblySheet) && Params.Input[_IsAssemblySheet_].DataType == GH_ParamData.@void);
+
       DB.ElementFilter filter = null;
       DA.GetData("Filter", ref filter);
 
@@ -77,13 +82,16 @@ namespace RhinoInside.Revit.GH.Components
         if (TryGetFilterStringParam(DB.BuiltInParameter.SHEET_NAME, ref name, out var sheetNameFilter))
           sheetsCollector = sheetsCollector.WherePasses(sheetNameFilter);
 
-        var sheets = collector.Cast<DB.ViewSheet>();
+        var sheets = sheetsCollector.Cast<DB.ViewSheet>();
 
         if (!nofilterIsPlaceholder)
           sheets = sheets.Where((x) => x.IsPlaceholder == IsPlaceholder);
 
         if (!nofilterIsIndexed)
           sheets = sheets.Where((x) => x.GetParameterValue<bool>(DB.BuiltInParameter.SHEET_SCHEDULED) == IsIndexed);
+
+        if (!nofilterIsAssemblySheet)
+          sheets = sheets.Where((x) => x.IsAssemblyView == IsAssemblySheet);
 
         DA.SetDataList("Sheets", sheets);
       }

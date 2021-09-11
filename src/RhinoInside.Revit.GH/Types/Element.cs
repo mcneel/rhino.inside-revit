@@ -179,6 +179,8 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(DB.Mullion),                 (element)=> new Mullion               (element as DB.Mullion)           },
       { typeof(DB.Dimension),               (element)=> new Dimension             (element as DB.Dimension)         },
       { typeof(DB.CurveElement),            (element)=> new CurveElement          (element as DB.CurveElement)      },
+
+      { typeof(DB.AssemblyInstance),        (element)=> new AssemblyInstance      (element as DB.AssemblyInstance)  },
     };
 
     public static Element FromElement(DB.Element element)

@@ -231,6 +231,13 @@
     <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainGridPanelType.cs" />
     <Compile Include="Components\ElementType\WallType\QueryWallTypes.cs" />
     <Compile Include="Components\Element\AdaptiveComponent\ByPoints.cs" />
+    <Compile Include="Components\Element\Assembly\AssemblyByLocation.cs" />
+    <Compile Include="Components\Element\Assembly\AssemblyHandler.cs" />
+    <Compile Include="Components\Element\Assembly\AssemblyMembers.cs" />
+    <Compile Include="Components\Element\Assembly\AssemblyByCategory.cs" />
+    <Compile Include="Components\Element\Assembly\DisassembleAssembly.cs" />
+    <Compile Include="Components\Element\Assembly\QueryAssemblies.cs" />
+    <Compile Include="Components\Element\Assembly\AssemblyViews.cs" />
     <Compile Include="Components\Element\Beam\ByCurve.cs" />
     <Compile Include="Components\Element\BuildingPad\ByOutline.cs" />
     <Compile Include="Components\Element\AnalysisComponent.cs" />
@@ -302,6 +309,7 @@
     <Compile Include="Components\Element\Railing\ByCurve.cs" />
     <Compile Include="Components\Element\Roof\ByOutline.cs" />
     <Compile Include="Components\Element\SelectDeselectElement.cs" />
+    <Compile Include="Components\Element\Sheet\AnalyzeSheet.cs" />
     <Compile Include="Components\Element\Sheet\QuerySheets.cs" />
     <Compile Include="Components\Element\Sheet\QueryTitleBlockTypes.cs" />
     <Compile Include="Components\Element\Sheet\SheetIdentity.cs" />
@@ -312,6 +320,7 @@
     <Compile Include="Components\Element\Topography\ByPoints.cs" />
     <Compile Include="Components\Element\Properties.cs" />
     <Compile Include="Components\Element\View\Active.cs" />
+    <Compile Include="Components\Element\View\ClusterViewsByType.cs" />
     <Compile Include="Components\Element\View\ExportImage.cs" />
     <Compile Include="Components\Element\View\Identity.cs" />
     <Compile Include="Components\Element\View\QueryViews.cs" />
@@ -368,7 +377,9 @@
     <Compile Include="Components\ParameterElement\ProjectParameter.cs" />
     <Compile Include="Components\ParameterElement\QueryParameters.cs" />
     <Compile Include="Components\ParameterElement\SharedParameters.cs" />
+    <Compile Include="Parameters\AssemblyInstance.cs" />
     <Compile Include="Parameters\Sheet.cs" />
+    <Compile Include="Types\AssemblyInstance.cs" />
     <Compile Include="Types\Sheet.cs" />
     <Compile Include="Types\Workset.cs" />
     <None Include="Extensions\README.md" />
