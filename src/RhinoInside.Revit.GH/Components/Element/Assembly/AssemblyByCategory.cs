@@ -133,18 +133,18 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
 
     bool Reuse(DB.AssemblyInstance assembly, AssemblyHandler data)
     {
-      //bool rejected;
+      bool rejected;
 
-      //// if categories are different, do not use
-      //rejected = assembly.NamingCategoryId is DB.ElementId categoryId
-      //    && !categoryId.Equals(data.CategoryId);
+      // if categories are different, do not use
+      rejected = assembly.NamingCategoryId is DB.ElementId categoryId
+          && !categoryId.Equals(data.CategoryId);
 
-      //if (rejected)
-      //{
-      //  // let's change the sheet number so other sheets can be created with same id
-      //  data.ExpireAssembly(assembly);
-      //  return false;
-      //}
+      if (rejected)
+      {
+        // let's change the sheet number so other sheets can be created with same id
+        data.ExpireAssembly(assembly);
+        return false;
+      }
 
       assembly.CopyParametersFrom(data.Template, ExcludeUniqueProperties);
       data.UpdateAssembly(assembly);
