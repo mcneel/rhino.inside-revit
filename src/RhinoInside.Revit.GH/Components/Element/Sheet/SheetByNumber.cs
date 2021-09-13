@@ -248,7 +248,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
 
       // sheet input data
       if (!Params.TryGetData(DA, "Number", out string number, x => !string.IsNullOrEmpty(x))) return;
-      // Note:
+      // Note (eirannejad Sep 10, 2021)
       // I decided for name to be a required field, although revit automatically names the sheets (e.g. Unnamed in English)
       // This matches the behaviour of Add View components since a name is required for a view and has to be unique
       // Sheets are a type of revit view but the naming is a little less stringent in the API
@@ -293,9 +293,9 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       }
     }
 
-    bool Reuse(DB.ViewSheet sheet, SheetHandler data)
+    bool Reuse(DB.ViewSheet sheet, SheetHandler handler)
     {
-      if (!data.CanUpdateSheet(sheet))
+      if (!handler.CanUpdateSheet(sheet))
       {
         // let's change the sheet number so other sheets can be created with same id
         sheet.SheetNumber = sheet.UniqueId;
@@ -303,24 +303,24 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       }
       else
       {
-        data.UpdateSheet(sheet);
+        handler.UpdateSheet(sheet);
         return true;
       }
     }
 
-    DB.ViewSheet Create(DB.Document doc, SheetHandler data)
+    DB.ViewSheet Create(DB.Document doc, SheetHandler handler)
     {
-      var sheet = data.CreateSheet(doc);
-      data.UpdateSheet(sheet);
+      var sheet = handler.CreateSheet(doc);
+      handler.UpdateSheet(sheet);
       return sheet;
     }
 
-    DB.ViewSheet Reconstruct(DB.ViewSheet sheet, DB.Document doc, SheetHandler data)
+    DB.ViewSheet Reconstruct(DB.ViewSheet sheet, DB.Document doc, SheetHandler handler)
     {
-      if (sheet is null || !Reuse(sheet, data))
+      if (sheet is null || !Reuse(sheet, handler))
         sheet = sheet.ReplaceElement
         (
-          Create(doc, data),
+          Create(doc, handler),
           ExcludeUniqueProperties
         );
 

@@ -131,39 +131,39 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
       }
     }
 
-    bool Reuse(DB.AssemblyInstance assembly, AssemblyHandler data)
+    bool Reuse(DB.AssemblyInstance assembly, AssemblyHandler handler)
     {
       bool rejected;
 
       // if categories are different, do not use
       rejected = assembly.NamingCategoryId is DB.ElementId categoryId
-          && !categoryId.Equals(data.CategoryId);
+          && !categoryId.Equals(handler.CategoryId);
 
       if (rejected)
       {
         // let's change the sheet number so other sheets can be created with same id
-        data.ExpireAssembly(assembly);
+        handler.ExpireAssembly(assembly);
         return false;
       }
 
-      assembly.CopyParametersFrom(data.Template, ExcludeUniqueProperties);
-      data.UpdateAssembly(assembly);
+      assembly.CopyParametersFrom(handler.Template, ExcludeUniqueProperties);
+      handler.UpdateAssembly(assembly);
       return true;
     }
 
-    DB.AssemblyInstance Create(DB.Document doc, AssemblyHandler data)
+    DB.AssemblyInstance Create(DB.Document doc, AssemblyHandler handler)
     {
-      var assembly = data.CreateAssembly(doc);
-      assembly.CopyParametersFrom(data.Template, ExcludeUniqueProperties);
+      var assembly = handler.CreateAssembly(doc);
+      assembly.CopyParametersFrom(handler.Template, ExcludeUniqueProperties);
       return assembly;
     }
 
-    DB.AssemblyInstance Reconstruct(DB.AssemblyInstance assembly, DB.Document doc, AssemblyHandler data)
+    DB.AssemblyInstance Reconstruct(DB.AssemblyInstance assembly, DB.Document doc, AssemblyHandler handler)
     {
-      if (assembly is null || !Reuse(assembly, data))
+      if (assembly is null || !Reuse(assembly, handler))
         assembly = assembly.ReplaceElement
         (
-          Create(doc, data),
+          Create(doc, handler),
           ExcludeUniqueProperties
         );
 
