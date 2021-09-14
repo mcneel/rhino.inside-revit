@@ -541,6 +541,9 @@ namespace RhinoInside.Revit.GH
 
     void OnDocumentChanged(object sender, DocumentChangedEventArgs e)
     {
+#if DEBUG
+      var transactions = e.GetTransactionNames();
+#endif
       var document = e.GetDocument();
       var added    = new ReadOnlySortedCollection(e.GetAddedElementIds());
       var deleted  = new ReadOnlySortedCollection(e.GetDeletedElementIds());
@@ -616,11 +619,11 @@ namespace RhinoInside.Revit.GH
         if (!EnableSolutions)
           return;
 
-        changeQueue.Enqueue(value);
-
         if (value.Definition.SolutionState != GH_ProcessStep.Process)
         {
           // Change NOT made by Grasshopper.
+          changeQueue.Enqueue(value);
+
           FlushQueue.Raise();
         }
       }
@@ -815,7 +818,10 @@ namespace RhinoInside.Revit.GH
           var modifiedIds = default(ICollection<DB.ElementId>);
 
           if (allowModelessHandling)
-            deletedIds = revitDocument.GetDependentElements(elementIds, out modifiedIds, default);
+          {
+            try { deletedIds = revitDocument.GetDependentElements(elementIds, out modifiedIds, default); }
+            catch (Autodesk.Revit.Exceptions.ArgumentException) { deletedIds = elementIds; modifiedIds = new DB.ElementId[0]; }
+          }
 
           using (var tx = new DB.Transaction(revitDocument, "Release Elements"))
           {

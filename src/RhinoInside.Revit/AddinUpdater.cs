@@ -104,9 +104,11 @@ namespace RhinoInside.Revit
     };
 
     // Note:
-    // It is expected that this list does not include any channels that do not belong to the major
-    // version of this addon. Any addon should only know about its own channels
-    // e.g. No 2.0/ channel on an addon with major version 1.0
+    // - It is expected that this list does not include any channels that do
+    //   not belong to the major
+    //   version of this addon. Any addon should only know about its own channels
+    //   e.g. No 2.0/ channel on an addon with major version 1.0
+    // - Order is important. Top to bottom from most public to least public
     public static readonly AddinUpdateChannel[] Channels = new AddinUpdateChannel[]
     {
       DefaultChannel,
@@ -146,5 +148,8 @@ namespace RhinoInside.Revit
 
     public static async Task<ReleaseInfo> GetReleaseInfoAsync()
         => await Task.Run(() => ActiveChannel?.GetLatestRelease());
+
+    public static async Task<ReleaseInfo> GetReleaseInfoAsync(AddinUpdateChannel channel)
+        => await Task.Run(() => channel?.GetLatestRelease());
   }
 }

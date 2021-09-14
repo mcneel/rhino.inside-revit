@@ -423,27 +423,20 @@ namespace RhinoInside.Revit.External.DB.Extensions
           switch (previousParameter.StorageType)
           {
             case StorageType.Integer:
-            {
-              var value = previousParameter.AsInteger();
-              if (param.AsInteger() != value) param.Set(value);
-            } break;
+              param.Update(previousParameter.AsInteger());
+              break;
+
             case StorageType.Double:
-            {
-              var value = previousParameter.AsDouble();
-              if (param.AsDouble() != value) param.Set(value);
-            } break;
+              param.Update(previousParameter.AsDouble());
+              break;
+
             case StorageType.String:
-            {
-              var value = previousParameter.AsString();
-              if (param.AsString() != value) param.Set(value);
-            }
-            break;
+              param.Update(previousParameter.AsString());
+              break;
+
             case StorageType.ElementId:
-            {
-              var value = GetNamesakeElement(to.Document, from.Document, previousParameter.AsElementId());
-              if (param.AsElementId() != value) param.Set(value);
-            }
-            break;
+              param.Update(GetNamesakeElement(to.Document, from.Document, previousParameter.AsElementId()));
+              break;
           }
         }
     }
@@ -638,7 +631,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return default;
     }
 
-    public static void SetParameterValue(this Element element, BuiltInParameter paramId, bool value)
+    public static void UpdateParameterValue(this Element element, BuiltInParameter paramId, bool value)
     {
       using (var param = element.get_Parameter(paramId))
       {
@@ -648,32 +641,31 @@ namespace RhinoInside.Revit.External.DB.Extensions
         if(param.StorageType != StorageType.Integer || (Schemas.DataType) param.Definition.GetDataType() != Schemas.SpecType.Boolean.YesNo)
           throw new System.InvalidCastException();
 
-        param.Set(value ? 1 : 0);
+        param.Update(value ? 1 : 0);
       }
     }
 
-    public static void SetParameterValue(this Element element, BuiltInParameter paramId, object value)
+    public static void UpdateParameterValue(this Element element, BuiltInParameter paramId, object value)
     {
-      var param = element.get_Parameter(paramId);
-      if (param != null)
+      if (element.get_Parameter(paramId) is Parameter param)
       {
         switch (value)
         {
           case int intVal:
             if (StorageType.Integer == param.StorageType)
-              param.Set(intVal);
+              param.Update(intVal);
             break;
           case string strVal:
             if (StorageType.String == param.StorageType)
-              param.Set(strVal);
+              param.Update(strVal);
             break;
           case double dblVal:
             if (StorageType.Double == param.StorageType)
-              param.Set(dblVal);
+              param.Update(dblVal);
             break;
           case ElementId idVal:
             if (StorageType.ElementId == param.StorageType)
-              param.Set(idVal);
+              param.Update(idVal);
             break;
         }
       }

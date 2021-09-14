@@ -103,7 +103,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var phase = default(DB.Phase);
+      var phase = default(Types.Phase);
       if (!DA.GetData("Phase", ref phase))
         return;
 

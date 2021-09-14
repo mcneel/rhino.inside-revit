@@ -118,8 +118,11 @@ namespace RhinoInside.Revit.GH.Components.Filters
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var parameterKey = default(Types.ParameterKey);
-      if (!DA.GetData("Parameter", ref parameterKey) || !parameterKey.IsReferencedData)
+      if (!DA.GetData("Parameter", ref parameterKey))
         return;
+
+      if (!parameterKey.IsReferencedData)
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Conversion from '{parameterKey.Name}' to Parameter may be ambiguous. Please use 'BuiltInParameter Picker' or a 'Parameter' Param");
 
       if (!TryGetParameterDefinition(parameterKey.Document, parameterKey.Id, out var storageType, out var dataType))
       {
@@ -129,6 +132,32 @@ namespace RhinoInside.Revit.GH.Components.Filters
           AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to found parameter '{parameterKey.Name}' in Revit document.");
 
         return;
+      }
+
+      // Do a guess based on the Value content
+      if (storageType == DB.StorageType.None)
+      {
+        var goo = default(IGH_Goo);
+        if (!DA.GetData("Value", ref goo)) return;
+
+        switch (goo)
+        {
+          case GH_Boolean _:          storageType = DB.StorageType.Integer; break;
+          case GH_Integer _:          storageType = DB.StorageType.Integer; break;
+          case GH_Number _:           storageType = DB.StorageType.Double; break;
+          case GH_String _:           storageType = DB.StorageType.String; break;
+          case Types.IGH_ElementId _: storageType = DB.StorageType.ElementId; break;
+          default:
+            switch (goo.ScriptVariable())
+            {
+              case bool _: storageType = DB.StorageType.Integer; break;
+              case int _: storageType = DB.StorageType.Integer; break;
+              case double _: storageType = DB.StorageType.Double; break;
+              case string _: storageType = DB.StorageType.String; break;
+              case DB.Element _: storageType = DB.StorageType.ElementId; break;
+            }
+            break;
+        }
       }
 
       var provider = new DB.ParameterValueProvider(parameterKey.Id);
@@ -338,6 +367,9 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!DA.GetData("Parameter", ref parameterKey))
         return;
 
+      if (!parameterKey.IsReferencedData)
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Conversion from '{parameterKey.Name}' to Parameter may be ambiguous. Please use 'BuiltInParameter Picker' or a 'Parameter' Param");
+
       var inverted = false;
       if (!DA.GetData("Inverted", ref inverted))
         return;
@@ -347,7 +379,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
         if (parameterKey.Id.TryGetBuiltInParameter(out var builtInParameter))
           AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to found parameter '{DB.LabelUtils.GetLabelFor(builtInParameter)}' in Revit document.");
         else
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to found parameter '{parameterKey.Id.IntegerValue}' in Revit document.");
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to found parameter '{parameterKey.Name}' in Revit document.");
 
         return;
       }

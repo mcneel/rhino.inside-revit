@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Types
         if (IsValid)
           return Value.GetGHComponentInfo().Name;
         else
-          return $"Invalid Asset";
+          return $"Texture Data";
       }
     }
 
@@ -29,10 +29,27 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastFrom(object source)
     {
-      if (source is MAT.TextureData tdata)
+      switch (source)
       {
-        Value = tdata;
-        return true;
+        case AssetPropertyDouble1DMap double1Map:
+          if (double1Map.Value.HasTexture)
+          {
+            Value = double1Map.Value.TextureValue;
+            return true;
+          }
+          break;
+
+        case AssetPropertyDouble4DMap double4Map:
+          if (double4Map.Value.HasTexture)
+          {
+            Value = double4Map.Value.TextureValue;
+            return true;
+          }
+          break;
+
+        case MAT.TextureData tdata:
+          Value = tdata;
+          return true;
       }
 
       return base.CastFrom(source);

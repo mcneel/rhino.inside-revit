@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Direct Shape")]
   public class DirectShape : GeometricElement
   {
-    protected override Type ScriptVariableType => typeof(DB.DirectShape);
+    protected override Type ValueType => typeof(DB.DirectShape);
     public new DB.DirectShape Value => base.Value as DB.DirectShape;
 
     public DirectShape() { }
@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Direct Shape Type")]
   public class DirectShapeType : ElementType
   {
-    protected override Type ScriptVariableType => typeof(DB.DirectShapeType);
+    protected override Type ValueType => typeof(DB.DirectShapeType);
     public new DB.DirectShapeType Value => base.Value as DB.DirectShapeType;
 
     public DirectShapeType() { }

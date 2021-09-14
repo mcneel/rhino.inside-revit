@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.ElementType>("Types", "E", "Element types list", GH_ParamAccess.list)
+      ParamDefinition.Create<Parameters.ElementType>("Types", "T", "Element types list", GH_ParamAccess.list)
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)

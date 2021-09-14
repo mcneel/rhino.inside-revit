@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Material")]
   public class Material : Element, Bake.IGH_BakeAwareElement
   {
-    protected override Type ScriptVariableType => typeof(DB.Material);
+    protected override Type ValueType => typeof(DB.Material);
     public new DB.Material Value => base.Value as DB.Material;
 
     public Material() { }

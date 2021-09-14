@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("View")]
   public class View : Element, IGH_View
   {
-    protected override Type ScriptVariableType => typeof(DB.View);
+    protected override Type ValueType => typeof(DB.View);
     public static explicit operator DB.View(View value) => value?.Value;
     public new DB.View Value => base.Value as DB.View;
 

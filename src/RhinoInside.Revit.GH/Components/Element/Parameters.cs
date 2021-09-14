@@ -68,7 +68,12 @@ namespace RhinoInside.Revit.GH
           return new GH_Integer(integer);
 
         case DB.StorageType.Double:
-          return new GH_Number(parameter.AsDoubleInRhinoUnits());
+          var value = parameter.AsDouble();
+
+          if (SpecType.IsMeasurableSpec(parameter.Definition.GetDataType(), out var spec))
+            value = UnitConverter.InRhinoUnits(value, spec);
+
+          return new GH_Number(value);
 
         case DB.StorageType.String:
           return new GH_String(parameter.AsString());
@@ -89,7 +94,7 @@ namespace RhinoInside.Revit.GH
       }
     }
 
-    internal static bool Set(this DB.Parameter parameter, IGH_Goo value)
+    internal static bool Update(this DB.Parameter parameter, IGH_Goo value)
     {
       if (parameter is null)
         return default;
@@ -105,7 +110,8 @@ namespace RhinoInside.Revit.GH
               if (!GH_Convert.ToBoolean(value, out var boolean, GH_Conversion.Both))
                 throw new InvalidCastException();
 
-              return parameter.Set(boolean ? 1 : 0);
+              var _boolean = boolean ? 1 : 0;
+              return parameter.Update(_boolean);
             }
             else if (parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
             {
@@ -115,7 +121,8 @@ namespace RhinoInside.Revit.GH
                 if (!GH_Convert.ToColor(value, out var color, GH_Conversion.Both))
                   throw new InvalidCastException();
 
-                return parameter.Set(((int) color.R) | ((int) color.G << 8) | ((int) color.B << 16));
+                var _color = ((int) color.R) | ((int) color.G << 8) | ((int) color.B << 16);
+                return parameter.Update(_color);
               }
             }
           }
@@ -123,19 +130,24 @@ namespace RhinoInside.Revit.GH
           if (!GH_Convert.ToInt32(value, out var integer, GH_Conversion.Both))
             throw new InvalidCastException();
 
-          return parameter.Set(integer);
+          return parameter.Update(integer);
 
         case DB.StorageType.Double:
           if (!GH_Convert.ToDouble(value, out var real, GH_Conversion.Both))
             throw new InvalidCastException();
 
-          return parameter.SetDoubleInRhinoUnits(real);
+          return parameter.Update
+          (
+            SpecType.IsMeasurableSpec(parameter.Definition.GetDataType(), out var spec) ?
+            UnitConverter.InHostUnits(real, spec) :
+            real
+          );
 
         case DB.StorageType.String:
           if (!GH_Convert.ToString(value, out var text, GH_Conversion.Both))
             throw new InvalidCastException();
 
-          return parameter.Set(text);
+          return parameter.Update(text);
 
         case DB.StorageType.ElementId:
           var element = new Types.Element();
@@ -145,30 +157,11 @@ namespace RhinoInside.Revit.GH
           if (!parameter.Element.Document.IsEquivalent(element.Document))
             throw new ArgumentException("Failed to assign an element from a diferent document.", parameter.Definition.Name);
 
-          return parameter.Set(element.Id);
+          return parameter.Update(element.Id);
 
         default:
           throw new NotImplementedException();
       }
-    }
-
-    internal static double AsDoubleInRhinoUnits(this DB.Parameter parameter)
-    {
-      var value = parameter.AsDouble();
-
-      return SpecType.IsMeasurableSpec(parameter.Definition.GetDataType(), out var spec) ?
-        UnitConverter.InRhinoUnits(value, spec) :
-        value;
-    }
-
-    internal static bool SetDoubleInRhinoUnits(this DB.Parameter parameter, double value)
-    {
-      return parameter.Set
-      (
-        SpecType.IsMeasurableSpec(parameter.Definition.GetDataType(), out var spec) ?
-        UnitConverter.InHostUnits(value, spec) :
-        value
-      );
     }
 
     internal static DB.Parameter GetParameter(IGH_ActiveObject obj, DB.Element element, IGH_Goo goo)
@@ -387,7 +380,7 @@ namespace RhinoInside.Revit.GH.Components.Element
       {
         StartTransaction(element.Document);
 
-        if (!parameter.Set(value))
+        if (!parameter.Update(value))
         {
           AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Unable to set parameter '{parameter.Definition.Name}' : '{value}' is not a valid value.");
           return;
@@ -685,7 +678,7 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
 
       StartTransaction(element.Document);
 
-      if (parameter.Set(value))
+      if (parameter.Update(value))
         DA.SetData("Element", element);
       else
         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Unable to set parameter '{parameter.Definition.Name}' : '{value}' is not a valid value.");

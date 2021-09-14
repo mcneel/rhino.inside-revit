@@ -87,7 +87,7 @@ namespace RhinoInside.Revit.GH.Components
         if (!updateLevel || !referenceLevel.IsReadOnly)
         {
           if (updateLevel)
-            referenceLevel.Set(level.Value.Id);
+          	referenceLevel.Update(level.Value.Id);
 
           if(!locationCurve.Curve.IsAlmostEqualTo(centerLine))
             locationCurve.Curve = centerLine;
@@ -118,11 +118,11 @@ namespace RhinoInside.Revit.GH.Components
         else
           DB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(newBeam, 1);
 
-        newBeam.get_Parameter(DB.BuiltInParameter.Y_JUSTIFICATION)?.Set((int) DB.Structure.YJustification.Origin);
-        newBeam.get_Parameter(DB.BuiltInParameter.Z_JUSTIFICATION)?.Set((int) DB.Structure.ZJustification.Origin);
+        newBeam.get_Parameter(DB.BuiltInParameter.Y_JUSTIFICATION)?.Update((int) DB.Structure.YJustification.Origin);
+        newBeam.get_Parameter(DB.BuiltInParameter.Z_JUSTIFICATION)?.Update((int) DB.Structure.ZJustification.Origin);
 
         newBeam.Document.Regenerate();
-        newBeam.get_Parameter(DB.BuiltInParameter.STRUCTURAL_BEND_DIR_ANGLE)?.Set(0.0);
+        newBeam.get_Parameter(DB.BuiltInParameter.STRUCTURAL_BEND_DIR_ANGLE)?.Update(0.0);
 
         var parametersMask = new DB.BuiltInParameter[]
         {

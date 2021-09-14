@@ -1,16 +1,36 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
+  using static NumericTolerance;
+
   public static class LinePatternExtension
   {
     public static bool IsValid(this BuiltInLinePattern value)
     {
       return value == BuiltInLinePattern.Solid;
+    }
+
+    public static bool UpdateSegments(this LinePattern pattern, IList<LinePatternSegment> lineSegs)
+    {
+      bool update = false;
+      var segments = pattern.GetSegments();
+      var count = segments.Count;
+      if (count == lineSegs.Count)
+      {
+        for (int s = 0; s < count && !update; ++s)
+        {
+          if (segments[s].Type != lineSegs[s].Type || !IsAlmostEqualTo(segments[s].Length, lineSegs[s].Length))
+            update = true;
+        }
+      }
+      else update = true;
+
+      if (update)
+        pattern.SetSegments(lineSegs);
+
+      return update;
     }
   }
 }

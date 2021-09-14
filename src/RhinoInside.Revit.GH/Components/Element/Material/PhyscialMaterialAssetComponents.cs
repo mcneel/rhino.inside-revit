@@ -177,7 +177,7 @@ namespace RhinoInside.Revit.GH.Components.Material
 
           foreach (var builtInPropInfo in
             _assetData.GetAPIAssetBuiltInPropertyInfos(assetPropInfo))
-            psetElement.SetParameterValue(builtInPropInfo.ParamId, inputValue);
+            psetElement.UpdateParameterValue(builtInPropInfo.ParamId, inputValue);
         }
       }
     }

@@ -38,9 +38,9 @@ namespace RhinoInside.Revit.GH.Components
       if
       (
         elementType is DB.ElementType &&
-        elementType.Category.Id == type.Category.Id &&
+        elementType.GetType() == type.GetType() &&
         elementType.FamilyName == type.FamilyName &&
-        elementType.GetType() == type.GetType()
+        elementType.Category?.Id == type.Category?.Id
       )
       {
         if (elementType.Name != name)

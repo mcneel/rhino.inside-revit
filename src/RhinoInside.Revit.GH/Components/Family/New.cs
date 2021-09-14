@@ -134,18 +134,18 @@ namespace RhinoInside.Revit.GH.Components
         ToDictionary(x => x.Key, x => x.First().Id);
     }
 
-    static Rhino.Geometry.GeometryBase AsGeometryBase(IGH_GeometricGoo obj)
+    static GeometryBase AsGeometryBase(IGH_GeometricGoo obj)
     {
       var scriptVariable = obj?.ScriptVariable();
       switch (scriptVariable)
       {
-        case Rhino.Geometry.Point3d point: return new Rhino.Geometry.Point(point);
-        case Rhino.Geometry.Line line: return new Rhino.Geometry.LineCurve(line);
-        case Rhino.Geometry.Rectangle3d rect: return rect.ToNurbsCurve();
-        case Rhino.Geometry.Arc arc: return new Rhino.Geometry.ArcCurve(arc);
-        case Rhino.Geometry.Circle circle: return new Rhino.Geometry.ArcCurve(circle);
-        case Rhino.Geometry.Ellipse ellipse: return ellipse.ToNurbsCurve();
-        case Rhino.Geometry.Box box: return box.ToBrep();
+        case Point3d point:     return new Point(point);
+        case Line line:         return new LineCurve(line);
+        case Rectangle3d rect:  return rect.ToNurbsCurve();
+        case Arc arc:           return new ArcCurve(arc);
+        case Circle circle:     return new ArcCurve(circle);
+        case Ellipse ellipse:   return ellipse.ToNurbsCurve();
+        case Box box:           return box.ToBrep();
       }
 
       return (scriptVariable as Rhino.Geometry.GeometryBase)?.DuplicateShallow();
@@ -185,7 +185,7 @@ namespace RhinoInside.Revit.GH.Components
     DB.Category MapCategory(DB.Document project, DB.Document family, DB.ElementId categoryId, bool createIfNotExist = false)
     {
       if (-3000000 < categoryId.IntegerValue && categoryId.IntegerValue < -2000000)
-        return DB.Category.GetCategory(family, categoryId);
+        return family.GetCategory(categoryId);
 
       try
       {
@@ -273,7 +273,7 @@ namespace RhinoInside.Revit.GH.Components
     (
       DB.Document doc,
       DB.Document familyDoc,
-      Rhino.Geometry.Brep brep,
+      Brep brep,
       DeleteElementEnumerator<DB.GenericForm> forms
     )
     {
@@ -288,7 +288,7 @@ namespace RhinoInside.Revit.GH.Components
         else freeForm = DB.FreeFormElement.Create(familyDoc, solid);
 
         brep.TryGetUserString(DB.BuiltInParameter.ELEMENT_IS_CUTTING.ToString(), out bool cutting, false);
-        freeForm.get_Parameter(DB.BuiltInParameter.ELEMENT_IS_CUTTING).Set(cutting ? 1 : 0);
+        freeForm.get_Parameter(DB.BuiltInParameter.ELEMENT_IS_CUTTING).Update(cutting ? 1 : 0);
 
         if (!cutting)
         {
@@ -313,19 +313,19 @@ namespace RhinoInside.Revit.GH.Components
           }
 
           if (familySubCategory is null)
-            freeForm.get_Parameter(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY).Set(DB.ElementId.InvalidElementId);
+            freeForm.get_Parameter(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY).Update(DB.ElementId.InvalidElementId);
           else
             freeForm.Subcategory = familySubCategory;
 
           brep.TryGetUserString(DB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), out var visible, true);
-          freeForm.get_Parameter(DB.BuiltInParameter.IS_VISIBLE_PARAM).Set(visible ? 1 : 0);
+          freeForm.get_Parameter(DB.BuiltInParameter.IS_VISIBLE_PARAM).Update(visible ? 1 : 0);
 
           brep.TryGetUserString(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility, 57406);
-          freeForm.get_Parameter(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Set(visibility);
+          freeForm.get_Parameter(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(visibility);
 
           brep.TryGetUserString(DB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), out DB.ElementId materialId);
           var familyMaterialId = MapMaterial(doc, familyDoc, materialId, true);
-          freeForm.get_Parameter(DB.BuiltInParameter.MATERIAL_ID_PARAM).Set(familyMaterialId);
+          freeForm.get_Parameter(DB.BuiltInParameter.MATERIAL_ID_PARAM).Update(familyMaterialId);
         }
 
         return cutting;
@@ -338,33 +338,27 @@ namespace RhinoInside.Revit.GH.Components
     (
       DB.Document doc,
       DB.Document familyDoc,
-      Rhino.Geometry.Curve curve,
+      Curve curve,
       List<KeyValuePair<double[], DB.SketchPlane>> planesSet,
       DeleteElementEnumerator<DB.CurveElement> curves
     )
     {
       if (curve.TryGetPlane(out var plane))
       {
-        var abcd = plane.GetPlaneEquation();
-        int index = planesSet.BinarySearch(new KeyValuePair<double[], DB.SketchPlane>(abcd, null), PlaneComparer.Instance);
-        if (index < 0)
-        {
-          var entry = new KeyValuePair<double[], DB.SketchPlane>(abcd, DB.SketchPlane.Create(familyDoc, plane.ToPlane()));
-          index = ~index;
-          planesSet.Insert(index, entry);
-        }
-        var sketchPlane = planesSet[index].Value;
-
-        DB.GraphicsStyle familyGraphicsStyle = null;
+        var familyGraphicsStyle = default(DB.GraphicsStyle);
         {
           DB.Category familySubCategory = null;
           if
           (
             curve.TryGetUserString(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), out DB.ElementId subCategoryId) &&
-            DB.Category.GetCategory(doc, subCategoryId) is DB.Category subCategory
+            doc.GetCategory(subCategoryId) is DB.Category subCategory
           )
           {
-            if (subCategoryId == familyDoc.OwnerFamily.FamilyCategory.Id)
+            if (subCategoryId.IntegerValue == (int) DB.BuiltInCategory.OST_InvisibleLines)
+            {
+              familySubCategory = MapCategory(doc, familyDoc, subCategoryId, true);
+            }
+            else if (subCategoryId == familyDoc.OwnerFamily.FamilyCategory.Id)
             {
               familySubCategory = MapCategory(doc, familyDoc, subCategoryId, true);
             }
@@ -386,43 +380,83 @@ namespace RhinoInside.Revit.GH.Components
           familyGraphicsStyle = familySubCategory?.GetGraphicsStyle(graphicsStyleType);
         }
 
-        curve.TryGetUserString(DB.BuiltInParameter.MODEL_OR_SYMBOLIC.ToString(), out bool symbolic, false);
+        curve.TryGetUserString(DB.BuiltInParameter.MODEL_OR_SYMBOLIC.ToString(), out bool symbolic, true);
         curve.TryGetUserString(DB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), out var visible, true);
         curve.TryGetUserString(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility, 57406);
 
-        foreach (var c in curve.ToCurveMany())
+        if (familyDoc.OwnerFamily.FamilyCategory.Id.IntegerValue == (int) DB.BuiltInCategory.OST_DetailComponents)
         {
-          curves.MoveNext();
-
-          if (symbolic)
+          using (var collector = new DB.FilteredElementCollector(familyDoc).OfClass(typeof(DB.View)))
           {
-            if (curves.Current is DB.SymbolicCurve symbolicCurve && symbolicCurve.GeometryCurve.IsSameKindAs(c))
+            var view = collector.FirstElement() as DB.View;
+            foreach (var c in curve.ToCurveMany())
             {
-              symbolicCurve.SetSketchPlaneAndCurve(sketchPlane, c);
-              curves.DeleteCurrent = false;
+              curves.MoveNext();
+
+              if (curves.Current is DB.DetailCurve detailCurve && detailCurve.GeometryCurve.IsSameKindAs(c))
+              {
+                detailCurve.SetGeometryCurve(c, true);
+                curves.DeleteCurrent = false;
+              }
+              else detailCurve = familyDoc.FamilyCreate.NewDetailCurve(view, c);
+
+              detailCurve.get_Parameter(DB.BuiltInParameter.IS_VISIBLE_PARAM).Update(visible ? 1 : 0);
+              detailCurve.get_Parameter(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(visibility);
+
+              if (familyGraphicsStyle is object)
+                detailCurve.LineStyle = familyGraphicsStyle;
+
+              if (!symbolic)
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Curves on a Detail will not display in 3D views");
             }
-            else symbolicCurve = familyDoc.FamilyCreate.NewSymbolicCurve(c, sketchPlane);
-
-            symbolicCurve.get_Parameter(DB.BuiltInParameter.IS_VISIBLE_PARAM).Set(visible ? 1 : 0);
-            symbolicCurve.get_Parameter(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Set(visibility);
-
-            if (familyGraphicsStyle is object)
-              symbolicCurve.Subcategory = familyGraphicsStyle;
           }
-          else
+        }
+        else
+        {
+          var abcd = plane.GetPlaneEquation();
+          int index = planesSet.BinarySearch(new KeyValuePair<double[], DB.SketchPlane>(abcd, null), PlaneComparer.Instance);
+          if (index < 0)
           {
-            if (curves.Current is DB.ModelCurve modelCurve && modelCurve.GeometryCurve.IsSameKindAs(c))
+            var entry = new KeyValuePair<double[], DB.SketchPlane>(abcd, DB.SketchPlane.Create(familyDoc, plane.ToPlane()));
+            index = ~index;
+            planesSet.Insert(index, entry);
+          }
+          var sketchPlane = planesSet[index].Value;
+
+          foreach (var c in curve.ToCurveMany())
+          {
+            curves.MoveNext();
+
+            if (symbolic)
             {
-              modelCurve.SetSketchPlaneAndCurve(sketchPlane, c);
-              curves.DeleteCurrent = false;
+              if (curves.Current is DB.SymbolicCurve symbolicCurve && symbolicCurve.GeometryCurve.IsSameKindAs(c))
+              {
+                symbolicCurve.SetSketchPlaneAndCurve(sketchPlane, c);
+                curves.DeleteCurrent = false;
+              }
+              else symbolicCurve = familyDoc.FamilyCreate.NewSymbolicCurve(c, sketchPlane);
+
+              symbolicCurve.get_Parameter(DB.BuiltInParameter.IS_VISIBLE_PARAM).Update(visible ? 1 : 0);
+              symbolicCurve.get_Parameter(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(visibility);
+
+              if (familyGraphicsStyle is object)
+                symbolicCurve.Subcategory = familyGraphicsStyle;
             }
-            else modelCurve = familyDoc.FamilyCreate.NewModelCurve(c, sketchPlane);
+            else
+            {
+              if (curves.Current is DB.ModelCurve modelCurve && modelCurve.GeometryCurve.IsSameKindAs(c))
+              {
+                modelCurve.SetSketchPlaneAndCurve(sketchPlane, c);
+                curves.DeleteCurrent = false;
+              }
+              else modelCurve = familyDoc.FamilyCreate.NewModelCurve(c, sketchPlane);
 
-            modelCurve.get_Parameter(DB.BuiltInParameter.IS_VISIBLE_PARAM).Set(visible ? 1 : 0);
-            modelCurve.get_Parameter(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Set(visibility);
+              modelCurve.get_Parameter(DB.BuiltInParameter.IS_VISIBLE_PARAM).Update(visible ? 1 : 0);
+              modelCurve.get_Parameter(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(visibility);
 
-            if (familyGraphicsStyle is object)
-              modelCurve.Subcategory = familyGraphicsStyle;
+              if (familyGraphicsStyle is object)
+                modelCurve.Subcategory = familyGraphicsStyle;
+            }
           }
         }
       }
@@ -432,7 +466,7 @@ namespace RhinoInside.Revit.GH.Components
     (
       DB.Document doc,
       DB.Document familyDoc,
-      IEnumerable<Rhino.Geometry.Curve> loops,
+      IEnumerable<Curve> loops,
       DB.HostObject host,
       DeleteElementEnumerator<DB.Opening> openings
     )
@@ -633,7 +667,7 @@ namespace RhinoInside.Revit.GH.Components
                       }
                     }
 
-                    familyDoc.OwnerFamily.get_Parameter(DB.BuiltInParameter.FAMILY_ALLOW_CUT_WITH_VOIDS).Set(hasVoids ? 1 : 0);
+                    familyDoc.OwnerFamily.get_Parameter(DB.BuiltInParameter.FAMILY_ALLOW_CUT_WITH_VOIDS).Update(hasVoids ? 1 : 0);
                   }
                 }
 

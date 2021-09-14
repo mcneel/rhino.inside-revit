@@ -73,15 +73,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
-// TODO : Upgrade Revit 2021 nuget package to 2021.0.1 and change the if below to REVIT_2021
-#if !REVIT_2022
+#if !REVIT_2021
   using InternalOrigin = Autodesk.Revit.DB.BasePoint;
 #endif
 
   public static class InternalOriginExtension
   {
-// TODO : Upgrade Revit 2021 nuget package to 2021.0.1 and change the if below to REVIT_2021
-#if REVIT_2022
+#if REVIT_2021
     /// <summary>
     /// Gets the shared position of the InternalOrigin.
     /// </summary>
@@ -98,14 +96,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
 #endif
 
     /// <summary>
-    /// Gets the project internal origin base point for the document.
+    /// Gets the project internal origin for the document.
     /// </summary>
-    /// <param name="doc">The document from which to get the internal origin base point.</param>
-    /// <returns>The project base point of the document.</returns>
+    /// <param name="doc">The document from which to get the internal origin.</param>
+    /// <returns>The project internal origin of the document.</returns>
     public static InternalOrigin GetInternalOriginPoint(Document doc)
     {
-// TODO : Upgrade Revit 2021 nuget package to 2021.0.1 and change the if below to REVIT_2021
-#if REVIT_2022
+#if REVIT_2021
       return InternalOrigin.Get(doc);
 #else
       using (var collector = new FilteredElementCollector(doc))

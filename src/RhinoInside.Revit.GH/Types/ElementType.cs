@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Element Type")]
   public class ElementType : Element, IGH_ElementType
   {
-    protected override Type ScriptVariableType => typeof(DB.ElementType);
+    protected override Type ValueType => typeof(DB.ElementType);
     public static explicit operator DB.ElementType(ElementType value) => value?.Value;
     public new DB.ElementType Value => base.Value as DB.ElementType;
 
@@ -45,7 +45,7 @@ namespace RhinoInside.Revit.GH.Types
       set
       {
         if (value is object)
-          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_TYPE_MARK)?.Set(value);
+          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_TYPE_MARK)?.Update(value);
       }
     }
     #endregion

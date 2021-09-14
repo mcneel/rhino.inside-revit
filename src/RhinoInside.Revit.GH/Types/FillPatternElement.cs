@@ -6,7 +6,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Fill Pattern")]
   public class FillPatternElement : Element
   {
-    protected override Type ScriptVariableType => typeof(DB.FillPatternElement);
+    protected override Type ValueType => typeof(DB.FillPatternElement);
     public new DB.FillPatternElement Value => base.Value as DB.FillPatternElement;
     public static explicit operator DB.FillPatternElement(FillPatternElement value) => value?.Value;
 

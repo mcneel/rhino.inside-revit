@@ -33,7 +33,7 @@ namespace RhinoInside.Revit.GH.Components
       if (element is null) return false;
 
       if (!element.Host.IsEquivalent(host)) return false;
-      if (element.LevelId != level.Id) return false;
+      if (element.LevelId != (level?.Id ?? DB.ElementId.InvalidElementId)) return false;
       if (element.GetTypeId() != type.Id)
       {
         if (DB.Element.IsValidType(element.Document, new DB.ElementId[] { element.Id }, type.Id))
@@ -44,12 +44,14 @@ namespace RhinoInside.Revit.GH.Components
         else return false;
       }
 
-      // Unpin here to allow SetLocation update location correctly.
-      if (element.Pinned == true)
+      var pinned = element.Pinned;
+      try
       {
-        try { element.Pinned = false; }
-        catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
+        element.Pinned = false;
+        element.SetLocation(location.Origin.ToXYZ(), location.XAxis.ToXYZ(), location.YAxis.ToXYZ());
       }
+      catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
+      finally { element.Pinned = pinned; }
 
       return true;
     }
@@ -86,7 +88,7 @@ namespace RhinoInside.Revit.GH.Components
 
       SolveOptionalLevel(document, location, type, ref level, host);
 
-      if (!Reuse(ref component, location, type, level.Value, host))
+      if (!Reuse(ref component, location, type, level.GetValueOrDefault(), host))
       {
         FamilyInstanceCreationData creationData;
         switch (type.Family.FamilyPlacementType)
@@ -145,10 +147,12 @@ namespace RhinoInside.Revit.GH.Components
         ReplaceElement(ref component, newElement, parametersMask);
 
         // Regenerate here to allow SetLocation get the current element location correctly.
-        document.Regenerate();
+        if (component.Symbol.Family.FamilyPlacementType != DB.FamilyPlacementType.OneLevelBasedHosted)
+        {
+          document.Regenerate();
+          component.SetLocation(location.Origin.ToXYZ(), location.XAxis.ToXYZ(), location.YAxis.ToXYZ());
+        }
       }
-
-      component?.SetLocation(location.Origin.ToXYZ(), location.XAxis.ToXYZ(), location.YAxis.ToXYZ());
     }
 
     void SolveOptionalLevel(DB.Document doc, Plane location, DB.FamilySymbol type, ref Optional<DB.Level> level, DB.Element host)

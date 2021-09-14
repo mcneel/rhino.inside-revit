@@ -72,6 +72,7 @@ namespace RhinoInside.Revit.GH.Components
       // Reenable new joined walls
       foreach (var wallToJoin in joinedWalls)
       {
+        if (!wallToJoin.IsValid()) continue;
         DB.WallUtils.AllowWallJoinAtEnd(wallToJoin, 0);
         DB.WallUtils.AllowWallJoinAtEnd(wallToJoin, 1);
       }
@@ -201,6 +202,12 @@ namespace RhinoInside.Revit.GH.Components
 
         using (var properties = AreaMassProperties.Compute(boundary))
         {
+          if (properties is null)
+          {
+            AddGeometryRuntimeError(GH_RuntimeMessageLevel.Error, "Failed to compute Boundary Area", boundary);
+            throw new RhinoInside.Revit.Exceptions.CancelException();
+          }
+
           if (properties.Area > maxArea)
           {
             maxArea = properties.Area;
@@ -247,6 +254,7 @@ namespace RhinoInside.Revit.GH.Components
 
         if (offsetDist != 0.0)
         {
+          offsetDist *= Revit.ModelUnits;
           var translation = Transform.Translation(normal * (flipped ? -offsetDist : offsetDist));
 
           var newProfile = new Curve[profile.Count];
@@ -259,6 +267,8 @@ namespace RhinoInside.Revit.GH.Components
           profile = newProfile;
         }
       }
+
+      normal = -normal;
 
       if (!Reuse(ref wall, profile, normal, type.Value))
       {
@@ -274,7 +284,7 @@ namespace RhinoInside.Revit.GH.Components
         );
 
         // Walls are created with the last LocationLine used in the Revit editor!!
-        //newWall.get_Parameter(BuiltInParameter.WALL_KEY_REF_PARAM).Set((int) WallLocationLine.WallCenterline);
+        //newWall.get_Parameter(BuiltInParameter.WALL_KEY_REF_PARAM).Update((int) WallLocationLine.WallCenterline);
 
         var parametersMask = new DB.BuiltInParameter[]
         {
@@ -282,6 +292,7 @@ namespace RhinoInside.Revit.GH.Components
           DB.BuiltInParameter.ELEM_FAMILY_PARAM,
           DB.BuiltInParameter.ELEM_TYPE_PARAM,
           DB.BuiltInParameter.WALL_KEY_REF_PARAM,
+          DB.BuiltInParameter.WALL_HEIGHT_TYPE,
           DB.BuiltInParameter.WALL_USER_HEIGHT_PARAM,
           DB.BuiltInParameter.WALL_BASE_CONSTRAINT,
           DB.BuiltInParameter.WALL_BASE_OFFSET,
@@ -294,17 +305,19 @@ namespace RhinoInside.Revit.GH.Components
 
       if (wall is object)
       {
-        wall.get_Parameter(DB.BuiltInParameter.WALL_BASE_CONSTRAINT).Set(level.Value.Id);
-        wall.get_Parameter(DB.BuiltInParameter.WALL_BASE_OFFSET).Set(bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight());
-        wall.get_Parameter(DB.BuiltInParameter.WALL_KEY_REF_PARAM).Set((int) locationLine);
+        wall.get_Parameter(DB.BuiltInParameter.WALL_HEIGHT_TYPE).Update(DB.ElementId.InvalidElementId);
+        wall.get_Parameter(DB.BuiltInParameter.WALL_USER_HEIGHT_PARAM).Update((bbox.Max.Z - bbox.Min.Z) / Revit.ModelUnits);
+        wall.get_Parameter(DB.BuiltInParameter.WALL_BASE_CONSTRAINT).Update(level.Value.Id);
+        wall.get_Parameter(DB.BuiltInParameter.WALL_BASE_OFFSET).Update(bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight());
+        wall.get_Parameter(DB.BuiltInParameter.WALL_KEY_REF_PARAM).Update((int) locationLine);
         if (structuralUsage == DB.Structure.StructuralWallUsage.NonBearing)
         {
-          wall.get_Parameter(DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).Set(0);
+          wall.get_Parameter(DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).Update(0);
         }
         else
         {
-          wall.get_Parameter(DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).Set(1);
-          wall.get_Parameter(DB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM).Set((int) structuralUsage);
+          wall.get_Parameter(DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).Update(1);
+          wall.get_Parameter(DB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM).Update((int) structuralUsage);
         }
 
         if (wall.Flipped != flipped)

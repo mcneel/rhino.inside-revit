@@ -5,7 +5,6 @@ using System.Windows.Forms;
 using GH_IO.Serialization;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 using DBX = RhinoInside.Revit.External.DB;
@@ -20,7 +19,75 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public ParameterKey() : base("Parameter", "Parameter", "Contains a collection of Revit parameters", "Params", "Revit Primitives") { }
 
+    public static bool GetDocumentParameter(IGH_Component component, IGH_DataAccess DA, string name, out Types.ParameterKey key)
+    {
+      if (!component.Params.GetData(DA, name, out key, x => x.IsValid)) return false;
+
+      if (!key.IsReferencedData)
+      {
+        if (!Document.TryGetCurrentDocument(component, out var document))
+          return false;
+
+        var keyName = key.Name;
+        var parameterId = document.Value.IsFamilyDocument ?
+              document.Value.FamilyManager.
+              get_Parameter(keyName)?.Id ??
+              DB.ElementId.InvalidElementId :
+              DB.GlobalParametersManager.FindByName(document.Value, keyName);
+
+        key = Types.ParameterKey.FromElementId(document.Value, parameterId);
+        if (key is object) return true;
+
+        if (document.Value.IsFamilyDocument)
+          throw new Exceptions.RuntimeWarningException($"Family parameter '{keyName}' is not defined on document '{document.Title}'");
+        else
+          throw new Exceptions.RuntimeWarningException($"Global parameter '{keyName}' is not defined on document '{document.Title}'");
+      }
+
+      return key.IsValid;
+    }
+
+    public static bool GetProjectParameter(IGH_Component component, IGH_DataAccess DA, string name, out Types.ParameterKey key)
+    {
+      if (!component.Params.GetData(DA, name, out key, x => x.IsValid)) return false;
+
+      if (!key.IsReferencedData)
+      {
+        if (!Document.TryGetCurrentDocument(component, out var document))
+          return false;
+
+        var keyName = key.Name;
+        if (!document.Value.IsFamilyDocument)
+        {
+          var parameterId = DB.ElementId.InvalidElementId;
+          using (var iterator = document.Value.ParameterBindings.ForwardIterator())
+          {
+            while (iterator.MoveNext())
+            {
+              if (iterator.Key is DB.InternalDefinition definition)
+              {
+                if (definition.Name == keyName)
+                  parameterId = definition.Id;
+              }
+            }
+          }
+
+          key = Types.ParameterKey.FromElementId(document.Value, parameterId);
+          if (key is object) return true;
+        }
+
+        throw new Exceptions.RuntimeWarningException($"Project parameter '{keyName}' is not defined on document '{document.Title}'");
+      }
+      else if (key.Document.IsFamilyDocument || key.Value is DB.GlobalParameter)
+        throw new Exceptions.RuntimeWarningException($"Parameter '{key.Name}' is not a valid reference to a project parameter");
+
+      return key.IsValid;
+    }
+
     #region UI
+
+    protected DB.BuiltInCategory SelectedBuiltInCategory = DB.BuiltInCategory.INVALID;
+
     public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
     {
       base.AppendAdditionalMenuItems(menu);
@@ -99,6 +166,8 @@ namespace RhinoInside.Revit.GH.Parameters
       categoriesTypeBox.Items.Add("Analytical");
       categoriesTypeBox.SelectedIndex = 0;
 
+      listBox.Tag = categoriesBox;
+
       Menu_AppendCustomItem(menu, categoriesTypeBox);
       Menu_AppendCustomItem(menu, categoriesBox);
       Menu_AppendCustomItem(menu, listBox);
@@ -121,10 +190,15 @@ namespace RhinoInside.Revit.GH.Parameters
 
       categoriesBox.SelectedIndex = -1;
       categoriesBox.Items.Clear();
+      categoriesBox.DisplayMember = "DisplayName";
+
       foreach (var category in categories)
+        categoriesBox.Items.Add(Types.Category.FromCategory(category));
+
+      if (SelectedBuiltInCategory != DB.BuiltInCategory.INVALID)
       {
-        var tag = Types.Category.FromCategory(category);
-        int index = categoriesBox.Items.Add(tag.EmitProxy());
+        var currentCategory = new Types.Category(doc, new DB.ElementId(SelectedBuiltInCategory));
+        categoriesBox.SelectedIndex = categoriesBox.Items.Cast<Types.Category>().IndexOf(currentCategory, 0).FirstOr(-1);
       }
     }
 
@@ -133,49 +207,37 @@ namespace RhinoInside.Revit.GH.Parameters
       if (Revit.ActiveUIDocument is null) return;
 
       var doc = Revit.ActiveUIDocument.Document;
-      var selectedIndex = -1;
 
-      try
+      listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
+      listBox.Items.Clear();
+      listBox.DisplayMember = "DisplayName";
+
+      var current = default(Types.ParameterKey);
+      if (SourceCount == 0 && PersistentDataCount == 1)
       {
-        listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
-        listBox.Items.Clear();
-
-        var current = default(Types.ParameterKey);
-        if (SourceCount == 0 && PersistentDataCount == 1)
-        {
-          if (PersistentData.get_FirstItem(true) is Types.ParameterKey firstValue)
-            current = firstValue as Types.ParameterKey;
-        }
-
-        {
-          var parameters = default(IEnumerable<DB.ElementId>);
-          if (categoriesBox.SelectedIndex == -1)
-          {
-            parameters = categoriesBox.Items.
-                         Cast<IGH_GooProxy>().
-                         Select(x => x.ProxyOwner).
-                         Cast<Types.Category>().
-                         SelectMany(x => DB.TableView.GetAvailableParameters(doc, x.Id)).
-                         GroupBy(x => x.IntegerValue).
-                         Select(x => x.First());
-          }
-          else
-          {
-            parameters = DB.TableView.GetAvailableParameters(doc, ((categoriesBox.Items[categoriesBox.SelectedIndex] as IGH_GooProxy).ProxyOwner as Types.Category).Id);
-          }
-
-          foreach (var parameter in parameters)
-          {
-            var tag = Types.ParameterKey.FromElementId(doc, parameter);
-            int index = listBox.Items.Add(tag.EmitProxy());
-            if (tag.UniqueID == current?.UniqueID)
-              selectedIndex = index;
-          }
-        }
+        if (PersistentData.get_FirstItem(true) is Types.ParameterKey firstValue)
+          current = firstValue as Types.ParameterKey;
       }
-      finally
+
       {
-        listBox.SelectedIndex = selectedIndex;
+        var parameters = default(IEnumerable<DB.ElementId>);
+        if (categoriesBox.SelectedIndex == -1)
+        {
+          parameters = categoriesBox.Items.
+                        Cast<Types.Category>().
+                        SelectMany(x => DB.TableView.GetAvailableParameters(doc, x.Id)).
+                        GroupBy(x => x.IntegerValue).
+                        Select(x => x.First());
+        }
+        else
+        {
+          parameters = DB.TableView.GetAvailableParameters(doc, (categoriesBox.Items[categoriesBox.SelectedIndex] as Types.Category).Id);
+        }
+
+        foreach (var parameter in parameters)
+          listBox.Items.Add(Types.ParameterKey.FromElementId(doc, parameter));
+
+        listBox.SelectedIndex = listBox.Items.Cast<Types.ParameterKey>().IndexOf(PersistentValue, 0).FirstOr(-1);
         listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
       }
     }
@@ -192,7 +254,13 @@ namespace RhinoInside.Revit.GH.Parameters
     private void CategoriesBox_SelectedIndexChanged(object sender, EventArgs e)
     {
       if (sender is ComboBox categoriesBox && categoriesBox.Tag is ListBox parametersListBox)
+      {
+        SelectedBuiltInCategory = DB.BuiltInCategory.INVALID;
+        if (categoriesBox.SelectedItem is Types.Category category)
+          category.Id.TryGetBuiltInCategory(out SelectedBuiltInCategory);
+
         RefreshParametersList(parametersListBox, categoriesBox);
+      }
     }
 
     private void ListBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -201,17 +269,44 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         if (listBox.SelectedIndex != -1)
         {
-          if (listBox.Items[listBox.SelectedIndex] is IGH_GooProxy value)
+          if (listBox.Items[listBox.SelectedIndex] is Types.ParameterKey value)
           {
             RecordPersistentDataEvent($"Set: {value}");
             PersistentData.Clear();
-            PersistentData.Append(value.ProxyOwner as Types.ParameterKey);
+            PersistentData.Append(value);
             OnObjectChanged(GH_ObjectEventType.PersistentData);
           }
         }
 
         ExpireSolution(true);
       }
+    }
+    #endregion
+
+    #region IO
+    public override bool Read(GH_IReader reader)
+    {
+      if (!base.Read(reader))
+        return false;
+
+      var selectedBuiltInCategory = string.Empty;
+      if (reader.TryGetString("SelectedBuiltInCategory", ref selectedBuiltInCategory))
+        SelectedBuiltInCategory = new EDBS.CategoryId(selectedBuiltInCategory);
+      else
+        SelectedBuiltInCategory = DB.BuiltInCategory.INVALID;
+
+      return true;
+    }
+
+    public override bool Write(GH_IWriter writer)
+    {
+      if (!base.Write(writer))
+        return false;
+
+      if (SelectedBuiltInCategory != DB.BuiltInCategory.INVALID)
+        writer.SetString("SelectedBuiltInCategory", ((EDBS.CategoryId) SelectedBuiltInCategory).FullName);
+
+      return true;
     }
     #endregion
   }
@@ -292,21 +387,23 @@ namespace RhinoInside.Revit.GH.Parameters
         ParameterClass = DBX.ParameterClass.BuiltIn;
         ParameterBuiltInId = parameterBuiltInId;
       }
-      else if(p.Element.Document.GetElement(p.Id) is DB.ParameterElement paramElement)
+      else if (p.Element.Document.GetElement(p.Id) is DB.ParameterElement paramElement)
       {
         if (paramElement is DB.GlobalParameter)
         {
           ParameterClass = DBX.ParameterClass.Global;
         }
         else switch (paramElement.get_Parameter(DB.BuiltInParameter.ELEM_DELETABLE_IN_FAMILY).AsInteger())
-        {
-          case 0: ParameterClass = DBX.ParameterClass.Family;  break;
-          case 1: ParameterClass = DBX.ParameterClass.Project; break;
-        }
+          {
+            case 0: ParameterClass = DBX.ParameterClass.Family; break;
+            case 1: ParameterClass = DBX.ParameterClass.Project; break;
+          }
       }
 
-      try { Name = $"{ParameterGroup.Label} : {ParameterName}"; }
-      catch (Autodesk.Revit.Exceptions.InvalidOperationException) { Name = ParameterName; }
+      if (ParameterGroup is object && ParameterGroup != EDBS.ParameterGroup.Empty)
+        Name = $"{ParameterGroup.Label} : {ParameterName}";
+      else
+        Name = ParameterName;
 
       NickName = Name;
       MutableNickName = false;
@@ -321,19 +418,19 @@ namespace RhinoInside.Revit.GH.Parameters
         Description = $"Shared parameter {ParameterSharedGUID.Value:B}\n{Description}";
       else if (ParameterBuiltInId != EDBS.ParameterId.Empty)
         Description = $"BuiltIn Parameter \"{ParameterBuiltInId.FullName}\"\n{Description}";
-      else if(ParameterBinding != DBX.ParameterBinding.Unknown)
+      else if (ParameterBinding != DBX.ParameterBinding.Unknown)
         Description = $"{ParameterClass} parameter ({ParameterBinding})\n{Description}";
       else
         Description = $"{ParameterClass} parameter\n{Description}";
     }
 
-    public string ParameterName                        { get; private set; } = string.Empty;
-    public EDBS.DataType ParameterType                 { get; private set; } = EDBS.DataType.Empty;
-    public EDBS.ParameterGroup ParameterGroup          { get; private set; } = EDBS.ParameterGroup.Empty;
-    public DBX.ParameterBinding ParameterBinding       { get; private set; } = DBX.ParameterBinding.Unknown;
-    public DBX.ParameterClass ParameterClass           { get; private set; } = DBX.ParameterClass.Any;
-    public EDBS.ParameterId ParameterBuiltInId         { get; private set; } = EDBS.ParameterId.Empty;
-    public Guid? ParameterSharedGUID                   { get; private set; } = default;
+    public string ParameterName { get; private set; } = string.Empty;
+    public EDBS.DataType ParameterType { get; private set; } = EDBS.DataType.Empty;
+    public EDBS.ParameterGroup ParameterGroup { get; private set; } = EDBS.ParameterGroup.Empty;
+    public DBX.ParameterBinding ParameterBinding { get; private set; } = DBX.ParameterBinding.Unknown;
+    public DBX.ParameterClass ParameterClass { get; private set; } = DBX.ParameterClass.Any;
+    public EDBS.ParameterId ParameterBuiltInId { get; private set; } = EDBS.ParameterId.Empty;
+    public Guid? ParameterSharedGUID { get; private set; } = default;
 
     public sealed override bool Read(GH_IReader reader)
     {
@@ -344,7 +441,7 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         if (reader.FindItem(name) is GH_IO.Types.GH_Item item)
         {
-          if (item.Type == GH_IO.Types.GH_Types.gh_int32)  return item._int32;
+          if (item.Type == GH_IO.Types.GH_Types.gh_int32) return item._int32;
           if (item.Type == GH_IO.Types.GH_Types.gh_string) return item._string;
         }
 
@@ -389,11 +486,11 @@ namespace RhinoInside.Revit.GH.Parameters
       var parameterClass = (int) DBX.ParameterClass.Any;
       if (reader.TryGetInt32("ParameterClass", ref parameterClass))
         ParameterClass = (DBX.ParameterClass) parameterClass;
-      else if(ParameterSharedGUID.HasValue)
+      else if (ParameterSharedGUID.HasValue)
         ParameterClass = DBX.ParameterClass.Shared;
-      else if(ParameterBuiltInId != EDBS.ParameterId.Empty)
+      else if (ParameterBuiltInId != EDBS.ParameterId.Empty)
         ParameterClass = DBX.ParameterClass.BuiltIn;
-      else if(ParameterBinding != DBX.ParameterBinding.Unknown)
+      else if (ParameterBinding != DBX.ParameterBinding.Unknown)
         ParameterClass = DBX.ParameterClass.Project;
 
       return true;
@@ -404,7 +501,7 @@ namespace RhinoInside.Revit.GH.Parameters
       if (!base.Write(writer))
         return false;
 
-      if(!string.IsNullOrEmpty(ParameterName))
+      if (!string.IsNullOrEmpty(ParameterName))
         writer.SetString("ParameterName", ParameterName);
 
       if (ParameterGroup != EDBS.ParameterGroup.Empty)
@@ -441,7 +538,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public override bool Equals(object obj)
     {
-      if(obj is ParameterParam value)
+      if (obj is ParameterParam value)
       {
         if (ParameterSharedGUID.HasValue)
           return value.ParameterSharedGUID.HasValue && ParameterSharedGUID == value.ParameterSharedGUID.Value;
@@ -460,10 +557,10 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public DB.Parameter GetParameter(DB.Element element)
     {
-      if(ParameterSharedGUID.HasValue)
+      if (ParameterSharedGUID.HasValue)
         return element.get_Parameter(ParameterSharedGUID.Value);
 
-      if(ParameterBuiltInId != EDBS.ParameterId.Empty)
+      if (ParameterBuiltInId != EDBS.ParameterId.Empty)
         return element.GetParameter(ParameterBuiltInId);
 
       return element.GetParameter(ParameterName, ParameterType, ParameterBinding, ParameterClass);

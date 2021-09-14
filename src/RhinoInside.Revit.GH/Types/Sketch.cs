@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Sketch")]
   public class Sketch : GraphicalElement
   {
-    protected override Type ScriptVariableType => typeof(DB.Sketch);
+    protected override Type ValueType => typeof(DB.Sketch);
     public new DB.Sketch Value => base.Value as DB.Sketch;
     public static explicit operator DB.Sketch(Sketch value) => value?.Value;
 
@@ -29,7 +29,7 @@ namespace RhinoInside.Revit.GH.Types
 
       if (value is DB.HostObject host)
       {
-        var sketch = host.GetFirstDependent<DB.Sketch>();
+        var sketch = host.GetSketch();
         return sketch is object && SetValue(sketch);
       }
 

@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Family")]
   public class Family : Element, IGH_Family
   {
-    protected override Type ScriptVariableType => typeof(DB.Family);
+    protected override Type ValueType => typeof(DB.Family);
     public static explicit operator DB.Family(Family value) => value?.Value;
     public new DB.Family Value => base.Value as DB.Family;
 

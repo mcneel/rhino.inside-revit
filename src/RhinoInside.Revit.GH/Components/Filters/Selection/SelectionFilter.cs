@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.EditSelection);
       Menu_AppendItem
       (
-        menu, $"Edit Filters…",
+        menu, $"Edit Selection…",
         (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
         activeApp.CanPostCommand(commandId), false
       );
@@ -136,7 +136,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
         name = doc.GetNamesakeElements
         (
-          typeof(DB.SelectionFilterElement), name
+          typeof(DB.FilterElement), name
         ).
         Select(x => x.Name).
         WhereNamePrefixedWith(name).

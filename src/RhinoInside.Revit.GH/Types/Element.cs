@@ -41,8 +41,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    // TODO : Rename to ValueType
-    protected virtual Type ScriptVariableType => typeof(DB.Element);
+    protected virtual Type ValueType => typeof(DB.Element);
     #endregion
 
     #region DocumentObject
@@ -127,8 +126,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public static readonly Dictionary<Type, Func<DB.Element, Element>> ActivatorDictionary = new Dictionary<Type, Func<DB.Element, Element>>()
     {
-// TODO : Upgrade Revit 2021 nuget package to 2021.0.1 and change the if below to REVIT_2021
-#if REVIT_2022
+#if REVIT_2021
       { typeof(DB.InternalOrigin),          (element)=> new InternalOrigin        (element as DB.InternalOrigin)    },
       { typeof(DB.BasePoint),               (element)=> new BasePoint             (element as DB.BasePoint)         },
 #endif
@@ -181,6 +179,8 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(DB.Mullion),                 (element)=> new Mullion               (element as DB.Mullion)           },
       { typeof(DB.Dimension),               (element)=> new Dimension             (element as DB.Dimension)         },
       { typeof(DB.CurveElement),            (element)=> new CurveElement          (element as DB.CurveElement)      },
+
+      { typeof(DB.AssemblyInstance),        (element)=> new AssemblyInstance      (element as DB.AssemblyInstance)  },
     };
 
     public static Element FromElement(DB.Element element)
@@ -213,8 +213,7 @@ namespace RhinoInside.Revit.GH.Types
 
           return new InstanceElement(element);
         }
-// TODO : Upgrade Revit 2021 nuget package to 2021.0.1 and change the if below to REVIT_2021
-#if !REVIT_2022
+#if !REVIT_2021
         else if (InternalOrigin.IsValidElement(element))
           return new InternalOrigin(element as DB.BasePoint);
         else if (BasePoint.IsValidElement(element))
@@ -300,7 +299,7 @@ namespace RhinoInside.Revit.GH.Types
 
     protected virtual bool SetValue(DB.Element element)
     {
-      if (ScriptVariableType.IsInstanceOfType(element))
+      if (ValueType.IsInstanceOfType(element))
       {
         Document     = element.Document;
         DocumentGUID = Document.GetFingerprintGUID();
@@ -563,7 +562,7 @@ namespace RhinoInside.Revit.GH.Types
     public DB.WorksetId WorksetId
     {
       get => Document?.GetWorksetId(Id);
-      set => Value?.get_Parameter(DB.BuiltInParameter.ELEM_PARTITION_PARAM)?.Set(value.IntegerValue);
+      set => Value?.get_Parameter(DB.BuiltInParameter.ELEM_PARTITION_PARAM)?.Update(value.IntegerValue);
     }
 
     public Phase CreatedPhase
@@ -602,7 +601,7 @@ namespace RhinoInside.Revit.GH.Types
       set
       {
         if (value is object)
-          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.Set(value);
+          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.Update(value);
       }
     }
 
@@ -612,7 +611,7 @@ namespace RhinoInside.Revit.GH.Types
       set
       {
         if (value is object)
-          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS)?.Set(value);
+          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS)?.Update(value);
       }
     }
 
@@ -622,7 +621,7 @@ namespace RhinoInside.Revit.GH.Types
       set
       {
         if (value is object)
-          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MANUFACTURER)?.Set(value);
+          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MANUFACTURER)?.Update(value);
       }
     }
 
@@ -632,7 +631,7 @@ namespace RhinoInside.Revit.GH.Types
       set
       {
         if (value is object)
-          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MODEL)?.Set(value);
+          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MODEL)?.Update(value);
       }
     }
 
@@ -642,7 +641,7 @@ namespace RhinoInside.Revit.GH.Types
       set
       {
         if (value is object)
-          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_COST)?.Set(value.Value);
+          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_COST)?.Update(value.Value);
       }
     }
 
@@ -652,7 +651,7 @@ namespace RhinoInside.Revit.GH.Types
       set
       {
         if (value is object)
-          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_URL)?.Set(value);
+          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_URL)?.Update(value);
       }
     }
 
@@ -662,7 +661,7 @@ namespace RhinoInside.Revit.GH.Types
       set
       {
         if (value is object)
-          Value?.get_Parameter(DB.BuiltInParameter.KEYNOTE_PARAM)?.Set(value);
+          Value?.get_Parameter(DB.BuiltInParameter.KEYNOTE_PARAM)?.Update(value);
       }
     }
 
@@ -676,7 +675,7 @@ namespace RhinoInside.Revit.GH.Types
       set
       {
         if (value is object)
-          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MARK)?.Set(value);
+          Value?.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MARK)?.Update(value);
       }
     }
 #endregion

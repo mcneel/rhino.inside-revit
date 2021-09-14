@@ -6,7 +6,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("MEP Curve")]
   public class MEPCurve : HostObject
   {
-    protected override Type ScriptVariableType => typeof(DB.MEPCurve);
+    protected override Type ValueType => typeof(DB.MEPCurve);
     public new DB.MEPCurve Value => base.Value as DB.MEPCurve;
 
     public MEPCurve() { }
@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("MEP Curve Type")]
   public class MEPCurveType : HostObjectType
   {
-    protected override Type ScriptVariableType => typeof(DB.MEPCurveType);
+    protected override Type ValueType => typeof(DB.MEPCurveType);
     public new DB.MEPCurveType Value => base.Value as DB.MEPCurveType;
 
     public MEPCurveType() { }

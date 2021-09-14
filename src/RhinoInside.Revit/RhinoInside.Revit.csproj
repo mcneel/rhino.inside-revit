@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -26,7 +26,7 @@
   <PropertyGroup Condition="$(Configuration.Contains('2021'))">
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <RevitVersion>2021</RevitVersion>
-    <RevitApiVersion>2021.0.0</RevitApiVersion>
+    <RevitApiVersion>2021.1.0</RevitApiVersion>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.Contains('2022'))">
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
@@ -264,6 +264,7 @@
     <Compile Include="External\DB\Extensions\Sketch.cs" />
     <Compile Include="External\DB\Extensions\Solid.cs" />
     <Compile Include="External\DB\Extensions\Surface.cs" />
+    <Compile Include="External\DB\NumericTolerance.cs" />
     <Compile Include="External\DB\Extensions\View.cs" />
     <Compile Include="External\DB\Extensions\XYZ.cs" />
     <Compile Include="External\DB\Extensions\Wall.cs" />

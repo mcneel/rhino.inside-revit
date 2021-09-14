@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Curtain System")]
   public class CurtainSystem : HostObject
   {
-    protected override Type ScriptVariableType => typeof(DB.CurtainSystem);
+    protected override Type ValueType => typeof(DB.CurtainSystem);
     public new DB.CurtainSystem Value => base.Value as DB.CurtainSystem;
     public static explicit operator DB.CurtainSystem(CurtainSystem value) => value?.Value;
 

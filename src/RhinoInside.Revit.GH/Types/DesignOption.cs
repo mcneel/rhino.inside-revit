@@ -51,7 +51,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Design Option")]
   public class DesignOption : Element
   {
-    protected override Type ScriptVariableType => typeof(DB.DesignOption);
+    protected override Type ValueType => typeof(DB.DesignOption);
     public new DB.DesignOption Value => base.Value as DB.DesignOption;
 
     public override string DisplayName
@@ -89,11 +89,11 @@ namespace RhinoInside.Revit.GH.Types
       }
       set
       {
-        if (value is object && Name != value)
+        if (value is object)
         {
           if (Value is DB.DesignOption option)
-            option.get_Parameter(DB.BuiltInParameter.OPTION_NAME).Set(value);
-          else if (Document is null && Id == DB.ElementId.InvalidElementId)
+            option.get_Parameter(DB.BuiltInParameter.OPTION_NAME).Update(value);
+          else if (Document is null && Id == DB.ElementId.InvalidElementId && value != "Main Model")
             throw new InvalidOperationException($"Design option 'Main Model' does not support assignment of a user-specified name.");
         }
       }

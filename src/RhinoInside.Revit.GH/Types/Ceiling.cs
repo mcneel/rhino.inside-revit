@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Ceiling")]
   public class Ceiling : HostObject
   {
-    protected override Type ScriptVariableType => typeof(DB.Ceiling);
+    protected override Type ValueType => typeof(DB.Ceiling);
     public static explicit operator DB.Ceiling(Ceiling value) => value?.Value;
     public new DB.Ceiling Value => base.Value as DB.Ceiling;
 
@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is DB.Ceiling ceiling && ceiling.GetFirstDependent<DB.Sketch>() is DB.Sketch sketch)
+        if (Value is DB.Ceiling ceiling && ceiling.GetSketch() is DB.Sketch sketch)
         {
           var center = Point3d.Origin;
           var count = 0;
@@ -40,7 +40,7 @@ namespace RhinoInside.Revit.GH.Types
           if (ceiling.Document.GetElement(ceiling.LevelId) is DB.Level level)
             center.Z = level.GetHeight() * Revit.ModelUnits;
 
-          center.Z += ceiling.get_Parameter(DB.BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM)?.AsDoubleInRhinoUnits() ?? 0.0;
+          center.Z += Revit.ModelUnits * ceiling.get_Parameter(DB.BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM)?.AsDouble() ?? 0.0;
 
           var plane = sketch.SketchPlane.GetPlane().ToPlane();
           var origin = center;

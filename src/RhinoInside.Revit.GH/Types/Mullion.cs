@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Mullion")]
   public class Mullion : FamilyInstance
   {
-    protected override Type ScriptVariableType => typeof(DB.Mullion);
+    protected override Type ValueType => typeof(DB.Mullion);
     public static explicit operator DB.Mullion(Mullion value) => value?.Value;
     public new DB.Mullion Value => base.Value as DB.Mullion;
 
@@ -23,7 +23,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Mullion Position")]
   public class MullionPosition : ElementType
   {
-    protected override Type ScriptVariableType => typeof(DB.ElementType);
+    protected override Type ValueType => typeof(DB.ElementType);
 
     public MullionPosition() { }
     public MullionPosition(DB.Document doc, DB.ElementId id) : base(doc, id) { }
@@ -46,7 +46,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Mullion Profile")]
   public class MullionProfile : ElementType
   {
-    protected override Type ScriptVariableType => typeof(DB.ElementType);
+    protected override Type ValueType => typeof(DB.ElementType);
 
     public MullionProfile() { }
     public MullionProfile(DB.Document doc, DB.ElementId id) : base(doc, id) { }

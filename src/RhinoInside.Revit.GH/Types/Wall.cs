@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Wall")]
   public class Wall : HostObject
   {
-    protected override Type ScriptVariableType => typeof(DB.Wall);
+    protected override Type ValueType => typeof(DB.Wall);
     public static explicit operator DB.Wall(Wall value) => value?.Value;
     public new DB.Wall Value => base.Value as DB.Wall;
 

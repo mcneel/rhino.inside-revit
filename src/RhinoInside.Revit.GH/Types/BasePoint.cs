@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Base Point")]
   public class BasePoint : GraphicalElement
   {
-    protected override Type ScriptVariableType => typeof(DB.BasePoint);
+    protected override Type ValueType => typeof(DB.BasePoint);
     public new DB.BasePoint Value => base.Value as DB.BasePoint;
 
     protected override bool SetValue(DB.Element element) => IsValidElement(element) && base.SetValue(element);
@@ -117,8 +117,7 @@ namespace RhinoInside.Revit.GH.Types
 
 namespace RhinoInside.Revit.GH.Types
 {
-// TODO : Upgrade Revit 2021 nuget package to 2021.0.1 and change the if below to REVIT_2021
-#if REVIT_2022
+#if REVIT_2021
   using DBInternalOrigin = Autodesk.Revit.DB.InternalOrigin;
 #else
   using DBInternalOrigin = Autodesk.Revit.DB.BasePoint;
@@ -127,7 +126,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Internal Origin")]
   public class InternalOrigin : GraphicalElement
   {
-    protected override Type ScriptVariableType => typeof(DBInternalOrigin);
+    protected override Type ValueType => typeof(DBInternalOrigin);
     public new DBInternalOrigin Value => base.Value as DBInternalOrigin;
 
     protected override bool SetValue(DB.Element element) => IsValidElement(element) && base.SetValue(element);
@@ -152,7 +151,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-#region IGH_PreviewData
+    #region IGH_PreviewData
     public override BoundingBox ClippingBox
     {
       get
@@ -178,56 +177,37 @@ namespace RhinoInside.Revit.GH.Types
       if (Value is DBInternalOrigin point)
       {
         var location = Location;
-        point.Category.Id.TryGetBuiltInCategory(out var builtInCategory);
-        var pointStyle = default(Rhino.Display.PointStyle);
+        var pointStyle = Rhino.Display.PointStyle.ActivePoint;
         var angle = default(float);
         var radius = 6.0f;
         var secondarySize = 3.5f;
-        switch (builtInCategory)
-        {
-          case DB.BuiltInCategory.OST_IOS_GeoSite:
-            pointStyle = Rhino.Display.PointStyle.ActivePoint;
-            break;
-          case DB.BuiltInCategory.OST_ProjectBasePoint:
-            pointStyle = Rhino.Display.PointStyle.RoundActivePoint;
-            angle = (float) Rhino.RhinoMath.ToRadians(45);
-            break;
-          case DB.BuiltInCategory.OST_SharedBasePoint:
-            pointStyle = Rhino.Display.PointStyle.Triangle;
-            radius = 12.0f;
-            secondarySize = 7.0f;
-            break;
-        }
 
         var strokeColor = (System.Drawing.Color) Rhino.Display.ColorRGBA.ApplyGamma(new Rhino.Display.ColorRGBA(args.Color), 2.0);
         args.Pipeline.DrawPoint(location.Origin, pointStyle, strokeColor, args.Color, radius, 2.0f, secondarySize, angle, true, true);
       }
     }
-#endregion
+    #endregion
 
-#region Properties
+    #region Properties
     public override Plane Location
     {
       get
       {
         if (Value is DBInternalOrigin point)
         {
-          var origin = point.GetPosition().ToPoint3d();
-          var axisX = Vector3d.XAxis;
-          var axisY = Vector3d.YAxis;
+          System.Diagnostics.Debug.Assert(point.GetPosition().IsAlmostEqualTo(DB.XYZ.Zero));
 
-          if (true /*point.IsShared*/)
-          {
-            point.Document.ActiveProjectLocation.GetLocation(out var _, out var basisX, out var basisY);
-            axisX = basisX.ToVector3d();
-            axisY = basisY.ToVector3d();
-          }
-          return new Plane(origin, axisX, axisY);
+          return new Plane
+          (
+            point.GetPosition().ToPoint3d(),
+            Vector3d.XAxis,
+            Vector3d.YAxis
+          );
         }
 
         return base.Location;
       }
     }
-#endregion
+    #endregion
   }
 }

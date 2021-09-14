@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Dimension")]
   public class Dimension : GraphicalElement
   {
-    protected override Type ScriptVariableType => typeof(DB.Dimension);
+    protected override Type ValueType => typeof(DB.Dimension);
     public static explicit operator DB.Dimension(Dimension value) => value?.Value;
     public new DB.Dimension Value => base.Value as DB.Dimension;
 

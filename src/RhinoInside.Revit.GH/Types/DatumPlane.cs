@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Datum")]
   public class DatumPlane : GraphicalElement
   {
-    protected override Type ScriptVariableType => typeof(DB.DatumPlane);
+    protected override Type ValueType => typeof(DB.DatumPlane);
     public new DB.DatumPlane Value => base.Value as DB.DatumPlane;
     public static explicit operator DB.DatumPlane(DatumPlane value) => value?.Value;
 
@@ -29,7 +29,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Level")]
   public class Level : DatumPlane, Bake.IGH_BakeAwareElement
   {
-    protected override Type ScriptVariableType => typeof(DB.Level);
+    protected override Type ValueType => typeof(DB.Level);
     public new DB.Level Value => base.Value as DB.Level;
     public static explicit operator DB.Level(Level value) => value?.Value;
 
@@ -173,7 +173,7 @@ namespace RhinoInside.Revit.GH.Types
       set
       {
         if (value is null || IsStructural == value) return;
-        Value?.get_Parameter(DB.BuiltInParameter.LEVEL_IS_STRUCTURAL).Set(value.Value ? 1 : 0);
+        Value?.get_Parameter(DB.BuiltInParameter.LEVEL_IS_STRUCTURAL).Update(value.Value ? 1 : 0);
       }
     }
 
@@ -183,7 +183,7 @@ namespace RhinoInside.Revit.GH.Types
       set
       {
         if (value is null || IsBuildingStory == value) return;
-        Value?.get_Parameter(DB.BuiltInParameter.LEVEL_IS_BUILDING_STORY).Set(value.Value ? 1 : 0);
+        Value?.get_Parameter(DB.BuiltInParameter.LEVEL_IS_BUILDING_STORY).Update(value.Value ? 1 : 0);
       }
     }
     #endregion
@@ -192,7 +192,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Grid")]
   public class Grid : DatumPlane, Bake.IGH_BakeAwareElement
   {
-    protected override Type ScriptVariableType => typeof(DB.Grid);
+    protected override Type ValueType => typeof(DB.Grid);
     public new DB.Grid Value => base.Value as DB.Grid;
     public static explicit operator DB.Grid(Grid value) => value?.Value;
 
@@ -437,7 +437,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Reference Plane")]
   public class ReferencePlane : DatumPlane, Bake.IGH_BakeAwareElement
   {
-    protected override Type ScriptVariableType => typeof(DB.ReferencePlane);
+    protected override Type ValueType => typeof(DB.ReferencePlane);
     public new DB.ReferencePlane Value => base.Value as DB.ReferencePlane;
     public static explicit operator DB.ReferencePlane(ReferencePlane value) => value?.Value;
 

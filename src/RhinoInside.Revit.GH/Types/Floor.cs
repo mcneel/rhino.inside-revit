@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Floor")]
   public class Floor : HostObject
   {
-    protected override Type ScriptVariableType => typeof(DB.Floor);
+    protected override Type ValueType => typeof(DB.Floor);
     public static explicit operator DB.Floor(Floor value) => value?.Value;
     public new DB.Floor Value => base.Value as DB.Floor;
 
@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is DB.Floor floor && floor.GetFirstDependent<DB.Sketch>() is DB.Sketch sketch)
+        if (Value is DB.Floor floor && floor.GetSketch() is DB.Sketch sketch)
         {
           var center = Point3d.Origin;
           var count = 0;
@@ -40,7 +40,7 @@ namespace RhinoInside.Revit.GH.Types
           if (floor.Document.GetElement(floor.LevelId) is DB.Level level)
             center.Z = level.GetHeight() * Revit.ModelUnits;
 
-          center.Z += floor.get_Parameter(DB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM)?.AsDoubleInRhinoUnits() ?? 0.0;
+          center.Z += Revit.ModelUnits * floor.get_Parameter(DB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM)?.AsDouble() ?? 0.0;
 
           var plane = sketch.SketchPlane.GetPlane().ToPlane();
           var origin = center;

@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Shared Site")]
   public class ProjectLocation : Instance, Bake.IGH_BakeAwareElement
   {
-    protected override Type ScriptVariableType => typeof(DB.ProjectLocation);
+    protected override Type ValueType => typeof(DB.ProjectLocation);
     public new DB.ProjectLocation Value => base.Value as DB.ProjectLocation;
 
     public ProjectLocation() { }
@@ -110,7 +110,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Site Location")]
   public class SiteLocation : ElementType
   {
-    protected override Type ScriptVariableType => typeof(DB.SiteLocation);
+    protected override Type ValueType => typeof(DB.SiteLocation);
     public new DB.SiteLocation Value => base.Value as DB.SiteLocation;
 
     public SiteLocation() { }

@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Host")]
   public class HostObject : InstanceElement, IGH_HostObject
   {
-    protected override Type ScriptVariableType => typeof(DB.HostObject);
+    protected override Type ValueType => typeof(DB.HostObject);
     public new DB.HostObject Value => base.Value as DB.HostObject;
 
     public HostObject() { }
@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (Value is DB.HostObject host && !(host.Location is DB.LocationPoint) && !(host.Location is DB.LocationCurve))
         {
-          if (host.GetFirstDependent<DB.Sketch>() is DB.Sketch sketch)
+          if (host.GetSketch() is DB.Sketch sketch)
           {
             var center = Point3d.Origin;
             var count = 0;
@@ -88,6 +88,7 @@ namespace RhinoInside.Revit.GH.Types
           case DB.ExtrusionRoof extrusionRoof: grids = extrusionRoof.CurtainGrids?.Cast<DB.CurtainGrid>(); break;
           case DB.FootPrintRoof footPrintRoof: grids = footPrintRoof.CurtainGrids?.Cast<DB.CurtainGrid>(); break;
           case DB.Wall wall: grids = wall.CurtainGrid is null ? null : Enumerable.Repeat(wall.CurtainGrid, 1); break;
+          default: return new CurtainGrid[0];
         }
 
         return grids.Select(x => new CurtainGrid(Value, x)).ToArray();
@@ -101,7 +102,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Host Type")]
   public class HostObjectType : ElementType, IGH_HostObjectType
   {
-    protected override Type ScriptVariableType => typeof(DB.HostObjAttributes);
+    protected override Type ValueType => typeof(DB.HostObjAttributes);
     public new DB.HostObjAttributes Value => base.Value as DB.HostObjAttributes;
 
     public HostObjectType() { }

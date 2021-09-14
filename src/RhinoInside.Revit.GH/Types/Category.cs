@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Types
   {
     #region IGH_Goo
     public override bool IsValid => (Id?.TryGetBuiltInCategory(out var _) == true) || base.IsValid;
-    protected override Type ScriptVariableType => typeof(DB.Category);
+    protected override Type ValueType => typeof(DB.Category);
     public override object ScriptVariable() => APIObject;
 
     public sealed override bool CastFrom(object source)
@@ -27,18 +27,9 @@ namespace RhinoInside.Revit.GH.Types
       var document = Revit.ActiveDBDocument;
       var categoryId = DB.ElementId.InvalidElementId;
 
-      if (source is ValueTuple<DB.Document, DB.ElementId> tuple)
+      if (source is IGH_Goo goo)
       {
-        (document, categoryId) = tuple;
-      }
-      else if (source is IGH_Goo goo)
-      {
-        if (source is IGH_Element element)
-        {
-          document = element.Document;
-          categoryId = element.Id;
-        }
-        else if (source is CategoryId id)
+        if (source is CategoryId id)
         {
           source = (DB.BuiltInCategory) id.Value;
         }
@@ -564,9 +555,8 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Graphics Style")]
   public class GraphicsStyle : Element
   {
-    protected override Type ScriptVariableType => typeof(DB.GraphicsStyle);
+    protected override Type ValueType => typeof(DB.GraphicsStyle);
     public new DB.GraphicsStyle Value => base.Value as DB.GraphicsStyle;
-    public static explicit operator DB.GraphicsStyle(GraphicsStyle value) => value?.Value;
 
     public GraphicsStyle() { }
     public GraphicsStyle(DB.GraphicsStyle graphicsStyle) : base(graphicsStyle) { }
@@ -575,22 +565,49 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var graphicsStyle = (DB.GraphicsStyle) this;
-        if (graphicsStyle is object)
+        if (Value is DB.GraphicsStyle style)
         {
           var tip = string.Empty;
-          if (graphicsStyle.GraphicsStyleCategory.Parent is DB.Category parent)
+          if (style.GraphicsStyleCategory.Parent is DB.Category parent)
             tip = $"{parent.Name}\\";
 
-          switch (graphicsStyle.GraphicsStyleType)
+          switch (style.GraphicsStyleType)
           {
-            case DB.GraphicsStyleType.Projection: return $"{tip}{graphicsStyle.Name} [projection]";
-            case DB.GraphicsStyleType.Cut:        return $"{tip}{graphicsStyle.Name} [cut]";
+            case DB.GraphicsStyleType.Projection: return $"{tip}{style.Name} [projection]";
+            case DB.GraphicsStyleType.Cut:        return $"{tip}{style.Name} [cut]";
           }
         }
 
         return base.DisplayName;
       }
+    }
+
+    public override bool CastFrom(object source)
+    {
+      if (base.CastFrom(source))
+        return true;
+
+      if (source is Category category)
+      {
+        if (category.APIObject.GetGraphicsStyle(DB.GraphicsStyleType.Projection) is DB.GraphicsStyle style)
+        {
+          SetValue(style.Document, style.Id);
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    public override bool CastTo<Q>(out Q target)
+    {
+      if (typeof(Q).IsAssignableFrom(typeof(DB.GraphicsStyle)))
+      {
+        target = (Q) (object) Value;
+        return true;
+      }
+
+      return base.CastTo(out target);
     }
   }
 }

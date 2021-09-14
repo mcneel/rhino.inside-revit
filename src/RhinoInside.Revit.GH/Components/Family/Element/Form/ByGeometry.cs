@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
@@ -114,10 +115,10 @@ namespace RhinoInside.Revit.GH.Components
             ReplaceElement(ref form, DB.FreeFormElement.Create(document, solid));
 
             if (document.OwnerFamily.IsConceptualMassFamily)
-              form.get_Parameter(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY).Set(new DB.ElementId(DB.BuiltInCategory.OST_MassForm));
+              form.get_Parameter(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY).Update(new DB.ElementId(DB.BuiltInCategory.OST_MassForm));
           }
 
-          form.get_Parameter(DB.BuiltInParameter.ELEMENT_IS_CUTTING)?.Set(cutting ? 1 : 0);
+          form.get_Parameter(DB.BuiltInParameter.ELEMENT_IS_CUTTING)?.Update(cutting ? 1 : 0);
         }
         else AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Failed to convert Brep to Form");
       }

@@ -2,7 +2,6 @@ using System;
 using GH_IO.Serialization;
 using Grasshopper.Kernel.Types;
 using Grasshopper.Special;
-using RhinoInside.Revit.External.ApplicationServices.Extensions;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 using DBX = RhinoInside.Revit.External.DB;
@@ -161,75 +160,7 @@ namespace RhinoInside.Revit.GH.Types
       ((Id?.TryGetBuiltInParameter(out var _) == true) || base.IsValid) :
       (name is object && DB.NamingUtils.IsValidName(name) || GUID.HasValue);
 
-    public bool GetDocumentParameter(Document document, out ParameterKey key)
-    {
-      if (document.Value.IsFamilyDocument)
-      {
-        var parameter = IsReferencedData ?
-          Value :
-          document.Value.GetElement
-          (document.Value.FamilyManager.get_Parameter(Name)?.Id ?? DB.ElementId.InvalidElementId)
-          as DB.ParameterElement;
-
-        if (parameter is object)
-        {
-          key = IsReferencedData ? this : new ParameterKey(parameter);
-          return true;
-        }
-      }
-      else
-      {
-        var global = IsReferencedData ?
-          Value as DB.GlobalParameter :
-          document.Value.GetElement(DB.GlobalParametersManager.FindByName(document.Value, Name)) as DB.GlobalParameter;
-
-        if (global is object)
-        {
-          key = IsReferencedData ? this : new ParameterKey(global);
-          return true;
-        }
-      }
-
-      key = this;
-      return false;
-    }
-    public bool GetProjectParameter(Document document, out ParameterKey key)
-    {
-      if (!document.Value.IsFamilyDocument && !(Value is DB.GlobalParameter))
-      {
-        var project = IsReferencedData ?
-          Value :
-          FindByName(document.Value, Name);
-
-        if (project is object)
-        {
-          key = IsReferencedData ? this : new ParameterKey(project);
-          return true;
-        }
-      }
-
-      key = this;
-      return false;
-    }
-
-    static DB.ParameterElement FindByName(DB.Document doc, string name)
-    {
-      using (var iterator = doc.ParameterBindings.ForwardIterator())
-      {
-        while (iterator.MoveNext())
-        {
-          if (iterator.Key is DB.InternalDefinition definition)
-          {
-            if (definition.Name == name)
-              return doc.GetElement(definition.Id) as DB.ParameterElement;
-          }
-        }
-      }
-
-      return default;
-    }
-
-    protected override Type ScriptVariableType => typeof(DB.ParameterElement);
+    protected override Type ValueType => typeof(DB.ParameterElement);
     public override object ScriptVariable() => Name;
 
     public sealed override bool CastFrom(object source)
@@ -792,7 +723,6 @@ namespace RhinoInside.Revit.GH.Types
         if (!IsReferencedData)
         {
           if (GUID.HasValue) return DBX.ParameterClass.Shared;
-          if (Name is object) return DBX.ParameterClass.Project;  
           return DBX.ParameterClass.Invalid;
         }
 
@@ -860,7 +790,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Parameter Value")]
-  public class ParameterValue : ReferenceObject,
+  public class ParameterValue : DocumentObject,
     IEquatable<ParameterValue>,
     IGH_Goo,
     IGH_QuickCast,
@@ -1086,10 +1016,6 @@ namespace RhinoInside.Revit.GH.Types
         return default;
       }
     }
-    #endregion
-
-    #region ReferenceObject
-    public override DB.ElementId Id => Value?.Element.Id;
     #endregion
   }
 }

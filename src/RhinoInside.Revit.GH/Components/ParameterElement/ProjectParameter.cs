@@ -142,11 +142,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       // Input
-      if (!Parameters.Document.TryGetCurrentDocument(this, out var document)) return;
-      if (!Params.GetData(DA, _Parameter_, out Types.ParameterKey key, x => x.IsValid)) return;
-      if (!key.GetProjectParameter(document, out key))
-        throw new Exceptions.RuntimeWarningException($"Parameter '{key.Name}' is not a valid reference to a project parameter");
-
+      if (!Parameters.ParameterKey.GetProjectParameter(this, DA, _Parameter_, out var key)) return;
       if (!Params.TryGetData(DA, "Varies", out bool? varies)) return;
       if (!Params.TryGetData(DA, "Binding", out Types.ParameterBinding binding, x => x.IsValid && x.Value != DBX.ParameterBinding.Unknown)) return;
       if (!Params.TryGetDataList(DA, "Categories", out IList<Types.Category> categories)) return;

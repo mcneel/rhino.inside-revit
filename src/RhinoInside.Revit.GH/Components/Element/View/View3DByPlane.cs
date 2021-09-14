@@ -2,6 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.GH.Kernel.Attributes;
 using DB = Autodesk.Revit.DB;
 
@@ -67,15 +68,22 @@ namespace RhinoInside.Revit.GH.Components.Views
         };
 
         newView.SetOrientation(orientation);
-        newView.get_Parameter(DB.BuiltInParameter.VIEWER_CROP_REGION).Set(0);
+        newView.get_Parameter(DB.BuiltInParameter.VIEWER_CROP_REGION).Update(0);
         ReplaceElement(ref view3D, newView, parametersMask);
       }
       else
       {
-        view3D.SetOrientation(orientation);
+        if (view3D.IsLocked)
+        {
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "View is locked and cannot be reoriented.");
+        }
+        else
+        {
+          view3D.SetOrientation(orientation);
 
-        if (perspective.HasValue)
-          view3D.get_Parameter(DB.BuiltInParameter.VIEWER_PERSPECTIVE).Set(perspective.Value ? 1 : 0);
+          if (perspective.HasValue)
+            view3D.get_Parameter(DB.BuiltInParameter.VIEWER_PERSPECTIVE).Update(perspective.Value ? 1 : 0);
+        }
 
         ChangeElementTypeId(ref view3D, type.Value.Id);
       }

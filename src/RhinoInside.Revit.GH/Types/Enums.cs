@@ -576,4 +576,45 @@ namespace RhinoInside.Revit.GH.Types
   {
     public override bool IsEmpty => Value == DB.ThermalMaterialType.Undefined;
   }
+
+  [
+    ComponentGuid("84DAF907-5D71-4766-9776-B6B86069A2B9"),
+    Name("Workset Kind"),
+    Description("Represents workset kind"),
+  ]
+  public class WorksetKind : GH_Enum<DB.WorksetKind>
+  {
+    public override bool IsEmpty => Value == DB.WorksetKind.OtherWorkset;
+
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
+      {
+        { (int) DB.WorksetKind.OtherWorkset,    "Other"             },
+        { (int) DB.WorksetKind.StandardWorkset, "Project Standards" },
+        { (int) DB.WorksetKind.UserWorkset,     "User-Created"      },
+        { (int) DB.WorksetKind.FamilyWorkset,   "Families"          },
+        { (int) DB.WorksetKind.ViewWorkset,     "Views"             },
+      }
+    );
+  }
+
+
+  [
+    ComponentGuid("CE75343A-FC1B-4246-B7AD-A0FC0DE050A4"),
+    Name("Checkout Status"),
+    Description("Represents checkout status"),
+  ]
+  public class CheckoutStatus : GH_Enum<DB.CheckoutStatus>
+  {
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
+      {
+        { (int) DB.CheckoutStatus.OwnedByCurrentUser, "Owned by current user" },
+        { (int) DB.CheckoutStatus.OwnedByOtherUser,   "Owned by other user" },
+        { (int) DB.CheckoutStatus.NotOwned,           "Not Owned" },
+      }
+    );
+  }
 }

@@ -1,6 +1,26 @@
 [
   {
-    "desc": "Represents a Revit document construction phase", 
+    "desc": "Contains a collection of Revit assemblies", 
+    "iconsrc": "/static/images/GH/AssemblyInstance.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
+    "tab": "Params", 
+    "title": "Assembly", 
+    "typename": "AssemblyInstance", 
+    "uuid": "d7958ccf-9847-4e27-996b-b7fdc0eb1086"
+  }, 
+  {
+    "desc": "Contains a Revit sheet", 
+    "iconsrc": "/static/images/GH/Sheet.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
+    "tab": "Params", 
+    "title": "Sheet", 
+    "typename": "Sheet", 
+    "uuid": "3c0d65b7-4173-423c-97e9-c6124e8c258a"
+  }, 
+  {
+    "desc": "Contains a collection of Revit construction phase elements", 
     "iconsrc": "/static/images/GH/Phase.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
@@ -310,6 +330,16 @@
     "uuid": "2dc4b866-54db-4ce6-94c0-c51b33d35b49"
   }, 
   {
+    "desc": "Contains a collection of Revit workset elements", 
+    "iconsrc": "/static/images/GH/Workset.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
+    "tab": "Params", 
+    "title": "Workset", 
+    "typename": "Workset", 
+    "uuid": "5c073f7d-6d31-4063-a943-4152e1a799d1"
+  }, 
+  {
     "desc": "Provides a picker for built-in categories", 
     "iconsrc": "/static/images/GH/BuiltInCategories.png", 
     "icontag": null, 
@@ -480,22 +510,22 @@
     "uuid": "c907b51e-eea7-4ecf-a110-79ef1b7069ec"
   }, 
   {
-    "desc": "Picker for physical material type options", 
+    "desc": "Picker for physical material class options", 
     "iconsrc": "/static/images/GH/StructuralAssetClass_ValueList.png", 
     "icontag": null, 
     "panel": "Material", 
     "tab": "Revit", 
-    "title": "Physical Asset Type", 
+    "title": "Physical Asset Class", 
     "typename": "StructuralAssetClass_ValueList", 
     "uuid": "6f5d09c7-797f-4ffe-afae-b9c0ddc5905f"
   }, 
   {
-    "desc": "Picker for thermal material type options", 
+    "desc": "Picker for thermal material class options", 
     "iconsrc": "/static/images/GH/ThermalMaterialType_ValueList.png", 
     "icontag": null, 
     "panel": "Material", 
     "tab": "Revit", 
-    "title": "Thermal Asset Type", 
+    "title": "Thermal Asset Class", 
     "typename": "ThermalMaterialType_ValueList", 
     "uuid": "9d9d0211-4598-4f50-921e-ad1208944e7c"
   }, 
@@ -558,6 +588,16 @@
     "title": "Wall Wrapping", 
     "typename": "WallWrapping_ValueList", 
     "uuid": "141f0da4-659e-47e4-8033-3b61057f860b"
+  }, 
+  {
+    "desc": "Get document line styles list", 
+    "iconsrc": "/static/images/GH/QueryLineStyles.png", 
+    "icontag": null, 
+    "panel": "Category", 
+    "tab": "Revit", 
+    "title": "Query Line Styles", 
+    "typename": "QueryLineStyles", 
+    "uuid": "54082395-7160-4563-b289-215afdd33a7f"
   }, 
   {
     "desc": "Query category identity information", 
@@ -1115,7 +1155,7 @@
     "icontag": null, 
     "panel": "Model", 
     "tab": "Revit", 
-    "title": "Add ModelLine", 
+    "title": "Add Model Line", 
     "typename": "ModelLineByCurve", 
     "uuid": "240127b1-94ee-47c9-98f8-05de32447b01"
   }, 
@@ -1225,7 +1265,7 @@
     "icontag": null, 
     "panel": "Model", 
     "tab": "Revit", 
-    "title": "Add SketchPlane", 
+    "title": "Add Sketch Plane", 
     "typename": "SketchPlaneByPlane", 
     "uuid": "1fa679e4-1821-483a-99f8-dc166b0595f4"
   }, 
@@ -1268,6 +1308,16 @@
     "title": "Active Graphical View", 
     "typename": "ViewActive", 
     "uuid": "7ccf350c-80cc-42d0-85ba-78544fd59f4a"
+  }, 
+  {
+    "desc": "Split a list of views into separate clusters by their family", 
+    "iconsrc": "/static/images/GH/ClusterViewsByType.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "tab": "Revit", 
+    "title": "Cluster Views By Family", 
+    "typename": "ClusterViewsByType", 
+    "uuid": "f6b99fe2-19e1-4840-96c1-13873a0aece8"
   }, 
   {
     "desc": "Exports a view into an image file", 
@@ -1580,6 +1630,16 @@
     "uuid": "f0887ad5-8acb-4806-bb12-7596bcedffed"
   }, 
   {
+    "desc": "Get document filters list", 
+    "iconsrc": "/static/images/GH/QueryFilters.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Query Filters", 
+    "typename": "QueryFilters", 
+    "uuid": "b7b1740b-0721-49c8-92f5-057775da9792"
+  }, 
+  {
     "desc": "Given its Definition, it adds a new Parameter into the Revit document", 
     "iconsrc": "/static/images/GH/AddParameter.png", 
     "icontag": null, 
@@ -1810,6 +1870,16 @@
     "uuid": "e6a1f501-bda4-4b78-8828-084b5eda926f"
   }, 
   {
+    "desc": "Filter used to match elements by their workset", 
+    "iconsrc": "/static/images/GH/ElementWorksetFilter.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Workset Filter", 
+    "typename": "ElementWorksetFilter", 
+    "uuid": "3380c493-b1df-4e93-a2ca-612808291394"
+  }, 
+  {
     "desc": "Filter used to match elements by their BoundingBox", 
     "iconsrc": "/static/images/GH/ElementBoundingBoxFilter.png", 
     "icontag": null, 
@@ -1950,6 +2020,16 @@
     "uuid": "01e86d7c-b143-47f6-bc26-0a234eb360f3"
   }, 
   {
+    "desc": "Selection Elements list", 
+    "iconsrc": "/static/images/GH/SelectionElements.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "tab": "Revit", 
+    "title": "Selection Elements", 
+    "typename": "SelectionElements", 
+    "uuid": "e90f2139-fa13-4ee2-bfd3-6642fa9053ab"
+  }, 
+  {
     "desc": "Create a selection filter", 
     "iconsrc": "/static/images/GH/SelectionFilterElementByName.png", 
     "icontag": null, 
@@ -1958,6 +2038,46 @@
     "title": "Add Selection Filter", 
     "typename": "SelectionFilterElementByName", 
     "uuid": "29618f71-3b57-4a20-9cb2-4c3d17774172"
+  }, 
+  {
+    "desc": "Gets the active workset", 
+    "iconsrc": "/static/images/GH/WorksetActive.png", 
+    "icontag": null, 
+    "panel": "Document", 
+    "tab": "Revit", 
+    "title": "Active Workset", 
+    "typename": "WorksetActive", 
+    "uuid": "aa467c94-d400-4f4a-80bf-defb309a4c52"
+  }, 
+  {
+    "desc": "Element Workset properties Get-Set accessor to element workset information", 
+    "iconsrc": "/static/images/GH/ElementWorkset.png", 
+    "icontag": null, 
+    "panel": "Element", 
+    "tab": "Revit", 
+    "title": "Element Workset", 
+    "typename": "ElementWorkset", 
+    "uuid": "b441ba8c-429e-4f92-90dc-97da3f14eb85"
+  }, 
+  {
+    "desc": "Workset properties Get-Set accessor to workset information", 
+    "iconsrc": "/static/images/GH/WorksetIdentity.png", 
+    "icontag": null, 
+    "panel": "Document", 
+    "tab": "Revit", 
+    "title": "Workset Identity", 
+    "typename": "WorksetIdentity", 
+    "uuid": "c33cd128-9bee-4b0c-bb0e-3ffbfcb3c41e"
+  }, 
+  {
+    "desc": "Get document construction worksets list", 
+    "iconsrc": "/static/images/GH/QueryWorksets.png", 
+    "icontag": null, 
+    "panel": "Document", 
+    "tab": "Revit", 
+    "title": "Query Worksets", 
+    "typename": "QueryWorksets", 
+    "uuid": "311316ba-81c7-495c-8a20-b7974091d6b1"
   }, 
   {
     "desc": "Given a plane, it adds a 3D View to the active Revit document", 
@@ -1970,34 +2090,24 @@
     "uuid": "f7b775c9-05e0-40f7-85e9-5cc2ef79731e"
   }, 
   {
-    "desc": "Get-Set accessor to element parameter values", 
-    "iconsrc": "/static/images/GH/ElementParameter.png", 
+    "desc": "Element Phasing properties Get-Set accessor to element phasing information", 
+    "iconsrc": "/static/images/GH/GraphicalElementPhasing.png", 
     "icontag": null, 
     "panel": "Element", 
     "tab": "Revit", 
-    "title": "Element Parameter", 
-    "typename": "ElementParameter", 
-    "uuid": "f568d3e7-be3f-455b-a8d4-ebfa573d55c2"
+    "title": "Element Phasing", 
+    "typename": "GraphicalElementPhasing", 
+    "uuid": "3ba4524a-d4e5-4392-88b3-17a0cf651b09"
   }, 
   {
-    "desc": "Resets the parameter value of a specified Revit Element", 
-    "iconsrc": "/static/images/GH/ElementParameterReset.png", 
+    "desc": "Get document construction phases list", 
+    "iconsrc": "/static/images/GH/QueryPhases.png", 
     "icontag": null, 
-    "panel": "Element", 
+    "panel": "Document", 
     "tab": "Revit", 
-    "title": "Reset Element Parameter", 
-    "typename": "ElementParameterReset", 
-    "uuid": "2c374e6d-a547-45ac-b77d-04dd61317622"
-  }, 
-  {
-    "desc": "Get the parameters of the specified Element", 
-    "iconsrc": "/static/images/GH/QueryElementParameters.png", 
-    "icontag": null, 
-    "panel": "Element", 
-    "tab": "Revit", 
-    "title": "Query Element Parameters", 
-    "typename": "QueryElementParameters", 
-    "uuid": "44515a6b-84ee-4dbd-8241-17edbe07c5b6"
+    "title": "Query Phases", 
+    "typename": "QueryPhases", 
+    "uuid": "91e4d3e1-883a-44d9-a3d2-b836967869e1"
   }, 
   {
     "desc": "Material Graphics Data", 
@@ -2260,6 +2370,36 @@
     "uuid": "7a889b89-c423-4ed8-91d9-5cece1ee803d"
   }, 
   {
+    "desc": "Create a Revit line pattern by name", 
+    "iconsrc": "/static/images/GH/LinePatternByName.png", 
+    "icontag": null, 
+    "panel": "Model", 
+    "tab": "Revit", 
+    "title": "Add Line Pattern", 
+    "typename": "LinePatternByName", 
+    "uuid": "5c99445a-e908-4598-b6f4-f3db4fb84cc1"
+  }, 
+  {
+    "desc": "Get-Set accessor to line patern dashes, spaces and dots", 
+    "iconsrc": "/static/images/GH/LinePatternDashes.png", 
+    "icontag": null, 
+    "panel": "Model", 
+    "tab": "Revit", 
+    "title": "Line Pattern Dashes", 
+    "typename": "LinePatternDashes", 
+    "uuid": "851e51fe-8b35-4f32-babd-0fb3a1afeaf4"
+  }, 
+  {
+    "desc": "Get document line patterns list", 
+    "iconsrc": "/static/images/GH/QueryLinePatterns.png", 
+    "icontag": null, 
+    "panel": "Model", 
+    "tab": "Revit", 
+    "title": "Query Line Patterns", 
+    "typename": "QueryLinePatterns", 
+    "uuid": "a94000fd-8bcd-49d5-9f00-09bedb88a123"
+  }, 
+  {
     "desc": "Query level identity information", 
     "iconsrc": "/static/images/GH/LevelIdentity.png", 
     "icontag": null, 
@@ -2338,6 +2478,146 @@
     "title": "Query Design Options", 
     "typename": "QueryDesignOptions", 
     "uuid": "6804582b-e6fd-4825-aa71-b59346f149cd"
+  }, 
+  {
+    "desc": "Get-Set accessor to element parameter values", 
+    "iconsrc": "/static/images/GH/ElementParameter.png", 
+    "icontag": null, 
+    "panel": "Element", 
+    "tab": "Revit", 
+    "title": "Element Parameter", 
+    "typename": "ElementParameter", 
+    "uuid": "f568d3e7-be3f-455b-a8d4-ebfa573d55c2"
+  }, 
+  {
+    "desc": "Resets the parameter value of a specified Revit Element", 
+    "iconsrc": "/static/images/GH/ElementParameterReset.png", 
+    "icontag": null, 
+    "panel": "Element", 
+    "tab": "Revit", 
+    "title": "Reset Element Parameter", 
+    "typename": "ElementParameterReset", 
+    "uuid": "2c374e6d-a547-45ac-b77d-04dd61317622"
+  }, 
+  {
+    "desc": "Get the parameters of the specified Element", 
+    "iconsrc": "/static/images/GH/QueryElementParameters.png", 
+    "icontag": null, 
+    "panel": "Element", 
+    "tab": "Revit", 
+    "title": "Query Element Parameters", 
+    "typename": "QueryElementParameters", 
+    "uuid": "44515a6b-84ee-4dbd-8241-17edbe07c5b6"
+  }, 
+  {
+    "desc": "Analyze given sheet view", 
+    "iconsrc": "/static/images/GH/AnalyzeSheet.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "tab": "Revit", 
+    "title": "Analyze Sheet", 
+    "typename": "AnalyzeSheet", 
+    "uuid": "15bac151-d31c-4c4d-8570-49cda0d58def"
+  }, 
+  {
+    "desc": "Get all document sheets", 
+    "iconsrc": "/static/images/GH/QuerySheets.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "tab": "Revit", 
+    "title": "Query Sheets", 
+    "typename": "QuerySheets", 
+    "uuid": "97c8cb27-955f-44cf-948d-dfbde285cd7a"
+  }, 
+  {
+    "desc": "Get all document title block types", 
+    "iconsrc": "/static/images/GH/QueryTitleBlockTypes.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "tab": "Revit", 
+    "title": "Query Title Block Types", 
+    "typename": "QueryTitleBlockTypes", 
+    "uuid": "c7a57ec8-d4d3-4251-aa91-cc67f833313b"
+  }, 
+  {
+    "desc": "Query sheet identity information", 
+    "iconsrc": "/static/images/GH/SheetIdentity.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "tab": "Revit", 
+    "title": "Sheet Identity", 
+    "typename": "SheetIdentity", 
+    "uuid": "cadf5fbb-9dea-4b9f-8214-9897cec0e54a"
+  }, 
+  {
+    "desc": "Create a new sheet in Revit with given number and name", 
+    "iconsrc": "/static/images/GH/SheetByNumber.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "tab": "Revit", 
+    "title": "Add Sheet", 
+    "typename": "SheetByNumber", 
+    "uuid": "704d9c1b-fc56-4407-87cf-720047ae5875"
+  }, 
+  {
+    "desc": "Get all views that belong to given assembly", 
+    "iconsrc": "/static/images/GH/AssemblyViews.png", 
+    "icontag": null, 
+    "panel": "Assembly", 
+    "tab": "Revit", 
+    "title": "Assembly Views", 
+    "typename": "AssemblyViews", 
+    "uuid": "64594dea-057a-47b9-8e63-5e0832e13adb"
+  }, 
+  {
+    "desc": "Create a new assembly instance at given location", 
+    "iconsrc": "/static/images/GH/AssemblyByLocation.png", 
+    "icontag": null, 
+    "panel": "Assembly", 
+    "tab": "Revit", 
+    "title": "Add Assembly (Location)", 
+    "typename": "AssemblyByLocation", 
+    "uuid": "26feb2e9-6476-4ba7-a553-1d0300674d1d"
+  }, 
+  {
+    "desc": "Analyze and modify the members of given assembly", 
+    "iconsrc": "/static/images/GH/AssemblyMembers.png", 
+    "icontag": null, 
+    "panel": "Assembly", 
+    "tab": "Revit", 
+    "title": "Assembly Members", 
+    "typename": "AssemblyMembers", 
+    "uuid": "33ead71b-647b-4783-b0ce-c840cd50c15d"
+  }, 
+  {
+    "desc": "Create a new assembly instance", 
+    "iconsrc": "/static/images/GH/AssemblyByCategory.png", 
+    "icontag": null, 
+    "panel": "Assembly", 
+    "tab": "Revit", 
+    "title": "Add Assembly", 
+    "typename": "AssemblyByCategory", 
+    "uuid": "6915b697-f10d-4bc8-8faa-f25438f393a8"
+  }, 
+  {
+    "desc": "Disassembly given assembly and release the members", 
+    "iconsrc": "/static/images/GH/DisassembleAssembly.png", 
+    "icontag": null, 
+    "panel": "Assembly", 
+    "tab": "Revit", 
+    "title": "Disassembly Assembly", 
+    "typename": "DisassembleAssembly", 
+    "uuid": "ff0f49ca-16ec-4287-8bd8-b903b6a6e781"
+  }, 
+  {
+    "desc": "Get all document assemblies", 
+    "iconsrc": "/static/images/GH/QueryAssemblies.png", 
+    "icontag": null, 
+    "panel": "Assembly", 
+    "tab": "Revit", 
+    "title": "Query Assemblies", 
+    "typename": "QueryAssemblies", 
+    "uuid": "fd5b45c3-7f55-4ad8-abbe-e871f95b4988"
   }, 
   {
     "desc": "Site location identity Data", 

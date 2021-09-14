@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
       Category = "Revit";
       SubCategory = "Material";
       Name = "Physical/Thermal Asset Behaviour";
-      NickName = "PTMB";
+      NickName = "Behaviour";
       Description = "Picker material behaviour options of physical or thermal assets";
 
       ListItems.Clear();
