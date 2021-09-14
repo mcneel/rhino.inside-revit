@@ -78,12 +78,12 @@ This video explains many of the details:
 
 The Tracking Mode can be controlled by right-clicking on the component center.
 
-![]({{ "/static/images/guides/tracking-modes.png" | prepend: site.baseurl }}){: class="small-image"}
+![]({{ "/static/images/guides/tracking-modes.png" | prepend: site.baseurl }})
 
 There are 3 modes:
 1. **Disabled** - This turns off any tracking of created Revit elements.  This can result in duplicate elements being created in Revit.
-1. **Supersede** - This will create completely new elements in Revit each time Grasshopper runs.
-1. **Reconstruct** - The default setting.  Grasshopper will modify existing elements in Revit if possible.  Otherwise, new objects will be created.
+2. **Enabled : Replace** - This will create completely new elements in Revit, replacing the previously-created element, each time Grasshopper runs.
+3. **Enabled : Update** - The default setting. Grasshopper will try to modify existing elements in Revit if possible (if Revit API allows the type of modification).  Otherwise, new objects will be created and the component would behave like *Enabled : Replace*
 
 Each output on Add Component has additional controls to help manage tracking:
 

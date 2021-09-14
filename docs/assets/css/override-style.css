@@ -1297,11 +1297,24 @@ a.btn-danger:hover {
     border: none;
 }
 
+h2.build-stablerelease {
+    text-align: left;
+    border-bottom: 1px solid #d0d0d0;
+    padding-bottom: 10px;
+}
+
+h3.build-prerelease {
+    text-align: right;
+    border-bottom: 1px dashed #d0d0d0;
+    padding-bottom: 10px;
+}
+
 small.build-time {
     text-align: right;
     display: block;
     color: #999;
     margin-top: -5px;
+    margin-right: 20px;
 }
 
 .video-player {
@@ -1394,13 +1407,15 @@ img.button-icon {
 
 .comp-tag {
     display: inline;
-    /* display: inline-block;
-    border-radius: 10px;
-    border: 1px solid #dbdbdb;
-    background: #ffffff;
-    padding: 1px 6px 1px 3px; */
 }
 
+.comp-item-tag {
+    display: inline-block;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.comp-item-tag img,
 .comp-tag img {
     display: inline-block;
     margin-top: -4px;
@@ -1408,6 +1423,7 @@ img.button-icon {
     vertical-align: middle;
 }
 
+.comp-item-tag strong,
 .comp-tag strong {
     font-weight: bold;
     font-size: .9em;

@@ -1,5 +1,9 @@
 {% if include.title %}
-## {{ include.title }}
+{% if include.pre_release %}
+<h3 class="build-prerelease">{{ include.title }}</h3>
+{% else %}
+<h2 class="build-stablerelease">{{ include.title }}</h2>
+{% endif %}
 <small class="build-time">{{ include.version }} @ {{ include.time }}</small>
 {% else %}
 ## v{{ include.version }}

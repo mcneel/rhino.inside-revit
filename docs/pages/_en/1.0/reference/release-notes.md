@@ -5,15 +5,39 @@ group: Deployment & Configs
 ---
 
 <!-- most recent release should be on top -->
-{% include ltr/release-header.html title="v1.1 RC4" version="v1.1.7916.15665 " time="09/07/2021" %}
+{% include ltr/release-header.html title="v1.2 RC1" version=" " pre_release=true time="09/14/2021" %}
+
+- New View Components!
+  - {% include ltr/comp_item.html uuid='97c8cb27-' %}
+  - {% include ltr/comp_item.html uuid='c7a57ec8-' %}
+  - {% include ltr/comp_item.html uuid='cadf5fbb-' %}
+  - {% include ltr/comp_item.html uuid='704d9c1b-' %}
+  - {% include ltr/comp_item.html uuid='15bac151-' %}
+  - {% include ltr/comp_item.html uuid='f6b99fe2-' %}
+
+- New Assembly Components!
+  - {% include ltr/comp_item.html uuid='fd5b45c3-' %}
+  - {% include ltr/comp_item.html uuid='64594dea-' %}
+  - {% include ltr/comp_item.html uuid='6915b697-' %}
+  - {% include ltr/comp_item.html uuid='26feb2e9-' %}
+  - {% include ltr/comp_item.html uuid='33ead71b-' %}
+  - {% include ltr/comp_item.html uuid='ff0f49ca-' %}
+
+- Merged [PR #486](https://github.com/mcneel/rhino.inside-revit/pull/486)
+
+{% include ltr/release-header.html title="v1.1 Stable" version="" time="09/14/2021" %}
 
 - Minor Fixes and Improvements
 
-{% include ltr/release-header.html title="v1.1 RC3" version="v1.1.7912.2443" time="08/30/2021" %}
+{% include ltr/release-header.html title="v1.1 RC4" version="v1.1.7916.15665" pre_release=true time="09/07/2021" %}
 
 - Minor Fixes and Improvements
 
-{% include ltr/release-header.html title="v1.1 RC2" version="v1.1.7906.21197" time="08/24/2021" %}
+{% include ltr/release-header.html title="v1.1 RC3" version="v1.1.7912.2443" pre_release=true time="08/30/2021" %}
+
+- Minor Fixes and Improvements
+
+{% include ltr/release-header.html title="v1.1 RC2" version="v1.1.7906.21197" pre_release=true time="08/24/2021" %}
 
 - 👉 Updated *Tracking Mode* context wording.
   - Supersede -> **Enabled : Replace**
