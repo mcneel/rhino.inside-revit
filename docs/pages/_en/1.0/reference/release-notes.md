@@ -5,15 +5,24 @@ group: Deployment & Configs
 ---
 
 <!-- most recent release should be on top -->
-{% include ltr/release-header.html title="v1.1 RC4" version="v1.1.7916.15665 " time="09/07/2021" %}
+{% include ltr/release-header.html title="v1.2 RC1" version=" " pre_release=true time="09/14/2021" %}
+
+- New Components!
+  - {% include ltr/comp.html uuid='704d9c1b-' %}
+
+{% include ltr/release-header.html title="v1.1 Stable" version="" time="09/14/2021" %}
 
 - Minor Fixes and Improvements
 
-{% include ltr/release-header.html title="v1.1 RC3" version="v1.1.7912.2443" time="08/30/2021" %}
+{% include ltr/release-header.html title="v1.1 RC4" version="v1.1.7916.15665" pre_release=true time="09/07/2021" %}
 
 - Minor Fixes and Improvements
 
-{% include ltr/release-header.html title="v1.1 RC2" version="v1.1.7906.21197" time="08/24/2021" %}
+{% include ltr/release-header.html title="v1.1 RC3" version="v1.1.7912.2443" pre_release=true time="08/30/2021" %}
+
+- Minor Fixes and Improvements
+
+{% include ltr/release-header.html title="v1.1 RC2" version="v1.1.7906.21197" pre_release=true time="08/24/2021" %}
 
 - 👉 Updated *Tracking Mode* context wording.
   - Supersede -> **Enabled : Replace**
