@@ -7,8 +7,23 @@ group: Deployment & Configs
 <!-- most recent release should be on top -->
 {% include ltr/release-header.html title="v1.2 RC1" version=" " pre_release=true time="09/14/2021" %}
 
-- New Components!
-  - {% include ltr/comp.html uuid='704d9c1b-' %}
+- New View Components!
+  - {% include ltr/comp_item.html uuid='97c8cb27-' %}
+  - {% include ltr/comp_item.html uuid='c7a57ec8-' %}
+  - {% include ltr/comp_item.html uuid='cadf5fbb-' %}
+  - {% include ltr/comp_item.html uuid='704d9c1b-' %}
+  - {% include ltr/comp_item.html uuid='15bac151-' %}
+  - {% include ltr/comp_item.html uuid='f6b99fe2-' %}
+
+- New Assembly Components!
+  - {% include ltr/comp_item.html uuid='fd5b45c3-' %}
+  - {% include ltr/comp_item.html uuid='64594dea-' %}
+  - {% include ltr/comp_item.html uuid='6915b697-' %}
+  - {% include ltr/comp_item.html uuid='26feb2e9-' %}
+  - {% include ltr/comp_item.html uuid='33ead71b-' %}
+  - {% include ltr/comp_item.html uuid='ff0f49ca-' %}
+
+- Merged [PR #486](https://github.com/mcneel/rhino.inside-revit/pull/486)
 
 {% include ltr/release-header.html title="v1.1 Stable" version="" time="09/14/2021" %}
 
