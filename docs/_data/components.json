@@ -1,5 +1,15 @@
 [
   {
+    "desc": "Contains a collection of Revit assemblies", 
+    "iconsrc": "/static/images/GH/AssemblyInstance.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
+    "tab": "Params", 
+    "title": "Assembly", 
+    "typename": "AssemblyInstance", 
+    "uuid": "d7958ccf-9847-4e27-996b-b7fdc0eb1086"
+  }, 
+  {
     "desc": "Contains a Revit sheet", 
     "iconsrc": "/static/images/GH/Sheet.png", 
     "icontag": null, 
@@ -1250,36 +1260,6 @@
     "uuid": "3e44d6bb-5f49-40e8-a2c4-53e5e3a63ddc"
   }, 
   {
-    "desc": "Get all document sheets", 
-    "iconsrc": "/static/images/GH/QuerySheets.png", 
-    "icontag": null, 
-    "panel": "View", 
-    "tab": "Revit", 
-    "title": "Query Sheets", 
-    "typename": "QuerySheets", 
-    "uuid": "97c8cb27-955f-44cf-948d-dfbde285cd7a"
-  }, 
-  {
-    "desc": "Get all document title block types", 
-    "iconsrc": "/static/images/GH/QueryTitleBlockTypes.png", 
-    "icontag": null, 
-    "panel": "View", 
-    "tab": "Revit", 
-    "title": "Query Title Block Types", 
-    "typename": "QueryTitleBlockTypes", 
-    "uuid": "c7a57ec8-d4d3-4251-aa91-cc67f833313b"
-  }, 
-  {
-    "desc": "Query sheet identity information", 
-    "iconsrc": "/static/images/GH/SheetIdentity.png", 
-    "icontag": null, 
-    "panel": "View", 
-    "tab": "Revit", 
-    "title": "Sheet Identity", 
-    "typename": "SheetIdentity", 
-    "uuid": "cadf5fbb-9dea-4b9f-8214-9897cec0e54a"
-  }, 
-  {
     "desc": "Given a Plane, it adds a SketchPlane element to the active Revit document", 
     "iconsrc": "/static/images/GH/SketchPlaneByPlane.png", 
     "icontag": null, 
@@ -1328,6 +1308,16 @@
     "title": "Active Graphical View", 
     "typename": "ViewActive", 
     "uuid": "7ccf350c-80cc-42d0-85ba-78544fd59f4a"
+  }, 
+  {
+    "desc": "Split a list of views into separate clusters by their family", 
+    "iconsrc": "/static/images/GH/ClusterViewsByType.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "tab": "Revit", 
+    "title": "Cluster Views By Family", 
+    "typename": "ClusterViewsByType", 
+    "uuid": "f6b99fe2-19e1-4840-96c1-13873a0aece8"
   }, 
   {
     "desc": "Exports a view into an image file", 
@@ -2090,16 +2080,6 @@
     "uuid": "311316ba-81c7-495c-8a20-b7974091d6b1"
   }, 
   {
-    "desc": "Create a new sheet in Revit with given number and name", 
-    "iconsrc": "/static/images/GH/SheetByNumber.png", 
-    "icontag": null, 
-    "panel": "View", 
-    "tab": "Revit", 
-    "title": "Add Sheet", 
-    "typename": "SheetByNumber", 
-    "uuid": "704d9c1b-fc56-4407-87cf-720047ae5875"
-  }, 
-  {
     "desc": "Given a plane, it adds a 3D View to the active Revit document", 
     "iconsrc": "/static/images/GH/View3DByPlane.png", 
     "icontag": null, 
@@ -2128,36 +2108,6 @@
     "title": "Query Phases", 
     "typename": "QueryPhases", 
     "uuid": "91e4d3e1-883a-44d9-a3d2-b836967869e1"
-  }, 
-  {
-    "desc": "Get-Set accessor to element parameter values", 
-    "iconsrc": "/static/images/GH/ElementParameter.png", 
-    "icontag": null, 
-    "panel": "Element", 
-    "tab": "Revit", 
-    "title": "Element Parameter", 
-    "typename": "ElementParameter", 
-    "uuid": "f568d3e7-be3f-455b-a8d4-ebfa573d55c2"
-  }, 
-  {
-    "desc": "Resets the parameter value of a specified Revit Element", 
-    "iconsrc": "/static/images/GH/ElementParameterReset.png", 
-    "icontag": null, 
-    "panel": "Element", 
-    "tab": "Revit", 
-    "title": "Reset Element Parameter", 
-    "typename": "ElementParameterReset", 
-    "uuid": "2c374e6d-a547-45ac-b77d-04dd61317622"
-  }, 
-  {
-    "desc": "Get the parameters of the specified Element", 
-    "iconsrc": "/static/images/GH/QueryElementParameters.png", 
-    "icontag": null, 
-    "panel": "Element", 
-    "tab": "Revit", 
-    "title": "Query Element Parameters", 
-    "typename": "QueryElementParameters", 
-    "uuid": "44515a6b-84ee-4dbd-8241-17edbe07c5b6"
   }, 
   {
     "desc": "Material Graphics Data", 
@@ -2528,6 +2478,146 @@
     "title": "Query Design Options", 
     "typename": "QueryDesignOptions", 
     "uuid": "6804582b-e6fd-4825-aa71-b59346f149cd"
+  }, 
+  {
+    "desc": "Get-Set accessor to element parameter values", 
+    "iconsrc": "/static/images/GH/ElementParameter.png", 
+    "icontag": null, 
+    "panel": "Element", 
+    "tab": "Revit", 
+    "title": "Element Parameter", 
+    "typename": "ElementParameter", 
+    "uuid": "f568d3e7-be3f-455b-a8d4-ebfa573d55c2"
+  }, 
+  {
+    "desc": "Resets the parameter value of a specified Revit Element", 
+    "iconsrc": "/static/images/GH/ElementParameterReset.png", 
+    "icontag": null, 
+    "panel": "Element", 
+    "tab": "Revit", 
+    "title": "Reset Element Parameter", 
+    "typename": "ElementParameterReset", 
+    "uuid": "2c374e6d-a547-45ac-b77d-04dd61317622"
+  }, 
+  {
+    "desc": "Get the parameters of the specified Element", 
+    "iconsrc": "/static/images/GH/QueryElementParameters.png", 
+    "icontag": null, 
+    "panel": "Element", 
+    "tab": "Revit", 
+    "title": "Query Element Parameters", 
+    "typename": "QueryElementParameters", 
+    "uuid": "44515a6b-84ee-4dbd-8241-17edbe07c5b6"
+  }, 
+  {
+    "desc": "Analyze given sheet view", 
+    "iconsrc": "/static/images/GH/AnalyzeSheet.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "tab": "Revit", 
+    "title": "Analyze Sheet", 
+    "typename": "AnalyzeSheet", 
+    "uuid": "15bac151-d31c-4c4d-8570-49cda0d58def"
+  }, 
+  {
+    "desc": "Get all document sheets", 
+    "iconsrc": "/static/images/GH/QuerySheets.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "tab": "Revit", 
+    "title": "Query Sheets", 
+    "typename": "QuerySheets", 
+    "uuid": "97c8cb27-955f-44cf-948d-dfbde285cd7a"
+  }, 
+  {
+    "desc": "Get all document title block types", 
+    "iconsrc": "/static/images/GH/QueryTitleBlockTypes.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "tab": "Revit", 
+    "title": "Query Title Block Types", 
+    "typename": "QueryTitleBlockTypes", 
+    "uuid": "c7a57ec8-d4d3-4251-aa91-cc67f833313b"
+  }, 
+  {
+    "desc": "Query sheet identity information", 
+    "iconsrc": "/static/images/GH/SheetIdentity.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "tab": "Revit", 
+    "title": "Sheet Identity", 
+    "typename": "SheetIdentity", 
+    "uuid": "cadf5fbb-9dea-4b9f-8214-9897cec0e54a"
+  }, 
+  {
+    "desc": "Create a new sheet in Revit with given number and name", 
+    "iconsrc": "/static/images/GH/SheetByNumber.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "tab": "Revit", 
+    "title": "Add Sheet", 
+    "typename": "SheetByNumber", 
+    "uuid": "704d9c1b-fc56-4407-87cf-720047ae5875"
+  }, 
+  {
+    "desc": "Get all views that belong to given assembly", 
+    "iconsrc": "/static/images/GH/AssemblyViews.png", 
+    "icontag": null, 
+    "panel": "Assembly", 
+    "tab": "Revit", 
+    "title": "Assembly Views", 
+    "typename": "AssemblyViews", 
+    "uuid": "64594dea-057a-47b9-8e63-5e0832e13adb"
+  }, 
+  {
+    "desc": "Create a new assembly instance at given location", 
+    "iconsrc": "/static/images/GH/AssemblyByLocation.png", 
+    "icontag": null, 
+    "panel": "Assembly", 
+    "tab": "Revit", 
+    "title": "Add Assembly (Location)", 
+    "typename": "AssemblyByLocation", 
+    "uuid": "26feb2e9-6476-4ba7-a553-1d0300674d1d"
+  }, 
+  {
+    "desc": "Analyze and modify the members of given assembly", 
+    "iconsrc": "/static/images/GH/AssemblyMembers.png", 
+    "icontag": null, 
+    "panel": "Assembly", 
+    "tab": "Revit", 
+    "title": "Assembly Members", 
+    "typename": "AssemblyMembers", 
+    "uuid": "33ead71b-647b-4783-b0ce-c840cd50c15d"
+  }, 
+  {
+    "desc": "Create a new assembly instance", 
+    "iconsrc": "/static/images/GH/AssemblyByCategory.png", 
+    "icontag": null, 
+    "panel": "Assembly", 
+    "tab": "Revit", 
+    "title": "Add Assembly", 
+    "typename": "AssemblyByCategory", 
+    "uuid": "6915b697-f10d-4bc8-8faa-f25438f393a8"
+  }, 
+  {
+    "desc": "Disassembly given assembly and release the members", 
+    "iconsrc": "/static/images/GH/DisassembleAssembly.png", 
+    "icontag": null, 
+    "panel": "Assembly", 
+    "tab": "Revit", 
+    "title": "Disassembly Assembly", 
+    "typename": "DisassembleAssembly", 
+    "uuid": "ff0f49ca-16ec-4287-8bd8-b903b6a6e781"
+  }, 
+  {
+    "desc": "Get all document assemblies", 
+    "iconsrc": "/static/images/GH/QueryAssemblies.png", 
+    "icontag": null, 
+    "panel": "Assembly", 
+    "tab": "Revit", 
+    "title": "Query Assemblies", 
+    "typename": "QueryAssemblies", 
+    "uuid": "fd5b45c3-7f55-4ad8-abbe-e871f95b4988"
   }, 
   {
     "desc": "Site location identity Data", 
