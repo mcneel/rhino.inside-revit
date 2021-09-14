@@ -5,7 +5,7 @@ group: Deployment & Configs
 ---
 
 <!-- most recent release should be on top -->
-{% include ltr/release-header.html title="v1.2 RC1" version=" " pre_release=true time="09/14/2021" %}
+{% include ltr/release-header.html title="v1.2 RC1" version="v1.2.7927.28069" pre_release=true time="09/14/2021" %}
 
 - New View Components!
   - {% include ltr/comp_item.html uuid='97c8cb27-' %}
@@ -25,7 +25,7 @@ group: Deployment & Configs
 
 - Merged [PR #486](https://github.com/mcneel/rhino.inside-revit/pull/486)
 
-{% include ltr/release-header.html title="v1.1 Stable" version="" time="09/14/2021" %}
+{% include ltr/release-header.html title="v1.1 Stable" version="v1.1.7927.27937" time="09/14/2021" %}
 
 - Minor Fixes and Improvements
 
