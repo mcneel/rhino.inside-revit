@@ -199,21 +199,22 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
         // - if titleblock on existing does not match the titleblock provided (or not),
         //   on the inputs, do not reuse so Revit places tblock by default at proper location
         //   and whether sheet has titleblock or not matches the input
-        var tblocks = new DB.FilteredElementCollector(sheet.Document, sheet.Id)
-                            .OfCategory(DB.BuiltInCategory.OST_TitleBlocks)
-                            .ToElements();
+        var blocks = new DB.FilteredElementCollector(sheet.Document, sheet.Id).
+          WhereElementIsNotElementType().
+          OfCategory(DB.BuiltInCategory.OST_TitleBlocks);
+
+        var blocksCount = blocks.GetElementCount();
         if (TitleblockType is DB.ElementType tblockType)
         {
-          if (tblocks.Count == 0 || tblocks.Count > 1)
-            canUpdate = false;
-          else
+          if (blocksCount == 1)
           {
-            var tblock = tblocks.First();
+            var tblock = blocks.FirstElement();
             if (!tblock.GetTypeId().Equals(tblockType.Id))
               canUpdate = false;
           }
+          else canUpdate = false;
         }
-        else if (tblocks.Any())
+        else if (blocksCount > 0)
           canUpdate = false;
 
         // - if sheet placeholder state is different from input, do not reuse.
@@ -286,11 +287,15 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
         Params.WriteTrackedElement(_Sheet_.name, doc.Value, sheet);
         DA.SetData(_Sheet_.name, sheet);
 
-        var titleblock = new DB.FilteredElementCollector(sheet.Document, sheet.Id)
-                               .OfCategory(DB.BuiltInCategory.OST_TitleBlocks)
-                               .ToElements()
-                               .FirstOrDefault();
-        DA.SetData(_TitleBlock_.name, titleblock);
+        using (var collector = new DB.FilteredElementCollector(sheet.Document, sheet.Id))
+        {
+          var titleblock = collector.
+           OfCategory(DB.BuiltInCategory.OST_TitleBlocks).
+           WhereElementIsNotElementType().
+           FirstElement();
+
+          DA.SetData(_TitleBlock_.name, titleblock);
+        }
       }
     }
 
