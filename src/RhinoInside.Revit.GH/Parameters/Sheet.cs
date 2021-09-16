@@ -4,14 +4,13 @@ using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
   public class Sheet : Element<Types.IGH_Sheet, DB.ViewSheet>
   {
-    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    public override GH_Exposure Exposure => GH_Exposure.quinary;
     public override Guid ComponentGuid => new Guid("3c0d65b7-4173-423c-97e9-c6124e8c258a");
 
     public Sheet() : base("Sheet", "Sheet", "Contains a Revit sheet", "Params", "Revit Primitives") { }

@@ -1,21 +1,18 @@
 using System;
 using System.Globalization;
-using Grasshopper.Kernel.Types;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Sheet")]
-  public interface IGH_Sheet : IGH_Element { }
+  public interface IGH_Sheet : IGH_View { }
 
   [Kernel.Attributes.Name("Sheet")]
-  public class Sheet : Element, IGH_Sheet
+  public class Sheet : View, IGH_Sheet
   {
     protected override Type ValueType => typeof(DB.ViewSheet);
     public static explicit operator DB.ViewSheet(Sheet value) => value?.Value;
     public new DB.ViewSheet Value => base.Value as DB.ViewSheet;
-
-    string IGH_Goo.TypeName => "Revit Sheet";
 
     public Sheet() { }
     public Sheet(DB.Document doc, DB.ElementId id) : base(doc, id) { }
