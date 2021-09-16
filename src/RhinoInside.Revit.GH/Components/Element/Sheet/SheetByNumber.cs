@@ -107,7 +107,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       ),
       new ParamDefinition
       (
-        new Parameters.Sheet()
+        new Parameters.ViewSheet()
         {
           Name = "Template",
           NickName = "T",
@@ -123,7 +123,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
     {
       new ParamDefinition
       (
-        new Parameters.Sheet()
+        new Parameters.ViewSheet()
         {
           Name = _Sheet_.name,
           NickName = _Sheet_.nickname,

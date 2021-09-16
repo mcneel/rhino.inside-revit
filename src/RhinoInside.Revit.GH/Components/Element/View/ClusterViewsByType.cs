@@ -174,7 +174,7 @@ namespace RhinoInside.Revit.GH.Components
               continue;
 
             case DB.ViewType.DrawingSheet:
-              param = new Parameters.Sheet();
+              param = new Parameters.ViewSheet();
               paramSetter = vs => vs.OfType<DB.ViewSheet>().Select(x => Types.ViewSheet.FromElement(x));
               break;
 

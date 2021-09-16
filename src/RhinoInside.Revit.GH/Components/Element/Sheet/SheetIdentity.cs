@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager.AddParameter(new Parameters.Sheet(), "Sheet", "Sheet", "Sheet to analyze identity", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.ViewSheet(), "Sheet", "Sheet", "Sheet to analyze identity", GH_ParamAccess.item);
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)

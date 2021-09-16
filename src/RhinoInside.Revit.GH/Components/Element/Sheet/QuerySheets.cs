@@ -40,7 +40,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.Sheet>("Sheets", "S", "Sheets list", GH_ParamAccess.list)
+      ParamDefinition.Create<Parameters.ViewSheet>("Sheets", "S", "Sheets list", GH_ParamAccess.list)
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)

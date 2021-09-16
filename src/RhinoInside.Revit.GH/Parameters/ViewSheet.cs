@@ -8,12 +8,12 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class Sheet : Element<Types.IGH_Sheet, DB.ViewSheet>
+  public class ViewSheet : Element<Types.IGH_Sheet, DB.ViewSheet>
   {
     public override GH_Exposure Exposure => GH_Exposure.quinary;
-    public override Guid ComponentGuid => new Guid("3c0d65b7-4173-423c-97e9-c6124e8c258a");
+    public override Guid ComponentGuid => new Guid("3C0D65B7-4173-423C-97E9-C6124E8C258A");
 
-    public Sheet() : base("Sheet", "Sheet", "Contains a Revit sheet", "Params", "Revit Primitives") { }
+    public ViewSheet() : base("Sheet", "Sheet", "Contains a collection of Revit sheet view elements", "Params", "Revit Primitives") { }
 
     protected override Types.IGH_Sheet InstantiateT() => new Types.ViewSheet();
 
