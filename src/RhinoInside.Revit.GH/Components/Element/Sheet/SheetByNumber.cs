@@ -66,12 +66,13 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       ),
       new ParamDefinition
       (
-        new Parameters.ElementType()
+        new Parameters.FamilySymbol()
         {
           Name = $"{_TitleBlock_.name} Type",
           NickName = $"{_TitleBlock_.nickname}T",
-          Description = $"{_TitleBlock_.name} type to use for Sheet",
-          Optional = true
+          Description = $"{_TitleBlock_.name} type to use for Title Block",
+          Optional = true,
+          SelectedBuiltInCategory = DB.BuiltInCategory.OST_TitleBlocks
         }
       ),
       new ParamDefinition
@@ -132,7 +133,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       ),
       new ParamDefinition
       (
-        new Parameters.Element()
+        new Parameters.FamilyInstance()
         {
           Name = _TitleBlock_.name,
           NickName = _TitleBlock_.nickname,
@@ -164,7 +165,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       public bool? IsPlaceHolder { get; set; }
       public bool? IsIndexed { get; set; }
 
-      public DB.ElementType TitleblockType { get; set; }
+      public DB.FamilySymbol TitleblockType { get; set; }
 
       public DB.AssemblyInstance Assembly { get; set; }
 
@@ -261,7 +262,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
 
       Params.TryGetData(DA, "Placeholder", out bool? placeholder);
       Params.TryGetData(DA, "Indexed", out bool? indexed);
-      Params.TryGetData(DA, $"{_TitleBlock_.name} Type", out DB.ElementType tblockType);
+      Params.TryGetData(DA, $"{_TitleBlock_.name} Type", out DB.FamilySymbol tblockType);
 
       Params.TryGetData(DA, "Assembly", out DB.AssemblyInstance assembly);
       Params.TryGetData(DA, "Template", out DB.ViewSheet template);

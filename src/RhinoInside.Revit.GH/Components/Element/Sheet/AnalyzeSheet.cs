@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(new Parameters.Element(), "Title Block", "TB", "Sheet's title block, if any", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.FamilyInstance(), "Title Block", "TB", "Sheet's title block, if any", GH_ParamAccess.item);
       manager.AddParameter(new Parameters.AssemblyInstance(), "Assembly", "A", "Sheet's associated Assembly, if any", GH_ParamAccess.item);
     }
 
