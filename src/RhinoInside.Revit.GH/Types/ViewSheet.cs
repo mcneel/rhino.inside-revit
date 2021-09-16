@@ -8,15 +8,15 @@ namespace RhinoInside.Revit.GH.Types
   public interface IGH_Sheet : IGH_View { }
 
   [Kernel.Attributes.Name("Sheet")]
-  public class Sheet : View, IGH_Sheet
+  public class ViewSheet : View, IGH_Sheet
   {
     protected override Type ValueType => typeof(DB.ViewSheet);
-    public static explicit operator DB.ViewSheet(Sheet value) => value?.Value;
+    public static explicit operator DB.ViewSheet(ViewSheet value) => value?.Value;
     public new DB.ViewSheet Value => base.Value as DB.ViewSheet;
 
-    public Sheet() { }
-    public Sheet(DB.Document doc, DB.ElementId id) : base(doc, id) { }
-    public Sheet(DB.ViewSheet sheet) : base(sheet) { }
+    public ViewSheet() { }
+    public ViewSheet(DB.Document doc, DB.ElementId id) : base(doc, id) { }
+    public ViewSheet(DB.ViewSheet sheet) : base(sheet) { }
 
     public override string DisplayName
     {

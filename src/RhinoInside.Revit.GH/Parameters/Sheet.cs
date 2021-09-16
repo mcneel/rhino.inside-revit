@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public Sheet() : base("Sheet", "Sheet", "Contains a Revit sheet", "Params", "Revit Primitives") { }
 
-    protected override Types.IGH_Sheet InstantiateT() => new Types.Sheet();
+    protected override Types.IGH_Sheet InstantiateT() => new Types.ViewSheet();
 
     #region UI
     static readonly List<(string title, Func<DB.ViewSheet, bool> qualifier)> sheetTypeQualifiers
@@ -52,7 +52,7 @@ namespace RhinoInside.Revit.GH.Parameters
         sheetTypeQualifiers.Select(q => q.title).ToArray()
         );
 
-      if (PersistentValue is Types.Sheet sheet)
+      if (PersistentValue is Types.ViewSheet sheet)
       {
         var mostStringentMatchedQualifier = sheetTypeQualifiers.Where(q => q.qualifier(sheet.Value)).LastOrDefault();
         sheetTypeBox.SelectedIndex = sheetTypeQualifiers.IndexOf(mostStringentMatchedQualifier);
@@ -93,10 +93,10 @@ namespace RhinoInside.Revit.GH.Parameters
 
         listBox.DisplayMember = "DisplayName";
         foreach (var sheet in sheets)
-          listBox.Items.Add(new Types.Sheet(sheet));
+          listBox.Items.Add(new Types.ViewSheet(sheet));
       }
 
-      listBox.SelectedIndex = listBox.Items.OfType<Types.Sheet>().IndexOf(PersistentValue, 0).FirstOr(-1);
+      listBox.SelectedIndex = listBox.Items.OfType<Types.ViewSheet>().IndexOf(PersistentValue, 0).FirstOr(-1);
       listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
     }
 
@@ -106,7 +106,7 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         if (listBox.SelectedIndex != -1)
         {
-          if (listBox.Items[listBox.SelectedIndex] is Types.Sheet sheet)
+          if (listBox.Items[listBox.SelectedIndex] is Types.ViewSheet sheet)
           {
             RecordPersistentDataEvent($"Set: {sheet}");
             PersistentData.Clear();
