@@ -4,19 +4,18 @@ using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class Sheet : Element<Types.IGH_Sheet, DB.ViewSheet>
+  public class ViewSheet : Element<Types.IGH_Sheet, DB.ViewSheet>
   {
-    public override GH_Exposure Exposure => GH_Exposure.quarternary;
-    public override Guid ComponentGuid => new Guid("3c0d65b7-4173-423c-97e9-c6124e8c258a");
+    public override GH_Exposure Exposure => GH_Exposure.quinary;
+    public override Guid ComponentGuid => new Guid("3C0D65B7-4173-423C-97E9-C6124E8C258A");
 
-    public Sheet() : base("Sheet", "Sheet", "Contains a Revit sheet", "Params", "Revit Primitives") { }
+    public ViewSheet() : base("Sheet", "Sheet", "Contains a collection of Revit sheet view elements", "Params", "Revit Primitives") { }
 
-    protected override Types.IGH_Sheet InstantiateT() => new Types.Sheet();
+    protected override Types.IGH_Sheet InstantiateT() => new Types.ViewSheet();
 
     #region UI
     static readonly List<(string title, Func<DB.ViewSheet, bool> qualifier)> sheetTypeQualifiers
@@ -53,7 +52,7 @@ namespace RhinoInside.Revit.GH.Parameters
         sheetTypeQualifiers.Select(q => q.title).ToArray()
         );
 
-      if (PersistentValue is Types.Sheet sheet)
+      if (PersistentValue is Types.ViewSheet sheet)
       {
         var mostStringentMatchedQualifier = sheetTypeQualifiers.Where(q => q.qualifier(sheet.Value)).LastOrDefault();
         sheetTypeBox.SelectedIndex = sheetTypeQualifiers.IndexOf(mostStringentMatchedQualifier);
@@ -94,10 +93,10 @@ namespace RhinoInside.Revit.GH.Parameters
 
         listBox.DisplayMember = "DisplayName";
         foreach (var sheet in sheets)
-          listBox.Items.Add(new Types.Sheet(sheet));
+          listBox.Items.Add(new Types.ViewSheet(sheet));
       }
 
-      listBox.SelectedIndex = listBox.Items.OfType<Types.Sheet>().IndexOf(PersistentValue, 0).FirstOr(-1);
+      listBox.SelectedIndex = listBox.Items.OfType<Types.ViewSheet>().IndexOf(PersistentValue, 0).FirstOr(-1);
       listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
     }
 
@@ -107,7 +106,7 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         if (listBox.SelectedIndex != -1)
         {
-          if (listBox.Items[listBox.SelectedIndex] is Types.Sheet sheet)
+          if (listBox.Items[listBox.SelectedIndex] is Types.ViewSheet sheet)
           {
             RecordPersistentDataEvent($"Set: {sheet}");
             PersistentData.Clear();

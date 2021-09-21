@@ -2893,16 +2893,6 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Sheet {
-            get {
-                object obj = ResourceManager.GetObject("Sheet", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap SheetByNumber {
             get {
                 object obj = ResourceManager.GetObject("SheetByNumber", resourceCulture);
@@ -3146,6 +3136,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap ViewIdentity {
             get {
                 object obj = ResourceManager.GetObject("ViewIdentity", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ViewSheet {
+            get {
+                object obj = ResourceManager.GetObject("ViewSheet", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

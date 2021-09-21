@@ -12,10 +12,11 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "DAS";
 
-    public DisassembleAssembly() : base(
-      name: "Disassembly Assembly",
+    public DisassembleAssembly() : base
+    (
+      name: "Disassemble Assembly",
       nickname: "DAS",
-      description: "Disassembly given assembly and release the members",
+      description: "Disassemble given assembly and release the members",
       category: "Revit",
       subCategory: "Assembly"
     )
@@ -40,7 +41,7 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
     {
       new ParamDefinition
       (
-        new Parameters.Element()
+        new Parameters.GraphicalElement()
         {
           Name = "Elements",
           NickName = "E",

@@ -50,8 +50,8 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       (
         new Param_String()
         {
-          Name = "Number",
-          NickName = "NO",
+          Name = "Sheet Number",
+          NickName = "NUM",
           Description = $"{_Sheet_.name} Number"
         }
       ),
@@ -59,19 +59,20 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       (
         new Param_String()
         {
-          Name = "Name",
+          Name = "Sheet Name",
           NickName = "N",
           Description = $"{_Sheet_.name} Name",
         }
       ),
       new ParamDefinition
       (
-        new Parameters.ElementType()
+        new Parameters.FamilySymbol()
         {
           Name = $"{_TitleBlock_.name} Type",
           NickName = $"{_TitleBlock_.nickname}T",
-          Description = $"{_TitleBlock_.name} type to use for Sheet",
-          Optional = true
+          Description = $"{_TitleBlock_.name} type to use for Title Block",
+          Optional = true,
+          SelectedBuiltInCategory = DB.BuiltInCategory.OST_TitleBlocks
         }
       ),
       new ParamDefinition
@@ -88,8 +89,8 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       (
         new Param_Boolean
         {
-          Name = "Indexed",
-          NickName = "IDX",
+          Name = "Appears In Sheet List",
+          NickName = "AISL",
           Description = $"Whether sheet appears on sheet lists",
           Optional = true
         }
@@ -107,7 +108,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       ),
       new ParamDefinition
       (
-        new Parameters.Sheet()
+        new Parameters.ViewSheet()
         {
           Name = "Template",
           NickName = "T",
@@ -123,7 +124,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
     {
       new ParamDefinition
       (
-        new Parameters.Sheet()
+        new Parameters.ViewSheet()
         {
           Name = _Sheet_.name,
           NickName = _Sheet_.nickname,
@@ -132,7 +133,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       ),
       new ParamDefinition
       (
-        new Parameters.Element()
+        new Parameters.FamilyInstance()
         {
           Name = _TitleBlock_.name,
           NickName = _TitleBlock_.nickname,
@@ -162,9 +163,9 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       }
 
       public bool? IsPlaceHolder { get; set; }
-      public bool? IsIndexed { get; set; }
+      public bool? SheetScheduled { get; set; }
 
-      public DB.ElementType TitleblockType { get; set; }
+      public DB.FamilySymbol TitleblockType { get; set; }
 
       public DB.AssemblyInstance Assembly { get; set; }
 
@@ -198,21 +199,22 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
         // - if titleblock on existing does not match the titleblock provided (or not),
         //   on the inputs, do not reuse so Revit places tblock by default at proper location
         //   and whether sheet has titleblock or not matches the input
-        var tblocks = new DB.FilteredElementCollector(sheet.Document, sheet.Id)
-                            .OfCategory(DB.BuiltInCategory.OST_TitleBlocks)
-                            .ToElements();
+        var blocks = new DB.FilteredElementCollector(sheet.Document, sheet.Id).
+          WhereElementIsNotElementType().
+          OfCategory(DB.BuiltInCategory.OST_TitleBlocks);
+
+        var blocksCount = blocks.GetElementCount();
         if (TitleblockType is DB.ElementType tblockType)
         {
-          if (tblocks.Count == 0 || tblocks.Count > 1)
-            canUpdate = false;
-          else
+          if (blocksCount == 1)
           {
-            var tblock = tblocks.First();
+            var tblock = blocks.FirstElement();
             if (!tblock.GetTypeId().Equals(tblockType.Id))
               canUpdate = false;
           }
+          else canUpdate = false;
         }
-        else if (tblocks.Any())
+        else if (blocksCount > 0)
           canUpdate = false;
 
         // - if sheet placeholder state is different from input, do not reuse.
@@ -236,8 +238,8 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
         if (Name is object)
           sheet.Name = Name;
 
-        if (IsIndexed.HasValue)
-          sheet.UpdateParameterValue(DB.BuiltInParameter.SHEET_SCHEDULED, IsIndexed.Value);
+        if (SheetScheduled.HasValue)
+          sheet.UpdateParameterValue(DB.BuiltInParameter.SHEET_SCHEDULED, SheetScheduled.Value);
       }
     }
 
@@ -247,7 +249,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
 
       // sheet input data
-      if (!Params.TryGetData(DA, "Number", out string number, x => !string.IsNullOrEmpty(x))) return;
+      if (!Params.TryGetData(DA, "Sheet Number", out string number, x => !string.IsNullOrEmpty(x))) return;
       // Note (eirannejad Sep 10, 2021)
       // I decided for name to be a required field, although revit automatically names the sheets (e.g. Unnamed in English)
       // This matches the behaviour of Add View components since a name is required for a view and has to be unique
@@ -257,11 +259,11 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       //   with revit's default name. If later a name input is connected, the component can correctly
       //   update the sheet names. But if the name input would be disconnected, the component has no way of
       //   knowing the previous or default name for the sheet and will leave the names as they are
-      if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return;
+      if (!Params.TryGetData(DA, "Sheet Name", out string name, x => !string.IsNullOrEmpty(x))) return;
 
       Params.TryGetData(DA, "Placeholder", out bool? placeholder);
-      Params.TryGetData(DA, "Indexed", out bool? indexed);
-      Params.TryGetData(DA, $"{_TitleBlock_.name} Type", out DB.ElementType tblockType);
+      Params.TryGetData(DA, "Appears In Sheet List", out bool? scheduled);
+      Params.TryGetData(DA, $"{_TitleBlock_.name} Type", out DB.FamilySymbol tblockType);
 
       Params.TryGetData(DA, "Assembly", out DB.AssemblyInstance assembly);
       Params.TryGetData(DA, "Template", out DB.ViewSheet template);
@@ -276,7 +278,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
         {
           Name = name,
           IsPlaceHolder = placeholder,
-          IsIndexed = indexed,
+          SheetScheduled = scheduled,
           TitleblockType = tblockType,
           Assembly = assembly,
           Template = template
@@ -285,11 +287,15 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
         Params.WriteTrackedElement(_Sheet_.name, doc.Value, sheet);
         DA.SetData(_Sheet_.name, sheet);
 
-        var titleblock = new DB.FilteredElementCollector(sheet.Document, sheet.Id)
-                               .OfCategory(DB.BuiltInCategory.OST_TitleBlocks)
-                               .ToElements()
-                               .FirstOrDefault();
-        DA.SetData(_TitleBlock_.name, titleblock);
+        using (var collector = new DB.FilteredElementCollector(sheet.Document, sheet.Id))
+        {
+          var titleblock = collector.
+           OfCategory(DB.BuiltInCategory.OST_TitleBlocks).
+           WhereElementIsNotElementType().
+           FirstElement();
+
+          DA.SetData(_TitleBlock_.name, titleblock);
+        }
       }
     }
 

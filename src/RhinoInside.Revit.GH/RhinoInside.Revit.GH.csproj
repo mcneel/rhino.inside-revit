@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -378,9 +378,7 @@
     <Compile Include="Components\ParameterElement\QueryParameters.cs" />
     <Compile Include="Components\ParameterElement\SharedParameters.cs" />
     <Compile Include="Parameters\AssemblyInstance.cs" />
-    <Compile Include="Parameters\Sheet.cs" />
     <Compile Include="Types\AssemblyInstance.cs" />
-    <Compile Include="Types\Sheet.cs" />
     <Compile Include="Types\Workset.cs" />
     <None Include="Extensions\README.md" />
     <Compile Include="Extensions\Grasshopper\Kernel\GH_ComponentParamServerExtension.cs" />
@@ -458,6 +456,7 @@
     <Compile Include="Parameters\ThermalAsset.cs" />
     <Compile Include="Parameters\ValueList.cs" />
     <Compile Include="Parameters\View.cs" />
+    <Compile Include="Parameters\ViewSheet.cs" />
     <Compile Include="Parameters\Workset.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -514,6 +513,7 @@
     <Compile Include="Types\TextureData.cs" />
     <Compile Include="Types\ThermalAsset.cs" />
     <Compile Include="Types\View.cs" />
+    <Compile Include="Types\ViewSheet.cs" />
     <Compile Include="Types\CurtainGridLine.cs" />
     <Compile Include="Types\SpatialElement.cs" />
     <Compile Include="Types\Mullion.cs" />

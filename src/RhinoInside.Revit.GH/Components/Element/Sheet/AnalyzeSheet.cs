@@ -23,12 +23,12 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager.AddParameter(new Parameters.Sheet(), "Sheet", "Sheet", string.Empty, GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.ViewSheet(), "Sheet", "Sheet", string.Empty, GH_ParamAccess.item);
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(new Parameters.Element(), "Title Block", "TB", "Sheet's title block, if any", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.FamilyInstance(), "Title Block", "TB", "Sheet's title block, if any", GH_ParamAccess.item);
       manager.AddParameter(new Parameters.AssemblyInstance(), "Assembly", "A", "Sheet's associated Assembly, if any", GH_ParamAccess.item);
     }
 
@@ -39,26 +39,32 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
         return;
 
       // TODO: this should really be collected beforeSolveInstance but document is needed
-      var tblocks = new DB.FilteredElementCollector(sheet.Document)
-                          .OfCategory(DB.BuiltInCategory.OST_TitleBlocks)
-                          .WhereElementIsNotElementType()
-                          .ToElements()
-                          .Cast<DB.FamilyInstance>();
-      DA.SetData(
-        "Title Block",
-        // lets find the associated titleblock by checking its owner view id
-        // collecting elements on the sheet to get the titleblock will cause
-        // revit to render every sheet and it is very time consuming
-        tblocks.Where(tb => tb.OwnerViewId.Equals(sheet.Id)).FirstOrDefault()
+      using (var collector = new DB.FilteredElementCollector(sheet.Document).
+          OfCategory(DB.BuiltInCategory.OST_TitleBlocks).
+          WhereElementIsNotElementType())
+      {
+        DA.SetData
+        (
+          "Title Block",
+          // lets find the associated titleblock by checking its owner view id
+          // collecting elements on the sheet to get the titleblock will cause
+          // revit to render every sheet and it is very time consuming
+          collector.Where(tb => tb.OwnerViewId.Equals(sheet.Id)).FirstOrDefault()
         );
+      }
 
       if (!sheet.AssociatedAssemblyInstanceId.Equals(DB.ElementId.InvalidElementId))
-        DA.SetData(
+      {
+        DA.SetData
+        (
           "Assembly",
-          Types.AssemblyInstance.FromElementId(
+          Types.AssemblyInstance.FromElementId
+          (
             sheet.Document,
-            sheet.AssociatedAssemblyInstanceId)
-          );
+            sheet.AssociatedAssemblyInstanceId
+          )
+        );
+      }
     }
   }
 }

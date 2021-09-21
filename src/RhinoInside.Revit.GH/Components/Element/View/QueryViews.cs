@@ -32,8 +32,9 @@ namespace RhinoInside.Revit.GH.Components
       ParamDefinition.Create<Param_String>("Name", "N", "View name", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Parameters.View>("Template", "T", "Views template", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_Boolean>("Is Template", "IT", "View is template", false, GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Param_Boolean>("Is Assembly", "IA", "View is assembly", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_Boolean>("Is Printable", "IP", "View is printable", GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_Boolean>("Is Assembly", "IA", "View is assembly", GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Parameters.AssemblyInstance>("Assembly", "A", "Assembly the view bolongs to", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true),
     };
 
@@ -66,13 +67,17 @@ namespace RhinoInside.Revit.GH.Components
       var _IsTemplate_ = Params.IndexOfInputParam("Is Template");
       bool nofilterIsTemplate = (!DA.GetData(_IsTemplate_, ref IsTemplate) && Params.Input[_IsTemplate_].DataType == GH_ParamData.@void);
 
+      bool IsPrintable = false;
+      var _IsPrintable_ = Params.IndexOfInputParam("Is Printable");
+      bool nofilterIsPrintable = (!DA.GetData(_IsPrintable_, ref IsPrintable) && Params.Input[_IsPrintable_].DataType == GH_ParamData.@void);
+
       bool IsAssembly = false;
       var _IsAssembly_ = Params.IndexOfInputParam("Is Assembly");
       bool nofilterIsAssembly = (!DA.GetData(_IsAssembly_, ref IsAssembly) && Params.Input[_IsAssembly_].DataType == GH_ParamData.@void);
 
-      bool IsPrintable = false;
-      var _IsPrintable_ = Params.IndexOfInputParam("Is Printable");
-      bool nofilterIsPrintable = (!DA.GetData(_IsPrintable_, ref IsPrintable) && Params.Input[_IsPrintable_].DataType == GH_ParamData.@void);
+      var Assembly = default(Types.AssemblyInstance);
+      var _Assembly_ = Params.IndexOfInputParam("Assembly");
+      bool noFilterAssembly = (!DA.GetData(_Assembly_, ref Assembly) && Params.Input[_Assembly_].DataType == GH_ParamData.@void);
 
       DB.ElementFilter filter = null;
       DA.GetData("Filter", ref filter);
@@ -93,16 +98,19 @@ namespace RhinoInside.Revit.GH.Components
         if (!nofilterTemplate && TryGetFilterElementIdParam(DB.BuiltInParameter.VIEW_TEMPLATE, Template?.Id ?? DB.ElementId.InvalidElementId, out var templateFilter))
           viewsCollector = viewsCollector.WherePasses(templateFilter);
 
+        if (!noFilterAssembly && TryGetFilterElementIdParam(DB.BuiltInParameter.VIEW_ASSOCIATED_ASSEMBLY_INSTANCE_ID, Assembly?.Id ?? DB.ElementId.InvalidElementId, out var assemblyFilter))
+          viewsCollector = viewsCollector.WherePasses(assemblyFilter);
+
         var views = collector.Cast<DB.View>();
 
         if (!nofilterIsTemplate)
           views = views.Where((x) => x.IsTemplate == IsTemplate);
 
-        if (!nofilterIsAssembly)
-          views = views.Where((x) => x.IsAssemblyView == IsAssembly);
-
         if (!nofilterIsPrintable)
           views = views.Where((x) => x.CanBePrinted == IsPrintable);
+
+        if (!nofilterIsAssembly)
+          views = views.Where((x) => x.IsAssemblyView == IsAssembly);
 
         if (viewFamily != DB.ViewFamily.Invalid)
           views = views.Where(x => (x.Document.GetElement(x.GetTypeId()) as DB.ViewFamilyType)?.ViewFamily == viewFamily);
