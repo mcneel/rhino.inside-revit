@@ -6,6 +6,73 @@ group: Deployment & Configs
 
 This guide looks at errors that can appear with {{ site.terms.rir }}. This address most of the common errors we have seen. [Please Contact Us](https://www.rhino3d.com/support) whether any of these options worked or did not work. We are working to minimize any of these messages.
 
+## System.Xml.XmlException
+
+### Problem
+
+Revit writes its keyboard shortcut configurations in a file named `KeyboardShortcuts.xml`. Some Revit add-ins (for example [*ArchIntelligence's Environment*](https://archintelligence.com)) contain characters in their commands names that are invalid under [XML standard](https://www.w3.org/TR/xml/#NT-Char) (for example `&#x14;` characters with *Environment* add-in)
+
+Revit does not seem to care about these, however the XML reader that {{ site.terms.rir }} uses does. When {{ site.terms.rir }} wants to add the shortcut for Grasshopper to Revit, it tries to read the `KeyboardShortcuts.xml` file but throws an error if any invalid characters exit. {{ site.terms.rir }} however continues to load so this is mostly an issue with an annoying error pop-up every time you launch {{ site.terms.rir }}
+
+![]({{ "/static/images/reference/systemxmlexception-error.png" | prepend: site.baseurl }})
+
+
+### Workaround
+
+If you have any plugins that causes such a problem, open the `KeyboardShortcuts.xml` and remove all instance of the invalid characters (for example replace `&#x14;` with nothing), OR, reset your `KeyboardShortcuts.xml` file completely.
+
+This will let {{ site.terms.rir }} load without errors. Note that the next time you make any changes to the keyboard settings, Revit will rewrite this file and will introduce the invalid characters again.
+
+
+## Grasshopper add-ons are missing in revit
+
+### Problem
+
+Depending on how the Grasshopper add-ons are installed, or how the user profile is setup on your network, some of the add-ons might be located on a network location. Revit, by default, prohibits loading external DLL files from a network location. This is primarily a security measure set by the .net runtime.
+
+If you notice one or more of the Grasshopper add-ons are missing when loaded inside Revit, please open Rhino window (inside Revit) and press F2 to open the command history in Rhino. You should be able to see a report of all the Grasshopper add-ons that have been loaded. Below is an example of such report:
+
+```
+...
+* Loading Grasshopper core assembly...
+* Loading CurveComponents assembly...
+* Loading FieldComponents assembly...
+* Loading GalapagosComponents assembly...
+* Loading IOComponents assembly...
+...
+```
+
+If there are any load errors like the example below, marked as `Exception System.NotSupportedException` then most probably Revit is blocking loading the Grasshopper add-ons from a network location:
+
+```
+Message: Could not load file or assembly 'file:///C:\Users\n.bucco\AppData\Roaming\Grasshopper\Libraries\anemone1.gha' or one of its dependencies. Operation is not supported. (Exception from HRESULT: 0x80131515)
+
+Exception System.NotSupportedException:
+
+Message: An attempt was made to load an assembly from a network location which would have caused the assembly to be sandboxed in previous versions of the .NET Framework. This release of the .NET Framework does not enable CAS policy by default, so this load may be dangerous. If this load is not intended to sandbox the assembly, please enable the loadFromRemoteSources switch. See http://go.microsoft.com/fwlink/?LinkId=155569 for more information.
+```
+
+### Workaround
+
+Modify the `Revit.exe.config` file (by default located alongside `Revit.exe` at `C:\Program Files\Autodesk\Revit 20XX\Revit.exe.config` where `20XX` is your Revit version) and add the following directive to the `<runtime>` xml element:
+
+```xml
+<loadFromRemoteSources  enabled="true"/>
+```
+
+Example:
+
+![]({{ "/static/images/reference/loadremoteresources.png" | prepend: site.baseurl }})
+
+## Rhino.Inside tab is missing
+
+{{ site.terms.rir }} looks into Windows Registry to determine which Revit versions are installed. There is a known issue with Revit 2021 installer that writes an incomplete install path to the `InstallLocation` key ([See here for the conversation over this issue](https://discourse.mcneel.com/t/rhino-inside-wont-load-in-revit-2021/100769/13)).
+
+This issue might make the installed Revit 2021, invisible to the {{ site.terms.rir }} installer and therefore {{ site.terms.rir }} will not load in Revit 2021. Updates has been applied to the installer to correct for this issue but it makes the assumption that Revit 2021 is installed under its default path (`C:\Program Files\Autodesk\Revit 2021`). If you have installed Revit 2021 at another location the issue will remain. 
+
+You can either change the value of `LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-2100-0510-0000-705C0D862004}\InstallLocation` to the full path of where Revit is installed, or update Revit 2021 to latest (latest installers have corrected this issue).
+
+
 ## Unsupported openNURBS
 
 ### Problem
@@ -102,53 +169,3 @@ A Long JSON error shows up as shown below
 ### Workaround
 
 Like the previous -200 error, this is a conflict with another plugin. See the Error - 200 solution for this problem, and the [Search for Conflicting Plugins]({{ site.baseurl }}{% link _en/1.0/reference/toubleshooting.md %}#search-for-conflicting-plugins) section below.
-
-
-## Rhino.Inside tab is missing
-
-{{ site.terms.rir }} looks into Windows Registry to determine which Revit versions are installed. There is a known issue with Revit 2021 installer that writes an incomplete install path to the `InstallLocation` key ([See here for the conversation over this issue](https://discourse.mcneel.com/t/rhino-inside-wont-load-in-revit-2021/100769/13)).
-
-This issue might make the installed Revit 2021, invisible to the {{ site.terms.rir }} installer and therefore {{ site.terms.rir }} will not load in Revit 2021. Updates has been applied to the installer to correct for this issue but it makes the assumption that Revit 2021 is installed under its default path (`C:\Program Files\Autodesk\Revit 2021`). If you have installed Revit 2021 at another location the issue will remain. 
-
-You can either change the value of `LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-2100-0510-0000-705C0D862004}\InstallLocation` to the full path of where Revit is installed, or update Revit 2021 to latest (latest installers have corrected this issue).
-
-
-## Grasshopper add-ons are missing in revit
-
-### Problem
-
-Depending on how the Grasshopper add-ons are installed, or how the user profile is setup on your network, some of the add-ons might be located on a network location. Revit, by default, prohibits loading external DLL files from a network location. This is primarily a security measure set by the .net runtime.
-
-If you notice one or more of the Grasshopper add-ons are missing when loaded inside Revit, please open Rhino window (inside Revit) and press F2 to open the command history in Rhino. You should be able to see a report of all the Grasshopper add-ons that have been loaded. Below is an example of such report:
-
-```
-...
-* Loading Grasshopper core assembly...
-* Loading CurveComponents assembly...
-* Loading FieldComponents assembly...
-* Loading GalapagosComponents assembly...
-* Loading IOComponents assembly...
-...
-```
-
-If there are any load errors like the example below, marked as `Exception System.NotSupportedException` then most probably Revit is blocking loading the Grasshopper add-ons from a network location:
-
-```
-Message: Could not load file or assembly 'file:///C:\Users\n.bucco\AppData\Roaming\Grasshopper\Libraries\anemone1.gha' or one of its dependencies. Operation is not supported. (Exception from HRESULT: 0x80131515)
-
-Exception System.NotSupportedException:
-
-Message: An attempt was made to load an assembly from a network location which would have caused the assembly to be sandboxed in previous versions of the .NET Framework. This release of the .NET Framework does not enable CAS policy by default, so this load may be dangerous. If this load is not intended to sandbox the assembly, please enable the loadFromRemoteSources switch. See http://go.microsoft.com/fwlink/?LinkId=155569 for more information.
-```
-
-### Workaround
-
-Modify the `Revit.exe.config` file (by default located alongside `Revit.exe` at `C:\Program Files\Autodesk\Revit 20XX\Revit.exe.config` where `20XX` is your Revit version) and add the following directive to the `<runtime>` xml element:
-
-```xml
-<loadFromRemoteSources  enabled="true"/>
-```
-
-Example:
-
-![]({{ "/static/images/reference/loadremoteresources.png" | prepend: site.baseurl }})
