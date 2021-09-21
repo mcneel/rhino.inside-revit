@@ -50,8 +50,8 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       (
         new Param_String()
         {
-          Name = "Number",
-          NickName = "NO",
+          Name = "Sheet Number",
+          NickName = "NUM",
           Description = $"{_Sheet_.name} Number"
         }
       ),
@@ -59,7 +59,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       (
         new Param_String()
         {
-          Name = "Name",
+          Name = "Sheet Name",
           NickName = "N",
           Description = $"{_Sheet_.name} Name",
         }
@@ -89,8 +89,8 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       (
         new Param_Boolean
         {
-          Name = "Indexed",
-          NickName = "IDX",
+          Name = "Appears In Sheet List",
+          NickName = "AISL",
           Description = $"Whether sheet appears on sheet lists",
           Optional = true
         }
@@ -163,7 +163,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       }
 
       public bool? IsPlaceHolder { get; set; }
-      public bool? IsIndexed { get; set; }
+      public bool? SheetScheduled { get; set; }
 
       public DB.FamilySymbol TitleblockType { get; set; }
 
@@ -238,8 +238,8 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
         if (Name is object)
           sheet.Name = Name;
 
-        if (IsIndexed.HasValue)
-          sheet.UpdateParameterValue(DB.BuiltInParameter.SHEET_SCHEDULED, IsIndexed.Value);
+        if (SheetScheduled.HasValue)
+          sheet.UpdateParameterValue(DB.BuiltInParameter.SHEET_SCHEDULED, SheetScheduled.Value);
       }
     }
 
@@ -249,7 +249,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
 
       // sheet input data
-      if (!Params.TryGetData(DA, "Number", out string number, x => !string.IsNullOrEmpty(x))) return;
+      if (!Params.TryGetData(DA, "Sheet Number", out string number, x => !string.IsNullOrEmpty(x))) return;
       // Note (eirannejad Sep 10, 2021)
       // I decided for name to be a required field, although revit automatically names the sheets (e.g. Unnamed in English)
       // This matches the behaviour of Add View components since a name is required for a view and has to be unique
@@ -259,10 +259,10 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       //   with revit's default name. If later a name input is connected, the component can correctly
       //   update the sheet names. But if the name input would be disconnected, the component has no way of
       //   knowing the previous or default name for the sheet and will leave the names as they are
-      if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return;
+      if (!Params.TryGetData(DA, "Sheet Name", out string name, x => !string.IsNullOrEmpty(x))) return;
 
       Params.TryGetData(DA, "Placeholder", out bool? placeholder);
-      Params.TryGetData(DA, "Indexed", out bool? indexed);
+      Params.TryGetData(DA, "Appears In Sheet List", out bool? scheduled);
       Params.TryGetData(DA, $"{_TitleBlock_.name} Type", out DB.FamilySymbol tblockType);
 
       Params.TryGetData(DA, "Assembly", out DB.AssemblyInstance assembly);
@@ -278,7 +278,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
         {
           Name = name,
           IsPlaceHolder = placeholder,
-          IsIndexed = indexed,
+          SheetScheduled = scheduled,
           TitleblockType = tblockType,
           Assembly = assembly,
           Template = template
