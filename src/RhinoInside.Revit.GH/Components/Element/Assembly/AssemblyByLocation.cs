@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
   public class AssemblyByLocation : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("26feb2e9-6476-4ba7-a553-1d0300674d1d");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
 
     public AssemblyByLocation() : base
     (

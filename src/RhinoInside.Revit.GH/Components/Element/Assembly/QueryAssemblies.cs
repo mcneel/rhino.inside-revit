@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
   public class QueryAssemblies : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("fd5b45c3-7f55-4ad8-abbe-e871f95b4988");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.AssemblyInstance));
 
     public QueryAssemblies() : base

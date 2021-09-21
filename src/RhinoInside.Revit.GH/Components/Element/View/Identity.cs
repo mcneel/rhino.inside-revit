@@ -32,8 +32,9 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddTextParameter("Name", "N", "View name", GH_ParamAccess.item);
       manager.AddParameter(new Parameters.View(), "Template", "T", "View template", GH_ParamAccess.list);
       manager.AddBooleanParameter("Is Template", "IT", "View is template", GH_ParamAccess.item);
-      manager.AddBooleanParameter("Is Assembly", "IA", "View is assembly", GH_ParamAccess.item);
       manager.AddBooleanParameter("Is Printable", "IP", "View is printable", GH_ParamAccess.item);
+      manager.AddBooleanParameter("Is Assembly", "IA", "View is assembly", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.AssemblyInstance(), "Assembly", "A", "Assembly instance that owns the assembly view", GH_ParamAccess.item);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -52,8 +53,9 @@ namespace RhinoInside.Revit.GH.Components
       DA.SetData("Name", view.Name);
       DA.SetData("Template", new Types.View(view.Document, view.ViewTemplateId));
       DA.SetData("Is Template", view.IsTemplate);
-      DA.SetData("Is Assembly", view.IsAssemblyView);
       DA.SetData("Is Printable", view.CanBePrinted);
+      DA.SetData("Is Assembly", view.IsAssemblyView);
+      DA.SetData("Assembly", new Types.AssemblyInstance(view.Document, view.AssociatedAssemblyInstanceId));
     }
   }
 }
