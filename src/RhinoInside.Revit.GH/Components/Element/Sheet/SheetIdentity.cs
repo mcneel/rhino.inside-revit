@@ -1,53 +1,73 @@
 using System;
 using Grasshopper.Kernel;
-
-using RhinoInside.Revit.External.DB.Extensions;
-
-using DB = Autodesk.Revit.DB;
+using Grasshopper.Kernel.Parameters;
 
 namespace RhinoInside.Revit.GH.Components.Element.Sheet
 {
-  public class SheetIdentity : Component
+  public class SheetIdentity : TransactionalChainComponent
   {
-    public override Guid ComponentGuid => new Guid("cadf5fbb-9dea-4b9f-8214-9897cec0e54a");
+    public override Guid ComponentGuid => new Guid("CADF5FBB-9DEA-4B9F-8214-9897CEC0E54A");
     public override GH_Exposure Exposure => GH_Exposure.primary;
 
     public SheetIdentity() : base
     (
       name: "Sheet Identity",
       nickname: "Identity",
-      description: "Query sheet identity information",
+      description: "Sheet Identity Data.",
       category: "Revit",
       subCategory: "View"
     )
     { }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      manager.AddParameter(new Parameters.ViewSheet(), "Sheet", "Sheet", "Sheet to analyze identity", GH_ParamAccess.item);
-    }
+      ParamDefinition.Create<Parameters.ViewSheet>("Sheet", "S"),
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+      ParamDefinition.Create<Param_String>("Sheet Number", "NUM", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Sheet Name", "N", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Sheet Issue Date", "ID", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Boolean>("Appears In Sheet List", "AISL", optional: true, relevance: ParamRelevance.Primary),
+    };
+
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      manager.AddTextParameter("Number", "NO", "Sheet number", GH_ParamAccess.item);
-      manager.AddTextParameter("Name", "N", "Sheet name", GH_ParamAccess.item);
-      manager.AddBooleanParameter("Is Placeholder", "IPH", "Sheet is placeholder", GH_ParamAccess.item);
-      manager.AddBooleanParameter("Is Indexed", "IIDX", "Sheet appears on sheet lists", GH_ParamAccess.item);
-      manager.AddBooleanParameter("Is Assembly Sheet", "IAS", "Sheet belongs to a Revit assembly", GH_ParamAccess.item);
-    }
+      ParamDefinition.Create<Parameters.ViewSheet>("Sheet", "S", relevance: ParamRelevance.Occasional),
+
+      ParamDefinition.Create<Param_Boolean>("Placeholder", "PH", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Sheet Number", "NUM", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Sheet Name", "N", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Sheet Issue Date", "ID", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Boolean>("Appears In Sheet List", "AISL", relevance: ParamRelevance.Primary),
+    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var sheet = default(DB.ViewSheet);
-      if (!DA.GetData("Sheet", ref sheet))
+      if (!Params.GetData(DA, "Sheet", out Types.ViewSheet sheet, x => x.IsValid))
         return;
 
-      DA.SetData("Number", sheet.SheetNumber);
-      DA.SetData("Name", sheet.Name);
+      bool update = false;
+      update |= Params.GetData(DA, "Sheet Number", out string number);
+      update |= Params.GetData(DA, "Sheet Name", out string name);
+      update |= Params.GetData(DA, "Sheet Issue Date", out string date);
+      update |= Params.GetData(DA, "Appears In Sheet List", out bool? scheduled);
 
-      DA.SetData("Is Placeholder", sheet.IsPlaceholder);
-      DA.SetData("Is Indexed", sheet.GetParameterValue<bool>(DB.BuiltInParameter.SHEET_SCHEDULED));
-      DA.SetData("Is Assembly Sheet", sheet.IsAssemblyView);
+      if (update)
+      {
+        StartTransaction(sheet.Document);
+        sheet.SheetNumber = number;
+        sheet.Name = name;
+        sheet.SheetIssueDate = date;
+        sheet.SheetScheduled = scheduled;
+      }
+
+      Params.TrySetData(DA, "Sheet", () => sheet);
+      Params.TrySetData(DA, "Placeholder", () => sheet.IsPlaceholder);
+      Params.TrySetData(DA, "Sheet Number", () => sheet.SheetNumber);
+      Params.TrySetData(DA, "Sheet Name", () => sheet.Name);
+      Params.TrySetData(DA, "Sheet Issue Date", () => sheet.SheetIssueDate);
+      Params.TrySetData(DA, "Appears In Sheet List", () => sheet.SheetScheduled);
     }
   }
 }
