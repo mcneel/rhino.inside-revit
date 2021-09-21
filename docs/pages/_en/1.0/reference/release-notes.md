@@ -5,28 +5,37 @@ group: Deployment & Configs
 ---
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html title="v1.2 RC2" version="v1.2.7934.7099" pre_release=true time="09/21/2021" %}
+
+- Corrected component name spelling {% include ltr/comp.html uuid='ff0f49ca-' %}
+- Removed {% include ltr/comp.html uuid='64594dea-' %} component
+- Convert {% include ltr/comp.html uuid='cadf5fbb-' %} component to pass-through
+- Revised {% include ltr/comp.html uuid='704d9c1b-' %} parameters to match Revit
+- Added 'Assembly' parameter to {% include ltr/comp.html uuid='b0440885-' %} and {% include ltr/comp.html uuid='df691659-' %}
+
 {% include ltr/release-header.html title="v1.2 RC1" version="v1.2.7927.28069" pre_release=true time="09/14/2021" %}
 
 - New View Components!
-  - {% include ltr/comp_item.html uuid='97c8cb27-' %}
-  - {% include ltr/comp_item.html uuid='c7a57ec8-' %}
-  - {% include ltr/comp_item.html uuid='cadf5fbb-' %}
-  - {% include ltr/comp_item.html uuid='704d9c1b-' %}
-  - {% include ltr/comp_item.html uuid='15bac151-' %}
-  - {% include ltr/comp_item.html uuid='f6b99fe2-' %}
+  - {% include ltr/comp.html uuid='97c8cb27-' extended=true %}
+  - {% include ltr/comp.html uuid='c7a57ec8-' extended=true %}
+  - {% include ltr/comp.html uuid='cadf5fbb-' extended=true %}
+  - {% include ltr/comp.html uuid='704d9c1b-' extended=true %}
+  - {% include ltr/comp.html uuid='15bac151-' extended=true %}
+  - {% include ltr/comp.html uuid='f6b99fe2-' extended=true %}
 
 - New Assembly Components!
-  - {% include ltr/comp_item.html uuid='fd5b45c3-' %}
-  - {% include ltr/comp_item.html uuid='64594dea-' %}
-  - {% include ltr/comp_item.html uuid='6915b697-' %}
-  - {% include ltr/comp_item.html uuid='26feb2e9-' %}
-  - {% include ltr/comp_item.html uuid='33ead71b-' %}
-  - {% include ltr/comp_item.html uuid='ff0f49ca-' %}
+  - {% include ltr/comp.html uuid='fd5b45c3-' extended=true %}
+  - {% include ltr/comp.html uuid='64594dea-' extended=true %}
+  - {% include ltr/comp.html uuid='6915b697-' extended=true %}
+  - {% include ltr/comp.html uuid='26feb2e9-' extended=true %}
+  - {% include ltr/comp.html uuid='33ead71b-' extended=true %}
+  - {% include ltr/comp.html uuid='ff0f49ca-' extended=true %}
 
 - Merged [PR #486](https://github.com/mcneel/rhino.inside-revit/pull/486)
 
 {% include ltr/release-header.html title="v1.1 Stable" version="v1.1.7927.27937" time="09/14/2021" %}
 
+- Includes all changes under 1.1RC releases listed below
 - Minor Fixes and Improvements
 
 {% include ltr/release-header.html title="v1.1 RC4" version="v1.1.7916.15665" pre_release=true time="09/07/2021" %}

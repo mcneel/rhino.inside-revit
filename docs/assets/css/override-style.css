@@ -1409,10 +1409,28 @@ img.button-icon {
     display: inline;
 }
 
-.comp-item-tag {
+.comp-tag-added {
     display: inline-block;
-    margin-top: 5px;
-    margin-bottom: 5px;
+    background-color: #e8e8e8;
+    font-size: 12px;
+    border-radius: 3px;
+    margin-left: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.comp-tag-removed {
+    display: inline-block;
+    background-color: #ffbb00;
+    font-size: 12px;
+    border-radius: 3px;
+    margin-left: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.comp-tag-desc {
+    font-size: 0.9em;
 }
 
 .comp-item-tag img,
