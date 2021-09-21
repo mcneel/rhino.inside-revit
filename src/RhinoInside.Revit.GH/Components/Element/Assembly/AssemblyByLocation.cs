@@ -10,11 +10,13 @@ using Rhino.Geometry;
 using RhinoInside.Revit.GH.ElementTracking;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Assemblies
 {
+  [Since("v1.2")]
   public class AssemblyByLocation : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("26feb2e9-6476-4ba7-a553-1d0300674d1d");

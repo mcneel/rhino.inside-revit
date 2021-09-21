@@ -4,8 +4,11 @@ using Grasshopper.Kernel;
 
 using DB = Autodesk.Revit.DB;
 
+using RhinoInside.Revit.GH.Kernel.Attributes;
+
 namespace RhinoInside.Revit.GH.Components.Element.Sheet
 {
+  [Since("v1.2")]
   public class QueryTitleBlockTypes : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("c7a57ec8-d4d3-4251-aa91-cc67f833313b");

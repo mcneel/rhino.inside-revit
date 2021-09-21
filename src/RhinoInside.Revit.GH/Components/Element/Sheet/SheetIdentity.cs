@@ -2,8 +2,11 @@ using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 
+using RhinoInside.Revit.GH.Kernel.Attributes;
+
 namespace RhinoInside.Revit.GH.Components.Element.Sheet
 {
+  [Since("v1.2")]
   public class SheetIdentity : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("CADF5FBB-9DEA-4B9F-8214-9897CEC0E54A");

@@ -59,4 +59,11 @@ namespace RhinoInside.Revit.GH.Kernel.Attributes
     public readonly Type Type;
     public ParamTypeAttribute(Type type) => Type = type;
   }
+
+  [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+  public sealed class SinceAttribute : Attribute
+  {
+    public readonly string Message;
+    public SinceAttribute(string message) => Message = message;
+  }
 }

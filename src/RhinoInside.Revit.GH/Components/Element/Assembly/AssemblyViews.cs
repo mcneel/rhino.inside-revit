@@ -4,8 +4,12 @@ using RhinoInside.Revit.External.DB.Extensions;
 
 using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Element.Assembly
+using RhinoInside.Revit.GH.Kernel.Attributes;
+
+namespace RhinoInside.Revit.GH.Components.Assemblies
 {
+  [Since("v1.2")]
+  [Obsolete("Since 1.2RC2")]
   public class AssemblyViews : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("64594dea-057a-47b9-8e63-5e0832e13adb");

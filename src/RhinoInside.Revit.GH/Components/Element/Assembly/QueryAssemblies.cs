@@ -5,8 +5,11 @@ using Grasshopper.Kernel.Parameters;
 
 using DB = Autodesk.Revit.DB;
 
+using RhinoInside.Revit.GH.Kernel.Attributes;
+
 namespace RhinoInside.Revit.GH.Components.Assemblies
 {
+  [Since("v1.2")]
   public class QueryAssemblies : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("fd5b45c3-7f55-4ad8-abbe-e871f95b4988");

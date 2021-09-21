@@ -4,8 +4,11 @@ using Grasshopper.Kernel;
 
 using DB = Autodesk.Revit.DB;
 
+using RhinoInside.Revit.GH.Kernel.Attributes;
+
 namespace RhinoInside.Revit.GH.Components.Assemblies
 {
+  [Since("v1.2")]
   public class DisassembleAssembly : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("ff0f49ca-16ec-4287-8bd8-b903b6a6e781");
