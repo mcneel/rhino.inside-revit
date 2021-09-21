@@ -1,7 +1,6 @@
 using System;
-using System.Linq;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Parameters;
+using RhinoInside.Revit.External.DB.Extensions;
 
 using DB = Autodesk.Revit.DB;
 
@@ -54,18 +53,15 @@ namespace RhinoInside.Revit.GH.Components.Element.Assembly
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var assembly = default(DB.AssemblyInstance);
-      if (!DA.GetData("Assembly", ref assembly))
+      if (!Params.GetData(DA, "Assembly", out Types.AssemblyInstance assembly, x => x.IsValid))
         return;
 
       using (var collector = new DB.FilteredElementCollector(assembly.Document))
       {
-        var viewCollector = collector.WherePasses(ElementFilter);
-        var assemblyViews = viewCollector.Cast<DB.View>()
-                                         .Where(x => x.IsAssemblyView
-                                                        && x.AssociatedAssemblyInstanceId.Equals(assembly.Id)
-                                                );
-        DA.SetDataList("Views", assemblyViews);
+        var viewCollector = collector.WherePasses(ElementFilter).
+          WhereParameterEqualsTo(DB.BuiltInParameter.VIEW_ASSOCIATED_ASSEMBLY_INSTANCE_ID, assembly.Id);
+
+        DA.SetDataList("Views", viewCollector);
       }
     }
   }

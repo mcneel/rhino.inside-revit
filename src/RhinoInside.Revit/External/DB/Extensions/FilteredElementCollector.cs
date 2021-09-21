@@ -53,6 +53,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
         return collector.WherePasses(filter);
     }
 
+    public static FilteredElementCollector WhereParameterEqualsTo(this FilteredElementCollector collector, BuiltInParameter paramId, ElementId value)
+    {
+      using (var provider = new ParameterValueProvider(new ElementId(paramId)))
+      using (var evaluator = new FilterNumericEquals())
+      using (var rule = new FilterElementIdRule(provider, evaluator, value))
+      using (var filter = new ElementParameterFilter(rule))
+        return collector.WherePasses(filter);
+    }
+
     public static FilteredElementCollector WhereParameterBeginsWith(this FilteredElementCollector collector, BuiltInParameter paramId, string value, bool caseSensitive = true)
     {
       if (string.IsNullOrEmpty(value))
