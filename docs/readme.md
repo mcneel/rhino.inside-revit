@@ -510,6 +510,10 @@ The site builder, automatically finds the component data based on the provided u
 ![](static/images/readme/ghcomp-ref.png)
 
 
+- `extended=` to show component description in front of title
+- `no_version=` to hide the "added since" and "removed since" version tags
+
+
 ## Referencing Grasshopper Parameters
 
 To reference any parameter that is part of this project, use the pre-defined block shown below:
