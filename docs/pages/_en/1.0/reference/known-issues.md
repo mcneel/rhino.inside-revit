@@ -19,7 +19,19 @@ Revit does not seem to care about these, however the XML reader that {{ site.ter
 
 ### Workaround
 
-If you have any plugins that causes such a problem, open the `KeyboardShortcuts.xml` and remove all instance of the invalid characters (for example replace `&#x14;` with nothing), OR, reset your `KeyboardShortcuts.xml` file completely.
+If you have any plugins that causes such a problem, open the `KeyboardShortcuts.xml` and remove all instance of the invalid characters, OR, reset your `KeyboardShortcuts.xml` file completely.
+
+For example replace `&#x14;` with nothing:
+
+```xml
+<!-- Before -->
+<ShortcutItem CommandName="Splitch:&#x14;" CommandId="CustomCtrl_...
+```
+
+```xml
+<!-- After -->
+<ShortcutItem CommandName="Splitch:" CommandId="CustomCtrl_...
+```
 
 This will let {{ site.terms.rir }} load without errors. Note that the next time you make any changes to the keyboard settings, Revit will rewrite this file and will introduce the invalid characters again.
 
