@@ -1008,6 +1008,25 @@
         ]
     },
     {
+        "title": "Floor Finish by Room using Grasshopper",
+        "url": "https://youtu.be/fA34G708GSg",
+        "thumbnail": "https://i3.ytimg.com/vi/fA34G708GSg/maxresdefault.jpg",
+        "author": "BIMGeek",
+        "authorUrl": "https://www.youtube.com/channel/UCLwgBbBfZLcqqbta10a_fpQ",
+        "description": "When room finishes are defined or embedded in a room's parameter, it doesn't make any sense to model floor finishes manually. We are going to create floor finishes from room boundaries using Grasshopper inside Revit.",
+        "kinds": [
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "tutorial",
+            "workflow"
+        ],
+        "versions" : [
+            "1.0"
+        ]
+    },
+    {
         "title": "Closest grid intersection to Revit elements",
         "url": "https://youtu.be/VWOk1d0RfgI",
         "thumbnail": "https://i3.ytimg.com/vi/VWOk1d0RfgI/maxresdefault.jpg",
