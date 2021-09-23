@@ -40,33 +40,47 @@ namespace RhinoInside.Revit.GH.Components.Host
         return;
 
       var doc = host.Document;
-      try
+      if (host is DB.RoofBase || host is DB.CeilingAndFloor)
       {
-        var bottom = DB.HostObjectUtils.GetBottomFaces(host).Select(reference => new Types.Face(doc, reference));
-        DA.SetDataList("Bottom", bottom);
-      }
-      catch (Autodesk.Revit.Exceptions.ApplicationException) { }
+        try
+        {
+          var bottom = DB.HostObjectUtils.GetBottomFaces(host).
+            Where(x => host.GetGeometryObjectFromReference(x) is DB.Face).
+            Select(reference => new Types.Face(doc, reference));
+          DA.SetDataList("Bottom", bottom);
+        }
+        catch (Autodesk.Revit.Exceptions.ApplicationException) { }
 
-      try
-      {
-        var top = DB.HostObjectUtils.GetTopFaces(host).Select(reference => new Types.Face(doc, reference));
-        DA.SetDataList("Top", top);
+        try
+        {
+          var top = DB.HostObjectUtils.GetTopFaces(host).
+            Where(x => host.GetGeometryObjectFromReference(x) is DB.Face).
+            Select(reference => new Types.Face(doc, reference));
+          DA.SetDataList("Top", top);
+        }
+        catch (Autodesk.Revit.Exceptions.ApplicationException) { }
       }
-      catch (Autodesk.Revit.Exceptions.ApplicationException) { }
 
-      try
+      if (host is DB.Wall || host is DB.FaceWall)
       {
-        var interior = DB.HostObjectUtils.GetSideFaces(host, DB.ShellLayerType.Interior).Select(reference => new Types.Face(doc, reference));
-        DA.SetDataList("Interior", interior);
-      }
-      catch (Autodesk.Revit.Exceptions.ApplicationException) { }
+        try
+        {
+          var interior = DB.HostObjectUtils.GetSideFaces(host, DB.ShellLayerType.Interior).
+            Where(x => host.GetGeometryObjectFromReference(x) is DB.Face).
+            Select(reference => new Types.Face(doc, reference));
+          DA.SetDataList("Interior", interior);
+        }
+        catch (Autodesk.Revit.Exceptions.ApplicationException) { }
 
-      try
-      {
-        var exterior = DB.HostObjectUtils.GetSideFaces(host, DB.ShellLayerType.Exterior).Select(reference => new Types.Face(doc, reference));
-        DA.SetDataList("Exterior", exterior);
+        try
+        {
+          var exterior = DB.HostObjectUtils.GetSideFaces(host, DB.ShellLayerType.Exterior).
+            Where(x => host.GetGeometryObjectFromReference(x) is DB.Face).
+            Select(reference => new Types.Face(doc, reference));
+          DA.SetDataList("Exterior", exterior);
+        }
+        catch (Autodesk.Revit.Exceptions.ApplicationException) { }
       }
-      catch (Autodesk.Revit.Exceptions.ApplicationException) { }
     }
   }
 }
