@@ -489,7 +489,14 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
         // while Revit Ruled Surface has those Curves along U axis.
         // This subtle thing also results in the correct normal of the resulting surface.
         // Transpose duplicates the underlaying surface, what is a desired side effect of calling Transpose here.
-        return lofts[0].Faces[0].Transpose();
+        var loft = lofts[0].Faces[0].Transpose();
+
+        loft.SetDomain(0, new Interval(0.0, 1.0));
+        loft.SetDomain(1, new Interval(0.0, 1.0));
+        loft.Extend(0, new Interval(bboxUV.Min.U, bboxUV.Max.U));
+        loft.Extend(1, new Interval(bboxUV.Min.V, bboxUV.Max.V));
+
+        return loft;
       }
 
       return null;
@@ -497,51 +504,21 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
     public static Surface ToRhinoSurface(DB.RuledFace face, double relativeTolerance)
     {
-//      NurbsSurface nurbsSurface = default;
-//      try
-//      {
-//#if REVIT_2021
-//        using (var surface = DB.ExportUtils.GetNurbsSurfaceDataForSurface(face.GetSurface()))
-//          nurbsSurface = ToRhino(surface, face.GetBoundingBox());
-//#else
-//        using (var surface = DB.ExportUtils.GetNurbsSurfaceDataForFace(face))
-//          nurbsSurface = ToRhino(surface, face.GetBoundingBox());
-//#endif
-//      }
-//      catch (Autodesk.Revit.Exceptions.ApplicationException) { }
-
-//      if (nurbsSurface is null)
-      {
-        return face.IsExtruded ?
-          FromExtrudedSurface
-          (
-            new DB.Curve[] { face.get_Curve(0), face.get_Curve(1) },
-            face.GetBoundingBox(),
-            relativeTolerance
-          ) :
-          FromRuledSurface
-          (
-            new DB.Curve[] { face.get_Curve(0), face.get_Curve(1) },
-            face.get_Curve(0) is null ? face.get_Point(0) : null,
-            face.get_Curve(1) is null ? face.get_Point(1) : null,
-            face.GetBoundingBox(),
-            relativeTolerance
-          );
-      }
-      //else
-      //{
-      //  double ctol = relativeTolerance * Revit.ShortCurveTolerance * 5.0;
-      //  if (ctol != 0.0)
-      //  {
-      //    // Extend using smooth way avoids creating C2 discontinuities
-      //    nurbsSurface = nurbsSurface.Extend(IsoStatus.West, ctol, true) as NurbsSurface ?? nurbsSurface;
-      //    nurbsSurface = nurbsSurface.Extend(IsoStatus.East, ctol, true) as NurbsSurface ?? nurbsSurface;
-      //    nurbsSurface = nurbsSurface.Extend(IsoStatus.South, ctol, true) as NurbsSurface ?? nurbsSurface;
-      //    nurbsSurface = nurbsSurface.Extend(IsoStatus.North, ctol, true) as NurbsSurface ?? nurbsSurface;
-      //  }
-      //}
-
-      //return nurbsSurface;
+      return face.IsExtruded ?
+        FromExtrudedSurface
+        (
+          new DB.Curve[] { face.get_Curve(0), face.get_Curve(1) },
+          face.GetBoundingBox(),
+          relativeTolerance
+        ) :
+        FromRuledSurface
+        (
+          new DB.Curve[] { face.get_Curve(0), face.get_Curve(1) },
+          face.get_Curve(0) is null ? face.get_Point(0) : null,
+          face.get_Curve(1) is null ? face.get_Point(1) : null,
+          face.GetBoundingBox(),
+          relativeTolerance
+        );
     }
 
     public static Surface ToRhino(DB.RuledSurface surface, DB.BoundingBoxUV bboxUV) => FromRuledSurface
@@ -695,21 +672,67 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       return nurbsSurface;
     }
 
+#if REVIT_2021
+    static NurbsSurface ToRhino(DB.HermiteSurface surface, DB.BoundingBoxUV bboxUV)
+    {
+      try
+      {
+        using (var surfaceData = DB.ExportUtils.GetNurbsSurfaceDataForSurface(surface))
+          return ToRhino(surfaceData, bboxUV);
+      }
+      catch (Autodesk.Revit.Exceptions.ApplicationException) { }
+
+      return null;
+    }
+
+    static Surface ToRhino(DB.OffsetSurface surface, DB.BoundingBoxUV bboxUV)
+    {
+      var basis = surface.GetBasisSurface();
+      var distance = surface.GetOffsetDistance();
+
+      var offset = ToRhino(basis, bboxUV).Offset(distance, Revit.VertexTolerance);
+      if (!surface.IsOrientationSameAsBasisSurface())
+        offset = offset.Reverse(0);
+
+      return offset;
+    }
+#endif
+
+    static Surface ToRhino(DB.Surface surface, DB.BoundingBoxUV bboxUV)
+    {
+      switch (surface)
+      {
+        case null:                              return null;
+        case DB.Plane plane:                    return ToRhino(plane, bboxUV);
+        case DB.ConicalSurface conical:         return ToRhino(conical, bboxUV);
+        case DB.CylindricalSurface cylindrical: return ToRhino(cylindrical, bboxUV);
+        case DB.RevolvedSurface revolved:       return ToRhino(revolved, bboxUV);
+        case DB.RuledSurface ruled:             return ToRhino(ruled, bboxUV);
+        case DB.HermiteSurface hermite:         return ToRhino(hermite, bboxUV);
+#if REVIT_2021
+        case DB.OffsetSurface offset:           return ToRhino(offset, bboxUV);
+#endif
+        default: throw new NotImplementedException();
+      }
+    }
+
     public static Surface ToRhinoSurface(DB.Face face, out bool parametricOrientation, double relativeTolerance = 0.0)
     {
       using (var surface = face.GetSurface())
+      {
         parametricOrientation = surface.MatchesParametricOrientation();
 
-      switch (face)
-      {
-        case null: return null;
-        case DB.PlanarFace planar:            return ToRhinoSurface(planar, relativeTolerance);
-        case DB.ConicalFace conical:          return ToRhinoSurface(conical, relativeTolerance);
-        case DB.CylindricalFace cylindrical:  return ToRhinoSurface(cylindrical, relativeTolerance);
-        case DB.RevolvedFace revolved:        return ToRhinoSurface(revolved, relativeTolerance);
-        case DB.RuledFace ruled:              return ToRhinoSurface(ruled, relativeTolerance);
-        case DB.HermiteFace hermite:          return ToRhinoSurface(hermite, relativeTolerance);
-        default: throw new NotImplementedException();
+        switch (face)
+        {
+          case null:                            return null;
+          case DB.PlanarFace planar:            return ToRhinoSurface(planar, relativeTolerance);
+          case DB.ConicalFace conical:          return ToRhinoSurface(conical, relativeTolerance);
+          case DB.CylindricalFace cylindrical:  return ToRhinoSurface(cylindrical, relativeTolerance);
+          case DB.RevolvedFace revolved:        return ToRhinoSurface(revolved, relativeTolerance);
+          case DB.RuledFace ruled:              return ToRhinoSurface(ruled, relativeTolerance);
+          case DB.HermiteFace hermite:          return ToRhinoSurface(hermite, relativeTolerance);
+          default:                              return ToRhino(surface, face.GetBoundingBox());
+        }
       }
     }
     #endregion

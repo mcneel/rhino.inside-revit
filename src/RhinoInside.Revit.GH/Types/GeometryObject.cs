@@ -290,6 +290,10 @@ namespace RhinoInside.Revit.GH.Types
         args.Pipeline.DrawPoint(point.Location, CentralSettings.PreviewPointStyle, CentralSettings.PreviewPointRadius, args.Color);
     }
     #endregion
+
+    #region Properties
+    public override string DisplayName => "Vertex";
+    #endregion
   }
 
   [Name("Edge")]
@@ -368,6 +372,31 @@ namespace RhinoInside.Revit.GH.Types
 
       if(Curve is Curve curve)
         args.Pipeline.DrawCurve(curve, args.Color, args.Thickness);
+    }
+    #endregion
+
+    #region Properties
+    public override string DisplayName
+    {
+      get
+      {
+        var edgeType = "Invalid Edge";
+        using (var curve = Value?.AsCurve())
+        {
+          switch (curve)
+          {
+            case DB.Arc _:              edgeType = "Arc Edge"; break;
+            case DB.CylindricalHelix _: edgeType = "Helix Edge"; break;
+            case DB.Ellipse _:          edgeType = "Ellipse Edge"; break;
+            case DB.HermiteSpline _:    edgeType = "Hermite Edge"; break;
+            case DB.Line _:             edgeType = "Line Edge"; break;
+            case DB.NurbSpline _:       edgeType = "NURB Edge"; break;
+            default:                    edgeType = "Unknown Edge"; break;
+          }
+        }
+
+        return edgeType;
+      }
     }
     #endregion
   }
@@ -522,6 +551,34 @@ namespace RhinoInside.Revit.GH.Types
 
       foreach (var mesh in Meshes(args.MeshingParameters))
         args.Pipeline.DrawMeshShaded(mesh, args.Material);
+    }
+    #endregion
+
+    #region Properties
+    public override string DisplayName
+    {
+      get
+      {
+        var faceType = "Invalid Face";
+        using (var surface = Value?.GetSurface())
+        {
+          switch (surface)
+          {
+            case DB.ConicalSurface _:     faceType = "Conical Face"; break;
+            case DB.CylindricalSurface _: faceType = "Cylindrical Face"; break;
+            case DB.HermiteSurface _:     faceType = "Hermite Face"; break;
+            case DB.Plane _:              faceType = "Planar Face"; break;
+#if REVIT_2021
+            case DB.OffsetSurface _:      faceType = "Offset Face"; break;
+#endif
+            case DB.RevolvedSurface _:    faceType = "Revolved Face"; break;
+            case DB.RuledSurface _:       faceType = "Ruled Face"; break;
+            default:                      faceType = "Unknown Face"; break;
+          }
+        }
+
+        return faceType;
+      }
     }
     #endregion
   }
