@@ -511,20 +511,19 @@ namespace Rhino.Geometry
         }
         else
         {
-          var nurbsEllipse = ellipse.ToNurbsCurve();
-          if
+          ellipse.Plane.ClosestParameter(curve.PointAtStart, out var u0, out var v0);
+          ellipse.Plane.ClosestParameter(curve.PointAtEnd, out var u1, out var v1);
+
+          var t0 = new Vector2d(u0, v0); t0.Unitize();
+          var t1 = new Vector2d(u1, v1); t1.Unitize();
+
+          domain = new Interval
           (
-            nurbsEllipse.ClosestPoint(curve.PointAtStart, out var t0, 0.0) &&
-            nurbsEllipse.ClosestPoint(curve.PointAtEnd, out var t1, 0.0)
-          )
-          {
-            domain = new Interval(t0, t1);
+            Math.Atan2(t0.Y * ellipse.Radius1, t0.X * ellipse.Radius2),
+            Math.Atan2(t1.Y * ellipse.Radius1, t1.X * ellipse.Radius2)
+          );
 
-            if (domain.IsDecreasing)
-              domain.T0 -= Math.PI * 2.0;
-
-            return true;
-          }
+          return true;
         }
       }
 
