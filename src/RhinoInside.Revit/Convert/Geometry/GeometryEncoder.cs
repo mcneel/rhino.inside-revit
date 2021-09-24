@@ -426,7 +426,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static DB.CurveLoop ToCurveLoop(this Curve value)
     {
       value = value.InOtherUnits(UnitConverter.ToHostUnits);
-      value.RemoveShortSegments(Revit.ShortCurveTolerance);
+      value.CombineShortSegments(Revit.ShortCurveTolerance);
 
       return DB.CurveLoop.Create(value.ToCurveMany(UnitConverter.NoScale).SelectMany(x => x.ToBoundedCurves()).ToList());
     }
@@ -434,7 +434,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static DB.CurveArray ToCurveArray(this Curve value)
     {
       value = value.InOtherUnits(UnitConverter.ToHostUnits);
-      value.RemoveShortSegments(Revit.ShortCurveTolerance);
+      value.CombineShortSegments(Revit.ShortCurveTolerance);
 
       return value.ToCurveMany(UnitConverter.NoScale).SelectMany(x => x.ToBoundedCurves()).ToCurveArray();
     }
@@ -529,7 +529,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       // Convert to Raw form
       value = value.DuplicateCurve() as NurbsCurve;
       if (factor != 1.0) value.Scale(factor);
-      value.RemoveShortSegments(Revit.ShortCurveTolerance);
+      value.CombineShortSegments(Revit.ShortCurveTolerance);
 
       // Transfer
       if (value.Degree == 1)
@@ -612,7 +612,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       // Convert to Raw form
       value = value.DuplicateCurve() as PolylineCurve;
       if(factor != 1.0) value.Scale(factor);
-      value.RemoveShortSegments(Revit.ShortCurveTolerance);
+      value.CombineShortSegments(Revit.ShortCurveTolerance);
 
       // Transfer
       int pointCount = value.PointCount;
@@ -638,7 +638,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       value = value.DuplicateCurve() as PolyCurve;
       if (factor != 1.0) value.Scale(factor);
       value.RemoveNesting();
-      value.RemoveShortSegments(Revit.ShortCurveTolerance);
+      value.CombineShortSegments(Revit.ShortCurveTolerance);
 
       // Transfer
       int segmentCount = value.SegmentCount;
