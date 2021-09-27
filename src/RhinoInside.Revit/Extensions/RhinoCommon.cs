@@ -379,8 +379,46 @@ namespace Rhino.Geometry
 
     public static bool IsClosed(this Ellipse ellipse, Interval interval, double tolerance)
     {
-      var nurb = ellipse.ToNurbsCurve();
-      return nurb.PointAt(interval.Min).DistanceTo(nurb.PointAt(interval.Max)) < tolerance;
+      return ellipse.PointAt(interval.T0).DistanceTo(ellipse.PointAt(interval.T1)) < tolerance;
+    }
+
+    /// <summary>
+    /// Finds parameter of the point on a curve that is closest to testPoint.
+    /// </summary>
+    /// <param name="ellipse"></param>
+    /// <param name="testPoint">Point to search from.</param>
+    /// <param name="t">Parameter of local closest point.</param>
+    /// <returns>true on success, false on failure.</returns>
+    public static bool ClosestPoint(this Ellipse ellipse, Point3d testPoint, out double t)
+    {
+      ellipse.Plane.ClosestParameter(testPoint, out var u, out var v);
+      var uv = new Vector2d(u * ellipse.Radius2, v * ellipse.Radius1);
+
+      if (uv.Unitize())
+      {
+        t = Math.Atan2(uv.Y, uv.X);
+        return true;
+      }
+      else
+      {
+        t = double.NaN;
+        return false;
+      }
+    }
+
+    /// <summary>
+    /// Evaluates point at a curve parameter.
+    /// </summary>
+    /// <param name="ellipse"></param>
+    /// <param name="t">Evaluation parameter.</param>
+    /// <returns>Point (location of curve at the parameter t).</returns>
+    public static Point3d PointAt(this Ellipse ellipse, double t)
+    {
+      return ellipse.Plane.PointAt
+      (
+        ellipse.Radius1 * Math.Cos(t),
+        ellipse.Radius2 * Math.Sin(t)
+      );
     }
   }
 
@@ -511,18 +549,9 @@ namespace Rhino.Geometry
         }
         else
         {
-          ellipse.Plane.ClosestParameter(curve.PointAtStart, out var u0, out var v0);
-          ellipse.Plane.ClosestParameter(curve.PointAtEnd, out var u1, out var v1);
-
-          var t0 = new Vector2d(u0, v0); t0.Unitize();
-          var t1 = new Vector2d(u1, v1); t1.Unitize();
-
-          domain = new Interval
-          (
-            Math.Atan2(t0.Y * ellipse.Radius1, t0.X * ellipse.Radius2),
-            Math.Atan2(t1.Y * ellipse.Radius1, t1.X * ellipse.Radius2)
-          );
-
+          ellipse.ClosestPoint(curve.PointAtStart, out var t0);
+          ellipse.ClosestPoint(curve.PointAtEnd, out var t1);
+          domain = new Interval(t0, t1);
           return true;
         }
       }
@@ -534,21 +563,23 @@ namespace Rhino.Geometry
 
     internal static bool TryGetHermiteSpline(this Curve curve, out IList<Point3d> points, out Vector3d startTangent, out Vector3d endTangent, double tolerance)
     {
-      if (!(curve.Fit(3, tolerance * 0.2, 0.0) is NurbsCurve fit))
+      if (curve.Fit(3, tolerance * 0.2, 0.0) is NurbsCurve fit)
       {
-        points = default;
+        var interval = curve.Domain;
+        startTangent = curve.TangentAt(interval.T0);
+        endTangent = curve.TangentAt(interval.T1);
+        points = fit.GrevillePoints(true);
+
+        return true;
+      }
+      else
+      {
         startTangent = default;
         endTangent = default;
-        return default;
+        points = default;
 
+        return false;
       }
-
-      var interval = curve.Domain;
-      startTangent = curve.TangentAt(interval.T0);
-      endTangent = curve.TangentAt(interval.T1);
-      points = fit.GrevillePoints(true);
-
-      return true;
     }
 
     /// <summary>
