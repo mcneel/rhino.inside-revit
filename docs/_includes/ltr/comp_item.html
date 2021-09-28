@@ -1,4 +1,0 @@
-{% assign c = site.data.components | where_exp: "item", "item.uuid contains include.uuid" %}
-<span class="comp-item-tag">
-    <strong><img src="{{ c.first.iconsrc | prepend: site.baseurl }}"/>{{ c.first.title }}:</strong> {{ c.first.desc }}
-</span>
