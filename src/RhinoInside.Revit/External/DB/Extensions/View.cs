@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Autodesk.Revit.DB;
 using RhinoInside.Revit.Convert.System.Drawing;
 using RhinoInside.Revit.External.UI.Extensions;
@@ -17,6 +18,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       switch (viewType)
       {
         case ViewType.Undefined:
+        case ViewType.Schedule:
         case ViewType.ProjectBrowser:
         case ViewType.SystemBrowser:
         case ViewType.Internal:
@@ -77,6 +79,53 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
 
       return ElementId.InvalidElementId;
+    }
+
+    internal static ElementId GetSketchGridId(this View view)
+    {
+      return view.
+        GetDependentElements(new ElementCategoryFilter(BuiltInCategory.OST_IOSSketchGrid)).
+        FirstOrDefault();
+    }
+
+    internal static bool TryGetSketchGridSurface
+    (
+      this View view,
+      out string name,
+      out Surface surface,
+      out BoundingBoxUV bboxUV,
+      out double gridSpacing
+    )
+    {
+      if
+      (
+        view.GetSketchGridId() is ElementId sketchGridId &&
+        view.Document.GetElement(sketchGridId) is Element sketchGrid
+      )
+      {
+        name = sketchGrid.Name;
+        gridSpacing = sketchGrid.get_Parameter(BuiltInParameter.SKETCH_GRID_SPACING_PARAM)?.AsDouble() ?? double.NaN;
+
+        using (var options = new Options() { View = view })
+        {
+          var geometry = sketchGrid.get_Geometry(options);
+          if (geometry.FirstOrDefault() is Solid solid && solid.Faces.Size == 1)
+          {
+            if (solid.Faces.get_Item(0) is Face face)
+            {
+              surface = face.GetSurface();
+              bboxUV = face.GetBoundingBox();
+              return true;
+            }
+          }
+        }
+      }
+
+      name = default;
+      surface = default;
+      bboxUV = default;
+      gridSpacing = double.NaN;
+      return false;
     }
   }
 }

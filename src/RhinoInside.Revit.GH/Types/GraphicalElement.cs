@@ -452,8 +452,8 @@ namespace RhinoInside.Revit.GH.Types
         UnitConverter.Convert(1.0, Rhino.UnitSystem.Meters, rhinoDoc.ModelUnitSystem),
 
         SnapSpacing = imperial ?
-        UnitConverter.Convert(1 / 16.0, Rhino.UnitSystem.Inches, rhinoDoc.ModelUnitSystem) :
-        UnitConverter.Convert(1.0, Rhino.UnitSystem.Millimeters, rhinoDoc.ModelUnitSystem),
+        UnitConverter.Convert(1.0, Rhino.UnitSystem.Yards, rhinoDoc.ModelUnitSystem) :
+        UnitConverter.Convert(1.0, Rhino.UnitSystem.Meters, rhinoDoc.ModelUnitSystem),
 
         GridLineCount = 70,
         ThickLineFrequency = imperial ? 6 : 5,

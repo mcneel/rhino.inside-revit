@@ -837,4 +837,37 @@ namespace Rhino.Display
       return false;
     }
   }
+
+  static class RhinoViewportExtension
+  {
+    public static bool SetViewProjection(this RhinoViewport viewport, DocObjects.ViewportInfo camera, bool updateTargetLocation, bool updateScreenPort)
+    {
+      var vportInfo = camera;
+
+      if (updateScreenPort)
+      {
+        viewport.GetScreenPort(out var left, out var right, out var top, out var bottom, out var _, out var _);
+        vportInfo = new DocObjects.ViewportInfo(camera)
+        {
+          FrustumAspect = viewport.FrustumAspect,
+          ScreenPort = new System.Drawing.Rectangle(left, top, right - left, top - bottom)
+        };
+      }
+
+      if (viewport.SetViewProjection(vportInfo, updateTargetLocation))
+      {
+        if (updateTargetLocation)
+        {
+          if (camera.TargetPoint.IsValid)
+            viewport.SetCameraTarget(camera.TargetPoint, false);
+          else
+            viewport.SetCameraTarget(vportInfo.CameraLocation + vportInfo.CameraDirection, false);
+        }
+
+        return true;
+      }
+
+      return false;
+    }
+  }
 }

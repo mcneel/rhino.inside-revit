@@ -502,13 +502,13 @@ namespace RhinoInside.Revit
 
             switch (taskDialog.Show())
             {
-            case Autodesk.Revit.UI.TaskDialogResult.CommandLink2:
+              case Autodesk.Revit.UI.TaskDialogResult.CommandLink2:
                 doc.ModelAngleToleranceRadians = Revit.AngleTolerance;
                 doc.ModelDistanceDisplayPrecision = distanceDisplayPrecision;
                 doc.ModelAbsoluteTolerance = UnitConverter.ConvertFromHostUnits(Revit.VertexTolerance, RevitModelUnitSystem);
                 doc.AdjustModelUnitSystem(RevitModelUnitSystem, true);
                 AdjustViewConstructionPlanes(doc);
-              break;
+                break;
               case Autodesk.Revit.UI.TaskDialogResult.CommandLink3:
                 doc.ModelAngleToleranceRadians = Revit.AngleTolerance;
                 doc.ModelDistanceDisplayPrecision = Clamp(Grasshopper.CentralSettings.FormatDecimalDigits, 0, 7);
@@ -590,7 +590,7 @@ namespace RhinoInside.Revit
         UnitConverter.Convert(1.0, UnitSystem.Meters, rhinoDoc.ModelUnitSystem);
 
         var modelSnapSpacing = imperial ?
-        UnitConverter.Convert(3.0, UnitSystem.Feet, rhinoDoc.ModelUnitSystem) :
+        UnitConverter.Convert(1.0, UnitSystem.Yards, rhinoDoc.ModelUnitSystem) :
         UnitConverter.Convert(1.0, UnitSystem.Meters, rhinoDoc.ModelUnitSystem);
 
         var modelThickLineFrequency = imperial ? 6 : 5;
@@ -610,7 +610,7 @@ namespace RhinoInside.Revit
         // Zoom to grid
         viewport.ZoomBoundingBox(bbox);
 
-        // Adjust to extens in case There is anything in the viewports like Grasshopper previews.
+        // Adjust to extens in case there is anything in the viewports like Grasshopper previews.
         viewport.ZoomExtents();
       }
     }
@@ -690,7 +690,7 @@ namespace RhinoInside.Revit
               if (!rhinoDoc.Views.Where(x => x.Floating).Any())
               {
                 var cursorPosition = System.Windows.Forms.Cursor.Position;
-                if (!OpenRevitViewport(cursorPosition.X - 400, cursorPosition.Y - 300))
+                if (OpenRevitViewport(cursorPosition.X - 400, cursorPosition.Y - 300) is null)
                   Exposed = true;
               }
             }
@@ -753,12 +753,12 @@ namespace RhinoInside.Revit
 
     #region Open Viewport
     const string RevitViewName = "Revit";
-    internal static bool OpenRevitViewport(int x, int y)
+    internal static RhinoView OpenRevitViewport(int x, int y)
     {
       if (RhinoDoc.ActiveDoc is RhinoDoc rhinoDoc)
       {
-        var view3D = rhinoDoc.Views.Where(v => v.MainViewport.Name == RevitViewName).FirstOrDefault();
-        if (view3D is null)
+        var openView = rhinoDoc.Views.Where(v => v.MainViewport.Name == RevitViewName).FirstOrDefault();
+        if (openView is null)
         {
           if
           (
@@ -767,32 +767,51 @@ namespace RhinoInside.Revit
               RevitViewName, DefinedViewportProjection.Perspective,
               new System.Drawing.Rectangle(x, y, 800, 600),
               true
-            ) is RhinoView rhinoView
+            ) is RhinoView newView
           )
           {
-            rhinoDoc.Views.ActiveView = rhinoView;
+            rhinoDoc.Views.ActiveView = newView;
 
-            AdjustViewCPlane(rhinoView.MainViewport);
-            return true;
+            AdjustViewCPlane(newView.MainViewport);
+            return newView;
           }
-          else return false;
         }
         else
         {
-          rhinoDoc.Views.ActiveView = view3D;
-          return view3D.BringToFront();
+          rhinoDoc.Views.ActiveView = openView;
+          openView.BringToFront();
+          return openView;
         }
       }
 
-      return false;
+      return default;
     }
 
-    public static async void RunCommandOpenViewportAsync()
+    public static async void RunCommandOpenViewportAsync
+    (
+      Rhino.DocObjects.ViewportInfo vport,
+      Rhino.DocObjects.ConstructionPlane cplane
+    )
     {
       var cursorPosition = System.Windows.Forms.Cursor.Position;
-
       await External.ActivationGate.Yield();
-      OpenRevitViewport(cursorPosition.X + 50, cursorPosition.Y + 50);
+
+      if (OpenRevitViewport(cursorPosition.X + 50, cursorPosition.Y + 50) is RhinoView view)
+      {
+        if (vport is object)
+          view.MainViewport.SetViewProjection(vport, updateScreenPort: true, updateTargetLocation: true);
+
+        if (cplane is object)
+        {
+          if (cplane.Plane.IsValid)
+            view.MainViewport.SetConstructionPlane(cplane);
+          else if (view.MainViewport.GetFrustumNearPlane(out var nearPlane))
+            view.MainViewport.SetConstructionPlane(nearPlane);
+        }
+
+        if (cplane is object || vport is object)
+          view.Redraw();
+      }
     }
     #endregion
 

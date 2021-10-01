@@ -255,7 +255,7 @@ namespace RhinoInside.Revit.GH
         if (!Rhinoceros.Exposed && !RhinoDoc.ActiveDoc.Views.Where(x => x.Floating).Any())
         {
           var cursorPosition = System.Windows.Forms.Cursor.Position;
-          if (!Rhinoceros.OpenRevitViewport(cursorPosition.X - 400, cursorPosition.Y - 300))
+          if (Rhinoceros.OpenRevitViewport(cursorPosition.X - 400, cursorPosition.Y - 300) is null)
             Rhinoceros.Exposed = true;
         }
       }
