@@ -72,8 +72,8 @@ namespace RhinoInside.Revit.Convert.DocObjects
           camera.IsPerspective    = false;
           camera.HorizontalExtent = max.X - min.X;
           camera.VerticalExtent   = max.Y - min.Y;
-          camera.RightOffset      = min.X - 0.5 * camera.HorizontalExtent;
-          camera.UpOffset         = min.Y - 0.5 * camera.VerticalExtent;
+          camera.RightOffset      = min.X + 0.5 * camera.HorizontalExtent;
+          camera.UpOffset         = min.Y + 0.5 * camera.VerticalExtent;
           camera.NearDistance     = -max.Z;
           camera.FarDistance      = -min.Z;
           camera.TargetDistance   = 1e30;
@@ -182,10 +182,10 @@ namespace RhinoInside.Revit.Convert.DocObjects
 
         // Set Frustum
         {
-          var left   = -0.5 * camera.HorizontalExtent + camera.RightOffset * Revit.ModelUnits;
-          var right  = +0.5 * camera.HorizontalExtent + camera.RightOffset * Revit.ModelUnits;
-          var bottom = -0.5 * camera.VerticalExtent + camera.UpOffset * Revit.ModelUnits;
-          var top    = +0.5 * camera.VerticalExtent + camera.UpOffset * Revit.ModelUnits;
+          var left   = ((-0.5 * camera.HorizontalExtent) + camera.RightOffset) * Revit.ModelUnits;
+          var right  = ((+0.5 * camera.HorizontalExtent) + camera.RightOffset) * Revit.ModelUnits;
+          var bottom = ((-0.5 * camera.VerticalExtent) + camera.UpOffset) * Revit.ModelUnits;
+          var top    = ((+0.5 * camera.VerticalExtent) + camera.UpOffset) * Revit.ModelUnits;
           vport.SetFrustum(left, right, bottom, top, near, far);
         }
 
