@@ -278,7 +278,7 @@ You can also use the Grasshopper components that you love, inside your code, as 
 from Rhino.NodeInCode import Components
 {% endhighlight %}
 
-Now you can access the component, like a function. These function names are prefixed with the name of their Grasshopper plugin to avoid naming conflicts. The example below shows how we can access the {% include ltr/comp.html uuid="0d9f07e2-" %} inside the code:
+Now you can access the component, like a function. These function names are prefixed with the name of their Grasshopper plugin to avoid naming conflicts. The example below shows how we can access the {% include ltr/comp.html uuid="3aedba3c-" %} inside the code:
 
 {% highlight python %}
 Components.NodeInCodeFunctions.RhinoInside_AddMaterial()

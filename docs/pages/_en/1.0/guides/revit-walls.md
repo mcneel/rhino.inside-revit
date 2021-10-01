@@ -71,7 +71,7 @@ In Revit API, {% include api_type.html type='Autodesk.Revit.DB.CompoundStructure
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-The {% include ltr/comp.html uuid="00a650ed-" %} component shown above, provides access to the *Compound Structure* definition of the *Basic Wall* type. Use the {% include ltr/comp.html uuid="d0853b76-" %} component shown here to extract information on *Compound Structure Layers*. Similar to above, {% include ltr/comp.html uuid='55b31952' %} and {% include ltr/comp.html uuid='8d73d533' %} components are provided to allow value comparison and filtering of the structure layers:
+The {% include ltr/comp.html uuid="00a650ed-" %} component shown above, provides access to the *Compound Structure* definition of the *Basic Wall* type. Use the {% include ltr/comp.html uuid="120090a3-" %} component shown here to extract information on *Compound Structure Layers*. Similar to above, {% include ltr/comp.html uuid='55b31952' %} and {% include ltr/comp.html uuid='8d73d533' %} components are provided to allow value comparison and filtering of the structure layers:
 
 ![]({{ "/static/images/guides/revit-walls-compstruct.png" | prepend: site.baseurl }})
 
@@ -81,7 +81,7 @@ As shown above, layers are ordered from **Exterior** to **Interior**, matching t
 
 ### Basic Wall Structure Layers
 
-Use the {% include ltr/comp.html uuid="bc64525a-" %} component to extract information about each individual *Compound Structure Layer*. {% include ltr/comp.html uuid='439ba763' %} and {% include ltr/comp.html uuid='db470316' %} components are also provide for value comparison:
+Use the {% include ltr/comp.html uuid="6b32703e-" %} component to extract information about each individual *Compound Structure Layer*. {% include ltr/comp.html uuid='439ba763' %} and {% include ltr/comp.html uuid='db470316' %} components are also provide for value comparison:
 
 ![]({{ "/static/images/guides/revit-walls-analyzecompstructlayer.png" | prepend: site.baseurl }})
 

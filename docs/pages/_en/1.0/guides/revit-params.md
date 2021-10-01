@@ -42,11 +42,11 @@ After adding this component to the canvas, you can Right-Click on the component 
 
 ![]({{ "/static/images/guides/revit-params-paramkey.png" | prepend: site.baseurl }})
 
-The output of this component can be passed to the {% include ltr/comp.html uuid='d86050f2' %} to query the value
+The output of this component can be passed to the {% include ltr/comp.html uuid='f568d3e7' %} to query the value
 
 ![]({{ "/static/images/guides/revit-params-getfromkey.png" | prepend: site.baseurl }})
 
-Another way of reading parameter values is by specifying the parameter name to the {% include ltr/comp.html uuid='d86050f2' %} component to get the parameter value.
+Another way of reading parameter values is by specifying the parameter name to the {% include ltr/comp.html uuid='f568d3e7' %} component to get the parameter value.
 
 ![]({{ "/static/images/guides/revit-params-getfromname.png" | prepend: site.baseurl }})
 
@@ -58,11 +58,11 @@ When working with Shared parameters, you can also pass the parameter UUID to the
 
 ## Updating Parameters
 
-Use the {% include ltr/comp.html uuid='8f1ee110' %} component to set a parameter value on a Revit element. The component is similar to {% include ltr/comp.html uuid='d86050f2' %} except that is also takes a value to be applied to the parameter. Keep in mind that some parameters are Read-only and their value can not be overridden.
+Use the same {% include ltr/comp.html uuid='f568d3e7' %} component to set a parameter value on a Revit element. Keep in mind that some parameters are Read-only and their value can not be overridden.
 
 ![]({{ "/static/images/guides/revit-params-setfromname.png" | prepend: site.baseurl }})
 
-Notice that the {% include ltr/comp.html uuid='ef607c2a' %} component is only holding a reference to the Revit element. So when the parameter value is updated by the {% include ltr/comp.html uuid='d86050f2' %} component, it is updated for all the components that is referencing that same element. This is different from what you might be used to when working with Grasshopper outside of Revit context.
+Notice that the {% include ltr/comp.html uuid='f568d3e7' %} component is only holding a reference to the Revit element. So when the parameter value is updated by the component, it is updated for all the components that is referencing that same element. This is different from what you might be used to when working with Grasshopper outside of Revit context.
 
 ![]({{ "/static/images/guides/revit-params-setverify.png" | prepend: site.baseurl }})
 
@@ -73,11 +73,9 @@ The components under the *Parameter* panel in Grasshopper, allow you to create n
 
 {% include ltr/warning_note.html note='Currently Revit API does not support creating project parameters' %}
 
-{% include ltr/warning_note.html note='The current implementation always creates Parameters of type **Text** and places them under the **Data** category in the Revit parameters panel. The parameter will be attached to all the categories in Revit' %}
-
 ![]({{ "/static/images/guides/revit-params-definekeycomp.png" | prepend: site.baseurl }})
 
-Create a new parameter by connecting the parameter name to the {% include ltr/comp.html uuid='84ab6f3c' %} component on the canvas. You can inspect the created parameter using the {% include ltr/comp.html uuid='3bde5890' %} component.
+Create a new parameter by connecting the parameter name to the {% include ltr/comp.html uuid='134b7171' %} component on the canvas. Then use the {% include ltr/comp.html uuid='8ab856c6' %} and {% include ltr/comp.html uuid='5d331b12' %} to set the parameter type and group inputs. The {% include ltr/comp.html uuid='134b7171' %}  component will create a new parameter definition. This definition can then be passed to {% include ltr/comp.html uuid='84ab6f3c' %} component to actually create the parameter in the Revit project. You can inspect the created parameter using the {% include ltr/comp.html uuid='3bde5890' %} component.
 
 ![]({{ "/static/images/guides/revit-params-createshared.png" | prepend: site.baseurl }})
 
@@ -85,6 +83,6 @@ Here is how the parameter configuration in Shared Parameters:
 
 ![]({{ "/static/images/guides/revit-params-sharedwindow.png" | prepend: site.baseurl }})
 
-The value of this parameter can later be read by passing the parameter name to the {% include ltr/comp.html uuid='d86050f2' %} component. You can inspect the parameter value using the {% include ltr/comp.html uuid='3bde5890' %} component.
+The value of this parameter can later be read or set by passing the parameter name to the {% include ltr/comp.html uuid='f568d3e7' %} component. You can inspect the parameter value using the {% include ltr/comp.html uuid='fad33c4b' %} component, and passing the parameter into {% include ltr/comp.html uuid='3bde5890' %} component:
 
 ![]({{ "/static/images/guides/revit-params-valueinfo.png" | prepend: site.baseurl }})
