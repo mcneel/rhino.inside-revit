@@ -26,7 +26,11 @@ You can connect any of these properties, then {% include ltr/kb_key.html key='Ct
 
 ### Finding the BuiltInParameter
 
-To find a built-in parameter associated with an element parameter, pass the element and parameter name to the *Find BuiltInParameter* shared here.
+Use the {% include ltr/comp.html uuid='c1d96f56' %} component to reference parameters that are built into Revit:
+
+![]({{ "/static/images/guides/revit-params-querybuiltin.png" | prepend: site.baseurl }})
+
+To find a built-in parameter associated with an element parameter, pass the element and parameter name to the *Find BuiltInParameter* shared here.:
 
 ![]({{ "/static/images/guides/revit-params-getbuiltin.png" | prepend: site.baseurl }})
 
