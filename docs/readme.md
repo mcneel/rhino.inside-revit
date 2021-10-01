@@ -1,5 +1,5 @@
-- [Rhino.Inside.Revit Wiki](#rhinoinsiderevit-wiki)
-- [Contributing to the Wiki](#contributing-to-the-wiki)
+- [Rhino.Inside.Revit Docs](#rhinoinsiderevit-docs)
+- [Contributing to the Docs](#contributing-to-the-docs)
   - [Applying Minor Changes Using the GitHub Editor](#applying-minor-changes-using-the-github-editor)
   - [Clone, Revise, Submit Pull-Request](#clone-revise-submit-pull-request)
     - [Getting git](#getting-git)
@@ -8,21 +8,21 @@
       - [Windows](#windows)
       - [macOS](#macos)
     - [Installing Jekyll](#installing-jekyll)
-    - [Building the Wiki using Jekyll](#building-the-wiki-using-jekyll)
+    - [Building the Docs using Jekyll](#building-the-docs-using-jekyll)
     - [Make Necessary Changes](#make-necessary-changes)
     - [Spell Check](#spell-check)
     - [Publishing the Changes](#publishing-the-changes)
 - [Online Experience](#online-experience)
-- [Understanding Wiki Source Files](#understanding-wiki-source-files)
+- [Understanding Docs Source Files](#understanding-docs-source-files)
   - [Page Metadata](#page-metadata)
     - [Page GH Definition](#page-gh-definition)
   - [Page Layouts](#page-layouts)
   - [Adding a New Language](#adding-a-new-language)
-  - [Adding a New Wiki Version](#adding-a-new-wiki-version)
+  - [Adding a New Docs Version](#adding-a-new-docs-version)
   - [Adding Button-Specific Documentation](#adding-button-specific-documentation)
   - [Adding Component-Specific Documentation](#adding-component-specific-documentation)
   - [Adding Release Notes](#adding-release-notes)
-- [Wiki Formatting Conventions](#wiki-formatting-conventions)
+- [Docs Formatting Conventions](#docs-formatting-conventions)
   - [Frequently User Terms](#frequently-user-terms)
   - [Linking Other Pages](#linking-other-pages)
   - [Linking Images](#linking-images)
@@ -52,18 +52,18 @@
   - [Grasshopper Component List](#grasshopper-component-list)
   - [Misc List](#misc-list)
 
-# Rhino.Inside.Revit Wiki
+# Rhino.Inside.Revit Docs
 
 This repo contains the contents of https://mcneel.github.io/rhino.inside-revit/
 
 - The site is hosted on [GitHub Pages](https://pages.github.com/) which uses a static site generator called [Jekyll](http://jekyllrb.com/).
 - The page are written using Markdown (specifically [Kramdown](http://kramdown.gettalong.org/syntax.html)) syntax
-- The contents of the Wiki are stored under `pages/` and are grouped by locale (e.g. `en` for English) and Rhino.Inside.Revit versions e.g. `en/beta/getting-started.md` for **Getting Started** article in **English** for **Beta** release.
+- The contents of the Docs are stored under `pages/` and are grouped by locale (e.g. `en` for English) and Rhino.Inside.Revit versions e.g. `en/beta/getting-started.md` for **Getting Started** article in **English** for **Beta** release.
 - All static resources, e.g. image or Revit models are stored under `static/`
 - Front-end assets are under `assets/`. Please coordinate any changes with the authors
 
 
-# Contributing to the Wiki
+# Contributing to the Docs
 
 There are multiple ways to edit the pages hosted in this repo. There are pros and cons to each approach. Each of the items listed here, is described in detail in sections below.
 
@@ -154,7 +154,7 @@ gem install github-pages
 gem install wdm
 ```
 
-### Building the Wiki using Jekyll
+### Building the Docs using Jekyll
 
 In this step we will ask Jekyll to parse the wiki source files (e.g. Markdown files and configurations), and build the final static website.
 
@@ -170,7 +170,7 @@ Alternatively, or in case of errors in command above, you can also run
 bundle exec jekyll build
 ```
 
-Jekyll will parse the file and will build a static version of Wiki into `_site/`. GitHub later uses this directory to serve the Wiki to the users. To preview the website, run the command below
+Jekyll will parse the file and will build a static version of Docs into `_site/`. GitHub later uses this directory to serve the Docs to the users. To preview the website, run the command below
 
 ```
 jekyll serve
@@ -188,11 +188,11 @@ Shutdown the server by pressing CTRL-C in terminal.
 
 ### Make Necessary Changes
 
-Now you can make the necessary changes to the Wiki pages
+Now you can make the necessary changes to the Docs pages
 
 ### Spell Check
 
-This Wiki has been edited using VSCode with ***Spell Right*** extension for spell checking. There is a spell check dictionary under `.vscode/` directory named `spellright.dict` and contains the excluded words and phrases for the spell check extension.
+This Docs has been edited using VSCode with ***Spell Right*** extension for spell checking. There is a spell check dictionary under `.vscode/` directory named `spellright.dict` and contains the excluded words and phrases for the spell check extension.
 
 ### Publishing the Changes
 
@@ -200,23 +200,23 @@ Once you are done with your changes, submit a pull-request through GitHub. If yo
 
 # Online Experience
 
-This Wiki is the first node and the official landing page for the project. See the sketch below to see the overarching ideas that helped designing this Wiki.
+This Docs is the first node and the official landing page for the project. See the sketch below to see the overarching ideas that helped designing this Docs.
 
 ![](static/images/readme/rir-online.png)
 
-- Wiki homepage is the official landing page
-- Wiki helps:
+- Docs homepage is the official landing page
+- Docs helps:
   - Getting started
   - Learning how to tackle Revit challenges using Rhino.Inside and provides easy to access samples
   - Provides the in-detail documentation on various aspects of the project
-- Wiki then
+- Docs then
   - routes the user to Forums for more questions
   - and routes the advanced users to the repo
 - The Repo
   - provides the source code
-  - provides the files for the Wiki
+  - provides the files for the Docs
 
-# Understanding Wiki Source Files
+# Understanding Docs Source Files
 
 As mentioned above, the wiki is built using [Jekyll](http://jekyllrb.com/) and is hosted on [GitHub Pages](https://pages.github.com/)
 
@@ -228,7 +228,7 @@ The structure of the source is as explained below:
 - `_includes/` contains Jekyll page fragments used across various page layouts
   - `ltr/` contains fragments for Left-to-Right (LTR) languages
   - `rtl/` contains fragments for Right-to-Left (RTL) languages
-- `pages/` contains the Wiki contents grouped by language and wiki version
+- `pages/` contains the Docs contents grouped by language and wiki version
 - `assets/` contains all front-end assets
   - `css/` contains all front-end stylesheets
   - `js/` contains all front-end JavaScript
@@ -241,7 +241,7 @@ The structure of the source is as explained below:
 - `_data/` contains data files used to generate special pages
 - `_config.yml` Jekyll site configs file (see the config file for more information on each available setting)
 - `GemFile*` Ruby gemfile listing the ruby dependencies
-- `index.md` Root of the Wiki. It redirects the visitor to default language and Wiki version (defaults are set in the site configs file)
+- `index.md` Root of the Docs. It redirects the visitor to default language and Docs version (defaults are set in the site configs file)
 - `readme.md`: This Markdown document
 - `update_components_data.gh`: This is a Grasshopper definition file, used to generate component data file under `_data/`
 
@@ -286,7 +286,7 @@ There are there main layouts created for this wiki. You can specify the layout u
 
 ## Adding a New Language
 
-To add a new language to the Wiki, a translator generally starts with the English version of the wiki and translates the content. Copy the `pages/_en` content to a new directory under `pages/` with your [ISO 693-1 language code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes). For example to translate the English wiki to Persian, copy the `pages/_en` content to `pages/_fa`
+To add a new language to the Docs, a translator generally starts with the English version of the wiki and translates the content. Copy the `pages/_en` content to a new directory under `pages/` with your [ISO 693-1 language code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes). For example to translate the English wiki to Persian, copy the `pages/_en` content to `pages/_fa`
 
 Now open the site config file and add the new language to the Jekyll site collections:
 
@@ -325,9 +325,9 @@ Jekyll site config file automatically sets the correct version and categories on
 Once the new language directory is created, open each page under each version and translate the page contents. And finally when all the translations are completed for all the content, notify the developers by creating an issue on the GitHub repo to incorporate the new language into the website.
 
 
-## Adding a New Wiki Version
+## Adding a New Docs Version
 
-To add a new version to the Wiki, browse under the site contents for your language and create a new version directory following the X.X format. For example to add version `1.5` to the wiki for English language we need to create `pages/_en/1.5/` directory.
+To add a new version to the Docs, browse under the site contents for your language and create a new version directory following the X.X format. For example to add version `1.5` to the wiki for English language we need to create `pages/_en/1.5/` directory.
 
 Instead of adding `version: 1.5` to the metadata for every single page, we will edit the site config file to add this metadata to the new pages automatically based on their location in directory structure.
 
@@ -409,11 +409,11 @@ Follow the steps below to add new release notes. Most recent release should be o
 - Write down a list of notes related to the release
 - Add images if necessary. Place images under `static/images/release_notes` and name by the release e.g. `0073256343_01.png` is the first image (`_01.png`) for release `0073256343`
 
-# Wiki Formatting Conventions
+# Docs Formatting Conventions
 
 ## Frequently User Terms
 
-The site configuration file has a list of frequently used terms. When adding or modifying content, ensure that you are using liquid tags instead of typing these terms. This allows for modifying the terms later on without having to chase down all instance of the term across the Wiki.
+The site configuration file has a list of frequently used terms. When adding or modifying content, ensure that you are using liquid tags instead of typing these terms. This allows for modifying the terms later on without having to chase down all instance of the term across the Docs.
 
 These terms are stored under `terms:` in site config file:
 
@@ -433,7 +433,7 @@ You can refer to these terms using liquid tags. Jekyll will automatically place 
 
 ## Linking Other Pages
 
-You can use the format below in your pages to point to other pages on the Wiki. Never refer to a page from another Wiki language or version. All the inter-page links should be restricted to pages of the same language and version. This helps keeping the Wiki in clean containers.
+You can use the format below in your pages to point to other pages on the Docs. Never refer to a page from another Docs language or version. All the inter-page links should be restricted to pages of the same language and version. This helps keeping the Docs in clean containers.
 
 ```markdown
 {{ site.baseurl }}{% link _en/beta/reference/rir-interface.md %}
@@ -526,7 +526,7 @@ It works exactly the same as the reference components block.
 
 ## Adding Email Links
 
-Emails links (`mailto:`) need to be obfuscated to avoid crawlers to extract email from the Wiki pages. Use the method described below:
+Emails links (`mailto:`) need to be obfuscated to avoid crawlers to extract email from the Docs pages. Use the method described below:
 
 - Open developers tools in your browser.
 - Open JavaScript console tab
@@ -562,7 +562,7 @@ In Revit API, all the built-in parameters are represented by the {% include api_
 
 ![](static/images/readme/wip-block.png)
 
-This block is meant to show upcoming content on your page. Make sure to replace with actual content and don't leave these blocks on the Wiki for too long.
+This block is meant to show upcoming content on your page. Make sure to replace with actual content and don't leave these blocks on the Docs for too long.
 
 This is how you would insert a WIP block into your page.
 
