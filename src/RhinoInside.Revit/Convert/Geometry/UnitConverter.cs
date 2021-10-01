@@ -139,9 +139,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       if (num == den)
         return value;
 
-      // To prevent overflow-underflow and loss of precision
-      // we rearrange the product in factors near 1.0.
-      if (Math.Abs(value - den) < Math.Abs(num - den))
+      if (Math.Abs(num) < Math.Abs(value))
         return num * (value / den);
       else
         return value * (num / den);
