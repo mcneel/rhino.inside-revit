@@ -36,6 +36,10 @@ group: Deployment & Configs
   - {% include ltr/comp.html uuid='33ead71b-' extended=true %}
   - {% include ltr/comp.html uuid='ff0f49ca-' extended=true %}
 
+- New Phase and Workset Components!
+  - {% include ltr/comp.html uuid='353ffb47-' extended=true %}
+  - {% include ltr/comp.html uuid='5c073f7d-' extended=true %}
+
 - Merged [PR #486](https://github.com/mcneel/rhino.inside-revit/pull/486)
 
 {% include ltr/release-header.html title="v1.1 Stable" version="v1.1.7927.27937" time="09/14/2021" %}
