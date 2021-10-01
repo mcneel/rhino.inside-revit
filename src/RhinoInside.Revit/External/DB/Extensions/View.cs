@@ -103,19 +103,30 @@ namespace RhinoInside.Revit.External.DB.Extensions
         view.Document.GetElement(sketchGridId) is Element sketchGrid
       )
       {
-        name = sketchGrid.Name;
-        gridSpacing = sketchGrid.get_Parameter(BuiltInParameter.SKETCH_GRID_SPACING_PARAM)?.AsDouble() ?? double.NaN;
-
         using (var options = new Options() { View = view })
         {
           var geometry = sketchGrid.get_Geometry(options);
-          if (geometry.FirstOrDefault() is Solid solid && solid.Faces.Size == 1)
+
+          using (geometry is object ? default : view.Document.RollBackScope())
           {
-            if (solid.Faces.get_Item(0) is Face face)
+            // SketchGrid need to be displayed at least once to have geometry.
+            if (geometry is null)
             {
-              surface = face.GetSurface();
-              bboxUV = face.GetBoundingBox();
-              return true;
+              view.ShowActiveWorkPlane();
+              geometry = sketchGrid.get_Geometry(options);
+            }
+
+            if (geometry?.FirstOrDefault() is Solid solid && solid.Faces.Size == 1)
+            {
+              if (solid.Faces.get_Item(0) is Face face)
+              {
+                name = sketchGrid.Name;
+                gridSpacing = sketchGrid.get_Parameter(BuiltInParameter.SKETCH_GRID_SPACING_PARAM)?.AsDouble() ?? double.NaN;
+
+                surface = face.GetSurface();
+                bboxUV = face.GetBoundingBox();
+                return true;
+              }
             }
           }
         }
