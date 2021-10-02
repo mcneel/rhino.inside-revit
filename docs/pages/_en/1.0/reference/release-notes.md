@@ -8,7 +8,7 @@ group: Deployment & Configs
 {% include ltr/release-header.html title="v1.2 RC3" version="v1.2.7937.23994" pre_release=true time="09/28/2021" %}
 
 - Improved 'Host Faces' component. Now skips invalid faces and avoids exceptions to be faster
-- Minor Fixes and Improvements
+- Fixes and improvements on Ellipse conversion routines.
 
 {% include ltr/release-header.html title="v1.2 RC2" version="v1.2.7934.7099" pre_release=true time="09/21/2021" %}
 
@@ -36,9 +36,19 @@ group: Deployment & Configs
   - {% include ltr/comp.html uuid='33ead71b-' extended=true %}
   - {% include ltr/comp.html uuid='ff0f49ca-' extended=true %}
 
-- New Phase and Workset Components!
-  - {% include ltr/comp.html uuid='353ffb47-' extended=true %}
+- New Workset Components!
   - {% include ltr/comp.html uuid='5c073f7d-' extended=true %}
+  - {% include ltr/comp.html uuid='aa467c94-' extended=true %}
+  - {% include ltr/comp.html uuid='b441ba8c-' extended=true %}
+  - {% include ltr/comp.html uuid='c33cd128-' extended=true %}
+  - {% include ltr/comp.html uuid='311316ba-' extended=true %}
+  - {% include ltr/comp.html uuid='3380c493-' extended=true %}
+
+- New Phase Components!
+  - {% include ltr/comp.html uuid='353ffb47-' extended=true %}
+  - {% include ltr/comp.html uuid='3ba4524a-' extended=true %}
+  - {% include ltr/comp.html uuid='91e4d3e1-' extended=true %}
+  - {% include ltr/comp.html uuid='805c21ee-' extended=true %}
 
 - Merged [PR #486](https://github.com/mcneel/rhino.inside-revit/pull/486)
 
