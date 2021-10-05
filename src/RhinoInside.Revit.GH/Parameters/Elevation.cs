@@ -41,7 +41,7 @@ namespace RhinoInside.Revit.GH.Parameters
         return false;
 
       if (ElevationBase != DBX.ElevationBase.InternalOrigin)
-        writer.SetInt32("Grouping", (int) ElevationBase);
+        writer.SetInt32("ElevationBase", (int) ElevationBase);
 
       return true;
     }
@@ -156,7 +156,7 @@ namespace RhinoInside.Revit.GH.Parameters
         return false;
 
       if (ElevationBase != DBX.ElevationBase.InternalOrigin)
-        writer.SetInt32("Grouping", (int) ElevationBase);
+        writer.SetInt32("ElevationBase", (int) ElevationBase);
 
       return true;
     }

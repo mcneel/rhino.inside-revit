@@ -172,14 +172,24 @@ namespace RhinoInside.Revit.GH
 
         if (IsShadingPass)
         {
-          var vc = HasVertexColors(vertexFormatBits) && ShowsVertexColors(displayStyle);
-          if (!vc)
+          if (HasVertexColors(vertexFormatBits) && ShowsVertexColors(displayStyle))
           {
-            ei.SetTransparency(Math.Max(1.0 / 255.0, (255 - color.A) / 255.0));
+            ei.SetTransparency(0.0);
+            ei.SetColor(DB.Color.InvalidColorValue);
+            ei.SetEmissiveColor(DB.Color.InvalidColorValue);
+          }
+          else
+          {
+            ei.SetTransparency((255 - color.A) / 255.0);
             ei.SetEmissiveColor(new DB.Color(color.R, color.G, color.B));
           }
         }
-        else ei.SetColor(new DB.Color(color.R, color.G, color.B));
+        else
+        {
+          ei.SetTransparency(0.0);
+          ei.SetColor(new DB.Color(color.R, color.G, color.B));
+          ei.SetEmissiveColor(DB.Color.InvalidColorValue);
+        }
 
         return ei;
       }

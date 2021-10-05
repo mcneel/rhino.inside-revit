@@ -354,8 +354,8 @@ namespace RhinoInside.Revit.Convert.Geometry
       if (value.TryGetEllipse(out var ellipse, out var interval, Revit.VertexTolerance * factor))
         return ellipse.ToCurve(interval, factor);
 
-      var gap = Revit.ShortCurveTolerance * 1.01;
-      if (value.IsClosed(gap * factor))
+      var gap = Revit.ShortCurveTolerance * 1.01 / factor;
+      if (value.IsClosed(gap))
       {
         var length = value.GetLength();
         if

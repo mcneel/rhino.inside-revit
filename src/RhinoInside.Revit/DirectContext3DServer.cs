@@ -85,8 +85,14 @@ namespace RhinoInside.Revit
         indexPointsBuffer.Map(VertexThreshold * DB3D.IndexPoint.GetSizeInShortInts());
         using (var istream = indexPointsBuffer.GetIndexStreamPoint())
         {
-          for (int vi = 0; vi < VertexThreshold; ++vi)
-            istream.AddPoint(new DB3D.IndexPoint(vi));
+          using (var point = new DB3D.IndexPoint(0))
+          {
+            for (int vi = 0; vi < VertexThreshold; ++vi)
+            {
+              point.Index = vi;
+              istream.AddPoint(point);
+            }
+          }
         }
         indexPointsBuffer.Unmap();
       }
@@ -116,6 +122,13 @@ namespace RhinoInside.Revit
       return indexLinesBuffer;
     }
 
+    /// <summary>
+    /// Convert Alpha value into a Transparency value
+    /// </summary>
+    /// <remarks>Since we are drawing in TransparentPass seems no pixel should be opaque</remarks>
+    /// <param name="alpha"></param>
+    /// <returns></returns>
+    static uint AlphaToTransparency(byte alpha) => Math.Max(1u, 255u - alpha);
 
     protected static DB3D.VertexBuffer ToVertexBuffer
     (
@@ -147,11 +160,27 @@ namespace RhinoInside.Revit
             vb.Map(verticesCount * DB3D.VertexPositionNormalColored.GetSizeInFloats());
             using (var stream = vb.GetVertexStreamPositionNormalColored())
             {
-              for (int v = part.StartVertexIndex; v < part.EndVertexIndex; ++v)
+              using (var clr = new DB.ColorWithTransparency(color.R, color.G, color.B, AlphaToTransparency(color.A)))
               {
-                var c = !color.IsEmpty ? color : colors[v];
-                uint T = Math.Max(1, 255u - c.A);
-                stream.AddVertex(new DB3D.VertexPositionNormalColored(RawEncoder.AsXYZ(vertices[v]), RawEncoder.AsXYZ(normals[v]), new DB.ColorWithTransparency(c.R, c.G, c.B, T)));
+                using (var vtx = new DB3D.VertexPositionNormalColored(DB.XYZ.Zero, DB.XYZ.Zero, clr))
+                {
+                  for (int v = part.StartVertexIndex; v < part.EndVertexIndex; ++v)
+                  {
+                    if (color.IsEmpty)
+                    {
+                      var c = colors[v];
+                      clr.SetRed(c.R);
+                      clr.SetGreen(c.G);
+                      clr.SetBlue(c.B);
+                      clr.SetTransparency(AlphaToTransparency(c.A));
+                      vtx.SetColor(clr);
+                    }
+
+                    vtx.Position = RawEncoder.AsXYZ(vertices[v]);
+                    vtx.Normal = RawEncoder.AsXYZ(normals[v]);
+                    stream.AddVertex(vtx);
+                  }
+                }
               }
             }
             vb.Unmap();
@@ -166,8 +195,15 @@ namespace RhinoInside.Revit
 
             using (var stream = vb.GetVertexStreamPositionNormal())
             {
-              for (int v = part.StartVertexIndex; v < part.EndVertexIndex; ++v)
-                stream.AddVertex(new DB3D.VertexPositionNormal(RawEncoder.AsXYZ(vertices[v]), RawEncoder.AsXYZ(normals[v])));
+              using (var vtx = new DB3D.VertexPositionNormal(DB.XYZ.Zero, DB.XYZ.Zero))
+              {
+                for (int v = part.StartVertexIndex; v < part.EndVertexIndex; ++v)
+                {
+                  vtx.Position = RawEncoder.AsXYZ(vertices[v]);
+                  vtx.Normal = RawEncoder.AsXYZ(normals[v]);
+                  stream.AddVertex(vtx);
+                }
+              }
             }
 
             vb.Unmap();
@@ -184,11 +220,26 @@ namespace RhinoInside.Revit
             vb.Map(verticesCount * DB3D.VertexPositionColored.GetSizeInFloats());
             using (var stream = vb.GetVertexStreamPositionColored())
             {
-              for (int v = part.StartVertexIndex; v < part.EndVertexIndex; ++v)
+              using (var clr = new DB.ColorWithTransparency(color.R, color.G, color.B, AlphaToTransparency(color.A)))
               {
-                var c = !color.IsEmpty ? color : colors[v];
-                uint T = Math.Max(1, 255u - c.A);
-                stream.AddVertex(new DB3D.VertexPositionColored(RawEncoder.AsXYZ(vertices[v]), new DB.ColorWithTransparency(c.R, c.G, c.B, T)));
+                using (var vtx = new DB3D.VertexPositionColored(DB.XYZ.Zero, clr))
+                {
+                  for (int v = part.StartVertexIndex; v < part.EndVertexIndex; ++v)
+                  {
+                    if (color.IsEmpty)
+                    {
+                      var c = colors[v];
+                      clr.SetRed(c.R);
+                      clr.SetGreen(c.G);
+                      clr.SetBlue(c.B);
+                      clr.SetTransparency(AlphaToTransparency(c.A));
+                      vtx.SetColor(clr);
+                    }
+
+                    vtx.Position = RawEncoder.AsXYZ(vertices[v]);
+                    stream.AddVertex(vtx);
+                  }
+                }
               }
             }
             vb.Unmap();
@@ -201,8 +252,14 @@ namespace RhinoInside.Revit
             vb.Map(verticesCount * DB3D.VertexPosition.GetSizeInFloats());
             using (var stream = vb.GetVertexStreamPosition())
             {
-              for (int v = part.StartVertexIndex; v < part.EndVertexIndex; ++v)
-                stream.AddVertex(new DB3D.VertexPosition(RawEncoder.AsXYZ(vertices[v])));
+              using (var vtx = new DB3D.VertexPosition(DB.XYZ.Zero))
+              {
+                for (int v = part.StartVertexIndex; v < part.EndVertexIndex; ++v)
+                {
+                  vtx.Position = RawEncoder.AsXYZ(vertices[v]);
+                  stream.AddVertex(vtx);
+                }
+              }
             }
             vb.Unmap();
             return vb;
@@ -238,13 +295,25 @@ namespace RhinoInside.Revit
         using (var istream = ib.GetIndexStreamTriangle())
         {
           var faces = mesh.Faces;
-          for (int f = part.StartFaceIndex; f < part.EndFaceIndex; ++f)
+          using (var triangle = new DB3D.IndexTriangle(0, 0, 0))
           {
-            var face = faces[f];
+            for (int f = part.StartFaceIndex; f < part.EndFaceIndex; ++f)
+            {
+              var face = faces[f];
 
-            istream.AddTriangle(new DB3D.IndexTriangle(face.A - part.StartVertexIndex, face.B - part.StartVertexIndex, face.C - part.StartVertexIndex));
-            if (face.IsQuad)
-              istream.AddTriangle(new DB3D.IndexTriangle(face.C - part.StartVertexIndex, face.D - part.StartVertexIndex, face.A - part.StartVertexIndex));
+              triangle.Index0 = face.A - part.StartVertexIndex;
+              triangle.Index1 = face.B - part.StartVertexIndex;
+              triangle.Index2 = face.C - part.StartVertexIndex;
+              istream.AddTriangle(triangle);
+
+              if (face.IsQuad)
+              {
+                triangle.Index0 = face.C - part.StartVertexIndex;
+                triangle.Index1 = face.D - part.StartVertexIndex;
+                triangle.Index2 = face.A - part.StartVertexIndex;
+                istream.AddTriangle(triangle);
+              }
+            }
           }
         }
 
@@ -265,13 +334,23 @@ namespace RhinoInside.Revit
 
         using (var istream = ib.GetIndexStreamLine())
         {
-          foreach (var face in mesh.Faces)
+          using (var line = new DB3D.IndexLine(0, 0))
           {
-            istream.AddLine(new DB3D.IndexLine(face.A, face.B));
-            istream.AddLine(new DB3D.IndexLine(face.B, face.C));
-            istream.AddLine(new DB3D.IndexLine(face.C, face.D));
-            if (face.IsQuad)
-              istream.AddLine(new DB3D.IndexLine(face.D, face.A));
+            foreach (var face in mesh.Faces)
+            {
+              line.Index0 = face.A; line.Index1 = face.B;
+              istream.AddLine(line);
+              line.Index0 = face.B; line.Index1 = face.C;
+              istream.AddLine(line);
+              line.Index0 = face.C; line.Index1 = face.D;
+              istream.AddLine(line);
+
+              if (face.IsQuad)
+              {
+                line.Index0 = face.D; line.Index1 = face.A;
+                istream.AddLine(line);
+              }
+            }
           }
         }
 
@@ -340,11 +419,15 @@ namespace RhinoInside.Revit
           ib.Map(linesCount * DB3D.IndexLine.GetSizeInShortInts());
           using (var istream = ib.GetIndexStreamLine())
           {
-            foreach (var edge in edgeIndices)
+            using (var line = new DB3D.IndexLine(0, 0))
             {
-              Debug.Assert(0 <= edge.I && edge.I < part.VertexCount);
-              Debug.Assert(0 <= edge.J && edge.J < part.VertexCount);
-              istream.AddLine(new DB3D.IndexLine(edge.I, edge.J));
+              foreach (var edge in edgeIndices)
+              {
+                Debug.Assert(0 <= edge.I && edge.I < part.VertexCount);
+                Debug.Assert(0 <= edge.J && edge.J < part.VertexCount);
+                line.Index0 = edge.I; line.Index1 = edge.J;
+                istream.AddLine(line);
+              }
             }
           }
           ib.Unmap();
@@ -376,8 +459,14 @@ namespace RhinoInside.Revit
         vb.Map(vertexCount * DB3D.VertexPosition.GetSizeInFloats());
         using (var vstream = vb.GetVertexStreamPosition())
         {
-          foreach (var v in polyline)
-            vstream.AddVertex(new DB3D.VertexPosition(RawEncoder.AsXYZ(v)));
+          using (var vtx = new DB3D.VertexPosition(DB.XYZ.Zero))
+          {
+            foreach (var v in polyline)
+            {
+              vtx.Position = RawEncoder.AsXYZ(v);
+              vstream.AddVertex(vtx);
+            }
+          }
         }
         vb.Unmap();
 
@@ -413,7 +502,8 @@ namespace RhinoInside.Revit
         vb.Map(pointsCount * DB3D.VertexPosition.GetSizeInFloats());
         using (var vstream = vb.GetVertexStreamPosition())
         {
-          vstream.AddVertex(new DB3D.VertexPosition(RawEncoder.AsXYZ(point.Location)));
+          using (var vtx = new DB3D.VertexPosition(RawEncoder.AsXYZ(point.Location)))
+            vstream.AddVertex(vtx);
         }
         vb.Unmap();
 
@@ -458,11 +548,23 @@ namespace RhinoInside.Revit
 
             using (var vstream = vb.GetVertexStreamPositionNormalColored())
             {
-              for(int p = part.StartVertexIndex; p < part.EndVertexIndex; ++p)
+              using (var clr = new DB.ColorWithTransparency())
               {
-                var point = pointCloud[p];
-                var c = new DB.ColorWithTransparency(point.Color.R, point.Color.G, point.Color.B, 255u - point.Color.A);
-                vstream.AddVertex(new DB3D.VertexPositionNormalColored(RawEncoder.AsXYZ(point.Location), RawEncoder.AsXYZ(point.Normal), c));
+                using (var vtx = new DB3D.VertexPositionNormalColored(DB.XYZ.Zero, DB.XYZ.Zero, clr))
+                {
+                  for (int p = part.StartVertexIndex; p < part.EndVertexIndex; ++p)
+                  {
+                    var point = pointCloud[p];
+                    clr.SetRed(point.Color.R);
+                    clr.SetGreen(point.Color.G);
+                    clr.SetBlue(point.Color.B);
+                    clr.SetTransparency(AlphaToTransparency(point.Color.A));
+                    vtx.SetColor(clr);
+                    vtx.Normal = RawEncoder.AsXYZ(point.Normal);
+                    vtx.Position = RawEncoder.AsXYZ(point.Location);
+                    vstream.AddVertex(vtx);
+                  }
+                }
               }
             }
 
@@ -476,10 +578,15 @@ namespace RhinoInside.Revit
 
             using (var vstream = vb.GetVertexStreamPositionNormal())
             {
-              for (int p = part.StartVertexIndex; p < part.EndVertexIndex; ++p)
+              using (var vtx = new DB3D.VertexPositionNormal(DB.XYZ.Zero, DB.XYZ.Zero))
               {
-                var point = pointCloud[p];
-                vstream.AddVertex(new DB3D.VertexPositionNormal(RawEncoder.AsXYZ(point.Location), RawEncoder.AsXYZ(point.Normal)));
+                for (int p = part.StartVertexIndex; p < part.EndVertexIndex; ++p)
+                {
+                  var point = pointCloud[p];
+                  vtx.Normal = RawEncoder.AsXYZ(point.Normal);
+                  vtx.Position = RawEncoder.AsXYZ(point.Location);
+                  vstream.AddVertex(vtx);
+                }
               }
             }
 
@@ -496,11 +603,22 @@ namespace RhinoInside.Revit
 
             using (var vstream = vb.GetVertexStreamPositionColored())
             {
-              for (int p = part.StartVertexIndex; p < part.EndVertexIndex; ++p)
+              using (var clr = new DB.ColorWithTransparency())
               {
-                var point = pointCloud[p];
-                var c = new DB.ColorWithTransparency(point.Color.R, point.Color.G, point.Color.B, 255u - point.Color.A);
-                vstream.AddVertex(new DB3D.VertexPositionColored(RawEncoder.AsXYZ(point.Location), c));
+                using (var vtx = new DB3D.VertexPositionColored(DB.XYZ.Zero, clr))
+                {
+                  for (int p = part.StartVertexIndex; p < part.EndVertexIndex; ++p)
+                  {
+                    var point = pointCloud[p];
+                    clr.SetRed(point.Color.R);
+                    clr.SetGreen(point.Color.G);
+                    clr.SetBlue(point.Color.B);
+                    clr.SetTransparency(AlphaToTransparency(point.Color.A));
+                    vtx.SetColor(clr);
+                    vtx.Position = RawEncoder.AsXYZ(point.Location);
+                    vstream.AddVertex(vtx);
+                  }
+                }
               }
             }
 
@@ -514,10 +632,14 @@ namespace RhinoInside.Revit
 
             using (var vstream = vb.GetVertexStreamPosition())
             {
-              for (int p = part.StartVertexIndex; p < part.EndVertexIndex; ++p)
+              using (var vtx = new DB3D.VertexPosition(DB.XYZ.Zero))
               {
-                var point = pointCloud[p];
-                vstream.AddVertex(new DB3D.VertexPosition(RawEncoder.AsXYZ(point.Location)));
+                for (int p = part.StartVertexIndex; p < part.EndVertexIndex; ++p)
+                {
+                  var point = pointCloud[p];
+                  vtx.Position = RawEncoder.AsXYZ(point.Location);
+                  vstream.AddVertex(vtx);
+                }
               }
             }
 
@@ -718,8 +840,7 @@ namespace RhinoInside.Revit
         if (!Regen())
           return;
 
-        var vc = HasVertexColors(vertexFormatBits) && ShowsVertexColors(displayStyle);
-        if (DB3D.DrawContext.IsTransparentPass() != vc)
+        if (DB3D.DrawContext.IsTransparentPass())
         {
           if (vertexCount > 0)
           {
