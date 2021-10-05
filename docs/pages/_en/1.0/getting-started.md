@@ -19,7 +19,7 @@ layout: ltr/page-h2-toc
 Download {{ site.terms.rir }} and {{ site.terms.rhino }} from the links below
 
 <!-- download links -->
-{% include ltr/download_buttons.html version=site.versions.beta %}
+{% include ltr/download_buttons.html version=site.versions.one %}
 
 The {{ site.terms.rir }} installer is also available on [Food4Rhino Website]({{ site.foodrhino_url }})
 
