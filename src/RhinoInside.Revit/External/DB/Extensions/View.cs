@@ -99,6 +99,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       if
       (
+        view.SketchPlane is object &&
         view.GetSketchGridId() is ElementId sketchGridId &&
         view.Document.GetElement(sketchGridId) is Element sketchGrid
       )
