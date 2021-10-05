@@ -5,6 +5,10 @@ group: Deployment & Configs
 ---
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html title="v1.2 RC4" version="v1.2.7948.6892 " pre_release=true time="10/05/2021" %}
+
+- Minor Fixes and Improvements
+
 {% include ltr/release-header.html title="v1.2 RC3" version="v1.2.7937.23994" pre_release=true time="09/28/2021" %}
 
 - Improved 'Host Faces' component. Now skips invalid faces and avoids exceptions to be faster
