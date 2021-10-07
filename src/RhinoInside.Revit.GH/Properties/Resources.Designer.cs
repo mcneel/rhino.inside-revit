@@ -273,16 +273,6 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap AnalyzeSheet {
-            get {
-                object obj = ResourceManager.GetObject("AnalyzeSheet", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap AnalyzeStackedWall {
             get {
                 object obj = ResourceManager.GetObject("AnalyzeStackedWall", resourceCulture);
@@ -1146,6 +1136,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap DocumentSave {
             get {
                 object obj = ResourceManager.GetObject("DocumentSave", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap DocumentTitleBlockSymbolPicker {
+            get {
+                object obj = ResourceManager.GetObject("DocumentTitleBlockSymbolPicker", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -2753,16 +2753,6 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap QueryTitleBlockTypes {
-            get {
-                object obj = ResourceManager.GetObject("QueryTitleBlockTypes", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap QueryTypes {
             get {
                 object obj = ResourceManager.GetObject("QueryTypes", resourceCulture);
@@ -2906,6 +2896,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap SheetIdentity {
             get {
                 object obj = ResourceManager.GetObject("SheetIdentity", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SheetTitleBlock {
+            get {
+                object obj = ResourceManager.GetObject("SheetTitleBlock", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
