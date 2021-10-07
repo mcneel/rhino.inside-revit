@@ -12,22 +12,28 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  public class FloorByOutline : ReconstructElementComponent
+  public class CeilingByOutline : ReconstructElementComponent
   {
-    public override Guid ComponentGuid => new Guid("DC8DAF4F-CC93-43E2-A871-3A01A920A722");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override Guid ComponentGuid => new Guid("A39BBDF2-78F2-4501-BB6E-F9CC3E83516E");
 
-    public FloorByOutline() : base
+#if REVIT_2022
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
+#else
+    public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.hidden;
+    public override bool SDKCompliancy(int exeVersion, int exeServiceRelease) => false;
+#endif
+
+   public CeilingByOutline() : base
     (
-      name: "Add Floor",
-      nickname: "Floor",
-      description: "Given its outline curve, it adds a Floor element to the active Revit document",
+      name: "Add Ceiling",
+      nickname: "Ceiling",
+      description: "Given its outline curve, it adds a Ceiling element to the active Revit document",
       category: "Revit",
       subCategory: "Build"
     )
     { }
 
-    bool Reuse(ref DB.Floor element, IList<Curve> boundaries, DB.FloorType type, DB.Level level, bool structural)
+    bool Reuse(ref DB.Ceiling element, IList<Curve> boundaries, DB.CeilingType type, DB.Level level)
     {
       if (element is null) return false;
 
@@ -97,30 +103,28 @@ namespace RhinoInside.Revit.GH.Components
         if (DB.Element.IsValidType(element.Document, new DB.ElementId[] { element.Id }, type.Id))
         {
           if (element.ChangeTypeId(type.Id) is DB.ElementId id && id != DB.ElementId.InvalidElementId)
-            element = element.Document.GetElement(id) as DB.Floor;
+            element = element.Document.GetElement(id) as DB.Ceiling;
         }
         else return false;
       }
 
       bool succeed = true;
-      succeed &= element.get_Parameter(DB.BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL).Update(structural ? 1 : 0);
       succeed &= element.get_Parameter(DB.BuiltInParameter.LEVEL_PARAM).Update(level.Id);
 
       return succeed;
     }
 
-    void ReconstructFloorByOutline
+    void ReconstructCeilingByOutline
     (
       [Optional, NickName("DOC")]
       DB.Document document,
 
-      [Description("New Floor")]
-      ref DB.Floor floor,
+      [Description("New Ceiling")]
+      ref DB.Ceiling ceiling,
 
       IList<Curve> boundary,
-      Optional<DB.FloorType> type,
-      Optional<DB.Level> level,
-      [Optional] bool structural
+      Optional<DB.CeilingType> type,
+      Optional<DB.Level> level
     )
     {
       if (boundary is null) return;
@@ -157,29 +161,21 @@ namespace RhinoInside.Revit.GH.Components
         index++;
       }
 
-#if !REVIT_2022
-      if (boundary.Count > 1)
-      {
-        boundary = new Curve[] { boundary[maxIndex] };
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Multiple boundary curves are only supported on Revit 2022 or above.");
-      }
-#endif
-
       if (type.HasValue && type.Value.Document.IsEquivalent(document) == false)
         ThrowArgumentException(nameof(type));
 
       if (level.HasValue && level.Value.Document.IsEquivalent(document) == false)
         ThrowArgumentException(nameof(level));
 
-      SolveOptionalType(document, ref type, DB.ElementTypeGroup.FloorType, nameof(type));
+      SolveOptionalType(document, ref type, DB.ElementTypeGroup.CeilingType, nameof(type));
 
       SolveOptionalLevel(document, boundary, ref level, out var bbox);
 
       if (boundary.Count == 0)
       {
-        floor = default;
+        ceiling = default;
       }
-      else if (!Reuse(ref floor, boundary, type.Value, level.Value, structural))
+      else if (!Reuse(ref ceiling, boundary, type.Value, level.Value))
       {
         var parametersMask = new DB.BuiltInParameter[]
         {
@@ -187,28 +183,22 @@ namespace RhinoInside.Revit.GH.Components
           DB.BuiltInParameter.ELEM_FAMILY_PARAM,
           DB.BuiltInParameter.ELEM_TYPE_PARAM,
           DB.BuiltInParameter.LEVEL_PARAM,
-          DB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM,
-          DB.BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL
+          DB.BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM
         };
 
 #if REVIT_2022
         var curveLoops = boundary.ConvertAll(GeometryEncoder.ToCurveLoop);
 
-        ReplaceElement(ref floor, DB.Floor.Create(document, curveLoops, type.Value.Id, level.Value.Id, structural, default, 0.0), parametersMask);
+        ReplaceElement(ref ceiling, DB.Ceiling.Create(document, curveLoops, type.Value.Id, level.Value.Id, default, 0.0), parametersMask);
 #else
-        var curveArray = boundary[0].ToCurveArray();
-
-        if (type.Value.IsFoundationSlab)
-          ReplaceElement(ref floor, document.Create.NewFoundationSlab(curveArray, type.Value, level.Value, structural, DB.XYZ.BasisZ), parametersMask);
-        else
-          ReplaceElement(ref floor, document.Create.NewFloor(curveArray, type.Value, level.Value, structural, DB.XYZ.BasisZ), parametersMask);
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"'{Name}' component is only supported on Revit 2022 or above.");
 #endif
       }
 
-      if (floor is object)
+      if (ceiling is object)
       {
         var heightAboveLevel = bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight();
-        floor.get_Parameter(DB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM)?.Update(heightAboveLevel);
+        ceiling.get_Parameter(DB.BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM)?.Update(heightAboveLevel);
       }
     }
   }

@@ -241,6 +241,7 @@
     <Compile Include="Components\Element\Beam\ByCurve.cs" />
     <Compile Include="Components\Element\BuildingPad\ByOutline.cs" />
     <Compile Include="Components\Element\AnalysisComponent.cs" />
+    <Compile Include="Components\Element\Ceiling\ByOutline.cs" />
     <Compile Include="Components\Element\CompoundStructureGeometry.cs" />
     <Compile Include="Components\Element\BoundingGeometry.cs" />
     <Compile Include="Components\Element\Delete.cs" />
