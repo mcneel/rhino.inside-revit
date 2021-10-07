@@ -131,15 +131,6 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
           Description = _Sheet_.tip,
         }
       ),
-      new ParamDefinition
-      (
-        new Parameters.FamilyInstance()
-        {
-          Name = _TitleBlock_.name,
-          NickName = _TitleBlock_.nickname,
-          Description = _TitleBlock_.tip,
-        }
-      ),
     };
 
     static readonly DB.BuiltInParameter[] ExcludeUniqueProperties =
@@ -286,16 +277,6 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
 
         Params.WriteTrackedElement(_Sheet_.name, doc.Value, sheet);
         DA.SetData(_Sheet_.name, sheet);
-
-        using (var collector = new DB.FilteredElementCollector(sheet.Document, sheet.Id))
-        {
-          var titleblock = collector.
-           OfCategory(DB.BuiltInCategory.OST_TitleBlocks).
-           WhereElementIsNotElementType().
-           FirstElement();
-
-          DA.SetData(_TitleBlock_.name, titleblock);
-        }
       }
     }
 
