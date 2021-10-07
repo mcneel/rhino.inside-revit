@@ -10,7 +10,7 @@ using RhinoInside.Revit.External.DB.Extensions;
 
 using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Assemblies
+namespace RhinoInside.Revit.GH.Components.Element.Assembly
 {
   public class AssemblyByCategory : ElementTrackerComponent
   {

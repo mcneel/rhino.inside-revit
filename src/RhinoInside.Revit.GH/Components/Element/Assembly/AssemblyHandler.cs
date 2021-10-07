@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Assemblies
+namespace RhinoInside.Revit.GH.Components.Element.Assembly
 {
   class AssemblyHandler
   {

@@ -5,7 +5,7 @@ using Grasshopper.Kernel;
 
 using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Assemblies
+namespace RhinoInside.Revit.GH.Components.Element.Assembly
 {
   public class AssemblyMembers : TransactionalChainComponent
   {
@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
     public AssemblyMembers() : base(
       name: "Assembly Members",
       nickname: "AM",
-      description: "Analyze and modify the members of given assembly",
+      description: "Get-Set accessor for assembly members",
       category: "Revit",
       subCategory: "Assembly"
     )

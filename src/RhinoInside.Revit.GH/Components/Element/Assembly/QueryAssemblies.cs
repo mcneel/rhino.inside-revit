@@ -5,7 +5,7 @@ using Grasshopper.Kernel.Parameters;
 
 using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Assemblies
+namespace RhinoInside.Revit.GH.Components.Element.Assembly
 {
   public class QueryAssemblies : ElementCollectorComponent
   {
