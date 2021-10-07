@@ -105,7 +105,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
           DB.FamilyInstance titleblock =
             sheet.Document.Create.NewFamilyInstance(new DB.XYZ(), tbSymbol, sheet);
 
-          DA.SetData(_TitleBlock_.name, titleblock);
+          DA.SetDataList(_TitleBlock_.name, new List<DB.FamilyInstance> { titleblock });
         }
       }
       else
