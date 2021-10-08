@@ -443,8 +443,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     internal static BuiltInParameter GetNameParameter(Type type)
     {
-      if (typeof(Family).IsAssignableFrom(type))
-        return BuiltInParameter.ALL_MODEL_FAMILY_NAME;
+      // `DB.Family` parameter `ALL_MODEL_FAMILY_NAME` use to be `null`.
+      //
+      // if (typeof(Family).IsAssignableFrom(type))
+      //   return BuiltInParameter.ALL_MODEL_FAMILY_NAME;
 
       if (typeof(ElementType).IsAssignableFrom(type))
         return BuiltInParameter.ALL_MODEL_TYPE_NAME;
