@@ -285,16 +285,18 @@ namespace RhinoInside.Revit.UI
         foreach (AddinUpdateChannel channel in prevChannels)
         {
           var releaseInfo = await AddinUpdater.GetReleaseInfoAsync(channel);
-          var downloadBtn = new LinkButton { Text = $"v{releaseInfo.Version}" };
-          downloadBtn.Click += (s, e) => Process.Start(releaseInfo.DownloadUrl);
-          var whatsNewButton = new LinkButton { Text = $"Release Notes" };
-          whatsNewButton.Click += (s, e) => Process.Start(releaseInfo.ReleaseNotesUrl);
+          if (releaseInfo is ReleaseInfo)
+          {
+            var downloadBtn = new LinkButton { Text = $"v{releaseInfo.Version}" };
+            downloadBtn.Click += (s, e) => Process.Start(releaseInfo.DownloadUrl);
+            var whatsNewButton = new LinkButton { Text = $"Release Notes" };
+            whatsNewButton.Click += (s, e) => Process.Start(releaseInfo.ReleaseNotesUrl);
 
-          infoTable.Rows.Add(
-            new TableRow
-            {
-              Cells =
+            infoTable.Rows.Add(
+              new TableRow
               {
+                Cells =
+                {
                 new ImageView
                 {
                   Width = 18,
@@ -310,8 +312,9 @@ namespace RhinoInside.Revit.UI
                 downloadBtn,
                 new Panel { Width = 20 },
                 whatsNewButton
-              }
-            });
+                }
+              });
+          }
         }
 
         _prevChannelsInfo.Content = infoTable;
