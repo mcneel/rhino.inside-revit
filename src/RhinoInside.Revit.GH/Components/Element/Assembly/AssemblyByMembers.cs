@@ -12,12 +12,12 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Element.Assembly
 {
-  public class AssemblyByCategory : ElementTrackerComponent
+  public class AssemblyByMembers : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("6915b697-f10d-4bc8-8faa-f25438f393a8");
     public override GH_Exposure Exposure => GH_Exposure.primary;
 
-    public AssemblyByCategory() : base
+    public AssemblyByMembers() : base
     (
       name: "Add Assembly",
       nickname: "Assembly",
@@ -35,22 +35,23 @@ namespace RhinoInside.Revit.GH.Components.Element.Assembly
     {
       new ParamDefinition
       (
-        new Parameters.Category()
-        {
-          Name = "Category",
-          NickName = "C",
-          Description = $"Category of the new assembly"
-        },
-        ParamRelevance.Primary
-      ),
-      new ParamDefinition
-      (
         new Parameters.Element()
         {
           Name = "Members",
           NickName = "M",
           Description = $"Elements to be members of the new assembly",
           Access = GH_ParamAccess.list
+        },
+        ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.Category()
+        {
+          Name = "Category",
+          NickName = "C",
+          Description = $"Category of the new assembly",
+          Optional = true
         },
         ParamRelevance.Primary
       ),
@@ -103,14 +104,11 @@ namespace RhinoInside.Revit.GH.Components.Element.Assembly
       // active document
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
 
-      var category = default(DB.Category);
-      if (!DA.GetData("Category", ref category))
-        return;
-
       var members = new List<DB.Element>();
       if (!DA.GetDataList("Members", members))
         return;
 
+      Params.TryGetData(DA, "Category", out DB.Category category);
       Params.TryGetData(DA, "Name", out string name);
       Params.TryGetData(DA, "Template", out DB.AssemblyInstance template);
 
@@ -120,7 +118,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Assembly
       // update, or create
       StartTransaction(doc.Value);
       {
-        assembly = Reconstruct(assembly, doc.Value, new AssemblyHandler(category, members)
+        assembly = Reconstruct(assembly, doc.Value, new AssemblyHandler(members, category)
         {
           Name = name,
           Template = template

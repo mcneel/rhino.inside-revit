@@ -86,7 +86,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Assembly
         {
           // set the assembly members to a new list. previous is cleared
           var memberdIds = newMembers.Select(x => x.Id).ToList();
-          var handler = new AssemblyHandler(assembly.NamingCategoryId, memberdIds);
+          var handler = new AssemblyHandler(memberdIds, assembly.NamingCategoryId);
 
           StartTransaction(assembly.Document);
           handler.UpdateAssemblyMembers(assembly);

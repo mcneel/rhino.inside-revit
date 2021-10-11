@@ -363,9 +363,9 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap AssemblyByCategory {
+        internal static System.Drawing.Bitmap AssemblyByLocation {
             get {
-                object obj = ResourceManager.GetObject("AssemblyByCategory", resourceCulture);
+                object obj = ResourceManager.GetObject("AssemblyByLocation", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -373,9 +373,9 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap AssemblyByLocation {
+        internal static System.Drawing.Bitmap AssemblyByMembers {
             get {
-                object obj = ResourceManager.GetObject("AssemblyByLocation", resourceCulture);
+                object obj = ResourceManager.GetObject("AssemblyByMembers", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

@@ -13,16 +13,23 @@ namespace RhinoInside.Revit.GH.Components.Element.Assembly
     public string Name { get; set; }
     public DB.AssemblyInstance Template { get; set; }
 
-    public AssemblyHandler(DB.ElementId categoryId, List<DB.ElementId> memberIds)
+    public AssemblyHandler(List<DB.ElementId> memberIds, DB.ElementId categoryId)
     {
-      CategoryId = categoryId;
       Members = memberIds;
+      CategoryId = categoryId;
     }
 
-    public AssemblyHandler(DB.Category category, List<DB.Element> members)
+    public AssemblyHandler(List<DB.Element> members, DB.Category category = null)
+      : this(
+          members.Select(m => m.Id).ToList(),
+          category?.Id ?? DB.ElementId.InvalidElementId
+          )
     {
-      CategoryId = category.Id;
-      Members = members.Select(e => e.Id).ToList();
+      if (CategoryId.Equals(DB.ElementId.InvalidElementId)
+          && members.Any()
+          && members.First().Category is DB.Category firstMemberCategory
+          )
+        CategoryId = firstMemberCategory.Id;
     }
 
     public DB.AssemblyInstance CreateAssembly(DB.Document doc)
@@ -66,7 +73,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Assembly
       // assembly instances do not support name assignment,
       // they are named by their type
       if (Name is string
-        && assembly.Document.GetElement(assembly.GetTypeId()) is DB.Element type)
+        && assembly.Document.GetElement(assembly.GetTypeId()) is DB.ElementType type)
         type.Name = name;
     }
   }

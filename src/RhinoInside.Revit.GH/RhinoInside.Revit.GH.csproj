@@ -234,7 +234,7 @@
     <Compile Include="Components\Element\Assembly\AssemblyByLocation.cs" />
     <Compile Include="Components\Element\Assembly\AssemblyHandler.cs" />
     <Compile Include="Components\Element\Assembly\AssemblyMembers.cs" />
-    <Compile Include="Components\Element\Assembly\AssemblyByCategory.cs" />
+    <Compile Include="Components\Element\Assembly\AssemblyByMembers.cs" />
     <Compile Include="Components\Element\Assembly\DisassembleAssembly.cs" />
     <Compile Include="Components\Element\Assembly\QueryAssemblies.cs" />
     <Compile Include="Components\Element\Assembly\AssemblyViews.cs" />
