@@ -2893,6 +2893,26 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap SheetByNumber_Assembly {
+            get {
+                object obj = ResourceManager.GetObject("SheetByNumber_Assembly", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SheetByNumber_Placeholder {
+            get {
+                object obj = ResourceManager.GetObject("SheetByNumber_Placeholder", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap SheetIdentity {
             get {
                 object obj = ResourceManager.GetObject("SheetIdentity", resourceCulture);
