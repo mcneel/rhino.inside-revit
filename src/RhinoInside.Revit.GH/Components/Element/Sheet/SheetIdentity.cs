@@ -43,7 +43,8 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       ParamDefinition.Create<Param_String>("Sheet Name", "N", relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_String>("Sheet Issue Date", "ID", relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Boolean>("Appears In Sheet List", "AISL", relevance: ParamRelevance.Primary),
-    };
+      ParamDefinition.Create<Parameters.AssemblyInstance>("Assembly", "A", "Assembly instance that owns the assembly view", GH_ParamAccess.item),
+  };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
@@ -71,6 +72,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       Params.TrySetData(DA, "Sheet Name", () => sheet.Name);
       Params.TrySetData(DA, "Sheet Issue Date", () => sheet.SheetIssueDate);
       Params.TrySetData(DA, "Appears In Sheet List", () => sheet.SheetScheduled);
+      DA.SetData("Assembly", new Types.AssemblyInstance(sheet.Document, sheet.Value.AssociatedAssemblyInstanceId));
     }
   }
 }

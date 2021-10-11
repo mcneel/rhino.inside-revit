@@ -5,9 +5,7 @@ using Grasshopper.Kernel;
 
 using DB = Autodesk.Revit.DB;
 
-using RhinoInside.Revit.GH.Kernel.Attributes;
-
-namespace RhinoInside.Revit.GH.Components.Assemblies
+namespace RhinoInside.Revit.GH.Components.Element.Assembly
 {
   [Since("v1.2")]
   public class AssemblyMembers : TransactionalChainComponent
@@ -19,7 +17,7 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
     public AssemblyMembers() : base(
       name: "Assembly Members",
       nickname: "AM",
-      description: "Analyze and modify the members of given assembly",
+      description: "Get-Set accessor for assembly members",
       category: "Revit",
       subCategory: "Assembly"
     )
@@ -89,7 +87,7 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
         {
           // set the assembly members to a new list. previous is cleared
           var memberdIds = newMembers.Select(x => x.Id).ToList();
-          var handler = new AssemblyHandler(assembly.NamingCategoryId, memberdIds);
+          var handler = new AssemblyHandler(memberdIds, assembly.NamingCategoryId);
 
           StartTransaction(assembly.Document);
           handler.UpdateAssemblyMembers(assembly);

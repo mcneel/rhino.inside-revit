@@ -9,11 +9,11 @@ using RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components.Element.Sheet
 {
-  [Since("v1.2")]
+  [Obsolete("Since v1.2")]
   public class QueryTitleBlockTypes : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("c7a57ec8-d4d3-4251-aa91-cc67f833313b");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.hidden;
     protected override DB.ElementFilter ElementFilter => CompoundElementFilter.Intersect
     (
       CompoundElementFilter.ElementIsElementTypeFilter(),

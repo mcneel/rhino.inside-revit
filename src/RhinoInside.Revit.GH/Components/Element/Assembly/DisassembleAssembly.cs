@@ -4,9 +4,7 @@ using Grasshopper.Kernel;
 
 using DB = Autodesk.Revit.DB;
 
-using RhinoInside.Revit.GH.Kernel.Attributes;
-
-namespace RhinoInside.Revit.GH.Components.Assemblies
+namespace RhinoInside.Revit.GH.Components.Element.Assembly
 {
   [Since("v1.2")]
   public class DisassembleAssembly : TransactionalChainComponent

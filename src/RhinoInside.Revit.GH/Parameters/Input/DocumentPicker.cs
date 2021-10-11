@@ -308,5 +308,45 @@ namespace RhinoInside.Revit.GH.Parameters.Input
     }
   }
 
+  public class DocumentTitleBlockSymbolPicker : DocumentElementPicker<Types.FamilySymbol>
+  {
+    public override Guid ComponentGuid => new Guid("f737745f-57ff-4699-a402-01a6db329313");
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    protected override DB.ElementFilter ElementFilter => new DB.ElementCategoryFilter(DB.BuiltInCategory.OST_TitleBlocks);
+
+    public DocumentTitleBlockSymbolPicker() : base
+    (
+      name: "Title Block Type Picker",
+      nickname: "TBTP",
+      description: "Provides a Title Block type picker",
+      category: "Revit",
+      subcategory: "Input"
+    )
+    { }
+
+    protected override void LoadVolatileData()
+    {
+      if (SourceCount == 0)
+      {
+        m_data.Clear();
+
+        if (Document.TryGetCurrentDocument(this, out var doc))
+        {
+          using (var collector = new DB.FilteredElementCollector(doc.Value).WherePasses(ElementFilter))
+          {
+            m_data.AppendRange(
+              collector.WhereElementIsElementType()
+                       .Cast<DB.FamilySymbol>()
+                       .Select(x => new Types.FamilySymbol(x))
+              );
+          }
+        }
+      }
+
+      base.LoadVolatileData();
+    }
+  }
+
+
   #endregion
 }
