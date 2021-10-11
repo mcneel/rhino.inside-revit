@@ -8,11 +8,11 @@ using RhinoInside.Revit.GH.Kernel.Attributes;
 
 namespace RhinoInside.Revit.GH.Components.Element.Sheet
 {
-  [Since("v1.2")]
+  [Obsolete("Since v1.2")]
   public class AnalyzeSheet : AnalysisComponent
   {
     public override Guid ComponentGuid => new Guid("15bac151-d31c-4c4d-8570-49cda0d58def");
-    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    public override GH_Exposure Exposure => GH_Exposure.hidden;
     protected override string IconTag => "AS";
 
     public AnalyzeSheet() : base(

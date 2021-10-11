@@ -6,32 +6,28 @@ using Grasshopper.Kernel.Parameters;
 
 using RhinoInside.Revit.GH.ElementTracking;
 using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 
 using DB = Autodesk.Revit.DB;
-
-using RhinoInside.Revit.GH.Kernel.Attributes;
 
 namespace RhinoInside.Revit.GH.Components.Element.Sheet
 {
   [Since("v1.2")]
-  public class SheetByNumber : BaseSheetByNumber<SheetHandler>
+  public class SheetByNumber_Placeholder : BaseSheetByNumber<PlaceholderSheetHandler>
   {
-    public override Guid ComponentGuid => new Guid("704d9c1b-fc56-4407-87cf-720047ae5875");
+    public override Guid ComponentGuid => new Guid("16f18871-6fe8-4dfb-a4f5-47826d582442");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
-    public SheetByNumber() : base
+    public SheetByNumber_Placeholder() : base
     (
-      name: "Add Sheet",
-      nickname: "Sheet",
-      description: "Create a new sheet in Revit with given number and name"
+      name: "Add Sheet (Placeholder)",
+      nickname: "Placeholder",
+      description: "Create a new placeholder sheet in Revit with given number and name"
     )
     { }
 
     static readonly (string name, string nickname, string tip) _Sheet_
     = (name: "Sheet", nickname: "S", tip: "Output Sheet");
-
-    static readonly (string name, string nickname, string tip) _TitleBlockType_
-      = (name: "Title Block Type", nickname: "TBT", tip: "Title Block type to use for Title Block");
 
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
@@ -63,27 +59,6 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
           Name = "Sheet Name",
           NickName = "N",
           Description = $"{_Sheet_.name} Name",
-        }
-      ),
-      new ParamDefinition
-      (
-        new Parameters.FamilySymbol()
-        {
-          Name = _TitleBlockType_.name,
-          NickName = _TitleBlockType_.nickname,
-          Description = _TitleBlockType_.tip,
-          Optional = true,
-          SelectedBuiltInCategory = DB.BuiltInCategory.OST_TitleBlocks
-        }
-      ),
-      new ParamDefinition
-      (
-        new Param_Boolean
-        {
-          Name = "Appears In Sheet List",
-          NickName = "AISL",
-          Description = $"Whether sheet appears on sheet lists",
-          Optional = true
         }
       ),
       new ParamDefinition
@@ -123,9 +98,6 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       // Note: see notes on SheetHandler.Name parameter
       if (!Params.TryGetData(DA, "Sheet Name", out string name, x => !string.IsNullOrEmpty(x))) return;
 
-      Params.TryGetData(DA, "Appears In Sheet List", out bool? scheduled);
-      Params.TryGetData(DA, _TitleBlockType_.name, out DB.FamilySymbol tblockType);
-
       Params.TryGetData(DA, "Template", out DB.ViewSheet template);
 
       // find any tracked sheet
@@ -134,11 +106,9 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       // update, or create
       StartTransaction(doc.Value);
       {
-        sheet = Reconstruct(sheet, doc.Value, new SheetHandler(number)
+        sheet = Reconstruct(sheet, doc.Value, new PlaceholderSheetHandler(number)
         {
           Name = name,
-          SheetScheduled = scheduled,
-          TitleBlockType = tblockType,
           Template = template
         });
 
