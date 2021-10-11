@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
-
+using RhinoInside.Revit.External.DB;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Filters
@@ -23,7 +23,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      DA.SetData("Filter", new DB.ElementIsElementTypeFilter(!inverted));
+      DA.SetData("Filter", CompoundElementFilter.ElementIsElementTypeFilter(!inverted));
     }
   }
 
@@ -75,15 +75,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
             filters.Add(new DB.ElementMulticlassFilter(types));
         }
 
-        if (filters.Count == 0)
-        {
-          var nothing = new DB.ElementFilter[] { new DB.ElementIsElementTypeFilter(true), new DB.ElementIsElementTypeFilter(false) };
-          DA.SetData("Filter", new DB.LogicalAndFilter(nothing));
-        }
-        else if (filters.Count == 1)
-          DA.SetData("Filter", filters[0]);
-        else
-          DA.SetData("Filter", new DB.LogicalOrFilter(filters));
+        DA.SetData("Filter", CompoundElementFilter.Union(filters));
       }
       catch (System.TypeLoadException e)
       {
@@ -122,19 +114,8 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      var ids = categoryIds.Select(x => x is null ? DB.ElementId.InvalidElementId : x).ToArray();
-      if (ids.Length == 0)
-      {
-        var nothing = new DB.ElementFilter[] { new DB.ElementIsElementTypeFilter(true), new DB.ElementIsElementTypeFilter(false) };
-        DA.SetData("Filter", new DB.LogicalAndFilter(nothing));
-      }
-      else
-      {
-        if (ids.Length == 1)
-          DA.SetData("Filter", new DB.ElementCategoryFilter(ids[0], inverted));
-        else
-          DA.SetData("Filter", new DB.ElementMulticategoryFilter(ids, inverted));
-      }
+      var ids = categoryIds.Where(x => x is object).ToList();
+      DA.SetData("Filter", CompoundElementFilter.ElementCategoryFilter(ids, inverted));
     }
   }
 
@@ -164,32 +145,9 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      if (types.Any())
-      {
-        var provider = new DB.ParameterValueProvider(new DB.ElementId(DB.BuiltInParameter.ELEM_TYPE_PARAM));
-
-        var typeIds = types.Select(x => x?.Id ?? DB.ElementId.InvalidElementId).ToArray();
-        if (typeIds.Length == 1)
-        {
-          var rule = new DB.FilterElementIdRule(provider, new DB.FilterNumericEquals(), typeIds[0]);
-          var filter = new DB.ElementParameterFilter(rule, inverted) as DB.ElementFilter;
-
-          DA.SetData("Filter", filter);
-        }
-        else
-        {
-          if (inverted)
-          {
-            var rules = typeIds.Select(x => new DB.FilterInverseRule(new DB.FilterElementIdRule(provider, new DB.FilterNumericEquals(), x))).ToArray();
-            DA.SetData("Filter", new DB.ElementParameterFilter(rules));
-          }
-          else
-          {
-            var filters = typeIds.Select(x => new DB.FilterElementIdRule(provider, new DB.FilterNumericEquals(), x)).Select(x => new DB.ElementParameterFilter(x)).ToArray();
-            DA.SetData("Filter", new DB.LogicalOrFilter(filters));
-          }
-        }
-      }
+      var filters = types.Where(x => x is object).ToList();
+      var filter = CompoundElementFilter.ElementTypeFilter(filters, inverted);
+      DA.SetData("Filter", filter);
     }
   }
 

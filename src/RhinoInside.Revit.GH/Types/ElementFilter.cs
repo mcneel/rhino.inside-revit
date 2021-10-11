@@ -1,6 +1,6 @@
 using System;
 using Grasshopper.Kernel.Types;
-using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.External.DB;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -80,6 +80,9 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (!IsValid)
         return $"Invalid {TypeName}";
+
+      if (ReferenceEquals(Value, CompoundElementFilter.Empty)) return "<empty>";
+      if (ReferenceEquals(Value, CompoundElementFilter.Full))  return "<full>";
 
       return $"{Value.GetType().Name}";
     }

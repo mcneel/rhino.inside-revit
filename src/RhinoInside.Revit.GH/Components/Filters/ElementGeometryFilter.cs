@@ -4,6 +4,7 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Filters
@@ -103,10 +104,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
             }
           );
 
-          var filterList = filters.ToArray();
-          filter = filterList.Length == 1 ?
-                   filterList[0] :
-                   new DB.LogicalOrFilter(filterList);
+          filter = CompoundElementFilter.Union(filters.ToArray());
         }
       }
 

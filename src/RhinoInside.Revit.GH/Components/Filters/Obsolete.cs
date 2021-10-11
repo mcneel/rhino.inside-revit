@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Obsolete
@@ -29,7 +30,7 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
       if (!DA.GetDataList("Filters", filters))
         return;
 
-      DA.SetData("Filter", new DB.LogicalAndFilter(filters));
+      DA.SetData("Filter", CompoundElementFilter.Intersect(filters));
     }
   }
 
@@ -55,7 +56,7 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
       if (!DA.GetDataList("Filters", filters))
         return;
 
-      DA.SetData("Filter", new DB.LogicalOrFilter(filters));
+      DA.SetData("Filter", CompoundElementFilter.Union(filters));
     }
   }
 
@@ -126,7 +127,7 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
       }
       else
       {
-        var filters = points.Select<Rhino.Geometry.Point3d, DB.ElementFilter>
+        var filters = points.ConvertAll<DB.ElementFilter>
         (
           x =>
           {
@@ -148,10 +149,7 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
           }
         );
 
-        var filterList = filters.ToArray();
-        filter = filterList.Length == 1 ?
-                 filterList[0] :
-                 new DB.LogicalOrFilter(filterList);
+        filter = CompoundElementFilter.Union(filters);
       }
 
       DA.SetData("Filter", filter);

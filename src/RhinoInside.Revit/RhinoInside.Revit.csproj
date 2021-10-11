@@ -240,6 +240,7 @@
     <Compile Include="External\DB\BuiltInLinePattern.cs" />
     <Compile Include="External\DB\BuiltInMullionPositionId.cs" />
     <Compile Include="External\DB\BuiltInMullionProfileId.cs" />
+    <Compile Include="External\DB\CompoundElementFilter.cs" />
     <Compile Include="External\DB\ElevationBase.cs" />
     <Compile Include="External\DB\Extensions\Application.cs" />
     <Compile Include="External\DB\Extensions\BasePoint.cs" />

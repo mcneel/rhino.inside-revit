@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.External.DB;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Filters
@@ -32,20 +33,11 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      if (levels.Count == 0)
-      {
-        var nothing = new DB.ElementFilter[] { new DB.ElementIsElementTypeFilter(true), new DB.ElementIsElementTypeFilter(false) };
-        DA.SetData("Filter", new DB.LogicalAndFilter(nothing));
-      }
-      else if (levels.Count == 1)
-      {
-        DA.SetData("Filter", new DB.ElementLevelFilter(levels[0]?.Id ?? DB.ElementId.InvalidElementId, inverted));
-      }
-      else
-      {
-        var filters = levels.Select(x => new DB.ElementLevelFilter(x?.Id ?? DB.ElementId.InvalidElementId, inverted)).ToList<DB.ElementFilter>();
-        DA.SetData("Filter", new DB.LogicalOrFilter(filters));
-      }
+      var filters = levels.Where(x => x is object).
+                    Select(x => new DB.ElementLevelFilter(x.Id, inverted)).
+                    ToList<DB.ElementFilter>();
+
+      DA.SetData("Filter", inverted ? CompoundElementFilter.Intersect(filters) : CompoundElementFilter.Union(filters));
     }
   }
 
@@ -56,31 +48,29 @@ namespace RhinoInside.Revit.GH.Components.Filters
     protected override string IconTag => "D";
 
     public ElementDesignOptionFilter()
-    : base("Design Option Filter", "DOptFiltr", "Filter used to match elements associated to the given Design Option", "Revit", "Filter")
+    : base("Design Option Filter", "OptnFltr", "Filter used to match elements associated to the given Design Option", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager[manager.AddParameter(new Parameters.Element(), "Design Option", "DO", "Design Option to match", GH_ParamAccess.item)].Optional = true;
+      var DesignOption = new Parameters.Element();
+      DesignOption.PersistentData.Append(new Types.DesignOption());
+
+      manager.AddParameter(DesignOption, "Design Option", "DO", "Design Option to match", GH_ParamAccess.item);
       base.RegisterInputParams(manager);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var designOption = default(DB.DesignOption);
-      var _DesignOption_ = Params.IndexOfInputParam("Design Option");
-      if
-      (
-        Params.Input[_DesignOption_].DataType != GH_ParamData.@void &&
-        !DA.GetData(_DesignOption_, ref designOption)
-      )
+      var designOption = default(Types.DesignOption);
+      if (!DA.GetData("Design Option", ref designOption))
         return;
 
       var inverted = false;
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      DA.SetData("Filter", new DB.ElementDesignOptionFilter(designOption?.Id ?? DB.ElementId.InvalidElementId, inverted));
+      DA.SetData("Filter", new DB.ElementDesignOptionFilter(designOption.Id, inverted));
     }
   }
 
@@ -91,7 +81,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
     protected override string IconTag => "P";
 
     public ElementPhaseStatusFilter()
-    : base("Phase Status Filter", "PhStFiltr", "Filter used to match elements associated to the given Phase status", "Revit", "Filter")
+    : base("Phase Status Filter", "PhaseFltr", "Filter used to match elements associated to the given Phase status", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -126,31 +116,29 @@ namespace RhinoInside.Revit.GH.Components.Filters
     protected override string IconTag => "V";
 
     public ElementOwnerViewFilter()
-    : base("Owner View Filter", "OViewFltr", "Filter used to match elements associated to the given View", "Revit", "Filter")
+    : base("Owner View Filter", "ViewFltr", "Filter used to match elements associated to the given View", "Revit", "Filter")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager[manager.AddParameter(new Parameters.View(), "View", "V", "View to match", GH_ParamAccess.item)].Optional = true;
+      var View = new Parameters.View();
+      View.PersistentData.Append(new Types.View());
+
+      manager.AddParameter(View, "View", "V", "View to query", GH_ParamAccess.item);
       base.RegisterInputParams(manager);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var view = default(DB.View);
-      var _View_ = Params.IndexOfInputParam("View");
-      if
-      (
-        Params.Input[_View_].DataType != GH_ParamData.@void &&
-        !DA.GetData(_View_, ref view)
-      )
+      var view = default(Types.View);
+      if (!DA.GetData("View", ref view))
         return;
 
       var inverted = false;
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      DA.SetData("Filter", new DB.ElementOwnerViewFilter(view?.Id ?? DB.ElementId.InvalidElementId, inverted));
+      DA.SetData("Filter", new DB.ElementOwnerViewFilter(view.Id, inverted));
     }
   }
 
@@ -166,13 +154,13 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager.AddParameter(new Parameters.View(), "View", "V", "View to match", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.View(), "View", "V", "View to query", GH_ParamAccess.item);
       base.RegisterInputParams(manager);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var view = default(DB.View);
+      var view = default(Types.View);
       if (!DA.GetData("View", ref view))
         return;
 

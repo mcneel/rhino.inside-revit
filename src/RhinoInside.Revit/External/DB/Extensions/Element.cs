@@ -156,7 +156,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         UpdaterRegistry.RegisterUpdater(this, isOptional: true);
 
         if (filter is null)
-          filter = new ElementCategoryFilter(BuiltInCategory.INVALID, true);
+          filter = CompoundElementFilter.Full;
 
         UpdaterRegistry.AddTrigger(UpdaterId, document, filter, Element.GetChangeTypeAny());
         UpdaterRegistry.AddTrigger(UpdaterId, document, filter, Element.GetChangeTypeElementDeletion());

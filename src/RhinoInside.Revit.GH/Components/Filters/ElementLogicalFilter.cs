@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.External.DB;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Filters
@@ -98,7 +99,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var filters = new List<DB.ElementFilter>();
+      var filters = new List<DB.ElementFilter>(Params.Input.Count);
       for (int i = 0; i < Params.Input.Count; ++i)
       {
         DB.ElementFilter filter = default;
@@ -106,8 +107,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
           filters.Add(filter);
       }
 
-      if (filters.Count > 0)
-        DA.SetData("Filter", new DB.LogicalAndFilter(filters));
+      DA.SetData("Filter", CompoundElementFilter.Intersect(filters));
     }
   }
 
@@ -123,7 +123,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var filters = new List<DB.ElementFilter>();
+      var filters = new List<DB.ElementFilter>(Params.Input.Count);
       for (int i = 0; i < Params.Input.Count; ++i)
       {
         DB.ElementFilter filter = default;
@@ -131,8 +131,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
           filters.Add(filter);
       }
 
-      if (filters.Count > 0)
-        DA.SetData("Filter", new DB.LogicalOrFilter(filters));
+      DA.SetData("Filter", CompoundElementFilter.Union(filters));
     }
   }
 
@@ -149,6 +148,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
       manager.AddParameter(new Parameters.Element(), "Elements", "E", "Elements to exclude", GH_ParamAccess.list);
+      base.RegisterInputParams(manager);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -157,9 +157,12 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!DA.GetDataList("Elements", elementIds))
         return;
 
-      var ids = elementIds.Where(x => x is object).ToArray();
-      if (ids.Length > 0)
-        DA.SetData("Filter", new DB.ExclusionFilter(ids));
+      var inverted = false;
+      if (!DA.GetData("Inverted", ref inverted))
+        return;
+
+      var ids = elementIds.Where(x => x is object).ToList();
+      DA.SetData("Filter", CompoundElementFilter.ExclusionFilter(ids, inverted));
     }
   }
 }
