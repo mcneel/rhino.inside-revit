@@ -110,7 +110,13 @@ namespace RhinoInside.Revit.GH.Components
           categories = categories.Where(x => x.Name.IsSymbolNameLike(name));
       }
 
-      DA.SetDataList("Categories", categories);
+      DA.SetDataList
+      (
+        "Categories",
+        categories.
+        Select(x => new Types.Category(x)).
+        TakeWhileIsNotEscapeKeyDown(this)
+      );
     }
   }
 }

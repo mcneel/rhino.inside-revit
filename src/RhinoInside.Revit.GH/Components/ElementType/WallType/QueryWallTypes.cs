@@ -38,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.ElementType>("WallTypes", "W", "Basic wall Types list", GH_ParamAccess.list)
+      ParamDefinition.Create<Parameters.ElementType>("Types", "T", "Wall Types list", GH_ParamAccess.list)
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -92,7 +92,13 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
         if (width.IsValid && wallKind != DB.WallKind.Basic)
           elements = elements.Where(x => width.IncludesParameter(x.Width * Revit.ModelUnits));
 
-        DA.SetDataList("WallTypes", elements);
+        DA.SetDataList
+        (
+          "Types",
+          elements.
+          Select(Types.ElementType.FromElement).
+          TakeWhileIsNotEscapeKeyDown(this)
+        );
       }
     }
   }

@@ -5,6 +5,7 @@ using Grasshopper.Kernel;
 using DB = Autodesk.Revit.DB;
 
 using RhinoInside.Revit.GH.Kernel.Attributes;
+using RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components.Element.Sheet
 {
@@ -13,7 +14,11 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
   {
     public override Guid ComponentGuid => new Guid("c7a57ec8-d4d3-4251-aa91-cc67f833313b");
     public override GH_Exposure Exposure => GH_Exposure.primary;
-    protected override DB.ElementFilter ElementFilter => new DB.ElementCategoryFilter(DB.BuiltInCategory.OST_TitleBlocks);
+    protected override DB.ElementFilter ElementFilter => CompoundElementFilter.Intersect
+    (
+      CompoundElementFilter.ElementIsElementTypeFilter(),
+      new DB.ElementCategoryFilter(DB.BuiltInCategory.OST_TitleBlocks)
+    );
 
     public QueryTitleBlockTypes() : base
     (
@@ -48,14 +53,20 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
 
       using (var collector = new DB.FilteredElementCollector(doc))
       {
-        var titleBlockTypeCollector = collector.WherePasses(ElementFilter);
+        var typesCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
-          titleBlockTypeCollector = titleBlockTypeCollector.WherePasses(filter);
+          typesCollector = typesCollector.WherePasses(filter);
 
-        var titleBlockTypes = titleBlockTypeCollector.WhereElementIsElementType().Cast<DB.ElementType>();
+        var titleBlockTypes = typesCollector.Cast<DB.ElementType>();
 
-        DA.SetDataList("Title Block Types", titleBlockTypes);
+        DA.SetDataList
+        (
+          "Title Block Types",
+          titleBlockTypes.
+          Select(Types.ElementType.FromElement).
+          TakeWhileIsNotEscapeKeyDown(this)
+        );
       }
     }
   }

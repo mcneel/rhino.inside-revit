@@ -78,7 +78,13 @@ namespace RhinoInside.Revit.GH.Components.DesignOption
         if (name is object)
           options = options.Where(x => x.get_Parameter(DB.BuiltInParameter.OPTION_SET_NAME).AsString().IsSymbolNameLike(name));
 
-        DA.SetDataList("Design Option Sets", options.Select(x => new Types.DesignOptionSet(x)));
+        DA.SetDataList
+        (
+          "Design Option Sets",
+          options.
+          Select(x => new Types.DesignOptionSet(x)).
+          TakeWhileIsNotEscapeKeyDown(this)
+        );
       }
     }
   }
@@ -178,7 +184,13 @@ namespace RhinoInside.Revit.GH.Components.DesignOption
           options = Enumerable.Repeat(default(DB.DesignOption), 1).Concat(options);
         }
 
-        DA.SetDataList("Design Options", options.Select(x => new Types.DesignOption(x)));
+        DA.SetDataList
+        (
+          "Design Options",
+          options.
+          Select(x => new Types.DesignOption(x)).
+          TakeWhileIsNotEscapeKeyDown(this)
+        );
       }
     }
   }

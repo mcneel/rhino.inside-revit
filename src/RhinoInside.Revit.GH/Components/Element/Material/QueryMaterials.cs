@@ -88,7 +88,13 @@ namespace RhinoInside.Revit.GH.Components.Material
         if (!string.IsNullOrEmpty(name))
           materials = materials.Where(x => x.Name.IsSymbolNameLike(name));
 
-        DA.SetDataList("Materials", materials);
+        DA.SetDataList
+        (
+          "Materials",
+          materials.
+          Select(x => new Types.Material(x)).
+          TakeWhileIsNotEscapeKeyDown(this)
+        );
       }
     }
   }

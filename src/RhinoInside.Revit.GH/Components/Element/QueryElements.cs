@@ -105,7 +105,7 @@ namespace RhinoInside.Revit.GH.Components
   {
     public override Guid ComponentGuid => new Guid("0F7DA57E-6C05-4DD0-AABF-69E42DF38859");
     public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
-    protected override DB.ElementFilter ElementFilter => new DB.ElementIsElementTypeFilter(true);
+    protected override DB.ElementFilter ElementFilter => CompoundElementFilter.ElementIsElementTypeFilter(inverted: true);
 
     static readonly string[] keywords = new string[] { "Count" };
     public override IEnumerable<string> Keywords => Enumerable.Concat(base.Keywords, keywords);
@@ -143,27 +143,32 @@ namespace RhinoInside.Revit.GH.Components
 
       using (var collector = new DB.FilteredElementCollector(doc))
       {
-        var elementCollector = collector.WherePasses(ElementFilter).WherePasses(filter.Value);
-        var elementCount = elementCollector.GetElementCount();
+        var elementCollector = collector.WherePasses(ElementFilter).
+          WherePasses(filter.Value);
 
+        var _Elements_ = Params.IndexOfOutputParam("Elements");
         Params.TrySetDataList(DA, "Elements", () =>
         {
           IEnumerable<DB.Element> elements = elementCollector;
           if (limit.HasValue)
           {
-            if (elementCount > limit)
-            {
-              var _Elements_ = Params.IndexOfOutputParam("Elements");
-              AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"'{Params.Output[_Elements_].NickName}' contains only first {limit} of {elementCount} total elements.");
-            }
-
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"'{Params.Output[_Elements_].NickName}' output is limited to {limit.Value} elements.{Environment.NewLine}Increase or remove 'Limit' input parameter to retreive more elements.");
             elements = elements.Take(limit.Value);
           }
 
-          return elements.Convert(Types.Element.FromElement);
+          return elements.
+            Convert(Types.Element.FromElement).
+            TakeWhileIsNotEscapeKeyDown(this);
         });
 
-        Params.TrySetData(DA, "Count", () => elementCount);
+        Params.TrySetData
+        (
+          DA,
+          "Count",
+          () => _Elements_ < 0 || limit.HasValue ?
+            elementCollector.GetElementCount() :
+            Params.Output[_Elements_].VolatileData.get_Branch(DA.ParameterTargetPath(_Elements_)).Count
+        );
       }
     }
   }
@@ -172,7 +177,7 @@ namespace RhinoInside.Revit.GH.Components
   {
     public override Guid ComponentGuid => new Guid("79DAEA3A-13A3-49BF-8BEB-AA28E3BE4515");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
-    protected override DB.ElementFilter ElementFilter => new DB.ElementIsElementTypeFilter(true);
+    protected override DB.ElementFilter ElementFilter => new DB.ElementIsElementTypeFilter(inverted: true);
 
     public QueryViewElements() : base
     (
@@ -198,39 +203,6 @@ namespace RhinoInside.Revit.GH.Components
       ParamDefinition.Create<Parameters.GraphicalElement>("Elements", "E", "Elements list", GH_ParamAccess.list)
     };
 
-    static DB.ElementFilter ElementCategoriesFilter(DB.Document doc, DB.ElementId[] ids)
-    {
-      var list = new List<DB.ElementFilter>();
-
-      if (ids.Length == 1)    list.Add(new DB.ElementCategoryFilter(ids[0]));
-      else if(ids.Length > 1) list.Add(new DB.ElementMulticategoryFilter(ids));
-
-      if (doc.IsFamilyDocument)
-      {
-        foreach (var id in ids)
-        {
-          using (var provider = new DB.ParameterValueProvider(new DB.ElementId(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY)))
-          using (var evaluator = new DB.FilterNumericEquals())
-          using (var rule = new DB.FilterElementIdRule(provider, evaluator, id))
-            list.Add(new DB.ElementParameterFilter(rule));
-        }
-      }
-
-      if (list.Count == 0)
-      {
-        var nothing = new DB.ElementFilter[] { new DB.ElementIsElementTypeFilter(true), new DB.ElementIsElementTypeFilter(false) };
-        return new DB.LogicalAndFilter(nothing);
-      }
-      else if (list.Count == 1)
-      {
-        return list[0];
-      }
-      else
-      {
-        return new DB.LogicalOrFilter(list);
-      }
-    }
-
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Params.GetData(DA, "View", out Types.View view, x => x.IsValid)) return;
@@ -247,7 +219,10 @@ namespace RhinoInside.Revit.GH.Components
             Where(x => x.IsValid && x.Document.Equals(view.Document)).
             Select(x => x.Id).ToArray();
 
-          elementCollector = elementCollector.WherePasses(ElementCategoriesFilter(view.Document, ids));
+          elementCollector = elementCollector.WherePasses
+          (
+            CompoundElementFilter.ElementCategoryFilter(ids, inverted: false, view.Document.IsFamilyDocument)
+          );
         }
 
         if (filter is object)
@@ -258,7 +233,8 @@ namespace RhinoInside.Revit.GH.Components
           "Elements",
           elementCollector.
           Where(x => Types.GraphicalElement.IsValidElement(x)).
-          Convert(Types.Element.FromElement)
+          Convert(Types.GraphicalElement.FromElement).
+          TakeWhileIsNotEscapeKeyDown(this)
         );
       }
     }

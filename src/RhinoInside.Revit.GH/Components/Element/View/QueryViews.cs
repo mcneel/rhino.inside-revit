@@ -118,7 +118,13 @@ namespace RhinoInside.Revit.GH.Components
         if (name is object)
           views = views.Where(x => x.Name.IsSymbolNameLike(name));
 
-        DA.SetDataList("Views", views);
+        DA.SetDataList
+        (
+          "Views",
+          views.
+          Select(Types.View.FromElement).
+          TakeWhileIsNotEscapeKeyDown(this)
+        );
       }
     }
   }

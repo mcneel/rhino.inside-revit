@@ -72,12 +72,18 @@ namespace RhinoInside.Revit.GH.Components.Phasing
         if (name is object && TryGetFilterStringParam(DB.BuiltInParameter.PHASE_NAME, ref name, out var nameFilter))
           phasesCollector = phasesCollector.WherePasses(nameFilter);
 
-        var options = collector.Cast<DB.Phase>();
+        var phases = collector.Cast<DB.Phase>();
 
         if (name is object)
-          options = options.Where(x => x.get_Parameter(DB.BuiltInParameter.PHASE_NAME).AsString().IsSymbolNameLike(name));
+          phases = phases.Where(x => x.get_Parameter(DB.BuiltInParameter.PHASE_NAME).AsString().IsSymbolNameLike(name));
 
-        DA.SetDataList("Phases", options.Select(x => new Types.Phase(x)));
+        DA.SetDataList
+        (
+          "Phases",
+          phases.
+          Select(x => new Types.Phase(x)).
+          TakeWhileIsNotEscapeKeyDown(this)
+        );
       }
     }
   }

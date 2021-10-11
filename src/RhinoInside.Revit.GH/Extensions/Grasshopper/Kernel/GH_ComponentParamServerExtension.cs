@@ -318,5 +318,23 @@ namespace Grasshopper.Kernel
       var index = parameters.Output.IndexOf(name, out var _);
       return index >= 0 && DA.SetDataList(index, list());
     }
+
+    internal static IEnumerable<TSource> TakeWhileIsNotEscapeKeyDown<TSource>
+      (this IEnumerable<TSource> source, IGH_DocumentObject documentObject)
+    {
+      if (source is null) throw new ArgumentNullException(nameof(source));
+      if (documentObject is null) throw new ArgumentNullException(nameof(documentObject));
+
+      foreach (TSource element in source)
+      {
+        if (GH_Document.IsEscapeKeyDown())
+        {
+          documentObject.OnPingDocument()?.RequestAbortSolution();
+          break;
+        }
+        yield return element;
+      }
+    }
+
   }
 }

@@ -162,7 +162,13 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
       // As any other Query component this should return elements sorted by Id.
       parameters = parameters.OrderBy(x => x.Id.IntegerValue);
 
-      DA.SetDataList("Parameter", parameters.Select(x => new Types.ParameterKey(doc, x)));
+      DA.SetDataList
+      (
+        "Parameter",
+        parameters.
+        Select(x => new Types.ParameterKey(doc, x)).
+        TakeWhileIsNotEscapeKeyDown(this)
+      );
     }
   }
 }

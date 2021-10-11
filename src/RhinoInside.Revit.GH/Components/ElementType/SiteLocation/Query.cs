@@ -75,7 +75,13 @@ namespace RhinoInside.Revit.GH.Components.Site
         if (name is object)
           locations = locations.Where(x => x.Name.IsSymbolNameLike(name));
 
-        DA.SetDataList("Site Locations", locations.Select(x => new Types.SiteLocation(x)));
+        DA.SetDataList
+        (
+          "Site Locations",
+          locations.
+          Select(x => new Types.SiteLocation(x)).
+          TakeWhileIsNotEscapeKeyDown(this)
+        );
       }
     }
   }

@@ -109,7 +109,13 @@ namespace RhinoInside.Revit.GH.Components
         if (name is object)
           styles = styles.Where(x => x.Name == name);
 
-        DA.SetDataList("Styles", styles);
+        DA.SetDataList
+        (
+          "Styles",
+          styles.
+          Select(x => new Types.GraphicsStyle(x)).
+          TakeWhileIsNotEscapeKeyDown(this)
+        );
       }
     }
   }

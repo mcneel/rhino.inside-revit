@@ -81,7 +81,12 @@ namespace RhinoInside.Revit.GH.Components.Worksets
         if (name is object)
           worksets = worksets.Where(x => x.Name.IsSymbolNameLike(name));
 
-        DA.SetDataList("Worksets", worksets.Select(x => new Types.Workset(doc, x)));
+        DA.SetDataList
+        (
+          "Worksets",
+          worksets.Select(x => new Types.Workset(doc, x)).
+          TakeWhileIsNotEscapeKeyDown(this)
+        );
       }
     }
   }

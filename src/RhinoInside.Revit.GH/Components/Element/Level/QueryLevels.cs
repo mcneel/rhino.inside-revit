@@ -82,7 +82,13 @@ namespace RhinoInside.Revit.GH.Components.Level
           levels = levels.Where(x => height.IncludesParameter(x.GetHeight(), false));
         }
 
-        DA.SetDataList("Levels", levels);
+        DA.SetDataList
+        (
+          "Levels",
+          levels.
+          Select(x => new Types.Level(x)).
+          TakeWhileIsNotEscapeKeyDown(this)
+        );
       }
     }
   }

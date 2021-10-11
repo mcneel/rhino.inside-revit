@@ -95,7 +95,13 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
         if (!nofilterIsAssemblySheet)
           sheets = sheets.Where((x) => x.IsAssemblyView == IsAssemblySheet);
 
-        DA.SetDataList("Sheets", sheets);
+        DA.SetDataList
+        (
+          "Sheets",
+          sheets.
+          Select(x => new Types.ViewSheet(x)).
+          TakeWhileIsNotEscapeKeyDown(this)
+        );
       }
     }
   }

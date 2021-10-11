@@ -65,7 +65,16 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
 
         var assemblies = assemblyCollector.Cast<DB.AssemblyInstance>();
 
-        DA.SetDataList("Assemblies", assemblies);
+        if (!string.IsNullOrEmpty(name))
+          assemblies = assemblies.Where(x => x.Name.IsSymbolNameLike(name));
+
+        DA.SetDataList
+        (
+          "Assemblies",
+          assemblies.
+          Select(x => new Types.AssemblyInstance(x)).
+          TakeWhileIsNotEscapeKeyDown(this)
+        );
       }
     }
   }

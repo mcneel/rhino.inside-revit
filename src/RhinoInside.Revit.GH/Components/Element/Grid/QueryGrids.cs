@@ -80,7 +80,13 @@ namespace RhinoInside.Revit.GH.Components
           );
         }
 
-        DA.SetDataList("Grids", grids);
+        DA.SetDataList
+        (
+          "Grids",
+          grids.
+          Select(x => new Types.Grid(x)).
+          TakeWhileIsNotEscapeKeyDown(this)
+        );
       }
     }
   }

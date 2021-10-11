@@ -63,15 +63,21 @@ namespace RhinoInside.Revit.GH.Components
         if (TryGetFilterStringParam(DB.BuiltInParameter.ALL_MODEL_TYPE_NAME, ref name, out var nameFilter))
           elementCollector = elementCollector.WherePasses(nameFilter);
 
-        var elements = collector.Cast<DB.ViewFamilyType>();
+        var types = collector.Cast<DB.ViewFamilyType>();
 
         if (viewFamily != DB.ViewFamily.Invalid)
-          elements = elements.Where(x => x.ViewFamily == viewFamily);
+          types = types.Where(x => x.ViewFamily == viewFamily);
 
         if (!string.IsNullOrEmpty(name))
-          elements = elements.Where(x => x.Name.IsSymbolNameLike(name));
+          types = types.Where(x => x.Name.IsSymbolNameLike(name));
 
-        DA.SetDataList("Types", elements);
+        DA.SetDataList
+        (
+          "Types",
+          types.
+          Select(Types.ElementType.FromElement).
+          TakeWhileIsNotEscapeKeyDown(this)
+        );
       }
     }
   }

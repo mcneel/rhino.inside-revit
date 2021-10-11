@@ -61,23 +61,21 @@ namespace RhinoInside.Revit.GH.Components
       // collect wall instances based on the given wallkind
       using (var collector = new DB.FilteredElementCollector(doc))
       {
-        IEnumerable<Types.Element> walls;
+        var wallsCollector = collector.WherePasses(ElementFilter);
+        var walls = wallsCollector.Cast<DB.Wall>();
 
         if (wallKind == DB.WallKind.Basic)
-        {
-          walls = collector.OfClass(typeof(DB.Wall))
-                                   .Cast<DB.Wall>()
-                                   .Where(x => x.WallType.Kind == wallKind && !x.IsStackedWallMember)
-                                   .Select(x => Types.Element.FromElement(x));
-        }
+          walls = walls.Where(x => x.WallType.Kind == wallKind && !x.IsStackedWallMember);
         else
-        {
-          walls = collector.OfClass(typeof(DB.Wall))
-                                   .Where(x => ((DB.Wall) x).WallType.Kind == wallKind)
-                                   .Select(x => Types.Element.FromElement(x));
-        }
+          walls = walls.Where(x => x.WallType.Kind == wallKind);
 
-        DA.SetDataList("Walls", walls);
+        DA.SetDataList
+        (
+          "Walls",
+          walls.
+          Select(Types.Element.FromElement).
+          TakeWhileIsNotEscapeKeyDown(this)
+        );
       }
     }
   }

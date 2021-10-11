@@ -74,7 +74,13 @@ namespace RhinoInside.Revit.GH.Components
         if (name is object)
           elementTypes = elementTypes.Where(x => x.Name.IsSymbolNameLike(name));
 
-        DA.SetDataList("Types", elementTypes.Select(x => new Types.ElementType(x)));
+        DA.SetDataList
+        (
+          "Types",
+          elementTypes.
+          Select(Types.ElementType.FromElement).
+          TakeWhileIsNotEscapeKeyDown(this)
+        );
       }
     }
 

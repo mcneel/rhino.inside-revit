@@ -67,7 +67,7 @@ namespace RhinoInside.Revit.GH.Components
       {
         var filtersCollector = collector.WherePasses(ElementFilter);
 
-        var filters = collector.Cast<DB.FilterElement>();
+        var filters = filtersCollector.TakeWhileIsNotEscapeKeyDown(this).Cast<DB.FilterElement>();
 
         if (!string.IsNullOrEmpty(name))
           filters = filters.Where(x => x.Name.IsSymbolNameLike(name));

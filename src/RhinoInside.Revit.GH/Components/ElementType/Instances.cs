@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.Convert.System.Collections.Generic;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
@@ -58,7 +59,8 @@ namespace RhinoInside.Revit.GH.Components
           "Elements",
           elementCollector.
           WhereTypeIdEqualsTo(elementType.Id).
-          Select(x => Types.Element.FromElement(x))
+          Select(Types.Element.FromElement).
+          TakeWhileIsNotEscapeKeyDown(this)
         );
       }
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
+using RhinoInside.Revit.External.DB;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
@@ -12,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components
   {
     public override Guid ComponentGuid => new Guid("B6C377BA-BC46-495C-8250-F09DB0219C91");
     public override GH_Exposure Exposure => GH_Exposure.primary;
-    protected override DB.ElementFilter ElementFilter => new DB.ElementIsElementTypeFilter(false);
+    protected override DB.ElementFilter ElementFilter => CompoundElementFilter.ElementIsElementTypeFilter();
 
     public QueryFamilies() : base
     (
@@ -83,13 +84,24 @@ namespace RhinoInside.Revit.GH.Components
         if (TryGetFilterStringParam(DB.BuiltInParameter.SYMBOL_FAMILY_NAME_PARAM, ref name, out var nameFilter))
           elementCollector = elementCollector.WherePasses(nameFilter);
 
-        var familiesSet = new HashSet<DB.ElementType>(elementCollector.Cast<DB.ElementType>(), default(FamilyNameComparer));
+        var familiesSet = new HashSet<DB.ElementType>
+        (
+          elementCollector.
+          TakeWhileIsNotEscapeKeyDown(this).
+          Cast<DB.ElementType>(),
+          default(FamilyNameComparer)
+        );
 
         var families = name is null ?
           familiesSet :
           familiesSet.Where(x => x.FamilyName.IsSymbolNameLike(name));
 
-        DA.SetDataList("Families", families.Select(x => x.FamilyName));
+        DA.SetDataList
+        (
+          "Families",
+          families.
+          Select(x => x.FamilyName)
+        );
       }
     }
 

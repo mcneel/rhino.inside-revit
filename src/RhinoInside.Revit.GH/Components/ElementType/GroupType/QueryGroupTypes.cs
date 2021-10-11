@@ -64,7 +64,13 @@ namespace RhinoInside.Revit.GH.Components
         if (!string.IsNullOrEmpty(name))
           groupTypes = groupTypes.Where(x => x.Name.IsSymbolNameLike(name));
 
-        DA.SetDataList("Types", groupTypes);
+        DA.SetDataList
+        (
+          "Types",
+          groupTypes.
+          Select(Types.Element.FromElement).
+          TakeWhileIsNotEscapeKeyDown(this)
+        );
       }
     }
   }

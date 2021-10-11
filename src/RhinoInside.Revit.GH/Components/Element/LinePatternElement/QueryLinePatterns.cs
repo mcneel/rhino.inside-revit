@@ -81,7 +81,12 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElement
         if (!string.IsNullOrEmpty(name))
           patterns = patterns.Where(x => x.Name.IsSymbolNameLike(name));
 
-        DA.SetDataList("Line Patterns", patterns);
+        DA.SetDataList
+        (
+          "Line Patterns",
+          patterns.
+          TakeWhileIsNotEscapeKeyDown(this)
+        );
       }
     }
   }
