@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Types
     internal static readonly DB.ElementFilter IsValidElementFilter = new DB.LogicalAndFilter
     (
       new DB.ElementCategoryFilter(DB.BuiltInCategory.OST_DesignOptionSets),
-#if REVIT_2022
+#if REVIT_2021
       new DB.ElementParameterFilter(new DB.HasValueFilterRule(new DB.ElementId(DB.BuiltInParameter.OPTION_SET_NAME)))
 #else
       new DB.ElementParameterFilter
