@@ -160,6 +160,9 @@ namespace RhinoInside.Revit.GH.Components
         foreach (DB.ViewType value in Enum.GetValues(typeof(DB.ViewType)))
         {
           var paramName = $"{value}";
+          if (Types.ViewType.NamedValues.TryGetValue((int)value, out string name))
+            paramName = name;
+          
           var paramNickname = paramName.Substring(0, 1);
           var paramTip = $"Views of type \"{paramName}\"";
 
