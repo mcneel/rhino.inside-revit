@@ -13,6 +13,7 @@ using RhinoInside.Revit.GH.Kernel.Attributes;
 
 namespace RhinoInside.Revit.GH.Components.Element.Sheet
 {
+  [Since("v1.2")]
   public class SheetByNumber : BaseSheetByNumber<SheetHandler>
   {
     public override Guid ComponentGuid => new Guid("704d9c1b-fc56-4407-87cf-720047ae5875");

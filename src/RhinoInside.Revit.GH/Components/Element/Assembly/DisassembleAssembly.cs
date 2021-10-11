@@ -2,6 +2,8 @@ using System;
 using System.Linq;
 using Grasshopper.Kernel;
 
+using RhinoInside.Revit.GH.Kernel.Attributes;
+
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Element.Assembly

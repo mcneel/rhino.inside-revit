@@ -3,11 +3,14 @@ using System.Linq;
 using System.Collections.Generic;
 using Grasshopper.Kernel;
 
+using RhinoInside.Revit.GH.Kernel.Attributes;
+
 using DB = Autodesk.Revit.DB;
 using CR = Autodesk.Revit.Creation;
 
 namespace RhinoInside.Revit.GH.Components.Element.Sheet
 {
+  [Since("v1.2")]
   public class SheetTitleBlock : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("f2f3d866-5a62-40c0-a85b-c417183e0a52");

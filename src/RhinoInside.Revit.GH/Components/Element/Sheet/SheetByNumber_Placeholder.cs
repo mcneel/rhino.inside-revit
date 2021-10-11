@@ -6,11 +6,13 @@ using Grasshopper.Kernel.Parameters;
 
 using RhinoInside.Revit.GH.ElementTracking;
 using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.GH.Kernel.Attributes;
 
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Element.Sheet
 {
+  [Since("v1.2")]
   public class SheetByNumber_Placeholder : BaseSheetByNumber<PlaceholderSheetHandler>
   {
     public override Guid ComponentGuid => new Guid("16f18871-6fe8-4dfb-a4f5-47826d582442");
