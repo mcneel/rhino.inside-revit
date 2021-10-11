@@ -54,7 +54,7 @@ namespace RhinoInside.Revit.External.DB
 
     #region Generic Filters
     public static ElementFilter ElementIsElementTypeFilter(bool inverted = false) => inverted ?
-      ElementIsElementTypeFilterInstance : ElementIsNotElementTypeFilterInstance;
+      ElementIsNotElementTypeFilterInstance : ElementIsElementTypeFilterInstance;
 
     public static ElementFilter ElementCategoryFilter(IList<ElementId> categoryIds, bool inverted = false, bool includeSubCategories = false)
     {
