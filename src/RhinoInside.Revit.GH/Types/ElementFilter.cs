@@ -15,6 +15,23 @@ namespace RhinoInside.Revit.GH.Types
     public SelectionFilterElement() { }
     public SelectionFilterElement(DB.Document doc, DB.ElementId id) : base(doc, id) { }
     public SelectionFilterElement(DB.SelectionFilterElement value) : base(value) { }
+
+    public override bool CastTo<Q>(out Q target)
+    {
+      if (base.CastTo<Q>(out target))
+        return true;
+
+      if (Value is DB.SelectionFilterElement value)
+      {
+        if (typeof(Q).IsAssignableFrom(typeof(ElementFilter)))
+        {
+          target = (Q) (object) new ElementFilter(CompoundElementFilter.ExclusionFilter(value.GetElementIds(), inverted: true));
+          return true;
+        }
+      }
+
+      return false;
+    }
   }
 
   [Kernel.Attributes.Name("Parameter Filter")]
