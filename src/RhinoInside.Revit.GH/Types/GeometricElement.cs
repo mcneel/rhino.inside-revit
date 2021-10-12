@@ -76,7 +76,12 @@ namespace RhinoInside.Revit.GH.Types
       out DB.Material[] materials, out Mesh[] meshes, out Curve[] wires
     )
     {
-      using (var options = new DB.Options() { DetailLevel = detailLevel == DB.ViewDetailLevel.Undefined ? DB.ViewDetailLevel.Medium : detailLevel })
+      using
+      (
+        var options = element.ViewSpecific ?
+        new DB.Options() { View = element.Document.GetElement(element.OwnerViewId) as DB.View } :
+        new DB.Options() { DetailLevel = detailLevel == DB.ViewDetailLevel.Undefined ? DB.ViewDetailLevel.Medium : detailLevel }
+      )
       using (var geometry = element?.GetGeometry(options))
       {
         if (geometry is null)
@@ -94,7 +99,7 @@ namespace RhinoInside.Revit.GH.Types
           meshes = geometry.GetPreviewMeshes(element.Document, meshingParameters).ToArray();
           materials = geometry.GetPreviewMaterials(element.Document, elementMaterial).ToArray();
 
-          if (wires.Length == 0 && meshes.Length == 0 && element.get_BoundingBox(null) is DB.BoundingBoxXYZ)
+          if (wires.Length == 0 && meshes.Length == 0 && element.get_BoundingBox(options.View) is DB.BoundingBoxXYZ)
           {
             var subMeshes = new List<Mesh>();
             var subWires = new List<Curve>();
@@ -102,10 +107,15 @@ namespace RhinoInside.Revit.GH.Types
 
             foreach (var dependent in element.GetDependentElements(null).Select(x => element.Document.GetElement(x)))
             {
-              if (dependent.get_BoundingBox(null) is null)
+              if (dependent.GetBoundingBoxXYZ(out var view) is null)
                 continue;
 
-              using (var dependentOptions = new DB.Options() { DetailLevel = detailLevel == DB.ViewDetailLevel.Undefined ? DB.ViewDetailLevel.Medium : detailLevel })
+              using
+              (
+                var dependentOptions = view is object ?
+                new DB.Options() { View = view } :
+                new DB.Options() { DetailLevel = detailLevel == DB.ViewDetailLevel.Undefined ? DB.ViewDetailLevel.Medium : detailLevel }
+              )
               using (var dependentGeometry = dependent?.GetGeometry(dependentOptions))
               {
                 if (dependentGeometry is object)

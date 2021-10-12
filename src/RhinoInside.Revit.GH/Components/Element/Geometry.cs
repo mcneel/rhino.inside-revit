@@ -96,7 +96,7 @@ namespace RhinoInside.Revit.GH.Components
             var path = basePath.AppendElement(index++);
             geometries.EnsurePath(path);
 
-            if (element.IsValid() && element.get_BoundingBox(null) is object)
+            if (element.IsValid() && element.get_BoundingBox(options.View) is object)
             {
               // Extract the geometry
               using (var geometry = element.GetGeometry(options))
@@ -119,7 +119,7 @@ namespace RhinoInside.Revit.GH.Components
                     {
                       foreach (var dependent in element.GetDependentElements(new DB.ExclusionFilter(new DB.ElementId[] { element.Id })).Select(x => element.Document.GetElement(x)))
                       {
-                        if (dependent.get_BoundingBox(null) is DB.BoundingBoxXYZ)
+                        if (dependent.get_BoundingBox(options.View) is DB.BoundingBoxXYZ)
                         {
                           using (var dependentGeometry = dependent?.GetGeometry(options))
                           {

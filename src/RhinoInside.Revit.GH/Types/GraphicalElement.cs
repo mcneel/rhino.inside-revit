@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH.Types
         if (location is object) return true;
       }
 
-      using (var bbox = element.get_BoundingBox(null))
+      using (var bbox = element.GetBoundingBoxXYZ())
       {
         return bbox is object;
       }
@@ -82,7 +82,7 @@ namespace RhinoInside.Revit.GH.Types
       if (Value is DB.Element)
       {
         var bbox = BoundingBox;
-        if(bbox.Transform(xform))
+        if (bbox.Transform(xform))
           return bbox;
       }
 
@@ -273,7 +273,7 @@ namespace RhinoInside.Revit.GH.Types
     /// Accurate axis aligned <see cref="Rhino.Geometry.BoundingBox"/> for computation.
     /// </summary>
     public virtual BoundingBox BoundingBox => Value is DB.Element element ?
-      element.get_BoundingBox(null).ToBoundingBox() :
+      element.GetBoundingBoxXYZ().ToBoundingBox() :
       NaN.BoundingBox;
 
     /// <summary>
@@ -287,7 +287,7 @@ namespace RhinoInside.Revit.GH.Types
         {
           var plane = Location;
           if (!Location.IsValid)
-            return element.get_BoundingBox(null).ToBox();
+            return element.GetBoundingBoxXYZ().ToBox();
 
           var xform = Transform.ChangeBasis(Plane.WorldXY, plane);
           var bbox = GetBoundingBox(xform);
