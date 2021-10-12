@@ -288,6 +288,15 @@ namespace RhinoInside.Revit.GH.Components
       // If we read from a previous version some parameters may need to be adjusted.
       if (ComponentVersion < CurrentVersion)
       {
+        if (Activator.CreateInstance(GetType()) is IGH_Component prototype)
+        {
+          Name = prototype.Name;
+          NickName = prototype.NickName;
+          Description = prototype.Description;
+          Category = prototype.Category;
+          SubCategory = prototype.SubCategory;
+        }
+
         document.DestroyObjectTable();
 
         // PerformLayout here to obtain parameters pivots.

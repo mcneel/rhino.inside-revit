@@ -16,13 +16,13 @@ namespace RhinoInside.Revit.GH.Components
   public class ClusterViewsByType : Component, IGH_VariableParameterComponent
   {
     public override Guid ComponentGuid => new Guid("f6b99fe2-19e1-4840-96c1-13873a0aece8");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => "BV";
 
     public ClusterViewsByType() : base
     (
-      name: "Cluster Views By Family",
-      nickname: "BV",
+      name: "Cluster Views (Family)",
+      nickname: "Views By Family",
       description: "Split a list of views into separate clusters by their family",
       category: "Revit",
       subCategory: "View"

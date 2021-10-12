@@ -7,7 +7,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
   public class SheetIdentity : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("CADF5FBB-9DEA-4B9F-8214-9897CEC0E54A");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
     public SheetIdentity() : base
     (
