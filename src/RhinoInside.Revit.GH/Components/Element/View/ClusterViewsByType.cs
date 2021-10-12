@@ -157,18 +157,26 @@ namespace RhinoInside.Revit.GH.Components
 
       else
       {
-        foreach (DB.ViewType value in Enum.GetValues(typeof(DB.ViewType)))
+        var values = Enum.GetValues(typeof(DB.ViewType)).Cast<DB.ViewType>().
+          Select
+          (
+            x =>
+            {
+              var name = x.ToString();
+              Types.ViewType.NamedValues.TryGetValue((int) x, out name);
+              return (Name: name, ViewType: x);
+            }
+          ).Where(x => x.Name is object);
+
+        foreach (var value in values.OrderBy(x => x.Name))
         {
-          var paramName = $"{value}";
-          if (Types.ViewType.NamedValues.TryGetValue((int)value, out string name))
-            paramName = name;
-          
+          var paramName = value.Name;          
           var paramNickname = paramName.Substring(0, 1);
           var paramTip = $"Views of type \"{paramName}\"";
 
           var param = default(IGH_Param);
           var paramSetter = default(Func<IEnumerable<DB.View>, IEnumerable<Types.Element>>);
-          switch (value)
+          switch (value.ViewType)
           {
             case DB.ViewType.Undefined:
             case DB.ViewType.Internal:
@@ -183,7 +191,7 @@ namespace RhinoInside.Revit.GH.Components
 
             default:
               param = new Parameters.View();
-              paramSetter = vs => vs.Where(v => v.ViewType == value).Select(x => Types.View.FromElement(x));
+              paramSetter = vs => vs.Where(v => v.ViewType == value.ViewType).Select(x => Types.View.FromElement(x));
               break;
           }
 
