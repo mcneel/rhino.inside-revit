@@ -1,9 +1,10 @@
 using System;
 using System.Linq;
-using DB = Autodesk.Revit.DB;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
+using RhinoInside.Revit.External.DB;
 using RhinoInside.Revit.External.DB.Extensions;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -27,6 +28,7 @@ namespace RhinoInside.Revit.GH.Components
     static readonly ParamDefinition[] inputs =
     {
       new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      ParamDefinition.Create<Parameters.Param_Enum<Types.ElementKind>>("Kind", "K", string.Empty, GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Parameters.Category>("Category", "C", string.Empty, GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_String>("Family Name", "FN", string.Empty, GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_String>("Name", "N",string.Empty, GH_ParamAccess.item, optional: true),
@@ -42,6 +44,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
+      if (!Params.TryGetData(DA, "Kind", out Types.ElementKind kind)) return;
       if (!Params.TryGetData(DA, "Category", out Types.Category category)) return;
       if (!Params.TryGetData(DA, "Family Name", out string familyName)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
@@ -53,6 +56,9 @@ namespace RhinoInside.Revit.GH.Components
       using (var collector = new DB.FilteredElementCollector(doc))
       {
         var elementCollector = collector.WherePasses(ElementFilter);
+
+        if (kind is object && CompoundElementFilter.ElementKindFilter(kind.Value, elementType: true) is DB.ElementFilter kindFilter)
+          elementCollector = elementCollector.WherePasses(kindFilter);
 
         if (category is object)
           elementCollector.WhereCategoryIdEqualsTo(category.Id);

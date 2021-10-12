@@ -94,7 +94,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
     protected override string IconTag => "∧";
 
     public ElementLogicalAndFilter()
-    : base("Logical And Filter", "AndFltr", "Filter used to combine a set of filters that pass when any pass", "Revit", "Filter")
+    : base("Logical And Filter", "AndFltr", "Filter used to combine a set of filters that pass when all pass", "Revit", "Filter")
     { }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)

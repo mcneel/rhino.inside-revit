@@ -119,6 +119,50 @@ namespace RhinoInside.Revit.GH.Components.Filters
     }
   }
 
+  public class ElementFamilyFilter : ElementFilterComponent
+  {
+    public override Guid ComponentGuid => new Guid("B344F1C1-F37D-4A1A-83B3-65A34FE946D2");
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    protected override string IconTag => "F";
+
+    public ElementFamilyFilter()
+    : base("Family Filter", "FamFltr", "Filter used to match elements by their family", "Revit", "Filter")
+    { }
+
+    protected override void RegisterInputParams(GH_InputParamManager manager)
+    {
+      manager[manager.AddParameter(new Parameters.Param_Enum<Types.ElementKind>(), "Kind", "K", "Kind to match", GH_ParamAccess.item)].Optional = true;
+      manager[manager.AddTextParameter("Family Name", "FN", "Family Name to match", GH_ParamAccess.item)].Optional = true;
+      manager[manager.AddTextParameter("Type Name", "TN", "Type Name to match", GH_ParamAccess.item)].Optional = true;
+      base.RegisterInputParams(manager);
+    }
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      if (!Params.TryGetData(DA, "Kind", out ElementKind? kind)) return;
+      if (!Params.TryGetData(DA, "Family Name", out string familyName)) return;
+      if (!Params.TryGetData(DA, "Type Name", out string typeName)) return;
+      if (!Params.GetData(DA, "Inverted", out bool? inverted)) return;
+
+      var filters = new List<DB.ElementFilter>(3);
+      if (kind.HasValue)
+        filters.Add(CompoundElementFilter.ElementKindFilter(kind.Value, elementType: default, inverted.Value));
+
+      if (familyName is object)
+        filters.Add(CompoundElementFilter.ElementFamilyNameFilter(familyName, inverted.Value));
+      //else
+      //  filters.Add(CompoundElementFilter.ElementFamilyNameFilter(string.Empty, inverted: true));
+
+      if (typeName is object)
+        filters.Add(CompoundElementFilter.ElementTypeNameFilter(typeName, inverted.Value));
+      else if (familyName is null)
+        filters.Add(CompoundElementFilter.ElementTypeNameFilter(string.Empty, inverted: true));
+
+      var filter = inverted.Value ? CompoundElementFilter.Union(filters) : CompoundElementFilter.Intersect(filters);
+      DA.SetData("Filter", filter);
+    }
+  }
+
   public class ElementTypeFilter : ElementFilterComponent
   {
     public override Guid ComponentGuid => new Guid("4434C470-4CAF-4178-929D-284C3B5A24B5");

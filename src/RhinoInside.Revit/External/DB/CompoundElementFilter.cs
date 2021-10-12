@@ -14,6 +14,8 @@ namespace RhinoInside.Revit.External.DB
     private static FilterNumericRuleEvaluator NumericEqualsEvaluator { get; } = new FilterNumericEquals();
     private static ParameterValueProvider IdParamProvider { get; } = new ParameterValueProvider(new ElementId(BuiltInParameter.ID_PARAM));
     private static ParameterValueProvider SubCategoryParamProvider { get; } = new ParameterValueProvider(new ElementId(BuiltInParameter.FAMILY_ELEM_SUBCATEGORY));
+    private static ParameterValueProvider FamilyNameParamProvider { get; } = new ParameterValueProvider(new ElementId(BuiltInParameter.ALL_MODEL_FAMILY_NAME));
+    private static ParameterValueProvider TypeNameParamProvider { get; } = new ParameterValueProvider(new ElementId(BuiltInParameter.ALL_MODEL_TYPE_NAME));
     private static ParameterValueProvider ElemTypeParamProvider { get; } = new ParameterValueProvider(new ElementId(BuiltInParameter.ELEM_TYPE_PARAM));
 
 #if REVIT_2021
@@ -53,6 +55,41 @@ namespace RhinoInside.Revit.External.DB
     #endregion
 
     #region Generic Filters
+    public static ElementFilter ElementKindFilter(ElementKind kind, bool? elementType, bool inverted = false)
+    {
+      var filters = new List<ElementFilter>();
+
+      if (inverted)
+      {
+        kind = (kind.HasFlag(ElementKind.System) ?    ElementKind.None : ElementKind.System) |
+               (kind.HasFlag(ElementKind.Component) ? ElementKind.None : ElementKind.Component) |
+               (kind.HasFlag(ElementKind.Direct) ?    ElementKind.None : ElementKind.Direct);
+      }
+
+      if (kind.HasFlag(ElementKind.Component) != kind.HasFlag(ElementKind.System))
+      {
+        if (elementType != true)
+          filters.Add(new ElementClassFilter(typeof(FamilyInstance), kind.HasFlag(ElementKind.System)));
+
+        if (elementType != false)
+          filters.Add(new ElementClassFilter(typeof(FamilySymbol), kind.HasFlag(ElementKind.System)));
+      }
+
+      if (kind.HasFlag(ElementKind.Direct) != kind.HasFlag(ElementKind.System))
+      {
+        if (elementType != true)
+          filters.Add(new ElementClassFilter(typeof(DirectShape), kind.HasFlag(ElementKind.System)));
+
+        if (elementType != false)
+          filters.Add(new ElementClassFilter(typeof(DirectShapeType), kind.HasFlag(ElementKind.System)));
+      }
+
+      return filters.Count == 0 ? default :
+        kind.HasFlag(ElementKind.System) ?
+        Intersect(filters) :
+        Union(filters);
+    }
+
     public static ElementFilter ElementIsElementTypeFilter(bool inverted = false) => inverted ?
       ElementIsNotElementTypeFilterInstance : ElementIsElementTypeFilterInstance;
 
@@ -90,6 +127,24 @@ namespace RhinoInside.Revit.External.DB
       );
 
       return inverted ? Intersect(filters) : Union(filters);
+    }
+
+    internal static ElementFilter ElementFamilyNameFilter(string familyName, bool inverted = false)
+    {
+      using (var evaluator = new FilterStringEquals())
+      using (var rule = new FilterStringRule(FamilyNameParamProvider, evaluator, familyName, caseSensitive: true))
+      {
+        return new ElementParameterFilter(rule, inverted);
+      }
+    }
+
+    internal static ElementFilter ElementTypeNameFilter(string typeName, bool inverted = false)
+    {
+      using (var evaluator = new FilterStringEquals())
+      using (var rule = new FilterStringRule(TypeNameParamProvider, evaluator, typeName, caseSensitive: true))
+      {
+        return new ElementParameterFilter(rule, inverted);
+      }
     }
 
     static ElementFilter ElementTypeFilter(ElementType elementType, bool inverted = false)
@@ -190,13 +245,14 @@ namespace RhinoInside.Revit.External.DB
       if (filters.Count == 1) return filters[0];
 
       var list = new List<ElementFilter>(filters.Count);
-      foreach (var filter in filters)
+      foreach (var filter in filters.Distinct())
       {
         if (ReferenceEquals(filter, Full)) return Full;
         if (ReferenceEquals(filter, Empty)) continue;
         list.Add(filter);
       }
 
+      if (list.Count == 1) return list[0];
       return new LogicalOrFilter(list);
     }
 
@@ -219,16 +275,16 @@ namespace RhinoInside.Revit.External.DB
     public static ElementFilter Intersect(IList<ElementFilter> filters)
     {
       if (filters.Count == 0) return Empty;
-      if (filters.Count == 1) return filters[0];
 
       var list = new List<ElementFilter>(filters.Count);
-      foreach (var filter in filters)
+      foreach (var filter in filters.Distinct())
       {
         if (ReferenceEquals(filter, Empty)) return Empty;
         if (ReferenceEquals(filter, Full)) continue;
         list.Add(filter);
       }
 
+      if (list.Count == 1) return list[0];
       return new LogicalAndFilter(list);
     }
 

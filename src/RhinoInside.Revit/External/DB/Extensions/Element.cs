@@ -67,6 +67,21 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return true;
     }
 
+    public static ElementKind GetElementKind(this Element element)
+    {
+      switch (element)
+      {
+        case DirectShape     _: return ElementKind.Direct;
+        case DirectShapeType _: return ElementKind.Direct;
+        case FamilyInstance  _: return ElementKind.Component;
+        case FamilySymbol    _: return ElementKind.Component;
+        case Family          _: return ElementKind.Component;
+        case Element         _: return ElementKind.System;
+      }
+
+      return ElementKind.None;
+    }
+
     public static bool CanBeRenamed(this Element element)
     {
       if (element is null) return false;

@@ -14,6 +14,16 @@ namespace RhinoInside.Revit.GH.Types
   using RhinoInside.Revit.External.DB.Extensions;
 
   [
+    ComponentGuid("4615F47E-A20E-448A-A5DB-AF3473867E3D"),
+    Name("Element Kind"),
+    Description("Contains a collection of Revit element kind values"),
+  ]
+  public class ElementKind : GH_Enum<DBX.ElementKind>
+  {
+    public override bool IsEmpty => Value == DBX.ElementKind.None;
+  }
+
+  [
     ComponentGuid("83088978-8B44-4154-ABC9-A7CA53CA65E5"),
     Name("Parameter Class"),
     Description("Contains a collection of Revit Parameter class values"),

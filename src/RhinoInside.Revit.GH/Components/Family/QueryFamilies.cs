@@ -29,6 +29,7 @@ namespace RhinoInside.Revit.GH.Components
     static readonly ParamDefinition[] inputs =
     {
       new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      ParamDefinition.Create<Parameters.Param_Enum<Types.ElementKind>>("Kind", "K", string.Empty, GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Parameters.Category>("Category", "C", string.Empty, GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_String>("Name", "N", string.Empty, GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true),
@@ -47,18 +48,21 @@ namespace RhinoInside.Revit.GH.Components
         if (ReferenceEquals(x, y))
           return true;
 
-        var familyNameX = x.FamilyName;
-        var isSystemTypeX = x is DB.FamilySymbol;
+        var categoryIdX = x?.Category?.Id ?? DB.ElementId.InvalidElementId;
+        var familyNameX = x?.FamilyName;
+        var kindX = x.GetElementKind();
 
-        var familyNameY = y.FamilyName;
-        var isSystemTypeY = y is DB.FamilySymbol;
+        var categoryIdY = y?.Category?.Id ?? DB.ElementId.InvalidElementId;
+        var familyNameY = y?.FamilyName;
+        var kindY = y.GetElementKind();
 
-        return (isSystemTypeX == isSystemTypeY) && (familyNameX == familyNameY);
+        return (kindX == kindY) && (categoryIdX == categoryIdY) && (familyNameX == familyNameY);
       }
 
       public int GetHashCode(DB.ElementType obj) => new
       {
-        IsSystemType = obj is DB.FamilySymbol,
+        Category = (obj?.Category?.Id ?? DB.ElementId.InvalidElementId).IntegerValue,
+        Kind = obj.GetElementKind(),
         FamilyName = obj?.FamilyName
       }.
       GetHashCode();
@@ -67,16 +71,20 @@ namespace RhinoInside.Revit.GH.Components
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
-      Params.GetData(DA, "Category", out Types.Category category);
-      Params.GetData(DA, "Name", out string name);
-      Params.GetData(DA, "Filter", out DB.ElementFilter filter);
+      if (!Params.TryGetData(DA, "Kind", out Types.ElementKind kind)) return;
+      if (!Params.TryGetData(DA, "Category", out Types.Category category)) return;
+      if (!Params.TryGetData(DA, "Name", out string name)) return;
+      if (!Params.TryGetData(DA, "Filter", out DB.ElementFilter filter)) return;
 
       using (var collector = new DB.FilteredElementCollector(doc))
       {
         var elementCollector = collector.WherePasses(ElementFilter);
 
+        if (kind is object && CompoundElementFilter.ElementKindFilter(kind.Value, elementType: true) is DB.ElementFilter kindFilter)
+          elementCollector = elementCollector.WherePasses(kindFilter);
+
         if (category is object)
-          elementCollector.WhereCategoryIdEqualsTo(category.Id);
+          elementCollector = elementCollector.WhereCategoryIdEqualsTo(category.Id);
 
         if (filter is object)
           elementCollector = elementCollector.WherePasses(filter);
