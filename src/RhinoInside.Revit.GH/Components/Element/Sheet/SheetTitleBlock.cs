@@ -8,7 +8,7 @@ using CR = Autodesk.Revit.Creation;
 
 namespace RhinoInside.Revit.GH.Components.Element.Sheet
 {
-  public class SheetTitleBlock : TransactionalChainComponent
+  class SheetTitleBlock : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("f2f3d866-5a62-40c0-a85b-c417183e0a52");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
