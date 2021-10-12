@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
   public class QuerySheets : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("97c8cb27-955f-44cf-948d-dfbde285cd7a");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
     protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.ViewSheet));
 
     public QuerySheets() : base

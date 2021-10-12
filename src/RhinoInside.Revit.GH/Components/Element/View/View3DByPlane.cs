@@ -11,12 +11,12 @@ namespace RhinoInside.Revit.GH.Components.Views
   public class View3DByPlane : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("F7B775C9-05E0-40F7-85E9-5CC2EF79731E");
-    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
     public View3DByPlane() : base
     (
-      name: "Add View3D",
-      nickname: "View3D",
+      name: "Add 3D View",
+      nickname: "3D View",
       description: "Given a plane, it adds a 3D View to the active Revit document",
       category: "Revit",
       subCategory: "View"

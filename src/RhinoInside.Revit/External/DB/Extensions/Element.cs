@@ -110,6 +110,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return element.Name == name;
     }
 
+    public static BoundingBoxXYZ GetBoundingBoxXYZ(this Element element, out View view)
+    {
+      view = element.ViewSpecific ? element.Document.GetElement(element.OwnerViewId) as View : default;
+      return element.get_BoundingBox(view);
+    }
+
+    public static BoundingBoxXYZ GetBoundingBoxXYZ(this Element element)
+    {
+      using (var view = element.ViewSpecific ? element.Document.GetElement(element.OwnerViewId) as View : default)
+        return element.get_BoundingBox(view);
+    }
+
     public static GeometryElement GetGeometry(this Element element, Options options)
     {
       if (!element.IsValid())
