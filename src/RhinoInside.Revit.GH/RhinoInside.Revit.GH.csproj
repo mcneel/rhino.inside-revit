@@ -237,7 +237,6 @@
     <Compile Include="Components\Element\Assembly\AssemblyByMembers.cs" />
     <Compile Include="Components\Element\Assembly\DisassembleAssembly.cs" />
     <Compile Include="Components\Element\Assembly\QueryAssemblies.cs" />
-    <Compile Include="Components\Element\Assembly\AssemblyViews.cs" />
     <Compile Include="Components\Element\Beam\ByCurve.cs" />
     <Compile Include="Components\Element\BuildingPad\ByOutline.cs" />
     <Compile Include="Components\Element\AnalysisComponent.cs" />
