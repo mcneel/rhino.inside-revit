@@ -309,12 +309,12 @@
     <Compile Include="Components\Element\Railing\ByCurve.cs" />
     <Compile Include="Components\Element\Roof\ByOutline.cs" />
     <Compile Include="Components\Element\SelectDeselectElement.cs" />
-    <Compile Include="Components\Element\Sheet\AnalyzeSheet.cs" />
     <Compile Include="Components\Element\Sheet\BaseSheetTypes.cs" />
     <Compile Include="Components\Element\Sheet\QuerySheets.cs" />
     <Compile Include="Components\Element\Sheet\QueryTitleBlockTypes.cs" />
     <Compile Include="Components\Element\Sheet\SheetByNumber_Assembly.cs" />
     <Compile Include="Components\Element\Sheet\SheetByNumber_Placeholder.cs" />
+    <Compile Include="Components\Element\Sheet\QuerySheets.cs" />
     <Compile Include="Components\Element\Sheet\SheetIdentity.cs" />
     <Compile Include="Components\Element\Sheet\SheetTitleBlock.cs" />
     <Compile Include="Components\Element\SketchPlane\ByPlane.cs" />

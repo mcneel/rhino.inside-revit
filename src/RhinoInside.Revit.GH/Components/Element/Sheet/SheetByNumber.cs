@@ -30,9 +30,6 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
     static readonly (string name, string nickname, string tip) _Sheet_
     = (name: "Sheet", nickname: "S", tip: "Output Sheet");
 
-    static readonly (string name, string nickname, string tip) _TitleBlockType_
-      = (name: "Title Block Type", nickname: "TBT", tip: "Title Block type to use for Title Block");
-
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
@@ -63,17 +60,6 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
           Name = "Sheet Name",
           NickName = "N",
           Description = $"{_Sheet_.name} Name",
-        }
-      ),
-      new ParamDefinition
-      (
-        new Parameters.FamilySymbol()
-        {
-          Name = _TitleBlockType_.name,
-          NickName = _TitleBlockType_.nickname,
-          Description = _TitleBlockType_.tip,
-          Optional = true,
-          SelectedBuiltInCategory = DB.BuiltInCategory.OST_TitleBlocks
         }
       ),
       new ParamDefinition
@@ -124,7 +110,6 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       if (!Params.TryGetData(DA, "Sheet Name", out string name, x => !string.IsNullOrEmpty(x))) return;
 
       Params.TryGetData(DA, "Appears In Sheet List", out bool? scheduled);
-      Params.TryGetData(DA, _TitleBlockType_.name, out DB.FamilySymbol tblockType);
 
       Params.TryGetData(DA, "Template", out DB.ViewSheet template);
 
@@ -138,7 +123,6 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
         {
           Name = name,
           SheetScheduled = scheduled,
-          TitleBlockType = tblockType,
           Template = template
         });
 

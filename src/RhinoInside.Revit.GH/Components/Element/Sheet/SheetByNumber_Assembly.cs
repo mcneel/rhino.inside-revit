@@ -13,7 +13,7 @@ using DB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Components.Element.Sheet
 {
   [Since("v1.2")]
-  public class SheetByNumber_Assembly : BaseSheetByNumber<AssemblySheetHandler>
+  class SheetByNumber_Assembly : BaseSheetByNumber<AssemblySheetHandler>
   {
     public override Guid ComponentGuid => new Guid("68ad9e6a-d39e-4cda-9e41-3eb311d0cf2b");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;

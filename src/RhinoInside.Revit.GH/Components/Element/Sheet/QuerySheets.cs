@@ -31,11 +31,12 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
     static readonly ParamDefinition[] inputs =
     {
       new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
-      ParamDefinition.Create<Param_String>("Number", "NO", "Sheet number", GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Param_String>("Name", "N", "Sheet name", GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Param_Boolean>("Is Placeholder", "IPH", "Sheet is placeholder", false, GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Param_Boolean>("Is Indexed", "IIDX", "Sheet appears on sheet lists", true, GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Param_Boolean>("Is Assembly Sheet", "IAS", "Sheet belongs to a Revit assembly", false, GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_Boolean>("Placeholder", "PH", "Sheet is placeholder", false, GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_String>("Sheet Number", "NUM", "Sheet number", GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_String>("Sheet Name", "N", "Sheet name", GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_String>("Sheet Issue Date", "ID", "Sheet issue date", GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_Boolean>("Appears In Sheet List", "AISL", "Sheet appears on sheet lists", true, GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Parameters.AssemblyInstance>("Assembly", "A", "Assembly the view belongs to", new Types.AssemblyInstance(), GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true),
     };
 
@@ -50,23 +51,26 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
         return;
 
-      string number = null;
-      DA.GetData("Number", ref number);
-
-      string name = null;
-      DA.GetData("Name", ref name);
-
       bool IsPlaceholder = false;
-      var _IsPlaceholder_ = Params.IndexOfInputParam("Is Placeholder");
+      var _IsPlaceholder_ = Params.IndexOfInputParam("Placeholder");
       bool nofilterIsPlaceholder = (!DA.GetData(_IsPlaceholder_, ref IsPlaceholder) && Params.Input[_IsPlaceholder_].DataType == GH_ParamData.@void);
 
-      bool IsIndexed = false;
-      var _IsIndexed_ = Params.IndexOfInputParam("Is Indexed");
-      bool nofilterIsIndexed = (!DA.GetData(_IsIndexed_, ref IsIndexed) && Params.Input[_IsIndexed_].DataType == GH_ParamData.@void);
+      string number = null;
+      DA.GetData("Sheet Number", ref number);
 
-      bool IsAssemblySheet = false;
-      var _IsAssemblySheet_ = Params.IndexOfInputParam("Is Assembly Sheet");
-      bool nofilterIsAssemblySheet = (!DA.GetData(_IsAssemblySheet_, ref IsAssemblySheet) && Params.Input[_IsAssemblySheet_].DataType == GH_ParamData.@void);
+      string name = null;
+      DA.GetData("Sheet Name", ref name);
+
+      string date = null;
+      DA.GetData("Sheet Issue Date", ref date);
+
+      bool IsScheduled = false;
+      var _IsScheduled_ = Params.IndexOfInputParam("Appears In Sheet List");
+      bool nofilterIsScheduled = (!DA.GetData(_IsScheduled_, ref IsScheduled) && Params.Input[_IsScheduled_].DataType == GH_ParamData.@void);
+
+      var Assembly = default(Types.AssemblyInstance);
+      var _Assembly_ = Params.IndexOfInputParam("Assembly");
+      bool noFilterAssembly = (!DA.GetData(_Assembly_, ref Assembly) && Params.Input[_Assembly_].DataType == GH_ParamData.@void);
 
       DB.ElementFilter filter = null;
       DA.GetData("Filter", ref filter);
@@ -84,16 +88,19 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
         if (TryGetFilterStringParam(DB.BuiltInParameter.SHEET_NAME, ref name, out var sheetNameFilter))
           sheetsCollector = sheetsCollector.WherePasses(sheetNameFilter);
 
+        if (TryGetFilterStringParam(DB.BuiltInParameter.SHEET_ISSUE_DATE, ref date, out var sheetIssueDateFilter))
+          sheetsCollector = sheetsCollector.WherePasses(sheetIssueDateFilter);
+
+        if (!nofilterIsScheduled)
+          sheetsCollector = sheetsCollector.WhereParameterEqualsTo(DB.BuiltInParameter.SHEET_SCHEDULED, IsScheduled ? 1 : 0);
+
+        if (!noFilterAssembly && TryGetFilterElementIdParam(DB.BuiltInParameter.VIEW_ASSOCIATED_ASSEMBLY_INSTANCE_ID, Assembly?.Id ?? DB.ElementId.InvalidElementId, out var assemblyFilter))
+          sheetsCollector = sheetsCollector.WherePasses(assemblyFilter);
+
         var sheets = sheetsCollector.Cast<DB.ViewSheet>();
 
         if (!nofilterIsPlaceholder)
           sheets = sheets.Where((x) => x.IsPlaceholder == IsPlaceholder);
-
-        if (!nofilterIsIndexed)
-          sheets = sheets.Where((x) => x.GetParameterValue<bool>(DB.BuiltInParameter.SHEET_SCHEDULED) == IsIndexed);
-
-        if (!nofilterIsAssemblySheet)
-          sheets = sheets.Where((x) => x.IsAssemblyView == IsAssemblySheet);
 
         DA.SetDataList
         (

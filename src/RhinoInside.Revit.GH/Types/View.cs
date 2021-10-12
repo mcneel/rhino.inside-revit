@@ -15,8 +15,6 @@ namespace RhinoInside.Revit.GH.Types
     public static explicit operator DB.View(View value) => value?.Value;
     public new DB.View Value => base.Value as DB.View;
 
-    string IGH_Goo.TypeName => Value?.IsTemplate == true ? "Revit View Template" : "Revit View";
-
     public View() { }
     public View(DB.Document doc, DB.ElementId id) : base(doc, id) { }
     public View(DB.View view) : base(view) { }

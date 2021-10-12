@@ -25,12 +25,14 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
 
     protected DB.ViewSheet Reconstruct(DB.ViewSheet sheet, DB.Document doc, TSheetHandler handler)
     {
-      if (sheet is null || !Reuse(sheet, handler))
+      if (!Reuse(sheet, handler))
+      {
         sheet = sheet.ReplaceElement
         (
           Create(doc, handler),
           BaseSheetHandler.ExcludeUniqueProperties
         );
+      }
 
       return sheet;
     }
@@ -40,7 +42,9 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       if (!handler.CanUpdateSheet(sheet))
       {
         // let's change the sheet number so other sheets can be created with same id
-        sheet.SheetNumber = sheet.UniqueId;
+        if (sheet is object)
+          sheet.SheetNumber = sheet.UniqueId;
+
         return false;
       }
       else
@@ -85,43 +89,11 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
 
     public bool? SheetScheduled { get; set; }
 
-    public DB.FamilySymbol TitleBlockType { get; set; }
-
     public DB.ViewSheet Template { get; set; }
 
     public abstract DB.ViewSheet CreateSheet(DB.Document doc);
 
-    public virtual bool CanUpdateSheet(DB.ViewSheet sheet)
-    {
-      bool canUpdate = true;
-
-      // if titleblock on existing does not match the titleblock provided (or not),
-      // on the inputs, do not reuse so Revit places tblock by default at proper location
-      // and whether sheet has titleblock or not matches the input
-      var tblocks = new DB.FilteredElementCollector(sheet.Document, sheet.Id).
-        WhereElementIsNotElementType().
-        OfCategory(DB.BuiltInCategory.OST_TitleBlocks);
-
-      var blocksCount = tblocks.GetElementCount();
-      if (TitleBlockType is DB.ElementType tblockType)
-      {
-        if (blocksCount == 1)
-        {
-          var tblock = tblocks.FirstElement();
-          if (!tblock.GetTypeId().Equals(tblockType.Id))
-            canUpdate = false;
-        }
-        else canUpdate = false;
-      }
-      else if (blocksCount > 0)
-        canUpdate = false;
-
-      // placeholders are handled by another component
-      if (sheet.IsPlaceholder)
-        canUpdate = false;
-
-      return canUpdate;
-    }
+    public virtual bool CanUpdateSheet(DB.ViewSheet sheet) => sheet is object;
 
     public virtual void UpdateSheet(DB.ViewSheet sheet)
     {
@@ -155,22 +127,16 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
   {
     public SheetHandler(string number) : base(number) { }
 
-    public override DB.ViewSheet CreateSheet(DB.Document doc)
-    {
-      // determine titleblock to use
-      var tblockId = TitleBlockType?.Id ?? DB.ElementId.InvalidElementId;
-      return DB.ViewSheet.Create(doc, tblockId);
-    }
+    public override DB.ViewSheet CreateSheet(DB.Document doc) =>
+      DB.ViewSheet.Create(doc, DB.ElementId.InvalidElementId);
   }
 
   public class PlaceholderSheetHandler : BaseSheetHandler
   {
     public PlaceholderSheetHandler(string number) : base(number) { }
 
-    public override DB.ViewSheet CreateSheet(DB.Document doc)
-      => DB.ViewSheet.CreatePlaceholder(doc);
-
-    public override bool CanUpdateSheet(DB.ViewSheet sheet) => sheet.IsPlaceholder;
+    public override DB.ViewSheet CreateSheet(DB.Document doc) =>
+      DB.ViewSheet.CreatePlaceholder(doc);
   }
 
   public class AssemblySheetHandler : BaseSheetHandler
@@ -181,20 +147,17 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
 
     public override DB.ViewSheet CreateSheet(DB.Document doc)
     {
-      // determine titleblock to use
-      var tblockId = TitleBlockType?.Id ?? DB.ElementId.InvalidElementId;
-      if (Assembly is DB.AssemblyInstance assm)
-        return DB.AssemblyViewUtils.CreateSheet(assm.Document, assm.Id, tblockId);
-      return null;
+      return Assembly is DB.AssemblyInstance assm ?
+        DB.AssemblyViewUtils.CreateSheet(assm.Document, assm.Id, DB.ElementId.InvalidElementId) :
+        null;
     }
 
     public override bool CanUpdateSheet(DB.ViewSheet sheet)
     {
-      if (sheet.AssemblyInstanceId != Assembly.Id)
+      if (!base.CanUpdateSheet(sheet))
         return false;
 
-      return base.CanUpdateSheet(sheet);
+      return sheet.AssemblyInstanceId == Assembly.Id;
     }
   }
 }
-

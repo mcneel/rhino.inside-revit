@@ -313,10 +313,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       base.AppendAdditionalComponentMenuItems(menu);
 
-#if DEBUG
-      // TODO : Keep thinking on Simulated Transactions feature
       Menu_AppendItem(menu, "Simulated", Menu_SimulatedClicked, true, Simulated);
-#endif
     }
 
     private void Menu_SimulatedClicked(object sender, EventArgs e)

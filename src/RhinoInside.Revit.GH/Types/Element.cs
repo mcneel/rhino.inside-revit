@@ -134,7 +134,6 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(DB.Phase),                   (element)=> new Phase                 (element as DB.Phase)             },
       { typeof(DB.SelectionFilterElement),  (element)=> new SelectionFilterElement(element as DB.SelectionFilterElement)},
       { typeof(DB.ParameterFilterElement),  (element)=> new ParameterFilterElement(element as DB.ParameterFilterElement)},
-      { typeof(DB.View),                    (element)=> new View                  (element as DB.View)              },
       { typeof(DB.Family),                  (element)=> new Family                (element as DB.Family)            },
       { typeof(DB.ElementType),             (element)=> new ElementType           (element as DB.ElementType)       },
       { typeof(DB.FamilySymbol),            (element)=> new FamilySymbol          (element as DB.FamilySymbol)      },
@@ -146,7 +145,10 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(DB.LinePatternElement),      (element)=> new LinePatternElement    (element as DB.LinePatternElement)},
       { typeof(DB.FillPatternElement),      (element)=> new FillPatternElement    (element as DB.FillPatternElement)},
       { typeof(DB.AppearanceAssetElement),  (element)=> new AppearanceAssetElement(element as DB.AppearanceAssetElement)},
-      
+
+      { typeof(DB.View),                    (element)=> new View                  (element as DB.View)              },
+      { typeof(DB.ViewSheet),               (element)=> new ViewSheet             (element as DB.ViewSheet)         },
+
       { typeof(DB.Instance),                (element)=> new Instance              (element as DB.Instance)          },
       { typeof(DB.ProjectLocation),         (element)=> new ProjectLocation       (element as DB.ProjectLocation)   },
       { typeof(DB.SiteLocation),            (element)=> new SiteLocation          (element as DB.SiteLocation)      },
