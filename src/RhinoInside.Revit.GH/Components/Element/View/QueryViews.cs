@@ -34,7 +34,7 @@ namespace RhinoInside.Revit.GH.Components
       ParamDefinition.Create<Param_Boolean>("Is Template", "IT", "View is template", false, GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_Boolean>("Is Printable", "IP", "View is printable", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_Boolean>("Is Assembly", "IA", "View is assembly", GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Parameters.AssemblyInstance>("Assembly", "A", "Assembly the view bolongs to", GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Parameters.AssemblyInstance>("Assembly", "A", "Assembly the view belongs to", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true),
     };
 
