@@ -312,7 +312,6 @@
     <Compile Include="Components\Element\Sheet\SheetByNumber_Assembly.cs" />
     <Compile Include="Components\Element\Sheet\SheetByNumber_Placeholder.cs" />
     <Compile Include="Components\Element\Sheet\QuerySheets.cs" />
-    <Compile Include="Components\Element\Sheet\QueryTitleBlockTypes.cs" />
     <Compile Include="Components\Element\Sheet\SheetIdentity.cs" />
     <Compile Include="Components\Element\Sheet\SheetTitleBlock.cs" />
     <Compile Include="Components\Element\SketchPlane\ByPlane.cs" />
