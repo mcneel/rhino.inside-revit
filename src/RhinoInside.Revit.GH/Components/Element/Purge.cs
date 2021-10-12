@@ -396,13 +396,9 @@ namespace RhinoInside.Revit.GH.Components
         activeApp.CanPostCommand(commandId), false
       );
 
-#if DEBUG
-      // TODO : Keep thinking on Simulated Transactions feature
       Menu_AppendItem(menu, "Simulated", Menu_SimulatedClicked, true, Simulated);
-#endif
     }
 
-#if DEBUG
     private void Menu_SimulatedClicked(object sender, EventArgs e)
     {
       if (sender is ToolStripMenuItem)
@@ -417,7 +413,6 @@ namespace RhinoInside.Revit.GH.Components
         ExpireSolution(true);
       }
     }
-#endif
     #endregion
 
     #region IO
