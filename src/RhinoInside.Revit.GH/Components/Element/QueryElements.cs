@@ -149,16 +149,21 @@ namespace RhinoInside.Revit.GH.Components
         var _Elements_ = Params.IndexOfOutputParam("Elements");
         Params.TrySetDataList(DA, "Elements", () =>
         {
-          IEnumerable<DB.Element> elements = elementCollector;
-          if (limit.HasValue)
+          try
           {
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"'{Params.Output[_Elements_].NickName}' output is limited to {limit.Value} elements.{Environment.NewLine}Increase or remove 'Limit' input parameter to retreive more elements.");
-            elements = elements.Take(limit.Value);
-          }
+            var elements = limit.HasValue ?
+              elementCollector.Take(limit.Value) :
+              elementCollector;
 
-          return elements.
-            Convert(Types.Element.FromElement).
-            TakeWhileIsNotEscapeKeyDown(this);
+            return elements.
+              Convert(Types.Element.FromElement).
+              TakeWhileIsNotEscapeKeyDown(this);
+          }
+          finally
+          {
+            if (limit <= (Params.Output[_Elements_].VolatileData.get_Branch(DA.ParameterTargetPath(_Elements_))?.Count ?? 0))
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"'{Params.Output[_Elements_].NickName}' output is limited to {limit.Value} elements.{Environment.NewLine}Increase or remove 'Limit' input parameter to retreive more elements.");
+          }
         });
 
         Params.TrySetData
