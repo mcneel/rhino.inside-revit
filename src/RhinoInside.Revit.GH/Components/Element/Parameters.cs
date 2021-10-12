@@ -17,8 +17,25 @@ namespace RhinoInside.Revit.GH
   {
     internal static IGH_Goo AsGoo(this DB.Parameter parameter)
     {
-      if (parameter?.HasValue != true)
+      if (parameter is null) return default;
+
+      // ALL_MODEL_FAMILY_NAME & ALL_MODEL_TYPE_NAME return null
+      // but DB.ElementParameterFilter works on those parameters!?!?
+      if (!parameter.HasValue)
+      {
+        switch ((DB.BuiltInParameter) parameter.Id.IntegerValue)
+        {
+          case DB.BuiltInParameter.ALL_MODEL_FAMILY_NAME:
+            return ((parameter.Element.Document.GetElement(parameter.Element.GetTypeId()) as DB.ElementType)?.FamilyName)
+              is string familyName ? new GH_String(familyName) : default;
+
+          case DB.BuiltInParameter.ALL_MODEL_TYPE_NAME:
+            return ((parameter.Element.Document.GetElement(parameter.Element.GetTypeId()) as DB.ElementType)?.Name)
+              is string typeName ? new GH_String(typeName) : default;
+        }
+
         return default;
+      }
 
       switch (parameter.StorageType)
       {
