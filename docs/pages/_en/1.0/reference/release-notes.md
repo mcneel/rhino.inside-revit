@@ -6,7 +6,7 @@ group: Deployment & Configs
 
 <!-- most recent release should be on top -->
 <!-- most recent release should be on top -->
-{% include ltr/release-header.html title="v1.2 Stable" version="v1.2.7955.20473" time="10/12/2021" %}
+{% include ltr/release-header.html title="v1.2 Stable" version="v1.2.7955.31573" time="10/12/2021" %}
 
 - Includes all changes under 1.2RC releases listed below
 - {% include ltr/comp.html uuid='704d9c1b-' %} component does not have a Title Block input anymore
