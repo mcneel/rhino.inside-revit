@@ -2933,16 +2933,6 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap SheetTitleBlock {
-            get {
-                object obj = ResourceManager.GetObject("SheetTitleBlock", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap SiteLocationIdentity {
             get {
                 object obj = ResourceManager.GetObject("SiteLocationIdentity", resourceCulture);
@@ -3056,6 +3046,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap ThermalMaterialType_ValueList {
             get {
                 object obj = ResourceManager.GetObject("ThermalMaterialType_ValueList", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap TitleBlockByType {
+            get {
+                object obj = ResourceManager.GetObject("TitleBlockByType", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

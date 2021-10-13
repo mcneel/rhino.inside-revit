@@ -5,6 +5,20 @@ group: Deployment & Configs
 ---
 
 <!-- most recent release should be on top -->
+<!-- most recent release should be on top -->
+{% include ltr/release-header.html title="v1.2 Stable" version="v1.2.7955.20473" time="10/12/2021" %}
+
+- Includes all changes under 1.2RC releases listed below
+- {% include ltr/comp.html uuid='704d9c1b-' %} component does not have a Title Block input anymore
+- Added {% include ltr/comp.html uuid='f2f3d866-' extended=true %}
+- Added {% include ltr/comp.html uuid='16f18871-' extended=true %}
+- {% include ltr/comp.html uuid='f6b99fe2-' %} now shows pretty names for view families sorted alphabetically
+- {% include ltr/comp.html uuid='f737745f-' %} replaces previous {% include ltr/comp_old.html title='Query Title Block Types' %} component
+- Removed {% include ltr/comp_old.html title='Analyze Sheet' %} component
+- {% include ltr/comp.html uuid='6915b697-' %} component does not require *Category* anymore
+- Minor Fixes and Improvements
+
+
 {% include ltr/release-header.html title="v1.2 RC4" version="v1.2.7948.6892 " pre_release=true time="10/05/2021" %}
 
 - Minor Fixes and Improvements
@@ -17,7 +31,7 @@ group: Deployment & Configs
 {% include ltr/release-header.html title="v1.2 RC2" version="v1.2.7934.7099" pre_release=true time="09/21/2021" %}
 
 - Corrected component name spelling {% include ltr/comp.html uuid='ff0f49ca-' %}
-- Removed {% include ltr/comp.html uuid='64594dea-' %} component
+- Removed {% include ltr/comp_old.html title='Assembly Views' %} component
 - Convert {% include ltr/comp.html uuid='cadf5fbb-' %} component to pass-through
 - Revised {% include ltr/comp.html uuid='704d9c1b-' %} parameters to match Revit
 - Added 'Assembly' parameter to {% include ltr/comp.html uuid='b0440885-' %} and {% include ltr/comp.html uuid='df691659-' %}
@@ -26,15 +40,15 @@ group: Deployment & Configs
 
 - New View Components!
   - {% include ltr/comp.html uuid='97c8cb27-' extended=true %}
-  - {% include ltr/comp.html uuid='c7a57ec8-' extended=true %}
+  - {% include ltr/comp_old.html title='Query Title Block Types' %}
   - {% include ltr/comp.html uuid='cadf5fbb-' extended=true %}
   - {% include ltr/comp.html uuid='704d9c1b-' extended=true %}
-  - {% include ltr/comp.html uuid='15bac151-' extended=true %}
+  - {% include ltr/comp_old.html title='Analyze Sheet' %}
   - {% include ltr/comp.html uuid='f6b99fe2-' extended=true %}
 
 - New Assembly Components!
   - {% include ltr/comp.html uuid='fd5b45c3-' extended=true %}
-  - {% include ltr/comp.html uuid='64594dea-' extended=true %}
+  - {% include ltr/comp_old.html title='Assembly Views' %}
   - {% include ltr/comp.html uuid='6915b697-' extended=true %}
   - {% include ltr/comp.html uuid='26feb2e9-' extended=true %}
   - {% include ltr/comp.html uuid='33ead71b-' extended=true %}
