@@ -9,16 +9,16 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Element.Sheet
 {
-  public class AddTitleBlock : ElementTrackerComponent
+  public class TitleBlockByType : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("F2F3D866-5A62-40C0-A85B-C417183E0A52");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
-    public AddTitleBlock() : base
+    public TitleBlockByType() : base
     (
       name: "Add Title Block",
       nickname: "Title Block",
-      description: "Create a Revit title block on a sheet view",
+      description: "Create a Revit Title Block on a sheet view",
       category: "Revit",
       subCategory: "View"
     )
@@ -29,22 +29,11 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
     {
       new ParamDefinition
       (
-        new Param_Point()
-        {
-          Name = "Location",
-          NickName = "L",
-          Description = "Sheet where to place the title block",
-          Optional = true,
-        },
-        ParamRelevance.Occasional
-      ),
-      new ParamDefinition
-      (
         new Parameters.ViewSheet()
         {
           Name = "Sheet",
           NickName = "S",
-          Description = "Sheet where to place the title block",
+          Description = $"Sheet where to place the {_TitleBlock_}",
         }
       ),
       new ParamDefinition
@@ -53,11 +42,22 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
         {
           Name = "Type",
           NickName = "T",
-          Description = "Title block type",
+          Description = $"{_TitleBlock_} type",
           Optional = true,
           SelectedBuiltInCategory = DB.BuiltInCategory.OST_TitleBlocks
         },
         ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_Point()
+        {
+          Name = "Location",
+          NickName = "L",
+          Description = $"Location where to place the {_TitleBlock_} on given Sheet",
+          Optional = true,
+        },
+        ParamRelevance.Occasional
       ),
     };
 
@@ -83,10 +83,10 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       var OST_TitleBlocks = new DB.ElementId(DB.BuiltInCategory.OST_TitleBlocks);
 
       // Input
-      if (!Params.TryGetData(DA, "Location", out Rhino.Geometry.Point3d? location, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Sheet", out Types.ViewSheet sheet, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Type", out Types.FamilySymbol type,
         x => x.IsValid && x.Document.Equals(sheet.Document) && x.Category.Id == OST_TitleBlocks)) return;
+      if (!Params.TryGetData(DA, "Location", out Rhino.Geometry.Point3d? location, x => x.IsValid)) return;
 
       if (type is null)
       {
