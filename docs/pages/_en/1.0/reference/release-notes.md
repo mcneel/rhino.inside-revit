@@ -6,16 +6,21 @@ group: Deployment & Configs
 
 <!-- most recent release should be on top -->
 <!-- most recent release should be on top -->
-{% include ltr/release-header.html title="v1.2 Stable" version="v1.2.7955.31573" time="10/12/2021" %}
+{% include ltr/release-header.html title="v1.2 Stable" version="v1.2.7955.32919" time="10/12/2021" %}
 
 - Includes all changes under 1.2RC releases listed below
-- {% include ltr/comp.html uuid='704d9c1b-' %} component does not have a Title Block input anymore
-- Added {% include ltr/comp.html uuid='f2f3d866-' extended=true %}
-- Added {% include ltr/comp.html uuid='16f18871-' extended=true %}
-- {% include ltr/comp.html uuid='f6b99fe2-' %} now shows pretty names for view families sorted alphabetically
-- {% include ltr/comp.html uuid='f737745f-' %} replaces previous {% include ltr/comp_old.html title='Query Title Block Types' %} component
-- Removed {% include ltr/comp_old.html title='Analyze Sheet' %} component
-- {% include ltr/comp.html uuid='6915b697-' %} component does not require *Category* anymore
+- Component Changes
+  - {% include ltr/comp.html uuid='704d9c1b-' %} component does not have a Title Block input anymore
+  - Added {% include ltr/comp.html uuid='f2f3d866-' extended=true %}
+  - Added {% include ltr/comp.html uuid='16f18871-' extended=true %}
+  - {% include ltr/comp.html uuid='f6b99fe2-' %} now shows pretty names for view families sorted alphabetically
+  - {% include ltr/comp.html uuid='f737745f-' %} replaces previous {% include ltr/comp_old.html title='Query Title Block Types' %} component
+  - Removed {% include ltr/comp_old.html title='Analyze Sheet' %} component
+  - {% include ltr/comp.html uuid='6915b697-' %} component does not require *Category* anymore
+
+- Issues
+  - Fixed Non-C2-BREP edge conversion when knots are below tolerance. RE [#382](https://github.com/mcneel/rhino.inside-revit/issues/382).
+
 - Minor Fixes and Improvements
 
 

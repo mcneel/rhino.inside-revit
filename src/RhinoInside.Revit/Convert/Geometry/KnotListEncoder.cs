@@ -182,6 +182,7 @@ namespace RhinoInside.Revit.Convert.Geometry
           if (!duplicate)
           {
             curve = curve.Duplicate() as Rhino.Geometry.NurbsCurve;
+            knots = curve.Knots;
             duplicate = true;
           }
 
