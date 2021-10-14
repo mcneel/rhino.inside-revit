@@ -92,12 +92,12 @@
     },
     {
         "highlight": true,
-        "title": "Building Systems Specialist Course",
+        "title": "Building Systems Specialist",
         "url": "https://rhre.pazacademy.xyz/register-form/",
         "thumbnail": "/static/images/discover/PAZ-BSS-COVER.jpg",
         "author": "PAZ Academy",
         "authorUrl": "",
-        "description": "A complete cirricullum on Parametric BIM Modeling. This extenive course results in the BSS TITLE focused on Rhino.Inside Revit + Rhinoceros & Grasshopper",
+        "description": "5 months personal online training for Architects, Engineers & BIM Modelers. Rhino, Grasshopper, Rhino.Inside.REVIT and much more fun.",
         "kinds": [
             "course",
             "tutorial",
