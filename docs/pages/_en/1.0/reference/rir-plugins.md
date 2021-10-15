@@ -6,7 +6,7 @@ group: Developer Interface
 
 ## Creating {{ site.terms.rir }} Plugins
 
-To access Rhino and Grasshopper APIs, reference latest [RhinoCommon](https://www.nuget.org/packages/RhinoCommon/8.0.21271.12305-wip) and [Grasshopper](https://www.nuget.org/packages/Grasshopper/8.0.21271.12305-wip) NuGet packages in your project.
+To access Rhino and Grasshopper APIs, reference latest [RhinoCommon](https://www.nuget.org/packages/RhinoCommon/7.0.0) and [Grasshopper](https://www.nuget.org/packages/Grasshopper/7.0.0) NuGet packages in your project.
 
 To use Revit API, reference Revit API libraries in your project. Your plugin will be loaded in {{ site.terms.rir }} and will have access to these libraries.
 
@@ -40,7 +40,6 @@ public class MyPlugin : GH_Component {
         DB.Document doc = Revit.ActiveDBDocument;
 
         // tolerances
-        double absoluteTolerance = Revit.AbsoluteTolerance;
         double angleTolerance = Revit.AngleTolerance;
         double shortCurveTolerance = Revit.ShortCurveTolerance;
         double vertexTolerance = Revit.VertexTolerance;
