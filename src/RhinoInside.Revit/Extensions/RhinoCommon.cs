@@ -192,11 +192,11 @@ namespace Rhino.Geometry
       }
       public Point3d Centroid
       {
-        get { if (!centroid.IsValid && Loop is object) using (var mp = AreaMassProperties.Compute(Loop, RhinoMath.ZeroTolerance)) if(mp is object) { area = mp.Area; centroid = mp.Centroid; } return centroid; }
+        get { if (!centroid.IsValid && Loop is object) using (var mp = AreaMassProperties.Compute(Loop, RhinoMath.ZeroTolerance)) if (mp is object) { area = mp.Area; centroid = mp.Centroid; } return centroid; }
       }
       public double LoopArea
       {
-        get { if (double.IsNaN(area) && Loop is object) using (var mp = AreaMassProperties.Compute(Loop, RhinoMath.ZeroTolerance)) if(mp is object) { area = mp.Area; centroid = mp.Centroid; } return area; }
+        get { if (double.IsNaN(area) && Loop is object) using (var mp = AreaMassProperties.Compute(Loop, RhinoMath.ZeroTolerance)) if (mp is object) { area = mp.Area; centroid = mp.Centroid; } return area; }
       }
 
       public bool ProjectionDegenartesToCurve(Surface surface)
@@ -264,7 +264,7 @@ namespace Rhino.Geometry
         return false;
 
       // If brep has more that 3 faces we should check if there are faces with interior loops
-      if (brep.Faces.Count > 3 && brep.Faces.Where(face => face.Loops.Count != 1).Any())
+      if (brep.Faces.Count > 3 && brep.Faces.Where(face => face.Loops.Count != 1 && !face.IsPlanar(RhinoMath.ZeroTolerance)).Any())
         return false;
 
       var candidateFaces = new List<int[]>();
@@ -346,8 +346,7 @@ namespace Rhino.Geometry
         (
           brep.Faces.
           Where(face => face.FaceIndex != startFace.Face.FaceIndex && face.FaceIndex != endFace.Face.FaceIndex).
-          Select(face => startFace.ProjectionDegenartesToCurve(face.UnderlyingSurface())).
-          Any(degenerateToCurve => degenerateToCurve == false)
+          Any(face => !startFace.ProjectionDegenartesToCurve(face.UnderlyingSurface()))
         )
           return false;
 
@@ -360,6 +359,15 @@ namespace Rhino.Geometry
                         +startFace.Plane.DistanceTo(endFace.Plane.Origin);
 
         extrusion = Extrusion.Create(profile, height, true);
+        var profilePlane = extrusion.GetProfilePlane(height < 0.0 ? 1.0 : 0.0);
+        var WCSTOPCS = Transform.PlaneToPlane(profilePlane, Plane.WorldXY);
+        foreach (var loop in startFace.Face.Loops.Where(x => x.LoopType == BrepLoopType.Inner))
+        {
+          var innerProfile = loop.To3dCurve();
+          innerProfile.Transform(WCSTOPCS);
+          extrusion.AddInnerProfile(innerProfile);
+        }
+
         return extrusion is object;
       }
 
