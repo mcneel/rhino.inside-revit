@@ -102,6 +102,24 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool Update(this Parameter parameter, ElementId value)
     {
       if (parameter.HasValue && parameter.AsElementId() == value) return true;
+
+      // `DB.Parameter.Set` does not validate `value` is a valid type for `parameter.Element`.
+      // Revit editor crashes when that element with a wrong type is selected.
+      if (parameter.GetTypeId() == Schemas.ParameterId.ElemTypeParam)
+      {
+        if (!parameter.Element.GetValidTypes().Contains(value))
+          return false;
+
+        if
+        (
+          parameter.Element.Document.GetElement(parameter.Element.GetTypeId()).GetType() !=
+          parameter.Element.Document.GetElement(value).GetType()
+        )
+          return false;
+
+        return parameter.Element.ChangeTypeId(value) == ElementId.InvalidElementId;
+      }
+
       return parameter.Set(value);
     }
 
