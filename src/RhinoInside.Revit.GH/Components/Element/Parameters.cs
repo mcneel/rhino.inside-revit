@@ -416,7 +416,11 @@ namespace RhinoInside.Revit.GH.Components.Element
             using (var formatOptions = new DB.FormatValueOptions() { AppendUnitSymbol = true })
             {
               var host = UnitConverter.InHostUnits(number, specTypeId);
-              var formated = DB.UnitFormatUtils.Format(element.Document.GetUnits(), specTypeId, host, false, formatOptions);
+#if REVIT_2021
+              var formated = DB.UnitFormatUtils.Format(element.Document.GetUnits(), specTypeId, host, forEditing: false, formatOptions);
+#else
+              var formated = DB.UnitFormatUtils.Format(element.Document.GetUnits(), specTypeId, host, maxAccuracy: false, forEditing: false, formatOptions);
+#endif
               message = $"Failed to set parameter '{parameter.Definition.Name}' to '{value}{unit_symbol}'. This value would be {formated} in Revit.";
             }
           }
