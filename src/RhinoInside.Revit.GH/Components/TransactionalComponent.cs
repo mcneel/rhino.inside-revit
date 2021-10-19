@@ -41,6 +41,15 @@ namespace RhinoInside.Revit.GH.Components
       FixUnhandledFailures = fixUnhandledFailures;
     }
 
+    static string GetDescriptionMessage(DB.FailureMessageAccessor error)
+    {
+      var description = error.GetDescriptionText();
+      if (string.IsNullOrWhiteSpace(description))
+        return $"{error.GetSeverity()} {{{error.GetFailureDefinitionId().Guid}}}";
+
+      return description;
+    }
+
     void AddRuntimeMessage(DB.FailureMessageAccessor error, bool? solved = null)
     {
       if (error.GetFailureDefinitionId() == DBX.ExternalFailures.TransactionFailures.SimulatedTransaction)
@@ -56,8 +65,10 @@ namespace RhinoInside.Revit.GH.Components
       var level = GH_RuntimeMessageLevel.Remark;
       switch (error.GetSeverity())
       {
-        case DB.FailureSeverity.Warning: level = GH_RuntimeMessageLevel.Warning; break;
-        case DB.FailureSeverity.Error: level = GH_RuntimeMessageLevel.Error; break;
+        case DB.FailureSeverity.None:               level = GH_RuntimeMessageLevel.Remark; break;
+        case DB.FailureSeverity.Warning:            level = GH_RuntimeMessageLevel.Warning; break;
+        case DB.FailureSeverity.Error:              level = GH_RuntimeMessageLevel.Error; break;
+        case DB.FailureSeverity.DocumentCorruption: level = GH_RuntimeMessageLevel.Error; break;
       }
 
       string solvedMark = string.Empty;
@@ -66,21 +77,19 @@ namespace RhinoInside.Revit.GH.Components
         switch (solved)
         {
           case false: solvedMark = "❌ "; break;
-          case true: solvedMark = "✔ "; break;
+          case true:  solvedMark = "✔ "; break;
         }
       }
 
-      var description = error.GetDescriptionText();
-      var text = string.IsNullOrEmpty(description) ?
-        $"{solvedMark}{level} {{{error.GetFailureDefinitionId().Guid}}}" :
-        $"{solvedMark}{description}";
+      var description = GetDescriptionMessage(error);
+      var message = $"{solvedMark}{description}";
 
       int idsCount = 0;
       foreach (var id in error.GetFailingElementIds())
-        text += idsCount++ == 0 ? $" {{{id.IntegerValue}" : $", {id.IntegerValue}";
-      if (idsCount > 0) text += "} ";
+        message += idsCount++ == 0 ? $" {{{id.IntegerValue}" : $", {id.IntegerValue}";
+      if (idsCount > 0) message += "} ";
 
-      ActiveObject.AddRuntimeMessage(level, text);
+      ActiveObject.AddRuntimeMessage(level, message);
     }
 
     DB.FailureProcessingResult FixFailures(DB.FailuresAccessor failuresAccessor, IEnumerable<DB.FailureDefinitionId> failureIds)

@@ -399,8 +399,29 @@ namespace RhinoInside.Revit.GH.Components.Element
 
         if (!parameter.Update(value))
         {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Unable to set parameter '{parameter.Definition.Name}' : '{value}' is not a valid value.");
-          return;
+          var message = $"Failed to set parameter '{parameter.Definition.Name}' to '{value}'.";
+          var specTypeId = parameter.Definition?.GetDataType();
+          if
+          (
+            SpecType.IsMeasurableSpec(specTypeId, out var spec) &&
+            GH_Convert.ToDouble(value, out var number, GH_Conversion.Both)
+          )
+          {
+            var unit_symbol = string.Empty;
+            if (specTypeId == SpecType.Measurable.Angle) unit_symbol = " ㎭";
+            else if (specTypeId == SpecType.Measurable.Length) unit_symbol = $" {GH_Format.RhinoUnitSymbol()}";
+            else if (specTypeId == SpecType.Measurable.Area) unit_symbol = $" {GH_Format.RhinoUnitSymbol()}²";
+            else if (specTypeId == SpecType.Measurable.Volume) unit_symbol = $" {GH_Format.RhinoUnitSymbol()}³";
+
+            using (var formatOptions = new DB.FormatValueOptions() { AppendUnitSymbol = true })
+            {
+              var host = UnitConverter.InHostUnits(number, specTypeId);
+              var formated = DB.UnitFormatUtils.Format(element.Document.GetUnits(), specTypeId, host, false, formatOptions);
+              message = $"Failed to set parameter '{parameter.Definition.Name}' to '{value}{unit_symbol}'. This value would be {formated} in Revit.";
+            }
+          }
+
+          throw new RhinoInside.Revit.Exceptions.CancelException($"{message} {{{element.Id.IntegerValue}}}");
         }
       }
 
