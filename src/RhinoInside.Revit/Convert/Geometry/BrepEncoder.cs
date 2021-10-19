@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -187,7 +188,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     }
 #endregion
 
-#region Transfer
+    #region Transfer
     internal static DB.Mesh ToMesh(/*const*/ Brep brep, double factor)
     {
       using (var mp = MeshingParameters.Default)
@@ -205,28 +206,43 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     internal static DB.Solid ToSolid(/*const*/Brep brep, double factor)
     {
+      // Try on existing solids already in memory.
+      if (GeometryCache.TryGetExistingGeometry(brep, factor, out DB.Solid existing, out var hash))
+      {
+        GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Using cached value {GeometryCache.HashToString(hash)}…", default);
+        AuditSolid(brep, existing);
+        return existing;
+      }
+
       // Try using DB.BRepBuilder
       {
         var raw = ToRawBrep(brep, factor);
 
         if (ToSolid(raw) is DB.Solid solid)
-          return AuditSolid(brep, solid);
+        {
+          AuditSolid(brep, solid);
+          GeometryCache.AddExistingGeometry(hash, solid);
+          return solid;
+        }
       }
 
-      // Try using SAT
-//#if !DEBUG
-      if (ToACIS(brep, factor) is DB.Solid sat)
+      // Try using DB.ShapeImporter | DB.Document.Import
       {
-        GeometryEncoder.Context.Peek.RuntimeMessage(255, "Using SAT…", default);
-        return AuditSolid(brep, sat);
+        GeometryEncoder.Context.Peek.RuntimeMessage(255, "Using 3DM…", default);
+
+        if (To3DM(brep, factor) is DB.Solid solid)
+        {
+          AuditSolid(brep, solid);
+          GeometryCache.AddExistingGeometry(hash, solid);
+          return solid;
+        }
       }
-//#endif
 
       GeometryEncoder.Context.Peek.RuntimeMessage(20, "Failed to convert geometry.", brep.InHostUnits());
       return default;
     }
 
-    static DB.Solid AuditSolid(Brep brep, DB.Solid solid)
+    static void AuditSolid(Brep brep, DB.Solid solid)
     {
       if (brep.IsSolid)
       {
@@ -242,8 +258,6 @@ namespace RhinoInside.Revit.Convert.Geometry
           GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Output geometry has naked edges.", default);
 //#endif
       }
-
-      return solid;
     }
 
     /// <summary>
@@ -708,19 +722,49 @@ namespace RhinoInside.Revit.Convert.Geometry
         yield return DB.BRepBuilderEdgeGeometry.Create(segment);
       }
     }
-#endregion
+    #endregion
 
-#region ACIS
-    static DB.Document acisDocument;
-    static DB.Document ACISDocument => acisDocument.IsValid() ? acisDocument :
-      acisDocument = Revit.ActiveDBApplication.NewProjectDocument(DB.UnitSystem.Imperial);
+    #region IO Support Methods
+    static DB.Document ioDocument;
+    static DB.Document IODocument => ioDocument.IsValid() ? ioDocument :
+      ioDocument = Revit.ActiveDBApplication.NewProjectDocument(DB.UnitSystem.Imperial);
 
-    internal static DB.Solid ToACIS(/*const*/ Brep brep, double factor)
+    static bool TryGetSolidFromInstance(DB.Document doc, DB.ElementId elementId, out DB.Solid solid)
     {
-      var TempFolder = Path.Combine(Path.GetTempPath(), AddIn.AddInCompany, AddIn.AddInName, $"V{RhinoApp.ExeVersion}", "SATCaches");
+      if (doc.GetElement(elementId) is DB.Element element)
+      {
+        using (var options = new DB.Options() { DetailLevel = DB.ViewDetailLevel.Fine })
+        {
+          /// <see cref="DB.GeometryInstance.GetInstanceGeometry"/> is like calling
+          /// <see cref="DB.SolidUtils.CreateTransformed"/> on <see cref="DB.GeometryInstance.SymbolGeometry"/>.
+          /// It creates a transformed copy of the solid that will survive the Rollback.
+          /// Unfortunately Paint information lives in the element so even if we paint the
+          /// instance before doing the duplicate this information is lost after Rollback.
+          if
+          (
+            element.get_Geometry(options) is DB.GeometryElement geometryElement &&
+            geometryElement.First() is DB.GeometryInstance instance &&
+            instance.GetInstanceGeometry().First() is DB.Solid instanceSolid
+          )
+          {
+            solid = DB.SolidUtils.Clone(instanceSolid);
+            return true;
+          }
+        }
+      }
+
+      solid = default;
+      return false;
+    }
+    #endregion
+
+    #region SAT
+    internal static DB.Solid ToSAT(/*const*/ Brep brep, double factor)
+    {
+      var TempFolder = Path.Combine(Path.GetTempPath(), AddIn.AddInCompany, AddIn.AddInName, $"V{RhinoApp.ExeVersion}", "IOCaches");
       Directory.CreateDirectory(TempFolder);
 
-      var SATFile = Path.Combine(TempFolder, $"{Guid.NewGuid():N}.sat");
+      var FileSAT = Path.Combine(TempFolder, $"{Guid.NewGuid():N}.sat");
 
       // Export
       {
@@ -737,7 +781,7 @@ namespace RhinoInside.Revit.Convert.Geometry
           objectGUID = activeModel.Objects.Add(brep);
 
           activeModel.Objects.Select(objectGUID);
-          RhinoApp.RunScript($@"_-Export ""{SATFile}"" ""Default"" _Enter", false);
+          RhinoApp.RunScript($@"_-Export ""{FileSAT}"" ""Default"" _Enter", false);
         }
         finally
         {
@@ -748,17 +792,17 @@ namespace RhinoInside.Revit.Convert.Geometry
       }
 
       // Import
-      if (File.Exists(SATFile))
+      if (File.Exists(FileSAT))
       {
         try
         {
-          var doc = GeometryEncoder.Context.Peek.Document ?? ACISDocument;
+          var doc = GeometryEncoder.Context.Peek.Document ?? IODocument;
 
           if (DB.ShapeImporter.IsServiceAvailable())
           {
             using (var importer = new DB.ShapeImporter())
             {
-              var list = importer.Convert(doc, SATFile);
+              var list = importer.Convert(doc, FileSAT);
               if (list.OfType<DB.Solid>().FirstOrDefault() is DB.Solid shape)
                 return shape;
 
@@ -780,7 +824,7 @@ namespace RhinoInside.Revit.Convert.Geometry
               {
                 using
                 (
-                  var SATOptions = new DB.SATImportOptions()
+                  var OptionsSAT = new DB.SATImportOptions()
                   {
                     ReferencePoint = DB.XYZ.Zero,
                     Placement = DB.ImportPlacement.Origin,
@@ -797,27 +841,9 @@ namespace RhinoInside.Revit.Convert.Geometry
                   var typeId = doc.GetDefaultElementTypeId(DB.ElementTypeGroup.ViewType3D);
                   var view = DB.View3D.CreatePerspective(doc, typeId);
 
-                  var instanceId = doc.Import(SATFile, SATOptions, view);
-                  if (doc.GetElement(instanceId) is DB.Element element)
-                  {
-                    using (var options = new DB.Options() { DetailLevel = DB.ViewDetailLevel.Fine })
-                    {
-                      /// <see cref="DB.GeometryInstance.GetInstanceGeometry"/> is like calling
-                      /// <see cref="DB.SolidUtils.CreateTransformed"/> on <see cref="DB.GeometryInstance.SymbolGeometry"/>.
-                      /// It creates a transformed copy of the solid that will survive the Rollback.
-                      /// Unfortunately Paint information lives in the element so even if we paint the
-                      /// instance before doing the duplicate this information is lost after Rollback.
-                      if
-                      (
-                        element.get_Geometry(options) is DB.GeometryElement geometryElement &&
-                        geometryElement.First() is DB.GeometryInstance instance &&
-                        instance.GetInstanceGeometry().First() is DB.Solid solid
-                      )
-                      {
-                        return DB.SolidUtils.Clone(solid);
-                      }
-                    }
-                  }
+                  var instanceId = doc.Import(FileSAT, OptionsSAT, view);
+                  if (TryGetSolidFromInstance(doc, instanceId, out var solid))
+                    return solid;
                 }
               }
             }
@@ -827,14 +853,14 @@ namespace RhinoInside.Revit.Convert.Geometry
             }
             finally
             {
-              if (doc != ACISDocument && doc != GeometryEncoder.Context.Peek.Document)
+              if (doc != IODocument && doc != GeometryEncoder.Context.Peek.Document)
                 doc.Close(false);
             }
           }
         }
         finally
         {
-          try { File.Delete(SATFile); } catch { }
+          try { File.Delete(FileSAT); } catch { }
         }
 
         GeometryEncoder.Context.Peek.RuntimeMessage(10, "Revit SAT module failed to import geometry", default);
@@ -843,8 +869,396 @@ namespace RhinoInside.Revit.Convert.Geometry
 
       return default;
     }
+    #endregion
 
-    internal static bool IsEquivalent(this DB.Solid solid, Brep brep)
+    #region 3DM
+    internal static DB.Solid To3DM(/*const*/ Brep brep, double factor)
+    {
+      var TempFolder = Path.Combine(Path.GetTempPath(), AddIn.AddInCompany, AddIn.AddInName, $"V{RhinoApp.ExeVersion}", "IOCaches");
+      Directory.CreateDirectory(TempFolder);
+
+      var File3DM = Path.Combine(TempFolder, $"{Guid.NewGuid():N}.3dm");
+
+      // Export
+      if (RhinoDoc.ActiveDoc is RhinoDoc activeDoc)
+      {
+        using (var rhinoDoc = RhinoDoc.CreateHeadless(null))
+        {
+          if (factor == UnitConverter.ToHostUnits)
+          {
+            rhinoDoc.ModelUnitSystem = activeDoc.ModelUnitSystem;
+            rhinoDoc.ModelAbsoluteTolerance = activeDoc.ModelAbsoluteTolerance;
+            rhinoDoc.ModelAngleToleranceRadians = activeDoc.ModelAngleToleranceRadians;
+
+            rhinoDoc.Objects.Add(brep);
+          }
+          else
+          {
+            rhinoDoc.ModelUnitSystem = UnitSystem.Feet;
+            rhinoDoc.ModelAbsoluteTolerance = activeDoc.ModelAbsoluteTolerance * factor;
+            rhinoDoc.ModelAngleToleranceRadians = activeDoc.ModelAngleToleranceRadians;
+
+            if (factor != 1.0)
+            {
+              brep = brep.DuplicateBrep();
+              if (!brep.Scale(factor)) return default;
+            }
+            
+            rhinoDoc.Objects.Add(brep);
+          }
+
+          rhinoDoc.SaveAs(File3DM);
+        }
+      }
+
+      // Import
+      if (File.Exists(File3DM))
+      {
+        try
+        {
+          var doc = GeometryEncoder.Context.Peek.Document ?? IODocument;
+
+          if (DB.ShapeImporter.IsServiceAvailable())
+          {
+            using (var importer = new DB.ShapeImporter())
+            {
+              var list = importer.Convert(IODocument, File3DM);
+              if (list.OfType<DB.Solid>().FirstOrDefault() is DB.Solid shape)
+                return shape;
+
+              GeometryEncoder.Context.Peek.RuntimeMessage(10, "Revit Data conversion service failed to import geometry", default);
+
+              // Looks like DB.ShapeImporter do not support short edges geometry
+              //return null;
+            }
+          }
+          else GeometryEncoder.Context.Peek.RuntimeMessage(255, "Revit Data conversion service is not available", default);
+
+#if REVIT_2022
+          // In case we don't have a destination document we create a new one here.
+          using (doc.IsValid() ? default : doc = Revit.ActiveDBApplication.NewProjectDocument(DB.UnitSystem.Imperial))
+          {
+            try
+            {
+              // Everything in this scope should be rolledback.
+              using (doc.RollBackScope())
+              {
+                using
+                (
+                  var Options3DM = new DB.ImportOptions3DM()
+                  {
+                    ReferencePoint = DB.XYZ.Zero,
+                    Placement = DB.ImportPlacement.Origin,
+                    CustomScale = DB.UnitUtils.Convert
+                    (
+                      factor,
+                      External.DB.Schemas.UnitType.Feet,
+                      doc.GetUnits().GetFormatOptions(External.DB.Schemas.SpecType.Measurable.Length).GetUnitTypeId()
+                    )
+                  }
+                )
+                {
+                  // Create a 3D view to import the 3DM file
+                  var typeId = doc.GetDefaultElementTypeId(DB.ElementTypeGroup.ViewType3D);
+                  var view = DB.View3D.CreatePerspective(doc, typeId);
+
+                  var instanceId = doc.Import(File3DM, Options3DM, view);
+                  if (TryGetSolidFromInstance(doc, instanceId, out var solid))
+                    return solid;
+                }
+              }
+            }
+            catch (Autodesk.Revit.Exceptions.OptionalFunctionalityNotAvailableException e)
+            {
+              GeometryEncoder.Context.Peek.RuntimeMessage(255, e.Message, default);
+            }
+            finally
+            {
+              if (doc != IODocument && doc != GeometryEncoder.Context.Peek.Document)
+                doc.Close(false);
+            }
+          }
+#endif
+        }
+        finally
+        {
+          try { File.Delete(File3DM); } catch { }
+        }
+
+        GeometryEncoder.Context.Peek.RuntimeMessage(10, "Revit 3DM module failed to import geometry", default);
+      }
+      else GeometryEncoder.Context.Peek.RuntimeMessage(20, "Failed to export geometry to 3DM file", default);
+
+      return default;
+    }
+    #endregion
+  }
+
+  static class GeometryCache
+  {
+    // True 
+    enum CachePolicy
+    {
+      Disabled = 0,     // Caching is disabled
+      Memory = 1,       // Memory over performance (Not Implemented)
+      Performance = 2,  // Performance over memory (Not Implemented)
+      Extreme = 3       // Does not allow .NET to collect any geometry
+    }
+    static CachePolicy Policy = CachePolicy.Performance;
+
+    class SoftReference<T> : WeakReference where T : class
+    {
+      private object reference;
+
+      public SoftReference(T value) : base(value) { }
+
+      public override object Target
+      {
+        get => reference is object ? reference : base.Target;
+        set
+        {
+          if (reference is object) throw new InvalidOperationException("Reference is keeping the object alive");
+          base.Target = (T) value;
+        }
+      }
+
+      public T Value
+      {
+        get => (T) Target;
+        set => Target = value;
+      }
+
+      public bool KeepAlive
+      {
+        get => reference is object;
+        set => reference = value ? Target : default;
+      }
+
+      public bool Hit = false;
+    }
+
+    struct HashComparer : IEqualityComparer<byte[]>
+    {
+      public bool Equals(byte[] x, byte[] y)
+      {
+        if (ReferenceEquals(x, y)) return true;
+        if (x is null || y is null) return false;
+
+        var length = x.Length;
+        if (length != y.Length) return false;
+
+        for (int i = 0; i < length; ++i)
+          if (x[i] != y[i]) return false;
+
+        return true;
+      }
+
+      public int GetHashCode(byte[] obj)
+      {
+        int hash = 0;
+
+        if (obj is object)
+        {
+          for (int i = 0; i < obj.Length; ++i)
+          {
+            var value = (int) obj[i];
+            hash ^= (value << 5) + value;
+          }
+        }
+
+        return hash;
+      }
+    }
+
+    static readonly Dictionary<byte[], SoftReference<DB.GeometryObject>> GeometryDictionary =
+      new Dictionary<byte[], SoftReference<DB.GeometryObject>>(default(HashComparer));
+
+    internal static void StartKeepAliveRegion()
+    {
+      if (Policy == CachePolicy.Disabled)
+      {
+        GeometryDictionary.Clear();
+      }
+      else if (Policy != CachePolicy.Extreme)
+      {
+        foreach (var value in GeometryDictionary.Values)
+        {
+          value.KeepAlive = true;
+          value.Hit = false;
+        }
+      }
+    }
+
+    internal static void EndKeepAliveRegion()
+    {
+      if (Policy == CachePolicy.Disabled) return;
+
+      // Mark non hitted references as collectable
+      if (Policy != CachePolicy.Extreme)
+      {
+        foreach (var entry in GeometryDictionary)
+        {
+          entry.Value.KeepAlive = entry.Value.Hit;
+          entry.Value.Hit = false;
+        }
+
+        //GC.Collect();
+      }
+
+      // Collect unreferenced entries
+      {
+        var purge = new List<byte[]>();
+        foreach (var entry in GeometryDictionary)
+        {
+          if (!entry.Value.IsAlive)
+            purge.Add(entry.Key);
+        }
+
+        foreach (var key in purge)
+          GeometryDictionary.Remove(key);
+      }
+
+#if DEBUG
+      Grasshopper.Instances.DocumentEditor.SetStatusBarEvent
+      (
+        new Grasshopper.Kernel.GH_RuntimeMessage
+        (
+          $"'{GeometryDictionary.Count}' solids in cache.",
+          Grasshopper.Kernel.GH_RuntimeMessageLevel.Remark
+        )
+      );
+#endif
+    }
+
+    internal static string HashToString(byte[] hash)
+    {
+      var hex = new global::System.Text.StringBuilder(hash.Length * 2);
+      foreach (var b in hash)
+        hex.AppendFormat("{0:x2}", b);
+
+      return hex.ToString();
+    }
+
+    static byte[] GetGeometryHashCode(GeometryBase geometry, double factor)
+    {
+      float Round(double value) => (float) (value * factor);
+
+      using (var stream = new MemoryStream())
+      {
+        using (var writer = new BinaryWriter(stream))
+        {
+          switch (geometry)
+          {
+            case Brep brep:
+
+              writer.Write(typeof(Brep).Name);
+              writer.Write(brep.Faces.Count);
+              writer.Write(brep.Surfaces.Count);
+              writer.Write(brep.Edges.Count);
+              writer.Write(brep.Curves3D.Count);
+
+              foreach (var face in brep.Faces)
+                writer.Write(face.OrientationIsReversed);
+
+              foreach (var surface in brep.Surfaces)
+              {
+                var nurbs = surface as NurbsSurface ?? surface.ToNurbsSurface(Revit.VertexTolerance * factor, out var accuracy);
+                writer.Write(nurbs.OrderU);
+                writer.Write(nurbs.OrderV);
+                var rational = nurbs.IsRational;
+                writer.Write(nurbs.IsRational);
+                writer.Write(nurbs.Points.CountU);
+                writer.Write(nurbs.Points.CountV);
+                foreach (var point in nurbs.Points)
+                {
+                  var location = point.Location;
+                  writer.Write(Round(location.X));
+                  writer.Write(Round(location.Y));
+                  writer.Write(Round(location.Z));
+                  if (rational) writer.Write(point.Weight);
+                }
+                foreach (var knot in nurbs.KnotsU) writer.Write(knot);
+                foreach (var knot in nurbs.KnotsV) writer.Write(knot);
+              }
+
+              foreach (var edge in brep.Edges)
+              {
+                var domain = edge.Domain;
+                writer.Write(domain.T0);
+                writer.Write(domain.T1);
+              }
+
+              foreach (var curve in brep.Curves3D)
+              {
+                var nurbs = curve as NurbsCurve ?? curve.ToNurbsCurve();
+                writer.Write(nurbs.Order);
+                var rational = nurbs.IsRational;
+                writer.Write(nurbs.IsRational);
+                writer.Write(nurbs.Points.Count);
+                foreach (var point in nurbs.Points)
+                {
+                  var location = point.Location;
+                  writer.Write(Round(location.X));
+                  writer.Write(Round(location.Y));
+                  writer.Write(Round(location.Z));
+                  if (rational) writer.Write(point.Weight);
+                }
+                foreach (var knot in nurbs.Knots) writer.Write(knot);
+              }
+
+              break;
+
+            default: throw new NotImplementedException();
+          }
+
+          writer.Flush();
+        }
+
+        using (var sha1 = new global::System.Security.Cryptography.SHA1Managed())
+          return sha1.ComputeHash(stream.GetBuffer());
+      }
+    }
+
+    internal static void AddExistingGeometry(byte[] hash, DB.GeometryObject to)
+    {
+      if (hash is object && to is object) GeometryDictionary.Add
+      (
+        hash,
+        new SoftReference<DB.GeometryObject>(to) { KeepAlive = true, Hit = true }
+      );
+    }
+
+    internal static bool TryGetExistingGeometry<R, T>(/*const*/ R from, double factor, out T to, out byte[] hash)
+      where R : GeometryBase
+      where T : DB.GeometryObject
+    {
+      if (Policy == CachePolicy.Disabled)
+      {
+        hash = default;
+      }
+      else
+      {
+        hash = GetGeometryHashCode(from, factor);
+        if (GeometryDictionary.TryGetValue(hash, out var reference))
+        {
+          reference.KeepAlive = true;
+
+          if (reference.IsAlive)
+          {
+            reference.Hit = true;
+            to = (T) reference.Value;
+            return true;
+          }
+
+          GeometryDictionary.Remove(hash);
+        }
+      }
+
+      to = default;
+      return false;
+    }
+
+    static bool IsEquivalent(this DB.Solid solid, Brep brep)
     {
       var hit = new bool[brep.Faces.Count];
 
@@ -892,6 +1306,5 @@ namespace RhinoInside.Revit.Convert.Geometry
 
       return !hit.Any(x => !x);
     }
-#endregion
   }
 }

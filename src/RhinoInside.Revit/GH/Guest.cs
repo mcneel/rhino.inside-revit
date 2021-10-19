@@ -900,6 +900,7 @@ namespace RhinoInside.Revit.GH
           obj.ExpireSolution(false);
       }
 
+      Convert.Geometry.GeometryCache.StartKeepAliveRegion();
       ActiveDocumentStack.Push(e.Document);
       StartTransactionGroups();
     }
@@ -911,6 +912,7 @@ namespace RhinoInside.Revit.GH
 
       CommitTransactionGroups();
       ActiveDocumentStack.Pop();
+      Convert.Geometry.GeometryCache.EndKeepAliveRegion();
 
       // Warn the user about objects that contain elements modified by Grasshopper.
       {
