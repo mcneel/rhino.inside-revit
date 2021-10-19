@@ -41,63 +41,68 @@ namespace RhinoInside.Revit.GH.Components
 
       brep.TryGetUserString(DB.BuiltInParameter.ELEMENT_IS_CUTTING.ToString(), out bool cutting, false);
 
-      if (brep.Faces.Count == 1 && brep.Faces[0].Loops.Count == 1 && brep.Faces[0].TryGetPlane(out var capPlane))
+      // If there are no inner-loops we try with a plain DB.Form
+      if (brep.Faces.All(face => face.Loops.Count == 1))
       {
-        using (var sketchPlane = DB.SketchPlane.Create(document, capPlane.ToPlane()))
-        using (var referenceArray = new DB.ReferenceArray())
+        if (brep.Faces.Count == 1 && brep.Faces[0].TryGetPlane(out var capPlane))
         {
-          try
+          using (var sketchPlane = DB.SketchPlane.Create(document, capPlane.ToPlane()))
+          using (var referenceArray = new DB.ReferenceArray())
           {
-            foreach (var curve in brep.Faces[0].OuterLoop.To3dCurve().ToCurveMany())
-              referenceArray.Append(new DB.Reference(document.FamilyCreate.NewModelCurve(curve, sketchPlane)));
+            try
+            {
+              foreach (var curve in brep.Faces[0].OuterLoop.To3dCurve().ToCurveMany())
+                referenceArray.Append(new DB.Reference(document.FamilyCreate.NewModelCurve(curve, sketchPlane)));
 
-            ReplaceElement
-            (
-              ref form,
-              document.FamilyCreate.NewFormByCap
+              ReplaceElement
               (
-                !cutting,
-                referenceArray
-              )
-            );
+                ref form,
+                document.FamilyCreate.NewFormByCap
+                (
+                  !cutting,
+                  referenceArray
+                )
+              );
 
-            return;
+              return;
+            }
+            catch (Autodesk.Revit.Exceptions.InvalidOperationException)
+            {
+              document.Delete(referenceArray.OfType<DB.Reference>().Select(x => x.ElementId).ToArray());
+            }
           }
-          catch (Autodesk.Revit.Exceptions.InvalidOperationException)
+        }
+        else if (brep.TryGetExtrusion(out var extrusion) && (extrusion.CapCount == 2 || !extrusion.IsClosed(0)))
+        {
+          using (var sketchPlane = DB.SketchPlane.Create(document, extrusion.GetProfilePlane(0.0).ToPlane()))
+          using (var referenceArray = new DB.ReferenceArray())
           {
-            document.Delete(referenceArray.OfType<DB.Reference>().Select(x => x.ElementId).ToArray());
+            try
+            {
+              foreach (var curve in extrusion.Profile3d(new Rhino.Geometry.ComponentIndex(Rhino.Geometry.ComponentIndexType.ExtrusionBottomProfile, 0)).ToCurveMany())
+                referenceArray.Append(new DB.Reference(document.FamilyCreate.NewModelCurve(curve, sketchPlane)));
+
+              ReplaceElement
+              (
+                ref form,
+                document.FamilyCreate.NewExtrusionForm
+                (
+                  !cutting,
+                  referenceArray,
+                  extrusion.PathLineCurve().Line.Direction.ToXYZ(UnitConverter.ToHostUnits)
+                )
+              );
+              return;
+            }
+            catch (Autodesk.Revit.Exceptions.InvalidOperationException)
+            {
+              document.Delete(referenceArray.OfType<DB.Reference>().Select(x => x.ElementId).ToArray());
+            }
           }
         }
       }
-      else if ( brep.TryGetExtrusion(out var extrusion) && (extrusion.CapCount == 2 || !extrusion.IsClosed(0)))
-      {
-        using (var sketchPlane = DB.SketchPlane.Create(document, extrusion.GetProfilePlane(0.0).ToPlane()))
-        using (var referenceArray = new DB.ReferenceArray())
-        {
-          try
-          {
-            foreach (var curve in extrusion.Profile3d(new Rhino.Geometry.ComponentIndex(Rhino.Geometry.ComponentIndexType.ExtrusionBottomProfile, 0)).ToCurveMany())
-              referenceArray.Append(new DB.Reference(document.FamilyCreate.NewModelCurve(curve, sketchPlane)));
 
-            ReplaceElement
-            (
-              ref form,
-              document.FamilyCreate.NewExtrusionForm
-              (
-                !cutting,
-                referenceArray,
-                extrusion.PathLineCurve().Line.Direction.ToXYZ(UnitConverter.ToHostUnits)
-              )
-            );
-            return;
-          }
-          catch(Autodesk.Revit.Exceptions.InvalidOperationException)
-          {
-             document.Delete(referenceArray.OfType<DB.Reference>().Select(x => x.ElementId).ToArray());
-          }
-        }
-      }
-
+      // Else we try with a DB.FreeFormElement
       using (var ctx = GeometryEncoder.Context.Push(document))
       {
         ctx.RuntimeMessage = (severity, message, invalidGeometry) =>
