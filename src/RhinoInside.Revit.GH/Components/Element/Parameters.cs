@@ -400,10 +400,10 @@ namespace RhinoInside.Revit.GH.Components.Element
         if (!parameter.Update(value))
         {
           var message = $"Failed to set parameter '{parameter.Definition.Name}' to '{value}'.";
-          var specTypeId = parameter.Definition?.GetDataType();
+          var dataTypeId = parameter.Definition?.GetDataType();
           if
           (
-            SpecType.IsMeasurableSpec(specTypeId, out var spec) &&
+            SpecType.IsMeasurableSpec(dataTypeId, out var specTypeId) &&
             GH_Convert.ToDouble(value, out var number, GH_Conversion.Both)
           )
           {
