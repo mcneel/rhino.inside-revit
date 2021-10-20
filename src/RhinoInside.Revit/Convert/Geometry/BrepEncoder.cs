@@ -120,8 +120,8 @@ namespace RhinoInside.Revit.Convert.Geometry
               edges.SplitKinkyEdge(ei, Revit.AngleTolerance);
 
             kinkyEdges += edges.Count - edgeCount;
-            microEdges += edges.RemoveNakedMicroEdges(Revit.VertexTolerance);
-            mergedEdges += edges.MergeAllEdges(Revit.AngleTolerance);
+            microEdges += edges.RemoveNakedMicroEdges(Revit.VertexTolerance, cleanUp: true);
+            mergedEdges += edges.MergeAllEdges(Revit.AngleTolerance) - edgeCount;
           }
 
           // Faces
@@ -209,7 +209,9 @@ namespace RhinoInside.Revit.Convert.Geometry
       // Try on existing solids already in memory.
       if (GeometryCache.TryGetExistingGeometry(brep, factor, out DB.Solid existing, out var hash))
       {
+#if DEBUG
         GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Using cached value {GeometryCache.HashToString(hash)}…", default);
+#endif
         AuditSolid(brep, existing);
         return existing;
       }
@@ -611,7 +613,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
         yield break;
       }
-      else if (curve.IsClosed(Revit.ShortCurveTolerance * 1.01))
+      else if (curve.IsClosed(Revit.VertexTolerance))
       {
         var segments = curve.DuplicateSegments();
         if (segments.Length == 1)
@@ -1001,10 +1003,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     {
       Disabled = 0,     // Caching is disabled
       Memory = 1,       // Memory over performance (Not Implemented)
-      Performance = 2,  // Performance over memory (Not Implemented)
+      Performance = 2,  // Performance over memory
       Extreme = 3       // Does not allow .NET to collect any geometry
     }
+#if DEBUG
+    static CachePolicy Policy = CachePolicy.Disabled;
+#else
     static CachePolicy Policy = CachePolicy.Performance;
+#endif
 
     class SoftReference<T> : WeakReference where T : class
     {
