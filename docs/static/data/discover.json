@@ -156,6 +156,28 @@
         ]
     },
     {
+        "highlight": true,
+        "title": "Quick Tutorial",
+        "url": "https://youtu.be/W5xLkt7ucI0",
+        "thumbnail": "https://i3.ytimg.com/vi/W5xLkt7ucI0/maxresdefault.jpg",
+        "author": "Oliver Thomas, BIG",
+        "authorUrl": "",
+        "description": "Learn how to import geometry from Rhino into Revit using Rhino Inside. During this tutorial we will cover 3 methodologies to move geometry from Rhino into Revit!",
+        "kinds": [
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "example",
+            "workflow",
+            "overview"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
+    },
+    {
         "title": "Rhino.Inside.Revit Review",
         "url": "https://www.youtube.com/watch?v=J11LIrDIchw",
         "thumbnail": "https://i3.ytimg.com/vi/J11LIrDIchw/maxresdefault.jpg",
