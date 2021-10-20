@@ -321,7 +321,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <param name="factor"></param>
     /// <returns>Returns a scaled duplicate of the input <paramref name="value"/> in other units.</returns>
     public static G InOtherUnits<G>(this G value, double factor) where G : GeometryBase
-    { value = (G) value.DuplicateShallow(); if(factor != 1.0) Scale(value, factor); return value; }
+    { value = (G) value.Duplicate(); if(factor != 1.0) Scale(value, factor); return value; }
 
     static double InOtherUnits(double value, EDBS.SpecType type, UnitSystem from, UnitSystem to)
     {
@@ -375,7 +375,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <param name="value"></param>
     /// <returns>Returns a scaled duplicate of the input <paramref name="value"/> in Active Rhino document units.</returns>
     public static G InRhinoUnits<G>(this G value) where G : GeometryBase
-    { Scale(value = (G) value.DuplicateShallow(), ToRhinoUnits); return value; }
+    { Scale(value = (G) value.Duplicate(), ToRhinoUnits); return value; }
 
     public static double InRhinoUnits(double value, EDBS.SpecType type) =>
       InOtherUnits(value, type, InternalUnitSystem, ExternalUnitSystem);
@@ -433,7 +433,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <param name="value"></param>
     /// <returns>Returns a duplicate of <paramref name="value"/> in Revit internal units.</returns>
     public static G InHostUnits<G>(this G value) where G : GeometryBase
-    { Scale(value = (G) value.DuplicateShallow(), ToHostUnits); return value; }
+    { Scale(value = (G) value.Duplicate(), ToHostUnits); return value; }
 
     public static double InHostUnits(double value, EDBS.SpecType type) =>
       InOtherUnits(value, type, ExternalUnitSystem, InternalUnitSystem);
