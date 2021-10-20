@@ -771,27 +771,34 @@ namespace RhinoInside.Revit.Convert.Geometry
       var FileSAT = Path.Combine(TempFolder, $"{Guid.NewGuid():N}.sat");
 
       // Export
+      if (RhinoDoc.ActiveDoc is RhinoDoc activeDoc)
       {
-        var activeModel = RhinoDoc.ActiveDoc;
-        var rhinoWindowEnabled = Rhinoceros.MainWindow.Enabled;
-        var redrawEnabled = activeModel.Views.RedrawEnabled;
-        var objectGUID = default(Guid);
-        try
+        using (var rhinoDoc = RhinoDoc.CreateHeadless(null))
         {
-          Rhinoceros.MainWindow.Enabled = false;
-          activeModel.Views.RedrawEnabled = false;
-          activeModel.Objects.UnselectAll();
+          if (factor == UnitConverter.ToHostUnits)
+          {
+            rhinoDoc.ModelUnitSystem = activeDoc.ModelUnitSystem;
+            rhinoDoc.ModelAbsoluteTolerance = activeDoc.ModelAbsoluteTolerance;
+            rhinoDoc.ModelAngleToleranceRadians = activeDoc.ModelAngleToleranceRadians;
 
-          objectGUID = activeModel.Objects.Add(brep);
+            rhinoDoc.Objects.Add(brep);
+          }
+          else
+          {
+            rhinoDoc.ModelUnitSystem = UnitSystem.Feet;
+            rhinoDoc.ModelAbsoluteTolerance = activeDoc.ModelAbsoluteTolerance * factor;
+            rhinoDoc.ModelAngleToleranceRadians = activeDoc.ModelAngleToleranceRadians;
 
-          activeModel.Objects.Select(objectGUID);
-          RhinoApp.RunScript($@"_-Export ""{FileSAT}"" ""Default"" _Enter", false);
-        }
-        finally
-        {
-          activeModel.Objects.Delete(objectGUID, true);
-          activeModel.Views.RedrawEnabled = redrawEnabled;
-          Rhinoceros.MainWindow.Enabled = rhinoWindowEnabled;
+            if (factor != 1.0)
+            {
+              brep = brep.DuplicateBrep();
+              if (!brep.Scale(factor)) return default;
+            }
+
+            rhinoDoc.Objects.Add(brep);
+          }
+
+          rhinoDoc.Export(FileSAT);
         }
       }
 
