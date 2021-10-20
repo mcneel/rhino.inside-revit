@@ -230,9 +230,9 @@ namespace RhinoInside.Revit.Convert.Geometry
 
       // Try using DB.ShapeImporter | DB.Document.Import
       {
-        GeometryEncoder.Context.Peek.RuntimeMessage(255, "Using 3DM…", default);
+        GeometryEncoder.Context.Peek.RuntimeMessage(255, "Using SAT…", default);
 
-        if (To3DM(brep, factor) is DB.Solid solid)
+        if (ToSAT(brep, factor) is DB.Solid solid)
         {
           AuditSolid(brep, solid);
           GeometryCache.AddExistingGeometry(hash, solid);
@@ -731,7 +731,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     static DB.Document IODocument => ioDocument.IsValid() ? ioDocument :
       ioDocument = Revit.ActiveDBApplication.NewProjectDocument(DB.UnitSystem.Imperial);
 
-    static bool TryGetSolidFromInstance(DB.Document doc, DB.ElementId elementId, out DB.Solid solid)
+    static bool TryGetSolidFromInstance(DB.Document doc, DB.ElementId elementId, DB.XYZ center, out DB.Solid solid)
     {
       if (doc.GetElement(elementId) is DB.Element element)
       {
@@ -746,10 +746,12 @@ namespace RhinoInside.Revit.Convert.Geometry
           (
             element.get_Geometry(options) is DB.GeometryElement geometryElement &&
             geometryElement.First() is DB.GeometryInstance instance &&
-            instance.GetInstanceGeometry().First() is DB.Solid instanceSolid
+            instance.GetSymbolGeometry().First() is DB.Solid symbolSolid
           )
           {
-            solid = DB.SolidUtils.Clone(instanceSolid);
+            var solidBBox = symbolSolid.GetBoundingBox();
+            var translate = DB.Transform.CreateTranslation(new DB.XYZ(0.0, 0.0, center.Z - solidBBox.Transform.Origin.Z));
+            solid = DB.SolidUtils.CreateTransformed(symbolSolid, translate);
             return true;
           }
         }
@@ -844,7 +846,8 @@ namespace RhinoInside.Revit.Convert.Geometry
                   var view = DB.View3D.CreatePerspective(doc, typeId);
 
                   var instanceId = doc.Import(FileSAT, OptionsSAT, view);
-                  if (TryGetSolidFromInstance(doc, instanceId, out var solid))
+                  var center = brep.GetBoundingBox(accurate: true).Center.ToXYZ(factor);
+                  if (TryGetSolidFromInstance(doc, instanceId, center, out var solid))
                     return solid;
                 }
               }
@@ -855,7 +858,7 @@ namespace RhinoInside.Revit.Convert.Geometry
             }
             finally
             {
-              if (doc != IODocument && doc != GeometryEncoder.Context.Peek.Document)
+              if (!doc.IsEquivalent(ioDocument) && doc != GeometryEncoder.Context.Peek.Document)
                 doc.Close(false);
             }
           }
@@ -924,7 +927,7 @@ namespace RhinoInside.Revit.Convert.Geometry
           {
             using (var importer = new DB.ShapeImporter())
             {
-              var list = importer.Convert(IODocument, File3DM);
+              var list = importer.Convert(doc, File3DM);
               if (list.OfType<DB.Solid>().FirstOrDefault() is DB.Solid shape)
                 return shape;
 
@@ -965,7 +968,8 @@ namespace RhinoInside.Revit.Convert.Geometry
                   var view = DB.View3D.CreatePerspective(doc, typeId);
 
                   var instanceId = doc.Import(File3DM, Options3DM, view);
-                  if (TryGetSolidFromInstance(doc, instanceId, out var solid))
+                  var center = brep.GetBoundingBox(accurate: true).Center.ToXYZ(factor);
+                  if (TryGetSolidFromInstance(doc, instanceId, center, out var solid))
                     return solid;
                 }
               }
@@ -976,7 +980,7 @@ namespace RhinoInside.Revit.Convert.Geometry
             }
             finally
             {
-              if (doc != IODocument && doc != GeometryEncoder.Context.Peek.Document)
+              if (!doc.IsEquivalent(ioDocument) && doc != GeometryEncoder.Context.Peek.Document)
                 doc.Close(false);
             }
           }
