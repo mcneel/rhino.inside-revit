@@ -65,15 +65,15 @@ namespace RhinoInside.Revit.GH.Kernel.Attributes
 namespace RhinoInside.Revit.GH
 {
   [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-  sealed class ComponentVersionAttribute : Attribute
+  public sealed class ComponentVersionAttribute : Attribute
   {
     public readonly Version Since;
     public readonly Version Updated;
     public readonly Version Obsolete;
 
-    public ComponentVersionAttribute(string since) : this(since, default, default) { }
-    public ComponentVersionAttribute(string since, string updated) : this(since, updated, default) { }
-    public ComponentVersionAttribute(string since, string updated, string obsolete)
+    internal ComponentVersionAttribute(string since) : this(since, default, default) { }
+    internal ComponentVersionAttribute(string since, string updated) : this(since, updated, default) { }
+    internal ComponentVersionAttribute(string since, string updated, string obsolete)
     {
       Since = Version.Parse(since);
       Updated = updated is object ? Version.Parse(updated) : default;
