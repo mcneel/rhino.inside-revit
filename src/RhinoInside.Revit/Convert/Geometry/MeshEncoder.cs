@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.Convert.Geometry
   static class MeshEncoder
   {
     #region Tolerances
-    static readonly double ShortEdgeTolerance = 2.0 * Revit.VertexTolerance;
+    internal static readonly double ShortEdgeTolerance = 2.0 * Revit.VertexTolerance;
     #endregion
 
     #region Encode
@@ -65,11 +65,11 @@ namespace RhinoInside.Revit.Convert.Geometry
       ShortEdges = 1,
     }
 
-    static MeshIssues AuditEdge(Point3d from, Point3d to)
+    static MeshIssues AuditEdge(Point3d from, Point3d to, double factor)
     {
       var issues = default(MeshIssues);
 
-      if (from.DistanceTo(to) < ShortEdgeTolerance)
+      if (from.DistanceTo(to) < ShortEdgeTolerance / factor)
       {
         issues |= MeshIssues.ShortEdges;
         GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Geometry contains short edges. Edges will be collapsed at the output.", new LineCurve(from, to));
@@ -78,7 +78,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       return issues;
     }
 
-    static MeshIssues AuditMesh(Mesh mesh)
+    static MeshIssues AuditMesh(Mesh mesh, double factor)
     {
       var issues = default(MeshIssues);
 
@@ -93,17 +93,17 @@ namespace RhinoInside.Revit.Convert.Geometry
         var B = vertices[face.B];
         var C = vertices[face.C];
 
-        issues |= AuditEdge(A, B);
-        issues |= AuditEdge(B, C);
+        issues |= AuditEdge(A, B, factor);
+        issues |= AuditEdge(B, C, factor);
 
         if (face.IsQuad)
         {
           var D = vertices[face.D];
 
-          issues |= AuditEdge(C, D);
-          issues |= AuditEdge(D, A);
+          issues |= AuditEdge(C, D, factor);
+          issues |= AuditEdge(D, A, factor);
         }
-        else issues |= AuditEdge(C, A);
+        else issues |= AuditEdge(C, A, factor);
       }
 
       var edges = mesh.TopologyEdges;
@@ -113,20 +113,40 @@ namespace RhinoInside.Revit.Convert.Geometry
           GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Geometry is nonmanifold.", new LineCurve(edges.EdgeLine(ei)));
       }
 
-      var degenerated = mesh.Faces.CullDegenerateFaces();
-      if(degenerated > 0)
-        GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Geometry contains degenerated faces. Those faces will be removed.", default);
-
       return issues;
     }
 
-    static bool TryRebuildMesh(Mesh mesh, MeshIssues issues)
+    static bool TryRebuildMesh(Mesh mesh, MeshIssues issues, double factor)
     {
+      var nGonCount = mesh.Ngons.Count;
+
       if (issues.HasFlag(MeshIssues.ShortEdges) && mesh.Ngons.Count == 0)
       {
-        mesh.Vertices.Align(ShortEdgeTolerance, mesh.GetNakedEdgePointStatus().Select(x => !x));
-        mesh.Vertices.Align(ShortEdgeTolerance, default);
+        mesh.Ngons.Count = 0;
+        mesh.Vertices.Align(ShortEdgeTolerance / factor, mesh.GetNakedEdgePointStatus().Select(x => !x));
+        mesh.Vertices.Align(ShortEdgeTolerance / factor, default);
         mesh.Weld(Revit.AngleTolerance);
+      }
+
+      var degenerated = mesh.Faces.CullDegenerateFaces();
+      if (degenerated > 0)
+      {
+        mesh.Ngons.Count = 0;
+        GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Geometry contains {degenerated} degenerated faces. Those faces will be removed.", default);
+      }
+
+      // Try to rebuild nGons
+      if (mesh.Ngons.Count != nGonCount)
+      {
+        if
+        (
+          nGonCount == 1 &&
+          Plane.FitPlaneToPoints(mesh.Vertices.ToPoint3dArray(), out var _, out var deviation) == PlaneFitResult.Success &&
+          deviation <= Revit.VertexTolerance / factor
+        )
+        {
+          mesh.Ngons.AddPlanarNgons(Revit.VertexTolerance / factor, 4, 2, true);
+        }
       }
 
       return mesh.IsValid;
@@ -164,22 +184,9 @@ namespace RhinoInside.Revit.Convert.Geometry
         { 
           foreach (var shell in shells)
           {
-            var issues = AuditMesh(shell);
+            var issues = AuditMesh(shell, factor);
 
-            var nGonCount = shell.Ngons.Count;
-            if (nGonCount != 0)
-            {
-              shell.Ngons.Count = 0;
-              if
-              (
-                nGonCount == 1 &&
-                Plane.FitPlaneToPoints(shell.Vertices.ToPoint3dArray(), out var _, out var deviation) == PlaneFitResult.Success &&
-                deviation <= Revit.VertexTolerance
-              )
-                shell.Ngons.AddPlanarNgons(Revit.VertexTolerance, 4, 2, true);
-            }
-
-            if (TryRebuildMesh(shell, issues))
+            if (TryRebuildMesh(shell, issues, factor))
               AddConnectedFaceSet(builder, shell, factor, true);
           }
 
@@ -201,9 +208,7 @@ namespace RhinoInside.Revit.Convert.Geometry
             {
               var geometries = result.GetGeometricalObjects();
               if (geometries.Count == 1)
-              {
                 return geometries[0] as DB.Mesh;
-              }
             }
           }
         }

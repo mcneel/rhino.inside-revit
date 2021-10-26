@@ -192,9 +192,21 @@ namespace RhinoInside.Revit.Convert.Geometry
     {
       using (var mp = MeshingParameters.Default)
       {
-        mp.MinimumEdgeLength = Revit.ShortCurveTolerance / factor;
-        mp.ClosedObjectPostProcess = brep.IsManifold;
-        mp.JaggedSeams = false;
+        mp.Tolerance = 0.0;// Revit.VertexTolerance / factor;
+        mp.MinimumTolerance = 0.0;
+        mp.RelativeTolerance = 0.0;
+
+        mp.RefineGrid = false;
+        mp.GridAspectRatio = 0.0;
+        mp.GridAngle = 0.0;
+        mp.GridMaxCount = 0;
+        mp.GridMinCount = 0;
+        mp.MinimumEdgeLength = MeshEncoder.ShortEdgeTolerance / factor;
+        mp.MaximumEdgeLength = 0.0;
+
+        mp.ClosedObjectPostProcess = brep.IsSolid;
+        mp.JaggedSeams = brep.IsManifold;
+        mp.SimplePlanes = true;
 
         if (Mesh.CreateFromBrep(brep, mp) is Mesh[] shells)
           return MeshEncoder.ToMesh(shells, factor);
@@ -215,6 +227,25 @@ namespace RhinoInside.Revit.Convert.Geometry
         return existing;
       }
 
+      if (brep.TryGetExtrusion(out var extrusion))
+      {
+        var height = extrusion.PathStart.DistanceTo(extrusion.PathEnd);
+        if (height < Revit.VertexTolerance / factor)
+        {
+          var curves = new List<Curve>(extrusion.ProfileCount);
+          for (int p = 0; p < extrusion.ProfileCount; ++p)
+            curves.Add(extrusion.Profile3d(p, 0.5));
+
+          var regions = Brep.CreatePlanarBreps(curves, Revit.VertexTolerance / factor);
+          if (regions.Length != 1)
+            return default;
+
+          brep = regions[0];
+
+          GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Output geometry has naked edges.", default);
+        }
+      }
+
       // Try using DB.BRepBuilder
       {
         var raw = ToRawBrep(brep, factor);
@@ -229,13 +260,14 @@ namespace RhinoInside.Revit.Convert.Geometry
 
       // Try using DB.ShapeImporter | DB.Document.Import
       {
-        GeometryEncoder.Context.Peek.RuntimeMessage(255, "Using SAT…", default);
+        GeometryEncoder.Context.Peek.RuntimeMessage(255, "Using 3DM…", default);
 
-        if (ToSAT(brep, factor) is DB.Solid solid)
+        if (To3DM(brep, factor) is DB.Solid solid)
         {
           AuditSolid(brep, solid);
           GeometryCache.AddExistingGeometry(hash, solid);
-          return solid;
+          if (GeometryEncoder.Context.Peek.Element is DB.DirectShape ds && ds.IsValidGeometry(solid))
+            return solid;
         }
       }
 
