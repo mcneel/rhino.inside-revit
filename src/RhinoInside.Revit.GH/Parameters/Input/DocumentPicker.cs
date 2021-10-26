@@ -308,6 +308,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
     }
   }
 
+  [ComponentVersion(since: "1.2")]
   public class DocumentTitleBlockSymbolPicker : DocumentElementPicker<Types.FamilySymbol>
   {
     public override Guid ComponentGuid => new Guid("f737745f-57ff-4699-a402-01a6db329313");

@@ -622,7 +622,7 @@ namespace RhinoInside.Revit.GH.Components.Material
 
     // behaviour
     [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_BEHAVIOR, typeof(DB.StructuralBehavior))]
-    [AssetGHParameter(typeof(Parameters.Param_Enum<Types.StructuralBehavior>), "Behaviour", "B", "Physical asset behaviour", modifiable: true)]
+    [AssetGHParameter(typeof(Parameters.Param_Enum<Types.StructuralBehavior>), "Behavior", "B", "Physical asset behaviour", modifiable: true)]
     public new DB.StructuralBehavior Behaviour { get; set; }
 
     // basic thermal
@@ -800,7 +800,7 @@ namespace RhinoInside.Revit.GH.Components.Material
 
     // behaviour
     [APIAssetBuiltInProp(DB.BuiltInParameter.PHY_MATERIAL_PARAM_BEHAVIOR, typeof(DB.StructuralBehavior))]
-    [AssetGHParameter(typeof(Parameters.Param_Enum<Types.StructuralBehavior>), "Behaviour", "B", "Thermal asset behaviour", modifiable: true)]
+    [AssetGHParameter(typeof(Parameters.Param_Enum<Types.StructuralBehavior>), "Behavior", "B", "Thermal asset behaviour", modifiable: true)]
     public new DB.StructuralBehavior Behaviour { get; set; }
 
     [APIAssetBuiltInProp(DB.BuiltInParameter.THERMAL_MATERIAL_PARAM_TRANSMITS_LIGHT, typeof(bool), exclusive: true)]

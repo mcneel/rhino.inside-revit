@@ -1,19 +1,14 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
-
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-
-using RhinoInside.Revit.GH.ElementTracking;
 using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.Kernel.Attributes;
-
+using RhinoInside.Revit.GH.ElementTracking;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Element.Assembly
 {
-  [Since("v1.2")]
+  [ComponentVersion(since: "1.2", updated: "1.2.4")]
   public class AssemblyByMembers : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("6915b697-f10d-4bc8-8faa-f25438f393a8");

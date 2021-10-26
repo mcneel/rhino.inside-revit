@@ -5,6 +5,7 @@ using Grasshopper.Kernel;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
+  [ComponentVersion(since: "1.2")]
   public class Workset : PersistentParam<Types.Workset>
   {
     public override Guid ComponentGuid => new Guid("5C073F7D-6D31-4063-A943-4152E1A799D1");

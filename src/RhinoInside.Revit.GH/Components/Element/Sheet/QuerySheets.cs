@@ -4,13 +4,12 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 
 using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.Kernel.Attributes;
 
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Element.Sheet
 {
-  [Since("v1.2")]
+  [ComponentVersion(since: "1.2")]
   public class QuerySheets : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("97c8cb27-955f-44cf-948d-dfbde285cd7a");

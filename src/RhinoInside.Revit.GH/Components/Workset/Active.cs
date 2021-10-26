@@ -5,6 +5,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Worksets
 {
+  [ComponentVersion(since: "1.2")]
   public class WorksetActive : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("AA467C94-D400-4F4A-80BF-DEFB309A4C52");

@@ -16,7 +16,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Element.Assembly
 {
-  [Since("v1.2")]
+  [ComponentVersion(since: "1.2")]
   public class AssemblyByLocation : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("26feb2e9-6476-4ba7-a553-1d0300674d1d");

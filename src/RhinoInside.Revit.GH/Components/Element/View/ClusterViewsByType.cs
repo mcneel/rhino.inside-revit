@@ -7,14 +7,11 @@ using Grasshopper.GUI;
 using Grasshopper.GUI.Canvas;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Attributes;
-using Grasshopper.Kernel.Types;
 using DB = Autodesk.Revit.DB;
-
-using RhinoInside.Revit.GH.Kernel.Attributes;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  [Since("v1.2")]
+  [ComponentVersion(since: "1.2", updated: "1.2.4")]
   public class ClusterViewsByType : Component, IGH_VariableParameterComponent
   {
     public override Guid ComponentGuid => new Guid("f6b99fe2-19e1-4840-96c1-13873a0aece8");

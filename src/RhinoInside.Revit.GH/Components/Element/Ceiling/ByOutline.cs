@@ -12,7 +12,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  [Since("v1.3")]
+  [ComponentVersion(since: "1.3")]
   public class CeilingByOutline : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("A39BBDF2-78F2-4501-BB6E-F9CC3E83516E");
