@@ -500,26 +500,34 @@ namespace RhinoInside.Revit
               }
             }
 
-            switch (taskDialog.Show())
+            var result = taskDialog.Show();
+            var ur = doc.BeginUndoRecord("Revit Units");
+            try
             {
-              case Autodesk.Revit.UI.TaskDialogResult.CommandLink2:
-                doc.ModelAngleToleranceRadians = Revit.AngleTolerance;
-                doc.ModelDistanceDisplayPrecision = distanceDisplayPrecision;
-                doc.ModelAbsoluteTolerance = UnitConverter.ConvertFromHostUnits(Revit.VertexTolerance, RevitModelUnitSystem);
-                doc.AdjustModelUnitSystem(RevitModelUnitSystem, true);
-                AdjustViewConstructionPlanes(doc);
-                break;
-              case Autodesk.Revit.UI.TaskDialogResult.CommandLink3:
-                doc.ModelAngleToleranceRadians = Revit.AngleTolerance;
-                doc.ModelDistanceDisplayPrecision = Clamp(Grasshopper.CentralSettings.FormatDecimalDigits, 0, 7);
-                doc.ModelAbsoluteTolerance = UnitConverter.ConvertFromHostUnits(Revit.VertexTolerance, GH.Guest.ModelUnitSystem);
-                doc.AdjustModelUnitSystem(GH.Guest.ModelUnitSystem, true);
-                AdjustViewConstructionPlanes(doc);
-                break;
-              default:
-                AuditTolerances(doc);
-                break;
+              switch (result)
+              {
+                case Autodesk.Revit.UI.TaskDialogResult.CommandLink2:
+                  doc.ModelAngleToleranceRadians = Revit.AngleTolerance;
+                  doc.ModelDistanceDisplayPrecision = distanceDisplayPrecision;
+                  doc.ModelAbsoluteTolerance = UnitConverter.ConvertFromHostUnits(Revit.VertexTolerance, RevitModelUnitSystem);
+                  doc.AdjustModelUnitSystem(RevitModelUnitSystem, true);
+                  AdjustViewConstructionPlanes(doc);
+                  break;
+
+                case Autodesk.Revit.UI.TaskDialogResult.CommandLink3:
+                  doc.ModelAngleToleranceRadians = Revit.AngleTolerance;
+                  doc.ModelDistanceDisplayPrecision = Clamp(Grasshopper.CentralSettings.FormatDecimalDigits, 0, 7);
+                  doc.ModelAbsoluteTolerance = UnitConverter.ConvertFromHostUnits(Revit.VertexTolerance, GH.Guest.ModelUnitSystem);
+                  doc.AdjustModelUnitSystem(GH.Guest.ModelUnitSystem, true);
+                  AdjustViewConstructionPlanes(doc);
+                  break;
+
+                default:
+                  AuditTolerances(doc);
+                  break;
+              }
             }
+            finally { doc.EndUndoRecord(ur); }
           }
         }
       }
@@ -801,12 +809,12 @@ namespace RhinoInside.Revit
         if (vport is object)
           view.MainViewport.SetViewProjection(vport, updateScreenPort: true, updateTargetLocation: true);
 
-        if (cplane is object)
+        if (cplane is object && view.MainViewport is RhinoViewport viewport)
         {
           if (cplane.Plane.IsValid)
-            view.MainViewport.SetConstructionPlane(cplane);
-          else if (view.MainViewport.GetFrustumNearPlane(out var nearPlane))
-            view.MainViewport.SetConstructionPlane(nearPlane);
+            viewport.SetConstructionPlane(cplane);
+          else if (viewport.GetFrustumNearPlane(out var nearPlane))
+            viewport.SetConstructionPlane(nearPlane);
         }
 
         if (cplane is object || vport is object)
