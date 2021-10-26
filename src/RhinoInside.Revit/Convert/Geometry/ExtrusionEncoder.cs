@@ -26,9 +26,21 @@ namespace RhinoInside.Revit.Convert.Geometry
     {
       using (var mp = MeshingParameters.Default)
       {
-        mp.MinimumEdgeLength = Revit.ShortCurveTolerance * factor;
-        mp.ClosedObjectPostProcess = extrusion.IsSolid;
-        mp.JaggedSeams = false;
+        mp.Tolerance = 0.0;// Revit.VertexTolerance / factor;
+        mp.MinimumTolerance = 0.0;
+        mp.RelativeTolerance = 0.0;
+
+        mp.RefineGrid = false;
+        mp.GridAspectRatio = 0.0;
+        mp.GridAngle = 0.0;
+        mp.GridMaxCount = 0;
+        mp.GridMinCount = 0;
+        mp.MinimumEdgeLength = MeshEncoder.ShortEdgeTolerance / factor;
+        mp.MaximumEdgeLength = 0.0;
+
+        mp.ClosedObjectPostProcess = extrusion.CapCount == 2;
+        mp.JaggedSeams = true;
+        mp.SimplePlanes = true;
 
         using (var mesh = Mesh.CreateFromSurface(extrusion, mp))
           return MeshEncoder.ToMesh(new Mesh[] { mesh }, factor);
