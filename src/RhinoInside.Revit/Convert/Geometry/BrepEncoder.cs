@@ -811,7 +811,7 @@ namespace RhinoInside.Revit.Convert.Geometry
             FileVersion = 6,
             UpdateDocumentPath = false,
             WriteUserData = false,
-            WriteGeometryOnly = true,
+            WriteGeometryOnly = false,
             SuppressAllInput = true,
             SuppressDialogBoxes = true,
             IncludeHistory = false,
