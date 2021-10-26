@@ -223,59 +223,21 @@ namespace RhinoInside.Revit.Convert.Geometry
 #if DEBUG
         GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Using cached value {GeometryCache.HashToString(hash)}…", default);
 #endif
-        AuditSolid(brep, existing);
-        return existing;
+        return AuditSolid(brep, existing);
       }
 
-      if (brep.TryGetExtrusion(out var extrusion))
+      // Try to convert...
+      if (TryGetSolid(brep, factor, out var solid))
       {
-        var height = extrusion.PathStart.DistanceTo(extrusion.PathEnd);
-        if (height < Revit.VertexTolerance / factor)
-        {
-          var curves = new List<Curve>(extrusion.ProfileCount);
-          for (int p = 0; p < extrusion.ProfileCount; ++p)
-            curves.Add(extrusion.Profile3d(p, 0.5));
+        GeometryCache.AddExistingGeometry(hash, solid);
 
-          var regions = Brep.CreatePlanarBreps(curves, Revit.VertexTolerance / factor);
-          if (regions.Length != 1)
-            return default;
-
-          brep = regions[0];
-
-          GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Output geometry has naked edges.", default);
-        }
+        return AuditSolid(brep, solid);
       }
 
-      // Try using DB.BRepBuilder
-      {
-        var raw = ToRawBrep(brep, factor);
-
-        if (ToSolid(raw) is DB.Solid solid)
-        {
-          AuditSolid(brep, solid);
-          GeometryCache.AddExistingGeometry(hash, solid);
-          return solid;
-        }
-      }
-
-      // Try using DB.ShapeImporter | DB.Document.Import
-      {
-        GeometryEncoder.Context.Peek.RuntimeMessage(255, "Using 3DM…", default);
-
-        if (To3DM(brep, factor) is DB.Solid solid)
-        {
-          AuditSolid(brep, solid);
-          GeometryCache.AddExistingGeometry(hash, solid);
-          if (GeometryEncoder.Context.Peek.Element is DB.DirectShape ds && ds.IsValidGeometry(solid))
-            return solid;
-        }
-      }
-
-      GeometryEncoder.Context.Peek.RuntimeMessage(20, "Failed to convert geometry.", brep.InHostUnits());
       return default;
     }
 
-    static void AuditSolid(Brep brep, DB.Solid solid)
+    static DB.Solid AuditSolid(Brep brep, DB.Solid solid)
     {
       if (brep.IsSolid)
       {
@@ -291,6 +253,76 @@ namespace RhinoInside.Revit.Convert.Geometry
           GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Output geometry has naked edges.", default);
 //#endif
       }
+
+      // DirectShape geometry has aditional validation
+      switch(GeometryEncoder.Context.Peek.Element)
+      {
+        case DB.DirectShape ds:
+          if (!ds.IsValidGeometry(solid))
+          {
+            GeometryEncoder.Context.Peek.RuntimeMessage(20, "Geometry does not satisfy DirectShape validation criteria", brep.InHostUnits());
+            return default;
+          }
+          break;
+
+        case DB.DirectShapeType dst:
+          if (!dst.IsValidShape(new DB.Solid[] { solid }))
+          {
+            GeometryEncoder.Context.Peek.RuntimeMessage(20, "Geometry does not satisfy DirectShapeType validation criteria", brep.InHostUnits());
+            return default;
+          }
+          break;
+      }
+
+      return solid;
+    }
+
+    internal static bool TryGetSolid(/*const*/Brep brep, double factor, out DB.Solid solid)
+    {
+      solid = default;
+
+      // Try convert flat extrusions under tolerance as surfaces
+      if (brep.TryGetExtrusion(out var extrusion))
+      {
+        var height = extrusion.PathStart.DistanceTo(extrusion.PathEnd);
+        if (height < Revit.VertexTolerance / factor)
+        {
+          var curves = new List<Curve>(extrusion.ProfileCount);
+          for (int p = 0; p < extrusion.ProfileCount; ++p)
+            curves.Add(extrusion.Profile3d(p, 0.5));
+
+          var regions = Brep.CreatePlanarBreps(curves, Revit.VertexTolerance / factor);
+          if (regions.Length != 1)
+            return false;
+
+          brep = regions[0];
+        }
+      }
+
+      // Try using DB.BRepBuilder
+      {
+        var raw = ToRawBrep(brep, factor);
+
+        if (ToSolid(raw) is DB.Solid converted)
+        {
+          solid = converted;
+          return true;
+        }
+      }
+
+      // Try using DB.ShapeImporter | DB.Document.Import
+      {
+        GeometryEncoder.Context.Peek.RuntimeMessage(255, "Using SAT…", default);
+
+        if (ToSAT(brep, factor) is DB.Solid imported)
+        {
+          solid = imported;
+          return true;
+        }
+      }
+
+      GeometryEncoder.Context.Peek.RuntimeMessage(20, "Failed to convert geometry.", brep.InHostUnits());
+      return false;
     }
 
     /// <summary>
