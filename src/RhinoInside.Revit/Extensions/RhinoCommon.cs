@@ -307,7 +307,10 @@ namespace Rhino.Geometry
 
           // Add result to candidates List reversing index order to keep extrusion creation direction
           // Breps that come from a Extrusion have the Cap[0] before Cap[1]
-          candidateFaces.Add(new int[] { g, f });
+          if (planarFaces[f].Face.FaceIndex < planarFaces[g].Face.FaceIndex)
+            candidateFaces.Add(new int[] { f, g });
+          else
+            candidateFaces.Add(new int[] { g, f });
         }
       }
 
@@ -333,9 +336,15 @@ namespace Rhino.Geometry
       // If caps and walls are interleaved, smallest pair of faces will be used as caps, producing beam-like extrusions.
 
       //  System.Linq.Enumerable.OrderBy performs a stable sort so only first and last face will be moved if found.
-      foreach (var candidate in candidateFaces.OrderBy(pair => (planarFaces[pair[1]].Face.FaceIndex == brep.Faces.Count - 1) ? 0 : // Last,  in case it comes from Extrusion
-                                                               (planarFaces[pair[0]].Face.FaceIndex == 0) ? 1 : // First, in case it comes from a JOIN command
-                                                                                                                    int.MaxValue)) // Others
+      var candidates = candidateFaces.OrderBy
+      (
+        pair =>
+        (planarFaces[pair[1]].Face.FaceIndex == brep.Faces.Count - 1) ? 0 : // Last,  in case it comes from Extrusion
+        (planarFaces[pair[0]].Face.FaceIndex == 0) ? 1 : // First, in case it comes from a JOIN command
+        int.MaxValue // Others
+      );
+
+      foreach (var candidate in candidates)
       {
         var startFace = planarFaces[candidate[0]];
         var endFace = planarFaces[candidate[1]];
@@ -359,13 +368,16 @@ namespace Rhino.Geometry
                         +startFace.Plane.DistanceTo(endFace.Plane.Origin);
 
         extrusion = Extrusion.Create(profile, height, true);
-        var profilePlane = extrusion.GetProfilePlane(height < 0.0 ? 1.0 : 0.0);
-        var WCSTOPCS = Transform.PlaneToPlane(profilePlane, Plane.WorldXY);
-        foreach (var loop in startFace.Face.Loops.Where(x => x.LoopType == BrepLoopType.Inner))
+        if (extrusion is object)
         {
-          var innerProfile = loop.To3dCurve();
-          innerProfile.Transform(WCSTOPCS);
-          extrusion.AddInnerProfile(innerProfile);
+          var profilePlane = extrusion.GetProfilePlane(height < 0.0 ? 1.0 : 0.0);
+          var WCSTOPCS = Transform.PlaneToPlane(profilePlane, Plane.WorldXY);
+          foreach (var loop in startFace.Face.Loops.Where(x => x.LoopType == BrepLoopType.Inner))
+          {
+            var innerProfile = loop.To3dCurve();
+            innerProfile.Transform(WCSTOPCS);
+            extrusion.AddInnerProfile(innerProfile);
+          }
         }
 
         return extrusion is object;
