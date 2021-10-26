@@ -76,21 +76,8 @@ namespace RhinoInside.Revit.GH.Components.Material
       ),
     };
 
-    public override void AddedToDocument(GH_Document document)
-    {
-      if (ComponentVersion < CurrentVersion)
-      {
-        if (Params.Output<IGH_Param>("Appearance Asset (Generic)") is IGH_Param asset)
-          asset.CopyFrom(FindDefinition(Outputs, _Asset_).Param);
-      }
-
-      base.AddedToDocument(document);
-    }
-
     const string _Asset_ = "Appearance Asset";
-    static readonly DB.BuiltInParameter[] ExcludeUniqueProperties =
-    {
-    };
+    static readonly DB.BuiltInParameter[] ExcludeUniqueProperties = { };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using Grasshopper.Kernel;
 
 namespace RhinoInside.Revit.GH.Kernel.Attributes
@@ -65,5 +66,54 @@ namespace RhinoInside.Revit.GH.Kernel.Attributes
   {
     public readonly string Message;
     public SinceAttribute(string message) => Message = message;
+  }
+}
+
+namespace RhinoInside.Revit.GH
+{
+  [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+  sealed class ComponentVersionAttribute : Attribute
+  {
+    public readonly Version Since;
+    public readonly Version Updated;
+    public readonly Version Obsolete;
+
+    public ComponentVersionAttribute(string since) : this(since, default, default) { }
+    public ComponentVersionAttribute(string since, string updated) : this(since, updated, default) { }
+    public ComponentVersionAttribute(string since, string updated, string obsolete)
+    {
+      Since = Version.Parse(since);
+      Updated = updated is object ? Version.Parse(updated) : default;
+      Obsolete = obsolete is object ? Version.Parse(obsolete) : default;
+
+#if DEBUG
+      var _since_ = Since;
+      var _updated_ = Updated ?? _since_;
+      var _obsolete_ = Obsolete ?? _updated_;
+
+      Debug.Assert(_updated_ >= _since_);
+      Debug.Assert(_obsolete_ >= _updated_);
+#endif
+    }
+
+    public static Version GetTypeVersionCurrentVersion(Type type)
+    {
+      var maxVersion = new Version();
+      var assembly = typeof(ComponentVersionAttribute).Assembly;
+      for (; type is object; type = type.BaseType)
+      {
+        // TypeVersionAttribute is private so it can not be used outside its assembly
+        if (type.Assembly != assembly) continue;
+
+        var typeVersion = (ComponentVersionAttribute[]) type.GetCustomAttributes(typeof(ComponentVersionAttribute), false);
+        if (typeVersion.Length > 0)
+        {
+          var updated = typeVersion[0].Updated ?? typeVersion[0].Since;
+          if (updated > maxVersion) maxVersion = updated;
+        }
+      }
+
+      return maxVersion;
+    }
   }
 }

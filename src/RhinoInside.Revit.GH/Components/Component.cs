@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Windows.Forms;
 using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
@@ -95,6 +94,7 @@ namespace RhinoInside.Revit.GH.Components
 #endif
   }
 
+  [ComponentVersion(since: "1.0", updated: "1.3")]
   public abstract class Component : GH_Component, Kernel.IGH_ElementIdComponent
   {
     protected Component(string name, string nickname, string description, string category, string subCategory)
@@ -116,8 +116,31 @@ namespace RhinoInside.Revit.GH.Components
     public override IEnumerable<string> Keywords => base.Keywords is null ? keywords : Enumerable.Concat(base.Keywords, keywords);
 
     #region IO
-    protected virtual Version CurrentVersion => GetType().Assembly.GetName().Version;
-    protected Version ComponentVersion { get; private set; }
+    private Version CurrentVersion
+    {
+      get
+      {
+        var maxVersion = ComponentVersionAttribute.GetTypeVersionCurrentVersion(GetType());
+
+        // If an input parameter is been modified this updates the component version
+        foreach (var input in Params.Input)
+        {
+          var version = ComponentVersionAttribute.GetTypeVersionCurrentVersion(input.GetType());
+          if (version > maxVersion) maxVersion = version;
+        }
+
+        // If an output parameter is been modified this updates the component version
+        foreach (var output in Params.Output)
+        {
+          var version = ComponentVersionAttribute.GetTypeVersionCurrentVersion(output.GetType());
+          if (version > maxVersion) maxVersion = version;
+        }
+
+        return maxVersion;
+      }
+    }
+
+    protected internal Version ComponentVersion { get; private set; }
 
     public override bool Read(GH_IReader reader)
     {
@@ -131,8 +154,14 @@ namespace RhinoInside.Revit.GH.Components
 
       if (ComponentVersion > CurrentVersion)
       {
-        var assemblyName = Grasshopper.Instances.ComponentServer.FindAssemblyByObject(this)?.Name ?? GetType().Assembly.GetName().Name;
-        reader.AddMessage($"Component '{Name}' was saved with a newer version.{Environment.NewLine}Please update '{assemblyName}' to version {ComponentVersion} or above.", GH_Message_Type.error);
+        var assemblyName = new AssemblyInfo().Name;
+        reader.AddMessage
+        (
+          $"Component '{Name}' was saved with a newer version." + Environment.NewLine +
+          "Some information may be lost" + Environment.NewLine +
+          $"Please update '{assemblyName}' to version {ComponentVersion} or above.",
+          GH_Message_Type.warning
+        );
       }
 
       return true;
@@ -143,10 +172,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!base.Write(writer))
         return false;
 
-      if (ComponentVersion > CurrentVersion)
-        writer.SetString("ComponentVersion", ComponentVersion.ToString());
-      else
-        writer.SetString("ComponentVersion", CurrentVersion.ToString());
+      writer.SetString("ComponentVersion", CurrentVersion.ToString());
 
       return true;
     }
@@ -160,13 +186,6 @@ namespace RhinoInside.Revit.GH.Components
     static Component ComputingComponent;
     public sealed override void ComputeData()
     {
-      if (ComponentVersion > CurrentVersion)
-      {
-        var assemblyName = Grasshopper.Instances.ComponentServer.FindAssemblyByObject(this)?.Name ?? GetType().Assembly.GetName().Name;
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"This component was saved with a newer version.{Environment.NewLine}Please update '{assemblyName}' to version {ComponentVersion} or above.");
-        return;
-      }
-
       var current = ComputingComponent;
       ComputingComponent = this;
       try
@@ -356,8 +375,10 @@ namespace RhinoInside.Revit.GH.Components
       var pointRadius = 2.0f * args.Display.DisplayPipelineAttributes.PointRadius * dpi;
       var curveThickness = (int) Math.Round(1.5f * args.DefaultCurveThickness * dpi, MidpointRounding.AwayFromZero);
 
+      var index = 0;
       foreach (var error in RuntimeErrorGeometry)
       {
+        index++;
         // Skip geometry outside the viewport
         if (!viewport.IsVisible(error.bbox))
           continue;

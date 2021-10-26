@@ -35,6 +35,7 @@ namespace RhinoInside.Revit.GH.Parameters
     bool ResetState();
   }
 
+  [ComponentVersion(since: "1.0", updated: "1.3")]
   public abstract class PersistentParam<T> : GH_PersistentParam<T>, IGH_InitCodeAware, IGH_PersistentStateAwareObject
     where T : class, IGH_Goo
   {
@@ -62,8 +63,8 @@ namespace RhinoInside.Revit.GH.Parameters
     }
 
     #region IO
-    protected virtual Version CurrentVersion => GetType().Assembly.GetName().Version;
-    protected Version ComponentVersion { get; private set; }
+    private Version CurrentVersion => ComponentVersionAttribute.GetTypeVersionCurrentVersion(GetType());
+    protected internal Version ComponentVersion { get; private set; }
 
     public override bool Read(GH_IReader reader)
     {
@@ -75,10 +76,16 @@ namespace RhinoInside.Revit.GH.Parameters
       ComponentVersion = Version.TryParse(version, out var componentVersion) ?
         componentVersion : new Version(0, 0, 0, 0);
 
-      if (ComponentVersion > CurrentVersion)
+      if (ComponentVersion > CurrentVersion && Kind <= GH_ParamKind.floating)
       {
-        var assemblyName = Grasshopper.Instances.ComponentServer.FindAssemblyByObject(this)?.Name ?? GetType().Assembly.GetName().Name;
-        reader.AddMessage($"Component '{Name}' was saved with a newer version.{Environment.NewLine}Please update '{assemblyName}' to version {ComponentVersion} or above.", GH_Message_Type.error);
+        var assemblyName = new AssemblyInfo().Name;
+        reader.AddMessage
+        (
+          $"Parameter '{Name}' was saved with a newer version." + Environment.NewLine +
+          "Some information may be lost" + Environment.NewLine +
+          $"Please update '{assemblyName}' to version {ComponentVersion} or above.",
+          GH_Message_Type.warning
+        );
       }
 
       int culling = (int) DataCulling.None;
@@ -95,10 +102,7 @@ namespace RhinoInside.Revit.GH.Parameters
       if (!base.Write(writer))
         return false;
 
-      if (ComponentVersion > CurrentVersion)
-        writer.SetString("ComponentVersion", ComponentVersion.ToString());
-      else
-        writer.SetString("ComponentVersion", CurrentVersion.ToString());
+      writer.SetString("ComponentVersion", CurrentVersion.ToString());
 
       if (Culling != DataCulling.None)
         writer.SetInt32("Culling", (int) Culling);
@@ -229,14 +233,6 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public sealed override void PostProcessData()
     {
-      if (ComponentVersion > CurrentVersion)
-      {
-        var assemblyName = Grasshopper.Instances.ComponentServer.FindAssemblyByObject(this)?.Name ?? GetType().Assembly.GetName().Name;
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"This component was saved with a newer version.{Environment.NewLine}Please update '{assemblyName}' to version {ComponentVersion} or above.");
-        VolatileData.Clear();
-        return;
-      }
-
       LoadVolatileData();
 
       PreProcessVolatileData();

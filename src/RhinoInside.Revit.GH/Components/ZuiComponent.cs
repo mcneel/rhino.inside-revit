@@ -14,10 +14,14 @@ namespace RhinoInside.Revit.GH.Components
   /// Base class for all variable parameter components
   /// </summary>
   /// <seealso cref="IGH_VariableParameterComponent"/>
+  [ComponentVersion(since: "1.0", updated: "1.3")]
   public abstract class ZuiComponent : Component, IGH_VariableParameterComponent
   {
     protected ZuiComponent(string name, string nickname, string description, string category, string subCategory)
-    : base(name, nickname, description, category, subCategory) { }
+    : base(name, nickname, description, category, subCategory)
+    {
+      variableParameterScheme = VariableParameterScheme;
+    }
 
     protected enum ParamRelevance
     {
@@ -285,18 +289,9 @@ namespace RhinoInside.Revit.GH.Components
 
     public override void AddedToDocument(GH_Document document)
     {
-      // If we read from a previous version some parameters may need to be adjusted.
-      if (ComponentVersion < CurrentVersion)
+      // If we read from a different version some parameters may need to be adjusted.
+      if (VariableParameterScheme is string currentParameterScheme && currentParameterScheme != variableParameterScheme)
       {
-        if (Activator.CreateInstance(GetType()) is IGH_Component prototype)
-        {
-          Name = prototype.Name;
-          NickName = prototype.NickName;
-          Description = prototype.Description;
-          Category = prototype.Category;
-          SubCategory = prototype.SubCategory;
-        }
-
         document.DestroyObjectTable();
 
         // PerformLayout here to obtain parameters pivots.
@@ -304,7 +299,7 @@ namespace RhinoInside.Revit.GH.Components
 
         // Detach Obsolete parameters.
         {
-          var obsoleteParameters = new List<IGH_Param>();
+          var unknownParameters = new List<IGH_Param>();
 
           for (var inputIndex = Params.Input.Count - 1; inputIndex >= 0; --inputIndex)
           {
@@ -319,7 +314,7 @@ namespace RhinoInside.Revit.GH.Components
             input.Attributes = default;
             input.CreateAttributes();
             input.Attributes.Pivot = new System.Drawing.PointF(Attributes.Bounds.Left + input.Attributes.Bounds.Width / 2.0f, y);
-            obsoleteParameters.Add(input);
+            unknownParameters.Add(input);
           }
 
           for (var outputIndex = Params.Output.Count - 1; outputIndex >= 0; --outputIndex)
@@ -335,25 +330,35 @@ namespace RhinoInside.Revit.GH.Components
             output.Attributes = default;
             output.CreateAttributes();
             output.Attributes.Pivot = new System.Drawing.PointF(Attributes.Bounds.Right - output.Attributes.Bounds.Width / 2.0f, y);
-            obsoleteParameters.Add(output);
+            unknownParameters.Add(output);
           }
 
-          // Add Obsolete Parameters to the document to keep as much
+          // Add unknown Parameters to the document to keep as much
           // previous information as possible available to the user.
           // Input parameters may contain PersistentData.
-          if (obsoleteParameters.Count > 0)
+          if (unknownParameters.Count > 0)
           {
+            var previousVersion = string.IsNullOrWhiteSpace(variableParameterScheme) ? new Version(0,0,0,0) : new System.Reflection.AssemblyName(variableParameterScheme).Version;
+            var currentVersion = string.IsNullOrWhiteSpace(currentParameterScheme) ? new Version(0, 0, 0, 0) : new System.Reflection.AssemblyName(currentParameterScheme).Version;
+
+            var action = "Mutated";
+            if (previousVersion is object && currentVersion is object)
+            {
+              if (previousVersion < currentVersion) action = "Upgraded";
+              else if (previousVersion > currentVersion) action = "Downgraded";
+            }
+
             var index = document.Objects.IndexOf(this);
             var group = new Grasshopper.Kernel.Special.GH_Group
             {
-              NickName = $"Upgraded : {Name}", // We tag it as "Upgraded" to allow user find those groups.
+              NickName = $"{action} : {Name}", // We tag it to allow user find those groups.
               Border = Grasshopper.Kernel.Special.GH_GroupBorder.Blob,
               Colour = System.Drawing.Color.FromArgb(211, GH_Skin.palette_warning_standard.Fill)
             };
             document.AddObject(group, false, index++);
 
             group.AddObject(InstanceGuid);
-            foreach (var param in obsoleteParameters)
+            foreach (var param in unknownParameters)
             {
               param.Locked = true;
               if (document.AddObject(param, false, index++))
@@ -436,12 +441,64 @@ namespace RhinoInside.Revit.GH.Components
           }
         }
 
+        // Update Common fields
+        if (Activator.CreateInstance(GetType()) is IGH_Component prototype)
+        {
+          Name = prototype.Name;
+          NickName = CentralSettings.CanvasFullNames ? prototype.Name : prototype.NickName;
+          Description = prototype.Description;
+          Category = prototype.Category;
+          SubCategory = prototype.SubCategory;
+        }
+
         // ExpireLayout here in case we have removed, added or sorted parameters.
         Attributes.ExpireLayout();
+
+        // Mark component as converted
+        variableParameterScheme = currentParameterScheme;
       }
 
       base.AddedToDocument(document);
     }
+
+    /// <summary>
+    /// Scheme name for the current input and output parameters configuration.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Default implentation returns a simplified version of component Type
+    /// <see cref="System.Reflection.Assembly.FullName"/>
+    /// to ensure parameters are synchronized with the current component implementation.
+    /// </para>
+    /// <para>
+    /// For a more accurate and manual control of upgrade-downgrade mechanism
+    /// subtypes may override this property and return a constant value related
+    /// to the current component implementation version.
+    /// </para>
+    /// <para>
+    /// Automatic upgrade-downgrade may be disabled returning null here.
+    /// </para>
+    /// </remarks>
+    protected virtual string VariableParameterScheme
+    {
+      get
+      {
+        var assembly = GetType().Assembly;
+        if (assembly.IsDynamic) return null;
+
+        var assemblyName = assembly.GetName();
+        var scheme = assemblyName.Name;
+
+        if (assemblyName.Version is object)
+          scheme += $", Version={assemblyName.Version}";
+
+        if (!string.IsNullOrWhiteSpace(assemblyName.CultureName))
+          scheme += $", Culture={assemblyName.CultureName}";
+
+        return scheme;
+      }
+    }
+    string variableParameterScheme;
 
     public override bool Read(GH_IReader reader)
     {
@@ -530,6 +587,21 @@ namespace RhinoInside.Revit.GH.Components
 
         VariableParameterMaintenance();
       }
+
+      // Read parameters-scheme value
+      if (!reader.TryGetString("VariableParameterScheme", ref variableParameterScheme))
+        variableParameterScheme = default;
+
+      return true;
+    }
+
+    public override bool Write(GH_IWriter writer)
+    {
+      if (!base.Write(writer)) return false;
+
+      // Write parameters-scheme value
+      if (variableParameterScheme is object)
+        writer.SetString("VariableParameterScheme", variableParameterScheme);
 
       return true;
     }
