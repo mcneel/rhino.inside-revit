@@ -242,12 +242,12 @@ with open(op.join(DOCS_PATH, DATA_FILE), 'w') as f:
     f.write(comps_data)</item>
                     <item name="Description" type_name="gh_string" type_code="10">GhPython provides a Python script component</item>
                     <item name="EditorLocation" type_name="gh_drawing_point" type_code="30">
-                      <X>130</X>
-                      <Y>130</Y>
+                      <X>296</X>
+                      <Y>132</Y>
                     </item>
                     <item name="EditorSize" type_name="gh_drawing_size" type_code="32">
-                      <W>976</W>
-                      <H>1048</H>
+                      <W>662</W>
+                      <H>830</H>
                     </item>
                     <item name="HideInput" type_name="gh_bool" type_code="1">true</item>
                     <item name="HideOutput" type_name="gh_bool" type_code="1">true</item>

@@ -2593,8 +2593,8 @@
   }, 
   {
     "desc": "Filter used to match elements by their family", 
-    "iconsrc": null, 
-    "icontag": "E", 
+    "iconsrc": "/static/images/GH/ElementFamilyFilter.png", 
+    "icontag": null, 
     "panel": "Filter", 
     "since": "1.3", 
     "tab": "Revit", 
