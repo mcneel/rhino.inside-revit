@@ -94,7 +94,7 @@ namespace RhinoInside.Revit.GH.Components
 #endif
   }
 
-  [ComponentVersion(introduced: "1.0", updated: "1.3")]
+  [ComponentVersion(introduced: "0.0", updated: "1.3")]
   public abstract class Component : GH_Component, Kernel.IGH_ElementIdComponent
   {
     protected Component(string name, string nickname, string description, string category, string subCategory)
@@ -102,13 +102,8 @@ namespace RhinoInside.Revit.GH.Components
     {
       ComponentVersion = CurrentVersion;
 
-#if DEBUG
-      // Call GetSinceVersion here to check base types since-version integrity.
-      var since = ComponentVersionAttribute.GetIntroducedVersion(GetType());
-#endif
-
-      var obsolete = ComponentVersionAttribute.GetDeprecatedVersion(GetType());
-      this.obsolete = Obsolete || obsolete is object;
+      ComponentVersionAttribute.GetVersionHistory(GetType(), out var _, out var _, out var deprecated);
+      obsolete = Obsolete || deprecated is object;
     }
 
     #if DEBUG
@@ -119,13 +114,17 @@ namespace RhinoInside.Revit.GH.Components
     {
       get
       {
-        ComponentVersionAttribute.GetVersionHistory(GetType(), out var since, out var _, out var obsolete);
-        var versionDescription = $"Introduced in v{since}" + Environment.NewLine;
+        ComponentVersionAttribute.GetVersionHistory(GetType(), out var introduced, out var _, out var deprecated);
+
+        var versionDescription = string.Empty;
+
+        if (introduced is object)
+          versionDescription += $"Introduced in v{introduced}" + Environment.NewLine;
 
         if (Obsolete)
         {
-          if (obsolete is object)
-            versionDescription += $"Obsolete since v{obsolete}" + Environment.NewLine;
+          if (deprecated is object)
+            versionDescription += $"Obsolete since v{deprecated}" + Environment.NewLine;
 
           foreach (var attribute in GetType().GetCustomAttributes(typeof(ObsoleteAttribute), false).Cast<ObsoleteAttribute>())
           {

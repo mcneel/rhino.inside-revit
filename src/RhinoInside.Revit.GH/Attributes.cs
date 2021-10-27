@@ -80,95 +80,24 @@ namespace RhinoInside.Revit.GH
       Deprecated = deprecated is object ? Version.Parse(deprecated) : default;
 
 #if DEBUG
-      var _since_ = Introduced;
-      var _updated_ = Updated ?? _since_;
-      var _obsolete_ = Deprecated ?? _updated_;
+      var _introduced_ = Introduced;
+      var _updated_ = Updated ?? _introduced_;
+      var _deprecated_ = Deprecated ?? _updated_;
 
-      Debug.Assert(_updated_ >= _since_);
-      Debug.Assert(_obsolete_ >= _updated_);
+      Debug.Assert(_updated_ >= _introduced_);
+      Debug.Assert(_deprecated_ >= _updated_);
 #endif
     }
 
-    public static void GetVersionHistory(Type type, out Version introduced, out Version updated, out Version deprecated)
+    public static bool GetVersionHistory(Type type, out Version introduced, out Version updated, out Version deprecated)
     {
-      introduced = GetIntroducedVersion(type);
-      updated = GetUpdatedVersion(type);
-      deprecated = GetDeprecatedVersion(type);
-    }
+      var versions = (ComponentVersionAttribute[]) type.GetCustomAttributes(typeof(ComponentVersionAttribute), false);
+      var version = versions.Length == 1 ? versions[0] : default;
 
-    internal static Version GetIntroducedVersion(Type type)
-    {
-      var since = default(Version);
-      var assembly = typeof(ComponentVersionAttribute).Assembly;
-      for (var t = type; t is object; t = t.BaseType)
-      {
-        // TypeVersionAttribute is private so it can not be used outside its assembly
-        if (t.Assembly != assembly) continue;
-
-        var typeVersion = (ComponentVersionAttribute[]) t.GetCustomAttributes(typeof(ComponentVersionAttribute), false);
-        if (typeVersion.Length > 0)
-        {
-          var version = typeVersion[0].Introduced;
-          if (version is null) continue;
-#if DEBUG
-          if (since is null) since = version;
-          else if (version > since)
-            throw new InvalidOperationException($"{type.FullName} since version should be greater than base class {t.FullName}");
-#else
-          return version;
-#endif
-        }
-      }
-
-      return since;
-    }
-
-    internal static Version GetUpdatedVersion(Type type)
-    {
-      var updated = default(Version);
-      var assembly = typeof(ComponentVersionAttribute).Assembly;
-      for (var t = type; t is object; t = t.BaseType)
-      {
-        // TypeVersionAttribute is private so it can not be used outside its assembly
-        if (t.Assembly != assembly) continue;
-
-        var typeVersion = (ComponentVersionAttribute[]) t.GetCustomAttributes(typeof(ComponentVersionAttribute), false);
-        if (typeVersion.Length > 0)
-        {
-          var version = typeVersion[0].Updated;
-          if (version is null) continue;
-          return version;
-        }
-      }
-
-      return updated;
-    }
-
-    internal static Version GetDeprecatedVersion(Type type)
-    {
-      var obsolete = default(Version);
-      var assembly = typeof(ComponentVersionAttribute).Assembly;
-      for (var t = type; t is object; t = t.BaseType)
-      {
-        // TypeVersionAttribute is private so it can not be used outside its assembly
-        if (t.Assembly != assembly) continue;
-
-        var typeVersion = (ComponentVersionAttribute[]) t.GetCustomAttributes(typeof(ComponentVersionAttribute), false);
-        if (typeVersion.Length > 0)
-        {
-          var version = typeVersion[0].Deprecated;
-          if (version is null) continue;
-#if DEBUG
-          if (obsolete is null) obsolete = version;
-          else if (version < obsolete)
-            throw new InvalidOperationException($"{type.FullName} obsolete version should be less than base class {t.FullName}");
-#else
-          return version;
-#endif
-        }
-      }
-
-      return obsolete;
+      introduced = version?.Introduced;
+      updated    = version?.Updated;
+      deprecated = version?.Deprecated;
+      return version is object;
     }
 
     internal static Version GetCurrentVersion(Type type)

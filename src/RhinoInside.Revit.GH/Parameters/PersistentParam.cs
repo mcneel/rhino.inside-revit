@@ -35,7 +35,7 @@ namespace RhinoInside.Revit.GH.Parameters
     bool ResetState();
   }
 
-  [ComponentVersion(introduced: "1.0", updated: "1.3")]
+  [ComponentVersion(introduced: "0.0", updated: "1.3")]
   public abstract class PersistentParam<T> : GH_PersistentParam<T>, IGH_InitCodeAware, IGH_PersistentStateAwareObject
     where T : class, IGH_Goo
   {
