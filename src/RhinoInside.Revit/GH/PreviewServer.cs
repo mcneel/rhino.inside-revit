@@ -155,7 +155,8 @@ namespace RhinoInside.Revit.GH
       readonly IGH_DocumentObject docObject;
       public ParamPrimitive(IGH_DocumentObject o, Rhino.Geometry.Point p) : base(p) { docObject = o; o.ObjectChanged += ObjectChanged; }
       public ParamPrimitive(IGH_DocumentObject o, Rhino.Geometry.Curve c) : base(c) { docObject = o; o.ObjectChanged += ObjectChanged; }
-      public ParamPrimitive(IGH_DocumentObject o, Rhino.Geometry.Mesh m)  : base(m) { docObject = o; o.ObjectChanged += ObjectChanged; }
+      public ParamPrimitive(IGH_DocumentObject o, Rhino.Geometry.Mesh m) : base(m) { docObject = o; o.ObjectChanged += ObjectChanged; }
+      public ParamPrimitive(IGH_DocumentObject o, Rhino.Geometry.Mesh m, Part p) : base(m, p) { docObject = o; o.ObjectChanged += ObjectChanged; }
 
       void ObjectChanged(IGH_DocumentObject sender, GH_ObjectChangedEventArgs e)
       {
@@ -234,7 +235,23 @@ namespace RhinoInside.Revit.GH
               case Rhino.Geometry.Circle circle:    primitives.Add(new ParamPrimitive(docObject, new Rhino.Geometry.ArcCurve(circle))); break;
               case Rhino.Geometry.Ellipse ellipse:  primitives.Add(new ParamPrimitive(docObject, ellipse.ToNurbsCurve())); break;
               case Rhino.Geometry.Curve curve:      primitives.Add(new ParamPrimitive(docObject, curve)); break;
-              case Rhino.Geometry.Mesh mesh:        primitives.Add(new ParamPrimitive(docObject, mesh)); break;
+              case Rhino.Geometry.Mesh mesh:
+              {
+                if (mesh.Vertices.Count <= VertexThreshold && mesh.Faces.Count <= VertexThreshold)
+                {
+                  primitives.Add(new ParamPrimitive(docObject, mesh));
+                }
+                else if (mesh.CreatePartitions(VertexThreshold, VertexThreshold))
+                {
+                  if (!mesh.IsValid)
+                    mesh.Vertices.UseDoublePrecisionVertices = true;
+
+                  var count = mesh.PartitionCount;
+                  for (int p = 0; p < count; ++p)
+                    primitives.Add(new ParamPrimitive(docObject, mesh, mesh.GetPartition(p)));
+                }
+              }
+              break;
               case Rhino.Geometry.Box box:
               {
                 if(Rhino.Geometry.Mesh.CreateFromBox(box, 1, 1, 1) is Rhino.Geometry.Mesh previewMesh)
