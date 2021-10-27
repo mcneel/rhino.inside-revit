@@ -6,6 +6,17 @@ group: Deployment & Configs
 
 <!-- most recent release should be on top -->
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html title="v1.3 RC1" version="v1.3.7970.19099" pre_release=true time="10/27/2021" %}
+
+- Component Changes
+  - New {% include ltr/comp.html uuid='7fcea93d-' extended=true %}
+  - New {% include ltr/comp.html uuid='a39bbdf2-' extended=true %}
+  - New {% include ltr/comp.html uuid='b344f1c1-' extended=true %}
+  - ZUI components e.g. {% include ltr/comp.html uuid='fad33c4b-' %} now have *Show all parameters* and *Hide unconnected parameters* on context menu
+- Performance
+  - Grasshopper now caches converted geometries from Rhino to Revit. This improves performance between Grasshopper runs, or when the same geometry is being converted many times.
+- Minor Fixes and Improvements
+
 {% include ltr/release-header.html title="v1.2 Stable" version="v1.2.7955.32919" time="10/12/2021" %}
 
 - Includes all changes under 1.2RC releases listed below
