@@ -393,8 +393,11 @@ namespace RhinoInside.Revit
         }
 
         // Split the mesh into partitions
-        else if (previewMesh.CreatePartitions(VertexThreshold, int.MaxValue))
+        else if (previewMesh.CreatePartitions(VertexThreshold, VertexThreshold))
         {
+          if (!previewMesh.IsValid)
+            previewMesh.Vertices.UseDoublePrecisionVertices = true;
+
           int partitionCount = previewMesh.PartitionCount;
           primitives = new Primitive[partitionCount];
           for (int p = 0; p < partitionCount; ++p)
