@@ -1303,6 +1303,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ElementFamilyFilter {
+            get {
+                object obj = ResourceManager.GetObject("ElementFamilyFilter", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ElementFilter {
             get {
                 object obj = ResourceManager.GetObject("ElementFilter", resourceCulture);
