@@ -124,7 +124,7 @@
     "iconsrc": "/static/images/GH/Phase.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
-    "since": null, 
+    "since": "1.2", 
     "tab": "Params", 
     "title": "Phase", 
     "typename": "Phase", 
@@ -664,7 +664,7 @@
     "iconsrc": "/static/images/GH/Workset.png", 
     "icontag": null, 
     "panel": "Revit Primitives", 
-    "since": null, 
+    "since": "1.2", 
     "tab": "Params", 
     "title": "Workset", 
     "typename": "Workset", 
@@ -788,7 +788,7 @@
     "tab": "Revit", 
     "title": "Model Categories Picker", 
     "typename": "ModelCategoriesPicker", 
-    "until": "Since 2021-06-10. Please use 'Built-In Categories'", 
+    "until": null, 
     "uuid": "eb266925-f1aa-4729-b5c0-b978937f51a3"
   }, 
   {
@@ -800,7 +800,7 @@
     "tab": "Revit", 
     "title": "Annotation Categories Picker", 
     "typename": "AnnotationCategoriesPicker", 
-    "until": "Since 2021-06-10. Please use 'Built-In Categories'", 
+    "until": null, 
     "uuid": "b1d1ca45-3771-49ca-8540-9a916a743c1b"
   }, 
   {
@@ -812,7 +812,7 @@
     "tab": "Revit", 
     "title": "Tag Categories Picker", 
     "typename": "TagCategoriesPicker", 
-    "until": "Since 2021-06-10. Please use 'Built-In Categories'", 
+    "until": null, 
     "uuid": "30f6da06-35f9-4e83-ae9e-080af26c8326"
   }, 
   {
@@ -824,7 +824,7 @@
     "tab": "Revit", 
     "title": "Analytical Categories Picker", 
     "typename": "AnalyticalCategoriesPicker", 
-    "until": "Since 2021-06-10. Please use 'Built-In Categories'", 
+    "until": null, 
     "uuid": "4120c5ed-4329-4f42-b8d3-fa518e6e6807"
   }, 
   {
@@ -856,7 +856,7 @@
     "iconsrc": "/static/images/GH/DocumentTitleBlockSymbolPicker.png", 
     "icontag": null, 
     "panel": "Input", 
-    "since": null, 
+    "since": "1.2", 
     "tab": "Revit", 
     "title": "Title Block Type Picker", 
     "typename": "DocumentTitleBlockSymbolPicker", 
@@ -1464,6 +1464,18 @@
     "uuid": "26411aa6-8187-49df-a908-a292a07918f1"
   }, 
   {
+    "desc": "Given its outline curve, it adds a Ceiling element to the active Revit document", 
+    "iconsrc": "/static/images/GH/CeilingByOutline.png", 
+    "icontag": null, 
+    "panel": "Build", 
+    "since": "1.3", 
+    "tab": "Revit", 
+    "title": "Add Ceiling", 
+    "typename": "CeilingByOutline", 
+    "until": null, 
+    "uuid": "a39bbdf2-78f2-4501-bb6e-f9cc3e83516e"
+  }, 
+  {
     "desc": "Extracts the parts geometry of the given element", 
     "iconsrc": "/static/images/GH/CompoundStructureGeometry.png", 
     "icontag": null, 
@@ -1936,7 +1948,7 @@
     "iconsrc": "/static/images/GH/ClusterViewsByType.png", 
     "icontag": null, 
     "panel": "View", 
-    "since": null, 
+    "since": "1.2", 
     "tab": "Revit", 
     "title": "Cluster Views (Family)", 
     "typename": "ClusterViewsByType", 
@@ -1960,7 +1972,7 @@
     "iconsrc": "/static/images/GH/ViewIdentity.png", 
     "icontag": null, 
     "panel": "View", 
-    "since": null, 
+    "since": "1.0", 
     "tab": "Revit", 
     "title": "View Identity", 
     "typename": "ViewIdentity", 
@@ -1972,7 +1984,7 @@
     "iconsrc": "/static/images/GH/QueryViews.png", 
     "icontag": null, 
     "panel": "View", 
-    "since": null, 
+    "since": "1.0", 
     "tab": "Revit", 
     "title": "Query Views", 
     "typename": "QueryViews", 
@@ -2548,7 +2560,7 @@
     "iconsrc": "/static/images/GH/ElementExcludeElementTypeFilter.png", 
     "icontag": null, 
     "panel": "Filter", 
-    "since": null, 
+    "since": "1.0", 
     "tab": "Revit", 
     "title": "Exclude Types", 
     "typename": "ElementExcludeElementTypeFilter", 
@@ -2580,6 +2592,18 @@
     "uuid": "d08f7ab1-be36-45fa-b006-0078022db140"
   }, 
   {
+    "desc": "Filter used to match elements by their family", 
+    "iconsrc": null, 
+    "icontag": "E", 
+    "panel": "Filter", 
+    "since": "1.3", 
+    "tab": "Revit", 
+    "title": "Family Filter", 
+    "typename": "ElementFamilyFilter", 
+    "until": null, 
+    "uuid": "b344f1c1-f37d-4a1a-83b3-65a34fe946d2"
+  }, 
+  {
     "desc": "Filter used to match elements by their type", 
     "iconsrc": "/static/images/GH/ElementTypeFilter.png", 
     "icontag": null, 
@@ -2608,7 +2632,7 @@
     "iconsrc": "/static/images/GH/ElementWorksetFilter.png", 
     "icontag": null, 
     "panel": "Filter", 
-    "since": null, 
+    "since": "1.2", 
     "tab": "Revit", 
     "title": "Workset Filter", 
     "typename": "ElementWorksetFilter", 
@@ -2692,7 +2716,7 @@
     "iconsrc": "/static/images/GH/ElementPhaseStatusFilter.png", 
     "icontag": null, 
     "panel": "Filter", 
-    "since": null, 
+    "since": "1.2", 
     "tab": "Revit", 
     "title": "Phase Status Filter", 
     "typename": "ElementPhaseStatusFilter", 
@@ -2724,7 +2748,7 @@
     "uuid": "ac546f16-c917-4cd1-9f8a-fbdd6330eb80"
   }, 
   {
-    "desc": "Filter used to combine a set of filters that pass when any pass", 
+    "desc": "Filter used to combine a set of filters that pass when all pass", 
     "iconsrc": "/static/images/GH/ElementLogicalAndFilter.png", 
     "icontag": null, 
     "panel": "Filter", 
@@ -2812,7 +2836,7 @@
     "iconsrc": "/static/images/GH/WorksetActive.png", 
     "icontag": null, 
     "panel": "Document", 
-    "since": null, 
+    "since": "1.2", 
     "tab": "Revit", 
     "title": "Active Workset", 
     "typename": "WorksetActive", 
@@ -2824,7 +2848,7 @@
     "iconsrc": "/static/images/GH/ElementWorkset.png", 
     "icontag": null, 
     "panel": "Element", 
-    "since": null, 
+    "since": "1.2", 
     "tab": "Revit", 
     "title": "Element Workset", 
     "typename": "ElementWorkset", 
@@ -2836,7 +2860,7 @@
     "iconsrc": "/static/images/GH/WorksetIdentity.png", 
     "icontag": null, 
     "panel": "Document", 
-    "since": null, 
+    "since": "1.2", 
     "tab": "Revit", 
     "title": "Workset Identity", 
     "typename": "WorksetIdentity", 
@@ -2848,7 +2872,7 @@
     "iconsrc": "/static/images/GH/QueryWorksets.png", 
     "icontag": null, 
     "panel": "Document", 
-    "since": null, 
+    "since": "1.2", 
     "tab": "Revit", 
     "title": "Query Worksets", 
     "typename": "QueryWorksets", 
@@ -2872,7 +2896,7 @@
     "iconsrc": "/static/images/GH/GraphicalElementPhasing.png", 
     "icontag": null, 
     "panel": "Element", 
-    "since": null, 
+    "since": "1.2", 
     "tab": "Revit", 
     "title": "Element Phasing", 
     "typename": "GraphicalElementPhasing", 
@@ -2884,7 +2908,7 @@
     "iconsrc": "/static/images/GH/QueryPhases.png", 
     "icontag": null, 
     "panel": "Document", 
-    "since": null, 
+    "since": "1.2", 
     "tab": "Revit", 
     "title": "Query Phases", 
     "typename": "QueryPhases", 
@@ -2932,7 +2956,7 @@
     "iconsrc": "/static/images/GH/ModifyStructuralAsset.png", 
     "icontag": null, 
     "panel": "Material", 
-    "since": null, 
+    "since": "1.0", 
     "tab": "Revit", 
     "title": "Modify Physical Asset", 
     "typename": "ModifyStructuralAsset", 
@@ -2944,7 +2968,7 @@
     "iconsrc": "/static/images/GH/AnalyzeStructuralAsset.png", 
     "icontag": null, 
     "panel": "Material", 
-    "since": null, 
+    "since": "1.0", 
     "tab": "Revit", 
     "title": "Analyze Physical Asset", 
     "typename": "AnalyzeStructuralAsset", 
@@ -3120,7 +3144,7 @@
     "uuid": "3aedba3c-1b77-4c52-a7fc-7ca7095f730e"
   }, 
   {
-    "desc": "Since 2020-09-25\r\nQuery material identity information", 
+    "desc": "Query material identity information", 
     "iconsrc": "/static/images/GH/MaterialIdentity.png", 
     "icontag": null, 
     "panel": "Material", 
@@ -3128,11 +3152,11 @@
     "tab": "Revit", 
     "title": "Material Identity", 
     "typename": "MaterialIdentity", 
-    "until": "Since 2020-09-25", 
+    "until": null, 
     "uuid": "06e0cf55-b10c-433a-b6f7-aaf3885055db"
   }, 
   {
-    "desc": "Since 2020-09-24\r\nCreate a new Revit material by name and color", 
+    "desc": "Create a new Revit material by name and color", 
     "iconsrc": "/static/images/GH/MaterialByName.png", 
     "icontag": null, 
     "panel": "Material", 
@@ -3140,7 +3164,7 @@
     "tab": "Revit", 
     "title": "Add Material", 
     "typename": "MaterialByName", 
-    "until": "Since 2020-09-24", 
+    "until": null, 
     "uuid": "0d9f07e2-3a21-4e85-96cc-bc0e6a607af1"
   }, 
   {
@@ -3400,7 +3424,7 @@
     "iconsrc": "/static/images/GH/TitleBlockByType.png", 
     "icontag": null, 
     "panel": "View", 
-    "since": null, 
+    "since": "1.2", 
     "tab": "Revit", 
     "title": "Add Title Block", 
     "typename": "TitleBlockByType", 
@@ -3408,23 +3432,11 @@
     "uuid": "f2f3d866-5a62-40c0-a85b-c417183e0a52"
   }, 
   {
-    "desc": "Create a new placeholder sheet in Revit with given number and name", 
-    "iconsrc": "/static/images/GH/SheetByNumber_Placeholder.png", 
-    "icontag": null, 
-    "panel": "View", 
-    "since": null, 
-    "tab": "Revit", 
-    "title": "Add Sheet (Placeholder)", 
-    "typename": "SheetByNumber_Placeholder", 
-    "until": null, 
-    "uuid": "16f18871-6fe8-4dfb-a4f5-47826d582442"
-  }, 
-  {
     "desc": "Get all document sheets", 
     "iconsrc": "/static/images/GH/QuerySheets.png", 
     "icontag": null, 
     "panel": "View", 
-    "since": null, 
+    "since": "1.2", 
     "tab": "Revit", 
     "title": "Query Sheets", 
     "typename": "QuerySheets", 
@@ -3432,11 +3444,23 @@
     "uuid": "97c8cb27-955f-44cf-948d-dfbde285cd7a"
   }, 
   {
+    "desc": "Create a new placeholder sheet in Revit with given number and name", 
+    "iconsrc": "/static/images/GH/SheetByNumber_Placeholder.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "since": "1.2", 
+    "tab": "Revit", 
+    "title": "Add Sheet (Placeholder)", 
+    "typename": "SheetByNumber_Placeholder", 
+    "until": null, 
+    "uuid": "16f18871-6fe8-4dfb-a4f5-47826d582442"
+  }, 
+  {
     "desc": "Sheet Identity Data", 
     "iconsrc": "/static/images/GH/SheetIdentity.png", 
     "icontag": null, 
     "panel": "View", 
-    "since": null, 
+    "since": "1.2", 
     "tab": "Revit", 
     "title": "Sheet Identity", 
     "typename": "SheetIdentity", 
@@ -3448,7 +3472,7 @@
     "iconsrc": "/static/images/GH/SheetByNumber.png", 
     "icontag": null, 
     "panel": "View", 
-    "since": null, 
+    "since": "1.2", 
     "tab": "Revit", 
     "title": "Add Sheet", 
     "typename": "SheetByNumber", 
@@ -3460,7 +3484,7 @@
     "iconsrc": "/static/images/GH/AssemblyByLocation.png", 
     "icontag": null, 
     "panel": "Assembly", 
-    "since": null, 
+    "since": "1.2", 
     "tab": "Revit", 
     "title": "Add Assembly (Location)", 
     "typename": "AssemblyByLocation", 
@@ -3468,23 +3492,11 @@
     "uuid": "26feb2e9-6476-4ba7-a553-1d0300674d1d"
   }, 
   {
-    "desc": "Get-Set accessor for assembly members", 
-    "iconsrc": "/static/images/GH/AssemblyMembers.png", 
-    "icontag": null, 
-    "panel": "Assembly", 
-    "since": null, 
-    "tab": "Revit", 
-    "title": "Assembly Members", 
-    "typename": "AssemblyMembers", 
-    "until": null, 
-    "uuid": "33ead71b-647b-4783-b0ce-c840cd50c15d"
-  }, 
-  {
     "desc": "Create a new assembly instance", 
     "iconsrc": "/static/images/GH/AssemblyByMembers.png", 
     "icontag": null, 
     "panel": "Assembly", 
-    "since": null, 
+    "since": "1.2", 
     "tab": "Revit", 
     "title": "Add Assembly", 
     "typename": "AssemblyByMembers", 
@@ -3492,11 +3504,23 @@
     "uuid": "6915b697-f10d-4bc8-8faa-f25438f393a8"
   }, 
   {
+    "desc": "Get-Set accessor for assembly members", 
+    "iconsrc": "/static/images/GH/AssemblyMembers.png", 
+    "icontag": null, 
+    "panel": "Assembly", 
+    "since": "1.2", 
+    "tab": "Revit", 
+    "title": "Assembly Members", 
+    "typename": "AssemblyMembers", 
+    "until": null, 
+    "uuid": "33ead71b-647b-4783-b0ce-c840cd50c15d"
+  }, 
+  {
     "desc": "Disassemble given assembly and release the members", 
     "iconsrc": "/static/images/GH/DisassembleAssembly.png", 
     "icontag": null, 
     "panel": "Assembly", 
-    "since": null, 
+    "since": "1.2", 
     "tab": "Revit", 
     "title": "Disassemble Assembly", 
     "typename": "DisassembleAssembly", 
@@ -3508,7 +3532,7 @@
     "iconsrc": "/static/images/GH/QueryAssemblies.png", 
     "icontag": null, 
     "panel": "Assembly", 
-    "since": null, 
+    "since": "1.2", 
     "tab": "Revit", 
     "title": "Query Assemblies", 
     "typename": "QueryAssemblies", 
@@ -3708,7 +3732,7 @@
     "uuid": "70ccf7a6-856c-4d24-a82b-bc1d4fc63078"
   }, 
   {
-    "desc": "Since 2021-03-23\r\nGet host object type compound structure", 
+    "desc": "Get host object type compound structure", 
     "iconsrc": "/static/images/GH/HostObjectTypeCompoundStructure.png", 
     "icontag": null, 
     "panel": "Host", 
@@ -3716,11 +3740,11 @@
     "tab": "Revit", 
     "title": "Host Type Compound Structure", 
     "typename": "HostObjectTypeCompoundStructure", 
-    "until": "Since 2021-03-23", 
+    "until": null, 
     "uuid": "024619ef-58ff-47c1-8833-96ba2f2b677b"
   }, 
   {
-    "desc": "Since 2021-03-24\r\nDeconstructs given compound structure into its properties", 
+    "desc": "Deconstructs given compound structure into its properties", 
     "iconsrc": "/static/images/GH/DeconstructCompoundStructure.png", 
     "icontag": null, 
     "panel": "Host", 
@@ -3728,11 +3752,11 @@
     "tab": "Revit", 
     "title": "Deconstruct Compound Structure", 
     "typename": "DeconstructCompoundStructure", 
-    "until": "Since 2021-03-24", 
+    "until": null, 
     "uuid": "d0853b76-49fa-4ba8-869c-293a9c30ffe1"
   }, 
   {
-    "desc": "Since 2021-03-24\r\nDeconstructs given compound structure layer into its properties", 
+    "desc": "Deconstructs given compound structure layer into its properties", 
     "iconsrc": "/static/images/GH/DeconstructCompoundStructureLayer.png", 
     "icontag": null, 
     "panel": "Host", 
@@ -3740,11 +3764,11 @@
     "tab": "Revit", 
     "title": "Deconstruct Compound Structure Layer", 
     "typename": "DeconstructCompoundStructureLayer", 
-    "until": "Since 2021-03-24", 
+    "until": null, 
     "uuid": "bc64525a-10b6-46db-a134-cf803738b1a0"
   }, 
   {
-    "desc": "Obsolete since 2020-10-08\r\n", 
+    "desc": "", 
     "iconsrc": "/static/images/GH/CategoryObjectStyle.png", 
     "icontag": null, 
     "panel": "Category", 
@@ -3752,11 +3776,11 @@
     "tab": "Revit", 
     "title": "Category ObjectStyle", 
     "typename": "CategoryObjectStyle", 
-    "until": "Obsolete since 2020-10-08", 
+    "until": null, 
     "uuid": "1dd8ae78-f7da-4f26-8353-4cce6b925dc6"
   }, 
   {
-    "desc": "Obsolete since 2020-06-01\r\nGet document wall types list", 
+    "desc": "Get document wall types list", 
     "iconsrc": null, 
     "icontag": "Q", 
     "panel": "Wall", 
@@ -3764,11 +3788,11 @@
     "tab": "Revit", 
     "title": "Query Wall Types", 
     "typename": "QueryWallTypes", 
-    "until": "Obsolete since 2020-06-01", 
+    "until": null, 
     "uuid": "e37bb2db-e096-45a1-9771-94ce7dbccdb8"
   }, 
   {
-    "desc": "Obsolete since 2020-05-21\r\nDeletes elements from Revit document", 
+    "desc": "Deletes elements from Revit document", 
     "iconsrc": "/static/images/GH/ElementDelete.png", 
     "icontag": null, 
     "panel": "Element", 
@@ -3776,11 +3800,11 @@
     "tab": "Revit", 
     "title": "Delete Element", 
     "typename": "ElementDelete", 
-    "until": "Obsolete since 2020-05-21", 
+    "until": null, 
     "uuid": "213c1f14-a827-40e2-957e-ba079ecce700"
   }, 
   {
-    "desc": "Obsolete since 2020-10-19\r\nQueries element placement information", 
+    "desc": "Queries element placement information", 
     "iconsrc": null, 
     "icontag": "E", 
     "panel": "Element", 
@@ -3788,11 +3812,11 @@
     "tab": "Revit", 
     "title": "Element Placement", 
     "typename": "ElementPlacement", 
-    "until": "Obsolete since 2020-10-19", 
+    "until": null, 
     "uuid": "71f196f1-59e8-4714-b9c2-45fafeedf426"
   }, 
   {
-    "desc": "Obsolete since 2020-07-27\r\nQueries element identity information", 
+    "desc": "Queries element identity information", 
     "iconsrc": "/static/images/GH/ElementIdentity.png", 
     "icontag": null, 
     "panel": "Element", 
@@ -3800,11 +3824,11 @@
     "tab": "Revit", 
     "title": "Element Identity", 
     "typename": "ElementIdentity", 
-    "until": "Obsolete since 2020-07-27", 
+    "until": null, 
     "uuid": "d3917d58-7183-4b3f-9d22-03f0fe93b956"
   }, 
   {
-    "desc": "Obsolete since 2021-07-30\r\nGets the parameter value of a specified Revit Element", 
+    "desc": "Gets the parameter value of a specified Revit Element", 
     "iconsrc": "/static/images/GH/ElementParameterGet.png", 
     "icontag": null, 
     "panel": "Element", 
@@ -3812,11 +3836,11 @@
     "tab": "Revit", 
     "title": "Get Element Parameter", 
     "typename": "ElementParameterGet", 
-    "until": "Obsolete since 2021-07-30", 
+    "until": null, 
     "uuid": "d86050f2-c774-49b1-9973-fb3ab188dc94"
   }, 
   {
-    "desc": "Obsolete since 2021-07-30\r\nSets the parameter value of a specified Revit Element", 
+    "desc": "Sets the parameter value of a specified Revit Element", 
     "iconsrc": "/static/images/GH/ElementParameterSet.png", 
     "icontag": null, 
     "panel": "Element", 
@@ -3824,11 +3848,11 @@
     "tab": "Revit", 
     "title": "Set Element Parameter", 
     "typename": "ElementParameterSet", 
-    "until": "Obsolete since 2021-07-30", 
+    "until": null, 
     "uuid": "8f1ee110-7fda-49e0-bed4-e8e0227bc021"
   }, 
   {
-    "desc": "Obsolete since 2020-10-22\r\nFilter used to combine a set of filters that pass when any pass", 
+    "desc": "Filter used to combine a set of filters that pass when any pass", 
     "iconsrc": "/static/images/GH/ElementLogicalAndFilter.png", 
     "icontag": null, 
     "panel": "Filter", 
@@ -3836,11 +3860,11 @@
     "tab": "Revit", 
     "title": "Logical And Filter", 
     "typename": "ElementLogicalAndFilter", 
-    "until": "Obsolete since 2020-10-22", 
+    "until": null, 
     "uuid": "754c40d7-5ae8-4027-921c-0210bbdfab37"
   }, 
   {
-    "desc": "Obsolete since 2020-10-22\r\nFilter used to combine a set of filters that pass when any pass", 
+    "desc": "Filter used to combine a set of filters that pass when any pass", 
     "iconsrc": "/static/images/GH/ElementLogicalOrFilter.png", 
     "icontag": null, 
     "panel": "Filter", 
@@ -3848,11 +3872,11 @@
     "tab": "Revit", 
     "title": "Logical Or Filter", 
     "typename": "ElementLogicalOrFilter", 
-    "until": "Obsolete since 2020-10-22", 
+    "until": null, 
     "uuid": "61f75de1-ee65-4aa8-b9f8-40516be46c8d"
   }, 
   {
-    "desc": "Obsolete since 2020-10-15\r\nFilter used to match elements by their BoundingBox", 
+    "desc": "Filter used to match elements by their BoundingBox", 
     "iconsrc": "/static/images/GH/ElementBoundingBoxFilter.png", 
     "icontag": null, 
     "panel": "Filter", 
@@ -3860,11 +3884,11 @@
     "tab": "Revit", 
     "title": "BoundingBox Filter", 
     "typename": "ElementBoundingBoxFilter", 
-    "until": "Obsolete since 2020-10-15", 
+    "until": null, 
     "uuid": "f5a32842-b18e-470f-8bd3-bae1373ad982"
   }, 
   {
-    "desc": "Obsolete since 2021-07-30\r\nQuery parameter identity data", 
+    "desc": "Query parameter identity data", 
     "iconsrc": "/static/images/GH/ParameterIdentity.png", 
     "icontag": null, 
     "panel": "Parameter", 
@@ -3872,7 +3896,7 @@
     "tab": "Revit", 
     "title": "Parameter Identity", 
     "typename": "ParameterIdentity", 
-    "until": "Obsolete since 2021-07-30", 
+    "until": null, 
     "uuid": "a80f4919-2387-4c78-be2b-2f35b2e60298"
   }
 ]
