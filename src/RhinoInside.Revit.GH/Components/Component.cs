@@ -94,7 +94,7 @@ namespace RhinoInside.Revit.GH.Components
 #endif
   }
 
-  [ComponentVersion(since: "1.0", updated: "1.3")]
+  [ComponentVersion(introduced: "1.0", updated: "1.3")]
   public abstract class Component : GH_Component, Kernel.IGH_ElementIdComponent
   {
     protected Component(string name, string nickname, string description, string category, string subCategory)
@@ -102,15 +102,47 @@ namespace RhinoInside.Revit.GH.Components
     {
       ComponentVersion = CurrentVersion;
 
-      if (Obsolete)
+#if DEBUG
+      // Call GetSinceVersion here to check base types since-version integrity.
+      var since = ComponentVersionAttribute.GetIntroducedVersion(GetType());
+#endif
+
+      var obsolete = ComponentVersionAttribute.GetDeprecatedVersion(GetType());
+      this.obsolete = Obsolete || obsolete is object;
+    }
+
+    #if DEBUG
+    public override string InstanceDescription =>
+      $"{base.InstanceDescription}{Environment.NewLine}{VersionDescription}";
+
+    string VersionDescription
+    {
+      get
       {
-        foreach (var obsolete in GetType().GetCustomAttributes(typeof(ObsoleteAttribute), false).Cast<ObsoleteAttribute>())
+        ComponentVersionAttribute.GetVersionHistory(GetType(), out var since, out var _, out var obsolete);
+        var versionDescription = $"Introduced in v{since}" + Environment.NewLine;
+
+        if (Obsolete)
         {
-          if (!string.IsNullOrEmpty(obsolete.Message))
-            Description = obsolete.Message + Environment.NewLine + Description;
+          if (obsolete is object)
+            versionDescription += $"Obsolete since v{obsolete}" + Environment.NewLine;
+
+          foreach (var attribute in GetType().GetCustomAttributes(typeof(ObsoleteAttribute), false).Cast<ObsoleteAttribute>())
+          {
+            if (!string.IsNullOrWhiteSpace(attribute.Message))
+              versionDescription += attribute.Message + Environment.NewLine;
+          }
         }
+
+        return versionDescription;
       }
     }
+    #endif
+
+    #region Obsolete
+    readonly bool? obsolete;
+    public override bool Obsolete => obsolete.GetValueOrDefault(base.Obsolete);
+    #endregion
 
     static readonly string[] keywords = new string[] { "Revit" };
     public override IEnumerable<string> Keywords => base.Keywords is null ? keywords : Enumerable.Concat(base.Keywords, keywords);
@@ -120,23 +152,23 @@ namespace RhinoInside.Revit.GH.Components
     {
       get
       {
-        var maxVersion = ComponentVersionAttribute.GetTypeVersionCurrentVersion(GetType());
+        var current = ComponentVersionAttribute.GetCurrentVersion(GetType());
 
         // If an input parameter is been modified this updates the component version
         foreach (var input in Params.Input)
         {
-          var version = ComponentVersionAttribute.GetTypeVersionCurrentVersion(input.GetType());
-          if (version > maxVersion) maxVersion = version;
+          var version = ComponentVersionAttribute.GetCurrentVersion(input.GetType());
+          if (version > current) current = version;
         }
 
         // If an output parameter is been modified this updates the component version
         foreach (var output in Params.Output)
         {
-          var version = ComponentVersionAttribute.GetTypeVersionCurrentVersion(output.GetType());
-          if (version > maxVersion) maxVersion = version;
+          var version = ComponentVersionAttribute.GetCurrentVersion(output.GetType());
+          if (version > current) current = version;
         }
 
-        return maxVersion;
+        return current;
       }
     }
 

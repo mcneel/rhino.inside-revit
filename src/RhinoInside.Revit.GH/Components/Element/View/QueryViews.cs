@@ -6,7 +6,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  [ComponentVersion(since: "1.0", updated: "1.2.1")]
+  [ComponentVersion(introduced: "1.0", updated: "1.2.1")]
   public class QueryViews : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("DF691659-B75B-4455-AF5F-8A5DE485FA05");

@@ -9,7 +9,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Element.Sheet
 {
-  [ComponentVersion(since: "1.2.4")]
+  [ComponentVersion(introduced: "1.2.4")]
   public class SheetByNumber_Placeholder : BaseSheetByNumber<PlaceholderSheetHandler>
   {
     public override Guid ComponentGuid => new Guid("16f18871-6fe8-4dfb-a4f5-47826d582442");

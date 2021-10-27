@@ -9,7 +9,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Element.Sheet
 {
-  [ComponentVersion(since: "1.2.4")]
+  [ComponentVersion(introduced: "1.2.4")]
   public class TitleBlockByType : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("F2F3D866-5A62-40C0-A85B-C417183E0A52");

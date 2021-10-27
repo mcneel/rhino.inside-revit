@@ -7,7 +7,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Filters
 {
-  [ComponentVersion(since: "1.0", updated: "1.3")]
+  [ComponentVersion(introduced: "1.0", updated: "1.3")]
   public class ElementExcludeElementTypeFilter : ElementFilterComponent
   {
     public override Guid ComponentGuid => new Guid("F69D485F-B262-4297-A496-93F5653F5D19");
@@ -120,7 +120,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
     }
   }
 
-  [ComponentVersion(since: "1.3")]
+  [ComponentVersion(introduced: "1.3")]
   public class ElementFamilyFilter : ElementFilterComponent
   {
     public override Guid ComponentGuid => new Guid("B344F1C1-F37D-4A1A-83B3-65A34FE946D2");
@@ -229,7 +229,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
     }
   }
 
-  [ComponentVersion(since: "1.2")]
+  [ComponentVersion(introduced: "1.2")]
   public class ElementWorksetFilter : ElementFilterComponent
   {
     public override Guid ComponentGuid => new Guid("3380C493-B1DF-4E93-A2CA-612808291394");

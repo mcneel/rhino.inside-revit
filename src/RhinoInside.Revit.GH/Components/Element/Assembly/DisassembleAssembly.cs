@@ -8,7 +8,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Element.Assembly
 {
-  [ComponentVersion(since: "1.2")]
+  [ComponentVersion(introduced: "1.2")]
   public class DisassembleAssembly : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("ff0f49ca-16ec-4287-8bd8-b903b6a6e781");

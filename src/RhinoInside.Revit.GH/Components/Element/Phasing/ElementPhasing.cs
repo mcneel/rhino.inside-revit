@@ -3,7 +3,7 @@ using Grasshopper.Kernel;
 
 namespace RhinoInside.Revit.GH.Components.Phasing
 {
-  [ComponentVersion(since: "1.2")]
+  [ComponentVersion(introduced: "1.2")]
   public class GraphicalElementPhasing : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("3BA4524A-D4E5-4392-88B3-17A0CF651B09");

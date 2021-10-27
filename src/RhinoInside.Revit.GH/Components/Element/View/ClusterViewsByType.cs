@@ -11,7 +11,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  [ComponentVersion(since: "1.2", updated: "1.2.4")]
+  [ComponentVersion(introduced: "1.2", updated: "1.2.4")]
   public class ClusterViewsByType : Component, IGH_VariableParameterComponent
   {
     public override Guid ComponentGuid => new Guid("f6b99fe2-19e1-4840-96c1-13873a0aece8");

@@ -408,7 +408,7 @@ namespace RhinoInside.Revit.GH.Components.Material
     }
   }
 
-  [ComponentVersion(since: "1.0", updated: "1.3")]
+  [ComponentVersion(introduced: "1.0", updated: "1.3")]
   public class ModifyStructuralAsset : BasePhysicalAssetComponent<StructuralAssetData>
   {
     public override Guid ComponentGuid =>
@@ -471,7 +471,7 @@ namespace RhinoInside.Revit.GH.Components.Material
     }
   }
 
-  [ComponentVersion(since: "1.0", updated: "1.3")]
+  [ComponentVersion(introduced: "1.0", updated: "1.3")]
   public class AnalyzeStructuralAsset : BasePhysicalAssetComponent<StructuralAssetData>
   {
     public override Guid ComponentGuid =>

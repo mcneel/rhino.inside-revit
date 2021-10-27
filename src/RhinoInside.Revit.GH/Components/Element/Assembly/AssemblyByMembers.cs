@@ -8,7 +8,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Element.Assembly
 {
-  [ComponentVersion(since: "1.2", updated: "1.2.4")]
+  [ComponentVersion(introduced: "1.2", updated: "1.2.4")]
   public class AssemblyByMembers : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("6915b697-f10d-4bc8-8faa-f25438f393a8");

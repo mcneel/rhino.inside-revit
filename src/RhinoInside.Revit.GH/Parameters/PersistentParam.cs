@@ -35,7 +35,7 @@ namespace RhinoInside.Revit.GH.Parameters
     bool ResetState();
   }
 
-  [ComponentVersion(since: "1.0", updated: "1.3")]
+  [ComponentVersion(introduced: "1.0", updated: "1.3")]
   public abstract class PersistentParam<T> : GH_PersistentParam<T>, IGH_InitCodeAware, IGH_PersistentStateAwareObject
     where T : class, IGH_Goo
   {
@@ -63,7 +63,7 @@ namespace RhinoInside.Revit.GH.Parameters
     }
 
     #region IO
-    private Version CurrentVersion => ComponentVersionAttribute.GetTypeVersionCurrentVersion(GetType());
+    private Version CurrentVersion => ComponentVersionAttribute.GetCurrentVersion(GetType());
     protected internal Version ComponentVersion { get; private set; }
 
     public override bool Read(GH_IReader reader)

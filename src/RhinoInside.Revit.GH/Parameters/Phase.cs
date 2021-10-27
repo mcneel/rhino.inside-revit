@@ -8,7 +8,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  [ComponentVersion(since: "1.2")]
+  [ComponentVersion(introduced: "1.2")]
   public class Phase : Element<Types.Phase, DB.Phase>
   {
     public override GH_Exposure Exposure => GH_Exposure.quarternary;

@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components
   /// Base class for all variable parameter components
   /// </summary>
   /// <seealso cref="IGH_VariableParameterComponent"/>
-  [ComponentVersion(since: "1.0", updated: "1.3")]
+  [ComponentVersion(introduced: "1.0", updated: "1.3")]
   public abstract class ZuiComponent : Component, IGH_VariableParameterComponent
   {
     protected ZuiComponent(string name, string nickname, string description, string category, string subCategory)

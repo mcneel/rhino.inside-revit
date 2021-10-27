@@ -8,7 +8,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Worksets
 {
-  [ComponentVersion(since: "1.2")]
+  [ComponentVersion(introduced: "1.2")]
   public class QueryWorksets : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("311316BA-81C7-495C-8A20-B7974091D6B1");

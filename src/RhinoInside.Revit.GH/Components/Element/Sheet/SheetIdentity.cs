@@ -4,7 +4,7 @@ using Grasshopper.Kernel.Parameters;
 
 namespace RhinoInside.Revit.GH.Components.Element.Sheet
 {
-  [ComponentVersion(since: "1.2", updated: "1.2.1")]
+  [ComponentVersion(introduced: "1.2", updated: "1.2.1")]
   public class SheetIdentity : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("CADF5FBB-9DEA-4B9F-8214-9897CEC0E54A");

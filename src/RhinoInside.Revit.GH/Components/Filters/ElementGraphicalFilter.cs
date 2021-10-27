@@ -74,7 +74,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
     }
   }
 
-  [ComponentVersion(since: "1.2")]
+  [ComponentVersion(introduced: "1.2")]
   public class ElementPhaseStatusFilter : ElementFilterComponent
   {
     public override Guid ComponentGuid => new Guid("805C21EE-5481-4412-A06C-7965761737E8");

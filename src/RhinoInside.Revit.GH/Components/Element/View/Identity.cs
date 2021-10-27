@@ -4,7 +4,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
-  [ComponentVersion(since: "1.0", updated: "1.2.1")]
+  [ComponentVersion(introduced: "1.0", updated: "1.2.1")]
   public class ViewIdentity : Component
   {
     public override Guid ComponentGuid => new Guid("B0440885-4AF3-4890-8E84-3BC2A8342B9F");

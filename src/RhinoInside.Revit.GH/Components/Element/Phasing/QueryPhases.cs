@@ -7,7 +7,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Phasing
 {
-  [ComponentVersion(since: "1.2")]
+  [ComponentVersion(introduced: "1.2")]
   public class QueryPhases : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("91E4D3E1-883A-44D9-A3D2-B836967869E1");
