@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
 using GH_IO.Serialization;
 using Grasshopper;
 using Grasshopper.GUI.Canvas;
@@ -254,6 +255,122 @@ namespace RhinoInside.Revit.GH.Components
     }
 
     public override void CreateAttributes() => Attributes = new ZuiAttributes(this);
+
+    public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
+    {
+      base.AppendAdditionalMenuItems(menu);
+
+      Menu_AppendSeparator(menu);
+      Menu_AppendItem(menu, "Show all parameters", Menu_ShowAllParameters, !AreAllParametersVisible(), false);
+      Menu_AppendItem(menu, "Hide unconnected parameters", Menu_HideUnconnectedParameters, !AreAllParametersConnected(), false);
+    }
+
+    bool AreAllParametersVisible()
+    {
+      return Params.Input.Count == Inputs.Length && Params.Output.Count == Outputs.Length;
+    }
+
+    bool AreAllParametersConnected()
+    {
+      foreach (var param in Params.Input)
+        if (param.Sources.Count == 0) return false;
+
+      foreach (var param in Params.Output)
+        if (param.Recipients.Count == 0) return false;
+
+      return true;
+    }
+
+    void Menu_ShowAllParameters(object sender, EventArgs e)
+    {
+      if (OnPingDocument() is GH_Document document)
+      {
+        RecordUndoEvent("Show All Parameters");
+
+        bool inputAdded = false;
+        {
+          for (int index = 0; index <= Params.Input.Count; ++index)
+          {
+            while (CanInsertParameter(GH_ParameterSide.Input, index))
+            {
+              var param = CreateParameter(GH_ParameterSide.Input, index);
+              if (Params.RegisterInputParam(param, index))
+                inputAdded |= !param.Optional;
+            }
+          }
+        }
+
+        bool outputAdded = false;
+        {
+          for (int index = 0; index <= Params.Output.Count; ++index)
+          {
+            while (CanInsertParameter(GH_ParameterSide.Output, index))
+            {
+              var param = CreateParameter(GH_ParameterSide.Output, index);
+              outputAdded |= Params.RegisterOutputParam(param, index);
+            }
+          }
+        }
+
+        Params.OnParametersChanged();
+
+        if (inputAdded) ExpireSolution(true);
+        else
+        {
+          OnDisplayExpired(false);
+
+          if (outputAdded)
+            Phase = GH_SolutionPhase.Blank;
+        }
+      }
+    }
+
+    void Menu_HideUnconnectedParameters(object sender, EventArgs e)
+    {
+      if (OnPingDocument() is GH_Document document)
+      {
+        RecordUndoEvent("Hide Unconnected Parameters");
+
+        bool inputRemoved = false;
+        {
+          int index = 0;
+          foreach (var input in Params.Input.ToArray())
+          {
+            if
+            (
+              input.DataType > GH_ParamData.@void ||
+              !CanRemoveParameter(GH_ParameterSide.Input, index)
+            )
+            {
+              ++index;
+            }
+            else if (Params.UnregisterInputParameter(input))
+            {
+              inputRemoved |= true;
+            }
+          }
+        }
+
+        {
+          int index = 0;
+          foreach (var output in Params.Output.ToArray())
+          {
+            if (output.Recipients.Count > 0 || !CanRemoveParameter(GH_ParameterSide.Output, index))
+              ++index;
+            else
+              Params.UnregisterOutputParameter(output);
+          }
+        }
+
+        Params.OnParametersChanged();
+
+        if (inputRemoved) ExpireSolution(true);
+        else
+        {
+          OnDisplayExpired(false);
+        }
+      }
+    }
     #endregion
 
     #region IO
