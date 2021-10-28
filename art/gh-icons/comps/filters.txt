@@ -12,3 +12,4 @@ ElementOwnerViewFilter
 ElementParameterFilter
 ElementSelectableInViewFilter
 ElementTypeFilter
+ElementFamilyFilter
