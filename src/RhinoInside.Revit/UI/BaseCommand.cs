@@ -12,19 +12,30 @@ namespace RhinoInside.Revit.UI
   public abstract class Command : External.UI.ExternalCommand
   {
     #region Ribbon item creation
-    internal static PushButton AddPushButton<CommandType, AvailabilityType>(PulldownButton pullDownButton, string text, string iconName, string tooltip = null)
+    internal static SplitButtonData NewSplitButtonData<CommandType>(string text, string image, string tooltip, string url = default)
       where CommandType : IExternalCommand
-      where AvailabilityType : IExternalCommandAvailability
     {
-      var buttonData = NewPushButtonData<CommandType, AvailabilityType>(text, iconName, tooltip);
-
-      if (pullDownButton.AddPushButton(buttonData) is PushButton pushButton)
+      var data = new SplitButtonData
+      (
+        typeof(CommandType).Name,
+        text ?? typeof(CommandType).Name
+      )
       {
-        pushButton.ToolTip = tooltip;
-        return pushButton;
+        Image = ImageBuilder.LoadRibbonButtonImage(image, true),
+        LargeImage = ImageBuilder.LoadRibbonButtonImage(image),
+        ToolTip = tooltip
+      };
+
+      if (url != string.Empty)
+      {
+        if (url is null) url = AddIn.AddInWebSite;
+        else if (!url.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+          url = AddIn.AddInWebSite + url;
+
+        data.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, url));
       }
 
-      return null;
+      return data;
     }
 
     internal static PushButtonData NewPushButtonData<CommandType, AvailabilityType>(string name, string iconName, string tooltip, string url = default)

@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.UI
 
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        pushButton.LongDescription = $"Use CTRL key to open the viewport without synchronizing camera";
+        pushButton.LongDescription = $"Use CTRL key to open the viewport synchronizing camera and workplane";
         StoreButton(CommandName, pushButton);
       }
     }
@@ -35,7 +35,7 @@ namespace RhinoInside.Revit.UI
     {
       var ctrlIsPressed = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
 
-      if (!ctrlIsPressed && data.View.TryGetViewportInfo(useUIView: true, out var vport))
+      if (ctrlIsPressed && data.View.TryGetViewportInfo(useUIView: true, out var vport))
       {
         var rhinoDoc = Rhino.RhinoDoc.ActiveDoc;
         bool imperial = rhinoDoc.ModelUnitSystem == Rhino.UnitSystem.Feet || rhinoDoc.ModelUnitSystem == Rhino.UnitSystem.Inches;
