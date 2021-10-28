@@ -80,6 +80,7 @@ namespace RhinoInside.Revit.UI
     readonly CheckBox _loadOnStartup = new CheckBox { Text = "Start Rhino on startup", ToolTip = "Restart Revit" };
     readonly CheckBox _isolateSettings = new CheckBox { Text = "Isolate Rhino settings", ToolTip = "Rhino will use a separate set of settings in Revit" };
     readonly CheckBox _useHostLanguage = new CheckBox { Text = "Use Revit UI language", ToolTip = "Rhino UI will be same language as Revit" };
+    readonly CheckBox _keepUIOnTop = new CheckBox { Text = "Keep UI always on top", ToolTip = "Rhino UI will display always on top of Revit window" };
     readonly CheckBox _compactTab = new CheckBox { Text = "Compact Revit tabs", ToolTip = "Load into Add-ins tab - Restart Revit" };
     readonly CheckBox _compactRibbon = new CheckBox { Text = "Compact Ribbon", ToolTip = "Collapse Rhino and Grasshopper panels" };
 
@@ -88,6 +89,7 @@ namespace RhinoInside.Revit.UI
       _loadOnStartup.Checked = AddinOptions.Current.LoadOnStartup;
       _isolateSettings.Checked = AddinOptions.Current.IsolateSettings;
       _useHostLanguage.Checked = AddinOptions.Current.UseHostLanguage;
+      _keepUIOnTop.Checked = AddinOptions.Current.KeepUIOnTop;
       _compactTab.Checked = AddinOptions.Current.CompactTab;
       _compactRibbon.Checked = AddinOptions.Current.CompactRibbon;
 
@@ -99,7 +101,7 @@ namespace RhinoInside.Revit.UI
         {
           new GroupBox
           {
-            Text = "Rhino",
+            Text = "Startup",
             Content = new TableLayout
             {
               Spacing = new Size(5, 10),
@@ -109,6 +111,7 @@ namespace RhinoInside.Revit.UI
                 _loadOnStartup,
                 _isolateSettings,
                 _useHostLanguage,
+                _keepUIOnTop
               }
             }
           },
@@ -147,6 +150,9 @@ namespace RhinoInside.Revit.UI
 
       if (_useHostLanguage.Checked.HasValue)
         AddinOptions.Current.UseHostLanguage = _useHostLanguage.Checked.Value;
+
+      if (_keepUIOnTop.Checked.HasValue)
+        AddinOptions.Current.UseHostLanguage = _keepUIOnTop.Checked.Value;
     }
   }
 

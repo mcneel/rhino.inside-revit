@@ -63,6 +63,25 @@ namespace Microsoft.Win32.SafeHandles
   #endregion
 
   #region User32
+  [Flags]
+  enum ExtendedWindowStyles
+  {
+    ModalFrame      = 0x00000001,
+    NoParentNotify  = 0x00000004,
+    TopMost         = 0x00000008,
+    MDIChild        = 0x00000040,
+    ToolWindow      = 0x00000080,
+    WindowEdge      = 0x00000100,
+    ContextHelp     = 0x00000400,
+    AcceptFiles     = 0x00000010,
+    ControlParent   = 0x00010000,
+    StaticEdge      = 0x00020000,
+    AppWindow       = 0x00040000,
+    Layered         = 0x00080000,
+    Composited      = 0x02000000,
+    NoActivate      = 0x08000000,
+  }
+
   internal class WindowHandle : SafeHandle, System.Windows.Forms.IWin32Window
   {
     public static bool operator ==(WindowHandle x, WindowHandle y) => x.handle == y.handle;
@@ -108,7 +127,12 @@ namespace Microsoft.Win32.SafeHandles
     public WindowHandle Owner => User32.GetWindow(this, 4 /*GW_OWNER*/);
     public WindowHandle ActivePopup => User32.GetWindow(this, 6 /*GW_ENABLEDPOPUP*/);
 
-    public WindowHandle Parent => User32.GetParent(this);
+    public WindowHandle Parent
+    {
+      get => User32.GetParent(this);
+      set => User32.SetParent(this, value);
+    }
+
     public bool Visible
     {
       //get => 0 != ((uint) WinUser.GetWindowLongPtr(this, -16 /*GWL_STYLE*/) & 0x10000000);
@@ -160,6 +184,12 @@ namespace Microsoft.Win32.SafeHandles
           }
         }
       }
+    }
+
+    public ExtendedWindowStyles ExtendedWindowStyles
+    {
+      get => (ExtendedWindowStyles) User32.GetWindowLongPtr(this, -20 /*GWL_EXSTYLE*/);
+      set => User32.SetWindowLongPtr(this, -20 /*GWL_EXSTYLE*/, (IntPtr) value);
     }
 
     public void Flash()
@@ -324,6 +354,9 @@ namespace Microsoft.Win32.SafeHandles.InteropServices
     public static bool DestroyWindow(SafeWindowHandle hWnd) => DestroyWindow(hWnd.Handle);
 
     [DllImport(USER32, SetLastError = true)]
+    public static extern IntPtr SetWindowLongPtr(HWND hWnd, int nIndex, IntPtr dwNewLong);
+
+    [DllImport(USER32, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static extern bool IsWindowEnabled(HWND hWnd);
 
@@ -358,6 +391,9 @@ namespace Microsoft.Win32.SafeHandles.InteropServices
 
     [DllImport(USER32, SetLastError = true)]
     public static extern HWND GetParent(HWND hWnd);
+
+    [DllImport(USER32, SetLastError = true)]
+    public static extern HWND SetParent(HWND hWnd, HWND hWndNewParent);
 
     [DllImport(USER32, SetLastError = true)]
     public static extern HWND SetActiveWindow(HWND hWnd);
