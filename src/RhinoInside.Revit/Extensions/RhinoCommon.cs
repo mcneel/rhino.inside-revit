@@ -13,6 +13,7 @@ namespace Rhino.Geometry
     public static readonly Vector3d Vector3d = new Vector3d(Value, Value, Value);
     public static readonly Plane Plane = new Plane(Point3d, Vector3d, Vector3d);
     public static readonly BoundingBox BoundingBox = new BoundingBox(Point3d, Point3d);
+    public static readonly Box Box = new Box(Plane, BoundingBox);
   }
 
   static class Vector3dExtension
