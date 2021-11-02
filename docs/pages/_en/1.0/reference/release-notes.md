@@ -6,6 +6,12 @@ group: Deployment & Configs
 
 <!-- most recent release should be on top -->
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html title="v1.3 RC2" version="v1.3.7976.20198" pre_release=true time="10/27/2021" %}
+
+- Now *Open Viewport* command needs CTRL pressed to synchronize camera and workplane
+- {% include ltr/comp.html uuid='2dc4b866' %} now converts to *Plane*, *Box*, *Surface*, and *Material*
+- {% include ltr/comp.html uuid='4a962a0c' %} defaults to a temp folder when no *Folder* is provided
+
 {% include ltr/release-header.html title="v1.3 RC1" version="v1.3.7970.19099" pre_release=true time="10/27/2021" %}
 
 - Component Changes
