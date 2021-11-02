@@ -110,13 +110,32 @@ namespace RhinoInside.Revit.External
         if (window.IsInvalid && window.ThreadId == ThreadHandle.CurrentThreadId)
           throw new ArgumentException("Invalid handle value", nameof(hWnd));
 
-      if (hook is null)
-        hook = new Hook();
-
       if (HasGate(hWnd, out var _))
         return false;
 
+      if (hook is null)
+        hook = new Hook();
+
       gates.Add(hWnd, new Gate(hWnd));
+      return true;
+    }
+
+    public static bool RemoveGateWindow(IntPtr hWnd)
+    {
+      if (!gates.TryGetValue(hWnd, out var gate))
+        return false;
+
+      if (!gates.Remove(hWnd))
+        return false;
+
+      gate.ExternalEvent.Dispose();
+
+      if (gates.Count == 0)
+      {
+        hook.Dispose();
+        hook = null;
+      }
+
       return true;
     }
 
@@ -447,16 +466,7 @@ namespace RhinoInside.Revit.External
           {
             if (HasGate(wParam, out var gate))
             {
-              if (wParam == gate.Window.Handle)
-              {
-                gate.ExternalEvent.Dispose();
-
-                if (gates.Remove(wParam) && gates.Count == 0)
-                {
-                  try { return base.DispatchHook(nCode, wParam, lParam); }
-                  finally { Dispose(); hook = default; }
-                }
-              }
+              if (wParam == gate.Window.Handle) return 1;
               else gate.ExternalWindows.Remove(wParam);
             }
           }

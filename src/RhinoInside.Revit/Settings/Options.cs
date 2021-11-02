@@ -54,6 +54,20 @@ namespace RhinoInside.Revit.Settings
     }
     private bool _useHostLanguage = true;
     public static event EventHandler<EventArgs> UseHostLanguageChanged;
+
+    [XmlElement]
+    public bool KeepUIOnTop
+    {
+      get => _keepUIOnTop;
+      set
+      {
+        if (_keepUIOnTop == value) return;
+        _keepUIOnTop = value;
+        KeepUIOnTopChanged?.Invoke(this, null);
+      }
+    }
+    private bool _keepUIOnTop = true;
+    public static event EventHandler<EventArgs> KeepUIOnTopChanged;
     #endregion
 
     #region UI

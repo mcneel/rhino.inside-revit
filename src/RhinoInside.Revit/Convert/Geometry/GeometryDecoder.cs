@@ -54,6 +54,21 @@ namespace RhinoInside.Revit.Convert.Geometry
       return rhino;
     }
 
+    public static Interval[] ToIntervals(DB.BoundingBoxUV value)
+    {
+      return !value.IsUnset() ?
+      new Interval[]
+      {
+        new Interval(value.Min.U, value.Max.U),
+        new Interval(value.Min.V, value.Max.V)
+      } :
+      new Interval[]
+      {
+        NaN.Interval,
+        NaN.Interval
+      };
+    }
+
     public static BoundingBox ToBoundingBox(this DB.Outline value)
     {
       return new BoundingBox(value.MinimumPoint.ToPoint3d(), value.MaximumPoint.ToPoint3d());

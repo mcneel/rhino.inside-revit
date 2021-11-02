@@ -41,7 +41,7 @@ namespace RhinoInside.Revit.GH.Components
       fitDirectionType.PersistentData.Append(new Types.FitDirectionType());
       manager.AddParameter(fitDirectionType, "Fit Direction", "D", "The fit direction", GH_ParamAccess.item);
 
-      manager.AddIntegerParameter("Pixel Size", "PS", "The pixel size of an image in specified direction", GH_ParamAccess.item, 2048);
+      manager.AddIntegerParameter("Pixel Size", "PS", "The pixel size of an image in specified direction", GH_ParamAccess.item, 1024);
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
@@ -60,7 +60,7 @@ namespace RhinoInside.Revit.GH.Components
       DA.GetData("Folder", ref folder);
 
       if (string.IsNullOrEmpty(folder))
-        folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), view.Document.GetTitle());
+        folder = Path.Combine(AddIn.SwapFolder,view.Document.GetFingerprintGUID().ToString(), InstanceGuid.ToString());
 
       Directory.CreateDirectory(folder);
 
@@ -112,7 +112,7 @@ namespace RhinoInside.Revit.GH.Components
       }
 
       if (!overwrite && File.Exists(filePath))
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"File '{filePath}' already exists.");
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"File '{filePath.TripleDotPath(64)}' already exists.");
       else
         view.Document.ExportImage(options);
 

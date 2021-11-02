@@ -301,7 +301,7 @@ namespace RhinoInside.Revit.GH.Types
           );
         }
 
-        return Box.Unset;
+        return NaN.Box;
       }
     }
 

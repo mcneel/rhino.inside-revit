@@ -33,6 +33,8 @@ namespace RhinoInside.Revit
     public static string AddInCompany => "McNeel";
     public static string AddInName => "Rhino.Inside";
     public static string AddInWebSite => @"https://www.rhino3d.com/inside/revit/1.0/";
+
+    internal static readonly string SwapFolder = Path.Combine(Path.GetTempPath(), AddInCompany, AddInName, $"V{AddIn.Version.Major}.{AddIn.Version.Minor}");
     #endregion
 
     #region Status
@@ -146,6 +148,9 @@ namespace RhinoInside.Revit
           var result = CanStartup(uiCtrlApp);
           if (result != Result.Succeeded) return result;
         }
+
+        // Ensure we have a SwapFolder
+        Directory.CreateDirectory(SwapFolder);
 
         ErrorReport.OnLoadStackTraceFilePath =
           Path.ChangeExtension(uiCtrlApp.ControlledApplication.RecordingJournalFilename, "log.md");

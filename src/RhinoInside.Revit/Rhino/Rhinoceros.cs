@@ -113,7 +113,10 @@ namespace RhinoInside.Revit
           args.Add("/stopwatch");
         }
 
-        core = new RhinoCore(args.ToArray(), WindowStyle.Hidden);
+        var hostWnd = Settings.AddinOptions.Session.KeepUIOnTop ?
+          hostMainWindow.Handle : IntPtr.Zero;
+
+        core = new RhinoCore(args.ToArray(), WindowStyle.Hidden, hostWnd);
       }
       catch (Exception e)
       {
@@ -132,6 +135,8 @@ namespace RhinoInside.Revit
       }
 
       MainWindow = new WindowHandle(RhinoApp.MainWindowHandle());
+      MainWindow.ExtendedWindowStyles |= ExtendedWindowStyles.AppWindow;
+
       return External.ActivationGate.AddGateWindow(MainWindow.Handle);
     }
 
@@ -191,6 +196,9 @@ namespace RhinoInside.Revit
     {
       if (core is null)
         return Result.Failed;
+
+      External.ActivationGate.RemoveGateWindow(MainWindow.Handle);
+      MainWindow.BringToFront();
 
       // Unload Guests
       CheckOutGuests();
