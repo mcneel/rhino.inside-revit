@@ -152,7 +152,7 @@ namespace RhinoInside.Revit.UI
         AddinOptions.Current.UseHostLanguage = _useHostLanguage.Checked.Value;
 
       if (_keepUIOnTop.Checked.HasValue)
-        AddinOptions.Current.UseHostLanguage = _keepUIOnTop.Checked.Value;
+        AddinOptions.Current.KeepUIOnTop = _keepUIOnTop.Checked.Value;
     }
   }
 
