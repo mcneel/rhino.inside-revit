@@ -151,6 +151,7 @@ namespace RhinoInside.Revit.GH.Types
             DB.FitDirectionType.Vertical;
           var pixelSize = Math.Max(rect.Width, rect.Height);
           if (pixelSize == 0) return default;
+          pixelSize = Math.Min(4096, pixelSize);
 
           var options = new DB.ImageExportOptions()
           {
@@ -164,14 +165,18 @@ namespace RhinoInside.Revit.GH.Types
             FilePath = swapFolder + Path.DirectorySeparatorChar
           };
           options.SetViewsAndSheets(new DB.ElementId[] { view.Id });
-          view.Document.ExportImage(options);
+          try
+          {
+            view.Document.ExportImage(options);
 
-          var viewName = DB.ImageExportOptions.GetFileName(view.Document, view.Id);
-          var filename = Path.Combine(options.FilePath, viewName) + ".png";
+            var viewName = DB.ImageExportOptions.GetFileName(view.Document, view.Id);
+            var filename = Path.Combine(options.FilePath, viewName) + ".png";
 
-          var material = new DisplayMaterial(System.Drawing.Color.White, transparency: 0.0);
-          material.SetBitmapTexture(filename, front: true);
-          return material;
+            var material = new DisplayMaterial(System.Drawing.Color.White, transparency: 0.0);
+            material.SetBitmapTexture(filename, front: true);
+            return material;
+          }
+          catch (Autodesk.Revit.Exceptions.ApplicationException) { }
         }
 
         return default;
