@@ -84,39 +84,55 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetData("Pixel Size", ref pixelSize))
         return;
 
-      var viewName = DB.ImageExportOptions.GetFileName(view.Document, view.Id);
-      var options = new DB.ImageExportOptions()
+      using (var uiDoc = new Autodesk.Revit.UI.UIDocument(view.Document))
       {
-        ZoomType = DB.ZoomFitType.FitToPage,
-        FitDirection          = fitDirection, // DB.FitDirectionType.Horizontal,
-        PixelSize             = pixelSize,    // 2048,
-        ImageResolution       = resolution,   // DB.ImageResolution.DPI_72,
-        ShadowViewsFileType   = fileType,     // DB.ImageFileType.PNG,
-        HLRandWFViewsFileType = fileType,     // DB.ImageFileType.PNG,
-        ExportRange = DB.ExportRange.SetOfViews,
-        FilePath = folder + Path.DirectorySeparatorChar
-      };
+        var selectedIds = uiDoc.Selection.GetElementIds();
+        if (selectedIds.Count > 0)
+          uiDoc.Selection.SetElementIds(new DB.ElementId[] { });
 
-      options.SetViewsAndSheets(new DB.ElementId[] { view.Id });
+        try
+        {
+          var viewName = DB.ImageExportOptions.GetFileName(view.Document, view.Id);
+          var options = new DB.ImageExportOptions()
+          {
+            ZoomType = DB.ZoomFitType.FitToPage,
+            FitDirection = fitDirection, // DB.FitDirectionType.Horizontal,
+            PixelSize = pixelSize,    // 2048,
+            ImageResolution = resolution,   // DB.ImageResolution.DPI_72,
+            ShadowViewsFileType = fileType,     // DB.ImageFileType.PNG,
+            HLRandWFViewsFileType = fileType,     // DB.ImageFileType.PNG,
+            ExportRange = DB.ExportRange.SetOfViews,
+            FilePath = folder + Path.DirectorySeparatorChar
+          };
 
-      var filePath = Path.Combine(options.FilePath, viewName);
-      switch (options.ShadowViewsFileType)
-      {
-        case DB.ImageFileType.BMP:          filePath += ".bmp"; break;
-        case DB.ImageFileType.JPEGLossless: filePath += ".jpg"; break;
-        case DB.ImageFileType.JPEGMedium:   filePath += ".jpg"; break;
-        case DB.ImageFileType.JPEGSmallest: filePath += ".jpg"; break;
-        case DB.ImageFileType.PNG:          filePath += ".png"; break;
-        case DB.ImageFileType.TARGA:        filePath += ".tga"; break;
-        case DB.ImageFileType.TIFF:         filePath += ".tif"; break;
+          options.SetViewsAndSheets(new DB.ElementId[] { view.Id });
+
+          var filePath = Path.Combine(options.FilePath, viewName);
+          switch (options.ShadowViewsFileType)
+          {
+            case DB.ImageFileType.BMP: filePath += ".bmp"; break;
+            case DB.ImageFileType.JPEGLossless: filePath += ".jpg"; break;
+            case DB.ImageFileType.JPEGMedium: filePath += ".jpg"; break;
+            case DB.ImageFileType.JPEGSmallest: filePath += ".jpg"; break;
+            case DB.ImageFileType.PNG: filePath += ".png"; break;
+            case DB.ImageFileType.TARGA: filePath += ".tga"; break;
+            case DB.ImageFileType.TIFF: filePath += ".tif"; break;
+          }
+
+          if (!overwrite && File.Exists(filePath))
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"File '{filePath.TripleDotPath(64)}' already exists.");
+          else
+            view.Document.ExportImage(options);
+
+          DA.SetData("Image File", filePath);
+        }
+        catch (Autodesk.Revit.Exceptions.ApplicationException) { }
+        finally
+        {
+          if (selectedIds.Count > 0)
+            uiDoc.Selection.SetElementIds(selectedIds);
+        }
       }
-
-      if (!overwrite && File.Exists(filePath))
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"File '{filePath.TripleDotPath(64)}' already exists.");
-      else
-        view.Document.ExportImage(options);
-
-      DA.SetData("Image File", filePath);
     }
   }
 }

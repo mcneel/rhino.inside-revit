@@ -153,30 +153,42 @@ namespace RhinoInside.Revit.GH.Types
           if (pixelSize == 0) return default;
           pixelSize = Math.Min(4096, pixelSize);
 
-          var options = new DB.ImageExportOptions()
+          using (var uiDoc = new Autodesk.Revit.UI.UIDocument(view.Document))
           {
-            ZoomType = DB.ZoomFitType.FitToPage,
-            FitDirection = fitDirection,
-            PixelSize = pixelSize,
-            ImageResolution = DB.ImageResolution.DPI_72,
-            ShadowViewsFileType = DB.ImageFileType.PNG,
-            HLRandWFViewsFileType = DB.ImageFileType.PNG,
-            ExportRange = DB.ExportRange.SetOfViews,
-            FilePath = swapFolder + Path.DirectorySeparatorChar
-          };
-          options.SetViewsAndSheets(new DB.ElementId[] { view.Id });
-          try
-          {
-            view.Document.ExportImage(options);
+            var selectedIds = uiDoc.Selection.GetElementIds();
+            if (selectedIds.Count > 0)
+              uiDoc.Selection.SetElementIds(new DB.ElementId[] { });
 
-            var viewName = DB.ImageExportOptions.GetFileName(view.Document, view.Id);
-            var filename = Path.Combine(options.FilePath, viewName) + ".png";
+            try
+            {
+              var options = new DB.ImageExportOptions()
+              {
+                ZoomType = DB.ZoomFitType.FitToPage,
+                FitDirection = fitDirection,
+                PixelSize = pixelSize,
+                ImageResolution = DB.ImageResolution.DPI_72,
+                ShadowViewsFileType = DB.ImageFileType.PNG,
+                HLRandWFViewsFileType = DB.ImageFileType.PNG,
+                ExportRange = DB.ExportRange.SetOfViews,
+                FilePath = swapFolder + Path.DirectorySeparatorChar
+              };
+              options.SetViewsAndSheets(new DB.ElementId[] { view.Id });
+              view.Document.ExportImage(options);
 
-            var material = new DisplayMaterial(System.Drawing.Color.White, transparency: 0.0);
-            material.SetBitmapTexture(filename, front: true);
-            return material;
+              var viewName = DB.ImageExportOptions.GetFileName(view.Document, view.Id);
+              var filename = Path.Combine(options.FilePath, viewName) + ".png";
+
+              var material = new DisplayMaterial(System.Drawing.Color.White, transparency: 0.0);
+              material.SetBitmapTexture(filename, front: true);
+              return material;
+            }
+            catch (Autodesk.Revit.Exceptions.ApplicationException) { }
+            finally
+            {
+              if (selectedIds.Count > 0)
+                uiDoc.Selection.SetElementIds(selectedIds);
+            }
           }
-          catch (Autodesk.Revit.Exceptions.ApplicationException) { }
         }
 
         return default;
