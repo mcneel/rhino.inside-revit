@@ -60,4 +60,12 @@ namespace System
       return builder.ToString();
     }
   }
+
+  internal static class FileExtension
+  {
+    public static void MoveFile(string sourceFileName, string destinationFileName, bool overwrite)
+    {
+      Microsoft.VisualBasic.FileIO.FileSystem.MoveFile(sourceFileName, destinationFileName, overwrite);
+    }
+  }
 }
