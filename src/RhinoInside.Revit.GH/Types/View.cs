@@ -177,9 +177,14 @@ namespace RhinoInside.Revit.GH.Types
 
               var viewName = DB.ImageExportOptions.GetFileName(view.Document, view.Id);
               var filename = Path.Combine(options.FilePath, viewName) + ".png";
+              var texturename = Path.Combine(options.FilePath, view.UniqueId) + ".png";
+
+              // We rename texture file to avoid conflicts
+              // between Rhino and Revit accessing the same file
+              FileExtension.MoveFile(filename, texturename, overwrite: true);
 
               var material = new DisplayMaterial(System.Drawing.Color.White, transparency: 0.0);
-              material.SetBitmapTexture(filename, front: true);
+              material.SetBitmapTexture(texturename, front: true);
               return material;
             }
             catch (Autodesk.Revit.Exceptions.ApplicationException) { }
