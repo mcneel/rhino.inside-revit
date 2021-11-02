@@ -56,7 +56,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     public static Interval[] ToIntervals(DB.BoundingBoxUV value)
     {
-      return value.IsSet ?
+      return !value.IsUnset() ?
       new Interval[]
       {
         new Interval(value.Min.U, value.Max.U),

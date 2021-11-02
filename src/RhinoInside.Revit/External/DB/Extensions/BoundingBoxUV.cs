@@ -4,6 +4,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
 {
   public static class BoundingBoxUVExtension
   {
+    public static bool IsUnset(this BoundingBoxUV value)
+    {
+#if REVIT_2021
+      return !value.IsSet;
+#else
+      return !(value.Min.U < value.Max.U && value.Min.V < value.Max.V);
+#endif
+    }
+
     public static UV Evaluate(this BoundingBoxUV value, UV uv)
     {
       var u = uv.U;

@@ -92,11 +92,12 @@ namespace RhinoInside.Revit.GH.Types
         if (Value is DB.View view)
         {
           var outline = view.Outline;
-          return outline.IsSet ?
+          var modelUnits = Revit.ModelUnits;
+          return !outline.IsUnset() ?
           new Interval[]
           {
-            new Interval(outline.Min.U * Revit.ModelUnits, outline.Max.U * Revit.ModelUnits),
-            new Interval(outline.Min.V * Revit.ModelUnits, outline.Max.V * Revit.ModelUnits)
+            new Interval(outline.Min.U * modelUnits, outline.Max.U * modelUnits),
+            new Interval(outline.Min.V * modelUnits, outline.Max.V * modelUnits)
           } :
           new Interval[] { NaN.Interval, NaN.Interval };
         }
