@@ -794,13 +794,10 @@ namespace RhinoInside.Revit.Convert.Geometry
     static DB.Document IODocument => ioDocument.IsValid() ? ioDocument :
       ioDocument = Revit.ActiveDBApplication.NewProjectDocument(DB.UnitSystem.Imperial);
 
-    static readonly string SwapFolder = Path.Combine(Path.GetTempPath(), AddIn.AddInCompany, AddIn.AddInName, $"V{AddIn.Version.Major}.{AddIn.Version.Minor}", "GeometrySwap");
-
-    static FileInfo NewSwapFileInfo(string extension = "tmp")
+    static FileInfo NewSwapFileInfo(string extension)
     {
-      Directory.CreateDirectory(SwapFolder);
-      var FileSAT = Path.Combine(SwapFolder, $"{Guid.NewGuid():N}.{extension}");
-      return new FileInfo(FileSAT);
+      var swapFile = Path.Combine(AddIn.SwapFolder, $"{Guid.NewGuid():N}.{extension}");
+      return new FileInfo(swapFile);
     }
 
     static bool ExportGeometry(string fileName, GeometryBase geometry, double factor)
