@@ -50,8 +50,8 @@ namespace RhinoInside.Revit.External.UI.Extensions
           (
             x =>
             {
-              using (var view = uiDocument.Document.GetElement<Autodesk.Revit.DB.View>(x.ViewId))
-                return view?.ViewType.IsGraphicalViewType() ?? false;
+              using (var view = uiDocument.Document.GetElement(x.ViewId) as Autodesk.Revit.DB.View)
+                return view.IsGraphicalView();
             }
           ).
           FirstOrDefault();
