@@ -552,7 +552,8 @@ namespace RhinoInside.Revit.GH.Components
     }
 
     #region IGH_TrackingComponent
-    public TrackingMode TrackingMode { get; set; } = TrackingMode.Reconstruct;
+    TrackingMode IGH_TrackingComponent.TrackingMode => TrackingMode;
+    internal TrackingMode TrackingMode { get; set; } = TrackingMode.Reconstruct;
     #endregion
 
     #region IO

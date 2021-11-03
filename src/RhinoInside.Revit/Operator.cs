@@ -2,7 +2,7 @@ using System;
 
 namespace RhinoInside.Revit
 {
-  public static class Operator
+  internal static class Operator
   {
     public enum CompareMethod
     {

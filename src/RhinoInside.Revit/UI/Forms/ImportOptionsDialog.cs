@@ -57,7 +57,7 @@ namespace RhinoInside.Revit.UI
 
       for (int i = 0; i < 10; ++i)
       {
-        var fileName = AddinOptions.Current.CustomOptions.Get(ImportOptions, $"FileNameMRU{i}");
+        var fileName = AddInOptions.Current.CustomOptions.Get(ImportOptions, $"FileNameMRU{i}");
         if (File.Exists(fileName))
           fileSelector.Items.Add(Path.GetFileName(fileName), fileName);
       }
@@ -380,10 +380,10 @@ namespace RhinoInside.Revit.UI
       for (int i = 0; i < 10; ++i)
       {
         var fileName = i < fileSelector.Items.Count ? fileSelector.Items[i].Key : default;
-        AddinOptions.Current.CustomOptions.Set(ImportOptions, $"FileNameMRU{i}", fileName);
+        AddInOptions.Current.CustomOptions.Set(ImportOptions, $"FileNameMRU{i}", fileName);
       }
 
-      AddinOptions.Save();
+      AddInOptions.Save();
       Close(DialogResult.Ok);
     }
   }

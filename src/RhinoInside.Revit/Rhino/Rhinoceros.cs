@@ -23,25 +23,25 @@ namespace RhinoInside
 {
   #region Guest
   [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
-  public class GuestPlugInIdAttribute : Attribute
+  internal class GuestPlugInIdAttribute : Attribute
   {
     public readonly Guid PlugInId;
     public GuestPlugInIdAttribute(string plugInId) => PlugInId = Guid.Parse(plugInId);
   }
 
-  public class CheckInArgs : EventArgs
+  internal class CheckInArgs : EventArgs
   {
     public string Message { get; set; } = string.Empty;
     public bool ShowMessage { get; set; } = true;
   }
 
-  public class CheckOutArgs : EventArgs
+  internal class CheckOutArgs : EventArgs
   {
     public string Message { get; set; } = string.Empty;
     public bool ShowMessage { get; set; } = true;
   }
 
-  public enum GuestResult
+  internal enum GuestResult
   {
     Failed = int.MinValue,
     Cancelled = int.MinValue + 1,
@@ -49,7 +49,7 @@ namespace RhinoInside
     Succeeded = 1
   }
 
-  public interface IGuest
+  internal interface IGuest
   {
     string Name { get; }
 
@@ -94,12 +94,12 @@ namespace RhinoInside.Revit
       {
         var args = new List<string>();
 
-        if (Settings.AddinOptions.Session.IsolateSettings)
+        if (Settings.AddInOptions.Session.IsolateSettings)
         {
           args.Add($"/scheme={SchemeName}");
         }
 
-        if (Settings.AddinOptions.Session.UseHostLanguage)
+        if (Settings.AddInOptions.Session.UseHostLanguage)
         {
           args.Add($"/language={AddIn.Host.Services.Language.ToLCID()}");
         }
@@ -113,7 +113,7 @@ namespace RhinoInside.Revit
           args.Add("/stopwatch");
         }
 
-        var hostWnd = Settings.AddinOptions.Session.KeepUIOnTop ?
+        var hostWnd = Settings.AddInOptions.Session.KeepUIOnTop ?
           hostMainWindow.Handle : IntPtr.Zero;
 
         core = new RhinoCore(args.ToArray(), WindowStyle.Hidden, hostWnd);
@@ -637,7 +637,7 @@ namespace RhinoInside.Revit
     public static void InvokeInHostContext(Action action) => core.InvokeInHostContext(action);
     /*internal*/ public static T InvokeInHostContext<T>(Func<T> func) => core.InvokeInHostContext(func);
 
-    public static bool Exposed
+    internal static bool Exposed
     {
       get => MainWindow.Visible && MainWindow.WindowStyle != ProcessWindowStyle.Minimized;
       set
@@ -743,7 +743,7 @@ namespace RhinoInside.Revit
       RhinoApp.RunScript(script, false);
     }
 
-    public static Result RunCommandAbout()
+    internal static Result RunCommandAbout()
     {
       var docSerial = RhinoDoc.ActiveDoc.RuntimeSerialNumber;
       var result = RhinoApp.RunScript("!_About", false) ? Result.Succeeded : Result.Failed;
@@ -757,12 +757,12 @@ namespace RhinoInside.Revit
       return Result.Cancelled;
     }
 
-    public static Result RunCommandOptions()
+    internal static Result RunCommandOptions()
     {
       return RhinoApp.RunScript("!_Options", false) ? Result.Succeeded : Result.Failed;
     }
 
-    public static Result RunCommandPackageManager()
+    internal static Result RunCommandPackageManager()
     {
       return RhinoApp.RunScript("!_PackageManager", false) ? Result.Succeeded : Result.Failed;
     }
@@ -803,7 +803,7 @@ namespace RhinoInside.Revit
       return default;
     }
 
-    public static async void RunCommandOpenViewportAsync
+    internal static async void RunCommandOpenViewportAsync
     (
       Rhino.DocObjects.ViewportInfo vport,
       Rhino.DocObjects.ConstructionPlane cplane

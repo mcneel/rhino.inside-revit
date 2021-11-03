@@ -195,8 +195,8 @@ namespace RhinoInside.Revit
 
         // Check For Updates
         {
-          AddinOptions.UpdateChannelChanged += (sender, args) => CheckForUpdates();
-          if (AddinOptions.Current.CheckForUpdatesOnStartup) CheckForUpdates();
+          AddInOptions.UpdateChannelChanged += (sender, args) => CheckForUpdates();
+          if (AddInOptions.Current.CheckForUpdatesOnStartup) CheckForUpdates();
         }
 
         return Result.Succeeded;
@@ -207,7 +207,7 @@ namespace RhinoInside.Revit
     {
       Host = new UIApplication(app);
 
-      if (StartupMode < AddInStartupMode.AtStartup && !AddinOptions.Session.LoadOnStartup)
+      if (StartupMode < AddInStartupMode.AtStartup && !AddInOptions.Session.LoadOnStartup)
         return;
 
       if (UI.CommandStart.Start() == Result.Succeeded)
@@ -359,14 +359,14 @@ namespace RhinoInside.Revit
 
     static async void CheckForUpdates()
     {
-      var releaseInfo = await AddinUpdater.GetReleaseInfoAsync();
+      var releaseInfo = await AddInUpdater.GetReleaseInfoAsync();
 
       // if release info is received, and
       // if current version on the active update channel is newer
       if (releaseInfo is ReleaseInfo && releaseInfo.Version > Version)
       {
         // ask UI to notify user of updates
-        if (!AddinOptions.Session.CompactTab)
+        if (!AddInOptions.Session.CompactTab)
           UI.CommandStart.NotifyUpdateAvailable(releaseInfo);
 
         UI.CommandAddinOptions.NotifyUpdateAvailable(releaseInfo);

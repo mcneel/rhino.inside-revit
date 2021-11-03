@@ -1,13 +1,10 @@
 using System;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Windows.Input;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
-using Microsoft.Win32;
-using RhinoInside.Revit.External.UI.Extensions;
+using RhinoInside.Revit.Settings;
 using DB = Autodesk.Revit.DB;
 using UIX = RhinoInside.Revit.External.UI;
 
@@ -23,7 +20,7 @@ namespace RhinoInside.Revit.UI
 
     // determine which RIR icon to use
     public static string CommandIcon =>
-      AddinUpdater.ActiveChannel is null ? "RIR-logo.png" :  (AddinUpdater.ActiveChannel.IsStable ? "RIR-logo.png" : "RIR-WIP-logo.png");
+      AddInUpdater.ActiveChannel is null ? "RIR-logo.png" :  (AddInUpdater.ActiveChannel.IsStable ? "RIR-logo.png" : "RIR-WIP-logo.png");
 
     /// <summary>
     /// Initialize the Ribbon tab and first panel
@@ -36,7 +33,7 @@ namespace RhinoInside.Revit.UI
       // Add the rest of the UI.
       // They will all be 'unavailable' (set by the Availability type) since
       // RiR is not loaded yet. This allows keyboard shortcuts to be assigned.
-      if (!Settings.AddinOptions.Session.CompactTab)
+      if (!AddInOptions.Session.CompactTab)
       {
         AddIn.Host.ActivateRibbonTab(AddIn.AddInName);
 
@@ -115,7 +112,7 @@ namespace RhinoInside.Revit.UI
           button.LongDescription = $"Use CTRL key to open a Rhino model";
           button.ShowText(false);
 
-          if (Settings.AddinOptions.Session.CompactTab)
+          if (AddInOptions.Session.CompactTab)
           {
             AddIn.Host.CreateRibbonTab(AddIn.AddInName);
 
@@ -164,17 +161,17 @@ namespace RhinoInside.Revit.UI
 
           if (AddIn.CurrentStatus >= AddIn.Status.Available && AddIn.StartupMode != AddInStartupMode.Disabled)
           {
-            if (Settings.KeyboardShortcuts.RegisterDefaultShortcut(tabName, ribbonPanel.Name, typeof(CommandStart).Name, CommandName, "R#Ctrl+R"))
+            if (KeyboardShortcuts.RegisterDefaultShortcut(tabName, ribbonPanel.Name, typeof(CommandStart).Name, CommandName, "R#Ctrl+R"))
               External.ActivationGate.Exit += ShowShortcutHelp;
           }
         }
 
         // add listener for ui compact changes
-        Settings.AddinOptions.CompactRibbonChanged += AddinOptions_CompactRibbonChanged;
-        Settings.AddinOptions.UpdateChannelChanged += AddinOptions_UpdateChannelChanged;
+        AddInOptions.CompactRibbonChanged += AddinOptions_CompactRibbonChanged;
+        AddInOptions.UpdateChannelChanged += AddinOptions_UpdateChannelChanged;
       }
 
-      if (Settings.AddinOptions.Session.CompactTab)
+      if (AddInOptions.Session.CompactTab)
       {
         ribbonPanel = uiCtrlApp.CreateRibbonPanel(AddIn.AddInName);
 
@@ -202,7 +199,7 @@ namespace RhinoInside.Revit.UI
       CommandForums.CreateUI(ribbonPanel);
       CommandHelpLinks.CreateUI(ribbonPanel);
 
-      if (!Settings.AddinOptions.Session.CompactTab)
+      if (!AddInOptions.Session.CompactTab)
       {
         ribbonPanel.AddSeparator();
         CommandAddinOptions.CreateUI(ribbonPanel);
@@ -295,7 +292,7 @@ namespace RhinoInside.Revit.UI
     static void UpdateRibbonCompact()
     {
       // collapse panel if in compact mode
-      if (Settings.AddinOptions.Current.CompactRibbon)
+      if (AddInOptions.Current.CompactRibbon)
       {
         rhinoPanel?.Collapse(AddIn.AddInName);
         grasshopperPanel?.Collapse(AddIn.AddInName);
@@ -319,7 +316,7 @@ namespace RhinoInside.Revit.UI
     public static void NotifyUpdateAvailable(ReleaseInfo releaseInfo)
     {
       // button gets deactivated if options are readonly
-      if (!Settings.AddinOptions.IsReadOnly)
+      if (!AddInOptions.IsReadOnly)
       {
         if (RestoreButton(CommandName) is PushButton button)
         {

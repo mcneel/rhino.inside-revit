@@ -45,7 +45,7 @@ namespace RhinoInside.Revit.UI
         }
 
       // select the previously selected category if any
-      if (AddinOptions.Current.CustomOptions.Get(OPTROOT, "LastSelectedCategory") is string lastCategoryName)
+      if (AddInOptions.Current.CustomOptions.Get(OPTROOT, "LastSelectedCategory") is string lastCategoryName)
         if (_categorySelector.Items.Select(x => x.Key).Contains(lastCategoryName))
           _categorySelector.SelectedKey = lastCategoryName;
 
@@ -63,7 +63,7 @@ namespace RhinoInside.Revit.UI
       }
 
       // select the previously selected workset if any
-      if (AddinOptions.Current.CustomOptions.Get(OPTROOT, "LastSelectedWorkset") is string lastWorksetName)
+      if (AddInOptions.Current.CustomOptions.Get(OPTROOT, "LastSelectedWorkset") is string lastWorksetName)
         if (_worksetSelector.Items.Select(x => x.Key).Contains(lastWorksetName))
           _worksetSelector.SelectedKey = lastWorksetName;
 
@@ -102,7 +102,7 @@ namespace RhinoInside.Revit.UI
       {
         if (category.Name != _categorySelector.SelectedKey) continue;
 
-        AddinOptions.Current.CustomOptions.Set(OPTROOT, "LastSelectedCategory", category.Name);
+        AddInOptions.Current.CustomOptions.Set(OPTROOT, "LastSelectedCategory", category.Name);
         SelectedCategory = category.Id;
       }
 
@@ -113,12 +113,12 @@ namespace RhinoInside.Revit.UI
         {
           if (workset.Name != _worksetSelector.SelectedKey) continue;
 
-          AddinOptions.Current.CustomOptions.Set(OPTROOT, "LastSelectedWorkset", workset.Name);
+          AddInOptions.Current.CustomOptions.Set(OPTROOT, "LastSelectedWorkset", workset.Name);
           SelectedWorkset = workset.Id;
         }
       }
 
-      AddinOptions.Save();
+      AddInOptions.Save();
       Close(DialogResult.Ok);
     }
   }

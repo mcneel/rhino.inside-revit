@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.Convert.Geometry
   public static class GeometryDecoder
   {
     #region Context
-    public sealed class Context : State<Context>
+    internal sealed class Context : State<Context>
     {
       public DB.Element Element = default;
       public DB.Visibility Visibility = DB.Visibility.Invisible;

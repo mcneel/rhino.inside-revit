@@ -425,7 +425,7 @@ namespace RhinoInside.Revit.GH.Components.Element
             }
           }
 
-          throw new RhinoInside.Revit.Exceptions.CancelException($"{message} {{{element.Id.IntegerValue}}}");
+          throw new Exceptions.RuntimeArgumentException("Value", $"{message} {{{element.Id.IntegerValue}}}");
         }
       }
 

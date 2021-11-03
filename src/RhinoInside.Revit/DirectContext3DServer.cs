@@ -13,7 +13,7 @@ using RhinoInside.Revit.Convert.Geometry.Raw;
 
 namespace RhinoInside.Revit
 {
-  public abstract class DirectContext3DServer : DB3D.IDirectContext3DServer
+  internal abstract class DirectContext3DServer : DB3D.IDirectContext3DServer
   {
     #region IExternalServer
     public abstract string GetDescription();

@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH.Kernel
   /// Do not implement this interface from scratch, derive from <see cref="RhinoInside.Revit.GH.Types.ElementIdParam"/> instead.
   /// </remarks>
   /// <seealso cref="RhinoInside.Revit.GH.Types.ElementIdParam"/>
-  public interface IGH_ElementIdParam : IGH_Param
+  internal interface IGH_ElementIdParam : IGH_Param
   {
     bool NeedsToBeExpired
     (
@@ -29,7 +29,7 @@ namespace RhinoInside.Revit.GH.Kernel
   /// Do not implement this interface from scratch, derive from <see cref="RhinoInside.Revit.GH.Components.Component"/> instead.
   /// </remarks>
   /// <seealso cref="RhinoInside.Revit.GH.Components.Component"/>
-  public interface IGH_ElementIdComponent : IGH_Component
+  internal interface IGH_ElementIdComponent : IGH_Component
   {
     bool NeedsToBeExpired
     (

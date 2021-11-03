@@ -1,16 +1,14 @@
 using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
-using System.IO;
-using System.Net;
-
 using RhinoInside.Revit.Settings;
 
-namespace RhinoInside.Revit
+namespace RhinoInside.Revit.Settings
 {
   public class ReleaseVersion : IXmlSerializable
   {
@@ -55,10 +53,10 @@ namespace RhinoInside.Revit
     [XmlElement("sha256")]
     public string Signature { get; set; }
 
-    internal AddinUpdateChannel Source { get; set; }
+    internal AddInUpdateChannel Source { get; set; }
   }
 
-  internal class AddinUpdateChannel
+  internal class AddInUpdateChannel
   {
     public Guid Id { get; set; }
     public string Name { get; set; }
@@ -74,7 +72,7 @@ namespace RhinoInside.Revit
       try
       {
         var xml = new XmlSerializer(typeof(ReleaseInfo));
-        string releaseInfo = new WebClient().DownloadString(this.Url);
+        string releaseInfo = new WebClient().DownloadString(Url);
         using (var reader = new StringReader(releaseInfo))
         {
           var rinfo = (ReleaseInfo) xml.Deserialize(reader);
@@ -82,7 +80,7 @@ namespace RhinoInside.Revit
           return rinfo;
         }
       }
-      catch (Exception)
+      catch
       {
         // TODO: log error message for debug
         return null;
@@ -90,9 +88,9 @@ namespace RhinoInside.Revit
     }
   }
 
-  internal static class AddinUpdater
+  internal static class AddInUpdater
   {
-    public static readonly AddinUpdateChannel DefaultChannel = new AddinUpdateChannel
+    public static readonly AddInUpdateChannel DefaultChannel = new AddInUpdateChannel
     {
       Id = new Guid("0b10351c-25e3-4680-9135-6b86cd27bcda"),
       Name = "Public Releases (Official)",
@@ -105,14 +103,14 @@ namespace RhinoInside.Revit
 
     // Note:
     // - It is expected that this list does not include any channels that do
-    //   not belong to the major
-    //   version of this addon. Any addon should only know about its own channels
+    //   not belong to the major version of this addon.
+    //   Any addon should only know about its own channels
     //   e.g. No 2.0/ channel on an addon with major version 1.0
     // - Order is important. Top to bottom from most public to least public
-    public static readonly AddinUpdateChannel[] Channels = new AddinUpdateChannel[]
+    public static readonly AddInUpdateChannel[] Channels = new AddInUpdateChannel[]
     {
       DefaultChannel,
-      new AddinUpdateChannel
+      new AddInUpdateChannel
       {
         Id =             new Guid("c63def46-e63d-41e3-8f82-9b5ee1d88251"),
         Name =           "Release Candidates (Pre-release Bug Fixes)",
@@ -121,7 +119,7 @@ namespace RhinoInside.Revit
         IconResource =   "RhinoInside.Revit.Resources.ChannelRC-icon.png",
         Url =            $@"https://files.mcneel.com/rhino.inside/revit/update/{AddIn.Version.Major}.x/rc.xml"
       },
-      new AddinUpdateChannel
+      new AddInUpdateChannel
       {
         Id =             new Guid("7fc1e535-c7cd-47d8-a969-e01435bacd65"),
         Name =           "Daily Builds (Work in Progress)",
@@ -132,11 +130,11 @@ namespace RhinoInside.Revit
       }
     };
 
-    public static AddinUpdateChannel ActiveChannel
+    public static AddInUpdateChannel ActiveChannel
     {
       get
       {
-        if (AddinOptions.Current.UpdateChannel is string activeChannelId)
+        if (AddInOptions.Current.UpdateChannel is string activeChannelId)
         {
           var channelGuid = new Guid(activeChannelId);
           return Channels.Where(x => x.Id == channelGuid).FirstOrDefault();
@@ -149,7 +147,7 @@ namespace RhinoInside.Revit
     public static async Task<ReleaseInfo> GetReleaseInfoAsync()
         => await Task.Run(() => ActiveChannel?.GetLatestRelease());
 
-    public static async Task<ReleaseInfo> GetReleaseInfoAsync(AddinUpdateChannel channel)
+    public static async Task<ReleaseInfo> GetReleaseInfoAsync(AddInUpdateChannel channel)
         => await Task.Run(() => channel?.GetLatestRelease());
   }
 }

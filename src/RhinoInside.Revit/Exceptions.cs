@@ -1,6 +1,6 @@
 using System;
 
-namespace RhinoInside.Revit.Exceptions
+namespace RhinoInside.Revit.External.Exceptions
 {
   /// <summary>
   /// The exception that is thrown when a non-fatal error occurs.

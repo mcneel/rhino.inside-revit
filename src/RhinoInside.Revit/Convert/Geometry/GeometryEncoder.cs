@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     public delegate void RuntimeMessage(int severity, string message, GeometryBase geometry);
 
     [DebuggerTypeProxy(typeof(DebugView))]
-    public sealed class Context : State<Context>
+    internal sealed class Context : State<Context>
     {
       public static Context Push(DB.Document document)
       {

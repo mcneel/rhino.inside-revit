@@ -267,20 +267,9 @@ namespace RhinoInside.Revit.GH.Components
       }
       catch (Exceptions.RuntimeErrorException e)
       {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
-      }
-      catch (RhinoInside.Revit.Exceptions.CancelException e)
-      {
-        // This will abort component solution
-        unhandledException = e;
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
-      }
-      catch (RhinoInside.Revit.Exceptions.FailException e)
-      {
-        // This will abort entire solution
-        OnPingDocument()?.RequestAbortSolution();
+        if (AbortOnUnhandledException)
+          unhandledException = e;
 
-        unhandledException = e;
         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
       }
       catch (Autodesk.Revit.Exceptions.ArgumentOutOfRangeException e)

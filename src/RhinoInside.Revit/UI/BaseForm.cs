@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.UI
   /// Rhino UI framework base form (non-modal) type for this addon
   /// Current implementation is centered on Revit window and uses the generic Rhino icon
   /// </summary>
-  public abstract class BaseForm : Form
+  internal abstract class BaseForm : Form
   {
     private Autodesk.Revit.UI.UIApplication _uiApp = null;
 

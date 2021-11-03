@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.Settings
   // Easy static access to addin options
   [Serializable]
   [XmlRoot("Options")]
-  public class AddinOptions
+  public class AddInOptions
   {
     #region Rhino
     [XmlElement]
@@ -126,7 +126,7 @@ namespace RhinoInside.Revit.Settings
         UpdateChannelChanged?.Invoke(this, null);
       }
     }
-    private string _updateChannel = AddinUpdater.DefaultChannel.Id.ToString();
+    private string _updateChannel = AddInUpdater.DefaultChannel.Id.ToString();
     public static event EventHandler<EventArgs> UpdateChannelChanged;
     #endregion
 
@@ -183,22 +183,22 @@ namespace RhinoInside.Revit.Settings
       Current != null && usingAdminOptions;
 
     // de/serializer
-    private static XmlSerializer _xml = new XmlSerializer(typeof(AddinOptions), new Type[] { typeof(AddinCustomOptions) });
+    private static XmlSerializer _xml = new XmlSerializer(typeof(AddInOptions), new Type[] { typeof(AddinCustomOptions) });
 
     // Singleton
     private static bool usingAdminOptions = false;
-    private static AddinOptions _sessionInstance = null;  // reflects changes at load time
-    private static AddinOptions _currentInstance = null;  // reflects latest changes
+    private static AddInOptions _sessionInstance = null;  // reflects changes at load time
+    private static AddInOptions _currentInstance = null;  // reflects latest changes
     private static readonly object padlock = new object();
 
-    public AddinOptions Clone()
+    public AddInOptions Clone()
     {
-      var clone = (AddinOptions) MemberwiseClone();
+      var clone = (AddInOptions) MemberwiseClone();
       clone.CustomOptions = CustomOptions.Clone();
       return clone;
     }
 
-    public static AddinOptions Session
+    public static AddInOptions Session
     {
       get
       {
@@ -208,7 +208,7 @@ namespace RhinoInside.Revit.Settings
       }
     }
 
-    public static AddinOptions Current
+    public static AddInOptions Current
     {
       get
       {
@@ -229,7 +229,7 @@ namespace RhinoInside.Revit.Settings
               {
                 // read settings
                 using (var optsFile = File.OpenRead(UserOptionsFilePath))
-                  _currentInstance = (AddinOptions) _xml.Deserialize(optsFile);
+                  _currentInstance = (AddInOptions) _xml.Deserialize(optsFile);
               }
               catch (Exception)
               {
@@ -239,7 +239,7 @@ namespace RhinoInside.Revit.Settings
 
             // otherwise use default
             if (_currentInstance is null)
-              _currentInstance = new AddinOptions();
+              _currentInstance = new AddInOptions();
           }
 
           return _currentInstance;

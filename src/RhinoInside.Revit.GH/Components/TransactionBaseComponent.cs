@@ -703,11 +703,6 @@ namespace RhinoInside.Revit.GH.Components
         if(!graphical || pinned)
           action(doc, ref element);
       }
-      catch (RhinoInside.Revit.Exceptions.CancelException e)
-      {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
-        element = null;
-      }
       catch (RuntimeArgumentNullException)
       {
         // Grasshopper components use to send a Null when

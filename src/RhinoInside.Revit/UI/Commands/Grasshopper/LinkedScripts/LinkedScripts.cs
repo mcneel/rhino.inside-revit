@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.UI
       // listed for changes in installed packages
       Rhino.Commands.Command.EndCommand += PackageManagerCommand_EndCommand;
       // listen for changes to user-script paths in options
-      AddinOptions.ScriptLocationsChanged += AddinOptions_ScriptLocationsChanged;
+      AddInOptions.ScriptLocationsChanged += AddinOptions_ScriptLocationsChanged;
 
       UpdateScriptPkgUI(ribbon);
     }
@@ -114,10 +114,10 @@ namespace RhinoInside.Revit.UI
     {
       // determine which packages need to be loaded
       var curState = new HashSet<ScriptPkg>();
-      if (AddinOptions.Current.LoadInstalledScriptPackages)
+      if (AddInOptions.Current.LoadInstalledScriptPackages)
         curState.UnionWith(CommandGrasshopperPackageManager.GetInstalledScriptPackages());
 
-      if (AddinOptions.Current.LoadUserScriptPackages)
+      if (AddInOptions.Current.LoadUserScriptPackages)
         curState.UnionWith(ScriptPkg.GetUserScriptPackages());
 
       // create a combined set of both last and current states to iterate over

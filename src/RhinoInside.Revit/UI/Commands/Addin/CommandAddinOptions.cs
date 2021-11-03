@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.UI
         StoreButton(CommandName, pushButton);
 
         // disable the button if options are readonly
-        pushButton.Enabled = !AddinOptions.IsReadOnly && AssemblyResolver.References.ContainsKey("Eto");
+        pushButton.Enabled = !AddInOptions.IsReadOnly && AssemblyResolver.References.ContainsKey("Eto");
 
         if (AddIn.StartupMode == AddInStartupMode.Disabled)
         {
@@ -43,7 +43,7 @@ namespace RhinoInside.Revit.UI
     public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
     {
       // try opening options window
-      if (!AddinOptions.IsReadOnly)
+      if (!AddInOptions.IsReadOnly)
       {
         var optWindow = new AddInOptionsDialog(data.Application);
         if (LatestReleaseInfo != null)
@@ -65,7 +65,7 @@ namespace RhinoInside.Revit.UI
     public static void NotifyUpdateAvailable(ReleaseInfo releaseInfo)
     {
       // button gets deactivated if options are readonly
-      if (!AddinOptions.IsReadOnly)
+      if (!AddInOptions.IsReadOnly)
       {
         if (RestoreButton(CommandName) is PushButton button)
         {

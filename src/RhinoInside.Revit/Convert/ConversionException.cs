@@ -5,7 +5,7 @@ namespace RhinoInside.Revit.Convert
   /// <summary>
   /// The exception that is thrown when a geometry conversion error occurs.
   /// </summary>
-  class ConversionException : Exceptions.CancelException
+  class ConversionException : Exception
   {
     public ConversionException() { }
     public ConversionException(string message) : base(message) { }

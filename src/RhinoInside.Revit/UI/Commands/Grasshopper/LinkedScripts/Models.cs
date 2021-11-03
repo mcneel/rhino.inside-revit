@@ -161,7 +161,7 @@ namespace RhinoInside.Revit.UI
     public static List<ScriptPkg> GetUserScriptPackages()
     {
       var pkgs = new List<ScriptPkg>();
-      foreach (var location in AddinOptions.Current.ScriptLocations)
+      foreach (var location in AddInOptions.Current.ScriptLocations)
         if (Directory.Exists(location))
           pkgs.Add(
             new ScriptPkg { Name = Path.GetFileName(location), Location = location }

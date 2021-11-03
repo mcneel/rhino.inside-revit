@@ -68,7 +68,7 @@ namespace RhinoInside.Revit.UI
       UpdatesPanel.ApplyChanges();
       ScriptsPanel.ApplyChanges();
 
-      AddinOptions.Save();
+      AddInOptions.Save();
       Close(DialogResult.Ok);
     }
   }
@@ -86,12 +86,12 @@ namespace RhinoInside.Revit.UI
 
     void InitLayout()
     {
-      _loadOnStartup.Checked = AddinOptions.Current.LoadOnStartup;
-      _isolateSettings.Checked = AddinOptions.Current.IsolateSettings;
-      _useHostLanguage.Checked = AddinOptions.Current.UseHostLanguage;
-      _keepUIOnTop.Checked = AddinOptions.Current.KeepUIOnTop;
-      _compactTab.Checked = AddinOptions.Current.CompactTab;
-      _compactRibbon.Checked = AddinOptions.Current.CompactRibbon;
+      _loadOnStartup.Checked = AddInOptions.Current.LoadOnStartup;
+      _isolateSettings.Checked = AddInOptions.Current.IsolateSettings;
+      _useHostLanguage.Checked = AddInOptions.Current.UseHostLanguage;
+      _keepUIOnTop.Checked = AddInOptions.Current.KeepUIOnTop;
+      _compactTab.Checked = AddInOptions.Current.CompactTab;
+      _compactRibbon.Checked = AddInOptions.Current.CompactRibbon;
 
       Content = new TableLayout
       {
@@ -137,22 +137,22 @@ namespace RhinoInside.Revit.UI
     internal void ApplyChanges()
     {
       if (_loadOnStartup.Checked.HasValue)
-        AddinOptions.Current.LoadOnStartup = _loadOnStartup.Checked.Value;
+        AddInOptions.Current.LoadOnStartup = _loadOnStartup.Checked.Value;
 
       if (_compactTab.Checked.HasValue)
-        AddinOptions.Current.CompactTab = _compactTab.Checked.Value;
+        AddInOptions.Current.CompactTab = _compactTab.Checked.Value;
 
       if (_compactRibbon.Checked.HasValue)
-        AddinOptions.Current.CompactRibbon = _compactRibbon.Checked.Value;
+        AddInOptions.Current.CompactRibbon = _compactRibbon.Checked.Value;
 
       if (_isolateSettings.Checked.HasValue)
-        AddinOptions.Current.IsolateSettings = _isolateSettings.Checked.Value;
+        AddInOptions.Current.IsolateSettings = _isolateSettings.Checked.Value;
 
       if (_useHostLanguage.Checked.HasValue)
-        AddinOptions.Current.UseHostLanguage = _useHostLanguage.Checked.Value;
+        AddInOptions.Current.UseHostLanguage = _useHostLanguage.Checked.Value;
 
       if (_keepUIOnTop.Checked.HasValue)
-        AddinOptions.Current.KeepUIOnTop = _keepUIOnTop.Checked.Value;
+        AddInOptions.Current.KeepUIOnTop = _keepUIOnTop.Checked.Value;
     }
   }
 
@@ -183,12 +183,12 @@ namespace RhinoInside.Revit.UI
     void InitLayout()
     {
       // setup update options
-      _checkUpdatesOnStartup.Checked = AddinOptions.Current.CheckForUpdatesOnStartup;
+      _checkUpdatesOnStartup.Checked = AddInOptions.Current.CheckForUpdatesOnStartup;
 
       // setup update channel selector
       _updateChannelSelector.SelectedIndexChanged += UpdateChannelSelector_SelectedIndexChanged;
       var execAssm = Assembly.GetExecutingAssembly();
-      foreach (AddinUpdateChannel channel in AddinUpdater.Channels)
+      foreach (AddInUpdateChannel channel in AddInUpdater.Channels)
       {
         _updateChannelSelector.Items.Add(
           new ImageListItem
@@ -199,14 +199,14 @@ namespace RhinoInside.Revit.UI
         );
       }
 
-      if (AddinOptions.Current.UpdateChannel is string activeChannelId)
+      if (AddInOptions.Current.UpdateChannel is string activeChannelId)
       {
         var channelGuid = new Guid(activeChannelId);
-        var updateChannel = AddinUpdater.Channels.Where(x => x.Id == channelGuid).First();
-        _updateChannelSelector.SelectedIndex = Array.IndexOf(AddinUpdater.Channels, updateChannel);
+        var updateChannel = AddInUpdater.Channels.Where(x => x.Id == channelGuid).First();
+        _updateChannelSelector.SelectedIndex = Array.IndexOf(AddInUpdater.Channels, updateChannel);
       }
       else
-        _updateChannelSelector.SelectedIndex = Array.IndexOf(AddinUpdater.Channels, AddinUpdater.DefaultChannel);
+        _updateChannelSelector.SelectedIndex = Array.IndexOf(AddInUpdater.Channels, AddInUpdater.DefaultChannel);
 
       // setup update options groupbox
       var spacing = new Size(5, 10);
@@ -269,18 +269,18 @@ namespace RhinoInside.Revit.UI
     {
       if (sender is DropDown channelSelector)
       {
-        var updateChannel = AddinUpdater.Channels[channelSelector.SelectedIndex];
+        var updateChannel = AddInUpdater.Channels[channelSelector.SelectedIndex];
         _channelDescription.Text = updateChannel.Description;
         _channelDescription.Visible = true;
 
         // build the table for other channel information
         UpdatePreviousChannelsInfo(
-          AddinUpdater.Channels.Where(c => c.Id != updateChannel.Id).ToList()
+          AddInUpdater.Channels.Where(c => c.Id != updateChannel.Id).ToList()
           );
       }
     }
 
-    private async void UpdatePreviousChannelsInfo(List<AddinUpdateChannel> prevChannels)
+    private async void UpdatePreviousChannelsInfo(List<AddInUpdateChannel> prevChannels)
     {
       if (prevChannels.Count > 0)
       {
@@ -288,9 +288,9 @@ namespace RhinoInside.Revit.UI
 
         var infoTable = new TableLayout();
 
-        foreach (AddinUpdateChannel channel in prevChannels)
+        foreach (AddInUpdateChannel channel in prevChannels)
         {
-          var releaseInfo = await AddinUpdater.GetReleaseInfoAsync(channel);
+          var releaseInfo = await AddInUpdater.GetReleaseInfoAsync(channel);
           if (releaseInfo is ReleaseInfo)
           {
             var downloadBtn = new LinkButton { Text = $"v{releaseInfo.Version}" };
@@ -394,10 +394,10 @@ namespace RhinoInside.Revit.UI
     {
       // update settings
       if (_checkUpdatesOnStartup.Checked.HasValue)
-        AddinOptions.Current.CheckForUpdatesOnStartup = _checkUpdatesOnStartup.Checked.Value;
+        AddInOptions.Current.CheckForUpdatesOnStartup = _checkUpdatesOnStartup.Checked.Value;
 
-      AddinOptions.Current.UpdateChannel =
-        AddinUpdater.Channels[_updateChannelSelector.SelectedIndex].Id.ToString();
+      AddInOptions.Current.UpdateChannel =
+        AddInUpdater.Channels[_updateChannelSelector.SelectedIndex].Id.ToString();
     }
   }
 
@@ -413,10 +413,10 @@ namespace RhinoInside.Revit.UI
 
     void InitLayout()
     {
-      _loadScriptsOnStartup.Checked = AddinOptions.Current.LoadUserScriptPackages;
-      _loadScriptPackagesOnStartup.Checked = AddinOptions.Current.LoadInstalledScriptPackages;
+      _loadScriptsOnStartup.Checked = AddInOptions.Current.LoadUserScriptPackages;
+      _loadScriptPackagesOnStartup.Checked = AddInOptions.Current.LoadInstalledScriptPackages;
 
-      foreach (var location in AddinOptions.Current.ScriptLocations)
+      foreach (var location in AddInOptions.Current.ScriptLocations)
         _scriptLocations.Items.Add(location);
       _scriptLocations.SelectedIndexChanged += ScriptLocations_SelectedIndexChanged;
 
@@ -494,15 +494,15 @@ namespace RhinoInside.Revit.UI
     internal void ApplyChanges()
     {
       if (_loadScriptsOnStartup.Checked.HasValue)
-        AddinOptions.Current.LoadUserScriptPackages = _loadScriptsOnStartup.Checked.Value;
+        AddInOptions.Current.LoadUserScriptPackages = _loadScriptsOnStartup.Checked.Value;
 
       if (_loadScriptPackagesOnStartup.Checked.HasValue)
-        AddinOptions.Current.LoadInstalledScriptPackages = _loadScriptPackagesOnStartup.Checked.Value;
+        AddInOptions.Current.LoadInstalledScriptPackages = _loadScriptPackagesOnStartup.Checked.Value;
 
       var scriptLocs = new HashSet<string>();
       foreach (var item in _scriptLocations.Items)
         scriptLocs.Add(item.Text);
-      AddinOptions.Current.ScriptLocations = scriptLocs;
+      AddInOptions.Current.ScriptLocations = scriptLocs;
     }
   }
 }

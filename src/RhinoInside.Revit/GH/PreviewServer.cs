@@ -16,7 +16,7 @@ using Grasshopper.GUI.Canvas;
 
 namespace RhinoInside.Revit.GH
 {
-  public class PreviewServer : DirectContext3DServer
+  internal class PreviewServer : DirectContext3DServer
   {
     static GH_Document ActiveDefinition => Instances.ActiveCanvas?.Document;
 

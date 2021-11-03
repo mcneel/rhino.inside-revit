@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH.ElementTracking
 {
   using DBXS = DB.ExtensibleStorage;
 
-  public enum TrackingMode
+  internal enum TrackingMode
   {
     /// <summary>
     /// Tracking is not applicable on this object.
@@ -52,7 +52,7 @@ namespace RhinoInside.Revit.GH.ElementTracking
     /// <remarks>
     /// Default value is <see cref="TrackingMode.NotApplicable"/>.
     /// </remarks>
-    TrackingMode TrackingMode { get; set; }
+    TrackingMode TrackingMode { get; }
   }
 
   internal interface IGH_TrackingParam

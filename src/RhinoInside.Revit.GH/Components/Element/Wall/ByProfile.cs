@@ -205,7 +205,7 @@ namespace RhinoInside.Revit.GH.Components
           if (properties is null)
           {
             AddGeometryRuntimeError(GH_RuntimeMessageLevel.Error, "Failed to compute Boundary Area", boundary);
-            throw new RhinoInside.Revit.Exceptions.CancelException();
+            throw new Exceptions.RuntimeErrorException();
           }
 
           if (properties.Area > maxArea)

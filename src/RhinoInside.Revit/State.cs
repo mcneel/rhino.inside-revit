@@ -1,12 +1,8 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RhinoInside
 {
-  public class State<T> : IDisposable where T : State<T>, new()
+  internal class State<T> : IDisposable where T : State<T>, new()
   {
     [ThreadStatic] static T root;
     [ThreadStatic] static T current;
