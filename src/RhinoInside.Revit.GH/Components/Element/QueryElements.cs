@@ -147,9 +147,9 @@ namespace RhinoInside.Revit.GH.Components
           WherePasses(filter.Value);
 
         var _Elements_ = Params.IndexOfOutputParam("Elements");
-        Params.TrySetDataList(DA, "Elements", () =>
-        {
-          try
+        if
+        (
+          Params.TrySetDataList(DA, "Elements", () =>
           {
             var elements = limit.HasValue ?
               elementCollector.Take(limit.Value) :
@@ -158,19 +158,19 @@ namespace RhinoInside.Revit.GH.Components
             return elements.
               Convert(Types.Element.FromElement).
               TakeWhileIsNotEscapeKeyDown(this);
-          }
-          finally
-          {
-            if (limit <= (Params.Output[_Elements_].VolatileData.get_Branch(DA.ParameterTargetPath(_Elements_))?.Count ?? 0))
-              AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"'{Params.Output[_Elements_].NickName}' output is limited to {limit.Value} elements.{Environment.NewLine}Increase or remove 'Limit' input parameter to retreive more elements.");
-          }
-        });
+          }) &&
+          limit <= (Params.Output[_Elements_].VolatileData.get_Branch(DA.ParameterTargetPath(_Elements_))?.Count ?? 0)
+        )
+        {
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"'{Params.Output[_Elements_].NickName}' output is limited to {limit.Value} elements.{Environment.NewLine}Increase or remove 'Limit' input parameter to retreive more elements.");
+        }
 
         Params.TrySetData
         (
           DA,
           "Count",
-          () => _Elements_ < 0 || limit.HasValue ?
+          () =>
+            _Elements_ < 0 || limit.HasValue ?
             elementCollector.GetElementCount() :
             Params.Output[_Elements_].VolatileData.get_Branch(DA.ParameterTargetPath(_Elements_)).Count
         );

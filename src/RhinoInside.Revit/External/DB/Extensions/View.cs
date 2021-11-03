@@ -29,6 +29,19 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
     /// <summary>
+    /// Checks if the provided <see cref="Autodesk.Revit.DB.View"/> represents a graphical view.
+    /// </summary>
+    /// <param name="view"></param>
+    /// <returns>true if <paramref name="view"/> is a graphical view.</returns>
+    public static bool IsGraphicalView(this View view)
+    {
+      if (view is null) return false;
+      if (view.IsTemplate) return false;
+
+      return IsGraphicalViewType(view.ViewType);
+    }
+
+    /// <summary>
     /// The bounds of the view in paper space (in pixels).
     /// </summary>
     /// <param name="view"></param>

@@ -678,7 +678,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static View GetActiveGraphicalView(this Document doc)
     {
       var active = doc.ActiveView;
-      if (active?.ViewType.IsGraphicalViewType() == true)
+      if (active.IsGraphicalView())
         return active;
 
       return Rhinoceros.InvokeInHostContext(() =>
@@ -691,7 +691,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           {
             var openViews = uiDocument.GetOpenUIViews().
                 Select(x => doc.GetElement(x.ViewId) as View).
-                Where(x => x.ViewType.IsGraphicalViewType());
+                Where(x => x.IsGraphicalView());
 
             activeView = openViews.FirstOrDefault();
           }

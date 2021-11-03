@@ -98,7 +98,7 @@ namespace RhinoInside.Revit.Convert.DocObjects
     {
       vport = default;
 
-      if (view?.ViewType.IsGraphicalViewType() != true)
+      if (!view.IsGraphicalView())
         return false;
 
       if (useUIView)
