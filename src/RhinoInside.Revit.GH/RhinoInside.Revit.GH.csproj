@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -380,6 +380,7 @@
     <Compile Include="Components\ParameterElement\ProjectParameter.cs" />
     <Compile Include="Components\ParameterElement\QueryParameters.cs" />
     <Compile Include="Components\ParameterElement\SharedParameters.cs" />
+    <Compile Include="Optional.cs" />
     <Compile Include="Parameters\AssemblyInstance.cs" />
     <Compile Include="Types\AssemblyInstance.cs" />
     <Compile Include="Types\Workset.cs" />

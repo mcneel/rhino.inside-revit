@@ -1,9 +1,8 @@
 using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
 
-namespace RhinoInside
+namespace RhinoInside.Revit.GH
 {
   public enum Optional { Missing };
 
