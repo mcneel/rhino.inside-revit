@@ -117,14 +117,20 @@ namespace RhinoInside.Revit.GH.Components
 
                     if (list.Count == 0)
                     {
-                      foreach (var dependent in element.GetDependentElements(new DB.ExclusionFilter(new DB.ElementId[] { element.Id })).Select(x => element.Document.GetElement(x)))
+                      using (var visibleInView = options.View is object ? new DB.VisibleInViewFilter(options.View.Document, options.View.Id) : default)
                       {
-                        if (dependent.get_BoundingBox(options.View) is DB.BoundingBoxXYZ)
+                        foreach (var dependent in element.GetDependentElements(new DB.ExclusionFilter(new DB.ElementId[] { element.Id })).Select(x => element.Document.GetElement(x)))
                         {
-                          using (var dependentGeometry = dependent?.GetGeometry(options))
+                          if (visibleInView?.PassesFilter(dependent) == false)
+                            continue;
+
+                          if (dependent.get_BoundingBox(options.View) is DB.BoundingBoxXYZ)
                           {
-                            if (dependentGeometry is object)
-                              list.AddRange(dependentGeometry.ToGeometryBaseMany().OfType<GeometryBase>());
+                            using (var dependentGeometry = dependent?.GetGeometry(options))
+                            {
+                              if (dependentGeometry is object)
+                                list.AddRange(dependentGeometry.ToGeometryBaseMany().OfType<GeometryBase>());
+                            }
                           }
                         }
                       }

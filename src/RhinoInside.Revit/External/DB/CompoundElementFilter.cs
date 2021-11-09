@@ -12,21 +12,10 @@ namespace RhinoInside.Revit.External.DB
     private static ElementFilter ElementIsElementTypeFilterInstance { get; } = new ElementIsElementTypeFilter(inverted: false);
     private static ElementFilter ElementIsNotElementTypeFilterInstance { get; } = new ElementIsElementTypeFilter(inverted: true);
     private static FilterNumericRuleEvaluator NumericEqualsEvaluator { get; } = new FilterNumericEquals();
-    private static ParameterValueProvider IdParamProvider { get; } = new ParameterValueProvider(new ElementId(BuiltInParameter.ID_PARAM));
     private static ParameterValueProvider SubCategoryParamProvider { get; } = new ParameterValueProvider(new ElementId(BuiltInParameter.FAMILY_ELEM_SUBCATEGORY));
     private static ParameterValueProvider FamilyNameParamProvider { get; } = new ParameterValueProvider(new ElementId(BuiltInParameter.ALL_MODEL_FAMILY_NAME));
     private static ParameterValueProvider TypeNameParamProvider { get; } = new ParameterValueProvider(new ElementId(BuiltInParameter.ALL_MODEL_TYPE_NAME));
     private static ParameterValueProvider ElemTypeParamProvider { get; } = new ParameterValueProvider(new ElementId(BuiltInParameter.ELEM_TYPE_PARAM));
-
-#if REVIT_2021
-    internal static ElementFilter ElementIdSetFilter(ICollection<ElementId> idsToInclude) =>
-     new ElementIdSetFilter(idsToInclude);
-#else
-    private static ElementFilter ElementIdSetFilter(ICollection<ElementId> idsToInclude) => Union
-    (
-      idsToInclude.ConvertAll(x => new ElementParameterFilter(new FilterElementIdRule(IdParamProvider, NumericEqualsEvaluator, x)))
-    );
-#endif
     #endregion
 
     #region Logical Filters
@@ -51,7 +40,7 @@ namespace RhinoInside.Revit.External.DB
     public static ElementFilter ExclusionFilter(ICollection<ElementId> ids, bool inverted = false) =>
       ids.Count == 0 ?
       (inverted ? Empty : Full) :
-      (inverted ? ElementIdSetFilter(ids) : new ExclusionFilter(ids));
+      (inverted ? (ElementFilter) new ElementIdSetFilter(ids) : (ElementFilter) new ExclusionFilter(ids));
     #endregion
 
     #region Generic Filters
@@ -296,3 +285,86 @@ namespace RhinoInside.Revit.External.DB
     #endregion
   }
 }
+
+#if !REVIT_2021
+namespace Autodesk.Revit.DB
+{
+  using RhinoInside.Revit.External.DB;
+  using RhinoInside.Revit.External.DB.Extensions;
+
+  abstract class ElementExternalFilter : IDisposable
+  {
+    public virtual bool IsValidObject => true;
+    public bool Inverted { get; protected set; }
+    public virtual void Dispose() { }
+
+    public abstract bool PassesFilter(Document document, ElementId id);
+    public abstract bool PassesFilter(Element element);
+  }
+
+  class ElementIdSetFilter : ElementExternalFilter
+  {
+    readonly HashSet<ElementId> IdsToInclude;
+    public ElementIdSetFilter(ICollection<ElementId> idsToInclude) => IdsToInclude = new HashSet<ElementId>(idsToInclude);
+    public ICollection<ElementId> GetIdsToInclude() => IdsToInclude;
+
+    public override bool PassesFilter(Document document, ElementId id) => IdsToInclude.Contains(id);
+    public override bool PassesFilter(Element element) => IdsToInclude.Contains(element.Id);
+
+    private static readonly FilterNumericRuleEvaluator NumericEqualsEvaluator = new FilterNumericEquals();
+    private static readonly ParameterValueProvider IdParamProvider = new ParameterValueProvider(new ElementId(BuiltInParameter.ID_PARAM));
+
+    public static implicit operator ElementFilter(ElementIdSetFilter filter) => CompoundElementFilter.Union
+    (
+      filter.IdsToInclude.ConvertAll(x => new ElementParameterFilter(new FilterElementIdRule(IdParamProvider, NumericEqualsEvaluator, x)))
+    );
+  }
+
+  class VisibleInViewFilter : ElementExternalFilter
+  {
+    readonly Document Document;
+    readonly ElementId ViewId;
+    public VisibleInViewFilter(Document document, ElementId viewId)
+    {
+      Document = document;
+      ViewId = viewId;
+    }
+
+    public VisibleInViewFilter(Document document, ElementId viewId, bool inverted) :
+      this(document, viewId)
+    {
+      Inverted = inverted;
+    }
+
+    public override bool PassesFilter(Document document, ElementId id)
+    {
+      if (!document.IsEquivalent(Document)) return false;
+
+      using (var collector = new FilteredElementCollector(Document, ViewId))
+      {
+        var visible = collector.WherePasses
+        (
+          new ElementIdSetFilter(new ElementId[] { id })
+        );
+
+        return (id == visible.FirstElementId()) != Inverted;
+      }
+    }
+
+    public override bool PassesFilter(Element element)
+    {
+      if (!element.Document.IsEquivalent(Document)) return false;
+
+      using (var collector = new FilteredElementCollector(Document, ViewId))
+      {
+        var visible = collector.WherePasses
+        (
+          new ElementIdSetFilter(new ElementId[] { element.Id })
+        );
+
+        return element.IsEquivalent(visible.FirstElement()) != Inverted;
+      }
+    }
+  }
+}
+#endif
