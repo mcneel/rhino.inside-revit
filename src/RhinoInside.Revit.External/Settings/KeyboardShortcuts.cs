@@ -141,7 +141,7 @@ namespace RhinoInside.Revit.Settings
         }
 
         if (shortcutUpdated)
-          SaveAs(shortcuts, Path.Combine(services.CurrentUsersDataFolderPath, "KeyboardShortcuts.xml"));
+          SaveAs(shortcuts, Path.Combine(services.GetCurrentUsersDataFolderPath(), "KeyboardShortcuts.xml"));
 
         return shortcutUpdated;
       }
