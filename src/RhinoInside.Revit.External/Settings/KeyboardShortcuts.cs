@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
 using Autodesk.Revit.ApplicationServices;
+using RhinoInside.Revit.External.ApplicationServices.Extensions;
 
 namespace RhinoInside.Revit.Settings
 {
@@ -83,7 +84,7 @@ namespace RhinoInside.Revit.Settings
     {
       commandId = $"CustomCtrl_%CustomCtrl_%{tabName}%{panelName}%{commandId}";
 
-      string keyboardShortcutsPath = Path.Combine(services.CurrentUsersDataFolderPath, "KeyboardShortcuts.xml");
+      string keyboardShortcutsPath = Path.Combine(services.GetCurrentUsersDataFolderPath(), "KeyboardShortcuts.xml");
       if (!File.Exists(keyboardShortcutsPath))
         keyboardShortcutsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Autodesk", $"RVT {services.VersionNumber}", "UserDataCache", "KeyboardShortcuts.xml");
 

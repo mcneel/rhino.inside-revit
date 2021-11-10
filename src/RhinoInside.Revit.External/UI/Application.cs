@@ -51,7 +51,11 @@ namespace RhinoInside.Revit.External.UI
       if (Instances.Count == 1)
       {
         uiControlledApplication = app;
+#if REVIT_2019
         HostMainWindow = new WindowHandle(app.MainWindowHandle);
+#else
+        HostMainWindow = new WindowHandle(System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle);
+#endif
       }
 
       var result = Result.Failed;
