@@ -52,7 +52,7 @@
       </Component>
 
       <Component Id="Addins.2018.RhinoInsideRevit.addin" Guid="{D49A455F-C51E-451B-B1B8-2AA62E6A9D1C}" Directory="APPLICATIONFOLDER2018">
-        <File Id="Addins.2018.RhinoInside.Revit.addin" Source="..\RhinoInside.Revit\Properties\RhinoInside.Revit.addin"/>
+        <File Id="Addins.2018.RhinoInside.Revit.addin" Source="..\RhinoInside.Revit.AddIn\Properties\RhinoInside.Revit.addin"/>
       </Component>
       
       <Component Id="Addins.2018.RhinoInsideRevit" Guid="{425DE5DB-2E76-4EAC-8CA9-F348965000F2}" Directory="INSTALLFOLDER2018">
@@ -77,7 +77,7 @@
       </Component>
 
       <Component Id="Addins.2019.RhinoInsideRevit.addin" Guid="{4C2C8AC5-3DD6-4B2C-B568-35BA015F8A66}" Directory="APPLICATIONFOLDER2019">
-        <File Id="Addins.2019.RhinoInside.Revit.addin" Source="..\RhinoInside.Revit\Properties\RhinoInside.Revit.addin"/>
+        <File Id="Addins.2019.RhinoInside.Revit.addin" Source="..\RhinoInside.Revit.AddIn\Properties\RhinoInside.Revit.addin"/>
       </Component>
       
       <Component Id="Addins.2019.RhinoInsideRevit" Guid="{C1D9E7B6-0DE7-4640-82C1-B475065E5024}" Directory="INSTALLFOLDER2019">
@@ -102,7 +102,7 @@
       </Component>
 
       <Component Id="Addins.2020.RhinoInsideRevit.addin" Guid="{F35F4F5C-B259-4E02-A615-807630BB23C4}" Directory="APPLICATIONFOLDER2020">
-        <File Id="Addins.2020.RhinoInsideRevit.addin" Source="..\RhinoInside.Revit\Properties\RhinoInside.Revit.addin"/>
+        <File Id="Addins.2020.RhinoInsideRevit.addin" Source="..\RhinoInside.Revit.AddIn\Properties\RhinoInside.Revit.addin"/>
       </Component>
       
       <Component Id="Addins.2020.RhinoInsideRevit" Guid="{6C890637-2DFD-4E0A-98BC-D3CAAA4EDE0E}" Directory="INSTALLFOLDER2020">
@@ -127,7 +127,7 @@
       </Component>
 
       <Component Id="Addins.2021.RhinoInsideRevit.addin" Guid="{973A5BCA-285D-4A43-BA31-EC261E4A4246}" Directory="APPLICATIONFOLDER2021">
-        <File Id="Addins.2021.RhinoInsideRevit.addin" Source="..\RhinoInside.Revit\Properties\RhinoInside.Revit.addin"/>
+        <File Id="Addins.2021.RhinoInsideRevit.addin" Source="..\RhinoInside.Revit.AddIn\Properties\RhinoInside.Revit.addin"/>
       </Component>
       
       <Component Id="Addins.2021.RhinoInsideRevit" Guid="{31B9D2CF-D920-463F-9C5B-F3FFB4EC97E1}" Directory="INSTALLFOLDER2021">
@@ -152,7 +152,7 @@
       </Component>
 
       <Component Id="Addins.2022.RhinoInsideRevit.addin" Guid="{0C36977A-87D0-460C-A6C4-630C1E525ADD}" Directory="APPLICATIONFOLDER2022">
-        <File Id="Addins.2022.RhinoInsideRevit.addin" Source="..\RhinoInside.Revit\Properties\RhinoInside.Revit.addin"/>
+        <File Id="Addins.2022.RhinoInsideRevit.addin" Source="..\RhinoInside.Revit.AddIn\Properties\RhinoInside.Revit.addin"/>
       </Component>
       
       <Component Id="Addins.2022.RhinoInsideRevit" Guid="{E7878FC4-D7C4-4A1E-B419-CBB6B9FE659B}" Directory="INSTALLFOLDER2022">
