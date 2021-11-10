@@ -289,6 +289,64 @@ namespace RhinoInside.Revit.GH
 
       return parameter;
     }
+
+    public static IConvertible ToConvertible(this DB.Parameter parameter)
+    {
+      switch (parameter.StorageType)
+      {
+        case DB.StorageType.Integer:
+          var integer = parameter.AsInteger();
+
+          if (parameter.Definition is DB.Definition definition)
+          {
+            var dataType = definition.GetDataType();
+
+            if (dataType == DBXS.SpecType.Boolean.YesNo)
+              return integer != 0;
+
+            if (parameter.Id.TryGetBuiltInParameter(out var builtInInteger))
+            {
+              var builtInIntegerName = builtInInteger.ToString();
+              if (builtInIntegerName.Contains("COLOR_") || builtInIntegerName.Contains("_COLOR_") || builtInIntegerName.Contains("_COLOR"))
+              {
+                int r = integer % 256;
+                integer /= 256;
+                int g = integer % 256;
+                integer /= 256;
+                int b = integer % 256;
+
+                return System.Drawing.Color.FromArgb(r, g, b).ToArgb();
+              }
+            }
+          }
+
+          return integer;
+
+        case DB.StorageType.Double:
+          var value = parameter.AsDouble();
+          return DBXS.SpecType.IsMeasurableSpec(parameter.Definition.GetDataType(), out var spec) ?
+            Convert.Geometry.UnitConverter.InRhinoUnits(value, spec) :
+            value;
+
+        case DB.StorageType.String:
+          return parameter.AsString();
+
+        case DB.StorageType.ElementId:
+
+          var document = parameter.Element?.Document;
+          var documentGUID = document.GetFingerprintGUID();
+          var elementId = parameter.AsElementId();
+
+          return elementId.IsBuiltInId() ?
+            DBX.FullUniqueId.Format(documentGUID, DBX.UniqueId.Format(Guid.Empty, elementId.IntegerValue)) :
+            document?.GetElement(elementId) is DB.Element element ?
+            DBX.FullUniqueId.Format(documentGUID, element.UniqueId) :
+            DBX.FullUniqueId.Format(Guid.Empty, DBX.UniqueId.Format(Guid.Empty, DB.ElementId.InvalidElementId.IntegerValue));
+
+        default:
+          throw new NotImplementedException();
+      }
+    }
   }
 }
 

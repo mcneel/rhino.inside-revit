@@ -87,30 +87,32 @@ namespace RhinoInside.Revit.GH.Components
       public string GetUpdaterName() => "Delete Updater";
       public string GetAdditionalInformation() => "N/A";
       public DB.ChangePriority GetChangePriority() => DB.ChangePriority.Annotations;
-      public DB.UpdaterId GetUpdaterId() => UpdaterId;
-      public static readonly DB.UpdaterId UpdaterId = new DB.UpdaterId
-      (
-        AddIn.Id,
-        new Guid("9536C7C9-C58B-4D48-9103-5C8EBAA6F6C8")
-      );
+      public DB.UpdaterId GetUpdaterId() => updaterId;
+      readonly DB.UpdaterId updaterId;
 
       public ICollection<DB.ElementId> AddedElementIds { get; private set; }
       public ICollection<DB.ElementId> DeletedElementIds { get; private set; }
       public ICollection<DB.ElementId> ModifiedElementIds { get; private set; }
 
-      public Updater()
+      public Updater(DB.Document doc)
       {
+        updaterId = new DB.UpdaterId
+        (
+          doc.Application.ActiveAddInId,
+          new Guid("9536C7C9-C58B-4D48-9103-5C8EBAA6F6C8")
+        );
+
         DB.UpdaterRegistry.RegisterUpdater(this, isOptional: true);
 
         var filter = new DB.ElementCategoryFilter(DB.BuiltInCategory.INVALID, true);
-        DB.UpdaterRegistry.AddTrigger(UpdaterId, filter, DB.Element.GetChangeTypeAny());
-        DB.UpdaterRegistry.AddTrigger(UpdaterId, filter, DB.Element.GetChangeTypeElementDeletion());
+        DB.UpdaterRegistry.AddTrigger(updaterId, filter, DB.Element.GetChangeTypeAny());
+        DB.UpdaterRegistry.AddTrigger(updaterId, filter, DB.Element.GetChangeTypeElementDeletion());
       }
 
       void IDisposable.Dispose()
       {
-        DB.UpdaterRegistry.RemoveAllTriggers(UpdaterId);
-        DB.UpdaterRegistry.UnregisterUpdater(UpdaterId);
+        DB.UpdaterRegistry.RemoveAllTriggers(updaterId);
+        DB.UpdaterRegistry.UnregisterUpdater(updaterId);
       }
 
       public void Execute(DB.UpdaterData data)
@@ -132,7 +134,7 @@ namespace RhinoInside.Revit.GH.Components
       var result = 0;
       if (elementIds.Count > 0)
       {
-        using (var updater = deleted is object && modified is object ? new Updater() : default)
+        using (var updater = deleted is object && modified is object ? new Updater(document) : default)
         {
           using (var transaction = NewTransaction(document))
           {

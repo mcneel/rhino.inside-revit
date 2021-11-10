@@ -10,13 +10,15 @@ namespace RhinoInside.Revit.Convert.Geometry
 {
   /// <summary>
   /// Methods in this class do a full geometry conversion.
+  /// </summary>
+  /// <remarks>
   /// <para>It converts geometry from Active Rhino model units to Revit internal units.</para>
   /// <para>For direct conversion methods see <see cref="Raw.RawEncoder"/> class.</para>
-  /// </summary>
+  /// </remarks>
   public static class GeometryEncoder
   {
     #region Context
-    public delegate void RuntimeMessage(int severity, string message, GeometryBase geometry);
+    internal delegate void RuntimeMessage(int severity, string message, GeometryBase geometry);
 
     [DebuggerTypeProxy(typeof(DebugView))]
     internal sealed class Context : State<Context>

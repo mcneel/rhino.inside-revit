@@ -796,7 +796,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     static FileInfo NewSwapFileInfo(string extension)
     {
-      var swapFile = Path.Combine(AddIn.SwapFolder, $"{Guid.NewGuid():N}.{extension}");
+      var swapFile = Path.Combine(Core.SwapFolder, $"{Guid.NewGuid():N}.{extension}");
       return new FileInfo(swapFile);
     }
 

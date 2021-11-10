@@ -16,7 +16,7 @@ using RhinoInside.Revit.Native;
 using static Microsoft.Win32.SafeHandles.InteropServices.Kernel32;
 using UIX = RhinoInside.Revit.External.UI;
 
-namespace RhinoInside.Revit
+namespace RhinoInside.Revit.Diagnostics
 {
   static class ErrorReport
   {
@@ -112,9 +112,9 @@ namespace RhinoInside.Revit
               writer.WriteLine($"  - ProductType: {revitProduct}");
               writer.WriteLine($"  - Language: {revitLanguage}");
 
-              var rhino = AddIn.RhinoVersionInfo;
+              var rhino = Core.RhinoVersionInfo;
               writer.WriteLine($"- Rhino: {rhino.ProductVersion} ({rhino.FileDescription})");
-              writer.WriteLine($"- Rhino.Inside Revit: {AddIn.DisplayVersion}");
+              writer.WriteLine($"- Rhino.Inside Revit: {Core.DisplayVersion}");
 
               writer.WriteLine();
               writer.WriteLine("### Environment Variables");
@@ -293,9 +293,9 @@ namespace RhinoInside.Revit
       mailBody += $"CLR: {ErrorReport.CLRVersion}" + Environment.NewLine;
       mailBody += $"Revit: {revitVersion}" + Environment.NewLine;
 
-      var rhino = AddIn.RhinoVersionInfo;
+      var rhino = Core.RhinoVersionInfo;
       mailBody += $"Rhino: {rhino.ProductVersion} ({rhino.FileDescription})" + Environment.NewLine;
-      mailBody += $"Rhino.Inside Revit: {AddIn.DisplayVersion}" + Environment.NewLine;
+      mailBody += $"Rhino.Inside Revit: {Core.DisplayVersion}" + Environment.NewLine;
 
       mailBody = Uri.EscapeDataString(mailBody);
 
@@ -317,7 +317,7 @@ namespace RhinoInside.Revit
           ExpandedContent = "This problem use to be due an incompatibility with other installed add-ins.\n\n" +
                             "While running on these modes you may see other add-ins errors and it may take longer to load, don't worry about that no persistent change will be made on your computer.",
           VerificationText = "Exclude installed add-ins list from the report.",
-          FooterText = "Current version: " + AddIn.DisplayVersion
+          FooterText = "Current version: " + Core.DisplayVersion
         }
       )
       {
@@ -333,12 +333,12 @@ namespace RhinoInside.Revit
             case TaskDialogResult.CommandLink2: RunVerboseMode(); break;
             case TaskDialogResult.CommandLink3: SendEmail
               (
-                AddIn.Host,
+                Core.Host,
                 "Rhino.Inside Revit failed to load",
                 !taskDialog.WasVerificationChecked(),
                 new string[]
                 {
-                  AddIn.Host.Services.RecordingJournalFilename,
+                  Core.Host.Services.RecordingJournalFilename,
                   RhinoDebugMessages_txt,
                   RhinoAssemblyResolveLog_txt
                 }
@@ -351,10 +351,10 @@ namespace RhinoInside.Revit
 
     static void RunWithoutAddIns()
     {
-      var SafeModeFolder = Path.Combine(AddIn.Host.Services.CurrentUserAddinsLocation, "RhinoInside.Revit", "SafeMode");
+      var SafeModeFolder = Path.Combine(Core.Host.Services.CurrentUserAddinsLocation, "RhinoInside.Revit", "SafeMode");
       Directory.CreateDirectory(SafeModeFolder);
 
-      Settings.AddIns.GetInstalledAddins(AddIn.Host.Services.VersionNumber, out var AddinFiles);
+      Settings.AddIns.GetInstalledAddins(Core.Host.Services.VersionNumber, out var AddinFiles);
       if (AddinFiles.Where(x => Path.GetFileName(x) == "RhinoInside.Revit.addin").FirstOrDefault() is string RhinoInsideRevitAddinFile)
       {
         var SafeModeAddinFile = Path.Combine(SafeModeFolder, Path.GetFileName(RhinoInsideRevitAddinFile));
@@ -420,10 +420,10 @@ namespace RhinoInside.Revit
             deleteKey = true;
           }
 
-        var DebugLogging = Settings.DebugLogging.Current;
+        var debugLogging = DebugLogging.Current;
         try
         {
-          Settings.DebugLogging.Current = new Settings.DebugLogging
+          DebugLogging.Current = new DebugLogging
           {
             Enabled = true,
             SaveToFile = true
@@ -441,7 +441,7 @@ namespace RhinoInside.Revit
         }
         finally
         {
-          Settings.DebugLogging.Current = DebugLogging;
+          DebugLogging.Current = debugLogging;
         }
       }
       finally
@@ -563,6 +563,36 @@ namespace RhinoInside.Revit
         );
       }
     }
+  }
+
+  struct DebugLogging
+  {
+    public static DebugLogging Current
+    {
+      get
+      {
+        using (var data = Registry.CurrentUser.OpenSubKey(@"Software\McNeel\Rhinoceros\7.0\Global Options\Debug Logging", true))
+        {
+          return new DebugLogging()
+          {
+            Enabled = (data.GetValue("Enabled", 0) as int?).GetValueOrDefault() != 0,
+            SaveToFile = (data.GetValue("SaveToFile", 0) as int?).GetValueOrDefault() != 0,
+          };
+        }
+      }
+      set
+      {
+        using (var data = Registry.CurrentUser.OpenSubKey(@"Software\McNeel\Rhinoceros\7.0\Global Options\Debug Logging", true))
+        {
+          data.SetValue("Enabled", value.Enabled ? 1 : 0);
+          data.SetValue("SaveToFile", value.SaveToFile ? 1 : 0);
+          data.Flush();
+        }
+      }
+    }
+
+    public bool Enabled;
+    public bool SaveToFile;
   }
 
   internal static class Logger

@@ -6,6 +6,7 @@ using Rhino.Display;
 using Rhino.Geometry;
 using Rhino.Render;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.Convert.System.Drawing;
 using RhinoInside.Revit.External.DB.Extensions;
 using DB = Autodesk.Revit.DB;
 
@@ -142,10 +143,10 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (Value is DB.View view)
         {
-          var swapFolder = Path.Combine(AddIn.SwapFolder, view.Document.GetFingerprintGUID().ToString());
+          var swapFolder = Path.Combine(Core.SwapFolder, view.Document.GetFingerprintGUID().ToString());
           Directory.CreateDirectory(swapFolder);
 
-          var rect = view.GetOutlineRectangle();
+          var rect = view.GetOutlineRectangle().ToRectangle();
           var fitDirection = rect.Width > rect.Height ?
             DB.FitDirectionType.Horizontal :
             DB.FitDirectionType.Vertical;

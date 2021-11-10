@@ -3,11 +3,13 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Rhino;
 using Rhino.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
 using EDBS = RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.Convert.Geometry
 {
+  /// <summary>
+  /// Converts a unit aware data type from one unit system to another.
+  /// </summary>
   public static class UnitConverter
   {
     static UnitConverter()
@@ -71,7 +73,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// Revit Internal Unit System.
     /// </summary>
     /// <remarks>
-    /// It returns <see cref="UnitSystem.Feet"/>.
+    /// It returns <see cref="Rhino.UnitSystem.Feet"/>.
     /// </remarks>
     internal const UnitSystem InternalUnitSystem = UnitSystem.Feet;
 
@@ -79,15 +81,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// Rhino Unit System.
     /// </summary>
     /// <remarks>
-    /// It returns <see cref="RhinoDoc.ActiveDoc.ModelUnitSystem"/> or <see cref="UnitSystem.Meters"/> if there is no ActiveDoc.
+    /// It returns <c>RhinoDoc.ActiveDoc.ModelUnitSystem</c> or <see cref="Rhino.UnitSystem.Meters"/> if there is no Rhino document active.
     /// </remarks>
     internal static UnitSystem ExternalUnitSystem => RhinoDoc.ActiveDoc?.ModelUnitSystem ?? UnitSystem.Meters;
 
     /// <summary>
     /// Converts a value from Host's internal units to a given unit.
     /// </summary>
-    /// <param name="value"></param>
-    /// <param name="unitSystem"></param>
+    /// <param name="value">Length value to convert</param>
+    /// <param name="unitSystem">The unit system to convert to.</param>
     /// <returns></returns>
     /// <remarks>
     /// This method may return <see cref="double.NaN"/> if the conversion is not defined.
@@ -100,8 +102,8 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <summary>
     /// Converts a value from a given unit to Host's internal units.
     /// </summary>
-    /// <param name="value"></param>
-    /// <param name="unitSystem"></param>
+    /// <param name="value">Length value to convert</param>
+    /// <param name="unitSystem">The unit system to convert from.</param>
     /// <returns></returns>
     /// <remarks>
     /// This method may return <see cref="double.NaN"/> if the conversion is not defined.
@@ -115,7 +117,8 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// Converts a value from Host's internal units to a given unit.
     /// </summary>
     /// <param name="value"></param>
-    /// <param name="rhinoModelUnits"></param>
+    /// <param name="from"></param>
+    /// <param name="to"></param>
     /// <param name="dimensionality"> 0 = factor, 1 = length, 2 = area, 3 = volumen </param>
     /// <returns></returns>
     /// <remarks>
@@ -162,83 +165,83 @@ namespace RhinoInside.Revit.Convert.Geometry
     #endregion
 
     #region Scale
-    public static void Scale(ref Interval value, double factor)
+    internal static void Scale(ref Interval value, double factor)
     {
       value.T0 *= factor;
       value.T1 *= factor;
     }
 
-    public static void Scale(ref Point2f value, double factor)
+    internal static void Scale(ref Point2f value, double factor)
     {
       value.X *= (float) factor;
       value.Y *= (float) factor;
     }
-    public static void Scale(ref Point2d value, double factor)
+    internal static void Scale(ref Point2d value, double factor)
     {
       value.X *= factor;
       value.Y *= factor;
     }
-    public static void Scale(ref Vector2d value, double factor)
+    internal static void Scale(ref Vector2d value, double factor)
     {
       value.X *= factor;
       value.Y *= factor;
     }
-    public static void Scale(ref Vector2f value, double factor)
+    internal static void Scale(ref Vector2f value, double factor)
     {
       value.X *= (float) factor;
       value.Y *= (float) factor;
     }
 
-    public static void Scale(ref Point3f value, double factor)
+    internal static void Scale(ref Point3f value, double factor)
     {
       value.X *= (float) factor;
       value.Y *= (float) factor;
       value.Z *= (float) factor;
     }
-    public static void Scale(ref Point3d value, double factor)
+    internal static void Scale(ref Point3d value, double factor)
     {
       value.X *= factor;
       value.Y *= factor;
       value.Z *= factor;
     }
-    public static void Scale(ref Vector3d value, double factor)
+    internal static void Scale(ref Vector3d value, double factor)
     {
       value.X *= factor;
       value.Y *= factor;
       value.Z *= factor;
     }
-    public static void Scale(ref Vector3f value, double factor)
+    internal static void Scale(ref Vector3f value, double factor)
     {
       value.X *= (float) factor;
       value.Y *= (float) factor;
       value.Z *= (float) factor;
     }
 
-    public static void Scale(ref Transform value, double scaleFactor)
+    internal static void Scale(ref Transform value, double scaleFactor)
     {
       value.M03 *= scaleFactor;
       value.M13 *= scaleFactor;
       value.M23 *= scaleFactor;
     }
 
-    public static void Scale(ref BoundingBox value, double scaleFactor)
+    internal static void Scale(ref BoundingBox value, double scaleFactor)
     {
       value.Min *= scaleFactor;
       value.Max *= scaleFactor;
     }
 
-    public static void Scale(ref Plane value, double scaleFactor)
+    internal static void Scale(ref Plane value, double scaleFactor)
     {
       value.Origin *= scaleFactor;
     }
 
-    public static void Scale(ref Line value, double scaleFactor)
+    internal static void Scale(ref Line value, double scaleFactor)
     {
       value.From *= scaleFactor;
       value.To   *= scaleFactor;
     }
 
-    public static void Scale(ref Arc value, double scaleFactor)
+    internal static void Scale(ref Arc value, double scaleFactor)
     {
       var plane = value.Plane;
       plane.Origin *= scaleFactor;
@@ -246,7 +249,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       value.Radius *= scaleFactor;
     }
 
-    public static void Scale(ref Circle value, double scaleFactor)
+    internal static void Scale(ref Circle value, double scaleFactor)
     {
       var plane = value.Plane;
       plane.Origin *= scaleFactor;
@@ -254,7 +257,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       value.Radius *= scaleFactor;
     }
 
-    public static void Scale(ref Ellipse value, double scaleFactor)
+    internal static void Scale(ref Ellipse value, double scaleFactor)
     {
       var plane = value.Plane;
       plane.Origin *= scaleFactor;
@@ -269,7 +272,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <param name="value"></param>
     /// <param name="factor"></param>
     /// <seealso cref="InOtherUnits{G}(G, double)"/>
-    public static void Scale<G>(G value, double factor) where G : GeometryBase
+    internal static void Scale<G>(G value, double factor) where G : GeometryBase
     {
       if (factor != 1.0 && value?.Scale(factor) == false)
         throw new InvalidOperationException($"Failed to Change {value} basis");
@@ -277,40 +280,40 @@ namespace RhinoInside.Revit.Convert.Geometry
     #endregion
 
     #region InOtherUnits
-    public static Interval InOtherUnits(this Interval value, double factor)
+    internal static Interval InOtherUnits(this Interval value, double factor)
     { Scale(ref value, factor); return value; }
 
-    public static Point3f InOtherUnits(this Point3f value, double factor)
+    internal static Point3f InOtherUnits(this Point3f value, double factor)
     { Scale(ref value, factor); return value; }
 
-    public static Point3d InOtherUnits(this Point3d value, double factor)
+    internal static Point3d InOtherUnits(this Point3d value, double factor)
     { Scale(ref value, factor); return value; }
 
-    public static Vector3d InOtherUnits(this Vector3d value, double factor)
+    internal static Vector3d InOtherUnits(this Vector3d value, double factor)
     { Scale(ref value, factor); return value; }
 
-    public static Vector3f InOtherUnits(this Vector3f value, double factor)
+    internal static Vector3f InOtherUnits(this Vector3f value, double factor)
     { Scale(ref value, factor); return value; }
 
-    public static Transform InOtherUnits(this Transform value, double factor)
+    internal static Transform InOtherUnits(this Transform value, double factor)
     { Scale(ref value, factor); return value; }
 
-    public static BoundingBox InOtherUnits(this BoundingBox value, double factor)
+    internal static BoundingBox InOtherUnits(this BoundingBox value, double factor)
     { Scale(ref value, factor); return value; }
 
-    public static Plane InOtherUnits(this Plane value, double factor)
+    internal static Plane InOtherUnits(this Plane value, double factor)
     { Scale(ref value, factor); return value; }
 
-    public static Line InOtherUnits(this Line value, double factor)
+    internal static Line InOtherUnits(this Line value, double factor)
     { Scale(ref value, factor); return value; }
 
-    public static Arc InOtherUnits(this Arc value, double factor)
+    internal static Arc InOtherUnits(this Arc value, double factor)
     { Scale(ref value, factor); return value; }
 
-    public static Circle InOtherUnits(this Circle value, double factor)
+    internal static Circle InOtherUnits(this Circle value, double factor)
     { Scale(ref value, factor); return value; }
 
-    public static Ellipse InOtherUnits(this Ellipse value, double factor)
+    internal static Ellipse InOtherUnits(this Ellipse value, double factor)
     { Scale(ref value, factor); return value; }
 
     /// <summary>
@@ -320,7 +323,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <param name="value"></param>
     /// <param name="factor"></param>
     /// <returns>Returns a scaled duplicate of the input <paramref name="value"/> in other units.</returns>
-    public static G InOtherUnits<G>(this G value, double factor) where G : GeometryBase
+    internal static G InOtherUnits<G>(this G value, double factor) where G : GeometryBase
     { value = (G) value.Duplicate(); if(factor != 1.0) Scale(value, factor); return value; }
 
     static double InOtherUnits(double value, EDBS.SpecType type, UnitSystem from, UnitSystem to)
@@ -377,13 +380,13 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static G InRhinoUnits<G>(this G value) where G : GeometryBase
     { Scale(value = (G) value.Duplicate(), ToRhinoUnits); return value; }
 
-    public static double InRhinoUnits(double value, EDBS.SpecType type) =>
-      InOtherUnits(value, type, InternalUnitSystem, ExternalUnitSystem);
+    internal static double InRhinoUnits(double value, EDBS.SpecType spec) =>
+      InOtherUnits(value, spec, InternalUnitSystem, ExternalUnitSystem);
 
-    static double InRhinoUnits(double value, EDBS.SpecType type, RhinoDoc rhinoDoc)
+    internal static double InRhinoUnits(double value, EDBS.SpecType type, RhinoDoc rhinoDoc)
     {
       if (rhinoDoc is null)
-        return double.NaN;
+        throw new ArgumentNullException(nameof(rhinoDoc));
 
       return InOtherUnits(value, type, InternalUnitSystem, rhinoDoc.ModelUnitSystem);
     }
@@ -435,15 +438,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static G InHostUnits<G>(this G value) where G : GeometryBase
     { Scale(value = (G) value.Duplicate(), ToHostUnits); return value; }
 
-    public static double InHostUnits(double value, EDBS.SpecType type) =>
-      InOtherUnits(value, type, ExternalUnitSystem, InternalUnitSystem);
+    internal static double InHostUnits(double value, EDBS.SpecType spec) =>
+      InOtherUnits(value, spec, ExternalUnitSystem, InternalUnitSystem);
 
-    static double InHostUnits(double value, EDBS.SpecType type, RhinoDoc rhinoDoc)
+    internal static double InHostUnits(double value, EDBS.SpecType spec, RhinoDoc rhinoDoc)
     {
       if (rhinoDoc is null)
         return double.NaN;
 
-      return InOtherUnits(value, type, rhinoDoc.ModelUnitSystem, InternalUnitSystem);
+      return InOtherUnits(value, spec, rhinoDoc.ModelUnitSystem, InternalUnitSystem);
     }
     #endregion
   }

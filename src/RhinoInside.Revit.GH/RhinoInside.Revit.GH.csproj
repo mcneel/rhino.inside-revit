@@ -140,6 +140,10 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
+    <ProjectReference Include="..\RhinoInside.Revit.External\RhinoInside.Revit.External.csproj">
+      <Project>{1df04e19-3270-4ca3-a6c0-692c52fa5853}</Project>
+      <Name>RhinoInside.Revit.External</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RhinoInside.Revit\RhinoInside.Revit.csproj">
       <Project>{d6c256d4-b518-464f-9e68-cb282202e846}</Project>
       <Name>RhinoInside.Revit</Name>
@@ -551,6 +555,9 @@
   <PropertyGroup>
     <TransformOnBuild>true</TransformOnBuild>
   </PropertyGroup>
+  <PropertyGroup>
+    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+  </PropertyGroup>
   <Target Name="AfterBuild">
     <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.dll" DestinationFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.gha" />
     <Copy Condition="$(Configuration.Contains('Debug'))" UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.gha;$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.pdb" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />
@@ -558,7 +565,4 @@
   <Target Name="BeforeClean">
     <Delete Files="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.gha" />
   </Target>
-  <PropertyGroup>
-    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
-  </PropertyGroup>
 </Project>

@@ -15,11 +15,12 @@ using Rhino.PlugIns;
 using Rhino.Runtime.InProcess;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.Convert.Units;
+using RhinoInside.Revit.Diagnostics;
 using RhinoInside.Revit.External.ApplicationServices.Extensions;
 using static Rhino.RhinoMath;
 using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside
+namespace RhinoInside.Revit
 {
   #region Guest
   [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
@@ -67,7 +68,7 @@ namespace RhinoInside.Revit
   {
     #region Revit Interface
     static RhinoCore core;
-    internal static readonly string SchemeName = $"Inside-Revit-{AddIn.Host.Services.VersionNumber}";
+    internal static readonly string SchemeName = $"Inside-Revit-{Core.Host.Services.VersionNumber}";
     internal static string[] StartupLog;
 
     internal static bool InitEto()
@@ -80,7 +81,7 @@ namespace RhinoInside.Revit
 
     internal static bool InitRhinoCommon()
     {
-      var hostMainWindow = new WindowHandle(AddIn.Host.MainWindowHandle);
+      var hostMainWindow = new WindowHandle(Core.Host.MainWindowHandle);
 
       // Save Revit window status
       bool wasEnabled = hostMainWindow.Enabled;
@@ -94,34 +95,34 @@ namespace RhinoInside.Revit
       {
         var args = new List<string>();
 
-        if (Settings.AddInOptions.Session.IsolateSettings)
+        if (Core.IsolateSettings)
         {
           args.Add($"/scheme={SchemeName}");
         }
 
-        if (Settings.AddInOptions.Session.UseHostLanguage)
+        if (Core.UseHostLanguage)
         {
-          args.Add($"/language={AddIn.Host.Services.Language.ToLCID()}");
+          args.Add($"/language={Core.Host.Services.Language.ToLCID()}");
         }
 
         args.Add("/nosplash");
         //args.Add("/notemplate");
 
-        if (Settings.DebugLogging.Current.Enabled)
+        if (DebugLogging.Current.Enabled)
         {
           args.Add("/captureprintcalls");
           args.Add("/stopwatch");
         }
 
-        var hostWnd = Settings.AddInOptions.Session.KeepUIOnTop ?
+        var hostWnd = Core.KeepUIOnTop ?
           hostMainWindow.Handle : IntPtr.Zero;
 
         core = new RhinoCore(args.ToArray(), WindowStyle.Hidden, hostWnd);
       }
       catch (Exception e)
       {
-        AddIn.ReportException(e, AddIn.Host, new string[0]);
-        AddIn.CurrentStatus = AddIn.Status.Failed;
+        Core.ReportException(e, Core.Host);
+        Core.CurrentStatus = Core.Status.Failed;
         return false;
       }
       finally
@@ -133,6 +134,8 @@ namespace RhinoInside.Revit
         StartupLog = RhinoApp.CapturedCommandWindowStrings(true);
         RhinoApp.CommandWindowCaptureEnabled = false;
       }
+
+      Rhino.Runtime.PythonScript.AddRuntimeAssembly(Assembly.GetExecutingAssembly());
 
       MainWindow = new WindowHandle(RhinoApp.MainWindowHandle());
       MainWindow.ExtendedWindowStyles |= ExtendedWindowStyles.AppWindow;
@@ -160,7 +163,7 @@ namespace RhinoInside.Revit
       RunScriptAsync
       (
         script:   Environment.GetEnvironmentVariable("RhinoInside_RunScript"),
-        activate: AddIn.StartupMode == AddInStartupMode.AtStartup
+        activate: Core.StartupMode == CoreStartupMode.OnStartup
       );
 
       // Add DefaultRenderAppearancePath to Rhino settings if missing
@@ -227,7 +230,6 @@ namespace RhinoInside.Revit
     }
 
     internal static WindowHandle MainWindow = WindowHandle.Zero;
-    public static IntPtr MainWindowHandle => MainWindow.Handle;
 
     static bool idlePending = true;
     internal static void RaiseIdle() => core.RaiseIdle();
@@ -351,7 +353,7 @@ namespace RhinoInside.Revit
 
           using
           (
-            var taskDialog = new TaskDialog(AddIn.DisplayVersion)
+            var taskDialog = new TaskDialog(Core.DisplayVersion)
             {
               Id = $"{MethodBase.GetCurrentMethod().DeclaringType.FullName}.{MethodBase.GetCurrentMethod().Name}",
               MainIcon = External.UI.TaskDialogIcons.IconError,
@@ -465,7 +467,7 @@ namespace RhinoInside.Revit
               MainInstruction = hasUnits ? (doc.IsOpening ? "Model units mismatch." : "Model units mismatch warning.") : "Rhino model has no units.",
               MainContent = doc.IsOpening ? "What units do you want to use?" : $"Revit document '{revitDoc.Title}' length units are {RevitModelUnitSystem}." + (hasUnits ? $"{Environment.NewLine}Rhino is working in {doc.ModelUnitSystem}." : string.Empty),
               ExpandedContent = expandedContent,
-              FooterText = "Current version: " + AddIn.DisplayVersion
+              FooterText = "Current version: " + Core.DisplayVersion
             }
           )
           {
@@ -633,9 +635,8 @@ namespace RhinoInside.Revit
     #endregion
 
     #region Rhino UI
-    /*internal*/
     public static void InvokeInHostContext(Action action) => core.InvokeInHostContext(action);
-    /*internal*/ public static T InvokeInHostContext<T>(Func<T> func) => core.InvokeInHostContext(func);
+    public static T InvokeInHostContext<T>(Func<T> func) => core.InvokeInHostContext(func);
 
     internal static bool Exposed
     {
@@ -717,7 +718,7 @@ namespace RhinoInside.Revit
       }
     }
 
-    public static void Show()
+    static void Show()
     {
       Exposed = true;
       MainWindow.BringToFront();
@@ -732,7 +733,7 @@ namespace RhinoInside.Revit
 
     public static async void RunScriptAsync(string script, bool activate)
     {
-      if (string.IsNullOrEmpty(script))
+      if (string.IsNullOrWhiteSpace(script))
         return;
 
       await External.ActivationGate.Yield();

@@ -281,13 +281,13 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         if (document.LoadReferencedData())
         {
-          return AddIn.Host.ActiveUIDocument = new Autodesk.Revit.UI.UIDocument(document.Value);
+          return Core.Host.ActiveUIDocument = new Autodesk.Revit.UI.UIDocument(document.Value);
         }
         else if
         (
           forceLoad &&
           document.ModelURI.ToModelPath() is DB.ModelPath modelPath &&
-          AddIn.Host.Value is Autodesk.Revit.UI.UIApplication host &&
+          Core.Host.Value is Autodesk.Revit.UI.UIApplication host &&
           MessageBox.Show
           (
             Form.ActiveForm,

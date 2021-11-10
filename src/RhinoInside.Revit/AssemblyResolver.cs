@@ -6,6 +6,7 @@ using System.Reflection;
 using Autodesk.Revit.UI;
 using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
+using RhinoInside.Revit.Diagnostics;
 using RhinoInside.Revit.Native;
 
 namespace RhinoInside.Revit
@@ -280,7 +281,7 @@ namespace RhinoInside.Revit
 
     static Assembly ResolveAssembly(Assembly requestingAssembly, AssemblyName requested)
     {
-      if (AddIn.CurrentStatus < AddIn.Status.Available)
+      if (Core.CurrentStatus < Core.Status.Available)
         return default;
 
       // Resolve this Assembly
@@ -355,7 +356,7 @@ namespace RhinoInside.Revit
 
             using
             (
-              var taskDialog = new TaskDialog($"Rhino.Inside {AddIn.Version} - openNURBS Conflict")
+              var taskDialog = new TaskDialog($"Rhino.Inside {Core.Version} - openNURBS Conflict")
               {
                 Id = $"{MethodBase.GetCurrentMethod().DeclaringType}.{MethodBase.GetCurrentMethod().Name}.OpenNURBSConflict",
                 MainIcon = External.UI.TaskDialogIcons.IconError,
@@ -373,31 +374,31 @@ namespace RhinoInside.Revit
               switch (taskDialog.Show())
               {
                 case TaskDialogResult.CommandLink1:
-                  using (Process.Start($@"{AddIn.AddInWebSite}/reference/known-issues")) { }
+                  using (Process.Start($@"{Core.WebSite}/reference/known-issues")) { }
                   break;
                 case TaskDialogResult.CommandLink2:
 
                   var RhinoInside_dmp = Path.Combine
                   (
-                    Path.GetDirectoryName(AddIn.Host.Services.RecordingJournalFilename),
-                    Path.GetFileNameWithoutExtension(AddIn.Host.Services.RecordingJournalFilename) + ".RhinoInside.Revit.dmp"
+                    Path.GetDirectoryName(Core.Host.Services.RecordingJournalFilename),
+                    Path.GetFileNameWithoutExtension(Core.Host.Services.RecordingJournalFilename) + ".RhinoInside.Revit.dmp"
                   );
 
                   MiniDumper.Write(RhinoInside_dmp);
 
                   ErrorReport.SendEmail
                   (
-                    AddIn.Host,
+                    Core.Host,
                     $"Rhino.Inside Revit failed - openNURBS Conflict",
                     true,
                     new string[]
                     {
-                      AddIn.Host.Services.RecordingJournalFilename,
+                      Core.Host.Services.RecordingJournalFilename,
                       RhinoInside_dmp
                     }
                   );
 
-                  AddIn.CurrentStatus = AddIn.Status.Failed;
+                  Core.CurrentStatus = Core.Status.Failed;
                   break;
               }
             }

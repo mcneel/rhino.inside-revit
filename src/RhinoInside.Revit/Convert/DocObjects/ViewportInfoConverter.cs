@@ -157,7 +157,7 @@ namespace RhinoInside.Revit.Convert.DocObjects
       }
       else
       {
-        var screenPort = view.GetOutlineRectangle();
+        var screenPort = view.GetOutlineRectangle().ToRectangle();
         var camera = CameraInfo.GetCameraInfo(view);
         var origin = camera.EyePosition.ToPoint3d();
         var zDirection = camera.ViewDirection.ToVector3d();

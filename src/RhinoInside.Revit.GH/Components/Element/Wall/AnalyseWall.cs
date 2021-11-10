@@ -204,7 +204,7 @@ namespace RhinoInside.Revit.GH.Components
       PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT, "Structural");
       PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM, "Structural Usage");
 
-      DA.SetData("Orientation", UnitConverter.InRhinoUnits(wallInstance.GetOrientationVector()));
+      DA.SetData("Orientation", wallInstance.GetOrientationVector().ToVector3d());
     }
   }
 }

@@ -1,0 +1,335 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
+    <Rhino7DebugInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_CURRENT_USER\Software\McNeel\Rhinoceros\7.0-WIP-Developer-Debug-trunk\Install', 'Path', null, RegistryView.Registry64))</Rhino7DebugInstallDir>
+    <Rhino7InstallDir>$([MSBuild]::ValueOrDefault('$(Rhino7DebugInstallDir)', '$(Rhino7DefaultInstallDir)'))</Rhino7InstallDir>
+    <Rhino7DefaultPluginsDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Default Plug-ins Folder', null, RegistryView.Registry64))</Rhino7DefaultPluginsDir>
+    <Rhino7DebugPluginsDir>$([MSBuild]::GetRegistryValueFromView('HKEY_CURRENT_USER\Software\McNeel\Rhinoceros\7.0-WIP-Developer-Debug-trunk\Install', 'Default Plug-ins Folder', null, RegistryView.Registry64))</Rhino7DebugPluginsDir>
+    <Rhino7PluginsDir>$([MSBuild]::ValueOrDefault('$(Rhino7DebugPluginsDir)', '$(Rhino7DefaultPluginsDir)'))</Rhino7PluginsDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration.Contains('2018'))">
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <RevitVersion>2018</RevitVersion>
+    <RevitApiVersion>2018.0.2</RevitApiVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration.Contains('2019'))">
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <RevitVersion>2019</RevitVersion>
+    <RevitApiVersion>2019.0.1</RevitApiVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration.Contains('2020'))">
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <RevitVersion>2020</RevitVersion>
+    <RevitApiVersion>2020.0.0</RevitApiVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration.Contains('2021'))">
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <RevitVersion>2021</RevitVersion>
+    <RevitApiVersion>2021.1.0</RevitApiVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration.Contains('2022'))">
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <RevitVersion>2022</RevitVersion>
+    <RevitApiVersion>2022.0.0</RevitApiVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{FE5652EC-6C45-46AE-88DD-395DE072AA02}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <LangVersion>7.3</LangVersion>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>RhinoInside.Revit.AddIn</RootNamespace>
+    <AssemblyName>RhinoInside.Revit.AddIn</AssemblyName>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2018|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug 2018\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;REVIT_2017;REVIT_2018</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2018|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Release 2018\</OutputPath>
+    <DefineConstants>REVIT_2017;REVIT_2018</DefineConstants>
+    <Optimize>true</Optimize>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2019|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug 2019\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;REVIT_2017;REVIT_2018;REVIT_2019</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2019|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Release 2019\</OutputPath>
+    <DefineConstants>REVIT_2017;REVIT_2018;REVIT_2019</DefineConstants>
+    <Optimize>true</Optimize>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2020|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug 2020\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2020|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Release 2020\</OutputPath>
+    <DefineConstants>REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020</DefineConstants>
+    <Optimize>true</Optimize>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2021|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug 2021\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2021|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Release 2021\</OutputPath>
+    <DefineConstants>REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021</DefineConstants>
+    <Optimize>true</Optimize>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2022|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug 2022\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021;REVIT_2022</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2022|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Release 2022\</OutputPath>
+    <DefineConstants>REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021;REVIT_2022</DefineConstants>
+    <Optimize>true</Optimize>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.Management.Automation" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <Choose>
+    <When Condition="$(Configuration.Contains('Debug'))">
+      <ItemGroup>
+        <Reference Include="Eto">
+          <HintPath>$(Rhino7InstallDir)Eto.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Eto.Wpf">
+          <HintPath>$(Rhino7InstallDir)Eto.Wpf.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="RhinoCommon">
+          <HintPath>$(Rhino7InstallDir)RhinoCommon.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Rhino.UI">
+          <HintPath>$(Rhino7InstallDir)Rhino.UI.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="GH_IO">
+          <HintPath>$(Rhino7PluginsDir)Grasshopper\GH_IO.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Grasshopper">
+          <HintPath>$(Rhino7PluginsDir)Grasshopper\Grasshopper.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="RevitAPI">
+          <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\RevitAPI.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="RevitAPIUI">
+          <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\RevitAPIUI.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="AdWindows">
+          <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\AdWindows.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <PackageReference Include="RhinoCommon" Version="7.9.21222.15001" IncludeAssets="compile; build" />
+        <PackageReference Include="RhinoWindows" Version="7.9.21222.15001" IncludeAssets="build; compile" />
+        <PackageReference Include="Grasshopper" Version="7.9.21222.15001" IncludeAssets="compile; build" />
+        <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitApiVersion)" IncludeAssets="build; compile" />
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
+  <ItemGroup>
+    <Compile Include="Commands\AddIn\CommandAbout.cs" />
+    <Compile Include="Commands\AddIn\CommandAddInOptions.cs" />
+    <Compile Include="Commands\AddIn\CommandForums.cs" />
+    <Compile Include="Commands\AddIn\CommandGuides.cs" />
+    <Compile Include="Commands\AddIn\CommandHelpLinks.cs" />
+    <Compile Include="Commands\AddIn\CommandStart.cs" />
+    <Compile Include="Properties\Options.cs" />
+    <Compile Include="Distribution.cs" />
+    <Compile Include="Loader.cs" />
+    <Compile Include="Commands\BaseCommand.cs" />
+    <Compile Include="Forms\BaseForm.cs" />
+    <Compile Include="Forms\BaseWindowUtils.cs" />
+    <Compile Include="Commands\Grasshopper\BaseGrasshopperCommand.cs" />
+    <Compile Include="Commands\Grasshopper\CommandGrasshopper.cs" />
+    <Compile Include="Commands\Grasshopper\CommandGrasshopperBake.cs" />
+    <Compile Include="Commands\Grasshopper\CommandGrasshopperCaptureElements.cs" />
+    <Compile Include="Commands\Grasshopper\CommandGrasshopperFolders.cs" />
+    <Compile Include="Commands\Grasshopper\CommandGrasshopperRecompute.cs" />
+    <Compile Include="Commands\Grasshopper\CommandGrasshopperReleaseElements.cs" />
+    <Compile Include="Commands\Grasshopper\CommandPackageManager.cs" />
+    <Compile Include="Commands\Grasshopper\CommandPreviewToggleGroup.cs" />
+    <Compile Include="Commands\Grasshopper\CommandSolverToggle.cs" />
+    <Compile Include="Commands\Grasshopper\GrasshopperPlayerCommand.cs" />
+    <Compile Include="Commands\Grasshopper\LinkedScripts\LinkedScriptAssembly.cs" />
+    <Compile Include="Commands\Grasshopper\LinkedScripts\LinkedScriptCommand.cs" />
+    <Compile Include="Commands\Grasshopper\LinkedScripts\LinkedScripts.cs" />
+    <Compile Include="Commands\Grasshopper\LinkedScripts\Models.cs" />
+    <Compile Include="Commands\Rhinoceros\BaseRhinoCommand.cs" />
+    <Compile Include="Commands\Rhinoceros\CommandImport.cs" />
+    <Compile Include="Commands\Rhinoceros\CommandPython.cs" />
+    <Compile Include="Commands\Rhinoceros\CommandRhino.cs" />
+    <Compile Include="Commands\Rhinoceros\CommandRhinoOpenViewport.cs" />
+    <Compile Include="Commands\Rhinoceros\CommandRhinoOptions.cs" />
+    <Compile Include="Commands\Rhinoceros\CommandToggleRhinoPreview.cs" />
+    <Compile Include="Forms\Dialogs\AddInOptionsDialog.cs" />
+    <Compile Include="Forms\Dialogs\BakeOptionsDialog.cs" />
+    <Compile Include="Forms\Dialogs\ImportOptionsDialog.cs" />
+    <Compile Include="Forms\ModalDialog.cs" />
+    <Compile Include="Commands\RibbonHandler.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\ProductInfo.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ProductInfo.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <None Include="Properties\RhinoInside.Revit.addin" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <SubType>Designer</SubType>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Properties\ProductInfo.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ProductInfo.cs</LastGenOutput>
+    </Content>
+    <EmbeddedResource Include="Resources\About-icon.png" />
+    <EmbeddedResource Include="Resources\ChannelDaily-icon.png" />
+    <EmbeddedResource Include="Resources\ChannelRC-icon.png" />
+    <EmbeddedResource Include="Resources\ChannelStable-icon.png" />
+    <EmbeddedResource Include="Resources\Folder-icon.png" />
+    <EmbeddedResource Include="Resources\Folder-icon_16.png" />
+    <EmbeddedResource Include="Resources\Forum-icon.png" />
+    <EmbeddedResource Include="Resources\Grasshopper.png" />
+    <EmbeddedResource Include="Resources\GrasshopperPlayer.png" />
+    <EmbeddedResource Include="Resources\Guides-icon.png" />
+    <EmbeddedResource Include="Resources\Link-icon.png" />
+    <EmbeddedResource Include="Resources\Link-icon_16.png" />
+    <EmbeddedResource Include="Resources\NewRelease.png" />
+    <EmbeddedResource Include="Resources\Options.png" />
+    <EmbeddedResource Include="Resources\PackageManager-icon.png" />
+    <EmbeddedResource Include="Resources\Python.png" />
+    <EmbeddedResource Include="Resources\Rhino-logo.ico" />
+    <EmbeddedResource Include="Resources\Rhino.png" />
+    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\Bake.png" />
+    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\CaptureElements.png" />
+    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GhFile.png" />
+    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GhFile_32.png" />
+    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GhFolder.png" />
+    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GhFolder_32.png" />
+    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GHSpecialFolder.png" />
+    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GHSpecialFolder_16.png" />
+    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GhxFile.png" />
+    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GhxFile_32.png" />
+    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\Preview_Off.png" />
+    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\Preview_Shaded.png" />
+    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\Preview_Wireframe.png" />
+    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\Recompute.png" />
+    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\ReleaseElements.png" />
+    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\SolverOff.png" />
+    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\SolverOn.png" />
+    <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Import-3DM.png" />
+    <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Import-3DM_32.png" />
+    <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\OpenViewport.png" />
+    <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Preview_Shaded.png" />
+    <EmbeddedResource Include="Resources\RIR-logo.ico" />
+    <EmbeddedResource Include="Resources\RIR-logo.png" />
+    <EmbeddedResource Include="Resources\RIR-WIP-logo.png" />
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RhinoInside.Revit.External\RhinoInside.Revit.External.csproj">
+      <Project>{1df04e19-3270-4ca3-a6c0-692c52fa5853}</Project>
+      <Name>RhinoInside.Revit.External</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RhinoInside.Revit\RhinoInside.Revit.csproj">
+      <Project>{d6c256d4-b518-464f-9e68-cb282202e846}</Project>
+      <Name>RhinoInside.Revit</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v16.0\TextTemplating\Microsoft.TextTemplating.targets" />
+  <PropertyGroup>
+    <TransformOnBuild>true</TransformOnBuild>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+  </PropertyGroup>
+  <Target Name="AfterBuild" Condition="$(Configuration.Contains('Debug'))">
+    <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)$(TargetFileName);$(ProjectDir)$(OutDir)$(TargetName).pdb" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />
+    <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)Properties\RhinoInside.Revit.addin" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)" />
+  </Target>
+  <Target Name="BeforeClean" Condition="$(Configuration.Contains('Debug'))">
+    <Delete Files="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit.addin" />
+    <RemoveDir Directories="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />
+  </Target>
+</Project>

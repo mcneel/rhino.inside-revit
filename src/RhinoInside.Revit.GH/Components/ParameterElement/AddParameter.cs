@@ -82,7 +82,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
       base.BeforeSolveInstance();
 
       // Create Temp Shared Parameters File
-      if (AddIn.Host.Services.Value is Autodesk.Revit.ApplicationServices.Application app)
+      if (Core.Host.Services.Value is Autodesk.Revit.ApplicationServices.Application app)
       {
         UserSharedParametersFilename = app.SharedParametersFilename;
         app.SharedParametersFilename = System.IO.Path.GetTempFileName() + ".txt";
@@ -94,7 +94,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
     protected override void AfterSolveInstance()
     {
       // Restore User Shared Parameters File
-      if (AddIn.Host.Services.Value is Autodesk.Revit.ApplicationServices.Application app)
+      if (Core.Host.Services.Value is Autodesk.Revit.ApplicationServices.Application app)
       {
         using (DefinitionFile) DefinitionFile = default;
 

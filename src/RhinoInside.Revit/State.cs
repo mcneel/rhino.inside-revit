@@ -1,6 +1,6 @@
 using System;
 
-namespace RhinoInside
+namespace RhinoInside.Revit
 {
   internal class State<T> : IDisposable where T : State<T>, new()
   {

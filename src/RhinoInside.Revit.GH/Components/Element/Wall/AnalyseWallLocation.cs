@@ -111,7 +111,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetData("Wall", ref wallInstance))
         return;
 
-      DA.SetData("Center Curve", wallInstance.GetCenterCurve());
+      DA.SetData("Center Curve", wallInstance.GetCenterCurve().ToCurve());
       PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.WALL_KEY_REF_PARAM, "Location Line");
 
       var offsetPlaneNormal = GetOffsetPlaneNormal(wallInstance);

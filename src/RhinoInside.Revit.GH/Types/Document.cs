@@ -269,7 +269,7 @@ namespace RhinoInside.Revit.GH.Types
 
     static Document()
     {
-      if (AddIn.Host.Value is Autodesk.Revit.UI.UIApplication host)
+      if (Core.Host.Value is Autodesk.Revit.UI.UIApplication host)
       {
         foreach (var document in host.Application.Documents.Cast<DB.Document>())
           AddDocument(document);

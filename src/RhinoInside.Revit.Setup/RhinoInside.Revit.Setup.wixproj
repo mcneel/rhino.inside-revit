@@ -48,7 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Product.wxs" />
-    <Content Include="Addin.wxi" />
+    <Content Include="AddIn.wxi" />
     <Content Include="Revit.wxi" />
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" Condition=" '$(WixTargetsPath)' != '' " />
@@ -75,7 +75,7 @@
     <Message Text="MajorMinorVersion = $(MajorMinorVersion)" Importance="high" />
     <Message Text="BuildVersion = $(BuildVersion)" Importance="high" />
     <!-- Set teamcity build number -->
-    <Message Text="##teamcity[buildNumber '$(ProductVersion)']" Importance="high" Condition="$(CI)==true"/>
+    <Message Text="##teamcity[buildNumber '$(ProductVersion)']" Importance="high" Condition="$(CI)==true" />
     <!-- Create the WiX preprocessor variables -->
     <CreateProperty Value="$(DefineConstants);ProductVersion=$(ProductVersion)">
       <Output TaskParameter="Value" PropertyName="DefineConstants" />

@@ -1,20 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Windows.Forms;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
 using Microsoft.Win32.SafeHandles;
-
-using Rhino;
 using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.Convert.System.Collections.Generic;
-using RhinoInside.Revit.External.ApplicationServices.Extensions;
-using RhinoInside.Revit.External.UI;
-using RhinoInside.Revit.External.UI.Extensions;
 
 namespace RhinoInside.Revit
 {
@@ -24,11 +16,11 @@ namespace RhinoInside.Revit
     {
       if (MainWindow.IsZero)
       {
-        var result = AddIn.CheckSetup();
+        var result = Core.CheckSetup();
         if (result != Result.Succeeded)
           return result;
 
-        MainWindow = new WindowHandle(AddIn.Host.MainWindowHandle);
+        MainWindow = new WindowHandle(Core.Host.MainWindowHandle);
 
         try   { result = Rhinoceros.Startup(); }
         catch { result = Result.Failed; }
@@ -40,10 +32,10 @@ namespace RhinoInside.Revit
         }
 
         // Register some events
-        AddIn.Host.Idling += OnIdle;
-        AddIn.Host.Services.DocumentChanged += OnDocumentChanged;
+        Core.Host.Idling += OnIdle;
+        Core.Host.Services.DocumentChanged += OnDocumentChanged;
 
-        AddIn.CurrentStatus = AddIn.Status.Ready;
+        Core.CurrentStatus = Core.Status.Ready;
       }
 
       return Result.Succeeded;
@@ -56,8 +48,8 @@ namespace RhinoInside.Revit
       if (!MainWindow.IsZero)
       {
         // Unregister some events
-        AddIn.Host.Services.DocumentChanged -= OnDocumentChanged;
-        AddIn.Host.Idling -= OnIdle;
+        Core.Host.Services.DocumentChanged -= OnDocumentChanged;
+        Core.Host.Idling -= OnIdle;
 
         MainWindow.SetHandleAsInvalid();
       }
@@ -66,18 +58,18 @@ namespace RhinoInside.Revit
     }
 
     static bool isRefreshActiveViewPending = false;
-    public static void RefreshActiveView() => isRefreshActiveViewPending = true;
+    internal static void RefreshActiveView() => isRefreshActiveViewPending = true;
 
     static void OnIdle(object sender, IdlingEventArgs args)
     {
-      if (AddIn.CurrentStatus > AddIn.Status.Available)
+      if (Core.CurrentStatus > Core.Status.Available)
       {
         if (ProcessIdleActions())
           args.SetRaiseWithoutDelay();
       }
     }
 
-    public static event EventHandler<DocumentChangedEventArgs> DocumentChanged;
+    internal static event EventHandler<DocumentChangedEventArgs> DocumentChanged;
     private static void OnDocumentChanged(object sender, DocumentChangedEventArgs args)
     {
       var document = args.GetDocument();
@@ -176,9 +168,8 @@ namespace RhinoInside.Revit
 
     #region Public Properties
     internal static WindowHandle MainWindow { get; private set; } = WindowHandle.Zero;
-    public static IntPtr MainWindowHandle                         => MainWindow.Handle;
 
-    public static Autodesk.Revit.UI.UIApplication                 ActiveUIApplication => AddIn.Host.Value as Autodesk.Revit.UI.UIApplication;
+    public static Autodesk.Revit.UI.UIApplication                 ActiveUIApplication => Core.Host.Value as Autodesk.Revit.UI.UIApplication;
     public static Autodesk.Revit.ApplicationServices.Application  ActiveDBApplication => ActiveUIApplication?.Application;
 
     public static Autodesk.Revit.UI.UIDocument                    ActiveUIDocument => ActiveUIApplication?.ActiveUIDocument;

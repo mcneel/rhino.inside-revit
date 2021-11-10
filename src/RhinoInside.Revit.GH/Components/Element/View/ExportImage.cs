@@ -60,7 +60,7 @@ namespace RhinoInside.Revit.GH.Components
       DA.GetData("Folder", ref folder);
 
       if (string.IsNullOrEmpty(folder))
-        folder = Path.Combine(AddIn.SwapFolder,view.Document.GetFingerprintGUID().ToString(), InstanceGuid.ToString());
+        folder = Path.Combine(Core.SwapFolder,view.Document.GetFingerprintGUID().ToString(), InstanceGuid.ToString());
 
       Directory.CreateDirectory(folder);
 

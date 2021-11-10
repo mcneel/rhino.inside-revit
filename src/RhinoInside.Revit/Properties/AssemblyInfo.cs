@@ -18,4 +18,5 @@ using System.Runtime.InteropServices;
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("C5BC7226-0E13-428C-9361-6F6B83169BD7")]
+[assembly: InternalsVisibleTo("RhinoInside.Revit.AddIn")]
 [assembly: InternalsVisibleTo("RhinoInside.Revit.GH")]

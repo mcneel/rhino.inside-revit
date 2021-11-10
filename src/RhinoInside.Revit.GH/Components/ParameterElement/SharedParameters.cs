@@ -116,7 +116,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (AddIn.Host.Services.Value is Autodesk.Revit.ApplicationServices.Application app)
+      if (Core.Host.Services.Value is Autodesk.Revit.ApplicationServices.Application app)
       {
         // Input
         if (!Params.TryGetData(DA, "File", out string file, x => File.Exists(x))) return;
