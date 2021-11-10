@@ -6,6 +6,10 @@ group: Deployment & Configs
 
 <!-- most recent release should be on top -->
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html title="v1.4 RC1" version="v1.4.7983.32601" pre_release=true time="11/09/2021" %}
+
+- Minor Fixes and Improvements
+
 {% include ltr/release-header.html title="v1.3 Stable" version="v1.3.7983.15227" time="10/12/2021" %}
 
 - Includes all changes under 1.2RC releases listed below
