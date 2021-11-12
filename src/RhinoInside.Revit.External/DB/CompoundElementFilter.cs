@@ -293,6 +293,9 @@ namespace Autodesk.Revit.DB
 
   abstract class ElementExternalFilter : IDisposable
   {
+    protected static readonly FilterNumericRuleEvaluator NumericEqualsEvaluator = new FilterNumericEquals();
+    protected static readonly ParameterValueProvider IdParamProvider = new ParameterValueProvider(new ElementId(BuiltInParameter.ID_PARAM));
+
     public virtual bool IsValidObject => true;
     public bool Inverted { get; protected set; }
     public virtual void Dispose() { }
@@ -309,9 +312,6 @@ namespace Autodesk.Revit.DB
 
     public override bool PassesFilter(Document document, ElementId id) => IdsToInclude.Contains(id);
     public override bool PassesFilter(Element element) => IdsToInclude.Contains(element.Id);
-
-    private static readonly FilterNumericRuleEvaluator NumericEqualsEvaluator = new FilterNumericEquals();
-    private static readonly ParameterValueProvider IdParamProvider = new ParameterValueProvider(new ElementId(BuiltInParameter.ID_PARAM));
 
     public static implicit operator ElementFilter(ElementIdSetFilter filter) => CompoundElementFilter.Union
     (
@@ -366,6 +366,12 @@ namespace Autodesk.Revit.DB
         return element.IsEquivalent(visible.FirstElement()) != Inverted;
       }
     }
+
+    public static implicit operator ElementFilter(VisibleInViewFilter filter) => CompoundElementFilter.ExclusionFilter
+    (
+      new FilteredElementCollector(filter.Document, filter.ViewId).ToElementIds(),
+      inverted: !filter.Inverted
+    );
   }
 }
 #endif
