@@ -6,6 +6,7 @@ using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using DB = Autodesk.Revit.DB;
+using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -104,7 +105,7 @@ namespace RhinoInside.Revit.GH.Components
 
         DB.UpdaterRegistry.RegisterUpdater(this, isOptional: true);
 
-        var filter = new DB.ElementCategoryFilter(DB.BuiltInCategory.INVALID, true);
+        var filter = DBX.CompoundElementFilter.ElementIsNotInternalFilter(doc);
         DB.UpdaterRegistry.AddTrigger(updaterId, filter, DB.Element.GetChangeTypeAny());
         DB.UpdaterRegistry.AddTrigger(updaterId, filter, DB.Element.GetChangeTypeElementDeletion());
       }

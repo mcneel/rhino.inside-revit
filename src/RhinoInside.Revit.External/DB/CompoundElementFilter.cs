@@ -8,6 +8,21 @@ namespace RhinoInside.Revit.External.DB
   internal static class CompoundElementFilter
   {
     #region Implementation Details
+    /// <summary>
+    /// ElementFilter used internaly to skip certain internal elements 
+    /// </summary>
+    /// <param name="doc">May be useful in the future to exclude certain elements</param>
+    /// <returns></returns>
+    internal static ElementFilter ElementIsNotInternalFilter(Document doc)
+    {
+      return Union
+      (
+        ElementIsElementTypeFilter(),
+        ElementHasCategoryFilter
+      );
+    }
+
+    public static ElementFilter ElementHasCategoryFilter { get; } = new ElementCategoryFilter(BuiltInCategory.INVALID, inverted: true);
     private static ElementFilter ElementIsElementTypeFilterInstance { get; } = new ElementIsElementTypeFilter(inverted: false);
     private static ElementFilter ElementIsNotElementTypeFilterInstance { get; } = new ElementIsElementTypeFilter(inverted: true);
     private static FilterNumericRuleEvaluator NumericEqualsEvaluator { get; } = new FilterNumericEquals();
@@ -137,9 +152,9 @@ namespace RhinoInside.Revit.External.DB
 
     static ElementFilter ElementTypeFilter(ElementType elementType, bool inverted = false)
     {
-      using (var rule = new FilterElementIdRule(ElemTypeParamProvider, NumericEqualsEvaluator, elementType.Id))
+      using (var rule = new FilterElementIdRule(ElemTypeParamProvider, NumericEqualsEvaluator, elementType?.Id ?? ElementId.InvalidElementId))
       {
-        if (!inverted && elementType.Category is Category category)
+        if (!inverted && elementType?.Category is Category category)
         {
           var filters = new ElementFilter[]
           {
@@ -163,7 +178,9 @@ namespace RhinoInside.Revit.External.DB
 
       if (inverted)
       {
-        var rules = elementTypes.Select(x => new FilterInverseRule(new FilterElementIdRule(ElemTypeParamProvider, NumericEqualsEvaluator, x.Id)));
+        var rules = elementTypes.
+          Distinct(Extensions.ElementEqualityComparer.SameDocument).
+          Select(x => new FilterInverseRule(new FilterElementIdRule(ElemTypeParamProvider, NumericEqualsEvaluator, x?.Id ?? ElementId.InvalidElementId)));
         return new ElementParameterFilter(rules.ToArray());
       }
       else
@@ -183,10 +200,12 @@ namespace RhinoInside.Revit.External.DB
       Slow = 4,
       All = int.MaxValue
     }
+
     private static FilterCost GetFilterCost(this ElementFilter filter)
     {
       if (ReferenceEquals(filter, Empty)) return FilterCost.Empty;
       if (ReferenceEquals(filter, Full)) return FilterCost.All;
+      if (ReferenceEquals(filter, null)) return FilterCost.All;
 
       switch (filter)
       {
@@ -235,6 +254,7 @@ namespace RhinoInside.Revit.External.DB
       var list = new List<ElementFilter>(filters.Count);
       foreach (var filter in filters.Distinct())
       {
+        if (ReferenceEquals(filter, null)) return null;
         if (ReferenceEquals(filter, Full)) return Full;
         if (ReferenceEquals(filter, Empty)) continue;
         list.Add(filter);
@@ -269,6 +289,7 @@ namespace RhinoInside.Revit.External.DB
       {
         if (ReferenceEquals(filter, Empty)) return Empty;
         if (ReferenceEquals(filter, Full)) continue;
+        if (ReferenceEquals(filter, null)) continue;
         list.Add(filter);
       }
 
