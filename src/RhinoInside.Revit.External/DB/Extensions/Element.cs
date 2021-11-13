@@ -9,8 +9,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 {
   internal static class ElementEqualityComparer
   {
-    public static readonly IEqualityComparer<Element> InterDocument = new InterDocumentComparer();
-    public static readonly IEqualityComparer<Element> SameDocument = new SameDocumentComparer();
+    public static readonly IEqualityComparer<Element> InterDocument = default(InterDocumentComparer);
+    public static readonly IEqualityComparer<Element> SameDocument = default(SameDocumentComparer);
 
     struct SameDocumentComparer : IEqualityComparer<Element>
     {
@@ -185,7 +185,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         UpdaterRegistry.RegisterUpdater(this, isOptional: true);
 
         if (filter is null)
-          filter = CompoundElementFilter.Full;
+          filter = CompoundElementFilter.All;
 
         UpdaterRegistry.AddTrigger(updaterId, document, filter, Element.GetChangeTypeAny());
         UpdaterRegistry.AddTrigger(updaterId, document, filter, Element.GetChangeTypeElementDeletion());

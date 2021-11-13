@@ -22,6 +22,8 @@ namespace RhinoInside.Revit.External.DB
       );
     }
 
+    const double BoundingBoxLimits = 1e+9;
+    public static ElementFilter ElementHasBoundingBoxFilter { get; } = new BoundingBoxIsInsideFilter(new Outline(new XYZ(-BoundingBoxLimits, -BoundingBoxLimits, -BoundingBoxLimits), new XYZ(+BoundingBoxLimits, +BoundingBoxLimits, +BoundingBoxLimits)));
     public static ElementFilter ElementHasCategoryFilter { get; } = new ElementCategoryFilter(BuiltInCategory.INVALID, inverted: true);
     private static ElementFilter ElementIsElementTypeFilterInstance { get; } = new ElementIsElementTypeFilter(inverted: false);
     private static ElementFilter ElementIsNotElementTypeFilterInstance { get; } = new ElementIsElementTypeFilter(inverted: true);
@@ -42,7 +44,7 @@ namespace RhinoInside.Revit.External.DB
       }
     );
 
-    public static ElementFilter Full { get; } = new LogicalOrFilter
+    public static ElementFilter All { get; } = new LogicalOrFilter
     (
       new ElementFilter[]
       {
@@ -53,7 +55,7 @@ namespace RhinoInside.Revit.External.DB
 
     public static ElementFilter ExclusionFilter(ICollection<ElementId> ids, bool inverted = false) =>
       ids.Count == 0 ?
-      (inverted ? Empty : Full) :
+      (inverted ? Empty : All) :
       (inverted ? (ElementFilter) new ElementIdSetFilter(ids) : (ElementFilter) new ExclusionFilter(ids));
     #endregion
 
@@ -194,6 +196,7 @@ namespace RhinoInside.Revit.External.DB
     #region Operators
     enum FilterCost
     {
+      Null = -1,
       Empty = 0,
       Quick = 1,
       Logical = 2,
@@ -203,9 +206,9 @@ namespace RhinoInside.Revit.External.DB
 
     private static FilterCost GetFilterCost(this ElementFilter filter)
     {
+      if (ReferenceEquals(filter, null)) return FilterCost.Null;
       if (ReferenceEquals(filter, Empty)) return FilterCost.Empty;
-      if (ReferenceEquals(filter, Full)) return FilterCost.All;
-      if (ReferenceEquals(filter, null)) return FilterCost.All;
+      if (ReferenceEquals(filter, All)) return FilterCost.All;
 
       switch (filter)
       {
@@ -235,11 +238,9 @@ namespace RhinoInside.Revit.External.DB
       var selfCost = self.GetFilterCost();
       var otherCost = other.GetFilterCost();
 
-      if (selfCost == FilterCost.All || otherCost == FilterCost.All)
-        return Full;
-
-      if (selfCost == FilterCost.Empty) return other;
-      if (otherCost == FilterCost.Empty) return self;
+      if (selfCost  == FilterCost.All   || otherCost == FilterCost.All) return All;
+      if (selfCost  == FilterCost.Empty || selfCost  == FilterCost.Null) return other;
+      if (otherCost == FilterCost.Empty || otherCost == FilterCost.Null) return self;
 
       return selfCost < otherCost ?
         new LogicalOrFilter(self, other) :
@@ -249,17 +250,18 @@ namespace RhinoInside.Revit.External.DB
     public static ElementFilter Union(IList<ElementFilter> filters)
     {
       if (filters.Count == 0) return Empty;
-      if (filters.Count == 1) return filters[0];
+      if (filters.Count == 1) return filters[0] ?? Empty;
 
       var list = new List<ElementFilter>(filters.Count);
       foreach (var filter in filters.Distinct())
       {
-        if (ReferenceEquals(filter, null)) return null;
-        if (ReferenceEquals(filter, Full)) return Full;
+        if (ReferenceEquals(filter, All)) return All;
         if (ReferenceEquals(filter, Empty)) continue;
+        if (ReferenceEquals(filter, null)) continue;
         list.Add(filter);
       }
 
+      if (list.Count == 0) return Empty;
       if (list.Count == 1) return list[0];
       return new LogicalOrFilter(list);
     }
@@ -269,30 +271,32 @@ namespace RhinoInside.Revit.External.DB
       var selfCost = self.GetFilterCost();
       var otherCost = other.GetFilterCost();
 
-      if (selfCost == FilterCost.Empty || otherCost == FilterCost.Empty)
-        return Empty;
-
-      if (selfCost == FilterCost.All) return other;
-      if (otherCost == FilterCost.All) return self;
+      if (selfCost  == FilterCost.Empty || otherCost == FilterCost.Empty) return Empty;
+      if (selfCost  == FilterCost.All   || selfCost  == FilterCost.Null) return other;
+      if (otherCost == FilterCost.All   || otherCost == FilterCost.Null) return self;
 
       return selfCost < otherCost ?
         new LogicalAndFilter(self, other) :
         new LogicalAndFilter(other, self);
     }
 
+    public static ElementFilter Intersect(params ElementFilter[] filters) => Intersect(filters as IList<ElementFilter>);
+
     public static ElementFilter Intersect(IList<ElementFilter> filters)
     {
       if (filters.Count == 0) return Empty;
+      if (filters.Count == 1) return filters[0] ?? Empty;
 
       var list = new List<ElementFilter>(filters.Count);
       foreach (var filter in filters.Distinct())
       {
         if (ReferenceEquals(filter, Empty)) return Empty;
-        if (ReferenceEquals(filter, Full)) continue;
+        if (ReferenceEquals(filter, All)) continue;
         if (ReferenceEquals(filter, null)) continue;
         list.Add(filter);
       }
 
+      if (list.Count == 0) return Empty;
       if (list.Count == 1) return list[0];
       return new LogicalAndFilter(list);
     }
@@ -314,9 +318,6 @@ namespace Autodesk.Revit.DB
 
   abstract class ElementExternalFilter : IDisposable
   {
-    protected static readonly FilterNumericRuleEvaluator NumericEqualsEvaluator = new FilterNumericEquals();
-    protected static readonly ParameterValueProvider IdParamProvider = new ParameterValueProvider(new ElementId(BuiltInParameter.ID_PARAM));
-
     public virtual bool IsValidObject => true;
     public bool Inverted { get; protected set; }
     public virtual void Dispose() { }
@@ -327,6 +328,9 @@ namespace Autodesk.Revit.DB
 
   class ElementIdSetFilter : ElementExternalFilter
   {
+    protected static readonly FilterNumericRuleEvaluator NumericEqualsEvaluator = new FilterNumericEquals();
+    protected static readonly ParameterValueProvider IdParamProvider = new ParameterValueProvider(new ElementId(BuiltInParameter.ID_PARAM));
+
     readonly HashSet<ElementId> IdsToInclude;
     public ElementIdSetFilter(ICollection<ElementId> idsToInclude) => IdsToInclude = new HashSet<ElementId>(idsToInclude);
     public ICollection<ElementId> GetIdsToInclude() => IdsToInclude;
@@ -345,52 +349,44 @@ namespace Autodesk.Revit.DB
   class VisibleInViewFilter : ElementExternalFilter
   {
     readonly Document Document;
-    readonly ElementId ViewId;
-    public VisibleInViewFilter(Document document, ElementId viewId)
-    {
-      Document = document;
-      ViewId = viewId;
-    }
+    readonly ICollection<ElementId> IdsToInclude;
 
-    public VisibleInViewFilter(Document document, ElementId viewId, bool inverted) :
-      this(document, viewId)
+    public override bool IsValidObject => Document.IsValidObject;
+
+    public VisibleInViewFilter(Document document, ElementId viewId) : this(document, viewId, inverted: false) { }
+
+    public VisibleInViewFilter(Document document, ElementId viewId, bool inverted)
     {
+      if (document is null) throw new ArgumentNullException(nameof(document));
+      if (viewId is null) throw new ArgumentNullException(nameof(viewId));
+
       Inverted = inverted;
+      Document = document;
+
+      using (var collector = new FilteredElementCollector(document, viewId))
+        IdsToInclude = collector.ToReadOnlyElementIdCollection();
     }
 
     public override bool PassesFilter(Document document, ElementId id)
     {
-      if (!document.IsEquivalent(Document)) return false;
+      if (document is null) throw new ArgumentNullException(nameof(document));
+      if (id is null) throw new ArgumentNullException(nameof(id));
+      if (!Document.IsEquivalent(document)) throw new ArgumentException("Invalid document", nameof(document));
 
-      using (var collector = new FilteredElementCollector(Document, ViewId))
-      {
-        var visible = collector.WherePasses
-        (
-          new ElementIdSetFilter(new ElementId[] { id })
-        );
-
-        return (id == visible.FirstElementId()) != Inverted;
-      }
+      return IdsToInclude.Contains(id) != Inverted;
     }
 
     public override bool PassesFilter(Element element)
     {
-      if (!element.Document.IsEquivalent(Document)) return false;
+      if (element is null) throw new ArgumentNullException(nameof(element));
+      if (!Document.IsEquivalent(element.Document)) throw new ArgumentException("Invalid element document", nameof(element));
 
-      using (var collector = new FilteredElementCollector(Document, ViewId))
-      {
-        var visible = collector.WherePasses
-        (
-          new ElementIdSetFilter(new ElementId[] { element.Id })
-        );
-
-        return element.IsEquivalent(visible.FirstElement()) != Inverted;
-      }
+      return IdsToInclude.Contains(element.Id) != Inverted;
     }
 
     public static implicit operator ElementFilter(VisibleInViewFilter filter) => CompoundElementFilter.ExclusionFilter
     (
-      new FilteredElementCollector(filter.Document, filter.ViewId).ToElementIds(),
+      filter.IdsToInclude,
       inverted: !filter.Inverted
     );
   }
