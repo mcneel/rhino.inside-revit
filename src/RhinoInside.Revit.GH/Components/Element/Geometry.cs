@@ -126,7 +126,7 @@ namespace RhinoInside.Revit.GH.Components
         }
 
         var elePath = elements is object ? elementsPath.AppendElement(index) : default;
-        if (level == 0 && ExpandDependents) elePath = elePath.AppendElement(0);
+        if (level == 0 && ExpandDependents) elePath = elePath?.AppendElement(0);
         elements?.EnsurePath(elePath);
 
         var geoPath = geometriesPath.AppendElement(index++);
@@ -177,7 +177,7 @@ namespace RhinoInside.Revit.GH.Components
                   (visibleInViewFilter?.PassesFilter(x) != false)
                 ),
                 visibleInViewFilter, options,
-                elePath.CullElement(), elements,
+                elePath?.CullElement(), elements,
                 geoPath.CullElement(), geometries,
                 level: 1
               );
