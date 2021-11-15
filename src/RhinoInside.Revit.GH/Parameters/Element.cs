@@ -297,23 +297,31 @@ namespace RhinoInside.Revit.GH.Parameters
       }
     }
 
-    (bool Committed, IList<string> Messages) DeleteElements()
+    bool DeleteElements(out IList<GH_RuntimeMessage> messages)
     {
       var committed = false;
-      var messages = new List<string>();
+      messages = new List<GH_RuntimeMessage>();
+      var groups = new List<DB.TransactionGroup>();
 
-      foreach (var document in ToElementIds(VolatileData).GroupBy(x => x.Document))
+      try
       {
-        using (var group = new DB.TransactionGroup(document.Key, "Delete Elements") { IsFailureHandlingForcedModal = true })
+        foreach (var document in ToElementIds(VolatileData).GroupBy(x => x.Document))
         {
+          // Look for all disctint non built-in elements
           var elementIds = new HashSet<DB.ElementId>
           (
-            document.Where(x => x.IsValid && !x.Id.IsBuiltInId()).Select(x => x.Id),
+            document.Where(x => !x.Id.IsBuiltInId() && x.Value is object).Select(x => x.Id),
             default(ElementIdEqualityComparer)
           );
 
           if (elementIds.Count > 0)
           {
+            var group = new DB.TransactionGroup(document.Key, "Delete Elements")
+            { IsFailureHandlingForcedModal = true };
+
+            if (group.Start() != DB.TransactionStatus.Started) continue;
+            groups.Add(group);
+
             using (var tx = new DB.Transaction(document.Key, "Delete Elements"))
             {
               tx.SetFailureHandlingOptions(tx.GetFailureHandlingOptions().SetDelayedMiniWarnings(false));
@@ -321,58 +329,91 @@ namespace RhinoInside.Revit.GH.Parameters
               if (tx.Start() == DB.TransactionStatus.Started)
               {
                 // Show feedback on Revit
-                foreach (var elementId in elementIds)
+                using (var message = new DB.FailureMessage(ExternalFailures.ElementFailures.ConfirmDeleteElement))
                 {
-                  using (var message = new DB.FailureMessage(ExternalFailures.ElementFailures.ConfirmDeleteElement))
-                  {
-                    message.SetFailingElement(elementId);
-                    document.Key.PostFailure(message);
-                  }
+                  message.SetFailingElements(elementIds);
+                  document.Key.PostFailure(message);
                 }
 
                 if (tx.Commit() == DB.TransactionStatus.Committed)
                 {
-                  messages.Add($"Some elements were deleted from '{document.Key.Title.TripleDot(16)}'.");
+                  tx.Start();
+                  document.Key.Delete(elementIds);
+                  committed |= tx.Commit() == DB.TransactionStatus.Committed;
 
-                  if (elementIds.All(x => document.Key.GetElement(x) is object))
+                  if (committed)
                   {
-                    tx.Start();
-                    document.Key.Delete(elementIds);
-                    committed |= tx.Commit() == DB.TransactionStatus.Committed;
+                    messages.Add
+                    (
+                      new GH_RuntimeMessage
+                      ($"Some elements were deleted from '{document.Key.Title.TripleDot(16)}'.",
+                      GH_RuntimeMessageLevel.Warning)
+                    );
                   }
-                  else committed = true;
+                  else break;
                 }
               }
             }
           }
         }
       }
+      catch (Autodesk.Revit.Exceptions.ArgumentException e)
+      {
+        committed = false;
+        messages.Clear();
+        messages.Add
+        (
+          new GH_RuntimeMessage(e.Message.Split
+          (new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)[0],
+          GH_RuntimeMessageLevel.Error, Attributes.GetTopLevel.DocObject.Name)
+        );
+      }
 
-      return (committed, messages);
+      foreach (var group in groups)
+      {
+        using (group)
+          if (committed) group.Assimilate();
+          else group.RollBack();
+      }
+
+      return committed;
     }
 
     void Menu_DeleteElements(object sender, EventArgs e)
     {
       bool enableSolutions = Guest.DocumentChangedEvent.EnableSolutions;
       Guest.DocumentChangedEvent.EnableSolutions = false;
+      var enabledCanvas = Grasshopper.Instances.ActiveCanvas.Enabled;
+      Grasshopper.Instances.ActiveCanvas.Enabled = false;
 
-      var (commited, messages) = DeleteElements();
-
-      Guest.ShowEditor();
-
-      if (commited)
+      try
       {
-        // Show feedback on Grasshopper
-        ClearRuntimeMessages();
-        foreach (var message in messages)
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, message);
+        var commited = DeleteElements(out var messages);
+        Guest.ShowEditor();
 
-        ReloadVolatileData();
-        ExpireDownStreamObjects();
-        OnPingDocument().NewSolution(false);
+        if (commited)
+        {
+          // Show feedback on the component
+          ClearRuntimeMessages();
+          foreach (var message in messages)
+            AddRuntimeMessage(message.Type, message.Message);
+
+          ReloadVolatileData();
+          ExpireDownStreamObjects();
+          OnPingDocument()?.NewSolution(false);
+        }
+        else
+        {
+          // Show feedback on Grasshopper
+          foreach (var message in messages)
+            Grasshopper.Instances.DocumentEditor.SetStatusBarEvent(message);
+        }
       }
-
-      Guest.DocumentChangedEvent.EnableSolutions = enableSolutions;
+      finally
+      {
+        Grasshopper.Instances.ActiveCanvas.Enabled = enabledCanvas;
+        Guest.DocumentChangedEvent.EnableSolutions = enableSolutions;
+      }
     }
     #endregion
 
