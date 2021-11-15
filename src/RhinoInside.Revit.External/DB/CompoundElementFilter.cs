@@ -247,6 +247,8 @@ namespace RhinoInside.Revit.External.DB
         new LogicalOrFilter(other, self);
     }
 
+    public static ElementFilter Union(params ElementFilter[] filters) => Union(filters as IList<ElementFilter>);
+
     public static ElementFilter Union(IList<ElementFilter> filters)
     {
       if (filters.Count == 0) return Empty;
@@ -313,6 +315,7 @@ namespace RhinoInside.Revit.External.DB
 #if !REVIT_2021
 namespace Autodesk.Revit.DB
 {
+  using System.Diagnostics;
   using RhinoInside.Revit.External.DB;
   using RhinoInside.Revit.External.DB.Extensions;
 
@@ -349,7 +352,9 @@ namespace Autodesk.Revit.DB
   class VisibleInViewFilter : ElementExternalFilter
   {
     readonly Document Document;
-    readonly ICollection<ElementId> IdsToInclude;
+    readonly ElementId ViewId;
+    readonly ICollection<ElementId> VisibleElementIds;
+    readonly ICollection<ElementId> VisibleCategoryIds;
 
     public override bool IsValidObject => Document.IsValidObject;
 
@@ -362,9 +367,28 @@ namespace Autodesk.Revit.DB
 
       Inverted = inverted;
       Document = document;
+      ViewId = viewId;
 
       using (var collector = new FilteredElementCollector(document, viewId))
-        IdsToInclude = collector.ToReadOnlyElementIdCollection();
+      {
+        VisibleElementIds = collector.ToReadOnlyElementIdCollection();
+        VisibleCategoryIds = new HashSet<ElementId>
+          (collector.Select(x => x.Category).OfType<Category>().Select(x => x.Id));
+      }
+
+#if DEBUG
+      foreach (var element in VisibleElementIds.Select(x => Document.GetElement(x)))
+      {
+        Debug.Assert(!(element is ElementType), "casting operator needs to be adjusted");
+        Debug.Assert
+        (
+          element.OwnerViewId == viewId ||
+          CompoundElementFilter.ElementHasBoundingBoxFilter.PassesFilter(element) ||
+          (element.Category is object && VisibleCategoryIds.Contains(element.Category.Id)),
+          "casting operator needs to be adjusted"
+        );
+      }
+#endif
     }
 
     public override bool PassesFilter(Document document, ElementId id)
@@ -373,7 +397,7 @@ namespace Autodesk.Revit.DB
       if (id is null) throw new ArgumentNullException(nameof(id));
       if (!Document.IsEquivalent(document)) throw new ArgumentException("Invalid document", nameof(document));
 
-      return IdsToInclude.Contains(id) != Inverted;
+      return VisibleElementIds.Contains(id) != Inverted;
     }
 
     public override bool PassesFilter(Element element)
@@ -381,13 +405,44 @@ namespace Autodesk.Revit.DB
       if (element is null) throw new ArgumentNullException(nameof(element));
       if (!Document.IsEquivalent(element.Document)) throw new ArgumentException("Invalid element document", nameof(element));
 
-      return IdsToInclude.Contains(element.Id) != Inverted;
+      return VisibleElementIds.Contains(element.Id) != Inverted;
     }
 
-    public static implicit operator ElementFilter(VisibleInViewFilter filter) => CompoundElementFilter.ExclusionFilter
+    public static implicit operator ElementFilter(VisibleInViewFilter filter) => filter.Inverted ?
+    CompoundElementFilter.ExclusionFilter(filter.VisibleElementIds, inverted: false):
+    CompoundElementFilter.Intersect
     (
-      filter.IdsToInclude,
-      inverted: !filter.Inverted
+      #region Quick exclusion
+      // Types are never visible on views.
+      CompoundElementFilter.ElementIsElementTypeFilter(inverted: true),
+      CompoundElementFilter.Union
+      (
+        // Elements should have a bbox
+        CompoundElementFilter.ElementHasBoundingBoxFilter,
+        // or be owned by this view
+        new ElementOwnerViewFilter(filter.ViewId),
+        // or be on one of those categories
+        new ElementMulticategoryFilter(filter.VisibleCategoryIds)
+      ),
+      #endregion
+      #region Slow inclusion
+      CompoundElementFilter.Union
+      (
+        // Cameras do not have parameter Id, so we select all except... ->
+        new ElementCategoryFilter(BuiltInCategory.OST_Cameras),
+        CompoundElementFilter.ExclusionFilter(filter.VisibleElementIds, inverted: true)
+      ),
+      // -> ... the one related to this view.
+      CompoundElementFilter.ExclusionFilter
+      (
+        new ElementId[]
+        {
+          filter.Document.GetElement(filter.ViewId).
+          GetDependentElements(new ElementCategoryFilter(BuiltInCategory.OST_Cameras)).
+          FirstOrDefault() ?? ElementId.InvalidElementId
+        }
+      )
+      #endregion
     );
   }
 }
