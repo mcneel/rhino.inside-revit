@@ -191,8 +191,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      var filters = types.Where(x => x is object).ToList();
-      var filter = CompoundElementFilter.ElementTypeFilter(filters, inverted);
+      var filter = CompoundElementFilter.ElementTypeFilter(types, inverted);
       DA.SetData("Filter", filter);
     }
   }

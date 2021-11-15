@@ -94,7 +94,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
     protected override string IconTag => "∧";
 
     public ElementLogicalAndFilter()
-    : base("Logical And Filter", "AndFltr", "Filter used to combine a set of filters that pass when all pass", "Revit", "Filter")
+    : base("Logical And Filter", "AndFltr", "Filter used to combine multiple filters into one that pass when all pass", "Revit", "Filter")
     { }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -118,7 +118,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
     protected override string IconTag => "∨";
 
     public ElementLogicalOrFilter()
-    : base("Logical Or Filter", "OrFltr", "Filter used to combine a set of filters that pass when any pass", "Revit", "Filter")
+    : base("Logical Or Filter", "OrFltr", "Filter used to combine multiple filters into one that pass when any pass", "Revit", "Filter")
     { }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -130,6 +130,56 @@ namespace RhinoInside.Revit.GH.Components.Filters
         if (DA.GetData(i, ref filter) && filter is object)
           filters.Add(filter);
       }
+
+      DA.SetData("Filter", CompoundElementFilter.Union(filters));
+    }
+  }
+
+  public class ElementIntersectionFilter : ElementFilterComponent
+  {
+    public override Guid ComponentGuid => new Guid("754C40D7-5AE8-4027-921C-0210BBDFAB37");
+    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
+    protected override string IconTag => "⋂";
+
+    public ElementIntersectionFilter()
+    : base("Intersection Filter", "Intersection", "Filter used to combine a set of filters into one that pass when all pass", "Revit", "Filter")
+    { }
+
+    protected override void RegisterInputParams(GH_InputParamManager manager)
+    {
+      manager.AddParameter(new Parameters.ElementFilter(), "Filters", "F", "Filters to combine", GH_ParamAccess.list);
+    }
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      var filters = new List<DB.ElementFilter>();
+      if (!DA.GetDataList("Filters", filters))
+        return;
+
+      DA.SetData("Filter", CompoundElementFilter.Intersect(filters));
+    }
+  }
+
+  public class ElementUnionFilter : ElementFilterComponent
+  {
+    public override Guid ComponentGuid => new Guid("61F75DE1-EE65-4AA8-B9F8-40516BE46C8D");
+    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
+    protected override string IconTag => "⋃";
+
+    public ElementUnionFilter()
+    : base("Union Filter", "Union", "Filter used to combine a set of filters into one that pass when any pass", "Revit", "Filter")
+    { }
+
+    protected override void RegisterInputParams(GH_InputParamManager manager)
+    {
+      manager.AddParameter(new Parameters.ElementFilter(), "Filters", "F", "Filters to combine", GH_ParamAccess.list);
+    }
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      var filters = new List<DB.ElementFilter>();
+      if (!DA.GetDataList("Filters", filters))
+        return;
 
       DA.SetData("Filter", CompoundElementFilter.Union(filters));
     }

@@ -386,6 +386,11 @@
     <Compile Include="Components\ParameterElement\SharedParameters.cs" />
     <Compile Include="Optional.cs" />
     <Compile Include="Parameters\AssemblyInstance.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Types\AssemblyInstance.cs" />
     <Compile Include="Types\Workset.cs" />
     <None Include="Extensions\README.md" />
@@ -466,11 +471,6 @@
     <Compile Include="Parameters\View.cs" />
     <Compile Include="Parameters\ViewSheet.cs" />
     <Compile Include="Parameters\Workset.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Solid.cs" />
     <Compile Include="Types\AppearanceAsset.cs" />
     <Compile Include="Types\AssetPropertyDouble1DMap.cs" />
