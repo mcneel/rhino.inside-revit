@@ -3,8 +3,12 @@ using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
-#if !REVIT_2021
-  using InternalOrigin = Autodesk.Revit.DB.BasePoint;
+#if REVIT_2021
+  using DBInternalOrigin = Autodesk.Revit.DB.InternalOrigin;
+#elif REVIT_2020
+  using DBInternalOrigin = Autodesk.Revit.DB.Element;
+#else
+  using DBInternalOrigin = Autodesk.Revit.DB.BasePoint;
 #endif
 
   public static class InternalOriginExtension
@@ -30,7 +34,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// </summary>
     /// <param name="doc">The document from which to get the internal origin.</param>
     /// <returns>The project internal origin of the document.</returns>
-    public static InternalOrigin Get(Document doc)
+    public static DBInternalOrigin Get(Document doc)
     {
 #if REVIT_2021
       return InternalOrigin.Get(doc);
@@ -38,9 +42,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
       using (var collector = new FilteredElementCollector(doc))
       {
         return collector.
-          OfClass(typeof(InternalOrigin)).
+#if !REVIT_2020
+          OfClass(typeof(DBInternalOrigin)).
+#endif
           OfCategoryId(new ElementId(BuiltInCategory.OST_IOS_GeoSite)).
-          FirstElement() as InternalOrigin;
+          FirstElement() as DBInternalOrigin;
       }
 #endif
     }

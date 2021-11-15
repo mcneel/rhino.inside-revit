@@ -406,6 +406,12 @@
   <data name="ElementLogicalOrFilter" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\..\..\art\gh-icons\comps\elementlogicalorfilter.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="ElementIntersectionFilter" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\..\..\art\gh-icons\comps\elementintersectionfilter.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ElementUnionFilter" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\..\..\art\gh-icons\comps\elementunionfilter.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="ElementMaterialQuantities" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\..\..\art\gh-icons\comps\elementmaterialquantities.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -441,6 +447,9 @@
   </data>
   <data name="ElementSelectableInViewFilter" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\..\..\art\gh-icons\comps\elementselectableinviewfilter.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ElementVisibleInViewFilter" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\..\..\art\gh-icons\comps\elementvisibleinviewfilter.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ElementType" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\..\..\art\gh-icons\params\elementtype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>

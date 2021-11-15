@@ -725,6 +725,18 @@ namespace Rhino.Geometry
 
   static class GeometryBaseExtension
   {
+    public static bool IsNullOrEmpty(this GeometryBase geometry)
+    {
+      switch (geometry)
+      {
+        case null: return true;
+        case Brep brep: return brep.Faces.Count == 0;
+        case Mesh mesh: return mesh.Faces.Count == 0;
+      }
+
+      return false;
+    }
+
     public static bool TryGetUserString<T>(this GeometryBase geometry, string key, out T value, T def) where T : IConvertible
     {
       if (geometry.GetUserString(key) is string stringValue)

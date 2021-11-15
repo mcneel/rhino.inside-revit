@@ -1453,6 +1453,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ElementIntersectionFilter {
+            get {
+                object obj = ResourceManager.GetObject("ElementIntersectionFilter", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ElementIntersectsBrepFilter {
             get {
                 object obj = ResourceManager.GetObject("ElementIntersectsBrepFilter", resourceCulture);
@@ -1763,9 +1773,29 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ElementUnionFilter {
+            get {
+                object obj = ResourceManager.GetObject("ElementUnionFilter", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ElementViewGeometry {
             get {
                 object obj = ResourceManager.GetObject("ElementViewGeometry", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ElementVisibleInViewFilter {
+            get {
+                object obj = ResourceManager.GetObject("ElementVisibleInViewFilter", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

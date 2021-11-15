@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
+using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Parameters;
@@ -14,6 +16,7 @@ using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
+  [ComponentVersion(introduced: "1.0", updated: "1.4")]
   public abstract class ElementGeometryComponent : ZuiComponent
   {
     protected ElementGeometryComponent(string name, string nickname, string description, string category, string subCategory)
@@ -50,100 +53,176 @@ namespace RhinoInside.Revit.GH.Components
       return default;
     }
 
-    internal static bool IsEmpty(GeometryBase geometry)
-    {
-      switch (geometry)
-      {
-        case Brep brep: return brep.Faces.Count == 0;
-        case Mesh mesh: return mesh.Faces.Count == 0;
-      }
-
-      return false;
-    }
+    static readonly DB.ElementFilter ElementHasGeometryFilter = CompoundElementFilter.Intersect
+    (
+      // Not 100% sure but looks like only elements with category have geometry.
+      CompoundElementFilter.ElementHasCategoryFilter,
+      CompoundElementFilter.ElementHasBoundingBoxFilter,
+      // Types below return no geometry.
+      new DB.ElementMulticlassFilter
+      (
+        new Type[]
+        {
+          typeof(DB.CurveElement),
+          typeof(DB.DatumPlane)
+        },
+        inverted: true
+      )
+    );
 
     protected void SolveGeometry
     (
-      GH_Path basePath,
       DB.Document doc,
-      IList<Types.Element> elements,
+      IList<Types.Element> include,
       IList<Types.Element> exclude,
       DB.Options options,
-      out GH_Structure<IGH_GeometricGoo> geometries
+      GH_Path elementsPath, out GH_Structure<Types.Element> elements,
+      GH_Path geometriesPath, out GH_Structure<IGH_GeometricGoo> geometries
     )
     {
+      elements = elementsPath is object ? new GH_Structure<Types.Element>() : default;
       geometries = new GH_Structure<IGH_GeometricGoo>();
 
       // Fill data tree
-      if (doc is object)
+      using (var scope = exclude?.Count > 0 ? doc.RollBackScope() : default)
       {
-        using (var scope = exclude?.Count > 0 ? doc.RollBackScope() : default)
+        if (scope is object)
         {
-          if (scope is object)
+          if (doc.Delete(exclude.ConvertAll(x => x?.Id ?? DB.ElementId.InvalidElementId)).Count > 0)
+            doc.Regenerate();
+        }
+
+        using (var visibleInViewFilter = options.View is object ? new DB.VisibleInViewFilter(options.View.Document, options.View.Id) : default)
+        {
+          SolveGeometry
+          (
+            include.Select(x => x?.Value),
+            visibleInViewFilter,
+            options,
+            elementsPath, elements,
+            geometriesPath, geometries
+          );
+        }
+      }
+    }
+
+    void SolveGeometry
+    (
+      IEnumerable<DB.Element> include,
+      DB.VisibleInViewFilter visibleInViewFilter,
+      DB.Options options,
+      GH_Path elementsPath, GH_Structure<Types.Element> elements,
+      GH_Path geometriesPath, GH_Structure<IGH_GeometricGoo> geometries,
+      int level = 0
+    )
+    {
+      var index = level;
+      foreach (var element in include)
+      {
+        if (level == 0 && GH_Document.IsEscapeKeyDown())
+        {
+          OnPingDocument()?.RequestAbortSolution();
+          return;
+        }
+
+        var elePath = elements is object ? elementsPath.AppendElement(index) : default;
+        if (level == 0 && ExpandDependents) elePath = elePath?.AppendElement(0);
+        elements?.EnsurePath(elePath);
+
+        var geoPath = geometriesPath.AppendElement(index++);
+        if (level == 0 && ExpandDependents) geoPath = geoPath.AppendElement(0);
+        geometries.EnsurePath(geoPath);
+
+        if
+        (
+          element is object &&
+          (
+            level > 0 ||
+            (
+              // 'Element Geometry' works with types.
+              (options.View is null || !(element is DB.ElementType)) &&
+              ElementHasGeometryFilter.PassesFilter(element) &&
+              visibleInViewFilter?.PassesFilter(element) != false
+            )
+          )
+        )
+        {
+          // Extract the geometry
+          var geometryBase = new List<GeometryBase>();
+          if (false != ExtractGeometry(element, options, geometryBase))
           {
-            if (doc.Delete(exclude.ConvertAll(x => x?.Id ?? DB.ElementId.InvalidElementId)).Count > 0)
-              doc.Regenerate();
-          }
+            geometries.AppendRange(geometryBase.Select(ToGeometricGoo), geoPath);
 
-          int index = 0;
-          foreach (var element in elements.Select(x => x.Value))
-          {
-            if (GH_Document.IsEscapeKeyDown())
+            // Extract dependent geometry
+            if (level == 0 && ExpandDependents)
             {
-              OnPingDocument()?.RequestAbortSolution();
-              return;
-            }
+              var dependents = element.GetDependentElements
+              (
+                CompoundElementFilter.Intersect
+                (
+                  // 'Element Geometry' works with types, but not when expanding dependents.
+                  CompoundElementFilter.ElementIsElementTypeFilter(inverted: true),
+                  ElementHasGeometryFilter,
+                  new DB.ExclusionFilter(new DB.ElementId[] { element.Id })
+                )
+              );
 
-            var path = basePath.AppendElement(index++);
-            geometries.EnsurePath(path);
-
-            if (element.IsValid() && element.get_BoundingBox(options.View) is object)
-            {
-              // Extract the geometry
-              using (var geometry = element.GetGeometry(options))
-              {
-                if (geometry is object)
-                {
-                  using (var context = GeometryDecoder.Context.Push())
-                  {
-                    context.Element = element;
-                    context.GraphicsStyleId = element.Category?.GetGraphicsStyle(DB.GraphicsStyleType.Projection)?.Id ?? DB.ElementId.InvalidElementId;
-                    context.MaterialId = element.Category?.Material?.Id ?? DB.ElementId.InvalidElementId;
-
-                    var list = geometry?.
-                        ToGeometryBaseMany().
-                        OfType<GeometryBase>().
-                        Where(x => !IsEmpty(x)).
-                        ToList();
-
-                    if (list.Count == 0)
-                    {
-                      using (var visibleInView = options.View is object ? new DB.VisibleInViewFilter(options.View.Document, options.View.Id) : default)
-                      {
-                        foreach (var dependent in element.GetDependentElements(new DB.ExclusionFilter(new DB.ElementId[] { element.Id })).Select(x => element.Document.GetElement(x)))
-                        {
-                          if (visibleInView?.PassesFilter(dependent) == false)
-                            continue;
-
-                          if (dependent.get_BoundingBox(options.View) is DB.BoundingBoxXYZ)
-                          {
-                            using (var dependentGeometry = dependent?.GetGeometry(options))
-                            {
-                              if (dependentGeometry is object)
-                                list.AddRange(dependentGeometry.ToGeometryBaseMany().OfType<GeometryBase>());
-                            }
-                          }
-                        }
-                      }
-                    }
-
-                    var valid = list.Where(x => !IsEmpty(x)).Select(ToGeometricGoo);
-                    geometries.AppendRange(valid, path);
-                  }
-                }
-              }
+              SolveGeometry
+              (
+                dependents.Select(x => element.Document.GetElement(x)).
+                Where
+                (
+                  x =>
+                  (x as DB.FamilyInstance)?.Invisible != true &&
+                  (visibleInViewFilter?.PassesFilter(x) != false)
+                ),
+                visibleInViewFilter, options,
+                elePath?.CullElement(), elements,
+                geoPath.CullElement(), geometries,
+                level: 1
+              );
             }
           }
         }
+
+        elements?.Append(Types.Element.FromElement(element), elePath);
+      }
+    }
+
+    static bool? ExtractGeometry
+    (
+      DB.Element element, DB.Options options,
+      List<GeometryBase> list
+    )
+    {
+      using (var geometry = element.GetGeometry(options))
+      {
+        if (geometry is null)
+          return default;
+
+        using (var context = GeometryDecoder.Context.Push())
+        {
+          context.Element = element;
+          if (element.Category is DB.Category category)
+          {
+            context.Category = category;
+            context.Material = category.Material;
+          }
+
+          list.AddRange
+          (
+            geometry.
+            ToGeometryBaseMany
+            (
+              x =>
+              options.View is null ||
+              !options.View.GetCategoryHidden(GeometryDecoder.Context.Peek.Category.Id)
+            ).
+            Where(x => !x.IsNullOrEmpty())
+          );
+        }
+
+        return true;
       }
     }
 
@@ -184,15 +263,71 @@ namespace RhinoInside.Revit.GH.Components
                 else
                 {
                   geometryBase.TryGetUserString(DB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), out DB.ElementId materialId);
-                  materialsList.Add(Types.Material.FromElementId(doc, materialId) as Types.Material);
+                  materialsList.Add(new Types.Material(doc, materialId));
                 }
               }
             }
           }
         }
       }
+    }
+
+    #region IO
+    bool _expandDependents = false;
+    protected bool ExpandDependents
+    {
+      get => _expandDependents;
+      set
+      {
+        _expandDependents = value;
+        Message = value ? "Dependents" : string.Empty;
       }
     }
+
+    public override bool Read(GH_IReader reader)
+    {
+      if (!base.Read(reader))
+        return false;
+
+      bool includeDependents = false;
+      reader.TryGetBoolean("ExpandDependents", ref includeDependents);
+      ExpandDependents = includeDependents;
+
+      return true;
+    }
+
+    public override bool Write(GH_IWriter writer)
+    {
+      if (!base.Write(writer))
+        return false;
+
+      if (ExpandDependents)
+        writer.SetBoolean("ExpandDependents", ExpandDependents);
+
+      return true;
+    }
+    #endregion
+
+    #region UI
+    protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
+    {
+      base.AppendAdditionalComponentMenuItems(menu);
+
+      Menu_AppendItem
+      (
+        menu, "Expand Dependents",
+        (sender, arg) =>
+        {
+          RecordUndoEvent("Set: Expand Dependents");
+          ExpandDependents = !ExpandDependents;
+          ExpireSolution(true);
+        },
+        enabled: true,
+        ExpandDependents
+      );
+    }
+    #endregion
+  }
 
   public class ElementGeometry : ElementGeometryComponent
   {
@@ -212,16 +347,6 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition
-      (
-        new Parameters.Param_Enum<Types.ViewDetailLevel>()
-        {
-          Name = "Detail Level",
-          NickName = "DL",
-          Description = "View detail level used to extract geometry",
-          Optional = true
-        }
-      ),
       new ParamDefinition
       (
         new Parameters.Element()
@@ -244,7 +369,17 @@ namespace RhinoInside.Revit.GH.Components
           Optional = true
         },
         ParamRelevance.Occasional
-      )
+      ),
+      new ParamDefinition
+      (
+        new Parameters.Param_Enum<Types.ViewDetailLevel>()
+        {
+          Name = "Detail Level",
+          NickName = "DL",
+          Description = "View detail level used to extract geometry",
+          Optional = true
+        }
+      ),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -257,7 +392,7 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Elements",
           NickName = "E",
           Description = "Elements geometry is extracted from",
-          Access = GH_ParamAccess.list
+          Access = GH_ParamAccess.tree
         },
         ParamRelevance.Occasional
       ),
@@ -297,9 +432,9 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.TryGetData(DA, "Detail Level", out DB.ViewDetailLevel? detailLevel)) return;
       if (!Params.GetDataList(DA, "Elements", out IList<Types.Element> elements)) return;
       if (!Params.TryGetDataList(DA, "Exclude", out IList<Types.Element> exclude)) return;
+      if (!Params.TryGetData(DA, "Detail Level", out DB.ViewDetailLevel? detailLevel)) return;
 
       if (!TryGetCommonDocument(elements.Concat(exclude ?? Enumerable.Empty<Types.Element>()), out var doc))
         return;
@@ -312,27 +447,34 @@ namespace RhinoInside.Revit.GH.Components
       else if (elements.Any(x => x.Value is DB.FamilySymbol symbol && !symbol.IsActive))
       {
         scope = doc.RollBackScope();
-        foreach(var symbol in elements.Select(x => x.Value).OfType<DB.FamilySymbol>())
-          symbol.Activate();
+        try
+        {
+          foreach (var symbol in elements.Select(x => x.Value).OfType<DB.FamilySymbol>())
+            symbol.Activate();
 
-        doc.Regenerate();
+          doc.Regenerate();
+        }
+        catch { scope.Dispose(); }
       }
 
       using (scope)
       using (var options = new DB.Options() { DetailLevel = detailLevel.Value })
       {
-        Params.TrySetDataList(DA, "Elements", () => elements);
-
+        var _Elements_ = Params.IndexOfOutputParam("Elements");
         var _Geometry_ = Params.IndexOfOutputParam("Geometry");
         SolveGeometry
         (
-          DA.ParameterTargetPath(_Geometry_),
           doc,
           elements,
           exclude,
           options,
-          out var Geometry
+          _Elements_ < 0 ? default : DA.ParameterTargetPath(_Elements_), out var Elements,
+          DA.ParameterTargetPath(_Geometry_), out var Geometry
         );
+
+        if (Elements is object)
+          DA.SetDataTree(_Elements_, Elements);
+
         DA.SetDataTree(_Geometry_, Geometry);
 
         var _Categories_ = Params.IndexOfOutputParam("Categories");
@@ -372,15 +514,6 @@ namespace RhinoInside.Revit.GH.Components
     {
       new ParamDefinition
       (
-        new Parameters.View()
-        {
-          Name = "View",
-          NickName = "V",
-          Description = "View used to extract geometry",
-        }
-      ),
-      new ParamDefinition
-      (
         new Parameters.GraphicalElement()
         {
           Name = "Elements",
@@ -400,7 +533,16 @@ namespace RhinoInside.Revit.GH.Components
           DataMapping = GH_DataMapping.Flatten,
           Optional = true
         },
-        ParamRelevance.Primary
+        ParamRelevance.Occasional
+      ),
+      new ParamDefinition
+      (
+        new Parameters.View()
+        {
+          Name = "View",
+          NickName = "V",
+          Description = "View used to extract geometry",
+        }
       ),
     };
 
@@ -414,7 +556,7 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Elements",
           NickName = "E",
           Description = "Elements geometry is extracted from",
-          Access = GH_ParamAccess.list
+          Access = GH_ParamAccess.tree
         },
         ParamRelevance.Occasional
       ),
@@ -454,27 +596,29 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "View", out Types.View view, x => x.IsValid)) return;
       if (!Params.GetDataList(DA, "Elements", out IList<Types.Element> elements)) return;
       if (!Params.TryGetDataList(DA, "Exclude", out IList<Types.Element> exclude)) return;
+      if (!Params.GetData(DA, "View", out Types.View view, x => x.IsValid)) return;
 
       if (!TryGetCommonDocument(elements.Concat(exclude ?? Enumerable.Empty<Types.Element>()).Concat(Enumerable.Repeat(view, 1)), out var doc))
         return;
 
       using (var options = new DB.Options() { View = view.Value })
       {
-        Params.TrySetDataList(DA, "Elements", () => elements);
-
+        var _Elements_ = Params.IndexOfOutputParam("Elements");
         var _Geometry_ = Params.IndexOfOutputParam("Geometry");
         SolveGeometry
         (
-          DA.ParameterTargetPath(_Geometry_),
           doc,
           elements,
           exclude,
           options,
-          out var Geometry
+          _Elements_ < 0 ? default : DA.ParameterTargetPath(_Elements_), out var Elements,
+          DA.ParameterTargetPath(_Geometry_), out var Geometry
         );
+
+        if (Elements is object)
+          DA.SetDataTree(_Elements_, Elements);
 
         DA.SetDataTree(_Geometry_, Geometry);
 

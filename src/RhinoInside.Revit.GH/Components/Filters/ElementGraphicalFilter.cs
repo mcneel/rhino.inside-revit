@@ -172,4 +172,35 @@ namespace RhinoInside.Revit.GH.Components.Filters
       DA.SetData("Filter", new Autodesk.Revit.UI.Selection.SelectableInViewFilter(view.Document, view.Id, inverted));
     }
   }
+
+  [ComponentVersion(introduced: "1.4")]
+  public class ElementVisibleInViewFilter : ElementFilterComponent
+  {
+    public override Guid ComponentGuid => new Guid("8FAD6039-DB4D-41AF-B414-D44E11507A99");
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    protected override string IconTag => "S";
+
+    public ElementVisibleInViewFilter()
+    : base("Visible In View Filter", "VisFltr", "Filter used to match visible elements into the given View", "Revit", "Filter")
+    { }
+
+    protected override void RegisterInputParams(GH_InputParamManager manager)
+    {
+      manager.AddParameter(new Parameters.View(), "View", "V", "View to query", GH_ParamAccess.item);
+      base.RegisterInputParams(manager);
+    }
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      var view = default(Types.View);
+      if (!DA.GetData("View", ref view))
+        return;
+
+      var inverted = false;
+      if (!DA.GetData("Inverted", ref inverted))
+        return;
+
+      DA.SetData("Filter", (DB.ElementFilter) new DB.VisibleInViewFilter(view.Document, view.Id, inverted));
+    }
+  }
 }

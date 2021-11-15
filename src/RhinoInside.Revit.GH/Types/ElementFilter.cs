@@ -100,7 +100,7 @@ namespace RhinoInside.Revit.GH.Types
         return $"Invalid {TypeName}";
 
       if (ReferenceEquals(Value, CompoundElementFilter.Empty)) return "<empty>";
-      if (ReferenceEquals(Value, CompoundElementFilter.Full))  return "<full>";
+      if (ReferenceEquals(Value, CompoundElementFilter.All))  return "<all>";
 
       return $"{Value.GetType().Name}";
     }

@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.GH.Types
         return false;
 
       using (var options = new DB.Options())
-        return !(element.get_Geometry(options) is null);
+        return element.get_Geometry(options) is object;
     }
 
     protected override void SubInvalidateGraphics()
@@ -423,16 +423,15 @@ namespace RhinoInside.Revit.GH.Types
       var context = GeometryDecoder.Context.Peek;
       var attributes = new ObjectAttributes();
 
-      if (context.GraphicsStyleId.IsValid() && document.GetElement(context.GraphicsStyleId) is DB.GraphicsStyle graphicsStyle)
+      if (context.Category is DB.Category category)
       {
-        if (new Category(graphicsStyle.GraphicsStyleCategory).BakeElement(idMap, false, doc, att, out var layerGuid))
+        if (new Category(category).BakeElement(idMap, false, doc, att, out var layerGuid))
           attributes.LayerIndex = doc.Layers.FindId(layerGuid).Index;
       }
 
-      if (context.MaterialId.IsValid() && document.GetElement(context.MaterialId) is DB.Material material)
+      if (context.Material is DB.Material material)
       {
-        var mat = new Material(material);
-        if (mat.BakeElement(idMap, false, doc, att, out var materialGuid))
+        if (new Material(material).BakeElement(idMap, false, doc, att, out var materialGuid))
         {
           attributes.MaterialSource = ObjectMaterialSource.MaterialFromObject;
           attributes.MaterialIndex = doc.Materials.FindId(materialGuid).Index;
@@ -565,7 +564,7 @@ namespace RhinoInside.Revit.GH.Types
                   foreach (var face in brep.Faces)
                   {
                     var faceMaterialId = context.FaceMaterialId[face.SurfaceIndex];
-                    if (faceMaterialId != context.MaterialId)
+                    if (faceMaterialId != (context.Material?.Id ?? DB.ElementId.InvalidElementId))
                     {
                       var faceMaterial = new Material(element.Document, faceMaterialId);
                       if (faceMaterial.BakeElement(idMap, false, doc, att, out var materialGuid))
@@ -646,8 +645,8 @@ namespace RhinoInside.Revit.GH.Types
               using (var context = GeometryDecoder.Context.Push())
               {
                 context.Element = element;
-                context.GraphicsStyleId = element.Category?.GetGraphicsStyle(DB.GraphicsStyleType.Projection)?.Id ?? DB.ElementId.InvalidElementId;
-                context.MaterialId = element.Category?.Material?.Id ?? DB.ElementId.InvalidElementId;
+                context.Category = element.Category;
+                context.Material = element.Category?.Material;
 
                 var location = element.Category is null || element.Category.Parent is object ?
                   Plane.WorldXY :

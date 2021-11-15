@@ -4,6 +4,7 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
+using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.Convert.System.Collections.Generic;
 using DB = Autodesk.Revit.DB;
@@ -105,8 +106,8 @@ namespace RhinoInside.Revit.GH.Components
                   {
                     var list = geometryElement?.
                       ToGeometryBaseMany().
-                      OfType<Rhino.Geometry.Brep>().
-                      Where(x => !ElementGeometryComponent.IsEmpty(x)).
+                      OfType<Brep>().
+                      Where(x => !x.IsNullOrEmpty()).
                       Convert(ElementGeometryComponent.ToGeometricGoo).
                       ToList();
 
@@ -159,8 +160,8 @@ namespace RhinoInside.Revit.GH.Components
                 {
                   var list = geometryElement?.
                     ToGeometryBaseMany().
-                    OfType<Rhino.Geometry.Brep>().
-                    Where(x => !ElementGeometryComponent.IsEmpty(x)).
+                    OfType<Brep>().
+                    Where(x => !x.IsNullOrEmpty()).
                     Convert(ElementGeometryComponent.ToGeometricGoo).
                     ToList();
 

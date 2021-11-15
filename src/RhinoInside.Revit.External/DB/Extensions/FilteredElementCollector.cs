@@ -1,10 +1,42 @@
 using System;
+using System.Collections.Generic;
 using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
+  internal struct ReadOnlySortedElementIdCollection : ICollection<ElementId>
+  {
+    readonly ICollection<ElementId> collection;
+    public ReadOnlySortedElementIdCollection(ICollection<ElementId> source) => collection = source;
+
+    public int Count => collection.Count;
+    public bool IsReadOnly => true;
+
+    public bool Contains(ElementId item)
+    {
+      if (collection is List<ElementId> list)
+        return list.BinarySearch(item, ElementIdComparer.NoNullsAscending) >= 0;
+      else
+        return collection.Contains(item);
+    }
+
+    public void CopyTo(ElementId[] array, int arrayIndex) => collection.CopyTo(array, arrayIndex);
+
+    public void Add(ElementId item) => throw new InvalidOperationException("Collection is read-only");
+    public bool Remove(ElementId item) => throw new InvalidOperationException("Collection is read-only");
+    public void Clear() => throw new InvalidOperationException("Collection is read-only");
+
+    public IEnumerator<ElementId> GetEnumerator() => collection.GetEnumerator();
+    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => collection.GetEnumerator();
+  }
+
   public static class FilteredElementCollectorExtension
   {
+    public static ICollection<ElementId> ToReadOnlyElementIdCollection(this FilteredElementCollector collector)
+    {
+      return new ReadOnlySortedElementIdCollection(collector.ToElementIds());
+    }
+
     public static FilteredElementCollector WhereElementIsKindOf(this FilteredElementCollector collector, Type type)
     {
       if (type == typeof(Element))

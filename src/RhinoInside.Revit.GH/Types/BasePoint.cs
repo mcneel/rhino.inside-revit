@@ -119,6 +119,8 @@ namespace RhinoInside.Revit.GH.Types
 {
 #if REVIT_2021
   using DBInternalOrigin = Autodesk.Revit.DB.InternalOrigin;
+#elif REVIT_2020
+  using DBInternalOrigin = Autodesk.Revit.DB.Element;
 #else
   using DBInternalOrigin = Autodesk.Revit.DB.BasePoint;
 #endif
@@ -138,7 +140,13 @@ namespace RhinoInside.Revit.GH.Types
 
     public InternalOrigin() { }
     public InternalOrigin(DB.Document doc, DB.ElementId id) : base(doc, id) { }
-    public InternalOrigin(DBInternalOrigin point) : base(point) { }
+    public InternalOrigin(DBInternalOrigin point) : base(point)
+    {
+#if !REVIT_2021
+      if (!IsValidElement(point))
+        throw new ArgumentException("Invalid Element", nameof(point));
+#endif
+    }
 
     public override string DisplayName
     {
@@ -152,29 +160,13 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region IGH_PreviewData
-    public override BoundingBox ClippingBox
-    {
-      get
-      {
-        if (Value is DBInternalOrigin point)
-        {
-          return new BoundingBox
-          (
-            new Point3d[]
-            {
-              point.GetPosition().ToPoint3d(),
-              (point.GetPosition() - point.GetSharedPosition()).ToPoint3d()
-            }
-          );
-        }
-
-        return NaN.BoundingBox;
-      }
-    }
+    public override BoundingBox ClippingBox => Value is DBInternalOrigin ?
+      new BoundingBox(Point3d.Origin, Point3d.Origin):
+      NaN.BoundingBox;
 
     public override void DrawViewportWires(GH_PreviewWireArgs args)
     {
-      if (Value is DBInternalOrigin point)
+      if (Value is DBInternalOrigin)
       {
         var location = Location;
         var pointStyle = Rhino.Display.PointStyle.ActivePoint;
@@ -189,25 +181,8 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Properties
-    public override Plane Location
-    {
-      get
-      {
-        if (Value is DBInternalOrigin point)
-        {
-          System.Diagnostics.Debug.Assert(point.GetPosition().IsAlmostEqualTo(DB.XYZ.Zero));
-
-          return new Plane
-          (
-            point.GetPosition().ToPoint3d(),
-            Vector3d.XAxis,
-            Vector3d.YAxis
-          );
-        }
-
-        return base.Location;
-      }
-    }
+    public override Plane Location => Value is DBInternalOrigin ?
+      Plane.WorldXY : base.Location;
     #endregion
   }
 }
