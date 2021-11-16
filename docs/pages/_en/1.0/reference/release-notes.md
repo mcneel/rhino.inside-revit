@@ -6,6 +6,15 @@ group: Deployment & Configs
 
 <!-- most recent release should be on top -->
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html title="v1.4 RC2" version="v1.4.7989.18759" pre_release=true time="11/16/2021" %}
+
+- Fix for `DB.InternalOrigin` on Revit 2020.2
+- Fixed a crash, when an element can't be deleted from the context menu
+- Fixed {% include ltr/comp.html uuid='b3bcbf5b-' %} and {% include ltr/comp.html uuid='8b85b1fb-' %}: Now both have an option **Expand Dependents** in the context menu to extract dependent elements geometry. Outputs are grafted accordingly
+- Added {% include ltr/comp.html uuid='8fad6039-' %}
+- Added back {% include ltr/comp.html uuid='754c40d7-' %}
+- Added back {% include ltr/comp.html uuid='61f75de1-' %}
+
 {% include ltr/release-header.html title="v1.4 RC1" version="v1.4.7983.32601" pre_release=true time="11/09/2021" %}
 
 - Minor Fixes and Improvements

@@ -1516,7 +1516,7 @@
     "iconsrc": "/static/images/GH/ElementDependents.png", 
     "icontag": null, 
     "panel": "Element", 
-    "since": null, 
+    "since": "1.0", 
     "tab": "Revit", 
     "title": "Element Dependents", 
     "typename": "ElementDependents", 
@@ -2748,7 +2748,19 @@
     "uuid": "ac546f16-c917-4cd1-9f8a-fbdd6330eb80"
   }, 
   {
-    "desc": "Filter used to combine a set of filters that pass when all pass", 
+    "desc": "Filter used to match visible elements into the given View", 
+    "iconsrc": "/static/images/GH/ElementVisibleInViewFilter.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "since": "1.4", 
+    "tab": "Revit", 
+    "title": "Visible In View Filter", 
+    "typename": "ElementVisibleInViewFilter", 
+    "until": null, 
+    "uuid": "8fad6039-db4d-41af-b414-d44e11507a99"
+  }, 
+  {
+    "desc": "Filter used to combine multiple filters into one that pass when all pass", 
     "iconsrc": "/static/images/GH/ElementLogicalAndFilter.png", 
     "icontag": null, 
     "panel": "Filter", 
@@ -2760,7 +2772,7 @@
     "uuid": "0e534afb-7264-4aff-99f3-7f7ea7db9f3d"
   }, 
   {
-    "desc": "Filter used to combine a set of filters that pass when any pass", 
+    "desc": "Filter used to combine multiple filters into one that pass when any pass", 
     "iconsrc": "/static/images/GH/ElementLogicalOrFilter.png", 
     "icontag": null, 
     "panel": "Filter", 
@@ -2770,6 +2782,30 @@
     "typename": "ElementLogicalOrFilter", 
     "until": null, 
     "uuid": "3804757f-3f4c-469d-8788-fca26f477a9c"
+  }, 
+  {
+    "desc": "Filter used to combine a set of filters into one that pass when all pass", 
+    "iconsrc": "/static/images/GH/ElementIntersectionFilter.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "since": null, 
+    "tab": "Revit", 
+    "title": "Intersection Filter", 
+    "typename": "ElementIntersectionFilter", 
+    "until": null, 
+    "uuid": "754c40d7-5ae8-4027-921c-0210bbdfab37"
+  }, 
+  {
+    "desc": "Filter used to combine a set of filters into one that pass when any pass", 
+    "iconsrc": "/static/images/GH/ElementUnionFilter.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "since": null, 
+    "tab": "Revit", 
+    "title": "Union Filter", 
+    "typename": "ElementUnionFilter", 
+    "until": null, 
+    "uuid": "61f75de1-ee65-4aa8-b9f8-40516be46c8d"
   }, 
   {
     "desc": "Filter used to exclude a set of elements", 
@@ -3850,30 +3886,6 @@
     "typename": "ElementParameterSet", 
     "until": null, 
     "uuid": "8f1ee110-7fda-49e0-bed4-e8e0227bc021"
-  }, 
-  {
-    "desc": "Filter used to combine a set of filters that pass when any pass", 
-    "iconsrc": "/static/images/GH/ElementLogicalAndFilter.png", 
-    "icontag": null, 
-    "panel": "Filter", 
-    "since": null, 
-    "tab": "Revit", 
-    "title": "Logical And Filter", 
-    "typename": "ElementLogicalAndFilter", 
-    "until": null, 
-    "uuid": "754c40d7-5ae8-4027-921c-0210bbdfab37"
-  }, 
-  {
-    "desc": "Filter used to combine a set of filters that pass when any pass", 
-    "iconsrc": "/static/images/GH/ElementLogicalOrFilter.png", 
-    "icontag": null, 
-    "panel": "Filter", 
-    "since": null, 
-    "tab": "Revit", 
-    "title": "Logical Or Filter", 
-    "typename": "ElementLogicalOrFilter", 
-    "until": null, 
-    "uuid": "61f75de1-ee65-4aa8-b9f8-40516be46c8d"
   }, 
   {
     "desc": "Filter used to match elements by their BoundingBox", 
