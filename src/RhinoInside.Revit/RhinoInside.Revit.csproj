@@ -301,4 +301,13 @@
     <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)..\RhinoInside.Revit.Native\bin\x64\Debug\RhinoInside.Revit.Native.dll;$(ProjectDir)..\RhinoInside.Revit.Native\bin\x64\Debug\RhinoInside.Revit.Native.pdb" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />
     <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)$(TargetFileName);$(ProjectDir)$(OutDir)$(TargetName).pdb;$(ProjectDir)$(OutDir)$(TargetName).xml" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />
   </Target>
+  <Target Name="BeforeClean" Condition="$(Configuration.Contains('Debug'))">
+    <ItemGroup>
+      <RhinoInsideRevitNative Include="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit\RhinoInside.Revit.Native.*" />
+      <ThisProjectFiles Include="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit\$(TargetName).dll;$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit\$(TargetName).pdb;$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit\$(TargetName).xml" />
+    </ItemGroup>
+    <Delete Files="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit\opennurbs_private.manifest" />
+    <Delete Files="@(RhinoInsideRevitNative)" />
+    <Delete Files="@(ThisProjectFiles)" />
+  </Target>
 </Project>

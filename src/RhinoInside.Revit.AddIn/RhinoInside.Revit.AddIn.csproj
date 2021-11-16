@@ -329,7 +329,10 @@
     <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)Properties\RhinoInside.Revit.addin" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)" />
   </Target>
   <Target Name="BeforeClean" Condition="$(Configuration.Contains('Debug'))">
+    <ItemGroup>
+      <ThisProjectFiles Include="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit\$(TargetName).dll;$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit\$(TargetName).pdb;$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit\$(TargetName).xml" />
+    </ItemGroup>
     <Delete Files="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit.addin" />
-    <RemoveDir Directories="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />
+    <Delete Files="@(ThisProjectFiles)" />
   </Target>
 </Project>

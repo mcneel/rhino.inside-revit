@@ -559,10 +559,13 @@
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
   </PropertyGroup>
   <Target Name="AfterBuild">
-    <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.dll" DestinationFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.gha" />
-    <Copy Condition="$(Configuration.Contains('Debug'))" UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.gha;$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.pdb" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />
+    <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)$(TargetName).dll" DestinationFiles="$(ProjectDir)$(OutDir)$(TargetName).gha" />
+    <Copy Condition="$(Configuration.Contains('Debug'))" UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)$(TargetName).gha;$(ProjectDir)$(OutDir)$(TargetName).pdb" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />
   </Target>
-  <Target Name="BeforeClean">
-    <Delete Files="$(ProjectDir)$(OutDir)RhinoInside.Revit.GH.gha" />
+  <Target Name="BeforeClean" Condition="$(Configuration.Contains('Debug'))">
+    <ItemGroup>
+      <ThisProjectFiles Include="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit\$(TargetName).gha;$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit\$(TargetName).pdb;$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit\$(TargetName).xml" />
+    </ItemGroup>
+    <Delete Files="@(ThisProjectFiles)" />
   </Target>
 </Project>
