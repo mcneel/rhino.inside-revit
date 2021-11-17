@@ -100,29 +100,32 @@ namespace RhinoInside.Revit.GH.Components
       );
 
       Params.TrySetData(DA, "Element", () => element);
-      if (Params.IndexOfOutputParam("Referentials") >= 0)
+      if (element.Value is object)
       {
-        try
+        if (Params.IndexOfOutputParam("Referentials") >= 0)
         {
-          var dependents = element.Document.GetDependentElements
-          (
-            new DB.ElementId[] { element.Id },
-            out var relateds,
-            filter
-          );
+          try
+          {
+            var dependents = element.Document.GetDependentElements
+            (
+              new DB.ElementId[] { element.Id },
+              out var relateds,
+              filter
+            );
 
-          DA.SetDataList("Dependents", dependents.Select(x => Types.Element.FromElementId(element.Document, x)));
-          DA.SetDataList("Referentials", relateds.Select(x => Types.Element.FromElementId(element.Document, x)));
+            DA.SetDataList("Dependents", dependents.Select(x => Types.Element.FromElementId(element.Document, x)));
+            DA.SetDataList("Referentials", relateds.Select(x => Types.Element.FromElementId(element.Document, x)));
 
-          return;
+            return;
+          }
+          catch (Autodesk.Revit.Exceptions.ArgumentException e)
+          { AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"{e.Message} {element.Id.IntegerValue}"); }
         }
-        catch (Autodesk.Revit.Exceptions.ArgumentException e)
-        { AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"{e.Message} {element.Id.IntegerValue}"); }
-      }
 
-      {
-        var dependents = element.Value.GetDependentElements(filter);
-        DA.SetDataList("Dependents", dependents.Select(x => Types.Element.FromElementId(element.Document, x)));
+        {
+          var dependents = element.Value.GetDependentElements(filter);
+          DA.SetDataList("Dependents", dependents.Select(x => Types.Element.FromElementId(element.Document, x)));
+        }
       }
     }
   }
