@@ -412,9 +412,9 @@ namespace Grasshopper.Special
 
     protected override void Menu_AppendInternaliseData(ToolStripDropDown menu)
     {
+      Menu_AppendItem(menu, "Invert selection", Menu_InvertSelectionClicked, ListItems.Count != PersistentDataCount);
+      Menu_AppendItem(menu, "Select all", Menu_SelectAllClicked, ListItems.Count != PersistentDataCount);
       Menu_AppendItem(menu, "Internalise selection", Menu_InternaliseDataClicked, SourceCount > 0);
-      Menu_AppendItem(menu, "Invert selection", Menu_InvertSelectionClicked, SourceCount > 0);
-      Menu_AppendItem(menu, "Select all", Menu_SelectAllClicked, SourceCount > 0);
     }
 
     private void Menu_InternaliseDataClicked(object sender, EventArgs e)
