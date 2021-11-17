@@ -64,16 +64,15 @@ namespace RhinoInside.Revit.AddIn.Commands
     {
       var id = DB.ElementId.InvalidElementId;
 
-      if (layer.HasName)
+      if (layer.HasName && layer.Name is string layerName)
       {
-        var matName = layer.Name;
-        if (categories.TryGetValue(matName, out var category)) id = category.Id;
+        if (categories.TryGetValue(layerName, out var category)) id = category.Id;
         else
         {
           var familyCategory = doc.OwnerFamily.FamilyCategory;
           if (familyCategory.CanAddSubcategory)
           {
-            if (doc.Settings.Categories.NewSubcategory(familyCategory, layer.Name) is DB.Category subCategory)
+            if (doc.Settings.Categories.NewSubcategory(familyCategory, layerName) is DB.Category subCategory)
             {
               subCategory.LineColor = layer.Color.ToColor();
 
@@ -84,7 +83,7 @@ namespace RhinoInside.Revit.AddIn.Commands
                   subCategory.Material = material;
               }
 
-              categories.Add(subCategory.Name, subCategory);
+              categories.Add(layerName, subCategory);
               id = subCategory.Id;
             }
           }
@@ -300,13 +299,12 @@ namespace RhinoInside.Revit.AddIn.Commands
     {
       var id = DB.ElementId.InvalidElementId;
 
-      if(mat.HasName)
+      if(mat.HasName && mat.Name is string materialName)
       {
-        var matName = mat.Name;
-        if (materials.TryGetValue(matName, out var material)) id = material.Id;
+        if (materials.TryGetValue(materialName, out var material)) id = material.Id;
         else
         {
-          id = DB.Material.Create(doc, matName);
+          id = DB.Material.Create(doc, materialName);
           var newMaterial = doc.GetElement(id) as DB.Material;
 
           newMaterial.Color         = mat.PreviewColor.ToColor();
@@ -315,7 +313,7 @@ namespace RhinoInside.Revit.AddIn.Commands
           newMaterial.Transparency  = (int) Math.Round(mat.Transparency * 100.0);
           newMaterial.AppearanceAssetId = ImportMaterial(doc, mat.RenderMaterial);
 
-          materials.Add(matName, newMaterial);
+          materials.Add(materialName, newMaterial);
         }
       }
 
