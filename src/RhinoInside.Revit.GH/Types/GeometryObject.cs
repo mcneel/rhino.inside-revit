@@ -181,8 +181,22 @@ namespace RhinoInside.Revit.GH.Types
       }
       catch (Autodesk.Revit.Exceptions.InvalidObjectException) { }
     }
+    public new X Value
+    {
+      get
+      {
+        // Cached value is not reliable if a document regeneration happens.
+        // Since there is no IsValidObject property we Reset the value always :(
+        ResetValue();
+        return base.Value as X;
+      }
+    }
 
-    public new X Value => base.Value as X;
+    protected override void ResetValue()
+    {
+      (this as IGH_PreviewMeshData).DestroyPreviewMeshes();
+      base.ResetValue();
+    }
 
     /// <summary>
     /// Accurate axis aligned <see cref="Rhino.Geometry.BoundingBox"/> for computation.
@@ -223,11 +237,11 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (point is null && IsValid)
+        if (point is null && Value is DB.Point vertex)
         {
-          point = new Point(Value.Coord.ToPoint3d());
+          point = new Point(vertex.Coord.ToPoint3d());
 
-          if(/*Value.IsElementGeometry && */Document?.GetElement(Reference) is DB.Instance instance)
+          if(vertex.IsElementGeometry && Document?.GetElement(Reference) is DB.Instance instance)
           {
             var xform = instance.GetTransform().ToTransform();
             point.Transform(xform);
@@ -269,15 +283,12 @@ namespace RhinoInside.Revit.GH.Types
 
     public override BoundingBox GetBoundingBox(Transform xform)
     {
-      if (Value is null)
-        return BoundingBox.Empty;
-
-      return
+      return Point is Point point ?
       (
         xform == Transform.Identity ?
-        Point?.GetBoundingBox(true) :
-        Point?.GetBoundingBox(xform)
-      ) ?? BoundingBox.Empty;
+        point.GetBoundingBox(true) :
+        point.GetBoundingBox(xform)
+      ) : BoundingBox.Empty;
     }
 
     #region IGH_PreviewData
@@ -306,11 +317,11 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (wires is null && IsValid)
+        if (wires is null && Value is DB.Edge edge)
         {
-          wires = Enumerable.Repeat(Value, 1).GetPreviewWires().ToArray();
+          wires = Enumerable.Repeat(edge, 1).GetPreviewWires().ToArray();
 
-          if (Value.IsElementGeometry && Document?.GetElement(Reference) is DB.Instance instance)
+          if (edge.IsElementGeometry && Document?.GetElement(Reference) is DB.Instance instance)
           {
             var xform = instance.GetTransform().ToTransform();
             foreach (var wire in wires)
@@ -353,15 +364,12 @@ namespace RhinoInside.Revit.GH.Types
 
     public override BoundingBox GetBoundingBox(Transform xform)
     {
-      if (Value is null)
-        return BoundingBox.Empty;
-
-      return
+      return Curve is Curve curve ?
       (
         xform == Transform.Identity ?
-        Curve?.GetBoundingBox(true) :
-        Curve?.GetBoundingBox(xform)
-      ) ?? BoundingBox.Empty;
+        curve.GetBoundingBox(true) :
+        curve.GetBoundingBox(xform)
+      ) : BoundingBox.Empty;
     }
 
     #region IGH_PreviewData
@@ -411,11 +419,11 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (wires is null && IsValid)
+        if (wires is null && Value is DB.Face face)
         {
-          wires = Value.GetEdgesAsCurveLoops().SelectMany(x => x.GetPreviewWires()).ToArray();
+          wires = face.GetEdgesAsCurveLoops().SelectMany(x => x.GetPreviewWires()).ToArray();
 
-          if (Value.IsElementGeometry && Document?.GetElement(Reference) is DB.Instance instance)
+          if (face.IsElementGeometry && Document?.GetElement(Reference) is DB.Instance instance)
           {
             var xform = instance.GetTransform().ToTransform();
             foreach (var wire in wires)
@@ -429,11 +437,11 @@ namespace RhinoInside.Revit.GH.Types
 
     Mesh[] Meshes(MeshingParameters meshingParameters)
     {
-      if (meshes is null && IsValid)
+      if (meshes is null && Value is DB.Face face)
       {
-        meshes = Enumerable.Repeat(Value, 1).GetPreviewMeshes(Document, meshingParameters).ToArray();
+        meshes = Enumerable.Repeat(face, 1).GetPreviewMeshes(Document, meshingParameters).ToArray();
 
-        if (Value.IsElementGeometry && Document?.GetElement(Reference) is DB.Instance instance)
+        if (face.IsElementGeometry && Document?.GetElement(Reference) is DB.Instance instance)
         {
           var xform = instance.GetTransform().ToTransform();
           foreach (var mesh in meshes)
@@ -459,13 +467,13 @@ namespace RhinoInside.Revit.GH.Types
         target = (Q) (object) (IsValid ? Value : null);
         return true;
       }
-      else if (Value is object)
+      else if (Value is DB.Face face)
       {
         var element = Reference is object ? Document?.GetElement(Reference) : null;
 
         if (typeof(Q).IsAssignableFrom(typeof(GH_Surface)))
         {
-          if (Value.ToBrep() is Brep brep)
+          if (face.ToBrep() is Brep brep)
           {
             if (element is DB.Instance instance)
               brep.Transform(instance.GetTransform().ToTransform());
@@ -477,7 +485,7 @@ namespace RhinoInside.Revit.GH.Types
         }
         else if (typeof(Q).IsAssignableFrom(typeof(GH_Brep)))
         {
-          if (Value.ToBrep() is Brep brep)
+          if (face.ToBrep() is Brep brep)
           {
             if (element is DB.Instance instance)
               brep.Transform(instance.GetTransform().ToTransform());
@@ -489,7 +497,7 @@ namespace RhinoInside.Revit.GH.Types
         }
         if (typeof(Q).IsAssignableFrom(typeof(GH_Mesh)))
         {
-          if (Value.Triangulate()?.ToMesh() is Mesh mesh)
+          if (face.Triangulate()?.ToMesh() is Mesh mesh)
           {
             if (element is DB.Instance instance)
               mesh.Transform(instance.GetTransform().ToTransform());
@@ -513,9 +521,6 @@ namespace RhinoInside.Revit.GH.Types
 
     public override BoundingBox GetBoundingBox(Transform xform)
     {
-      if (Value is null)
-        return BoundingBox.Empty;
-
       var bbox = BoundingBox.Empty;
       if (Curves is Curve[] curves)
       {
