@@ -221,6 +221,28 @@
         ]
     },
     {
+        "highlight": true,
+        "title": "Sturctural Design with AKT II",
+        "url": "https://www.youtube.com/watch?v=SiSPU1EFylg",
+        "thumbnail": "https://i3.ytimg.com/vi/SiSPU1EFylg/maxresdefault.jpg",
+        "author": "Deyan Marzev and James Magbanua from AKT II London",
+        "authorUrl": "https://www.rhino3d.co.uk/events/rhino-meeting-rhino-inside-revit-november-2021/",
+        "description": "Rhino3D Meeting with a focus on Rhino.Inside®.Revit. Featuring Engineers AKT II, and Rhino.Inside Developers from McNeel.",
+        "kinds": [
+            "podcast",
+            "video"
+        ],
+        "tags": [
+            "presentation",
+            "example",
+            "workflow"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
+    },
+    {
         "title": "Grasshopper in a Revit Workflow",
         "url": "https://www.youtube.com/watch?v=9xoP-rruTMw",
         "thumbnail": "https://i3.ytimg.com/vi/9xoP-rruTMw/maxresdefault.jpg",
