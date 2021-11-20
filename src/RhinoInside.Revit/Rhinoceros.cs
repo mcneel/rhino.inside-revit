@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Windows.Input;
 using Microsoft.Win32.SafeHandles;
 using Rhino;
 using Rhino.Commands;
@@ -15,56 +14,17 @@ using Rhino.PlugIns;
 using Rhino.Runtime.InProcess;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.Convert.Units;
-using RhinoInside.Revit.Diagnostics;
+using static RhinoInside.Revit.Diagnostics;
 using RhinoInside.Revit.External.ApplicationServices.Extensions;
 using static Rhino.RhinoMath;
 using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit
 {
-  #region Guest
-  [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
-  internal class GuestPlugInIdAttribute : Attribute
-  {
-    public readonly Guid PlugInId;
-    public GuestPlugInIdAttribute(string plugInId) => PlugInId = Guid.Parse(plugInId);
-  }
-
-  internal class CheckInArgs : EventArgs
-  {
-    public string Message { get; set; } = string.Empty;
-    public bool ShowMessage { get; set; } = true;
-  }
-
-  internal class CheckOutArgs : EventArgs
-  {
-    public string Message { get; set; } = string.Empty;
-    public bool ShowMessage { get; set; } = true;
-  }
-
-  internal enum GuestResult
-  {
-    Failed = int.MinValue,
-    Cancelled = int.MinValue + 1,
-    Nothing = 0,
-    Succeeded = 1
-  }
-
-  internal interface IGuest
-  {
-    string Name { get; }
-
-    GuestResult EntryPoint(object sender, EventArgs args);
-  }
-  #endregion
-}
-
-namespace RhinoInside.Revit
-{
   using Result = Autodesk.Revit.UI.Result;
   using TaskDialog = Autodesk.Revit.UI.TaskDialog;
 
-  public static class Rhinoceros
+  public static partial class Rhinoceros
   {
     #region Revit Interface
     static RhinoCore core;
@@ -663,6 +623,8 @@ namespace RhinoInside.Revit
     }
     static ExposureSnapshot QuiescentExposure;
 
+    static DB.TransactionGroup CommandGroup;
+
     static void BeginCommand(object sender, CommandEventArgs e)
     {
       if (!Command.InScriptRunnerCommand())
@@ -672,6 +634,28 @@ namespace RhinoInside.Revit
 
         // Disable Revit Main Window while in Command
         Revit.MainWindow.Enabled = false;
+
+        var groupName = e.CommandLocalName;
+        var pluginId = PlugIn.IdFromName(e.CommandPluginName);
+        var plugin   = PlugIn.Find(pluginId);
+        var command  = plugin?.GetCommands().Where(x => x.Id == e.CommandId).FirstOrDefault();
+        if
+        (
+          command?.GetType().GetRuntimeProperty("DisplayName") is PropertyInfo info &&
+          info.CanRead &&
+          info.PropertyType == typeof(string) &&
+          info.GetValue(command) is string displayName &&
+          !string.IsNullOrWhiteSpace(displayName)
+        )
+        {
+          groupName = displayName;
+        }
+
+        CommandGroup = new DB.TransactionGroup
+        (Revit.ActiveUIDocument.Document, groupName)
+        { IsFailureHandlingForcedModal = true };
+
+        CommandGroup.Start();
       }
     }
 
@@ -679,6 +663,40 @@ namespace RhinoInside.Revit
     {
       if (!Command.InScriptRunnerCommand())
       {
+        var result = e.CommandResult;
+
+        try
+        {
+          if (CommandGroup.HasStarted())
+          {
+            if (Revit.ActiveUIDocument.Document.IsModifiable)
+            {
+              var groupName = CommandGroup.GetName();
+              if (string.IsNullOrWhiteSpace(groupName))
+                groupName = e.CommandEnglishName;
+
+              var message = "A Revit transaction or sub-transaction was opened but not closed." + Environment.NewLine +
+                           $"All changes to the active document made by command '{groupName}' will be discarded.";
+
+              Rhino.UI.Dialogs.ShowMessage
+              (
+                message, groupName,
+                buttons: Rhino.UI.ShowMessageButton.OK,
+                icon: Rhino.UI.ShowMessageIcon.Warning
+              );
+
+              result = Rhino.Commands.Result.Failure;
+            }
+
+            if (result == Rhino.Commands.Result.Failure || result == Rhino.Commands.Result.ExitRhino)
+              CommandGroup.RollBack();
+            else
+              CommandGroup.Assimilate();
+          }
+        }
+        catch { }
+        finally { CommandGroup?.Dispose(); CommandGroup = null; }
+
         // Reenable Revit main window
         Revit.MainWindow.Enabled = true;
 
@@ -832,69 +850,6 @@ namespace RhinoInside.Revit
     }
     #endregion
 
-    /// <summary>
-    /// Represents a Pseudo-modal loop.
-    /// </summary>
-    /// <remarks>
-    /// This class implements <see cref="IDisposable"/> interface, it's been designed to be used in a using statement.
-    /// </remarks>
-    internal sealed class ModalScope : IDisposable
-    {
-      static bool wasExposed = false;
-      readonly bool wasEnabled = Revit.MainWindow.Enabled;
-
-      public ModalScope() => Revit.MainWindow.Enabled = false;
-
-      void IDisposable.Dispose() => Revit.MainWindow.Enabled = wasEnabled;
-
-      public Result Run(bool exposeMainWindow)
-      {
-        return Run(exposeMainWindow, !Keyboard.IsKeyDown(Key.LeftCtrl));
-      }
-
-      public Result Run(bool exposeMainWindow, bool restorePopups)
-      {
-        try
-        {
-          if (exposeMainWindow) Exposed = true;
-          else if (restorePopups) Exposed = wasExposed || MainWindow.WindowStyle == ProcessWindowStyle.Minimized;
-
-          if (restorePopups)
-            MainWindow.ShowOwnedPopups();
-
-          // Activate a Rhino window to keep the loop running
-          var activePopup = MainWindow.ActivePopup;
-          if (activePopup.IsInvalid || exposeMainWindow)
-          {
-            if (!Exposed)
-              return Result.Cancelled;
-
-            RhinoApp.SetFocusToMainWindow();
-          }
-          else
-          {
-            activePopup.BringToFront();
-          }
-
-          while (Rhinoceros.Run())
-          {
-            if (!Exposed && MainWindow.ActivePopup.IsInvalid)
-              break;
-          }
-
-          return Result.Succeeded;
-        }
-        finally
-        {
-          wasExposed = Exposed;
-
-          Revit.MainWindow.Enabled = true;
-          WindowHandle.ActiveWindow = Revit.MainWindow;
-          MainWindow.HideOwnedPopups();
-          Exposed = false;
-        }
-      }
-    }
     #endregion
   }
 }

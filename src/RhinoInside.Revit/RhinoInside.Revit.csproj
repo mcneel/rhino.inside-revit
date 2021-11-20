@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -236,23 +236,21 @@
     <Compile Include="Convert\System.Drawing.cs" />
     <Compile Include="Convert\System.Windows.Media.cs" />
     <Compile Include="Core.cs" />
-    <Compile Include="ErrorReport.cs" />
-    <Compile Include="Extensions\Native.cs" />
-    <Compile Include="Extensions\RhinoCommon.cs" />
-    <Compile Include="Extensions\ShellItem.cs" />
+    <Compile Include="Diagnostics.cs" />
     <Compile Include="GH\Bake.cs" />
     <Compile Include="GH\ElementStream.cs" />
     <Compile Include="GH\Guest.cs" />
     <Compile Include="GH\Kernel.cs" />
     <Compile Include="GH\PreviewServer.cs" />
-    <Compile Include="Rhino\Rhinoceros.cs" />
-    <Compile Include="Rhino\DocumentPreviewServer.cs" />
+    <Compile Include="Guest.cs" />
+    <Compile Include="Rhinoceros.cs" />
+    <Compile Include="Rhinoceros.DebugLogging.cs" />
+    <Compile Include="Rhinoceros.PreviewServer.cs" />
     <Compile Include="DirectContext3DServer.cs" />
     <Compile Include="ImageBuilder.cs" />
     <Compile Include="Operator.cs" />
     <Compile Include="State.cs" />
     <Compile Include="Revit.cs" />
-    <Compile Include="Revit.FailuresPreprocessor.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -270,6 +268,7 @@
       <SubType>Designer</SubType>
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>RhinoInside.Revit</CustomToolNamespace>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -278,9 +277,6 @@
       <LastGenOutput>ProductInfo.cs</LastGenOutput>
     </Content>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Extensions\README.md" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RhinoInside.Revit.External\RhinoInside.Revit.External.csproj">
@@ -300,14 +296,5 @@
     <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)..\RhinoInside.Revit.Setup\opennurbs_private.manifest;" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />
     <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)..\RhinoInside.Revit.Native\bin\x64\Debug\RhinoInside.Revit.Native.dll;$(ProjectDir)..\RhinoInside.Revit.Native\bin\x64\Debug\RhinoInside.Revit.Native.pdb" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />
     <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)$(TargetFileName);$(ProjectDir)$(OutDir)$(TargetName).pdb;$(ProjectDir)$(OutDir)$(TargetName).xml" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />
-  </Target>
-  <Target Name="BeforeClean" Condition="$(Configuration.Contains('Debug'))">
-    <ItemGroup>
-      <RhinoInsideRevitNative Include="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit\RhinoInside.Revit.Native.*" />
-      <ThisProjectFiles Include="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit\$(TargetName).dll;$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit\$(TargetName).pdb;$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit\$(TargetName).xml" />
-    </ItemGroup>
-    <Delete Files="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit\opennurbs_private.manifest" />
-    <Delete Files="@(RhinoInsideRevitNative)" />
-    <Delete Files="@(ThisProjectFiles)" />
   </Target>
 </Project>

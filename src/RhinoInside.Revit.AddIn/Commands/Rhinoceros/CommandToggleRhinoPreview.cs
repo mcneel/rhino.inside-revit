@@ -34,7 +34,7 @@ namespace RhinoInside.Revit.AddIn.Commands
 #if REVIT_2018
     private static void RhinoCommon_AssemblyActivated(object sender, AssemblyLoadEventArgs args)
     {
-      DocumentPreviewServer.ActiveDocumentChanged += DocumentPreviewServer_ActiveDocumentChanged;
+      Rhinoceros.PreviewServer.ActiveDocumentChanged += DocumentPreviewServer_ActiveDocumentChanged;
     }
 
     static void ButtonSetImages(bool status)
@@ -55,13 +55,13 @@ namespace RhinoInside.Revit.AddIn.Commands
     }
 
     private static void DocumentPreviewServer_ActiveDocumentChanged(object sender, EventArgs e) =>
-      ButtonSetImages(DocumentPreviewServer.ActiveDocument is object);
+      ButtonSetImages(Rhinoceros.PreviewServer.ActiveDocument is object);
 #endif
 
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
 #if REVIT_2018
-      DocumentPreviewServer.Toggle();
+      Rhinoceros.PreviewServer.Toggle();
       return Result.Succeeded;
 #else
       return Result.Failed;

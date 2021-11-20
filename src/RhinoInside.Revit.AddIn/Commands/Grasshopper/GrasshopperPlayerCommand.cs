@@ -16,9 +16,10 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
-using Rhino.PlugIns;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
+using Microsoft.Win32.SafeHandles;
+using System.Diagnostics;
 
 namespace RhinoInside.Revit.AddIn.Commands
 {
@@ -393,7 +394,7 @@ namespace RhinoInside.Revit.AddIn.Commands
                   value.Key.AddVolatileDataList(new Grasshopper.Kernel.Data.GH_Path(0), value.Value);
 
                 Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-                using (var modal = new Rhinoceros.ModalScope())
+                using (var modal = new ModalScope())
                 {
                   definition.NewSolution(false, GH_SolutionMode.Silent);
 
@@ -431,6 +432,70 @@ namespace RhinoInside.Revit.AddIn.Commands
 
       message = msg;
       return res;
+    }
+  }
+
+  /// <summary>
+  /// Represents a Pseudo-modal loop.
+  /// </summary>
+  /// <remarks>
+  /// This class implements <see cref="IDisposable"/> interface, it's been designed to be used in a using statement.
+  /// </remarks>
+  sealed class ModalScope : IDisposable
+  {
+    static bool wasExposed = false;
+    readonly bool wasEnabled = Revit.MainWindow.Enabled;
+
+    public ModalScope() => Revit.MainWindow.Enabled = false;
+
+    void IDisposable.Dispose() => Revit.MainWindow.Enabled = wasEnabled;
+
+    public Result Run(bool exposeMainWindow)
+    {
+      return Run(exposeMainWindow, !Keyboard.IsKeyDown(Key.LeftCtrl));
+    }
+
+    public Result Run(bool exposeMainWindow, bool restorePopups)
+    {
+      try
+      {
+        if (exposeMainWindow) Rhinoceros.Exposed = true;
+        else if (restorePopups) Rhinoceros.Exposed = wasExposed || Rhinoceros.MainWindow.WindowStyle == ProcessWindowStyle.Minimized;
+
+        if (restorePopups)
+          Rhinoceros.MainWindow.ShowOwnedPopups();
+
+        // Activate a Rhino window to keep the loop running
+        var activePopup = Rhinoceros.MainWindow.ActivePopup;
+        if (activePopup.IsInvalid || exposeMainWindow)
+        {
+          if (!Rhinoceros.Exposed)
+            return Result.Cancelled;
+
+          Rhino.RhinoApp.SetFocusToMainWindow();
+        }
+        else
+        {
+          activePopup.BringToFront();
+        }
+
+        while (Rhinoceros.Run())
+        {
+          if (!Rhinoceros.Exposed && Rhinoceros.MainWindow.ActivePopup.IsInvalid)
+            break;
+        }
+
+        return Result.Succeeded;
+      }
+      finally
+      {
+        wasExposed = Rhinoceros.Exposed;
+
+        Revit.MainWindow.Enabled = true;
+        WindowHandle.ActiveWindow = Revit.MainWindow;
+        Rhinoceros.MainWindow.HideOwnedPopups();
+        Rhinoceros.Exposed = false;
+      }
     }
   }
 }

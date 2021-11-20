@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Windows.Input;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
-using RhinoInside.Revit.Diagnostics;
+using static RhinoInside.Revit.Diagnostics;
 using DB = Autodesk.Revit.DB;
 using UIX = RhinoInside.Revit.External.UI;
 

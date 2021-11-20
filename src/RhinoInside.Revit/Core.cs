@@ -9,9 +9,8 @@ using System.Windows.Interop;
 using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
 using Microsoft.Win32;
-using RhinoInside.Revit.Diagnostics;
+using static RhinoInside.Revit.Diagnostics;
 using RhinoInside.Revit.External.ApplicationServices.Extensions;
-using RhinoInside.Revit.Native;
 using UIX = RhinoInside.Revit.External.UI;
 
 namespace RhinoInside.Revit

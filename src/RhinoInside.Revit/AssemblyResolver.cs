@@ -6,8 +6,7 @@ using System.Reflection;
 using Autodesk.Revit.UI;
 using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
-using RhinoInside.Revit.Diagnostics;
-using RhinoInside.Revit.Native;
+using static RhinoInside.Revit.Diagnostics;
 
 namespace RhinoInside.Revit
 {

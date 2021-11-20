@@ -4,7 +4,7 @@ using System.Text;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using RhinoInside.Revit.Diagnostics;
+using static RhinoInside.Revit.Diagnostics;
 
 namespace RhinoInside.Revit.AddIn.Commands
 {

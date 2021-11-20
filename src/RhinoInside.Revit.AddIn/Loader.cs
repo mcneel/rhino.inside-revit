@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Autodesk.Revit.UI;
-using RhinoInside.Revit.Diagnostics;
+using static RhinoInside.Revit.Diagnostics;
 using UIX = RhinoInside.Revit.External.UI;
 
 namespace RhinoInside.Revit.AddIn
